@@ -1,0 +1,13 @@
+family: be_nellys_superstars
+founder_identity: bnelly_founder_lock
+branches:
+  - id: 01_backstreet_b_nellies
+    status: scaffolded
+  - id: 02_country_grit
+    status: placeholder
+  - id: 03_grit_americana
+    status: placeholder
+  - id: 04_press_room
+    status: placeholder
+  - id: 05_studio_sessions
+    status: placeholder

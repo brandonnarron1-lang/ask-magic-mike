@@ -1,0 +1,6 @@
+queue_id,shot_id,member,prompt_ref,status,owner
+HG-001,S02,01_clean_lead,motion_prompts#clean_lead,pending,producer
+HG-002,S03,02_leather_rebel,motion_prompts#leather_rebel,pending,producer
+HG-003,S04,03_blond_spark,motion_prompts#blond_spark,pending,producer
+HG-004,S05,04_soul_edge,motion_prompts#soul_edge,pending,producer
+HG-005,S06,05_sporty_charm,motion_prompts#sporty_charm,pending,producer

@@ -1,0 +1,4 @@
+queue_id,shot_id,asset_type,prompt_ref,status,owner
+RW-001,S01,group_lineup,visual_prompts/group_lineup_prompt.txt,pending,artist
+RW-002,S07,chorus_formation,visual_style_guide.md,pending,artist
+RW-003,S08,final_pose,visual_style_guide.md,pending,artist

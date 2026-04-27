@@ -1,0 +1,12 @@
+_source,asset_type,inputs,member,owner,prompt_ref,queue_id,sequence,shot_id,status,task
+heygen_queue.csv,,,01_clean_lead,producer,motion_prompts#clean_lead,HG-001,,S02,pending,
+heygen_queue.csv,,,02_leather_rebel,producer,motion_prompts#leather_rebel,HG-002,,S03,pending,
+heygen_queue.csv,,,03_blond_spark,producer,motion_prompts#blond_spark,HG-003,,S04,pending,
+heygen_queue.csv,,,04_soul_edge,producer,motion_prompts#soul_edge,HG-004,,S05,pending,
+heygen_queue.csv,,,05_sporty_charm,producer,motion_prompts#sporty_charm,HG-005,,S06,pending,
+runway_queue.csv,group_lineup,,,artist,visual_prompts/group_lineup_prompt.txt,RW-001,,S01,pending,
+runway_queue.csv,chorus_formation,,,artist,visual_style_guide.md,RW-002,,S07,pending,
+runway_queue.csv,final_pose,,,artist,visual_style_guide.md,RW-003,,S08,pending,
+manual_composite_queue.csv,,"S01,S02,S03,S04,S05,S06,S07,S08",,editor,,MC-001,proof_v1,,pending,assemble_60s_proof
+manual_composite_queue.csv,,music_track_v1,,editor,,MC-002,proof_v1,,pending,align_edit_to_track
+manual_composite_queue.csv,,qa_notes_v1,,editor,,MC-003,proof_v1,,pending,apply_revision_pass

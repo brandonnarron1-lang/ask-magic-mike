@@ -1,0 +1,9 @@
+shot_id,start_s,end_s,shot_type,focus_member,description
+S01,0,6,wide,group,Hero silhouette walk-in with synchronized pace
+S02,6,12,medium,01_clean_lead,Lead opening lines direct to camera
+S03,12,18,close,02_leather_rebel,Edge profile turn with lyric emphasis
+S04,18,24,close,03_blond_spark,Hook pickup with bright expression
+S05,24,30,close,04_soul_edge,Soulful pre-chorus anchor
+S06,30,36,close,05_sporty_charm,Playful kinetic transition
+S07,36,48,wide,group,Chorus formation with alternating depth
+S08,48,60,medium,group,Final lockup pose and fade
