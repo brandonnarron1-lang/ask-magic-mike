@@ -73,6 +73,7 @@ export interface Database {
         Row: {
           id: string;
           session_id: string;
+          contact_id: string | null;
           created_at: string;
           updated_at: string;
           first_name: string | null;
@@ -104,6 +105,7 @@ export interface Database {
         Insert: {
           id?: string;
           session_id: string;
+          contact_id?: string | null;
           created_at?: string;
           updated_at?: string;
           first_name?: string | null;
@@ -319,7 +321,7 @@ export interface Database {
           lead_id?: string | null;
           agent_id?: string | null;
           event_name: string;
-          event_category: string;
+          event_category?: string | null;
           properties?: Json;
           utm_source?: string | null;
           utm_medium?: string | null;
@@ -361,6 +363,304 @@ export interface Database {
           error_message?: string | null;
           duration_ms?: number | null;
         };
+        Relationships: [];
+      };
+      properties: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          address_line1: string;
+          address_line2: string | null;
+          city: string;
+          state: string;
+          zip: string;
+          county: string | null;
+          fips_code: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          beds: number | null;
+          baths: number | null;
+          sqft: number | null;
+          lot_sqft: number | null;
+          year_built: number | null;
+          property_type: string | null;
+          parcel_id: string | null;
+          last_sale_price: number | null;
+          last_sale_date: string | null;
+          estimated_value: number | null;
+          estimated_at: string | null;
+          lead_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          address_line1: string;
+          address_line2?: string | null;
+          city: string;
+          state?: string;
+          zip: string;
+          county?: string | null;
+          fips_code?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          beds?: number | null;
+          baths?: number | null;
+          sqft?: number | null;
+          lot_sqft?: number | null;
+          year_built?: number | null;
+          property_type?: string | null;
+          parcel_id?: string | null;
+          last_sale_price?: number | null;
+          last_sale_date?: string | null;
+          estimated_value?: number | null;
+          estimated_at?: string | null;
+          lead_id?: string | null;
+        };
+        Update: {
+          updated_at?: string;
+          county?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          beds?: number | null;
+          baths?: number | null;
+          sqft?: number | null;
+          estimated_value?: number | null;
+          estimated_at?: string | null;
+          lead_id?: string | null;
+        };
+        Relationships: [];
+      };
+      contacts: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          first_name: string | null;
+          last_name: string | null;
+          email: string | null;
+          phone: string | null;
+          phone_normalized: string | null;
+          crm_contact_id: string | null;
+          crm_synced_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          email?: string | null;
+          phone?: string | null;
+          phone_normalized?: string | null;
+          crm_contact_id?: string | null;
+          crm_synced_at?: string | null;
+        };
+        Update: {
+          updated_at?: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          email?: string | null;
+          phone?: string | null;
+          phone_normalized?: string | null;
+          crm_contact_id?: string | null;
+          crm_synced_at?: string | null;
+        };
+        Relationships: [];
+      };
+      consents: {
+        Row: {
+          id: string;
+          created_at: string;
+          lead_id: string;
+          contact_id: string | null;
+          consent_type: string;
+          granted: boolean;
+          language_version: string;
+          language_text: string | null;
+          ip_address: string | null;
+          user_agent: string | null;
+          collected_at: string;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          lead_id: string;
+          contact_id?: string | null;
+          consent_type: string;
+          granted: boolean;
+          language_version?: string;
+          language_text?: string | null;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          collected_at?: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      messages: {
+        Row: {
+          id: string;
+          created_at: string;
+          session_id: string | null;
+          lead_id: string | null;
+          role: string;
+          content: string;
+          content_type: string;
+          model_id: string | null;
+          prompt_tokens: number | null;
+          completion_tokens: number | null;
+          agent_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          session_id?: string | null;
+          lead_id?: string | null;
+          role: string;
+          content: string;
+          content_type?: string;
+          model_id?: string | null;
+          prompt_tokens?: number | null;
+          completion_tokens?: number | null;
+          agent_id?: string | null;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      source_attribution: {
+        Row: {
+          id: string;
+          created_at: string;
+          session_id: string | null;
+          lead_id: string | null;
+          utm_source: string | null;
+          utm_medium: string | null;
+          utm_campaign: string | null;
+          utm_content: string | null;
+          utm_term: string | null;
+          referrer_url: string | null;
+          referrer_type: string | null;
+          landing_page: string | null;
+          is_paid: boolean;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          session_id?: string | null;
+          lead_id?: string | null;
+          utm_source?: string | null;
+          utm_medium?: string | null;
+          utm_campaign?: string | null;
+          utm_content?: string | null;
+          utm_term?: string | null;
+          referrer_url?: string | null;
+          referrer_type?: string | null;
+          landing_page?: string | null;
+          is_paid?: boolean;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      agent_assignments: {
+        Row: {
+          id: string;
+          created_at: string;
+          lead_id: string;
+          agent_id: string;
+          assigned_by: string;
+          assignment_reason: string | null;
+          status: string;
+          accepted_at: string | null;
+          declined_at: string | null;
+          accept_deadline: string | null;
+          contact_deadline: string | null;
+          notes: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          lead_id: string;
+          agent_id: string;
+          assigned_by?: string;
+          assignment_reason?: string | null;
+          status?: string;
+          accepted_at?: string | null;
+          declined_at?: string | null;
+          accept_deadline?: string | null;
+          contact_deadline?: string | null;
+          notes?: string | null;
+        };
+        Update: {
+          status?: string;
+          accepted_at?: string | null;
+          declined_at?: string | null;
+          notes?: string | null;
+        };
+        Relationships: [];
+      };
+      compliance_flags: {
+        Row: {
+          id: string;
+          created_at: string;
+          lead_id: string | null;
+          contact_id: string | null;
+          session_id: string | null;
+          flag_type: string;
+          severity: string;
+          resolved: boolean;
+          resolved_at: string | null;
+          resolved_by: string | null;
+          notes: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          lead_id?: string | null;
+          contact_id?: string | null;
+          session_id?: string | null;
+          flag_type: string;
+          severity?: string;
+          resolved?: boolean;
+          resolved_at?: string | null;
+          resolved_by?: string | null;
+          notes?: string | null;
+        };
+        Update: {
+          resolved?: boolean;
+          resolved_at?: string | null;
+          resolved_by?: string | null;
+          notes?: string | null;
+        };
+        Relationships: [];
+      };
+      audit_logs: {
+        Row: {
+          id: string;
+          created_at: string;
+          actor: string;
+          action: string;
+          resource_type: string;
+          resource_id: string | null;
+          before_state: Json | null;
+          after_state: Json | null;
+          ip_address: string | null;
+          metadata: Json | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          actor: string;
+          action: string;
+          resource_type: string;
+          resource_id?: string | null;
+          before_state?: Json | null;
+          after_state?: Json | null;
+          ip_address?: string | null;
+          metadata?: Json | null;
+        };
+        Update: Record<string, never>;
         Relationships: [];
       };
     };

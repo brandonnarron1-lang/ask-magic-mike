@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { IntakeStepSchema } from "@/schemas/lead.schema";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
+import { advanceSessionStep } from "@/lib/db/session-repository";
 
 export async function POST(req: NextRequest) {
   let body: unknown;
@@ -26,19 +27,7 @@ export async function POST(req: NextRequest) {
     properties: { step, dataKeys: Object.keys(data) },
   });
 
-  // Partial save — upsert what we have so far
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (supabaseUrl && serviceKey) {
-    const { createAdminClient } = await import("@/lib/supabase/admin");
-    const client = createAdminClient();
-
-    await client
-      .from("sessions")
-      .update({ step_reached: step })
-      .eq("id", sessionId);
-  }
+  await advanceSessionStep(sessionId, step);
 
   return NextResponse.json({ ok: true, step });
 }
