@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { ChevronDown, ChevronUp, ChevronsUpDown, CheckCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { TemperatureBadge } from "./temperature-badge";
 import { ScoreDisplay } from "./score-display";
-import type { Temperature } from "@/types/domain.types";
 import type { AdminLeadRow, FactorLogEntry } from "@/lib/db/types";
 
 // Re-export for backwards compatibility
@@ -91,9 +90,8 @@ export function LeadTable({ leads }: LeadTableProps) {
         </thead>
         <tbody className="divide-y divide-white/[0.04]">
           {sorted.map((lead) => (
-            <>
+            <React.Fragment key={lead.id}>
               <tr
-                key={lead.id}
                 onClick={() => setExpanded(expanded === lead.id ? null : lead.id)}
                 className={cn(
                   "cursor-pointer transition-colors",
@@ -232,7 +230,7 @@ export function LeadTable({ leads }: LeadTableProps) {
                   </td>
                 </tr>
               )}
-            </>
+            </React.Fragment>
           ))}
 
           {leads.length === 0 && (

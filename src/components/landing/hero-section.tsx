@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { CTAChips } from "./cta-chips";
@@ -34,8 +34,6 @@ export function HeroSection() {
   const [question, setQuestion]         = useState("");
   const [loading, setLoading]           = useState(false);
   const [loaded, setLoaded]             = useState(false);
-  const btnRef = useRef<HTMLButtonElement>(null);
-
   useEffect(() => {
     const t = setTimeout(() => setLoaded(true), 80);
     return () => clearTimeout(t);
@@ -61,22 +59,6 @@ export function HeroSection() {
     },
     [router, selectedChip]
   );
-
-  // Magnetic button effect
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    const btn = btnRef.current;
-    if (!btn) return;
-    const rect = btn.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top  + rect.height / 2;
-    const dx = (e.clientX - cx) * 0.25;
-    const dy = (e.clientY - cy) * 0.25;
-    btn.style.transform = `translate(${dx}px, ${dy}px)`;
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    if (btnRef.current) btnRef.current.style.transform = "translate(0, 0)";
-  }, []);
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-[#0A0A0A]">
