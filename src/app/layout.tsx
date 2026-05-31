@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  icons: { icon: "/icon.svg", shortcut: "/icon.svg" },
   title: "Ask Magic Mike | Local Real Estate AI — Our Town Properties",
   description:
     "Get real answers about Wilson NC and Eastern NC real estate — home values, market timing, buying power, and expert guidance from Mike Eatmon at Our Town Properties.",
