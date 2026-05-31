@@ -1,0 +1,99 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { EmbedShell } from "@/components/embed/embed-shell";
+import { StepQuestion } from "@/components/intake/step-question";
+import { StepIntent } from "@/components/intake/step-intent";
+import { StepContact } from "@/components/intake/step-contact";
+import { StepConsent } from "@/components/intake/step-consent";
+import { StepConfirmation } from "@/components/intake/step-confirmation";
+import { useSession } from "@/hooks/use-session";
+import { useIntakeFlow } from "@/hooks/use-intake-flow";
+import type { CTAChip, PrimaryIntent, TimelineMonths } from "@/types/domain.types";
+
+function EmbedAskInner() {
+  const params = useSearchParams();
+  const initialQuestion = params.get("q") ?? "";
+  const initialAddress  = params.get("address") ?? "";
+  const initialChip     = (params.get("chip") as CTAChip) ?? null;
+
+  const { sessionId } = useSession();
+  const flow = useIntakeFlow(sessionId, {
+    question: initialQuestion,
+    address:  initialAddress,
+    ctaChip:  initialChip,
+  });
+
+  const renderStep = () => {
+    switch (flow.step) {
+      case 1: return (
+        <StepQuestion
+          question={flow.data.question}
+          address={flow.data.address}
+          onQuestionChange={(q) => flow.updateData({ question: q })}
+          onAddressChange={(a) => flow.updateData({ address: a })}
+          onNext={flow.nextStep}
+        />
+      );
+      case 2: return (
+        <StepIntent
+          intent={flow.data.intent}
+          timelineMonths={flow.data.timelineMonths}
+          onIntentChange={(intent) => flow.updateData({ intent: intent as PrimaryIntent })}
+          onTimelineChange={(months) => flow.updateData({ timelineMonths: months as TimelineMonths })}
+          onNext={flow.nextStep}
+        />
+      );
+      case 3: return (
+        <StepContact
+          firstName={flow.data.firstName}
+          lastName={flow.data.lastName}
+          email={flow.data.email}
+          phone={flow.data.phone}
+          onChange={(field, value) => flow.updateData({ [field]: value } as Parameters<typeof flow.updateData>[0])}
+          onNext={flow.nextStep}
+        />
+      );
+      case 4: return (
+        <StepConsent
+          consentSms={flow.data.consentSms}
+          consentCall={flow.data.consentCall}
+          consentEmail={flow.data.consentEmail}
+          onToggle={(key) => flow.updateData({ [key]: !flow.data[key] })}
+          onSubmit={flow.submit}
+          submitting={flow.submitting}
+        />
+      );
+      case 5: return (
+        <StepConfirmation firstName={flow.data.firstName} score={flow.score} />
+      );
+      default: return null;
+    }
+  };
+
+  return (
+    <EmbedShell
+      step={flow.step}
+      totalSteps={flow.totalSteps}
+      progress={flow.progress}
+      onBack={flow.prevStep}
+      showBack={flow.step > 1 && flow.step < 5}
+    >
+      {flow.error && (
+        <div className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-300">
+          {flow.error}
+        </div>
+      )}
+      {renderStep()}
+    </EmbedShell>
+  );
+}
+
+export default function EmbedAskPage() {
+  return (
+    <Suspense>
+      <EmbedAskInner />
+    </Suspense>
+  );
+}

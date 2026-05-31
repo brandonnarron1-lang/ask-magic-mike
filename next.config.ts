@@ -11,6 +11,22 @@ const nextConfig: NextConfig = {
       allowedOrigins: ["localhost:3000"],
     },
   },
+  async headers() {
+    return [
+      {
+        // Allow ourtownproperties.com to embed /embed/* in an iframe
+        source: "/embed/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self' https://ourtownproperties.com https://*.ourtownproperties.com https://www.ourtownproperties.com",
+          },
+          // Override Next.js default SAMEORIGIN for embed routes only
+          { key: "X-Frame-Options", value: "ALLOWALL" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
