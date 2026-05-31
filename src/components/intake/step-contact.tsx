@@ -21,6 +21,7 @@ interface FieldConfig {
   placeholder: string;
   required?: boolean;
   autoComplete?: string;
+  testId?: string;
 }
 
 const FIELDS: FieldConfig[] = [
@@ -31,6 +32,7 @@ const FIELDS: FieldConfig[] = [
     placeholder: "Jane",
     required: true,
     autoComplete: "given-name",
+    testId: "contact-first-name",
   },
   {
     name: "lastName",
@@ -38,6 +40,7 @@ const FIELDS: FieldConfig[] = [
     type: "text",
     placeholder: "Smith",
     autoComplete: "family-name",
+    testId: "contact-last-name",
   },
   {
     name: "email",
@@ -46,6 +49,7 @@ const FIELDS: FieldConfig[] = [
     placeholder: "jane@example.com",
     required: true,
     autoComplete: "email",
+    testId: "contact-email",
   },
   {
     name: "phone",
@@ -53,6 +57,7 @@ const FIELDS: FieldConfig[] = [
     type: "tel",
     placeholder: "(252) 555-1234",
     autoComplete: "tel",
+    testId: "contact-phone",
   },
 ];
 
@@ -110,6 +115,7 @@ export function StepContact({
               )}
             </label>
             <input
+              data-testid={field.testId}
               type={field.type}
               value={values[field.name]}
               autoComplete={field.autoComplete}

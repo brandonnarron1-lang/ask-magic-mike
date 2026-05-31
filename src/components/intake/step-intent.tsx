@@ -55,6 +55,7 @@ export function StepIntent({
             <button
               key={opt.value}
               type="button"
+              data-testid={`intent-${opt.value}`}
               onClick={() => onIntentChange(opt.value)}
               className={cn(
                 "flex items-center gap-3 rounded-xl border px-4 py-3.5 text-sm text-left transition-all duration-200",
@@ -81,6 +82,7 @@ export function StepIntent({
             <button
               key={opt.value}
               type="button"
+              data-testid={`timeline-${opt.value}`}
               onClick={() => onTimelineChange(opt.value)}
               className={cn(
                 "rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200",

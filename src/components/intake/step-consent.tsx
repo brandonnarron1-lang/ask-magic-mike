@@ -17,6 +17,7 @@ interface ConsentOption {
   key: "consentSms" | "consentCall" | "consentEmail";
   label: string;
   description: string;
+  testId: string;
 }
 
 const CONSENT_OPTIONS: ConsentOption[] = [
@@ -24,16 +25,19 @@ const CONSENT_OPTIONS: ConsentOption[] = [
     key: "consentSms",
     label: "Text / SMS",
     description: "Receive updates and responses via text message",
+    testId: "consent-sms",
   },
   {
     key: "consentCall",
     label: "Phone Call",
     description: "Mike may call you directly to discuss your needs",
+    testId: "consent-call",
   },
   {
     key: "consentEmail",
     label: "Email",
     description: "Receive market reports, valuations, and follow-ups",
+    testId: "consent-email",
   },
 ];
 
@@ -74,6 +78,7 @@ export function StepConsent({
             <button
               key={opt.key}
               type="button"
+              data-testid={opt.testId}
               onClick={() => onToggle(opt.key)}
               className={cn(
                 "w-full flex items-center gap-4 rounded-xl border px-4 py-4 text-left transition-all duration-200",
@@ -122,6 +127,7 @@ export function StepConsent({
       </div>
 
       <Button
+        data-testid="submit-intake"
         variant="primary"
         size="lg"
         onClick={onSubmit}

@@ -55,7 +55,7 @@ export function StepConfirmation({
   const message = TEMPERATURE_MESSAGES[temperature];
 
   return (
-    <div className="pt-8 flex flex-col items-center text-center">
+    <div data-testid="confirmation-panel" className="pt-8 flex flex-col items-center text-center">
       {/* Icon */}
       <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gold-400/10 border border-gold-400/30">
         <CheckCircle className="h-8 w-8 text-gold-400" />

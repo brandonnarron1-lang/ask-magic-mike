@@ -36,6 +36,7 @@ export function StepQuestion({
             Your Question
           </label>
           <textarea
+            data-testid="ask-question-textarea"
             value={question}
             onChange={(e) => onQuestionChange(e.target.value)}
             rows={4}
@@ -57,6 +58,7 @@ export function StepQuestion({
           <div className="relative">
             <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gold-400/50" />
             <input
+              data-testid="ask-address-input"
               type="text"
               value={address}
               onChange={(e) => onAddressChange(e.target.value)}
@@ -72,6 +74,7 @@ export function StepQuestion({
       </div>
 
       <Button
+        data-testid="ask-continue-button"
         variant="primary"
         size="lg"
         onClick={onNext}
