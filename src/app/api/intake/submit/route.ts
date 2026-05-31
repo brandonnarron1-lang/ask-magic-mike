@@ -8,8 +8,10 @@ import { upsertLead, updateLeadStatus, updateLeadCRM } from "@/lib/db/lead-repos
 import { upsertProperty } from "@/lib/db/property-repository";
 import { createConsentsFromLead } from "@/lib/db/consent-repository";
 import { completeSession } from "@/lib/db/session-repository";
-import { isDev } from "@/lib/db/types";
+import { shouldUseDevStorage, isProduction, isSupabaseConfigured } from "@/lib/db/types";
 import type { ScoringInput } from "@/types/domain.types";
+
+const NO_STORE = { "Cache-Control": "no-store" };
 
 export async function POST(req: NextRequest) {
   let body: unknown;
@@ -30,6 +32,14 @@ export async function POST(req: NextRequest) {
   const input = parsed.data;
   const ip        = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
   const userAgent = req.headers.get("user-agent") ?? null;
+
+  // Production without Supabase: reject — leads must persist somewhere real
+  if (isProduction() && !isSupabaseConfigured()) {
+    return NextResponse.json(
+      { error: "Configuration error", message: "Lead storage is not configured." },
+      { status: 503, headers: NO_STORE }
+    );
+  }
 
   // 1. Compute score (always — no DB required)
   const scoringInput: ScoringInput = {
@@ -54,7 +64,7 @@ export async function POST(req: NextRequest) {
   let routingDecision = null;
 
   // 2. Persist to DB
-  if (!isDev()) {
+  if (!shouldUseDevStorage()) {
     try {
       // Upsert contact (dedup by email/phone)
       const contact = await upsertContact({
@@ -317,14 +327,17 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  return NextResponse.json({
-    leadId,
-    score: {
-      sellerCertaintyScore: score.sellerCertaintyScore,
-      buyerCertaintyScore:  score.buyerCertaintyScore,
-      compositeScore:       score.compositeScore,
-      temperature:          score.temperature,
+  return NextResponse.json(
+    {
+      leadId,
+      score: {
+        sellerCertaintyScore: score.sellerCertaintyScore,
+        buyerCertaintyScore:  score.buyerCertaintyScore,
+        compositeScore:       score.compositeScore,
+        temperature:          score.temperature,
+      },
+      routing: routingDecision,
     },
-    routing: routingDecision,
-  });
+    { headers: NO_STORE }
+  );
 }

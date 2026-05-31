@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { IntakeStepSchema } from "@/schemas/lead.schema";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
 import { advanceSessionStep } from "@/lib/db/session-repository";
+import { isProduction, isSupabaseConfigured } from "@/lib/db/types";
+
+const NO_STORE = { "Cache-Control": "no-store" };
 
 export async function POST(req: NextRequest) {
+  if (isProduction() && !isSupabaseConfigured()) {
+    return NextResponse.json(
+      { error: "Configuration error", message: "Lead storage is not configured." },
+      { status: 503, headers: NO_STORE }
+    );
+  }
   let body: unknown;
   try {
     body = await req.json();
@@ -29,5 +38,5 @@ export async function POST(req: NextRequest) {
 
   await advanceSessionStep(sessionId, step);
 
-  return NextResponse.json({ ok: true, step });
+  return NextResponse.json({ ok: true, step }, { headers: NO_STORE });
 }

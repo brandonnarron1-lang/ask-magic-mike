@@ -96,21 +96,35 @@ export interface AdminLeadRow {
   consentEmail: boolean;
 }
 
-/** True when Supabase credentials are present — use this to gate DB calls */
+export function isProduction(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
 export function isSupabaseConfigured(): boolean {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
-/** @deprecated use isSupabaseConfigured() — kept for call-sites that pre-date the rename */
-export function isDev(): boolean {
-  return !isSupabaseConfigured();
+/**
+ * True only in non-production environments WITHOUT Supabase credentials.
+ * Dev/mock storage is NEVER allowed in production — not even as a fallback.
+ */
+export function shouldUseDevStorage(): boolean {
+  return !isProduction() && !isSupabaseConfigured();
 }
 
-/** Throws in production if Supabase is not configured (call on write paths) */
-export function requireSupabase(): void {
-  if (process.env.NODE_ENV === "production" && !isSupabaseConfigured()) {
+/**
+ * Throws if called in production without Supabase.
+ * Call at the top of every write path (session create, lead submit, etc.)
+ */
+export function requireSupabaseForProduction(): void {
+  if (isProduction() && !isSupabaseConfigured()) {
     throw new Error(
       "Supabase is required in production. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."
     );
   }
+}
+
+/** @deprecated use shouldUseDevStorage() */
+export function isDev(): boolean {
+  return shouldUseDevStorage();
 }

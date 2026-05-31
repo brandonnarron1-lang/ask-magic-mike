@@ -1,5 +1,5 @@
 import type { DbContact } from "./types";
-import { isDev } from "./types";
+import { shouldUseDevStorage } from "./types";
 import { stripToDigits } from "@/lib/utils/phone";
 
 export interface UpsertContactInput {
@@ -10,7 +10,7 @@ export interface UpsertContactInput {
 }
 
 export async function upsertContact(input: UpsertContactInput): Promise<DbContact | null> {
-  if (isDev()) return null;
+  if (shouldUseDevStorage()) return null;
 
   const phoneNormalized = input.phone ? stripToDigits(input.phone) : null;
 
@@ -82,7 +82,7 @@ export async function upsertContact(input: UpsertContactInput): Promise<DbContac
 }
 
 export async function updateContactCRM(contactId: string, crmContactId: string): Promise<void> {
-  if (isDev()) return;
+  if (shouldUseDevStorage()) return;
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
   await createAdminClient()

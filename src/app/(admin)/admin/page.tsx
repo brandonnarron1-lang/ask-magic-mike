@@ -1,8 +1,10 @@
+export const dynamic   = "force-dynamic";
+export const revalidate = 0;
+
 import { LeadTable } from "@/components/admin/lead-table";
 import { getLeadsForAdmin } from "@/lib/db/lead-repository";
-import { isDev } from "@/lib/db/types";
 
-async function AdminIcon() {
+function AdminIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 60 60" fill="none">
       <rect x="2" y="2" width="56" height="56" rx="4" fill="#0A0A0A" stroke="#D4A017" strokeWidth="2"/>
@@ -14,8 +16,33 @@ async function AdminIcon() {
 }
 
 export default async function AdminPage() {
-  const leads     = await getLeadsForAdmin();
-  const devMode   = isDev();
+  const result = await getLeadsForAdmin();
+
+  // Production without Supabase — show locked state, never show mock data
+  if (result.mode === "locked") {
+    return (
+      <div className="min-h-screen bg-[#080806] flex items-center justify-center">
+        <div className="max-w-md text-center px-6">
+          <div className="mb-6 flex justify-center">
+            <AdminIcon />
+          </div>
+          <h1 className="text-xl font-bold text-ruby-400 mb-3">Admin Unavailable</h1>
+          <p className="text-sm text-slate-400 leading-relaxed mb-4">
+            Supabase is not configured. Set{" "}
+            <code className="text-amber-400 text-xs">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+            <code className="text-amber-400 text-xs">SUPABASE_SERVICE_ROLE_KEY</code>{" "}
+            in your production environment.
+          </p>
+          <p className="text-xs text-slate-600">
+            Mock data is never shown in production.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const leads   = result.leads;
+  const devMode = result.mode === "dev";
 
   const counts = {
     total:    leads.length,
@@ -47,6 +74,21 @@ export default async function AdminPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
+
+        {/* Dev storage warning banner */}
+        {devMode && (
+          <div className="mb-6 rounded-xl border-2 border-amber-400/60 bg-amber-400/10 px-5 py-4">
+            <p className="text-sm font-bold text-amber-400 mb-1">
+              DEV MOCK DATA — Supabase is not connected.
+            </p>
+            <p className="text-xs text-amber-300/70">
+              This data is fabricated for development only. It is never shown in production.
+              Connect Supabase (set <code>NEXT_PUBLIC_SUPABASE_URL</code> +{" "}
+              <code>SUPABASE_SERVICE_ROLE_KEY</code>) to see real leads.
+            </p>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[
             { label: "Total Leads",  value: counts.total,    color: "text-cream" },

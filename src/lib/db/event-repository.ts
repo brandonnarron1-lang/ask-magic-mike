@@ -1,4 +1,4 @@
-import { isDev } from "./types";
+import { shouldUseDevStorage } from "./types";
 
 export interface CreateEventInput {
   sessionId?: string | null;
@@ -14,7 +14,7 @@ export interface CreateEventInput {
 }
 
 export async function createEvent(input: CreateEventInput): Promise<void> {
-  if (isDev()) return;
+  if (shouldUseDevStorage()) return;
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
   const client = createAdminClient();

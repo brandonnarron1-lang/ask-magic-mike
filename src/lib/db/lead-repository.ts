@@ -1,5 +1,5 @@
 import type { DbLead, AdminLeadRow, FactorLogEntry } from "./types";
-import { isDev } from "./types";
+import { shouldUseDevStorage, isSupabaseConfigured, isProduction } from "./types";
 import type { Temperature } from "@/types/domain.types";
 import { stripToDigits } from "@/lib/utils/phone";
 
@@ -29,7 +29,7 @@ export interface UpsertLeadInput {
 }
 
 export async function upsertLead(input: UpsertLeadInput): Promise<DbLead | null> {
-  if (isDev()) return null;
+  if (shouldUseDevStorage()) return null;
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
   const client = createAdminClient();
@@ -75,7 +75,7 @@ export async function upsertLead(input: UpsertLeadInput): Promise<DbLead | null>
 }
 
 export async function updateLeadStatus(leadId: string, status: string): Promise<void> {
-  if (isDev()) return;
+  if (shouldUseDevStorage()) return;
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
   await createAdminClient()
@@ -85,7 +85,7 @@ export async function updateLeadStatus(leadId: string, status: string): Promise<
 }
 
 export async function updateLeadCRM(leadId: string, crmContactId: string): Promise<void> {
-  if (isDev()) return;
+  if (shouldUseDevStorage()) return;
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
   await createAdminClient()
@@ -94,8 +94,21 @@ export async function updateLeadCRM(leadId: string, crmContactId: string): Promi
     .eq("id", leadId);
 }
 
-export async function getLeadsForAdmin(limit = 100): Promise<AdminLeadRow[]> {
-  if (isDev()) return DEV_LEADS;
+export type GetLeadsForAdminResult =
+  | { mode: "live";    leads: AdminLeadRow[] }
+  | { mode: "dev";     leads: AdminLeadRow[] }
+  | { mode: "locked";  leads: never[] };
+
+export async function getLeadsForAdmin(limit = 100): Promise<GetLeadsForAdminResult> {
+  // Production without Supabase: locked — never show mock data
+  if (isProduction() && !isSupabaseConfigured()) {
+    return { mode: "locked", leads: [] };
+  }
+
+  // Non-production without Supabase: dev mode with sample data
+  if (shouldUseDevStorage()) {
+    return { mode: "dev", leads: DEV_LEADS };
+  }
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
   const client = createAdminClient();
@@ -113,9 +126,9 @@ export async function getLeadsForAdmin(limit = 100): Promise<AdminLeadRow[]> {
     .order("created_at", { ascending: false })
     .limit(limit);
 
-  if (!data) return DEV_LEADS;
+  if (!data) return { mode: "live", leads: [] };
 
-  return data.map((row) => {
+  return { mode: "live", leads: data.map((row) => {
     const score   = Array.isArray(row.lead_scores)  ? row.lead_scores[0]  : row.lead_scores;
     const routing = Array.isArray(row.lead_routing) ? row.lead_routing[0] : row.lead_routing;
     const session = Array.isArray(row.sessions)     ? row.sessions[0]     : row.sessions;
@@ -153,7 +166,7 @@ export async function getLeadsForAdmin(limit = 100): Promise<AdminLeadRow[]> {
       consentCall:   row.consent_call ?? false,
       consentEmail:  row.consent_email ?? false,
     };
-  });
+  }) };
 }
 
 function mapLead(row: Record<string, unknown>): DbLead {

@@ -1,4 +1,4 @@
-import { isDev } from "./types";
+import { shouldUseDevStorage } from "./types";
 
 export interface UpsertPropertyInput {
   leadId?: string | null;
@@ -23,7 +23,7 @@ export interface DbProperty {
 }
 
 export async function upsertProperty(input: UpsertPropertyInput): Promise<DbProperty | null> {
-  if (isDev()) return null;
+  if (shouldUseDevStorage()) return null;
   if (!input.addressLine1 && !input.addressRaw) return null;
 
   // properties.address_line1 is NOT NULL — use addressRaw as fallback

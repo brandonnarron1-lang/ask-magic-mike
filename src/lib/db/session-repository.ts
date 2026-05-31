@@ -1,5 +1,5 @@
 import type { DbSession } from "./types";
-import { isDev, requireSupabase } from "./types";
+import { shouldUseDevStorage, requireSupabaseForProduction } from "./types";
 
 export interface CreateSessionInput {
   utmSource?: string | null;
@@ -18,9 +18,9 @@ export interface CreateSessionInput {
 }
 
 export async function createSession(input: CreateSessionInput): Promise<DbSession> {
-  requireSupabase();
+  requireSupabaseForProduction();
 
-  if (isDev()) {
+  if (shouldUseDevStorage()) {
     const stubId = crypto.randomUUID();
     return {
       id: stubId,
@@ -68,7 +68,7 @@ export async function createSession(input: CreateSessionInput): Promise<DbSessio
 }
 
 export async function advanceSessionStep(sessionId: string, step: number): Promise<void> {
-  if (isDev()) return;
+  if (shouldUseDevStorage()) return;
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
   await createAdminClient()
@@ -78,7 +78,7 @@ export async function advanceSessionStep(sessionId: string, step: number): Promi
 }
 
 export async function completeSession(sessionId: string): Promise<void> {
-  if (isDev()) return;
+  if (shouldUseDevStorage()) return;
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
   await createAdminClient()

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { TrackEventSchema } from "@/schemas/analytics.schema";
 import { trackEvent } from "@/lib/analytics/ledger";
 
+const NO_STORE = { "Cache-Control": "no-store" };
+
 export async function POST(req: NextRequest) {
   let body: unknown;
   try {
@@ -27,5 +29,5 @@ export async function POST(req: NextRequest) {
     userAgent,
   });
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true }, { headers: NO_STORE });
 }

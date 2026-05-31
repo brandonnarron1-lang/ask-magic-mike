@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { CreateSessionSchema } from "@/schemas/session.schema";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
 import { createSession } from "@/lib/db/session-repository";
+import { isProduction, isSupabaseConfigured } from "@/lib/db/types";
+
+const NO_STORE = { "Cache-Control": "no-store" };
 
 export async function POST(req: NextRequest) {
+  if (isProduction() && !isSupabaseConfigured()) {
+    return NextResponse.json(
+      { error: "Configuration error", message: "Lead storage is not configured." },
+      { status: 503, headers: NO_STORE }
+    );
+  }
   let body: unknown;
   try {
     body = await req.json();
@@ -55,13 +64,13 @@ export async function POST(req: NextRequest) {
       userAgent:   userAgent ?? undefined,
     });
 
-    return NextResponse.json({
-      sessionId:  session.id,
-      expiresAt:  session.expiresAt,
-    });
+    return NextResponse.json(
+      { sessionId: session.id, expiresAt: session.expiresAt },
+      { headers: NO_STORE }
+    );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[session/create] error:", msg);
-    return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create session" }, { status: 500, headers: NO_STORE });
   }
 }

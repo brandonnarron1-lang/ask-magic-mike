@@ -1,4 +1,4 @@
-import { isDev } from "./types";
+import { shouldUseDevStorage } from "./types";
 
 export interface CreateConsentInput {
   leadId: string;
@@ -12,7 +12,7 @@ export interface CreateConsentInput {
 }
 
 export async function createConsent(input: CreateConsentInput): Promise<void> {
-  if (isDev()) return;
+  if (shouldUseDevStorage()) return;
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
   const client = createAdminClient();
@@ -43,7 +43,7 @@ export async function createConsentsFromLead(params: {
   ipAddress?: string | null;
   userAgent?: string | null;
 }): Promise<void> {
-  if (isDev()) return;
+  if (shouldUseDevStorage()) return;
   if (!params.sms && !params.call && !params.email) return;
 
   const types: Array<"sms" | "call" | "email"> = [];

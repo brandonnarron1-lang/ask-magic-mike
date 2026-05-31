@@ -9,7 +9,7 @@ export const SubmitIntakeSchema = z.object({
   email: z.string().email().nullable().default(null),
   phone: z
     .string()
-    .regex(E164PhoneRegex, "Must be E.164 format (e.g. +13525551234)")
+    .regex(E164PhoneRegex, "Must be E.164 format (e.g. +12525551234)")
     .nullable()
     .default(null),
   addressRaw: z.string().max(500).nullable().default(null),
