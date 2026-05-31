@@ -79,8 +79,8 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Dev mode: return stub
-  const stubId = `dev-session-${Date.now()}`;
+  // Dev mode: return stub UUID
+  const stubId = crypto.randomUUID();
   console.log("[session/create] Dev mode — returning stub session:", stubId);
   trackEventNoWait({ eventName: "session_created", sessionId: stubId });
 
