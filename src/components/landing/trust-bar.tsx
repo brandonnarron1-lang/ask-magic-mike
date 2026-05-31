@@ -12,7 +12,7 @@ const TRUST_ITEMS = [
   },
   {
     icon: Shield,
-    label: "Licensed NC Broker",
+    label: `Licensed NC Broker${process.env.NEXT_PUBLIC_AGENT_LICENSE ? ` #${process.env.NEXT_PUBLIC_AGENT_LICENSE}` : ""}`,
   },
   {
     icon: MapPin,
