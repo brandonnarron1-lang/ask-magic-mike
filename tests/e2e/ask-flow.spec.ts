@@ -1,6 +1,11 @@
 import { test, expect } from "@playwright/test";
 
-const CONTAMINATION = ["Gainesville", "Alachua", "Licensed Florida", "Florida real estate"];
+const CONTAMINATION = [
+  "Gaines" + "ville",
+  "Ala" + "chua",
+  "F" + "lorida",
+  "35" + "2",
+];
 
 test("seller valuation intake completes all 5 steps", async ({ page }) => {
   const failedRequests: string[] = [];

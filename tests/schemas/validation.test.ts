@@ -5,14 +5,14 @@ import { LeadScoreSchema } from "@/schemas/scoring.schema";
 
 describe("E164PhoneRegex", () => {
   it("accepts valid E.164 numbers", () => {
-    expect(E164PhoneRegex.test("+13525551234")).toBe(true);
+    expect(E164PhoneRegex.test("+12525551234")).toBe(true);
     expect(E164PhoneRegex.test("+19045551234")).toBe(true);
     expect(E164PhoneRegex.test("+447911123456")).toBe(true);
   });
 
   it("rejects numbers without country code", () => {
-    expect(E164PhoneRegex.test("3525551234")).toBe(false);
-    expect(E164PhoneRegex.test("(352) 555-1234")).toBe(false);
+    expect(E164PhoneRegex.test("2525551234")).toBe(false);
+    expect(E164PhoneRegex.test("(252) 555-1234")).toBe(false);
   });
 
   it("rejects numbers starting with +0", () => {
@@ -46,7 +46,7 @@ describe("SubmitIntakeSchema", () => {
   it("rejects invalid E.164 phone", () => {
     const result = SubmitIntakeSchema.safeParse({
       sessionId: "550e8400-e29b-41d4-a716-446655440000",
-      phone: "3525551234",
+      phone: "2525551234",
     });
     expect(result.success).toBe(false);
   });
@@ -54,7 +54,7 @@ describe("SubmitIntakeSchema", () => {
   it("accepts valid E.164 phone", () => {
     const result = SubmitIntakeSchema.safeParse({
       sessionId: "550e8400-e29b-41d4-a716-446655440000",
-      phone: "+13525551234",
+      phone: "+12525551234",
     });
     expect(result.success).toBe(true);
   });
@@ -88,7 +88,7 @@ describe("SubmitIntakeSchema", () => {
   it("accepts valid 5-digit zip", () => {
     const result = SubmitIntakeSchema.safeParse({
       sessionId: "550e8400-e29b-41d4-a716-446655440000",
-      zip: "32601",
+      zip: "27893",
     });
     expect(result.success).toBe(true);
   });
