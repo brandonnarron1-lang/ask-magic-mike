@@ -4,7 +4,7 @@ export const DISCLAIMER_V1 = `This Automated Valuation Model (AVM) estimate is f
 
 For a professional, no-obligation evaluation of your home's current market value, contact Mike Eatmon at Our Town Properties. Our Town Properties and its affiliates are not responsible for errors or omissions in this estimate and make no representations regarding its accuracy or completeness.
 
-Licensed Real Estate Broker · Our Town Properties · Gainesville, FL`;
+Licensed Real Estate Broker · Our Town Properties, Inc. · Wilson, NC`;
 
 export function getDisclaimer(version: string = DISCLAIMER_VERSION): string {
   const map: Record<string, string> = {

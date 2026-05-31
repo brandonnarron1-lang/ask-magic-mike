@@ -4,27 +4,28 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Ask Magic Mike | Local Real Estate AI — Our Town Properties",
   description:
-    "Get real answers about Gainesville real estate — home values, market timing, buying power, and expert guidance from Mike Eatmon at Our Town Properties.",
+    "Get real answers about Wilson NC and Eastern NC real estate — home values, market timing, buying power, and expert guidance from Mike Eatmon at Our Town Properties.",
   keywords: [
-    "Gainesville real estate",
+    "Wilson NC real estate",
+    "Eastern NC real estate",
     "home value estimate",
     "Our Town Properties",
     "Mike Eatmon",
-    "sell my home Gainesville",
-    "buy a home Gainesville FL",
+    "sell my home Wilson NC",
+    "buy a home Eastern NC",
   ],
   authors: [{ name: "Mike Eatmon", url: "https://askmagicmike.com" }],
   openGraph: {
     title: "Ask Magic Mike | Local Real Estate AI",
     description:
-      "Real answers about Gainesville real estate from a licensed local expert.",
+      "Real answers about Wilson NC and Eastern NC real estate from a licensed local expert.",
     siteName: "Ask Magic Mike",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Ask Magic Mike | Local Real Estate AI",
-    description: "Real answers about Gainesville real estate.",
+    description: "Real answers about Wilson NC and Eastern NC real estate.",
   },
   robots: {
     index: true,

@@ -27,7 +27,7 @@ export function StepQuestion({
         What do you want to know?
       </h2>
       <p className="text-slate-400 mb-8">
-        Ask anything about buying, selling, or your home&apos;s value in Gainesville.
+        Ask anything about buying, selling, or your home&apos;s value in Wilson or Eastern NC.
       </p>
 
       <div className="space-y-4">
@@ -39,7 +39,7 @@ export function StepQuestion({
             value={question}
             onChange={(e) => onQuestionChange(e.target.value)}
             rows={4}
-            placeholder="What's the market like? Should I sell now? Can I tour that listing on NW 23rd Ave?"
+            placeholder="What's the market like? Should I sell now? What's my home worth in Wilson?"
             className={cn(
               "w-full rounded-xl border border-white/10 bg-white/5",
               "px-4 py-3 text-cream placeholder:text-slate-500",
@@ -60,7 +60,7 @@ export function StepQuestion({
               type="text"
               value={address}
               onChange={(e) => onAddressChange(e.target.value)}
-              placeholder="123 NW 5th Ave, Gainesville, FL 32601"
+              placeholder="123 Nash St NW, Wilson, NC 27896"
               className={cn(
                 "w-full rounded-xl border border-white/10 bg-white/5",
                 "pl-10 pr-4 py-3 text-cream placeholder:text-slate-500",

@@ -40,7 +40,14 @@ const config: Config = {
       },
       fontFamily: {
         display: ["var(--font-playfair)", "Georgia", "serif"],
-        body: ["var(--font-inter)", "system-ui", "sans-serif"],
+        body:    ["var(--font-inter)", "system-ui", "sans-serif"],
+        bebas:   ["var(--font-bebas)", "Impact", "sans-serif"],
+      },
+      spacing: {
+        "13": "3.25rem",
+      },
+      transitionDuration: {
+        "400": "400ms",
       },
       backgroundImage: {
         "hero-gradient":

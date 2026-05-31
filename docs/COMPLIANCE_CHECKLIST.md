@@ -43,11 +43,11 @@
 - [ ] **TODO**: Lead data deletion request handler (CCPA/right to be forgotten)
 - [ ] **TODO**: PII handling documentation
 
-## Florida-Specific
+## North Carolina-Specific
 
-- [ ] **TODO**: Verify compliance with FL Statutes § 475 (Real Estate Broker)
-- [ ] **TODO**: Ensure AVM disclaimer meets FL disclosure requirements
-- [ ] **TODO**: FREC (Florida Real Estate Commission) rules review for AI-generated content
+- [ ] **TODO**: Verify compliance with NC General Statute § 93A (Real Estate License Law)
+- [ ] **TODO**: Ensure AVM disclaimer meets NC disclosure requirements
+- [ ] **TODO**: NCREC (NC Real Estate Commission) rules review for AI-generated content
 
 ## Security
 

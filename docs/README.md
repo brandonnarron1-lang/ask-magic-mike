@@ -1,6 +1,6 @@
 # Ask Magic Mike
 
-**www.askmagicmike.com** — Real estate AI lead operating system for Mike Eatmon / Our Town Properties, Gainesville, FL.
+**www.askmagicmike.com** — Real estate AI lead operating system for Mike Eatmon / Our Town Properties, Wilson, NC.
 
 ## What This Is
 
@@ -98,7 +98,7 @@ tests/              # Vitest tests
 
 - Agent: Mike Eatmon
 - Brokerage: Our Town Properties
-- Market: Gainesville, FL
+- Market: Wilson, NC (Eastern NC)
 - Colors: black #0A0A0A, gold #D4A017, ruby #C1272D, cream #F5F0E8
 - Typography: Playfair Display (headers), Inter (body)
 - Tone: Premium, local, professional — not cartoon or fantasy

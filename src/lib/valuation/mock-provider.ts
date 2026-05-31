@@ -1,15 +1,15 @@
 import type { AVMProvider, AVMInput, AVMResult } from "./provider-interface";
 import type { ValuationComp } from "@/types/domain.types";
 
-// Deterministic price range by zip code prefix (for Gainesville, FL area)
+// Deterministic price range by zip code prefix (for Wilson, NC area)
 // All values in cents
 const ZIP_BASE_PRICES: Record<string, number> = {
-  "326": 28000000, // Gainesville area (~$280k base)
-  "327": 32000000, // North Central FL (~$320k base)
-  "328": 25000000, // ~$250k
-  "329": 22000000, // ~$220k
+  "278": 22000000, // Wilson County area (~$220k base)
+  "275": 25000000, // Wake County (~$250k base)
+  "279": 19000000, // Eastern NC rural (~$190k base)
+  "276": 21000000, // Nash County (~$210k base)
 };
-const DEFAULT_BASE = 27500000; // $275,000
+const DEFAULT_BASE = 22000000; // $220,000
 
 function getBasePrice(zip: string): number {
   const prefix = zip.slice(0, 3);
@@ -20,7 +20,7 @@ function buildStubComps(zip: string, midCents: number): ValuationComp[] {
   const variance = midCents * 0.08;
   return [
     {
-      address: `1234 Sample Oak Dr, Gainesville, FL ${zip}`,
+      address: `1234 Sample Oak Dr, Wilson, NC ${zip}`,
       salePrice: Math.round(midCents - variance * 0.5),
       saleDate: "2024-11-15",
       sqft: 1820,
@@ -29,7 +29,7 @@ function buildStubComps(zip: string, midCents: number): ValuationComp[] {
       distanceMiles: 0.3,
     },
     {
-      address: `5678 Magnolia Blvd, Gainesville, FL ${zip}`,
+      address: `5678 Magnolia Blvd, Wilson, NC ${zip}`,
       salePrice: Math.round(midCents + variance * 0.2),
       saleDate: "2024-10-28",
       sqft: 1950,
@@ -38,7 +38,7 @@ function buildStubComps(zip: string, midCents: number): ValuationComp[] {
       distanceMiles: 0.7,
     },
     {
-      address: `9012 Palmetto Ave, Gainesville, FL ${zip}`,
+      address: `9012 Pinecrest Ave, Wilson, NC ${zip}`,
       salePrice: Math.round(midCents + variance * 0.8),
       saleDate: "2024-12-03",
       sqft: 2100,
@@ -57,7 +57,7 @@ export class MockAVMProvider implements AVMProvider {
   }
 
   async getEstimate(input: AVMInput): Promise<AVMResult> {
-    const base = getBasePrice(input.zip ?? "326");
+    const base = getBasePrice(input.zip ?? "278");
 
     // Adjust for sqft if known
     const sqftMultiplier = input.sqft

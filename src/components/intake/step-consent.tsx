@@ -11,7 +11,7 @@ const CONSENT_LANGUAGE_V1 = `By checking the boxes below, you agree to be contac
 • We will not sell, rent, or share your contact information with third parties for marketing purposes.
 • This consent is provided under the Telephone Consumer Protection Act (TCPA).
 
-Our Town Properties · Gainesville, FL · Licensed Real Estate Broker`;
+Our Town Properties, Inc. · Wilson, NC · Licensed Real Estate Broker`;
 
 interface ConsentOption {
   key: "consentSms" | "consentCall" | "consentEmail";

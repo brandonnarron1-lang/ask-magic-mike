@@ -79,7 +79,7 @@ export function StepConfirmation({
           <div>
             <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Assigned to</p>
             <p className="text-sm font-semibold text-cream">{agentName}</p>
-            <p className="text-xs text-slate-400">Our Town Properties · Gainesville, FL</p>
+            <p className="text-xs text-slate-400">Our Town Properties · Wilson, NC</p>
           </div>
         </div>
 

@@ -12,11 +12,11 @@ const TRUST_ITEMS = [
   },
   {
     icon: Shield,
-    label: "Licensed FL Realtor",
+    label: "Licensed NC Broker",
   },
   {
     icon: MapPin,
-    label: "Gainesville, FL",
+    label: "Wilson, NC",
   },
 ];
 

@@ -20,7 +20,7 @@ If these are absent, the app runs in **dev mode**: sessions and leads are logged
 | `NEXT_PUBLIC_AGENT_NAME` | `Mike Eatmon` | Agent's display name |
 | `NEXT_PUBLIC_BROKERAGE_NAME` | `Our Town Properties` | Brokerage name |
 | `NEXT_PUBLIC_AGENT_PHONE` | — | Agent's phone in E.164 format |
-| `NEXT_PUBLIC_MARKET_AREA` | `Gainesville, FL` | Market area displayed in UI |
+| `NEXT_PUBLIC_MARKET_AREA` | `Wilson, NC` | Market area displayed in UI |
 | `ADMIN_SECRET` | `changeme-local` | Password for `/admin` route (basic auth) |
 | `SLA_ACCEPT_MS` | `120000` | Accept SLA in milliseconds (2 min) |
 | `SLA_CONTACT_MS` | `300000` | Contact SLA in milliseconds (5 min) |
