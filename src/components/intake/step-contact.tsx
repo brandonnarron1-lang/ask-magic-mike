@@ -51,7 +51,7 @@ const FIELDS: FieldConfig[] = [
     name: "phone",
     label: "Phone",
     type: "tel",
-    placeholder: "(352) 555-1234",
+    placeholder: "(252) 555-1234",
     autoComplete: "tel",
   },
 ];
