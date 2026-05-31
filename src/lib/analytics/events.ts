@@ -1,0 +1,99 @@
+import type { AnalyticsEventCategory, AnalyticsEventName } from "@/types/domain.types";
+
+export const ANALYTICS_EVENTS: Record<
+  AnalyticsEventName,
+  { category: AnalyticsEventCategory; description: string }
+> = {
+  session_created: {
+    category: "session",
+    description: "New session row created on first page load",
+  },
+  landing_page_viewed: {
+    category: "session",
+    description: "User viewed the landing page",
+  },
+  cta_chip_clicked: {
+    category: "intake",
+    description: "User clicked a CTA chip on the landing page",
+  },
+  question_submitted: {
+    category: "intake",
+    description: "User submitted a free-text question",
+  },
+  address_entered: {
+    category: "intake",
+    description: "User entered a property address",
+  },
+  intake_step_completed: {
+    category: "intake",
+    description: "User completed an intake step",
+  },
+  contact_info_submitted: {
+    category: "intake",
+    description: "User submitted name/email/phone",
+  },
+  consent_granted: {
+    category: "intake",
+    description: "User granted at least one contact consent",
+  },
+  consent_declined: {
+    category: "intake",
+    description: "User declined all contact consent",
+  },
+  intake_completed: {
+    category: "intake",
+    description: "User completed all intake steps",
+  },
+  intake_abandoned: {
+    category: "intake",
+    description: "User abandoned the intake flow",
+  },
+  lead_scored: {
+    category: "scoring",
+    description: "Lead score computed and stored",
+  },
+  lead_assigned: {
+    category: "routing",
+    description: "Lead assigned to an agent",
+  },
+  agent_notified: {
+    category: "routing",
+    description: "Agent notification sent",
+  },
+  agent_accepted: {
+    category: "routing",
+    description: "Agent accepted the lead",
+  },
+  agent_contacted: {
+    category: "routing",
+    description: "Agent marked lead as contacted",
+  },
+  sla_accept_breached: {
+    category: "routing",
+    description: "Agent did not accept within 2-minute SLA",
+  },
+  sla_contact_breached: {
+    category: "routing",
+    description: "Agent did not contact within 5-minute SLA",
+  },
+  lead_escalated: {
+    category: "routing",
+    description: "Lead escalated to admin",
+  },
+  valuation_requested: {
+    category: "valuation",
+    description: "User requested a home valuation estimate",
+  },
+  valuation_delivered: {
+    category: "valuation",
+    description: "Valuation report delivered to user",
+  },
+  crm_sync_success: {
+    category: "crm",
+    description: "Lead synced to CRM successfully",
+  },
+  crm_sync_error: {
+    category: "crm",
+    description: "CRM sync failed",
+  },
+};
