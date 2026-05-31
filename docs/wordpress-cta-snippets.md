@@ -133,6 +133,7 @@ src="https://askmagicmike.com/embed/ask?chip=what_can_afford"
 ## Notes
 
 - `/value` — standalone campaign landing page, works as a direct link from any page or ad
-- `/embed/ask` — lightweight iframe embed, no nav/footer, mobile-responsive
+- `/embed/ask` — lightweight iframe embed intended for WordPress Custom HTML blocks; no nav/footer, mobile-responsive
+- **iframe embedding** relies on the `Content-Security-Policy: frame-ancestors` header (not `X-Frame-Options`). Modern browsers enforce CSP over X-Frame-Options. The allowed origins are `self`, `https://ourtownproperties.com`, `https://www.ourtownproperties.com`, and `https://*.ourtownproperties.com`. Embedding from any other domain will be blocked by the browser.
 - Do not claim guaranteed valuations — all language uses "local guidance" and "Mike will follow up"
 - License number #226434 appears only in trust/consent areas per compliance guidelines

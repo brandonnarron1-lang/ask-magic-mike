@@ -21,8 +21,6 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: "frame-ancestors 'self' https://ourtownproperties.com https://*.ourtownproperties.com https://www.ourtownproperties.com",
           },
-          // Override Next.js default SAMEORIGIN for embed routes only
-          { key: "X-Frame-Options", value: "ALLOWALL" },
         ],
       },
     ];
