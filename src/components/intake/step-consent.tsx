@@ -62,16 +62,16 @@ export function StepConsent({
   const hasConsent = consentSms || consentCall || consentEmail;
 
   return (
-    <div className="pt-8">
-      <h2 className="font-display text-3xl font-semibold text-cream mb-2">
+    <div className="pt-2">
+      <h2 className="font-display text-[26px] sm:text-3xl font-semibold text-[#F7F1E8] mb-2 leading-tight">
         How can Mike contact you?
       </h2>
-      <p className="text-slate-400 mb-6">
-        Select at least one method so Mike can reach out promptly.
+      <p className="text-[13.5px] text-slate-400 mb-6">
+        Pick at least one method so Mike or the Our Town Properties team can
+        follow up.
       </p>
 
-      {/* Consent options */}
-      <div className="space-y-3 mb-8">
+      <div className="space-y-2.5 mb-7">
         {CONSENT_OPTIONS.map((opt) => {
           const checked = values[opt.key];
           return (
@@ -80,12 +80,13 @@ export function StepConsent({
               type="button"
               data-testid={opt.testId}
               onClick={() => onToggle(opt.key)}
+              aria-pressed={checked}
               className={cn(
-                "w-full flex items-center gap-4 rounded-xl border px-4 py-4 text-left transition-all duration-200",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400",
+                "w-full flex items-center gap-4 rounded-xl border px-4 py-3.5 text-left transition-all duration-200",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60",
                 checked
-                  ? "border-gold-400/50 bg-gold-400/[0.08]"
-                  : "border-white/10 bg-white/[0.03] hover:border-white/20"
+                  ? "border-gold-400/55 bg-gold-400/[0.08]"
+                  : "border-white/10 bg-[#0B0E14]/70 hover:border-gold-400/30"
               )}
             >
               <span
@@ -95,9 +96,10 @@ export function StepConsent({
                     ? "border-gold-400 bg-gold-400"
                     : "border-slate-500"
                 )}
+                aria-hidden="true"
               >
                 {checked && (
-                  <svg className="h-3 w-3 text-midnight" fill="none" viewBox="0 0 12 12">
+                  <svg className="h-3 w-3 text-[#0A0A0A]" fill="none" viewBox="0 0 12 12">
                     <path
                       d="M2 6l3 3 5-5"
                       stroke="currentColor"
@@ -109,10 +111,10 @@ export function StepConsent({
                 )}
               </span>
               <div>
-                <p className={cn("text-sm font-semibold", checked ? "text-gold-300" : "text-cream")}>
+                <p className={cn("text-[14px] font-semibold", checked ? "text-gold-200" : "text-[#F7F1E8]")}>
                   {opt.label}
                 </p>
-                <p className="text-xs text-slate-500 mt-0.5">{opt.description}</p>
+                <p className="text-[12px] text-slate-500 mt-0.5">{opt.description}</p>
               </div>
             </button>
           );
@@ -120,8 +122,8 @@ export function StepConsent({
       </div>
 
       {/* TCPA language */}
-      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 mb-8">
-        <p className="text-xs text-slate-500 leading-relaxed whitespace-pre-wrap">
+      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 mb-7">
+        <p className="text-[11.5px] text-slate-500 leading-relaxed whitespace-pre-wrap">
           {CONSENT_LANGUAGE_V1}
         </p>
       </div>
@@ -138,7 +140,7 @@ export function StepConsent({
         {submitting ? "Sending your info to Mike..." : "Submit — Connect with Mike"}
       </Button>
 
-      <p className="mt-3 text-center text-xs text-slate-600">
+      <p className="mt-3 text-center text-[11.5px] text-slate-600">
         You must consent to at least one contact method to proceed.
       </p>
     </div>

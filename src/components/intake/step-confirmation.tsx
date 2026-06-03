@@ -91,7 +91,7 @@ export function StepConfirmation({
         <div className="flex items-center gap-3">
           <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden border border-gold-400/25 bg-[#0B0E14]">
             <Image
-              src="/images/ask-magic-mike/mike-eatmon-headshot.png"
+              src="/images/ask-magic-mike/mike-eatmon-headshot.webp"
               alt={`${agentName} headshot`}
               fill
               sizes="56px"

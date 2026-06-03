@@ -90,15 +90,16 @@ export function StepContact({
   };
 
   return (
-    <div className="pt-8">
-      <h2 className="font-display text-3xl font-semibold text-cream mb-2">
+    <div className="pt-2">
+      <h2 className="font-display text-[26px] sm:text-3xl font-semibold text-[#F7F1E8] mb-2 leading-tight">
         How should Mike reach you?
       </h2>
-      <p className="text-slate-400 mb-8">
-        Mike typically responds within minutes. Your info is never sold or spammed.
+      <p className="text-[13.5px] text-slate-400 mb-7">
+        Mike typically responds within a few hours. Your info is never sold or
+        spammed — it goes straight to Our Town Properties.
       </p>
 
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-2 gap-4 mb-7">
         {FIELDS.map((field) => (
           <div
             key={field.name}
@@ -108,13 +109,17 @@ export function StepContact({
                 : "col-span-1"
             }
           >
-            <label className="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">
+            <label
+              htmlFor={`contact-${field.name}`}
+              className="block text-[10.5px] font-semibold text-slate-400 mb-2 uppercase tracking-[0.18em]"
+            >
               {field.label}
               {field.required && (
                 <span className="ml-1 text-gold-400">*</span>
               )}
             </label>
             <input
+              id={`contact-${field.name}`}
               data-testid={field.testId}
               type={field.type}
               value={values[field.name]}
@@ -123,12 +128,12 @@ export function StepContact({
               onBlur={field.name === "phone" ? handlePhoneBlur : undefined}
               placeholder={field.placeholder}
               className={cn(
-                "w-full rounded-xl border bg-white/5 px-4 py-3",
-                "text-cream placeholder:text-slate-500 text-sm",
+                "w-full rounded-xl border bg-[#0B0E14]/85 px-4 py-3",
+                "text-[#F7F1E8] placeholder:text-slate-500 text-[14.5px]",
                 "focus:outline-none transition-colors",
                 phoneError && field.name === "phone"
-                  ? "border-red-500 focus:border-red-400"
-                  : "border-white/10 focus:border-gold-400/40"
+                  ? "border-red-500 focus:border-red-400 focus:ring-2 focus:ring-red-500/20"
+                  : "border-white/10 focus:border-gold-400/45 focus:ring-2 focus:ring-gold-400/15"
               )}
             />
             {field.name === "phone" && phoneError && (

@@ -2,23 +2,36 @@ import type { Metadata } from "next";
 import { ValueHero } from "@/components/campaign/value-hero";
 
 export const metadata: Metadata = {
-  title: "What's My Home Worth? | Mike Eatmon · Our Town Properties",
+  title:
+    "Start with your address. Get a local read on your home. | Ask Magic Mike",
   description:
-    "Get a real, local perspective on your Wilson NC home value from Mike Eatmon at Our Town Properties. No fluff, no automated guesses — just Mike.",
+    "Ask Magic Mike by Our Town Properties helps Wilson-area homeowners see a preliminary home value range and get follow-up from Mike Eatmon's team. AI-assisted intake, local human follow-up.",
   robots: { index: true, follow: true },
   openGraph: {
-    title: "What's My Home Worth? | Mike Eatmon · Our Town Properties",
+    title:
+      "Ask Magic Mike by Our Town Properties | Wilson, NC home value range",
     description:
-      "Wilson NC real estate guidance from a local expert. Start with your address.",
+      "Start with your address. Mike Eatmon's Our Town Properties team follows up with local guidance. Preliminary home value range, not an appraisal.",
     siteName: "Ask Magic Mike",
     type: "website",
+    images: [
+      {
+        url: "/images/ask-magic-mike/mike-eatmon-headshot.webp",
+        width: 515,
+        height: 720,
+        alt: "Mike Eatmon, broker at Our Town Properties, Inc.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Start with your address. Get a local read on your home.",
+    description:
+      "Mike Eatmon and the Our Town Properties team follow up with local guidance.",
+    images: ["/images/ask-magic-mike/mike-eatmon-headshot.webp"],
   },
 };
 
 export default function ValuePage() {
-  return (
-    <main className="min-h-screen bg-[#0A0A0A]">
-      <ValueHero />
-    </main>
-  );
+  return <ValueHero />;
 }

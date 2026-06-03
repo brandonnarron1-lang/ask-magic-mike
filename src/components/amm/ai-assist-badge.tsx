@@ -3,17 +3,37 @@ import { cn } from "@/lib/utils/cn";
 
 interface AiAssistBadgeProps {
   className?: string;
-  variant?: "default" | "subtle";
+  variant?: "default" | "subtle" | "inline";
 }
 
 /**
  * AiAssistBadge — small, restrained badge that names the AI/human split.
  * Cyan is the only place we allow that hue, and it's a single dot.
+ *
+ * Variants:
+ *  - default: bordered card (used inside MikeTrustCard)
+ *  - subtle:  no card, just the lockup (used under intake step cards)
+ *  - inline:  single-line pill (used in /value sub-trust + embed footer)
  */
 export function AiAssistBadge({
   className,
   variant = "default",
 }: AiAssistBadgeProps) {
+  if (variant === "inline") {
+    return (
+      <span
+        data-testid="ai-assist-badge"
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full border border-cyan-400/22 bg-cyan-400/[0.04] px-2.5 py-1 text-[10.5px] tracking-[0.16em] uppercase text-cyan-200/85",
+          className
+        )}
+      >
+        <Sparkles className="h-2.5 w-2.5" aria-hidden="true" />
+        AI-assisted &middot; Local human follow-up
+      </span>
+    );
+  }
+
   return (
     <div
       data-testid="ai-assist-badge"

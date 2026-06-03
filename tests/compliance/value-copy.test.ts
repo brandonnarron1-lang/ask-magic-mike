@@ -83,11 +83,23 @@ describe("/value page — professional trust-first copy", () => {
   const valueHero = normalize(
     readSource("src/components/campaign/value-hero.tsx")
   );
+  const valuePage = normalize(
+    readSource("src/app/(campaign)/value/page.tsx")
+  );
   const mikeTrustCard = normalize(
     readSource("src/components/amm/mike-trust-card.tsx")
   );
   const brandHeader = normalize(
     readSource("src/components/amm/brand-header.tsx")
+  );
+  const conversionPanel = normalize(
+    readSource("src/components/amm/conversion-panel.tsx")
+  );
+  const optionCard = normalize(
+    readSource("src/components/amm/option-card.tsx")
+  );
+  const howItWorks = normalize(
+    readSource("src/components/amm/how-it-works.tsx")
   );
 
   it("ships the new trust-first headline and subheadline", () => {
@@ -101,22 +113,32 @@ describe("/value page — professional trust-first copy", () => {
 
   it("uses the eyebrow and CTA copy", () => {
     expect(valueHero).toContain("Ask Magic Mike by Our Town Properties");
-    expect(valueHero).toContain("Start With Your Address");
+    // CTA copy lives inside the reusable ConversionPanel default.
+    expect(conversionPanel).toContain("Start With Your Address");
   });
 
-  it("renders the three secondary options", () => {
+  it("renders the three secondary path options as OptionCards", () => {
     expect(valueHero).toContain("Compare selling options");
     expect(valueHero).toContain("Request direct-purchase review");
     expect(valueHero).toContain("Ask Mike a question");
+    expect(valueHero).toContain("OptionCard");
   });
 
   it("uses the AI-assist micro-positioning", () => {
-    expect(valueHero).toContain("AI-assisted intake. Local human follow-up.");
+    // The line now lives in ConversionPanel (default microLine) and the
+    // AiAssistBadge inline variant.
+    expect(conversionPanel).toContain(
+      "AI-assisted intake. Local human follow-up."
+    );
   });
 
-  it("composes the MikeTrustCard and BrandHeader", () => {
-    expect(valueHero).toContain("MikeTrustCard");
+  it("composes BrandShell + BrandHeader + MikeTrustCard + ConversionPanel + OptionCard + HowItWorks", () => {
+    expect(valueHero).toContain("BrandShell");
     expect(valueHero).toContain("BrandHeader");
+    expect(valueHero).toContain("MikeTrustCard");
+    expect(valueHero).toContain("ConversionPanel");
+    expect(valueHero).toContain("HowItWorks");
+    expect(valueHero).toContain("ProofStrip");
   });
 
   it("renders Mike + Our Town credentials inside the trust card", () => {
@@ -127,18 +149,36 @@ describe("/value page — professional trust-first copy", () => {
     expect(mikeTrustCard).toContain("Selling real estate since 1993");
   });
 
-  it("uses the real headshot and the official Our Town logo", () => {
+  it("uses the real headshot (WebP) and the official Our Town logo", () => {
     expect(mikeTrustCard).toContain(
-      "/images/ask-magic-mike/mike-eatmon-headshot.png"
+      "/images/ask-magic-mike/mike-eatmon-headshot.webp"
     );
     expect(brandHeader).toContain(
-      "/images/ask-magic-mike/our-town-properties-logo.png"
+      "/images/ask-magic-mike/our-town-properties-logo.webp"
     );
+  });
+
+  it("renders the 'What happens next' three-step explainer", () => {
+    expect(howItWorks).toContain("Start with your address");
+    expect(howItWorks).toContain("Answer a few quick questions");
+    expect(howItWorks).toContain("Mike's team follows up with local guidance");
   });
 
   it("uses the shared ComplianceFooter for the disclosure", () => {
     expect(valueHero).toContain("ComplianceFooter");
     expect(valueHero).toMatch(/testId="value-disclosure"/);
+  });
+
+  it("OptionCard preserves UTM attribution when navigating to /ask", () => {
+    expect(optionCard).toContain("readAttribution");
+    expect(optionCard).toContain("appendUtmsToParams");
+  });
+
+  it("page metadata leads with trust-first copy", () => {
+    expect(valuePage).toContain("Start with your address");
+    expect(valuePage).toContain("preliminary home value range");
+    expect(valuePage).not.toMatch(/guaranteed/i);
+    expect(valuePage).not.toMatch(/instant cash offer/i);
   });
 });
 
@@ -153,20 +193,43 @@ describe("intake confirmation — trust-first success state", () => {
     expect(confirmation).toContain("Our Town Properties");
   });
 
-  it("shows a Call Mike CTA and a link to Our Town Properties", () => {
+  it("uses the 'Your local contact' label and Call Mike CTA", () => {
+    expect(confirmation).toContain("Your local contact");
     expect(confirmation).toContain("Call Mike");
     expect(confirmation).toContain("Visit Our Town Properties");
   });
 
-  it("uses the real headshot inside the assignment card", () => {
+  it("uses the WebP headshot inside the assignment card", () => {
     expect(confirmation).toContain(
-      "/images/ask-magic-mike/mike-eatmon-headshot.png"
+      "/images/ask-magic-mike/mike-eatmon-headshot.webp"
     );
   });
 
   it("uses the shared ComplianceFooter", () => {
     expect(confirmation).toContain("ComplianceFooter");
     expect(confirmation).toMatch(/testId="confirmation-disclosure"/);
+  });
+});
+
+describe("intake shell and embed shell — cohesive branding", () => {
+  const intakeShell = normalize(
+    readSource("src/components/intake/intake-shell.tsx")
+  );
+  const embedShell = normalize(
+    readSource("src/components/embed/embed-shell.tsx")
+  );
+
+  it("intake shell uses BrandShell + BrandHeader + MikeTrustCard + AiAssistBadge", () => {
+    expect(intakeShell).toContain("BrandShell");
+    expect(intakeShell).toContain("BrandHeader");
+    expect(intakeShell).toContain("MikeTrustCard");
+    expect(intakeShell).toContain("AiAssistBadge");
+  });
+
+  it("embed shell uses BrandHeader + MikeTrustCard compact variant", () => {
+    expect(embedShell).toContain("BrandHeader");
+    expect(embedShell).toContain("MikeTrustCard");
+    expect(embedShell).toContain('variant="compact"');
   });
 });
 

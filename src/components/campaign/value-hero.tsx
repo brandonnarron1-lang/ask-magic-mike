@@ -1,235 +1,185 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { MapPin, ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils/cn";
 import {
-  captureAttribution,
-  appendUtmsToParams,
-  type StoredAttribution,
-} from "@/lib/attribution/client-storage";
+  Home,
+  Banknote,
+  MessageCircle,
+} from "lucide-react";
+import { cn } from "@/lib/utils/cn";
+import { BrandShell } from "@/components/amm/brand-shell";
 import { BrandHeader } from "@/components/amm/brand-header";
 import { MikeTrustCard } from "@/components/amm/mike-trust-card";
 import { ProofStrip } from "@/components/amm/proof-strip";
-import { MagicBackdrop } from "@/components/amm/magic-backdrop";
 import { ComplianceFooter } from "@/components/amm/compliance-footer";
+import { ConversionPanel } from "@/components/amm/conversion-panel";
+import { OptionCard, type OptionCardProps } from "@/components/amm/option-card";
+import { HowItWorks } from "@/components/amm/how-it-works";
+import { AiAssistBadge } from "@/components/amm/ai-assist-badge";
 import { ammTokens } from "@/components/amm/tokens";
+import { motion } from "@/components/amm/motion";
 
-interface SecondaryChip {
-  label: string;
-  q: string;
-  chip: string;
-}
-
-// Labels are the new professional public-facing copy. Chip values stay on the
-// existing CTAChip enum so scoring, routing, and analytics keep working.
-const SECONDARY_CHIPS: SecondaryChip[] = [
+const SECONDARY_OPTIONS: OptionCardProps[] = [
   {
-    label: "Compare selling options",
-    q: "I'd like to compare my options for selling my home in Wilson, NC.",
+    Icon: Home,
+    title: "Compare selling options",
+    description:
+      "See list-with-Mike vs. direct-purchase review side by side, with timelines and what to expect.",
+    question:
+      "I'd like to compare my options for selling my home in Wilson, NC.",
     chip: "should_sell_now",
   },
   {
-    label: "Request direct-purchase review",
-    q: "Please review my home for a direct-purchase preliminary estimate, subject to inspection.",
+    Icon: Banknote,
+    title: "Request direct-purchase review",
+    description:
+      "Share your address and timing for a preliminary direct-purchase review — subject to review, not an instant offer.",
+    question:
+      "Please review my home for a direct-purchase preliminary estimate, subject to inspection.",
     chip: "what_can_afford",
+    ribbon: "New",
   },
   {
-    label: "Ask Mike a question",
-    q: "I'd like to ask Mike Eatmon a question about my home or the Wilson market.",
+    Icon: MessageCircle,
+    title: "Ask Mike a question",
+    description:
+      "Have a market question first? Send it in and Mike's team will reply with local guidance.",
+    question:
+      "I'd like to ask Mike Eatmon a question about my home or the Wilson market.",
     chip: "talk_to_mike",
   },
 ];
 
 export function ValueHero() {
-  const router = useRouter();
-  const [address, setAddress] = useState("");
-  const [focused, setFocused] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const attributionRef = useRef<StoredAttribution | null>(null);
-  const viewLoggedRef = useRef(false);
-
-  // Capture UTMs/referrer on mount; fire a single page-view signal with UTMs.
-  useEffect(() => {
-    attributionRef.current = captureAttribution();
-    if (viewLoggedRef.current) return;
-    viewLoggedRef.current = true;
-    fetch("/api/analytics/event", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        eventName: "landing_page_viewed",
-        properties: {
-          path: "/value",
-          utmSource:    attributionRef.current?.utmSource ?? null,
-          utmMedium:    attributionRef.current?.utmMedium ?? null,
-          utmCampaign:  attributionRef.current?.utmCampaign ?? null,
-          referrerType: attributionRef.current?.referrerType ?? "direct",
-        },
-        utmSource:   attributionRef.current?.utmSource   ?? undefined,
-        utmMedium:   attributionRef.current?.utmMedium   ?? undefined,
-        utmCampaign: attributionRef.current?.utmCampaign ?? undefined,
-      }),
-      keepalive: true,
-    }).catch(() => {});
-  }, []);
-
-  const buildAskParams = useCallback(
-    (overrides: Record<string, string>) => {
-      const params = new URLSearchParams();
-      for (const [k, v] of Object.entries(overrides)) params.set(k, v);
-      return appendUtmsToParams(params, attributionRef.current);
-    },
-    []
-  );
-
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (loading) return;
-      setLoading(true);
-      const overrides: Record<string, string> = {
-        q: "What is my home worth in Wilson, NC?",
-        chip: "home_worth",
-      };
-      if (address.trim()) overrides.address = address.trim();
-      router.push(`/ask?${buildAskParams(overrides).toString()}`);
-    },
-    [router, address, loading, buildAskParams]
-  );
-
   return (
-    <div className={cn(ammTokens.pageShellPadded)}>
-      <MagicBackdrop variant="hero" />
-
+    <BrandShell>
       <BrandHeader />
 
-      <section className="relative z-10 flex-1 px-5 sm:px-6 pt-4 pb-14 max-w-6xl mx-auto w-full">
-        <div className="grid lg:grid-cols-[1.25fr_0.75fr] gap-10 lg:gap-14 items-start">
-          {/* Copy + form */}
-          <div className="max-w-xl">
-            <div className={cn(ammTokens.eyebrow, "mb-5")}>
-              <span className={ammTokens.eyebrowDot} />
-              <span>Ask Magic Mike by Our Town Properties</span>
-            </div>
-
-            <h1
-              className={cn(ammTokens.headlineDisplay, "mb-4")}
-              style={{ fontSize: "clamp(2.2rem, 5.4vw, 3.7rem)" }}
-            >
-              Start with your address.<br />
-              <span className="text-gold-shimmer">Get a local read on your home.</span>
-            </h1>
-
-            <p className={cn(ammTokens.subhead, "mb-2 max-w-lg")}>
-              Ask Magic Mike helps Wilson-area homeowners see a preliminary
-              home value range, compare selling options, and get follow-up
-              from Mike Eatmon&apos;s Our Town Properties team.
-            </p>
-            <p className="text-slate-500 text-[13px] mb-7">
-              Free · No account · Local human follow-up
-            </p>
-
-            {/* Address form */}
-            <form
-              onSubmit={handleSubmit}
-              className="mb-5"
-              data-testid="value-address-form"
-            >
-              <div
-                className={cn(
-                  ammTokens.inputShell,
-                  focused && ammTokens.inputShellFocused
-                )}
-              >
-                <div
-                  className={cn(
-                    "absolute inset-x-0 top-0 h-px rounded-t-xl transition-opacity duration-300",
-                    "bg-gradient-to-r from-transparent via-gold-400/60 to-transparent",
-                    focused ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:pl-4">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <MapPin className="h-4 w-4 text-gold-400/65 shrink-0" />
-                    <input
-                      type="text"
-                      data-testid="value-address-input"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      onFocus={() => setFocused(true)}
-                      onBlur={() => setFocused(false)}
-                      placeholder="Enter your property address in Wilson, NC"
-                      className="flex-1 bg-transparent text-[#F7F1E8] placeholder:text-slate-500 text-[15px] focus:outline-none min-w-0 py-2"
-                      autoComplete="street-address"
-                      inputMode="text"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    data-testid="value-submit-button"
-                    disabled={loading}
-                    className={cn(
-                      ammTokens.buttonGold,
-                      "w-full sm:w-auto shrink-0 px-5 py-3 sm:py-2.5"
-                    )}
-                  >
-                    {loading ? (
-                      <span className="h-3.5 w-3.5 rounded-full border-2 border-[#0A0A0A]/40 border-t-[#0A0A0A] animate-spin" />
-                    ) : (
-                      <>
-                        Start With Your Address
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </>
-                    )}
-                  </button>
-                </div>
+      <main className="relative z-10 flex-1 px-5 sm:px-6 pb-16 max-w-6xl mx-auto w-full">
+        {/* HERO */}
+        <section
+          aria-labelledby="value-hero-heading"
+          className={cn("pt-4 pb-12", motion.fadeUp)}
+        >
+          <div className="grid lg:grid-cols-[1.25fr_0.75fr] gap-10 lg:gap-14 items-start">
+            <div className="max-w-xl">
+              <div className={cn(ammTokens.eyebrow, "mb-5")}>
+                <span className={ammTokens.eyebrowDot} />
+                <span>Ask Magic Mike by Our Town Properties</span>
               </div>
-              <p className="mt-2.5 text-[11px] text-slate-500 pl-1">
-                AI-assisted intake. Local human follow-up.
-              </p>
-            </form>
 
-            {/* Secondary chips */}
-            <div
-              className="flex flex-wrap gap-2 mb-8"
-              role="group"
-              aria-label="Other ways to start"
-              data-testid="value-secondary-chips"
-            >
-              {SECONDARY_CHIPS.map(({ label, q, chip }) => (
-                <button
-                  key={chip}
-                  type="button"
-                  data-testid={`value-chip-${chip}`}
-                  onClick={() => {
-                    const overrides: Record<string, string> = { q, chip };
-                    if (address.trim()) overrides.address = address.trim();
-                    router.push(`/ask?${buildAskParams(overrides).toString()}`);
-                  }}
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium transition-all",
-                    "border border-white/12 text-slate-200 bg-white/[0.03]",
-                    "hover:border-gold-400/40 hover:text-[#F7F1E8] hover:bg-gold-400/[0.05]"
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
+              <h1
+                id="value-hero-heading"
+                className={cn(ammTokens.headlineDisplay, "mb-4")}
+                style={{ fontSize: "clamp(2.2rem, 5.4vw, 3.7rem)" }}
+              >
+                Start with your address.<br />
+                <span className="text-gold-shimmer">
+                  Get a local read on your home.
+                </span>
+              </h1>
+
+              <p className={cn(ammTokens.subhead, "mb-2 max-w-lg")}>
+                Ask Magic Mike helps Wilson-area homeowners see a preliminary
+                home value range, compare selling options, and get follow-up
+                from Mike Eatmon&apos;s Our Town Properties team.
+              </p>
+              <p className="text-slate-500 text-[13px] mb-7">
+                Free · No account · Local human follow-up
+              </p>
+
+              <ConversionPanel className="mb-6" />
+
+              <AiAssistBadge variant="inline" />
             </div>
 
-            <ProofStrip data-testid="value-trust-row" className="mb-6" />
-
-            <ComplianceFooter variant="inline" testId="value-disclosure" />
+            {/* Trust column — beside copy on desktop, below on mobile */}
+            <div className="w-full max-w-md lg:max-w-none lg:sticky lg:top-6">
+              <MikeTrustCard />
+            </div>
           </div>
+        </section>
 
-          {/* Trust column — beside the copy on desktop, below on mobile */}
-          <div className="w-full max-w-md lg:max-w-none lg:sticky lg:top-6">
-            <MikeTrustCard />
+        {/* PROOF STRIP */}
+        <section className={cn("mb-12", motion.fadeUpDelay100)}>
+          <ProofStrip />
+        </section>
+
+        {/* PATH CARDS */}
+        <section
+          aria-labelledby="value-paths-heading"
+          className={cn("mb-14", motion.fadeUpDelay200)}
+        >
+          <div className="flex items-baseline justify-between gap-3 mb-3">
+            <h2
+              id="value-paths-heading"
+              className="font-display text-[22px] sm:text-[26px] font-semibold text-[#F7F1E8] leading-tight"
+            >
+              Choose your path
+            </h2>
+            <p className="text-[12px] text-slate-500 hidden sm:block">
+              Pick the one that fits — Mike&apos;s team takes it from there.
+            </p>
           </div>
-        </div>
-      </section>
-    </div>
+          <div
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+            data-testid="value-secondary-chips"
+          >
+            {SECONDARY_OPTIONS.map((opt) => (
+              <OptionCard
+                key={opt.chip}
+                {...opt}
+                testId={`value-chip-${opt.chip}`}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* HOW IT WORKS */}
+        <section className={cn("mb-14", motion.fadeUpDelay300)}>
+          <HowItWorks />
+        </section>
+
+        {/* FINAL TRUST BLOCK */}
+        <section
+          aria-labelledby="value-trust-heading"
+          className={cn(
+            "rounded-2xl border border-white/[0.08] bg-[#0F131A]/85 p-5 sm:p-6 mb-8",
+            motion.fadeUpDelay500
+          )}
+        >
+          <div className="grid md:grid-cols-[1fr_auto] gap-4 md:gap-6 items-center">
+            <div>
+              <h2
+                id="value-trust-heading"
+                className="font-display text-[19px] sm:text-[22px] font-semibold text-[#F7F1E8] leading-tight mb-2"
+              >
+                A licensed broker on the other end.
+              </h2>
+              <p className="text-[13.5px] text-slate-300 leading-relaxed max-w-xl">
+                Mike Eatmon has been selling Wilson and Eastern North Carolina
+                real estate since 1993 with Our Town Properties, Inc. Your
+                request is reviewed and followed up by a real person, not an
+                auto-responder.
+              </p>
+              <p className="mt-3 text-[12px] text-slate-500">
+                Licensed in North Carolina · 3301 Nash St. N Suite E, Wilson, NC 27896
+              </p>
+            </div>
+            <a
+              href={`tel:${process.env.NEXT_PUBLIC_AGENT_PHONE ?? "+12522454337"}`}
+              className={cn(
+                ammTokens.buttonSecondary,
+                "self-start",
+                motion.focusGold
+              )}
+            >
+              Call Mike directly
+            </a>
+          </div>
+        </section>
+
+        <ComplianceFooter variant="inline" testId="value-disclosure" />
+      </main>
+    </BrandShell>
   );
 }

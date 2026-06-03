@@ -3,30 +3,42 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   icons: { icon: "/icon.svg", shortcut: "/icon.svg" },
-  title: "Ask Magic Mike | Local Real Estate AI — Our Town Properties",
+  title:
+    "Ask Magic Mike by Our Town Properties | Mike Eatmon — Wilson NC Real Estate",
   description:
-    "Get real answers about Wilson NC and Eastern NC real estate — home values, market timing, buying power, and expert guidance from Mike Eatmon at Our Town Properties.",
+    "AI-assisted intake with local human follow-up from Mike Eatmon at Our Town Properties. See a preliminary home value range and get real guidance for Wilson and Eastern NC.",
   keywords: [
     "Wilson NC real estate",
     "Eastern NC real estate",
-    "home value estimate",
+    "preliminary home value range",
     "Our Town Properties",
     "Mike Eatmon",
     "sell my home Wilson NC",
     "buy a home Eastern NC",
   ],
-  authors: [{ name: "Mike Eatmon", url: "https://askmagicmike.com" }],
+  authors: [{ name: "Mike Eatmon" }, { name: "Our Town Properties, Inc." }],
   openGraph: {
-    title: "Ask Magic Mike | Local Real Estate AI",
+    title:
+      "Ask Magic Mike by Our Town Properties | Mike Eatmon — Wilson NC",
     description:
-      "Real answers about Wilson NC and Eastern NC real estate from a licensed local expert.",
+      "Start with your address. Get a local read on your home from Mike Eatmon's Our Town Properties team. AI-assisted intake, local human follow-up.",
     siteName: "Ask Magic Mike",
     type: "website",
+    images: [
+      {
+        url: "/images/ask-magic-mike/mike-eatmon-headshot.webp",
+        width: 515,
+        height: 720,
+        alt: "Mike Eatmon, broker at Our Town Properties, Inc.",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ask Magic Mike | Local Real Estate AI",
-    description: "Real answers about Wilson NC and Eastern NC real estate.",
+    title: "Ask Magic Mike by Our Town Properties",
+    description:
+      "Start with your address. Get a local read on your home — Mike Eatmon, Our Town Properties.",
+    images: ["/images/ask-magic-mike/mike-eatmon-headshot.webp"],
   },
   robots: {
     index: true,

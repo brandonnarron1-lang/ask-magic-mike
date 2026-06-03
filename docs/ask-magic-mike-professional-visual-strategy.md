@@ -55,12 +55,14 @@ Public-facing copy on confirmation:
 
 See `docs/ask-magic-mike-asset-manifest.md` for the full inventory.
 
-- Headshot — real Mike Eatmon photo from `4729 Country Club / promo_assets_pack
-  / mike_cutout.png`, downsized to 515×720 PNG, served via `next/image` with
-  explicit `sizes` so the responsive variants are right-sized.
-- Logo — official Our Town Properties wordmark
-  (`promo_assets_pack/ourtown_logo_black.png`) on black background. Matches
-  our `#05070A` page background cleanly.
+- Headshot — real Mike Eatmon photo, served as a 35 KB WebP
+  (`/images/ask-magic-mike/mike-eatmon-headshot.webp`, 515×720). PNG
+  fallback at 435 KB is kept for non-WebP tools.
+- Logo — official Our Town Properties wordmark, served as a 9.4 KB WebP
+  (`/images/ask-magic-mike/our-town-properties-logo.webp`, 343×180). PNG
+  fallback at 41 KB is kept.
+- All public images go through `next/image` with explicit dimensions; the
+  hero headshot is the only `priority` image.
 - No MLS / flexmls listing photos, comp tables, or confidential listing
   artifacts anywhere in the public UI. Period.
 

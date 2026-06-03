@@ -7,8 +7,10 @@ surfaces, where they came from, and what is explicitly NOT being used.
 
 | Path (public-facing) | Size / dims | Use | Source | Notes |
 | --- | --- | --- | --- | --- |
-| `public/images/ask-magic-mike/mike-eatmon-headshot.png` | 515×720 · 435 KB | Mike trust card headshot | `~/Documents/4729 Country Club /promo_assets_pack/mike_cutout.png` (1024×1430 · 1.3 MB) | Real, on-brand headshot of Mike Eatmon. Resized to 720px tall; Next.js Image further optimizes per device. |
-| `public/images/ask-magic-mike/our-town-properties-logo.png` | 343×180 · 41 KB | Brand header logo | `~/Documents/4729 Country Club /promo_assets_pack/ourtown_logo_black.png` | Official Our Town Properties, Inc. wordmark on black background — blends cleanly with `#05070A` page background. |
+| `public/images/ask-magic-mike/mike-eatmon-headshot.webp` | 515×720 · **35 KB** | Mike trust card headshot (primary, preferred by Next.js Image) | derived from `mike-eatmon-headshot.png` via `cwebp -q 82 -m 6` | 12× smaller than the PNG with no perceptible quality loss; chosen for above-the-fold delivery. |
+| `public/images/ask-magic-mike/mike-eatmon-headshot.png` | 515×720 · 435 KB | PNG fallback (kept for tooling that doesn't accept WebP) | `~/Documents/4729 Country Club /promo_assets_pack/mike_cutout.png` (1024×1430 · 1.3 MB) | Real, on-brand headshot of Mike Eatmon. Resized to 720px tall. |
+| `public/images/ask-magic-mike/our-town-properties-logo.webp` | 343×180 · **9.4 KB** | Brand header logo (preferred) | derived from the PNG via `cwebp -q 90 -m 6` | 4× smaller than PNG. |
+| `public/images/ask-magic-mike/our-town-properties-logo.png` | 343×180 · 41 KB | PNG fallback for the logo | `~/Documents/4729 Country Club /promo_assets_pack/ourtown_logo_black.png` | Official Our Town Properties, Inc. wordmark on black background — blends cleanly with `#05070A` page background. |
 
 ## Already in repo (pre-existing, untouched this pass)
 

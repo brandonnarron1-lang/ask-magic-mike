@@ -1,7 +1,7 @@
 # Ask Magic Mike — Visual QA
 
-This is the post-redesign QA pass. Use it after pulling `main` to verify the
-`/value` and `/ask` surfaces still hit the brand bar and the funnel is intact.
+Post-rebuild QA checklist. Use this against the Vercel preview URL, then
+re-run after each visual change before promoting to production.
 
 ## Local URLs
 
@@ -9,6 +9,8 @@ This is the post-redesign QA pass. Use it after pulling `main` to verify the
 http://localhost:3000/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike
 http://localhost:3000/value?utm_source=ourtown_wp&utm_medium=mike_profile&utm_campaign=ask_magic_mike
 http://localhost:3000/value?utm_source=ourtown_wp&utm_medium=seller_page_cta&utm_campaign=ask_magic_mike
+http://localhost:3000/ask?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike
+http://localhost:3000/embed/ask?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike
 ```
 
 Boot dev server:
@@ -21,33 +23,33 @@ Boot dev server:
 
 Desktop (≥ 1024px):
 
-- [ ] Two-column layout: copy + form left, lamp visual right.
-- [ ] Lamp glyph renders with gold body + cyan flame halo.
-- [ ] Headline reads "Rub the lamp." across multiple lines.
-- [ ] Primary CTA reads "Start With Your Address".
-- [ ] Trust bullets row shows: Local guidance · Preliminary home value range
-      · Mike follows up.
-- [ ] Secondary chips: "Thinking of selling", "Just curious", "Need local
-      guidance" (last one ruby tint).
-- [ ] Compliance disclosure paragraph visible under the trust line (small
-      slate text, never as a modal).
-- [ ] Phone link in the nav strip renders the masked phone number.
+- [ ] Two-column hero: copy + address form on the left, `MikeTrustCard` on the right.
+- [ ] Eyebrow reads `ASK MAGIC MIKE BY OUR TOWN PROPERTIES` (gold).
+- [ ] H1 reads `Start with your address.` / `Get a local read on your home.` with the second line in `text-gold-shimmer`.
+- [ ] Primary CTA reads `Start With Your Address`.
+- [ ] Micro line under the input: `AI-assisted intake. Local human follow-up.`
+- [ ] AI-assist pill chip directly under the form.
+- [ ] `MikeTrustCard` shows: real Mike Eatmon headshot (portrait crop), eyebrow + `Verified` badge, `Mike Eatmon`, `Our Town Properties, Inc.`, `Selling real estate since 1993`, `Licensed in North Carolina`, `Wilson, NC · Eastern North Carolina`, click-to-call phone, and the AI-assist card.
+- [ ] `ProofStrip` shows the four proof cards.
+- [ ] `Choose your path` heading + three `OptionCard`s: `Compare selling options`, `Request direct-purchase review` (with the "New" gold ribbon), `Ask Mike a question`.
+- [ ] Each option card hovers with a subtle lift + gold border.
+- [ ] `What happens next` block shows three numbered steps.
+- [ ] Final trust block: headline `A licensed broker on the other end.` + `Call Mike directly` secondary button.
+- [ ] `ComplianceFooter` visible above the footer fade.
 
 Mobile (≤ 480px):
 
-- [ ] Address input and gold submit button stack vertically.
-- [ ] Submit button is full-width and tappable above the iOS keyboard.
-- [ ] Lamp visual is hidden (single column layout).
-- [ ] Trust bullets stack into a single column.
+- [ ] Address input + gold submit stack vertically.
+- [ ] Trust card collapses below the copy.
+- [ ] All three OptionCards stack vertically.
 - [ ] No horizontal scroll.
+- [ ] Phone CTA in nav reads "Call Mike" below `xs`.
 
 Attribution:
 
-- [ ] DevTools → Application → Session Storage → `amm_attribution` contains
-      `utmSource = "ourtown_wp"` plus the right `utmMedium`.
-- [ ] Click "Start With Your Address" → `/ask?…` URL contains the same
-      `utm_source` / `utm_medium` / `utm_campaign`.
-- [ ] Click any quick chip → `/ask?…` URL also contains UTMs.
+- [ ] DevTools → Application → Session Storage → `amm_attribution` contains `utmSource = "ourtown_wp"` and the right `utmMedium`.
+- [ ] Click `Start With Your Address` → `/ask?…` URL contains the same UTMs.
+- [ ] Click any option card → `/ask?…` URL contains UTMs.
 
 Console:
 
@@ -56,31 +58,38 @@ Console:
 
 ## /ask intake checklist
 
-- [ ] Page header shows the AMM lockup (small) + "Step N of 5" + active step
-      label in gold uppercase.
-- [ ] Progress bar present and animates between steps.
-- [ ] Each step renders inside a gold-bordered card with the new card glow.
-- [ ] Step transitions still use the slide-up animation.
-- [ ] Back button only appears on steps 2–4.
-- [ ] Consent step still shows the full TCPA paragraph.
-- [ ] Submit hits `/api/intake/submit` with `utmSource/Medium/Campaign`,
-      `sourceUrl`, `landingPath`, `referrerUrl`, `sessionId` (verify in
-      Network → request payload).
+- [ ] Header: `BrandHeader compact` with the Our Town logo + tap-to-call.
+- [ ] Compact `MikeTrustCard` sits above the step card (headshot, "Mike Eatmon · Our Town Properties", "Licensed in NC · Selling real estate since 1993").
+- [ ] Progress bar + step label render in gold uppercase.
+- [ ] Step card has the gold-bordered, dark navy surface treatment.
+- [ ] `Back` button only shows on steps 2–4 (with chevron + word).
+- [ ] Step 1 form labels read `Your question`, `Property address (optional)` in uppercase tracked gold.
+- [ ] Step 4 still shows the full TCPA paragraph.
+- [ ] AI-assist inline pill sits under the step card.
+- [ ] Submit hits `/api/intake/submit` with `utmSource/Medium/Campaign`, `sourceUrl`, `landingPath`, `referrerUrl`, `sessionId` (verify in Network → request payload).
 
 ## Confirmation checklist
 
-- [ ] Eyebrow "Your request is in" above the headline.
-- [ ] Gold CheckCircle with cyan halo above the headline.
-- [ ] Assignment card shows lamp glyph + "Assigned to Mike Eatmon".
-- [ ] Primary CTA reads "Call Mike now" and points at the env phone number.
-- [ ] Secondary link: "Visit ourtownproperties.com".
-- [ ] ComplianceFooter visible at bottom of card.
-- [ ] No "appraisal" except in "not an appraisal".
-- [ ] No "guaranteed", "binding", or "instant cash offer" anywhere.
+- [ ] Eyebrow chip `Your request is in` with gold check.
+- [ ] H2 `Thanks, {firstName}.` (or `Thanks for reaching out.` when no name).
+- [ ] Assignment card shows the WebP headshot + `Your local contact` eyebrow + `Mike Eatmon` + `Our Town Properties · Wilson, NC` + response time line.
+- [ ] Primary CTA `Call Mike` (gold, full-width on mobile).
+- [ ] Secondary `Visit Our Town Properties` link with external icon.
+- [ ] `ComplianceFooter` visible at bottom.
+- [ ] No `appraisal` except `not an appraisal`.
+- [ ] No `guaranteed`, `binding`, or `instant cash offer` anywhere.
+
+## /embed/ask checklist
+
+- [ ] Renders inside a WordPress iframe without horizontal scroll.
+- [ ] `BrandHeader compact` shows the logo + Ask Magic Mike lockup + tap-to-call.
+- [ ] Compact `MikeTrustCard` is present above the step card on steps 1–4.
+- [ ] Same intake step components — same copy and behaviour.
+- [ ] AI-assist inline pill at the bottom on steps 1–4.
 
 ## Compliance & forbidden language
 
-Run automated check (always green if the codebase is healthy):
+Automated check (always green if codebase is healthy):
 
 ```
 ./node_modules/.bin/vitest run tests/compliance
@@ -89,10 +98,10 @@ Run automated check (always green if the codebase is healthy):
 Manual spot check:
 
 ```
-grep -nEi "(\bappraisal\b|guaranteed|binding offer|instant cash offer)" \
+grep -nEi "(\bappraisal\b|guaranteed|binding offer|instant cash offer|rub the lamp)" \
   src/components/campaign/value-hero.tsx \
   src/components/intake/step-confirmation.tsx \
-  src/components/amm/compliance-footer.tsx \
+  src/components/amm/*.tsx \
 | grep -vi "not an appraisal"
 ```
 
@@ -101,24 +110,27 @@ Expected: no output.
 ## Full local verification commands
 
 ```
-./node_modules/.bin/vitest run         # 110 tests passing
+./node_modules/.bin/vitest run         # 122 tests passing
 ./node_modules/.bin/tsc --noEmit       # clean
 ./node_modules/.bin/next lint          # clean
-./node_modules/.bin/next build         # /value 6.36 kB / 115 kB first load
+./node_modules/.bin/next build         # /value 4.94 kB / 124 kB first load
 ```
+
+Bundle status:
+
+- `/value` 4.94 kB (124 kB first-load JS)
+- `/ask`   2.11 kB (130 kB)
+- `/embed/ask` 1.51 kB (130 kB)
 
 ## Preview deploy
 
 ```
-./node_modules/.bin/vercel deploy
+./node_modules/.bin/vercel deploy --scope eyes-up-industries
 ```
 
-After preview confirms in a real browser:
+Production promotion is a separate, explicit step — see
+`docs/ask-magic-mike-funnel-qa.md`.
 
-```
-./node_modules/.bin/vercel --prod
-```
-
-DNS stays unchanged.
-askmagicmike.com migration is **not** part of this phase.
-WordPress source URLs are **not** part of this phase.
+DNS stays unchanged. `askmagicmike.com` migration is **not** part of this
+phase. WordPress edits are tracked separately in
+`docs/ask-magic-mike-wordpress-visual-brief.md`.

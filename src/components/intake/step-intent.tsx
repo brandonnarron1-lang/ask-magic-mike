@@ -37,17 +37,17 @@ export function StepIntent({
   const canProceed = intent !== "unknown" || timelineMonths !== null;
 
   return (
-    <div className="pt-8">
-      <h2 className="font-display text-3xl font-semibold text-cream mb-2">
+    <div className="pt-2">
+      <h2 className="font-display text-[26px] sm:text-3xl font-semibold text-[#F7F1E8] mb-2 leading-tight">
         What&apos;s your situation?
       </h2>
-      <p className="text-slate-400 mb-8">
-        This helps Mike prioritize the right information for you.
+      <p className="text-[13.5px] text-slate-400 mb-7">
+        This helps Mike&apos;s team route the right local guidance to you.
       </p>
 
       {/* Intent selector */}
-      <div className="mb-8">
-        <label className="block text-xs font-medium text-slate-400 mb-3 uppercase tracking-wider">
+      <div className="mb-7">
+        <label className="block text-[10.5px] font-semibold text-slate-400 mb-3 uppercase tracking-[0.18em]">
           I&apos;m thinking about
         </label>
         <div className="grid grid-cols-2 gap-3">
@@ -58,14 +58,14 @@ export function StepIntent({
               data-testid={`intent-${opt.value}`}
               onClick={() => onIntentChange(opt.value)}
               className={cn(
-                "flex items-center gap-3 rounded-xl border px-4 py-3.5 text-sm text-left transition-all duration-200",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400",
+                "flex items-center gap-3 rounded-xl border px-4 py-3.5 text-[14px] text-left transition-all duration-200",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60",
                 intent === opt.value
-                  ? "border-gold-400/60 bg-gold-400/10 text-gold-300"
-                  : "border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/[0.07]"
+                  ? "border-gold-400/55 bg-gold-400/[0.08] text-gold-200"
+                  : "border-white/10 bg-[#0B0E14]/70 text-slate-200 hover:border-gold-400/30 hover:bg-white/[0.04]"
               )}
             >
-              <span className="text-lg">{opt.emoji}</span>
+              <span className="text-base" aria-hidden="true">{opt.emoji}</span>
               <span className="font-medium">{opt.label}</span>
             </button>
           ))}
@@ -73,8 +73,8 @@ export function StepIntent({
       </div>
 
       {/* Timeline */}
-      <div className="mb-8">
-        <label className="block text-xs font-medium text-slate-400 mb-3 uppercase tracking-wider">
+      <div className="mb-7">
+        <label className="block text-[10.5px] font-semibold text-slate-400 mb-3 uppercase tracking-[0.18em]">
           My timeframe
         </label>
         <div className="flex flex-wrap gap-2">
@@ -85,11 +85,11 @@ export function StepIntent({
               data-testid={`timeline-${opt.value}`}
               onClick={() => onTimelineChange(opt.value)}
               className={cn(
-                "rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400",
+                "rounded-full border px-4 py-2 text-[13.5px] font-medium transition-all duration-200",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60",
                 timelineMonths === opt.value
-                  ? "border-gold-400/60 bg-gold-400/10 text-gold-300"
-                  : "border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-300"
+                  ? "border-gold-400/55 bg-gold-400/[0.08] text-gold-200"
+                  : "border-white/10 text-slate-300 hover:border-gold-400/30 hover:text-[#F7F1E8]"
               )}
             >
               {opt.label}

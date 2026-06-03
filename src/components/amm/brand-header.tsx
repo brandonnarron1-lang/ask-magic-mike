@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Phone } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { motion } from "./motion";
 
 const AGENT_PHONE = process.env.NEXT_PUBLIC_AGENT_PHONE ?? "+12522454337";
 const PHONE_DISPLAY = AGENT_PHONE.replace(/^\+1/, "").replace(
@@ -10,14 +11,14 @@ const PHONE_DISPLAY = AGENT_PHONE.replace(/^\+1/, "").replace(
 
 interface BrandHeaderProps {
   className?: string;
-  /** Compact variant for /ask intake shell. */
+  /** Compact variant for /ask intake shell and /embed/ask. */
   compact?: boolean;
 }
 
 /**
  * BrandHeader — Our Town wordmark + "Ask Magic Mike by Our Town Properties"
- * + tap-to-call phone. Replaces the lamp-forward lockup. Authoritative on
- * desktop; collapses cleanly on mobile.
+ * + tap-to-call phone. Authoritative on desktop, collapses cleanly on
+ * mobile. Now prefers the WebP logo with a small fallback chip.
  */
 export function BrandHeader({ className, compact = false }: BrandHeaderProps) {
   return (
@@ -33,11 +34,11 @@ export function BrandHeader({ className, compact = false }: BrandHeaderProps) {
         href="https://www.ourtownproperties.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-3 group"
+        className={cn("flex items-center gap-3 group", motion.focusGold, "rounded-md")}
         aria-label="Our Town Properties"
       >
         <Image
-          src="/images/ask-magic-mike/our-town-properties-logo.png"
+          src="/images/ask-magic-mike/our-town-properties-logo.webp"
           alt="Our Town Properties, Inc."
           width={compact ? 96 : 124}
           height={compact ? 50 : 65}
@@ -53,11 +54,7 @@ export function BrandHeader({ className, compact = false }: BrandHeaderProps) {
           >
             Ask Magic Mike
           </span>
-          <span
-            className={cn(
-              "block text-[10px] uppercase tracking-[0.18em] text-gold-300/80 mt-0.5"
-            )}
-          >
+          <span className="block text-[10px] uppercase tracking-[0.18em] text-gold-300/80 mt-0.5">
             by Our Town Properties
           </span>
         </span>
@@ -67,8 +64,9 @@ export function BrandHeader({ className, compact = false }: BrandHeaderProps) {
         href={`tel:${AGENT_PHONE}`}
         className={cn(
           "inline-flex items-center gap-2 transition-colors",
+          motion.focusGold,
           compact
-            ? "text-[12px] text-slate-400 hover:text-gold-400"
+            ? "text-[12px] text-slate-400 hover:text-gold-400 rounded-md px-1"
             : "rounded-full border border-white/12 bg-white/[0.03] px-3.5 py-1.5 text-[12.5px] text-[#F7F1E8] hover:border-gold-400/45 hover:text-gold-300"
         )}
       >
