@@ -54,13 +54,13 @@ export function ValueHero() {
     <BrandShell>
       <BrandHeader />
 
-      <main className="relative z-10 flex-1 px-5 sm:px-6 pb-16 max-w-6xl mx-auto w-full">
+      <main className="relative z-10 flex-1 px-4 sm:px-6 pb-14 max-w-6xl mx-auto w-full">
         {/* HERO */}
         <section
           aria-labelledby="value-hero-heading"
-          className={cn("pt-4 pb-12", motion.fadeUp)}
+          className={cn("pt-3 sm:pt-4 pb-10 sm:pb-12", motion.fadeUp)}
         >
-          <div className="grid lg:grid-cols-[1.25fr_0.75fr] gap-10 lg:gap-14 items-start">
+          <div className="grid lg:grid-cols-[1.25fr_0.75fr] gap-8 sm:gap-10 lg:gap-14 items-start">
             <div className="max-w-xl">
               <div className={cn(ammTokens.eyebrow, "mb-5")}>
                 <span className={ammTokens.eyebrowDot} />
@@ -70,7 +70,7 @@ export function ValueHero() {
               <h1
                 id="value-hero-heading"
                 className={cn(ammTokens.headlineDisplay, "mb-4")}
-                style={{ fontSize: "clamp(2.2rem, 5.4vw, 3.7rem)" }}
+                style={{ fontSize: "clamp(2rem, 5.4vw, 3.7rem)" }}
               >
                 Start with your address.<br />
                 <span className="text-gold-shimmer">
@@ -83,7 +83,7 @@ export function ValueHero() {
                 home value range, compare selling options, and get follow-up
                 from Mike Eatmon&apos;s Our Town Properties team.
               </p>
-              <p className="text-slate-500 text-[13px] mb-7">
+              <p className="text-slate-300 text-[13.5px] mb-7">
                 Free · No account · Local human follow-up
               </p>
 
@@ -116,7 +116,7 @@ export function ValueHero() {
             >
               Choose your path
             </h2>
-            <p className="text-[12px] text-slate-500 hidden sm:block">
+            <p className="text-[12.5px] text-slate-300 hidden sm:block">
               Pick the one that fits — Mike&apos;s team takes it from there.
             </p>
           </div>
@@ -155,13 +155,13 @@ export function ValueHero() {
               >
                 A licensed broker on the other end.
               </h2>
-              <p className="text-[13.5px] text-slate-300 leading-relaxed max-w-xl">
+              <p className="text-[14px] text-slate-200 leading-relaxed max-w-xl">
                 Mike Eatmon has been selling Wilson and Eastern North Carolina
                 real estate since 1993 with Our Town Properties, Inc. Your
                 request is reviewed and followed up by a real person, not an
                 auto-responder.
               </p>
-              <p className="mt-3 text-[12px] text-slate-500">
+              <p className="mt-3 text-[12.5px] text-slate-300">
                 Licensed in North Carolina · 3301 Nash St. N Suite E, Wilson, NC 27896
               </p>
             </div>

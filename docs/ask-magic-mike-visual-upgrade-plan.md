@@ -116,15 +116,36 @@ Under `src/components/amm/`:
 
 ## Screenshot QA plan
 
-Playwright is configured (`playwright.config.ts`) but running headed
-browsers in this environment is unreliable. The plan is:
+Resolved this pass: `scripts/qa/visual-smoke.mjs` runs headless Chromium via
+`@playwright/test` and saves desktop + mobile screenshots of `/value`,
+`/ask` step 1, and `/embed/ask` into
+`artifacts/ask-magic-mike-visual-upgrade/`. Same script asserts HTTP 200,
+required strings, forbidden-language absence, bare-appraisal absence,
+console-error count, and horizontal-scroll absence. See
+`docs/ask-magic-mike-visual-qa.md` for the exact run commands.
 
-- Use `curl` to confirm HTTP 200 + presence of required strings on
-  `/value`, `/ask?…`, `/embed/ask` against the local dev server and the
-  preview URL.
-- Document the manual browser checklist in `docs/ask-magic-mike-visual-qa.md`
-  so Atlas can run it against the preview URL.
-- Save no screenshots in this branch — Vercel preview is the live artifact.
+## Readability pass (final pre-prod polish)
+
+After Atlas QA reported small/low-contrast text on the first preview, this
+branch bumps the following without expanding the page footprint:
+
+- `ComplianceFooter` text 11px → 12px+ with `text-slate-400` instead of
+  `text-slate-500/600`.
+- `ProofStrip` card text 12.5px → 13.5px with stronger contrast.
+- `MikeTrustCard` body 12px/12.5px → 13px+ across credentials and verified
+  badge.
+- `OptionCard` title 15.5px → 16px, body 13px → 13.5px.
+- `HowItWorks` body 12.5px → 13px and gold step number at full opacity.
+- `ConversionPanel` micro line 11px → 12.5px with `text-slate-300`.
+- `AiAssistBadge` inline pill 10.5px → 11.5px with brighter cyan ink.
+- Confirmation: "Your local contact" label 10.5px → 11px and the assignment
+  card body bumped to 12.5–13px.
+- Intake / embed shell step labels and counter 10.5px → 11.5/12px.
+
+Mobile layout: added an `xs: 420px` Tailwind breakpoint so the phone-CTA
+label collapse on the `BrandHeader` actually works on small screens. Tightened
+`/value` hero padding from `pt-4`/`pb-12` to `pt-3`/`pb-10` on `< sm` so the
+address form lands closer to the fold.
 
 ## Out of scope (logged as next phases)
 

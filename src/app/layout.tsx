@@ -1,7 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
+/**
+ * Production alias today is ask-magic-mike.vercel.app — used so Next.js resolves
+ * OG image paths to absolute URLs that crawlers can fetch. When we migrate to
+ * askmagicmike.com this constant flips, see
+ * docs/ask-magic-mike-visual-upgrade-plan.md.
+ */
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://ask-magic-mike.vercel.app";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   icons: { icon: "/icon.svg", shortcut: "/icon.svg" },
   title:
     "Ask Magic Mike by Our Town Properties | Mike Eatmon — Wilson NC Real Estate",

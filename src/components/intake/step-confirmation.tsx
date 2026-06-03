@@ -75,7 +75,7 @@ export function StepConfirmation({
         Mike Eatmon or the Our Town Properties team will follow up with local
         guidance based on what you shared.
       </p>
-      <p className="text-slate-500 text-[13px] max-w-sm mb-7 leading-relaxed">
+      <p className="text-slate-300 text-[13.5px] max-w-sm mb-7 leading-relaxed">
         {message.sub}
       </p>
 
@@ -99,13 +99,13 @@ export function StepConfirmation({
             />
           </div>
           <div className="min-w-0">
-            <p className="text-[10.5px] tracking-[0.18em] uppercase text-gold-300/80 mb-0.5">
+            <p className="text-[11px] tracking-[0.18em] uppercase text-gold-300 mb-0.5">
               Your local contact
             </p>
             <p className="text-[15px] font-semibold text-[#F7F1E8] leading-tight">
               {agentName}
             </p>
-            <p className="text-[12px] text-slate-400 mt-0.5">
+            <p className="text-[12.5px] text-slate-300 mt-0.5">
               Our Town Properties · Wilson, NC
             </p>
           </div>
@@ -114,15 +114,15 @@ export function StepConfirmation({
         <div className="h-px bg-white/[0.06] my-3.5" />
 
         <div className="flex items-center gap-2.5">
-          <Clock className="h-3.5 w-3.5 text-gold-400/80 shrink-0" />
-          <p className="text-[12.5px] text-slate-200">{message.eta}</p>
+          <Clock className="h-3.5 w-3.5 text-gold-300 shrink-0" />
+          <p className="text-[13px] text-[#F7F1E8]/90">{message.eta}</p>
         </div>
 
         {score && (
           <>
             <div className="h-px bg-white/[0.06] my-3.5" />
             <div className="flex items-center gap-2">
-              <p className="text-[12px] text-slate-500">Priority:</p>
+              <p className="text-[12.5px] text-slate-300">Priority:</p>
               <Badge variant={temperature}>
                 {temperature.charAt(0).toUpperCase() + temperature.slice(1)}
               </Badge>
@@ -150,13 +150,13 @@ export function StepConfirmation({
         href="https://www.ourtownproperties.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-gold-300 transition-colors"
+        className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] text-slate-300 hover:text-gold-300 transition-colors"
       >
         Visit Our Town Properties
         <ExternalLink className="h-3 w-3" />
       </a>
 
-      <p className="mt-4 text-[11px] text-slate-600 max-w-xs">
+      <p className="mt-4 text-[12px] text-slate-400 max-w-xs">
         You can close this window. Mike has your info.
       </p>
 

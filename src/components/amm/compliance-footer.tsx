@@ -10,8 +10,9 @@ interface ComplianceFooterProps {
 /**
  * Single source of compliance microcopy used on /value, /ask, and confirmation.
  *
- * Intentionally short and readable. Do NOT expand into a legal wall — the goal
- * is visible-but-not-dominant.
+ * Sized to be readable when someone actually needs to read it (≥12 px) but
+ * still visually subordinate to the headline + CTA. Do NOT expand into a
+ * legal wall — the goal is visible-but-not-dominant.
  */
 export function ComplianceFooter({
   variant = "inline",
@@ -23,8 +24,8 @@ export function ComplianceFooter({
       data-testid={testId}
       className={cn(
         variant === "footer"
-          ? "max-w-2xl mx-auto text-center text-[10px] leading-relaxed text-slate-600"
-          : "max-w-lg text-[11px] leading-relaxed text-slate-500",
+          ? "max-w-2xl mx-auto text-center text-[12px] sm:text-[12.5px] leading-relaxed text-slate-400"
+          : "max-w-xl text-[12px] sm:text-[12.5px] leading-relaxed text-slate-400",
         className
       )}
     >

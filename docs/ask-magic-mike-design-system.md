@@ -80,7 +80,25 @@ see a still page. There is no JS-driven animation runtime in this funnel.
 - Form controls stack vertically below `sm` (640 px).
 - The hero address input becomes full-width with a full-width gold submit.
 - `MikeTrustCard` collapses below the copy column at `lg` and below.
-- Phone CTA shows `(252) 245-4337` on `xs+`, "Call Mike" below `xs`.
+- Phone CTA shows `(252) 245-4337` on `xs+` (≥ 420 px), "Call Mike" below
+  `xs`. The `xs: 420px` breakpoint is set in `tailwind.config.ts`.
+
+### Readability minimums
+
+After Atlas QA, the funnel now enforces these floors:
+
+| Surface | Minimum | Was |
+| --- | --- | --- |
+| `ComplianceFooter` | 12 px / `slate-400` | 10–11 px / `slate-500/600` |
+| `ProofStrip` labels | 13.5 px / `[#F7F1E8]/92` | 12.5 px / `slate-200` |
+| `MikeTrustCard` body | 13 px / `slate-200` | 12.5 px / `slate-300` |
+| `OptionCard` body | 13.5 px / `slate-200` | 13 px / `slate-300` |
+| `HowItWorks` body | 13 px / `slate-200` | 12.5 px / `slate-300` |
+| AiAssistBadge inline | 11.5 px / `cyan-100` | 10.5 px / `cyan-200/85` |
+| Confirmation labels | 11 px / `gold-300` | 10.5 px / `gold-300/80` |
+
+Anything smaller is reserved for non-essential decoration and explicitly
+avoided for copy a real user might need to read.
 
 ## Image rules
 

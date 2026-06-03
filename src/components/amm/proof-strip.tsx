@@ -13,8 +13,8 @@ interface ProofStripProps {
 }
 
 /**
- * ProofStrip — four small proof points, four columns on desktop, stacked on
- * mobile. Sits between the hero copy and the compliance footer.
+ * ProofStrip — four small proof cards. Sits between the hero copy and the
+ * compliance footer. Sized for readability at arm's length; never tiny.
  */
 export function ProofStrip({ className }: ProofStripProps) {
   return (
@@ -28,10 +28,13 @@ export function ProofStrip({ className }: ProofStripProps) {
       {PROOFS.map(({ Icon, label }) => (
         <li
           key={label}
-          className="flex items-start gap-2.5 rounded-xl border border-white/[0.06] bg-white/[0.025] px-3.5 py-3"
+          className="flex items-start gap-3 rounded-xl border border-white/[0.09] bg-white/[0.035] px-4 py-3"
         >
-          <Icon className="mt-0.5 h-4 w-4 text-gold-400/85 shrink-0" />
-          <span className="text-[12.5px] text-slate-200 leading-snug">
+          <Icon
+            className="mt-0.5 h-4 w-4 text-gold-300 shrink-0"
+            aria-hidden="true"
+          />
+          <span className="text-[13.5px] text-[#F7F1E8]/92 leading-snug">
             {label}
           </span>
         </li>

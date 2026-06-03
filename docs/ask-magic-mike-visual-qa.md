@@ -110,17 +110,47 @@ Expected: no output.
 ## Full local verification commands
 
 ```
-./node_modules/.bin/vitest run         # 122 tests passing
+./node_modules/.bin/vitest run         # 126 tests passing
 ./node_modules/.bin/tsc --noEmit       # clean
 ./node_modules/.bin/next lint          # clean
-./node_modules/.bin/next build         # /value 4.94 kB / 124 kB first load
+./node_modules/.bin/next build         # /value 4.96 kB / 124 kB first load
 ```
 
 Bundle status:
 
-- `/value` 4.94 kB (124 kB first-load JS)
-- `/ask`   2.11 kB (130 kB)
-- `/embed/ask` 1.51 kB (130 kB)
+- `/value` 4.96 kB (124 kB first-load JS)
+- `/ask`   2.10 kB (131 kB)
+- `/embed/ask` 1.50 kB (130 kB)
+
+## Headless screenshot QA
+
+A scripted Playwright smoke test lives at `scripts/qa/visual-smoke.mjs`. It
+captures `/value`, `/ask` step 1, and `/embed/ask` at desktop + mobile sizes
+into `artifacts/ask-magic-mike-visual-upgrade/` and asserts:
+
+- HTTP 200 for each page
+- no horizontal overflow at the chosen viewport
+- all required strings present
+- zero forbidden phrases
+- zero bare "appraisal" outside the allowed negation
+- zero console errors
+
+Run after booting `next dev`:
+
+```
+./node_modules/.bin/next dev -p 4101 &
+BASE_URL=http://localhost:4101 node scripts/qa/visual-smoke.mjs
+```
+
+Saved screenshots:
+
+- `value-desktop-1440x1000.png`
+- `value-mobile-390x844.png`
+- `ask-first-step-desktop-1440x1000.png`
+- `ask-first-step-mobile-390x844.png`
+- `embed-ask-desktop-1024x900.png`
+- `embed-ask-mobile-390x844.png`
+- `smoke-report.json`
 
 ## Preview deploy
 

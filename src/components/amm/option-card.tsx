@@ -64,19 +64,19 @@ export function OptionCard({
       )}
 
       <div className="flex items-center gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gold-400/25 bg-gold-400/[0.08]">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gold-400/30 bg-gold-400/[0.10]">
           <Icon className="h-4 w-4 text-gold-300" aria-hidden="true" />
         </span>
-        <h3 className="text-[15.5px] font-semibold text-[#F7F1E8] leading-tight">
+        <h3 className="text-[16px] font-semibold text-[#F7F1E8] leading-tight">
           {title}
         </h3>
         <ArrowUpRight
-          className="ml-auto h-4 w-4 text-slate-500 transition-colors group-hover:text-gold-300"
+          className="ml-auto h-4 w-4 text-slate-400 transition-colors group-hover:text-gold-300"
           aria-hidden="true"
         />
       </div>
 
-      <p className="text-[13px] text-slate-300 leading-relaxed">{description}</p>
+      <p className="text-[13.5px] text-slate-200 leading-relaxed">{description}</p>
     </button>
   );
 }

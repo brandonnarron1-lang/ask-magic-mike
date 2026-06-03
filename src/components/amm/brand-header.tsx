@@ -24,8 +24,8 @@ export function BrandHeader({ className, compact = false }: BrandHeaderProps) {
   return (
     <nav
       className={cn(
-        "relative z-10 flex items-center justify-between gap-4",
-        compact ? "px-5 sm:px-6 py-3" : "px-6 py-5 max-w-6xl mx-auto w-full",
+        "relative z-10 flex items-center justify-between gap-3 sm:gap-4",
+        compact ? "px-4 sm:px-6 py-3" : "px-5 sm:px-6 py-4 sm:py-5 max-w-6xl mx-auto w-full",
         className
       )}
       aria-label="Ask Magic Mike header"
@@ -40,10 +40,11 @@ export function BrandHeader({ className, compact = false }: BrandHeaderProps) {
         <Image
           src="/images/ask-magic-mike/our-town-properties-logo.webp"
           alt="Our Town Properties, Inc."
-          width={compact ? 96 : 124}
-          height={compact ? 50 : 65}
+          width={compact ? 92 : 124}
+          height={compact ? 48 : 65}
           priority={!compact}
-          className="h-auto w-auto rounded-sm"
+          sizes={compact ? "92px" : "(max-width: 640px) 96px, 124px"}
+          className="h-auto w-auto rounded-sm shrink-0"
         />
         <span className="hidden sm:block">
           <span
@@ -62,12 +63,13 @@ export function BrandHeader({ className, compact = false }: BrandHeaderProps) {
 
       <a
         href={`tel:${AGENT_PHONE}`}
+        aria-label={`Call Mike at ${PHONE_DISPLAY}`}
         className={cn(
-          "inline-flex items-center gap-2 transition-colors",
+          "shrink-0 inline-flex items-center gap-2 transition-colors",
           motion.focusGold,
           compact
-            ? "text-[12px] text-slate-400 hover:text-gold-400 rounded-md px-1"
-            : "rounded-full border border-white/12 bg-white/[0.03] px-3.5 py-1.5 text-[12.5px] text-[#F7F1E8] hover:border-gold-400/45 hover:text-gold-300"
+            ? "rounded-md px-1 py-1 text-[12.5px] text-[#F7F1E8] hover:text-gold-300"
+            : "rounded-full border border-white/12 bg-white/[0.04] px-3.5 py-1.5 text-[13px] text-[#F7F1E8] hover:border-gold-400/45 hover:text-gold-300"
         )}
       >
         <Phone className="h-3.5 w-3.5" />

@@ -44,24 +44,24 @@ export function HowItWorks({
       className={cn("w-full", className)}
       aria-label={heading}
     >
-      <p className="text-[10.5px] font-semibold tracking-[0.22em] uppercase text-gold-300/85 mb-3">
+      <p className="text-[11px] font-semibold tracking-[0.22em] uppercase text-gold-300 mb-3">
         {heading}
       </p>
       <ol className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {STEPS.map((step) => (
           <li
             key={step.number}
-            className="relative rounded-2xl border border-white/[0.08] bg-white/[0.025] p-4"
+            className="relative rounded-2xl border border-white/[0.09] bg-white/[0.035] p-4"
           >
             <div className="flex items-baseline gap-3">
-              <span className="font-display text-[28px] font-semibold text-gold-300/85 leading-none">
+              <span className="font-display text-[28px] font-semibold text-gold-300 leading-none">
                 {step.number}
               </span>
-              <h4 className="text-[14px] font-semibold text-[#F7F1E8] leading-snug">
+              <h4 className="text-[14.5px] font-semibold text-[#F7F1E8] leading-snug">
                 {step.title}
               </h4>
             </div>
-            <p className="mt-2 text-[12.5px] text-slate-300 leading-relaxed">
+            <p className="mt-2 text-[13px] text-slate-200 leading-relaxed">
               {step.body}
             </p>
           </li>

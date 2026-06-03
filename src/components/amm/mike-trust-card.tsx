@@ -44,10 +44,10 @@ export function MikeTrustCard({
           />
         </div>
         <div className="min-w-0">
-          <p className="text-[12.5px] font-semibold text-[#F7F1E8] leading-tight truncate">
+          <p className="text-[13px] font-semibold text-[#F7F1E8] leading-tight truncate">
             Mike Eatmon &middot; Our Town Properties
           </p>
-          <p className="text-[10.5px] text-slate-400 truncate">
+          <p className="text-[11.5px] text-slate-300 truncate">
             Licensed in NC &middot; Selling real estate since 1993
           </p>
         </div>
@@ -75,12 +75,12 @@ export function MikeTrustCard({
 
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <p className="text-[10.5px] tracking-[0.18em] uppercase text-gold-300/85">
+            <p className="text-[11px] tracking-[0.18em] uppercase text-gold-300">
               Your local expert
             </p>
             <span
               data-testid="mike-verified-badge"
-              className="inline-flex items-center gap-1 rounded-full border border-gold-400/25 bg-gold-400/[0.06] px-1.5 py-0.5 text-[8.5px] tracking-[0.18em] uppercase text-gold-300"
+              className="inline-flex items-center gap-1 rounded-full border border-gold-400/30 bg-gold-400/[0.10] px-2 py-0.5 text-[10px] tracking-[0.16em] uppercase text-gold-200"
             >
               <Sparkles className="h-2.5 w-2.5" aria-hidden="true" />
               Verified
@@ -89,16 +89,16 @@ export function MikeTrustCard({
           <h2 className="font-display text-2xl font-semibold text-[#F7F1E8] leading-tight">
             Mike Eatmon
           </h2>
-          <p className="text-[13px] text-slate-300 mt-0.5">
+          <p className="text-[13.5px] text-slate-200 mt-0.5">
             Our Town Properties, Inc.
           </p>
-          <p className="text-[12px] text-slate-400 mt-1">
+          <p className="text-[12.5px] text-slate-300 mt-1">
             Selling real estate since 1993
           </p>
         </div>
       </div>
 
-      <div className="mt-5 grid gap-2 text-[12.5px] text-slate-300">
+      <div className="mt-5 grid gap-2 text-[13px] text-slate-200">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-3.5 w-3.5 text-gold-400/85 shrink-0" />
           <span>

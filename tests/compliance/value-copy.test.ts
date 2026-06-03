@@ -180,6 +180,37 @@ describe("/value page — professional trust-first copy", () => {
     expect(valuePage).not.toMatch(/guaranteed/i);
     expect(valuePage).not.toMatch(/instant cash offer/i);
   });
+
+  it("page metadata points at the safe Mike headshot for OG image", () => {
+    expect(valuePage).toContain(
+      "/images/ask-magic-mike/mike-eatmon-headshot.webp"
+    );
+    expect(valuePage).not.toMatch(/MLS|flexmls/i);
+  });
+});
+
+describe("root layout metadata", () => {
+  const layout = normalize(readSource("src/app/layout.tsx"));
+
+  it("sets metadataBase so OG paths resolve absolutely", () => {
+    expect(layout).toContain("metadataBase");
+    expect(layout).toContain("NEXT_PUBLIC_SITE_URL");
+  });
+
+  it("titles and descriptions name Mike + Our Town and stay compliance-safe", () => {
+    expect(layout).toContain("Ask Magic Mike by Our Town Properties");
+    expect(layout).toContain("Mike Eatmon");
+    expect(layout).toContain("preliminary home value range");
+    expect(layout).not.toMatch(/guaranteed/i);
+    expect(layout).not.toMatch(/instant cash offer/i);
+  });
+
+  it("OG image points at the safe Mike headshot WebP, no MLS source", () => {
+    expect(layout).toContain(
+      "/images/ask-magic-mike/mike-eatmon-headshot.webp"
+    );
+    expect(layout).not.toMatch(/flexmls|mls listing/i);
+  });
 });
 
 describe("intake confirmation — trust-first success state", () => {
