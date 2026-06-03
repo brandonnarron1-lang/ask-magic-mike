@@ -1,10 +1,41 @@
 # Ask Magic Mike — Visual Direction (Next Pass)
 
-Phase status: attribution + compliance hardened. **Visual redesign has not
-started yet.** This doc captures the direction for the next pass so we don't
-lose the thread between phases.
+Phase status: attribution + compliance hardened **and first visual pass
+shipped** (lamp lockup, magic backdrop, redesigned `/value` hero, polished
+intake step cards, polished confirmation, shared compliance footer). This doc
+captures what is in place and what is still queued for the follow-on visual
+sweep.
 
-## 1. Current state (do not change yet)
+## Shipped in the current visual pass
+
+- `src/components/amm/tokens.ts` — small visual constants module reused across
+  /value, /ask, and confirmation (page shell, card surface, input shell, gold
+  buttons, eyebrow, compliance text).
+- `src/components/amm/amm-lockup.tsx` — `AmmLockup` brand mark + `LampGlyph`
+  SVG (cyan flame is the only cyan accent in the system).
+- `src/components/amm/magic-backdrop.tsx` — atmospheric layer (gold + cyan
+  radial gradients) and an optional `Sparkles` field used on the hero.
+- `src/components/amm/compliance-footer.tsx` — single source of disclosure
+  copy. Used on `/value` and the confirmation screen.
+- `/value` redesigned: lamp visual, "Rub the lamp." headline, "Start With Your
+  Address" primary CTA, three secondary chips ("Thinking of selling", "Just
+  curious", "Need local guidance" → mapped to existing CTA enum values),
+  trust bullets row, mobile-first stacked address form.
+- `/ask` intake shell now renders steps inside a gold-bordered step card with
+  the AMM lockup and the active step label.
+- Confirmation: "Your request is in" eyebrow, lamp-on-check success mark,
+  assignment card with lamp glyph, gold "Call Mike now" CTA, shared
+  compliance footer underneath.
+
+Behavior preserved:
+
+- UTM capture + persistence in `sessionStorage` and forwarding into `/ask`
+  unchanged.
+- Lead submit payload schema unchanged.
+- API contracts, scoring, routing, CRM tags unchanged.
+- All TCPA / consent flow unchanged.
+
+## 1. Current state
 
 - Funnel entry: `/value` (Wilson/Eastern NC value lookup)
 - Intake: `/ask` — 5-step flow (question → intent → contact → consent →
@@ -36,28 +67,30 @@ not generic real-estate widget.
 Reserved: the genie/lamp visual language is the next hero motif. Treat the
 lamp as a one-time entrance animation, not a recurring element.
 
-## 3. Next components (priority order)
+## 3. Next components (still queued after this pass)
 
-1. **Premium landing hero on `/value`** — replace the current address bar
-   block with a centered lamp/genie hero that animates in on first paint.
-   Address field stays primary; trust line and disclosure stay visible above
-   the fold on mobile.
-2. **Animated lamp/genie entrance** — Lottie or pure SVG. Plays once per
-   session; respect `prefers-reduced-motion`.
-3. **Mobile-first address form** — single full-width address input with a
-   gold submit button. Place city autosuggest below the input (Wilson, NC
-   first). Form must remain visible above the keyboard on iOS Safari.
-4. **Step cards on `/ask`** — replace the flat progress bar with a stack of
-   3–4 step "cards" that scale into the active card. Carry the lamp accent
-   as a small idle animation at the top of each card.
-5. **Trust / compliance footer** — house the existing disclosure copy in a
-   collapsed footer card so it is consistent across `/value`, `/ask`, and the
-   embed shell.
-6. **Confirmation appointment CTA** — after submit, lead the user into a
-   calendar embed or "Mike will text you within Xm" card with a temperature
-   badge and a single secondary CTA (back to ourtownproperties.com).
-7. **Social ad visual consistency** — extract the hero motif into a 1080×1080
-   and 1080×1920 ad template so paid social uses the same lamp + headline.
+Done in this pass:
+
+- [x] Premium landing hero on `/value` with lamp visual
+- [x] Mobile-first stacked address form
+- [x] Branded step cards on `/ask`
+- [x] Shared compliance footer
+- [x] Confirmation success state with a direct phone CTA
+
+Still queued:
+
+1. **Animated lamp/genie entrance** — Lottie or pure SVG entrance animation.
+   The current lamp is a static SVG with a float idle. Add a one-shot
+   entrance that respects `prefers-reduced-motion`.
+2. **Address autosuggest** — autosuggest under the input (Wilson, NC first)
+   once we wire a geocoder/places provider that's safe for production.
+3. **Real appointment scheduling** — confirmation currently leads with "Call
+   Mike now" (`tel:` link) because no scheduling integration is wired. Swap
+   to a calendar embed when the integration is approved.
+4. **Step micro-illustrations** — small lamp/sparkle motif on each step
+   header to reinforce the brand without crowding form fields.
+5. **Social ad visual consistency** — extract the hero motif into 1080×1080
+   and 1080×1920 ad templates so paid social uses the same lamp + headline.
 
 ## 4. Content inputs available for the next design pass
 

@@ -38,20 +38,55 @@ function stripAllowedAppraisalContext(source: string): string {
   return cleaned;
 }
 
-describe("/value compliance copy", () => {
+const complianceFooter = normalize(
+  readSource("src/components/amm/compliance-footer.tsx")
+);
+
+describe("ComplianceFooter shared copy", () => {
+  it("contains the canonical disclosure", () => {
+    expect(complianceFooter).toContain(
+      "Ask Magic Mike by Our Town Properties, Inc."
+    );
+    expect(complianceFooter).toContain("local guidance");
+    expect(complianceFooter).toContain("preliminary home value range");
+    expect(complianceFooter).toContain("not an appraisal");
+    expect(complianceFooter).toContain(
+      "does not create an agency relationship"
+    );
+    expect(complianceFooter).toContain("written brokerage agreement");
+  });
+
+  it("does not introduce disallowed language", () => {
+    const cleaned = stripAllowedAppraisalContext(complianceFooter);
+    for (const phrase of FORBIDDEN_PHRASES) {
+      expect(cleaned).not.toMatch(phrase);
+    }
+  });
+});
+
+describe("/value page", () => {
   const valueHero = normalize(readSource("src/components/campaign/value-hero.tsx"));
   const valuePage = normalize(readSource("src/app/(campaign)/value/page.tsx"));
 
-  it("includes the Our Town disclosure text", () => {
-    expect(valueHero).toContain("Ask Magic Mike by Our Town Properties");
-    expect(valueHero).toContain("not an appraisal");
-    expect(valueHero).toContain("does not create an agency relationship");
-    expect(valueHero).toContain("written brokerage agreement");
+  it("uses the shared ComplianceFooter for disclosure", () => {
+    expect(valueHero).toContain("ComplianceFooter");
+    expect(valueHero).toMatch(/testId="value-disclosure"/);
   });
 
-  it("references local guidance language, not guarantees", () => {
-    expect(valueHero).toContain("local guidance");
-    expect(valueHero).toContain("preliminary home value range");
+  it("ships the campaign primary CTA copy", () => {
+    expect(valueHero).toContain("Start With Your Address");
+    expect(valueHero).toContain("Rub the lamp");
+    expect(valueHero).toContain("Wilson-area home");
+  });
+
+  it("keeps the Ask Magic Mike lockup", () => {
+    expect(valueHero).toContain("AmmLockup");
+  });
+
+  it("renders the trust bullets", () => {
+    expect(valueHero).toContain("Local guidance");
+    expect(valueHero).toContain("Preliminary home value range");
+    expect(valueHero).toContain("Mike follows up");
   });
 
   it("does not use disallowed valuation/offer language", () => {
@@ -74,11 +109,10 @@ describe("intake confirmation compliance copy", () => {
     readSource("src/components/intake/step-confirmation.tsx")
   );
 
-  it("includes the Our Town follow-up disclosure", () => {
+  it("uses the shared ComplianceFooter and success lead", () => {
+    expect(confirmation).toContain("ComplianceFooter");
+    expect(confirmation).toContain("Your request is in");
     expect(confirmation).toContain("Our Town Properties");
-    expect(confirmation).toContain("preliminary");
-    expect(confirmation).toContain("not an appraisal");
-    expect(confirmation).toContain("agency relationship");
   });
 
   it("does not promise a guaranteed value or binding offer", () => {
