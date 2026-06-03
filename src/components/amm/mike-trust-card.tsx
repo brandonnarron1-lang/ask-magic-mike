@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils/cn";
 import { ammTokens } from "./tokens";
 import { AiAssistBadge } from "./ai-assist-badge";
 import { VisualFrame } from "./visual-frame";
+import { brandPackAssets } from "./brand-pack-assets";
 
 const AGENT_PHONE = process.env.NEXT_PUBLIC_AGENT_PHONE ?? "+12522454337";
 const PHONE_DISPLAY = AGENT_PHONE.replace(/^\+1/, "").replace(
@@ -34,13 +35,13 @@ export function MikeTrustCard({
           className
         )}
       >
-        <div className="relative h-10 w-10 shrink-0 rounded-full overflow-hidden border border-gold-400/25 bg-[#0B0E14]">
+        <div className="relative h-10 w-10 shrink-0 rounded-full overflow-hidden border border-gold-400/30 bg-[#0B0B0B]">
           <Image
-            src="/images/ask-magic-mike/mike-eatmon-headshot.webp"
+            src={brandPackAssets.mike.avatar128}
             alt="Mike Eatmon"
             fill
             sizes="40px"
-            className="object-cover object-top"
+            className="object-cover"
           />
         </div>
         <div className="min-w-0">
@@ -62,13 +63,13 @@ export function MikeTrustCard({
       aria-label="About Mike Eatmon, Our Town Properties"
     >
       <div className="flex flex-col gap-4">
-        <VisualFrame aspect="aspect-[4/5]" className="max-w-[200px]">
+        <VisualFrame aspect="aspect-square" className="max-w-[220px]">
           <Image
-            src="/images/ask-magic-mike/mike-eatmon-headshot.webp"
+            src={brandPackAssets.mike.headshot}
             alt="Mike Eatmon, broker at Our Town Properties"
             fill
-            sizes="(max-width: 640px) 50vw, 200px"
-            className="object-cover object-top"
+            sizes="(max-width: 640px) 50vw, 220px"
+            className="object-cover object-center"
             priority
           />
         </VisualFrame>

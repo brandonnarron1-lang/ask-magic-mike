@@ -15,6 +15,7 @@ import { ConversionPanel } from "@/components/amm/conversion-panel";
 import { OptionCard, type OptionCardProps } from "@/components/amm/option-card";
 import { HowItWorks } from "@/components/amm/how-it-works";
 import { AiAssistBadge } from "@/components/amm/ai-assist-badge";
+import { MagicMikeWidgetLauncher } from "@/components/amm/magic-mike-widget-launcher";
 import { ammTokens } from "@/components/amm/tokens";
 import { motion } from "@/components/amm/motion";
 
@@ -32,11 +33,12 @@ const SECONDARY_OPTIONS: OptionCardProps[] = [
     Icon: Banknote,
     title: "Request direct-purchase review",
     description:
-      "Share your address and timing for a preliminary direct-purchase review — subject to review, not an instant offer.",
+      "Share your address and timing for a preliminary direct-purchase review — subject to review. Not an instant offer.",
     question:
       "Please review my home for a direct-purchase preliminary estimate, subject to inspection.",
     chip: "what_can_afford",
-    ribbon: "New",
+    ribbon: "Priority review",
+    ribbonTone: "ruby",
   },
   {
     Icon: MessageCircle,
@@ -83,8 +85,11 @@ export function ValueHero() {
                 home value range, compare selling options, and get follow-up
                 from Mike Eatmon&apos;s Our Town Properties team.
               </p>
-              <p className="text-slate-300 text-[13.5px] mb-7">
-                Free · No account · Local human follow-up
+              <p className="text-slate-300 text-[13.5px] mb-2">
+                Real answers. Local insight. AI-assisted.
+              </p>
+              <p className="text-slate-400 text-[12.5px] mb-7">
+                No account. No pressure. Local human follow-up.
               </p>
 
               <ConversionPanel className="mb-6" />
@@ -180,6 +185,11 @@ export function ValueHero() {
 
         <ComplianceFooter variant="inline" testId="value-disclosure" />
       </main>
+
+      <MagicMikeWidgetLauncher
+        href="#value-hero-heading"
+        label="Ask Magic Mike"
+      />
     </BrandShell>
   );
 }

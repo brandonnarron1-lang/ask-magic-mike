@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Phone } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { motion } from "./motion";
+import { brandPackAssets } from "./brand-pack-assets";
 
 const AGENT_PHONE = process.env.NEXT_PUBLIC_AGENT_PHONE ?? "+12522454337";
 const PHONE_DISPLAY = AGENT_PHONE.replace(/^\+1/, "").replace(
@@ -38,7 +39,7 @@ export function BrandHeader({ className, compact = false }: BrandHeaderProps) {
         aria-label="Our Town Properties"
       >
         <Image
-          src="/images/ask-magic-mike/our-town-properties-logo.webp"
+          src={brandPackAssets.logo.primary}
           alt="Our Town Properties, Inc."
           width={compact ? 92 : 124}
           height={compact ? 48 : 65}

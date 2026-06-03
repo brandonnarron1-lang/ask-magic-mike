@@ -16,9 +16,9 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/images/ask-magic-mike/mike-eatmon-headshot.webp",
-        width: 515,
-        height: 720,
+        url: "/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp",
+        width: 1024,
+        height: 1024,
         alt: "Mike Eatmon, broker at Our Town Properties, Inc.",
       },
     ],
@@ -28,7 +28,9 @@ export const metadata: Metadata = {
     title: "Start with your address. Get a local read on your home.",
     description:
       "Mike Eatmon and the Our Town Properties team follow up with local guidance.",
-    images: ["/images/ask-magic-mike/mike-eatmon-headshot.webp"],
+    images: [
+      "/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp",
+    ],
   },
 };
 

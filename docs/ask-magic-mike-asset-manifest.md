@@ -3,14 +3,40 @@
 Records the brand assets that ship with the public `/value` and `/ask`
 surfaces, where they came from, and what is explicitly NOT being used.
 
-## In repo, safe for public UI
+Current source: **brand pack v2** (see
+`docs/ask-magic-mike-brand-pack-v2-integration.md`). All registry entries
+live in `src/components/amm/brand-pack-assets.ts`.
+
+## Brand pack v2 (current primary)
+
+| Public path | Size / dims | Use |
+| --- | --- | --- |
+| `brand-pack-v2/mike-headshot-source.webp` | 1024×1024 · **33 KB** | `MikeTrustCard` headshot, OG/Twitter image |
+| `brand-pack-v2/mike-headshot-source.jpg` | 1024×1024 · 132 KB | JPG fallback |
+| `brand-pack-v2/mike-avatar-circle-64.png` | 64×64 · 6.6 KB | Future micro avatar |
+| `brand-pack-v2/mike-avatar-circle-128.webp` / `.png` | 128×128 · 4.9 / 21 KB | Compact `MikeTrustCard`, widget launcher |
+| `brand-pack-v2/mike-avatar-circle-256.webp` / `.png` | 256×256 · 12 / 69 KB | Confirmation assignment card, larger widget states |
+| `brand-pack-v2/our-town-logo-clean.webp` / `.png` | 343×180 · 9.4 / 41 KB | `BrandHeader` |
+| `brand-pack-v2/our-town-logo-web.jpg` | 343×180 · 14 KB | Web preview fallback |
+| `brand-pack-v2/accent-gold-arrow.svg` | — · 604 B | Inline CTA accent |
+| `brand-pack-v2/accent-ruby.svg` | — · 437 B | Ruby accent |
+| `brand-pack-v2/accent-smoke-glow.svg` | — · 564 B | Atmosphere accent |
+| `brand-pack-v2/accent-sparkle.svg` | — · 383 B | Sparkle accent |
+| `brand-pack-v2/chat-widget-concept.webp` | 390×430 · 22 KB | **Reference only** — design comp |
+| `brand-pack-v2/answer-smoke-sequence.webp` | 390×105 · 9.6 KB | **Reference only** — `MagicMikeAnswerReveal` is CSS-only |
+| `brand-pack-v2/social-home-value-feed.jpg` | 1080×1350 · 187 KB | **Reference only** — social/ad template |
+| `brand-pack-v2/social-cash-offer-feed.jpg` | 1080×1350 · 174 KB | **Reference only** — copy must be replaced before paid use |
+| `brand-pack-v2/social-chat-story.jpg` | 1080×1920 · 246 KB | **Reference only** — social/ad template |
+| `brand-pack-v2/social-seller-story.jpg` | 1080×1920 · 243 KB | **Reference only** — social/ad template |
+
+## Brand pack v1 (legacy, kept for parity)
 
 | Path (public-facing) | Size / dims | Use | Source | Notes |
 | --- | --- | --- | --- | --- |
-| `public/images/ask-magic-mike/mike-eatmon-headshot.webp` | 515×720 · **35 KB** | Mike trust card headshot (primary, preferred by Next.js Image) | derived from `mike-eatmon-headshot.png` via `cwebp -q 82 -m 6` | 12× smaller than the PNG with no perceptible quality loss; chosen for above-the-fold delivery. |
-| `public/images/ask-magic-mike/mike-eatmon-headshot.png` | 515×720 · 435 KB | PNG fallback (kept for tooling that doesn't accept WebP) | `~/Documents/4729 Country Club /promo_assets_pack/mike_cutout.png` (1024×1430 · 1.3 MB) | Real, on-brand headshot of Mike Eatmon. Resized to 720px tall. |
-| `public/images/ask-magic-mike/our-town-properties-logo.webp` | 343×180 · **9.4 KB** | Brand header logo (preferred) | derived from the PNG via `cwebp -q 90 -m 6` | 4× smaller than PNG. |
-| `public/images/ask-magic-mike/our-town-properties-logo.png` | 343×180 · 41 KB | PNG fallback for the logo | `~/Documents/4729 Country Club /promo_assets_pack/ourtown_logo_black.png` | Official Our Town Properties, Inc. wordmark on black background — blends cleanly with `#05070A` page background. |
+| `public/images/ask-magic-mike/mike-eatmon-headshot.webp` | 515×720 · **35 KB** | (no longer used in `/value` after v2 swap) | derived from `mike-eatmon-headshot.png` via `cwebp -q 82 -m 6` | Kept for backwards-compat / external tools. |
+| `public/images/ask-magic-mike/mike-eatmon-headshot.png` | 515×720 · 435 KB | (no longer used in `/value` after v2 swap) | `~/Documents/4729 Country Club /promo_assets_pack/mike_cutout.png` (1024×1430 · 1.3 MB) | Real, on-brand headshot of Mike Eatmon. Resized to 720px tall. |
+| `public/images/ask-magic-mike/our-town-properties-logo.webp` | 343×180 · **9.4 KB** | (no longer used in `/value` after v2 swap) | derived from the PNG via `cwebp -q 90 -m 6` | 4× smaller than PNG. |
+| `public/images/ask-magic-mike/our-town-properties-logo.png` | 343×180 · 41 KB | (no longer used in `/value` after v2 swap) | `~/Documents/4729 Country Club /promo_assets_pack/ourtown_logo_black.png` | Official Our Town Properties, Inc. wordmark on black background. |
 
 ## Already in repo (pre-existing, untouched this pass)
 

@@ -53,7 +53,7 @@ image so aspect ratios stay locked and CLS stays at zero.
 | `BrandHeader` | Logo + lockup + click-to-call; `compact` for `/ask` and `/embed/ask` |
 | `MikeTrustCard` | Trust anchor — headshot + credentials + AI badge. `compact` for intake header |
 | `ConversionPanel` | Reusable address input → `/ask` handoff with UTM forwarding |
-| `OptionCard` | Path card that forwards a CTA chip + UTM-aware navigation |
+| `OptionCard` | Path card that forwards a CTA chip + UTM-aware navigation. `ribbonTone: "ruby"` for the direct-purchase path |
 | `HowItWorks` | Three-step reassurance band |
 | `ProofStrip` | Four icon + text proof cards |
 | `AiAssistBadge` | `default` (card), `subtle`, `inline` (pill) |
@@ -61,6 +61,16 @@ image so aspect ratios stay locked and CLS stays at zero.
 | `VisualFrame` | Fixed-aspect, rounded media container |
 | `MagicBackdrop` | Single warm radial behind hero/card |
 | `AmmLockup` | Text + dot brand mark for sub-locations |
+| `MagicMikeAvatar` | Mike circular trust anchor with `state` cues (idle/listening/thinking/cta/success) |
+| `MagicMikeWidgetLauncher` | Floating bottom-right launcher with accessible "Ask Magic Mike" label |
+| `MagicMikeAnswerReveal` | CSS-only gold smoke wash for answer cards |
+
+### Asset registry
+
+`src/components/amm/brand-pack-assets.ts` is the single source for every
+public-facing image. Components import from the registry instead of
+hard-coding `/images/...` paths so the tests can statically verify nothing
+references MLS / flexmls sources.
 
 ## Motion
 

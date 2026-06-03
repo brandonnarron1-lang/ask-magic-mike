@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import { brandPackAssets } from "@/components/amm/brand-pack-assets";
 
 const repoRoot = join(__dirname, "..", "..");
 
@@ -16,6 +17,10 @@ function normalize(source: string): string {
   return source.replace(/\s+/g, " ");
 }
 
+// Top-level forbidden phrases applied via raw substring scans.
+// `genie` / `lamp` are not in this list because the dedicated sweep below
+// (which strips comments) checks for them inside JSX text rather than source
+// comments.
 const FORBIDDEN_PHRASES = [
   /\bappraisal\b/i,
   /\bguaranteed value\b/i,
@@ -149,13 +154,10 @@ describe("/value page — professional trust-first copy", () => {
     expect(mikeTrustCard).toContain("Selling real estate since 1993");
   });
 
-  it("uses the real headshot (WebP) and the official Our Town logo", () => {
-    expect(mikeTrustCard).toContain(
-      "/images/ask-magic-mike/mike-eatmon-headshot.webp"
-    );
-    expect(brandHeader).toContain(
-      "/images/ask-magic-mike/our-town-properties-logo.webp"
-    );
+  it("pulls headshot + logo from the brand-pack-v2 registry", () => {
+    expect(mikeTrustCard).toContain("brandPackAssets.mike.headshot");
+    expect(mikeTrustCard).toContain("brandPackAssets.mike.avatar128");
+    expect(brandHeader).toContain("brandPackAssets.logo.primary");
   });
 
   it("renders the 'What happens next' three-step explainer", () => {
@@ -181,9 +183,9 @@ describe("/value page — professional trust-first copy", () => {
     expect(valuePage).not.toMatch(/instant cash offer/i);
   });
 
-  it("page metadata points at the safe Mike headshot for OG image", () => {
+  it("page metadata points at the brand-pack Mike headshot for OG image", () => {
     expect(valuePage).toContain(
-      "/images/ask-magic-mike/mike-eatmon-headshot.webp"
+      "/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp"
     );
     expect(valuePage).not.toMatch(/MLS|flexmls/i);
   });
@@ -205,9 +207,9 @@ describe("root layout metadata", () => {
     expect(layout).not.toMatch(/instant cash offer/i);
   });
 
-  it("OG image points at the safe Mike headshot WebP, no MLS source", () => {
+  it("OG image points at the brand-pack Mike headshot, no MLS source", () => {
     expect(layout).toContain(
-      "/images/ask-magic-mike/mike-eatmon-headshot.webp"
+      "/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp"
     );
     expect(layout).not.toMatch(/flexmls|mls listing/i);
   });
@@ -230,10 +232,8 @@ describe("intake confirmation — trust-first success state", () => {
     expect(confirmation).toContain("Visit Our Town Properties");
   });
 
-  it("uses the WebP headshot inside the assignment card", () => {
-    expect(confirmation).toContain(
-      "/images/ask-magic-mike/mike-eatmon-headshot.webp"
-    );
+  it("uses the brand-pack avatar inside the assignment card", () => {
+    expect(confirmation).toContain("brandPackAssets.mike.avatar256");
   });
 
   it("uses the shared ComplianceFooter", () => {
@@ -264,6 +264,53 @@ describe("intake shell and embed shell — cohesive branding", () => {
   });
 });
 
+describe("brand pack v2 registry", () => {
+  it("every registry path resolves to a file in public/", () => {
+    const visit = (node: unknown) => {
+      if (typeof node === "string" && node.startsWith("/images/")) {
+        const full = join(repoRoot, "public", node);
+        expect(existsSync(full), `missing file: ${full}`).toBe(true);
+      } else if (node && typeof node === "object") {
+        for (const value of Object.values(node)) visit(value);
+      }
+    };
+    visit(brandPackAssets);
+  });
+
+  it("never references MLS / flexmls source paths", () => {
+    const json = JSON.stringify(brandPackAssets).toLowerCase();
+    expect(json).not.toMatch(/flexmls/);
+    expect(json).not.toMatch(/mls/);
+  });
+});
+
+describe("Magic Mike widget / avatar foundation", () => {
+  const avatar = normalize(
+    readSource("src/components/amm/magic-mike-avatar.tsx")
+  );
+  const launcher = normalize(
+    readSource("src/components/amm/magic-mike-widget-launcher.tsx")
+  );
+  const reveal = normalize(
+    readSource("src/components/amm/magic-mike-answer-reveal.tsx")
+  );
+
+  it("avatar component uses the brand-pack circle avatars", () => {
+    expect(avatar).toContain("brandPackAssets.mike.avatar128");
+    expect(avatar).toContain("brandPackAssets.mike.avatar256");
+  });
+
+  it("widget launcher has an accessible Ask Magic Mike label", () => {
+    expect(launcher).toContain("Ask Magic Mike");
+    expect(launcher).toContain("aria-label");
+  });
+
+  it("answer reveal is CSS-only (no smoke image embedded)", () => {
+    expect(reveal).not.toMatch(/answer-smoke-sequence\.webp/);
+    expect(reveal).toContain("radial-gradient");
+  });
+});
+
 describe("public UI source bans gimmicky / non-compliant copy", () => {
   const publicDirs = [
     join(repoRoot, "src/app"),
@@ -283,6 +330,21 @@ describe("public UI source bans gimmicky / non-compliant copy", () => {
       expect(txt, `forbidden 'Rub the lamp' in ${file}`).not.toMatch(
         /rub the lamp/i
       );
+    }
+  });
+
+  it("never frames Mike as a genie or uses 'lamp' identity in public source", () => {
+    // We strip line + block comments first so that internal notes which
+    // describe the rejected direction (e.g. "No lamp or genie identity.")
+    // don't trip the sweep. JSX text and string literals are still checked.
+    const stripComments = (src: string) =>
+      src
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/(^|[^:])\/\/.*$/gm, "$1");
+    for (const file of publicSources) {
+      const txt = stripComments(readFileSync(file, "utf8"));
+      expect(txt, `'genie' in ${file}`).not.toMatch(/\bgenie\b/i);
+      expect(txt, `'lamp' in ${file}`).not.toMatch(/\blamp\b/i);
     }
   });
 

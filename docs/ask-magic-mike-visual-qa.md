@@ -110,15 +110,15 @@ Expected: no output.
 ## Full local verification commands
 
 ```
-./node_modules/.bin/vitest run         # 126 tests passing
+./node_modules/.bin/vitest run         # 132 tests passing
 ./node_modules/.bin/tsc --noEmit       # clean
 ./node_modules/.bin/next lint          # clean
-./node_modules/.bin/next build         # /value 4.96 kB / 124 kB first load
+./node_modules/.bin/next build         # /value 5.79 kB / 126 kB first load
 ```
 
-Bundle status:
+Bundle status (with the floating widget launcher and brand-pack registry):
 
-- `/value` 4.96 kB (124 kB first-load JS)
+- `/value` 5.79 kB (126 kB first-load JS)
 - `/ask`   2.10 kB (131 kB)
 - `/embed/ask` 1.50 kB (130 kB)
 

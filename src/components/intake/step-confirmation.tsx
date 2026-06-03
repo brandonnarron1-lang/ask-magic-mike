@@ -5,6 +5,7 @@ import { Phone, Clock, ExternalLink, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Badge } from "@/components/ui/badge";
 import { ComplianceFooter } from "@/components/amm/compliance-footer";
+import { brandPackAssets } from "@/components/amm/brand-pack-assets";
 import type { Temperature } from "@/types/domain.types";
 
 interface ScoreData {
@@ -91,11 +92,11 @@ export function StepConfirmation({
         <div className="flex items-center gap-3">
           <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden border border-gold-400/25 bg-[#0B0E14]">
             <Image
-              src="/images/ask-magic-mike/mike-eatmon-headshot.webp"
+              src={brandPackAssets.mike.avatar256}
               alt={`${agentName} headshot`}
               fill
               sizes="56px"
-              className="object-cover object-top"
+              className="object-cover"
             />
           </div>
           <div className="min-w-0">
