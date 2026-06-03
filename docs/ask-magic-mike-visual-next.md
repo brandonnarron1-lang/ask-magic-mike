@@ -1,31 +1,34 @@
 # Ask Magic Mike — Visual Direction (Next Pass)
 
-Phase status: attribution + compliance hardened **and first visual pass
-shipped** (lamp lockup, magic backdrop, redesigned `/value` hero, polished
-intake step cards, polished confirmation, shared compliance footer). This doc
-captures what is in place and what is still queued for the follow-on visual
-sweep.
+Phase status: attribution + compliance hardened, first visual pass shipped,
+and **the first visual pass has been replaced by a professional trust-first
+rebuild** on branch `visual/professional-mike-trust-funnel`. The earlier
+"Rub the lamp" / lamp-as-identity treatment was retired before reaching
+production. See `docs/ask-magic-mike-professional-visual-strategy.md` for the
+full rationale.
 
-## Shipped in the current visual pass
+## Shipped in the professional rebuild
 
-- `src/components/amm/tokens.ts` — small visual constants module reused across
-  /value, /ask, and confirmation (page shell, card surface, input shell, gold
-  buttons, eyebrow, compliance text).
-- `src/components/amm/amm-lockup.tsx` — `AmmLockup` brand mark + `LampGlyph`
-  SVG (cyan flame is the only cyan accent in the system).
-- `src/components/amm/magic-backdrop.tsx` — atmospheric layer (gold + cyan
-  radial gradients) and an optional `Sparkles` field used on the hero.
-- `src/components/amm/compliance-footer.tsx` — single source of disclosure
-  copy. Used on `/value` and the confirmation screen.
-- `/value` redesigned: lamp visual, "Rub the lamp." headline, "Start With Your
-  Address" primary CTA, three secondary chips ("Thinking of selling", "Just
-  curious", "Need local guidance" → mapped to existing CTA enum values),
-  trust bullets row, mobile-first stacked address form.
-- `/ask` intake shell now renders steps inside a gold-bordered step card with
-  the AMM lockup and the active step label.
-- Confirmation: "Your request is in" eyebrow, lamp-on-check success mark,
-  assignment card with lamp glyph, gold "Call Mike now" CTA, shared
-  compliance footer underneath.
+- New brand primitives under `src/components/amm/`:
+  `tokens.ts` (palette + token classes), `brand-header.tsx` (Our Town wordmark
+  + nav + tap-to-call), `mike-trust-card.tsx` (real Mike Eatmon headshot +
+  credentials + phone), `proof-strip.tsx` (four proof cards), and
+  `ai-assist-badge.tsx` (single small AI/human-follow-up tag).
+- `amm-lockup.tsx` trimmed to text + gold dot — no lamp glyph as identity.
+- `magic-backdrop.tsx` reduced to a single restrained gold radial; the cyan
+  sparkle field was removed from `/value`.
+- `compliance-footer.tsx` continues to be the single source of disclosure
+  copy. Used on `/value` and confirmation.
+- `/value` rebuilt around `BrandHeader` + `MikeTrustCard` + `ProofStrip` with
+  the trust-first headline, sub, and CTA copy. Three secondary chips:
+  "Compare selling options", "Request direct-purchase review", "Ask Mike a
+  question" (mapped to the existing CTA enum).
+- `/ask` intake shell now renders the `BrandHeader` (compact), a small "Mike's
+  team reviews the details" trust cue with Mike's headshot, a clean step
+  card, and the AI-assist badge below the card.
+- Confirmation: "Your request is in" eyebrow + check, Mike headshot in the
+  assignment card, gold "Call Mike" CTA, secondary "Visit Our Town
+  Properties" link, compliance footer at the bottom.
 
 Behavior preserved:
 
@@ -34,6 +37,13 @@ Behavior preserved:
 - Lead submit payload schema unchanged.
 - API contracts, scoring, routing, CRM tags unchanged.
 - All TCPA / consent flow unchanged.
+
+Replaced / removed from public UI:
+
+- The "Rub the lamp." headline.
+- The genie lamp glyph as primary identity.
+- The cyan sparkle field on `/value`.
+- The cartoon lamp success mark on confirmation.
 
 ## 1. Current state
 
@@ -67,30 +77,32 @@ not generic real-estate widget.
 Reserved: the genie/lamp visual language is the next hero motif. Treat the
 lamp as a one-time entrance animation, not a recurring element.
 
-## 3. Next components (still queued after this pass)
+## 3. Next components (queued after the professional rebuild)
 
-Done in this pass:
+Done in the rebuild:
 
-- [x] Premium landing hero on `/value` with lamp visual
+- [x] Premium landing hero on `/value` (trust-first, no cartoon lamp)
 - [x] Mobile-first stacked address form
-- [x] Branded step cards on `/ask`
+- [x] Brand-headered, professional step card on `/ask`
 - [x] Shared compliance footer
-- [x] Confirmation success state with a direct phone CTA
+- [x] Confirmation success state with Mike's headshot + Call Mike CTA
+- [x] AI-assist badge in place of any genie / lamp identity
 
 Still queued:
 
-1. **Animated lamp/genie entrance** — Lottie or pure SVG entrance animation.
-   The current lamp is a static SVG with a float idle. Add a one-shot
-   entrance that respects `prefers-reduced-motion`.
-2. **Address autosuggest** — autosuggest under the input (Wilson, NC first)
+1. **Address autosuggest** — autosuggest under the input (Wilson, NC first)
    once we wire a geocoder/places provider that's safe for production.
-3. **Real appointment scheduling** — confirmation currently leads with "Call
-   Mike now" (`tel:` link) because no scheduling integration is wired. Swap
-   to a calendar embed when the integration is approved.
-4. **Step micro-illustrations** — small lamp/sparkle motif on each step
-   header to reinforce the brand without crowding form fields.
-5. **Social ad visual consistency** — extract the hero motif into 1080×1080
-   and 1080×1920 ad templates so paid social uses the same lamp + headline.
+2. **Real appointment scheduling** — confirmation currently leads with
+   `tel:` because no scheduling integration is wired. Swap to a calendar
+   embed when the integration is approved.
+3. **Social / video ad templates** — the lamp/genie creative continues to
+   have a home in paid social and video. Build 1080×1080 and 1080×1920
+   templates that lean into Magic Mike personality while preserving the
+   trust-first hierarchy.
+4. **`askmagicmike.com` migration** — DNS, Vercel domain attach, redirect
+   plan, sitemap, OG image set. Out of scope until production approval.
+5. **Per-step micro-illustrations** — small gold accents per intake step to
+   reinforce brand without crowding form fields. Optional polish.
 
 ## 4. Content inputs available for the next design pass
 

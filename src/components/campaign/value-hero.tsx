@@ -2,40 +2,45 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { MapPin, ArrowRight, Shield, Phone, Sparkles as SparkleIcon } from "lucide-react";
+import { MapPin, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import {
   captureAttribution,
   appendUtmsToParams,
   type StoredAttribution,
 } from "@/lib/attribution/client-storage";
-import { AmmLockup, LampGlyph } from "@/components/amm/amm-lockup";
-import { MagicBackdrop, Sparkles } from "@/components/amm/magic-backdrop";
+import { BrandHeader } from "@/components/amm/brand-header";
+import { MikeTrustCard } from "@/components/amm/mike-trust-card";
+import { ProofStrip } from "@/components/amm/proof-strip";
+import { MagicBackdrop } from "@/components/amm/magic-backdrop";
 import { ComplianceFooter } from "@/components/amm/compliance-footer";
 import { ammTokens } from "@/components/amm/tokens";
-
-const LICENSE = process.env.NEXT_PUBLIC_AGENT_LICENSE;
-const AGENT_PHONE = process.env.NEXT_PUBLIC_AGENT_PHONE ?? "+12522454337";
-const PHONE_DISPLAY = AGENT_PHONE.replace(/^\+1/, "").replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
 
 interface SecondaryChip {
   label: string;
   q: string;
   chip: string;
-  ruby?: boolean;
 }
 
+// Labels are the new professional public-facing copy. Chip values stay on the
+// existing CTAChip enum so scoring, routing, and analytics keep working.
 const SECONDARY_CHIPS: SecondaryChip[] = [
-  { label: "Thinking of selling", q: "I'm thinking about selling my home in Wilson, NC.",      chip: "should_sell_now" },
-  { label: "Just curious",        q: "Just curious about my home value in Eastern NC.",         chip: "what_can_afford" },
-  { label: "Need local guidance", q: "I'd like local guidance from Mike Eatmon at Our Town.",   chip: "talk_to_mike", ruby: true },
+  {
+    label: "Compare selling options",
+    q: "I'd like to compare my options for selling my home in Wilson, NC.",
+    chip: "should_sell_now",
+  },
+  {
+    label: "Request direct-purchase review",
+    q: "Please review my home for a direct-purchase preliminary estimate, subject to inspection.",
+    chip: "what_can_afford",
+  },
+  {
+    label: "Ask Mike a question",
+    q: "I'd like to ask Mike Eatmon a question about my home or the Wilson market.",
+    chip: "talk_to_mike",
+  },
 ];
-
-const TRUST_BULLETS = [
-  "Local guidance",
-  "Preliminary home value range",
-  "Mike follows up",
-] as const;
 
 export function ValueHero() {
   const router = useRouter();
@@ -45,7 +50,7 @@ export function ValueHero() {
   const attributionRef = useRef<StoredAttribution | null>(null);
   const viewLoggedRef = useRef(false);
 
-  // Capture UTMs/referrer on mount and fire a single page-view signal.
+  // Capture UTMs/referrer on mount; fire a single page-view signal with UTMs.
   useEffect(() => {
     attributionRef.current = captureAttribution();
     if (viewLoggedRef.current) return;
@@ -98,60 +103,38 @@ export function ValueHero() {
     <div className={cn(ammTokens.pageShellPadded)}>
       <MagicBackdrop variant="hero" />
 
-      {/* Nav strip */}
-      <nav className="relative z-10 flex items-center justify-between px-6 py-5 max-w-6xl mx-auto w-full">
-        <a
-          href="https://www.ourtownproperties.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group"
-          aria-label="Our Town Properties"
-        >
-          <AmmLockup size="md" />
-        </a>
-        <a
-          href={`tel:${AGENT_PHONE}`}
-          className="hidden sm:flex items-center gap-2 text-[12px] text-slate-400 hover:text-gold-400 transition-colors"
-        >
-          <Phone className="h-3.5 w-3.5" />
-          {PHONE_DISPLAY}
-        </a>
-      </nav>
+      <BrandHeader />
 
-      {/* Main */}
-      <section className="relative z-10 flex-1 flex items-center px-6 pt-6 pb-16 max-w-6xl mx-auto w-full">
-        <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-14 items-center w-full">
+      <section className="relative z-10 flex-1 px-5 sm:px-6 pt-4 pb-14 max-w-6xl mx-auto w-full">
+        <div className="grid lg:grid-cols-[1.25fr_0.75fr] gap-10 lg:gap-14 items-start">
           {/* Copy + form */}
           <div className="max-w-xl">
-            {/* Eyebrow */}
-            <div className={cn(ammTokens.eyebrow, "mb-6")}>
+            <div className={cn(ammTokens.eyebrow, "mb-5")}>
               <span className={ammTokens.eyebrowDot} />
-              <span>Wilson, NC · Eastern NC</span>
+              <span>Ask Magic Mike by Our Town Properties</span>
             </div>
 
-            {/* Headline */}
             <h1
-              className={cn(ammTokens.headlineDisplay, "mb-5")}
-              style={{ fontSize: "clamp(2.6rem, 6.5vw, 4.8rem)" }}
+              className={cn(ammTokens.headlineDisplay, "mb-4")}
+              style={{ fontSize: "clamp(2.2rem, 5.4vw, 3.7rem)" }}
             >
-              Rub the lamp.<br />
-              <span className="text-gold-shimmer italic">See what your</span><br />
-              Wilson-area home<br />
-              may be worth.
+              Start with your address.<br />
+              <span className="text-gold-shimmer">Get a local read on your home.</span>
             </h1>
 
-            <p className={cn(ammTokens.subhead, "mb-2")}>
-              Start with your address and Mike Eatmon&apos;s team will follow up
-              with local guidance — not a generic internet guess.
+            <p className={cn(ammTokens.subhead, "mb-2 max-w-lg")}>
+              Ask Magic Mike helps Wilson-area homeowners see a preliminary
+              home value range, compare selling options, and get follow-up
+              from Mike Eatmon&apos;s Our Town Properties team.
             </p>
-            <p className="text-slate-500 text-sm mb-8">
-              Free · No account · Mike follows up directly
+            <p className="text-slate-500 text-[13px] mb-7">
+              Free · No account · Local human follow-up
             </p>
 
             {/* Address form */}
             <form
               onSubmit={handleSubmit}
-              className="mb-6"
+              className="mb-5"
               data-testid="value-address-form"
             >
               <div
@@ -169,7 +152,7 @@ export function ValueHero() {
                 />
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:pl-4">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <MapPin className="h-4 w-4 text-gold-400/55 shrink-0" />
+                    <MapPin className="h-4 w-4 text-gold-400/65 shrink-0" />
                     <input
                       type="text"
                       data-testid="value-address-input"
@@ -178,7 +161,7 @@ export function ValueHero() {
                       onFocus={() => setFocused(true)}
                       onBlur={() => setFocused(false)}
                       placeholder="Enter your property address in Wilson, NC"
-                      className="flex-1 bg-transparent text-cream placeholder:text-slate-600 text-[15px] focus:outline-none min-w-0 py-2"
+                      className="flex-1 bg-transparent text-[#F7F1E8] placeholder:text-slate-500 text-[15px] focus:outline-none min-w-0 py-2"
                       autoComplete="street-address"
                       inputMode="text"
                     />
@@ -193,7 +176,7 @@ export function ValueHero() {
                     )}
                   >
                     {loading ? (
-                      <span className="h-3.5 w-3.5 rounded-full border-2 border-midnight/40 border-t-midnight animate-spin" />
+                      <span className="h-3.5 w-3.5 rounded-full border-2 border-[#0A0A0A]/40 border-t-[#0A0A0A] animate-spin" />
                     ) : (
                       <>
                         Start With Your Address
@@ -203,14 +186,19 @@ export function ValueHero() {
                   </button>
                 </div>
               </div>
-              <p className="mt-2.5 text-[11px] text-slate-600 pl-1">
-                Or tap a quick option below ↓ &nbsp;·&nbsp; No commitment required
+              <p className="mt-2.5 text-[11px] text-slate-500 pl-1">
+                AI-assisted intake. Local human follow-up.
               </p>
             </form>
 
             {/* Secondary chips */}
-            <div className="flex flex-wrap gap-2 mb-8" role="group" aria-label="Quick options">
-              {SECONDARY_CHIPS.map(({ label, q, chip, ruby }) => (
+            <div
+              className="flex flex-wrap gap-2 mb-8"
+              role="group"
+              aria-label="Other ways to start"
+              data-testid="value-secondary-chips"
+            >
+              {SECONDARY_CHIPS.map(({ label, q, chip }) => (
                 <button
                   key={chip}
                   type="button"
@@ -221,10 +209,9 @@ export function ValueHero() {
                     router.push(`/ask?${buildAskParams(overrides).toString()}`);
                   }}
                   className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all border",
-                    ruby
-                      ? "border-ruby-400/30 text-ruby-300 bg-ruby-400/5 hover:bg-ruby-400/10 hover:border-ruby-400/55"
-                      : "border-gold-400/22 text-gold-300 bg-gold-400/5 hover:bg-gold-400/10 hover:border-gold-400/45"
+                    "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium transition-all",
+                    "border border-white/12 text-slate-200 bg-white/[0.03]",
+                    "hover:border-gold-400/40 hover:text-[#F7F1E8] hover:bg-gold-400/[0.05]"
                   )}
                 >
                   {label}
@@ -232,90 +219,17 @@ export function ValueHero() {
               ))}
             </div>
 
-            {/* Trust row */}
-            <ul
-              data-testid="value-trust-row"
-              className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-6"
-            >
-              {TRUST_BULLETS.map((bullet) => (
-                <li
-                  key={bullet}
-                  className="flex items-center gap-2 text-[12px] text-slate-300"
-                >
-                  <SparkleIcon className="h-3 w-3 text-gold-400/80 shrink-0" />
-                  <span>{bullet}</span>
-                </li>
-              ))}
-            </ul>
+            <ProofStrip data-testid="value-trust-row" className="mb-6" />
 
-            <TrustLine />
-
-            {/* Compliance microcopy */}
-            <div className="mt-5">
-              <ComplianceFooter variant="inline" testId="value-disclosure" />
-            </div>
+            <ComplianceFooter variant="inline" testId="value-disclosure" />
           </div>
 
-          {/* Lamp visual (right column on lg+) */}
-          <LampVisual />
+          {/* Trust column — beside the copy on desktop, below on mobile */}
+          <div className="w-full max-w-md lg:max-w-none lg:sticky lg:top-6">
+            <MikeTrustCard />
+          </div>
         </div>
       </section>
-    </div>
-  );
-}
-
-function LampVisual() {
-  return (
-    <div
-      aria-hidden="true"
-      className="hidden lg:flex relative items-center justify-center min-h-[420px]"
-    >
-      {/* Soft outer glow */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 55% at 50% 55%, rgba(212,160,23,0.18) 0%, transparent 70%)",
-        }}
-      />
-      <Sparkles className="absolute inset-0" />
-
-      {/* Lamp on a plinth */}
-      <div className="relative motion-safe:animate-float">
-        {/* Cyan flame halo */}
-        <div
-          className="absolute -top-6 left-1/2 -translate-x-1/2 h-16 w-16 rounded-full opacity-70 blur-2xl"
-          style={{ background: "radial-gradient(circle, rgba(103,232,249,0.45) 0%, transparent 70%)" }}
-        />
-        <LampGlyph size={220} className="drop-shadow-[0_24px_40px_rgba(212,160,23,0.35)]" />
-      </div>
-
-      {/* Gold ring under lamp */}
-      <div className="absolute bottom-[18%] left-1/2 -translate-x-1/2 w-56 h-2 rounded-full bg-gradient-to-r from-transparent via-gold-400/40 to-transparent" />
-    </div>
-  );
-}
-
-function TrustLine() {
-  return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-slate-500">
-      <span className="flex items-center gap-1.5">
-        <Shield className="h-3 w-3 text-gold-400/55" />
-        {LICENSE ? `Lic. #${LICENSE}` : "Licensed NC Broker"}
-      </span>
-      <span className="text-slate-700">·</span>
-      <span>Our Town Properties, Inc.</span>
-      <span className="text-slate-700">·</span>
-      <span>Wilson, NC</span>
-      <span className="text-slate-700">·</span>
-      <a
-        href="https://www.ourtownproperties.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="hover:text-slate-300 transition-colors underline underline-offset-2"
-      >
-        ourtownproperties.com
-      </a>
     </div>
   );
 }
