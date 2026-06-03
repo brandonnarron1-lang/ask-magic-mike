@@ -92,6 +92,38 @@ describe("SubmitIntakeSchema", () => {
     });
     expect(result.success).toBe(true);
   });
+
+  it("accepts WordPress UTM attribution fields on the lead payload", () => {
+    const result = SubmitIntakeSchema.safeParse({
+      sessionId:   "550e8400-e29b-41d4-a716-446655440000",
+      utmSource:   "ourtown_wp",
+      utmMedium:   "homepage_cta",
+      utmCampaign: "ask_magic_mike",
+      sourceUrl:
+        "https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike",
+      landingPath: "/value",
+      referrerUrl: "https://www.ourtownproperties.com/",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.utmSource).toBe("ourtown_wp");
+      expect(result.data.utmMedium).toBe("homepage_cta");
+      expect(result.data.utmCampaign).toBe("ask_magic_mike");
+      expect(result.data.landingPath).toBe("/value");
+    }
+  });
+
+  it("defaults attribution fields to null when omitted", () => {
+    const result = SubmitIntakeSchema.safeParse({
+      sessionId: "550e8400-e29b-41d4-a716-446655440000",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.utmSource).toBeNull();
+      expect(result.data.sourceUrl).toBeNull();
+      expect(result.data.landingPath).toBeNull();
+    }
+  });
 });
 
 describe("CreateSessionSchema", () => {

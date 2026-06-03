@@ -122,6 +122,16 @@ export function StepConfirmation({
       <p className="text-[11px] text-slate-700 max-w-xs">
         You can close this window. Mike has your info and will reach out directly.
       </p>
+
+      <p
+        data-testid="confirmation-disclosure"
+        className="mt-6 max-w-sm text-[10px] leading-relaxed text-slate-700"
+      >
+        Mike Eatmon or a member of the Our Town Properties team will follow up
+        with local guidance based on the information provided. Any home value
+        range shared is preliminary and is not an appraisal. No agency
+        relationship is created unless a written brokerage agreement is signed.
+      </p>
     </div>
   );
 }

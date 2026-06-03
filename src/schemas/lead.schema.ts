@@ -50,6 +50,14 @@ export const SubmitIntakeSchema = z.object({
     ])
     .nullable()
     .default(null),
+  utmSource:   z.string().max(200).nullable().default(null),
+  utmMedium:   z.string().max(200).nullable().default(null),
+  utmCampaign: z.string().max(200).nullable().default(null),
+  utmContent:  z.string().max(200).nullable().default(null),
+  utmTerm:     z.string().max(200).nullable().default(null),
+  sourceUrl:   z.string().max(2000).nullable().default(null),
+  landingPath: z.string().max(500).nullable().default(null),
+  referrerUrl: z.string().max(2000).nullable().default(null),
 });
 
 export type SubmitIntakeInput = z.infer<typeof SubmitIntakeSchema>;

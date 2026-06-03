@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import type { CTAChip, PrimaryIntent, TimelineMonths } from "@/types/domain.types";
 import { normalizeToE164 } from "@/lib/utils/phone";
+import { readAttribution } from "@/lib/attribution/client-storage";
 
 export interface IntakeFormData {
   question: string;
@@ -111,6 +112,14 @@ export function useIntakeFlow(
       const data = state.data;
       const phone = data.phone ? normalizeToE164(data.phone) : null;
 
+      const attribution = readAttribution();
+      const sourceUrl =
+        typeof window !== "undefined" ? window.location.href : null;
+      const referrerUrl =
+        typeof document !== "undefined" && document.referrer
+          ? document.referrer
+          : attribution?.referrerUrl ?? null;
+
       const res = await fetch("/api/intake/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -128,6 +137,14 @@ export function useIntakeFlow(
           consentCall: data.consentCall,
           consentEmail: data.consentEmail,
           ctaChipUsed: data.ctaChip,
+          utmSource:   attribution?.utmSource   ?? null,
+          utmMedium:   attribution?.utmMedium   ?? null,
+          utmCampaign: attribution?.utmCampaign ?? null,
+          utmContent:  attribution?.utmContent  ?? null,
+          utmTerm:     attribution?.utmTerm     ?? null,
+          sourceUrl,
+          landingPath: attribution?.landingPath ?? null,
+          referrerUrl,
         }),
       });
 

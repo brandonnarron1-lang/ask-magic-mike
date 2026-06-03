@@ -1,15 +1,19 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import { IntakeShell } from "@/components/intake/intake-shell";
 import { StepQuestion } from "@/components/intake/step-question";
 import { StepIntent } from "@/components/intake/step-intent";
 import { StepContact } from "@/components/intake/step-contact";
 import { StepConsent } from "@/components/intake/step-consent";
 import { StepConfirmation } from "@/components/intake/step-confirmation";
-import { useSession } from "@/hooks/use-session";
+import { useSession, type UseSessionAttribution } from "@/hooks/use-session";
 import { useIntakeFlow } from "@/hooks/use-intake-flow";
+import {
+  captureAttribution,
+  readAttribution,
+} from "@/lib/attribution/client-storage";
 import type { CTAChip, PrimaryIntent, TimelineMonths } from "@/types/domain.types";
 
 function AskPageInner() {
@@ -19,7 +23,28 @@ function AskPageInner() {
   const initialAddress = params.get("address") ?? "";
   const initialChip = (params.get("chip") as CTAChip) ?? null;
 
-  const { sessionId } = useSession();
+  // Resolve attribution from URL (if /value forwarded UTMs) or sessionStorage
+  // (if user landed straight on /ask). captureAttribution writes back so the
+  // session row persists what we actually saw.
+  const attribution = useMemo<UseSessionAttribution>(() => {
+    if (typeof window === "undefined") return {};
+    const captured = captureAttribution() ?? readAttribution();
+    return {
+      utmSource:    captured?.utmSource ?? null,
+      utmMedium:    captured?.utmMedium ?? null,
+      utmCampaign:  captured?.utmCampaign ?? null,
+      utmContent:   captured?.utmContent ?? null,
+      utmTerm:      captured?.utmTerm ?? null,
+      referrerUrl:  captured?.referrerUrl ?? null,
+      referrerType: captured?.referrerType ?? "direct",
+      landingPage:  captured?.landingPath ?? window.location.pathname,
+      initialQuestion: initialQuestion || null,
+      initialAddress:  initialAddress || null,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const { sessionId } = useSession(attribution);
 
   const flow = useIntakeFlow(sessionId, {
     question: initialQuestion,

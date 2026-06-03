@@ -54,8 +54,8 @@ export async function POST(req: NextRequest) {
     consentCall:    input.consentCall,
     consentEmail:   input.consentEmail,
     ctaChipUsed:    input.ctaChipUsed,
-    utmSource:      null,
-    utmMedium:      null,
+    utmSource:      input.utmSource,
+    utmMedium:      input.utmMedium,
   };
 
   const score = computeScore(scoringInput);
@@ -225,10 +225,15 @@ export async function POST(req: NextRequest) {
             lastName:  input.lastName,
             email:     input.email,
             phone:     input.phone,
-            source:    "ask-magic-mike",
+            source:    input.utmSource
+              ? `ask-magic-mike:${input.utmSource}`
+              : "ask-magic-mike",
             tags: [
               `intent:${input.primaryIntent}`,
               `temperature:${score.temperature}`,
+              ...(input.utmSource   ? [`utm_source:${input.utmSource}`]     : []),
+              ...(input.utmMedium   ? [`utm_medium:${input.utmMedium}`]     : []),
+              ...(input.utmCampaign ? [`utm_campaign:${input.utmCampaign}`] : []),
             ],
           });
 
@@ -298,7 +303,13 @@ export async function POST(req: NextRequest) {
       temperature:    score.temperature,
       compositeScore: score.compositeScore,
       primaryIntent:  input.primaryIntent,
+      sourceUrl:      input.sourceUrl,
+      landingPath:    input.landingPath,
+      referrerUrl:    input.referrerUrl,
     },
+    utmSource:   input.utmSource ?? undefined,
+    utmMedium:   input.utmMedium ?? undefined,
+    utmCampaign: input.utmCampaign ?? undefined,
   });
 
   trackEventNoWait({
@@ -312,6 +323,9 @@ export async function POST(req: NextRequest) {
       temperature:    score.temperature,
       factorCount:    score.factorLog.length,
     },
+    utmSource:   input.utmSource ?? undefined,
+    utmMedium:   input.utmMedium ?? undefined,
+    utmCampaign: input.utmCampaign ?? undefined,
   });
 
   if (input.consentSms || input.consentCall || input.consentEmail) {

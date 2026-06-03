@@ -1,10 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { MapPin, ArrowRight, Shield, Phone } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import {
+  captureAttribution,
+  appendUtmsToParams,
+  type StoredAttribution,
+} from "@/lib/attribution/client-storage";
 
 const LICENSE = process.env.NEXT_PUBLIC_AGENT_LICENSE;
 const AGENT_PHONE = process.env.NEXT_PUBLIC_AGENT_PHONE ?? "+12522454337";
@@ -15,19 +20,57 @@ export function ValueHero() {
   const [address, setAddress] = useState("");
   const [focused, setFocused] = useState(false);
   const [loading, setLoading] = useState(false);
+  const attributionRef = useRef<StoredAttribution | null>(null);
+  const viewLoggedRef = useRef(false);
+
+  // Capture UTMs/referrer on mount so they persist through /ask steps even if
+  // the user refreshes or navigates back. Fire a lightweight page-view signal.
+  useEffect(() => {
+    attributionRef.current = captureAttribution();
+    if (viewLoggedRef.current) return;
+    viewLoggedRef.current = true;
+    fetch("/api/analytics/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventName: "landing_page_viewed",
+        properties: {
+          path: "/value",
+          utmSource:    attributionRef.current?.utmSource ?? null,
+          utmMedium:    attributionRef.current?.utmMedium ?? null,
+          utmCampaign:  attributionRef.current?.utmCampaign ?? null,
+          referrerType: attributionRef.current?.referrerType ?? "direct",
+        },
+        utmSource:   attributionRef.current?.utmSource ?? undefined,
+        utmMedium:   attributionRef.current?.utmMedium ?? undefined,
+        utmCampaign: attributionRef.current?.utmCampaign ?? undefined,
+      }),
+      keepalive: true,
+    }).catch(() => {});
+  }, []);
+
+  const buildAskParams = useCallback(
+    (overrides: Record<string, string>) => {
+      const params = new URLSearchParams();
+      for (const [k, v] of Object.entries(overrides)) params.set(k, v);
+      return appendUtmsToParams(params, attributionRef.current);
+    },
+    []
+  );
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
       if (loading) return;
       setLoading(true);
-      const params = new URLSearchParams();
-      if (address.trim()) params.set("address", address.trim());
-      params.set("q", "What is my home worth in Wilson, NC?");
-      params.set("chip", "home_worth");
-      router.push(`/ask?${params.toString()}`);
+      const overrides: Record<string, string> = {
+        q: "What is my home worth in Wilson, NC?",
+        chip: "home_worth",
+      };
+      if (address.trim()) overrides.address = address.trim();
+      router.push(`/ask?${buildAskParams(overrides).toString()}`);
     },
-    [router, address, loading]
+    [router, address, loading, buildAskParams]
   );
 
   return (
@@ -165,9 +208,9 @@ export function ValueHero() {
                 key={chip}
                 type="button"
                 onClick={() => {
-                  const params = new URLSearchParams({ q, chip });
-                  if (address.trim()) params.set("address", address.trim());
-                  router.push(`/ask?${params.toString()}`);
+                  const overrides: Record<string, string> = { q, chip };
+                  if (address.trim()) overrides.address = address.trim();
+                  router.push(`/ask?${buildAskParams(overrides).toString()}`);
                 }}
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all",
@@ -195,6 +238,18 @@ export function ValueHero() {
 
           {/* Trust line */}
           <TrustLine />
+
+          {/* Compliance disclosure */}
+          <p
+            data-testid="value-disclosure"
+            className="mt-5 max-w-lg text-[11px] leading-relaxed text-slate-500"
+          >
+            Ask Magic Mike by Our Town Properties, Inc. provides local guidance
+            and a preliminary home value range. This is not an appraisal and
+            does not create an agency relationship unless a written brokerage
+            agreement is signed. Mike Eatmon or a member of the Our Town
+            Properties team may follow up.
+          </p>
         </div>
       </div>
 

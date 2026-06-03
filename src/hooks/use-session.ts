@@ -11,13 +11,20 @@ interface SessionState {
   error: string | null;
 }
 
-export function useSession(attribution?: {
+export interface UseSessionAttribution {
   utmSource?: string | null;
   utmMedium?: string | null;
   utmCampaign?: string | null;
+  utmContent?: string | null;
+  utmTerm?: string | null;
+  referrerUrl?: string | null;
   referrerType?: string;
   landingPage?: string;
-}) {
+  initialQuestion?: string | null;
+  initialAddress?: string | null;
+}
+
+export function useSession(attribution?: UseSessionAttribution) {
   const [state, setState] = useState<SessionState>({
     sessionId: null,
     loading: true,
@@ -30,13 +37,18 @@ export function useSession(attribution?: {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          utmSource: attribution?.utmSource ?? null,
-          utmMedium: attribution?.utmMedium ?? null,
-          utmCampaign: attribution?.utmCampaign ?? null,
+          utmSource:    attribution?.utmSource ?? null,
+          utmMedium:    attribution?.utmMedium ?? null,
+          utmCampaign:  attribution?.utmCampaign ?? null,
+          utmContent:   attribution?.utmContent ?? null,
+          utmTerm:      attribution?.utmTerm ?? null,
+          referrerUrl:  attribution?.referrerUrl ?? null,
           referrerType: attribution?.referrerType ?? "direct",
-          landingPage: attribution?.landingPage ?? window.location.pathname,
-          userAgent: navigator.userAgent,
-          deviceType: getDeviceType(),
+          landingPage:  attribution?.landingPage ?? window.location.pathname,
+          userAgent:    navigator.userAgent,
+          deviceType:   getDeviceType(),
+          initialQuestion: attribution?.initialQuestion ?? null,
+          initialAddress:  attribution?.initialAddress ?? null,
         }),
       });
 
