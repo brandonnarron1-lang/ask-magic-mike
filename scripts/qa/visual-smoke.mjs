@@ -13,7 +13,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:4101";
-const OUT_DIR = "artifacts/ask-magic-mike-visual-upgrade";
+const OUT_DIR =
+  process.env.OUT_DIR ?? "artifacts/ask-magic-mike-visual-upgrade";
 
 const REQUIRED_VALUE = [
   "Start with your address",
@@ -62,6 +63,19 @@ const PAGES = [
     desktop: { width: 1024, height: 900 },
     mobile: { width: 390, height: 844 },
     required: ["Mike Eatmon", "Our Town Properties", "AI-assisted"],
+  },
+  {
+    name: "widget-preview",
+    url: `${BASE}/widget-preview`,
+    desktop: { width: 1440, height: 1000 },
+    mobile: { width: 390, height: 844 },
+    required: [
+      "Mike Eatmon",
+      "Our Town Properties",
+      "AI-assisted",
+      "not an appraisal",
+      "MagicMikeWidgetShell",
+    ],
   },
 ];
 

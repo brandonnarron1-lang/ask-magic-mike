@@ -32,8 +32,8 @@ const FORBIDDEN_PHRASES = [
 ];
 
 const ALLOWED_APPRAISAL_NEGATIONS = [
-  /not an appraisal/i,
-  /is not an appraisal/i,
+  /not\s+an\s+appraisal/i,
+  /is\s+not\s+an\s+appraisal/i,
 ];
 
 function stripAllowedAppraisalContext(source: string): string {
@@ -294,6 +294,9 @@ describe("Magic Mike widget / avatar foundation", () => {
   const reveal = normalize(
     readSource("src/components/amm/magic-mike-answer-reveal.tsx")
   );
+  const shell = normalize(
+    readSource("src/components/amm/magic-mike-widget-shell.tsx")
+  );
 
   it("avatar component uses the brand-pack circle avatars", () => {
     expect(avatar).toContain("brandPackAssets.mike.avatar128");
@@ -308,6 +311,74 @@ describe("Magic Mike widget / avatar foundation", () => {
   it("answer reveal is CSS-only (no smoke image embedded)", () => {
     expect(reveal).not.toMatch(/answer-smoke-sequence\.webp/);
     expect(reveal).toContain("radial-gradient");
+  });
+
+  it("widget shell mirrors the kit's MessageList / PromptChips / LeadCapture structure", () => {
+    expect(shell).toContain("amm-widget-messages");
+    expect(shell).toContain("amm-widget-chips");
+    expect(shell).toContain("amm-widget-lead");
+    expect(shell).toContain("amm-widget-status");
+  });
+
+  it("widget shell ships compliance-safe prompt chips (no 'cash offer')", () => {
+    expect(shell).not.toMatch(/cash offer/i);
+    expect(shell).toContain("Request a direct-purchase review");
+  });
+
+  it("widget shell uses the brand-pack avatar in the header", () => {
+    expect(shell).toContain("brandPackAssets.mike.avatar128");
+  });
+});
+
+describe("brand kit evidence report", () => {
+  const evidence = readSource(
+    "docs/ask-magic-mike-brand-kit-v2-evidence-report.md"
+  );
+
+  it("records the ZIP path and SHA-256 checksum", () => {
+    expect(evidence).toContain("ask_magic_mike_full_branding_pack_v2.zip");
+    expect(evidence).toMatch(
+      /7a4690e64ce665457c526df7d218f50218682756c86dce1925ae5fa591613758/
+    );
+  });
+
+  it("has imported / rejected / reference-only sections", () => {
+    expect(evidence).toMatch(/Assets imported into the repo/i);
+    expect(evidence).toMatch(/Assets rejected/i);
+    expect(evidence).toMatch(/Concept references/i);
+  });
+
+  it("documents the production go/no-go gate", () => {
+    expect(evidence).toMatch(/production status:\s*hold/i);
+  });
+});
+
+describe("widget preview route", () => {
+  const widgetPage = normalize(
+    readSource("src/app/widget-preview/page.tsx")
+  );
+
+  it("is noindex / nofollow", () => {
+    expect(widgetPage).toMatch(/robots:\s*\{\s*index:\s*false,\s*follow:\s*false\s*\}/);
+  });
+
+  it("renders the widget shell at four states", () => {
+    expect(widgetPage).toContain('variant="idle"');
+    expect(widgetPage).toContain('variant="thinking"');
+    expect(widgetPage).toContain('variant="answer"');
+    expect(widgetPage).toContain('variant="lead"');
+  });
+
+  it("includes the brand kit showcase + compliance footer", () => {
+    expect(widgetPage).toContain("BrandKitShowcase");
+    expect(widgetPage).toContain("ComplianceFooter");
+  });
+
+  it("mentions Mike Eatmon and Our Town Properties + AI-assisted", () => {
+    expect(widgetPage).toContain("Mike Eatmon");
+    expect(widgetPage).toContain("Our Town Properties");
+    expect(widgetPage).toMatch(/AI-assisted/);
+    expect(widgetPage).toContain("not an appraisal");
   });
 });
 
@@ -330,6 +401,28 @@ describe("public UI source bans gimmicky / non-compliant copy", () => {
       expect(txt, `forbidden 'Rub the lamp' in ${file}`).not.toMatch(
         /rub the lamp/i
       );
+    }
+  });
+
+  it("never says 'cash offer' on the public funnel surfaces", () => {
+    // Whitelist: `widget-preview` and the brand-kit showcase reference the
+    // kit's `cash-offer-feed.jpg` filename and explicitly call out that the
+    // baked copy must be rewritten before paid use. The actual funnel
+    // surfaces (/value, /ask, /embed/ask, intake step components, amm
+    // primitives) must never carry the phrase.
+    const stripComments = (src: string) =>
+      src
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/(^|[^:])\/\/.*$/gm, "$1");
+    const whitelistedSubstrings = [
+      "/widget-preview/",
+      "/brand-kit-showcase",
+      "/brand-pack-assets",
+    ];
+    for (const file of publicSources) {
+      if (whitelistedSubstrings.some((s) => file.includes(s))) continue;
+      const txt = stripComments(readFileSync(file, "utf8"));
+      expect(txt, `'cash offer' in ${file}`).not.toMatch(/cash offer/i);
     }
   });
 
