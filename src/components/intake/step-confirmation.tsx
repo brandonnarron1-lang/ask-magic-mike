@@ -100,7 +100,7 @@ export function StepConfirmation({
           </div>
           <div className="min-w-0">
             <p className="text-[10.5px] tracking-[0.18em] uppercase text-gold-300/80 mb-0.5">
-              Following up
+              Your local contact
             </p>
             <p className="text-[15px] font-semibold text-[#F7F1E8] leading-tight">
               {agentName}
