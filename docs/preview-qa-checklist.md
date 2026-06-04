@@ -9,6 +9,7 @@ must NOT be promoted in this phase.
 PREVIEW_URL="https://<preview-url>" \
 ADMIN_SECRET="…" \
 CRON_SECRET="…" \
+VERCEL_AUTOMATION_BYPASS_SECRET="…"   # only if preview protection is on \
 SAFE_DB_WRITE=false \
 npm run preview:qa
 ```
@@ -17,6 +18,24 @@ Writes `artifacts/preview-qa-report.json` and `.md`. Exits nonzero on any
 failure. Mutation tests require `SAFE_DB_WRITE=true` AND the preview
 health endpoint reporting `safe_for_preview_mutation: true`. See
 [release-gate.md](./release-gate.md) for the full layered gate.
+
+### Testing protected Vercel previews
+
+If the preview returns 401 on `/`, Vercel Deployment Protection is on.
+Set `VERCEL_AUTOMATION_BYPASS_SECRET` (or one of its aliases) and
+re-run. The runner sends `x-vercel-protection-bypass: <secret>` on
+every request and reports `protection_bypass_present` in the artifact.
+Set `SET_VERCEL_BYPASS_COOKIE=true` to also send the
+`x-vercel-set-bypass-cookie` header.
+
+For manual browser QA, sign in to Vercel for the same scope, or use a
+bypass-cookie URL of the shape
+`?x-vercel-protection-bypass=<secret>&x-vercel-set-bypass-cookie=true`.
+**Never paste bypass URLs into public docs, tickets, screenshots,
+Slack, or QA reports.** Set `PRINT_MANUAL_BYPASS_URL=true` to surface
+the *template* (no token) in runner stdout.
+
+The runner uses Node's built-in `fetch`; no system `curl` is required.
 
 The checklist below documents the manual probes the runner automates —
 keep it for incidents or partial debugging when the runner can't reach

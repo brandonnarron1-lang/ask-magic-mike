@@ -394,6 +394,40 @@ Hard rules baked into the gate:
 - Do not merge to main from automation.
 - Do not promote to production from automation.
 - Do not modify production env vars.
+- Do not disable Vercel Preview Protection.
+- Do not print bypass secrets.
 - Do not run persistent DB mutation tests unless the preview database
   is verified safe by the health endpoint.
 - Health endpoint must never return raw secret values.
+
+### Testing protected Vercel previews
+
+Vercel preview deployments often return 401 on every route because
+Deployment Protection is enabled. The runner supports the
+**Protection Bypass for Automation** secret. Env precedence (highest
+first): `VERCEL_AUTOMATION_BYPASS_SECRET`,
+`VERCEL_PROTECTION_BYPASS_TOKEN`, `VERCEL_BYPASS_SECRET`. The secret is
+sent as the `x-vercel-protection-bypass` header on every request and
+is never appended to URLs in artifacts. Set
+`SET_VERCEL_BYPASS_COOKIE=true` to also send the
+`x-vercel-set-bypass-cookie` header.
+
+```
+PREVIEW_URL="https://<preview>" \
+ADMIN_SECRET="…" CRON_SECRET="…" \
+VERCEL_AUTOMATION_BYPASS_SECRET="…" \
+SAFE_DB_WRITE=false \
+npm run preview:qa
+```
+
+The runner runs a `vercel_preview_access` precheck and exits early
+with a clear remedy message when the preview is protected and no
+bypass is supplied, or when a supplied bypass is rejected. Artifacts
+are still written on early failure. The runner uses Node `fetch` —
+no system `curl` is required.
+
+For manual browser QA, either sign in to Vercel for the same scope or
+use the cookie-bypass URL shape
+`?x-vercel-protection-bypass=<secret>&x-vercel-set-bypass-cookie=true`.
+Never paste bypass URLs into public docs, tickets, screenshots, Slack,
+or reports.

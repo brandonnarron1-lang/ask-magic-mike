@@ -33,6 +33,8 @@ export async function GET(req: NextRequest) {
   const supabaseServicePresent = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
   const adminSecretPresent = !!process.env.ADMIN_SECRET;
   const cronSecretPresent = !!process.env.CRON_SECRET;
+  const deploymentProtectionBypassEnvPresent =
+    !!process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
   const smsProvider = (process.env.SMS_PROVIDER ?? "mock").toLowerCase();
   const smsEnabled =
     (process.env.ENABLE_SMS ?? "false").toLowerCase() === "true";
@@ -135,6 +137,8 @@ export async function GET(req: NextRequest) {
         node_env: nodeEnv,
         vercel_env: vercelEnv,
         site_url: siteUrl,
+        deployment_protection_bypass_env_present:
+          deploymentProtectionBypassEnvPresent,
       },
       env: {
         supabase_url_present: supabaseUrlPresent,
@@ -165,8 +169,13 @@ export async function GET(req: NextRequest) {
         live_sms_disabled: !smsEnabled,
         live_email_disabled: !emailEnabled,
         safe_for_preview_mutation: safeForPreviewMutation,
+        deployment_protection_bypass_env_present:
+          deploymentProtectionBypassEnvPresent,
         warnings,
       },
+      preview_access_notes: [
+        "If preview returns 401, run preview QA with VERCEL_AUTOMATION_BYPASS_SECRET.",
+      ],
     },
     { headers: NO_STORE }
   );

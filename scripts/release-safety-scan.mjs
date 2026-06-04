@@ -274,12 +274,144 @@ async function checkPublicListingWhitelist() {
   );
 }
 
+/** E — preview QA runner handles Vercel protection bypass safely */
+async function checkPreviewQaBypassPlumbing() {
+  const path = "scripts/preview-qa.mjs";
+  let text;
+  try {
+    text = await readFile(join(REPO_ROOT, path), "utf8");
+  } catch (err) {
+    fail(
+      "E. preview_qa_bypass",
+      `${path} missing (${err.message})`
+    );
+    return;
+  }
+  if (!text.includes("x-vercel-protection-bypass")) {
+    fail(
+      "E. preview_qa_bypass",
+      `${path} does not reference x-vercel-protection-bypass header`
+    );
+  }
+  if (!text.includes("redactSecrets") && !text.includes("redact(")) {
+    fail(
+      "E. preview_qa_bypass",
+      `${path} does not appear to redact secrets in log/excerpt output`
+    );
+  }
+  // The runner must never console.log() the bypass secret value.
+  // Catch obvious mistakes: any console.log line that names the env var
+  // *and* contains the variable read.
+  const offenders = text
+    .split("\n")
+    .filter(
+      (line) =>
+        /console\.(log|error|warn)/.test(line) &&
+        /process\.env\.VERCEL_AUTOMATION_BYPASS_SECRET\b/.test(line)
+    );
+  if (offenders.length > 0) {
+    fail(
+      "E. preview_qa_bypass",
+      `${path} logs the raw VERCEL_AUTOMATION_BYPASS_SECRET value`
+    );
+  }
+  pass(
+    "E. preview_qa_bypass",
+    "preview-qa.mjs uses bypass header + redaction + never logs raw secret"
+  );
+}
+
+/** F — /api/admin/health does not return raw env values */
+async function checkHealthEndpointShape() {
+  const path = "src/app/api/admin/health/route.ts";
+  let text;
+  try {
+    text = await readFile(join(REPO_ROOT, path), "utf8");
+  } catch (err) {
+    fail("F. health_endpoint_shape", `${path} missing (${err.message})`);
+    return;
+  }
+  const stripped = text
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/(^|[^:])\/\/.*$/gm, "$1");
+
+  // Forbid the *value* of any of these env vars from appearing inside
+  // a NextResponse.json(...) payload. Boolean-presence flags
+  // (!!process.env.X) and `=== process.env.X` auth comparisons elsewhere
+  // in the file are fine.
+  const forbiddenInResponse = [
+    "ADMIN_SECRET",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "CRON_SECRET",
+    "TWILIO_AUTH_TOKEN",
+    "EMAIL_API_KEY",
+    "VERCEL_AUTOMATION_BYPASS_SECRET",
+  ];
+  // Capture each NextResponse.json(...) argument list. We approximate by
+  // matching the call and balancing parens for the first argument block.
+  const callRx = /NextResponse\.json\s*\(/g;
+  let match;
+  const slices = [];
+  while ((match = callRx.exec(stripped))) {
+    let depth = 1;
+    let i = match.index + match[0].length;
+    const start = i;
+    while (i < stripped.length && depth > 0) {
+      const ch = stripped[i];
+      if (ch === "(") depth++;
+      else if (ch === ")") depth--;
+      i++;
+    }
+    slices.push(stripped.slice(start, i - 1));
+  }
+  for (const slice of slices) {
+    for (const name of forbiddenInResponse) {
+      // Skip the boolean-presence pattern.
+      const cleaned = slice.replace(
+        new RegExp(`!!\\s*process\\.env\\.${name}\\b`, "g"),
+        "__bool__"
+      );
+      if (new RegExp(`process\\.env\\.${name}\\b`).test(cleaned)) {
+        fail(
+          "F. health_endpoint_shape",
+          `${path} embeds process.env.${name} value in a NextResponse.json payload`
+        );
+      }
+    }
+  }
+  pass(
+    "F. health_endpoint_shape",
+    "health route response only emits boolean presence flags, never raw secret values"
+  );
+}
+
+/** G — package.json wires the release scripts */
+async function checkPackageScripts() {
+  const path = "package.json";
+  const text = await readFile(join(REPO_ROOT, path), "utf8");
+  const pkg = JSON.parse(text);
+  const scripts = pkg.scripts ?? {};
+  const required = ["preview:qa", "release:safety", "release:gate"];
+  for (const name of required) {
+    if (!scripts[name]) {
+      fail("G. package_scripts", `${path} is missing script "${name}"`);
+    }
+  }
+  pass(
+    "G. package_scripts",
+    "package.json defines preview:qa, release:safety, release:gate"
+  );
+}
+
 async function main() {
   const files = await walk(SRC);
   await checkSecretExposure(files);
   await checkPrivateFieldLeak(files);
   await checkWidgetWiring(files);
   await checkPublicListingWhitelist();
+  await checkPreviewQaBypassPlumbing();
+  await checkHealthEndpointShape();
+  await checkPackageScripts();
 
   for (const p of passes) console.log(`PASS  ${p.check} — ${p.message}`);
   for (const f of failures) {

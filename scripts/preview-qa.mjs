@@ -3,6 +3,8 @@
  * Preview release-gate QA runner.
  *
  * Walks a Vercel preview URL end-to-end:
+ *   - vercel_preview_access — early access precheck. Detects 401/403 from
+ *     Vercel Deployment Protection and fails fast with a clear remedy.
  *   - Public funnel HTTP 200 + required-copy spot-checks
  *   - GET /api/admin/health (auth required)
  *   - Admin REST: dashboard / leads / list filters
@@ -16,8 +18,15 @@
  *   PREVIEW_URL="https://…vercel.app" \
  *   ADMIN_SECRET="…" \
  *   CRON_SECRET="…" \
+ *   VERCEL_AUTOMATION_BYPASS_SECRET="…" \
  *   SAFE_DB_WRITE=false \
  *   npm run preview:qa
+ *
+ * Bypass-secret env vars (precedence: highest first):
+ *   1. VERCEL_AUTOMATION_BYPASS_SECRET
+ *   2. VERCEL_PROTECTION_BYPASS_TOKEN
+ *   3. VERCEL_BYPASS_SECRET
+ * SET_VERCEL_BYPASS_COOKIE=true adds `x-vercel-set-bypass-cookie: true`.
  *
  * Defaults to SAFE_DB_WRITE=false. Mutation tests are NEVER run by
  * accident — they require BOTH SAFE_DB_WRITE=true AND the health
@@ -29,49 +38,64 @@
  *   - artifacts/preview-qa-report.json
  *   - artifacts/preview-qa-report.md
  *   - process exit code: nonzero if any required check fails
+ *
+ * Secrets are NEVER logged. Bypass token is added via the
+ * `x-vercel-protection-bypass` header — never appended to URLs in
+ * artifacts. A manual browser URL hint is printed only if
+ * PRINT_MANUAL_BYPASS_URL=true, and even then the token itself is
+ * not printed.
  */
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import {
+  getBypassConfig,
+  buildRequestHeaders,
+  classifyAccessStatus,
+  redactSecrets,
+  shouldRunMutationChecks,
+} from "./preview-qa-lib.mjs";
 
 const PREVIEW_URL = (process.env.PREVIEW_URL ?? "").replace(/\/$/, "");
 const ADMIN_SECRET = process.env.ADMIN_SECRET ?? "";
 const CRON_SECRET = process.env.CRON_SECRET ?? "";
-const SAFE_DB_WRITE = (process.env.SAFE_DB_WRITE ?? "false").toLowerCase() === "true";
-const FORCE_DB_WRITE = (process.env.FORCE_DB_WRITE ?? "false").toLowerCase() === "true";
-const CONFIRM_FORCE = process.env.CONFIRM_FORCE_DB_WRITE ?? "";
-const FORCE_CONFIRM_TOKEN =
-  "I_UNDERSTAND_THIS_WRITES_TO_THE_CONFIGURED_DATABASE";
+const PRINT_MANUAL_BYPASS_URL =
+  (process.env.PRINT_MANUAL_BYPASS_URL ?? "false").toLowerCase() === "true";
+
+const BYPASS = getBypassConfig(process.env);
+const ALL_SECRETS = [ADMIN_SECRET, CRON_SECRET, BYPASS.secret];
 
 const OUT_DIR = resolve("artifacts");
 
 /** @type {Array<{ name: string; status: "pass"|"fail"|"skip"; http?: number; message?: string; excerpt?: string }>} */
 const results = [];
 
+let accessBlocked = false;
+
 function record(name, status, extras = {}) {
   results.push({ name, status, ...extras });
   const tag = status === "pass" ? "PASS" : status === "fail" ? "FAIL" : "SKIP";
   const http = extras.http !== undefined ? ` (${extras.http})` : "";
+  const msg = extras.message ? " — " + redact(extras.message) : "";
   // eslint-disable-next-line no-console
-  console.log(`[${tag}] ${name}${http}${extras.message ? " — " + extras.message : ""}`);
+  console.log(`[${tag}] ${name}${http}${msg}`);
 }
 
 /** Truncate response excerpts so secrets / giant payloads don't leak. */
 function redact(s) {
   if (!s) return "";
-  let out = String(s).slice(0, 400);
-  // Redact common secret-looking tokens.
-  out = out.replace(/sk_[A-Za-z0-9_]{8,}/g, "sk_***redacted***");
-  out = out.replace(/Bearer\s+[A-Za-z0-9._-]+/g, "Bearer ***redacted***");
-  return out;
+  return redactSecrets(String(s).slice(0, 400), ALL_SECRETS);
 }
 
 async function http(method, path, opts = {}) {
   const url = `${PREVIEW_URL}${path}`;
-  const headers = {
-    "User-Agent": "amm-preview-qa/1.0",
-    ...(opts.headers ?? {}),
-  };
+  const headers = buildRequestHeaders(
+    {
+      "User-Agent": "amm-preview-qa/1.0",
+      ...(opts.headers ?? {}),
+    },
+    process.env
+  );
   let body = opts.body;
   if (body && typeof body !== "string") {
     headers["Content-Type"] = "application/json";
@@ -119,6 +143,47 @@ function cronHeaders() {
 }
 
 // ─── Checks ────────────────────────────────────────────────────────────────
+
+async function vercelPreviewAccess() {
+  const r = await http("GET", "/");
+  const classification = classifyAccessStatus(r.status, BYPASS.present);
+  switch (classification) {
+    case "ok":
+      record("vercel_preview_access", "pass", {
+        http: r.status,
+        message: BYPASS.present
+          ? "bypass header accepted"
+          : "preview reachable without bypass",
+      });
+      return true;
+    case "missing_bypass":
+      record("vercel_preview_access", "fail", {
+        http: r.status,
+        message:
+          "Preview is protected. Provide VERCEL_AUTOMATION_BYPASS_SECRET or run vercel curl manually.",
+      });
+      return false;
+    case "rejected_bypass":
+      record("vercel_preview_access", "fail", {
+        http: r.status,
+        message:
+          "Preview protection bypass was provided but rejected. Check secret, project, branch, and deployment URL.",
+      });
+      return false;
+    case "network_error":
+      record("vercel_preview_access", "fail", {
+        http: 0,
+        message: "network error reaching preview",
+      });
+      return false;
+    default:
+      record("vercel_preview_access", "fail", {
+        http: r.status,
+        message: "preview returned an unexpected status",
+      });
+      return false;
+  }
+}
 
 async function publicRoutes() {
   const paths = ["/", "/ask", "/value", "/widget-preview"];
@@ -174,13 +239,15 @@ async function healthCheck() {
   const h = r.json;
   // Verify no raw secret values leaked.
   const blob = JSON.stringify(h);
-  if (
-    (ADMIN_SECRET && blob.includes(ADMIN_SECRET)) ||
-    (CRON_SECRET && blob.includes(CRON_SECRET))
-  ) {
+  const leaks = [];
+  if (ADMIN_SECRET && blob.includes(ADMIN_SECRET)) leaks.push("ADMIN_SECRET");
+  if (CRON_SECRET && blob.includes(CRON_SECRET)) leaks.push("CRON_SECRET");
+  if (BYPASS.secret && blob.includes(BYPASS.secret))
+    leaks.push("VERCEL_AUTOMATION_BYPASS_SECRET");
+  if (leaks.length) {
     record("health:no_secret_leak", "fail", {
       http: r.status,
-      message: "response contains a raw secret",
+      message: `response contains raw secret(s): ${leaks.join(", ")}`,
     });
   } else {
     record("health:no_secret_leak", "pass", { http: r.status });
@@ -288,31 +355,6 @@ async function listingPrivateLeakCheck() {
   }
 }
 
-async function mutationGate(health) {
-  // Decide whether mutation tests may run.
-  if (!SAFE_DB_WRITE && !FORCE_DB_WRITE) {
-    return { allowed: false, reason: "SAFE_DB_WRITE not set" };
-  }
-  if (FORCE_DB_WRITE && CONFIRM_FORCE !== FORCE_CONFIRM_TOKEN) {
-    return {
-      allowed: false,
-      reason: `FORCE_DB_WRITE=true requires CONFIRM_FORCE_DB_WRITE="${FORCE_CONFIRM_TOKEN}"`,
-    };
-  }
-  if (!health) {
-    return { allowed: false, reason: "no health response to inspect" };
-  }
-  if (!health.safety?.safe_for_preview_mutation && !FORCE_DB_WRITE) {
-    return {
-      allowed: false,
-      reason:
-        "health.safety.safe_for_preview_mutation=false. " +
-        "Set FORCE_DB_WRITE=true + CONFIRM_FORCE_DB_WRITE if you really mean it.",
-    };
-  }
-  return { allowed: true, reason: "ok" };
-}
-
 async function mutationTests(gate) {
   if (!gate.allowed) {
     record("mutation:lead_create", "skip", { message: gate.reason });
@@ -406,6 +448,18 @@ async function mutationTests(gate) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────
 
+async function writeReport(summary) {
+  await mkdir(OUT_DIR, { recursive: true });
+  await writeFile(
+    resolve(OUT_DIR, "preview-qa-report.json"),
+    JSON.stringify(summary, null, 2)
+  );
+  await writeFile(
+    resolve(OUT_DIR, "preview-qa-report.md"),
+    renderMarkdown(summary)
+  );
+}
+
 async function main() {
   if (!PREVIEW_URL) {
     console.error("ERROR: PREVIEW_URL is required. Example:");
@@ -416,27 +470,57 @@ async function main() {
   }
   console.log(`Preview QA against: ${PREVIEW_URL}`);
   console.log(
-    `Mode: SAFE_DB_WRITE=${SAFE_DB_WRITE} FORCE_DB_WRITE=${FORCE_DB_WRITE}`
+    `Bypass: ${BYPASS.present ? `present via ${BYPASS.source} (header mode)` : "not provided"}`
   );
-
-  await publicRoutes();
-  await wpUtmVariants();
-  const health = await healthCheck();
-  await adminListAndDashboard();
-  await slaSweep();
-  await listingPrivateLeakCheck();
-
-  const gate = await mutationGate(health);
-  if (!gate.allowed) {
-    console.log(`Mutation tests skipped: ${gate.reason}`);
+  console.log(
+    `Mode: SAFE_DB_WRITE=${process.env.SAFE_DB_WRITE ?? "false"} ` +
+      `FORCE_DB_WRITE=${process.env.FORCE_DB_WRITE ?? "false"}`
+  );
+  if (PRINT_MANUAL_BYPASS_URL && BYPASS.present) {
+    // Print *how* to construct the URL, not the URL itself.
+    console.log(
+      "Manual browser bypass: open PREVIEW_URL with " +
+        "?x-vercel-protection-bypass=<secret>&x-vercel-set-bypass-cookie=true"
+    );
   }
-  await mutationTests(gate);
 
-  await mkdir(OUT_DIR, { recursive: true });
+  const accessOk = await vercelPreviewAccess();
+
+  let health = null;
+  if (accessOk) {
+    await publicRoutes();
+    await wpUtmVariants();
+    health = await healthCheck();
+    await adminListAndDashboard();
+    await slaSweep();
+    await listingPrivateLeakCheck();
+
+    const gate = shouldRunMutationChecks(health, process.env);
+    if (!gate.allowed) {
+      console.log(`Mutation tests skipped: ${gate.reason}`);
+    }
+    await mutationTests(gate);
+  } else {
+    accessBlocked = true;
+    console.log(
+      "Skipping downstream checks because preview access failed early."
+    );
+  }
+
+  const gate = shouldRunMutationChecks(health, process.env);
   const summary = {
     preview_url: PREVIEW_URL,
     run_at: new Date().toISOString(),
-    mode: { SAFE_DB_WRITE, FORCE_DB_WRITE },
+    mode: {
+      SAFE_DB_WRITE:
+        (process.env.SAFE_DB_WRITE ?? "false").toLowerCase() === "true",
+      FORCE_DB_WRITE:
+        (process.env.FORCE_DB_WRITE ?? "false").toLowerCase() === "true",
+    },
+    protection_bypass_present: BYPASS.present,
+    protection_bypass_mode: BYPASS.present ? "header" : null,
+    set_bypass_cookie: BYPASS.setCookie,
+    access_blocked: accessBlocked,
     mutation_gate: gate,
     health: health
       ? {
@@ -450,14 +534,7 @@ async function main() {
       : null,
     results,
   };
-  await writeFile(
-    resolve(OUT_DIR, "preview-qa-report.json"),
-    JSON.stringify(summary, null, 2)
-  );
-  await writeFile(
-    resolve(OUT_DIR, "preview-qa-report.md"),
-    renderMarkdown(summary)
-  );
+  await writeReport(summary);
 
   const failed = results.filter((r) => r.status === "fail");
   console.log(
@@ -482,6 +559,9 @@ function renderMarkdown(s) {
     `- Preview: \`${s.preview_url}\``,
     `- Run at: ${s.run_at}`,
     `- Mode: SAFE_DB_WRITE=${s.mode.SAFE_DB_WRITE} · FORCE_DB_WRITE=${s.mode.FORCE_DB_WRITE}`,
+    `- Protection bypass: ${s.protection_bypass_present ? "present (header mode)" : "not provided"}`,
+    `- Set bypass cookie: ${s.set_bypass_cookie}`,
+    `- Access blocked early: ${s.access_blocked}`,
     `- Mutation gate: ${s.mutation_gate.allowed ? "ALLOWED" : "BLOCKED"} (${s.mutation_gate.reason})`,
     "",
     "## Build",
