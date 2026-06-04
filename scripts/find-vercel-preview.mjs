@@ -56,6 +56,9 @@ function emit(ok, extras = {}) {
  * (matches `meta.githubCommitRef`).
  *
  * Returns `{ url, state, branch, commit_sha, created_at } | null`.
+ *
+ * @param {unknown} parsed
+ * @param {string | null} [branchFilter]
  */
 export function pickReadyPreview(parsed, branchFilter = null) {
   if (!parsed || !Array.isArray(parsed.deployments)) return null;

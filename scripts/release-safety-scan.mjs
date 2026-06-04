@@ -393,11 +393,16 @@ async function checkPackageScripts() {
   const scripts = pkg.scripts ?? {};
   const required = [
     "preview:find",
+    "preview:wait",
     "preview:qa",
     "preview:e2e",
     "release:safety",
+    "release:doctor",
     "release:gate",
     "release:report",
+    "release:assert",
+    "launch:authority",
+    "monitor:synthetic",
   ];
   for (const name of required) {
     if (!scripts[name]) {
@@ -406,7 +411,7 @@ async function checkPackageScripts() {
   }
   pass(
     "G. package_scripts",
-    `package.json defines ${required.join(", ")}`
+    `package.json defines all ${required.length} required scripts`
   );
 }
 
@@ -523,6 +528,176 @@ async function checkReleaseDocs() {
   );
 }
 
+/** K — GitHub workflows exist and contain no forbidden phrases */
+async function checkWorkflows() {
+  const required = [
+    ".github/workflows/release-gate.yml",
+    ".github/workflows/preview-qa.yml",
+    ".github/pull_request_template.md",
+  ];
+  for (const path of required) {
+    try {
+      await readFile(join(REPO_ROOT, path), "utf8");
+    } catch (err) {
+      fail("K. workflows", `${path} missing (${err.message})`);
+    }
+  }
+
+  let releaseGateText = "";
+  let previewQaText = "";
+  try {
+    releaseGateText = await readFile(
+      join(REPO_ROOT, ".github/workflows/release-gate.yml"),
+      "utf8"
+    );
+  } catch {
+    // already failed above
+  }
+  try {
+    previewQaText = await readFile(
+      join(REPO_ROOT, ".github/workflows/preview-qa.yml"),
+      "utf8"
+    );
+  } catch {
+    // already failed above
+  }
+
+  const banned = [
+    "SAFE_DB_WRITE=true",
+    "vercel promote",
+    "git merge",
+    "git checkout main",
+    "vercel rollback",
+  ];
+  for (const phrase of banned) {
+    if (releaseGateText.includes(phrase) || previewQaText.includes(phrase)) {
+      fail(
+        "K. workflows",
+        `forbidden phrase "${phrase}" present in a workflow`
+      );
+    }
+  }
+
+  // release-gate.yml must reference these commands.
+  const gateMustReference = [
+    "npm run release:doctor",
+    "npm run release:safety",
+    "npm run test",
+    "npm run typecheck",
+    "npm run lint",
+    "npm run build",
+    "npm run launch:authority",
+    "upload-artifact",
+  ];
+  for (const phrase of gateMustReference) {
+    if (!releaseGateText.includes(phrase)) {
+      fail(
+        "K. workflows",
+        `release-gate.yml is missing reference to "${phrase}"`
+      );
+    }
+  }
+
+  // preview-qa.yml must reference these.
+  const qaMustReference = [
+    "VERCEL_AUTOMATION_BYPASS_SECRET",
+    "SAFE_DB_WRITE",
+    "npm run preview:qa",
+    "preview:e2e",
+    "upload-artifact",
+  ];
+  for (const phrase of qaMustReference) {
+    if (!previewQaText.includes(phrase)) {
+      fail(
+        "K. workflows",
+        `preview-qa.yml is missing reference to "${phrase}"`
+      );
+    }
+  }
+
+  // preview-qa must refuse SAFE_DB_WRITE override.
+  if (!/inputs\.safe_db_write/.test(previewQaText)) {
+    fail(
+      "K. workflows",
+      `preview-qa.yml must accept and validate the safe_db_write input`
+    );
+  }
+
+  pass(
+    "K. workflows",
+    "release-gate + preview-qa workflows exist with required references and no forbidden phrases"
+  );
+}
+
+/** L — governance + rollback docs exist */
+async function checkGovernanceDocs() {
+  const required = [
+    "docs/controlled-preview-mutation-qa.md",
+    "docs/rollback-runbook.md",
+    "docs/github-actions-release-gate.md",
+  ];
+  for (const path of required) {
+    try {
+      await readFile(join(REPO_ROOT, path), "utf8");
+    } catch (err) {
+      fail("L. governance_docs", `${path} missing (${err.message})`);
+    }
+  }
+  pass(
+    "L. governance_docs",
+    "controlled-mutation, rollback, and CI docs all present"
+  );
+}
+
+/** M — synthetic monitor uses no mutating methods, never POSTs /api/leads */
+async function checkSyntheticMonitor() {
+  const path = "scripts/synthetic-monitor.mjs";
+  let text;
+  try {
+    text = await readFile(join(REPO_ROOT, path), "utf8");
+  } catch (err) {
+    fail("M. synthetic_monitor", `${path} missing (${err.message})`);
+    return;
+  }
+  if (/method\s*:\s*["'`](POST|PATCH|PUT|DELETE)["'`]/i.test(text)) {
+    fail(
+      "M. synthetic_monitor",
+      `${path} contains a mutating HTTP method literal`
+    );
+  }
+  // Belt and braces: forbid the literal string "/api/leads" anywhere
+  // *outside* of a comment that explains it's forbidden.
+  const stripped = text
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/(^|[^:])\/\/.*$/gm, "$1");
+  if (stripped.includes("/api/leads")) {
+    fail(
+      "M. synthetic_monitor",
+      `${path} references /api/leads in executable code`
+    );
+  }
+  pass(
+    "M. synthetic_monitor",
+    "synthetic-monitor.mjs uses no mutating verbs and never references /api/leads at runtime"
+  );
+}
+
+/** N — artifacts directory is gitignored */
+async function checkArtifactsGitignored() {
+  const path = ".gitignore";
+  let text;
+  try {
+    text = await readFile(join(REPO_ROOT, path), "utf8");
+  } catch (err) {
+    fail("N. gitignore", `${path} missing (${err.message})`);
+    return;
+  }
+  if (!/(^|\n)\/?artifacts\/?(\s|$)/.test(text)) {
+    fail("N. gitignore", `${path} should contain an entry for artifacts/`);
+  }
+  pass("N. gitignore", "artifacts/ is gitignored");
+}
+
 async function main() {
   const files = await walk(SRC);
   await checkSecretExposure(files);
@@ -535,6 +710,10 @@ async function main() {
   await checkMutationGateContract();
   await checkWidgetE2eInterception();
   await checkReleaseDocs();
+  await checkWorkflows();
+  await checkGovernanceDocs();
+  await checkSyntheticMonitor();
+  await checkArtifactsGitignored();
 
   for (const p of passes) console.log(`PASS  ${p.check} — ${p.message}`);
   for (const f of failures) {

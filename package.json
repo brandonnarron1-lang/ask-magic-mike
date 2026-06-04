@@ -15,11 +15,17 @@
     "test:e2e:ui": "./node_modules/.bin/playwright test --ui",
     "test:all": "./node_modules/.bin/vitest run && ./node_modules/.bin/playwright test",
     "release:safety": "node scripts/release-safety-scan.mjs",
+    "release:doctor": "node scripts/release-doctor.mjs",
     "preview:find": "node scripts/find-vercel-preview.mjs",
+    "preview:wait": "node scripts/wait-for-vercel-preview.mjs",
     "preview:qa": "node scripts/preview-qa.mjs",
     "preview:e2e": "./node_modules/.bin/playwright test tests/e2e/widget-preview-flow.spec.ts",
     "release:gate": "npm run release:safety && npm run test && npm run typecheck && npm run lint && npm run build",
-    "release:report": "node scripts/release-candidate-report.mjs"
+    "release:report": "node scripts/release-candidate-report.mjs",
+    "release:assert": "node scripts/assert-release-candidate.mjs",
+    "launch:authority": "node scripts/launch-authority-report.mjs",
+    "monitor:synthetic": "node scripts/synthetic-monitor.mjs",
+    "release:preflight": "npm run release:doctor && npm run release:gate && npm run release:report && npm run launch:authority"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.0",

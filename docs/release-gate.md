@@ -73,16 +73,33 @@ Artifacts: `artifacts/preview-qa-report.json` and
 
 ## Release sequence
 
-1. `npm run release:safety` — static scan
-2. `npm run release:gate` — runs safety + test + typecheck + lint + build
-3. `npm run preview:find` — discover the latest Ready preview URL
+1. `npm run release:doctor` — fast local checks; produces
+   `artifacts/release-doctor-report.{json,md}`. Run this *before* you
+   push.
+2. `npm run release:gate` — safety + test + typecheck + lint + build.
+3. `npm run preview:find` — discover the latest Ready preview URL.
+   For commit-matched discovery, `npm run preview:wait`.
 4. `PREVIEW_URL=… VERCEL_AUTOMATION_BYPASS_SECRET=… SAFE_DB_WRITE=false npm run preview:qa`
 5. `PREVIEW_URL=… VERCEL_AUTOMATION_BYPASS_SECRET=… npm run preview:e2e`
-6. `npm run release:report`
-7. Review `artifacts/release-candidate-report.md` (and `.json`).
-8. **No production promotion without explicit human approval.** Only
-   after every gate is green does `main` get touched, and only when the
-   operator explicitly requests promotion.
+6. `npm run release:report` — `artifacts/release-candidate-report.*`.
+7. `npm run launch:authority` — single GO / NO-GO across the ladder.
+   Verdict: `BLOCKED` / `LOCAL_READY` / `PREVIEW_READY` /
+   `MUTATION_READY` / `PROMOTION_READY`.
+8. `npm run release:assert` (default `REQUIRE_VERDICT=LOCAL_READY`,
+   tighten via env in CI). Exits nonzero if the verdict is below
+   the required level.
+9. After production lands: `TARGET_URL="…" npm run monitor:synthetic`
+   for non-mutating smoke against the live target.
+10. **No production promotion without explicit human approval.** Only
+    after every gate is green does `main` get touched, and only when
+    the operator explicitly requests promotion. Controlled mutation
+    QA is **manual** — see
+    [`controlled-preview-mutation-qa.md`](./controlled-preview-mutation-qa.md).
+
+CI wiring is documented in
+[`github-actions-release-gate.md`](./github-actions-release-gate.md).
+Rollback is documented in
+[`rollback-runbook.md`](./rollback-runbook.md).
 
 ## Generated artifacts
 

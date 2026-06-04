@@ -1,0 +1,133 @@
+name: Ask Magic Mike Preview QA
+
+on:
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: "Preview URL (leave blank to auto-discover)"
+        required: false
+        default: ""
+      wait_for_preview:
+        description: "If preview_url is blank, wait for the deployment matching this commit"
+        required: false
+        default: "true"
+      run_browser_e2e:
+        description: "Also run npm run preview:e2e"
+        required: false
+        default: "true"
+      safe_db_write:
+        description: "Must be 'false'. Controlled mutation QA is intentionally manual."
+        required: false
+        default: "false"
+
+jobs:
+  preview-qa:
+    name: preview-qa
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+
+    steps:
+      - name: Refuse SAFE_DB_WRITE override
+        run: |
+          if [ "${{ inputs.safe_db_write }}" != "false" ]; then
+            echo "ERROR: this workflow refuses safe_db_write != false."
+            echo "Controlled mutation QA is intentionally manual — see"
+            echo "docs/controlled-preview-mutation-qa.md."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install deps
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Release safety scan
+        run: npm run release:safety
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: ./node_modules/.bin/playwright install --with-deps chromium
+
+      - name: Determine PREVIEW_URL
+        id: pick_url
+        run: |
+          if [ -n "${{ inputs.preview_url }}" ]; then
+            echo "preview_url=${{ inputs.preview_url }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "${{ inputs.wait_for_preview }}" = "true" ]; then
+            JSON="$(npm run preview:wait --silent)"
+          else
+            JSON="$(npm run preview:find --silent)"
+          fi
+          OK="$(echo "$JSON" | node -e 'let s="";process.stdin.on("data",c=>s+=c).on("end",()=>{try{console.log(JSON.parse(s).ok)}catch{console.log(false)}})')"
+          if [ "$OK" != "true" ]; then
+            echo "Failed to discover preview URL:"
+            echo "$JSON"
+            exit 1
+          fi
+          URL="$(echo "$JSON" | node -e 'let s="";process.stdin.on("data",c=>s+=c).on("end",()=>{try{console.log(JSON.parse(s).preview_url)}catch{console.log("")}})')"
+          if [ -z "$URL" ]; then
+            echo "Discovery returned no URL."
+            exit 1
+          fi
+          echo "preview_url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Preview QA (SAFE_DB_WRITE=false)
+        env:
+          PREVIEW_URL: ${{ steps.pick_url.outputs.preview_url }}
+          SAFE_DB_WRITE: "false"
+        run: npm run preview:qa
+
+      - name: Widget browser e2e
+        if: inputs.run_browser_e2e == 'true'
+        env:
+          PREVIEW_URL: ${{ steps.pick_url.outputs.preview_url }}
+        run: |
+          ./node_modules/.bin/playwright test \
+            tests/e2e/widget-preview-flow.spec.ts \
+            --reporter=json > artifacts/widget-e2e-report.json
+        continue-on-error: false
+
+      - name: Release candidate report
+        run: npm run release:report
+
+      - name: Launch authority report
+        run: npm run launch:authority
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-qa-artifacts
+          path: |
+            artifacts/*.json
+            artifacts/*.md
+          if-no-files-found: ignore
