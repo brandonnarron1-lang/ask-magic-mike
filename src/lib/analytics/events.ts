@@ -96,4 +96,137 @@ export const ANALYTICS_EVENTS: Record<
     category: "crm",
     description: "CRM sync failed",
   },
+  // Canonical platform additions
+  lead_created: {
+    category: "intake",
+    description: "New lead row created via POST /api/leads",
+  },
+  duplicate_detected: {
+    category: "intake",
+    description: "Incoming lead matched an existing record",
+  },
+  spam_flagged: {
+    category: "system",
+    description: "Incoming lead exceeded the spam-reject threshold",
+  },
+  rate_limited: {
+    category: "system",
+    description: "Public endpoint blocked a request via rate limiter",
+  },
+  listing_imported: {
+    category: "system",
+    description: "FlexMLS CSV/PDF import completed",
+  },
+  listing_viewed: {
+    category: "intake",
+    description: "User viewed a listing page",
+  },
+  listing_matched: {
+    category: "intake",
+    description: "Lead matched to one or more listings",
+  },
+  marketing_asset_generated: {
+    category: "system",
+    description: "Marketing template render produced a generated asset",
+  },
+  sms_sent: {
+    category: "intake",
+    description: "Outbound SMS sent (mock or live)",
+  },
+  sms_received: {
+    category: "intake",
+    description: "Inbound SMS received via webhook",
+  },
+  sms_delivered: {
+    category: "intake",
+    description: "Carrier confirmed delivery",
+  },
+  sms_failed: {
+    category: "intake",
+    description: "Carrier reported failure",
+  },
+  email_sent: {
+    category: "intake",
+    description: "Outbound email sent (mock or live)",
+  },
+  email_received: {
+    category: "intake",
+    description: "Inbound email captured via webhook",
+  },
+  email_opened: {
+    category: "intake",
+    description: "Provider reported email open",
+  },
+  email_clicked: {
+    category: "intake",
+    description: "Provider reported link click",
+  },
+  lead_updated: {
+    category: "intake",
+    description: "Admin or system mutated a lead row",
+  },
+  note_added: {
+    category: "admin",
+    description: "Note appended to a lead",
+  },
+  task_created: {
+    category: "admin",
+    description: "Task created on a lead",
+  },
+  task_completed: {
+    category: "admin",
+    description: "Task closed",
+  },
+  appointment_requested: {
+    category: "intake",
+    description: "Lead requested an appointment",
+  },
+  appointment_set: {
+    category: "intake",
+    description: "Appointment scheduled",
+  },
+  appointment_completed: {
+    category: "intake",
+    description: "Appointment occurred",
+  },
+  widget_opened: {
+    category: "intake",
+    description: "Widget launcher opened",
+  },
+  widget_started: {
+    category: "intake",
+    description: "Widget conversation started",
+  },
+  widget_intent_selected: {
+    category: "intake",
+    description: "User picked an intent in widget",
+  },
+  widget_question_answered: {
+    category: "intake",
+    description: "Widget question answered",
+  },
+  widget_contact_submitted: {
+    category: "intake",
+    description: "User submitted contact info via widget",
+  },
+  widget_lead_created: {
+    category: "intake",
+    description: "Widget posted a lead through /api/leads",
+  },
+  widget_cta_clicked: {
+    category: "intake",
+    description: "Widget CTA tap",
+  },
+  widget_submit_failed: {
+    category: "intake",
+    description: "Widget tried to POST /api/leads and got a non-OK response",
+  },
+  opt_out: {
+    category: "intake",
+    description: "User opted out of a channel",
+  },
+  opt_in: {
+    category: "intake",
+    description: "User opted in to a channel",
+  },
 };

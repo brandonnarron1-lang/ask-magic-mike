@@ -4,6 +4,28 @@ This brief covers the **manual WordPress edits** needed after the funnel
 visual upgrade ships. Do not edit themes or plugins. All edits are in
 Beaver Builder.
 
+## v2 update notes (post brand-kit-v2 + canonical platform)
+
+- Funnel landing host is `ask-magic-mike.vercel.app` until the
+  `askmagicmike.com` domain migration runs (see
+  `docs/askmagicmike-domain-migration.md`). After migration, replace
+  the host in every CTA URL but **keep the UTM params unchanged**.
+- The canonical `POST /api/leads` endpoint is now live. Future
+  Beaver Builder Gravity-Forms-style inline forms can submit directly
+  to it instead of routing through `/value`.
+- CTA variants below are aligned with Brand Kit v2 + the
+  trust-first copy floor.
+
+## CTA variants (use any matching pair)
+
+| Variant | Headline | Sub | CTA label | Target |
+| --- | --- | --- | --- | --- |
+| Ask Magic Mike | Start with your address. Get a local read on your home. | Mike Eatmon's Our Town Properties team will follow up. | Ask Magic Mike | `/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike` |
+| Home value | What could your Wilson-area home sell for? | Get a preliminary home value range — not an appraisal. | Find out what your home could sell for | `/value?utm_source=ourtown_wp&utm_medium=home_value_cta&utm_campaign=ask_magic_mike` |
+| Seller fast | Need to sell quickly? | Compare a preliminary direct-purchase review and a listing scenario. | See my selling options | `/value?utm_source=ourtown_wp&utm_medium=seller_page_cta&utm_campaign=ask_magic_mike` |
+| Listing inquiry | Question about a listing? | Get details, schedule a showing, or see similar homes. | Ask about this listing | `/value?utm_source=ourtown_wp&utm_medium=listing_cta&utm_campaign=ask_magic_mike` |
+| Talk to Mike | Want a real conversation? | Mike Eatmon, Our Town Properties · Licensed in NC. | Talk to Mike | `/value?utm_source=ourtown_wp&utm_medium=talk_to_mike&utm_campaign=ask_magic_mike` |
+
 ## Scope
 
 Three CTA blocks already routing to `/value` with UTMs:
