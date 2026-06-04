@@ -3,6 +3,25 @@
 Run against the Vercel Preview URL produced by this branch. Production
 must NOT be promoted in this phase.
 
+## Automated runner (preferred)
+
+```bash
+PREVIEW_URL="https://<preview-url>" \
+ADMIN_SECRET="…" \
+CRON_SECRET="…" \
+SAFE_DB_WRITE=false \
+npm run preview:qa
+```
+
+Writes `artifacts/preview-qa-report.json` and `.md`. Exits nonzero on any
+failure. Mutation tests require `SAFE_DB_WRITE=true` AND the preview
+health endpoint reporting `safe_for_preview_mutation: true`. See
+[release-gate.md](./release-gate.md) for the full layered gate.
+
+The checklist below documents the manual probes the runner automates —
+keep it for incidents or partial debugging when the runner can't reach
+a host.
+
 ## Setup
 
 ```bash

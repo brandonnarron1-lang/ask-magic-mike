@@ -347,3 +347,53 @@ What still needs manual setup:
   envelope shapes; the adapter layer ships mock-only today.
 - Rewrite baked-copy ad templates per
   `docs/paid-traffic-launch-copy-pack.md` before any paid spend.
+
+## Phase-2 release gate (preview hardening, 2026-06)
+
+Branch `platform/phase-2-release-hardening` adds a two-layer release
+gate so the branch can be promoted to a Vercel preview safely without
+risking production.
+
+- **`scripts/release-safety-scan.mjs`** — static scan, no network.
+  Fails on: client-side reads of `ADMIN_SECRET` /
+  `SUPABASE_SERVICE_ROLE_KEY` / `TWILIO_AUTH_TOKEN` / `EMAIL_API_KEY` /
+  `CRON_SECRET` / `NEXT_PUBLIC_*SECRET`; private MLS fields
+  (`agent_remarks`, `lockbox_info`, `showing_instructions`,
+  `compensation`, `owner_notes`, `internal_notes`, `private_remarks`,
+  `broker_notes`) referenced in public API routes or marketing-asset
+  generators; widget wiring drift (`MagicMikeWidgetController` /
+  `MagicMikeWidgetFloating` must each have ≥1 consumer; `/value` must
+  mount Floating; `/widget-preview` must mount Controller or Floating);
+  public listing whitelist (`/api/listings/search` and
+  `/api/listings/[id]` must reference `PUBLIC_FIELD_NAMES`). Run:
+  `npm run release:safety`.
+- **`scripts/preview-qa.mjs`** — remote QA harness. Probes public
+  routes, WordPress UTM variants, admin endpoints, dual-auth SLA sweep,
+  public-listing private-field leak, and (opt-in) DB mutation flows.
+  Default `SAFE_DB_WRITE=false`. Mutation tests require
+  `SAFE_DB_WRITE=true` AND `FORCE_DB_WRITE=true` AND
+  `CONFIRM_FORCE_DB_WRITE="I_UNDERSTAND_THIS_WRITES_TO_THE_CONFIGURED_DATABASE"`
+  AND the health endpoint flag `safe_for_preview_mutation: true`.
+  Outputs `artifacts/preview-qa-report.{json,md}`. Run:
+  `PREVIEW_URL=… ADMIN_SECRET=… CRON_SECRET=… npm run preview:qa`.
+- **`/api/admin/health`** — runtime safety probe. Reports build
+  identity, env presence (boolean only — never raw secrets), DB
+  reachability with per-table probes, migration 00012 likelihood, and
+  `safe_for_preview_mutation`. Auth: `x-admin-secret` OR
+  `Authorization: Bearer $CRON_SECRET`.
+- **Widget test surface.** Stable `data-testid` on
+  `magic-mike-widget-launcher`, `magic-mike-widget-controller`, each
+  intent option, question input, contact name/email/phone, both consent
+  checkboxes, submit, success, and error.
+- **Docs.** `docs/release-gate.md` (sequence and constraints) and an
+  automated-runner section at the top of
+  `docs/preview-qa-checklist.md`.
+
+Hard rules baked into the gate:
+
+- Do not merge to main from automation.
+- Do not promote to production from automation.
+- Do not modify production env vars.
+- Do not run persistent DB mutation tests unless the preview database
+  is verified safe by the health endpoint.
+- Health endpoint must never return raw secret values.

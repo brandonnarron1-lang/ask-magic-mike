@@ -51,18 +51,22 @@ export function MagicMikeWidgetFloating({
           data-testid="magic-mike-widget-overlay"
           className="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 z-50 max-h-[82vh] w-[min(420px,94vw)] overflow-auto"
         >
-          <MagicMikeWidgetController
-            listingId={listingId ?? null}
-            onClose={close}
-          />
+          <div data-testid="magic-mike-widget-controller">
+            <MagicMikeWidgetController
+              listingId={listingId ?? null}
+              onClose={close}
+            />
+          </div>
         </div>
       )}
 
-      <MagicMikeWidgetLauncher
-        onClick={() => setOpen((v) => !v)}
-        label={label}
-        active={open}
-      />
+      <div data-testid="magic-mike-widget-launcher">
+        <MagicMikeWidgetLauncher
+          onClick={() => setOpen((v) => !v)}
+          label={label}
+          active={open}
+        />
+      </div>
     </>
   );
 }

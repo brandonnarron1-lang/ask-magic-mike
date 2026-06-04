@@ -394,14 +394,16 @@ export function MagicMikeWidgetController({
         hideInput
         onClose={onClose}
         answer={
-          <ErrorActions
-            onRetry={() =>
-              setState((s) => ({ ...s, step: "contact", error: undefined }))
-            }
-            onCall={() => {
-              track("widget_cta_clicked", { cta: "call_mike_after_error" });
-            }}
-          />
+          <div data-testid="widget-error">
+            <ErrorActions
+              onRetry={() =>
+                setState((s) => ({ ...s, step: "contact", error: undefined }))
+              }
+              onCall={() => {
+                track("widget_cta_clicked", { cta: "call_mike_after_error" });
+              }}
+            />
+          </div>
         }
       />
     );
@@ -422,20 +424,22 @@ export function MagicMikeWidgetController({
       hideInput
       onClose={onClose}
       answer={
-        <SuccessActions
-          leadId={state.leadId}
-          onCall={() => track("widget_cta_clicked", { cta: "call_mike" })}
-          onRestart={() =>
-            setState({
-              step: "greeting",
-              answers: {},
-              questionIdx: 0,
-              questions: [],
-              contact: { firstName: "", lastName: "", email: "", phone: "" },
-              consent: { sms: true, email: true },
-            })
-          }
-        />
+        <div data-testid="widget-success">
+          <SuccessActions
+            leadId={state.leadId}
+            onCall={() => track("widget_cta_clicked", { cta: "call_mike" })}
+            onRestart={() =>
+              setState({
+                step: "greeting",
+                answers: {},
+                questionIdx: 0,
+                questions: [],
+                contact: { firstName: "", lastName: "", email: "", phone: "" },
+                consent: { sms: true, email: true },
+              })
+            }
+          />
+        </div>
       }
     />
   );
@@ -480,6 +484,7 @@ function IntentPicker({
         <button
           key={opt.key}
           type="button"
+          data-testid={`widget-intent-option-${opt.key}`}
           onClick={() => onPick(opt.key, opt.leadType)}
           className="rounded-md border border-white/12 bg-white/[0.04] px-3 py-2 text-[13px] text-left hover:border-gold-400/55 hover:bg-gold-400/[0.06]"
         >
@@ -525,6 +530,7 @@ function QuestionAnswerer({
     >
       <input
         type="text"
+        data-testid="widget-question-input"
         value={text}
         onChange={(e) => setText(e.target.value)}
         className="flex-1 rounded-md border border-white/12 bg-[#0B0E14] px-3 py-2 text-[14px] text-[#F4F4F4]"
@@ -532,6 +538,7 @@ function QuestionAnswerer({
       />
       <button
         type="submit"
+        data-testid="widget-answer-submit"
         className="rounded-md bg-gold-400 px-3 py-2 text-[13px] font-bold text-[#050505]"
       >
         Next
@@ -567,12 +574,14 @@ function ContactForm({
     >
       <div className="grid grid-cols-2 gap-2">
         <input
+          data-testid="widget-contact-name"
           placeholder="First name"
           value={value.firstName}
           onChange={(e) => onChange({ firstName: e.target.value }, {})}
           className="rounded-md border border-white/12 bg-[#0B0E14] px-3 py-2"
         />
         <input
+          data-testid="widget-contact-last-name"
           placeholder="Last name"
           value={value.lastName}
           onChange={(e) => onChange({ lastName: e.target.value }, {})}
@@ -581,6 +590,7 @@ function ContactForm({
       </div>
       <input
         type="email"
+        data-testid="widget-contact-email"
         placeholder="Email"
         value={value.email}
         onChange={(e) => onChange({ email: e.target.value }, {})}
@@ -588,6 +598,7 @@ function ContactForm({
       />
       <input
         type="tel"
+        data-testid="widget-contact-phone"
         placeholder="Phone (optional, recommended)"
         value={value.phone}
         onChange={(e) => onChange({ phone: e.target.value }, {})}
@@ -596,6 +607,7 @@ function ContactForm({
       <label className="flex items-start gap-2 text-[11.5px] text-slate-300">
         <input
           type="checkbox"
+          data-testid="widget-consent-sms"
           checked={consent.sms}
           onChange={(e) => onChange({}, { sms: e.target.checked })}
           className="mt-0.5"
@@ -605,6 +617,7 @@ function ContactForm({
       <label className="flex items-start gap-2 text-[11.5px] text-slate-300">
         <input
           type="checkbox"
+          data-testid="widget-consent-email"
           checked={consent.email}
           onChange={(e) => onChange({}, { email: e.target.checked })}
           className="mt-0.5"
@@ -614,6 +627,7 @@ function ContactForm({
       <p className="text-[10.5px] text-slate-400 leading-relaxed">{consentText}</p>
       <button
         type="submit"
+        data-testid="widget-submit"
         className="w-full rounded-md bg-gold-400 px-3 py-2.5 font-bold text-[#050505]"
       >
         Send to Mike
