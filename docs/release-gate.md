@@ -169,6 +169,25 @@ early with a clear message if the preview is protected and no bypass
 is provided, or if the bypass is rejected. Artifacts are still written
 on early failure.
 
+The bypass secret is **normalized** before use: leading/trailing
+whitespace and trailing CR/LF are stripped, and a value that is empty
+after trim, contains embedded CR/LF, or contains non-printable
+characters is rejected. An invalid value fails `vercel_preview_access`
+early with `Invalid Vercel bypass secret: <reason>` — the reason never
+contains the secret.
+
+### Troubleshooting: HTTP 0 / network error
+
+If preview QA reports HTTP 0/network error, the runner now reports safe
+fetch error details (`error_name`, `error_message`, `cause_code`,
+`cause_hostname`, `cause_syscall`) in `preview-qa-report.json` and the
+report message — with every secret redacted. The most common cause is
+an invalid bypass secret value with whitespace/newline (a trailing
+newline injected when the GitHub Actions secret was set). Regenerate
+the Vercel bypass secret and update the GitHub Actions secret
+(`VERCEL_AUTOMATION_BYPASS_SECRET`), making sure no trailing newline is
+included.
+
 For manual browser QA: either sign in to Vercel for the same scope,
 or use a bypass-cookie URL of the shape
 `?x-vercel-protection-bypass=<secret>&x-vercel-set-bypass-cookie=true`.

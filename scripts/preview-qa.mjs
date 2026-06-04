@@ -54,6 +54,8 @@ import {
   classifyAccessStatus,
   redactSecrets,
   shouldRunMutationChecks,
+  summarizeFetchError,
+  formatFetchErrorSummary,
 } from "./preview-qa-lib.mjs";
 
 const PREVIEW_URL = (process.env.PREVIEW_URL ?? "").replace(/\/$/, "");
@@ -63,7 +65,16 @@ const PRINT_MANUAL_BYPASS_URL =
   (process.env.PRINT_MANUAL_BYPASS_URL ?? "false").toLowerCase() === "true";
 
 const BYPASS = getBypassConfig(process.env);
-const ALL_SECRETS = [ADMIN_SECRET, CRON_SECRET, BYPASS.secret];
+// Redact admin/cron secrets, the normalized bypass token, and — defensively —
+// the raw bypass env values (in case one was invalid and never normalized).
+const ALL_SECRETS = [
+  ADMIN_SECRET,
+  CRON_SECRET,
+  BYPASS.secret,
+  process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+  process.env.VERCEL_PROTECTION_BYPASS_TOKEN,
+  process.env.VERCEL_BYPASS_SECRET,
+];
 
 const OUT_DIR = resolve("artifacts");
 
@@ -105,12 +116,21 @@ async function http(method, path, opts = {}) {
   try {
     res = await fetch(url, { method, headers, body });
   } catch (err) {
+    // fetch threw before any HTTP response (DNS/TLS/socket, or an invalid
+    // header value). Surface a safe, secret-free summary instead of hiding
+    // it behind a generic "network error". Redact each field defensively.
+    const summary = summarizeFetchError(err);
+    /** @type {Record<string, string|null>} */
+    const safe = {};
+    for (const [k, v] of Object.entries(summary)) {
+      safe[k] = typeof v === "string" ? redact(v) : v;
+    }
     return {
       ok: false,
       status: 0,
       json: null,
       text: "",
-      error: err.message,
+      error: safe,
     };
   }
   const ct = res.headers.get("content-type") ?? "";
@@ -145,6 +165,14 @@ function cronHeaders() {
 // ─── Checks ────────────────────────────────────────────────────────────────
 
 async function vercelPreviewAccess() {
+  // A bypass secret was supplied but failed normalization — fail fast with the
+  // reason (never the secret) instead of letting fetch throw a vague error.
+  if (BYPASS.present && !BYPASS.valid) {
+    record("vercel_preview_access", "fail", {
+      message: `Invalid Vercel bypass secret: ${BYPASS.invalidReason}`,
+    });
+    return false;
+  }
   const r = await http("GET", "/");
   const classification = classifyAccessStatus(r.status, BYPASS.present);
   switch (classification) {
@@ -170,12 +198,18 @@ async function vercelPreviewAccess() {
           "Preview protection bypass was provided but rejected. Check secret, project, branch, and deployment URL.",
       });
       return false;
-    case "network_error":
+    case "network_error": {
+      const detail = formatFetchErrorSummary(r.error);
       record("vercel_preview_access", "fail", {
         http: 0,
-        message: "network error reaching preview",
+        message: detail
+          ? `network error reaching preview — ${detail}`
+          : "network error reaching preview",
+        // Safe, already-redacted fetch error summary for the artifacts.
+        fetch_error: r.error ?? null,
       });
       return false;
+    }
     default:
       record("vercel_preview_access", "fail", {
         http: r.status,
@@ -470,7 +504,13 @@ async function main() {
   }
   console.log(`Preview QA against: ${PREVIEW_URL}`);
   console.log(
-    `Bypass: ${BYPASS.present ? `present via ${BYPASS.source} (header mode)` : "not provided"}`
+    `Bypass: ${
+      BYPASS.present
+        ? BYPASS.valid
+          ? `present via ${BYPASS.source} (header mode)`
+          : `present via ${BYPASS.source} but INVALID (${BYPASS.invalidReason})`
+        : "not provided"
+    }`
   );
   console.log(
     `Mode: SAFE_DB_WRITE=${process.env.SAFE_DB_WRITE ?? "false"} ` +
@@ -518,7 +558,10 @@ async function main() {
         (process.env.FORCE_DB_WRITE ?? "false").toLowerCase() === "true",
     },
     protection_bypass_present: BYPASS.present,
-    protection_bypass_mode: BYPASS.present ? "header" : null,
+    protection_bypass_valid: BYPASS.valid,
+    protection_bypass_source: BYPASS.source,
+    protection_bypass_invalid_reason: BYPASS.invalidReason,
+    protection_bypass_mode: BYPASS.present && BYPASS.valid ? "header" : null,
     set_bypass_cookie: BYPASS.setCookie,
     access_blocked: accessBlocked,
     mutation_gate: gate,
@@ -559,7 +602,13 @@ function renderMarkdown(s) {
     `- Preview: \`${s.preview_url}\``,
     `- Run at: ${s.run_at}`,
     `- Mode: SAFE_DB_WRITE=${s.mode.SAFE_DB_WRITE} · FORCE_DB_WRITE=${s.mode.FORCE_DB_WRITE}`,
-    `- Protection bypass: ${s.protection_bypass_present ? "present (header mode)" : "not provided"}`,
+    `- Protection bypass: ${
+      s.protection_bypass_present
+        ? s.protection_bypass_valid
+          ? "present (header mode)"
+          : `present but INVALID (${s.protection_bypass_invalid_reason})`
+        : "not provided"
+    }`,
     `- Set bypass cookie: ${s.set_bypass_cookie}`,
     `- Access blocked early: ${s.access_blocked}`,
     `- Mutation gate: ${s.mutation_gate.allowed ? "ALLOWED" : "BLOCKED"} (${s.mutation_gate.reason})`,

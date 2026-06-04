@@ -8,22 +8,75 @@
 
 /**
  * @typedef {Object} BypassConfig
- * @property {string|null} secret    Raw secret value (never logged).
- * @property {string|null} source    Name of the env var the value came from.
- * @property {boolean}     present   Convenience flag.
- * @property {boolean}     setCookie SET_VERCEL_BYPASS_COOKIE flag.
+ * @property {boolean}     present       A bypass env var held a non-empty raw
+ *                                       value (even if it turns out invalid).
+ * @property {string|null} source        Name of the env var the value came
+ *                                       from, or null when none present.
+ * @property {boolean}     valid         The value normalized to a clean,
+ *                                       header-safe token.
+ * @property {string|null} invalidReason Why the value was rejected (no secret
+ *                                       material), or null when valid/absent.
+ * @property {string|null} secret        Normalized secret, or null when the
+ *                                       value is absent or invalid. Never
+ *                                       logged or written to artifacts.
+ * @property {boolean}     setCookie     SET_VERCEL_BYPASS_COOKIE flag.
  */
 
 /**
- * Resolve the Vercel deployment-protection bypass secret from env.
+ * Normalize a raw bypass secret into a clean, header-safe token.
+ *
+ * Rules:
+ *   - strip trailing CR/LF
+ *   - trim leading/trailing whitespace
+ *   - reject empty values after trim
+ *   - reject values containing embedded CR/LF (header injection)
+ *   - reject values containing non-printable characters
+ *
+ * Returns the normalized secret plus a validity verdict. The reason string
+ * never contains any secret material.
+ *
+ * @param {string} raw
+ * @returns {{ secret: string|null, valid: boolean, invalidReason: string|null }}
+ */
+function normalizeBypassSecret(raw) {
+  // Strip trailing CR/LF first (the classic GitHub-Actions / `echo` artifact),
+  // then trim any remaining surrounding whitespace.
+  const s = String(raw).replace(/[\r\n]+$/, "").trim();
+  if (s.length === 0) {
+    return { secret: null, valid: false, invalidReason: "empty after trim" };
+  }
+  if (/[\r\n]/.test(s)) {
+    return {
+      secret: null,
+      valid: false,
+      invalidReason: "contains embedded CR/LF",
+    };
+  }
+  // Header values must be a single clean token of printable ASCII
+  // (0x20–0x7E). Anything else (NUL, tab, control bytes, smart-quoted
+  // pastes) would make Node's fetch throw before it ever gets a response.
+  if (/[^\x20-\x7E]/.test(s)) {
+    return {
+      secret: null,
+      valid: false,
+      invalidReason: "contains non-printable characters",
+    };
+  }
+  return { secret: s, valid: true, invalidReason: null };
+}
+
+/**
+ * Resolve and normalize the Vercel deployment-protection bypass secret.
  *
  * Precedence (highest first):
  *   1. VERCEL_AUTOMATION_BYPASS_SECRET
  *   2. VERCEL_PROTECTION_BYPASS_TOKEN
  *   3. VERCEL_BYPASS_SECRET
  *
- * The first nonempty value wins. The secret is returned but MUST NOT
- * be logged or written to artifacts.
+ * The first env var holding a non-empty raw value wins; its value is then
+ * normalized (see {@link normalizeBypassSecret}). A value can therefore be
+ * `present` but not `valid` — the runner reports the reason without ever
+ * exposing the secret. The secret MUST NOT be logged or written to artifacts.
  *
  * @param {Record<string, string|undefined>} env
  * @returns {BypassConfig}
@@ -34,21 +87,37 @@ export function getBypassConfig(env) {
     "VERCEL_PROTECTION_BYPASS_TOKEN",
     "VERCEL_BYPASS_SECRET",
   ];
-  for (const name of order) {
-    const v = env[name];
-    if (typeof v === "string" && v.length > 0) {
-      const setCookie =
-        (env.SET_VERCEL_BYPASS_COOKIE ?? "false").toLowerCase() === "true";
-      return { secret: v, source: name, present: true, setCookie };
-    }
-  }
   const setCookie =
     (env.SET_VERCEL_BYPASS_COOKIE ?? "false").toLowerCase() === "true";
-  return { secret: null, source: null, present: false, setCookie };
+
+  for (const name of order) {
+    const raw = env[name];
+    if (typeof raw !== "string" || raw.length === 0) continue;
+    const { secret, valid, invalidReason } = normalizeBypassSecret(raw);
+    return {
+      present: true,
+      source: name,
+      valid,
+      invalidReason,
+      secret: valid ? secret : null,
+      setCookie,
+    };
+  }
+  return {
+    present: false,
+    source: null,
+    valid: false,
+    invalidReason: null,
+    secret: null,
+    setCookie,
+  };
 }
 
 /**
  * Merge bypass headers into a base header set. Never mutates the input.
+ *
+ * The bypass header is set ONLY when the configured value is present, valid,
+ * and yields a normalized secret — never from an untrimmed or invalid value.
  *
  * @param {Record<string, string>} baseHeaders
  * @param {Record<string, string|undefined>} env
@@ -57,13 +126,58 @@ export function getBypassConfig(env) {
 export function buildRequestHeaders(baseHeaders, env) {
   const cfg = getBypassConfig(env);
   const out = { ...baseHeaders };
-  if (cfg.secret) {
+  if (cfg.present && cfg.valid && cfg.secret) {
     out["x-vercel-protection-bypass"] = cfg.secret;
     if (cfg.setCookie) {
       out["x-vercel-set-bypass-cookie"] = "true";
     }
   }
   return out;
+}
+
+/**
+ * Extract a safe, secret-free summary from a fetch/network exception.
+ *
+ * Node's `fetch` throws a `TypeError` whose `cause` carries the underlying
+ * system error (DNS, TLS, socket). None of these fields contain secret
+ * material, but callers still redact them defensively before emitting.
+ *
+ * @param {unknown} err
+ * @returns {{ error_name: string|null, error_message: string|null,
+ *   cause_code: string|null, cause_hostname: string|null,
+ *   cause_syscall: string|null }}
+ */
+export function summarizeFetchError(err) {
+  const e = err && typeof err === "object" ? err : {};
+  const cause = e.cause && typeof e.cause === "object" ? e.cause : {};
+  const str = (v) => (typeof v === "string" && v.length ? v : v == null ? null : String(v));
+  return {
+    error_name: str(e.name),
+    error_message: str(e.message),
+    cause_code: str(cause.code),
+    cause_hostname: str(cause.hostname),
+    cause_syscall: str(cause.syscall),
+  };
+}
+
+/**
+ * Render a fetch-error summary as a single human-readable line for the
+ * report message. Pure / side-effect-free.
+ *
+ * @param {ReturnType<typeof summarizeFetchError>|null|undefined} summary
+ * @returns {string}
+ */
+export function formatFetchErrorSummary(summary) {
+  if (!summary || typeof summary !== "object") return "";
+  const parts = [];
+  if (summary.error_name) parts.push(String(summary.error_name));
+  if (summary.error_message) parts.push(String(summary.error_message));
+  const cause = [];
+  if (summary.cause_code) cause.push(`code=${summary.cause_code}`);
+  if (summary.cause_syscall) cause.push(`syscall=${summary.cause_syscall}`);
+  if (summary.cause_hostname) cause.push(`hostname=${summary.cause_hostname}`);
+  if (cause.length) parts.push(`(${cause.join(" ")})`);
+  return parts.join(": ");
 }
 
 /**

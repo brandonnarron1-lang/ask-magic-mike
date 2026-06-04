@@ -35,7 +35,23 @@ bypass-cookie URL of the shape
 Slack, or QA reports.** Set `PRINT_MANUAL_BYPASS_URL=true` to surface
 the *template* (no token) in runner stdout.
 
+The bypass secret is normalized before use (whitespace and trailing
+CR/LF stripped; embedded CR/LF, non-printable, and empty-after-trim
+values rejected). An invalid value fails the `vercel_preview_access`
+precheck with `Invalid Vercel bypass secret: <reason>` and never prints
+the secret.
+
 The runner uses Node's built-in `fetch`; no system `curl` is required.
+
+### Troubleshooting: HTTP 0 / network error
+
+If preview QA reports HTTP 0/network error, the runner now reports safe
+fetch error details (`error_name`, `error_message`, `cause_code`,
+`cause_hostname`, `cause_syscall`) in `preview-qa-report.json`/`.md`,
+with every secret redacted. The most common cause is an invalid bypass
+secret value with whitespace/newline. Regenerate the Vercel bypass
+secret and update the GitHub Actions secret
+(`VERCEL_AUTOMATION_BYPASS_SECRET`) with no trailing newline.
 
 ### Discovering the latest preview URL
 

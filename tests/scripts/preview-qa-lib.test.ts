@@ -9,6 +9,8 @@ import {
   classifyAccessStatus,
   redactSecrets,
   shouldRunMutationChecks,
+  summarizeFetchError,
+  formatFetchErrorSummary,
 } from "../../scripts/preview-qa-lib.mjs";
 
 const FORCE_CONFIRM_TOKEN = "I_UNDERSTAND_THIS_WRITES_TO_THE_CONFIGURED_DATABASE";
@@ -46,6 +48,61 @@ describe("getBypassConfig", () => {
     const cfg = getBypassConfig({ VERCEL_BYPASS_SECRET: "legacy-alias" });
     expect(cfg.source).toBe("VERCEL_BYPASS_SECRET");
     expect(cfg.secret).toBe("legacy-alias");
+  });
+
+  it("trims surrounding whitespace before the secret is used", () => {
+    const cfg = getBypassConfig({
+      VERCEL_AUTOMATION_BYPASS_SECRET: "  automation-secret  ",
+    });
+    expect(cfg.present).toBe(true);
+    expect(cfg.valid).toBe(true);
+    expect(cfg.invalidReason).toBeNull();
+    expect(cfg.secret).toBe("automation-secret");
+  });
+
+  it("removes a trailing newline (the classic CI / echo artifact)", () => {
+    const cfg = getBypassConfig({
+      VERCEL_AUTOMATION_BYPASS_SECRET: "automation-secret\n",
+    });
+    expect(cfg.valid).toBe(true);
+    expect(cfg.secret).toBe("automation-secret");
+  });
+
+  it("removes a trailing CRLF", () => {
+    const cfg = getBypassConfig({
+      VERCEL_AUTOMATION_BYPASS_SECRET: "automation-secret\r\n",
+    });
+    expect(cfg.valid).toBe(true);
+    expect(cfg.secret).toBe("automation-secret");
+  });
+
+  it("rejects an embedded newline without exposing the secret", () => {
+    const cfg = getBypassConfig({
+      VERCEL_AUTOMATION_BYPASS_SECRET: "abc\ndef",
+    });
+    expect(cfg.present).toBe(true);
+    expect(cfg.valid).toBe(false);
+    expect(cfg.secret).toBeNull();
+    expect(cfg.invalidReason).toMatch(/CR\/LF/);
+  });
+
+  it("rejects a non-printable control character", () => {
+    const cfg = getBypassConfig({
+      VERCEL_AUTOMATION_BYPASS_SECRET: "abc\x00def",
+    });
+    expect(cfg.valid).toBe(false);
+    expect(cfg.secret).toBeNull();
+    expect(cfg.invalidReason).toMatch(/non-printable/);
+  });
+
+  it("rejects a value that is empty after trim", () => {
+    const cfg = getBypassConfig({
+      VERCEL_AUTOMATION_BYPASS_SECRET: "   \n",
+    });
+    expect(cfg.present).toBe(true);
+    expect(cfg.valid).toBe(false);
+    expect(cfg.secret).toBeNull();
+    expect(cfg.invalidReason).toMatch(/empty after trim/);
   });
 
   it("reads SET_VERCEL_BYPASS_COOKIE as a boolean string", () => {
@@ -103,6 +160,34 @@ describe("buildRequestHeaders", () => {
     expect("x-vercel-protection-bypass" in base).toBe(false);
     expect(out).not.toBe(base);
   });
+
+  it("sets the bypass header to the trimmed secret, never the raw value", () => {
+    const h = buildRequestHeaders(
+      {},
+      { VERCEL_AUTOMATION_BYPASS_SECRET: "  automation-secret\n" }
+    );
+    expect(h["x-vercel-protection-bypass"]).toBe("automation-secret");
+  });
+
+  it("does not set the bypass header when the secret is invalid", () => {
+    const embedded = buildRequestHeaders(
+      {},
+      { VERCEL_AUTOMATION_BYPASS_SECRET: "abc\ndef" }
+    );
+    expect("x-vercel-protection-bypass" in embedded).toBe(false);
+
+    const nonPrintable = buildRequestHeaders(
+      {},
+      { VERCEL_AUTOMATION_BYPASS_SECRET: "abc\x07def" }
+    );
+    expect("x-vercel-protection-bypass" in nonPrintable).toBe(false);
+
+    const emptyAfterTrim = buildRequestHeaders(
+      {},
+      { VERCEL_AUTOMATION_BYPASS_SECRET: "   " }
+    );
+    expect("x-vercel-protection-bypass" in emptyAfterTrim).toBe(false);
+  });
 });
 
 describe("classifyAccessStatus", () => {
@@ -157,9 +242,74 @@ describe("redactSecrets", () => {
     expect(out).toContain("sk_***redacted***");
   });
 
+  it("removes the raw bypass secret from a string", () => {
+    const bypass = "amm_bypass_TOPSECRET_value";
+    const out = redactSecrets(
+      `fetch failed using x-vercel-protection-bypass=${bypass}`,
+      [bypass]
+    );
+    expect(out).not.toContain(bypass);
+    expect(out).toContain("***redacted***");
+  });
+
   it("does not crash on null text", () => {
     // @ts-expect-error — intentional null input
     expect(redactSecrets(null, ["x"])).toBe("");
+  });
+});
+
+describe("summarizeFetchError", () => {
+  it("extracts name/message and cause fields from a fetch TypeError", () => {
+    const err = Object.assign(new TypeError("fetch failed"), {
+      cause: {
+        code: "ENOTFOUND",
+        hostname: "preview.vercel.app",
+        syscall: "getaddrinfo",
+      },
+    });
+    const s = summarizeFetchError(err);
+    expect(s.error_name).toBe("TypeError");
+    expect(s.error_message).toBe("fetch failed");
+    expect(s.cause_code).toBe("ENOTFOUND");
+    expect(s.cause_hostname).toBe("preview.vercel.app");
+    expect(s.cause_syscall).toBe("getaddrinfo");
+  });
+
+  it("returns nulls for missing fields and non-objects", () => {
+    const s = summarizeFetchError(undefined);
+    expect(s.error_name).toBeNull();
+    expect(s.error_message).toBeNull();
+    expect(s.cause_code).toBeNull();
+    expect(s.cause_hostname).toBeNull();
+    expect(s.cause_syscall).toBeNull();
+  });
+});
+
+describe("formatFetchErrorSummary", () => {
+  it("formats a one-line summary with cause details", () => {
+    const line = formatFetchErrorSummary({
+      error_name: "TypeError",
+      error_message: "fetch failed",
+      cause_code: "ECONNRESET",
+      cause_syscall: "read",
+      cause_hostname: "preview.vercel.app",
+    });
+    expect(line).toBe(
+      "TypeError: fetch failed: (code=ECONNRESET syscall=read hostname=preview.vercel.app)"
+    );
+  });
+
+  it("omits absent fields and tolerates null", () => {
+    expect(formatFetchErrorSummary(null)).toBe("");
+    expect(
+      formatFetchErrorSummary({
+        error_name: "TypeError",
+        error_message: null,
+        cause_code: null,
+        cause_syscall: null,
+        cause_hostname: null,
+      })
+    ).toBe("TypeError");
   });
 });
 
