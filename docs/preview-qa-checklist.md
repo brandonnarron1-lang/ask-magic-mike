@@ -37,6 +37,51 @@ the *template* (no token) in runner stdout.
 
 The runner uses Node's built-in `fetch`; no system `curl` is required.
 
+### Discovering the latest preview URL
+
+```bash
+npm run preview:find
+```
+
+Parses `vercel ls ask-magic-mike --scope eyes-up-industries` and emits
+JSON with the latest **Ready** Preview deployment. If the CLI is
+missing or parsing fails, the script emits a deterministic
+`{ ok: false, error, manual_commands }` payload — it never guesses a
+URL.
+
+### Browser widget e2e (no DB writes)
+
+```bash
+PREVIEW_URL="https://<preview-url>" \
+VERCEL_AUTOMATION_BYPASS_SECRET="…" \
+npm run preview:e2e
+```
+
+Drives the widget on `/widget-preview` in Chromium, intercepts every
+`POST /api/leads` via Playwright's `page.route`, and asserts the
+canonical payload shape. No real `/api/leads` request leaves the
+browser — no DB write occurs. Adds `extraHTTPHeaders` for bypass; the
+token is never printed.
+
+To capture an e2e summary for the release-candidate report:
+
+```bash
+PREVIEW_URL="…" VERCEL_AUTOMATION_BYPASS_SECRET="…" \
+./node_modules/.bin/playwright test tests/e2e/widget-preview-flow.spec.ts \
+  --reporter=json > artifacts/widget-e2e-report.json
+```
+
+### Consolidated release report
+
+```bash
+npm run release:report
+```
+
+Writes `artifacts/release-candidate-report.json` and `.md` with a
+single GO / NO-GO verdict from the static safety scan, the preview QA
+artifact, and (when present) the widget e2e artifact. No secrets are
+embedded.
+
 The checklist below documents the manual probes the runner automates —
 keep it for incidents or partial debugging when the runner can't reach
 a host.

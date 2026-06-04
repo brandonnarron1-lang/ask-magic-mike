@@ -431,3 +431,49 @@ use the cookie-bypass URL shape
 `?x-vercel-protection-bypass=<secret>&x-vercel-set-bypass-cookie=true`.
 Never paste bypass URLs into public docs, tickets, screenshots, Slack,
 or reports.
+
+### Promotion-grade upgrades
+
+The release gate is now durable enough to act as the permanent
+pre-promotion standard.
+
+- **`npm run preview:find`** — wraps `vercel ls` and emits JSON for
+  the latest Ready Preview deployment. Never guesses; on parse failure
+  it surfaces the exact manual commands.
+- **`npm run preview:e2e`** — Playwright spec
+  `tests/e2e/widget-preview-flow.spec.ts` drives the widget on
+  `/widget-preview` and intercepts `POST /api/leads` via `page.route`.
+  Bypass headers wire through `extraHTTPHeaders`. No real lead created.
+- **`npm run release:report`** — `scripts/release-candidate-report.mjs`
+  consolidates git metadata, the safety-scan summary, the preview QA
+  artifact, and any widget e2e JSON into one
+  `artifacts/release-candidate-report.{json,md}` with a single GO /
+  NO-GO verdict.
+- **Database identity in `/api/admin/health`** — extracted to
+  `src/lib/admin/health-safety.ts`. Five new env vars feed it:
+  `DATABASE_ENV`, `SUPABASE_PROJECT_REF`,
+  `PRODUCTION_SUPABASE_PROJECT_REF`, `PREVIEW_SUPABASE_PROJECT_REF`,
+  `ALLOW_PREVIEW_DB_MUTATION`. The verdict is deterministic and exposes
+  a stable `safety_blockers` array.
+- **No-escape mutation gate.** `shouldRunMutationChecks` in
+  `scripts/preview-qa-lib.mjs` now refuses to mutate when the health
+  endpoint reports `safe_for_preview_mutation: false` — **even with
+  FORCE_DB_WRITE + the confirm token**. Health is the single source of
+  truth. There is no override.
+- **Safety scanner extended** with checks H (mutation gate contract),
+  I (e2e route interception), J (release-gate doc strings). The
+  scanner now also requires `preview:find`, `preview:e2e`, and
+  `release:report` to exist in `package.json`.
+
+Release sequence:
+
+```
+npm run release:safety
+npm run release:gate
+npm run preview:find
+PREVIEW_URL=… VERCEL_AUTOMATION_BYPASS_SECRET=… SAFE_DB_WRITE=false npm run preview:qa
+PREVIEW_URL=… VERCEL_AUTOMATION_BYPASS_SECRET=… npm run preview:e2e
+npm run release:report
+# Review artifacts/release-candidate-report.md
+# No production promotion without explicit human approval.
+```

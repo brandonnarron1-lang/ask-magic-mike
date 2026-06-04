@@ -391,7 +391,14 @@ async function checkPackageScripts() {
   const text = await readFile(join(REPO_ROOT, path), "utf8");
   const pkg = JSON.parse(text);
   const scripts = pkg.scripts ?? {};
-  const required = ["preview:qa", "release:safety", "release:gate"];
+  const required = [
+    "preview:find",
+    "preview:qa",
+    "preview:e2e",
+    "release:safety",
+    "release:gate",
+    "release:report",
+  ];
   for (const name of required) {
     if (!scripts[name]) {
       fail("G. package_scripts", `${path} is missing script "${name}"`);
@@ -399,7 +406,120 @@ async function checkPackageScripts() {
   }
   pass(
     "G. package_scripts",
-    "package.json defines preview:qa, release:safety, release:gate"
+    `package.json defines ${required.join(", ")}`
+  );
+}
+
+/** H — mutation gate must use the health endpoint as source of truth */
+async function checkMutationGateContract() {
+  const libPath = "scripts/preview-qa-lib.mjs";
+  const qaPath = "scripts/preview-qa.mjs";
+
+  let lib;
+  try {
+    lib = await readFile(join(REPO_ROOT, libPath), "utf8");
+  } catch (err) {
+    fail("H. mutation_gate", `${libPath} missing (${err.message})`);
+    return;
+  }
+  let qa;
+  try {
+    qa = await readFile(join(REPO_ROOT, qaPath), "utf8");
+  } catch (err) {
+    fail("H. mutation_gate", `${qaPath} missing (${err.message})`);
+    return;
+  }
+
+  if (!/export function shouldRunMutationChecks\b/.test(lib)) {
+    fail(
+      "H. mutation_gate",
+      `${libPath} does not export shouldRunMutationChecks`
+    );
+  }
+  if (!qa.includes(`from "./preview-qa-lib.mjs"`) &&
+      !qa.includes(`from './preview-qa-lib.mjs'`)) {
+    fail(
+      "H. mutation_gate",
+      `${qaPath} does not import from preview-qa-lib.mjs`
+    );
+  }
+  // The lib must check health.safety.safe_for_preview_mutation and
+  // refuse when it is false. We look for the literal property access.
+  if (!lib.includes("safe_for_preview_mutation")) {
+    fail(
+      "H. mutation_gate",
+      `${libPath} does not reference health.safety.safe_for_preview_mutation`
+    );
+  }
+  // Defense in depth: there must NOT be a `force &&` shortcut that
+  // skips the safe_for_preview_mutation check.
+  if (/!health\.safety\?\.safe_for_preview_mutation && !force/.test(lib)) {
+    fail(
+      "H. mutation_gate",
+      `${libPath} still treats FORCE_DB_WRITE as an override for safe_for_preview_mutation`
+    );
+  }
+  pass(
+    "H. mutation_gate",
+    "shouldRunMutationChecks honours health.safety.safe_for_preview_mutation with no force override"
+  );
+}
+
+/** I — widget e2e must intercept /api/leads so no real lead is created */
+async function checkWidgetE2eInterception() {
+  const path = "tests/e2e/widget-preview-flow.spec.ts";
+  let text;
+  try {
+    text = await readFile(join(REPO_ROOT, path), "utf8");
+  } catch (err) {
+    fail("I. widget_e2e", `${path} missing (${err.message})`);
+    return;
+  }
+  if (!/page\.route\(\s*['"`]\*\*\/api\/leads['"`]/.test(text)) {
+    fail(
+      "I. widget_e2e",
+      `${path} does not intercept POST /api/leads via page.route`
+    );
+  }
+  // Belt and braces: ensure the spec doesn't use route.continue() which
+  // would let the real request through.
+  if (/route\.continue\s*\(/.test(text)) {
+    fail(
+      "I. widget_e2e",
+      `${path} uses route.continue() — real /api/leads request can pass`
+    );
+  }
+  pass(
+    "I. widget_e2e",
+    `${path} intercepts /api/leads with route.fulfill (no real lead creation)`
+  );
+}
+
+/** J — release-gate docs name the bypass secret and SAFE_DB_WRITE default */
+async function checkReleaseDocs() {
+  const path = "docs/release-gate.md";
+  let text;
+  try {
+    text = await readFile(join(REPO_ROOT, path), "utf8");
+  } catch (err) {
+    fail("J. release_docs", `${path} missing (${err.message})`);
+    return;
+  }
+  if (!text.includes("VERCEL_AUTOMATION_BYPASS_SECRET")) {
+    fail(
+      "J. release_docs",
+      `${path} does not mention VERCEL_AUTOMATION_BYPASS_SECRET`
+    );
+  }
+  if (!text.includes("SAFE_DB_WRITE=false")) {
+    fail(
+      "J. release_docs",
+      `${path} does not mention SAFE_DB_WRITE=false default`
+    );
+  }
+  pass(
+    "J. release_docs",
+    "release-gate.md documents bypass secret + SAFE_DB_WRITE default"
   );
 }
 
@@ -412,6 +532,9 @@ async function main() {
   await checkPreviewQaBypassPlumbing();
   await checkHealthEndpointShape();
   await checkPackageScripts();
+  await checkMutationGateContract();
+  await checkWidgetE2eInterception();
+  await checkReleaseDocs();
 
   for (const p of passes) console.log(`PASS  ${p.check} — ${p.message}`);
   for (const f of failures) {

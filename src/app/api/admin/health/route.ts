@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { computeHealthSafety } from "@/lib/admin/health-safety";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
@@ -9,8 +10,11 @@ const NO_STORE = { "Cache-Control": "no-store" };
  *   - build identity (commit / branch / Vercel env / site URL)
  *   - presence of required env vars (boolean only; never echoes values)
  *   - DB reachability + which migration-00012 tables exist
- *   - safety flags the QA runner uses to decide whether mutation
- *     tests are allowed
+ *   - DB identity (preview vs production vs unknown, derived from
+ *     SUPABASE_PROJECT_REF, PREVIEW_SUPABASE_PROJECT_REF,
+ *     PRODUCTION_SUPABASE_PROJECT_REF, DATABASE_ENV)
+ *   - safety flags + blockers the QA runner uses to decide whether
+ *     mutation tests are allowed
  *
  * Auth (either works):
  *   - x-admin-secret: $ADMIN_SECRET
@@ -93,9 +97,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // The 00012 migration adds tasks/listings/listing_matches/webhook_events/
-  // generated_assets/message_deliveries. If all five "new" tables answer,
-  // the migration is almost certainly applied.
+  // Migration 00012 adds the five tables below.
   const migration00012Likely =
     tablePresence.tasks &&
     tablePresence.listings &&
@@ -104,29 +106,14 @@ export async function GET(req: NextRequest) {
     tablePresence.generated_assets &&
     tablePresence.message_deliveries;
 
-  const warnings: string[] = [];
-
-  if (!supabaseUrlPresent) warnings.push("supabase_url_missing");
-  if (!supabaseServicePresent) warnings.push("supabase_service_role_missing");
-  if (!adminSecretPresent) warnings.push("admin_secret_missing");
-  if (smsEnabled) warnings.push("live_sms_enabled");
-  if (emailEnabled) warnings.push("live_email_enabled");
-  if (dbConfigured && !dbReachable) warnings.push("db_unreachable");
-  if (dbConfigured && dbReachable && !migration00012Likely)
-    warnings.push("migration_00012_not_applied");
-
-  // Mutation safety: only true when we are *clearly* in a preview env,
-  // live SMS/email are off, DB is reachable, and migration 00012 is in.
-  // If we can't tell, the answer is "no".
-  const isPreviewEnv =
-    vercelEnv === "preview" || vercelEnv === "development" || nodeEnv !== "production";
-  const liveSendsDisabled = !smsEnabled && !emailEnabled;
-  const safeForPreviewMutation =
-    isPreviewEnv &&
-    liveSendsDisabled &&
-    dbConfigured &&
-    dbReachable &&
-    migration00012Likely;
+  const safety = computeHealthSafety({
+    env: process.env as Record<string, string | undefined>,
+    dbConfigured,
+    dbReachable,
+    migration00012Likely,
+    smsEnabled,
+    emailEnabled,
+  });
 
   return NextResponse.json(
     {
@@ -158,20 +145,37 @@ export async function GET(req: NextRequest) {
         email_enabled: emailEnabled,
         ai_enabled: aiEnabled,
         flexmls_api_enabled: flexmlsEnabled,
+        database_env_set: !!process.env.DATABASE_ENV,
+        production_supabase_ref_set:
+          !!process.env.PRODUCTION_SUPABASE_PROJECT_REF,
+        preview_supabase_ref_set: !!process.env.PREVIEW_SUPABASE_PROJECT_REF,
+        allow_preview_db_mutation:
+          (process.env.ALLOW_PREVIEW_DB_MUTATION ?? "false").toLowerCase() ===
+          "true",
       },
       database: {
         configured: dbConfigured,
         reachable: dbReachable,
         migration_00012_likely_applied: migration00012Likely,
         tables: tablePresence,
+        identity: {
+          database_env: safety.identity.database_env,
+          supabase_project_ref_present:
+            safety.identity.supabase_project_ref_present,
+          matches_production_ref: safety.identity.matches_production_ref,
+          matches_preview_ref: safety.identity.matches_preview_ref,
+        },
       },
       safety: {
-        live_sms_disabled: !smsEnabled,
-        live_email_disabled: !emailEnabled,
-        safe_for_preview_mutation: safeForPreviewMutation,
+        live_sms_disabled: safety.live_sms_disabled,
+        live_email_disabled: safety.live_email_disabled,
+        is_preview_runtime: safety.is_preview_runtime,
+        allow_preview_db_mutation: safety.allow_preview_db_mutation,
+        safe_for_preview_mutation: safety.safe_for_preview_mutation,
+        safety_blockers: safety.safety_blockers,
         deployment_protection_bypass_env_present:
           deploymentProtectionBypassEnvPresent,
-        warnings,
+        warnings: safety.warnings,
       },
       preview_access_notes: [
         "If preview returns 401, run preview QA with VERCEL_AUTOMATION_BYPASS_SECRET.",

@@ -194,8 +194,19 @@ describe("shouldRunMutationChecks", () => {
     expect(r.reason).toContain(FORCE_CONFIRM_TOKEN);
   });
 
-  it("allows when FORCE_DB_WRITE=true and confirm token matches", () => {
+  it("STILL blocks when FORCE_DB_WRITE=true + confirm but health is unsafe", () => {
+    // The health endpoint is the single source of truth. FORCE does not
+    // override an unsafe health verdict — there is no escape hatch.
     const r = shouldRunMutationChecks(unsafeHealth, {
+      FORCE_DB_WRITE: "true",
+      CONFIRM_FORCE_DB_WRITE: FORCE_CONFIRM_TOKEN,
+    });
+    expect(r.allowed).toBe(false);
+    expect(r.reason).toMatch(/safe_for_preview_mutation=false/);
+  });
+
+  it("allows when FORCE_DB_WRITE=true + confirm AND health is safe", () => {
+    const r = shouldRunMutationChecks(safeHealth, {
       FORCE_DB_WRITE: "true",
       CONFIRM_FORCE_DB_WRITE: FORCE_CONFIRM_TOKEN,
     });

@@ -114,11 +114,20 @@ export function redactSecrets(text, secrets) {
 /**
  * Decide whether mutation checks may run.
  *
- * Hard rules:
- *   - default off (SAFE_DB_WRITE=false blocks)
- *   - FORCE_DB_WRITE requires the explicit confirm token
- *   - the health endpoint must report safe_for_preview_mutation=true
- *     unless FORCE_DB_WRITE is set
+ * The health endpoint is the single source of truth: if it reports
+ * `safe_for_preview_mutation: false`, mutation is never allowed —
+ * not even with FORCE_DB_WRITE. The only way to mutate is:
+ *
+ *   1. The health endpoint reports `safe_for_preview_mutation: true`
+ *      (which itself requires DATABASE_ENV/VERCEL_ENV=preview,
+ *      ALLOW_PREVIEW_DB_MUTATION=true, a non-production supabase ref,
+ *      live sends off, migration 00012 applied, and DB reachable).
+ *   2. SAFE_DB_WRITE=true, OR
+ *      (FORCE_DB_WRITE=true AND CONFIRM_FORCE_DB_WRITE === the exact
+ *      confirm token).
+ *
+ * If both 1 and 2 are satisfied, mutation may run. Otherwise it is
+ * blocked. There is no escape hatch when health says unsafe.
  *
  * @param {{ safety?: { safe_for_preview_mutation?: boolean } } | null} health
  * @param {Record<string, string|undefined>} env
@@ -143,12 +152,15 @@ export function shouldRunMutationChecks(health, env) {
   if (!health) {
     return { allowed: false, reason: "no health response to inspect" };
   }
-  if (!health.safety?.safe_for_preview_mutation && !force) {
+  // Health endpoint is the single source of truth. No escape hatch.
+  if (!health.safety?.safe_for_preview_mutation) {
     return {
       allowed: false,
       reason:
-        "health.safety.safe_for_preview_mutation=false. " +
-        "Set FORCE_DB_WRITE=true + CONFIRM_FORCE_DB_WRITE if you really mean it.",
+        "health.safety.safe_for_preview_mutation=false — refusing to mutate. " +
+        "The health endpoint is the single source of truth and FORCE_DB_WRITE " +
+        "does not override it. Configure DATABASE_ENV=preview, " +
+        "ALLOW_PREVIEW_DB_MUTATION=true, and a non-production Supabase ref.",
     };
   }
   return { allowed: true, reason: "ok" };

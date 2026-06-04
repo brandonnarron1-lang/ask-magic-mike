@@ -73,17 +73,59 @@ Artifacts: `artifacts/preview-qa-report.json` and
 
 ## Release sequence
 
-1. `npm run lint`
-2. `npm run typecheck`
-3. `npm run test`
-4. `npm run release:safety`
-5. `npm run build`
-6. Push branch — Vercel creates a preview deployment.
-7. Set `PREVIEW_URL` to the preview URL.
-8. `npm run preview:qa` (dry-run first, no DB writes).
-9. Review `artifacts/preview-qa-report.md`.
-10. Only after every gate is green — and only when the user explicitly
-    requests promotion — does `main` get touched.
+1. `npm run release:safety` — static scan
+2. `npm run release:gate` — runs safety + test + typecheck + lint + build
+3. `npm run preview:find` — discover the latest Ready preview URL
+4. `PREVIEW_URL=… VERCEL_AUTOMATION_BYPASS_SECRET=… SAFE_DB_WRITE=false npm run preview:qa`
+5. `PREVIEW_URL=… VERCEL_AUTOMATION_BYPASS_SECRET=… npm run preview:e2e`
+6. `npm run release:report`
+7. Review `artifacts/release-candidate-report.md` (and `.json`).
+8. **No production promotion without explicit human approval.** Only
+   after every gate is green does `main` get touched, and only when the
+   operator explicitly requests promotion.
+
+## Generated artifacts
+
+- `artifacts/preview-qa-report.json` and `.md`
+- `artifacts/release-candidate-report.json` and `.md`
+- `artifacts/widget-e2e-report.json` (when Playwright is run with
+  `--reporter=json --output=artifacts/widget-e2e-report.json`)
+
+The `artifacts/` directory is gitignored. No artifact contains raw
+secrets — admin secret, cron secret, and bypass token are redacted in
+every excerpt.
+
+## Database identity and mutation safety
+
+`/api/admin/health` is the **single source of truth** for whether the
+QA runner may mutate the database. Five env vars feed the verdict:
+
+- `DATABASE_ENV` — `preview` / `production` / `development`
+- `SUPABASE_PROJECT_REF` — project ref of the active Supabase
+- `PRODUCTION_SUPABASE_PROJECT_REF` — the production ref to refuse
+- `PREVIEW_SUPABASE_PROJECT_REF` — the preview ref to accept
+- `ALLOW_PREVIEW_DB_MUTATION` — explicit opt-in; default `false`
+
+`safety.safe_for_preview_mutation` is `true` only when **every** rule
+holds: preview runtime, `ALLOW_PREVIEW_DB_MUTATION=true`, DB configured
+and reachable, migration 00012 applied, live SMS/email disabled,
+supabase ref does not match production ref, supabase ref matches
+preview ref (or `DATABASE_ENV=preview` with no production ref
+configured). If identity is unknown, the answer is `false`.
+
+`shouldRunMutationChecks` in `scripts/preview-qa-lib.mjs` refuses to
+mutate when the health endpoint says unsafe — **`FORCE_DB_WRITE` does
+not override an unsafe verdict**. This is intentional.
+
+## Browser widget e2e
+
+`npm run preview:e2e` runs `tests/e2e/widget-preview-flow.spec.ts`,
+which drives the widget on `/widget-preview` from intent → contact →
+success and intercepts `POST /api/leads` via Playwright's `page.route`.
+No real lead is ever created. The spec also covers the error path by
+intercepting with `500`. Bypass headers are wired through
+`extraHTTPHeaders` so protected previews work without printing the
+token.
 
 ## Testing protected Vercel previews
 
