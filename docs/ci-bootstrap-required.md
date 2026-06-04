@@ -1,115 +1,101 @@
-# CI bootstrap required
+# CI bootstrap — Preview QA dispatcher
+
+This doc explains the bootstrap PR that adds the Preview QA
+dispatcher workflow to `main`.
+
+## Why this exists
 
 GitHub Actions has a structural rule: a workflow with a
 `workflow_dispatch` trigger only becomes dispatchable from the
 **Actions** tab once the workflow file exists on the repository's
-**default branch**.
+**default branch** (`main`).
 
-The release-hardening branch introduces two workflows:
+The release-hardening branch
+(`platform/phase-2-release-hardening`) ships the full release gate,
+including a full preview-QA workflow. But until that branch lands on
+`main`, the "Run workflow" button does not appear. Operators cannot
+run protected-preview QA from GitHub CI against the release branch
+without first merging it — which defeats the point of running QA
+*before* merging.
 
-- `.github/workflows/release-gate.yml`
-- `.github/workflows/preview-qa.yml`
+This bootstrap PR closes that gap.
 
-`release-gate.yml` runs on `pull_request` and on `push` to the
-release-hardening branch (and to `main`). It is already running
-correctly: GitHub picks up the workflow from the feature branch via
-the `pull_request` event.
+## What this PR adds
 
-`preview-qa.yml` is `workflow_dispatch` only. Until that file is on
-`main`, the **Run workflow** button does not appear in the GitHub UI,
-and `gh workflow run "Ask Magic Mike Preview QA"` returns "could not
-find any workflows named …" because no record exists on the default
-branch.
+- **`.github/workflows/preview-qa-dispatch.yml`** — a minimal
+  dispatcher workflow. It is `workflow_dispatch` only. It takes a
+  `target_ref` input (default
+  `platform/phase-2-release-hardening`), checks that ref out, and
+  runs the QA scripts that ship on that ref. It is the smallest thing
+  that puts the "Run workflow" button in the GitHub UI.
 
-## What this means
+## What this PR does NOT include
 
-- **No CI bypass.** Skipping branch protection or back-dooring a
-  preview promotion still requires real human action.
-- **The `pull_request` Release Gate is enforceable today.** It will
-  run on every PR including ones not destined for `main`.
-- **The `workflow_dispatch` Preview QA needs one preliminary action.**
+- No application code.
+- No release-branch merge.
+- No production promotion path.
+- No production env-var changes.
+- No DB writes. The dispatcher refuses `safe_db_write != "false"` at
+  step 1.
+- No Phase 3 product features.
+- No CRM changes.
+- No further workflows. The full release-gate workflow ships with the
+  release branch.
 
-## Two safe paths to bootstrap
+## Safety guarantees baked into the dispatcher
 
-### Option A — merge this PR
+1. The first step fails the run if `safe_db_write` is anything other
+   than `"false"`.
+2. The workflow checks out the caller-selected `target_ref`, not
+   `main`. The QA scripts run against the release-branch source.
+3. No `vercel promote`, no `git merge`, no `git checkout main` for
+   promotion appears in the file.
+4. Secrets are read only as `${{ secrets.NAME }}` env vars. The
+   values are never echoed.
+5. Controlled DB mutation QA is intentionally **not** supported here.
+   It is a manual procedure documented on the release branch.
 
-After human review of the PR, merge it. That puts the workflow files
-on `main`. Future PRs gain access to the manual Preview QA workflow
-immediately.
+## Required GitHub repo secrets
 
-This is the simplest path because the PR already contains the entire
-release system. Branch protection on `main` can then be configured to
-require the Release Gate check on subsequent PRs.
+After this PR is merged, add these in
+`Settings → Secrets and variables → Actions`:
 
-### Option B — surgical bootstrap PR first
-
-If the operator wants `workflow_dispatch` *before* merging the full
-release-hardening PR, they can:
-
-1. From `main`, create a tiny branch.
-2. Cherry-pick **only** the two workflow files and (optionally) this
-   doc.
-3. Open + merge that minimal bootstrap PR.
-4. Rebase the full release-hardening branch on top.
-
-This is slower but isolates the CI plumbing from the larger code
-diff. It does not change what either workflow does.
-
-## Required GitHub secrets
-
-In either path, the Preview QA workflow needs three repo secrets
-**before** it can fully pass:
-
-| Secret | Where to find |
+| Secret | Source |
 | --- | --- |
 | `ADMIN_SECRET`                     | Vercel preview env |
 | `CRON_SECRET`                      | Vercel preview env |
 | `VERCEL_AUTOMATION_BYPASS_SECRET`  | Vercel Project → Settings → Deployment Protection → Protection Bypass for Automation |
 
-Add them at:
+Without these, the dispatcher will fail at the preview-access
+precheck with the documented "missing bypass" message.
 
-```
-https://github.com/brandonnarron1-lang/ask-magic-mike/settings/secrets/actions
-```
+## After this PR merges — exact operator steps
 
-Without these, Preview QA still runs and produces a report — it just
-fails at the access-precheck step with the documented missing-bypass
-message. That is not a code defect.
+1. Add the three repo secrets listed above.
+2. Go to **Actions → Ask Magic Mike Preview QA Dispatch → Run
+   workflow**.
+3. Inputs:
+   - `target_ref`: `platform/phase-2-release-hardening`
+   - `preview_url`: leave blank (the workflow runs `preview:wait` and
+     selects a commit-matched Ready preview) — OR paste the URL from
+     the latest Vercel preview build comment on the release PR.
+   - `wait_for_preview`: `true`
+   - `run_browser_e2e`: `true`
+   - `safe_db_write`: `false` (any other value is rejected)
+4. Wait for the run. Download
+   `preview-qa-dispatch-artifacts.zip`. Open
+   `launch-authority-report.md` first.
 
-## After bootstrap
+The release branch's full `Ask Magic Mike Release Gate` workflow
+becomes available automatically once the release PR (#3) merges to
+`main`. This bootstrap PR does not replace it — it only unblocks
+manual Preview QA while the release PR is still open.
 
-Confirm via:
+## What does NOT change with this PR
 
-```
-gh workflow list                       # both workflows visible
-gh workflow view "Ask Magic Mike Preview QA"
-```
-
-Then trigger:
-
-```
-gh workflow run "Ask Magic Mike Preview QA" \
-  --ref platform/phase-2-release-hardening \
-  -f preview_url="" \
-  -f wait_for_preview="true" \
-  -f run_browser_e2e="true" \
-  -f safe_db_write="false"
-```
-
-The workflow will fail at step 1 if `safe_db_write` is anything other
-than `false`. That is intentional — controlled mutation QA is
-documented in `docs/controlled-preview-mutation-qa.md` and is a
-manual procedure, never CI.
-
-## Branch protection (recommended, post-bootstrap)
-
-Once the Release Gate has run on `main`, configure:
-
-- Settings → Branches → Branch protection rules → `main`
-- Require status checks: `Ask Magic Mike Release Gate / local-release-gate`
-- Require PR review (≥ 1 reviewer)
-- Block force pushes
-
-The release-safety scanner already enforces the rule that no
-production promotion workflow exists. Branch protection makes
-unauthorized merges to `main` impossible too.
+- Production deployment is untouched.
+- Production env vars are untouched.
+- Production DB is untouched.
+- `main`'s application code is unchanged.
+- Branch protection on `main` is unchanged (configure it separately
+  once the release PR lands).
