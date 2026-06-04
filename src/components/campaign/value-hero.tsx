@@ -15,7 +15,7 @@ import { ConversionPanel } from "@/components/amm/conversion-panel";
 import { OptionCard, type OptionCardProps } from "@/components/amm/option-card";
 import { HowItWorks } from "@/components/amm/how-it-works";
 import { AiAssistBadge } from "@/components/amm/ai-assist-badge";
-import { MagicMikeWidgetLauncher } from "@/components/amm/magic-mike-widget-launcher";
+import { MagicMikeWidgetFloating } from "@/components/amm/magic-mike-widget-floating";
 import { ammTokens } from "@/components/amm/tokens";
 import { motion } from "@/components/amm/motion";
 
@@ -186,10 +186,7 @@ export function ValueHero() {
         <ComplianceFooter variant="inline" testId="value-disclosure" />
       </main>
 
-      <MagicMikeWidgetLauncher
-        href="#value-hero-heading"
-        label="Ask Magic Mike"
-      />
+      <MagicMikeWidgetFloating label="Ask Magic Mike" />
     </BrandShell>
   );
 }

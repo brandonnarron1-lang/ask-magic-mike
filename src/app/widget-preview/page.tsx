@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { BrandShell } from "@/components/amm/brand-shell";
 import { BrandHeader } from "@/components/amm/brand-header";
 import { MagicMikeWidgetShell } from "@/components/amm/magic-mike-widget-shell";
-import { MagicMikeWidgetLauncher } from "@/components/amm/magic-mike-widget-launcher";
+import { MagicMikeWidgetController } from "@/components/amm/magic-mike-widget-controller";
+import { MagicMikeWidgetFloating } from "@/components/amm/magic-mike-widget-floating";
 import { BrandKitShowcase } from "@/components/amm/brand-kit-showcase";
 import { ComplianceFooter } from "@/components/amm/compliance-footer";
 import { ammTokens } from "@/components/amm/tokens";
@@ -76,6 +77,23 @@ export default function WidgetPreviewPage() {
           </p>
         </section>
 
+        {/* Live functional widget — drives the deterministic flow + posts
+            to /api/leads. This is the cell the preview QA checklist
+            interacts with end-to-end. */}
+        <section className="mb-12" data-testid="widget-live-demo">
+          <h2 className={`${ammTokens.headlineDisplay} text-[20px] mb-4`}>
+            MagicMikeWidgetController — live demo
+          </h2>
+          <p className="text-[12.5px] text-slate-300 mb-3">
+            Pick an intent, answer 1–3 questions, submit → POST /api/leads.
+            Use this cell for the preview QA checklist. Same controller is
+            mounted on `/value` as a floating widget bottom-right.
+          </p>
+          <div className="max-w-[420px]">
+            <MagicMikeWidgetController />
+          </div>
+        </section>
+
         {/* Four widget states */}
         <section className="mb-12">
           <h2
@@ -126,10 +144,7 @@ export default function WidgetPreviewPage() {
         </div>
       </main>
 
-      <MagicMikeWidgetLauncher
-        href="#widget-state-grid"
-        label="Ask Magic Mike"
-      />
+      <MagicMikeWidgetFloating label="Ask Magic Mike" />
     </BrandShell>
   );
 }
