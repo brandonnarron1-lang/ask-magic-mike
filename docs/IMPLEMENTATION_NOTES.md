@@ -204,3 +204,91 @@ This turn's vitest run on the new modules and the existing 143-test baseline shi
 4. **Real PDF FlexMLS import** — `PdfListingProvider` is an interface stub. CSV is the live path.
 5. **AI generation** — deterministic templates only. When `OPENAI_API_KEY` lands, swap `MarketingAssetEngine.generate()` to the LLM path; the public-safe sanitizer is already enforced upstream of the prompt, so leakage is prevented either way.
 6. **Production promotion** — preview-only this phase. Production stays at `ecf59c9`.
+
+## Phase 2 — Cockpit & Conversion Engine (added this turn)
+
+Branch: `platform/phase-2-cockpit-conversion-engine` (off `61cc9da`). Production
+remains at `ecf59c9`. Not promoted.
+
+What landed:
+
+- **New engines**:
+  - `src/lib/engines/seller-offer-intelligence.ts` — deterministic seller
+    scorer + router + script generator. Strict-no on guaranteed/binding/
+    instant language; "subject to review, no commitment" is the safe
+    phrasing.
+  - `src/lib/engines/listing-match.ts` — buyer/listing matcher using
+    public listing fields only. No protected-class signaling.
+  - `src/lib/engines/sla-sweep.ts` — DB-aware sweep on top of the pure
+    `SlaEngine`. `POST /api/admin/sla/sweep` triggers it. Persists
+    breaches to `compliance_flags` when asked.
+- **Admin APIs**:
+  - `GET /api/admin/dashboard` — totals, source breakdown, recent
+    activity feed.
+  - `GET /api/admin/leads` — filtered lead list (q / lead_type / status /
+    grade / source / unassigned_only / spam_suspect / sort / pagination).
+  - `GET /api/admin/leads/[id]` — full detail (lead + events + messages
+    + tasks + assignments + attribution + consents + listing matches +
+    compliance flags).
+  - `PATCH /api/admin/leads/[id]` — update status/type/grade/follow-up,
+    writes `audit_logs` + `analytics_events`.
+  - `POST /api/admin/leads/[id]/assign` — assign/reassign, writes
+    `agent_assignments` + `audit_logs` + `lead_assigned` event.
+  - `POST /api/admin/leads/[id]/notes` — append note as a `messages` row.
+  - `POST /api/admin/leads/[id]/tasks` — create a `tasks` row.
+  - `POST /api/admin/leads/[id]/messages` — send templated SMS/email
+    through `CommunicationsEngine`; reads consent + `compliance_flags`.
+  - `POST /api/admin/sla/sweep` — runs `SlaSweepEngine`; `?persist=true`
+    writes `compliance_flags`.
+  - All admin routes gated by `x-admin-secret` against `ADMIN_SECRET`.
+- **Webhook scaffolds**:
+  - `POST /api/webhooks/sms/inbound` — Twilio-style + JSON; handles
+    STOP/START/UNSTOP; writes `opt_out_sms`/`opt_in` flags; mirrors raw
+    payload to `webhook_events`.
+  - `POST /api/webhooks/email/events` — provider-generic envelope;
+    updates `message_deliveries`; bounce/unsubscribe writes
+    `opt_out_email`.
+- **Widget backend**: `src/lib/widget/submit-lead.ts` — client helper
+  the `MagicMikeWidgetShell` calls; pulls UTM attribution from
+  `sessionStorage`, posts to the canonical `/api/leads`, persists a
+  widget session id.
+- **Admin UI**:
+  - `/admin/leads` — full inbox with filters + sort.
+  - `/admin/leads/[id]` — detail view with profile, attribution, events,
+    messages, tasks, compliance flags, listing matches.
+  - Existing `/admin` dashboard untouched (still works).
+- **Analytics events**: extended the `AnalyticsEventName` enum and
+  registry with `lead_updated`, `note_added`, `task_created`,
+  `task_completed`, `appointment_*`, `widget_*`, `opt_out`, `opt_in`.
+
+What still needs manual setup:
+
+- **Generated DB types**: migration 00012 added tables that aren't yet in
+  `src/types/database.types.ts`. The new modules cast through `any`
+  with a clear comment. Apply 00012 and regen:
+  ```
+  supabase db push
+  supabase gen types typescript --linked > src/types/database.types.ts
+  ```
+- **Vercel Cron**: wire the SLA sweep:
+  ```
+  // vercel.json
+  { "crons": [{ "path": "/api/admin/sla/sweep?persist=true", "schedule": "*/5 * * * *" }] }
+  ```
+  When ops enables this, also add `x-admin-secret` via Vercel's
+  Authorization header injection or move the sweep to a cron-only auth
+  scheme.
+- **Twilio signature verification**: `/api/webhooks/sms/inbound`
+  currently logs `x-twilio-signature` but doesn't compute the HMAC.
+  Production should compute it from `TWILIO_AUTH_TOKEN` before going
+  fully open.
+- **Email provider pick**: `/api/webhooks/email/events` is
+  provider-generic. When Resend / SendGrid is selected, plug in the
+  signature check + add a real provider adapter (interface already
+  defined in `src/lib/adapters/email-types.ts`).
+- **Real chat backend**: `MagicMikeWidgetShell` is still visual. The
+  `submit-lead.ts` helper covers the lead-create handoff; an actual
+  multi-turn conversation backend is queued.
+
+Test status: 230 tests passing (+15 net). TypeScript clean. Lint clean.
+Build clean.

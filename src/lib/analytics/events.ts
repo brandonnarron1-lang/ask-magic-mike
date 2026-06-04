@@ -161,4 +161,68 @@ export const ANALYTICS_EVENTS: Record<
     category: "intake",
     description: "Provider reported link click",
   },
+  lead_updated: {
+    category: "intake",
+    description: "Admin or system mutated a lead row",
+  },
+  note_added: {
+    category: "admin",
+    description: "Note appended to a lead",
+  },
+  task_created: {
+    category: "admin",
+    description: "Task created on a lead",
+  },
+  task_completed: {
+    category: "admin",
+    description: "Task closed",
+  },
+  appointment_requested: {
+    category: "intake",
+    description: "Lead requested an appointment",
+  },
+  appointment_set: {
+    category: "intake",
+    description: "Appointment scheduled",
+  },
+  appointment_completed: {
+    category: "intake",
+    description: "Appointment occurred",
+  },
+  widget_opened: {
+    category: "intake",
+    description: "Widget launcher opened",
+  },
+  widget_started: {
+    category: "intake",
+    description: "Widget conversation started",
+  },
+  widget_intent_selected: {
+    category: "intake",
+    description: "User picked an intent in widget",
+  },
+  widget_question_answered: {
+    category: "intake",
+    description: "Widget question answered",
+  },
+  widget_contact_submitted: {
+    category: "intake",
+    description: "User submitted contact info via widget",
+  },
+  widget_lead_created: {
+    category: "intake",
+    description: "Widget posted a lead through /api/leads",
+  },
+  widget_cta_clicked: {
+    category: "intake",
+    description: "Widget CTA tap",
+  },
+  opt_out: {
+    category: "intake",
+    description: "User opted out of a channel",
+  },
+  opt_in: {
+    category: "intake",
+    description: "User opted in to a channel",
+  },
 };

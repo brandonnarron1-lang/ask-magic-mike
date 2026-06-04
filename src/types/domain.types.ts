@@ -359,6 +359,7 @@ export type AnalyticsEventName =
   | "crm_sync_error"
   // Canonical platform additions (migration 00012 + LeadCaptureEngine):
   | "lead_created"
+  | "lead_updated"
   | "duplicate_detected"
   | "spam_flagged"
   | "rate_limited"
@@ -373,7 +374,22 @@ export type AnalyticsEventName =
   | "email_sent"
   | "email_received"
   | "email_opened"
-  | "email_clicked";
+  | "email_clicked"
+  | "note_added"
+  | "task_created"
+  | "task_completed"
+  | "appointment_requested"
+  | "appointment_set"
+  | "appointment_completed"
+  | "widget_opened"
+  | "widget_started"
+  | "widget_intent_selected"
+  | "widget_question_answered"
+  | "widget_contact_submitted"
+  | "widget_lead_created"
+  | "widget_cta_clicked"
+  | "opt_out"
+  | "opt_in";
 
 export interface AnalyticsEvent {
   id: string;
