@@ -63,6 +63,16 @@ async function main() {
   const results = [];
 
   // ─ Git hygiene ─
+  // CI pull_request runs check out the PR's merge commit in detached
+  // HEAD — that's normal, not a failure. We capture the branch from
+  // the GitHub-supplied env when available and treat the check as
+  // advisory.
+  const ciBranch =
+    process.env.GITHUB_HEAD_REF ||
+    process.env.GITHUB_REF_NAME ||
+    null;
+  const effectiveBranch =
+    branch && branch !== "HEAD" ? branch : ciBranch ?? branch;
   results.push(
     check(
       "git.tree_clean",
@@ -74,9 +84,11 @@ async function main() {
   results.push(
     check(
       "git.branch_present",
-      branch && branch !== "HEAD" ? "pass" : "fail",
-      true,
-      branch ? `on branch ${branch}` : "no branch (detached HEAD)"
+      effectiveBranch && effectiveBranch !== "HEAD" ? "pass" : "fail",
+      false,
+      effectiveBranch && effectiveBranch !== "HEAD"
+        ? `on branch ${effectiveBranch}`
+        : "no branch resolvable (detached HEAD without GITHUB_HEAD_REF/REF_NAME)"
     )
   );
 
