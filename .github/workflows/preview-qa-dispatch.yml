@@ -1,0 +1,172 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Ask Magic Mike — Preview QA Dispatch (bootstrap workflow)
+#
+# Purpose
+# -------
+# This is the *bootstrap* dispatcher for protected-preview QA.
+# It exists on `main` only so that GitHub Actions' `workflow_dispatch`
+# trigger registers and the "Run workflow" button is available in the
+# Actions UI. Without this, manual Preview QA against the release
+# branch cannot be invoked from CI.
+#
+# This workflow checks out a caller-selected `target_ref` (default:
+# the release branch) and runs the QA scripts that ship on that ref.
+# It does not run scripts from `main`. It does not modify `main`.
+#
+# Safety contract
+# ---------------
+# - SAFE_DB_WRITE is hard-pinned to "false". The dispatcher refuses
+#   any other value at step 1.
+# - No `vercel promote`. No production env mutation. No `git merge`.
+#   No `git checkout main` for promotion.
+# - No secrets are echoed. All secret env values are passed through
+#   `${{ secrets.* }}` only.
+# - Controlled DB-mutation QA is intentionally *not* supported here —
+#   that procedure is documented separately and is manual on purpose.
+#
+# Future people: read this comment after the disaster, not before.
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Ask Magic Mike Preview QA Dispatch
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_ref:
+        description: "Branch, tag, or commit to test (e.g. platform/phase-2-release-hardening)"
+        required: true
+        default: "platform/phase-2-release-hardening"
+      preview_url:
+        description: "Vercel preview URL. Leave blank to auto-discover after checkout."
+        required: false
+        default: ""
+      wait_for_preview:
+        description: "If preview_url is blank, wait for the deployment matching the target_ref's HEAD commit"
+        required: true
+        default: "true"
+      run_browser_e2e:
+        description: "Also run npm run preview:e2e (Playwright widget flow)"
+        required: true
+        default: "true"
+      safe_db_write:
+        description: "Must remain 'false'. This dispatcher refuses any other value."
+        required: true
+        default: "false"
+
+jobs:
+  preview-qa-dispatch:
+    name: preview-qa-dispatch
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+
+    steps:
+      - name: Refuse SAFE_DB_WRITE override
+        run: |
+          if [ "${{ inputs.safe_db_write }}" != "false" ]; then
+            echo "ERROR: this dispatcher refuses safe_db_write != false."
+            echo "Controlled mutation QA is intentionally manual — see"
+            echo "docs/controlled-preview-mutation-qa.md on the release branch."
+            exit 1
+          fi
+
+      - name: Checkout target_ref
+        # We deliberately check out the *target_ref*, not main, because
+        # the QA scripts only exist on the release branch.
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target_ref }}
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install deps
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Release safety scan
+        run: npm run release:safety
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright browsers
+        if: inputs.run_browser_e2e == 'true'
+        run: ./node_modules/.bin/playwright install --with-deps chromium
+
+      - name: Determine PREVIEW_URL
+        id: pick_url
+        run: |
+          set -e
+          if [ -n "${{ inputs.preview_url }}" ]; then
+            echo "preview_url=${{ inputs.preview_url }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "${{ inputs.wait_for_preview }}" = "true" ]; then
+            JSON="$(npm run preview:wait --silent)"
+          else
+            JSON="$(npm run preview:find --silent)"
+          fi
+          OK="$(echo "$JSON" | node -e 'let s="";process.stdin.on("data",c=>s+=c).on("end",()=>{try{console.log(JSON.parse(s).ok)}catch{console.log(false)}})')"
+          if [ "$OK" != "true" ]; then
+            echo "Failed to discover preview URL."
+            echo "$JSON"
+            exit 1
+          fi
+          URL="$(echo "$JSON" | node -e 'let s="";process.stdin.on("data",c=>s+=c).on("end",()=>{try{console.log(JSON.parse(s).preview_url)}catch{console.log("")}})')"
+          if [ -z "$URL" ]; then
+            echo "Discovery returned no URL."
+            exit 1
+          fi
+          echo "preview_url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Preview QA (SAFE_DB_WRITE=false)
+        env:
+          PREVIEW_URL: ${{ steps.pick_url.outputs.preview_url }}
+          SAFE_DB_WRITE: "false"
+        run: npm run preview:qa
+
+      - name: Widget browser e2e
+        if: inputs.run_browser_e2e == 'true'
+        env:
+          PREVIEW_URL: ${{ steps.pick_url.outputs.preview_url }}
+        run: |
+          mkdir -p artifacts
+          ./node_modules/.bin/playwright test \
+            tests/e2e/widget-preview-flow.spec.ts \
+            --reporter=json > artifacts/widget-e2e-report.json
+
+      - name: Release candidate report
+        run: npm run release:report
+
+      - name: Launch authority report
+        run: npm run launch:authority
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-qa-dispatch-artifacts
+          path: |
+            artifacts/*.json
+            artifacts/*.md
+          if-no-files-found: ignore
