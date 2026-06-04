@@ -292,3 +292,58 @@ What still needs manual setup:
 
 Test status: 230 tests passing (+15 net). TypeScript clean. Lint clean.
 Build clean.
+
+## Phase 2 hardening (added this turn — branch `platform/phase-2-release-hardening`)
+
+Targeted patches against the known gaps in `ed32a0b`. Production is
+unchanged (still `ecf59c9`).
+
+What landed:
+
+- **Twilio signature verification.** New helper
+  `src/lib/adapters/twilio-signature.ts` (pure function, constant-time
+  compare). `/api/webhooks/sms/inbound` requires a valid
+  `X-Twilio-Signature` when `SMS_PROVIDER=twilio` and `ENABLE_SMS=true`;
+  otherwise falls back to `x-admin-secret` for mock/dev.
+- **Email webhook normalizer.** New helper
+  `src/lib/adapters/email-webhook-normalizer.ts` detects
+  Resend / SendGrid / Postmark / mock envelopes and projects them onto
+  a canonical event shape. Bounce / complaint / unsubscribe events
+  write `opt_out_email` `compliance_flags`.
+- **SLA cron auth.** `POST/GET /api/admin/sla/sweep` accepts admin
+  (`x-admin-secret`) **or** cron (`Authorization: Bearer $CRON_SECRET`).
+  GET mirrors POST so Vercel Cron's default GET works.
+- **Functional widget.** `MagicMikeWidgetController` wraps the visual
+  shell with a deterministic intent → qualify → contact → submit state
+  machine. Submits via the canonical `/api/leads`. Tracks
+  `widget_opened/started/intent_selected/question_answered/contact_submitted/lead_created/submit_failed/cta_clicked`.
+- **Admin mutation UX (server actions).** New
+  `src/app/(admin)/admin/leads/[id]/actions.ts` exposes server actions
+  for assign / status / type / mark-spam / note / task / message /
+  listing-match / seller-offer-review. `AdminLeadActions` renders the
+  forms. `ADMIN_SECRET` stays server-side.
+- **Two new admin intel routes:** `POST /api/admin/leads/[id]/match-listings`
+  (runs `ListingMatch`, persists top 10 into `listing_matches`) and
+  `POST /api/admin/leads/[id]/seller-offer-review` (runs
+  `SellerOfferIntelligence`, persists into `generated_assets`).
+- **Analytics event registry**: added `widget_submit_failed`.
+- **Docs:** `docs/supabase-migration-and-types.md`,
+  `docs/vercel-cron-sla-sweep.md`,
+  `docs/paid-traffic-launch-copy-pack.md`,
+  `docs/preview-qa-checklist.md`.
+- **`.env.example`**: `CRON_SECRET`, `BUSINESS_HOURS_*`.
+
+Tests: 29 files / 257 tests passing (+27 net). New coverage: Twilio
+signature helper (7), email webhook normalizer (10), admin auth (5),
+lead-list mock-mode (3). TypeScript clean. Lint clean. Build clean.
+
+What still needs manual setup:
+
+- Apply migration 00012 + regen `database.types.ts`
+  (`docs/supabase-migration-and-types.md`).
+- Set `CRON_SECRET` in Vercel project env + add `vercel.json`
+  (`docs/vercel-cron-sla-sweep.md`).
+- Pick + configure email provider. The normalizer handles all three
+  envelope shapes; the adapter layer ships mock-only today.
+- Rewrite baked-copy ad templates per
+  `docs/paid-traffic-launch-copy-pack.md` before any paid spend.

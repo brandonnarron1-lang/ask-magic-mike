@@ -1,62 +1,93 @@
 import { NextRequest, NextResponse } from "next/server";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
+import { verifyTwilioSignature } from "@/lib/adapters/twilio-signature";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
 /**
  * Inbound SMS webhook.
  *
- * Twilio sends an `application/x-www-form-urlencoded` body with `From`,
- * `Body`, `MessageSid`, etc. Other carriers vary; we accept JSON too.
- * STOP / START / UNSTOP keywords are honored by updating
- * `compliance_flags` with `opt_out_sms` / clearing it.
+ * Two accepted call shapes:
+ *   1) Twilio (form-urlencoded) — verified against `X-Twilio-Signature`
+ *      when `SMS_PROVIDER=twilio` and `ENABLE_SMS=true`.
+ *   2) Dev / mock (JSON or form) — accepted only when `x-admin-secret`
+ *      matches `ADMIN_SECRET`. Use this for replaying captured payloads
+ *      and end-to-end tests.
  *
- * Signature verification: when `TWILIO_AUTH_TOKEN` is set we'll soon
- * compute the Twilio signature; for now we accept the payload but log
- * the signature header so production can flip on verification.
+ * STOP / START / UNSTOP keywords update consent state via
+ * `compliance_flags`. The raw payload is mirrored to `webhook_events`
+ * for replay.
+ *
+ * Response shapes (stable):
+ *   200 { ok: true,  lead_id, stop_handled, start_handled, mode }
+ *   401 { ok: false, error: "unauthorized" }
+ *   400 { ok: false, error: "..." }
  */
 export async function POST(req: NextRequest) {
-  // Dev/mock path: allow ADMIN_SECRET-gated test payloads.
+  const twilioEnabled =
+    (process.env.SMS_PROVIDER ?? "").toLowerCase() === "twilio" &&
+    (process.env.ENABLE_SMS ?? "false").toLowerCase() === "true";
+
   const adminSecret = req.headers.get("x-admin-secret");
   const twilioSig = req.headers.get("x-twilio-signature");
-  const looksLikeTwilio =
-    !!twilioSig || (req.headers.get("content-type") ?? "").includes("application/x-www-form-urlencoded");
-
-  if (!adminSecret && !looksLikeTwilio) {
-    return NextResponse.json(
-      { ok: false, error: "unrecognized_source" },
-      { status: 400, headers: NO_STORE }
-    );
-  }
-  if (
-    adminSecret &&
-    process.env.ADMIN_SECRET &&
-    adminSecret !== process.env.ADMIN_SECRET
-  ) {
-    return NextResponse.json(
-      { ok: false, error: "unauthorized" },
-      { status: 401, headers: NO_STORE }
-    );
-  }
-
-  // Parse based on content-type.
-  let from = "";
-  let body = "";
-  let providerMessageId: string | null = null;
-
   const ct = req.headers.get("content-type") ?? "";
+
+  // Parse body once (we may need it for sig verification).
+  let formParams: Record<string, string> | undefined;
+  let jsonBody: Record<string, unknown> | undefined;
   if (ct.includes("application/json")) {
-    const j = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-    from = String(j.from ?? j.From ?? "");
-    body = String(j.body ?? j.Body ?? "");
-    providerMessageId = String(j.message_id ?? j.MessageSid ?? "") || null;
+    jsonBody = (await req.json().catch(() => ({}))) as Record<string, unknown>;
   } else {
     const text = await req.text();
     const params = new URLSearchParams(text);
-    from = params.get("From") ?? "";
-    body = params.get("Body") ?? "";
-    providerMessageId = params.get("MessageSid");
+    formParams = {};
+    for (const [k, v] of params) formParams[k] = v;
   }
+
+  // Determine authorization mode.
+  let mode: "twilio" | "mock" = "mock";
+  if (twilioEnabled) {
+    const fullUrl =
+      req.headers.get("x-forwarded-proto") && req.headers.get("host")
+        ? `${req.headers.get("x-forwarded-proto")}://${req.headers.get("host")}${req.nextUrl.pathname}${req.nextUrl.search}`
+        : req.url;
+    const verify = verifyTwilioSignature({
+      url: fullUrl,
+      providedSignature: twilioSig,
+      authToken: process.env.TWILIO_AUTH_TOKEN ?? "",
+      formParams,
+    });
+    if (!verify.ok) {
+      return NextResponse.json(
+        { ok: false, error: "unauthorized", reason: verify.reason },
+        { status: 401, headers: NO_STORE }
+      );
+    }
+    mode = "twilio";
+  } else {
+    if (!process.env.ADMIN_SECRET || adminSecret !== process.env.ADMIN_SECRET) {
+      return NextResponse.json(
+        { ok: false, error: "unauthorized" },
+        { status: 401, headers: NO_STORE }
+      );
+    }
+    mode = "mock";
+  }
+
+  // Extract canonical fields from whichever body shape arrived.
+  const from = String(
+    jsonBody?.from ?? jsonBody?.From ?? formParams?.From ?? ""
+  ).trim();
+  const body = String(
+    jsonBody?.body ?? jsonBody?.Body ?? formParams?.Body ?? ""
+  );
+  const providerMessageId =
+    String(
+      jsonBody?.message_id ??
+        jsonBody?.MessageSid ??
+        formParams?.MessageSid ??
+        ""
+    ) || null;
 
   if (!from || !body) {
     return NextResponse.json(
@@ -66,10 +97,12 @@ export async function POST(req: NextRequest) {
   }
 
   const normalizedBody = body.trim().toLowerCase();
-  const isStop = /^(stop|stopall|unsubscribe|cancel|end|quit)$/.test(normalizedBody);
+  const isStop = /^(stop|stopall|unsubscribe|cancel|end|quit)$/.test(
+    normalizedBody
+  );
   const isStart = /^(start|unstop|yes)$/.test(normalizedBody);
 
-  // Find the matching lead by normalized phone (when configured).
+  // Find a matching lead by normalized phone (when configured).
   let leadId: string | null = null;
   if (
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -87,7 +120,6 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
     leadId = data?.id ?? null;
 
-    // Log the message either way.
     if (leadId) {
       await client.from("messages").insert({
         lead_id: leadId,
@@ -101,27 +133,15 @@ export async function POST(req: NextRequest) {
         lead_id: leadId,
         flag_type: "opt_out_sms",
         severity: "warn",
-        notes: JSON.stringify({ providerMessageId }),
+        notes: JSON.stringify({ providerMessageId, mode }),
       });
     }
-    if (isStart && leadId) {
-      await client.from("compliance_flags").insert({
-        lead_id: leadId,
-        flag_type: "opt_in" as never, // we accept extra values for future schema growth
-        severity: "info",
-        notes: JSON.stringify({ providerMessageId }),
-      }).then(
-        () => {},
-        () => {}
-      );
-    }
 
-    // Mirror raw payload to webhook_events for replay.
     await client.from("webhook_events").insert({
-      provider: "twilio_sms",
+      provider: mode === "twilio" ? "twilio_sms" : "mock_sms",
       topic: "inbound",
-      signature_ok: !!twilioSig, // verification stub
-      payload: { from, body, providerMessageId },
+      signature_ok: mode === "twilio",
+      payload: { from, body, providerMessageId, params: formParams ?? jsonBody },
       processed_at: new Date().toISOString(),
     });
   }
@@ -129,7 +149,7 @@ export async function POST(req: NextRequest) {
   trackEventNoWait({
     eventName: isStop ? "opt_out" : isStart ? "opt_in" : "sms_received",
     leadId: leadId ?? undefined,
-    properties: { from, providerMessageId, body },
+    properties: { from, providerMessageId, body, mode },
   });
 
   return NextResponse.json(
@@ -138,6 +158,7 @@ export async function POST(req: NextRequest) {
       lead_id: leadId,
       stop_handled: isStop,
       start_handled: isStart,
+      mode,
     },
     { headers: NO_STORE }
   );

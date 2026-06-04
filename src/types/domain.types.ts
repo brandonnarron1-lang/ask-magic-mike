@@ -388,6 +388,7 @@ export type AnalyticsEventName =
   | "widget_contact_submitted"
   | "widget_lead_created"
   | "widget_cta_clicked"
+  | "widget_submit_failed"
   | "opt_out"
   | "opt_in";
 

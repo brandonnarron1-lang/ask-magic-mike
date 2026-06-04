@@ -4,6 +4,7 @@ export const revalidate = 0;
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { loadLeadDetail } from "@/lib/admin/lead-detail";
+import { AdminLeadActions } from "@/components/admin/admin-lead-actions";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -41,6 +42,29 @@ export default async function LeadDetailPage({ params }: PageProps) {
       </header>
 
       <main className="px-6 py-6 max-w-6xl mx-auto grid md:grid-cols-3 gap-6">
+        {/* Cockpit actions (spans full width on small screens) */}
+        <section className="md:col-span-3">
+          <AdminLeadActions
+            leadId={id}
+            currentStatus={String(lead.status ?? "")}
+            currentLeadType={String(lead.lead_type ?? "")}
+            consentSms={!!lead.consent_sms}
+            consentEmail={!!lead.consent_email}
+            smsOptOut={detail.complianceFlags.some(
+              (f) => (f as Record<string, unknown>).flag_type === "opt_out_sms"
+            )}
+            emailOptOut={detail.complianceFlags.some(
+              (f) => (f as Record<string, unknown>).flag_type === "opt_out_email"
+            )}
+            smsEnabled={
+              (process.env.NEXT_PUBLIC_ENABLE_SMS ?? "false").toLowerCase() === "true"
+            }
+            emailEnabled={
+              (process.env.NEXT_PUBLIC_ENABLE_EMAIL ?? "false").toLowerCase() === "true"
+            }
+          />
+        </section>
+
         {/* Left column: profile + attribution + listing matches */}
         <section className="md:col-span-2 space-y-5">
           {!detail.configured && (

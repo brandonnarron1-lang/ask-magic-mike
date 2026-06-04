@@ -217,6 +217,10 @@ export const ANALYTICS_EVENTS: Record<
     category: "intake",
     description: "Widget CTA tap",
   },
+  widget_submit_failed: {
+    category: "intake",
+    description: "Widget tried to POST /api/leads and got a non-OK response",
+  },
   opt_out: {
     category: "intake",
     description: "User opted out of a channel",
