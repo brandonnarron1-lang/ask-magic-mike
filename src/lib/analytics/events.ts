@@ -96,4 +96,69 @@ export const ANALYTICS_EVENTS: Record<
     category: "crm",
     description: "CRM sync failed",
   },
+  // Canonical platform additions
+  lead_created: {
+    category: "intake",
+    description: "New lead row created via POST /api/leads",
+  },
+  duplicate_detected: {
+    category: "intake",
+    description: "Incoming lead matched an existing record",
+  },
+  spam_flagged: {
+    category: "system",
+    description: "Incoming lead exceeded the spam-reject threshold",
+  },
+  rate_limited: {
+    category: "system",
+    description: "Public endpoint blocked a request via rate limiter",
+  },
+  listing_imported: {
+    category: "system",
+    description: "FlexMLS CSV/PDF import completed",
+  },
+  listing_viewed: {
+    category: "intake",
+    description: "User viewed a listing page",
+  },
+  listing_matched: {
+    category: "intake",
+    description: "Lead matched to one or more listings",
+  },
+  marketing_asset_generated: {
+    category: "system",
+    description: "Marketing template render produced a generated asset",
+  },
+  sms_sent: {
+    category: "intake",
+    description: "Outbound SMS sent (mock or live)",
+  },
+  sms_received: {
+    category: "intake",
+    description: "Inbound SMS received via webhook",
+  },
+  sms_delivered: {
+    category: "intake",
+    description: "Carrier confirmed delivery",
+  },
+  sms_failed: {
+    category: "intake",
+    description: "Carrier reported failure",
+  },
+  email_sent: {
+    category: "intake",
+    description: "Outbound email sent (mock or live)",
+  },
+  email_received: {
+    category: "intake",
+    description: "Inbound email captured via webhook",
+  },
+  email_opened: {
+    category: "intake",
+    description: "Provider reported email open",
+  },
+  email_clicked: {
+    category: "intake",
+    description: "Provider reported link click",
+  },
 };

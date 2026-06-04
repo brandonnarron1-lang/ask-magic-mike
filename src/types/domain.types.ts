@@ -356,7 +356,24 @@ export type AnalyticsEventName =
   | "valuation_requested"
   | "valuation_delivered"
   | "crm_sync_success"
-  | "crm_sync_error";
+  | "crm_sync_error"
+  // Canonical platform additions (migration 00012 + LeadCaptureEngine):
+  | "lead_created"
+  | "duplicate_detected"
+  | "spam_flagged"
+  | "rate_limited"
+  | "listing_imported"
+  | "listing_viewed"
+  | "listing_matched"
+  | "marketing_asset_generated"
+  | "sms_sent"
+  | "sms_received"
+  | "sms_delivered"
+  | "sms_failed"
+  | "email_sent"
+  | "email_received"
+  | "email_opened"
+  | "email_clicked";
 
 export interface AnalyticsEvent {
   id: string;
