@@ -229,4 +229,61 @@ export const ANALYTICS_EVENTS: Record<
     category: "intake",
     description: "User opted in to a channel",
   },
+  // Client-side funnel events (also accepted by TrackEventSchema):
+  page_view: {
+    category: "session",
+    description: "Generic page view fired by client-side instrumentation",
+  },
+  cta_click: {
+    category: "intake",
+    description: "Generic CTA click (non-chip)",
+  },
+  address_started: {
+    category: "intake",
+    description: "User began typing into the address field",
+  },
+  address_submitted: {
+    category: "intake",
+    description: "User confirmed the address selection",
+  },
+  email_submitted: {
+    category: "intake",
+    description: "User submitted their email address",
+  },
+  phone_submitted: {
+    category: "intake",
+    description: "User submitted their phone number",
+  },
+  timeline_selected: {
+    category: "intake",
+    description: "User selected a move timeline",
+  },
+  lead_qualified: {
+    category: "scoring",
+    description: "Lead passed qualification threshold",
+  },
+  lead_allocated: {
+    category: "routing",
+    description: "Lead assigned to a routing queue",
+  },
+  invalid_lead_detected: {
+    category: "system",
+    description: "Incoming lead rejected as invalid or spam",
+  },
+  compliance_review_required: {
+    category: "system",
+    description: "Lead flagged for compliance review before outreach",
+  },
+  appointment_cta_clicked: {
+    category: "intake",
+    description: "User clicked an appointment / callback CTA",
+  },
+  chat_opened: {
+    category: "intake",
+    description: "User opened the chat widget",
+  },
+  chat_message_sent: {
+    category: "intake",
+    description: "User sent a message via chat",
+  },
 };

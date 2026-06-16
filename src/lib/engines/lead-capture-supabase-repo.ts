@@ -92,12 +92,12 @@ export function createSupabaseLeadCaptureRepo(): LeadCaptureRepository {
           spam_score: rec.spamScore,
           spam_reasons: rec.spamReasons,
           lead_grade: rec.leadGrade,
-          consent_sms: rec.consent.sms,
-          consent_email: rec.consent.email,
-          consent_call: rec.consent.call,
-          consent_timestamp: rec.consent.timestamp,
+          consent_sms: rec.consent?.sms ?? false,
+          consent_email: rec.consent?.email ?? false,
+          consent_call: rec.consent?.call ?? false,
+          consent_timestamp: rec.consent?.timestamp ?? new Date().toISOString(),
           consent_language_version: "canonical_v1",
-          status: legacyLeadStatusFor(rec.allocation),
+          status: legacyLeadStatusFor(rec.allocation ?? null),
         })
         .select("id")
         .single();
@@ -149,7 +149,12 @@ export function createSupabaseLeadCaptureRepo(): LeadCaptureRepository {
       });
     },
 
-    async recordAllocation({ leadId, allocation, source, utm }) {
+    async recordAllocation({ leadId, allocation, source, utm }: {
+      leadId: string;
+      allocation: LeadAllocationResult;
+      source: string;
+      utm: PersistableLead["utm"];
+    }) {
       const client = createAdminClient() as UntypedClient;
       await persistAllocation(client, leadId, allocation, source, utm);
     },
@@ -216,12 +221,12 @@ async function insertLegacyLead(
       state: rec.state,
       zip: rec.zip,
       question_raw: rec.metadata?.source_intent ?? null,
-      consent_sms: rec.consent.sms,
-      consent_email: rec.consent.email,
-      consent_call: rec.consent.call,
-      consent_timestamp: rec.consent.timestamp,
+      consent_sms: rec.consent?.sms ?? false,
+      consent_email: rec.consent?.email ?? false,
+      consent_call: rec.consent?.call ?? false,
+      consent_timestamp: rec.consent?.timestamp ?? new Date().toISOString(),
       consent_language_version: "canonical_v1",
-      status: legacyLeadStatusFor(rec.allocation),
+      status: legacyLeadStatusFor(rec.allocation ?? null),
     })
     .select("id")
     .single();

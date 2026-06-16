@@ -390,7 +390,22 @@ export type AnalyticsEventName =
   | "widget_cta_clicked"
   | "widget_submit_failed"
   | "opt_out"
-  | "opt_in";
+  | "opt_in"
+  // Client-side / intake funnel events added to TrackEventSchema:
+  | "page_view"
+  | "cta_click"
+  | "address_started"
+  | "address_submitted"
+  | "email_submitted"
+  | "phone_submitted"
+  | "timeline_selected"
+  | "lead_qualified"
+  | "lead_allocated"
+  | "invalid_lead_detected"
+  | "compliance_review_required"
+  | "appointment_cta_clicked"
+  | "chat_opened"
+  | "chat_message_sent";
 
 export interface AnalyticsEvent {
   id: string;
