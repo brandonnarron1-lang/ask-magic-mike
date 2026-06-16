@@ -43,11 +43,7 @@ function rwaFromRow(l: LeadListRow): RwaScore {
           : null,
     hasEmail: !!l.email,
     hasPhone: !!l.phone,
-    intentText: l.intent,
-    appointmentRequested: l.appointmentRequested,
-    temperature: l.temperature,
     spamScore: l.spamScore,
-    complianceFlags: l.complianceFlags,
   });
 }
 
@@ -68,13 +64,6 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
 
   const rwaMap = new Map(list.items.map((l) => [l.id, rwaFromRow(l)]));
   const rwaUrgent = [...rwaMap.values()].filter((r) => r.tier === "urgent").length;
-
-  const formatQueue = (queue: string | null) =>
-    queue
-      ? queue
-          .replace(/_/g, " ")
-          .replace(/\b\w/g, (letter) => letter.toUpperCase())
-      : "—";
 
   return (
     <div className="min-h-screen bg-[#05070A] text-[#F4F4F4]">
@@ -227,7 +216,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                     ) : null}
                   </td>
                   <td className="px-3 py-2 text-slate-300">{l.leadType}</td>
-                  <td className="px-3 py-2 text-slate-300">{l.intent ?? "—"}</td>
+                  <td className="px-3 py-2 text-slate-300">{"—"}</td>
                   <td className="px-3 py-2">
                     <span
                       className={`inline-block rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
@@ -239,8 +228,8 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                       {l.grade ?? "—"}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-slate-300">{l.score ?? "—"}</td>
-                  <td className="px-3 py-2 text-slate-300">{l.temperature ?? "—"}</td>
+                  <td className="px-3 py-2 text-slate-300">{"—"}</td>
+                  <td className="px-3 py-2 text-slate-300">{"—"}</td>
                   <td className="px-3 py-2">
                     {(() => {
                       const rwa = rwaMap.get(l.id);
@@ -256,22 +245,8 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                     })()}
                   </td>
                   <td className="px-3 py-2 text-slate-300">{l.status}</td>
-                  <td className="px-3 py-2 text-slate-300">
-                    <div>{formatQueue(l.allocatedQueue)}</div>
-                    <div className="text-[10.5px] text-slate-500">
-                      {l.allocationEvidence}
-                    </div>
-                  </td>
-                  <td className="px-3 py-2 text-slate-300 max-w-[220px]">
-                    {l.nextAction ?? "—"}
-                    {l.appointmentRequested && (
-                      <div className="mt-1 inline-flex items-center rounded-full border border-gold-400/30 bg-gold-400/[0.08] px-2 py-0.5 text-[10.5px] font-semibold text-gold-300">
-                        Follow-up requested
-                        {l.appointmentWindow ? ` · ${l.appointmentWindow}` : ""}
-                        {l.appointmentMethod ? ` · ${l.appointmentMethod}` : ""}
-                      </div>
-                    )}
-                  </td>
+                  <td className="px-3 py-2 text-slate-300">{"—"}</td>
+                  <td className="px-3 py-2 text-slate-300 max-w-[220px]">{"—"}</td>
                   <td className="px-3 py-2 text-slate-300">{l.source ?? "—"}</td>
                   <td className="px-3 py-2 text-slate-300">
                     {l.utmCampaign ?? "—"}
