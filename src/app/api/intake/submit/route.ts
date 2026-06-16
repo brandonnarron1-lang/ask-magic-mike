@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { SubmitIntakeSchema } from "@/schemas/lead.schema";
 import { computeScore } from "@/lib/scoring";
 import { getCRMAdapter } from "@/lib/crm";
+import { allocateLead } from "@/lib/leads/allocation";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
 import { upsertContact } from "@/lib/db/contact-repository";
 import { upsertLead, updateLeadStatus, updateLeadCRM } from "@/lib/db/lead-repository";
@@ -108,6 +109,73 @@ export async function POST(req: NextRequest) {
       if (lead) {
         leadId = lead.id;
 
+        // Funnel events for this capture path. The canonical engine fires
+        // these on /api/leads; the intake path computes the allocation with
+        // the same pure engine so the funnel rollup sees both paths.
+        // Emission failures must never block capture.
+        try {
+          const allocation = allocateLead(
+            {
+              lead_type:
+                input.primaryIntent === "sell" || input.primaryIntent === "both"
+                  ? "seller"
+                  : input.primaryIntent === "buy"
+                    ? "buyer"
+                    : "unknown",
+              source: "ask_magic_mike_landing",
+              email: input.email ?? null,
+              phone: input.phone ?? null,
+              property_address: input.addressRaw ?? input.addressLine1 ?? null,
+              city: input.city ?? null,
+              state: input.state ?? undefined,
+              zip: input.zip ?? null,
+              intent: input.questionRaw ?? null,
+              metadata: {},
+            },
+            {
+              hasValidEmail: Boolean(input.email),
+              hasValidPhone: Boolean(input.phone),
+              hasValidAddress: Boolean(input.addressRaw || input.addressLine1),
+              spamScore: 0,
+            }
+          );
+
+          trackEventNoWait({
+            eventName: "lead_created",
+            leadId,
+            sessionId: input.sessionId,
+            properties: {
+              source: "ask_magic_mike_landing",
+              capturePath: "intake_submit",
+              temperature: score.temperature,
+            },
+            utmSource:   input.utmSource   ?? undefined,
+            utmMedium:   input.utmMedium   ?? undefined,
+            utmCampaign: input.utmCampaign ?? undefined,
+          });
+
+          trackEventNoWait({
+            eventName: "lead_allocated",
+            leadId,
+            sessionId: input.sessionId,
+            properties: {
+              allocatedQueue: allocation.allocatedQueue,
+              allocatedOwner: allocation.allocatedOwner,
+              intentCategory: allocation.intentCategory,
+              leadTemperature: allocation.leadTemperature,
+              capturePath: "intake_submit_computed",
+            },
+            utmSource:   input.utmSource   ?? undefined,
+            utmMedium:   input.utmMedium   ?? undefined,
+            utmCampaign: input.utmCampaign ?? undefined,
+          });
+        } catch (funnelErr) {
+          console.warn(
+            "[intake/submit] funnel event emission failed:",
+            funnelErr instanceof Error ? funnelErr.message : funnelErr
+          );
+        }
+
         // Upsert property
         if (input.addressLine1 || input.addressRaw) {
           await upsertProperty({
@@ -137,6 +205,42 @@ export async function POST(req: NextRequest) {
         // Persist score
         const { createAdminClient } = await import("@/lib/supabase/admin");
         const client = createAdminClient();
+
+        // Write source attribution row so dashboard / UTM reports can resolve
+        // this lead. Mirrors the canonical /api/leads path. Must not block.
+        if (
+          input.utmSource || input.utmMedium || input.utmCampaign ||
+          input.referrerUrl || input.landingPath
+        ) {
+          try {
+            const medium = (input.utmMedium ?? "").toLowerCase();
+            const utmSrc  = (input.utmSource  ?? "").toLowerCase();
+            const referrerType: string =
+              ["cpc", "paid", "paid_social", "ppc"].includes(medium) ? "paid" :
+              ["facebook", "instagram", "meta", "tiktok", "youtube"].includes(utmSrc) ? "social" :
+              medium === "email" ? "email" :
+              input.referrerUrl ? "referral" : "direct";
+
+            await client.from("source_attribution").upsert({
+              lead_id:       leadId,
+              session_id:    input.sessionId,
+              utm_source:    input.utmSource,
+              utm_medium:    input.utmMedium,
+              utm_campaign:  input.utmCampaign,
+              utm_content:   input.utmContent,
+              utm_term:      input.utmTerm,
+              referrer_url:  input.referrerUrl,
+              referrer_type: referrerType,
+              landing_page:  input.landingPath,
+              is_paid:       ["cpc", "paid_social", "paid"].includes(medium),
+            }, { onConflict: "lead_id", ignoreDuplicates: true });
+          } catch (attrErr) {
+            console.warn(
+              "[intake/submit] source_attribution write failed:",
+              attrErr instanceof Error ? attrErr.message : attrErr
+            );
+          }
+        }
 
         await client.from("lead_scores").upsert(
           {
