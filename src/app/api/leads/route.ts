@@ -89,6 +89,14 @@ export async function POST(req: NextRequest) {
         ...result.publicPayload,
         lead_grade: result.grade,
         is_duplicate: result.isDuplicate,
+        allocation: {
+          allocated_queue: result.allocation.allocatedQueue,
+          allocated_owner: result.allocation.allocatedOwner,
+          lead_temperature: result.allocation.leadTemperature,
+          next_action: result.allocation.nextAction,
+          status: result.allocation.status,
+          compliance_flags: result.allocation.complianceFlags,
+        },
       },
       { status: result.isDuplicate ? 200 : 201, headers: NO_STORE }
     );
