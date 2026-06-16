@@ -1,26 +1,22 @@
 import type { Metadata, Viewport } from "next";
+import { mikePlatformAssets } from "@/lib/mikePlatformAssets";
+import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
 
-/**
- * Production alias today is ask-magic-mike.vercel.app — used so Next.js resolves
- * OG image paths to absolute URLs that crawlers can fetch. When we migrate to
- * askmagicmike.com this constant flips, see
- * docs/ask-magic-mike-visual-upgrade-plan.md.
- */
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://ask-magic-mike.vercel.app";
+const SITE_URL = siteConfig.canonicalSiteUrl;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  alternates: { canonical: "/" },
   icons: { icon: "/icon.svg", shortcut: "/icon.svg" },
   title:
     "Ask Magic Mike by Our Town Properties | Mike Eatmon — Wilson NC Real Estate",
   description:
-    "AI-assisted intake with local human follow-up from Mike Eatmon at Our Town Properties. See a preliminary home value range and get real guidance for Wilson and Eastern NC.",
+    "AI-assisted intake with local human follow-up from Mike Eatmon at Our Town Properties. Share the property details and get broker-reviewed guidance for Wilson and Eastern NC.",
   keywords: [
     "Wilson NC real estate",
     "Eastern NC real estate",
-    "preliminary home value range",
+    "Wilson NC property review assistant",
     "Our Town Properties",
     "Mike Eatmon",
     "sell my home Wilson NC",
@@ -29,17 +25,17 @@ export const metadata: Metadata = {
   authors: [{ name: "Mike Eatmon" }, { name: "Our Town Properties, Inc." }],
   openGraph: {
     title:
-      "Ask Magic Mike by Our Town Properties | Mike Eatmon — Wilson NC",
+      "Ask Magic Mike — Wilson, NC Real Estate by Our Town Properties",
     description:
-      "Start with your address. Get a local read on your home from Mike Eatmon's Our Town Properties team. AI-assisted intake, local human follow-up.",
+      "Share the property details. Mike Eatmon's Our Town Properties team follows up with broker-reviewed local guidance.",
     siteName: "Ask Magic Mike",
     type: "website",
     images: [
       {
-        url: "/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp",
-        width: 1024,
-        height: 1024,
-        alt: "Mike Eatmon, broker at Our Town Properties, Inc.",
+        url: mikePlatformAssets.openGraphCard.src,
+        width: mikePlatformAssets.openGraphCard.width,
+        height: mikePlatformAssets.openGraphCard.height,
+        alt: mikePlatformAssets.openGraphCard.alt,
       },
     ],
   },
@@ -47,10 +43,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Ask Magic Mike by Our Town Properties",
     description:
-      "Start with your address. Get a local read on your home — Mike Eatmon, Our Town Properties.",
-    images: [
-      "/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp",
-    ],
+      "Wilson, NC property review assistant with broker-reviewed local guidance from Mike Eatmon.",
+    images: [mikePlatformAssets.openGraphCard.src],
   },
   robots: {
     index: true,
@@ -72,6 +66,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen bg-midnight text-cream antialiased">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-gold-400 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-midnight"
+        >
+          Skip to main content
+        </a>
         {children}
       </body>
     </html>
