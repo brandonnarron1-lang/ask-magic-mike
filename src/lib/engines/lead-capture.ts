@@ -32,6 +32,7 @@ import {
   type KnownLeadIdentity,
 } from "@/lib/leads/duplicate-detection";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
+import { allocateLead, type LeadAllocationResult } from "@/lib/leads/allocation";
 
 export interface CaptureRequestMeta {
   ipAddress?: string | null;
@@ -49,6 +50,7 @@ export interface CaptureResult {
   isSpamSuspect: boolean;
   leadType: LeadType;
   grade: string;
+  allocation: LeadAllocationResult;
   autoConfirmationQueued: boolean;
   reasons: Array<{ code: string; points?: number; label: string }>;
   // Public-safe response shape — never includes internal fields.
@@ -74,6 +76,14 @@ export interface LeadCaptureRepository {
     existingLeadId: string;
     spamScore: number;
     spamReasons: unknown;
+  }): Promise<void>;
+
+  /** Persist allocation result to tasks / lead_scores tables. Optional — in-memory repos omit it. */
+  recordAllocation?(args: {
+    leadId: string;
+    allocation: LeadAllocationResult;
+    source: string;
+    utm: PersistableLead["utm"];
   }): Promise<void>;
 }
 
@@ -114,6 +124,8 @@ export interface PersistableLead {
   spamReasons: unknown;
   leadGrade: string;
   metadata: Record<string, unknown> | null;
+  consent?: { sms: boolean; email: boolean; call: boolean; timestamp: string } | null;
+  allocation?: LeadAllocationResult | null;
 }
 
 /**
@@ -148,11 +160,19 @@ export class LeadCaptureEngine {
     });
     for (const r of spam.reasons) reasons.push({ code: r.code, points: r.points, label: r.label });
 
+    // Compute allocation from input signals (available for all return paths).
+    const allocation = allocateLead(input, {
+      hasValidEmail: Boolean(ids.email.normalized),
+      hasValidPhone: Boolean(ids.phone.e164),
+      hasValidAddress: Boolean(ids.address.fingerprint),
+      spamScore: spam.score,
+    });
+
     if (spam.isReject) {
       // Reject before touching the DB; emit a tracking event so we still
       // see the volume of bot traffic in the analytics ledger.
       trackEventNoWait({
-        eventName: "spam_flagged", // not in the legacy enum; ledger swallows unknown gracefully
+        eventName: "spam_flagged",
         properties: {
           spamScore: spam.score,
           spamReasons: spam.reasons,
@@ -168,6 +188,7 @@ export class LeadCaptureEngine {
         isSpamSuspect: false,
         leadType: input.lead_type,
         grade: "D",
+        allocation,
         autoConfirmationQueued: false,
         reasons: [...reasons, { code: "spam_rejected", label: "Rejected as spam" }],
         publicPayload: {
@@ -223,6 +244,7 @@ export class LeadCaptureEngine {
         isSpamSuspect: spam.isSuspect,
         leadType: input.lead_type,
         grade,
+        allocation,
         autoConfirmationQueued: false,
         reasons,
         publicPayload: {
@@ -276,6 +298,13 @@ export class LeadCaptureEngine {
         gclid:  input.gclid ?? null,
         fbclid: input.fbclid ?? null,
       },
+      consent: input.consent ? {
+        sms:       input.consent.sms   ?? false,
+        email:     input.consent.email ?? false,
+        call:      input.consent.call  ?? false,
+        timestamp: new Date().toISOString(),
+      } : null,
+      allocation,
     };
 
     const persistedId = await this.repo.insertLead(persistable);
@@ -305,6 +334,7 @@ export class LeadCaptureEngine {
       isSpamSuspect: spam.isSuspect,
       leadType: input.lead_type,
       grade,
+      allocation,
       autoConfirmationQueued:
         shouldAutoSendConfirmation(grade) && !spam.isSuspect,
       reasons,
