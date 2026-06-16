@@ -2,8 +2,9 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 import Link from "next/link";
-import { loadLeadList, type LeadListFilters } from "@/lib/admin/lead-list";
+import { loadLeadList, type LeadListFilters, type LeadListRow } from "@/lib/admin/lead-list";
 import { loadDashboardMetrics } from "@/lib/admin/dashboard-metrics";
+import { computeReadyWillingAble, type RwaScore } from "@/lib/leads/ready-willing-able";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -31,6 +32,32 @@ function readFilters(sp: Record<string, string | string[] | undefined>): LeadLis
   };
 }
 
+function rwaFromRow(l: LeadListRow): RwaScore {
+  return computeReadyWillingAble({
+    leadType: l.leadType,
+    primaryIntent:
+      ["seller", "seller_cash_offer", "home_value", "investor"].includes(l.leadType)
+        ? "sell"
+        : ["buyer", "listing_inquiry", "relocation", "renter"].includes(l.leadType)
+          ? "buy"
+          : null,
+    hasEmail: !!l.email,
+    hasPhone: !!l.phone,
+    intentText: l.intent,
+    appointmentRequested: l.appointmentRequested,
+    temperature: l.temperature,
+    spamScore: l.spamScore,
+    complianceFlags: l.complianceFlags,
+  });
+}
+
+const RWA_TIER_STYLES: Record<string, string> = {
+  urgent: "bg-red-500/20 text-red-300 border-red-500/30",
+  hot:    "bg-gold-400/20 text-gold-300 border-gold-400/30",
+  warm:   "bg-amber-500/10 text-amber-300 border-amber-500/30",
+  cold:   "bg-white/[0.05] text-slate-400 border-white/10",
+};
+
 export default async function LeadsInboxPage({ searchParams }: PageProps) {
   const sp = await searchParams;
   const filters = readFilters(sp);
@@ -38,6 +65,16 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
     loadLeadList(filters),
     loadDashboardMetrics(),
   ]);
+
+  const rwaMap = new Map(list.items.map((l) => [l.id, rwaFromRow(l)]));
+  const rwaUrgent = [...rwaMap.values()].filter((r) => r.tier === "urgent").length;
+
+  const formatQueue = (queue: string | null) =>
+    queue
+      ? queue
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (letter) => letter.toUpperCase())
+      : "—";
 
   return (
     <div className="min-h-screen bg-[#05070A] text-[#F4F4F4]">
@@ -58,12 +95,13 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
 
       <main className="px-6 py-6 max-w-7xl mx-auto">
         {/* Compact stats strip */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
           {[
             { label: "New today", value: dash.totals.newToday },
             { label: "Hot leads", value: dash.totals.hot, accent: true },
             { label: "Unassigned", value: dash.totals.unassigned },
             { label: "Overdue SLA", value: dash.totals.overdueSla, accent: true },
+            { label: "RWA Urgent", value: rwaUrgent, accent: true },
           ].map((s) => (
             <div
               key={s.label}
@@ -149,16 +187,23 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
               <tr>
                 <th className="text-left px-3 py-2">Name</th>
                 <th className="text-left px-3 py-2">Type</th>
+                <th className="text-left px-3 py-2">Intent</th>
                 <th className="text-left px-3 py-2">Grade</th>
+                <th className="text-left px-3 py-2">Score</th>
+                <th className="text-left px-3 py-2">Temp</th>
+                <th className="text-left px-3 py-2">RWA</th>
                 <th className="text-left px-3 py-2">Status</th>
+                <th className="text-left px-3 py-2">Queue</th>
+                <th className="text-left px-3 py-2">Next action</th>
                 <th className="text-left px-3 py-2">Source</th>
+                <th className="text-left px-3 py-2">Campaign</th>
                 <th className="text-left px-3 py-2">Created</th>
               </tr>
             </thead>
             <tbody>
               {list.items.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-6 text-center text-slate-400">
+                  <td colSpan={13} className="px-3 py-6 text-center text-slate-400">
                     No leads match these filters.
                   </td>
                 </tr>
@@ -182,6 +227,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                     ) : null}
                   </td>
                   <td className="px-3 py-2 text-slate-300">{l.leadType}</td>
+                  <td className="px-3 py-2 text-slate-300">{l.intent ?? "—"}</td>
                   <td className="px-3 py-2">
                     <span
                       className={`inline-block rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
@@ -193,8 +239,43 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                       {l.grade ?? "—"}
                     </span>
                   </td>
+                  <td className="px-3 py-2 text-slate-300">{l.score ?? "—"}</td>
+                  <td className="px-3 py-2 text-slate-300">{l.temperature ?? "—"}</td>
+                  <td className="px-3 py-2">
+                    {(() => {
+                      const rwa = rwaMap.get(l.id);
+                      if (!rwa) return <span className="text-slate-500">—</span>;
+                      return (
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10.5px] font-semibold ${RWA_TIER_STYLES[rwa.tier] ?? ""}`}
+                          title={`R:${rwa.ready} W:${rwa.willing} A:${rwa.able}`}
+                        >
+                          {rwa.tier.toUpperCase()} · {rwa.overall}
+                        </span>
+                      );
+                    })()}
+                  </td>
                   <td className="px-3 py-2 text-slate-300">{l.status}</td>
+                  <td className="px-3 py-2 text-slate-300">
+                    <div>{formatQueue(l.allocatedQueue)}</div>
+                    <div className="text-[10.5px] text-slate-500">
+                      {l.allocationEvidence}
+                    </div>
+                  </td>
+                  <td className="px-3 py-2 text-slate-300 max-w-[220px]">
+                    {l.nextAction ?? "—"}
+                    {l.appointmentRequested && (
+                      <div className="mt-1 inline-flex items-center rounded-full border border-gold-400/30 bg-gold-400/[0.08] px-2 py-0.5 text-[10.5px] font-semibold text-gold-300">
+                        Follow-up requested
+                        {l.appointmentWindow ? ` · ${l.appointmentWindow}` : ""}
+                        {l.appointmentMethod ? ` · ${l.appointmentMethod}` : ""}
+                      </div>
+                    )}
+                  </td>
                   <td className="px-3 py-2 text-slate-300">{l.source ?? "—"}</td>
+                  <td className="px-3 py-2 text-slate-300">
+                    {l.utmCampaign ?? "—"}
+                  </td>
                   <td className="px-3 py-2 text-slate-400 text-[12px]">
                     {new Date(l.createdAt).toLocaleString()}
                   </td>
