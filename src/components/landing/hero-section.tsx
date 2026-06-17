@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
-import { MikeHeroPortrait, MikeVisualTrustBadge } from "@/components/amm";
 import { CTAChips } from "./cta-chips";
 import { QuestionInput } from "./question-input";
 import {
@@ -12,7 +11,40 @@ import {
   type StoredAttribution,
 } from "@/lib/attribution/client-storage";
 import { brandPackAssets } from "@/components/amm/brand-pack-assets";
+import { mikePlatformAssets } from "@/lib/mikePlatformAssets";
 import { siteConfig } from "@/lib/site-config";
+
+function MikeVisualTrustBadge() {
+  return (
+    <div className="inline-flex items-center gap-2 rounded-full border border-gold-400/20 bg-gold-400/[0.06] px-3 py-1.5">
+      <Image
+        src={mikePlatformAssets.circularAvatar.src}
+        alt={mikePlatformAssets.circularAvatar.alt}
+        width={24}
+        height={24}
+        className="rounded-full object-cover"
+      />
+      <span className="text-[11px] font-semibold tracking-[0.14em] uppercase text-gold-400/90">
+        Mike Eatmon · Our Town Properties
+      </span>
+    </div>
+  );
+}
+
+function MikeHeroPortrait({ priority }: { priority?: boolean }) {
+  return (
+    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-gold-400/10 bg-[#0D0B07]">
+      <Image
+        src={mikePlatformAssets.feedAd.src}
+        alt={mikePlatformAssets.feedAd.alt}
+        fill
+        priority={priority}
+        className="object-cover object-top"
+        sizes="(max-width: 1024px) 100vw, 520px"
+      />
+    </div>
+  );
+}
 import type { CTAChip } from "@/types/domain.types";
 
 /** Fire-and-forget funnel event; failures must never affect the hero. */

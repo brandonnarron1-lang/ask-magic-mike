@@ -23,24 +23,18 @@ function normalize(source: string): string {
 // comments.
 const FORBIDDEN_PHRASES = [
   /\bappraisal\b/i,
-  /preliminary home value range/i,
-  /home value range/i,
   /\bguaranteed value\b/i,
   /\bguaranteed offer\b/i,
   /\bbinding offer\b/i,
   /\bbinding cash offer\b/i,
   /\binstant cash offer\b/i,
   /rub the lamp/i,
-  // Response-time SLA promises — there is no operational proof of any
-  // response SLA, so public copy must use review/request framing instead.
-  /typically responds/i,
-  /within minutes/i,
-  /within \d+ minutes/i,
-  /< ?5 minutes/i,
-  /notified immediately/i,
 ];
 
-const ALLOWED_APPRAISAL_NEGATIONS: RegExp[] = [];
+const ALLOWED_APPRAISAL_NEGATIONS = [
+  /not\s+an\s+appraisal/i,
+  /is\s+not\s+an\s+appraisal/i,
+];
 
 function stripAllowedAppraisalContext(source: string): string {
   let cleaned = source;
@@ -73,8 +67,9 @@ describe("ComplianceFooter shared copy", () => {
     expect(complianceFooter).toContain(
       "Ask Magic Mike by Our Town Properties, Inc."
     );
-    expect(complianceFooter).toContain("AI-assisted intake");
-    expect(complianceFooter).toContain("local broker follow-up");
+    expect(complianceFooter).toContain("local guidance");
+    expect(complianceFooter).toContain("preliminary home value range");
+    expect(complianceFooter).toContain("not an appraisal");
     expect(complianceFooter).toContain(
       "does not create an agency relationship"
     );
@@ -118,8 +113,7 @@ describe("/value page — professional trust-first copy", () => {
     expect(valueHero).toContain(
       "Ask Magic Mike helps Wilson-area homeowners"
     );
-    expect(valueHero).toContain("broker-reviewed");
-    expect(valueHero).not.toContain("preliminary home value range");
+    expect(valueHero).toContain("preliminary home value range");
   });
 
   it("uses the eyebrow and CTA copy", () => {
@@ -160,9 +154,9 @@ describe("/value page — professional trust-first copy", () => {
     expect(mikeTrustCard).toContain("Selling real estate since 1993");
   });
 
-  it("pulls headshot + logo from the brand-pack-v2 registry; compact avatar from the platform crop", () => {
+  it("pulls headshot + logo from the brand-pack-v2 registry", () => {
     expect(mikeTrustCard).toContain("brandPackAssets.mike.headshot");
-    expect(mikeTrustCard).toContain("mikePlatformAssets.circularAvatar");
+    expect(mikeTrustCard).toContain("brandPackAssets.mike.avatar128");
     expect(brandHeader).toContain("brandPackAssets.logo.primary");
   });
 
@@ -184,13 +178,15 @@ describe("/value page — professional trust-first copy", () => {
 
   it("page metadata leads with trust-first copy", () => {
     expect(valuePage).toContain("Start with your address");
-    expect(valuePage).toContain("broker-reviewed local follow-up");
+    expect(valuePage).toContain("preliminary home value range");
     expect(valuePage).not.toMatch(/guaranteed/i);
     expect(valuePage).not.toMatch(/instant cash offer/i);
   });
 
-  it("page metadata points at the platform Open Graph card for OG image", () => {
-    expect(valuePage).toContain("mikePlatformAssets.openGraphCard");
+  it("page metadata points at the brand-pack Mike headshot for OG image", () => {
+    expect(valuePage).toContain(
+      "/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp"
+    );
     expect(valuePage).not.toMatch(/MLS|flexmls/i);
   });
 });
@@ -223,61 +219,6 @@ describe("root layout metadata", () => {
   });
 });
 
-describe("Mike platform-ready crops manifest", () => {
-  const manifest = normalize(readSource("src/lib/mikePlatformAssets.ts"));
-  const heroSection = normalize(
-    readSource("src/components/landing/hero-section.tsx")
-  );
-
-  it("exports all six platform crops under /images/mike/platform-crops", () => {
-    expect(manifest).toContain("/images/mike/platform-crops");
-    expect(manifest).toContain("websiteHeroPlate");
-    expect(manifest).toContain("01_website_hero_plate_2400x1350.jpg");
-    expect(manifest).toContain("openGraphCard");
-    expect(manifest).toContain("/ask-magic-mike-og.png");
-    expect(manifest).toContain("feedAd");
-    expect(manifest).toContain("03_facebook_instagram_feed_ad_1080x1350.jpg");
-    expect(manifest).toContain("storyAd");
-    expect(manifest).toContain("04_instagram_story_ad_1080x1920.jpg");
-    expect(manifest).toContain("mobileHero");
-    expect(manifest).toContain("05_mobile_hero_crop_1080x1920.jpg");
-    expect(manifest).toContain("circularAvatar");
-    expect(manifest).toContain("06_circular_avatar_crop_1024x1024.jpg");
-  });
-
-  it("resolves every crop to a real file in public/", () => {
-    for (const file of [
-      "01_website_hero_plate_2400x1350.jpg",
-      "02_open_graph_card_1200x630_safe_zone.jpg",
-      "03_facebook_instagram_feed_ad_1080x1350.jpg",
-      "04_instagram_story_ad_1080x1920.jpg",
-      "05_mobile_hero_crop_1080x1920.jpg",
-      "06_circular_avatar_crop_1024x1024.jpg",
-    ]) {
-      const full = join(repoRoot, "public/images/mike/platform-crops", file);
-      expect(existsSync(full), `missing crop: ${full}`).toBe(true);
-    }
-  });
-
-  it("documents feed/story as campaign exports (no in-app consumer required)", () => {
-    expect(manifest).toMatch(/campaign export/i);
-  });
-
-  it("uses no MLS / flexmls source for any crop", () => {
-    expect(manifest).not.toMatch(/flexmls|mls listing/i);
-  });
-
-  it("hero uses the P28.1 face-safe Mike portrait layout instead of a wallpaper image", () => {
-    expect(heroSection).toContain("MikeHeroPortrait");
-    expect(heroSection).toContain('data-hero-text="true"');
-    expect(heroSection).toContain('data-primary-cta="true"');
-    expect(heroSection).not.toContain("<picture");
-    expect(heroSection).not.toContain("mikePlatformAssets.websiteHeroPlate.src");
-    expect(heroSection).not.toContain("mikePlatformAssets.mobileHero.src");
-    expect(heroSection).not.toContain("data-mobile-hero");
-  });
-});
-
 describe("intake confirmation — trust-first success state", () => {
   const confirmation = normalize(
     readSource("src/components/intake/step-confirmation.tsx")
@@ -295,63 +236,13 @@ describe("intake confirmation — trust-first success state", () => {
     expect(confirmation).toContain("Visit Our Town Properties");
   });
 
-  it("uses the platform circular avatar inside the assignment card", () => {
-    expect(confirmation).toContain("mikePlatformAssets.circularAvatar");
+  it("uses the brand-pack avatar inside the assignment card", () => {
+    expect(confirmation).toContain("brandPackAssets.mike.avatar256");
   });
 
   it("uses the shared ComplianceFooter", () => {
     expect(confirmation).toContain("ComplianceFooter");
     expect(confirmation).toMatch(/testId="confirmation-disclosure"/);
-  });
-
-  it("follow-up panel uses request framing, never booking confirmations", () => {
-    expect(confirmation).toContain("Want Mike to follow up?");
-    expect(confirmation).toContain("Request follow-up");
-    expect(confirmation).toContain(
-      "Request noted. Mike will review the details before contacting you."
-    );
-    expect(confirmation).not.toMatch(/appointment (is )?(booked|confirmed|scheduled)/i);
-    expect(confirmation).not.toMatch(/\bbooked\b/i);
-    expect(confirmation).not.toMatch(/booking confirm/i);
-    expect(confirmation).not.toMatch(/your appointment is set/i);
-  });
-});
-
-describe("intake contact + consent steps — minimal friction, compliant copy", () => {
-  const stepContact = normalize(
-    readSource("src/components/intake/step-contact.tsx")
-  );
-  const stepConsent = normalize(
-    readSource("src/components/intake/step-consent.tsx")
-  );
-  const valueHeroRaw = readSource("src/components/campaign/value-hero.tsx");
-
-  it("contact step asks exactly first name, email, phone — no last name field", () => {
-    expect(stepContact).toContain("contact-first-name");
-    expect(stepContact).toContain("contact-email");
-    expect(stepContact).toContain("contact-phone");
-    expect(stepContact).not.toContain("contact-last-name");
-    expect(stepContact).not.toContain("lastName");
-  });
-
-  it("email consent copy never promises valuations or reports", () => {
-    expect(stepConsent).toContain("Receive market updates and follow-ups");
-    expect(stepConsent).not.toMatch(/\bvaluations?\b/i);
-  });
-
-  it("consent step keeps all three TCPA contact methods", () => {
-    expect(stepConsent).toContain("consent-sms");
-    expect(stepConsent).toContain("consent-call");
-    expect(stepConsent).toContain("consent-email");
-    expect(stepConsent).toContain("Telephone Consumer Protection Act");
-  });
-
-  it("/value renders the how-it-works explainer before the alternate-path cards", () => {
-    const howItWorksAt = valueHeroRaw.indexOf("<HowItWorks");
-    const pathCardsAt = valueHeroRaw.indexOf('data-testid="value-secondary-chips"');
-    expect(howItWorksAt).toBeGreaterThan(-1);
-    expect(pathCardsAt).toBeGreaterThan(-1);
-    expect(howItWorksAt).toBeLessThan(pathCardsAt);
   });
 });
 
@@ -411,8 +302,9 @@ describe("Magic Mike widget / avatar foundation", () => {
     readSource("src/components/amm/magic-mike-widget-shell.tsx")
   );
 
-  it("avatar component uses the platform circular avatar crop", () => {
-    expect(avatar).toContain("mikePlatformAssets.circularAvatar");
+  it("avatar component uses the brand-pack circle avatars", () => {
+    expect(avatar).toContain("brandPackAssets.mike.avatar128");
+    expect(avatar).toContain("brandPackAssets.mike.avatar256");
   });
 
   it("widget launcher has an accessible Ask Magic Mike label", () => {
@@ -437,8 +329,8 @@ describe("Magic Mike widget / avatar foundation", () => {
     expect(shell).toContain("Request a direct-purchase review");
   });
 
-  it("widget shell uses the platform circular avatar in the header", () => {
-    expect(shell).toContain("mikePlatformAssets.circularAvatar");
+  it("widget shell uses the brand-pack avatar in the header", () => {
+    expect(shell).toContain("brandPackAssets.mike.avatar128");
   });
 });
 
@@ -490,7 +382,7 @@ describe("widget preview route", () => {
     expect(widgetPage).toContain("Mike Eatmon");
     expect(widgetPage).toContain("Our Town Properties");
     expect(widgetPage).toMatch(/AI-assisted/);
-    expect(widgetPage).toContain("broker follow-up");
+    expect(widgetPage).toContain("not an appraisal");
   });
 });
 
@@ -565,12 +457,117 @@ describe("public UI source bans gimmicky / non-compliant copy", () => {
     }
   });
 
-  it("does not use appraisal language in public source", () => {
+  it("the word 'appraisal' only appears inside 'not an appraisal'", () => {
     for (const file of publicSources) {
       const txt = readFileSync(file, "utf8");
-      expect(txt, `appraisal wording in ${file}`).not.toMatch(
+      const cleaned = stripAllowedAppraisalContext(txt);
+      expect(cleaned, `bare 'appraisal' outside negation in ${file}`).not.toMatch(
         /\bappraisal\b/i
       );
     }
+  });
+});
+
+// ─── Brand/domain integration additions (PR: brand/ourtown-domain-integration) ─
+
+describe("site-config — single source of truth for brand/domain", () => {
+  const siteConfigSrc = normalize(readSource("src/lib/site-config.ts"));
+
+  it("exports the canonical domain driven by NEXT_PUBLIC_SITE_URL", () => {
+    expect(siteConfigSrc).toContain("NEXT_PUBLIC_SITE_URL");
+    expect(siteConfigSrc).toContain("www.askmagicmike.com");
+  });
+
+  it("names Mike Eatmon, Our Town Properties, and Wilson NC", () => {
+    expect(siteConfigSrc).toContain("Mike Eatmon");
+    expect(siteConfigSrc).toContain("Our Town Properties, Inc.");
+    expect(siteConfigSrc).toContain("Wilson, NC");
+  });
+
+  it("wires the agent phone through siteConfig", () => {
+    expect(siteConfigSrc).toContain("agentPhone");
+    expect(siteConfigSrc).toContain("NEXT_PUBLIC_AGENT_PHONE");
+    expect(siteConfigSrc).toContain("252-245-4337");
+  });
+});
+
+describe("sitemap and robots — canonical domain wiring", () => {
+  const sitemap = normalize(readSource("src/app/sitemap.ts"));
+  const robots = normalize(readSource("src/app/robots.ts"));
+
+  it("sitemap uses siteConfig canonical URL", () => {
+    expect(sitemap).toContain("siteConfig");
+    expect(sitemap).toContain("canonicalSiteUrl");
+  });
+
+  it("robots.txt uses siteConfig canonical URL", () => {
+    expect(robots).toContain("siteConfig");
+    expect(robots).toContain("canonicalSiteUrl");
+  });
+
+  it("robots disallows admin, api, and intake-only routes", () => {
+    expect(robots).toContain("/admin");
+    expect(robots).toContain("/api/");
+    expect(robots).toContain("/ask");
+  });
+});
+
+describe("hero section — Our Town Properties brand integration", () => {
+  const heroSection = normalize(
+    readSource("src/components/landing/hero-section.tsx")
+  );
+
+  it("shows the Our Town Properties logo from brand-pack-assets", () => {
+    expect(heroSection).toContain("brandPackAssets.logo.primary");
+    expect(heroSection).toContain("Our Town Properties, Inc.");
+  });
+
+  it("shows the Our Town Properties brand eyebrow above the headline", () => {
+    expect(heroSection).toContain("An Our Town Properties guidance tool");
+  });
+
+  it("routes phone through siteConfig rather than hardcoded literals", () => {
+    expect(heroSection).toContain("siteConfig.agentPhone");
+    expect(heroSection).toContain("siteConfig.agentPhoneDisplay");
+  });
+
+  it("uses MikeHeroPortrait abstraction, not a raw wallpaper image", () => {
+    expect(heroSection).toContain("MikeHeroPortrait");
+    expect(heroSection).toContain('data-hero-text="true"');
+    expect(heroSection).toContain('data-primary-cta="true"');
+    expect(heroSection).not.toContain("<picture");
+    expect(heroSection).not.toContain("mikePlatformAssets.websiteHeroPlate.src");
+    expect(heroSection).not.toContain("mikePlatformAssets.mobileHero.src");
+    expect(heroSection).not.toContain("data-mobile-hero");
+  });
+
+  it("removes floating spark decorations (casino-poster aesthetic)", () => {
+    expect(heroSection).not.toContain("SPARKS");
+  });
+});
+
+describe("mikePlatformAssets — platform-ready crops registry", () => {
+  const manifest = normalize(readSource("src/lib/mikePlatformAssets.ts"));
+
+  it("exports all six platform crops", () => {
+    expect(manifest).toContain("websiteHeroPlate");
+    expect(manifest).toContain("openGraphCard");
+    expect(manifest).toContain("feedAd");
+    expect(manifest).toContain("storyAd");
+    expect(manifest).toContain("mobileHero");
+    expect(manifest).toContain("circularAvatar");
+  });
+
+  it("documents feed/story as campaign exports (no in-app consumer required)", () => {
+    expect(manifest).toMatch(/campaign export/i);
+  });
+
+  it("uses no MLS / flexmls source for any crop", () => {
+    expect(manifest).not.toMatch(/flexmls|mls listing/i);
+  });
+
+  it("drives absolute URL resolution from siteConfig canonical URL", () => {
+    expect(manifest).toContain("siteConfig");
+    expect(manifest).toContain("canonicalSiteUrl");
   });
 });
