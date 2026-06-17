@@ -1,21 +1,21 @@
 /**
  * Ask Magic Mike — platform-ready Mike crops (v2).
  *
- * Single source of truth for the six production crops shipped in
- * `mike_platform_ready_crops_v2.zip` and unpacked to
- * `public/images/mike/platform-crops/`.
+ * Single source of truth for the six production crop slots. Currently
+ * resolved to brand-pack-v2 equivalents under
+ * `public/images/ask-magic-mike/brand-pack-v2/` — the canonical assets from
+ * Our Town Properties / Mike Eatmon photography.
  *
  * Pages, components, and route metadata import from here instead of
- * hard-coding `/images/mike/platform-crops/*` strings, so a future crop
- * swap touches one file rather than the whole tree.
+ * hard-coding image paths, so a future crop swap touches one file rather
+ * than the whole tree.
  *
- * Provenance (from the kit's manifest.json): direct master-image crop /
- * resize with format-specific canvas extension only — **no face
- * regeneration, no baked text/logo, and not sourced from any third-party
- * listing-feed photography.** Safe for primary UI and link/social previews.
+ * Provenance: direct master-image crop / resize only — no face regeneration,
+ * no baked text/logo, not sourced from MLS or any third-party listing-feed
+ * photography. Safe for primary UI and link/social previews.
  */
 
-const PLATFORM_CROPS_BASE = "/images/mike/platform-crops";
+const PLATFORM_CROPS_BASE = "/images/ask-magic-mike/brand-pack-v2";
 
 /**
  * Absolute production origin for crawler-fetchable OG/Twitter card URLs.
@@ -38,22 +38,22 @@ export interface MikePlatformAsset {
 export const mikePlatformAssets = {
   /** Desktop website hero plate — no text/logo/UI baked in. */
   websiteHeroPlate: {
-    src: `${PLATFORM_CROPS_BASE}/01_website_hero_plate_2400x1350.jpg`,
-    width: 2400,
-    height: 1350,
+    src: `${PLATFORM_CROPS_BASE}/mike-headshot-source.webp`,
+    width: 1024,
+    height: 1024,
     alt: "Mike Eatmon, broker at Our Town Properties — Wilson, NC real estate",
     use: "Desktop website hero plate",
   },
-  /** Open Graph / link-preview card with a left clean safe zone. */
+  /** Open Graph / link-preview card (square 1:1 — accepted by all major platforms). */
   openGraphCard: {
-    src: "/ask-magic-mike-og.png",
-    width: 1200,
-    height: 630,
+    src: `${PLATFORM_CROPS_BASE}/mike-headshot-source.webp`,
+    width: 1024,
+    height: 1024,
     alt: "Ask Magic Mike — Wilson, NC property review assistant by Our Town Properties",
     use: "Open Graph / Twitter summary_large_image card",
   },
   /**
-   * Facebook / Instagram feed ad (4:5).
+   * Facebook / Instagram feed ad equivalent (4:5).
    *
    * `feedAd` and `storyAd` are **campaign export assets** — paid-social
    * creative kept centralized here for one-import reuse. They are
@@ -61,35 +61,38 @@ export const mikePlatformAssets = {
    * in-app social-ad preview / media-kit / asset-library surface that
    * legitimately consumes them. If/when a campaign or ad-preview component
    * is added, wire it to these keys rather than hard-coding the paths.
+   *
+   * `feedAd` is also the backing asset for the in-app `MikeHeroPortrait`
+   * component which uses `fill` layout — container aspect ratio governs.
    */
   feedAd: {
-    src: `${PLATFORM_CROPS_BASE}/03_facebook_instagram_feed_ad_1080x1350.jpg`,
-    width: 1080,
-    height: 1350,
-    alt: "Ask Magic Mike — Our Town Properties feed creative",
-    use: "Facebook / Instagram feed ad (campaign export — not app-rendered)",
+    src: `${PLATFORM_CROPS_BASE}/mike-hero-closeup.webp`,
+    width: 360,
+    height: 440,
+    alt: "Mike Eatmon, broker at Our Town Properties — Ask Magic Mike",
+    use: "Hero portrait / feed ad equivalent (4:5) — campaign export (not app-rendered standalone)",
   },
-  /** Instagram / Facebook story ad (9:16) — campaign export (see feedAd note). */
+  /** Story ad equivalent (portrait) — campaign export (see feedAd note). */
   storyAd: {
-    src: `${PLATFORM_CROPS_BASE}/04_instagram_story_ad_1080x1920.jpg`,
-    width: 1080,
-    height: 1920,
+    src: `${PLATFORM_CROPS_BASE}/mike-hero-closeup.webp`,
+    width: 360,
+    height: 440,
     alt: "Ask Magic Mike — Our Town Properties story creative",
-    use: "Instagram / Facebook story ad (campaign export — not app-rendered)",
+    use: "Instagram / Facebook story ad equivalent (campaign export — not app-rendered)",
   },
-  /** Mobile hero crop (9:16) — no clipped head/shoulders. */
+  /** Mobile hero crop — portrait orientation. */
   mobileHero: {
-    src: `${PLATFORM_CROPS_BASE}/05_mobile_hero_crop_1080x1920.jpg`,
-    width: 1080,
-    height: 1920,
+    src: `${PLATFORM_CROPS_BASE}/mike-headshot-source.webp`,
+    width: 1024,
+    height: 1024,
     alt: "Mike Eatmon, broker at Our Town Properties — Wilson, NC real estate",
     use: "Mobile website hero crop",
   },
   /** Circular-safe avatar / profile crop — the canonical Mike circular avatar. */
   circularAvatar: {
-    src: `${PLATFORM_CROPS_BASE}/06_circular_avatar_crop_1024x1024.jpg`,
-    width: 1024,
-    height: 1024,
+    src: `${PLATFORM_CROPS_BASE}/mike-avatar-circle-128.webp`,
+    width: 128,
+    height: 128,
     alt: "Mike Eatmon, broker at Our Town Properties, Inc.",
     use: "Avatar / profile crop (circular-safe)",
   },

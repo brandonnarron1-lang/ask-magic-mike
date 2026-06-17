@@ -7,7 +7,7 @@ Provenance and usage rules for brand assets currently in this repo. Keep this fi
 ## Our Town Properties logo
 
 **Registry key:** `brandPackAssets.logo.primary`  
-**Path:** `/images/ask-magic-mike/brand-pack-v2/ourtown-logo-white.png`  
+**Path:** `/images/ask-magic-mike/brand-pack-v2/our-town-logo-clean.webp`  
 **Source:** Official Our Town Properties corporate branding, supplied via brand-pack v2 ZIP  
 **SHA-256 in evidence report:** see `docs/ask-magic-mike-brand-kit-v2-evidence-report.md`
 
@@ -26,22 +26,21 @@ Provenance and usage rules for brand assets currently in this repo. Keep this fi
 ## Mike Eatmon — platform-ready crops
 
 **Registry:** `src/lib/mikePlatformAssets.ts`  
-**Public path base:** `/images/mike/platform-crops/`  
+**Public path base:** `/images/ask-magic-mike/brand-pack-v2/` (brand-pack-v2 equivalents)  
 **Source:** Cropped from master photography supplied by Our Town Properties; no third-party listing photography, no MLS source, no face regeneration  
-**Provenance doc:** `docs/ask-magic-mike-asset-manifest.md`
 
-| Key | File | Use |
-|-----|------|-----|
-| `websiteHeroPlate` | `01_website_hero_plate_2400x1350.jpg` | Fallback desktop hero plate (not primary UI — use `MikeHeroPortrait` instead) |
-| `openGraphCard` | `/ask-magic-mike-og.png` | Open Graph / Twitter `summary_large_image` |
-| `feedAd` | `03_facebook_instagram_feed_ad_1080x1350.jpg` | Campaign export — paid social feed creative |
-| `storyAd` | `04_instagram_story_ad_1080x1920.jpg` | Campaign export — paid social story creative |
-| `mobileHero` | `05_mobile_hero_crop_1080x1920.jpg` | Mobile hero fallback (not primary UI) |
-| `circularAvatar` | `06_circular_avatar_crop_1024x1024.jpg` | Avatar / profile crop — widget header, circular badge |
+| Key | File | Dimensions | Use |
+|-----|------|------------|-----|
+| `websiteHeroPlate` | `mike-headshot-source.webp` | 1024×1024 | Fallback desktop hero plate (not primary UI — use `MikeHeroPortrait` instead) |
+| `openGraphCard` | `mike-headshot-source.webp` | 1024×1024 | Open Graph / Twitter `summary_large_image` |
+| `feedAd` | `mike-hero-closeup.webp` | 360×440 | Hero portrait backing asset + feed ad equivalent (4:5) |
+| `storyAd` | `mike-hero-closeup.webp` | 360×440 | Story ad equivalent (campaign export — not app-rendered) |
+| `mobileHero` | `mike-headshot-source.webp` | 1024×1024 | Mobile hero fallback (not primary UI) |
+| `circularAvatar` | `mike-avatar-circle-128.webp` | 128×128 | Avatar / profile crop — trust badge, widget header |
 
 **Compliance rules (enforced by `tests/compliance/value-copy.test.ts`):**
 - Never use `websiteHeroPlate.src` or `mobileHero.src` directly in the hero — use the `MikeHeroPortrait` component abstraction so the crop can be swapped without touching the hero layout
-- `feedAd` and `storyAd` are not rendered by the app at runtime; they are creative exports only
+- `feedAd` and `storyAd` are campaign export references; `feedAd.src` also backs `MikeHeroPortrait` via `fill` layout (container governs render dimensions)
 - No MLS / FlexMLS source for any crop (verified by test)
 
 ---
