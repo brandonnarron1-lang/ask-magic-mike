@@ -19,7 +19,11 @@ declare namespace NodeJS {
     RESEND_API_KEY?: string;
     TWILIO_ACCOUNT_SID?: string;
     TWILIO_AUTH_TOKEN?: string;
-    TWILIO_FROM_PHONE?: string;
+    TWILIO_PHONE_NUMBER?: string;
+    ENABLE_SMS?: string;
+    SMS_PROVIDER?: string;
+    /** Operator approval gate — real SMS sends stay off until a human sets this to "true". */
+    SMS_SENDS_HUMAN_APPROVED?: string;
 
     // AVM
     ATTOM_API_KEY?: string;
@@ -27,6 +31,8 @@ declare namespace NodeJS {
     HOUSECANARY_API_SECRET?: string;
 
     // App
+    NEXT_PUBLIC_SITE_URL?: string;
+    PUBLIC_SITE_URL?: string;
     NEXT_PUBLIC_APP_URL: string;
     NEXT_PUBLIC_AGENT_NAME: string;
     NEXT_PUBLIC_BROKERAGE_NAME: string;
