@@ -123,6 +123,68 @@ export function sitemapHasOrigin(sitemapXml, expectedOrigin) {
   return sitemapXml.includes(expectedOrigin.replace(/\/$/, ""));
 }
 
+/**
+ * Return true when an og:image meta tag with non-empty content is present.
+ *
+ * @param {string} html
+ * @returns {boolean}
+ */
+export function hasOgImage(html) {
+  const lower = html.toLowerCase();
+  const a = /property=["']og:image["'][^>]*content=["']([^"']+)["']/i;
+  const b = /content=["']([^"']+)["'][^>]*property=["']og:image["']/i;
+  return a.test(lower) || b.test(lower);
+}
+
+/**
+ * Return true when both a twitter:card and a twitter:image meta tag exist.
+ *
+ * @param {string} html
+ * @returns {boolean}
+ */
+export function hasTwitterImage(html) {
+  const lower = html.toLowerCase();
+  const card = /name=["']twitter:card["'][^>]*content=["']([^"']+)["']/i;
+  const image = /name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i;
+  return card.test(lower) && image.test(lower);
+}
+
+/**
+ * Return true when the HTML contains no reference to the legacy /funnel route.
+ *
+ * @param {string} html
+ * @returns {boolean}
+ */
+export function hasNoFunnelReference(html) {
+  return !/\/funnel\b/i.test(html);
+}
+
+/**
+ * Return the list of known stale / novelty copy markers present in the HTML.
+ * An empty array means the page is clean. Note: the word "magic" alone is
+ * intentionally NOT a marker — the brand is "Ask Magic Mike".
+ *
+ * @param {string} html
+ * @returns {string[]}
+ */
+export function findStaleNoveltyCopy(html) {
+  const markers = [
+    /gainesville/i,
+    /\bflorida\b/i,
+    /rub the lamp/i,
+    /\bgenie\b/i,
+    /\bcasino\b/i,
+    /magic trick/i,
+    /\bSPARKS\b/,
+  ];
+  const found = [];
+  for (const rx of markers) {
+    const m = html.match(rx);
+    if (m) found.push(m[0]);
+  }
+  return found;
+}
+
 // ---------------------------------------------------------------------------
 // Network helpers
 // ---------------------------------------------------------------------------
@@ -211,6 +273,37 @@ async function checkHomepage() {
     });
   } else {
     record("homepage:no_secret_leak", "pass");
+  }
+
+  if (hasOgImage(r.text)) {
+    record("homepage:og_image", "pass");
+  } else {
+    record("homepage:og_image", "fail", { message: "og:image meta tag not found" });
+  }
+
+  if (hasTwitterImage(r.text)) {
+    record("homepage:twitter_image", "pass");
+  } else {
+    record("homepage:twitter_image", "fail", {
+      message: "twitter:card and/or twitter:image meta tag not found",
+    });
+  }
+
+  if (hasNoFunnelReference(r.text)) {
+    record("homepage:no_funnel", "pass");
+  } else {
+    record("homepage:no_funnel", "fail", {
+      message: "/funnel reference found in homepage HTML",
+    });
+  }
+
+  const stale = findStaleNoveltyCopy(r.text);
+  if (stale.length === 0) {
+    record("homepage:no_stale_copy", "pass");
+  } else {
+    record("homepage:no_stale_copy", "fail", {
+      message: `stale/novelty markers found: ${stale.join(", ")}`,
+    });
   }
 }
 

@@ -5,6 +5,10 @@ import {
   hasCanonical,
   robotsBlocksAdmin,
   sitemapHasOrigin,
+  hasOgImage,
+  hasTwitterImage,
+  hasNoFunnelReference,
+  findStaleNoveltyCopy,
   SMOKE_UTM_CAMPAIGN,
 } from "../../scripts/prod-smoke.mjs";
 
@@ -145,5 +149,54 @@ describe("sitemapHasOrigin", () => {
   it("tolerates trailing slash in expectedOrigin", () => {
     const xml = `<loc>https://www.askmagicmike.com/value</loc>`;
     expect(sitemapHasOrigin(xml, "https://www.askmagicmike.com/")).toBe(true);
+  });
+});
+
+describe("hasOgImage", () => {
+  it("returns true for a property-first og:image tag", () => {
+    const html = `<meta property="og:image" content="https://www.askmagicmike.com/img/card.webp">`;
+    expect(hasOgImage(html)).toBe(true);
+  });
+
+  it("returns true for a content-first og:image tag", () => {
+    const html = `<meta content="https://x/card.webp" property="og:image">`;
+    expect(hasOgImage(html)).toBe(true);
+  });
+
+  it("returns false when og:image is absent", () => {
+    expect(hasOgImage(`<meta property="og:title" content="Ask Magic Mike">`)).toBe(false);
+  });
+});
+
+describe("hasTwitterImage", () => {
+  it("returns true when both twitter:card and twitter:image are present", () => {
+    const html = `<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://x/card.webp">`;
+    expect(hasTwitterImage(html)).toBe(true);
+  });
+
+  it("returns false when twitter:image is missing", () => {
+    expect(hasTwitterImage(`<meta name="twitter:card" content="summary_large_image">`)).toBe(false);
+  });
+});
+
+describe("hasNoFunnelReference", () => {
+  it("returns true when there is no /funnel reference", () => {
+    expect(hasNoFunnelReference(`<a href="/value">Get started</a>`)).toBe(true);
+  });
+
+  it("returns false when /funnel appears", () => {
+    expect(hasNoFunnelReference(`<meta http-equiv="refresh" content="0;url=/funnel">`)).toBe(false);
+  });
+});
+
+describe("findStaleNoveltyCopy", () => {
+  it("returns empty for clean Ask Magic Mike copy (does not flag the word 'magic')", () => {
+    const html = `<h1>Ask Magic Mike</h1><p>Wilson, NC real estate by Our Town Properties.</p>`;
+    expect(findStaleNoveltyCopy(html)).toEqual([]);
+  });
+
+  it("flags stale novelty / wrong-market markers", () => {
+    expect(findStaleNoveltyCopy(`Serving Gainesville, Florida`).length).toBeGreaterThan(0);
+    expect(findStaleNoveltyCopy(`rub the lamp and the genie appears`).length).toBeGreaterThan(0);
   });
 });
