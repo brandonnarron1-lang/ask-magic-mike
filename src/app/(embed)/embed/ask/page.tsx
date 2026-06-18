@@ -1,7 +1,8 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect, useMemo } from "react";
+import { captureAttribution } from "@/lib/attribution/client-storage";
 import { EmbedShell } from "@/components/embed/embed-shell";
 import { StepQuestion } from "@/components/intake/step-question";
 import { StepIntent } from "@/components/intake/step-intent";
@@ -18,7 +19,33 @@ function EmbedAskInner() {
   const initialAddress  = params.get("address") ?? "";
   const initialChip     = (params.get("chip") as CTAChip) ?? null;
 
-  const { sessionId } = useSession();
+  // Persist UTMs from the iframe URL into sessionStorage so readAttribution()
+  // returns them at form submit time. The loader injects utm_* params and a
+  // referrer param into the iframe src — without this call, source_attribution
+  // is never written because readAttribution() returns null.
+  useEffect(() => {
+    captureAttribution();
+  }, []);
+
+  // Extract UTMs from iframe URL params for session creation. Memoized to
+  // prevent useSession from re-running createSession on every render.
+  const utmSource   = params.get("utm_source");
+  const utmMedium   = params.get("utm_medium");
+  const utmCampaign = params.get("utm_campaign");
+  const utmContent  = params.get("utm_content");
+  const utmTerm     = params.get("utm_term");
+  const referrer    = params.get("referrer");
+
+  const sessionAttribution = useMemo(() => ({
+    utmSource,
+    utmMedium,
+    utmCampaign,
+    utmContent,
+    utmTerm,
+    referrerUrl: referrer,
+  }), [utmSource, utmMedium, utmCampaign, utmContent, utmTerm, referrer]);
+
+  const { sessionId } = useSession(sessionAttribution);
   const flow = useIntakeFlow(sessionId, {
     question: initialQuestion,
     address:  initialAddress,
