@@ -3,6 +3,7 @@ export const revalidate = 0;
 
 import { LeadTable } from "@/components/admin/lead-table";
 import { getLeadsForAdmin } from "@/lib/db/lead-repository";
+import { loadDashboardMetrics } from "@/lib/admin/dashboard-metrics";
 
 function AdminIcon() {
   return (
@@ -16,7 +17,10 @@ function AdminIcon() {
 }
 
 export default async function AdminPage() {
-  const result = await getLeadsForAdmin();
+  const [result, metrics] = await Promise.all([
+    getLeadsForAdmin(),
+    loadDashboardMetrics(),
+  ]);
 
   // Production without Supabase — show locked state, never show mock data
   if (result.mode === "locked") {
@@ -89,7 +93,8 @@ export default async function AdminPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        {/* Primary status tiles */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {[
             { label: "Total Leads",  value: counts.total,    color: "text-cream" },
             { label: "Urgent",       value: counts.urgent,   color: "text-ruby-400" },
@@ -102,6 +107,43 @@ export default async function AdminPage() {
             </div>
           ))}
         </div>
+
+        {/* Funnel conversion tiles — from dashboard-metrics */}
+        {metrics.configured && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+            {[
+              { label: "New Today",     value: metrics.totals.newToday,             color: "text-cream" },
+              { label: "Contacted",     value: metrics.totals.contacted,            color: "text-emerald-400" },
+              { label: "Appt. Req.",    value: metrics.totals.appointmentsRequested, color: "text-gold-400" },
+              { label: "Unassigned",    value: metrics.totals.unassigned,           color: "text-amber-400" },
+            ].map((s) => (
+              <div key={s.label} className="rounded-xl border border-white/[0.04] bg-white/[0.01] px-5 py-4">
+                <div className={`font-bebas text-4xl leading-none ${s.color}`}>{s.value}</div>
+                <div className="text-[11px] text-slate-600 mt-1 uppercase tracking-[0.1em]">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Source / UTM breakdown */}
+        {metrics.configured && metrics.bySource.length > 0 && (
+          <div className="mb-8 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-3">
+              Leads by Source
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {metrics.bySource.map(({ source, count }) => (
+                <span
+                  key={source}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1 text-xs text-slate-300"
+                >
+                  <span className="font-medium text-gold-400">{count}</span>
+                  <span className="text-slate-500">{source}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-300">

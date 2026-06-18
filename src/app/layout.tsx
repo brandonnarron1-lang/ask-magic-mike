@@ -29,6 +29,7 @@ export const metadata: Metadata = {
     description:
       "Share the property details. Mike Eatmon's Our Town Properties team follows up with broker-reviewed local guidance.",
     siteName: "Ask Magic Mike",
+    url: SITE_URL,
     type: "website",
     images: [
       {
