@@ -3,6 +3,9 @@
  *
  * Pure helper around the Supabase admin client. Returns a stable empty
  * shape when not configured. Filters are validated upstream.
+ *
+ * Attribution and scoring are loaded as optional supplements so the list
+ * degrades gracefully when those tables are absent or return errors.
  */
 import { LEAD_TYPES, LEAD_STATUSES, LEAD_GRADES } from "@/lib/leads/lead-types";
 
@@ -34,7 +37,18 @@ export interface LeadListRow {
   status: string;
   grade: string | null;
   source: string | null;
+  /** Referrer classification written by classifyReferrer() on capture. */
+  referrerType: string | null;
+  /** Whether source_attribution.is_paid is true for this lead. */
+  isPaid: boolean;
+  utmSource: string | null;
+  utmMedium: string | null;
   utmCampaign: string | null;
+  landingPage: string | null;
+  /** Attribution evidence tier: source_attribution > sessions > lead_row > none */
+  attributionEvidence: "source_attribution" | "lead_row" | "none";
+  score: number | null;
+  temperature: string | null;
   assignedAgentId: string | null;
   lastContactedAt: string | null;
   spamScore: number | null;
@@ -51,6 +65,20 @@ export interface LeadListResult {
 }
 
 const MAX_LIMIT = 100;
+
+interface AttributionSupplement {
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  referrer_type: string | null;
+  is_paid: boolean;
+  landing_page: string | null;
+}
+
+interface ScoreSupplement {
+  composite_score: number | null;
+  temperature: string | null;
+}
 
 export async function loadLeadList(
   filters: LeadListFilters
@@ -86,8 +114,7 @@ export async function loadLeadList(
     q = q.eq("lead_grade", filters.grade);
   }
   if (filters.source) q = q.eq("source", filters.source);
-  if (filters.assignedAgentId)
-    q = q.eq("assigned_agent_id", filters.assignedAgentId);
+  if (filters.assignedAgentId) q = q.eq("assigned_agent_id", filters.assignedAgentId);
   if (filters.unassignedOnly) q = q.is("assigned_agent_id", null);
   if (filters.spamSuspect) q = q.gte("spam_score", 40);
   if (filters.city) q = q.ilike("city", `%${filters.city}%`);
@@ -122,7 +149,91 @@ export async function loadLeadList(
   if (error) {
     return { configured: true, items: [], total: 0, limit, offset };
   }
-  const items: LeadListRow[] = ((data ?? []) as Array<Record<string, unknown>>).map((r) => ({
+
+  const rows = (data ?? []) as Array<Record<string, unknown>>;
+  const ids = rows.map((r) => r.id as string).filter(Boolean);
+
+  // Batch-fetch attribution and scores — failures are non-fatal
+  const [attributionMap, scoreMap] = await Promise.all([
+    loadAttributionSupplements(client, ids),
+    loadScoreSupplements(client, ids),
+  ]);
+
+  const items: LeadListRow[] = rows.map((r) => {
+    const id = r.id as string;
+    const attr = attributionMap.get(id) ?? null;
+    const sc = scoreMap.get(id) ?? null;
+    return mapLeadListRow(r, attr, sc);
+  });
+
+  return { configured: true, items, total: count ?? items.length, limit, offset };
+}
+
+async function loadAttributionSupplements(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: any,
+  ids: string[]
+): Promise<Map<string, AttributionSupplement>> {
+  const map = new Map<string, AttributionSupplement>();
+  if (ids.length === 0) return map;
+  try {
+    const { data } = await client
+      .from("source_attribution")
+      .select("lead_id, utm_source, utm_medium, utm_campaign, referrer_type, is_paid, landing_page")
+      .in("lead_id", ids);
+    for (const row of data ?? []) {
+      map.set(row.lead_id, {
+        utm_source: row.utm_source ?? null,
+        utm_medium: row.utm_medium ?? null,
+        utm_campaign: row.utm_campaign ?? null,
+        referrer_type: row.referrer_type ?? null,
+        is_paid: Boolean(row.is_paid),
+        landing_page: row.landing_page ?? null,
+      });
+    }
+  } catch {
+    // Non-fatal: attribution supplement unavailable
+  }
+  return map;
+}
+
+async function loadScoreSupplements(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: any,
+  ids: string[]
+): Promise<Map<string, ScoreSupplement>> {
+  const map = new Map<string, ScoreSupplement>();
+  if (ids.length === 0) return map;
+  try {
+    const { data } = await client
+      .from("lead_scores")
+      .select("lead_id, composite_score, temperature")
+      .in("lead_id", ids);
+    for (const row of data ?? []) {
+      map.set(row.lead_id, {
+        composite_score: typeof row.composite_score === "number" ? row.composite_score : null,
+        temperature: typeof row.temperature === "string" ? row.temperature : null,
+      });
+    }
+  } catch {
+    // Non-fatal: score supplement unavailable
+  }
+  return map;
+}
+
+export function mapLeadListRow(
+  r: Record<string, unknown>,
+  attr: AttributionSupplement | null,
+  sc: ScoreSupplement | null
+): LeadListRow {
+  const sourceOnRow = typeof r.source === "string" && r.source.trim() !== "" ? r.source : null;
+  const attributionEvidence: LeadListRow["attributionEvidence"] = attr
+    ? "source_attribution"
+    : sourceOnRow
+      ? "lead_row"
+      : "none";
+
+  return {
     id: r.id as string,
     createdAt: r.created_at as string,
     firstName: (r.first_name as string | null) ?? null,
@@ -132,13 +243,20 @@ export async function loadLeadList(
     leadType: (r.lead_type as string | null) ?? "unknown",
     status: (r.status as string | null) ?? "new",
     grade: (r.lead_grade as string | null) ?? null,
-    source: (r.source as string | null) ?? null,
-    utmCampaign: null,
+    source: sourceOnRow,
+    referrerType: attr?.referrer_type ?? null,
+    isPaid: attr?.is_paid ?? false,
+    utmSource: attr?.utm_source ?? null,
+    utmMedium: attr?.utm_medium ?? null,
+    utmCampaign: attr?.utm_campaign ?? null,
+    landingPage: attr?.landing_page ?? null,
+    attributionEvidence,
+    score: sc?.composite_score ?? null,
+    temperature: sc?.temperature ?? null,
     assignedAgentId: (r.assigned_agent_id as string | null) ?? null,
     lastContactedAt: (r.last_contacted_at as string | null) ?? null,
     spamScore: (r.spam_score as number | null) ?? null,
     city: (r.city as string | null) ?? null,
     state: (r.state as string | null) ?? null,
-  }));
-  return { configured: true, items, total: count ?? items.length, limit, offset };
+  };
 }

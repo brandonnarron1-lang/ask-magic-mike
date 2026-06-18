@@ -86,6 +86,8 @@ export default async function LeadDetailPage({ params }: PageProps) {
           <Card title="Attribution">
             {detail.attribution ? (
               <>
+                <Field label="referrer_type" value={String(detail.attribution.referrer_type ?? "—")} />
+                <Field label="is_paid" value={detail.attribution.is_paid ? "yes" : "no"} />
                 <Field label="utm_source" value={String(detail.attribution.utm_source ?? "—")} />
                 <Field label="utm_medium" value={String(detail.attribution.utm_medium ?? "—")} />
                 <Field label="utm_campaign" value={String(detail.attribution.utm_campaign ?? "—")} />

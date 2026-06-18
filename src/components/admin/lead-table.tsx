@@ -217,9 +217,11 @@ export function LeadTable({ leads }: LeadTableProps) {
                         <div>
                           <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-slate-500 mb-2">Attribution</p>
                           <div className="space-y-1 text-xs text-slate-400">
-                            {lead.utmSource   && <div><span className="text-slate-600">source</span> {lead.utmSource}</div>}
-                            {lead.utmCampaign && <div><span className="text-slate-600">campaign</span> {lead.utmCampaign}</div>}
-                            {!lead.utmSource && !lead.utmCampaign && (
+                            {lead.referrerType && <div><span className="text-slate-600">type</span> {lead.referrerType}</div>}
+                            {lead.utmSource    && <div><span className="text-slate-600">source</span> {lead.utmSource}</div>}
+                            {lead.utmMedium    && <div><span className="text-slate-600">medium</span> {lead.utmMedium}</div>}
+                            {lead.utmCampaign  && <div><span className="text-slate-600">campaign</span> {lead.utmCampaign}</div>}
+                            {!lead.referrerType && !lead.utmSource && !lead.utmCampaign && (
                               <div className="text-slate-600">Direct / unknown</div>
                             )}
                           </div>

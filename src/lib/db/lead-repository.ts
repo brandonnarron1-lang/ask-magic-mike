@@ -121,7 +121,7 @@ export async function getLeadsForAdmin(limit = 100): Promise<GetLeadsForAdminRes
       consent_sms, consent_call, consent_email,
       lead_scores ( seller_certainty_score, buyer_certainty_score, composite_score, temperature, factor_log ),
       lead_routing ( status, accept_deadline, contact_deadline, agents ( name ) ),
-      sessions ( utm_source, utm_campaign )
+      sessions ( utm_source, utm_medium, utm_campaign )
     `)
     .order("created_at", { ascending: false })
     .limit(limit);
@@ -161,7 +161,9 @@ export async function getLeadsForAdmin(limit = 100): Promise<GetLeadsForAdminRes
       createdAt:     row.created_at,
       slaBreached,
       utmSource:     (session as { utm_source?: string | null } | null)?.utm_source ?? null,
+      utmMedium:     (session as { utm_medium?: string | null } | null)?.utm_medium ?? null,
       utmCampaign:   (session as { utm_campaign?: string | null } | null)?.utm_campaign ?? null,
+      referrerType:  null,  // source_attribution not joined here; available via lead-list supplement
       consentSms:    row.consent_sms ?? false,
       consentCall:   row.consent_call ?? false,
       consentEmail:  row.consent_email ?? false,
@@ -224,7 +226,9 @@ const DEV_LEADS: AdminLeadRow[] = [
     createdAt: new Date(Date.now() - 3 * 60000).toISOString(),
     slaBreached: false,
     utmSource: "google",
+    utmMedium: "cpc",
     utmCampaign: "spring-sellers",
+    referrerType: "paid",
     consentSms: true,
     consentCall: true,
     consentEmail: false,
@@ -253,7 +257,9 @@ const DEV_LEADS: AdminLeadRow[] = [
     createdAt: new Date(Date.now() - 18 * 60000).toISOString(),
     slaBreached: false,
     utmSource: null,
+    utmMedium: null,
     utmCampaign: null,
+    referrerType: "direct",
     consentSms: true,
     consentCall: false,
     consentEmail: true,
@@ -280,7 +286,9 @@ const DEV_LEADS: AdminLeadRow[] = [
     createdAt: new Date(Date.now() - 2 * 3600000).toISOString(),
     slaBreached: true,
     utmSource: "facebook",
+    utmMedium: "social",
     utmCampaign: null,
+    referrerType: "social",
     consentSms: true,
     consentCall: false,
     consentEmail: false,
@@ -303,7 +311,9 @@ const DEV_LEADS: AdminLeadRow[] = [
     createdAt: new Date(Date.now() - 24 * 3600000).toISOString(),
     slaBreached: false,
     utmSource: null,
+    utmMedium: null,
     utmCampaign: null,
+    referrerType: null,
     consentSms: false,
     consentCall: false,
     consentEmail: false,
