@@ -1,7 +1,10 @@
 # WordPress CTA Snippets — Ask Magic Mike
 
 Paste these into WordPress using the **Custom HTML block** or your theme's page builder.
-Replace `https://askmagicmike.com` with the live domain if it changes.
+
+**Canonical production URL:** `https://www.askmagicmike.com` (with www — apex redirects to www)
+
+For full iframe embed instructions see `docs/WORDPRESS_WIDGET_INTEGRATION.md`.
 
 ---
 
@@ -12,7 +15,7 @@ Place on the homepage hero or banner area.
 ```html
 <div style="text-align:center; margin: 2rem 0;">
   <a
-    href="https://askmagicmike.com/value"
+    href="https://www.askmagicmike.com/value"
     style="
       display: inline-block;
       background: #D4A017;
@@ -51,7 +54,7 @@ Place at the bottom of the Mike Eatmon agent profile page.
     Get a real local take on your home's value, the Wilson NC market, or your next move.
   </p>
   <a
-    href="https://askmagicmike.com/value"
+    href="https://www.askmagicmike.com/value"
     style="
       display:inline-block; background:#D4A017; color:#0A0A0A;
       font-weight:700; font-size:0.9rem; padding:0.75rem 2rem;
@@ -82,7 +85,7 @@ Place on any seller-focused page.
     not an automated estimate.
   </p>
   <a
-    href="https://askmagicmike.com/value"
+    href="https://www.askmagicmike.com/value"
     style="
       display:inline-block; background:#D4A017; color:#0A0A0A;
       font-weight:700; font-size:0.875rem; padding:0.65rem 1.6rem;
@@ -104,7 +107,7 @@ Works in a Custom HTML block. Adjust height as needed (600px–700px recommended
 ```html
 <div style="border-radius:12px; overflow:hidden; border:1px solid rgba(212,160,23,0.2);">
   <iframe
-    src="https://askmagicmike.com/embed/ask"
+    src="https://www.askmagicmike.com/embed/ask"
     width="100%"
     height="650"
     style="border:none; display:block; background:#0A0A0A;"
@@ -120,12 +123,12 @@ Works in a Custom HTML block. Adjust height as needed (600px–700px recommended
 
 **Pre-fill with seller chip:**
 ```
-src="https://askmagicmike.com/embed/ask?chip=home_worth&q=What+is+my+home+worth+in+Wilson+NC"
+src="https://www.askmagicmike.com/embed/ask?chip=home_worth&q=What+is+my+home+worth+in+Wilson+NC"
 ```
 
 **Pre-fill with buyer chip:**
 ```
-src="https://askmagicmike.com/embed/ask?chip=what_can_afford"
+src="https://www.askmagicmike.com/embed/ask?chip=what_can_afford"
 ```
 
 ---
