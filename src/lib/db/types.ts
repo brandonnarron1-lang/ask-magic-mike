@@ -90,7 +90,9 @@ export interface AdminLeadRow {
   createdAt: string;
   slaBreached: boolean;
   utmSource: string | null;
+  utmMedium: string | null;
   utmCampaign: string | null;
+  referrerType: string | null;
   consentSms: boolean;
   consentCall: boolean;
   consentEmail: boolean;

@@ -44,8 +44,18 @@ function rwaFromRow(l: LeadListRow): RwaScore {
     hasEmail: !!l.email,
     hasPhone: !!l.phone,
     spamScore: l.spamScore,
+    temperature: l.temperature ?? null,
   });
 }
+
+const REFERRER_BADGE: Record<string, string> = {
+  paid:     "bg-gold-400/20 text-gold-300 border-gold-400/30",
+  organic:  "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+  social:   "bg-blue-500/15 text-blue-300 border-blue-500/30",
+  email:    "bg-purple-500/15 text-purple-300 border-purple-500/30",
+  referral: "bg-slate-500/15 text-slate-300 border-slate-500/30",
+  direct:   "bg-white/[0.06] text-slate-400 border-white/10",
+};
 
 const RWA_TIER_STYLES: Record<string, string> = {
   urgent: "bg-red-500/20 text-red-300 border-red-500/30",
@@ -228,8 +238,22 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                       {l.grade ?? "—"}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-slate-300">{"—"}</td>
-                  <td className="px-3 py-2 text-slate-300">{"—"}</td>
+                  <td className="px-3 py-2 text-slate-300 tabular-nums">
+                    {l.score !== null ? l.score : "—"}
+                  </td>
+                  <td className="px-3 py-2">
+                    {l.temperature ? (
+                      <span className={`inline-block rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
+                        l.temperature === "urgent" ? "bg-red-500/20 text-red-300" :
+                        l.temperature === "hot"    ? "bg-gold-400/20 text-gold-300" :
+                        l.temperature === "warm"   ? "bg-amber-500/15 text-amber-300" :
+                        l.temperature === "nurture"? "bg-blue-500/10 text-blue-300" :
+                        "bg-white/[0.05] text-slate-400"
+                      }`}>
+                        {l.temperature.toUpperCase()}
+                      </span>
+                    ) : <span className="text-slate-500">—</span>}
+                  </td>
                   <td className="px-3 py-2">
                     {(() => {
                       const rwa = rwaMap.get(l.id);
@@ -247,7 +271,18 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                   <td className="px-3 py-2 text-slate-300">{l.status}</td>
                   <td className="px-3 py-2 text-slate-300">{"—"}</td>
                   <td className="px-3 py-2 text-slate-300 max-w-[220px]">{"—"}</td>
-                  <td className="px-3 py-2 text-slate-300">{l.source ?? "—"}</td>
+                  <td className="px-3 py-2 text-slate-300">
+                    {l.referrerType ? (
+                      <span
+                        className={`inline-block rounded-full border px-2 py-0.5 text-[10.5px] font-semibold ${REFERRER_BADGE[l.referrerType] ?? REFERRER_BADGE.direct}`}
+                        title={`${l.referrerType}${l.utmSource ? ` · ${l.utmSource}` : ""}`}
+                      >
+                        {l.referrerType.toUpperCase()}
+                      </span>
+                    ) : (
+                      <span className="text-slate-500">{l.source ?? "—"}</span>
+                    )}
+                  </td>
                   <td className="px-3 py-2 text-slate-300">
                     {l.utmCampaign ?? "—"}
                   </td>
