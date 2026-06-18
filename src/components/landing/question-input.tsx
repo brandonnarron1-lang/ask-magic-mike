@@ -128,7 +128,7 @@ export function QuestionInput({
             </span>
           ) : (
             <>
-              Get My Answer
+              Request Guidance
               <ArrowRight className="h-4 w-4" />
             </>
           )}
