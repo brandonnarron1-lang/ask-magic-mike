@@ -217,6 +217,16 @@ describe("root layout metadata", () => {
     expect(layout).toContain("mikePlatformAssets.openGraphCard");
     expect(layout).not.toMatch(/flexmls|mls listing/i);
   });
+
+  it("og:url is explicitly set in the openGraph config", () => {
+    // Next.js App Router does NOT auto-inject og:url from metadataBase.
+    // The url field must appear inside the openGraph block.
+    // We verify both that openGraph is defined and that url: appears after it.
+    expect(layout).toContain("openGraph:");
+    // After normalize(), check that url: SITE_URL appears as a sibling key
+    // inside the openGraph block — not inside images[] or the twitter block.
+    expect(layout).toMatch(/openGraph:[\s\S]{0,600}url: SITE_URL/);
+  });
 });
 
 describe("intake confirmation — trust-first success state", () => {

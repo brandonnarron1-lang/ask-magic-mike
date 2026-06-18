@@ -14,9 +14,9 @@ All of the following must be set in the production environment:
 |----------|---------|----------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | **REQUIRED** |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key (server-only) | **REQUIRED** |
-| `NEXT_PUBLIC_ANON_KEY` | Supabase anon key | **REQUIRED** |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key | **REQUIRED** |
 | `ADMIN_SECRET` | Password for `/admin` route | **REQUIRED** |
-| `NEXT_PUBLIC_APP_URL` | Canonical site URL (e.g. `https://askmagicmike.com`) | **REQUIRED** |
+| `NEXT_PUBLIC_SITE_URL` | Canonical site URL (e.g. `https://www.askmagicmike.com`) | **REQUIRED** |
 | `NEXT_PUBLIC_AGENT_NAME` | `Mike Eatmon` | **REQUIRED** |
 | `NEXT_PUBLIC_BROKERAGE_NAME` | `Our Town Properties` | **REQUIRED** |
 | `NEXT_PUBLIC_MARKET_AREA` | `Wilson, NC` | **REQUIRED** |
@@ -131,7 +131,7 @@ Missing `NEXT_PUBLIC_SUPABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` in production 
 - [ ] Legal/compliance attorney has reviewed TCPA consent language
 - [ ] Hosting/DNS configured for `askmagicmike.com`
 - [ ] SSL certificate active
-- [ ] `NEXT_PUBLIC_APP_URL` set to production domain
+- [ ] `NEXT_PUBLIC_SITE_URL` set to production domain (`https://www.askmagicmike.com`)
 
 ---
 
