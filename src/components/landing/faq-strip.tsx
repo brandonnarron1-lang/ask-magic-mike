@@ -6,20 +6,28 @@ import { cn } from "@/lib/utils/cn";
 
 const FAQS = [
   {
+    q: "Is this a formal home valuation?",
+    a: "No. Ask Magic Mike is not an appraisal — it is broker-reviewed local guidance from a licensed broker. Formal valuations by licensed appraisers are required for lending or legal purposes. What you get here is local broker context to help you understand your position and your options.",
+  },
+  {
+    q: "What happens after I submit?",
+    a: "Your request goes directly to Mike Eatmon at Our Town Properties. Mike or his team reviews your details and follows up with local broker-reviewed guidance. You are not automatically enrolled in any program — this is a direct request for follow-up from a licensed broker.",
+  },
+  {
     q: "Is this service free?",
     a: "Yes — completely free. Ask your question, get real answers. Mike earns his commission when a transaction closes, not from inquiries.",
   },
   {
     q: "Do I have to sign anything to ask a question?",
-    a: "No. You can ask anonymously. We only ask for contact info if you want Mike to follow up personally — and you control how he reaches you.",
+    a: "No. You can ask anonymously. We only ask for contact info if you want Mike to follow up — and you control how he reaches you.",
   },
   {
     q: "What's a Comparative Market Analysis (CMA) and can I get one?",
     a: "A CMA compares your home to recently sold properties nearby to estimate current market value. It's not an appraisal, but it's what agents use to price listings. Mike provides CMAs at no charge — just ask.",
   },
   {
-    q: "How fast does Mike actually respond?",
-    a: "Typically within minutes during business hours. The AI scores and routes your lead instantly — Mike gets notified immediately with your info and situation.",
+    q: "How fast does Mike respond?",
+    a: "Response timing varies. Mike and the Our Town Properties team prioritize every request and follow up during business hours. We don't promise specific turnaround times — we promise local broker attention, not an automated response.",
   },
   {
     q: "What areas does Mike serve?",

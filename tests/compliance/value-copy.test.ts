@@ -556,6 +556,48 @@ describe("hero section — Our Town Properties brand integration", () => {
   });
 });
 
+describe("landing page copy — conversion trust guards", () => {
+  const landingHowItWorks = normalize(
+    readSource("src/components/landing/how-it-works.tsx")
+  );
+  const faqStrip = normalize(
+    readSource("src/components/landing/faq-strip.tsx")
+  );
+  const questionInput = normalize(
+    readSource("src/components/landing/question-input.tsx")
+  );
+
+  it("landing how-it-works does not use the forbidden word 'Instant'", () => {
+    expect(landingHowItWorks).not.toMatch(/\bInstant\b/i);
+  });
+
+  it("landing how-it-works does not over-promise a personal Mike phone call", () => {
+    expect(landingHowItWorks).not.toContain("Mike Calls You");
+  });
+
+  it("landing how-it-works does not imply a same-day SLA", () => {
+    expect(landingHowItWorks).not.toMatch(/same business day/i);
+  });
+
+  it("faq-strip includes an 'is not an appraisal' trust clarification", () => {
+    expect(faqStrip).toMatch(/is not an appraisal/i);
+    expect(faqStrip).toContain("Is this a formal home valuation");
+  });
+
+  it("faq-strip includes a 'What happens after I submit' FAQ", () => {
+    expect(faqStrip).toContain("What happens after I submit");
+  });
+
+  it("faq-strip does not promise a 'within minutes' response time", () => {
+    expect(faqStrip).not.toMatch(/within minutes/i);
+  });
+
+  it("submit button says 'Request Guidance', not 'Get My Answer'", () => {
+    expect(questionInput).toContain("Request Guidance");
+    expect(questionInput).not.toContain("Get My Answer");
+  });
+});
+
 describe("mikePlatformAssets — platform-ready crops registry", () => {
   const manifest = normalize(readSource("src/lib/mikePlatformAssets.ts"));
 
