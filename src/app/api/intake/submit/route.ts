@@ -10,6 +10,7 @@ import { upsertProperty } from "@/lib/db/property-repository";
 import { createConsentsFromLead } from "@/lib/db/consent-repository";
 import { completeSession } from "@/lib/db/session-repository";
 import { shouldUseDevStorage, isProduction, isSupabaseConfigured } from "@/lib/db/types";
+import { classifyReferrer } from "@/lib/attribution/referrer-classifier";
 import type { ScoringInput } from "@/types/domain.types";
 
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -213,13 +214,10 @@ export async function POST(req: NextRequest) {
           input.referrerUrl || input.landingPath
         ) {
           try {
-            const medium = (input.utmMedium ?? "").toLowerCase();
-            const utmSrc  = (input.utmSource  ?? "").toLowerCase();
-            const referrerType: string =
-              ["cpc", "paid", "paid_social", "ppc"].includes(medium) ? "paid" :
-              ["facebook", "instagram", "meta", "tiktok", "youtube"].includes(utmSrc) ? "social" :
-              medium === "email" ? "email" :
-              input.referrerUrl ? "referral" : "direct";
+            const referrerType = classifyReferrer(
+              input.referrerUrl ?? "",
+              input.utmMedium ?? null,
+            );
 
             await client.from("source_attribution").upsert({
               lead_id:       leadId,
@@ -232,7 +230,7 @@ export async function POST(req: NextRequest) {
               referrer_url:  input.referrerUrl,
               referrer_type: referrerType,
               landing_page:  input.landingPath,
-              is_paid:       ["cpc", "paid_social", "paid"].includes(medium),
+              is_paid:       referrerType === "paid",
             }, { onConflict: "lead_id", ignoreDuplicates: true });
           } catch (attrErr) {
             console.warn(
