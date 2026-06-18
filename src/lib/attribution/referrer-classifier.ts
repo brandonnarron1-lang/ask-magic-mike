@@ -30,6 +30,10 @@ const PAID_MEDIUMS = new Set([
   "paid",
   "paidsearch",
   "paidsocial",
+  "paid_social",   // underscore variant (common in Google Analytics exports)
+  "paid-social",   // hyphen variant
+  "paid_search",   // underscore variant
+  "paid-search",   // hyphen variant
   "display",
   "banner",
   "cpv",
