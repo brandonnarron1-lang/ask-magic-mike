@@ -309,6 +309,62 @@ describe("WordPress widget campaign count", () => {
 });
 
 // ---------------------------------------------------------------------------
+// 3b. wordpressWidget24h — true 24h window
+// ---------------------------------------------------------------------------
+
+describe("wordpressWidget24h", () => {
+  it("counts website_widget campaign leads created in the last 24h", async () => {
+    // makeLeadRow defaults to 60s ago — within 24h
+    const leads = [
+      makeLeadRow({ id: "l1" }),
+      makeLeadRow({ id: "l2" }),
+    ];
+    const attrRows = [
+      makeAttrRow({ lead_id: "l1", utm_campaign: "website_widget" }),
+      makeAttrRow({ lead_id: "l2", utm_campaign: "other_campaign" }),
+    ];
+    const client = makeClient({ leadsData: leads, attrData: attrRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.funnelHealth.wordpressWidget24h).toBe(1);
+  });
+
+  it("does not count website_widget leads older than 24h", async () => {
+    const ago25h = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
+    const leads = [makeLeadRow({ id: "l1", created_at: ago25h })];
+    const attrRows = [makeAttrRow({ lead_id: "l1", utm_campaign: "website_widget" })];
+    const client = makeClient({ leadsData: leads, attrData: attrRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.funnelHealth.wordpressWidget24h).toBe(0);
+  });
+
+  it("wordpressWidget7d still counts across the full 7-day window", async () => {
+    const ago3d = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+    const ago25h = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
+    const leads = [
+      makeLeadRow({ id: "l1" }),          // within 24h + 7d
+      makeLeadRow({ id: "l2", created_at: ago3d }),  // within 7d but not 24h
+      makeLeadRow({ id: "l3", created_at: ago25h }), // within 7d but not 24h
+    ];
+    const attrRows = [
+      makeAttrRow({ lead_id: "l1", utm_campaign: "website_widget" }),
+      makeAttrRow({ lead_id: "l2", utm_campaign: "website_widget" }),
+      makeAttrRow({ lead_id: "l3", utm_campaign: "website_widget" }),
+    ];
+    const client = makeClient({ leadsData: leads, attrData: attrRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.funnelHealth.wordpressWidget24h).toBe(1);
+    expect(result.funnelHealth.wordpressWidget7d).toBe(3);
+  });
+
+  it("result shape includes both wordpressWidget24h and wordpressWidget7d", async () => {
+    const client = makeClient();
+    const result = await loadRevenueCommand(client);
+    expect(result.funnelHealth).toHaveProperty("wordpressWidget24h");
+    expect(result.funnelHealth).toHaveProperty("wordpressWidget7d");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // 4. Buckets scores correctly into 0-25, 26-50, 51-75, 76-100 bands
 // ---------------------------------------------------------------------------
 

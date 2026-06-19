@@ -3,7 +3,7 @@
 **This is read-only. It does not send email, SMS, calls, automations, or outbound messages.**
 
 URL: `https://www.askmagicmike.com/admin/revenue`  
-Access: Any username + ADMIN_SECRET from 1Password (brandonnarron1@gmail.com)
+Access: Any username + ADMIN_SECRET — retrieve the secret from the approved password manager.
 
 ---
 

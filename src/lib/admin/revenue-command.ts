@@ -44,6 +44,7 @@ export interface RevenueCommandData {
     leads7d: number;
     leads30d: number;
     unattributed7d: number;
+    wordpressWidget24h: number;
     wordpressWidget7d: number;
     highIntent24h: number;
   };
@@ -226,6 +227,7 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
   let leads7d = 0;
   const leads30d = leads.length;
   let unattributed7d = 0;
+  let wordpressWidget24h = 0;
   let wordpressWidget7d = 0;
   let highIntent24h = 0;
 
@@ -238,6 +240,10 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
       const sc = scoreByLeadId.get(l.id as string);
       const temp = (sc?.temperature as string | null) ?? null;
       if (temp && HOT_URGENT.has(temp)) highIntent24h++;
+      const attr24 = attrByLeadId.get(l.id as string);
+      if (attr24 && (attr24.utm_campaign as string | null) === "website_widget") {
+        wordpressWidget24h++;
+      }
     }
     if (is7d) {
       leads7d++;
@@ -460,6 +466,7 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
       leads7d,
       leads30d,
       unattributed7d,
+      wordpressWidget24h,
       wordpressWidget7d,
       highIntent24h,
     },
