@@ -3,6 +3,8 @@
  *
  * All tests mock the Supabase client — no network calls, no env vars needed.
  */
+import { readFileSync } from "fs";
+import { join } from "path";
 import { describe, expect, it, vi } from "vitest";
 import { loadRevenueCommand, isSyntheticEmail } from "@/lib/admin/revenue-command";
 
@@ -428,13 +430,13 @@ describe("followUpQueue synthetic exclusion", () => {
     expect(result.followUpQueue).toHaveLength(0);
   });
 
-  it("caps followUpQueue at 10 real leads", async () => {
-    const leads = Array.from({ length: 20 }, (_, i) =>
+  it("caps followUpQueue at 20 real leads", async () => {
+    const leads = Array.from({ length: 25 }, (_, i) =>
       makeLeadRow({ id: `real${i}`, email: `real${i}@domain.com` })
     );
     const client = makeClient({ leadsData: leads });
     const result = await loadRevenueCommand(client);
-    expect(result.followUpQueue.length).toBeLessThanOrEqual(10);
+    expect(result.followUpQueue.length).toBe(20);
   });
 
   it("includes @example.com in synthetic exclusion", async () => {
@@ -578,6 +580,7 @@ describe("result shape", () => {
     const client = makeClient();
     const result = await loadRevenueCommand(client);
     expect(result).toHaveProperty("funnelHealth");
+    expect(result).toHaveProperty("trafficPathScorecard");
     expect(result).toHaveProperty("sourceAttribution");
     expect(result).toHaveProperty("qualification");
     expect(result).toHaveProperty("routing");
@@ -585,5 +588,272 @@ describe("result shape", () => {
     expect(result).toHaveProperty("attributionIntegrity");
     expect(result).toHaveProperty("syntheticResidues");
     expect(result).toHaveProperty("generatedAt");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 9. Traffic path scorecard
+// ---------------------------------------------------------------------------
+
+describe("trafficPathScorecard", () => {
+  it("groups leads by utm_medium into correct path keys", async () => {
+    const leads = [
+      makeLeadRow({ id: "l1" }),
+      makeLeadRow({ id: "l2" }),
+      makeLeadRow({ id: "l3" }),
+    ];
+    const attrRows = [
+      makeAttrRow({ lead_id: "l1", utm_medium: "website_widget" }),
+      makeAttrRow({ lead_id: "l2", utm_medium: "homepage_cta" }),
+      makeAttrRow({ lead_id: "l3", utm_medium: "agent_profile_cta" }),
+    ];
+    const client = makeClient({ leadsData: leads, attrData: attrRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.trafficPathScorecard.website_widget.leads30d).toBe(1);
+    expect(result.trafficPathScorecard.homepage_cta.leads30d).toBe(1);
+    expect(result.trafficPathScorecard.agent_profile_cta.leads30d).toBe(1);
+    expect(result.trafficPathScorecard.direct_unknown.leads30d).toBe(0);
+  });
+
+  it("routes leads without any attribution row to direct_unknown", async () => {
+    const leads = [makeLeadRow({ id: "l1" })];
+    const client = makeClient({ leadsData: leads, attrData: [] });
+    const result = await loadRevenueCommand(client);
+    expect(result.trafficPathScorecard.direct_unknown.leads30d).toBe(1);
+    expect(result.trafficPathScorecard.website_widget.leads30d).toBe(0);
+  });
+
+  it("routes leads with unrecognized utm_medium to direct_unknown", async () => {
+    const leads = [makeLeadRow({ id: "l1" })];
+    const attrRows = [makeAttrRow({ lead_id: "l1", utm_medium: "some_other_channel" })];
+    const client = makeClient({ leadsData: leads, attrData: attrRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.trafficPathScorecard.direct_unknown.leads30d).toBe(1);
+  });
+
+  it("counts leads7d per path within the 7-day window only", async () => {
+    const ago3d  = new Date(Date.now() - 3  * 24 * 60 * 60 * 1000).toISOString();
+    const ago20d = new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString();
+    const leads = [
+      makeLeadRow({ id: "l1", created_at: ago3d }),
+      makeLeadRow({ id: "l2", created_at: ago20d }),
+    ];
+    const attrRows = [
+      makeAttrRow({ lead_id: "l1", utm_medium: "agent_profile_cta" }),
+      makeAttrRow({ lead_id: "l2", utm_medium: "agent_profile_cta" }),
+    ];
+    const client = makeClient({ leadsData: leads, attrData: attrRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.trafficPathScorecard.agent_profile_cta.leads7d).toBe(1);
+    expect(result.trafficPathScorecard.agent_profile_cta.leads30d).toBe(2);
+  });
+
+  it("increments hotUrgentCount for hot and urgent temperature only", async () => {
+    const leads = [
+      makeLeadRow({ id: "l1" }),
+      makeLeadRow({ id: "l2" }),
+      makeLeadRow({ id: "l3" }),
+    ];
+    const attrRows = [
+      makeAttrRow({ lead_id: "l1", utm_medium: "website_widget" }),
+      makeAttrRow({ lead_id: "l2", utm_medium: "website_widget" }),
+      makeAttrRow({ lead_id: "l3", utm_medium: "website_widget" }),
+    ];
+    const scoreRows = [
+      makeScoreRow({ lead_id: "l1", temperature: "hot" }),
+      makeScoreRow({ lead_id: "l2", temperature: "urgent" }),
+      makeScoreRow({ lead_id: "l3", temperature: "warm" }),
+    ];
+    const client = makeClient({ leadsData: leads, attrData: attrRows, scoreData: scoreRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.trafficPathScorecard.website_widget.hotUrgentCount).toBe(2);
+  });
+
+  it("computes avgScore per path as rounded mean of scored leads", async () => {
+    const leads = [makeLeadRow({ id: "l1" }), makeLeadRow({ id: "l2" })];
+    const attrRows = [
+      makeAttrRow({ lead_id: "l1", utm_medium: "homepage_cta" }),
+      makeAttrRow({ lead_id: "l2", utm_medium: "homepage_cta" }),
+    ];
+    const scoreRows = [
+      makeScoreRow({ lead_id: "l1", composite_score: 40 }),
+      makeScoreRow({ lead_id: "l2", composite_score: 60 }),
+    ];
+    const client = makeClient({ leadsData: leads, attrData: attrRows, scoreData: scoreRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.trafficPathScorecard.homepage_cta.avgScore).toBe(50);
+  });
+
+  it("returns null avgScore for paths with no scored leads", async () => {
+    const leads = [makeLeadRow({ id: "l1" })];
+    const attrRows = [makeAttrRow({ lead_id: "l1", utm_medium: "agent_profile_cta" })];
+    const client = makeClient({ leadsData: leads, attrData: attrRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.trafficPathScorecard.agent_profile_cta.avgScore).toBeNull();
+  });
+
+  it("counts missingAttribution30d for leads whose path has no attr row", async () => {
+    const leads = [
+      makeLeadRow({ id: "l1" }), // no attr → direct_unknown, missing++
+      makeLeadRow({ id: "l2" }), // no attr → direct_unknown, missing++
+      makeLeadRow({ id: "l3" }), // has attr → website_widget, missing stays 0
+    ];
+    const attrRows = [makeAttrRow({ lead_id: "l3", utm_medium: "website_widget" })];
+    const client = makeClient({ leadsData: leads, attrData: attrRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.trafficPathScorecard.direct_unknown.missingAttribution30d).toBe(2);
+    expect(result.trafficPathScorecard.website_widget.missingAttribution30d).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 10. Priority-sorted follow-up queue
+// ---------------------------------------------------------------------------
+
+describe("followUpQueue priority sort", () => {
+  it("sorts urgent leads before hot before warm before no-temperature", async () => {
+    const leads = [
+      makeLeadRow({ id: "warm1",   email: "warm@test.com" }),
+      makeLeadRow({ id: "urgent1", email: "urgent@test.com" }),
+      makeLeadRow({ id: "none1",   email: "none@test.com" }),
+      makeLeadRow({ id: "hot1",    email: "hot@test.com" }),
+    ];
+    const scoreRows = [
+      makeScoreRow({ lead_id: "warm1",   temperature: "warm",   composite_score: 50 }),
+      makeScoreRow({ lead_id: "urgent1", temperature: "urgent", composite_score: 50 }),
+      makeScoreRow({ lead_id: "hot1",    temperature: "hot",    composite_score: 50 }),
+    ];
+    const client = makeClient({ leadsData: leads, scoreData: scoreRows });
+    const result = await loadRevenueCommand(client);
+    const ids = result.followUpQueue.map((l) => l.id);
+    expect(ids.indexOf("urgent1")).toBeLessThan(ids.indexOf("hot1"));
+    expect(ids.indexOf("hot1")).toBeLessThan(ids.indexOf("warm1"));
+    expect(ids.indexOf("warm1")).toBeLessThan(ids.indexOf("none1"));
+  });
+
+  it("within same temperature sorts by score descending", async () => {
+    const leads = [
+      makeLeadRow({ id: "hot_low",  email: "hotlow@test.com" }),
+      makeLeadRow({ id: "hot_high", email: "hothigh@test.com" }),
+    ];
+    const scoreRows = [
+      makeScoreRow({ lead_id: "hot_low",  temperature: "hot", composite_score: 30 }),
+      makeScoreRow({ lead_id: "hot_high", temperature: "hot", composite_score: 80 }),
+    ];
+    const client = makeClient({ leadsData: leads, scoreData: scoreRows });
+    const result = await loadRevenueCommand(client);
+    const ids = result.followUpQueue.map((l) => l.id);
+    expect(ids.indexOf("hot_high")).toBeLessThan(ids.indexOf("hot_low"));
+  });
+
+  it("within same temperature and score sorts newest first", async () => {
+    const older = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    const newer = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+    const leads = [
+      makeLeadRow({ id: "older_lead", created_at: older, email: "older@test.com" }),
+      makeLeadRow({ id: "newer_lead", created_at: newer, email: "newer@test.com" }),
+    ];
+    const scoreRows = [
+      makeScoreRow({ lead_id: "older_lead", temperature: "warm", composite_score: 50 }),
+      makeScoreRow({ lead_id: "newer_lead", temperature: "warm", composite_score: 50 }),
+    ];
+    const client = makeClient({ leadsData: leads, scoreData: scoreRows });
+    const result = await loadRevenueCommand(client);
+    const ids = result.followUpQueue.map((l) => l.id);
+    expect(ids.indexOf("newer_lead")).toBeLessThan(ids.indexOf("older_lead"));
+  });
+
+  it("includes utmMedium field populated from attribution", async () => {
+    const leads = [makeLeadRow({ id: "l1", email: "buyer@test.com" })];
+    const attrRows = [makeAttrRow({ lead_id: "l1", utm_medium: "agent_profile_cta" })];
+    const client = makeClient({ leadsData: leads, attrData: attrRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.followUpQueue[0].utmMedium).toBe("agent_profile_cta");
+  });
+
+  it("utmMedium is null when lead has no attribution row", async () => {
+    const leads = [makeLeadRow({ id: "l1", email: "buyer@test.com" })];
+    const client = makeClient({ leadsData: leads, attrData: [] });
+    const result = await loadRevenueCommand(client);
+    expect(result.followUpQueue[0].utmMedium).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 11. funnelHealth.highIntent24h
+// ---------------------------------------------------------------------------
+
+describe("funnelHealth.highIntent24h", () => {
+  it("counts hot and urgent leads created within 24h", async () => {
+    // makeLeadRow defaults to 60 seconds ago — safely within 24h
+    const leads = [
+      makeLeadRow({ id: "l1" }),
+      makeLeadRow({ id: "l2" }),
+      makeLeadRow({ id: "l3" }),
+    ];
+    const scoreRows = [
+      makeScoreRow({ lead_id: "l1", temperature: "hot" }),
+      makeScoreRow({ lead_id: "l2", temperature: "urgent" }),
+      makeScoreRow({ lead_id: "l3", temperature: "warm" }),
+    ];
+    const client = makeClient({ leadsData: leads, scoreData: scoreRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.funnelHealth.highIntent24h).toBe(2);
+  });
+
+  it("does not count warm or null temperature leads as high intent", async () => {
+    const leads = [
+      makeLeadRow({ id: "l1" }),
+      makeLeadRow({ id: "l2" }),
+    ];
+    const scoreRows = [
+      makeScoreRow({ lead_id: "l1", temperature: "warm" }),
+      makeScoreRow({ lead_id: "l2", temperature: null }),
+    ];
+    const client = makeClient({ leadsData: leads, scoreData: scoreRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.funnelHealth.highIntent24h).toBe(0);
+  });
+
+  it("does not count hot leads older than 24h", async () => {
+    const ago25h = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
+    const leads = [makeLeadRow({ id: "l1", created_at: ago25h })];
+    const scoreRows = [makeScoreRow({ lead_id: "l1", temperature: "hot" })];
+    const client = makeClient({ leadsData: leads, scoreData: scoreRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.funnelHealth.highIntent24h).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 12. Public copy — hero section
+// ---------------------------------------------------------------------------
+
+describe("hero section public copy", () => {
+  const heroSource = readFileSync(
+    join(process.cwd(), "src/components/landing/hero-section.tsx"),
+    "utf-8"
+  );
+  const questionInputSource = readFileSync(
+    join(process.cwd(), "src/components/landing/question-input.tsx"),
+    "utf-8"
+  );
+
+  it("includes 'Not an appraisal' disclaimer in subtext", () => {
+    expect(heroSource).toContain("Not an appraisal");
+  });
+
+  it("includes broker-reviewed trust strip", () => {
+    expect(heroSource).toContain("Broker-reviewed guidance");
+  });
+
+  it("preserves 'Request Guidance' CTA button text in question input", () => {
+    expect(questionInputSource).toContain("Request Guidance");
+  });
+
+  it("does not contain instant/guaranteed overpromise language", () => {
+    expect(heroSource).not.toMatch(/instant valuation/i);
+    expect(heroSource).not.toMatch(/guaranteed offer/i);
+    expect(heroSource).not.toMatch(/offer engine/i);
   });
 });

@@ -252,7 +252,7 @@ export function HeroSection() {
             "mb-7 text-sm text-slate-500 opacity-0",
             loaded && "animate-fade-up delay-350"
           )}>
-            Wilson, NC · Eastern NC · Free starting point · Follow-up timing may vary
+            Wilson, NC · Eastern NC · Free starting point · Not an appraisal · Follow-up timing may vary
           </p>
 
           <div
@@ -269,6 +269,24 @@ export function HeroSection() {
 
           <div className={cn("mt-5 opacity-0", loaded && "animate-fade-up delay-500")}>
             <CTAChips onSelect={handleChipSelect} selected={selectedChip} className="justify-start" />
+          </div>
+
+          {/* Broker trust strip — visible directly below CTA chips */}
+          <div className={cn("mt-5 opacity-0", loaded && "animate-fade-up delay-550")}>
+            <div
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500"
+              data-trust-strip="broker-reviewed"
+            >
+              <span className="font-medium text-slate-400">Our Town Properties, Inc.</span>
+              <span className="text-gold-400/30">·</span>
+              <span>Wilson, NC</span>
+              <span className="text-gold-400/30">·</span>
+              <span>Mike Eatmon</span>
+              <span className="text-gold-400/30">·</span>
+              <span className="text-gold-400/80 font-medium">Broker-reviewed guidance</span>
+              <span className="text-gold-400/30">·</span>
+              <span className="italic">Not an appraisal.</span>
+            </div>
           </div>
 
           <div className={cn("mt-8 w-full max-w-2xl opacity-0", loaded && "animate-fade-up delay-600")}>

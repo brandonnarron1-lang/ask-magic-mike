@@ -30,6 +30,14 @@ export function isSyntheticEmail(email: string | null | undefined): boolean {
 // Output types
 // ---------------------------------------------------------------------------
 
+export interface TrafficPathRow {
+  leads7d: number;
+  leads30d: number;
+  avgScore: number | null;
+  hotUrgentCount: number;
+  missingAttribution30d: number;
+}
+
 export interface RevenueCommandData {
   funnelHealth: {
     leads24h: number;
@@ -37,6 +45,13 @@ export interface RevenueCommandData {
     leads30d: number;
     unattributed7d: number;
     wordpressWidget7d: number;
+    highIntent24h: number;
+  };
+  trafficPathScorecard: {
+    website_widget: TrafficPathRow;
+    homepage_cta: TrafficPathRow;
+    agent_profile_cta: TrafficPathRow;
+    direct_unknown: TrafficPathRow;
   };
   sourceAttribution: {
     byReferrerType: Record<string, number>;
@@ -62,6 +77,7 @@ export interface RevenueCommandData {
     hasEmail: boolean;
     hasPhone: boolean;
     utmSource: string | null;
+    utmMedium: string | null;
     utmCampaign: string | null;
     referrerType: string | null;
     score: number | null;
@@ -204,16 +220,25 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
   // -------------------------------------------------------------------------
   // 5. Compute funnel health
   // -------------------------------------------------------------------------
+  const HOT_URGENT = new Set(["hot", "urgent"]);
+
   let leads24h = 0;
   let leads7d = 0;
   const leads30d = leads.length;
   let unattributed7d = 0;
   let wordpressWidget7d = 0;
+  let highIntent24h = 0;
 
   for (const l of leads) {
     const createdAt = l.created_at as string;
     const is7d = createdAt >= ago7d;
-    if (createdAt >= ago24h) leads24h++;
+    const is24h = createdAt >= ago24h;
+    if (is24h) {
+      leads24h++;
+      const sc = scoreByLeadId.get(l.id as string);
+      const temp = (sc?.temperature as string | null) ?? null;
+      if (temp && HOT_URGENT.has(temp)) highIntent24h++;
+    }
     if (is7d) {
       leads7d++;
       const attr = attrByLeadId.get(l.id as string);
@@ -249,6 +274,63 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
   }
 
   // -------------------------------------------------------------------------
+  // 6b. Traffic path scorecard (by utm_medium for known OTP paths)
+  // -------------------------------------------------------------------------
+  const KNOWN_PATHS = ["website_widget", "homepage_cta", "agent_profile_cta"] as const;
+
+  function emptyPathRow(): TrafficPathRow {
+    return { leads7d: 0, leads30d: 0, avgScore: null, hotUrgentCount: 0, missingAttribution30d: 0 };
+  }
+
+  const pathRows: Record<string, TrafficPathRow> = {
+    website_widget:    emptyPathRow(),
+    homepage_cta:      emptyPathRow(),
+    agent_profile_cta: emptyPathRow(),
+    direct_unknown:    emptyPathRow(),
+  };
+  const pathScoreAccum: Record<string, number[]> = {
+    website_widget: [], homepage_cta: [], agent_profile_cta: [], direct_unknown: [],
+  };
+
+  for (const l of leads) {
+    const createdAt = l.created_at as string;
+    const is7d = createdAt >= ago7d;
+    const attr = attrByLeadId.get(l.id as string);
+    const medium = (attr?.utm_medium as string | null) ?? null;
+    const sc = scoreByLeadId.get(l.id as string);
+    const temp = (sc?.temperature as string | null) ?? null;
+    const score = typeof sc?.composite_score === "number" ? (sc.composite_score as number) : null;
+
+    let pathKey: string;
+    if (medium && (KNOWN_PATHS as readonly string[]).includes(medium)) {
+      pathKey = medium;
+    } else {
+      pathKey = "direct_unknown";
+    }
+
+    const row = pathRows[pathKey];
+    row.leads30d++;
+    if (is7d) row.leads7d++;
+    if (!attr) row.missingAttribution30d++;
+    if (temp && HOT_URGENT.has(temp)) row.hotUrgentCount++;
+    if (score !== null) pathScoreAccum[pathKey].push(score);
+  }
+
+  for (const key of Object.keys(pathRows)) {
+    const scores = pathScoreAccum[key];
+    pathRows[key].avgScore = scores.length > 0
+      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+      : null;
+  }
+
+  const trafficPathScorecard: RevenueCommandData["trafficPathScorecard"] = {
+    website_widget:    pathRows["website_widget"],
+    homepage_cta:      pathRows["homepage_cta"],
+    agent_profile_cta: pathRows["agent_profile_cta"],
+    direct_unknown:    pathRows["direct_unknown"],
+  };
+
+  // -------------------------------------------------------------------------
   // 7. Qualification
   // -------------------------------------------------------------------------
   const byTemperature: Record<string, number> = {};
@@ -281,25 +363,27 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
   }
 
   // -------------------------------------------------------------------------
-  // 8. Follow-up queue — latest 10 non-synthetic leads
+  // 8. Follow-up queue — top 20 non-synthetic, priority-sorted
+  //    Priority: urgent/hot first → score desc → newest first
   // -------------------------------------------------------------------------
-  const followUpQueue: RevenueCommandData["followUpQueue"] = [];
+  const TEMP_PRIORITY: Record<string, number> = { urgent: 0, hot: 1, warm: 2, low: 3 };
 
+  const queueCandidates: RevenueCommandData["followUpQueue"] = [];
   for (const l of leads) {
-    if (followUpQueue.length >= 10) break;
     const email = (l.email as string | null) ?? null;
     if (isSyntheticEmail(email)) continue;
 
     const attr = attrByLeadId.get(l.id as string) ?? null;
     const sc = scoreByLeadId.get(l.id as string) ?? null;
 
-    followUpQueue.push({
+    queueCandidates.push({
       id: l.id as string,
       createdAt: l.created_at as string,
       firstName: (l.first_name as string | null) ?? null,
       hasEmail: Boolean(email),
       hasPhone: Boolean(l.phone),
       utmSource: (attr?.utm_source as string | null) ?? null,
+      utmMedium: (attr?.utm_medium as string | null) ?? null,
       utmCampaign: (attr?.utm_campaign as string | null) ?? null,
       referrerType: (attr?.referrer_type as string | null) ?? null,
       score: typeof sc?.composite_score === "number" ? (sc.composite_score as number) : null,
@@ -308,6 +392,18 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
       leadDetailUrl: `/admin/leads/${l.id as string}`,
     });
   }
+
+  queueCandidates.sort((a, b) => {
+    const ta = TEMP_PRIORITY[a.temperature ?? ""] ?? 4;
+    const tb = TEMP_PRIORITY[b.temperature ?? ""] ?? 4;
+    if (ta !== tb) return ta - tb;
+    const sa = a.score ?? -1;
+    const sb = b.score ?? -1;
+    if (sa !== sb) return sb - sa;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  const followUpQueue = queueCandidates.slice(0, 20);
 
   // -------------------------------------------------------------------------
   // 9. Attribution integrity
@@ -365,7 +461,9 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
       leads30d,
       unattributed7d,
       wordpressWidget7d,
+      highIntent24h,
     },
+    trafficPathScorecard,
     sourceAttribution: {
       byReferrerType,
       byUtmSource,

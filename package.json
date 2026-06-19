@@ -32,7 +32,8 @@
     "release:preflight": "npm run release:doctor && npm run release:gate && npm run release:report && npm run launch:authority",
     "verify": "npm run typecheck && npm run test && npm run lint && npm run build",
     "smoke:prod": "TARGET_URL=https://www.askmagicmike.com node scripts/prod-smoke.mjs",
-    "smoke:target": "node scripts/prod-smoke.mjs"
+    "smoke:target": "node scripts/prod-smoke.mjs",
+    "amm:verify:funnel": "node scripts/amm/verify-live-conversion-funnel.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.0",

@@ -70,6 +70,43 @@ export default async function RevenueCommandPage() {
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
 
         {/* ------------------------------------------------------------------ */}
+        {/* 0. Executive Snapshot — What changed in the last 24h               */}
+        {/* ------------------------------------------------------------------ */}
+        <section>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-3">
+            0 &middot; Executive Snapshot &mdash; Last 24 h
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[
+              { label: "New Leads",            value: d.funnelHealth.leads24h,       warn: false },
+              { label: "High Intent",          value: d.funnelHealth.highIntent24h,  warn: d.funnelHealth.highIntent24h > 0, positive: true },
+              { label: "WordPress Attributed", value: d.funnelHealth.wordpressWidget7d, warn: false },
+              { label: "Unattributed (7 d)",   value: d.funnelHealth.unattributed7d, warn: d.funnelHealth.unattributed7d > 0 },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className={`rounded-xl border px-5 py-4 ${
+                  s.warn && !s.positive ? "border-amber-400/40 bg-amber-400/[0.05]"
+                  : s.warn && s.positive ? "border-emerald-500/30 bg-emerald-500/[0.04]"
+                  : "border-white/[0.06] bg-white/[0.02]"
+                }`}
+              >
+                <div className={`font-bebas text-4xl leading-none ${
+                  s.warn && !s.positive ? "text-amber-400"
+                  : s.warn && s.positive ? "text-emerald-400"
+                  : "text-[#F4F4F4]"
+                }`}>
+                  {s.value}
+                </div>
+                <div className="text-[11px] text-slate-500 mt-1 uppercase tracking-[0.1em]">
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
         {/* 1. Funnel Health                                                     */}
         {/* ------------------------------------------------------------------ */}
         <section>
@@ -78,10 +115,10 @@ export default async function RevenueCommandPage() {
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {[
-              { label: "Last 24 h",             value: d.funnelHealth.leads24h,          warn: false },
-              { label: "Last 7 d",              value: d.funnelHealth.leads7d,           warn: false },
-              { label: "Last 30 d",             value: d.funnelHealth.leads30d,          warn: false },
-              { label: "Unattributed (7 d)",    value: d.funnelHealth.unattributed7d,    warn: d.funnelHealth.unattributed7d > 0 },
+              { label: "Last 24 h",              value: d.funnelHealth.leads24h,          warn: false },
+              { label: "Last 7 d",               value: d.funnelHealth.leads7d,           warn: false },
+              { label: "Last 30 d",              value: d.funnelHealth.leads30d,          warn: false },
+              { label: "Unattributed (7 d)",     value: d.funnelHealth.unattributed7d,    warn: d.funnelHealth.unattributed7d > 0 },
               { label: "WordPress Widget (7 d)", value: d.funnelHealth.wordpressWidget7d, warn: false },
             ].map((s) => (
               <div
@@ -100,6 +137,56 @@ export default async function RevenueCommandPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* 1b. Traffic Path Scorecard                                           */}
+        {/* ------------------------------------------------------------------ */}
+        <section>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-3">
+            1b &middot; Traffic Path Scorecard
+          </h2>
+          <div className="overflow-x-auto rounded-xl border border-white/[0.09]">
+            <table className="w-full text-[13px]">
+              <thead className="bg-white/[0.03] text-[10px] tracking-[0.14em] uppercase text-slate-400">
+                <tr>
+                  <th className="text-left px-4 py-2">Path (utm_medium)</th>
+                  <th className="text-right px-4 py-2">Leads 7d</th>
+                  <th className="text-right px-4 py-2">Leads 30d</th>
+                  <th className="text-right px-4 py-2">Avg Score</th>
+                  <th className="text-right px-4 py-2">Hot/Urgent</th>
+                  <th className="text-right px-4 py-2">Missing Attr</th>
+                </tr>
+              </thead>
+              <tbody>
+                {([
+                  ["website_widget",    "Website Widget",    d.trafficPathScorecard.website_widget],
+                  ["homepage_cta",      "Homepage CTA",      d.trafficPathScorecard.homepage_cta],
+                  ["agent_profile_cta", "Agent Profile CTA", d.trafficPathScorecard.agent_profile_cta],
+                  ["direct_unknown",    "Direct / Unknown",  d.trafficPathScorecard.direct_unknown],
+                ] as const).map(([key, label, row]) => (
+                  <tr key={key} className="border-t border-white/[0.06] hover:bg-white/[0.02]">
+                    <td className="px-4 py-2 font-mono text-[12px] text-gold-300/80">{label}</td>
+                    <td className="px-4 py-2 text-right tabular-nums text-[#F4F4F4]">{row.leads7d}</td>
+                    <td className="px-4 py-2 text-right tabular-nums text-slate-300">{row.leads30d}</td>
+                    <td className="px-4 py-2 text-right tabular-nums text-slate-300">
+                      {row.avgScore !== null ? row.avgScore : <span className="text-slate-600">&mdash;</span>}
+                    </td>
+                    <td className="px-4 py-2 text-right tabular-nums">
+                      {row.hotUrgentCount > 0
+                        ? <span className="text-red-300 font-semibold">{row.hotUrgentCount}</span>
+                        : <span className="text-slate-600">0</span>}
+                    </td>
+                    <td className="px-4 py-2 text-right tabular-nums">
+                      {row.missingAttribution30d > 0
+                        ? <span className="text-amber-400">{row.missingAttribution30d}</span>
+                        : <span className="text-slate-600">0</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
 
@@ -234,10 +321,10 @@ export default async function RevenueCommandPage() {
         {/* ------------------------------------------------------------------ */}
         <section>
           <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-1">
-            5 &middot; Follow-Up Queue
+            5 &middot; Action Priority Queue
           </h2>
           <p className="text-[11px] text-slate-600 mb-3">
-            Latest 10 non-synthetic leads &middot; synthetic/test emails excluded
+            Top 20 non-synthetic leads &middot; sorted: urgent/hot → score desc → newest &middot; synthetic/test excluded
           </p>
           <div className="overflow-x-auto rounded-xl border border-white/[0.09]">
             <table className="w-full text-[13px]">
@@ -248,6 +335,7 @@ export default async function RevenueCommandPage() {
                   <th className="text-left px-3 py-2">Email</th>
                   <th className="text-left px-3 py-2">Phone</th>
                   <th className="text-left px-3 py-2">Source</th>
+                  <th className="text-left px-3 py-2">Medium</th>
                   <th className="text-left px-3 py-2">Campaign</th>
                   <th className="text-left px-3 py-2">Score</th>
                   <th className="text-left px-3 py-2">Temp</th>
@@ -258,7 +346,7 @@ export default async function RevenueCommandPage() {
               <tbody>
                 {d.followUpQueue.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="px-3 py-6 text-center text-slate-400">
+                    <td colSpan={11} className="px-3 py-6 text-center text-slate-400">
                       No leads in queue.
                     </td>
                   </tr>
@@ -282,6 +370,9 @@ export default async function RevenueCommandPage() {
                       </td>
                       <td className="px-3 py-2 text-slate-300">
                         {lead.utmSource ?? <span className="text-slate-600">&mdash;</span>}
+                      </td>
+                      <td className="px-3 py-2 text-slate-300 text-[12px] font-mono">
+                        {lead.utmMedium ?? <span className="text-slate-600">&mdash;</span>}
                       </td>
                       <td className="px-3 py-2 text-slate-300">
                         {lead.utmCampaign ? (
@@ -331,6 +422,74 @@ export default async function RevenueCommandPage() {
             </table>
           </div>
         </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* 5b. Integrity Warnings                                              */}
+        {/* ------------------------------------------------------------------ */}
+        {(d.attributionIntegrity.missingAttribution7d > 0 ||
+          d.attributionIntegrity.missingReferrerType > 0 ||
+          d.qualification.missingScore > 0 ||
+          d.syntheticResidues.length > 0) && (
+          <section>
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-3">
+              5b &middot; Integrity Warnings
+            </h2>
+            <div className="space-y-2">
+              {d.attributionIntegrity.missingAttribution7d > 0 && (
+                <div className="rounded-lg border border-amber-400/40 bg-amber-400/[0.04] px-4 py-3 flex items-start gap-3">
+                  <span className="text-amber-400 font-bold text-sm mt-0.5">⚠</span>
+                  <div>
+                    <p className="text-amber-300 text-sm font-semibold">
+                      {d.attributionIntegrity.missingAttribution7d} WordPress campaign lead{d.attributionIntegrity.missingAttribution7d === 1 ? "" : "s"} missing source_attribution (last 7 d)
+                    </p>
+                    <p className="text-slate-500 text-xs mt-0.5">
+                      Leads without a source_attribution row cannot be tracked to their traffic source. Check amm-loader.js is loading on OTP pages.
+                    </p>
+                  </div>
+                </div>
+              )}
+              {d.attributionIntegrity.missingReferrerType > 0 && (
+                <div className="rounded-lg border border-amber-400/30 bg-amber-400/[0.03] px-4 py-3 flex items-start gap-3">
+                  <span className="text-amber-400/70 font-bold text-sm mt-0.5">⚠</span>
+                  <div>
+                    <p className="text-amber-300/80 text-sm font-semibold">
+                      {d.attributionIntegrity.missingReferrerType} source_attribution row{d.attributionIntegrity.missingReferrerType === 1 ? "" : "s"} missing referrer_type
+                    </p>
+                    <p className="text-slate-500 text-xs mt-0.5">
+                      referrer_type determines traffic category (direct/referral/paid). Missing values reduce Traffic Path Scorecard accuracy.
+                    </p>
+                  </div>
+                </div>
+              )}
+              {d.qualification.missingScore > 0 && (
+                <div className="rounded-lg border border-slate-600/40 bg-slate-800/20 px-4 py-3 flex items-start gap-3">
+                  <span className="text-slate-400 font-bold text-sm mt-0.5">ℹ</span>
+                  <div>
+                    <p className="text-slate-300 text-sm font-semibold">
+                      {d.qualification.missingScore} lead{d.qualification.missingScore === 1 ? "" : "s"} missing composite score
+                    </p>
+                    <p className="text-slate-500 text-xs mt-0.5">
+                      Leads without a score cannot be prioritized in the action queue. Scoring runs asynchronously; recent leads may not be scored yet.
+                    </p>
+                  </div>
+                </div>
+              )}
+              {d.syntheticResidues.length > 0 && (
+                <div className="rounded-lg border border-red-500/30 bg-red-500/[0.04] px-4 py-3 flex items-start gap-3">
+                  <span className="text-red-400 font-bold text-sm mt-0.5">✕</span>
+                  <div>
+                    <p className="text-red-300 text-sm font-semibold">
+                      {d.syntheticResidues.length} synthetic/test lead{d.syntheticResidues.length === 1 ? "" : "s"} visible in production
+                    </p>
+                    <p className="text-slate-500 text-xs mt-0.5">
+                      These are excluded from the action queue. See Synthetic / Test Residue section below. Do not contact them.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* ------------------------------------------------------------------ */}
         {/* 6. Attribution Integrity                                             */}
