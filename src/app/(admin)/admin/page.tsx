@@ -1,6 +1,7 @@
 export const dynamic   = "force-dynamic";
 export const revalidate = 0;
 
+import Link from "next/link";
 import { LeadTable } from "@/components/admin/lead-table";
 import { getLeadsForAdmin } from "@/lib/db/lead-repository";
 import { loadDashboardMetrics } from "@/lib/admin/dashboard-metrics";
@@ -144,6 +145,22 @@ export default async function AdminPage() {
             </div>
           </div>
         )}
+
+        {/* Admin navigation links */}
+        <div className="mb-6 flex flex-wrap gap-3">
+          <Link
+            href="/admin/leads"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 text-xs font-medium text-slate-300 hover:text-gold-300 hover:border-gold-400/30 transition-colors"
+          >
+            Leads Inbox
+          </Link>
+          <Link
+            href="/admin/revenue"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 text-xs font-medium text-slate-300 hover:text-gold-300 hover:border-gold-400/30 transition-colors"
+          >
+            Revenue Command Center
+          </Link>
+        </div>
 
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-300">
