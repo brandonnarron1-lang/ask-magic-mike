@@ -1,0 +1,508 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+import Link from "next/link";
+import { loadRevenueCommand } from "@/lib/admin/revenue-command";
+
+export default async function RevenueCommandPage() {
+  // createAdminClient throws when env vars are absent — we wrap in try/catch
+  // and render a locked state (same pattern as admin dashboard).
+  let data: Awaited<ReturnType<typeof loadRevenueCommand>> | null = null;
+  let locked = false;
+
+  try {
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const client = createAdminClient();
+    data = await loadRevenueCommand(client);
+  } catch {
+    locked = true;
+  }
+
+  if (locked || !data) {
+    return (
+      <div className="min-h-screen bg-[#080806] flex items-center justify-center">
+        <div className="max-w-md text-center px-6">
+          <h1 className="text-xl font-bold text-red-400 mb-3">Admin Unavailable</h1>
+          <p className="text-sm text-slate-400 leading-relaxed">
+            Supabase is not configured. Set{" "}
+            <code className="text-amber-400 text-xs">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+            <code className="text-amber-400 text-xs">SUPABASE_SERVICE_ROLE_KEY</code>{" "}
+            in your environment.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const d = data;
+
+  return (
+    <div className="min-h-screen bg-[#080806] text-[#F4F4F4]">
+      {/* Header */}
+      <header className="border-b border-white/10 bg-[#0D0B07] px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <p className="text-[10.5px] tracking-[0.18em] uppercase text-gold-300/85">
+              Ask Magic Mike · Admin
+            </p>
+            <h1 className="font-display text-[22px] font-semibold text-[#F4F4F4]">
+              Revenue Command Center
+            </h1>
+            <p className="text-sm text-slate-400 mt-0.5">
+              Lead source, qualification, and follow-up visibility for Ask Magic Mike.
+            </p>
+            <p className="text-xs text-slate-600 mt-0.5">
+              Read-only. No outbound messaging is sent from this page.
+            </p>
+            <p className="text-[11px] text-slate-700 mt-1">
+              Generated at:{" "}
+              <span className="text-slate-500">{d.generatedAt}</span>
+            </p>
+          </div>
+          <div className="flex items-center gap-4 text-xs text-slate-500">
+            <Link href="/admin" className="hover:text-gold-300">
+              &larr; dashboard
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+
+        {/* ------------------------------------------------------------------ */}
+        {/* 1. Funnel Health                                                     */}
+        {/* ------------------------------------------------------------------ */}
+        <section>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-3">
+            1 &middot; Funnel Health
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {[
+              { label: "Last 24 h",             value: d.funnelHealth.leads24h,          warn: false },
+              { label: "Last 7 d",              value: d.funnelHealth.leads7d,           warn: false },
+              { label: "Last 30 d",             value: d.funnelHealth.leads30d,          warn: false },
+              { label: "Unattributed (7 d)",    value: d.funnelHealth.unattributed7d,    warn: d.funnelHealth.unattributed7d > 0 },
+              { label: "WordPress Widget (7 d)", value: d.funnelHealth.wordpressWidget7d, warn: false },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className={`rounded-xl border px-5 py-4 ${
+                  s.warn
+                    ? "border-amber-400/40 bg-amber-400/[0.05]"
+                    : "border-white/[0.06] bg-white/[0.02]"
+                }`}
+              >
+                <div className={`font-bebas text-4xl leading-none ${s.warn ? "text-amber-400" : "text-[#F4F4F4]"}`}>
+                  {s.value}
+                </div>
+                <div className="text-[11px] text-slate-500 mt-1 uppercase tracking-[0.1em]">
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* 2. Source Attribution                                                */}
+        {/* ------------------------------------------------------------------ */}
+        <section>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-3">
+            2 &middot; Source Attribution
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <AttributionTable title="By Referrer Type" rows={d.sourceAttribution.byReferrerType} />
+            <AttributionTable title="By UTM Source"    rows={d.sourceAttribution.byUtmSource} />
+            <AttributionTable title="By UTM Medium"    rows={d.sourceAttribution.byUtmMedium} />
+            <AttributionTable
+              title="By Campaign"
+              rows={d.sourceAttribution.byCampaign}
+              highlightKey="website_widget"
+            />
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* 3. Qualification                                                     */}
+        {/* ------------------------------------------------------------------ */}
+        <section>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-3">
+            3 &middot; Qualification
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Temperature */}
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
+              <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Temperature</p>
+              {Object.keys(d.qualification.byTemperature).length === 0 ? (
+                <p className="text-slate-500 text-sm">No data</p>
+              ) : (
+                <table className="w-full text-[13px]">
+                  <tbody>
+                    {Object.entries(d.qualification.byTemperature)
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([temp, count]) => (
+                        <tr key={temp} className="border-t border-white/[0.05]">
+                          <td className="py-1 text-slate-300 capitalize">{temp}</td>
+                          <td className="py-1 text-right tabular-nums text-[#F4F4F4] font-semibold">{count}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* Score bands */}
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
+              <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Score Bands</p>
+              <table className="w-full text-[13px]">
+                <tbody>
+                  {(Object.entries(d.qualification.byScoreBand) as [string, number][])
+                    .map(([band, count]) => (
+                      <tr key={band} className="border-t border-white/[0.05]">
+                        <td className="py-1 text-slate-300">{band}</td>
+                        <td className="py-1 text-right tabular-nums text-[#F4F4F4] font-semibold">{count}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Missing score */}
+            <div className={`rounded-xl border px-5 py-4 ${d.qualification.missingScore > 0 ? "border-amber-400/30 bg-amber-400/[0.04]" : "border-white/[0.06] bg-white/[0.02]"}`}>
+              <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Missing Score</p>
+              <div className={`font-bebas text-5xl leading-none ${d.qualification.missingScore > 0 ? "text-amber-400" : "text-[#F4F4F4]"}`}>
+                {d.qualification.missingScore}
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Leads with no composite score in lead_scores
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* 4. Routing                                                           */}
+        {/* ------------------------------------------------------------------ */}
+        <section>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-3">
+            4 &middot; Routing
+          </h2>
+          {d.routing === null ? (
+            <div className="rounded-xl border border-slate-700/50 bg-slate-800/20 px-5 py-4">
+              <p className="text-slate-400 text-sm">
+                lead_routing table not available &mdash; this table is optional.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
+                <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Assigned</p>
+                <div className="font-bebas text-5xl text-emerald-400">{d.routing.assigned}</div>
+              </div>
+              <div className={`rounded-xl border px-5 py-4 ${d.routing.unassigned > 0 ? "border-amber-400/30 bg-amber-400/[0.03]" : "border-white/[0.06] bg-white/[0.02]"}`}>
+                <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Unassigned</p>
+                <div className={`font-bebas text-5xl ${d.routing.unassigned > 0 ? "text-amber-400" : "text-[#F4F4F4]"}`}>
+                  {d.routing.unassigned}
+                </div>
+                {d.routing.oldestUnassignedAge && (
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Oldest: {new Date(d.routing.oldestUnassignedAge).toLocaleString()}
+                  </p>
+                )}
+              </div>
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
+                <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Status Counts</p>
+                <table className="w-full text-[13px]">
+                  <tbody>
+                    {Object.entries(d.routing.statusCounts)
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([status, count]) => (
+                        <tr key={status} className="border-t border-white/[0.05]">
+                          <td className="py-1 text-slate-300">{status}</td>
+                          <td className="py-1 text-right tabular-nums text-[#F4F4F4] font-semibold">{count}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* 5. Follow-Up Queue                                                   */}
+        {/* ------------------------------------------------------------------ */}
+        <section>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-1">
+            5 &middot; Follow-Up Queue
+          </h2>
+          <p className="text-[11px] text-slate-600 mb-3">
+            Latest 10 non-synthetic leads &middot; synthetic/test emails excluded
+          </p>
+          <div className="overflow-x-auto rounded-xl border border-white/[0.09]">
+            <table className="w-full text-[13px]">
+              <thead className="bg-white/[0.03] text-[10.5px] tracking-[0.16em] uppercase text-slate-300">
+                <tr>
+                  <th className="text-left px-3 py-2">Date</th>
+                  <th className="text-left px-3 py-2">Name</th>
+                  <th className="text-left px-3 py-2">Email</th>
+                  <th className="text-left px-3 py-2">Phone</th>
+                  <th className="text-left px-3 py-2">Source</th>
+                  <th className="text-left px-3 py-2">Campaign</th>
+                  <th className="text-left px-3 py-2">Score</th>
+                  <th className="text-left px-3 py-2">Temp</th>
+                  <th className="text-left px-3 py-2">Assigned</th>
+                  <th className="text-left px-3 py-2">Link</th>
+                </tr>
+              </thead>
+              <tbody>
+                {d.followUpQueue.length === 0 ? (
+                  <tr>
+                    <td colSpan={10} className="px-3 py-6 text-center text-slate-400">
+                      No leads in queue.
+                    </td>
+                  </tr>
+                ) : (
+                  d.followUpQueue.map((lead) => (
+                    <tr
+                      key={lead.id}
+                      className="border-t border-white/[0.06] hover:bg-white/[0.02]"
+                    >
+                      <td className="px-3 py-2 text-slate-400 text-[12px] whitespace-nowrap">
+                        {new Date(lead.createdAt).toLocaleString()}
+                      </td>
+                      <td className="px-3 py-2 text-[#F4F4F4]">
+                        {lead.firstName ?? "(unnamed)"}
+                      </td>
+                      <td className="px-3 py-2 text-slate-300">
+                        {lead.hasEmail ? "✓" : <span className="text-slate-600">&mdash;</span>}
+                      </td>
+                      <td className="px-3 py-2 text-slate-300">
+                        {lead.hasPhone ? "✓" : <span className="text-slate-600">&mdash;</span>}
+                      </td>
+                      <td className="px-3 py-2 text-slate-300">
+                        {lead.utmSource ?? <span className="text-slate-600">&mdash;</span>}
+                      </td>
+                      <td className="px-3 py-2 text-slate-300">
+                        {lead.utmCampaign ? (
+                          <span className={lead.utmCampaign === "website_widget" ? "text-gold-300 font-semibold" : ""}>
+                            {lead.utmCampaign}
+                          </span>
+                        ) : (
+                          <span className="text-slate-600">&mdash;</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-slate-300 tabular-nums">
+                        {lead.score !== null ? lead.score : <span className="text-slate-600">&mdash;</span>}
+                      </td>
+                      <td className="px-3 py-2">
+                        {lead.temperature ? (
+                          <span className={`inline-block rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
+                            lead.temperature === "urgent" ? "bg-red-500/20 text-red-300" :
+                            lead.temperature === "hot"    ? "bg-gold-400/20 text-gold-300" :
+                            lead.temperature === "warm"   ? "bg-amber-500/15 text-amber-300" :
+                            "bg-white/[0.05] text-slate-400"
+                          }`}>
+                            {lead.temperature.toUpperCase()}
+                          </span>
+                        ) : (
+                          <span className="text-slate-600">&mdash;</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-slate-300">
+                        {lead.assigned ? (
+                          <span className="text-emerald-400">&#10003;</span>
+                        ) : (
+                          <span className="text-amber-400">&#10007;</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        <Link
+                          href={lead.leadDetailUrl}
+                          className="text-gold-300 hover:underline text-[12px]"
+                        >
+                          View &rarr;
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* 6. Attribution Integrity                                             */}
+        {/* ------------------------------------------------------------------ */}
+        <section>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-3">
+            6 &middot; Attribution Integrity
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <IntegrityCard
+              label="Missing Attribution (7 d)"
+              value={d.attributionIntegrity.missingAttribution7d}
+              warn={d.attributionIntegrity.missingAttribution7d > 0}
+            />
+            <IntegrityCard
+              label="Missing Referrer Type"
+              value={d.attributionIntegrity.missingReferrerType}
+              warn={d.attributionIntegrity.missingReferrerType > 0}
+            />
+            <IntegrityCard
+              label="Website Widget Count (all)"
+              value={d.attributionIntegrity.websiteWidgetCount}
+              warn={false}
+            />
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 col-span-full md:col-span-1">
+              <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Latest Attribution Row</p>
+              <p className="text-sm text-slate-300">
+                {d.attributionIntegrity.latestAttributionAt
+                  ? new Date(d.attributionIntegrity.latestAttributionAt).toLocaleString()
+                  : <span className="text-slate-600">None</span>}
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 col-span-full md:col-span-1">
+              <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Latest Lead Created At</p>
+              <p className="text-sm text-slate-300">
+                {d.attributionIntegrity.latestLeadAt
+                  ? new Date(d.attributionIntegrity.latestLeadAt).toLocaleString()
+                  : <span className="text-slate-600">None</span>}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* 7. Synthetic / Test Residue                                          */}
+        {/* ------------------------------------------------------------------ */}
+        <section>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-3">
+            7 &middot; Synthetic / Test Residue
+          </h2>
+          {d.syntheticResidues.length === 0 ? (
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] px-5 py-4">
+              <p className="text-emerald-400 text-sm font-medium">
+                No synthetic residue detected.
+              </p>
+              <p className="text-[11px] text-slate-500 mt-1">
+                No test-marker emails found in the leads table.
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-amber-400/40 bg-amber-400/[0.05] px-5 py-4">
+              <p className="text-amber-400 text-sm font-bold mb-2">
+                Warning: {d.syntheticResidues.length} synthetic / test lead
+                {d.syntheticResidues.length === 1 ? "" : "s"} detected in production
+              </p>
+              <p className="text-[11px] text-slate-400 mb-3">
+                These rows match synthetic-marker patterns and should NOT be in
+                production. They are excluded from the follow-up queue above.
+              </p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-[12px]">
+                  <thead className="text-[10px] tracking-[0.14em] uppercase text-slate-500">
+                    <tr>
+                      <th className="text-left py-1 pr-4">ID</th>
+                      <th className="text-left py-1 pr-4">Email</th>
+                      <th className="text-left py-1">Created At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.syntheticResidues.map((r) => (
+                      <tr key={r.id} className="border-t border-white/[0.06]">
+                        <td className="py-1 pr-4 font-mono text-slate-400 text-[11px]">{r.id}</td>
+                        <td className="py-1 pr-4 text-amber-300">{r.email}</td>
+                        <td className="py-1 text-slate-500">
+                          {new Date(r.createdAt).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </section>
+
+        <p className="mt-6 text-[11px] text-slate-700 text-center">
+          Ask Magic Mike Revenue Command Center &middot; Our Town Properties, Inc. &middot; Wilson, NC &middot; Read-only view
+        </p>
+      </main>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Helper sub-components (server-component-safe)
+// ---------------------------------------------------------------------------
+
+function AttributionTable({
+  title,
+  rows,
+  highlightKey,
+}: {
+  title: string;
+  rows: Record<string, number>;
+  highlightKey?: string;
+}) {
+  const entries = Object.entries(rows).sort((a, b) => b[1] - a[1]);
+  return (
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
+      <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">{title}</p>
+      {entries.length === 0 ? (
+        <p className="text-slate-500 text-sm">No data</p>
+      ) : (
+        <table className="w-full text-[13px]">
+          <tbody>
+            {entries.map(([key, count]) => (
+              <tr
+                key={key}
+                className={`border-t border-white/[0.05] ${
+                  highlightKey && key === highlightKey ? "bg-gold-400/[0.06]" : ""
+                }`}
+              >
+                <td className={`py-1 ${highlightKey && key === highlightKey ? "text-gold-300 font-semibold" : "text-slate-300"}`}>
+                  {key}
+                </td>
+                <td className="py-1 text-right tabular-nums text-[#F4F4F4] font-semibold">
+                  {count}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+function IntegrityCard({
+  label,
+  value,
+  warn,
+}: {
+  label: string;
+  value: number;
+  warn: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-xl border px-5 py-4 ${
+        warn
+          ? "border-amber-400/40 bg-amber-400/[0.04]"
+          : "border-white/[0.06] bg-white/[0.02]"
+      }`}
+    >
+      <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">{label}</p>
+      <div
+        className={`font-bebas text-4xl leading-none ${
+          warn ? "text-amber-400" : "text-[#F4F4F4]"
+        }`}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
