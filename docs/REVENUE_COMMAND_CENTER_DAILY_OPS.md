@@ -7,14 +7,60 @@ Access: Any username + ADMIN_SECRET — retrieve the secret from the approved pa
 
 ---
 
+## Start With the Today Action Board
+
+The **Today Action Board** is the first thing you'll see at the top of `/admin/revenue`. It tells you what needs attention right now, derived from lead urgency, routing gaps, and funnel attribution health — without you having to scroll through everything.
+
+### Overall Status Pill
+
+| Pill | Meaning |
+|---|---|
+| **All clear** (green) | No alerts. Funnel and attribution look healthy. |
+| **Info** (blue) | Something worth knowing — e.g., high-intent leads arrived today. |
+| **Needs attention** (amber) | One or more warnings — funnel quiet, unattributed leads, unassigned routing gap. |
+| **Critical** (red) | Immediate action required — funnel may be broken or a lead has been unassigned > 24 h. |
+
+### Summary Cards
+
+Five cards across the top show:
+- **Actions** — total items in today's action list (max 8)
+- **Critical** — number of critical-severity alerts
+- **Warnings** — number of warning-severity alerts
+- **High Intent 24 h** — hot/urgent leads created today
+- **WP Attr 24 h** — WordPress-attributed leads in the last 24 h (zero = investigate)
+
+### Action Items
+
+Up to 8 action items, sorted urgent → high → normal. Colored dots:
+- **Red dot** = urgent (act immediately)
+- **Amber dot** = high priority (act today)
+- **Grey dot** = normal (act this week)
+
+Each item shows a title, reason, and specific action to take. If a lead is linked, "View lead →" opens the lead detail.
+
+### Alerts
+
+Each alert shows severity, title, detail message, and a suggested action. Alerts are not tasks — they are signals. If an alert says "Run live funnel QA", use:
+
+```
+pnpm run amm:verify:funnel
+```
+
+### Do Not Contact Synthetic/Test Records
+
+If the board shows a "Synthetic/test residue" alert, those records are QA seeds — not real people. Do not follow up, do not call, do not email.
+
+---
+
 ## What to Check Every Morning
 
 Open `/admin/revenue` and review in this order:
 
-1. **Executive Snapshot (Section 0)** — new leads in the last 24h, high-intent count, unattributed count
-2. **Integrity Warnings (Section 5b)** — any amber/red warnings at a glance
-3. **Action Priority Queue (Section 5)** — top 20 leads sorted by urgency, score, then recency
-4. **Traffic Path Scorecard (Section 1b)** — confirm all three OTP traffic paths are generating leads
+1. **Today Action Board (top)** — read the status pill and act on any urgent/high items first
+2. **Executive Snapshot (Section 0)** — new leads in the last 24h, high-intent count, unattributed count
+3. **Integrity Warnings (Section 5b)** — any amber/red warnings at a glance
+4. **Action Priority Queue (Section 5)** — top 20 leads sorted by urgency, score, then recency
+5. **Traffic Path Scorecard (Section 1b)** — confirm all three OTP traffic paths are generating leads
 
 This takes under 5 minutes on a normal day.
 

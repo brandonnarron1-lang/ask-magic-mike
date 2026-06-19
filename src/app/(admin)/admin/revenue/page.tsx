@@ -3,6 +3,8 @@ export const revalidate = 0;
 
 import Link from "next/link";
 import { loadRevenueCommand } from "@/lib/admin/revenue-command";
+import { buildRevenueSentinel } from "@/lib/admin/revenue-sentinel";
+import type { SentinelSeverity } from "@/lib/admin/revenue-sentinel";
 
 export default async function RevenueCommandPage() {
   // createAdminClient throws when env vars are absent — we wrap in try/catch
@@ -35,6 +37,31 @@ export default async function RevenueCommandPage() {
   }
 
   const d = data;
+  const sentinel = buildRevenueSentinel(d);
+
+  const STATUS_STYLES: Record<SentinelSeverity, { pill: string; label: string }> = {
+    ok:       { pill: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25", label: "All clear" },
+    info:     { pill: "bg-blue-500/15 text-blue-400 border border-blue-500/25",         label: "Info" },
+    warning:  { pill: "bg-amber-400/15 text-amber-400 border border-amber-400/30",      label: "Needs attention" },
+    critical: { pill: "bg-red-500/15 text-red-400 border border-red-500/30",            label: "Critical" },
+  };
+
+  const ALERT_BORDER: Record<SentinelSeverity, string> = {
+    ok:       "border-white/[0.06]",
+    info:     "border-blue-500/25 bg-blue-500/[0.04]",
+    warning:  "border-amber-400/30 bg-amber-400/[0.04]",
+    critical: "border-red-500/30 bg-red-500/[0.04]",
+  };
+
+  const ALERT_ICON: Record<SentinelSeverity, string> = {
+    ok: "✓", info: "ℹ", warning: "⚠", critical: "✕",
+  };
+
+  const PRIORITY_DOT: Record<string, string> = {
+    urgent: "bg-red-400",
+    high:   "bg-amber-400",
+    normal: "bg-slate-500",
+  };
 
   return (
     <div className="min-h-screen bg-[#080806] text-[#F4F4F4]">
@@ -68,6 +95,133 @@ export default async function RevenueCommandPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Today Action Board                                                   */}
+        {/* ------------------------------------------------------------------ */}
+        <section>
+          {/* Header row */}
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500">
+              Today Action Board
+            </h2>
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${STATUS_STYLES[sentinel.overallStatus].pill}`}>
+              <span>{ALERT_ICON[sentinel.overallStatus]}</span>
+              {STATUS_STYLES[sentinel.overallStatus].label}
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mb-5 -mt-2">
+            What needs attention now, based on lead source, urgency, routing, and attribution health. Read-only. No outbound messaging is sent from this page.
+          </p>
+
+          {/* Summary cards */}
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-6">
+            {[
+              { label: "Actions",         value: sentinel.summary.actionCount,        warn: sentinel.summary.actionCount > 0,       positive: false },
+              { label: "Critical",        value: sentinel.summary.criticalCount,      warn: sentinel.summary.criticalCount > 0,     positive: false },
+              { label: "Warnings",        value: sentinel.summary.warningCount,       warn: sentinel.summary.warningCount > 0,      positive: false },
+              { label: "High Intent 24 h",value: sentinel.summary.highIntent24h,      warn: sentinel.summary.highIntent24h > 0,     positive: true  },
+              { label: "WP Attr 24 h",   value: sentinel.summary.wordpressWidget24h, warn: sentinel.summary.wordpressWidget24h === 0, positive: false },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className={`rounded-xl border px-4 py-3 ${
+                  s.warn && !s.positive ? "border-amber-400/40 bg-amber-400/[0.05]"
+                  : s.warn && s.positive ? "border-emerald-500/30 bg-emerald-500/[0.04]"
+                  : "border-white/[0.06] bg-white/[0.02]"
+                }`}
+              >
+                <div className={`font-bebas text-3xl leading-none ${
+                  s.warn && !s.positive ? "text-amber-400"
+                  : s.warn && s.positive ? "text-emerald-400"
+                  : "text-[#F4F4F4]"
+                }`}>
+                  {s.value}
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 uppercase tracking-[0.1em]">{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Today action list */}
+          {sentinel.todayActions.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-600 mb-3">
+                Action Items ({sentinel.todayActions.length})
+              </h3>
+              <div className="space-y-2">
+                {sentinel.todayActions.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-start gap-3 rounded-lg border border-white/[0.06] bg-white/[0.02] px-4 py-3"
+                  >
+                    <span className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${PRIORITY_DOT[item.priority] ?? "bg-slate-500"}`} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-medium text-[#F4F4F4]">{item.title}</span>
+                        <span className={`text-[10px] uppercase tracking-wider font-semibold ${
+                          item.priority === "urgent" ? "text-red-400"
+                          : item.priority === "high" ? "text-amber-400"
+                          : "text-slate-500"
+                        }`}>{item.priority}</span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-0.5">{item.reason}</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5 italic">{item.action}</p>
+                      {item.leadDetailHref && (
+                        <Link
+                          href={item.leadDetailHref}
+                          className="mt-1 inline-block text-[11px] text-gold-400/80 hover:text-gold-300 underline underline-offset-2"
+                        >
+                          View lead →
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Sentinel alerts */}
+          {sentinel.alerts.length > 0 && (
+            <div>
+              <h3 className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-600 mb-3">
+                Alerts ({sentinel.alerts.length})
+              </h3>
+              <div className="space-y-2">
+                {sentinel.alerts.map((alert) => (
+                  <div
+                    key={alert.id}
+                    className={`rounded-lg border px-4 py-3 ${ALERT_BORDER[alert.severity]}`}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-[11px] font-bold ${
+                        alert.severity === "critical" ? "text-red-400"
+                        : alert.severity === "warning"  ? "text-amber-400"
+                        : alert.severity === "info"     ? "text-blue-400"
+                        : "text-emerald-400"
+                      }`}>
+                        {ALERT_ICON[alert.severity]}
+                      </span>
+                      <span className="text-sm font-medium text-[#F4F4F4]">{alert.title}</span>
+                      {alert.value !== undefined && (
+                        <span className="ml-auto text-xs text-slate-500 font-mono">{alert.metric}: {alert.value}</span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-400">{alert.message}</p>
+                    <p className="text-[11px] text-slate-500 mt-1 italic">{alert.action}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {sentinel.alerts.length === 0 && sentinel.todayActions.length === 0 && (
+            <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/[0.03] px-4 py-3">
+              <span className="text-sm text-emerald-400">✓ No alerts. Funnel and attribution look healthy.</span>
+            </div>
+          )}
+        </section>
 
         {/* ------------------------------------------------------------------ */}
         {/* 0. Executive Snapshot — What changed in the last 24h               */}
