@@ -80,7 +80,7 @@ export default async function RevenueCommandPage() {
             {[
               { label: "New Leads",            value: d.funnelHealth.leads24h,       warn: false },
               { label: "High Intent",          value: d.funnelHealth.highIntent24h,  warn: d.funnelHealth.highIntent24h > 0, positive: true },
-              { label: "WordPress Attributed", value: d.funnelHealth.wordpressWidget7d, warn: false },
+              { label: "WordPress Attr (24 h)", value: d.funnelHealth.wordpressWidget24h, warn: false },
               { label: "Unattributed (7 d)",   value: d.funnelHealth.unattributed7d, warn: d.funnelHealth.unattributed7d > 0 },
             ].map((s) => (
               <div
