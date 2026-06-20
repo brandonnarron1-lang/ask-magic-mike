@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { loadLeadDetail } from "@/lib/admin/lead-detail";
 import { AdminLeadActions } from "@/components/admin/admin-lead-actions";
+import { buildNextBestAction } from "@/lib/admin/next-best-action";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -19,6 +20,26 @@ export default async function LeadDetailPage({ params }: PageProps) {
   const name = [lead.first_name, lead.last_name]
     .filter(Boolean)
     .join(" ") || "(unnamed)";
+
+  const nba = buildNextBestAction({
+    leadType:    String(lead.lead_type ?? ""),
+    status:      String(lead.status ?? ""),
+    temperature: String(lead.temperature ?? ""),
+    score:       typeof lead.score === "number" ? lead.score : null,
+    source:      String(lead.source ?? ""),
+    utmMedium:   detail.attribution ? String(detail.attribution.utm_medium ?? "") : null,
+    utmCampaign: detail.attribution ? String(detail.attribution.utm_campaign ?? "") : null,
+    firstName:   lead.first_name ? String(lead.first_name) : null,
+    hasEmail:    !!lead.email,
+    hasPhone:    !!lead.phone,
+    hasAddress:  !!(lead.address_raw ?? lead.address_line1),
+    email:       lead.email ? String(lead.email) : null,
+    phone:       lead.phone ? String(lead.phone) : null,
+    addressRaw:  lead.address_raw ? String(lead.address_raw) : null,
+    consentSms:  !!lead.consent_sms,
+    consentEmail: !!lead.consent_email,
+    isSynthetic: false,
+  });
 
   return (
     <div className="min-h-screen bg-[#05070A] text-[#F4F4F4]">
@@ -72,6 +93,76 @@ export default async function LeadDetailPage({ params }: PageProps) {
               Supabase not connected — showing empty detail.
             </div>
           )}
+
+          {/* Next Best Action card */}
+          <div
+            data-testid="next-best-action-card"
+            className={`rounded-xl border p-4 ${
+              nba.isSynthetic
+                ? "border-ruby-400/30 bg-ruby-400/[0.04]"
+                : nba.doNotContact
+                ? "border-amber-400/30 bg-amber-400/[0.04]"
+                : "border-white/[0.09] bg-white/[0.025]"
+            }`}
+          >
+            <p className="text-[10.5px] tracking-[0.18em] uppercase text-gold-300/85 mb-3">
+              Conversation Summary · Next Best Action
+            </p>
+
+            {nba.isSynthetic && (
+              <div
+                data-testid="nba-synthetic-warning"
+                className="mb-3 rounded-lg border border-ruby-400/30 bg-ruby-400/[0.08] px-3 py-2 text-[12px] text-ruby-300 font-semibold"
+              >
+                ⚠ Synthetic / test lead — do not contact.
+              </div>
+            )}
+
+            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1 mb-3">
+              <Field label="Source path"   value={nba.sourcePath} />
+              <Field label="Score"         value={nba.scoreLabel} />
+              <Field label="Temperature"   value={nba.temperatureLabel} />
+              <Field label="Intent"        value={nba.intentSummary} />
+            </div>
+
+            {nba.missingInfo.length > 0 && (
+              <div className="mb-3">
+                <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-amber-400/80 mb-1">
+                  Missing info
+                </p>
+                <ul className="flex flex-wrap gap-2">
+                  {nba.missingInfo.map((item) => (
+                    <li
+                      key={item}
+                      className="rounded-full border border-amber-400/25 bg-amber-400/[0.06] px-2.5 py-0.5 text-[11px] text-amber-300"
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div>
+              <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-slate-400 mb-1">
+                Suggested follow-up angle
+              </p>
+              <p
+                data-testid="nba-follow-up-angle"
+                className={`text-[12.5px] leading-relaxed ${
+                  nba.isSynthetic || nba.doNotContact
+                    ? "text-ruby-300"
+                    : "text-[#F4F4F4]"
+                }`}
+              >
+                {nba.followUpAngle}
+              </p>
+            </div>
+
+            <p className="mt-3 text-[10px] text-slate-600">
+              Read-only. No outbound messaging is sent from this page.
+            </p>
+          </div>
 
           <Card title="Profile">
             <Field label="Email" value={String(lead.email ?? "—")} />

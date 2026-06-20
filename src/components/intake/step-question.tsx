@@ -36,6 +36,18 @@ export function StepQuestion({
           <label className="block text-[10.5px] font-semibold text-slate-400 mb-2 uppercase tracking-[0.18em]">
             Your question
           </label>
+          {/* Helper prompt examples */}
+          <p
+            data-testid="helper-prompt-examples"
+            className="text-[11px] text-slate-500 mb-2 leading-relaxed"
+          >
+            Examples:{" "}
+            <span className="text-slate-400 italic">&ldquo;What is my Wilson home worth?&rdquo;</span>
+            {" · "}
+            <span className="text-slate-400 italic">&ldquo;Is now a good time to sell?&rdquo;</span>
+            {" · "}
+            <span className="text-slate-400 italic">&ldquo;What should I know before buying in Wilson?&rdquo;</span>
+          </p>
           <textarea
             data-testid="ask-question-textarea"
             value={question}

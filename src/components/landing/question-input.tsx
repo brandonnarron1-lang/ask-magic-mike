@@ -135,9 +135,39 @@ export function QuestionInput({
         </button>
       </div>
 
-      <p className="px-5 pb-3.5 text-[11px] text-slate-700">
+      <p className="px-5 pb-1.5 text-[11px] text-slate-700">
         ⌘ + Enter to submit · Free · No account required
       </p>
+      <p
+        data-testid="broker-reviewed-microcopy"
+        className="px-5 pb-3.5 text-[10.5px] text-slate-500"
+      >
+        Broker-reviewed guidance from Our Town Properties. Not an appraisal.
+      </p>
+
+      {/* What happens next? trust panel */}
+      <div
+        data-testid="what-happens-next-panel"
+        className="mx-5 mb-4 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3"
+      >
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 mb-2">
+          What happens next?
+        </p>
+        <ol className="space-y-1.5">
+          {([
+            "Ask your question",
+            "Mike reviews the request",
+            "A local expert follows up if needed",
+          ] as const).map((step, i) => (
+            <li key={i} className="flex items-start gap-2.5 text-[11.5px] text-slate-400">
+              <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-gold-400/15 text-[9px] font-bold text-gold-400/80 mt-px">
+                {i + 1}
+              </span>
+              {step}
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
   );
 }
