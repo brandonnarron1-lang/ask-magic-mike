@@ -623,3 +623,80 @@ describe("mikePlatformAssets — platform-ready crops registry", () => {
     expect(manifest).toContain("canonicalSiteUrl");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Lead Capture Conversion Polish v1 — public funnel copy and trust signals
+// ---------------------------------------------------------------------------
+
+describe("question-input — broker trust microcopy", () => {
+  const questionInput = normalize(
+    readSource("src/components/landing/question-input.tsx")
+  );
+
+  it("contains 'Not an appraisal' microcopy", () => {
+    expect(questionInput).toContain("Not an appraisal");
+  });
+
+  it("contains 'Broker-reviewed guidance from Our Town Properties'", () => {
+    expect(questionInput).toContain(
+      "Broker-reviewed guidance from Our Town Properties"
+    );
+  });
+
+  it("does NOT claim instant valuation", () => {
+    expect(questionInput).not.toMatch(/instant valuation/i);
+    expect(questionInput).not.toMatch(/instant home value/i);
+  });
+
+  it("does NOT claim guaranteed offer or guaranteed value", () => {
+    expect(questionInput).not.toMatch(/guaranteed offer/i);
+    expect(questionInput).not.toMatch(/guaranteed value/i);
+  });
+
+  it("contains the 'What happens next?' trust panel", () => {
+    expect(questionInput).toContain("What happens next");
+  });
+
+  it("three-step What happens next panel contains correct steps", () => {
+    expect(questionInput).toContain("Ask your question");
+    expect(questionInput).toContain("Mike reviews the request");
+    expect(questionInput).toContain("A local expert follows up if needed");
+  });
+
+  it("does NOT claim appraisal as a standalone positive (only as negation)", () => {
+    const cleaned = stripAllowedAppraisalContext(questionInput);
+    expect(cleaned).not.toMatch(/\bappraisal\b/i);
+  });
+});
+
+describe("step-question intake — helper prompt examples", () => {
+  const stepQuestion = normalize(
+    readSource("src/components/intake/step-question.tsx")
+  );
+
+  it("contains helper prompt examples section", () => {
+    expect(stepQuestion).toContain("helper-prompt-examples");
+  });
+
+  it("contains 'What is my Wilson home worth?' example", () => {
+    expect(stepQuestion).toContain("What is my Wilson home worth");
+  });
+
+  it("contains 'Is now a good time to sell?' example", () => {
+    expect(stepQuestion).toContain("Is now a good time to sell");
+  });
+
+  it("contains 'What should I know before buying in Wilson?' example", () => {
+    expect(stepQuestion).toContain("What should I know before buying in Wilson");
+  });
+
+  it("does NOT promise an instant valuation", () => {
+    expect(stepQuestion).not.toMatch(/instant valuation/i);
+    expect(stepQuestion).not.toMatch(/instant (home )?value/i);
+  });
+
+  it("does NOT promise an appraisal as a standalone service", () => {
+    const cleaned = stripAllowedAppraisalContext(stepQuestion);
+    expect(cleaned).not.toMatch(/\bappraisal\b/i);
+  });
+});
