@@ -89,6 +89,7 @@ export default async function RevenueCommandPage() {
             </p>
           </div>
           <div className="flex items-center gap-4 text-xs text-slate-500">
+            <Link href="/admin/traffic" className="hover:text-gold-300">traffic</Link>
             <Link href="/admin" className="hover:text-gold-300">
               &larr; dashboard
             </Link>

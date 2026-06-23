@@ -160,6 +160,12 @@ export default async function AdminPage() {
           >
             Revenue Command Center
           </Link>
+          <Link
+            href="/admin/traffic"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 text-xs font-medium text-slate-300 hover:text-gold-300 hover:border-gold-400/30 transition-colors"
+          >
+            Traffic Command Center
+          </Link>
         </div>
 
         <div className="mb-4 flex items-center justify-between">
