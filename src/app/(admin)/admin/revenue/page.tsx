@@ -5,6 +5,7 @@ import Link from "next/link";
 import { loadRevenueCommand } from "@/lib/admin/revenue-command";
 import { buildRevenueSentinel } from "@/lib/admin/revenue-sentinel";
 import type { SentinelSeverity } from "@/lib/admin/revenue-sentinel";
+import { buildLeadSourceReconciliation } from "@/lib/admin/lead-source-reconciliation";
 
 export default async function RevenueCommandPage() {
   // createAdminClient throws when env vars are absent — we wrap in try/catch
@@ -38,6 +39,7 @@ export default async function RevenueCommandPage() {
 
   const d = data;
   const sentinel = buildRevenueSentinel(d);
+  const reconciliation = buildLeadSourceReconciliation(d);
 
   const STATUS_STYLES: Record<SentinelSeverity, { pill: string; label: string }> = {
     ok:       { pill: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25", label: "All clear" },
@@ -221,6 +223,203 @@ export default async function RevenueCommandPage() {
               <span className="text-sm text-emerald-400">✓ No alerts. Funnel and attribution look healthy.</span>
             </div>
           )}
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Lead Source Reconciliation                                          */}
+        {/* ------------------------------------------------------------------ */}
+        <section>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-1">
+            Lead Source Reconciliation
+          </h2>
+          <p className="text-[11px] text-slate-600 mb-4">
+            Supabase truth vs. snapshot &middot; synthetic/test leads excluded from follow-up and revenue queues &middot; snapshot window: last 30 d
+          </p>
+
+          {/* Data freshness */}
+          <div className={`flex items-center gap-2 mb-4 px-3 py-2 rounded-lg border text-[11px] w-fit ${
+            reconciliation.dataFreshnessStatus === "fresh"   ? "border-emerald-500/30 bg-emerald-500/[0.04] text-emerald-400"
+            : reconciliation.dataFreshnessStatus === "stale" ? "border-amber-400/40 bg-amber-400/[0.05] text-amber-400"
+            : "border-slate-600/40 bg-slate-800/20 text-slate-500"
+          }`}>
+            <span className="font-semibold">
+              {reconciliation.dataFreshnessStatus === "fresh" ? "✓ Data fresh"
+               : reconciliation.dataFreshnessStatus === "stale" ? "⚠ Snapshot stale"
+               : "ℹ Freshness unknown"}
+            </span>
+            {reconciliation.stalenessMinutes !== null && (
+              <span className="text-slate-500 font-mono">
+                ({reconciliation.stalenessMinutes} min ago)
+              </span>
+            )}
+          </div>
+
+          {/* Real vs synthetic grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            {[
+              { label: "Total Leads (30 d)",     value: reconciliation.totalLeads,          warn: false },
+              { label: "Real Leads (30 d)",       value: reconciliation.realLeads,           warn: false, positive: reconciliation.realLeads > 0 },
+              { label: "Synthetic / Test (all)",  value: reconciliation.syntheticLeads,      warn: reconciliation.syntheticLeads > 0 },
+              { label: "Synthetic in 30 d",       value: reconciliation.syntheticLeads30d,   warn: reconciliation.syntheticLeads30d > 0 },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className={`rounded-xl border px-4 py-3 ${
+                  s.warn            ? "border-amber-400/40 bg-amber-400/[0.05]"
+                  : s.positive      ? "border-emerald-500/30 bg-emerald-500/[0.04]"
+                  : "border-white/[0.06] bg-white/[0.02]"
+                }`}
+              >
+                <div className={`font-bebas text-3xl leading-none ${
+                  s.warn       ? "text-amber-400"
+                  : s.positive ? "text-emerald-400"
+                  : "text-[#F4F4F4]"
+                }`}>
+                  {s.value}
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 uppercase tracking-[0.1em]">{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Attribution health */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            {[
+              { label: "Widget Leads 24 h",  value: reconciliation.websiteWidgetLeads24h, warn: false },
+              { label: "Widget Leads 7 d",   value: reconciliation.websiteWidgetLeads7d,  warn: false },
+              { label: "Unattributed 7 d",   value: reconciliation.unattributedLeads7d,   warn: reconciliation.unattributedLeads7d > 0 },
+              { label: "WP-Attributed 7 d",  value: reconciliation.wordpressAttributedLeads7d, warn: false },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className={`rounded-xl border px-4 py-3 ${
+                  s.warn ? "border-amber-400/40 bg-amber-400/[0.05]" : "border-white/[0.06] bg-white/[0.02]"
+                }`}
+              >
+                <div className={`font-bebas text-3xl leading-none ${s.warn ? "text-amber-400" : "text-[#F4F4F4]"}`}>
+                  {s.value}
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 uppercase tracking-[0.1em]">{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Timestamps */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            {[
+              { label: "Latest Lead (any)",     ts: reconciliation.latestLeadAt },
+              { label: "Latest Real Lead",       ts: reconciliation.latestRealLeadAt },
+              { label: "Latest Synthetic Lead",  ts: reconciliation.latestSyntheticLeadAt },
+            ].map((s) => (
+              <div key={s.label} className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
+                <div className="text-[10px] text-slate-500 uppercase tracking-[0.1em] mb-1">{s.label}</div>
+                <div className="text-sm text-slate-300">
+                  {s.ts ? new Date(s.ts).toLocaleString() : <span className="text-slate-600">None</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Reconciliation warnings */}
+          {reconciliation.warnings.length > 0 && (
+            <div className="space-y-2 mb-4">
+              {reconciliation.warnings.map((w, i) => (
+                <div key={i} className="rounded-lg border border-amber-400/30 bg-amber-400/[0.04] px-4 py-2.5 flex items-start gap-2">
+                  <span className="text-amber-400 font-bold text-sm mt-0.5 flex-shrink-0">⚠</span>
+                  <p className="text-[12px] text-slate-300 leading-relaxed">{w}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Synthetic exclusion note */}
+          <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-4 py-3 mb-4">
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              <span className="font-semibold text-slate-300">Synthetic/test leads are excluded</span>{" "}
+              from real follow-up and revenue action queues.
+              They are flagged by email markers ({" "}
+              <span className="font-mono text-slate-500 text-[10px]">qa+amm-</span>,{" "}
+              <span className="font-mono text-slate-500 text-[10px]">@example.com</span>,{" "}
+              <span className="font-mono text-slate-500 text-[10px]">amm-wordpress-smoke</span>,{" "}
+              <span className="font-mono text-slate-500 text-[10px]">DO_NOT_CONTACT</span>{" "}
+              ), kept for audit purposes, and never surfaced in the Action Priority Queue.
+              Do not contact them.
+            </p>
+          </div>
+
+          {/* Recommended next action */}
+          <div className={`rounded-lg border px-4 py-3 ${
+            reconciliation.dataFreshnessStatus === "stale" ? "border-amber-400/40 bg-amber-400/[0.04]"
+            : reconciliation.recommendedNextAction.toLowerCase().includes("follow") ? "border-gold-400/30 bg-gold-400/[0.03]"
+            : "border-emerald-500/20 bg-emerald-500/[0.03]"
+          }`}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-1">
+              Recommended Next Action
+            </div>
+            <p className="text-sm text-[#F4F4F4]">{reconciliation.recommendedNextAction}</p>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Regency Pending — Social Preview Blocker Status                     */}
+        {/* ------------------------------------------------------------------ */}
+        <section>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-3">
+            Social Preview Readiness &middot; External Blocker Status
+          </h2>
+          <div className="rounded-xl border border-slate-700/50 bg-slate-800/20 px-5 py-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <span className="text-amber-400 font-bold text-sm mt-0.5 flex-shrink-0">⚠</span>
+              <div>
+                <p className="text-[12px] font-semibold text-amber-300">
+                  Facebook preview blocker: Pending host cPanel / ModSecurity whitelist
+                </p>
+                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                  <span className="font-semibold text-slate-300">What&apos;s blocked:</span>{" "}
+                  <code className="text-slate-400 text-[10px]">facebookexternalhit/1.1</code> returns HTTP 403 site-wide on ourtownproperties.com.
+                  Diagnosed as a host-level cPanel ModSecurity rule — NOT a WordPress or .htaccess issue.
+                  WordPress .htaccess is clean (verified via WP .htaccess Editor plugin).
+                </p>
+                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                  <span className="font-semibold text-slate-300">Fix required:</span>{" "}
+                  cPanel &rsaquo; Security &rsaquo; ModSecurity &rsaquo; find the rule firing on{" "}
+                  <code className="text-[10px] text-slate-400">facebookexternalhit</code> in the
+                  &ldquo;Hits List&rdquo;, then whitelist that rule ID for ourtownproperties.com, or
+                  ask the host (Regency / Liquid Web) to allow facebookexternalhit and bare Mozilla/5.0.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              {[
+                { label: "AMM Funnel Links",        status: "safe",    detail: "UTM-tracked links verified via synthetic test lead" },
+                { label: "OTP → AMM Social Links",  status: "pending", detail: "Wait for WAF whitelist before Facebook sharing" },
+                { label: "Social Preview Score",    status: "partial", detail: "40/42 PASS (last verified 2026-06-23). Two FB 403s remain." },
+              ].map((item) => (
+                <div key={item.label} className={`rounded-lg border px-3 py-2.5 ${
+                  item.status === "safe"    ? "border-emerald-500/30 bg-emerald-500/[0.04]"
+                  : item.status === "pending" ? "border-amber-400/30 bg-amber-400/[0.04]"
+                  : "border-blue-500/25 bg-blue-500/[0.04]"
+                }`}>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-1">
+                    {item.label}
+                  </div>
+                  <div className={`text-xs font-semibold mb-0.5 ${
+                    item.status === "safe"    ? "text-emerald-400"
+                    : item.status === "pending" ? "text-amber-400"
+                    : "text-blue-300"
+                  }`}>
+                    {item.status === "safe" ? "✓ Safe" : item.status === "pending" ? "⚠ Pending" : "◑ Partial"}
+                  </div>
+                  <p className="text-[10.5px] text-slate-500">{item.detail}</p>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-[10.5px] text-slate-600 italic">
+              This card is read-only. It does not trigger any host actions. Contact the host administrator to apply the WAF whitelist.
+            </p>
+          </div>
         </section>
 
         {/* ------------------------------------------------------------------ */}
