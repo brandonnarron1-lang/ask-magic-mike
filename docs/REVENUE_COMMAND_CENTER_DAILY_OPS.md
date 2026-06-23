@@ -152,6 +152,56 @@ Act immediately if:
 
 ---
 
+---
+
+## Reconcile Before Reacting
+
+The **Lead Source Reconciliation** panel (below the Today Action Board) is the lens that separates database truth from dashboard noise. Read it before acting on any metric.
+
+### Dashboard Snapshot vs. Database Truth
+
+The Revenue Command Center renders a fresh server-side snapshot on every page load (`force-dynamic`, no caching). Each time you load or reload the page, all counts reflect the current state of the Supabase database. If the page has been open in a browser tab for more than 10 minutes, the reconciliation panel will flag the snapshot as **stale** and recommend a reload. Never act on stale data — reload first.
+
+### Synthetic / Test Residue
+
+The AMM funnel captures one intentional synthetic/test lead at time of pipeline verification. Its email contains `@example.com` or `qa+amm-` markers. The reconciliation panel shows:
+
+- **Synthetic / Test (all)** — all-time count of test leads in Supabase
+- **Synthetic in 30 d** — test leads within the snapshot window
+
+These are **already excluded** from the Action Priority Queue and all revenue tracking. Their presence is expected and harmless. Counts > 0 do not mean the funnel is broken — they mean QA ran. Do not delete them (append-only compliance design). Do not contact them.
+
+The reconciliation panel will always show `realLeads = totalLeads − syntheticLeads30d`. If `realLeads = 0` and `syntheticLeads > 0`, this means the pipeline is verified working but real organic traffic has not arrived yet.
+
+### website_widget Real Traffic
+
+The `Widget Leads 7d` counter in the reconciliation panel shows how many leads came via the OTP `website_widget` embed path in the last 7 days. A count of `0` does **not** mean the funnel is broken — the synthetic test lead confirmed the attribution pipeline works end-to-end. Zero real widget leads simply means real organic traffic hasn't arrived through that embed path in the 7-day window.
+
+Do not call the QA synthetic lead a "real widget lead." It is excluded from this count.
+
+### What to Do When Social Preview Is Blocked
+
+The **Social Preview Readiness** card (below the Lead Source Reconciliation panel) shows the current status of the Facebook/OG preview blocker on ourtownproperties.com. While the blocker is in **Pending** state:
+
+- AMM funnel links are **safe** — the UTM pipeline is verified and captures leads correctly
+- OTP social sharing (Facebook posts that link to ourtownproperties.com) will **not** render preview cards — wait for the host WAF whitelist before promoting OTP pages via Facebook
+- AMM social sharing (posts linking to askmagicmike.com) is **unaffected** — the blocker is host-level on OTP, not on the AMM Vercel app
+- The social preview score is **40/42** — only the two Facebook UA tests are failing
+
+To resolve: ask the host administrator (Regency / Liquid Web cPanel) to whitelist `facebookexternalhit` in ModSecurity. No WordPress or code change is required.
+
+### What Not to Do
+
+| Situation | Wrong reaction | Correct reaction |
+|---|---|---|
+| `realLeads = 0`, syntheticLeads > 0 | Assume funnel is broken | Pipeline verified. Await real traffic. |
+| `website_widget 7d = 0` | Declare widget broken | Funnel proven via synthetic. Monitor. |
+| Social preview card shows Pending | Try to fix in WordPress | Contact host for ModSecurity whitelist. |
+| Stale snapshot warning visible | Act on displayed counts | Reload the page first. |
+| Synthetic leads visible in Section 7 | Contact them or delete them | Ignore — they are excluded automatically. |
+
+---
+
 ## Production Details
 
 - Admin is protected by HTTP Basic Auth — any username + ADMIN_SECRET
