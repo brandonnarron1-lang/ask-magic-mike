@@ -1,3 +1,31 @@
+import { siteConfig } from "@/lib/site-config";
+
+function EqualHousingIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-label="Equal Housing Opportunity"
+      className={className}
+    >
+      <path
+        d="M3 10.5L12 3L21 10.5V21H15V15H9V21H3V10.5Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 12H15M9 14.5H15"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export function Footer() {
   return (
     <footer className="relative border-t border-gold-400/10 bg-[#080806] px-6 py-12">
@@ -6,7 +34,7 @@ export function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <svg width="28" height="28" viewBox="0 0 60 60" fill="none">
+              <svg width="28" height="28" viewBox="0 0 60 60" fill="none" aria-hidden="true">
                 <rect x="2" y="2" width="56" height="56" rx="4" fill="#0A0A0A" stroke="#D4A017" strokeWidth="2"/>
                 <path d="M30 8 C18 8 10 18 10 28 L10 50 L20 50 L20 36 L40 36 L40 50 L50 50 L50 28 C50 18 42 8 30 8Z" fill="none" stroke="#D4A017" strokeWidth="2.5"/>
                 <rect x="23" y="36" width="14" height="14" rx="1" fill="none" stroke="#D4A017" strokeWidth="2"/>
@@ -26,10 +54,21 @@ export function Footer() {
           <div>
             <h4 className="text-xs font-semibold tracking-[0.15em] uppercase text-cream mb-4">Contact</h4>
             <div className="space-y-2 text-xs text-slate-400">
-              <div><a href="tel:2522454337" className="hover:text-gold-400 transition-colors">252-245-4337</a></div>
-              <div><a href="tel:2522437700" className="hover:text-gold-400 transition-colors">252-243-7700 (office)</a></div>
-              <div><a href="https://ourtownproperties.com" className="hover:text-gold-400 transition-colors">ourtownproperties.com</a></div>
-              <div className="text-slate-500">Wilson, NC · Eastern NC</div>
+              <div>
+                <span className="text-slate-600 text-[10px] uppercase tracking-[0.12em] block mb-0.5">Direct</span>
+                <a href="tel:2522454337" className="hover:text-gold-400 transition-colors">252-245-4337</a>
+              </div>
+              <div>
+                <span className="text-slate-600 text-[10px] uppercase tracking-[0.12em] block mb-0.5">Office</span>
+                <a href="tel:2522437700" className="hover:text-gold-400 transition-colors">252-243-7700</a>
+              </div>
+              <div>
+                <span className="text-slate-600 text-[10px] uppercase tracking-[0.12em] block mb-0.5">Web</span>
+                <a href={siteConfig.parentBrandUrl} className="hover:text-gold-400 transition-colors">
+                  ourtownproperties.com
+                </a>
+              </div>
+              <div className="text-slate-500 pt-1">Wilson, NC · Eastern NC</div>
             </div>
           </div>
 
@@ -49,8 +88,8 @@ export function Footer() {
         <div className="gold-rule mb-6" />
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-600">
           <span>© {new Date().getFullYear()} Our Town Properties, Inc. · Mike Eatmon, REALTOR®</span>
-          <span className="flex items-center gap-2">
-            <span>🏠</span>
+          <span className="flex items-center gap-1.5">
+            <EqualHousingIcon />
             <span>Equal Housing Opportunity</span>
           </span>
         </div>
