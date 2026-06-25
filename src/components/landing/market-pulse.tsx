@@ -13,15 +13,24 @@ export function MarketPulse() {
   const doubled = [...FACTS, ...FACTS];
 
   return (
-    <div className="relative border-y border-gold-400/10 bg-[#0D0B07] overflow-hidden py-3">
+    <div className="relative border-y border-gold-400/[0.12] bg-[#0D0B07] overflow-hidden py-3"
+      style={{ boxShadow: "inset 0 1px 0 rgba(212,160,23,0.04), inset 0 -1px 0 rgba(212,160,23,0.04)" }}
+    >
       {/* Fade masks */}
-      <div className="pointer-events-none absolute left-0 inset-y-0 w-16 z-10 bg-gradient-to-r from-[#0D0B07] to-transparent" />
+      <div className="pointer-events-none absolute left-0 inset-y-0 w-20 z-10 bg-gradient-to-r from-[#0D0B07] to-transparent" />
       <div className="pointer-events-none absolute right-0 inset-y-0 w-16 z-10 bg-gradient-to-l from-[#0D0B07] to-transparent" />
 
       {/* Header tag */}
       <div className="absolute left-4 inset-y-0 z-20 flex items-center pointer-events-none">
-        <span className="bg-gold-400 text-midnight text-[9px] font-black tracking-[0.15em] uppercase px-2 py-0.5 rounded-sm">
-          Our Town
+        <span
+          className="text-[9px] font-black tracking-[0.18em] uppercase px-2.5 py-1 rounded"
+          style={{
+            background: "linear-gradient(135deg, #D4A017, #B8860B)",
+            color: "#0A0A0A",
+            boxShadow: "0 1px 4px rgba(212,160,23,0.3)",
+          }}
+        >
+          OTP
         </span>
       </div>
 
@@ -31,11 +40,11 @@ export function MarketPulse() {
           {doubled.map((fact, i) => (
             <div
               key={i}
-              className="flex items-center gap-3 px-6 border-r border-gold-400/10 shrink-0"
+              className="flex items-center gap-2.5 px-6 border-r border-gold-400/[0.09] shrink-0"
             >
-              <span className="text-xs text-slate-400 whitespace-nowrap">{fact.label}</span>
-              <span className="text-sm font-semibold text-cream whitespace-nowrap">{fact.value}</span>
-              <span className="text-[11px] font-medium text-gold-400/60 whitespace-nowrap">
+              <span className="text-[10.5px] text-slate-500 whitespace-nowrap">{fact.label}</span>
+              <span className="text-[13px] font-semibold text-cream whitespace-nowrap">{fact.value}</span>
+              <span className="text-[10px] font-medium text-gold-400/55 whitespace-nowrap">
                 {fact.note}
               </span>
             </div>

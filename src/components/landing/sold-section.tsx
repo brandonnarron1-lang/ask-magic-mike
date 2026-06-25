@@ -109,22 +109,22 @@ export function SoldSection() {
               <div
                 key={item.label}
                 className={cn(
-                  "group flex items-center justify-between rounded-xl border border-white/[0.05]",
+                  "group flex items-center justify-between rounded-xl border border-white/[0.06]",
                   "bg-white/[0.02] px-5 py-4",
-                  "hover:border-gold-400/20 hover:bg-white/[0.04]",
-                  "transition-all duration-300 opacity-0",
+                  "hover:border-gold-400/[0.22] hover:bg-white/[0.04]",
+                  "transition-all duration-300 motion-reduce:transition-none opacity-0",
                   rightIn && "animate-fade-up"
                 )}
                 style={{ animationDelay: `${300 + i * 80}ms` }}
               >
                 <div>
-                  <div className="text-sm font-medium text-cream group-hover:text-white transition-colors">
+                  <div className="text-[13.5px] font-medium text-cream group-hover:text-white transition-colors">
                     {item.label}
                   </div>
-                  <div className="text-xs text-slate-500 mt-0.5">{item.detail}</div>
+                  <div className="text-[11px] text-slate-500 mt-0.5">{item.detail}</div>
                 </div>
                 <div className="text-right shrink-0 ml-5">
-                  <div className="text-sm font-bold text-gold-400">{item.value}</div>
+                  <div className="font-bebas text-xl tracking-wider text-gold-400 leading-none">{item.value}</div>
                 </div>
               </div>
             ))}

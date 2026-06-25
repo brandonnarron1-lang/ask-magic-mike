@@ -28,13 +28,15 @@ export function ProofStrip({ className }: ProofStripProps) {
       {PROOFS.map(({ Icon, label }) => (
         <li
           key={label}
-          className="flex items-start gap-3 rounded-xl border border-white/[0.09] bg-white/[0.035] px-4 py-3"
+          className="relative flex items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.025] px-4 py-3.5 overflow-hidden"
+          style={{ boxShadow: "inset 0 1px 0 rgba(212,160,23,0.06)" }}
         >
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gold-400/30 to-transparent" />
           <Icon
-            className="mt-0.5 h-4 w-4 text-gold-300 shrink-0"
+            className="mt-0.5 h-4 w-4 text-gold-400/80 shrink-0"
             aria-hidden="true"
           />
-          <span className="text-[13.5px] text-[#F7F1E8]/92 leading-snug">
+          <span className="text-[13px] text-[#F7F1E8]/90 leading-snug">
             {label}
           </span>
         </li>
