@@ -25,7 +25,7 @@ export default async function RevenueCommandPage() {
     return (
       <div className="min-h-screen bg-[#080806] flex items-center justify-center">
         <div className="max-w-md text-center px-6">
-          <h1 className="text-xl font-bold text-red-400 mb-3">Admin Unavailable</h1>
+          <h1 className="text-xl font-bold text-ruby-400 mb-3">Admin Unavailable</h1>
           <p className="text-sm text-slate-400 leading-relaxed">
             Supabase is not configured. Set{" "}
             <code className="text-amber-400 text-xs">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}

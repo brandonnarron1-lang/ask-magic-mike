@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
 import { notFound } from "next/navigation";
 import { loadLeadDetail } from "@/lib/admin/lead-detail";
 import { AdminLeadActions } from "@/components/admin/admin-lead-actions";
@@ -112,9 +113,10 @@ export default async function LeadDetailPage({ params }: PageProps) {
             {nba.isSynthetic && (
               <div
                 data-testid="nba-synthetic-warning"
-                className="mb-3 rounded-lg border border-ruby-400/30 bg-ruby-400/[0.08] px-3 py-2 text-[12px] text-ruby-300 font-semibold"
+                className="mb-3 flex items-center gap-2 rounded-lg border border-ruby-400/30 bg-ruby-400/[0.08] px-3 py-2 text-[12px] text-ruby-300 font-semibold"
               >
-                ⚠ Synthetic / test lead — do not contact.
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                Synthetic / test lead — do not contact.
               </div>
             )}
 
