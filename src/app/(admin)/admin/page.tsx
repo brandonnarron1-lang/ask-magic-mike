@@ -2,6 +2,7 @@ export const dynamic   = "force-dynamic";
 export const revalidate = 0;
 
 import Link from "next/link";
+import { Inbox, DollarSign, BarChart2, Share2 } from "lucide-react";
 import { LeadTable } from "@/components/admin/lead-table";
 import { getLeadsForAdmin } from "@/lib/db/lead-repository";
 import { loadDashboardMetrics } from "@/lib/admin/dashboard-metrics";
@@ -146,37 +147,39 @@ export default async function AdminPage() {
           </div>
         )}
 
-        {/* Admin navigation links */}
-        <div className="mb-6 flex flex-wrap gap-3">
-          <Link
-            href="/admin/leads"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 text-xs font-medium text-slate-300 hover:text-gold-300 hover:border-gold-400/30 transition-colors"
-          >
-            Leads Inbox
-          </Link>
-          <Link
-            href="/admin/revenue"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 text-xs font-medium text-slate-300 hover:text-gold-300 hover:border-gold-400/30 transition-colors"
-          >
-            Revenue Command Center
-          </Link>
-          <Link
-            href="/admin/traffic"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 text-xs font-medium text-slate-300 hover:text-gold-300 hover:border-gold-400/30 transition-colors"
-          >
-            Traffic Command Center
-          </Link>
-          <Link
-            href="/admin/distribution"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 text-xs font-medium text-slate-300 hover:text-gold-300 hover:border-gold-400/30 transition-colors"
-          >
-            Distribution Command Center
-          </Link>
+        {/* Command center navigation */}
+        <div className="mb-7">
+          <p className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-slate-500 mb-3">
+            Command Centers
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { href: "/admin/leads",        Icon: Inbox,     label: "Leads Inbox",          sub: "Inbox · filter · detail" },
+              { href: "/admin/revenue",      Icon: DollarSign, label: "Revenue",              sub: "Pipeline · sentinel · alerts" },
+              { href: "/admin/traffic",      Icon: BarChart2,  label: "Traffic",              sub: "UTM · sources · sessions" },
+              { href: "/admin/distribution", Icon: Share2,     label: "Distribution",         sub: "Queue · platforms · plan" },
+            ].map(({ href, Icon, label, sub }) => (
+              <Link
+                key={href}
+                href={href}
+                className="group flex flex-col gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3.5 hover:border-gold-400/30 hover:bg-gold-400/[0.03] transition-all duration-200"
+              >
+                <Icon className="h-4 w-4 text-slate-500 group-hover:text-gold-400 transition-colors" aria-hidden="true" />
+                <div>
+                  <p className="text-xs font-semibold text-slate-200 group-hover:text-gold-300 transition-colors leading-none mb-0.5">
+                    {label}
+                  </p>
+                  <p className="text-[10.5px] text-slate-600 leading-tight">{sub}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
 
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-300">
-            Recent Leads <span className="text-slate-600 font-normal ml-1">· click a row to expand</span>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+            Recent Leads
+            <span className="ml-2 font-normal normal-case tracking-normal text-slate-700">· click a row to expand</span>
           </h2>
         </div>
 
