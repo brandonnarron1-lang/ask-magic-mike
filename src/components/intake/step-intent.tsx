@@ -1,14 +1,16 @@
 "use client";
 
+import { Home, Key, ArrowLeftRight, Search } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
 import type { PrimaryIntent, TimelineMonths } from "@/types/domain.types";
 
-const INTENT_OPTIONS: { value: PrimaryIntent; label: string; emoji: string }[] = [
-  { value: "sell", label: "Selling my home", emoji: "🏠" },
-  { value: "buy", label: "Buying a home", emoji: "🔑" },
-  { value: "both", label: "Buying & Selling", emoji: "⇄" },
-  { value: "unknown", label: "Just exploring", emoji: "👀" },
+const INTENT_OPTIONS: { value: PrimaryIntent; label: string; Icon: LucideIcon }[] = [
+  { value: "sell", label: "Selling my home", Icon: Home },
+  { value: "buy", label: "Buying a home", Icon: Key },
+  { value: "both", label: "Buying & Selling", Icon: ArrowLeftRight },
+  { value: "unknown", label: "Just exploring", Icon: Search },
 ];
 
 const TIMELINE_OPTIONS: { value: TimelineMonths; label: string }[] = [
@@ -51,24 +53,34 @@ export function StepIntent({
           I&apos;m thinking about
         </label>
         <div className="grid grid-cols-2 gap-3">
-          {INTENT_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              data-testid={`intent-${opt.value}`}
-              onClick={() => onIntentChange(opt.value)}
-              className={cn(
-                "flex items-center gap-3 rounded-xl border px-4 py-3.5 text-[14px] text-left transition-all duration-200",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60",
-                intent === opt.value
-                  ? "border-gold-400/55 bg-gold-400/[0.08] text-gold-200"
-                  : "border-white/10 bg-[#0B0E14]/70 text-slate-200 hover:border-gold-400/30 hover:bg-white/[0.04]"
-              )}
-            >
-              <span className="text-base" aria-hidden="true">{opt.emoji}</span>
-              <span className="font-medium">{opt.label}</span>
-            </button>
-          ))}
+          {INTENT_OPTIONS.map((opt) => {
+            const selected = intent === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                data-testid={`intent-${opt.value}`}
+                onClick={() => onIntentChange(opt.value)}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl border px-4 py-3.5 text-[14px] text-left transition-all duration-200",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60",
+                  selected
+                    ? "border-gold-400/55 bg-gold-400/[0.08] text-gold-200"
+                    : "border-white/10 bg-[#0B0E14]/70 text-slate-200 hover:border-gold-400/30 hover:bg-white/[0.04]"
+                )}
+              >
+                <opt.Icon
+                  size={16}
+                  aria-hidden="true"
+                  className={cn(
+                    "shrink-0 transition-colors",
+                    selected ? "text-gold-400" : "text-slate-500"
+                  )}
+                />
+                <span className="font-medium">{opt.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
