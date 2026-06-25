@@ -70,17 +70,21 @@ export function CTAChips({ onSelect, selected, className }: CTAChipsProps) {
             type="button"
             onClick={() => onSelect?.(chip.id, chip.defaultQuestion)}
             className={cn(
-              "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
-              "border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent",
+              "inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium",
+              "border transition-all duration-200 motion-reduce:transition-none",
+              "hover:-translate-y-[2px] active:translate-y-0 motion-reduce:hover:translate-y-0",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-1 focus-visible:ring-offset-transparent",
               !isRuby && [
-                "border-gold-400/25 text-gold-300 bg-gold-400/5",
-                "hover:bg-gold-400/12 hover:border-gold-400/55 hover:text-gold-200 hover:shadow-sm hover:shadow-gold-400/10",
-                isSelected && "bg-gold-400/18 border-gold-400/70 text-gold-100 shadow-md shadow-gold-400/15",
+                "border-gold-400/25 text-gold-300 bg-gold-400/[0.05]",
+                "hover:bg-gold-400/[0.10] hover:border-gold-400/50 hover:text-gold-200",
+                "hover:shadow-[0_4px_16px_rgba(212,160,23,0.12)]",
+                isSelected && "bg-gold-400/[0.14] border-gold-400/65 text-gold-100 shadow-[0_4px_20px_rgba(212,160,23,0.18)]",
               ],
               isRuby && [
-                "border-ruby-400/35 text-ruby-300 bg-ruby-400/5",
-                "hover:bg-ruby-400/12 hover:border-ruby-400/65 hover:text-ruby-200 hover:shadow-sm hover:shadow-ruby-400/10",
-                isSelected && "bg-ruby-400/18 border-ruby-400/70 text-ruby-100 shadow-md shadow-ruby-400/15",
+                "border-ruby-400/35 text-ruby-300 bg-ruby-400/[0.05]",
+                "hover:bg-ruby-400/[0.10] hover:border-ruby-400/60 hover:text-ruby-200",
+                "hover:shadow-[0_4px_16px_rgba(193,39,45,0.12)]",
+                isSelected && "bg-ruby-400/[0.14] border-ruby-400/65 text-ruby-100 shadow-[0_4px_20px_rgba(193,39,45,0.18)]",
               ]
             )}
           >

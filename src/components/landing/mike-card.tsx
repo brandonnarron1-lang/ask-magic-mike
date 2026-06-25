@@ -166,12 +166,12 @@ export function MikeCard() {
                   onClick={() => router.push("/ask")}
                   className={cn(
                     "inline-flex items-center gap-2 rounded-xl bg-gold-400 px-7 py-3.5 text-sm font-bold text-midnight",
-                    "hover:bg-gold-300 active:scale-95 transition-all duration-200 group",
-                    "animate-pulse-gold shadow-lg shadow-gold-400/20"
+                    "hover:bg-gold-300 active:scale-[0.97] transition-all duration-200 motion-reduce:transition-none group",
+                    "shadow-[0_4px_24px_rgba(212,160,23,0.25)] hover:shadow-[0_6px_32px_rgba(212,160,23,0.35)]"
                   )}
                 >
                   Ask Mike Now
-                  <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                  <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform motion-reduce:transition-none" />
                 </button>
 
                 <a href="tel:2522454337"

@@ -16,13 +16,16 @@ import { siteConfig } from "@/lib/site-config";
 
 function MikeVisualTrustBadge() {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-gold-400/20 bg-gold-400/[0.06] px-3 py-1.5">
+    <div
+      className="inline-flex items-center gap-2.5 rounded-full border border-gold-400/25 bg-gold-400/[0.07] px-3.5 py-1.5"
+      style={{ boxShadow: "0 2px 12px rgba(212,160,23,0.10), inset 0 1px 0 rgba(212,160,23,0.08)" }}
+    >
       <Image
         src={mikePlatformAssets.circularAvatar.src}
         alt={mikePlatformAssets.circularAvatar.alt}
-        width={24}
-        height={24}
-        className="rounded-full object-cover"
+        width={22}
+        height={22}
+        className="rounded-full object-cover ring-1 ring-gold-400/30"
       />
       <span className="text-[11px] font-semibold tracking-[0.14em] uppercase text-gold-400/90">
         Mike Eatmon · Our Town Properties
@@ -33,15 +36,28 @@ function MikeVisualTrustBadge() {
 
 function MikeHeroPortrait({ priority }: { priority?: boolean }) {
   return (
-    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-gold-400/10 bg-[#0D0B07]">
-      <Image
-        src={mikePlatformAssets.feedAd.src}
-        alt={mikePlatformAssets.feedAd.alt}
-        fill
-        priority={priority}
-        className="object-cover object-top"
-        sizes="(max-width: 1024px) 100vw, 520px"
+    <div className="relative">
+      {/* Ambient glow behind portrait */}
+      <div
+        className="absolute -inset-6 rounded-3xl pointer-events-none"
+        aria-hidden="true"
+        style={{
+          background: "radial-gradient(ellipse 75% 55% at 50% 90%, rgba(212,160,23,0.12) 0%, transparent 70%)",
+          filter: "blur(20px)",
+        }}
       />
+      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-gold-400/12 bg-[#0D0B07]"
+        style={{ boxShadow: "0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,160,23,0.06)" }}
+      >
+        <Image
+          src={mikePlatformAssets.feedAd.src}
+          alt={mikePlatformAssets.feedAd.alt}
+          fill
+          priority={priority}
+          className="object-cover object-top"
+          sizes="(max-width: 1024px) 100vw, 520px"
+        />
+      </div>
     </div>
   );
 }
@@ -128,14 +144,15 @@ export function HeroSection() {
       className="relative overflow-hidden bg-[#0A0A0A] px-5 pb-16 sm:px-6"
       data-amm-surface="landing-hero"
     >
-      {/* Subtle ambient gradient — brokerage-professional, not novelty */}
+      {/* Ambient gradient */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <div
           className="absolute inset-0"
           style={{
             background: `
-              radial-gradient(ellipse 60% 50% at 10% 0%, rgba(212,160,23,0.07) 0%, transparent 65%),
-              radial-gradient(ellipse 40% 40% at 90% 80%, rgba(212,160,23,0.04) 0%, transparent 65%)
+              radial-gradient(ellipse 70% 55% at 8% 0%, rgba(212,160,23,0.10) 0%, transparent 65%),
+              radial-gradient(ellipse 45% 45% at 92% 85%, rgba(212,160,23,0.05) 0%, transparent 65%),
+              radial-gradient(ellipse 30% 40% at 50% 110%, rgba(193,39,45,0.03) 0%, transparent 60%)
             `,
           }}
         />
@@ -290,18 +307,19 @@ export function HeroSection() {
           </div>
 
           <div className={cn("mt-8 w-full max-w-2xl opacity-0", loaded && "animate-fade-up delay-600")}>
-            <div className="card-gradient-border p-px">
-              <div className="rounded-2xl bg-[#0D0B07]/90 px-4 py-4 backdrop-blur-sm sm:px-6">
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                  {STATS.map((s) => (
-                    <div key={s.label} className="text-left sm:text-center">
-                      <div className="font-bebas text-2xl leading-none tracking-wider text-gold-400 sm:text-3xl">
-                        {s.value}
-                      </div>
-                      <div className="mt-1 text-[11px] leading-tight text-slate-500">{s.label}</div>
+            <div className="relative overflow-hidden rounded-2xl border border-gold-400/[0.13] bg-[#0D0B07]/70 backdrop-blur-sm"
+              style={{ boxShadow: "inset 0 1px 0 rgba(212,160,23,0.08), 0 1px 0 rgba(0,0,0,0.5)" }}
+            >
+              <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 100% 200% at 50% -10%, rgba(212,160,23,0.05) 0%, transparent 60%)" }} />
+              <div className="relative grid grid-cols-2 sm:grid-cols-4 divide-x divide-gold-400/[0.08]">
+                {STATS.map((s, i) => (
+                  <div key={s.label} className={cn("px-5 py-4 text-center", i >= 2 && "border-t border-gold-400/[0.08] sm:border-t-0")}>
+                    <div className="font-bebas text-2xl leading-none tracking-wider text-gold-300 sm:text-3xl">
+                      {s.value}
                     </div>
-                  ))}
-                </div>
+                    <div className="mt-1.5 text-[10px] leading-tight text-slate-500 uppercase tracking-[0.09em]">{s.label}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

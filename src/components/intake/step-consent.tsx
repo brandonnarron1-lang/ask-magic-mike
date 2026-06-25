@@ -1,5 +1,6 @@
 "use client";
 
+import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
 
@@ -82,19 +83,20 @@ export function StepConsent({
               onClick={() => onToggle(opt.key)}
               aria-pressed={checked}
               className={cn(
-                "w-full flex items-center gap-4 rounded-xl border px-4 py-3.5 text-left transition-all duration-200",
+                "w-full flex items-center gap-4 rounded-xl border px-4 py-3.5 text-left",
+                "transition-all duration-200 motion-reduce:transition-none",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60",
                 checked
-                  ? "border-gold-400/55 bg-gold-400/[0.08]"
-                  : "border-white/10 bg-[#0B0E14]/70 hover:border-gold-400/30"
+                  ? "border-gold-400/55 bg-gold-400/[0.07] shadow-[0_2px_12px_rgba(212,160,23,0.08)]"
+                  : "border-white/[0.09] bg-[#0B0E14]/70 hover:border-gold-400/28 hover:bg-gold-400/[0.03]"
               )}
             >
               <span
                 className={cn(
                   "flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors",
                   checked
-                    ? "border-gold-400 bg-gold-400"
-                    : "border-slate-500"
+                    ? "border-gold-400 bg-gold-400 shadow-[0_0_8px_rgba(212,160,23,0.4)]"
+                    : "border-slate-600"
                 )}
                 aria-hidden="true"
               >
@@ -122,9 +124,18 @@ export function StepConsent({
       </div>
 
       {/* TCPA language */}
-      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 mb-7">
-        <p className="text-[11.5px] text-slate-500 leading-relaxed whitespace-pre-wrap">
-          {CONSENT_LANGUAGE_V1}
+      <div className="card-gradient-border mb-7">
+        <div className="rounded-[15px] bg-[#080808]/60 p-4">
+          <p className="text-[11px] text-slate-500 leading-relaxed whitespace-pre-wrap">
+            {CONSENT_LANGUAGE_V1}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center gap-1.5 mb-3">
+        <Lock className="h-3 w-3 text-slate-600 shrink-0" aria-hidden="true" />
+        <p className="text-[11px] text-slate-600">
+          Your information is never sold or shared with third parties.
         </p>
       </div>
 
