@@ -62,7 +62,10 @@ export function StepConfirmation({
       data-testid="confirmation-panel"
       className="pt-2 pb-1 flex flex-col items-center text-center"
     >
-      <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold-400/25 bg-gold-400/[0.08] px-3 py-1.5">
+      <div
+        className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/[0.09] px-3.5 py-1.5"
+        style={{ boxShadow: "0 0 20px rgba(212,160,23,0.12), inset 0 1px 0 rgba(212,160,23,0.10)" }}
+      >
         <CheckCircle className="h-3.5 w-3.5 text-gold-400" />
         <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-gold-300">
           Your request is in
@@ -84,9 +87,9 @@ export function StepConfirmation({
       <div
         data-testid="confirmation-assignment-card"
         className={cn(
-          "w-full max-w-sm rounded-2xl border border-white/10 bg-[#0F131A]/95",
+          "w-full max-w-sm rounded-2xl border border-gold-400/[0.14] bg-[#0D0B07]/90",
           "p-4 mb-6 text-left",
-          "shadow-[0_20px_50px_-28px_rgba(0,0,0,0.8)]"
+          "shadow-[0_20px_50px_-28px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(212,160,23,0.07)]"
         )}
       >
         <div className="flex items-center gap-3">
@@ -140,7 +143,7 @@ export function StepConfirmation({
           "inline-flex items-center justify-center gap-2 w-full max-w-sm",
           "rounded-xl bg-gold-400 px-6 py-3.5 text-sm font-bold text-[#0A0A0A]",
           "shadow-[0_18px_40px_-12px_rgba(212,160,23,0.50)]",
-          "hover:bg-gold-300 active:scale-[0.99] transition-all duration-200"
+          "hover:bg-gold-300 active:scale-[0.99] transition-all duration-200 motion-reduce:transition-none"
         )}
       >
         <Phone className="h-4 w-4" />
