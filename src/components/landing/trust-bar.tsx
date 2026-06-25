@@ -1,4 +1,4 @@
-import { Shield, MapPin, Star } from "lucide-react";
+import { Shield, MapPin, Award } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 interface TrustBarProps {
@@ -7,8 +7,8 @@ interface TrustBarProps {
 
 const TRUST_ITEMS = [
   {
-    icon: Star,
-    label: "Our Town Properties",
+    icon: Award,
+    label: "Our Town Properties, Inc.",
   },
   {
     icon: Shield,
@@ -22,27 +22,29 @@ const TRUST_ITEMS = [
 
 export function TrustBar({ className }: TrustBarProps) {
   return (
-    <div
-      className={cn(
-        "border-t border-gold-400/10 pt-6",
-        className
-      )}
-    >
-      <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-400">
-        {TRUST_ITEMS.map((item, i) => {
-          const Icon = item.icon;
-          return (
-            <span key={i} className="flex items-center gap-2">
-              <Icon className="h-3.5 w-3.5 text-gold-400/60" />
-              {item.label}
-            </span>
-          );
-        })}
+    <div className={cn("pt-8", className)}>
+      <div
+        className="rounded-xl border border-gold-400/[0.10] bg-gold-400/[0.025] px-5 py-3.5"
+        style={{ boxShadow: "inset 0 1px 0 rgba(212,160,23,0.06)" }}
+      >
+        <div className="flex flex-wrap items-center justify-center gap-x-7 gap-y-2.5">
+          {TRUST_ITEMS.map((item, i) => {
+            const Icon = item.icon;
+            return (
+              <span key={i} className="flex items-center gap-2 text-[12px] text-slate-400">
+                <Icon className="h-3.5 w-3.5 text-gold-400/55 shrink-0" aria-hidden="true" />
+                {item.label}
+              </span>
+            );
+          })}
 
-        <span className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-gold-400/40" />
-          <span className="font-medium text-gold-400/80">Mike Eatmon</span>
-        </span>
+          <span className="h-3 w-px bg-gold-400/[0.15] hidden sm:block" aria-hidden="true" />
+
+          <span className="flex items-center gap-2 text-[12px]">
+            <span className="h-1.5 w-1.5 rounded-full bg-gold-400/60" aria-hidden="true" />
+            <span className="font-semibold text-gold-400/85">Mike Eatmon</span>
+          </span>
+        </div>
       </div>
     </div>
   );

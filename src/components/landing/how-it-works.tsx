@@ -73,7 +73,14 @@ export function HowItWorks() {
         </div>
 
         {/* Steps grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Connector thread — desktop only */}
+          <div
+            className="absolute top-[52px] left-[calc(16.67%+1.5rem)] right-[calc(16.67%+1.5rem)] h-px hidden md:block pointer-events-none"
+            aria-hidden="true"
+            style={{ background: "linear-gradient(90deg, rgba(212,160,23,0.25) 0%, rgba(212,160,23,0.08) 50%, rgba(212,160,23,0.25) 100%)" }}
+          />
+
           {STEPS.map((step, i) => {
             const Icon = step.icon;
             return (
@@ -81,8 +88,9 @@ export function HowItWorks() {
                 key={step.n}
                 className={cn(
                   "relative group rounded-2xl border border-white/[0.06] bg-white/[0.025] p-8 overflow-hidden",
-                  "hover:border-gold-400/30 hover:bg-white/[0.04]",
-                  "transition-all duration-400 cursor-default",
+                  "hover:border-gold-400/[0.28] hover:bg-white/[0.04]",
+                  "transition-all duration-300 motion-reduce:transition-none cursor-default",
+                  "hover:shadow-[0_8px_40px_rgba(212,160,23,0.06)]",
                   "opacity-0",
                   inView && "animate-fade-up"
                 )}
@@ -90,24 +98,22 @@ export function HowItWorks() {
               >
                 {/* Top gradient glow */}
                 <div className={cn(
-                  "absolute top-0 inset-x-0 h-32 bg-gradient-to-b pointer-events-none opacity-60 group-hover:opacity-100 transition-opacity",
+                  "absolute top-0 inset-x-0 h-36 bg-gradient-to-b pointer-events-none opacity-50 group-hover:opacity-90 transition-opacity duration-300",
                   step.color
                 )} />
 
-                {/* Hover border glow */}
-                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{ boxShadow: "inset 0 0 40px rgba(212,160,23,0.04)" }} />
-
-                {/* Step number — huge watermark */}
+                {/* Step number — watermark */}
                 <div
-                  className="absolute bottom-3 right-5 font-bebas text-[5rem] leading-none select-none pointer-events-none"
-                  style={{ color: "rgba(212,160,23,0.06)" }}
+                  className="absolute bottom-4 right-5 font-bebas text-[5.5rem] leading-none select-none pointer-events-none"
+                  style={{ color: "rgba(212,160,23,0.055)" }}
                 >
                   {step.n}
                 </div>
 
                 {/* Icon */}
-                <div className="relative mb-6 inline-flex h-13 w-13 items-center justify-center rounded-xl border border-gold-400/20 bg-gold-400/8 group-hover:bg-gold-400/14 group-hover:border-gold-400/40 transition-all duration-300">
+                <div className="relative mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-gold-400/20 bg-gold-400/[0.07] group-hover:bg-gold-400/[0.12] group-hover:border-gold-400/40 transition-all duration-300"
+                  style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}
+                >
                   <Icon className="h-5 w-5 text-gold-400" />
                 </div>
 
@@ -117,8 +123,8 @@ export function HowItWorks() {
                     {step.title}
                   </h3>
                   <p className="text-sm leading-relaxed text-slate-400 mb-5">{step.body}</p>
-                  <span className="inline-flex items-center gap-1.5 text-xs text-gold-400/70 font-medium border border-gold-400/15 rounded-full px-3.5 py-1.5 bg-gold-400/[0.04]">
-                    <span className="h-1 w-1 rounded-full bg-gold-400/60" />
+                  <span className="inline-flex items-center gap-1.5 text-[11.5px] text-gold-400/65 font-medium border border-gold-400/[0.13] rounded-full px-3.5 py-1.5 bg-gold-400/[0.03]">
+                    <span className="h-1 w-1 rounded-full bg-gold-400/55" />
                     {step.note}
                   </span>
                 </div>
