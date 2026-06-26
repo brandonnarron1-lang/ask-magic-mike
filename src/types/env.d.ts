@@ -33,7 +33,8 @@ declare namespace NodeJS {
     // App
     NEXT_PUBLIC_SITE_URL?: string;
     PUBLIC_SITE_URL?: string;
-    NEXT_PUBLIC_APP_URL: string;
+    /** @deprecated Use NEXT_PUBLIC_SITE_URL instead. */
+    NEXT_PUBLIC_APP_URL?: string;
     NEXT_PUBLIC_AGENT_NAME: string;
     NEXT_PUBLIC_BROKERAGE_NAME: string;
     NEXT_PUBLIC_AGENT_PHONE: string;

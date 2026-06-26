@@ -185,6 +185,44 @@ export function findStaleNoveltyCopy(html) {
   return found;
 }
 
+/**
+ * Return true when the HTML contains no MLS / IDX confidential markers.
+ * These strings must never appear in public-facing pages.
+ *
+ * @param {string} html
+ * @returns {boolean}
+ */
+export function hasNoMlsMarkers(html) {
+  const forbidden = [
+    /flexmls/i,
+    /mls\s*(confidential|data|export|feed)/i,
+    /idx\s*(feed|data|import)/i,
+    /listing_private_fields/i,
+    /"status"\s*:\s*"active"\s*,\s*"mlsNumber"/i,
+  ];
+  return !forbidden.some((rx) => rx.test(html));
+}
+
+/**
+ * Extract the presence of launch security headers from a Headers object (or
+ * a plain Record<string,string>). Returns a map of header name → present.
+ *
+ * @param {Headers | Record<string,string>} headers
+ * @returns {{ hsts: boolean; noSniff: boolean; referrerPolicy: boolean; permissionsPolicy: boolean }}
+ */
+export function extractSecurityHeaders(headers) {
+  const get = (name) => {
+    if (typeof headers.get === "function") return headers.get(name) ?? "";
+    return headers[name] ?? headers[name.toLowerCase()] ?? "";
+  };
+  return {
+    hsts: get("strict-transport-security").includes("max-age"),
+    noSniff: get("x-content-type-options").toLowerCase() === "nosniff",
+    referrerPolicy: get("referrer-policy").length > 0,
+    permissionsPolicy: get("permissions-policy").length > 0,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Network helpers
 // ---------------------------------------------------------------------------
@@ -199,7 +237,7 @@ async function fetchText(path, opts = {}) {
     body: opts.body,
   });
   const text = await res.text();
-  return { status: res.status, ok: res.ok, text, url };
+  return { status: res.status, ok: res.ok, text, url, headers: res.headers };
 }
 
 async function fetchJson(path, opts = {}) {
@@ -303,6 +341,75 @@ async function checkHomepage() {
   } else {
     record("homepage:no_stale_copy", "fail", {
       message: `stale/novelty markers found: ${stale.join(", ")}`,
+    });
+  }
+
+  if (hasNoMlsMarkers(r.text)) {
+    record("homepage:no_mls_markers", "pass");
+  } else {
+    record("homepage:no_mls_markers", "fail", {
+      message: "MLS/IDX confidential marker found in public HTML — investigate immediately",
+    });
+  }
+}
+
+async function checkSecurityHeaders() {
+  const r = await fetchText("/");
+  if (!r.ok) {
+    record("security:headers", "skip", { message: "homepage unreachable" });
+    return;
+  }
+  const sh = extractSecurityHeaders(r.headers);
+  if (sh.hsts) {
+    record("security:hsts", "pass");
+  } else {
+    record("security:hsts", "warn", {
+      message: "Strict-Transport-Security header missing — add to next.config.ts headers()",
+    });
+  }
+  if (sh.noSniff) {
+    record("security:x_content_type_options", "pass");
+  } else {
+    record("security:x_content_type_options", "warn", {
+      message: "X-Content-Type-Options: nosniff missing — add to next.config.ts headers()",
+    });
+  }
+  if (sh.referrerPolicy) {
+    record("security:referrer_policy", "pass");
+  } else {
+    record("security:referrer_policy", "warn", {
+      message: "Referrer-Policy header missing — add to next.config.ts headers()",
+    });
+  }
+  if (sh.permissionsPolicy) {
+    record("security:permissions_policy", "pass");
+  } else {
+    record("security:permissions_policy", "warn", {
+      message: "Permissions-Policy header missing — add to next.config.ts headers()",
+    });
+  }
+}
+
+async function checkAdminUnauth() {
+  const r = await fetchText("/api/admin/health");
+  if (r.status === 401) {
+    record("admin:unauth_returns_401", "pass", { http: r.status });
+  } else {
+    record("admin:unauth_returns_401", "fail", {
+      http: r.status,
+      message: `Expected 401 without credentials; got ${r.status}`,
+    });
+  }
+}
+
+async function checkEmbed() {
+  const r = await fetchText("/embed/ask");
+  if (r.ok) {
+    record("embed:ask_loads", "pass", { http: r.status });
+  } else {
+    record("embed:ask_loads", "fail", {
+      http: r.status,
+      message: "/embed/ask did not return 200",
     });
   }
 }
@@ -441,7 +548,7 @@ async function main() {
   if (DRY_RUN) {
     console.log("DRY RUN — no network calls.");
     console.log(`Would check: ${TARGET_URL}`);
-    console.log("Checks: homepage, og_url, canonical, no_secret_leak, robots, sitemap, admin:health, session:create");
+    console.log("Checks: homepage, security_headers, admin_unauth, embed, robots, sitemap, admin:health, session:create");
     console.log(`Write mode: ${WRITE_MODE ? "ON" : "OFF (default)"}`);
     console.log(`Admin health: ${ADMIN_SECRET ? "enabled" : "skipped (no ADMIN_SECRET)"}`);
     process.exit(0);
@@ -454,6 +561,9 @@ async function main() {
   console.log("");
 
   await checkHomepage();
+  await checkSecurityHeaders();
+  await checkAdminUnauth();
+  await checkEmbed();
   await checkRobots();
   await checkSitemap();
   await checkAdminHealth();
