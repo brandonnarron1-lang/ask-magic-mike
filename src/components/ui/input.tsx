@@ -33,13 +33,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               "bg-white border-gray-200 text-gray-900 focus:border-gold-400":
                 variant === "light",
             },
-            error && "border-red-500 focus:ring-red-500/50",
+            error && "border-ruby-400/60 focus:ring-ruby-400/40",
             className
           )}
           {...props}
         />
         {error && (
-          <p className="mt-1 text-xs text-red-400">{error}</p>
+          <p className="mt-1 text-xs text-ruby-400">{error}</p>
         )}
       </div>
     );

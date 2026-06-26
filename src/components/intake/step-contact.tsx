@@ -132,12 +132,12 @@ export function StepContact({
                 "text-[#F7F1E8] placeholder:text-slate-500 text-[14.5px]",
                 "focus:outline-none transition-colors",
                 phoneError && field.name === "phone"
-                  ? "border-red-500 focus:border-red-400 focus:ring-2 focus:ring-red-500/20"
+                  ? "border-ruby-400/60 focus:border-ruby-400 focus:ring-2 focus:ring-ruby-400/[0.15]"
                   : "border-white/10 focus:border-gold-400/45 focus:ring-2 focus:ring-gold-400/15"
               )}
             />
             {field.name === "phone" && phoneError && (
-              <p className="mt-1 text-xs text-red-400">{phoneError}</p>
+              <p className="mt-1 text-xs text-ruby-400">{phoneError}</p>
             )}
           </div>
         ))}

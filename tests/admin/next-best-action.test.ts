@@ -142,6 +142,21 @@ describe("temperatureLabel", () => {
     expect(r.temperatureLabel).toMatch(/24 h/i);
   });
 
+  it("warm maps to follow up this week", () => {
+    const r = buildNextBestAction(makeInput({ temperature: "warm" }));
+    expect(r.temperatureLabel).toMatch(/this week/i);
+  });
+
+  it("nurture maps to follow up next month", () => {
+    const r = buildNextBestAction(makeInput({ temperature: "nurture" }));
+    expect(r.temperatureLabel).toMatch(/next month/i);
+  });
+
+  it("low maps to long-term list", () => {
+    const r = buildNextBestAction(makeInput({ temperature: "low" }));
+    expect(r.temperatureLabel).toMatch(/long-term/i);
+  });
+
   it("null temperature maps to Not assessed", () => {
     const r = buildNextBestAction(makeInput({ temperature: null }));
     expect(r.temperatureLabel).toBe("Not assessed");
@@ -259,9 +274,14 @@ describe("followUpAngle — temperature", () => {
     expect(r.followUpAngle).toMatch(/week/i);
   });
 
-  it("cold lead with no missing info gets low-priority message", () => {
-    const r = buildNextBestAction(makeInput({ temperature: "cold" }));
-    expect(r.followUpAngle).toMatch(/cold|no immediate/i);
+  it("low lead with no missing info gets low-urgency message", () => {
+    const r = buildNextBestAction(makeInput({ temperature: "low" }));
+    expect(r.followUpAngle).toMatch(/low urgency|no immediate/i);
+  });
+
+  it("nurture lead gets 30-day re-engage suggestion", () => {
+    const r = buildNextBestAction(makeInput({ temperature: "nurture" }));
+    expect(r.followUpAngle).toMatch(/nurture|30.day|re-engage/i);
   });
 });
 
