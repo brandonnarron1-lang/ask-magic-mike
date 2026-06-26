@@ -15,9 +15,9 @@ All three route to `/value` with `utm_source=ourtown_wp` and a distinct
 
 | Source | URL |
 | ------ | --- |
-| Homepage | `https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike` |
-| Mike profile | `https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=mike_profile&utm_campaign=ask_magic_mike` |
-| We Buy Homes / Seller page | `https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=seller_page_cta&utm_campaign=ask_magic_mike` |
+| Homepage | `https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike` |
+| Mike profile | `https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=mike_profile&utm_campaign=ask_magic_mike` |
+| We Buy Homes / Seller page | `https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=seller_page_cta&utm_campaign=ask_magic_mike` |
 
 `utm_source` is always `ourtown_wp`. Ignore any rendered `utm_source=chatgpt.com`
 links — the verified browser URLs use `ourtown_wp`.

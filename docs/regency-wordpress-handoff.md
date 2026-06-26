@@ -37,7 +37,7 @@ until the direct-link CTAs are confirmed working in production.
 
 **CTA URL:**
 ```
-https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike
+https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike
 ```
 
 **Headline copy:**
@@ -66,7 +66,7 @@ radius/padding as existing site buttons. Opens in new tab (`target="_blank"`).
 
 **CTA URL:**
 ```
-https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=mike_profile&utm_campaign=ask_magic_mike
+https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=mike_profile&utm_campaign=ask_magic_mike
 ```
 
 **Headline copy:**
@@ -87,7 +87,7 @@ https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=mike_pr
 
 **CTA URL:**
 ```
-https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=seller_page_cta&utm_campaign=ask_magic_mike
+https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=seller_page_cta&utm_campaign=ask_magic_mike
 ```
 
 **Headline copy:**
@@ -105,10 +105,10 @@ https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=seller_
 For each page edited:
 - [ ] Open the page in an incognito window (not logged in to WP)
 - [ ] Click the CTA button
-- [ ] Confirm it lands on `https://ask-magic-mike.vercel.app/value`
+- [ ] Confirm it lands on `https://www.askmagicmike.com/value`
 - [ ] Confirm UTM params are present in the URL bar
 - [ ] Complete all 5 steps of the intake form as a test lead
-- [ ] Confirm lead appears in `https://ask-magic-mike.vercel.app/admin`
+- [ ] Confirm lead appears in `https://www.askmagicmike.com/admin`
   (requires `ADMIN_SECRET` — set a strong one before public traffic)
 - [ ] Screenshot the final live page
 
@@ -121,7 +121,7 @@ Do not install until direct-link CTAs are confirmed working. When ready:
 ```html
 <div style="border-radius:12px; overflow:hidden; border:1px solid rgba(212,160,23,0.2);">
   <iframe
-    src="https://ask-magic-mike.vercel.app/embed/ask"
+    src="https://www.askmagicmike.com/embed/ask"
     width="100%"
     height="650"
     style="border:none; display:block; background:#0A0A0A;"
@@ -131,7 +131,7 @@ Do not install until direct-link CTAs are confirmed working. When ready:
   ></iframe>
 </div>
 <p style="font-size:0.7rem; color:#888; text-align:center; margin-top:0.5rem;">
-  Powered by <a href="https://ask-magic-mike.vercel.app" style="color:#888;">Ask Magic Mike</a>
+  Powered by <a href="https://www.askmagicmike.com" style="color:#888;">Ask Magic Mike</a>
   · Our Town Properties · Lic. #226434
 </p>
 ```

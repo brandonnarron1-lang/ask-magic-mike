@@ -56,18 +56,18 @@ The local `.env.example` already lists these.
 
 ```bash
 # Dry-run (does not persist breaches)
-curl -X POST "https://ask-magic-mike.vercel.app/api/admin/sla/sweep" \
+curl -X POST "https://www.askmagicmike.com/api/admin/sla/sweep" \
   -H "x-admin-secret: $ADMIN_SECRET"
 
 # Persist breaches into compliance_flags
-curl -X POST "https://ask-magic-mike.vercel.app/api/admin/sla/sweep?persist=true" \
+curl -X POST "https://www.askmagicmike.com/api/admin/sla/sweep?persist=true" \
   -H "x-admin-secret: $ADMIN_SECRET"
 ```
 
 Cron mock test:
 
 ```bash
-curl -X GET "https://ask-magic-mike.vercel.app/api/admin/sla/sweep?persist=true" \
+curl -X GET "https://www.askmagicmike.com/api/admin/sla/sweep?persist=true" \
   -H "Authorization: Bearer $CRON_SECRET"
 ```
 
