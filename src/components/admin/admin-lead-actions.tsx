@@ -11,6 +11,7 @@ import {
   sendMessageAction,
   runListingMatchAction,
   runSellerOfferReviewAction,
+  setFollowUpAction,
 } from "@/app/(admin)/admin/leads/[id]/actions";
 import { LEAD_STATUSES, LEAD_TYPES } from "@/lib/leads/lead-types";
 import { SMS_TEMPLATES, EMAIL_TEMPLATES } from "@/lib/engines/communications-templates";
@@ -274,6 +275,38 @@ export function AdminLeadActions({
             <SubmitBtn className="flex-1">Seller-offer review</SubmitBtn>
           </form>
         </div>
+      </Card>
+
+      {/* Follow-up date */}
+      <Card title="Follow-up date">
+        <form
+          action={(fd) => wrap(setFollowUpAction, fd)}
+          className="flex flex-wrap gap-2 items-end"
+        >
+          <input type="hidden" name="lead_id" value={leadId} />
+          <div className="flex-1 min-w-[180px]">
+            <label className="block text-[10.5px] text-slate-400 mb-1">
+              Schedule next follow-up
+            </label>
+            <input
+              type="datetime-local"
+              name="follow_up_at"
+              className="w-full rounded-md border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-[12.5px]"
+            />
+          </div>
+          <SubmitBtn>Set date</SubmitBtn>
+          <button
+            type="submit"
+            onClick={(e) => {
+              const form = (e.currentTarget as HTMLButtonElement).closest("form") as HTMLFormElement;
+              const input = form.querySelector<HTMLInputElement>("input[name=follow_up_at]");
+              if (input) input.value = "";
+            }}
+            className="rounded-md border border-white/12 px-3 py-1.5 text-[12.5px] text-slate-300 hover:bg-white/5"
+          >
+            Clear
+          </button>
+        </form>
       </Card>
     </div>
   );

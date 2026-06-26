@@ -192,6 +192,14 @@ export default async function LeadDetailPage({ params }: PageProps) {
             <Field label="Source" value={String(lead.source ?? "—")} />
             <Field label="Spam score" value={String(lead.spam_score ?? 0)} />
             <Field label="Created" value={new Date(String(lead.created_at)).toLocaleString()} />
+            <Field
+              label="Last Contacted"
+              value={lead.last_contacted_at ? new Date(String(lead.last_contacted_at)).toLocaleString() : "Never"}
+            />
+            <Field
+              label="Next Follow-up"
+              value={lead.next_follow_up_at ? new Date(String(lead.next_follow_up_at)).toLocaleString() : "Not set"}
+            />
           </Card>
 
           <Card title="Attribution">

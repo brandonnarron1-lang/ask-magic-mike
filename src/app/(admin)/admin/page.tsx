@@ -192,6 +192,31 @@ export default async function AdminPage() {
           </div>
         )}
 
+        {/* Today's Operations */}
+        {metrics.configured && (metrics.totals.followUpDue > 0 || metrics.totals.neverContacted > 0) && (
+          <div className="mb-8 rounded-xl border border-amber-400/25 bg-amber-400/[0.04] px-5 py-4">
+            <h2 className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-amber-300/80 mb-3">
+              Today&rsquo;s Operations
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              <Link href="/admin/leads?filter=follow_up_due" className="group rounded-lg border border-white/[0.06] bg-white/[0.02] px-4 py-3 hover:border-amber-400/30 hover:bg-amber-400/[0.04] transition-all">
+                <div className={`font-bebas text-4xl leading-none ${metrics.totals.followUpDue > 0 ? "text-amber-400" : "text-slate-600"}`}>
+                  {metrics.totals.followUpDue}
+                </div>
+                <div className="text-[11px] text-slate-500 mt-1 uppercase tracking-[0.1em]">Follow-ups Due</div>
+                <div className="text-[10px] text-slate-600 mt-0.5">next_follow_up_at &le; now</div>
+              </Link>
+              <Link href="/admin/leads?filter=never_contacted" className="group rounded-lg border border-white/[0.06] bg-white/[0.02] px-4 py-3 hover:border-ruby-400/30 hover:bg-ruby-400/[0.04] transition-all">
+                <div className={`font-bebas text-4xl leading-none ${metrics.totals.neverContacted > 0 ? "text-ruby-400" : "text-slate-600"}`}>
+                  {metrics.totals.neverContacted}
+                </div>
+                <div className="text-[11px] text-slate-500 mt-1 uppercase tracking-[0.1em]">Never Contacted</div>
+                <div className="text-[10px] text-slate-600 mt-0.5">assigned &gt; 2h, no contact yet</div>
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Source / UTM breakdown */}
         {metrics.configured && metrics.bySource.length > 0 && (
           <div className="mb-8 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">

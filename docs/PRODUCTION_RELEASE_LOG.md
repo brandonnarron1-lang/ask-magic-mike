@@ -4,6 +4,32 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## [PR #38] Lead Capture Reliability — Silent Failure Fixes
+
+**Merged:** 2026-06-16  
+**Branch:** `fix/lead-capture-silent-failures`
+
+### Changes
+- `src/app/api/intake/submit/route.ts` — tracks `persistenceFailed`; returns 503 (not 200) when `upsertLead()` returns null or throws; guards `completeSession()` call
+- `src/app/api/admin/leads/[id]/notes/route.ts` — captures `insertErr` from Supabase insert; returns 500 with `{ ok: false, error: "note_save_failed" }` on DB failure
+- `tests/api/intake-submit-reliability.test.ts` — 9 tests verifying persistence errors surface as 503
+- `tests/api/admin-notes-reliability.test.ts` — 5 tests verifying note insert failures surface as 500
+
+---
+
+## [PR #37] Agent Routing Command Center
+
+**Merged:** 2026-06-16  
+**Branch:** `feature/agent-routing-command-center`
+
+### Changes
+- `src/lib/admin/routing-command.ts` — data loader: agent roster, SLA breach detection, routing history
+- `src/app/(admin)/admin/routing/page.tsx` — `/admin/routing` command center: agent cards, SLA rules, history table; locked state when unconfigured
+- `src/app/(admin)/admin/page.tsx` — added Agent Routing nav tile, 5-column grid
+- Tests: routing command + routing history tests
+
+---
+
 ## [PR #36] Product Excellence — Sprint V3
 
 **Merged:** 2026-06-16  
