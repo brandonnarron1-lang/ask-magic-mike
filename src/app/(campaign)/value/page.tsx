@@ -1,5 +1,71 @@
 import type { Metadata } from "next";
 import { ValueHero } from "@/components/campaign/value-hero";
+import { siteConfig } from "@/lib/site-config";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "RealEstateAgent",
+  "@id": `${siteConfig.canonicalSiteUrl}/#agent`,
+  name: "Mike Eatmon — Our Town Properties",
+  description:
+    "Wilson and Eastern North Carolina real estate broker since 1993. " +
+    "Over $750M in career sales and 2,500+ homes closed. " +
+    "Ask Magic Mike provides AI-assisted intake with local broker follow-up.",
+  url: siteConfig.canonicalSiteUrl,
+  telephone: siteConfig.agentPhone,
+  image: `${siteConfig.canonicalSiteUrl}/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp`,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "3301 Nash St. N Suite E",
+    addressLocality: "Wilson",
+    addressRegion: "NC",
+    postalCode: "27896",
+    addressCountry: "US",
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: 35.7309,
+    longitude: -77.918,
+  },
+  areaServed: [
+    { "@type": "State", name: "North Carolina" },
+    { "@type": "County", name: "Wilson County" },
+    { "@type": "City", name: "Wilson" },
+  ],
+  knowsAbout: [
+    "Residential Real Estate",
+    "Wilson County NC Real Estate",
+    "Eastern North Carolina Real Estate",
+    "Home Valuation",
+    "Direct-Purchase Home Review",
+  ],
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Real Estate Services — Our Town Properties",
+    itemListElement: [
+      {
+        "@type": "Offer",
+        itemOffered: { "@type": "Service", name: "Preliminary Home Value Review" },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: { "@type": "Service", name: "Seller Representation" },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: { "@type": "Service", name: "Buyer Representation" },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: { "@type": "Service", name: "Direct-Purchase Review" },
+      },
+    ],
+  },
+  sameAs: [
+    siteConfig.parentBrandUrl,
+    siteConfig.agentProfileUrl,
+  ],
+};
 
 export const metadata: Metadata = {
   title:
@@ -35,5 +101,13 @@ export const metadata: Metadata = {
 };
 
 export default function ValuePage() {
-  return <ValueHero />;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ValueHero />
+    </>
+  );
 }

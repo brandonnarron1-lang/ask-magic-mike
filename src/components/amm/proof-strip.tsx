@@ -1,11 +1,11 @@
-import { ShieldCheck, MapPin, FileText, MessageSquare } from "lucide-react";
+import { ShieldCheck, Award, TrendingUp, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 const PROOFS = [
-  { Icon: MapPin,        label: "Local guidance, Wilson NC" },
-  { Icon: FileText,      label: "Preliminary home value range" },
-  { Icon: MessageSquare, label: "Mike's team follows up directly" },
-  { Icon: ShieldCheck,   label: "Licensed in North Carolina · Not an appraisal" },
+  { Icon: Award,         label: "30+ years · Wilson County's market authority" },
+  { Icon: TrendingUp,    label: "$750M+ in career sales · 2,500+ homes closed" },
+  { Icon: MessageSquare, label: "Mike's team follows up — not a bot" },
+  { Icon: ShieldCheck,   label: "Licensed NC Broker · Not an appraisal" },
 ];
 
 interface ProofStripProps {

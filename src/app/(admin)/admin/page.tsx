@@ -2,10 +2,20 @@ export const dynamic   = "force-dynamic";
 export const revalidate = 0;
 
 import Link from "next/link";
-import { Inbox, DollarSign, BarChart2, Share2 } from "lucide-react";
+import { Inbox, DollarSign, BarChart2, Share2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { LeadTable } from "@/components/admin/lead-table";
 import { getLeadsForAdmin } from "@/lib/db/lead-repository";
 import { loadDashboardMetrics } from "@/lib/admin/dashboard-metrics";
+
+function timeSince(isoString: string): string {
+  const ms = Date.now() - new Date(isoString).getTime();
+  const mins = Math.floor(ms / 60_000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
 
 function AdminIcon() {
   return (
@@ -56,6 +66,12 @@ export default async function AdminPage() {
     hot:      leads.filter((l) => l.temperature === "hot").length,
     breached: leads.filter((l) => l.slaBreached).length,
   };
+
+  const ATTENTION_LIMIT = 5;
+  const urgentLeads = leads.filter((l) => l.temperature === "urgent");
+  const breachedNotUrgent = leads.filter((l) => l.slaBreached && l.temperature !== "urgent");
+  const attentionLeads = [...urgentLeads, ...breachedNotUrgent].slice(0, ATTENTION_LIMIT);
+  const attentionTotal = urgentLeads.length + breachedNotUrgent.length;
 
   return (
     <div className="min-h-screen bg-[#080806] text-cream">
@@ -109,6 +125,55 @@ export default async function AdminPage() {
             </div>
           ))}
         </div>
+
+        {/* Attention Required — actionable lead routing strip */}
+        {attentionTotal > 0 ? (
+          <div className="mb-6 rounded-xl border border-ruby-400/30 bg-ruby-400/[0.04] p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertCircle className="h-4 w-4 text-ruby-400 shrink-0" aria-hidden="true" />
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ruby-400">
+                Attention Required &middot; {attentionTotal} lead{attentionTotal !== 1 ? "s" : ""} need{attentionTotal === 1 ? "s" : ""} action
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              {attentionLeads.map((lead) => (
+                <Link
+                  key={lead.id}
+                  href={`/admin/leads/${lead.id}`}
+                  className="flex items-center gap-3 rounded-lg border border-white/[0.05] bg-white/[0.025] px-3 py-2.5 hover:border-ruby-400/25 hover:bg-ruby-400/[0.04] transition-all duration-150 group"
+                >
+                  <span className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${
+                    lead.temperature === "urgent"
+                      ? "bg-ruby-400/[0.14] text-ruby-300 border-ruby-400/30"
+                      : lead.slaBreached
+                      ? "bg-amber-400/10 text-amber-300 border-amber-400/25"
+                      : "bg-gold-400/15 text-gold-300 border-gold-400/25"
+                  }`}>
+                    {lead.slaBreached && lead.temperature !== "urgent" ? "SLA" : lead.temperature}
+                  </span>
+                  <span className="text-[13px] font-medium text-[#F4F4F4] flex-1 truncate group-hover:text-white transition-colors">
+                    {lead.name}
+                  </span>
+                  <span className="text-[11px] text-slate-500 shrink-0">{timeSince(lead.createdAt)}</span>
+                  <span className="text-gold-400 text-[13px] shrink-0">→</span>
+                </Link>
+              ))}
+            </div>
+            {attentionTotal > ATTENTION_LIMIT && (
+              <Link
+                href="/admin/leads"
+                className="mt-2.5 inline-block text-[11px] text-slate-400 hover:text-gold-300 transition-colors"
+              >
+                + {attentionTotal - ATTENTION_LIMIT} more in Leads Inbox →
+              </Link>
+            )}
+          </div>
+        ) : (
+          <div className="mb-6 rounded-xl border border-white/[0.05] bg-white/[0.015] px-4 py-3 flex items-center gap-2.5">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" aria-hidden="true" />
+            <p className="text-[12px] text-slate-400">All clear — no urgent leads or SLA breaches right now</p>
+          </div>
+        )}
 
         {/* Funnel conversion tiles — from dashboard-metrics */}
         {metrics.configured && (

@@ -56,7 +56,7 @@ export function ValueHero() {
     <BrandShell>
       <BrandHeader />
 
-      <main className="relative z-10 flex-1 px-4 sm:px-6 pb-14 max-w-6xl mx-auto w-full">
+      <main id="main-content" className="relative z-10 flex-1 px-4 sm:px-6 pb-14 max-w-6xl mx-auto w-full">
         {/* HERO */}
         <section
           aria-labelledby="value-hero-heading"
