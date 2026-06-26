@@ -8,6 +8,7 @@
  * degrades gracefully when those tables are absent or return errors.
  */
 import { LEAD_TYPES, LEAD_STATUSES, LEAD_GRADES } from "@/lib/leads/lead-types";
+import { SPAM_SUSPECT_THRESHOLD } from "@/lib/leads/spam-detector";
 
 export interface LeadListFilters {
   q?: string | null;
@@ -116,7 +117,7 @@ export async function loadLeadList(
   if (filters.source) q = q.eq("source", filters.source);
   if (filters.assignedAgentId) q = q.eq("assigned_agent_id", filters.assignedAgentId);
   if (filters.unassignedOnly) q = q.is("assigned_agent_id", null);
-  if (filters.spamSuspect) q = q.gte("spam_score", 40);
+  if (filters.spamSuspect) q = q.gte("spam_score", SPAM_SUSPECT_THRESHOLD);
   if (filters.city) q = q.ilike("city", `%${filters.city}%`);
   if (filters.createdFromIso) q = q.gte("created_at", filters.createdFromIso);
   if (filters.createdToIso) q = q.lte("created_at", filters.createdToIso);

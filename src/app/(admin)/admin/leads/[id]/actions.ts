@@ -199,3 +199,18 @@ export async function runSellerOfferReviewAction(
   revalidatePath(`/admin/leads/${leadId}`);
   return { ok: true, message: "Seller-offer review generated." };
 }
+
+export async function setFollowUpAction(formData: FormData): Promise<ActionResult> {
+  const leadId = String(formData.get("lead_id") ?? "");
+  const followUpAt = String(formData.get("follow_up_at") ?? "").trim();
+  if (!leadId) return { ok: false, error: "lead_id_required" };
+
+  const r = await call(`/api/admin/leads/${leadId}`, {
+    method: "PATCH",
+    jsonBody: { next_follow_up_at: followUpAt || null },
+  });
+  if (r.status >= 300) return { ok: false, error: `follow_up_failed_${r.status}` };
+  revalidatePath(`/admin/leads/${leadId}`);
+  revalidatePath("/admin");
+  return { ok: true, message: followUpAt ? "Follow-up date set." : "Follow-up cleared." };
+}

@@ -19,6 +19,8 @@ export interface DashboardMetrics {
     appointmentsRequested: number;
     sellerCashOffer: number;
     listingInquiries: number;
+    followUpDue: number;     // next_follow_up_at <= now
+    neverContacted: number;  // assigned + no last_contacted_at + created > 2h ago
   };
   bySource: Array<{ source: string; count: number }>;
   recentLeads: Array<{
@@ -43,6 +45,8 @@ const EMPTY: DashboardMetrics = {
     appointmentsRequested: 0,
     sellerCashOffer: 0,
     listingInquiries: 0,
+    followUpDue: 0,
+    neverContacted: 0,
   },
   bySource: [],
   recentLeads: [],
@@ -73,6 +77,24 @@ export async function loadDashboardMetrics(): Promise<DashboardMetrics> {
   if (error) return { ...EMPTY, generatedAt: new Date().toISOString() };
   const rows = (data ?? []) as Array<Record<string, unknown>>;
 
+  // Targeted count queries for daily-operations panel.
+  const now = new Date().toISOString();
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60_000).toISOString();
+
+  const [followUpRes, neverContactedRes] = await Promise.all([
+    client
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .lte("next_follow_up_at", now)
+      .not("next_follow_up_at", "is", null),
+    client
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "assigned")
+      .is("last_contacted_at", null)
+      .lt("created_at", twoHoursAgo),
+  ]);
+
   const totals = {
     newToday: 0,
     hot: 0,
@@ -82,6 +104,8 @@ export async function loadDashboardMetrics(): Promise<DashboardMetrics> {
     appointmentsRequested: 0,
     sellerCashOffer: 0,
     listingInquiries: 0,
+    followUpDue: (followUpRes.count as number | null) ?? 0,
+    neverContacted: (neverContactedRes.count as number | null) ?? 0,
   };
 
   const sources: Record<string, number> = {};
