@@ -44,27 +44,40 @@ export async function POST(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = createAdminClient() as any;
 
-  await client.from("leads").update({
+  const { error: assignErr } = await client.from("leads").update({
     assigned_agent_id: body.agent_id,
     assigned_at: new Date().toISOString(),
     assignment_status: "assigned",
   }).eq("id", id);
 
-  await client.from("agent_assignments").insert({
+  if (assignErr) {
+    return NextResponse.json(
+      { ok: false, error: "assignment_failed" },
+      { status: 500, headers: NO_STORE }
+    );
+  }
+
+  const { error: assignmentInsertErr } = await client.from("agent_assignments").insert({
     lead_id: id,
     agent_id: body.agent_id,
     assigned_by: "admin",
     assignment_reason: body.reason ?? "manual_admin_assignment",
     status: "pending",
   });
+  if (assignmentInsertErr) {
+    console.error("[assign] agent_assignments insert failed:", assignmentInsertErr.message);
+  }
 
-  await client.from("audit_logs").insert({
+  const { error: auditErr } = await client.from("audit_logs").insert({
     actor: auth.actor,
     action: "lead.assigned",
     resource_type: "lead",
     resource_id: id,
     after_state: { agent_id: body.agent_id, reason: body.reason ?? null },
   });
+  if (auditErr) {
+    console.error("[assign] audit_logs insert failed:", auditErr.message);
+  }
 
   trackEventNoWait({
     eventName: "lead_assigned",

@@ -16,6 +16,7 @@ function readFilters(sp: Record<string, string | string[] | undefined>): LeadLis
     const x = sp[k];
     return Array.isArray(x) ? x[0] : x;
   };
+  const filterShortcut = v("filter");
   return {
     q: v("q") ?? null,
     leadType: v("lead_type") ?? null,
@@ -29,6 +30,8 @@ function readFilters(sp: Record<string, string | string[] | undefined>): LeadLis
     sort: (v("sort") as never) ?? "newest",
     limit: 25,
     offset: v("offset") ? Number(v("offset")) : 0,
+    followUpDue: filterShortcut === "follow_up_due",
+    neverContacted: filterShortcut === "never_contacted",
   };
 }
 

@@ -23,6 +23,8 @@ export interface LeadListFilters {
   createdFromIso?: string | null;
   createdToIso?: string | null;
   sort?: "newest" | "highest_score" | "sla_deadline" | "last_activity";
+  followUpDue?: boolean;
+  neverContacted?: boolean;
   limit?: number;
   offset?: number;
 }
@@ -121,6 +123,14 @@ export async function loadLeadList(
   if (filters.city) q = q.ilike("city", `%${filters.city}%`);
   if (filters.createdFromIso) q = q.gte("created_at", filters.createdFromIso);
   if (filters.createdToIso) q = q.lte("created_at", filters.createdToIso);
+  if (filters.followUpDue) {
+    const now = new Date().toISOString();
+    q = q.lte("next_follow_up_at", now).not("next_follow_up_at", "is", null);
+  }
+  if (filters.neverContacted) {
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    q = q.eq("status", "assigned").is("last_contacted_at", null).lt("created_at", twoHoursAgo);
+  }
   if (filters.q) {
     q = q.or(
       [

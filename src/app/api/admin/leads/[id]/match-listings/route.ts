@@ -75,7 +75,7 @@ export async function POST(
   // Persist top 10 to listing_matches.
   const top = matches.slice(0, 10);
   for (const m of top) {
-    await client.from("listing_matches").upsert(
+    const { error: upsertErr } = await client.from("listing_matches").upsert(
       {
         lead_id: id,
         listing_id: m.listingId,
@@ -84,6 +84,9 @@ export async function POST(
       },
       { onConflict: "lead_id,listing_id" }
     );
+    if (upsertErr) {
+      console.error(`[match-listings] upsert failed for listing ${m.listingId}:`, upsertErr.message);
+    }
   }
 
   trackEventNoWait({
