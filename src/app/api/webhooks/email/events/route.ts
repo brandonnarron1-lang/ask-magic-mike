@@ -72,13 +72,16 @@ export async function POST(req: NextRequest) {
         unknown: "sent",
       };
       if (del?.id) {
-        await client
+        const { error: deliveryErr } = await client
           .from("message_deliveries")
           .update({
             status: statusMap[normalized.eventType],
             raw_payload: payload,
           })
           .eq("id", del.id);
+        if (deliveryErr) {
+          console.error("[email-events] message_deliveries.update failed:", deliveryErr.message);
+        }
       }
     }
 
@@ -88,7 +91,7 @@ export async function POST(req: NextRequest) {
         normalized.eventType === "unsubscribed" ||
         normalized.eventType === "complained")
     ) {
-      await client.from("compliance_flags").insert({
+      const { error: flagErr } = await client.from("compliance_flags").insert({
         lead_id: leadId,
         flag_type: "opt_out_email",
         severity:
@@ -101,15 +104,24 @@ export async function POST(req: NextRequest) {
           eventType: normalized.eventType,
         }),
       });
+      if (flagErr) {
+        console.error(
+          "[email-events][COMPLIANCE CRITICAL] compliance_flags insert failed for opt-out. Lead",
+          leadId, "may NOT be opted out. Error:", flagErr.message
+        );
+      }
     }
 
-    await client.from("webhook_events").insert({
+    const { error: evtErr } = await client.from("webhook_events").insert({
       provider: `email_${normalized.provider}`,
       topic: normalized.eventType,
       signature_ok: null,
       payload,
       processed_at: new Date().toISOString(),
     });
+    if (evtErr) {
+      console.error("[email-events] webhook_events.insert failed:", evtErr.message);
+    }
   }
 
   const evMap: Record<

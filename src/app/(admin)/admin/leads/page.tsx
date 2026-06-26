@@ -5,6 +5,7 @@ import Link from "next/link";
 import { loadLeadList, type LeadListFilters, type LeadListRow } from "@/lib/admin/lead-list";
 import { loadDashboardMetrics } from "@/lib/admin/dashboard-metrics";
 import { computeReadyWillingAble, type RwaScore } from "@/lib/leads/ready-willing-able";
+import { LEAD_STATUSES } from "@/lib/leads/lead-types";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -124,54 +125,77 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
         </div>
 
         {/* Filters */}
-        <form
-          method="get"
-          className="mb-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2"
-        >
-          <input
-            name="q"
-            defaultValue={filters.q ?? ""}
-            placeholder="Search name/email/phone/address"
-            className="col-span-2 rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4] placeholder:text-slate-600"
-          />
-          <select
-            name="lead_type"
-            defaultValue={filters.leadType ?? ""}
-            className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4]"
-          >
-            <option value="">All types</option>
-            {[
-              "buyer",
-              "seller",
-              "seller_cash_offer",
-              "investor",
-              "listing_inquiry",
-              "home_value",
-              "general_question",
-            ].map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-          <select
-            name="grade"
-            defaultValue={filters.grade ?? ""}
-            className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4]"
-          >
-            <option value="">All grades</option>
-            {["A+", "A", "B", "C", "D"].map((g) => (
-              <option key={g} value={g}>
-                {g}
-              </option>
-            ))}
-          </select>
-          <button
-            type="submit"
-            className="rounded-md bg-gold-400 text-[#050505] font-bold px-4 py-2 text-[13px]"
-          >
-            Apply
-          </button>
+        <form method="get" className="mb-5 space-y-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+            <input
+              name="q"
+              defaultValue={filters.q ?? ""}
+              placeholder="Search name/email/phone/address"
+              className="col-span-2 sm:col-span-3 md:col-span-2 rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4] placeholder:text-slate-600"
+            />
+            <select
+              name="lead_type"
+              defaultValue={filters.leadType ?? ""}
+              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4]"
+            >
+              <option value="">All types</option>
+              {[
+                "buyer",
+                "seller",
+                "seller_cash_offer",
+                "investor",
+                "listing_inquiry",
+                "home_value",
+                "general_question",
+              ].map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+            <select
+              name="grade"
+              defaultValue={filters.grade ?? ""}
+              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4]"
+            >
+              <option value="">All grades</option>
+              {["A+", "A", "B", "C", "D"].map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="rounded-md bg-gold-400 text-[#050505] font-bold px-4 py-2 text-[13px]"
+            >
+              Apply
+            </button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <select
+              name="status"
+              defaultValue={filters.status ?? ""}
+              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4]"
+            >
+              <option value="">All statuses</option>
+              {LEAD_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <select
+              name="sort"
+              defaultValue={filters.sort ?? "newest"}
+              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4]"
+            >
+              <option value="newest">Newest first</option>
+              <option value="highest_score">Highest score</option>
+              <option value="sla_deadline">SLA deadline</option>
+              <option value="last_activity">Last activity</option>
+            </select>
+          </div>
         </form>
 
         {!list.configured && (
