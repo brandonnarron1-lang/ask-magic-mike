@@ -45,14 +45,14 @@ export default async function RevenueCommandPage() {
     ok:       { pill: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25", label: "All clear" },
     info:     { pill: "bg-blue-500/15 text-blue-400 border border-blue-500/25",         label: "Info" },
     warning:  { pill: "bg-amber-400/15 text-amber-400 border border-amber-400/30",      label: "Needs attention" },
-    critical: { pill: "bg-red-500/15 text-red-400 border border-red-500/30",            label: "Critical" },
+    critical: { pill: "bg-ruby-400/[0.12] text-ruby-400 border border-ruby-400/25",     label: "Critical" },
   };
 
   const ALERT_BORDER: Record<SentinelSeverity, string> = {
     ok:       "border-white/[0.06]",
     info:     "border-blue-500/25 bg-blue-500/[0.04]",
     warning:  "border-amber-400/30 bg-amber-400/[0.04]",
-    critical: "border-red-500/30 bg-red-500/[0.04]",
+    critical: "border-ruby-400/30 bg-ruby-400/[0.04]",
   };
 
   const ALERT_ICON: Record<SentinelSeverity, string> = {
@@ -60,7 +60,7 @@ export default async function RevenueCommandPage() {
   };
 
   const PRIORITY_DOT: Record<string, string> = {
-    urgent: "bg-red-400",
+    urgent: "bg-ruby-400",
     high:   "bg-amber-400",
     normal: "bg-slate-500",
   };
@@ -163,7 +163,7 @@ export default async function RevenueCommandPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-sm font-medium text-[#F4F4F4]">{item.title}</span>
                         <span className={`text-[10px] uppercase tracking-wider font-semibold ${
-                          item.priority === "urgent" ? "text-red-400"
+                          item.priority === "urgent" ? "text-ruby-400"
                           : item.priority === "high" ? "text-amber-400"
                           : "text-slate-500"
                         }`}>{item.priority}</span>
@@ -199,7 +199,7 @@ export default async function RevenueCommandPage() {
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <span className={`text-[11px] font-bold ${
-                        alert.severity === "critical" ? "text-red-400"
+                        alert.severity === "critical" ? "text-ruby-400"
                         : alert.severity === "warning"  ? "text-amber-400"
                         : alert.severity === "info"     ? "text-blue-400"
                         : "text-emerald-400"
@@ -743,7 +743,7 @@ export default async function RevenueCommandPage() {
                       <td className="px-3 py-2">
                         {lead.temperature ? (
                           <span className={`inline-block rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
-                            lead.temperature === "urgent" ? "bg-red-500/20 text-red-300" :
+                            lead.temperature === "urgent" ? "bg-ruby-400/[0.14] text-ruby-300" :
                             lead.temperature === "hot"    ? "bg-gold-400/20 text-gold-300" :
                             lead.temperature === "warm"   ? "bg-amber-500/15 text-amber-300" :
                             "bg-white/[0.05] text-slate-400"
@@ -829,10 +829,10 @@ export default async function RevenueCommandPage() {
                 </div>
               )}
               {d.syntheticResidues.length > 0 && (
-                <div className="rounded-lg border border-red-500/30 bg-red-500/[0.04] px-4 py-3 flex items-start gap-3">
-                  <span className="text-red-400 font-bold text-sm mt-0.5">✕</span>
+                <div className="rounded-lg border border-ruby-400/30 bg-ruby-400/[0.04] px-4 py-3 flex items-start gap-3">
+                  <span className="text-ruby-400 font-bold text-sm mt-0.5">✕</span>
                   <div>
-                    <p className="text-red-300 text-sm font-semibold">
+                    <p className="text-ruby-300 text-sm font-semibold">
                       {d.syntheticResidues.length} synthetic/test lead{d.syntheticResidues.length === 1 ? "" : "s"} visible in production
                     </p>
                     <p className="text-slate-500 text-xs mt-0.5">

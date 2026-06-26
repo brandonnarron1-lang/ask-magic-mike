@@ -58,7 +58,7 @@ const REFERRER_BADGE: Record<string, string> = {
 };
 
 const RWA_TIER_STYLES: Record<string, string> = {
-  urgent: "bg-red-500/20 text-red-300 border-red-500/30",
+  urgent: "bg-ruby-400/[0.14] text-ruby-300 border-ruby-400/30",
   hot:    "bg-gold-400/20 text-gold-300 border-gold-400/30",
   warm:   "bg-amber-500/10 text-amber-300 border-amber-500/30",
   cold:   "bg-white/[0.05] text-slate-400 border-white/10",
@@ -110,7 +110,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                 {s.label}
               </p>
               <p
-                className={`font-display text-[28px] font-semibold leading-none mt-1 ${
+                className={`font-bebas text-4xl leading-none mt-1 ${
                   s.accent ? "text-gold-300" : "text-[#F4F4F4]"
                 }`}
               >
@@ -129,12 +129,12 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
             name="q"
             defaultValue={filters.q ?? ""}
             placeholder="Search name/email/phone/address"
-            className="col-span-2 rounded-md border border-white/12 bg-[#0B0E14] px-3 py-2 text-[13px]"
+            className="col-span-2 rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4] placeholder:text-slate-600"
           />
           <select
             name="lead_type"
             defaultValue={filters.leadType ?? ""}
-            className="rounded-md border border-white/12 bg-[#0B0E14] px-3 py-2 text-[13px]"
+            className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4]"
           >
             <option value="">All types</option>
             {[
@@ -154,7 +154,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
           <select
             name="grade"
             defaultValue={filters.grade ?? ""}
-            className="rounded-md border border-white/12 bg-[#0B0E14] px-3 py-2 text-[13px]"
+            className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4]"
           >
             <option value="">All grades</option>
             {["A+", "A", "B", "C", "D"].map((g) => (
@@ -202,8 +202,14 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
             <tbody>
               {list.items.length === 0 && (
                 <tr>
-                  <td colSpan={13} className="px-3 py-6 text-center text-slate-400">
-                    No leads match these filters.
+                  <td colSpan={13} className="px-3 py-14 text-center">
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="h-9 w-9 rounded-full border border-white/[0.08] bg-white/[0.02] flex items-center justify-center mb-1">
+                        <span className="font-bebas text-lg text-slate-600 leading-none">0</span>
+                      </div>
+                      <p className="text-[13px] font-medium text-slate-400">No leads match these filters</p>
+                      <p className="text-[11px] text-slate-600">Adjust filters above · leads appear here as the funnel receives traffic</p>
+                    </div>
                   </td>
                 </tr>
               )}
@@ -244,7 +250,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                   <td className="px-3 py-2">
                     {l.temperature ? (
                       <span className={`inline-block rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
-                        l.temperature === "urgent" ? "bg-red-500/20 text-red-300" :
+                        l.temperature === "urgent" ? "bg-ruby-400/[0.14] text-ruby-300" :
                         l.temperature === "hot"    ? "bg-gold-400/20 text-gold-300" :
                         l.temperature === "warm"   ? "bg-amber-500/15 text-amber-300" :
                         l.temperature === "nurture"? "bg-blue-500/10 text-blue-300" :

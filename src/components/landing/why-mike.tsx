@@ -58,7 +58,7 @@ export function WhyMike() {
                 key={p.title}
                 className={cn(
                   "group relative rounded-2xl border border-white/[0.05] bg-white/[0.02] p-7",
-                  "transition-all duration-400 cursor-default overflow-hidden",
+                  "transition-all duration-300 cursor-default overflow-hidden",
                   p.borderColor,
                   "opacity-0",
                   inView && "animate-fade-up"

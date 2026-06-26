@@ -22,7 +22,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 const POST_STATUS_BADGE: Record<string, string> = {
-  high_priority: "bg-red-500/15 text-red-300",
+  high_priority: "bg-ruby-400/[0.12] text-ruby-300",
   ready:         "bg-emerald-500/15 text-emerald-300",
   monitor:       "bg-slate-700/20 text-slate-400",
 };
@@ -69,7 +69,7 @@ export default async function DistributionCommandPage() {
     return (
       <div className="min-h-screen bg-[#080806] flex items-center justify-center">
         <div className="max-w-md text-center px-6">
-          <h1 className="text-xl font-bold text-red-400 mb-3">Distribution Command Unavailable</h1>
+          <h1 className="text-xl font-bold text-ruby-400 mb-3">Distribution Command Unavailable</h1>
           <p className="text-sm text-slate-400 leading-relaxed">
             Supabase is not configured. Set{" "}
             <code className="text-amber-400 text-xs">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}

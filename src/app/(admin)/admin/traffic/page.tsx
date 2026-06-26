@@ -38,7 +38,7 @@ const PLATFORM_COLORS: Record<string, string> = {
 };
 
 const INTENT_BADGE: Record<string, string> = {
-  high:   "bg-red-500/20 text-red-300",
+  high:   "bg-ruby-400/[0.14] text-ruby-300",
   medium: "bg-amber-500/15 text-amber-300",
   low:    "bg-slate-700/20 text-slate-400",
 };
@@ -75,7 +75,7 @@ export default async function TrafficCommandPage() {
     return (
       <div className="min-h-screen bg-[#080806] flex items-center justify-center">
         <div className="max-w-md text-center px-6">
-          <h1 className="text-xl font-bold text-red-400 mb-3">Traffic Command Unavailable</h1>
+          <h1 className="text-xl font-bold text-ruby-400 mb-3">Traffic Command Unavailable</h1>
           <p className="text-sm text-slate-400 leading-relaxed">
             Supabase is not configured. Set{" "}
             <code className="text-amber-400 text-xs">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
@@ -268,11 +268,11 @@ export default async function TrafficCommandPage() {
           </p>
           <div className="space-y-3">
             {launchReadiness.doNotPostList.map((item, i) => (
-              <div key={i} className="rounded-xl border border-red-500/20 bg-red-500/[0.04] px-5 py-3">
+              <div key={i} className="rounded-xl border border-ruby-400/20 bg-ruby-400/[0.04] px-5 py-3">
                 <div className="flex items-start gap-3">
-                  <span className="flex-shrink-0 text-red-400 font-bold text-sm mt-0.5">✗</span>
+                  <span className="flex-shrink-0 text-ruby-400 font-bold text-sm mt-0.5">✗</span>
                   <div>
-                    <code className="text-[11px] font-mono text-red-300/80">{item.url}</code>
+                    <code className="text-[11px] font-mono text-ruby-300/80">{item.url}</code>
                     <span className="ml-2 text-[10px] text-slate-500 italic">on {item.platform}</span>
                     <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">{item.reason}</p>
                   </div>
@@ -547,7 +547,7 @@ export default async function TrafficCommandPage() {
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <span className="text-[10px] text-slate-600 font-mono">{opp.intentScore}</span>
                     <span className={`text-[10px] font-semibold rounded-full px-2 py-0.5 ${
-                      opp.intentScore >= 80 ? "bg-red-500/15 text-red-300"
+                      opp.intentScore >= 80 ? "bg-ruby-400/[0.12] text-ruby-300"
                       : opp.intentScore >= 60 ? "bg-amber-500/15 text-amber-300"
                       : "bg-slate-700/20 text-slate-500"
                     }`}>

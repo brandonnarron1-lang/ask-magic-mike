@@ -108,7 +108,7 @@ function EmbedAskInner() {
       showBack={flow.step > 1 && flow.step < 5}
     >
       {flow.error && (
-        <div className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-300">
+        <div className="mb-3 rounded-lg border border-ruby-400/30 bg-ruby-400/[0.08] px-3 py-2.5 text-sm text-ruby-300">
           {flow.error}
         </div>
       )}
