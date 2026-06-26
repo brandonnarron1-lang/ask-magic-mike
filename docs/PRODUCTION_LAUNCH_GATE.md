@@ -32,7 +32,7 @@ Missing `NEXT_PUBLIC_SUPABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` in production 
 ## 2. Database
 
 - [ ] Supabase project created
-- [ ] All migrations applied in order (`00001` → `00011`)
+- [ ] All migrations applied in order (`00001` → `00013`)
 - [ ] Row Level Security enabled on all tables (verified in Supabase dashboard)
 - [ ] Mike Eatmon agent row seeded (migration 00010 + upserted in 00011)
 - [ ] `sessions`, `leads`, `lead_scores`, `lead_routing`, `agents` tables exist

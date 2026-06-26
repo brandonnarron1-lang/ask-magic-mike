@@ -123,6 +123,10 @@ Every report stores the disclaimer text verbatim alongside the estimate. The `di
 
 ## Database Schema Summary
 
+13 migration files (00001 → 00013). Tables by category:
+
+### Core funnel (migrations 00001–00009)
+
 | Table | Purpose |
 |-------|---------|
 | `sessions` | One per page visit; captures attribution before any lead data |
@@ -134,6 +138,40 @@ Every report stores the disclaimer text verbatim alongside the estimate. The `di
 | `valuation_reports` | AVM estimates with comps and disclaimer |
 | `analytics_events` | Every named event; append-only |
 | `crm_sync_log` | Every CRM operation attempt; append-only audit trail |
+
+### Schema v2 — broker ops + compliance (migration 00011)
+
+| Table | Purpose |
+|-------|---------|
+| `contacts` | Deduplicated contact records; one contact may have many leads |
+| `source_attribution` | Detailed UTM + referrer attribution per lead |
+| `consents` | Immutable consent records; one row per consent event |
+| `messages` | Outbound SMS and email records with delivery status |
+| `agent_assignments` | Full assignment history (agent, reason, timestamps) |
+| `compliance_flags` | Opt-out events (STOP/UNSUBSCRIBE) and compliance audit rows |
+| `audit_logs` | Admin action audit trail — every PATCH, assign, or status change |
+
+### Canonical platform — listings + operations (migration 00012)
+
+| Table | Purpose |
+|-------|---------|
+| `tasks` | Admin-created tasks per lead with priority and due dates |
+| `listings` | Active listing inventory (MLS import; broker-only) |
+| `listing_photos` | Photos linked to listing rows |
+| `listing_private_fields` | Confidential MLS fields; never exposed publicly |
+| `flex_imports` | Raw FlexMLS import staging rows |
+| `listing_matches` | Listings matched to buyer leads |
+| `notifications` | In-app admin notifications |
+| `marketing_templates` | Reusable copy blocks for campaigns |
+| `generated_assets` | AI-generated content records (images, copy drafts) |
+| `sms_templates` | Named SMS template library |
+| `email_templates` | Named email template library |
+| `message_deliveries` | Delivery tracking per outbound message |
+| `integration_accounts` | External CRM / service account credentials (encrypted) |
+| `webhook_events` | Raw inbound webhook payloads (Twilio, Resend, etc.) |
+| `saved_views` | Admin-saved filter presets |
+| `campaigns` | Campaign definitions |
+| `campaign_events` | Campaign event log |
 
 ## Key Design Decisions
 
