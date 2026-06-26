@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
 
   const score = computeScore(scoringInput);
 
-  await client.from("lead_scores").upsert(
+  const { error: upsertErr } = await client.from("lead_scores").upsert(
     {
       lead_id: leadId,
       seller_certainty_score: score.sellerCertaintyScore,
@@ -76,6 +76,13 @@ export async function POST(req: NextRequest) {
     },
     { onConflict: "lead_id" }
   );
+
+  if (upsertErr) {
+    return NextResponse.json(
+      { error: "score_persist_failed", detail: upsertErr.message },
+      { status: 500 }
+    );
+  }
 
   trackEventNoWait({
     eventName: "lead_scored",

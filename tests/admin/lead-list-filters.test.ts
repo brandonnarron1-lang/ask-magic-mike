@@ -1,5 +1,40 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { loadLeadList, mapLeadListRow } from "@/lib/admin/lead-list";
+
+// ---------------------------------------------------------------------------
+// Supabase mock for filter-wiring tests (vi.mock is hoisted by vitest)
+// ---------------------------------------------------------------------------
+
+const lteMock = vi.fn();
+const notFilterMock = vi.fn();
+const eqMock = vi.fn();
+const isMock = vi.fn();
+const ltMock = vi.fn();
+
+vi.mock("@/lib/supabase/admin", () => ({
+  createAdminClient: () => ({
+    from: (table: string) => {
+      if (table !== "leads") {
+        return { select: () => ({ in: () => Promise.resolve({ data: [], error: null }) }) };
+      }
+      const q: Record<string, unknown> = {};
+      q.select = () => q;
+      q.range = () => q;
+      q.order = () => q;
+      q.eq = (...a: unknown[]) => { eqMock(...a); return q; };
+      q.is = (...a: unknown[]) => { isMock(...a); return q; };
+      q.lte = (...a: unknown[]) => { lteMock(...a); return q; };
+      q.not = (...a: unknown[]) => { notFilterMock(...a); return q; };
+      q.lt = (...a: unknown[]) => { ltMock(...a); return q; };
+      q.gte = () => q;
+      q.ilike = () => q;
+      q.or = () => q;
+      q.then = (resolve: (v: unknown) => unknown) =>
+        resolve({ data: [], count: 0, error: null });
+      return q;
+    },
+  }),
+}));
 
 describe("loadLeadList — mock mode (no Supabase)", () => {
   it("returns a stable empty shape when Supabase isn't configured", async () => {
@@ -124,5 +159,52 @@ describe("mapLeadListRow — score supplement", () => {
     const row = mapLeadListRow(baseRow, null, { composite_score: null, temperature: "warm" });
     expect(row.score).toBeNull();
     expect(row.temperature).toBe("warm");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Filter wiring — followUpDue / neverContacted
+// ---------------------------------------------------------------------------
+
+describe("loadLeadList — followUpDue / neverContacted filter wiring", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "test-key";
+  });
+
+  afterEach(() => {
+    delete (process.env as Record<string, string | undefined>).NEXT_PUBLIC_SUPABASE_URL;
+    delete (process.env as Record<string, string | undefined>).SUPABASE_SERVICE_ROLE_KEY;
+  });
+
+  it("returns configured: true when Supabase is configured", async () => {
+    const r = await loadLeadList({});
+    expect(r.configured).toBe(true);
+  });
+
+  it("applies lte(next_follow_up_at) + not-null guard when followUpDue: true", async () => {
+    await loadLeadList({ followUpDue: true });
+    expect(lteMock).toHaveBeenCalledWith("next_follow_up_at", expect.any(String));
+    expect(notFilterMock).toHaveBeenCalledWith("next_follow_up_at", "is", null);
+  });
+
+  it("applies eq(status=assigned) + is(last_contacted_at, null) + lt(created_at) when neverContacted: true", async () => {
+    await loadLeadList({ neverContacted: true });
+    expect(eqMock).toHaveBeenCalledWith("status", "assigned");
+    expect(isMock).toHaveBeenCalledWith("last_contacted_at", null);
+    expect(ltMock).toHaveBeenCalledWith("created_at", expect.any(String));
+  });
+
+  it("does not apply followUpDue filters when flag is absent", async () => {
+    await loadLeadList({});
+    expect(lteMock).not.toHaveBeenCalledWith("next_follow_up_at", expect.any(String));
+    expect(notFilterMock).not.toHaveBeenCalled();
+  });
+
+  it("does not apply neverContacted filters when flag is absent", async () => {
+    await loadLeadList({});
+    expect(isMock).not.toHaveBeenCalledWith("last_contacted_at", null);
+    expect(ltMock).not.toHaveBeenCalledWith("created_at", expect.any(String));
   });
 });
