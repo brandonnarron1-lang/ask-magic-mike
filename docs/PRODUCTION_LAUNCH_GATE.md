@@ -145,3 +145,13 @@ List any items that cannot be completed before launch and document the owner + E
 | NC license # in UI | Confirm license number | Mike Eatmon | Before launch |
 | Privacy policy page | Legal review | TBD | Before launch |
 | Admin session-based auth | Engineering | TBD | Before high-traffic |
+
+---
+
+## Controlled Launch Runbook
+
+For the step-by-step operator checklist, verification procedures, rollback plan, go/no-go criteria, and post-launch monitoring cadence, see:
+
+**[`docs/CONTROLLED_LAUNCH_RUNBOOK.md`](CONTROLLED_LAUNCH_RUNBOOK.md)**
+
+That document is the authoritative launch cockpit — it converts every item above into an executable owner action with verification commands and go/no-go gates.

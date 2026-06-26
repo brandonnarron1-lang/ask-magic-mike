@@ -4,6 +4,31 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## [PR #49] Launch Candidate 3 — Final Launch Gate + Doc Hardening
+
+**Merged:** 2026-06-26  
+**Commit:** `674edde`  
+**Branch:** `launch-candidate-3-final-launch-gate`  
+**Rebased onto:** `d332468` (post-LC-2 main)
+
+### Changes
+- `docs/LAUNCH_CANDIDATE_3_FINAL_GATE.md` (new) — Full pre-launch audit: 20 public product areas, 8 admin/ops areas, 7 repo hygiene areas; 11-item owner action table; PR #8 final assessment
+- `docs/regency-wordpress-handoff.md` — Replaced all 7 occurrences of `ask-magic-mike.vercel.app` → `https://www.askmagicmike.com`
+- `docs/ask-magic-mike-wordpress-visual-brief.md` — Replaced stale vercel.app URLs; added domain migration complete note
+- `docs/ask-magic-mike-funnel-qa.md` — Replaced stale vercel.app URLs (3 occurrences)
+- `docs/vercel-cron-sla-sweep.md` — Replaced stale vercel.app URLs (3 curl examples)
+- `docs/PRODUCTION_RELEASE_LOG.md` — Added PR #48 entry
+
+### Validation (on merge)
+- typecheck: 0 errors
+- lint: 0 new errors
+- test: 1137/1137 passing (74 files)
+- build: clean
+- funnel verify: 15/15 PASS
+- smoke: 19 pass / 2 skip / 0 fail
+
+---
+
 ## [PR #48] Launch Candidate 2 — Public Conversion Polish
 
 **Merged:** 2026-06-26  
