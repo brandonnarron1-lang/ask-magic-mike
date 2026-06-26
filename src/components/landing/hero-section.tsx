@@ -219,6 +219,14 @@ export function HeroSection() {
             {siteConfig.agentPhoneDisplay}
           </a>
           <span className="text-gold-400/25">·</span>
+          <a
+            href="/value"
+            className="hover:text-gold-400 transition-colors font-medium"
+            data-nav-link="home-value"
+          >
+            Home Value
+          </a>
+          <span className="text-gold-400/25">·</span>
           <span className="text-slate-500">Licensed NC Broker</span>
         </div>
 
@@ -313,6 +321,16 @@ export function HeroSection() {
 
           <div className={cn("mt-5 opacity-0", loaded && "animate-fade-up delay-500")}>
             <CTAChips onSelect={handleChipSelect} selected={selectedChip} className="justify-start" />
+            <p className="mt-3 text-[11.5px] text-slate-500">
+              Seller?{" "}
+              <a
+                href="/value"
+                className="text-gold-400/80 hover:text-gold-400 underline underline-offset-2 transition-colors"
+                data-cta-link="value-deep-link"
+              >
+                Get a structured home value estimate →
+              </a>
+            </p>
           </div>
 
           {/* Broker trust strip — visible directly below CTA chips */}

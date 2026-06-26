@@ -83,6 +83,30 @@ export function StepConfirmation({
         {message.sub}
       </p>
 
+      {/* What happens now */}
+      <div
+        data-testid="confirmation-next-steps"
+        className="w-full max-w-sm mb-6 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3.5 text-left"
+      >
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 mb-3">
+          What happens now
+        </p>
+        <ol className="space-y-2.5">
+          {[
+            "Mike receives your full request and contact info",
+            "He reviews it personally — not an auto-responder",
+            "Watch your phone or email for follow-up from Our Town Properties",
+          ].map((step, i) => (
+            <li key={i} className="flex items-start gap-2.5 text-[12px] text-slate-400 leading-snug">
+              <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-gold-400/15 text-[9px] font-bold text-gold-400/80 mt-px">
+                {i + 1}
+              </span>
+              {step}
+            </li>
+          ))}
+        </ol>
+      </div>
+
       {/* Assigned-to card */}
       <div
         data-testid="confirmation-assignment-card"

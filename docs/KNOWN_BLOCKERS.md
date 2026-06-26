@@ -56,12 +56,13 @@ See `docs/PRODUCTION_LAUNCH_GATE.md` for the full pre-launch checklist.
 
 ## Soft blockers (advisable before high-traffic launch)
 
-### S-01 — PR #8 (V8 value page) needs rebase
+### S-01 — PR #8 (V8 value page) needs rebase before it is safe to merge
 
 **PR:** #8 (`feat: integrate v8 value page experience`)  
-**Impact:** Branch is 30+ days stale; test suite ran against 370 tests, main is now at 1090+. MERGESTATE: UNKNOWN.  
-**Fix:** Rebase against main (post-Delta; after Epsilon merges rebase again), re-run full validation, product review before merge.  
-**Owner:** Brandon · **ETA:** Before next visual sprint
+**Impact:** Branch is 30+ days stale; 179 files changed, main now at 1137 tests (was ~370). `MERGESTATE: UNKNOWN` (GitHub cannot auto-check). Confirmed conflicts with `src/components/campaign/value-hero.tsx` (LC-1 modified this file heavily) and multiple doc files.  
+**Assessment (LC-2 sprint, 2026-06-26):** NOT safe to merge without a dedicated rebase sprint. A rebase will surface real conflicts in value-hero.tsx and potentially other landing components. Full rebase, conflict resolution, validation, and product review are required.  
+**Fix:** Dedicate a branch sprint: checkout PR #8 branch, `git rebase main`, resolve conflicts (value-hero.tsx is the likely hotspot), re-run full validation (typecheck/lint/1137 tests/build/funnel), get product review, then open a new PR against current main.  
+**Owner:** Brandon · **ETA:** Dedicated sprint — not in LC-2
 
 ---
 
@@ -73,12 +74,9 @@ See `docs/PRODUCTION_LAUNCH_GATE.md` for the full pre-launch checklist.
 
 ---
 
-### S-04 — YouTube badge uses prohibited red-* token (deferred to Epsilon)
+### ~~S-04 — YouTube badge uses prohibited red-* token~~ ✅ RESOLVED
 
-**File:** `src/app/(admin)/admin/traffic/page.tsx:28`  
-**Impact:** `YouTube: "bg-red-600/20 text-red-300"` violates the ruby-400 / no-red-* design token rule.  
-**Fix:** Fixed in PR #45 (Epsilon) → `bg-ruby-400/[0.14] text-ruby-300`. Will resolve when Epsilon merges.  
-**Owner:** Engineering · **ETA:** On Epsilon merge
+Fixed in PR #45 (Epsilon), merged 2026-06-26. `bg-ruby-400/[0.14] text-ruby-300` is now on main.
 
 ---
 
