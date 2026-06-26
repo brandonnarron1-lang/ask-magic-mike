@@ -1,11 +1,12 @@
 # Owner Action Proof Pack — Ask Magic Mike
 
-**Version:** LC-6 (post-merge-train #44–#51)  
-**Code state:** `main` @ `cd9a83b` — launch-ready  
+**Version:** LC-7 (post-merge-train #44–#52)  
+**Code state:** `main` @ `815a33a` — authority packet complete  
 **Audience:** Brandon Narron (operator)  
 **Purpose:** Capture verifiable evidence for each owner-gated launch action. No secrets are recorded here — only screenshots of field names, terminal output summaries, and URL structures.
 
-**Go/No-Go decision:** See `docs/GO_NO_GO_COMMAND_CENTER.md` for the authority gate table and final sign-off block.
+**Go/No-Go decision:** See `docs/GO_NO_GO_COMMAND_CENTER.md` for the authority gate table and final sign-off block.  
+**Traffic activation sequence:** See `docs/CONTROLLED_TRAFFIC_ACTIVATION.md` for the step-by-step private test and limited traffic activation procedure.
 
 ---
 
