@@ -9,7 +9,7 @@ import { Footer } from "@/components/landing/footer";
 
 export default function HomePage() {
   return (
-    <main className="bg-[#0A0A0A]">
+    <main id="main-content" className="bg-[#0A0A0A]">
       <HeroSection />
       <MarketPulse />
       <HowItWorks />
