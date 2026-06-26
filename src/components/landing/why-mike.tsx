@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { Shield, MapPin, Clock, Award, Scale, TrendingUp } from "lucide-react";
 import { useInView } from "@/hooks/use-in-view";
 import { cn } from "@/lib/utils/cn";
+import { brandPackAssets } from "@/components/amm/brand-pack-assets";
 
 const PILLARS = [
   { icon: MapPin,      title: "Wilson County Authority",       body: "Every neighborhood. Every school district. Every pocket of value in Eastern NC. Mike knows the market before it moves.",    accentColor: "text-gold-400",    borderColor: "group-hover:border-gold-400/35" },
@@ -34,9 +36,22 @@ export function WhyMike() {
 
         {/* Header */}
         <div className={cn(
-          "text-center mb-20 opacity-0",
+          "text-center mb-20 opacity-0 relative",
           inView && "animate-fade-up delay-0"
         )}>
+          {/* Sparkle accent */}
+          <span
+            className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 pointer-events-none select-none"
+            aria-hidden="true"
+          >
+            <Image
+              src={brandPackAssets.accents.sparkle}
+              alt=""
+              width={24}
+              height={24}
+              className="opacity-50"
+            />
+          </span>
           <p className="text-xs font-semibold tracking-[0.25em] uppercase text-gold-400 mb-4">
             Why Ask Mike
           </p>

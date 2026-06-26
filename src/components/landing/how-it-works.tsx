@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { MessageSquare, Zap, Phone } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useInView } from "@/hooks/use-in-view";
+import { brandPackAssets } from "@/components/amm/brand-pack-assets";
 
 const STEPS = [
   {
@@ -12,6 +14,8 @@ const STEPS = [
     body: "Type your question or address — home value, timing, buying, selling. No forms. No gated content. Takes about 30 seconds.",
     note: "~30 seconds",
     color: "from-gold-400/20 to-transparent",
+    portrait: brandPackAssets.expressions.thinkingChin,
+    portraitAlt: "Mike Eatmon listening intently",
   },
   {
     n: "02",
@@ -20,6 +24,8 @@ const STEPS = [
     body: "Your request goes to Mike Eatmon at Our Town Properties — with your full context included. No call centers. No automated responses.",
     note: "Routed to Mike directly",
     color: "from-amber-400/15 to-transparent",
+    portrait: brandPackAssets.actions.explaining,
+    portraitAlt: "Mike Eatmon reviewing your details",
   },
   {
     n: "03",
@@ -28,6 +34,8 @@ const STEPS = [
     body: "Mike or the Our Town Properties team follows up with local broker-reviewed guidance — not a generic estimate or an automated message.",
     note: "Response timing may vary",
     color: "from-ruby-400/15 to-transparent",
+    portrait: brandPackAssets.expressions.confident,
+    portraitAlt: "Mike Eatmon ready to help",
   },
 ];
 
@@ -52,6 +60,21 @@ export function HowItWorks() {
         >
           HOW IT WORKS
         </span>
+      </div>
+
+      {/* Ambient Mike portrait — section-level background element */}
+      <div
+        className="absolute bottom-0 right-0 w-72 h-96 pointer-events-none select-none overflow-hidden"
+        aria-hidden="true"
+      >
+        <Image
+          src={brandPackAssets.mike.heroCloseup}
+          alt=""
+          fill
+          sizes="288px"
+          className="object-cover object-top opacity-[0.04]"
+          style={{ maskImage: "radial-gradient(ellipse 100% 100% at 100% 100%, black 0%, transparent 70%)" }}
+        />
       </div>
 
       <div className="max-w-6xl mx-auto relative">
@@ -101,6 +124,21 @@ export function HowItWorks() {
                   "absolute top-0 inset-x-0 h-36 bg-gradient-to-b pointer-events-none opacity-50 group-hover:opacity-90 transition-opacity duration-300",
                   step.color
                 )} />
+
+                {/* Mike portrait — ambient background element */}
+                <div
+                  className="absolute bottom-0 right-0 w-36 h-44 pointer-events-none select-none overflow-hidden rounded-br-2xl"
+                  aria-hidden="true"
+                >
+                  <Image
+                    src={step.portrait}
+                    alt=""
+                    fill
+                    sizes="144px"
+                    className="object-cover object-top opacity-[0.10] group-hover:opacity-[0.15] transition-opacity duration-500"
+                    style={{ maskImage: "radial-gradient(ellipse 100% 100% at 100% 100%, black 0%, transparent 65%)" }}
+                  />
+                </div>
 
                 {/* Step number — watermark */}
                 <div

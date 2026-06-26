@@ -5,6 +5,7 @@ import { Phone, Mail, MapPin, Star, ArrowRight, CheckCircle2 } from "lucide-reac
 import { useRouter } from "next/navigation";
 import { useInView } from "@/hooks/use-in-view";
 import { cn } from "@/lib/utils/cn";
+import { brandPackAssets } from "@/components/amm/brand-pack-assets";
 
 const CREDENTIALS = [
   "Licensed NC Real Estate Broker",
@@ -78,7 +79,13 @@ export function MikeCard() {
               {/* Our Town badge */}
               <div className="absolute bottom-5 left-5">
                 <div className="bg-glass-gold rounded-xl px-4 py-3 border border-gold-400/25 inline-flex items-center gap-2.5">
-                  <OurTownIcon size={22} />
+                  <Image
+                    src={brandPackAssets.logo.primary}
+                    alt="Our Town Properties, Inc."
+                    width={44}
+                    height={23}
+                    className="h-auto w-auto"
+                  />
                   <div>
                     <div className="text-[11px] font-bold tracking-[0.12em] uppercase text-gold-400 leading-none">Our Town</div>
                     <div className="text-[10px] text-slate-400 leading-none mt-0.5">Properties, Inc.</div>
@@ -195,13 +202,3 @@ export function MikeCard() {
   );
 }
 
-function OurTownIcon({ size = 28 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 60 60" fill="none">
-      <rect x="1.5" y="1.5" width="57" height="57" rx="5" fill="#0A0A0A" stroke="#D4A017" strokeWidth="2"/>
-      <path d="M30 9 C17.5 9 9 19.5 9 29 L9 51 L19 51 L19 37 L41 37 L41 51 L51 51 L51 29 C51 19.5 42.5 9 30 9Z"
-        fill="none" stroke="#D4A017" strokeWidth="2.2"/>
-      <rect x="23" y="37" width="14" height="14" rx="1.5" fill="none" stroke="#D4A017" strokeWidth="1.8"/>
-    </svg>
-  );
-}

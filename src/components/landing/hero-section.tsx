@@ -37,6 +37,20 @@ function MikeVisualTrustBadge() {
 function MikeHeroPortrait({ priority }: { priority?: boolean }) {
   return (
     <div className="relative">
+      {/* Smoke glow SVG ambient layer */}
+      <div
+        className="absolute -inset-8 pointer-events-none select-none"
+        aria-hidden="true"
+        style={{ transform: "scale(1.2)" }}
+      >
+        <Image
+          src={brandPackAssets.accents.smokeGlow}
+          alt=""
+          fill
+          sizes="600px"
+          className="object-contain opacity-40"
+        />
+      </div>
       {/* Ambient glow behind portrait */}
       <div
         className="absolute -inset-6 rounded-3xl pointer-events-none"
@@ -141,7 +155,7 @@ export function HeroSection() {
 
   return (
     <section
-      className="relative overflow-hidden bg-[#0A0A0A] px-5 pb-16 sm:px-6"
+      className="relative overflow-hidden bg-[#0A0A0A] px-5 pb-16 sm:px-6 grain-overlay"
       data-amm-surface="landing-hero"
     >
       {/* Ambient gradient */}
@@ -247,7 +261,20 @@ export function HeroSection() {
             </p>
           </div>
 
-          <div className={cn("mb-6 opacity-0", loaded && "animate-fade-up delay-200")}>
+          <div className={cn("mb-6 opacity-0 relative", loaded && "animate-fade-up delay-200")}>
+            {/* Sparkle accent — purely decorative, positioned near the headline */}
+            <span
+              className="absolute -top-3 -right-2 sm:right-8 opacity-60 pointer-events-none select-none"
+              aria-hidden="true"
+            >
+              <Image
+                src={brandPackAssets.accents.sparkle}
+                alt=""
+                width={28}
+                height={28}
+                className="opacity-70"
+              />
+            </span>
             <h1 className="font-display text-6xl font-black leading-[0.9] text-cream sm:text-7xl lg:text-8xl xl:text-9xl">
               <span className="block">Ask</span>
               <span className="block">

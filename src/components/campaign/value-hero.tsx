@@ -148,10 +148,16 @@ export function ValueHero() {
         <section
           aria-labelledby="value-trust-heading"
           className={cn(
-            "rounded-2xl border border-white/[0.08] bg-[#0F131A]/85 p-5 sm:p-6 mb-8",
+            "relative rounded-2xl border border-white/[0.08] bg-[#0F131A]/85 p-5 sm:p-6 mb-8 overflow-hidden",
             motion.fadeUpDelay500
           )}
         >
+          {/* Ambient gold gradient top accent */}
+          <div
+            className="absolute top-0 inset-x-0 h-px pointer-events-none"
+            style={{ background: "linear-gradient(90deg, transparent, rgba(212,160,23,0.35), transparent)" }}
+            aria-hidden="true"
+          />
           <div className="grid md:grid-cols-[1fr_auto] gap-4 md:gap-6 items-center">
             <div>
               <h2
