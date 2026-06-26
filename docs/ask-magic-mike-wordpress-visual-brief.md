@@ -6,10 +6,9 @@ Beaver Builder.
 
 ## v2 update notes (post brand-kit-v2 + canonical platform)
 
-- Funnel landing host is `ask-magic-mike.vercel.app` until the
-  `askmagicmike.com` domain migration runs (see
-  `docs/askmagicmike-domain-migration.md`). After migration, replace
-  the host in every CTA URL but **keep the UTM params unchanged**.
+- **Domain migration complete.** Funnel landing host is now `https://www.askmagicmike.com`
+  (see `docs/askmagicmike-domain-migration.md`). All CTA URLs below use the
+  canonical domain. UTM params are unchanged.
 - The canonical `POST /api/leads` endpoint is now live. Future
   Beaver Builder Gravity-Forms-style inline forms can submit directly
   to it instead of routing through `/value`.
@@ -71,7 +70,7 @@ Headline:   Start with your address. Get a local read on your home.
 Subhead:    Mike Eatmon's Our Town Properties team follows up with local
             guidance. AI-assisted intake. Local human follow-up.
 Button:     Start With Your Address
-Button URL: https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike
+Button URL: https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike
 ```
 
 ### B. Mike profile page CTA block
@@ -83,7 +82,7 @@ Subhead:    Selling real estate in Wilson and Eastern NC since 1993.
             Share your address and Mike's team will follow up with local
             guidance.
 Button:     Start With Your Address
-Button URL: https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=mike_profile&utm_campaign=ask_magic_mike
+Button URL: https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=mike_profile&utm_campaign=ask_magic_mike
 ```
 
 ### C. We Buy Homes / Seller page CTA block
@@ -96,7 +95,7 @@ Subhead:    Share your address and timeline. Our Town Properties will review
             and follow up with local guidance. Preliminary only — not an
             appraisal.
 Button:     Request Direct-Purchase Review
-Button URL: https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=seller_page_cta&utm_campaign=ask_magic_mike
+Button URL: https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=seller_page_cta&utm_campaign=ask_magic_mike
 ```
 
 ## 3. Remaining We Buy Homes page copy fix

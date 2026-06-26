@@ -4,6 +4,32 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## [PR #48] Launch Candidate 2 — Public Conversion Polish
+
+**Merged:** 2026-06-26  
+**Commit:** `d332468`  
+**Branch:** `launch-candidate-2-public-conversion-polish`  
+**Rebased onto:** `4d55923` (post-LC-1 main)
+
+### Changes
+- `src/app/(intake)/ask/layout.tsx` (new) — Intake-specific OG/Twitter metadata and JSON-LD ContactPage schema for `/ask` route; `index: false`
+- `src/components/landing/hero-section.tsx` — Added "Home Value" link in desktop nav; added secondary CTA text link below CTAChips pointing to `/value`
+- `src/components/intake/step-confirmation.tsx` — Added "what happens now" 3-step panel above assignment card
+- `src/components/landing/footer.tsx` — Added Quick Links sub-section (Ask a Question, Home Value Estimate)
+- `docs/LAUNCH_CANDIDATE_2_CONVERSION_AUDIT.md` (new) — Full audit table: F-01 (no /value path from homepage), F-02 (no /ask metadata), F-03 (no post-confirmation guidance), F-04 (footer links), F-05 (mobile nav)
+- `docs/PRODUCTION_RELEASE_LOG.md` — Added PR #45, #46, #47 merge entries
+- `docs/KNOWN_BLOCKERS.md` — Resolved S-04 (red-* token, fixed in Epsilon); expanded S-01 (PR #8 stale/conflicting with value-hero.tsx)
+
+### Validation (on merge)
+- typecheck: 0 errors
+- lint: 0 new errors
+- test: 1137/1137 passing (74 files)
+- build: clean
+- funnel verify: 15/15 PASS
+- smoke: 19 pass / 2 skip / 0 fail
+
+---
+
 ## [PR #47] Launch Candidate 1 — Premium Visual System
 
 **Merged:** 2026-06-26  
