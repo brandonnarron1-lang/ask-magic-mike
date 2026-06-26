@@ -63,8 +63,10 @@ export async function PATCH(
     updates.lead_type = body.lead_type;
   }
   if (typeof body.lead_grade === "string") updates.lead_grade = body.lead_grade;
-  if (typeof body.next_follow_up_at === "string")
+  if (typeof body.next_follow_up_at === "string" || body.next_follow_up_at === null)
     updates.next_follow_up_at = body.next_follow_up_at;
+  if (typeof body.last_contacted_at === "string" || body.last_contacted_at === null)
+    updates.last_contacted_at = body.last_contacted_at;
   if (typeof body.closed_lost_reason === "string")
     updates.closed_lost_reason = body.closed_lost_reason;
   if (typeof body.mark_spam === "boolean") {

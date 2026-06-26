@@ -200,6 +200,19 @@ export async function runSellerOfferReviewAction(
   return { ok: true, message: "Seller-offer review generated." };
 }
 
+export async function markContactedAction(formData: FormData): Promise<ActionResult> {
+  const leadId = String(formData.get("lead_id") ?? "");
+  if (!leadId) return { ok: false, error: "lead_id_required" };
+  const r = await call(`/api/admin/leads/${leadId}`, {
+    method: "PATCH",
+    jsonBody: { last_contacted_at: new Date().toISOString() },
+  });
+  if (r.status >= 300) return { ok: false, error: `mark_contacted_failed_${r.status}` };
+  revalidatePath(`/admin/leads/${leadId}`);
+  revalidatePath("/admin");
+  return { ok: true, message: "Marked as contacted." };
+}
+
 export async function setFollowUpAction(formData: FormData): Promise<ActionResult> {
   const leadId = String(formData.get("lead_id") ?? "");
   const followUpAt = String(formData.get("follow_up_at") ?? "").trim();

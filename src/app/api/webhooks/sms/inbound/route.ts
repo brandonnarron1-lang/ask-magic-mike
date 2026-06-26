@@ -121,29 +121,41 @@ export async function POST(req: NextRequest) {
     leadId = data?.id ?? null;
 
     if (leadId) {
-      await client.from("messages").insert({
+      const { error: msgErr } = await client.from("messages").insert({
         lead_id: leadId,
         role: "user",
         content: body,
       });
+      if (msgErr) {
+        console.error("[sms-inbound] messages.insert failed:", msgErr.message);
+      }
     }
 
     if (isStop && leadId) {
-      await client.from("compliance_flags").insert({
+      const { error: flagErr } = await client.from("compliance_flags").insert({
         lead_id: leadId,
         flag_type: "opt_out_sms",
         severity: "warn",
         notes: JSON.stringify({ providerMessageId, mode }),
       });
+      if (flagErr) {
+        console.error(
+          "[sms-inbound][COMPLIANCE CRITICAL] compliance_flags insert failed for opt-out. Lead",
+          leadId, "may NOT be opted out. Error:", flagErr.message
+        );
+      }
     }
 
-    await client.from("webhook_events").insert({
+    const { error: evtErr } = await client.from("webhook_events").insert({
       provider: mode === "twilio" ? "twilio_sms" : "mock_sms",
       topic: "inbound",
       signature_ok: mode === "twilio",
       payload: { from, body, providerMessageId, params: formParams ?? jsonBody },
       processed_at: new Date().toISOString(),
     });
+    if (evtErr) {
+      console.error("[sms-inbound] webhook_events.insert failed:", evtErr.message);
+    }
   }
 
   trackEventNoWait({

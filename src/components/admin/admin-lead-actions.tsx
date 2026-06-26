@@ -12,6 +12,7 @@ import {
   runListingMatchAction,
   runSellerOfferReviewAction,
   setFollowUpAction,
+  markContactedAction,
 } from "@/app/(admin)/admin/leads/[id]/actions";
 import { LEAD_STATUSES, LEAD_TYPES } from "@/lib/leads/lead-types";
 import { SMS_TEMPLATES, EMAIL_TEMPLATES } from "@/lib/engines/communications-templates";
@@ -275,6 +276,20 @@ export function AdminLeadActions({
             <SubmitBtn className="flex-1">Seller-offer review</SubmitBtn>
           </form>
         </div>
+      </Card>
+
+      {/* Contact activity */}
+      <Card title="Contact activity">
+        <form
+          action={(fd) => wrap(markContactedAction, fd)}
+          className="flex items-center gap-2"
+        >
+          <input type="hidden" name="lead_id" value={leadId} />
+          <p className="text-[11.5px] text-slate-400 flex-1">
+            Records the current timestamp as last contacted.
+          </p>
+          <SubmitBtn>Mark contacted now</SubmitBtn>
+        </form>
       </Card>
 
       {/* Follow-up date */}
