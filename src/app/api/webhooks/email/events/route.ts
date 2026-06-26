@@ -4,7 +4,9 @@ import {
   normalizeEmailEvent,
   type EmailEventType,
 } from "@/lib/adapters/email-webhook-normalizer";
+import { createLogger } from "@/lib/observability/logger";
 
+const log = createLogger("email-events");
 const NO_STORE = { "Cache-Control": "no-store" };
 
 /**
@@ -80,7 +82,7 @@ export async function POST(req: NextRequest) {
           })
           .eq("id", del.id);
         if (deliveryErr) {
-          console.error("[email-events] message_deliveries.update failed:", deliveryErr.message);
+          log.error("message_deliveries.update_failed", { error: deliveryErr.message });
         }
       }
     }
@@ -105,10 +107,7 @@ export async function POST(req: NextRequest) {
         }),
       });
       if (flagErr) {
-        console.error(
-          "[email-events][COMPLIANCE CRITICAL] compliance_flags insert failed for opt-out. Lead",
-          leadId, "may NOT be opted out. Error:", flagErr.message
-        );
+        log.error("compliance_flags.insert_failed_CRITICAL", { lead_id: leadId, error: flagErr.message });
       }
     }
 
@@ -120,7 +119,7 @@ export async function POST(req: NextRequest) {
       processed_at: new Date().toISOString(),
     });
     if (evtErr) {
-      console.error("[email-events] webhook_events.insert failed:", evtErr.message);
+      log.error("webhook_events.insert_failed", { error: evtErr.message });
     }
   }
 

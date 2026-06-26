@@ -122,3 +122,71 @@ The `agents` table may be empty. Seed data is in `supabase/migrations/00010_seed
 
 **SLA breach count is stuck**  
 SLA breaches clear when `accepted_at` or `contacted_at` is set on the `lead_routing` row. Update these fields in Supabase to acknowledge contact.
+
+---
+
+## Daily Launch Monitoring
+
+### Morning checklist (run before 9 AM local time)
+
+| Step | URL / command | Expected |
+|---|---|---|
+| 1. SLA breach | `/admin/leads?filter=sla_breach` | 0 results by 9 AM |
+| 2. Never contacted | `/admin/leads?filter=never_contacted` | 0 results by 10 AM |
+| 3. Follow-up due | `/admin/leads?filter=follow_up_due` | Work through before noon |
+| 4. Urgent queue | `/admin/leads?filter=urgent` | All A+/A leads have `last_contacted_at` set |
+| 5. Health check | `GET /api/admin/health` with `x-admin-secret` | `ok: true, database.reachable: true, live_sms_disabled: true` |
+
+### Quick filter chips reference
+
+The leads inbox now shows five quick filter chips at the top:
+
+| Chip | URL param | Shows |
+|---|---|---|
+| All leads | `?` (no filter) | Full inbox |
+| Urgent (A+/A) | `?filter=urgent` | Grade A+ or A leads |
+| SLA breach | `?filter=sla_breach` | A+/A leads, never contacted, 5+ min old |
+| Follow-up due | `?filter=follow_up_due` | Past-due `next_follow_up_at` |
+| Never contacted | `?filter=never_contacted` | Assigned leads, no contact, 2+ hr old |
+
+### "Last contact" column
+
+The leads inbox now shows a **Last contact** column. Values:
+- `just now` — contacted < 1 minute ago
+- `15m ago` — contacted N minutes ago
+- `3h ago` — contacted N hours ago
+- `2d ago` — contacted N days ago
+- `never` *(italic, muted)* — `last_contacted_at` is null
+
+### Post-deploy smoke test
+
+Run immediately after any production deploy:
+```bash
+TARGET_URL=https://www.askmagicmike.com pnpm run amm:smoke:prod
+```
+
+To verify the session-create write path (smoke session only — **not a real lead**):
+```bash
+TARGET_URL=https://www.askmagicmike.com node scripts/prod-smoke.mjs --write
+```
+
+All checks should pass. Security header checks (`hsts`, `noSniff`, etc.) report `warn` until Delta headers are confirmed live. After confirming, promote those checks to `fail` in `scripts/prod-smoke.mjs`.
+
+### Before deploying
+
+Always verify what is currently live before pushing:
+```bash
+node scripts/amm/verify-production-alias.mjs
+```
+
+This confirms the live commit at `www.askmagicmike.com` and prevents unattributed production changes.
+
+### Escalation path
+
+| Severity | Condition | Action |
+|---|---|---|
+| P0 | `database.reachable: false` | Page Brandon immediately. Do not take other actions. |
+| P0 | `live_sms_disabled: false` in prod | Page Brandon + Mike. Stop all campaigns. |
+| P1 | A+/A lead unreachable after 30 min | Escalate to Mike; log in lead notes. |
+| P2 | `overdueSla > 3` at morning check | Work SLA queue before any other admin task. |
+| P3 | Smoke test fail on any check | Investigate before the next deploy. |

@@ -25,6 +25,10 @@ export interface LeadListFilters {
   sort?: "newest" | "highest_score" | "sla_deadline" | "last_activity";
   followUpDue?: boolean;
   neverContacted?: boolean;
+  /** Grade A+/A leads — highest priority inbox view. */
+  urgentOnly?: boolean;
+  /** A+/A grade, no last_contacted_at, created > 5 min ago — SLA at risk. */
+  slaBreach?: boolean;
   limit?: number;
   offset?: number;
 }
@@ -130,6 +134,13 @@ export async function loadLeadList(
   if (filters.neverContacted) {
     const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
     q = q.eq("status", "assigned").is("last_contacted_at", null).lt("created_at", twoHoursAgo);
+  }
+  if (filters.urgentOnly) {
+    q = q.in("lead_grade", ["A+", "A"]);
+  }
+  if (filters.slaBreach) {
+    const fiveMinAgo = new Date(Date.now() - 5 * 60_000).toISOString();
+    q = q.in("lead_grade", ["A+", "A"]).is("last_contacted_at", null).lt("created_at", fiveMinAgo);
   }
   if (filters.q) {
     q = q.or(
