@@ -6,6 +6,7 @@ import { loadLeadList, type LeadListFilters, type LeadListRow } from "@/lib/admi
 import { loadDashboardMetrics } from "@/lib/admin/dashboard-metrics";
 import { computeReadyWillingAble, type RwaScore } from "@/lib/leads/ready-willing-able";
 import { LEAD_STATUSES } from "@/lib/leads/lead-types";
+import { formatContactAge } from "@/lib/admin/lead-contact-format";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -33,6 +34,8 @@ function readFilters(sp: Record<string, string | string[] | undefined>): LeadLis
     offset: v("offset") ? Number(v("offset")) : 0,
     followUpDue: filterShortcut === "follow_up_due",
     neverContacted: filterShortcut === "never_contacted",
+    urgentOnly: filterShortcut === "urgent",
+    slaBreach: filterShortcut === "sla_breach",
   };
 }
 
@@ -52,6 +55,7 @@ function rwaFromRow(l: LeadListRow): RwaScore {
   });
 }
 
+
 const REFERRER_BADGE: Record<string, string> = {
   paid:     "bg-gold-400/20 text-gold-300 border-gold-400/30",
   organic:  "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
@@ -68,9 +72,19 @@ const RWA_TIER_STYLES: Record<string, string> = {
   cold:   "bg-white/[0.05] text-slate-400 border-white/10",
 };
 
+const QUICK_FILTERS = [
+  { label: "All leads",       key: null,             style: "border-white/[0.12] text-slate-400 hover:text-slate-200" },
+  { label: "Urgent (A+/A)",   key: "urgent",         style: "border-ruby-400/30 text-ruby-300 bg-ruby-400/[0.08] hover:bg-ruby-400/[0.14]" },
+  { label: "SLA breach",      key: "sla_breach",     style: "border-ruby-400/30 text-ruby-300 bg-ruby-400/[0.08] hover:bg-ruby-400/[0.14]" },
+  { label: "Follow-up due",   key: "follow_up_due",  style: "border-amber-400/30 text-amber-300 bg-amber-400/[0.06] hover:bg-amber-400/[0.12]" },
+  { label: "Never contacted", key: "never_contacted",style: "border-blue-400/30 text-blue-300 bg-blue-400/[0.06] hover:bg-blue-400/[0.12]" },
+] as const;
+
 export default async function LeadsInboxPage({ searchParams }: PageProps) {
   const sp = await searchParams;
   const filters = readFilters(sp);
+  const activeFilter = (Array.isArray(sp.filter) ? sp.filter[0] : sp.filter) ?? null;
+
   const [list, dash] = await Promise.all([
     loadLeadList(filters),
     loadDashboardMetrics(),
@@ -122,6 +136,25 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
               </p>
             </div>
           ))}
+        </div>
+
+        {/* Quick filter chips */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {QUICK_FILTERS.map(({ label, key, style }) => {
+            const isActive = key === null ? !activeFilter : activeFilter === key;
+            const href = key ? `?filter=${key}` : "?";
+            return (
+              <Link
+                key={label}
+                href={href}
+                className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors ${style} ${
+                  isActive ? "ring-1 ring-white/20" : "opacity-70"
+                }`}
+              >
+                {label}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Filters */}
@@ -219,7 +252,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                 <th className="text-left px-3 py-2">Temp</th>
                 <th className="text-left px-3 py-2">RWA</th>
                 <th className="text-left px-3 py-2">Status</th>
-                <th className="text-left px-3 py-2">Queue</th>
+                <th className="text-left px-3 py-2">Last contact</th>
                 <th className="text-left px-3 py-2">Next action</th>
                 <th className="text-left px-3 py-2">Source</th>
                 <th className="text-left px-3 py-2">Campaign</th>
@@ -302,7 +335,15 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                     })()}
                   </td>
                   <td className="px-3 py-2 text-slate-300">{l.status}</td>
-                  <td className="px-3 py-2 text-slate-300">{"—"}</td>
+                  <td className="px-3 py-2 text-[12px] tabular-nums">
+                    <span className={
+                      l.lastContactedAt
+                        ? "text-emerald-400"
+                        : "text-slate-500 italic"
+                    }>
+                      {formatContactAge(l.lastContactedAt)}
+                    </span>
+                  </td>
                   <td className="px-3 py-2 text-slate-300 max-w-[220px]">{"—"}</td>
                   <td className="px-3 py-2 text-slate-300">
                     {l.referrerType ? (

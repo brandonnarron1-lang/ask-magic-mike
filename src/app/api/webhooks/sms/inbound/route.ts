@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
 import { verifyTwilioSignature } from "@/lib/adapters/twilio-signature";
+import { createLogger } from "@/lib/observability/logger";
 
+const log = createLogger("sms-inbound");
 const NO_STORE = { "Cache-Control": "no-store" };
 
 /**
@@ -127,7 +129,7 @@ export async function POST(req: NextRequest) {
         content: body,
       });
       if (msgErr) {
-        console.error("[sms-inbound] messages.insert failed:", msgErr.message);
+        log.error("messages.insert_failed", { error: msgErr.message });
       }
     }
 
@@ -139,10 +141,7 @@ export async function POST(req: NextRequest) {
         notes: JSON.stringify({ providerMessageId, mode }),
       });
       if (flagErr) {
-        console.error(
-          "[sms-inbound][COMPLIANCE CRITICAL] compliance_flags insert failed for opt-out. Lead",
-          leadId, "may NOT be opted out. Error:", flagErr.message
-        );
+        log.error("compliance_flags.insert_failed_CRITICAL", { lead_id: leadId, error: flagErr.message });
       }
     }
 
@@ -154,7 +153,7 @@ export async function POST(req: NextRequest) {
       processed_at: new Date().toISOString(),
     });
     if (evtErr) {
-      console.error("[sms-inbound] webhook_events.insert failed:", evtErr.message);
+      log.error("webhook_events.insert_failed", { error: evtErr.message });
     }
   }
 

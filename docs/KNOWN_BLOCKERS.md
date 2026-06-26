@@ -59,8 +59,8 @@ See `docs/PRODUCTION_LAUNCH_GATE.md` for the full pre-launch checklist.
 ### S-01 — PR #8 (V8 value page) needs rebase
 
 **PR:** #8 (`feat: integrate v8 value page experience`)  
-**Impact:** Branch is 20+ days stale; test suite ran against 370 tests, main now has 1084+. MERGESTATE: UNKNOWN.  
-**Fix:** Rebase against main, re-run full validation, product review before merge.  
+**Impact:** Branch is 30+ days stale; test suite ran against 370 tests, main is now at 1090+. MERGESTATE: UNKNOWN.  
+**Fix:** Rebase against main (post-Delta; after Epsilon merges rebase again), re-run full validation, product review before merge.  
 **Owner:** Brandon · **ETA:** Before next visual sprint
 
 ---
@@ -70,6 +70,15 @@ See `docs/PRODUCTION_LAUNCH_GATE.md` for the full pre-launch checklist.
 **Impact:** No leads are synced to Follow Up Boss or kvCORE until credentials are configured.  
 **Fix:** Set `FUB_API_KEY` (or `KVCORE_API_KEY` + `KVCORE_BASE_URL`) in Vercel and verify `crm_sync_log` entries.  
 **Owner:** Mike Eatmon · **ETA:** When CRM account is ready
+
+---
+
+### S-04 — YouTube badge uses prohibited red-* token (deferred to Epsilon)
+
+**File:** `src/app/(admin)/admin/traffic/page.tsx:28`  
+**Impact:** `YouTube: "bg-red-600/20 text-red-300"` violates the ruby-400 / no-red-* design token rule.  
+**Fix:** Fixed in PR #45 (Epsilon) → `bg-ruby-400/[0.14] text-ruby-300`. Will resolve when Epsilon merges.  
+**Owner:** Engineering · **ETA:** On Epsilon merge
 
 ---
 

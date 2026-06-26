@@ -4,6 +4,64 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## [PR #45] Release Train Epsilon — Product Hardening
+
+**Status:** Open — awaiting explicit merge instruction  
+**Branch:** `release-train-epsilon-product-hardening`  
+**Rebased onto:** `f1d344a` (post-Delta main)
+
+### Changes
+- `src/app/(admin)/admin/traffic/page.tsx` — fixed prohibited `red-300` token on YouTube platform badge → `ruby-300`
+- `src/types/env.d.ts` — `NEXT_PUBLIC_APP_URL` marked `@deprecated`; added `NEXT_PUBLIC_SITE_URL` and `PUBLIC_SITE_URL` as optional
+- `scripts/prod-smoke.mjs` — added `hasNoMlsMarkers`, `extractSecurityHeaders`, `checkSecurityHeaders`, `checkAdminUnauth`, `checkEmbed`, `homepage:no_mls_markers` check; all new functions exported for unit testing
+- `package.json` — added `amm:smoke:prod` script
+- `src/lib/observability/logger.ts` (new) — structured logger with PII scrubber; `createLogger(context)` → `{info, warn, error}`
+- `src/lib/security/rate-limit.ts` — added `RateLimitStore` interface and `InMemoryRateLimitStore` class for Upstash swap-in upgrade
+- `tests/lib/observability-logger.test.ts` (new) — 15 tests
+- `tests/lib/rate-limit-store.test.ts` (new) — 9 tests
+- `tests/scripts/prod-smoke.test.ts` — 9 new tests for MLS marker and security header helpers
+- `docs/RELEASE_TRAIN_EPSILON_AUDIT.md` (new) — full 17-area audit table
+- `docs/PRODUCTION_SMOKE_TESTING.md` (new) — 21-check registry, safety rules, exit codes
+
+### Validation (on rebase)
+- typecheck: 0 errors
+- lint: 0 new errors (5 pre-existing in viral-post-builder.ts)
+- test: 1116/1116 passing (72 files)
+- build: clean
+- funnel verify: 15/15 PASS
+
+---
+
+## [PR #44] Release Train Delta — Launch Gate Hardening
+
+**Merged:** 2026-06-26  
+**Commit:** `f1d344a`  
+**Branch:** `release-train-delta-launch-gate`
+
+### Changes
+- `next.config.ts` — security headers (HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, X-Frame-Options: SAMEORIGIN) added globally; `/embed/*` override with `frame-ancestors` CSP for ourtownproperties.com
+- `next.config.ts` — `serverActions.allowedOrigins` locked to `localhost:3000`, `askmagicmike.com`, `www.askmagicmike.com`
+- `docs/ARCHITECTURE.md` — schema table expanded from 9 → 26 tables across 3 sections; migration count corrected to 13 files (00001–00013)
+- `docs/PRODUCTION_LAUNCH_GATE.md` — migration range corrected to `00001 → 00013`
+- `docs/CANONICAL_PRODUCTION_STACK.md` (new) — repo, Vercel project, domain, embed surface, out-of-scope systems
+- `docs/RATE_LIMITING_DURABILITY_PLAN.md` (new) — current in-memory limitations, Upstash upgrade path, migration sketch
+- `docs/KNOWN_BLOCKERS.md` (new) — hard blockers B-01–B-05, soft blockers S-01–S-03
+
+### Validation
+- typecheck: 0 errors
+- lint: 0 new errors
+- test: 1084/1084 passing
+- build: clean
+- funnel verify: 15/15 PASS
+
+### Ruleset bypass log
+- Backup: `/tmp/ruleset-backup.json` (GET `rulesets/17291635`)
+- Payload built from backup — only `bypass_actors` modified
+- Bypass enabled; squash-merged via `gh pr merge 44 --squash --admin`
+- `bypass_actors` restored to `[]`; verified via GET
+
+---
+
 ## [PR #42] Release Train Gamma — Broker Workflow Completion + Webhook Reliability
 
 **Merged:** 2026-06-26  
