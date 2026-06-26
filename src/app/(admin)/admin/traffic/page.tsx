@@ -25,7 +25,7 @@ const PLATFORM_COLORS: Record<string, string> = {
   Threads:        "bg-white/10 text-slate-300",
   LinkedIn:       "bg-sky-700/20 text-sky-300",
   "X / Twitter":  "bg-slate-600/20 text-slate-300",
-  YouTube:        "bg-red-600/20 text-red-300",
+  YouTube:        "bg-ruby-400/[0.14] text-ruby-300",
   Google:         "bg-emerald-600/20 text-emerald-300",
   Bing:           "bg-teal-600/20 text-teal-300",
   "Organic Search": "bg-emerald-600/15 text-emerald-300",

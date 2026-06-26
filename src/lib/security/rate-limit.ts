@@ -16,12 +16,73 @@ export interface RateLimitResult {
   resetAt: number; // unix ms
 }
 
+/**
+ * Abstraction over the rate-limit backing store.
+ *
+ * The current implementation is InMemoryRateLimitStore — it works for
+ * local dev and single-instance deploys but is NOT launch-grade.
+ *
+ * To upgrade to Upstash Redis:
+ *   1. Install @upstash/ratelimit @upstash/redis
+ *   2. Implement DurableRateLimitStore using @upstash/ratelimit (see
+ *      docs/RATE_LIMITING_DURABILITY_PLAN.md for the full migration sketch)
+ *   3. Export the durable store from this file and swap the call site below
+ *
+ * The interface is synchronous-only for now (matching the current Map
+ * implementation). A durable store would need async — update the interface
+ * and callers at that point.
+ */
+export interface RateLimitStore {
+  check(key: string, limit: number, windowMs: number): RateLimitResult;
+}
+
 interface BucketEntry {
   count: number;
   windowStart: number;
 }
 
+/**
+ * In-memory rate limit store.
+ *
+ * LIMITATIONS (not launch-grade):
+ * - Resets to zero on every cold start (serverless functions = frequent resets)
+ * - Each Vercel/Node instance has its own isolated store
+ * - No shared state across horizontally-scaled instances
+ *
+ * See docs/RATE_LIMITING_DURABILITY_PLAN.md for the Upstash upgrade path.
+ */
+export class InMemoryRateLimitStore implements RateLimitStore {
+  private readonly store = new Map<string, BucketEntry>();
+
+  check(key: string, limit: number, windowMs: number): RateLimitResult {
+    const now = Date.now();
+    const entry = this.store.get(key);
+
+    if (!entry || now - entry.windowStart > windowMs) {
+      this.store.set(key, { count: 1, windowStart: now });
+      return { allowed: true, remaining: limit - 1, resetAt: now + windowMs };
+    }
+
+    if (entry.count >= limit) {
+      return {
+        allowed: false,
+        remaining: 0,
+        resetAt: entry.windowStart + windowMs,
+      };
+    }
+
+    entry.count += 1;
+    return {
+      allowed: true,
+      remaining: limit - entry.count,
+      resetAt: entry.windowStart + windowMs,
+    };
+  }
+}
+
 // In-memory store: key → { count, windowStart }
+// Used by the legacy checkRateLimit() function below. The InMemoryRateLimitStore
+// class above provides the same logic through the RateLimitStore interface.
 const store = new Map<string, BucketEntry>();
 
 /**

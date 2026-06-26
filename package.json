@@ -34,7 +34,8 @@
     "smoke:prod": "TARGET_URL=https://www.askmagicmike.com node scripts/prod-smoke.mjs",
     "smoke:target": "node scripts/prod-smoke.mjs",
     "amm:verify:funnel": "node scripts/amm/verify-live-conversion-funnel.mjs",
-    "amm:verify:social-preview": "node scripts/amm/verify-social-preview.mjs"
+    "amm:verify:social-preview": "node scripts/amm/verify-social-preview.mjs",
+    "amm:smoke:prod": "TARGET_URL=https://www.askmagicmike.com node scripts/prod-smoke.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.0",
