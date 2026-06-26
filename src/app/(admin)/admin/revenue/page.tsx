@@ -529,7 +529,7 @@ export default async function RevenueCommandPage() {
                     </td>
                     <td className="px-4 py-2 text-right tabular-nums">
                       {row.hotUrgentCount > 0
-                        ? <span className="text-red-300 font-semibold">{row.hotUrgentCount}</span>
+                        ? <span className="text-ruby-300 font-semibold">{row.hotUrgentCount}</span>
                         : <span className="text-slate-600">0</span>}
                     </td>
                     <td className="px-4 py-2 text-right tabular-nums">

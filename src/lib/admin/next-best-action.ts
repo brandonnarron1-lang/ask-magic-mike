@@ -83,7 +83,8 @@ function deriveTemperatureLabel(temperature?: string | null): string {
     case "urgent":  return "Urgent — act same day";
     case "hot":     return "Hot — act within 24 h";
     case "warm":    return "Warm — follow up this week";
-    case "cold":    return "Cold — low urgency";
+    case "nurture": return "Nurture — follow up next month";
+    case "low":     return "Low — add to long-term list";
     default:        return "Not assessed";
   }
 }
@@ -111,7 +112,7 @@ function deriveFollowUpAngle(input: NextBestActionInput, missing: string[]): str
     return "DO NOT CONTACT — synthetic/test lead. No follow-up action.";
   }
 
-  const temp = input.temperature ?? "cold";
+  const temp = input.temperature ?? "low";
   const type = input.leadType ?? "";
 
   if (missing.includes("Contact consent (email or SMS)")) {
@@ -138,11 +139,15 @@ function deriveFollowUpAngle(input: NextBestActionInput, missing: string[]): str
     return "Warm lead — reach out this week with a low-pressure check-in.";
   }
 
+  if (temp === "nurture") {
+    return "Nurture lead — re-engage in 30 days with a market update or value check-in.";
+  }
+
   if (missing.length > 0) {
     return `Low-urgency lead — consider collecting missing info (${missing.join(", ")}) before following up.`;
   }
 
-  return "Cold lead — no immediate follow-up needed. Monitor for re-engagement.";
+  return "Low urgency — no immediate follow-up needed. Monitor for re-engagement.";
 }
 
 export function buildNextBestAction(input: NextBestActionInput): NextBestActionResult {

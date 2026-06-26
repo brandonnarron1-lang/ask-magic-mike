@@ -45,8 +45,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               variant === "secondary",
             // Ghost: transparent
             "text-cream hover:bg-white/10": variant === "ghost",
-            // Destructive: subtle red
-            "bg-red-600 text-white hover:bg-red-500": variant === "destructive",
+            // Destructive: ruby (matches urgent/critical token)
+            "bg-ruby-400 text-white hover:bg-ruby-300 active:bg-ruby-500": variant === "destructive",
             // Ruby: CTA accent
             "bg-ruby-400 text-white hover:bg-ruby-300 active:bg-ruby-500 shadow-lg shadow-ruby-400/20":
               variant === "ruby",

@@ -22,6 +22,15 @@ export default async function LeadDetailPage({ params }: PageProps) {
     .filter(Boolean)
     .join(" ") || "(unnamed)";
 
+  const rawTemperature = String(lead.temperature ?? "");
+  const tempBadgeClass =
+    rawTemperature === "urgent"  ? "bg-ruby-400/[0.14] text-ruby-300 border-ruby-400/30" :
+    rawTemperature === "hot"     ? "bg-gold-400/20 text-gold-300 border-gold-400/30" :
+    rawTemperature === "warm"    ? "bg-amber-500/10 text-amber-300 border-amber-500/30" :
+    rawTemperature === "nurture" ? "bg-blue-500/10 text-blue-300 border-blue-500/20" :
+    rawTemperature === "low"     ? "bg-slate-600/30 text-slate-400 border-slate-600/30" :
+    null;
+
   const nba = buildNextBestAction({
     leadType:    String(lead.lead_type ?? ""),
     status:      String(lead.status ?? ""),
@@ -123,7 +132,16 @@ export default async function LeadDetailPage({ params }: PageProps) {
             <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1 mb-3">
               <Field label="Source path"   value={nba.sourcePath} />
               <Field label="Score"         value={nba.scoreLabel} />
-              <Field label="Temperature"   value={nba.temperatureLabel} />
+              <div className="text-[12.5px] mb-1">
+                <span className="text-slate-400 mr-2">Temperature:</span>
+                {tempBadgeClass ? (
+                  <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${tempBadgeClass}`}>
+                    {nba.temperatureLabel}
+                  </span>
+                ) : (
+                  <span className="text-[#F4F4F4]">{nba.temperatureLabel}</span>
+                )}
+              </div>
               <Field label="Intent"        value={nba.intentSummary} />
             </div>
 
@@ -179,13 +197,13 @@ export default async function LeadDetailPage({ params }: PageProps) {
           <Card title="Attribution">
             {detail.attribution ? (
               <>
-                <Field label="referrer_type" value={String(detail.attribution.referrer_type ?? "—")} />
-                <Field label="is_paid" value={detail.attribution.is_paid ? "yes" : "no"} />
-                <Field label="utm_source" value={String(detail.attribution.utm_source ?? "—")} />
-                <Field label="utm_medium" value={String(detail.attribution.utm_medium ?? "—")} />
-                <Field label="utm_campaign" value={String(detail.attribution.utm_campaign ?? "—")} />
-                <Field label="referrer" value={String(detail.attribution.referrer_url ?? "—")} />
-                <Field label="landing page" value={String(detail.attribution.landing_page ?? "—")} />
+                <Field label="Referrer Type"  value={String(detail.attribution.referrer_type ?? "—")} />
+                <Field label="Paid Traffic"   value={detail.attribution.is_paid ? "yes" : "no"} />
+                <Field label="UTM Source"     value={String(detail.attribution.utm_source ?? "—")} />
+                <Field label="UTM Medium"     value={String(detail.attribution.utm_medium ?? "—")} />
+                <Field label="UTM Campaign"   value={String(detail.attribution.utm_campaign ?? "—")} />
+                <Field label="Referring URL"  value={String(detail.attribution.referrer_url ?? "—")} />
+                <Field label="Landing Page"   value={String(detail.attribution.landing_page ?? "—")} />
               </>
             ) : (
               <p className="text-[12.5px] text-slate-400">No attribution row.</p>
