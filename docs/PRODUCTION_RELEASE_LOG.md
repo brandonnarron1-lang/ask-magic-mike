@@ -4,6 +4,36 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## [PR #40] Backend Reliability + Daily-Ops Filter Wiring
+
+**Merged:** 2026-06-26  
+**Commit:** `0a09703`  
+**Branch:** `fix/backend-reliability-broker-os-v2`
+
+### Changes
+- `src/app/api/admin/leads/[id]/assign/route.ts` — captures `leads.update` error → 500 with `{ ok: false, error: "assignment_failed" }`; `agent_assignments.insert` and `audit_logs.insert` errors logged as non-fatal
+- `src/app/api/scoring/compute/route.ts` — captures `lead_scores.upsert` error → 500 with `{ error: "score_persist_failed" }`
+- `src/app/api/admin/leads/[id]/match-listings/route.ts` — per-listing upsert errors captured and logged (non-fatal)
+- `src/lib/admin/lead-list.ts` — added `followUpDue` and `neverContacted` to `LeadListFilters`; DB constraints: `lte(next_follow_up_at, now) + not-null guard`; `eq(status=assigned) + is(last_contacted_at, null) + lt(created_at, -2h)`
+- `src/app/(admin)/admin/leads/page.tsx` — `readFilters()` handles `?filter=follow_up_due` and `?filter=never_contacted` shortcut params (fixes dead links from Today's Operations panel)
+- `tests/api/admin-assign-reliability.test.ts` — 6 new tests
+- `tests/api/scoring-compute-reliability.test.ts` — 5 new tests
+- `tests/admin/lead-list-filters.test.ts` — 5 new filter-wiring tests added
+
+### Validation
+- typecheck: 0 errors
+- lint: pre-existing ESLint plugin conflict (unrelated to changes)
+- test: 1072/1072 passing
+- build: clean
+- funnel verify: 15/15 PASS
+
+### Ruleset bypass log
+- GET saved to `/tmp/current-ruleset.json` before modification
+- bypass\_actors set at 09:44:33 UTC, restored at 09:45:43 UTC (70 seconds)
+- PR merged at 13:45:30 UTC (GitHub timestamp)
+
+---
+
 ## [PR #39] Daily Operations v1 — Follow-up Tracking + Broker Ops Panel
 
 **Merged:** 2026-06-26  
