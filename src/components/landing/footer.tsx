@@ -1,4 +1,6 @@
+import Image from "next/image";
 import { siteConfig } from "@/lib/site-config";
+import { brandPackAssets } from "@/components/amm/brand-pack-assets";
 
 function EqualHousingIcon({ className = "" }: { className?: string }) {
   return (
@@ -34,11 +36,13 @@ export function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <svg width="28" height="28" viewBox="0 0 60 60" fill="none" aria-hidden="true">
-                <rect x="2" y="2" width="56" height="56" rx="4" fill="#0A0A0A" stroke="#D4A017" strokeWidth="2"/>
-                <path d="M30 8 C18 8 10 18 10 28 L10 50 L20 50 L20 36 L40 36 L40 50 L50 50 L50 28 C50 18 42 8 30 8Z" fill="none" stroke="#D4A017" strokeWidth="2.5"/>
-                <rect x="23" y="36" width="14" height="14" rx="1" fill="none" stroke="#D4A017" strokeWidth="2"/>
-              </svg>
+              <Image
+                src={brandPackAssets.logo.primary}
+                alt="Our Town Properties, Inc."
+                width={52}
+                height={27}
+                className="h-auto w-auto opacity-80"
+              />
               <div>
                 <div className="text-xs font-semibold tracking-[0.15em] uppercase text-gold-400">Ask Magic Mike</div>
                 <div className="text-[10px] text-slate-500">Powered by Our Town Properties</div>
