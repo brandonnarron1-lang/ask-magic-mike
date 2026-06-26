@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
 
   let leadId: string | null = null;
   let routingDecision = null;
+  let persistenceFailed = false;
 
   // 2. Persist to DB
   if (!shouldUseDevStorage()) {
@@ -386,14 +387,32 @@ export async function POST(req: NextRequest) {
             properties: { adapter: crm.name, error: errorMsg },
           });
         }
+      } else {
+        // upsertLead returned null — DB error was logged inside upsertLead
+        persistenceFailed = true;
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error("[intake/submit] persistence error:", msg);
+      persistenceFailed = true;
     }
 
-    // Mark session complete
-    await completeSession(input.sessionId);
+    // Mark session complete only when the lead was actually saved
+    if (!persistenceFailed) {
+      await completeSession(input.sessionId);
+    }
+  }
+
+  // Return 503 if production persistence failed — do not let the caller
+  // believe the lead was captured when it was not.
+  if (!shouldUseDevStorage() && persistenceFailed) {
+    return NextResponse.json(
+      {
+        error:   "submission_failed",
+        message: "Your request could not be saved. Please try again in a moment.",
+      },
+      { status: 503, headers: NO_STORE }
+    );
   }
 
   // 3. Fire analytics events (dev + prod)

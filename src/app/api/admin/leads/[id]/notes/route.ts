@@ -47,12 +47,20 @@ export async function POST(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = createAdminClient() as any;
 
-  await client.from("messages").insert({
+  const { error: insertErr } = await client.from("messages").insert({
     lead_id: id,
     role: "agent",
     content: note,
     agent_id: body.agent_id ?? null,
   });
+
+  if (insertErr) {
+    console.error("[notes] insert error:", insertErr.message);
+    return NextResponse.json(
+      { ok: false, error: "note_save_failed" },
+      { status: 500, headers: NO_STORE }
+    );
+  }
 
   await client.from("audit_logs").insert({
     actor: auth.actor,
