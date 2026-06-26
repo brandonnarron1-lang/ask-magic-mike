@@ -4,6 +4,63 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## [PR #42] Release Train Gamma — Broker Workflow Completion + Webhook Reliability
+
+**Merged:** 2026-06-26  
+**Commit:** `4d7c0e8`  
+**Branch:** `feat/gamma-broker-complete`
+
+### Changes
+- `src/app/api/webhooks/sms/inbound/route.ts` — error capture on `messages.insert`, `compliance_flags.insert`, `webhook_events.insert`; `[COMPLIANCE CRITICAL]` prefix on opt-out failures; return 200 preserved
+- `src/app/api/webhooks/email/events/route.ts` — error capture on `message_deliveries.update`, `compliance_flags.insert`, `webhook_events.insert`; same critical prefix on email opt-out failures
+- `src/app/api/admin/leads/[id]/route.ts` — PATCH now accepts `next_follow_up_at: null` (was returning 400; Clear button was broken) and `last_contacted_at` (string or null)
+- `src/app/(admin)/admin/leads/[id]/actions.ts` — `markContactedAction` sets `last_contacted_at = now()`, revalidates lead detail + dashboard
+- `src/components/admin/admin-lead-actions.tsx` — "Contact activity" card with "Mark contacted now" button
+- `src/app/(admin)/admin/leads/page.tsx` — status dropdown + sort selector added as second filter row; LEAD_STATUSES imported
+- `tests/api/webhook-sms-reliability.test.ts` — 4 new tests
+- `tests/api/webhook-email-reliability.test.ts` — 4 new tests
+- `tests/api/admin-lead-patch-null.test.ts` — 4 new tests
+
+### Bugs Fixed
+- **Webhook silent data loss** — SMS and email webhooks swallowed all DB errors with no logging
+- **Clear follow-up broken** — PATCH with `next_follow_up_at: null` returned 400 (`no_supported_fields`)
+- **Mark Contacted missing** — no write path for `last_contacted_at`; `neverContacted` filter was tracking unclearable state
+
+### Validation
+- typecheck: 0 errors
+- test: 1084/1084 passing
+- build: clean
+- funnel verify: 15/15 PASS
+
+### Ruleset bypass log
+- Backup saved to `/tmp/gamma-ruleset-backup.json` before modification
+- Payload built from backup (only `bypass_actors` changed)
+- Bypass enabled: 14:00 UTC; merged: 14:00 UTC; restored: 14:00 UTC
+- Post-restore verification: `bypass_actors: []`, `enforcement: active`, all 4 rules intact
+
+---
+
+## [PR #40] Backend Reliability + Daily-Ops Filter Wiring
+
+**Merged:** 2026-06-26  
+**Commit:** `0a09703`  
+**Branch:** `fix/backend-reliability-broker-os-v2`
+
+### Changes
+- `src/app/api/admin/leads/[id]/assign/route.ts` — captures `leads.update` error → 500; `agent_assignments` and `audit_logs` failures logged non-fatal
+- `src/app/api/scoring/compute/route.ts` — captures `lead_scores.upsert` error → 500
+- `src/app/api/admin/leads/[id]/match-listings/route.ts` — per-listing upsert errors captured and logged
+- `src/lib/admin/lead-list.ts` — `followUpDue` and `neverContacted` filter fields + DB constraints
+- `src/app/(admin)/admin/leads/page.tsx` — `readFilters()` handles `?filter=follow_up_due` / `never_contacted` shortcuts
+- `tests/api/admin-assign-reliability.test.ts` — 6 new tests
+- `tests/api/scoring-compute-reliability.test.ts` — 5 new tests
+- `tests/admin/lead-list-filters.test.ts` — 5 new filter-wiring tests
+
+### Validation
+- typecheck: 0 errors · test: 1072/1072 · build: clean · funnel: 15/15
+
+---
+
 ## [PR #39] Daily Operations v1 — Follow-up Tracking + Broker Ops Panel
 
 **Merged:** 2026-06-26  
