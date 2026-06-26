@@ -163,3 +163,7 @@ Evidence capture template — defines exactly what screenshot or terminal output
 **[`docs/PRODUCTION_DEPLOY_REHEARSAL.md`](PRODUCTION_DEPLOY_REHEARSAL.md)**
 
 Deployment-day minute-by-minute timeline with Stop If column for every action. Follow this top-to-bottom on launch day.
+
+**[`docs/GO_NO_GO_COMMAND_CENTER.md`](GO_NO_GO_COMMAND_CENTER.md)**
+
+Single-page launch authority decision. Current status, gate summary table, hard GO/NO-GO criteria, and final sign-off block. Run `npm run amm:launch:authority` to verify current authority status.

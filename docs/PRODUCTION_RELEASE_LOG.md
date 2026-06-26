@@ -4,6 +4,32 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## [PR #51] Launch Candidate 5 — Production Deploy Rehearsal + Owner Proof Pack
+
+**Merged:** 2026-06-26  
+**Commit:** `cd9a83b`  
+**Branch:** `launch-candidate-5-production-deploy-rehearsal`  
+**Rebased onto:** `ba7f40f` (post-LC-4 main)
+
+### Changes
+- `docs/OWNER_ACTION_PROOF_PACK.md` (new) — 12-section evidence capture template; 14-row evidence table defining exactly what screenshot or terminal output constitutes proof for each of the 6 owner-gated actions; final controlled traffic authorization signature block; 11 stop conditions; 1Password evidence log template
+- `docs/PRODUCTION_DEPLOY_REHEARSAL.md` (new) — deployment-day operator timeline with 20-row T-30m through T+24h sequence (Time | Operator | Action | Command | Expected Result | Stop If); 8-row first-hour monitoring; rollback trigger list; rollback communication note; go/no-go decision checklist
+- `docs/CONTROLLED_LAUNCH_RUNBOOK.md` — version bump LC-4→LC-5; added companion pointers to proof pack and rehearsal docs
+- `docs/PRODUCTION_LAUNCH_GATE.md` — added pointers to OWNER_ACTION_PROOF_PACK.md and PRODUCTION_DEPLOY_REHEARSAL.md
+- `docs/PRODUCTION_RELEASE_LOG.md` — added PR #50 entry
+- `scripts/amm/launch-readiness-doctor.mjs` — added checks for 2 new docs, release log currency (PR #49, #50), stale vercel.app in operational docs; 2 new exported helpers: `releaseLogMentionsPr`, `findStaleVercelUrlsInDocs`
+- `tests/scripts/launch-readiness-doctor.test.ts` — 9 new tests (1187 total)
+
+### Validation (on merge)
+- typecheck: 0 errors
+- lint: 0 new errors
+- test: 1187/1187 passing (75 files)
+- build: clean
+- funnel verify: 15/15 PASS
+- launch doctor: 26 PASS / 6 SKIP (owner-gated env vars) / 0 FAIL
+
+---
+
 ## [PR #50] Launch Candidate 4 — Owner Action Runbook + Launch Doctor
 
 **Merged:** 2026-06-26  

@@ -1,10 +1,11 @@
 # Production Deploy Rehearsal — Ask Magic Mike
 
-**Version:** LC-5 (post-merge-train #44–#50)  
-**Code state:** `main` @ `ba7f40f` — launch-ready  
+**Version:** LC-6 (post-merge-train #44–#51)  
+**Code state:** `main` @ `cd9a83b` — launch-ready  
 **Audience:** Brandon Narron (operator)  
 **Estimated total time:** 60–90 minutes with credentials in hand  
 **Companion documents:**
+- `docs/GO_NO_GO_COMMAND_CENTER.md` — final launch authority decision and gate table
 - `docs/CONTROLLED_LAUNCH_RUNBOOK.md` — full procedures for each step
 - `docs/OWNER_ACTION_PROOF_PACK.md` — evidence capture template
 - `docs/KNOWN_BLOCKERS.md` — outstanding blockers
