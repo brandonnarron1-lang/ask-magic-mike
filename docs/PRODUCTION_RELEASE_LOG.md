@@ -4,9 +4,60 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## [PR #47] Launch Candidate 1 — Premium Visual System
+
+**Merged:** 2026-06-26  
+**Commit:** `4d55923`  
+**Branch:** `launch-candidate-1-premium-visual-system`  
+**Rebased onto:** `c552ab2` (post-Zeta main)
+
+### Changes
+- `src/components/landing/how-it-works.tsx` — Full replacement with ambient Mike portrait per step (opacity 0.10), step connector thread, watermark step numbers, section-level heroCloseup ambient element
+- `src/components/landing/hero-section.tsx` — `grain-overlay` texture, sparkle accent near h1, smokeGlow SVG ambient layer on portrait
+- `src/components/landing/footer.tsx` — Replaced hand-drawn SVG house icon with `brandPackAssets.logo.primary`
+- `src/components/landing/mike-card.tsx` — Replaced `OurTownIcon` SVG function with `brandPackAssets.logo.primary`
+- `src/components/landing/why-mike.tsx` — Added sparkle accent above section heading
+- `src/components/campaign/value-hero.tsx` — Added gold-rule top accent to final trust block
+- `src/app/globals.css` — Added `delay-250` animation utility
+- `tests/brand/visual-tokens-lc1.test.ts` (new) — 15 compliance tests (no red-* tokens, no vercel.app URLs, concept asset restriction, asset existence, delay-250)
+- `docs/LAUNCH_CANDIDATE_1_VISUAL_AUDIT.md` (new) — Full visual audit table
+- `docs/VISUAL_ASSET_REQUIREMENTS.md` (new) — Brand asset registry documentation
+
+### Validation (on rebase)
+- typecheck: 0 errors
+- lint: 0 new errors
+- test: 1137/1137 passing (74 files)
+- build: clean
+- funnel verify: 15/15 PASS
+
+---
+
+## [PR #46] Release Train Zeta — Admin UX + Lead Routing
+
+**Merged:** 2026-06-26  
+**Commit:** `c552ab2`  
+**Branch:** `release-train-zeta-admin-ux-lead-routing`  
+**Rebased onto:** `aae43cf` (post-Epsilon main)
+
+### Changes
+- `src/lib/admin/lead-contact-format.ts` (new) — `formatContactAge(isoString)` utility
+- `src/lib/admin/lead-list.ts` — Added `urgentOnly` and `slaBreach` boolean filter flags to `LeadListFilters`
+- `src/lib/observability/logger.ts` — Backported from Epsilon; auto-resolved on rebase (identical content)
+- Admin dashboard UX improvements and lead routing schema migrations
+
+### Validation (on rebase)
+- typecheck: 0 errors
+- lint: 0 new errors
+- test: passing (73 files)
+- build: clean
+- funnel verify: 15/15 PASS
+
+---
+
 ## [PR #45] Release Train Epsilon — Product Hardening
 
-**Status:** Open — awaiting explicit merge instruction  
+**Merged:** 2026-06-26  
+**Commit:** `aae43cf`  
 **Branch:** `release-train-epsilon-product-hardening`  
 **Rebased onto:** `f1d344a` (post-Delta main)
 

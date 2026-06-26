@@ -73,6 +73,11 @@ export function Footer() {
                 </a>
               </div>
               <div className="text-slate-500 pt-1">Wilson, NC · Eastern NC</div>
+              <div className="pt-3 border-t border-white/[0.05] space-y-1.5">
+                <span className="text-slate-600 text-[10px] uppercase tracking-[0.12em] block mb-1.5">Quick Links</span>
+                <a href="/ask" className="block hover:text-gold-400 transition-colors">Ask a Question</a>
+                <a href="/value" className="block hover:text-gold-400 transition-colors">Home Value Estimate</a>
+              </div>
             </div>
           </div>
 
