@@ -2,7 +2,7 @@ export const dynamic   = "force-dynamic";
 export const revalidate = 0;
 
 import Link from "next/link";
-import { Inbox, DollarSign, BarChart2, Share2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Inbox, DollarSign, BarChart2, Share2, AlertCircle, CheckCircle2, Users } from "lucide-react";
 import { LeadTable } from "@/components/admin/lead-table";
 import { getLeadsForAdmin } from "@/lib/db/lead-repository";
 import { loadDashboardMetrics } from "@/lib/admin/dashboard-metrics";
@@ -217,9 +217,10 @@ export default async function AdminPage() {
           <p className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-slate-500 mb-3">
             Command Centers
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {[
               { href: "/admin/leads",        Icon: Inbox,     label: "Leads Inbox",          sub: "Inbox · filter · detail" },
+              { href: "/admin/routing",      Icon: Users,      label: "Agent Routing",        sub: "Roster · queue · SLA" },
               { href: "/admin/revenue",      Icon: DollarSign, label: "Revenue",              sub: "Pipeline · sentinel · alerts" },
               { href: "/admin/traffic",      Icon: BarChart2,  label: "Traffic",              sub: "UTM · sources · sessions" },
               { href: "/admin/distribution", Icon: Share2,     label: "Distribution",         sub: "Queue · platforms · plan" },
