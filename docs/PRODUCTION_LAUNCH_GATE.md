@@ -155,3 +155,11 @@ For the step-by-step operator checklist, verification procedures, rollback plan,
 **[`docs/CONTROLLED_LAUNCH_RUNBOOK.md`](CONTROLLED_LAUNCH_RUNBOOK.md)**
 
 That document is the authoritative launch cockpit — it converts every item above into an executable owner action with verification commands and go/no-go gates.
+
+**[`docs/OWNER_ACTION_PROOF_PACK.md`](OWNER_ACTION_PROOF_PACK.md)**
+
+Evidence capture template — defines exactly what screenshot or terminal output to collect for each owner action, and where to record pass/fail. Use this alongside the runbook.
+
+**[`docs/PRODUCTION_DEPLOY_REHEARSAL.md`](PRODUCTION_DEPLOY_REHEARSAL.md)**
+
+Deployment-day minute-by-minute timeline with Stop If column for every action. Follow this top-to-bottom on launch day.
