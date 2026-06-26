@@ -4,6 +4,33 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## [PR #39] Daily Operations v1 — Follow-up Tracking + Broker Ops Panel
+
+**Merged:** 2026-06-26  
+**Commit:** `cae7ab1`  
+**Branch:** `product/daily-operations-v1`  
+**Vercel deployment:** `dpl_Bj7DfmWpUHGUZPNUfwAgvGijxrD4` (state: READY, target: production)
+
+### Changes
+- `src/app/(admin)/admin/leads/[id]/actions.ts` — `setFollowUpAction`: PATCH `next_follow_up_at`, revalidates `/admin` and lead detail
+- `src/components/admin/admin-lead-actions.tsx` — Follow-up Date card with datetime-local input and Clear button
+- `src/lib/admin/dashboard-metrics.ts` — two targeted count queries: `followUpDue` (`next_follow_up_at <= NOW()`) and `neverContacted` (assigned, no contact, >2h old)
+- `src/app/(admin)/admin/page.tsx` — Today's Operations panel (amber-bordered, conditionally rendered when Supabase live and either count > 0)
+- `src/app/(admin)/admin/leads/[id]/page.tsx` — Profile card: `Last Contacted` + `Next Follow-up` fields
+- `src/lib/admin/lead-list.ts` — DRY fix: import `SPAM_SUSPECT_THRESHOLD` from `spam-detector` (was hardcoded `40`)
+- `tests/admin/dashboard-metrics.test.ts` — 5 new tests for `followUpDue` / `neverContacted` metric fields
+
+### Validation
+- typecheck: 0 errors
+- lint: 0 errors
+- test: 1024/1024 passing
+- build: clean
+- funnel verify: 15/15 PASS
+- social preview: expected FAIL (WAF blocker, pre-existing)
+- Production UI verified: admin dashboard renders, Command Centers 5-tile grid confirmed, follow-up card + Profile fields verified via dev server smoke test
+
+---
+
 ## [PR #38] Lead Capture Reliability — Silent Failure Fixes
 
 **Merged:** 2026-06-16  

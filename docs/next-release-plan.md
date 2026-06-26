@@ -1,6 +1,7 @@
 # Next Release Plan — Ask Magic Mike Launch Operations Readiness
 
-Generated from code + live inspection on 2026-06-18.
+Generated from code + live inspection on 2026-06-18.  
+**Note:** Gap B (admin funnel metrics in UI) resolved by PR #39 (2026-06-26) — `followUpDue`, `neverContacted`, funnel tiles, and Today's Operations panel are now live. Remaining gaps: E (og:url), A (prod smoke script), G (launch gate doc).
 
 ---
 

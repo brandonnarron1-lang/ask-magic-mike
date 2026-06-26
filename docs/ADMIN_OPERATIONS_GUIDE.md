@@ -20,11 +20,16 @@ The main dashboard shows:
 | Stat tiles (top row) | Total leads, urgent count, hot count, SLA-breached count |
 | Attention Required | Named leads that are urgent or SLA-breached, with direct links |
 | Funnel tiles (if Supabase connected) | New today, contacted, appointments requested, unassigned |
+| **Today's Operations** (if Supabase connected) | Follow-ups overdue + never-contacted assigned leads |
 | Source breakdown | Lead counts by UTM source |
-| Command Centers nav | Links to all specialized command centers |
+| Command Centers nav | Links to all 5 specialized command centers |
 | Recent Leads table | Click any row to open the lead detail page |
 
 **Attention Required** appears when at least one lead is urgent (score ≥80, timeline ≤3 months) or SLA-breached. Click any lead row to go directly to the detail page. "All clear" shown when none qualify.
+
+**Today's Operations** appears when at least one of these conditions is true:
+- **Follow-ups Due** — leads where `next_follow_up_at` is in the past; click tile to go to filtered inbox
+- **Never Contacted** — leads with status `assigned`, no `last_contacted_at`, created more than 2 hours ago
 
 ---
 
@@ -36,6 +41,8 @@ Shows full lead information:
 - **Next Best Action** — recommended follow-up action based on score + temperature + timeline
 - **Attribution** — referrer type, UTM source/medium/campaign, landing page
 - **Consent flags** — SMS, call, email consent recorded at intake
+- **Profile card** — includes `Last Contacted` (timestamp or "Never") and `Next Follow-up` (timestamp or "Not set")
+- **Follow-up Date** action card — set or clear `next_follow_up_at` using the datetime picker; cleared via the "Clear" button; revalidates the dashboard and this page on save
 
 ---
 

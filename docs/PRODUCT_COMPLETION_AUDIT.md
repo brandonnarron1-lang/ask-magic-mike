@@ -1,7 +1,7 @@
 # Product Completion Audit — Ask Magic Mike
 
 _Ask Magic Mike · Our Town Properties, Inc. · Wilson, NC_
-_Audit date: 2026-06-25. Branch: product/completion-sprint-v1._
+_Audit date: 2026-06-26. Last updated: PR #39 daily-operations-v1._
 
 ---
 
@@ -85,8 +85,9 @@ Ask Magic Mike is a production-grade AI real estate lead system. As of this audi
 |---|---|---|
 | Lead count tiles | ✅ Complete | Total/Urgent/Hot/SLA Breached |
 | Funnel metrics | ✅ Complete | New Today/Contacted/Appt./Unassigned (when Supabase configured) |
+| **Today's Operations panel** | ✅ Complete | Follow-ups Due + Never Contacted (PR #39; Supabase required) |
 | Lead by source | ✅ Complete | UTM source breakdown pills |
-| Command center nav | ✅ Complete | 4 nav cards with icons and sub-labels |
+| Command center nav | ✅ Complete | 5 nav cards — Leads, Agent Routing, Revenue, Traffic, Distribution |
 | LeadTable | ✅ Complete | Sortable, expandable rows |
 | Locked state | ✅ Complete | Shows when Supabase absent, no mock data |
 | Dev mode banner | ✅ Complete | Amber warning when running locally without DB |
@@ -107,7 +108,7 @@ Ask Magic Mike is a production-grade AI real estate lead system. As of this audi
 
 | Feature | Status | Notes |
 |---|---|---|
-| Profile | ✅ Complete | Name, email, phone, address, source, spam score, created |
+| Profile | ✅ Complete | Name, email, phone, address, source, spam score, created, Last Contacted, Next Follow-up |
 | Attribution | ✅ Complete | utm_source/medium/campaign, referrer_type, is_paid, landing_page |
 | Events log | ✅ Complete | All lead events with timestamps |
 | Messages log | ✅ Complete | SMS/email content log |
@@ -115,7 +116,8 @@ Ask Magic Mike is a production-grade AI real estate lead system. As of this audi
 | Compliance flags | ✅ Complete | Opt-out flags, severity |
 | Listing matches | ✅ Complete | Match ID and score |
 | Next Best Action | ✅ Complete | NBA engine, score, source path, follow-up angle |
-| Operator actions | ✅ Complete | Assign, status, lead type, mark spam, note, task, message, listings, offers |
+| Operator actions | ✅ Complete | Assign, status, lead type, mark spam, note, task, message, listings, offers, **follow-up date** |
+| Follow-up date setter | ✅ Complete | datetime-local input, Set/Clear; PATCH next_follow_up_at (PR #39) |
 | Synthetic warning | ✅ Complete | AlertTriangle icon + ruby banner |
 
 ### Revenue Command Center (`/admin/revenue`)
@@ -171,7 +173,7 @@ Ask Magic Mike is a production-grade AI real estate lead system. As of this audi
 | UTM forwarding | ✅ Complete | Client-side sessionStorage → form submit → server |
 | Routing / assignment | ✅ Complete | assignLeadAction, routing logic |
 | SLA monitoring | ✅ Complete | Vercel Cron sweep, breach detection |
-| Operator actions | ✅ Complete | Status, type, assign, note, task, SMS, email, listings, offer |
+| Operator actions | ✅ Complete | Status, type, assign, note, task, SMS, email, listings, offer, follow-up date |
 | Admin auth | ✅ Complete | ADMIN_SECRET header, server actions, fail-closed |
 
 ---
