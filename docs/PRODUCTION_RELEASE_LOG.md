@@ -4,6 +4,31 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## [PR #50] Launch Candidate 4 — Owner Action Runbook + Launch Doctor
+
+**Merged:** 2026-06-26  
+**Commit:** `ba7f40f`  
+**Branch:** `launch-candidate-4-owner-action-runbook`  
+**Rebased onto:** `674edde` (post-LC-3 main)
+
+### Changes
+- `docs/CONTROLLED_LAUNCH_RUNBOOK.md` (new) — 11-section operator cockpit: env var checklist, Supabase migration verification (13 tables + RLS + agent seed), admin auth verification, production smoke command sequence, manual real test lead procedure, admin dashboard verification, WordPress CTA activation, rollback plan, go/no-go criteria, 24h monitoring cadence
+- `scripts/amm/launch-readiness-doctor.mjs` (new) — read-only 27-check launch readiness script; exits 1 on FAIL, 0 on PASS or owner-gated SKIP
+- `tests/scripts/launch-readiness-doctor.test.ts` (new) — 41 unit tests for all exported pure helper functions
+- `package.json` — added `"amm:launch:doctor"` script
+- `docs/PRODUCTION_LAUNCH_GATE.md` — added pointer section to `CONTROLLED_LAUNCH_RUNBOOK.md`
+- `docs/PRODUCTION_RELEASE_LOG.md` — added PR #49 merge entry
+
+### Validation (on merge)
+- typecheck: 0 errors
+- lint: 0 new errors
+- test: 1178/1178 passing (75 files)
+- build: clean
+- funnel verify: 15/15 PASS
+- launch doctor: 21 PASS / 6 SKIP (owner-gated env vars) / 0 FAIL
+
+---
+
 ## [PR #49] Launch Candidate 3 — Final Launch Gate + Doc Hardening
 
 **Merged:** 2026-06-26  

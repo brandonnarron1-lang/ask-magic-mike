@@ -7,6 +7,8 @@ import {
   findNoveltyCopy,
   findMlsMarkers,
   checkCanonicalSiteConfig,
+  releaseLogMentionsPr,
+  findStaleVercelUrlsInDocs,
   VERCEL_URL_PATTERN,
   VERCEL_URL_ALLOWLIST,
   RED_TOKEN_PATTERN,
@@ -300,5 +302,77 @@ describe("checkCanonicalSiteConfig", () => {
 
   it("CANONICAL_DOMAIN is the production domain", () => {
     expect(CANONICAL_DOMAIN).toBe("askmagicmike.com");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// releaseLogMentionsPr
+// ---------------------------------------------------------------------------
+
+describe("releaseLogMentionsPr", () => {
+  it("returns ok: false for a non-existent file", () => {
+    const result = releaseLogMentionsPr("/does/not/exist.md", 50);
+    expect(result.ok).toBe(false);
+    expect(result.reason).toContain("not found");
+  });
+
+  it("returns ok: false when PR number is absent from the log", () => {
+    const { writeFileSync } = require("fs");
+    const path = "/tmp/test-release-log-missing.md";
+    writeFileSync(path, "## [PR #48] Some sprint\n\nMerged.");
+    const result = releaseLogMentionsPr(path, 50);
+    expect(result.ok).toBe(false);
+    expect(result.reason).toContain("PR #50");
+  });
+
+  it("returns ok: true when PR number appears as a header", () => {
+    const { writeFileSync } = require("fs");
+    const path = "/tmp/test-release-log-present.md";
+    writeFileSync(path, "## [PR #50] LC-4 Owner Action Runbook\n\nMerged at ba7f40f.");
+    const result = releaseLogMentionsPr(path, 50);
+    expect(result.ok).toBe(true);
+  });
+
+  it("returns ok: true when PR number appears in inline text", () => {
+    const { writeFileSync } = require("fs");
+    const path = "/tmp/test-release-log-inline.md";
+    writeFileSync(path, "See PR #50 for full change list.");
+    const result = releaseLogMentionsPr(path, 50);
+    expect(result.ok).toBe(true);
+  });
+
+  it("correctly checks the actual release log for PR #49 and #50", () => {
+    const logPath = process.cwd() + "/docs/PRODUCTION_RELEASE_LOG.md";
+    expect(releaseLogMentionsPr(logPath, 49).ok).toBe(true);
+    // PR #50 entry is added in LC-5 — will pass after this sprint lands
+  });
+});
+
+// ---------------------------------------------------------------------------
+// findStaleVercelUrlsInDocs
+// ---------------------------------------------------------------------------
+
+describe("findStaleVercelUrlsInDocs", () => {
+  it("returns empty array for no docs", () => {
+    expect(findStaleVercelUrlsInDocs([])).toEqual([]);
+  });
+
+  it("flags a doc containing a stale vercel.app URL", () => {
+    const { writeFileSync } = require("fs");
+    const path = "/tmp/test-doc-stale.md";
+    writeFileSync(path, "Old URL: https://ask-magic-mike.vercel.app/ask");
+    expect(findStaleVercelUrlsInDocs([path])).toContain(path);
+  });
+
+  it("does not flag a doc using only the canonical domain", () => {
+    const { writeFileSync } = require("fs");
+    const path = "/tmp/test-doc-canonical.md";
+    writeFileSync(path, "Use https://www.askmagicmike.com/ask for all CTAs.");
+    expect(findStaleVercelUrlsInDocs([path])).not.toContain(path);
+  });
+
+  it("does not flag a non-existent path (skips gracefully)", () => {
+    const result = findStaleVercelUrlsInDocs(["/does/not/exist.md"]);
+    expect(result).not.toContain("/does/not/exist.md");
   });
 });

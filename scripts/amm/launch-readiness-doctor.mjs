@@ -153,6 +153,34 @@ export function findMlsMarkers(files) {
 }
 
 /**
+ * Check that the production release log mentions a specific PR number.
+ * Used to verify the log is kept current with the merge train.
+ */
+export function releaseLogMentionsPr(releaseLogPath, prNumber) {
+  const content = readFileSafe(releaseLogPath);
+  if (!content) return { ok: false, reason: "PRODUCTION_RELEASE_LOG.md not found" };
+  const patterns = [`[PR #${prNumber}]`, `PR #${prNumber}`];
+  const found = patterns.some((p) => content.includes(p));
+  if (!found) {
+    return { ok: false, reason: `PR #${prNumber} not found in release log` };
+  }
+  return { ok: true };
+}
+
+/**
+ * Check that a set of operational docs do not contain stale vercel.app preview URLs.
+ * Unlike the src check, this applies to specified doc paths directly.
+ */
+export function findStaleVercelUrlsInDocs(docPaths) {
+  const hits = [];
+  for (const docPath of docPaths) {
+    const content = readFileSafe(docPath);
+    if (VERCEL_URL_PATTERN.test(content)) hits.push(docPath);
+  }
+  return hits;
+}
+
+/**
  * Verify canonical site URL in site-config.ts points to production domain.
  */
 export const CANONICAL_DOMAIN = "askmagicmike.com";
@@ -238,6 +266,8 @@ if (isMain) {
     ["docs/PRODUCTION_RELEASE_LOG.md", "Release log"],
     ["docs/ADMIN_OPERATIONS_GUIDE.md", "Admin ops guide"],
     ["docs/regency-wordpress-handoff.md", "WordPress handoff"],
+    ["docs/OWNER_ACTION_PROOF_PACK.md", "Owner proof pack"],
+    ["docs/PRODUCTION_DEPLOY_REHEARSAL.md", "Deploy rehearsal checklist"],
   ];
   for (const [rel, label] of requiredDocs) {
     if (existsSync(join(ROOT, rel))) {
@@ -245,6 +275,35 @@ if (isMain) {
     } else {
       fail(`doc missing: ${label}`, rel);
     }
+  }
+
+  // ── Release log currency check ───────────────────────────────────────────
+  console.log("\n[Release log currency]");
+  const releaseLogPath = join(ROOT, "docs/PRODUCTION_RELEASE_LOG.md");
+  for (const prNum of [49, 50]) {
+    const logResult = releaseLogMentionsPr(releaseLogPath, prNum);
+    if (logResult.ok) {
+      pass(`release log mentions PR #${prNum}`);
+    } else {
+      fail(`release log missing PR #${prNum} entry`, logResult.reason);
+    }
+  }
+
+  // ── Stale vercel.app URLs in new operational docs ────────────────────────
+  console.log("\n[Stale vercel.app URLs in operational docs]");
+  const operationalDocs = [
+    join(ROOT, "docs/CONTROLLED_LAUNCH_RUNBOOK.md"),
+    join(ROOT, "docs/OWNER_ACTION_PROOF_PACK.md"),
+    join(ROOT, "docs/PRODUCTION_DEPLOY_REHEARSAL.md"),
+  ].filter(existsSync);
+  const staleDocUrls = findStaleVercelUrlsInDocs(operationalDocs);
+  if (staleDocUrls.length === 0) {
+    pass("no stale vercel.app URLs in operational docs");
+  } else {
+    fail(
+      `stale vercel.app URLs in ${staleDocUrls.length} doc(s)`,
+      staleDocUrls.map((f) => f.replace(ROOT + "/", "")).join(", ")
+    );
   }
 
   // ── Stale vercel.app URLs in src/ ────────────────────────────────────────
