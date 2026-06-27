@@ -50,3 +50,6 @@ export type {
 
 export { StatusBadge } from "./status-badge";
 export type { StatusBadgeProps } from "./status-badge";
+
+export { Reveal, Stagger } from "./reveal";
+export type { RevealProps, StaggerProps } from "./reveal";

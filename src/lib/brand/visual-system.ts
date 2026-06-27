@@ -386,6 +386,46 @@ export const dash = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// Motion system tokens (Tailwind class compositions)
+// ---------------------------------------------------------------------------
+
+export const motion = {
+  // Scroll-reveal entrance animations — consumed by useReveal / <Reveal>
+  reveal: {
+    "fade-up":    "animate-fade-up",
+    "fade-down":  "animate-fade-down",
+    "fade-in":    "animate-fade-in",
+    "scale-in":   "animate-scale-in",
+    "slide-left": "animate-slide-left",
+    "slide-right":"animate-slide-right",
+    "blur-in":    "animate-blur-in",
+  },
+  // Hover micro-interactions
+  hover: {
+    lift:   "transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg",
+    scale:  "transition-transform duration-200 ease-out hover:scale-[1.02]",
+    glow:   "transition-shadow duration-300 hover:shadow-[0_0_24px_-4px_rgba(212,160,23,0.25)]",
+    dim:    "transition-opacity duration-150 hover:opacity-80",
+    bright: "transition-opacity duration-150 opacity-70 hover:opacity-100",
+  },
+  // Active press states
+  press: {
+    sm: "active:scale-[0.97] motion-reduce:active:scale-100",
+    md: "active:scale-[0.96] motion-reduce:active:scale-100",
+  },
+  // Base transition utilities
+  transition: {
+    fast:      "transition-all duration-150 ease-out",
+    base:      "transition-all duration-200 ease-out",
+    slow:      "transition-all duration-300 ease-out",
+    color:     "transition-colors duration-200 ease-out",
+    shadow:    "transition-shadow duration-300 ease-out",
+    opacity:   "transition-opacity duration-200 ease-out",
+    transform: "transition-transform duration-200 ease-out",
+  },
+} as const;
+
+// ---------------------------------------------------------------------------
 // URL safety helpers
 // ---------------------------------------------------------------------------
 
