@@ -201,6 +201,64 @@ export const gradients = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// Elevation system — named z0-z6 shadow scale (for inline styles)
+// ---------------------------------------------------------------------------
+
+export const elevation = {
+  z0: "none",
+  z1: "0 1px 3px rgba(0,0,0,0.50), 0 1px 2px rgba(0,0,0,0.35)",
+  z2: "0 4px 12px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.40)",
+  z3: "0 8px 24px rgba(0,0,0,0.60), 0 4px 8px rgba(0,0,0,0.45)",
+  z4: "0 16px 40px rgba(0,0,0,0.65), 0 8px 16px rgba(0,0,0,0.50)",
+  z5: "0 24px 60px rgba(0,0,0,0.75), 0 12px 24px rgba(0,0,0,0.55)",
+  z6: "0 40px 80px rgba(0,0,0,0.85), 0 20px 40px rgba(0,0,0,0.60)",
+} as const;
+
+export const glows = {
+  goldXs:   "0 0 8px rgba(212,160,23,0.20)",
+  goldSm:   "0 0 16px rgba(212,160,23,0.25)",
+  goldMd:   "0 0 28px rgba(212,160,23,0.30)",
+  goldLg:   "0 0 48px rgba(212,160,23,0.35)",
+  goldXl:   "0 0 80px rgba(212,160,23,0.40)",
+  goldLift: "0 18px 40px -12px rgba(212,160,23,0.55)",
+  goldCta:  "0 10px 30px -10px rgba(212,175,55,0.55)",
+  goldHalo: "0 0 120px rgba(212,160,23,0.20), 0 0 60px rgba(212,160,23,0.12)",
+  rubyXs:   "0 0 8px rgba(193,39,45,0.20)",
+  rubyMd:   "0 0 24px rgba(193,39,45,0.28)",
+  rubyLg:   "0 0 48px rgba(193,39,45,0.35)",
+  cyanXs:   "0 0 8px rgba(0,207,234,0.15)",
+  cyanMd:   "0 0 24px rgba(0,207,234,0.22)",
+} as const;
+
+// ---------------------------------------------------------------------------
+// Animation tokens — easing curves and durations (for inline styles)
+// ---------------------------------------------------------------------------
+
+export const easing = {
+  luxury:    "cubic-bezier(0.22, 1, 0.36, 1)",
+  spring:    "cubic-bezier(0.34, 1.56, 0.64, 1)",
+  swift:     "cubic-bezier(0.55, 0, 0.1, 1)",
+  cinematic: "cubic-bezier(0.76, 0, 0.24, 1)",
+  entrance:  "cubic-bezier(0.0, 0.0, 0.2, 1.0)",
+  exit:      "cubic-bezier(0.4, 0.0, 1, 1)",
+  emphasis:  "cubic-bezier(0.3, 0, 0, 1)",
+  snap:      "cubic-bezier(0.85, 0, 0.15, 1)",
+  standard:  "cubic-bezier(0.4, 0.0, 0.2, 1)",
+} as const;
+
+export const duration = {
+  instant:    "0ms",
+  ultraFast:  "80ms",
+  fast:       "150ms",
+  base:       "250ms",
+  medium:     "350ms",
+  slow:       "500ms",
+  leisurely:  "650ms",
+  cinematic:  "800ms",
+  dramatic:   "1200ms",
+} as const;
+
+// ---------------------------------------------------------------------------
 // Animation delay helpers (ms values as strings for inline styles)
 // ---------------------------------------------------------------------------
 
@@ -212,6 +270,58 @@ export const animDelay = {
   lg:    "450ms",
   xl:    "600ms",
   "2xl": "750ms",
+  "3xl": "1000ms",
+} as const;
+
+// ---------------------------------------------------------------------------
+// Layout tokens — spacing, container sizes, gutters
+// ---------------------------------------------------------------------------
+
+export const layout = {
+  pageGutter:  "clamp(1rem, 4vw, 2rem)",
+  sectionY:    "clamp(4rem, 10vw, 8rem)",
+  sectionGap:  "clamp(3rem, 6vw, 5rem)",
+  cardPad:     "clamp(1.25rem, 3vw, 1.75rem)",
+  cardPadLg:   "clamp(1.75rem, 4vw, 2.5rem)",
+  maxContent:  "72rem",
+  maxText:     "52rem",
+  maxNarrow:   "38rem",
+} as const;
+
+// ---------------------------------------------------------------------------
+// Lighting primitive tokens — ambient/rim/bloom (for inline styles)
+// ---------------------------------------------------------------------------
+
+export const lighting = {
+  ambientGold:
+    "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(212,160,23,0.14) 0%, transparent 65%)",
+  ambientTop:
+    "radial-gradient(ellipse 100% 40% at 50% 0%, rgba(212,160,23,0.08) 0%, transparent 60%)",
+  ambientRuby:
+    "radial-gradient(ellipse 60% 40% at 80% 110%, rgba(193,39,45,0.08) 0%, transparent 60%)",
+  bloomGold:  "0 0 120px rgba(212,160,23,0.15)",
+  bloomRuby:  "0 0 80px rgba(193,39,45,0.12)",
+  rimGold:    "0 0 60px rgba(212,160,23,0.08)",
+  rimWarm:    "0 0 40px rgba(245,240,232,0.04)",
+  cta:        "0 10px 30px -10px rgba(212,175,55,0.55)",
+} as const;
+
+// ---------------------------------------------------------------------------
+// Glass surface tokens (for inline styles)
+// ---------------------------------------------------------------------------
+
+export const glass = {
+  bg:       "rgba(10,10,10,0.72)",
+  bgLight:  "rgba(20,20,20,0.60)",
+  bgHeavy:  "rgba(5,5,5,0.88)",
+  bgWarm:   "rgba(14,12,7,0.80)",
+  goldBg:   "rgba(212,160,23,0.05)",
+  border:   "rgba(255,255,255,0.07)",
+  borderMid:"rgba(255,255,255,0.10)",
+  borderStr:"rgba(255,255,255,0.15)",
+  blurSm:   "8px",
+  blur:     "24px",
+  blurXl:   "48px",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -283,4 +393,4 @@ export const motionSafe = "motion-reduce:animate-none motion-reduce:transition-n
 // Version tag — used in tests to confirm the module is importable
 // ---------------------------------------------------------------------------
 
-export const VISUAL_SYSTEM_VERSION = "1.0.0" as const;
+export const VISUAL_SYSTEM_VERSION = "2.0.0" as const;
