@@ -63,7 +63,7 @@ export function AdminLeadActions({
       {result ? (
         <p
           role="status"
-          className={`text-[12.5px] rounded-md px-3 py-2 ${
+          className={`text-sm rounded-md px-3 py-2 ${
             result.ok
               ? "bg-emerald-500/10 border border-emerald-400/40 text-emerald-200"
               : "bg-ruby-400/10 border border-ruby-400/40 text-ruby-200"
@@ -84,12 +84,12 @@ export function AdminLeadActions({
             name="agent_id"
             required
             placeholder="agent UUID"
-            className="flex-1 rounded-md border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-[12.5px]"
+            className="flex-1 rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
           />
           <input
             name="reason"
             placeholder="reason (optional)"
-            className="flex-1 rounded-md border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-[12.5px]"
+            className="flex-1 rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
           />
           <SubmitBtn>Assign</SubmitBtn>
         </form>
@@ -103,7 +103,7 @@ export function AdminLeadActions({
             <select
               name="status"
               defaultValue={currentStatus ?? ""}
-              className="flex-1 rounded-md border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-[12.5px]"
+              className="flex-1 rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
             >
               {LEAD_STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -119,7 +119,7 @@ export function AdminLeadActions({
             <select
               name="lead_type"
               defaultValue={currentLeadType ?? ""}
-              className="flex-1 rounded-md border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-[12.5px]"
+              className="flex-1 rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
             >
               {LEAD_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -135,7 +135,7 @@ export function AdminLeadActions({
             <select
               name="spam"
               defaultValue="true"
-              className="flex-1 rounded-md border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-[12.5px]"
+              className="flex-1 rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
             >
               <option value="true">Mark spam</option>
               <option value="false">Clear spam</option>
@@ -157,7 +157,7 @@ export function AdminLeadActions({
             required
             rows={3}
             placeholder="Internal note — visible only to admin"
-            className="w-full rounded-md border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-[12.5px]"
+            className="w-full rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
           />
           <SubmitBtn>Save note</SubmitBtn>
         </form>
@@ -174,17 +174,17 @@ export function AdminLeadActions({
             name="title"
             required
             placeholder="Title"
-            className="rounded-md border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-[12.5px]"
+            className="rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
           />
           <input
             name="due_at"
             type="datetime-local"
-            className="rounded-md border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-[12.5px]"
+            className="rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
           />
           <select
             name="priority"
             defaultValue="normal"
-            className="rounded-md border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-[12.5px]"
+            className="rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
           >
             <option value="low">low</option>
             <option value="normal">normal</option>
@@ -195,7 +195,7 @@ export function AdminLeadActions({
             name="body"
             rows={2}
             placeholder="Notes (optional)"
-            className="sm:col-span-2 rounded-md border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-[12.5px]"
+            className="sm:col-span-2 rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
           />
           <SubmitBtn className="sm:col-span-2">Create task</SubmitBtn>
         </form>
@@ -203,7 +203,7 @@ export function AdminLeadActions({
 
       {/* Messaging */}
       <Card title="Send templated message">
-        <p className="text-[10.5px] uppercase tracking-[0.16em] text-slate-400 mb-2">
+        <p className="text-[10.5px] uppercase tracking-label text-slate-400 mb-2">
           Mock provider: SMS={smsEnabled ? "LIVE" : "MOCK"} · EMAIL=
           {emailEnabled ? "LIVE" : "MOCK"}
         </p>
@@ -215,14 +215,14 @@ export function AdminLeadActions({
           >
             <input type="hidden" name="lead_id" value={leadId} />
             <input type="hidden" name="channel" value="sms" />
-            <p className="text-[11.5px] text-slate-300">
+            <p className="text-xs text-slate-300">
               SMS · consent: {consentSms ? "yes" : "no"}{" "}
               {smsOptOut ? "· opted out" : ""}
             </p>
             <select
               name="template_slug"
               required
-              className="w-full rounded-md border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-[12.5px]"
+              className="w-full rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
             >
               {Object.keys(SMS_TEMPLATES).map((slug) => (
                 <option key={slug} value={slug}>
@@ -242,14 +242,14 @@ export function AdminLeadActions({
           >
             <input type="hidden" name="lead_id" value={leadId} />
             <input type="hidden" name="channel" value="email" />
-            <p className="text-[11.5px] text-slate-300">
+            <p className="text-xs text-slate-300">
               Email · consent: {consentEmail ? "yes" : "no"}{" "}
               {emailOptOut ? "· opted out" : ""}
             </p>
             <select
               name="template_slug"
               required
-              className="w-full rounded-md border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-[12.5px]"
+              className="w-full rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
             >
               {Object.keys(EMAIL_TEMPLATES).map((slug) => (
                 <option key={slug} value={slug}>
@@ -285,7 +285,7 @@ export function AdminLeadActions({
           className="flex items-center gap-2"
         >
           <input type="hidden" name="lead_id" value={leadId} />
-          <p className="text-[11.5px] text-slate-400 flex-1">
+          <p className="text-xs text-slate-400 flex-1">
             Records the current timestamp as last contacted.
           </p>
           <SubmitBtn>Mark contacted now</SubmitBtn>
@@ -306,7 +306,7 @@ export function AdminLeadActions({
             <input
               type="datetime-local"
               name="follow_up_at"
-              className="w-full rounded-md border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-[12.5px]"
+              className="w-full rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
             />
           </div>
           <SubmitBtn>Set date</SubmitBtn>
@@ -317,7 +317,7 @@ export function AdminLeadActions({
               const input = form.querySelector<HTMLInputElement>("input[name=follow_up_at]");
               if (input) input.value = "";
             }}
-            className="rounded-md border border-white/12 px-3 py-1.5 text-[12.5px] text-slate-300 hover:bg-white/5"
+            className="rounded-xl border border-white/12 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5"
           >
             Clear
           </button>
@@ -330,7 +330,7 @@ export function AdminLeadActions({
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-white/[0.09] bg-white/[0.025] p-4">
-      <p className="text-[10.5px] tracking-[0.18em] uppercase text-gold-300/85 mb-2">
+      <p className="text-[10.5px] tracking-label uppercase text-gold-300/85 mb-2">
         {title}
       </p>
       {children}
@@ -351,7 +351,7 @@ function SubmitBtn({
     <button
       type="submit"
       disabled={disabled}
-      className={`rounded-md bg-gold-400 px-3 py-1.5 text-[12.5px] font-bold text-[#050505] disabled:opacity-50 disabled:cursor-not-allowed ${
+      className={`rounded-xl bg-gold-400 px-3 py-1.5 text-sm font-bold text-midnight disabled:opacity-50 disabled:cursor-not-allowed ${
         className ?? ""
       }`}
     >

@@ -14,8 +14,8 @@ import { buildUtmCopyBank } from "@/lib/admin/utm-link-builder";
 const CARD = "rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4";
 const CARD_WARN = "rounded-xl border border-amber-400/40 bg-amber-400/[0.05] px-5 py-4";
 const CARD_OK   = "rounded-xl border border-emerald-500/30 bg-emerald-500/[0.04] px-5 py-4";
-const LABEL = "text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-1";
-const BIG   = "font-bebas text-4xl leading-none text-[#F4F4F4]";
+const LABEL = "text-[10.5px] tracking-label uppercase text-slate-500 mb-1";
+const BIG   = "font-bebas text-4xl leading-none text-cream";
 const BIG_WARN = "font-bebas text-4xl leading-none text-amber-400";
 const BIG_OK   = "font-bebas text-4xl leading-none text-emerald-400";
 
@@ -99,17 +99,17 @@ export default async function TrafficCommandPage() {
     : "0%";
 
   return (
-    <div className="min-h-screen bg-[#080806] text-[#F4F4F4]">
+    <div className="min-h-screen bg-[#080806] text-cream">
       {/* ------------------------------------------------------------------ */}
       {/* Header                                                              */}
       {/* ------------------------------------------------------------------ */}
       <header className="border-b border-white/10 bg-[#0D0B07] px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
-            <p className="text-[10.5px] tracking-[0.18em] uppercase text-gold-300/85">
+            <p className="text-[10.5px] tracking-label uppercase text-gold-300/85">
               Ask Magic Mike · Admin
             </p>
-            <h1 className="font-display text-[22px] font-semibold text-[#F4F4F4]">
+            <h1 className="font-display text-[22px] font-semibold text-cream">
               Traffic Command Center
             </h1>
             <p className="text-sm text-slate-400 mt-0.5">
@@ -142,13 +142,13 @@ export default async function TrafficCommandPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             {/* AMM Links */}
             <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/[0.04] px-5 py-4">
-              <div className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-1">AMM Links</div>
+              <div className="text-[10.5px] tracking-label uppercase text-slate-500 mb-1">AMM Links</div>
               <div className="font-bebas text-3xl leading-none text-emerald-400">Safe ✓</div>
               <p className="text-[11px] text-slate-500 mt-1">askmagicmike.com — post freely</p>
             </div>
             {/* OTP Facebook */}
             <div className="rounded-xl border border-amber-400/40 bg-amber-400/[0.05] px-5 py-4">
-              <div className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-1">OTP Facebook Links</div>
+              <div className="text-[10.5px] tracking-label uppercase text-slate-500 mb-1">OTP Facebook Links</div>
               <div className="font-bebas text-3xl leading-none text-amber-400">
                 {launchReadiness.otpFacebookLinksSafe ? "Clear ✓" : "Blocked ⚠"}
               </div>
@@ -160,15 +160,15 @@ export default async function TrafficCommandPage() {
             </div>
             {/* Primary posting domain */}
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
-              <div className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-1">Post Here First</div>
-              <div className="text-lg font-semibold text-[#F4F4F4] mt-1 break-all">
+              <div className="text-[10.5px] tracking-label uppercase text-slate-500 mb-1">Post Here First</div>
+              <div className="text-lg font-semibold text-cream mt-1 break-all">
                 {launchReadiness.recommendedPrimaryPostingDomain}
               </div>
               <p className="text-[11px] text-slate-500 mt-1">All platforms. All previews pass.</p>
             </div>
             {/* Social preview score */}
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
-              <div className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-1">Social Preview Score</div>
+              <div className="text-[10.5px] tracking-label uppercase text-slate-500 mb-1">Social Preview Score</div>
               <div className="font-bebas text-3xl leading-none text-amber-400">40/42</div>
               <p className="text-[11px] text-slate-500 mt-1">AMM 3/3 ✓ · OTP Facebook 2 blocks</p>
             </div>
@@ -225,7 +225,7 @@ export default async function TrafficCommandPage() {
           </p>
           <div className="overflow-x-auto rounded-xl border border-white/[0.09]">
             <table className="w-full text-[12px]">
-              <thead className="bg-white/[0.03] text-[10px] tracking-[0.14em] uppercase text-slate-400">
+              <thead className="bg-white/[0.03] text-[10px] tracking-label uppercase text-slate-400">
                 <tr>
                   <th className="text-left px-4 py-2">Platform</th>
                   <th className="text-left px-4 py-2">Tracked URL — copy &amp; paste</th>
@@ -372,7 +372,7 @@ export default async function TrafficCommandPage() {
             ].map((item) => (
               <div key={item.label} className={CARD}>
                 <div className={LABEL}>{item.label}</div>
-                <p className="text-sm text-[#F4F4F4] leading-snug line-clamp-2" title={item.value}>
+                <p className="text-sm text-cream leading-snug line-clamp-2" title={item.value}>
                   {item.value}
                 </p>
               </div>
@@ -398,7 +398,7 @@ export default async function TrafficCommandPage() {
           ) : (
             <div className="overflow-x-auto rounded-xl border border-white/[0.09]">
               <table className="w-full text-[13px]">
-                <thead className="bg-white/[0.03] text-[10px] tracking-[0.14em] uppercase text-slate-400">
+                <thead className="bg-white/[0.03] text-[10px] tracking-label uppercase text-slate-400">
                   <tr>
                     <th className="text-left px-4 py-2">Platform</th>
                     <th className="text-left px-4 py-2">Raw Source</th>
@@ -417,7 +417,7 @@ export default async function TrafficCommandPage() {
                       <td className="px-4 py-2 font-mono text-[11px] text-slate-500">
                         {row.rawSource ?? "—"}
                       </td>
-                      <td className="px-4 py-2 text-right tabular-nums text-[#F4F4F4] font-semibold">
+                      <td className="px-4 py-2 text-right tabular-nums text-cream font-semibold">
                         {row.count}
                       </td>
                       <td className="px-4 py-2 text-right">
@@ -480,7 +480,7 @@ export default async function TrafficCommandPage() {
           ) : (
             <div className="overflow-x-auto rounded-xl border border-white/[0.09]">
               <table className="w-full text-[13px]">
-                <thead className="bg-white/[0.03] text-[10px] tracking-[0.14em] uppercase text-slate-400">
+                <thead className="bg-white/[0.03] text-[10px] tracking-label uppercase text-slate-400">
                   <tr>
                     <th className="text-left px-4 py-2">Question</th>
                     <th className="text-right px-4 py-2">Count</th>
@@ -495,7 +495,7 @@ export default async function TrafficCommandPage() {
                       <td className="px-4 py-2 text-slate-300 max-w-sm">
                         <span className="line-clamp-2" title={q.text}>{q.text}</span>
                       </td>
-                      <td className="px-4 py-2 text-right tabular-nums text-[#F4F4F4] font-semibold">
+                      <td className="px-4 py-2 text-right tabular-nums text-cream font-semibold">
                         {q.count}
                       </td>
                       <td className="px-4 py-2">
@@ -540,7 +540,7 @@ export default async function TrafficCommandPage() {
                     {opp.rank}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#F4F4F4]">{opp.title}</p>
+                    <p className="text-sm font-semibold text-cream">{opp.title}</p>
                     <p className="text-[12px] text-slate-400 mt-0.5 leading-snug">{opp.hook}</p>
                     <p className="text-[11px] text-gold-300/80 mt-1 font-medium">{opp.cta}</p>
                   </div>
@@ -646,7 +646,7 @@ export default async function TrafficCommandPage() {
           {marketHeatmap.cells.length > 0 && (
             <div className="overflow-x-auto rounded-xl border border-white/[0.09]">
               <table className="w-full text-[13px]">
-                <thead className="bg-white/[0.03] text-[10px] tracking-[0.14em] uppercase text-slate-400">
+                <thead className="bg-white/[0.03] text-[10px] tracking-label uppercase text-slate-400">
                   <tr>
                     <th className="text-left px-4 py-2">Platform</th>
                     <th className="text-left px-4 py-2">Segment</th>
@@ -664,7 +664,7 @@ export default async function TrafficCommandPage() {
                       <td className="px-4 py-2 text-slate-400 capitalize">
                         {cell.segment.replace("_", " ")}
                       </td>
-                      <td className="px-4 py-2 text-right tabular-nums font-semibold text-[#F4F4F4]">
+                      <td className="px-4 py-2 text-right tabular-nums font-semibold text-cream">
                         {cell.count}
                       </td>
                     </tr>
@@ -697,7 +697,7 @@ export default async function TrafficCommandPage() {
             </div>
             <div className={CARD}>
               <div className={LABEL}>Top Source</div>
-              <div className="text-lg font-semibold text-[#F4F4F4] mt-1">
+              <div className="text-lg font-semibold text-cream mt-1">
                 {report.revenue.topSource ?? "—"}
               </div>
             </div>

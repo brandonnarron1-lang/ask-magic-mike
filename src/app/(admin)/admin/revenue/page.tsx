@@ -66,15 +66,15 @@ export default async function RevenueCommandPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080806] text-[#F4F4F4]">
+    <div className="min-h-screen bg-[#080806] text-cream">
       {/* Header */}
       <header className="border-b border-white/10 bg-[#0D0B07] px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
-            <p className="text-[10.5px] tracking-[0.18em] uppercase text-gold-300/85">
+            <p className="text-[10.5px] tracking-label uppercase text-gold-300/85">
               Ask Magic Mike · Admin
             </p>
-            <h1 className="font-display text-[22px] font-semibold text-[#F4F4F4]">
+            <h1 className="font-display text-[22px] font-semibold text-cream">
               Revenue Command Center
             </h1>
             <p className="text-sm text-slate-400 mt-0.5">
@@ -137,7 +137,7 @@ export default async function RevenueCommandPage() {
                 <div className={`font-bebas text-3xl leading-none ${
                   s.warn && !s.positive ? "text-amber-400"
                   : s.warn && s.positive ? "text-emerald-400"
-                  : "text-[#F4F4F4]"
+                  : "text-cream"
                 }`}>
                   {s.value}
                 </div>
@@ -161,7 +161,7 @@ export default async function RevenueCommandPage() {
                     <span className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${PRIORITY_DOT[item.priority] ?? "bg-slate-500"}`} />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-sm font-medium text-[#F4F4F4]">{item.title}</span>
+                        <span className="text-sm font-medium text-cream">{item.title}</span>
                         <span className={`text-[10px] uppercase tracking-wider font-semibold ${
                           item.priority === "urgent" ? "text-ruby-400"
                           : item.priority === "high" ? "text-amber-400"
@@ -206,7 +206,7 @@ export default async function RevenueCommandPage() {
                       }`}>
                         {ALERT_ICON[alert.severity]}
                       </span>
-                      <span className="text-sm font-medium text-[#F4F4F4]">{alert.title}</span>
+                      <span className="text-sm font-medium text-cream">{alert.title}</span>
                       {alert.value !== undefined && (
                         <span className="ml-auto text-xs text-slate-500 font-mono">{alert.metric}: {alert.value}</span>
                       )}
@@ -274,7 +274,7 @@ export default async function RevenueCommandPage() {
                 <div className={`font-bebas text-3xl leading-none ${
                   s.warn       ? "text-amber-400"
                   : s.positive ? "text-emerald-400"
-                  : "text-[#F4F4F4]"
+                  : "text-cream"
                 }`}>
                   {s.value}
                 </div>
@@ -297,7 +297,7 @@ export default async function RevenueCommandPage() {
                   s.warn ? "border-amber-400/40 bg-amber-400/[0.05]" : "border-white/[0.06] bg-white/[0.02]"
                 }`}
               >
-                <div className={`font-bebas text-3xl leading-none ${s.warn ? "text-amber-400" : "text-[#F4F4F4]"}`}>
+                <div className={`font-bebas text-3xl leading-none ${s.warn ? "text-amber-400" : "text-cream"}`}>
                   {s.value}
                 </div>
                 <div className="text-[10px] text-slate-500 mt-1 uppercase tracking-[0.1em]">{s.label}</div>
@@ -357,7 +357,7 @@ export default async function RevenueCommandPage() {
             <div className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-1">
               Recommended Next Action
             </div>
-            <p className="text-sm text-[#F4F4F4]">{reconciliation.recommendedNextAction}</p>
+            <p className="text-sm text-cream">{reconciliation.recommendedNextAction}</p>
           </div>
         </section>
 
@@ -448,7 +448,7 @@ export default async function RevenueCommandPage() {
                 <div className={`font-bebas text-4xl leading-none ${
                   s.warn && !s.positive ? "text-amber-400"
                   : s.warn && s.positive ? "text-emerald-400"
-                  : "text-[#F4F4F4]"
+                  : "text-cream"
                 }`}>
                   {s.value}
                 </div>
@@ -483,7 +483,7 @@ export default async function RevenueCommandPage() {
                     : "border-white/[0.06] bg-white/[0.02]"
                 }`}
               >
-                <div className={`font-bebas text-4xl leading-none ${s.warn ? "text-amber-400" : "text-[#F4F4F4]"}`}>
+                <div className={`font-bebas text-4xl leading-none ${s.warn ? "text-amber-400" : "text-cream"}`}>
                   {s.value}
                 </div>
                 <div className="text-[11px] text-slate-500 mt-1 uppercase tracking-[0.1em]">
@@ -503,7 +503,7 @@ export default async function RevenueCommandPage() {
           </h2>
           <div className="overflow-x-auto rounded-xl border border-white/[0.09]">
             <table className="w-full text-[13px]">
-              <thead className="bg-white/[0.03] text-[10px] tracking-[0.14em] uppercase text-slate-400">
+              <thead className="bg-white/[0.03] text-[10px] tracking-label uppercase text-slate-400">
                 <tr>
                   <th className="text-left px-4 py-2">Path (utm_medium)</th>
                   <th className="text-right px-4 py-2">Leads 7d</th>
@@ -522,7 +522,7 @@ export default async function RevenueCommandPage() {
                 ] as const).map(([key, label, row]) => (
                   <tr key={key} className="border-t border-white/[0.06] hover:bg-white/[0.02]">
                     <td className="px-4 py-2 font-mono text-[12px] text-gold-300/80">{label}</td>
-                    <td className="px-4 py-2 text-right tabular-nums text-[#F4F4F4]">{row.leads7d}</td>
+                    <td className="px-4 py-2 text-right tabular-nums text-cream">{row.leads7d}</td>
                     <td className="px-4 py-2 text-right tabular-nums text-slate-300">{row.leads30d}</td>
                     <td className="px-4 py-2 text-right tabular-nums text-slate-300">
                       {row.avgScore !== null ? row.avgScore : <span className="text-slate-600">&mdash;</span>}
@@ -573,7 +573,7 @@ export default async function RevenueCommandPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Temperature */}
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
-              <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Temperature</p>
+              <p className="text-[10.5px] tracking-label uppercase text-slate-500 mb-2">Temperature</p>
               {Object.keys(d.qualification.byTemperature).length === 0 ? (
                 <p className="text-slate-500 text-sm">No data</p>
               ) : (
@@ -584,7 +584,7 @@ export default async function RevenueCommandPage() {
                       .map(([temp, count]) => (
                         <tr key={temp} className="border-t border-white/[0.05]">
                           <td className="py-1 text-slate-300 capitalize">{temp}</td>
-                          <td className="py-1 text-right tabular-nums text-[#F4F4F4] font-semibold">{count}</td>
+                          <td className="py-1 text-right tabular-nums text-cream font-semibold">{count}</td>
                         </tr>
                       ))}
                   </tbody>
@@ -594,14 +594,14 @@ export default async function RevenueCommandPage() {
 
             {/* Score bands */}
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
-              <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Score Bands</p>
+              <p className="text-[10.5px] tracking-label uppercase text-slate-500 mb-2">Score Bands</p>
               <table className="w-full text-[13px]">
                 <tbody>
                   {(Object.entries(d.qualification.byScoreBand) as [string, number][])
                     .map(([band, count]) => (
                       <tr key={band} className="border-t border-white/[0.05]">
                         <td className="py-1 text-slate-300">{band}</td>
-                        <td className="py-1 text-right tabular-nums text-[#F4F4F4] font-semibold">{count}</td>
+                        <td className="py-1 text-right tabular-nums text-cream font-semibold">{count}</td>
                       </tr>
                     ))}
                 </tbody>
@@ -610,8 +610,8 @@ export default async function RevenueCommandPage() {
 
             {/* Missing score */}
             <div className={`rounded-xl border px-5 py-4 ${d.qualification.missingScore > 0 ? "border-amber-400/30 bg-amber-400/[0.04]" : "border-white/[0.06] bg-white/[0.02]"}`}>
-              <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Missing Score</p>
-              <div className={`font-bebas text-5xl leading-none ${d.qualification.missingScore > 0 ? "text-amber-400" : "text-[#F4F4F4]"}`}>
+              <p className="text-[10.5px] tracking-label uppercase text-slate-500 mb-2">Missing Score</p>
+              <div className={`font-bebas text-5xl leading-none ${d.qualification.missingScore > 0 ? "text-amber-400" : "text-cream"}`}>
                 {d.qualification.missingScore}
               </div>
               <p className="text-[11px] text-slate-500 mt-1">
@@ -637,12 +637,12 @@ export default async function RevenueCommandPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
-                <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Assigned</p>
+                <p className="text-[10.5px] tracking-label uppercase text-slate-500 mb-2">Assigned</p>
                 <div className="font-bebas text-5xl text-emerald-400">{d.routing.assigned}</div>
               </div>
               <div className={`rounded-xl border px-5 py-4 ${d.routing.unassigned > 0 ? "border-amber-400/30 bg-amber-400/[0.03]" : "border-white/[0.06] bg-white/[0.02]"}`}>
-                <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Unassigned</p>
-                <div className={`font-bebas text-5xl ${d.routing.unassigned > 0 ? "text-amber-400" : "text-[#F4F4F4]"}`}>
+                <p className="text-[10.5px] tracking-label uppercase text-slate-500 mb-2">Unassigned</p>
+                <div className={`font-bebas text-5xl ${d.routing.unassigned > 0 ? "text-amber-400" : "text-cream"}`}>
                   {d.routing.unassigned}
                 </div>
                 {d.routing.oldestUnassignedAge && (
@@ -652,7 +652,7 @@ export default async function RevenueCommandPage() {
                 )}
               </div>
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
-                <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Status Counts</p>
+                <p className="text-[10.5px] tracking-label uppercase text-slate-500 mb-2">Status Counts</p>
                 <table className="w-full text-[13px]">
                   <tbody>
                     {Object.entries(d.routing.statusCounts)
@@ -660,7 +660,7 @@ export default async function RevenueCommandPage() {
                       .map(([status, count]) => (
                         <tr key={status} className="border-t border-white/[0.05]">
                           <td className="py-1 text-slate-300">{status}</td>
-                          <td className="py-1 text-right tabular-nums text-[#F4F4F4] font-semibold">{count}</td>
+                          <td className="py-1 text-right tabular-nums text-cream font-semibold">{count}</td>
                         </tr>
                       ))}
                   </tbody>
@@ -682,7 +682,7 @@ export default async function RevenueCommandPage() {
           </p>
           <div className="overflow-x-auto rounded-xl border border-white/[0.09]">
             <table className="w-full text-[13px]">
-              <thead className="bg-white/[0.03] text-[10.5px] tracking-[0.16em] uppercase text-slate-300">
+              <thead className="bg-white/[0.03] text-[10.5px] tracking-label uppercase text-slate-300">
                 <tr>
                   <th className="text-left px-3 py-2">Date</th>
                   <th className="text-left px-3 py-2">Name</th>
@@ -713,7 +713,7 @@ export default async function RevenueCommandPage() {
                       <td className="px-3 py-2 text-slate-400 text-[12px] whitespace-nowrap">
                         {new Date(lead.createdAt).toLocaleString()}
                       </td>
-                      <td className="px-3 py-2 text-[#F4F4F4]">
+                      <td className="px-3 py-2 text-cream">
                         {lead.firstName ?? "(unnamed)"}
                       </td>
                       <td className="px-3 py-2 text-slate-300">
@@ -869,7 +869,7 @@ export default async function RevenueCommandPage() {
               warn={false}
             />
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 col-span-full md:col-span-1">
-              <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Latest Attribution Row</p>
+              <p className="text-[10.5px] tracking-label uppercase text-slate-500 mb-2">Latest Attribution Row</p>
               <p className="text-sm text-slate-300">
                 {d.attributionIntegrity.latestAttributionAt
                   ? new Date(d.attributionIntegrity.latestAttributionAt).toLocaleString()
@@ -877,7 +877,7 @@ export default async function RevenueCommandPage() {
               </p>
             </div>
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 col-span-full md:col-span-1">
-              <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">Latest Lead Created At</p>
+              <p className="text-[10.5px] tracking-label uppercase text-slate-500 mb-2">Latest Lead Created At</p>
               <p className="text-sm text-slate-300">
                 {d.attributionIntegrity.latestLeadAt
                   ? new Date(d.attributionIntegrity.latestLeadAt).toLocaleString()
@@ -915,7 +915,7 @@ export default async function RevenueCommandPage() {
               </p>
               <div className="overflow-x-auto">
                 <table className="w-full text-[12px]">
-                  <thead className="text-[10px] tracking-[0.14em] uppercase text-slate-500">
+                  <thead className="text-[10px] tracking-label uppercase text-slate-500">
                     <tr>
                       <th className="text-left py-1 pr-4">ID</th>
                       <th className="text-left py-1 pr-4">Email</th>
@@ -963,7 +963,7 @@ function AttributionTable({
   const entries = Object.entries(rows).sort((a, b) => b[1] - a[1]);
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
-      <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">{title}</p>
+      <p className="text-[10.5px] tracking-label uppercase text-slate-500 mb-2">{title}</p>
       {entries.length === 0 ? (
         <p className="text-slate-500 text-sm">No data</p>
       ) : (
@@ -979,7 +979,7 @@ function AttributionTable({
                 <td className={`py-1 ${highlightKey && key === highlightKey ? "text-gold-300 font-semibold" : "text-slate-300"}`}>
                   {key}
                 </td>
-                <td className="py-1 text-right tabular-nums text-[#F4F4F4] font-semibold">
+                <td className="py-1 text-right tabular-nums text-cream font-semibold">
                   {count}
                 </td>
               </tr>
@@ -1008,10 +1008,10 @@ function IntegrityCard({
           : "border-white/[0.06] bg-white/[0.02]"
       }`}
     >
-      <p className="text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-2">{label}</p>
+      <p className="text-[10.5px] tracking-label uppercase text-slate-500 mb-2">{label}</p>
       <div
         className={`font-bebas text-4xl leading-none ${
-          warn ? "text-amber-400" : "text-[#F4F4F4]"
+          warn ? "text-amber-400" : "text-cream"
         }`}
       >
         {value}

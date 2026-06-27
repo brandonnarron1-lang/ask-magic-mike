@@ -10,8 +10,8 @@ import { buildDistributionCommand } from "@/lib/admin/distribution-command";
 // ---------------------------------------------------------------------------
 
 const CARD  = "rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4";
-const LABEL = "text-[10.5px] tracking-[0.16em] uppercase text-slate-500 mb-1";
-const BIG   = "font-bebas text-4xl leading-none text-[#F4F4F4]";
+const LABEL = "text-[10.5px] tracking-label uppercase text-slate-500 mb-1";
+const BIG   = "font-bebas text-4xl leading-none text-cream";
 const BIG_OK   = "font-bebas text-4xl leading-none text-emerald-400";
 const BIG_WARN = "font-bebas text-4xl leading-none text-amber-400";
 
@@ -86,17 +86,17 @@ export default async function DistributionCommandPage() {
   const d = data;
 
   return (
-    <div className="min-h-screen bg-[#080806] text-[#F4F4F4]">
+    <div className="min-h-screen bg-[#080806] text-cream">
       {/* ------------------------------------------------------------------ */}
       {/* Header                                                              */}
       {/* ------------------------------------------------------------------ */}
       <header className="border-b border-white/10 bg-[#0D0B07] px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
-            <p className="text-[10.5px] tracking-[0.18em] uppercase text-gold-300/85">
+            <p className="text-[10.5px] tracking-label uppercase text-gold-300/85">
               Ask Magic Mike · Admin
             </p>
-            <h1 className="font-display text-[22px] font-semibold text-[#F4F4F4]">
+            <h1 className="font-display text-[22px] font-semibold text-cream">
               Distribution Command Center
             </h1>
             <p className="text-sm text-slate-400 mt-0.5">
@@ -173,7 +173,7 @@ export default async function DistributionCommandPage() {
           </p>
           <div className="overflow-x-auto rounded-xl border border-white/[0.09]">
             <table className="w-full text-[13px]">
-              <thead className="bg-white/[0.03] text-[10px] tracking-[0.14em] uppercase text-slate-400">
+              <thead className="bg-white/[0.03] text-[10px] tracking-label uppercase text-slate-400">
                 <tr>
                   <th className="text-left px-4 py-2">Platform</th>
                   <th className="text-center px-4 py-2">Drafted</th>
@@ -196,7 +196,7 @@ export default async function DistributionCommandPage() {
                         ? <span className="text-emerald-400">✓</span>
                         : <span className="text-slate-600">—</span>}
                     </td>
-                    <td className="px-4 py-2.5 text-right tabular-nums text-[#F4F4F4]">
+                    <td className="px-4 py-2.5 text-right tabular-nums text-cream">
                       {row.traffic7d > 0 ? row.traffic7d : <span className="text-slate-600">0</span>}
                     </td>
                     <td className="px-4 py-2.5 text-right tabular-nums">
@@ -247,7 +247,7 @@ export default async function DistributionCommandPage() {
                     {post.rank}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#F4F4F4]">{post.title}</p>
+                    <p className="text-sm font-semibold text-cream">{post.title}</p>
                     <p className="text-[12px] text-slate-400 mt-0.5 leading-snug">{post.hook}</p>
                     <p className="text-[11px] text-gold-300/80 mt-1 font-medium">{post.cta}</p>
                   </div>
@@ -284,7 +284,7 @@ export default async function DistributionCommandPage() {
           ) : (
             <div className="overflow-x-auto rounded-xl border border-white/[0.09]">
               <table className="w-full text-[13px]">
-                <thead className="bg-white/[0.03] text-[10px] tracking-[0.14em] uppercase text-slate-400">
+                <thead className="bg-white/[0.03] text-[10px] tracking-label uppercase text-slate-400">
                   <tr>
                     <th className="text-left px-4 py-2">Platform</th>
                     <th className="text-right px-4 py-2">Traffic 7d</th>
@@ -296,7 +296,7 @@ export default async function DistributionCommandPage() {
                   {d.trafficByPlatform.map((row) => (
                     <tr key={row.platform} className="border-t border-white/[0.06] hover:bg-white/[0.02]">
                       <td className="px-4 py-2.5 font-semibold text-slate-300">{row.platform}</td>
-                      <td className="px-4 py-2.5 text-right tabular-nums text-[#F4F4F4]">
+                      <td className="px-4 py-2.5 text-right tabular-nums text-cream">
                         {row.traffic7d}
                       </td>
                       <td className="px-4 py-2.5 text-right tabular-nums">
@@ -343,7 +343,7 @@ export default async function DistributionCommandPage() {
                   <div className="flex items-start gap-3">
                     <span className="text-amber-400 font-bold flex-shrink-0 text-sm">⚠</span>
                     <div>
-                      <p className="text-sm font-semibold text-[#F4F4F4] mb-0.5">{item.platform}</p>
+                      <p className="text-sm font-semibold text-cream mb-0.5">{item.platform}</p>
                       <p className="text-[12px] text-slate-400">{item.reason}</p>
                       <p className="text-[11px] text-gold-300/70 mt-1 font-medium">
                         {item.recommendation}

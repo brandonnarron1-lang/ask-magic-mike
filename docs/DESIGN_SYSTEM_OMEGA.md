@@ -336,6 +336,56 @@ motion.transition.shadow  // transition-shadow only
 
 ---
 
+## Phase 6 — Dashboard Command Center (PR #59)
+
+### Philosophy
+
+The authenticated admin is a mission-control cockpit for broker operations —
+not a CMS panel. Every surface communicates urgency hierarchy, lead intelligence,
+and SLA status at a glance. Complexity is hidden; relevance is surfaced.
+
+### Architecture
+
+**`src/components/admin/admin-shell.tsx`** — Shared chrome for all admin pages:
+- `<AdminShell>` — Gold top accent bar, glassmorphic header, eyebrow/title/back-link.
+  `devMode` prop triggers an amber "Sample Data" chip.
+- `<AdminCard>` — Section card with optional gold eyebrow title.
+- `<AdminSectionHeading>` — 10.5px uppercase tracking-label section labels.
+
+**`src/app/(admin)/admin/page.tsx`** — Command center dashboard:
+- Parallel data load: `getLeadsForAdmin()` + `loadDashboardMetrics()`
+- `LockedState` component for unconfigured Supabase (production safety)
+- Lead Intelligence grid: Total / Urgent / Hot / SLA Breached
+- Funnel Health grid: New Today / Contacted / Appt. Req. / Unassigned (behind `metrics.configured` guard)
+- Attention strip: urgent + SLA-breached leads with direct row links (limited to 5, overflow count shown)
+- Today's Operations panel: Follow-ups Due + Never Contacted clickable tiles
+- Source Attribution pill cloud
+- Command center nav cards → all 5 admin sections
+- Recent Leads table (existing `<LeadTable>`)
+- Dev mode warning banner (never shown in production)
+
+### Token Cleanup — All Admin Surfaces
+
+All admin pages and components cleaned of prohibited patterns:
+- `text-[#F4F4F4]` → `text-cream` (all occurrences across 7 files)
+- `text-[#050505]` → `text-midnight` (`admin-lead-actions.tsx` SubmitBtn)
+- `tracking-[0.18em]` → `tracking-label` (all occurrences)
+- `tracking-[0.16em]` → `tracking-label` (all occurrences)
+- `tracking-[0.14em]` → `tracking-label` (all occurrences)
+- `text-[12.5px]` → `text-sm` (all occurrences in actions + detail pages)
+- `text-[11.5px]` → `text-xs` (all occurrences)
+- `rounded-md` → `rounded-xl` for inputs, selects, buttons in `admin-lead-actions.tsx`
+
+### Static Guards (tests/brand/admin-components.test.ts)
+
+36 tests covering:
+- AdminShell/AdminCard/AdminSectionHeading exports and token compliance
+- Admin homepage: AdminShell wired, `loadDashboardMetrics` imported, no banned tokens,
+  LockedState present, devMode guard, five command center links, no genie/lamp copy
+- Token guards on `admin-lead-actions.tsx`, leads inbox, lead detail, all four supporting pages
+
+---
+
 ## Remaining Phases
 
 | Phase | Scope | Status |
@@ -344,6 +394,6 @@ motion.transition.shadow  // transition-shadow only
 | 2 | Typography System | ✅ Done (PR #55) |
 | 3 | Component Library | ✅ Done (PR #56) |
 | 4 | Motion System | ✅ Done (PR #57) |
-| 5 | Public Experience | 🔜 Next |
-| 6 | Dashboard UX | 🔜 Next |
+| 5 | Public Experience | ✅ Done (PR #58) |
+| 6 | Dashboard Command Center | ✅ Done (PR #59) |
 | 7 | Marketing System | 🔜 Next |

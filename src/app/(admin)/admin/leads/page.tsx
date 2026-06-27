@@ -94,7 +94,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
   const rwaUrgent = [...rwaMap.values()].filter((r) => r.tier === "urgent").length;
 
   return (
-    <div className="min-h-screen bg-[#05070A] text-[#F4F4F4]">
+    <div className="min-h-screen bg-[#05070A] text-cream">
       <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div>
           <p className="text-[10.5px] tracking-label uppercase text-gold-300/85">
@@ -164,12 +164,12 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
               name="q"
               defaultValue={filters.q ?? ""}
               placeholder="Search name/email/phone/address"
-              className="col-span-2 sm:col-span-3 md:col-span-2 rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream placeholder:text-slate-600"
+              className="col-span-2 sm:col-span-3 md:col-span-2 rounded-xl border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream placeholder:text-slate-600"
             />
             <select
               name="lead_type"
               defaultValue={filters.leadType ?? ""}
-              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream"
+              className="rounded-xl border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream"
             >
               <option value="">All types</option>
               {[
@@ -189,7 +189,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
             <select
               name="grade"
               defaultValue={filters.grade ?? ""}
-              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream"
+              className="rounded-xl border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream"
             >
               <option value="">All grades</option>
               {["A+", "A", "B", "C", "D"].map((g) => (
@@ -209,7 +209,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
             <select
               name="status"
               defaultValue={filters.status ?? ""}
-              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream"
+              className="rounded-xl border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream"
             >
               <option value="">All statuses</option>
               {LEAD_STATUSES.map((s) => (
@@ -221,7 +221,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
             <select
               name="sort"
               defaultValue={filters.sort ?? "newest"}
-              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream"
+              className="rounded-xl border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream"
             >
               <option value="newest">Newest first</option>
               <option value="highest_score">Highest score</option>
