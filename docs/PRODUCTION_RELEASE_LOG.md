@@ -4,6 +4,58 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## [PR #62] Design System Omega Phase 9 — Agent Portal & Assignments
+
+**Branch:** `design-system-omega-phase-9-agent-portal-assignments`
+
+### Changes
+
+**Agent Auth Layer**
+- **`src/lib/agent/agent-auth.ts`** (new) — `resolveAgentAccess()` with UUID validation, agents table lookup, typed `AgentAccess` result. `agentOwnsLead()` fail-closed ownership gate. `AGENT_DENIAL_MESSAGES` for all 5 denial reasons. Completely separate from `ADMIN_SECRET`.
+
+**Agent Portal Metrics**
+- **`src/lib/agent/agent-portal-metrics.ts`** (new) — `loadAgentPortalMetrics()` with all queries scoped to `assigned_agent_id`. Queue counts, performance percentages, recent leads, tasks. `loadAgentEventLog()` for read-only event history.
+
+**Component Library (`src/components/agent/`)**
+- `agent-shell.tsx` — `AgentShell` (cyan accent, nav strip), `AgentCard`, `AgentSectionHeading`
+- `role-gate.tsx` — `RoleGate` (full-page access denied), `PermissionNotice` (inline)
+- `sla-risk-badge.tsx` — `SlaRiskBadge` (breach/near-breach), `FollowUpBadge` (overdue/due-today/date)
+- `capacity-badge.tsx` — `CapacityBadge`, `AgentRosterCard` (with capacity bar and portal link)
+- `agent-lead-row.tsx` — `AgentLeadRow` with grade, status, SLA/follow-up badges
+- `task-list.tsx` — `TaskItem`, `TaskRow`, `TaskList` with priority dots
+
+**Agent Portal Pages (`src/app/(agent)/agent/`)**
+- `page.tsx` — Home dashboard: queue metrics grid, activity snapshot, performance card, recent leads, tasks, quick-action cards
+- `leads/page.tsx` — Lead queue with 6 filter tabs (all/urgent/followup/stale/appointments/new)
+- `leads/[id]/page.tsx` — Lead detail: contact info, SLA/follow-up badges, contact timeline, quick actions, notes, assignment event log
+- `tasks/page.tsx` — Task list split into open/completed, overdue alert
+- `performance/page.tsx` — Health score ring (SVG), conversion/response/SLA/follow-up stats with progress bars, benchmarks
+
+**Mutation API Routes (`src/app/api/agent/[agentId]/leads/[leadId]/`)**
+- `contact/route.ts` — POST/GET sets `last_contacted_at`; GET redirects back to lead detail
+- `follow-up/route.ts` — POST sets `next_follow_up_at` with ISO date validation
+- `status/route.ts` — POST with strict allowlist (contacted/nurture/appointment_set/appointment_requested); agents cannot set converted/dead/scored
+
+**Admin Upgrade**
+- `src/app/(admin)/admin/routing/page.tsx` — Added portal links to each agent card; new Assignment Control Center section with capacity display and "Open Portal →" broker-preview links
+
+**Tests**
+- `tests/brand/agent-portal.test.ts` (new) — 10 test groups, 40+ assertions covering role guards, auth unit tests, assignment filter verification, token guards, copy guards, secret guards, outbound messaging guards, admin regression, intelligence engine correctness, API shape validation
+
+**Docs**
+- `docs/DESIGN_SYSTEM_OMEGA.md` — Phase 9 section added; Remaining Phases table updated to Done
+- `docs/PRODUCTION_RELEASE_LOG.md` — This entry
+
+### Security
+- Agent auth is completely separate from `ADMIN_SECRET`
+- All agent queries filtered by `assigned_agent_id`
+- `agentOwnsLead()` is fail-closed (returns `false` when DB not configured)
+- Mutation routes validate UUID shape before ownership check
+- Status allowlist prevents agents from setting broker-only statuses
+- No agent component imports admin controls
+
+---
+
 ## [PR #61] Design System Omega Phase 8 — Analytics Intelligence
 
 **Branch:** `design-system-omega-phase-8-analytics-intelligence`
