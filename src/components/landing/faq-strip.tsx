@@ -48,7 +48,7 @@ export function FaqStrip() {
 
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-14">
-          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-gold-400 mb-3">FAQ</p>
+          <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400 mb-3">FAQ</p>
           <h2 className="font-display text-4xl sm:text-5xl font-bold text-cream">
             Real Questions.{" "}
             <span className="text-gold-shimmer">Straight Answers.</span>

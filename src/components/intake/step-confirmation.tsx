@@ -72,14 +72,14 @@ export function StepConfirmation({
         </p>
       </div>
 
-      <h2 className="font-display text-3xl sm:text-[34px] font-semibold text-[#F7F1E8] leading-tight mb-3">
+      <h2 className="font-display text-3xl sm:text-4xl font-semibold text-cream leading-snug mb-3">
         {firstName ? `Thanks, ${firstName}.` : "Thanks for reaching out."}
       </h2>
-      <p className="text-slate-300 text-base mb-1.5 max-w-md">
+      <p className="text-slate-300 text-base mb-1.5 max-w-md leading-relaxed">
         Mike Eatmon or the Our Town Properties team will follow up with local
         guidance based on what you shared.
       </p>
-      <p className="text-slate-300 text-[13.5px] max-w-sm mb-7 leading-relaxed">
+      <p className="text-slate-300 text-sm max-w-sm mb-7 leading-relaxed">
         {message.sub}
       </p>
 
@@ -88,7 +88,7 @@ export function StepConfirmation({
         data-testid="confirmation-next-steps"
         className="w-full max-w-sm mb-6 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3.5 text-left"
       >
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 mb-3">
+        <p className="text-[10.5px] font-semibold uppercase tracking-label text-slate-500 mb-3">
           What happens now
         </p>
         <ol className="space-y-2.5">
@@ -97,7 +97,7 @@ export function StepConfirmation({
             "He reviews it personally — not an auto-responder",
             "Watch your phone or email for follow-up from Our Town Properties",
           ].map((step, i) => (
-            <li key={i} className="flex items-start gap-2.5 text-[12px] text-slate-400 leading-snug">
+            <li key={i} className="flex items-start gap-2.5 text-xs text-slate-400 leading-snug">
               <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-gold-400/15 text-[9px] font-bold text-gold-400/80 mt-px">
                 {i + 1}
               </span>
@@ -127,13 +127,13 @@ export function StepConfirmation({
             />
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] tracking-[0.18em] uppercase text-gold-300 mb-0.5">
+            <p className="text-[10.5px] tracking-label uppercase text-gold-300 mb-0.5 font-semibold">
               Your local contact
             </p>
-            <p className="text-[15px] font-semibold text-[#F7F1E8] leading-tight">
+            <p className="text-base font-semibold text-cream leading-tight">
               {agentName}
             </p>
-            <p className="text-[12.5px] text-slate-300 mt-0.5">
+            <p className="text-xs text-slate-300 mt-0.5">
               Our Town Properties · Wilson, NC
             </p>
           </div>
@@ -143,14 +143,14 @@ export function StepConfirmation({
 
         <div className="flex items-center gap-2.5">
           <Clock className="h-3.5 w-3.5 text-gold-300 shrink-0" />
-          <p className="text-[13px] text-[#F7F1E8]/90">{message.eta}</p>
+          <p className="text-sm text-cream/90">{message.eta}</p>
         </div>
 
         {score && (
           <>
             <div className="h-px bg-white/[0.06] my-3.5" />
             <div className="flex items-center gap-2">
-              <p className="text-[12.5px] text-slate-300">Priority:</p>
+              <p className="text-xs text-slate-300">Priority:</p>
               <Badge variant={temperature}>
                 {temperature.charAt(0).toUpperCase() + temperature.slice(1)}
               </Badge>
@@ -178,13 +178,13 @@ export function StepConfirmation({
         href="https://www.ourtownproperties.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] text-slate-300 hover:text-gold-300 transition-colors"
+        className="mt-3 inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-gold-300 transition-colors"
       >
         Visit Our Town Properties
         <ExternalLink className="h-3 w-3" />
       </a>
 
-      <p className="mt-4 text-[12px] text-slate-400 max-w-xs">
+      <p className="mt-4 text-xs text-slate-400 max-w-xs">
         You can close this window. Mike has your info.
       </p>
 

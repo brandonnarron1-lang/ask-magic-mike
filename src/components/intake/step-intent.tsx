@@ -40,16 +40,16 @@ export function StepIntent({
 
   return (
     <div className="pt-2">
-      <h2 className="font-display text-[26px] sm:text-3xl font-semibold text-[#F7F1E8] mb-2 leading-tight">
+      <h2 className="font-display text-2xl sm:text-3xl font-semibold text-cream mb-2 leading-snug">
         What&apos;s your situation?
       </h2>
-      <p className="text-[13.5px] text-slate-400 mb-7">
+      <p className="text-sm text-slate-400 mb-7 leading-relaxed">
         This helps Mike&apos;s team route the right local guidance to you.
       </p>
 
       {/* Intent selector */}
       <div className="mb-7">
-        <label className="block text-[10.5px] font-semibold text-slate-400 mb-3 uppercase tracking-[0.18em]">
+        <label className="block text-[10.5px] font-semibold text-slate-400 mb-3 uppercase tracking-label">
           I&apos;m thinking about
         </label>
         <div className="grid grid-cols-2 gap-3">
@@ -62,7 +62,7 @@ export function StepIntent({
                 data-testid={`intent-${opt.value}`}
                 onClick={() => onIntentChange(opt.value)}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl border px-4 py-3.5 text-[14px] text-left transition-all duration-200",
+                  "flex items-center gap-3 rounded-xl border px-4 py-3.5 text-sm text-left transition-all duration-200",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60",
                   selected
                     ? "border-gold-400/55 bg-gold-400/[0.08] text-gold-200"
@@ -86,7 +86,7 @@ export function StepIntent({
 
       {/* Timeline */}
       <div className="mb-7">
-        <label className="block text-[10.5px] font-semibold text-slate-400 mb-3 uppercase tracking-[0.18em]">
+        <label className="block text-[10.5px] font-semibold text-slate-400 mb-3 uppercase tracking-label">
           My timeframe
         </label>
         <div className="flex flex-wrap gap-2">
@@ -97,11 +97,11 @@ export function StepIntent({
               data-testid={`timeline-${opt.value}`}
               onClick={() => onTimelineChange(opt.value)}
               className={cn(
-                "rounded-full border px-4 py-2 text-[13.5px] font-medium transition-all duration-200",
+                "rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60",
                 timelineMonths === opt.value
                   ? "border-gold-400/55 bg-gold-400/[0.08] text-gold-200"
-                  : "border-white/10 text-slate-300 hover:border-gold-400/30 hover:text-[#F7F1E8]"
+                  : "border-white/10 text-slate-300 hover:border-gold-400/30 hover:text-cream"
               )}
             >
               {opt.label}

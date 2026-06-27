@@ -83,14 +83,14 @@ export function HowItWorks() {
           "text-center mb-20 opacity-0 transition-all duration-700",
           inView && "opacity-100 translate-y-0 animate-fade-up"
         )}>
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase text-gold-400 mb-4">
+          <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400 mb-4">
             The Process
           </p>
           <h2 className="font-display text-5xl sm:text-6xl font-bold text-cream leading-tight">
             Ask. Score.{" "}
             <span className="text-gold-shimmer">Connect.</span>
           </h2>
-          <p className="mt-5 text-slate-400 max-w-md mx-auto text-lg">
+          <p className="mt-5 text-lg text-slate-400 max-w-md mx-auto">
             Three steps. No gatekeeping. Just answers from the man who&apos;s done it 2,500+ times.
           </p>
         </div>
@@ -161,7 +161,7 @@ export function HowItWorks() {
                     {step.title}
                   </h3>
                   <p className="text-sm leading-relaxed text-slate-400 mb-5">{step.body}</p>
-                  <span className="inline-flex items-center gap-1.5 text-[11.5px] text-gold-400/65 font-medium border border-gold-400/[0.13] rounded-full px-3.5 py-1.5 bg-gold-400/[0.03]">
+                  <span className="inline-flex items-center gap-1.5 text-xs text-gold-400/65 font-medium border border-gold-400/[0.13] rounded-full px-3.5 py-1.5 bg-gold-400/[0.03]">
                     <span className="h-1 w-1 rounded-full bg-gold-400/55" />
                     {step.note}
                   </span>

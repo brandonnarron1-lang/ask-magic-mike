@@ -52,14 +52,14 @@ export function WhyMike() {
               className="opacity-50"
             />
           </span>
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase text-gold-400 mb-4">
+          <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400 mb-4">
             Why Ask Mike
           </p>
           <h2 className="font-display text-5xl sm:text-6xl font-bold text-cream leading-tight">
             Calm. Confident.{" "}
             <span className="text-gold-shimmer">Sold.</span>
           </h2>
-          <p className="mt-5 text-slate-400 max-w-md mx-auto">
+          <p className="mt-5 text-lg text-slate-400 max-w-md mx-auto">
             Real estate magic without the smoke. Expertise, data, and a reputation that speaks for itself.
           </p>
         </div>

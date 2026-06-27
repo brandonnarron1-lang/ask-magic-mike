@@ -91,10 +91,10 @@ export function StepContact({
 
   return (
     <div className="pt-2">
-      <h2 className="font-display text-[26px] sm:text-3xl font-semibold text-[#F7F1E8] mb-2 leading-tight">
+      <h2 className="font-display text-2xl sm:text-3xl font-semibold text-cream mb-2 leading-snug">
         How should Mike reach you?
       </h2>
-      <p className="text-[13.5px] text-slate-400 mb-7">
+      <p className="text-sm text-slate-400 mb-7 leading-relaxed">
         Mike typically responds within a few hours. Your info is never sold or
         spammed — it goes straight to Our Town Properties.
       </p>
@@ -111,7 +111,7 @@ export function StepContact({
           >
             <label
               htmlFor={`contact-${field.name}`}
-              className="block text-[10.5px] font-semibold text-slate-400 mb-2 uppercase tracking-[0.18em]"
+              className="block text-[10.5px] font-semibold text-slate-400 mb-2 uppercase tracking-label"
             >
               {field.label}
               {field.required && (
@@ -129,7 +129,7 @@ export function StepContact({
               placeholder={field.placeholder}
               className={cn(
                 "w-full rounded-xl border bg-[#0B0E14]/85 px-4 py-3",
-                "text-[#F7F1E8] placeholder:text-slate-500 text-[14.5px]",
+                "text-cream placeholder:text-slate-500 text-sm",
                 "focus:outline-none transition-colors",
                 phoneError && field.name === "phone"
                   ? "border-ruby-400/60 focus:border-ruby-400 focus:ring-2 focus:ring-ruby-400/[0.15]"

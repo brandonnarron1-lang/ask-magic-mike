@@ -54,10 +54,10 @@ export function IntakeShell({
         <div className="mb-3">
           <Progress value={progress} className="h-1" />
           <div className="mt-2.5 flex items-center justify-between gap-3">
-            <p className="text-[12px] font-semibold tracking-[0.18em] uppercase text-gold-300">
+            <p className="text-xs font-semibold tracking-label uppercase text-gold-300">
               {stepLabel}
             </p>
-            <span className="text-[11px] uppercase tracking-[0.16em] text-slate-300">
+            <span className="text-xs uppercase tracking-label text-slate-300">
               Step {step} of {totalSteps}
             </span>
           </div>

@@ -325,6 +325,67 @@ export const glass = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// Section structure tokens (Tailwind class compositions)
+// ---------------------------------------------------------------------------
+
+export const section = {
+  eyebrow:    "text-xs font-semibold tracking-kicker uppercase text-gold-400",
+  eyebrowSlate: "text-xs font-semibold tracking-label uppercase text-slate-400",
+  heading:    "font-display text-5xl sm:text-6xl font-bold text-cream leading-tight",
+  headingMd:  "font-display text-4xl sm:text-5xl font-semibold text-cream leading-tight",
+  headingSm:  "font-display text-3xl sm:text-4xl font-semibold text-cream leading-snug",
+  lead:       "text-lg leading-relaxed text-slate-400",
+  leadLg:     "text-xl leading-relaxed text-slate-300 font-light",
+  cardTitle:  "text-base font-semibold text-cream",
+  cardBody:   "text-sm leading-relaxed text-slate-400",
+} as const;
+
+// ---------------------------------------------------------------------------
+// Intake flow tokens (Tailwind class compositions)
+// ---------------------------------------------------------------------------
+
+export const intake = {
+  heading:    "font-display text-2xl sm:text-3xl font-semibold text-cream leading-snug",
+  subhead:    "text-sm text-slate-400 leading-relaxed",
+  fieldLabel: "block text-[10.5px] font-semibold text-slate-400 mb-2 uppercase tracking-label",
+  helperText: "text-xs text-slate-500 leading-relaxed",
+  inputBase:  "w-full rounded-xl border border-white/10 bg-[#0B0E14]/85 px-4 py-3 text-cream text-sm placeholder:text-slate-500 focus:outline-none focus:border-gold-400/45 focus:ring-2 focus:ring-gold-400/15 transition-colors",
+} as const;
+
+// ---------------------------------------------------------------------------
+// Prose tokens (body copy hierarchies)
+// ---------------------------------------------------------------------------
+
+export const prose = {
+  lead:       "text-lg leading-relaxed text-slate-300 font-light",
+  body:       "text-base leading-relaxed text-slate-400",
+  bodySm:     "text-sm leading-relaxed text-slate-400",
+  muted:      "text-sm leading-relaxed text-slate-500",
+  caption:    "text-xs leading-relaxed text-slate-500",
+  legal:      "text-xs leading-relaxed text-slate-600 italic",
+  compliance: "text-xs leading-relaxed text-slate-600",
+} as const;
+
+// ---------------------------------------------------------------------------
+// Dashboard / admin tokens (Tailwind class compositions)
+// ---------------------------------------------------------------------------
+
+export const dash = {
+  headerTitle:    "text-sm font-bold text-cream",
+  headerSub:      "text-xs text-slate-500",
+  metricValue:    "font-bebas text-4xl leading-none",
+  metricValueLg:  "font-bebas text-5xl leading-none",
+  metricLabel:    "text-xs uppercase tracking-widest text-slate-500 mt-1",
+  sectionLabel:   "text-[10.5px] font-semibold tracking-label uppercase text-slate-400",
+  tableHeader:    "text-xs font-semibold tracking-label uppercase text-slate-400",
+  cellPrimary:    "text-sm font-medium text-cream",
+  cellSecondary:  "text-xs text-slate-500",
+  alertHeader:    "text-xs font-bold uppercase tracking-label",
+  statusBadge:    "inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase",
+  clearStatus:    "text-xs text-slate-400",
+} as const;
+
+// ---------------------------------------------------------------------------
 // URL safety helpers
 // ---------------------------------------------------------------------------
 
