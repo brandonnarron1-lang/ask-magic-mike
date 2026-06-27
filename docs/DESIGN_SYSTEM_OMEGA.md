@@ -18,6 +18,56 @@ the weight. If it is weak, everything else is theater makeup on bad structure.
 
 ---
 
+## Omega Launch Phase — Production Readiness (PR #65)
+
+**Branch:** `omega-launch-phase-production-readiness`
+**Mission:** Finish the platform. Make every capability cohesive, operationally usable, and documented.
+
+### Executive Command Center Upgrade (`/admin`)
+- Intelligence Pulse strip added: pipeline value, appointments (7d), SLA compliance, active campaigns
+- Command Centers navigation expanded: 5 → 11 links (Intelligence, Automation, Analytics, Listings, Documents, Marketing added)
+- `loadIntelligenceSignals()` integrated into parallel data fetch
+- All existing sections (Lead Intelligence, Funnel Health, Attention Strip, Operations, Attribution) preserved
+
+### New: Listing OS (`/admin/listings`)
+Seller-focused operations hub:
+- Seller pipeline filtered from lead intent signals
+- Hot sellers urgency strip with quick navigation to lead detail
+- Neighborhood activity heat map from `IntelligenceSignals.neighborhoodLeadCounts`
+- Listing inventory status card (live status + empty-state import guide)
+- Quick actions sidebar to intelligence sub-pages (sellers, properties, buyers)
+- Step-by-step FlexMLS CSV import guide (3 steps)
+
+### New: Document Engine (`/admin/documents`)
+9-template professional document gallery:
+- **Seller:** CMA Packet, Listing Presentation, Marketing Packet
+- **Buyer:** Buyer Consultation, Appointment Prep, Buyer Roadmap
+- **Transaction:** Closing Checklist
+- **Marketing:** Open House Packet
+- **Mixed:** Seller Roadmap
+- Each template card: purpose, data requirements, 3+ outputs, category-colored CTA
+- Pipeline context strip from intelligence signals
+
+### New Documentation (7 files)
+| File | Purpose |
+|------|---------|
+| `docs/LAUNCH_CHECKLIST.md` | 12-section pre-launch gate + day-of + 48h post-launch |
+| `docs/PRODUCTION_QA.md` | Full QA playbook for all surfaces and boundaries |
+| `docs/OPERATOR_GUIDE.md` | Daily operation guide — all 11 platform sections |
+| `docs/BROKER_DAILY_WORKFLOW.md` | Mike Eatmon's morning brief → weekly intelligence review |
+| `docs/AGENT_DAILY_WORKFLOW.md` | Agent portal, SLA standards, contact logging, lead handling |
+| `docs/KNOWN_LIMITATIONS.md` | 15 honest limitations with workarounds and roadmap entries |
+| `docs/ROADMAP_POST_LAUNCH.md` | Phases 16–23 roadmap, 12-month horizon |
+
+### Design Rules Applied
+- Intelligence Pulse strip: gold accent for SLA healthy, ruby for < 75%
+- Listing OS: seller leads use gold/ruby urgency — same temperature pattern as main admin
+- Document cards: category-colored borders (gold=seller, emerald=buyer, amber=transaction, blue=marketing)
+- All new pages use `AdminShell` with `backHref="/admin"` and `backLabel="← Command Center"`
+- All `force-dynamic` + `revalidate = 0` on server components
+
+---
+
 ## Phase 1 — Visual System Foundation (PR #54, merged 2026-06-27)
 
 ### Token Architecture

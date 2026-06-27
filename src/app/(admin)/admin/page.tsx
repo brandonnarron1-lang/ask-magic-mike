@@ -2,11 +2,12 @@ export const dynamic   = "force-dynamic";
 export const revalidate = 0;
 
 import Link from "next/link";
-import { Inbox, DollarSign, BarChart2, Share2, AlertCircle, CheckCircle2, Users, ArrowRight, Activity } from "lucide-react";
+import { Inbox, DollarSign, BarChart2, Share2, AlertCircle, CheckCircle2, Users, ArrowRight, Activity, Brain, Zap, TrendingUp, Home, FileText, Megaphone } from "lucide-react";
 import { LeadTable } from "@/components/admin/lead-table";
 import { AdminShell, AdminSectionHeading } from "@/components/admin/admin-shell";
 import { getLeadsForAdmin } from "@/lib/db/lead-repository";
 import { loadDashboardMetrics } from "@/lib/admin/dashboard-metrics";
+import { loadIntelligenceSignals } from "@/lib/intelligence/intelligence-signals";
 
 function timeSince(isoString: string): string {
   const ms = Date.now() - new Date(isoString).getTime();
@@ -39,9 +40,10 @@ function LockedState() {
 }
 
 export default async function AdminPage() {
-  const [result, metrics] = await Promise.all([
+  const [result, metrics, signals] = await Promise.all([
     getLeadsForAdmin(),
     loadDashboardMetrics(),
+    loadIntelligenceSignals(),
   ]);
 
   if (result.mode === "locked") return <LockedState />;
@@ -61,6 +63,11 @@ export default async function AdminPage() {
   const breachedNotUrgent = leads.filter((l) => l.slaBreached && l.temperature !== "urgent");
   const attentionLeads    = [...urgentLeads, ...breachedNotUrgent].slice(0, ATTENTION_LIMIT);
   const attentionTotal    = urgentLeads.length + breachedNotUrgent.length;
+
+  const pipelineFmt = signals.estimatedPipelineValue > 0
+    ? `$${(signals.estimatedPipelineValue / 1_000).toFixed(0)}K`
+    : "—";
+  const slaScore = Math.round(signals.avgSlaComplianceRate * 100);
 
   return (
     <AdminShell
@@ -233,16 +240,45 @@ export default async function AdminPage() {
           </div>
         )}
 
+        {/* ── Intelligence Pulse ── */}
+        <div>
+          <AdminSectionHeading className="mb-3">Intelligence Pulse · 7-Day Window</AdminSectionHeading>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-white/[0.04] rounded-xl overflow-hidden border border-white/[0.04]">
+            {[
+              { label: "Pipeline Value",     value: pipelineFmt,                                          color: "text-emerald-400" },
+              { label: "Appts (7d)",         value: signals.appointmentsInWindow,                         color: "text-gold-400"    },
+              { label: "SLA Compliance",     value: `${slaScore}%`,                                       color: slaScore >= 90 ? "text-emerald-400" : slaScore >= 75 ? "text-amber-400" : "text-ruby-400" },
+              { label: "Active Campaigns",   value: signals.activeCampaigns,                              color: "text-cream"       },
+            ].map((s) => (
+              <div key={s.label} className="bg-[#0a0a0a] px-4 py-3 text-center">
+                <p className="text-[8px] tracking-[0.15em] uppercase text-slate-600 mb-0.5">{s.label}</p>
+                <p className={`font-bebas text-3xl leading-none ${s.color}`}>{s.value}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 flex justify-end">
+            <Link href="/admin/intelligence" className="text-[10px] text-slate-600 hover:text-gold-300 transition-colors">
+              Full intelligence dashboard →
+            </Link>
+          </div>
+        </div>
+
         {/* ── Command center navigation ── */}
         <div>
           <AdminSectionHeading className="mb-3">Command Centers</AdminSectionHeading>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {[
-              { href: "/admin/leads",        Icon: Inbox,      label: "Leads Inbox",    sub: "Inbox · filter · detail",        accent: "group-hover:border-gold-400/40 group-hover:text-gold-300" },
-              { href: "/admin/routing",      Icon: Users,      label: "Agent Routing",  sub: "Roster · queue · SLA",           accent: "group-hover:border-amber-400/30 group-hover:text-amber-300" },
-              { href: "/admin/revenue",      Icon: DollarSign, label: "Revenue",        sub: "Pipeline · sentinel · alerts",   accent: "group-hover:border-emerald-400/30 group-hover:text-emerald-300" },
-              { href: "/admin/traffic",      Icon: BarChart2,  label: "Traffic",        sub: "UTM · sources · sessions",       accent: "group-hover:border-blue-400/30 group-hover:text-blue-300" },
-              { href: "/admin/distribution", Icon: Share2,     label: "Distribution",   sub: "Queue · platforms · plan",       accent: "group-hover:border-purple-400/30 group-hover:text-purple-300" },
+              { href: "/admin/leads",        Icon: Inbox,      label: "Leads Inbox",       sub: "Inbox · filter · detail",        accent: "group-hover:border-gold-400/40 group-hover:text-gold-300" },
+              { href: "/admin/routing",      Icon: Users,      label: "Agent Routing",     sub: "Roster · queue · SLA",           accent: "group-hover:border-amber-400/30 group-hover:text-amber-300" },
+              { href: "/admin/revenue",      Icon: DollarSign, label: "Revenue",           sub: "Pipeline · sentinel · alerts",   accent: "group-hover:border-emerald-400/30 group-hover:text-emerald-300" },
+              { href: "/admin/traffic",      Icon: BarChart2,  label: "Traffic",           sub: "UTM · sources · sessions",       accent: "group-hover:border-blue-400/30 group-hover:text-blue-300" },
+              { href: "/admin/distribution", Icon: Share2,     label: "Distribution",      sub: "Queue · platforms · plan",       accent: "group-hover:border-purple-400/30 group-hover:text-purple-300" },
+              { href: "/admin/intelligence", Icon: Brain,      label: "Intelligence",      sub: "Signals · predictions · memory", accent: "group-hover:border-gold-400/40 group-hover:text-gold-300" },
+              { href: "/admin/automation",   Icon: Zap,        label: "Automation",        sub: "Workflows · queue · history",    accent: "group-hover:border-cyan-400/30 group-hover:text-cyan-300" },
+              { href: "/admin/analytics",    Icon: TrendingUp, label: "Analytics",         sub: "Reports · campaigns · sources",  accent: "group-hover:border-indigo-400/30 group-hover:text-indigo-300" },
+              { href: "/admin/listings",     Icon: Home,       label: "Listings",          sub: "Inventory · inquiries · import", accent: "group-hover:border-amber-400/30 group-hover:text-amber-300" },
+              { href: "/admin/documents",    Icon: FileText,   label: "Documents",         sub: "CMA · packets · guides",         accent: "group-hover:border-slate-400/30 group-hover:text-slate-300" },
+              { href: "/admin/marketing",    Icon: Megaphone,  label: "Marketing",         sub: "Content · campaigns · assets",   accent: "group-hover:border-pink-400/30 group-hover:text-pink-300" },
             ].map(({ href, Icon, label, sub, accent }) => (
               <Link
                 key={href}
