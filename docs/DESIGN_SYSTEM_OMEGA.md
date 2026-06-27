@@ -626,6 +626,76 @@ All components: no `red-*` tokens, no hardcoded hex, `motion-safe:` animations, 
 
 ---
 
+## Phase 11 — Brokerage Intelligence Brain (PR #64)
+
+### Architecture
+
+Ask Magic Mike becomes a **self-aware brokerage intelligence platform**. A deterministic knowledge graph, memory engine, and seven pure-function scoring engines give the broker real-time predictive context on every lead, property, seller, and buyer — all computed at request time, zero external AI APIs.
+
+**Safety guarantee:** All intelligence is read-only. Engines read from `analytics_events` (never write). No outbound messaging, no production mutations, no external AI calls.
+
+### Engine Layer (`src/lib/intelligence/`)
+
+10 files, all pure functions (except async loaders):
+
+- **`types.ts`** — 30+ shared types: `NodeType`, `RelationshipType`, `IntelligenceSignals`, `PropertyIntelligence`, `SellerReadiness`, `BuyerReadiness`, `Prediction`, `Opportunity`, `Risk`, `ExecutiveInsight`, `BriefingPacket`
+- **`intelligence-signals.ts`** — `loadIntelligenceSignals()`: async loader with safe fallback
+- **`knowledge-graph.ts`** — In-memory brokerage graph: `createNode`, `createEdge`, `buildBrokerageGraph`, `findConnections`, `traverseGraph`, `getTopNodes`, `NODE_TYPE_LABELS`, `RELATIONSHIP_LABELS`
+- **`memory-engine.ts`** — `buildMemoryRecord`, `consolidateMemory`, `buildMemoryFromEvents`, `loadBrokerageMemorySummary` — reads `analytics_events`, never writes
+- **`property-intelligence.ts`** — `scorePropertyIntelligence`, `derivePropertySignalsFromBrokerage`, `rankPropertiesByOpportunity`, `identifyHotProperties`
+- **`seller-intelligence.ts`** — `scoreSellerReadiness`, `deriveSellerSignalsFromBrokerage`, `rankSellersByReadiness`, `identifyHotSellers` — with `SELLER_SIGNAL_LABELS`, `LISTING_WINDOW_LABELS`, `INTENT_GRADE_COLORS`
+- **`buyer-intelligence.ts`** — `scoreBuyerReadiness`, `deriveBuyerSignalsFromBrokerage`, `rankBuyersByPurchaseProbability`, `identifyActiveBuyers` — with `BUYER_SIGNAL_LABELS`, `TIME_HORIZON_LABELS`
+- **`prediction-engine.ts`** — `generatePredictions` (11 types), `rankPredictionsByConfidence`, `filterPredictionsByType` — `PREDICTION_TYPE_LABELS`, `PREDICTION_URGENCY_COLORS`
+- **`opportunity-engine.ts`** — `discoverOpportunities` (7 categories), `rankByROI`, `getFastestWin`, `getLargestPipelineOpportunity`, `getTopRisks` — ROI formula: `businessValue / (effortHours * 50)`
+- **`executive-intelligence.ts`** — `generateExecutiveInsights` (8 types), `rankInsightsByImpact`, `buildBriefingPacket` — `INSIGHT_TYPE_LABELS`, `INSIGHT_TYPE_COLORS`
+
+### Component Library (`src/components/admin/intelligence/`)
+
+10 files, 23+ named exports:
+
+- `confidence-badge.tsx` — `ConfidenceBadge`, `ReasonCard`, `ImpactBadge`
+- `prediction-card.tsx` — `PredictionCard`, `PredictionEvidence`
+- `opportunity-card.tsx` — `OpportunityCard`, `DecisionSupportCard`, `RiskCard`
+- `property-score.tsx` — `PropertyScore`, `PropertyInterestCard`, `NeighborhoodHeat`
+- `seller-score.tsx` — `SellerScore`, `SellerReadinessCard`
+- `buyer-score.tsx` — `BuyerScore`, `BuyerReadinessCard`
+- `memory-timeline.tsx` — `MemoryTimeline`, `HistoryPanel`
+- `executive-insight.tsx` — `ExecutiveInsight`, `RecommendationEvidence`, `BriefingSummary`
+- `knowledge-graph-card.tsx` — `KnowledgeGraphCard`, `GraphLegend`, `EntityNavigator`
+- `relationship-map.tsx` — `RelationshipMap`, `RelationshipStrength`
+
+### Intelligence Command Center (`src/app/(admin)/admin/intelligence/`)
+
+8 new admin pages:
+
+- `/admin/intelligence` — Main dashboard: health banner, signal snapshot, top insights, knowledge graph card, predictions + opportunities preview
+- `/admin/intelligence/properties` — Property intelligence: neighborhood heat, hot properties, ranked list
+- `/admin/intelligence/sellers` — Seller intelligence: readiness ranking, commission estimates, trend indicators
+- `/admin/intelligence/buyers` — Buyer intelligence: purchase probability, time horizon distribution, active buyer list
+- `/admin/intelligence/predictions` — Prediction engine: critical/high tier, by-type breakdown, confidence evidence
+- `/admin/intelligence/opportunities` — Opportunity engine: decision support, fastest win, largest pipeline, risk register
+- `/admin/intelligence/relationships` — Relationship map: node map, graph legend, entity navigator, strength visualization
+- `/admin/intelligence/memory` — Memory layer: brokerage timeline, consolidation panel, top entities, read-only notice
+
+### Tests (`tests/brand/intelligence-brain.test.ts`)
+
+**105 tests** across 11 groups (exceeds Phase 10's 76):
+1. Knowledge graph — `createNode`, `createEdge`, graph operations, traversal, analytics (15 tests)
+2. Memory engine — `buildMemoryRecord`, `calculateMemoryStrength`, `consolidateMemory`, `buildMemoryFromEvents`, label maps (12 tests)
+3. Property intelligence — `scorePropertyIntelligence`, ranking, filtering, narrative, derive (9 tests)
+4. Seller intelligence — `scoreSellerReadiness`, ranking, label maps (12 tests)
+5. Buyer intelligence — `scoreBuyerReadiness`, ranking, label maps (11 tests)
+6. Prediction engine — `generatePredictions`, utilities, label maps (11 tests)
+7. Opportunity engine — `discoverOpportunities`, ranking/selection, risks, label maps (12 tests)
+8. Executive intelligence — `generateExecutiveInsights`, ranking, briefing, label maps (10 tests)
+9. Intelligence signals — structure, field types (3 tests)
+10. Cross-engine integration — graph + predictions + opportunities consistency (4 tests)
+11. Brand compliance — no MLS markers in any label map (5 tests)
+
+**Suite total: 1,756 tests (all passing)**
+
+---
+
 ## Phase 10 — Autonomous Operations & Workflow Engine (PR #63)
 
 ### Architecture

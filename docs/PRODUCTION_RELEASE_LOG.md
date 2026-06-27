@@ -4,6 +4,62 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## [PR #64] Design System Omega Phase 11 — Brokerage Intelligence Brain
+
+**Branch:** `design-system-omega-phase-11-brokerage-intelligence-brain`
+
+### Summary
+
+Transforms AMM into a **self-aware brokerage intelligence platform**. All computation is deterministic and pure — no external AI APIs, no DB writes, no outbound messaging. Everything derives from live `IntelligenceSignals` loaded at request time.
+
+### Changes
+
+**Intelligence Engine Layer (`src/lib/intelligence/`, 10 files)**
+- `types.ts` — 30+ shared types for all engines
+- `intelligence-signals.ts` — async loader with safe fallback
+- `knowledge-graph.ts` — in-memory brokerage graph (nodes, edges, BFS traversal, weight scoring)
+- `memory-engine.ts` — read-only `analytics_events` reader; `buildMemoryFromEvents`, `consolidateMemory`, `loadBrokerageMemorySummary`
+- `property-intelligence.ts` — `scorePropertyIntelligence`, neighborhood heat, market velocity
+- `seller-intelligence.ts` — `scoreSellerReadiness`, intent grades (A+–D), listing window prediction
+- `buyer-intelligence.ts` — `scoreBuyerReadiness`, purchase probability, time horizon classification
+- `prediction-engine.ts` — 11 prediction types, urgency-sorted, confidence-ranked
+- `opportunity-engine.ts` — 7 opportunity categories, ROI formula, risk register
+- `executive-intelligence.ts` — 8 insight types, briefing packet, health assessment
+
+**Component Library (`src/components/admin/intelligence/`, 10 files, 23+ exports)**
+- `ConfidenceBadge`, `ImpactBadge`, `ReasonCard`
+- `PredictionCard`, `PredictionEvidence`
+- `OpportunityCard`, `DecisionSupportCard`, `RiskCard`
+- `PropertyScore`, `PropertyInterestCard`, `NeighborhoodHeat`
+- `SellerScore`, `SellerReadinessCard`
+- `BuyerScore`, `BuyerReadinessCard`
+- `MemoryTimeline`, `HistoryPanel`
+- `ExecutiveInsight`, `RecommendationEvidence`, `BriefingSummary`
+- `KnowledgeGraphCard`, `GraphLegend`, `EntityNavigator`
+- `RelationshipMap`, `RelationshipStrength`
+
+**Intelligence Command Center (`src/app/(admin)/admin/intelligence/`, 8 pages)**
+- `/admin/intelligence` — main dashboard
+- `/admin/intelligence/properties` — property intelligence
+- `/admin/intelligence/sellers` — seller intelligence
+- `/admin/intelligence/buyers` — buyer intelligence
+- `/admin/intelligence/predictions` — prediction engine
+- `/admin/intelligence/opportunities` — opportunity engine
+- `/admin/intelligence/relationships` — relationship map
+- `/admin/intelligence/memory` — memory layer (read-only notice)
+
+**Tests:** 105 tests in `tests/brand/intelligence-brain.test.ts` — suite now **1,756 total (all passing)**
+
+**TypeScript:** 0 errors (`tsc --noEmit`)
+
+**Launch doctor:** 26/26 non-env checks pass
+
+### Rollback Strategy
+
+Branch reverts cleanly. Zero DB migrations. Zero schema changes. All engines are pure functions with read-only Supabase access. Pages are async Server Components — no client state.
+
+---
+
 ## [PR #62] Design System Omega Phase 9 — Agent Portal & Assignments
 
 **Branch:** `design-system-omega-phase-9-agent-portal-assignments`
