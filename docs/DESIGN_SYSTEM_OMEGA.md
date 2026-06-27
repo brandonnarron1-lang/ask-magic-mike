@@ -386,6 +386,82 @@ All admin pages and components cleaned of prohibited patterns:
 
 ---
 
+## Phase 7 — Marketing System (PR #60)
+
+### Philosophy
+
+The Marketing Command Center is a read-only, asset-generation layer. It never posts
+to social media, never calls external APIs, and never stores data. Everything is deterministic:
+given a campaign slug, the same UTM links, copy blocks, and post templates are always produced.
+The operator copies assets manually into native platforms.
+
+### Architecture
+
+**`src/lib/admin/campaign-assets.ts`** — Core marketing library:
+- `CAMPAIGN_CATALOG` — 5 main campaigns + 1 comment-lead campaign (6 total)
+- `BrandCopyBlock` — 6-channel copy per campaign (X/short, Threads/medium, Facebook/full, email subject, email body, flyer)
+- `CampaignFlyerSpec` — Print-ready QR + CTA asset spec per campaign
+- `buildCampaignUtmLinks(slug, landingPath)` — Parameterized UTM builder (extends Phase 3 UTM system)
+- `buildCampaignAssets(slug)` — Full asset set builder
+- `getAllCampaignAssets()` — All 6 campaigns
+
+**`src/components/admin/campaign-card.tsx`** — Campaign status card + selector chip:
+- `<CampaignCard>` — Name, tagline, status badge, targeting, CTA, landing path
+- `<CampaignChip>` — Compact campaign selector for page header
+
+**`src/components/admin/copy-block.tsx`** (client component) — Copy block with clipboard button:
+- Shows label, sublabel, char count vs. limit (over-limit warning in ruby-400)
+- "Copy" → "Copied ✓" feedback state
+
+**`src/components/admin/platform-post-preview.tsx`** — Platform chrome preview:
+- Four platforms: Facebook, LinkedIn, Threads, X
+- Renders platform header bar, mock avatar + author, post body, hashtags, over-limit warning
+- No interactive elements — display only
+
+**`src/app/(admin)/admin/marketing/page.tsx`** — Marketing Command Center:
+- Campaign selector chips (`?campaign=slug` URL param routing)
+- Active campaign overview card
+- UTM Link Bank (8 platforms per campaign, CopyBlock per link)
+- Brand Copy Blocks (4 channel sizes, hashtag bank, comment-capture hook when relevant)
+- Platform Post Templates (all 4 platforms with preview + copy)
+- QR/Flyer Asset Spec (print-ready instructions + QR URL)
+- Weekly Content Calendar (suggested publishing cadence)
+- All Campaign Cards grid
+
+### Campaign Catalog
+
+| Slug | Name | Landing | Target Audience |
+|------|------|---------|-----------------|
+| `amm_launch` | AMM Launch | `/ask` | Broad awareness |
+| `home_value` | Home Value | `/value` | Homeowners curious about selling |
+| `we_buy_houses` | We Buy Houses | `/ask` | Cash offer recipients |
+| `ask_mike` | Ask Mike Anything | `/ask` | Any Wilson real estate question |
+| `wilson_authority` | Wilson Authority | `/ask` | Online searchers for Wilson RE info |
+| `comment_lead` | Comment-to-Lead | `/ask` | Facebook/IG followers |
+
+### Brand Copy Rules Enforced
+
+- No genie / magic lamp / lamp / wish / mascot copy in any block
+- No `ourtownproperties.com` or `vercel.app` in any UTM link or flyer URL
+- Wilson NC mentioned in every social copy block
+- socialShort ≤ 140 chars, socialMedium ≤ 500 chars, emailSubject ≤ 90 chars
+- All 8 UTM platforms use `askmagicmike.com` only
+- Facebook link safety: only `/ask` base URL marked `safeToPostOnFacebook: true`
+
+### Static Guards (`tests/brand/marketing-system.test.ts`)
+
+84 tests covering:
+- Campaign catalog structure (6 campaigns, all required fields)
+- Banned term detection (genie/lamp/mascot/chatbot) in all copy
+- Wilson NC presence in every social copy block
+- Character limit compliance per channel
+- Flyer QR URL domain validation + UTM campaign slug
+- UTM link count (8 per campaign), domain safety, parameter presence
+- `buildCampaignAssets` for all 6 slugs
+- Token guards on all 3 new components + the marketing page
+
+---
+
 ## Remaining Phases
 
 | Phase | Scope | Status |
@@ -396,4 +472,5 @@ All admin pages and components cleaned of prohibited patterns:
 | 4 | Motion System | ✅ Done (PR #57) |
 | 5 | Public Experience | ✅ Done (PR #58) |
 | 6 | Dashboard Command Center | ✅ Done (PR #59) |
-| 7 | Marketing System | 🔜 Next |
+| 7 | Marketing System | ✅ Done (PR #60) |
+| 8 | Analytics & Reporting | 🔜 Next |
