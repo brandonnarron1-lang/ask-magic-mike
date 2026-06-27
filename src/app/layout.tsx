@@ -1,7 +1,33 @@
 import type { Metadata, Viewport } from "next";
+import { Playfair_Display, Inter, Bebas_Neue } from "next/font/google";
 import { mikePlatformAssets } from "@/lib/mikePlatformAssets";
 import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
+  variable: "--font-playfair",
+  display: "swap",
+  preload: true,
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+  preload: true,
+});
+
+const bebas = Bebas_Neue({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-bebas",
+  display: "swap",
+  preload: false,
+});
 
 const SITE_URL = siteConfig.canonicalSiteUrl;
 
@@ -65,8 +91,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-midnight text-cream antialiased">
+    <html lang="en" className={`dark ${playfair.variable} ${inter.variable} ${bebas.variable}`}>
+      <body className="min-h-screen bg-midnight text-cream antialiased font-body">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-gold-400 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-midnight"
