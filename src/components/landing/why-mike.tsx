@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { Shield, MapPin, Clock, Award, Scale, TrendingUp } from "lucide-react";
-import { useInView } from "@/hooks/use-in-view";
 import { cn } from "@/lib/utils/cn";
+import { Reveal } from "@/components/ui/reveal";
 import { brandPackAssets } from "@/components/amm/brand-pack-assets";
 
 const PILLARS = [
@@ -16,13 +16,8 @@ const PILLARS = [
 ];
 
 export function WhyMike() {
-  const { ref, inView } = useInView(0.08);
-
   return (
-    <section
-      ref={ref as React.RefObject<HTMLElement>}
-      className="relative py-28 px-6 bg-[#0A0A0A] overflow-hidden"
-    >
+    <section className="relative py-28 px-6 bg-[#0A0A0A] overflow-hidden">
       <div className="gold-rule absolute top-0 inset-x-0" />
 
       {/* Mesh background */}
@@ -35,73 +30,70 @@ export function WhyMike() {
       <div className="max-w-6xl mx-auto relative">
 
         {/* Header */}
-        <div className={cn(
-          "text-center mb-20 opacity-0 relative",
-          inView && "animate-fade-up delay-0"
-        )}>
-          {/* Sparkle accent */}
-          <span
-            className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 pointer-events-none select-none"
-            aria-hidden="true"
-          >
-            <Image
-              src={brandPackAssets.accents.sparkle}
-              alt=""
-              width={24}
-              height={24}
-              className="opacity-50"
-            />
-          </span>
-          <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400 mb-4">
-            Why Ask Mike
-          </p>
-          <h2 className="font-display text-5xl sm:text-6xl font-bold text-cream leading-tight">
-            Calm. Confident.{" "}
-            <span className="text-gold-shimmer">Sold.</span>
-          </h2>
-          <p className="mt-5 text-lg text-slate-400 max-w-md mx-auto">
-            Real estate magic without the smoke. Expertise, data, and a reputation that speaks for itself.
-          </p>
-        </div>
+        <Reveal variant="fade-up">
+          <div className="text-center mb-20 relative">
+            {/* Sparkle accent */}
+            <span
+              className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 pointer-events-none select-none"
+              aria-hidden="true"
+            >
+              <Image
+                src={brandPackAssets.accents.sparkle}
+                alt=""
+                width={24}
+                height={24}
+                className="opacity-50"
+              />
+            </span>
+            <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400 mb-4">
+              Why Ask Mike
+            </p>
+            <h2 className="font-display text-5xl sm:text-6xl font-bold text-cream leading-tight">
+              Calm. Confident.{" "}
+              <span className="text-gold-shimmer">Sold.</span>
+            </h2>
+            <p className="mt-5 text-lg text-slate-400 max-w-md mx-auto">
+              Real estate magic without the smoke. Expertise, data, and a reputation that speaks for itself.
+            </p>
+          </div>
+        </Reveal>
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {PILLARS.map((p, i) => {
             const Icon = p.icon;
             return (
-              <div
-                key={p.title}
-                className={cn(
-                  "group relative rounded-2xl border border-white/[0.05] bg-white/[0.02] p-7",
-                  "transition-all duration-300 cursor-default overflow-hidden",
-                  p.borderColor,
-                  "opacity-0",
-                  inView && "animate-fade-up"
-                )}
-                style={{ animationDelay: `${150 + i * 80}ms` }}
-              >
-                {/* Hover glow */}
-                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,160,23,0.05) 0%, transparent 70%)" }}
-                />
+              <Reveal key={p.title} variant="fade-up" delay={150 + i * 80}>
+                <div
+                  className={cn(
+                    "group relative rounded-2xl border border-white/[0.05] bg-white/[0.02] p-7",
+                    "transition-all duration-300 cursor-default overflow-hidden",
+                    p.borderColor,
+                  )}
+                >
+                  {/* Hover glow */}
+                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,160,23,0.05) 0%, transparent 70%)" }}
+                  />
 
-                {/* Icon */}
-                <div className={cn(
-                  "relative mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl",
-                  "border border-white/10 bg-white/[0.04]",
-                  "group-hover:bg-white/[0.07] group-hover:border-white/20",
-                  "transition-all duration-300"
-                )}>
-                  <Icon className={cn("h-5 w-5 transition-colors", p.accentColor)} />
+                  {/* Icon */}
+                  <div className={cn(
+                    "relative mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl",
+                    "border border-white/10 bg-white/[0.04]",
+                    "group-hover:bg-white/[0.07] group-hover:border-white/20",
+                    "transition-all duration-300"
+                  )}>
+                    <Icon className={cn("h-5 w-5 transition-colors", p.accentColor)} />
+                  </div>
+
+                  <h3 className="text-base font-semibold text-cream mb-2.5 group-hover:text-white transition-colors">
+                    {p.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-slate-400 group-hover:text-slate-300 transition-colors">
+                    {p.body}
+                  </p>
                 </div>
-
-                <h3 className="text-base font-semibold text-cream mb-2.5 group-hover:text-white transition-colors">
-                  {p.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-slate-400 group-hover:text-slate-300 transition-colors">
-                  {p.body}
-                </p>
-              </div>
+              </Reveal>
             );
           })}
         </div>

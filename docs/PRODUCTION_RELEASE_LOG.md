@@ -4,6 +4,23 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## [PR #58] Design System Omega Phase 5 — Public Experience
+
+**Branch:** `design-system-omega-phase-5-public-experience`
+
+### Changes
+- **`<Reveal>` integration** — Migrated `HowItWorks`, `WhyMike`, `SoldSection`, `MikeCard` from raw `useInView` hook + manual `opacity-0 / inView && animate-*` to `<Reveal>` / staggered `<Reveal>` wrappers from Phase 4 motion system
+- **`FaqStrip`** — Section header now entrances with `<Reveal variant="fade-up">`
+- **Hero `prefers-reduced-motion` safety** — All 13 hero load animations now carry `motion-reduce:opacity-100` (content always visible on reduced motion) + `motion-safe:animate-*` prefix (animation never runs for users who opted out)
+- **Token cleanup** — `market-pulse.tsx`: `text-[10.5px]`→`text-xs`, `text-[13px]`→`text-sm`; `trust-bar.tsx`: `text-[12px]`→`text-xs`; `mike-card.tsx`: `text-[11px]`→`text-xs`, `bg-gold-400/6`→`bg-gold-400/[0.06]`; `intake-shell.tsx`: `text-[12px]`→`text-xs`
+
+### Validation
+- typecheck: 0 errors
+- tests: 77/77 passing
+- launch-readiness-doctor: 26 PASS, 0 FAIL, 6 SKIP (owner env vars)
+
+---
+
 ## [PR #54] Design System Omega Phase 1 — Visual Operating System
 
 **Merged:** 2026-06-26

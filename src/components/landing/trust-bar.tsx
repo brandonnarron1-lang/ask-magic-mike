@@ -31,7 +31,7 @@ export function TrustBar({ className }: TrustBarProps) {
           {TRUST_ITEMS.map((item, i) => {
             const Icon = item.icon;
             return (
-              <span key={i} className="flex items-center gap-2 text-[12px] text-slate-400">
+              <span key={i} className="flex items-center gap-2 text-xs text-slate-400">
                 <Icon className="h-3.5 w-3.5 text-gold-400/55 shrink-0" aria-hidden="true" />
                 {item.label}
               </span>
@@ -40,7 +40,7 @@ export function TrustBar({ className }: TrustBarProps) {
 
           <span className="h-3 w-px bg-gold-400/[0.15] hidden sm:block" aria-hidden="true" />
 
-          <span className="flex items-center gap-2 text-[12px]">
+          <span className="flex items-center gap-2 text-xs">
             <span className="h-1.5 w-1.5 rounded-full bg-gold-400/60" aria-hidden="true" />
             <span className="font-semibold text-gold-400/85">Mike Eatmon</span>
           </span>

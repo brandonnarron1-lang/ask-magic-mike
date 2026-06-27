@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { Reveal } from "@/components/ui/reveal";
 
 const FAQS = [
   {
@@ -47,13 +48,15 @@ export function FaqStrip() {
       <div className="gold-rule absolute top-0 inset-x-0" />
 
       <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400 mb-3">FAQ</p>
-          <h2 className="font-display text-4xl sm:text-5xl font-bold text-cream">
-            Real Questions.{" "}
-            <span className="text-gold-shimmer">Straight Answers.</span>
-          </h2>
-        </div>
+        <Reveal variant="fade-up">
+          <div className="text-center mb-14">
+            <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400 mb-3">FAQ</p>
+            <h2 className="font-display text-4xl sm:text-5xl font-bold text-cream">
+              Real Questions.{" "}
+              <span className="text-gold-shimmer">Straight Answers.</span>
+            </h2>
+          </div>
+        </Reveal>
 
         <div className="space-y-2">
           {FAQS.map((faq, i) => {

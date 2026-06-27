@@ -81,7 +81,7 @@ export function IntakeShell({
               className="-ml-2 mb-2 p-1.5 h-auto text-slate-400 hover:text-[#F7F1E8]"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span className="text-[12px]">Back</span>
+              <span className="text-xs">Back</span>
             </Button>
           )}
           {children}

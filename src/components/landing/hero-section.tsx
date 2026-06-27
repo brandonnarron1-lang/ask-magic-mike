@@ -185,9 +185,9 @@ export function HeroSection() {
           rel="noopener noreferrer"
           aria-label="Our Town Properties, Inc."
           className={cn(
-            "flex items-center gap-3 rounded-md opacity-0",
+            "flex items-center gap-3 rounded-md opacity-0 motion-reduce:opacity-100",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]",
-            loaded && "animate-fade-in delay-100"
+            loaded && "motion-safe:animate-fade-in motion-safe:delay-100"
           )}
         >
           <Image
@@ -210,8 +210,8 @@ export function HeroSection() {
         </a>
 
         <div className={cn(
-          "hidden md:flex items-center gap-6 text-xs text-slate-400 tracking-wide opacity-0",
-          loaded && "animate-fade-in delay-200"
+          "hidden md:flex items-center gap-6 text-xs text-slate-400 tracking-wide opacity-0 motion-reduce:opacity-100",
+          loaded && "motion-safe:animate-fade-in motion-safe:delay-200"
         )}>
           <span>Wilson, NC</span>
           <span className="text-gold-400/25">·</span>
@@ -242,10 +242,10 @@ export function HeroSection() {
             )
           }
           className={cn(
-            "rounded-lg border border-gold-400/30 px-4 py-2 text-sm font-medium text-cream/90 opacity-0",
+            "rounded-lg border border-gold-400/30 px-4 py-2 text-sm font-medium text-cream/90 opacity-0 motion-reduce:opacity-100",
             "transition-colors hover:border-gold-400/60 hover:bg-gold-400/8",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]",
-            loaded && "animate-scale-in delay-300"
+            loaded && "motion-safe:animate-scale-in motion-safe:delay-300"
           )}
         >
           Call Mike
@@ -259,17 +259,17 @@ export function HeroSection() {
           data-hero-text="true"
           data-mike-layout="split"
         >
-          <div className={cn("mb-6 opacity-0", loaded && "animate-fade-up delay-100")}>
+          <div className={cn("mb-6 opacity-0 motion-reduce:opacity-100", loaded && "motion-safe:animate-fade-up motion-safe:delay-100")}>
             <MikeVisualTrustBadge />
           </div>
 
-          <div className={cn("mb-5 opacity-0", loaded && "animate-fade-up delay-150")}>
+          <div className={cn("mb-5 opacity-0 motion-reduce:opacity-100", loaded && "motion-safe:animate-fade-up motion-safe:delay-150")}>
             <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400/90">
               An Our Town Properties guidance tool
             </p>
           </div>
 
-          <div className={cn("mb-6 opacity-0 relative", loaded && "animate-fade-up delay-200")}>
+          <div className={cn("mb-6 opacity-0 motion-reduce:opacity-100 relative", loaded && "motion-safe:animate-fade-up motion-safe:delay-200")}>
             {/* Sparkle accent — purely decorative, positioned near the headline */}
             <span
               className="absolute -top-3 -right-2 sm:right-8 opacity-60 pointer-events-none select-none"
@@ -293,22 +293,22 @@ export function HeroSection() {
           </div>
 
           <p className={cn(
-            "mb-3 max-w-2xl text-lg leading-relaxed text-slate-300 sm:text-xl font-light opacity-0",
-            loaded && "animate-fade-up delay-300"
+            "mb-3 max-w-2xl text-lg leading-relaxed text-slate-300 sm:text-xl font-light opacity-0 motion-reduce:opacity-100",
+            loaded && "motion-safe:animate-fade-up motion-safe:delay-300"
           )}>
             Local Wilson-area real estate guidance from Mike Eatmon and
             Our Town Properties — broker review first, not a blind estimate.
           </p>
 
           <p className={cn(
-            "mb-7 text-sm text-slate-500 opacity-0",
-            loaded && "animate-fade-up delay-350"
+            "mb-7 text-sm text-slate-500 opacity-0 motion-reduce:opacity-100",
+            loaded && "motion-safe:animate-fade-up motion-safe:delay-350"
           )}>
             Wilson, NC · Eastern NC · Free starting point · Not an appraisal · Follow-up timing may vary
           </p>
 
           <div
-            className={cn("w-full max-w-2xl opacity-0", loaded && "animate-scale-in delay-400")}
+            className={cn("w-full max-w-2xl opacity-0 motion-reduce:opacity-100", loaded && "motion-safe:animate-scale-in motion-safe:delay-400")}
             data-primary-cta="true"
           >
             <QuestionInput
@@ -319,7 +319,7 @@ export function HeroSection() {
             />
           </div>
 
-          <div className={cn("mt-5 opacity-0", loaded && "animate-fade-up delay-500")}>
+          <div className={cn("mt-5 opacity-0 motion-reduce:opacity-100", loaded && "motion-safe:animate-fade-up motion-safe:delay-500")}>
             <CTAChips onSelect={handleChipSelect} selected={selectedChip} className="justify-start" />
             <p className="mt-3 text-xs text-slate-500">
               Seller?{" "}
@@ -334,7 +334,7 @@ export function HeroSection() {
           </div>
 
           {/* Broker trust strip — visible directly below CTA chips */}
-          <div className={cn("mt-5 opacity-0", loaded && "animate-fade-up delay-550")}>
+          <div className={cn("mt-5 opacity-0 motion-reduce:opacity-100", loaded && "motion-safe:animate-fade-up motion-safe:delay-550")}>
             <div
               className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500"
               data-trust-strip="broker-reviewed"
@@ -351,7 +351,7 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className={cn("mt-8 w-full max-w-2xl opacity-0", loaded && "animate-fade-up delay-600")}>
+          <div className={cn("mt-8 w-full max-w-2xl opacity-0 motion-reduce:opacity-100", loaded && "motion-safe:animate-fade-up motion-safe:delay-600")}>
             <div className="relative overflow-hidden rounded-2xl border border-gold-400/[0.13] bg-[#0D0B07]/70 backdrop-blur-sm"
               style={{ boxShadow: "inset 0 1px 0 rgba(212,160,23,0.08), 0 1px 0 rgba(0,0,0,0.5)" }}
             >
@@ -370,7 +370,7 @@ export function HeroSection() {
           </div>
         </div>
 
-        <div className={cn("mx-auto w-full max-w-[500px] opacity-0", loaded && "animate-fade-up delay-300")}>
+        <div className={cn("mx-auto w-full max-w-[500px] opacity-0 motion-reduce:opacity-100", loaded && "motion-safe:animate-fade-up motion-safe:delay-300")}>
           <MikeHeroPortrait priority />
         </div>
       </div>
