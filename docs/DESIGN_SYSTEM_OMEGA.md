@@ -622,3 +622,85 @@ All components: no `red-*` tokens, no hardcoded hex, `motion-safe:` animations, 
 | 7 | Marketing System | ✅ Done (PR #60) |
 | 8 | Analytics Intelligence | ✅ Done (PR #61) |
 | 9 | Agent Portal & Assignments | ✅ Done (PR #62) |
+| 10 | Autonomous Operations & Workflow Engine | ✅ Done (PR #63) |
+
+---
+
+## Phase 10 — Autonomous Operations & Workflow Engine (PR #63)
+
+### Architecture
+
+Ask Magic Mike transforms from an intelligence platform into an **autonomous brokerage operating system**. Every recommendation becomes an executable, approval-gated workflow.
+
+**Safety guarantee:** All automation is PLANNING only. No message is ever sent, no record ever modified, and no content ever published without explicit broker approval.
+
+### Engine Layer (`src/lib/automation/`)
+
+**`workflow-engine.ts`** — Core types + pure functions:
+- 22 `WorkflowTrigger` values covering the full lead/agent/campaign lifecycle
+- `WorkflowDefinition` — immutable declarative spec (no side effects)
+- `ExecutionPlan` — derived runtime plan with steps, impact, confidence, approval status
+- `buildExecutionPlan(definition, signals, confidence)` — deterministic, pure
+- `evaluateConditions(conditions, signals)` — AND-logic condition evaluation
+- `resolveApprovalRequirements(steps, impact)` — broker gate detection
+- `prioritizeWorkflowQueue(plans)` — priority-weight × conversionLift sort
+- `TRIGGER_LABELS`, `CATEGORY_LABELS`, `STATUS_CONFIG` export maps
+
+**`audit-log.ts`** — Immutable audit trail:
+- 10 `AuditEventType` values (workflow_created → rollback_executed)
+- `AuditEvent` — append-only records with `immutable: true` marker
+- `loadAuditHistory(limit, workflowId?)` — reads from `analytics_events` table
+- `buildAuditSummary(events)` — aggregate counts
+
+**`automation-templates.ts`** — 20 production templates across 6 categories:
+- Lead Management (4), Agent Operations (4), Marketing (4), Reporting (3), Coaching (3), Compliance (2)
+- Every template: versioned, rollback strategy, step-level approval gates
+
+**`execution-planner.ts`** — Planning engine:
+- `buildMorningBrief(signals, pending)` — 8-item executive Q&A briefing
+- `planActiveWorkflows(signals)` — evaluates all templates against live signals
+- `scoreExecutionImpact(plan)` — 0–100 impact score with breakdown
+- `buildApprovalQueue(plans)` — sorted approval queue items
+- `loadWorkflowSignals()` — gracefully degrades when Supabase not configured
+
+### Component Library (`src/components/admin/automation/`)
+
+9 new components (21 named exports):
+- `automation-badge.tsx` — `AutomationBadge`, `ExecutionBadge`, `ApprovalRequiredBadge`
+- `impact-score.tsx` — `ImpactScore` (SVG ring), `AutomationMetric`, `ImpactBreakdownRow`
+- `workflow-status.tsx` — `WorkflowStatus`, `CategoryTag`, `PriorityDot`
+- `workflow-card.tsx` — `WorkflowCard`, `WorkflowStepRow`
+- `approval-card.tsx` — `ApprovalCard`, `ApprovalQueue`
+- `execution-timeline.tsx` — `ExecutionTimeline`
+- `execution-log.tsx` — `ExecutionLog`, `FailureCard`, `RetryCard`
+- `execution-summary.tsx` — `ExecutionSummary`
+- `workflow-table.tsx` — `WorkflowTable`, `WorkflowSummaryStrip`
+
+### Automation Command Center (`src/app/(admin)/admin/automation/`)
+
+6 new pages:
+- `/admin/automation` — Morning Command Brief + approval queue + priority workflows + audit summary
+- `/admin/automation/workflows` — Full workflow browser: table + category-grouped cards
+- `/admin/automation/queue` — Approval queue: critical/high/standard tiers + plan detail
+- `/admin/automation/templates` — Template library: full step detail, rollback strategy, tags
+- `/admin/automation/history` — Execution history: failures + full audit log + integrity notice
+- `/admin/automation/executions` — Active executions: awaiting/queued/pending views
+
+### Tests (`tests/brand/automation-engine.test.ts`)
+
+**76 tests** across 15 groups:
+1. `buildExecutionPlan` — plan shape, determinism, confidence clamping
+2. `evaluateConditions` — gt/eq/lte/AND logic
+3. `resolveApprovalRequirements` — always/if_high_impact/never
+4. `prioritizeWorkflowQueue` — sort order
+5. Label & status maps — coverage counts
+6. Template integrity — count, unique IDs, step types, approval types, versioning
+7. Template lookups — getTemplate, getTemplatesByCategory, getTemplatesByTrigger
+8. Morning brief — 8 items, urgency signal propagation
+9. planActiveWorkflows — determinism, signal sensitivity
+10. scoreExecutionImpact — 0–100 range, critical > low
+11. estimateCompletionTime — format correctness
+12. buildApprovalQueue — broker-only filter
+13. Audit log — empty/event counting, label/color maps
+14. Token compliance — no `red-*`, motion-safe prefix, opacity-0 safety net
+15. Brand compliance — no genie/lamp/MLS/mascot; no secret exposure; no outbound execution
