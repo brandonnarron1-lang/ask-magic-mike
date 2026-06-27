@@ -85,10 +85,10 @@ export function ValueHero() {
                 home value range, compare selling options, and get follow-up
                 from Mike Eatmon&apos;s Our Town Properties team.
               </p>
-              <p className="text-slate-300 text-[13.5px] mb-2">
+              <p className="text-slate-300 text-sm mb-2">
                 Real answers. Local insight. AI-assisted.
               </p>
-              <p className="text-slate-400 text-[12.5px] mb-7">
+              <p className="text-slate-400 text-xs mb-7">
                 No account. No pressure. Local human follow-up.
               </p>
 
@@ -117,11 +117,11 @@ export function ValueHero() {
           <div className="flex items-baseline justify-between gap-3 mb-3">
             <h2
               id="value-paths-heading"
-              className="font-display text-[22px] sm:text-[26px] font-semibold text-[#F7F1E8] leading-tight"
+              className="font-display text-2xl sm:text-3xl font-semibold text-cream leading-tight"
             >
               Choose your path
             </h2>
-            <p className="text-[12.5px] text-slate-300 hidden sm:block">
+            <p className="text-xs text-slate-300 hidden sm:block">
               Pick the one that fits — Mike&apos;s team takes it from there.
             </p>
           </div>
@@ -162,17 +162,17 @@ export function ValueHero() {
             <div>
               <h2
                 id="value-trust-heading"
-                className="font-display text-[19px] sm:text-[22px] font-semibold text-[#F7F1E8] leading-tight mb-2"
+                className="font-display text-xl sm:text-2xl font-semibold text-cream leading-tight mb-2"
               >
                 A licensed broker on the other end.
               </h2>
-              <p className="text-[14px] text-slate-200 leading-relaxed max-w-xl">
+              <p className="text-sm text-slate-200 leading-relaxed max-w-xl">
                 Mike Eatmon has been selling Wilson and Eastern North Carolina
                 real estate since 1993 with Our Town Properties, Inc. Your
                 request is reviewed and followed up by a real person, not an
                 auto-responder.
               </p>
-              <p className="mt-3 text-[12.5px] text-slate-300">
+              <p className="mt-3 text-xs text-slate-300">
                 Licensed in North Carolina · 3301 Nash St. N Suite E, Wilson, NC 27896
               </p>
             </div>
