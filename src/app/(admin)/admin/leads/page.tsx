@@ -97,14 +97,14 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
     <div className="min-h-screen bg-[#05070A] text-[#F4F4F4]">
       <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div>
-          <p className="text-[10.5px] tracking-[0.18em] uppercase text-gold-300/85">
+          <p className="text-[10.5px] tracking-label uppercase text-gold-300/85">
             Ask Magic Mike · cockpit
           </p>
-          <h1 className="font-display text-[22px] font-semibold">Leads inbox</h1>
+          <h1 className="font-display text-2xl font-semibold">Leads inbox</h1>
         </div>
         <Link
           href="/admin"
-          className="text-[12px] text-slate-300 hover:text-gold-300"
+          className="text-xs text-slate-300 hover:text-gold-300"
         >
           ← dashboard
         </Link>
@@ -124,12 +124,12 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
               key={s.label}
               className="rounded-xl border border-white/[0.09] bg-white/[0.025] px-4 py-3"
             >
-              <p className="text-[10.5px] tracking-[0.18em] uppercase text-slate-300">
+              <p className="text-[10.5px] tracking-label uppercase text-slate-300">
                 {s.label}
               </p>
               <p
                 className={`font-bebas text-4xl leading-none mt-1 ${
-                  s.accent ? "text-gold-300" : "text-[#F4F4F4]"
+                  s.accent ? "text-gold-300" : "text-cream"
                 }`}
               >
                 {s.value}
@@ -147,7 +147,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
               <Link
                 key={label}
                 href={href}
-                className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors ${style} ${
+                className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${style} ${
                   isActive ? "ring-1 ring-white/20" : "opacity-70"
                 }`}
               >
@@ -164,12 +164,12 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
               name="q"
               defaultValue={filters.q ?? ""}
               placeholder="Search name/email/phone/address"
-              className="col-span-2 sm:col-span-3 md:col-span-2 rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4] placeholder:text-slate-600"
+              className="col-span-2 sm:col-span-3 md:col-span-2 rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream placeholder:text-slate-600"
             />
             <select
               name="lead_type"
               defaultValue={filters.leadType ?? ""}
-              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4]"
+              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream"
             >
               <option value="">All types</option>
               {[
@@ -189,7 +189,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
             <select
               name="grade"
               defaultValue={filters.grade ?? ""}
-              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4]"
+              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream"
             >
               <option value="">All grades</option>
               {["A+", "A", "B", "C", "D"].map((g) => (
@@ -200,7 +200,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
             </select>
             <button
               type="submit"
-              className="rounded-md bg-gold-400 text-[#050505] font-bold px-4 py-2 text-[13px]"
+              className="rounded-xl bg-gold-400 text-midnight font-bold px-4 py-2 text-sm"
             >
               Apply
             </button>
@@ -209,7 +209,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
             <select
               name="status"
               defaultValue={filters.status ?? ""}
-              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4]"
+              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream"
             >
               <option value="">All statuses</option>
               {LEAD_STATUSES.map((s) => (
@@ -221,7 +221,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
             <select
               name="sort"
               defaultValue={filters.sort ?? "newest"}
-              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-[13px] text-[#F4F4F4]"
+              className="rounded-md border border-white/[0.12] bg-[#0B0E14] px-3 py-2 text-sm text-cream"
             >
               <option value="newest">Newest first</option>
               <option value="highest_score">Highest score</option>
@@ -232,7 +232,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
         </form>
 
         {!list.configured && (
-          <div className="mb-5 rounded-md border border-amber-400/30 bg-amber-400/[0.08] px-3 py-2 text-[12px] text-amber-200">
+          <div className="mb-5 rounded-xl border border-amber-400/30 bg-amber-400/[0.08] px-3 py-2 text-xs text-amber-200">
             Supabase not connected — showing empty list. The canonical API works
             in mock mode; live leads will appear here when{" "}
             <code>NEXT_PUBLIC_SUPABASE_URL</code> +{" "}
@@ -241,8 +241,8 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
         )}
 
         <div className="overflow-x-auto rounded-xl border border-white/[0.09]">
-          <table className="w-full text-[13px]">
-            <thead className="bg-white/[0.03] text-[10.5px] tracking-[0.16em] uppercase text-slate-300">
+          <table className="w-full text-sm">
+            <thead className="bg-white/[0.03] text-[10.5px] tracking-label uppercase text-slate-300">
               <tr>
                 <th className="text-left px-3 py-2">Name</th>
                 <th className="text-left px-3 py-2">Type</th>
@@ -267,8 +267,8 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                       <div className="h-9 w-9 rounded-full border border-white/[0.08] bg-white/[0.02] flex items-center justify-center mb-1">
                         <span className="font-bebas text-lg text-slate-600 leading-none">0</span>
                       </div>
-                      <p className="text-[13px] font-medium text-slate-400">No leads match these filters</p>
-                      <p className="text-[11px] text-slate-600">Adjust filters above · leads appear here as the funnel receives traffic</p>
+                      <p className="text-sm font-medium text-slate-400">No leads match these filters</p>
+                      <p className="text-xs text-slate-600">Adjust filters above · leads appear here as the funnel receives traffic</p>
                     </div>
                   </td>
                 </tr>
@@ -281,14 +281,14 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                   <td className="px-3 py-2">
                     <Link
                       href={`/admin/leads/${l.id}`}
-                      className="text-[#F4F4F4] hover:text-gold-300"
+                      className="text-cream hover:text-gold-300"
                     >
                       {l.firstName || l.lastName
                         ? `${l.firstName ?? ""} ${l.lastName ?? ""}`.trim()
                         : "(unnamed)"}
                     </Link>
                     {l.email ? (
-                      <div className="text-[11px] text-slate-400">{l.email}</div>
+                      <div className="text-xs text-slate-400">{l.email}</div>
                     ) : null}
                   </td>
                   <td className="px-3 py-2 text-slate-300">{l.leadType}</td>
@@ -297,7 +297,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                     <span
                       className={`inline-block rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
                         l.grade === "A+" || l.grade === "A"
-                          ? "bg-gold-400 text-[#050505]"
+                          ? "bg-gold-400 text-midnight"
                           : "bg-white/[0.08] text-slate-200"
                       }`}
                     >
@@ -309,7 +309,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                   </td>
                   <td className="px-3 py-2">
                     {l.temperature ? (
-                      <span className={`inline-block rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
                         l.temperature === "urgent" ? "bg-ruby-400/[0.14] text-ruby-300" :
                         l.temperature === "hot"    ? "bg-gold-400/20 text-gold-300" :
                         l.temperature === "warm"   ? "bg-amber-500/15 text-amber-300" :
@@ -326,7 +326,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                       if (!rwa) return <span className="text-slate-500">—</span>;
                       return (
                         <span
-                          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10.5px] font-semibold ${RWA_TIER_STYLES[rwa.tier] ?? ""}`}
+                          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10.5px] font-bold ${RWA_TIER_STYLES[rwa.tier] ?? ""}`}
                           title={`R:${rwa.ready} W:${rwa.willing} A:${rwa.able}`}
                         >
                           {rwa.tier.toUpperCase()} · {rwa.overall}
@@ -335,7 +335,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                     })()}
                   </td>
                   <td className="px-3 py-2 text-slate-300">{l.status}</td>
-                  <td className="px-3 py-2 text-[12px] tabular-nums">
+                  <td className="px-3 py-2 text-xs tabular-nums">
                     <span className={
                       l.lastContactedAt
                         ? "text-emerald-400"
@@ -348,7 +348,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                   <td className="px-3 py-2 text-slate-300">
                     {l.referrerType ? (
                       <span
-                        className={`inline-block rounded-full border px-2 py-0.5 text-[10.5px] font-semibold ${REFERRER_BADGE[l.referrerType] ?? REFERRER_BADGE.direct}`}
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10.5px] font-bold ${REFERRER_BADGE[l.referrerType] ?? REFERRER_BADGE.direct}`}
                         title={`${l.referrerType}${l.utmSource ? ` · ${l.utmSource}` : ""}`}
                       >
                         {l.referrerType.toUpperCase()}
@@ -360,7 +360,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                   <td className="px-3 py-2 text-slate-300">
                     {l.utmCampaign ?? "—"}
                   </td>
-                  <td className="px-3 py-2 text-slate-400 text-[12px]">
+                  <td className="px-3 py-2 text-slate-400 text-xs">
                     {new Date(l.createdAt).toLocaleString()}
                   </td>
                 </tr>
@@ -369,7 +369,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
           </table>
         </div>
 
-        <p className="mt-3 text-[11px] text-slate-500">
+        <p className="mt-3 text-xs text-slate-500">
           Showing {list.items.length} of {list.total} · limit {list.limit}
         </p>
       </main>

@@ -57,42 +57,42 @@ export const ammTokens = {
   stepCard:
     "relative rounded-2xl border border-white/10 bg-[#111111]/92 backdrop-blur-sm p-6 sm:p-8 shadow-[0_24px_60px_-32px_rgba(0,0,0,0.85)]",
 
-  // Buttons
+  // Buttons — rounded-xl luxury standard
   buttonGold:
-    "inline-flex items-center justify-center gap-2 rounded-lg bg-gold-400 px-5 py-2.5 text-sm font-bold text-[#050505] shadow-[0_10px_30px_-10px_rgba(212,175,55,0.55)] transition-all duration-200 hover:bg-gold-300 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed",
+    "inline-flex items-center justify-center gap-2 rounded-xl bg-gold-400 px-5 py-2.5 text-sm font-bold text-midnight shadow-[0_8px_24px_-8px_rgba(212,160,23,0.40)] transition-all duration-200 hover:bg-gold-300 hover:shadow-[0_12px_32px_-8px_rgba(212,160,23,0.55)] active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed",
   buttonGoldLg:
-    "inline-flex items-center justify-center gap-2 rounded-xl bg-gold-400 px-7 py-3.5 text-base font-bold text-[#050505] shadow-[0_18px_40px_-12px_rgba(212,175,55,0.55)] transition-all duration-200 hover:bg-gold-300 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed",
+    "inline-flex items-center justify-center gap-2 rounded-xl bg-gold-400 px-7 py-3.5 text-base font-bold text-midnight shadow-[0_8px_24px_-8px_rgba(212,160,23,0.40)] transition-all duration-200 hover:bg-gold-300 hover:shadow-[0_12px_32px_-8px_rgba(212,160,23,0.55)] active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed",
   buttonSecondary:
-    "inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-[#F4F4F4] transition-all duration-200 hover:border-gold-400/40 hover:bg-gold-400/[0.06]",
+    "inline-flex items-center justify-center gap-2 rounded-xl border border-gold-400/30 px-5 py-2.5 text-sm font-semibold text-gold-300 transition-all duration-200 hover:border-gold-400/55 hover:bg-gold-400/8 hover:text-gold-200",
 
-  // Eyebrow
+  // Eyebrow — Phase 2 tokens applied
   eyebrow:
-    "inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/[0.08] px-3 py-1.5 text-[11px] font-semibold tracking-[0.18em] uppercase text-gold-300",
+    "inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/[0.08] px-3 py-1.5 text-[10.5px] font-semibold tracking-label uppercase text-gold-300",
   eyebrowDot: "h-1.5 w-1.5 rounded-full bg-gold-400",
   rubyChip:
-    "inline-flex items-center gap-1.5 rounded-full border border-ruby-400/40 bg-ruby-400/[0.10] px-2.5 py-1 text-[10.5px] font-semibold tracking-[0.18em] uppercase text-ruby-200",
+    "inline-flex items-center gap-1.5 rounded-full border border-ruby-400/40 bg-ruby-400/[0.10] px-2.5 py-1 text-[10.5px] font-semibold tracking-label uppercase text-ruby-200",
   cyanPulse:
-    "inline-flex items-center gap-1.5 rounded-full border border-cyan-400/35 bg-cyan-400/[0.06] px-2.5 py-1 text-[11px] tracking-[0.16em] uppercase text-cyan-100",
+    "inline-flex items-center gap-1.5 rounded-full border border-cyan-400/35 bg-cyan-400/[0.06] px-2.5 py-1 text-[10.5px] tracking-label uppercase text-cyan-100",
 
-  // Typography
+  // Typography — Phase 2 tokens applied
   headlineDisplay:
-    "font-display font-semibold leading-[0.98] text-[#F4F4F4]",
+    "font-display font-semibold leading-[0.98] text-cream",
   subhead:
-    "text-[#F4F4F4]/85 text-base sm:text-[17px] leading-relaxed",
+    "text-cream/85 text-base leading-relaxed",
 
-  // Microcopy floors (set by the readability QA pass)
+  // Microcopy — Phase 2 tokens applied
   microWarm:
-    "text-[12.5px] text-[#F4F4F4]/85",
+    "text-sm text-cream/85",
   microSlate:
-    "text-[12px] text-slate-300",
+    "text-xs text-slate-300",
   microMuted:
-    "text-[11.5px] text-slate-400",
+    "text-xs text-slate-400",
 
   // Compliance text
   complianceText:
-    "text-[12px] sm:text-[12.5px] leading-relaxed text-slate-400",
+    "text-xs leading-relaxed text-slate-400",
   complianceTextFooter:
-    "text-[12px] sm:text-[12.5px] leading-relaxed text-slate-400 text-center",
+    "text-xs leading-relaxed text-slate-400 text-center",
 } as const;
 
 export type AmmToken = keyof typeof ammTokens;

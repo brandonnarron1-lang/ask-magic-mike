@@ -52,21 +52,21 @@ export default async function LeadDetailPage({ params }: PageProps) {
   });
 
   return (
-    <div className="min-h-screen bg-[#05070A] text-[#F4F4F4]">
+    <div className="min-h-screen bg-[#05070A] text-cream">
       <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div>
-          <p className="text-[10.5px] tracking-[0.18em] uppercase text-gold-300/85">
+          <p className="text-[10.5px] tracking-label uppercase text-gold-300/85">
             Ask Magic Mike · cockpit
           </p>
-          <h1 className="font-display text-[22px] font-semibold">{name}</h1>
-          <p className="text-[12px] text-slate-400 mt-0.5">
+          <h1 className="font-display text-2xl font-semibold">{name}</h1>
+          <p className="text-xs text-slate-400 mt-0.5">
             {String(lead.lead_type ?? "unknown")} · {String(lead.status ?? "new")} ·{" "}
             grade {String(lead.lead_grade ?? "—")}
           </p>
         </div>
         <Link
           href="/admin/leads"
-          className="text-[12px] text-slate-300 hover:text-gold-300"
+          className="text-xs text-slate-300 hover:text-gold-300"
         >
           ← inbox
         </Link>
