@@ -1,7 +1,7 @@
 "use client";
 
 import type { MemoryRecord, MemoryConsolidation } from "@/lib/intelligence/types";
-import { MEMORY_EVENT_LABELS, SIGNIFICANCE_COLORS } from "@/lib/intelligence/memory-engine";
+import { MEMORY_EVENT_LABELS, SIGNIFICANCE_COLORS } from "@/lib/intelligence/memory-constants";
 
 // ---------------------------------------------------------------------------
 // MemoryTimeline — chronological record list
