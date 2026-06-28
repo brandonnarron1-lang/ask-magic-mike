@@ -46,6 +46,26 @@ function EmbedAskInner() {
   }), [utmSource, utmMedium, utmCampaign, utmContent, utmTerm, referrer]);
 
   const { sessionId } = useSession(sessionAttribution);
+
+  // Fire once when session is established. Enables real session counts and
+  // conversion rate in the traffic dashboard (traffic-command.ts queries
+  // analytics_events for page_view to compute sessions7d vs leads7d).
+  useEffect(() => {
+    if (!sessionId) return;
+    fetch("/api/analytics/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventName: "page_view",
+        sessionId,
+        properties: { page: "embed_ask", context: "iframe" },
+        utmSource:   utmSource   ?? undefined,
+        utmMedium:   utmMedium   ?? undefined,
+        utmCampaign: utmCampaign ?? undefined,
+      }),
+    }).catch(() => {}); // never block intake
+  }, [sessionId, utmSource, utmMedium, utmCampaign]);
+
   const flow = useIntakeFlow(sessionId, {
     question: initialQuestion,
     address:  initialAddress,
