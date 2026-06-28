@@ -1,7 +1,7 @@
 # Production Deploy Rehearsal — Ask Magic Mike
 
-**Version:** LC-6 (post-merge-train #44–#51)  
-**Code state:** `main` @ `cd9a83b` — launch-ready  
+**Version:** LC-7 (post-merge-train #44–#52)  
+**Code state:** `main` @ `815a33a` — authority packet complete  
 **Audience:** Brandon Narron (operator)  
 **Estimated total time:** 60–90 minutes with credentials in hand  
 **Companion documents:**
@@ -9,6 +9,7 @@
 - `docs/CONTROLLED_LAUNCH_RUNBOOK.md` — full procedures for each step
 - `docs/OWNER_ACTION_PROOF_PACK.md` — evidence capture template
 - `docs/KNOWN_BLOCKERS.md` — outstanding blockers
+- `docs/CONTROLLED_TRAFFIC_ACTIVATION.md` — private test and limited traffic activation sequence
 
 This document is the deployment-day timeline. Follow it top to bottom. Every row has a Stop If column — if the condition is met, stop and investigate before continuing. Do not skip rows.
 

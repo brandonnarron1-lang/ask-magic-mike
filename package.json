@@ -37,7 +37,8 @@
     "amm:verify:social-preview": "node scripts/amm/verify-social-preview.mjs",
     "amm:smoke:prod": "TARGET_URL=https://www.askmagicmike.com node scripts/prod-smoke.mjs",
     "amm:launch:doctor": "node scripts/amm/launch-readiness-doctor.mjs",
-    "amm:launch:authority": "node scripts/amm/launch-authority-report.mjs"
+    "amm:launch:authority": "node scripts/amm/launch-authority-report.mjs",
+    "amm:public:cta-check": "node scripts/amm/public-cta-final-check.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.0",

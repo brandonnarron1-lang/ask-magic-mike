@@ -1,7 +1,7 @@
 # Controlled Launch Runbook — Ask Magic Mike
 
-**Version:** LC-6 (post-merge-train #44–#51)  
-**Code state:** `main` @ `cd9a83b` — launch-ready  
+**Version:** LC-7 (post-merge-train #44–#52)  
+**Code state:** `main` @ `815a33a` — authority packet complete  
 **Audience:** Brandon Narron (operator), Mike Eatmon (broker/BIC)  
 **Estimated total time to Go/No-Go:** 60–90 minutes with credentials in hand
 
@@ -9,6 +9,7 @@
 - `docs/GO_NO_GO_COMMAND_CENTER.md` — single-page launch authority decision with gate summary table
 - `docs/OWNER_ACTION_PROOF_PACK.md` — evidence capture template for each owner action
 - `docs/PRODUCTION_DEPLOY_REHEARSAL.md` — deployment-day minute-by-minute timeline
+- `docs/CONTROLLED_TRAFFIC_ACTIVATION.md` — private test and limited traffic activation sequence
 
 ---
 

@@ -167,3 +167,7 @@ Deployment-day minute-by-minute timeline with Stop If column for every action. F
 **[`docs/GO_NO_GO_COMMAND_CENTER.md`](GO_NO_GO_COMMAND_CENTER.md)**
 
 Single-page launch authority decision. Current status, gate summary table, hard GO/NO-GO criteria, and final sign-off block. Run `npm run amm:launch:authority` to verify current authority status.
+
+**[`docs/CONTROLLED_TRAFFIC_ACTIVATION.md`](CONTROLLED_TRAFFIC_ACTIVATION.md)**
+
+Operator-ready private test and limited traffic activation sequence. Converts launch authority into the exact steps from private testing through WordPress CTA activation and 24-hour monitoring. Run `npm run amm:public:cta-check` before starting Stage 3.

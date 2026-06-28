@@ -1,9 +1,11 @@
 # Go / No-Go Command Center — Ask Magic Mike
 
-**Version:** LC-6 (post-merge-train #44–#51)  
-**Code state:** `main` @ `cd9a83b` — launch-ready  
+**Version:** LC-7 (post-merge-train #44–#52)  
+**Code state:** `main` @ `815a33a` — authority packet complete  
 **Launch authority script:** `npm run amm:launch:authority`  
-**Operator:** Brandon Narron
+**Operator:** Brandon Narron  
+**Companion documents:**
+- `docs/CONTROLLED_TRAFFIC_ACTIVATION.md` — private test and limited traffic activation sequence
 
 ---
 
@@ -28,6 +30,7 @@ This status will change to GO only after OA-1 through OA-5 are completed and ver
 | Owner action runbook (LC-4) | ✅ DONE | Merged PR #50 @ `ba7f40f` |
 | Deploy rehearsal + proof pack (LC-5) | ✅ DONE | Merged PR #51 @ `cd9a83b` |
 | Go/No-Go command center (LC-6) | ✅ DONE | This document |
+| Controlled traffic activation (LC-7) | ✅ DONE | Merged PR #52 @ `815a33a` |
 | Security headers | ✅ DONE | HSTS, X-Content-Type, Referrer-Policy in production |
 | Embed CSP frame-ancestors | ✅ DONE | ourtownproperties.com + subdomains permitted |
 | Admin auth (401 gate) | ✅ DONE (code) | Requires OA-3 to verify against production |
@@ -38,6 +41,7 @@ This status will change to GO only after OA-1 through OA-5 are completed and ver
 | Red-* token violations | ✅ DONE | Fixed in Epsilon (PR #45) |
 | MLS/FlexMLS in public source | ✅ DONE | Confined to internal library paths |
 | Launch doctor: 0 FAIL | ✅ DONE | 26 PASS / 6 SKIP / 0 FAIL |
+| Public CTA check: PASS | ✅ DONE | `npm run amm:public:cta-check` → PUBLIC_CTA_CHECK: PASS |
 
 ---
 
@@ -245,4 +249,6 @@ Controlled traffic decision:
 WordPress CTA activation (separate step):
   [ ] OA-6 complete — proceeding to WordPress CTAs
   [ ] OA-6 deferred — reason: ____________________
+
+Controlled traffic activation sequence: docs/CONTROLLED_TRAFFIC_ACTIVATION.md
 ```
