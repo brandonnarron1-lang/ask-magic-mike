@@ -11,6 +11,9 @@ import type {
   MemorySignificance,
   NodeType,
 } from "./types";
+import { MEMORY_EVENT_LABELS } from "./memory-constants";
+
+export { MEMORY_EVENT_LABELS, SIGNIFICANCE_COLORS } from "./memory-constants";
 
 // ---------------------------------------------------------------------------
 // Event-type to significance mapping
@@ -33,8 +36,6 @@ const EVENT_SIGNIFICANCE: Record<MemoryEventType, MemorySignificance> = {
   follow_up_completed:  "low",
   dead_lead:            "medium",
 };
-
-export { MEMORY_EVENT_LABELS, SIGNIFICANCE_COLORS } from "./memory-constants";
 
 // ---------------------------------------------------------------------------
 // Memory record factory
