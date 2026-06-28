@@ -18,6 +18,7 @@ import {
 } from "./sla";
 import type { LeadGrade } from "@/lib/leads/lead-types";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
+import { isSyntheticEmail } from "@/lib/leads/synthetic-detection";
 
 export interface SlaSweepReport {
   scanned: number;
@@ -84,20 +85,22 @@ export function createSupabaseSlaSweepRepo(): SlaSweepRepository {
       const client = createAdminClient() as any;
       const { data, error } = await client
         .from("leads")
-        .select("id, created_at, lead_grade, last_contacted_at, status")
+        .select("id, created_at, lead_grade, last_contacted_at, status, email")
         .in("status", ["new", "qualified", "contacted", "assigned"])
         .order("created_at", { ascending: false })
         .limit(limit);
       if (error) throw new Error(`[sla-sweep] fetch: ${error.message}`);
-      return (data ?? []).map((row: Record<string, unknown>): LeadSlaState => ({
-        leadId: row.id as string,
-        grade: ((row.lead_grade as LeadGrade | null) ?? "C"),
-        createdAt: new Date(row.created_at as string),
-        acceptedAt: null, // Could read from lead_routing when needed.
-        contactedAt: row.last_contacted_at
-          ? new Date(row.last_contacted_at as string)
-          : null,
-      }));
+      return (data ?? [])
+        .filter((row: Record<string, unknown>) => !isSyntheticEmail(row.email as string | null))
+        .map((row: Record<string, unknown>): LeadSlaState => ({
+          leadId: row.id as string,
+          grade: ((row.lead_grade as LeadGrade | null) ?? "C"),
+          createdAt: new Date(row.created_at as string),
+          acceptedAt: null, // Could read from lead_routing when needed.
+          contactedAt: row.last_contacted_at
+            ? new Date(row.last_contacted_at as string)
+            : null,
+        }));
     },
 
     async recordBreach(b: SlaBreach) {
