@@ -2,6 +2,7 @@ export const dynamic   = "force-dynamic";
 export const revalidate = 0;
 
 import Link from "next/link";
+import { AdminShell } from "@/components/admin/admin-shell";
 import { loadTrafficCommand } from "@/lib/admin/traffic-command";
 import { buildWeeklyExecutiveReport } from "@/lib/admin/weekly-executive-report";
 import { buildLaunchReadiness } from "@/lib/admin/traffic-launch-readiness";
@@ -99,37 +100,16 @@ export default async function TrafficCommandPage() {
     : "0%";
 
   return (
-    <div className="min-h-screen bg-[#080806] text-cream">
-      {/* ------------------------------------------------------------------ */}
-      {/* Header                                                              */}
-      {/* ------------------------------------------------------------------ */}
-      <header className="border-b border-white/10 bg-[#0D0B07] px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <p className="text-[10.5px] tracking-label uppercase text-gold-300/85">
-              Ask Magic Mike · Admin
-            </p>
-            <h1 className="font-display text-[22px] font-semibold text-cream">
-              Traffic Command Center
-            </h1>
-            <p className="text-sm text-slate-400 mt-0.5">
-              Sessions · Attribution · Questions · Content · Posts · Heatmap
-            </p>
-            <p className="text-xs text-slate-600 mt-0.5">
-              Read-only. No outbound messaging.
-            </p>
-            <p className="text-[11px] text-slate-700 mt-1">
-              Generated: <span className="text-slate-500">{d.generatedAt}</span>
-            </p>
-          </div>
-          <div className="flex items-center gap-4 text-xs text-slate-500">
-            <Link href="/admin/distribution" className="hover:text-gold-300">distribution</Link>
-            <Link href="/admin/revenue" className="hover:text-gold-300">revenue</Link>
-            <Link href="/admin" className="hover:text-gold-300">&larr; dashboard</Link>
-          </div>
+    <AdminShell
+      title="Traffic Command Center"
+      backHref="/admin"
+      headerRight={
+        <div className="flex items-center gap-3">
+          <Link href="/admin/revenue" className="text-[10px] text-slate-500 hover:text-gold-300 transition-colors">revenue →</Link>
+          <Link href="/admin/distribution" className="text-[10px] text-slate-500 hover:text-gold-300 transition-colors">distribution →</Link>
         </div>
-      </header>
-
+      }
+    >
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-10">
 
         {/* ---------------------------------------------------------------- */}
@@ -735,6 +715,6 @@ export default async function TrafficCommandPage() {
           Ask Magic Mike Traffic Command Center &middot; Our Town Properties, Inc. &middot; Wilson, NC &middot; Read-only view
         </p>
       </main>
-    </div>
+    </AdminShell>
   );
 }

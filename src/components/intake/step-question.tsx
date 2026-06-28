@@ -55,10 +55,10 @@ export function StepQuestion({
             rows={4}
             placeholder="What's the market like? Should I sell now? What's my home worth in Wilson?"
             className={cn(
-              "w-full rounded-xl border border-white/10 bg-[#0B0E14]/85",
+              "w-full rounded-xl border border-white/[0.08] bg-[#0B0E14]/85",
               "px-4 py-3 text-cream placeholder:text-slate-500",
               "text-sm leading-relaxed resize-none",
-              "focus:outline-none focus:border-gold-400/45 focus:ring-2 focus:ring-gold-400/15 transition-colors"
+              "focus:outline-none focus:border-gold-400/50 focus:ring-2 focus:ring-gold-400/[0.10] focus:shadow-[0_0_20px_-4px_rgba(212,160,23,0.18)] transition-all duration-200"
             )}
             aria-label="Your question"
           />
@@ -79,9 +79,9 @@ export function StepQuestion({
               placeholder="123 Nash St NW, Wilson, NC 27896"
               autoComplete="street-address"
               className={cn(
-                "w-full rounded-xl border border-white/10 bg-[#0B0E14]/85",
+                "w-full rounded-xl border border-white/[0.08] bg-[#0B0E14]/85",
                 "pl-10 pr-4 py-3 text-cream placeholder:text-slate-500",
-                "text-sm focus:outline-none focus:border-gold-400/45 focus:ring-2 focus:ring-gold-400/15 transition-colors"
+                "text-sm focus:outline-none focus:border-gold-400/50 focus:ring-2 focus:ring-gold-400/[0.10] focus:shadow-[0_0_20px_-4px_rgba(212,160,23,0.18)] transition-all duration-200"
               )}
               aria-label="Property address"
             />

@@ -83,14 +83,22 @@ export function StepConsent({
               onClick={() => onToggle(opt.key)}
               aria-pressed={checked}
               className={cn(
-                "w-full flex items-center gap-4 rounded-xl border px-4 py-3.5 text-left",
+                "relative w-full flex items-center gap-4 rounded-xl border px-4 py-3.5 text-left overflow-hidden",
                 "transition-all duration-200 motion-reduce:transition-none",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60",
                 checked
-                  ? "border-gold-400/55 bg-gold-400/[0.07] shadow-[0_2px_12px_rgba(212,160,23,0.08)]"
-                  : "border-white/[0.09] bg-[#0B0E14]/70 hover:border-gold-400/28 hover:bg-gold-400/[0.03]"
+                  ? "border-gold-400/50 bg-gold-400/[0.07]"
+                  : "border-white/[0.08] bg-[#0B0E14]/70 hover:border-gold-400/25 hover:bg-gold-400/[0.03]"
               )}
+              style={checked ? { boxShadow: "0 0 24px -6px rgba(212,160,23,0.20), inset 0 1px 0 rgba(212,160,23,0.08)" } : undefined}
             >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "absolute inset-x-0 top-0 h-px transition-opacity duration-200 bg-gradient-to-r from-transparent via-gold-400/45 to-transparent",
+                  checked ? "opacity-100" : "opacity-0"
+                )}
+              />
               <span
                 className={cn(
                   "flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors",

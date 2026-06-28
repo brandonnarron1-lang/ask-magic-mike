@@ -62,22 +62,33 @@ export function StepIntent({
                 data-testid={`intent-${opt.value}`}
                 onClick={() => onIntentChange(opt.value)}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl border px-4 py-3.5 text-sm text-left transition-all duration-200",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60",
+                  "relative flex items-center gap-3 rounded-xl border px-4 py-3.5 text-sm text-left overflow-hidden",
+                  "transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60",
                   selected
-                    ? "border-gold-400/55 bg-gold-400/[0.08] text-gold-200"
-                    : "border-white/10 bg-[#0B0E14]/70 text-slate-200 hover:border-gold-400/30 hover:bg-white/[0.04]"
+                    ? "border-gold-400/50 bg-gold-400/[0.08] text-gold-200 shadow-[0_0_24px_-4px_rgba(212,160,23,0.18),inset_0_0_0_1px_rgba(212,160,23,0.08)]"
+                    : "border-white/[0.08] bg-[#0B0E14]/70 text-slate-200 hover:border-gold-400/25 hover:bg-white/[0.03]"
                 )}
+                style={selected ? { boxShadow: "0 0 28px -6px rgba(212,160,23,0.22), inset 0 1px 0 rgba(212,160,23,0.10)" } : undefined}
               >
-                <opt.Icon
-                  size={16}
+                {/* Top rim on selected */}
+                <span
                   aria-hidden="true"
                   className={cn(
-                    "shrink-0 transition-colors",
-                    selected ? "text-gold-400" : "text-slate-500"
+                    "absolute inset-x-0 top-0 h-px transition-opacity duration-200",
+                    selected
+                      ? "opacity-100 bg-gradient-to-r from-transparent via-gold-400/50 to-transparent"
+                      : "opacity-0 bg-gradient-to-r from-transparent via-gold-400/30 to-transparent group-hover:opacity-100"
                   )}
                 />
-                <span className="font-medium">{opt.label}</span>
+                <span className={cn(
+                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
+                  selected
+                    ? "bg-gold-400/15 text-gold-400"
+                    : "bg-white/[0.04] text-slate-500"
+                )}>
+                  <opt.Icon size={14} aria-hidden="true" />
+                </span>
+                <span className="font-medium leading-snug">{opt.label}</span>
               </button>
             );
           })}
@@ -100,8 +111,8 @@ export function StepIntent({
                 "rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60",
                 timelineMonths === opt.value
-                  ? "border-gold-400/55 bg-gold-400/[0.08] text-gold-200"
-                  : "border-white/10 text-slate-300 hover:border-gold-400/30 hover:text-cream"
+                  ? "border-gold-400/50 bg-gold-400/[0.10] text-gold-200 shadow-[0_0_16px_-4px_rgba(212,160,23,0.22)]"
+                  : "border-white/[0.08] text-slate-300 hover:border-gold-400/25 hover:text-cream"
               )}
             >
               {opt.label}

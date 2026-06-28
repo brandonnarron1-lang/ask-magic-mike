@@ -130,10 +130,10 @@ export function StepContact({
               className={cn(
                 "w-full rounded-xl border bg-[#0B0E14]/85 px-4 py-3",
                 "text-cream placeholder:text-slate-500 text-sm",
-                "focus:outline-none transition-colors",
+                "focus:outline-none transition-all duration-200",
                 phoneError && field.name === "phone"
-                  ? "border-ruby-400/60 focus:border-ruby-400 focus:ring-2 focus:ring-ruby-400/[0.15]"
-                  : "border-white/10 focus:border-gold-400/45 focus:ring-2 focus:ring-gold-400/15"
+                  ? "border-ruby-400/60 focus:border-ruby-400/70 focus:ring-2 focus:ring-ruby-400/[0.12] focus:shadow-[0_0_20px_-4px_rgba(193,39,45,0.20)]"
+                  : "border-white/[0.08] focus:border-gold-400/50 focus:ring-2 focus:ring-gold-400/[0.10] focus:shadow-[0_0_20px_-4px_rgba(212,160,23,0.18)]"
               )}
             />
             {field.name === "phone" && phoneError && (
