@@ -44,7 +44,7 @@ export function HowItWorks({
       className={cn("w-full", className)}
       aria-label={heading}
     >
-      <p className="text-[11px] font-semibold tracking-[0.22em] uppercase text-gold-300 mb-3">
+      <p className="text-[11px] font-semibold tracking-kicker uppercase text-gold-300 mb-3">
         {heading}
       </p>
       <ol className="grid grid-cols-1 sm:grid-cols-3 gap-3">

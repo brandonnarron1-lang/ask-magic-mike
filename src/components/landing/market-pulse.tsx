@@ -23,7 +23,7 @@ export function MarketPulse() {
       {/* Header tag */}
       <div className="absolute left-4 inset-y-0 z-20 flex items-center pointer-events-none">
         <span
-          className="text-[9px] font-black tracking-[0.18em] uppercase px-2.5 py-1 rounded"
+          className="text-[9px] font-black tracking-label uppercase px-2.5 py-1 rounded"
           style={{
             background: "linear-gradient(135deg, #D4A017, #B8860B)",
             color: "#0A0A0A",

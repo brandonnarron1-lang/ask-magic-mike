@@ -38,7 +38,7 @@ export function AmmLockup({
         {showTagline && (
           <div
             className={cn(
-              "tracking-[0.18em] uppercase text-gold-300/80 mt-0.5",
+              "tracking-label uppercase text-gold-300/80 mt-0.5",
               size === "sm" ? "text-[8.5px]" : "text-[9.5px]"
             )}
           >

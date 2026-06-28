@@ -76,12 +76,12 @@ export function MikeTrustCard({
 
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <p className="text-[11px] tracking-[0.18em] uppercase text-gold-300">
+            <p className="text-[11px] tracking-label uppercase text-gold-300">
               Your local expert
             </p>
             <span
               data-testid="mike-verified-badge"
-              className="inline-flex items-center gap-1 rounded-full border border-gold-400/30 bg-gold-400/[0.10] px-2 py-0.5 text-[10px] tracking-[0.16em] uppercase text-gold-200"
+              className="inline-flex items-center gap-1 rounded-full border border-gold-400/30 bg-gold-400/[0.10] px-2 py-0.5 text-[10px] tracking-label uppercase text-gold-200"
             >
               <Sparkles className="h-2.5 w-2.5" aria-hidden="true" />
               Verified

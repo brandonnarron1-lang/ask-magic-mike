@@ -24,7 +24,7 @@ export function BrandShell({
   return (
     <div
       className={cn(
-        "relative min-h-screen w-full overflow-hidden bg-[#05070A] text-[#F7F1E8] antialiased flex flex-col",
+        "relative min-h-screen w-full overflow-hidden bg-[#080806] text-[#F7F1E8] antialiased flex flex-col",
         className
       )}
     >

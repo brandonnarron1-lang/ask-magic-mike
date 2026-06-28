@@ -24,7 +24,7 @@ export function AiAssistBadge({
       <span
         data-testid="ai-assist-badge"
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/[0.06] px-3 py-1 text-[11.5px] tracking-[0.16em] uppercase text-cyan-100",
+          "inline-flex items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/[0.06] px-3 py-1 text-[11.5px] tracking-label uppercase text-cyan-100",
           className
         )}
       >

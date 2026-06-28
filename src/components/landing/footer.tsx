@@ -59,22 +59,22 @@ export function Footer() {
             <h4 className="text-xs font-semibold tracking-label uppercase text-cream mb-4">Contact</h4>
             <div className="space-y-2 text-xs text-slate-400">
               <div>
-                <span className="text-slate-600 text-[10px] uppercase tracking-widest block mb-0.5">Direct</span>
+                <span className="text-slate-600 text-[10px] uppercase tracking-label block mb-0.5">Direct</span>
                 <a href="tel:2522454337" className="hover:text-gold-400 transition-colors">252-245-4337</a>
               </div>
               <div>
-                <span className="text-slate-600 text-[10px] uppercase tracking-widest block mb-0.5">Office</span>
+                <span className="text-slate-600 text-[10px] uppercase tracking-label block mb-0.5">Office</span>
                 <a href="tel:2522437700" className="hover:text-gold-400 transition-colors">252-243-7700</a>
               </div>
               <div>
-                <span className="text-slate-600 text-[10px] uppercase tracking-widest block mb-0.5">Web</span>
+                <span className="text-slate-600 text-[10px] uppercase tracking-label block mb-0.5">Web</span>
                 <a href={siteConfig.parentBrandUrl} className="hover:text-gold-400 transition-colors">
                   ourtownproperties.com
                 </a>
               </div>
               <div className="text-slate-500 pt-1">Wilson, NC · Eastern NC</div>
               <div className="pt-3 border-t border-white/[0.05] space-y-1.5">
-                <span className="text-slate-600 text-[10px] uppercase tracking-widest block mb-1.5">Quick Links</span>
+                <span className="text-slate-600 text-[10px] uppercase tracking-label block mb-1.5">Quick Links</span>
                 <a href="/ask" className="block hover:text-gold-400 transition-colors">Ask a Question</a>
                 <a href="/value" className="block hover:text-gold-400 transition-colors">Home Value Estimate</a>
               </div>

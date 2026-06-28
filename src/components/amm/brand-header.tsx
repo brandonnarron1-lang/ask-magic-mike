@@ -56,7 +56,7 @@ export function BrandHeader({ className, compact = false }: BrandHeaderProps) {
           >
             Ask Magic Mike
           </span>
-          <span className="block text-[10px] uppercase tracking-[0.18em] text-gold-300/80 mt-0.5">
+          <span className="block text-[10px] uppercase tracking-label text-gold-300/80 mt-0.5">
             by Our Town Properties
           </span>
         </span>
