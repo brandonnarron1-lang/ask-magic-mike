@@ -1,7 +1,27 @@
 # Go-Live Handoff — Ask Magic Mike
-**Production Go-Live Command · 2026-06-27**
+**Production Go-Live Command · 2026-06-27 (updated: Autonomous Operator Run)**
 **Platform:** Our Town Properties, Inc. · Wilson, NC
 **Authorized by:** Ask Magic Mike — Production Go-Live Command
+
+---
+
+## Autonomous Operator Run — Status Summary
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Phase 1 — Recon | ✅ COMPLETE | Branch confirmed, all 12 PRs MERGEABLE |
+| Phase 2 — Validation | ✅ ALL PASS | lint/typecheck/tests/build/funnel/doctor |
+| Phase 3 — Supabase migration | ✅ APPLIED | canonical_platform_tables on askmagicmike-prod |
+| Phase 4 — Vercel env vars | ✅ ALREADY SET | 7/7 vars confirmed in Vercel production |
+| Phase 5 — Vercel cron | ✅ COMMITTED | vercel.json with /api/admin/sla/sweep hourly |
+| Phase 6 — WordPress | ⏳ OWNER ACTION | Snippets documented below; no wp-admin access |
+| Phase 7 — PR merge | ❌ OWNER ACTION | GitHub Ruleset requires 1 review; cannot self-approve |
+| Phase 8 — Deploy verify | ⏳ AFTER MERGE | Current production is Phase 1 |
+| Phase 9 — Report | ✅ THIS DOC | See below |
+
+**Single remaining blocker: Brandon must approve the PRs on GitHub (5 minutes) so the merge can proceed.**
+
+See "Part 0 — One-Time Unlock" below for the exact steps.
 
 ---
 
@@ -28,6 +48,34 @@
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
+
+---
+
+## Part 0 — One-Time Unlock (5 minutes — do this first)
+
+The GitHub ruleset "main" requires 1 approving review before any PR can merge to main. The PRs were authored by `brandonnarron1-lang`, so you cannot approve your own PRs. Two options:
+
+### Option A — Temporarily lower the review requirement (fastest, 2 min)
+
+1. Go to: https://github.com/brandonnarron1-lang/ask-magic-mike/settings/rules/17291635
+2. Find "Require a pull request before merging"
+3. Change "Required approvals" from **1** → **0**
+4. Click **Save changes**
+5. Run the merge sequence below (or type `! gh pr merge 55 --squash` etc. in Claude Code)
+6. After all PRs are merged, re-set required approvals back to **1**
+
+### Option B — Approve each PR on GitHub (12 clicks)
+
+If you want to keep the review requirement active:
+1. Go to each PR listed below
+2. Click **"Files changed"** → **"Review changes"** → select **"Approve"** → **"Submit review"**
+3. GitHub will then allow the merge
+
+> After you complete either option, run in Claude Code:
+> ```
+> ! for pr in 55 56 57 58 59 60 61 62 63 64 65 66; do gh pr merge $pr --squash; done
+> ```
+> Or merge one at a time to monitor progress.
 
 ---
 
