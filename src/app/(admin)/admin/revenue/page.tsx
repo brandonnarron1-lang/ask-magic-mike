@@ -6,6 +6,7 @@ import { loadRevenueCommand } from "@/lib/admin/revenue-command";
 import { buildRevenueSentinel } from "@/lib/admin/revenue-sentinel";
 import type { SentinelSeverity } from "@/lib/admin/revenue-sentinel";
 import { buildLeadSourceReconciliation } from "@/lib/admin/lead-source-reconciliation";
+import { buildRevenueForecast } from "@/lib/admin/revenue-forecast";
 
 export default async function RevenueCommandPage() {
   // createAdminClient throws when env vars are absent — we wrap in try/catch
@@ -40,6 +41,7 @@ export default async function RevenueCommandPage() {
   const d = data;
   const sentinel = buildRevenueSentinel(d);
   const reconciliation = buildLeadSourceReconciliation(d);
+  const forecast = buildRevenueForecast(d.pipelineLeads);
 
   const STATUS_STYLES: Record<SentinelSeverity, { pill: string; label: string }> = {
     ok:       { pill: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25", label: "All clear" },
@@ -458,6 +460,104 @@ export default async function RevenueCommandPage() {
               </div>
             ))}
           </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* 0b. Revenue Forecast                                                 */}
+        {/* ------------------------------------------------------------------ */}
+        <section>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-1">
+            0b &middot; Revenue Forecast
+          </h2>
+          <p className="text-[11px] text-slate-600 mb-4">
+            Wilson NC market · $215K avg home · 3% gross commission · 50% agent split · synthetic leads excluded · {forecast.confidenceNote.toLowerCase()}
+          </p>
+
+          {/* Primary metrics */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+            {[
+              { label: "Pipeline Value",      value: forecast.pipelineValueLabel,  sub: `${forecast.activeLeads} active leads`,     accent: "text-gold-300" },
+              { label: "30-Day Commission",   value: forecast.commission30dLabel,  sub: `${forecast.projectedClosings30d} projected closings`, accent: "text-emerald-400" },
+              { label: "90-Day Commission",   value: forecast.commission90dLabel,  sub: `${forecast.projectedClosings90d} projected closings`, accent: "text-emerald-400" },
+              { label: "Total in Pipeline",   value: String(forecast.totalLeadsInPipeline), sub: `${forecast.activeLeads} active / ${forecast.totalLeadsInPipeline - forecast.activeLeads} closed`, accent: "text-cream" },
+            ].map((s) => (
+              <div key={s.label} className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
+                <div className={`font-bebas text-3xl leading-none ${s.accent}`}>
+                  {s.value}
+                </div>
+                <div className="text-[10.5px] text-slate-500 mt-1 uppercase tracking-[0.1em]">{s.label}</div>
+                <div className="text-[10px] text-slate-600 mt-0.5">{s.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Grade breakdown */}
+          <div className="overflow-x-auto rounded-xl border border-white/[0.09]">
+            <table className="w-full text-[13px]">
+              <thead className="bg-white/[0.03] text-[10px] tracking-label uppercase text-slate-400">
+                <tr>
+                  <th className="text-left px-4 py-2">Grade</th>
+                  <th className="text-right px-4 py-2">Leads</th>
+                  <th className="text-right px-4 py-2">Close Prob</th>
+                  <th className="text-right px-4 py-2">Pipeline Value</th>
+                  <th className="text-right px-4 py-2">Est. Commission (90d)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {["A+", "A", "B", "C", "D"].map((grade) => {
+                  const row = forecast.byGrade[grade];
+                  if (!row) return null;
+                  return (
+                    <tr key={grade} className="border-t border-white/[0.06] hover:bg-white/[0.02]">
+                      <td className="px-4 py-2">
+                        <span className={`inline-block rounded-full px-2 py-0.5 text-[10.5px] font-bold ${
+                          grade === "A+" || grade === "A" ? "bg-gold-400 text-midnight" : "bg-white/[0.08] text-slate-200"
+                        }`}>{grade}</span>
+                      </td>
+                      <td className="px-4 py-2 text-right tabular-nums text-cream">{row.count}</td>
+                      <td className="px-4 py-2 text-right tabular-nums text-slate-300">{row.closingProbability}%</td>
+                      <td className="px-4 py-2 text-right tabular-nums text-slate-300 font-mono text-[12px]">
+                        {row.estimatedValue > 0 ? `$${row.estimatedValue.toLocaleString()}` : <span className="text-slate-600">&mdash;</span>}
+                      </td>
+                      <td className="px-4 py-2 text-right tabular-nums font-mono text-[12px]">
+                        {row.estimatedCommission > 0
+                          ? <span className="text-emerald-400">${row.estimatedCommission.toLocaleString()}</span>
+                          : <span className="text-slate-600">&mdash;</span>}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Top sources */}
+          {forecast.bySource.length > 0 && (
+            <div className="mt-3 overflow-x-auto rounded-xl border border-white/[0.09]">
+              <table className="w-full text-[13px]">
+                <thead className="bg-white/[0.03] text-[10px] tracking-label uppercase text-slate-400">
+                  <tr>
+                    <th className="text-left px-4 py-2">Top Source</th>
+                    <th className="text-right px-4 py-2">Leads</th>
+                    <th className="text-right px-4 py-2">Est. Commission (90d)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {forecast.bySource.map((s) => (
+                    <tr key={s.source} className="border-t border-white/[0.06] hover:bg-white/[0.02]">
+                      <td className="px-4 py-2 font-mono text-[12px] text-gold-300/80">{s.source}</td>
+                      <td className="px-4 py-2 text-right tabular-nums text-cream">{s.leadCount}</td>
+                      <td className="px-4 py-2 text-right tabular-nums font-mono text-[12px]">
+                        {s.estimatedCommission > 0
+                          ? <span className="text-emerald-400">${s.estimatedCommission.toLocaleString()}</span>
+                          : <span className="text-slate-600">&mdash;</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
 
         {/* ------------------------------------------------------------------ */}
