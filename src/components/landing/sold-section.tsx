@@ -44,7 +44,7 @@ export function SoldSection() {
             {/* "Calm. Confident. Sold." overlay at top */}
             <div className="absolute top-5 left-5 right-5">
               <div className="bg-glass-gold rounded-xl px-4 py-2.5 border border-gold-400/25 inline-block">
-                <span className="font-bebas text-xl tracking-[0.15em] text-cream">
+                <span className="font-bebas text-xl tracking-label text-cream">
                   CALM.&nbsp; CONFIDENT.&nbsp; SOLD.
                 </span>
               </div>

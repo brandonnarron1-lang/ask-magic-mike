@@ -64,7 +64,7 @@ export function OptionCard({
       {ribbon && (
         <span
           className={cn(
-            "absolute -top-2 right-3 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-[0.18em] uppercase",
+            "absolute -top-2 right-3 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-label uppercase",
             ribbonTone === "ruby"
               ? "bg-ruby-400 text-[#F4F4F4] shadow-[0_6px_18px_-6px_rgba(193,39,45,0.55)]"
               : "bg-gold-400 text-[#0A0A0A]"

@@ -23,7 +23,7 @@ const STEPS = [
     title: "Mike Reviews Your Details",
     body: "Your request goes to Mike Eatmon at Our Town Properties — with your full context included. No call centers. No automated responses.",
     note: "Routed to Mike directly",
-    color: "from-amber-400/15 to-transparent",
+    color: "from-gold-400/15 to-transparent",
     portrait: brandPackAssets.actions.explaining,
     portraitAlt: "Mike Eatmon reviewing your details",
   },

@@ -296,15 +296,15 @@ export function HeroSection() {
             "mb-3 max-w-2xl text-lg leading-relaxed text-slate-300 sm:text-xl font-light opacity-0 motion-reduce:opacity-100",
             loaded && "motion-safe:animate-fade-up motion-safe:delay-300"
           )}>
-            Local Wilson-area real estate guidance from Mike Eatmon and
-            Our Town Properties — broker review first, not a blind estimate.
+            Real answers from the broker who&apos;s closed 2,500+ homes in
+            Eastern NC. Ask anything — Mike Eatmon reviews every request personally.
           </p>
 
           <p className={cn(
             "mb-7 text-sm text-slate-500 opacity-0 motion-reduce:opacity-100",
             loaded && "motion-safe:animate-fade-up motion-safe:delay-350"
           )}>
-            Wilson, NC · Eastern NC · Free starting point · Not an appraisal · Follow-up timing may vary
+            Wilson, NC · Eastern NC · Free · No account · Not an appraisal
           </p>
 
           <div
@@ -362,7 +362,7 @@ export function HeroSection() {
                     <div className="font-bebas text-2xl leading-none tracking-wider text-gold-300 sm:text-3xl">
                       {s.value}
                     </div>
-                    <div className="mt-1.5 text-[10px] leading-tight text-slate-500 uppercase tracking-widest">{s.label}</div>
+                    <div className="mt-1.5 text-[10px] leading-tight text-slate-500 uppercase tracking-label">{s.label}</div>
                   </div>
                 ))}
               </div>

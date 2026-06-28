@@ -108,7 +108,7 @@ export function ConversionPanel({
       data-testid="value-address-form"
     >
       {sourceBadge && (
-        <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-gold-400/22 bg-gold-400/[0.06] px-3 py-1 text-[11px] tracking-[0.16em] uppercase text-gold-300">
+        <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-gold-400/22 bg-gold-400/[0.06] px-3 py-1 text-[11px] tracking-label uppercase text-gold-300">
           {sourceBadge}
         </div>
       )}

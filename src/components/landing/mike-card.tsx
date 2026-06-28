@@ -79,7 +79,7 @@ export function MikeCard() {
                       className="h-auto w-auto"
                     />
                     <div>
-                      <div className="text-xs font-bold tracking-[0.12em] uppercase text-gold-400 leading-none">Our Town</div>
+                      <div className="text-xs font-bold tracking-label uppercase text-gold-400 leading-none">Our Town</div>
                       <div className="text-[10px] text-slate-400 leading-none mt-0.5">Properties, Inc.</div>
                     </div>
                   </div>

@@ -67,7 +67,7 @@ export function StepConfirmation({
         style={{ boxShadow: "0 0 20px rgba(212,160,23,0.12), inset 0 1px 0 rgba(212,160,23,0.10)" }}
       >
         <CheckCircle className="h-3.5 w-3.5 text-gold-400" />
-        <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-gold-300">
+        <p className="text-[11px] font-semibold tracking-label uppercase text-gold-300">
           Your request is in
         </p>
       </div>
