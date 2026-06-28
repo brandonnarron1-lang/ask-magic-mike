@@ -2,8 +2,9 @@ export const dynamic   = "force-dynamic";
 export const revalidate = 0;
 
 import Link from "next/link";
-import { Inbox, DollarSign, BarChart2, Share2, AlertCircle, CheckCircle2, Users } from "lucide-react";
+import { Inbox, DollarSign, BarChart2, Share2, AlertCircle, CheckCircle2, Users, ArrowRight, Activity } from "lucide-react";
 import { LeadTable } from "@/components/admin/lead-table";
+import { AdminShell, AdminSectionHeading } from "@/components/admin/admin-shell";
 import { getLeadsForAdmin } from "@/lib/db/lead-repository";
 import { loadDashboardMetrics } from "@/lib/admin/dashboard-metrics";
 
@@ -17,14 +18,23 @@ function timeSince(isoString: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-function AdminIcon() {
+function LockedState() {
   return (
-    <svg width="28" height="28" viewBox="0 0 60 60" fill="none">
-      <rect x="2" y="2" width="56" height="56" rx="4" fill="#0A0A0A" stroke="#D4A017" strokeWidth="2"/>
-      <path d="M30 8 C18 8 10 18 10 28 L10 50 L20 50 L20 36 L40 36 L40 50 L50 50 L50 28 C50 18 42 8 30 8Z"
-        fill="none" stroke="#D4A017" strokeWidth="2.5"/>
-      <rect x="23" y="36" width="14" height="14" rx="1" fill="none" stroke="#D4A017" strokeWidth="2"/>
-    </svg>
+    <div className="min-h-screen bg-[#080806] flex items-center justify-center">
+      <div className="max-w-md text-center px-6">
+        <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-ruby-400/30 bg-ruby-400/[0.08]">
+          <Activity className="h-6 w-6 text-ruby-400" />
+        </div>
+        <h1 className="font-display text-2xl font-bold text-ruby-400 mb-3">Admin Unavailable</h1>
+        <p className="text-sm text-slate-400 leading-relaxed mb-4">
+          Supabase is not configured. Set{" "}
+          <code className="text-amber-400 text-xs">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+          <code className="text-amber-400 text-xs">SUPABASE_SERVICE_ROLE_KEY</code>{" "}
+          in your production environment.
+        </p>
+        <p className="text-xs text-slate-600">Mock data is never shown in production.</p>
+      </div>
+    </div>
   );
 }
 
@@ -34,28 +44,7 @@ export default async function AdminPage() {
     loadDashboardMetrics(),
   ]);
 
-  // Production without Supabase — show locked state, never show mock data
-  if (result.mode === "locked") {
-    return (
-      <div className="min-h-screen bg-[#080806] flex items-center justify-center">
-        <div className="max-w-md text-center px-6">
-          <div className="mb-6 flex justify-center">
-            <AdminIcon />
-          </div>
-          <h1 className="text-xl font-bold text-ruby-400 mb-3">Admin Unavailable</h1>
-          <p className="text-sm text-slate-400 leading-relaxed mb-4">
-            Supabase is not configured. Set{" "}
-            <code className="text-amber-400 text-xs">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
-            <code className="text-amber-400 text-xs">SUPABASE_SERVICE_ROLE_KEY</code>{" "}
-            in your production environment.
-          </p>
-          <p className="text-xs text-slate-600">
-            Mock data is never shown in production.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  if (result.mode === "locked") return <LockedState />;
 
   const leads   = result.leads;
   const devMode = result.mode === "dev";
@@ -68,79 +57,95 @@ export default async function AdminPage() {
   };
 
   const ATTENTION_LIMIT = 5;
-  const urgentLeads = leads.filter((l) => l.temperature === "urgent");
+  const urgentLeads       = leads.filter((l) => l.temperature === "urgent");
   const breachedNotUrgent = leads.filter((l) => l.slaBreached && l.temperature !== "urgent");
-  const attentionLeads = [...urgentLeads, ...breachedNotUrgent].slice(0, ATTENTION_LIMIT);
-  const attentionTotal = urgentLeads.length + breachedNotUrgent.length;
+  const attentionLeads    = [...urgentLeads, ...breachedNotUrgent].slice(0, ATTENTION_LIMIT);
+  const attentionTotal    = urgentLeads.length + breachedNotUrgent.length;
 
   return (
-    <div className="min-h-screen bg-[#080806] text-cream">
-      <header className="border-b border-gold-400/10 bg-[#0D0B07] px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <AdminIcon />
-            <div>
-              <div className="text-sm font-bold text-cream">Ask Magic Mike</div>
-              <div className="text-xs text-slate-500">Lead Dashboard · Our Town Properties</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 text-xs text-slate-500">
-            {devMode && (
-              <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 text-amber-400 font-medium">
-                Dev Mode — Sample Data
-              </span>
-            )}
-            <span>{new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</span>
-          </div>
-        </div>
-      </header>
+    <AdminShell
+      title="Command Center"
+      devMode={devMode}
+      headerRight={
+        <span className="hidden sm:block text-xs text-slate-500 tabular-nums">
+          {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+        </span>
+      }
+    >
+      <main className="max-w-7xl mx-auto px-6 py-8 space-y-6">
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-
-        {/* Dev storage warning banner */}
+        {/* Dev data warning */}
         {devMode && (
-          <div className="mb-6 rounded-xl border-2 border-amber-400/60 bg-amber-400/10 px-5 py-4">
-            <p className="text-sm font-bold text-amber-400 mb-1">
-              DEV MOCK DATA — Supabase is not connected.
-            </p>
+          <div className="rounded-xl border-2 border-amber-400/50 bg-amber-400/[0.07] px-5 py-4">
+            <p className="text-sm font-bold text-amber-400 mb-1">DEV MODE — Sample Data Only</p>
             <p className="text-xs text-amber-300/70">
-              This data is fabricated for development only. It is never shown in production.
-              Connect Supabase (set <code>NEXT_PUBLIC_SUPABASE_URL</code> +{" "}
-              <code>SUPABASE_SERVICE_ROLE_KEY</code>) to see real leads.
+              This data is fabricated for development. Never shown in production.
+              Connect Supabase (<code>NEXT_PUBLIC_SUPABASE_URL</code> + <code>SUPABASE_SERVICE_ROLE_KEY</code>) to see live leads.
             </p>
           </div>
         )}
 
-        {/* Primary status tiles */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          {[
-            { label: "Total Leads",  value: counts.total,    color: "text-cream" },
-            { label: "Urgent",       value: counts.urgent,   color: "text-ruby-400" },
-            { label: "Hot",          value: counts.hot,      color: "text-gold-400" },
-            { label: "SLA Breached", value: counts.breached, color: "text-ruby-400" },
-          ].map((s) => (
-            <div key={s.label} className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
-              <div className={`font-bebas text-4xl leading-none ${s.color}`}>{s.value}</div>
-              <div className="text-xs text-slate-500 mt-1 uppercase tracking-widest">{s.label}</div>
-            </div>
-          ))}
+        {/* ── Primary status grid ── */}
+        <div>
+          <AdminSectionHeading className="mb-3">Lead Intelligence</AdminSectionHeading>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[
+              { label: "Total Leads",  value: counts.total,    color: "text-cream",     sub: "in system" },
+              { label: "Urgent",       value: counts.urgent,   color: "text-ruby-400",  sub: "need action now" },
+              { label: "Hot",          value: counts.hot,      color: "text-gold-400",  sub: "high intent" },
+              { label: "SLA Breached", value: counts.breached, color: "text-ruby-400",  sub: "response overdue" },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="rounded-xl border border-white/[0.07] bg-white/[0.025] px-5 py-4 hover:border-white/[0.12] transition-colors"
+              >
+                <div className={`font-bebas text-5xl leading-none ${s.color}`}>{s.value}</div>
+                <div className="text-xs font-semibold text-slate-400 mt-1 uppercase tracking-widest">{s.label}</div>
+                <div className="text-[10.5px] text-slate-600 mt-0.5">{s.sub}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Attention Required — actionable lead routing strip */}
-        {attentionTotal > 0 ? (
-          <div className="mb-6 rounded-xl border border-ruby-400/30 bg-ruby-400/[0.04] p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <AlertCircle className="h-4 w-4 text-ruby-400 shrink-0" aria-hidden="true" />
-              <p className="text-xs font-bold uppercase tracking-label text-ruby-400">
-                Attention Required &middot; {attentionTotal} lead{attentionTotal !== 1 ? "s" : ""} need{attentionTotal === 1 ? "s" : ""} action
-              </p>
+        {/* ── Funnel conversion tiles ── */}
+        {metrics.configured && (
+          <div>
+            <AdminSectionHeading className="mb-3">Funnel Health</AdminSectionHeading>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                { label: "New Today",     value: metrics.totals.newToday,              color: "text-cream",       sub: "since midnight" },
+                { label: "Contacted",     value: metrics.totals.contacted,             color: "text-emerald-400", sub: "reached" },
+                { label: "Appt. Req.",    value: metrics.totals.appointmentsRequested, color: "text-gold-400",    sub: "scheduled" },
+                { label: "Unassigned",    value: metrics.totals.unassigned,            color: "text-amber-400",   sub: "need routing" },
+              ].map((s) => (
+                <div key={s.label} className="rounded-xl border border-white/[0.05] bg-white/[0.015] px-5 py-4">
+                  <div className={`font-bebas text-5xl leading-none ${s.color}`}>{s.value}</div>
+                  <div className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-widest">{s.label}</div>
+                  <div className="text-[10.5px] text-slate-600 mt-0.5">{s.sub}</div>
+                </div>
+              ))}
             </div>
-            <div className="space-y-1.5">
+          </div>
+        )}
+
+        {/* ── Attention strip ── */}
+        {attentionTotal > 0 ? (
+          <div className="rounded-xl border border-ruby-400/30 bg-ruby-400/[0.04]">
+            <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-ruby-400/15">
+              <AlertCircle className="h-4 w-4 text-ruby-400 shrink-0" aria-hidden="true" />
+              <p className="text-xs font-bold uppercase tracking-label text-ruby-400 flex-1">
+                Action Required &middot; {attentionTotal} lead{attentionTotal !== 1 ? "s" : ""}
+              </p>
+              <Link href="/admin/leads" className="text-[10.5px] text-slate-400 hover:text-gold-300 transition-colors">
+                View all →
+              </Link>
+            </div>
+            <div className="p-3 space-y-1.5">
               {attentionLeads.map((lead) => (
                 <Link
                   key={lead.id}
                   href={`/admin/leads/${lead.id}`}
-                  className="flex items-center gap-3 rounded-lg border border-white/[0.05] bg-white/[0.025] px-3 py-2.5 hover:border-ruby-400/25 hover:bg-ruby-400/[0.04] transition-all duration-150 group"
+                  className="flex items-center gap-3 rounded-lg border border-white/[0.05] bg-white/[0.02] px-3.5 py-2.5 hover:border-ruby-400/25 hover:bg-ruby-400/[0.05] transition-all duration-150 group"
                 >
                   <span className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${
                     lead.temperature === "urgent"
@@ -154,110 +159,102 @@ export default async function AdminPage() {
                   <span className="text-sm font-medium text-cream flex-1 truncate group-hover:text-white transition-colors">
                     {lead.name}
                   </span>
-                  <span className="text-xs text-slate-500 shrink-0">{timeSince(lead.createdAt)}</span>
-                  <span className="text-gold-400 text-sm shrink-0">→</span>
+                  <span className="text-xs text-slate-500 shrink-0 tabular-nums">{timeSince(lead.createdAt)}</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-slate-600 group-hover:text-gold-400 transition-colors shrink-0" aria-hidden="true" />
                 </Link>
               ))}
             </div>
             {attentionTotal > ATTENTION_LIMIT && (
-              <Link
-                href="/admin/leads"
-                className="mt-2.5 inline-block text-xs text-slate-400 hover:text-gold-300 transition-colors"
-              >
-                + {attentionTotal - ATTENTION_LIMIT} more in Leads Inbox →
-              </Link>
+              <div className="px-5 pb-3.5">
+                <Link href="/admin/leads" className="text-xs text-slate-400 hover:text-gold-300 transition-colors">
+                  + {attentionTotal - ATTENTION_LIMIT} more in Leads Inbox →
+                </Link>
+              </div>
             )}
           </div>
         ) : (
-          <div className="mb-6 rounded-xl border border-white/[0.05] bg-white/[0.015] px-4 py-3 flex items-center gap-2.5">
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.03] px-5 py-3.5 flex items-center gap-3">
             <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" aria-hidden="true" />
-            <p className="text-xs text-slate-400">All clear — no urgent leads or SLA breaches right now</p>
+            <div>
+              <p className="text-xs font-semibold text-emerald-400">All clear</p>
+              <p className="text-[10.5px] text-slate-500 mt-0.5">No urgent leads or SLA breaches right now</p>
+            </div>
           </div>
         )}
 
-        {/* Funnel conversion tiles — from dashboard-metrics */}
-        {metrics.configured && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-            {[
-              { label: "New Today",     value: metrics.totals.newToday,             color: "text-cream" },
-              { label: "Contacted",     value: metrics.totals.contacted,            color: "text-emerald-400" },
-              { label: "Appt. Req.",    value: metrics.totals.appointmentsRequested, color: "text-gold-400" },
-              { label: "Unassigned",    value: metrics.totals.unassigned,           color: "text-amber-400" },
-            ].map((s) => (
-              <div key={s.label} className="rounded-xl border border-white/[0.04] bg-white/[0.01] px-5 py-4">
-                <div className={`font-bebas text-4xl leading-none ${s.color}`}>{s.value}</div>
-                <div className="text-xs text-slate-600 mt-1 uppercase tracking-widest">{s.label}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Today's Operations */}
+        {/* ── Today's Operations ── */}
         {metrics.configured && (metrics.totals.followUpDue > 0 || metrics.totals.neverContacted > 0) && (
-          <div className="mb-8 rounded-xl border border-amber-400/25 bg-amber-400/[0.04] px-5 py-4">
-            <h2 className="text-[10.5px] font-semibold uppercase tracking-label text-amber-300/80 mb-3">
-              Today&rsquo;s Operations
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              <Link href="/admin/leads?filter=follow_up_due" className="group rounded-lg border border-white/[0.06] bg-white/[0.02] px-4 py-3 hover:border-amber-400/30 hover:bg-amber-400/[0.04] transition-all">
-                <div className={`font-bebas text-4xl leading-none ${metrics.totals.followUpDue > 0 ? "text-amber-400" : "text-slate-600"}`}>
-                  {metrics.totals.followUpDue}
-                </div>
-                <div className="text-xs text-slate-500 mt-1 uppercase tracking-widest">Follow-ups Due</div>
-                <div className="text-[10px] text-slate-600 mt-0.5">next_follow_up_at &le; now</div>
-              </Link>
-              <Link href="/admin/leads?filter=never_contacted" className="group rounded-lg border border-white/[0.06] bg-white/[0.02] px-4 py-3 hover:border-ruby-400/30 hover:bg-ruby-400/[0.04] transition-all">
-                <div className={`font-bebas text-4xl leading-none ${metrics.totals.neverContacted > 0 ? "text-ruby-400" : "text-slate-600"}`}>
-                  {metrics.totals.neverContacted}
-                </div>
-                <div className="text-xs text-slate-500 mt-1 uppercase tracking-widest">Never Contacted</div>
-                <div className="text-[10px] text-slate-600 mt-0.5">assigned &gt; 2h, no contact yet</div>
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* Source / UTM breakdown */}
-        {metrics.configured && metrics.bySource.length > 0 && (
-          <div className="mb-8 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
-            <h2 className="text-xs font-semibold uppercase tracking-label text-slate-500 mb-3">
-              Leads by Source
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {metrics.bySource.map(({ source, count }) => (
-                <span
-                  key={source}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1 text-xs text-slate-300"
+          <div>
+            <AdminSectionHeading className="mb-3">Today&rsquo;s Operations</AdminSectionHeading>
+            <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.03] p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Link
+                  href="/admin/leads?filter=follow_up_due"
+                  className="group rounded-xl border border-white/[0.06] bg-white/[0.025] px-5 py-4 hover:border-amber-400/30 hover:bg-amber-400/[0.04] transition-all"
                 >
-                  <span className="font-medium text-gold-400">{count}</span>
-                  <span className="text-slate-500">{source}</span>
-                </span>
-              ))}
+                  <div className={`font-bebas text-4xl leading-none ${metrics.totals.followUpDue > 0 ? "text-amber-400" : "text-slate-600"}`}>
+                    {metrics.totals.followUpDue}
+                  </div>
+                  <div className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-widest">Follow-ups Due</div>
+                  <div className="text-[10.5px] text-slate-600 mt-0.5">next_follow_up_at ≤ now</div>
+                </Link>
+                <Link
+                  href="/admin/leads?filter=never_contacted"
+                  className="group rounded-xl border border-white/[0.06] bg-white/[0.025] px-5 py-4 hover:border-ruby-400/30 hover:bg-ruby-400/[0.04] transition-all"
+                >
+                  <div className={`font-bebas text-4xl leading-none ${metrics.totals.neverContacted > 0 ? "text-ruby-400" : "text-slate-600"}`}>
+                    {metrics.totals.neverContacted}
+                  </div>
+                  <div className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-widest">Never Contacted</div>
+                  <div className="text-[10.5px] text-slate-600 mt-0.5">assigned &gt; 2h, no contact yet</div>
+                </Link>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Command center navigation */}
-        <div className="mb-7">
-          <p className="text-[10.5px] font-semibold uppercase tracking-label text-slate-500 mb-3">
-            Command Centers
-          </p>
+        {/* ── Source attribution ── */}
+        {metrics.configured && metrics.bySource.length > 0 && (
+          <div>
+            <AdminSectionHeading className="mb-3">Lead Source Attribution</AdminSectionHeading>
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
+              <div className="flex flex-wrap gap-2">
+                {metrics.bySource.map(({ source, count }) => (
+                  <span
+                    key={source}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.035] px-3 py-1 text-xs"
+                  >
+                    <span className="font-bebas text-base leading-none text-gold-400 tabular-nums">{count}</span>
+                    <span className="text-slate-400">{source}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Command center navigation ── */}
+        <div>
+          <AdminSectionHeading className="mb-3">Command Centers</AdminSectionHeading>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {[
-              { href: "/admin/leads",        Icon: Inbox,     label: "Leads Inbox",          sub: "Inbox · filter · detail" },
-              { href: "/admin/routing",      Icon: Users,      label: "Agent Routing",        sub: "Roster · queue · SLA" },
-              { href: "/admin/revenue",      Icon: DollarSign, label: "Revenue",              sub: "Pipeline · sentinel · alerts" },
-              { href: "/admin/traffic",      Icon: BarChart2,  label: "Traffic",              sub: "UTM · sources · sessions" },
-              { href: "/admin/distribution", Icon: Share2,     label: "Distribution",         sub: "Queue · platforms · plan" },
-            ].map(({ href, Icon, label, sub }) => (
+              { href: "/admin/leads",        Icon: Inbox,      label: "Leads Inbox",    sub: "Inbox · filter · detail",        accent: "group-hover:border-gold-400/40 group-hover:text-gold-300" },
+              { href: "/admin/routing",      Icon: Users,      label: "Agent Routing",  sub: "Roster · queue · SLA",           accent: "group-hover:border-amber-400/30 group-hover:text-amber-300" },
+              { href: "/admin/revenue",      Icon: DollarSign, label: "Revenue",        sub: "Pipeline · sentinel · alerts",   accent: "group-hover:border-emerald-400/30 group-hover:text-emerald-300" },
+              { href: "/admin/traffic",      Icon: BarChart2,  label: "Traffic",        sub: "UTM · sources · sessions",       accent: "group-hover:border-blue-400/30 group-hover:text-blue-300" },
+              { href: "/admin/distribution", Icon: Share2,     label: "Distribution",   sub: "Queue · platforms · plan",       accent: "group-hover:border-purple-400/30 group-hover:text-purple-300" },
+            ].map(({ href, Icon, label, sub, accent }) => (
               <Link
                 key={href}
                 href={href}
-                className="group flex flex-col gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3.5 hover:border-gold-400/30 hover:bg-gold-400/[0.03] transition-all duration-200"
+                className={`group flex flex-col gap-2.5 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-4 hover:bg-white/[0.035] transition-all duration-200 ${accent}`}
               >
-                <Icon className="h-4 w-4 text-slate-500 group-hover:text-gold-400 transition-colors" aria-hidden="true" />
+                <div className="flex items-center justify-between">
+                  <Icon className="h-4 w-4 text-slate-500 group-hover:text-current transition-colors" aria-hidden="true" />
+                  <ArrowRight className="h-3 w-3 text-slate-700 group-hover:text-current transition-colors" aria-hidden="true" />
+                </div>
                 <div>
-                  <p className="text-xs font-semibold text-slate-200 group-hover:text-gold-300 transition-colors leading-none mb-0.5">
+                  <p className="text-xs font-semibold text-slate-200 group-hover:text-current transition-colors leading-none mb-1">
                     {label}
                   </p>
                   <p className="text-[10.5px] text-slate-600 leading-tight">{sub}</p>
@@ -267,20 +264,25 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-label text-slate-500">
-            Recent Leads
-            <span className="ml-2 font-normal normal-case tracking-normal text-slate-700">· click a row to expand</span>
-          </h2>
+        {/* ── Recent leads ── */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <AdminSectionHeading>
+              Recent Leads
+              <span className="ml-2 font-normal normal-case tracking-normal text-slate-700">· click a row to expand</span>
+            </AdminSectionHeading>
+            <Link href="/admin/leads" className="text-xs text-slate-500 hover:text-gold-300 transition-colors">
+              View all →
+            </Link>
+          </div>
+          <LeadTable leads={leads} />
         </div>
 
-        <LeadTable leads={leads} />
-
-        <p className="mt-6 text-xs text-slate-700 text-center">
+        <p className="text-xs text-slate-700 text-center pb-4">
           Ask Magic Mike Admin · Our Town Properties, Inc. · Wilson, NC ·{" "}
-          {devMode ? "Sample data — connect Supabase to see live leads" : "Live data"}
+          {devMode ? "Sample data — connect Supabase for live leads" : "Live data"}
         </p>
       </main>
-    </div>
+    </AdminShell>
   );
 }

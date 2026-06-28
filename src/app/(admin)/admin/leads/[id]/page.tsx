@@ -99,7 +99,7 @@ export default async function LeadDetailPage({ params }: PageProps) {
         {/* Left column: profile + attribution + listing matches */}
         <section className="md:col-span-2 space-y-5">
           {!detail.configured && (
-            <div className="rounded-md border border-amber-400/30 bg-amber-400/[0.08] px-3 py-2 text-[12px] text-amber-200">
+            <div className="rounded-md border border-amber-400/30 bg-amber-400/[0.08] px-3 py-2 text-sm text-amber-200">
               Supabase not connected — showing empty detail.
             </div>
           )}
@@ -115,14 +115,14 @@ export default async function LeadDetailPage({ params }: PageProps) {
                 : "border-white/[0.09] bg-white/[0.025]"
             }`}
           >
-            <p className="text-[10.5px] tracking-[0.18em] uppercase text-gold-300/85 mb-3">
+            <p className="text-[10.5px] tracking-label uppercase text-gold-300/85 mb-3">
               Conversation Summary · Next Best Action
             </p>
 
             {nba.isSynthetic && (
               <div
                 data-testid="nba-synthetic-warning"
-                className="mb-3 flex items-center gap-2 rounded-lg border border-ruby-400/30 bg-ruby-400/[0.08] px-3 py-2 text-[12px] text-ruby-300 font-semibold"
+                className="mb-3 flex items-center gap-2 rounded-lg border border-ruby-400/30 bg-ruby-400/[0.08] px-3 py-2 text-sm text-ruby-300 font-semibold"
               >
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                 Synthetic / test lead — do not contact.
@@ -132,14 +132,14 @@ export default async function LeadDetailPage({ params }: PageProps) {
             <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1 mb-3">
               <Field label="Source path"   value={nba.sourcePath} />
               <Field label="Score"         value={nba.scoreLabel} />
-              <div className="text-[12.5px] mb-1">
+              <div className="text-sm mb-1">
                 <span className="text-slate-400 mr-2">Temperature:</span>
                 {tempBadgeClass ? (
                   <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${tempBadgeClass}`}>
                     {nba.temperatureLabel}
                   </span>
                 ) : (
-                  <span className="text-[#F4F4F4]">{nba.temperatureLabel}</span>
+                  <span className="text-cream">{nba.temperatureLabel}</span>
                 )}
               </div>
               <Field label="Intent"        value={nba.intentSummary} />
@@ -147,7 +147,7 @@ export default async function LeadDetailPage({ params }: PageProps) {
 
             {nba.missingInfo.length > 0 && (
               <div className="mb-3">
-                <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-amber-400/80 mb-1">
+                <p className="text-[10.5px] font-semibold uppercase tracking-label text-amber-400/80 mb-1">
                   Missing info
                 </p>
                 <ul className="flex flex-wrap gap-2">
@@ -164,15 +164,15 @@ export default async function LeadDetailPage({ params }: PageProps) {
             )}
 
             <div>
-              <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-slate-400 mb-1">
+              <p className="text-[10.5px] font-semibold uppercase tracking-label text-slate-400 mb-1">
                 Suggested follow-up angle
               </p>
               <p
                 data-testid="nba-follow-up-angle"
-                className={`text-[12.5px] leading-relaxed ${
+                className={`text-sm leading-relaxed ${
                   nba.isSynthetic || nba.doNotContact
                     ? "text-ruby-300"
-                    : "text-[#F4F4F4]"
+                    : "text-cream"
                 }`}
               >
                 {nba.followUpAngle}
@@ -214,17 +214,17 @@ export default async function LeadDetailPage({ params }: PageProps) {
                 <Field label="Landing Page"   value={String(detail.attribution.landing_page ?? "—")} />
               </>
             ) : (
-              <p className="text-[12.5px] text-slate-400">No attribution row.</p>
+              <p className="text-sm text-slate-400">No attribution row.</p>
             )}
           </Card>
 
           <Card title={`Listing matches (${detail.listingMatches.length})`}>
             {detail.listingMatches.length === 0 ? (
-              <p className="text-[12.5px] text-slate-400">No matches yet.</p>
+              <p className="text-sm text-slate-400">No matches yet.</p>
             ) : (
               <ul className="space-y-2">
                 {detail.listingMatches.map((m: Record<string, unknown>) => (
-                  <li key={String(m.id)} className="text-[12.5px] text-slate-200">
+                  <li key={String(m.id)} className="text-sm text-slate-200">
                     <span className="font-semibold">{String(m.listing_id)}</span> · score {String(m.match_score)}
                   </li>
                 ))}
@@ -236,7 +236,7 @@ export default async function LeadDetailPage({ params }: PageProps) {
         {/* Right column: events, messages, tasks, compliance */}
         <section className="space-y-5">
           <Card title={`Events (${detail.events.length})`}>
-            <ul className="space-y-1.5 text-[12px]">
+            <ul className="space-y-1.5 text-sm">
               {detail.events.slice(0, 20).map((e: Record<string, unknown>) => (
                 <li key={String(e.id)} className="text-slate-200">
                   <span className="font-semibold text-gold-300">
@@ -254,10 +254,10 @@ export default async function LeadDetailPage({ params }: PageProps) {
           </Card>
 
           <Card title={`Messages (${detail.messages.length})`}>
-            <ul className="space-y-2 text-[12.5px]">
+            <ul className="space-y-2 text-sm">
               {detail.messages.slice(0, 20).map((m: Record<string, unknown>) => (
                 <li key={String(m.id)} className="text-slate-200">
-                  <span className="text-[10.5px] tracking-[0.16em] uppercase text-slate-400 mr-2">
+                  <span className="text-[10.5px] tracking-label uppercase text-slate-400 mr-2">
                     {String(m.role)}
                   </span>
                   {String(m.content)}
@@ -270,7 +270,7 @@ export default async function LeadDetailPage({ params }: PageProps) {
           </Card>
 
           <Card title={`Tasks (${detail.tasks.length})`}>
-            <ul className="space-y-1.5 text-[12.5px]">
+            <ul className="space-y-1.5 text-sm">
               {detail.tasks.slice(0, 20).map((t: Record<string, unknown>) => (
                 <li key={String(t.id)} className="text-slate-200">
                   <span className="font-semibold">{String(t.title)}</span> ·{" "}
@@ -284,7 +284,7 @@ export default async function LeadDetailPage({ params }: PageProps) {
           </Card>
 
           <Card title={`Compliance flags (${detail.complianceFlags.length})`}>
-            <ul className="space-y-1.5 text-[12.5px]">
+            <ul className="space-y-1.5 text-sm">
               {detail.complianceFlags.slice(0, 20).map((f: Record<string, unknown>) => (
                 <li key={String(f.id)} className="text-slate-200">
                   <span className="font-semibold text-ruby-300">
@@ -307,7 +307,7 @@ export default async function LeadDetailPage({ params }: PageProps) {
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-white/[0.09] bg-white/[0.025] p-4">
-      <p className="text-[10.5px] tracking-[0.18em] uppercase text-gold-300/85 mb-2">
+      <p className="text-[10.5px] tracking-label uppercase text-gold-300/85 mb-2">
         {title}
       </p>
       <div>{children}</div>
@@ -317,9 +317,9 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 
 function Field({ label, value }: { label: string; value: string }) {
   return (
-    <p className="text-[12.5px] mb-1">
+    <p className="text-sm mb-1">
       <span className="text-slate-400 mr-2">{label}:</span>
-      <span className="text-[#F4F4F4]">{value}</span>
+      <span className="text-cream">{value}</span>
     </p>
   );
 }

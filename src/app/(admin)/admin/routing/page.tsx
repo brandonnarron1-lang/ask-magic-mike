@@ -63,7 +63,7 @@ function AgentCard({ agent }: { agent: AgentRosterRow }) {
     <div className={`rounded-xl border p-4 ${agent.isActive ? "border-white/[0.08] bg-white/[0.025]" : "border-white/[0.03] bg-white/[0.01] opacity-50"}`}>
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-[#F4F4F4] leading-tight truncate">{agent.name}</p>
+          <p className="text-sm font-semibold text-cream leading-tight truncate">{agent.name}</p>
           <p className="text-[11px] text-slate-500 truncate">{agent.email}</p>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
@@ -223,7 +223,7 @@ export default async function RoutingCommandPage() {
         <section aria-labelledby="agent-roster-heading" className="mb-8">
           <h2
             id="agent-roster-heading"
-            className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-slate-500 mb-3"
+            className="text-[10.5px] font-semibold uppercase tracking-label text-slate-500 mb-3"
           >
             Agent Roster
           </h2>
@@ -254,7 +254,7 @@ export default async function RoutingCommandPage() {
         <section aria-labelledby="routing-rules-heading" className="mb-8">
           <h2
             id="routing-rules-heading"
-            className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-slate-500 mb-3"
+            className="text-[10.5px] font-semibold uppercase tracking-label text-slate-500 mb-3"
           >
             Routing Rules
           </h2>
@@ -286,7 +286,7 @@ export default async function RoutingCommandPage() {
           <div className="flex items-center justify-between mb-3">
             <h2
               id="routing-history-heading"
-              className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-slate-500"
+              className="text-[10.5px] font-semibold uppercase tracking-label text-slate-500"
             >
               Recent Routing Decisions
               <span className="ml-2 normal-case tracking-normal font-normal text-slate-700">· last 50</span>
