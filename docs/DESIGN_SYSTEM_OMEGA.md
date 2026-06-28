@@ -462,6 +462,84 @@ The operator copies assets manually into native platforms.
 
 ---
 
+## Phase 9 — Agent Portal & Assignments (PR #62)
+
+Agent-scoped portal completely separate from the broker admin. Agents view
+and manage only their assigned leads. No admin controls bleed across.
+
+### Security Architecture
+
+- **Agent auth layer** — `src/lib/agent/agent-auth.ts`
+  - `resolveAgentAccess(searchParams)` — UUID-validates `?agent_id=` param, queries `agents` table, returns typed `AgentAccess` result
+  - `agentOwnsLead(agentId, leadId)` — fail-closed ownership gate; returns `false` when DB not configured
+  - `AGENT_DENIAL_MESSAGES` — covers all 5 denial reasons
+  - Completely separate from `ADMIN_SECRET` — neither auth boundary weakens the other
+
+- **Agent portal metrics** — `src/lib/agent/agent-portal-metrics.ts`
+  - All queries scoped with `.eq("assigned_agent_id", agentId)`
+  - Derived metrics (queue counts, performance %) use intelligence engine pure functions
+  - `loadAgentEventLog(leadId, agentId)` — read-only event history from `analytics_events`
+
+### Agent Chrome
+
+- **`AgentShell`** (`src/components/agent/agent-shell.tsx`) — Cyan top accent bar (deliberately distinct from admin gold), nav strip with Dashboard / Lead Queue / Tasks / Performance, broker-preview badge, dev-mode chip
+- **`AgentCard`**, **`AgentSectionHeading`** — agent-scoped card and heading primitives
+
+### Components
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `RoleGate` | `agent/role-gate.tsx` | Full-page permission denied with context-aware help |
+| `PermissionNotice` | `agent/role-gate.tsx` | Inline permission notice for sub-action denials |
+| `SlaRiskBadge` | `agent/sla-risk-badge.tsx` | Breach (ruby pulse) / near-breach (amber) / countdown |
+| `FollowUpBadge` | `agent/sla-risk-badge.tsx` | Overdue (ruby) / due-today (amber) / date (slate) |
+| `CapacityBadge` | `agent/capacity-badge.tsx` | Current/max lead load with emerald→ruby color coding |
+| `AgentRosterCard` | `agent/capacity-badge.tsx` | Full agent card with capacity bar, stats, portal link |
+| `AgentLeadRow` | `agent/agent-lead-row.tsx` | Lead row with grade badge, status, SLA/follow-up badges |
+| `TaskRow` / `TaskList` | `agent/task-list.tsx` | Priority-dotted task list with checkbox indicator |
+
+### Agent Portal Pages
+
+| Route | Page | Description |
+|-------|------|-------------|
+| `/agent` | `agent/page.tsx` | Home dashboard: queue metrics, performance, recent leads, tasks |
+| `/agent/leads` | `agent/leads/page.tsx` | Filterable lead queue (all/urgent/followup/stale/appointments/new) |
+| `/agent/leads/[id]` | `agent/leads/[id]/page.tsx` | Lead detail with contact info, timeline, quick actions, event log |
+| `/agent/tasks` | `agent/tasks/page.tsx` | Full task list with open/completed split |
+| `/agent/performance` | `agent/performance/page.tsx` | Health score ring, conversion/response/SLA/follow-up metrics |
+
+### Mutation API Routes (safe, scoped)
+
+| Route | Method | Action |
+|-------|--------|--------|
+| `/api/agent/[agentId]/leads/[leadId]/contact` | `POST`/`GET` | Set `last_contacted_at = now()` |
+| `/api/agent/[agentId]/leads/[leadId]/follow-up` | `POST` | Set `next_follow_up_at` from body `{ dueAt }` |
+| `/api/agent/[agentId]/leads/[leadId]/status` | `POST` | Set `status` from strict allowlist: contacted/nurture/appointment_set/appointment_requested |
+
+All routes: validate UUID shape, call `agentOwnsLead()` before write, return 403 on ownership failure, never touch non-owned leads.
+
+### Admin Upgrade — Assignment Control Center
+
+`src/app/(admin)/admin/routing/page.tsx` — upgraded with:
+- Portal link on each active agent card (View Agent Portal →)
+- New **Assignment Control Center** section showing all active agents with capacity, load bar, and "Open Portal →" link for broker-preview access
+
+### Tests
+
+`tests/brand/agent-portal.test.ts` — covers:
+1. Role guard (agent files never import ADMIN_SECRET or AdminShell)
+2. Auth unit tests (all denial reasons, UUID validation, fail-closed ownership)
+3. Assignment filter assertion (all queries scoped by assigned_agent_id)
+4. Token guards (no red-*, no unapproved hex, motion-safe: prefix)
+5. Forbidden copy guards (no genie/lamp/mascot/MLS markers)
+6. No secrets in source
+7. No outbound messaging (no sendEmail/sendSms/fetch external)
+8. Admin regression (routing page not weakened)
+9. Intelligence engine correctness (used by portal metrics)
+10. API route shape (UUID guard, body validation, 403 on ownership failure, status allowlist)
+
+---
+
 ## Phase 8 — Analytics Intelligence
 
 **PR:** #61 · `design-system-omega-phase-8-analytics-intelligence`
@@ -543,4 +621,4 @@ All components: no `red-*` tokens, no hardcoded hex, `motion-safe:` animations, 
 | 6 | Dashboard Command Center | ✅ Done (PR #59) |
 | 7 | Marketing System | ✅ Done (PR #60) |
 | 8 | Analytics Intelligence | ✅ Done (PR #61) |
-| 9 | Agent Portal & Assignments | 🔜 Next |
+| 9 | Agent Portal & Assignments | ✅ Done (PR #62) |

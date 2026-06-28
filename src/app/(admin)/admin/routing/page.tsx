@@ -114,6 +114,19 @@ function AgentCard({ agent }: { agent: AgentRosterRow }) {
         {agent.notificationEmail && <span title="Email notifications">✉</span>}
         {agent.notificationSms && <span title="SMS notifications">📱</span>}
       </div>
+
+      {/* Agent portal link — broker can preview the agent's view */}
+      {agent.isActive && (
+        <div className="mt-3 pt-2 border-t border-white/[0.04]">
+          <Link
+            href={`/agent?agent_id=${agent.id}`}
+            className="text-[10px] text-cyan-400/60 hover:text-cyan-400 transition-colors"
+            aria-label={`Open ${agent.name}'s agent portal`}
+          >
+            View Agent Portal →
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
@@ -248,6 +261,60 @@ export default async function RoutingCommandPage() {
               )}
             </>
           )}
+        </section>
+
+        {/* Assignment Control Center */}
+        <section aria-labelledby="assignment-control-heading" className="mb-8">
+          <h2
+            id="assignment-control-heading"
+            className="text-[10.5px] font-semibold uppercase tracking-label text-slate-500 mb-3"
+          >
+            Assignment Control Center
+          </h2>
+          <div className="rounded-xl border border-cyan-500/[0.08] bg-white/[0.01] px-5 py-4">
+            <div className="h-px bg-cyan-500/20 -mx-5 mb-4" aria-hidden="true" />
+            <div className="flex items-start gap-2 mb-4">
+              <div className="h-1.5 w-1.5 rounded-full bg-cyan-400/50 shrink-0 mt-1.5" aria-hidden="true" />
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Each active agent has a dedicated portal. Share the portal link with an agent to give them access
+                to their assigned lead queue, tasks, and performance view. Portal access is scoped strictly to
+                that agent&rsquo;s assigned leads — no broker controls are visible.
+              </p>
+            </div>
+            {activeAgents.length === 0 ? (
+              <p className="text-xs text-slate-600 py-2">No active agents. Activate agents in Supabase to generate portal links.</p>
+            ) : (
+              <div className="space-y-2">
+                {activeAgents.map((agent) => {
+                  const pct = agent.maxDailyLeads > 0
+                    ? Math.min(100, Math.round((agent.currentLoad / agent.maxDailyLeads) * 100))
+                    : 0;
+                  const capColor = pct >= 90 ? "text-ruby-400" : pct >= 70 ? "text-amber-400" : "text-emerald-400";
+                  return (
+                    <div
+                      key={agent.id}
+                      className="flex items-center gap-4 rounded-lg border border-white/[0.05] bg-white/[0.01] px-4 py-3"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-cream truncate">{agent.name}</p>
+                        <p className="text-[10px] text-slate-600 truncate">{agent.email}</p>
+                      </div>
+                      <span className={["font-bebas text-lg tabular-nums", capColor].join(" ")}>
+                        {agent.currentLoad}/{agent.maxDailyLeads}
+                      </span>
+                      <Link
+                        href={`/agent?agent_id=${agent.id}`}
+                        className="shrink-0 rounded-lg border border-cyan-500/20 bg-cyan-500/[0.05] hover:bg-cyan-500/10 px-3 py-1.5 text-[10.5px] font-semibold text-cyan-400 transition-colors whitespace-nowrap"
+                        aria-label={`Open ${agent.name}'s agent portal`}
+                      >
+                        Open Portal →
+                      </Link>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </section>
 
         {/* Routing Rules */}
