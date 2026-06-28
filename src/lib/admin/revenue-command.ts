@@ -9,6 +9,11 @@
  */
 
 import { isSyntheticEmail } from "@/lib/leads/synthetic-detection";
+<<<<<<< HEAD
+=======
+import type { LeadPipelineRow } from "./revenue-forecast";
+
+>>>>>>> origin/main
 // Re-export so existing callers don't break.
 export { isSyntheticEmail };
 
@@ -70,8 +75,11 @@ export interface RevenueCommandData {
     score: number | null;
     temperature: string | null;
     assigned: boolean;
+    grade: string | null;
+    leadType: string | null;
     leadDetailUrl: string;
   }>;
+  pipelineLeads: LeadPipelineRow[];
   attributionIntegrity: {
     missingAttribution7d: number;
     missingReferrerType: number;
@@ -109,7 +117,7 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
   // -------------------------------------------------------------------------
   const { data: leadsRaw, error: leadsError } = await client
     .from("leads")
-    .select("id, created_at, first_name, email, phone, assigned_agent_id, status")
+    .select("id, created_at, first_name, email, phone, assigned_agent_id, status, lead_grade, lead_type")
     .gte("created_at", ago30d)
     .order("created_at", { ascending: false })
     .limit(1000);
@@ -381,6 +389,8 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
       score: typeof sc?.composite_score === "number" ? (sc.composite_score as number) : null,
       temperature: (sc?.temperature as string | null) ?? null,
       assigned: Boolean(l.assigned_agent_id),
+      grade: (l.lead_grade as string | null) ?? null,
+      leadType: (l.lead_type as string | null) ?? null,
       leadDetailUrl: `/admin/leads/${l.id as string}`,
     });
   }
@@ -444,6 +454,28 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
   }
 
   // -------------------------------------------------------------------------
+  // 11. Pipeline leads for revenue forecast
+  // -------------------------------------------------------------------------
+  const pipelineLeads: LeadPipelineRow[] = leads
+    .filter((l) => !isSyntheticEmail(l.email as string | null))
+    .map((l): LeadPipelineRow => {
+      const attr = attrByLeadId.get(l.id as string) ?? null;
+      const sc   = scoreByLeadId.get(l.id as string) ?? null;
+      return {
+        id: l.id as string,
+        grade:            (l.lead_grade as string | null) ?? null,
+        temperature:      (sc?.temperature as string | null) ?? null,
+        leadType:         (l.lead_type as string | null) ?? null,
+        status:           (l.status as string | null) ?? null,
+        estimatedHomeValue: null,
+        utmSource:        (attr?.utm_source as string | null) ?? null,
+        utmCampaign:      (attr?.utm_campaign as string | null) ?? null,
+        assignedAgentId:  (l.assigned_agent_id as string | null) ?? null,
+        createdAt:        (l.created_at as string | null) ?? null,
+      };
+    });
+
+  // -------------------------------------------------------------------------
   // Return
   // -------------------------------------------------------------------------
   return {
@@ -478,6 +510,7 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
       latestLeadAt: latestLeadAtRaw,
     },
     syntheticResidues,
+    pipelineLeads,
     generatedAt: now.toISOString(),
   };
 }
