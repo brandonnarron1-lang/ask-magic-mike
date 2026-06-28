@@ -7,6 +7,9 @@ import { loadDashboardMetrics } from "@/lib/admin/dashboard-metrics";
 import { computeReadyWillingAble, type RwaScore } from "@/lib/leads/ready-willing-able";
 import { LEAD_STATUSES } from "@/lib/leads/lead-types";
 import { formatContactAge } from "@/lib/admin/lead-contact-format";
+import { isSyntheticEmail } from "@/lib/leads/synthetic-detection";
+import { buildConversionPrediction } from "@/lib/leads/conversion-prediction";
+import { buildLeadIntelligence } from "@/lib/leads/lead-intelligence";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -92,6 +95,46 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
 
   const rwaMap = new Map(list.items.map((l) => [l.id, rwaFromRow(l)]));
   const rwaUrgent = [...rwaMap.values()].filter((r) => r.tier === "urgent").length;
+
+  const conversionMap = new Map(list.items.map((l) => [l.id, buildConversionPrediction({
+    grade: l.grade,
+    score: l.score,
+    temperature: l.temperature,
+    leadType: l.leadType,
+    hasEmail: !!l.email,
+    hasPhone: !!l.phone,
+    utmSource: l.utmSource,
+    utmMedium: l.utmMedium,
+    referrerType: l.referrerType,
+    status: l.status,
+    assignedAgentId: l.assignedAgentId,
+    spamScore: l.spamScore,
+    createdAt: l.createdAt,
+  })]));
+
+  const intelMap = new Map(list.items.map((l) => [l.id, buildLeadIntelligence({
+    leadType: l.leadType,
+    score: l.score,
+    temperature: l.temperature,
+    grade: l.grade,
+    status: l.status,
+    hasEmail: !!l.email,
+    hasPhone: !!l.phone,
+    utmSource: l.utmSource,
+    utmMedium: l.utmMedium,
+    utmCampaign: l.utmCampaign,
+    referrerType: l.referrerType,
+    assignedAgentId: l.assignedAgentId,
+    lastContactedAt: l.lastContactedAt,
+    createdAt: l.createdAt,
+  })]));
+
+  const CONVERSION_TIER: Record<string, string> = {
+    green:  "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+    yellow: "bg-gold-400/20 text-gold-300 border-gold-400/30",
+    amber:  "bg-amber-500/10 text-amber-300 border-amber-500/30",
+    red:    "bg-ruby-400/[0.12] text-ruby-300 border-ruby-400/30",
+  };
 
   return (
     <div className="min-h-screen bg-[#05070A] text-cream">
@@ -279,20 +322,49 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                   className="border-t border-white/[0.06] hover:bg-white/[0.02]"
                 >
                   <td className="px-3 py-2">
-                    <Link
-                      href={`/admin/leads/${l.id}`}
-                      className="text-cream hover:text-gold-300"
-                    >
-                      {l.firstName || l.lastName
-                        ? `${l.firstName ?? ""} ${l.lastName ?? ""}`.trim()
-                        : "(unnamed)"}
-                    </Link>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <Link
+                        href={`/admin/leads/${l.id}`}
+                        className="text-cream hover:text-gold-300"
+                      >
+                        {l.firstName || l.lastName
+                          ? `${l.firstName ?? ""} ${l.lastName ?? ""}`.trim()
+                          : "(unnamed)"}
+                      </Link>
+                      {isSyntheticEmail(l.email) && (
+                        <span className="inline-flex items-center rounded-full border border-purple-400/40 bg-purple-500/[0.12] px-1.5 py-px text-[9px] font-bold uppercase tracking-wider text-purple-300">
+                          QA
+                        </span>
+                      )}
+                    </div>
                     {l.email ? (
                       <div className="text-xs text-slate-400">{l.email}</div>
                     ) : null}
+                    {(() => {
+                      const intel = intelMap.get(l.id);
+                      if (!intel) return null;
+                      return (
+                        <div className="mt-0.5 text-[10px] text-emerald-400/70 font-mono">
+                          {intel.commissionRange.label}
+                        </div>
+                      );
+                    })()}
                   </td>
                   <td className="px-3 py-2 text-slate-300">{l.leadType}</td>
-                  <td className="px-3 py-2 text-slate-300">{"—"}</td>
+                  <td className="px-3 py-2">
+                    {(() => {
+                      const cv = conversionMap.get(l.id);
+                      if (!cv) return <span className="text-slate-500">—</span>;
+                      return (
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10.5px] font-bold ${CONVERSION_TIER[cv.colorTier] ?? ""}`}
+                          title={cv.primaryReason}
+                        >
+                          {cv.score}
+                        </span>
+                      );
+                    })()}
+                  </td>
                   <td className="px-3 py-2">
                     <span
                       className={`inline-block rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
@@ -344,7 +416,18 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                       {formatContactAge(l.lastContactedAt)}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-slate-300 max-w-[220px]">{"—"}</td>
+                  <td className="px-3 py-2 max-w-[220px]">
+                    {(() => {
+                      const intel = intelMap.get(l.id);
+                      if (!intel) return <span className="text-slate-500">—</span>;
+                      return (
+                        <div>
+                          <div className="text-[10.5px] text-slate-300 leading-snug">{intel.nextAction}</div>
+                          <div className="text-[10px] text-slate-500 mt-0.5">{intel.recommendedFollowUpLabel}</div>
+                        </div>
+                      );
+                    })()}
+                  </td>
                   <td className="px-3 py-2 text-slate-300">
                     {l.referrerType ? (
                       <span

@@ -769,10 +769,10 @@ describe("trafficPathScorecard", () => {
 describe("followUpQueue priority sort", () => {
   it("sorts urgent leads before hot before warm before no-temperature", async () => {
     const leads = [
-      makeLeadRow({ id: "warm1",   email: "warm@test.com" }),
-      makeLeadRow({ id: "urgent1", email: "urgent@test.com" }),
-      makeLeadRow({ id: "none1",   email: "none@test.com" }),
-      makeLeadRow({ id: "hot1",    email: "hot@test.com" }),
+      makeLeadRow({ id: "warm1",   email: "warm@lead-fixture.com" }),
+      makeLeadRow({ id: "urgent1", email: "urgent@lead-fixture.com" }),
+      makeLeadRow({ id: "none1",   email: "none@lead-fixture.com" }),
+      makeLeadRow({ id: "hot1",    email: "hot@lead-fixture.com" }),
     ];
     const scoreRows = [
       makeScoreRow({ lead_id: "warm1",   temperature: "warm",   composite_score: 50 }),
@@ -789,8 +789,8 @@ describe("followUpQueue priority sort", () => {
 
   it("within same temperature sorts by score descending", async () => {
     const leads = [
-      makeLeadRow({ id: "hot_low",  email: "hotlow@test.com" }),
-      makeLeadRow({ id: "hot_high", email: "hothigh@test.com" }),
+      makeLeadRow({ id: "hot_low",  email: "hotlow@lead-fixture.com" }),
+      makeLeadRow({ id: "hot_high", email: "hothigh@lead-fixture.com" }),
     ];
     const scoreRows = [
       makeScoreRow({ lead_id: "hot_low",  temperature: "hot", composite_score: 30 }),
@@ -806,8 +806,8 @@ describe("followUpQueue priority sort", () => {
     const older = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
     const newer = new Date(Date.now() - 30 * 60 * 1000).toISOString();
     const leads = [
-      makeLeadRow({ id: "older_lead", created_at: older, email: "older@test.com" }),
-      makeLeadRow({ id: "newer_lead", created_at: newer, email: "newer@test.com" }),
+      makeLeadRow({ id: "older_lead", created_at: older, email: "older@lead-fixture.com" }),
+      makeLeadRow({ id: "newer_lead", created_at: newer, email: "newer@lead-fixture.com" }),
     ];
     const scoreRows = [
       makeScoreRow({ lead_id: "older_lead", temperature: "warm", composite_score: 50 }),
@@ -820,7 +820,7 @@ describe("followUpQueue priority sort", () => {
   });
 
   it("includes utmMedium field populated from attribution", async () => {
-    const leads = [makeLeadRow({ id: "l1", email: "buyer@test.com" })];
+    const leads = [makeLeadRow({ id: "l1", email: "buyer@lead-fixture.com" })];
     const attrRows = [makeAttrRow({ lead_id: "l1", utm_medium: "agent_profile_cta" })];
     const client = makeClient({ leadsData: leads, attrData: attrRows });
     const result = await loadRevenueCommand(client);
@@ -828,7 +828,7 @@ describe("followUpQueue priority sort", () => {
   });
 
   it("utmMedium is null when lead has no attribution row", async () => {
-    const leads = [makeLeadRow({ id: "l1", email: "buyer@test.com" })];
+    const leads = [makeLeadRow({ id: "l1", email: "buyer@lead-fixture.com" })];
     const client = makeClient({ leadsData: leads, attrData: [] });
     const result = await loadRevenueCommand(client);
     expect(result.followUpQueue[0].utmMedium).toBeNull();
@@ -911,5 +911,66 @@ describe("hero section public copy", () => {
     expect(heroSource).not.toMatch(/instant valuation/i);
     expect(heroSource).not.toMatch(/guaranteed offer/i);
     expect(heroSource).not.toMatch(/offer engine/i);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 13. pipelineLeads — revenue forecast input
+// ---------------------------------------------------------------------------
+
+describe("pipelineLeads", () => {
+  it("returns an empty array when there are no leads", async () => {
+    const client = makeClient({ leadsData: [] });
+    const result = await loadRevenueCommand(client);
+    expect(result.pipelineLeads).toEqual([]);
+  });
+
+  it("includes real leads in pipelineLeads", async () => {
+    const leads = [makeLeadRow({ id: "real1" })];
+    const client = makeClient({ leadsData: leads });
+    const result = await loadRevenueCommand(client);
+    expect(result.pipelineLeads).toHaveLength(1);
+    expect(result.pipelineLeads[0].id).toBe("real1");
+  });
+
+  it("excludes synthetic leads from pipelineLeads", async () => {
+    const leads = [
+      makeLeadRow({ id: "real1" }),
+      makeLeadRow({ id: "synth1", email: "qa+amm-smoke@gmail.com" }),
+    ];
+    const client = makeClient({ leadsData: leads });
+    const result = await loadRevenueCommand(client);
+    expect(result.pipelineLeads).toHaveLength(1);
+    expect(result.pipelineLeads[0].id).toBe("real1");
+  });
+
+  it("maps temperature from lead_scores into pipelineLeads", async () => {
+    const leads = [makeLeadRow({ id: "l1" })];
+    const scoreRows = [makeScoreRow({ lead_id: "l1", temperature: "hot" })];
+    const client = makeClient({ leadsData: leads, scoreData: scoreRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.pipelineLeads[0].temperature).toBe("hot");
+  });
+
+  it("maps utmSource from attribution into pipelineLeads", async () => {
+    const leads = [makeLeadRow({ id: "l1" })];
+    const attrRows = [makeAttrRow({ lead_id: "l1", utm_source: "ourtownproperties" })];
+    const client = makeClient({ leadsData: leads, attrData: attrRows });
+    const result = await loadRevenueCommand(client);
+    expect(result.pipelineLeads[0].utmSource).toBe("ourtownproperties");
+  });
+
+  it("has null utmSource when no attribution exists", async () => {
+    const leads = [makeLeadRow({ id: "l1" })];
+    const client = makeClient({ leadsData: leads, attrData: [] });
+    const result = await loadRevenueCommand(client);
+    expect(result.pipelineLeads[0].utmSource).toBeNull();
+  });
+
+  it("maps status from lead row into pipelineLeads", async () => {
+    const leads = [makeLeadRow({ id: "l1", status: "qualified" })];
+    const client = makeClient({ leadsData: leads });
+    const result = await loadRevenueCommand(client);
+    expect(result.pipelineLeads[0].status).toBe("qualified");
   });
 });
