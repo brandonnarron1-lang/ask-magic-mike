@@ -1,12 +1,12 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { notFound } from "next/navigation";
 import { loadLeadDetail } from "@/lib/admin/lead-detail";
 import { AdminLeadActions } from "@/components/admin/admin-lead-actions";
 import { buildNextBestAction } from "@/lib/admin/next-best-action";
+import { AdminShell } from "@/components/admin/admin-shell";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -52,26 +52,12 @@ export default async function LeadDetailPage({ params }: PageProps) {
   });
 
   return (
-    <div className="min-h-screen bg-[#05070A] text-cream">
-      <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <div>
-          <p className="text-[10.5px] tracking-label uppercase text-gold-300/85">
-            Ask Magic Mike · cockpit
-          </p>
-          <h1 className="font-display text-2xl font-semibold">{name}</h1>
-          <p className="text-xs text-slate-400 mt-0.5">
-            {String(lead.lead_type ?? "unknown")} · {String(lead.status ?? "new")} ·{" "}
-            grade {String(lead.lead_grade ?? "—")}
-          </p>
-        </div>
-        <Link
-          href="/admin/leads"
-          className="text-xs text-slate-300 hover:text-gold-300"
-        >
-          ← inbox
-        </Link>
-      </header>
-
+    <AdminShell
+      title={name}
+      eyebrow={`${String(lead.lead_type ?? "unknown")} · grade ${String(lead.lead_grade ?? "—")}`}
+      backHref="/admin/leads"
+      backLabel="← inbox"
+    >
       <main className="px-6 py-6 max-w-6xl mx-auto grid md:grid-cols-3 gap-6">
         {/* Cockpit actions (spans full width on small screens) */}
         <section className="md:col-span-3">
@@ -300,7 +286,7 @@ export default async function LeadDetailPage({ params }: PageProps) {
           </Card>
         </section>
       </main>
-    </div>
+    </AdminShell>
   );
 }
 

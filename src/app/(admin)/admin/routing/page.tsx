@@ -2,9 +2,10 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 import Link from "next/link";
-import { Users, AlertTriangle, CheckCircle2, Clock, ArrowLeft, Info } from "lucide-react";
+import { Users, AlertTriangle, CheckCircle2, Clock, Info } from "lucide-react";
 import { loadRoutingCommand } from "@/lib/admin/routing-command";
 import type { AgentRosterRow, RoutingHistoryRow } from "@/lib/admin/routing-command";
+import { AdminShell } from "@/components/admin/admin-shell";
 
 function timeSince(isoString: string): string {
   const ms = Date.now() - new Date(isoString).getTime();
@@ -111,8 +112,8 @@ function AgentCard({ agent }: { agent: AgentRosterRow }) {
         <span>Priority: <span className="text-slate-400 font-bebas">{agent.priorityScore}</span></span>
         <span className="text-slate-700">·</span>
         <span>{agent.timezone.split("/")[1]?.replace("_", " ") ?? agent.timezone}</span>
-        {agent.notificationEmail && <span title="Email notifications">✉</span>}
-        {agent.notificationSms && <span title="SMS notifications">📱</span>}
+        {agent.notificationEmail && <span role="img" aria-label="Email notifications" title="Email notifications">✉</span>}
+        {agent.notificationSms && <span role="img" aria-label="SMS notifications" title="SMS notifications">📱</span>}
       </div>
 
       {/* Agent portal link — broker can preview the agent's view */}
@@ -159,23 +160,22 @@ export default async function RoutingCommandPage() {
 
   if (!data.configured) {
     return (
-      <div className="min-h-screen bg-[#080806] flex items-center justify-center">
-        <div className="max-w-md text-center px-6">
-          <div className="mb-4 flex justify-center">
-            <Users className="h-10 w-10 text-slate-600" />
+      <AdminShell title="Agent Routing" eyebrow="Command Center" backHref="/admin" backLabel="← dashboard">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="max-w-md text-center px-6">
+            <div className="mb-4 flex justify-center">
+              <Users className="h-10 w-10 text-slate-600" aria-hidden="true" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-300 mb-3">Routing Data Unavailable</h2>
+            <p className="text-sm text-slate-500 leading-relaxed">
+              Supabase is not configured. Set{" "}
+              <code className="text-amber-400 text-xs">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+              <code className="text-amber-400 text-xs">SUPABASE_SERVICE_ROLE_KEY</code>{" "}
+              in your production environment to view agent routing data.
+            </p>
           </div>
-          <h1 className="text-xl font-bold text-slate-300 mb-3">Routing Command Unavailable</h1>
-          <p className="text-sm text-slate-500 leading-relaxed mb-4">
-            Supabase is not configured. Set{" "}
-            <code className="text-amber-400 text-xs">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
-            <code className="text-amber-400 text-xs">SUPABASE_SERVICE_ROLE_KEY</code>{" "}
-            in your production environment to view agent routing data.
-          </p>
-          <Link href="/admin" className="text-xs text-gold-400 hover:text-gold-300 transition-colors">
-            ← Back to Admin Dashboard
-          </Link>
         </div>
-      </div>
+      </AdminShell>
     );
   }
 
@@ -183,23 +183,7 @@ export default async function RoutingCommandPage() {
   const inactiveAgents = data.agents.filter((a) => !a.isActive);
 
   return (
-    <div className="min-h-screen bg-[#080806] text-cream">
-      <header className="border-b border-gold-400/10 bg-[#0D0B07] px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Users className="h-6 w-6 text-gold-400" aria-hidden="true" />
-            <div>
-              <div className="text-sm font-bold text-cream">Agent Routing</div>
-              <div className="text-[11px] text-slate-500">Command Center · Our Town Properties</div>
-            </div>
-          </div>
-          <Link href="/admin" className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-gold-300 transition-colors">
-            <ArrowLeft className="h-3 w-3" />
-            Dashboard
-          </Link>
-        </div>
-      </header>
-
+    <AdminShell title="Agent Routing" eyebrow="Command Center" backHref="/admin" backLabel="← dashboard">
       <main className="max-w-7xl mx-auto px-6 py-8">
 
         {/* Top-line tiles */}
@@ -424,6 +408,6 @@ export default async function RoutingCommandPage() {
           Agent Routing · Ask Magic Mike Admin · Our Town Properties, Inc. · Wilson, NC
         </p>
       </main>
-    </div>
+    </AdminShell>
   );
 }
