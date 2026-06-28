@@ -15,7 +15,8 @@ Place on the homepage hero or banner area.
 ```html
 <div style="text-align:center; margin: 2rem 0;">
   <a
-    href="https://www.askmagicmike.com/value"
+    href="https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike"
+    target="_blank" rel="noopener noreferrer"
     style="
       display: inline-block;
       background: #D4A017;
@@ -45,7 +46,7 @@ Place at the bottom of the Mike Eatmon agent profile page.
 ```html
 <div style="background:#0A0A0A; border:1px solid rgba(212,160,23,0.25); border-radius:12px; padding:1.5rem 2rem; text-align:center; margin:2rem 0;">
   <p style="color:#D4A017; font-size:0.7rem; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; margin-bottom:0.5rem;">
-    ✦ AI-Powered Local Guidance
+    ✦ Broker-Reviewed Local Guidance
   </p>
   <h3 style="color:#F5F0E8; font-size:1.4rem; font-weight:700; margin-bottom:0.5rem;">
     Ask Mike directly — anytime.
@@ -54,7 +55,8 @@ Place at the bottom of the Mike Eatmon agent profile page.
     Get a real local take on your home's value, the Wilson NC market, or your next move.
   </p>
   <a
-    href="https://www.askmagicmike.com/value"
+    href="https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=mike_profile&utm_campaign=ask_magic_mike"
+    target="_blank" rel="noopener noreferrer"
     style="
       display:inline-block; background:#D4A017; color:#0A0A0A;
       font-weight:700; font-size:0.9rem; padding:0.75rem 2rem;
@@ -85,7 +87,8 @@ Place on any seller-focused page.
     not an automated estimate.
   </p>
   <a
-    href="https://www.askmagicmike.com/value"
+    href="https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=seller_page_cta&utm_campaign=ask_magic_mike"
+    target="_blank" rel="noopener noreferrer"
     style="
       display:inline-block; background:#D4A017; color:#0A0A0A;
       font-weight:700; font-size:0.875rem; padding:0.65rem 1.6rem;
@@ -107,7 +110,7 @@ Works in a Custom HTML block. Adjust height as needed (600px–700px recommended
 ```html
 <div style="border-radius:12px; overflow:hidden; border:1px solid rgba(212,160,23,0.2);">
   <iframe
-    src="https://www.askmagicmike.com/embed/ask"
+    src="https://www.askmagicmike.com/embed/ask?utm_source=ourtown_wp&utm_medium=embed_widget&utm_campaign=ask_magic_mike"
     width="100%"
     height="650"
     style="border:none; display:block; background:#0A0A0A;"
