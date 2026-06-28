@@ -18,6 +18,7 @@ import { buildViralPostSet } from "./viral-post-builder";
 import type { ViralPostSet } from "./viral-post-builder";
 import { buildMarketHeatmap } from "./market-heatmap";
 import type { MarketHeatmap, HeatmapInputRow } from "./market-heatmap";
+import { isSyntheticEmail } from "@/lib/leads/synthetic-detection";
 
 // ---------------------------------------------------------------------------
 // Output types
@@ -62,20 +63,6 @@ export interface TrafficCommandData {
 // ---------------------------------------------------------------------------
 
 type AnyRow = Record<string, unknown>;
-
-const SYNTHETIC_MARKERS = [
-  "amm-wordpress-smoke",
-  "amm-wordpress-attribution-smoke",
-  "AMM_WORDPRESS",
-  "DO_NOT_CONTACT",
-  "qa+amm-",
-  "@example.com",
-] as const;
-
-function isSyntheticEmail(email: string | null | undefined): boolean {
-  if (!email) return false;
-  return SYNTHETIC_MARKERS.some((m) => email.includes(m));
-}
 
 // ---------------------------------------------------------------------------
 // Loader
