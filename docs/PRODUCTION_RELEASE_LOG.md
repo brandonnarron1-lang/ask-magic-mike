@@ -578,3 +578,50 @@ Bypass actors are always restored before the next operation.
 | `/admin/revenue` | 401 (Basic Auth) | ✓ |
 
 Screenshots: `reports/production-advancement/screenshots/`
+
+---
+
+## [PR #63] Design System Omega Phase 10 — Autonomous Operations & Workflow Engine
+
+**Branch:** `design-system-omega-phase-10-autonomous-operations`
+**Status:** Open — do not merge
+
+### Business Value
+
+Transforms Ask Magic Mike from an intelligence platform into an **autonomous brokerage operating system**. Every recommendation becomes an executable, approval-gated workflow. Mike (executive advisor/broker) reviews and approves only what matters — all preparation work happens automatically.
+
+### Safety Guarantee
+
+All automation is PLANNING only. No message is ever sent, no record ever modified, and no content ever published without explicit broker approval. Every action has a rollback strategy. All events are audit-logged as immutable records.
+
+### Changes
+
+**Engine Layer (`src/lib/automation/`)** — 4 new files:
+- `workflow-engine.ts` — 22 triggers, pure typed functions, deterministic plan building
+- `audit-log.ts` — 10 event types, append-only immutable audit trail
+- `automation-templates.ts` — 20 production templates across 6 categories
+- `execution-planner.ts` — Morning brief (8 Q&A), planner, impact scorer, approval queue builder
+
+**Component Library (`src/components/admin/automation/`)** — 9 new files (21 named exports):
+- `automation-badge.tsx`, `impact-score.tsx`, `workflow-status.tsx`, `workflow-card.tsx`
+- `approval-card.tsx`, `execution-timeline.tsx`, `execution-log.tsx`, `execution-summary.tsx`, `workflow-table.tsx`
+
+**Automation Command Center (`src/app/(admin)/admin/automation/`)** — 6 new pages:
+- `/admin/automation` — Morning Command Brief dashboard
+- `/admin/automation/workflows` — Full workflow browser
+- `/admin/automation/queue` — Broker approval queue
+- `/admin/automation/templates` — Template library with full step detail
+- `/admin/automation/history` — Execution history + audit log
+- `/admin/automation/executions` — Active execution viewer
+
+**Tests:** 76 tests in `tests/brand/automation-engine.test.ts` — suite now 1,651 total (all passing)
+
+**Bug fix:** TypeScript cast in `workflow-engine.ts:evaluateConditions()` — `signals as unknown as Record<string, unknown>`
+
+### Rollback Strategy
+
+Branch can be reverted cleanly. No database migrations. No schema changes. Engine layer is pure functions — no state. Pages are `force-dynamic` and read-only.
+
+### Phase 11 Recommendation
+
+Execution persistence: store approved `ExecutionPlan` records in Supabase with status tracking. Build a live execution runner that advances step status as Mike completes each step. Add webhook triggers from lead events to auto-queue relevant workflows.
