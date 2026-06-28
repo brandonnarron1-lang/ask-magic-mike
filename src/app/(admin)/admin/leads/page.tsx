@@ -7,6 +7,7 @@ import { loadDashboardMetrics } from "@/lib/admin/dashboard-metrics";
 import { computeReadyWillingAble, type RwaScore } from "@/lib/leads/ready-willing-able";
 import { LEAD_STATUSES } from "@/lib/leads/lead-types";
 import { formatContactAge } from "@/lib/admin/lead-contact-format";
+import { isSyntheticEmail } from "@/lib/leads/synthetic-detection";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -279,14 +280,21 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                   className="border-t border-white/[0.06] hover:bg-white/[0.02]"
                 >
                   <td className="px-3 py-2">
-                    <Link
-                      href={`/admin/leads/${l.id}`}
-                      className="text-cream hover:text-gold-300"
-                    >
-                      {l.firstName || l.lastName
-                        ? `${l.firstName ?? ""} ${l.lastName ?? ""}`.trim()
-                        : "(unnamed)"}
-                    </Link>
+                    <div className="flex items-center gap-1.5">
+                      <Link
+                        href={`/admin/leads/${l.id}`}
+                        className="text-cream hover:text-gold-300"
+                      >
+                        {l.firstName || l.lastName
+                          ? `${l.firstName ?? ""} ${l.lastName ?? ""}`.trim()
+                          : "(unnamed)"}
+                      </Link>
+                      {isSyntheticEmail(l.email) && (
+                        <span className="inline-flex items-center rounded-full border border-purple-400/40 bg-purple-500/[0.12] px-1.5 py-px text-[9px] font-bold uppercase tracking-wider text-purple-300">
+                          QA
+                        </span>
+                      )}
+                    </div>
                     {l.email ? (
                       <div className="text-xs text-slate-400">{l.email}</div>
                     ) : null}

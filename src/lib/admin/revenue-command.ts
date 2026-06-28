@@ -8,23 +8,9 @@
  * NEVER logs secrets. NEVER performs writes.
  */
 
-// ---------------------------------------------------------------------------
-// Synthetic test-lead detection
-// ---------------------------------------------------------------------------
-
-const SYNTHETIC_MARKERS = [
-  "amm-wordpress-smoke",
-  "amm-wordpress-attribution-smoke",
-  "AMM_WORDPRESS",
-  "DO_NOT_CONTACT",
-  "qa+amm-",
-  "@example.com",
-] as const;
-
-export function isSyntheticEmail(email: string | null | undefined): boolean {
-  if (!email) return false;
-  return SYNTHETIC_MARKERS.some((m) => email.includes(m));
-}
+import { isSyntheticEmail } from "@/lib/leads/synthetic-detection";
+// Re-export so existing callers don't break.
+export { isSyntheticEmail };
 
 // ---------------------------------------------------------------------------
 // Output types

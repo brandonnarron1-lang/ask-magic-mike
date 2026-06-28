@@ -36,20 +36,11 @@ export interface NextBestActionResult {
   doNotContact: boolean;
 }
 
-const SYNTHETIC_EMAIL_MARKERS = [
-  "@example.com",
-  "@test.com",
-  "+qa",
-  "+test",
-  "+synthetic",
-  "test@",
-  "synthetic@",
-];
+import { isSyntheticEmail } from "@/lib/leads/synthetic-detection";
 
+// Alias kept for backward compatibility with existing tests.
 export function isSyntheticLead(email?: string | null): boolean {
-  if (!email) return false;
-  const lower = email.toLowerCase();
-  return SYNTHETIC_EMAIL_MARKERS.some((m) => lower.includes(m));
+  return isSyntheticEmail(email);
 }
 
 function deriveSourcePath(input: NextBestActionInput): string {
