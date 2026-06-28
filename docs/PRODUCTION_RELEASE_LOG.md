@@ -4,6 +4,43 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## [PR #60] Design System Omega Phase 7 — Marketing System
+
+**Branch:** `design-system-omega-phase-7-marketing-system`
+
+### Changes
+- **`src/lib/admin/campaign-assets.ts`** (new) — 6-campaign catalog, brand copy blocks (6 channels each), flyer specs, parameterized UTM builder, full asset builder
+- **`src/components/admin/campaign-card.tsx`** (new) — `<CampaignCard>` + `<CampaignChip>` for campaign selection UI
+- **`src/components/admin/copy-block.tsx`** (new) — client component with clipboard copy + over-limit warning
+- **`src/components/admin/platform-post-preview.tsx`** (new) — platform chrome preview (Facebook/LinkedIn/Threads/X)
+- **`src/app/(admin)/admin/marketing/page.tsx`** (new) — Marketing Command Center: campaign selector, UTM bank, brand copy, post templates, flyer spec, content calendar, all-campaign grid
+- **84 static brand guard tests** (`tests/brand/marketing-system.test.ts`)
+- **`docs/DESIGN_SYSTEM_OMEGA.md`** — Phase 7 section
+
+### Validation
+- typecheck: 0 errors
+- tests: 1359/1359 passing
+- launch-readiness-doctor: 26 PASS, 0 FAIL, 6 SKIP (owner env vars)
+
+---
+
+## [PR #59] Design System Omega Phase 6 — Dashboard Command Center
+
+**Branch:** `design-system-omega-phase-6-dashboard-command-center`
+
+### Changes
+- **`AdminShell` / `AdminCard` / `AdminSectionHeading`** — New shared chrome components with gold accent bar, glassmorphic header, eyebrow/title/back-link, devMode chip
+- **Command Center dashboard** (`/admin`) rebuilt: lead intelligence grid, funnel health tiles, urgent+SLA attention strip, today's operations panel, source attribution pills, five command center nav cards, `LockedState` for unconfigured Supabase
+- **Token cleanup across all 7 admin surfaces** — `#F4F4F4`→`text-cream`, `#050505`→`text-midnight`, `tracking-[*em]`→named tokens, `text-[12.5px]`→`text-sm`, `rounded-md`→`rounded-xl`
+- **36 static brand guard tests** (`tests/brand/admin-components.test.ts`)
+
+### Validation
+- typecheck: 0 errors
+- tests: 1275/1275 passing
+- launch-readiness-doctor: 26 PASS, 0 FAIL, 6 SKIP (owner env vars)
+
+---
+
 ## [PR #58] Design System Omega Phase 5 — Public Experience
 
 **Branch:** `design-system-omega-phase-5-public-experience`
