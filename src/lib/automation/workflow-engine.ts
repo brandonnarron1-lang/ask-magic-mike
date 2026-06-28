@@ -176,13 +176,26 @@ export interface ApprovalGate {
 export interface WorkflowSignals {
   urgentLeadCount: number;
   slaBreachCount: number;
+  slaWarningCount: number;
   unassignedLeadCount: number;
   hotLeadCount: number;
   overdueTasks: number;
+  overdueTaskCount: number;
+  openTaskCount: number;
   agentCapacityPct: number;     // 0–100
+  activeAgentCount: number;
+  overCapacityAgents: number;
+  underCapacityAgents: number;
   campaignUnderperformingCount: number;
   campaignSurgingCount: number;
+  activeCampaignCount: number;
+  underperformingCampaigns: number;
   appointmentsMissed24h: number;
+  missedAppointments24h: number;
+  appointmentsToday: number;
+  abandonedConversations: number;
+  pendingReviewCount: number;
+  averageLeadScore: number;
   newLeads24h: number;
   conversionsLast7d: number;
   staleLeadCount: number;
