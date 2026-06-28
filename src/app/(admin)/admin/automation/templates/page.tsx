@@ -36,7 +36,7 @@ export default function TemplateLibraryPage() {
           <div className="space-y-1.5 text-xs text-slate-500 leading-relaxed">
             <p>• All templates are <strong className="text-slate-400">pure, typed, versioned, and deterministic</strong>. No side effects. No API calls.</p>
             <p>• Templates <strong className="text-slate-400">PREPARE work</strong> — they never automatically send, post, or modify records.</p>
-            <p>• Steps marked <strong className="text-slate-400">"Approval Required"</strong> are gated on explicit broker sign-off before any action proceeds.</p>
+            <p>• Steps marked <strong className="text-slate-400">&ldquo;Approval Required&rdquo;</strong> are gated on explicit broker sign-off before any action proceeds.</p>
             <p>• All templates include a rollback strategy — no irreversible operations without a clear undo path.</p>
           </div>
         </div>
