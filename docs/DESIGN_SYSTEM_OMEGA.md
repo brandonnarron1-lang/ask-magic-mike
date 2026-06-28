@@ -462,6 +462,75 @@ The operator copies assets manually into native platforms.
 
 ---
 
+## Phase 8 — Analytics Intelligence
+
+**PR:** #61 · `design-system-omega-phase-8-analytics-intelligence`
+
+### Philosophy
+
+The intelligence layer transforms AMM from a dashboard into the operating system for a modern real estate brokerage. Every surface answers: **"So what should I do next?"**
+
+Priority → Urgency → Confidence → Opportunity → Trend → Conversion → Risk → Velocity
+
+### Intelligence Engine (`src/lib/admin/intelligence-engine.ts`)
+
+Pure, deterministic calculation utilities — no side effects, no API calls, fully unit-testable:
+
+| Function | Purpose |
+|---|---|
+| `calculateConversion()` | Rate (0–100) from numerator/denominator |
+| `calculateDropoff()` | Funnel stage dropoff with lost count |
+| `calculateTrend()` | Direction + signed % change with display label |
+| `calculateVelocity()` | Leads/day + leads/week with trend |
+| `calculateMomentum()` | 5-tier: strong → growing → steady → slowing → stalled |
+| `calculateHeat()` | Pipeline heat: critical → hot → warm → cool → cold |
+| `calculatePipeline()` | Full pipeline with estimated commission + velocity days |
+| `calculateOpportunity()` | 3-tier opportunity scoring |
+| `calculateAgentRank()` | Agent tier vs avg conversion + response time |
+| `calculateCampaignRank()` | Campaign tier vs avg conversion + momentum |
+| `calculateSourceRank()` | Source tier by volume share + conversion |
+| `calculatePriority()` | Operational priority: critical → high → medium → low |
+| `calculateConfidence()` | Data confidence: sample + coverage + consistency |
+| `calculateHealthScore()` | A–F health grade across 5 operational dimensions |
+| `formatCurrency/Duration/Count()` | Display helpers co-located with domain logic |
+
+### Recommendation Engine (`src/lib/admin/recommendation-engine.ts`)
+
+Deterministic action cards — no LLM, no API, pure functions:
+
+```
+buildLeadRecommendations()        → SLA breach, urgent, never-contacted, volume drop
+buildCampaignRecommendations()    → top performer, pause candidate, momentum spike
+buildAgentRecommendations()       → SLA breach, slow response, top performer
+buildSourceRecommendations()      → accelerating platform, underinvested high-converter
+buildConversationRecommendations()→ high abandon, early exit, objection detected
+buildRecommendationSummary()      → aggregated, priority-sorted, by-category
+```
+
+Every `Recommendation` contains: `priority`, `category`, `title`, `reason`, `action`, `impact`, `confidence`, `expectedGain`, `metric?`
+
+### Component Library (`src/components/admin/analytics/`)
+
+`AnalyticsCard` · `MetricGrid` · `MetricTile` · `ExecutiveMetric` · `TrendBadge` · `PerformanceBadge` · `Sparkline` · `ConversionFunnel` · `RecommendationCard` · `InsightCard` · `PipelineCard` · `EmptyState` · `LoadingState` · `NoDataState`
+
+All components: no `red-*` tokens, no hardcoded hex, `motion-safe:` animations, ARIA roles.
+
+### Admin Analytics Pages
+
+| Route | Purpose |
+|---|---|
+| `/admin/analytics` | Executive Command Center — metrics, priority strip, funnel, health, heat, pipeline, recommendations |
+| `/admin/analytics/sources` | Traffic Source Intelligence — platform breakdown, ranked sources, UTM guide |
+| `/admin/analytics/campaigns` | Campaign Intelligence — scorecards for all 6 campaigns, momentum |
+| `/admin/analytics/conversations` | Conversation Intelligence — intent breakdown, optimization checklist |
+| `/admin/analytics/reports` | Executive Reports — Daily Brief, Health Report, copy-ready text blocks |
+
+### Static Guards (`tests/brand/analytics-intelligence.test.ts`)
+
+162 tests: intelligence engine unit coverage, recommendation engine coverage, banned term detection, no-API/no-write guards, component token guards, page-level guards.
+
+---
+
 ## Remaining Phases
 
 | Phase | Scope | Status |
@@ -473,4 +542,5 @@ The operator copies assets manually into native platforms.
 | 5 | Public Experience | ✅ Done (PR #58) |
 | 6 | Dashboard Command Center | ✅ Done (PR #59) |
 | 7 | Marketing System | ✅ Done (PR #60) |
-| 8 | Analytics & Reporting | 🔜 Next |
+| 8 | Analytics Intelligence | ✅ Done (PR #61) |
+| 9 | Agent Portal & Assignments | 🔜 Next |
