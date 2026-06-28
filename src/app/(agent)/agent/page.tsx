@@ -25,9 +25,23 @@ function AgentMetricCell({
   accent?: boolean;
 }) {
   return (
-    <div className="bg-[#0A0906] px-4 py-4 flex flex-col gap-1">
+    <div className={[
+      "relative px-4 py-4 flex flex-col gap-1.5",
+      urgent ? "bg-ruby-400/[0.04]" : accent ? "bg-cyan-500/[0.04]" : "bg-[#080808]/80",
+    ].join(" ")}>
+      {(urgent || accent) && (
+        <span
+          aria-hidden="true"
+          className={[
+            "absolute inset-x-0 top-0 h-px",
+            urgent
+              ? "bg-gradient-to-r from-transparent via-ruby-400/40 to-transparent"
+              : "bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent",
+          ].join(" ")}
+        />
+      )}
       <p className={[
-        "text-[10px] tracking-label font-semibold uppercase leading-none",
+        "text-[9.5px] tracking-[0.14em] font-bold uppercase leading-none",
         urgent ? "text-ruby-400/80" : "text-slate-500",
       ].join(" ")}>
         {label}
@@ -209,12 +223,16 @@ export default async function AgentHomePage({ searchParams }: PageProps) {
             <Link
               key={card.href}
               href={card.href}
-              className="group rounded-xl border border-white/[0.06] bg-white/[0.015] hover:border-cyan-500/20 hover:bg-white/[0.03] transition-colors p-5"
+              className="group relative rounded-xl border border-white/[0.07] bg-[#080A0B]/60 hover:border-cyan-500/[0.22] hover:bg-[#080C0E]/80 transition-all duration-200 p-5 overflow-hidden"
             >
-              <p className="text-[10.5px] tracking-label font-semibold uppercase text-cyan-400/60 group-hover:text-cyan-400 transition-colors mb-1">
+              <span
+                aria-hidden="true"
+                className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/0 to-transparent group-hover:via-cyan-400/35 transition-all duration-200"
+              />
+              <p className="text-[10px] tracking-[0.14em] font-semibold uppercase text-cyan-400/55 group-hover:text-cyan-400/90 transition-colors mb-1.5">
                 {card.label}
               </p>
-              <p className="text-xs text-slate-500 leading-relaxed">{card.desc}</p>
+              <p className="text-xs text-slate-500 group-hover:text-slate-400 leading-relaxed transition-colors">{card.desc}</p>
             </Link>
           ))}
         </div>

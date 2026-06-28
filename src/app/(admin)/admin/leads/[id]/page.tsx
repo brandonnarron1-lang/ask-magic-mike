@@ -75,7 +75,7 @@ export default async function LeadDetailPage({ params }: PageProps) {
       backHref="/admin/leads"
       backLabel="← inbox"
     >
-      <main className="px-6 py-6 max-w-6xl mx-auto grid md:grid-cols-3 gap-6">
+      <main className="px-6 py-6 max-w-6xl mx-auto grid md:grid-cols-3 gap-5">
         {/* Cockpit actions (spans full width on small screens) */}
         <section className="md:col-span-3">
           <AdminLeadActions
@@ -110,15 +110,16 @@ export default async function LeadDetailPage({ params }: PageProps) {
           {/* Next Best Action card */}
           <div
             data-testid="next-best-action-card"
-            className={`rounded-xl border p-4 ${
+            className={`relative overflow-hidden rounded-xl border backdrop-blur-sm p-5 ${
               nba.isSynthetic
-                ? "border-ruby-400/30 bg-ruby-400/[0.04]"
+                ? "border-ruby-400/25 bg-[#0D0606]/80"
                 : nba.doNotContact
-                ? "border-amber-400/30 bg-amber-400/[0.04]"
-                : "border-white/[0.09] bg-white/[0.025]"
+                ? "border-amber-400/25 bg-[#0C0A06]/80"
+                : "border-white/[0.08] bg-[#0D0D0D]/60"
             }`}
           >
-            <p className="text-[10.5px] tracking-label uppercase text-gold-300/85 mb-3">
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gold-400/35 to-transparent" />
+            <p className="text-[9.5px] tracking-label uppercase font-bold text-gold-300/75 mb-4">
               Conversation Summary · Next Best Action
             </p>
 
@@ -233,15 +234,24 @@ export default async function LeadDetailPage({ params }: PageProps) {
           </div>
 
           {/* Conversion Prediction panel */}
-          <div className={`rounded-xl border p-4 ${convPred.colorClass}`}>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[10.5px] tracking-label uppercase text-gold-300/85">
+          <div className={`relative overflow-hidden rounded-xl border backdrop-blur-sm p-5 ${convPred.colorClass}`}>
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gold-400/30 to-transparent" />
+            <div className="flex items-start justify-between mb-3">
+              <p className="text-[9.5px] tracking-label uppercase font-bold text-gold-300/75">
                 Conversion Prediction
               </p>
-              <span className={`font-bebas text-3xl leading-none`}>
-                {convPred.score}
-                <span className="text-base ml-0.5 opacity-60">/100</span>
-              </span>
+              <div className="text-right">
+                <span className="font-bebas text-5xl leading-none text-cream">{convPred.score}</span>
+                <span className="text-sm text-slate-500 ml-0.5">/100</span>
+              </div>
+            </div>
+            <div className="mb-3 h-1.5 w-full rounded-full bg-white/[0.07] overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-700 ${
+                  convPred.score >= 70 ? "bg-emerald-400" : convPred.score >= 40 ? "bg-gold-400" : "bg-ruby-400"
+                }`}
+                style={{ width: `${convPred.score}%` }}
+              />
             </div>
             <p className="text-xs text-slate-300 mb-3">{convPred.primaryReason}</p>
             <div className="grid sm:grid-cols-2 gap-3">
@@ -273,8 +283,9 @@ export default async function LeadDetailPage({ params }: PageProps) {
           </div>
 
           {/* Sales Intelligence panel */}
-          <div className="rounded-xl border border-white/[0.09] bg-white/[0.025] p-4">
-            <p className="text-[10.5px] tracking-label uppercase text-gold-300/85 mb-3">Sales Intelligence</p>
+          <div className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#0D0D0D]/60 backdrop-blur-sm p-5">
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gold-400/30 to-transparent" />
+            <p className="text-[9.5px] tracking-label uppercase font-bold text-gold-300/75 mb-4">Sales Intelligence</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
               <IntentGauge label="Selling intent" value={intel.sellingIntent} tier={intel.sellingIntentLabel} />
               <IntentGauge label="Buying intent" value={intel.buyingIntent} tier={intel.buyingIntentLabel} />
@@ -305,9 +316,10 @@ export default async function LeadDetailPage({ params }: PageProps) {
 
           {/* Follow-up Calendar panel */}
           {followUp.touchpoints.length > 0 && (
-            <div className="rounded-xl border border-white/[0.09] bg-white/[0.025] p-4">
+            <div className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#0D0D0D]/60 backdrop-blur-sm p-5">
+              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gold-400/25 to-transparent" />
               <div className="flex items-center justify-between mb-3">
-                <p className="text-[10.5px] tracking-label uppercase text-gold-300/85">Follow-up Calendar</p>
+                <p className="text-[9.5px] tracking-label uppercase font-bold text-gold-300/75">Follow-up Calendar</p>
                 <span className="text-[10.5px] text-slate-400 capitalize">{followUp.urgencyLevel.replace("-", " ")} · {followUp.totalTouchpoints} touchpoints</span>
               </div>
               <div className="space-y-2">
@@ -454,8 +466,9 @@ export default async function LeadDetailPage({ params }: PageProps) {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-white/[0.09] bg-white/[0.025] p-4">
-      <p className="text-[10.5px] tracking-label uppercase text-gold-300/85 mb-2">
+    <div className="relative overflow-hidden rounded-xl border border-white/[0.07] bg-[#0E0E0E]/55 backdrop-blur-sm p-4">
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+      <p className="text-[9.5px] tracking-label uppercase font-bold text-gold-300/65 mb-3">
         {title}
       </p>
       <div>{children}</div>
@@ -465,24 +478,28 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 
 function Field({ label, value }: { label: string; value: string }) {
   return (
-    <p className="text-sm mb-1">
-      <span className="text-slate-400 mr-2">{label}:</span>
-      <span className="text-cream">{value}</span>
-    </p>
+    <div className="flex items-start gap-2 py-1.5 border-b border-white/[0.04] last:border-0">
+      <span className="text-[10px] tracking-wide uppercase text-slate-500 font-medium shrink-0 w-28 mt-px">{label}</span>
+      <span className="text-[12px] text-cream/90 leading-relaxed">{value}</span>
+    </div>
   );
 }
 
 function IntentGauge({ label, value, tier }: { label: string; value: number; tier: string }) {
-  const color =
-    tier === "high"     ? "bg-emerald-400"
-    : tier === "moderate" ? "bg-gold-400"
+  const barColor =
+    tier === "high"     ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"
+    : tier === "moderate" ? "bg-gold-400 shadow-[0_0_8px_rgba(212,160,23,0.4)]"
     : "bg-slate-500";
+  const numColor =
+    tier === "high"     ? "text-emerald-300"
+    : tier === "moderate" ? "text-gold-300"
+    : "text-slate-400";
   return (
-    <div>
-      <p className="text-[9.5px] tracking-label uppercase text-slate-500 mb-1">{label}</p>
-      <p className="font-bebas text-2xl leading-none text-cream">{value}</p>
-      <div className="mt-1 h-1 w-full rounded-full bg-white/[0.07]">
-        <div className={`h-1 rounded-full ${color}`} style={{ width: `${value}%` }} />
+    <div className="rounded-lg border border-white/[0.05] bg-white/[0.02] px-3 py-2.5">
+      <p className="text-[8.5px] tracking-label uppercase text-slate-500 mb-1.5 font-semibold">{label}</p>
+      <p className={`font-bebas text-2xl leading-none mb-1.5 ${numColor}`}>{value}</p>
+      <div className="h-1 w-full rounded-full bg-white/[0.06] overflow-hidden">
+        <div className={`h-full rounded-full ${barColor} transition-all duration-500`} style={{ width: `${value}%` }} />
       </div>
     </div>
   );
