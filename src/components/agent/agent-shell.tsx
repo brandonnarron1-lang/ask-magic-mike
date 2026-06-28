@@ -45,7 +45,7 @@ export function AgentShell({
           </div>
 
           <div className="min-w-0 flex-1">
-            <p className="text-[9.5px] tracking-[0.16em] font-semibold uppercase text-cyan-400/60 mb-px leading-none">
+            <p className="text-[9.5px] tracking-label font-semibold uppercase text-cyan-400/60 mb-px leading-none">
               {eyebrow}
               {agentName && (
                 <span className="ml-2 text-slate-600">· {agentName}</span>
@@ -108,7 +108,7 @@ export function AgentShell({
                   key={n.href}
                   href={n.href}
                   className={cn(
-                    "relative px-4 py-3 text-[10px] tracking-[0.14em] font-semibold uppercase whitespace-nowrap",
+                    "relative px-4 py-3 text-[10px] tracking-label font-semibold uppercase whitespace-nowrap",
                     "text-slate-500 hover:text-slate-300 transition-colors duration-150",
                     "after:absolute after:bottom-0 after:inset-x-4 after:h-px after:rounded-full",
                     "after:bg-cyan-400/0 hover:after:bg-cyan-400/40 after:transition-all after:duration-150"
@@ -162,7 +162,7 @@ export function AgentCard({
       {title && (
         <div className="px-5 pt-4 pb-0">
           <h3 className={cn(
-            "flex items-center gap-2 text-[9.5px] tracking-[0.16em] font-bold uppercase leading-none",
+            "flex items-center gap-2 text-[9.5px] tracking-label font-bold uppercase leading-none",
             accent ? "text-cyan-400/70" : "text-slate-500"
           )}>
             <span
@@ -192,7 +192,7 @@ export function AgentSectionHeading({
   return (
     <h2
       className={cn(
-        "flex items-center gap-2.5 text-[9.5px] font-bold uppercase tracking-[0.18em] text-slate-400/80",
+        "flex items-center gap-2.5 text-[9.5px] font-bold uppercase tracking-label text-slate-400/80",
         className
       )}
     >

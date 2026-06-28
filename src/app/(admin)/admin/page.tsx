@@ -204,7 +204,7 @@ export default async function AdminPage() {
                   { label: "Active Campaigns", value: signals.activeCampaigns, sub: "running now" },
                 ].map((s, i) => (
                   <div key={s.label} className={`px-5 py-4 text-center ${i >= 2 ? "border-t border-gold-400/[0.08] sm:border-t-0" : ""}`}>
-                    <div className="text-[8.5px] tracking-[0.18em] uppercase text-gold-400/45 mb-1 font-semibold">{s.label}</div>
+                    <div className="text-[8.5px] tracking-label uppercase text-gold-400/45 mb-1 font-semibold">{s.label}</div>
                     <div className="font-bebas text-3xl leading-none text-gold-300 sm:text-4xl">{s.value}</div>
                     <div className="text-[9px] text-slate-600 mt-1">{s.sub}</div>
                   </div>
