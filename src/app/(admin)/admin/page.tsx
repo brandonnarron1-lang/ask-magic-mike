@@ -81,7 +81,7 @@ export default async function AdminPage() {
             <AdminIcon />
             <div>
               <div className="text-sm font-bold text-cream">Ask Magic Mike</div>
-              <div className="text-[11px] text-slate-500">Lead Dashboard · Our Town Properties</div>
+              <div className="text-xs text-slate-500">Lead Dashboard · Our Town Properties</div>
             </div>
           </div>
           <div className="flex items-center gap-4 text-xs text-slate-500">
@@ -121,7 +121,7 @@ export default async function AdminPage() {
           ].map((s) => (
             <div key={s.label} className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
               <div className={`font-bebas text-4xl leading-none ${s.color}`}>{s.value}</div>
-              <div className="text-[11px] text-slate-500 mt-1 uppercase tracking-[0.1em]">{s.label}</div>
+              <div className="text-xs text-slate-500 mt-1 uppercase tracking-widest">{s.label}</div>
             </div>
           ))}
         </div>
@@ -131,7 +131,7 @@ export default async function AdminPage() {
           <div className="mb-6 rounded-xl border border-ruby-400/30 bg-ruby-400/[0.04] p-4">
             <div className="flex items-center gap-2 mb-3">
               <AlertCircle className="h-4 w-4 text-ruby-400 shrink-0" aria-hidden="true" />
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ruby-400">
+              <p className="text-xs font-bold uppercase tracking-label text-ruby-400">
                 Attention Required &middot; {attentionTotal} lead{attentionTotal !== 1 ? "s" : ""} need{attentionTotal === 1 ? "s" : ""} action
               </p>
             </div>
@@ -151,18 +151,18 @@ export default async function AdminPage() {
                   }`}>
                     {lead.slaBreached && lead.temperature !== "urgent" ? "SLA" : lead.temperature}
                   </span>
-                  <span className="text-[13px] font-medium text-[#F4F4F4] flex-1 truncate group-hover:text-white transition-colors">
+                  <span className="text-sm font-medium text-cream flex-1 truncate group-hover:text-white transition-colors">
                     {lead.name}
                   </span>
-                  <span className="text-[11px] text-slate-500 shrink-0">{timeSince(lead.createdAt)}</span>
-                  <span className="text-gold-400 text-[13px] shrink-0">→</span>
+                  <span className="text-xs text-slate-500 shrink-0">{timeSince(lead.createdAt)}</span>
+                  <span className="text-gold-400 text-sm shrink-0">→</span>
                 </Link>
               ))}
             </div>
             {attentionTotal > ATTENTION_LIMIT && (
               <Link
                 href="/admin/leads"
-                className="mt-2.5 inline-block text-[11px] text-slate-400 hover:text-gold-300 transition-colors"
+                className="mt-2.5 inline-block text-xs text-slate-400 hover:text-gold-300 transition-colors"
               >
                 + {attentionTotal - ATTENTION_LIMIT} more in Leads Inbox →
               </Link>
@@ -171,7 +171,7 @@ export default async function AdminPage() {
         ) : (
           <div className="mb-6 rounded-xl border border-white/[0.05] bg-white/[0.015] px-4 py-3 flex items-center gap-2.5">
             <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" aria-hidden="true" />
-            <p className="text-[12px] text-slate-400">All clear — no urgent leads or SLA breaches right now</p>
+            <p className="text-xs text-slate-400">All clear — no urgent leads or SLA breaches right now</p>
           </div>
         )}
 
@@ -186,7 +186,7 @@ export default async function AdminPage() {
             ].map((s) => (
               <div key={s.label} className="rounded-xl border border-white/[0.04] bg-white/[0.01] px-5 py-4">
                 <div className={`font-bebas text-4xl leading-none ${s.color}`}>{s.value}</div>
-                <div className="text-[11px] text-slate-600 mt-1 uppercase tracking-[0.1em]">{s.label}</div>
+                <div className="text-xs text-slate-600 mt-1 uppercase tracking-widest">{s.label}</div>
               </div>
             ))}
           </div>
@@ -195,7 +195,7 @@ export default async function AdminPage() {
         {/* Today's Operations */}
         {metrics.configured && (metrics.totals.followUpDue > 0 || metrics.totals.neverContacted > 0) && (
           <div className="mb-8 rounded-xl border border-amber-400/25 bg-amber-400/[0.04] px-5 py-4">
-            <h2 className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-amber-300/80 mb-3">
+            <h2 className="text-[10.5px] font-semibold uppercase tracking-label text-amber-300/80 mb-3">
               Today&rsquo;s Operations
             </h2>
             <div className="grid grid-cols-2 gap-4">
@@ -203,14 +203,14 @@ export default async function AdminPage() {
                 <div className={`font-bebas text-4xl leading-none ${metrics.totals.followUpDue > 0 ? "text-amber-400" : "text-slate-600"}`}>
                   {metrics.totals.followUpDue}
                 </div>
-                <div className="text-[11px] text-slate-500 mt-1 uppercase tracking-[0.1em]">Follow-ups Due</div>
+                <div className="text-xs text-slate-500 mt-1 uppercase tracking-widest">Follow-ups Due</div>
                 <div className="text-[10px] text-slate-600 mt-0.5">next_follow_up_at &le; now</div>
               </Link>
               <Link href="/admin/leads?filter=never_contacted" className="group rounded-lg border border-white/[0.06] bg-white/[0.02] px-4 py-3 hover:border-ruby-400/30 hover:bg-ruby-400/[0.04] transition-all">
                 <div className={`font-bebas text-4xl leading-none ${metrics.totals.neverContacted > 0 ? "text-ruby-400" : "text-slate-600"}`}>
                   {metrics.totals.neverContacted}
                 </div>
-                <div className="text-[11px] text-slate-500 mt-1 uppercase tracking-[0.1em]">Never Contacted</div>
+                <div className="text-xs text-slate-500 mt-1 uppercase tracking-widest">Never Contacted</div>
                 <div className="text-[10px] text-slate-600 mt-0.5">assigned &gt; 2h, no contact yet</div>
               </Link>
             </div>
@@ -220,7 +220,7 @@ export default async function AdminPage() {
         {/* Source / UTM breakdown */}
         {metrics.configured && metrics.bySource.length > 0 && (
           <div className="mb-8 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 mb-3">
+            <h2 className="text-xs font-semibold uppercase tracking-label text-slate-500 mb-3">
               Leads by Source
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -239,7 +239,7 @@ export default async function AdminPage() {
 
         {/* Command center navigation */}
         <div className="mb-7">
-          <p className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-slate-500 mb-3">
+          <p className="text-[10.5px] font-semibold uppercase tracking-label text-slate-500 mb-3">
             Command Centers
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -268,7 +268,7 @@ export default async function AdminPage() {
         </div>
 
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+          <h2 className="text-xs font-semibold uppercase tracking-label text-slate-500">
             Recent Leads
             <span className="ml-2 font-normal normal-case tracking-normal text-slate-700">· click a row to expand</span>
           </h2>
@@ -276,7 +276,7 @@ export default async function AdminPage() {
 
         <LeadTable leads={leads} />
 
-        <p className="mt-6 text-[11px] text-slate-700 text-center">
+        <p className="mt-6 text-xs text-slate-700 text-center">
           Ask Magic Mike Admin · Our Town Properties, Inc. · Wilson, NC ·{" "}
           {devMode ? "Sample data — connect Supabase to see live leads" : "Live data"}
         </p>

@@ -23,23 +23,23 @@ export function StepQuestion({
 
   return (
     <div className="pt-2">
-      <h2 className="font-display text-[26px] sm:text-3xl font-semibold text-[#F7F1E8] mb-2 leading-tight">
+      <h2 className="font-display text-2xl sm:text-3xl font-semibold text-cream mb-2 leading-snug">
         What do you want to know?
       </h2>
-      <p className="text-[13.5px] text-slate-400 mb-7">
+      <p className="text-sm text-slate-400 mb-7 leading-relaxed">
         Ask anything about buying, selling, or your home&apos;s value in Wilson
         or Eastern NC. Mike&apos;s team reviews each answer.
       </p>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-[10.5px] font-semibold text-slate-400 mb-2 uppercase tracking-[0.18em]">
+          <label className="block text-[10.5px] font-semibold text-slate-400 mb-2 uppercase tracking-label">
             Your question
           </label>
           {/* Helper prompt examples */}
           <p
             data-testid="helper-prompt-examples"
-            className="text-[11px] text-slate-500 mb-2 leading-relaxed"
+            className="text-xs text-slate-500 mb-2 leading-relaxed"
           >
             Examples:{" "}
             <span className="text-slate-400 italic">&ldquo;What is my Wilson home worth?&rdquo;</span>
@@ -56,8 +56,8 @@ export function StepQuestion({
             placeholder="What's the market like? Should I sell now? What's my home worth in Wilson?"
             className={cn(
               "w-full rounded-xl border border-white/10 bg-[#0B0E14]/85",
-              "px-4 py-3 text-[#F7F1E8] placeholder:text-slate-500",
-              "text-[14.5px] leading-relaxed resize-none",
+              "px-4 py-3 text-cream placeholder:text-slate-500",
+              "text-sm leading-relaxed resize-none",
               "focus:outline-none focus:border-gold-400/45 focus:ring-2 focus:ring-gold-400/15 transition-colors"
             )}
             aria-label="Your question"
@@ -65,7 +65,7 @@ export function StepQuestion({
         </div>
 
         <div>
-          <label className="block text-[10.5px] font-semibold text-slate-400 mb-2 uppercase tracking-[0.18em]">
+          <label className="block text-[10.5px] font-semibold text-slate-400 mb-2 uppercase tracking-label">
             Property address{" "}
             <span className="normal-case text-slate-600">(optional)</span>
           </label>
@@ -80,8 +80,8 @@ export function StepQuestion({
               autoComplete="street-address"
               className={cn(
                 "w-full rounded-xl border border-white/10 bg-[#0B0E14]/85",
-                "pl-10 pr-4 py-3 text-[#F7F1E8] placeholder:text-slate-500",
-                "text-[14.5px] focus:outline-none focus:border-gold-400/45 focus:ring-2 focus:ring-gold-400/15 transition-colors"
+                "pl-10 pr-4 py-3 text-cream placeholder:text-slate-500",
+                "text-sm focus:outline-none focus:border-gold-400/45 focus:ring-2 focus:ring-gold-400/15 transition-colors"
               )}
               aria-label="Property address"
             />

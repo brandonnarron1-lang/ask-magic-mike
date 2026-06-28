@@ -40,7 +40,7 @@ export function MikeCard() {
           "text-center mb-16 opacity-0",
           inView && "animate-fade-up delay-0"
         )}>
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase text-gold-400 mb-4">
+          <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400 mb-4">
             Your Agent
           </p>
           <h2 className="font-display text-5xl sm:text-6xl font-bold text-cream">

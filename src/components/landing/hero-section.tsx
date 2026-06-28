@@ -27,7 +27,7 @@ function MikeVisualTrustBadge() {
         height={22}
         className="rounded-full object-cover ring-1 ring-gold-400/30"
       />
-      <span className="text-[11px] font-semibold tracking-[0.14em] uppercase text-gold-400/90">
+      <span className="text-xs font-semibold tracking-label uppercase text-gold-400/90">
         Mike Eatmon · Our Town Properties
       </span>
     </div>
@@ -200,17 +200,17 @@ export function HeroSection() {
             className="h-auto w-auto"
           />
           <span className="hidden sm:block">
-            <span className="block text-[13px] font-semibold tracking-tight text-[#F7F1E8]">
+            <span className="block text-sm font-semibold tracking-tight text-cream">
               Ask Magic Mike
             </span>
-            <span className="block text-[10px] uppercase tracking-[0.18em] text-gold-400/70 mt-0.5">
+            <span className="block text-[10px] uppercase tracking-label text-gold-400/70 mt-0.5">
               by Our Town Properties
             </span>
           </span>
         </a>
 
         <div className={cn(
-          "hidden md:flex items-center gap-6 text-[11px] text-slate-400 tracking-wide opacity-0",
+          "hidden md:flex items-center gap-6 text-xs text-slate-400 tracking-wide opacity-0",
           loaded && "animate-fade-in delay-200"
         )}>
           <span>Wilson, NC</span>
@@ -264,7 +264,7 @@ export function HeroSection() {
           </div>
 
           <div className={cn("mb-5 opacity-0", loaded && "animate-fade-up delay-150")}>
-            <p className="text-xs font-semibold tracking-[0.22em] uppercase text-gold-400/90">
+            <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400/90">
               An Our Town Properties guidance tool
             </p>
           </div>
@@ -321,7 +321,7 @@ export function HeroSection() {
 
           <div className={cn("mt-5 opacity-0", loaded && "animate-fade-up delay-500")}>
             <CTAChips onSelect={handleChipSelect} selected={selectedChip} className="justify-start" />
-            <p className="mt-3 text-[11.5px] text-slate-500">
+            <p className="mt-3 text-xs text-slate-500">
               Seller?{" "}
               <a
                 href="/value"
@@ -336,7 +336,7 @@ export function HeroSection() {
           {/* Broker trust strip — visible directly below CTA chips */}
           <div className={cn("mt-5 opacity-0", loaded && "animate-fade-up delay-550")}>
             <div
-              className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500"
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500"
               data-trust-strip="broker-reviewed"
             >
               <span className="font-medium text-slate-400">Our Town Properties, Inc.</span>
@@ -362,7 +362,7 @@ export function HeroSection() {
                     <div className="font-bebas text-2xl leading-none tracking-wider text-gold-300 sm:text-3xl">
                       {s.value}
                     </div>
-                    <div className="mt-1.5 text-[10px] leading-tight text-slate-500 uppercase tracking-[0.09em]">{s.label}</div>
+                    <div className="mt-1.5 text-[10px] leading-tight text-slate-500 uppercase tracking-widest">{s.label}</div>
                   </div>
                 ))}
               </div>

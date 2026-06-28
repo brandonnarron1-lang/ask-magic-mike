@@ -77,7 +77,7 @@ export function SoldSection() {
           <div className="absolute -top-4 -left-4 sm:-left-8 card-gradient-border">
             <div className="rounded-[15px] bg-[#0D0B07] px-5 py-4 text-center">
               <div className="font-bebas text-4xl text-gold-400 tracking-wider leading-none">2,500+</div>
-              <div className="text-[11px] text-slate-400 mt-1 leading-snug">Homes sold<br/>Eastern NC</div>
+              <div className="text-xs text-slate-400 mt-1 leading-snug">Homes sold<br/>Eastern NC</div>
             </div>
           </div>
         </div>
@@ -90,7 +90,7 @@ export function SoldSection() {
             rightIn && "animate-slide-right"
           )}
         >
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase text-gold-400 mb-4">
+          <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400 mb-4">
             Track Record
           </p>
           <h2 className="font-display text-5xl sm:text-6xl font-bold text-cream mb-6 leading-tight">
@@ -118,10 +118,10 @@ export function SoldSection() {
                 style={{ animationDelay: `${300 + i * 80}ms` }}
               >
                 <div>
-                  <div className="text-[13.5px] font-medium text-cream group-hover:text-white transition-colors">
+                  <div className="text-sm font-medium text-cream group-hover:text-white transition-colors">
                     {item.label}
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5">{item.detail}</div>
+                  <div className="text-xs text-slate-500 mt-0.5">{item.detail}</div>
                 </div>
                 <div className="text-right shrink-0 ml-5">
                   <div className="font-bebas text-xl tracking-wider text-gold-400 leading-none">{item.value}</div>
