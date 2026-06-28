@@ -218,7 +218,103 @@ dash.metricValue     // "font-bebas text-4xl leading-none"
 dash.metricLabel     // "text-xs uppercase tracking-widest text-slate-500 mt-1"
 dash.cellPrimary     // "text-sm font-medium text-cream"
 dash.sectionLabel    // "text-[10.5px] font-semibold tracking-label uppercase text-slate-400"
+
+// Motion system
+motion.reveal["fade-up"]          // "animate-fade-up"
+motion.hover.lift                 // "transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg"
+motion.hover.glow                 // "transition-shadow duration-300 hover:shadow-[0_0_24px_-4px_rgba(212,160,23,0.25)]"
+motion.press.sm                   // "active:scale-[0.97] motion-reduce:active:scale-100"
+motion.transition.base            // "transition-all duration-200 ease-out"
+motion.transition.color           // "transition-colors duration-200 ease-out"
 ```
+
+---
+
+## Phase 4 — Motion System (PR #57)
+
+### Philosophy
+
+Motion reinforces information hierarchy — it does not decorate it. Every
+entrance animation has a purpose: directing attention, communicating sequence,
+or rewarding scroll. Gratuitous motion is prohibited.
+
+All animations respect `prefers-reduced-motion` via the `motion-safe:` Tailwind
+prefix. Users who opt out of motion see instant opacity transitions only.
+
+### Architecture
+
+**`src/hooks/use-reveal.ts`** — `useReveal` hook powering all scroll-triggered
+entrances. Returns `animationClass` (with `motion-safe:` prefix) and `style`
+(inline `animationDelay`). Observes the element via `IntersectionObserver`
+with configurable `threshold` and `once` options.
+
+**`src/components/ui/reveal.tsx`** — Two components:
+- `<Reveal>` — polymorphic wrapper. Any element becomes scroll-aware. `as` prop
+  controls the rendered tag (default: `div`). Accepts all standard HTML attributes.
+- `<Stagger>` — maps children to ascending stagger delays. `base` + `interval`
+  control the delay ladder. Renders each child inside a `<Reveal>`.
+
+### Reveal Variants
+
+| Variant | Animation | Use Case |
+|---------|-----------|----------|
+| `fade-up` | Opacity + translateY up | Default, universal |
+| `fade-down` | Opacity + translateY down | Dropdowns, expanded content |
+| `fade-in` | Opacity only | Overlays, ambient content |
+| `scale-in` | Opacity + scale from 0.95 | Cards, modals, badges |
+| `slide-left` | Opacity + translateX from right | Panels, drawers |
+| `slide-right` | Opacity + translateX from left | Back navigation |
+| `blur-in` | Opacity + blur from 8px | Hero text, premium moments |
+
+### Stagger Pattern
+
+```tsx
+// Auto-stagger a list — 80ms between each child
+<Stagger variant="fade-up" base={0} interval={80}>
+  <FeatureCard ... />
+  <FeatureCard ... />
+  <FeatureCard ... />
+</Stagger>
+
+// Direct hook usage for full control
+const { ref, animationClass, style } = useReveal({ variant: "blur-in", delay: 200 });
+<h1 ref={ref} className={cn(animationClass, "font-display text-5xl")} style={style}>
+  Wilson's Local Expert
+</h1>
+```
+
+### Motion Token API
+
+All motion constants live in `src/lib/brand/visual-system.ts` under the `motion`
+export group, keeping them co-located with all other semantic tokens:
+
+```ts
+// Hover interactions
+motion.hover.lift   // card hover lift + shadow
+motion.hover.scale  // 2% scale on hover
+motion.hover.glow   // gold ambient glow on hover
+motion.hover.dim    // opacity fade on hover
+
+// Press states
+motion.press.sm     // active:scale-[0.97] — for buttons
+motion.press.md     // active:scale-[0.96] — for larger targets
+
+// Transitions
+motion.transition.fast    // 150ms ease-out
+motion.transition.base    // 200ms ease-out (default)
+motion.transition.slow    // 300ms ease-out
+motion.transition.color   // transition-colors only
+motion.transition.shadow  // transition-shadow only
+```
+
+### Rules
+
+- Always use `motion-safe:` prefix on entrance animations — never raw `animate-*`
+- Never animate layout properties (width, height, display) — only transform and opacity
+- Stagger intervals: 60–100ms. Never exceed 150ms between siblings
+- Maximum total stagger sequence duration: 600ms (6–7 items at 80ms)
+- Blur animations only on hero moments — overuse destroys the premium signal
+- All `<Reveal>` instances set `once={true}` by default — elements animate once on first view
 
 ---
 
@@ -246,8 +342,8 @@ dash.sectionLabel    // "text-[10.5px] font-semibold tracking-label uppercase te
 |-------|-------|--------|
 | 1 | Visual System Foundation | ✅ Done (PR #54) |
 | 2 | Typography System | ✅ Done (PR #55) |
-| 3 | Component Library | 🔜 Next |
-| 4 | Motion System | 🔜 Next |
+| 3 | Component Library | ✅ Done (PR #56) |
+| 4 | Motion System | ✅ Done (PR #57) |
 | 5 | Public Experience | 🔜 Next |
 | 6 | Dashboard UX | 🔜 Next |
 | 7 | Marketing System | 🔜 Next |
