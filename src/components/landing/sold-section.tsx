@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useInView } from "@/hooks/use-in-view";
+import { Reveal } from "@/components/ui/reveal";
 import { cn } from "@/lib/utils/cn";
 
 const PROOF = [
@@ -12,9 +12,6 @@ const PROOF = [
 ];
 
 export function SoldSection() {
-  const { ref: leftRef,  inView: leftIn  } = useInView(0.15);
-  const { ref: rightRef, inView: rightIn } = useInView(0.15);
-
   return (
     <section className="relative py-28 px-6 bg-[#080806] overflow-hidden">
       <div className="gold-rule absolute top-0 inset-x-0" />
@@ -30,13 +27,7 @@ export function SoldSection() {
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
         {/* Left — visual */}
-        <div
-          ref={leftRef as React.RefObject<HTMLDivElement>}
-          className={cn(
-            "relative opacity-0",
-            leftIn && "animate-slide-left"
-          )}
-        >
+        <Reveal variant="slide-left" className="relative">
           {/* Main sign image */}
           <div className="relative rounded-2xl overflow-hidden border border-gold-400/15 shadow-2xl shadow-black/60">
             <Image
@@ -80,61 +71,56 @@ export function SoldSection() {
               <div className="text-xs text-slate-400 mt-1 leading-snug">Homes sold<br/>Eastern NC</div>
             </div>
           </div>
-        </div>
+        </Reveal>
 
         {/* Right — copy */}
-        <div
-          ref={rightRef as React.RefObject<HTMLDivElement>}
-          className={cn(
-            "opacity-0",
-            rightIn && "animate-slide-right"
-          )}
-        >
-          <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400 mb-4">
-            Track Record
-          </p>
-          <h2 className="font-display text-5xl sm:text-6xl font-bold text-cream mb-6 leading-tight">
-            Mike Did It{" "}
-            <span className="text-gold-shimmer italic">Again.</span>
-          </h2>
-          <p className="text-slate-400 mb-8 leading-relaxed text-base">
-            Three decades of closed deals in Eastern NC. Not leads. Not open houses.
-            <strong className="text-cream"> Sold signs.</strong> Mike prices your home
-            to win — not to sit — and negotiates every dollar back to your side of the table.
-          </p>
+        <Reveal variant="slide-right">
+          <div>
+            <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400 mb-4">
+              Track Record
+            </p>
+            <h2 className="font-display text-5xl sm:text-6xl font-bold text-cream mb-6 leading-tight">
+              Mike Did It{" "}
+              <span className="text-gold-shimmer italic">Again.</span>
+            </h2>
+            <p className="text-slate-400 mb-8 leading-relaxed text-base">
+              Three decades of closed deals in Eastern NC. Not leads. Not open houses.
+              <strong className="text-cream"> Sold signs.</strong> Mike prices your home
+              to win — not to sit — and negotiates every dollar back to your side of the table.
+            </p>
 
-          {/* Proof cards */}
-          <div className="space-y-3 mb-6">
-            {PROOF.map((item, i) => (
-              <div
-                key={item.label}
-                className={cn(
-                  "group flex items-center justify-between rounded-xl border border-white/[0.06]",
-                  "bg-white/[0.02] px-5 py-4",
-                  "hover:border-gold-400/[0.22] hover:bg-white/[0.04]",
-                  "transition-all duration-300 motion-reduce:transition-none opacity-0",
-                  rightIn && "animate-fade-up"
-                )}
-                style={{ animationDelay: `${300 + i * 80}ms` }}
-              >
-                <div>
-                  <div className="text-sm font-medium text-cream group-hover:text-white transition-colors">
-                    {item.label}
+            {/* Proof cards */}
+            <div className="space-y-3 mb-6">
+              {PROOF.map((item, i) => (
+                <Reveal key={item.label} variant="fade-up" delay={300 + i * 80}>
+                  <div
+                    className={cn(
+                      "group flex items-center justify-between rounded-xl border border-white/[0.06]",
+                      "bg-white/[0.02] px-5 py-4",
+                      "hover:border-gold-400/[0.22] hover:bg-white/[0.04]",
+                      "transition-all duration-300 motion-reduce:transition-none",
+                    )}
+                  >
+                    <div>
+                      <div className="text-sm font-medium text-cream group-hover:text-white transition-colors">
+                        {item.label}
+                      </div>
+                      <div className="text-xs text-slate-500 mt-0.5">{item.detail}</div>
+                    </div>
+                    <div className="text-right shrink-0 ml-5">
+                      <div className="font-bebas text-xl tracking-wider text-gold-400 leading-none">{item.value}</div>
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-500 mt-0.5">{item.detail}</div>
-                </div>
-                <div className="text-right shrink-0 ml-5">
-                  <div className="font-bebas text-xl tracking-wider text-gold-400 leading-none">{item.value}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+                </Reveal>
+              ))}
+            </div>
 
-          <p className="text-xs text-slate-600 italic">
-            Performance statements based on Mike Eatmon&apos;s Our Town Properties career biography.
-            Individual results vary. Market conditions change.
-          </p>
-        </div>
+            <p className="text-xs text-slate-600 italic">
+              Performance statements based on Mike Eatmon&apos;s Our Town Properties career biography.
+              Individual results vary. Market conditions change.
+            </p>
+          </div>
+        </Reveal>
       </div>
     </section>
   );

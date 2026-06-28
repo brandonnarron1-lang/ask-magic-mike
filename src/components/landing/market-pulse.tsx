@@ -42,9 +42,9 @@ export function MarketPulse() {
               key={i}
               className="flex items-center gap-2.5 px-6 border-r border-gold-400/[0.09] shrink-0"
             >
-              <span className="text-[10.5px] text-slate-500 whitespace-nowrap">{fact.label}</span>
-              <span className="text-[13px] font-semibold text-cream whitespace-nowrap">{fact.value}</span>
-              <span className="text-[10px] font-medium text-gold-400/55 whitespace-nowrap">
+              <span className="text-xs text-slate-500 whitespace-nowrap">{fact.label}</span>
+              <span className="text-sm font-semibold text-cream whitespace-nowrap">{fact.value}</span>
+              <span className="text-[10.5px] font-medium text-gold-400/55 whitespace-nowrap">
                 {fact.note}
               </span>
             </div>
