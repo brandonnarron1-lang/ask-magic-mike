@@ -67,6 +67,7 @@ function makeData(overrides: DataOverrides = {}): RevenueCommandData {
       latestLeadAt: null,
     },
     syntheticResidues: [],
+    pipelineLeads: [],
     generatedAt: DEFAULT_GENERATED_AT,
   };
 
@@ -81,6 +82,7 @@ function makeData(overrides: DataOverrides = {}): RevenueCommandData {
     syntheticResidues: overrides.syntheticResidues ?? base.syntheticResidues,
     followUpQueue: overrides.followUpQueue ?? base.followUpQueue,
     trafficPathScorecard: base.trafficPathScorecard,
+    pipelineLeads: [],
   };
 }
 
@@ -109,6 +111,8 @@ function makeQueueLead(
     score: opts.score ?? null,
     temperature: opts.temperature ?? null,
     assigned: false,
+    grade: null,
+    leadType: null,
     leadDetailUrl: `/admin/leads/${id}`,
   };
 }

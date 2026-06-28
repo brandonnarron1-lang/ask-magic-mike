@@ -300,3 +300,71 @@ describe("doNotContact", () => {
     expect(r.doNotContact).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// V2 enrichment fields
+// ---------------------------------------------------------------------------
+
+describe("NBA V2 enrichments", () => {
+  it("whyItMatters is non-empty for cash offer leads", () => {
+    const r = buildNextBestAction(makeInput({ leadType: "seller_cash_offer" }));
+    expect(r.whyItMatters.length).toBeGreaterThan(0);
+    expect(r.whyItMatters.toLowerCase()).toContain("cash offer");
+  });
+
+  it("whyNow is non-empty for urgent temperature", () => {
+    const r = buildNextBestAction(makeInput({ temperature: "urgent" }));
+    expect(r.whyNow.length).toBeGreaterThan(0);
+    expect(r.whyNow.toLowerCase()).toContain("urgent");
+  });
+
+  it("riskIfIgnored escalates for hot leads", () => {
+    const r = buildNextBestAction(makeInput({ temperature: "hot" }));
+    expect(r.riskIfIgnored.toLowerCase()).toContain("loss");
+  });
+
+  it("suggestedSms is non-null when phone + sms consent", () => {
+    const r = buildNextBestAction(makeInput({ hasPhone: true, consentSms: true }));
+    expect(r.suggestedSms).not.toBeNull();
+    expect(r.suggestedSms!.length).toBeGreaterThan(10);
+  });
+
+  it("suggestedSms is null when no phone", () => {
+    const r = buildNextBestAction(makeInput({ hasPhone: false, consentSms: false }));
+    expect(r.suggestedSms).toBeNull();
+  });
+
+  it("suggestedEmailSubject and body are non-null when email consent", () => {
+    const r = buildNextBestAction(makeInput({ hasEmail: true, consentEmail: true }));
+    expect(r.suggestedEmailSubject).not.toBeNull();
+    expect(r.suggestedEmailBody).not.toBeNull();
+  });
+
+  it("phoneOpener is null when no phone", () => {
+    const r = buildNextBestAction(makeInput({ hasPhone: false }));
+    expect(r.phoneOpener).toBeNull();
+  });
+
+  it("phoneOpener contains greeting when phone available", () => {
+    const r = buildNextBestAction(makeInput({ hasPhone: true }));
+    expect(r.phoneOpener).not.toBeNull();
+    expect(r.phoneOpener!).toContain("Mike Eatmon");
+  });
+
+  it("successProbability is 0-100", () => {
+    const r = buildNextBestAction(makeInput());
+    expect(r.successProbability).toBeGreaterThanOrEqual(0);
+    expect(r.successProbability).toBeLessThanOrEqual(100);
+  });
+
+  it("appointmentCTA is non-empty string", () => {
+    const r = buildNextBestAction(makeInput());
+    expect(r.appointmentCTA.length).toBeGreaterThan(0);
+  });
+
+  it("urgent leads have higher success probability than nurture leads", () => {
+    const urgent  = buildNextBestAction(makeInput({ temperature: "urgent", score: 90 }));
+    const nurture = buildNextBestAction(makeInput({ temperature: "nurture", score: 20 }));
+    expect(urgent.successProbability).toBeGreaterThan(nurture.successProbability);
+  });
+});
