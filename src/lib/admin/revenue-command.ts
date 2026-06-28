@@ -9,11 +9,8 @@
  */
 
 import { isSyntheticEmail } from "@/lib/leads/synthetic-detection";
-<<<<<<< HEAD
-=======
 import type { LeadPipelineRow } from "./revenue-forecast";
 
->>>>>>> origin/main
 // Re-export so existing callers don't break.
 export { isSyntheticEmail };
 

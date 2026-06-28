@@ -8,11 +8,8 @@ import { computeReadyWillingAble, type RwaScore } from "@/lib/leads/ready-willin
 import { LEAD_STATUSES } from "@/lib/leads/lead-types";
 import { formatContactAge } from "@/lib/admin/lead-contact-format";
 import { isSyntheticEmail } from "@/lib/leads/synthetic-detection";
-<<<<<<< HEAD
-=======
 import { buildConversionPrediction } from "@/lib/leads/conversion-prediction";
 import { buildLeadIntelligence } from "@/lib/leads/lead-intelligence";
->>>>>>> origin/main
 
 interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -325,11 +322,7 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                   className="border-t border-white/[0.06] hover:bg-white/[0.02]"
                 >
                   <td className="px-3 py-2">
-<<<<<<< HEAD
-                    <div className="flex items-center gap-1.5">
-=======
                     <div className="flex items-center gap-1.5 flex-wrap">
->>>>>>> origin/main
                       <Link
                         href={`/admin/leads/${l.id}`}
                         className="text-cream hover:text-gold-300"

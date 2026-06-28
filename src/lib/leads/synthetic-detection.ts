@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * Single source of truth for synthetic / QA test lead detection.
  *
@@ -11,9 +10,6 @@
 
 export const SYNTHETIC_EMAIL_MARKERS = [
   // Generic QA / test patterns
-=======
-export const SYNTHETIC_EMAIL_MARKERS = [
->>>>>>> origin/main
   "@example.com",
   "@test.com",
   "+qa",
@@ -21,10 +17,7 @@ export const SYNTHETIC_EMAIL_MARKERS = [
   "+synthetic",
   "test@",
   "synthetic@",
-<<<<<<< HEAD
   // AMM-specific operational markers
-=======
->>>>>>> origin/main
   "qa+amm-",
   "amm-wordpress-smoke",
   "amm-wordpress-attribution-smoke",
@@ -32,13 +25,10 @@ export const SYNTHETIC_EMAIL_MARKERS = [
   "do_not_contact",
 ] as const;
 
-<<<<<<< HEAD
 /**
  * Returns true if the email address matches any known synthetic/QA marker.
  * Safe to call with null/undefined (returns false).
  */
-=======
->>>>>>> origin/main
 export function isSyntheticEmail(email: string | null | undefined): boolean {
   if (!email) return false;
   const lower = email.toLowerCase();
