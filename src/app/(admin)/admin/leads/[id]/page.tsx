@@ -7,6 +7,9 @@ import { loadLeadDetail } from "@/lib/admin/lead-detail";
 import { AdminLeadActions } from "@/components/admin/admin-lead-actions";
 import { buildNextBestAction } from "@/lib/admin/next-best-action";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { buildLeadIntelligence } from "@/lib/leads/lead-intelligence";
+import { buildConversionPrediction } from "@/lib/leads/conversion-prediction";
+import { buildFollowUpCalendar } from "@/lib/leads/followup-calendar";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -31,14 +34,17 @@ export default async function LeadDetailPage({ params }: PageProps) {
     rawTemperature === "low"     ? "bg-slate-600/30 text-slate-400 border-slate-600/30" :
     null;
 
-  const nba = buildNextBestAction({
+  const leadInput = {
     leadType:    String(lead.lead_type ?? ""),
     status:      String(lead.status ?? ""),
     temperature: String(lead.temperature ?? ""),
-    score:       typeof lead.score === "number" ? lead.score : null,
+    score:       typeof lead.score === "number" ? lead.score : (typeof lead.composite_score === "number" ? lead.composite_score : null),
+    grade:       String(lead.lead_grade ?? ""),
     source:      String(lead.source ?? ""),
+    utmSource:   detail.attribution ? String(detail.attribution.utm_source ?? "") : null,
     utmMedium:   detail.attribution ? String(detail.attribution.utm_medium ?? "") : null,
     utmCampaign: detail.attribution ? String(detail.attribution.utm_campaign ?? "") : null,
+    referrerType: detail.attribution ? String(detail.attribution.referrer_type ?? "") : null,
     firstName:   lead.first_name ? String(lead.first_name) : null,
     hasEmail:    !!lead.email,
     hasPhone:    !!lead.phone,
@@ -48,8 +54,19 @@ export default async function LeadDetailPage({ params }: PageProps) {
     addressRaw:  lead.address_raw ? String(lead.address_raw) : null,
     consentSms:  !!lead.consent_sms,
     consentEmail: !!lead.consent_email,
+    consentCall: !!lead.consent_call,
     isSynthetic: false,
-  });
+    questionRaw: lead.question_raw ? String(lead.question_raw) : null,
+    createdAt:   lead.created_at ? String(lead.created_at) : null,
+    lastContactedAt: lead.last_contacted_at ? String(lead.last_contacted_at) : null,
+    assignedAgentId: lead.assigned_agent_id ? String(lead.assigned_agent_id) : null,
+    spamScore:   typeof lead.spam_score === "number" ? lead.spam_score : null,
+  };
+
+  const nba       = buildNextBestAction(leadInput);
+  const intel     = buildLeadIntelligence(leadInput);
+  const convPred  = buildConversionPrediction(leadInput);
+  const followUp  = buildFollowUpCalendar(leadInput);
 
   return (
     <AdminShell
@@ -165,10 +182,155 @@ export default async function LeadDetailPage({ params }: PageProps) {
               </p>
             </div>
 
+            {!nba.isSynthetic && (
+              <div className="mt-4 grid sm:grid-cols-3 gap-3 border-t border-white/[0.07] pt-3">
+                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-2.5">
+                  <p className="text-[9.5px] tracking-label uppercase text-slate-500 mb-0.5">Why it matters</p>
+                  <p className="text-xs text-slate-200 leading-relaxed">{nba.whyItMatters}</p>
+                </div>
+                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-2.5">
+                  <p className="text-[9.5px] tracking-label uppercase text-slate-500 mb-0.5">Why now</p>
+                  <p className="text-xs text-slate-200 leading-relaxed">{nba.whyNow}</p>
+                </div>
+                <div className="rounded-lg bg-ruby-400/[0.06] border border-ruby-400/20 p-2.5">
+                  <p className="text-[9.5px] tracking-label uppercase text-ruby-400/70 mb-0.5">Risk if ignored</p>
+                  <p className="text-xs text-ruby-200 leading-relaxed">{nba.riskIfIgnored}</p>
+                </div>
+              </div>
+            )}
+
+            {!nba.isSynthetic && (nba.suggestedSms || nba.phoneOpener) && (
+              <div className="mt-3 space-y-2 border-t border-white/[0.07] pt-3">
+                {nba.phoneOpener && (
+                  <div>
+                    <p className="text-[9.5px] tracking-label uppercase text-emerald-400/70 mb-1">Phone opener</p>
+                    <p className="text-xs text-emerald-200 font-mono leading-relaxed bg-emerald-500/[0.06] border border-emerald-500/20 rounded-lg px-3 py-2">{nba.phoneOpener}</p>
+                  </div>
+                )}
+                {nba.suggestedSms && (
+                  <div>
+                    <p className="text-[9.5px] tracking-label uppercase text-blue-400/70 mb-1">SMS template</p>
+                    <p className="text-xs text-blue-100 leading-relaxed bg-blue-500/[0.06] border border-blue-500/20 rounded-lg px-3 py-2">{nba.suggestedSms}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="mt-3 flex items-center gap-4 border-t border-white/[0.07] pt-3">
+              <div>
+                <p className="text-[9.5px] tracking-label uppercase text-slate-500">Appointment CTA</p>
+                <p className="text-xs text-gold-300 mt-0.5">{nba.appointmentCTA}</p>
+              </div>
+              <div className="ml-auto text-right">
+                <p className="text-[9.5px] tracking-label uppercase text-slate-500">Success probability</p>
+                <p className="text-lg font-bold text-cream font-bebas leading-none mt-0.5">{nba.successProbabilityLabel}</p>
+              </div>
+            </div>
+
             <p className="mt-3 text-[10px] text-slate-600">
               Read-only. No outbound messaging is sent from this page.
             </p>
           </div>
+
+          {/* Conversion Prediction panel */}
+          <div className={`rounded-xl border p-4 ${convPred.colorClass}`}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[10.5px] tracking-label uppercase text-gold-300/85">
+                Conversion Prediction
+              </p>
+              <span className={`font-bebas text-3xl leading-none`}>
+                {convPred.score}
+                <span className="text-base ml-0.5 opacity-60">/100</span>
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 mb-3">{convPred.primaryReason}</p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {convPred.positiveSignals.length > 0 && (
+                <div>
+                  <p className="text-[9.5px] tracking-label uppercase text-emerald-400/70 mb-1.5">Positive signals</p>
+                  <ul className="space-y-1">
+                    {convPred.positiveSignals.map((s) => (
+                      <li key={s} className="text-[11px] text-emerald-200 flex gap-1.5 items-start">
+                        <span className="mt-0.5 text-emerald-400">+</span>{s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {convPred.negativeSignals.length > 0 && (
+                <div>
+                  <p className="text-[9.5px] tracking-label uppercase text-ruby-400/70 mb-1.5">Negative signals</p>
+                  <ul className="space-y-1">
+                    {convPred.negativeSignals.map((s) => (
+                      <li key={s} className="text-[11px] text-ruby-200 flex gap-1.5 items-start">
+                        <span className="mt-0.5 text-ruby-400">−</span>{s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Sales Intelligence panel */}
+          <div className="rounded-xl border border-white/[0.09] bg-white/[0.025] p-4">
+            <p className="text-[10.5px] tracking-label uppercase text-gold-300/85 mb-3">Sales Intelligence</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+              <IntentGauge label="Selling intent" value={intel.sellingIntent} tier={intel.sellingIntentLabel} />
+              <IntentGauge label="Buying intent" value={intel.buyingIntent} tier={intel.buyingIntentLabel} />
+              <IntentGauge label="Urgency" value={intel.urgencyScore} tier={intel.urgencyScore >= 70 ? "high" : intel.urgencyScore >= 40 ? "moderate" : "low"} />
+              <IntentGauge label="Conv. likelihood" value={intel.likelyToConvert} tier={intel.likelyToConvert >= 50 ? "high" : intel.likelyToConvert >= 25 ? "moderate" : "low"} />
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3 mb-3 border-t border-white/[0.07] pt-3">
+              <div>
+                <p className="text-[9.5px] tracking-label uppercase text-slate-500 mb-0.5">Est. commission</p>
+                <p className="text-sm font-semibold text-gold-300">{intel.commissionRange.label}</p>
+                <p className="text-[10px] text-slate-500">Wilson NC market avg</p>
+              </div>
+              <div>
+                <p className="text-[9.5px] tracking-label uppercase text-slate-500 mb-0.5">Motivation</p>
+                <p className="text-sm text-cream capitalize">{intel.motivationStrength}</p>
+                <p className="text-[10px] text-slate-500">Follow up in {intel.recommendedFollowUpLabel}</p>
+              </div>
+            </div>
+            <div className="border-t border-white/[0.07] pt-3">
+              <p className="text-[9.5px] tracking-label uppercase text-slate-500 mb-1">Suggested script</p>
+              <p className="text-xs text-slate-200 font-mono leading-relaxed bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2">{intel.suggestedScript}</p>
+            </div>
+            <div className="mt-2 border-t border-white/[0.07] pt-2">
+              <p className="text-[9.5px] tracking-label uppercase text-slate-500 mb-1">Objection handling</p>
+              <p className="text-xs text-slate-300 leading-relaxed">{intel.objectionHandling}</p>
+            </div>
+          </div>
+
+          {/* Follow-up Calendar panel */}
+          {followUp.touchpoints.length > 0 && (
+            <div className="rounded-xl border border-white/[0.09] bg-white/[0.025] p-4">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[10.5px] tracking-label uppercase text-gold-300/85">Follow-up Calendar</p>
+                <span className="text-[10.5px] text-slate-400 capitalize">{followUp.urgencyLevel.replace("-", " ")} · {followUp.totalTouchpoints} touchpoints</span>
+              </div>
+              <div className="space-y-2">
+                {followUp.touchpoints.map((tp) => (
+                  <div key={tp.templateId} className="flex items-start gap-3 rounded-lg bg-white/[0.02] border border-white/[0.05] px-3 py-2">
+                    <div className="w-20 shrink-0">
+                      <p className="text-[10px] font-semibold text-gold-300">{tp.delayLabel}</p>
+                      <p className={`text-[9px] tracking-label uppercase mt-0.5 ${
+                        tp.priority === "critical" ? "text-ruby-300" :
+                        tp.priority === "high"     ? "text-amber-300" :
+                        tp.priority === "medium"   ? "text-blue-300" : "text-slate-400"
+                      }`}>{tp.priority}</p>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10.5px] text-slate-300 capitalize">{tp.channel} · <span className="text-slate-500 text-[10px]">{tp.reason}</span></p>
+                      <p className="text-[10px] text-slate-500 mt-0.5 truncate">{tp.messageTemplate}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-2 text-[10px] text-slate-600">Planning only — no messages are sent automatically.</p>
+            </div>
+          )}
 
           <Card title="Profile">
             <Field label="Email" value={String(lead.email ?? "—")} />
@@ -307,5 +469,21 @@ function Field({ label, value }: { label: string; value: string }) {
       <span className="text-slate-400 mr-2">{label}:</span>
       <span className="text-cream">{value}</span>
     </p>
+  );
+}
+
+function IntentGauge({ label, value, tier }: { label: string; value: number; tier: string }) {
+  const color =
+    tier === "high"     ? "bg-emerald-400"
+    : tier === "moderate" ? "bg-gold-400"
+    : "bg-slate-500";
+  return (
+    <div>
+      <p className="text-[9.5px] tracking-label uppercase text-slate-500 mb-1">{label}</p>
+      <p className="font-bebas text-2xl leading-none text-cream">{value}</p>
+      <div className="mt-1 h-1 w-full rounded-full bg-white/[0.07]">
+        <div className={`h-1 rounded-full ${color}`} style={{ width: `${value}%` }} />
+      </div>
+    </div>
   );
 }
