@@ -548,12 +548,21 @@ export function HeroSection() {
             )}
           >
             <CTAChips onSelect={handleChipSelect} selected={selectedChip} className="justify-start" />
-            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-slate-600">
-              <span>Free · No account</span>
-              <span className="text-gold-400/25">·</span>
-              <span>Our Town Properties, Inc.</span>
-              <span className="text-gold-400/25">·</span>
-              <span className="text-gold-400/70">Broker-reviewed guidance. Not an appraisal.</span>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-y-3">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-slate-600">
+                <span>Free · No account</span>
+                <span className="text-gold-400/25">·</span>
+                <span>Our Town Properties, Inc.</span>
+                <span className="text-gold-400/25">·</span>
+                <span className="text-gold-400/70">Broker-reviewed guidance. Not an appraisal.</span>
+              </div>
+              <a
+                href="/value"
+                data-cta-link="value-deep-link"
+                className="inline-flex items-center gap-1.5 rounded-full border border-gold-400/20 bg-gold-400/[0.07] px-3.5 py-1 text-[11.5px] font-medium text-gold-300 hover:border-gold-400/40 hover:text-gold-200 transition-colors"
+              >
+                Seller? Get a home value estimate →
+              </a>
             </div>
           </div>
         </div>

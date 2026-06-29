@@ -68,6 +68,7 @@ export function AiDemoSection() {
     <section
       ref={sectionRef}
       className="relative overflow-hidden bg-[#0A0A0A] px-5 py-20 sm:px-6 sm:py-28"
+      id="ai-demo"
       data-amm-surface="ai-demo"
     >
       {/* Background grain + glow */}
