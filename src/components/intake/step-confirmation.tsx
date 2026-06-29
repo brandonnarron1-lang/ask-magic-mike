@@ -8,6 +8,20 @@ import { ComplianceFooter } from "@/components/amm/compliance-footer";
 import { brandPackAssets } from "@/components/amm/brand-pack-assets";
 import type { Temperature } from "@/types/domain.types";
 
+/* ── CSS confetti particles (pure CSS, no JS library) ─── */
+const CONFETTI_PIECES = [
+  { top: "8%",  left: "12%", color: "#D4A017", size: 8,  delay: 0,   shape: "rect",   rotate: 25 },
+  { top: "5%",  left: "78%", color: "#F5C842", size: 6,  delay: 120, shape: "circle", rotate: 0  },
+  { top: "12%", left: "55%", color: "#C1272D", size: 7,  delay: 60,  shape: "rect",   rotate: -40 },
+  { top: "4%",  left: "35%", color: "#FFD566", size: 5,  delay: 200, shape: "circle", rotate: 0  },
+  { top: "15%", left: "88%", color: "#D4A017", size: 9,  delay: 80,  shape: "rect",   rotate: 60 },
+  { top: "7%",  left: "22%", color: "#F5C842", size: 6,  delay: 160, shape: "rect",   rotate: -20 },
+  { top: "10%", left: "66%", color: "#A01A1F", size: 5,  delay: 40,  shape: "circle", rotate: 0  },
+  { top: "3%",  left: "48%", color: "#FFD566", size: 8,  delay: 100, shape: "rect",   rotate: 45 },
+  { top: "18%", left: "8%",  color: "#F5C842", size: 5,  delay: 220, shape: "circle", rotate: 0  },
+  { top: "6%",  left: "92%", color: "#D4A017", size: 7,  delay: 50,  shape: "rect",   rotate: -55 },
+] as const;
+
 interface ScoreData {
   sellerCertaintyScore: number;
   buyerCertaintyScore: number;
@@ -60,15 +74,55 @@ export function StepConfirmation({
   return (
     <div
       data-testid="confirmation-panel"
-      className="pt-2 pb-1 flex flex-col items-center text-center"
+      className="relative pt-2 pb-1 flex flex-col items-center text-center overflow-hidden"
     >
+      {/* CSS confetti burst */}
+      <style>{`
+        @keyframes confettiFly {
+          0%   { opacity: 1; transform: translateY(0) rotate(var(--r, 0deg)) scale(1); }
+          60%  { opacity: 0.8; }
+          100% { opacity: 0; transform: translateY(-80px) rotate(calc(var(--r, 0deg) + 180deg)) scale(0.4); }
+        }
+        .confetti-piece {
+          position: absolute;
+          pointer-events: none;
+          animation: confettiFly 1.2s cubic-bezier(0.22,1,0.36,1) both;
+        }
+      `}</style>
+      {CONFETTI_PIECES.map((p, i) => (
+        <span
+          key={i}
+          className="confetti-piece"
+          aria-hidden="true"
+          style={{
+            top: p.top,
+            left: p.left,
+            width: p.size,
+            height: p.shape === "circle" ? p.size : p.size * 1.6,
+            borderRadius: p.shape === "circle" ? "50%" : "2px",
+            backgroundColor: p.color,
+            animationDelay: `${p.delay}ms`,
+            ["--r" as string]: `${p.rotate}deg`,
+          }}
+        />
+      ))}
+
+      {/* Large success checkmark */}
+      <div
+        className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10 ring-2 ring-emerald-500/30"
+        style={{ boxShadow: "0 0 40px rgba(16,185,129,0.18)" }}
+      >
+        <CheckCircle className="h-10 w-10 text-emerald-400" strokeWidth={1.75} />
+      </div>
+
+      {/* "Your request has been submitted" kicker */}
       <div
         className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/[0.09] px-3.5 py-1.5"
         style={{ boxShadow: "0 0 20px rgba(212,160,23,0.12), inset 0 1px 0 rgba(212,160,23,0.10)" }}
       >
-        <CheckCircle className="h-3.5 w-3.5 text-gold-400" />
+        <span className="h-1.5 w-1.5 rounded-full bg-gold-400 motion-safe:animate-pulse" />
         <p className="text-[11px] font-semibold tracking-label uppercase text-gold-300">
-          Your request is in
+          Your request is in — Mike has it
         </p>
       </div>
 
@@ -83,25 +137,32 @@ export function StepConfirmation({
         {message.sub}
       </p>
 
-      {/* What happens now */}
+      {/* What happens now — premium timeline */}
       <div
         data-testid="confirmation-next-steps"
-        className="w-full max-w-sm mb-6 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3.5 text-left"
+        className="w-full max-w-sm mb-6 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-4 text-left"
+        style={{ boxShadow: "inset 0 1px 0 rgba(212,160,23,0.06)" }}
       >
-        <p className="text-[10.5px] font-semibold uppercase tracking-label text-slate-500 mb-3">
+        <p className="text-[10.5px] font-semibold uppercase tracking-label text-gold-400/60 mb-4">
           What happens now
         </p>
-        <ol className="space-y-2.5">
+        <ol className="relative space-y-0">
           {[
-            "Mike receives your full request and contact info",
-            "He reviews it personally — not an auto-responder",
-            "Watch your phone or email for follow-up from Our Town Properties",
-          ].map((step, i) => (
-            <li key={i} className="flex items-start gap-2.5 text-xs text-slate-400 leading-snug">
-              <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-gold-400/15 text-[9px] font-bold text-gold-400/80 mt-px">
-                {i + 1}
-              </span>
-              {step}
+            { label: "Mike receives your full request and contact info", icon: "1" },
+            { label: "He reviews it personally — not an auto-responder", icon: "2" },
+            { label: "Watch your phone or email for follow-up from Our Town Properties", icon: "3" },
+          ].map((item, i, arr) => (
+            <li key={i} className="flex gap-3 pb-4 last:pb-0">
+              {/* Timeline spine */}
+              <div className="flex flex-col items-center shrink-0">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold-400/15 text-[10px] font-bold text-gold-300 ring-1 ring-gold-400/25 z-10">
+                  {item.icon}
+                </span>
+                {i < arr.length - 1 && (
+                  <span className="mt-1 w-px flex-1 bg-gradient-to-b from-gold-400/25 to-transparent min-h-[1.25rem]" />
+                )}
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed pt-0.5">{item.label}</p>
             </li>
           ))}
         </ol>
@@ -159,26 +220,30 @@ export function StepConfirmation({
         )}
       </div>
 
-      {/* Primary CTA — direct phone is the only real "schedule" available */}
+      {/* Primary CTA — premium gold gradient */}
       <a
         href={`tel:${AGENT_PHONE}`}
         data-testid="confirmation-call-cta"
         className={cn(
           "inline-flex items-center justify-center gap-2 w-full max-w-sm",
-          "rounded-xl bg-gold-400 px-6 py-3.5 text-sm font-bold text-[#0A0A0A]",
-          "shadow-[0_18px_40px_-12px_rgba(212,160,23,0.50)]",
-          "hover:bg-gold-300 active:scale-[0.99] transition-all duration-200 motion-reduce:transition-none"
+          "rounded-xl px-6 py-3.5 text-sm font-bold text-[#0A0A0A]",
+          "btn-gold-premium",
+          "active:scale-[0.99] transition-transform duration-100 motion-reduce:transition-none"
         )}
       >
         <Phone className="h-4 w-4" />
-        Call Mike
+        Call Mike Now
       </a>
 
       <a
         href="https://www.ourtownproperties.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-3 inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-gold-300 transition-colors"
+        className={cn(
+          "mt-3 inline-flex items-center justify-center gap-1.5 w-full max-w-sm",
+          "rounded-xl border border-gold-400/20 bg-gold-400/[0.05] px-6 py-3 text-xs font-semibold text-gold-300",
+          "hover:border-gold-400/35 hover:bg-gold-400/[0.09] transition-colors duration-200"
+        )}
       >
         Visit Our Town Properties
         <ExternalLink className="h-3 w-3" />

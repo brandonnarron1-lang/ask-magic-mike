@@ -157,7 +157,7 @@ export function ConversionPanel({
             )}
           >
             {loading ? (
-              <span className="h-3.5 w-3.5 rounded-full border-2 border-[#0A0A0A]/40 border-t-[#0A0A0A] animate-spin" />
+              <span className="h-3.5 w-3.5 rounded-full border-2 border-[#0A0A0A]/40 border-t-[#0A0A0A] motion-safe:animate-spin" />
             ) : (
               <>
                 {ctaLabel}

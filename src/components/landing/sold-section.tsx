@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 import { cn } from "@/lib/utils/cn";
 
@@ -29,17 +30,26 @@ export function SoldSection() {
         {/* Left — visual */}
         <Reveal variant="slide-left" className="relative">
           {/* Main sign image */}
-          <div className="relative rounded-2xl overflow-hidden border border-gold-400/15 shadow-2xl shadow-black/60">
+          <div className="relative rounded-2xl overflow-hidden border border-gold-400/15 shadow-2xl shadow-black/60 group">
             <Image
               src="/images/mike-sold-sign.png"
               alt="Our Town Properties SOLD — Mike Did It Again, Wilson NC"
               width={560}
               height={700}
-              className="w-full object-cover object-top"
+              className="w-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
               priority
             />
             {/* Bottom fade */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#080806] via-transparent to-transparent" />
+
+            {/* Glass hover overlay */}
+            <div
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+              style={{
+                background: "linear-gradient(135deg, rgba(212,160,23,0.08) 0%, rgba(0,0,0,0.35) 100%)",
+                backdropFilter: "blur(1px)",
+              }}
+            />
 
             {/* "Calm. Confident. Sold." overlay at top */}
             <div className="absolute top-5 left-5 right-5">
@@ -76,10 +86,19 @@ export function SoldSection() {
         {/* Right — copy */}
         <Reveal variant="slide-right">
           <div>
-            <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400 mb-4">
-              Track Record
-            </p>
-            <h2 className="font-display text-5xl sm:text-6xl font-bold text-cream mb-6 leading-tight">
+            {/* Premium pill eyebrow */}
+            <div className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 mb-5"
+              style={{
+                background: "linear-gradient(135deg, rgba(212,160,23,0.18) 0%, rgba(212,160,23,0.08) 100%)",
+                border: "1px solid rgba(212,160,23,0.35)",
+                boxShadow: "0 0 20px rgba(212,160,23,0.08)",
+              }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-gold-400" />
+              <span className="text-[11px] font-black tracking-kicker uppercase text-gold-400">Track Record</span>
+            </div>
+
+            <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-cream mb-6 leading-tight">
               Mike Did It{" "}
               <span className="text-gold-shimmer italic">Again.</span>
             </h2>
@@ -90,17 +109,24 @@ export function SoldSection() {
             </p>
 
             {/* Proof cards */}
-            <div className="space-y-3 mb-6">
+            <div className="space-y-3 mb-8">
               {PROOF.map((item, i) => (
                 <Reveal key={item.label} variant="fade-up" delay={300 + i * 80}>
                   <div
                     className={cn(
                       "group flex items-center justify-between rounded-xl border border-white/[0.06]",
-                      "bg-white/[0.02] px-5 py-4",
-                      "hover:border-gold-400/[0.22] hover:bg-white/[0.04]",
+                      "bg-white/[0.02] px-5 py-4 relative overflow-hidden",
+                      "hover:border-gold-400/[0.30] hover:bg-white/[0.04]",
                       "transition-all duration-300 motion-reduce:transition-none",
                     )}
                   >
+                    {/* Glass sheen on hover */}
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-xl"
+                      style={{
+                        background: "linear-gradient(105deg, rgba(212,160,23,0.06) 0%, transparent 60%)",
+                      }}
+                    />
                     <div>
                       <div className="text-sm font-medium text-cream group-hover:text-white transition-colors">
                         {item.label}
@@ -114,6 +140,32 @@ export function SoldSection() {
                 </Reveal>
               ))}
             </div>
+
+            {/* View All Sold Homes CTA */}
+            <Reveal variant="fade-up" delay={650}>
+              <a
+                href="https://ourtownproperties.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 rounded-xl border px-6 py-3.5 text-sm font-semibold transition-all duration-200 group mb-6"
+                style={{
+                  border: "1px solid rgba(212,160,23,0.30)",
+                  color: "#D4A017",
+                  background: "rgba(212,160,23,0.05)",
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLAnchorElement).style.background = "rgba(212,160,23,0.12)";
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(212,160,23,0.50)";
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLAnchorElement).style.background = "rgba(212,160,23,0.05)";
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(212,160,23,0.30)";
+                }}
+              >
+                View All Sold Homes
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+              </a>
+            </Reveal>
 
             <p className="text-xs text-slate-600 italic">
               Performance statements based on Mike Eatmon&apos;s Our Town Properties career biography.

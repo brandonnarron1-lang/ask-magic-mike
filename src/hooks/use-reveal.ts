@@ -7,6 +7,7 @@ export type RevealVariant =
   | "fade-down"
   | "fade-in"
   | "scale-in"
+  | "scale"
   | "slide-left"
   | "slide-right"
   | "blur-in";
@@ -16,6 +17,7 @@ const ANIMATION_CLASS: Record<RevealVariant, string> = {
   "fade-down":  "animate-fade-down",
   "fade-in":    "animate-fade-in",
   "scale-in":   "animate-scale-in",
+  "scale":      "animate-scale-luxury",
   "slide-left": "animate-slide-left",
   "slide-right":"animate-slide-right",
   "blur-in":    "animate-blur-in",
@@ -57,7 +59,7 @@ export function useReveal({
           setInView(false);
         }
       },
-      { threshold }
+      { threshold, rootMargin: "0px 0px -60px 0px" }
     );
 
     obs.observe(el);

@@ -30,34 +30,62 @@ function EqualHousingIcon({ className = "" }: { className?: string }) {
 
 export function Footer() {
   return (
-    <footer className="relative border-t border-gold-400/10 bg-[#080806] px-6 py-12">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
+    <footer
+      className="relative border-t border-gold-400/15 bg-[#080806] px-6 py-16 overflow-hidden"
+      style={{
+        backgroundImage:
+          "radial-gradient(ellipse 80% 40% at 50% 0%, rgba(212,160,23,0.04) 0%, transparent 60%)",
+      }}
+    >
+      {/* Dot-grid subtle overlay */}
+      <div className="bg-dot-grid-subtle pointer-events-none absolute inset-0 opacity-30" aria-hidden="true" />
+
+      {/* Inset top rim gradient */}
+      <div
+        className="pointer-events-none absolute top-0 left-0 right-0 h-px"
+        style={{
+          background:
+            "linear-gradient(to right, transparent, rgba(212,160,23,0.30), transparent)",
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="max-w-6xl mx-auto relative">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
+
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <Image
-                src={brandPackAssets.logo.primary}
-                alt="Our Town Properties, Inc."
-                width={52}
-                height={27}
-                className="h-auto w-auto opacity-80"
-              />
+              <div className="rounded-md p-1 bg-white/[0.03] border border-white/[0.05]">
+                <Image
+                  src={brandPackAssets.logo.primary}
+                  alt="Our Town Properties, Inc."
+                  width={52}
+                  height={27}
+                  className="h-auto w-auto opacity-80"
+                />
+              </div>
               <div>
-                <div className="text-xs font-semibold tracking-label uppercase text-gold-400">Ask Magic Mike</div>
-                <div className="text-[10px] text-slate-500">Powered by Our Town Properties</div>
+                <div className="text-xs font-semibold tracking-label uppercase text-gradient-gold">Ask Magic Mike</div>
+                <div className="text-[11px] text-slate-500">Powered by Our Town Properties</div>
               </div>
             </div>
             <p className="text-xs leading-relaxed text-slate-500">
               Eastern NC&apos;s real estate AI. Instant answers, expert follow-up,
               and the most experienced closer in Eastern North Carolina.
             </p>
+            <div className="white-rule my-3" />
+            <p className="text-[10px] text-slate-600 tracking-wide">Since 1993 · Wilson, NC</p>
           </div>
 
           {/* Contact */}
           <div>
             <h4 className="text-xs font-semibold tracking-label uppercase text-cream mb-4">Contact</h4>
             <div className="space-y-2 text-xs text-slate-400">
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="status-online" aria-hidden="true" />
+                <span className="text-[11px] text-slate-500">Broker available</span>
+              </div>
               <div>
                 <span className="text-slate-600 text-[10px] uppercase tracking-label block mb-0.5">Direct</span>
                 <a href="tel:2522454337" className="hover:text-gold-400 transition-colors">252-245-4337</a>
@@ -73,18 +101,24 @@ export function Footer() {
                 </a>
               </div>
               <div className="text-slate-500 pt-1">Wilson, NC · Eastern NC</div>
-              <div className="pt-3 border-t border-white/[0.05] space-y-1.5">
-                <span className="text-slate-600 text-[10px] uppercase tracking-label block mb-1.5">Quick Links</span>
-                <a href="/ask" className="block hover:text-gold-400 transition-colors">Ask a Question</a>
-                <a href="/value" className="block hover:text-gold-400 transition-colors">Home Value Estimate</a>
-              </div>
+            </div>
+          </div>
+
+          {/* Tools */}
+          <div>
+            <h4 className="text-xs font-semibold tracking-label uppercase text-cream mb-4">Tools</h4>
+            <div className="space-y-2 text-xs text-slate-400">
+              <a href="/ask" className="block hover:text-gold-400 transition-colors">Ask a Question</a>
+              <a href="/value" className="block hover:text-gold-400 transition-colors">Home Value Estimate</a>
+              <a href={siteConfig.parentBrandUrl} className="block hover:text-gold-400 transition-colors">Property Search</a>
+              <a href={siteConfig.parentBrandUrl} className="block hover:text-gold-400 transition-colors">Meet Mike</a>
             </div>
           </div>
 
           {/* Legal */}
-          <div>
+          <div className="border-l border-white/[0.05] pl-6">
             <h4 className="text-xs font-semibold tracking-label uppercase text-cream mb-4">Disclosures</h4>
-            <p className="text-xs leading-relaxed text-slate-600">
+            <p className="text-[11px] leading-relaxed text-slate-600">
               Mike Eatmon is a licensed North Carolina real estate professional (Our Town
               Properties, Inc. Broker). All market data is approximate and for informational
               purposes only. AVM estimates are not appraisals. Past sales performance does not
@@ -94,13 +128,23 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="gold-rule mb-6" />
+        <div className="gold-rule-strong mb-6" />
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
           <span>© {new Date().getFullYear()} Our Town Properties, Inc. · Mike Eatmon, REALTOR®</span>
-          <span className="flex items-center gap-1.5">
-            <EqualHousingIcon />
-            <span>Equal Housing Opportunity</span>
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-2 text-[10px] text-slate-700">
+              <span>10k+ questions answered</span>
+              <span className="text-slate-800">·</span>
+              <span>30+ yrs</span>
+              <span className="text-slate-800">·</span>
+              <span>Wilson NC</span>
+            </span>
+            <span className="h-3 w-px bg-white/10" aria-hidden="true" />
+            <span className="flex items-center gap-1.5">
+              <EqualHousingIcon />
+              <span>Equal Housing Opportunity</span>
+            </span>
+          </div>
         </div>
       </div>
     </footer>

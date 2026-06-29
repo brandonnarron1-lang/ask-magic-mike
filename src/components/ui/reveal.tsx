@@ -65,7 +65,7 @@ export function Stagger({
   variant = "fade-up",
   base = 0,
   interval = 80,
-  threshold = 0.10,
+  threshold = 0.12,
   className,
   itemClassName,
 }: StaggerProps) {

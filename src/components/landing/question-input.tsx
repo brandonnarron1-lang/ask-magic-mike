@@ -123,7 +123,7 @@ export function QuestionInput({
         >
           {loading ? (
             <span className="flex items-center gap-2">
-              <span className="h-3.5 w-3.5 rounded-full border-2 border-midnight/40 border-t-midnight animate-spin" />
+              <span className="h-3.5 w-3.5 rounded-full border-2 border-midnight/40 border-t-midnight motion-safe:animate-spin" />
               Routing…
             </span>
           ) : (

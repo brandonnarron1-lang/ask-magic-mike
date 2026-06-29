@@ -22,6 +22,26 @@ export { Progress } from "./progress";
 export { Input } from "./input";
 export type { InputProps } from "./input";
 
+export { Textarea } from "./textarea";
+export type { TextareaProps } from "./textarea";
+
+export {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+} from "./select";
+
+export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
+export type { TabsProps, TabsListProps, TabsTriggerProps, TabsContentProps } from "./tabs";
+
+export { EmptyState } from "./empty-state";
+export type { EmptyStateProps } from "./empty-state";
+
 export {
   Skeleton,
   SkeletonText,
