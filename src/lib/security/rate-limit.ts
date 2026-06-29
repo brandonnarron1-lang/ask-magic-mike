@@ -124,6 +124,8 @@ export function checkRateLimit(
 export const LIMITS = {
   /** /api/intake/submit — 10 per 10 minutes */
   intakeSubmit: { limit: 10, windowMs: 10 * 60 * 1000 },
+  /** /api/intake/step — 30 per 5 minutes */
+  intakeStep: { limit: 30, windowMs: 5 * 60 * 1000 },
   /** /api/session/create — 30 per 10 minutes */
   sessionCreate: { limit: 30, windowMs: 10 * 60 * 1000 },
   /** /api/analytics/event — 60 per minute */

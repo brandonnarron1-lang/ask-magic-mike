@@ -12,6 +12,7 @@ const trackMock = vi.fn();
 
 vi.mock("@/lib/analytics/ledger", () => ({
   trackEvent: (...args: unknown[]) => trackMock(...args),
+  trackEventNoWait: (...args: unknown[]) => trackMock(...args),
 }));
 
 import { POST } from "@/app/api/analytics/event/route";

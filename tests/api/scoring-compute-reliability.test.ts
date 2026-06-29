@@ -28,6 +28,7 @@ vi.mock("@/lib/analytics/ledger", () => ({ trackEventNoWait: vi.fn() }));
 beforeEach(() => {
   process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
   process.env.SUPABASE_SERVICE_ROLE_KEY = "test-key";
+  process.env.ADMIN_SECRET = "test-admin-secret";
 });
 
 import { POST } from "@/app/api/scoring/compute/route";
@@ -53,7 +54,10 @@ const MOCK_LEAD = {
 function makeRequest(): NextRequest {
   return new NextRequest("http://localhost/api/scoring/compute", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "x-admin-secret": "test-admin-secret",
+    },
     body: JSON.stringify({ leadId: LEAD_ID }),
   });
 }

@@ -1,10 +1,9 @@
 /**
  * Admin auth helper.
  *
- * Until a full Supabase Auth flow is wired, admin mutation routes are
- * gated by an `ADMIN_SECRET` env var passed in the `x-admin-secret`
- * header (or `?admin_secret=` for dev). Production should swap this for
- * a proper auth check before any real ad spend lands on /admin.
+ * Admin API routes are gated by an `ADMIN_SECRET` env var passed in the
+ * `x-admin-secret` request header. The secret must never appear in URLs
+ * (leaked to logs, history, referrer headers).
  */
 import type { NextRequest } from "next/server";
 
@@ -27,9 +26,7 @@ export function checkAdminAuth(req: NextRequest): AdminAuthOk | AdminAuthFail {
       error: "admin_secret_not_configured",
     };
   }
-  const supplied =
-    req.headers.get("x-admin-secret") ??
-    req.nextUrl.searchParams.get("admin_secret");
+  const supplied = req.headers.get("x-admin-secret");
   if (!supplied || supplied !== secret) {
     return { ok: false, status: 401, error: "unauthorized" };
   }

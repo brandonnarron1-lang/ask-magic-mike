@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AcceptLeadSchema } from "@/schemas/routing.schema";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
+import { checkAdminAuth } from "@/lib/admin/auth";
 
 export async function POST(req: NextRequest) {
+  const auth = checkAdminAuth(req);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
   let body: unknown;
   try {
     body = await req.json();

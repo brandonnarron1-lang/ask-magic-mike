@@ -135,8 +135,8 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
         )
         .in("lead_id", leadIds);
       attrRows = data ?? [];
-    } catch {
-      // Non-fatal
+    } catch (err) {
+      console.warn("[revenue-command] source_attribution fetch failed:", err instanceof Error ? err.message : err);
     }
   }
 
@@ -156,8 +156,8 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
         .select("lead_id, composite_score, temperature")
         .in("lead_id", leadIds);
       scoreRows = data ?? [];
-    } catch {
-      // Non-fatal: lead_scores may not exist
+    } catch (err) {
+      console.warn("[revenue-command] lead_scores fetch failed:", err instanceof Error ? err.message : err);
     }
   }
 
@@ -205,8 +205,8 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
         oldestUnassignedAge: oldestUnassignedDate ? oldestUnassignedDate.toISOString() : null,
       };
     }
-  } catch {
-    // Non-fatal: lead_routing table may not exist
+  } catch (err) {
+    console.warn("[revenue-command] lead_routing fetch failed:", err instanceof Error ? err.message : err);
   }
 
   // -------------------------------------------------------------------------
@@ -438,8 +438,8 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
       .select("id, email, created_at")
       .limit(2000);
     allLeadsForSynthetic = synRaw ?? [];
-  } catch {
-    // Non-fatal
+  } catch (err) {
+    console.warn("[revenue-command] synthetic residue fetch failed:", err instanceof Error ? err.message : err);
   }
 
   const syntheticResidues: RevenueCommandData["syntheticResidues"] = [];

@@ -127,12 +127,21 @@ export function createSupabaseSlaSweepRepo(): SlaSweepRepository {
       const { createAdminClient } = await import("@/lib/supabase/admin");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const client = createAdminClient() as any;
+      const flagType =
+        b.type === "accept_missed" ? "sla_accept_breached" : "sla_contact_breached";
+
+      // Skip if an identical flag already exists — prevents duplicate rows on repeated sweeps.
+      const { data: existing } = await client
+        .from("compliance_flags")
+        .select("id")
+        .eq("lead_id", b.leadId)
+        .eq("flag_type", flagType)
+        .maybeSingle();
+      if (existing) return;
+
       await client.from("compliance_flags").insert({
         lead_id: b.leadId,
-        flag_type:
-          b.type === "accept_missed"
-            ? "sla_accept_breached"
-            : "sla_contact_breached",
+        flag_type: flagType,
         severity: b.grade === "A+" || b.grade === "A" ? "critical" : "warn",
         notes: JSON.stringify({ grade: b.grade, dueAt: b.dueAt.toISOString() }),
       });

@@ -103,8 +103,8 @@ export async function loadTrafficCommand(client: any): Promise<TrafficCommandDat
         )
         .in("lead_id", leadIds);
       attrRows = data ?? [];
-    } catch {
-      // Non-fatal
+    } catch (err) {
+      console.warn("[traffic-command] source_attribution fetch failed:", err instanceof Error ? err.message : err);
     }
   }
 
@@ -126,8 +126,8 @@ export async function loadTrafficCommand(client: any): Promise<TrafficCommandDat
       .order("occurred_at", { ascending: false })
       .limit(5000);
     sessionEvents = evRaw ?? [];
-  } catch {
-    // analytics_events may not be populated
+  } catch (err) {
+    console.warn("[traffic-command] analytics_events fetch failed:", err instanceof Error ? err.message : err);
   }
 
   // -------------------------------------------------------------------------
@@ -141,8 +141,8 @@ export async function loadTrafficCommand(client: any): Promise<TrafficCommandDat
         .select("lead_id, composite_score, temperature")
         .in("lead_id", leadIds);
       scoreRows = data ?? [];
-    } catch {
-      // Non-fatal
+    } catch (err) {
+      console.warn("[traffic-command] lead_scores fetch failed:", err instanceof Error ? err.message : err);
     }
   }
   const scoreByLeadId = new Map<string, AnyRow>();
