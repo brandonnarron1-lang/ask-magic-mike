@@ -75,6 +75,16 @@ export function AdminLeadActions({
 
       {/* Assign */}
       <Card title="Assign / reassign">
+        <p className="text-[10px] text-slate-600 mb-2">
+          Agent IDs are listed at{" "}
+          <a
+            href="/admin/routing"
+            className="text-gold-400/70 hover:text-gold-300 transition-colors underline underline-offset-2 decoration-gold-400/30"
+          >
+            /admin/routing
+          </a>
+          .
+        </p>
         <form
           className="flex gap-2"
           action={(fd) => wrap(assignLeadAction, fd)}
@@ -83,13 +93,14 @@ export function AdminLeadActions({
           <input
             name="agent_id"
             required
-            placeholder="agent UUID"
-            className="flex-1 rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
+            placeholder="Agent UUID"
+            aria-label="Agent UUID (find at /admin/routing)"
+            className="flex-1 rounded-xl border border-white/12 bg-white/[0.04] px-2 py-1.5 text-sm"
           />
           <input
             name="reason"
-            placeholder="reason (optional)"
-            className="flex-1 rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
+            placeholder="Reason (optional)"
+            className="flex-1 rounded-xl border border-white/12 bg-white/[0.04] px-2 py-1.5 text-sm"
           />
           <SubmitBtn>Assign</SubmitBtn>
         </form>
@@ -103,7 +114,7 @@ export function AdminLeadActions({
             <select
               name="status"
               defaultValue={currentStatus ?? ""}
-              className="flex-1 rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
+              className="flex-1 rounded-xl border border-white/12 bg-white/[0.04] px-2 py-1.5 text-sm"
             >
               {LEAD_STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -119,7 +130,7 @@ export function AdminLeadActions({
             <select
               name="lead_type"
               defaultValue={currentLeadType ?? ""}
-              className="flex-1 rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
+              className="flex-1 rounded-xl border border-white/12 bg-white/[0.04] px-2 py-1.5 text-sm"
             >
               {LEAD_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -135,7 +146,7 @@ export function AdminLeadActions({
             <select
               name="spam"
               defaultValue="true"
-              className="flex-1 rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
+              className="flex-1 rounded-xl border border-white/12 bg-white/[0.04] px-2 py-1.5 text-sm"
             >
               <option value="true">Mark spam</option>
               <option value="false">Clear spam</option>
@@ -157,7 +168,7 @@ export function AdminLeadActions({
             required
             rows={3}
             placeholder="Internal note — visible only to admin"
-            className="w-full rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
+            className="w-full rounded-xl border border-white/12 bg-white/[0.04] px-2 py-1.5 text-sm"
           />
           <SubmitBtn>Save note</SubmitBtn>
         </form>
@@ -174,17 +185,17 @@ export function AdminLeadActions({
             name="title"
             required
             placeholder="Title"
-            className="rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
+            className="rounded-xl border border-white/12 bg-white/[0.04] px-2 py-1.5 text-sm"
           />
           <input
             name="due_at"
             type="datetime-local"
-            className="rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
+            className="rounded-xl border border-white/12 bg-white/[0.04] px-2 py-1.5 text-sm"
           />
           <select
             name="priority"
             defaultValue="normal"
-            className="rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
+            className="rounded-xl border border-white/12 bg-white/[0.04] px-2 py-1.5 text-sm"
           >
             <option value="low">low</option>
             <option value="normal">normal</option>
@@ -195,7 +206,7 @@ export function AdminLeadActions({
             name="body"
             rows={2}
             placeholder="Notes (optional)"
-            className="sm:col-span-2 rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
+            className="sm:col-span-2 rounded-xl border border-white/12 bg-white/[0.04] px-2 py-1.5 text-sm"
           />
           <SubmitBtn className="sm:col-span-2">Create task</SubmitBtn>
         </form>
@@ -222,7 +233,7 @@ export function AdminLeadActions({
             <select
               name="template_slug"
               required
-              className="w-full rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
+              className="w-full rounded-xl border border-white/12 bg-white/[0.04] px-2 py-1.5 text-sm"
             >
               {Object.keys(SMS_TEMPLATES).map((slug) => (
                 <option key={slug} value={slug}>
@@ -249,7 +260,7 @@ export function AdminLeadActions({
             <select
               name="template_slug"
               required
-              className="w-full rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
+              className="w-full rounded-xl border border-white/12 bg-white/[0.04] px-2 py-1.5 text-sm"
             >
               {Object.keys(EMAIL_TEMPLATES).map((slug) => (
                 <option key={slug} value={slug}>
@@ -306,7 +317,7 @@ export function AdminLeadActions({
             <input
               type="datetime-local"
               name="follow_up_at"
-              className="w-full rounded-xl border border-white/12 bg-[#0B0E14] px-2 py-1.5 text-sm"
+              className="w-full rounded-xl border border-white/12 bg-white/[0.04] px-2 py-1.5 text-sm"
             />
           </div>
           <SubmitBtn>Set date</SubmitBtn>

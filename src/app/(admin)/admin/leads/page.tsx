@@ -299,6 +299,12 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
                         </div>
                         <p className="text-sm font-medium text-slate-400">No leads match these filters</p>
                         <p className="text-xs text-slate-600">Adjust filters above · leads appear as the funnel receives traffic</p>
+                        <Link
+                          href="/admin/leads"
+                          className="mt-1 text-xs text-gold-400/70 hover:text-gold-300 transition-colors"
+                        >
+                          ← Clear all filters
+                        </Link>
                       </div>
                     </td>
                   </tr>
