@@ -534,7 +534,7 @@ export function HeroSection() {
                   initialQuestion={question}
                   onSubmit={handleSubmit}
                   loading={loading}
-                  className="w-full text-left"
+                  className="w-full text-left !border-transparent !shadow-none bg-transparent backdrop-blur-none"
                 />
               </div>
             </div>
