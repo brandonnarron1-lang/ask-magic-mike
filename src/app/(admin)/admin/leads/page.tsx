@@ -475,6 +475,23 @@ export default async function LeadsInboxPage({ searchParams }: PageProps) {
             )}
           </div>
         </div>
+
+        {/* ── Quick links ── */}
+        <div className="flex flex-wrap gap-3 pt-4 mt-4">
+          {[
+            { href: "/admin/ops",     label: "Lead Ops Queue →" },
+            { href: "/admin/routing", label: "Agent Routing →" },
+            { href: "/admin/launch",  label: "Launch Control →" },
+          ].map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="text-[11px] text-slate-500 hover:text-gold-300 transition-colors border border-white/[0.06] rounded-lg px-3.5 py-2 hover:border-gold-400/25"
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
       </main>
     </AdminShell>
   );

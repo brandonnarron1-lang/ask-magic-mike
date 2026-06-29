@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { notFound } from "next/navigation";
 import { loadLeadDetail } from "@/lib/admin/lead-detail";
@@ -459,6 +460,23 @@ export default async function LeadDetailPage({ params }: PageProps) {
             </ul>
           </Card>
         </section>
+
+        {/* ── Quick links ── */}
+        <div className="md:col-span-3 flex flex-wrap gap-3 pt-2">
+          {[
+            { href: "/admin/ops",     label: "← Ops Queue" },
+            { href: "/admin/routing", label: "Agent Routing →" },
+            { href: "/admin/leads",   label: "← All Leads" },
+          ].map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="text-[11px] text-slate-500 hover:text-gold-300 transition-colors border border-white/[0.06] rounded-lg px-3.5 py-2 hover:border-gold-400/25"
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
       </main>
     </AdminShell>
   );
