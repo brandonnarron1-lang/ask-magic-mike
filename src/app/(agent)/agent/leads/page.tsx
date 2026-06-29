@@ -198,13 +198,23 @@ export default async function AgentLeadQueuePage({ searchParams }: PageProps) {
           </div>
         ) : (
           <div
-            className="text-center py-16 text-slate-600 text-xs"
+            className="flex flex-col items-center gap-2 text-center py-16"
             role="status"
             aria-label="No leads in this filter"
           >
-            {configured
-              ? `No ${FILTER_LABELS[filter].toLowerCase()} leads.`
-              : "Database not configured — connect Supabase to load lead queue."}
+            <p className="text-xs text-slate-600">
+              {configured
+                ? `No ${FILTER_LABELS[filter].toLowerCase()} leads.`
+                : "Database not configured — connect Supabase to load lead queue."}
+            </p>
+            {configured && filter !== "all" && (
+              <Link
+                href={`/agent/leads?agent_id=${agentId}`}
+                className="text-xs text-gold-400/70 hover:text-gold-300 transition-colors"
+              >
+                ← View all assigned leads
+              </Link>
+            )}
           </div>
         )}
 
