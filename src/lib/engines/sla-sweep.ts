@@ -100,11 +100,12 @@ export function createSupabaseSlaSweepRepo(): SlaSweepRepository {
       const leadIds = nonSynth.map((r: Record<string, unknown>) => r.id as string);
       const acceptedAtByLeadId = new Map<string, Date>();
       if (leadIds.length > 0) {
-        const { data: routingRows } = await client
+        const { data: routingRows, error: routingError } = await client
           .from("lead_routing")
           .select("lead_id, accepted_at")
           .in("lead_id", leadIds)
           .not("accepted_at", "is", null);
+        if (routingError) throw new Error(`[sla-sweep] routing fetch: ${routingError.message}`);
         for (const r of routingRows ?? []) {
           if (r.accepted_at) {
             acceptedAtByLeadId.set(r.lead_id as string, new Date(r.accepted_at as string));
@@ -139,12 +140,13 @@ export function createSupabaseSlaSweepRepo(): SlaSweepRepository {
         .maybeSingle();
       if (existing) return;
 
-      await client.from("compliance_flags").insert({
+      const { error: insertError } = await client.from("compliance_flags").insert({
         lead_id: b.leadId,
         flag_type: flagType,
         severity: b.grade === "A+" || b.grade === "A" ? "critical" : "warn",
         notes: JSON.stringify({ grade: b.grade, dueAt: b.dueAt.toISOString() }),
       });
+      if (insertError) throw new Error(`[sla-sweep] recordBreach insert: ${insertError.message}`);
     },
   };
 }

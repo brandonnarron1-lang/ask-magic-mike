@@ -1,5 +1,8 @@
 import type { DbSession } from "./types";
 import { shouldUseDevStorage, requireSupabaseForProduction } from "./types";
+import { createLogger } from "@/lib/observability/logger";
+
+const log = createLogger("session-repository");
 
 export interface CreateSessionInput {
   utmSource?: string | null;
@@ -71,20 +74,22 @@ export async function advanceSessionStep(sessionId: string, step: number): Promi
   if (shouldUseDevStorage()) return;
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
-  await createAdminClient()
+  const { error } = await createAdminClient()
     .from("sessions")
     .update({ step_reached: step })
     .eq("id", sessionId);
+  if (error) log.error("sessions.advance_step_failed", { sessionId, step, dbError: error.message });
 }
 
 export async function completeSession(sessionId: string): Promise<void> {
   if (shouldUseDevStorage()) return;
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
-  await createAdminClient()
+  const { error } = await createAdminClient()
     .from("sessions")
     .update({ status: "completed" })
     .eq("id", sessionId);
+  if (error) log.error("sessions.complete_failed", { sessionId, dbError: error.message });
 }
 
 function mapSession(row: Record<string, unknown>): DbSession {

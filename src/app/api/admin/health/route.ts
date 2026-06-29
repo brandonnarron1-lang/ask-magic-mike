@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { computeHealthSafety } from "@/lib/admin/health-safety";
+import { createLogger } from "@/lib/observability/logger";
+
+const log = createLogger("admin:health");
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
@@ -92,8 +95,9 @@ export async function GET(req: NextRequest) {
       for (const [t, ok] of probes) tablePresence[t] = ok;
       // Reachable if at least the `leads` table responded.
       dbReachable = tablePresence.leads;
-    } catch {
+    } catch (err) {
       dbReachable = false;
+      log.error("db.probe_failed", { error: err instanceof Error ? err.message : String(err) });
     }
   }
 

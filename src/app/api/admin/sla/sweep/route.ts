@@ -67,7 +67,19 @@ async function handle(req: NextRequest) {
   }
 
   const engine = new SlaSweepEngine(createSupabaseSlaSweepRepo());
-  const report = await engine.sweep({ persistBreaches: persist });
+  let report: Awaited<ReturnType<typeof engine.sweep>>;
+  try {
+    report = await engine.sweep({ persistBreaches: persist });
+  } catch (err) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "sweep_failed",
+        detail: err instanceof Error ? err.message : "Unknown error",
+      },
+      { status: 503, headers: NO_STORE }
+    );
+  }
   return NextResponse.json(
     { ok: true, mode: isCronAuth ? "cron" : "admin", ...report },
     { headers: NO_STORE }
