@@ -212,6 +212,7 @@ export async function POST(req: NextRequest) {
         // this lead. Mirrors the canonical /api/leads path. Must not block.
         if (
           input.utmSource || input.utmMedium || input.utmCampaign ||
+          input.utmContent || input.utmTerm ||
           input.referrerUrl || input.landingPath
         ) {
           try {

@@ -17,7 +17,7 @@ export interface WeeklyExecutiveReport {
 
   revenue: {
     note: string;
-    highIntentLeads: number;
+    highIntentLeads24h: number;
     conversionRate: string;
     topSource: string | null;
   };
@@ -166,7 +166,7 @@ export function buildWeeklyExecutiveReport(
     generatedAt: now.toISOString(),
     revenue: {
       note: "Revenue tracked in CRM. High-intent leads below are the pipeline input.",
-      highIntentLeads: data.summary.highIntent24h,
+      highIntentLeads24h: data.summary.highIntent24h,
       conversionRate,
       topSource: data.sourceRollup.topPlatform,
     },

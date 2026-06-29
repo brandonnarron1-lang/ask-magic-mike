@@ -216,16 +216,20 @@ export async function loadRevenueCommand(client: any): Promise<RevenueCommandDat
 
   let leads24h = 0;
   let leads7d = 0;
-  const leads30d = leads.length;
+  let leads30d = 0;
   let unattributed7d = 0;
   let wordpressWidget24h = 0;
   let wordpressWidget7d = 0;
   let highIntent24h = 0;
 
   for (const l of leads) {
+    // Exclude synthetic/test leads from all funnel health metrics
+    if (isSyntheticEmail(l.email as string | null)) continue;
+
     const createdAt = l.created_at as string;
     const is7d = createdAt >= ago7d;
     const is24h = createdAt >= ago24h;
+    leads30d++;
     if (is24h) {
       leads24h++;
       const sc = scoreByLeadId.get(l.id as string);

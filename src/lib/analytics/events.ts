@@ -286,4 +286,8 @@ export const ANALYTICS_EVENTS: Record<
     category: "intake",
     description: "User sent a message via chat",
   },
+  agent_status_updated: {
+    category: "admin",
+    description: "Agent updated lead status from the agent portal",
+  },
 };

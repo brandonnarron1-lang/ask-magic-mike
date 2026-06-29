@@ -113,7 +113,8 @@ describe("agent/leads/[id]/page.tsx — workflow nav", () => {
   });
 
   it("has Set Follow-up quick action", () => {
-    expect(src).toContain("/follow-up");
+    // AgentFollowUpForm is a client component that POSTs to /follow-up — verify it's imported
+    expect(src).toContain("AgentFollowUpForm");
   });
 
   it("has back link to agent lead queue", () => {
