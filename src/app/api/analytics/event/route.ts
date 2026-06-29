@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TrackEventSchema } from "@/schemas/analytics.schema";
-import { trackEvent } from "@/lib/analytics/ledger";
+import { trackEventNoWait } from "@/lib/analytics/ledger";
+import { checkRateLimit, rateLimitKey, LIMITS } from "@/lib/security/rate-limit";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+  const rl = checkRateLimit(rateLimitKey(ip), LIMITS.analyticsEvent.limit, LIMITS.analyticsEvent.windowMs);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "rate_limit_exceeded" },
+      { status: 429, headers: { ...NO_STORE, "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();
@@ -20,12 +30,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   const userAgent = req.headers.get("user-agent") ?? undefined;
 
-  await trackEvent({
+  trackEventNoWait({
     ...parsed.data,
-    ipAddress: ip,
+    ipAddress: ip ?? undefined,
     userAgent,
   });
 

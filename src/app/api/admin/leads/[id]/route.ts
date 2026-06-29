@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkAdminAuth } from "@/lib/admin/auth";
 import { loadLeadDetail } from "@/lib/admin/lead-detail";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
-import { LEAD_STATUSES, LEAD_TYPES } from "@/lib/leads/lead-types";
+import { LEAD_STATUSES, LEAD_TYPES, LEAD_GRADES } from "@/lib/leads/lead-types";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -62,7 +62,9 @@ export async function PATCH(
   if (typeof body.lead_type === "string" && (LEAD_TYPES as readonly string[]).includes(body.lead_type)) {
     updates.lead_type = body.lead_type;
   }
-  if (typeof body.lead_grade === "string") updates.lead_grade = body.lead_grade;
+  if (typeof body.lead_grade === "string" && (LEAD_GRADES as readonly string[]).includes(body.lead_grade)) {
+    updates.lead_grade = body.lead_grade;
+  }
   if (typeof body.next_follow_up_at === "string" || body.next_follow_up_at === null)
     updates.next_follow_up_at = body.next_follow_up_at;
   if (typeof body.last_contacted_at === "string" || body.last_contacted_at === null)

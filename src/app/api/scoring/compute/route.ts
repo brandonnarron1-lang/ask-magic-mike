@@ -2,10 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { ComputeScoreRequestSchema } from "@/schemas/scoring.schema";
 import { computeScore } from "@/lib/scoring";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
+import { checkAdminAuth } from "@/lib/admin/auth";
 import type { ScoringInput } from "@/types/domain.types";
 import type { Json } from "@/types/database.types";
 
 export async function POST(req: NextRequest) {
+  const auth = checkAdminAuth(req);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
   let body: unknown;
   try {
     body = await req.json();

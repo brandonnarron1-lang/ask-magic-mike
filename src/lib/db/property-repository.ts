@@ -37,15 +37,20 @@ export async function upsertProperty(input: UpsertPropertyInput): Promise<DbProp
 
   const { data, error } = await client
     .from("properties")
-    .insert({
-      lead_id:       input.leadId ?? null,
-      address_line1: addressLine1,
-      address_line2: input.addressLine2 ?? null,
-      city,
-      state,
-      zip,
-      county:        input.county ?? (state === "NC" ? "Wilson County" : null),
-    })
+    .upsert(
+      {
+        lead_id:       input.leadId ?? null,
+        address_line1: addressLine1,
+        address_line2: input.addressLine2 ?? null,
+        city,
+        state,
+        zip,
+        county:        input.county ?? (state === "NC" ? "Wilson County" : null),
+      },
+      // uq_properties_lead_id (migration 00015) enables safe upsert by lead_id.
+      // ignoreDuplicates=false so address fields update on retry.
+      { onConflict: "lead_id", ignoreDuplicates: false }
+    )
     .select("id, lead_id, address_line1, city, state, zip, created_at")
     .single();
 

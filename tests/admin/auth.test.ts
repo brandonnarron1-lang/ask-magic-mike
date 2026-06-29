@@ -49,8 +49,8 @@ describe("checkAdminAuth", () => {
     expect(r.ok).toBe(true);
   });
 
-  it("accepts the query-param form (dev convenience)", () => {
+  it("rejects the query-param form (secret must not appear in URLs)", () => {
     const r = checkAdminAuth(fakeRequest({}, { admin_secret: "test_secret_v1" }));
-    expect(r.ok).toBe(true);
+    expect(r.ok).toBe(false);
   });
 });

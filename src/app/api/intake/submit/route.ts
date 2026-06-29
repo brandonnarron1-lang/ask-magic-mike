@@ -11,11 +11,21 @@ import { createConsentsFromLead } from "@/lib/db/consent-repository";
 import { completeSession } from "@/lib/db/session-repository";
 import { shouldUseDevStorage, isProduction, isSupabaseConfigured } from "@/lib/db/types";
 import { classifyReferrer } from "@/lib/attribution/referrer-classifier";
+import { checkRateLimit, rateLimitKey, LIMITS } from "@/lib/security/rate-limit";
 import type { ScoringInput } from "@/types/domain.types";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+  const rl = checkRateLimit(rateLimitKey(ip), LIMITS.intakeSubmit.limit, LIMITS.intakeSubmit.windowMs);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "rate_limit_exceeded" },
+      { status: 429, headers: { ...NO_STORE, "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();
@@ -32,7 +42,6 @@ export async function POST(req: NextRequest) {
   }
 
   const input = parsed.data;
-  const ip        = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
   const userAgent = req.headers.get("user-agent") ?? null;
 
   // Production without Supabase: reject — leads must persist somewhere real
@@ -472,7 +481,7 @@ export async function POST(req: NextRequest) {
         compositeScore:       score.compositeScore,
         temperature:          score.temperature,
       },
-      routing: routingDecision,
+      routing: routingDecision ? { assigned: true } : null,
     },
     { headers: NO_STORE }
   );

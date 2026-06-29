@@ -308,7 +308,8 @@ export async function loadAgentEventLog(
         detail:    eventName.replace(/_/g, " "),
       };
     });
-  } catch {
+  } catch (err) {
+    console.warn("[agent-portal-metrics] activity fetch failed:", err instanceof Error ? err.message : err);
     return [];
   }
 }
