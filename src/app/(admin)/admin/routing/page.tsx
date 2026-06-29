@@ -404,6 +404,23 @@ export default async function RoutingCommandPage() {
           </div>
         )}
 
+        {/* ── Quick links ── */}
+        <div className="flex flex-wrap gap-3 pt-2 mt-6">
+          {[
+            { href: "/admin/ops",    label: "← Lead Ops Queue" },
+            { href: "/admin/leads",  label: "← Leads Inbox" },
+            { href: "/admin/launch", label: "Launch Control →" },
+          ].map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="text-[11px] text-slate-500 hover:text-gold-300 transition-colors border border-white/[0.06] rounded-lg px-3.5 py-2 hover:border-gold-400/25"
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+
         <p className="mt-8 text-[11px] text-slate-700 text-center">
           Agent Routing · Ask Magic Mike Admin · Our Town Properties, Inc. · Wilson, NC
         </p>
