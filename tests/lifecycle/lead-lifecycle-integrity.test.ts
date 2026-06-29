@@ -80,8 +80,8 @@ describe("escalateLead", () => {
     // Temporarily clear env vars
     const savedUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const savedKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "";
 
     try {
       const { escalateLead } = await import("@/lib/routing/escalation");
@@ -89,8 +89,8 @@ describe("escalateLead", () => {
       expect(result.escalated).toBe(false);
       expect(result.error).toBe("db_not_configured");
     } finally {
-      if (savedUrl) process.env.NEXT_PUBLIC_SUPABASE_URL = savedUrl;
-      if (savedKey) process.env.SUPABASE_SERVICE_ROLE_KEY = savedKey;
+      process.env.NEXT_PUBLIC_SUPABASE_URL = savedUrl ?? "";
+      process.env.SUPABASE_SERVICE_ROLE_KEY = savedKey ?? "";
     }
   });
 
