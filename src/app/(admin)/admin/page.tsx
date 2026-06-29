@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Inbox, DollarSign, BarChart2, Share2, AlertCircle, CheckCircle2,
   Users, ArrowRight, Activity, Brain, Zap, TrendingUp, Home, FileText,
-  Megaphone, Clock, PhoneCall,
+  Megaphone, Clock, PhoneCall, Rocket, ListOrdered,
 } from "lucide-react";
 import { LeadTable } from "@/components/admin/lead-table";
 import { AdminShell, AdminSectionHeading } from "@/components/admin/admin-shell";
@@ -374,8 +374,10 @@ export default async function AdminPage() {
         <div>
           <AdminSectionHeading className="mb-3">Command Centers</AdminSectionHeading>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2.5">
-            <CenterTile href="/admin/leads"        Icon={Inbox}      label="Leads Inbox"   sub="Inbox · filter · detail"        iconColor="group-hover:border-gold-400/25 group-hover:bg-gold-400/[0.08]" />
-            <CenterTile href="/admin/routing"      Icon={Users}      label="Routing"       sub="Roster · queue · SLA"           iconColor="group-hover:border-amber-400/20 group-hover:bg-amber-400/[0.07]" />
+            <CenterTile href="/admin/launch"       Icon={Rocket}       label="Launch Control" sub="Readiness · verdict · checklist" iconColor="group-hover:border-gold-400/30 group-hover:bg-gold-400/[0.10]" />
+            <CenterTile href="/admin/ops"          Icon={ListOrdered}  label="Lead Ops"       sub="Priority queue · SLA · ops"     iconColor="group-hover:border-ruby-400/25 group-hover:bg-ruby-400/[0.08]" />
+            <CenterTile href="/admin/leads"        Icon={Inbox}        label="Leads Inbox"    sub="Inbox · filter · detail"        iconColor="group-hover:border-gold-400/25 group-hover:bg-gold-400/[0.08]" />
+            <CenterTile href="/admin/routing"      Icon={Users}        label="Routing"        sub="Roster · queue · SLA"           iconColor="group-hover:border-amber-400/20 group-hover:bg-amber-400/[0.07]" />
             <CenterTile href="/admin/revenue"      Icon={DollarSign} label="Revenue"       sub="Pipeline · forecast · alerts"   iconColor="group-hover:border-emerald-400/20 group-hover:bg-emerald-400/[0.07]" />
             <CenterTile href="/admin/traffic"      Icon={BarChart2}  label="Traffic"       sub="UTM · sources · sessions"       iconColor="group-hover:border-blue-400/20 group-hover:bg-blue-400/[0.06]" />
             <CenterTile href="/admin/distribution" Icon={Share2}     label="Distribution"  sub="Queue · platforms · plan"       iconColor="group-hover:border-purple-400/20 group-hover:bg-purple-400/[0.06]" />

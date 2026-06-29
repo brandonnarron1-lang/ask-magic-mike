@@ -155,6 +155,8 @@ describe("supporting admin pages token guard", () => {
     "app/(admin)/admin/distribution/page.tsx",
     "app/(admin)/admin/routing/page.tsx",
     "app/(admin)/admin/revenue/page.tsx",
+    "app/(admin)/admin/launch/page.tsx",
+    "app/(admin)/admin/ops/page.tsx",
   ];
 
   for (const p of pages) {
