@@ -57,15 +57,37 @@ ALTER TABLE leads
 
 -- ─── 3. Missing performance indexes ──────────────────────────────────────────
 
+-- assigned_agent_id was just added above — always safe to index.
 CREATE INDEX IF NOT EXISTS idx_leads_assigned_agent_id
   ON leads(assigned_agent_id) WHERE assigned_agent_id IS NOT NULL;
-
-CREATE INDEX IF NOT EXISTS idx_leads_next_follow_up_at
-  ON leads(next_follow_up_at) WHERE next_follow_up_at IS NOT NULL;
-
-CREATE INDEX IF NOT EXISTS idx_leads_last_contacted_at
-  ON leads(last_contacted_at) WHERE last_contacted_at IS NOT NULL;
 
 -- Composite index for agent portal queries (most common: WHERE assigned_agent_id = ? ORDER BY created_at)
 CREATE INDEX IF NOT EXISTS idx_leads_agent_created
   ON leads(assigned_agent_id, created_at DESC) WHERE assigned_agent_id IS NOT NULL;
+
+-- next_follow_up_at and last_contacted_at were added in migration 00012.
+-- Guard so this migration is safe to run even when 00012 is not yet applied.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'leads' AND column_name = 'next_follow_up_at'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_indexes WHERE tablename = 'leads' AND indexname = 'idx_leads_next_follow_up_at'
+    ) THEN
+      EXECUTE 'CREATE INDEX idx_leads_next_follow_up_at ON leads(next_follow_up_at) WHERE next_follow_up_at IS NOT NULL';
+    END IF;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'leads' AND column_name = 'last_contacted_at'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_indexes WHERE tablename = 'leads' AND indexname = 'idx_leads_last_contacted_at'
+    ) THEN
+      EXECUTE 'CREATE INDEX idx_leads_last_contacted_at ON leads(last_contacted_at) WHERE last_contacted_at IS NOT NULL';
+    END IF;
+  END IF;
+END $$;
