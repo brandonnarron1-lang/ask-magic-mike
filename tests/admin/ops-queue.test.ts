@@ -11,27 +11,30 @@ import type { OpsQueueItem } from "@/lib/admin/ops-queue";
 
 type FQLead = Parameters<typeof buildOpsQueue>[0][number];
 
+const LEAD_DEFAULTS = {
+  firstName:    "TestLead" as string | null,
+  hasEmail:     true,
+  hasPhone:     true,
+  utmSource:    "facebook" as string | null,
+  utmMedium:    "social"   as string | null,
+  utmCampaign:  "june-push" as string | null,
+  referrerType: "social"   as string | null,
+  score:        55          as number | null,
+  temperature:  "warm"     as string | null,
+  assigned:     true,
+  grade:        "B"        as string | null,
+  leadType:     "buyer"    as string | null,
+};
+
 function makeLead(overrides: Partial<FQLead> & { id: string }): FQLead {
   const createdAt = overrides.createdAt ?? new Date(Date.now() - 30 * 60_000).toISOString();
-  // Use "key in overrides" so that explicit null values (e.g. utmSource: null) are preserved
-  // rather than falling through to the default via ??.
   return {
+    ...LEAD_DEFAULTS,
+    ...overrides,
     id:            overrides.id,
     createdAt,
-    firstName:     "firstName"    in overrides ? overrides.firstName!    : "TestLead",
-    hasEmail:      "hasEmail"     in overrides ? overrides.hasEmail!     : true,
-    hasPhone:      "hasPhone"     in overrides ? overrides.hasPhone!     : true,
-    utmSource:     "utmSource"    in overrides ? overrides.utmSource     : "facebook",
-    utmMedium:     "utmMedium"    in overrides ? overrides.utmMedium     : "social",
-    utmCampaign:   "utmCampaign"  in overrides ? overrides.utmCampaign   : "june-push",
-    referrerType:  "referrerType" in overrides ? overrides.referrerType  : "social",
-    score:         "score"        in overrides ? overrides.score         : 55,
-    temperature:   "temperature"  in overrides ? overrides.temperature   : "warm",
-    assigned:      "assigned"     in overrides ? overrides.assigned!     : true,
-    grade:         "grade"        in overrides ? overrides.grade         : "B",
-    leadType:      "leadType"     in overrides ? overrides.leadType      : "buyer",
     leadDetailUrl: overrides.leadDetailUrl ?? `/admin/leads/${overrides.id}`,
-  };
+  } as FQLead;
 }
 
 function oldTimestamp(hoursAgo: number): string {

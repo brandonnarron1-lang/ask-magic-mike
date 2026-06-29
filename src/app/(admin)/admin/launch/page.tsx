@@ -3,7 +3,7 @@ export const revalidate = 0;
 
 import Link from "next/link";
 import {
-  Rocket, CheckCircle2, AlertTriangle, XCircle,
+  CheckCircle2, AlertTriangle, XCircle,
   ArrowRight, Ban,
 } from "lucide-react";
 import { loadLaunchControl } from "@/lib/admin/launch-control";
