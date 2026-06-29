@@ -16,7 +16,7 @@ export const SubmitIntakeSchema = z.object({
   addressLine1: z.string().max(300).nullable().default(null),
   addressLine2: z.string().max(300).nullable().default(null),
   city: z.string().max(200).nullable().default(null),
-  state: z.string().length(2).default("FL"),
+  state: z.string().length(2).default("NC"),
   zip: z
     .string()
     .regex(/^\d{5}(-\d{4})?$/)

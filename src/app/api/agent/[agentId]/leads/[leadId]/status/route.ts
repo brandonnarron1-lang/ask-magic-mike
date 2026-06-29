@@ -20,6 +20,7 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 import { agentOwnsLead } from "@/lib/agent/agent-auth";
+import { trackEventNoWait } from "@/lib/analytics/ledger";
 
 // Agent-permitted status transitions (broker-only values excluded)
 const AGENT_PERMITTED_STATUSES = new Set([
@@ -92,6 +93,12 @@ export async function POST(
     if (error) {
       return NextResponse.json({ error: "update_failed" }, { status: 500 });
     }
+
+    trackEventNoWait({
+      eventName: "agent_status_updated",
+      leadId,
+      properties: { agentId, newStatus: status },
+    });
 
     return NextResponse.json({ ok: true, status });
   } catch {

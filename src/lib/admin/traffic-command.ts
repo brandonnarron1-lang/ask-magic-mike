@@ -203,7 +203,7 @@ export async function loadTrafficCommand(client: any): Promise<TrafficCommandDat
     }
     returning7d = Array.from(sessionCounts.values()).filter((c) => c > 1).length;
   } else {
-    // Fallback: each lead represents a session
+    // No session event data yet — conversion rate is not computable
     sessions7d = leads7d;
     returning7d = 0;
   }
@@ -213,8 +213,12 @@ export async function loadTrafficCommand(client: any): Promise<TrafficCommandDat
     sessionEvents.filter((e) => (e.occurred_at as string) >= ago24h).length
   );
 
+  // Only compute a conversion rate when we have real session event data;
+  // the leads7d fallback would produce 100% which is misleading.
   const conversionRate =
-    sessions7d > 0 ? Math.round((leads7d / sessions7d) * 1000) / 10 : null;
+    sessionEvents.length > 0 && sessions7d > 0
+      ? Math.round((leads7d / sessions7d) * 1000) / 10
+      : null;
 
   // -------------------------------------------------------------------------
   // 6. Top source / campaign / landing page / question

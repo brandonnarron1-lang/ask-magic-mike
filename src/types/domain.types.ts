@@ -405,7 +405,8 @@ export type AnalyticsEventName =
   | "compliance_review_required"
   | "appointment_cta_clicked"
   | "chat_opened"
-  | "chat_message_sent";
+  | "chat_message_sent"
+  | "agent_status_updated";
 
 export interface AnalyticsEvent {
   id: string;

@@ -90,17 +90,37 @@ export function createSupabaseSlaSweepRepo(): SlaSweepRepository {
         .order("created_at", { ascending: false })
         .limit(limit);
       if (error) throw new Error(`[sla-sweep] fetch: ${error.message}`);
-      return (data ?? [])
-        .filter((row: Record<string, unknown>) => !isSyntheticEmail(row.email as string | null))
-        .map((row: Record<string, unknown>): LeadSlaState => ({
-          leadId: row.id as string,
-          grade: ((row.lead_grade as LeadGrade | null) ?? "C"),
-          createdAt: new Date(row.created_at as string),
-          acceptedAt: null, // Could read from lead_routing when needed.
-          contactedAt: row.last_contacted_at
-            ? new Date(row.last_contacted_at as string)
-            : null,
-        }));
+
+      const nonSynth = (data ?? []).filter(
+        (row: Record<string, unknown>) => !isSyntheticEmail(row.email as string | null)
+      );
+
+      // Read accepted_at from lead_routing for any lead that has been accepted,
+      // so we don't generate false-positive accept-breach flags.
+      const leadIds = nonSynth.map((r: Record<string, unknown>) => r.id as string);
+      const acceptedAtByLeadId = new Map<string, Date>();
+      if (leadIds.length > 0) {
+        const { data: routingRows } = await client
+          .from("lead_routing")
+          .select("lead_id, accepted_at")
+          .in("lead_id", leadIds)
+          .not("accepted_at", "is", null);
+        for (const r of routingRows ?? []) {
+          if (r.accepted_at) {
+            acceptedAtByLeadId.set(r.lead_id as string, new Date(r.accepted_at as string));
+          }
+        }
+      }
+
+      return nonSynth.map((row: Record<string, unknown>): LeadSlaState => ({
+        leadId: row.id as string,
+        grade: ((row.lead_grade as LeadGrade | null) ?? "C"),
+        createdAt: new Date(row.created_at as string),
+        acceptedAt: acceptedAtByLeadId.get(row.id as string) ?? null,
+        contactedAt: row.last_contacted_at
+          ? new Date(row.last_contacted_at as string)
+          : null,
+      }));
     },
 
     async recordBreach(b: SlaBreach) {

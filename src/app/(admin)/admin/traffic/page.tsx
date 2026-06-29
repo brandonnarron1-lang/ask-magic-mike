@@ -667,8 +667,8 @@ export default async function TrafficCommandPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className={CARD}>
               <div className={LABEL}>Revenue Pipeline</div>
-              <div className={BIG}>{report.revenue.highIntentLeads}</div>
-              <p className="text-[11px] text-slate-500 mt-1">high-intent leads this week</p>
+              <div className={BIG}>{report.revenue.highIntentLeads24h}</div>
+              <p className="text-[11px] text-slate-500 mt-1">high-intent leads (last 24h)</p>
             </div>
             <div className={CARD}>
               <div className={LABEL}>Conversion Rate</div>

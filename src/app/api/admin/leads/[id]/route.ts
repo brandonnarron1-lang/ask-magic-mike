@@ -70,7 +70,10 @@ export async function PATCH(
   if (typeof body.closed_lost_reason === "string")
     updates.closed_lost_reason = body.closed_lost_reason;
   if (typeof body.mark_spam === "boolean") {
-    updates.status = body.mark_spam ? "spam" : "qualified";
+    if (body.mark_spam) {
+      updates.status = "spam";
+    }
+    // For mark_spam=false: status is restored after reading prior state below
   }
 
   if (Object.keys(updates).length === 0) {
@@ -99,6 +102,12 @@ export async function PATCH(
     .select("status, lead_type, lead_grade")
     .eq("id", id)
     .maybeSingle();
+
+  // Restore prior status when unspamming — never overwrite e.g. "appointment_set" with "qualified"
+  if (body.mark_spam === false) {
+    const priorStatus = prior?.status as string | null;
+    updates.status = (priorStatus && priorStatus !== "spam") ? priorStatus : "new";
+  }
 
   const { error } = await client.from("leads").update(updates).eq("id", id);
   if (error) {

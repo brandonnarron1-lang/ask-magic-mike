@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AgentShell, AgentCard, AgentSectionHeading } from "@/components/agent/agent-shell";
 import { RoleGate, PermissionNotice } from "@/components/agent/role-gate";
 import { SlaRiskBadge, FollowUpBadge } from "@/components/agent/sla-risk-badge";
+import { AgentFollowUpForm } from "@/components/agent/agent-follow-up-form";
 import { resolveAgentAccess, agentOwnsLead } from "@/lib/agent/agent-auth";
 import { loadAgentEventLog } from "@/lib/agent/agent-portal-metrics";
 import type { AgentEventLogEntry } from "@/lib/agent/agent-portal-metrics";
@@ -280,7 +281,7 @@ export default async function AgentLeadDetailPage({ params, searchParams }: Page
                 </div>
               </div>
 
-              {/* Quick action links — POST via href to API routes */}
+              {/* Quick action links */}
               <div className="flex flex-wrap gap-2 pt-3 border-t border-white/[0.05]">
                 <AgentSectionHeading className="w-full mb-2">Quick Actions</AgentSectionHeading>
                 <a
@@ -289,13 +290,12 @@ export default async function AgentLeadDetailPage({ params, searchParams }: Page
                 >
                   Mark Contacted
                 </a>
-                <a
-                  href={`/api/agent/${agentId}/leads/${leadId}/follow-up`}
-                  className="rounded-lg border border-cyan-500/20 bg-cyan-500/[0.05] hover:bg-cyan-500/[0.08] px-4 py-2 text-xs font-semibold text-cyan-400 transition-colors"
-                >
-                  Set Follow-up
-                </a>
               </div>
+              <AgentFollowUpForm
+                agentId={agentId}
+                leadId={leadId}
+                currentFollowUpAt={lead.nextFollowUpAt}
+              />
             </AgentCard>
 
             {/* ── Notes ── */}
