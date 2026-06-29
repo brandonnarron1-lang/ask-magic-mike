@@ -532,8 +532,9 @@ describe("hero section — Our Town Properties brand integration", () => {
     expect(heroSection).toContain("Our Town Properties, Inc.");
   });
 
-  it("shows the Our Town Properties brand eyebrow above the headline", () => {
-    expect(heroSection).toContain("An Our Town Properties guidance tool");
+  it("shows the Our Town Properties brand above the headline via trust badge", () => {
+    // The kicker was removed in Titan IV; brand is now carried by MikeVisualTrustBadge
+    expect(heroSection).toContain("Mike Eatmon · Our Town Properties");
   });
 
   it("routes phone through siteConfig rather than hardcoded literals", () => {

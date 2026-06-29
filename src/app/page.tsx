@@ -1,4 +1,5 @@
 import { HeroSection } from "@/components/landing/hero-section";
+import { AiDemoSection } from "@/components/landing/ai-demo-section";
 import { MarketPulse } from "@/components/landing/market-pulse";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { SoldSection } from "@/components/landing/sold-section";
@@ -11,6 +12,7 @@ export default function HomePage() {
   return (
     <main id="main-content" className="bg-[#0A0A0A]">
       <HeroSection />
+      <AiDemoSection />
       <MarketPulse />
       <HowItWorks />
       <SoldSection />

@@ -262,48 +262,6 @@ const STATS = [
 ];
 
 /* ─────────────────────────────────────────────────────────────────────────
-   TRUST STRIP — powered-by / social proof indicators
-───────────────────────────────────────────────────────────────────────── */
-function TrustStrip() {
-  const items = [
-    "30+ Years Active",
-    "NC Licensed Broker",
-    "Broker-Reviewed Guidance",
-    "2,500+ Homes Closed",
-    "Wilson & Eastern NC",
-    "$750M+ Career Sales",
-    "Free · No Account",
-  ];
-  return (
-    <div className="relative overflow-hidden py-1" aria-label="Trust indicators">
-      {/* Fade masks */}
-      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-12 z-10"
-        style={{ background: "linear-gradient(to right, #0A0A0A, transparent)" }}
-        aria-hidden="true"
-      />
-      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 z-10"
-        style={{ background: "linear-gradient(to left, #0A0A0A, transparent)" }}
-        aria-hidden="true"
-      />
-      <div className="flex items-center gap-6 overflow-x-auto scrollbar-none whitespace-nowrap pb-0.5">
-        {items.map((item) => (
-          <div key={item} className="flex items-center gap-2.5 flex-shrink-0">
-            <span
-              className="block h-1 w-1 rounded-full flex-shrink-0"
-              style={{ background: "rgba(212,160,23,0.5)" }}
-              aria-hidden="true"
-            />
-            <span className="text-[10px] uppercase tracking-label text-slate-500 font-medium">
-              {item}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
    MAIN EXPORT
 ───────────────────────────────────────────────────────────────────────── */
 export function HeroSection() {
@@ -501,9 +459,9 @@ export function HeroSection() {
       </header>
 
       {/* ── Main grid ── */}
-      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 pb-8 pt-5 md:pb-14 lg:min-h-[calc(100svh-88px)] lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,520px)] lg:gap-16">
+      <div className="relative z-10 mx-auto grid max-w-[1400px] items-center gap-10 pb-8 pt-4 md:pb-14 lg:min-h-[calc(100svh-76px)] lg:grid-cols-[1fr_480px] xl:grid-cols-[1fr_540px] lg:gap-20">
 
-        {/* ── Left: copy + CTA ── */}
+        {/* ── Left: headline + CTA ── */}
         <div
           className="min-w-0 text-left"
           data-hero-text="true"
@@ -512,107 +470,74 @@ export function HeroSection() {
           {/* Trust badge */}
           <div
             className={cn(
-              "mb-6 opacity-0 motion-reduce:opacity-100",
+              "mb-8 opacity-0 motion-reduce:opacity-100",
               loaded && "motion-safe:animate-fade-up motion-safe:delay-100"
             )}
           >
             <MikeVisualTrustBadge />
           </div>
 
-          {/* Kicker */}
+          {/* Headline — THE focal point */}
           <div
             className={cn(
-              "mb-5 opacity-0 motion-reduce:opacity-100",
-              loaded && "motion-safe:animate-fade-up motion-safe:delay-150"
-            )}
-          >
-            <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400/90">
-              An Our Town Properties guidance tool
-            </p>
-          </div>
-
-          {/* Headline */}
-          <div
-            className={cn(
-              "mb-6 opacity-0 motion-reduce:opacity-100 relative",
+              "mb-8 opacity-0 motion-reduce:opacity-100 relative",
               loaded && "motion-safe:animate-fade-up motion-safe:delay-200"
             )}
           >
-            {/* Decorative accent line before heading */}
+            {/* Ambient glow behind the headline */}
             <div
-              className="mb-4 flex items-center gap-3"
+              className="absolute -inset-8 pointer-events-none"
               aria-hidden="true"
-            >
-              <div
-                className="h-px flex-1 max-w-[48px]"
-                style={{
-                  background:
-                    "linear-gradient(to right, rgba(212,160,23,0.6), rgba(212,160,23,0.15))",
-                }}
-              />
-              <span
-                className="block h-1 w-1 rounded-full"
-                style={{ background: "rgba(212,160,23,0.5)" }}
-              />
-            </div>
-
-            {/* Sparkle accent */}
-            <span
-              className="absolute -top-3 -right-2 sm:right-8 opacity-60 pointer-events-none select-none"
-              aria-hidden="true"
-            >
-              <Image
-                src={brandPackAssets.accents.sparkle}
-                alt=""
-                width={28}
-                height={28}
-                className="opacity-70"
-              />
-            </span>
-
-            <h1 className="font-display text-hero font-black leading-[0.9] text-cream">
+              style={{
+                background: "radial-gradient(ellipse 70% 60% at 10% 50%, rgba(212,160,23,0.08) 0%, transparent 70%)",
+                filter: "blur(20px)",
+              }}
+            />
+            <h1 className="relative font-display text-hero font-black text-cream" style={{ lineHeight: 0.88, letterSpacing: "-0.02em" }}>
               <span className="block">Ask</span>
               <span className="block">
                 <span className="text-gold-shimmer italic">Magic</span>
               </span>
-              <span className="block">Mike</span>
+              <span className="block">Mike.</span>
             </h1>
           </div>
 
-          {/* Body copy */}
+          {/* Body copy — one clear statement */}
           <p
             className={cn(
-              "mb-3 max-w-2xl text-lg leading-relaxed text-slate-300 sm:text-xl font-light opacity-0 motion-reduce:opacity-100",
+              "mb-8 max-w-lg text-xl leading-relaxed text-slate-300 font-light opacity-0 motion-reduce:opacity-100",
               loaded && "motion-safe:animate-fade-up motion-safe:delay-300"
             )}
           >
-            Real answers from the broker who&apos;s closed 2,500+ homes in
-            Eastern NC. Ask anything — Mike Eatmon reviews every request personally.
+            Real answers from Wilson NC&apos;s most experienced broker.
+            2,500+ homes closed. Every request reviewed personally by Mike Eatmon.
           </p>
 
-          <p
-            className={cn(
-              "mb-7 text-sm text-slate-500 opacity-0 motion-reduce:opacity-100",
-              loaded && "motion-safe:animate-fade-up motion-safe:delay-350"
-            )}
-          >
-            Wilson, NC · Eastern NC · Free · No account · Not an appraisal
-          </p>
-
-          {/* Question input */}
+          {/* Question input — primary conversion action */}
           <div
             className={cn(
-              "w-full max-w-2xl opacity-0 motion-reduce:opacity-100",
+              "w-full max-w-[640px] opacity-0 motion-reduce:opacity-100",
               loaded && "motion-safe:animate-scale-in motion-safe:delay-400"
             )}
             data-primary-cta="true"
           >
-            <QuestionInput
-              initialQuestion={question}
-              onSubmit={handleSubmit}
-              loading={loading}
-              className="w-full text-left"
-            />
+            {/* Cinematic input wrapper */}
+            <div
+              className="relative rounded-2xl p-[1px] overflow-hidden"
+              style={{
+                background: "linear-gradient(135deg, rgba(212,160,23,0.4) 0%, rgba(212,160,23,0.08) 50%, rgba(212,160,23,0.2) 100%)",
+                boxShadow: "0 0 60px rgba(212,160,23,0.12), 0 24px 80px rgba(0,0,0,0.6)",
+              }}
+            >
+              <div className="rounded-[15px] bg-[#0A0806]">
+                <QuestionInput
+                  initialQuestion={question}
+                  onSubmit={handleSubmit}
+                  loading={loading}
+                  className="w-full text-left"
+                />
+              </div>
+            </div>
           </div>
 
           {/* CTA chips */}
@@ -623,117 +548,12 @@ export function HeroSection() {
             )}
           >
             <CTAChips onSelect={handleChipSelect} selected={selectedChip} className="justify-start" />
-            <p className="mt-3 text-xs text-slate-500">
-              Seller?{" "}
-              <a
-                href="/value"
-                className="text-gold-400/80 hover:text-gold-400 underline underline-offset-2 transition-colors"
-                data-cta-link="value-deep-link"
-              >
-                Get a structured home value estimate →
-              </a>
-            </p>
-          </div>
-
-          {/* Broker trust strip */}
-          <div
-            className={cn(
-              "mt-5 opacity-0 motion-reduce:opacity-100",
-              loaded && "motion-safe:animate-fade-up motion-safe:delay-550"
-            )}
-          >
-            <div
-              className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500"
-              data-trust-strip="broker-reviewed"
-            >
-              <span className="font-medium text-slate-400">Our Town Properties, Inc.</span>
-              <span className="text-gold-400/30">·</span>
-              <span>Wilson, NC</span>
-              <span className="text-gold-400/30">·</span>
-              <span>Mike Eatmon</span>
-              <span className="text-gold-400/30">·</span>
-              <span className="text-gold-400/80 font-medium">Broker-reviewed guidance</span>
-              <span className="text-gold-400/30">·</span>
-              <span className="italic">Not an appraisal.</span>
-            </div>
-          </div>
-
-          {/* ── Powered-by trust strip ── */}
-          <div
-            className={cn(
-              "mt-6 opacity-0 motion-reduce:opacity-100",
-              loaded && "motion-safe:animate-fade-up motion-safe:delay-600"
-            )}
-          >
-            <div
-              className="rounded-xl border border-gold-400/[0.09] overflow-hidden"
-              style={{ background: "rgba(13,11,7,0.5)" }}
-            >
-              <div className="border-b border-gold-400/[0.07] px-4 py-1.5">
-                <span className="text-[9px] uppercase tracking-label text-gold-400/40 font-semibold">
-                  Powered by 30+ years of real deals
-                </span>
-              </div>
-              <div className="px-4 py-2.5">
-                <TrustStrip />
-              </div>
-            </div>
-          </div>
-
-          {/* ── Stats bar ── */}
-          <div
-            className={cn(
-              "mt-6 w-full max-w-2xl opacity-0 motion-reduce:opacity-100",
-              loaded && "motion-safe:animate-fade-up motion-safe:delay-700"
-            )}
-          >
-            <div
-              className="group relative overflow-hidden rounded-2xl border border-gold-400/[0.13] bg-[#0D0B07]/70 backdrop-blur-sm transition-all duration-500 hover:border-gold-400/25"
-              style={{
-                boxShadow:
-                  "inset 0 1px 0 rgba(212,160,23,0.08), 0 1px 0 rgba(0,0,0,0.5)",
-              }}
-            >
-              {/* Accent top line */}
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/40 to-transparent" />
-
-              {/* Hover gold glow */}
-              <div
-                className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                style={{
-                  background:
-                    "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,160,23,0.06) 0%, transparent 70%)",
-                  boxShadow: "inset 0 0 40px rgba(212,160,23,0.04)",
-                }}
-                aria-hidden="true"
-              />
-
-              <div className="absolute inset-0 pointer-events-none"
-                style={{
-                  background:
-                    "radial-gradient(ellipse 100% 200% at 50% -10%, rgba(212,160,23,0.05) 0%, transparent 60%)",
-                }}
-                aria-hidden="true"
-              />
-
-              <div className="relative grid grid-cols-2 sm:grid-cols-4 divide-x divide-gold-400/[0.08]">
-                {STATS.map((s, i) => (
-                  <div
-                    key={s.label}
-                    className={cn(
-                      "px-5 py-4 text-center",
-                      i >= 2 && "border-t border-gold-400/[0.08] sm:border-t-0"
-                    )}
-                  >
-                    <div className="font-bebas text-3xl leading-none tracking-wider text-gold-300 sm:text-4xl">
-                      {s.value}
-                    </div>
-                    <div className="mt-1.5 text-[10px] leading-tight text-slate-500 uppercase tracking-label">
-                      {s.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-slate-600">
+              <span>Free · No account</span>
+              <span className="text-gold-400/25">·</span>
+              <span>Our Town Properties, Inc.</span>
+              <span className="text-gold-400/25">·</span>
+              <span className="text-gold-400/70">Broker-reviewed guidance. Not an appraisal.</span>
             </div>
           </div>
         </div>
@@ -741,11 +561,34 @@ export function HeroSection() {
         {/* ── Right: Mike portrait ── */}
         <div
           className={cn(
-            "mx-auto w-full max-w-[500px] opacity-0 motion-reduce:opacity-100",
-            loaded && "motion-safe:animate-fade-up motion-safe:delay-300"
+            "mx-auto w-full max-w-[500px] lg:max-w-none opacity-0 motion-reduce:opacity-100",
+            loaded && "motion-safe:animate-fade-up motion-safe:delay-250"
           )}
         >
           <MikeHeroPortrait priority />
+        </div>
+      </div>
+
+      {/* ── Below-fold stats bar ── */}
+      <div
+        className={cn(
+          "relative z-10 mx-auto max-w-[1400px] pb-14 opacity-0 motion-reduce:opacity-100",
+          loaded && "motion-safe:animate-fade-up motion-safe:delay-600"
+        )}
+      >
+        <div
+          className="relative overflow-hidden rounded-2xl border border-gold-400/[0.12] bg-[#0D0B07]/70 backdrop-blur-sm"
+          style={{ boxShadow: "inset 0 1px 0 rgba(212,160,23,0.08)" }}
+        >
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/35 to-transparent" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-gold-400/[0.07]">
+            {STATS.map((s, i) => (
+              <div key={s.label} className={cn("px-6 py-5 text-center", i >= 2 && "border-t border-gold-400/[0.07] sm:border-t-0")}>
+                <div className="font-bebas text-4xl leading-none tracking-wider text-gold-300 sm:text-5xl">{s.value}</div>
+                <div className="mt-2 text-[10px] leading-tight text-slate-500 uppercase tracking-label">{s.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
