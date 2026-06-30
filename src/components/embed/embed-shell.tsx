@@ -61,7 +61,7 @@ export function EmbedShell({
           className={cn(
             ammTokens.stepCard,
             "p-4 sm:p-5",
-            step < 5 && "animate-slide-up"
+            step < 5 && "motion-safe:animate-slide-up"
           )}
           data-testid={`embed-step-card-${step}`}
         >

@@ -62,7 +62,7 @@ export function SoldSection() {
           </div>
 
           {/* SOLD rider — floating, bottom-right */}
-          <div className="absolute -bottom-5 -right-3 sm:-right-8 animate-float">
+          <div className="absolute -bottom-5 -right-3 sm:-right-8 motion-safe:animate-float">
             <div className="relative">
               <Image
                 src="/images/sold-rider.png"

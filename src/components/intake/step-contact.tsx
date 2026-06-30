@@ -150,7 +150,7 @@ export function StepContact({
         disabled={!canProceed}
         className="w-full"
       >
-        Continue
+        Get my answer →
       </Button>
     </div>
   );

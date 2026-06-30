@@ -70,7 +70,7 @@ export function MarketPulse() {
 
       {/* Scrolling ticker */}
       <div className="flex pl-36">
-        <div className="animate-ticker flex items-center gap-0 shrink-0">
+        <div className="motion-safe:animate-ticker flex items-center gap-0 shrink-0">
           {doubled.map((fact, i) => (
             <div
               key={i}

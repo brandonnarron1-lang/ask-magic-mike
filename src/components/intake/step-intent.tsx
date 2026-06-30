@@ -128,7 +128,7 @@ export function StepIntent({
         disabled={!canProceed}
         className="w-full"
       >
-        Continue
+        Looks right →
       </Button>
     </div>
   );
