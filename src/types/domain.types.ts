@@ -404,6 +404,7 @@ export type AnalyticsEventName =
   | "invalid_lead_detected"
   | "compliance_review_required"
   | "appointment_cta_clicked"
+  | "call_button_clicked"
   | "chat_opened"
   | "chat_message_sent"
   | "agent_status_updated";

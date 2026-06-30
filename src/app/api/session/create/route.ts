@@ -4,16 +4,19 @@ import { trackEventNoWait } from "@/lib/analytics/ledger";
 import { createSession } from "@/lib/db/session-repository";
 import { isProduction, isSupabaseConfigured } from "@/lib/db/types";
 import { checkRateLimit, rateLimitKey, LIMITS } from "@/lib/security/rate-limit";
+import { requestContext } from "@/lib/observability/request";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
 export async function POST(req: NextRequest) {
+  const ctx = requestContext("session/create", req.headers.get("x-request-id"));
   const ipRaw = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
   const rl = await checkRateLimit(rateLimitKey(ipRaw), LIMITS.sessionCreate.limit, LIMITS.sessionCreate.windowMs, "sessionCreate");
   if (!rl.allowed) {
+    ctx.log.warn("rate_limited", { request_id: ctx.requestId });
     return NextResponse.json(
       { error: "rate_limit_exceeded" },
-      { status: 429, headers: { ...NO_STORE, "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+      { status: 429, headers: { ...ctx.responseHeaders(), "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
     );
   }
 
@@ -76,11 +79,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { sessionId: session.id, expiresAt: session.expiresAt },
-      { headers: NO_STORE }
+      { headers: ctx.finish(200, { session_id: session.id }) }
     );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error("[session/create] error:", msg);
-    return NextResponse.json({ error: "Failed to create session" }, { status: 500, headers: NO_STORE });
+    ctx.log.error("session_create_failed", { request_id: ctx.requestId, error: msg });
+    return NextResponse.json({ error: "Failed to create session" }, { status: 500, headers: ctx.responseHeaders(500) });
   }
 }

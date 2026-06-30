@@ -61,10 +61,24 @@ export function AiDemoSection() {
   const timerRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
   const streamRef  = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  /* Intersection-based reveal — fires heading animation on scroll */
+  /* Intersection-based reveal — fires heading animation on scroll + analytics */
   useEffect(() => {
+    let fired = false;
     const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          if (!fired) {
+            fired = true;
+            fetch("/api/analytics/event", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ eventName: "page_view", properties: { surface: "ai_demo_section" } }),
+              keepalive: true,
+            }).catch(() => {});
+          }
+        }
+      },
       { threshold: 0.10 }
     );
     if (sectionRef.current) obs.observe(sectionRef.current);

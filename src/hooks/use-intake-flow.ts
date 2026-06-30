@@ -99,11 +99,17 @@ export function useIntakeFlow(
   }, [sessionId]);
 
   const prevStep = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      step: Math.max(prev.step - 1, 1),
-    }));
-  }, []);
+    setState((prev) => {
+      const fromStep = prev.step;
+      fetch("/api/analytics/event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventName: "cta_click", properties: { action: "intake_step_back", from_step: fromStep }, sessionId }),
+        keepalive: true,
+      }).catch(() => {});
+      return { ...prev, step: Math.max(prev.step - 1, 1) };
+    });
+  }, [sessionId]);
 
   const submit = useCallback(async () => {
     if (!sessionId) {

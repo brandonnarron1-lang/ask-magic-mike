@@ -278,6 +278,10 @@ export const ANALYTICS_EVENTS: Record<
     category: "intake",
     description: "User clicked an appointment / callback CTA",
   },
+  call_button_clicked: {
+    category: "intake",
+    description: "User clicked a tel: phone link to call Mike",
+  },
   chat_opened: {
     category: "intake",
     description: "User opened the chat widget",
