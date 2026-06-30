@@ -110,10 +110,9 @@ describe("/value page — professional trust-first copy", () => {
   it("ships the new trust-first headline and subheadline", () => {
     expect(valueHero).toContain("Start with your address.");
     expect(valueHero).toContain("Get a local read on your home.");
-    expect(valueHero).toContain(
-      "Ask Magic Mike helps Wilson-area homeowners"
-    );
-    expect(valueHero).toContain("preliminary home value range");
+    // Titan VI: prose replaced with micro-trust chips — verify presence of key trust signals
+    expect(valueHero).toContain("Wilson NC specialist");
+    expect(valueHero).toContain("Broker-reviewed");
   });
 
   it("uses the eyebrow and CTA copy", () => {
@@ -532,8 +531,9 @@ describe("hero section — Our Town Properties brand integration", () => {
     expect(heroSection).toContain("Our Town Properties, Inc.");
   });
 
-  it("shows the Our Town Properties brand eyebrow above the headline", () => {
-    expect(heroSection).toContain("An Our Town Properties guidance tool");
+  it("shows the Our Town Properties brand above the headline via trust badge", () => {
+    // The kicker was removed in Titan IV; brand is now carried by MikeVisualTrustBadge
+    expect(heroSection).toContain("Mike Eatmon · Our Town Properties");
   });
 
   it("routes phone through siteConfig rather than hardcoded literals", () => {

@@ -8,10 +8,8 @@ interface MagicBackdropProps {
 /**
  * Atmospheric background layer behind /value and /ask.
  *
- * Restrained: a single warm gold radial glow off the top-left and a deep
- * navy fade off the bottom. The earlier cyan accent and sparkle field have
- * been removed from the hero — they were over-indexing on "magic" and
- * underweighting the brokerage trust hierarchy.
+ * Hero variant: rich multi-stop gold ambient with a warm-to-dark sweep.
+ * Card variant: soft centered glow — subtle enough for elevated surfaces.
  */
 export function MagicBackdrop({
   variant = "hero",
@@ -25,19 +23,46 @@ export function MagicBackdrop({
       {/* Hairline gold rule across the top */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/55 to-transparent" />
 
-      {/* Warm gold ambient glow */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            variant === "hero"
-              ? "radial-gradient(ellipse 65% 45% at 15% 12%, rgba(212,160,23,0.085) 0%, transparent 70%)"
-              : "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,160,23,0.065) 0%, transparent 75%)",
-        }}
-      />
+      {variant === "hero" ? (
+        <>
+          {/* Primary gold bloom — upper-left, high intensity anchor */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(ellipse 70% 52% at 14% 10%, rgba(212,160,23,0.14) 0%, rgba(212,160,23,0.05) 50%, transparent 72%)",
+            }}
+          />
+          {/* Secondary gold wash — right-centre, gives horizon depth */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(ellipse 50% 38% at 78% 30%, rgba(212,160,23,0.07) 0%, rgba(212,160,23,0.02) 45%, transparent 68%)",
+            }}
+          />
+          {/* Warm amber centre fill — prevents the void from going cold */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(ellipse 85% 45% at 50% 42%, rgba(212,160,23,0.042) 0%, transparent 65%)",
+            }}
+          />
+        </>
+      ) : (
+        /* Card variant — single centred glow, kept restrained */
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,160,23,0.065) 0%, transparent 75%)",
+          }}
+        />
+      )}
 
-      {/* Deep navy fade on the bottom edge */}
-      <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-[#05070A] to-transparent" />
+      {/* Deep navy fade on the bottom edge — both variants */}
+      <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#05070A] to-transparent" />
     </div>
   );
 }

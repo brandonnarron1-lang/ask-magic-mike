@@ -31,15 +31,31 @@ export function AgentShell({
 }: AgentShellProps) {
   return (
     <div className={cn("min-h-screen bg-[#080806] text-cream", className)}>
-      {/* Cyan top accent — distinct from gold admin accent */}
-      <div className="h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent" />
+      {/* Cyan top accent bar — animated shimmer, distinct from gold admin accent */}
+      <div className="relative h-[2px] overflow-hidden bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent">
+        <div
+          aria-hidden="true"
+          className="shimmer-line absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent 0%, rgba(0,207,234,0.18) 20%, rgba(0,207,234,0.80) 50%, rgba(0,207,234,0.18) 80%, transparent 100%)",
+          }}
+        />
+      </div>
 
-      <header className="sticky top-0 z-40 border-b border-cyan-500/[0.10] bg-[#080806]/92 backdrop-blur-md">
+      <header
+        className="sticky top-0 z-40 border-b border-cyan-500/[0.10] bg-[#070605]/95 backdrop-blur-md"
+        style={{ boxShadow: "0 1px 0 rgba(0,0,0,0.4)" }}
+      >
         <div className="max-w-5xl mx-auto flex items-center gap-4 px-5 py-3.5">
-          {/* Cyan "A" logotype mark */}
+          {/* Cyan "A" logotype mark — h-9 w-9 with cyan glow */}
           <div
             aria-hidden="true"
-            className="hidden sm:flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-cyan-500/[0.18] bg-gradient-to-b from-cyan-500/[0.10] to-cyan-500/[0.03] text-[13px] font-black tracking-tight text-cyan-400/80 select-none"
+            className="hidden sm:flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cyan-500/[0.22] bg-gradient-to-b from-cyan-500/[0.12] to-cyan-500/[0.04] text-[13px] font-black tracking-tight text-cyan-400/90 select-none"
+            style={{
+              boxShadow:
+                "0 0 16px rgba(0,207,234,0.12), inset 0 1px 0 rgba(0,207,234,0.15)",
+            }}
           >
             A
           </div>
@@ -51,18 +67,29 @@ export function AgentShell({
                 <span className="ml-2 text-slate-600">· {agentName}</span>
               )}
             </p>
-            <h1 className="font-display text-xl font-semibold text-cream leading-tight truncate">
+            <h1 className="font-display text-xl sm:text-2xl font-bold text-cream leading-tight truncate">
               {title}
             </h1>
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
-            {/* Live pulse */}
-            <span
-              aria-hidden="true"
-              className="flex h-1.5 w-1.5 rounded-full bg-cyan-400"
-              style={{ boxShadow: "0 0 6px rgba(0,207,234,0.7)" }}
-            />
+            {/* Live status badge — premium pill with pulse */}
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-500/[0.20] bg-cyan-500/[0.06] px-2.5 py-1 text-[9.5px] tracking-label font-bold uppercase text-cyan-400/80">
+              <span
+                aria-hidden="true"
+                className="relative flex h-1.5 w-1.5 shrink-0"
+              >
+                <span
+                  className="absolute inline-flex h-full w-full motion-safe:animate-ping rounded-full bg-cyan-400 opacity-60"
+                  style={{ animationDuration: "2.4s" }}
+                />
+                <span
+                  className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400"
+                  style={{ boxShadow: "0 0 6px rgba(0,207,234,0.8)" }}
+                />
+              </span>
+              Live
+            </span>
 
             {brokerPreview && (
               <span className="rounded-full border border-amber-400/40 bg-amber-400/[0.10] px-2.5 py-1 text-[10px] tracking-label font-bold uppercase text-amber-400">
@@ -109,9 +136,10 @@ export function AgentShell({
                   href={n.href}
                   className={cn(
                     "relative px-4 py-3 text-[10px] tracking-label font-semibold uppercase whitespace-nowrap",
-                    "text-slate-500 hover:text-slate-300 transition-colors duration-150",
+                    "text-slate-500 hover:text-cyan-300 transition-colors duration-150",
+                    // Active underline on hover; actual active state would need usePathname
                     "after:absolute after:bottom-0 after:inset-x-4 after:h-px after:rounded-full",
-                    "after:bg-cyan-400/0 hover:after:bg-cyan-400/40 after:transition-all after:duration-150"
+                    "after:bg-cyan-400/0 hover:after:bg-cyan-400/60 after:transition-all after:duration-150"
                   )}
                 >
                   {n.label}
@@ -142,7 +170,7 @@ export function AgentCard({
   return (
     <div
       className={cn(
-        "relative rounded-xl border overflow-hidden backdrop-blur-[1px]",
+        "relative rounded-2xl border overflow-hidden backdrop-blur-[1px]",
         accent
           ? "border-cyan-500/[0.18] bg-[#0A0906]/70"
           : "border-white/[0.07] bg-white/[0.018]",
@@ -155,12 +183,12 @@ export function AgentCard({
         className={cn(
           "absolute inset-x-0 top-0 h-px",
           accent
-            ? "bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent"
-            : "bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"
+            ? "bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"
+            : "bg-gradient-to-r from-transparent via-white/[0.07] to-transparent"
         )}
       />
       {title && (
-        <div className="px-5 pt-4 pb-0">
+        <div className="px-5 pt-5 pb-0">
           <h3 className={cn(
             "flex items-center gap-2 text-[9.5px] tracking-label font-bold uppercase leading-none",
             accent ? "text-cyan-400/70" : "text-slate-500"

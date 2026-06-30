@@ -2,36 +2,74 @@ import * as React from "react";
 import { cn } from "@/lib/utils/cn";
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: "default" | "glass" | "elevated" | "inset";
+  variant?: "default" | "glass" | "elevated" | "inset" | "gold" | "command" | "ambient";
+  accent?: "gold" | "ruby" | "cyan" | "emerald" | "amber" | "none";
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = "default", ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn(
-        "relative rounded-2xl",
-        variant === "default" && [
-          "border border-white/[0.06] bg-white/[0.02]",
-        ],
-        variant === "glass" && [
-          "border border-white/[0.08] bg-[#0D0B07]/80 backdrop-blur-sm",
-          "shadow-[0_24px_60px_-32px_rgba(0,0,0,0.70)]",
-          "after:pointer-events-none after:absolute after:inset-x-0 after:top-0 after:h-px",
-          "after:rounded-t-2xl after:bg-gradient-to-r after:from-transparent after:via-gold-400/15 after:to-transparent",
-        ],
-        variant === "elevated" && [
-          "border border-white/[0.08] bg-[#0D0B07]",
-          "shadow-[0_32px_80px_-24px_rgba(0,0,0,0.80),0_0_0_1px_rgba(212,160,23,0.05)]",
-        ],
-        variant === "inset" && [
-          "border border-white/[0.04] bg-white/[0.01]",
-        ],
-        className
-      )}
-      {...props}
-    />
-  )
+  ({ className, variant = "default", accent = "none", ...props }, ref) => {
+    const accentRim: Record<typeof accent, string> = {
+      gold:    "via-gold-400/40",
+      ruby:    "via-ruby-400/35",
+      cyan:    "via-cyan-400/30",
+      emerald: "via-emerald-400/30",
+      amber:   "via-amber-400/30",
+      none:    "via-white/[0.08]",
+    };
+
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "relative rounded-2xl overflow-hidden",
+
+          variant === "default" && [
+            "border border-white/[0.06] bg-white/[0.02]",
+            "transition-all duration-200",
+          ],
+          variant === "glass" && [
+            "border border-white/[0.08] bg-[#0D0B07]/80 backdrop-blur-md",
+            "shadow-[0_24px_60px_-32px_rgba(0,0,0,0.70)]",
+            "transition-all duration-200",
+          ],
+          variant === "elevated" && [
+            "border border-white/[0.09] bg-[#0D0B07]",
+            "shadow-[0_32px_80px_-24px_rgba(0,0,0,0.80),0_0_0_1px_rgba(212,160,23,0.05)]",
+          ],
+          variant === "inset" && [
+            "border border-white/[0.04] bg-white/[0.01]",
+          ],
+          variant === "gold" && [
+            "glass-gold-card",
+            "transition-all duration-200",
+          ],
+          variant === "command" && [
+            "border border-white/[0.07] bg-[#0D0D0D]/60 backdrop-blur-[2px]",
+            "transition-all duration-250",
+            "hover:border-white/[0.12] hover:-translate-y-0.5",
+            "hover:shadow-[0_8px_24px_rgba(0,0,0,0.55)]",
+          ],
+          variant === "ambient" && [
+            "border border-white/[0.07] bg-[#0C0C0C]/75 backdrop-blur-sm",
+            "shadow-[0_20px_50px_-20px_rgba(0,0,0,0.75),inset_0_1px_0_rgba(255,255,255,0.05)]",
+          ],
+
+          className
+        )}
+        {...props}
+      >
+        {/* Top rim gradient — always present */}
+        <div
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent",
+            accentRim[accent]
+          )}
+        />
+        {props.children}
+      </div>
+    );
+  }
 );
 Card.displayName = "Card";
 

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Minus } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Reveal } from "@/components/ui/reveal";
+import { Phone } from "lucide-react";
 
 const FAQS = [
   {
@@ -50,8 +51,18 @@ export function FaqStrip() {
       <div className="max-w-3xl mx-auto">
         <Reveal variant="fade-up">
           <div className="text-center mb-14">
-            <p className="text-xs font-semibold tracking-kicker uppercase text-gold-400 mb-3">FAQ</p>
-            <h2 className="font-display text-4xl sm:text-5xl font-bold text-cream">
+            {/* Gold pill eyebrow badge */}
+            <div className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 mb-5"
+              style={{
+                background: "linear-gradient(135deg, rgba(212,160,23,0.18) 0%, rgba(212,160,23,0.08) 100%)",
+                border: "1px solid rgba(212,160,23,0.35)",
+                boxShadow: "0 0 20px rgba(212,160,23,0.08)",
+              }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-gold-400" />
+              <span className="text-[11px] font-black tracking-kicker uppercase text-gold-400">FAQ</span>
+            </div>
+            <h2 className="font-display text-5xl sm:text-6xl font-bold text-cream">
               Real Questions.{" "}
               <span className="text-gold-shimmer">Straight Answers.</span>
             </h2>
@@ -65,39 +76,91 @@ export function FaqStrip() {
               <div
                 key={i}
                 className={cn(
-                  "rounded-xl border transition-all duration-200 overflow-hidden",
+                  "rounded-xl border transition-all duration-300 overflow-hidden",
                   isOpen
-                    ? "border-gold-400/25 bg-white/[0.04]"
-                    : "border-white/5 bg-white/[0.02] hover:border-gold-400/15"
+                    ? "border-gold-400/30 bg-white/[0.04]"
+                    : "border-white/5 bg-white/[0.02]"
                 )}
+                style={isOpen ? { boxShadow: "0 0 0 1px rgba(212,160,23,0.08), 0 4px 24px rgba(0,0,0,0.3)" } : {}}
               >
-                <button
-                  className="w-full flex items-center justify-between px-6 py-4 text-left"
-                  onClick={() => setOpen(isOpen ? null : i)}
+                {/* Left gold border accent — animates in when open */}
+                <div
+                  className="flex"
+                  style={isOpen ? {
+                    borderLeft: "3px solid rgba(212,160,23,0.7)",
+                    animation: "faqBorderIn 0.25s ease forwards",
+                  } : { borderLeft: "3px solid transparent" }}
                 >
-                  <span className={cn(
-                    "text-sm font-medium transition-colors",
-                    isOpen ? "text-cream" : "text-slate-300"
-                  )}>
-                    {faq.q}
-                  </span>
-                  <span className={cn(
-                    "flex-shrink-0 ml-4 flex h-6 w-6 items-center justify-center rounded-full transition-all",
-                    isOpen ? "bg-gold-400 text-midnight" : "bg-white/5 text-slate-400"
-                  )}>
-                    {isOpen ? <Minus className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
-                  </span>
-                </button>
+                  <div className="flex-1">
+                    <button
+                      className={cn(
+                        "w-full flex items-center justify-between px-6 py-4 text-left",
+                        "transition-colors duration-200",
+                        !isOpen && "hover:bg-white/[0.03]"
+                      )}
+                      onClick={() => setOpen(isOpen ? null : i)}
+                    >
+                      <span className={cn(
+                        "text-sm font-medium transition-colors",
+                        isOpen ? "text-cream" : "text-slate-300"
+                      )}>
+                        {faq.q}
+                      </span>
 
-                {isOpen && (
-                  <div className="px-6 pb-5">
-                    <p className="text-sm leading-relaxed text-slate-400">{faq.a}</p>
+                      {/* Rotating chevron */}
+                      <span className={cn(
+                        "flex-shrink-0 ml-4 flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300",
+                        isOpen ? "bg-gold-400/20 border border-gold-400/40" : "bg-white/5 border border-white/10"
+                      )}>
+                        <ChevronDown
+                          className={cn(
+                            "h-4 w-4 transition-transform duration-300",
+                            isOpen ? "text-gold-400 rotate-180" : "text-slate-400 rotate-0"
+                          )}
+                        />
+                      </span>
+                    </button>
+
+                    {isOpen && (
+                      <div className="px-6 pb-5">
+                        <p className="text-sm leading-relaxed text-slate-400">{faq.a}</p>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             );
           })}
         </div>
+
+        {/* "Still have questions?" CTA row — glass card */}
+        <Reveal variant="fade-up" delay={200}>
+          <div
+            className="mt-10 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-5 px-7 py-6"
+            style={{
+              background: "linear-gradient(135deg, rgba(212,160,23,0.07) 0%, rgba(255,255,255,0.03) 100%)",
+              border: "1px solid rgba(212,160,23,0.2)",
+              boxShadow: "inset 0 1px 0 rgba(212,160,23,0.08), 0 8px 32px rgba(0,0,0,0.4)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            <div>
+              <p className="text-sm font-semibold text-cream mb-1">Still have questions?</p>
+              <p className="text-xs text-slate-400">Mike picks up the phone. Try him.</p>
+            </div>
+            <a
+              href="tel:2522454337"
+              className="inline-flex items-center gap-2.5 rounded-xl px-6 py-3 text-sm font-bold text-midnight shrink-0 transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+              style={{
+                background: "linear-gradient(135deg, #D4A017 0%, #B8860B 100%)",
+                boxShadow: "0 4px 20px rgba(212,160,23,0.30)",
+              }}
+            >
+              <Phone className="h-4 w-4" />
+              Call Mike → 252-245-4337
+            </a>
+          </div>
+        </Reveal>
 
         <p className="mt-8 text-center text-xs text-slate-600">
           The information provided through this platform is for general informational purposes only
@@ -105,6 +168,13 @@ export function FaqStrip() {
           professional for advice specific to your situation.
         </p>
       </div>
+
+      <style>{`
+        @keyframes faqBorderIn {
+          from { border-left-color: transparent; }
+          to   { border-left-color: rgba(212,160,23,0.7); }
+        }
+      `}</style>
     </section>
   );
 }

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { LeadTable } from "@/components/admin/lead-table";
 import { AdminShell, AdminSectionHeading } from "@/components/admin/admin-shell";
+import { MetricTile } from "@/components/ui/metric-tile";
 import { getLeadsForAdmin } from "@/lib/db/lead-repository";
 import { loadDashboardMetrics } from "@/lib/admin/dashboard-metrics";
 import { loadIntelligenceSignals } from "@/lib/intelligence/intelligence-signals";
@@ -41,54 +42,6 @@ function LockedState() {
       </div>
     </div>
   );
-}
-
-/* ── Glass metric tile ── */
-function MetricTile({
-  label,
-  value,
-  sub,
-  accent = "neutral",
-  pulse = false,
-  href,
-}: {
-  label: string;
-  value: number | string;
-  sub?: string;
-  accent?: "ruby" | "gold" | "emerald" | "amber" | "cyan" | "neutral";
-  pulse?: boolean;
-  href?: string;
-}) {
-  const styles = {
-    ruby:    { wrap: "border-ruby-400/22 bg-[#0D0606]/75", rim: "via-ruby-400/35",   num: "text-ruby-300",   glow: "from-ruby-400/[0.06]"   },
-    gold:    { wrap: "border-gold-400/22 bg-[#0D0A06]/75", rim: "via-gold-400/35",   num: "text-gold-300",   glow: "from-gold-400/[0.05]"   },
-    emerald: { wrap: "border-emerald-500/18 bg-[#060D08]/75", rim: "via-emerald-400/25", num: "text-emerald-300", glow: "from-emerald-400/[0.05]" },
-    amber:   { wrap: "border-amber-500/18 bg-[#0C0A06]/75", rim: "via-amber-400/30",  num: "text-amber-300",  glow: "from-amber-400/[0.05]"  },
-    cyan:    { wrap: "border-cyan-500/18 bg-[#05090D]/75",  rim: "via-cyan-400/25",   num: "text-cyan-300",   glow: "from-cyan-400/[0.04]"   },
-    neutral: { wrap: "border-white/[0.07] bg-[#0D0D0D]/60", rim: "via-white/[0.10]", num: "text-cream",      glow: "from-white/[0.02]"      },
-  };
-  const s = styles[accent];
-  const inner = (
-    <div className={`relative overflow-hidden rounded-xl border backdrop-blur-sm px-5 py-4.5 h-full transition-all duration-200 ${s.wrap} ${href ? "hover:border-opacity-50 hover:-translate-y-0.5 hover:shadow-z2 cursor-pointer" : ""}`}>
-      {/* Top rim */}
-      <div className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent ${s.rim} to-transparent`} />
-      {/* Ambient fill */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${s.glow} to-transparent pointer-events-none`} />
-      <div className="relative">
-        <div className={`font-bebas text-5xl leading-none tracking-wide ${s.num}`}>{value}</div>
-        <div className="text-[10px] font-bold tracking-[0.14em] uppercase text-slate-400/80 mt-1.5">{label}</div>
-        {sub && <div className="text-[9.5px] text-slate-600 mt-0.5">{sub}</div>}
-      </div>
-      {pulse && (Number(value) > 0) && (
-        <span
-          className="absolute top-3.5 right-3.5 h-2 w-2 rounded-full animate-pulse"
-          style={{ backgroundColor: accent === "ruby" ? "rgba(193,39,45,0.9)" : "rgba(212,160,23,0.9)", boxShadow: `0 0 8px ${accent === "ruby" ? "rgba(193,39,45,0.6)" : "rgba(212,160,23,0.5)"}` }}
-          aria-hidden="true"
-        />
-      )}
-    </div>
-  );
-  return href ? <Link href={href} className="block h-full">{inner}</Link> : inner;
 }
 
 /* ── Command Center nav tile ── */
@@ -225,10 +178,10 @@ export default async function AdminPage() {
         <div>
           <AdminSectionHeading className="mb-3">Lead Intelligence</AdminSectionHeading>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <MetricTile label="Total Leads"  value={counts.total}    sub="in system"         accent="neutral" />
-            <MetricTile label="Urgent"       value={counts.urgent}   sub="need action now"   accent="ruby"    pulse href="/admin/leads?filter=urgent" />
-            <MetricTile label="Hot"          value={counts.hot}      sub="high intent"        accent="gold"    pulse href="/admin/leads?filter=urgent" />
-            <MetricTile label="SLA Breached" value={counts.breached} sub="response overdue"  accent="ruby"    pulse href="/admin/leads?filter=sla_breach" />
+            <MetricTile label="Total Leads"  value={counts.total}    sublabel="in system"         accent="neutral" />
+            <MetricTile label="Urgent"       value={counts.urgent}   sublabel="need action now"   accent="ruby"    pulse href="/admin/leads?filter=urgent" />
+            <MetricTile label="Hot"          value={counts.hot}      sublabel="high intent"        accent="gold"    pulse href="/admin/leads?filter=urgent" />
+            <MetricTile label="SLA Breached" value={counts.breached} sublabel="response overdue"  accent="ruby"    pulse href="/admin/leads?filter=sla_breach" />
           </div>
         </div>
 
@@ -237,10 +190,10 @@ export default async function AdminPage() {
           <div>
             <AdminSectionHeading className="mb-3">Funnel Health</AdminSectionHeading>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <MetricTile label="New Today"   value={metrics.totals.newToday}              sub="since midnight"  accent="neutral" />
-              <MetricTile label="Contacted"   value={metrics.totals.contacted}             sub="reached"         accent="emerald" />
-              <MetricTile label="Appt. Req."  value={metrics.totals.appointmentsRequested} sub="scheduled"       accent="gold"    />
-              <MetricTile label="Unassigned"  value={metrics.totals.unassigned}            sub="need routing"    accent="amber"   pulse />
+              <MetricTile label="New Today"   value={metrics.totals.newToday}              sublabel="since midnight"  accent="neutral" />
+              <MetricTile label="Contacted"   value={metrics.totals.contacted}             sublabel="reached"         accent="emerald" />
+              <MetricTile label="Appt. Req."  value={metrics.totals.appointmentsRequested} sublabel="scheduled"       accent="gold"    />
+              <MetricTile label="Unassigned"  value={metrics.totals.unassigned}            sublabel="need routing"    accent="amber"   pulse />
             </div>
           </div>
         )}

@@ -60,9 +60,20 @@ export function ValueHero() {
         {/* HERO */}
         <section
           aria-labelledby="value-hero-heading"
-          className={cn("pt-3 sm:pt-4 pb-10 sm:pb-12", motion.fadeUp)}
+          className={cn("pt-3 sm:pt-4 pb-10 sm:pb-12 relative", motion.fadeUp)}
         >
-          <div className="grid lg:grid-cols-[1.25fr_0.75fr] gap-8 sm:gap-10 lg:gap-14 items-start">
+          {/* Ambient hero glow — top gold bloom */}
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-[420px] -z-0"
+            aria-hidden="true"
+            style={{
+              background:
+                "radial-gradient(ellipse 90% 70% at 30% -5%, rgba(212,160,23,0.13) 0%, transparent 60%), " +
+                "radial-gradient(ellipse 60% 50% at 80% 110%, rgba(193,39,45,0.06) 0%, transparent 60%)",
+            }}
+          />
+
+          <div className="relative z-10 grid lg:grid-cols-[1.25fr_0.75fr] gap-8 sm:gap-10 lg:gap-14 items-start">
             <div className="max-w-xl">
               <div className={cn(ammTokens.eyebrow, "mb-5")}>
                 <span className={ammTokens.eyebrowDot} />
@@ -80,19 +91,46 @@ export function ValueHero() {
                 </span>
               </h1>
 
-              <p className={cn(ammTokens.subhead, "mb-2 max-w-lg")}>
-                Ask Magic Mike helps Wilson-area homeowners see a preliminary
-                home value range, compare selling options, and get follow-up
-                from Mike Eatmon&apos;s Our Town Properties team.
-              </p>
-              <p className="text-slate-300 text-sm mb-2">
-                Real answers. Local insight. AI-assisted.
-              </p>
-              <p className="text-slate-400 text-xs mb-7">
-                No account. No pressure. Local human follow-up.
-              </p>
+              {/* Micro-trust signals replace body copy — show value, not describe it */}
+              <div className="flex flex-wrap items-center gap-2 mb-7 mt-4">
+                {[
+                  { label: "Real answers in 24 hrs", icon: "✓" },
+                  { label: "Wilson NC specialist", icon: "✓" },
+                  { label: "Broker-reviewed", icon: "✓" },
+                  { label: "No pressure · No account", icon: "✓" },
+                ].map((item) => (
+                  <span
+                    key={item.label}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gold-400/15 bg-gold-400/[0.05] px-3 py-1 text-xs font-medium text-slate-300"
+                  >
+                    <span className="text-gold-400/80 text-[10px]">{item.icon}</span>
+                    {item.label}
+                  </span>
+                ))}
+              </div>
 
-              <ConversionPanel className="mb-6" />
+              {/* Apple-style premium address input wrapper */}
+              <div
+                className="relative rounded-2xl border border-gold-400/20 bg-[#0C0A05]/90 p-1 mb-6"
+                style={{
+                  boxShadow:
+                    "0 0 0 1px rgba(212,160,23,0.06), " +
+                    "0 24px 60px -16px rgba(0,0,0,0.70), " +
+                    "0 0 60px rgba(212,160,23,0.05), " +
+                    "inset 0 1px 0 rgba(212,160,23,0.08)",
+                }}
+              >
+                {/* Top accent line */}
+                <div
+                  className="absolute top-0 inset-x-6 h-px pointer-events-none"
+                  aria-hidden="true"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, transparent, rgba(212,160,23,0.50), transparent)",
+                  }}
+                />
+                <ConversionPanel className="rounded-xl" />
+              </div>
 
               <AiAssistBadge variant="inline" />
             </div>
@@ -114,14 +152,19 @@ export function ValueHero() {
           aria-labelledby="value-paths-heading"
           className={cn("mb-14", motion.fadeUpDelay200)}
         >
-          <div className="flex items-baseline justify-between gap-3 mb-3">
-            <h2
-              id="value-paths-heading"
-              className="font-display text-2xl sm:text-3xl font-semibold text-cream leading-tight"
-            >
-              Choose your path
-            </h2>
-            <p className="text-xs text-slate-300 hidden sm:block">
+          <div className="flex items-baseline justify-between gap-3 mb-5">
+            <div>
+              <h2
+                id="value-paths-heading"
+                className="font-display text-2xl sm:text-3xl font-semibold text-cream leading-tight"
+              >
+                Choose your path
+              </h2>
+              <p className="mt-1 text-xs text-slate-400 sm:hidden">
+                Pick the one that fits — Mike&apos;s team takes it from there.
+              </p>
+            </div>
+            <p className="text-xs text-slate-300 hidden sm:block shrink-0">
               Pick the one that fits — Mike&apos;s team takes it from there.
             </p>
           </div>
@@ -148,17 +191,31 @@ export function ValueHero() {
         <section
           aria-labelledby="value-trust-heading"
           className={cn(
-            "relative rounded-2xl border border-white/[0.08] bg-[#0F131A]/85 p-5 sm:p-6 mb-8 overflow-hidden",
+            "relative rounded-2xl border border-gold-400/[0.14] bg-[#0C0A05]/90 p-5 sm:p-7 mb-8 overflow-hidden",
             motion.fadeUpDelay500
           )}
+          style={{
+            boxShadow:
+              "0 0 0 1px rgba(212,160,23,0.05), " +
+              "0 32px 80px -24px rgba(0,0,0,0.65), " +
+              "inset 0 1px 0 rgba(212,160,23,0.08)",
+          }}
         >
-          {/* Ambient gold gradient top accent */}
+          {/* Ambient gold top accent */}
           <div
             className="absolute top-0 inset-x-0 h-px pointer-events-none"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(212,160,23,0.35), transparent)" }}
+            style={{ background: "linear-gradient(90deg, transparent, rgba(212,160,23,0.50), transparent)" }}
             aria-hidden="true"
           />
-          <div className="grid md:grid-cols-[1fr_auto] gap-4 md:gap-6 items-center">
+          {/* Subtle corner bloom */}
+          <div
+            className="absolute top-0 left-0 w-64 h-64 pointer-events-none -z-0"
+            aria-hidden="true"
+            style={{
+              background: "radial-gradient(ellipse 60% 60% at 0% 0%, rgba(212,160,23,0.07) 0%, transparent 70%)",
+            }}
+          />
+          <div className="relative z-10 grid md:grid-cols-[1fr_auto] gap-4 md:gap-6 items-center">
             <div>
               <h2
                 id="value-trust-heading"
@@ -172,15 +229,18 @@ export function ValueHero() {
                 request is reviewed and followed up by a real person, not an
                 auto-responder.
               </p>
-              <p className="mt-3 text-xs text-slate-300">
-                Licensed in North Carolina · 3301 Nash St. N Suite E, Wilson, NC 27896
-              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                <span className="text-xs text-slate-400">Licensed in North Carolina</span>
+                <span className="text-gold-400/30">·</span>
+                <span className="text-xs text-slate-400">Since 1993</span>
+                <span className="text-gold-400/30">·</span>
+                <span className="text-xs text-slate-400">3301 Nash St. N Suite E, Wilson, NC 27896</span>
+              </div>
             </div>
             <a
               href={`tel:${process.env.NEXT_PUBLIC_AGENT_PHONE ?? "+12522454337"}`}
               className={cn(
-                ammTokens.buttonSecondary,
-                "self-start",
+                "inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-[#0A0A0A] btn-gold-premium self-start shrink-0",
                 motion.focusGold
               )}
             >

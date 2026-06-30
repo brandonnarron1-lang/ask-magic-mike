@@ -4,12 +4,22 @@ import { useState, useRef, useEffect } from "react";
 import { MapPin, ArrowRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
+const CYCLING_PLACEHOLDERS = [
+  "What's on your mind? Home value, timing, affordability…",
+  "What's my Wilson home worth right now?",
+  "Is it a good time to buy in Eastern NC?",
+  "How fast are homes selling in Wilson?",
+  "What should I know before listing my home?",
+];
+const PLACEHOLDER_MS = 3200;
+
 interface QuestionInputProps {
   initialQuestion?: string;
   initialAddress?: string;
   onSubmit?: (question: string, address: string) => void;
   loading?: boolean;
   className?: string;
+  compact?: boolean;
 }
 
 export function QuestionInput({
@@ -18,11 +28,20 @@ export function QuestionInput({
   onSubmit,
   loading = false,
   className,
+  compact = false,
 }: QuestionInputProps) {
-  const [question, setQuestion] = useState(initialQuestion);
-  const [address,  setAddress]  = useState(initialAddress);
-  const [focused,  setFocused]  = useState(false);
+  const [question, setQuestion]         = useState(initialQuestion);
+  const [address,  setAddress]          = useState(initialAddress);
+  const [focused,  setFocused]          = useState(false);
+  const [phIdx,    setPhIdx]            = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Cycle placeholder when input is empty and not focused
+  useEffect(() => {
+    if (question || focused) return;
+    const id = setInterval(() => setPhIdx((i) => (i + 1) % CYCLING_PLACEHOLDERS.length), PLACEHOLDER_MS);
+    return () => clearInterval(id);
+  }, [question, focused]);
 
   // Sync if parent updates the initial question (chip tap)
   useEffect(() => { setQuestion(initialQuestion); }, [initialQuestion]);
@@ -58,13 +77,15 @@ export function QuestionInput({
       )} />
 
       <div className="p-5 pb-4">
-        {/* Header label */}
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="h-3.5 w-3.5 text-gold-400/70" />
-          <span className="text-[10.5px] font-semibold tracking-label uppercase text-gold-400/70">
-            Ask Magic Mike
-          </span>
-        </div>
+        {/* Header label — hidden in compact/hero mode to reduce redundancy */}
+        {!compact && (
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="h-3.5 w-3.5 text-gold-400/70" />
+            <span className="text-[10.5px] font-semibold tracking-label uppercase text-gold-400/70">
+              Ask Magic Mike
+            </span>
+          </div>
+        )}
 
         {/* Textarea */}
         <textarea
@@ -74,7 +95,7 @@ export function QuestionInput({
           onKeyDown={handleKeyDown}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          placeholder="What's on your mind? Home value, timing, affordability…"
+          placeholder={CYCLING_PLACEHOLDERS[phIdx]}
           rows={3}
           className={cn(
             "w-full resize-none bg-transparent",
@@ -118,12 +139,12 @@ export function QuestionInput({
             "transition-all duration-200 shrink-0",
             canSubmit && !loading
               ? "bg-gold-400 hover:bg-gold-300 shadow-lg shadow-gold-400/20 hover:shadow-gold-400/30 active:scale-95"
-              : "bg-gold-400/30 text-midnight/40 cursor-not-allowed"
+              : "bg-gold-400/50 cursor-not-allowed opacity-60"
           )}
         >
           {loading ? (
             <span className="flex items-center gap-2">
-              <span className="h-3.5 w-3.5 rounded-full border-2 border-midnight/40 border-t-midnight animate-spin" />
+              <span className="h-3.5 w-3.5 rounded-full border-2 border-midnight/40 border-t-midnight motion-safe:animate-spin" />
               Routing…
             </span>
           ) : (
@@ -142,9 +163,10 @@ export function QuestionInput({
         Free · No account · Broker-reviewed guidance from Our Town Properties · Not an appraisal.
       </p>
 
-      {/* What happens next? trust panel */}
+      {/* What happens next? trust panel — hidden in compact/hero context */}
       <div
         data-testid="what-happens-next-panel"
+        hidden={compact}
         className="relative mx-5 mb-4 rounded-xl border border-white/[0.07] bg-white/[0.02] overflow-hidden"
       >
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/25 to-transparent" />
