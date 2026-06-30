@@ -28,18 +28,24 @@ const DEMO_EXCHANGES = [
   },
 ] as const;
 
-const CYCLE_MS   = 5800;   // time before advancing to next exchange
-const REVEAL_MS  = 340;    // stagger between Q and A bubble appearance
+const CYCLE_MS    = 6200;  // time before advancing to next exchange
+const REVEAL_MS   = 380;   // stagger between Q and typing indicator
+const TYPING_MS   = 900;   // how long typing indicator shows before stream starts
+
+const STREAM_WORD_MS = 38; // ms per word — roughly 26 wps (realistic AI stream)
 
 /* ─── Component ────────────────────────────────────────────────────────── */
 export function AiDemoSection() {
-  const [activeIdx, setActiveIdx]   = useState(0);
-  const [showAnswer, setShowAnswer] = useState(false);
-  const [visible, setVisible]       = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const timerRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [activeIdx, setActiveIdx]         = useState(0);
+  const [showTyping, setShowTyping]       = useState(false);
+  const [showAnswer, setShowAnswer]       = useState(false);
+  const [streamedWords, setStreamedWords] = useState(0);
+  const [visible, setVisible]             = useState(false);
+  const sectionRef  = useRef<HTMLDivElement>(null);
+  const timerRef    = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const streamRef   = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  /* Intersection-based mount animation */
+  /* Intersection-based reveal */
   useEffect(() => {
     const obs = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setVisible(true); },
@@ -51,18 +57,49 @@ export function AiDemoSection() {
 
   /* Auto-cycle through exchanges */
   useEffect(() => {
+    setShowTyping(false);
     setShowAnswer(false);
-    const answerTimer = setTimeout(() => setShowAnswer(true), REVEAL_MS);
-    timerRef.current  = setTimeout(() => {
+    setStreamedWords(0);
+    if (streamRef.current) clearInterval(streamRef.current);
+
+    // Step 1: show typing indicator after REVEAL_MS
+    const typingTimer = setTimeout(() => {
+      setShowTyping(true);
+
+      // Step 2: start streaming the answer after TYPING_MS
+      const streamTimer = setTimeout(() => {
+        setShowTyping(false);
+        setShowAnswer(true);
+        const words = DEMO_EXCHANGES[activeIdx].answer.split(" ");
+        let w = 0;
+        streamRef.current = setInterval(() => {
+          w++;
+          setStreamedWords(w);
+          if (w >= words.length && streamRef.current) {
+            clearInterval(streamRef.current);
+            streamRef.current = null;
+          }
+        }, STREAM_WORD_MS);
+      }, TYPING_MS);
+
+      return () => clearTimeout(streamTimer);
+    }, REVEAL_MS);
+
+    timerRef.current = setTimeout(() => {
       setActiveIdx((i) => (i + 1) % DEMO_EXCHANGES.length);
     }, CYCLE_MS);
+
     return () => {
-      clearTimeout(answerTimer);
-      if (timerRef.current) clearTimeout(timerRef.current);
+      clearTimeout(typingTimer);
+      if (timerRef.current)  clearTimeout(timerRef.current);
+      if (streamRef.current) clearInterval(streamRef.current);
     };
   }, [activeIdx]);
 
   const ex = DEMO_EXCHANGES[activeIdx];
+  const answerWords    = ex.answer.split(" ");
+  const displayAnswer  = answerWords.slice(0, streamedWords).join(" ");
+  const isStreaming    = showAnswer && streamedWords < answerWords.length;
 
   return (
     <section
@@ -183,7 +220,37 @@ export function AiDemoSection() {
                 </div>
               </div>
 
-              {/* Mike answer bubble */}
+              {/* Typing indicator — appears briefly before stream starts */}
+              {showTyping && (
+                <div
+                  key={`typing-${activeIdx}`}
+                  className="flex items-start gap-3 motion-safe:animate-fade-up"
+                >
+                  <Image
+                    src={mikePlatformAssets.circularAvatar.src}
+                    alt=""
+                    width={28}
+                    height={28}
+                    className="rounded-full object-cover ring-1 ring-gold-400/30 flex-shrink-0 mt-0.5"
+                    aria-hidden="true"
+                  />
+                  <div
+                    className="rounded-2xl rounded-bl-sm px-4 py-3.5"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.07)",
+                    }}
+                  >
+                    <div className="flex items-center gap-1.5" aria-label="Mike is typing">
+                      <span className="typing-dot-1 block h-1.5 w-1.5 rounded-full bg-gold-400/60" />
+                      <span className="typing-dot-2 block h-1.5 w-1.5 rounded-full bg-gold-400/60" />
+                      <span className="typing-dot-3 block h-1.5 w-1.5 rounded-full bg-gold-400/60" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Mike answer bubble — streams word-by-word */}
               {showAnswer && (
                 <div
                   key={`a-${activeIdx}`}
@@ -204,13 +271,24 @@ export function AiDemoSection() {
                       border: "1px solid rgba(255,255,255,0.07)",
                     }}
                   >
-                    <p className="text-sm leading-relaxed text-slate-300">{ex.answer}</p>
-                    <div className="mt-2 flex items-center gap-1.5">
-                      <span className="block h-1 w-1 rounded-full bg-emerald-400/70" aria-hidden="true" />
-                      <span className="text-[10px] text-emerald-400/70 uppercase tracking-label">
-                        Mike Eatmon · Broker-reviewed
-                      </span>
-                    </div>
+                    <p className="text-sm leading-relaxed text-slate-300">
+                      {displayAnswer}
+                      {/* Blinking cursor while streaming */}
+                      {isStreaming && (
+                        <span
+                          className="inline-block w-0.5 h-3.5 bg-gold-400/80 ml-0.5 -mb-0.5 motion-safe:animate-pulse"
+                          aria-hidden="true"
+                        />
+                      )}
+                    </p>
+                    {!isStreaming && (
+                      <div className="mt-2 flex items-center gap-1.5">
+                        <span className="block h-1 w-1 rounded-full bg-emerald-400/70" aria-hidden="true" />
+                        <span className="text-[10px] text-emerald-400/70 uppercase tracking-label">
+                          Mike Eatmon · Broker-reviewed
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

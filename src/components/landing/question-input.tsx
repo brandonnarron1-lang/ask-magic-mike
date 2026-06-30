@@ -4,6 +4,15 @@ import { useState, useRef, useEffect } from "react";
 import { MapPin, ArrowRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
+const CYCLING_PLACEHOLDERS = [
+  "What's on your mind? Home value, timing, affordability…",
+  "What's my Wilson home worth right now?",
+  "Is it a good time to buy in Eastern NC?",
+  "How fast are homes selling in Wilson?",
+  "What should I know before listing my home?",
+];
+const PLACEHOLDER_MS = 3200;
+
 interface QuestionInputProps {
   initialQuestion?: string;
   initialAddress?: string;
@@ -21,10 +30,18 @@ export function QuestionInput({
   className,
   compact = false,
 }: QuestionInputProps) {
-  const [question, setQuestion] = useState(initialQuestion);
-  const [address,  setAddress]  = useState(initialAddress);
-  const [focused,  setFocused]  = useState(false);
+  const [question, setQuestion]         = useState(initialQuestion);
+  const [address,  setAddress]          = useState(initialAddress);
+  const [focused,  setFocused]          = useState(false);
+  const [phIdx,    setPhIdx]            = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Cycle placeholder when input is empty and not focused
+  useEffect(() => {
+    if (question || focused) return;
+    const id = setInterval(() => setPhIdx((i) => (i + 1) % CYCLING_PLACEHOLDERS.length), PLACEHOLDER_MS);
+    return () => clearInterval(id);
+  }, [question, focused]);
 
   // Sync if parent updates the initial question (chip tap)
   useEffect(() => { setQuestion(initialQuestion); }, [initialQuestion]);
@@ -76,7 +93,7 @@ export function QuestionInput({
           onKeyDown={handleKeyDown}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          placeholder="What's on your mind? Home value, timing, affordability…"
+          placeholder={CYCLING_PLACEHOLDERS[phIdx]}
           rows={3}
           className={cn(
             "w-full resize-none bg-transparent",
