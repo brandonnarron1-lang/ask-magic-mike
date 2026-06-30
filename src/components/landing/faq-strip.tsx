@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown, Phone } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Reveal } from "@/components/ui/reveal";
+import { Phone } from "lucide-react";
 
 function trackCall(surface: string) {
   fetch("/api/analytics/event", {
