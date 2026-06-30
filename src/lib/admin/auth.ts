@@ -5,6 +5,7 @@
  * `x-admin-secret` request header. The secret must never appear in URLs
  * (leaked to logs, history, referrer headers).
  */
+import { timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 
 export interface AdminAuthOk {
@@ -27,7 +28,17 @@ export function checkAdminAuth(req: NextRequest): AdminAuthOk | AdminAuthFail {
     };
   }
   const supplied = req.headers.get("x-admin-secret");
-  if (!supplied || supplied !== secret) {
+  if (!supplied) {
+    return { ok: false, status: 401, error: "unauthorized" };
+  }
+  // Timing-safe comparison prevents secret-length/character oracle attacks.
+  // Pad to equal length first — timingSafeEqual requires identical byte lengths.
+  const secretBuf   = Buffer.from(secret);
+  const suppliedBuf = Buffer.from(supplied);
+  const match =
+    secretBuf.length === suppliedBuf.length &&
+    timingSafeEqual(secretBuf, suppliedBuf);
+  if (!match) {
     return { ok: false, status: 401, error: "unauthorized" };
   }
   return { ok: true, actor: "admin" };

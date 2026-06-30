@@ -233,6 +233,9 @@ export function AiDemoSection() {
 
             {/* Response area — gated by intersection observer */}
             <div
+              aria-live="polite"
+              aria-atomic="false"
+              aria-label="Mike's response"
               className={cn(
                 "space-y-4 min-h-[200px] transition-all duration-500",
                 !visible && "motion-safe:opacity-0",
