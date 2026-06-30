@@ -1,10 +1,18 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Home, Key, ArrowLeftRight, Search } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
 import type { PrimaryIntent, TimelineMonths } from "@/types/domain.types";
+
+function inferIntentFromQuestion(question: string): PrimaryIntent | null {
+  const q = question.toLowerCase();
+  if (/sell|selling|worth|value|list|listing|market value|what.s my home/.test(q)) return "sell";
+  if (/buy|buying|afford|tour|homes? for sale|purchase|move to|moving to/.test(q)) return "buy";
+  return null;
+}
 
 const INTENT_OPTIONS: { value: PrimaryIntent; label: string; Icon: LucideIcon }[] = [
   { value: "sell", label: "Selling my home", Icon: Home },
@@ -27,6 +35,7 @@ interface StepIntentProps {
   onIntentChange: (intent: PrimaryIntent) => void;
   onTimelineChange: (months: TimelineMonths) => void;
   onNext: () => void;
+  question?: string;
 }
 
 export function StepIntent({
@@ -35,17 +44,46 @@ export function StepIntent({
   onIntentChange,
   onTimelineChange,
   onNext,
+  question,
 }: StepIntentProps) {
+  const [inferredIntent, setInferredIntent] = useState<PrimaryIntent | null>(null);
   const canProceed = intent !== "unknown" || timelineMonths !== null;
+
+  useEffect(() => {
+    if (!question || intent !== "unknown") return;
+    const inferred = inferIntentFromQuestion(question);
+    if (inferred) {
+      setInferredIntent(inferred);
+      onIntentChange(inferred);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="pt-2">
       <h2 className="font-display text-2xl sm:text-3xl font-semibold text-cream mb-2 leading-snug">
         Tell Mike where you are.
       </h2>
-      <p className="text-sm text-slate-400 mb-7 leading-relaxed">
+      <p className="text-sm text-slate-400 mb-4 leading-relaxed">
         This helps Mike tailor the right guidance to your situation.
       </p>
+
+      {/* Adaptive inference banner */}
+      {inferredIntent && (
+        <div
+          data-testid="intent-inference-banner"
+          className="mb-5 flex items-start gap-2.5 rounded-xl border border-gold-400/20 bg-gold-400/[0.05] px-4 py-3"
+        >
+          <span className="mt-0.5 h-2 w-2 rounded-full bg-gold-400 shrink-0 motion-safe:animate-pulse" />
+          <p className="text-[13px] text-slate-300 leading-snug">
+            Based on your question, it sounds like you may be thinking about{" "}
+            <strong className="text-gold-300">
+              {inferredIntent === "sell" ? "selling" : "buying"}
+            </strong>{" "}
+            — is that right?
+          </p>
+        </div>
+      )}
 
       {/* Intent selector */}
       <div className="mb-7">

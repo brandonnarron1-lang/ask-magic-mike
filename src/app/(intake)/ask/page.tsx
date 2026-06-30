@@ -76,6 +76,7 @@ function AskPageInner() {
               flow.updateData({ timelineMonths: months as TimelineMonths })
             }
             onNext={flow.nextStep}
+            question={flow.data.question}
           />
         );
       case 3:
@@ -109,6 +110,8 @@ function AskPageInner() {
           <StepConfirmation
             firstName={flow.data.firstName}
             score={flow.score}
+            question={flow.data.question}
+            intent={flow.data.intent}
           />
         );
       default:

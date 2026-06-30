@@ -108,53 +108,84 @@ export function QuestionInput({
       {/* Divider */}
       <div className="h-px bg-gradient-to-r from-transparent via-gold-400/10 to-transparent mx-5" />
 
-      {/* Bottom row */}
-      <div className="flex items-center gap-3 p-4 pt-3.5">
-        {/* Address */}
-        <div className="relative flex-1">
-          <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-400/40" />
-          <input
-            type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            placeholder="Property address (optional)"
-            className={cn(
-              "w-full rounded-xl border border-white/[0.06] bg-white/[0.04]",
-              "pl-9 pr-4 py-2.5 text-sm text-cream placeholder:text-slate-600",
-              "focus:outline-none focus:border-gold-400/30 transition-colors"
-            )}
-          />
-        </div>
+      {/* Bottom row — hidden during loading bridge */}
+      {!loading && (
+        <div className="flex items-center gap-3 p-4 pt-3.5">
+          {/* Address */}
+          <div className="relative flex-1">
+            <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-400/40" />
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              placeholder="Property address (optional)"
+              className={cn(
+                "w-full rounded-xl border border-white/[0.06] bg-white/[0.04]",
+                "pl-9 pr-4 py-2.5 text-sm text-cream placeholder:text-slate-600",
+                "focus:outline-none focus:border-gold-400/30 transition-colors"
+              )}
+            />
+          </div>
 
-        {/* Submit button */}
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={!canSubmit || loading}
-          className={cn(
-            "inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-midnight",
-            "transition-all duration-200 shrink-0",
-            canSubmit && !loading
-              ? "bg-gold-400 hover:bg-gold-300 shadow-lg shadow-gold-400/20 hover:shadow-gold-400/30 active:scale-95"
-              : "bg-gold-400/50 cursor-not-allowed opacity-60"
-          )}
+          {/* Submit button */}
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-midnight",
+              "transition-all duration-200 shrink-0",
+              canSubmit
+                ? "bg-gold-400 hover:bg-gold-300 shadow-lg shadow-gold-400/20 hover:shadow-gold-400/30 active:scale-95"
+                : "bg-gold-400/50 cursor-not-allowed opacity-60"
+            )}
+          >
+            Ask Mike
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Premium "Mike is reviewing" bridge — shown only while loading */}
+      {loading && (
+        <div
+          data-testid="mike-reviewing-bridge"
+          className="relative mx-5 mb-4 mt-3 rounded-xl border border-gold-400/20 bg-gold-400/[0.04] overflow-hidden px-4 py-4"
+          style={{ boxShadow: "0 0 30px rgba(212,160,23,0.06), inset 0 1px 0 rgba(212,160,23,0.08)" }}
         >
-          {loading ? (
-            <span className="flex items-center gap-2">
-              <span className="h-3.5 w-3.5 rounded-full border-2 border-midnight/40 border-t-midnight motion-safe:animate-spin" />
-              Routing…
-            </span>
-          ) : (
-            <>
-              Ask Mike
-              <ArrowRight className="h-4 w-4" />
-            </>
+          <div className="bridge-scan-line" aria-hidden="true" />
+
+          {/* Frozen question preview */}
+          {question && (
+            <p className="text-sm text-cream/80 leading-relaxed mb-3 italic line-clamp-2">
+              &ldquo;{question}&rdquo;
+            </p>
           )}
-        </button>
-      </div>
+
+          {/* Status label */}
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="h-2 w-2 rounded-full bg-gold-400 motion-safe:animate-pulse shrink-0" />
+            <p className="text-sm font-semibold text-gold-300">
+              Mike is reviewing your question…
+            </p>
+          </div>
+
+          {/* Context chips */}
+          <div className="flex flex-wrap gap-1.5">
+            {["Wilson, NC", "Broker reviewed", "Eastern NC market"].map((chip) => (
+              <span
+                key={chip}
+                className="rounded-full border border-gold-400/20 bg-gold-400/[0.06] px-2.5 py-0.5 text-[10.5px] text-gold-400/70"
+              >
+                {chip}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <p
         data-testid="broker-reviewed-microcopy"
@@ -163,10 +194,10 @@ export function QuestionInput({
         Free · No account · Broker-reviewed guidance from Our Town Properties · Not an appraisal.
       </p>
 
-      {/* What happens next? trust panel — hidden in compact/hero context */}
+      {/* What happens next? trust panel — hidden in compact/hero context or during loading */}
       <div
         data-testid="what-happens-next-panel"
-        hidden={compact}
+        hidden={compact || loading}
         className="relative mx-5 mb-4 rounded-xl border border-white/[0.07] bg-white/[0.02] overflow-hidden"
       >
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/25 to-transparent" />

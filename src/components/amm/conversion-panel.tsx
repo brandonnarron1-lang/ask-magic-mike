@@ -38,10 +38,10 @@ interface ConversionPanelProps {
  */
 export function ConversionPanel({
   placeholder = "Enter your property address in Wilson, NC",
-  ctaLabel = "Start With Your Address",
+  ctaLabel = "See What Mike Says",
   defaultQuestion = "What is my home worth in Wilson, NC?",
   chip = "home_worth",
-  microLine = "AI-assisted intake. Local human follow-up.",
+  microLine = "Local expertise. Real answers. No call centers.",
   className,
   sourceBadge,
   logView = true,

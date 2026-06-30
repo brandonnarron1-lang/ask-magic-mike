@@ -1425,3 +1425,18 @@
   pointer-events: none;
   animation: confettiFly 1.2s cubic-bezier(0.22,1,0.36,1) both;
 }
+
+@keyframes scanLine {
+  0%   { top: 0%;   opacity: 0.9; }
+  70%  { opacity: 0.7; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.bridge-scan-line {
+  position: absolute;
+  inset-x: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(212,160,23,0.7), transparent);
+  animation: scanLine 1.8s cubic-bezier(0.4,0,0.6,1) infinite;
+  pointer-events: none;
+}

@@ -575,7 +575,7 @@ export function HeroSection() {
                 className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-300 hover:bg-gold-400/[0.08] hover:text-gold-300 transition-colors"
               >
                 <MapPin className="h-4 w-4 text-gold-400/60 shrink-0" />
-                What's My Home Worth?
+                What&apos;s My Home Worth?
               </a>
               <a
                 href={`tel:${siteConfig.agentPhone}`}
