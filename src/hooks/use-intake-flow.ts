@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { CTAChip, PrimaryIntent, TimelineMonths } from "@/types/domain.types";
 import { normalizeToE164 } from "@/lib/utils/phone";
 import { readAttribution } from "@/lib/attribution/client-storage";
@@ -67,6 +67,8 @@ export function useIntakeFlow(
     score: null,
     error: null,
   });
+  // Synchronous guard prevents double-submit when setState hasn't re-rendered yet.
+  const submittingRef = useRef(false);
 
   const updateData = useCallback((updates: Partial<IntakeFormData>) => {
     setState((prev) => ({
@@ -97,14 +99,30 @@ export function useIntakeFlow(
   }, [sessionId]);
 
   const prevStep = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      step: Math.max(prev.step - 1, 1),
-    }));
-  }, []);
+    setState((prev) => {
+      const fromStep = prev.step;
+      fetch("/api/analytics/event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventName: "cta_click", properties: { action: "intake_step_back", from_step: fromStep }, sessionId }),
+        keepalive: true,
+      }).catch(() => {});
+      return { ...prev, step: Math.max(prev.step - 1, 1) };
+    });
+  }, [sessionId]);
 
   const submit = useCallback(async () => {
-    if (!sessionId) return;
+    if (!sessionId) {
+      setState((prev) => ({
+        ...prev,
+        error: "Unable to connect — please refresh the page or call us directly.",
+      }));
+      return;
+    }
+
+    // Synchronous ref check prevents concurrent submissions from rapid double-clicks.
+    if (submittingRef.current) return;
+    submittingRef.current = true;
 
     setState((prev) => ({ ...prev, submitting: true, error: null }));
 
@@ -169,6 +187,8 @@ export function useIntakeFlow(
         submitting: false,
         error: err instanceof Error ? err.message : "Something went wrong",
       }));
+    } finally {
+      submittingRef.current = false;
     }
   }, [sessionId, state.data]);
 

@@ -4,23 +4,24 @@ import { trackEventNoWait } from "@/lib/analytics/ledger";
 import { advanceSessionStep } from "@/lib/db/session-repository";
 import { isProduction, isSupabaseConfigured } from "@/lib/db/types";
 import { checkRateLimit, rateLimitKey, LIMITS } from "@/lib/security/rate-limit";
-
-const NO_STORE = { "Cache-Control": "no-store" };
+import { requestContext } from "@/lib/observability/request";
 
 export async function POST(req: NextRequest) {
+  const ctx = requestContext("intake/step", req.headers.get("x-request-id"));
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
-  const rl = checkRateLimit(rateLimitKey(ip), LIMITS.intakeStep.limit, LIMITS.intakeStep.windowMs);
+  const rl = await checkRateLimit(rateLimitKey(ip), LIMITS.intakeStep.limit, LIMITS.intakeStep.windowMs, "intakeStep");
   if (!rl.allowed) {
+    ctx.log.warn("rate_limited", { request_id: ctx.requestId });
     return NextResponse.json(
       { error: "rate_limit_exceeded" },
-      { status: 429, headers: { ...NO_STORE, "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+      { status: 429, headers: { ...ctx.responseHeaders(), "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
     );
   }
 
   if (isProduction() && !isSupabaseConfigured()) {
     return NextResponse.json(
       { error: "Configuration error", message: "Lead storage is not configured." },
-      { status: 503, headers: NO_STORE }
+      { status: 503, headers: ctx.responseHeaders(503) }
     );
   }
   let body: unknown;
@@ -48,5 +49,5 @@ export async function POST(req: NextRequest) {
 
   await advanceSessionStep(sessionId, step);
 
-  return NextResponse.json({ ok: true, step }, { headers: NO_STORE });
+  return NextResponse.json({ ok: true, step }, { headers: ctx.finish(200, { step }) });
 }

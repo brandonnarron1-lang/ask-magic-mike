@@ -623,6 +623,19 @@ export function HeroSection() {
             </h1>
           </div>
 
+          {/* Value tagline — answers "what is this?" in one line */}
+          <div
+            className={cn(
+              "mb-5 sm:mb-6 opacity-0 motion-reduce:opacity-100",
+              loaded && "motion-safe:animate-fade-up motion-safe:delay-200"
+            )}
+          >
+            <p className="text-base text-slate-400 leading-snug max-w-md">
+              Real-time answers from Eastern NC&apos;s most experienced real estate broker.{" "}
+              <span className="text-gold-400/70">Powered by AI.</span>
+            </p>
+          </div>
+
           {/* CTA chips — entry points ABOVE the input */}
           <div
             className={cn(
@@ -671,7 +684,10 @@ export function HeroSection() {
             {/* Live activity strip */}
             <div className="mb-2.5 flex items-center gap-2">
               <span className="block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-400 motion-safe:animate-pulse" aria-hidden="true" />
-              <span className="text-[11px] text-slate-500 transition-opacity duration-500">
+              <span
+                key={activityIdx}
+                className="text-[11px] text-slate-500 motion-safe:animate-fade-in"
+              >
                 {ACTIVITY_LINES[activityIdx]}
               </span>
             </div>

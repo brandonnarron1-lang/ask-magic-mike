@@ -12,17 +12,20 @@ import { completeSession } from "@/lib/db/session-repository";
 import { shouldUseDevStorage, isProduction, isSupabaseConfigured } from "@/lib/db/types";
 import { classifyReferrer } from "@/lib/attribution/referrer-classifier";
 import { checkRateLimit, rateLimitKey, LIMITS } from "@/lib/security/rate-limit";
+import { requestContext } from "@/lib/observability/request";
 import type { ScoringInput } from "@/types/domain.types";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
 export async function POST(req: NextRequest) {
+  const ctx = requestContext("intake/submit", req.headers.get("x-request-id"));
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
-  const rl = checkRateLimit(rateLimitKey(ip), LIMITS.intakeSubmit.limit, LIMITS.intakeSubmit.windowMs);
+  const rl = await checkRateLimit(rateLimitKey(ip), LIMITS.intakeSubmit.limit, LIMITS.intakeSubmit.windowMs, "intakeSubmit");
   if (!rl.allowed) {
+    ctx.log.warn("rate_limited", { request_id: ctx.requestId, durable: rl.durable });
     return NextResponse.json(
       { error: "rate_limit_exceeded" },
-      { status: 429, headers: { ...NO_STORE, "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+      { status: 429, headers: { ...ctx.responseHeaders(), "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
     );
   }
 
@@ -483,6 +486,6 @@ export async function POST(req: NextRequest) {
       },
       routing: routingDecision ? { assigned: true } : null,
     },
-    { headers: NO_STORE }
+    { headers: ctx.finish(200, { lead_id: leadId, temperature: score.temperature }) }
   );
 }

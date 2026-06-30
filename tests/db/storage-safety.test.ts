@@ -153,7 +153,7 @@ describe("storage safety functions", () => {
 describe("rate limiter", () => {
   it("allows requests within limit", async () => {
     const { checkRateLimit } = await import("@/lib/security/rate-limit");
-    const result = checkRateLimit("test-ip-1", 5, 60000);
+    const result = await checkRateLimit("test-ip-1", 5, 60000);
     expect(result.allowed).toBe(true);
     expect(result.remaining).toBe(4);
   });
@@ -161,8 +161,8 @@ describe("rate limiter", () => {
   it("blocks requests over limit", async () => {
     const { checkRateLimit } = await import("@/lib/security/rate-limit");
     const key = `test-ip-block-${Date.now()}`;
-    for (let i = 0; i < 3; i++) checkRateLimit(key, 3, 60000);
-    const result = checkRateLimit(key, 3, 60000);
+    for (let i = 0; i < 3; i++) await checkRateLimit(key, 3, 60000);
+    const result = await checkRateLimit(key, 3, 60000);
     expect(result.allowed).toBe(false);
     expect(result.remaining).toBe(0);
   });
@@ -170,9 +170,9 @@ describe("rate limiter", () => {
   it("resets after window expires", async () => {
     const { checkRateLimit } = await import("@/lib/security/rate-limit");
     const key = `test-ip-reset-${Date.now()}`;
-    for (let i = 0; i < 2; i++) checkRateLimit(key, 2, 1); // 1ms window
+    for (let i = 0; i < 2; i++) await checkRateLimit(key, 2, 1); // 1ms window
     await new Promise((r) => setTimeout(r, 5));
-    const result = checkRateLimit(key, 2, 1);
+    const result = await checkRateLimit(key, 2, 1);
     expect(result.allowed).toBe(true);
   });
 });

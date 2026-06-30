@@ -1,10 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Phone } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Reveal } from "@/components/ui/reveal";
-import { Phone } from "lucide-react";
+
+function trackCall(surface: string) {
+  fetch("/api/analytics/event", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ eventName: "call_button_clicked", properties: { surface } }),
+    keepalive: true,
+  }).catch(() => {});
+}
 
 const FAQS = [
   {
@@ -150,6 +158,7 @@ export function FaqStrip() {
             </div>
             <a
               href="tel:2522454337"
+              onClick={() => trackCall("faq_strip")}
               className="inline-flex items-center gap-2.5 rounded-xl px-6 py-3 text-sm font-bold text-midnight shrink-0 transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
               style={{
                 background: "linear-gradient(135deg, #D4A017 0%, #B8860B 100%)",

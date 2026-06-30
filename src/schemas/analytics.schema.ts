@@ -39,6 +39,7 @@ export const TrackEventSchema = z.object({
     "invalid_lead_detected",
     "compliance_review_required",
     "appointment_cta_clicked",
+    "call_button_clicked",
     "appointment_requested",
     "chat_opened",
     "chat_message_sent",

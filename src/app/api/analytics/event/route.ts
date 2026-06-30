@@ -2,16 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { TrackEventSchema } from "@/schemas/analytics.schema";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
 import { checkRateLimit, rateLimitKey, LIMITS } from "@/lib/security/rate-limit";
-
-const NO_STORE = { "Cache-Control": "no-store" };
+import { requestContext } from "@/lib/observability/request";
 
 export async function POST(req: NextRequest) {
+  const ctx = requestContext("analytics/event", req.headers.get("x-request-id"));
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
-  const rl = checkRateLimit(rateLimitKey(ip), LIMITS.analyticsEvent.limit, LIMITS.analyticsEvent.windowMs);
+  const rl = await checkRateLimit(rateLimitKey(ip), LIMITS.analyticsEvent.limit, LIMITS.analyticsEvent.windowMs, "analyticsEvent");
   if (!rl.allowed) {
+    ctx.log.warn("rate_limited", { request_id: ctx.requestId });
     return NextResponse.json(
       { error: "rate_limit_exceeded" },
-      { status: 429, headers: { ...NO_STORE, "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+      { status: 429, headers: { ...ctx.responseHeaders(), "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
     );
   }
 
@@ -38,5 +39,5 @@ export async function POST(req: NextRequest) {
     userAgent,
   });
 
-  return NextResponse.json({ ok: true }, { headers: NO_STORE });
+  return NextResponse.json({ ok: true }, { headers: ctx.finish(200) });
 }

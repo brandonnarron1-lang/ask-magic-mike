@@ -4,6 +4,7 @@ import {
   Home,
   Banknote,
   MessageCircle,
+  CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { BrandShell } from "@/components/amm/brand-shell";
@@ -18,6 +19,7 @@ import { AiAssistBadge } from "@/components/amm/ai-assist-badge";
 import { MagicMikeWidgetFloating } from "@/components/amm/magic-mike-widget-floating";
 import { ammTokens } from "@/components/amm/tokens";
 import { motion } from "@/components/amm/motion";
+import { siteConfig } from "@/lib/site-config";
 
 const SECONDARY_OPTIONS: OptionCardProps[] = [
   {
@@ -94,17 +96,20 @@ export function ValueHero() {
               {/* Micro-trust signals replace body copy — show value, not describe it */}
               <div className="flex flex-wrap items-center gap-2 mb-7 mt-4">
                 {[
-                  { label: "Real answers in 24 hrs", icon: "✓" },
-                  { label: "Wilson NC specialist", icon: "✓" },
-                  { label: "Broker-reviewed", icon: "✓" },
-                  { label: "No pressure · No account", icon: "✓" },
-                ].map((item) => (
+                  "Real answers in 24 hrs",
+                  "Wilson NC specialist",
+                  "Broker-reviewed",
+                  "No pressure · No account",
+                ].map((label) => (
                   <span
-                    key={item.label}
+                    key={label}
                     className="inline-flex items-center gap-1.5 rounded-full border border-gold-400/15 bg-gold-400/[0.05] px-3 py-1 text-xs font-medium text-slate-300"
                   >
-                    <span className="text-gold-400/80 text-[10px]">{item.icon}</span>
-                    {item.label}
+                    <CheckCircle2
+                      className="h-3 w-3 text-gold-400/70 shrink-0"
+                      aria-hidden="true"
+                    />
+                    {label}
                   </span>
                 ))}
               </div>
@@ -238,7 +243,7 @@ export function ValueHero() {
               </div>
             </div>
             <a
-              href={`tel:${process.env.NEXT_PUBLIC_AGENT_PHONE ?? "+12522454337"}`}
+              href={`tel:${siteConfig.agentPhone}`}
               className={cn(
                 "inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-[#0A0A0A] btn-gold-premium self-start shrink-0",
                 motion.focusGold

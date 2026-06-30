@@ -7,6 +7,15 @@ import { Reveal } from "@/components/ui/reveal";
 import { cn } from "@/lib/utils/cn";
 import { brandPackAssets } from "@/components/amm/brand-pack-assets";
 
+function trackCall(surface: string) {
+  fetch("/api/analytics/event", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ eventName: "call_button_clicked", properties: { surface } }),
+    keepalive: true,
+  }).catch(() => {});
+}
+
 const CREDENTIALS = [
   "Licensed NC Real Estate Broker",
   "Licensed & Active Since 1993 — 30+ Years",
@@ -186,6 +195,7 @@ export function MikeCard() {
                 {/* Contact */}
                 <div className="flex flex-wrap gap-3 mb-7">
                   <a href="tel:2522454337"
+                    onClick={() => trackCall("mike_card_contact")}
                     className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-gold-400 transition-colors group"
                   >
                     <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-gold-400/20 bg-gold-400/[0.06] group-hover:bg-gold-400/[0.15] transition-all">
@@ -228,6 +238,7 @@ export function MikeCard() {
                   </button>
 
                   <a href="tel:2522454337"
+                    onClick={() => trackCall("mike_card_cta")}
                     className="inline-flex items-center gap-2 rounded-xl border border-gold-400/25 px-6 py-4 text-sm font-medium text-gold-300 hover:bg-gold-400/[0.08] hover:border-gold-400/45 transition-all"
                   >
                     <Phone className="h-4 w-4" />
