@@ -27,7 +27,7 @@ export function StepQuestion({
   return (
     <div className="pt-2">
       <h2 className="font-display text-2xl sm:text-3xl font-semibold text-cream mb-5 leading-snug">
-        What do you want to know?
+        What&apos;s on your mind?
       </h2>
 
       {/* Chat-style message input */}

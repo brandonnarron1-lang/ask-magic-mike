@@ -156,43 +156,17 @@ export function IntakeShell({
             </div>
 
             {/* Progress + step label */}
-            <div className="mb-5 mt-4">
+            <div className="mb-4 mt-2">
               <Progress
                 value={progress}
-                className="h-1.5 bg-white/[0.07]"
+                className="h-1 bg-white/[0.06]"
                 indicatorClassName="progress-gold"
-                style={{ boxShadow: "0 0 12px rgba(212,160,23,0.4)" } as React.CSSProperties}
+                style={{ boxShadow: "0 0 10px rgba(212,160,23,0.35)" } as React.CSSProperties}
               />
-
-              {/* Step dots */}
-              <div className="mt-3 flex items-center justify-center gap-2" aria-hidden="true">
-                {Array.from({ length: totalSteps }).map((_, i) => {
-                  const dotStep = i + 1;
-                  const completed = dotStep < step;
-                  const active = dotStep === step;
-                  return (
-                    <span
-                      key={dotStep}
-                      className={cn(
-                        "rounded-full transition-all duration-500",
-                        completed
-                          ? "h-2 w-2 bg-gold-400 shadow-[0_0_6px_rgba(212,160,23,0.55)]"
-                          : active
-                          ? "h-2.5 w-2.5 bg-gold-300 shadow-[0_0_10px_rgba(212,160,23,0.70)] ring-2 ring-gold-400/40"
-                          : "h-1.5 w-1.5 border border-gold-400/30 bg-transparent"
-                      )}
-                    />
-                  );
-                })}
-              </div>
-
-              <div className="mt-2 flex items-center justify-between gap-3">
-                <p className="text-xs font-semibold tracking-label uppercase text-gold-300">
+              <div className="mt-2 flex items-center gap-2">
+                <p className="text-[10px] font-semibold tracking-label uppercase text-gold-300/70">
                   {stepLabel}
                 </p>
-                <span className="text-xs uppercase tracking-label text-slate-300">
-                  Step {step} of {totalSteps}
-                </span>
               </div>
             </div>
 
