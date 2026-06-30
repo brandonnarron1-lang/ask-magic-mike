@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Inbox, DollarSign, BarChart2, Share2, AlertCircle, CheckCircle2,
   Users, ArrowRight, Activity, Brain, Zap, TrendingUp, Home, FileText,
-  Megaphone, Clock, PhoneCall, Rocket, ListOrdered,
+  Megaphone, Clock, PhoneCall, Rocket, ListOrdered, Code2,
 } from "lucide-react";
 import { LeadTable } from "@/components/admin/lead-table";
 import { AdminShell, AdminSectionHeading } from "@/components/admin/admin-shell";
@@ -340,6 +340,7 @@ export default async function AdminPage() {
             <CenterTile href="/admin/listings"     Icon={Home}       label="Listings"      sub="Inventory · inquiries · import" iconColor="group-hover:border-amber-400/20 group-hover:bg-amber-400/[0.07]" />
             <CenterTile href="/admin/documents"    Icon={FileText}   label="Documents"     sub="CMA · packets · guides"         iconColor="group-hover:border-slate-400/20 group-hover:bg-slate-400/[0.06]" />
             <CenterTile href="/admin/marketing"    Icon={Megaphone}  label="Marketing"     sub="Content · campaigns · assets"   iconColor="group-hover:border-pink-400/20 group-hover:bg-pink-400/[0.06]" />
+            <CenterTile href="/admin/widgets"     Icon={Code2}      label="Widgets"       sub="Embed · channel links · QR"     iconColor="group-hover:border-cyan-400/20 group-hover:bg-cyan-400/[0.06]" />
           </div>
         </div>
 

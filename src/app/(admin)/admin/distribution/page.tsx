@@ -99,6 +99,26 @@ export default async function DistributionCommandPage() {
     >
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-10">
 
+        {/* ── Embed / Widget shortcut ── */}
+        <div className="rounded-xl border border-gold-400/[0.14] bg-gold-400/[0.04] px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+          style={{ boxShadow: "inset 0 1px 0 rgba(212,160,23,0.07)" }}
+        >
+          <div>
+            <p className="text-[10.5px] tracking-label uppercase font-semibold text-gold-400/70 mb-0.5">
+              Widget Distribution
+            </p>
+            <p className="text-[12px] text-slate-400 leading-snug">
+              Copyable embed snippets, channel links (Facebook, Instagram, Email, QR), and intent quick links.
+            </p>
+          </div>
+          <Link
+            href="/admin/widgets"
+            className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-gold-400/25 bg-gold-400/[0.08] px-4 py-2 text-[11px] font-semibold text-gold-300 hover:bg-gold-400/[0.14] hover:border-gold-400/40 transition-colors"
+          >
+            Open Widget Center →
+          </Link>
+        </div>
+
         {/* ---------------------------------------------------------------- */}
         {/* 1. Publishing Command Center — counts                             */}
         {/* ---------------------------------------------------------------- */}
