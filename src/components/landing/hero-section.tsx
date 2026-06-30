@@ -45,35 +45,35 @@ function MikeVisualTrustBadge() {
 const HERO_CONVOS = [
   {
     question: "What’s my home worth in Wilson?",
-    before: "Based on 12 recent comps, homes like yours are trading between ",
+    before: "Based on 12 recent comps in your area, homes like yours are trading between ",
     highlight: "$185K–$235K",
-    after: " right now. Want the full analysis?",
+    after: ". School zone and lot depth will move you toward one end or the other.",
     score: 87,
-    scoreLabel: "Seller Match Score",
+    scoreLabel: "Seller Readiness",
   },
   {
     question: "Is now a good time to sell?",
     before: "Inventory is down 18% year-over-year. Well-priced homes are going under contract in ",
     highlight: "12–21 days",
-    after: " — that’s a seller’s market by most measures.",
+    after: " — that’s a seller’s market. Overpriced homes are sitting 60+ days.",
     score: 91,
-    scoreLabel: "Market Confidence",
+    scoreLabel: "Market Timing Signal",
   },
   {
     question: "Which neighborhoods have the best value?",
     before: "Fike High zone homes command ",
     highlight: "$15–$30K premium",
-    after: " over comparable addresses outside it. I can show you which active listings qualify.",
+    after: " over comparable addresses. That gap has held for a decade and isn’t going away.",
     score: 74,
-    scoreLabel: "Neighborhood Factor",
+    scoreLabel: "Neighborhood Premium",
   },
   {
     question: "Should I wait for rates to drop?",
-    before: "At current inventory levels, buyers who waited 6 months paid ",
+    before: "Buyers who waited 6 months paid ",
     highlight: "3–7% more",
-    after: " on average. Time in market typically beats timing the market.",
+    after: " on average as prices climbed. Time in market almost always beats timing the market.",
     score: 82,
-    scoreLabel: "Timing Analysis",
+    scoreLabel: "Rate Sensitivity",
   },
 ] as const;
 
@@ -326,10 +326,11 @@ function logHeroEvent(
    ACTIVITY LINES — rotate in the hero trust footer to signal live operation
 ───────────────────────────────────────────────────────────────────────── */
 const ACTIVITY_LINES = [
-  "Mike is reviewing questions · Last answered 6 min ago",
-  "Wilson inventory updated today · 14 active listings",
-  "3 sellers received valuations this morning",
-  "Market pulse: Wilson median $195K · Inventory –18% YOY",
+  "Mike reviewed a question · 7 min ago",
+  "Wilson: 14 active listings · Median $195K · DOM avg 16 days",
+  "4 sellers requested valuations this week",
+  "Inventory –18% YOY · Well-priced homes moving in 12–21 days",
+  "Fike zone premium: +$15–30K vs. comparable Hunt-zone homes",
 ] as const;
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -684,8 +685,8 @@ export function HeroSection() {
             )}
           >
             <p className="text-base text-slate-400 leading-snug max-w-md">
-              Real-time answers from Eastern NC&apos;s most experienced real estate broker.{" "}
-              <span className="text-gold-400/70">Powered by AI.</span>
+              Mike Eatmon has closed 2,500+ deals in Wilson — and he reviews every question you send him personally.{" "}
+              <span className="text-gold-400/70">Local expertise. Real answers.</span>
             </p>
           </div>
 

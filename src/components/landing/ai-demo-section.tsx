@@ -11,7 +11,7 @@ const DEMO_EXCHANGES = [
   {
     question: "Is now a good time to buy in Wilson, NC?",
     answer:
-      "Wilson's median is around $195K — still one of the most accessible markets in Eastern NC. Inventory has loosened since last year, and rates have moderated. If you're planning to stay 3+ years, the math works solidly in your favor right now.",
+      "Wilson's median is around $195K — still one of the most accessible markets in Eastern NC. Inventory has loosened from the 2022 peak, and rates have moderated from their highs. If you're buying near the medical district or in the Fike school zone, you're entering markets where I've watched values hold through every cycle since I got licensed in '93.",
     tag: "Market Timing",
     toolCall: "Searching Wilson NC market conditions",
     toolQuery: 'search({ market: "Wilson-NC", metrics: ["median_price", "inventory", "dom"] })',
@@ -163,7 +163,7 @@ export function AiDemoSection() {
         <div className="mb-14 text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold-400/20 bg-gold-400/[0.06] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-label text-gold-400/80">
             <Sparkles className="h-3 w-3" />
-            Example guidance
+            How Mike answers
           </div>
           <h2
             className="font-display text-display font-black leading-[0.93] text-cream"
@@ -474,7 +474,7 @@ export function AiDemoSection() {
               href="/ask"
               className="inline-flex items-center gap-2 rounded-xl bg-gold-400 px-4 py-2 text-sm font-bold text-midnight transition-all duration-200 hover:bg-gold-300 hover:shadow-lg hover:shadow-gold-400/25 active:scale-95"
             >
-              Ask your question
+              Ask Mike about your home
               <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
@@ -482,7 +482,7 @@ export function AiDemoSection() {
 
         {/* Microcopy */}
         <p className="mt-6 text-center text-xs text-slate-600">
-          Illustrative examples · Your question gets a personalized response reviewed by Mike&apos;s team · Free · Not an appraisal.
+          Representative examples based on real Wilson market conditions · Your question is reviewed personally by Mike Eatmon · Free · Not an appraisal.
         </p>
       </div>
     </section>

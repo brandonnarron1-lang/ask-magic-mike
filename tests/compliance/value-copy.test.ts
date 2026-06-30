@@ -592,8 +592,8 @@ describe("landing page copy — conversion trust guards", () => {
     expect(faqStrip).not.toMatch(/within minutes/i);
   });
 
-  it("submit button says 'Request Guidance', not 'Get My Answer'", () => {
-    expect(questionInput).toContain("Request Guidance");
+  it("submit button says 'Ask Mike', not 'Get My Answer'", () => {
+    expect(questionInput).toContain("Ask Mike");
     expect(questionInput).not.toContain("Get My Answer");
   });
 });
@@ -659,8 +659,8 @@ describe("question-input — broker trust microcopy", () => {
 
   it("three-step What happens next panel contains correct steps", () => {
     expect(questionInput).toContain("Ask your question");
-    expect(questionInput).toContain("Mike reviews the request");
-    expect(questionInput).toContain("A local expert follows up if needed");
+    expect(questionInput).toContain("Mike reviews it personally");
+    expect(questionInput).toContain("You get a real answer");
   });
 
   it("does NOT claim appraisal as a standalone positive (only as negation)", () => {
@@ -678,7 +678,7 @@ describe("step-question intake — helper prompt examples", () => {
     expect(stepQuestion).toContain("helper-prompt-examples");
   });
 
-  it("contains 'What is my Wilson home worth?' example", () => {
+  it("contains a Wilson home value example", () => {
     expect(stepQuestion).toContain("What is my Wilson home worth");
   });
 

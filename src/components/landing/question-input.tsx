@@ -149,7 +149,7 @@ export function QuestionInput({
             </span>
           ) : (
             <>
-              Request Guidance
+              Ask Mike
               <ArrowRight className="h-4 w-4" />
             </>
           )}
@@ -176,9 +176,9 @@ export function QuestionInput({
           </p>
           <ol className="space-y-2">
             {([
-              ["Ask your question", "Takes about 30 seconds"],
-              ["Mike reviews the request", "No call centers — direct to the broker"],
-              ["A local expert follows up if needed", "Phone, text, or email — your choice"],
+              ["Ask your question", "Takes about 60 seconds"],
+              ["Mike reviews it personally", "No call centers — straight to the broker"],
+              ["You get a real answer", "Phone, text, or email — your choice"],
             ] as const).map(([step, note], i) => (
               <li key={i} className="flex items-start gap-2.5">
                 <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-gold-400/15 text-[9px] font-bold text-gold-400/80 mt-px">

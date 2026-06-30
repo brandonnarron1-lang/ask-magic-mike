@@ -41,10 +41,10 @@ export function StepIntent({
   return (
     <div className="pt-2">
       <h2 className="font-display text-2xl sm:text-3xl font-semibold text-cream mb-2 leading-snug">
-        What&apos;s your situation?
+        Tell Mike where you are.
       </h2>
       <p className="text-sm text-slate-400 mb-7 leading-relaxed">
-        This helps Mike&apos;s team route the right local guidance to you.
+        This helps Mike tailor the right guidance to your situation.
       </p>
 
       {/* Intent selector */}
