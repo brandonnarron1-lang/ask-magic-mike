@@ -9,7 +9,7 @@ const NO_STORE = { "Cache-Control": "no-store" };
 
 export async function POST(req: NextRequest) {
   const ipRaw = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
-  const rl = checkRateLimit(rateLimitKey(ipRaw), LIMITS.sessionCreate.limit, LIMITS.sessionCreate.windowMs);
+  const rl = await checkRateLimit(rateLimitKey(ipRaw), LIMITS.sessionCreate.limit, LIMITS.sessionCreate.windowMs, "sessionCreate");
   if (!rl.allowed) {
     return NextResponse.json(
       { error: "rate_limit_exceeded" },

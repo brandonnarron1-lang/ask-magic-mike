@@ -149,17 +149,17 @@ export function AiDemoSection() {
         <div className="mb-14 text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold-400/20 bg-gold-400/[0.06] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-label text-gold-400/80">
             <Sparkles className="h-3 w-3" />
-            Live preview
+            Example guidance
           </div>
           <h2
             className="font-display text-display font-black leading-[0.93] text-cream"
             style={{ letterSpacing: "-0.02em" }}
           >
-            Watch Mike answer<br />
-            <span className="text-gold-shimmer italic">in real time.</span>
+            The kind of answers<br />
+            <span className="text-gold-shimmer italic">Mike delivers.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-md text-base leading-relaxed text-slate-400">
-            30 years. 2,500+ homes. Every answer is specific to Wilson, NC — not generic real estate advice.
+            30 years. 2,500+ homes. Every answer draws on Mike&apos;s firsthand knowledge of Eastern NC — not generic real estate advice.
           </p>
         </div>
 
@@ -311,7 +311,7 @@ export function AiDemoSection() {
                         tool_call
                       </span>
                       <div className="ml-auto flex items-center gap-1.5" aria-hidden="true">
-                        <span className="font-mono text-[9px] text-slate-700">running</span>
+                        <span className="font-mono text-[9px] text-slate-700">reviewing</span>
                         <span className="flex items-center gap-0.5">
                           {[0, 200, 400].map((d) => (
                             <span
@@ -468,7 +468,7 @@ export function AiDemoSection() {
 
         {/* Microcopy */}
         <p className="mt-6 text-center text-xs text-slate-600">
-          Free · No account required · Broker-reviewed guidance from Our Town Properties, Inc. · Not an appraisal.
+          Illustrative examples · Your question gets a personalized response reviewed by Mike&apos;s team · Free · Not an appraisal.
         </p>
       </div>
     </section>
