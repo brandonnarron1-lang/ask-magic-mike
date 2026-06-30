@@ -23,20 +23,6 @@ const CONFETTI_PIECES = [
   { top: "6%",  left: "92%", color: "#D4A017", size: 7,  delay: 50,  shape: "rect",   rotate: -55 },
 ] as const;
 
-/* ── CSS confetti particles (pure CSS, no JS library) ─── */
-const CONFETTI_PIECES = [
-  { top: "8%",  left: "12%", color: "#D4A017", size: 8,  delay: 0,   shape: "rect",   rotate: 25 },
-  { top: "5%",  left: "78%", color: "#F5C842", size: 6,  delay: 120, shape: "circle", rotate: 0  },
-  { top: "12%", left: "55%", color: "#C1272D", size: 7,  delay: 60,  shape: "rect",   rotate: -40 },
-  { top: "4%",  left: "35%", color: "#FFD566", size: 5,  delay: 200, shape: "circle", rotate: 0  },
-  { top: "15%", left: "88%", color: "#D4A017", size: 9,  delay: 80,  shape: "rect",   rotate: 60 },
-  { top: "7%",  left: "22%", color: "#F5C842", size: 6,  delay: 160, shape: "rect",   rotate: -20 },
-  { top: "10%", left: "66%", color: "#A01A1F", size: 5,  delay: 40,  shape: "circle", rotate: 0  },
-  { top: "3%",  left: "48%", color: "#FFD566", size: 8,  delay: 100, shape: "rect",   rotate: 45 },
-  { top: "18%", left: "8%",  color: "#F5C842", size: 5,  delay: 220, shape: "circle", rotate: 0  },
-  { top: "6%",  left: "92%", color: "#D4A017", size: 7,  delay: 50,  shape: "rect",   rotate: -55 },
-] as const;
-
 interface ScoreData {
   sellerCertaintyScore: number;
   buyerCertaintyScore: number;
