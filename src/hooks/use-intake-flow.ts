@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { CTAChip, PrimaryIntent, TimelineMonths } from "@/types/domain.types";
 import { normalizeToE164 } from "@/lib/utils/phone";
 import { readAttribution } from "@/lib/attribution/client-storage";
@@ -67,6 +67,8 @@ export function useIntakeFlow(
     score: null,
     error: null,
   });
+  // Synchronous guard prevents double-submit when setState hasn't re-rendered yet.
+  const submittingRef = useRef(false);
 
   const updateData = useCallback((updates: Partial<IntakeFormData>) => {
     setState((prev) => ({
@@ -104,7 +106,17 @@ export function useIntakeFlow(
   }, []);
 
   const submit = useCallback(async () => {
-    if (!sessionId) return;
+    if (!sessionId) {
+      setState((prev) => ({
+        ...prev,
+        error: "Unable to connect — please refresh the page or call us directly.",
+      }));
+      return;
+    }
+
+    // Synchronous ref check prevents concurrent submissions from rapid double-clicks.
+    if (submittingRef.current) return;
+    submittingRef.current = true;
 
     setState((prev) => ({ ...prev, submitting: true, error: null }));
 
@@ -169,6 +181,8 @@ export function useIntakeFlow(
         submitting: false,
         error: err instanceof Error ? err.message : "Something went wrong",
       }));
+    } finally {
+      submittingRef.current = false;
     }
   }, [sessionId, state.data]);
 
