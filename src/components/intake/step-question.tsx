@@ -26,13 +26,9 @@ export function StepQuestion({
 
   return (
     <div className="pt-2">
-      <h2 className="font-display text-2xl sm:text-3xl font-semibold text-cream mb-1.5 leading-snug">
+      <h2 className="font-display text-2xl sm:text-3xl font-semibold text-cream mb-5 leading-snug">
         What do you want to know?
       </h2>
-      <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-        Ask anything — buying, selling, home value, timing, neighborhood.
-        Mike reviews every answer personally.
-      </p>
 
       {/* Chat-style message input */}
       <div
@@ -111,7 +107,7 @@ export function StepQuestion({
               "transition-all duration-200",
               canProceed
                 ? "bg-gold-400 hover:bg-gold-300 shadow-lg shadow-gold-400/20 hover:shadow-gold-400/30 active:scale-95"
-                : "bg-gold-400/25 text-midnight/30 cursor-not-allowed"
+                : "bg-gold-400/50 cursor-not-allowed opacity-60"
             )}
           >
             Send

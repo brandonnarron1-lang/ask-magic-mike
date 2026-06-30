@@ -91,23 +91,20 @@ export function ValueHero() {
                 </span>
               </h1>
 
-              <p className={cn(ammTokens.subhead, "mb-2 max-w-lg")}>
-                Ask Magic Mike helps Wilson-area homeowners see a preliminary
-                home value range, compare selling options, and get follow-up
-                from Mike Eatmon&apos;s Our Town Properties team.
-              </p>
-
-              {/* Premium trust indicators */}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-7">
+              {/* Micro-trust signals replace body copy — show value, not describe it */}
+              <div className="flex flex-wrap items-center gap-2 mb-7 mt-4">
                 {[
-                  "Real answers",
-                  "Local insight",
-                  "No account needed",
-                  "No pressure",
+                  { label: "Real answers in 24 hrs", icon: "✓" },
+                  { label: "Wilson NC specialist", icon: "✓" },
+                  { label: "Broker-reviewed", icon: "✓" },
+                  { label: "No pressure · No account", icon: "✓" },
                 ].map((item) => (
-                  <span key={item} className="inline-flex items-center gap-1.5 text-xs text-slate-300">
-                    <span className="h-1 w-1 rounded-full bg-gold-400/70 shrink-0" />
-                    {item}
+                  <span
+                    key={item.label}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gold-400/15 bg-gold-400/[0.05] px-3 py-1 text-xs font-medium text-slate-300"
+                  >
+                    <span className="text-gold-400/80 text-[10px]">{item.icon}</span>
+                    {item.label}
                   </span>
                 ))}
               </div>

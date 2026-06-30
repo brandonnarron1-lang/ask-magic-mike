@@ -43,7 +43,7 @@ const TRUST_STATS = [
 function MikePresencePanel() {
   return (
     <aside
-      className="hidden lg:flex flex-col justify-center px-10 xl:px-14 py-12 border-r border-gold-400/[0.10]"
+      className="hidden md:flex flex-col justify-center px-8 lg:px-10 xl:px-14 py-10 lg:py-12 border-r border-gold-400/[0.10]"
       style={{
         background:
           "linear-gradient(160deg, rgba(212,160,23,0.04) 0%, transparent 60%)",
@@ -143,15 +143,15 @@ export function IntakeShell({
       {/* Two-panel layout at lg+ */}
       <div className="relative z-10 flex flex-1 overflow-hidden">
         {/* Left: Mike presence (hidden on mobile) */}
-        <div className="lg:w-[340px] xl:w-[380px] flex-shrink-0">
+        <div className="md:w-[300px] lg:w-[340px] xl:w-[380px] flex-shrink-0">
           <MikePresencePanel />
         </div>
 
         {/* Right: form area */}
         <main className="flex-1 min-w-0 overflow-y-auto px-5 sm:px-8 lg:px-12 xl:px-16 pb-12 pt-2">
-          <div className="max-w-xl mx-auto lg:mx-0 w-full">
-            {/* Trust cue (mobile only — desktop shows side panel) */}
-            <div className={cn("mt-2 mb-4 lg:hidden", motion.fadeUp)}>
+          <div className="max-w-xl mx-auto md:mx-0 w-full">
+            {/* Trust cue (mobile only — md+ shows side panel) */}
+            <div className={cn("mt-2 mb-4 md:hidden", motion.fadeUp)}>
               <MikeTrustCard variant="compact" />
             </div>
 

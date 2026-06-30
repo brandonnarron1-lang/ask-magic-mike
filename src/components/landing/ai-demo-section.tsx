@@ -122,7 +122,7 @@ export function AiDemoSection() {
       {/* Top divider */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/20 to-transparent" />
 
-      <div className="relative mx-auto max-w-5xl">
+      <div className="relative mx-auto max-w-4xl">
         {/* Heading block */}
         <div
           className={cn(
@@ -136,11 +136,11 @@ export function AiDemoSection() {
             Live preview
           </div>
           <h2 className="font-display text-display font-black leading-[0.93] text-cream" style={{ letterSpacing: "-0.02em" }}>
-            Ask anything about<br />
-            <span className="text-gold-shimmer italic">Wilson real estate.</span>
+            Watch Mike answer<br />
+            <span className="text-gold-shimmer italic">in real time.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-md text-base leading-relaxed text-slate-400">
-            Mike Eatmon has closed over 2,500 homes in Eastern NC. This is the kind of answer you get — specific, direct, no fluff.
+            30 years. 2,500+ homes. Every answer is specific to Wilson, NC — not generic real estate advice.
           </p>
         </div>
 
@@ -153,7 +153,7 @@ export function AiDemoSection() {
           )}
         >
           <div
-            className="relative mx-auto max-w-2xl rounded-2xl overflow-hidden"
+            className="relative mx-auto max-w-3xl rounded-2xl overflow-hidden"
             style={{
               background: "rgba(13,11,7,0.85)",
               backdropFilter: "blur(24px)",
@@ -203,7 +203,7 @@ export function AiDemoSection() {
             </div>
 
             {/* Conversation area */}
-            <div className="px-5 py-6 space-y-5 min-h-[220px]">
+            <div className="px-6 py-7 space-y-5 min-h-[260px]">
               {/* User question bubble */}
               <div
                 key={`q-${activeIdx}`}

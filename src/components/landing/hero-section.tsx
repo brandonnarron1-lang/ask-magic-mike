@@ -200,9 +200,9 @@ function MikeHeroPortrait({ priority }: { priority?: boolean }) {
         />
       </div>
 
-      {/* Floating conversation card — top-right */}
+      {/* Floating conversation card — top-right, lg+ only (portrait wide enough to contain it) */}
       <div
-        className="absolute -top-6 -right-8 z-20 pointer-events-none hidden sm:block xl:-right-12"
+        className="absolute -top-6 -right-8 z-20 pointer-events-none hidden lg:block xl:-right-12"
         style={{ transform: "rotate(-2deg)" }}
         aria-hidden="true"
       >
@@ -459,7 +459,7 @@ export function HeroSection() {
       </header>
 
       {/* ── Main grid ── */}
-      <div className="relative z-10 mx-auto grid max-w-[1400px] items-center gap-10 pb-8 pt-4 md:pb-14 lg:min-h-[calc(100svh-76px)] lg:grid-cols-[1fr_480px] xl:grid-cols-[1fr_540px] lg:gap-20">
+      <div className="relative z-10 mx-auto grid max-w-[1400px] items-center gap-10 pb-8 pt-4 md:pb-14 md:min-h-[calc(100svh-76px)] md:grid-cols-[1fr_340px] md:gap-10 lg:grid-cols-[1fr_480px] xl:grid-cols-[1fr_540px] lg:gap-20">
 
         {/* ── Left: headline + CTA ── */}
         <div
@@ -467,20 +467,20 @@ export function HeroSection() {
           data-hero-text="true"
           data-mike-layout="split"
         >
-          {/* Trust badge — desktop only; mobile Mike card covers this context */}
+          {/* Trust badge — shown from sm; Mike card handles below-md */}
           <div
             className={cn(
-              "mb-6 lg:mb-8 hidden sm:block opacity-0 motion-reduce:opacity-100",
+              "mb-5 hidden sm:block opacity-0 motion-reduce:opacity-100",
               loaded && "motion-safe:animate-fade-up motion-safe:delay-100"
             )}
           >
             <MikeVisualTrustBadge />
           </div>
 
-          {/* Mobile Mike portrait — visible below lg (portrait column not yet shown) */}
+          {/* Mobile/tablet Mike portrait — hidden when portrait column shows at md+ */}
           <div
             className={cn(
-              "mb-5 flex items-center gap-3 lg:hidden opacity-0 motion-reduce:opacity-100",
+              "mb-5 flex items-center gap-3 md:hidden opacity-0 motion-reduce:opacity-100",
               loaded && "motion-safe:animate-fade-up motion-safe:delay-100"
             )}
           >
@@ -513,8 +513,8 @@ export function HeroSection() {
           {/* Headline — THE focal point */}
           <div
             className={cn(
-              "mb-4 sm:mb-6 lg:mb-8 opacity-0 motion-reduce:opacity-100 relative",
-              loaded && "motion-safe:animate-fade-up motion-safe:delay-200"
+              "mb-5 sm:mb-6 opacity-0 motion-reduce:opacity-100 relative",
+              loaded && "motion-safe:animate-fade-up motion-safe:delay-150"
             )}
           >
             {/* Ambient glow behind the headline */}
@@ -535,21 +535,21 @@ export function HeroSection() {
             </h1>
           </div>
 
-          {/* Body copy — one clear statement */}
-          <p
+          {/* CTA chips — entry points ABOVE the input */}
+          <div
             className={cn(
-              "mb-5 sm:mb-7 lg:mb-8 max-w-lg text-base sm:text-xl leading-relaxed text-slate-300 font-light opacity-0 motion-reduce:opacity-100",
-              loaded && "motion-safe:animate-fade-up motion-safe:delay-300"
+              "mb-4 opacity-0 motion-reduce:opacity-100",
+              loaded && "motion-safe:animate-fade-up motion-safe:delay-250"
             )}
           >
-            Wilson NC&apos;s most experienced broker — 30 years, 2,500+ homes, every answer reviewed by Mike personally.
-          </p>
+            <CTAChips onSelect={handleChipSelect} selected={selectedChip} className="justify-start" />
+          </div>
 
           {/* Question input — primary conversion action */}
           <div
             className={cn(
               "w-full max-w-[640px] opacity-0 motion-reduce:opacity-100",
-              loaded && "motion-safe:animate-scale-in motion-safe:delay-400"
+              loaded && "motion-safe:animate-scale-in motion-safe:delay-350"
             )}
             data-primary-cta="true"
           >
@@ -573,15 +573,14 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* CTA chips */}
+          {/* Trust footer + seller link */}
           <div
             className={cn(
-              "mt-5 opacity-0 motion-reduce:opacity-100",
-              loaded && "motion-safe:animate-fade-up motion-safe:delay-500"
+              "mt-4 opacity-0 motion-reduce:opacity-100",
+              loaded && "motion-safe:animate-fade-up motion-safe:delay-450"
             )}
           >
-            <CTAChips onSelect={handleChipSelect} selected={selectedChip} className="justify-start" />
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-y-3">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-slate-600">
                 <span>Free · No account</span>
                 <span className="text-gold-400/25">·</span>

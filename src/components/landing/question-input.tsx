@@ -77,13 +77,15 @@ export function QuestionInput({
       )} />
 
       <div className="p-5 pb-4">
-        {/* Header label */}
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="h-3.5 w-3.5 text-gold-400/70" />
-          <span className="text-[10.5px] font-semibold tracking-label uppercase text-gold-400/70">
-            Ask Magic Mike
-          </span>
-        </div>
+        {/* Header label — hidden in compact/hero mode to reduce redundancy */}
+        {!compact && (
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="h-3.5 w-3.5 text-gold-400/70" />
+            <span className="text-[10.5px] font-semibold tracking-label uppercase text-gold-400/70">
+              Ask Magic Mike
+            </span>
+          </div>
+        )}
 
         {/* Textarea */}
         <textarea
@@ -137,7 +139,7 @@ export function QuestionInput({
             "transition-all duration-200 shrink-0",
             canSubmit && !loading
               ? "bg-gold-400 hover:bg-gold-300 shadow-lg shadow-gold-400/20 hover:shadow-gold-400/30 active:scale-95"
-              : "bg-gold-400/30 text-midnight/40 cursor-not-allowed"
+              : "bg-gold-400/50 cursor-not-allowed opacity-60"
           )}
         >
           {loading ? (
