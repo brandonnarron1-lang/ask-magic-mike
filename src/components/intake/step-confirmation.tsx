@@ -34,6 +34,35 @@ interface StepConfirmationProps {
   firstName?: string;
   score?: ScoreData | null;
   agentName?: string;
+  question?: string;
+  intent?: string;
+}
+
+function getWhatMikeWillLookAt(intent?: string, question?: string): string[] {
+  const q = (question ?? "").toLowerCase();
+  if (intent === "buy" || /buy|buying|afford|tour|homes? for sale|purchase/.test(q)) {
+    return [
+      "Active listings that match your criteria in Wilson",
+      "Price per square foot in target neighborhoods",
+      "Wilson market absorption rate and buyer competition",
+      "Affordability in the current rate environment",
+    ];
+  }
+  if (intent === "both") {
+    return [
+      "Your home's likely value range vs. purchase budget",
+      "Timing — whether to sell before or after buying",
+      "Wilson inventory levels for both sides of your move",
+      "Bridge financing options and contingency strategy",
+    ];
+  }
+  // "sell" or home_worth or anything mentioning value/worth
+  return [
+    "Recent comparable sales in your exact neighborhood",
+    "School zone and lot characteristics affecting value",
+    "Days on market trends for similar Wilson homes",
+    "Current list-to-sale price ratios in your area",
+  ];
 }
 
 const TEMPERATURE_MESSAGES: Record<
@@ -68,6 +97,8 @@ export function StepConfirmation({
   firstName,
   score,
   agentName = "Mike Eatmon",
+  question,
+  intent,
 }: StepConfirmationProps) {
   const temperature = (score?.temperature as Temperature) ?? "warm";
   const message = TEMPERATURE_MESSAGES[temperature];
@@ -77,19 +108,7 @@ export function StepConfirmation({
       data-testid="confirmation-panel"
       className="relative pt-2 pb-1 flex flex-col items-center text-center overflow-hidden"
     >
-      {/* CSS confetti burst */}
-      <style>{`
-        @keyframes confettiFly {
-          0%   { opacity: 1; transform: translateY(0) rotate(var(--r, 0deg)) scale(1); }
-          60%  { opacity: 0.8; }
-          100% { opacity: 0; transform: translateY(-80px) rotate(calc(var(--r, 0deg) + 180deg)) scale(0.4); }
-        }
-        .confetti-piece {
-          position: absolute;
-          pointer-events: none;
-          animation: confettiFly 1.2s cubic-bezier(0.22,1,0.36,1) both;
-        }
-      `}</style>
+      {/* CSS confetti burst — keyframes in globals.css */}
       {CONFETTI_PIECES.map((p, i) => (
         <span
           key={i}
@@ -134,9 +153,28 @@ export function StepConfirmation({
         Mike Eatmon or the Our Town Properties team will follow up with local
         guidance based on what you shared.
       </p>
-      <p className="text-slate-300 text-sm max-w-sm mb-7 leading-relaxed">
+      <p className="text-slate-300 text-sm max-w-sm mb-5 leading-relaxed">
         {message.sub}
       </p>
+
+      {/* Adaptive value preview — what Mike will look at */}
+      <div
+        data-testid="confirmation-value-preview"
+        className="w-full max-w-sm mb-5 rounded-xl border border-gold-400/[0.16] bg-gold-400/[0.04] px-4 py-4 text-left"
+        style={{ boxShadow: "inset 0 1px 0 rgba(212,160,23,0.08)" }}
+      >
+        <p className="text-[10.5px] font-semibold uppercase tracking-label text-gold-400/60 mb-3">
+          What Mike will look at next
+        </p>
+        <ul className="space-y-2">
+          {getWhatMikeWillLookAt(intent, question).map((item, i) => (
+            <li key={i} className="flex items-start gap-2.5">
+              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-gold-400/50 shrink-0" />
+              <span className="text-xs text-slate-300 leading-relaxed">{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       {/* What happens now — premium timeline */}
       <div

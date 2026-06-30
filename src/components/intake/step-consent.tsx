@@ -65,11 +65,10 @@ export function StepConsent({
   return (
     <div className="pt-2">
       <h2 className="font-display text-[26px] sm:text-3xl font-semibold text-[#F7F1E8] mb-2 leading-tight">
-        How can Mike contact you?
+        Last step — how should Mike follow up?
       </h2>
       <p className="text-[13.5px] text-slate-400 mb-6">
-        Pick at least one method so Mike or the Our Town Properties team can
-        follow up.
+        Pick at least one — Mike or his team will reach out with a real answer.
       </p>
 
       <div className="space-y-2.5 mb-7">

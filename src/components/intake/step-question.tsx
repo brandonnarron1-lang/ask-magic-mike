@@ -27,7 +27,7 @@ export function StepQuestion({
   return (
     <div className="pt-2">
       <h2 className="font-display text-2xl sm:text-3xl font-semibold text-cream mb-5 leading-snug">
-        What&apos;s on your mind?
+        What do you want to know?
       </h2>
 
       {/* Chat-style message input */}
@@ -43,7 +43,7 @@ export function StepQuestion({
           className="px-4 pt-4 pb-2 flex flex-wrap gap-2"
         >
           {[
-            "What is my Wilson home worth?",
+            "What is my Wilson home worth right now?",
             "Is now a good time to sell?",
             "What should I know before buying in Wilson?",
           ].map((ex) => (
@@ -64,7 +64,7 @@ export function StepQuestion({
           onChange={(e) => onQuestionChange(e.target.value)}
           onKeyDown={handleKeyDown}
           rows={4}
-          placeholder="Type your question here — I'll review it personally and follow up with a real answer."
+          placeholder="Ask anything — Mike reviews every question and follows up personally."
           className={cn(
             "w-full bg-transparent",
             "px-4 py-3 text-cream placeholder:text-slate-600",
@@ -117,7 +117,7 @@ export function StepQuestion({
       </div>
 
       <p className="mt-3 text-[11px] text-slate-600 text-center">
-        Free · No account required · ⌘↵ to send
+        Free · No account required · Mike reviews every question personally · ⌘↵ to send
       </p>
     </div>
   );

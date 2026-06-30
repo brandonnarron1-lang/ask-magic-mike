@@ -903,8 +903,8 @@ describe("hero section public copy", () => {
     expect(heroSource).toContain("Broker-reviewed guidance");
   });
 
-  it("preserves 'Request Guidance' CTA button text in question input", () => {
-    expect(questionInputSource).toContain("Request Guidance");
+  it("preserves direct CTA button text in question input", () => {
+    expect(questionInputSource).toContain("Ask Mike");
   });
 
   it("does not contain instant/guaranteed overpromise language", () => {

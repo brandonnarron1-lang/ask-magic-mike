@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Menu, X, Phone, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { CTAChips } from "./cta-chips";
 import { QuestionInput } from "./question-input";
@@ -44,35 +45,35 @@ function MikeVisualTrustBadge() {
 const HERO_CONVOS = [
   {
     question: "What’s my home worth in Wilson?",
-    before: "Based on 12 recent comps, homes like yours are trading between ",
+    before: "Based on 12 recent comps in your area, homes like yours are trading between ",
     highlight: "$185K–$235K",
-    after: " right now. Want the full analysis?",
+    after: ". School zone and lot depth will move you toward one end or the other.",
     score: 87,
-    scoreLabel: "Seller Match Score",
+    scoreLabel: "Seller Readiness",
   },
   {
     question: "Is now a good time to sell?",
     before: "Inventory is down 18% year-over-year. Well-priced homes are going under contract in ",
     highlight: "12–21 days",
-    after: " — that’s a seller’s market by most measures.",
+    after: " — that’s a seller’s market. Overpriced homes are sitting 60+ days.",
     score: 91,
-    scoreLabel: "Market Confidence",
+    scoreLabel: "Market Timing Signal",
   },
   {
     question: "Which neighborhoods have the best value?",
     before: "Fike High zone homes command ",
     highlight: "$15–$30K premium",
-    after: " over comparable addresses outside it. I can show you which active listings qualify.",
+    after: " over comparable addresses. That gap has held for a decade and isn’t going away.",
     score: 74,
-    scoreLabel: "Neighborhood Factor",
+    scoreLabel: "Neighborhood Premium",
   },
   {
     question: "Should I wait for rates to drop?",
-    before: "At current inventory levels, buyers who waited 6 months paid ",
+    before: "Buyers who waited 6 months paid ",
     highlight: "3–7% more",
-    after: " on average. Time in market typically beats timing the market.",
+    after: " on average as prices climbed. Time in market almost always beats timing the market.",
     score: 82,
-    scoreLabel: "Timing Analysis",
+    scoreLabel: "Rate Sensitivity",
   },
 ] as const;
 
@@ -325,10 +326,11 @@ function logHeroEvent(
    ACTIVITY LINES — rotate in the hero trust footer to signal live operation
 ───────────────────────────────────────────────────────────────────────── */
 const ACTIVITY_LINES = [
-  "Mike is reviewing questions · Last answered 6 min ago",
-  "Wilson inventory updated today · 14 active listings",
-  "3 sellers received valuations this morning",
-  "Market pulse: Wilson median $195K · Inventory –18% YOY",
+  "Mike reviewed a question · 7 min ago",
+  "Wilson: 14 active listings · Median $195K · DOM avg 16 days",
+  "4 sellers requested valuations this week",
+  "Inventory –18% YOY · Well-priced homes moving in 12–21 days",
+  "Fike zone premium: +$15–30K vs. comparable Hunt-zone homes",
 ] as const;
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -352,6 +354,7 @@ export function HeroSection() {
   const [loaded, setLoaded]             = useState(false);
   const [navScrolled, setNavScrolled]   = useState(false);
   const [activityIdx, setActivityIdx]   = useState(0);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const attributionRef = useRef<StoredAttribution | null>(null);
   const viewLoggedRef  = useRef(false);
 
@@ -522,7 +525,17 @@ export function HeroSection() {
             <span className="text-slate-500">Licensed NC Broker</span>
           </div>
 
-          {/* Call CTA */}
+          {/* Mobile menu button — hidden on md+ */}
+          <button
+            onClick={() => setMobileNavOpen((o) => !o)}
+            aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileNavOpen}
+            className="md:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-gold-400/20 bg-gold-400/[0.05] text-gold-300 transition-colors hover:bg-gold-400/[0.12]"
+          >
+            {mobileNavOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+
+          {/* Call CTA — desktop only */}
           <a
             href={`tel:${siteConfig.agentPhone}`}
             data-testid="nav-call-link"
@@ -535,7 +548,7 @@ export function HeroSection() {
               )
             }
             className={cn(
-              "rounded-lg border border-gold-400/30 px-4 py-2 text-sm font-medium text-cream/90 opacity-0 motion-reduce:opacity-100",
+              "hidden md:inline-flex rounded-lg border border-gold-400/30 px-4 py-2 text-sm font-medium text-cream/90 opacity-0 motion-reduce:opacity-100",
               "transition-colors hover:border-gold-400/60 hover:bg-gold-400/8",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]",
               loaded && "motion-safe:animate-scale-in motion-safe:delay-300"
@@ -544,6 +557,47 @@ export function HeroSection() {
             Call Mike
           </a>
         </nav>
+
+        {/* Mobile nav drawer */}
+        {mobileNavOpen && (
+          <div
+            className="md:hidden absolute left-0 right-0 z-30 px-4 pb-4"
+            style={{
+              background: "rgba(10,10,10,0.96)",
+              backdropFilter: "blur(24px)",
+              borderBottom: "1px solid rgba(212,160,23,0.12)",
+            }}
+          >
+            <div className="flex flex-col gap-1 pt-1">
+              <a
+                href="/value"
+                onClick={() => setMobileNavOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-300 hover:bg-gold-400/[0.08] hover:text-gold-300 transition-colors"
+              >
+                <MapPin className="h-4 w-4 text-gold-400/60 shrink-0" />
+                What&apos;s My Home Worth?
+              </a>
+              <a
+                href={`tel:${siteConfig.agentPhone}`}
+                onClick={() => { setMobileNavOpen(false); logHeroEvent("cta_click", { surface: "mobile_nav", cta: "call_mike" }, attributionRef.current); }}
+                className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-300 hover:bg-gold-400/[0.08] hover:text-gold-300 transition-colors"
+              >
+                <Phone className="h-4 w-4 text-gold-400/60 shrink-0" />
+                Call Mike — {siteConfig.agentPhoneDisplay}
+              </a>
+              <div className="mt-2 pt-2 border-t border-white/[0.06]">
+                <a
+                  href="/ask"
+                  onClick={() => setMobileNavOpen(false)}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-midnight transition-all"
+                  style={{ background: "linear-gradient(135deg, #D4A017 0%, #B8860B 100%)" }}
+                >
+                  Ask Mike a Question
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ── Main grid ── */}
@@ -631,8 +685,8 @@ export function HeroSection() {
             )}
           >
             <p className="text-base text-slate-400 leading-snug max-w-md">
-              Real-time answers from Eastern NC&apos;s most experienced real estate broker.{" "}
-              <span className="text-gold-400/70">Powered by AI.</span>
+              Mike Eatmon has closed 2,500+ deals in Wilson — and he reviews every question you send him personally.{" "}
+              <span className="text-gold-400/70">Local expertise. Real answers.</span>
             </p>
           </div>
 

@@ -1,7 +1,10 @@
 import { HeroSection } from "@/components/landing/hero-section";
 import { AiDemoSection } from "@/components/landing/ai-demo-section";
+import { WhyMike } from "@/components/landing/why-mike";
+import { MikeCard } from "@/components/landing/mike-card";
 import { MarketPulse } from "@/components/landing/market-pulse";
 import { SoldSection } from "@/components/landing/sold-section";
+import { FaqStrip } from "@/components/landing/faq-strip";
 import { Footer } from "@/components/landing/footer";
 import { siteConfig } from "@/lib/site-config";
 
@@ -84,8 +87,11 @@ export default function HomePage() {
       <main id="main-content" className="bg-[#0A0A0A]">
         <HeroSection />
         <AiDemoSection />
+        <WhyMike />
+        <MikeCard />
         <MarketPulse />
         <SoldSection />
+        <FaqStrip />
         <Footer />
       </main>
     </>

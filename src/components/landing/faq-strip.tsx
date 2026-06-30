@@ -178,12 +178,6 @@ export function FaqStrip() {
         </p>
       </div>
 
-      <style>{`
-        @keyframes faqBorderIn {
-          from { border-left-color: transparent; }
-          to   { border-left-color: rgba(212,160,23,0.7); }
-        }
-      `}</style>
     </section>
   );
 }

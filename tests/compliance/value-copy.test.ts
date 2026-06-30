@@ -118,7 +118,7 @@ describe("/value page — professional trust-first copy", () => {
   it("uses the eyebrow and CTA copy", () => {
     expect(valueHero).toContain("Ask Magic Mike by Our Town Properties");
     // CTA copy lives inside the reusable ConversionPanel default.
-    expect(conversionPanel).toContain("Start With Your Address");
+    expect(conversionPanel).toContain("See What Mike Says");
   });
 
   it("renders the three secondary path options as OptionCards", () => {
@@ -132,7 +132,7 @@ describe("/value page — professional trust-first copy", () => {
     // The line now lives in ConversionPanel (default microLine) and the
     // AiAssistBadge inline variant.
     expect(conversionPanel).toContain(
-      "AI-assisted intake. Local human follow-up."
+      "Local expertise. Real answers. No call centers."
     );
   });
 
@@ -592,8 +592,8 @@ describe("landing page copy — conversion trust guards", () => {
     expect(faqStrip).not.toMatch(/within minutes/i);
   });
 
-  it("submit button says 'Request Guidance', not 'Get My Answer'", () => {
-    expect(questionInput).toContain("Request Guidance");
+  it("submit button says 'Ask Mike', not 'Get My Answer'", () => {
+    expect(questionInput).toContain("Ask Mike");
     expect(questionInput).not.toContain("Get My Answer");
   });
 });
@@ -659,8 +659,8 @@ describe("question-input — broker trust microcopy", () => {
 
   it("three-step What happens next panel contains correct steps", () => {
     expect(questionInput).toContain("Ask your question");
-    expect(questionInput).toContain("Mike reviews the request");
-    expect(questionInput).toContain("A local expert follows up if needed");
+    expect(questionInput).toContain("Mike reviews it personally");
+    expect(questionInput).toContain("You get a real answer");
   });
 
   it("does NOT claim appraisal as a standalone positive (only as negation)", () => {
@@ -678,7 +678,7 @@ describe("step-question intake — helper prompt examples", () => {
     expect(stepQuestion).toContain("helper-prompt-examples");
   });
 
-  it("contains 'What is my Wilson home worth?' example", () => {
+  it("contains a Wilson home value example", () => {
     expect(stepQuestion).toContain("What is my Wilson home worth");
   });
 
@@ -698,5 +698,172 @@ describe("step-question intake — helper prompt examples", () => {
   it("does NOT promise an appraisal as a standalone service", () => {
     const cleaned = stripAllowedAppraisalContext(stepQuestion);
     expect(cleaned).not.toMatch(/\bappraisal\b/i);
+  });
+});
+
+// ─── Black Diamond V2 — Experience Layer Tests ───────────────────────────────
+
+describe("Black Diamond V2 — demo-to-intake bridge (question-input)", () => {
+  const questionInput = readSource(
+    "src/components/landing/question-input.tsx"
+  );
+
+  it("renders the mike-reviewing-bridge element", () => {
+    expect(questionInput).toContain("mike-reviewing-bridge");
+  });
+
+  it("shows 'Mike is reviewing your question' in loading state", () => {
+    expect(questionInput).toContain("Mike is reviewing your question");
+  });
+
+  it("includes Wilson NC context chip in bridge", () => {
+    expect(questionInput).toContain("Wilson, NC");
+  });
+
+  it("includes broker-reviewed context chip in bridge", () => {
+    expect(questionInput).toContain("Broker reviewed");
+  });
+
+  it("does NOT claim instant AI processing", () => {
+    expect(questionInput).not.toMatch(/instant(ly)? analyz/i);
+    expect(questionInput).not.toMatch(/AI is (processing|analyzing)/i);
+  });
+
+  it("uses the bridge-scan-line CSS class defined in globals.css", () => {
+    const globals = readSource("src/app/globals.css");
+    expect(globals).toContain("bridge-scan-line");
+    expect(globals).toContain("scanLine");
+  });
+});
+
+describe("Black Diamond V2 — adaptive intake intelligence (step-intent)", () => {
+  const stepIntent = readSource("src/components/intake/step-intent.tsx");
+
+  it("exports inferIntentFromQuestion logic", () => {
+    expect(stepIntent).toContain("inferIntentFromQuestion");
+  });
+
+  it("renders intent-inference-banner when intent is inferred", () => {
+    expect(stepIntent).toContain("intent-inference-banner");
+  });
+
+  it("inference banner references selling and buying", () => {
+    expect(stepIntent).toContain("selling");
+    expect(stepIntent).toContain("buying");
+  });
+
+  it("accepts a question prop", () => {
+    expect(stepIntent).toContain("question?:");
+  });
+
+  it("does NOT auto-overwrite a non-unknown intent on mount", () => {
+    expect(stepIntent).toContain('intent !== "unknown"');
+  });
+});
+
+describe("Black Diamond V2 — confirmation value preview (step-confirmation)", () => {
+  const stepConfirmation = readSource(
+    "src/components/intake/step-confirmation.tsx"
+  );
+
+  it("renders confirmation-value-preview element", () => {
+    expect(stepConfirmation).toContain("confirmation-value-preview");
+  });
+
+  it("shows 'What Mike will look at next' section header", () => {
+    expect(stepConfirmation).toContain("What Mike will look at next");
+  });
+
+  it("exports getWhatMikeWillLookAt function", () => {
+    expect(stepConfirmation).toContain("getWhatMikeWillLookAt");
+  });
+
+  it("adaptive bullets include seller comps copy", () => {
+    expect(stepConfirmation).toContain("comparable sales");
+  });
+
+  it("adaptive bullets include buyer copy", () => {
+    expect(stepConfirmation).toContain("Active listings");
+  });
+
+  it("accepts question and intent props", () => {
+    expect(stepConfirmation).toContain("question?:");
+    expect(stepConfirmation).toContain("intent?:");
+  });
+});
+
+describe("Black Diamond V2 — value funnel CTA polish (conversion-panel)", () => {
+  const conversionPanel = readSource(
+    "src/components/amm/conversion-panel.tsx"
+  );
+
+  it("uses warm CTA label default", () => {
+    expect(conversionPanel).toContain("See What Mike Says");
+  });
+
+  it("uses accurate micro-line copy", () => {
+    expect(conversionPanel).toContain("Local expertise. Real answers. No call centers.");
+  });
+
+  it("does NOT use the removed AI-assisted intake micro-line", () => {
+    expect(conversionPanel).not.toContain("AI-assisted intake");
+  });
+});
+
+describe("Black Diamond V2 — widget distribution docs", () => {
+  it("WIDGET_DISTRIBUTION.md exists", () => {
+    expect(existsSync(join(repoRoot, "docs/WIDGET_DISTRIBUTION.md"))).toBe(true);
+  });
+
+  it("contains UTM attribute reference table", () => {
+    const doc = readSource("docs/WIDGET_DISTRIBUTION.md");
+    expect(doc).toContain("utm_source");
+    expect(doc).toContain("utm_campaign");
+    expect(doc).toContain("utm_content");
+  });
+
+  it("includes WordPress snippet", () => {
+    const doc = readSource("docs/WIDGET_DISTRIBUTION.md");
+    expect(doc).toContain("WordPress");
+    expect(doc).toContain("data-amm-widget");
+  });
+
+  it("includes stale URL guard warning", () => {
+    const doc = readSource("docs/WIDGET_DISTRIBUTION.md");
+    expect(doc).toContain("verify-production-alias");
+  });
+
+  it("does NOT link to a preview Vercel URL as canonical", () => {
+    const doc = readSource("docs/WIDGET_DISTRIBUTION.md");
+    expect(doc).not.toMatch(/ask-magic-mike-[a-z0-9]+\.vercel\.app/);
+  });
+});
+
+describe("Black Diamond V2 — marketing templates docs", () => {
+  it("MARKETING_TEMPLATES.md exists", () => {
+    expect(existsSync(join(repoRoot, "docs/MARKETING_TEMPLATES.md"))).toBe(true);
+  });
+
+  it("does not make guaranteed value claims", () => {
+    const doc = readSource("docs/MARKETING_TEMPLATES.md");
+    expect(doc).not.toMatch(/guaranteed (home )?value/i);
+    expect(doc).not.toMatch(/guaranteed (sale )?price/i);
+  });
+
+  it("includes compliance notes section", () => {
+    const doc = readSource("docs/MARKETING_TEMPLATES.md");
+    expect(doc).toContain("Compliance Notes");
+  });
+
+  it("includes UTM-tagged links", () => {
+    const doc = readSource("docs/MARKETING_TEMPLATES.md");
+    expect(doc).toContain("utm_source=facebook");
+    expect(doc).toContain("utm_source=email");
+  });
+
+  it("references Mike Eatmon and Our Town Properties by name", () => {
+    const doc = readSource("docs/MARKETING_TEMPLATES.md");
+    expect(doc).toContain("Mike Eatmon");
+    expect(doc).toContain("Our Town Properties");
   });
 });
