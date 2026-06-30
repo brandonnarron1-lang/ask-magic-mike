@@ -202,8 +202,8 @@ function MikeHeroPortrait({ priority }: { priority?: boolean }) {
 
       {/* Floating conversation card — top-right, lg+ only (portrait wide enough to contain it) */}
       <div
-        className="absolute -top-6 -right-8 z-20 pointer-events-none hidden lg:block xl:-right-12"
-        style={{ transform: "rotate(-2deg)" }}
+        className="absolute -top-6 -right-8 z-20 pointer-events-none hidden lg:block xl:-right-12 motion-safe:animate-float"
+        style={{ transform: "rotate(-2deg)", animationDelay: "0.8s" }}
         aria-hidden="true"
       >
         <HeroConversationPreview />

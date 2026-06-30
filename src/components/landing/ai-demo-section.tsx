@@ -136,14 +136,8 @@ export function AiDemoSection() {
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/20 to-transparent" />
 
       <div className="relative mx-auto max-w-4xl">
-        {/* Heading — animates in on scroll */}
-        <div
-          className={cn(
-            "mb-14 text-center transition-all duration-700",
-            !visible && "motion-safe:opacity-0 motion-safe:translate-y-4",
-            visible && "opacity-100 translate-y-0"
-          )}
-        >
+        {/* Heading — always visible; content drives the page, not the entrance */}
+        <div className="mb-14 text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold-400/20 bg-gold-400/[0.06] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-label text-gold-400/80">
             <Sparkles className="h-3 w-3" />
             Live preview
