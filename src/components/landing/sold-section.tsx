@@ -147,20 +147,7 @@ export function SoldSection() {
                 href="https://ourtownproperties.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 rounded-xl border px-6 py-3.5 text-sm font-semibold transition-all duration-200 group mb-6"
-                style={{
-                  border: "1px solid rgba(212,160,23,0.30)",
-                  color: "#D4A017",
-                  background: "rgba(212,160,23,0.05)",
-                }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLAnchorElement).style.background = "rgba(212,160,23,0.12)";
-                  (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(212,160,23,0.50)";
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLAnchorElement).style.background = "rgba(212,160,23,0.05)";
-                  (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(212,160,23,0.30)";
-                }}
+                className="inline-flex items-center gap-2.5 rounded-xl border border-gold-400/30 bg-gold-400/[0.05] px-6 py-3.5 text-sm font-semibold text-gold-400 transition-all duration-200 group mb-6 hover:border-gold-400/50 hover:bg-gold-400/[0.12]"
               >
                 View All Sold Homes
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
