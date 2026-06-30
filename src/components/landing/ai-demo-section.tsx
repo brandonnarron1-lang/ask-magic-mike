@@ -15,6 +15,8 @@ const DEMO_EXCHANGES = [
     tag: "Market Timing",
     toolCall: "Searching Wilson NC market conditions",
     sources: ["2024 MLS Data", "Rate Trends", "Inventory Analysis"],
+    confidence: 88,
+    followUps: ["What neighborhoods offer the most value?", "What's realistic for a first-time buyer?"],
   },
   {
     question: "What makes a Wilson home worth more?",
@@ -23,6 +25,8 @@ const DEMO_EXCHANGES = [
     tag: "Home Value",
     toolCall: "Analyzing comparable sales + school zones",
     sources: ["School District Data", "Property Comps", "Wilson MLS"],
+    confidence: 91,
+    followUps: ["Can you show me Fike zone listings?", "What's the ROI on updating before selling?"],
   },
   {
     question: "How fast are homes selling right now?",
@@ -31,10 +35,12 @@ const DEMO_EXCHANGES = [
     tag: "Market Conditions",
     toolCall: "Pulling days-on-market + absorption data",
     sources: ["Days on Market", "Price Reductions", "Absorption Rate"],
+    confidence: 85,
+    followUps: ["How should I price my Wilson home?", "What improvements reduce days on market?"],
   },
 ] as const;
 
-const CYCLE_MS        = 7500; // full cycle duration
+const CYCLE_MS        = 8500; // full cycle duration
 const REVEAL_MS       = 300;  // delay before typing indicator
 const TYPING_MS       = 800;  // typing dots duration
 const TOOL_MS         = 950;  // tool-call indicator duration
@@ -225,7 +231,7 @@ export function AiDemoSection() {
             {/* Response area — gated by intersection observer */}
             <div
               className={cn(
-                "space-y-4 min-h-[160px] transition-all duration-500",
+                "space-y-4 min-h-[200px] transition-all duration-500",
                 !visible && "motion-safe:opacity-0",
                 visible && "opacity-100"
               )}
@@ -327,24 +333,57 @@ export function AiDemoSection() {
                       )}
                     </p>
 
-                    {/* Broker badge + source chips — appear after streaming completes */}
+                    {/* Broker badge + sources + confidence + follow-ups — appear after streaming */}
                     {!isStreaming && (
-                      <div className="mt-3">
-                        <div className="flex items-center gap-1.5 mb-2">
-                          <span className="block h-1 w-1 rounded-full bg-emerald-400/70" aria-hidden="true" />
-                          <span className="text-[10px] text-emerald-400/70 uppercase tracking-label">
-                            Mike Eatmon · Broker-reviewed
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {ex.sources.map((source) => (
-                            <span
-                              key={source}
-                              className="inline-flex items-center rounded border border-gold-400/[0.12] bg-gold-400/[0.04] px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-gold-400/40"
-                            >
-                              {source}
+                      <div className="mt-3 space-y-2.5">
+                        <div>
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <span className="block h-1 w-1 rounded-full bg-emerald-400/70" aria-hidden="true" />
+                            <span className="text-[10px] text-emerald-400/70 uppercase tracking-label">
+                              Mike Eatmon · Broker-reviewed
                             </span>
-                          ))}
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {ex.sources.map((source) => (
+                              <span
+                                key={source}
+                                className="inline-flex items-center rounded border border-gold-400/[0.12] bg-gold-400/[0.04] px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-gold-400/40"
+                              >
+                                {source}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Confidence bar */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] uppercase tracking-label text-slate-700 w-16 flex-shrink-0">Confidence</span>
+                          <div className="flex-1 h-0.5 rounded-full bg-white/[0.05] overflow-hidden">
+                            <div
+                              className="h-full rounded-full"
+                              style={{
+                                width: `${ex.confidence}%`,
+                                background: "linear-gradient(90deg, rgba(212,160,23,0.4) 0%, rgba(212,160,23,0.75) 100%)",
+                              }}
+                            />
+                          </div>
+                          <span className="text-[9px] font-semibold text-slate-600 tabular-nums w-7 text-right">{ex.confidence}%</span>
+                        </div>
+
+                        {/* Follow-up suggestions */}
+                        <div>
+                          <p className="text-[9px] uppercase tracking-label text-slate-700 mb-1.5">Ask next</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {ex.followUps.map((q) => (
+                              <a
+                                key={q}
+                                href="/ask"
+                                className="inline-block rounded-full border border-gold-400/[0.12] px-2.5 py-1 text-[10px] text-slate-500 hover:text-gold-300 hover:border-gold-400/25 transition-colors"
+                              >
+                                {q}
+                              </a>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     )}

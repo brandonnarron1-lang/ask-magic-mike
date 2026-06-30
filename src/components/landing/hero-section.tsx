@@ -39,9 +39,64 @@ function MikeVisualTrustBadge() {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   HERO CONVERSATION PREVIEW (floating AI card)
+   HERO CONVERSATION PREVIEW — cycles through live conversations
 ───────────────────────────────────────────────────────────────────────── */
+const HERO_CONVOS = [
+  {
+    question: "What’s my home worth in Wilson?",
+    before: "Based on 12 recent comps, homes like yours are trading between ",
+    highlight: "$185K–$235K",
+    after: " right now. Want the full analysis?",
+    score: 87,
+    scoreLabel: "Seller Match Score",
+  },
+  {
+    question: "Is now a good time to sell?",
+    before: "Inventory is down 18% year-over-year. Well-priced homes are going under contract in ",
+    highlight: "12–21 days",
+    after: " — that’s a seller’s market by most measures.",
+    score: 91,
+    scoreLabel: "Market Confidence",
+  },
+  {
+    question: "Which neighborhoods have the best value?",
+    before: "Fike High zone homes command ",
+    highlight: "$15–$30K premium",
+    after: " over comparable addresses outside it. I can show you which active listings qualify.",
+    score: 74,
+    scoreLabel: "Neighborhood Factor",
+  },
+  {
+    question: "Should I wait for rates to drop?",
+    before: "At current inventory levels, buyers who waited 6 months paid ",
+    highlight: "3–7% more",
+    after: " on average. Time in market typically beats timing the market.",
+    score: 82,
+    scoreLabel: "Timing Analysis",
+  },
+] as const;
+
 function HeroConversationPreview() {
+  const [idx, setIdx]           = useState(0);
+  const [contentVisible, setContentVisible] = useState(true);
+  const swapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const cycle = setInterval(() => {
+      setContentVisible(false);
+      swapTimerRef.current = setTimeout(() => {
+        setIdx((i) => (i + 1) % HERO_CONVOS.length);
+        setContentVisible(true);
+      }, 300);
+    }, 5500);
+    return () => {
+      clearInterval(cycle);
+      if (swapTimerRef.current) clearTimeout(swapTimerRef.current);
+    };
+  }, []);
+
+  const conv = HERO_CONVOS[idx];
+
   return (
     <div
       className="relative w-[300px] sm:w-[360px] rounded-2xl overflow-hidden"
@@ -54,7 +109,7 @@ function HeroConversationPreview() {
           "0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(212,160,23,0.10), inset 0 1px 0 rgba(212,160,23,0.14)",
       }}
     >
-      {/* Card header */}
+      {/* Card header — always static */}
       <div
         className="flex items-center gap-2.5 px-4 py-3 border-b border-gold-400/[0.12]"
         style={{ background: "rgba(212,160,23,0.06)" }}
@@ -67,7 +122,6 @@ function HeroConversationPreview() {
             height={28}
             className="rounded-full object-cover ring-1 ring-gold-400/40"
           />
-          {/* Live dot */}
           <span
             className="absolute -bottom-0.5 -right-0.5 block h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[#0D0B07]"
             aria-hidden="true"
@@ -78,22 +132,23 @@ function HeroConversationPreview() {
           <p className="text-[10px] uppercase tracking-label text-gold-400/60 mt-0.5">AI · Wilson, NC</p>
         </div>
         <div className="ml-auto flex items-center gap-1">
-          <span className="block h-1.5 w-1.5 rounded-full bg-emerald-400/80" />
+          <span className="block h-1.5 w-1.5 rounded-full bg-emerald-400/80 motion-safe:animate-pulse" aria-hidden="true" />
           <span className="text-[10px] text-emerald-400/80 uppercase tracking-label">Live</span>
         </div>
       </div>
 
-      {/* Conversation */}
-      <div className="px-4 py-3 space-y-3">
+      {/* Cycling conversation content */}
+      <div
+        className="px-4 py-3 space-y-3"
+        style={{ opacity: contentVisible ? 1 : 0, transition: "opacity 0.28s ease" }}
+      >
         {/* User bubble */}
         <div className="flex justify-end">
           <div
             className="max-w-[85%] rounded-xl rounded-br-sm px-3 py-2"
             style={{ background: "rgba(212,160,23,0.14)", border: "1px solid rgba(212,160,23,0.22)" }}
           >
-            <p className="text-xs text-cream/90 leading-relaxed">
-              What&apos;s my home worth in Wilson?
-            </p>
+            <p className="text-xs text-cream/90 leading-relaxed">{conv.question}</p>
           </div>
         </div>
 
@@ -112,32 +167,47 @@ function HeroConversationPreview() {
             style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
           >
             <p className="text-xs text-slate-300 leading-relaxed">
-              Based on recent comparable sales, homes in central Wilson with similar specs are trading between{" "}
-              <span className="text-gold-300 font-semibold">$185K–$235K</span> right now. Want me to run the full analysis?
+              {conv.before}
+              <span className="text-gold-300 font-semibold">{conv.highlight}</span>
+              {conv.after}
             </p>
           </div>
         </div>
 
-        {/* Lead score bar */}
+        {/* Score bar */}
         <div
-          className="rounded-lg px-3 py-2 mt-1"
+          className="rounded-lg px-3 py-2"
           style={{ background: "rgba(212,160,23,0.06)", border: "1px solid rgba(212,160,23,0.12)" }}
         >
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[9px] uppercase tracking-label text-gold-400/70">Seller Match Score</span>
-            <span className="text-[11px] font-bebas text-gold-300 leading-none">87</span>
+            <span className="text-[9px] uppercase tracking-label text-gold-400/70">{conv.scoreLabel}</span>
+            <span className="text-[11px] font-bebas text-gold-300 leading-none">{conv.score}</span>
           </div>
           <div className="h-1 w-full rounded-full bg-white/[0.06] overflow-hidden">
             <div
-              className="h-full rounded-full"
+              className="h-full rounded-full transition-all duration-700"
               style={{
-                width: "87%",
+                width: `${conv.score}%`,
                 background: "linear-gradient(90deg, rgba(212,160,23,0.6) 0%, rgba(212,160,23,1) 100%)",
                 boxShadow: "0 0 6px rgba(212,160,23,0.5)",
               }}
             />
           </div>
         </div>
+      </div>
+
+      {/* Conversation indicator dots */}
+      <div className="flex justify-center gap-1.5 pb-3 pt-0.5">
+        {HERO_CONVOS.map((_, i) => (
+          <span
+            key={i}
+            className={cn(
+              "block h-1 rounded-full transition-all duration-300",
+              i === idx ? "w-4 bg-gold-400/60" : "w-1 bg-gold-400/20"
+            )}
+            aria-hidden="true"
+          />
+        ))}
       </div>
     </div>
   );
@@ -252,7 +322,17 @@ function logHeroEvent(
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   STATS — unchanged
+   ACTIVITY LINES — rotate in the hero trust footer to signal live operation
+───────────────────────────────────────────────────────────────────────── */
+const ACTIVITY_LINES = [
+  "Mike is reviewing questions · Last answered 6 min ago",
+  "Wilson inventory updated today · 14 active listings",
+  "3 sellers received valuations this morning",
+  "Market pulse: Wilson median $195K · Inventory –18% YOY",
+] as const;
+
+/* ─────────────────────────────────────────────────────────────────────────
+   STATS
 ───────────────────────────────────────────────────────────────────────── */
 const STATS = [
   { value: "Since 1993", label: "Licensed & active" },
@@ -271,6 +351,7 @@ export function HeroSection() {
   const [loading, setLoading]           = useState(false);
   const [loaded, setLoaded]             = useState(false);
   const [navScrolled, setNavScrolled]   = useState(false);
+  const [activityIdx, setActivityIdx]   = useState(0);
   const attributionRef = useRef<StoredAttribution | null>(null);
   const viewLoggedRef  = useRef(false);
 
@@ -294,6 +375,13 @@ export function HeroSection() {
       clearTimeout(t);
       window.removeEventListener("scroll", onScroll);
     };
+  }, []);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setActivityIdx((i) => (i + 1) % ACTIVITY_LINES.length);
+    }, 4000);
+    return () => clearInterval(t);
   }, []);
 
   const handleChipSelect = useCallback((chip: CTAChip, defaultQuestion: string) => {
@@ -580,6 +668,14 @@ export function HeroSection() {
               loaded && "motion-safe:animate-fade-up motion-safe:delay-450"
             )}
           >
+            {/* Live activity strip */}
+            <div className="mb-2.5 flex items-center gap-2">
+              <span className="block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-400 motion-safe:animate-pulse" aria-hidden="true" />
+              <span className="text-[11px] text-slate-500 transition-opacity duration-500">
+                {ACTIVITY_LINES[activityIdx]}
+              </span>
+            </div>
+
             <div className="flex flex-wrap items-center justify-between gap-y-3">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-slate-600">
                 <span>Free · No account</span>
