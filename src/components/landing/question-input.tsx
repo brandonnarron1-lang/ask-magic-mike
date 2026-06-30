@@ -10,6 +10,7 @@ interface QuestionInputProps {
   onSubmit?: (question: string, address: string) => void;
   loading?: boolean;
   className?: string;
+  compact?: boolean;
 }
 
 export function QuestionInput({
@@ -18,6 +19,7 @@ export function QuestionInput({
   onSubmit,
   loading = false,
   className,
+  compact = false,
 }: QuestionInputProps) {
   const [question, setQuestion] = useState(initialQuestion);
   const [address,  setAddress]  = useState(initialAddress);
@@ -142,9 +144,10 @@ export function QuestionInput({
         Free · No account · Broker-reviewed guidance from Our Town Properties · Not an appraisal.
       </p>
 
-      {/* What happens next? trust panel */}
+      {/* What happens next? trust panel — hidden in compact/hero context */}
       <div
         data-testid="what-happens-next-panel"
+        hidden={compact}
         className="relative mx-5 mb-4 rounded-xl border border-white/[0.07] bg-white/[0.02] overflow-hidden"
       >
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/25 to-transparent" />

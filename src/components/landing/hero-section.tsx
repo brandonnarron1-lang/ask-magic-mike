@@ -44,7 +44,7 @@ function MikeVisualTrustBadge() {
 function HeroConversationPreview() {
   return (
     <div
-      className="relative w-[270px] sm:w-[300px] rounded-2xl overflow-hidden"
+      className="relative w-[300px] sm:w-[360px] rounded-2xl overflow-hidden"
       style={{
         background: "rgba(13,11,7,0.82)",
         backdropFilter: "blur(24px)",
@@ -74,12 +74,12 @@ function HeroConversationPreview() {
           />
         </div>
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold text-cream/90 leading-none">Magic Mike</p>
-          <p className="text-[9px] uppercase tracking-label text-gold-400/60 mt-0.5">AI · Wilson, NC</p>
+          <p className="text-xs font-semibold text-cream/90 leading-none">Magic Mike</p>
+          <p className="text-[10px] uppercase tracking-label text-gold-400/60 mt-0.5">AI · Wilson, NC</p>
         </div>
         <div className="ml-auto flex items-center gap-1">
           <span className="block h-1.5 w-1.5 rounded-full bg-emerald-400/80" />
-          <span className="text-[9px] text-emerald-400/80 uppercase tracking-label">Live</span>
+          <span className="text-[10px] text-emerald-400/80 uppercase tracking-label">Live</span>
         </div>
       </div>
 
@@ -91,7 +91,7 @@ function HeroConversationPreview() {
             className="max-w-[85%] rounded-xl rounded-br-sm px-3 py-2"
             style={{ background: "rgba(212,160,23,0.14)", border: "1px solid rgba(212,160,23,0.22)" }}
           >
-            <p className="text-[11px] text-cream/90 leading-relaxed">
+            <p className="text-xs text-cream/90 leading-relaxed">
               What&apos;s my home worth in Wilson?
             </p>
           </div>
@@ -111,7 +111,7 @@ function HeroConversationPreview() {
             className="max-w-[88%] rounded-xl rounded-bl-sm px-3 py-2"
             style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
           >
-            <p className="text-[11px] text-slate-300 leading-relaxed">
+            <p className="text-xs text-slate-300 leading-relaxed">
               Based on recent comparable sales, homes in central Wilson with similar specs are trading between{" "}
               <span className="text-gold-300 font-semibold">$185K–$235K</span> right now. Want me to run the full analysis?
             </p>
@@ -202,7 +202,7 @@ function MikeHeroPortrait({ priority }: { priority?: boolean }) {
 
       {/* Floating conversation card — top-right */}
       <div
-        className="absolute -top-4 -right-6 z-20 pointer-events-none hidden sm:block"
+        className="absolute -top-6 -right-8 z-20 pointer-events-none hidden sm:block xl:-right-12"
         style={{ transform: "rotate(-2deg)" }}
         aria-hidden="true"
       >
@@ -467,20 +467,53 @@ export function HeroSection() {
           data-hero-text="true"
           data-mike-layout="split"
         >
-          {/* Trust badge */}
+          {/* Trust badge — desktop only; mobile Mike card covers this context */}
           <div
             className={cn(
-              "mb-8 opacity-0 motion-reduce:opacity-100",
+              "mb-6 lg:mb-8 hidden sm:block opacity-0 motion-reduce:opacity-100",
               loaded && "motion-safe:animate-fade-up motion-safe:delay-100"
             )}
           >
             <MikeVisualTrustBadge />
           </div>
 
+          {/* Mobile Mike portrait — visible below lg (portrait column not yet shown) */}
+          <div
+            className={cn(
+              "mb-5 flex items-center gap-3 lg:hidden opacity-0 motion-reduce:opacity-100",
+              loaded && "motion-safe:animate-fade-up motion-safe:delay-100"
+            )}
+          >
+            <div
+              className="relative flex-shrink-0"
+              style={{
+                boxShadow: "0 0 0 1px rgba(212,160,23,0.30), 0 8px 24px rgba(0,0,0,0.5)",
+                borderRadius: "9999px",
+              }}
+            >
+              <Image
+                src={mikePlatformAssets.circularAvatar.src}
+                alt="Mike Eatmon"
+                width={64}
+                height={64}
+                className="rounded-full object-cover"
+              />
+              <span
+                className="absolute bottom-0.5 right-0.5 block h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-[#0A0A0A]"
+                aria-hidden="true"
+              />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-cream leading-snug">Mike Eatmon</p>
+              <p className="text-xs text-slate-400">Broker · Our Town Properties · Wilson NC</p>
+              <p className="mt-1 text-[10px] text-gold-400/70 uppercase tracking-label">Since 1993 · 2,500+ homes</p>
+            </div>
+          </div>
+
           {/* Headline — THE focal point */}
           <div
             className={cn(
-              "mb-8 opacity-0 motion-reduce:opacity-100 relative",
+              "mb-4 sm:mb-6 lg:mb-8 opacity-0 motion-reduce:opacity-100 relative",
               loaded && "motion-safe:animate-fade-up motion-safe:delay-200"
             )}
           >
@@ -505,12 +538,11 @@ export function HeroSection() {
           {/* Body copy — one clear statement */}
           <p
             className={cn(
-              "mb-8 max-w-lg text-xl leading-relaxed text-slate-300 font-light opacity-0 motion-reduce:opacity-100",
+              "mb-5 sm:mb-7 lg:mb-8 max-w-lg text-base sm:text-xl leading-relaxed text-slate-300 font-light opacity-0 motion-reduce:opacity-100",
               loaded && "motion-safe:animate-fade-up motion-safe:delay-300"
             )}
           >
-            Real answers from Wilson NC&apos;s most experienced broker.
-            2,500+ homes closed. Every request reviewed personally by Mike Eatmon.
+            Wilson NC&apos;s most experienced broker — 30 years, 2,500+ homes, every answer reviewed by Mike personally.
           </p>
 
           {/* Question input — primary conversion action */}
@@ -534,6 +566,7 @@ export function HeroSection() {
                   initialQuestion={question}
                   onSubmit={handleSubmit}
                   loading={loading}
+                  compact
                   className="w-full text-left !border-transparent !shadow-none bg-transparent backdrop-blur-none"
                 />
               </div>

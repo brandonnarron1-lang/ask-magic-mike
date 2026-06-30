@@ -89,8 +89,9 @@ export function AiDemoSection() {
         {/* Heading block */}
         <div
           className={cn(
-            "mb-14 text-center opacity-0 motion-reduce:opacity-100 transition-all duration-700",
-            visible && "opacity-100 translate-y-0 motion-safe:animate-fade-up"
+            "mb-14 text-center transition-all duration-700",
+            !visible && "motion-safe:opacity-0 motion-safe:translate-y-4",
+            visible && "opacity-100 translate-y-0"
           )}
         >
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold-400/20 bg-gold-400/[0.06] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-label text-gold-400/80">
@@ -109,8 +110,9 @@ export function AiDemoSection() {
         {/* Demo panel */}
         <div
           className={cn(
-            "opacity-0 motion-reduce:opacity-100",
-            visible && "motion-safe:animate-fade-up motion-safe:delay-200"
+            "transition-all duration-700 delay-200",
+            !visible && "motion-safe:opacity-0 motion-safe:translate-y-4",
+            visible && "opacity-100 translate-y-0"
           )}
         >
           <div
