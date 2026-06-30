@@ -14,6 +14,7 @@ const DEMO_EXCHANGES = [
       "Wilson's median is around $195K — still one of the most accessible markets in Eastern NC. Inventory has loosened since last year, and rates have moderated. If you're planning to stay 3+ years, the math works solidly in your favor right now.",
     tag: "Market Timing",
     toolCall: "Searching Wilson NC market conditions",
+    toolQuery: 'search({ market: "Wilson-NC", metrics: ["median_price", "inventory", "dom"] })',
     sources: ["2024 MLS Data", "Rate Trends", "Inventory Analysis"],
     confidence: 88,
     followUps: ["What neighborhoods offer the most value?", "What's realistic for a first-time buyer?"],
@@ -24,6 +25,7 @@ const DEMO_EXCHANGES = [
       "Three things move the needle: school zone (Fike High vs. Hunt), proximity to the medical district, and lot depth. A Fike-zone home in similar condition will typically command $15–30K over a comparable address outside it.",
     tag: "Home Value",
     toolCall: "Analyzing comparable sales + school zones",
+    toolQuery: 'analyze({ type: "comps", zone: "Fike-High", filters: ["school_zone", "lot_depth"] })',
     sources: ["School District Data", "Property Comps", "Wilson MLS"],
     confidence: 91,
     followUps: ["Can you show me Fike zone listings?", "What's the ROI on updating before selling?"],
@@ -34,6 +36,7 @@ const DEMO_EXCHANGES = [
       "Well-priced homes in good condition are going under contract in 12–21 days. Overpriced or deferred-maintenance listings are sitting 60+ days and taking price cuts. Presentation and pricing discipline matter more than they did in 2021.",
     tag: "Market Conditions",
     toolCall: "Pulling days-on-market + absorption data",
+    toolQuery: 'query({ metrics: ["days_on_market", "absorption_rate"], period: "90d" })',
     sources: ["Days on Market", "Price Reductions", "Absorption Rate"],
     confidence: 85,
     followUps: ["How should I price my Wilson home?", "What improvements reduce days on market?"],
@@ -267,7 +270,7 @@ export function AiDemoSection() {
                 </div>
               )}
 
-              {/* Step 2: Tool-call indicator — AI doing real work */}
+              {/* Step 2: Tool-call indicator — terminal-style AI execution */}
               {showToolCall && (
                 <div
                   key={`tool-${activeIdx}`}
@@ -282,22 +285,56 @@ export function AiDemoSection() {
                     aria-hidden="true"
                   />
                   <div
-                    className="inline-flex items-center gap-2.5 rounded-xl px-3.5 py-2.5"
+                    className="flex-1 overflow-hidden rounded-xl"
                     style={{
-                      background: "rgba(212,160,23,0.04)",
-                      border: "1px solid rgba(212,160,23,0.12)",
+                      background: "rgba(8,7,4,0.96)",
+                      border: "1px solid rgba(212,160,23,0.20)",
                     }}
-                    aria-label="Searching data"
+                    aria-label="AI tool execution in progress"
                   >
-                    <span
-                      className="block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-gold-400/50 motion-safe:animate-pulse"
-                      aria-hidden="true"
-                    />
-                    <span className="text-xs text-slate-500">{ex.toolCall}</span>
-                    <span className="text-slate-700 text-xs" aria-hidden="true">·</span>
-                    <span className="text-[11px] text-slate-600 motion-safe:animate-pulse">
-                      pulling data
-                    </span>
+                    {/* Terminal header */}
+                    <div
+                      className="flex items-center gap-2 border-b border-gold-400/[0.10] px-3 py-2"
+                      style={{ background: "rgba(212,160,23,0.04)" }}
+                    >
+                      <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
+                        <span
+                          className="absolute h-full w-full rounded-full bg-gold-400/60 motion-safe:animate-ping"
+                          style={{ animationDuration: "1.8s" }}
+                        />
+                        <span className="relative h-2 w-2 rounded-full bg-gold-400/80" />
+                      </span>
+                      <span className="font-mono text-[9px] tracking-widest text-gold-400/45 uppercase select-none">
+                        tool_call
+                      </span>
+                      <div className="ml-auto flex items-center gap-1.5" aria-hidden="true">
+                        <span className="font-mono text-[9px] text-slate-700">running</span>
+                        <span className="flex items-center gap-0.5">
+                          {[0, 200, 400].map((d) => (
+                            <span
+                              key={d}
+                              className="block h-1 w-1 rounded-full bg-slate-700 motion-safe:animate-pulse"
+                              style={{ animationDelay: `${d}ms` }}
+                            />
+                          ))}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Terminal body */}
+                    <div className="space-y-1.5 px-3 py-3">
+                      <p className="font-mono text-[11px] leading-relaxed text-slate-400">
+                        <span className="text-gold-400/50 select-none mr-1.5">→</span>
+                        {ex.toolCall}
+                        <span
+                          className="ml-1 inline-block h-[12px] w-[5px] bg-gold-400/60 -mb-[2px] motion-safe:animate-pulse"
+                          aria-hidden="true"
+                        />
+                      </p>
+                      <p className="font-mono text-[10px] text-slate-700 pl-4">
+                        <span className="text-slate-800 mr-1.5 select-none">›</span>
+                        {ex.toolQuery}
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}

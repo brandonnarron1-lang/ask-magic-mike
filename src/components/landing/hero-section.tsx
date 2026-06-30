@@ -623,6 +623,19 @@ export function HeroSection() {
             </h1>
           </div>
 
+          {/* Value tagline — answers "what is this?" in one line */}
+          <div
+            className={cn(
+              "mb-5 sm:mb-6 opacity-0 motion-reduce:opacity-100",
+              loaded && "motion-safe:animate-fade-up motion-safe:delay-200"
+            )}
+          >
+            <p className="text-base text-slate-400 leading-snug max-w-md">
+              Real-time answers from Eastern NC&apos;s most experienced real estate broker.{" "}
+              <span className="text-gold-400/70">Powered by AI.</span>
+            </p>
+          </div>
+
           {/* CTA chips — entry points ABOVE the input */}
           <div
             className={cn(

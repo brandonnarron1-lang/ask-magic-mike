@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ComplianceFooter } from "@/components/amm/compliance-footer";
 import { brandPackAssets } from "@/components/amm/brand-pack-assets";
 import type { Temperature } from "@/types/domain.types";
+import { siteConfig } from "@/lib/site-config";
 
 /* ── CSS confetti particles (pure CSS, no JS library) ─── */
 const CONFETTI_PIECES = [
@@ -61,7 +62,7 @@ const TEMPERATURE_MESSAGES: Record<
   },
 };
 
-const AGENT_PHONE = process.env.NEXT_PUBLIC_AGENT_PHONE ?? "+12522454337";
+const AGENT_PHONE = siteConfig.agentPhone;
 
 export function StepConfirmation({
   firstName,
