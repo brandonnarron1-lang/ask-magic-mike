@@ -684,7 +684,10 @@ export function HeroSection() {
             {/* Live activity strip */}
             <div className="mb-2.5 flex items-center gap-2">
               <span className="block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-400 motion-safe:animate-pulse" aria-hidden="true" />
-              <span className="text-[11px] text-slate-500 transition-opacity duration-500">
+              <span
+                key={activityIdx}
+                className="text-[11px] text-slate-500 motion-safe:animate-fade-in"
+              >
                 {ACTIVITY_LINES[activityIdx]}
               </span>
             </div>
