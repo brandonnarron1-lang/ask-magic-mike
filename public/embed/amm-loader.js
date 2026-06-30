@@ -16,6 +16,8 @@
  *   data-utm-source     Default: "ourtownproperties"
  *   data-utm-medium     Default: "referral"
  *   data-utm-campaign   Default: "website_widget"
+ *   data-utm-content    Default: "" (omitted if blank)
+ *   data-utm-term       Default: "" (omitted if blank)
  *   data-height         iframe height in px. Default: 580
  *   data-q              Pre-fill the question field. Default: ""
  *
@@ -45,6 +47,12 @@
       utm_medium:   el.getAttribute("data-utm-medium")   || "referral",
       utm_campaign: el.getAttribute("data-utm-campaign") || "website_widget",
     };
+
+    var utmContent = el.getAttribute("data-utm-content") || "";
+    if (utmContent) params.utm_content = utmContent;
+
+    var utmTerm = el.getAttribute("data-utm-term") || "";
+    if (utmTerm) params.utm_term = utmTerm;
 
     var q = el.getAttribute("data-q") || "";
     if (q) params.q = q;

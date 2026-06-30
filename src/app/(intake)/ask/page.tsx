@@ -134,9 +134,23 @@ function AskPageInner() {
   );
 }
 
+function AskLoadingSkeleton() {
+  return (
+    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+      <div className="w-full max-w-lg mx-auto px-6 space-y-4 animate-pulse">
+        <div className="h-2 w-full rounded-full bg-white/[0.06]" />
+        <div className="h-10 w-3/4 rounded-xl bg-white/[0.04]" />
+        <div className="h-4 w-1/2 rounded bg-white/[0.04]" />
+        <div className="h-32 w-full rounded-xl bg-white/[0.03]" />
+        <div className="h-12 w-full rounded-xl bg-gold-400/[0.08]" />
+      </div>
+    </div>
+  );
+}
+
 export default function AskPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<AskLoadingSkeleton />}>
       <AskPageInner />
     </Suspense>
   );

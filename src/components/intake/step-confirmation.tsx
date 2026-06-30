@@ -77,19 +77,7 @@ export function StepConfirmation({
       data-testid="confirmation-panel"
       className="relative pt-2 pb-1 flex flex-col items-center text-center overflow-hidden"
     >
-      {/* CSS confetti burst */}
-      <style>{`
-        @keyframes confettiFly {
-          0%   { opacity: 1; transform: translateY(0) rotate(var(--r, 0deg)) scale(1); }
-          60%  { opacity: 0.8; }
-          100% { opacity: 0; transform: translateY(-80px) rotate(calc(var(--r, 0deg) + 180deg)) scale(0.4); }
-        }
-        .confetti-piece {
-          position: absolute;
-          pointer-events: none;
-          animation: confettiFly 1.2s cubic-bezier(0.22,1,0.36,1) both;
-        }
-      `}</style>
+      {/* CSS confetti burst — keyframes in globals.css */}
       {CONFETTI_PIECES.map((p, i) => (
         <span
           key={i}
