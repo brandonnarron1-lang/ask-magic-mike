@@ -50,13 +50,10 @@ export function EmbedShell({
 
         <div className="mb-3 mt-2">
           <Progress value={progress} className="h-0.5" />
-          <div className="mt-2 flex items-center justify-between gap-2">
-            <p className="text-[11.5px] font-semibold tracking-label uppercase text-gold-300">
+          <div className="mt-2">
+            <p className="text-[10px] font-semibold tracking-label uppercase text-gold-300/70">
               {stepLabel}
             </p>
-            <span className="text-[11px] uppercase tracking-label text-slate-300">
-              {step} / {totalSteps}
-            </span>
           </div>
         </div>
 
