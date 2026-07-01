@@ -40,6 +40,53 @@ const GENERIC_HTML_SNIPPET = `<!-- Ask Magic Mike — Generic HTML Embed -->
   data-amm-campaign="widget"
 ></script>`;
 
+// ── Hero Trust Metrics ────────────────────────────────────────────────────────
+
+const TRUST_METRICS = [
+  { num: "2,500+", label: "deals closed" },
+  { num: "30+", label: "years in Wilson" },
+  { num: "6", label: "channels" },
+  { num: "~3 min", label: "to deploy" },
+] as const;
+
+// ── Launch Paths ──────────────────────────────────────────────────────────────
+
+const LAUNCH_PATHS = [
+  {
+    id: "widget",
+    label: "Website Widget",
+    anchor: "embed-snippets",
+    accentClass: "bg-cyan-400/[0.08] border border-cyan-400/20 text-cyan-300",
+    bestFor: "WordPress, any website, sidebar",
+    description:
+      "Embed the intake form directly. Prospects stay on your site — no redirect, no friction.",
+    setup: "Under 5 minutes",
+    ctaText: "Get embed code",
+  },
+  {
+    id: "social",
+    label: "Social & Email",
+    anchor: "channel-links",
+    accentClass: "bg-blue-400/[0.08] border border-blue-400/20 text-blue-300",
+    bestFor: "Facebook, Instagram, email blast",
+    description:
+      "Share a UTM-tracked link. Works in bio links, posts, newsletters, and text campaigns.",
+    setup: "Under 1 minute",
+    ctaText: "Get channel links",
+  },
+  {
+    id: "print",
+    label: "QR / Print",
+    anchor: "channel-links",
+    accentClass: "bg-purple-400/[0.08] border border-purple-400/20 text-purple-300",
+    bestFor: "Yard signs, open houses, mailers",
+    description:
+      "Drop the QR link into any free generator. Print on signs, flyers, and door hangers.",
+    setup: "Under 2 minutes",
+    ctaText: "Get QR links",
+  },
+] as const;
+
 // ── Channel UTM Links ─────────────────────────────────────────────────────────
 
 const CHANNELS = [
@@ -160,10 +207,21 @@ export default function DistributionPage() {
           Embed Ask Magic Mike.{" "}
           <span className="text-gradient-gold">Everywhere.</span>
         </h1>
-        <p className="max-w-xl mx-auto text-sm text-slate-400 leading-relaxed mb-8">
+        <p className="max-w-xl mx-auto text-sm text-slate-400 leading-relaxed mb-6">
           Website widget, Facebook, Instagram, email, QR code, sign rider — every channel
           with UTM attribution built in. Mike reviews every lead personally.
         </p>
+
+        {/* Trust metrics */}
+        <div className="flex items-center justify-center gap-6 sm:gap-10 flex-wrap mb-8">
+          {TRUST_METRICS.map((m) => (
+            <div key={m.label} className="text-center">
+              <div className="font-bebas text-2xl sm:text-3xl text-gold-300 leading-tight">{m.num}</div>
+              <div className="text-[9.5px] font-semibold uppercase tracking-label text-slate-600">{m.label}</div>
+            </div>
+          ))}
+        </div>
+
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <Link
             href="/ask"
@@ -177,6 +235,42 @@ export default function DistributionPage() {
           >
             Home Value Estimate
           </Link>
+        </div>
+      </section>
+
+      {/* Launch Paths */}
+      <section className="relative px-5 pb-10 sm:px-8" aria-label="Launch Paths">
+        <div className="max-w-3xl mx-auto">
+          <div className="gold-rule mb-8" />
+          <p className="text-[10.5px] font-semibold tracking-label uppercase text-gold-400/70 mb-1">
+            Launch Paths
+          </p>
+          <h2 className="font-bebas text-2xl sm:text-3xl text-cream mb-6">
+            Three ways to deploy Mike.
+          </h2>
+          <div className="grid sm:grid-cols-3 gap-3">
+            {LAUNCH_PATHS.map((path) => (
+              <a
+                key={path.id}
+                href={`#${path.anchor}`}
+                className="group rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-4 block hover:border-gold-400/15 transition-all"
+              >
+                <span className={`inline-block rounded-full px-2.5 py-0.5 text-[9.5px] font-semibold mb-3 ${path.accentClass}`}>
+                  {path.label}
+                </span>
+                <p className="text-sm font-semibold text-cream mb-1">{path.bestFor}</p>
+                <p className="text-xs text-slate-500 leading-relaxed mb-3">{path.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-slate-600">
+                    Setup: <span className="text-slate-500">{path.setup}</span>
+                  </span>
+                  <span className="text-[10.5px] text-gold-400/50 group-hover:text-gold-300 transition-colors">
+                    {path.ctaText} →
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
 

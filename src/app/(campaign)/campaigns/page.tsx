@@ -17,15 +17,46 @@ const CATEGORY_LABELS: Record<string, string> = {
   video: "Video",
 };
 
+const FILTER_OPTIONS = [
+  { value: "all", label: "All" },
+  ...CATEGORY_ORDER.map((c) => ({ value: c, label: CATEGORY_LABELS[c] })),
+];
+
+// ── Preset Nav ────────────────────────────────────────────────────────────────
+
 function PresetNav({
   active,
   onSelect,
+  visiblePresets,
+  filterCat,
 }: {
   active: string;
   onSelect: (id: string) => void;
+  visiblePresets: CampaignPreset[];
+  filterCat: string;
 }) {
+  const btnClass = (id: string) =>
+    [
+      "w-full text-left rounded-lg px-3 py-2 text-xs transition-all duration-150",
+      active === id
+        ? "border border-gold-400/25 bg-gold-400/[0.08] text-gold-300 font-semibold"
+        : "border border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]",
+    ].join(" ");
+
+  if (filterCat !== "all") {
+    return (
+      <nav aria-label="Campaign presets" className="space-y-0.5">
+        {visiblePresets.map((p) => (
+          <button key={p.id} onClick={() => onSelect(p.id)} className={btnClass(p.id)}>
+            {p.label}
+          </button>
+        ))}
+      </nav>
+    );
+  }
+
   const grouped = CATEGORY_ORDER.reduce<Record<string, CampaignPreset[]>>((acc, cat) => {
-    const presets = CAMPAIGN_PRESETS.filter((p) => p.category === cat);
+    const presets = visiblePresets.filter((p) => p.category === cat);
     if (presets.length > 0) acc[cat] = presets;
     return acc;
   }, {});
@@ -39,16 +70,7 @@ function PresetNav({
           </p>
           <div className="space-y-0.5">
             {presets.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => onSelect(p.id)}
-                className={[
-                  "w-full text-left rounded-lg px-3 py-2 text-xs transition-all duration-150",
-                  active === p.id
-                    ? "border border-gold-400/25 bg-gold-400/[0.08] text-gold-300 font-semibold"
-                    : "border border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]",
-                ].join(" ")}
-              >
+              <button key={p.id} onClick={() => onSelect(p.id)} className={btnClass(p.id)}>
                 {p.label}
               </button>
             ))}
@@ -58,6 +80,8 @@ function PresetNav({
     </nav>
   );
 }
+
+// ── Preset Detail ─────────────────────────────────────────────────────────────
 
 function PresetDetail({ preset }: { preset: CampaignPreset }) {
   return (
@@ -179,16 +203,39 @@ function PresetDetail({ preset }: { preset: CampaignPreset }) {
   );
 }
 
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 export default function CampaignsPage() {
   const [activeId, setActiveId] = useState(CAMPAIGN_PRESETS[0]?.id ?? "home_value");
+  const [filterCat, setFilterCat] = useState("all");
 
-  const activePreset = CAMPAIGN_PRESETS.find((p) => p.id === activeId) ?? CAMPAIGN_PRESETS[0];
+  const visiblePresets =
+    filterCat === "all"
+      ? CAMPAIGN_PRESETS
+      : CAMPAIGN_PRESETS.filter((p) => p.category === filterCat);
+
+  function handleFilter(cat: string) {
+    setFilterCat(cat);
+    const next =
+      cat === "all"
+        ? CAMPAIGN_PRESETS
+        : CAMPAIGN_PRESETS.filter((p) => p.category === cat);
+    if (next.length > 0 && !next.find((p) => p.id === activeId)) {
+      setActiveId(next[0].id);
+    }
+  }
+
+  const activePreset =
+    visiblePresets.find((p) => p.id === activeId) ?? visiblePresets[0];
 
   return (
     <BrandShell>
       {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-5 py-4 sm:px-8">
-        <Link href="/" className="text-sm font-semibold tracking-label uppercase text-gold-400/80 hover:text-gold-300 transition-colors">
+        <Link
+          href="/"
+          className="text-sm font-semibold tracking-label uppercase text-gold-400/80 hover:text-gold-300 transition-colors"
+        >
           Ask Magic Mike
         </Link>
         <div className="flex items-center gap-3">
@@ -222,10 +269,16 @@ export default function CampaignsPage() {
           Ready-to-use campaigns.{" "}
           <span className="text-gradient-gold">Copy and post.</span>
         </h1>
-        <p className="text-sm text-slate-400 leading-relaxed max-w-xl">
-          {CAMPAIGN_PRESETS.length} presets — Facebook posts, Instagram captions, email blasts,
-          QR flyers, video scripts, and more. Every CTA is UTM-tracked. All compliance-reviewed.
-        </p>
+        <div className="flex flex-wrap items-center gap-3 mt-2">
+          <p className="text-sm text-slate-400 leading-relaxed max-w-xl">
+            {CAMPAIGN_PRESETS.length} presets — Facebook posts, Instagram captions, email
+            blasts, QR flyers, video scripts, and more. Every CTA is UTM-tracked.
+          </p>
+          <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/[0.05] px-2.5 py-0.5 text-[10px] font-semibold text-emerald-400/70">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400/60" aria-hidden="true" />
+            All compliance-reviewed
+          </span>
+        </div>
       </section>
 
       {/* Two-column layout */}
@@ -233,7 +286,42 @@ export default function CampaignsPage() {
         {/* Preset selector sidebar */}
         <aside className="md:w-52 lg:w-60 shrink-0 mb-6 md:mb-0">
           <div className="sticky top-4 rounded-xl border border-white/[0.07] bg-white/[0.02] p-3">
-            <PresetNav active={activeId} onSelect={setActiveId} />
+            {/* Category filter tabs */}
+            <div
+              className="flex flex-wrap gap-1 mb-3 pb-3 border-b border-white/[0.06]"
+              role="group"
+              aria-label="Filter by category"
+            >
+              {FILTER_OPTIONS.map(({ value, label }) => {
+                const count =
+                  value === "all"
+                    ? CAMPAIGN_PRESETS.length
+                    : CAMPAIGN_PRESETS.filter((p) => p.category === value).length;
+                return (
+                  <button
+                    key={value}
+                    onClick={() => handleFilter(value)}
+                    aria-pressed={filterCat === value}
+                    className={[
+                      "rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-label transition-all duration-150",
+                      filterCat === value
+                        ? "bg-gold-400/[0.10] border border-gold-400/25 text-gold-300"
+                        : "border border-transparent text-slate-600 hover:text-slate-400",
+                    ].join(" ")}
+                  >
+                    {label}
+                    <span className="ml-1 opacity-50">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <PresetNav
+              active={activeId}
+              onSelect={setActiveId}
+              visiblePresets={visiblePresets}
+              filterCat={filterCat}
+            />
           </div>
         </aside>
 
