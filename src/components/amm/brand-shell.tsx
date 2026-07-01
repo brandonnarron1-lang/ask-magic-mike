@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils/cn";
 import { MagicBackdrop } from "./magic-backdrop";
+import { CinematicBg } from "./cinematic-bg";
 
 interface BrandShellProps {
   children: React.ReactNode;
@@ -7,6 +8,16 @@ interface BrandShellProps {
   variant?: "hero" | "card";
   /** Set false on embed/iframe surfaces to avoid the bottom navy fade. */
   withBackdrop?: boolean;
+  /**
+   * Path to a cinematic background SVG/webp asset under /assets/black-diamond/.
+   * When provided, renders beneath the MagicBackdrop gradient layer.
+   * Falls back gracefully to CSS-only when omitted.
+   */
+  cinematicSrc?: string;
+  /** Alt text for the cinematic background (decorative by default). */
+  cinematicAlt?: string;
+  /** Overlay opacity 0–1. Default 0.50 keeps foreground text legible. */
+  cinematicOverlay?: number;
 }
 
 /**
@@ -20,6 +31,9 @@ export function BrandShell({
   className,
   variant = "hero",
   withBackdrop = true,
+  cinematicSrc,
+  cinematicAlt,
+  cinematicOverlay = 0.5,
 }: BrandShellProps) {
   return (
     <div
@@ -30,6 +44,15 @@ export function BrandShell({
         className
       )}
     >
+      {/* Cinematic asset sits below all gradient layers */}
+      {cinematicSrc && (
+        <CinematicBg
+          src={cinematicSrc}
+          alt={cinematicAlt}
+          overlayOpacity={cinematicOverlay}
+        />
+      )}
+
       {withBackdrop && <MagicBackdrop variant={variant} />}
 
       {/* 3-layer ambient radial system */}

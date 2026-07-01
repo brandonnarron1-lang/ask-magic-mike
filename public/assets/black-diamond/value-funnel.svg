@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1350" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="vf-bloom" cx="22%" cy="18%" r="55%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.18"/>
+      <stop offset="45%" stop-color="#D4A017" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vf-property-glow" cx="72%" cy="62%" r="32%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vf-radar" cx="72%" cy="62%" r="1" gradientUnits="userSpaceOnUse" r="280">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="vf-grid-h" x="0" y="0" width="2400" height="80" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="2400" y2="0" stroke="#D4A017" stroke-width="0.6"/>
+    </pattern>
+    <pattern id="vf-grid-v" x="0" y="0" width="120" height="1350" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="1350" stroke="#D4A017" stroke-width="0.6"/>
+    </pattern>
+    <linearGradient id="vf-bottom-fade" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#080806" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#080806" stop-opacity="0.92"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base -->
+  <rect width="2400" height="1350" fill="#080806"/>
+
+  <!-- Map coordinate grid -->
+  <rect x="0" y="0" width="2400" height="1350" fill="url(#vf-grid-h)" opacity="0.030"/>
+  <rect x="0" y="0" width="2400" height="1350" fill="url(#vf-grid-v)" opacity="0.022"/>
+
+  <!-- Gold bloom upper-left -->
+  <rect width="2400" height="1350" fill="url(#vf-bloom)"/>
+
+  <!-- Property glow zone — lower right -->
+  <rect width="2400" height="1350" fill="url(#vf-property-glow)"/>
+
+  <!-- Radar rings — concentric circles (property range indicator) -->
+  <circle cx="1720" cy="840" r="80"  fill="none" stroke="#D4A017" stroke-width="0.8" opacity="0.12"/>
+  <circle cx="1720" cy="840" r="160" fill="none" stroke="#D4A017" stroke-width="0.6" opacity="0.08"/>
+  <circle cx="1720" cy="840" r="260" fill="none" stroke="#D4A017" stroke-width="0.5" opacity="0.05"/>
+  <circle cx="1720" cy="840" r="380" fill="none" stroke="#D4A017" stroke-width="0.4" opacity="0.03"/>
+
+  <!-- Abstract property silhouette — lower right -->
+  <!-- House body -->
+  <rect x="1580" y="720" width="280" height="220" fill="none" stroke="#D4A017" stroke-width="1.4" opacity="0.18" rx="2"/>
+  <!-- Roof -->
+  <path d="M1555,720 L1720,600 L1885,720" fill="none" stroke="#D4A017" stroke-width="1.4" opacity="0.18"/>
+  <!-- Door -->
+  <rect x="1680" y="800" width="80" height="140" fill="none" stroke="#D4A017" stroke-width="0.8" opacity="0.12"/>
+  <!-- Windows -->
+  <rect x="1600" y="740" width="60" height="60" fill="none" stroke="#D4A017" stroke-width="0.7" opacity="0.10"/>
+  <rect x="1780" y="740" width="60" height="60" fill="none" stroke="#D4A017" stroke-width="0.7" opacity="0.10"/>
+
+  <!-- Coordinate markers (crosshair dots) -->
+  <circle cx="1720" cy="840" r="4" fill="#D4A017" opacity="0.35"/>
+  <line x1="1720" y1="820" x2="1720" y2="800" stroke="#D4A017" stroke-width="1" opacity="0.25"/>
+  <line x1="1700" y1="840" x2="1680" y2="840" stroke="#D4A017" stroke-width="1" opacity="0.25"/>
+  <line x1="1740" y1="840" x2="1760" y2="840" stroke="#D4A017" stroke-width="1" opacity="0.25"/>
+
+  <!-- Secondary corner markers -->
+  <circle cx="820" cy="380" r="2.5" fill="#D4A017" opacity="0.2"/>
+  <circle cx="1100" cy="260" r="2" fill="#D4A017" opacity="0.15"/>
+  <circle cx="480" cy="590" r="2" fill="#D4A017" opacity="0.12"/>
+
+  <!-- Bottom fade -->
+  <rect width="2400" height="1350" fill="url(#vf-bottom-fade)"/>
+
+  <!-- Top hairline -->
+  <rect x="0" y="0" width="2400" height="1" fill="#D4A017" opacity="0.22"/>
+</svg>

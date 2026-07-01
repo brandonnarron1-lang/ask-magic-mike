@@ -55,7 +55,10 @@ const SECONDARY_OPTIONS: OptionCardProps[] = [
 
 export function ValueHero() {
   return (
-    <BrandShell>
+    <BrandShell
+      cinematicSrc="/assets/black-diamond/value-funnel.svg"
+      cinematicOverlay={0.42}
+    >
       <BrandHeader />
 
       <main id="main-content" className="relative z-10 flex-1 px-4 sm:px-6 pb-14 max-w-6xl mx-auto w-full">
