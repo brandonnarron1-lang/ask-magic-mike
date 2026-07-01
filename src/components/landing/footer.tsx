@@ -110,6 +110,8 @@ export function Footer() {
             <div className="space-y-2 text-xs text-slate-400">
               <a href="/ask" className="block hover:text-gold-400 transition-colors">Ask a Question</a>
               <a href="/value" className="block hover:text-gold-400 transition-colors">Home Value Estimate</a>
+              <a href="/distribution" className="block hover:text-gold-400 transition-colors">Partner Distribution</a>
+              <a href="/campaigns" className="block hover:text-gold-400 transition-colors">Campaign Generator</a>
               <a href={siteConfig.parentBrandUrl} className="block hover:text-gold-400 transition-colors">Property Search</a>
               <a href={siteConfig.parentBrandUrl} className="block hover:text-gold-400 transition-colors">Meet Mike</a>
             </div>
