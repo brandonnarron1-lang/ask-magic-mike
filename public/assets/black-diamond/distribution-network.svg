@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1350" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="dn-hub-glow" cx="50%" cy="50%" r="28%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.20"/>
+      <stop offset="40%" stop-color="#D4A017" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="dn-bloom" cx="18%" cy="14%" r="50%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="dn-node-fb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4F87D4" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#4F87D4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="dn-node-ig" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#D47B4F" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#D47B4F" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="dn-node-em" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4FD4A0" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#4FD4A0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="dn-node-qr" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#B44FD4" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#B44FD4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="dn-node-ws" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4FA8D4" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#4FA8D4" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="dn-bottom-fade" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#080806" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#080806" stop-opacity="0.90"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base -->
+  <rect width="2400" height="1350" fill="#080806"/>
+
+  <!-- Hub glow -->
+  <rect width="2400" height="1350" fill="url(#dn-hub-glow)"/>
+  <rect width="2400" height="1350" fill="url(#dn-bloom)"/>
+
+  <!-- Connection lines: hub (1200,675) → nodes (dashed gold) -->
+  <!-- → Facebook (380, 320) -->
+  <line x1="1200" y1="675" x2="380" y2="320" stroke="#D4A017" stroke-width="1.2"
+        stroke-dasharray="8,12" opacity="0.22"/>
+  <!-- → Instagram (440, 1000) -->
+  <line x1="1200" y1="675" x2="440" y2="1000" stroke="#D4A017" stroke-width="1.2"
+        stroke-dasharray="8,12" opacity="0.20"/>
+  <!-- → Email (1820, 280) -->
+  <line x1="1200" y1="675" x2="1820" y2="280" stroke="#D4A017" stroke-width="1.2"
+        stroke-dasharray="8,12" opacity="0.22"/>
+  <!-- → QR (2020, 900) -->
+  <line x1="1200" y1="675" x2="2020" y2="900" stroke="#D4A017" stroke-width="1.2"
+        stroke-dasharray="8,12" opacity="0.18"/>
+  <!-- → Website (1200, 1120) -->
+  <line x1="1200" y1="675" x2="1200" y2="1120" stroke="#D4A017" stroke-width="1.2"
+        stroke-dasharray="8,12" opacity="0.20"/>
+
+  <!-- Outer node glows -->
+  <circle cx="380" cy="320" r="80" fill="url(#dn-node-fb)"/>
+  <circle cx="440" cy="1000" r="80" fill="url(#dn-node-ig)"/>
+  <circle cx="1820" cy="280" r="80" fill="url(#dn-node-em)"/>
+  <circle cx="2020" cy="900" r="80" fill="url(#dn-node-qr)"/>
+  <circle cx="1200" cy="1120" r="80" fill="url(#dn-node-ws)"/>
+
+  <!-- Outer node rings -->
+  <circle cx="380" cy="320" r="36" fill="none" stroke="#4F87D4" stroke-width="1.2" opacity="0.35"/>
+  <circle cx="380" cy="320" r="20" fill="none" stroke="#4F87D4" stroke-width="0.8" opacity="0.25"/>
+  <circle cx="380" cy="320" r="6"  fill="#4F87D4" opacity="0.40"/>
+
+  <circle cx="440" cy="1000" r="36" fill="none" stroke="#D47B4F" stroke-width="1.2" opacity="0.35"/>
+  <circle cx="440" cy="1000" r="20" fill="none" stroke="#D47B4F" stroke-width="0.8" opacity="0.25"/>
+  <circle cx="440" cy="1000" r="6"  fill="#D47B4F" opacity="0.40"/>
+
+  <circle cx="1820" cy="280" r="36" fill="none" stroke="#4FD4A0" stroke-width="1.2" opacity="0.35"/>
+  <circle cx="1820" cy="280" r="20" fill="none" stroke="#4FD4A0" stroke-width="0.8" opacity="0.25"/>
+  <circle cx="1820" cy="280" r="6"  fill="#4FD4A0" opacity="0.40"/>
+
+  <circle cx="2020" cy="900" r="36" fill="none" stroke="#B44FD4" stroke-width="1.2" opacity="0.35"/>
+  <circle cx="2020" cy="900" r="20" fill="none" stroke="#B44FD4" stroke-width="0.8" opacity="0.25"/>
+  <circle cx="2020" cy="900" r="6"  fill="#B44FD4" opacity="0.40"/>
+
+  <circle cx="1200" cy="1120" r="36" fill="none" stroke="#4FA8D4" stroke-width="1.2" opacity="0.35"/>
+  <circle cx="1200" cy="1120" r="20" fill="none" stroke="#4FA8D4" stroke-width="0.8" opacity="0.25"/>
+  <circle cx="1200" cy="1120" r="6"  fill="#4FA8D4" opacity="0.40"/>
+
+  <!-- Central hub -->
+  <circle cx="1200" cy="675" r="120" fill="none" stroke="#D4A017" stroke-width="0.8" opacity="0.08"/>
+  <circle cx="1200" cy="675" r="72"  fill="none" stroke="#D4A017" stroke-width="1.2" opacity="0.16"/>
+  <circle cx="1200" cy="675" r="40"  fill="none" stroke="#D4A017" stroke-width="1.8" opacity="0.30"/>
+  <circle cx="1200" cy="675" r="14"  fill="#D4A017" opacity="0.55"/>
+  <circle cx="1200" cy="675" r="6"   fill="#F5C842" opacity="0.90"/>
+
+  <!-- Bottom fade -->
+  <rect width="2400" height="1350" fill="url(#dn-bottom-fade)"/>
+
+  <!-- Top hairline -->
+  <rect x="0" y="0" width="2400" height="1" fill="#D4A017" opacity="0.22"/>
+</svg>

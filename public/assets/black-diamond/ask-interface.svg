@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1350" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="ai-core" cx="36%" cy="50%" r="38%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.18"/>
+      <stop offset="35%" stop-color="#D4A017" stop-opacity="0.07"/>
+      <stop offset="70%" stop-color="#D4A017" stop-opacity="0.02"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ai-pulse" cx="36%" cy="50%" r="18%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F5C842" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#F5C842" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ai-right-glow" cx="78%" cy="48%" r="32%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="ai-scan-dense" x="0" y="0" width="2400" height="6" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="2400" y2="0" stroke="#D4A017" stroke-width="0.5"/>
+    </pattern>
+    <pattern id="ai-scan-sparse" x="0" y="0" width="2400" height="20" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="2400" y2="0" stroke="#D4A017" stroke-width="0.7"/>
+    </pattern>
+    <linearGradient id="ai-panel-edge-l" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ai-bottom-fade" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#080806" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#050504" stop-opacity="0.95"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base -->
+  <rect width="2400" height="1350" fill="#080806"/>
+
+  <!-- Dense scan lines — centre band -->
+  <rect x="0" y="320" width="2400" height="660" fill="url(#ai-scan-dense)" opacity="0.022"/>
+
+  <!-- Sparse scan lines — outer bands -->
+  <rect x="0" y="0" width="2400" height="320" fill="url(#ai-scan-sparse)" opacity="0.018"/>
+  <rect x="0" y="980" width="2400" height="370" fill="url(#ai-scan-sparse)" opacity="0.018"/>
+
+  <!-- AI core glow -->
+  <rect width="2400" height="1350" fill="url(#ai-core)"/>
+  <rect width="2400" height="1350" fill="url(#ai-pulse)"/>
+
+  <!-- Right conversation panel glow -->
+  <rect width="2400" height="1350" fill="url(#ai-right-glow)"/>
+
+  <!-- Vertical gold rule — left panel edge -->
+  <rect x="720" y="80" width="1" height="1190" fill="url(#ai-panel-edge-l)"/>
+
+  <!-- Subtle panel frame suggestion (thin gold rect outline, very low opacity) -->
+  <rect x="820" y="140" width="1400" height="1060" fill="none" stroke="#D4A017" stroke-width="0.8" opacity="0.06" rx="8"/>
+
+  <!-- Horizontal gold accent lines (intelligence scan effect) -->
+  <line x1="0" y1="480" x2="2400" y2="480" stroke="#D4A017" stroke-width="1.2" opacity="0.08"/>
+  <line x1="0" y1="481" x2="2400" y2="481" stroke="#F5C842" stroke-width="0.4" opacity="0.06"/>
+  <line x1="0" y1="860" x2="2400" y2="860" stroke="#D4A017" stroke-width="0.8" opacity="0.05"/>
+
+  <!-- Bottom fade -->
+  <rect width="2400" height="1350" fill="url(#ai-bottom-fade)"/>
+
+  <!-- Top hairline -->
+  <rect x="0" y="0" width="2400" height="1" fill="#D4A017" opacity="0.25"/>
+</svg>

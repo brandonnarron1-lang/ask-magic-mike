@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1350" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="ac-bloom" cx="16%" cy="12%" r="52%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ac-heat" cx="55%" cy="85%" r="45%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.10"/>
+      <stop offset="40%" stop-color="#B41C1C" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#B41C1C" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="ac-grid-v" x="0" y="0" width="200" height="1350" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="1350" stroke="#D4A017" stroke-width="0.5"/>
+    </pattern>
+    <pattern id="ac-grid-h" x="0" y="0" width="2400" height="80" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="2400" y2="0" stroke="#D4A017" stroke-width="0.5"/>
+    </pattern>
+    <linearGradient id="ac-bar-1" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0.10"/>
+    </linearGradient>
+    <linearGradient id="ac-bar-2" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.42"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="ac-bar-3" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#B41C1C" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#B41C1C" stop-opacity="0.07"/>
+    </linearGradient>
+    <linearGradient id="ac-bottom-fade" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#080806" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#080806" stop-opacity="0.92"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base -->
+  <rect width="2400" height="1350" fill="#080806"/>
+
+  <!-- Grid -->
+  <rect x="0" y="0" width="2400" height="1350" fill="url(#ac-grid-v)" opacity="0.025"/>
+  <rect x="0" y="0" width="2400" height="1350" fill="url(#ac-grid-h)" opacity="0.025"/>
+
+  <!-- Bloom + heat -->
+  <rect width="2400" height="1350" fill="url(#ac-bloom)"/>
+  <rect width="2400" height="1350" fill="url(#ac-heat)"/>
+
+  <!-- Dashboard panel outline -->
+  <rect x="120" y="100" width="2160" height="1120" fill="none" stroke="#D4A017" stroke-width="0.8" opacity="0.07" rx="8"/>
+
+  <!-- Top bar (dashboard nav simulation) -->
+  <rect x="120" y="100" width="2160" height="56" fill="#D4A017" opacity="0.025" rx="8"/>
+  <rect x="120" y="152" width="2160" height="1" fill="#D4A017" opacity="0.10"/>
+
+  <!-- Nav dots -->
+  <circle cx="160" cy="128" r="5" fill="#D4A017" opacity="0.30"/>
+  <circle cx="180" cy="128" r="5" fill="#D4A017" opacity="0.20"/>
+  <circle cx="200" cy="128" r="5" fill="#D4A017" opacity="0.12"/>
+
+  <!-- KPI stat blocks (top row) -->
+  <rect x="160" y="180" width="480" height="140" fill="none" stroke="#D4A017" stroke-width="0.8" opacity="0.10" rx="6"/>
+  <rect x="660" y="180" width="480" height="140" fill="none" stroke="#D4A017" stroke-width="0.8" opacity="0.10" rx="6"/>
+  <rect x="1160" y="180" width="480" height="140" fill="none" stroke="#D4A017" stroke-width="0.8" opacity="0.10" rx="6"/>
+  <rect x="1660" y="180" width="600" height="140" fill="none" stroke="#D4A017" stroke-width="0.8" opacity="0.08" rx="6"/>
+
+  <!-- KPI large number stubs -->
+  <rect x="200" y="220" width="180" height="32" fill="#D4A017" opacity="0.08" rx="4"/>
+  <rect x="700" y="220" width="140" height="32" fill="#D4A017" opacity="0.06" rx="4"/>
+  <rect x="1200" y="220" width="160" height="32" fill="#B41C1C" opacity="0.07" rx="4"/>
+  <rect x="1700" y="220" width="180" height="32" fill="#D4A017" opacity="0.07" rx="4"/>
+
+  <!-- Label stubs -->
+  <rect x="200" y="264" width="100" height="10" fill="#D4A017" opacity="0.06" rx="2"/>
+  <rect x="700" y="264" width="80" height="10" fill="#D4A017" opacity="0.05" rx="2"/>
+  <rect x="1200" y="264" width="90" height="10" fill="#D4A017" opacity="0.05" rx="2"/>
+  <rect x="1700" y="264" width="110" height="10" fill="#D4A017" opacity="0.05" rx="2"/>
+
+  <!-- Horizontal bar chart — lead routing / conversion -->
+  <!-- Bar labels -->
+  <rect x="160" y="380" width="120" height="10" fill="#D4A017" opacity="0.08" rx="2"/>
+  <rect x="160" y="428" width="100" height="10" fill="#D4A017" opacity="0.07" rx="2"/>
+  <rect x="160" y="476" width="130" height="10" fill="#D4A017" opacity="0.07" rx="2"/>
+  <rect x="160" y="524" width="90"  height="10" fill="#D4A017" opacity="0.06" rx="2"/>
+  <rect x="160" y="572" width="115" height="10" fill="#D4A017" opacity="0.06" rx="2"/>
+
+  <!-- Bars -->
+  <rect x="320" y="370" width="1640" height="28" fill="url(#ac-bar-1)" rx="3"/>
+  <rect x="320" y="418" width="1260" height="28" fill="url(#ac-bar-2)" rx="3"/>
+  <rect x="320" y="466" width="980"  height="28" fill="url(#ac-bar-2)" rx="3"/>
+  <rect x="320" y="514" width="740"  height="28" fill="url(#ac-bar-3)" rx="3"/>
+  <rect x="320" y="562" width="520"  height="28" fill="url(#ac-bar-3)" rx="3"/>
+
+  <!-- Mini dot indicators at bar end -->
+  <circle cx="1960" cy="384" r="6" fill="#D4A017" opacity="0.50"/>
+  <circle cx="1580" cy="432" r="6" fill="#D4A017" opacity="0.40"/>
+  <circle cx="1300" cy="480" r="6" fill="#D4A017" opacity="0.35"/>
+  <circle cx="1060" cy="528" r="6" fill="#B41C1C" opacity="0.40"/>
+  <circle cx="840"  cy="576" r="6" fill="#B41C1C" opacity="0.35"/>
+
+  <!-- Conversion heat area — bottom section -->
+  <rect x="160" y="680" width="2120" height="480" fill="none" stroke="#D4A017" stroke-width="0.7" opacity="0.08" rx="6"/>
+
+  <!-- Heat map cells (12 cols × 6 rows, abstract) -->
+  <!-- Row colours range from low (dark) to high (gold) based on col position -->
+  <!-- Just a few representative cells for performance -->
+  <rect x="180" y="700" width="160" height="68" fill="#D4A017" opacity="0.04" rx="2"/>
+  <rect x="356" y="700" width="160" height="68" fill="#D4A017" opacity="0.07" rx="2"/>
+  <rect x="532" y="700" width="160" height="68" fill="#D4A017" opacity="0.12" rx="2"/>
+  <rect x="708" y="700" width="160" height="68" fill="#D4A017" opacity="0.18" rx="2"/>
+  <rect x="884" y="700" width="160" height="68" fill="#D4A017" opacity="0.22" rx="2"/>
+  <rect x="1060" y="700" width="160" height="68" fill="#D4A017" opacity="0.28" rx="2"/>
+  <rect x="1236" y="700" width="160" height="68" fill="#D4A017" opacity="0.20" rx="2"/>
+  <rect x="1412" y="700" width="160" height="68" fill="#D4A017" opacity="0.14" rx="2"/>
+  <rect x="1588" y="700" width="160" height="68" fill="#B41C1C" opacity="0.10" rx="2"/>
+  <rect x="1764" y="700" width="160" height="68" fill="#B41C1C" opacity="0.16" rx="2"/>
+  <rect x="1940" y="700" width="160" height="68" fill="#B41C1C" opacity="0.22" rx="2"/>
+  <rect x="2116" y="700" width="144" height="68" fill="#B41C1C" opacity="0.12" rx="2"/>
+
+  <!-- Bottom fade -->
+  <rect width="2400" height="1350" fill="url(#ac-bottom-fade)"/>
+
+  <!-- Top hairline -->
+  <rect x="0" y="0" width="2400" height="1" fill="#D4A017" opacity="0.22"/>
+</svg>

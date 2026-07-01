@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { CinematicBg } from "@/components/amm/cinematic-bg";
 import { Menu, X, Phone, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { CTAChips } from "./cta-chips";
@@ -419,6 +420,12 @@ export function HeroSection() {
       className="relative overflow-hidden bg-[#0A0A0A] px-5 pb-16 sm:px-6 grain-overlay"
       data-amm-surface="landing-hero"
     >
+      {/* ── Cinematic hero background ── */}
+      <CinematicBg
+        src="/assets/black-diamond/hero-cinematic.svg"
+        overlayOpacity={0.38}
+      />
+
       {/* ── Deep atmospheric background ── */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         {/* Dot grid */}
