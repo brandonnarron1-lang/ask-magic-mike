@@ -1,0 +1,202 @@
+{
+  "package": "ask_magic_mike_black_diamond_recovery_wave01",
+  "status": "Recovery package replacing rejected Wave 01 and Wave 02 design directions.",
+  "production_rule": "Use supplied Mike photography as the identity lock. Do not regenerate Mike's face. Design overlays live in HTML/Figma/Canva, not baked into background photography.",
+  "source_photography": {
+    "primary_wide_lake_hero": "683FF486-0743-4D15-B939-3C64EEE0A2CB.jpeg",
+    "wide_lake_alt": "503BF0A3-2DD2-46BA-8B7C-EE6FD17F8812.jpeg",
+    "wide_lake_alt_close": "3F73E0DD-FA28-4B0B-8241-DAEC05236FAD.jpeg",
+    "wide_lake_alt_duplicate_safe": "7F7E1389-5A07-486B-AEEE-41F983BCEC48.jpeg",
+    "vertical_walkway_full": "93E557E9-5EA1-474F-A9F7-1951AE6D5AEE.jpeg",
+    "vertical_walkway_medium": "0808DE56-BCDE-412E-8DDD-A115BE39D3F8.jpeg",
+    "portrait_square_close": "34549223-F84F-412D-9AA5-1CB1FC5F3E69.jpeg",
+    "social_portrait_4x5": "A0FA7419-3450-43BD-A731-761CEF50C727.jpeg",
+    "parent_brand_exterior_entry": "6EE4ED67-D09D-4FF0-9A0A-C928B7DD163B.jpeg",
+    "premium_tech_interior": "46E013B6-C78C-4E9E-919B-DACC40E1A864.jpeg",
+    "official_logo_black_bg": "AE64725C-BAAD-4138-B9EF-884629604AFE.png"
+  },
+  "outputs": [
+    {
+      "file": "exports/backgrounds/01_homepage_desktop_hero_overlay_ready_2880x1620.jpg",
+      "dimensions": [
+        2880,
+        1620
+      ],
+      "source": "683FF486-0743-4D15-B939-3C64EEE0A2CB.jpeg",
+      "purpose": "AskMagicMike.com desktop hero background with strong left live-copy zone.",
+      "recommended_live_overlay_safe_zone_percent": {
+        "x": 4,
+        "y": 16,
+        "w": 42,
+        "h": 60
+      },
+      "notes": "No baked type. Left side intentionally darkened for HTML headline/CTA."
+    },
+    {
+      "file": "exports/backgrounds/02_homepage_desktop_hero_overlay_ready_1920x1080.jpg",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "source": "683FF486-0743-4D15-B939-3C64EEE0A2CB.jpeg",
+      "purpose": "Production 1920 desktop hero fallback.",
+      "recommended_live_overlay_safe_zone_percent": {
+        "x": 4,
+        "y": 16,
+        "w": 42,
+        "h": 60
+      },
+      "notes": "Use for web hero under 2400px viewports."
+    },
+    {
+      "file": "exports/backgrounds/03_mobile_homepage_hero_overlay_ready_1080x1920.jpg",
+      "dimensions": [
+        1080,
+        1920
+      ],
+      "source": "93E557E9-5EA1-474F-A9F7-1951AE6D5AEE.jpeg",
+      "purpose": "Mobile landing page hero background.",
+      "recommended_live_overlay_safe_zone_percent": {
+        "x": 8,
+        "y": 5,
+        "w": 84,
+        "h": 28
+      },
+      "notes": "Top area is the cleanest mobile copy zone. Bottom can hold CTA."
+    },
+    {
+      "file": "exports/backgrounds/04_story_reel_master_overlay_ready_1080x1920.jpg",
+      "dimensions": [
+        1080,
+        1920
+      ],
+      "source": "0808DE56-BCDE-412E-8DDD-A115BE39D3F8.jpeg",
+      "purpose": "Instagram/Facebook Story/Reel cover master.",
+      "recommended_live_overlay_safe_zone_percent": {
+        "x": 8,
+        "y": 66,
+        "w": 84,
+        "h": 20
+      },
+      "notes": "Bottom caption zone. Keep UI chrome safe."
+    },
+    {
+      "file": "exports/social/05_social_feed_master_4x5_overlay_ready_1080x1350.jpg",
+      "dimensions": [
+        1080,
+        1350
+      ],
+      "source": "A0FA7419-3450-43BD-A731-761CEF50C727.jpeg",
+      "purpose": "FB/IG feed ad master frame, 4:5.",
+      "recommended_live_overlay_safe_zone_percent": {
+        "x": 7,
+        "y": 6,
+        "w": 50,
+        "h": 30
+      },
+      "notes": "Live headline should sit top-left or bottom-left."
+    },
+    {
+      "file": "exports/social/06_square_profile_social_master_1080x1080.jpg",
+      "dimensions": [
+        1080,
+        1080
+      ],
+      "source": "34549223-F84F-412D-9AA5-1CB1FC5F3E69.jpeg",
+      "purpose": "Square portrait plate for profile tiles and testimonial cards.",
+      "recommended_live_overlay_safe_zone_percent": {
+        "x": 8,
+        "y": 72,
+        "w": 84,
+        "h": 18
+      },
+      "notes": "Use sparingly; this is identity/credibility, not hero composition."
+    },
+    {
+      "file": "exports/backgrounds/07_ourtown_parent_brand_desktop_hero_2880x1620.jpg",
+      "dimensions": [
+        2880,
+        1620
+      ],
+      "source": "6EE4ED67-D09D-4FF0-9A0A-C928B7DD163B.jpeg",
+      "purpose": "OurTownProperties.com integration hero with large left negative zone.",
+      "recommended_live_overlay_safe_zone_percent": {
+        "x": 4,
+        "y": 14,
+        "w": 40,
+        "h": 64
+      },
+      "notes": "Best parent-brand bridge between real estate authority and Ask Mike product."
+    },
+    {
+      "file": "exports/backgrounds/08_admin_dashboard_login_backdrop_2880x1620.jpg",
+      "dimensions": [
+        2880,
+        1620
+      ],
+      "source": "46E013B6-C78C-4E9E-919B-DACC40E1A864.jpeg",
+      "purpose": "Admin/dashboard login and SaaS command-center backdrop.",
+      "recommended_live_overlay_safe_zone_percent": {
+        "x": 5,
+        "y": 18,
+        "w": 42,
+        "h": 56
+      },
+      "notes": "Use tech overlay sparingly; do not add more fake UI over it."
+    },
+    {
+      "file": "exports/backgrounds/09_email_campaign_header_wide_2400x1260.jpg",
+      "dimensions": [
+        2400,
+        1260
+      ],
+      "source": "503BF0A3-2DD2-46BA-8B7C-EE6FD17F8812.jpeg",
+      "purpose": "Email/LinkedIn banner header at wide ratio.",
+      "recommended_live_overlay_safe_zone_percent": {
+        "x": 4,
+        "y": 18,
+        "w": 40,
+        "h": 54
+      },
+      "notes": "Good for polished outbound campaign headers."
+    },
+    {
+      "file": "exports/backgrounds/10_clean_property_lifestyle_plate_1920x1080.jpg",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "source": "3F73E0DD-FA28-4B0B-8241-DAEC05236FAD.jpeg",
+      "purpose": "Clean premium lifestyle plate for cards, sections, and CTAs.",
+      "recommended_live_overlay_safe_zone_percent": {
+        "x": 5,
+        "y": 14,
+        "w": 36,
+        "h": 60
+      },
+      "notes": "Secondary web section background."
+    },
+    {
+      "file": "exports/logo/ourtown_logo_gold_transparent_native.png",
+      "dimensions": [
+        343,
+        145
+      ],
+      "source": "AE64725C-BAAD-4138-B9EF-884629604AFE.png",
+      "purpose": "Transparent Our Town Properties logo, native cleaned raster.",
+      "recommended_live_overlay_safe_zone_percent": null,
+      "notes": "Use as an overlay layer; do not bake into hero backgrounds unless platform requires a flat export."
+    },
+    {
+      "file": "exports/logo/ourtown_logo_gold_transparent_1200w.png",
+      "dimensions": [
+        1200,
+        507
+      ],
+      "source": "AE64725C-BAAD-4138-B9EF-884629604AFE.png",
+      "purpose": "Large transparent logo raster for presentation and social layout drafts.",
+      "recommended_live_overlay_safe_zone_percent": null,
+      "notes": "Upscaled raster. Replace with vector logo when available."
+    }
+  ]
+}
