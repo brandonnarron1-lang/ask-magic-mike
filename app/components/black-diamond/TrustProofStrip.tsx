@@ -1,4 +1,4 @@
-import { brand } from "@/app/lib/constants";
+import { brand } from "../../lib/constants";
 
 export function TrustProofStrip() {
   const items = [

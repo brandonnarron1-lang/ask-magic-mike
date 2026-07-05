@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { trackEvent } from "@/app/lib/analytics";
-import { readAttribution } from "@/app/lib/attribution";
+import { trackEvent } from "../../lib/analytics";
+import { readAttribution } from "../../lib/attribution";
 
 type PageTrackerProps = {
   funnelName: string;

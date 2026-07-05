@@ -5,7 +5,7 @@ import { AskMikeChatPanel } from "./AskMikeChatPanel";
 import { HomeValueFunnel } from "./HomeValueFunnel";
 import { SellerIntentSection } from "./SellerIntentSection";
 import { PageTracker } from "./PageTracker";
-import type { Attribution } from "@/app/lib/leadPayload";
+import type { Attribution } from "../../lib/leadPayload";
 
 type Tab = "value" | "ask" | "sell";
 

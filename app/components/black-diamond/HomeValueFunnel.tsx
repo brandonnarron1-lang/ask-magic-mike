@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { trackEvent } from "@/app/lib/analytics";
-import { initialAttribution, readAttribution } from "@/app/lib/attribution";
-import { brand, timelineOptions } from "@/app/lib/constants";
-import { clean, type Attribution, type LeadSourceSurface } from "@/app/lib/leadPayload";
+import { trackEvent } from "../../lib/analytics";
+import { initialAttribution, readAttribution } from "../../lib/attribution";
+import { brand, timelineOptions } from "../../lib/constants";
+import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
 import { LuxuryCard } from "./LuxuryCard";
 import { ProgressBar } from "./ProgressBar";
 import { SelectField, TextField } from "./FormField";

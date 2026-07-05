@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { trackEvent } from "@/app/lib/analytics";
-import { readAttribution } from "@/app/lib/attribution";
+import { trackEvent } from "../../lib/analytics";
+import { readAttribution } from "../../lib/attribution";
 import { BlackDiamondHeader } from "./BlackDiamondHeader";
 
 export function HeroSection() {

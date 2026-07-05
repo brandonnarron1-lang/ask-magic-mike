@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import { useState, type FormEvent } from "react";
-import { trackEvent } from "@/app/lib/analytics";
-import { initialAttribution, readAttribution } from "@/app/lib/attribution";
-import { starterPrompts } from "@/app/lib/constants";
-import { type Attribution, type LeadSourceSurface } from "@/app/lib/leadPayload";
+import { trackEvent } from "../../lib/analytics";
+import { initialAttribution, readAttribution } from "../../lib/attribution";
+import { starterPrompts } from "../../lib/constants";
+import { type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
 import { LuxuryCard } from "./LuxuryCard";
 
 type Message = {

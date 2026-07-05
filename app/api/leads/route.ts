@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { normalizeLeadPayload, type LeadPayload } from "@/app/lib/leadPayload";
+import { normalizeLeadPayload, type LeadPayload } from "../../lib/leadPayload";
 
 async function trackPosthog(event: string, properties: Record<string, unknown>) {
   const apiKey = process.env.POSTHOG_API_KEY;
