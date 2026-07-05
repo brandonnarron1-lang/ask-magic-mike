@@ -15,8 +15,8 @@ export function WidgetApp() {
     if (typeof window === "undefined") return {};
     const params = new URLSearchParams(window.location.search);
     return {
-      source: params.get("source") || "widget",
-      medium: params.get("medium") || "embed",
+      source: params.get("utm_source") || params.get("source") || "widget",
+      medium: params.get("utm_medium") || params.get("medium") || "embed",
       campaign: params.get("campaign") || undefined,
       parent_url: params.get("parent_url") || undefined,
       embed_host: params.get("embed_host") || undefined,

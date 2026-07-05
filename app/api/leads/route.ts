@@ -217,6 +217,10 @@ function validateLead(payload: LeadPayload) {
     return "Question is required for chat leads.";
   }
 
+  if (payload.funnel_type === "appointment" && !payload.email && !payload.phone) {
+    return "Email or phone is required to schedule an appointment.";
+  }
+
   return null;
 }
 
