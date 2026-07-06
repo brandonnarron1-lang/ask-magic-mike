@@ -5,6 +5,7 @@ import { trackEvent } from "../../lib/analytics";
 import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { brand, timelineOptions } from "../../lib/constants";
 import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
+import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
 import { LuxuryCard } from "./LuxuryCard";
 import { ProgressBar } from "./ProgressBar";
 import { SelectField, TextField } from "./FormField";
@@ -90,7 +91,7 @@ export function HomeValueFunnel({
         }),
       });
       const data = (await res.json()) as { message?: string; error?: string };
-      if (!res.ok) throw new Error(data.error || "Unable to submit right now.");
+      if (!res.ok) throw new Error(publicLeadErrorMessage(data.error));
       trackEvent("lead_created", attribution, { funnel_name: "home_value", step_name: "thank_you" });
       if (surface === "widget") {
         trackEvent("widget_lead_created", attribution, { funnel_name: "home_value" });
@@ -99,7 +100,7 @@ export function HomeValueFunnel({
       setLeadMessage(data.message || "Got it. Mike will follow up shortly.");
       setStep(4);
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Unable to submit right now.");
+      setFormError(publicLeadErrorMessage(error instanceof Error ? error.message : undefined));
     } finally {
       setSubmitting(false);
     }

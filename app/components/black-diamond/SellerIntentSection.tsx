@@ -5,6 +5,7 @@ import { trackEvent } from "../../lib/analytics";
 import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { conditionOptions, sellerPaths, timelineOptions } from "../../lib/constants";
 import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
+import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
 import { TextAreaField, TextField } from "./FormField";
 import { LuxuryCard } from "./LuxuryCard";
 
@@ -59,12 +60,12 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
         body: JSON.stringify(payload),
       });
       const data = (await res.json()) as { message?: string; error?: string };
-      if (!res.ok) throw new Error(data.error || "Unable to submit right now.");
+      if (!res.ok) throw new Error(publicLeadErrorMessage(data.error));
       trackEvent("lead_created", attribution, { funnel_name: "seller", step_name: "seller_intent" });
       setSellerMessage(data.message || "Got it. Mike will review it.");
       event.currentTarget.reset();
     } catch (error) {
-      setSellerMessage(error instanceof Error ? error.message : "Unable to submit right now.");
+      setSellerMessage(publicLeadErrorMessage(error instanceof Error ? error.message : undefined));
     } finally {
       setSubmitting(false);
     }
