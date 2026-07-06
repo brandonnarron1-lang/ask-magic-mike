@@ -10,6 +10,7 @@
  */
 import { readAttribution } from "@/lib/attribution/client-storage";
 import type { LeadType } from "@/lib/leads/lead-types";
+import { publicWidgetLeadError } from "@/lib/widget/public-errors";
 
 export interface WidgetSubmitInput {
   leadType: LeadType;
@@ -108,7 +109,7 @@ export async function submitWidgetLead(
       error?: string;
     };
     if (!data.ok) {
-      return { ok: false, error: data.error ?? `http_${res.status}` };
+      return { ok: false, error: publicWidgetLeadError(data.error ?? `http_${res.status}`) };
     }
     return {
       ok: true,
@@ -119,7 +120,7 @@ export async function submitWidgetLead(
   } catch (err) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : "network_error",
+      error: publicWidgetLeadError(err instanceof Error ? err.message : "network_error"),
     };
   }
 }

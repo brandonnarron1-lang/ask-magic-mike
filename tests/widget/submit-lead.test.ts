@@ -163,4 +163,32 @@ describe("submitWidgetLead", () => {
     expect(r.ok).toBe(false);
     expect(r.error).toBe("spam_rejected");
   });
+
+  it("sanitizes raw Supabase/PostgREST errors before returning them to widget UI", async () => {
+    seedAttribution();
+    setupFetch({
+      ok: false,
+      status: 500,
+      json: {
+        ok: false,
+        error:
+          "Supabase insert failed: {\"code\":\"PGRST204\",\"message\":\"Could not find the 'address' column of 'leads' in the schema cache\"}",
+      },
+    });
+    const r = await submitWidgetLead({
+      leadType: "seller_cash_offer",
+      email: "jane@example.com",
+      phone: "2525551212",
+      propertyAddress: "123 Nash St",
+      consent: { sms: false, email: true },
+    });
+
+    expect(r.ok).toBe(false);
+    expect(r.error).toContain("We couldn't save that just yet");
+    expect(r.error).toContain("252-243-7700");
+    expect(r.error).not.toMatch(/Supabase insert failed/i);
+    expect(r.error).not.toMatch(/PGRST204/i);
+    expect(r.error).not.toMatch(/schema cache/i);
+    expect(r.error).not.toMatch(/address column/i);
+  });
 });

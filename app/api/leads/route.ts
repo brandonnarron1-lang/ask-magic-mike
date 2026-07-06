@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { normalizeLeadPayload, type LeadPayload } from "../../lib/leadPayload";
+import { PUBLIC_LEAD_SAVE_ERROR } from "../../lib/publicLeadErrors";
+
+const MAX_SCHEMA_COMPAT_RETRIES = 10;
 
 async function trackPosthog(event: string, properties: Record<string, unknown>) {
   const apiKey = process.env.POSTHOG_API_KEY;
@@ -99,10 +102,17 @@ async function sendResendEmail(payload: LeadPayload, summary?: string) {
   });
 }
 
-function buildLeadRows(payload: LeadPayload) {
+function leadTypeFor(payload: LeadPayload) {
+  if (payload.funnel_type === "seller") return "seller";
+  if (payload.funnel_type === "home_value" || payload.funnel_type === "widget") return "home_value";
+  return "general_question";
+}
+
+function buildInsertRow(payload: LeadPayload) {
   const attribution = payload.attribution || {};
   const notes = [
     payload.notes,
+    payload.address ? "Address: " + payload.address : undefined,
     payload.question ? "Question: " + payload.question : undefined,
     payload.condition ? "Condition: " + payload.condition : undefined,
     payload.timeline ? "Timeline: " + payload.timeline : undefined,
@@ -111,19 +121,33 @@ function buildLeadRows(payload: LeadPayload) {
     .filter(Boolean)
     .join("\n");
 
-  const fullRow = {
+  return {
     funnel_type: payload.funnel_type,
+    lead_type: leadTypeFor(payload),
     lead_source_surface: payload.lead_source_surface,
     address: payload.address,
     property_address: payload.property_address || payload.address,
+    address_raw: payload.property_address || payload.address,
+    normalized_property_address: payload.property_address || payload.address,
     email: payload.email,
     name: payload.name,
     phone: payload.phone,
     timeline: payload.timeline,
+    primary_intent: payload.funnel_type === "seller" ? "sell" : "unknown",
     property_condition: payload.condition,
+    condition: payload.condition,
     notes,
     question: payload.question,
-    source: attribution.source,
+    question_raw: payload.question,
+    source: attribution.source || payload.lead_source_surface,
+    source_detail: payload.lead_source_surface,
+    source_attribution: attribution,
+    attribution,
+    metadata: {
+      funnel_type: payload.funnel_type,
+      lead_source_surface: payload.lead_source_surface,
+      attribution,
+    },
     medium: attribution.medium,
     campaign: attribution.campaign,
     content: attribution.content,
@@ -142,16 +166,66 @@ function buildLeadRows(payload: LeadPayload) {
     assigned_agent_id: payload.assigned_agent_id,
     created_at: payload.created_at || new Date().toISOString(),
   };
+}
 
-  const legacyRow = {
-    address: payload.address,
-    email: payload.email,
-    name: payload.name,
-    phone: payload.phone,
-    notes,
-  };
+function parseMissingColumn(errorText: string) {
+  const quotedMatch = errorText.match(/Could not find the '([^']+)' column/i);
+  if (quotedMatch?.[1]) return quotedMatch[1];
 
-  return { fullRow, legacyRow };
+  const jsonColumnMatch = errorText.match(/"message"\s*:\s*"Could not find the '([^']+)' column/i);
+  if (jsonColumnMatch?.[1]) return jsonColumnMatch[1];
+
+  return null;
+}
+
+function withoutUndefined(row: Record<string, unknown>) {
+  return Object.fromEntries(Object.entries(row).filter(([, value]) => value !== undefined));
+}
+
+async function insertSchemaCompatibleLead(
+  supabaseUrl: string,
+  headers: Record<string, string>,
+  row: Record<string, unknown>,
+) {
+  const insertUrl = supabaseUrl + "/rest/v1/leads";
+  const droppedColumns: string[] = [];
+  let insertRow = withoutUndefined(row);
+
+  for (let attempt = 0; attempt <= MAX_SCHEMA_COMPAT_RETRIES; attempt += 1) {
+    const response = await fetch(insertUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(insertRow),
+    });
+
+    if (response.ok) {
+      if (droppedColumns.length) {
+        console.warn("Lead insert schema compatibility dropped unsupported columns", {
+          dropped_columns: droppedColumns,
+        });
+      }
+      return;
+    }
+
+    const errorText = await response.text();
+    const missingColumn = parseMissingColumn(errorText);
+    if (!missingColumn || !(missingColumn in insertRow) || attempt === MAX_SCHEMA_COMPAT_RETRIES) {
+      console.error("Lead insert failed after schema compatibility attempts", {
+        status: response.status,
+        status_text: response.statusText,
+        dropped_columns: droppedColumns,
+        error: errorText || response.statusText,
+      });
+      throw new Error("lead_insert_failed");
+    }
+
+    droppedColumns.push(missingColumn);
+    const nextRow = { ...insertRow };
+    delete nextRow[missingColumn];
+    insertRow = nextRow;
+  }
+
+  throw new Error("lead_insert_failed");
 }
 
 async function insertLead(payload: LeadPayload) {
@@ -169,7 +243,7 @@ async function insertLead(payload: LeadPayload) {
     return;
   }
 
-  const { fullRow, legacyRow } = buildLeadRows(payload);
+  const row = buildInsertRow(payload);
   const headers = {
     apikey: supabaseServiceKey,
     Authorization: "Bearer " + supabaseServiceKey,
@@ -177,24 +251,7 @@ async function insertLead(payload: LeadPayload) {
     Prefer: "return=minimal",
   };
 
-  const insertFull = await fetch(supabaseUrl + "/rest/v1/leads", {
-    method: "POST",
-    headers,
-    body: JSON.stringify(fullRow),
-  });
-
-  if (insertFull.ok) return;
-
-  const insertLegacy = await fetch(supabaseUrl + "/rest/v1/leads", {
-    method: "POST",
-    headers,
-    body: JSON.stringify(legacyRow),
-  });
-
-  if (!insertLegacy.ok) {
-    const errText = await insertLegacy.text();
-    throw new Error("Supabase insert failed: " + (errText || insertLegacy.statusText));
-  }
+  await insertSchemaCompatibleLead(supabaseUrl, headers, row);
 }
 
 function validateLead(payload: LeadPayload) {
@@ -243,8 +300,13 @@ export async function POST(req: Request) {
   try {
     await insertLead(payload);
   } catch (error) {
+    console.error("Lead persistence failed", {
+      funnel_type: payload.funnel_type,
+      lead_source_surface: payload.lead_source_surface,
+      error: error instanceof Error ? error.message : "unknown",
+    });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Lead insert failed." },
+      { error: PUBLIC_LEAD_SAVE_ERROR },
       { status: 500 },
     );
   }

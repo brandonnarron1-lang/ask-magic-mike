@@ -119,6 +119,17 @@ describe("normalizeAdminLeadRow", () => {
     expect(lead.primary_detail).toBe("Should I sell now or wait?");
   });
 
+  it("falls back to address_raw when canonical address is absent", () => {
+    const lead = normalizeAdminLeadRow({
+      id: "lead-legacy-address",
+      address_raw: "321 Green St NE",
+      phone: "2525550101",
+    });
+
+    expect(lead.address).toBe("321 Green St NE");
+    expect(lead.primary_detail).toBe("321 Green St NE");
+  });
+
   it("normalizes arrays of rows", () => {
     const leads = normalizeAdminLeadRows([{ id: "a" }, { id: "b" }]);
     expect(leads.map((lead) => lead.id)).toEqual(["a", "b"]);
