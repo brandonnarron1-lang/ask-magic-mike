@@ -2,7 +2,21 @@ import { NextResponse } from "next/server";
 import { normalizeLeadPayload, type LeadPayload } from "../../lib/leadPayload";
 import { PUBLIC_LEAD_SAVE_ERROR } from "../../lib/publicLeadErrors";
 
-const MAX_SCHEMA_COMPAT_RETRIES = 10;
+const LEAD_TYPES = new Set([
+  "buyer",
+  "seller",
+  "seller_cash_offer",
+  "investor",
+  "listing_inquiry",
+  "home_value",
+  "relocation",
+  "renter",
+  "agent_referral",
+  "general_question",
+  "unknown",
+]);
+
+type SupabaseHeaders = Record<string, string>;
 
 async function trackPosthog(event: string, properties: Record<string, unknown>) {
   const apiKey = process.env.POSTHOG_API_KEY;
@@ -103,12 +117,114 @@ async function sendResendEmail(payload: LeadPayload, summary?: string) {
 }
 
 function leadTypeFor(payload: LeadPayload) {
+  if (payload.lead_type && LEAD_TYPES.has(payload.lead_type)) return payload.lead_type;
   if (payload.funnel_type === "seller") return "seller";
   if (payload.funnel_type === "home_value" || payload.funnel_type === "widget") return "home_value";
   return "general_question";
 }
 
-function buildInsertRow(payload: LeadPayload) {
+function primaryIntentFor(leadType: string, payload: LeadPayload) {
+  if (
+    leadType === "seller" ||
+    leadType === "seller_cash_offer" ||
+    leadType === "investor" ||
+    leadType === "home_value" ||
+    payload.funnel_type === "seller"
+  ) {
+    return "sell";
+  }
+  if (
+    leadType === "buyer" ||
+    leadType === "listing_inquiry" ||
+    leadType === "relocation" ||
+    leadType === "renter"
+  ) {
+    return "buy";
+  }
+  return "unknown";
+}
+
+function timelineMonthsFor(input?: string) {
+  const value = (input || "").toLowerCase();
+  if (!value) return 24;
+  if (/\basap\b|immediate|as soon|right away|0\s*[-–]\s*30|under 30|this month/.test(value)) return 0;
+  if (/30\s*[-–]\s*60|60\s*[-–]\s*90|31\s*[-–]\s*90|next 90|90 days/.test(value)) return 3;
+  if (/3\s*[-–]\s*6|three\s*[-–]\s*six|3 to 6/.test(value)) return 6;
+  if (/6\s*[-–]\s*12|six\s*[-–]\s*twelve|6 to 12/.test(value)) return 12;
+  if (/12\+|12 plus|more than 12|next year|just planning|just curious|not sure|unknown/.test(value)) return 24;
+  return 24;
+}
+
+function splitName(payload: LeadPayload) {
+  const explicitFirst = payload.first_name;
+  const explicitLast = payload.last_name;
+  if (explicitFirst || explicitLast) {
+    return { firstName: explicitFirst || null, lastName: explicitLast || null };
+  }
+
+  const name = payload.name?.trim();
+  if (!name) return { firstName: null, lastName: null };
+  const parts = name.split(/\s+/);
+  return {
+    firstName: parts[0] || null,
+    lastName: parts.length > 1 ? parts.slice(1).join(" ") : null,
+  };
+}
+
+function stripPhoneDigits(phone?: string) {
+  const digits = (phone || "").replace(/\D/g, "");
+  return digits || null;
+}
+
+function isUuid(value?: string) {
+  return !!value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function sessionIdFor(payload: LeadPayload): string {
+  return isUuid(payload.widget_session_id) && payload.widget_session_id
+    ? payload.widget_session_id
+    : crypto.randomUUID();
+}
+
+function sourceFor(payload: LeadPayload) {
+  const attribution = payload.attribution || {};
+  return attribution.source || (payload.lead_source_surface === "widget" ? "widget" : payload.lead_source_surface);
+}
+
+function sourceDetailFor(payload: LeadPayload) {
+  const attribution = payload.attribution || {};
+  return [
+    payload.lead_source_surface,
+    attribution.medium,
+    attribution.campaign,
+    attribution.placement,
+  ].filter(Boolean).join(" / ") || null;
+}
+
+function pageUrlFor(payload: LeadPayload, req: Request) {
+  const attribution = payload.attribution || {};
+  const referrer = req.headers.get("referer") || undefined;
+  return (
+    payload.page_url ||
+    attribution.parent_url ||
+    attribution.landing_page ||
+    attribution.current_path ||
+    referrer ||
+    null
+  );
+}
+
+function referrerTypeFor(payload: LeadPayload) {
+  const source = (sourceFor(payload) || "").toLowerCase();
+  const medium = (payload.attribution?.medium || "").toLowerCase();
+  if (["cpc", "paid", "paid_social", "ppc"].includes(medium)) return "paid";
+  if (["facebook", "instagram", "meta", "tiktok", "youtube"].includes(source)) return "social";
+  if (medium === "email") return "email";
+  if (payload.attribution?.referrer || payload.attribution?.parent_url) return "referral";
+  return "direct";
+}
+
+function buildNotes(payload: LeadPayload) {
   const attribution = payload.attribution || {};
   const notes = [
     payload.notes,
@@ -121,114 +237,96 @@ function buildInsertRow(payload: LeadPayload) {
     .filter(Boolean)
     .join("\n");
 
+  return notes || null;
+}
+
+function buildSessionRow(payload: LeadPayload, req: Request, sessionId: string) {
+  const attribution = payload.attribution || {};
   return {
-    funnel_type: payload.funnel_type,
-    lead_type: leadTypeFor(payload),
-    lead_source_surface: payload.lead_source_surface,
-    address: payload.address,
-    property_address: payload.property_address || payload.address,
-    address_raw: payload.property_address || payload.address,
-    normalized_property_address: payload.property_address || payload.address,
-    email: payload.email,
-    name: payload.name,
-    phone: payload.phone,
-    timeline: payload.timeline,
-    primary_intent: payload.funnel_type === "seller" ? "sell" : "unknown",
-    property_condition: payload.condition,
-    condition: payload.condition,
-    notes,
-    question: payload.question,
-    question_raw: payload.question,
-    source: attribution.source || payload.lead_source_surface,
-    source_detail: payload.lead_source_surface,
-    source_attribution: attribution,
-    attribution,
-    metadata: {
-      funnel_type: payload.funnel_type,
-      lead_source_surface: payload.lead_source_surface,
-      attribution,
-    },
-    medium: attribution.medium,
-    campaign: attribution.campaign,
-    content: attribution.content,
-    term: attribution.term,
-    referrer: attribution.referrer,
-    landing_page: attribution.landing_page,
-    initial_path: attribution.initial_path,
-    current_path: attribution.current_path,
-    parent_url: attribution.parent_url,
-    embed_host: attribution.embed_host,
-    placement: attribution.placement,
-    gclid: attribution.gclid,
-    fbclid: attribution.fbclid,
-    device_category: attribution.device_category,
-    status: payload.status,
-    assigned_agent_id: payload.assigned_agent_id,
-    created_at: payload.created_at || new Date().toISOString(),
+    id: sessionId,
+    utm_source: attribution.source || null,
+    utm_medium: attribution.medium || null,
+    utm_campaign: attribution.campaign || null,
+    utm_content: attribution.content || null,
+    utm_term: attribution.term || null,
+    referrer_url: attribution.parent_url || attribution.referrer || req.headers.get("referer") || null,
+    referrer_type: referrerTypeFor(payload),
+    landing_page: attribution.landing_page || attribution.current_path || pageUrlFor(payload, req),
+    user_agent: req.headers.get("user-agent") || null,
+    device_type: attribution.device_category === "mobile" ||
+      attribution.device_category === "tablet" ||
+      attribution.device_category === "desktop"
+      ? attribution.device_category
+      : null,
+    initial_question: payload.question || null,
+    initial_address: payload.address || payload.property_address || null,
+    status: "completed",
+    step_reached: 5,
   };
 }
 
-function parseMissingColumn(errorText: string) {
-  const quotedMatch = errorText.match(/Could not find the '([^']+)' column/i);
-  if (quotedMatch?.[1]) return quotedMatch[1];
+function buildLeadRow(payload: LeadPayload, req: Request, sessionId: string) {
+  const leadType = leadTypeFor(payload);
+  const { firstName, lastName } = splitName(payload);
+  const notes = buildNotes(payload);
 
-  const jsonColumnMatch = errorText.match(/"message"\s*:\s*"Could not find the '([^']+)' column/i);
-  if (jsonColumnMatch?.[1]) return jsonColumnMatch[1];
-
-  return null;
+  return {
+    session_id: sessionId,
+    first_name: firstName,
+    last_name: lastName,
+    email: payload.email || null,
+    phone: payload.phone || null,
+    phone_normalized: stripPhoneDigits(payload.phone),
+    state: "NC",
+    address_raw: payload.property_address || payload.address || null,
+    primary_intent: primaryIntentFor(leadType, payload),
+    question_raw: notes || payload.question || payload.condition || null,
+    timeline_months: timelineMonthsFor(payload.timeline),
+    consent_sms: false,
+    consent_call: false,
+    consent_email: false,
+    consent_timestamp: new Date().toISOString(),
+    consent_language_version: "canonical_v1",
+    status: payload.status,
+    lead_type: leadType,
+    source: sourceFor(payload),
+    source_detail: sourceDetailFor(payload),
+    page_url: pageUrlFor(payload, req),
+    widget_session_id: payload.widget_session_id || sessionId,
+  };
 }
 
 function withoutUndefined(row: Record<string, unknown>) {
   return Object.fromEntries(Object.entries(row).filter(([, value]) => value !== undefined));
 }
 
-async function insertSchemaCompatibleLead(
-  supabaseUrl: string,
-  headers: Record<string, string>,
+async function postgrestUpsert(
+  url: string,
+  headers: SupabaseHeaders,
   row: Record<string, unknown>,
 ) {
-  const insertUrl = supabaseUrl + "/rest/v1/leads";
-  const droppedColumns: string[] = [];
-  let insertRow = withoutUndefined(row);
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      ...headers,
+      Prefer: "resolution=merge-duplicates,return=minimal",
+    },
+    body: JSON.stringify(withoutUndefined(row)),
+  });
 
-  for (let attempt = 0; attempt <= MAX_SCHEMA_COMPAT_RETRIES; attempt += 1) {
-    const response = await fetch(insertUrl, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(insertRow),
-    });
+  if (response.ok) return;
 
-    if (response.ok) {
-      if (droppedColumns.length) {
-        console.warn("Lead insert schema compatibility dropped unsupported columns", {
-          dropped_columns: droppedColumns,
-        });
-      }
-      return;
-    }
-
-    const errorText = await response.text();
-    const missingColumn = parseMissingColumn(errorText);
-    if (!missingColumn || !(missingColumn in insertRow) || attempt === MAX_SCHEMA_COMPAT_RETRIES) {
-      console.error("Lead insert failed after schema compatibility attempts", {
-        status: response.status,
-        status_text: response.statusText,
-        dropped_columns: droppedColumns,
-        error: errorText || response.statusText,
-      });
-      throw new Error("lead_insert_failed");
-    }
-
-    droppedColumns.push(missingColumn);
-    const nextRow = { ...insertRow };
-    delete nextRow[missingColumn];
-    insertRow = nextRow;
-  }
-
+  const errorText = await response.text();
+  console.error("LeadOps production write failed", {
+    url: url.replace(/^https?:\/\/[^/]+/, "[supabase]"),
+    status: response.status,
+    status_text: response.statusText,
+    error: errorText || response.statusText,
+  });
   throw new Error("lead_insert_failed");
 }
 
-async function insertLead(payload: LeadPayload) {
+async function insertLead(payload: LeadPayload, req: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -243,15 +341,24 @@ async function insertLead(payload: LeadPayload) {
     return;
   }
 
-  const row = buildInsertRow(payload);
+  const sessionId = sessionIdFor(payload);
   const headers = {
     apikey: supabaseServiceKey,
     Authorization: "Bearer " + supabaseServiceKey,
     "Content-Type": "application/json",
-    Prefer: "return=minimal",
   };
 
-  await insertSchemaCompatibleLead(supabaseUrl, headers, row);
+  await postgrestUpsert(
+    supabaseUrl + "/rest/v1/sessions?on_conflict=id",
+    headers,
+    buildSessionRow(payload, req, sessionId),
+  );
+
+  await postgrestUpsert(
+    supabaseUrl + "/rest/v1/leads?on_conflict=session_id",
+    headers,
+    buildLeadRow(payload, req, sessionId),
+  );
 }
 
 function validateLead(payload: LeadPayload) {
@@ -298,7 +405,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    await insertLead(payload);
+    await insertLead(payload, req);
   } catch (error) {
     console.error("Lead persistence failed", {
       funnel_type: payload.funnel_type,

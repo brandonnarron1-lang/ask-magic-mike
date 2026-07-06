@@ -30,15 +30,20 @@ export type Attribution = {
 export type LeadPayload = {
   funnel_type: FunnelType;
   lead_source_surface: LeadSourceSurface;
+  lead_type?: string;
   address?: string;
   property_address?: string;
   name?: string;
+  first_name?: string;
+  last_name?: string;
   email?: string;
   phone?: string;
   timeline?: string;
   condition?: string;
   notes?: string;
   question?: string;
+  page_url?: string;
+  widget_session_id?: string;
   attribution: Attribution;
   status: "new";
   assigned_agent_id: string | null;
@@ -62,15 +67,20 @@ export function normalizeLeadPayload(input: Record<string, unknown>): LeadPayloa
   return {
     funnel_type: funnelType,
     lead_source_surface: normalizeSurface(input.lead_source_surface, funnelType),
+    lead_type: cleanOptional(input.lead_type),
     address: cleanOptional(input.address || input.property_address),
     property_address: cleanOptional(input.property_address || input.address),
     name: cleanOptional(input.name),
+    first_name: cleanOptional(input.first_name),
+    last_name: cleanOptional(input.last_name),
     email: cleanOptional(input.email),
     phone: cleanOptional(input.phone),
     timeline: cleanOptional(input.timeline),
-    condition: cleanOptional(input.condition),
+    condition: cleanOptional(input.condition || input.property_condition),
     notes: cleanOptional(input.notes),
-    question: cleanOptional(input.question),
+    question: cleanOptional(input.question || input.intent),
+    page_url: cleanOptional(input.page_url),
+    widget_session_id: cleanOptional(input.widget_session_id),
     attribution,
     status: "new",
     assigned_agent_id: null,

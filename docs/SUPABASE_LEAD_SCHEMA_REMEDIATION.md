@@ -10,17 +10,11 @@ PGRST204: Could not find the 'address' column of 'leads' in the schema cache
 
 This means the application sent a canonical LeadOps insert row containing `address`, while the live Supabase `leads` table did not expose an `address` column to PostgREST.
 
-## Code compatibility added
+## Superseded by production write mapping
 
-The application now keeps the canonical LeadOps payload internally, but performs a schema-compatible insert into Supabase:
+This note captured the first PGRST204 diagnosis. The active production fix is now documented in `docs/SUPABASE_LEAD_CAPTURE_REMEDIATION.md`.
 
-- The first insert includes canonical fields and compatible legacy aliases where available.
-- If PostgREST returns `PGRST204` for a missing column, the API removes only that unsupported column and retries.
-- Retries are capped to avoid loops.
-- Dropped columns are logged server-side only.
-- Public clients receive a generic save-failure message instead of raw Supabase or schema-cache details.
-
-This preserves lead capture while production schema is reviewed.
+The `/api/leads` route no longer uses a missing-column retry loop. It writes a `sessions` row first, then writes a production-shaped `leads` row using existing columns such as `session_id`, `address_raw`, `primary_intent`, `timeline_months`, `lead_type`, `source`, `source_detail`, `page_url`, and `widget_session_id`.
 
 ## Recommended non-destructive SQL for human review
 
@@ -62,5 +56,5 @@ If Supabase continues reporting stale columns after a reviewed migration, reload
 
 - No production Supabase schema change was applied by this hotfix.
 - No production leads were submitted during verification.
-- The compatibility retry is an application safety layer, not a replacement for aligning the database schema with canonical LeadOps fields.
+- The production write mapping is an application safety layer, not a replacement for aligning the database schema with canonical LeadOps fields later.
 - AdminOps lead review already tolerates legacy address fields such as `address_raw`, `property_address`, and `normalized_property_address`.
