@@ -20,7 +20,11 @@ afterEach(() => {
 function makeRequest(body: unknown) {
   return new Request("http://localhost/api/leads", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "user-agent": "vitest-browser",
+      referer: "https://www.ourtownproperties.com/ask-mike/",
+    },
     body: JSON.stringify(body),
   });
 }
@@ -29,7 +33,7 @@ async function json(res: Response) {
   return res.json() as Promise<Record<string, unknown>>;
 }
 
-function missingColumnResponse(column: string) {
+function missingColumnResponse(column: string, table = "leads") {
   return {
     ok: false,
     status: 400,
@@ -39,12 +43,12 @@ function missingColumnResponse(column: string) {
         code: "PGRST204",
         details: null,
         hint: null,
-        message: "Could not find the '" + column + "' column of 'leads' in the schema cache",
+        message: "Could not find the '" + column + "' column of '" + table + "' in the schema cache",
       }),
   } as Response;
 }
 
-function successInsertResponse() {
+function successInsertResponse(status = 201) {
   return { ok: true, status: 201, statusText: "Created", text: async () => "" } as Response;
 }
 
@@ -187,19 +191,23 @@ describe("POST /api/leads — malformed input", () => {
 // ─── Attribution forwarded to Supabase ────────────────────────────────────────
 
 describe("POST /api/leads — attribution forwarded to Supabase insert", () => {
-  it("passes all attribution fields to Supabase fullRow", async () => {
+  it("creates a session first and maps attribution to the production lead row", async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://fake.supabase.co";
     process.env.SUPABASE_SERVICE_ROLE_KEY = "fake-key";
 
-    const captured: unknown[] = [];
+    const captured: Array<{ table: string; body: Record<string, unknown>; url: string }> = [];
     globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
       const urlStr = String(url);
       if (urlStr.includes("supabase")) {
         const body = init?.body && typeof init.body === "string"
           ? JSON.parse(init.body) as Record<string, unknown>
           : {};
-        captured.push(body);
-        return { ok: true, status: 201, text: async () => "" } as Response;
+        captured.push({
+          table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads",
+          body,
+          url: urlStr,
+        });
+        return successInsertResponse();
       }
       return { ok: true, status: 200, json: async () => ({}) } as Response;
     }) as unknown as typeof fetch;
@@ -209,6 +217,7 @@ describe("POST /api/leads — attribution forwarded to Supabase insert", () => {
       address: "123 Nash St NW, Wilson NC",
       email: "jane@example.com",
       phone: "2525551212",
+      widget_session_id: "11111111-1111-4111-8111-111111111111",
       attribution: {
         source: "facebook",
         medium: "paid_social",
@@ -219,33 +228,40 @@ describe("POST /api/leads — attribution forwarded to Supabase insert", () => {
       },
     }));
 
-    expect(captured).toHaveLength(1);
-    const row = captured[0] as Record<string, unknown>;
+    expect(captured.map((call) => call.table)).toEqual(["sessions", "leads"]);
+    const session = captured[0].body;
+    const row = captured[1].body;
+    expect(session.id).toBe("11111111-1111-4111-8111-111111111111");
+    expect(session.utm_source).toBe("facebook");
+    expect(session.utm_medium).toBe("paid_social");
+    expect(session.utm_campaign).toBe("seller_q3_wilson");
+    expect(session.initial_address).toBe("123 Nash St NW, Wilson NC");
+    expect(row.session_id).toBe(session.id);
     expect(row.source).toBe("facebook");
-    expect(row.medium).toBe("paid_social");
-    expect(row.campaign).toBe("seller_q3_wilson");
-    expect(row.embed_host).toBe("ourtownproperties.com");
-    expect(row.placement).toBe("sitewide-floating");
-    expect(row.funnel_type).toBe("home_value");
+    expect(row.source_detail).toBe("home_value_page / paid_social / seller_q3_wilson / sitewide-floating");
+    expect(row.page_url).toBe("https://www.ourtownproperties.com/ask-mike/");
+    expect(row.widget_session_id).toBe("11111111-1111-4111-8111-111111111111");
+    expect(row.lead_type).toBe("home_value");
+    expect(row.primary_intent).toBe("sell");
     expect(row.status).toBe("new");
-    expect(row.assigned_agent_id).toBeNull();
   });
 });
 
-// ─── Supabase schema compatibility ───────────────────────────────────────────
+// ─── Supabase production schema compatibility ────────────────────────────────
 
 describe("POST /api/leads — Supabase schema compatibility", () => {
-  it("retries home-value inserts without a PGRST204 missing address column", async () => {
+  it("maps home-value payloads to production lead columns without address or canonical-only fields", async () => {
     configureSupabaseEnv();
 
-    const captured: Array<Record<string, unknown>> = [];
+    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
     globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
       if (String(url).includes("supabase")) {
+        const urlStr = String(url);
         const body = init?.body && typeof init.body === "string"
           ? JSON.parse(init.body) as Record<string, unknown>
           : {};
-        captured.push(body);
-        return captured.length === 1 ? missingColumnResponse("address") : successInsertResponse();
+        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        return successInsertResponse();
       }
       return { ok: true, status: 200, json: async () => ({}) } as Response;
     }) as unknown as typeof fetch;
@@ -256,30 +272,47 @@ describe("POST /api/leads — Supabase schema compatibility", () => {
       address: "123 Nash St NW, Wilson NC",
       email: "jane@example.com",
       phone: "2525551212",
-      timeline: "30 days",
-      attribution: { source: "ourtownproperties", placement: "sitewide-floating" },
+      timeline: "30-60 days",
+      attribution: {
+        source: "ourtownproperties",
+        medium: "website",
+        campaign: "parent-site-widget",
+        parent_url: "https://www.ourtownproperties.com/",
+        placement: "sitewide-floating",
+      },
     }));
 
     expect(res.status).toBe(200);
     expect(captured).toHaveLength(2);
-    expect(captured[0].address).toBe("123 Nash St NW, Wilson NC");
-    expect(captured[1]).not.toHaveProperty("address");
-    expect(captured[1].address_raw).toBe("123 Nash St NW, Wilson NC");
-    expect(captured[1].property_address).toBe("123 Nash St NW, Wilson NC");
-    expect(String(captured[1].notes)).toContain("Address: 123 Nash St NW, Wilson NC");
+    expect(captured[0].table).toBe("sessions");
+    expect(captured[1].table).toBe("leads");
+    const row = captured[1].body;
+    expect(row.address_raw).toBe("123 Nash St NW, Wilson NC");
+    expect(row.timeline_months).toBe(3);
+    expect(row.lead_type).toBe("home_value");
+    expect(row.primary_intent).toBe("sell");
+    expect(row.source).toBe("ourtownproperties");
+    expect(row.source_detail).toBe("widget / website / parent-site-widget / sitewide-floating");
+    expect(row.page_url).toBe("https://www.ourtownproperties.com/");
+    expect(row).not.toHaveProperty("address");
+    expect(row).not.toHaveProperty("property_address");
+    expect(row).not.toHaveProperty("funnel_type");
+    expect(row).not.toHaveProperty("lead_source_surface");
+    expect(row).not.toHaveProperty("attribution");
   });
 
-  it("keeps seller condition, timeline, and compatible address fields after dropping address", async () => {
+  it("keeps seller context in production-safe fields", async () => {
     configureSupabaseEnv();
 
-    const captured: Array<Record<string, unknown>> = [];
+    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
     globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
       if (String(url).includes("supabase")) {
+        const urlStr = String(url);
         const body = init?.body && typeof init.body === "string"
           ? JSON.parse(init.body) as Record<string, unknown>
           : {};
-        captured.push(body);
-        return captured.length === 1 ? missingColumnResponse("address") : successInsertResponse();
+        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        return successInsertResponse();
       }
       return { ok: true, status: 200, json: async () => ({}) } as Response;
     }) as unknown as typeof fetch;
@@ -296,29 +329,30 @@ describe("POST /api/leads — Supabase schema compatibility", () => {
 
     expect(res.status).toBe(200);
     expect(captured).toHaveLength(2);
-    const retryRow = captured[1];
-    expect(retryRow).not.toHaveProperty("address");
-    expect(retryRow.address_raw).toBe("804 Herring Ave E");
-    expect(retryRow.property_address).toBe("804 Herring Ave E");
-    expect(retryRow.property_condition).toBe("Needs repairs");
-    expect(retryRow.condition).toBe("Needs repairs");
-    expect(retryRow.timeline).toBe("As soon as practical");
-    expect(String(retryRow.notes)).toContain("Inherited property");
+    const row = captured[1].body;
+    expect(row.address_raw).toBe("804 Herring Ave E");
+    expect(row.lead_type).toBe("seller");
+    expect(row.primary_intent).toBe("sell");
+    expect(row.timeline_months).toBe(0);
+    expect(String(row.question_raw)).toContain("Condition: Needs repairs");
+    expect(String(row.question_raw)).toContain("Inherited property");
+    expect(row).not.toHaveProperty("condition");
+    expect(row).not.toHaveProperty("property_condition");
+    expect(row).not.toHaveProperty("notes");
   });
 
-  it("can drop multiple unsupported canonical columns while preserving compatible widget lead data", async () => {
+  it("maps widget lead_type, page_url, and widget_session_id without retrying missing columns", async () => {
     configureSupabaseEnv();
 
-    const captured: Array<Record<string, unknown>> = [];
-    const missingColumns = ["address", "property_address", "funnel_type"];
+    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
     globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
       if (String(url).includes("supabase")) {
+        const urlStr = String(url);
         const body = init?.body && typeof init.body === "string"
           ? JSON.parse(init.body) as Record<string, unknown>
           : {};
-        captured.push(body);
-        const missing = missingColumns[captured.length - 1];
-        return missing ? missingColumnResponse(missing) : successInsertResponse();
+        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        return successInsertResponse();
       }
       return { ok: true, status: 200, json: async () => ({}) } as Response;
     }) as unknown as typeof fetch;
@@ -326,10 +360,13 @@ describe("POST /api/leads — Supabase schema compatibility", () => {
     const res = await POST(makeRequest({
       funnel_type: "widget",
       lead_source_surface: "widget",
+      lead_type: "seller_cash_offer",
       address: "400 Broad St W",
       email: "jane@example.com",
       phone: "2525551212",
-      timeline: "This month",
+      timeline: "6-12 months",
+      page_url: "https://www.ourtownproperties.com/sell/",
+      widget_session_id: "22222222-2222-4222-8222-222222222222",
       attribution: {
         source: "ourtownproperties",
         campaign: "parent-site-widget",
@@ -338,22 +375,60 @@ describe("POST /api/leads — Supabase schema compatibility", () => {
     }));
 
     expect(res.status).toBe(200);
-    expect(captured).toHaveLength(4);
-    const finalRow = captured[3];
-    expect(finalRow).not.toHaveProperty("address");
-    expect(finalRow).not.toHaveProperty("property_address");
-    expect(finalRow).not.toHaveProperty("funnel_type");
-    expect(finalRow.address_raw).toBe("400 Broad St W");
-    expect(finalRow.lead_type).toBe("home_value");
-    expect(finalRow.source).toBe("ourtownproperties");
-    expect(finalRow.placement).toBe("sitewide-floating");
+    expect(captured.map((call) => call.table)).toEqual(["sessions", "leads"]);
+    const row = captured[1].body;
+    expect(row.session_id).toBe("22222222-2222-4222-8222-222222222222");
+    expect(row.widget_session_id).toBe("22222222-2222-4222-8222-222222222222");
+    expect(row.address_raw).toBe("400 Broad St W");
+    expect(row.lead_type).toBe("seller_cash_offer");
+    expect(row.primary_intent).toBe("sell");
+    expect(row.timeline_months).toBe(12);
+    expect(row.page_url).toBe("https://www.ourtownproperties.com/sell/");
+    expect(row.source).toBe("ourtownproperties");
   });
 
-  it("returns a generic public error when Supabase insert cannot be recovered", async () => {
+  it("does not send address even when PostgREST would reject it with PGRST204", async () => {
     configureSupabaseEnv();
 
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL) => {
+    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
       if (String(url).includes("supabase")) {
+        const urlStr = String(url);
+        const body = init?.body && typeof init.body === "string"
+          ? JSON.parse(init.body) as Record<string, unknown>
+          : {};
+        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        if (urlStr.includes("/rest/v1/leads") && "address" in body) {
+          return missingColumnResponse("address");
+        }
+        return successInsertResponse();
+      }
+      return { ok: true, status: 200, json: async () => ({}) } as Response;
+    }) as unknown as typeof fetch;
+
+    const res = await POST(makeRequest({
+      funnel_type: "home_value",
+      address: "123 Nash St NW",
+      email: "jane@example.com",
+      phone: "2525551212",
+    }));
+
+    expect(res.status).toBe(200);
+    const leadWrites = captured.filter((call) => call.table === "leads");
+    expect(leadWrites).toHaveLength(1);
+    expect(leadWrites[0].body).not.toHaveProperty("address");
+    expect(leadWrites[0].body.address_raw).toBe("123 Nash St NW");
+  });
+
+  it("returns a generic public error when Supabase lead insert fails and does not retry storm", async () => {
+    configureSupabaseEnv();
+
+    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL) => {
+      const urlStr = String(url);
+      if (urlStr.includes("supabase")) {
+        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body: {} });
+        if (urlStr.includes("/rest/v1/sessions")) return successInsertResponse();
         return {
           ok: false,
           status: 500,
@@ -374,11 +449,57 @@ describe("POST /api/leads — Supabase schema compatibility", () => {
     const serialized = JSON.stringify(body);
 
     expect(res.status).toBe(500);
+    expect(captured.filter((call) => call.table === "sessions")).toHaveLength(1);
+    expect(captured.filter((call) => call.table === "leads")).toHaveLength(1);
     expect(body.error).toBe(PUBLIC_LEAD_SAVE_ERROR);
     expect(serialized).not.toMatch(/Supabase insert failed/i);
     expect(serialized).not.toMatch(/PGRST204/i);
     expect(serialized).not.toMatch(/schema cache/i);
     expect(serialized).not.toMatch(/address column/i);
+  });
+});
+
+describe("POST /api/leads — timeline mapping", () => {
+  async function leadRowForTimeline(timeline: string) {
+    configureSupabaseEnv();
+    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      if (String(url).includes("supabase")) {
+        const urlStr = String(url);
+        const body = init?.body && typeof init.body === "string"
+          ? JSON.parse(init.body) as Record<string, unknown>
+          : {};
+        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        return successInsertResponse();
+      }
+      return { ok: true, status: 200, json: async () => ({}) } as Response;
+    }) as unknown as typeof fetch;
+
+    await POST(makeRequest({
+      funnel_type: "home_value",
+      address: "123 Nash St",
+      email: "jane@example.com",
+      phone: "2525551212",
+      timeline,
+    }));
+
+    return captured.find((call) => call.table === "leads")?.body || {};
+  }
+
+  it("maps ASAP to 0 months", async () => {
+    expect((await leadRowForTimeline("ASAP")).timeline_months).toBe(0);
+  });
+
+  it("maps 30-60 days to 3 months", async () => {
+    expect((await leadRowForTimeline("30-60 days")).timeline_months).toBe(3);
+  });
+
+  it("maps 6-12 months to 12 months", async () => {
+    expect((await leadRowForTimeline("6-12 months")).timeline_months).toBe(12);
+  });
+
+  it("maps just curious/not sure to 24 months", async () => {
+    expect((await leadRowForTimeline("Just curious / not sure")).timeline_months).toBe(24);
   });
 });
 
