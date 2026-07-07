@@ -23,15 +23,20 @@ describe("AdminOps readiness guards", () => {
     expect(middleware).toContain("Unauthorized");
   });
 
-  it("adds an active root admin lead inbox without public POST behavior", () => {
+  it("keeps active root admin lead actions scoped to protected admin files", () => {
     const page = read("app/admin/leads/page.tsx");
     expect(page).toContain("loadAdminLeadInbox");
-    expect(page).toContain("Protected, read-only review");
-    expect(page).not.toContain("method=\"post\"");
+    expect(page).toContain("Status actions");
+    expect(page).toContain("updateLeadStatusAction");
     expect(page).not.toContain("fetch(");
+
+    const actions = read("app/admin/leads/actions.ts");
+    expect(actions).toContain('"use server"');
+    expect(actions).toContain("updateAdminLeadStatus");
+    expect(actions).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
   });
 
-  it("does not expose admin lead view model from public routes", () => {
+  it("does not expose admin lead view or mutation helpers from public routes", () => {
     const publicFiles = [
       "app/page.tsx",
       "app/home-value/page.tsx",
@@ -45,6 +50,8 @@ describe("AdminOps readiness guards", () => {
     for (const file of publicFiles) {
       expect(read(file), file).not.toContain("adminLeadView");
       expect(read(file), file).not.toContain("loadAdminLeadInbox");
+      expect(read(file), file).not.toContain("adminLeadActions");
+      expect(read(file), file).not.toContain("updateAdminLeadStatus");
     }
   });
 
@@ -59,7 +66,9 @@ describe("AdminOps readiness guards", () => {
     const files = [
       "docs/ADMINOPS_ROUTING_READINESS.md",
       "app/admin/leads/page.tsx",
+      "app/admin/leads/actions.ts",
       "app/lib/adminLeadView.ts",
+      "app/lib/adminLeadActions.ts",
     ];
 
     for (const file of files) {
@@ -72,6 +81,11 @@ describe("AdminOps readiness guards", () => {
     expect(page).not.toMatch(/process\.env/);
     expect(page).not.toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
     expect(page).not.toMatch(/ADMIN_SECRET/);
+
+    const actions = read("app/admin/leads/actions.ts");
+    expect(actions).not.toMatch(/process\.env/);
+    expect(actions).not.toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
+    expect(actions).not.toMatch(/ADMIN_SECRET/);
   });
 
   it("does not introduce fake value, appraisal, or automation claims", () => {
@@ -79,6 +93,7 @@ describe("AdminOps readiness guards", () => {
       read("docs/ADMINOPS_ROUTING_READINESS.md"),
       read("app/admin/leads/page.tsx"),
       read("app/lib/adminLeadView.ts"),
+      read("app/lib/adminLeadActions.ts"),
     ].join("\n");
 
     expect(changedText).not.toMatch(/guaranteed (home )?value/i);

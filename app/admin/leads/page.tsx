@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
 import { loadAdminLeadInbox, type AdminLeadView } from "../../lib/adminLeadView";
+import {
+  ADMIN_LEAD_STATUS_ACTIONS,
+  type AdminLeadStatus,
+} from "../../lib/adminLeadActions";
+import { updateLeadStatusAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -33,6 +38,111 @@ function Badge({ children }: { children: ReactNode }) {
     <span className="rounded-full border border-[#cda24a33] bg-[#cda24a14] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#e2c06f]">
       {children}
     </span>
+  );
+}
+
+const FILTERS = [
+  {
+    key: "active",
+    label: "Active / New",
+    statuses: ["new", "scored", "assigned", "escalated"],
+  },
+  {
+    key: "working",
+    label: "Contacted / Working",
+    statuses: ["contacted", "nurture"],
+  },
+  {
+    key: "qualified",
+    label: "Qualified / Appointment",
+    statuses: ["qualified", "appointment_requested", "appointment_set"],
+  },
+  {
+    key: "closed",
+    label: "Spam / Test / Closed",
+    statuses: ["spam", "dead", "converted"],
+  },
+  {
+    key: "all",
+    label: "All",
+    statuses: [],
+  },
+] as const;
+
+function filterLeads(leads: AdminLeadView[], filterKey: string) {
+  const filter = FILTERS.find((item) => item.key === filterKey) || FILTERS[0];
+  if (filter.key === "all") return leads;
+  const statuses = filter.statuses as readonly string[];
+  return leads.filter((lead) => statuses.includes(lead.status));
+}
+
+function StatusActionForm({
+  lead,
+  status,
+  label,
+  intent,
+  requiresConfirmation,
+  confirmationLabel,
+}: {
+  lead: AdminLeadView;
+  status: AdminLeadStatus;
+  label: string;
+  intent: "standard" | "caution";
+  requiresConfirmation?: boolean;
+  confirmationLabel?: string;
+}) {
+  if (lead.status === status) return null;
+
+  const buttonClass =
+    intent === "caution"
+      ? "border-[#7f1d1d] bg-[#2a0909] text-[#ffd7d7] hover:border-[#d66b6b]"
+      : "border-[#cda24a33] bg-[#cda24a14] text-[#f4ead4] hover:border-[#cda24a]";
+
+  return (
+    <form action={updateLeadStatusAction} className="rounded-md border border-white/10 bg-white/[0.03] p-3">
+      <input type="hidden" name="lead_id" value={lead.id} />
+      <input type="hidden" name="status" value={status} />
+      {requiresConfirmation ? (
+        <label className="mb-2 flex items-start gap-2 text-[11px] leading-4 text-[#d9ceb8]">
+          <input
+            required
+            type="checkbox"
+            name="confirm"
+            value="yes"
+            className="mt-0.5"
+            aria-label={confirmationLabel}
+          />
+          <span>{confirmationLabel}</span>
+        </label>
+      ) : null}
+      <button
+        type="submit"
+        className={`w-full rounded-md border px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] transition ${buttonClass}`}
+      >
+        {label}
+      </button>
+    </form>
+  );
+}
+
+function LeadStatusActions({ lead }: { lead: AdminLeadView }) {
+  return (
+    <div className="mt-5 rounded-md border border-white/10 bg-[#080808] p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#e2c06f]">
+          Status actions
+        </p>
+        <p className="text-xs text-[#8f8778]">Current: {lead.status}</p>
+      </div>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        {ADMIN_LEAD_STATUS_ACTIONS.map((action) => (
+          <StatusActionForm key={action.status} lead={lead} {...action} />
+        ))}
+      </div>
+      <p className="mt-3 text-xs leading-5 text-[#8f8778]">
+        Spam / test lead marks internal QA and non-real submissions without deleting the record.
+      </p>
+    </div>
   );
 }
 
@@ -128,12 +238,21 @@ function LeadCard({ lead }: { lead: AdminLeadView }) {
           </dl>
         ) : null}
       </div>
+
+      <LeadStatusActions lead={lead} />
     </article>
   );
 }
 
-export default async function AdminLeadsPage() {
+export default async function AdminLeadsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ filter?: string; status_action?: string }>;
+}) {
   const inbox = await loadAdminLeadInbox();
+  const params = searchParams ? await searchParams : {};
+  const activeFilter = params.filter || "active";
+  const visibleLeads = filterLeads(inbox.leads, activeFilter);
 
   return (
     <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
@@ -144,18 +263,40 @@ export default async function AdminLeadsPage() {
           </p>
           <h1 className="mt-3 font-serif text-4xl">Lead inbox and routing readiness</h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-[#d9ceb8]">
-            Protected, read-only review of normalized Ask Magic Mike leads. Use this surface to
-            inspect contact fields, attribution, status, and assignment readiness before routing.
+            Protected review of normalized Ask Magic Mike leads. Use this surface to inspect
+            contact fields, attribution, status, and assignment readiness before routing.
           </p>
+          {params.status_action ? (
+            <p className="mt-4 rounded-md border border-[#cda24a33] bg-[#cda24a14] p-3 text-sm text-[#f4ead4]">
+              Status action result: {params.status_action.replaceAll("_", " ")}
+            </p>
+          ) : null}
         </header>
 
         {!inbox.leads.length ? (
           <EmptyState configured={inbox.configured} error={inbox.error} />
         ) : (
           <section className="space-y-4">
-            {inbox.leads.map((lead) => (
+            <nav className="flex flex-wrap gap-2" aria-label="Lead status filters">
+              {FILTERS.map((filter) => (
+                <a
+                  key={filter.key}
+                  href={`/admin/leads?filter=${filter.key}`}
+                  className={`rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] ${
+                    activeFilter === filter.key
+                      ? "border-[#cda24a] bg-[#cda24a] text-black"
+                      : "border-[#cda24a33] bg-[#0b0b0b] text-[#d9ceb8]"
+                  }`}
+                >
+                  {filter.label}
+                </a>
+              ))}
+            </nav>
+            {visibleLeads.length ? visibleLeads.map((lead) => (
               <LeadCard key={lead.id} lead={lead} />
-            ))}
+            )) : (
+              <EmptyState configured={inbox.configured} error="No leads match this status filter." />
+            )}
           </section>
         )}
       </div>
