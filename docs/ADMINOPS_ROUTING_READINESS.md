@@ -39,7 +39,7 @@ Admin API routes in `src/app/api/admin/*` use `src/lib/admin/auth.ts`.
 - Query-string secrets are rejected
 - Missing `ADMIN_SECRET` returns `503`
 
-This branch does not weaken or replace either pattern. The active `app/admin/leads` page is read-only and is protected by the existing `/admin/:path*` middleware.
+This branch does not weaken or replace either pattern. The active `app/admin/leads` page is protected by the existing `/admin/:path*` middleware.
 
 ## Lead Inbox Workflow
 
@@ -52,7 +52,7 @@ The protected inbox at `/admin/leads` is intended for:
 - inspecting attribution source, medium, campaign, placement, parent URL, embed host, landing path, and device
 - seeing status and assignment readiness
 
-The page performs no writes, sends no messages, and does not submit forms.
+The page now supports protected status-only actions for lead triage. It does not send messages, delete leads, assign leads, or submit public forms.
 
 ## Canonical Admin Lead Fields
 
@@ -125,7 +125,19 @@ Existing write-capable admin/routing patterns were found under `src/app/api/admi
 - `PATCH /api/admin/leads/[id]`
 - `POST /api/admin/leads/[id]/assign`
 
-Those routes already use admin auth helpers and audit/event behavior. This branch does not add new mutation routes because the active root app and older `src/app` admin system need a deliberate consolidation decision before expanding write surfaces.
+Those routes already use admin auth helpers and audit/event behavior. The active root app now includes a narrow status-only server action for `/admin/leads`. It updates only `leads.status`, validates IDs/statuses server-side, and uses only schema-supported status values.
+
+Supported active inbox actions:
+
+- contacted
+- qualified
+- appointment_set
+- converted
+- dead
+- spam
+- new
+
+Unsupported direct statuses such as `internal_qa`, `test`, and `archived` are not invented. Internal QA and not-a-real-lead cleanup uses `spam`.
 
 ## Assignment Readiness
 
@@ -134,7 +146,7 @@ The protected inbox displays `assigned_agent_id` when present and labels unassig
 Recommended follow-up, if the business approves:
 
 1. Consolidate active admin routing under the root `app/` tree or intentionally migrate back to `src/app`.
-2. Reuse the existing `x-admin-secret` admin API pattern for any status or assignment writes.
+2. Consolidate the older `x-admin-secret` admin API pattern with the active root server-action path before adding assignment or messaging writes.
 3. Keep assignment writes audited in `audit_logs`.
 4. Keep outbound SMS/email actions opt-in and consent-aware.
 
