@@ -76,6 +76,18 @@ The active `/api/leads` route now performs a production-shaped write:
 
 The route no longer sends unsupported canonical-only columns directly to `leads`, including `address`, `funnel_type`, `lead_source_surface`, or top-level `attribution`.
 
+### Embedded widget landing-page attribution
+
+For embedded widgets, `sessions.landing_page` now prefers the true parent/embed URL when available:
+
+1. `attribution.parent_url`
+2. `payload.page_url`
+3. `attribution.landing_page`
+4. `attribution.current_path`
+5. request `referer`
+
+This aligns the session row with the parent OurTownProperties.com page for embedded submissions. Lead-level `leads.page_url` was already recording the parent URL correctly and remains unchanged. No schema migration is required.
+
 ## Timeline mapping
 
 - `ASAP`, `Immediately`, `0-30 days`, `This month` -> `0`

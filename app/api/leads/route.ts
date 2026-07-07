@@ -214,6 +214,18 @@ function pageUrlFor(payload: LeadPayload, req: Request) {
   );
 }
 
+function sessionLandingPageFor(payload: LeadPayload, req: Request) {
+  const attribution = payload.attribution || {};
+  return (
+    attribution.parent_url ||
+    payload.page_url ||
+    attribution.landing_page ||
+    attribution.current_path ||
+    req.headers.get("referer") ||
+    null
+  );
+}
+
 function referrerTypeFor(payload: LeadPayload) {
   const source = (sourceFor(payload) || "").toLowerCase();
   const medium = (payload.attribution?.medium || "").toLowerCase();
@@ -251,7 +263,7 @@ function buildSessionRow(payload: LeadPayload, req: Request, sessionId: string) 
     utm_term: attribution.term || null,
     referrer_url: attribution.parent_url || attribution.referrer || req.headers.get("referer") || null,
     referrer_type: referrerTypeFor(payload),
-    landing_page: attribution.landing_page || attribution.current_path || pageUrlFor(payload, req),
+    landing_page: sessionLandingPageFor(payload, req),
     user_agent: req.headers.get("user-agent") || null,
     device_type: attribution.device_category === "mobile" ||
       attribution.device_category === "tablet" ||
