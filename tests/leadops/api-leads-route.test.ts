@@ -6,15 +6,26 @@
  * the correct HTTP shape.  One fetch-mock section validates that full
  * attribution fields reach the Supabase insert payload.
  */
-import { describe, expect, it, vi, afterEach } from "vitest";
+import { describe, expect, it, vi, afterEach, beforeEach } from "vitest";
 import { POST } from "../../app/api/leads/route";
 import { PUBLIC_LEAD_SAVE_ERROR } from "../../app/lib/publicLeadErrors";
 
 const ORIGINAL_FETCH = globalThis.fetch;
+beforeEach(() => {
+  delete (process.env as Record<string, string | undefined>).NEXT_PUBLIC_SUPABASE_URL;
+  delete (process.env as Record<string, string | undefined>).SUPABASE_SERVICE_ROLE_KEY;
+  delete (process.env as Record<string, string | undefined>).OPENAI_API_KEY;
+  delete (process.env as Record<string, string | undefined>).POSTHOG_API_KEY;
+  delete (process.env as Record<string, string | undefined>).RESEND_API_KEY;
+});
+
 afterEach(() => {
   globalThis.fetch = ORIGINAL_FETCH;
   delete (process.env as Record<string, string | undefined>).NEXT_PUBLIC_SUPABASE_URL;
   delete (process.env as Record<string, string | undefined>).SUPABASE_SERVICE_ROLE_KEY;
+  delete (process.env as Record<string, string | undefined>).OPENAI_API_KEY;
+  delete (process.env as Record<string, string | undefined>).POSTHOG_API_KEY;
+  delete (process.env as Record<string, string | undefined>).RESEND_API_KEY;
 });
 
 function makeRequest(body: unknown) {
@@ -236,6 +247,7 @@ describe("POST /api/leads — attribution forwarded to Supabase insert", () => {
     expect(session.utm_medium).toBe("paid_social");
     expect(session.utm_campaign).toBe("seller_q3_wilson");
     expect(session.initial_address).toBe("123 Nash St NW, Wilson NC");
+    expect(session.landing_page).toBe("https://www.ourtownproperties.com/ask-mike/");
     expect(row.session_id).toBe(session.id);
     expect(row.source).toBe("facebook");
     expect(row.source_detail).toBe("home_value_page / paid_social / seller_q3_wilson / sitewide-floating");
@@ -299,6 +311,112 @@ describe("POST /api/leads — Supabase schema compatibility", () => {
     expect(row).not.toHaveProperty("funnel_type");
     expect(row).not.toHaveProperty("lead_source_surface");
     expect(row).not.toHaveProperty("attribution");
+  });
+
+  it("prefers parent URL for embedded widget session landing page while preserving lead page_url", async () => {
+    configureSupabaseEnv();
+
+    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      if (String(url).includes("supabase")) {
+        const urlStr = String(url);
+        const body = init?.body && typeof init.body === "string"
+          ? JSON.parse(init.body) as Record<string, unknown>
+          : {};
+        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        return successInsertResponse();
+      }
+      return { ok: true, status: 200, json: async () => ({}) } as Response;
+    }) as unknown as typeof fetch;
+
+    const res = await POST(makeRequest({
+      funnel_type: "widget",
+      lead_source_surface: "widget",
+      address: "123 Nash St NW",
+      email: "jane@example.com",
+      phone: "2525551212",
+      attribution: {
+        source: "ourtownproperties",
+        medium: "website",
+        campaign: "parent-site-widget",
+        parent_url: "https://www.ourtownproperties.com/",
+        landing_page: "https://www.askmagicmike.com/widget-preview",
+        current_path: "/widget",
+        placement: "sitewide-floating",
+      },
+    }));
+
+    expect(res.status).toBe(200);
+    expect(captured.map((call) => call.table)).toEqual(["sessions", "leads"]);
+    expect(captured[0].body.landing_page).toBe("https://www.ourtownproperties.com/");
+    expect(captured[1].body.page_url).toBe("https://www.ourtownproperties.com/");
+  });
+
+  it("keeps widget-preview as session landing page for direct Ask Magic Mike preview submissions", async () => {
+    configureSupabaseEnv();
+
+    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      if (String(url).includes("supabase")) {
+        const urlStr = String(url);
+        const body = init?.body && typeof init.body === "string"
+          ? JSON.parse(init.body) as Record<string, unknown>
+          : {};
+        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        return successInsertResponse();
+      }
+      return { ok: true, status: 200, json: async () => ({}) } as Response;
+    }) as unknown as typeof fetch;
+
+    const res = await POST(makeRequest({
+      funnel_type: "widget",
+      lead_source_surface: "widget",
+      address: "123 Nash St NW",
+      email: "jane@example.com",
+      phone: "2525551212",
+      attribution: {
+        source: "askmagicmike",
+        medium: "website",
+        landing_page: "https://www.askmagicmike.com/widget-preview",
+      },
+    }));
+
+    expect(res.status).toBe(200);
+    expect(captured[0].body.landing_page).toBe("https://www.askmagicmike.com/widget-preview");
+    expect(captured[1].body.page_url).toBe("https://www.askmagicmike.com/widget-preview");
+  });
+
+  it("uses request referer for session landing page when attribution URLs are absent", async () => {
+    configureSupabaseEnv();
+
+    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      if (String(url).includes("supabase")) {
+        const urlStr = String(url);
+        const body = init?.body && typeof init.body === "string"
+          ? JSON.parse(init.body) as Record<string, unknown>
+          : {};
+        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        return successInsertResponse();
+      }
+      return { ok: true, status: 200, json: async () => ({}) } as Response;
+    }) as unknown as typeof fetch;
+
+    const res = await POST(makeRequest({
+      funnel_type: "widget",
+      lead_source_surface: "widget",
+      address: "123 Nash St NW",
+      email: "jane@example.com",
+      phone: "2525551212",
+      attribution: {
+        source: "external",
+        medium: "website",
+      },
+    }));
+
+    expect(res.status).toBe(200);
+    expect(captured[0].body.landing_page).toBe("https://www.ourtownproperties.com/ask-mike/");
+    expect(captured[1].body.page_url).toBe("https://www.ourtownproperties.com/ask-mike/");
   });
 
   it("keeps seller context in production-safe fields", async () => {
