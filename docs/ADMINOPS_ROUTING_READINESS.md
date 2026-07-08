@@ -22,6 +22,7 @@ Because the active Next build is rooted at `app/`, this branch adds a narrow act
 
 - `app/admin/page.tsx`
 - `app/admin/leads/page.tsx`
+- `app/admin/reporting/page.tsx`
 
 ## Auth And Protection Pattern
 
@@ -53,6 +54,16 @@ The protected inbox at `/admin/leads` is intended for:
 - seeing status and assignment readiness
 
 The page now supports protected status-only actions for lead triage. It does not send messages, delete leads, assign leads, or submit public forms.
+
+## Read-Only Reporting
+
+The protected reporting route at `/admin/reporting` provides AdminOps Analytics v1 from existing `leads` rows.
+
+- It uses the existing `/admin/:path*` Basic Auth middleware.
+- It reads only the current reporting columns through a bounded Supabase REST `GET`.
+- It supports 7, 30, and 90 day windows with application-side aggregation.
+- It provides lead volume, contactable rate, status buckets, source attribution, top pages, intent/timeline mix, and hot lead indicators.
+- It does not add a schema migration, write production data, update lead status, submit public forms, or mutate Supabase.
 
 ## Canonical Admin Lead Fields
 
@@ -179,6 +190,15 @@ If Supabase variables are missing, the protected inbox renders an empty configur
 - no stale Vercel URLs are introduced
 - active admin UI does not expose secret names
 - no fake value, appraisal, or automatic-assignment claims are introduced
+
+`tests/adminops/admin-reporting-view.test.ts` and `tests/adminops/admin-reporting-route-guards.test.ts` verify:
+
+- reporting row normalization and missing optional fields
+- deterministic KPI, funnel, status, source, page, timeline, and hot lead summaries
+- missing Supabase env vars return an unconfigured read-only state
+- Supabase access is bounded REST `GET` only with a capped limit
+- `/admin/reporting` has no forms, server actions, or mutation fetches
+- public routes do not import the reporting read model
 
 ## Production Decisions Still Needed
 
