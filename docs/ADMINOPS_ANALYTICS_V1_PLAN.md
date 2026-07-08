@@ -2,6 +2,15 @@
 
 Read-only planning document for Ask Magic Mike admin analytics and conversion reporting.
 
+## Implementation Status
+
+Implemented in the active root app as a protected read-only route at `/admin/reporting`.
+
+- Read model: `app/lib/adminReportingView.ts`
+- Page: `app/admin/reporting/page.tsx`
+- Tests: `tests/adminops/admin-reporting-view.test.ts` and `tests/adminops/admin-reporting-route-guards.test.ts`
+- Scope remains read-only: no schema migration, Supabase mutation, production data write, Vercel setting change, WordPress change, lead submission, or deployment is included.
+
 ## Scope
 
 Analytics V1 should give protected admins a practical read on lead volume, attribution quality, status conversion, and funnel performance without changing the production Supabase schema or mutating lead data.

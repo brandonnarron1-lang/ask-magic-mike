@@ -52,6 +52,8 @@ describe("AdminOps readiness guards", () => {
       expect(read(file), file).not.toContain("loadAdminLeadInbox");
       expect(read(file), file).not.toContain("adminLeadActions");
       expect(read(file), file).not.toContain("updateAdminLeadStatus");
+      expect(read(file), file).not.toContain("adminReportingView");
+      expect(read(file), file).not.toContain("loadAdminReportingSummary");
     }
   });
 
@@ -67,8 +69,10 @@ describe("AdminOps readiness guards", () => {
       "docs/ADMINOPS_ROUTING_READINESS.md",
       "app/admin/leads/page.tsx",
       "app/admin/leads/actions.ts",
+      "app/admin/reporting/page.tsx",
       "app/lib/adminLeadView.ts",
       "app/lib/adminLeadActions.ts",
+      "app/lib/adminReportingView.ts",
     ];
 
     for (const file of files) {
@@ -86,14 +90,21 @@ describe("AdminOps readiness guards", () => {
     expect(actions).not.toMatch(/process\.env/);
     expect(actions).not.toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
     expect(actions).not.toMatch(/ADMIN_SECRET/);
+
+    const reportingPage = read("app/admin/reporting/page.tsx");
+    expect(reportingPage).not.toMatch(/process\.env/);
+    expect(reportingPage).not.toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
+    expect(reportingPage).not.toMatch(/ADMIN_SECRET/);
   });
 
   it("does not introduce fake value, appraisal, or automation claims", () => {
     const changedText = [
       read("docs/ADMINOPS_ROUTING_READINESS.md"),
       read("app/admin/leads/page.tsx"),
+      read("app/admin/reporting/page.tsx"),
       read("app/lib/adminLeadView.ts"),
       read("app/lib/adminLeadActions.ts"),
+      read("app/lib/adminReportingView.ts"),
     ].join("\n");
 
     expect(changedText).not.toMatch(/guaranteed (home )?value/i);
