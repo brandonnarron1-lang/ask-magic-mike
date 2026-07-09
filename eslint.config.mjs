@@ -13,6 +13,7 @@ export default [
   {
     ignores: [
       ".next/**",
+      ".amm-run/**",
       "out/**",
       "build/**",
       "next-env.d.ts",

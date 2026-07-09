@@ -189,12 +189,20 @@ export default async function AdminReportingPage({
                 timeline mix, and hot lead indicators.
               </p>
             </div>
-            <Link
-              href="/admin/leads"
-              className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]"
-            >
-              Lead inbox
-            </Link>
+            <nav className="flex flex-wrap gap-2" aria-label="Admin navigation">
+              <Link
+                href="/admin/leads"
+                className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]"
+              >
+                Lead inbox
+              </Link>
+              <Link
+                href="/admin/allocation"
+                className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]"
+              >
+                Agent allocation
+              </Link>
+            </nav>
           </div>
           <nav className="mt-5 flex flex-wrap gap-2" aria-label="Reporting windows">
             {WINDOWS.map((days) => (
