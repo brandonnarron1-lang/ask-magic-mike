@@ -23,6 +23,7 @@ Because the active Next build is rooted at `app/`, this branch adds a narrow act
 - `app/admin/page.tsx`
 - `app/admin/leads/page.tsx`
 - `app/admin/reporting/page.tsx`
+- `app/admin/allocation/page.tsx`
 
 ## Auth And Protection Pattern
 
@@ -64,6 +65,30 @@ The protected reporting route at `/admin/reporting` provides AdminOps Analytics 
 - It supports 7, 30, and 90 day windows with application-side aggregation.
 - It provides lead volume, contactable rate, status buckets, source attribution, top pages, intent/timeline mix, and hot lead indicators.
 - It does not add a schema migration, write production data, update lead status, submit public forms, or mutate Supabase.
+
+## Agent Allocation
+
+The protected allocation route at `/admin/allocation` provides AdminOps Agent Allocation v1 from existing schema-supported rows.
+
+- It uses the existing `/admin/:path*` Basic Auth middleware.
+- It reads `agents` and bounded `leads` rows through Supabase REST `GET`.
+- It displays agent availability, capacity, current assigned lead count, hot lead count, unassigned queues, assigned leads by agent, stale unassigned leads, and source/intent/timeline mix.
+- It uses existing schema support only: `agents`, `leads.assigned_agent_id`, `leads.assigned_at`, and `leads.assignment_status`.
+- It does not add a migration or assume assignment history beyond the existing `lead_routing` table.
+- It does not expose the Supabase service role key to page/client code.
+- It does not submit public leads, call `/api/leads`, send messages, update WordPress/Vercel/DNS, or mutate production during tests.
+
+Supported active allocation actions:
+
+- Assign lead to agent: PATCH `leads.assigned_agent_id`, `leads.assigned_at`, and `leads.assignment_status`.
+- Unassign lead: PATCH those same assignment fields back to an unassigned state.
+
+Unsupported allocation actions:
+
+- Lead deletion.
+- Destructive cleanup.
+- Public lead mutation.
+- Agent availability writes. The current schema has schedule-style `agents.availability` JSON, not a simple mutable availability status field, so v1 leaves availability read-only.
 
 ## Canonical Admin Lead Fields
 
@@ -138,6 +163,8 @@ Existing write-capable admin/routing patterns were found under `src/app/api/admi
 
 Those routes already use admin auth helpers and audit/event behavior. The active root app now includes a narrow status-only server action for `/admin/leads`. It updates only `leads.status`, validates IDs/statuses server-side, and uses only schema-supported status values.
 
+Agent Allocation v1 is implemented in the active root app with server actions under `/admin/allocation`. Assignment writes validate UUIDs server-side and use PATCH only against the Supabase `leads` table. Tests mock fetch and do not mutate production data.
+
 Supported active inbox actions:
 
 - contacted
@@ -152,12 +179,12 @@ Unsupported direct statuses such as `internal_qa`, `test`, and `archived` are no
 
 ## Assignment Readiness
 
-The protected inbox displays `assigned_agent_id` when present and labels unassigned leads. It prepares review for assignment without assigning leads automatically.
+The protected inbox displays `assigned_agent_id` when present and labels unassigned leads. `/admin/allocation` now provides the protected manual assignment workflow.
 
 Recommended follow-up, if the business approves:
 
 1. Consolidate active admin routing under the root `app/` tree or intentionally migrate back to `src/app`.
-2. Consolidate the older `x-admin-secret` admin API pattern with the active root server-action path before adding assignment or messaging writes.
+2. Consolidate the older `x-admin-secret` admin API pattern with the active root server-action path before adding messaging writes.
 3. Keep assignment writes audited in `audit_logs`.
 4. Keep outbound SMS/email actions opt-in and consent-aware.
 
@@ -199,6 +226,43 @@ If Supabase variables are missing, the protected inbox renders an empty configur
 - Supabase access is bounded REST `GET` only with a capped limit
 - `/admin/reporting` has no forms, server actions, or mutation fetches
 - public routes do not import the reporting read model
+
+`tests/adminops/admin-agent-allocation-view.test.ts`, `tests/adminops/admin-agent-allocation-actions.test.ts`, and `tests/adminops/admin-allocation-route-guards.test.ts` verify:
+
+- agent and assignable lead row normalization
+- unassigned vs assigned grouping
+- hot lead scoring
+- agent load/count summaries
+- missing Supabase env safe state
+- GET-only allocation read model
+- PATCH-only assignment/unassignment actions
+- no POST to `/api/leads`
+- no destructive methods
+- allocation page has no delete controls
+- public routes do not import allocation modules
+- middleware protects `/admin/allocation`
+- service role key is not used in the page component
+- invalid lead/agent IDs are rejected
+- safe error handling
+
+## Local Verification
+
+Recommended verification commands:
+
+```bash
+pnpm run lint
+pnpm run typecheck
+pnpm run build
+pnpm run test
+pnpm exec vitest run tests/adminops/ tests/leadops/
+```
+
+Optional local smoke with blank Supabase env and a local-only admin secret:
+
+- Anonymous `/admin/allocation` should return `401`.
+- Authenticated `/admin/allocation` should render the safe unconfigured state.
+- `/admin/reporting` should still render.
+- `/widget` should still render.
 
 ## Production Decisions Still Needed
 

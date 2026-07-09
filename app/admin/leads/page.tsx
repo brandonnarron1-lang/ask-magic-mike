@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { loadAdminLeadInbox, type AdminLeadView } from "../../lib/adminLeadView";
 import {
   ADMIN_LEAD_STATUS_ACTIONS,
@@ -258,14 +259,32 @@ export default async function AdminLeadsPage({
     <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
       <div className="mx-auto max-w-6xl">
         <header className="mb-7 border-b border-[#cda24a33] pb-5">
-          <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#e2c06f]">
-            AdminOps
-          </p>
-          <h1 className="mt-3 font-serif text-4xl">Lead inbox and routing readiness</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-[#d9ceb8]">
-            Protected review of normalized Ask Magic Mike leads. Use this surface to inspect
-            contact fields, attribution, status, and assignment readiness before routing.
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#e2c06f]">
+                AdminOps
+              </p>
+              <h1 className="mt-3 font-serif text-4xl">Lead inbox and routing readiness</h1>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-[#d9ceb8]">
+                Protected review of normalized Ask Magic Mike leads. Use this surface to inspect
+                contact fields, attribution, status, and assignment readiness before routing.
+              </p>
+            </div>
+            <nav className="flex flex-wrap gap-2" aria-label="Admin navigation">
+              <Link
+                href="/admin/reporting"
+                className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]"
+              >
+                Reporting
+              </Link>
+              <Link
+                href="/admin/allocation"
+                className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]"
+              >
+                Agent allocation
+              </Link>
+            </nav>
+          </div>
           {params.status_action ? (
             <p className="mt-4 rounded-md border border-[#cda24a33] bg-[#cda24a14] p-3 text-sm text-[#f4ead4]">
               Status action result: {params.status_action.replaceAll("_", " ")}
