@@ -32,9 +32,11 @@ describe("AdminOps allocation route guards", () => {
     for (const file of publicFiles) {
       expect(read(file), file).not.toContain("adminAgentAllocationView");
       expect(read(file), file).not.toContain("adminAgentAllocationActions");
+      expect(read(file), file).not.toContain("adminAssignmentAudit");
       expect(read(file), file).not.toContain("loadAdminAgentAllocationView");
       expect(read(file), file).not.toContain("assignLeadToAgent");
       expect(read(file), file).not.toContain("unassignLead");
+      expect(read(file), file).not.toContain("writeAssignmentAuditEvent");
     }
   });
 
@@ -43,6 +45,7 @@ describe("AdminOps allocation route guards", () => {
     expect(page).toContain("loadAdminAgentAllocationView");
     expect(page).toContain("assignLeadToAgentAction");
     expect(page).toContain("unassignLeadAction");
+    expect(page).toContain("Recent assignment activity");
     expect(page).toContain('href="/admin/leads"');
     expect(page).toContain('href="/admin/reporting"');
     expect(page).not.toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
@@ -56,18 +59,24 @@ describe("AdminOps allocation route guards", () => {
     const view = read("app/lib/adminAgentAllocationView.ts");
     expect(view).toContain('new URL("/rest/v1/agents"');
     expect(view).toContain('new URL("/rest/v1/leads"');
+    expect(view).toContain("loadRecentAssignmentAuditEvents");
     expect(view).toContain('leadUrl.searchParams.set("limit", String(cappedLimit))');
     expect(view).not.toMatch(/method:\s*["'`](POST|PATCH|PUT|DELETE)["'`]/);
     expect(view).not.toContain("body:");
   });
 
-  it("keeps allocation actions server-only and PATCH-only", () => {
+  it("keeps allocation actions server-only with assignment PATCH and audit writer isolated", () => {
     const routeActions = read("app/admin/allocation/actions.ts");
     const libActions = read("app/lib/adminAgentAllocationActions.ts");
+    const audit = read("app/lib/adminAssignmentAudit.ts");
     expect(routeActions).toContain('"use server"');
     expect(routeActions).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
     expect(libActions).toContain('method: "PATCH"');
     expect(libActions).not.toMatch(/method:\s*["'`](POST|PUT|DELETE)["'`]/);
     expect(libActions).not.toContain("/api/leads");
+    expect(audit).toContain('new URL("/rest/v1/audit_logs"');
+    expect(audit).toContain('method: "POST"');
+    expect(audit).not.toMatch(/method:\s*["'`](PATCH|PUT|DELETE)["'`]/);
+    expect(audit).not.toContain("/api/leads");
   });
 });

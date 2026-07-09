@@ -1,3 +1,8 @@
+import {
+  loadRecentAssignmentAuditEvents,
+  type AdminAssignmentAuditRecord,
+} from "./adminAssignmentAudit";
+
 export type AdminAgentAvailability = "active" | "inactive" | "unavailable";
 
 export type AdminAgentAllocationAgent = {
@@ -61,6 +66,9 @@ export type AdminAgentAllocationSummary = {
   sourceMix: Array<{ value: string; count: number }>;
   timelineMix: Array<{ value: string; count: number }>;
   intentMix: Array<{ value: string; count: number }>;
+  recentAssignmentActivity: AdminAssignmentAuditRecord[];
+  auditActivityConfigured: boolean;
+  auditActivityError?: string;
   error?: string;
 };
 
@@ -169,6 +177,8 @@ function emptySummary(configured: boolean, error?: string): AdminAgentAllocation
     sourceMix: [],
     timelineMix: [],
     intentMix: [],
+    recentAssignmentActivity: [],
+    auditActivityConfigured: configured,
     error,
   };
 }
@@ -292,6 +302,9 @@ function timelineLabel(months: number | null) {
 export function summarizeAgentAllocation(
   agentsInput: AdminAgentAllocationAgent[],
   leadsInput: AdminAssignableLead[],
+  recentAssignmentActivity: AdminAssignmentAuditRecord[] = [],
+  auditActivityConfigured = true,
+  auditActivityError?: string,
 ): AdminAgentAllocationSummary {
   const agents = agentsInput.map((agent) => ({ ...agent }));
   const leads = leadsInput.map((lead) => ({ ...lead }));
@@ -337,6 +350,9 @@ export function summarizeAgentAllocation(
     sourceMix: mix(assignableLeads, "source"),
     timelineMix: mix(assignableLeads, "timeline_months"),
     intentMix: mix(assignableLeads, "primary_intent"),
+    recentAssignmentActivity,
+    auditActivityConfigured,
+    auditActivityError,
   };
 }
 
@@ -368,9 +384,10 @@ export async function loadAdminAgentAllocationView(limit = 200): Promise<AdminAg
     "Cache-Control": "no-store",
   };
 
-  const [agentResponse, leadResponse] = await Promise.all([
+  const [agentResponse, leadResponse, auditActivity] = await Promise.all([
     fetch(agentUrl, { headers, cache: "no-store" }),
     fetch(leadUrl, { headers, cache: "no-store" }),
+    loadRecentAssignmentAuditEvents(25),
   ]);
 
   if (!agentResponse.ok) {
@@ -385,5 +402,8 @@ export async function loadAdminAgentAllocationView(limit = 200): Promise<AdminAg
   return summarizeAgentAllocation(
     agentRows.map(normalizeAgentRow),
     leadRows.map(normalizeAssignableLeadRow),
+    auditActivity.events,
+    auditActivity.configured,
+    auditActivity.error,
   );
 }

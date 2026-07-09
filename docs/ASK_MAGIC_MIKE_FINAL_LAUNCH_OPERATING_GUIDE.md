@@ -137,6 +137,8 @@ For OurTownProperties.com widget leads, the intended result is that the parent O
 Admin route:
 
 - `https://www.askmagicmike.com/admin/leads`
+- `https://www.askmagicmike.com/admin/reporting`
+- `https://www.askmagicmike.com/admin/allocation`
 
 Protection:
 
@@ -169,6 +171,17 @@ Admin UI rules:
 - Use `/admin/leads` status actions rather than direct database edits.
 - Spam/test and closed actions require explicit confirmation in the UI.
 - Restore a wrongly marked lead by using `Restore to new`.
+
+Agent allocation:
+
+- `/admin/allocation` is the protected manual assignment surface.
+- Assignment controls are live admin actions.
+- Assign sets `leads.assigned_agent_id`, `leads.assigned_at`, and `leads.assignment_status`.
+- Unassign clears `leads.assigned_agent_id` and `leads.assigned_at`, then sets `leads.assignment_status` to `unassigned`.
+- Every successful assign, reassign, or unassign attempts to write an append-only `audit_logs` record with previous agent, new agent, lead id, actor label, source, and route metadata.
+- If the UI reports an audit warning after an assignment action, treat the lead assignment as changed and investigate `audit_logs` write health before continuing bulk operations.
+- Do not test assignment controls on production leads unless the business owner explicitly approves that specific operational action.
+- Do not use terminal scripts to mutate production assignments.
 
 ## QA Lead Policy
 

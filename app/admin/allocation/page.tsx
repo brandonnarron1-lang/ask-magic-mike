@@ -5,6 +5,7 @@ import {
   type AdminAgentAllocationAgent,
   type AdminAssignableLead,
 } from "../../lib/adminAgentAllocationView";
+import type { AdminAssignmentAuditRecord } from "../../lib/adminAssignmentAudit";
 import { assignLeadToAgentAction, unassignLeadAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -176,6 +177,38 @@ function AgentCard({ agent }: { agent: AdminAgentAllocationAgent }) {
   );
 }
 
+function ActivityRow({ event }: { event: AdminAssignmentAuditRecord }) {
+  return (
+    <article className="rounded-md border border-white/10 bg-[#080808] p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-[#f4ead4]">
+            {event.action.replace("_", " ")} lead {event.lead_id}
+          </p>
+          <p className="mt-1 text-xs text-[#8f8778]">
+            {event.source} / {event.actor}
+          </p>
+        </div>
+        <Badge>{shortDate(event.created_at)}</Badge>
+      </div>
+      <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
+        <div>
+          <dt className="uppercase tracking-[0.14em] text-[#8f8778]">Previous agent</dt>
+          <dd className="mt-1 break-all text-[#d9ceb8]">{event.previous_agent_id || "Unassigned"}</dd>
+        </div>
+        <div>
+          <dt className="uppercase tracking-[0.14em] text-[#8f8778]">New agent</dt>
+          <dd className="mt-1 break-all text-[#d9ceb8]">{event.new_agent_id || "Unassigned"}</dd>
+        </div>
+        <div>
+          <dt className="uppercase tracking-[0.14em] text-[#8f8778]">Status</dt>
+          <dd className="mt-1 text-[#d9ceb8]">{event.assignment_status}</dd>
+        </div>
+      </dl>
+    </article>
+  );
+}
+
 export default async function AdminAllocationPage({
   searchParams,
 }: {
@@ -195,7 +228,8 @@ export default async function AdminAllocationPage({
               </p>
               <h1 className="mt-3 font-serif text-4xl">Agent allocation</h1>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-[#d9ceb8]">
-                Protected controls for reviewing agent load, assigning captured leads, and tracking assignment state.
+                Protected AdminOps controls for reviewing agent load, assigning captured leads, and tracking assignment state.
+                Assignment controls are live admin actions and write an audit record after successful updates.
               </p>
             </div>
             <nav className="flex flex-wrap gap-2" aria-label="Admin navigation">
@@ -325,6 +359,24 @@ export default async function AdminAllocationPage({
                 <p className="text-sm text-[#8f8778]">No agents available for assignment sections.</p>
               )}
             </div>
+          </Panel>
+
+          <Panel title="Recent assignment activity">
+            {summary.auditActivityError ? (
+              <p className="text-sm text-[#8f8778]">{summary.auditActivityError}</p>
+            ) : summary.recentAssignmentActivity.length ? (
+              <div className="space-y-3">
+                {summary.recentAssignmentActivity.map((event) => (
+                  <ActivityRow key={event.id} event={event} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-[#8f8778]">
+                {summary.auditActivityConfigured
+                  ? "No recent assignment audit events returned."
+                  : "Assignment audit activity is unavailable until Supabase admin variables are configured."}
+              </p>
+            )}
           </Panel>
 
           <div className="grid gap-5 lg:grid-cols-3">
