@@ -37,6 +37,10 @@ async function patchLeadAssignment(
   const url = new URL("/rest/v1/leads", config.supabaseUrl);
   url.searchParams.set("id", "eq." + leadId);
   url.searchParams.set("select", "id,assigned_agent_id,assignment_status");
+  url.searchParams.set(
+    "assigned_agent_id",
+    previousAgentId ? "eq." + previousAgentId : "is.null",
+  );
 
   const response = await fetch(url, {
     method: "PATCH",
@@ -62,7 +66,7 @@ async function patchLeadAssignment(
 
   const rows = (await response.json().catch(() => [])) as Array<Record<string, unknown>>;
   if (!rows.length) {
-    return { ok: false, statusCode: 404, error: "lead_not_found" };
+    return { ok: false, statusCode: 409, error: "assignment_conflict" };
   }
 
   const auditResult = await writeAssignmentAuditEvent({
