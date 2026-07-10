@@ -6,6 +6,7 @@ import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { conditionOptions, sellerPaths, timelineOptions } from "../../lib/constants";
 import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
 import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
+import { brand } from "../../lib/constants";
 import { TextAreaField, TextField } from "./FormField";
 import { LuxuryCard } from "./LuxuryCard";
 
@@ -19,11 +20,13 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
     typeof window === "undefined" ? initialAttribution : readAttribution(),
   );
   const [sellerMessage, setSellerMessage] = useState<string | null>(null);
+  const [sellerSuccess, setSellerSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   async function submitSeller(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSellerMessage(null);
+    setSellerSuccess(false);
 
     const formData = new FormData(event.currentTarget);
     const payload = {
@@ -63,6 +66,7 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
       if (!res.ok) throw new Error(publicLeadErrorMessage(data.error));
       trackEvent("lead_created", attribution, { funnel_name: "seller", step_name: "seller_intent" });
       setSellerMessage(data.message || "Got it. Mike will review it.");
+      setSellerSuccess(true);
       event.currentTarget.reset();
     } catch (error) {
       setSellerMessage(publicLeadErrorMessage(error instanceof Error ? error.message : undefined));
@@ -85,14 +89,14 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
         ))}
       </div>
 
-      <form onSubmit={submitSeller} className="mt-6 grid gap-4 sm:grid-cols-2">
+      <form onSubmit={submitSeller} className="mt-6 grid gap-4 sm:grid-cols-2" aria-describedby={sellerMessage ? "seller-form-status" : undefined}>
         <TextField name="seller-address" required label="Property address" placeholder="Property address" className="sm:col-span-2" />
         <TextField name="seller-name" label="Name optional" placeholder="Name" />
         <TextField name="seller-phone" required type="tel" label="Phone required" placeholder="Phone" />
         <TextField name="seller-email" type="email" label="Email optional" placeholder="Email" />
         <label className="block">
           <span className="text-sm font-semibold text-[#f4ead4]">Condition</span>
-          <select name="condition" className="mt-2 w-full rounded-md border border-[#cda24a4a] bg-black/45 px-4 py-4 text-base text-[#f4ead4] outline-none focus:border-[#22c6d2]">
+          <select name="condition" className="amm-form-field text-base">
             {conditionOptions.map((option) => (
               <option key={option}>{option}</option>
             ))}
@@ -100,18 +104,36 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
         </label>
         <label className="block">
           <span className="text-sm font-semibold text-[#f4ead4]">Timeline</span>
-          <select name="seller-timeline" className="mt-2 w-full rounded-md border border-[#cda24a4a] bg-black/45 px-4 py-4 text-base text-[#f4ead4] outline-none focus:border-[#22c6d2]">
+          <select name="seller-timeline" className="amm-form-field text-base">
             {timelineOptions.map((option) => (
               <option key={option}>{option}</option>
             ))}
           </select>
         </label>
         <TextAreaField name="notes" label="Notes" placeholder="What should Mike know before calling?" rows={4} className="sm:col-span-2" />
-        <button disabled={submitting} className="rounded-full bg-[#cda24a] px-5 py-4 text-sm font-black uppercase tracking-[0.12em] text-black transition hover:bg-[#e2c06f] disabled:opacity-60 sm:col-span-2">
+        <button disabled={submitting} aria-busy={submitting} className="amm-primary-button px-5 py-4 disabled:opacity-60 sm:col-span-2">
           {submitting ? "Sending" : "Send Seller Details"}
         </button>
       </form>
-      {sellerMessage ? <p className="mt-4 text-sm text-[#d9ceb8]">{sellerMessage}</p> : null}
+      {sellerMessage ? (
+        <div
+          id="seller-form-status"
+          className={`mt-4 rounded-md border p-4 text-sm leading-6 ${
+            sellerSuccess
+              ? "border-[#cda24a55] bg-[#cda24a14] text-[#f4ead4]"
+              : "border-[#6e162680] bg-[#6e16261f] text-[#ffcabd]"
+          }`}
+          role="status"
+          aria-live="polite"
+        >
+          <p>{sellerMessage}</p>
+          {sellerSuccess ? (
+            <a href={brand.calendlyUrl} className="amm-secondary-button mt-4 px-5 py-3">
+              Schedule a Conversation
+            </a>
+          ) : null}
+        </div>
+      ) : null}
     </LuxuryCard>
   );
 }

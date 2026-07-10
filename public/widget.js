@@ -61,6 +61,8 @@
     launcher.style.letterSpacing = ".14em";
     launcher.style.textTransform = "uppercase";
     launcher.style.cursor = "pointer";
+    launcher.style.minHeight = "48px";
+    launcher.style.backdropFilter = "blur(14px)";
 
     var panel = document.createElement("div");
     panel.hidden = true;
@@ -92,6 +94,7 @@
     close.style.letterSpacing = ".12em";
     close.style.textTransform = "uppercase";
     close.style.cursor = "pointer";
+    close.style.minHeight = "40px";
 
     var frame = document.createElement("iframe");
     frame.title = "Ask Magic Mike widget";
@@ -105,6 +108,7 @@
       panel.hidden = false;
       launcher.hidden = true;
       launcher.setAttribute("aria-expanded", "true");
+      close.focus({ preventScroll: true });
       window.dispatchEvent(new CustomEvent("askmagicmike:opened"));
     }
 
@@ -112,6 +116,7 @@
       panel.hidden = true;
       launcher.hidden = false;
       launcher.setAttribute("aria-expanded", "false");
+      launcher.focus({ preventScroll: true });
       window.dispatchEvent(new CustomEvent("askmagicmike:closed"));
     }
 

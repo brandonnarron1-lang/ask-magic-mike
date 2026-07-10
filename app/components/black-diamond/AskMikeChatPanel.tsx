@@ -26,6 +26,8 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatStarted, setChatStarted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
+  const [lastMessage, setLastMessage] = useState<string | null>(null);
 
   function markStarted(stepName: string) {
     if (chatStarted) return;
@@ -45,6 +47,8 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
     if (!trimmed) return;
     markStarted("message_sent");
     setSubmitting(true);
+    setChatError(null);
+    setLastMessage(trimmed);
     setInput("");
     setMessages((current) => [...current, { role: "user", content: trimmed }]);
     trackEvent("chat_message_sent", attribution, {
@@ -59,6 +63,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
         body: JSON.stringify({ message: trimmed, attribution, lead_source_surface: surface }),
       });
       const data = (await res.json()) as { message?: string };
+      if (!res.ok) throw new Error("chat_failed");
       setMessages((current) => [
         ...current,
         {
@@ -68,6 +73,8 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
             "For address-specific advice, send the property address and best contact information so Mike can follow up.",
         },
       ]);
+    } catch {
+      setChatError("Mike's answer did not come through. You can retry, or send the property address through the home-value path for direct follow-up.");
     } finally {
       setSubmitting(false);
     }
@@ -126,6 +133,25 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
             ))}
           </div>
         ) : null}
+        {submitting ? (
+          <div className="mt-4 mr-8 rounded-md border border-[#22c6d24a] bg-[#22c6d212] px-3 py-2 text-sm leading-6 text-[#d9ceb8]" role="status">
+            Mike is drafting a careful answer...
+          </div>
+        ) : null}
+        {chatError ? (
+          <div className="mt-4 rounded-md border border-[#6e162680] bg-[#6e16261f] p-3 text-sm leading-6 text-[#ffcabd]" role="alert">
+            <p>{chatError}</p>
+            {lastMessage ? (
+              <button
+                type="button"
+                onClick={() => void sendMessage(lastMessage)}
+                className="amm-secondary-button mt-3 min-h-0 px-4 py-2 text-xs"
+              >
+                Retry
+              </button>
+            ) : null}
+          </div>
+        ) : null}
         <form onSubmit={submit} className="mt-5">
           <label className="block">
             <span className="sr-only">Ask Mike message</span>
@@ -134,13 +160,16 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
               onChange={(event) => setInput(event.target.value)}
               onFocus={() => markStarted("message_focus")}
               placeholder="Ask Mike a real estate question..."
-              className="w-full rounded-full border border-[#cda24a4a] bg-black/60 px-4 py-4 text-[#f4ead4] outline-none placeholder:text-[#d9ceb87a] focus:border-[#22c6d2]"
+              className="amm-form-field rounded-full bg-black/60"
             />
           </label>
-          <button disabled={submitting} className="mt-3 w-full rounded-full border border-[#22c6d266] px-5 py-3 text-sm font-bold uppercase tracking-[0.12em] text-[#f4ead4] transition hover:border-[#22c6d2] disabled:opacity-60">
+          <button disabled={submitting} aria-busy={submitting} className="amm-cyan-button mt-3 w-full px-5 py-3 disabled:opacity-60">
             {submitting ? "Sending" : "Send Question"}
           </button>
         </form>
+        <p className="mt-4 text-xs leading-5 text-[#8f8778]">
+          For pricing, listing strategy, or property-specific facts, Mike or the Our Town Properties team should verify details directly.
+        </p>
       </div>
     </LuxuryCard>
   );

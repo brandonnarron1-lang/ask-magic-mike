@@ -34,7 +34,7 @@ export function BlackDiamondHeader({ onAsk }: HeaderProps) {
       <Link
         href="/ask"
         onClick={onAsk}
-        className="rounded-full border border-[#cda24a66] bg-black/35 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#e2c06f] backdrop-blur transition hover:border-[#e2c06f]"
+        className="amm-secondary-button min-h-0 px-4 py-2 text-[#e2c06f]"
       >
         Ask Mike
       </Link>

@@ -12,6 +12,12 @@
   --bd-gold-soft: #e2c06f;
   --bd-ruby: #6e1626;
   --bd-cyan-restrained: #22c6d2;
+  --bd-border-gold: rgba(205, 162, 74, 0.32);
+  --bd-border-quiet: rgba(255, 255, 255, 0.1);
+  --bd-glass: rgba(17, 17, 19, 0.78);
+  --bd-glass-soft: rgba(255, 255, 255, 0.045);
+  --bd-shadow-lg: 0 28px 90px rgba(0, 0, 0, 0.42);
+  --bd-focus: 0 0 0 3px rgba(34, 198, 210, 0.28);
 }
 
 @theme inline {
@@ -31,6 +37,21 @@ html {
   scroll-behavior: smooth;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 ::selection {
   background: var(--bd-gold);
   color: var(--bd-black);
@@ -46,4 +67,128 @@ button {
 select option {
   background: var(--bd-black-2);
   color: var(--bd-cream);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--bd-cyan-restrained);
+  outline-offset: 3px;
+  box-shadow: var(--bd-focus);
+}
+
+.amm-page-surface {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(205, 162, 74, 0.12), transparent 28rem),
+    radial-gradient(circle at 84% 18%, rgba(34, 198, 210, 0.08), transparent 24rem),
+    linear-gradient(180deg, #050505 0%, #080808 48%, #050505 100%);
+}
+
+.amm-section {
+  padding: 4rem 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .amm-section {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .amm-section {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
+.amm-container {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 80rem;
+}
+
+.amm-eyebrow {
+  color: var(--bd-gold-soft);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.amm-glass-card {
+  border: 1px solid var(--bd-border-gold);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
+    var(--bd-glass);
+  box-shadow: var(--bd-shadow-lg);
+  backdrop-filter: blur(18px);
+}
+
+.amm-primary-button,
+.amm-secondary-button,
+.amm-cyan-button {
+  min-height: 3rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.amm-primary-button {
+  border: 1px solid var(--bd-gold-soft);
+  background: var(--bd-gold);
+  color: #080807;
+}
+
+.amm-primary-button:hover {
+  background: var(--bd-gold-soft);
+}
+
+.amm-secondary-button {
+  border: 1px solid rgba(205, 162, 74, 0.5);
+  background: rgba(0, 0, 0, 0.38);
+  color: var(--bd-cream);
+}
+
+.amm-secondary-button:hover {
+  border-color: var(--bd-gold-soft);
+}
+
+.amm-cyan-button {
+  border: 1px solid rgba(34, 198, 210, 0.48);
+  background: rgba(34, 198, 210, 0.04);
+  color: var(--bd-cream);
+}
+
+.amm-cyan-button:hover {
+  border-color: var(--bd-cyan-restrained);
+}
+
+.amm-form-field {
+  margin-top: 0.5rem;
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(205, 162, 74, 0.36);
+  background: rgba(0, 0, 0, 0.45);
+  padding: 1rem;
+  color: var(--bd-cream);
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.amm-form-field::placeholder {
+  color: rgba(217, 206, 184, 0.48);
+}
+
+.amm-form-field:focus {
+  border-color: var(--bd-cyan-restrained);
 }

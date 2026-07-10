@@ -18,8 +18,22 @@ export function SocialAdSupportSection() {
           </Link>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <Image src="/brand/black-diamond/hero-social-4x5.jpg" alt="Approved Ask Magic Mike 4:5 social ad visual plate" width={540} height={675} className="rounded-lg border border-[#cda24a33]" />
-          <Image src="/brand/black-diamond/hero-social-story.jpg" alt="Approved Ask Magic Mike story ad visual plate" width={540} height={960} className="rounded-lg border border-[#cda24a33]" />
+          <Image
+            src="/brand/black-diamond/hero-social-4x5.jpg"
+            alt="Approved Ask Magic Mike 4:5 social ad visual plate"
+            width={540}
+            height={675}
+            priority
+            className="h-auto rounded-lg border border-[#cda24a33] bg-[#111113]"
+          />
+          <Image
+            src="/brand/black-diamond/hero-social-story.jpg"
+            alt="Approved Ask Magic Mike story ad visual plate"
+            width={540}
+            height={960}
+            priority
+            className="h-auto rounded-lg border border-[#cda24a33] bg-[#111113]"
+          />
         </div>
       </div>
     </section>
