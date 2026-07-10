@@ -2,6 +2,8 @@
 
 This guide captures the verified launch state for Ask Magic Mike and the OurTownProperties.com widget integration so day-to-day operation is not trapped in chat history.
 
+For the current production AdminOps runbook covering `/admin/leads`, `/admin/reporting`, `/admin/allocation`, assignment audit behavior, safe verification, and incident response, use `docs/ADMINOPS_PRODUCTION_OPERATING_PACK.md`.
+
 ## Final Verified Status
 
 - Ask Magic Mike production is live.

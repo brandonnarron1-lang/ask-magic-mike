@@ -2,6 +2,8 @@
 
 Post LeadOps hardening for Ask Magic Mike admin review, triage, and routing preparation.
 
+Current production operating procedures for the deployed AdminOps surfaces are consolidated in `docs/ADMINOPS_PRODUCTION_OPERATING_PACK.md`.
+
 ## Protected Surfaces Found
 
 The active public build uses the root `app/` tree. The Black Diamond lead capture surface writes through:
