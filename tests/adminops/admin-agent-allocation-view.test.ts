@@ -120,6 +120,8 @@ describe("AdminOps agent allocation view", () => {
     expect(summary.sourceMix.map((item) => item.value)).toContain("widget");
     expect(summary.intentMix.map((item) => item.value)).toContain("sell");
     expect(summary.timelineMix.map((item) => item.value)).toContain("Immediate / 0-30 days");
+    expect(summary.recentAssignmentActivity).toEqual([]);
+    expect(summary.auditActivityConfigured).toBe(true);
   });
 
   it("returns a safe unconfigured state when Supabase env vars are missing", async () => {
@@ -150,11 +152,13 @@ describe("AdminOps agent allocation view", () => {
     const summary = await loadAdminAgentAllocationView(999);
 
     expect(summary.configured).toBe(true);
-    expect(calls).toHaveLength(2);
+    expect(calls).toHaveLength(3);
     expect(calls.every((call) => !call.init?.method || call.init.method === "GET")).toBe(true);
     expect(calls[0].url).toContain("/rest/v1/agents");
     expect(calls[1].url).toContain("/rest/v1/leads");
     expect(calls[1].url).toContain("limit=300");
+    expect(calls[2].url).toContain("/rest/v1/audit_logs");
+    expect(calls[2].url).toContain("limit=25");
     expect(JSON.stringify(calls)).not.toContain("/api/leads");
   });
 });

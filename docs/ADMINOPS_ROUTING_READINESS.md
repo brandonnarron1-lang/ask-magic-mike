@@ -82,6 +82,7 @@ Supported active allocation actions:
 
 - Assign lead to agent: PATCH `leads.assigned_agent_id`, `leads.assigned_at`, and `leads.assignment_status`.
 - Unassign lead: PATCH those same assignment fields back to an unassigned state.
+- Reassign lead: the same assign action records a reassignment when the lead already had `assigned_agent_id`.
 
 Unsupported allocation actions:
 
@@ -89,6 +90,57 @@ Unsupported allocation actions:
 - Destructive cleanup.
 - Public lead mutation.
 - Agent availability writes. The current schema has schedule-style `agents.availability` JSON, not a simple mutable availability status field, so v1 leaves availability read-only.
+
+## Assignment Audit v1
+
+`/admin/allocation` assignment writes are now wrapped with durable assignment audit logging before live operations should use the controls.
+
+Storage used:
+
+- `leads` remains the current assignment state table.
+- `audit_logs` is the append-only assignment audit trail.
+- `agent_assignments` exists as assignment history, but v1 does not use it for manual unassignment because `agent_id` is required and cannot represent "unassigned" cleanly.
+- `lead_routing` remains the current/latest routing and SLA table. It has a unique `lead_id`, so it is not a full manual assignment history store.
+
+Assignment event fields:
+
+- `actor`: `system/admin_basic_auth` until a true named admin identity exists in the active root admin route.
+- `action`: `lead.assigned`, `lead.reassigned`, or `lead.unassigned`.
+- `resource_type`: `lead`.
+- `resource_id`: lead id.
+- `before_state.assigned_agent_id`: previous agent id or null.
+- `after_state.assigned_agent_id`: new agent id or null.
+- `after_state.assignment_status`: assignment state written to `leads`.
+- `metadata.source`: `admin_allocation`.
+- `metadata.action_route`: `/admin/allocation`.
+- `metadata.warning_flags`: reserved for safe operational flags.
+
+Supported audited actions:
+
+- Assign: previous agent is null, new agent is set.
+- Reassign: previous agent is set, new agent is set.
+- Unassign: previous agent is set or null, new agent is null.
+
+Failure behavior:
+
+- Assignment preflight failure: no PATCH occurs.
+- Assignment PATCH failure: no audit write is attempted.
+- Assignment succeeds but audit write fails: the assignment remains in place and the server action returns a safe audit-warning result. Raw Supabase details are logged server-side only as status metadata, never exposed in UI.
+
+Security:
+
+- Assignment write helpers and audit writer are server-only.
+- The active route remains protected by `/admin/:path*` Basic Auth middleware.
+- The page component does not read `process.env` and does not expose `SUPABASE_SERVICE_ROLE_KEY`.
+- Public routes do not import allocation action modules or the audit writer.
+- Tests mock Supabase REST and do not mutate production data.
+- No deploy was performed as part of Assignment Audit v1 implementation.
+
+Read-only activity:
+
+- `/admin/allocation` now includes a bounded "Recent assignment activity" panel sourced from `audit_logs`.
+- The panel displays action, lead id, previous agent id, new agent id, timestamp, source, and actor label.
+- It does not join or expose contact data.
 
 ## Canonical Admin Lead Fields
 
@@ -235,7 +287,10 @@ If Supabase variables are missing, the protected inbox renders an empty configur
 - agent load/count summaries
 - missing Supabase env safe state
 - GET-only allocation read model
-- PATCH-only assignment/unassignment actions
+- assignment preflight GET before PATCH
+- PATCH-only lead assignment/unassignment mutation
+- audit POST to `audit_logs` after successful assignment PATCH
+- audit warning behavior when audit write fails after assignment succeeds
 - no POST to `/api/leads`
 - no destructive methods
 - allocation page has no delete controls
@@ -244,6 +299,15 @@ If Supabase variables are missing, the protected inbox renders an empty configur
 - service role key is not used in the page component
 - invalid lead/agent IDs are rejected
 - safe error handling
+
+`tests/adminops/admin-assignment-audit.test.ts` verifies:
+
+- audit payload shape
+- `audit_logs` REST write method
+- missing env safe state
+- safe failed-write result
+- audit row normalization
+- bounded recent activity readback
 
 ## Local Verification
 

@@ -18,7 +18,11 @@ export async function assignLeadToAgentAction(formData: FormData) {
     redirect("/admin/allocation?assignment_action=" + result.error);
   }
 
-  redirect("/admin/allocation?assignment_action=assigned");
+  if (result.warning) {
+    redirect("/admin/allocation?assignment_action=" + result.action + "_audit_warning");
+  }
+
+  redirect("/admin/allocation?assignment_action=" + result.action);
 }
 
 export async function unassignLeadAction(formData: FormData) {
@@ -29,6 +33,10 @@ export async function unassignLeadAction(formData: FormData) {
 
   if (!result.ok) {
     redirect("/admin/allocation?assignment_action=" + result.error);
+  }
+
+  if (result.warning) {
+    redirect("/admin/allocation?assignment_action=unassigned_audit_warning");
   }
 
   redirect("/admin/allocation?assignment_action=unassigned");

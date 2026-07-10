@@ -54,6 +54,10 @@ describe("AdminOps readiness guards", () => {
       expect(read(file), file).not.toContain("updateAdminLeadStatus");
       expect(read(file), file).not.toContain("adminReportingView");
       expect(read(file), file).not.toContain("loadAdminReportingSummary");
+      expect(read(file), file).not.toContain("adminAgentAllocationView");
+      expect(read(file), file).not.toContain("adminAgentAllocationActions");
+      expect(read(file), file).not.toContain("adminAssignmentAudit");
+      expect(read(file), file).not.toContain("writeAssignmentAuditEvent");
     }
   });
 
@@ -70,9 +74,13 @@ describe("AdminOps readiness guards", () => {
       "app/admin/leads/page.tsx",
       "app/admin/leads/actions.ts",
       "app/admin/reporting/page.tsx",
+      "app/admin/allocation/page.tsx",
       "app/lib/adminLeadView.ts",
       "app/lib/adminLeadActions.ts",
       "app/lib/adminReportingView.ts",
+      "app/lib/adminAgentAllocationView.ts",
+      "app/lib/adminAgentAllocationActions.ts",
+      "app/lib/adminAssignmentAudit.ts",
     ];
 
     for (const file of files) {
@@ -95,6 +103,11 @@ describe("AdminOps readiness guards", () => {
     expect(reportingPage).not.toMatch(/process\.env/);
     expect(reportingPage).not.toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
     expect(reportingPage).not.toMatch(/ADMIN_SECRET/);
+
+    const allocationPage = read("app/admin/allocation/page.tsx");
+    expect(allocationPage).not.toMatch(/process\.env/);
+    expect(allocationPage).not.toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
+    expect(allocationPage).not.toMatch(/ADMIN_SECRET/);
   });
 
   it("does not introduce fake value, appraisal, or automation claims", () => {
@@ -102,9 +115,13 @@ describe("AdminOps readiness guards", () => {
       read("docs/ADMINOPS_ROUTING_READINESS.md"),
       read("app/admin/leads/page.tsx"),
       read("app/admin/reporting/page.tsx"),
+      read("app/admin/allocation/page.tsx"),
       read("app/lib/adminLeadView.ts"),
       read("app/lib/adminLeadActions.ts"),
       read("app/lib/adminReportingView.ts"),
+      read("app/lib/adminAgentAllocationView.ts"),
+      read("app/lib/adminAgentAllocationActions.ts"),
+      read("app/lib/adminAssignmentAudit.ts"),
     ].join("\n");
 
     expect(changedText).not.toMatch(/guaranteed (home )?value/i);
