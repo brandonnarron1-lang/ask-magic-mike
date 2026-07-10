@@ -71,6 +71,7 @@ describe("AdminOps readiness guards", () => {
   it("does not introduce stale Vercel URLs in AdminOps docs or active admin files", () => {
     const files = [
       "docs/ADMINOPS_ROUTING_READINESS.md",
+      "docs/ADMINOPS_PRODUCTION_OPERATING_PACK.md",
       "app/admin/leads/page.tsx",
       "app/admin/leads/actions.ts",
       "app/admin/reporting/page.tsx",
@@ -128,5 +129,15 @@ describe("AdminOps readiness guards", () => {
     expect(changedText).not.toMatch(/guaranteed (sale )?price/i);
     expect(changedText).not.toMatch(/certified appraisal/i);
     expect(changedText).not.toMatch(/automatically assigns/i);
+  });
+
+  it("keeps the AdminOps production operating pack present and grounded in deployed surfaces", () => {
+    const doc = read("docs/ADMINOPS_PRODUCTION_OPERATING_PACK.md");
+    expect(doc).toContain("/admin/leads");
+    expect(doc).toContain("/admin/reporting");
+    expect(doc).toContain("/admin/allocation");
+    expect(doc).toContain("audit_logs");
+    expect(doc).toContain("assignment_conflict");
+    expect(doc).toContain("No production data was mutated during read-only verification");
   });
 });

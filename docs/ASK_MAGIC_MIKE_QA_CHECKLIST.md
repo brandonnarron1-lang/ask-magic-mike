@@ -2,6 +2,8 @@
 
 Use this checklist for production verification without relying on chat history. Do not submit production leads or mutate production data unless the specific QA pass explicitly authorizes it.
 
+For AdminOps operator procedures and incident response, use `docs/ADMINOPS_PRODUCTION_OPERATING_PACK.md`.
+
 ## Safety Gate
 
 - [ ] No secrets are printed or pasted.
