@@ -13,7 +13,7 @@ const snippet = `<script
 
 export default function OurTownIntegrationPage() {
   return (
-    <main className="min-h-screen bg-[#050505] text-[#f4ead4]">
+    <main className="amm-page-surface min-h-screen overflow-x-hidden text-[#f4ead4]">
       <section className="px-5 py-6 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <BlackDiamondHeader />
@@ -33,9 +33,9 @@ export default function OurTownIntegrationPage() {
               Open Widget Preview
             </Link>
           </div>
-          <div className="rounded-lg border border-[#cda24a33] bg-[#111113] p-5">
+          <div className="min-w-0 rounded-lg border border-[#cda24a33] bg-[#111113] p-5">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#22c6d2]">Production snippet</p>
-            <pre className="mt-4 overflow-auto rounded-md border border-white/10 bg-black p-4 text-sm leading-6 text-[#d9ceb8]">
+            <pre className="mt-4 max-w-full overflow-auto whitespace-pre-wrap break-words rounded-md border border-white/10 bg-black p-4 text-sm leading-6 text-[#d9ceb8]">
               <code>{snippet}</code>
             </pre>
             <div className="mt-6 grid gap-4 sm:grid-cols-3">

@@ -32,11 +32,11 @@ export function WidgetApp() {
     <main className="min-h-screen bg-[#050505] text-[#f4ead4]">
       <PageTracker funnelName="widget" />
       <div className="flex min-h-screen flex-col">
-        <header className="border-b border-[#cda24a33] bg-[#080808] px-4 py-4">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#e2c06f]">Ask Magic Mike</p>
+        <header className="border-b border-[#cda24a33] bg-[linear-gradient(135deg,#080808,rgba(34,198,210,.08))] px-4 py-4">
+          <h1 className="text-xs font-bold uppercase tracking-[0.2em] text-[#e2c06f]">Ask Magic Mike</h1>
           <p className="mt-1 text-sm text-[#d9ceb8]">Local guidance from Our Town Properties</p>
         </header>
-        <nav className="grid grid-cols-3 border-b border-[#cda24a24] bg-black">
+        <nav className="grid grid-cols-3 border-b border-[#cda24a24] bg-black" role="tablist" aria-label="Ask Magic Mike paths">
           {[
             ["value", "Get My Home Value"],
             ["ask", "Ask a Question"],
@@ -45,8 +45,10 @@ export function WidgetApp() {
             <button
               key={key}
               type="button"
+              role="tab"
+              aria-selected={active === key}
               onClick={() => setActive(key as Tab)}
-              className={`px-2 py-3 text-xs font-bold uppercase tracking-[0.1em] transition ${
+              className={`min-h-12 px-2 py-3 text-xs font-bold uppercase tracking-[0.1em] transition ${
                 active === key ? "bg-[#cda24a] text-black" : "text-[#d9ceb8] hover:text-[#f4ead4]"
               }`}
             >

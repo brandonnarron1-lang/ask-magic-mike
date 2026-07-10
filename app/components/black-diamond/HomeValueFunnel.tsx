@@ -17,6 +17,7 @@ type HomeValueFunnelProps = {
 };
 
 const stepLabels = ["Address", "Email", "Phone", "Thank you"];
+const errorId = "home-value-form-error";
 
 export function HomeValueFunnel({
   surface = "home_value_page",
@@ -118,9 +119,11 @@ export function HomeValueFunnel({
             onChange={(event) => setAddress(event.target.value)}
             autoComplete="street-address"
             placeholder="123 Lake Wilson Road, Wilson, NC"
+            aria-describedby={formError ? errorId : undefined}
+            aria-invalid={Boolean(formError)}
             required
           />
-          <button className="w-full rounded-full bg-[#cda24a] px-5 py-4 text-sm font-black uppercase tracking-[0.12em] text-black transition hover:bg-[#e2c06f]">
+          <button className="amm-primary-button w-full px-5 py-4">
             Continue
           </button>
         </form>
@@ -135,13 +138,15 @@ export function HomeValueFunnel({
             type="email"
             autoComplete="email"
             placeholder="you@example.com"
+            aria-describedby={formError ? errorId : undefined}
+            aria-invalid={Boolean(formError)}
             required
           />
           <div className="flex gap-3">
-            <button type="button" onClick={() => setStep(1)} className="rounded-full border border-[#cda24a66] px-5 py-4 text-sm font-bold uppercase tracking-[0.12em] text-[#f4ead4]">
+            <button type="button" onClick={() => setStep(1)} className="amm-secondary-button px-5 py-4">
               Back
             </button>
-            <button className="flex-1 rounded-full bg-[#cda24a] px-5 py-4 text-sm font-black uppercase tracking-[0.12em] text-black">
+            <button className="amm-primary-button flex-1 px-5 py-4">
               Continue
             </button>
           </div>
@@ -157,6 +162,8 @@ export function HomeValueFunnel({
             type="tel"
             autoComplete="tel"
             placeholder="252-555-0123"
+            aria-describedby={formError ? errorId : undefined}
+            aria-invalid={Boolean(formError)}
             required
           />
           <SelectField label="Timeline" value={timeline} onChange={(event) => setTimeline(event.target.value)}>
@@ -165,10 +172,10 @@ export function HomeValueFunnel({
             ))}
           </SelectField>
           <div className="flex gap-3">
-            <button type="button" onClick={() => setStep(2)} className="rounded-full border border-[#cda24a66] px-5 py-4 text-sm font-bold uppercase tracking-[0.12em] text-[#f4ead4]">
+            <button type="button" onClick={() => setStep(2)} className="amm-secondary-button px-5 py-4">
               Back
             </button>
-            <button disabled={submitting} className="flex-1 rounded-full bg-[#cda24a] px-5 py-4 text-sm font-black uppercase tracking-[0.12em] text-black disabled:opacity-60">
+            <button disabled={submitting} aria-busy={submitting} className="amm-primary-button flex-1 px-5 py-4 disabled:opacity-60">
               {submitting ? "Submitting" : "Request Valuation"}
             </button>
           </div>
@@ -181,6 +188,16 @@ export function HomeValueFunnel({
           <p className="text-[#d9ceb8]">
             {leadMessage || "Mike will review the property details and follow up with practical next steps."}
           </p>
+          <div className="rounded-md border border-[#cda24a33] bg-black/35 p-4">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#e2c06f]">
+              What happens next
+            </p>
+            <ul className="mt-3 space-y-2 text-sm leading-6 text-[#d9ceb8]">
+              <li>Mike reviews the address and timing you shared.</li>
+              <li>Our Town Properties follows up through your provided contact path.</li>
+              <li>You can schedule a conversation now if you want a faster handoff.</li>
+            </ul>
+          </div>
           <a
             href={brand.calendlyUrl}
             onClick={() =>
@@ -189,14 +206,21 @@ export function HomeValueFunnel({
                 step_name: "thank_you",
               })
             }
-            className="inline-flex rounded-full bg-[#cda24a] px-6 py-4 text-sm font-black uppercase tracking-[0.12em] text-black"
+            className="amm-primary-button px-6 py-4"
           >
             Schedule a Conversation
           </a>
+          <p className="text-sm leading-6 text-[#d9ceb8]">
+            Prefer a direct call? Our Town Properties can be reached through the contact information on ourtownproperties.com.
+          </p>
         </div>
       ) : null}
 
-      {formError ? <p className="mt-4 text-sm text-[#ffcabd]">{formError}</p> : null}
+      {formError ? (
+        <p id={errorId} className="mt-4 rounded-md border border-[#6e162680] bg-[#6e16261f] p-3 text-sm text-[#ffcabd]" role="alert">
+          {formError}
+        </p>
+      ) : null}
     </LuxuryCard>
   );
 }

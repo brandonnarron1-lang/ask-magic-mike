@@ -44,14 +44,14 @@ export function HeroSection() {
               <Link
                 href="/home-value"
                 onClick={() => trackHero("home_value")}
-                className="rounded-full border border-[#e2c06f] bg-[#cda24a] px-6 py-4 text-center text-sm font-black uppercase tracking-[0.12em] text-[#080807] shadow-[0_24px_70px_rgba(0,0,0,.48)] transition hover:bg-[#e2c06f]"
+                className="amm-primary-button px-6 py-4 shadow-[0_24px_70px_rgba(0,0,0,.48)]"
               >
                 Get My Home Value
               </Link>
               <Link
                 href="/ask"
                 onClick={() => trackHero("ask_mike_chat")}
-                className="rounded-full border border-[#cda24a66] bg-black/40 px-6 py-4 text-center text-sm font-bold uppercase tracking-[0.12em] text-[#f4ead4] backdrop-blur transition hover:border-[#e2c06f]"
+                className="amm-secondary-button px-6 py-4"
               >
                 Ask Mike
               </Link>

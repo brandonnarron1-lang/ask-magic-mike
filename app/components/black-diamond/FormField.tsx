@@ -1,7 +1,7 @@
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
 
 const fieldClass =
-  "mt-2 w-full rounded-md border border-[#cda24a4a] bg-black/45 px-4 py-4 text-base text-[#f4ead4] outline-none transition placeholder:text-[#d9ceb87a] focus:border-[#22c6d2]";
+  "amm-form-field text-base";
 
 type BaseProps = {
   label: string;
@@ -9,10 +9,11 @@ type BaseProps = {
 };
 
 export function TextField({ label, ...props }: BaseProps & InputHTMLAttributes<HTMLInputElement>) {
+  const describedBy = props["aria-describedby"];
   return (
     <label className="block">
       <span className="text-sm font-semibold text-[#f4ead4]">{label}</span>
-      <input {...props} className={`${fieldClass} ${props.className || ""}`} />
+      <input {...props} aria-describedby={describedBy} className={`${fieldClass} ${props.className || ""}`} />
     </label>
   );
 }
