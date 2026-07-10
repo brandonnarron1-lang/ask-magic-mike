@@ -2,6 +2,11 @@ import {
   type AdminAssignmentAuditAction,
   writeAssignmentAuditEvent,
 } from "./adminAssignmentAudit";
+import {
+  loadAgentForNotification,
+  loadLeadForNotification,
+} from "./leadNotificationRepository";
+import { createAssignmentNotification } from "./leadNotificationService";
 
 export type AdminAgentAssignmentResult =
   | { ok: true; action: AdminAssignmentAuditAction; warning?: string }
@@ -84,6 +89,34 @@ async function patchLeadAssignment(
     return { ok: true, action, warning: auditResult.error };
   }
 
+  if (action === "assigned" || action === "reassigned") {
+    const [lead, agent] = await Promise.all([
+      loadLeadForNotification(leadId),
+      newAgentId ? loadAgentForNotification(newAgentId) : Promise.resolve(null),
+    ]);
+
+    if (!lead || !agent) {
+      return { ok: true, action, warning: "notification_context_missing" };
+    }
+
+    const notificationResult = await createAssignmentNotification({
+      lead,
+      agent,
+      assignmentAuditId: auditResult.id || null,
+      assignmentEventAt: auditResult.created_at || null,
+      assignmentRoute: ACTION_ROUTE,
+      actor: AUDIT_ACTOR,
+      action,
+    });
+
+    if (!notificationResult.ok) {
+      return { ok: true, action, warning: notificationResult.error };
+    }
+    if (notificationResult.warning) {
+      return { ok: true, action, warning: notificationResult.warning };
+    }
+  }
+
   return { ok: true, action };
 }
 
@@ -145,6 +178,9 @@ export async function assignLeadToAgent(
 
   const current = await loadCurrentLeadAssignment(leadId);
   if (!current.ok) return current;
+  if (current.assigned_agent_id === agentId && current.assignment_status === "assigned") {
+    return { ok: true, action: "assigned", warning: "assignment_already_current" };
+  }
   const action: AdminAssignmentAuditAction =
     current.assigned_agent_id && current.assigned_agent_id !== agentId ? "reassigned" : "assigned";
 

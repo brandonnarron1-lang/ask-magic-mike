@@ -19,7 +19,7 @@ export type AdminAssignmentAuditRecord = Omit<AdminAssignmentAuditEvent, "create
 };
 
 export type AdminAssignmentAuditResult =
-  | { ok: true }
+  | { ok: true; id?: string; created_at?: string | null }
   | { ok: false; statusCode: number; error: string };
 
 const AUDIT_ACTIONS: Record<AdminAssignmentAuditAction, string> = {
@@ -107,13 +107,14 @@ export async function writeAssignmentAuditEvent(
   }
 
   const url = new URL("/rest/v1/audit_logs", config.supabaseUrl);
+  url.searchParams.set("select", "id,created_at");
   const response = await fetch(url, {
     method: "POST",
     headers: {
       apikey: config.serviceKey,
       Authorization: "Bearer " + config.serviceKey,
       "Content-Type": "application/json",
-      Prefer: "return=minimal",
+      Prefer: "return=representation",
     },
     body: JSON.stringify(buildAssignmentAuditPayload(event)),
     cache: "no-store",
@@ -129,7 +130,18 @@ export async function writeAssignmentAuditEvent(
     return { ok: false, statusCode: 500, error: "audit_write_failed" };
   }
 
-  return { ok: true };
+  const rows = typeof response.json === "function"
+    ? ((await response.json().catch(() => [])) as Array<Record<string, unknown>>)
+    : [];
+  const row = rows[0] || {};
+  if (!text(row.id) && !text(row.created_at)) {
+    return { ok: true };
+  }
+  return {
+    ok: true,
+    id: text(row.id) || undefined,
+    created_at: text(row.created_at),
+  };
 }
 
 export async function loadRecentAssignmentAuditEvents(
