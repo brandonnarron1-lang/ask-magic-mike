@@ -70,7 +70,7 @@ describe("AdminOps assignment audit", () => {
     await expect(writeAssignmentAuditEvent(event)).resolves.toEqual({ ok: true });
 
     expect(captured).toHaveLength(1);
-    expect(captured[0].url).toBe("https://fake.supabase.co/rest/v1/audit_logs");
+    expect(captured[0].url).toContain("https://fake.supabase.co/rest/v1/audit_logs");
     expect(captured[0].init?.method).toBe("POST");
     expect(captured[0].body).toMatchObject({
       actor: "system/admin_basic_auth",

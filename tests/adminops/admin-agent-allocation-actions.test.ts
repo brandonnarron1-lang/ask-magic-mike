@@ -7,12 +7,111 @@ import {
 const ORIGINAL_FETCH = globalThis.fetch;
 const LEAD_ID = "11111111-1111-4111-8111-111111111111";
 const AGENT_ID = "22222222-2222-4222-8222-222222222222";
+const PREVIOUS_AGENT_ID = "33333333-3333-4333-8333-333333333333";
+
+function jsonResponse(rows: Array<Record<string, unknown>>, status = 200): Response {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    statusText: status >= 200 && status < 300 ? "OK" : "Error",
+    json: async () => rows,
+  } as Response;
+}
+
+function mockAssignmentFetch(initialAgentId: string | null) {
+  const captured: Array<{ url: string; init?: RequestInit; body: Record<string, unknown> }> = [];
+  globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+    const requestUrl = String(url);
+    const method = init?.method || "GET";
+    const body = init?.body && typeof init.body === "string"
+      ? JSON.parse(init.body) as Record<string, unknown>
+      : {};
+    captured.push({ url: requestUrl, init, body });
+
+    if (
+      requestUrl.includes("/rest/v1/leads") &&
+      method === "GET" &&
+      requestUrl.includes("select=id%2Cassigned_agent_id%2Cassignment_status")
+    ) {
+      return jsonResponse([{ id: LEAD_ID, assigned_agent_id: initialAgentId, assignment_status: initialAgentId ? "assigned" : null }]);
+    }
+    if (requestUrl.includes("/rest/v1/leads") && method === "PATCH") {
+      return jsonResponse([{ id: LEAD_ID, assigned_agent_id: AGENT_ID, assignment_status: "assigned" }]);
+    }
+    if (requestUrl.includes("/rest/v1/audit_logs") && method === "POST") {
+      return jsonResponse([{ id: "audit-1", created_at: "2026-07-09T12:00:00.000Z" }], 201);
+    }
+    if (requestUrl.includes("/rest/v1/leads") && method === "GET") {
+      return jsonResponse([{
+        id: LEAD_ID,
+        status: "new",
+        assigned_agent_id: AGENT_ID,
+        assigned_at: "2026-07-09T12:00:00.000Z",
+        assignment_status: "assigned",
+        address_raw: "000 QA Test Property, Wilson, NC",
+        primary_intent: "sell",
+        timeline_months: 3,
+        lead_type: "home_value",
+        source: "qa",
+        source_detail: "home_value",
+        page_url: "https://www.askmagicmike.com/home-value",
+      }]);
+    }
+    if (requestUrl.includes("/rest/v1/agents") && method === "GET") {
+      return jsonResponse([{ id: AGENT_ID, name: "Mike Eatmon", email: "agent@example.test", phone: null, role: "agent", is_active: true }]);
+    }
+    if (requestUrl.includes("/rest/v1/lead_notifications") && method === "GET") {
+      return jsonResponse([]);
+    }
+    if (requestUrl.includes("/rest/v1/lead_notifications") && method === "POST") {
+      return jsonResponse([{
+        id: "notification-1",
+        lead_id: LEAD_ID,
+        agent_id: AGENT_ID,
+        assignment_audit_id: "audit-1",
+        notification_type: "agent_assignment",
+        channel: "email",
+        recipient_type: "agent",
+        template_version: "agent_assignment_email_v1",
+        idempotency_key: "test-key",
+        status: "pending",
+        attempt_count: 0,
+        max_attempts: 3,
+        provider: "disabled",
+        metadata: {},
+      }], 201);
+    }
+    if (requestUrl.includes("/rest/v1/lead_notifications") && method === "PATCH") {
+      return jsonResponse([{
+        id: "notification-1",
+        lead_id: LEAD_ID,
+        agent_id: AGENT_ID,
+        notification_type: "agent_assignment",
+        channel: "email",
+        recipient_type: "agent",
+        template_version: "agent_assignment_email_v1",
+        idempotency_key: "test-key",
+        status: "skipped",
+        attempt_count: 0,
+        max_attempts: 3,
+        provider: "disabled",
+        error_code: "agent_notifications_disabled",
+        metadata: {},
+      }]);
+    }
+
+    throw new Error(`Unexpected request ${method} ${requestUrl}`);
+  }) as unknown as typeof fetch;
+  return captured;
+}
 
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-07-09T12:00:00.000Z"));
   process.env.NEXT_PUBLIC_SUPABASE_URL = "https://fake.supabase.co";
   process.env.SUPABASE_SERVICE_ROLE_KEY = "fake-service-role";
+  process.env.AGENT_NOTIFICATIONS_ENABLED = "false";
+  process.env.LEAD_NOTIFICATION_MODE = "disabled";
 });
 
 afterEach(() => {
@@ -20,41 +119,20 @@ afterEach(() => {
   globalThis.fetch = ORIGINAL_FETCH;
   delete (process.env as Record<string, string | undefined>).NEXT_PUBLIC_SUPABASE_URL;
   delete (process.env as Record<string, string | undefined>).SUPABASE_SERVICE_ROLE_KEY;
+  delete (process.env as Record<string, string | undefined>).AGENT_NOTIFICATIONS_ENABLED;
+  delete (process.env as Record<string, string | undefined>).LEAD_NOTIFICATION_MODE;
 });
 
 describe("AdminOps agent allocation actions", () => {
-  it("GETs current assignment, assigns through narrow PATCH, then writes audit", async () => {
-    const captured: Array<{ url: string; init?: RequestInit; body: Record<string, unknown> }> = [];
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
-      const body = init?.body && typeof init.body === "string"
-        ? JSON.parse(init.body) as Record<string, unknown>
-        : {};
-      captured.push({ url: String(url), init, body });
-      if (!init?.method) {
-        return {
-          ok: true,
-          status: 200,
-          statusText: "OK",
-          json: async () => [{ id: LEAD_ID, assigned_agent_id: null, assignment_status: null }],
-        } as Response;
-      }
-      if (init.method === "POST") {
-        return { ok: true, status: 201, statusText: "Created" } as Response;
-      }
-      return {
-        ok: true,
-        status: 200,
-        statusText: "OK",
-        json: async () => [{ id: LEAD_ID, assigned_agent_id: AGENT_ID }],
-      } as Response;
-    }) as unknown as typeof fetch;
+  it("GETs current assignment, assigns through narrow PATCH, writes audit, then creates a notification event", async () => {
+    const captured = mockAssignmentFetch(null);
 
     await expect(assignLeadToAgent(LEAD_ID, AGENT_ID)).resolves.toEqual({
       ok: true,
       action: "assigned",
+      warning: "agent_notifications_disabled",
     });
 
-    expect(captured).toHaveLength(3);
     expect(captured[0].url).toBe(
       "https://fake.supabase.co/rest/v1/leads?id=eq." +
         LEAD_ID +
@@ -74,7 +152,7 @@ describe("AdminOps agent allocation actions", () => {
     });
     expect(captured[1].body).not.toHaveProperty("status");
     expect(captured[1].body).not.toHaveProperty("email");
-    expect(captured[2].url).toBe("https://fake.supabase.co/rest/v1/audit_logs");
+    expect(captured[2].url).toContain("https://fake.supabase.co/rest/v1/audit_logs");
     expect(captured[2].init?.method).toBe("POST");
     expect(captured[2].body).toMatchObject({
       actor: "system/admin_basic_auth",
@@ -84,53 +162,31 @@ describe("AdminOps agent allocation actions", () => {
       before_state: { assigned_agent_id: null },
       after_state: { assigned_agent_id: AGENT_ID, assignment_status: "assigned" },
     });
+    expect(captured.some((call) => call.url.includes("/rest/v1/lead_notifications") && call.init?.method === "POST")).toBe(true);
+    expect(captured.findIndex((call) => call.url.includes("/rest/v1/audit_logs"))).toBeLessThan(
+      captured.findIndex((call) => call.url.includes("/rest/v1/lead_notifications") && call.init?.method === "POST"),
+    );
     expect(JSON.stringify(captured)).not.toContain("/api/leads");
     expect(JSON.stringify(captured)).not.toMatch(/DELETE|PUT/);
   });
 
   it("records reassignment when the lead already has an agent", async () => {
-    const captured: Array<{ url: string; init?: RequestInit; body: Record<string, unknown> }> = [];
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
-      const body = init?.body && typeof init.body === "string"
-        ? JSON.parse(init.body) as Record<string, unknown>
-        : {};
-      captured.push({ url: String(url), init, body });
-      if (!init?.method) {
-        return {
-          ok: true,
-          status: 200,
-          statusText: "OK",
-          json: async () => [{
-            id: LEAD_ID,
-            assigned_agent_id: "33333333-3333-4333-8333-333333333333",
-            assignment_status: "assigned",
-          }],
-        } as Response;
-      }
-      if (init.method === "POST") {
-        return { ok: true, status: 201, statusText: "Created" } as Response;
-      }
-      return {
-        ok: true,
-        status: 200,
-        statusText: "OK",
-        json: async () => [{ id: LEAD_ID, assigned_agent_id: AGENT_ID }],
-      } as Response;
-    }) as unknown as typeof fetch;
+    const captured = mockAssignmentFetch(PREVIOUS_AGENT_ID);
 
     await expect(assignLeadToAgent(LEAD_ID, AGENT_ID)).resolves.toEqual({
       ok: true,
       action: "reassigned",
+      warning: "agent_notifications_disabled",
     });
     expect(captured[2].body).toMatchObject({
       action: "lead.reassigned",
-      before_state: { assigned_agent_id: "33333333-3333-4333-8333-333333333333" },
+      before_state: { assigned_agent_id: PREVIOUS_AGENT_ID },
       after_state: { assigned_agent_id: AGENT_ID, assignment_status: "assigned" },
     });
-    expect(captured[1].url).toContain("assigned_agent_id=eq.33333333-3333-4333-8333-333333333333");
+    expect(captured[1].url).toContain("assigned_agent_id=eq." + PREVIOUS_AGENT_ID);
   });
 
-  it("does not label same-agent assignment as reassignment", async () => {
+  it("does not mutate, audit, or notify when the lead is already assigned to the same agent", async () => {
     const captured: Array<{ init?: RequestInit; body: Record<string, unknown> }> = [];
     globalThis.fetch = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
       const body = init?.body && typeof init.body === "string"
@@ -163,12 +219,9 @@ describe("AdminOps agent allocation actions", () => {
     await expect(assignLeadToAgent(LEAD_ID, AGENT_ID)).resolves.toEqual({
       ok: true,
       action: "assigned",
+      warning: "assignment_already_current",
     });
-    expect(captured[2].body).toMatchObject({
-      action: "lead.assigned",
-      before_state: { assigned_agent_id: AGENT_ID },
-      after_state: { assigned_agent_id: AGENT_ID, assignment_status: "assigned" },
-    });
+    expect(captured).toHaveLength(1);
   });
 
   it("unassigns a lead through GET, PATCH, and audit without touching public lead capture", async () => {

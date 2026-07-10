@@ -19,7 +19,7 @@ export async function assignLeadToAgentAction(formData: FormData) {
   }
 
   if (result.warning) {
-    redirect("/admin/allocation?assignment_action=" + result.action + "_audit_warning");
+    redirect("/admin/allocation?assignment_action=" + result.action + "_" + result.warning);
   }
 
   redirect("/admin/allocation?assignment_action=" + result.action);

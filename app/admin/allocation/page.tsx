@@ -5,6 +5,7 @@ import {
   type AdminAgentAllocationAgent,
   type AdminAssignableLead,
 } from "../../lib/adminAgentAllocationView";
+import { loadAdminLeadNotificationSummary } from "../../lib/adminLeadNotificationView";
 import type { AdminAssignmentAuditRecord } from "../../lib/adminAssignmentAudit";
 import { assignLeadToAgentAction, unassignLeadAction } from "./actions";
 
@@ -215,7 +216,10 @@ export default async function AdminAllocationPage({
   searchParams?: Promise<{ assignment_action?: string }>;
 }) {
   const params = searchParams ? await searchParams : {};
-  const summary = await loadAdminAgentAllocationView();
+  const [summary, notifications] = await Promise.all([
+    loadAdminAgentAllocationView(),
+    loadAdminLeadNotificationSummary(25),
+  ]);
 
   return (
     <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
@@ -244,6 +248,12 @@ export default async function AdminAllocationPage({
                 className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]"
               >
                 Reporting
+              </Link>
+              <Link
+                href="/admin/notifications"
+                className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]"
+              >
+                Notifications
               </Link>
             </nav>
           </div>
@@ -377,6 +387,21 @@ export default async function AdminAllocationPage({
                   : "Assignment audit activity is unavailable until Supabase admin variables are configured."}
               </p>
             )}
+          </Panel>
+
+          <Panel title="Notification outbox">
+            <div className="grid gap-3 text-sm sm:grid-cols-5">
+              <MetricCard label="Total" value={notifications.kpis.total} />
+              <MetricCard label="Sent" value={notifications.kpis.sent} />
+              <MetricCard label="Failed" value={notifications.kpis.failed} />
+              <MetricCard label="Skipped" value={notifications.kpis.skipped} />
+              <MetricCard label="Retry" value={notifications.kpis.retryScheduled} />
+            </div>
+            <p className="mt-4 text-sm text-[#8f8778]">
+              <Link href="/admin/notifications" className="text-[#e2c06f] underline-offset-4 hover:underline">
+                Open notification details and retry controls
+              </Link>
+            </p>
           </Panel>
 
           <div className="grid gap-5 lg:grid-cols-3">
