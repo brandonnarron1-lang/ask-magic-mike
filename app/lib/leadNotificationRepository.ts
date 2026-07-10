@@ -190,6 +190,26 @@ export class SupabaseLeadNotificationRepository implements LeadNotificationRepos
     return rows[0] ? normalizeLeadNotificationRow(rows[0]) : null;
   }
 
+  async claimForProcessing(id: string, patch: Partial<LeadNotificationRecord>): Promise<LeadNotificationRecord | null> {
+    const config = this.ensureConfig();
+    const url = new URL("/rest/v1/lead_notifications", config.supabaseUrl);
+    url.searchParams.set("id", "eq." + id);
+    url.searchParams.set("status", "in.(pending,failed,retry_scheduled)");
+    url.searchParams.set("select", "*");
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        ...headers(config),
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify(patch),
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    const rows = (await response.json().catch(() => [])) as Array<Record<string, unknown>>;
+    return rows[0] ? normalizeLeadNotificationRow(rows[0]) : null;
+  }
+
   async listRecent(limit = 50): Promise<LeadNotificationRecord[]> {
     const config = this.ensureConfig();
     const capped = Math.max(1, Math.min(limit, 100));

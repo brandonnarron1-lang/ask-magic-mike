@@ -62,6 +62,16 @@ class MemoryNotificationRepo implements LeadNotificationRepository {
     return this.rows[index];
   }
 
+  async claimForProcessing(id: string, patch: Partial<LeadNotificationRecord>) {
+    const index = this.rows.findIndex((row) => (
+      row.id === id &&
+      ["pending", "failed", "retry_scheduled"].includes(row.status)
+    ));
+    if (index < 0) return null;
+    this.rows[index] = { ...this.rows[index], ...patch, updated_at: new Date().toISOString() };
+    return this.rows[index];
+  }
+
   async listRecent() {
     return [...this.rows].reverse();
   }
@@ -72,6 +82,13 @@ class MemoryNotificationRepo implements LeadNotificationRepository {
 
   async listRetryable() {
     return this.rows.filter((row) => ["failed", "retry_scheduled"].includes(row.status));
+  }
+}
+
+class LostClaimNotificationRepo extends MemoryNotificationRepo {
+  async claimForProcessing(id: string, _patch: Partial<LeadNotificationRecord>) {
+    await this.update(id, { status: "processing" });
+    return null;
   }
 }
 
@@ -197,6 +214,57 @@ describe("LeadNotificationService", () => {
     expect(repo.rows[0].status).toBe("permanently_failed");
     expect(blocked.ok).toBe(false);
     if (!blocked.ok) expect(blocked.error).toBe("notification_not_retryable");
+  });
+
+  it("does not call the provider when another worker already claimed the event", async () => {
+    const repo = new MemoryNotificationRepo();
+    const provider = new ConsoleNotificationProvider("success");
+    const spy = vi.spyOn(provider, "send");
+    const service = new LeadNotificationService(repo, provider);
+
+    await repo.create({
+      lead_id: LEAD_ID,
+      agent_id: AGENT_ID,
+      notification_type: "agent_assignment",
+      channel: "email",
+      recipient_type: "agent",
+      template_version: "agent_assignment_email_v1",
+      idempotency_key: "lead_assignment:claimed",
+      status: "processing",
+      max_attempts: 3,
+    });
+
+    const result = await service.processNotification("notification-1", context());
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("notification_not_processable");
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it("does not call the provider when a concurrent claim wins first", async () => {
+    const repo = new LostClaimNotificationRepo();
+    const provider = new ConsoleNotificationProvider("success");
+    const spy = vi.spyOn(provider, "send");
+    const service = new LeadNotificationService(repo, provider);
+
+    await repo.create({
+      lead_id: LEAD_ID,
+      agent_id: AGENT_ID,
+      notification_type: "agent_assignment",
+      channel: "email",
+      recipient_type: "agent",
+      template_version: "agent_assignment_email_v1",
+      idempotency_key: "lead_assignment:lost_claim",
+      status: "pending",
+      max_attempts: 3,
+    });
+
+    const result = await service.processNotification("notification-1", context());
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.warning).toBe("notification_already_claimed");
+    expect(repo.rows[0].status).toBe("processing");
+    expect(spy).not.toHaveBeenCalled();
   });
 
   it("blocks missing recipients and inactive agents safely", async () => {

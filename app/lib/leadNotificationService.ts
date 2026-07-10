@@ -191,6 +191,9 @@ export class LeadNotificationService {
     const current = await this.repo.findById(notificationId);
     if (!current) return { ok: false, statusCode: 404, error: "notification_not_found" };
     if (current.status === "sent") return { ok: true, notification: current };
+    if (!["pending", "failed", "retry_scheduled"].includes(current.status)) {
+      return { ok: false, statusCode: 409, error: "notification_not_processable" };
+    }
     if (current.attempt_count >= current.max_attempts) {
       const permanent = await this.repo.update(current.id, {
         status: "permanently_failed",
@@ -202,14 +205,22 @@ export class LeadNotificationService {
     }
 
     const nextAttempt = current.attempt_count + 1;
-    const claimed = await this.repo.update(current.id, {
+    const claimed = await this.repo.claimForProcessing(current.id, {
       status: "processing",
       attempt_count: nextAttempt,
       provider: this.provider.name,
       error_code: null,
       error_summary: null,
     });
-    const working = claimed || current;
+    if (!claimed) {
+      const refreshed = await this.repo.findById(notificationId);
+      return {
+        ok: true,
+        notification: refreshed || current,
+        warning: "notification_already_claimed",
+      };
+    }
+    const working = claimed;
     const resolvedContext = context || (await this.loadContextFor(working));
     if (!resolvedContext) {
       const failed = await this.repo.update(current.id, {
