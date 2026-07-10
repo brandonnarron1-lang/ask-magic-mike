@@ -129,6 +129,47 @@ describe("AdminOps agent allocation actions", () => {
     });
   });
 
+  it("does not label same-agent assignment as reassignment", async () => {
+    const captured: Array<{ init?: RequestInit; body: Record<string, unknown> }> = [];
+    globalThis.fetch = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      const body = init?.body && typeof init.body === "string"
+        ? JSON.parse(init.body) as Record<string, unknown>
+        : {};
+      captured.push({ init, body });
+      if (!init?.method) {
+        return {
+          ok: true,
+          status: 200,
+          statusText: "OK",
+          json: async () => [{
+            id: LEAD_ID,
+            assigned_agent_id: AGENT_ID,
+            assignment_status: "assigned",
+          }],
+        } as Response;
+      }
+      if (init.method === "POST") {
+        return { ok: true, status: 201, statusText: "Created" } as Response;
+      }
+      return {
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        json: async () => [{ id: LEAD_ID, assigned_agent_id: AGENT_ID }],
+      } as Response;
+    }) as unknown as typeof fetch;
+
+    await expect(assignLeadToAgent(LEAD_ID, AGENT_ID)).resolves.toEqual({
+      ok: true,
+      action: "assigned",
+    });
+    expect(captured[2].body).toMatchObject({
+      action: "lead.assigned",
+      before_state: { assigned_agent_id: AGENT_ID },
+      after_state: { assigned_agent_id: AGENT_ID, assignment_status: "assigned" },
+    });
+  });
+
   it("unassigns a lead through GET, PATCH, and audit without touching public lead capture", async () => {
     const captured: Array<{ init?: RequestInit; body: Record<string, unknown> }> = [];
     globalThis.fetch = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {

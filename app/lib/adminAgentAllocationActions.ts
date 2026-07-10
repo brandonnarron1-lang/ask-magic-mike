@@ -141,7 +141,8 @@ export async function assignLeadToAgent(
 
   const current = await loadCurrentLeadAssignment(leadId);
   if (!current.ok) return current;
-  const action: AdminAssignmentAuditAction = current.assigned_agent_id ? "reassigned" : "assigned";
+  const action: AdminAssignmentAuditAction =
+    current.assigned_agent_id && current.assigned_agent_id !== agentId ? "reassigned" : "assigned";
 
   return patchLeadAssignment(
     leadId,
