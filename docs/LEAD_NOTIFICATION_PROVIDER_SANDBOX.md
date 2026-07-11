@@ -36,7 +36,9 @@ Sandbox mode requires:
 - `AGENT_NOTIFICATION_SANDBOX_EMAIL`
 - `AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS`
 
-`AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS` is a comma-separated list. The sandbox recipient domain must match one of those domains or a subdomain. If the recipient is absent, invalid, or outside the allowlist, the provider fails closed before transport invocation.
+`AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS` is a required comma-separated list. The sandbox recipient domain must match one of those domains or a subdomain. If the allowlist is missing, empty, invalid, or if the recipient is absent, invalid, or outside the allowlist, the provider fails closed before transport invocation.
+
+Sandbox recipient values must be a single plain email address. Display-name syntax, comma-separated recipients, semicolon-separated recipients, newline injection, malformed domains, wildcard-like allowlist entries, and deceptive suffixes such as `example.test.attacker.invalid` are rejected.
 
 ## Supported Notification Types
 

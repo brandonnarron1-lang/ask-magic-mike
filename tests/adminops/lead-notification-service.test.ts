@@ -365,6 +365,7 @@ describe("LeadNotificationService", () => {
     process.env.AGENT_NOTIFICATIONS_ENABLED = "true";
     process.env.RESEND_API_KEY = "test_resend_key";
     process.env.AGENT_NOTIFICATION_FROM_EMAIL = "alerts@example.test";
+    process.env.AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS = "example.test";
     const transport = vi.fn(async () => resendResponse(200, { id: "sandbox-msg-1" }));
     const provider = new ResendEmailNotificationProvider("sandbox", transport as typeof fetch);
 
@@ -459,6 +460,7 @@ describe("LeadNotificationService", () => {
     process.env.LEAD_NOTIFICATION_MODE = "sandbox";
     process.env.AGENT_NOTIFICATIONS_ENABLED = "true";
     process.env.AGENT_NOTIFICATION_SANDBOX_EMAIL = "sandbox@example.test";
+    process.env.AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS = "example.test";
     const transport = vi.fn(async () => resendResponse(200, { id: "sandbox-msg-4" }));
     const provider = new ResendEmailNotificationProvider("sandbox", transport as typeof fetch);
 
@@ -481,6 +483,7 @@ describe("LeadNotificationService", () => {
     process.env.RESEND_API_KEY = "test_resend_key";
     process.env.AGENT_NOTIFICATION_FROM_EMAIL = "alerts@example.test";
     process.env.AGENT_NOTIFICATION_SANDBOX_EMAIL = "sandbox@example.test";
+    process.env.AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS = "example.test";
     const repo = new MemoryNotificationRepo();
     const transport = vi.fn(async () => resendResponse(200, { id: "sandbox-msg-5" }));
     const service = new LeadNotificationService(repo, new ResendEmailNotificationProvider("sandbox", transport as typeof fetch));
@@ -501,6 +504,7 @@ describe("LeadNotificationService", () => {
     process.env.RESEND_API_KEY = "test_resend_key";
     process.env.AGENT_NOTIFICATION_FROM_EMAIL = "alerts@example.test";
     process.env.AGENT_NOTIFICATION_SANDBOX_EMAIL = "sandbox@example.test";
+    process.env.AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS = "example.test";
 
     const retryRepo = new MemoryNotificationRepo();
     const retryTransport = vi.fn(async () => resendResponse(429, { message: "rate limited agent@example.test +15555550123" }));
@@ -531,6 +535,7 @@ describe("LeadNotificationService", () => {
     process.env.RESEND_API_KEY = "test_resend_key";
     process.env.AGENT_NOTIFICATION_FROM_EMAIL = "alerts@example.test";
     process.env.AGENT_NOTIFICATION_SANDBOX_EMAIL = "sandbox@example.test";
+    process.env.AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS = "example.test";
     const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
     const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const provider = new ResendEmailNotificationProvider("sandbox", vi.fn(async () => resendResponse(200, { id: "sandbox-msg-6" })) as typeof fetch);
@@ -551,5 +556,208 @@ describe("LeadNotificationService", () => {
     expect(output).not.toContain("Message body should not be logged");
     info.mockRestore();
     error.mockRestore();
+  });
+
+  it("fails closed for omitted or invalid direct provider construction modes", async () => {
+    process.env.LEAD_NOTIFICATION_MODE = "production";
+    process.env.LEAD_NOTIFICATION_PRODUCTION_ENABLED = "true";
+    process.env.AGENT_NOTIFICATIONS_ENABLED = "true";
+    process.env.RESEND_API_KEY = "test_resend_key";
+    process.env.AGENT_NOTIFICATION_FROM_EMAIL = "alerts@example.test";
+    const transport = vi.fn(async () => resendResponse(200, { id: "prod-msg-omitted" }));
+
+    const omitted = await new (ResendEmailNotificationProvider as unknown as new (
+      mode?: "sandbox" | "production",
+      transport?: typeof fetch,
+    ) => ResendEmailNotificationProvider)(undefined, transport as typeof fetch).send({
+      notificationId: "notification-7",
+      channel: "email",
+      recipient: "agent@example.test",
+      text: "Test body",
+      idempotencyKey: "idem-7",
+    });
+
+    const invalid = await new (ResendEmailNotificationProvider as unknown as new (
+      mode?: string,
+      transport?: typeof fetch,
+    ) => ResendEmailNotificationProvider)("preview", transport as typeof fetch).send({
+      notificationId: "notification-8",
+      channel: "email",
+      recipient: "agent@example.test",
+      text: "Test body",
+      idempotencyKey: "idem-8",
+    });
+
+    expect(omitted.ok).toBe(false);
+    if (!omitted.ok) expect(omitted.errorCode).toBe("provider_mode_invalid");
+    expect(invalid.ok).toBe(false);
+    if (!invalid.ok) expect(invalid.errorCode).toBe("provider_mode_invalid");
+    expect(transport).not.toHaveBeenCalled();
+  });
+
+  it("normalizes provider mode safely and keeps invalid legacy modes disabled", () => {
+    delete (process.env as Record<string, string | undefined>).LEAD_NOTIFICATION_MODE;
+    delete (process.env as Record<string, string | undefined>).NOTIFICATION_PROVIDER_MODE;
+    expect(selectNotificationProvider()).toBeInstanceOf(DisabledNotificationProvider);
+
+    process.env.LEAD_NOTIFICATION_MODE = "";
+    expect(selectNotificationProvider()).toBeInstanceOf(DisabledNotificationProvider);
+
+    process.env.LEAD_NOTIFICATION_MODE = "not-a-mode";
+    expect(selectNotificationProvider()).toBeInstanceOf(DisabledNotificationProvider);
+
+    process.env.LEAD_NOTIFICATION_MODE = "SANDBOX";
+    expect(selectNotificationProvider()).toBeInstanceOf(ResendEmailNotificationProvider);
+
+    delete (process.env as Record<string, string | undefined>).LEAD_NOTIFICATION_MODE;
+    process.env.NOTIFICATION_PROVIDER_MODE = "console";
+    expect(selectNotificationProvider()).toBeInstanceOf(ConsoleNotificationProvider);
+  });
+
+  it("fails closed for missing, empty, malformed, or deceptive sandbox allowlists and recipients", async () => {
+    process.env.LEAD_NOTIFICATION_MODE = "sandbox";
+    process.env.AGENT_NOTIFICATIONS_ENABLED = "true";
+    process.env.RESEND_API_KEY = "test_resend_key";
+    process.env.AGENT_NOTIFICATION_FROM_EMAIL = "alerts@example.test";
+    const transport = vi.fn(async () => resendResponse(200, { id: "sandbox-msg-edge" }));
+    const provider = new ResendEmailNotificationProvider("sandbox", transport as typeof fetch);
+
+    const cases: Array<{ recipient: string; allowlist?: string; code: string }> = [
+      { recipient: "sandbox@example.test", allowlist: undefined, code: "missing_sandbox_allowlist" },
+      { recipient: "sandbox@example.test", allowlist: " , ", code: "empty_sandbox_allowlist" },
+      { recipient: "sandbox@example.test", allowlist: "*", code: "invalid_sandbox_allowlist" },
+      { recipient: "sandbox@.example.test", allowlist: "example.test", code: "invalid_sandbox_recipient" },
+      { recipient: "sandbox@example.test.", allowlist: "example.test", code: "invalid_sandbox_recipient" },
+      { recipient: "sandbox@example.test,other@example.test", allowlist: "example.test", code: "invalid_sandbox_recipient" },
+      { recipient: "sandbox@example.test;other@example.test", allowlist: "example.test", code: "invalid_sandbox_recipient" },
+      { recipient: "Sandbox <sandbox@example.test>", allowlist: "example.test", code: "invalid_sandbox_recipient" },
+      { recipient: "sandbox@example.test\nbcc:other@example.test", allowlist: "example.test", code: "invalid_sandbox_recipient" },
+      { recipient: "sandbox@example.test.attacker.invalid", allowlist: "example.test", code: "sandbox_recipient_not_allowlisted" },
+    ];
+
+    for (const item of cases) {
+      process.env.AGENT_NOTIFICATION_SANDBOX_EMAIL = item.recipient;
+      if (item.allowlist === undefined) {
+        delete (process.env as Record<string, string | undefined>).AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS;
+      } else {
+        process.env.AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS = item.allowlist;
+      }
+      const result = await provider.send({
+        notificationId: "notification-edge",
+        channel: "email",
+        recipient: "agent@example.test",
+        text: "Test body",
+        idempotencyKey: `idem-${item.code}`,
+      });
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.errorCode).toBe(item.code);
+    }
+
+    expect(transport).not.toHaveBeenCalled();
+  });
+
+  it("allows exact, subdomain, uppercase, whitespace, and multiple-domain sandbox allowlist matches", async () => {
+    process.env.LEAD_NOTIFICATION_MODE = "sandbox";
+    process.env.AGENT_NOTIFICATIONS_ENABLED = "true";
+    process.env.RESEND_API_KEY = "test_resend_key";
+    process.env.AGENT_NOTIFICATION_FROM_EMAIL = "alerts@example.test";
+    process.env.AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS = " example.test, other.test ";
+    const transport = vi.fn(async () => resendResponse(200, { id: "sandbox-msg-domain" }));
+    const provider = new ResendEmailNotificationProvider("sandbox", transport as typeof fetch);
+
+    for (const recipient of ["sandbox@EXAMPLE.TEST", "sandbox@mail.example.test", "sandbox@other.test"]) {
+      process.env.AGENT_NOTIFICATION_SANDBOX_EMAIL = recipient;
+      const result = await provider.send({
+        notificationId: "notification-domain",
+        channel: "email",
+        recipient: "agent@example.test",
+        text: "Test body",
+        idempotencyKey: `idem-${recipient}`,
+      });
+      expect(result.ok).toBe(true);
+    }
+
+    expect(transport).toHaveBeenCalledTimes(3);
+    for (const call of transport.mock.calls) {
+      const [, init] = call as unknown as [string, RequestInit];
+      expect(String(init.body)).not.toContain("agent@example.test");
+    }
+  });
+
+  it("classifies Resend status codes without retrying permanent authorization or request failures", async () => {
+    process.env.LEAD_NOTIFICATION_MODE = "sandbox";
+    process.env.AGENT_NOTIFICATIONS_ENABLED = "true";
+    process.env.RESEND_API_KEY = "test_resend_key";
+    process.env.AGENT_NOTIFICATION_FROM_EMAIL = "alerts@example.test";
+    process.env.AGENT_NOTIFICATION_SANDBOX_EMAIL = "sandbox@example.test";
+    process.env.AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS = "example.test";
+
+    for (const status of [408, 409, 425, 429, 500, 503]) {
+      const result = await new ResendEmailNotificationProvider(
+        "sandbox",
+        vi.fn(async () => resendResponse(status)) as typeof fetch,
+      ).send({
+        notificationId: `notification-${status}`,
+        channel: "email",
+        recipient: "agent@example.test",
+        text: "Test body",
+        idempotencyKey: `idem-${status}`,
+      });
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.retryable).toBe(true);
+    }
+
+    for (const status of [400, 401, 403, 422]) {
+      const result = await new ResendEmailNotificationProvider(
+        "sandbox",
+        vi.fn(async () => resendResponse(status)) as typeof fetch,
+      ).send({
+        notificationId: `notification-${status}`,
+        channel: "email",
+        recipient: "agent@example.test",
+        text: "Test body",
+        idempotencyKey: `idem-${status}`,
+      });
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.retryable).toBe(false);
+    }
+  });
+
+  it("sanitizes sender, subject, and provider message IDs at the transport boundary", async () => {
+    process.env.LEAD_NOTIFICATION_MODE = "sandbox";
+    process.env.AGENT_NOTIFICATIONS_ENABLED = "true";
+    process.env.RESEND_API_KEY = "test_resend_key";
+    process.env.AGENT_NOTIFICATION_SANDBOX_EMAIL = "sandbox@example.test";
+    process.env.AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS = "example.test";
+
+    process.env.AGENT_NOTIFICATION_FROM_EMAIL = "alerts@example.test\nbcc:other@example.test";
+    const invalidSenderTransport = vi.fn(async () => resendResponse(200, { id: "sandbox-msg-invalid" }));
+    const invalidSender = await new ResendEmailNotificationProvider("sandbox", invalidSenderTransport as typeof fetch).send({
+      notificationId: "notification-invalid-sender",
+      channel: "email",
+      recipient: "agent@example.test",
+      text: "Test body",
+      idempotencyKey: "idem-invalid-sender",
+    });
+    expect(invalidSender.ok).toBe(false);
+    if (!invalidSender.ok) expect(invalidSender.errorCode).toBe("missing_provider_config");
+    expect(invalidSenderTransport).not.toHaveBeenCalled();
+
+    process.env.AGENT_NOTIFICATION_FROM_EMAIL = "alerts@example.test";
+    const transport = vi.fn(async () => resendResponse(200, { id: "bad id with spaces and @ symbol" }));
+    const result = await new ResendEmailNotificationProvider("sandbox", transport as typeof fetch).send({
+      notificationId: "notification-subject",
+      channel: "email",
+      recipient: "agent@example.test",
+      subject: "Hello\r\nbcc: hidden@example.test",
+      text: "Test body",
+      idempotencyKey: "idem-subject",
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.providerMessageId).toBeUndefined();
+    const [, init] = transport.mock.calls[0] as unknown as [string, RequestInit];
+    const body = JSON.parse(String(init.body));
+    expect(body.subject).toBe("Hello bcc: hidden@example.test");
   });
 });

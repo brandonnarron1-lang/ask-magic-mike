@@ -5,8 +5,6 @@ import type {
   NotificationResult,
 } from "./leadNotificationTypes";
 
-const DEFAULT_SANDBOX_ALLOWED_DOMAINS = ["example.test"];
-
 export function notificationMode(): NotificationMode {
   const mode = (process.env.LEAD_NOTIFICATION_MODE || process.env.NOTIFICATION_PROVIDER_MODE || "disabled").toLowerCase();
   if (mode === "console" || mode === "sandbox" || mode === "production") return mode;
@@ -40,17 +38,67 @@ export function safeRecipientReference(channel: string, recipient: string) {
   return "recipient_configured";
 }
 
-function configuredSandboxAllowedDomains() {
+function validDomain(value: string) {
+  if (
+    !value ||
+    value.length > 253 ||
+    value.startsWith(".") ||
+    value.endsWith(".") ||
+    value.includes("..") ||
+    value.includes("*") ||
+    !value.includes(".")
+  ) {
+    return false;
+  }
+  return value.split(".").every((label) => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label));
+}
+
+function configuredSandboxAllowedDomains():
+  | { ok: true; domains: string[] }
+  | { ok: false; errorCode: string; errorSummary: string } {
   const raw = process.env.AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS;
-  const values = (raw ? raw.split(",") : DEFAULT_SANDBOX_ALLOWED_DOMAINS)
+  if (raw === undefined) {
+    return {
+      ok: false,
+      errorCode: "missing_sandbox_allowlist",
+      errorSummary: "Sandbox email recipient allowlist is not configured.",
+    };
+  }
+  const values = raw
+    .split(",")
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);
-  return values.length ? values : DEFAULT_SANDBOX_ALLOWED_DOMAINS;
+  if (!values.length) {
+    return {
+      ok: false,
+      errorCode: "empty_sandbox_allowlist",
+      errorSummary: "Sandbox email recipient allowlist is empty.",
+    };
+  }
+  if (!values.every(validDomain)) {
+    return {
+      ok: false,
+      errorCode: "invalid_sandbox_allowlist",
+      errorSummary: "Sandbox email recipient allowlist is invalid.",
+    };
+  }
+  return { ok: true, domains: values };
 }
 
 function emailDomain(email: string) {
-  const parts = email.trim().toLowerCase().split("@");
-  if (parts.length !== 2 || !parts[0] || !parts[1] || !parts[1].includes(".")) return null;
+  const value = email.trim().toLowerCase();
+  if (
+    !value ||
+    /[\s,;<>()[\]\\"]/.test(value) ||
+    Array.from(value).some((character) => {
+      const code = character.charCodeAt(0);
+      return code <= 31 || code === 127;
+    })
+  ) {
+    return null;
+  }
+  const parts = value.split("@");
+  if (parts.length !== 2 || !parts[0] || !parts[1] || !validDomain(parts[1])) return null;
   return parts[1];
 }
 
@@ -78,7 +126,14 @@ export function resolveSandboxEmailRecipient() {
   }
 
   const allowedDomains = configuredSandboxAllowedDomains();
-  if (!domainAllowed(domain, allowedDomains)) {
+  if (!allowedDomains.ok) {
+    return {
+      ok: false as const,
+      errorCode: allowedDomains.errorCode,
+      errorSummary: allowedDomains.errorSummary,
+    };
+  }
+  if (!domainAllowed(domain, allowedDomains.domains)) {
     return {
       ok: false as const,
       errorCode: "sandbox_recipient_not_allowlisted",
@@ -87,6 +142,24 @@ export function resolveSandboxEmailRecipient() {
   }
 
   return { ok: true as const, recipient };
+}
+
+function hasHeaderInjection(value: string) {
+  return /[\r\n]/.test(value);
+}
+
+function safeSubject(value: string | undefined) {
+  return (value || "Ask Magic Mike lead assignment").replace(/[\r\n]+/g, " ").slice(0, 180);
+}
+
+function retryableResendStatus(status: number) {
+  return status === 408 || status === 409 || status === 425 || status === 429 || status >= 500;
+}
+
+function safeProviderMessageId(value: unknown) {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return /^[A-Za-z0-9_-]{1,120}$/.test(trimmed) ? trimmed : undefined;
 }
 
 export class DisabledNotificationProvider implements NotificationProvider {
@@ -146,16 +219,27 @@ export class ConsoleNotificationProvider implements NotificationProvider {
 }
 
 export class ResendEmailNotificationProvider implements NotificationProvider {
-  name: "resend" | "resend_sandbox";
+  name: "resend" | "resend_sandbox" | "disabled";
+  private readonly mode: "sandbox" | "production" | "invalid";
 
   constructor(
-    private readonly mode: "sandbox" | "production" = "production",
+    mode: "sandbox" | "production",
     private readonly transport: typeof fetch = fetch,
   ) {
-    this.name = mode === "sandbox" ? "resend_sandbox" : "resend";
+    this.mode = mode === "sandbox" || mode === "production" ? mode : "invalid";
+    this.name = this.mode === "sandbox" ? "resend_sandbox" : this.mode === "production" ? "resend" : "disabled";
   }
 
   async send(request: NotificationRequest): Promise<NotificationResult> {
+    if (this.mode === "invalid") {
+      return {
+        ok: false,
+        provider: this.name,
+        retryable: false,
+        errorCode: "provider_mode_invalid",
+        errorSummary: "Notification provider mode is invalid.",
+      };
+    }
     if (request.channel !== "email") {
       return {
         ok: false,
@@ -210,7 +294,7 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
 
     const apiKey = process.env.RESEND_API_KEY;
     const from = process.env.AGENT_NOTIFICATION_FROM_EMAIL || process.env.FROM_EMAIL;
-    if (!apiKey || !from) {
+    if (!apiKey || !from || hasHeaderInjection(from)) {
       return {
         ok: false,
         provider: this.name,
@@ -232,7 +316,7 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
         body: JSON.stringify({
           from,
           to: recipient,
-          subject: request.subject || "Ask Magic Mike lead assignment",
+          subject: safeSubject(request.subject),
           text: request.text,
           html: request.html,
         }),
@@ -251,14 +335,14 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
       return {
         ok: false,
         provider: this.name,
-        retryable: response.status >= 500 || response.status === 429,
+        retryable: retryableResendStatus(response.status),
         errorCode: `resend_http_${response.status}`,
         errorSummary: "Resend email request failed.",
       };
     }
 
     const data = (await response.json().catch(() => ({}))) as { id?: string };
-    return { ok: true, provider: this.name, providerMessageId: data.id };
+    return { ok: true, provider: this.name, providerMessageId: safeProviderMessageId(data.id) };
   }
 }
 

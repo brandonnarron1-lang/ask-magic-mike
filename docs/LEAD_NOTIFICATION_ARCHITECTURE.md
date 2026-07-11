@@ -37,7 +37,7 @@ Modes:
 - `sandbox`: provider-compatible email boundary that replaces the assigned agent recipient with an allowlisted sandbox recipient before transport invocation.
 - `production`: gated production adapter boundary that also requires explicit production activation.
 
-The email boundary uses Resend in sandbox or production modes only when `AGENT_NOTIFICATIONS_ENABLED=true`, `RESEND_API_KEY` is present, and a sender is configured. Sandbox mode also requires `AGENT_NOTIFICATION_SANDBOX_EMAIL` and `AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS`. Production mode also requires `LEAD_NOTIFICATION_PRODUCTION_ENABLED=true`. SMS is template-ready but not activated.
+The email boundary uses Resend in sandbox or production modes only when selected by the centralized provider factory, `AGENT_NOTIFICATIONS_ENABLED=true`, `RESEND_API_KEY` is present, and a sender is configured. Sandbox mode also requires `AGENT_NOTIFICATION_SANDBOX_EMAIL` and a non-empty `AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS`. Production mode also requires `LEAD_NOTIFICATION_PRODUCTION_ENABLED=true`. Invalid or omitted direct provider modes fail closed. SMS is template-ready but not activated.
 
 ## Idempotency
 
