@@ -22,7 +22,7 @@ It is read-only. No mutations happen from this page.
 | `lead_routing` | id, lead_id, agent_id, assigned_at, accept_deadline, contact_deadline, accepted_at, contacted_at, status, assignment_reason |
 | `leads` | first_name, last_name, temperature (joined via lead_routing) |
 
-The `accept_deadline` and `contact_deadline` columns are GENERATED: `assigned_at + INTERVAL '2 minutes'` and `assigned_at + INTERVAL '5 minutes'` respectively (see `supabase/migrations/00005_routing.sql`).
+The `accept_deadline` and `contact_deadline` columns are maintained by the database from `assigned_at`: `assigned_at + INTERVAL '2 minutes'` and `assigned_at + INTERVAL '5 minutes'` respectively (see `supabase/migrations/00005_routing.sql`).
 
 ---
 

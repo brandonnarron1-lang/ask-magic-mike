@@ -9,11 +9,10 @@ CREATE TABLE lead_routing (
   assignment_reason   TEXT NOT NULL,
   agent_priority_score SMALLINT NOT NULL,        -- snapshot at assignment time
 
-  -- SLA deadlines (computed at insert time)
-  accept_deadline     TIMESTAMPTZ NOT NULL
-                      GENERATED ALWAYS AS (assigned_at + INTERVAL '2 minutes') STORED,
-  contact_deadline    TIMESTAMPTZ NOT NULL
-                      GENERATED ALWAYS AS (assigned_at + INTERVAL '5 minutes') STORED,
+  -- SLA deadlines are trigger-maintained because Postgres 17 rejects
+  -- TIMESTAMPTZ + INTERVAL inside stored generated columns as non-immutable.
+  accept_deadline     TIMESTAMPTZ NOT NULL,
+  contact_deadline    TIMESTAMPTZ NOT NULL,
 
   accepted_at         TIMESTAMPTZ,
   contacted_at        TIMESTAMPTZ,
@@ -28,6 +27,20 @@ CREATE TABLE lead_routing (
 
   CONSTRAINT uq_lead_routing_lead UNIQUE (lead_id)
 );
+
+CREATE OR REPLACE FUNCTION public.set_lead_routing_sla_deadlines()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.accept_deadline := NEW.assigned_at + INTERVAL '2 minutes';
+  NEW.contact_deadline := NEW.assigned_at + INTERVAL '5 minutes';
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lead_routing_sla_deadlines_biu
+  BEFORE INSERT OR UPDATE OF assigned_at, accept_deadline, contact_deadline
+  ON public.lead_routing
+  FOR EACH ROW EXECUTE FUNCTION public.set_lead_routing_sla_deadlines();
 
 CREATE INDEX idx_lead_routing_agent ON lead_routing(agent_id);
 CREATE INDEX idx_lead_routing_status ON lead_routing(status);
