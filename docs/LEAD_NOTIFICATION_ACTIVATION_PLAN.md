@@ -10,6 +10,7 @@ Agent assignment notification infrastructure is implemented but disabled by defa
 - Confirm RLS and server-only write boundaries.
 - Configure provider credentials through the approved secret manager.
 - Configure sender identity.
+- Configure an owner-controlled sandbox recipient and allowlisted sandbox domain before provider-sandbox testing.
 - Verify no DNS changes are required or obtain separate approval if they are.
 - Confirm the designated owner-controlled test recipient.
 - Complete compliance review before any customer email or SMS.
@@ -19,10 +20,10 @@ Agent assignment notification infrastructure is implemented but disabled by defa
 1. Keep `CUSTOMER_EMAIL_ENABLED=false` and `CUSTOMER_SMS_ENABLED=false`.
 2. Set provider secrets in the deployment environment through the approved UI or CLI process.
 3. Set `AGENT_NOTIFICATION_FROM_EMAIL`.
-4. Set `LEAD_NOTIFICATION_MODE=sandbox` if the provider supports no-real-delivery sandbox behavior, otherwise keep disabled until production test approval.
+4. Set `LEAD_NOTIFICATION_MODE=sandbox` only in a non-production environment with `AGENT_NOTIFICATION_SANDBOX_EMAIL` and `AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS` configured.
 5. Run a local/sandbox assignment notification test.
 6. With owner approval, set `AGENT_NOTIFICATIONS_ENABLED=true`.
-7. For production delivery, set `LEAD_NOTIFICATION_MODE=production`.
+7. For production delivery, set `LEAD_NOTIFICATION_MODE=production` and `LEAD_NOTIFICATION_PRODUCTION_ENABLED=true` only in a separate approved production activation.
 8. Execute one controlled QA assignment and verify one sent row.
 
 ## Agent SMS Readiness

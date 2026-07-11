@@ -34,10 +34,10 @@ Modes:
 
 - `disabled`: default. Creates/skips events without delivery.
 - `console`: local/test only. Logs safe metadata, never recipient values.
-- `sandbox`: reserved boundary for no-real-delivery providers.
-- `production`: gated production adapter boundary.
+- `sandbox`: provider-compatible email boundary that replaces the assigned agent recipient with an allowlisted sandbox recipient before transport invocation.
+- `production`: gated production adapter boundary that also requires explicit production activation.
 
-The initial production email boundary uses Resend only when `LEAD_NOTIFICATION_MODE=production`, `AGENT_NOTIFICATIONS_ENABLED=true`, `RESEND_API_KEY` is present, and a sender is configured. SMS is template-ready but not activated.
+The email boundary uses Resend in sandbox or production modes only when selected by the centralized provider factory, `AGENT_NOTIFICATIONS_ENABLED=true`, `RESEND_API_KEY` is present, and a sender is configured. Sandbox mode also requires `AGENT_NOTIFICATION_SANDBOX_EMAIL` and a non-empty `AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS`. Production mode also requires `LEAD_NOTIFICATION_PRODUCTION_ENABLED=true`. Invalid or omitted direct provider modes fail closed. SMS is template-ready but not activated.
 
 ## Idempotency
 
@@ -96,6 +96,9 @@ Manual retry requires a confirmation checkbox and targets one notification ID.
 - `LEAD_NOTIFICATION_MODE`
 - `CUSTOMER_EMAIL_ENABLED`
 - `CUSTOMER_SMS_ENABLED`
+- `AGENT_NOTIFICATION_SANDBOX_EMAIL`
+- `AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS`
+- `LEAD_NOTIFICATION_PRODUCTION_ENABLED`
 
 Customer messaging remains disabled by default and independently from agent notification mode.
 

@@ -33,6 +33,9 @@
 - `CUSTOMER_EMAIL_ENABLED`
 - `CUSTOMER_SMS_ENABLED`
 - `AGENT_NOTIFICATION_FROM_EMAIL`
+- `AGENT_NOTIFICATION_SANDBOX_EMAIL`
+- `AGENT_NOTIFICATION_SANDBOX_ALLOWED_DOMAINS`
+- `LEAD_NOTIFICATION_PRODUCTION_ENABLED`
 - `CONSOLE_NOTIFICATION_BEHAVIOR`
 - `RESEND_API_KEY`
 - `FROM_EMAIL`
@@ -42,8 +45,9 @@ Do not place credential values in documentation, screenshots, logs, or tickets.
 ## Safe Modes
 
 - Local tests: `LEAD_NOTIFICATION_MODE=console`, `AGENT_NOTIFICATIONS_ENABLED=true`
+- Provider sandbox tests: `LEAD_NOTIFICATION_MODE=sandbox`, `AGENT_NOTIFICATIONS_ENABLED=true`, configured sandbox recipient, and customer/SMS gates disabled
 - Production disabled default: `LEAD_NOTIFICATION_MODE=disabled`, `AGENT_NOTIFICATIONS_ENABLED=false`
-- Production email activation requires owner approval and provider prerequisites.
+- Production email activation requires owner approval, provider prerequisites, and `LEAD_NOTIFICATION_PRODUCTION_ENABLED=true`.
 
 ## Retry Policy
 
