@@ -7,7 +7,7 @@ import {
 } from "../../lib/adminAgentAllocationView";
 import { loadAdminLeadNotificationSummary } from "../../lib/adminLeadNotificationView";
 import type { AdminAssignmentAuditRecord } from "../../lib/adminAssignmentAudit";
-import { assignLeadToAgentAction, unassignLeadAction } from "./actions";
+import { assignLeadToAgentAction, unassignLeadAction, updateAgentOperationsAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -67,7 +67,7 @@ function AgentSelect({ agents }: { agents: AdminAgentAllocationAgent[] }) {
       <option value="">Select agent</option>
       {activeAgents.map((agent) => (
         <option key={agent.id} value={agent.id}>
-          {agent.name}
+          {agent.name} ({agent.capacityRemaining ?? "open"} open)
         </option>
       ))}
     </select>
@@ -151,8 +151,12 @@ function AgentCard({ agent }: { agent: AdminAgentAllocationAgent }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="font-serif text-2xl text-[#f4ead4]">{agent.name}</h3>
-          <p className="mt-2 text-sm text-[#d9ceb8]">{agent.email || "No email"}</p>
-          <p className="mt-1 text-xs text-[#8f8778]">{agent.phone || "No phone"}</p>
+          <p className="mt-2 text-sm text-[#d9ceb8]">
+            {agent.email ? "Email configured" : "No email configured"}
+          </p>
+          <p className="mt-1 text-xs text-[#8f8778]">
+            {agent.phone ? "Phone configured" : "No phone configured"}
+          </p>
         </div>
         <Badge>{agent.availability}</Badge>
       </div>
@@ -167,13 +171,88 @@ function AgentCard({ agent }: { agent: AdminAgentAllocationAgent }) {
         </div>
         <div>
           <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Capacity</dt>
-          <dd className="mt-1 text-[#f4ead4]">{agent.max_daily_leads ?? "Unknown"}</dd>
+          <dd className="mt-1 text-[#f4ead4]">
+            {agent.currentAssignedLeadCount}/{agent.max_daily_leads ?? "Unknown"}
+          </dd>
         </div>
         <div>
           <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Priority</dt>
           <dd className="mt-1 text-[#f4ead4]">{agent.priority_score ?? "Unknown"}</dd>
         </div>
       </dl>
+      <form action={updateAgentOperationsAction} className="mt-5 rounded-md border border-white/10 bg-white/[0.03] p-4">
+        <input type="hidden" name="agent_id" value={agent.id} />
+        <div className="flex flex-wrap gap-4">
+          <label className="flex min-h-10 items-center gap-2 text-xs font-semibold text-[#d9ceb8]">
+            <input
+              type="checkbox"
+              name="is_active"
+              defaultChecked={agent.is_active}
+              className="size-4 accent-[#cda24a]"
+            />
+            Active for routing
+          </label>
+          <label className="flex min-h-10 items-center gap-2 text-xs font-semibold text-[#d9ceb8]">
+            <input
+              type="checkbox"
+              name="notification_email"
+              defaultChecked={agent.notification_email}
+              className="size-4 accent-[#cda24a]"
+            />
+            Email notifications
+          </label>
+          <label className="flex min-h-10 items-center gap-2 text-xs font-semibold text-[#d9ceb8]">
+            <input
+              type="checkbox"
+              name="notification_sms"
+              defaultChecked={agent.notification_sms}
+              className="size-4 accent-[#cda24a]"
+            />
+            SMS ready
+          </label>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <label className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+            Capacity
+            <input
+              type="number"
+              name="max_daily_leads"
+              min={0}
+              max={999}
+              defaultValue={agent.max_daily_leads ?? 0}
+              className="mt-2 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-3 py-2 text-sm text-[#f4ead4]"
+            />
+          </label>
+          <label className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+            Manual load
+            <input
+              type="number"
+              name="current_load"
+              min={0}
+              max={999}
+              defaultValue={agent.current_load ?? 0}
+              className="mt-2 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-3 py-2 text-sm text-[#f4ead4]"
+            />
+          </label>
+          <label className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+            Priority
+            <input
+              type="number"
+              name="priority_score"
+              min={0}
+              max={100}
+              defaultValue={agent.priority_score ?? 50}
+              className="mt-2 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-3 py-2 text-sm text-[#f4ead4]"
+            />
+          </label>
+        </div>
+        <button
+          type="submit"
+          className="mt-4 rounded-md border border-[#cda24a] bg-[#cda24a] px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-black"
+        >
+          Save agent ops
+        </button>
+      </form>
     </article>
   );
 }

@@ -17,8 +17,11 @@ export type AdminAgentAllocationAgent = {
   current_load: number | null;
   priority_score: number | null;
   timezone: string | null;
+  notification_email: boolean;
+  notification_sms: boolean;
   currentAssignedLeadCount: number;
   hotLeadCount: number;
+  capacityRemaining: number | null;
 };
 
 export type AdminAssignableLead = {
@@ -104,6 +107,8 @@ const AGENT_SELECT = [
   "priority_score",
   "availability",
   "timezone",
+  "notification_email",
+  "notification_sms",
 ].join(",");
 
 const ACTIVE_LEAD_STATUSES = new Set([
@@ -206,8 +211,11 @@ export function normalizeAgentRow(row: Record<string, unknown>): AdminAgentAlloc
     current_load: numberOrNull(row.current_load),
     priority_score: numberOrNull(row.priority_score),
     timezone: text(row.timezone),
+    notification_email: bool(row.notification_email, true),
+    notification_sms: bool(row.notification_sms, false),
     currentAssignedLeadCount: 0,
     hotLeadCount: 0,
+    capacityRemaining: null,
   };
 }
 
@@ -316,6 +324,17 @@ export function summarizeAgentAllocation(
     if (!agent || !ACTIVE_LEAD_STATUSES.has(statusOf(lead.status))) continue;
     agent.currentAssignedLeadCount += 1;
     if (lead.isHot) agent.hotLeadCount += 1;
+  }
+
+  for (const agent of agents) {
+    if (agent.max_daily_leads !== null) {
+      agent.capacityRemaining = Math.max(0, agent.max_daily_leads - agent.currentAssignedLeadCount);
+    }
+    if (!agent.is_active) {
+      agent.availability = "inactive";
+    } else if (agent.max_daily_leads !== null && agent.currentAssignedLeadCount >= agent.max_daily_leads) {
+      agent.availability = "unavailable";
+    }
   }
 
   const assignableLeads = leads.filter((lead) => ACTIVE_LEAD_STATUSES.has(statusOf(lead.status)));
