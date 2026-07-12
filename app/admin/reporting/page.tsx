@@ -254,6 +254,12 @@ export default async function AdminReportingPage({
               >
                 Agent allocation
               </Link>
+              <Link
+                href="/admin/action-queue"
+                className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]"
+              >
+                Action queue
+              </Link>
             </nav>
           </div>
           <nav className="mt-5 flex flex-wrap gap-2" aria-label="Reporting windows">
@@ -361,6 +367,46 @@ export default async function AdminReportingPage({
             <p className="mt-3 text-xs leading-5 text-[#8f8778]">
               Rates include sample counts and are operational indicators, not compensation or employment scoring.
             </p>
+          </Panel>
+
+          <Panel title="Appointment operations">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <MetricCard label="Requests" value={summary.appointmentOps.requested} />
+              <MetricCard label="Scheduled+" value={summary.appointmentOps.scheduled} note="Scheduled, confirmed, completed, or no-show" />
+              <MetricCard label="Completed" value={summary.appointmentOps.completed} />
+              <MetricCard label="No-shows" value={summary.appointmentOps.noShow} />
+              <MetricCard
+                label="Request → scheduled"
+                value={`${summary.appointmentOps.requestToScheduledRate}%`}
+                note="Scheduled-or-later / requested plus scheduled-or-later"
+              />
+              <MetricCard
+                label="Scheduled → completed"
+                value={`${summary.appointmentOps.scheduledToCompletedRate}%`}
+                note="Completed / scheduled-or-later"
+              />
+              <MetricCard
+                label="No-show rate"
+                value={`${summary.appointmentOps.noShowRate}%`}
+                note="No-show / confirmed-or-later"
+              />
+              <MetricCard label="Canceled" value={summary.appointmentOps.canceled} />
+            </div>
+          </Panel>
+
+          <Panel title="Follow-up operations">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <MetricCard label="Open follow-ups" value={summary.followupOps.open} />
+              <MetricCard label="Overdue" value={summary.followupOps.overdue} />
+              <MetricCard label="Due today" value={summary.followupOps.dueToday} />
+              <MetricCard label="Completed" value={summary.followupOps.completed} />
+              <MetricCard label="Canceled" value={summary.followupOps.cancelled} />
+              <MetricCard
+                label="Completion rate"
+                value={`${summary.followupOps.completionRate}%`}
+                note="Completed / all follow-up tasks in window"
+              />
+            </div>
           </Panel>
 
           <div className="grid gap-5 lg:grid-cols-2">

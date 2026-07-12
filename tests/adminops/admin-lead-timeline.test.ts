@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   buildLeadTimeline,
   normalizeAuditTimelineEvent,
+  normalizeAppointmentTimelineEvent,
+  normalizeFollowupTimelineEvent,
   normalizeNotificationTimelineEvent,
 } from "../../app/lib/adminLeadTimeline";
 
@@ -98,5 +100,47 @@ describe("AdminOps lead timeline", () => {
     expect(JSON.stringify(timeline)).not.toContain("jane@example.test");
     expect(JSON.stringify(timeline)).not.toContain("2525550100");
     expect(JSON.stringify(timeline)).not.toContain("service-role");
+  });
+
+  it("normalizes appointment and follow-up events without exposing unsafe metadata", () => {
+    const appointment = normalizeAppointmentTimelineEvent({
+      id: "appointment-1",
+      status: "confirmed",
+      starts_at: "2026-07-12T15:00:00.000Z",
+      timezone: "America/New_York",
+      meeting_url: "https://calendar.example.test/secret-token",
+      location_label: "Private customer address",
+      updated_at: "2026-07-12T14:00:00.000Z",
+    });
+    expect(appointment).toEqual({
+      id: "appointment-appointment-1-confirmed",
+      occurred_at: "2026-07-12T14:00:00.000Z",
+      type: "appointment",
+      label: "Appointment confirmed",
+      actor: "AdminOps",
+      detail: "Starts 2026-07-12T15:00:00.000Z (America/New_York)",
+    });
+
+    const followup = normalizeFollowupTimelineEvent({
+      id: "task-1",
+      status: "open",
+      category: "followup:appointment_confirmation",
+      due_at: "2026-07-12T16:00:00.000Z",
+      created_by: "agent@example.test",
+      body: "Call +1 252-555-0100 with Authorization: Bearer token",
+      updated_at: "2026-07-12T12:00:00.000Z",
+    });
+    expect(followup).toEqual({
+      id: "followup-task-1-open",
+      occurred_at: "2026-07-12T12:00:00.000Z",
+      type: "followup",
+      label: "Follow-up open",
+      actor: "AdminOps",
+      detail: "appointment confirmation due 2026-07-12T16:00:00.000Z",
+    });
+    expect(JSON.stringify([appointment, followup])).not.toContain("secret-token");
+    expect(JSON.stringify([appointment, followup])).not.toContain("agent@example.test");
+    expect(JSON.stringify([appointment, followup])).not.toContain("252-555-0100");
+    expect(JSON.stringify([appointment, followup])).not.toContain("Authorization");
   });
 });

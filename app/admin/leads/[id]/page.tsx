@@ -11,7 +11,18 @@ import {
   type AdminLeadStatus,
   type LeadTerminalReason,
 } from "../../../lib/adminLeadLifecycle";
-import { updateLeadStatusAction } from "../actions";
+import type {
+  AdminAppointmentRow,
+  AdminFollowupTaskRow,
+  AppointmentStatus,
+} from "../../../lib/adminAppointmentFollowupOps";
+import {
+  createAppointmentAction,
+  createFollowupTaskAction,
+  transitionAppointmentAction,
+  updateFollowupTaskAction,
+  updateLeadStatusAction,
+} from "../actions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -37,6 +48,21 @@ function statusActionMessage(code: string) {
   }
   if (code === "updated") return "Lifecycle updated.";
   return code.replaceAll("_", " ");
+}
+
+function operationMessage(code: string) {
+  const labels: Record<string, string> = {
+    updated: "Operation updated.",
+    appointment_created_audit_failed: "Appointment updated, but the audit event could not be recorded.",
+    appointment_updated_audit_failed: "Appointment updated, but the audit event could not be recorded.",
+    appointment_status_already_current: "Appointment already has that status.",
+    followup_status_already_current: "Follow-up already has that status.",
+    duplicate_active_appointment: "This lead already has an active appointment.",
+    appointment_start_required: "A scheduled, confirmed, or completed appointment needs a start time.",
+    appointment_end_before_start: "Appointment end time must be after the start time.",
+    invalid_timezone: "Choose a valid timezone.",
+  };
+  return labels[code] || code.replaceAll("_", " ");
 }
 
 function Badge({ children, tone = "gold" }: { children: ReactNode; tone?: "gold" | "ruby" | "cyan" }) {
@@ -161,15 +187,231 @@ function Timeline({ events }: { events: AdminLeadTimelineEvent[] }) {
   );
 }
 
+function AppointmentCreateForm({ leadId }: { leadId: string }) {
+  return (
+    <form action={createAppointmentAction} className="rounded-md border border-white/10 bg-white/[0.03] p-4">
+      <input type="hidden" name="lead_id" value={leadId} />
+      <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+          Status
+          <select name="status" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]">
+            <option value="requested">Requested</option>
+            <option value="scheduled">Scheduled</option>
+          </select>
+        </label>
+        <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+          Timezone
+          <input name="timezone" defaultValue="America/New_York" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
+        </label>
+        <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+          Starts
+          <input name="starts_at" type="datetime-local" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
+        </label>
+        <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+          Ends
+          <input name="ends_at" type="datetime-local" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
+        </label>
+        <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+          Location type
+          <select name="location_type" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]">
+            <option value="office">Office</option>
+            <option value="property">Property</option>
+            <option value="phone">Phone</option>
+            <option value="video">Video</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+          Safe location label
+          <input name="location_label" maxLength={120} className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
+        </label>
+      </div>
+      <button type="submit" className="mt-3 rounded-md border border-[#cda24a33] bg-[#cda24a14] px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#f4ead4]">
+        Create appointment
+      </button>
+    </form>
+  );
+}
+
+function appointmentNextStatuses(status: AppointmentStatus): AppointmentStatus[] {
+  const transitions: Record<AppointmentStatus, AppointmentStatus[]> = {
+    requested: ["scheduled", "canceled"],
+    scheduled: ["confirmed", "canceled", "reschedule_requested"],
+    confirmed: ["completed", "no_show", "canceled", "reschedule_requested"],
+    completed: [],
+    canceled: ["reschedule_requested"],
+    no_show: ["reschedule_requested"],
+    reschedule_requested: ["scheduled", "canceled"],
+  };
+  return transitions[status] || [];
+}
+
+function AppointmentCard({ leadId, appointment }: { leadId: string; appointment: AdminAppointmentRow }) {
+  return (
+    <article className="rounded-md border border-white/10 bg-[#080808] p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-[#f4ead4]">{appointment.status.replaceAll("_", " ")}</p>
+          <p className="mt-1 text-xs text-[#8f8778]">
+            {appointment.starts_at ? shortDate(appointment.starts_at) : "No scheduled time"} · {appointment.timezone}
+          </p>
+        </div>
+        <Badge tone={appointment.status === "completed" ? "cyan" : appointment.status === "canceled" || appointment.status === "no_show" ? "ruby" : "gold"}>
+          {appointment.location_type}
+        </Badge>
+      </div>
+      {appointment.location_label ? <p className="mt-3 text-xs text-[#d9ceb8]">{appointment.location_label}</p> : null}
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        {appointmentNextStatuses(appointment.status).map((status) => (
+          <form key={status} action={transitionAppointmentAction} className="rounded-md border border-white/10 bg-white/[0.02] p-3">
+            <input type="hidden" name="lead_id" value={leadId} />
+            <input type="hidden" name="appointment_id" value={appointment.id} />
+            <input type="hidden" name="status" value={status} />
+            <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
+            {status === "scheduled" ? (
+              <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+                Starts
+                <input required name="starts_at" type="datetime-local" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
+              </label>
+            ) : null}
+            {status === "canceled" ? (
+              <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+                Cancellation reason
+                <input name="cancellation_reason" maxLength={120} className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
+              </label>
+            ) : null}
+            <button className="w-full rounded-md border border-[#cda24a33] bg-[#cda24a14] px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#f4ead4]">
+              Mark {status.replaceAll("_", " ")}
+            </button>
+          </form>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function AppointmentPanel({ leadId, appointments }: { leadId: string; appointments: AdminAppointmentRow[] }) {
+  return (
+    <Panel title="Appointment operations">
+      <div className="space-y-3">
+        {appointments.length ? appointments.map((appointment) => (
+          <AppointmentCard key={appointment.id} leadId={leadId} appointment={appointment} />
+        )) : (
+          <p className="text-sm text-[#8f8778]">No appointment record yet.</p>
+        )}
+        <AppointmentCreateForm leadId={leadId} />
+      </div>
+    </Panel>
+  );
+}
+
+function FollowupCreateForm({ leadId }: { leadId: string }) {
+  return (
+    <form action={createFollowupTaskAction} className="rounded-md border border-white/10 bg-white/[0.03] p-4">
+      <input type="hidden" name="lead_id" value={leadId} />
+      <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+          Type
+          <select name="task_type" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]">
+            <option value="first_contact">First contact</option>
+            <option value="qualification_followup">Qualification follow-up</option>
+            <option value="appointment_confirmation">Appointment confirmation</option>
+            <option value="appointment_followup">Appointment follow-up</option>
+            <option value="document_followup">Document follow-up</option>
+            <option value="nurture_check_in">Nurture check-in</option>
+            <option value="manual_callback">Manual callback</option>
+          </select>
+        </label>
+        <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+          Priority
+          <select name="priority" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]">
+            <option value="normal">Normal</option>
+            <option value="high">High</option>
+            <option value="urgent">Urgent</option>
+            <option value="low">Low</option>
+          </select>
+        </label>
+        <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+          Due
+          <input required name="due_at" type="datetime-local" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
+        </label>
+        <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+          Safe note
+          <input name="note" maxLength={160} className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
+        </label>
+      </div>
+      <button className="mt-3 rounded-md border border-[#cda24a33] bg-[#cda24a14] px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#f4ead4]">
+        Add follow-up
+      </button>
+    </form>
+  );
+}
+
+function FollowupTaskCard({ leadId, task }: { leadId: string; task: AdminFollowupTaskRow }) {
+  return (
+    <article className="rounded-md border border-white/10 bg-[#080808] p-4">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <p className="text-sm font-semibold text-[#f4ead4]">{task.title}</p>
+          <p className="mt-1 text-xs text-[#8f8778]">{task.due_at ? `Due ${shortDate(task.due_at)}` : "No due date"} · {task.priority}</p>
+        </div>
+        <Badge tone={task.status === "done" ? "cyan" : task.status === "cancelled" ? "ruby" : "gold"}>{task.status}</Badge>
+      </div>
+      {task.status === "open" || task.status === "in_progress" ? (
+        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+          {(["complete", "cancel"] as const).map((action) => (
+            <form key={action} action={updateFollowupTaskAction}>
+              <input type="hidden" name="lead_id" value={leadId} />
+              <input type="hidden" name="task_id" value={task.id} />
+              <input type="hidden" name="task_action" value={action} />
+              <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
+              <button className="w-full rounded-md border border-[#cda24a33] bg-[#cda24a14] px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#f4ead4]">
+                {action}
+              </button>
+            </form>
+          ))}
+          <form action={updateFollowupTaskAction}>
+            <input type="hidden" name="lead_id" value={leadId} />
+            <input type="hidden" name="task_id" value={task.id} />
+            <input type="hidden" name="task_action" value="reschedule" />
+            <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
+            <input aria-label="New follow-up due time" required name="due_at" type="datetime-local" className="mb-2 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
+            <button className="w-full rounded-md border border-[#cda24a33] bg-[#cda24a14] px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#f4ead4]">
+              Reschedule
+            </button>
+          </form>
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
+function FollowupPanel({ leadId, tasks }: { leadId: string; tasks: AdminFollowupTaskRow[] }) {
+  return (
+    <Panel title="Follow-up tasks">
+      <div className="space-y-3">
+        {tasks.length ? tasks.map((task) => (
+          <FollowupTaskCard key={task.id} leadId={leadId} task={task} />
+        )) : (
+          <p className="text-sm text-[#8f8778]">No follow-up tasks yet.</p>
+        )}
+        <FollowupCreateForm leadId={leadId} />
+      </div>
+    </Panel>
+  );
+}
+
 export default async function AdminLeadDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ status_action?: string }>;
+  searchParams?: Promise<{ status_action?: string; appointment_action?: string; followup_action?: string }>;
 }) {
   const { id } = await params;
-  const emptyQuery: { status_action?: string } = {};
+  const emptyQuery: { status_action?: string; appointment_action?: string; followup_action?: string } = {};
   const [detail, query] = await Promise.all([
     loadAdminLeadDetail(id),
     searchParams ? searchParams : Promise.resolve(emptyQuery),
@@ -196,13 +438,28 @@ export default async function AdminLeadDetailPage({
               <Link href="/admin/reporting" className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]">
                 Reporting
               </Link>
+              <Link href="/admin/action-queue" className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]">
+                Action queue
+              </Link>
             </nav>
           </div>
-          {query.status_action ? (
-            <p className="mt-4 rounded-md border border-[#cda24a33] bg-[#cda24a14] p-3 text-sm text-[#f4ead4]">
-              Lifecycle result: {statusActionMessage(query.status_action)}
-            </p>
-          ) : null}
+          <div className="mt-4 space-y-2">
+            {query.status_action ? (
+              <p className="rounded-md border border-[#cda24a33] bg-[#cda24a14] p-3 text-sm text-[#f4ead4]">
+                Lifecycle result: {statusActionMessage(query.status_action)}
+              </p>
+            ) : null}
+            {query.appointment_action ? (
+              <p className="rounded-md border border-[#cda24a33] bg-[#cda24a14] p-3 text-sm text-[#f4ead4]">
+                Appointment result: {operationMessage(query.appointment_action)}
+              </p>
+            ) : null}
+            {query.followup_action ? (
+              <p className="rounded-md border border-[#cda24a33] bg-[#cda24a14] p-3 text-sm text-[#f4ead4]">
+                Follow-up result: {operationMessage(query.followup_action)}
+              </p>
+            ) : null}
+          </div>
         </header>
 
         {!lead ? (
@@ -240,6 +497,10 @@ export default async function AdminLeadDetailPage({
                   Server-side transition validation is authoritative. Same-state submissions are idempotent.
                 </p>
               </Panel>
+
+              <AppointmentPanel leadId={lead.id} appointments={detail.appointments} />
+
+              <FollowupPanel leadId={lead.id} tasks={detail.followupTasks} />
 
               <Panel title="Unified activity history">
                 <Timeline events={detail.timeline} />

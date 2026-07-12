@@ -12,7 +12,9 @@ export type AdminLeadTimelineEvent = {
     | "attribution"
     | "assignment"
     | "lifecycle"
-    | "notification";
+    | "notification"
+    | "appointment"
+    | "followup";
   label: string;
   actor: string | null;
   detail: string;
@@ -123,6 +125,44 @@ export function normalizeNotificationTimelineEvent(row: Record<string, unknown>)
   };
 }
 
+export function normalizeAppointmentTimelineEvent(row: Record<string, unknown>): AdminLeadTimelineEvent | null {
+  const id = text(row.id);
+  const status = text(row.status);
+  if (!id || !status) return null;
+  const occurredAt =
+    text(row.completed_at) ||
+    text(row.confirmed_at) ||
+    text(row.canceled_at) ||
+    text(row.updated_at) ||
+    text(row.created_at);
+  const startsAt = text(row.starts_at);
+  const timezone = text(row.timezone) || "local time";
+  return {
+    id: `appointment-${id}-${status}`,
+    occurred_at: occurredAt,
+    type: "appointment",
+    label: `Appointment ${status.replaceAll("_", " ")}`,
+    actor: "AdminOps",
+    detail: sanitizeTimelineText(startsAt ? `Starts ${startsAt} (${timezone})` : "Appointment state recorded"),
+  };
+}
+
+export function normalizeFollowupTimelineEvent(row: Record<string, unknown>): AdminLeadTimelineEvent | null {
+  const id = text(row.id);
+  const status = text(row.status);
+  if (!id || !status) return null;
+  const category = (text(row.category) || "followup").replace(/^followup:/, "").replaceAll("_", " ");
+  const dueAt = text(row.due_at);
+  return {
+    id: `followup-${id}-${status}`,
+    occurred_at: text(row.updated_at) || text(row.created_at) || dueAt,
+    type: "followup",
+    label: `Follow-up ${status.replaceAll("_", " ")}`,
+    actor: safeActor(row.created_by) || "AdminOps",
+    detail: sanitizeTimelineText(dueAt ? `${category} due ${dueAt}` : category),
+  };
+}
+
 export function buildLeadTimeline(input: {
   lead: {
     id: string;
@@ -132,6 +172,8 @@ export function buildLeadTimeline(input: {
   };
   auditRows?: Array<Record<string, unknown>>;
   notificationRows?: Array<Record<string, unknown>>;
+  appointmentRows?: Array<Record<string, unknown>>;
+  taskRows?: Array<Record<string, unknown>>;
 }): AdminLeadTimelineEvent[] {
   const events: AdminLeadTimelineEvent[] = [
     {
@@ -162,6 +204,16 @@ export function buildLeadTimeline(input: {
 
   for (const row of input.notificationRows || []) {
     events.push(normalizeNotificationTimelineEvent(row));
+  }
+
+  for (const row of input.appointmentRows || []) {
+    const event = normalizeAppointmentTimelineEvent(row);
+    if (event) events.push(event);
+  }
+
+  for (const row of input.taskRows || []) {
+    const event = normalizeFollowupTimelineEvent(row);
+    if (event) events.push(event);
   }
 
   return uniqueEvents(events).sort((a, b) => eventTime(b) - eventTime(a));

@@ -201,7 +201,19 @@ describe("AdminOps reporting view model", () => {
         phone: null,
         widget_session_id: null,
       },
-    ], NOW, 30, new Map([["agent-1", "Notification Sandbox Agent"]]));
+    ], NOW, 30, new Map([["agent-1", "Notification Sandbox Agent"]]), [
+      { id: "appt-requested", status: "requested", created_at: "2026-07-08T12:00:00.000Z" },
+      { id: "appt-scheduled", status: "scheduled", created_at: "2026-07-08T12:00:00.000Z" },
+      { id: "appt-confirmed", status: "confirmed", created_at: "2026-07-08T12:00:00.000Z" },
+      { id: "appt-completed", status: "completed", created_at: "2026-07-08T12:00:00.000Z" },
+      { id: "appt-no-show", status: "no_show", created_at: "2026-07-08T12:00:00.000Z" },
+      { id: "appt-canceled", status: "canceled", created_at: "2026-07-08T12:00:00.000Z" },
+    ], [
+      { id: "task-open", status: "open", due_at: "2026-07-08T15:00:00.000Z", category: "followup:appointment_confirmation" },
+      { id: "task-today", status: "open", due_at: "2026-07-08T18:00:00.000Z", category: "followup:manual_callback" },
+      { id: "task-done", status: "done", due_at: "2026-07-07T18:00:00.000Z", category: "followup:appointment_followup" },
+      { id: "task-cancel", status: "cancelled", due_at: "2026-07-07T18:00:00.000Z", category: "followup:nurture_check_in" },
+    ]);
 
     expect(summary.kpis).toEqual({
       leadsToday: 1,
@@ -258,6 +270,25 @@ describe("AdminOps reporting view model", () => {
     expect(summary.intents.find((row) => row.primary_intent === "sell")).toMatchObject({ count: 3 });
     expect(summary.timelines.map((row) => row.label)).toContain("Immediate / 0-30 days");
     expect(summary.hotLeads.map((row) => row.id)).toEqual(["hot"]);
+    expect(summary.appointmentOps).toEqual({
+      requested: 1,
+      scheduled: 4,
+      confirmed: 3,
+      completed: 1,
+      canceled: 1,
+      noShow: 1,
+      requestToScheduledRate: 80,
+      scheduledToCompletedRate: 25,
+      noShowRate: 33,
+    });
+    expect(summary.followupOps).toEqual({
+      open: 2,
+      overdue: 1,
+      dueToday: 2,
+      completed: 1,
+      cancelled: 1,
+      completionRate: 25,
+    });
   });
 
   it("keeps spam out of closed-lost sales outcomes and reports disqualification separately", () => {
@@ -334,7 +365,7 @@ describe("AdminOps reporting view model", () => {
     const summary = await loadAdminReportingSummary(90);
 
     expect(summary.configured).toBe(true);
-    expect(captured).toHaveLength(1);
+    expect(captured).toHaveLength(3);
     expect(captured[0].url.origin).toBe("https://fake.supabase.co");
     expect(captured[0].url.pathname).toBe("/rest/v1/leads");
     expect(captured[0].init?.method).toBeUndefined();
@@ -344,6 +375,11 @@ describe("AdminOps reporting view model", () => {
     expect(captured[0].url.searchParams.get("created_at")).toMatch(/^gte\./);
     expect(captured[0].url.searchParams.get("order")).toBe("created_at.desc");
     expect(captured[0].url.searchParams.get("limit")).toBe("1000");
+    expect(captured[1].url.pathname).toBe("/rest/v1/lead_appointments");
+    expect(captured[1].url.searchParams.get("select")).toBe("id,status,starts_at,lead_id,assigned_agent_id,created_at");
+    expect(captured[2].url.pathname).toBe("/rest/v1/tasks");
+    expect(captured[2].url.searchParams.get("select")).toBe("id,status,due_at,lead_id,agent_id,category,created_at");
+    expect(captured.map((call) => call.init?.method || "GET")).toEqual(["GET", "GET", "GET"]);
   });
 
   it("loads a bounded agent id-to-name map without contact fields", async () => {

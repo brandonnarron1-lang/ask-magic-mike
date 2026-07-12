@@ -55,6 +55,65 @@ The allocation page summarizes the notification outbox and links to `/admin/noti
 
 Notification delivery remains governed by the notification provider gates. Local and staging verification must keep external delivery disabled unless a later mission explicitly authorizes a controlled provider sandbox send.
 
+## Daily Action Queue
+
+Use `/admin/action-queue` as the first daily operating surface. It orders work by:
+
+1. overdue follow-ups,
+2. appointment requests or reschedule requests that are not scheduled,
+3. appointments occurring today or needing confirmation,
+4. stalled leads,
+5. retry-scheduled notification review.
+
+Each queue row links directly to the lead detail page and shows action type, owner, due time, current status, and the recommended next action. Appointment-specific rows suppress duplicate generic stalled-lead rows for the same lead so operators see the most precise action first.
+
+## Appointment Operations
+
+Appointment state is stored in `lead_appointments` and managed from `/admin/leads/[id]` through the protected AdminOps server boundary. The canonical states are:
+
+- `requested`
+- `scheduled`
+- `confirmed`
+- `completed`
+- `canceled`
+- `no_show`
+- `reschedule_requested`
+
+Allowed transitions are:
+
+- `requested` -> `scheduled` or `canceled`,
+- `scheduled` -> `confirmed`, `canceled`, or `reschedule_requested`,
+- `confirmed` -> `completed`, `no_show`, `canceled`, or `reschedule_requested`,
+- `canceled` -> `reschedule_requested`,
+- `no_show` -> `reschedule_requested`,
+- `reschedule_requested` -> `scheduled` or `canceled`.
+
+Same-state appointment submissions are idempotent. Scheduled, confirmed, and completed appointments require a valid start time. End time, when supplied, must be after start time. Timezone is validated server-side.
+
+Creating or updating an appointment writes an append-only audit event and synchronizes the lead lifecycle where appropriate:
+
+- requested or reschedule requested -> `appointment_requested`,
+- scheduled, confirmed, completed, or no-show -> `appointment_set`,
+- canceled preserves the lead lifecycle.
+
+External calendar writes are not active. The current boundary is local/AdminOps only; future calendar integration must use an adapter with explicit idempotency, failure classification, cancellation handling, and separate owner approval.
+
+## Follow-Up Tasks
+
+Follow-up work uses the existing `tasks` table with `category=followup:*`. Operators can create, complete, cancel, or reschedule follow-ups from `/admin/leads/[id]`.
+
+Supported follow-up types are:
+
+- first contact,
+- qualification follow-up,
+- appointment confirmation,
+- appointment follow-up,
+- document follow-up,
+- nurture check-in,
+- manual callback.
+
+Follow-ups have an owner when the lead is assigned, a due timestamp, priority, and status. Completed and canceled actions are idempotent. Rescheduling requires a valid due timestamp. Every mutation writes an append-only audit event when the audit store is available.
+
 ## Lead Lifecycle
 
 Lead lifecycle changes are made from `/admin/leads` or `/admin/leads/[id]` and are enforced by the protected AdminOps server action. The canonical statuses are:
@@ -123,6 +182,8 @@ Timeline events are normalized from:
 - source and campaign attribution,
 - assignment and reassignment audit events,
 - lifecycle audit events,
+- appointment events,
+- follow-up task events,
 - notification outbox state changes.
 
 Timeline metadata is intentionally concise. It must not include raw provider payloads, authorization headers, credentials, or full contact values.
@@ -164,6 +225,13 @@ The reporting denominators are:
 - close rate: converted leads divided by converted plus closed-lost (`dead`) leads,
 - disqualification rate: spam or disqualified leads divided by all captured leads.
 
+Appointment and follow-up reporting uses:
+
+- request-to-scheduled rate: scheduled-or-later appointments divided by requested plus scheduled-or-later appointments,
+- scheduled-to-completed rate: completed appointments divided by scheduled-or-later appointments,
+- no-show rate: no-show appointments divided by confirmed-or-later appointments,
+- follow-up completion rate: completed follow-up tasks divided by all follow-up tasks in the selected window.
+
 These are operational triage measures, not production revenue claims. Empty windows should render explicit empty states instead of fabricated metrics.
 
 ## Local Verification
@@ -183,6 +251,7 @@ pnpm exec vitest run \
   tests/adminops/admin-agent-allocation-actions.test.ts \
   tests/adminops/admin-agent-allocation-view.test.ts \
   tests/adminops/admin-notification-guards.test.ts \
+  tests/adminops/admin-appointment-followup-ops.test.ts \
   tests/adminops/admin-lead-actions.test.ts \
   tests/adminops/admin-lead-timeline.test.ts \
   tests/adminops/admin-reporting-view.test.ts
