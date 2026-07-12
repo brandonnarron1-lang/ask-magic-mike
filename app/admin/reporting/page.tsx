@@ -44,6 +44,13 @@ function shortDate(value: string | null) {
   }).format(date);
 }
 
+function contactPresence(row: AdminReportingLeadRow) {
+  if (row.email && row.phone) return "Email and phone present";
+  if (row.email) return "Email present";
+  if (row.phone) return "Phone present";
+  return "Not provided";
+}
+
 function MetricCard({
   label,
   value,
@@ -148,7 +155,10 @@ function AgentPerformanceTable({ rows }: { rows: AdminAgentPerformanceGroup[] })
         <tbody className="divide-y divide-white/10 text-[#f4ead4]">
           {rows.length ? rows.map((row) => (
             <tr key={row.agent_id}>
-              <td className="max-w-[18rem] py-3 pr-4 font-mono text-xs text-[#d9ceb8]">{row.agent_id}</td>
+              <td className="max-w-[18rem] py-3 pr-4 text-[#d9ceb8]">
+                <span className="block font-semibold text-[#f4ead4]">{row.agent_name}</span>
+                <span className="mt-1 block font-mono text-[11px] text-[#8f8778]">{row.agent_id}</span>
+              </td>
               <td className="py-3 pr-4">{row.assigned}</td>
               <td className="py-3 pr-4">{row.qualified}</td>
               <td className="py-3 pr-4">{row.appointments}</td>
@@ -188,7 +198,7 @@ function HotLeadList({ rows }: { rows: AdminReportingLeadRow[] }) {
             </div>
             <div>
               <dt className="uppercase tracking-[0.14em] text-[#8f8778]">Contact</dt>
-              <dd className="mt-1 text-[#d9ceb8]">{row.phone || row.email || "Not provided"}</dd>
+              <dd className="mt-1 text-[#d9ceb8]">{contactPresence(row)}</dd>
             </div>
             <div>
               <dt className="uppercase tracking-[0.14em] text-[#8f8778]">Type</dt>
@@ -291,7 +301,7 @@ export default async function AdminReportingPage({
           <MetricCard
             label="Appointment rate"
             value={`${summary.rates.appointmentRate}%`}
-            note="Appointments set/requested / qualified-or-later leads"
+            note="Appointment requested or set / qualified-or-later leads"
           />
           <MetricCard
             label="Conversion rate"
@@ -301,12 +311,25 @@ export default async function AdminReportingPage({
           <MetricCard
             label="Close rate"
             value={`${summary.rates.closeRate}%`}
-            note="Converted / converted plus lost/disqualified"
+            note="Converted / converted plus closed-lost leads"
           />
+          <MetricCard
+            label="Disqualification rate"
+            value={`${summary.rates.disqualificationRate}%`}
+            note="Spam or disqualified leads / all captured leads"
+          />
+        </div>
+
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
           <MetricCard
             label="Stalled leads"
             value={summary.stalledLeadCount}
             note="Operational stalls from SLA and lifecycle thresholds"
+          />
+          <MetricCard
+            label="Lost / disqualified"
+            value={summary.funnel.lostDisqualified}
+            note="Closed-lost plus spam or disqualified records"
           />
         </div>
 

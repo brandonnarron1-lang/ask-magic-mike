@@ -7,6 +7,7 @@ import {
   isClosedLost,
   isQualified,
   isSpamOrTest,
+  loadAgentNameMap,
   loadAdminReportingSummary,
   normalizeReportingLeadRow,
   summarizeReportingRows,
@@ -94,7 +95,7 @@ describe("AdminOps reporting view model", () => {
     expect(isQualified(qualified)).toBe(true);
     expect(isAppointment(appointment)).toBe(true);
     expect(isConverted(converted)).toBe(true);
-    expect(isClosedLost(spam)).toBe(true);
+    expect(isClosedLost(spam)).toBe(false);
     expect(isSpamOrTest(spam)).toBe(true);
   });
 
@@ -200,7 +201,7 @@ describe("AdminOps reporting view model", () => {
         phone: null,
         widget_session_id: null,
       },
-    ], NOW, 30);
+    ], NOW, 30, new Map([["agent-1", "Notification Sandbox Agent"]]));
 
     expect(summary.kpis).toEqual({
       leadsToday: 1,
@@ -212,15 +213,16 @@ describe("AdminOps reporting view model", () => {
       captured: 4,
       contacted: 3,
       qualified: 3,
-      appointment: 1,
+      appointment: 2,
       converted: 1,
       lostDisqualified: 1,
     });
     expect(summary.rates).toEqual({
       qualificationRate: 75,
-      appointmentRate: 33,
+      appointmentRate: 67,
       conversionRate: 25,
-      closeRate: 50,
+      closeRate: 100,
+      disqualificationRate: 20,
     });
     expect(summary.stalledLeadCount).toBe(3);
     expect(summary.statusBuckets).toMatchObject({
@@ -239,9 +241,10 @@ describe("AdminOps reporting view model", () => {
     expect(summary.campaigns.map((row) => row.label)).toContain("floating");
     expect(summary.agentPerformance).toEqual([{
       agent_id: "agent-1",
+      agent_name: "Notification Sandbox Agent",
       assigned: 1,
       qualified: 1,
-      appointments: 0,
+      appointments: 1,
       converted: 1,
       closedLost: 0,
       stalled: 0,
@@ -255,6 +258,43 @@ describe("AdminOps reporting view model", () => {
     expect(summary.intents.find((row) => row.primary_intent === "sell")).toMatchObject({ count: 3 });
     expect(summary.timelines.map((row) => row.label)).toContain("Immediate / 0-30 days");
     expect(summary.hotLeads.map((row) => row.id)).toEqual(["hot"]);
+  });
+
+  it("keeps spam out of closed-lost sales outcomes and reports disqualification separately", () => {
+    const summary = summarizeReportingRows([
+      normalizeReportingLeadRow({ id: "won", status: "converted", assigned_agent_id: "agent-1" }),
+      normalizeReportingLeadRow({ id: "lost", status: "dead", assigned_agent_id: "agent-1" }),
+      normalizeReportingLeadRow({ id: "spam", status: "spam", assigned_agent_id: "agent-1" }),
+    ], NOW, 30, new Map([["agent-1", "Known Agent"]]));
+
+    expect(summary.rates.closeRate).toBe(50);
+    expect(summary.rates.disqualificationRate).toBe(33);
+    expect(summary.agentPerformance[0]).toMatchObject({
+      agent_name: "Known Agent",
+      closedLost: 1,
+      assigned: 2,
+    });
+  });
+
+  it("uses agent names with a safe fallback and collapses duplicate agent ids", () => {
+    const summary = summarizeReportingRows([
+      normalizeReportingLeadRow({ id: "a", status: "qualified", assigned_agent_id: "agent-known" }),
+      normalizeReportingLeadRow({ id: "b", status: "converted", assigned_agent_id: "agent-known" }),
+      normalizeReportingLeadRow({ id: "c", status: "qualified", assigned_agent_id: "agent-missing" }),
+    ], NOW, 30, new Map([["agent-known", "Notification Sandbox Agent"]]));
+
+    expect(summary.agentPerformance).toEqual([
+      expect.objectContaining({
+        agent_id: "agent-known",
+        agent_name: "Notification Sandbox Agent",
+        assigned: 2,
+      }),
+      expect.objectContaining({
+        agent_id: "agent-missing",
+        agent_name: "Unknown agent",
+        assigned: 1,
+      }),
+    ]);
   });
 
   it("labels timeline buckets", () => {
@@ -304,6 +344,37 @@ describe("AdminOps reporting view model", () => {
     expect(captured[0].url.searchParams.get("created_at")).toMatch(/^gte\./);
     expect(captured[0].url.searchParams.get("order")).toBe("created_at.desc");
     expect(captured[0].url.searchParams.get("limit")).toBe("1000");
+  });
+
+  it("loads a bounded agent id-to-name map without contact fields", async () => {
+    const captured: Array<{ url: URL; init?: RequestInit }> = [];
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      captured.push({ url: new URL(String(url)), init });
+      return {
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        json: async () => [
+          { id: "agent-1", name: "Notification Sandbox Agent" },
+          { id: "agent-1", name: "Duplicate Ignored" },
+        ],
+      } as Response;
+    }) as unknown as typeof fetch;
+
+    const ids = Array.from({ length: 105 }, (_unused, index) => `agent-${index + 1}`);
+    const map = await loadAgentNameMap({
+      supabaseUrl: "https://fake.supabase.co",
+      serviceKey: "fake-service-role",
+      agentIds: ["agent-1", "agent-1", ...ids],
+    });
+
+    expect(map.get("agent-1")).toBe("Notification Sandbox Agent");
+    expect(captured).toHaveLength(1);
+    expect(captured[0].url.searchParams.get("select")).toBe("id,name");
+    expect(captured[0].url.searchParams.get("limit")).toBe("100");
+    expect(captured[0].url.searchParams.get("id")?.split(",")).toHaveLength(100);
+    expect(captured[0].url.toString()).not.toContain("email");
+    expect(captured[0].url.toString()).not.toContain("phone");
   });
 
   it("returns a safe admin error when the read query fails", async () => {

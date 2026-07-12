@@ -76,6 +76,20 @@ The lifecycle action reloads the current lead status, validates the requested tr
 
 Same-state submissions are idempotent. Terminal success and loss states do not regress except for the explicit restore-to-new path from `dead`, `spam`, or `escalated`.
 
+Lifecycle field cleanup is destination-specific:
+
+- restore to `new`: clears `conversion_stage`, `converted_at`, `closed_won_at`, `closed_lost_at`, `closed_lost_reason`, and `appointment_requested`; capture and assignment history are preserved,
+- move to `contacted`: sets `last_contacted_at` and `conversion_stage=contacted`; success/loss fields are cleared,
+- move to `qualified`: sets `conversion_stage=qualified`; success/loss fields are cleared,
+- move to `appointment_requested`: sets `appointment_requested=true` and `conversion_stage=appointment_requested`; success/loss fields are cleared,
+- move to `appointment_set`: sets `appointment_requested=true` and `conversion_stage=appointment_set`; success/loss fields are cleared,
+- move to `nurture` or `escalated`: sets the matching `conversion_stage`; success/loss fields are cleared,
+- move to `converted`: sets `converted_at`, `closed_won_at`, and `conversion_stage=converted`; loss fields are cleared,
+- move to `dead`: sets `closed_lost_at`, `closed_lost_reason`, and `conversion_stage=dead`; success fields are cleared,
+- move to `spam`: sets `closed_lost_at`, `closed_lost_reason`, and `conversion_stage=disqualified`; success fields and `appointment_requested` are cleared.
+
+If the lead update succeeds but the audit write fails, the action returns degraded success with `lifecycle_updated_audit_failed` and the UI shows: `Lifecycle updated, but the audit event could not be recorded.` The lead update is not falsely reported as failed, but audit completeness is not guaranteed for that operation.
+
 Closed-lost reasons use the structured lost reason set:
 
 - chose another agent
@@ -96,6 +110,8 @@ Spam or disqualified records use the structured disqualification reason set:
 - duplicate record
 - internal test
 - other
+
+`dead` accepts only lost reasons. `spam` accepts only disqualification reasons. Non-terminal statuses reject submitted terminal reasons.
 
 ## Lead Detail And Timeline
 
@@ -143,9 +159,10 @@ The allocation and reporting views use the current lead store to show:
 The reporting denominators are:
 
 - qualification rate: qualified-or-later leads divided by non-spam captured leads,
-- appointment rate: appointment-set-or-later leads divided by qualified-or-later leads,
+- appointment rate: appointment-requested-or-later leads divided by qualified-or-later leads,
 - conversion rate: converted leads divided by non-spam captured leads,
-- close rate: converted leads divided by converted plus lost or disqualified leads.
+- close rate: converted leads divided by converted plus closed-lost (`dead`) leads,
+- disqualification rate: spam or disqualified leads divided by all captured leads.
 
 These are operational triage measures, not production revenue claims. Empty windows should render explicit empty states instead of fabricated metrics.
 
@@ -156,6 +173,7 @@ Use the local staging harness before reviewing AdminOps changes:
 ```bash
 pnpm run staging:local:up
 pnpm run staging:local:verify
+pnpm run staging:local:fixtures
 ```
 
 Then run the focused AdminOps suites:
@@ -169,6 +187,14 @@ pnpm exec vitest run \
   tests/adminops/admin-lead-timeline.test.ts \
   tests/adminops/admin-reporting-view.test.ts
 ```
+
+Clean up exact local fixtures when browser checks are complete:
+
+```bash
+pnpm run staging:local:fixtures:cleanup
+```
+
+The fixture cleanup never truncates tables. Audit rows are append-only by schema policy and may be retained as local evidence even when exact cleanup removes fixture sessions, agents, leads, attribution, and notification rows.
 
 Stop local Supabase when verification is complete:
 

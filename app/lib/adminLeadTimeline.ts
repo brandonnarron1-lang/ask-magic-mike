@@ -30,6 +30,27 @@ function metadata(value: unknown): Record<string, unknown> {
     : {};
 }
 
+function sanitizeTimelineText(value: string | null, fallback = "Event recorded") {
+  if (!value) return fallback;
+  return value
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[redacted email]")
+    .replace(/\+?1?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b/g, "[redacted phone]")
+    .replace(/authorization\s*:\s*bearer\s+[a-z0-9._-]+/gi, "[redacted authorization]")
+    .replace(/service[_-]?role[a-z0-9._-]*/gi, "[redacted credential]")
+    .replace(/raw[_-]?provider[_-]?payload/gi, "[redacted provider payload]")
+    .replace(/\s*(\[redacted (?:email|phone|authorization|credential|provider payload)\])/g, " $1")
+    .replace(/\s{2,}/g, " ")
+    .trim()
+    .slice(0, 220);
+}
+
+function safeActor(value: unknown) {
+  const actor = text(value);
+  if (!actor) return null;
+  if (sanitizeTimelineText(actor, "") !== actor) return "AdminOps";
+  return actor.slice(0, 80);
+}
+
 function eventTime(event: AdminLeadTimelineEvent) {
   if (!event.occurred_at) return 0;
   const time = new Date(event.occurred_at).getTime();
@@ -63,8 +84,8 @@ export function normalizeAuditTimelineEvent(row: Record<string, unknown>): Admin
       occurred_at: occurredAt,
       type: "lifecycle",
       label: `Lifecycle changed to ${lifecycleStageLabel(status)}`,
-      actor: text(row.actor),
-      detail: reason ? `Reason: ${reason.replaceAll("_", " ")}` : "Status transition recorded",
+      actor: safeActor(row.actor),
+      detail: sanitizeTimelineText(reason ? `Reason: ${reason.replaceAll("_", " ")}` : "Status transition recorded"),
     };
   }
 
@@ -79,8 +100,8 @@ export function normalizeAuditTimelineEvent(row: Record<string, unknown>): Admin
           : action === "lead.unassigned"
             ? "Lead unassigned"
             : "Lead assigned",
-      actor: text(row.actor),
-      detail: text(afterState.assignment_status) || text(meta.assignment_action) || "Assignment event",
+      actor: safeActor(row.actor),
+      detail: sanitizeTimelineText(text(afterState.assignment_status) || text(meta.assignment_action), "Assignment event"),
     };
   }
 
@@ -97,8 +118,8 @@ export function normalizeNotificationTimelineEvent(row: Record<string, unknown>)
     occurred_at: occurredAt,
     type: "notification",
     label: `Notification ${status.replaceAll("_", " ")}`,
-    actor: text(row.provider) || null,
-    detail: `${notificationType.replaceAll("_", " ")} / ${channel}`,
+    actor: safeActor(row.provider),
+    detail: sanitizeTimelineText(`${notificationType.replaceAll("_", " ")} / ${channel}`),
   };
 }
 
@@ -119,7 +140,7 @@ export function buildLeadTimeline(input: {
       type: "captured",
       label: "Lead captured",
       actor: "public_capture",
-      detail: input.lead.lead_source_surface,
+      detail: sanitizeTimelineText(input.lead.lead_source_surface),
     },
   ];
 
@@ -130,7 +151,7 @@ export function buildLeadTimeline(input: {
       type: "attribution",
       label: "Attribution captured",
       actor: "source_attribution",
-      detail: input.lead.attribution_summary,
+      detail: sanitizeTimelineText(input.lead.attribution_summary),
     });
   }
 

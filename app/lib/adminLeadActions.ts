@@ -1,11 +1,12 @@
 import {
   ADMIN_LEAD_STATUS_ACTIONS,
   ADMIN_LEAD_STATUSES,
+  buildLeadLifecyclePatch,
   type AdminLeadStatus,
   isAdminLeadStatus,
   isAllowedLeadTransition,
-  isTerminalReason,
   type LeadTerminalReason,
+  validateTerminalReasonForStatus,
 } from "./adminLeadLifecycle";
 
 export {
@@ -35,39 +36,6 @@ function text(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const cleaned = value.trim();
   return cleaned || null;
-}
-
-function lifecyclePatch(status: AdminLeadStatus, nowIso: string, reason: LeadTerminalReason | null) {
-  const patch: Record<string, unknown> = { status };
-  if (status === "contacted") patch.last_contacted_at = nowIso;
-  if (status === "qualified") patch.conversion_stage = "qualified";
-  if (status === "appointment_requested") {
-    patch.appointment_requested = true;
-    patch.conversion_stage = "appointment_requested";
-  }
-  if (status === "appointment_set") {
-    patch.appointment_requested = true;
-    patch.conversion_stage = "appointment_set";
-  }
-  if (status === "nurture") patch.conversion_stage = "nurture";
-  if (status === "converted") {
-    patch.converted_at = nowIso;
-    patch.closed_won_at = nowIso;
-    patch.conversion_stage = "converted";
-  }
-  if (status === "dead") {
-    patch.closed_lost_at = nowIso;
-    patch.closed_lost_reason = reason || "other";
-    patch.conversion_stage = "dead";
-  }
-  if (status === "spam") {
-    patch.closed_lost_reason = reason || "internal_test";
-    patch.conversion_stage = "disqualified";
-  }
-  if (status === "new") {
-    patch.conversion_stage = null;
-  }
-  return patch;
 }
 
 async function writeLifecycleAuditEvent(input: {
@@ -133,7 +101,11 @@ export async function updateAdminLeadStatus(
     return { ok: false, statusCode: 400, error: "invalid_status" };
   }
 
-  const reason = isTerminalReason(options.reason || null) ? options.reason as LeadTerminalReason : null;
+  const reasonValidation = validateTerminalReasonForStatus(status, options.reason || null);
+  if (!reasonValidation.ok) {
+    return { ok: false, statusCode: 400, error: reasonValidation.error };
+  }
+  const reason: LeadTerminalReason | null = reasonValidation.reason;
   const config = configured();
   if (!config) {
     return { ok: false, statusCode: 503, error: "lead_store_not_configured" };
@@ -188,7 +160,7 @@ export async function updateAdminLeadStatus(
       "Content-Type": "application/json",
       Prefer: "return=representation",
     },
-    body: JSON.stringify(lifecyclePatch(status, nowIso, reason)),
+    body: JSON.stringify(buildLeadLifecyclePatch(status, { nowIso, reason })),
     cache: "no-store",
   });
 
@@ -215,7 +187,7 @@ export async function updateAdminLeadStatus(
     occurredAt: nowIso,
   });
   if (!audit.ok) {
-    return { ok: true, status, warning: audit.error };
+    return { ok: true, status, warning: "lifecycle_updated_audit_failed" };
   }
 
   return { ok: true, status };

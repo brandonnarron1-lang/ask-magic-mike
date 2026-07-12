@@ -40,6 +40,17 @@ function shortDate(value: string | null) {
   }).format(date);
 }
 
+function statusActionMessage(code: string) {
+  if (code === "lifecycle_updated_audit_failed") {
+    return "Lifecycle updated, but the audit event could not be recorded.";
+  }
+  if (code === "invalid_terminal_reason") {
+    return "Choose the required reason for that terminal lifecycle action.";
+  }
+  if (code === "updated") return "Lifecycle updated.";
+  return code.replaceAll("_", " ");
+}
+
 function Badge({ children }: { children: ReactNode }) {
   return (
     <span className="rounded-full border border-[#cda24a33] bg-[#cda24a14] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#e2c06f]">
@@ -325,7 +336,7 @@ export default async function AdminLeadsPage({
           </div>
           {params.status_action ? (
             <p className="mt-4 rounded-md border border-[#cda24a33] bg-[#cda24a14] p-3 text-sm text-[#f4ead4]">
-              Status action result: {params.status_action.replaceAll("_", " ")}
+              Status action result: {statusActionMessage(params.status_action)}
             </p>
           ) : null}
         </header>

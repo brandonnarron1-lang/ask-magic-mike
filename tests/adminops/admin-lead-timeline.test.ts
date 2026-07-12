@@ -29,14 +29,15 @@ describe("AdminOps lead timeline", () => {
     const assignment = normalizeAuditTimelineEvent({
       id: "audit-assign",
       created_at: "2026-07-12T11:00:00.000Z",
-      actor: "system/admin_basic_auth",
+      actor: "agent@example.test",
       action: "lead.assigned",
       before_state: { assigned_agent_id: null },
-      after_state: { assigned_agent_id: "agent-1", assignment_status: "assigned" },
-      metadata: { assignment_action: "assigned" },
+      after_state: { assigned_agent_id: "agent-1", assignment_status: "assigned to 2525550100" },
+      metadata: { assignment_action: "assigned", Authorization: "Bearer service-role-value" },
     });
     expect(assignment?.label).toBe("Lead assigned");
-    expect(assignment?.detail).toBe("assigned");
+    expect(assignment?.actor).toBe("AdminOps");
+    expect(assignment?.detail).toBe("assigned to [redacted phone]");
 
     const notification = normalizeNotificationTimelineEvent({
       id: "notification-1",
@@ -44,7 +45,7 @@ describe("AdminOps lead timeline", () => {
       status: "retry_scheduled",
       type: "agent_assignment",
       channel: "email",
-      provider: "console",
+      provider: "authorization: Bearer service-role-value",
       provider_response: { raw: "not shown" },
     });
     expect(notification).toEqual({
@@ -52,7 +53,7 @@ describe("AdminOps lead timeline", () => {
       occurred_at: "2026-07-12T11:05:00.000Z",
       type: "notification",
       label: "Notification retry scheduled",
-      actor: "console",
+      actor: "AdminOps",
       detail: "agent assignment / email",
     });
     expect(JSON.stringify([lifecycle, assignment, notification])).not.toContain("example.test");
@@ -65,8 +66,8 @@ describe("AdminOps lead timeline", () => {
       lead: {
         id: "lead-1",
         created_at: "2026-07-10T12:00:00.000Z",
-        attribution_summary: "widget / website / campaign",
-        lead_source_surface: "widget",
+        attribution_summary: "widget / jane@example.test / 2525550100 / Authorization: Bearer service-role-value",
+        lead_source_surface: "widget jane@example.test",
       },
       auditRows: [
         {
@@ -94,5 +95,8 @@ describe("AdminOps lead timeline", () => {
       "Lead captured",
       "Attribution captured",
     ]);
+    expect(JSON.stringify(timeline)).not.toContain("jane@example.test");
+    expect(JSON.stringify(timeline)).not.toContain("2525550100");
+    expect(JSON.stringify(timeline)).not.toContain("service-role");
   });
 });

@@ -6,8 +6,12 @@ import {
   updateAdminLeadStatus,
 } from "../../app/lib/adminLeadActions";
 import {
+  buildLeadLifecyclePatch,
   buildStalledLeadSignals,
+  DISQUALIFIED_REASONS,
   isAllowedLeadTransition,
+  LOST_REASONS,
+  validateTerminalReasonForStatus,
 } from "../../app/lib/adminLeadLifecycle";
 
 const ORIGINAL_FETCH = globalThis.fetch;
@@ -73,6 +77,90 @@ describe("AdminOps lead status actions", () => {
     expect(isAllowedLeadTransition("dead", "new")).toBe(true);
   });
 
+  it("defines an explicit cleanup patch for every destination lifecycle status", () => {
+    const nowIso = "2026-07-12T12:00:00.000Z";
+    const patches = Object.fromEntries(
+      ADMIN_LEAD_STATUSES.map((status) => [
+        status,
+        buildLeadLifecyclePatch(status, {
+          nowIso,
+          reason: status === "dead" ? "timing_changed" : status === "spam" ? "internal_test" : null,
+        }),
+      ]),
+    );
+
+    expect(Object.keys(patches)).toEqual(ADMIN_LEAD_STATUSES);
+    expect(patches.new).toMatchObject({
+      status: "new",
+      conversion_stage: null,
+      converted_at: null,
+      closed_won_at: null,
+      closed_lost_at: null,
+      closed_lost_reason: null,
+      appointment_requested: false,
+    });
+    expect(patches.dead).toMatchObject({
+      status: "dead",
+      closed_lost_at: nowIso,
+      closed_lost_reason: "timing_changed",
+      conversion_stage: "dead",
+      converted_at: null,
+      closed_won_at: null,
+    });
+    expect(patches.spam).toMatchObject({
+      status: "spam",
+      closed_lost_at: nowIso,
+      closed_lost_reason: "internal_test",
+      conversion_stage: "disqualified",
+      converted_at: null,
+      closed_won_at: null,
+      appointment_requested: false,
+    });
+    expect(patches.converted).toMatchObject({
+      status: "converted",
+      converted_at: nowIso,
+      closed_won_at: nowIso,
+      conversion_stage: "converted",
+      closed_lost_at: null,
+      closed_lost_reason: null,
+    });
+    expect(patches.appointment_requested).toMatchObject({
+      appointment_requested: true,
+      conversion_stage: "appointment_requested",
+    });
+    expect(patches.appointment_set).toMatchObject({
+      appointment_requested: true,
+      conversion_stage: "appointment_set",
+    });
+  });
+
+  it("validates destination-specific terminal reasons", () => {
+    expect(validateTerminalReasonForStatus("dead", LOST_REASONS[0])).toEqual({
+      ok: true,
+      reason: LOST_REASONS[0],
+    });
+    expect(validateTerminalReasonForStatus("spam", DISQUALIFIED_REASONS[0])).toEqual({
+      ok: true,
+      reason: DISQUALIFIED_REASONS[0],
+    });
+    expect(validateTerminalReasonForStatus("dead", DISQUALIFIED_REASONS[0])).toEqual({
+      ok: false,
+      error: "invalid_terminal_reason",
+    });
+    expect(validateTerminalReasonForStatus("spam", LOST_REASONS[0])).toEqual({
+      ok: false,
+      error: "invalid_terminal_reason",
+    });
+    expect(validateTerminalReasonForStatus("qualified", LOST_REASONS[0])).toEqual({
+      ok: false,
+      error: "invalid_terminal_reason",
+    });
+    expect(validateTerminalReasonForStatus("dead", null)).toEqual({
+      ok: false,
+      error: "invalid_terminal_reason",
+    });
+  });
+
   it("updates lifecycle status with optimistic concurrency and writes an audit event", async () => {
     const captured: Array<{ url: string; init?: RequestInit; body: Record<string, unknown> }> = [];
     globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
@@ -110,8 +198,12 @@ describe("AdminOps lead status actions", () => {
     expect(captured[1].url).toBe("https://fake.supabase.co/rest/v1/leads?id=eq." + LEAD_ID + "&status=eq.qualified&select=id%2Cstatus");
     expect(captured[1].body).toEqual({
       status: "spam",
+      appointment_requested: false,
+      closed_lost_at: "2026-07-12T12:00:00.000Z",
       closed_lost_reason: "internal_test",
       conversion_stage: "disqualified",
+      converted_at: null,
+      closed_won_at: null,
     });
     expect(captured[1].body).not.toHaveProperty("address_raw");
     expect(captured[1].body).not.toHaveProperty("email");
@@ -139,6 +231,33 @@ describe("AdminOps lead status actions", () => {
       ok: false,
       statusCode: 400,
       error: "invalid_status",
+    });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("rejects missing or mismatched terminal reasons before patching", async () => {
+    const fetchSpy = vi.fn();
+    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+
+    await expect(updateAdminLeadStatus(LEAD_ID, "dead")).resolves.toEqual({
+      ok: false,
+      statusCode: 400,
+      error: "invalid_terminal_reason",
+    });
+    await expect(updateAdminLeadStatus(LEAD_ID, "dead", { reason: "internal_test" })).resolves.toEqual({
+      ok: false,
+      statusCode: 400,
+      error: "invalid_terminal_reason",
+    });
+    await expect(updateAdminLeadStatus(LEAD_ID, "spam", { reason: "timing_changed" })).resolves.toEqual({
+      ok: false,
+      statusCode: 400,
+      error: "invalid_terminal_reason",
+    });
+    await expect(updateAdminLeadStatus(LEAD_ID, "qualified", { reason: "timing_changed" })).resolves.toEqual({
+      ok: false,
+      statusCode: 400,
+      error: "invalid_terminal_reason",
     });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -218,6 +337,38 @@ describe("AdminOps lead status actions", () => {
       ok: false,
       statusCode: 409,
       error: "concurrent_status_update",
+    });
+  });
+
+  it("reports lifecycle update success with a dedicated audit warning when audit write fails", async () => {
+    globalThis.fetch = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      if (!init?.method) {
+        return {
+          ok: true,
+          status: 200,
+          statusText: "OK",
+          json: async () => [{ id: LEAD_ID, status: "contacted" }],
+        } as Response;
+      }
+      if (init.method === "POST") {
+        return {
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        } as Response;
+      }
+      return {
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        json: async () => [{ id: LEAD_ID, status: "qualified" }],
+      } as Response;
+    }) as unknown as typeof fetch;
+
+    await expect(updateAdminLeadStatus(LEAD_ID, "qualified")).resolves.toEqual({
+      ok: true,
+      status: "qualified",
+      warning: "lifecycle_updated_audit_failed",
     });
   });
 

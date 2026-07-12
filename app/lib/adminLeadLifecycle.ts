@@ -49,6 +49,23 @@ export type LeadTerminalReason =
   | (typeof LOST_REASONS)[number]
   | (typeof DISQUALIFIED_REASONS)[number];
 
+type LifecycleFieldAction = "set" | "preserve" | "clear";
+
+type LifecycleFieldBehavior = {
+  appointment_requested: LifecycleFieldAction;
+  last_contacted_at: LifecycleFieldAction;
+  conversion_stage: LifecycleFieldAction;
+  converted_at: LifecycleFieldAction;
+  closed_won_at: LifecycleFieldAction;
+  closed_lost_at: LifecycleFieldAction;
+  closed_lost_reason: LifecycleFieldAction;
+};
+
+type LifecyclePatchContext = {
+  nowIso: string;
+  reason: LeadTerminalReason | null;
+};
+
 export const TERMINAL_REASON_LABELS: Record<LeadTerminalReason, string> = {
   chose_another_agent: "Chose another agent",
   timing_changed: "Timing changed",
@@ -64,6 +81,132 @@ export const TERMINAL_REASON_LABELS: Record<LeadTerminalReason, string> = {
   duplicate_record: "Duplicate record",
   internal_test: "Internal test",
   other: "Other",
+};
+
+export const LEAD_LIFECYCLE_FIELD_CLEANUP: Record<AdminLeadStatus, LifecycleFieldBehavior> = {
+  new: {
+    appointment_requested: "clear",
+    last_contacted_at: "preserve",
+    conversion_stage: "clear",
+    converted_at: "clear",
+    closed_won_at: "clear",
+    closed_lost_at: "clear",
+    closed_lost_reason: "clear",
+  },
+  scored: {
+    appointment_requested: "preserve",
+    last_contacted_at: "preserve",
+    conversion_stage: "set",
+    converted_at: "clear",
+    closed_won_at: "clear",
+    closed_lost_at: "clear",
+    closed_lost_reason: "clear",
+  },
+  assigned: {
+    appointment_requested: "preserve",
+    last_contacted_at: "preserve",
+    conversion_stage: "set",
+    converted_at: "clear",
+    closed_won_at: "clear",
+    closed_lost_at: "clear",
+    closed_lost_reason: "clear",
+  },
+  contacted: {
+    appointment_requested: "preserve",
+    last_contacted_at: "set",
+    conversion_stage: "set",
+    converted_at: "clear",
+    closed_won_at: "clear",
+    closed_lost_at: "clear",
+    closed_lost_reason: "clear",
+  },
+  qualified: {
+    appointment_requested: "preserve",
+    last_contacted_at: "preserve",
+    conversion_stage: "set",
+    converted_at: "clear",
+    closed_won_at: "clear",
+    closed_lost_at: "clear",
+    closed_lost_reason: "clear",
+  },
+  appointment_requested: {
+    appointment_requested: "set",
+    last_contacted_at: "preserve",
+    conversion_stage: "set",
+    converted_at: "clear",
+    closed_won_at: "clear",
+    closed_lost_at: "clear",
+    closed_lost_reason: "clear",
+  },
+  appointment_set: {
+    appointment_requested: "set",
+    last_contacted_at: "preserve",
+    conversion_stage: "set",
+    converted_at: "clear",
+    closed_won_at: "clear",
+    closed_lost_at: "clear",
+    closed_lost_reason: "clear",
+  },
+  nurture: {
+    appointment_requested: "preserve",
+    last_contacted_at: "preserve",
+    conversion_stage: "set",
+    converted_at: "clear",
+    closed_won_at: "clear",
+    closed_lost_at: "clear",
+    closed_lost_reason: "clear",
+  },
+  escalated: {
+    appointment_requested: "preserve",
+    last_contacted_at: "preserve",
+    conversion_stage: "set",
+    converted_at: "clear",
+    closed_won_at: "clear",
+    closed_lost_at: "clear",
+    closed_lost_reason: "clear",
+  },
+  converted: {
+    appointment_requested: "preserve",
+    last_contacted_at: "preserve",
+    conversion_stage: "set",
+    converted_at: "set",
+    closed_won_at: "set",
+    closed_lost_at: "clear",
+    closed_lost_reason: "clear",
+  },
+  dead: {
+    appointment_requested: "preserve",
+    last_contacted_at: "preserve",
+    conversion_stage: "set",
+    converted_at: "clear",
+    closed_won_at: "clear",
+    closed_lost_at: "set",
+    closed_lost_reason: "set",
+  },
+  spam: {
+    appointment_requested: "clear",
+    last_contacted_at: "preserve",
+    conversion_stage: "set",
+    converted_at: "clear",
+    closed_won_at: "clear",
+    closed_lost_at: "set",
+    closed_lost_reason: "set",
+  },
+};
+
+const CONVERSION_STAGE_BY_STATUS: Partial<Record<AdminLeadStatus, string | null>> = {
+  scored: "scored",
+  assigned: "assigned",
+  contacted: "contacted",
+  qualified: "qualified",
+  appointment_requested: "appointment_requested",
+  appointment_set: "appointment_set",
+  nurture: "nurture",
+  escalated: "escalated",
+  converted: "converted",
+  dead: "dead",
+  spam: "disqualified",
+  new: null,
 };
 
 export const ADMIN_LEAD_STATUS_ACTIONS: AdminLeadStatusAction[] = [
@@ -175,6 +318,63 @@ export function isTerminalReason(value: string | null): value is LeadTerminalRea
     (LOST_REASONS as readonly string[]).includes(value) ||
     (DISQUALIFIED_REASONS as readonly string[]).includes(value)
   );
+}
+
+export function validateTerminalReasonForStatus(
+  status: AdminLeadStatus,
+  reason: string | null,
+): { ok: true; reason: LeadTerminalReason | null } | { ok: false; error: "invalid_terminal_reason" } {
+  const cleaned = text(reason);
+
+  if (status === "dead") {
+    if (!cleaned || !(LOST_REASONS as readonly string[]).includes(cleaned)) {
+      return { ok: false, error: "invalid_terminal_reason" };
+    }
+    return { ok: true, reason: cleaned as LeadTerminalReason };
+  }
+
+  if (status === "spam") {
+    if (!cleaned || !(DISQUALIFIED_REASONS as readonly string[]).includes(cleaned)) {
+      return { ok: false, error: "invalid_terminal_reason" };
+    }
+    return { ok: true, reason: cleaned as LeadTerminalReason };
+  }
+
+  if (cleaned) {
+    return { ok: false, error: "invalid_terminal_reason" };
+  }
+
+  return { ok: true, reason: null };
+}
+
+export function buildLeadLifecyclePatch(
+  status: AdminLeadStatus,
+  context: LifecyclePatchContext,
+): Record<string, unknown> {
+  const behavior = LEAD_LIFECYCLE_FIELD_CLEANUP[status];
+  const patch: Record<string, unknown> = { status };
+
+  if (behavior.appointment_requested === "set") patch.appointment_requested = true;
+  if (behavior.appointment_requested === "clear") patch.appointment_requested = false;
+
+  if (behavior.last_contacted_at === "set") patch.last_contacted_at = context.nowIso;
+
+  if (behavior.conversion_stage === "set") patch.conversion_stage = CONVERSION_STAGE_BY_STATUS[status] ?? null;
+  if (behavior.conversion_stage === "clear") patch.conversion_stage = null;
+
+  if (behavior.converted_at === "set") patch.converted_at = context.nowIso;
+  if (behavior.converted_at === "clear") patch.converted_at = null;
+
+  if (behavior.closed_won_at === "set") patch.closed_won_at = context.nowIso;
+  if (behavior.closed_won_at === "clear") patch.closed_won_at = null;
+
+  if (behavior.closed_lost_at === "set") patch.closed_lost_at = context.nowIso;
+  if (behavior.closed_lost_at === "clear") patch.closed_lost_at = null;
+
+  if (behavior.closed_lost_reason === "set") patch.closed_lost_reason = context.reason;
+  if (behavior.closed_lost_reason === "clear") patch.closed_lost_reason = null;
+
+  return patch;
 }
 
 export function isAllowedLeadTransition(current: AdminLeadStatus, next: AdminLeadStatus) {

@@ -35,6 +35,7 @@ export type AdminReportingGroup = {
 
 export type AdminAgentPerformanceGroup = {
   agent_id: string;
+  agent_name: string;
   assigned: number;
   qualified: number;
   appointments: number;
@@ -68,6 +69,7 @@ export type AdminReportingSummary = {
     appointmentRate: number;
     conversionRate: number;
     closeRate: number;
+    disqualificationRate: number;
   };
   stalledLeadCount: number;
   statusBuckets: Record<StatusBucketKey, number>;
@@ -120,8 +122,8 @@ const QUALIFIED_STATUSES = new Set([
   "converted",
 ]);
 
-const APPOINTMENT_STATUSES = new Set(["appointment_requested", "appointment_set"]);
-const CLOSED_LOST_STATUSES = new Set(["dead", "spam"]);
+const APPOINTMENT_STATUSES = new Set(["appointment_requested", "appointment_set", "converted"]);
+const CLOSED_LOST_STATUSES = new Set(["dead"]);
 const HOT_STATUSES = new Set(["new", "scored", "qualified", "appointment_requested"]);
 const HOT_LEAD_TYPES = new Set(["seller", "seller_cash_offer", "home_value"]);
 
@@ -180,6 +182,7 @@ function emptySummary(
       appointmentRate: 0,
       conversionRate: 0,
       closeRate: 0,
+      disqualificationRate: 0,
     },
     stalledLeadCount: 0,
     statusBuckets: {
@@ -296,6 +299,10 @@ export function isClosedLost(row: AdminReportingLeadRow): boolean {
   return CLOSED_LOST_STATUSES.has(statusOf(row));
 }
 
+export function agentNameFor(agentId: string, agentNames: ReadonlyMap<string, string>) {
+  return agentNames.get(agentId) || "Unknown agent";
+}
+
 export function timelineLabel(months: number | null | undefined): string {
   if (months === 0) return "Immediate / 0-30 days";
   if (months === 3) return "30-90 days";
@@ -309,6 +316,7 @@ export function summarizeReportingRows(
   rows: AdminReportingLeadRow[],
   now = new Date(),
   windowDays: 7 | 30 | 90 = 30,
+  agentNames: ReadonlyMap<string, string> = new Map(),
 ): AdminReportingSummary {
   const normalizedRows = rows.map((row) => normalizeReportingLeadRow(row as unknown as Record<string, unknown>));
   const nonSpamRows = normalizedRows.filter((row) => !isSpamOrTest(row));
@@ -369,6 +377,7 @@ export function summarizeReportingRows(
     if (row.assigned_agent_id) {
       const agent = agentMap.get(row.assigned_agent_id) || {
         agent_id: row.assigned_agent_id,
+        agent_name: agentNameFor(row.assigned_agent_id, agentNames),
         assigned: 0,
         qualified: 0,
         appointments: 0,
@@ -419,6 +428,7 @@ export function summarizeReportingRows(
     (a, b) =>
       b.assigned - a.assigned ||
       b.converted - a.converted ||
+      a.agent_name.localeCompare(b.agent_name) ||
       a.agent_id.localeCompare(b.agent_id),
   );
 
@@ -462,13 +472,17 @@ export function summarizeReportingRows(
       qualified: nonSpamRows.filter(isQualified).length,
       appointment: nonSpamRows.filter(isAppointment).length,
       converted: nonSpamRows.filter(isConverted).length,
-      lostDisqualified: normalizedRows.filter(isClosedLost).length,
+      lostDisqualified: normalizedRows.filter((row) => isClosedLost(row) || isSpamOrTest(row)).length,
     },
     rates: {
       qualificationRate: percent(nonSpamRows.filter(isQualified).length, nonSpamRows.length),
       appointmentRate: percent(nonSpamRows.filter(isAppointment).length, nonSpamRows.filter(isQualified).length),
       conversionRate: percent(nonSpamRows.filter(isConverted).length, nonSpamRows.length),
-      closeRate: percent(nonSpamRows.filter(isConverted).length, nonSpamRows.filter(isConverted).length + normalizedRows.filter(isClosedLost).length),
+      closeRate: percent(
+        nonSpamRows.filter(isConverted).length,
+        nonSpamRows.filter(isConverted).length + nonSpamRows.filter(isClosedLost).length,
+      ),
+      disqualificationRate: percent(normalizedRows.filter(isSpamOrTest).length, normalizedRows.length),
     },
     stalledLeadCount: nonSpamRows.filter((row) => buildStalledLeadSignals(row, now).length > 0).length,
     statusBuckets,
@@ -481,6 +495,42 @@ export function summarizeReportingRows(
     timelines,
     hotLeads,
   };
+}
+
+export async function loadAgentNameMap(input: {
+  supabaseUrl: string;
+  serviceKey: string;
+  agentIds: string[];
+}): Promise<Map<string, string>> {
+  const uniqueAgentIds = [...new Set(input.agentIds.filter(Boolean))].slice(0, 100);
+  if (!uniqueAgentIds.length) return new Map();
+
+  const url = new URL("/rest/v1/agents", input.supabaseUrl);
+  url.searchParams.set("select", "id,name");
+  url.searchParams.set("id", `in.(${uniqueAgentIds.join(",")})`);
+  url.searchParams.set("limit", "100");
+
+  const response = await fetch(url, {
+    headers: {
+      apikey: input.serviceKey,
+      Authorization: "Bearer " + input.serviceKey,
+      "Cache-Control": "no-store",
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) return new Map();
+
+  const rows = (await response.json().catch(() => [])) as Array<Record<string, unknown>>;
+  const names = new Map<string, string>();
+  for (const row of rows) {
+    const id = text(row.id);
+    const name = text(row.name);
+    if (id && name && uniqueAgentIds.includes(id) && !names.has(id)) {
+      names.set(id, name);
+    }
+  }
+  return names;
 }
 
 export async function loadAdminReportingSummary(
@@ -514,5 +564,11 @@ export async function loadAdminReportingSummary(
   }
 
   const rows = (await response.json()) as Array<Record<string, unknown>>;
-  return summarizeReportingRows(rows.map(normalizeReportingLeadRow), now, windowDays);
+  const normalizedRows = rows.map(normalizeReportingLeadRow);
+  const agentNames = await loadAgentNameMap({
+    supabaseUrl,
+    serviceKey,
+    agentIds: normalizedRows.map((row) => row.assigned_agent_id).filter((id): id is string => Boolean(id)),
+  });
+  return summarizeReportingRows(normalizedRows, now, windowDays, agentNames);
 }
