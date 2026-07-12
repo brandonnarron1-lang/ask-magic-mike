@@ -101,11 +101,6 @@ export async function updateAdminLeadStatus(
     return { ok: false, statusCode: 400, error: "invalid_status" };
   }
 
-  const reasonValidation = validateTerminalReasonForStatus(status, options.reason || null);
-  if (!reasonValidation.ok) {
-    return { ok: false, statusCode: 400, error: reasonValidation.error };
-  }
-  const reason: LeadTerminalReason | null = reasonValidation.reason;
   const config = configured();
   if (!config) {
     return { ok: false, statusCode: 503, error: "lead_store_not_configured" };
@@ -140,8 +135,19 @@ export async function updateAdminLeadStatus(
     return { ok: false, statusCode: 409, error: "invalid_current_status" };
   }
   if (currentStatusText === status) {
+    if (options.reason) {
+      const sameStateReasonValidation = validateTerminalReasonForStatus(status, options.reason);
+      if (!sameStateReasonValidation.ok) {
+        return { ok: false, statusCode: 400, error: sameStateReasonValidation.error };
+      }
+    }
     return { ok: true, status, warning: "status_already_current" };
   }
+  const reasonValidation = validateTerminalReasonForStatus(status, options.reason || null);
+  if (!reasonValidation.ok) {
+    return { ok: false, statusCode: 400, error: reasonValidation.error };
+  }
+  const reason: LeadTerminalReason | null = reasonValidation.reason;
   if (!isAllowedLeadTransition(currentStatusText, status)) {
     return { ok: false, statusCode: 409, error: "forbidden_transition" };
   }

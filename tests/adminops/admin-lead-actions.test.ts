@@ -236,8 +236,16 @@ describe("AdminOps lead status actions", () => {
   });
 
   it("rejects missing or mismatched terminal reasons before patching", async () => {
-    const fetchSpy = vi.fn();
-    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+    const calls: Array<{ init?: RequestInit }> = [];
+    globalThis.fetch = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      calls.push({ init });
+      return {
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        json: async () => [{ id: LEAD_ID, status: "qualified" }],
+      } as Response;
+    }) as unknown as typeof fetch;
 
     await expect(updateAdminLeadStatus(LEAD_ID, "dead")).resolves.toEqual({
       ok: false,
@@ -259,7 +267,7 @@ describe("AdminOps lead status actions", () => {
       statusCode: 400,
       error: "invalid_terminal_reason",
     });
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(calls.map((call) => call.init?.method || "GET")).toEqual(["GET", "GET", "GET", "GET"]);
   });
 
   it("handles unknown lead ids without leaking raw database errors", async () => {
@@ -292,6 +300,26 @@ describe("AdminOps lead status actions", () => {
     await expect(updateAdminLeadStatus(LEAD_ID, "contacted")).resolves.toEqual({
       ok: true,
       status: "contacted",
+      warning: "status_already_current",
+    });
+    expect(calls.map((call) => call.init?.method || "GET")).toEqual(["GET"]);
+  });
+
+  it("treats terminal same-state submission as idempotent before requiring a reason", async () => {
+    const calls: Array<{ init?: RequestInit }> = [];
+    globalThis.fetch = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      calls.push({ init });
+      return {
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        json: async () => [{ id: LEAD_ID, status: "dead" }],
+      } as Response;
+    }) as unknown as typeof fetch;
+
+    await expect(updateAdminLeadStatus(LEAD_ID, "dead")).resolves.toEqual({
+      ok: true,
+      status: "dead",
       warning: "status_already_current",
     });
     expect(calls.map((call) => call.init?.method || "GET")).toEqual(["GET"]);
