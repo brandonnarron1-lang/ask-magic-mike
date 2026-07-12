@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   loadAdminReportingSummary,
   type AdminReportingGroup,
+  type AdminAgentPerformanceGroup,
   type AdminReportingLeadRow,
   type AdminReportingSummary,
   type StatusBucketKey,
@@ -103,7 +104,8 @@ function SourceTable({ rows }: { rows: AdminReportingGroup[] }) {
             <th className="py-2 pr-4">Count</th>
             <th className="py-2 pr-4">Contactable</th>
             <th className="py-2 pr-4">Qualified / appointment</th>
-            <th className="py-2">Converted</th>
+            <th className="py-2 pr-4">Converted</th>
+            <th className="py-2">Conv. rate</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/10 text-[#f4ead4]">
@@ -113,11 +115,51 @@ function SourceTable({ rows }: { rows: AdminReportingGroup[] }) {
               <td className="py-3 pr-4">{row.count}</td>
               <td className="py-3 pr-4">{row.contactable}</td>
               <td className="py-3 pr-4">{row.qualifiedAppointment}</td>
-              <td className="py-3">{row.converted}</td>
+              <td className="py-3 pr-4">{row.converted}</td>
+              <td className="py-3">{row.conversionRate}%</td>
             </tr>
           )) : (
             <tr>
-              <td className="py-3 text-[#8f8778]" colSpan={5}>No source rows.</td>
+              <td className="py-3 text-[#8f8778]" colSpan={6}>No source rows.</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function AgentPerformanceTable({ rows }: { rows: AdminAgentPerformanceGroup[] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full text-left text-sm">
+        <thead className="text-[11px] uppercase tracking-[0.14em] text-[#8f8778]">
+          <tr>
+            <th className="py-2 pr-4">Agent</th>
+            <th className="py-2 pr-4">Assigned</th>
+            <th className="py-2 pr-4">Qualified</th>
+            <th className="py-2 pr-4">Appointments</th>
+            <th className="py-2 pr-4">Converted</th>
+            <th className="py-2 pr-4">Lost/disqualified</th>
+            <th className="py-2 pr-4">Stalled</th>
+            <th className="py-2">Conv. rate</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-white/10 text-[#f4ead4]">
+          {rows.length ? rows.map((row) => (
+            <tr key={row.agent_id}>
+              <td className="max-w-[18rem] py-3 pr-4 font-mono text-xs text-[#d9ceb8]">{row.agent_id}</td>
+              <td className="py-3 pr-4">{row.assigned}</td>
+              <td className="py-3 pr-4">{row.qualified}</td>
+              <td className="py-3 pr-4">{row.appointments}</td>
+              <td className="py-3 pr-4">{row.converted}</td>
+              <td className="py-3 pr-4">{row.closedLost}</td>
+              <td className="py-3 pr-4">{row.stalled}</td>
+              <td className="py-3">{row.conversionRate}%</td>
+            </tr>
+          )) : (
+            <tr>
+              <td className="py-3 text-[#8f8778]" colSpan={8}>No assigned leads in this window.</td>
             </tr>
           )}
         </tbody>
@@ -240,6 +282,34 @@ export default async function AdminReportingPage({
           <MetricCard label="Converted" value={summary.funnel.converted} />
         </div>
 
+        <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          <MetricCard
+            label="Qualification rate"
+            value={`${summary.rates.qualificationRate}%`}
+            note="Qualified or later / captured non-spam leads"
+          />
+          <MetricCard
+            label="Appointment rate"
+            value={`${summary.rates.appointmentRate}%`}
+            note="Appointments set/requested / qualified-or-later leads"
+          />
+          <MetricCard
+            label="Conversion rate"
+            value={`${summary.rates.conversionRate}%`}
+            note="Converted / captured non-spam leads"
+          />
+          <MetricCard
+            label="Close rate"
+            value={`${summary.rates.closeRate}%`}
+            note="Converted / converted plus lost/disqualified"
+          />
+          <MetricCard
+            label="Stalled leads"
+            value={summary.stalledLeadCount}
+            note="Operational stalls from SLA and lifecycle thresholds"
+          />
+        </div>
+
         <div className="mt-6 space-y-5">
           <EmptyNotice summary={summary} />
 
@@ -257,6 +327,17 @@ export default async function AdminReportingPage({
 
           <Panel title="Source attribution">
             <SourceTable rows={summary.sources} />
+          </Panel>
+
+          <Panel title="Campaign/source-detail performance">
+            <SourceTable rows={summary.campaigns} />
+          </Panel>
+
+          <Panel title="Agent performance">
+            <AgentPerformanceTable rows={summary.agentPerformance} />
+            <p className="mt-3 text-xs leading-5 text-[#8f8778]">
+              Rates include sample counts and are operational indicators, not compensation or employment scoring.
+            </p>
           </Panel>
 
           <div className="grid gap-5 lg:grid-cols-2">

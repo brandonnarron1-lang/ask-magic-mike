@@ -4,6 +4,7 @@ import {
   isAppointment,
   isContactable,
   isConverted,
+  isClosedLost,
   isQualified,
   isSpamOrTest,
   loadAdminReportingSummary,
@@ -43,6 +44,10 @@ describe("AdminOps reporting view model", () => {
       timeline_months: "0",
       primary_intent: "sell",
       assigned_agent_id: "agent-1",
+      assigned_at: "2026-07-08T12:05:00.000Z",
+      last_contacted_at: null,
+      lead_grade: "A",
+      conversion_stage: null,
       address_raw: "123 Nash St NW",
       email: " jane@example.com ",
       phone: "2525551212",
@@ -58,6 +63,8 @@ describe("AdminOps reporting view model", () => {
       primary_intent: "sell",
       email: "jane@example.com",
       phone: "2525551212",
+      assigned_at: "2026-07-08T12:05:00.000Z",
+      lead_grade: "A",
     });
   });
 
@@ -87,6 +94,7 @@ describe("AdminOps reporting view model", () => {
     expect(isQualified(qualified)).toBe(true);
     expect(isAppointment(appointment)).toBe(true);
     expect(isConverted(converted)).toBe(true);
+    expect(isClosedLost(spam)).toBe(true);
     expect(isSpamOrTest(spam)).toBe(true);
   });
 
@@ -103,6 +111,10 @@ describe("AdminOps reporting view model", () => {
         timeline_months: 0,
         primary_intent: "sell",
         assigned_agent_id: null,
+        assigned_at: null,
+        last_contacted_at: null,
+        lead_grade: "A",
+        conversion_stage: null,
         address_raw: "100 Nash St",
         email: null,
         phone: "2525550100",
@@ -119,6 +131,10 @@ describe("AdminOps reporting view model", () => {
         timeline_months: 3,
         primary_intent: "sell",
         assigned_agent_id: null,
+        assigned_at: null,
+        last_contacted_at: null,
+        lead_grade: "B",
+        conversion_stage: "qualified",
         address_raw: "200 Nash St",
         email: "jane@example.com",
         phone: null,
@@ -135,6 +151,10 @@ describe("AdminOps reporting view model", () => {
         timeline_months: 6,
         primary_intent: "sell",
         assigned_agent_id: null,
+        assigned_at: null,
+        last_contacted_at: "2026-06-22T12:00:00.000Z",
+        lead_grade: "A",
+        conversion_stage: "appointment_requested",
         address_raw: "300 Nash St",
         email: null,
         phone: "2525550200",
@@ -151,6 +171,10 @@ describe("AdminOps reporting view model", () => {
         timeline_months: 12,
         primary_intent: "buy",
         assigned_agent_id: "agent-1",
+        assigned_at: "2026-06-12T12:05:00.000Z",
+        last_contacted_at: "2026-06-12T13:00:00.000Z",
+        lead_grade: "C",
+        conversion_stage: "converted",
         address_raw: null,
         email: "buyer@example.com",
         phone: null,
@@ -167,6 +191,10 @@ describe("AdminOps reporting view model", () => {
         timeline_months: 24,
         primary_intent: "sell",
         assigned_agent_id: null,
+        assigned_at: null,
+        last_contacted_at: null,
+        lead_grade: null,
+        conversion_stage: "disqualified",
         address_raw: null,
         email: "spam@example.com",
         phone: null,
@@ -186,7 +214,15 @@ describe("AdminOps reporting view model", () => {
       qualified: 3,
       appointment: 1,
       converted: 1,
+      lostDisqualified: 1,
     });
+    expect(summary.rates).toEqual({
+      qualificationRate: 75,
+      appointmentRate: 33,
+      conversionRate: 25,
+      closeRate: 50,
+    });
+    expect(summary.stalledLeadCount).toBe(3);
     expect(summary.statusBuckets).toMatchObject({
       new: 1,
       qualified_appointment: 2,
@@ -198,7 +234,19 @@ describe("AdminOps reporting view model", () => {
       count: 2,
       contactable: 2,
       qualifiedAppointment: 1,
+      conversionRate: 0,
     });
+    expect(summary.campaigns.map((row) => row.label)).toContain("floating");
+    expect(summary.agentPerformance).toEqual([{
+      agent_id: "agent-1",
+      assigned: 1,
+      qualified: 1,
+      appointments: 0,
+      converted: 1,
+      closedLost: 0,
+      stalled: 0,
+      conversionRate: 100,
+    }]);
     expect(summary.topPages[0]).toEqual({
       page_url: "https://askmagicmike.com/home-value",
       count: 2,
@@ -251,7 +299,7 @@ describe("AdminOps reporting view model", () => {
     expect(captured[0].url.pathname).toBe("/rest/v1/leads");
     expect(captured[0].init?.method).toBeUndefined();
     expect(captured[0].url.searchParams.get("select")).toBe(
-      "id,created_at,status,lead_type,source,source_detail,page_url,timeline_months,primary_intent,assigned_agent_id,address_raw,email,phone,widget_session_id",
+      "id,created_at,status,lead_type,source,source_detail,page_url,timeline_months,primary_intent,assigned_agent_id,assigned_at,last_contacted_at,lead_grade,conversion_stage,address_raw,email,phone,widget_session_id",
     );
     expect(captured[0].url.searchParams.get("created_at")).toMatch(/^gte\./);
     expect(captured[0].url.searchParams.get("order")).toBe("created_at.desc");
