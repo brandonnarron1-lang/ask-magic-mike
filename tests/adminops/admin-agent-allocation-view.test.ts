@@ -117,12 +117,38 @@ describe("AdminOps agent allocation view", () => {
     expect(summary.unassignedHotLeads.map((lead) => lead.id)).toEqual(["lead-hot"]);
     expect(summary.staleUnassignedLeads.map((lead) => lead.id)).toEqual(["lead-stale"]);
     expect(summary.assignedLeadsByAgent[0].agent.currentAssignedLeadCount).toBe(1);
+    expect(summary.assignedLeadsByAgent[0].agent.capacityRemaining).toBe(null);
     expect(summary.sourceMix.map((item) => item.value)).toContain("widget");
     expect(summary.intentMix.map((item) => item.value)).toContain("sell");
     expect(summary.timelineMix.map((item) => item.value)).toContain("Immediate / 0-30 days");
     expect(summary.recentAssignmentActivity).toEqual([]);
     expect(summary.auditActivityConfigured).toBe(true);
   });
+
+  it("marks agents unavailable when live assigned lead count reaches capacity", () => {
+    const agents = [
+      normalizeAgentRow({ id: "agent-1", name: "Mike", is_active: true, max_daily_leads: 1 }),
+    ];
+    const leads = [
+      normalizeAssignableLeadRow({
+        id: "lead-assigned",
+        created_at: "2026-07-09T10:00:00.000Z",
+        status: "assigned",
+        assigned_agent_id: "agent-1",
+        phone: "2525550102",
+        primary_intent: "sell",
+        timeline_months: 3,
+        lead_type: "home_value",
+      }),
+    ];
+
+    const summary = summarizeAgentAllocation(agents, leads);
+
+    expect(summary.agents[0].availability).toBe("unavailable");
+    expect(summary.agents[0].capacityRemaining).toBe(0);
+    expect(summary.kpis.availableAgents).toBe(0);
+  });
+
 
   it("returns a safe unconfigured state when Supabase env vars are missing", async () => {
     const fetchSpy = vi.fn();

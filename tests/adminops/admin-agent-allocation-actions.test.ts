@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   assignLeadToAgent,
+  updateAgentOperations,
   unassignLead,
 } from "../../app/lib/adminAgentAllocationActions";
 
@@ -34,6 +35,21 @@ function mockAssignmentFetch(initialAgentId: string | null) {
       requestUrl.includes("select=id%2Cassigned_agent_id%2Cassignment_status")
     ) {
       return jsonResponse([{ id: LEAD_ID, assigned_agent_id: initialAgentId, assignment_status: initialAgentId ? "assigned" : null }]);
+    }
+    if (
+      requestUrl.includes("/rest/v1/agents") &&
+      method === "GET" &&
+      requestUrl.includes("select=id%2Cis_active%2Cmax_daily_leads")
+    ) {
+      return jsonResponse([{ id: AGENT_ID, is_active: true, max_daily_leads: 20 }]);
+    }
+    if (
+      requestUrl.includes("/rest/v1/leads") &&
+      method === "GET" &&
+      requestUrl.includes("assigned_agent_id=eq." + AGENT_ID) &&
+      requestUrl.includes("select=id")
+    ) {
+      return jsonResponse([]);
     }
     if (requestUrl.includes("/rest/v1/leads") && method === "PATCH") {
       return jsonResponse([{ id: LEAD_ID, assigned_agent_id: AGENT_ID, assignment_status: "assigned" }]);
@@ -139,22 +155,22 @@ describe("AdminOps agent allocation actions", () => {
         "&select=id%2Cassigned_agent_id%2Cassignment_status&limit=1",
     );
     expect(captured[0].init?.method).toBeUndefined();
-    expect(captured[1].url).toBe(
+    expect(captured[3].url).toBe(
       "https://fake.supabase.co/rest/v1/leads?id=eq." +
         LEAD_ID +
         "&select=id%2Cassigned_agent_id%2Cassignment_status&assigned_agent_id=is.null",
     );
-    expect(captured[1].init?.method).toBe("PATCH");
-    expect(captured[1].body).toEqual({
+    expect(captured[3].init?.method).toBe("PATCH");
+    expect(captured[3].body).toEqual({
       assigned_agent_id: AGENT_ID,
       assigned_at: "2026-07-09T12:00:00.000Z",
       assignment_status: "assigned",
     });
-    expect(captured[1].body).not.toHaveProperty("status");
-    expect(captured[1].body).not.toHaveProperty("email");
-    expect(captured[2].url).toContain("https://fake.supabase.co/rest/v1/audit_logs");
-    expect(captured[2].init?.method).toBe("POST");
-    expect(captured[2].body).toMatchObject({
+    expect(captured[3].body).not.toHaveProperty("status");
+    expect(captured[3].body).not.toHaveProperty("email");
+    expect(captured[4].url).toContain("https://fake.supabase.co/rest/v1/audit_logs");
+    expect(captured[4].init?.method).toBe("POST");
+    expect(captured[4].body).toMatchObject({
       actor: "system/admin_basic_auth",
       action: "lead.assigned",
       resource_type: "lead",
@@ -162,6 +178,8 @@ describe("AdminOps agent allocation actions", () => {
       before_state: { assigned_agent_id: null },
       after_state: { assigned_agent_id: AGENT_ID, assignment_status: "assigned" },
     });
+    expect(captured[1].url).toContain("/rest/v1/agents");
+    expect(captured[2].url).toContain("assigned_agent_id=eq." + AGENT_ID);
     expect(captured.some((call) => call.url.includes("/rest/v1/lead_notifications") && call.init?.method === "POST")).toBe(true);
     expect(captured.findIndex((call) => call.url.includes("/rest/v1/audit_logs"))).toBeLessThan(
       captured.findIndex((call) => call.url.includes("/rest/v1/lead_notifications") && call.init?.method === "POST"),
@@ -178,12 +196,12 @@ describe("AdminOps agent allocation actions", () => {
       action: "reassigned",
       warning: "agent_notifications_disabled",
     });
-    expect(captured[2].body).toMatchObject({
+    expect(captured[4].body).toMatchObject({
       action: "lead.reassigned",
       before_state: { assigned_agent_id: PREVIOUS_AGENT_ID },
       after_state: { assigned_agent_id: AGENT_ID, assignment_status: "assigned" },
     });
-    expect(captured[1].url).toContain("assigned_agent_id=eq." + PREVIOUS_AGENT_ID);
+    expect(captured[3].url).toContain("assigned_agent_id=eq." + PREVIOUS_AGENT_ID);
   });
 
   it("does not mutate, audit, or notify when the lead is already assigned to the same agent", async () => {
@@ -322,8 +340,9 @@ describe("AdminOps agent allocation actions", () => {
   it("rejects assignment when the lead assignment changes between preflight and PATCH", async () => {
     const calls: Array<{ url: string; init?: RequestInit }> = [];
     globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
-      calls.push({ url: String(url), init });
-      if (!init?.method) {
+      const requestUrl = String(url);
+      calls.push({ url: requestUrl, init });
+      if (!init?.method && requestUrl.includes("select=id%2Cassigned_agent_id%2Cassignment_status")) {
         return {
           ok: true,
           status: 200,
@@ -334,6 +353,12 @@ describe("AdminOps agent allocation actions", () => {
             assignment_status: "assigned",
           }],
         } as Response;
+      }
+      if (requestUrl.includes("/rest/v1/agents")) {
+        return jsonResponse([{ id: AGENT_ID, is_active: true, max_daily_leads: 20 }]);
+      }
+      if (requestUrl.includes("assigned_agent_id=eq." + AGENT_ID)) {
+        return jsonResponse([]);
       }
       return {
         ok: true,
@@ -349,17 +374,18 @@ describe("AdminOps agent allocation actions", () => {
       error: "assignment_conflict",
     });
 
-    expect(calls).toHaveLength(2);
-    expect(calls[1].init?.method).toBe("PATCH");
-    expect(calls[1].url).toContain("assigned_agent_id=eq.33333333-3333-4333-8333-333333333333");
+    expect(calls).toHaveLength(4);
+    expect(calls[3].init?.method).toBe("PATCH");
+    expect(calls[3].url).toContain("assigned_agent_id=eq.33333333-3333-4333-8333-333333333333");
     expect(JSON.stringify(calls)).not.toContain("/rest/v1/audit_logs");
   });
 
   it("returns a warning if audit fails after assignment succeeds", async () => {
     const captured: Array<{ init?: RequestInit }> = [];
-    globalThis.fetch = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      const requestUrl = String(url);
       captured.push({ init });
-      if (!init?.method) {
+      if (!init?.method && requestUrl.includes("select=id%2Cassigned_agent_id%2Cassignment_status")) {
         return {
           ok: true,
           status: 200,
@@ -367,7 +393,13 @@ describe("AdminOps agent allocation actions", () => {
           json: async () => [{ id: LEAD_ID, assigned_agent_id: null, assignment_status: null }],
         } as Response;
       }
-      if (init.method === "PATCH") {
+      if (requestUrl.includes("/rest/v1/agents")) {
+        return jsonResponse([{ id: AGENT_ID, is_active: true, max_daily_leads: 20 }]);
+      }
+      if (requestUrl.includes("assigned_agent_id=eq." + AGENT_ID)) {
+        return jsonResponse([]);
+      }
+      if (init?.method === "PATCH") {
         return {
           ok: true,
           status: 200,
@@ -387,6 +419,129 @@ describe("AdminOps agent allocation actions", () => {
       action: "assigned",
       warning: "audit_write_failed",
     });
+    expect(captured.map((call) => call.init?.method || "GET")).toEqual(["GET", "GET", "GET", "PATCH", "POST"]);
+  });
+
+  it("rejects inactive and at-capacity agents before assignment mutation", async () => {
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      const requestUrl = String(url);
+      if (requestUrl.includes("select=id%2Cassigned_agent_id%2Cassignment_status")) {
+        return jsonResponse([{ id: LEAD_ID, assigned_agent_id: null, assignment_status: null }]);
+      }
+      if (requestUrl.includes("/rest/v1/agents")) {
+        return jsonResponse([{ id: AGENT_ID, is_active: false, max_daily_leads: 20 }]);
+      }
+      if (requestUrl.includes("assigned_agent_id=eq." + AGENT_ID)) {
+        return jsonResponse([]);
+      }
+      if (init?.method === "PATCH") {
+        throw new Error("assignment patch should not run");
+      }
+      return jsonResponse([]);
+    }) as unknown as typeof fetch;
+
+    await expect(assignLeadToAgent(LEAD_ID, AGENT_ID)).resolves.toEqual({
+      ok: false,
+      statusCode: 409,
+      error: "agent_inactive",
+    });
+
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      const requestUrl = String(url);
+      if (requestUrl.includes("select=id%2Cassigned_agent_id%2Cassignment_status")) {
+        return jsonResponse([{ id: LEAD_ID, assigned_agent_id: null, assignment_status: null }]);
+      }
+      if (requestUrl.includes("/rest/v1/agents")) {
+        return jsonResponse([{ id: AGENT_ID, is_active: true, max_daily_leads: 1 }]);
+      }
+      if (requestUrl.includes("assigned_agent_id=eq." + AGENT_ID)) {
+        return jsonResponse([{ id: "active-lead" }]);
+      }
+      if (init?.method === "PATCH") {
+        throw new Error("assignment patch should not run");
+      }
+      return jsonResponse([]);
+    }) as unknown as typeof fetch;
+
+    await expect(assignLeadToAgent(LEAD_ID, AGENT_ID)).resolves.toEqual({
+      ok: false,
+      statusCode: 409,
+      error: "agent_at_capacity",
+    });
+  });
+
+  it("updates agent operations through bounded PATCH and writes an agent audit event", async () => {
+    const captured: Array<{ url: string; init?: RequestInit; body: Record<string, unknown> }> = [];
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      const body = init?.body && typeof init.body === "string"
+        ? JSON.parse(init.body) as Record<string, unknown>
+        : {};
+      captured.push({ url: String(url), init, body });
+
+      if (!init?.method && String(url).includes("/rest/v1/agents")) {
+        return jsonResponse([{
+          id: AGENT_ID,
+          is_active: true,
+          max_daily_leads: 20,
+          current_load: 0,
+          priority_score: 50,
+          notification_email: true,
+          notification_sms: false,
+        }]);
+      }
+      if (init?.method === "PATCH") {
+        return jsonResponse([{ id: AGENT_ID }]);
+      }
+      if (init?.method === "POST" && String(url).includes("/rest/v1/audit_logs")) {
+        return jsonResponse([], 201);
+      }
+      throw new Error(`Unexpected request ${init?.method || "GET"} ${String(url)}`);
+    }) as unknown as typeof fetch;
+
+    await expect(updateAgentOperations({
+      agentId: AGENT_ID,
+      isActive: false,
+      maxDailyLeads: 4,
+      currentLoad: 1,
+      priorityScore: 80,
+      notificationEmail: true,
+      notificationSms: false,
+    })).resolves.toEqual({ ok: true });
+
     expect(captured.map((call) => call.init?.method || "GET")).toEqual(["GET", "PATCH", "POST"]);
+    expect(captured[1].body).toEqual({
+      is_active: false,
+      max_daily_leads: 4,
+      current_load: 1,
+      priority_score: 80,
+      notification_email: true,
+      notification_sms: false,
+    });
+    expect(captured[2].body).toMatchObject({
+      action: "agent.operations_updated",
+      resource_type: "agent",
+      resource_id: AGENT_ID,
+      metadata: { source: "admin_allocation", action_route: "/admin/allocation" },
+    });
+  });
+
+  it("rejects invalid agent operation values before calling Supabase", async () => {
+    const fetchSpy = vi.fn();
+    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+
+    await expect(updateAgentOperations({
+      agentId: AGENT_ID,
+      isActive: true,
+      maxDailyLeads: 1000,
+      currentLoad: 0,
+      priorityScore: 50,
+      notificationEmail: true,
+      notificationSms: false,
+    })).resolves.toEqual({
+      ok: false,
+      statusCode: 400,
+      error: "invalid_agent_operations",
+    });
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
