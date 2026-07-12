@@ -332,6 +332,12 @@ export default async function AdminLeadsPage({
               >
                 Notifications
               </Link>
+              <Link
+                href="/admin/action-queue"
+                className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]"
+              >
+                Action queue
+              </Link>
             </nav>
           </div>
           {params.status_action ? (

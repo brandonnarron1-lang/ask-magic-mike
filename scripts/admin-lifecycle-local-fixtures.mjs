@@ -32,6 +32,19 @@ const FIXTURE = {
     "bbbbbbbb-3333-4333-8333-333333333333",
     "bbbbbbbb-5555-4555-8555-555555555555",
   ],
+  appointments: [
+    "cccccccc-1111-4111-8111-111111111111",
+    "cccccccc-2222-4222-8222-222222222222",
+    "cccccccc-3333-4333-8333-333333333333",
+    "cccccccc-4444-4444-8444-444444444444",
+    "cccccccc-5555-4555-8555-555555555555",
+  ],
+  tasks: [
+    "dddddddd-1111-4111-8111-111111111111",
+    "dddddddd-2222-4222-8222-222222222222",
+    "dddddddd-3333-4333-8333-333333333333",
+    "dddddddd-4444-4444-8444-444444444444",
+  ],
 };
 
 function fail(message) {
@@ -111,7 +124,9 @@ begin
     (select count(*) from public.agents where id in (${idList(FIXTURE.agents)})) +
     (select count(*) from public.leads where id in (${idList(FIXTURE.sessions)})) +
     (select count(*) from public.audit_logs where id in (${idList(FIXTURE.audits)})) +
-    (select count(*) from public.lead_notifications where id in (${idList(FIXTURE.notifications)}))
+    (select count(*) from public.lead_notifications where id in (${idList(FIXTURE.notifications)})) +
+    (select count(*) from public.lead_appointments where id in (${idList(FIXTURE.appointments)})) +
+    (select count(*) from public.tasks where id in (${idList(FIXTURE.tasks)}))
   into existing_count;
   if existing_count > 0 then
     raise exception 'admin lifecycle fixture rows already exist';
@@ -161,6 +176,21 @@ values
   ('bbbbbbbb-3333-4333-8333-333333333333', '33333333-3333-4333-8333-333333333333', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', null, now() - interval '4 days 20 hours', 'agent_assignment', 'email', 'agent', 'agent:primary', 'agent-assignment:v1', 'fixture-lost-notification', 'retry_scheduled', 1, 3, 'console', null, 'provider_retryable', 'Temporary sandbox fixture failure', now() + interval '1 hour', null, now() - interval '2 hours', '{"source":"local_staging_fixture"}'),
   ('bbbbbbbb-5555-4555-8555-555555555555', '55555555-5555-4555-8555-555555555555', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', 'aaaaaaaa-5555-4555-8555-555555555555', now() - interval '30 hours', 'agent_assignment', 'email', 'agent', 'agent:primary', 'agent-assignment:v1', 'fixture-stalled-notification', 'permanently_failed', 3, 3, 'console', null, 'missing_agent_email', 'No safe agent email available', null, null, now() - interval '20 hours', '{"source":"local_staging_fixture"}');
 
+insert into public.lead_appointments (id, lead_id, assigned_agent_id, status, starts_at, ends_at, timezone, location_type, location_label, requested_at, confirmed_at, completed_at, canceled_at, cancellation_reason, created_by)
+values
+  ('cccccccc-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111', null, 'requested', null, null, 'America/New_York', 'office', 'Notification Sandbox request', now() - interval '2 hours', null, null, null, null, 'fixture'),
+  ('cccccccc-2222-4222-8222-222222222222', '22222222-2222-4222-8222-222222222222', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', 'completed', now() - interval '2 days', now() - interval '2 days' + interval '45 minutes', 'America/New_York', 'office', 'Notification Sandbox completed appointment', now() - interval '3 days', now() - interval '2 days 2 hours', now() - interval '2 days', null, null, 'fixture'),
+  ('cccccccc-3333-4333-8333-333333333333', '33333333-3333-4333-8333-333333333333', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', 'canceled', now() - interval '1 day', now() - interval '1 day' + interval '45 minutes', 'America/New_York', 'phone', 'Notification Sandbox canceled appointment', now() - interval '4 days', null, null, now() - interval '2 days', 'timing_changed', 'fixture'),
+  ('cccccccc-4444-4444-8444-444444444444', '44444444-4444-4444-8444-444444444444', null, 'no_show', now() - interval '1 day', now() - interval '1 day' + interval '45 minutes', 'America/New_York', 'office', 'Notification Sandbox no-show appointment', now() - interval '3 days', now() - interval '2 days', null, null, null, 'fixture'),
+  ('cccccccc-5555-4555-8555-555555555555', '55555555-5555-4555-8555-555555555555', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', 'confirmed', now() + interval '3 hours', now() + interval '4 hours', 'America/New_York', 'property', 'Notification Sandbox property visit', now() - interval '1 day', now() - interval '12 hours', null, null, null, 'fixture');
+
+insert into public.tasks (id, lead_id, agent_id, created_by, title, body, due_at, status, priority, category)
+values
+  ('dddddddd-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111', null, 'fixture', 'appointment confirmation', null, now() - interval '1 hour', 'open', 'urgent', 'followup:appointment_confirmation'),
+  ('dddddddd-2222-4222-8222-222222222222', '22222222-2222-4222-8222-222222222222', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', 'fixture', 'appointment follow-up', 'Completed in fixture', now() - interval '2 days', 'done', 'normal', 'followup:appointment_followup'),
+  ('dddddddd-3333-4333-8333-333333333333', '33333333-3333-4333-8333-333333333333', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', 'fixture', 'nurture check-in', null, now() + interval '4 hours', 'open', 'high', 'followup:nurture_check_in'),
+  ('dddddddd-4444-4444-8444-444444444444', '55555555-5555-4555-8555-555555555555', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', 'fixture', 'manual callback', 'Canceled in fixture', now() - interval '1 day', 'cancelled', 'low', 'followup:manual_callback');
+
 commit;
 select jsonb_build_object(
   'sessions_created', 5,
@@ -168,7 +198,9 @@ select jsonb_build_object(
   'leads_created', 5,
   'source_attribution_created', 5,
   'audit_rows_created', 5,
-  'notifications_created', 3
+  'notifications_created', 3,
+  'appointments_created', 5,
+  'followup_tasks_created', 4
 )::text;
 `;
 }
@@ -177,6 +209,8 @@ function cleanupSql() {
   return `
 begin;
 delete from public.lead_notifications where id in (${idList(FIXTURE.notifications)});
+delete from public.tasks where id in (${idList(FIXTURE.tasks)});
+delete from public.lead_appointments where id in (${idList(FIXTURE.appointments)});
 delete from public.source_attribution where lead_id in (${idList(FIXTURE.sessions)});
 delete from public.audit_logs where id in (${idList(FIXTURE.audits)});
 delete from public.leads where id in (${idList(FIXTURE.sessions)});
@@ -190,6 +224,8 @@ select jsonb_build_object(
   'remaining_source_attribution', (select count(*) from public.source_attribution where lead_id in (${idList(FIXTURE.sessions)})),
   'remaining_audit_rows', (select count(*) from public.audit_logs where id in (${idList(FIXTURE.audits)})),
   'remaining_notifications', (select count(*) from public.lead_notifications where id in (${idList(FIXTURE.notifications)})),
+  'remaining_appointments', (select count(*) from public.lead_appointments where id in (${idList(FIXTURE.appointments)})),
+  'remaining_followup_tasks', (select count(*) from public.tasks where id in (${idList(FIXTURE.tasks)})),
   'audit_rows_retained_by_append_only_rule', true
 )::text;
 `;

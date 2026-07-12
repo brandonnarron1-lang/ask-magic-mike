@@ -76,6 +76,25 @@ export type AdminReportingSummary = {
   sources: AdminReportingGroup[];
   campaigns: AdminReportingGroup[];
   agentPerformance: AdminAgentPerformanceGroup[];
+  appointmentOps: {
+    requested: number;
+    scheduled: number;
+    confirmed: number;
+    completed: number;
+    canceled: number;
+    noShow: number;
+    requestToScheduledRate: number;
+    scheduledToCompletedRate: number;
+    noShowRate: number;
+  };
+  followupOps: {
+    open: number;
+    overdue: number;
+    dueToday: number;
+    completed: number;
+    cancelled: number;
+    completionRate: number;
+  };
   topPages: Array<{ page_url: string; count: number }>;
   leadTypes: Array<{ lead_type: string; count: number }>;
   intents: Array<{ primary_intent: string; count: number }>;
@@ -195,12 +214,73 @@ function emptySummary(
     sources: [],
     campaigns: [],
     agentPerformance: [],
+    appointmentOps: {
+      requested: 0,
+      scheduled: 0,
+      confirmed: 0,
+      completed: 0,
+      canceled: 0,
+      noShow: 0,
+      requestToScheduledRate: 0,
+      scheduledToCompletedRate: 0,
+      noShowRate: 0,
+    },
+    followupOps: {
+      open: 0,
+      overdue: 0,
+      dueToday: 0,
+      completed: 0,
+      cancelled: 0,
+      completionRate: 0,
+    },
     topPages: [],
     leadTypes: [],
     intents: [],
     timelines: [],
     hotLeads: [],
     error,
+  };
+}
+
+function summarizeAppointmentOps(rows: Array<Record<string, unknown>>) {
+  const requested = rows.filter((row) => statusOf(String(row.status || "")) === "requested").length;
+  const scheduled = rows.filter((row) => ["scheduled", "confirmed", "completed", "no_show"].includes(statusOf(String(row.status || "")))).length;
+  const confirmed = rows.filter((row) => ["confirmed", "completed", "no_show"].includes(statusOf(String(row.status || "")))).length;
+  const completed = rows.filter((row) => statusOf(String(row.status || "")) === "completed").length;
+  const canceled = rows.filter((row) => statusOf(String(row.status || "")) === "canceled").length;
+  const noShow = rows.filter((row) => statusOf(String(row.status || "")) === "no_show").length;
+  return {
+    requested,
+    scheduled,
+    confirmed,
+    completed,
+    canceled,
+    noShow,
+    requestToScheduledRate: percent(scheduled, requested + scheduled),
+    scheduledToCompletedRate: percent(completed, scheduled),
+    noShowRate: percent(noShow, confirmed),
+  };
+}
+
+function summarizeFollowupOps(rows: Array<Record<string, unknown>>, now: Date) {
+  const todayStart = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const todayEnd = todayStart + 24 * 60 * 60 * 1000;
+  const openRows = rows.filter((row) => statusOf(String(row.status || "")) === "open");
+  const completed = rows.filter((row) => statusOf(String(row.status || "")) === "done").length;
+  const cancelled = rows.filter((row) => statusOf(String(row.status || "")) === "cancelled").length;
+  return {
+    open: openRows.length,
+    overdue: openRows.filter((row) => {
+      const dueAt = parseTime(text(row.due_at));
+      return Number.isFinite(dueAt) && dueAt < now.getTime();
+    }).length,
+    dueToday: openRows.filter((row) => {
+      const dueAt = parseTime(text(row.due_at));
+      return Number.isFinite(dueAt) && dueAt >= todayStart && dueAt < todayEnd;
+    }).length,
+    completed,
+    cancelled,
+    completionRate: percent(completed, openRows.length + completed + cancelled),
   };
 }
 
@@ -317,6 +397,8 @@ export function summarizeReportingRows(
   now = new Date(),
   windowDays: 7 | 30 | 90 = 30,
   agentNames: ReadonlyMap<string, string> = new Map(),
+  appointmentRows: Array<Record<string, unknown>> = [],
+  followupRows: Array<Record<string, unknown>> = [],
 ): AdminReportingSummary {
   const normalizedRows = rows.map((row) => normalizeReportingLeadRow(row as unknown as Record<string, unknown>));
   const nonSpamRows = normalizedRows.filter((row) => !isSpamOrTest(row));
@@ -489,6 +571,8 @@ export function summarizeReportingRows(
     sources,
     campaigns,
     agentPerformance,
+    appointmentOps: summarizeAppointmentOps(appointmentRows),
+    followupOps: summarizeFollowupOps(followupRows, now),
     topPages,
     leadTypes: groupSimple(nonSpamRows, "lead_type") as Array<{ lead_type: string; count: number }>,
     intents: groupSimple(nonSpamRows, "primary_intent") as Array<{ primary_intent: string; count: number }>,
@@ -570,5 +654,43 @@ export async function loadAdminReportingSummary(
     serviceKey,
     agentIds: normalizedRows.map((row) => row.assigned_agent_id).filter((id): id is string => Boolean(id)),
   });
-  return summarizeReportingRows(normalizedRows, now, windowDays, agentNames);
+
+  const appointmentsUrl = new URL("/rest/v1/lead_appointments", supabaseUrl);
+  appointmentsUrl.searchParams.set("select", "id,status,starts_at,lead_id,assigned_agent_id,created_at");
+  appointmentsUrl.searchParams.set("created_at", "gte." + cutoff.toISOString());
+  appointmentsUrl.searchParams.set("limit", "1000");
+
+  const followupsUrl = new URL("/rest/v1/tasks", supabaseUrl);
+  followupsUrl.searchParams.set("select", "id,status,due_at,lead_id,agent_id,category,created_at");
+  followupsUrl.searchParams.set("category", "like.followup:%");
+  followupsUrl.searchParams.set("created_at", "gte." + cutoff.toISOString());
+  followupsUrl.searchParams.set("limit", "1000");
+
+  const [appointmentsResponse, followupsResponse] = await Promise.all([
+    fetch(appointmentsUrl, {
+      headers: {
+        apikey: serviceKey,
+        Authorization: "Bearer " + serviceKey,
+        "Cache-Control": "no-store",
+      },
+      cache: "no-store",
+    }),
+    fetch(followupsUrl, {
+      headers: {
+        apikey: serviceKey,
+        Authorization: "Bearer " + serviceKey,
+        "Cache-Control": "no-store",
+      },
+      cache: "no-store",
+    }),
+  ]);
+
+  const appointmentRows = appointmentsResponse.ok
+    ? ((await appointmentsResponse.json().catch(() => [])) as Array<Record<string, unknown>>)
+    : [];
+  const followupRows = followupsResponse.ok
+    ? ((await followupsResponse.json().catch(() => [])) as Array<Record<string, unknown>>)
+    : [];
+
+  return summarizeReportingRows(normalizedRows, now, windowDays, agentNames, appointmentRows, followupRows);
 }
