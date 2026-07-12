@@ -29,6 +29,8 @@
     "release:assert": "node scripts/assert-release-candidate.mjs",
     "launch:authority": "node scripts/launch-authority-report.mjs",
     "monitor:synthetic": "node scripts/synthetic-monitor.mjs",
+    "staging:local:up": "node scripts/staging-local-up.mjs",
+    "staging:local:verify": "node scripts/staging-local-verify.mjs",
     "release:preflight": "npm run release:doctor && npm run release:gate && npm run release:report && npm run launch:authority",
     "verify": "npm run typecheck && npm run test && npm run lint && npm run build",
     "smoke:prod": "TARGET_URL=https://www.askmagicmike.com node scripts/prod-smoke.mjs",
