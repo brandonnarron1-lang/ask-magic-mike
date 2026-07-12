@@ -4,7 +4,6 @@ import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = process.cwd();
-const PROJECT_ID = "C_EyesUpask-magic-mike";
 const RUN_DIR = path.join(ROOT, ".amm-run", "local-staging");
 const SUMMARY_PATH = path.join(RUN_DIR, "verify-summary.json");
 const ROUTING_SQL_PATH = path.join(
@@ -40,8 +39,18 @@ function migrationFiles() {
     .map((name) => name.replace(/\.sql$/, ""));
 }
 
-function findDbContainer() {
-  const exact = `supabase_db_${PROJECT_ID}`;
+function readProjectId() {
+  const configPath = path.join(ROOT, "supabase", "config.toml");
+  const config = fs.readFileSync(configPath, "utf8");
+  const match = config.match(/^\s*project_id\s*=\s*"([^"]+)"\s*$/m);
+  if (!match?.[1]) {
+    fail("Could not read supabase project_id from supabase/config.toml.");
+  }
+  return match[1];
+}
+
+function findDbContainer(projectId) {
+  const exact = `supabase_db_${projectId}`;
   const exactResult = run("docker", [
     "ps",
     "--filter",
@@ -49,22 +58,14 @@ function findDbContainer() {
     "--format",
     "{{.Names}}",
   ]);
+  if (exactResult.status !== 0) {
+    fail("Could not inspect local Docker containers for Supabase verification.");
+  }
+
   const exactName = exactResult.stdout.trim();
   if (exactResult.status === 0 && exactName) return exactName.split("\n")[0];
 
-  const result = run("docker", [
-    "ps",
-    "--filter",
-    "name=supabase_db_",
-    "--format",
-    "{{.Names}}",
-  ]);
-  const candidates = result.stdout
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .filter((name) => name.includes(PROJECT_ID));
-  return candidates[0] ?? null;
+  fail(`Local Supabase database container not found for project_id ${projectId}. Run pnpm run staging:local:up first.`);
 }
 
 function psql(container, sql) {
@@ -80,10 +81,8 @@ if (fs.existsSync(remoteLink)) {
   fail("Refusing local staging verification: supabase/.temp/project-ref exists.");
 }
 
-const container = findDbContainer();
-if (!container) {
-  fail("Local Supabase database container not found. Run pnpm run staging:local:up first.");
-}
+const projectId = readProjectId();
+const container = findDbContainer(projectId);
 
 const expectedMigrations = migrationFiles();
 const routingSql = fs.readFileSync(ROUTING_SQL_PATH, "utf8");
@@ -154,6 +153,7 @@ const summary = {
   generated_at_utc: new Date().toISOString(),
   target_environment: "local",
   remote_project_linked: false,
+  supabase_project_id: projectId,
   docker_container_used: container,
   expected_migration_count: expectedMigrations.length,
   expected_final_migration: latestExpected,
