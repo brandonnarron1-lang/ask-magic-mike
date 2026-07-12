@@ -5,6 +5,12 @@ import {
   ADMIN_LEAD_STATUS_ACTIONS,
   type AdminLeadStatus,
 } from "../../lib/adminLeadActions";
+import {
+  DISQUALIFIED_REASONS,
+  LOST_REASONS,
+  TERMINAL_REASON_LABELS,
+  type LeadTerminalReason,
+} from "../../lib/adminLeadLifecycle";
 import { updateLeadStatusAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +38,17 @@ function shortDate(value: string | null) {
     hour: "numeric",
     minute: "2-digit",
   }).format(date);
+}
+
+function statusActionMessage(code: string) {
+  if (code === "lifecycle_updated_audit_failed") {
+    return "Lifecycle updated, but the audit event could not be recorded.";
+  }
+  if (code === "invalid_terminal_reason") {
+    return "Choose the required reason for that terminal lifecycle action.";
+  }
+  if (code === "updated") return "Lifecycle updated.";
+  return code.replaceAll("_", " ");
 }
 
 function Badge({ children }: { children: ReactNode }) {
@@ -84,6 +101,7 @@ function StatusActionForm({
   intent,
   requiresConfirmation,
   confirmationLabel,
+  reasonSet,
 }: {
   lead: AdminLeadView;
   status: AdminLeadStatus;
@@ -91,6 +109,7 @@ function StatusActionForm({
   intent: "standard" | "caution";
   requiresConfirmation?: boolean;
   confirmationLabel?: string;
+  reasonSet?: "lost" | "disqualified";
 }) {
   if (lead.status === status) return null;
 
@@ -103,6 +122,8 @@ function StatusActionForm({
     <form action={updateLeadStatusAction} className="rounded-md border border-white/10 bg-white/[0.03] p-3">
       <input type="hidden" name="lead_id" value={lead.id} />
       <input type="hidden" name="status" value={status} />
+      <input type="hidden" name="return_to" value="/admin/leads" />
+      {reasonSet ? <ReasonSelect set={reasonSet} /> : null}
       {requiresConfirmation ? (
         <label className="mb-2 flex items-start gap-2 text-[11px] leading-4 text-[#d9ceb8]">
           <input
@@ -123,6 +144,25 @@ function StatusActionForm({
         {label}
       </button>
     </form>
+  );
+}
+
+function ReasonSelect({ set }: { set: "lost" | "disqualified" }) {
+  const reasons = set === "lost" ? LOST_REASONS : DISQUALIFIED_REASONS;
+  return (
+    <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+      Reason
+      <select
+        name="reason"
+        className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]"
+      >
+        {reasons.map((reason) => (
+          <option key={reason} value={reason}>
+            {TERMINAL_REASON_LABELS[reason as LeadTerminalReason]}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
@@ -177,11 +217,14 @@ function LeadCard({ lead }: { lead: AdminLeadView }) {
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#e2c06f]">
             {lead.funnel_type} / {lead.lead_source_surface}
           </p>
-          <h2 className="mt-2 font-serif text-2xl text-[#f4ead4]">{lead.primary_detail}</h2>
+          <Link href={`/admin/leads/${lead.id}`} className="mt-2 block font-serif text-2xl text-[#f4ead4] hover:text-[#e2c06f]">
+            {lead.primary_detail}
+          </Link>
           <p className="mt-2 text-sm text-[#d9ceb8]">{lead.contact_summary}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Badge>{lead.status}</Badge>
+          {lead.stalled_signals.length ? <Badge>Stalled</Badge> : null}
           {lead.routing_ready ? <Badge>Routing ready</Badge> : null}
           {lead.assigned_agent_id ? <Badge>Assigned</Badge> : <Badge>Unassigned</Badge>}
         </div>
@@ -293,7 +336,7 @@ export default async function AdminLeadsPage({
           </div>
           {params.status_action ? (
             <p className="mt-4 rounded-md border border-[#cda24a33] bg-[#cda24a14] p-3 text-sm text-[#f4ead4]">
-              Status action result: {params.status_action.replaceAll("_", " ")}
+              Status action result: {statusActionMessage(params.status_action)}
             </p>
           ) : null}
         </header>

@@ -1,3 +1,5 @@
+import { buildStalledLeadSignals } from "./adminLeadLifecycle";
+
 export type AdminReportingLeadRow = {
   id: string;
   created_at: string | null;
@@ -9,6 +11,10 @@ export type AdminReportingLeadRow = {
   timeline_months: number | null;
   primary_intent: string | null;
   assigned_agent_id: string | null;
+  assigned_at: string | null;
+  last_contacted_at: string | null;
+  lead_grade: string | null;
+  conversion_stage: string | null;
   address_raw: string | null;
   email: string | null;
   phone: string | null;
@@ -24,6 +30,19 @@ export type AdminReportingGroup = {
   contactable: number;
   qualifiedAppointment: number;
   converted: number;
+  conversionRate: number;
+};
+
+export type AdminAgentPerformanceGroup = {
+  agent_id: string;
+  agent_name: string;
+  assigned: number;
+  qualified: number;
+  appointments: number;
+  converted: number;
+  closedLost: number;
+  stalled: number;
+  conversionRate: number;
 };
 
 export type AdminReportingSummary = {
@@ -43,9 +62,20 @@ export type AdminReportingSummary = {
     qualified: number;
     appointment: number;
     converted: number;
+    lostDisqualified: number;
   };
+  rates: {
+    qualificationRate: number;
+    appointmentRate: number;
+    conversionRate: number;
+    closeRate: number;
+    disqualificationRate: number;
+  };
+  stalledLeadCount: number;
   statusBuckets: Record<StatusBucketKey, number>;
   sources: AdminReportingGroup[];
+  campaigns: AdminReportingGroup[];
+  agentPerformance: AdminAgentPerformanceGroup[];
   topPages: Array<{ page_url: string; count: number }>;
   leadTypes: Array<{ lead_type: string; count: number }>;
   intents: Array<{ primary_intent: string; count: number }>;
@@ -65,6 +95,10 @@ const REPORTING_SELECT = [
   "timeline_months",
   "primary_intent",
   "assigned_agent_id",
+  "assigned_at",
+  "last_contacted_at",
+  "lead_grade",
+  "conversion_stage",
   "address_raw",
   "email",
   "phone",
@@ -88,7 +122,8 @@ const QUALIFIED_STATUSES = new Set([
   "converted",
 ]);
 
-const APPOINTMENT_STATUSES = new Set(["appointment_requested", "appointment_set"]);
+const APPOINTMENT_STATUSES = new Set(["appointment_requested", "appointment_set", "converted"]);
+const CLOSED_LOST_STATUSES = new Set(["dead"]);
 const HOT_STATUSES = new Set(["new", "scored", "qualified", "appointment_requested"]);
 const HOT_LEAD_TYPES = new Set(["seller", "seller_cash_offer", "home_value"]);
 
@@ -140,7 +175,16 @@ function emptySummary(
       qualified: 0,
       appointment: 0,
       converted: 0,
+      lostDisqualified: 0,
     },
+    rates: {
+      qualificationRate: 0,
+      appointmentRate: 0,
+      conversionRate: 0,
+      closeRate: 0,
+      disqualificationRate: 0,
+    },
+    stalledLeadCount: 0,
     statusBuckets: {
       new: 0,
       working: 0,
@@ -149,6 +193,8 @@ function emptySummary(
       spam_test: 0,
     },
     sources: [],
+    campaigns: [],
+    agentPerformance: [],
     topPages: [],
     leadTypes: [],
     intents: [],
@@ -173,6 +219,10 @@ function countToday(rows: AdminReportingLeadRow[], now: Date) {
     const createdAt = parseTime(row.created_at);
     return Number.isFinite(createdAt) && createdAt >= start && createdAt < end;
   }).length;
+}
+
+function percent(numerator: number, denominator: number) {
+  return denominator > 0 ? Math.round((numerator / denominator) * 100) : 0;
 }
 
 function groupSimple(
@@ -201,6 +251,10 @@ export function normalizeReportingLeadRow(row: Record<string, unknown>): AdminRe
     timeline_months: numberOrNull(row.timeline_months),
     primary_intent: text(row.primary_intent),
     assigned_agent_id: text(row.assigned_agent_id),
+    assigned_at: text(row.assigned_at),
+    last_contacted_at: text(row.last_contacted_at),
+    lead_grade: text(row.lead_grade),
+    conversion_stage: text(row.conversion_stage),
     address_raw: text(row.address_raw),
     email: text(row.email),
     phone: text(row.phone),
@@ -241,6 +295,14 @@ export function isConverted(row: AdminReportingLeadRow): boolean {
   return statusOf(row) === "converted";
 }
 
+export function isClosedLost(row: AdminReportingLeadRow): boolean {
+  return CLOSED_LOST_STATUSES.has(statusOf(row));
+}
+
+export function agentNameFor(agentId: string, agentNames: ReadonlyMap<string, string>) {
+  return agentNames.get(agentId) || "Unknown agent";
+}
+
 export function timelineLabel(months: number | null | undefined): string {
   if (months === 0) return "Immediate / 0-30 days";
   if (months === 3) return "30-90 days";
@@ -254,6 +316,7 @@ export function summarizeReportingRows(
   rows: AdminReportingLeadRow[],
   now = new Date(),
   windowDays: 7 | 30 | 90 = 30,
+  agentNames: ReadonlyMap<string, string> = new Map(),
 ): AdminReportingSummary {
   const normalizedRows = rows.map((row) => normalizeReportingLeadRow(row as unknown as Record<string, unknown>));
   const nonSpamRows = normalizedRows.filter((row) => !isSpamOrTest(row));
@@ -271,6 +334,8 @@ export function summarizeReportingRows(
   }
 
   const sourceMap = new Map<string, AdminReportingGroup>();
+  const campaignMap = new Map<string, AdminReportingGroup>();
+  const agentMap = new Map<string, AdminAgentPerformanceGroup>();
   const pageMap = new Map<string, number>();
   const timelineMap = new Map<number | null, number>();
 
@@ -285,6 +350,7 @@ export function summarizeReportingRows(
       contactable: 0,
       qualifiedAppointment: 0,
       converted: 0,
+      conversionRate: 0,
     };
     group.count += 1;
     if (isContactable(row)) group.contactable += 1;
@@ -292,17 +358,78 @@ export function summarizeReportingRows(
     if (isConverted(row)) group.converted += 1;
     sourceMap.set(key, group);
 
+    const campaign = row.source_detail || row.source || "Unknown campaign";
+    const campaignGroup = campaignMap.get(campaign) || {
+      key: campaign,
+      label: campaign,
+      count: 0,
+      contactable: 0,
+      qualifiedAppointment: 0,
+      converted: 0,
+      conversionRate: 0,
+    };
+    campaignGroup.count += 1;
+    if (isContactable(row)) campaignGroup.contactable += 1;
+    if (isQualified(row) || isAppointment(row)) campaignGroup.qualifiedAppointment += 1;
+    if (isConverted(row)) campaignGroup.converted += 1;
+    campaignMap.set(campaign, campaignGroup);
+
+    if (row.assigned_agent_id) {
+      const agent = agentMap.get(row.assigned_agent_id) || {
+        agent_id: row.assigned_agent_id,
+        agent_name: agentNameFor(row.assigned_agent_id, agentNames),
+        assigned: 0,
+        qualified: 0,
+        appointments: 0,
+        converted: 0,
+        closedLost: 0,
+        stalled: 0,
+        conversionRate: 0,
+      };
+      agent.assigned += 1;
+      if (isQualified(row)) agent.qualified += 1;
+      if (isAppointment(row)) agent.appointments += 1;
+      if (isConverted(row)) agent.converted += 1;
+      if (isClosedLost(row)) agent.closedLost += 1;
+      if (buildStalledLeadSignals(row, now).length) agent.stalled += 1;
+      agentMap.set(row.assigned_agent_id, agent);
+    }
+
     if (row.page_url) pageMap.set(row.page_url, (pageMap.get(row.page_url) || 0) + 1);
     timelineMap.set(row.timeline_months, (timelineMap.get(row.timeline_months) || 0) + 1);
   }
 
-  const sources = [...sourceMap.values()].sort(
+  const sources = [...sourceMap.values()].map((group) => ({
+    ...group,
+    conversionRate: percent(group.converted, group.count),
+  })).sort(
     (a, b) =>
       b.count - a.count ||
       b.contactable - a.contactable ||
       b.qualifiedAppointment - a.qualifiedAppointment ||
       b.converted - a.converted ||
       a.label.localeCompare(b.label),
+  );
+
+  const campaigns = [...campaignMap.values()].map((group) => ({
+    ...group,
+    conversionRate: percent(group.converted, group.count),
+  })).sort(
+    (a, b) =>
+      b.converted - a.converted ||
+      b.count - a.count ||
+      a.label.localeCompare(b.label),
+  );
+
+  const agentPerformance = [...agentMap.values()].map((agent) => ({
+    ...agent,
+    conversionRate: percent(agent.converted, agent.assigned),
+  })).sort(
+    (a, b) =>
+      b.assigned - a.assigned ||
+      b.converted - a.converted ||
+      a.agent_name.localeCompare(b.agent_name) ||
+      a.agent_id.localeCompare(b.agent_id),
   );
 
   const topPages = [...pageMap.entries()]
@@ -345,15 +472,65 @@ export function summarizeReportingRows(
       qualified: nonSpamRows.filter(isQualified).length,
       appointment: nonSpamRows.filter(isAppointment).length,
       converted: nonSpamRows.filter(isConverted).length,
+      lostDisqualified: normalizedRows.filter((row) => isClosedLost(row) || isSpamOrTest(row)).length,
     },
+    rates: {
+      qualificationRate: percent(nonSpamRows.filter(isQualified).length, nonSpamRows.length),
+      appointmentRate: percent(nonSpamRows.filter(isAppointment).length, nonSpamRows.filter(isQualified).length),
+      conversionRate: percent(nonSpamRows.filter(isConverted).length, nonSpamRows.length),
+      closeRate: percent(
+        nonSpamRows.filter(isConverted).length,
+        nonSpamRows.filter(isConverted).length + nonSpamRows.filter(isClosedLost).length,
+      ),
+      disqualificationRate: percent(normalizedRows.filter(isSpamOrTest).length, normalizedRows.length),
+    },
+    stalledLeadCount: nonSpamRows.filter((row) => buildStalledLeadSignals(row, now).length > 0).length,
     statusBuckets,
     sources,
+    campaigns,
+    agentPerformance,
     topPages,
     leadTypes: groupSimple(nonSpamRows, "lead_type") as Array<{ lead_type: string; count: number }>,
     intents: groupSimple(nonSpamRows, "primary_intent") as Array<{ primary_intent: string; count: number }>,
     timelines,
     hotLeads,
   };
+}
+
+export async function loadAgentNameMap(input: {
+  supabaseUrl: string;
+  serviceKey: string;
+  agentIds: string[];
+}): Promise<Map<string, string>> {
+  const uniqueAgentIds = [...new Set(input.agentIds.filter(Boolean))].slice(0, 100);
+  if (!uniqueAgentIds.length) return new Map();
+
+  const url = new URL("/rest/v1/agents", input.supabaseUrl);
+  url.searchParams.set("select", "id,name");
+  url.searchParams.set("id", `in.(${uniqueAgentIds.join(",")})`);
+  url.searchParams.set("limit", "100");
+
+  const response = await fetch(url, {
+    headers: {
+      apikey: input.serviceKey,
+      Authorization: "Bearer " + input.serviceKey,
+      "Cache-Control": "no-store",
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) return new Map();
+
+  const rows = (await response.json().catch(() => [])) as Array<Record<string, unknown>>;
+  const names = new Map<string, string>();
+  for (const row of rows) {
+    const id = text(row.id);
+    const name = text(row.name);
+    if (id && name && uniqueAgentIds.includes(id) && !names.has(id)) {
+      names.set(id, name);
+    }
+  }
+  return names;
 }
 
 export async function loadAdminReportingSummary(
@@ -387,5 +564,11 @@ export async function loadAdminReportingSummary(
   }
 
   const rows = (await response.json()) as Array<Record<string, unknown>>;
-  return summarizeReportingRows(rows.map(normalizeReportingLeadRow), now, windowDays);
+  const normalizedRows = rows.map(normalizeReportingLeadRow);
+  const agentNames = await loadAgentNameMap({
+    supabaseUrl,
+    serviceKey,
+    agentIds: normalizedRows.map((row) => row.assigned_agent_id).filter((id): id is string => Boolean(id)),
+  });
+  return summarizeReportingRows(normalizedRows, now, windowDays, agentNames);
 }
