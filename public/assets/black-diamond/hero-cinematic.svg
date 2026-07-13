@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1350" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="hc-gold-bloom" cx="13%" cy="9%" r="62%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.22"/>
+      <stop offset="38%" stop-color="#D4A017" stop-opacity="0.07"/>
+      <stop offset="72%" stop-color="#D4A017" stop-opacity="0.01"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="hc-ruby-ember" cx="88%" cy="84%" r="42%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#B41C1C" stop-opacity="0.13"/>
+      <stop offset="50%" stop-color="#B41C1C" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#B41C1C" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="hc-warm-centre" cx="50%" cy="40%" r="55%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hc-ray-a" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.16"/>
+      <stop offset="55%" stop-color="#D4A017" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="hc-ray-b" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.09"/>
+      <stop offset="60%" stop-color="#D4A017" stop-opacity="0.02"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="hc-scan" x="0" y="0" width="2400" height="10" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="2400" y2="0" stroke="#D4A017" stroke-width="0.6"/>
+    </pattern>
+    <linearGradient id="hc-horizon-fade" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#080806" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#080806" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base -->
+  <rect width="2400" height="1350" fill="#080806"/>
+
+  <!-- Scan lines (upper portion only) -->
+  <rect x="0" y="60" width="2400" height="840" fill="url(#hc-scan)" opacity="0.028"/>
+
+  <!-- Gold bloom — upper-left -->
+  <rect width="2400" height="1350" fill="url(#hc-gold-bloom)"/>
+
+  <!-- Ruby ember — lower-right -->
+  <rect width="2400" height="1350" fill="url(#hc-ruby-ember)"/>
+
+  <!-- Warm centre fill -->
+  <rect width="2400" height="1350" fill="url(#hc-warm-centre)"/>
+
+  <!-- Cinematic light rays from upper-left -->
+  <polygon points="0,0 760,1350 560,1350" fill="url(#hc-ray-a)"/>
+  <polygon points="0,0 1180,1350 1020,1350" fill="url(#hc-ray-b)"/>
+  <polygon points="80,0 1560,1350 1440,1350" fill="url(#hc-ray-b)" opacity="0.6"/>
+  <polygon points="220,0 1900,1350 1800,1350" fill="url(#hc-ray-b)" opacity="0.3"/>
+
+  <!-- Horizon / Wilson roofline abstraction -->
+  <path d="M0,940 L160,870 L320,910 L520,830 L680,875 L880,820 L1040,855 L1200,840
+           L1360,870 L1520,835 L1680,865 L1840,842 L2020,880 L2200,855 L2400,872
+           L2400,1350 L0,1350 Z" fill="#060604" opacity="0.88"/>
+
+  <!-- Gold hairline on roofline -->
+  <path d="M0,940 L160,870 L320,910 L520,830 L680,875 L880,820 L1040,855 L1200,840
+           L1360,870 L1520,835 L1680,865 L1840,842 L2020,880 L2200,855 L2400,872"
+        fill="none" stroke="#D4A017" stroke-width="1.2" opacity="0.28"/>
+
+  <!-- Secondary cream hairline 4px above -->
+  <path d="M0,936 L160,866 L320,906 L520,826 L680,871 L880,816 L1040,851 L1200,836
+           L1360,866 L1520,831 L1680,861 L1840,838 L2020,876 L2200,851 L2400,868"
+        fill="none" stroke="#F5F0E8" stroke-width="0.5" opacity="0.08"/>
+
+  <!-- Vignette fade to dark at bottom -->
+  <rect width="2400" height="1350" fill="url(#hc-horizon-fade)"/>
+
+  <!-- Top hairline rule -->
+  <rect x="0" y="0" width="2400" height="1" fill="#D4A017" opacity="0.3"/>
+</svg>

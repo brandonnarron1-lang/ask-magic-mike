@@ -173,7 +173,10 @@ const UTM_PARAMS = [
 
 export default function DistributionPage() {
   return (
-    <BrandShell>
+    <BrandShell
+      cinematicSrc="/assets/black-diamond/distribution-network.svg"
+      cinematicOverlay={0.44}
+    >
       {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-5 py-4 sm:px-8">
         <Link href="/" className="text-sm font-semibold tracking-label uppercase text-gold-400/80 hover:text-gold-300 transition-colors">

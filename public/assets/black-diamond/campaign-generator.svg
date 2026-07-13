@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1350" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="cg-bloom" cx="15%" cy="12%" r="55%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.17"/>
+      <stop offset="50%" stop-color="#D4A017" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="cg-ruby-accent" cx="85%" cy="78%" r="35%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#B41C1C" stop-opacity="0.09"/>
+      <stop offset="100%" stop-color="#B41C1C" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cg-card-a" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#D4A017" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#D4A017" stop-opacity="0.01"/>
+    </linearGradient>
+    <linearGradient id="cg-bottom-fade" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#080806" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#080806" stop-opacity="0.90"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base -->
+  <rect width="2400" height="1350" fill="#080806"/>
+
+  <!-- Gold bloom -->
+  <rect width="2400" height="1350" fill="url(#cg-bloom)"/>
+  <rect width="2400" height="1350" fill="url(#cg-ruby-accent)"/>
+
+  <!-- Card stack — card C (back, rotated most) -->
+  <g transform="rotate(-6, 1200, 675)">
+    <rect x="640" y="260" width="1120" height="740" fill="url(#cg-card-a)" stroke="#D4A017" stroke-width="1" opacity="0.09" rx="10"/>
+  </g>
+
+  <!-- Card stack — card B (middle) -->
+  <g transform="rotate(-2.5, 1200, 675)">
+    <rect x="660" y="280" width="1100" height="720" fill="url(#cg-card-a)" stroke="#D4A017" stroke-width="1" opacity="0.13" rx="10"/>
+    <!-- Inner copy lines -->
+    <rect x="730" y="360" width="440" height="8" fill="#D4A017" opacity="0.08" rx="2"/>
+    <rect x="730" y="380" width="320" height="6" fill="#D4A017" opacity="0.06" rx="2"/>
+    <rect x="730" y="400" width="380" height="6" fill="#D4A017" opacity="0.06" rx="2"/>
+  </g>
+
+  <!-- Card stack — card A (front, main) -->
+  <rect x="680" y="300" width="1040" height="700" fill="url(#cg-card-a)" stroke="#D4A017" stroke-width="1.2" opacity="0.22" rx="10"/>
+
+  <!-- Card header bar -->
+  <rect x="680" y="300" width="1040" height="52" fill="#D4A017" opacity="0.04" rx="10"/>
+  <rect x="680" y="348" width="1040" height="2" fill="#D4A017" opacity="0.10"/>
+
+  <!-- Card dot nav -->
+  <circle cx="712" cy="324" r="5" fill="#D4A017" opacity="0.20"/>
+  <circle cx="728" cy="324" r="5" fill="#D4A017" opacity="0.14"/>
+  <circle cx="744" cy="324" r="5" fill="#D4A017" opacity="0.10"/>
+
+  <!-- Card content — abstract copy blocks -->
+  <rect x="730" y="380" width="420" height="12" fill="#F5F0E8" opacity="0.07" rx="3"/>
+  <rect x="730" y="403" width="310" height="9" fill="#F5F0E8" opacity="0.05" rx="3"/>
+  <rect x="730" y="422" width="360" height="9" fill="#F5F0E8" opacity="0.05" rx="3"/>
+
+  <!-- UTM tag abstract -->
+  <rect x="730" y="455" width="180" height="28" fill="#D4A017" opacity="0.06" rx="14"/>
+  <rect x="920" y="455" width="140" height="28" fill="#D4A017" opacity="0.04" rx="14"/>
+
+  <!-- Long copy block -->
+  <rect x="730" y="508" width="960" height="9" fill="#F5F0E8" opacity="0.04" rx="2"/>
+  <rect x="730" y="526" width="880" height="9" fill="#F5F0E8" opacity="0.04" rx="2"/>
+  <rect x="730" y="544" width="920" height="9" fill="#F5F0E8" opacity="0.04" rx="2"/>
+  <rect x="730" y="562" width="700" height="9" fill="#F5F0E8" opacity="0.04" rx="2"/>
+
+  <!-- CTA button block -->
+  <rect x="730" y="620" width="340" height="52" fill="#D4A017" opacity="0.10" rx="8"/>
+  <rect x="1090" y="628" width="200" height="36" fill="#D4A017" opacity="0.05" rx="6"/>
+
+  <!-- Compliance note line at bottom of card -->
+  <rect x="730" y="920" width="960" height="7" fill="#F5F0E8" opacity="0.03" rx="2"/>
+  <rect x="730" y="934" width="560" height="7" fill="#F5F0E8" opacity="0.03" rx="2"/>
+
+  <!-- Badge pill -->
+  <rect x="730" y="318" width="100" height="22" fill="#D4A017" opacity="0.14" rx="11"/>
+
+  <!-- Bottom fade -->
+  <rect width="2400" height="1350" fill="url(#cg-bottom-fade)"/>
+
+  <!-- Top hairline -->
+  <rect x="0" y="0" width="2400" height="1" fill="#D4A017" opacity="0.22"/>
+</svg>

@@ -229,7 +229,10 @@ export default function CampaignsPage() {
     visiblePresets.find((p) => p.id === activeId) ?? visiblePresets[0];
 
   return (
-    <BrandShell>
+    <BrandShell
+      cinematicSrc="/assets/black-diamond/campaign-generator.svg"
+      cinematicOverlay={0.44}
+    >
       {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-5 py-4 sm:px-8">
         <Link
