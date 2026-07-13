@@ -450,11 +450,11 @@ pre-promotion standard.
   `artifacts/release-candidate-report.{json,md}` with a single GO /
   NO-GO verdict.
 - **Database identity in `/api/admin/health`** — extracted to
-  `src/lib/admin/health-safety.ts`. Five new env vars feed it:
+  `src/lib/admin/health-safety.ts`. Six env vars feed it:
   `DATABASE_ENV`, `SUPABASE_PROJECT_REF`,
   `PRODUCTION_SUPABASE_PROJECT_REF`, `PREVIEW_SUPABASE_PROJECT_REF`,
-  `ALLOW_PREVIEW_DB_MUTATION`. The verdict is deterministic and exposes
-  a stable `safety_blockers` array.
+  `ALLOW_PREVIEW_DB_MUTATION`, and `PREVIEW_DATA_MODE`. The verdict is
+  deterministic and exposes a stable `safety_blockers` array.
 - **No-escape mutation gate.** `shouldRunMutationChecks` in
   `scripts/preview-qa-lib.mjs` now refuses to mutate when the health
   endpoint reports `safe_for_preview_mutation: false` — **even with

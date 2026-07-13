@@ -13,6 +13,7 @@ function previewEnv(over: Record<string, string | undefined> = {}) {
   return {
     VERCEL_ENV: "preview",
     DATABASE_ENV: "preview",
+    PREVIEW_DATA_MODE: "enabled",
     ALLOW_PREVIEW_DB_MUTATION: "true",
     NEXT_PUBLIC_SUPABASE_URL: `https://${PREVIEW_REF}.supabase.co`,
     SUPABASE_PROJECT_REF: PREVIEW_REF,
@@ -152,6 +153,20 @@ describe("computeHealthSafety", () => {
     );
     expect(r.safe_for_preview_mutation).toBe(false);
     expect(r.safety_blockers).toContain("allow_preview_db_mutation_not_set");
+  });
+
+  it("blocks preview mutation when PREVIEW_DATA_MODE is disabled or absent", () => {
+    const disabled = computeHealthSafety(
+      safeInput({ PREVIEW_DATA_MODE: "disabled" })
+    );
+    expect(disabled.safe_for_preview_mutation).toBe(false);
+    expect(disabled.safety_blockers).toContain("preview_data_disabled");
+
+    const absent = computeHealthSafety(
+      safeInput({ PREVIEW_DATA_MODE: undefined })
+    );
+    expect(absent.safe_for_preview_mutation).toBe(false);
+    expect(absent.safety_blockers).toContain("preview_data_disabled");
   });
 
   it("allows when DATABASE_ENV=preview and no production ref is configured", () => {

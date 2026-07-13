@@ -26,6 +26,10 @@ afterEach(() => {
   globalThis.fetch = ORIGINAL_FETCH;
   delete (process.env as Record<string, string | undefined>).NEXT_PUBLIC_SUPABASE_URL;
   delete (process.env as Record<string, string | undefined>).SUPABASE_SERVICE_ROLE_KEY;
+  delete (process.env as Record<string, string | undefined>).VERCEL_ENV;
+  delete (process.env as Record<string, string | undefined>).DATABASE_ENV;
+  delete (process.env as Record<string, string | undefined>).PREVIEW_DATA_MODE;
+  delete (process.env as Record<string, string | undefined>).ALLOW_PREVIEW_DB_MUTATION;
 });
 
 describe("AdminOps lead status actions", () => {
@@ -231,6 +235,22 @@ describe("AdminOps lead status actions", () => {
       ok: false,
       statusCode: 400,
       error: "invalid_status",
+    });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("refuses lifecycle mutation in Preview read-only mode before Supabase calls", async () => {
+    process.env.VERCEL_ENV = "preview";
+    process.env.DATABASE_ENV = "preview";
+    process.env.PREVIEW_DATA_MODE = "disabled";
+    process.env.ALLOW_PREVIEW_DB_MUTATION = "false";
+    const fetchSpy = vi.fn();
+    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+
+    await expect(updateAdminLeadStatus(LEAD_ID, "qualified")).resolves.toEqual({
+      ok: false,
+      statusCode: 503,
+      error: "preview_data_disabled",
     });
     expect(fetchSpy).not.toHaveBeenCalled();
   });

@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { computeHealthSafety } from "@/lib/admin/health-safety";
 import { createLogger } from "@/lib/observability/logger";
+import {
+  isPreviewDataDisabled,
+  previewDataMode,
+  serviceRoleAvailable,
+} from "@/lib/preview-security";
 
 const log = createLogger("admin:health");
 
@@ -52,6 +57,22 @@ export async function GET(req: NextRequest) {
     (process.env.ENABLE_AI_GENERATION ?? "false").toLowerCase() === "true";
   const flexmlsEnabled =
     (process.env.ENABLE_FLEXMLS_API ?? "false").toLowerCase() === "true";
+  const leadNotificationMode = (process.env.LEAD_NOTIFICATION_MODE ?? "disabled").toLowerCase();
+  const agentNotificationsEnabled =
+    (process.env.AGENT_NOTIFICATIONS_ENABLED ?? "false").toLowerCase() === "true";
+  const productionNotificationEnabled =
+    (process.env.LEAD_NOTIFICATION_PRODUCTION_ENABLED ?? "false").toLowerCase() === "true";
+  const customerEmailEnabled =
+    (process.env.CUSTOMER_EMAIL_ENABLED ?? "false").toLowerCase() === "true";
+  const customerSmsEnabled =
+    (process.env.CUSTOMER_SMS_ENABLED ?? "false").toLowerCase() === "true";
+  const agentSmsEnabled =
+    (process.env.AGENT_SMS_NOTIFICATIONS_ENABLED ?? "false").toLowerCase() === "true";
+  const providerDeliveryEnabled =
+    !isPreviewDataDisabled(process.env as Record<string, string | undefined>) &&
+    agentNotificationsEnabled &&
+    (leadNotificationMode === "sandbox" ||
+      (leadNotificationMode === "production" && productionNotificationEnabled));
 
   const commit =
     process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GIT_COMMIT ?? "unknown";
@@ -135,6 +156,7 @@ export async function GET(req: NextRequest) {
         supabase_url_present: supabaseUrlPresent,
         supabase_anon_key_present: supabaseAnonPresent,
         supabase_service_role_present: supabaseServicePresent,
+        service_role_available: serviceRoleAvailable(process.env as Record<string, string | undefined>),
         admin_secret_present: adminSecretPresent,
         cron_secret_present: cronSecretPresent,
         sms_provider: ["mock", "twilio"].includes(smsProvider)
@@ -156,6 +178,11 @@ export async function GET(req: NextRequest) {
         allow_preview_db_mutation:
           (process.env.ALLOW_PREVIEW_DB_MUTATION ?? "false").toLowerCase() ===
           "true",
+        preview_data_mode: previewDataMode(process.env as Record<string, string | undefined>),
+        provider_delivery_enabled: providerDeliveryEnabled,
+        customer_email_enabled: customerEmailEnabled,
+        customer_sms_enabled: customerSmsEnabled,
+        agent_sms_enabled: agentSmsEnabled,
       },
       database: {
         configured: dbConfigured,
@@ -175,7 +202,13 @@ export async function GET(req: NextRequest) {
         live_email_disabled: safety.live_email_disabled,
         is_preview_runtime: safety.is_preview_runtime,
         allow_preview_db_mutation: safety.allow_preview_db_mutation,
+        preview_data_mode: previewDataMode(process.env as Record<string, string | undefined>),
+        service_role_available: serviceRoleAvailable(process.env as Record<string, string | undefined>),
         safe_for_preview_mutation: safety.safe_for_preview_mutation,
+        provider_delivery_enabled: providerDeliveryEnabled,
+        customer_email_enabled: customerEmailEnabled,
+        customer_sms_enabled: customerSmsEnabled,
+        agent_sms_enabled: agentSmsEnabled,
         safety_blockers: safety.safety_blockers,
         deployment_protection_bypass_env_present:
           deploymentProtectionBypassEnvPresent,

@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { normalizeLeadPayload, type LeadPayload } from "../../lib/leadPayload";
 import { PUBLIC_LEAD_SAVE_ERROR } from "../../lib/publicLeadErrors";
+import {
+  PREVIEW_READ_ONLY_MESSAGE,
+  assertDatabaseMutationAllowed,
+  assertProviderDeliveryAllowed,
+} from "../../../src/lib/preview-security";
 
 const LEAD_TYPES = new Set([
   "buyer",
@@ -19,6 +24,7 @@ const LEAD_TYPES = new Set([
 type SupabaseHeaders = Record<string, string>;
 
 async function trackPosthog(event: string, properties: Record<string, unknown>) {
+  if (!assertProviderDeliveryAllowed().ok) return;
   const apiKey = process.env.POSTHOG_API_KEY;
   if (!apiKey) return;
 
@@ -41,6 +47,7 @@ async function trackPosthog(event: string, properties: Record<string, unknown>) 
 }
 
 async function generateSummary(payload: LeadPayload) {
+  if (!assertProviderDeliveryAllowed().ok) return undefined;
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return undefined;
 
@@ -88,6 +95,7 @@ async function generateSummary(payload: LeadPayload) {
 }
 
 async function sendResendEmail(payload: LeadPayload, summary?: string) {
+  if (!assertProviderDeliveryAllowed().ok) return;
   const resendKey = process.env.RESEND_API_KEY;
   const to = payload.email;
   if (!resendKey || !to) return;
@@ -344,6 +352,9 @@ async function postgrestUpsert(
 }
 
 async function insertLead(payload: LeadPayload, req: Request) {
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) throw new Error(mutation.error);
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -351,9 +362,9 @@ async function insertLead(payload: LeadPayload, req: Request) {
     console.info("Lead capture no-op: missing Supabase env vars", {
       funnel_type: payload.funnel_type,
       lead_source_surface: payload.lead_source_surface,
-      address: payload.address,
-      email: payload.email,
-      phone: payload.phone,
+      address_present: Boolean(payload.address),
+      email_present: Boolean(payload.email),
+      phone_present: Boolean(payload.phone),
     });
     return null;
   }
@@ -429,9 +440,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: validationError }, { status: 400 });
   }
 
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return NextResponse.json(
+      { error: mutation.publicMessage, code: mutation.error },
+      { status: mutation.statusCode },
+    );
+  }
+
   try {
     persistedLead = await insertLead(payload, req);
   } catch (error) {
+    if (error instanceof Error && error.message === "preview_data_disabled") {
+      return NextResponse.json(
+        { error: PREVIEW_READ_ONLY_MESSAGE, code: "preview_data_disabled" },
+        { status: 503 },
+      );
+    }
     console.error("Lead persistence failed", {
       funnel_type: payload.funnel_type,
       lead_source_surface: payload.lead_source_surface,
