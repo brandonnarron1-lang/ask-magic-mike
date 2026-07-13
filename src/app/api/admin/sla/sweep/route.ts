@@ -4,6 +4,7 @@ import {
   SlaSweepEngine,
   createSupabaseSlaSweepRepo,
 } from "@/lib/engines/sla-sweep";
+import { assertDatabaseMutationAllowed } from "@/lib/preview-security";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
@@ -48,6 +49,16 @@ async function handle(req: NextRequest) {
     }
   }
   const persist = urlPersist || bodyPersist;
+
+  if (persist) {
+    const mutation = assertDatabaseMutationAllowed(process.env as Record<string, string | undefined>);
+    if (!mutation.ok) {
+      return NextResponse.json(
+        { ok: false, error: mutation.error, message: "Preview is in read-only demonstration mode. SLA flags were not written." },
+        { status: mutation.statusCode, headers: NO_STORE },
+      );
+    }
+  }
 
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||

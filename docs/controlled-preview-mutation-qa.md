@@ -26,10 +26,11 @@ All of the following must be true before any mutation run:
    the health endpoint can verify a non-match.
 4. `PREVIEW_SUPABASE_PROJECT_REF` is set to the preview ref so the
    health endpoint can verify a match.
-5. `ALLOW_PREVIEW_DB_MUTATION=true` in the preview env only.
-6. `/api/admin/health` returns `safety.safe_for_preview_mutation: true`.
-7. Migration `00012` is applied to the preview project.
-8. `ENABLE_SMS=false` and `ENABLE_EMAIL=false` — no live sends.
+5. `PREVIEW_DATA_MODE=enabled` in the preview env only.
+6. `ALLOW_PREVIEW_DB_MUTATION=true` in the preview env only.
+7. `/api/admin/health` returns `safety.safe_for_preview_mutation: true`.
+8. Migration `00012` is applied to the preview project.
+9. `ENABLE_SMS=false` and `ENABLE_EMAIL=false` — no live sends.
 
 ## Non-mutating precheck (always run this first)
 
@@ -114,6 +115,7 @@ cleanup against a database you cannot positively identify as preview.
 - Live SMS or email enabled in preview env. → no.
 - Production Supabase ref detected by `/api/admin/health`. → no.
 - Migration 00012 not applied. → no.
+- `PREVIEW_DATA_MODE=disabled` or unset. → no.
 - `ALLOW_PREVIEW_DB_MUTATION=false` or unset. → no.
 - Health endpoint unreachable. → no.
 - Operator cannot verify the preview Supabase project from the

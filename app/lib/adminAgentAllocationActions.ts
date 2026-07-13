@@ -7,6 +7,7 @@ import {
   loadLeadForNotification,
 } from "./leadNotificationRepository";
 import { createAssignmentNotification } from "./leadNotificationService";
+import { assertDatabaseMutationAllowed } from "../../src/lib/preview-security";
 
 export type AdminAgentAssignmentResult =
   | { ok: true; action: AdminAssignmentAuditAction; warning?: string }
@@ -283,6 +284,11 @@ export async function updateAgentOperations(input: {
     return { ok: false, statusCode: 400, error: "invalid_agent_operations" };
   }
 
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return { ok: false, statusCode: mutation.statusCode, error: mutation.error };
+  }
+
   const config = configured();
   if (!config) {
     return { ok: false, statusCode: 503, error: "lead_store_not_configured" };
@@ -415,6 +421,11 @@ export async function assignLeadToAgent(
     return { ok: false, statusCode: 400, error: "invalid_agent_id" };
   }
 
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return { ok: false, statusCode: mutation.statusCode, error: mutation.error };
+  }
+
   const current = await loadCurrentLeadAssignment(leadId);
   if (!current.ok) return current;
   if (current.assigned_agent_id === agentId && current.assignment_status === "assigned") {
@@ -451,6 +462,11 @@ export async function assignLeadToAgent(
 export async function unassignLead(leadId: string): Promise<AdminAgentAssignmentResult> {
   if (!validUuid(leadId)) {
     return { ok: false, statusCode: 400, error: "invalid_lead_id" };
+  }
+
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return { ok: false, statusCode: mutation.statusCode, error: mutation.error };
   }
 
   const current = await loadCurrentLeadAssignment(leadId);

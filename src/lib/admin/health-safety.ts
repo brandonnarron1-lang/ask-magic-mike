@@ -1,3 +1,5 @@
+import { isPreviewDataDisabled, previewDataMode } from "@/lib/preview-security";
+
 /**
  * Pure helpers for `/api/admin/health` mutation-safety classification.
  *
@@ -10,19 +12,20 @@
  *
  *   1. The runtime is a preview surface:
  *      VERCEL_ENV === "preview" OR DATABASE_ENV === "preview"
- *   2. ALLOW_PREVIEW_DB_MUTATION === "true"
- *   3. Supabase is configured (url + service role key present)
- *   4. Supabase is reachable (probe result passed in)
- *   5. migration_00012_likely_applied === true (probe result passed in)
- *   6. Live SMS disabled
- *   7. Live email disabled
- *   8. SUPABASE_PROJECT_REF (or URL-derived ref) does NOT match
+ *   2. PREVIEW_DATA_MODE === "enabled"
+ *   3. ALLOW_PREVIEW_DB_MUTATION === "true"
+ *   4. Supabase is configured (url + service role key present)
+ *   5. Supabase is reachable (probe result passed in)
+ *   6. migration_00012_likely_applied === true (probe result passed in)
+ *   7. Live SMS disabled
+ *   8. Live email disabled
+ *   9. SUPABASE_PROJECT_REF (or URL-derived ref) does NOT match
  *      PRODUCTION_SUPABASE_PROJECT_REF
- *   9. Either:
+ *  10. Either:
  *      - SUPABASE_PROJECT_REF matches PREVIEW_SUPABASE_PROJECT_REF, OR
  *      - DATABASE_ENV === "preview" AND PRODUCTION_SUPABASE_PROJECT_REF
  *        is absent
- *  10. No critical warnings
+ *  11. No critical warnings
  *
  * If identity cannot be determined, the answer is "no".
  */
@@ -130,10 +133,12 @@ export function computeHealthSafety(input: HealthSafetyInput): HealthSafety {
   const isPreviewRuntime =
     (input.env.VERCEL_ENV ?? "").toLowerCase() === "preview" ||
     identity.database_env === "preview";
+  const previewDisabled = isPreviewDataDisabled(input.env);
 
   const blockers: string[] = [];
 
   if (!isPreviewRuntime) blockers.push("not_preview_runtime");
+  if (previewDisabled) blockers.push("preview_data_disabled");
   if (!allowPreviewMutation) blockers.push("allow_preview_db_mutation_not_set");
   if (!input.dbConfigured) blockers.push("db_not_configured");
   if (!input.dbReachable) blockers.push("db_unreachable");
@@ -157,6 +162,8 @@ export function computeHealthSafety(input: HealthSafetyInput): HealthSafety {
   if (!input.env.SUPABASE_SERVICE_ROLE_KEY)
     warnings.push("supabase_service_role_missing");
   if (!input.env.ADMIN_SECRET) warnings.push("admin_secret_missing");
+  if (isPreviewRuntime && previewDataMode(input.env) !== "enabled")
+    warnings.push("preview_data_disabled");
   if (input.smsEnabled) warnings.push("live_sms_enabled");
   if (input.emailEnabled) warnings.push("live_email_enabled");
   if (input.dbConfigured && !input.dbReachable) warnings.push("db_unreachable");

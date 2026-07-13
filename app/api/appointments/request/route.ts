@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requestPublicAppointment } from "../../../lib/publicAppointmentRequest";
+import { PREVIEW_READ_ONLY_MESSAGE } from "../../../../src/lib/preview-security";
 
 function clean(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -24,6 +25,8 @@ export async function POST(req: Request) {
     const publicError =
       result.error === "appointment_request_not_found"
         ? "We could not verify that appointment request. Please submit the lead form again."
+        : result.error === "preview_data_disabled"
+          ? PREVIEW_READ_ONLY_MESSAGE
         : result.error === "appointment_request_store_not_configured"
           ? "Appointment requests are temporarily unavailable."
           : "We could not save the appointment request. Please try again.";

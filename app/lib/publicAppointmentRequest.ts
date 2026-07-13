@@ -1,5 +1,6 @@
 import { updateAdminLeadStatus } from "./adminLeadActions";
 import { normalizeAppointment } from "./adminAppointmentFollowupOps";
+import { assertDatabaseMutationAllowed } from "../../src/lib/preview-security";
 
 export type PublicAppointmentRequestResult =
   | {
@@ -176,6 +177,9 @@ export async function requestPublicAppointment(input: {
 }): Promise<PublicAppointmentRequestResult> {
   if (!UUID.test(input.leadId)) return { ok: false, statusCode: 400, error: "invalid_lead_reference" };
   if (!UUID.test(input.sessionId)) return { ok: false, statusCode: 400, error: "invalid_session_reference" };
+
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) return { ok: false, statusCode: mutation.statusCode, error: mutation.error };
 
   const config = configured();
   if (!config) return { ok: false, statusCode: 503, error: "appointment_request_store_not_configured" };

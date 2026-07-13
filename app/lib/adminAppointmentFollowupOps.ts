@@ -1,5 +1,6 @@
 import { updateAdminLeadStatus, type AdminLeadStatus } from "./adminLeadActions";
 import { buildLeadStalledSignals } from "./adminLeadTimeline";
+import { assertDatabaseMutationAllowed } from "../../src/lib/preview-security";
 
 export const APPOINTMENT_STATUSES = [
   "requested",
@@ -369,6 +370,9 @@ export async function createAppointment(input: {
   const windowError = validateAppointmentWindow({ status, startsAt, endsAt, timezone });
   if (windowError) return { ok: false, statusCode: 400, error: windowError };
 
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) return { ok: false, statusCode: mutation.statusCode, error: mutation.error };
+
   const config = configured();
   if (!config) return { ok: false, statusCode: 503, error: "appointment_store_not_configured" };
 
@@ -440,6 +444,8 @@ export async function transitionAppointment(input: {
 }): Promise<AppointmentMutationResult> {
   if (!UUID.test(input.appointmentId)) return { ok: false, statusCode: 400, error: "invalid_appointment_id" };
   if (!isAppointmentStatus(input.status)) return { ok: false, statusCode: 400, error: "invalid_appointment_status" };
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) return { ok: false, statusCode: mutation.statusCode, error: mutation.error };
   const config = configured();
   if (!config) return { ok: false, statusCode: 503, error: "appointment_store_not_configured" };
 
@@ -554,6 +560,8 @@ export async function createFollowupTask(input: {
   if (!["low", "normal", "high", "urgent"].includes(priority)) {
     return { ok: false, statusCode: 400, error: "invalid_followup_priority" };
   }
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) return { ok: false, statusCode: mutation.statusCode, error: mutation.error };
   const config = configured();
   if (!config) return { ok: false, statusCode: 503, error: "followup_store_not_configured" };
   const lead = await readLead({ ...config, leadId: input.leadId });
@@ -605,6 +613,8 @@ export async function updateFollowupTask(input: {
   outcome?: string | null;
 }): Promise<FollowupMutationResult> {
   if (!UUID.test(input.taskId)) return { ok: false, statusCode: 400, error: "invalid_followup_id" };
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) return { ok: false, statusCode: mutation.statusCode, error: mutation.error };
   const config = configured();
   if (!config) return { ok: false, statusCode: 503, error: "followup_store_not_configured" };
 

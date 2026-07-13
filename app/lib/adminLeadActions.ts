@@ -8,6 +8,7 @@ import {
   type LeadTerminalReason,
   validateTerminalReasonForStatus,
 } from "./adminLeadLifecycle";
+import { assertDatabaseMutationAllowed } from "../../src/lib/preview-security";
 
 export {
   ADMIN_LEAD_STATUS_ACTIONS,
@@ -99,6 +100,11 @@ export async function updateAdminLeadStatus(
 
   if (!isAdminLeadStatus(status)) {
     return { ok: false, statusCode: 400, error: "invalid_status" };
+  }
+
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return { ok: false, statusCode: mutation.statusCode, error: mutation.error };
   }
 
   const config = configured();

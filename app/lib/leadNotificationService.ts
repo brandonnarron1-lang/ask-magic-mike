@@ -25,6 +25,7 @@ import type {
   LeadNotificationStatus,
   NotificationProvider,
 } from "./leadNotificationTypes";
+import { assertProviderDeliveryAllowed } from "../../src/lib/preview-security";
 
 export type LeadNotificationServiceResult =
   | { ok: true; notification: LeadNotificationRecord; warning?: string }
@@ -114,6 +115,10 @@ export class LeadNotificationService {
     if (context.agent.is_active === false) {
       return { ok: false, statusCode: 409, error: "assigned_agent_inactive" };
     }
+    const delivery = assertProviderDeliveryAllowed();
+    if (!delivery.ok) {
+      return { ok: false, statusCode: delivery.statusCode, error: delivery.error };
+    }
     const customerMessagingDisabled = !customerEmailEnabled() && !customerSmsEnabled();
 
     const templateVersion = templateVersionFor(channel);
@@ -188,6 +193,10 @@ export class LeadNotificationService {
     notificationId: string,
     context?: AssignmentNotificationContext,
   ): Promise<LeadNotificationServiceResult> {
+    const delivery = assertProviderDeliveryAllowed();
+    if (!delivery.ok) {
+      return { ok: false, statusCode: delivery.statusCode, error: delivery.error };
+    }
     const current = await this.repo.findById(notificationId);
     if (!current) return { ok: false, statusCode: 404, error: "notification_not_found" };
     if (current.status === "sent") return { ok: true, notification: current };
@@ -274,6 +283,10 @@ export class LeadNotificationService {
     notificationId: string,
     context?: AssignmentNotificationContext,
   ): Promise<LeadNotificationServiceResult> {
+    const delivery = assertProviderDeliveryAllowed();
+    if (!delivery.ok) {
+      return { ok: false, statusCode: delivery.statusCode, error: delivery.error };
+    }
     const current = await this.repo.findById(notificationId);
     if (!current) return { ok: false, statusCode: 404, error: "notification_not_found" };
     if (!["failed", "retry_scheduled"].includes(current.status)) {

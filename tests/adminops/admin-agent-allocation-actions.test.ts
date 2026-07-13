@@ -137,9 +137,47 @@ afterEach(() => {
   delete (process.env as Record<string, string | undefined>).SUPABASE_SERVICE_ROLE_KEY;
   delete (process.env as Record<string, string | undefined>).AGENT_NOTIFICATIONS_ENABLED;
   delete (process.env as Record<string, string | undefined>).LEAD_NOTIFICATION_MODE;
+  delete (process.env as Record<string, string | undefined>).VERCEL_ENV;
+  delete (process.env as Record<string, string | undefined>).DATABASE_ENV;
+  delete (process.env as Record<string, string | undefined>).PREVIEW_DATA_MODE;
+  delete (process.env as Record<string, string | undefined>).ALLOW_PREVIEW_DB_MUTATION;
 });
 
 describe("AdminOps agent allocation actions", () => {
+  it("refuses assignment and agent mutations in Preview read-only mode before Supabase calls", async () => {
+    process.env.VERCEL_ENV = "preview";
+    process.env.DATABASE_ENV = "preview";
+    process.env.PREVIEW_DATA_MODE = "disabled";
+    process.env.ALLOW_PREVIEW_DB_MUTATION = "false";
+    const fetchSpy = vi.fn();
+    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+
+    await expect(assignLeadToAgent(LEAD_ID, AGENT_ID)).resolves.toEqual({
+      ok: false,
+      statusCode: 503,
+      error: "preview_data_disabled",
+    });
+    await expect(unassignLead(LEAD_ID)).resolves.toEqual({
+      ok: false,
+      statusCode: 503,
+      error: "preview_data_disabled",
+    });
+    await expect(updateAgentOperations({
+      agentId: AGENT_ID,
+      isActive: true,
+      maxDailyLeads: 10,
+      currentLoad: 0,
+      priorityScore: 50,
+      notificationEmail: true,
+      notificationSms: false,
+    })).resolves.toEqual({
+      ok: false,
+      statusCode: 503,
+      error: "preview_data_disabled",
+    });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
   it("GETs current assignment, assigns through narrow PATCH, writes audit, then creates a notification event", async () => {
     const captured = mockAssignmentFetch(null);
 

@@ -17,6 +17,10 @@ beforeEach(() => {
   delete (process.env as Record<string, string | undefined>).OPENAI_API_KEY;
   delete (process.env as Record<string, string | undefined>).POSTHOG_API_KEY;
   delete (process.env as Record<string, string | undefined>).RESEND_API_KEY;
+  delete (process.env as Record<string, string | undefined>).VERCEL_ENV;
+  delete (process.env as Record<string, string | undefined>).DATABASE_ENV;
+  delete (process.env as Record<string, string | undefined>).PREVIEW_DATA_MODE;
+  delete (process.env as Record<string, string | undefined>).ALLOW_PREVIEW_DB_MUTATION;
 });
 
 afterEach(() => {
@@ -26,6 +30,10 @@ afterEach(() => {
   delete (process.env as Record<string, string | undefined>).OPENAI_API_KEY;
   delete (process.env as Record<string, string | undefined>).POSTHOG_API_KEY;
   delete (process.env as Record<string, string | undefined>).RESEND_API_KEY;
+  delete (process.env as Record<string, string | undefined>).VERCEL_ENV;
+  delete (process.env as Record<string, string | undefined>).DATABASE_ENV;
+  delete (process.env as Record<string, string | undefined>).PREVIEW_DATA_MODE;
+  delete (process.env as Record<string, string | undefined>).ALLOW_PREVIEW_DB_MUTATION;
 });
 
 function makeRequest(body: unknown) {
@@ -108,6 +116,33 @@ describe("POST /api/leads — home_value validation", () => {
     expect(res.status).toBe(200);
     const body = await json(res);
     expect(body.message).toMatch(/mike/i);
+  });
+
+  it("refuses valid lead writes in Preview read-only mode before database or provider calls", async () => {
+    process.env.VERCEL_ENV = "preview";
+    process.env.DATABASE_ENV = "preview";
+    process.env.PREVIEW_DATA_MODE = "disabled";
+    process.env.ALLOW_PREVIEW_DB_MUTATION = "false";
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://production-ref.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = ["production", "service", "role"].join("-");
+    process.env.RESEND_API_KEY = ["resend", "key"].join("-");
+    const fetchSpy = vi.fn();
+    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+
+    const res = await POST(makeRequest({
+      funnel_type: "home_value",
+      address: "123 Nash St NW, Wilson NC",
+      email: "jane@example.com",
+      phone: "2525551212",
+    }));
+
+    expect(res.status).toBe(503);
+    const body = await json(res);
+    expect(body).toMatchObject({
+      code: "preview_data_disabled",
+    });
+    expect(String(body.error)).toMatch(/read-only demonstration mode/i);
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
 

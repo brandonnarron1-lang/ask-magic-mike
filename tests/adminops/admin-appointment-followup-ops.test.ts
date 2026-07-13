@@ -1,14 +1,69 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildDailyActionQueue,
   canTransitionAppointment,
+  createAppointment,
+  createFollowupTask,
   disabledCalendarAdapter,
+  transitionAppointment,
+  updateFollowupTask,
   validateAppointmentWindow,
 } from "../../app/lib/adminAppointmentFollowupOps";
 
 const NOW = new Date("2026-07-12T14:00:00.000Z");
+const LEAD_ID = "11111111-1111-4111-8111-111111111111";
+const APPOINTMENT_ID = "22222222-2222-4222-8222-222222222222";
+const TASK_ID = "33333333-3333-4333-8333-333333333333";
+const ORIGINAL_FETCH = globalThis.fetch;
+
+afterEach(() => {
+  globalThis.fetch = ORIGINAL_FETCH;
+  delete (process.env as Record<string, string | undefined>).NEXT_PUBLIC_SUPABASE_URL;
+  delete (process.env as Record<string, string | undefined>).SUPABASE_SERVICE_ROLE_KEY;
+  delete (process.env as Record<string, string | undefined>).VERCEL_ENV;
+  delete (process.env as Record<string, string | undefined>).DATABASE_ENV;
+  delete (process.env as Record<string, string | undefined>).PREVIEW_DATA_MODE;
+  delete (process.env as Record<string, string | undefined>).ALLOW_PREVIEW_DB_MUTATION;
+});
 
 describe("AdminOps appointment and follow-up operations", () => {
+  it("refuses appointment and follow-up mutations in Preview read-only mode before Supabase calls", async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://fake.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = ["fake", "service", "role"].join("-");
+    process.env.VERCEL_ENV = "preview";
+    process.env.DATABASE_ENV = "preview";
+    process.env.PREVIEW_DATA_MODE = "disabled";
+    process.env.ALLOW_PREVIEW_DB_MUTATION = "false";
+    const fetchSpy = vi.fn();
+    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+
+    await expect(createAppointment({ leadId: LEAD_ID })).resolves.toEqual({
+      ok: false,
+      statusCode: 503,
+      error: "preview_data_disabled",
+    });
+    await expect(transitionAppointment({ appointmentId: APPOINTMENT_ID, status: "scheduled" })).resolves.toEqual({
+      ok: false,
+      statusCode: 503,
+      error: "preview_data_disabled",
+    });
+    await expect(createFollowupTask({
+      leadId: LEAD_ID,
+      taskType: "appointment_confirmation",
+      dueAt: "2026-07-12T16:00:00.000Z",
+    })).resolves.toEqual({
+      ok: false,
+      statusCode: 503,
+      error: "preview_data_disabled",
+    });
+    await expect(updateFollowupTask({ taskId: TASK_ID, action: "complete" })).resolves.toEqual({
+      ok: false,
+      statusCode: 503,
+      error: "preview_data_disabled",
+    });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
   it("defines the canonical appointment transition map", () => {
     expect(canTransitionAppointment("requested", "scheduled")).toBe(true);
     expect(canTransitionAppointment("scheduled", "confirmed")).toBe(true);

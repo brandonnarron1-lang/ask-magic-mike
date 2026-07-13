@@ -54,6 +54,12 @@ declare namespace NodeJS {
 
     // Admin
     ADMIN_SECRET: string;
+    DATABASE_ENV?: string;
+    SUPABASE_PROJECT_REF?: string;
+    PRODUCTION_SUPABASE_PROJECT_REF?: string;
+    PREVIEW_SUPABASE_PROJECT_REF?: string;
+    ALLOW_PREVIEW_DB_MUTATION?: string;
+    PREVIEW_DATA_MODE?: string;
     SLA_ACCEPT_MS?: string;
     SLA_CONTACT_MS?: string;
   }
