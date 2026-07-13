@@ -6,6 +6,8 @@ import { trackEvent } from "../../lib/analytics";
 import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { starterPrompts } from "../../lib/constants";
 import { type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
+import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
+import { AppointmentRequestCTA } from "./AppointmentRequestCTA";
 import { LuxuryCard } from "./LuxuryCard";
 
 type Message = {
@@ -28,6 +30,13 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
   const [submitting, setSubmitting] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
   const [lastMessage, setLastMessage] = useState<string | null>(null);
+  const [chatSessionId] = useState(() =>
+    typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : "",
+  );
+  const [leadReference, setLeadReference] = useState<{ leadId: string | null; sessionId: string | null }>({
+    leadId: null,
+    sessionId: null,
+  });
 
   function markStarted(stepName: string) {
     if (chatStarted) return;
@@ -73,6 +82,33 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
             "For address-specific advice, send the property address and best contact information so Mike can follow up.",
         },
       ]);
+      try {
+        const leadRes = await fetch("/api/leads", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            funnel_type: "chat",
+            lead_source_surface: surface,
+            question: trimmed,
+            status: "new",
+            assigned_agent_id: null,
+            widget_session_id: chatSessionId || undefined,
+            attribution,
+          }),
+        });
+        const leadData = (await leadRes.json()) as {
+          lead_id?: string | null;
+          session_id?: string | null;
+          error?: string;
+        };
+        if (!leadRes.ok) throw new Error(publicLeadErrorMessage(leadData.error));
+        setLeadReference({
+          leadId: leadData.lead_id || null,
+          sessionId: leadData.session_id || chatSessionId || null,
+        });
+      } catch {
+        setChatError("Mike's answer came through, but the appointment request path could not be prepared. You can still submit the home-value form for direct follow-up.");
+      }
     } catch {
       setChatError("Mike's answer did not come through. You can retry, or send the property address through the home-value path for direct follow-up.");
     } finally {
@@ -150,6 +186,18 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
                 Retry
               </button>
             ) : null}
+          </div>
+        ) : null}
+        {leadReference.leadId ? (
+          <div className="mt-5">
+            <AppointmentRequestCTA
+              leadId={leadReference.leadId}
+              sessionId={leadReference.sessionId}
+              requestSurface={surface}
+              funnelName="ask_mike_chat"
+              attribution={attribution}
+              compact
+            />
           </div>
         ) : null}
         <form onSubmit={submit} className="mt-5">

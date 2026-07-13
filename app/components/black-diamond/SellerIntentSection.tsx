@@ -6,7 +6,7 @@ import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { conditionOptions, sellerPaths, timelineOptions } from "../../lib/constants";
 import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
 import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
-import { brand } from "../../lib/constants";
+import { AppointmentRequestCTA } from "./AppointmentRequestCTA";
 import { TextAreaField, TextField } from "./FormField";
 import { LuxuryCard } from "./LuxuryCard";
 
@@ -21,6 +21,10 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
   );
   const [sellerMessage, setSellerMessage] = useState<string | null>(null);
   const [sellerSuccess, setSellerSuccess] = useState(false);
+  const [leadReference, setLeadReference] = useState<{ leadId: string | null; sessionId: string | null }>({
+    leadId: null,
+    sessionId: null,
+  });
   const [submitting, setSubmitting] = useState(false);
 
   async function submitSeller(event: FormEvent<HTMLFormElement>) {
@@ -62,10 +66,16 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = (await res.json()) as { message?: string; error?: string };
+      const data = (await res.json()) as {
+        message?: string;
+        error?: string;
+        lead_id?: string | null;
+        session_id?: string | null;
+      };
       if (!res.ok) throw new Error(publicLeadErrorMessage(data.error));
       trackEvent("lead_created", attribution, { funnel_name: "seller", step_name: "seller_intent" });
       setSellerMessage(data.message || "Got it. Mike will review it.");
+      setLeadReference({ leadId: data.lead_id || null, sessionId: data.session_id || null });
       setSellerSuccess(true);
       event.currentTarget.reset();
     } catch (error) {
@@ -128,9 +138,16 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
         >
           <p>{sellerMessage}</p>
           {sellerSuccess ? (
-            <a href={brand.calendlyUrl} className="amm-secondary-button mt-4 px-5 py-3">
-              Schedule a Conversation
-            </a>
+            <div className="mt-4">
+              <AppointmentRequestCTA
+                leadId={leadReference.leadId}
+                sessionId={leadReference.sessionId}
+                requestSurface={surface}
+                funnelName="seller"
+                attribution={attribution}
+                compact
+              />
+            </div>
           ) : null}
         </div>
       ) : null}

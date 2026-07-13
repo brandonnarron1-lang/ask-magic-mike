@@ -200,6 +200,27 @@ Stalled-lead signals are centralized in the AdminOps lifecycle model. Current th
 
 Each stalled signal includes a reason, age, and next-action label. The signal is advisory; operators still use the normal assignment and lifecycle actions.
 
+## Public Appointment Requests
+
+Public funnel CTAs create appointment requests only after a lead has been persisted. Supported public surfaces are the homepage home-value path, dedicated home-value page, seller and We Buy Houses path, Ask Mike chat capture, and the embedded widget paths.
+
+The public request boundary:
+
+- verifies the submitted `lead_id` belongs to the submitted session reference,
+- creates only a `requested` appointment row,
+- never creates `scheduled` or `confirmed` appointments from the browser,
+- preserves original lead source and campaign attribution,
+- updates the lead lifecycle to `appointment_requested`,
+- writes append-only audit evidence where available,
+- ensures one open `followup:appointment_confirmation` task,
+- returns an already-requested state for repeat clicks or browser retries.
+
+Customer-facing copy must say the request was received and that the team will confirm time and details. It must not say booked, confirmed, reserved, or calendar event created until an operator schedules or confirms the appointment in AdminOps.
+
+If the appointment row is saved but the follow-up task or audit write is degraded, the public response still treats the request as received. AdminOps should use the daily action queue and lead detail timeline to verify whether a confirmation follow-up exists.
+
+External calendar writes remain disabled. No Google Calendar, provider email, SMS, or customer notification is triggered by the public appointment request.
+
 ## Reporting Definitions
 
 The allocation and reporting views use the current lead store to show:

@@ -316,17 +316,22 @@ async function postgrestUpsert(
   url: string,
   headers: SupabaseHeaders,
   row: Record<string, unknown>,
+  returnRepresentation = false,
 ) {
   const response = await fetch(url, {
     method: "POST",
     headers: {
       ...headers,
-      Prefer: "resolution=merge-duplicates,return=minimal",
+      Prefer: `resolution=merge-duplicates,return=${returnRepresentation ? "representation" : "minimal"}`,
     },
     body: JSON.stringify(withoutUndefined(row)),
   });
 
-  if (response.ok) return;
+  if (response.ok) {
+    if (!returnRepresentation) return [];
+    if (typeof response.json !== "function") return [];
+    return (await response.json().catch(() => [])) as Array<Record<string, unknown>>;
+  }
 
   const errorText = await response.text();
   console.error("LeadOps production write failed", {
@@ -350,7 +355,7 @@ async function insertLead(payload: LeadPayload, req: Request) {
       email: payload.email,
       phone: payload.phone,
     });
-    return;
+    return null;
   }
 
   const sessionId = sessionIdFor(payload);
@@ -366,11 +371,18 @@ async function insertLead(payload: LeadPayload, req: Request) {
     buildSessionRow(payload, req, sessionId),
   );
 
-  await postgrestUpsert(
-    supabaseUrl + "/rest/v1/leads?on_conflict=session_id",
+  const rows = await postgrestUpsert(
+    supabaseUrl + "/rest/v1/leads?on_conflict=session_id&select=id,session_id,widget_session_id",
     headers,
     buildLeadRow(payload, req, sessionId),
+    true,
   );
+  const lead = rows[0];
+  return {
+    lead_id: typeof lead?.id === "string" ? lead.id : null,
+    session_id: typeof lead?.session_id === "string" ? lead.session_id : sessionId,
+    widget_session_id: typeof lead?.widget_session_id === "string" ? lead.widget_session_id : sessionId,
+  };
 }
 
 function validateLead(payload: LeadPayload) {
@@ -402,6 +414,7 @@ function validateLead(payload: LeadPayload) {
 
 export async function POST(req: Request) {
   let raw: unknown;
+  let persistedLead: Awaited<ReturnType<typeof insertLead>> = null;
   try {
     raw = await req.json();
   } catch {
@@ -417,7 +430,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    await insertLead(payload, req);
+    persistedLead = await insertLead(payload, req);
   } catch (error) {
     console.error("Lead persistence failed", {
       funnel_type: payload.funnel_type,
@@ -449,5 +462,7 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     message: summary ? "Got it. " + summary : "Got it. Mike will follow up shortly.",
+    lead_id: persistedLead?.lead_id ?? null,
+    session_id: persistedLead?.session_id ?? payload.widget_session_id ?? null,
   });
 }

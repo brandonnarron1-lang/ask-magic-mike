@@ -63,6 +63,16 @@ function successInsertResponse(status = 201) {
   return { ok: true, status: 201, statusText: "Created", text: async () => "" } as Response;
 }
 
+function successRepresentationResponse(rows: Array<Record<string, unknown>>) {
+  return {
+    ok: true,
+    status: 201,
+    statusText: "Created",
+    json: async () => rows,
+    text: async () => JSON.stringify(rows),
+  } as Response;
+}
+
 function configureSupabaseEnv() {
   process.env.NEXT_PUBLIC_SUPABASE_URL = "https://fake.supabase.co";
   process.env.SUPABASE_SERVICE_ROLE_KEY = "fake-key";
@@ -642,6 +652,36 @@ describe("POST /api/leads — response shape", () => {
     }));
     const body = await json(res);
     expect(body.message).toContain("Mike");
+  });
+
+  it("returns safe lead and session references when persistence succeeds", async () => {
+    configureSupabaseEnv();
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL) => {
+      const urlStr = String(url);
+      if (urlStr.includes("/rest/v1/sessions")) return successInsertResponse();
+      if (urlStr.includes("/rest/v1/leads")) {
+        return successRepresentationResponse([{
+          id: "33333333-3333-4333-8333-333333333333",
+          session_id: "11111111-1111-4111-8111-111111111111",
+          widget_session_id: "11111111-1111-4111-8111-111111111111",
+        }]);
+      }
+      return { ok: true, status: 200, json: async () => ({}) } as Response;
+    }) as unknown as typeof fetch;
+
+    const res = await POST(makeRequest({
+      funnel_type: "home_value",
+      address: "123 Nash St NW",
+      email: "jane@example.com",
+      phone: "2525551212",
+      widget_session_id: "11111111-1111-4111-8111-111111111111",
+    }));
+
+    expect(res.status).toBe(200);
+    const body = await json(res);
+    expect(body.lead_id).toBe("33333333-3333-4333-8333-333333333333");
+    expect(body.session_id).toBe("11111111-1111-4111-8111-111111111111");
+    expect(JSON.stringify(body)).not.toContain("fake-key");
   });
 });
 
