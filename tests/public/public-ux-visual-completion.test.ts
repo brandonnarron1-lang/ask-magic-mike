@@ -38,16 +38,23 @@ describe("public UX visual completion", () => {
   it("keeps form success, validation, and appointment handoff states visible", () => {
     const homeValue = read("app/components/black-diamond/HomeValueFunnel.tsx");
     expect(homeValue).toContain("What happens next");
-    expect(homeValue).toContain("Schedule a Conversation");
+    expect(homeValue).toContain("AppointmentRequestCTA");
+    expect(homeValue).toContain("request a conversation");
     expect(homeValue).toContain('role="alert"');
     expect(homeValue).toContain("aria-busy");
     expect(homeValue).toContain("aria-invalid");
 
     const seller = read("app/components/black-diamond/SellerIntentSection.tsx");
     expect(seller).toContain("seller-form-status");
-    expect(seller).toContain("Schedule a Conversation");
+    expect(seller).toContain("AppointmentRequestCTA");
     expect(seller).toContain('aria-live="polite"');
     expect(seller).toContain("aria-busy");
+
+    const cta = read("app/components/black-diamond/AppointmentRequestCTA.tsx");
+    expect(cta).toContain("Your appointment request has been received.");
+    expect(cta).toContain("No calendar event has been created yet.");
+    expect(cta).not.toContain("Schedule a Conversation");
+    expect(cta).not.toContain("appointment booked");
   });
 
   it("keeps chat loading, retry, and handoff states available", () => {

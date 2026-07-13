@@ -3,9 +3,10 @@
 import { useState, type FormEvent } from "react";
 import { trackEvent } from "../../lib/analytics";
 import { initialAttribution, readAttribution } from "../../lib/attribution";
-import { brand, timelineOptions } from "../../lib/constants";
+import { timelineOptions } from "../../lib/constants";
 import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
 import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
+import { AppointmentRequestCTA } from "./AppointmentRequestCTA";
 import { LuxuryCard } from "./LuxuryCard";
 import { ProgressBar } from "./ProgressBar";
 import { SelectField, TextField } from "./FormField";
@@ -34,6 +35,10 @@ export function HomeValueFunnel({
   const [timeline, setTimeline] = useState(timelineOptions[1]);
   const [formError, setFormError] = useState<string | null>(null);
   const [leadMessage, setLeadMessage] = useState<string | null>(null);
+  const [leadReference, setLeadReference] = useState<{ leadId: string | null; sessionId: string | null }>({
+    leadId: null,
+    sessionId: null,
+  });
   const [submitting, setSubmitting] = useState(false);
 
   function submitAddress(event: FormEvent<HTMLFormElement>) {
@@ -91,7 +96,12 @@ export function HomeValueFunnel({
           attribution,
         }),
       });
-      const data = (await res.json()) as { message?: string; error?: string };
+      const data = (await res.json()) as {
+        message?: string;
+        error?: string;
+        lead_id?: string | null;
+        session_id?: string | null;
+      };
       if (!res.ok) throw new Error(publicLeadErrorMessage(data.error));
       trackEvent("lead_created", attribution, { funnel_name: "home_value", step_name: "thank_you" });
       if (surface === "widget") {
@@ -99,6 +109,7 @@ export function HomeValueFunnel({
         window.parent?.postMessage({ type: "askmagicmike:lead_created" }, "*");
       }
       setLeadMessage(data.message || "Got it. Mike will follow up shortly.");
+      setLeadReference({ leadId: data.lead_id || null, sessionId: data.session_id || null });
       setStep(4);
     } catch (error) {
       setFormError(publicLeadErrorMessage(error instanceof Error ? error.message : undefined));
@@ -195,21 +206,16 @@ export function HomeValueFunnel({
             <ul className="mt-3 space-y-2 text-sm leading-6 text-[#d9ceb8]">
               <li>Mike reviews the address and timing you shared.</li>
               <li>Our Town Properties follows up through your provided contact path.</li>
-              <li>You can schedule a conversation now if you want a faster handoff.</li>
+              <li>You can request a conversation now if you want a faster handoff.</li>
             </ul>
           </div>
-          <a
-            href={brand.calendlyUrl}
-            onClick={() =>
-              trackEvent("appointment_click", attribution, {
-                funnel_name: "home_value",
-                step_name: "thank_you",
-              })
-            }
-            className="amm-primary-button px-6 py-4"
-          >
-            Schedule a Conversation
-          </a>
+          <AppointmentRequestCTA
+            leadId={leadReference.leadId}
+            sessionId={leadReference.sessionId}
+            requestSurface={surface}
+            funnelName="home_value"
+            attribution={attribution}
+          />
           <p className="text-sm leading-6 text-[#d9ceb8]">
             Prefer a direct call? Our Town Properties can be reached through the contact information on ourtownproperties.com.
           </p>
