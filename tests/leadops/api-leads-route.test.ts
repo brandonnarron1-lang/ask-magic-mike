@@ -1,9 +1,9 @@
 /**
  * HTTP-level tests for the Black Diamond /api/leads route handler.
  *
- * All external services (Supabase, OpenAI, PostHog, Resend) are absent
- * (no env vars set), so calls gracefully no-op and the route still returns
- * the correct HTTP shape.  One fetch-mock section validates that full
+ * External providers (OpenAI, PostHog, Resend) are absent unless mocked.
+ * Missing Supabase persistence is a truthful 503 instead of a synthetic
+ * success. One fetch-mock section validates that full
  * attribution fields reach the Supabase insert payload.
  */
 import { describe, expect, it, vi, afterEach, beforeEach } from "vitest";
@@ -106,16 +106,18 @@ describe("POST /api/leads — home_value validation", () => {
     expect(res.status).toBe(400);
   });
 
-  it("200 when all required fields present", async () => {
+  it("503 when all required fields are present but persistence is not configured", async () => {
     const res = await POST(makeRequest({
       funnel_type: "home_value",
       address: "123 Nash St NW, Wilson NC",
       email: "jane@example.com",
       phone: "2525551212",
     }));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(503);
     const body = await json(res);
-    expect(body.message).toMatch(/mike/i);
+    expect(body).toMatchObject({ code: "lead_store_not_configured" });
+    expect(body.error).toBe(PUBLIC_LEAD_SAVE_ERROR);
+    expect(body).not.toHaveProperty("lead_id");
   });
 
   it("refuses valid lead writes in Preview read-only mode before database or provider calls", async () => {
@@ -161,9 +163,11 @@ describe("POST /api/leads — seller validation", () => {
     expect(res.status).toBe(400);
   });
 
-  it("200 when address + phone present", async () => {
+  it("503 when address and phone are present but persistence is not configured", async () => {
     const res = await POST(makeRequest({ funnel_type: "seller", address: "123 Nash St", phone: "2525551212" }));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(503);
+    const body = await json(res);
+    expect(body).toMatchObject({ code: "lead_store_not_configured" });
   });
 });
 
@@ -177,9 +181,11 @@ describe("POST /api/leads — chat validation", () => {
     expect(body.error).toMatch(/question/i);
   });
 
-  it("200 when question present", async () => {
+  it("503 when question is present but persistence is not configured", async () => {
     const res = await POST(makeRequest({ funnel_type: "chat", question: "What is the Wilson market like?" }));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(503);
+    const body = await json(res);
+    expect(body).toMatchObject({ code: "lead_store_not_configured" });
   });
 });
 
@@ -193,19 +199,25 @@ describe("POST /api/leads — appointment validation", () => {
     expect(body.error).toMatch(/email or phone/i);
   });
 
-  it("200 when email provided (no phone)", async () => {
+  it("503 when email is provided but persistence is not configured", async () => {
     const res = await POST(makeRequest({ funnel_type: "appointment", email: "jane@example.com" }));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(503);
+    const body = await json(res);
+    expect(body).toMatchObject({ code: "lead_store_not_configured" });
   });
 
-  it("200 when phone provided (no email)", async () => {
+  it("503 when phone is provided but persistence is not configured", async () => {
     const res = await POST(makeRequest({ funnel_type: "appointment", phone: "2525551212" }));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(503);
+    const body = await json(res);
+    expect(body).toMatchObject({ code: "lead_store_not_configured" });
   });
 
-  it("200 when both email and phone provided", async () => {
+  it("503 when email and phone are provided but persistence is not configured", async () => {
     const res = await POST(makeRequest({ funnel_type: "appointment", email: "jane@example.com", phone: "2525551212" }));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(503);
+    const body = await json(res);
+    expect(body).toMatchObject({ code: "lead_store_not_configured" });
   });
 });
 
@@ -217,7 +229,7 @@ describe("POST /api/leads — widget validation", () => {
     expect(res.status).toBe(400);
   });
 
-  it("200 when all required fields present", async () => {
+  it("503 when all required widget fields are present but persistence is not configured", async () => {
     const res = await POST(makeRequest({
       funnel_type: "widget",
       address: "123 Nash St NW",
@@ -225,7 +237,9 @@ describe("POST /api/leads — widget validation", () => {
       phone: "2525551212",
       attribution: { source: "widget", medium: "embed" },
     }));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(503);
+    const body = await json(res);
+    expect(body).toMatchObject({ code: "lead_store_not_configured" });
   });
 });
 
@@ -669,7 +683,24 @@ describe("POST /api/leads — timeline mapping", () => {
 // ─── Response shape ───────────────────────────────────────────────────────────
 
 describe("POST /api/leads — response shape", () => {
+  function mockSuccessfulPersistence() {
+    configureSupabaseEnv();
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL) => {
+      const urlStr = String(url);
+      if (urlStr.includes("/rest/v1/sessions")) return successInsertResponse();
+      if (urlStr.includes("/rest/v1/leads")) {
+        return successRepresentationResponse([{
+          id: "33333333-3333-4333-8333-333333333333",
+          session_id: "11111111-1111-4111-8111-111111111111",
+          widget_session_id: "11111111-1111-4111-8111-111111111111",
+        }]);
+      }
+      return { ok: true, status: 200, json: async () => ({}) } as Response;
+    }) as unknown as typeof fetch;
+  }
+
   it("returns JSON with message field on success", async () => {
+    mockSuccessfulPersistence();
     const res = await POST(makeRequest({
       funnel_type: "seller",
       address: "123 Nash St",
@@ -681,6 +712,7 @@ describe("POST /api/leads — response shape", () => {
   });
 
   it("includes 'Mike' in default message when OpenAI absent", async () => {
+    mockSuccessfulPersistence();
     const res = await POST(makeRequest({
       funnel_type: "chat",
       question: "What is my home worth?",

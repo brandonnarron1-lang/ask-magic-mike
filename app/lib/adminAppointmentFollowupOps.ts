@@ -694,7 +694,8 @@ export function buildDailyActionQueue(input: {
 
   const leadLabel = (leadId: string) => {
     const lead = leadMap.get(leadId);
-    return text(lead?.address) || text(lead?.address_raw) || text(lead?.property_address) || text(lead?.name) || leadId;
+    const name = [text(lead?.first_name), text(lead?.last_name)].filter(Boolean).join(" ");
+    return text(lead?.address_raw) || name || leadId;
   };
   const owner = (leadId: string, agentId?: string | null) =>
     agentId || text(leadMap.get(leadId)?.assigned_agent_id) || "Unassigned";
@@ -835,7 +836,7 @@ export async function loadAdminActionQueue(): Promise<AdminActionQueueResult> {
   if (!config) return { configured: false, generatedAt: now.toISOString(), items: [] };
 
   const leadsUrl = new URL("/rest/v1/leads", config.supabaseUrl);
-  leadsUrl.searchParams.set("select", "id,created_at,status,assigned_agent_id,assigned_at,last_contacted_at,lead_grade,timeline_months,address,address_raw,property_address,name");
+  leadsUrl.searchParams.set("select", "id,created_at,status,assigned_agent_id,assigned_at,last_contacted_at,lead_grade,timeline_months,address_raw,first_name,last_name");
   leadsUrl.searchParams.set("order", "created_at.desc");
   leadsUrl.searchParams.set("limit", "500");
 
