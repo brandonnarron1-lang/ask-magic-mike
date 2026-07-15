@@ -359,14 +359,14 @@ async function insertLead(payload: LeadPayload, req: Request) {
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseServiceKey) {
-    console.info("Lead capture no-op: missing Supabase env vars", {
+    console.info("Lead capture refused: missing Supabase env vars", {
       funnel_type: payload.funnel_type,
       lead_source_surface: payload.lead_source_surface,
       address_present: Boolean(payload.address),
       email_present: Boolean(payload.email),
       phone_present: Boolean(payload.phone),
     });
-    return null;
+    throw new Error("lead_store_not_configured");
   }
 
   const sessionId = sessionIdFor(payload);
@@ -425,7 +425,7 @@ function validateLead(payload: LeadPayload) {
 
 export async function POST(req: Request) {
   let raw: unknown;
-  let persistedLead: Awaited<ReturnType<typeof insertLead>> = null;
+  let persistedLead: Awaited<ReturnType<typeof insertLead>>;
   try {
     raw = await req.json();
   } catch {
@@ -454,6 +454,12 @@ export async function POST(req: Request) {
     if (error instanceof Error && error.message === "preview_data_disabled") {
       return NextResponse.json(
         { error: PREVIEW_READ_ONLY_MESSAGE, code: "preview_data_disabled" },
+        { status: 503 },
+      );
+    }
+    if (error instanceof Error && error.message === "lead_store_not_configured") {
+      return NextResponse.json(
+        { error: PUBLIC_LEAD_SAVE_ERROR, code: "lead_store_not_configured" },
         { status: 503 },
       );
     }
