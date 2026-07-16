@@ -272,11 +272,13 @@ describe("POST /api/leads — attribution forwarded to Supabase insert", () => {
         const body = init?.body && typeof init.body === "string"
           ? JSON.parse(init.body) as Record<string, unknown>
           : {};
-        captured.push({
-          table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads",
-          body,
-          url: urlStr,
-        });
+        if ((init?.method || "GET") === "POST") {
+          captured.push({
+            table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads",
+            body,
+            url: urlStr,
+          });
+        }
         return successInsertResponse();
       }
       return { ok: true, status: 200, json: async () => ({}) } as Response;
@@ -314,7 +316,225 @@ describe("POST /api/leads — attribution forwarded to Supabase insert", () => {
     expect(row.widget_session_id).toBe("11111111-1111-4111-8111-111111111111");
     expect(row.lead_type).toBe("home_value");
     expect(row.primary_intent).toBe("sell");
-    expect(row.status).toBe("new");
+    expect(row.status).toBe("qualified");
+  });
+});
+
+describe("POST /api/leads — owned home-value lifecycle", () => {
+  it("normalizes, qualifies, attributes, routes, audits, and creates a skipped notification outbox row", async () => {
+    configureSupabaseEnv();
+    const leadId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const sessionId = "11111111-1111-4111-8111-111111111111";
+    const agentId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+    const auditId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+    const notificationId = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
+    const writes: Array<{ table: string; method: string; body: Record<string, unknown>; url: string }> = [];
+
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      const urlStr = String(url);
+      const method = init?.method || "GET";
+      const body = init?.body && typeof init.body === "string"
+        ? JSON.parse(init.body) as Record<string, unknown>
+        : {};
+      const table = urlStr.includes("/rest/v1/sessions")
+        ? "sessions"
+        : urlStr.includes("/rest/v1/source_attribution")
+          ? "source_attribution"
+          : urlStr.includes("/rest/v1/agents")
+            ? "agents"
+            : urlStr.includes("/rest/v1/lead_routing")
+              ? "lead_routing"
+              : urlStr.includes("/rest/v1/audit_logs")
+                ? "audit_logs"
+                : urlStr.includes("/rest/v1/lead_notifications")
+                  ? "lead_notifications"
+                  : "leads";
+      if (method !== "GET") writes.push({ table, method, body, url: urlStr });
+
+      if (urlStr.includes("/rest/v1/leads") && method === "GET" && urlStr.includes("or=")) {
+        return successRepresentationResponse([]);
+      }
+      if (urlStr.includes("/rest/v1/agents") && method === "GET") {
+        return successRepresentationResponse([{
+          id: agentId,
+          name: "Notification Sandbox Agent",
+          email: "agent@example.test",
+          phone: "2525550101",
+          notification_phone: "2525550101",
+          role: "primary",
+          is_active: true,
+          availability: "available",
+          max_daily_leads: 50,
+          current_load: 0,
+          priority_score: 100,
+        }]);
+      }
+      if (urlStr.includes("/rest/v1/leads") && method === "GET" && urlStr.includes("assigned_agent_id=")) {
+        return successRepresentationResponse([]);
+      }
+      if (urlStr.includes("/rest/v1/leads") && method === "GET" && urlStr.includes("id=eq." + leadId)) {
+        return successRepresentationResponse([{
+          id: leadId,
+          created_at: "2026-07-15T20:00:00.000Z",
+          status: "assigned",
+          assigned_agent_id: agentId,
+          assigned_at: "2026-07-15T20:00:00.000Z",
+          assignment_status: "assigned",
+          first_name: "Notification",
+          last_name: "Sandbox",
+          address_raw: "123 Nash St NW, Wilson NC",
+          primary_intent: "sell",
+          timeline_months: 3,
+          lead_type: "home_value",
+          source: "facebook",
+          source_detail: "home_value_page / paid_social / seller_q3_wilson",
+          page_url: "https://www.ourtownproperties.com/ask-mike/",
+          question_raw: "Timeline: 30-60 days",
+        }]);
+      }
+      if (urlStr.includes("/rest/v1/lead_notifications") && method === "GET") {
+        return successRepresentationResponse([]);
+      }
+      if (urlStr.includes("/rest/v1/sessions")) return successInsertResponse();
+      if (urlStr.includes("/rest/v1/leads") && method === "POST") {
+        return successRepresentationResponse([{ id: leadId, session_id: sessionId, widget_session_id: sessionId }]);
+      }
+      if (urlStr.includes("/rest/v1/leads") && method === "PATCH") {
+        return successRepresentationResponse([{ id: leadId, assigned_agent_id: agentId, assigned_at: "2026-07-15T20:00:00.000Z", assignment_status: "assigned" }]);
+      }
+      if (urlStr.includes("/rest/v1/source_attribution")) return successInsertResponse();
+      if (urlStr.includes("/rest/v1/lead_routing")) return successInsertResponse();
+      if (urlStr.includes("/rest/v1/audit_logs")) {
+        return successRepresentationResponse([{ id: auditId, created_at: "2026-07-15T20:00:01.000Z" }]);
+      }
+      if (urlStr.includes("/rest/v1/lead_notifications") && method === "POST") {
+        return successRepresentationResponse([{
+          id: notificationId,
+          lead_id: leadId,
+          agent_id: agentId,
+          assignment_audit_id: auditId,
+          notification_type: "agent_assignment",
+          channel: "email",
+          recipient_type: "agent",
+          template_version: "agent_assignment_email_v1",
+          idempotency_key: "lead_assignment:test",
+          status: "pending",
+          attempt_count: 0,
+          max_attempts: 3,
+          metadata: {},
+        }]);
+      }
+      if (urlStr.includes("/rest/v1/lead_notifications") && method === "PATCH") {
+        return successRepresentationResponse([{
+          id: notificationId,
+          lead_id: leadId,
+          agent_id: agentId,
+          assignment_audit_id: auditId,
+          notification_type: "agent_assignment",
+          channel: "email",
+          recipient_type: "agent",
+          template_version: "agent_assignment_email_v1",
+          idempotency_key: "lead_assignment:test",
+          status: "skipped",
+          attempt_count: 0,
+          max_attempts: 3,
+          provider: "disabled",
+          error_code: "agent_notifications_disabled",
+          metadata: {},
+        }]);
+      }
+      return successInsertResponse();
+    }) as unknown as typeof fetch;
+
+    const res = await POST(makeRequest({
+      funnel_type: "home_value",
+      address: "123 Nash St NW, Wilson NC",
+      email: "Notification.Sandbox@example.test",
+      phone: "252-555-0100",
+      timeline: "30-60 days",
+      widget_session_id: sessionId,
+      attribution: {
+        source: "facebook",
+        medium: "paid_social",
+        campaign: "seller_q3_wilson",
+      },
+    }));
+
+    expect(res.status).toBe(200);
+    const responseBody = await json(res);
+    expect(responseBody).toMatchObject({ lead_id: leadId, session_id: sessionId });
+
+    const leadWrite = writes.find((write) => write.table === "leads" && write.method === "POST")?.body;
+    expect(leadWrite).toMatchObject({
+      normalized_email: "notification.sandbox@example.test",
+      normalized_phone: "2525550100",
+      normalized_property_address: "123 nash st nw wilson nc",
+      lead_grade: "A",
+      conversion_stage: "qualified",
+      status: "qualified",
+      is_duplicate: false,
+    });
+    expect(writes.some((write) => write.table === "source_attribution")).toBe(true);
+    expect(writes.some((write) => write.table === "lead_routing")).toBe(true);
+    expect(writes.some((write) => write.table === "audit_logs" && write.body.action === "lead.assigned")).toBe(true);
+    expect(writes.some((write) => write.table === "lead_notifications" && write.method === "POST")).toBe(true);
+    expect(writes.some((write) => write.table === "lead_notifications" && write.method === "PATCH" && write.body.status === "skipped")).toBe(true);
+  });
+
+  it("marks duplicate leads and skips assignment, routing, audit, and notification side effects", async () => {
+    configureSupabaseEnv();
+    const duplicateOf = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const duplicateLead = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
+    const writes: Array<{ table: string; method: string; body: Record<string, unknown> }> = [];
+
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      const urlStr = String(url);
+      const method = init?.method || "GET";
+      const body = init?.body && typeof init.body === "string"
+        ? JSON.parse(init.body) as Record<string, unknown>
+        : {};
+      const table = urlStr.includes("/rest/v1/sessions")
+        ? "sessions"
+        : urlStr.includes("/rest/v1/source_attribution")
+          ? "source_attribution"
+          : urlStr.includes("/rest/v1/lead_routing")
+            ? "lead_routing"
+            : urlStr.includes("/rest/v1/audit_logs")
+              ? "audit_logs"
+              : urlStr.includes("/rest/v1/lead_notifications")
+                ? "lead_notifications"
+                : "leads";
+      if (method !== "GET") writes.push({ table, method, body });
+      if (urlStr.includes("/rest/v1/leads") && method === "GET") {
+        return successRepresentationResponse([{ id: duplicateOf }]);
+      }
+      if (urlStr.includes("/rest/v1/leads") && method === "POST") {
+        return successRepresentationResponse([{ id: duplicateLead, session_id: "22222222-2222-4222-8222-222222222222" }]);
+      }
+      return successInsertResponse();
+    }) as unknown as typeof fetch;
+
+    const res = await POST(makeRequest({
+      funnel_type: "home_value",
+      address: "123 Nash St NW, Wilson NC",
+      email: "notification.sandbox@example.test",
+      phone: "2525550100",
+      widget_session_id: "22222222-2222-4222-8222-222222222222",
+    }));
+
+    expect(res.status).toBe(200);
+    const responseBody = await json(res);
+    expect(responseBody.duplicate_of_lead_id).toBe(duplicateOf);
+    const leadWrite = writes.find((write) => write.table === "leads" && write.method === "POST")?.body;
+    expect(leadWrite).toMatchObject({
+      is_duplicate: true,
+      duplicate_of_lead_id: duplicateOf,
+      conversion_stage: "duplicate",
+    });
+    expect(writes.some((write) => write.table === "source_attribution")).toBe(true);
+    expect(writes.some((write) => write.table === "lead_routing")).toBe(false);
+    expect(writes.some((write) => write.table === "audit_logs")).toBe(false);
+    expect(writes.some((write) => write.table === "lead_notifications")).toBe(false);
   });
 });
 
@@ -331,7 +551,9 @@ describe("POST /api/leads — Supabase schema compatibility", () => {
         const body = init?.body && typeof init.body === "string"
           ? JSON.parse(init.body) as Record<string, unknown>
           : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        if ((init?.method || "GET") === "POST") {
+          captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        }
         return successInsertResponse();
       }
       return { ok: true, status: 200, json: async () => ({}) } as Response;
@@ -382,7 +604,9 @@ describe("POST /api/leads — Supabase schema compatibility", () => {
         const body = init?.body && typeof init.body === "string"
           ? JSON.parse(init.body) as Record<string, unknown>
           : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        if ((init?.method || "GET") === "POST") {
+          captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        }
         return successInsertResponse();
       }
       return { ok: true, status: 200, json: async () => ({}) } as Response;
@@ -421,7 +645,9 @@ describe("POST /api/leads — Supabase schema compatibility", () => {
         const body = init?.body && typeof init.body === "string"
           ? JSON.parse(init.body) as Record<string, unknown>
           : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        if ((init?.method || "GET") === "POST") {
+          captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        }
         return successInsertResponse();
       }
       return { ok: true, status: 200, json: async () => ({}) } as Response;
@@ -455,7 +681,9 @@ describe("POST /api/leads — Supabase schema compatibility", () => {
         const body = init?.body && typeof init.body === "string"
           ? JSON.parse(init.body) as Record<string, unknown>
           : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        if ((init?.method || "GET") === "POST") {
+          captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        }
         return successInsertResponse();
       }
       return { ok: true, status: 200, json: async () => ({}) } as Response;
@@ -488,7 +716,9 @@ describe("POST /api/leads — Supabase schema compatibility", () => {
         const body = init?.body && typeof init.body === "string"
           ? JSON.parse(init.body) as Record<string, unknown>
           : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        if ((init?.method || "GET") === "POST") {
+          captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        }
         return successInsertResponse();
       }
       return { ok: true, status: 200, json: async () => ({}) } as Response;
@@ -528,7 +758,9 @@ describe("POST /api/leads — Supabase schema compatibility", () => {
         const body = init?.body && typeof init.body === "string"
           ? JSON.parse(init.body) as Record<string, unknown>
           : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        if ((init?.method || "GET") === "POST") {
+          captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        }
         return successInsertResponse();
       }
       return { ok: true, status: 200, json: async () => ({}) } as Response;
@@ -574,7 +806,9 @@ describe("POST /api/leads — Supabase schema compatibility", () => {
         const body = init?.body && typeof init.body === "string"
           ? JSON.parse(init.body) as Record<string, unknown>
           : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        if ((init?.method || "GET") === "POST") {
+          captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        }
         if (urlStr.includes("/rest/v1/leads") && "address" in body) {
           return missingColumnResponse("address");
         }
@@ -601,10 +835,12 @@ describe("POST /api/leads — Supabase schema compatibility", () => {
     configureSupabaseEnv();
 
     const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
       const urlStr = String(url);
       if (urlStr.includes("supabase")) {
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body: {} });
+        if ((init?.method || "GET") === "POST") {
+          captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body: {} });
+        }
         if (urlStr.includes("/rest/v1/sessions")) return successInsertResponse();
         return {
           ok: false,
@@ -646,7 +882,9 @@ describe("POST /api/leads — timeline mapping", () => {
         const body = init?.body && typeof init.body === "string"
           ? JSON.parse(init.body) as Record<string, unknown>
           : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        if ((init?.method || "GET") === "POST") {
+          captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
+        }
         return successInsertResponse();
       }
       return { ok: true, status: 200, json: async () => ({}) } as Response;
