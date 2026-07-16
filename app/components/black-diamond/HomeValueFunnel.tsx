@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { trackEvent } from "../../lib/analytics";
 import { initialAttribution, readAttribution } from "../../lib/attribution";
+import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
 import { timelineOptions } from "../../lib/constants";
 import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
 import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
@@ -28,6 +29,7 @@ export function HomeValueFunnel({
   const [attribution] = useState<Attribution>(() =>
     typeof window === "undefined" ? initialAttribution : readAttribution(attributionOverrides),
   );
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [step, setStep] = useState(1);
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
@@ -40,6 +42,10 @@ export function HomeValueFunnel({
     sessionId: null,
   });
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    setSubmissionId(tryCreateBrowserSubmissionId());
+  }, []);
 
   function submitAddress(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -76,6 +82,10 @@ export function HomeValueFunnel({
       setFormError("Enter a phone number with area code.");
       return;
     }
+    if (!submissionId) {
+      setFormError("This browser could not create a secure submission reference. Refresh and try again.");
+      return;
+    }
 
     setSubmitting(true);
     trackEvent("phone_submit", attribution, { funnel_name: "home_value", step_name: "phone_timeline" });
@@ -93,6 +103,7 @@ export function HomeValueFunnel({
           timeline,
           status: "new",
           assigned_agent_id: null,
+          widget_session_id: submissionId,
           attribution,
         }),
       });
@@ -103,10 +114,13 @@ export function HomeValueFunnel({
         session_id?: string | null;
       };
       if (!res.ok) throw new Error(publicLeadErrorMessage(data.error));
-      trackEvent("lead_created", attribution, { funnel_name: "home_value", step_name: "thank_you" });
-      if (surface === "widget") {
-        trackEvent("widget_lead_created", attribution, { funnel_name: "home_value" });
-        window.parent?.postMessage({ type: "askmagicmike:lead_created" }, "*");
+      const idempotentReplay = res.headers.get("X-AMM-Idempotent-Replay") === "1";
+      if (!idempotentReplay) {
+        trackEvent("lead_created", attribution, { funnel_name: "home_value", step_name: "thank_you" });
+        if (surface === "widget") {
+          trackEvent("widget_lead_created", attribution, { funnel_name: "home_value" });
+          window.parent?.postMessage({ type: "askmagicmike:lead_created" }, "*");
+        }
       }
       setLeadMessage(data.message || "Got it. Mike will follow up shortly.");
       setLeadReference({ leadId: data.lead_id || null, sessionId: data.session_id || null });

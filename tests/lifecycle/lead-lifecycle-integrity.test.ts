@@ -156,7 +156,10 @@ describe("SLA sweep acceptedAt", () => {
     const { readFileSync } = await import("node:fs");
     const { resolve } = await import("node:path");
     const src = readFileSync(
-      resolve(process.cwd(), "src/lib/engines/sla-sweep.ts"),
+      resolve(
+        process.cwd(),
+        "src/lib/persistence/supabase/sla-sweep-repository.ts",
+      ),
       "utf-8"
     );
     expect(src).toContain("lead_routing");

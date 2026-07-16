@@ -56,7 +56,9 @@ describe("AdminOps allocation route guards", () => {
   });
 
   it("keeps allocation read model GET-only and bounded", () => {
-    const view = read("app/lib/adminAgentAllocationView.ts");
+    const facade = read("app/lib/adminAgentAllocationView.ts");
+    const view = read("app/lib/persistence/supabase/adminAgentAllocationView.ts");
+    expect(facade).toContain("persistence/supabase/adminAgentAllocationView");
     expect(view).toContain('new URL("/rest/v1/agents"');
     expect(view).toContain('new URL("/rest/v1/leads"');
     expect(view).toContain("loadRecentAssignmentAuditEvents");
@@ -65,22 +67,24 @@ describe("AdminOps allocation route guards", () => {
     expect(view).not.toContain("body:");
   });
 
-  it("keeps allocation actions server-only with assignment PATCH and audit writers isolated", () => {
+  it("keeps allocation actions server-only with atomic persistence isolated", () => {
     const routeActions = read("app/admin/allocation/actions.ts");
     const libActions = read("app/lib/adminAgentAllocationActions.ts");
-    const audit = read("app/lib/adminAssignmentAudit.ts");
+    const adapter = read("app/lib/persistence/supabasePostgrestAdapter.ts");
+    const migration = read("supabase/migrations/20260716043829_infra_02_atomic_lifecycle.sql");
     expect(routeActions).toContain('"use server"');
     expect(routeActions).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
-    expect(libActions).toContain('method: "PATCH"');
-    expect(libActions).toContain('new URL("/rest/v1/audit_logs"');
-    expect(libActions).toContain('action: "agent.operations_updated"');
-    expect(libActions).toContain('method: "POST"');
-    expect(libActions).not.toMatch(/method:\s*["'`](PUT|DELETE)["'`]/);
+    expect(libActions).toContain("mutateAdminAssignment");
+    expect(libActions).toContain("mutateAdminAgentOperations");
+    expect(libActions).not.toContain("/rest/v1/");
+    expect(libActions).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
     expect(libActions).not.toContain("/api/leads");
     expect(libActions).not.toContain("/rest/v1/lead_notifications");
-    expect(audit).toContain('new URL("/rest/v1/audit_logs"');
-    expect(audit).toContain('method: "POST"');
-    expect(audit).not.toMatch(/method:\s*["'`](PATCH|PUT|DELETE)["'`]/);
-    expect(audit).not.toContain("/api/leads");
+    expect(adapter).toContain('this.rpc("mutate_admin_assignment_v1"');
+    expect(adapter).toContain('this.rpc("mutate_admin_agent_operations_v1"');
+    expect(migration).toContain("CREATE OR REPLACE FUNCTION public.mutate_admin_assignment_v1");
+    expect(migration).toContain("INSERT INTO public.agent_assignments");
+    expect(migration).toContain("INSERT INTO public.audit_logs");
+    expect(migration).toContain("INSERT INTO public.lead_notifications");
   });
 });

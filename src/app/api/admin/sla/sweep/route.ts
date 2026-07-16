@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkAdminAuth } from "@/lib/admin/auth";
 import {
   SlaSweepEngine,
-  createSupabaseSlaSweepRepo,
 } from "@/lib/engines/sla-sweep";
+import { createSupabaseSlaSweepRepo } from "@/lib/persistence/supabase/sla-sweep-repository";
 import { assertDatabaseMutationAllowed } from "@/lib/preview-security";
 
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -66,14 +66,14 @@ async function handle(req: NextRequest) {
   ) {
     return NextResponse.json(
       {
-        ok: true,
-        note: "mock_mode",
+        ok: false,
+        error: "sla_store_not_configured",
         scanned: 0,
         breaches: [],
         flaggedCount: 0,
         mode: isCronAuth ? "cron" : "admin",
       },
-      { headers: NO_STORE }
+      { status: 503, headers: NO_STORE }
     );
   }
 

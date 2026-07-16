@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { trackEvent } from "../../lib/analytics";
 import { initialAttribution, readAttribution } from "../../lib/attribution";
+import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
 import { conditionOptions, sellerPaths, timelineOptions } from "../../lib/constants";
 import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
 import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
@@ -19,6 +20,7 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
   const [attribution] = useState<Attribution>(() =>
     typeof window === "undefined" ? initialAttribution : readAttribution(),
   );
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [sellerMessage, setSellerMessage] = useState<string | null>(null);
   const [sellerSuccess, setSellerSuccess] = useState(false);
   const [leadReference, setLeadReference] = useState<{ leadId: string | null; sessionId: string | null }>({
@@ -27,12 +29,17 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
   });
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    setSubmissionId(tryCreateBrowserSubmissionId());
+  }, []);
+
   async function submitSeller(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     setSellerMessage(null);
     setSellerSuccess(false);
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
     const payload = {
       funnel_type: "seller",
       lead_source_surface: surface,
@@ -45,11 +52,16 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
       notes: clean(formData.get("notes")) || undefined,
       status: "new",
       assigned_agent_id: null,
+      widget_session_id: submissionId || undefined,
       attribution,
     };
 
     if (payload.address.length < 5 || payload.phone.replace(/\D/g, "").length < 10) {
       setSellerMessage("Property address and phone are required.");
+      return;
+    }
+    if (!submissionId) {
+      setSellerMessage("This browser could not create a secure submission reference. Refresh and try again.");
       return;
     }
 
@@ -73,11 +85,15 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
         session_id?: string | null;
       };
       if (!res.ok) throw new Error(publicLeadErrorMessage(data.error));
-      trackEvent("lead_created", attribution, { funnel_name: "seller", step_name: "seller_intent" });
+      const idempotentReplay = res.headers.get("X-AMM-Idempotent-Replay") === "1";
+      if (!idempotentReplay) {
+        trackEvent("lead_created", attribution, { funnel_name: "seller", step_name: "seller_intent" });
+      }
       setSellerMessage(data.message || "Got it. Mike will review it.");
       setLeadReference({ leadId: data.lead_id || null, sessionId: data.session_id || null });
       setSellerSuccess(true);
-      event.currentTarget.reset();
+      form.reset();
+      setSubmissionId(tryCreateBrowserSubmissionId());
     } catch (error) {
       setSellerMessage(publicLeadErrorMessage(error instanceof Error ? error.message : undefined));
     } finally {

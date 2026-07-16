@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { normalizeLeadPayload, type LeadPayload } from "../../lib/leadPayload";
-import { completePublicLeadLifecycle } from "../../lib/publicLeadLifecycle";
 import { PUBLIC_LEAD_SAVE_ERROR } from "../../lib/publicLeadErrors";
+import {
+  configuredNotificationMode,
+  createDefaultPersistence,
+} from "../../lib/persistence/defaultPersistence";
+import type { LeadLifecycleCaptureResult } from "../../lib/persistence/contracts";
 import {
   PREVIEW_READ_ONLY_MESSAGE,
   assertDatabaseMutationAllowed,
@@ -22,11 +26,15 @@ const LEAD_TYPES = new Set([
   "unknown",
 ]);
 
-type SupabaseHeaders = Record<string, string>;
-type SupabaseConfig = { supabaseUrl: string; headers: SupabaseHeaders };
-type DuplicateLead = { id: string } | null;
+const PUBLIC_LEAD_CONFLICT_ERROR =
+  "That submission conflicts with an existing request. Please refresh and submit again, or call Our Town Properties at 252-243-7700.";
+const PROVIDER_PHASE_TIMEOUT_MS = 3_000;
 
-async function trackPosthog(event: string, properties: Record<string, unknown>) {
+async function trackPosthog(
+  event: string,
+  properties: Record<string, unknown>,
+  signal?: AbortSignal,
+) {
   if (!assertProviderDeliveryAllowed().ok) return;
   const apiKey = process.env.POSTHOG_API_KEY;
   if (!apiKey) return;
@@ -36,6 +44,7 @@ async function trackPosthog(event: string, properties: Record<string, unknown>) 
   try {
     await fetch(host + "/capture/", {
       method: "POST",
+      signal,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         api_key: apiKey,
@@ -49,55 +58,64 @@ async function trackPosthog(event: string, properties: Record<string, unknown>) 
   }
 }
 
-async function generateSummary(payload: LeadPayload) {
+async function generateSummary(payload: LeadPayload, signal?: AbortSignal) {
   if (!assertProviderDeliveryAllowed().ok) return undefined;
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return undefined;
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + apiKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are Mike Eatmon at Our Town Properties. Reply with one concise, practical sentence for a Wilson, NC real estate lead. Do not invent MLS data, pricing, or property facts.",
-        },
-        {
-          role: "user",
-          content: [
-            "Funnel: " + payload.funnel_type,
-            "Surface: " + payload.lead_source_surface,
-            "Address: " + (payload.address || ""),
-            "Name: " + (payload.name || ""),
-            "Email: " + (payload.email || ""),
-            "Phone: " + (payload.phone || ""),
-            "Timeline: " + (payload.timeline || ""),
-            "Condition: " + (payload.condition || ""),
-            "Question: " + (payload.question || ""),
-            "Notes: " + (payload.notes || ""),
-          ].join("\n"),
-        },
-      ],
-      max_tokens: 90,
-      temperature: 0.35,
-    }),
-  });
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      signal,
+      headers: {
+        Authorization: "Bearer " + apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are Mike Eatmon at Our Town Properties. Reply with one concise, practical sentence for a Wilson, NC real estate lead. Do not invent MLS data, pricing, or property facts.",
+          },
+          {
+            role: "user",
+            content: [
+              "Funnel: " + payload.funnel_type,
+              "Surface: " + payload.lead_source_surface,
+              "Address: " + (payload.address || ""),
+              "Name: " + (payload.name || ""),
+              "Email: " + (payload.email || ""),
+              "Phone: " + (payload.phone || ""),
+              "Timeline: " + (payload.timeline || ""),
+              "Condition: " + (payload.condition || ""),
+              "Question: " + (payload.question || ""),
+              "Notes: " + (payload.notes || ""),
+            ].join("\n"),
+          },
+        ],
+        max_tokens: 90,
+        temperature: 0.35,
+      }),
+    });
 
-  if (!res.ok) return undefined;
-  const data = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const summary = data.choices?.[0]?.message?.content;
-  return typeof summary === "string" ? summary.trim() : undefined;
+    if (!res.ok) return undefined;
+    const data = (await res.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const summary = data.choices?.[0]?.message?.content;
+    return typeof summary === "string" ? summary.trim() : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
-async function sendResendEmail(payload: LeadPayload, summary?: string) {
+async function sendResendEmail(
+  payload: LeadPayload,
+  summary?: string,
+  signal?: AbortSignal,
+) {
   if (!assertProviderDeliveryAllowed().ok) return;
   const resendKey = process.env.RESEND_API_KEY;
   const to = payload.email;
@@ -112,19 +130,52 @@ async function sendResendEmail(payload: LeadPayload, summary?: string) {
     (summary ? "\n\n" + summary : "") +
     "\n\nCalendly: https://calendly.com/askmagicmike";
 
-  await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + resendKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: "Ask Magic Mike <mike@askmagicmike.com>",
-      to,
-      subject,
-      text,
-    }),
-  });
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      signal,
+      headers: {
+        Authorization: "Bearer " + resendKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Ask Magic Mike <mike@askmagicmike.com>",
+        to,
+        subject,
+        text,
+      }),
+    });
+  } catch {
+    // A provider failure must never turn a committed lead into a public error.
+  }
+}
+
+async function runPostCommitProviders(payload: LeadPayload) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), PROVIDER_PHASE_TIMEOUT_MS);
+  const eventProperties = {
+    funnel_name: payload.funnel_type,
+    lead_source_surface: payload.lead_source_surface,
+    step_name: payload.funnel_type === "seller" ? "seller_intent" : "lead_submit",
+    distinct_id: payload.email || payload.phone || "anonymous",
+    address: payload.address,
+    email: payload.email,
+    phone: payload.phone,
+    timeline: payload.timeline,
+    ...payload.attribution,
+  };
+
+  try {
+    const posthog = trackPosthog("lead_created", eventProperties, controller.signal);
+    const summary = await generateSummary(payload, controller.signal);
+    await sendResendEmail(payload, summary, controller.signal);
+    await posthog;
+    return summary;
+  } catch {
+    return undefined;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function leadTypeFor(payload: LeadPayload) {
@@ -328,13 +379,12 @@ function buildSessionRow(payload: LeadPayload, req: Request, sessionId: string) 
   };
 }
 
-function buildLeadRow(payload: LeadPayload, req: Request, sessionId: string, duplicate: DuplicateLead) {
+function buildLeadRow(payload: LeadPayload, req: Request, sessionId: string) {
   const leadType = leadTypeFor(payload);
   const { firstName, lastName } = splitName(payload);
   const notes = buildNotes(payload);
   const qualification = qualificationFor(payload);
   const address = payload.property_address || payload.address || undefined;
-  const duplicateId = duplicate?.id || null;
 
   return {
     session_id: sessionId,
@@ -348,8 +398,8 @@ function buildLeadRow(payload: LeadPayload, req: Request, sessionId: string, dup
     normalized_property_address: normalizePropertyAddress(address),
     spam_score: 0,
     spam_reasons: [],
-    is_duplicate: Boolean(duplicateId),
-    duplicate_of_lead_id: duplicateId,
+    is_duplicate: false,
+    duplicate_of_lead_id: null,
     state: "NC",
     address_raw: address || null,
     primary_intent: primaryIntentFor(leadType, payload),
@@ -360,10 +410,10 @@ function buildLeadRow(payload: LeadPayload, req: Request, sessionId: string, dup
     consent_email: false,
     consent_timestamp: new Date().toISOString(),
     consent_language_version: "canonical_v1",
-    status: duplicateId ? "new" : qualification.status,
+    status: qualification.status,
     lead_type: leadType,
-    lead_grade: duplicateId ? "D" : qualification.lead_grade,
-    conversion_stage: duplicateId ? "duplicate" : qualification.status === "qualified" ? "qualified" : null,
+    lead_grade: qualification.lead_grade,
+    conversion_stage: qualification.status === "qualified" ? "qualified" : null,
     source: sourceFor(payload),
     source_detail: sourceDetailFor(payload),
     page_url: pageUrlFor(payload, req),
@@ -371,79 +421,10 @@ function buildLeadRow(payload: LeadPayload, req: Request, sessionId: string, dup
   };
 }
 
-function withoutUndefined(row: Record<string, unknown>) {
-  return Object.fromEntries(Object.entries(row).filter(([, value]) => value !== undefined));
-}
-
-async function postgrestUpsert(
-  url: string,
-  headers: SupabaseHeaders,
-  row: Record<string, unknown>,
-  returnRepresentation = false,
-) {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      ...headers,
-      Prefer: `resolution=merge-duplicates,return=${returnRepresentation ? "representation" : "minimal"}`,
-    },
-    body: JSON.stringify(withoutUndefined(row)),
-  });
-
-  if (response.ok) {
-    if (!returnRepresentation) return [];
-    if (typeof response.json !== "function") return [];
-    const rows = await response.json().catch(() => []);
-    return Array.isArray(rows) ? (rows as Array<Record<string, unknown>>) : [];
-  }
-
-  const errorText = await response.text();
-  console.error("LeadOps production write failed", {
-    url: url.replace(/^https?:\/\/[^/]+/, "[supabase]"),
-    status: response.status,
-    status_text: response.statusText,
-    error: errorText || response.statusText,
-  });
-  throw new Error("lead_insert_failed");
-}
-
-async function getJsonRows(url: string, headers: SupabaseHeaders) {
-  const response = await fetch(url, { headers, cache: "no-store" });
-  if (!response.ok) return [];
-  if (typeof response.json !== "function") return [];
-  const rows = await response.json().catch(() => []);
-  return Array.isArray(rows) ? (rows as Array<Record<string, unknown>>) : [];
-}
-
-async function findDuplicateLead(config: SupabaseConfig, payload: LeadPayload, sessionId: string): Promise<DuplicateLead> {
-  const normalizedEmail = normalizeEmail(payload.email);
-  const normalizedPhone = normalizePhone(payload.phone);
-  const normalizedAddress = normalizePropertyAddress(payload.property_address || payload.address || undefined);
-  const predicates = [
-    normalizedEmail ? `normalized_email.eq.${normalizedEmail}` : null,
-    normalizedPhone ? `normalized_phone.eq.${normalizedPhone}` : null,
-    normalizedAddress ? `normalized_property_address.eq.${normalizedAddress}` : null,
-  ].filter(Boolean);
-
-  if (!predicates.length) return null;
-  const url = new URL("/rest/v1/leads", config.supabaseUrl);
-  url.searchParams.set("select", "id");
-  url.searchParams.set("or", `(${predicates.join(",")})`);
-  url.searchParams.set("session_id", "neq." + sessionId);
-  url.searchParams.set("is_duplicate", "eq.false");
-  url.searchParams.set("order", "created_at.asc");
-  url.searchParams.set("limit", "1");
-  const rows = await getJsonRows(url.toString(), config.headers);
-  const id = typeof rows[0]?.id === "string" ? rows[0].id : null;
-  return id ? { id } : null;
-}
-
-function buildSourceAttributionRow(payload: LeadPayload, req: Request, sessionId: string, leadId: string) {
+function buildSourceAttributionRow(payload: LeadPayload, req: Request) {
   const attribution = payload.attribution || {};
   const medium = attribution.medium || null;
   return {
-    session_id: sessionId,
-    lead_id: leadId,
     utm_source: attribution.source || sourceFor(payload) || null,
     utm_medium: medium,
     utm_campaign: attribution.campaign || null,
@@ -456,40 +437,12 @@ function buildSourceAttributionRow(payload: LeadPayload, req: Request, sessionId
   };
 }
 
-async function writeSourceAttribution(
-  config: SupabaseConfig,
-  payload: LeadPayload,
-  req: Request,
-  sessionId: string,
-  leadId: string,
-) {
-  await postgrestUpsert(
-    config.supabaseUrl + "/rest/v1/source_attribution?on_conflict=lead_id",
-    config.headers,
-    buildSourceAttributionRow(payload, req, sessionId, leadId),
-  );
-}
-
-async function completeOwnedLifecycle(
-  config: SupabaseConfig,
-  payload: LeadPayload,
-  req: Request,
-  sessionId: string,
-  leadId: string,
-  duplicate: DuplicateLead,
-) {
-  await writeSourceAttribution(config, payload, req, sessionId, leadId);
-  return completePublicLeadLifecycle(config, leadId, Boolean(duplicate));
-}
-
 async function insertLead(payload: LeadPayload, req: Request) {
   const mutation = assertDatabaseMutationAllowed();
   if (!mutation.ok) throw new Error(mutation.error);
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !supabaseServiceKey) {
+  const persistence = createDefaultPersistence();
+  if (!persistence) {
     console.info("Lead capture refused: missing Supabase env vars", {
       funnel_type: payload.funnel_type,
       lead_source_surface: payload.lead_source_surface,
@@ -501,38 +454,18 @@ async function insertLead(payload: LeadPayload, req: Request) {
   }
 
   const sessionId = sessionIdFor(payload);
-  const headers = {
-    apikey: supabaseServiceKey,
-    Authorization: "Bearer " + supabaseServiceKey,
-    "Content-Type": "application/json",
-  };
-  const config = { supabaseUrl, headers };
-  const duplicate = await findDuplicateLead(config, payload, sessionId);
+  return persistence.captureLeadLifecycle({
+    session: buildSessionRow(payload, req, sessionId),
+    lead: buildLeadRow(payload, req, sessionId),
+    attribution: buildSourceAttributionRow(payload, req),
+    notificationMode: configuredNotificationMode(),
+  });
+}
 
-  await postgrestUpsert(
-    supabaseUrl + "/rest/v1/sessions?on_conflict=id",
-    headers,
-    buildSessionRow(payload, req, sessionId),
-  );
-
-  const rows = await postgrestUpsert(
-    supabaseUrl + "/rest/v1/leads?on_conflict=session_id&select=id,session_id,widget_session_id",
-    headers,
-    buildLeadRow(payload, req, sessionId, duplicate),
-    true,
-  );
-  const lead = rows[0];
-  const leadId = typeof lead?.id === "string" ? lead.id : null;
-  const returnedSessionId = typeof lead?.session_id === "string" ? lead.session_id : sessionId;
-  if (leadId) {
-    await completeOwnedLifecycle(config, payload, req, returnedSessionId, leadId, duplicate);
-  }
-  return {
-    lead_id: leadId,
-    session_id: returnedSessionId,
-    widget_session_id: typeof lead?.widget_session_id === "string" ? lead.widget_session_id : sessionId,
-    duplicate_of_lead_id: duplicate?.id || null,
-  };
+function isLeadConflict(
+  result: LeadLifecycleCaptureResult,
+): result is Extract<LeadLifecycleCaptureResult, { ok: false }> {
+  return result.ok === false;
 }
 
 function validateLead(payload: LeadPayload) {
@@ -613,27 +546,30 @@ export async function POST(req: Request) {
     );
   }
 
-  const summary = await generateSummary(payload);
-  await sendResendEmail(payload, summary);
+  if (isLeadConflict(persistedLead)) {
+    return NextResponse.json(
+      { error: PUBLIC_LEAD_CONFLICT_ERROR, code: persistedLead.error },
+      { status: 409 },
+    );
+  }
 
-  const eventProperties = {
-    funnel_name: payload.funnel_type,
-    lead_source_surface: payload.lead_source_surface,
-    step_name: payload.funnel_type === "seller" ? "seller_intent" : "lead_submit",
-    distinct_id: payload.email || payload.phone || "anonymous",
-    address: payload.address,
-    email: payload.email,
-    phone: payload.phone,
-    timeline: payload.timeline,
-    ...payload.attribution,
-  };
+  if (persistedLead.idempotent_replay) {
+    return NextResponse.json(
+      {
+        message: "Got it. Mike will follow up shortly.",
+        lead_id: persistedLead.lead_id,
+        session_id: persistedLead.session_id,
+        duplicate_of_lead_id: persistedLead.duplicate_of_lead_id ?? null,
+      },
+      { headers: { "X-AMM-Idempotent-Replay": "1" } },
+    );
+  }
 
-  await trackPosthog("lead_created", eventProperties);
-
+  const summary = await runPostCommitProviders(payload);
   return NextResponse.json({
     message: summary ? "Got it. " + summary : "Got it. Mike will follow up shortly.",
-    lead_id: persistedLead?.lead_id ?? null,
-    session_id: persistedLead?.session_id ?? payload.widget_session_id ?? null,
-    duplicate_of_lead_id: persistedLead?.duplicate_of_lead_id ?? null,
+    lead_id: persistedLead.lead_id,
+    session_id: persistedLead.session_id,
+    duplicate_of_lead_id: persistedLead.duplicate_of_lead_id ?? null,
   });
 }

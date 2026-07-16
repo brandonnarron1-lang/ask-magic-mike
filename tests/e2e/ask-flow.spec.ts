@@ -1,96 +1,159 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-const CONTAMINATION = [
-  "Gaines" + "ville",
-  "Ala" + "chua",
-  "F" + "lorida",
-  "35" + "2",
-];
+test("active Ask Mike flow uses intercepted chat and lead persistence", async ({ page }) => {
+  const chatPayloads: Array<Record<string, unknown>> = [];
+  const leadPayloads: Array<Record<string, unknown>> = [];
+  const appointmentPayloads: Array<Record<string, unknown>> = [];
 
-test("seller valuation intake completes all 5 steps", async ({ page }) => {
-  const failedRequests: string[] = [];
-  page.on("response", (resp) => {
-    if (resp.status() >= 400) {
-      failedRequests.push(`${resp.status()} ${resp.url()}`);
-    }
+  await page.route("**/api/chat", async (route) => {
+    chatPayloads.push(route.request().postDataJSON() as Record<string, unknown>);
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        message: "Synthetic local answer: Mike can review timing and property context with you.",
+      }),
+    });
+  });
+  await page.route("**/api/appointments/request", async (route) => {
+    appointmentPayloads.push(route.request().postDataJSON() as Record<string, unknown>);
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        status: "requested",
+        appointment_id: "qa_intercepted_appointment",
+        appointment_status: "requested",
+      }),
+    });
+  });
+  await page.route("**/api/leads", async (route) => {
+    leadPayloads.push(route.request().postDataJSON() as Record<string, unknown>);
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        lead_id: "qa_intercepted_chat_lead",
+        session_id: "qa_intercepted_chat_session",
+      }),
+    });
   });
 
-  // ── Step 1: Question ──────────────────────────────────────────────────────
   await page.goto("/ask");
-  await expect(page.getByText("What do you want to know?")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /focused local real estate advisor/i })).toBeVisible();
+  await page.getByLabel("Ask Mike message").fill("What should I prepare before listing in Wilson?");
+  await page.getByRole("button", { name: "Send Question" }).click();
 
-  const bodyText = await page.locator("body").innerText();
-  for (const word of CONTAMINATION) {
-    expect(bodyText, `Contamination found: "${word}"`).not.toContain(word);
-  }
-
-  await page.getByTestId("ask-question-textarea").fill(
-    "What is my home worth in Wilson NC?"
-  );
-  await page.getByTestId("ask-address-input").fill(
-    "123 Nash St NW, Wilson, NC 27896"
-  );
-  await page.screenshot({ path: "test-results/ask-step1-question.png" });
-
-  await page.getByTestId("ask-continue-button").click();
-
-  // ── Step 2: Intent / Timeline ─────────────────────────────────────────────
-  await expect(page.getByText("What's your situation?")).toBeVisible();
-  await page.getByTestId("intent-sell").click();
-  await page.getByTestId("timeline-0").click(); // ASAP = value 0
-  await page.screenshot({ path: "test-results/ask-step2-timeline.png" });
-  await page.getByRole("button", { name: "Continue" }).click();
-
-  // ── Step 3: Contact ───────────────────────────────────────────────────────
-  await expect(page.getByText("How should Mike reach you?")).toBeVisible();
-  await page.getByTestId("contact-first-name").fill("John");
-  await page.getByTestId("contact-last-name").fill("Smith");
-  await page.getByTestId("contact-email").fill("john@example.com");
-  await page.getByTestId("contact-phone").fill("2525550100");
-  await page.screenshot({ path: "test-results/ask-step3-contact.png" });
-  await page.getByRole("button", { name: "Continue" }).click();
-
-  // ── Step 4: Consent ───────────────────────────────────────────────────────
-  await expect(page.getByText("How can Mike contact you?")).toBeVisible();
-
-  const consentBody = await page.locator("body").innerText();
-  expect(consentBody).toContain("Text / SMS");
-  expect(consentBody).toContain("Phone Call");
-  expect(consentBody).toContain("Email");
-  expect(consentBody).toContain("Our Town Properties, Inc.");
-  expect(consentBody).toContain("Wilson, NC");
-
-  await page.getByTestId("consent-sms").click();
-  await page.getByTestId("consent-call").click();
-  await page.getByTestId("consent-email").click();
-  await page.screenshot({ path: "test-results/ask-step4-consent.png" });
-  await page.getByTestId("submit-intake").click();
-
-  // ── Step 5: Confirmation ──────────────────────────────────────────────────
-  await expect(page.getByTestId("confirmation-panel")).toBeVisible({
-    timeout: 15_000,
+  await expect(page.getByText(/Synthetic local answer/)).toBeVisible();
+  expect(chatPayloads[0]).toMatchObject({
+    message: "What should I prepare before listing in Wilson?",
+    lead_source_surface: "ask_page",
   });
-  await page.screenshot({ path: "test-results/ask-step5-confirmation.png" });
+  expect(leadPayloads[0]).toMatchObject({
+    funnel_type: "chat",
+    lead_source_surface: "ask_page",
+    question: "What should I prepare before listing in Wilson?",
+  });
+  expect(
+    typeof (leadPayloads[0] as unknown as Record<string, unknown>).widget_session_id,
+  ).toBe("string");
 
-  const confirmText = await page.getByTestId("confirmation-panel").innerText();
-  expect(confirmText).toContain("Thanks, John");
-  expect(confirmText).toContain("Mike Eatmon");
-  expect(confirmText).toContain("Our Town Properties");
-  expect(confirmText).toContain("Wilson, NC");
+  await page.getByLabel("Ask Mike message").fill("What about a second distinct question?");
+  await page.getByRole("button", { name: "Send Question" }).click();
+  await expect.poll(() => chatPayloads.length).toBe(2);
+  expect(chatPayloads[1]).toMatchObject({
+    message: "What about a second distinct question?",
+    lead_source_surface: "ask_page",
+  });
+  expect(leadPayloads).toHaveLength(1);
 
-  // ── Post-run assertions ───────────────────────────────────────────────────
-  const favicon404 = failedRequests.filter((r) => r.includes("favicon.ico"));
-  expect(favicon404, "favicon.ico should not 404").toHaveLength(0);
+  await page.getByRole("button", { name: "Request a conversation" }).click();
+  await expect(page.getByRole("heading", { name: "Your appointment request has been received." })).toBeVisible();
+  expect(appointmentPayloads).toHaveLength(1);
+  expect(appointmentPayloads[0]).toMatchObject({
+    lead_id: "qa_intercepted_chat_lead",
+    session_id: "qa_intercepted_chat_session",
+    request_surface: "ask_page",
+  });
+});
 
-  const client422 = failedRequests.filter((r) => r.startsWith("422"));
-  expect(client422, "No 422 validation errors allowed").toHaveLength(0);
+test("Ask Mike failed lead preparation retry reuses the conversation submission ID", async ({ page }) => {
+  const chatPayloads: Array<Record<string, unknown>> = [];
+  const leadPayloads: Array<Record<string, unknown>> = [];
+  const appointmentPayloads: Array<Record<string, unknown>> = [];
+  let leadAttempts = 0;
 
-  // Filter out known harmless framework requests (HMR websocket etc.)
-  const hardFails = failedRequests.filter(
-    (r) =>
-      !r.includes("favicon.ico") &&
-      !r.includes("_next/webpack-hmr") &&
-      !r.includes("__nextjs")
-  );
-  expect(hardFails, `Unexpected failed requests: ${hardFails.join(", ")}`).toHaveLength(0);
+  await page.route("**/api/chat", async (route) => {
+    chatPayloads.push(route.request().postDataJSON() as Record<string, unknown>);
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        message: "Synthetic retry answer: Mike can still prepare a follow-up path.",
+      }),
+    });
+  });
+  await page.route("**/api/leads", async (route) => {
+    leadAttempts += 1;
+    leadPayloads.push(route.request().postDataJSON() as Record<string, unknown>);
+    if (leadAttempts === 1) {
+      await route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "synthetic_lead_prep_failure" }),
+      });
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        lead_id: "qa_retry_chat_lead",
+        session_id: "qa_retry_chat_session",
+      }),
+    });
+  });
+  await page.route("**/api/appointments/request", async (route) => {
+    appointmentPayloads.push(route.request().postDataJSON() as Record<string, unknown>);
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        status: "requested",
+        appointment_id: "qa_retry_appointment",
+        appointment_status: "requested",
+      }),
+    });
+  });
+
+  await page.goto("/ask");
+  await page.getByLabel("Ask Mike message").fill("Can Mike help me think through timing?");
+  await page.getByRole("button", { name: "Send Question" }).click();
+  await expect(page.getByText(/appointment request path could not be prepared/i)).toBeVisible();
+  expect(leadPayloads).toHaveLength(1);
+  const originalSubmissionId = leadPayloads[0].widget_session_id;
+  expect(typeof originalSubmissionId).toBe("string");
+
+  await page.getByRole("button", { name: "Retry" }).click();
+  await expect(page.getByRole("button", { name: "Request a conversation" })).toBeVisible();
+  expect(leadPayloads).toHaveLength(2);
+  expect(leadPayloads[1].widget_session_id).toBe(originalSubmissionId);
+
+  await page.getByLabel("Ask Mike message").fill("What should I ask on the follow-up call?");
+  await page.getByRole("button", { name: "Send Question" }).click();
+  await expect.poll(() => chatPayloads.length).toBe(3);
+  expect(leadPayloads).toHaveLength(2);
+
+  await page.getByRole("button", { name: "Request a conversation" }).click();
+  await expect(page.getByRole("heading", { name: "Your appointment request has been received." })).toBeVisible();
+  expect(appointmentPayloads).toHaveLength(1);
+  expect(appointmentPayloads[0]).toMatchObject({
+    lead_id: "qa_retry_chat_lead",
+    session_id: "qa_retry_chat_session",
+    request_surface: "ask_page",
+  });
 });

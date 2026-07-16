@@ -323,9 +323,8 @@ async function slaSweep() {
   if (!ADMIN_SECRET) {
     record("sla:sweep_admin", "skip", { message: "no ADMIN_SECRET" });
   } else {
-    const r = await http("POST", "/api/admin/sla/sweep", {
+    const r = await http("GET", "/api/admin/sla/sweep", {
       headers: adminHeaders(),
-      body: {},
     });
     if (r.ok && r.json?.ok) record("sla:sweep_admin", "pass", { http: r.status });
     else
@@ -443,10 +442,10 @@ async function mutationTests(gate) {
     { http: task.status }
   );
 
-  // 4) SLA persist.
-  const sla = await http("POST", "/api/admin/sla/sweep?persist=true", {
+  // 4) SLA persist. Active root runtime exposes the cron-compatible GET
+  // surface only; POST remains inactive in src/app.
+  const sla = await http("GET", "/api/admin/sla/sweep?persist=true", {
     headers: adminHeaders(),
-    body: { persist: true },
   });
   record(
     "mutation:sla_persist",
