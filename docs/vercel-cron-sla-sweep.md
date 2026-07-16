@@ -1,6 +1,6 @@
 # Vercel Cron — SLA sweep
 
-The SLA sweep route `POST/GET /api/admin/sla/sweep` accepts two
+The active root SLA sweep route `GET /api/admin/sla/sweep` accepts two
 authorization modes:
 
 1. **Admin** — `x-admin-secret: $ADMIN_SECRET` (manual run from cockpit).
@@ -12,15 +12,14 @@ Vercel Cron supports out of the box.
 
 ## Recommended `vercel.json`
 
-Add to the repo root (this file does NOT currently exist; create it
-when you're ready to enable cron):
+The checked-in `vercel.json` contains the active cron target:
 
 ```json
 {
   "crons": [
     {
-      "path": "/api/admin/sla/sweep?persist=true",
-      "schedule": "*/5 * * * *"
+      "path": "/api/admin/sla/sweep",
+      "schedule": "0 * * * *"
     }
   ]
 }
@@ -56,11 +55,11 @@ The local `.env.example` already lists these.
 
 ```bash
 # Dry-run (does not persist breaches)
-curl -X POST "https://www.askmagicmike.com/api/admin/sla/sweep" \
+curl -X GET "https://www.askmagicmike.com/api/admin/sla/sweep" \
   -H "x-admin-secret: $ADMIN_SECRET"
 
 # Persist breaches into compliance_flags
-curl -X POST "https://www.askmagicmike.com/api/admin/sla/sweep?persist=true" \
+curl -X GET "https://www.askmagicmike.com/api/admin/sla/sweep?persist=true" \
   -H "x-admin-secret: $ADMIN_SECRET"
 ```
 

@@ -31,28 +31,31 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Release doctor
-        run: npm run release:doctor
+        run: pnpm run release:doctor
 
       - name: Release safety scan
-        run: npm run release:safety
+        run: pnpm run release:safety
 
       - name: Unit tests
-        run: npm run test
+        run: pnpm run test
 
       - name: Typecheck
-        run: npm run typecheck
+        run: pnpm run typecheck
 
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
+
+      - name: Assert canonical route manifest and cron targets
+        run: pnpm run routes:assert
 
       - name: Release candidate report
-        run: npm run release:report
+        run: pnpm run release:report
 
       - name: Launch authority report
-        run: npm run launch:authority
+        run: pnpm run launch:authority
 
       - name: Upload artifacts
         if: always()

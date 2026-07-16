@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "canonicalRouter": "app",
+  "ignoredRouter": "src/app",
+  "expectedRoutes": [
+    "/",
+    "/admin",
+    "/admin/action-queue",
+    "/admin/allocation",
+    "/admin/leads",
+    "/admin/leads/[id]",
+    "/admin/notifications",
+    "/admin/reporting",
+    "/api/admin/sla/sweep",
+    "/api/appointments/request",
+    "/api/chat",
+    "/api/leads",
+    "/api/valuation",
+    "/ask",
+    "/embed/ask",
+    "/favicon.ico",
+    "/home-value",
+    "/integrations/ourtownproperties",
+    "/sell",
+    "/social-preview",
+    "/value",
+    "/we-buy-houses",
+    "/widget",
+    "/widget-preview"
+  ],
+  "required": {
+    "public": [
+      "/", "/home-value", "/value", "/sell", "/we-buy-houses", "/ask",
+      "/widget", "/widget-preview", "/embed/ask",
+      "/integrations/ourtownproperties", "/social-preview"
+    ],
+    "admin": [
+      "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation",
+      "/admin/action-queue", "/admin/notifications", "/admin/reporting"
+    ],
+    "api": [
+      "/api/leads", "/api/valuation", "/api/appointments/request", "/api/chat",
+      "/api/admin/sla/sweep"
+    ]
+  },
+  "classifications": {
+    "/distribution": "inactive-src-only",
+    "/campaigns": "inactive-src-only",
+    "/admin/traffic": "inactive-src-only",
+    "/admin/distribution": "inactive-src-only",
+    "/api/analytics/event": "inactive-src-only",
+    "/api/health/live": "inactive-src-only",
+    "/api/health/ready": "inactive-src-only",
+    "/api/admin/health": "inactive-src-only",
+    "/api/admin/sla/sweep": "active-required-by-vercel-cron"
+  },
+  "acknowledgedRootSrcDuplicates": [
+    "/", "/admin", "/admin/leads", "/admin/leads/[id]", "/api/admin/sla/sweep", "/api/leads",
+    "/ask", "/embed/ask", "/value", "/widget-preview"
+  ]
+}
