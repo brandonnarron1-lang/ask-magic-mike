@@ -1,0 +1,28 @@
+-- PR121 offline release preflight fixture matrix.
+--
+-- This file documents the deterministic local-only scenarios executed by
+-- scripts/release/pr121-preflight-rehearsal.mjs. The runner injects the fixture
+-- SQL inside transactions and rolls back each scenario, then performs explicit
+-- cleanup by marker/id prefix.
+--
+-- Fixture marker:
+--   utm_source/source = 'pr121-preflight'
+--   UUID prefix = 121*
+--   synthetic identities = *@example.test
+--
+-- Required scenarios:
+--   clean_baseline
+--   duplicate_normalized_email
+--   duplicate_normalized_phone
+--   split_identity_collision
+--   same_contact_repeated_identity
+--   null_blank_absent_identities
+--   legacy_orphan_session
+--   legacy_lead_contact_compatibility
+--   idempotent_replay_identity
+--   materially_different_payload_same_session
+--
+-- The checked-in preflight SQL is executed for every scenario. Supplemental
+-- local-only assertions classify orphan sessions, legacy unlinked leads, and
+-- same-session idempotency risks separately from contact identity blockers.
+select 'pr121_preflight_fixture_matrix_documented' as status;

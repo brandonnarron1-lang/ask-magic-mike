@@ -37,6 +37,7 @@
     "staging:local:fixtures:cleanup": "node scripts/admin-lifecycle-local-fixtures.mjs --cleanup",
     "test:postgres:infra02": "node scripts/infra-02-local-db-verify.mjs --postgres-contract",
     "test:supabase:infra02": "node scripts/infra-02-local-db-verify.mjs --supabase-lifecycle",
+    "release:pr121:offline": "node scripts/release/pr121-offline-release.mjs",
     "release:preflight": "pnpm run release:doctor && pnpm run release:gate && pnpm run release:report && pnpm run launch:authority",
     "verify": "pnpm run typecheck && pnpm run test && pnpm run lint && pnpm run routes:verify",
     "smoke:prod": "TARGET_URL=https://www.askmagicmike.com node scripts/prod-smoke.mjs",

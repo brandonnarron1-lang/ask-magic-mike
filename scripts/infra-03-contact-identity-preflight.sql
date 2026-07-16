@@ -39,10 +39,45 @@ phone_conflicts as (
   where normalized_phone is not null
   group by normalized_phone
   having count(distinct id) > 1
+),
+legacy_leads as (
+  select
+    id,
+    nullif(lower(btrim(coalesce(normalized_email, email))), '') as normalized_email,
+    case
+      when nullif(regexp_replace(coalesce(normalized_phone, phone_normalized, phone, ''), '[^0-9]', '', 'g'), '') is null then null
+      when length(regexp_replace(coalesce(normalized_phone, phone_normalized, phone, ''), '[^0-9]', '', 'g')) = 11
+        and left(regexp_replace(coalesce(normalized_phone, phone_normalized, phone, ''), '[^0-9]', '', 'g'), 1) = '1'
+        then substring(regexp_replace(coalesce(normalized_phone, phone_normalized, phone, ''), '[^0-9]', '', 'g') from 2)
+      else regexp_replace(coalesce(normalized_phone, phone_normalized, phone, ''), '[^0-9]', '', 'g')
+    end as normalized_phone
+  from public.leads
+),
+lead_split_identity_conflicts as (
+  select
+    'lead_split_identity' as identity_type,
+    legacy_leads.id::text as normalized_value,
+    2 as contact_count,
+    array(
+      select contact_id
+      from unnest(array[email_contact.id, phone_contact.id]) as contact_ids(contact_id)
+      order by contact_id
+    ) as contact_ids
+  from legacy_leads
+  join normalized_contacts email_contact
+    on email_contact.normalized_email = legacy_leads.normalized_email
+  join normalized_contacts phone_contact
+    on phone_contact.normalized_phone = legacy_leads.normalized_phone
+  where legacy_leads.normalized_email is not null
+    and legacy_leads.normalized_phone is not null
+    and email_contact.id <> phone_contact.id
 )
 select *
 from email_conflicts
 union all
 select *
 from phone_conflicts
+union all
+select *
+from lead_split_identity_conflicts
 order by identity_type, normalized_value;
