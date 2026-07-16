@@ -119,6 +119,8 @@ CREATE POLICY contact_identities_deny_public
   USING (false)
   WITH CHECK (false);
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.contact_identities TO service_role;
+
 -- Core lifecycle tables predate the repository's deny-public policy pattern.
 -- Enabling RLS now closes that ambiguity without affecting the service role,
 -- which remains the server-only PostgREST principal.
@@ -268,6 +270,20 @@ BEGIN
     );
   END IF;
 
+  PERFORM 1
+    FROM public.sessions
+   WHERE id = v_session_id
+   FOR UPDATE;
+
+  IF FOUND THEN
+    RETURN jsonb_build_object(
+      'ok', false,
+      'error', 'idempotency_conflict',
+      'session_id', v_session_id,
+      'idempotent_replay', false
+    );
+  END IF;
+
   FOR v_lock_key IN
     SELECT key FROM (
       VALUES
@@ -303,6 +319,7 @@ BEGIN
 
   v_contact_id := COALESCE(v_email_contact, v_phone_contact);
 
+  BEGIN
   IF v_contact_id IS NULL AND (v_email IS NOT NULL OR v_phone IS NOT NULL) THEN
     INSERT INTO public.contacts(first_name, last_name, email, phone, phone_normalized)
     VALUES (
@@ -323,12 +340,7 @@ BEGIN
       FROM public.contact_identities
      WHERE identity_type = 'email' AND normalized_value = v_email;
     IF v_identity_contact IS NOT NULL AND v_identity_contact <> v_contact_id THEN
-      RETURN jsonb_build_object(
-        'ok', false,
-        'error', 'identity_conflict',
-        'session_id', v_session_id,
-        'idempotent_replay', false
-      );
+      RAISE EXCEPTION 'identity_conflict' USING ERRCODE = 'AMM01';
     END IF;
   END IF;
   IF v_contact_id IS NOT NULL AND v_phone IS NOT NULL THEN
@@ -339,12 +351,7 @@ BEGIN
       FROM public.contact_identities
      WHERE identity_type = 'phone' AND normalized_value = v_phone;
     IF v_identity_contact IS NOT NULL AND v_identity_contact <> v_contact_id THEN
-      RETURN jsonb_build_object(
-        'ok', false,
-        'error', 'identity_conflict',
-        'session_id', v_session_id,
-        'idempotent_replay', false
-      );
+      RAISE EXCEPTION 'identity_conflict' USING ERRCODE = 'AMM01';
     END IF;
   END IF;
 
@@ -578,6 +585,14 @@ BEGIN
     'notification_status', v_notification_status,
     'idempotent_replay', false
   );
+  EXCEPTION WHEN SQLSTATE 'AMM01' THEN
+    RETURN jsonb_build_object(
+      'ok', false,
+      'error', 'identity_conflict',
+      'session_id', v_session_id,
+      'idempotent_replay', false
+    );
+  END;
 END;
 $$;
 
@@ -850,6 +865,15 @@ BEGIN
     RETURN jsonb_build_object(
       'ok', true,
       'action', 'assigned',
+      'idempotent_replay', true
+    );
+  END IF;
+  IF p_agent_id IS NULL
+     AND v_lead.assigned_agent_id IS NULL
+     AND COALESCE(v_lead.assignment_status, 'unassigned') = 'unassigned' THEN
+    RETURN jsonb_build_object(
+      'ok', true,
+      'action', 'unassigned',
       'idempotent_replay', true
     );
   END IF;

@@ -63,15 +63,6 @@ export async function updateAdminLeadStatus(
     if (!isAdminLeadStatus(currentStatusText)) {
       return { ok: false, statusCode: 409, error: "invalid_current_status" };
     }
-    if (currentStatusText === status) {
-      if (options.reason) {
-        const sameStateReasonValidation = validateTerminalReasonForStatus(status, options.reason);
-        if (!sameStateReasonValidation.ok) {
-          return { ok: false, statusCode: 400, error: sameStateReasonValidation.error };
-        }
-      }
-      return { ok: true, status, warning: "status_already_current" };
-    }
     const reasonValidation = validateTerminalReasonForStatus(status, options.reason || null);
     if (!reasonValidation.ok) {
       return { ok: false, statusCode: 400, error: reasonValidation.error };

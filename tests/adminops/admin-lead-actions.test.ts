@@ -164,14 +164,31 @@ describe("atomic AdminOps lead status action", () => {
     });
   });
 
-  it("treats same-state requests as idempotent without a mutation", async () => {
-    const calls = installStatusFetch("contacted", {});
+  it("revalidates same-state requests through the atomic RPC", async () => {
+    const calls = installStatusFetch("contacted", {
+      ok: true,
+      status: "contacted",
+      idempotent_replay: true,
+    });
     await expect(updateAdminLeadStatus(LEAD_ID, "contacted")).resolves.toEqual({
       ok: true,
       status: "contacted",
       warning: "status_already_current",
     });
-    expect(calls).toHaveLength(1);
+    expect(calls.map((call) => call.method)).toEqual(["GET", "POST"]);
+    expect(calls[1].body).toMatchObject({
+      p_expected_status: "contacted",
+      p_next_status: "contacted",
+    });
+  });
+
+  it("does not claim same-state success when database revalidation detects a stale read", async () => {
+    installStatusFetch("contacted", { ok: false, error: "concurrent_status_update" });
+    await expect(updateAdminLeadStatus(LEAD_ID, "contacted")).resolves.toEqual({
+      ok: false,
+      statusCode: 409,
+      error: "concurrent_status_update",
+    });
   });
 
   it("rejects invalid reasons and forbidden transitions before mutation", async () => {

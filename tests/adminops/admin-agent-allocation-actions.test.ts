@@ -145,14 +145,32 @@ describe("atomic AdminOps agent allocation actions", () => {
     });
   });
 
-  it("treats a current assignment as idempotent without an RPC", async () => {
-    const calls = installAssignmentFetch(AGENT_ID, {});
+  it("revalidates a current assignment through the atomic RPC", async () => {
+    const calls = installAssignmentFetch(AGENT_ID, {
+      ok: true,
+      action: "assigned",
+      idempotent_replay: true,
+    });
     await expect(assignLeadToAgent(LEAD_ID, AGENT_ID)).resolves.toEqual({
       ok: true,
       action: "assigned",
       warning: "assignment_already_current",
     });
-    expect(calls).toHaveLength(1);
+    expect(calls.map((call) => call.method)).toEqual(["GET", "POST"]);
+    expect(calls[1].body).toMatchObject({
+      p_agent_id: AGENT_ID,
+      p_expected_agent_id: AGENT_ID,
+      p_action: "assigned",
+    });
+  });
+
+  it("does not claim same-state success when database revalidation detects a stale read", async () => {
+    installAssignmentFetch(AGENT_ID, { ok: false, error: "assignment_conflict" });
+    await expect(assignLeadToAgent(LEAD_ID, AGENT_ID)).resolves.toEqual({
+      ok: false,
+      statusCode: 409,
+      error: "assignment_conflict",
+    });
   });
 
   it("unassigns atomically and maps concurrency and capacity errors", async () => {
@@ -168,6 +186,22 @@ describe("atomic AdminOps agent allocation actions", () => {
     expect(unassignCalls[1].body).toMatchObject({
       p_agent_id: null,
       p_expected_agent_id: PREVIOUS_AGENT_ID,
+      p_action: "unassigned",
+    });
+
+    const alreadyUnassignedCalls = installAssignmentFetch(null, {
+      ok: true,
+      action: "unassigned",
+      idempotent_replay: true,
+    });
+    await expect(unassignLead(LEAD_ID)).resolves.toEqual({
+      ok: true,
+      action: "unassigned",
+    });
+    expect(alreadyUnassignedCalls.map((call) => call.method)).toEqual(["GET", "POST"]);
+    expect(alreadyUnassignedCalls[1].body).toMatchObject({
+      p_agent_id: null,
+      p_expected_agent_id: null,
       p_action: "unassigned",
     });
 

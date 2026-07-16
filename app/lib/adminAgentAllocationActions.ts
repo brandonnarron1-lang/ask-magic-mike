@@ -126,10 +126,8 @@ export async function assignLeadToAgent(
     if (!current || !current.found) {
       return { ok: false, statusCode: 404, error: "lead_not_found" };
     }
-    if (current.agentId === agentId && current.status === "assigned") {
-      return { ok: true, action: "assigned", warning: "assignment_already_current" };
-    }
-    const action: AdminAssignmentAuditAction = current.agentId ? "reassigned" : "assigned";
+    const action: AdminAssignmentAuditAction =
+      current.agentId && current.agentId !== agentId ? "reassigned" : "assigned";
     const result = await persistence.mutateAdminAssignment({
       leadId,
       agentId,
@@ -175,9 +173,6 @@ export async function unassignLead(leadId: string): Promise<AdminAgentAssignment
     const current = await currentAssignment(leadId);
     if (!current || !current.found) {
       return { ok: false, statusCode: 404, error: "lead_not_found" };
-    }
-    if (!current.agentId && current.status === "unassigned") {
-      return { ok: true, action: "unassigned", warning: "assignment_already_current" };
     }
     const result = await persistence.mutateAdminAssignment({
       leadId,

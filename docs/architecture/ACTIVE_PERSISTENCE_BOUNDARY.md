@@ -39,6 +39,8 @@ AdminOps page / server action
 
 Public capture invokes `capture_public_lead_v1`. It commits session, identity, lead, attribution, duplicate decision, qualification projection, routing, assignment history, audit, and notification outbox together. Appointment intent invokes `request_public_appointment_v1`; appointment, lead projection, audit, and the confirmation task commit together.
 
+Identity conflicts detected before the write phase return a sanitized `identity_conflict` result without writing lifecycle rows. Identity conflicts detected after a contact or first identity insert are raised inside a PL/pgSQL subtransaction; the subtransaction rolls back the contact/identity/session/lead/attribution/audit/routing/history/outbox write phase before returning the same sanitized `identity_conflict` result. A legacy orphan session row with no lead is treated as an `idempotency_conflict` and is not reused; this deterministic refusal avoids attaching a new lead to an ambiguous historical request id.
+
 Admin status, assignment, and agent-operation writes invoke `mutate_admin_lead_status_v1`, `mutate_admin_assignment_v1`, and `mutate_admin_agent_operations_v1`. The assignment function shares the public capture capacity lock, locks the selected agent row, and commits routing, assignment history, audit, and outbox with the lead projection.
 
 SLA persistence invokes `record_sla_breach_v1`. A lead/type advisory lock makes overlapping cron or manual GET sweeps idempotent without deleting historical compliance rows or imposing a uniqueness migration over unknown existing data.
@@ -119,6 +121,15 @@ Remote application of the contact identity backfill remains blocked until an own
 Application rollback is to restore the previous route modules and default adapter calls while leaving RLS enabled. Database rollback guidance is recorded at the end of `20260716043829_infra_02_atomic_lifecycle.sql`: drop the new functions/triggers/table/column only after application callers have been rolled back. Do not delete historical migrations or disable RLS. Restore the prior append-only rules only if the hard-failing triggers must be removed.
 
 Because the migration is additive, the safest operational rollback is normally to stop using the new RPCs first and retain the added constraints, identity table, RLS, and immutable history until a reviewed follow-up migration is available.
+
+## Deployment accounting
+
+INFRA-02/03/04 source changes do not authorize a manual deployment, production deployment, preview promotion, remote SQL application, or merge. GitHub/Vercel may still create automatic PR preview deployments from the existing repository integration after a branch push. Evidence and PR text should therefore report:
+
+- `manual_deployments=0`
+- `production_deployments=0`
+- `automatic_pr_preview_deployments=triggered_by_existing_integration`
+- `preview_promotions=0`
 
 ## Intentionally unsupported
 
