@@ -35,10 +35,11 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
 
   async function submitSeller(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     setSellerMessage(null);
     setSellerSuccess(false);
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
     const payload = {
       funnel_type: "seller",
       lead_source_surface: surface,
@@ -84,11 +85,14 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
         session_id?: string | null;
       };
       if (!res.ok) throw new Error(publicLeadErrorMessage(data.error));
-      trackEvent("lead_created", attribution, { funnel_name: "seller", step_name: "seller_intent" });
+      const idempotentReplay = res.headers.get("X-AMM-Idempotent-Replay") === "1";
+      if (!idempotentReplay) {
+        trackEvent("lead_created", attribution, { funnel_name: "seller", step_name: "seller_intent" });
+      }
       setSellerMessage(data.message || "Got it. Mike will review it.");
       setLeadReference({ leadId: data.lead_id || null, sessionId: data.session_id || null });
       setSellerSuccess(true);
-      event.currentTarget.reset();
+      form.reset();
       setSubmissionId(tryCreateBrowserSubmissionId());
     } catch (error) {
       setSellerMessage(publicLeadErrorMessage(error instanceof Error ? error.message : undefined));

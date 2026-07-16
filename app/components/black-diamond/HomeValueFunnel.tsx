@@ -114,10 +114,13 @@ export function HomeValueFunnel({
         session_id?: string | null;
       };
       if (!res.ok) throw new Error(publicLeadErrorMessage(data.error));
-      trackEvent("lead_created", attribution, { funnel_name: "home_value", step_name: "thank_you" });
-      if (surface === "widget") {
-        trackEvent("widget_lead_created", attribution, { funnel_name: "home_value" });
-        window.parent?.postMessage({ type: "askmagicmike:lead_created" }, "*");
+      const idempotentReplay = res.headers.get("X-AMM-Idempotent-Replay") === "1";
+      if (!idempotentReplay) {
+        trackEvent("lead_created", attribution, { funnel_name: "home_value", step_name: "thank_you" });
+        if (surface === "widget") {
+          trackEvent("widget_lead_created", attribution, { funnel_name: "home_value" });
+          window.parent?.postMessage({ type: "askmagicmike:lead_created" }, "*");
+        }
       }
       setLeadMessage(data.message || "Got it. Mike will follow up shortly.");
       setLeadReference({ leadId: data.lead_id || null, sessionId: data.session_id || null });

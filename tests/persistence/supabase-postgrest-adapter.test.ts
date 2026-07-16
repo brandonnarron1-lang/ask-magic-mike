@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { PersistenceUnavailableError } from "../../app/lib/persistence/contracts";
 import { SupabasePostgrestAdapter } from "../../app/lib/persistence/supabasePostgrestAdapter";
 
 function response(body: unknown, status = 200) {
@@ -104,5 +105,71 @@ describe("Supabase PostgREST persistence adapter", () => {
       session_id: "22222222-2222-4222-8222-222222222222",
       idempotent_replay: false,
     });
+  });
+
+  it("keeps known lead conflicts typed and rejects unknown domain failures", async () => {
+    for (const error of ["identity_conflict", "idempotency_conflict"] as const) {
+      const request = vi.fn(async () =>
+        response({
+          ok: false,
+          error,
+          session_id: "22222222-2222-4222-8222-222222222222",
+          idempotent_replay: false,
+        }),
+      );
+      const adapter = new SupabasePostgrestAdapter({
+        baseUrl: "http://127.0.0.1:54321",
+        serviceRoleKey: "synthetic-local-key",
+        fetch: request,
+      });
+
+      await expect(adapter.captureLeadLifecycle({
+        session: { id: "22222222-2222-4222-8222-222222222222" },
+        lead: { normalized_email: "conflict@example.test" },
+        attribution: {},
+        notificationMode: "disabled",
+      })).resolves.toEqual({
+        ok: false,
+        error,
+        session_id: "22222222-2222-4222-8222-222222222222",
+        idempotent_replay: false,
+      });
+    }
+
+    const request = vi.fn(async () =>
+      response({
+        ok: false,
+        error: "some_future_failure",
+        idempotent_replay: false,
+      }),
+    );
+    const adapter = new SupabasePostgrestAdapter({
+      baseUrl: "http://127.0.0.1:54321",
+      serviceRoleKey: "synthetic-local-key",
+      fetch: request,
+    });
+
+    await expect(adapter.captureLeadLifecycle({
+      session: { id: "22222222-2222-4222-8222-222222222222" },
+      lead: { normalized_email: "future@example.test" },
+      attribution: {},
+      notificationMode: "disabled",
+    })).rejects.toMatchObject({
+      name: "PersistenceUnavailableError",
+      code: "capture_public_lead_v1_domain_failure",
+      statusCode: 502,
+    });
+
+    try {
+      await adapter.captureLeadLifecycle({
+        session: { id: "22222222-2222-4222-8222-222222222222" },
+        lead: { normalized_email: "future@example.test" },
+        attribution: {},
+        notificationMode: "disabled",
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(PersistenceUnavailableError);
+      expect(String(error)).not.toContain("some_future_failure");
+    }
   });
 });

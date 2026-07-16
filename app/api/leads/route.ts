@@ -28,8 +28,13 @@ const LEAD_TYPES = new Set([
 
 const PUBLIC_LEAD_CONFLICT_ERROR =
   "That submission conflicts with an existing request. Please refresh and submit again, or call Our Town Properties at 252-243-7700.";
+const PROVIDER_PHASE_TIMEOUT_MS = 3_000;
 
-async function trackPosthog(event: string, properties: Record<string, unknown>) {
+async function trackPosthog(
+  event: string,
+  properties: Record<string, unknown>,
+  signal?: AbortSignal,
+) {
   if (!assertProviderDeliveryAllowed().ok) return;
   const apiKey = process.env.POSTHOG_API_KEY;
   if (!apiKey) return;
@@ -39,6 +44,7 @@ async function trackPosthog(event: string, properties: Record<string, unknown>) 
   try {
     await fetch(host + "/capture/", {
       method: "POST",
+      signal,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         api_key: apiKey,
@@ -52,7 +58,7 @@ async function trackPosthog(event: string, properties: Record<string, unknown>) 
   }
 }
 
-async function generateSummary(payload: LeadPayload) {
+async function generateSummary(payload: LeadPayload, signal?: AbortSignal) {
   if (!assertProviderDeliveryAllowed().ok) return undefined;
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return undefined;
@@ -60,6 +66,7 @@ async function generateSummary(payload: LeadPayload) {
   try {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
+      signal,
       headers: {
         Authorization: "Bearer " + apiKey,
         "Content-Type": "application/json",
@@ -104,7 +111,11 @@ async function generateSummary(payload: LeadPayload) {
   }
 }
 
-async function sendResendEmail(payload: LeadPayload, summary?: string) {
+async function sendResendEmail(
+  payload: LeadPayload,
+  summary?: string,
+  signal?: AbortSignal,
+) {
   if (!assertProviderDeliveryAllowed().ok) return;
   const resendKey = process.env.RESEND_API_KEY;
   const to = payload.email;
@@ -122,6 +133,7 @@ async function sendResendEmail(payload: LeadPayload, summary?: string) {
   try {
     await fetch("https://api.resend.com/emails", {
       method: "POST",
+      signal,
       headers: {
         Authorization: "Bearer " + resendKey,
         "Content-Type": "application/json",
@@ -135,6 +147,34 @@ async function sendResendEmail(payload: LeadPayload, summary?: string) {
     });
   } catch {
     // A provider failure must never turn a committed lead into a public error.
+  }
+}
+
+async function runPostCommitProviders(payload: LeadPayload) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), PROVIDER_PHASE_TIMEOUT_MS);
+  const eventProperties = {
+    funnel_name: payload.funnel_type,
+    lead_source_surface: payload.lead_source_surface,
+    step_name: payload.funnel_type === "seller" ? "seller_intent" : "lead_submit",
+    distinct_id: payload.email || payload.phone || "anonymous",
+    address: payload.address,
+    email: payload.email,
+    phone: payload.phone,
+    timeline: payload.timeline,
+    ...payload.attribution,
+  };
+
+  try {
+    const posthog = trackPosthog("lead_created", eventProperties, controller.signal);
+    const summary = await generateSummary(payload, controller.signal);
+    await sendResendEmail(payload, summary, controller.signal);
+    await posthog;
+    return summary;
+  } catch {
+    return undefined;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -513,23 +553,19 @@ export async function POST(req: Request) {
     );
   }
 
-  const summary = await generateSummary(payload);
-  await sendResendEmail(payload, summary);
+  if (persistedLead.idempotent_replay) {
+    return NextResponse.json(
+      {
+        message: "Got it. Mike will follow up shortly.",
+        lead_id: persistedLead.lead_id,
+        session_id: persistedLead.session_id,
+        duplicate_of_lead_id: persistedLead.duplicate_of_lead_id ?? null,
+      },
+      { headers: { "X-AMM-Idempotent-Replay": "1" } },
+    );
+  }
 
-  const eventProperties = {
-    funnel_name: payload.funnel_type,
-    lead_source_surface: payload.lead_source_surface,
-    step_name: payload.funnel_type === "seller" ? "seller_intent" : "lead_submit",
-    distinct_id: payload.email || payload.phone || "anonymous",
-    address: payload.address,
-    email: payload.email,
-    phone: payload.phone,
-    timeline: payload.timeline,
-    ...payload.attribution,
-  };
-
-  await trackPosthog("lead_created", eventProperties);
-
+  const summary = await runPostCommitProviders(payload);
   return NextResponse.json({
     message: summary ? "Got it. " + summary : "Got it. Mike will follow up shortly.",
     lead_id: persistedLead.lead_id,

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { trackEvent } from "../../lib/analytics";
 import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
@@ -32,6 +32,8 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
   const [chatError, setChatError] = useState<string | null>(null);
   const [lastMessage, setLastMessage] = useState<string | null>(null);
   const [chatSessionId, setChatSessionId] = useState<string | null>(null);
+  const leadPreparedRef = useRef(false);
+  const leadPreparationInFlightRef = useRef(false);
   const [leadReference, setLeadReference] = useState<{ leadId: string | null; sessionId: string | null }>({
     leadId: null,
     sessionId: null,
@@ -89,7 +91,9 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
             "For address-specific advice, send the property address and best contact information so Mike can follow up.",
         },
       ]);
+      if (leadPreparedRef.current || leadPreparationInFlightRef.current) return;
       try {
+        leadPreparationInFlightRef.current = true;
         const leadRes = await fetch("/api/leads", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -109,13 +113,16 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
           error?: string;
         };
         if (!leadRes.ok) throw new Error(publicLeadErrorMessage(leadData.error));
+        if (!leadData.lead_id) throw new Error("lead_preparation_failed");
+        leadPreparedRef.current = true;
         setLeadReference({
-          leadId: leadData.lead_id || null,
+          leadId: leadData.lead_id,
           sessionId: leadData.session_id || chatSessionId,
         });
-        setChatSessionId(tryCreateBrowserSubmissionId());
       } catch {
         setChatError("Mike's answer came through, but the appointment request path could not be prepared. You can still submit the home-value form for direct follow-up.");
+      } finally {
+        leadPreparationInFlightRef.current = false;
       }
     } catch {
       setChatError("Mike's answer did not come through. You can retry, or send the property address through the home-value path for direct follow-up.");

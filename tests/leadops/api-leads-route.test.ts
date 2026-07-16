@@ -66,6 +66,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   for (const key of ENV_KEYS) {
     const value = original[key];
@@ -231,6 +232,35 @@ describe("POST /api/leads atomic lifecycle command", () => {
     });
   });
 
+  it("returns replay success without provider side effects", async () => {
+    process.env.OPENAI_API_KEY = "synthetic-openai-key";
+    process.env.RESEND_API_KEY = "synthetic-resend-key";
+    process.env.POSTHOG_API_KEY = "synthetic-posthog-key";
+    const { calls } = installRpc(success({ idempotent_replay: true }));
+
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "310 Replay Oak Dr",
+      email: "repeat-provider@example.test",
+      phone: "2525550110",
+      widget_session_id: SESSION_ID,
+    }));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("X-AMM-Idempotent-Replay")).toBe("1");
+    expect(await response.json()).toMatchObject({
+      message: "Got it. Mike will follow up shortly.",
+      lead_id: LEAD_ID,
+      session_id: SESSION_ID,
+    });
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toContain("/rest/v1/rpc/capture_public_lead_v1");
+    expect(calls.some((call) => call.url.includes("api.openai.com"))).toBe(false);
+    expect(calls.some((call) => call.url.includes("api.resend.com"))).toBe(false);
+    expect(calls.some((call) => call.url.includes("posthog"))).toBe(false);
+  });
+
   it("returns duplicate identity linkage supplied by the transaction", async () => {
     installRpc(success({
       duplicate_of_lead_id: DUPLICATE_ID,
@@ -287,6 +317,46 @@ describe("POST /api/leads atomic lifecycle command", () => {
     expect((await response.json()).error).toBe(PUBLIC_LEAD_SAVE_ERROR);
   });
 
+  it("keeps provider work bounded by one post-commit timeout", async () => {
+    vi.useFakeTimers();
+    process.env.OPENAI_API_KEY = "synthetic-openai-key";
+    const fetchSpy = vi.fn((input: URL | RequestInfo, init?: RequestInit) => {
+      const url = String(input);
+      if (url.includes("/rest/v1/rpc/capture_public_lead_v1")) {
+        return Promise.resolve(jsonResponse(success()));
+      }
+      if (url.includes("api.openai.com")) {
+        return new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener(
+            "abort",
+            () => reject(new DOMException("aborted", "AbortError")),
+            { once: true },
+          );
+        });
+      }
+      return Promise.reject(new Error("unexpected provider call"));
+    });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const responsePromise = POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "610 Synthetic Timeout Ln",
+      email: "timeout@example.test",
+      phone: "2525550111",
+      widget_session_id: SESSION_ID,
+    }));
+    await vi.advanceTimersByTimeAsync(3_100);
+
+    const response = await responsePromise;
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toMatchObject({ lead_id: LEAD_ID, session_id: SESSION_ID });
+    expect(body).not.toHaveProperty("error");
+    expect(JSON.stringify(body)).not.toContain("AbortError");
+    expect(fetchSpy.mock.calls.filter(([input]) => String(input).includes("api.openai.com"))).toHaveLength(1);
+  });
+
   it("keeps a committed lead successful when an external provider throws", async () => {
     process.env.OPENAI_API_KEY = "synthetic-openai-key";
     process.env.RESEND_API_KEY = "synthetic-resend-key";
@@ -309,5 +379,28 @@ describe("POST /api/leads atomic lifecycle command", () => {
     }));
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ lead_id: LEAD_ID });
+  });
+
+  it("maps unknown domain failures to a sanitized persistence error", async () => {
+    const { mock } = installRpc({
+      ok: false,
+      error: "some_future_failure",
+      idempotent_replay: false,
+    });
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "700 Future Failure Way",
+      email: "future@example.test",
+      phone: "2525550112",
+      widget_session_id: SESSION_ID,
+    }));
+
+    expect(response.status).toBe(500);
+    expect(response.status).not.toBe(409);
+    expect(mock).toHaveBeenCalledTimes(1);
+    const body = await response.json();
+    expect(body).toEqual({ error: PUBLIC_LEAD_SAVE_ERROR });
+    expect(JSON.stringify(body)).not.toContain("some_future_failure");
   });
 });

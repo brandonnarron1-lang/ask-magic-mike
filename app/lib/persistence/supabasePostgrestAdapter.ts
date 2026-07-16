@@ -97,14 +97,18 @@ export class SupabasePostgrestAdapter implements ActivePersistenceBoundary {
       p_notification_mode: input.notificationMode,
     });
     if (result.ok === false) {
-      const error =
-        result.error === "identity_conflict" ||
-        result.error === "idempotency_conflict"
-          ? result.error
-          : "idempotency_conflict";
+      if (
+        result.error !== "identity_conflict" &&
+        result.error !== "idempotency_conflict"
+      ) {
+        throw new PersistenceUnavailableError(
+          "capture_public_lead_v1_domain_failure",
+          502,
+        );
+      }
       return {
         ok: false,
-        error,
+        error: result.error,
         session_id: typeof result.session_id === "string" ? result.session_id : null,
         idempotent_replay: false,
       };
