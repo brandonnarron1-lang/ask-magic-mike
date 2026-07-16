@@ -46,7 +46,9 @@ describe("AdminOps reporting route guards", () => {
   });
 
   it("keeps the reporting read model GET-only and bounded", () => {
-    const view = read("app/lib/adminReportingView.ts");
+    const facade = read("app/lib/adminReportingView.ts");
+    const view = read("app/lib/persistence/supabase/adminReportingView.ts");
+    expect(facade).toContain("persistence/supabase/adminReportingView");
     expect(view).toContain('new URL("/rest/v1/leads"');
     expect(view).toContain('url.searchParams.set("select"');
     expect(view).toContain('url.searchParams.set("created_at", "gte."');

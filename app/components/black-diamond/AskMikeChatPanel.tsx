@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { trackEvent } from "../../lib/analytics";
 import { initialAttribution, readAttribution } from "../../lib/attribution";
+import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
 import { starterPrompts } from "../../lib/constants";
 import { type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
 import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
@@ -30,13 +31,15 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
   const [submitting, setSubmitting] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
   const [lastMessage, setLastMessage] = useState<string | null>(null);
-  const [chatSessionId] = useState(() =>
-    typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : "",
-  );
+  const [chatSessionId, setChatSessionId] = useState<string | null>(null);
   const [leadReference, setLeadReference] = useState<{ leadId: string | null; sessionId: string | null }>({
     leadId: null,
     sessionId: null,
   });
+
+  useEffect(() => {
+    setChatSessionId(tryCreateBrowserSubmissionId());
+  }, []);
 
   function markStarted(stepName: string) {
     if (chatStarted) return;
@@ -54,6 +57,10 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
   async function sendMessage(message: string) {
     const trimmed = message.trim();
     if (!trimmed) return;
+    if (!chatSessionId) {
+      setChatError("This browser could not create a secure submission reference. Refresh and try again.");
+      return;
+    }
     markStarted("message_sent");
     setSubmitting(true);
     setChatError(null);
@@ -92,7 +99,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
             question: trimmed,
             status: "new",
             assigned_agent_id: null,
-            widget_session_id: chatSessionId || undefined,
+            widget_session_id: chatSessionId,
             attribution,
           }),
         });
@@ -104,8 +111,9 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
         if (!leadRes.ok) throw new Error(publicLeadErrorMessage(leadData.error));
         setLeadReference({
           leadId: leadData.lead_id || null,
-          sessionId: leadData.session_id || chatSessionId || null,
+          sessionId: leadData.session_id || chatSessionId,
         });
+        setChatSessionId(tryCreateBrowserSubmissionId());
       } catch {
         setChatError("Mike's answer came through, but the appointment request path could not be prepared. You can still submit the home-value form for direct follow-up.");
       }
