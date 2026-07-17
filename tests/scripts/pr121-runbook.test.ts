@@ -20,10 +20,34 @@ describe("PR121 production cutover runbook", () => {
   it("requires corrected preflight source and blob verification before remote preflight", () => {
     expect(RUNBOOK).toContain("Accepted PR #121 at `a6fc33c22ba9951487e2cafc97e2f511eeb6c23e` does not");
     expect(RUNBOOK).toMatch(/must not\s+use the preflight script from accepted PR #121 as-is/);
+    expect(RUNBOOK).toContain("Do not integrate only the latest offline commit");
+    expect(RUNBOOK).toContain("31719358edc7fab0ea3037907097c0cadffe5254");
+    expect(RUNBOOK).toContain("6a18b9cc400e158b5fe980a3716a628be54cfe59");
+    expect(RUNBOOK).toContain("a6fc33c22ba9951487e2cafc97e2f511eeb6c23e..<AUTHORITATIVE_EVIDENCE_HEAD>");
+    expect(RUNBOOK).toContain("Cherry-picking only the tip commit is prohibited");
     expect(RUNBOOK).toContain("Verify the corrected `scripts/infra-03-contact-identity-preflight.sql` Git");
+    expect(RUNBOOK).toContain("git rev-list --reverse");
     expect(RUNBOOK.indexOf("Reviewed Preflight Source Prerequisite")).toBeLessThan(
       RUNBOOK.indexOf("Read-Only Identity Preflight Procedure"),
     );
+  });
+
+  it("documents legacy unlinked lead review and migration behavior accurately", () => {
+    expect(RUNBOOK).toContain("Legacy Unlinked Lead Review");
+    expect(RUNBOOK).toContain("A `legacy_unlinked_lead` row is not proof of a cross-contact collision");
+    expect(RUNBOOK).toContain("backfills `request_fingerprint`");
+    expect(RUNBOOK).toContain("does not automatically attach a contact");
+    expect(RUNBOOK).toContain("does not create `contact_identities` for that lead");
+    expect(RUNBOOK).toContain("create a new lead marked through the duplicate path");
+    expect(RUNBOOK).toContain("leave the historical lead unlinked");
+  });
+
+  it("requires legacy remediation or explicit exception before proceeding", () => {
+    expect(RUNBOOK).toContain("`REMEDIATE`");
+    expect(RUNBOOK).toContain("`ACCEPT_EXCEPTION`");
+    expect(RUNBOOK).toContain("Unresolved `legacy_unlinked_lead` rows remain a migration stop condition");
+    expect(RUNBOOK).toContain("Do not record raw email or phone in shared cutover evidence");
+    expect(RUNBOOK).toContain("`identity_type = 'legacy_unlinked_lead'`");
   });
 
   it("keeps migration before PR121 application deployment", () => {
@@ -56,6 +80,7 @@ describe("PR121 production cutover runbook", () => {
       "source branch SHA mismatch",
       "corrected preflight script blob SHA mismatch",
       "any preflight blocker row",
+      "any unresolved `legacy_unlinked_lead` row without recorded owner disposition",
       "missing backup/restore checkpoint reference",
       "missing `SUPABASE_SERVICE_ROLE_KEY` presence or Production scope",
       "grant/RLS verification failure",

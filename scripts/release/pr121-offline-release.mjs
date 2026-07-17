@@ -162,6 +162,7 @@ function writeReadinessMarkdown(file, summary) {
     `HEAD: ${summary.head}`,
     `HEAD tree: ${summary.headTree}`,
     `Tracked worktree clean: ${summary.trackedWorktreeClean ? "true" : "false"}`,
+    `Migration count: ${summary.migrationCount}`,
     `Target: ${summary.target}`,
     "",
     "## Results",
@@ -195,7 +196,7 @@ function writeReadinessMarkdown(file, summary) {
   writeFileSync(file, `${lines.join("\n")}\n`);
 }
 
-function provenance(metadata, authoritative) {
+function provenance(metadata, authoritative, migrationCount) {
   return {
     authoritative,
     branch: metadata.branch,
@@ -211,6 +212,7 @@ function provenance(metadata, authoritative) {
     predecessorMigrationVersion: PREDECESSOR_MIGRATION_VERSION,
     preflightScriptBlob: metadata.preflightScriptBlob,
     fixtureFileBlob: metadata.fixtureFileBlob,
+    ...(migrationCount === undefined ? {} : { migrationCount }),
     localOnlyTarget: true,
     remoteProjectLinked: false,
     productionChanges: 0,
@@ -259,7 +261,7 @@ async function main() {
   const migrations = migrationFiles();
   const localProjectId = projectId();
   const metadata = gitMetadata();
-  const baseProvenance = provenance(metadata, options.authoritative);
+  const baseProvenance = provenance(metadata, options.authoritative, migrations.length);
   let failed = null;
   let stopResult = null;
   let remainingContainerCount = null;
@@ -360,7 +362,6 @@ async function main() {
     generatedAt,
     target: "local-only",
     ...baseProvenance,
-    migrationCount: migrations.length,
     predecessorStateVerified: true,
     predecessorState,
     targetStateBefore,

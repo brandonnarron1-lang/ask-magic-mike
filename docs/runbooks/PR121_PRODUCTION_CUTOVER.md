@@ -21,6 +21,27 @@ Accepted PR #121 at `a6fc33c22ba9951487e2cafc97e2f511eeb6c23e` does not
 contain the corrected offline preflight package. The remote operator must not
 use the preflight script from accepted PR #121 as-is.
 
+Do not integrate only the latest offline commit. Commit
+`6a18b9cc400e158b5fe980a3716a628be54cfe59` depends on files introduced by
+`31719358edc7fab0ea3037907097c0cadffe5254`. The operator-used branch must
+integrate the complete ordered ancestry after the exclusive base
+`a6fc33c22ba9951487e2cafc97e2f511eeb6c23e`.
+
+The required source range is:
+
+```bash
+a6fc33c22ba9951487e2cafc97e2f511eeb6c23e..<AUTHORITATIVE_EVIDENCE_HEAD>
+```
+
+`AUTHORITATIVE_EVIDENCE_HEAD` is the final local commit recorded in the
+accepted authoritative evidence. The ordered range must include at minimum:
+
+- `31719358edc7fab0ea3037907097c0cadffe5254`
+- `6a18b9cc400e158b5fe980a3716a628be54cfe59`
+- the final narrow-fix commit recorded as `AUTHORITATIVE_EVIDENCE_HEAD`
+
+Cherry-picking only the tip commit is prohibited.
+
 Before any remote preflight:
 
 1. Integrate the reviewed offline correction into the operator-used branch under
@@ -31,6 +52,12 @@ Before any remote preflight:
    offline evidence if local rehearsal is rerun.
 4. Record the operator-used branch SHA, the preflight script blob SHA, and the
    evidence directory in the operator log.
+5. Verify the integrated ordered range:
+
+   ```bash
+   git rev-list --reverse \
+     a6fc33c22ba9951487e2cafc97e2f511eeb6c23e..<AUTHORITATIVE_EVIDENCE_HEAD>
+   ```
 
 Stop if the branch SHA or script blob SHA does not match the reviewed offline
 evidence.
@@ -129,17 +156,53 @@ Run the checked-in SQL from:
 Use only the corrected source whose Git blob SHA matches the authoritative
 offline evidence. Run that SQL against the intended Production database in a
 read-only operator session. The query reports contact identity blockers and
-legacy lead split-identity blockers. Store the result in the operator evidence
-location. Redact personal values before sharing outside the owner-controlled
-system.
+legacy lead review rows. Store the result in the operator evidence location.
+Redact personal values before sharing outside the owner-controlled system.
 
-## 11. Exact Preflight Stop Conditions
+## 11. Legacy Unlinked Lead Review
+
+A `legacy_unlinked_lead` row is not proof of a cross-contact collision. It means
+the historical lead has usable identity but `contact_id` is null.
+
+The target migration:
+
+- preserves the lead;
+- backfills `request_fingerprint`;
+- does not automatically attach a contact;
+- does not create `contact_identities` for that lead.
+
+A later new-session submission using the same identity may:
+
+- create or reuse a canonical contact;
+- create a new lead marked through the duplicate path;
+- create a new lifecycle, audit, and outbox sequence as designed for that new
+  submission;
+- leave the historical lead unlinked.
+
+Every `legacy_unlinked_lead` row must stop automatic cutover progression until
+an owner/operator disposition is recorded.
+
+Allowed dispositions:
+
+- `REMEDIATE`: use a separately reviewed and authorized data-remediation
+  procedure. Link the legacy lead only when the canonical contact is
+  deterministically established. Do not improvise SQL during cutover. Rerun the
+  corrected preflight; the row must disappear before proceeding.
+- `ACCEPT_EXCEPTION`: requires explicit owner approval. Record the lead UUID,
+  UTC timestamp, operator, and reason. Acknowledge the possible
+  historical/new-lifecycle fragmentation. Do not record raw email or phone in shared cutover evidence.
+
+Unresolved `legacy_unlinked_lead` rows remain a migration stop condition. This
+runbook does not claim that migration automatically reconciles these rows.
+
+## 12. Exact Preflight Stop Conditions
 
 Stop before migration if preflight reports any row where:
 
 - `identity_type = 'email'`
 - `identity_type = 'phone'`
 - `identity_type = 'lead_split_identity'`
+- `identity_type = 'legacy_unlinked_lead'`
 
 Stop if the operator cannot prove the query ran against the intended Production
 database. Stop if any unexpected SQL error occurs. Stop if the source branch SHA
@@ -150,6 +213,7 @@ Additional hard stops:
 - source branch SHA mismatch;
 - corrected preflight script blob SHA mismatch;
 - any preflight blocker row;
+- any unresolved `legacy_unlinked_lead` row without recorded owner disposition;
 - missing backup/restore checkpoint reference;
 - missing `SUPABASE_SERVICE_ROLE_KEY` presence or Production scope;
 - missing `NEXT_PUBLIC_SUPABASE_URL` presence or Production scope;
@@ -157,7 +221,7 @@ Additional hard stops:
 - public lead, idempotent replay, appointment, Admin, notification outbox, or
   analytics smoke-test failure.
 
-## 12. Migration Application Procedure Placeholders
+## 13. Migration Application Procedure Placeholders
 
 Use the owner-approved Supabase migration method for exactly:
 
@@ -174,7 +238,7 @@ Record:
 
 Do not apply any additional migration during this cutover.
 
-## 13. Migration Verification Queries
+## 14. Migration Verification Queries
 
 Run read-only verification queries that expose no secrets:
 
@@ -187,7 +251,7 @@ Run read-only verification queries that expose no secrets:
 - `select to_regprocedure('public.mutate_admin_lead_status_v1(uuid,text,text,jsonb,text,text,timestamptz)') is not null;`
 - `select to_regprocedure('public.mutate_admin_assignment_v1(uuid,uuid,uuid,text,text,text,timestamptz)') is not null;`
 
-## 14. Required Grant And RLS Checks
+## 15. Required Grant And RLS Checks
 
 Verify:
 
@@ -199,7 +263,7 @@ Verify:
   `lead_appointments`, and `tasks`.
 - Deny-public policies remain in place for protected public-schema tables.
 
-## 15. Required Public Lead Smoke Checks
+## 16. Required Public Lead Smoke Checks
 
 After migration and before traffic:
 
@@ -209,7 +273,7 @@ After migration and before traffic:
 - Confirm the public response does not expose raw persistence/provider errors.
 - Clean up synthetic records only through the owner-approved procedure.
 
-## 16. Required Idempotent Replay Checks
+## 17. Required Idempotent Replay Checks
 
 Using the same synthetic submission identity:
 
@@ -219,7 +283,7 @@ Using the same synthetic submission identity:
   outbox row is created.
 - Confirm provider and client analytics are not duplicated on replay.
 
-## 17. Required Appointment-Request Checks
+## 18. Required Appointment-Request Checks
 
 - Request an appointment for the synthetic lead/session pair.
 - Confirm one active appointment and one open confirmation follow-up task.
@@ -227,7 +291,7 @@ Using the same synthetic submission identity:
 - Confirm the second request returns the existing appointment path and creates no
   duplicate task.
 
-## 18. Required Admin Same-State And Concurrency Checks
+## 19. Required Admin Same-State And Concurrency Checks
 
 - Submit a same-status Admin lead transition and confirm it is revalidated by the
   database as idempotent replay.
@@ -237,7 +301,7 @@ Using the same synthetic submission identity:
   history, audit, or outbox row is created.
 - Confirm a stale expected assignment is rejected.
 
-## 19. Required Notification Outbox Checks
+## 20. Required Notification Outbox Checks
 
 - Confirm public capture and Admin assignment enqueue notification outbox rows
   only through the atomic RPC path.
@@ -245,7 +309,7 @@ Using the same synthetic submission identity:
 - Confirm disabled notification mode records skipped status rather than attempting
   provider delivery.
 
-## 20. Provider And Client Analytics Duplication Checks
+## 21. Provider And Client Analytics Duplication Checks
 
 - Confirm idempotent replay does not call OpenAI, Resend, or PostHog.
 - Confirm idempotent replay returns `X-AMM-Idempotent-Replay: 1`.
@@ -254,7 +318,7 @@ Using the same synthetic submission identity:
 - Confirm widget replay emits neither `widget_lead_created` nor the lead-created
   parent-window postMessage.
 
-## 21. Production Traffic Re-Enable Criteria
+## 22. Production Traffic Re-Enable Criteria
 
 Traffic may be enabled only after:
 
@@ -264,7 +328,7 @@ Traffic may be enabled only after:
 - service-role scoped server routes are healthy;
 - owner records the traffic-enable decision.
 
-## 22. Automatic Deployment Re-Enable Criteria
+## 23. Automatic Deployment Re-Enable Criteria
 
 Automatic Production deployment may be re-enabled only after:
 
@@ -273,7 +337,7 @@ Automatic Production deployment may be re-enabled only after:
 - monitoring and owner smoke checks are green;
 - branch retarget/merge sequence is complete.
 
-## 23. Rollback Decision Matrix
+## 24. Rollback Decision Matrix
 
 | Phase | Primary action | Rollback path | Classification |
 | --- | --- | --- | --- |

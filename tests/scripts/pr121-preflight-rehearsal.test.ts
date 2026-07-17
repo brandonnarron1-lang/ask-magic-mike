@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
+  COMPATIBILITY_SCENARIOS,
   DATABASE_HOST_ALIASES,
   DATABASE_URL_ALIASES,
   PREDECESSOR_MIGRATION_VERSION,
@@ -10,10 +11,12 @@ import {
   TARGET_MIGRATION_VERSION,
   assertLocalDatabaseTargets,
   assertLocalSupabaseCommand,
+  classifyFindings,
   cleanupSqlForFixture,
   evaluateScenario,
   executeScenario,
   exactProjectContainerNames,
+  filterPreflightRowsForFixture,
   hasUnsafeSummaryContent,
   migrationStatusSql,
   sanitizeSummary,
@@ -24,18 +27,33 @@ const ROOT = process.cwd();
 const PREFLIGHT_SQL = readFileSync(path.join(ROOT, "scripts/infra-03-contact-identity-preflight.sql"), "utf8");
 const FIXTURE_SQL = readFileSync(path.join(ROOT, "scripts/release/pr121-preflight-fixtures.sql"), "utf8");
 
+type ScenarioLike = {
+  expectedPreflightTypes: string[];
+  fixtureIds: { leads: string[] };
+  expectedLegacyContactCount?: number;
+  expectedLegacyContactIds?: string[];
+  expectedSplitContactCount?: number;
+  expectedSplitContactIds?: string[];
+};
+
 function scenario(name: string) {
   const found = PREMIGRATION_SCENARIOS.find((entry) => entry.name === name);
   if (!found) throw new Error(`missing scenario ${name}`);
   return found;
 }
 
-function actualFor(entry: (typeof PREMIGRATION_SCENARIOS)[number]) {
+function actualFor(entry: ScenarioLike) {
   const rows = entry.expectedPreflightTypes.map((identity_type: string) => ({
     identity_type,
-    normalized_value: identity_type === "lead_split_identity" ? entry.fixtureIds.leads[0] : "synthetic-redacted",
-    contact_count: entry.expectedSplitContactCount ?? 2,
-    contact_ids: entry.expectedSplitContactIds ?? [],
+    normalized_value: ["lead_split_identity", "legacy_unlinked_lead"].includes(identity_type)
+      ? entry.fixtureIds.leads[0]
+      : "synthetic-redacted",
+    contact_count: identity_type === "legacy_unlinked_lead"
+      ? (entry.expectedLegacyContactCount ?? 0)
+      : (entry.expectedSplitContactCount ?? 2),
+    contact_ids: identity_type === "legacy_unlinked_lead"
+      ? (entry.expectedLegacyContactIds ?? [])
+      : (entry.expectedSplitContactIds ?? []),
   }));
   return {
     preflightRows: rows,
@@ -62,6 +80,23 @@ describe("PR121 preflight SQL correction", () => {
     expect(PREFLIGHT_SQL).toContain("phone_contact_matches");
     expect(PREFLIGHT_SQL).toContain("cardinality(distinct_contacts.contact_ids) as contact_count");
     expect(PREFLIGHT_SQL).not.toContain("2 as contact_count");
+  });
+
+  it("surfaces legacy unlinked leads with the lead UUID as the sanitized identifier", () => {
+    expect(PREFLIGHT_SQL).toContain("'legacy_unlinked_lead' as identity_type");
+    expect(PREFLIGHT_SQL).toContain("legacy_leads.id::text as normalized_value");
+    expect(PREFLIGHT_SQL).toContain("legacy_leads.contact_id is null");
+    const legacyBlock = PREFLIGHT_SQL.slice(PREFLIGHT_SQL.indexOf("legacy_unlinked_lead_reviews"));
+    expect(legacyBlock).not.toMatch(/normalized_(email|phone)\s+as\s+normalized_value/i);
+    expect(legacyBlock).not.toMatch(/email\s+as\s+normalized_value/i);
+    expect(legacyBlock).not.toMatch(/phone\s+as\s+normalized_value/i);
+  });
+
+  it("unions and deduplicates legacy candidate contacts with actual cardinality", () => {
+    expect(PREFLIGHT_SQL).toContain("legacy_unlinked_lead_reviews");
+    expect(PREFLIGHT_SQL).toContain("array_agg(distinct contact_id order by contact_id)");
+    expect(PREFLIGHT_SQL).toContain("cardinality(coalesce(candidate_contacts.contact_ids, array[]::uuid[])) as contact_count");
+    expect(PREFLIGHT_SQL).toContain("coalesce(candidate_contacts.contact_ids, array[]::uuid[]) as contact_ids");
   });
 });
 
@@ -107,16 +142,111 @@ describe("PR121 preflight scenario evaluation", () => {
     const entry = scenario("multiple_identity_matches");
     const evaluation = evaluateScenario(entry, actualFor(entry));
     expect(evaluation.passed).toBe(true);
-    expect(evaluation.actualPreflightTypes).toEqual(["email", "lead_split_identity", "phone"]);
+    expect(evaluation.actualPreflightTypes).toEqual(["email", "lead_split_identity", "legacy_unlinked_lead", "phone"]);
     expect(evaluation.splitContactCount).toBe(4);
     expect(evaluation.splitContactIds).toEqual([...entry.expectedSplitContactIds!].sort());
+    expect(evaluation.legacyContactCount).toBe(4);
+    expect(evaluation.legacyContactIds).toEqual([...entry.expectedLegacyContactIds!].sort());
   });
 
   it("does not classify shared contact intersection as split identity", () => {
     const entry = scenario("shared_contact_intersection");
     const evaluation = evaluateScenario(entry, actualFor(entry));
     expect(evaluation.passed).toBe(true);
-    expect(evaluation.actualPreflightTypes).toEqual(["email", "phone"]);
+    expect(evaluation.actualPreflightTypes).toEqual(["email", "legacy_unlinked_lead", "phone"]);
+    expect(evaluation.legacyContactCount).toBe(3);
+  });
+
+  it("classifies legacy unlinked lead alone as operator review", () => {
+    const legacy = COMPATIBILITY_SCENARIOS.legacy_lead_contact_compatibility;
+    const evaluation = evaluateScenario(legacy, actualFor(legacy));
+    expect(evaluation).toMatchObject({
+      actualClassification: "operator_review",
+      actualPreflightTypes: ["legacy_unlinked_lead"],
+      preflightBlockerCount: 1,
+      legacyContactCount: 0,
+      legacyContactIds: [],
+      passed: true,
+    });
+  });
+
+  it("keeps collision blockers higher priority than legacy operator review", () => {
+    expect(classifyFindings([
+      { identity_type: "legacy_unlinked_lead" },
+      { identity_type: "email" },
+    ], {})).toBe("contact_identity_blocker");
+  });
+
+  it("keeps clean and idempotency-risk classifications stable", () => {
+    expect(classifyFindings([], {})).toBe("clean");
+    expect(classifyFindings([], { orphan_sessions: 1 })).toBe("idempotency_risk");
+    expect(classifyFindings([], { changed_session_idempotency_risks: 1 })).toBe("idempotency_risk");
+  });
+
+  it("keeps persisted compatibility fixture preflight rows scoped by exact IDs", () => {
+    const ownedLead = "12199990-0000-4000-8000-000000000201";
+    const otherLead = "12199990-0000-4000-8000-000000000202";
+    expect(filterPreflightRowsForFixture([
+      { identity_type: "legacy_unlinked_lead", normalized_value: ownedLead, contact_ids: [] },
+      { identity_type: "legacy_unlinked_lead", normalized_value: otherLead, contact_ids: [] },
+    ], {
+      leads: [ownedLead],
+      contacts: [],
+      sessions: [],
+    })).toEqual([
+      { identity_type: "legacy_unlinked_lead", normalized_value: ownedLead, contact_ids: [] },
+    ]);
+  });
+
+  it("supports one candidate contact when email and phone match the same contact", () => {
+    const contactId = "12199991-0000-4000-8000-000000000001";
+    const evaluation = evaluateScenario({
+      ...scenario("clean_baseline"),
+      expectedClassification: "operator_review",
+      expectedPreflightTypes: ["legacy_unlinked_lead"],
+      expectedBlockerCount: 1,
+      expectedLegacyContactCount: 1,
+      expectedLegacyContactIds: [contactId],
+    }, {
+      preflightRows: [{
+        identity_type: "legacy_unlinked_lead",
+        normalized_value: "12199991-0000-4000-8000-000000000201",
+        contact_count: 1,
+        contact_ids: [contactId],
+      }],
+      supplemental: {},
+    });
+    expect(evaluation).toMatchObject({
+      actualClassification: "operator_review",
+      legacyContactCount: 1,
+      legacyContactIds: [contactId],
+      passed: true,
+    });
+  });
+
+  it("supports multiple candidate contacts in one deterministic legacy finding", () => {
+    const contactIds = [
+      "12199992-0000-4000-8000-000000000001",
+      "12199992-0000-4000-8000-000000000002",
+      "12199992-0000-4000-8000-000000000003",
+    ];
+    const evaluation = evaluateScenario({
+      ...scenario("clean_baseline"),
+      expectedClassification: "operator_review",
+      expectedPreflightTypes: ["legacy_unlinked_lead"],
+      expectedBlockerCount: 1,
+      expectedLegacyContactCount: 3,
+      expectedLegacyContactIds: contactIds,
+    }, {
+      preflightRows: [{
+        identity_type: "legacy_unlinked_lead",
+        normalized_value: "12199992-0000-4000-8000-000000000201",
+        contact_count: 3,
+        contact_ids: [...contactIds].reverse(),
+      }],
+      supplemental: {},
+    });
+    expect(evaluation.passed).toBe(true);
   });
 
   it("runs cleanup after success and after failure", async () => {

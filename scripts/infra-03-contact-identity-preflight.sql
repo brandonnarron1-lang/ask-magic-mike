@@ -52,6 +52,7 @@ phone_conflicts as (
 legacy_leads as (
   select
     id,
+    contact_id,
     coalesce(
       nullif(lower(btrim(normalized_email)), ''),
       nullif(lower(btrim(email)), '')
@@ -122,6 +123,35 @@ lead_split_identity_conflicts as (
     join unnest(phone_matches.contact_ids) phone_contacts(contact_id)
       using (contact_id)
   )
+),
+legacy_unlinked_lead_reviews as (
+  select
+    'legacy_unlinked_lead' as identity_type,
+    -- For legacy-unlinked rows, normalized_value is a lead record identifier,
+    -- not an email or phone identity value.
+    legacy_leads.id::text as normalized_value,
+    cardinality(coalesce(candidate_contacts.contact_ids, array[]::uuid[])) as contact_count,
+    coalesce(candidate_contacts.contact_ids, array[]::uuid[]) as contact_ids
+  from legacy_leads
+  cross join lateral (
+    select array_agg(distinct contact_id order by contact_id) as contact_ids
+    from (
+      select normalized_contacts.id as contact_id
+      from normalized_contacts
+      where legacy_leads.normalized_email is not null
+        and normalized_contacts.normalized_email = legacy_leads.normalized_email
+      union
+      select normalized_contacts.id as contact_id
+      from normalized_contacts
+      where legacy_leads.normalized_phone is not null
+        and normalized_contacts.normalized_phone = legacy_leads.normalized_phone
+    ) matches
+  ) candidate_contacts
+  where legacy_leads.contact_id is null
+    and (
+      legacy_leads.normalized_email is not null
+      or legacy_leads.normalized_phone is not null
+    )
 )
 select *
 from email_conflicts
@@ -131,4 +161,7 @@ from phone_conflicts
 union all
 select *
 from lead_split_identity_conflicts
+union all
+select *
+from legacy_unlinked_lead_reviews
 order by identity_type, normalized_value;

@@ -109,6 +109,8 @@ function scenario(name, group, expectedClassification, expectedPreflightTypes, b
     expectedBlockerCount: extra.expectedBlockerCount ?? expectedPreflightTypes.length,
     expectedSplitContactCount: extra.expectedSplitContactCount,
     expectedSplitContactIds: extra.expectedSplitContactIds,
+    expectedLegacyContactCount: extra.expectedLegacyContactCount,
+    expectedLegacyContactIds: extra.expectedLegacyContactIds,
     fixtureIds,
     fixtureSql: build(fixtureIds),
   };
@@ -135,7 +137,7 @@ export const PREMIGRATION_SCENARIOS = [
     contact("duplicate_normalized_phone", contacts[0], "phone-one-pr121@example.test", "+1 (252) 555-1101", "12525551101"),
     contact("duplicate_normalized_phone", contacts[1], "phone-two-pr121@example.test", "252.555.1101", null),
   ], { ids: { contacts: [1, 2] }, expectedBlockerCount: 1 }),
-  scenario("split_identity_collision", 4, "contact_identity_blocker", ["lead_split_identity"], ({ contacts, sessions, leads }) => [
+  scenario("split_identity_collision", 4, "contact_identity_blocker", ["lead_split_identity", "legacy_unlinked_lead"], ({ contacts, sessions, leads }) => [
     contact("split_identity_collision", contacts[0], "split-email-pr121@example.test", "+1 (252) 555-1200", "2525551200"),
     contact("split_identity_collision", contacts[1], "split-phone-holder-pr121@example.test", "+1 (252) 555-1201", "2525551201"),
     session("split_identity_collision", sessions[0]),
@@ -147,9 +149,11 @@ export const PREMIGRATION_SCENARIOS = [
     }),
   ], {
     ids: { contacts: [1, 2], sessions: [101], leads: [201] },
-    expectedBlockerCount: 1,
+    expectedBlockerCount: 2,
     expectedSplitContactCount: 2,
     expectedSplitContactIds: [fixtureUuid(4, 1), fixtureUuid(4, 2)],
+    expectedLegacyContactCount: 2,
+    expectedLegacyContactIds: [fixtureUuid(4, 1), fixtureUuid(4, 2)],
   }),
   scenario("same_contact_repeated_identity", 5, "clean", [], ({ contacts, sessions, leads }) => [
     contact("same_contact_repeated_identity", contacts[0], "same-contact-pr121@example.test", "+1 (252) 555-1301", "2525551301"),
@@ -181,7 +185,7 @@ export const PREMIGRATION_SCENARIOS = [
       normalizedPhone: "   ",
     }),
   ], { ids: { contacts: [1, 2], sessions: [101], leads: [201] }, expectedBlockerCount: 0 }),
-  scenario("blank_normalized_email_fallback", 7, "contact_identity_blocker", ["lead_split_identity"], ({ contacts, sessions, leads }) => [
+  scenario("blank_normalized_email_fallback", 7, "contact_identity_blocker", ["lead_split_identity", "legacy_unlinked_lead"], ({ contacts, sessions, leads }) => [
     contact("blank_normalized_email_fallback", contacts[0], "blank-email-pr121@example.test", "+1 (252) 555-1700", "2525551700"),
     contact("blank_normalized_email_fallback", contacts[1], "blank-email-phone-pr121@example.test", "+1 (252) 555-1701", "2525551701"),
     session("blank_normalized_email_fallback", sessions[0]),
@@ -193,11 +197,13 @@ export const PREMIGRATION_SCENARIOS = [
     }),
   ], {
     ids: { contacts: [1, 2], sessions: [101], leads: [201] },
-    expectedBlockerCount: 1,
+    expectedBlockerCount: 2,
     expectedSplitContactCount: 2,
     expectedSplitContactIds: [fixtureUuid(7, 1), fixtureUuid(7, 2)],
+    expectedLegacyContactCount: 2,
+    expectedLegacyContactIds: [fixtureUuid(7, 1), fixtureUuid(7, 2)],
   }),
-  scenario("blank_normalized_phone_fallback", 8, "contact_identity_blocker", ["lead_split_identity"], ({ contacts, sessions, leads }) => [
+  scenario("blank_normalized_phone_fallback", 8, "contact_identity_blocker", ["lead_split_identity", "legacy_unlinked_lead"], ({ contacts, sessions, leads }) => [
     contact("blank_normalized_phone_fallback", contacts[0], "blank-phone-email-pr121@example.test", "+1 (252) 555-1800", "2525551800"),
     contact("blank_normalized_phone_fallback", contacts[1], "blank-phone-pr121@example.test", "+1 (252) 555-1801", "2525551801"),
     session("blank_normalized_phone_fallback", sessions[0]),
@@ -210,11 +216,13 @@ export const PREMIGRATION_SCENARIOS = [
     }),
   ], {
     ids: { contacts: [1, 2], sessions: [101], leads: [201] },
-    expectedBlockerCount: 1,
+    expectedBlockerCount: 2,
     expectedSplitContactCount: 2,
     expectedSplitContactIds: [fixtureUuid(8, 1), fixtureUuid(8, 2)],
+    expectedLegacyContactCount: 2,
+    expectedLegacyContactIds: [fixtureUuid(8, 1), fixtureUuid(8, 2)],
   }),
-  scenario("multiple_identity_matches", 9, "contact_identity_blocker", ["email", "lead_split_identity", "phone"], ({ contacts, sessions, leads }) => [
+  scenario("multiple_identity_matches", 9, "contact_identity_blocker", ["email", "lead_split_identity", "legacy_unlinked_lead", "phone"], ({ contacts, sessions, leads }) => [
     contact("multiple_identity_matches", contacts[0], "multi-email-pr121@example.test", "+1 (252) 555-1901", "2525551901"),
     contact("multiple_identity_matches", contacts[1], " multi-email-pr121@example.test ", "+1 (252) 555-1902", "2525551902"),
     contact("multiple_identity_matches", contacts[2], "multi-phone-a-pr121@example.test", "+1 (252) 555-1903", "12525551999"),
@@ -228,11 +236,13 @@ export const PREMIGRATION_SCENARIOS = [
     }),
   ], {
     ids: { contacts: [1, 2, 3, 4], sessions: [101], leads: [201] },
-    expectedBlockerCount: 3,
+    expectedBlockerCount: 4,
     expectedSplitContactCount: 4,
     expectedSplitContactIds: [fixtureUuid(9, 1), fixtureUuid(9, 2), fixtureUuid(9, 3), fixtureUuid(9, 4)],
+    expectedLegacyContactCount: 4,
+    expectedLegacyContactIds: [fixtureUuid(9, 1), fixtureUuid(9, 2), fixtureUuid(9, 3), fixtureUuid(9, 4)],
   }),
-  scenario("shared_contact_intersection", 10, "contact_identity_blocker", ["email", "phone"], ({ contacts, sessions, leads }) => [
+  scenario("shared_contact_intersection", 10, "contact_identity_blocker", ["email", "legacy_unlinked_lead", "phone"], ({ contacts, sessions, leads }) => [
     contact("shared_contact_intersection", contacts[0], "shared-pr121@example.test", "+1 (252) 555-2000", "2525552000"),
     contact("shared_contact_intersection", contacts[1], " shared-pr121@example.test ", "+1 (252) 555-2001", "2525552001"),
     contact("shared_contact_intersection", contacts[2], "shared-phone-pr121@example.test", "+1 (252) 555-2000", null),
@@ -243,7 +253,12 @@ export const PREMIGRATION_SCENARIOS = [
       normalizedEmail: "shared-pr121@example.test",
       normalizedPhone: "2525552000",
     }),
-  ], { ids: { contacts: [1, 2, 3], sessions: [101], leads: [201] }, expectedBlockerCount: 2 }),
+  ], {
+    ids: { contacts: [1, 2, 3], sessions: [101], leads: [201] },
+    expectedBlockerCount: 3,
+    expectedLegacyContactCount: 3,
+    expectedLegacyContactIds: [fixtureUuid(10, 1), fixtureUuid(10, 2), fixtureUuid(10, 3)],
+  }),
   scenario("same_contact_email_phone", 11, "clean", [], ({ contacts, sessions, leads }) => [
     contact("same_contact_email_phone", contacts[0], "same-both-pr121@example.test", "+1 (252) 555-2100", "2525552100"),
     session("same_contact_email_phone", sessions[0]),
@@ -261,7 +276,7 @@ export const COMPATIBILITY_SCENARIOS = {
   legacy_orphan_session: scenario("legacy_orphan_session", 12, "idempotency_risk", [], ({ sessions }) => [
     session("legacy_orphan_session", sessions[0], "active", 1),
   ], { ids: { sessions: [101] }, expectedBlockerCount: 0 }),
-  legacy_lead_contact_compatibility: scenario("legacy_lead_contact_compatibility", 13, "operator_review", [], ({ sessions, leads }) => [
+  legacy_lead_contact_compatibility: scenario("legacy_lead_contact_compatibility", 13, "operator_review", ["legacy_unlinked_lead"], ({ sessions, leads }) => [
     session("legacy_lead_contact_compatibility", sessions[0]),
     lead("legacy_lead_contact_compatibility", leads[0], sessions[0], {
       email: "legacy-unlinked-pr121@example.test",
@@ -270,7 +285,12 @@ export const COMPATIBILITY_SCENARIOS = {
       normalizedPhone: "2525552201",
       address: "2201 Legacy Compatibility Road",
     }),
-  ], { ids: { sessions: [101], leads: [201] }, expectedBlockerCount: 0 }),
+  ], {
+    ids: { sessions: [101], leads: [201] },
+    expectedBlockerCount: 1,
+    expectedLegacyContactCount: 0,
+    expectedLegacyContactIds: [],
+  }),
 };
 
 export const RUNTIME_SCENARIOS = {
@@ -380,13 +400,17 @@ export function hasUnsafeSummaryContent(value) {
 }
 
 export function classifyFindings(preflightRows, supplemental) {
-  if (preflightRows.length > 0) return "contact_identity_blocker";
+  const blockerTypes = new Set(["email", "phone", "lead_split_identity"]);
+  if (preflightRows.some((row) => blockerTypes.has(String(row.identity_type)))) {
+    return "contact_identity_blocker";
+  }
   if (
     Number(supplemental.orphan_sessions) > 0 ||
     Number(supplemental.changed_session_idempotency_risks) > 0
   ) {
     return "idempotency_risk";
   }
+  if (preflightRows.some((row) => row.identity_type === "legacy_unlinked_lead")) return "operator_review";
   if (Number(supplemental.legacy_leads_without_contact) > 0) return "operator_review";
   return "clean";
 }
@@ -401,6 +425,11 @@ export function evaluateScenario(scenarioDefinition, actual) {
   const splitContactIds = Array.isArray(splitRow?.contact_ids)
     ? splitRow.contact_ids.map(String).sort()
     : [];
+  const legacyRows = preflightRows.filter((row) => row.identity_type === "legacy_unlinked_lead");
+  const legacyRow = legacyRows[0] ?? null;
+  const legacyContactIds = Array.isArray(legacyRow?.contact_ids)
+    ? legacyRow.contact_ids.map(String).sort()
+    : [];
   const actualClassification = classifyFindings(preflightRows, supplemental);
   const splitContactCountOk =
     scenarioDefinition.expectedSplitContactCount === undefined ||
@@ -408,13 +437,22 @@ export function evaluateScenario(scenarioDefinition, actual) {
   const splitContactIdsOk =
     scenarioDefinition.expectedSplitContactIds === undefined ||
     JSON.stringify(splitContactIds) === JSON.stringify([...scenarioDefinition.expectedSplitContactIds].sort());
+  const legacyContactCountOk =
+    scenarioDefinition.expectedLegacyContactCount === undefined ||
+    Number(legacyRow?.contact_count) === scenarioDefinition.expectedLegacyContactCount;
+  const legacyContactIdsOk =
+    scenarioDefinition.expectedLegacyContactIds === undefined ||
+    JSON.stringify(legacyContactIds) === JSON.stringify([...scenarioDefinition.expectedLegacyContactIds].sort());
   const passed =
     actualClassification === scenarioDefinition.expectedClassification &&
     JSON.stringify(actualTypes) === JSON.stringify(expectedTypes) &&
     preflightRows.length === scenarioDefinition.expectedBlockerCount &&
     splitRows.length <= 1 &&
+    legacyRows.length <= 1 &&
     splitContactCountOk &&
-    splitContactIdsOk;
+    splitContactIdsOk &&
+    legacyContactCountOk &&
+    legacyContactIdsOk;
   return {
     scenario: scenarioDefinition.name,
     proofType: "pre_migration_preflight",
@@ -426,6 +464,8 @@ export function evaluateScenario(scenarioDefinition, actual) {
     supplemental,
     splitContactCount: splitRow?.contact_count ?? null,
     splitContactIds,
+    legacyContactCount: legacyRow?.contact_count ?? null,
+    legacyContactIds,
     passed,
   };
 }
@@ -625,13 +665,33 @@ function queryScenario(scenarioDefinition) {
   };
 }
 
+export function filterPreflightRowsForFixture(preflightRows, fixtureIds) {
+  const leadIds = new Set((fixtureIds.leads ?? []).map(String));
+  const contactIds = new Set((fixtureIds.contacts ?? []).map(String));
+  return preflightRows.filter((row) => {
+    if (
+      ["lead_split_identity", "legacy_unlinked_lead"].includes(String(row.identity_type)) &&
+      leadIds.has(String(row.normalized_value))
+    ) {
+      return true;
+    }
+    if (Array.isArray(row.contact_ids) && row.contact_ids.some((contactId) => contactIds.has(String(contactId)))) {
+      return true;
+    }
+    return false;
+  });
+}
+
 function queryExistingScenario(scenarioDefinition) {
   const output = psql(`
     ${preflightSelectSql()}
     ${supplementalSelectSql(scenarioDefinition.fixtureIds)}
   `);
   return {
-    preflightRows: parseJsonLine(output, "PREFLIGHT_JSON:"),
+    preflightRows: filterPreflightRowsForFixture(
+      parseJsonLine(output, "PREFLIGHT_JSON:"),
+      scenarioDefinition.fixtureIds,
+    ),
     supplemental: parseJsonLine(output, "SUPPLEMENTAL_JSON:"),
   };
 }

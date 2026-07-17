@@ -32,6 +32,13 @@ describe("PR121 offline release orchestration", () => {
     expect(RELEASE_SCRIPT).toContain("fixtureFileBlob");
   });
 
+  it("includes migrationCount in common success provenance and readiness output", () => {
+    expect(RELEASE_SCRIPT).toContain("function provenance(metadata, authoritative, migrationCount)");
+    expect(RELEASE_SCRIPT).toContain("...(migrationCount === undefined ? {} : { migrationCount })");
+    expect(RELEASE_SCRIPT).toContain("const baseProvenance = provenance(metadata, options.authoritative, migrations.length)");
+    expect(RELEASE_SCRIPT).toContain("Migration count: ${summary.migrationCount}");
+  });
+
   it("writes sanitized failure evidence without raw command streams", () => {
     const failureBlock = RELEASE_SCRIPT.slice(
       RELEASE_SCRIPT.indexOf("function writeFailureEvidence"),
