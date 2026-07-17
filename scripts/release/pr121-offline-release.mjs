@@ -4,10 +4,25 @@ import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  ACCEPTED_PR121_SHA,
+  PREDECESSOR_MIGRATION_FILE,
+  PREDECESSOR_MIGRATION_VERSION,
+  TARGET_MIGRATION_FILE,
+  TARGET_MIGRATION_VERSION,
   assertLocalDatabaseTargets,
-  hasUnsafeSummaryContent,
+  assertLocalSupabaseCommand,
+  assertPredecessorState,
+  assertTargetState,
+  exactProjectContainerNames,
+  gitMetadata,
+  readTargetObjectStatus,
+  runPostMigrationCompatibilityAssertions,
+  runPostMigrationRuntimeAssertions,
   runPreflightRehearsal,
+  prepareCompatibilityFixtures,
   sanitizeSummary,
+  sanitizedChildEnv,
+  hasUnsafeSummaryContent,
 } from "./pr121-preflight-rehearsal.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,31 +30,49 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, "../..");
 const REMOTE_LINK = path.join(ROOT, "supabase/.temp/project-ref");
 
+class StageError extends Error {
+  constructor(stage, code) {
+    super(code);
+    this.stage = stage;
+    this.code = code;
+  }
+}
+
 function timestamp() {
   return new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
 }
 
-function defaultEvidenceDir() {
-  return path.join(ROOT, ".amm-run", `${timestamp()}-pr121-offline-release`);
+function defaultEvidenceDir(authoritative) {
+  const prefix = authoritative ? `${timestamp()}-pr121-offline-release` : `pr121-offline-development-${timestamp()}`;
+  return path.join(ROOT, ".amm-run", prefix);
 }
 
 function parseArgs(argv) {
-  const options = { evidenceDir: defaultEvidenceDir() };
+  const options = { development: false, evidenceDir: null };
   for (let index = 0; index < argv.length; index += 1) {
-    if (argv[index] === "--evidence-dir") {
+    const arg = argv[index];
+    if (arg === "--development") {
+      options.development = true;
+    } else if (arg === "--evidence-dir") {
       options.evidenceDir = path.resolve(argv[index + 1]);
       index += 1;
     }
   }
-  return options;
+  return {
+    ...options,
+    authoritative: !options.development,
+    evidenceDir: options.evidenceDir ?? defaultEvidenceDir(!options.development),
+  };
 }
 
 function run(command, args, options = {}) {
+  assertLocalSupabaseCommand(command, args);
   const startedAt = Date.now();
   const result = spawnSync(command, args, {
     cwd: ROOT,
     encoding: "utf8",
     maxBuffer: 30 * 1024 * 1024,
+    env: sanitizedChildEnv(),
     ...options,
   });
   return {
@@ -51,9 +84,9 @@ function run(command, args, options = {}) {
   };
 }
 
-function runRequired(command, args, name, steps, options = {}) {
+function runRequired(command, args, name, steps) {
   console.log(`PR121 offline release: ${name}`);
-  const result = run(command, args, options);
+  const result = run(command, args);
   steps.push({
     name,
     command: result.command,
@@ -61,7 +94,7 @@ function runRequired(command, args, name, steps, options = {}) {
     durationMs: result.durationMs,
   });
   if (result.exitCode !== 0) {
-    throw new Error(`${name}_failed`);
+    throw new StageError(name, `${name.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}_failed`);
   }
   return result;
 }
@@ -86,53 +119,37 @@ function projectId() {
   return id;
 }
 
-function stopLocalSupabase(steps) {
-  const result = run("supabase", ["stop", "--no-backup"], {
+function stopLocalSupabase() {
+  return run("supabase", ["stop", "--no-backup"], {
     stdio: ["ignore", "ignore", "ignore"],
   });
-  steps.push({
-    name: "stop local Supabase",
-    command: "supabase stop --no-backup",
-    exitCode: result.exitCode,
-    durationMs: result.durationMs,
-  });
 }
 
-function runningSupabaseContainerCount() {
-  const result = run("docker", [
-    "ps",
-    "--filter",
-    "name=supabase",
-    "--format",
-    "{{.Names}}",
-  ]);
+function runningProjectContainerCount(localProjectId) {
+  const result = run("docker", ["ps", "--format", "{{.Names}}"]);
   if (result.exitCode !== 0) return null;
-  return result.stdout.split("\n").filter(Boolean).length;
+  return exactProjectContainerNames(result.stdout, localProjectId).length;
 }
 
-function runningNextProcessCount() {
-  const result = run("ps", ["-axo", "pid,command"]);
-  if (result.exitCode !== 0) return null;
-  return result.stdout
-    .split("\n")
-    .filter((line) => /next (start|dev)|node .*next/.test(line))
-    .filter((line) => !line.includes("pr121-offline-release"))
-    .length;
-}
-
-function advisorsSummary(output) {
+export function advisorsSummary(output) {
   try {
-    const parsed = JSON.parse(output);
+    const parsed = JSON.parse(output || "null");
     if (Array.isArray(parsed)) {
-      return { findingCount: parsed.length, errorFindingCount: parsed.length };
+      return { parseStatus: "recognized", findingCount: parsed.length, errorFindingCount: parsed.length };
     }
-    if (Array.isArray(parsed?.lints)) {
-      return { findingCount: parsed.lints.length, errorFindingCount: parsed.lints.length };
+    for (const key of ["lints", "advisors", "findings"]) {
+      if (Array.isArray(parsed?.[key])) {
+        return {
+          parseStatus: "recognized",
+          findingCount: parsed[key].length,
+          errorFindingCount: parsed[key].length,
+        };
+      }
     }
   } catch {
-    return { findingCount: null, errorFindingCount: null };
+    return { parseStatus: "unrecognized" };
   }
-  return { findingCount: null, errorFindingCount: null };
+  return { parseStatus: "unrecognized" };
 }
 
 function writeReadinessMarkdown(file, summary) {
@@ -140,19 +157,32 @@ function writeReadinessMarkdown(file, summary) {
     "# PR121 Offline Release Readiness",
     "",
     `Generated UTC: ${summary.generatedAt}`,
+    `Authoritative: ${summary.authoritative ? "true" : "false"}`,
     `Branch: ${summary.branch}`,
     `HEAD: ${summary.head}`,
+    `HEAD tree: ${summary.headTree}`,
+    `Tracked worktree clean: ${summary.trackedWorktreeClean ? "true" : "false"}`,
     `Target: ${summary.target}`,
     "",
     "## Results",
     "",
-    `- Preflight fixture matrix: ${summary.preflightPassed ? "PASS" : "FAIL"}`,
-    `- Migration chain verification: ${summary.migrationVerificationPassed ? "PASS" : "FAIL"}`,
+    `- Pre-migration preflight fixture matrix: ${summary.preflightPassed ? "PASS" : "FAIL"}`,
+    `- Predecessor state verified: ${summary.predecessorStateVerified ? "PASS" : "FAIL"}`,
+    `- Target migration transition: ${summary.targetMigrationApplied ? "PASS" : "FAIL"}`,
+    `- Cutover compatibility assertions: ${summary.compatibilityPassed ? "PASS" : "FAIL"}`,
+    `- Runtime replay/idempotency assertions: ${summary.runtimePassed ? "PASS" : "FAIL"}`,
     `- PostgreSQL contract test: ${summary.postgresContractPassed ? "PASS" : "FAIL"}`,
     `- Local Supabase lifecycle test: ${summary.supabaseLifecyclePassed ? "PASS" : "FAIL"}`,
     `- Schema lint: ${summary.schemaLintPassed ? "PASS" : "FAIL"}`,
     `- Security advisors: ${summary.securityAdvisorsPassed ? "PASS" : "FAIL"}`,
     `- Local Supabase stopped: ${summary.localSupabaseStopped ? "YES" : "NO"}`,
+    "",
+    "## Provenance",
+    "",
+    `- Accepted PR #121 SHA: ${summary.acceptedPr121Sha}`,
+    `- Target migration blob SHA: ${summary.targetMigrationBlob}`,
+    `- Corrected preflight blob SHA: ${summary.preflightScriptBlob}`,
+    `- Executable fixture blob SHA: ${summary.fixtureFileBlob}`,
     "",
     "## Production Status",
     "",
@@ -165,28 +195,107 @@ function writeReadinessMarkdown(file, summary) {
   writeFileSync(file, `${lines.join("\n")}\n`);
 }
 
+function provenance(metadata, authoritative) {
+  return {
+    authoritative,
+    branch: metadata.branch,
+    head: metadata.head,
+    headParent: metadata.parent,
+    headTree: metadata.tree,
+    acceptedPr121Sha: ACCEPTED_PR121_SHA,
+    trackedWorktreeClean: metadata.trackedWorktreeClean,
+    targetMigration: TARGET_MIGRATION_FILE,
+    targetMigrationVersion: TARGET_MIGRATION_VERSION,
+    targetMigrationBlob: metadata.targetMigrationBlob,
+    predecessorMigration: PREDECESSOR_MIGRATION_FILE,
+    predecessorMigrationVersion: PREDECESSOR_MIGRATION_VERSION,
+    preflightScriptBlob: metadata.preflightScriptBlob,
+    fixtureFileBlob: metadata.fixtureFileBlob,
+    localOnlyTarget: true,
+    remoteProjectLinked: false,
+    productionChanges: 0,
+    remoteSql: 0,
+    providerCalls: 0,
+  };
+}
+
+function writeFailureEvidence({ options, metadata, stage, code, steps, stopResult, remainingContainerCount }) {
+  writeJson(path.join(options.evidenceDir, "failure-summary.json"), {
+    schemaVersion: 2,
+    ok: false,
+    authoritative: false,
+    generatedAt: new Date().toISOString(),
+    failedStage: stage,
+    failureCode: code,
+    ...provenance(metadata, false),
+    completedSteps: steps.map((step) => ({
+      name: step.name,
+      exitCode: step.exitCode,
+      durationMs: step.durationMs,
+    })),
+    localStopResult: stopResult
+      ? { exitCode: stopResult.exitCode, durationMs: stopResult.durationMs }
+      : null,
+    exactProjectRemainingContainerCount: remainingContainerCount,
+    productionChanges: 0,
+    remoteDatabaseChanges: 0,
+    providerCalls: 0,
+  });
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2));
-  const steps = [];
-  const migrations = migrationFiles();
-  mkdirSync(options.evidenceDir, { recursive: true });
-
   if (existsSync(REMOTE_LINK)) throw new Error("remote_supabase_project_ref_present");
   assertLocalDatabaseTargets(process.env);
 
-  const branch = run("git", ["branch", "--show-current"]).stdout.trim();
-  const head = run("git", ["rev-parse", "HEAD"]).stdout.trim();
-  const localProjectIdConfigured = Boolean(projectId());
+  const initialMetadata = gitMetadata();
+  if (options.authoritative && !initialMetadata.trackedWorktreeClean) {
+    throw new Error("authoritative_rehearsal_requires_clean_tracked_worktree");
+  }
 
+  mkdirSync(options.evidenceDir, { recursive: true });
+
+  const steps = [];
+  const migrations = migrationFiles();
+  const localProjectId = projectId();
+  const metadata = gitMetadata();
+  const baseProvenance = provenance(metadata, options.authoritative);
+  let failed = null;
+  let stopResult = null;
+  let remainingContainerCount = null;
+  let predecessorState = null;
+  let targetStateBefore = null;
+  let targetStateAfter = null;
   let preflightSummary = null;
-  let stagingVerify = null;
+  let compatibilitySetup = null;
+  let compatibilityRuntime = null;
+  let runtimeSummary = null;
   let lint = null;
   let advisors = null;
+
   try {
     runRequired("pnpm", ["run", "staging:local:up"], "start/reset local Supabase", steps);
-    stagingVerify = runRequired("pnpm", ["run", "staging:local:verify"], "verify migration chain", steps);
+    runRequired(
+      "supabase",
+      ["db", "reset", "--local", "--version", PREDECESSOR_MIGRATION_VERSION, "--no-seed", "--yes"],
+      "reset local database to predecessor migration",
+      steps,
+    );
 
-    preflightSummary = await runPreflightRehearsal({ evidenceDir: options.evidenceDir });
+    predecessorState = assertPredecessorState();
+    targetStateBefore = readTargetObjectStatus();
+
+    preflightSummary = await runPreflightRehearsal();
+    compatibilitySetup = prepareCompatibilityFixtures();
+
+    runRequired("supabase", ["migration", "up", "--local"], "apply pending local migrations", steps);
+    targetStateAfter = assertTargetState();
+
+    compatibilityRuntime = runPostMigrationCompatibilityAssertions();
+    if (!compatibilityRuntime.passed) throw new StageError("cutover compatibility assertions", "cutover_compatibility_failed");
+
+    runtimeSummary = runPostMigrationRuntimeAssertions();
+    if (!runtimeSummary.passed) throw new StageError("runtime replay assertions", "runtime_replay_assertions_failed");
 
     runRequired("pnpm", ["run", "staging:local:up"], "reset to clean local state", steps);
     runRequired("pnpm", ["run", "test:postgres:infra02"], "postgres contract", steps);
@@ -203,83 +312,137 @@ async function main() {
       "security advisors",
       steps,
     );
+  } catch (error) {
+    failed = error instanceof StageError
+      ? error
+      : new StageError("unknown", error instanceof Error ? error.message : "unknown_failure");
   } finally {
-    stopLocalSupabase(steps);
+    stopResult = stopLocalSupabase();
+    steps.push({
+      name: "stop local Supabase",
+      command: "supabase stop --no-backup",
+      exitCode: stopResult.exitCode,
+      durationMs: stopResult.durationMs,
+    });
+    remainingContainerCount = runningProjectContainerCount(localProjectId);
+    if (!failed && stopResult.exitCode !== 0) {
+      failed = new StageError("stop local Supabase", "local_supabase_stop_failed");
+    }
+    if (!failed && remainingContainerCount !== 0) {
+      failed = new StageError("verify local Supabase stopped", "local_supabase_containers_still_running");
+    }
   }
 
-  const supabaseContainerCount = runningSupabaseContainerCount();
-  const nextProcessCount = runningNextProcessCount();
-  const localSupabaseStopped = supabaseContainerCount === 0;
-  const temporaryNextProcessesStopped = nextProcessCount === 0;
+  if (failed) {
+    writeFailureEvidence({
+      options,
+      metadata,
+      stage: failed.stage,
+      code: failed.code,
+      steps,
+      stopResult,
+      remainingContainerCount,
+    });
+    throw failed;
+  }
 
   const generatedAt = new Date().toISOString();
-  const migrationSummary = {
-    schemaVersion: 1,
+  const advisorParse = advisorsSummary(advisors?.stdout || "");
+
+  writeJson(path.join(options.evidenceDir, "preflight-summary.json"), {
+    ...baseProvenance,
+    ...preflightSummary,
+    authoritative: options.authoritative,
+  });
+
+  writeJson(path.join(options.evidenceDir, "migration-rehearsal-summary.json"), {
+    schemaVersion: 2,
     generatedAt,
     target: "local-only",
-    branch,
-    head,
-    localProjectIdConfigured,
-    expectedMigrationCount: migrations.length,
-    finalRepositoryMigration: migrations.at(-1),
-    stagingVerificationPassed: stagingVerify?.exitCode === 0,
+    ...baseProvenance,
+    migrationCount: migrations.length,
+    predecessorStateVerified: true,
+    predecessorState,
+    targetStateBefore,
+    targetMigrationApplied: true,
+    targetStateAfter,
     steps: steps.filter((step) =>
-      ["start/reset local Supabase", "verify migration chain", "reset to clean local state", "stop local Supabase"].includes(step.name),
+      [
+        "start/reset local Supabase",
+        "reset local database to predecessor migration",
+        "apply pending local migrations",
+        "reset to clean local state",
+        "stop local Supabase",
+      ].includes(step.name),
     ),
-    providerCalls: 0,
     productionChanges: 0,
     remoteDatabaseChanges: 0,
-  };
-  writeJson(path.join(options.evidenceDir, "migration-rehearsal-summary.json"), migrationSummary);
+    providerCalls: 0,
+  });
 
-  const verificationSummary = {
-    schemaVersion: 1,
+  writeJson(path.join(options.evidenceDir, "runtime-summary.json"), {
+    schemaVersion: 2,
     generatedAt,
     target: "local-only",
-    branch,
-    head,
+    ...baseProvenance,
+    compatibilityPreflight: compatibilitySetup.evaluations,
+    compatibilityRuntime,
+    runtimeSummary,
+    productionChanges: 0,
+    remoteDatabaseChanges: 0,
+    providerCalls: 0,
+  });
+
+  const verificationSummary = {
+    schemaVersion: 2,
+    generatedAt,
+    target: "local-only",
+    ...baseProvenance,
     preflightPassed: preflightSummary?.passed === true,
+    predecessorStateVerified: true,
+    targetMigrationApplied: true,
+    compatibilityPassed: compatibilityRuntime?.passed === true,
+    runtimePassed: runtimeSummary?.passed === true,
     postgresContractPassed: steps.some((step) => step.name === "postgres contract" && step.exitCode === 0),
     supabaseLifecyclePassed: steps.some((step) => step.name === "local Supabase lifecycle" && step.exitCode === 0),
     schemaLintPassed: lint?.exitCode === 0,
     securityAdvisorsPassed: advisors?.exitCode === 0,
-    securityAdvisors: advisorsSummary(advisors?.stdout || ""),
-    localSupabaseStopped,
-    runningSupabaseContainerCount: supabaseContainerCount,
-    temporaryNextProcessesStopped,
-    runningNextProcessCount: nextProcessCount,
+    securityAdvisors: advisorParse,
+    localSupabaseStopped: remainingContainerCount === 0,
+    exactProjectRemainingContainerCount: remainingContainerCount,
     steps,
-    providerCalls: 0,
     productionChanges: 0,
     remoteDatabaseChanges: 0,
+    providerCalls: 0,
   };
   writeJson(path.join(options.evidenceDir, "verification-summary.json"), verificationSummary);
 
-  const readiness = {
+  writeReadinessMarkdown(path.join(options.evidenceDir, "release-readiness.md"), {
     generatedAt,
-    branch,
-    head,
     target: "local-only",
+    ...baseProvenance,
     preflightPassed: verificationSummary.preflightPassed,
-    migrationVerificationPassed: migrationSummary.stagingVerificationPassed,
+    predecessorStateVerified: verificationSummary.predecessorStateVerified,
+    targetMigrationApplied: verificationSummary.targetMigrationApplied,
+    compatibilityPassed: verificationSummary.compatibilityPassed,
+    runtimePassed: verificationSummary.runtimePassed,
     postgresContractPassed: verificationSummary.postgresContractPassed,
     supabaseLifecyclePassed: verificationSummary.supabaseLifecyclePassed,
     schemaLintPassed: verificationSummary.schemaLintPassed,
     securityAdvisorsPassed: verificationSummary.securityAdvisorsPassed,
-    localSupabaseStopped,
-  };
-  writeReadinessMarkdown(path.join(options.evidenceDir, "release-readiness.md"), readiness);
-
-  if (!localSupabaseStopped) throw new Error("local_supabase_containers_still_running");
-  if (!temporaryNextProcessesStopped) throw new Error("temporary_next_processes_still_running");
+    localSupabaseStopped: verificationSummary.localSupabaseStopped,
+  });
 
   console.log(JSON.stringify({
     ok: true,
+    authoritative: options.authoritative,
     evidenceDir: path.relative(ROOT, options.evidenceDir),
-    branch,
-    head,
+    branch: metadata.branch,
+    head: metadata.head,
+    headTree: metadata.tree,
     migrationCount: migrations.length,
-    finalRepositoryMigration: migrations.at(-1),
+    predecessorMigration: PREDECESSOR_MIGRATION_FILE,
+    targetMigration: TARGET_MIGRATION_FILE,
   }, null, 2));
 }
 

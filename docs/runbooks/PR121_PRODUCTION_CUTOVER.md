@@ -15,7 +15,27 @@ deployment, remote SQL, preview promotion, or Production traffic changes.
 - Production application traffic must not reach PR #121 runtime code before the
   migration is applied and verified.
 
-## 2. Required Owner Access
+## 2. Reviewed Preflight Source Prerequisite
+
+Accepted PR #121 at `a6fc33c22ba9951487e2cafc97e2f511eeb6c23e` does not
+contain the corrected offline preflight package. The remote operator must not
+use the preflight script from accepted PR #121 as-is.
+
+Before any remote preflight:
+
+1. Integrate the reviewed offline correction into the operator-used branch under
+   separate external authorization.
+2. Verify the corrected `scripts/infra-03-contact-identity-preflight.sql` Git
+   blob SHA against the authoritative offline evidence.
+3. Verify the executable fixture source Git blob SHA against the authoritative
+   offline evidence if local rehearsal is rerun.
+4. Record the operator-used branch SHA, the preflight script blob SHA, and the
+   evidence directory in the operator log.
+
+Stop if the branch SHA or script blob SHA does not match the reviewed offline
+evidence.
+
+## 3. Required Owner Access
 
 - GitHub permission to merge PRs and retarget child PRs.
 - Vercel owner/admin permission for every connected project that can deploy from
@@ -24,7 +44,7 @@ deployment, remote SQL, preview promotion, or Production traffic changes.
   backup/restore checkpoint, apply the approved migration, and verify grants/RLS.
 - Ability to pause and re-enable Production traffic or Production auto-deploys.
 
-## 3. Vercel-Connected Projects To Verify
+## 4. Vercel-Connected Projects To Verify
 
 Observed connected projects:
 
@@ -37,7 +57,7 @@ The owner must verify which of these can deploy Production from `main`. Do not
 assume all four serve Production traffic. Any project that can deploy Production
 from `main` must be held before merging the migration-bearing stack.
 
-## 4. Required Production Environment Variables
+## 5. Required Production Environment Variables
 
 Verify presence and Production scope only. Never print values.
 
@@ -49,7 +69,7 @@ Verify presence and Production scope only. Never print values.
 Stop if a required variable is missing, scoped only to Preview/Development, or
 points at the wrong Supabase project.
 
-## 5. Production Auto-Deployment Hold Procedure
+## 6. Production Auto-Deployment Hold Procedure
 
 1. Identify every Vercel project that can deploy Production from `main`.
 2. Pause, disable, or otherwise hold automatic Production deployment for those
@@ -60,7 +80,7 @@ points at the wrong Supabase project.
 
 Stop if the hold cannot be verified.
 
-## 6. Merge-Commit-Only Stack Sequence
+## 7. Merge-Commit-Only Stack Sequence
 
 1. Merge PR #118 into `main`.
 2. Retarget PR #119 to `main`.
@@ -69,15 +89,19 @@ Stop if the hold cannot be verified.
 5. Merge PR #120 into `main`.
 6. Retarget PR #121 to `main`.
 7. Keep PR #121 draft until separate migration authorization is present.
-8. Run the read-only identity preflight.
-9. Apply the migration only after preflight and backup checkpoints pass.
-10. Merge PR #121 into `main`.
-11. Deploy the resulting `main` SHA only after migration verification passes.
+8. Integrate the reviewed offline preflight correction into the operator-used
+   source under separate external authorization.
+9. Verify branch SHA and corrected preflight script blob SHA against the
+   authoritative offline evidence.
+10. Run the read-only identity preflight.
+11. Apply the migration only after preflight and backup checkpoints pass.
+12. Merge PR #121 into `main`.
+13. Deploy the resulting `main` SHA only after migration verification passes.
 
 Do not merge PR #121 before the deployment hold, environment verification,
-preflight, and migration plan are all complete.
+source/blob verification, preflight, and migration plan are all complete.
 
-## 7. Branch Deletion Timing
+## 8. Branch Deletion Timing
 
 - Delete a parent branch only after its child PR has been retargeted away from
   that parent branch or merged.
@@ -85,7 +109,7 @@ preflight, and migration plan are all complete.
   verification is complete.
 - Do not delete any branch while another open PR still uses it as base.
 
-## 8. Backup And Restore Checkpoint
+## 9. Backup And Restore Checkpoint
 
 Before migration:
 
@@ -96,18 +120,20 @@ Before migration:
 
 Stop if a restore checkpoint cannot be identified.
 
-## 9. Read-Only Identity Preflight Procedure
+## 10. Read-Only Identity Preflight Procedure
 
 Run the checked-in SQL from:
 
 `scripts/infra-03-contact-identity-preflight.sql`
 
-against the intended Production database in a read-only operator session. The
-query reports contact identity blockers and legacy lead split-identity blockers.
-Store the result in the operator evidence location. Redact personal values before
-sharing outside the owner-controlled system.
+Use only the corrected source whose Git blob SHA matches the authoritative
+offline evidence. Run that SQL against the intended Production database in a
+read-only operator session. The query reports contact identity blockers and
+legacy lead split-identity blockers. Store the result in the operator evidence
+location. Redact personal values before sharing outside the owner-controlled
+system.
 
-## 10. Exact Preflight Stop Conditions
+## 11. Exact Preflight Stop Conditions
 
 Stop before migration if preflight reports any row where:
 
@@ -116,9 +142,22 @@ Stop before migration if preflight reports any row where:
 - `identity_type = 'lead_split_identity'`
 
 Stop if the operator cannot prove the query ran against the intended Production
-database. Stop if any unexpected SQL error occurs.
+database. Stop if any unexpected SQL error occurs. Stop if the source branch SHA
+or preflight script blob SHA differs from the reviewed offline evidence.
 
-## 11. Migration Application Procedure Placeholders
+Additional hard stops:
+
+- source branch SHA mismatch;
+- corrected preflight script blob SHA mismatch;
+- any preflight blocker row;
+- missing backup/restore checkpoint reference;
+- missing `SUPABASE_SERVICE_ROLE_KEY` presence or Production scope;
+- missing `NEXT_PUBLIC_SUPABASE_URL` presence or Production scope;
+- grant/RLS verification failure;
+- public lead, idempotent replay, appointment, Admin, notification outbox, or
+  analytics smoke-test failure.
+
+## 12. Migration Application Procedure Placeholders
 
 Use the owner-approved Supabase migration method for exactly:
 
@@ -135,7 +174,7 @@ Record:
 
 Do not apply any additional migration during this cutover.
 
-## 12. Migration Verification Queries
+## 13. Migration Verification Queries
 
 Run read-only verification queries that expose no secrets:
 
@@ -148,7 +187,7 @@ Run read-only verification queries that expose no secrets:
 - `select to_regprocedure('public.mutate_admin_lead_status_v1(uuid,text,text,jsonb,text,text,timestamptz)') is not null;`
 - `select to_regprocedure('public.mutate_admin_assignment_v1(uuid,uuid,uuid,text,text,text,timestamptz)') is not null;`
 
-## 13. Required Grant And RLS Checks
+## 14. Required Grant And RLS Checks
 
 Verify:
 
@@ -160,7 +199,7 @@ Verify:
   `lead_appointments`, and `tasks`.
 - Deny-public policies remain in place for protected public-schema tables.
 
-## 14. Required Public Lead Smoke Checks
+## 15. Required Public Lead Smoke Checks
 
 After migration and before traffic:
 
@@ -170,7 +209,7 @@ After migration and before traffic:
 - Confirm the public response does not expose raw persistence/provider errors.
 - Clean up synthetic records only through the owner-approved procedure.
 
-## 15. Required Idempotent Replay Checks
+## 16. Required Idempotent Replay Checks
 
 Using the same synthetic submission identity:
 
@@ -180,7 +219,7 @@ Using the same synthetic submission identity:
   outbox row is created.
 - Confirm provider and client analytics are not duplicated on replay.
 
-## 16. Required Appointment-Request Checks
+## 17. Required Appointment-Request Checks
 
 - Request an appointment for the synthetic lead/session pair.
 - Confirm one active appointment and one open confirmation follow-up task.
@@ -188,7 +227,7 @@ Using the same synthetic submission identity:
 - Confirm the second request returns the existing appointment path and creates no
   duplicate task.
 
-## 17. Required Admin Same-State And Concurrency Checks
+## 18. Required Admin Same-State And Concurrency Checks
 
 - Submit a same-status Admin lead transition and confirm it is revalidated by the
   database as idempotent replay.
@@ -198,7 +237,7 @@ Using the same synthetic submission identity:
   history, audit, or outbox row is created.
 - Confirm a stale expected assignment is rejected.
 
-## 18. Required Notification Outbox Checks
+## 19. Required Notification Outbox Checks
 
 - Confirm public capture and Admin assignment enqueue notification outbox rows
   only through the atomic RPC path.
@@ -206,7 +245,7 @@ Using the same synthetic submission identity:
 - Confirm disabled notification mode records skipped status rather than attempting
   provider delivery.
 
-## 19. Provider And Client Analytics Duplication Checks
+## 20. Provider And Client Analytics Duplication Checks
 
 - Confirm idempotent replay does not call OpenAI, Resend, or PostHog.
 - Confirm idempotent replay returns `X-AMM-Idempotent-Replay: 1`.
@@ -215,7 +254,7 @@ Using the same synthetic submission identity:
 - Confirm widget replay emits neither `widget_lead_created` nor the lead-created
   parent-window postMessage.
 
-## 20. Production Traffic Re-Enable Criteria
+## 21. Production Traffic Re-Enable Criteria
 
 Traffic may be enabled only after:
 
@@ -225,7 +264,7 @@ Traffic may be enabled only after:
 - service-role scoped server routes are healthy;
 - owner records the traffic-enable decision.
 
-## 21. Automatic Deployment Re-Enable Criteria
+## 22. Automatic Deployment Re-Enable Criteria
 
 Automatic Production deployment may be re-enabled only after:
 
@@ -234,7 +273,7 @@ Automatic Production deployment may be re-enabled only after:
 - monitoring and owner smoke checks are green;
 - branch retarget/merge sequence is complete.
 
-## 22. Rollback Decision Matrix
+## 23. Rollback Decision Matrix
 
 | Phase | Primary action | Rollback path | Classification |
 | --- | --- | --- | --- |

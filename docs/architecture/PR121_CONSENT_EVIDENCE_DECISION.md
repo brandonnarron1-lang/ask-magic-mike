@@ -3,32 +3,25 @@
 Status: release-readiness decision record. This is product/audit evidence
 analysis, not legal advice.
 
-## Question
+## Technical Fact
 
-Does a public submission in accepted PR #121 create a durable row in
-`public.consents`?
-
-## Finding
-
-No. A public submission currently persists consent-related fields on the
-`public.leads` row, but `capture_public_lead_v1` does not insert into
-`public.consents`.
+Accepted PR #121 does not create durable rows in `public.consents` for public
+lead submissions.
 
 Evidence:
 
-- `app/api/leads/route.ts` builds lead persistence fields:
+- `app/api/leads/route.ts` maps consent-related lead fields:
   `consent_sms`, `consent_call`, `consent_email`, `consent_timestamp`, and
   `consent_language_version`.
 - `supabase/migrations/20260716043829_infra_02_atomic_lifecycle.sql` inserts
   those fields into `public.leads` inside `capture_public_lead_v1`.
-- The same function inserts `sessions`, `contacts`, `contact_identities`,
-  `leads`, `source_attribution`, `audit_logs`, assignment records, routing, and
-  notification outbox rows, but contains no `insert into public.consents`.
+- `capture_public_lead_v1` inserts `sessions`, `contacts`,
+  `contact_identities`, `leads`, `source_attribution`, `audit_logs`, routing,
+  assignment history, and notification outbox rows, but does not insert into
+  `public.consents`.
 - `app/lib/persistence/contracts.ts` and
-  `app/lib/persistence/supabasePostgrestAdapter.ts` expose the lead lifecycle
-  result, not a consent-row result.
-
-## Existing Durable Fields
+  `app/lib/persistence/supabasePostgrestAdapter.ts` expose lead lifecycle
+  identifiers and statuses, not consent-row identifiers.
 
 The durable lead row stores:
 
@@ -38,10 +31,10 @@ The durable lead row stores:
 - `leads.consent_timestamp`
 - `leads.consent_language_version`
 
-The unpublished migration also hard-fails update/delete attempts on
-`public.consents`, but that protects consent rows only when they exist.
+The unpublished migration hard-fails update/delete attempts on
+`public.consents`, but that protection applies only to consent rows that exist.
 
-## Absent Product/Audit Evidence
+## Missing Product/Audit Evidence
 
 The current public capture path does not create append-only consent evidence
 with:
@@ -52,12 +45,21 @@ with:
 - consent collection IP/user-agent on the `public.consents` row;
 - replay-protected consent-row idempotency.
 
-## Release Classification
+## Technical Recommendation
 
-This is an accepted-defer issue for PR #121, not a newly discovered application
-source blocker. The accepted PR #121 scope does not claim durable immutable
-consent-row evidence, and this offline mission is not authorized to change
-application behavior or migrations.
+ACCEPT_EXPLICIT_DEFERRAL is the current technical recommendation for PR #121.
+
+This recommendation is based on scope: accepted PR #121 does not claim durable
+immutable consent-row evidence, and this offline package is not authorized to
+change application behavior or the PR #121 migration.
+
+## Owner Decision Status
+
+OWNER_DECISION_PENDING
+
+Owner must explicitly choose either to accept durable consent-row evidence as a
+documented post-PR121 deferral or to block release pending a separate atomic
+consent-evidence patch.
 
 ## Smallest Future Patch
 
@@ -85,13 +87,3 @@ capture transaction:
   lifecycle transaction.
 - Immutability test proving update/delete attempts on `public.consents` fail.
 - Public response test proving consent internals are not exposed to clients.
-
-## Disposition
-
-ACCEPT_EXPLICIT_DEFERRAL
-
-Owner decision sentence:
-
-Approve PR #121 with durable immutable consent-row evidence explicitly deferred;
-do not claim consent-row audit durability until a separate schema and
-application patch is authorized and verified.
