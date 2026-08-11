@@ -50,10 +50,12 @@
     "amm:public:cta-check": "node scripts/amm/public-cta-final-check.mjs",
     "amm:verify:startup": "node scripts/amm/verify-startup.mjs",
     "amm:verify:health": "node scripts/amm/verify-health.mjs",
+    "amm:health:lead-pipe": "node scripts/amm/lead-pipe-health-check.mjs",
     "amm:verify:release": "node scripts/amm/verify-release.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.0",
+    "@neondatabase/serverless": "^1.1.0",
     "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-progress": "^1.1.0",

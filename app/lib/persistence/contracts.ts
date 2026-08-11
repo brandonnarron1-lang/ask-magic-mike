@@ -10,6 +10,13 @@ export type LeadLifecycleCapture = {
   notificationMode: "disabled" | "console" | "sandbox" | "production";
 };
 
+export type LeadLifecycleEnrichment = {
+  leadId: string;
+  leadPatch: Record<string, unknown>;
+  attributionPatch: Record<string, unknown>;
+  consents: Array<Record<string, unknown>>;
+};
+
 export type LeadLifecycleCaptureSuccess = {
   ok?: true;
   lead_id: string;
@@ -44,6 +51,8 @@ export type LeadLifecycleCaptureResult =
  */
 export interface LeadLifecyclePersistence {
   captureLeadLifecycle(input: LeadLifecycleCapture): Promise<LeadLifecycleCaptureResult>;
+  /** Additive post-capture enrichment. The lead already exists before this runs. */
+  enrichLeadRecord?(input: LeadLifecycleEnrichment): Promise<void>;
 }
 
 export type SessionAndSourceAttributionPersistence = Pick<

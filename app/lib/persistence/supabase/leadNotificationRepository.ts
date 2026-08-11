@@ -57,7 +57,7 @@ export function normalizeLeadNotificationRow(row: Record<string, unknown>): Lead
     assignment_event_at: text(row.assignment_event_at),
     notification_type: text(row.notification_type) || "agent_assignment",
     channel: text(row.channel) === "sms" ? "sms" : "email",
-    recipient_type: text(row.recipient_type) === "customer" ? "customer" : "agent",
+    recipient_type: text(row.recipient_type) === "customer" ? "customer" : text(row.recipient_type) === "internal" ? "internal" : "agent",
     recipient_reference: text(row.recipient_reference),
     template_version: text(row.template_version) || "unknown",
     idempotency_key: text(row.idempotency_key) || "unknown",

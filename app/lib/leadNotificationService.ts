@@ -8,9 +8,9 @@ import {
   selectNotificationProvider,
 } from "./leadNotificationProvider";
 import {
+  createLeadNotificationRepository,
   loadAgentForNotification,
   loadLeadForNotification,
-  SupabaseLeadNotificationRepository,
 } from "./leadNotificationRepository";
 import {
   renderAgentAssignmentEmail,
@@ -101,7 +101,7 @@ function renderRequest(record: LeadNotificationRecord, context: AssignmentNotifi
 
 export class LeadNotificationService {
   constructor(
-    private readonly repo: LeadNotificationRepository = new SupabaseLeadNotificationRepository(),
+    private readonly repo: LeadNotificationRepository = createLeadNotificationRepository(),
     private readonly provider: NotificationProvider = selectNotificationProvider(),
   ) {}
 

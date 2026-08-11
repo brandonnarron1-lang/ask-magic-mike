@@ -7,10 +7,13 @@ import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
 import { timelineOptions } from "../../lib/constants";
 import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
 import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
+import { LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../lib/leadConsent";
+import { postToWidgetParent } from "../../lib/widgetMessaging";
 import { AppointmentRequestCTA } from "./AppointmentRequestCTA";
 import { LuxuryCard } from "./LuxuryCard";
 import { ProgressBar } from "./ProgressBar";
 import { SelectField, TextField } from "./FormField";
+import { LeadConsentField } from "./LeadConsentField";
 
 type HomeValueFunnelProps = {
   surface?: LeadSourceSurface;
@@ -35,6 +38,7 @@ export function HomeValueFunnel({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [timeline, setTimeline] = useState(timelineOptions[1]);
+  const [consent, setConsent] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [leadMessage, setLeadMessage] = useState<string | null>(null);
   const [leadReference, setLeadReference] = useState<{ leadId: string | null; sessionId: string | null }>({
@@ -55,9 +59,11 @@ export function HomeValueFunnel({
       return;
     }
     trackEvent("home_value_started", attribution, { funnel_name: "home_value", lead_source_surface: surface });
+    trackEvent("funnel_started", attribution, { funnel_name: "home_value", lead_source_surface: surface });
     trackEvent("address_submit", attribution, { funnel_name: "home_value", step_name: "address" });
+    trackEvent("address_submitted", attribution, { funnel_name: "home_value", step_name: "address" });
     if (surface === "widget") {
-      window.parent?.postMessage({ type: "askmagicmike:lead_started" }, "*");
+      postToWidgetParent({ type: "askmagicmike:lead_started" }, attribution);
     }
     setStep(2);
   }
@@ -70,6 +76,7 @@ export function HomeValueFunnel({
       return;
     }
     trackEvent("email_submit", attribution, { funnel_name: "home_value", step_name: "email" });
+    trackEvent("contact_submitted", attribution, { funnel_name: "home_value", step_name: "email" });
     setStep(3);
   }
 
@@ -89,11 +96,14 @@ export function HomeValueFunnel({
 
     setSubmitting(true);
     trackEvent("phone_submit", attribution, { funnel_name: "home_value", step_name: "phone_timeline" });
+    trackEvent("timeline_selected", attribution, { funnel_name: "home_value", timeline });
+    trackEvent("contact_submitted", attribution, { funnel_name: "home_value", step_name: "phone" });
+    if (consent) trackEvent("consent_accepted", attribution, { funnel_name: "home_value", consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION });
 
     try {
       const res = await fetch("/api/leads", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Idempotency-Key": submissionId },
         body: JSON.stringify({
           funnel_type: surface === "widget" ? "widget" : "home_value",
           lead_source_surface: surface,
@@ -104,6 +114,13 @@ export function HomeValueFunnel({
           status: "new",
           assigned_agent_id: null,
           widget_session_id: submissionId,
+          idempotency_key: submissionId,
+          consent,
+          consent_email: consent,
+          consent_call: consent,
+          consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
+          consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
+          consent_source: `${surface}:home-value`,
           attribution,
         }),
       });
@@ -119,12 +136,13 @@ export function HomeValueFunnel({
         trackEvent("lead_created", attribution, { funnel_name: "home_value", step_name: "thank_you" });
         if (surface === "widget") {
           trackEvent("widget_lead_created", attribution, { funnel_name: "home_value" });
-          window.parent?.postMessage({ type: "askmagicmike:lead_created" }, "*");
+          postToWidgetParent({ type: "askmagicmike:lead_created" }, attribution);
         }
       }
       setLeadMessage(data.message || "Got it. Mike will follow up shortly.");
       setLeadReference({ leadId: data.lead_id || null, sessionId: data.session_id || null });
       setStep(4);
+      trackEvent("thank_you_viewed", attribution, { funnel_name: "home_value" });
     } catch (error) {
       setFormError(publicLeadErrorMessage(error instanceof Error ? error.message : undefined));
     } finally {
@@ -196,6 +214,7 @@ export function HomeValueFunnel({
               <option key={option}>{option}</option>
             ))}
           </SelectField>
+          <LeadConsentField checked={consent} onChange={setConsent} />
           <div className="flex gap-3">
             <button type="button" onClick={() => setStep(2)} className="amm-secondary-button px-5 py-4">
               Back
@@ -233,6 +252,7 @@ export function HomeValueFunnel({
           <p className="text-sm leading-6 text-[#d9ceb8]">
             Prefer a direct call? Our Town Properties can be reached through the contact information on ourtownproperties.com.
           </p>
+          <p className="text-xs leading-5 text-[#8f8778]">This is broker-reviewed guidance, not an automated appraisal. Not a survey.</p>
         </div>
       ) : null}
 

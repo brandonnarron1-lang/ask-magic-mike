@@ -16,14 +16,14 @@ VALUES
   (
     'Mike Eatmon',
     'mike@ourtownproperties.com',
-    '+13525550001',
+    NULL,
     'primary',
     100,
     50,
     '{"mon":[8,20],"tue":[8,20],"wed":[8,20],"thu":[8,20],"fri":[8,20],"sat":[9,17]}',
     'America/New_York',
     TRUE,
-    TRUE
+    FALSE
   ),
   (
     'Admin Escalation',

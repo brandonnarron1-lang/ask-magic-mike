@@ -1,9 +1,19 @@
-export type FunnelType = "home_value" | "seller" | "chat" | "appointment" | "widget";
+export type FunnelType =
+  | "home_value"
+  | "seller"
+  | "buyer"
+  | "renter"
+  | "open_house"
+  | "chat"
+  | "appointment"
+  | "widget";
 
 export type LeadSourceSurface =
   | "homepage"
   | "home_value_page"
   | "seller_page"
+  | "buyer_page"
+  | "open_house"
   | "ask_page"
   | "widget"
   | "ourtownproperties";
@@ -22,7 +32,17 @@ export type Attribution = {
   embed_host?: string;
   placement?: string;
   gclid?: string;
+  gbraid?: string;
+  wbraid?: string;
   fbclid?: string;
+  msclkid?: string;
+  page_title?: string;
+  placement_id?: string;
+  listing_id?: string;
+  property_id?: string;
+  agent_id?: string;
+  first_touch?: Record<string, string | undefined>;
+  last_touch?: Record<string, string | undefined>;
   device_category?: string;
   created_at?: string;
 };
@@ -38,12 +58,29 @@ export type LeadPayload = {
   last_name?: string;
   email?: string;
   phone?: string;
+  city?: string;
+  target_geography?: string;
+  financing?: string;
+  preapproval?: boolean;
+  listing_id?: string;
+  property_id?: string;
+  agent_id?: string;
   timeline?: string;
   condition?: string;
   notes?: string;
   question?: string;
   page_url?: string;
   widget_session_id?: string;
+  idempotency_key?: string;
+  honeypot?: string;
+  is_test?: boolean;
+  consent?: boolean;
+  consent_email?: boolean;
+  consent_call?: boolean;
+  consent_sms?: boolean;
+  consent_language_version?: string;
+  consent_language_text?: string;
+  consent_source?: string;
   attribution: Attribution;
   status: "new";
   assigned_agent_id: string | null;
@@ -75,12 +112,29 @@ export function normalizeLeadPayload(input: Record<string, unknown>): LeadPayloa
     last_name: cleanOptional(input.last_name),
     email: cleanOptional(input.email),
     phone: cleanOptional(input.phone),
+    city: cleanOptional(input.city),
+    target_geography: cleanOptional(input.target_geography),
+    financing: cleanOptional(input.financing),
+    preapproval: typeof input.preapproval === "boolean" ? input.preapproval : undefined,
+    listing_id: cleanOptional(input.listing_id),
+    property_id: cleanOptional(input.property_id),
+    agent_id: cleanOptional(input.agent_id),
     timeline: cleanOptional(input.timeline),
     condition: cleanOptional(input.condition || input.property_condition),
     notes: cleanOptional(input.notes),
     question: cleanOptional(input.question || input.intent),
     page_url: cleanOptional(input.page_url),
     widget_session_id: cleanOptional(input.widget_session_id),
+    idempotency_key: cleanOptional(input.idempotency_key || input.request_fingerprint),
+    honeypot: clean(input.website || input.honeypot),
+    is_test: input.is_test === true,
+    consent: input.consent === true,
+    consent_email: input.consent_email === true,
+    consent_call: input.consent_call === true,
+    consent_sms: input.consent_sms === true,
+    consent_language_version: cleanOptional(input.consent_language_version),
+    consent_language_text: cleanOptional(input.consent_language_text),
+    consent_source: cleanOptional(input.consent_source),
     attribution,
     status: "new",
     assigned_agent_id: null,
@@ -104,7 +158,17 @@ export function cleanAttribution(input: unknown): Attribution {
     embed_host: cleanOptional(raw.embed_host),
     placement: cleanOptional(raw.placement),
     gclid: cleanOptional(raw.gclid),
+    gbraid: cleanOptional(raw.gbraid),
+    wbraid: cleanOptional(raw.wbraid),
     fbclid: cleanOptional(raw.fbclid),
+    msclkid: cleanOptional(raw.msclkid),
+    page_title: cleanOptional(raw.page_title),
+    placement_id: cleanOptional(raw.placement_id || raw.placement),
+    listing_id: cleanOptional(raw.listing_id),
+    property_id: cleanOptional(raw.property_id),
+    agent_id: cleanOptional(raw.agent_id),
+    first_touch: cleanAttributionSnapshot(raw.first_touch),
+    last_touch: cleanAttributionSnapshot(raw.last_touch),
     device_category: cleanOptional(raw.device_category),
     created_at: cleanOptional(raw.created_at),
   };
@@ -113,6 +177,9 @@ export function cleanAttribution(input: unknown): Attribution {
 function normalizeFunnelType(input: unknown): FunnelType {
   if (
     input === "seller" ||
+    input === "buyer" ||
+    input === "renter" ||
+    input === "open_house" ||
     input === "chat" ||
     input === "appointment" ||
     input === "widget"
@@ -127,6 +194,8 @@ function normalizeSurface(input: unknown, funnelType: FunnelType): LeadSourceSur
     input === "homepage" ||
     input === "home_value_page" ||
     input === "seller_page" ||
+    input === "buyer_page" ||
+    input === "open_house" ||
     input === "ask_page" ||
     input === "widget" ||
     input === "ourtownproperties"
@@ -134,7 +203,40 @@ function normalizeSurface(input: unknown, funnelType: FunnelType): LeadSourceSur
     return input;
   }
   if (funnelType === "seller") return "seller_page";
+  if (funnelType === "buyer" || funnelType === "renter") return "buyer_page";
+  if (funnelType === "open_house") return "open_house";
   if (funnelType === "chat") return "ask_page";
   if (funnelType === "widget") return "widget";
   return "home_value_page";
+}
+
+function cleanAttributionSnapshot(input: unknown) {
+  const raw = input && typeof input === "object" ? (input as Record<string, unknown>) : {};
+  const fields = [
+    "source",
+    "medium",
+    "campaign",
+    "content",
+    "term",
+    "referrer",
+    "landing_page",
+    "current_path",
+    "parent_url",
+    "embed_host",
+    "placement",
+    "placement_id",
+    "listing_id",
+    "property_id",
+    "agent_id",
+    "gclid",
+    "gbraid",
+    "wbraid",
+    "fbclid",
+    "msclkid",
+  ];
+  return Object.fromEntries(
+    fields
+      .map((field) => [field, cleanOptional(raw[field])] as const)
+      .filter(([, value]) => Boolean(value)),
+  );
 }

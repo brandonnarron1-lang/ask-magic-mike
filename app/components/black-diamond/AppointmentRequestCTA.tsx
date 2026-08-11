@@ -67,6 +67,10 @@ export function AppointmentRequestCTA({
       step_name: "appointment_request",
       request_surface: requestSurface,
     });
+    trackEvent("appointment_cta_clicked", attribution, {
+      funnel_name: funnelName,
+      request_surface: requestSurface,
+    });
 
     try {
       const response = await fetch("/api/appointments/request", {

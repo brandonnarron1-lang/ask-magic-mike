@@ -11,36 +11,56 @@
     "/admin/leads/[id]",
     "/admin/notifications",
     "/admin/reporting",
+    "/api/admin/health",
+    "/api/admin/notifications/retry",
     "/api/admin/sla/sweep",
     "/api/appointments/request",
     "/api/chat",
+    "/api/chat/message",
+    "/api/chat/session",
+    "/api/events",
+    "/api/health/live",
+    "/api/health/ready",
     "/api/leads",
     "/api/valuation",
+    "/api/widget/events",
     "/ask",
+    "/buy",
+    "/contact",
     "/embed/ask",
     "/favicon.ico",
     "/home-value",
     "/integrations/ourtownproperties",
+    "/open-house/[propertyOrId]",
+    "/privacy",
+    "/robots.txt",
+    "/rent",
     "/sell",
+    "/sitemap.xml",
     "/social-preview",
+    "/thank-you",
+    "/terms",
+    "/accessibility",
     "/value",
     "/we-buy-houses",
     "/widget",
+    "/widget/v1",
     "/widget-preview"
   ],
   "required": {
     "public": [
-      "/", "/home-value", "/value", "/sell", "/we-buy-houses", "/ask",
-      "/widget", "/widget-preview", "/embed/ask",
-      "/integrations/ourtownproperties", "/social-preview"
+      "/", "/home-value", "/value", "/sell", "/we-buy-houses", "/ask", "/buy", "/rent", "/open-house/[propertyOrId]", "/thank-you",
+      "/privacy", "/terms", "/accessibility", "/contact",
+      "/widget", "/widget/v1", "/widget-preview", "/embed/ask",
+      "/integrations/ourtownproperties", "/robots.txt", "/sitemap.xml", "/social-preview"
     ],
     "admin": [
       "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation",
       "/admin/action-queue", "/admin/notifications", "/admin/reporting"
     ],
     "api": [
-      "/api/leads", "/api/valuation", "/api/appointments/request", "/api/chat",
-      "/api/admin/sla/sweep"
+      "/api/leads", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/widget/events",
+      "/api/admin/health", "/api/admin/sla/sweep"
     ]
   },
   "classifications": {
@@ -50,12 +70,12 @@
     "/admin/distribution": "inactive-src-only",
     "/api/analytics/event": "inactive-src-only",
     "/api/health/live": "inactive-src-only",
-    "/api/health/ready": "inactive-src-only",
-    "/api/admin/health": "inactive-src-only",
+    "/api/health/ready": "active-documented-readiness-probe",
+    "/api/admin/health": "active-documented-health-probe",
     "/api/admin/sla/sweep": "active-required-by-vercel-cron"
   },
   "acknowledgedRootSrcDuplicates": [
-    "/", "/admin", "/admin/leads", "/admin/leads/[id]", "/api/admin/sla/sweep", "/api/leads",
+    "/", "/admin", "/admin/leads", "/admin/leads/[id]", "/api/admin/health", "/api/admin/sla/sweep", "/api/health/live", "/api/health/ready", "/api/leads",
     "/ask", "/embed/ask", "/value", "/widget-preview"
   ]
 }

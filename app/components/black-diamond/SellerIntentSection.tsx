@@ -7,8 +7,10 @@ import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
 import { conditionOptions, sellerPaths, timelineOptions } from "../../lib/constants";
 import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
 import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
+import { LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../lib/leadConsent";
 import { AppointmentRequestCTA } from "./AppointmentRequestCTA";
 import { TextAreaField, TextField } from "./FormField";
+import { LeadConsentField } from "./LeadConsentField";
 import { LuxuryCard } from "./LuxuryCard";
 
 type SellerIntentSectionProps = {
@@ -50,6 +52,14 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
       condition: clean(formData.get("condition")),
       timeline: clean(formData.get("seller-timeline")),
       notes: clean(formData.get("notes")) || undefined,
+      consent: formData.get("consent") === "yes",
+      consent_email: formData.get("consent") === "yes",
+      consent_call: formData.get("consent") === "yes",
+      consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
+      consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
+      consent_source: `${surface}:seller-intake`,
+      website: clean(formData.get("website")),
+      idempotency_key: submissionId || undefined,
       status: "new",
       assigned_agent_id: null,
       widget_session_id: submissionId || undefined,
@@ -71,11 +81,14 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
       step_name: "seller_intent",
       lead_source_surface: surface,
     });
+    trackEvent("funnel_started", attribution, { funnel_name: "seller", lead_source_surface: surface });
+    trackEvent("contact_submitted", attribution, { funnel_name: "seller", lead_source_surface: surface });
+    if (payload.consent) trackEvent("consent_accepted", attribution, { funnel_name: "seller", consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION });
 
     try {
       const res = await fetch("/api/leads", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Idempotency-Key": submissionId },
         body: JSON.stringify(payload),
       });
       const data = (await res.json()) as {
@@ -92,6 +105,7 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
       setSellerMessage(data.message || "Got it. Mike will review it.");
       setLeadReference({ leadId: data.lead_id || null, sessionId: data.session_id || null });
       setSellerSuccess(true);
+      trackEvent("thank_you_viewed", attribution, { funnel_name: "seller" });
       form.reset();
       setSubmissionId(tryCreateBrowserSubmissionId());
     } catch (error) {
@@ -137,10 +151,15 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
           </select>
         </label>
         <TextAreaField name="notes" label="Notes" placeholder="What should Mike know before calling?" rows={4} className="sm:col-span-2" />
+        <div className="absolute -left-[10000px] h-px w-px overflow-hidden" aria-hidden="true">
+          <label>Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
+        </div>
+        <LeadConsentField />
         <button disabled={submitting} aria-busy={submitting} className="amm-primary-button px-5 py-4 disabled:opacity-60 sm:col-span-2">
           {submitting ? "Sending" : "Send Seller Details"}
         </button>
       </form>
+      <p className="mt-4 text-xs leading-5 text-[#8f8778]">Mike reviews the details before discussing next steps. No valuation or offer is promised by this form. Not a survey.</p>
       {sellerMessage ? (
         <div
           id="seller-form-status"

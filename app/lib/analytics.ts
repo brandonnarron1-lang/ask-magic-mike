@@ -3,6 +3,7 @@
 import { analyticsEvents } from "./constants";
 import { getDeviceCategory } from "./attribution";
 import type { Attribution } from "./leadPayload";
+import { allowedWidgetParentOrigin } from "./publicOrigin";
 
 export type EventName = (typeof analyticsEvents)[number];
 
@@ -34,7 +35,28 @@ export function trackEvent(
   maybeWindow.dataLayer?.push(payload);
   maybeWindow.posthog?.capture?.(event, payload.properties);
 
+  // The browser event remains useful for GA/GTM/PostHog, while this small
+  // server ledger gives the lead pipe an auditable event without sending PII.
+  void window.fetch("/api/events", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      event_name: event,
+      event_category: "intake",
+      properties,
+      attribution: {
+        source: attribution.source,
+        medium: attribution.medium,
+        campaign: attribution.campaign,
+      },
+    }),
+    keepalive: true,
+  }).catch(() => undefined);
+
   if (window.parent && window.parent !== window) {
-    window.parent.postMessage({ type: "askmagicmike:event", ...payload }, "*");
+    const parentOrigin = allowedWidgetParentOrigin(attribution.parent_url);
+    if (parentOrigin) {
+      window.parent.postMessage({ type: "askmagicmike:event", ...payload }, parentOrigin);
+    }
   }
 }

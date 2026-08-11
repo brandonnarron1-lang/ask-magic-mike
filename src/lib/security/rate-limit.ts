@@ -138,9 +138,11 @@ export async function checkRateLimit(
   windowMs: number,
   prefix: LimitKey = "intakeSubmit",
 ): Promise<RateLimitResult> {
-  const isProduction =
-    process.env.NODE_ENV === "production" ||
-    process.env.VERCEL_ENV === "production";
+  // Next.js sets NODE_ENV=production for every optimized Vercel build,
+  // including isolated previews. VERCEL_ENV is authoritative when present.
+  const isProduction = process.env.VERCEL_ENV
+    ? process.env.VERCEL_ENV === "production"
+    : process.env.NODE_ENV === "production";
 
   // Attempt Upstash whenever credentials are available (also in dev for manual testing)
   if (process.env.UPSTASH_REDIS_REST_URL) {

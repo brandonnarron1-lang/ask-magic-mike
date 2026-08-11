@@ -8,6 +8,7 @@ import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
 import { starterPrompts } from "../../lib/constants";
 import { type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
 import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
+import { postToWidgetParent } from "../../lib/widgetMessaging";
 import { AppointmentRequestCTA } from "./AppointmentRequestCTA";
 import { LuxuryCard } from "./LuxuryCard";
 
@@ -52,7 +53,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
       lead_source_surface: surface,
     });
     if (surface === "widget") {
-      window.parent?.postMessage({ type: "askmagicmike:chat_started" }, "*");
+      postToWidgetParent({ type: "askmagicmike:chat_started" }, attribution);
     }
   }
 
@@ -75,7 +76,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
     });
 
     try {
-      const res = await fetch("/api/chat", {
+      const res = await fetch("/api/chat/message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: trimmed, attribution, lead_source_surface: surface }),

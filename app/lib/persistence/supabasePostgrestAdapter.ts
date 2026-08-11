@@ -12,6 +12,7 @@ import type {
   LeadLifecycleCapture,
   LeadLifecycleCaptureResult,
   LeadLifecycleCaptureSuccess,
+  LeadLifecycleEnrichment,
   PersistenceFetch,
   ReportingReadRequest,
 } from "./contracts";
@@ -148,6 +149,42 @@ export class SupabasePostgrestAdapter implements ActivePersistenceBoundary {
           : null,
       idempotent_replay: result.idempotent_replay === true,
     };
+  }
+
+  async enrichLeadRecord(input: LeadLifecycleEnrichment): Promise<void> {
+    const leadUrl = this.url("/rest/v1/leads");
+    leadUrl.searchParams.set("id", `eq.${input.leadId}`);
+    const leadResponse = await this.request(leadUrl, {
+      method: "PATCH",
+      headers: { ...this.headers(true), Prefer: "return=minimal" },
+      body: JSON.stringify(input.leadPatch),
+      cache: "no-store",
+    });
+    if (!leadResponse.ok) throw new PersistenceUnavailableError("lead_enrichment_failed", leadResponse.status || 500);
+
+    if (Object.keys(input.attributionPatch).length) {
+      const attributionUrl = this.url("/rest/v1/source_attribution");
+      attributionUrl.searchParams.set("lead_id", `eq.${input.leadId}`);
+      const attributionResponse = await this.request(attributionUrl, {
+        method: "PATCH",
+        headers: { ...this.headers(true), Prefer: "return=minimal" },
+        body: JSON.stringify(input.attributionPatch),
+        cache: "no-store",
+      });
+      if (!attributionResponse.ok) throw new PersistenceUnavailableError("attribution_enrichment_failed", attributionResponse.status || 500);
+    }
+
+    for (const consent of input.consents) {
+      const consentUrl = this.url("/rest/v1/consents");
+      consentUrl.searchParams.set("on_conflict", "lead_id,consent_type");
+      const consentResponse = await this.request(consentUrl, {
+        method: "POST",
+        headers: { ...this.headers(true), Prefer: "resolution=ignore-duplicates,return=minimal" },
+        body: JSON.stringify(consent),
+        cache: "no-store",
+      });
+      if (!consentResponse.ok) throw new PersistenceUnavailableError("consent_enrichment_failed", consentResponse.status || 500);
+    }
   }
 
   async requestAppointment(

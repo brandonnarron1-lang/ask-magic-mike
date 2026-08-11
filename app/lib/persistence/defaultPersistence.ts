@@ -1,10 +1,13 @@
 import type { PersistenceFetch } from "./contracts";
 import { SupabasePostgrestAdapter } from "./supabasePostgrestAdapter";
+import { NeonPostgresAdapter } from "./neonPostgresAdapter";
 
 export function createDefaultPersistence(
   env: Record<string, string | undefined> = process.env,
   request?: PersistenceFetch,
 ) {
+  const neonAdapter = NeonPostgresAdapter.fromEnv(env);
+  if (neonAdapter) return neonAdapter;
   const baseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
   if (!baseUrl || !serviceRoleKey) return null;

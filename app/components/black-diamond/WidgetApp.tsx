@@ -6,6 +6,7 @@ import { HomeValueFunnel } from "./HomeValueFunnel";
 import { SellerIntentSection } from "./SellerIntentSection";
 import { PageTracker } from "./PageTracker";
 import type { Attribution } from "../../lib/leadPayload";
+import { postToWidgetParent } from "../../lib/widgetMessaging";
 
 type Tab = "value" | "ask" | "sell";
 
@@ -21,12 +22,22 @@ export function WidgetApp() {
       parent_url: params.get("parent_url") || undefined,
       embed_host: params.get("embed_host") || undefined,
       placement: params.get("placement") || "sitewide-floating",
+      placement_id: params.get("placement_id") || params.get("placement") || "sitewide-floating",
+      listing_id: params.get("listing_id") || undefined,
+      property_id: params.get("property_id") || undefined,
+      agent_id: params.get("agent_id") || undefined,
+      page_title: params.get("page_title") || undefined,
+      gclid: params.get("gclid") || undefined,
+      gbraid: params.get("gbraid") || undefined,
+      wbraid: params.get("wbraid") || undefined,
+      fbclid: params.get("fbclid") || undefined,
+      msclkid: params.get("msclkid") || undefined,
     };
   }, []);
 
   useEffect(() => {
-    window.parent?.postMessage({ type: "askmagicmike:opened" }, "*");
-  }, []);
+    postToWidgetParent({ type: "askmagicmike:opened" }, attributionOverrides as Attribution);
+  }, [attributionOverrides]);
 
   return (
     <main className="min-h-screen bg-[#050505] text-[#f4ead4]">

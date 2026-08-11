@@ -317,28 +317,17 @@ describe("POST /api/leads atomic lifecycle command", () => {
     expect((await response.json()).error).toBe(PUBLIC_LEAD_SAVE_ERROR);
   });
 
-  it("keeps provider work bounded by one post-commit timeout", async () => {
-    vi.useFakeTimers();
-    process.env.OPENAI_API_KEY = "synthetic-openai-key";
+  it("does not call generative or consumer providers from the public lead route", async () => {
     const fetchSpy = vi.fn((input: URL | RequestInfo, init?: RequestInit) => {
       const url = String(input);
       if (url.includes("/rest/v1/rpc/capture_public_lead_v1")) {
         return Promise.resolve(jsonResponse(success()));
       }
-      if (url.includes("api.openai.com")) {
-        return new Promise<Response>((_resolve, reject) => {
-          init?.signal?.addEventListener(
-            "abort",
-            () => reject(new DOMException("aborted", "AbortError")),
-            { once: true },
-          );
-        });
-      }
       return Promise.reject(new Error("unexpected provider call"));
     });
     vi.stubGlobal("fetch", fetchSpy);
 
-    const responsePromise = POST(request({
+    const response = await POST(request({
       funnel_type: "home_value",
       lead_source_surface: "home_value_page",
       address: "610 Synthetic Timeout Ln",
@@ -346,15 +335,12 @@ describe("POST /api/leads atomic lifecycle command", () => {
       phone: "2525550111",
       widget_session_id: SESSION_ID,
     }));
-    await vi.advanceTimersByTimeAsync(3_100);
-
-    const response = await responsePromise;
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toMatchObject({ lead_id: LEAD_ID, session_id: SESSION_ID });
     expect(body).not.toHaveProperty("error");
     expect(JSON.stringify(body)).not.toContain("AbortError");
-    expect(fetchSpy.mock.calls.filter(([input]) => String(input).includes("api.openai.com"))).toHaveLength(1);
+    expect(fetchSpy.mock.calls.some(([input]) => String(input).includes("api.openai.com"))).toBe(false);
   });
 
   it("keeps a committed lead successful when an external provider throws", async () => {
@@ -400,7 +386,8 @@ describe("POST /api/leads atomic lifecycle command", () => {
     expect(response.status).not.toBe(409);
     expect(mock).toHaveBeenCalledTimes(1);
     const body = await response.json();
-    expect(body).toEqual({ error: PUBLIC_LEAD_SAVE_ERROR });
+    expect(body).toMatchObject({ error: PUBLIC_LEAD_SAVE_ERROR });
+    expect(body.correlation_id).toEqual(expect.any(String));
     expect(JSON.stringify(body)).not.toContain("some_future_failure");
   });
 });
