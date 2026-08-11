@@ -55,10 +55,18 @@ test("INFRA-02 Admin middleware and cron fail closed in a real browser stack", a
   expect(unauthorized.headers()["www-authenticate"]).toContain("Basic");
 
   const unauthenticatedCron = await request.get("/api/admin/sla/sweep");
-  expect(unauthenticatedCron.status()).toBe(401);
-
   const localCronSecret = process.env.CRON_SECRET;
-  expect(localCronSecret).toBeTruthy();
+  if (!localCronSecret) {
+    // Missing cron configuration fails closed before credential comparison.
+    expect(unauthenticatedCron.status()).toBe(503);
+    expect(await unauthenticatedCron.json()).toMatchObject({
+      ok: false,
+      error: "admin_secret_not_configured",
+    });
+    return;
+  }
+
+  expect(unauthenticatedCron.status()).toBe(401);
   const noPersistence = await request.get("/api/admin/sla/sweep", {
     headers: { Authorization: `Bearer ${localCronSecret}` },
   });

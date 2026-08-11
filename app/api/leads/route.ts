@@ -15,6 +15,7 @@ import {
   PREVIEW_READ_ONLY_MESSAGE,
   assertDatabaseMutationAllowed,
 } from "../../../src/lib/preview-security";
+import { verifyWordPressBridgeRequest } from "../../lib/wordpressBridgeSignature";
 
 const LEAD_TYPES = new Set([
   "buyer",
@@ -514,9 +515,27 @@ export async function POST(req: Request) {
   }
 
   let raw: unknown;
+  let rawBody: string;
   let persistedLead: Awaited<ReturnType<typeof insertLead>>;
   try {
-    raw = await req.json();
+    const declaredSize = Number(req.headers.get("content-length") || "0");
+    if (Number.isFinite(declaredSize) && declaredSize > 65_536) {
+      return NextResponse.json({ error: "Submission is too large.", correlation_id: correlationId }, { status: 413 });
+    }
+    rawBody = await req.text();
+    if (rawBody.length > 65_536) {
+      return NextResponse.json({ error: "Submission is too large.", correlation_id: correlationId }, { status: 413 });
+    }
+    if (req.headers.get("x-amm-wp-bridge")) {
+      const bridge = verifyWordPressBridgeRequest(req, rawBody);
+      if (!bridge.ok) {
+        return NextResponse.json(
+          { error: "WordPress bridge authorization failed.", code: bridge.error, correlation_id: correlationId },
+          { status: bridge.status, headers: { "X-AMM-Correlation-Id": correlationId } },
+        );
+      }
+    }
+    raw = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }

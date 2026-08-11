@@ -8,8 +8,8 @@ Updated 2026-08-11.
 - Both Ask hostnames serve the correct Ask Magic Mike project; no NellySelly marker
   found in live HTML.
 - Our Town remains live WordPress/SEO surface; live phone evidence preserved.
-- Atomic Supabase lead capture, attribution, dedupe/fingerprint, routing, audit,
-  AdminOps inbox/detail, and notification outbox exist in the canonical codebase.
+- Canonical Neon lead capture, attribution, dedupe/fingerprint, routing, audit,
+  AdminOps inbox/detail, and notification outbox exist in the production codebase.
 - Existing release-rehearsal work is preserved.
 - Production is deployed on Neon Free PostgreSQL. Public capture, durable rate
   limiting, attribution, scoring, routing, audit, consent, notification outbox,
@@ -61,10 +61,49 @@ Updated 2026-08-11.
   UUID idempotent replay are proven on deployment
   `dpl_EwjyYzJmKCiq1LjzyiJX24zFS3dX`.
 
-## Remaining external work
+## Combined-system audit — 2026-08-11
 
-- Full per-user role-based Hub; current `/admin` MVP is shared Basic Auth.
-- WordPress form IDs/notifications/entries-before-email and page-specific publish.
+- Authenticated WordPress inspection found seven active Gravity Forms with durable
+  local entry history and one admin notification each. None has a native Consent
+  field. Exact field mappings and entry counts are recorded in
+  `COMBINED_SYSTEM_AUDIT_2026-08-11.md`.
+- The live AMM Connector is configured for the canonical Ask Magic Mike app; tracked
+  CTAs are present on the homepage, home-value page, and seller page. Existing
+  forms and legacy plugin records remain unchanged.
+- The legacy WordPress AMM plugin remains a competing local lead/`wp_mail` silo and
+  must be reconciled, not expanded.
+- The hourly SLA cron and protected admin health route now use Neon directly.
+  Preview mutation safety requires both `VERCEL_ENV=preview` and an explicit
+  `DATABASE_ENV=preview`; stale Supabase project-ref variables no longer control
+  this boundary. A live persisted cron breach remains a production QA gate.
+- The server analytics ledger and public event endpoint now write through one
+  privacy-minimized Neon repository. PII-shaped property keys and non-scalar
+  payloads are dropped before insertion, and raw IP is not written.
+- A signed Gravity Forms bridge package exists in disabled shadow-safe mode. It
+  maps only approved form IDs 1–7, signs exact request bodies, uses deterministic
+  idempotency, retries three times, and does not send a second WordPress email.
+- Current `/admin` remains shared Basic Auth; per-user role-based Hub authentication
+  is still required.
+- No WordPress form/notification/plugin/page, DNS, database, environment, deployment,
+  or external message was changed during this audit.
+
+## Reuse-first hardening candidate — 2026-08-11
+
+- Branch: `codex/amm-reuse-first-hardening-20260811`.
+- Existing black-diamond public visuals were retained after rendered inspection of
+  `/`, `/home-value`, and `/buy`; no redesign or synthetic replacement imagery was
+  warranted. Evidence is under `output/product-design-audit/2026-08-11/`.
+- Next.js was patched within 15.5, Node is pinned to 20.x, vulnerable transitive
+  packages are overridden, and `pnpm audit --prod` reports zero known issues.
+- Public chat now has exact-origin validation, bounded input/body size, a durable
+  Neon limiter, provider timeout, no-store response policy, and safe correlation
+  handling.
+- Admin health no longer accepts query-string secrets; middleware Basic comparison
+  is Edge-safe and digest-based. Shared Basic Auth remains the only unresolved
+  high-traffic identity/RBAC limitation.
+- Verification: 137 Vitest files / 2,488 tests pass; 13/13 browser E2E tests pass;
+  lint, strict typecheck, production build, 43-route manifest, 14/14 release-safety
+  checks, dependency audit, whitespace check, and 319-commit gitleaks scan pass.
 
 ## Database recovery decision
 

@@ -18,6 +18,20 @@ export interface AdminAuthFail {
   error: string;
 }
 
+export function secretsMatch(expected: string | undefined, supplied: string | null): boolean {
+  if (!expected || !supplied) return false;
+  const expectedBuffer = Buffer.from(expected);
+  const suppliedBuffer = Buffer.from(supplied);
+  return expectedBuffer.length === suppliedBuffer.length &&
+    timingSafeEqual(expectedBuffer, suppliedBuffer);
+}
+
+export function checkBearerSecret(req: NextRequest, expected: string | undefined): boolean {
+  const authorization = req.headers.get("authorization") ?? "";
+  if (!authorization.toLowerCase().startsWith("bearer ")) return false;
+  return secretsMatch(expected, authorization.slice(7).trim());
+}
+
 export function checkAdminAuth(req: NextRequest): AdminAuthOk | AdminAuthFail {
   const secret = process.env.ADMIN_SECRET;
   if (!secret) {
@@ -33,12 +47,7 @@ export function checkAdminAuth(req: NextRequest): AdminAuthOk | AdminAuthFail {
   }
   // Timing-safe comparison prevents secret-length/character oracle attacks.
   // Pad to equal length first — timingSafeEqual requires identical byte lengths.
-  const secretBuf   = Buffer.from(secret);
-  const suppliedBuf = Buffer.from(supplied);
-  const match =
-    secretBuf.length === suppliedBuf.length &&
-    timingSafeEqual(secretBuf, suppliedBuf);
-  if (!match) {
+  if (!secretsMatch(secret, supplied)) {
     return { ok: false, status: 401, error: "unauthorized" };
   }
   return { ok: true, actor: "admin" };

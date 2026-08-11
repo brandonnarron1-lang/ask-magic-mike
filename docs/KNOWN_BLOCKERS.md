@@ -8,13 +8,12 @@ See `docs/PRODUCTION_LAUNCH_GATE.md` for the full pre-launch checklist.
 
 ## Hard blockers (launch cannot proceed)
 
-### B-01 — Rate limiter is in-memory only
+### Resolved 2026-08-11 — durable rate limiter
 
 **File:** `src/lib/security/rate-limit.ts`  
-**Impact:** Rate limits reset on every cold start and are not shared across Vercel instances. An attacker can bypass all limits by waiting for a cold start or routing to a new instance.  
-**Fix:** Migrate to Upstash Redis (`@upstash/ratelimit`). Requires owner approval (paid dependency).  
-**Plan:** `docs/RATE_LIMITING_DURABILITY_PLAN.md`  
-**Owner:** TBD · **ETA:** Before launch
+Production uses the canonical Neon `rate_limit_buckets` table. The stale Upstash
+runtime path and paid-vendor requirement were removed. In-memory limiting remains a
+logged emergency fallback only.
 
 ---
 
@@ -36,12 +35,15 @@ See `docs/PRODUCTION_LAUNCH_GATE.md` for the full pre-launch checklist.
 
 ---
 
-### B-04 — Privacy policy page missing
+### Resolved 2026-08-11 — Privacy policy route
 
 **Route:** `/privacy`  
 **Impact:** TCPA consent form references a privacy policy. If the page is 404, the consent flow has a broken link.  
 **Fix:** Create `/privacy` route with attorney-reviewed policy text.  
 **Owner:** TBD (legal) · **ETA:** Before launch
+
+**Resolved technically 2026-08-11:** `/privacy` exists and is linked. Attorney
+review of policy/consent language remains under B-05.
 
 ---
 
@@ -80,8 +82,22 @@ Fixed in PR #45 (Epsilon), merged 2026-06-26. `bg-ruby-400/[0.14] text-ruby-300`
 
 ---
 
-### S-03 — listings table migration (00012) not yet applied to prod
+### Resolved 2026-08-11 — canonical migration chain
 
 **Context:** See memory: `listings-table-not-in-prod`. Migration 00012 was not in prod when last checked (lead API 500'd, hotfix PR #5 degraded safely). Verify via Supabase dashboard that 00012 and 00013 are applied.  
 **Fix:** Apply pending migrations via Supabase dashboard or CLI.  
 **Owner:** Brandon · **ETA:** Before broker panel goes live
+
+**Resolved for the canonical platform 2026-08-11:** the full migration chain is
+present on Neon preview and production. Supabase is retired as canonical storage.
+
+---
+
+### S-05 — Facebook crawler blocked by Our Town WAF
+
+**Impact:** FacebookExternalHit receives HTTP 403 on the WordPress `/ask-mike/`
+and Mike profile pages, while browsers and other tested social crawlers receive
+200. Link previews may be incomplete on Facebook.
+**Fix:** add a narrow, logged WAF exception for the verified Facebook crawler and
+rerun `pnpm amm:verify:social-preview`. Do not disable general bot protection.
+**Owner:** Hosting/WordPress administrator · **ETA:** Before organic Facebook push

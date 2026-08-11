@@ -5,7 +5,7 @@ test("active Ask Mike flow uses intercepted chat and lead persistence", async ({
   const leadPayloads: Array<Record<string, unknown>> = [];
   const appointmentPayloads: Array<Record<string, unknown>> = [];
 
-  await page.route("**/api/chat", async (route) => {
+  await page.route("**/api/chat/message", async (route) => {
     chatPayloads.push(route.request().postDataJSON() as Record<string, unknown>);
     await route.fulfill({
       status: 200,
@@ -85,7 +85,7 @@ test("Ask Mike failed lead preparation retry reuses the conversation submission 
   const appointmentPayloads: Array<Record<string, unknown>> = [];
   let leadAttempts = 0;
 
-  await page.route("**/api/chat", async (route) => {
+  await page.route("**/api/chat/message", async (route) => {
     chatPayloads.push(route.request().postDataJSON() as Record<string, unknown>);
     await route.fulfill({
       status: 200,

@@ -1,33 +1,12 @@
 import { isPreviewDataDisabled, previewDataMode } from "@/lib/preview-security";
 
 /**
- * Pure helpers for `/api/admin/health` mutation-safety classification.
+ * Provider-neutral mutation-safety policy for `/api/admin/health`.
  *
- * The health route uses these helpers so the safety policy is one set
- * of rules, testable in isolation, and shared with the preview QA
- * runner (via `shouldRunMutationChecks` in `scripts/preview-qa-lib.mjs`).
- *
- * Rules — `safe_for_preview_mutation` is true ONLY when EVERY one of
- * the following holds:
- *
- *   1. The runtime is a preview surface:
- *      VERCEL_ENV === "preview" OR DATABASE_ENV === "preview"
- *   2. PREVIEW_DATA_MODE === "enabled"
- *   3. ALLOW_PREVIEW_DB_MUTATION === "true"
- *   4. Supabase is configured (url + service role key present)
- *   5. Supabase is reachable (probe result passed in)
- *   6. migration_00012_likely_applied === true (probe result passed in)
- *   7. Live SMS disabled
- *   8. Live email disabled
- *   9. SUPABASE_PROJECT_REF (or URL-derived ref) does NOT match
- *      PRODUCTION_SUPABASE_PROJECT_REF
- *  10. Either:
- *      - SUPABASE_PROJECT_REF matches PREVIEW_SUPABASE_PROJECT_REF, OR
- *      - DATABASE_ENV === "preview" AND PRODUCTION_SUPABASE_PROJECT_REF
- *        is absent
- *  11. No critical warnings
- *
- * If identity cannot be determined, the answer is "no".
+ * Preview writes are deliberately opt-in. A Vercel preview alone is not
+ * enough: the database must also be explicitly labelled `DATABASE_ENV=preview`.
+ * This prevents a preview deployment from mutating production when its
+ * DATABASE_URL was copied into the wrong environment scope.
  */
 
 export interface HealthSafetyInput {
@@ -41,12 +20,9 @@ export interface HealthSafetyInput {
 
 export interface DatabaseIdentity {
   database_env: "preview" | "production" | "development" | "unknown";
-  supabase_project_ref: string | null;
-  supabase_project_ref_present: boolean;
-  matches_production_ref: boolean;
-  matches_preview_ref: boolean;
-  production_ref_present: boolean;
-  preview_ref_present: boolean;
+  database_env_explicit: boolean;
+  vercel_env: "preview" | "production" | "development" | "unknown";
+  preview_identity_confirmed: boolean;
 }
 
 export interface HealthSafety {
@@ -60,84 +36,58 @@ export interface HealthSafety {
   warnings: string[];
 }
 
-/**
- * Extract the supabase project ref from either SUPABASE_PROJECT_REF
- * (preferred) or the host segment of NEXT_PUBLIC_SUPABASE_URL.
- *
- * Returns null when neither is set or the URL is malformed.
- */
-export function extractSupabaseRef(
-  env: Record<string, string | undefined>
-): string | null {
-  const direct = env.SUPABASE_PROJECT_REF;
-  if (direct && direct.length > 0) return direct;
-  const url = env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  if (!url) return null;
-  try {
-    const host = new URL(url).host;
-    const ref = host.split(".")[0];
-    return ref && ref !== "" ? ref : null;
-  } catch {
-    return null;
+type KnownEnvironment = DatabaseIdentity["database_env"];
+
+function normalizeEnvironment(value: string | undefined): KnownEnvironment {
+  const normalized = (value ?? "").toLowerCase();
+  if (
+    normalized === "preview" ||
+    normalized === "production" ||
+    normalized === "development"
+  ) {
+    return normalized;
   }
+  return "unknown";
 }
 
 export function classifyDatabaseEnv(
   env: Record<string, string | undefined>
-): DatabaseIdentity["database_env"] {
-  const explicit = (env.DATABASE_ENV ?? "").toLowerCase();
-  if (
-    explicit === "preview" ||
-    explicit === "production" ||
-    explicit === "development"
-  ) {
-    return explicit;
-  }
-  const vercelEnv = (env.VERCEL_ENV ?? "").toLowerCase();
-  if (vercelEnv === "preview" || vercelEnv === "production")
-    return vercelEnv === "preview" ? "preview" : "production";
-  if (vercelEnv === "development") return "development";
-  return "unknown";
+): KnownEnvironment {
+  const explicit = normalizeEnvironment(env.DATABASE_ENV);
+  if (explicit !== "unknown") return explicit;
+  return normalizeEnvironment(env.VERCEL_ENV);
 }
 
 export function computeDatabaseIdentity(
   env: Record<string, string | undefined>
 ): DatabaseIdentity {
-  const databaseEnv = classifyDatabaseEnv(env);
-  const ref = extractSupabaseRef(env);
-  const prodRef = env.PRODUCTION_SUPABASE_PROJECT_REF ?? "";
-  const previewRef = env.PREVIEW_SUPABASE_PROJECT_REF ?? "";
+  const explicitDatabaseEnv = normalizeEnvironment(env.DATABASE_ENV);
+  const vercelEnv = normalizeEnvironment(env.VERCEL_ENV);
+
   return {
-    database_env: databaseEnv,
-    supabase_project_ref: ref,
-    supabase_project_ref_present: !!ref,
-    matches_production_ref: !!ref && !!prodRef && ref === prodRef,
-    matches_preview_ref: !!ref && !!previewRef && ref === previewRef,
-    production_ref_present: !!prodRef,
-    preview_ref_present: !!previewRef,
+    database_env:
+      explicitDatabaseEnv !== "unknown" ? explicitDatabaseEnv : vercelEnv,
+    database_env_explicit: explicitDatabaseEnv !== "unknown",
+    vercel_env: vercelEnv,
+    preview_identity_confirmed:
+      explicitDatabaseEnv === "preview" && vercelEnv === "preview",
   };
 }
 
-/**
- * Compute the full safety verdict. Returns the identity, the verdict,
- * and the ordered list of blockers when the verdict is `false` —
- * useful for the report.
- *
- * The blockers list is deterministic and stable so the safety scanner
- * and report consumers can rely on it.
- */
 export function computeHealthSafety(input: HealthSafetyInput): HealthSafety {
   const identity = computeDatabaseIdentity(input.env);
   const allowPreviewMutation =
     (input.env.ALLOW_PREVIEW_DB_MUTATION ?? "false").toLowerCase() === "true";
-  const isPreviewRuntime =
-    (input.env.VERCEL_ENV ?? "").toLowerCase() === "preview" ||
-    identity.database_env === "preview";
+  const isPreviewRuntime = identity.vercel_env === "preview";
   const previewDisabled = isPreviewDataDisabled(input.env);
 
   const blockers: string[] = [];
 
   if (!isPreviewRuntime) blockers.push("not_preview_runtime");
+  if (!identity.database_env_explicit)
+    blockers.push("database_env_not_explicit");
+  if (!identity.preview_identity_confirmed)
+    blockers.push("database_identity_not_preview");
   if (previewDisabled) blockers.push("preview_data_disabled");
   if (!allowPreviewMutation) blockers.push("allow_preview_db_mutation_not_set");
   if (!input.dbConfigured) blockers.push("db_not_configured");
@@ -145,23 +95,12 @@ export function computeHealthSafety(input: HealthSafetyInput): HealthSafety {
   if (!input.migration00012Likely) blockers.push("migration_00012_missing");
   if (input.smsEnabled) blockers.push("live_sms_enabled");
   if (input.emailEnabled) blockers.push("live_email_enabled");
-  if (identity.matches_production_ref) blockers.push("matches_production_ref");
 
-  // Identity must resolve to a preview ref OR an explicit preview
-  // DATABASE_ENV with no production ref configured to compare against.
-  const identityIndicatesPreview =
-    identity.matches_preview_ref ||
-    (identity.database_env === "preview" && !identity.production_ref_present);
-  if (!identityIndicatesPreview) blockers.push("identity_not_preview");
-
-  if (identity.database_env === "unknown") blockers.push("database_env_unknown");
-
-  // Warnings echo what the health route surfaces today.
   const warnings: string[] = [];
-  if (!input.env.NEXT_PUBLIC_SUPABASE_URL) warnings.push("supabase_url_missing");
-  if (!input.env.SUPABASE_SERVICE_ROLE_KEY)
-    warnings.push("supabase_service_role_missing");
+  if (!input.env.DATABASE_URL) warnings.push("database_url_missing");
   if (!input.env.ADMIN_SECRET) warnings.push("admin_secret_missing");
+  if (!identity.database_env_explicit)
+    warnings.push("database_env_not_explicit");
   if (isPreviewRuntime && previewDataMode(input.env) !== "enabled")
     warnings.push("preview_data_disabled");
   if (input.smsEnabled) warnings.push("live_sms_enabled");
@@ -169,10 +108,6 @@ export function computeHealthSafety(input: HealthSafetyInput): HealthSafety {
   if (input.dbConfigured && !input.dbReachable) warnings.push("db_unreachable");
   if (input.dbConfigured && input.dbReachable && !input.migration00012Likely)
     warnings.push("migration_00012_not_applied");
-  if (identity.matches_production_ref)
-    warnings.push("supabase_ref_matches_production");
-  if (identity.database_env === "unknown")
-    warnings.push("database_env_unknown");
 
   return {
     identity,

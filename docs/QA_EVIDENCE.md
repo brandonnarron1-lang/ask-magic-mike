@@ -193,3 +193,36 @@ The approved QA lead was submitted through the public form, stored as
 `is_test=true`, delivered to the internal recipient plus hidden audit BCC, and
 replayed idempotently. Consumer acknowledgment, SMS, and WordPress publication
 were not executed.
+
+## Reuse-first hardening verification — 2026-08-11 16:05 America/New_York
+
+This candidate did not submit another lead, send another email/SMS, mutate the
+live database, deploy production, or publish WordPress. Prior controlled
+production QA proof above remains the only delivery proof.
+
+| Check | Result |
+|---|---|
+| `pnpm lint` | PASS |
+| `pnpm typecheck` | PASS |
+| `pnpm build` | PASS; 38 generated pages, 43 active routes |
+| `pnpm vitest run --reporter=dot` | PASS; 137 files / 2,488 tests |
+| `pnpm exec playwright test` | PASS; 13/13 browser E2E tests |
+| `pnpm routes:assert` | PASS; 43 active / 13 acknowledged duplicates |
+| `pnpm release:safety` | PASS; 14/14 |
+| `pnpm audit --prod` | PASS; zero known vulnerabilities |
+| `gitleaks detect --source . --redact` | PASS; 319 commits, no leaks |
+| `git diff --check` | PASS |
+| `pnpm amm:verify:funnel` | PASS; 15/15 live read-only checks |
+| `pnpm amm:public:cta-check` | PASS; 16/16 |
+| `pnpm amm:verify:social-preview` | 40/42; Facebook crawler receives 403 on two Our Town WordPress URLs |
+
+Rendered evidence for the retained visual system:
+
+- `output/product-design-audit/2026-08-11/01-home-desktop.png`
+- `output/product-design-audit/2026-08-11/02-home-value-desktop.png`
+- `output/product-design-audit/2026-08-11/03-buy-desktop.png`
+
+Known verification limitations: local shell Node is 26.5.1 while the project and
+Vercel target are pinned to Node 20.x; the build passes locally but preview remains
+the Node-20 deployment proof. PHP CLI is unavailable locally, so staging must run
+`php -l` before the disabled bridge package is uploaded.

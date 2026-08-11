@@ -98,8 +98,8 @@ Missing `NEXT_PUBLIC_SUPABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` in production 
 ## 8. Security
 
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` not exposed in any client-side bundle (verify with `NEXT_PUBLIC_` prefix absence)
-- [ ] Rate limiting on `/api/intake/submit` — replace in-memory stub with Upstash Redis before launch
-  - Set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
+- [x] Durable rate limiting on public capture/event routes through canonical Neon
+  - Requires `DATABASE_URL` and `public.rate_limit_buckets`
 - [ ] `Content-Security-Policy` header configured
 - [ ] Admin auth upgraded from Basic Auth to session-based auth (before high-traffic launch)
 - [ ] All intake API routes return `Cache-Control: no-store` (already implemented)
@@ -141,7 +141,7 @@ List any items that cannot be completed before launch and document the owner + E
 
 | Item | Blocked By | Owner | ETA |
 |------|-----------|-------|-----|
-| Rate limiting (Upstash) | Upstash account setup | TBD | Before launch |
+| Rate limiting (Neon) | Included in canonical database; no additional vendor | Engineering | Complete |
 | NC license # in UI | Confirm license number | Mike Eatmon | Before launch |
 | Privacy policy page | Legal review | TBD | Before launch |
 | Admin session-based auth | Engineering | TBD | Before high-traffic |

@@ -1,26 +1,21 @@
 /**
- * Rate limiter — in-memory for development/test, Upstash Redis in production.
+ * Rate limiter — Neon PostgreSQL in production, in-memory in development/test.
  *
- * Production requires:
- *   UPSTASH_REDIS_REST_URL    — Upstash console → REST API → Endpoint
- *   UPSTASH_REDIS_REST_TOKEN  — Upstash console → REST API → Token (server-only)
- *
- * If those vars are absent in production the limiter logs a critical warning
- * and falls back to in-memory (fail-open, not fail-closed).
+ * Production requires DATABASE_URL and the canonical rate_limit_buckets table.
+ * If Neon is unavailable the limiter logs a critical warning and falls back to
+ * in-memory (fail-open, not fail-closed) so a database incident does not turn
+ * every public request into an outage.
  * Set RATE_LIMIT_EMERGENCY_MEMORY=1 in Vercel env to acknowledge the fallback
  * and silence the warning during a controlled degraded-mode deploy.
  *
  * checkRateLimit() is now async — all three callers must await it.
  */
 
-import type { Ratelimit as UpstashRatelimit } from "@upstash/ratelimit";
-import type { Redis as UpstashRedis } from "@upstash/redis";
-
 export interface RateLimitResult {
   allowed: boolean;
   remaining: number;
   resetAt: number; // unix ms
-  /** true = backed by Upstash Redis; false = in-memory fallback (not durable) */
+  /** true = backed by Neon PostgreSQL; false = in-memory fallback (not durable) */
   durable: boolean;
 }
 
@@ -62,55 +57,7 @@ export class InMemoryRateLimitStore implements RateLimitStore {
   }
 }
 
-// ─── Upstash singleton ─────────────────────────────────────────────────────────
-
-let _redis: UpstashRedis | null = null;
-let _limiters: Map<string, UpstashRatelimit> | null = null;
-let _initAttempted = false;
 let _neonSql: ReturnType<typeof import("@neondatabase/serverless")["neon"]> | null = null;
-
-export function normalizeUpstashRestUrl(value: string | undefined) {
-  const configuredUrl = value?.trim();
-  if (!configuredUrl) return undefined;
-  return /^https?:\/\//i.test(configuredUrl)
-    ? configuredUrl
-    : `https://${configuredUrl}`;
-}
-
-async function getUpstashLimiter(prefix: string): Promise<UpstashRatelimit | null> {
-  if (_initAttempted && !_redis) return null;
-
-  const url = normalizeUpstashRestUrl(process.env.UPSTASH_REDIS_REST_URL);
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return null;
-
-  if (!_redis || !_limiters) {
-    _initAttempted = true;
-    try {
-      const { Redis }     = await import("@upstash/redis");
-      const { Ratelimit } = await import("@upstash/ratelimit");
-      _redis    = new Redis({ url, token });
-      _limiters = new Map();
-
-      for (const [k, v] of Object.entries(LIMITS)) {
-        const windowSecs = Math.ceil(v.windowMs / 1000);
-        _limiters.set(k, new Ratelimit({
-          // _redis is non-null here — we just constructed it above
-          redis: _redis!,
-          limiter: Ratelimit.slidingWindow(v.limit, `${windowSecs} s`),
-          prefix: `amm:${k}`,
-        }));
-      }
-    } catch (err) {
-      console.error("[rate-limit] Failed to initialize Upstash Redis:", err);
-      _redis    = null;
-      _limiters = null;
-      return null;
-    }
-  }
-
-  return _limiters?.get(prefix) ?? null;
-}
 
 async function checkNeonRateLimit(
   key: string,
@@ -175,6 +122,8 @@ export const LIMITS = {
   sessionCreate:  { limit: 30, windowMs: 10 * 60 * 1000 },
   /** /api/analytics/event — 60 per minute */
   analyticsEvent: { limit: 60, windowMs:       60 * 1000 },
+  /** /api/chat — 20 messages per 10 minutes */
+  chatMessage:    { limit: 20, windowMs: 10 * 60 * 1000 },
 } as const;
 
 export type LimitKey = keyof typeof LIMITS;
@@ -187,7 +136,7 @@ export type LimitKey = keyof typeof LIMITS;
  * @param key    - IP address, session ID, or "anonymous" fallback
  * @param limit  - Max requests per window
  * @param windowMs - Window size in milliseconds
- * @param prefix - LIMITS key for Upstash limiter selection
+ * @param prefix - LIMITS key used to partition durable buckets
  */
 export async function checkRateLimit(
   key: string,
@@ -201,21 +150,6 @@ export async function checkRateLimit(
     ? process.env.VERCEL_ENV === "production"
     : process.env.NODE_ENV === "production";
 
-  // Attempt Upstash whenever credentials are available (also in dev for manual testing)
-  if (process.env.UPSTASH_REDIS_REST_URL) {
-    const upstash = await getUpstashLimiter(prefix);
-    if (upstash) {
-      try {
-        const { success, remaining, reset } = await upstash.limit(key);
-        return { allowed: success, remaining, resetAt: reset, durable: true };
-      } catch (error) {
-        console.error("[rate-limit] Upstash unavailable; trying Neon:", error);
-        _redis = null;
-        _limiters = null;
-      }
-    }
-  }
-
   const neonResult = await checkNeonRateLimit(key, limit, windowMs, prefix);
   if (neonResult) return neonResult;
 
@@ -223,7 +157,7 @@ export async function checkRateLimit(
   if (isProduction && !process.env.RATE_LIMIT_EMERGENCY_MEMORY) {
     console.error(
       "[rate-limit] CRITICAL: Production is using non-durable in-memory rate limiting. " +
-      "Set UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN to enable durable limits. " +
+      "Set DATABASE_URL and apply the rate_limit_buckets migration to enable durable limits. " +
       "Set RATE_LIMIT_EMERGENCY_MEMORY=1 to acknowledge this degraded state."
     );
   }

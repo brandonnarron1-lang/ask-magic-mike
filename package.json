@@ -3,9 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=20"
+    "node": "20.x"
   },
   "packageManager": "pnpm@10.30.3",
+  "pnpm": {
+    "overrides": {
+      "nanoid@<3.3.18": "3.3.18",
+      "postcss@<8.5.26": "8.5.26",
+      "sharp@<0.35.0": "0.35.0"
+    }
+  },
   "scripts": {
     "dev": "./node_modules/.bin/next dev",
     "build": "./node_modules/.bin/next build",
@@ -54,7 +61,6 @@
     "amm:verify:release": "node scripts/amm/verify-release.mjs"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.0",
     "@neondatabase/serverless": "^1.1.0",
     "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.2",
@@ -65,13 +71,11 @@
     "@radix-ui/react-toast": "^1.2.2",
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.46.1",
-    "@upstash/ratelimit": "^2.0.8",
-    "@upstash/redis": "^1.38.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.460.0",
-    "nanoid": "^5.0.8",
-    "next": "^15.5.20",
+    "nanoid": "^5.1.16",
+    "next": "^15.5.21",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^2.5.4",
@@ -79,7 +83,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
-    "@next/eslint-plugin-next": "^15.5.20",
+    "@next/eslint-plugin-next": "^15.5.21",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4.3.2",
     "@testing-library/jest-dom": "^6.6.3",
@@ -92,11 +96,11 @@
     "@vitest/coverage-v8": "^2.1.6",
     "autoprefixer": "^10.5.0",
     "eslint": "^9.39.4",
-    "eslint-config-next": "^15.5.20",
+    "eslint-config-next": "^15.5.21",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.7.0",
     "jsdom": "^25.0.1",
-    "postcss": "^8.4.49",
+    "postcss": "^8.5.26",
     "tailwindcss": "^4.3.2",
     "typescript": "^5.7.0",
     "typescript-eslint": "^8.62.1",

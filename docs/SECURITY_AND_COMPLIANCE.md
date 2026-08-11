@@ -3,7 +3,7 @@
 ## Controls in the canonical implementation
 
 - Server-side validation and bounded field lengths for public lead payloads.
-- Honeypot, origin checks, durable rate limiting when Upstash is configured, and
+- Honeypot, origin checks, durable rate limiting through canonical Neon PostgreSQL, and
   safe in-memory fallback only for local/degraded acknowledgement.
 - Supabase service-role/database code remains server-only; public routes never
   return provider/database errors.

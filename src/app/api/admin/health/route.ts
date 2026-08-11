@@ -1,247 +1,189 @@
+import { neon } from "@neondatabase/serverless";
 import { NextRequest, NextResponse } from "next/server";
+import { checkAdminAuth, checkBearerSecret } from "@/lib/admin/auth";
 import { computeHealthSafety } from "@/lib/admin/health-safety";
-import { createLogger } from "@/lib/observability/logger";
 import {
   isPreviewDataDisabled,
   previewDataMode,
-  serviceRoleAvailable,
 } from "@/lib/preview-security";
-
-const log = createLogger("admin:health");
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
-/**
- * GET /api/admin/health
- *
- * Authorized telemetry endpoint for the preview QA runner. Reports:
- *   - build identity (commit / branch / Vercel env / site URL)
- *   - presence of required env vars (boolean only; never echoes values)
- *   - DB reachability + which migration-00012 tables exist
- *   - DB identity (preview vs production vs unknown, derived from
- *     SUPABASE_PROJECT_REF, PREVIEW_SUPABASE_PROJECT_REF,
- *     PRODUCTION_SUPABASE_PROJECT_REF, DATABASE_ENV)
- *   - safety flags + blockers the QA runner uses to decide whether
- *     mutation tests are allowed
- *
- * Auth (either works):
- *   - x-admin-secret: $ADMIN_SECRET
- *   - Authorization: Bearer $CRON_SECRET (if CRON_SECRET is set)
- *
- * Response shape is intentionally stable so the QA runner can rely on
- * it across deploys. New fields go at the end; existing fields don't
- * change meaning.
- */
+const TABLES = [
+  "leads",
+  "lead_routing",
+  "lead_notifications",
+  "consents",
+  "source_attribution",
+  "audit_logs",
+  "compliance_flags",
+  "rate_limit_buckets",
+  "tasks",
+  "listings",
+  "listing_matches",
+  "webhook_events",
+  "generated_assets",
+  "message_deliveries",
+] as const;
+
+type TableName = typeof TABLES[number];
+
+function authorized(req: NextRequest) {
+  if (checkBearerSecret(req, process.env.CRON_SECRET)) return true;
+  return checkAdminAuth(req).ok;
+}
+
+function enabled(value: string | undefined) {
+  return (value ?? "false").toLowerCase() === "true";
+}
+
+async function probeNeon(databaseUrl: string) {
+  const sql = neon(databaseUrl);
+  const tableSelect = TABLES
+    .map((table) => `to_regclass('public.${table}') IS NOT NULL AS ${table}`)
+    .join(",\n");
+  const rows = await sql.query(
+    `SELECT
+       current_database() IS NOT NULL AS reachable,
+       to_regprocedure('public.capture_public_lead_v1(jsonb,jsonb,jsonb,text)') IS NOT NULL AS capture_function,
+       to_regprocedure('public.record_sla_breach_v1(uuid,text,text,text)') IS NOT NULL AS sla_function,
+       ${tableSelect}`,
+    [],
+  ) as Array<Record<string, unknown>>;
+  const row = rows[0] ?? {};
+  return {
+    reachable: row.reachable === true,
+    captureFunction: row.capture_function === true,
+    slaFunction: row.sla_function === true,
+    tables: Object.fromEntries(TABLES.map((table) => [table, row[table] === true])) as Record<TableName, boolean>,
+  };
+}
+
+/** Protected provider-neutral health detail for release automation.
+ * Values are presence/status booleans only; credentials and database identity
+ * never leave the server. */
 export async function GET(req: NextRequest) {
-  if (!isAuthorized(req)) {
-    return NextResponse.json(
-      { ok: false, error: "unauthorized" },
-      { status: 401, headers: NO_STORE }
-    );
+  if (!authorized(req)) {
+    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401, headers: NO_STORE });
   }
 
-  const supabaseUrlPresent = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonPresent = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const supabaseServicePresent = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const adminSecretPresent = !!process.env.ADMIN_SECRET;
-  const cronSecretPresent = !!process.env.CRON_SECRET;
-  const deploymentProtectionBypassEnvPresent =
-    !!process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
-  const smsProvider = (process.env.SMS_PROVIDER ?? "mock").toLowerCase();
-  const smsEnabled =
-    (process.env.ENABLE_SMS ?? "false").toLowerCase() === "true";
-  const emailProvider = (process.env.EMAIL_PROVIDER ?? "mock").toLowerCase();
-  const emailEnabled =
-    (process.env.ENABLE_EMAIL ?? "false").toLowerCase() === "true";
-  const aiEnabled =
-    (process.env.ENABLE_AI_GENERATION ?? "false").toLowerCase() === "true";
-  const flexmlsEnabled =
-    (process.env.ENABLE_FLEXMLS_API ?? "false").toLowerCase() === "true";
-  const leadNotificationMode = (process.env.LEAD_NOTIFICATION_MODE ?? "disabled").toLowerCase();
-  const agentNotificationsEnabled =
-    (process.env.AGENT_NOTIFICATIONS_ENABLED ?? "false").toLowerCase() === "true";
-  const productionNotificationEnabled =
-    (process.env.LEAD_NOTIFICATION_PRODUCTION_ENABLED ?? "false").toLowerCase() === "true";
-  const customerEmailEnabled =
-    (process.env.CUSTOMER_EMAIL_ENABLED ?? "false").toLowerCase() === "true";
-  const customerSmsEnabled =
-    (process.env.CUSTOMER_SMS_ENABLED ?? "false").toLowerCase() === "true";
-  const agentSmsEnabled =
-    (process.env.AGENT_SMS_NOTIFICATIONS_ENABLED ?? "false").toLowerCase() === "true";
-  const providerDeliveryEnabled =
-    !isPreviewDataDisabled(process.env as Record<string, string | undefined>) &&
-    agentNotificationsEnabled &&
-    (leadNotificationMode === "sandbox" ||
-      (leadNotificationMode === "production" && productionNotificationEnabled));
-
-  const commit =
-    process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GIT_COMMIT ?? "unknown";
-  const branch =
-    process.env.VERCEL_GIT_COMMIT_REF ?? process.env.GIT_BRANCH ?? "unknown";
-  const nodeEnv = process.env.NODE_ENV ?? "unknown";
-  const vercelEnv = process.env.VERCEL_ENV ?? "unknown";
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    process.env.PUBLIC_SITE_URL ??
-    null;
-
-  // Database probe.
-  const dbConfigured = supabaseUrlPresent && supabaseServicePresent;
+  const databaseUrlPresent = Boolean(process.env.DATABASE_URL);
   let dbReachable = false;
-  const tablePresence: Record<string, boolean> = {
-    leads: false,
-    tasks: false,
-    listings: false,
-    listing_matches: false,
-    webhook_events: false,
-    generated_assets: false,
-    message_deliveries: false,
-  };
+  let captureFunction = false;
+  let slaFunction = false;
+  let tablePresence = Object.fromEntries(TABLES.map((table) => [table, false])) as Record<TableName, boolean>;
+  let databaseError: "not_configured" | "unreachable" | null = databaseUrlPresent ? null : "not_configured";
 
-  if (dbConfigured) {
+  if (process.env.DATABASE_URL) {
     try {
-      const { createAdminClient } = await import("@/lib/supabase/admin");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const client = createAdminClient() as any;
-      const probes = await Promise.all(
-        Object.keys(tablePresence).map(async (table) => {
-          // `head: true` + `count: "exact"` issues a HEAD-style query.
-          // Returns 0 rows but resolves the metadata cheaply.
-          const { error } = await client
-            .from(table)
-            .select("*", { head: true, count: "exact" });
-          return [table, !error] as const;
-        })
-      );
-      for (const [t, ok] of probes) tablePresence[t] = ok;
-      // Reachable if at least the `leads` table responded.
-      dbReachable = tablePresence.leads;
-    } catch (err) {
-      dbReachable = false;
-      log.error("db.probe_failed", { error: err instanceof Error ? err.message : String(err) });
+      const probe = await probeNeon(process.env.DATABASE_URL);
+      dbReachable = probe.reachable;
+      captureFunction = probe.captureFunction;
+      slaFunction = probe.slaFunction;
+      tablePresence = probe.tables;
+      databaseError = probe.reachable ? null : "unreachable";
+    } catch {
+      databaseError = "unreachable";
     }
   }
 
-  // Migration 00012 adds the five tables below.
-  const migration00012Likely =
-    tablePresence.tasks &&
-    tablePresence.listings &&
-    tablePresence.listing_matches &&
-    tablePresence.webhook_events &&
-    tablePresence.generated_assets &&
-    tablePresence.message_deliveries;
+  const migration00012Likely = [
+    "tasks",
+    "listings",
+    "listing_matches",
+    "webhook_events",
+    "generated_assets",
+    "message_deliveries",
+  ].every((table) => tablePresence[table as TableName]);
+  const leadPipeSchemaReady = captureFunction && slaFunction && [
+    "leads",
+    "lead_routing",
+    "lead_notifications",
+    "consents",
+    "source_attribution",
+    "audit_logs",
+    "compliance_flags",
+    "rate_limit_buckets",
+  ].every((table) => tablePresence[table as TableName]);
 
+  const smsEnabled = enabled(process.env.ENABLE_SMS);
+  const emailEnabled = enabled(process.env.ENABLE_EMAIL);
+  const agentNotificationsEnabled = enabled(process.env.AGENT_NOTIFICATIONS_ENABLED);
+  const productionNotificationEnabled = enabled(process.env.LEAD_NOTIFICATION_PRODUCTION_ENABLED);
+  const leadNotificationMode = (process.env.LEAD_NOTIFICATION_MODE ?? "disabled").toLowerCase();
+  const providerDeliveryEnabled =
+    !isPreviewDataDisabled(process.env) &&
+    agentNotificationsEnabled &&
+    (leadNotificationMode === "sandbox" ||
+      (leadNotificationMode === "production" && productionNotificationEnabled));
   const safety = computeHealthSafety({
-    env: process.env as Record<string, string | undefined>,
-    dbConfigured,
+    env: process.env,
+    dbConfigured: databaseUrlPresent,
     dbReachable,
     migration00012Likely,
     smsEnabled,
     emailEnabled,
   });
 
-  return NextResponse.json(
-    {
-      ok: true,
-      build: {
-        commit,
-        branch,
-        node_env: nodeEnv,
-        vercel_env: vercelEnv,
-        site_url: siteUrl,
-        deployment_protection_bypass_env_present:
-          deploymentProtectionBypassEnvPresent,
-      },
-      env: {
-        supabase_url_present: supabaseUrlPresent,
-        supabase_anon_key_present: supabaseAnonPresent,
-        supabase_service_role_present: supabaseServicePresent,
-        service_role_available: serviceRoleAvailable(process.env as Record<string, string | undefined>),
-        admin_secret_present: adminSecretPresent,
-        cron_secret_present: cronSecretPresent,
-        sms_provider: ["mock", "twilio"].includes(smsProvider)
-          ? smsProvider
-          : "unknown",
-        sms_enabled: smsEnabled,
-        email_provider: ["mock", "resend", "sendgrid", "postmark"].includes(
-          emailProvider
-        )
-          ? emailProvider
-          : "unknown",
-        email_enabled: emailEnabled,
-        ai_enabled: aiEnabled,
-        flexmls_api_enabled: flexmlsEnabled,
-        database_env_set: !!process.env.DATABASE_ENV,
-        production_supabase_ref_set:
-          !!process.env.PRODUCTION_SUPABASE_PROJECT_REF,
-        preview_supabase_ref_set: !!process.env.PREVIEW_SUPABASE_PROJECT_REF,
-        allow_preview_db_mutation:
-          (process.env.ALLOW_PREVIEW_DB_MUTATION ?? "false").toLowerCase() ===
-          "true",
-        preview_data_mode: previewDataMode(process.env as Record<string, string | undefined>),
-        provider_delivery_enabled: providerDeliveryEnabled,
-        customer_email_enabled: customerEmailEnabled,
-        customer_sms_enabled: customerSmsEnabled,
-        agent_sms_enabled: agentSmsEnabled,
-      },
-      database: {
-        configured: dbConfigured,
-        reachable: dbReachable,
-        migration_00012_likely_applied: migration00012Likely,
-        tables: tablePresence,
-        identity: {
-          database_env: safety.identity.database_env,
-          supabase_project_ref_present:
-            safety.identity.supabase_project_ref_present,
-          matches_production_ref: safety.identity.matches_production_ref,
-          matches_preview_ref: safety.identity.matches_preview_ref,
-        },
-      },
-      safety: {
-        live_sms_disabled: safety.live_sms_disabled,
-        live_email_disabled: safety.live_email_disabled,
-        is_preview_runtime: safety.is_preview_runtime,
-        allow_preview_db_mutation: safety.allow_preview_db_mutation,
-        preview_data_mode: previewDataMode(process.env as Record<string, string | undefined>),
-        service_role_available: serviceRoleAvailable(process.env as Record<string, string | undefined>),
-        safe_for_preview_mutation: safety.safe_for_preview_mutation,
-        provider_delivery_enabled: providerDeliveryEnabled,
-        customer_email_enabled: customerEmailEnabled,
-        customer_sms_enabled: customerSmsEnabled,
-        agent_sms_enabled: agentSmsEnabled,
-        safety_blockers: safety.safety_blockers,
-        deployment_protection_bypass_env_present:
-          deploymentProtectionBypassEnvPresent,
-        warnings: safety.warnings,
-      },
-      preview_access_notes: [
-        "If preview returns 401, run preview QA with VERCEL_AUTOMATION_BYPASS_SECRET.",
-      ],
+  return NextResponse.json({
+    ok: true,
+    build: {
+      commit: process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GIT_COMMIT ?? "unknown",
+      branch: process.env.VERCEL_GIT_COMMIT_REF ?? process.env.GIT_BRANCH ?? "unknown",
+      node_env: process.env.NODE_ENV ?? "unknown",
+      vercel_env: process.env.VERCEL_ENV ?? "unknown",
+      site_url: process.env.NEXT_PUBLIC_SITE_URL ?? process.env.PUBLIC_SITE_URL ?? null,
+      deployment_protection_bypass_env_present:
+        !!process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
     },
-    { headers: NO_STORE }
-  );
+    env: {
+      database_url_present: databaseUrlPresent,
+      database_provider: databaseUrlPresent ? "neon_postgres" : "not_configured",
+      admin_secret_present: !!process.env.ADMIN_SECRET,
+      cron_secret_present: !!process.env.CRON_SECRET,
+      email_provider: (process.env.EMAIL_PROVIDER ?? "mock").toLowerCase(),
+      email_enabled: emailEnabled,
+      sms_provider: (process.env.SMS_PROVIDER ?? "mock").toLowerCase(),
+      sms_enabled: smsEnabled,
+      ai_enabled: enabled(process.env.ENABLE_AI_GENERATION),
+      flexmls_api_enabled: enabled(process.env.ENABLE_FLEXMLS_API),
+      database_env_set: Boolean(process.env.DATABASE_ENV),
+      preview_data_mode: previewDataMode(process.env),
+      provider_delivery_enabled: providerDeliveryEnabled,
+      customer_email_enabled: enabled(process.env.CUSTOMER_EMAIL_ENABLED),
+      customer_sms_enabled: enabled(process.env.CUSTOMER_SMS_ENABLED),
+      agent_sms_enabled: enabled(process.env.AGENT_SMS_NOTIFICATIONS_ENABLED),
+    },
+    database: {
+      provider: "neon_postgres",
+      configured: databaseUrlPresent,
+      reachable: dbReachable,
+      error: databaseError,
+      lead_pipe_schema_ready: leadPipeSchemaReady,
+      migration_00012_likely_applied: migration00012Likely,
+      capture_function: captureFunction,
+      sla_function: slaFunction,
+      tables: tablePresence,
+      identity: { database_env: safety.identity.database_env },
+    },
+    safety: {
+      live_sms_disabled: safety.live_sms_disabled,
+      live_email_disabled: safety.live_email_disabled,
+      is_preview_runtime: safety.is_preview_runtime,
+      allow_preview_db_mutation: safety.allow_preview_db_mutation,
+      preview_data_mode: previewDataMode(process.env),
+      database_credential_available: databaseUrlPresent,
+      safe_for_preview_mutation: safety.safe_for_preview_mutation,
+      provider_delivery_enabled: providerDeliveryEnabled,
+      safety_blockers: safety.safety_blockers,
+      warnings: safety.warnings,
+    },
+    preview_access_notes: [
+      "If preview returns 401, run preview QA with VERCEL_AUTOMATION_BYPASS_SECRET.",
+    ],
+  }, { headers: NO_STORE });
 }
 
 export async function POST(req: NextRequest) {
   return GET(req);
-}
-
-function isAuthorized(req: NextRequest): boolean {
-  // Bearer CRON_SECRET (for CI/cron callers)
-  const authz = req.headers.get("authorization") ?? "";
-  const cronSecret = process.env.CRON_SECRET;
-  if (
-    cronSecret &&
-    authz.toLowerCase().startsWith("bearer ") &&
-    authz.slice(7).trim() === cronSecret
-  ) {
-    return true;
-  }
-  // x-admin-secret (for admin/runner callers)
-  const adminSecret = process.env.ADMIN_SECRET;
-  if (!adminSecret) return false;
-  const supplied =
-    req.headers.get("x-admin-secret") ??
-    req.nextUrl.searchParams.get("admin_secret");
-  return !!supplied && supplied === adminSecret;
 }

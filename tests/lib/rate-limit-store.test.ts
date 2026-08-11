@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   InMemoryRateLimitStore,
   checkRateLimit,
-  normalizeUpstashRestUrl,
   rateLimitKey,
 } from "@/lib/security/rate-limit";
 
@@ -60,20 +59,6 @@ describe("InMemoryRateLimitStore", () => {
   });
 });
 
-describe("normalizeUpstashRestUrl", () => {
-  it("adds HTTPS to legacy host-only endpoints", () => {
-    expect(normalizeUpstashRestUrl("example.upstash.io")).toBe(
-      "https://example.upstash.io",
-    );
-  });
-
-  it("preserves an existing HTTPS endpoint", () => {
-    expect(normalizeUpstashRestUrl("https://example.upstash.io")).toBe(
-      "https://example.upstash.io",
-    );
-  });
-});
-
 describe("checkRateLimit — async, in-memory fallback in test env", () => {
   it("allows first request", async () => {
     const result = await checkRateLimit("test-unique-key-1", 10, 60_000);
@@ -87,7 +72,7 @@ describe("checkRateLimit — async, in-memory fallback in test env", () => {
     expect(result.allowed).toBe(false);
   });
 
-  it("uses in-memory fallback (durable: false) when no Upstash creds", async () => {
+  it("uses in-memory fallback (durable: false) when no database is configured", async () => {
     const result = await checkRateLimit("test-durable-check", 10, 60_000);
     expect(result.durable).toBe(false);
   });
