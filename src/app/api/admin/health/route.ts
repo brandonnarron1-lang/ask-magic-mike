@@ -107,7 +107,7 @@ export async function GET(req: NextRequest) {
   ].every((table) => tablePresence[table as TableName]);
 
   const smsEnabled = enabled(process.env.ENABLE_SMS);
-  const emailEnabled = enabled(process.env.ENABLE_EMAIL);
+  const emailEnabled = enabled(process.env.ENABLE_EMAIL) || enabled(process.env.EMAIL_ENABLED);
   const agentNotificationsEnabled = enabled(process.env.AGENT_NOTIFICATIONS_ENABLED);
   const productionNotificationEnabled = enabled(process.env.LEAD_NOTIFICATION_PRODUCTION_ENABLED);
   const leadNotificationMode = (process.env.LEAD_NOTIFICATION_MODE ?? "disabled").toLowerCase();
@@ -141,7 +141,7 @@ export async function GET(req: NextRequest) {
       database_provider: databaseUrlPresent ? "neon_postgres" : "not_configured",
       admin_secret_present: !!process.env.ADMIN_SECRET,
       cron_secret_present: !!process.env.CRON_SECRET,
-      email_provider: (process.env.EMAIL_PROVIDER ?? "mock").toLowerCase(),
+      email_provider: (process.env.EMAIL_PROVIDER ?? (process.env.RESEND_API_KEY ? "resend" : "mock")).toLowerCase(),
       email_enabled: emailEnabled,
       sms_provider: (process.env.SMS_PROVIDER ?? "mock").toLowerCase(),
       sms_enabled: smsEnabled,
@@ -150,6 +150,7 @@ export async function GET(req: NextRequest) {
       database_env_set: Boolean(process.env.DATABASE_ENV),
       preview_data_mode: previewDataMode(process.env),
       provider_delivery_enabled: providerDeliveryEnabled,
+      lead_notification_bcc_present: Boolean(process.env.LEAD_NOTIFICATION_BCC),
       customer_email_enabled: enabled(process.env.CUSTOMER_EMAIL_ENABLED),
       customer_sms_enabled: enabled(process.env.CUSTOMER_SMS_ENABLED),
       agent_sms_enabled: enabled(process.env.AGENT_SMS_NOTIFICATIONS_ENABLED),

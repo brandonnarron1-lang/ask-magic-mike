@@ -102,6 +102,12 @@ function NotificationCard({ notification }: { notification: LeadNotificationReco
           <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Next retry</dt>
           <dd className="mt-1 text-[#f4ead4]">{shortDate(notification.next_attempt_at)}</dd>
         </div>
+        <div className="sm:col-span-2 lg:col-span-4">
+          <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Provider message ID</dt>
+          <dd className="mt-1 break-all font-mono text-xs text-[#f4ead4]">
+            {notification.provider_message_id || "Not set"}
+          </dd>
+        </div>
       </dl>
 
       {notification.error_code || notification.error_summary ? (
