@@ -13,12 +13,12 @@ describe("Ask Magic Mike system isolation", () => {
     expect(source).toContain("push_subscription_schema_missing");
   });
 
-  it("is linked to the dedicated Ask Magic Mike Vercel project", async () => {
-    const linked = JSON.parse(await readFile(resolve(".vercel/project.json"), "utf8"));
-    expect(linked).toEqual({
-      projectId: "prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8",
-      orgId: "team_OVg2uOSyJCpX100BPgb8nJK9",
-      projectName: "ask-magic-mike",
-    });
+  it("pins the dedicated Ask Magic Mike Vercel identity in the release guard", async () => {
+    const source = await readFile(resolve("scripts/amm/verify-system-isolation.mjs"), "utf8");
+    expect(source).toContain('projectId: "prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8"');
+    expect(source).toContain('orgId: "team_OVg2uOSyJCpX100BPgb8nJK9"');
+    expect(source).toContain('projectName: "ask-magic-mike"');
+    expect(source).toContain("process.env.VERCEL_PROJECT_ID");
+    expect(source).toContain("process.env.VERCEL_ORG_ID");
   });
 });

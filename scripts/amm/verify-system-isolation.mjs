@@ -49,13 +49,28 @@ for (const path of deployableRoots) {
   }
 }
 
+let projectLinkVerified = false;
 try {
   const linked = JSON.parse(await readFile(join(root, ".vercel/project.json"), "utf8"));
   for (const [key, expected] of Object.entries(expectedVercel)) {
     if (linked[key] !== expected) failures.push(`.vercel/project.json ${key} is ${JSON.stringify(linked[key])}; expected ${JSON.stringify(expected)}`);
   }
-} catch (error) {
-  failures.push(`unable to verify .vercel/project.json: ${error instanceof Error ? error.message : String(error)}`);
+  projectLinkVerified = true;
+} catch {
+  // .vercel is intentionally gitignored. Vercel builds expose immutable project
+  // metadata as system variables; plain GitHub CI has neither and still runs the
+  // deployable-source boundary scan below.
+  const deployed = {
+    projectId: process.env.VERCEL_PROJECT_ID,
+    orgId: process.env.VERCEL_ORG_ID,
+    projectName: process.env.VERCEL_PROJECT_NAME,
+  };
+  if (Object.values(deployed).some(Boolean)) {
+    for (const [key, expected] of Object.entries(expectedVercel)) {
+      if (deployed[key] !== expected) failures.push(`Vercel system variable ${key} is ${JSON.stringify(deployed[key])}; expected ${JSON.stringify(expected)}`);
+    }
+    projectLinkVerified = true;
+  }
 }
 
 if (failures.length) {
@@ -65,6 +80,8 @@ if (failures.length) {
 }
 
 console.log("Ask Magic Mike system-isolation verification passed");
-console.log(`- Vercel project: ${expectedVercel.projectName} (${expectedVercel.projectId})`);
+console.log(projectLinkVerified
+  ? `- Vercel project verified: ${expectedVercel.projectName} (${expectedVercel.projectId})`
+  : "- Vercel link metadata unavailable in plain CI; deployable-source boundary verified");
 console.log("- Deployable code contains no NellySelly project identifiers");
 console.log("- Documentation is intentionally excluded so isolation decisions can be recorded");
