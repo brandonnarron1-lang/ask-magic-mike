@@ -14,3 +14,14 @@
 - Added full-history secret scanning, provider-neutral preview mutation guards,
   Edge-safe admin secret comparison, regression tests, browser E2E corrections,
   and rendered visual evidence.
+
+## 2026-08-11 — Production cutover follow-up
+
+- Promoted the verified Neon-backed candidate to the canonical Ask Magic Mike
+  production domains after an isolated production-environment smoke test.
+- Verified a controlled public `[TEST]` lead, deterministic score/routing,
+  first-attempt Resend delivery, test suppression, and canonical attribution.
+- Routed protected Lead Center inbox/detail reads to Neon and surfaced provider
+  message IDs in the notification dashboard.
+- Corrected protected health reporting to recognize the active email enablement
+  variable and report BCC presence as a boolean only.

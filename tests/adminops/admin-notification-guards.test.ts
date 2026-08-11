@@ -80,6 +80,13 @@ describe("AdminOps notification guards", () => {
     expect(action).not.toContain("/api/leads");
   });
 
+  it("shows the provider message id without exposing recipient addresses", () => {
+    const page = read("app/admin/notifications/page.tsx");
+    expect(page).toContain("Provider message ID");
+    expect(page).toContain("notification.provider_message_id");
+    expect(page).not.toContain("recipient_reference");
+  });
+
   it("summarizes status counts and retry eligibility without recipient values", () => {
     const summary = summarizeNotifications([
       notification({ id: "pending-1", status: "pending" }),

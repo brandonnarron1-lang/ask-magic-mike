@@ -117,6 +117,20 @@ canonical schema; production health and public durable capture pass. No Supabase
 historic-data mutation or copy was performed.
 
 The current production deployment serves all required public routes, robots,
-sitemap, health endpoints, widget, and legal pages. WordPress publishing remains
-separate because the authenticated form/page IDs and notification rules have not
-yet been inspected in the owner-controlled WordPress console.
+sitemap, health endpoints, widget, and legal pages. Prior WordPress inspection
+identified the relevant form area, but the current connector configuration and
+duplicate-notification behavior still require authenticated confirmation before
+any bridge activation or shadow-mode test.
+
+## Production cutover — 2026-08-11
+
+- The reuse-first candidate was merged through PR `#122` and promoted as Vercel
+  deployment `dpl_4yacS3NeepmZNp4AnamDF6oPA5GW` after production-environment
+  route, authorization, database, migration, and health checks passed.
+- A canonical-hostname QA form submission created one test lead, one internal
+  alert, and no consumer acknowledgment. The Resend outbox row is sent on the
+  first attempt; the hidden audit BCC remains configured and undisclosed.
+- The Lead Center now selects Neon for inbox and detail reads when `DATABASE_URL`
+  is present. Supabase remains a compatibility fallback only.
+- The notification dashboard now displays the provider message ID needed for
+  delivery reconciliation without exposing recipient addresses.

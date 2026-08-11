@@ -2,10 +2,10 @@
 
 ## Application
 
-Before deployment, record the target commit and current production deployment
-`dpl_FvdnTNjTvzPYu4JsJ49NSDZxXLUj`. If smoke checks fail, stop traffic activation and
-use Vercel's deployment rollback/redeploy of the recorded known-good deployment
-after owner approval. Do not delete a deployment or force-push.
+Current production is `dpl_4yacS3NeepmZNp4AnamDF6oPA5GW`. The immediately prior
+known-good deployment is `dpl_SDMv6Nz69aKZJFfmGB54h6MpY5yt`. If smoke checks fail,
+stop traffic activation and use Vercel promotion/rollback to the recorded prior
+deployment. Do not delete a deployment or force-push.
 
 ## Database
 

@@ -240,3 +240,30 @@ the Node-20 deployment proof. PHP CLI is unavailable locally, so staging must ru
 - Vercel warns that Node 20 becomes unsupported for deployments created on or
   after 2026-10-01. A deliberate Node 24 compatibility upgrade is a follow-up,
   not an untested runtime change inside this hardening candidate.
+
+### Approved production cutover and controlled QA — 2026-08-11 16:33 America/New_York
+
+- PR `#122` merged to `main` as `38639bc873dda5bd51c261d6f340a84dd9ecef03`.
+- Production-target deployment `dpl_4yacS3NeepmZNp4AnamDF6oPA5GW` was built
+  with public domain assignment held back. Fifteen public/legal/health routes
+  returned HTTP 200, `/admin/leads` returned 401 without authentication, and
+  protected health reported production Neon reachable with the complete lead
+  schema and notification delivery enabled.
+- The first isolated-hostname form attempt failed closed with `origin not
+  approved`; it created no lead and sent no message. The candidate was then
+  promoted to the canonical domains with prior deployment
+  `dpl_SDMv6Nz69aKZJFfmGB54h6MpY5yt` retained as rollback.
+- A controlled public home-value submission used the exact marker
+  `INTERNAL QA — DO NOT CONTACT`, synthetic contact data, `is_test=true`, and
+  `internal_qa / qa / production_cutover` attribution. Lead ID:
+  `bbed9a2d-4619-4c18-9298-5167a9694f73`.
+- The deterministic score is 90. Exact subject:
+  `[TEST] HOME VALUE LEAD | internal_qa | Home Value | INTERNAL QA — DO NOT CONTACT — 999 Verification Way, Wilson, NC | INTERNAL QA | Score 90`.
+- The canonical notification record is `sent`, provider `resend`, attempt `1/3`.
+  The configured hidden BCC is passed through the provider request without
+  rendering its value. Consumer acknowledgment and SMS were suppressed for the
+  test record.
+- Post-cutover inspection found the protected notification view correctly used
+  Neon while the Lead Center inbox still selected the retired Supabase read
+  adapter. The follow-up patch makes inbox/detail reads provider-neutral and
+  exposes provider message IDs in the protected notification view.
