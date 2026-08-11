@@ -67,6 +67,37 @@ function safeProviderErrorSummary(value: unknown) {
   return sanitized || "Resend email request failed.";
 }
 
+export function normalizeUsSmsRecipient(value: string | undefined | null) {
+  const digits = (value || "").replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  return null;
+}
+
+function retryableTwilioStatus(status: number) {
+  return status === 408 || status === 409 || status === 425 || status === 429 || status >= 500;
+}
+
+function configuredSiteOrigin() {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.askmagicmike.com").origin;
+  } catch {
+    return "https://www.askmagicmike.com";
+  }
+}
+
+function safeMediaUrls(values: string[] | undefined) {
+  const origin = configuredSiteOrigin();
+  return (values || []).filter((value) => {
+    try {
+      const url = new URL(value);
+      return url.protocol === "https:" && url.origin === origin;
+    } catch {
+      return false;
+    }
+  }).slice(0, 1);
+}
+
 function configuredSandboxAllowedDomains():
   | { ok: true; domains: string[] }
   | { ok: false; errorCode: string; errorSummary: string } {
@@ -366,6 +397,79 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
   }
 }
 
+export class TwilioSmsNotificationProvider implements NotificationProvider {
+  name = "twilio";
+
+  constructor(private readonly transport: typeof fetch = fetch) {}
+
+  async send(request: NotificationRequest): Promise<NotificationResult> {
+    if (request.channel !== "sms") {
+      return { ok: false, provider: this.name, retryable: false, errorCode: "unsupported_channel", errorSummary: "Twilio provider supports SMS notifications only." };
+    }
+    if (
+      notificationMode() !== "production" ||
+      !productionNotificationDeliveryEnabled() ||
+      !agentSmsNotificationsEnabled() ||
+      (process.env.ENABLE_SMS || "false").toLowerCase() !== "true" ||
+      (process.env.SMS_PROVIDER || "").toLowerCase() !== "twilio"
+    ) {
+      return { ok: false, provider: this.name, retryable: false, errorCode: "sms_notifications_disabled", errorSummary: "Production SMS notifications are disabled by configuration." };
+    }
+
+    const accountSid = (process.env.TWILIO_ACCOUNT_SID || "").trim();
+    const authToken = process.env.TWILIO_AUTH_TOKEN || "";
+    const from = normalizeUsSmsRecipient(process.env.TWILIO_FROM_PHONE || process.env.TWILIO_PHONE_NUMBER);
+    const to = normalizeUsSmsRecipient(request.recipient);
+    if (!/^AC[a-f0-9]{32}$/i.test(accountSid) || !authToken || !from || !to) {
+      return { ok: false, provider: this.name, retryable: false, errorCode: "missing_provider_config", errorSummary: "Twilio provider configuration is incomplete." };
+    }
+
+    const body = new URLSearchParams({ From: from, To: to, Body: request.text.slice(0, 1200) });
+    const callback = `${configuredSiteOrigin()}/api/webhooks/sms/status`;
+    body.set("StatusCallback", callback);
+    for (const mediaUrl of safeMediaUrls(request.mediaUrls)) body.append("MediaUrl", mediaUrl);
+
+    let response: Response;
+    try {
+      response = await this.transport(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
+        method: "POST",
+        headers: {
+          Authorization: "Basic " + Buffer.from(`${accountSid}:${authToken}`).toString("base64"),
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: body.toString(),
+        signal: AbortSignal.timeout(10_000),
+      });
+    } catch {
+      return { ok: false, provider: this.name, retryable: true, errorCode: "twilio_network_error", errorSummary: "Twilio SMS request failed before completion." };
+    }
+
+    if (!response.ok) {
+      const providerError = await response.json().catch(() => ({})) as { message?: unknown };
+      return {
+        ok: false,
+        provider: this.name,
+        retryable: retryableTwilioStatus(response.status),
+        errorCode: `twilio_http_${response.status}`,
+        errorSummary: safeProviderErrorSummary(providerError.message).replace("Resend email", "Twilio SMS"),
+      };
+    }
+    const data = await response.json().catch(() => ({})) as { sid?: unknown };
+    return { ok: true, provider: this.name, providerMessageId: safeProviderMessageId(data.sid) };
+  }
+}
+
+class ProductionNotificationProvider implements NotificationProvider {
+  name = "production_router";
+  constructor(
+    private readonly email = new ResendEmailNotificationProvider("production"),
+    private readonly sms = new TwilioSmsNotificationProvider(),
+  ) {}
+  send(request: NotificationRequest) {
+    return request.channel === "sms" ? this.sms.send(request) : this.email.send(request);
+  }
+}
+
 export function selectNotificationProvider(): NotificationProvider {
   const mode = notificationMode();
   if (mode === "disabled") return new DisabledNotificationProvider();
@@ -377,5 +481,5 @@ export function selectNotificationProvider(): NotificationProvider {
     return new ConsoleNotificationProvider("success");
   }
   if (mode === "sandbox") return new ResendEmailNotificationProvider("sandbox");
-  return new ResendEmailNotificationProvider("production");
+  return new ProductionNotificationProvider();
 }

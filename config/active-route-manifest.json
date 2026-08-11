@@ -23,6 +23,7 @@
     "/api/health/ready",
     "/api/leads",
     "/api/valuation",
+    "/api/webhooks/sms/status",
     "/api/widget/events",
     "/ask",
     "/buy",
@@ -59,7 +60,7 @@
       "/admin/action-queue", "/admin/notifications", "/admin/reporting"
     ],
     "api": [
-      "/api/leads", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/widget/events",
+      "/api/leads", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/webhooks/sms/status", "/api/widget/events",
       "/api/admin/health", "/api/admin/sla/sweep"
     ]
   },

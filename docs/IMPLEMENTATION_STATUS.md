@@ -33,10 +33,12 @@ Updated 2026-08-11.
   The supplied cards are creative references only; their fictional sample lead
   details are never sent. The generated asset is decorative, and all lead facts
   remain accessible HTML/text.
-- Keep agent urgency SMS text-only and fail-closed: it requires an approved
-  recipient, enabled carrier provider, score ≥60, and a non-test lead. Video is
-  intentionally excluded from transactional notifications because it degrades
-  email/MMS delivery and does not improve routing accuracy.
+- Wire internal live-lead SMS through the canonical outbox for primary and copy
+  recipients, with separate idempotency/retry records and hard QA suppression.
+  Twilio credentials and a registered sender remain required before production
+  activation. Optional MMS uses static, PII-free urgency art. Video remains
+  outside transactional notifications because it adds latency without routing
+  value.
 - Add the read-only `pnpm amm:health:lead-pipe` monitor and protected retry endpoint
   for `lead_alert` / `consumer_ack` outbox records.
 

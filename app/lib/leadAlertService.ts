@@ -1,13 +1,14 @@
 import { assertProviderDeliveryAllowed } from "../../src/lib/preview-security";
 import { neon } from "@neondatabase/serverless";
-import { notificationMode, safeRecipientReference, selectNotificationProvider } from "./leadNotificationProvider";
+import { agentSmsNotificationsEnabled, normalizeUsSmsRecipient, notificationMode, safeRecipientReference, selectNotificationProvider } from "./leadNotificationProvider";
 import { SupabaseLeadNotificationRepository } from "./persistence/supabase/leadNotificationRepository";
 import { NeonLeadNotificationRepository } from "./persistence/neonLeadNotificationRepository";
 import type { LeadNotificationRecord, LeadNotificationRepository, NotificationProvider } from "./leadNotificationTypes";
 import type { LeadPayload } from "./leadPayload";
 import { routeLead, type LeadRoutingDecision } from "./leadRouting";
 import { scoreLead, type LeadScore } from "./leadScoring";
-import { CONSUMER_ACK_TEMPLATE_VERSION, LEAD_ALERT_TEMPLATE_VERSION, renderConsumerAcknowledgment, renderLeadAlert } from "./leadAlertTemplates";
+import { CONSUMER_ACK_TEMPLATE_VERSION, LEAD_ALERT_SMS_TEMPLATE_VERSION, LEAD_ALERT_TEMPLATE_VERSION, renderConsumerAcknowledgment, renderLeadAlert, renderLeadAlertSms } from "./leadAlertTemplates";
+import { shouldAttachLeadAlertMedia, shouldQueueAgentUrgencySms, visualAssetUrl } from "./leadAlertVisualTemplates";
 
 const MAX_ATTEMPTS = 3;
 const RETRY_DELAYS_MS = [60_000, 5 * 60_000, 30 * 60_000];
@@ -32,6 +33,18 @@ function configuredBcc() {
   return (process.env.LEAD_NOTIFICATION_BCC || "").split(",").map((value) => value.trim()).filter(validEmail).slice(0, 5);
 }
 function configuredTo() { return validEmail(process.env.LEAD_NOTIFICATION_TO) ? process.env.LEAD_NOTIFICATION_TO!.trim() : "mike@ourtownproperties.com"; }
+export function configuredInternalSmsRecipients() {
+  const candidates = [
+    { role: "primary", recipient: normalizeUsSmsRecipient(process.env.LEAD_SMS_TO) },
+    { role: "copy", recipient: normalizeUsSmsRecipient(process.env.LEAD_SMS_COPY_TO) },
+  ];
+  const seen = new Set<string>();
+  return candidates.filter((candidate): candidate is { role: "primary" | "copy"; recipient: string } => {
+    if (!candidate.recipient || seen.has(candidate.recipient)) return false;
+    seen.add(candidate.recipient);
+    return true;
+  });
+}
 function notificationRepository(): LeadNotificationRepository {
   return NeonLeadNotificationRepository.fromEnv() || new SupabaseLeadNotificationRepository();
 }
@@ -40,7 +53,7 @@ function safeError(value: string) { return value.replace(/[A-Z0-9._%+-]+@[A-Z0-9
 
 async function deliver(
   notification: LeadNotificationRecord,
-  request: { recipient: string; subject: string; text: string; html: string; bcc?: string[]; replyTo?: string },
+  request: { channel: "email" | "sms"; recipient: string; subject?: string; text: string; html?: string; bcc?: string[]; replyTo?: string; mediaUrls?: string[] },
   repo: LeadNotificationRepository,
   provider: NotificationProvider,
 ) {
@@ -49,13 +62,16 @@ async function deliver(
   if (notificationMode() === "disabled") {
     return await repo.update(current.id, { status: "skipped", provider: provider.name, error_code: "notifications_disabled", error_summary: "Notification provider mode is disabled.", failed_at: nowIso() }) || current;
   }
+  if (request.channel === "sms" && !agentSmsNotificationsEnabled()) {
+    return await repo.update(current.id, { status: "skipped", provider: provider.name, error_code: "agent_sms_notifications_disabled", error_summary: "Agent SMS notifications are disabled by configuration.", failed_at: nowIso() }) || current;
+  }
   const nextAttempt = current.attempt_count + 1;
   if (nextAttempt > current.max_attempts) {
     return await repo.update(current.id, { status: "permanently_failed", error_code: "max_attempts_reached", error_summary: "Maximum notification attempts reached.", failed_at: nowIso() }) || current;
   }
   const claimed = await repo.claimForProcessing(current.id, { status: "processing", attempt_count: nextAttempt, provider: provider.name, error_code: null, error_summary: null });
   if (!claimed) return (await repo.findById(current.id)) || current;
-  const result = await provider.send({ notificationId: claimed.id, channel: "email", recipient: request.recipient, subject: request.subject, text: request.text, html: request.html, bcc: request.bcc, replyTo: request.replyTo, idempotencyKey: claimed.idempotency_key });
+  const result = await provider.send({ notificationId: claimed.id, channel: request.channel, recipient: request.recipient, subject: request.subject, text: request.text, html: request.html, mediaUrls: request.mediaUrls, bcc: request.bcc, replyTo: request.replyTo, idempotencyKey: claimed.idempotency_key });
   if (result.ok) return await repo.update(claimed.id, { status: "sent", provider: result.provider, provider_message_id: result.providerMessageId || null, sent_at: nowIso(), failed_at: null, error_code: null, error_summary: null, next_attempt_at: null }) || claimed;
   const retryable = result.retryable && nextAttempt < claimed.max_attempts;
   return await repo.update(claimed.id, { status: retryable ? "retry_scheduled" : "permanently_failed", provider: result.provider, error_code: result.errorCode, error_summary: safeError(result.errorSummary), failed_at: nowIso(), next_attempt_at: retryable ? nextAttemptAt(nextAttempt) : null }) || claimed;
@@ -66,31 +82,38 @@ async function enqueueOne(input: {
   type: "lead_alert" | "consumer_ack";
   templateVersion: string;
   recipient: string;
-  subject: string;
+  channel: "email" | "sms";
+  recipientRole?: "primary" | "copy";
+  subject?: string;
   text: string;
-  html: string;
+  html?: string;
+  mediaUrls?: string[];
   bcc?: string[];
   replyTo?: string;
   metadata: Record<string, unknown>;
   repo: LeadNotificationRepository;
   provider: NotificationProvider;
 }) {
-  const idempotencyKey = `${input.type}:${input.leadId}:${input.templateVersion}`;
+  const idempotencyKey = input.channel === "sms"
+    ? `${input.type}:${input.leadId}:${input.templateVersion}:sms:${input.recipientRole || "internal"}`
+    : `${input.type}:${input.leadId}:${input.templateVersion}`;
   const existing = await input.repo.findByIdempotencyKey(idempotencyKey);
   if (existing) return existing;
   const created = await input.repo.create({
     lead_id: input.leadId,
     agent_id: null,
     notification_type: input.type,
-    channel: "email",
+    channel: input.channel,
     recipient_type: input.type === "consumer_ack" ? "customer" : "internal",
-    recipient_reference: safeRecipientReference("email", input.recipient),
+    recipient_reference: input.channel === "sms"
+      ? `sms_${input.recipientRole || "internal"}_configured`
+      : safeRecipientReference("email", input.recipient),
     template_version: input.templateVersion,
     idempotency_key: idempotencyKey,
     status: "pending",
     max_attempts: MAX_ATTEMPTS,
     provider: notificationMode(),
-    metadata: input.metadata,
+    metadata: { ...input.metadata, recipient_role: input.recipientRole || null },
   });
   return deliver(created, input, input.repo, input.provider);
 }
@@ -213,10 +236,23 @@ export async function retryLeadAlertNotification(notificationId: string) {
       return await repo.update(current.id, { status: "skipped", error_code: "consumer_ack_not_permitted", error_summary: "Consumer acknowledgment is not permitted for this lead.", failed_at: nowIso() });
     }
     const rendered = renderConsumerAcknowledgment(input);
-    return deliver(current, { recipient: input.payload.email, subject: rendered.subject, text: rendered.text, html: rendered.html, replyTo: process.env.SMTP_REPLY_TO || process.env.RESEND_FROM || process.env.FROM_EMAIL }, repo, provider);
+    return deliver(current, { channel: "email", recipient: input.payload.email, subject: rendered.subject, text: rendered.text, html: rendered.html, replyTo: process.env.SMTP_REPLY_TO || process.env.RESEND_FROM || process.env.FROM_EMAIL }, repo, provider);
+  }
+  if (current.channel === "sms") {
+    if (input.payload.is_test) {
+      return await repo.update(current.id, { status: "skipped", error_code: "test_lead_suppressed", error_summary: "QA test leads never trigger internal SMS.", failed_at: nowIso() });
+    }
+    const role = current.metadata.recipient_role === "copy" ? "copy" : "primary";
+    const recipient = configuredInternalSmsRecipients().find((candidate) => candidate.role === role)?.recipient;
+    if (!recipient) {
+      return await repo.update(current.id, { status: "skipped", error_code: "sms_recipient_missing", error_summary: "The approved internal SMS recipient is not configured.", failed_at: nowIso() });
+    }
+    const sms = renderLeadAlertSms(input);
+    const mediaUrls = shouldAttachLeadAlertMedia(false) ? [visualAssetUrl(sms.visualTemplate.backgroundAssetPath)] : undefined;
+    return deliver(current, { channel: "sms", recipient, text: sms.text, mediaUrls }, repo, provider);
   }
   const rendered = renderLeadAlert(input);
-  return deliver(current, { recipient: configuredTo(), subject: rendered.subject, text: rendered.text, html: rendered.html, bcc: configuredBcc(), replyTo: rendered.safeEmail || undefined }, repo, provider);
+  return deliver(current, { channel: "email", recipient: configuredTo(), subject: rendered.subject, text: rendered.text, html: rendered.html, bcc: configuredBcc(), replyTo: rendered.safeEmail || undefined }, repo, provider);
 }
 
 export async function retryDueLeadAlertNotifications(limit = 25) {
@@ -231,7 +267,7 @@ export async function retryDueLeadAlertNotifications(limit = 25) {
 
 export async function enqueueLeadNotifications(input: LeadAlertInput) {
   const delivery = assertProviderDeliveryAllowed();
-  if (!delivery.ok) return { internal: null, consumer: null, warning: delivery.error };
+  if (!delivery.ok) return { internal: null, sms: [], consumer: null, warning: delivery.error };
   const repo = notificationRepository();
   const provider = selectNotificationProvider();
   const rendered = renderLeadAlert(input);
@@ -240,6 +276,7 @@ export async function enqueueLeadNotifications(input: LeadAlertInput) {
       leadId: input.leadId,
       type: "lead_alert",
       templateVersion: LEAD_ALERT_TEMPLATE_VERSION,
+      channel: "email",
       recipient: configuredTo(),
       subject: rendered.subject,
       text: rendered.text,
@@ -250,6 +287,33 @@ export async function enqueueLeadNotifications(input: LeadAlertInput) {
       repo,
       provider,
     });
+    const smsRecipients = configuredInternalSmsRecipients();
+    const smsEnabled = shouldQueueAgentUrgencySms({
+      isTest: input.payload.is_test === true,
+      score: input.score.score,
+      hasApprovedSmsRecipient: smsRecipients.length > 0,
+      smsDeliveryEnabled: true,
+    });
+    const smsNotifications: LeadNotificationRecord[] = [];
+    if (smsEnabled) {
+      const sms = renderLeadAlertSms(input);
+      const mediaUrls = shouldAttachLeadAlertMedia(false) ? [visualAssetUrl(sms.visualTemplate.backgroundAssetPath)] : undefined;
+      for (const destination of smsRecipients) {
+        smsNotifications.push(await enqueueOne({
+          leadId: input.leadId,
+          type: "lead_alert",
+          templateVersion: LEAD_ALERT_SMS_TEMPLATE_VERSION,
+          channel: "sms",
+          recipientRole: destination.role,
+          recipient: destination.recipient,
+          text: sms.text,
+          mediaUrls,
+          metadata: { source_label: input.routing.sourceLabel, intent_label: input.routing.intentLabel, score: input.score.score, score_grade: input.score.grade, is_test: false, correlation_id: input.correlationId, visual_template: sms.visualTemplate.id },
+          repo,
+          provider,
+        }));
+      }
+    }
     let consumer: LeadNotificationRecord | null = null;
     if (input.payload.email && input.payload.consent_email && !input.payload.is_test) {
       const ack = renderConsumerAcknowledgment(input);
@@ -257,6 +321,7 @@ export async function enqueueLeadNotifications(input: LeadAlertInput) {
         leadId: input.leadId,
         type: "consumer_ack",
         templateVersion: CONSUMER_ACK_TEMPLATE_VERSION,
+        channel: "email",
         recipient: input.payload.email,
         subject: ack.subject,
         text: ack.text,
@@ -267,9 +332,9 @@ export async function enqueueLeadNotifications(input: LeadAlertInput) {
         provider,
       });
     }
-    return { internal, consumer, warning: null };
+    return { internal, sms: smsNotifications, consumer, warning: null };
   } catch (error) {
     console.error("Lead notification enqueue failed", { lead_id: input.leadId, error: error instanceof Error ? error.message : "unknown" });
-    return { internal: null, consumer: null, warning: "notification_enqueue_failed" };
+    return { internal: null, sms: [], consumer: null, warning: "notification_enqueue_failed" };
   }
 }
