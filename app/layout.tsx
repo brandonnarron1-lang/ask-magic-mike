@@ -24,6 +24,8 @@ export const metadata: Metadata = {
   },
   description:
     "Local home value guidance, seller strategy, and real estate answers from Mike Eatmon and Our Town Properties in Wilson, North Carolina.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: "Magic Mike", statusBarStyle: "black-translucent" },
   openGraph: {
     title: "Ask Magic Mike | Our Town Properties",
     description:

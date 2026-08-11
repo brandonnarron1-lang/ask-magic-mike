@@ -1,4 +1,4 @@
-export type LeadNotificationChannel = "email" | "sms";
+export type LeadNotificationChannel = "email" | "sms" | "push";
 export type LeadNotificationRecipientType = "agent" | "customer" | "internal";
 export type LeadNotificationType = "agent_assignment" | "lead_alert" | "consumer_ack";
 export type LeadNotificationStatus =

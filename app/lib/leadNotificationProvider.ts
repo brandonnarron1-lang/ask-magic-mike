@@ -4,6 +4,8 @@ import type {
   NotificationRequest,
   NotificationResult,
 } from "./leadNotificationTypes";
+import webpush from "web-push";
+import { NeonPushSubscriptionRepository } from "./persistence/neonPushSubscriptionRepository";
 
 export function notificationMode(): NotificationMode {
   const mode = (process.env.LEAD_NOTIFICATION_MODE || process.env.NOTIFICATION_PROVIDER_MODE || "disabled").toLowerCase();
@@ -17,6 +19,10 @@ export function agentNotificationsEnabled() {
 
 export function agentSmsNotificationsEnabled() {
   return (process.env.AGENT_SMS_NOTIFICATIONS_ENABLED || "false").toLowerCase() === "true";
+}
+
+export function agentPushNotificationsEnabled() {
+  return (process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED || "false").toLowerCase() === "true";
 }
 
 export function customerEmailEnabled() {
@@ -459,14 +465,86 @@ export class TwilioSmsNotificationProvider implements NotificationProvider {
   }
 }
 
+export class WebPushNotificationProvider implements NotificationProvider {
+  name = "web_push";
+
+  async send(request: NotificationRequest): Promise<NotificationResult> {
+    if (request.channel !== "push") {
+      return { ok: false, provider: this.name, retryable: false, errorCode: "unsupported_channel", errorSummary: "Web Push provider supports push notifications only." };
+    }
+    if (
+      notificationMode() !== "production" ||
+      !productionNotificationDeliveryEnabled() ||
+      !agentPushNotificationsEnabled()
+    ) {
+      return { ok: false, provider: this.name, retryable: false, errorCode: "push_notifications_disabled", errorSummary: "Production Web Push notifications are disabled by configuration." };
+    }
+
+    const publicKey = (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "").trim();
+    const privateKey = (process.env.VAPID_PRIVATE_KEY || "").trim();
+    const subject = (process.env.VAPID_SUBJECT || "mailto:mike@ourtownproperties.com").trim();
+    if (!publicKey || !privateKey || !/^mailto:[^\s@]+@[^\s@]+\.[^\s@]+$|^https:\/\//.test(subject)) {
+      return { ok: false, provider: this.name, retryable: false, errorCode: "missing_provider_config", errorSummary: "Web Push VAPID configuration is incomplete." };
+    }
+
+    let repository: NeonPushSubscriptionRepository;
+    try {
+      repository = new NeonPushSubscriptionRepository();
+    } catch {
+      return { ok: false, provider: this.name, retryable: false, errorCode: "missing_database_config", errorSummary: "Web Push subscription storage is unavailable." };
+    }
+    const subscription = await repository.findActiveById(request.recipient).catch(() => null);
+    if (!subscription) {
+      return { ok: false, provider: this.name, retryable: false, errorCode: "push_subscription_missing", errorSummary: "The approved phone notification subscription is inactive or missing." };
+    }
+
+    webpush.setVapidDetails(subject, publicKey, privateKey);
+    const payload = JSON.stringify({
+      title: safeSubject(request.subject || "Ask Magic Mike lead alert"),
+      body: request.text.slice(0, 180),
+      icon: "/images/ask-magic-mike/brand-pack-v2/mike-avatar-circle-256.png",
+      badge: "/images/ask-magic-mike/brand-pack-v2/mike-avatar-circle-128.png",
+      url: "/admin/leads",
+      tag: request.idempotencyKey.slice(0, 120),
+    });
+
+    try {
+      await webpush.sendNotification(
+        { endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth } },
+        payload,
+        { TTL: 300, urgency: "high", timeout: 10_000 },
+      );
+      await repository.markSent(subscription.id).catch(() => undefined);
+      return { ok: true, provider: this.name, providerMessageId: `webpush_${request.notificationId}` };
+    } catch (error) {
+      const status = typeof error === "object" && error && "statusCode" in error
+        ? Number((error as { statusCode?: unknown }).statusCode)
+        : 0;
+      const expired = status === 404 || status === 410;
+      const summary = expired ? "The phone notification subscription expired and was disabled." : `Web Push delivery failed${status ? ` with status ${status}` : ""}.`;
+      await repository.markFailure(subscription.id, summary, expired).catch(() => undefined);
+      return {
+        ok: false,
+        provider: this.name,
+        retryable: !expired && (status === 0 || status === 408 || status === 429 || status >= 500),
+        errorCode: expired ? "push_subscription_expired" : status ? `web_push_http_${status}` : "web_push_network_error",
+        errorSummary: summary,
+      };
+    }
+  }
+}
+
 class ProductionNotificationProvider implements NotificationProvider {
   name = "production_router";
   constructor(
     private readonly email = new ResendEmailNotificationProvider("production"),
     private readonly sms = new TwilioSmsNotificationProvider(),
+    private readonly push = new WebPushNotificationProvider(),
   ) {}
   send(request: NotificationRequest) {
-    return request.channel === "sms" ? this.sms.send(request) : this.email.send(request);
+    if (request.channel === "sms") return this.sms.send(request);
+    if (request.channel === "push") return this.push.send(request);
+    return this.email.send(request);
   }
 }
 
