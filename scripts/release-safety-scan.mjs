@@ -397,6 +397,7 @@ async function checkPackageScripts() {
     "preview:qa",
     "preview:e2e",
     "release:safety",
+    "amm:verify:isolation",
     "release:doctor",
     "release:gate",
     "release:report",
