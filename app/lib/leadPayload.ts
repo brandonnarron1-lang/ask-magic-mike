@@ -100,6 +100,22 @@ export function cleanOptional(value: unknown) {
 export function normalizeLeadPayload(input: Record<string, unknown>): LeadPayload {
   const attribution = cleanAttribution(input.attribution);
   const funnelType = normalizeFunnelType(input.funnel_type);
+  const qaMarkerText = [
+    input.name,
+    input.first_name,
+    input.last_name,
+    input.notes,
+    input.question,
+    input.intent,
+    input.address,
+    input.property_address,
+  ]
+    .map(clean)
+    .join(" ")
+    .toUpperCase();
+  const isInternalQa =
+    qaMarkerText.includes("INTERNAL QA") &&
+    qaMarkerText.includes("DO NOT CONTACT");
 
   return {
     funnel_type: funnelType,
@@ -127,7 +143,7 @@ export function normalizeLeadPayload(input: Record<string, unknown>): LeadPayloa
     widget_session_id: cleanOptional(input.widget_session_id),
     idempotency_key: cleanOptional(input.idempotency_key || input.request_fingerprint),
     honeypot: clean(input.website || input.honeypot),
-    is_test: input.is_test === true,
+    is_test: input.is_test === true || isInternalQa,
     consent: input.consent === true,
     consent_email: input.consent_email === true,
     consent_call: input.consent_call === true,

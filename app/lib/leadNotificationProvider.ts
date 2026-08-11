@@ -57,6 +57,16 @@ function validDomain(value: string) {
   return value.split(".").every((label) => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label));
 }
 
+function safeProviderErrorSummary(value: unknown) {
+  if (typeof value !== "string") return "Resend email request failed.";
+  const sanitized = value
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[redacted-email]")
+    .replace(/[\r\n]+/g, " ")
+    .trim()
+    .slice(0, 240);
+  return sanitized || "Resend email request failed.";
+}
+
 function configuredSandboxAllowedDomains():
   | { ok: true; domains: string[] }
   | { ok: false; errorCode: string; errorSummary: string } {
@@ -339,12 +349,15 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
     }
 
     if (!response.ok) {
+      const providerError = (await response.json().catch(() => ({}))) as {
+        message?: unknown;
+      };
       return {
         ok: false,
         provider: this.name,
         retryable: retryableResendStatus(response.status),
         errorCode: `resend_http_${response.status}`,
-        errorSummary: "Resend email request failed.",
+        errorSummary: safeProviderErrorSummary(providerError.message),
       };
     }
 

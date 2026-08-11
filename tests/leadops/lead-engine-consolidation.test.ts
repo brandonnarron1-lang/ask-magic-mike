@@ -4,7 +4,7 @@ import { scoreLead } from "../../app/lib/leadScoring";
 import { routeLead } from "../../app/lib/leadRouting";
 import { ResendEmailNotificationProvider } from "../../app/lib/leadNotificationProvider";
 import { safeAnalyticsProperties } from "../../app/lib/serverAnalytics";
-import type { LeadPayload } from "../../app/lib/leadPayload";
+import { normalizeLeadPayload, type LeadPayload } from "../../app/lib/leadPayload";
 
 const ENV_KEYS = [
   "EMAIL_ENABLED",
@@ -52,6 +52,15 @@ afterEach(() => {
 });
 
 describe("same-day lead engine contract", () => {
+  it("forces unmistakable internal QA markers into the test/suppression path", () => {
+    const normalized = normalizeLeadPayload({
+      funnel_type: "seller",
+      name: "INTERNAL QA — DO NOT CONTACT",
+      notes: "Production launch verification only",
+    });
+    expect(normalized.is_test).toBe(true);
+  });
+
   it("scores deterministically and explains the factors without protected data", () => {
     const score = scoreLead(payload);
     expect(score.version).toBe("deterministic_v1");
@@ -139,5 +148,32 @@ describe("same-day lead engine contract", () => {
     });
     expect(result).toMatchObject({ ok: true, providerMessageId: "msg_synthetic_123" });
     expect(body).toMatchObject({ to: "mike@ourtownproperties.com", bcc: ["audit@example.test"], reply_to: "qa@example.test" });
+  });
+
+  it("retains a sanitized provider rejection without leaking recipient addresses", async () => {
+    process.env.EMAIL_ENABLED = "true";
+    process.env.LEAD_NOTIFICATION_MODE = "production";
+    process.env.LEAD_NOTIFICATION_PRODUCTION_ENABLED = "true";
+    process.env.RESEND_API_KEY = "synthetic-resend-key";
+    process.env.AGENT_NOTIFICATION_FROM_EMAIL = "alerts@example.test";
+    const provider = new ResendEmailNotificationProvider("production", async () =>
+      new Response(
+        JSON.stringify({ message: "Testing is limited to private@example.test\nRetry later" }),
+        { status: 400 },
+      ),
+    );
+    const result = await provider.send({
+      notificationId: "notification-2",
+      channel: "email",
+      recipient: "mike@ourtownproperties.com",
+      subject: "[TEST] SELLER LEAD",
+      text: "INTERNAL QA — DO NOT CONTACT",
+      idempotencyKey: "lead_alert:lead-2:v1",
+    });
+    expect(result).toMatchObject({
+      ok: false,
+      errorCode: "resend_http_400",
+      errorSummary: "Testing is limited to [redacted-email] Retry later",
+    });
   });
 });
