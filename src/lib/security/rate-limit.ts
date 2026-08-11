@@ -67,6 +67,7 @@ export class InMemoryRateLimitStore implements RateLimitStore {
 let _redis: UpstashRedis | null = null;
 let _limiters: Map<string, UpstashRatelimit> | null = null;
 let _initAttempted = false;
+let _neonSql: ReturnType<typeof import("@neondatabase/serverless")["neon"]> | null = null;
 
 export function normalizeUpstashRestUrl(value: string | undefined) {
   const configuredUrl = value?.trim();
@@ -109,6 +110,54 @@ async function getUpstashLimiter(prefix: string): Promise<UpstashRatelimit | nul
   }
 
   return _limiters?.get(prefix) ?? null;
+}
+
+async function checkNeonRateLimit(
+  key: string,
+  limit: number,
+  windowMs: number,
+  prefix: LimitKey,
+): Promise<RateLimitResult | null> {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) return null;
+
+  try {
+    if (!_neonSql) {
+      const { neon } = await import("@neondatabase/serverless");
+      _neonSql = neon(databaseUrl);
+    }
+    const bucketKey = `${prefix}:${key}`;
+    const rows = (await _neonSql`
+      INSERT INTO public.rate_limit_buckets (bucket_key, request_count, window_started_at)
+      VALUES (${bucketKey}, 1, NOW())
+      ON CONFLICT (bucket_key) DO UPDATE SET
+        request_count = CASE
+          WHEN public.rate_limit_buckets.window_started_at <= NOW() - (${windowMs} * INTERVAL '1 millisecond')
+            THEN 1
+          ELSE public.rate_limit_buckets.request_count + 1
+        END,
+        window_started_at = CASE
+          WHEN public.rate_limit_buckets.window_started_at <= NOW() - (${windowMs} * INTERVAL '1 millisecond')
+            THEN NOW()
+          ELSE public.rate_limit_buckets.window_started_at
+        END
+      RETURNING
+        request_count,
+        EXTRACT(EPOCH FROM (window_started_at + (${windowMs} * INTERVAL '1 millisecond'))) * 1000 AS reset_at
+    `) as Array<{ request_count: number | string; reset_at: number | string }>;
+    const requestCount = Number(rows[0]?.request_count || 0);
+    const resetAt = Number(rows[0]?.reset_at || Date.now() + windowMs);
+    return {
+      allowed: requestCount <= limit,
+      remaining: Math.max(0, limit - requestCount),
+      resetAt,
+      durable: true,
+    };
+  } catch (error) {
+    console.error("[rate-limit] Failed to use Neon durable rate limiting:", error);
+    _neonSql = null;
+    return null;
+  }
 }
 
 // ─── In-memory singleton ────────────────────────────────────────────────────────
@@ -156,10 +205,19 @@ export async function checkRateLimit(
   if (process.env.UPSTASH_REDIS_REST_URL) {
     const upstash = await getUpstashLimiter(prefix);
     if (upstash) {
-      const { success, remaining, reset } = await upstash.limit(key);
-      return { allowed: success, remaining, resetAt: reset, durable: true };
+      try {
+        const { success, remaining, reset } = await upstash.limit(key);
+        return { allowed: success, remaining, resetAt: reset, durable: true };
+      } catch (error) {
+        console.error("[rate-limit] Upstash unavailable; trying Neon:", error);
+        _redis = null;
+        _limiters = null;
+      }
     }
   }
+
+  const neonResult = await checkNeonRateLimit(key, limit, windowMs, prefix);
+  if (neonResult) return neonResult;
 
   // Production without credentials: fail-open with critical log
   if (isProduction && !process.env.RATE_LIMIT_EMERGENCY_MEMORY) {
