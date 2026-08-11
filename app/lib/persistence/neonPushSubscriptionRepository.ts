@@ -60,20 +60,8 @@ export class NeonPushSubscriptionRepository {
           DO $amm_push$
           BEGIN
             PERFORM pg_advisory_xact_lock(2026081119);
-            IF NOT EXISTS (
-              SELECT 1 FROM pg_constraint
-              WHERE conname = 'lead_notifications_channel_check'
-                AND pg_get_constraintdef(oid) ILIKE '%push%'
-            ) THEN
-              ALTER TABLE public.lead_notifications
-                DROP CONSTRAINT IF EXISTS lead_notifications_channel_check;
-              ALTER TABLE public.lead_notifications
-                ADD CONSTRAINT lead_notifications_channel_check
-                CHECK (channel IN ('email', 'sms', 'push'));
-            END IF;
-
             CREATE TABLE IF NOT EXISTS public.staff_push_subscriptions (
-              id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
               recipient_role TEXT NOT NULL CHECK (recipient_role IN ('primary', 'copy')),
               endpoint TEXT NOT NULL UNIQUE,
               p256dh TEXT NOT NULL,
