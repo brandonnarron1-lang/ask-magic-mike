@@ -10,7 +10,14 @@ Updated 2026-08-11.
 - Our Town remains live WordPress/SEO surface; live phone evidence preserved.
 - Atomic Supabase lead capture, attribution, dedupe/fingerprint, routing, audit,
   AdminOps inbox/detail, and notification outbox exist in the canonical codebase.
-- Existing release-rehearsal work is preserved; no production mutation performed.
+- Existing release-rehearsal work is preserved.
+- Production is deployed on Neon Free PostgreSQL. Public capture, durable rate
+  limiting, attribution, scoring, routing, audit, consent, notification outbox,
+  and the protected Admin Lead Center are live.
+- The canonical `www` hostname is live and the apex redirects permanently.
+- Production sender DNS and a restricted Resend sending key are configured and
+  verified. The final public-form QA alert reached provider `delivered` state and
+  the approved audit mailbox contains the hidden copy.
 
 ## Same-day changes in this worktree
 
@@ -54,27 +61,20 @@ Updated 2026-08-11.
   UUID idempotent replay are proven on deployment
   `dpl_EwjyYzJmKCiq1LjzyiJX24zFS3dX`.
 
-## Not yet proven / owner action
+## Remaining external work
 
-- Production deploy and live route repair.
-- Neon production migration and data health (the existing Supabase production
-  database is not touched).
-- Secure recipient/BCC/sender env entry and authenticated provider delivery.
-- First QA lead through production and receipt at Mike/BCC.
 - Full per-user role-based Hub; current `/admin` MVP is shared Basic Auth.
 - WordPress form IDs/notifications/entries-before-email and page-specific publish.
 
 ## Database recovery decision
 
 The owner reported that the Supabase project has outstanding invoices and no
-funds are available to restore it. `FREE_DATABASE_RECOVERY_PLAN.md` selects
-Neon Free PostgreSQL as the no-cost replacement path; it is compatible with the
-canonical Postgres schema and Vercel Functions. The owner created the no-cost
-Neon project and preview branch, and preview migrations completed. No production
-database migration or historic-data copy has been performed.
+funds are available to restore it. `FREE_DATABASE_RECOVERY_PLAN.md` selected
+Neon Free PostgreSQL. Both preview and production Neon branches now have the
+canonical schema; production health and public durable capture pass. No Supabase
+historic-data mutation or copy was performed.
 
-The public production deployment is currently healthy for `/`, `/ask`, `/sell`, and
-`/value`; it remains the prior deployment and still returns 404 for the new `/buy`,
-`/rent`, `/open-house/*`, `/widget/v1`, `/robots.txt`, `/sitemap.xml`, and
-`/api/health/live` surfaces. The local candidate builds all of those routes plus
-`/privacy`, `/terms`, `/accessibility`, and `/contact`.
+The current production deployment serves all required public routes, robots,
+sitemap, health endpoints, widget, and legal pages. WordPress publishing remains
+separate because the authenticated form/page IDs and notification rules have not
+yet been inspected in the owner-controlled WordPress console.

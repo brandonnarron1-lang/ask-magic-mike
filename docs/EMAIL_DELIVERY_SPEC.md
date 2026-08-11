@@ -32,12 +32,13 @@ EMAIL_PROVIDER=resend
 EMAIL_ENABLED=false
 ```
 
-The existing approved provider exposed by the current Vercel project is Resend.
-The adapter accepts the existing `RESEND_FROM` sender setting and the canonical
-notification flags. SMTP variable names remain in `.env.example` for a future
-authenticated transport, but no SMTP password is requested or committed. Sender
-identity must be a verified domain; because `askmagicmike.com` has no observed mail
-authentication records, use the approved aligned Our Town sender.
+The existing provider exposed by the current Vercel project is Resend. The
+adapter accepts `RESEND_FROM` and the canonical notification flags. SMTP variable
+names remain in `.env.example` for a future authenticated transport, but no SMTP
+password is requested or committed. Production uses the dedicated aligned sender
+subdomain `notify.askmagicmike.com`; its DKIM, SPF, return-path MX, and DMARC
+records are managed in Vercel DNS. The API key is sending-only and stored as a
+Sensitive production environment value.
 
 ## Subject builder
 

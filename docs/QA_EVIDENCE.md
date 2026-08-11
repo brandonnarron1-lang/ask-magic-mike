@@ -1,8 +1,74 @@
 # QA Evidence
 
-Status: local candidate and isolated Vercel/Neon preview verified; no production
-QA lead submitted and no email sent.
+Status: production funnel, Neon persistence, routing, suppression, outbox, and
+provider delivery are verified. No synthetic record is represented as a live
+prospect.
 All timestamps are America/New_York unless noted.
+
+## Production cutover evidence — 2026-08-11
+
+- Canonical commit: `008bbc8` on
+  `rescue/amm-pre-consolidation-20260810-162915`.
+- Production deployment: `dpl_SDMv6Nz69aKZJFfmGB54h6MpY5yt`, Ready and
+  aliased to `https://www.askmagicmike.com`.
+- Public routes `/`, `/sell`, `/buy`, `/ask`, `/widget/v1`,
+  `/api/health/live`, and `/api/health/ready` return HTTP 200.
+- `https://askmagicmike.com/` returns HTTP 308 to the selected `www` canonical
+  hostname. `/admin/leads` returns HTTP 401 without authentication.
+- Production health reports PostgreSQL configured, Neon capture ready, email
+  enabled, notification mode `production`, and the canonical lead and outbox
+  tables available.
+- The production Neon branch received the complete migration chain. The former
+  Supabase project and any historic data were not changed.
+- Public-form QA lead `a1a7e899-9b2e-4ffe-968f-1e10728d60e8` was durably
+  stored and immediately quarantined as `is_test=true` after an early UI marker
+  omission was detected. It is score 83, communication/email/SMS suppressed,
+  has three consent rows, first/last-touch attribution, click-ID fields, audit
+  rows, and notification history.
+- A second public-form QA lead `8609b5e2-da81-49b0-8db9-c113af6894a3`
+  proved the server-side marker fix: it was born `is_test=true`, suppressed,
+  linked to the first QA master as a duplicate, and excluded from live KPIs.
+- The two provider attempts produced no outbound email and no provider message
+  ID. The latest outbox record truthfully reports `permanently_failed` with
+  `resend_http_400` / `API key is invalid`.
+- The invalid key was replaced securely with a sending-only production key.
+  `notify.askmagicmike.com` has matching DKIM, SPF, return-path MX, and DMARC
+  monitoring records in Vercel DNS. Google Public DNS returns each expected
+  value and Resend reports the domain `verified`.
+- Final local gates after the Neon enrichment correction: 130 test files / 2,473
+  tests pass; typecheck and ESLint pass; the 43-route manifest passes; 14/14
+  release-safety checks pass; production build passes.
+
+### Final controlled end-to-end QA — 2026-08-11 12:31 America/New_York
+
+- Submitted through the public production `/sell` form with the campaign
+  `production_launch_qa_verified_sender` and explicit `INTERNAL QA — DO NOT
+  CONTACT` markers.
+- Canonical lead ID: `59bba7cf-fe27-42c3-adb6-27b27727e5c7`.
+- The lead was born `is_test=true`, score 83, grade A, assigned to active primary
+  recipient Mike Eatmon, and communication/email/SMS suppressed. It is excluded
+  from production KPIs and is not a live prospect.
+- Request idempotency is stored. Replaying the same public API request returned
+  HTTP 200 with `X-AMM-Idempotent-Replay: 1`, the same lead ID, one lead row, one
+  internal-alert row, three consent rows, and no duplicate send.
+- First/last touch, source URL, referrer, UTMs, click-ID object, consent version,
+  consent timestamp/source, deterministic score version, five score factors,
+  routing reason, and audit records are present.
+- Internal alert status: `sent`; provider: Resend; message ID
+  `fdf79d0e-7cf8-44d1-a1e1-d39dafb675c1`; provider event: `delivered`.
+- Sender: `Ask Magic Mike <leads@notify.askmagicmike.com>`.
+- Exact subject:
+  `[TEST] SELLER LEAD | internal_qa | Seller | INTERNAL QA — DO NOT CONTACT — 999 Verification Way, Wilson, NC | INTERNAL QA — DO NOT CONTACT | Score 83`.
+- Provider record contains one direct recipient and one hidden BCC. Gmail search
+  in the approved audit mailbox found exactly one matching received message; the
+  private BCC value is intentionally not reproduced.
+- Authenticated Lead Center list/detail and notification routes returned HTTP
+  200; the final lead ID and sent notification are present. The same routes
+  return HTTP 401 without authentication.
+- Consumer acknowledgment and SMS were intentionally not sent for this QA lead.
+- Temporary full-access Resend DNS and one-hour Vercel maintenance credentials
+  were revoked after verification. Only the restricted production sending key
+  remains in Vercel Sensitive environment storage.
 
 ## Neon preview adapter verification — 2026-08-11
 
@@ -64,9 +130,11 @@ All timestamps are America/New_York unless noted.
 - `pnpm typecheck` — pass.
 - `pnpm vitest run tests/leadops/lead-alert-visual-templates.test.ts tests/leadops/lead-engine-consolidation.test.ts` — 2 files / 9 tests pass.
 - `pnpm lint` and `git diff --check` — pass.
-- No email, SMS/MMS, consumer acknowledgment, deployment, or database mutation was performed. Production remains fail-closed while the service-role credential is unavailable.
+- Templates keep transactional SMS text-only and render live lead facts as
+  accessible HTML/text over a non-PII decorative frame. The final production
+  email used the QA variant; SMS/MMS and consumer acknowledgment stayed off.
 
-## Baseline evidence
+## Historical baseline evidence (superseded by production proof above)
 
 - `pnpm routes:assert`: PASS, 42 active routes with 12 acknowledged root/src
   duplicates after the same-day additions.
@@ -74,7 +142,8 @@ All timestamps are America/New_York unless noted.
 - Live route triage: documented in `LIVE_TRIAGE_2026-08-10.md`; the current public
   deployment is reachable but missing `/buy`, `/widget/v1`, robots, sitemap, and
   the new health route.
-- Vercel: production deployment is Ready; no deployment mutation performed.
+- Vercel baseline was captured before production mutation and remains useful for
+  rollback comparison.
 
 ## Local candidate results
 
@@ -82,22 +151,21 @@ All timestamps are America/New_York unless noted.
 |---|---|---|
 | `pnpm typecheck` | PASS | strict TypeScript compiler, final local run |
 | `pnpm lint` | PASS | ESLint, final local run |
-| `pnpm test` | PASS | 128 files / 2,466 tests, final local run |
+| `pnpm test` | PASS | 130 files / 2,473 tests, final local run |
 | `pnpm build` | PASS | Next.js production build, final local run |
 | `pnpm routes:assert` | PASS | 42 active / 12 acknowledged duplicates |
-| `pnpm routes:verify` | PASS | production build plus 42 active / 12 acknowledged routes |
+| `pnpm routes:verify` | PASS | production build plus 43 active / 13 acknowledged routes |
 | `pnpm release:safety` | PASS | 14 checks / 0 failures |
 | `git diff --check` | PASS | no whitespace errors |
-| `pnpm amm:health:lead-pipe` against live | EXPECTED FAIL | 200 for existing routes; 404 for new routes |
+| production route/health matrix | PASS | required public routes and both health endpoints return 200 |
 | banned product-copy scan | PASS | no forbidden product-copy matches in `app`, `public`, or `docs` |
 | `pnpm amm:verify:funnel` against live | PASS | 15/15 read-only legacy conversion checks |
 | `pnpm amm:public:cta-check` | PASS | 16/16 source/route/doc checks |
-| `pnpm amm:smoke:prod` against live | EXPECTED FAIL | old deployment lacks canonical/OG, health, robots, sitemap, and one protected admin route |
-| `pnpm amm:verify:health` against live | EXPECTED FAIL | `/api/health/live` and `/api/health/ready` are 404 until candidate deploy |
+| production canonical/admin boundary | PASS | apex 308 to `www`; unauthenticated Admin returns 401 |
 | Playwright local `/buy` + open-house mobile smoke | PASS | 390×844 snapshots; accessible labels/consent/footer; 0 browser errors after local-origin fix |
 | `tests/leadops/lead-engine-consolidation.test.ts` | PASS | scoring, subject, BCC, privacy filters |
-| migration application | NOT RUN | production approval gate |
-| public QA lead/email/BCC | NOT RUN | explicit approval gate |
+| migration application | PASS | production Neon branch ready; Supabase untouched |
+| public QA lead/email/BCC | PASS | test lead stored; one alert; provider delivered; hidden copy confirmed |
 
 The test suite deliberately does not call external providers. The Resend contract
 test uses a synthetic transport and verifies that BCC is passed without logging or
@@ -119,9 +187,9 @@ Also run the source-level banned-copy/secret scans, widget origin tests, API
 contract/idempotency tests, notification console/retry tests, accessibility smoke,
 and local production route matrix. Record exit codes and timestamps here.
 
-## Production QA gate (not executed)
+## Production QA gate (executed)
 
-Requires explicit approval before: production deployment, live migration, public
-form submission, internal email, consumer acknowledgment, or WP publication. The
-QA lead must be `is_test=true` and contain `INTERNAL QA — DO NOT CONTACT`, then be
-verified end-to-end and suppressed/excluded from KPIs.
+The approved QA lead was submitted through the public form, stored as
+`is_test=true`, delivered to the internal recipient plus hidden audit BCC, and
+replayed idempotently. Consumer acknowledgment, SMS, and WordPress publication
+were not executed.
