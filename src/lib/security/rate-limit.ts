@@ -68,10 +68,18 @@ let _redis: UpstashRedis | null = null;
 let _limiters: Map<string, UpstashRatelimit> | null = null;
 let _initAttempted = false;
 
+export function normalizeUpstashRestUrl(value: string | undefined) {
+  const configuredUrl = value?.trim();
+  if (!configuredUrl) return undefined;
+  return /^https?:\/\//i.test(configuredUrl)
+    ? configuredUrl
+    : `https://${configuredUrl}`;
+}
+
 async function getUpstashLimiter(prefix: string): Promise<UpstashRatelimit | null> {
   if (_initAttempted && !_redis) return null;
 
-  const url   = process.env.UPSTASH_REDIS_REST_URL;
+  const url = normalizeUpstashRestUrl(process.env.UPSTASH_REDIS_REST_URL);
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) return null;
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   InMemoryRateLimitStore,
   checkRateLimit,
+  normalizeUpstashRestUrl,
   rateLimitKey,
 } from "@/lib/security/rate-limit";
 
@@ -56,6 +57,20 @@ describe("InMemoryRateLimitStore", () => {
     const store = new InMemoryRateLimitStore();
     const result = store.check("key-h", 5, 60_000);
     expect(result.durable).toBe(false);
+  });
+});
+
+describe("normalizeUpstashRestUrl", () => {
+  it("adds HTTPS to legacy host-only endpoints", () => {
+    expect(normalizeUpstashRestUrl("example.upstash.io")).toBe(
+      "https://example.upstash.io",
+    );
+  });
+
+  it("preserves an existing HTTPS endpoint", () => {
+    expect(normalizeUpstashRestUrl("https://example.upstash.io")).toBe(
+      "https://example.upstash.io",
+    );
   });
 });
 
