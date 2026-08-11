@@ -1,5 +1,29 @@
 # Internal Lead SMS/MMS Delivery Spec
 
+## Zero-cost phone-alert path
+
+Carrier SMS is not permanently free: every legitimate U.S. provider ultimately
+incurs carrier, sender, and compliance costs. The production-safe no-cost path
+is encrypted Web Push using the same lead outbox. It is not mislabeled as SMS.
+
+Web Push activation requires:
+
+- `AGENT_PUSH_NOTIFICATIONS_ENABLED=true`
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
+- `VAPID_PRIVATE_KEY` (Sensitive/server-only)
+- `VAPID_SUBJECT=mailto:mike@ourtownproperties.com`
+- one device registration for the `primary` role and one for the `copy` role at
+  `/admin/notifications/phone`
+
+Each live lead creates independent push delivery records per registered device,
+with provider status, attempts, retries, and deterministic idempotency. QA leads
+are suppressed. Lock-screen content contains urgency, intent, broad area, and
+score only; contact details and free text remain behind Lead Center auth.
+
+On iOS/iPadOS, Web Push requires adding the site to the Home Screen before the
+user grants notification permission. Android and supported desktop browsers can
+subscribe directly. Removing a device deactivates its server-side capability.
+
 ## Scope
 
 This is an internal operational alert, not a consumer marketing message. The
@@ -60,3 +84,6 @@ never reads a phone number from the database.
 
 Set `AGENT_SMS_NOTIFICATIONS_ENABLED=false` or `ENABLE_SMS=false`. Email and
 durable lead capture continue independently. Do not delete notification rows.
+For Web Push, set `AGENT_PUSH_NOTIFICATIONS_ENABLED=false`; registered devices
+may remain for a reversible rollback or be deactivated from the protected setup
+screen.

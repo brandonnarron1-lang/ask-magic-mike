@@ -10,6 +10,8 @@
     "/admin/leads",
     "/admin/leads/[id]",
     "/admin/notifications",
+    "/admin/notifications/phone",
+    "/admin/api/push/subscriptions",
     "/admin/reporting",
     "/api/admin/health",
     "/api/admin/notifications/retry",
@@ -32,6 +34,7 @@
     "/favicon.ico",
     "/home-value",
     "/integrations/ourtownproperties",
+    "/manifest.webmanifest",
     "/open-house/[propertyOrId]",
     "/privacy",
     "/robots.txt",
@@ -57,7 +60,7 @@
     ],
     "admin": [
       "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation",
-      "/admin/action-queue", "/admin/notifications", "/admin/reporting"
+      "/admin/action-queue", "/admin/notifications", "/admin/notifications/phone", "/admin/reporting"
     ],
     "api": [
       "/api/leads", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/webhooks/sms/status", "/api/widget/events",

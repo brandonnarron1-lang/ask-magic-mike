@@ -107,7 +107,7 @@ export class LeadNotificationService {
 
   async createAssignmentNotification(
     context: AssignmentNotificationContext,
-    channel: LeadNotificationChannel = "email",
+    channel: Exclude<LeadNotificationChannel, "push"> = "email",
   ): Promise<LeadNotificationServiceResult> {
     if (context.action === "reassigned" && context.lead.assigned_agent_id !== context.agent.id) {
       return { ok: false, statusCode: 409, error: "assignment_agent_mismatch" };
@@ -327,7 +327,7 @@ export class LeadNotificationService {
 
 export async function createAssignmentNotification(
   context: AssignmentNotificationContext,
-  channel: LeadNotificationChannel = "email",
+  channel: Exclude<LeadNotificationChannel, "push"> = "email",
 ) {
   return new LeadNotificationService().createAssignmentNotification(context, channel);
 }

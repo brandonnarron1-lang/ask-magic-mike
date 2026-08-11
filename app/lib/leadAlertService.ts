@@ -1,6 +1,6 @@
 import { assertProviderDeliveryAllowed } from "../../src/lib/preview-security";
 import { neon } from "@neondatabase/serverless";
-import { agentSmsNotificationsEnabled, normalizeUsSmsRecipient, notificationMode, safeRecipientReference, selectNotificationProvider } from "./leadNotificationProvider";
+import { agentPushNotificationsEnabled, agentSmsNotificationsEnabled, normalizeUsSmsRecipient, notificationMode, safeRecipientReference, selectNotificationProvider } from "./leadNotificationProvider";
 import { SupabaseLeadNotificationRepository } from "./persistence/supabase/leadNotificationRepository";
 import { NeonLeadNotificationRepository } from "./persistence/neonLeadNotificationRepository";
 import type { LeadNotificationRecord, LeadNotificationRepository, NotificationProvider } from "./leadNotificationTypes";
@@ -9,6 +9,7 @@ import { routeLead, type LeadRoutingDecision } from "./leadRouting";
 import { scoreLead, type LeadScore } from "./leadScoring";
 import { CONSUMER_ACK_TEMPLATE_VERSION, LEAD_ALERT_SMS_TEMPLATE_VERSION, LEAD_ALERT_TEMPLATE_VERSION, renderConsumerAcknowledgment, renderLeadAlert, renderLeadAlertSms } from "./leadAlertTemplates";
 import { shouldAttachLeadAlertMedia, shouldQueueAgentUrgencySms, visualAssetUrl } from "./leadAlertVisualTemplates";
+import { NeonPushSubscriptionRepository, type StaffPushRecipientRole } from "./persistence/neonPushSubscriptionRepository";
 
 const MAX_ATTEMPTS = 3;
 const RETRY_DELAYS_MS = [60_000, 5 * 60_000, 30 * 60_000];
@@ -25,6 +26,7 @@ export type LeadAlertInput = {
 };
 
 function nowIso() { return new Date().toISOString(); }
+function pushPriority(score: number) { return score >= 80 ? "[HOT]" : score >= 60 ? "[ACTIVE]" : "[NEW]"; }
 function nextAttemptAt(attempt: number) { return new Date(Date.now() + RETRY_DELAYS_MS[Math.min(Math.max(attempt - 1, 0), RETRY_DELAYS_MS.length - 1)]).toISOString(); }
 function validEmail(value: string | undefined | null): value is string {
   return Boolean(value && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(value.trim()) && !/[\r\n]/.test(value));
@@ -53,7 +55,7 @@ function safeError(value: string) { return value.replace(/[A-Z0-9._%+-]+@[A-Z0-9
 
 async function deliver(
   notification: LeadNotificationRecord,
-  request: { channel: "email" | "sms"; recipient: string; subject?: string; text: string; html?: string; bcc?: string[]; replyTo?: string; mediaUrls?: string[] },
+  request: { channel: "email" | "sms" | "push"; recipient: string; subject?: string; text: string; html?: string; bcc?: string[]; replyTo?: string; mediaUrls?: string[] },
   repo: LeadNotificationRepository,
   provider: NotificationProvider,
 ) {
@@ -64,6 +66,9 @@ async function deliver(
   }
   if (request.channel === "sms" && !agentSmsNotificationsEnabled()) {
     return await repo.update(current.id, { status: "skipped", provider: provider.name, error_code: "agent_sms_notifications_disabled", error_summary: "Agent SMS notifications are disabled by configuration.", failed_at: nowIso() }) || current;
+  }
+  if (request.channel === "push" && !agentPushNotificationsEnabled()) {
+    return await repo.update(current.id, { status: "skipped", provider: provider.name, error_code: "agent_push_notifications_disabled", error_summary: "Staff phone push notifications are disabled by configuration.", failed_at: nowIso() }) || current;
   }
   const nextAttempt = current.attempt_count + 1;
   if (nextAttempt > current.max_attempts) {
@@ -82,8 +87,9 @@ async function enqueueOne(input: {
   type: "lead_alert" | "consumer_ack";
   templateVersion: string;
   recipient: string;
-  channel: "email" | "sms";
-  recipientRole?: "primary" | "copy";
+  channel: "email" | "sms" | "push";
+  recipientRole?: StaffPushRecipientRole;
+  recipientKey?: string;
   subject?: string;
   text: string;
   html?: string;
@@ -94,8 +100,8 @@ async function enqueueOne(input: {
   repo: LeadNotificationRepository;
   provider: NotificationProvider;
 }) {
-  const idempotencyKey = input.channel === "sms"
-    ? `${input.type}:${input.leadId}:${input.templateVersion}:sms:${input.recipientRole || "internal"}`
+  const idempotencyKey = input.channel !== "email"
+    ? `${input.type}:${input.leadId}:${input.templateVersion}:${input.channel}:${input.recipientRole || "internal"}:${input.recipientKey || "default"}`
     : `${input.type}:${input.leadId}:${input.templateVersion}`;
   const existing = await input.repo.findByIdempotencyKey(idempotencyKey);
   if (existing) return existing;
@@ -105,15 +111,15 @@ async function enqueueOne(input: {
     notification_type: input.type,
     channel: input.channel,
     recipient_type: input.type === "consumer_ack" ? "customer" : "internal",
-    recipient_reference: input.channel === "sms"
-      ? `sms_${input.recipientRole || "internal"}_configured`
+    recipient_reference: input.channel === "sms" || input.channel === "push"
+      ? `${input.channel}_${input.recipientRole || "internal"}_configured`
       : safeRecipientReference("email", input.recipient),
     template_version: input.templateVersion,
     idempotency_key: idempotencyKey,
     status: "pending",
     max_attempts: MAX_ATTEMPTS,
     provider: notificationMode(),
-    metadata: { ...input.metadata, recipient_role: input.recipientRole || null },
+    metadata: { ...input.metadata, recipient_role: input.recipientRole || null, recipient_key: input.recipientKey || null },
   });
   return deliver(created, input, input.repo, input.provider);
 }
@@ -251,6 +257,17 @@ export async function retryLeadAlertNotification(notificationId: string) {
     const mediaUrls = shouldAttachLeadAlertMedia(false) ? [visualAssetUrl(sms.visualTemplate.backgroundAssetPath)] : undefined;
     return deliver(current, { channel: "sms", recipient, text: sms.text, mediaUrls }, repo, provider);
   }
+  if (current.channel === "push") {
+    if (input.payload.is_test) {
+      return await repo.update(current.id, { status: "skipped", error_code: "test_lead_suppressed", error_summary: "QA test leads never trigger staff phone push notifications.", failed_at: nowIso() });
+    }
+    const subscriptionId = typeof current.metadata.subscription_id === "string" ? current.metadata.subscription_id : null;
+    if (!subscriptionId) {
+      return await repo.update(current.id, { status: "skipped", error_code: "push_subscription_missing", error_summary: "The approved phone notification subscription is missing.", failed_at: nowIso() });
+    }
+    const location = input.payload.city || input.payload.target_geography || "Wilson area";
+    return deliver(current, { channel: "push", recipient: subscriptionId, subject: `${pushPriority(input.score.score)} ${input.routing.intentLabel}`, text: `${location} • Score ${input.score.score} • Open the secure Lead Center.` }, repo, provider);
+  }
   const rendered = renderLeadAlert(input);
   return deliver(current, { channel: "email", recipient: configuredTo(), subject: rendered.subject, text: rendered.text, html: rendered.html, bcc: configuredBcc(), replyTo: rendered.safeEmail || undefined }, repo, provider);
 }
@@ -267,7 +284,7 @@ export async function retryDueLeadAlertNotifications(limit = 25) {
 
 export async function enqueueLeadNotifications(input: LeadAlertInput) {
   const delivery = assertProviderDeliveryAllowed();
-  if (!delivery.ok) return { internal: null, sms: [], consumer: null, warning: delivery.error };
+  if (!delivery.ok) return { internal: null, sms: [], push: [], consumer: null, warning: delivery.error };
   const repo = notificationRepository();
   const provider = selectNotificationProvider();
   const rendered = renderLeadAlert(input);
@@ -314,6 +331,27 @@ export async function enqueueLeadNotifications(input: LeadAlertInput) {
         }));
       }
     }
+    const pushNotifications: LeadNotificationRecord[] = [];
+    if (!input.payload.is_test && agentPushNotificationsEnabled() && process.env.DATABASE_URL) {
+      const subscriptions = await new NeonPushSubscriptionRepository().listActive().catch(() => []);
+      const location = input.payload.city || input.payload.target_geography || "Wilson area";
+      for (const subscription of subscriptions) {
+        pushNotifications.push(await enqueueOne({
+          leadId: input.leadId,
+          type: "lead_alert",
+          templateVersion: `${LEAD_ALERT_SMS_TEMPLATE_VERSION}-push-1`,
+          channel: "push",
+          recipientRole: subscription.recipientRole,
+          recipientKey: subscription.id,
+          recipient: subscription.id,
+          subject: `${pushPriority(input.score.score)} ${input.routing.intentLabel}`,
+          text: `${location} • Score ${input.score.score} • Open the secure Lead Center.`,
+          metadata: { source_label: input.routing.sourceLabel, intent_label: input.routing.intentLabel, score: input.score.score, score_grade: input.score.grade, is_test: false, correlation_id: input.correlationId, subscription_id: subscription.id },
+          repo,
+          provider,
+        }));
+      }
+    }
     let consumer: LeadNotificationRecord | null = null;
     if (input.payload.email && input.payload.consent_email && !input.payload.is_test) {
       const ack = renderConsumerAcknowledgment(input);
@@ -332,9 +370,9 @@ export async function enqueueLeadNotifications(input: LeadAlertInput) {
         provider,
       });
     }
-    return { internal, sms: smsNotifications, consumer, warning: null };
+    return { internal, sms: smsNotifications, push: pushNotifications, consumer, warning: null };
   } catch (error) {
     console.error("Lead notification enqueue failed", { lead_id: input.leadId, error: error instanceof Error ? error.message : "unknown" });
-    return { internal: null, sms: [], consumer: null, warning: "notification_enqueue_failed" };
+    return { internal: null, sms: [], push: [], consumer: null, warning: "notification_enqueue_failed" };
   }
 }

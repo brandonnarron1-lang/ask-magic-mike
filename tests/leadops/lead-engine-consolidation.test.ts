@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderConsumerAcknowledgment, renderLeadAlert, renderLeadAlertSms } from "../../app/lib/leadAlertTemplates";
 import { scoreLead } from "../../app/lib/leadScoring";
 import { routeLead } from "../../app/lib/leadRouting";
-import { ResendEmailNotificationProvider, TwilioSmsNotificationProvider } from "../../app/lib/leadNotificationProvider";
+import { agentPushNotificationsEnabled, ResendEmailNotificationProvider, TwilioSmsNotificationProvider } from "../../app/lib/leadNotificationProvider";
+import { normalizeLeadNotificationRow } from "../../app/lib/persistence/supabase/leadNotificationRepository";
 import { safeAnalyticsProperties } from "../../app/lib/serverAnalytics";
 import { normalizeLeadPayload, type LeadPayload } from "../../app/lib/leadPayload";
 
@@ -13,6 +14,7 @@ const ENV_KEYS = [
   "RESEND_API_KEY",
   "AGENT_NOTIFICATION_FROM_EMAIL",
   "AGENT_SMS_NOTIFICATIONS_ENABLED",
+  "AGENT_PUSH_NOTIFICATIONS_ENABLED",
   "ENABLE_SMS",
   "SMS_PROVIDER",
   "TWILIO_ACCOUNT_SID",
@@ -145,6 +147,23 @@ describe("same-day lead engine contract", () => {
     expect(rendered.text).toContain("/admin/leads/11111111-1111-4111-8111-111111111111");
     expect(rendered.text).not.toContain("Private Person");
     expect(rendered.text).not.toContain("qa@example.test");
+  });
+
+  it("keeps free phone push delivery explicitly gated and preserves the push outbox channel", () => {
+    process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED = "true";
+    expect(agentPushNotificationsEnabled()).toBe(true);
+    const row = normalizeLeadNotificationRow({
+      id: "notification-push-1",
+      lead_id: "lead-1",
+      notification_type: "lead_alert",
+      channel: "push",
+      recipient_type: "internal",
+      template_version: "push-v1",
+      idempotency_key: "lead:push:1",
+      status: "pending",
+    });
+    expect(row.channel).toBe("push");
+    expect(row.recipient_type).toBe("internal");
   });
 
   it("removes sensitive keys from analytics properties", () => {
