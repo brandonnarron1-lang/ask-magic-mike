@@ -63,6 +63,7 @@ export type NotificationRequest = {
   subject?: string;
   text: string;
   html?: string;
+  mediaUrls?: string[];
   bcc?: string[];
   replyTo?: string;
   idempotencyKey: string;

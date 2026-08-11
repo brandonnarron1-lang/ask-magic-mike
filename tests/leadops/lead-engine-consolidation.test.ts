@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { renderConsumerAcknowledgment, renderLeadAlert } from "../../app/lib/leadAlertTemplates";
+import { renderConsumerAcknowledgment, renderLeadAlert, renderLeadAlertSms } from "../../app/lib/leadAlertTemplates";
 import { scoreLead } from "../../app/lib/leadScoring";
 import { routeLead } from "../../app/lib/leadRouting";
-import { ResendEmailNotificationProvider } from "../../app/lib/leadNotificationProvider";
+import { ResendEmailNotificationProvider, TwilioSmsNotificationProvider } from "../../app/lib/leadNotificationProvider";
 import { safeAnalyticsProperties } from "../../app/lib/serverAnalytics";
 import { normalizeLeadPayload, type LeadPayload } from "../../app/lib/leadPayload";
 
@@ -12,6 +12,13 @@ const ENV_KEYS = [
   "LEAD_NOTIFICATION_PRODUCTION_ENABLED",
   "RESEND_API_KEY",
   "AGENT_NOTIFICATION_FROM_EMAIL",
+  "AGENT_SMS_NOTIFICATIONS_ENABLED",
+  "ENABLE_SMS",
+  "SMS_PROVIDER",
+  "TWILIO_ACCOUNT_SID",
+  "TWILIO_AUTH_TOKEN",
+  "TWILIO_FROM_PHONE",
+  "NEXT_PUBLIC_SITE_URL",
 ] as const;
 const original = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
 
@@ -121,6 +128,25 @@ describe("same-day lead engine contract", () => {
     expect(rendered.text).not.toContain("within 5 minutes");
   });
 
+  it("renders a minimal internal SMS with urgency, source, score, and a secure lead link", () => {
+    const livePayload = { ...payload, is_test: false, city: "Wilson", name: "Private Person" };
+    const score = scoreLead(livePayload);
+    const rendered = renderLeadAlertSms({
+      leadId: "11111111-1111-4111-8111-111111111111",
+      sessionId: "22222222-2222-4222-8222-222222222222",
+      correlationId: "33333333-3333-4333-8333-333333333333",
+      payload: livePayload,
+      score,
+      routing: routeLead(livePayload, score.score),
+      submittedAt: "2026-08-11T17:00:00.000Z",
+    });
+    expect(rendered.text).toContain("[HOT]");
+    expect(rendered.text).toContain("Score");
+    expect(rendered.text).toContain("/admin/leads/11111111-1111-4111-8111-111111111111");
+    expect(rendered.text).not.toContain("Private Person");
+    expect(rendered.text).not.toContain("qa@example.test");
+  });
+
   it("removes sensitive keys from analytics properties", () => {
     expect(safeAnalyticsProperties({ email: "qa@example.test", phone: "2525550100", address: "1 Synthetic QA Road", score: 92, funnel_name: "seller" })).toEqual({ score: 92 });
   });
@@ -175,5 +201,35 @@ describe("same-day lead engine contract", () => {
       errorCode: "resend_http_400",
       errorSummary: "Testing is limited to [redacted-email] Retry later",
     });
+  });
+
+  it("sends a Twilio MMS request with status callback and same-origin urgency art", async () => {
+    process.env.LEAD_NOTIFICATION_MODE = "production";
+    process.env.LEAD_NOTIFICATION_PRODUCTION_ENABLED = "true";
+    process.env.AGENT_SMS_NOTIFICATIONS_ENABLED = "true";
+    process.env.ENABLE_SMS = "true";
+    process.env.SMS_PROVIDER = "twilio";
+    process.env.TWILIO_ACCOUNT_SID = `AC${"a".repeat(32)}`;
+    process.env.TWILIO_AUTH_TOKEN = "synthetic-auth-token";
+    process.env.TWILIO_FROM_PHONE = "2525550100";
+    process.env.NEXT_PUBLIC_SITE_URL = "https://www.askmagicmike.com";
+    let submitted = "";
+    const provider = new TwilioSmsNotificationProvider(async (_input, init) => {
+      submitted = String(init?.body || "");
+      return new Response(JSON.stringify({ sid: `SM${"b".repeat(32)}`, status: "queued" }), { status: 201 });
+    });
+    const result = await provider.send({
+      notificationId: "notification-sms-1",
+      channel: "sms",
+      recipient: "2525550101",
+      text: "[HOT] SELLER LEAD | Wilson | Score 90",
+      mediaUrls: ["https://www.askmagicmike.com/images/ask-magic-mike/notifications/lead-alert-hot-v2.png", "https://evil.example/tracker.png"],
+      idempotencyKey: "lead_alert:lead-1:sms:primary",
+    });
+    const form = new URLSearchParams(submitted);
+    expect(result).toMatchObject({ ok: true, provider: "twilio", providerMessageId: `SM${"b".repeat(32)}` });
+    expect(form.get("To")).toBe("+12525550101");
+    expect(form.get("StatusCallback")).toBe("https://www.askmagicmike.com/api/webhooks/sms/status");
+    expect(form.getAll("MediaUrl")).toEqual(["https://www.askmagicmike.com/images/ask-magic-mike/notifications/lead-alert-hot-v2.png"]);
   });
 });

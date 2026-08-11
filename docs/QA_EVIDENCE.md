@@ -5,6 +5,17 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Dual internal SMS/MMS upgrade — 2026-08-11
+
+- Focused Vitest covers urgency selection, QA suppression, minimal SMS content,
+  Twilio form encoding, the same-origin MMS allowlist, status callback URL, and
+  provider message ID parsing.
+- TypeScript strict checking passed after implementation.
+- No live SMS was sent. Production had no Twilio credentials at audit time, so
+  carrier delivery remains an explicit activation blocker.
+- Three AI-generated urgency assets were normalized to 1120x350 PNG and contain
+  no consumer PII or synthetic lead facts.
+
 ## Production cutover evidence — 2026-08-11
 
 - Canonical commit: `008bbc8` on

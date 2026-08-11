@@ -7,12 +7,28 @@ import {
   visualAssetUrl,
 } from "./leadAlertVisualTemplates";
 
-export const LEAD_ALERT_TEMPLATE_VERSION = "lead_alert_email_v1";
+export const LEAD_ALERT_TEMPLATE_VERSION = "lead_alert_email_v2";
+export const LEAD_ALERT_SMS_TEMPLATE_VERSION = "lead_alert_sms_v2";
 export const CONSUMER_ACK_TEMPLATE_VERSION = "consumer_ack_email_v1";
 
 function safe(value: unknown, fallback = "Not provided") {
   const text = typeof value === "string" ? value.trim() : "";
   return text ? text.replace(/[\r\n]+/g, " ").slice(0, 500) : fallback;
+}
+
+export function renderLeadAlertSms(input: Parameters<typeof renderLeadAlert>[0]) {
+  const rendered = renderLeadAlert(input);
+  const tag = priority(input.score.score, input.payload.is_test === true);
+  const label = leadLabel(input.payload);
+  const source = safe(input.routing.sourceLabel, "Unknown source");
+  const intent = safe(input.routing.intentLabel, "Unknown intent");
+  const location = safe(input.payload.city || input.payload.target_geography, "Eastern NC");
+  const leadCenterBase = (process.env.ADMIN_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://www.askmagicmike.com").replace(/\/$/, "");
+  const leadCenterUrl = `${leadCenterBase}/admin/leads/${encodeURIComponent(input.leadId)}`;
+  return {
+    text: `${tag} ${label} | ${source} | ${intent} | ${location} | Score ${input.score.score}. Open secure Lead Center: ${leadCenterUrl}`.slice(0, 480),
+    visualTemplate: rendered.visualTemplate,
+  };
 }
 
 function html(value: unknown, fallback = "Not provided") {

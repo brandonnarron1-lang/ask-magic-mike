@@ -19,6 +19,9 @@ export type LeadAlertVisualTemplate = {
 };
 
 const FRAME = "/images/ask-magic-mike/notifications/lead-alert-frame-v1.png";
+const HOT_FRAME = "/images/ask-magic-mike/notifications/lead-alert-hot-v2.png";
+const ACTIVE_FRAME = "/images/ask-magic-mike/notifications/lead-alert-active-v2.png";
+const NEW_FRAME = "/images/ask-magic-mike/notifications/lead-alert-new-v2.png";
 
 export function selectLeadAlertVisualTemplate(
   payload: Pick<LeadPayload, "is_test">,
@@ -38,33 +41,33 @@ export function selectLeadAlertVisualTemplate(
   if (score.score >= 80) {
     return {
       id: "hot_priority",
-      version: "lead_visual_hot_v1",
+      version: "lead_visual_hot_v2",
       label: "Priority lead",
       eyebrow: "PRIORITY LEAD — REVIEW NOW",
       accent: "#dc2626",
-      backgroundAssetPath: FRAME,
+      backgroundAssetPath: HOT_FRAME,
       smsEnabled: true,
     };
   }
   if (score.score >= 60) {
     return {
       id: "active_assignment",
-      version: "lead_visual_active_v1",
+      version: "lead_visual_active_v2",
       label: "Active lead",
       eyebrow: "LEAD ASSIGNMENT — REVIEW TODAY",
       accent: "#d4a72c",
-      backgroundAssetPath: FRAME,
+      backgroundAssetPath: ACTIVE_FRAME,
       smsEnabled: true,
     };
   }
   return {
     id: "new_lead",
-    version: "lead_visual_new_v1",
+    version: "lead_visual_new_v2",
     label: "New lead",
     eyebrow: "NEW LEAD — REVIEW WHEN AVAILABLE",
     accent: "#b68b22",
-    backgroundAssetPath: FRAME,
-    smsEnabled: false,
+    backgroundAssetPath: NEW_FRAME,
+    smsEnabled: true,
   };
 }
 
@@ -77,13 +80,15 @@ export function shouldRenderLeadAlertVisual() {
   return (process.env.LEAD_ALERT_VISUALS_ENABLED || "true").toLowerCase() === "true";
 }
 
-/** SMS intentionally stays text-only: it is faster, more accessible, avoids
- * carrier MMS conversion, and never embeds lead PII in an image. */
 export function shouldQueueAgentUrgencySms(input: {
   isTest: boolean;
   score: number;
   hasApprovedSmsRecipient: boolean;
   smsDeliveryEnabled: boolean;
 }) {
-  return !input.isTest && input.score >= 60 && input.hasApprovedSmsRecipient && input.smsDeliveryEnabled;
+  return !input.isTest && input.score >= 0 && input.hasApprovedSmsRecipient && input.smsDeliveryEnabled;
+}
+
+export function shouldAttachLeadAlertMedia(isTest: boolean) {
+  return !isTest && (process.env.LEAD_SMS_MEDIA_ENABLED || "false").toLowerCase() === "true";
 }

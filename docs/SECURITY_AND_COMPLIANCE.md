@@ -13,6 +13,10 @@
   policy for legal review.
 - Email/SMS suppression, unsubscribe handling, test-lead exclusion, idempotency,
   provider retries, and safe error summaries.
+- Internal SMS destination numbers are deployment secrets. Outbox rows retain
+  only recipient roles; SMS bodies omit consumer contact details, full
+  addresses, free text, and click IDs. Twilio delivery callbacks require
+  signature verification.
 - Security headers and exact iframe `frame-ancestors` allowlist.
 - No protected-class fields or proxies in scoring, routing, targeting, or public
   recommendations; no private MLS fields are exposed.
