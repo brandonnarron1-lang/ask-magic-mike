@@ -53,51 +53,57 @@ export class NeonPushSubscriptionRepository {
 
   private ensureSchema() {
     if (!this.schemaReady) {
-      this.schemaReady = this.sql.query(`
-        DO $amm_push$
-        BEGIN
-          PERFORM pg_advisory_xact_lock(2026081119);
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_constraint
-            WHERE conname = 'lead_notifications_channel_check'
-              AND pg_get_constraintdef(oid) ILIKE '%push%'
-          ) THEN
-            ALTER TABLE public.lead_notifications
-              DROP CONSTRAINT IF EXISTS lead_notifications_channel_check;
-            ALTER TABLE public.lead_notifications
-              ADD CONSTRAINT lead_notifications_channel_check
-              CHECK (channel IN ('email', 'sms', 'push'));
-          END IF;
+      this.schemaReady = (async () => {
+        // Neon executes prepared statements, which intentionally reject multiple
+        // top-level commands. Keep each idempotent schema command separate.
+        await this.sql.query(`
+          DO $amm_push$
+          BEGIN
+            PERFORM pg_advisory_xact_lock(2026081119);
+            IF NOT EXISTS (
+              SELECT 1 FROM pg_constraint
+              WHERE conname = 'lead_notifications_channel_check'
+                AND pg_get_constraintdef(oid) ILIKE '%push%'
+            ) THEN
+              ALTER TABLE public.lead_notifications
+                DROP CONSTRAINT IF EXISTS lead_notifications_channel_check;
+              ALTER TABLE public.lead_notifications
+                ADD CONSTRAINT lead_notifications_channel_check
+                CHECK (channel IN ('email', 'sms', 'push'));
+            END IF;
 
-          CREATE TABLE IF NOT EXISTS public.staff_push_subscriptions (
-            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-            recipient_role TEXT NOT NULL CHECK (recipient_role IN ('primary', 'copy')),
-            endpoint TEXT NOT NULL UNIQUE,
-            p256dh TEXT NOT NULL,
-            auth TEXT NOT NULL,
-            user_agent TEXT,
-            is_active BOOLEAN NOT NULL DEFAULT TRUE,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            last_sent_at TIMESTAMPTZ,
-            last_error TEXT
-          );
-          ALTER TABLE public.staff_push_subscriptions ENABLE ROW LEVEL SECURITY;
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_policies
-            WHERE schemaname = 'public'
-              AND tablename = 'staff_push_subscriptions'
-              AND policyname = 'staff_push_subscriptions_deny_public'
-          ) THEN
-            CREATE POLICY staff_push_subscriptions_deny_public
-              ON public.staff_push_subscriptions
-              FOR ALL TO PUBLIC USING (FALSE) WITH CHECK (FALSE);
-          END IF;
-        END $amm_push$;
-        CREATE INDEX IF NOT EXISTS staff_push_subscriptions_active_role_idx
-          ON public.staff_push_subscriptions(recipient_role)
-          WHERE is_active = TRUE;
-      `).then(() => undefined).catch((error) => {
+            CREATE TABLE IF NOT EXISTS public.staff_push_subscriptions (
+              id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+              recipient_role TEXT NOT NULL CHECK (recipient_role IN ('primary', 'copy')),
+              endpoint TEXT NOT NULL UNIQUE,
+              p256dh TEXT NOT NULL,
+              auth TEXT NOT NULL,
+              user_agent TEXT,
+              is_active BOOLEAN NOT NULL DEFAULT TRUE,
+              created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+              updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+              last_sent_at TIMESTAMPTZ,
+              last_error TEXT
+            );
+            ALTER TABLE public.staff_push_subscriptions ENABLE ROW LEVEL SECURITY;
+            IF NOT EXISTS (
+              SELECT 1 FROM pg_policies
+              WHERE schemaname = 'public'
+                AND tablename = 'staff_push_subscriptions'
+                AND policyname = 'staff_push_subscriptions_deny_public'
+            ) THEN
+              CREATE POLICY staff_push_subscriptions_deny_public
+                ON public.staff_push_subscriptions
+                FOR ALL TO PUBLIC USING (FALSE) WITH CHECK (FALSE);
+            END IF;
+          END $amm_push$;
+        `);
+        await this.sql.query(`
+          CREATE INDEX IF NOT EXISTS staff_push_subscriptions_active_role_idx
+            ON public.staff_push_subscriptions(recipient_role)
+            WHERE is_active = TRUE
+        `);
+      })().catch((error) => {
         this.schemaReady = null;
         throw error;
       });
