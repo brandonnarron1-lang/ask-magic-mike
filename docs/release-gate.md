@@ -122,10 +122,12 @@ QA runner may mutate the database. Five env vars feed the verdict:
 - `PRODUCTION_SUPABASE_PROJECT_REF` — the production ref to refuse
 - `PREVIEW_SUPABASE_PROJECT_REF` — the preview ref to accept
 - `ALLOW_PREVIEW_DB_MUTATION` — explicit opt-in; default `false`
+- `PREVIEW_DATA_MODE` — `disabled` / `enabled`; default `disabled`
 
 `safety.safe_for_preview_mutation` is `true` only when **every** rule
-holds: preview runtime, `ALLOW_PREVIEW_DB_MUTATION=true`, DB configured
-and reachable, migration 00012 applied, live SMS/email disabled,
+holds: preview runtime, `PREVIEW_DATA_MODE=enabled`,
+`ALLOW_PREVIEW_DB_MUTATION=true`, DB configured and reachable,
+migration 00012 applied, live SMS/email disabled,
 supabase ref does not match production ref, supabase ref matches
 preview ref (or `DATABASE_ENV=preview` with no production ref
 configured). If identity is unknown, the answer is `false`.

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { decodeBasicPassword, edgeSecretsMatch } from "@/lib/admin/edge-secret";
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   if (!req.nextUrl.pathname.startsWith("/admin")) return NextResponse.next();
 
   const secret = process.env.ADMIN_SECRET;
@@ -15,14 +16,11 @@ export function middleware(req: NextRequest) {
   }
 
   const effectiveSecret = secret ?? "changeme-local";
-  const auth   = req.headers.get("authorization") ?? "";
-  const [scheme, encoded] = auth.split(" ");
-
-  if (scheme?.toLowerCase() === "basic" && encoded) {
-    const decoded = Buffer.from(encoded, "base64").toString("utf-8");
-    const [, pass] = decoded.split(":");
-    if (pass === effectiveSecret) return NextResponse.next();
-  }
+  const password = decodeBasicPassword(
+    req.headers.get("authorization") ?? "",
+  );
+  if (await edgeSecretsMatch(effectiveSecret, password))
+    return NextResponse.next();
 
   return new NextResponse("Unauthorized", {
     status: 401,

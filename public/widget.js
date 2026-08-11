@@ -3,11 +3,16 @@
   if (existing && existing.__loaded) return;
 
   var currentScript = document.currentScript;
+  var pageParams = new URLSearchParams(window.location.search);
   var defaultConfig = {
     source: currentScript && currentScript.dataset.source || "external",
     medium: currentScript && currentScript.dataset.medium || "website",
     campaign: currentScript && currentScript.dataset.campaign || "sitewide-widget",
     placement: currentScript && currentScript.dataset.placement || "sitewide-floating",
+    placement_id: currentScript && currentScript.dataset.placementId || currentScript && currentScript.dataset.placement || "sitewide-floating",
+    listing_id: currentScript && currentScript.dataset.listingId || pageParams.get("listing_id") || "",
+    property_id: currentScript && currentScript.dataset.propertyId || pageParams.get("property_id") || "",
+    agent_id: currentScript && currentScript.dataset.agentId || pageParams.get("agent_id") || "",
     theme: currentScript && currentScript.dataset.theme || "black-diamond"
   };
 
@@ -26,11 +31,24 @@
       medium: config.medium || defaultConfig.medium,
       campaign: config.campaign || defaultConfig.campaign,
       placement: config.placement || defaultConfig.placement,
+      placement_id: config.placement_id || config.placement || defaultConfig.placement_id,
+      listing_id: config.listing_id || defaultConfig.listing_id,
+      property_id: config.property_id || defaultConfig.property_id,
+      agent_id: config.agent_id || defaultConfig.agent_id,
       parent_url: window.location.href,
       embed_host: window.location.hostname,
-      referrer: document.referrer || ""
+      referrer: document.referrer || "",
+      page_title: document.title || "",
+      utm_source: config.source || "",
+      utm_medium: config.medium || "",
+      utm_campaign: config.campaign || "",
+      gclid: pageParams.get("gclid") || "",
+      gbraid: pageParams.get("gbraid") || "",
+      wbraid: pageParams.get("wbraid") || "",
+      fbclid: pageParams.get("fbclid") || "",
+      msclkid: pageParams.get("msclkid") || ""
     });
-    return base + "/widget?" + params.toString();
+    return base + "/widget/v1?" + params.toString();
   }
 
   function init(options) {

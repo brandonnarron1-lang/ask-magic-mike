@@ -1,27 +1,19 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Homepage", () => {
-  test("page title, meta, and JSON-LD are present", async ({ page }) => {
+  test("page title and canonical metadata are present", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveTitle(/Ask Magic Mike/);
-
-    // JSON-LD structured data
-    const ldJson = await page.locator('script[type="application/ld+json"]').textContent();
-    expect(ldJson).toBeTruthy();
-    const schema = JSON.parse(ldJson!);
-    const graph = schema["@graph"] as Array<{ "@type": string }>;
-    const types = graph.map((n) => n["@type"]);
-    expect(types).toContain("RealEstateAgent");
-    expect(types).toContain("LocalBusiness");
-    expect(types).toContain("WebSite");
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+      "content",
+      /Wilson, North Carolina/,
+    );
   });
 
-  test("skip-to-main-content link is in the DOM and targets #main-content", async ({ page }) => {
+  test("canonical root renders one primary main landmark", async ({ page }) => {
     await page.goto("/");
-    const skipLink = page.locator('a[href="#main-content"]').first();
-    await expect(skipLink).toBeAttached();
-    const target = page.locator("#main-content");
-    await expect(target).toBeAttached();
+    await expect(page.locator("main")).toHaveCount(1);
+    await expect(page.locator("main")).toContainText("Choose your path");
   });
 
   test("hero section renders Mike's name and primary CTA", async ({ page }) => {
@@ -61,11 +53,10 @@ test.describe("Homepage", () => {
     expect(broken, `Broken images: ${broken.join("\n")}`).toHaveLength(0);
   });
 
-  test("nav call link has correct tel href", async ({ page }) => {
+  test("footer links point to active root integration routes", async ({ page }) => {
     await page.goto("/");
-    const callLink = page.locator('[data-testid="nav-call-link"]');
-    await expect(callLink).toBeAttached();
-    const href = await callLink.getAttribute("href");
-    expect(href).toMatch(/^tel:/);
+    await expect(page.locator('a[href="/widget-preview"]')).toBeAttached();
+    await expect(page.locator('a[href="/integrations/ourtownproperties"]')).toBeAttached();
+    await expect(page.locator('a[href="/social-preview"]').first()).toBeAttached();
   });
 });

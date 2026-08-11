@@ -150,6 +150,10 @@ afterEach(() => {
   delete (process.env as Record<string, string | undefined>).LEAD_NOTIFICATION_PRODUCTION_ENABLED;
   delete (process.env as Record<string, string | undefined>).RESEND_API_KEY;
   delete (process.env as Record<string, string | undefined>).FROM_EMAIL;
+  delete (process.env as Record<string, string | undefined>).VERCEL_ENV;
+  delete (process.env as Record<string, string | undefined>).DATABASE_ENV;
+  delete (process.env as Record<string, string | undefined>).PREVIEW_DATA_MODE;
+  delete (process.env as Record<string, string | undefined>).ALLOW_PREVIEW_DB_MUTATION;
 });
 
 function resendResponse(status: number, body: Record<string, unknown> = {}) {
@@ -160,6 +164,46 @@ function resendResponse(status: number, body: Record<string, unknown> = {}) {
 }
 
 describe("LeadNotificationService", () => {
+  it("refuses notification creation, processing, and retry in Preview read-only mode before provider calls", async () => {
+    process.env.VERCEL_ENV = "preview";
+    process.env.DATABASE_ENV = "preview";
+    process.env.PREVIEW_DATA_MODE = "disabled";
+    process.env.ALLOW_PREVIEW_DB_MUTATION = "false";
+    const repo = new MemoryNotificationRepo();
+    const provider = new ConsoleNotificationProvider("success");
+    const spy = vi.spyOn(provider, "send");
+    const service = new LeadNotificationService(repo, provider);
+    await repo.create({
+      lead_id: LEAD_ID,
+      agent_id: AGENT_ID,
+      notification_type: "agent_assignment",
+      channel: "email",
+      recipient_type: "agent",
+      recipient_reference: "email_configured",
+      template_version: "agent_assignment_email_v1",
+      idempotency_key: "preview-retry",
+      status: "failed",
+      max_attempts: 3,
+    });
+
+    await expect(service.createAssignmentNotification(context())).resolves.toEqual({
+      ok: false,
+      statusCode: 503,
+      error: "preview_data_disabled",
+    });
+    await expect(service.processNotification("notification-1", context())).resolves.toEqual({
+      ok: false,
+      statusCode: 503,
+      error: "preview_data_disabled",
+    });
+    await expect(service.retryNotification("notification-1", context())).resolves.toEqual({
+      ok: false,
+      statusCode: 503,
+      error: "preview_data_disabled",
+    });
+    expect(spy).not.toHaveBeenCalled();
+  });
+
   it("builds stable idempotency keys for assignment notifications", () => {
     expect(
       assignmentNotificationIdempotencyKey({

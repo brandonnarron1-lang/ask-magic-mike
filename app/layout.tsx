@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,8 +13,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL = siteConfig.canonicalSiteUrl;
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://askmagicmike.com"),
+  metadataBase: new URL(SITE_URL),
+  alternates: { canonical: "/" },
   title: {
     default: "Ask Magic Mike | Wilson, NC Real Estate Guidance",
     template: "%s | Ask Magic Mike",
@@ -24,7 +28,7 @@ export const metadata: Metadata = {
     title: "Ask Magic Mike | Our Town Properties",
     description:
       "Premium local real estate guidance for Wilson, NC homeowners and buyers.",
-    url: "https://askmagicmike.com",
+    url: SITE_URL,
     siteName: "Ask Magic Mike",
     images: [
       {
@@ -36,6 +40,10 @@ export const metadata: Metadata = {
     ],
     locale: "en_US",
     type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
   twitter: {
     card: "summary_large_image",

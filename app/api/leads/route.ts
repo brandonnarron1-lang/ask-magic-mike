@@ -1,6 +1,21 @@
 import { NextResponse } from "next/server";
+import { createHash } from "node:crypto";
 import { normalizeLeadPayload, type LeadPayload } from "../../lib/leadPayload";
 import { PUBLIC_LEAD_SAVE_ERROR } from "../../lib/publicLeadErrors";
+import { consentGrantedForCall, consentGrantedForEmail, consentGrantedForSms, LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../lib/leadConsent";
+import { scoreLead } from "../../lib/leadScoring";
+import { routeLead } from "../../lib/leadRouting";
+import { enqueueLeadNotifications } from "../../lib/leadAlertService";
+import { recordServerAnalyticsEvent } from "../../lib/serverAnalytics";
+import { isApprovedPublicOrigin } from "../../lib/publicOrigin";
+import { checkRateLimit, LIMITS, rateLimitKey } from "../../../src/lib/security/rate-limit";
+import { createDefaultPersistence } from "../../lib/persistence/defaultPersistence";
+import type { LeadLifecycleCaptureResult } from "../../lib/persistence/contracts";
+import {
+  PREVIEW_READ_ONLY_MESSAGE,
+  assertDatabaseMutationAllowed,
+} from "../../../src/lib/preview-security";
+import { verifyWordPressBridgeRequest } from "../../lib/wordpressBridgeSignature";
 
 const LEAD_TYPES = new Set([
   "buyer",
@@ -8,6 +23,7 @@ const LEAD_TYPES = new Set([
   "seller_cash_offer",
   "investor",
   "listing_inquiry",
+  "open_house",
   "home_value",
   "relocation",
   "renter",
@@ -16,109 +32,14 @@ const LEAD_TYPES = new Set([
   "unknown",
 ]);
 
-type SupabaseHeaders = Record<string, string>;
-
-async function trackPosthog(event: string, properties: Record<string, unknown>) {
-  const apiKey = process.env.POSTHOG_API_KEY;
-  if (!apiKey) return;
-
-  const host = process.env.POSTHOG_API_HOST || "https://app.posthog.com";
-
-  try {
-    await fetch(host + "/capture/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        api_key: apiKey,
-        event,
-        properties,
-        distinct_id: properties.distinct_id || "anonymous",
-      }),
-    });
-  } catch {
-    // Analytics must never block lead capture.
-  }
-}
-
-async function generateSummary(payload: LeadPayload) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return undefined;
-
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + apiKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are Mike Eatmon at Our Town Properties. Reply with one concise, practical sentence for a Wilson, NC real estate lead. Do not invent MLS data, pricing, or property facts.",
-        },
-        {
-          role: "user",
-          content: [
-            "Funnel: " + payload.funnel_type,
-            "Surface: " + payload.lead_source_surface,
-            "Address: " + (payload.address || ""),
-            "Name: " + (payload.name || ""),
-            "Email: " + (payload.email || ""),
-            "Phone: " + (payload.phone || ""),
-            "Timeline: " + (payload.timeline || ""),
-            "Condition: " + (payload.condition || ""),
-            "Question: " + (payload.question || ""),
-            "Notes: " + (payload.notes || ""),
-          ].join("\n"),
-        },
-      ],
-      max_tokens: 90,
-      temperature: 0.35,
-    }),
-  });
-
-  if (!res.ok) return undefined;
-  const data = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const summary = data.choices?.[0]?.message?.content;
-  return typeof summary === "string" ? summary.trim() : undefined;
-}
-
-async function sendResendEmail(payload: LeadPayload, summary?: string) {
-  const resendKey = process.env.RESEND_API_KEY;
-  const to = payload.email;
-  if (!resendKey || !to) return;
-
-  const subject =
-    payload.funnel_type === "seller"
-      ? "We received your property details"
-      : "We received your home value request";
-  const text =
-    "Thanks for reaching out to Ask Magic Mike and Our Town Properties." +
-    (summary ? "\n\n" + summary : "") +
-    "\n\nCalendly: https://calendly.com/askmagicmike";
-
-  await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + resendKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: "Ask Magic Mike <mike@askmagicmike.com>",
-      to,
-      subject,
-      text,
-    }),
-  });
-}
-
+const PUBLIC_LEAD_CONFLICT_ERROR =
+  "That submission conflicts with an existing request. Please refresh and submit again, or call Our Town Properties at 252-243-7700.";
 function leadTypeFor(payload: LeadPayload) {
   if (payload.lead_type && LEAD_TYPES.has(payload.lead_type)) return payload.lead_type;
   if (payload.funnel_type === "seller") return "seller";
+  if (payload.funnel_type === "buyer") return "buyer";
+  if (payload.funnel_type === "renter") return "renter";
+  if (payload.funnel_type === "open_house") return "open_house";
   if (payload.funnel_type === "home_value" || payload.funnel_type === "widget") return "home_value";
   return "general_question";
 }
@@ -176,13 +97,42 @@ function stripPhoneDigits(phone?: string) {
   return digits || null;
 }
 
+function normalizeEmail(email?: string) {
+  const cleaned = (email || "").trim().toLowerCase();
+  return cleaned || null;
+}
+
+function normalizePhone(phone?: string) {
+  const digits = stripPhoneDigits(phone);
+  if (!digits) return null;
+  if (digits.length === 11 && digits.startsWith("1")) return digits.slice(1);
+  return digits;
+}
+
+function normalizePropertyAddress(address?: string) {
+  const cleaned = (address || "")
+    .toLowerCase()
+    .replace(/[^\w\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return cleaned || null;
+}
+
+function consentIpHash(req: Request) {
+  const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0]?.trim();
+  const salt = process.env.CONSENT_IP_HASH_SALT;
+  if (!ip || !salt) return null;
+  return createHash("sha256").update(`${salt}:${ip}`).digest("hex");
+}
+
 function isUuid(value?: string) {
   return !!value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
 function sessionIdFor(payload: LeadPayload): string {
-  return isUuid(payload.widget_session_id) && payload.widget_session_id
-    ? payload.widget_session_id
+  const candidate = payload.idempotency_key || payload.widget_session_id;
+  return isUuid(candidate) && candidate
+    ? candidate
     : crypto.randomUUID();
 }
 
@@ -197,7 +147,7 @@ function sourceDetailFor(payload: LeadPayload) {
     payload.lead_source_surface,
     attribution.medium,
     attribution.campaign,
-    attribution.placement,
+    attribution.placement_id || attribution.placement,
   ].filter(Boolean).join(" / ") || null;
 }
 
@@ -252,6 +202,25 @@ function buildNotes(payload: LeadPayload) {
   return notes || null;
 }
 
+function qualificationFor(payload: LeadPayload) {
+  const leadType = leadTypeFor(payload);
+  const timelineMonths = timelineMonthsFor(payload.timeline);
+  const hasContact = Boolean(payload.email || payload.phone);
+  const hasProperty = Boolean(payload.address || payload.property_address);
+  const sellerIntent = primaryIntentFor(leadType, payload) === "sell";
+
+  if (sellerIntent && hasProperty && hasContact && timelineMonths <= 3) {
+    return { status: "qualified", lead_grade: "A" };
+  }
+  if (sellerIntent && hasProperty && hasContact) {
+    return { status: "qualified", lead_grade: "B" };
+  }
+  if (hasContact) {
+    return { status: "new", lead_grade: "C" };
+  }
+  return { status: "new", lead_grade: "D" };
+}
+
 function buildSessionRow(payload: LeadPayload, req: Request, sessionId: string) {
   const attribution = payload.attribution || {};
   return {
@@ -281,6 +250,13 @@ function buildLeadRow(payload: LeadPayload, req: Request, sessionId: string) {
   const leadType = leadTypeFor(payload);
   const { firstName, lastName } = splitName(payload);
   const notes = buildNotes(payload);
+  const qualification = qualificationFor(payload);
+  const address = payload.property_address || payload.address || undefined;
+  const score = scoreLead(payload);
+  const routing = routeLead(payload, score.score);
+  const consentEmail = consentGrantedForEmail(payload);
+  const consentCall = consentGrantedForCall(payload);
+  const consentSms = consentGrantedForSms(payload);
 
   return {
     session_id: sessionId,
@@ -289,100 +265,173 @@ function buildLeadRow(payload: LeadPayload, req: Request, sessionId: string) {
     email: payload.email || null,
     phone: payload.phone || null,
     phone_normalized: stripPhoneDigits(payload.phone),
+    normalized_email: normalizeEmail(payload.email),
+    normalized_phone: normalizePhone(payload.phone),
+    normalized_property_address: normalizePropertyAddress(address),
+    spam_score: 0,
+    spam_reasons: [],
+    is_duplicate: false,
+    duplicate_of_lead_id: null,
     state: "NC",
-    address_raw: payload.property_address || payload.address || null,
+    address_raw: address || null,
     primary_intent: primaryIntentFor(leadType, payload),
     question_raw: notes || payload.question || payload.condition || null,
     timeline_months: timelineMonthsFor(payload.timeline),
-    consent_sms: false,
-    consent_call: false,
-    consent_email: false,
-    consent_timestamp: new Date().toISOString(),
-    consent_language_version: "canonical_v1",
-    status: payload.status,
+    consent_sms: consentSms,
+    consent_call: consentCall,
+    consent_email: consentEmail,
+    consent_timestamp: consentEmail || consentCall || consentSms ? new Date().toISOString() : null,
+    consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
+    status: qualification.status,
     lead_type: leadType,
+    lead_grade: qualification.lead_grade,
+    conversion_stage: qualification.status === "qualified" ? "qualified" : null,
     source: sourceFor(payload),
     source_detail: sourceDetailFor(payload),
     page_url: pageUrlFor(payload, req),
     widget_session_id: payload.widget_session_id || sessionId,
+    city: payload.city || null,
+    score: score.score,
+    score_factors: score.factors,
+    score_version: score.version,
+    is_test: payload.is_test === true,
+    consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
+    consent_ip_hash: consentIpHash(req),
+    consent_source: payload.consent_source || payload.lead_source_surface,
+    consent_user_agent: req.headers.get("user-agent") || null,
+    communication_suppressed: payload.is_test === true,
+    email_suppressed: payload.is_test === true,
+    sms_suppressed: payload.is_test === true,
+    routing_reason: routing.routingReason,
+    target_geography: payload.target_geography || null,
+    financing: payload.financing || null,
+    preapproval: payload.preapproval ?? null,
+    request_idempotency_key: payload.idempotency_key || null,
   };
 }
 
-function withoutUndefined(row: Record<string, unknown>) {
-  return Object.fromEntries(Object.entries(row).filter(([, value]) => value !== undefined));
-}
-
-async function postgrestUpsert(
-  url: string,
-  headers: SupabaseHeaders,
-  row: Record<string, unknown>,
-  returnRepresentation = false,
-) {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      ...headers,
-      Prefer: `resolution=merge-duplicates,return=${returnRepresentation ? "representation" : "minimal"}`,
+function buildSourceAttributionRow(payload: LeadPayload, req: Request) {
+  const attribution = payload.attribution || {};
+  const medium = attribution.medium || null;
+  return {
+    utm_source: attribution.source || sourceFor(payload) || null,
+    utm_medium: medium,
+    utm_campaign: attribution.campaign || null,
+    utm_content: attribution.content || null,
+    utm_term: attribution.term || null,
+    referrer_url: attribution.parent_url || attribution.referrer || req.headers.get("referer") || null,
+    referrer_type: referrerTypeFor(payload),
+    landing_page: sessionLandingPageFor(payload, req),
+    is_paid: ["cpc", "paid", "paid_social", "ppc"].includes(String(medium || "").toLowerCase()),
+    first_touch: attribution.first_touch || null,
+    last_touch: attribution.last_touch || attribution,
+    click_ids: {
+      gclid: attribution.gclid || null,
+      gbraid: attribution.gbraid || null,
+      wbraid: attribution.wbraid || null,
+      fbclid: attribution.fbclid || null,
+      msclkid: attribution.msclkid || null,
     },
-    body: JSON.stringify(withoutUndefined(row)),
-  });
-
-  if (response.ok) {
-    if (!returnRepresentation) return [];
-    if (typeof response.json !== "function") return [];
-    return (await response.json().catch(() => [])) as Array<Record<string, unknown>>;
-  }
-
-  const errorText = await response.text();
-  console.error("LeadOps production write failed", {
-    url: url.replace(/^https?:\/\/[^/]+/, "[supabase]"),
-    status: response.status,
-    status_text: response.statusText,
-    error: errorText || response.statusText,
-  });
-  throw new Error("lead_insert_failed");
+    placement_id: attribution.placement_id || attribution.placement || null,
+    page_title: attribution.page_title || null,
+    listing_id: payload.listing_id || attribution.listing_id || null,
+    property_id: payload.property_id || attribution.property_id || null,
+    agent_id: payload.agent_id || attribution.agent_id || null,
+  };
 }
 
 async function insertLead(payload: LeadPayload, req: Request) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) throw new Error(mutation.error);
 
-  if (!supabaseUrl || !supabaseServiceKey) {
-    console.info("Lead capture no-op: missing Supabase env vars", {
+  const persistence = createDefaultPersistence();
+  if (!persistence) {
+    console.info("Lead capture refused: missing Supabase env vars", {
       funnel_type: payload.funnel_type,
       lead_source_surface: payload.lead_source_surface,
-      address: payload.address,
-      email: payload.email,
-      phone: payload.phone,
+      address_present: Boolean(payload.address),
+      email_present: Boolean(payload.email),
+      phone_present: Boolean(payload.phone),
     });
-    return null;
+    throw new Error("lead_store_not_configured");
   }
 
   const sessionId = sessionIdFor(payload);
-  const headers = {
-    apikey: supabaseServiceKey,
-    Authorization: "Bearer " + supabaseServiceKey,
-    "Content-Type": "application/json",
-  };
+  const result = await persistence.captureLeadLifecycle({
+    session: buildSessionRow(payload, req, sessionId),
+    lead: buildLeadRow(payload, req, sessionId),
+    attribution: buildSourceAttributionRow(payload, req),
+    // The public capture owns the single internal lead-alert outbox below.
+    // Disable the legacy assignment outbox here so a Mike assignment cannot
+    // create a duplicate email alongside the canonical alert.
+    notificationMode: "disabled",
+  });
+  if (process.env.NODE_ENV !== "test" && result.ok && !result.idempotent_replay && persistence.enrichLeadRecord) {
+    const score = scoreLead(payload);
+    const routing = routeLead(payload, score.score);
+    const consentEmail = consentGrantedForEmail(payload);
+    const consentCall = consentGrantedForCall(payload);
+    const consentSms = consentGrantedForSms(payload);
+    const collectedAt = new Date().toISOString();
+    await persistence.enrichLeadRecord({
+      leadId: result.lead_id,
+      leadPatch: {
+        city: payload.city || null,
+        score: score.score,
+        score_factors: score.factors,
+        score_version: score.version,
+        is_test: payload.is_test === true,
+        consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
+        consent_ip_hash: consentIpHash(req),
+        consent_source: payload.consent_source || payload.lead_source_surface,
+        consent_user_agent: req.headers.get("user-agent") || null,
+        communication_suppressed: payload.is_test === true,
+        email_suppressed: payload.is_test === true,
+        sms_suppressed: payload.is_test === true,
+        routing_reason: routing.routingReason,
+        target_geography: payload.target_geography || null,
+        financing: payload.financing || null,
+        preapproval: payload.preapproval ?? null,
+        request_idempotency_key: payload.idempotency_key || null,
+      },
+      attributionPatch: {
+        first_touch: payload.attribution.first_touch || null,
+        last_touch: payload.attribution.last_touch || payload.attribution,
+        click_ids: {
+          gclid: payload.attribution.gclid || null,
+          gbraid: payload.attribution.gbraid || null,
+          wbraid: payload.attribution.wbraid || null,
+          fbclid: payload.attribution.fbclid || null,
+          msclkid: payload.attribution.msclkid || null,
+        },
+        placement_id: payload.attribution.placement_id || payload.attribution.placement || null,
+        page_title: payload.attribution.page_title || null,
+        listing_id: payload.listing_id || payload.attribution.listing_id || null,
+        property_id: payload.property_id || payload.attribution.property_id || null,
+        agent_id: payload.agent_id || payload.attribution.agent_id || null,
+      },
+      consents: [
+        ["email", consentEmail],
+        ["call", consentCall],
+        ["sms", consentSms],
+      ].map(([type, granted]) => ({
+        lead_id: result.lead_id,
+        consent_type: type,
+        granted,
+        language_version: LEAD_CONSENT_LANGUAGE_VERSION,
+        language_text: LEAD_CONSENT_LANGUAGE_TEXT,
+        user_agent: req.headers.get("user-agent") || null,
+        collected_at: collectedAt,
+      })),
+    });
+  }
+  return result;
+}
 
-  await postgrestUpsert(
-    supabaseUrl + "/rest/v1/sessions?on_conflict=id",
-    headers,
-    buildSessionRow(payload, req, sessionId),
-  );
-
-  const rows = await postgrestUpsert(
-    supabaseUrl + "/rest/v1/leads?on_conflict=session_id&select=id,session_id,widget_session_id",
-    headers,
-    buildLeadRow(payload, req, sessionId),
-    true,
-  );
-  const lead = rows[0];
-  return {
-    lead_id: typeof lead?.id === "string" ? lead.id : null,
-    session_id: typeof lead?.session_id === "string" ? lead.session_id : sessionId,
-    widget_session_id: typeof lead?.widget_session_id === "string" ? lead.widget_session_id : sessionId,
-  };
+function isLeadConflict(
+  result: LeadLifecycleCaptureResult,
+): result is Extract<LeadLifecycleCaptureResult, { ok: false }> {
+  return result.ok === false;
 }
 
 function validateLead(payload: LeadPayload) {
@@ -409,60 +458,184 @@ function validateLead(payload: LeadPayload) {
     return "Email or phone is required to schedule an appointment.";
   }
 
+  if ((payload.funnel_type === "buyer" || payload.funnel_type === "renter") && !payload.email && !payload.phone) {
+    return "Email or phone is required for buyer and renter requests.";
+  }
+
+  if (payload.funnel_type === "open_house" && !payload.email && !payload.phone) {
+    return "Email or phone is required for open-house registration.";
+  }
+
+  if (payload.email && (payload.email.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(payload.email))) {
+    return "Enter a valid email address.";
+  }
+
+  if (payload.phone && (payload.phone.length > 40 || !/^[+()\d\s.-]{7,40}$/.test(payload.phone))) {
+    return "Enter a valid phone number.";
+  }
+
+  const boundedFields: Array<[string, string | undefined, number]> = [
+    ["address", payload.address, 500],
+    ["name", payload.name, 160],
+    ["question", payload.question, 4000],
+    ["notes", payload.notes, 4000],
+    ["page_url", payload.page_url, 2048],
+    ["idempotency_key", payload.idempotency_key, 160],
+  ];
+  for (const [label, value, max] of boundedFields) {
+    if (value && value.length > max) return `${label} is too long.`;
+  }
+
   return null;
 }
 
 export async function POST(req: Request) {
+  const correlationId = crypto.randomUUID();
+  const origin = req.headers.get("origin");
+  if (!isApprovedPublicOrigin(origin)) {
+    return NextResponse.json({ error: "This form origin is not approved.", correlation_id: correlationId }, { status: 403, headers: { "X-AMM-Correlation-Id": correlationId } });
+  }
+
+  const rateLimit = process.env.NODE_ENV === "test"
+    ? { allowed: true, remaining: LIMITS.intakeSubmit.limit, resetAt: Date.now() + LIMITS.intakeSubmit.windowMs, durable: true }
+    : await checkRateLimit(
+        rateLimitKey(req.headers.get("x-forwarded-for")),
+        LIMITS.intakeSubmit.limit,
+        LIMITS.intakeSubmit.windowMs,
+        "intakeSubmit",
+      );
+  if (!rateLimit.allowed) {
+    return NextResponse.json({ error: "Too many requests. Please try again shortly.", correlation_id: correlationId }, { status: 429, headers: { "Retry-After": String(Math.max(1, Math.ceil((rateLimit.resetAt - Date.now()) / 1000))), "X-AMM-Correlation-Id": correlationId } });
+  }
+  const isProductionRuntime = process.env.VERCEL_ENV
+    ? process.env.VERCEL_ENV === "production"
+    : process.env.NODE_ENV === "production";
+  if (isProductionRuntime && !rateLimit.durable && !process.env.RATE_LIMIT_EMERGENCY_MEMORY) {
+    return NextResponse.json({ error: "Lead intake is temporarily unavailable.", correlation_id: correlationId }, { status: 503, headers: { "X-AMM-Correlation-Id": correlationId } });
+  }
+
   let raw: unknown;
-  let persistedLead: Awaited<ReturnType<typeof insertLead>> = null;
+  let rawBody: string;
+  let persistedLead: Awaited<ReturnType<typeof insertLead>>;
   try {
-    raw = await req.json();
+    const declaredSize = Number(req.headers.get("content-length") || "0");
+    if (Number.isFinite(declaredSize) && declaredSize > 65_536) {
+      return NextResponse.json({ error: "Submission is too large.", correlation_id: correlationId }, { status: 413 });
+    }
+    rawBody = await req.text();
+    if (rawBody.length > 65_536) {
+      return NextResponse.json({ error: "Submission is too large.", correlation_id: correlationId }, { status: 413 });
+    }
+    if (req.headers.get("x-amm-wp-bridge")) {
+      const bridge = verifyWordPressBridgeRequest(req, rawBody);
+      if (!bridge.ok) {
+        return NextResponse.json(
+          { error: "WordPress bridge authorization failed.", code: bridge.error, correlation_id: correlationId },
+          { status: bridge.status, headers: { "X-AMM-Correlation-Id": correlationId } },
+        );
+      }
+    }
+    raw = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
 
   const input = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
-  const payload = normalizeLeadPayload(input);
+  const payload = normalizeLeadPayload({
+    ...input,
+    idempotency_key: input.idempotency_key || req.headers.get("idempotency-key") || undefined,
+  });
+
+  if (payload.honeypot) {
+    return NextResponse.json({ message: "Got it.", correlation_id: correlationId }, { status: 202, headers: { "X-AMM-Correlation-Id": correlationId } });
+  }
   const validationError = validateLead(payload);
 
   if (validationError) {
-    return NextResponse.json({ error: validationError }, { status: 400 });
+    return NextResponse.json({ error: validationError, correlation_id: correlationId }, { status: 400, headers: { "X-AMM-Correlation-Id": correlationId } });
+  }
+
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return NextResponse.json(
+      { error: mutation.publicMessage, code: mutation.error },
+      { status: mutation.statusCode, headers: { "X-AMM-Correlation-Id": correlationId } },
+    );
   }
 
   try {
     persistedLead = await insertLead(payload, req);
   } catch (error) {
+    if (error instanceof Error && error.message === "preview_data_disabled") {
+      return NextResponse.json({ error: PREVIEW_READ_ONLY_MESSAGE, code: "preview_data_disabled", correlation_id: correlationId }, { status: 503, headers: { "X-AMM-Correlation-Id": correlationId } });
+    }
+    if (error instanceof Error && error.message === "lead_store_not_configured") {
+      return NextResponse.json({ error: PUBLIC_LEAD_SAVE_ERROR, code: "lead_store_not_configured", correlation_id: correlationId }, { status: 503, headers: { "X-AMM-Correlation-Id": correlationId } });
+    }
     console.error("Lead persistence failed", {
       funnel_type: payload.funnel_type,
       lead_source_surface: payload.lead_source_surface,
       error: error instanceof Error ? error.message : "unknown",
     });
+    return NextResponse.json({ error: PUBLIC_LEAD_SAVE_ERROR, correlation_id: correlationId }, { status: 500, headers: { "X-AMM-Correlation-Id": correlationId } });
+  }
+
+  if (isLeadConflict(persistedLead)) {
+    return NextResponse.json({ error: PUBLIC_LEAD_CONFLICT_ERROR, code: persistedLead.error, correlation_id: correlationId }, { status: 409, headers: { "X-AMM-Correlation-Id": correlationId } });
+  }
+
+  if (persistedLead.idempotent_replay) {
     return NextResponse.json(
-      { error: PUBLIC_LEAD_SAVE_ERROR },
-      { status: 500 },
+      {
+        message: "Got it. Mike will follow up shortly.",
+        lead_id: persistedLead.lead_id,
+        session_id: persistedLead.session_id,
+        duplicate_of_lead_id: persistedLead.duplicate_of_lead_id ?? null,
+        correlation_id: correlationId,
+      },
+      { headers: { "X-AMM-Idempotent-Replay": "1", "X-AMM-Correlation-Id": correlationId } },
     );
   }
 
-  const summary = await generateSummary(payload);
-  await sendResendEmail(payload, summary);
-
-  const eventProperties = {
-    funnel_name: payload.funnel_type,
-    lead_source_surface: payload.lead_source_surface,
-    step_name: payload.funnel_type === "seller" ? "seller_intent" : "lead_submit",
-    distinct_id: payload.email || payload.phone || "anonymous",
-    address: payload.address,
-    email: payload.email,
-    phone: payload.phone,
-    timeline: payload.timeline,
-    ...payload.attribution,
-  };
-
-  await trackPosthog("lead_created", eventProperties);
-
+  const score = scoreLead(payload);
+  const routing = routeLead(payload, score.score);
+  let notificationResult: Awaited<ReturnType<typeof enqueueLeadNotifications>> | null = null;
+  if (process.env.NODE_ENV !== "test") {
+    notificationResult = await enqueueLeadNotifications({
+      leadId: persistedLead.lead_id,
+      sessionId: persistedLead.session_id,
+      correlationId,
+      payload,
+      score,
+      routing,
+      submittedAt: new Date().toISOString(),
+      duplicateOfLeadId: persistedLead.duplicate_of_lead_id,
+    });
+    await recordServerAnalyticsEvent({
+      eventName: "lead_created",
+      category: "intake",
+      sessionId: persistedLead.session_id,
+      leadId: persistedLead.lead_id,
+      attribution: { source: payload.attribution.source, medium: payload.attribution.medium, campaign: payload.attribution.campaign },
+      properties: { funnel_name: payload.funnel_type, lead_source_surface: payload.lead_source_surface, is_test: payload.is_test === true, score: score.score },
+      userAgent: req.headers.get("user-agent"),
+    });
+    const internalStatus = notificationResult.internal?.status;
+    if (internalStatus) {
+      await recordServerAnalyticsEvent({
+        eventName: internalStatus === "sent" ? "notification_delivered" : internalStatus === "retry_scheduled" || internalStatus === "permanently_failed" ? "notification_failed" : "notification_queued",
+        category: "system",
+        sessionId: persistedLead.session_id,
+        leadId: persistedLead.lead_id,
+        properties: { notification_type: "lead_alert", status: internalStatus, is_test: payload.is_test === true },
+      });
+    }
+  }
   return NextResponse.json({
-    message: summary ? "Got it. " + summary : "Got it. Mike will follow up shortly.",
-    lead_id: persistedLead?.lead_id ?? null,
-    session_id: persistedLead?.session_id ?? payload.widget_session_id ?? null,
-  });
+    message: "Got it. Mike will review your request and follow up shortly.",
+    lead_id: persistedLead.lead_id,
+    session_id: persistedLead.session_id,
+    duplicate_of_lead_id: persistedLead.duplicate_of_lead_id ?? null,
+    correlation_id: correlationId,
+  }, { headers: { "X-AMM-Correlation-Id": correlationId } });
 }

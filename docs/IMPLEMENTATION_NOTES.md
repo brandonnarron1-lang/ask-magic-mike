@@ -199,7 +199,7 @@ This turn's vitest run on the new modules and the existing 143-test baseline shi
 ## Remaining risks / manual setup
 
 1. **Admin cockpit UI redesign** — the prompt's 10-screen cockpit is bigger than one safe change. The existing `/admin` works; this turn does not redo it. The lead-detail view will surface the new lead-type / status / events columns, but the visual cockpit is queued as a separate phase.
-2. **Cron / scheduled SLA escalation** — the `SlaEngine` exposes pure computation (deadlines, breach detection, escalation thresholds). A cron / Vercel-cron / Inngest runner is needed to actually fire escalations. Recommended: Vercel Cron pointing at `POST /api/admin/sla/sweep` (route not built this turn — easy to add when ops chooses a runner).
+2. **Cron / scheduled SLA escalation** — the `SlaEngine` exposes pure computation (deadlines, breach detection, escalation thresholds). Current active runtime exposes `GET /api/admin/sla/sweep` from the root `app/` router for Vercel Cron. The older `src/app` POST route is preserved as inactive code while root `app/` remains canonical.
 3. **Inbound SMS / email webhook handlers** — interfaces exist in `CommunicationsEngine`; the webhook routes (`/api/webhooks/sms/inbound`, etc.) are not built this turn.
 4. **Real PDF FlexMLS import** — `PdfListingProvider` is an interface stub. CSV is the live path.
 5. **AI generation** — deterministic templates only. When `OPENAI_API_KEY` lands, swap `MarketingAssetEngine.generate()` to the LLM path; the public-safe sanitizer is already enforced upstream of the prompt, so leakage is prevented either way.
@@ -220,7 +220,8 @@ What landed:
   - `src/lib/engines/listing-match.ts` — buyer/listing matcher using
     public listing fields only. No protected-class signaling.
   - `src/lib/engines/sla-sweep.ts` — DB-aware sweep on top of the pure
-    `SlaEngine`. `POST /api/admin/sla/sweep` triggers it. Persists
+    `SlaEngine`. The active root `GET /api/admin/sla/sweep` wrapper triggers
+    it for cron. Persists
     breaches to `compliance_flags` when asked.
 - **Admin APIs**:
   - `GET /api/admin/dashboard` — totals, source breakdown, recent
@@ -238,7 +239,7 @@ What landed:
   - `POST /api/admin/leads/[id]/tasks` — create a `tasks` row.
   - `POST /api/admin/leads/[id]/messages` — send templated SMS/email
     through `CommunicationsEngine`; reads consent + `compliance_flags`.
-  - `POST /api/admin/sla/sweep` — runs `SlaSweepEngine`; `?persist=true`
+  - `GET /api/admin/sla/sweep` — runs `SlaSweepEngine`; `?persist=true`
     writes `compliance_flags`.
   - All admin routes gated by `x-admin-secret` against `ADMIN_SECRET`.
 - **Webhook scaffolds**:
@@ -273,11 +274,11 @@ What still needs manual setup:
 - **Vercel Cron**: wire the SLA sweep:
   ```
   // vercel.json
-  { "crons": [{ "path": "/api/admin/sla/sweep?persist=true", "schedule": "*/5 * * * *" }] }
+  { "crons": [{ "path": "/api/admin/sla/sweep", "schedule": "0 * * * *" }] }
   ```
-  When ops enables this, also add `x-admin-secret` via Vercel's
-  Authorization header injection or move the sweep to a cron-only auth
-  scheme.
+  The active source route is GET-only and authenticates via
+  `Authorization: Bearer $CRON_SECRET` for cron or `x-admin-secret` for local
+  manual verification.
 - **Twilio signature verification**: `/api/webhooks/sms/inbound`
   currently logs `x-twilio-signature` but doesn't compute the HMAC.
   Production should compute it from `TWILIO_AUTH_TOKEN` before going
@@ -310,9 +311,9 @@ What landed:
   Resend / SendGrid / Postmark / mock envelopes and projects them onto
   a canonical event shape. Bounce / complaint / unsubscribe events
   write `opt_out_email` `compliance_flags`.
-- **SLA cron auth.** `POST/GET /api/admin/sla/sweep` accepts admin
+- **SLA cron auth.** `GET /api/admin/sla/sweep` accepts admin
   (`x-admin-secret`) **or** cron (`Authorization: Bearer $CRON_SECRET`).
-  GET mirrors POST so Vercel Cron's default GET works.
+  POST is not active in the root router.
 - **Functional widget.** `MagicMikeWidgetController` wraps the visual
   shell with a deterministic intent → qualify → contact → submit state
   machine. Submits via the canonical `/api/leads`. Tracks
@@ -450,11 +451,11 @@ pre-promotion standard.
   `artifacts/release-candidate-report.{json,md}` with a single GO /
   NO-GO verdict.
 - **Database identity in `/api/admin/health`** — extracted to
-  `src/lib/admin/health-safety.ts`. Five new env vars feed it:
+  `src/lib/admin/health-safety.ts`. Six env vars feed it:
   `DATABASE_ENV`, `SUPABASE_PROJECT_REF`,
   `PRODUCTION_SUPABASE_PROJECT_REF`, `PREVIEW_SUPABASE_PROJECT_REF`,
-  `ALLOW_PREVIEW_DB_MUTATION`. The verdict is deterministic and exposes
-  a stable `safety_blockers` array.
+  `ALLOW_PREVIEW_DB_MUTATION`, and `PREVIEW_DATA_MODE`. The verdict is
+  deterministic and exposes a stable `safety_blockers` array.
 - **No-escape mutation gate.** `shouldRunMutationChecks` in
   `scripts/preview-qa-lib.mjs` now refuses to mutate when the health
   endpoint reports `safe_for_preview_mutation: false` — **even with

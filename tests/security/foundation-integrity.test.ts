@@ -97,11 +97,12 @@ describe("Admin PATCH /api/admin/leads/[id] — lead_grade validation", () => {
 // ── SLA sweep idempotency ─────────────────────────────────────────────────────
 
 describe("SLA sweep recordBreach — idempotency", () => {
-  const src = read("lib/engines/sla-sweep.ts");
+  const src = read("lib/persistence/supabase/sla-sweep-repository.ts");
 
-  it("checks for an existing compliance_flag before inserting", () => {
-    expect(src).toContain("maybeSingle");
-    expect(src).toContain("if (existing) return");
+  it("uses the concurrency-safe idempotent SLA breach contract", () => {
+    expect(src).toContain('.rpc("record_sla_breach_v1"');
+    expect(src).not.toContain("maybeSingle");
+    expect(src).not.toContain('.from("compliance_flags").insert');
   });
 });
 

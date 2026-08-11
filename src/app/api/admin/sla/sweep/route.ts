@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkAdminAuth } from "@/lib/admin/auth";
+import { checkAdminAuth, checkBearerSecret } from "@/lib/admin/auth";
 import {
   SlaSweepEngine,
-  createSupabaseSlaSweepRepo,
 } from "@/lib/engines/sla-sweep";
+import { createNeonSlaSweepRepo } from "@/lib/persistence/neon/sla-sweep-repository";
+import { assertDatabaseMutationAllowed } from "@/lib/preview-security";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
@@ -20,12 +21,7 @@ const NO_STORE = { "Cache-Control": "no-store" };
  * sweep is dry-run.
  */
 async function handle(req: NextRequest) {
-  const authHeader = req.headers.get("authorization") ?? "";
-  const cronSecret = process.env.CRON_SECRET;
-  const isCronAuth =
-    !!cronSecret &&
-    authHeader.toLowerCase().startsWith("bearer ") &&
-    authHeader.slice(7).trim() === cronSecret;
+  const isCronAuth = checkBearerSecret(req, process.env.CRON_SECRET);
 
   if (!isCronAuth) {
     const auth = checkAdminAuth(req);
@@ -49,24 +45,32 @@ async function handle(req: NextRequest) {
   }
   const persist = urlPersist || bodyPersist;
 
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.SUPABASE_SERVICE_ROLE_KEY
-  ) {
+  if (persist) {
+    const mutation = assertDatabaseMutationAllowed(process.env as Record<string, string | undefined>);
+    if (!mutation.ok) {
+      return NextResponse.json(
+        { ok: false, error: mutation.error, message: "Preview is in read-only demonstration mode. SLA flags were not written." },
+        { status: mutation.statusCode, headers: NO_STORE },
+      );
+    }
+  }
+
+  const repository = createNeonSlaSweepRepo();
+  if (!repository) {
     return NextResponse.json(
       {
-        ok: true,
-        note: "mock_mode",
+        ok: false,
+        error: "sla_store_not_configured",
         scanned: 0,
         breaches: [],
         flaggedCount: 0,
         mode: isCronAuth ? "cron" : "admin",
       },
-      { headers: NO_STORE }
+      { status: 503, headers: NO_STORE }
     );
   }
 
-  const engine = new SlaSweepEngine(createSupabaseSlaSweepRepo());
+  const engine = new SlaSweepEngine(repository);
   let report: Awaited<ReturnType<typeof engine.sweep>>;
   try {
     report = await engine.sweep({ persistBreaches: persist });
@@ -75,7 +79,7 @@ async function handle(req: NextRequest) {
       {
         ok: false,
         error: "sweep_failed",
-        detail: err instanceof Error ? err.message : "Unknown error",
+        correlation_id: crypto.randomUUID(),
       },
       { status: 503, headers: NO_STORE }
     );

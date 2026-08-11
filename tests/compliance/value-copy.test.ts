@@ -521,6 +521,50 @@ describe("sitemap and robots — canonical domain wiring", () => {
   });
 });
 
+describe("active root router SEO and headers", () => {
+  const rootLayout = normalize(readSource("app/layout.tsx"));
+  const rootSitemap = normalize(readSource("app/sitemap.ts"));
+  const rootRobots = normalize(readSource("app/robots.ts"));
+  const adminHealthRoute = normalize(readSource("app/api/admin/health/route.ts"));
+  const nextConfig = normalize(readSource("next.config.ts"));
+
+  it("active root layout uses siteConfig for canonical metadata", () => {
+    expect(rootLayout).toContain("siteConfig.canonicalSiteUrl");
+    expect(rootLayout).toMatch(/metadataBase:\s*new URL\(SITE_URL\)/);
+    expect(rootLayout).toMatch(/alternates:\s*\{\s*canonical:\s*"\/"\s*\}/);
+    expect(rootLayout).toMatch(/openGraph:[\s\S]{0,600}url: SITE_URL/);
+  });
+
+  it("active root router serves robots and sitemap from the canonical domain", () => {
+    expect(rootRobots).toContain("siteConfig");
+    expect(rootRobots).toContain("canonicalSiteUrl");
+    expect(rootRobots).toContain("/admin");
+    expect(rootRobots).toContain("/api/");
+    expect(rootSitemap).toContain("siteConfig");
+    expect(rootSitemap).toContain("canonicalSiteUrl");
+    expect(rootSitemap).toContain("/home-value");
+  });
+
+  it("protects the production widget iframe surface for Our Town embeds", () => {
+    expect(nextConfig).toContain('source: "/widget"');
+    expect(nextConfig).toContain("frame-ancestors");
+    expect(nextConfig).toContain("https://www.ourtownproperties.com");
+  });
+
+  it("ships the standard production smoke security headers", () => {
+    expect(nextConfig).toContain("X-Content-Type-Options");
+    expect(nextConfig).toContain("nosniff");
+    expect(nextConfig).toContain("Referrer-Policy");
+    expect(nextConfig).toContain("Permissions-Policy");
+  });
+
+  it("activates the documented admin health probe in the canonical router", () => {
+    expect(adminHealthRoute).toContain("src/app/api/admin/health/route");
+    expect(adminHealthRoute).toContain("GET");
+    expect(adminHealthRoute).toContain("POST");
+  });
+});
+
 describe("hero section — Our Town Properties brand integration", () => {
   const heroSection = normalize(
     readSource("src/components/landing/hero-section.tsx")

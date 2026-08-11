@@ -213,22 +213,22 @@ INSERT INTO agents (name, email, phone, role, is_active, max_daily_leads, priori
 VALUES (
   'Mike Eatmon',
   'mike@ourtownproperties.com',
-  '+12522454337',
+  NULL,
   'primary',
   TRUE,
   50,
   100,
   'America/New_York',
   TRUE,
-  TRUE,
-  '+12522454337'
+  FALSE,
+  NULL
 )
 ON CONFLICT (email) DO UPDATE SET
   name            = EXCLUDED.name,
-  phone           = EXCLUDED.phone,
   role            = EXCLUDED.role,
   is_active       = EXCLUDED.is_active,
   max_daily_leads = EXCLUDED.max_daily_leads,
   priority_score  = EXCLUDED.priority_score,
   timezone        = EXCLUDED.timezone,
-  notification_phone = EXCLUDED.notification_phone;
+  notification_phone = EXCLUDED.notification_phone,
+  notification_sms = EXCLUDED.notification_sms;

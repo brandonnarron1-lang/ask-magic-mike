@@ -1,0 +1,4 @@
+# Reviewed false positives: documentation label and security-test fixtures.
+1db6d7e0ae61d557d44fd572082afbdaa04c7c5e:docs/QA_EVIDENCE.md:generic-api-key:49
+d80bd4dcd9f4ab81e88d7006592e74ba4edcbd51:tests/amm/verify-live-conversion-funnel.test.ts:generic-api-key:161
+b677ebc0affe48df6ca5fafe305c7f80c39683d9:tests/scripts/preview-qa-lib.test.ts:stripe-access-token:153

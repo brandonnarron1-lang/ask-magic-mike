@@ -301,7 +301,7 @@ Expected: all checks PASS. Any FAIL = rollback (see Part 8).
 
 - [ ] Revenue dashboard (`/admin/revenue`): pipeline value calculating correctly
 - [ ] Analytics page (`/admin/analytics`): lead count trending
-- [ ] Run a manual SLA sweep: `POST /api/admin/sla/sweep` with `Authorization: Bearer <ADMIN_SECRET>`
+- [ ] Run a manual SLA sweep: `GET /api/admin/sla/sweep` with `Authorization: Bearer <ADMIN_SECRET>`
 - [ ] Review any SLA-breached leads — assign agents and contact immediately
 - [ ] Confirm WordPress CTAs are driving traffic (check UTM sources in lead list)
 

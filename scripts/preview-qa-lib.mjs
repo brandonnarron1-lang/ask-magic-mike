@@ -234,8 +234,9 @@ export function redactSecrets(text, secrets) {
  *
  *   1. The health endpoint reports `safe_for_preview_mutation: true`
  *      (which itself requires DATABASE_ENV/VERCEL_ENV=preview,
- *      ALLOW_PREVIEW_DB_MUTATION=true, a non-production supabase ref,
- *      live sends off, migration 00012 applied, and DB reachable).
+ *      PREVIEW_DATA_MODE=enabled, ALLOW_PREVIEW_DB_MUTATION=true, a
+ *      non-production supabase ref, live sends off, migration 00012
+ *      applied, and DB reachable).
  *   2. SAFE_DB_WRITE=true, OR
  *      (FORCE_DB_WRITE=true AND CONFIRM_FORCE_DB_WRITE === the exact
  *      confirm token).
@@ -274,7 +275,7 @@ export function shouldRunMutationChecks(health, env) {
         "health.safety.safe_for_preview_mutation=false — refusing to mutate. " +
         "The health endpoint is the single source of truth and FORCE_DB_WRITE " +
         "does not override it. Configure DATABASE_ENV=preview, " +
-        "ALLOW_PREVIEW_DB_MUTATION=true, and a non-production Supabase ref.",
+        "PREVIEW_DATA_MODE=enabled, ALLOW_PREVIEW_DB_MUTATION=true, and a non-production Supabase ref.",
     };
   }
   return { allowed: true, reason: "ok" };

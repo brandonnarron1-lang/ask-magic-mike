@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { checkAdminAuth } from "@/lib/admin/auth";
+import { checkAdminAuth, checkBearerSecret } from "@/lib/admin/auth";
 import type { NextRequest } from "next/server";
 
 function fakeRequest(headers: Record<string, string> = {}, searchParams: Record<string, string> = {}): NextRequest {
@@ -52,5 +52,13 @@ describe("checkAdminAuth", () => {
   it("rejects the query-param form (secret must not appear in URLs)", () => {
     const r = checkAdminAuth(fakeRequest({}, { admin_secret: "test_secret_v1" }));
     expect(r.ok).toBe(false);
+  });
+});
+
+describe("checkBearerSecret", () => {
+  it("accepts only a matching bearer secret", () => {
+    expect(checkBearerSecret(fakeRequest({ authorization: "Bearer cron-secret" }), "cron-secret")).toBe(true);
+    expect(checkBearerSecret(fakeRequest({ authorization: "Bearer wrong" }), "cron-secret")).toBe(false);
+    expect(checkBearerSecret(fakeRequest({}, { admin_secret: "cron-secret" }), "cron-secret")).toBe(false);
   });
 });

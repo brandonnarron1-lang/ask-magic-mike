@@ -27,6 +27,10 @@ export function customerSmsEnabled() {
   return (process.env.CUSTOMER_SMS_ENABLED || "false").toLowerCase() === "true";
 }
 
+export function emailNotificationsEnabled() {
+  return (process.env.EMAIL_ENABLED || "false").toLowerCase() === "true" || agentNotificationsEnabled();
+}
+
 export function productionNotificationDeliveryEnabled() {
   return (process.env.LEAD_NOTIFICATION_PRODUCTION_ENABLED || "false").toLowerCase() === "true";
 }
@@ -51,6 +55,16 @@ function validDomain(value: string) {
     return false;
   }
   return value.split(".").every((label) => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label));
+}
+
+function safeProviderErrorSummary(value: unknown) {
+  if (typeof value !== "string") return "Resend email request failed.";
+  const sanitized = value
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[redacted-email]")
+    .replace(/[\r\n]+/g, " ")
+    .trim()
+    .slice(0, 240);
+  return sanitized || "Resend email request failed.";
 }
 
 function configuredSandboxAllowedDomains():
@@ -250,13 +264,13 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
       };
     }
 
-    if (!agentNotificationsEnabled()) {
+    if (!emailNotificationsEnabled()) {
       return {
         ok: false,
         provider: this.name,
         retryable: false,
-        errorCode: "agent_notifications_disabled",
-        errorSummary: "Agent notifications are disabled by configuration.",
+        errorCode: "email_notifications_disabled",
+        errorSummary: "Email notifications are disabled by configuration.",
       };
     }
 
@@ -293,8 +307,9 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
     }
 
     const apiKey = process.env.RESEND_API_KEY;
-    const from = process.env.AGENT_NOTIFICATION_FROM_EMAIL || process.env.FROM_EMAIL;
-    if (!apiKey || !from || hasHeaderInjection(from)) {
+    const from = process.env.AGENT_NOTIFICATION_FROM_EMAIL || process.env.RESEND_FROM || process.env.FROM_EMAIL;
+    const bcc = (request.bcc || []).filter((recipient) => Boolean(emailDomain(recipient)) && !hasHeaderInjection(recipient));
+    if (!apiKey || !from || hasHeaderInjection(from) || (request.replyTo && (!emailDomain(request.replyTo) || hasHeaderInjection(request.replyTo)))) {
       return {
         ok: false,
         provider: this.name,
@@ -316,6 +331,8 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
         body: JSON.stringify({
           from,
           to: recipient,
+          ...(bcc.length ? { bcc } : {}),
+          ...(request.replyTo ? { reply_to: request.replyTo } : {}),
           subject: safeSubject(request.subject),
           text: request.text,
           html: request.html,
@@ -332,12 +349,15 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
     }
 
     if (!response.ok) {
+      const providerError = (await response.json().catch(() => ({}))) as {
+        message?: unknown;
+      };
       return {
         ok: false,
         provider: this.name,
         retryable: retryableResendStatus(response.status),
         errorCode: `resend_http_${response.status}`,
-        errorSummary: "Resend email request failed.",
+        errorSummary: safeProviderErrorSummary(providerError.message),
       };
     }
 

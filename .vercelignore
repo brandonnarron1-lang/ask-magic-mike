@@ -1,0 +1,5 @@
+.amm-run/
+.playwright-cli/
+output/playwright/
+artifacts/
+coverage/

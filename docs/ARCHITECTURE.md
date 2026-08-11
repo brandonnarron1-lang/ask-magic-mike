@@ -186,3 +186,62 @@ Every report stores the disclaimer text verbatim alongside the estimate. The `di
 **Analytics never blocks.** `trackEventNoWait()` fires and forgets. Zero risk of analytics failure causing an intake failure.
 
 **Money in cents.** All price values (sale price, estimate) are stored as BIGINT in cents to avoid floating point rounding issues.
+# Consolidated same-day lead pipe (2026-08-10)
+
+This section is the active architecture decision for the Ask Magic Mike / Our Town
+Properties lead flow. Older design notes in this file remain historical unless they
+conflict with this section.
+
+## System of record
+
+- Public application: Next.js root `app/` router in this repository, deployed as
+  Vercel project `eyes-up-industries/ask-magic-mike`.
+- Canonical database: Supabase through the server-only PostgREST adapter and the
+  reviewed atomic RPC `capture_public_lead_v1`.
+- Brokerage/SEO surface: `https://www.ourtownproperties.com` (WordPress,
+  Beaver Builder, Gravity Forms, FlexMLS/IDX). It remains a presentation and
+  attribution bridge, not a competing lead database.
+- Private review surface: the protected AdminOps routes under `/admin`. The current
+  same-day deployment uses the existing server-side Basic Auth boundary; a per-user
+  role/session provider is a separately tracked hardening item.
+- Outbound delivery: the existing Resend adapter and `lead_notifications` outbox,
+  with production delivery disabled until secure environment configuration and
+  explicit approval are complete.
+
+## Durable request sequence
+
+`public form/widget -> runtime validation and bot controls -> atomic Supabase
+capture -> same-record consent/attribution/score enrichment -> internal notification
+outbox -> bounded provider retry -> AdminOps timeline`
+
+Provider failure never rolls back a durable lead. A public success response is only
+returned after the atomic capture succeeds. Notification status is reported from
+the outbox, not inferred from an HTTP 200 from the public form.
+
+The existing atomic RPC remains the first durable write for compatibility with the
+current release branch. The additive enrichment call immediately patches the same
+lead/source rows and appends immutable consent evidence before the notification
+service runs; the production migration is therefore a prerequisite for promotion.
+
+## Active route boundary
+
+The root `app/` tree is the deployed router. The older `src/app/` tree remains in
+the repository as reference and for shared server modules; route-manifest checks
+explicitly acknowledge duplicate root/src files. New public routes must be added to
+the root tree or wrapped there deliberately.
+
+## Data boundary
+
+The public app may receive a user question and attribution context. It must never
+return internal notes, agent secrets, private MLS fields, provider credentials, or
+database errors. AdminOps reads use server-only service-role access after the admin
+boundary. Analytics receives event names and low-risk attribution only; raw contact
+fields are excluded.
+
+## Rollback
+
+The rescue branch created before consolidation is
+`rescue/amm-pre-consolidation-20260810-162915`. Production rollback is a Vercel
+deployment rollback or redeploy of the last known-good production commit, subject
+to owner approval. Database migrations are additive and have explicit rollback
+notes; no live migration is applied by this task.

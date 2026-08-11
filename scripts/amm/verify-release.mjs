@@ -46,7 +46,7 @@ async function checkAdminHealth() {
     if (res.status === 200) {
       const body = await res.json();
       const dbOk = body.database?.reachable === true;
-      const envOk = body.env?.supabase_url_present && body.env?.supabase_service_role_present && body.env?.admin_secret_present;
+      const envOk = body.env?.database_url_present && body.env?.admin_secret_present;
 
       if (dbOk && envOk) {
         console.log("  PASS  /api/admin/health — DB reachable, env vars present");

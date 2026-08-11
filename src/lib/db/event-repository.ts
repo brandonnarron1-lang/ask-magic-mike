@@ -1,4 +1,5 @@
 import { shouldUseDevStorage } from "./types";
+import { recordNeonAnalyticsEvent } from "@/lib/persistence/neon/analytics-event-repository";
 
 export interface CreateEventInput {
   sessionId?: string | null;
@@ -16,23 +17,15 @@ export interface CreateEventInput {
 export async function createEvent(input: CreateEventInput): Promise<void> {
   if (shouldUseDevStorage()) return;
 
-  const { createAdminClient } = await import("@/lib/supabase/admin");
-  const client = createAdminClient();
-
-  const { error } = await client.from("analytics_events").insert({
-    session_id:     input.sessionId ?? null,
-    lead_id:        input.leadId ?? null,
-    event_name:     input.eventName,
-    event_category: input.eventCategory ?? null,
-    properties:     (input.properties ?? {}) as import("@/types/database.types").Json,
-    ip_address:     input.ipAddress ?? null,
-    user_agent:     input.userAgent ?? null,
-    utm_source:     input.utmSource ?? null,
-    utm_medium:     input.utmMedium ?? null,
-    utm_campaign:   input.utmCampaign ?? null,
+  await recordNeonAnalyticsEvent({
+    sessionId: input.sessionId,
+    leadId: input.leadId,
+    eventName: input.eventName,
+    eventCategory: input.eventCategory,
+    properties: input.properties,
+    userAgent: input.userAgent,
+    utmSource: input.utmSource,
+    utmMedium: input.utmMedium,
+    utmCampaign: input.utmCampaign,
   });
-
-  if (error) {
-    console.error("[event-repository] createEvent error:", error.message);
-  }
 }

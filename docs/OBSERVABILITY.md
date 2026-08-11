@@ -34,13 +34,16 @@ When a rate limit is hit, the route logs `warn("rate_limited", { request_id })` 
 - `Retry-After: <seconds>`
 - Standard correlation headers
 
-Rate limits are enforced per IP. In production with Upstash credentials set, limits are durable across edge replicas. Without credentials, an in-memory sliding window is used (single replica only — adequate for dev/preview).
+Rate limits are enforced per IP. In production, the canonical Neon
+`rate_limit_buckets` table makes limits durable across serverless instances.
+Without `DATABASE_URL`, an in-memory sliding window is used for local tests only.
 
-**Required Vercel env vars for durable rate limiting:**
-- `UPSTASH_REDIS_REST_URL` — from Upstash console → REST API tab
-- `UPSTASH_REDIS_REST_TOKEN` — from Upstash console → REST API tab
+**Required production configuration:**
+- `DATABASE_URL` — the same server-only Neon connection used by lead capture
+- `public.rate_limit_buckets` — applied by the canonical migration chain
 
-Set `RATE_LIMIT_EMERGENCY_MEMORY=1` to force in-memory mode if Upstash is down.
+`RATE_LIMIT_EMERGENCY_MEMORY=1` acknowledges a temporary degraded in-memory mode;
+it does not make the limiter durable.
 
 ## Analytics Events
 

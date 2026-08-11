@@ -72,7 +72,7 @@ describe("checkRateLimit — async, in-memory fallback in test env", () => {
     expect(result.allowed).toBe(false);
   });
 
-  it("uses in-memory fallback (durable: false) when no Upstash creds", async () => {
+  it("uses in-memory fallback (durable: false) when no database is configured", async () => {
     const result = await checkRateLimit("test-durable-check", 10, 60_000);
     expect(result.durable).toBe(false);
   });

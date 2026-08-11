@@ -1,6 +1,6 @@
 export type LeadNotificationChannel = "email" | "sms";
-export type LeadNotificationRecipientType = "agent" | "customer";
-export type LeadNotificationType = "agent_assignment";
+export type LeadNotificationRecipientType = "agent" | "customer" | "internal";
+export type LeadNotificationType = "agent_assignment" | "lead_alert" | "consumer_ack";
 export type LeadNotificationStatus =
   | "pending"
   | "processing"
@@ -63,6 +63,8 @@ export type NotificationRequest = {
   subject?: string;
   text: string;
   html?: string;
+  bcc?: string[];
+  replyTo?: string;
   idempotencyKey: string;
 };
 
@@ -115,6 +117,16 @@ export type AssignmentNotificationLead = {
   source_detail?: string | null;
   page_url?: string | null;
   question_raw?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  score?: number | null;
+  score_factors?: Array<Record<string, unknown>> | null;
+  is_test?: boolean | null;
+  consent_email?: boolean | null;
+  consent_call?: boolean | null;
+  consent_sms?: boolean | null;
+  consent_language_version?: string | null;
+  routing_reason?: string | null;
 };
 
 export type AssignmentNotificationAgent = {

@@ -41,6 +41,12 @@ export const starterPrompts = [
 
 export const analyticsEvents = [
   "page_view",
+  "funnel_started",
+  "address_submitted",
+  "intent_selected",
+  "timeline_selected",
+  "contact_submitted",
+  "consent_accepted",
   "hero_cta_click",
   "home_value_started",
   "address_submit",
@@ -55,4 +61,12 @@ export const analyticsEvents = [
   "chat_message_sent",
   "appointment_click",
   "lead_created",
+  "thank_you_viewed",
+  "appointment_cta_clicked",
+  "phone_click",
+  "email_click",
+  "widget_step_completed",
+  "notification_queued",
+  "notification_delivered",
+  "notification_failed",
 ] as const;

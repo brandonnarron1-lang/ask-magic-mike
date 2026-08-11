@@ -1,696 +1,393 @@
-/**
- * HTTP-level tests for the Black Diamond /api/leads route handler.
- *
- * All external services (Supabase, OpenAI, PostHog, Resend) are absent
- * (no env vars set), so calls gracefully no-op and the route still returns
- * the correct HTTP shape.  One fetch-mock section validates that full
- * attribution fields reach the Supabase insert payload.
- */
-import { describe, expect, it, vi, afterEach, beforeEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "../../app/api/leads/route";
 import { PUBLIC_LEAD_SAVE_ERROR } from "../../app/lib/publicLeadErrors";
 
-const ORIGINAL_FETCH = globalThis.fetch;
-beforeEach(() => {
-  delete (process.env as Record<string, string | undefined>).NEXT_PUBLIC_SUPABASE_URL;
-  delete (process.env as Record<string, string | undefined>).SUPABASE_SERVICE_ROLE_KEY;
-  delete (process.env as Record<string, string | undefined>).OPENAI_API_KEY;
-  delete (process.env as Record<string, string | undefined>).POSTHOG_API_KEY;
-  delete (process.env as Record<string, string | undefined>).RESEND_API_KEY;
-});
+const SESSION_ID = "11111111-1111-4111-8111-111111111111";
+const LEAD_ID = "22222222-2222-4222-8222-222222222222";
+const DUPLICATE_ID = "33333333-3333-4333-8333-333333333333";
+const ENV_KEYS = [
+  "NEXT_PUBLIC_SUPABASE_URL",
+  "SUPABASE_SERVICE_ROLE_KEY",
+  "VERCEL_ENV",
+  "DATABASE_ENV",
+  "PREVIEW_DATA_MODE",
+  "ALLOW_PREVIEW_DB_MUTATION",
+  "OPENAI_API_KEY",
+  "RESEND_API_KEY",
+  "POSTHOG_API_KEY",
+  "AGENT_NOTIFICATIONS_ENABLED",
+  "LEAD_NOTIFICATION_MODE",
+] as const;
+const original = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
 
-afterEach(() => {
-  globalThis.fetch = ORIGINAL_FETCH;
-  delete (process.env as Record<string, string | undefined>).NEXT_PUBLIC_SUPABASE_URL;
-  delete (process.env as Record<string, string | undefined>).SUPABASE_SERVICE_ROLE_KEY;
-  delete (process.env as Record<string, string | undefined>).OPENAI_API_KEY;
-  delete (process.env as Record<string, string | undefined>).POSTHOG_API_KEY;
-  delete (process.env as Record<string, string | undefined>).RESEND_API_KEY;
-});
+function jsonResponse(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
 
-function makeRequest(body: unknown) {
+function request(body: Record<string, unknown>, headers: HeadersInit = {}) {
   return new Request("http://localhost/api/leads", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "user-agent": "vitest-browser",
-      referer: "https://www.ourtownproperties.com/ask-mike/",
-    },
+    headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify(body),
   });
 }
 
-async function json(res: Response) {
-  return res.json() as Promise<Record<string, unknown>>;
-}
-
-function missingColumnResponse(column: string, table = "leads") {
+function success(overrides: Record<string, unknown> = {}) {
   return {
-    ok: false,
-    status: 400,
-    statusText: "Bad Request",
-    text: async () =>
-      JSON.stringify({
-        code: "PGRST204",
-        details: null,
-        hint: null,
-        message: "Could not find the '" + column + "' column of '" + table + "' in the schema cache",
-      }),
-  } as Response;
+    lead_id: LEAD_ID,
+    session_id: SESSION_ID,
+    widget_session_id: SESSION_ID,
+    duplicate_of_lead_id: null,
+    assignment_status: "assigned",
+    idempotent_replay: false,
+    ...overrides,
+  };
 }
 
-function successInsertResponse(status = 201) {
-  return { ok: true, status: 201, statusText: "Created", text: async () => "" } as Response;
+function installRpc(result: Record<string, unknown> = success(), status = 200) {
+  const calls: Array<{ url: string; body: Record<string, unknown> }> = [];
+  const mock = vi.fn(async (input: URL | RequestInfo, init?: RequestInit) => {
+    const url = String(input);
+    const body = init?.body ? JSON.parse(String(init.body)) : {};
+    calls.push({ url, body });
+    return jsonResponse(result, status);
+  });
+  vi.stubGlobal("fetch", mock);
+  return { calls, mock };
 }
 
-function successRepresentationResponse(rows: Array<Record<string, unknown>>) {
-  return {
-    ok: true,
-    status: 201,
-    statusText: "Created",
-    json: async () => rows,
-    text: async () => JSON.stringify(rows),
-  } as Response;
-}
+beforeEach(() => {
+  process.env.NEXT_PUBLIC_SUPABASE_URL = "http://127.0.0.1:54321";
+  process.env.SUPABASE_SERVICE_ROLE_KEY = "synthetic-local-key";
+  for (const key of ENV_KEYS.slice(2)) delete process.env[key];
+});
 
-function configureSupabaseEnv() {
-  process.env.NEXT_PUBLIC_SUPABASE_URL = "https://fake.supabase.co";
-  process.env.SUPABASE_SERVICE_ROLE_KEY = "fake-key";
-}
+afterEach(() => {
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
+  for (const key of ENV_KEYS) {
+    const value = original[key];
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
+});
 
-// ─── Validation: home_value ────────────────────────────────────────────────────
-
-describe("POST /api/leads — home_value validation", () => {
-  it("400 when address missing", async () => {
-    const res = await POST(makeRequest({ funnel_type: "home_value", email: "a@b.com", phone: "2525551212" }));
-    expect(res.status).toBe(400);
-    const body = await json(res);
-    expect(body.error).toMatch(/address/i);
+describe("POST /api/leads validation and truthful persistence", () => {
+  it("returns 400 for invalid JSON", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/leads", { method: "POST", body: "{" }),
+    );
+    expect(response.status).toBe(400);
   });
 
-  it("400 when email missing", async () => {
-    const res = await POST(makeRequest({ funnel_type: "home_value", address: "123 Nash St", phone: "2525551212" }));
-    expect(res.status).toBe(400);
+  it.each([
+    [{ funnel_type: "home_value", email: "a@example.test", phone: "2525550100" }, "Address is required."],
+    [{ funnel_type: "home_value", address: "1 Synthetic St", phone: "2525550100" }, "Email and phone are required"],
+    [{ funnel_type: "seller", address: "1 Synthetic St" }, "Property address and phone are required"],
+    [{ funnel_type: "chat" }, "Question is required"],
+    [{ funnel_type: "appointment" }, "Email or phone is required"],
+  ])("rejects an incomplete payload without persistence calls", async (payload, message) => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const response = await POST(request(payload));
+    expect(response.status).toBe(400);
+    expect((await response.json()).error).toContain(message);
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("400 when phone missing", async () => {
-    const res = await POST(makeRequest({ funnel_type: "home_value", address: "123 Nash St", email: "a@b.com" }));
-    expect(res.status).toBe(400);
-  });
-
-  it("200 when all required fields present", async () => {
-    const res = await POST(makeRequest({
+  it("returns a truthful 503 when persistence is not configured", async () => {
+    Reflect.deleteProperty(process.env, "NEXT_PUBLIC_SUPABASE_URL");
+    Reflect.deleteProperty(process.env, "SUPABASE_SERVICE_ROLE_KEY");
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const response = await POST(request({
       funnel_type: "home_value",
-      address: "123 Nash St NW, Wilson NC",
-      email: "jane@example.com",
-      phone: "2525551212",
+      lead_source_surface: "home_value_page",
+      address: "1 Synthetic St",
+      email: "owner@example.test",
+      phone: "2525550100",
     }));
-    expect(res.status).toBe(200);
-    const body = await json(res);
-    expect(body.message).toMatch(/mike/i);
-  });
-});
-
-// ─── Validation: seller ────────────────────────────────────────────────────────
-
-describe("POST /api/leads — seller validation", () => {
-  it("400 when address missing", async () => {
-    const res = await POST(makeRequest({ funnel_type: "seller", phone: "2525551212" }));
-    expect(res.status).toBe(400);
-    const body = await json(res);
-    expect(body.error).toMatch(/address/i);
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({
+      error: PUBLIC_LEAD_SAVE_ERROR,
+      code: "lead_store_not_configured",
+    });
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("400 when phone missing", async () => {
-    const res = await POST(makeRequest({ funnel_type: "seller", address: "123 Nash St" }));
-    expect(res.status).toBe(400);
-  });
-
-  it("200 when address + phone present", async () => {
-    const res = await POST(makeRequest({ funnel_type: "seller", address: "123 Nash St", phone: "2525551212" }));
-    expect(res.status).toBe(200);
-  });
-});
-
-// ─── Validation: chat ─────────────────────────────────────────────────────────
-
-describe("POST /api/leads — chat validation", () => {
-  it("400 when question missing", async () => {
-    const res = await POST(makeRequest({ funnel_type: "chat" }));
-    expect(res.status).toBe(400);
-    const body = await json(res);
-    expect(body.error).toMatch(/question/i);
-  });
-
-  it("200 when question present", async () => {
-    const res = await POST(makeRequest({ funnel_type: "chat", question: "What is the Wilson market like?" }));
-    expect(res.status).toBe(200);
-  });
-});
-
-// ─── Validation: appointment (new hardening) ──────────────────────────────────
-
-describe("POST /api/leads — appointment validation", () => {
-  it("400 when both email and phone missing", async () => {
-    const res = await POST(makeRequest({ funnel_type: "appointment" }));
-    expect(res.status).toBe(400);
-    const body = await json(res);
-    expect(body.error).toMatch(/email or phone/i);
-  });
-
-  it("200 when email provided (no phone)", async () => {
-    const res = await POST(makeRequest({ funnel_type: "appointment", email: "jane@example.com" }));
-    expect(res.status).toBe(200);
-  });
-
-  it("200 when phone provided (no email)", async () => {
-    const res = await POST(makeRequest({ funnel_type: "appointment", phone: "2525551212" }));
-    expect(res.status).toBe(200);
-  });
-
-  it("200 when both email and phone provided", async () => {
-    const res = await POST(makeRequest({ funnel_type: "appointment", email: "jane@example.com", phone: "2525551212" }));
-    expect(res.status).toBe(200);
-  });
-});
-
-// ─── Validation: widget ────────────────────────────────────────────────────────
-
-describe("POST /api/leads — widget validation", () => {
-  it("400 when address missing", async () => {
-    const res = await POST(makeRequest({ funnel_type: "widget", email: "a@b.com", phone: "2525551212" }));
-    expect(res.status).toBe(400);
-  });
-
-  it("200 when all required fields present", async () => {
-    const res = await POST(makeRequest({
-      funnel_type: "widget",
-      address: "123 Nash St NW",
-      email: "jane@example.com",
-      phone: "2525551212",
-      attribution: { source: "widget", medium: "embed" },
-    }));
-    expect(res.status).toBe(200);
-  });
-});
-
-// ─── Malformed input ──────────────────────────────────────────────────────────
-
-describe("POST /api/leads — malformed input", () => {
-  it("400 when body is not valid JSON", async () => {
-    const res = await POST(new Request("http://localhost/api/leads", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: "not json {{{",
-    }));
-    expect(res.status).toBe(400);
-    const body = await json(res);
-    expect(body.error).toMatch(/json/i);
-  });
-});
-
-// ─── Attribution forwarded to Supabase ────────────────────────────────────────
-
-describe("POST /api/leads — attribution forwarded to Supabase insert", () => {
-  it("creates a session first and maps attribution to the production lead row", async () => {
-    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://fake.supabase.co";
-    process.env.SUPABASE_SERVICE_ROLE_KEY = "fake-key";
-
-    const captured: Array<{ table: string; body: Record<string, unknown>; url: string }> = [];
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
-      const urlStr = String(url);
-      if (urlStr.includes("supabase")) {
-        const body = init?.body && typeof init.body === "string"
-          ? JSON.parse(init.body) as Record<string, unknown>
-          : {};
-        captured.push({
-          table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads",
-          body,
-          url: urlStr,
-        });
-        return successInsertResponse();
-      }
-      return { ok: true, status: 200, json: async () => ({}) } as Response;
-    }) as unknown as typeof fetch;
-
-    await POST(makeRequest({
-      funnel_type: "home_value",
-      address: "123 Nash St NW, Wilson NC",
-      email: "jane@example.com",
-      phone: "2525551212",
-      widget_session_id: "11111111-1111-4111-8111-111111111111",
-      attribution: {
-        source: "facebook",
-        medium: "paid_social",
-        campaign: "seller_q3_wilson",
-        gclid: undefined,
-        embed_host: "ourtownproperties.com",
-        placement: "sitewide-floating",
-      },
-    }));
-
-    expect(captured.map((call) => call.table)).toEqual(["sessions", "leads"]);
-    const session = captured[0].body;
-    const row = captured[1].body;
-    expect(session.id).toBe("11111111-1111-4111-8111-111111111111");
-    expect(session.utm_source).toBe("facebook");
-    expect(session.utm_medium).toBe("paid_social");
-    expect(session.utm_campaign).toBe("seller_q3_wilson");
-    expect(session.initial_address).toBe("123 Nash St NW, Wilson NC");
-    expect(session.landing_page).toBe("https://www.ourtownproperties.com/ask-mike/");
-    expect(row.session_id).toBe(session.id);
-    expect(row.source).toBe("facebook");
-    expect(row.source_detail).toBe("home_value_page / paid_social / seller_q3_wilson / sitewide-floating");
-    expect(row.page_url).toBe("https://www.ourtownproperties.com/ask-mike/");
-    expect(row.widget_session_id).toBe("11111111-1111-4111-8111-111111111111");
-    expect(row.lead_type).toBe("home_value");
-    expect(row.primary_intent).toBe("sell");
-    expect(row.status).toBe("new");
-  });
-});
-
-// ─── Supabase production schema compatibility ────────────────────────────────
-
-describe("POST /api/leads — Supabase schema compatibility", () => {
-  it("maps home-value payloads to production lead columns without address or canonical-only fields", async () => {
-    configureSupabaseEnv();
-
-    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
-      if (String(url).includes("supabase")) {
-        const urlStr = String(url);
-        const body = init?.body && typeof init.body === "string"
-          ? JSON.parse(init.body) as Record<string, unknown>
-          : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
-        return successInsertResponse();
-      }
-      return { ok: true, status: 200, json: async () => ({}) } as Response;
-    }) as unknown as typeof fetch;
-
-    const res = await POST(makeRequest({
-      funnel_type: "home_value",
-      lead_source_surface: "widget",
-      address: "123 Nash St NW, Wilson NC",
-      email: "jane@example.com",
-      phone: "2525551212",
-      timeline: "30-60 days",
-      attribution: {
-        source: "ourtownproperties",
-        medium: "website",
-        campaign: "parent-site-widget",
-        parent_url: "https://www.ourtownproperties.com/",
-        placement: "sitewide-floating",
-      },
-    }));
-
-    expect(res.status).toBe(200);
-    expect(captured).toHaveLength(2);
-    expect(captured[0].table).toBe("sessions");
-    expect(captured[1].table).toBe("leads");
-    const row = captured[1].body;
-    expect(row.address_raw).toBe("123 Nash St NW, Wilson NC");
-    expect(row.timeline_months).toBe(3);
-    expect(row.lead_type).toBe("home_value");
-    expect(row.primary_intent).toBe("sell");
-    expect(row.source).toBe("ourtownproperties");
-    expect(row.source_detail).toBe("widget / website / parent-site-widget / sitewide-floating");
-    expect(row.page_url).toBe("https://www.ourtownproperties.com/");
-    expect(row).not.toHaveProperty("address");
-    expect(row).not.toHaveProperty("property_address");
-    expect(row).not.toHaveProperty("funnel_type");
-    expect(row).not.toHaveProperty("lead_source_surface");
-    expect(row).not.toHaveProperty("attribution");
-  });
-
-  it("prefers parent URL for embedded widget session landing page while preserving lead page_url", async () => {
-    configureSupabaseEnv();
-
-    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
-      if (String(url).includes("supabase")) {
-        const urlStr = String(url);
-        const body = init?.body && typeof init.body === "string"
-          ? JSON.parse(init.body) as Record<string, unknown>
-          : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
-        return successInsertResponse();
-      }
-      return { ok: true, status: 200, json: async () => ({}) } as Response;
-    }) as unknown as typeof fetch;
-
-    const res = await POST(makeRequest({
-      funnel_type: "widget",
-      lead_source_surface: "widget",
-      address: "123 Nash St NW",
-      email: "jane@example.com",
-      phone: "2525551212",
-      attribution: {
-        source: "ourtownproperties",
-        medium: "website",
-        campaign: "parent-site-widget",
-        parent_url: "https://www.ourtownproperties.com/",
-        landing_page: "https://www.askmagicmike.com/widget-preview",
-        current_path: "/widget",
-        placement: "sitewide-floating",
-      },
-    }));
-
-    expect(res.status).toBe(200);
-    expect(captured.map((call) => call.table)).toEqual(["sessions", "leads"]);
-    expect(captured[0].body.landing_page).toBe("https://www.ourtownproperties.com/");
-    expect(captured[1].body.page_url).toBe("https://www.ourtownproperties.com/");
-  });
-
-  it("keeps widget-preview as session landing page for direct Ask Magic Mike preview submissions", async () => {
-    configureSupabaseEnv();
-
-    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
-      if (String(url).includes("supabase")) {
-        const urlStr = String(url);
-        const body = init?.body && typeof init.body === "string"
-          ? JSON.parse(init.body) as Record<string, unknown>
-          : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
-        return successInsertResponse();
-      }
-      return { ok: true, status: 200, json: async () => ({}) } as Response;
-    }) as unknown as typeof fetch;
-
-    const res = await POST(makeRequest({
-      funnel_type: "widget",
-      lead_source_surface: "widget",
-      address: "123 Nash St NW",
-      email: "jane@example.com",
-      phone: "2525551212",
-      attribution: {
-        source: "askmagicmike",
-        medium: "website",
-        landing_page: "https://www.askmagicmike.com/widget-preview",
-      },
-    }));
-
-    expect(res.status).toBe(200);
-    expect(captured[0].body.landing_page).toBe("https://www.askmagicmike.com/widget-preview");
-    expect(captured[1].body.page_url).toBe("https://www.askmagicmike.com/widget-preview");
-  });
-
-  it("uses request referer for session landing page when attribution URLs are absent", async () => {
-    configureSupabaseEnv();
-
-    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
-      if (String(url).includes("supabase")) {
-        const urlStr = String(url);
-        const body = init?.body && typeof init.body === "string"
-          ? JSON.parse(init.body) as Record<string, unknown>
-          : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
-        return successInsertResponse();
-      }
-      return { ok: true, status: 200, json: async () => ({}) } as Response;
-    }) as unknown as typeof fetch;
-
-    const res = await POST(makeRequest({
-      funnel_type: "widget",
-      lead_source_surface: "widget",
-      address: "123 Nash St NW",
-      email: "jane@example.com",
-      phone: "2525551212",
-      attribution: {
-        source: "external",
-        medium: "website",
-      },
-    }));
-
-    expect(res.status).toBe(200);
-    expect(captured[0].body.landing_page).toBe("https://www.ourtownproperties.com/ask-mike/");
-    expect(captured[1].body.page_url).toBe("https://www.ourtownproperties.com/ask-mike/");
-  });
-
-  it("keeps seller context in production-safe fields", async () => {
-    configureSupabaseEnv();
-
-    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
-      if (String(url).includes("supabase")) {
-        const urlStr = String(url);
-        const body = init?.body && typeof init.body === "string"
-          ? JSON.parse(init.body) as Record<string, unknown>
-          : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
-        return successInsertResponse();
-      }
-      return { ok: true, status: 200, json: async () => ({}) } as Response;
-    }) as unknown as typeof fetch;
-
-    const res = await POST(makeRequest({
+  it("performs zero persistence/provider calls in Preview read-only mode", async () => {
+    process.env.VERCEL_ENV = "preview";
+    process.env.DATABASE_ENV = "preview";
+    process.env.PREVIEW_DATA_MODE = "disabled";
+    process.env.ALLOW_PREVIEW_DB_MUTATION = "false";
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const response = await POST(request({
       funnel_type: "seller",
       lead_source_surface: "seller_page",
-      address: "804 Herring Ave E",
-      phone: "2525551212",
-      condition: "Needs repairs",
-      timeline: "As soon as practical",
-      notes: "Inherited property",
+      address: "2 Synthetic Ave",
+      phone: "2525550101",
     }));
-
-    expect(res.status).toBe(200);
-    expect(captured).toHaveLength(2);
-    const row = captured[1].body;
-    expect(row.address_raw).toBe("804 Herring Ave E");
-    expect(row.lead_type).toBe("seller");
-    expect(row.primary_intent).toBe("sell");
-    expect(row.timeline_months).toBe(0);
-    expect(String(row.question_raw)).toContain("Condition: Needs repairs");
-    expect(String(row.question_raw)).toContain("Inherited property");
-    expect(row).not.toHaveProperty("condition");
-    expect(row).not.toHaveProperty("property_condition");
-    expect(row).not.toHaveProperty("notes");
+    expect(response.status).toBe(503);
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
+});
 
-  it("maps widget lead_type, page_url, and widget_session_id without retrying missing columns", async () => {
-    configureSupabaseEnv();
-
-    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
-      if (String(url).includes("supabase")) {
-        const urlStr = String(url);
-        const body = init?.body && typeof init.body === "string"
-          ? JSON.parse(init.body) as Record<string, unknown>
-          : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
-        return successInsertResponse();
-      }
-      return { ok: true, status: 200, json: async () => ({}) } as Response;
-    }) as unknown as typeof fetch;
-
-    const res = await POST(makeRequest({
-      funnel_type: "widget",
-      lead_source_surface: "widget",
-      lead_type: "seller_cash_offer",
-      address: "400 Broad St W",
-      email: "jane@example.com",
-      phone: "2525551212",
-      timeline: "6-12 months",
-      page_url: "https://www.ourtownproperties.com/sell/",
-      widget_session_id: "22222222-2222-4222-8222-222222222222",
+describe("POST /api/leads atomic lifecycle command", () => {
+  it("maps a home-value request, qualification, normalized identity, and attribution into one RPC", async () => {
+    const { calls } = installRpc();
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "100 Synthetic Oak Road",
+      email: " Owner@Example.Test ",
+      phone: "+1 (252) 555-0102",
+      timeline: "ASAP",
+      widget_session_id: SESSION_ID,
       attribution: {
-        source: "ourtownproperties",
-        campaign: "parent-site-widget",
-        placement: "sitewide-floating",
+        source: "synthetic",
+        medium: "cpc",
+        campaign: "infra-02",
+        landing_page: "/home-value",
       },
     }));
 
-    expect(res.status).toBe(200);
-    expect(captured.map((call) => call.table)).toEqual(["sessions", "leads"]);
-    const row = captured[1].body;
-    expect(row.session_id).toBe("22222222-2222-4222-8222-222222222222");
-    expect(row.widget_session_id).toBe("22222222-2222-4222-8222-222222222222");
-    expect(row.address_raw).toBe("400 Broad St W");
-    expect(row.lead_type).toBe("seller_cash_offer");
-    expect(row.primary_intent).toBe("sell");
-    expect(row.timeline_months).toBe(12);
-    expect(row.page_url).toBe("https://www.ourtownproperties.com/sell/");
-    expect(row.source).toBe("ourtownproperties");
+    expect(response.status).toBe(200);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toContain("/rest/v1/rpc/capture_public_lead_v1");
+    expect(calls[0].body).toMatchObject({
+      p_session: {
+        id: SESSION_ID,
+        utm_source: "synthetic",
+        utm_medium: "cpc",
+      },
+      p_lead: {
+        normalized_email: "owner@example.test",
+        normalized_phone: "2525550102",
+        normalized_property_address: "100 synthetic oak road",
+        timeline_months: 0,
+        status: "qualified",
+        lead_grade: "A",
+      },
+      p_attribution: {
+        utm_source: "synthetic",
+        utm_medium: "cpc",
+        is_paid: true,
+      },
+      p_notification_mode: "disabled",
+    });
+    expect(await response.json()).toMatchObject({
+      lead_id: LEAD_ID,
+      session_id: SESSION_ID,
+      duplicate_of_lead_id: null,
+    });
   });
 
-  it("does not send address even when PostgREST would reject it with PGRST204", async () => {
-    configureSupabaseEnv();
-
-    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
-      if (String(url).includes("supabase")) {
-        const urlStr = String(url);
-        const body = init?.body && typeof init.body === "string"
-          ? JSON.parse(init.body) as Record<string, unknown>
-          : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
-        if (urlStr.includes("/rest/v1/leads") && "address" in body) {
-          return missingColumnResponse("address");
-        }
-        return successInsertResponse();
-      }
-      return { ok: true, status: 200, json: async () => ({}) } as Response;
-    }) as unknown as typeof fetch;
-
-    const res = await POST(makeRequest({
-      funnel_type: "home_value",
-      address: "123 Nash St NW",
-      email: "jane@example.com",
-      phone: "2525551212",
-    }));
-
-    expect(res.status).toBe(200);
-    const leadWrites = captured.filter((call) => call.table === "leads");
-    expect(leadWrites).toHaveLength(1);
-    expect(leadWrites[0].body).not.toHaveProperty("address");
-    expect(leadWrites[0].body.address_raw).toBe("123 Nash St NW");
-  });
-
-  it("returns a generic public error when Supabase lead insert fails and does not retry storm", async () => {
-    configureSupabaseEnv();
-
-    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL) => {
-      const urlStr = String(url);
-      if (urlStr.includes("supabase")) {
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body: {} });
-        if (urlStr.includes("/rest/v1/sessions")) return successInsertResponse();
-        return {
-          ok: false,
-          status: 500,
-          statusText: "Internal Server Error",
-          text: async () => "Supabase insert failed: PGRST204 schema cache address column",
-        } as Response;
-      }
-      return { ok: true, status: 200, json: async () => ({}) } as Response;
-    }) as unknown as typeof fetch;
-
-    const res = await POST(makeRequest({
-      funnel_type: "home_value",
-      address: "123 Nash St NW",
-      email: "jane@example.com",
-      phone: "2525551212",
-    }));
-    const body = await json(res);
-    const serialized = JSON.stringify(body);
-
-    expect(res.status).toBe(500);
-    expect(captured.filter((call) => call.table === "sessions")).toHaveLength(1);
-    expect(captured.filter((call) => call.table === "leads")).toHaveLength(1);
-    expect(body.error).toBe(PUBLIC_LEAD_SAVE_ERROR);
-    expect(serialized).not.toMatch(/Supabase insert failed/i);
-    expect(serialized).not.toMatch(/PGRST204/i);
-    expect(serialized).not.toMatch(/schema cache/i);
-    expect(serialized).not.toMatch(/address column/i);
-  });
-});
-
-describe("POST /api/leads — timeline mapping", () => {
-  async function leadRowForTimeline(timeline: string) {
-    configureSupabaseEnv();
-    const captured: Array<{ table: string; body: Record<string, unknown> }> = [];
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
-      if (String(url).includes("supabase")) {
-        const urlStr = String(url);
-        const body = init?.body && typeof init.body === "string"
-          ? JSON.parse(init.body) as Record<string, unknown>
-          : {};
-        captured.push({ table: urlStr.includes("/rest/v1/sessions") ? "sessions" : "leads", body });
-        return successInsertResponse();
-      }
-      return { ok: true, status: 200, json: async () => ({}) } as Response;
-    }) as unknown as typeof fetch;
-
-    await POST(makeRequest({
-      funnel_type: "home_value",
-      address: "123 Nash St",
-      email: "jane@example.com",
-      phone: "2525551212",
-      timeline,
-    }));
-
-    return captured.find((call) => call.table === "leads")?.body || {};
-  }
-
-  it("maps ASAP to 0 months", async () => {
-    expect((await leadRowForTimeline("ASAP")).timeline_months).toBe(0);
-  });
-
-  it("maps 30-60 days to 3 months", async () => {
-    expect((await leadRowForTimeline("30-60 days")).timeline_months).toBe(3);
-  });
-
-  it("maps 6-12 months to 12 months", async () => {
-    expect((await leadRowForTimeline("6-12 months")).timeline_months).toBe(12);
-  });
-
-  it("maps just curious/not sure to 24 months", async () => {
-    expect((await leadRowForTimeline("Just curious / not sure")).timeline_months).toBe(24);
-  });
-});
-
-// ─── Response shape ───────────────────────────────────────────────────────────
-
-describe("POST /api/leads — response shape", () => {
-  it("returns JSON with message field on success", async () => {
-    const res = await POST(makeRequest({
+  it("maps seller and chat leads without changing the public response shape", async () => {
+    const seller = installRpc();
+    const sellerResponse = await POST(request({
       funnel_type: "seller",
-      address: "123 Nash St",
-      phone: "2525551212",
+      lead_source_surface: "seller_page",
+      address: "200 Synthetic Pine St",
+      phone: "2525550103",
+      condition: "Needs work",
+      timeline: "30-60 days",
+      widget_session_id: SESSION_ID,
     }));
-    const body = await json(res);
-    expect(typeof body.message).toBe("string");
-    expect(String(body.message).length).toBeGreaterThan(0);
-  });
+    expect(sellerResponse.status).toBe(200);
+    expect(seller.calls[0].body.p_lead).toMatchObject({
+      lead_type: "seller",
+      primary_intent: "sell",
+      timeline_months: 3,
+    });
 
-  it("includes 'Mike' in default message when OpenAI absent", async () => {
-    const res = await POST(makeRequest({
+    installRpc();
+    const chatResponse = await POST(request({
       funnel_type: "chat",
-      question: "What is my home worth?",
+      lead_source_surface: "ask_page",
+      question: "What is a synthetic inspection?",
+      widget_session_id: SESSION_ID,
     }));
-    const body = await json(res);
-    expect(body.message).toContain("Mike");
+    expect(chatResponse.status).toBe(200);
+    expect(await chatResponse.json()).toHaveProperty("message");
   });
 
-  it("returns safe lead and session references when persistence succeeds", async () => {
-    configureSupabaseEnv();
-    globalThis.fetch = vi.fn(async (url: RequestInfo | URL) => {
-      const urlStr = String(url);
-      if (urlStr.includes("/rest/v1/sessions")) return successInsertResponse();
-      if (urlStr.includes("/rest/v1/leads")) {
-        return successRepresentationResponse([{
-          id: "33333333-3333-4333-8333-333333333333",
-          session_id: "11111111-1111-4111-8111-111111111111",
-          widget_session_id: "11111111-1111-4111-8111-111111111111",
-        }]);
-      }
-      return { ok: true, status: 200, json: async () => ({}) } as Response;
-    }) as unknown as typeof fetch;
-
-    const res = await POST(makeRequest({
+  it("returns the canonical lead on an idempotent replay", async () => {
+    installRpc(success({ idempotent_replay: true }));
+    const response = await POST(request({
       funnel_type: "home_value",
-      address: "123 Nash St NW",
-      email: "jane@example.com",
-      phone: "2525551212",
-      widget_session_id: "11111111-1111-4111-8111-111111111111",
+      lead_source_surface: "home_value_page",
+      address: "300 Synthetic Cedar Dr",
+      email: "repeat@example.test",
+      phone: "2525550104",
+      widget_session_id: SESSION_ID,
+    }));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      lead_id: LEAD_ID,
+      session_id: SESSION_ID,
+    });
+  });
+
+  it("returns replay success without provider side effects", async () => {
+    process.env.OPENAI_API_KEY = "synthetic-openai-key";
+    process.env.RESEND_API_KEY = "synthetic-resend-key";
+    process.env.POSTHOG_API_KEY = "synthetic-posthog-key";
+    const { calls } = installRpc(success({ idempotent_replay: true }));
+
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "310 Replay Oak Dr",
+      email: "repeat-provider@example.test",
+      phone: "2525550110",
+      widget_session_id: SESSION_ID,
     }));
 
-    expect(res.status).toBe(200);
-    const body = await json(res);
-    expect(body.lead_id).toBe("33333333-3333-4333-8333-333333333333");
-    expect(body.session_id).toBe("11111111-1111-4111-8111-111111111111");
-    expect(JSON.stringify(body)).not.toContain("fake-key");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("X-AMM-Idempotent-Replay")).toBe("1");
+    expect(await response.json()).toMatchObject({
+      message: "Got it. Mike will follow up shortly.",
+      lead_id: LEAD_ID,
+      session_id: SESSION_ID,
+    });
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toContain("/rest/v1/rpc/capture_public_lead_v1");
+    expect(calls.some((call) => call.url.includes("api.openai.com"))).toBe(false);
+    expect(calls.some((call) => call.url.includes("api.resend.com"))).toBe(false);
+    expect(calls.some((call) => call.url.includes("posthog"))).toBe(false);
   });
-});
 
-// ─── /api/valuation backward compat ──────────────────────────────────────────
+  it("returns duplicate identity linkage supplied by the transaction", async () => {
+    installRpc(success({
+      duplicate_of_lead_id: DUPLICATE_ID,
+      assignment_status: "duplicate",
+    }));
+    const response = await POST(request({
+      funnel_type: "seller",
+      lead_source_surface: "seller_page",
+      address: "400 Shared Address Way",
+      email: "duplicate@example.test",
+      phone: "2525550105",
+      widget_session_id: SESSION_ID,
+    }));
+    expect(await response.json()).toMatchObject({
+      duplicate_of_lead_id: DUPLICATE_ID,
+    });
+  });
 
-describe("POST /api/valuation — re-exports leads route", () => {
-  it("module exports the same POST function as /api/leads", async () => {
-    const valuation = await import("../../app/api/valuation/route");
-    const leads = await import("../../app/api/leads/route");
-    expect(valuation.POST).toBe(leads.POST);
+  it.each(["identity_conflict", "idempotency_conflict"] as const)(
+    "maps %s to HTTP 409 without exposing an existing lead id",
+    async (code) => {
+      installRpc({
+        ok: false,
+        error: code,
+        session_id: SESSION_ID,
+        idempotent_replay: false,
+      });
+      const response = await POST(request({
+        funnel_type: "home_value",
+        lead_source_surface: "home_value_page",
+        address: "450 Conflict Way",
+        email: "conflict@example.test",
+        phone: "2525550199",
+        widget_session_id: SESSION_ID,
+      }));
+      expect(response.status).toBe(409);
+      const body = await response.json();
+      expect(body).toMatchObject({ code });
+      expect(body).not.toHaveProperty("lead_id");
+    },
+  );
+
+  it("does not retry-storm when the atomic persistence call fails", async () => {
+    const { mock } = installRpc({ error: "synthetic" }, 500);
+    const response = await POST(request({
+      funnel_type: "seller",
+      lead_source_surface: "seller_page",
+      address: "500 Synthetic Failure Ct",
+      phone: "2525550106",
+      widget_session_id: SESSION_ID,
+    }));
+    expect(response.status).toBe(500);
+    expect(mock).toHaveBeenCalledTimes(1);
+    expect((await response.json()).error).toBe(PUBLIC_LEAD_SAVE_ERROR);
+  });
+
+  it("does not call generative or consumer providers from the public lead route", async () => {
+    const fetchSpy = vi.fn((input: URL | RequestInfo, init?: RequestInit) => {
+      const url = String(input);
+      if (url.includes("/rest/v1/rpc/capture_public_lead_v1")) {
+        return Promise.resolve(jsonResponse(success()));
+      }
+      return Promise.reject(new Error("unexpected provider call"));
+    });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "610 Synthetic Timeout Ln",
+      email: "timeout@example.test",
+      phone: "2525550111",
+      widget_session_id: SESSION_ID,
+    }));
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toMatchObject({ lead_id: LEAD_ID, session_id: SESSION_ID });
+    expect(body).not.toHaveProperty("error");
+    expect(JSON.stringify(body)).not.toContain("AbortError");
+    expect(fetchSpy.mock.calls.some(([input]) => String(input).includes("api.openai.com"))).toBe(false);
+  });
+
+  it("keeps a committed lead successful when an external provider throws", async () => {
+    process.env.OPENAI_API_KEY = "synthetic-openai-key";
+    process.env.RESEND_API_KEY = "synthetic-resend-key";
+    const fetchSpy = vi.fn(async (input: URL | RequestInfo) => {
+      const url = String(input);
+      if (url.includes("/rest/v1/rpc/capture_public_lead_v1")) {
+        return jsonResponse(success());
+      }
+      throw new Error("synthetic provider unavailable");
+    });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "600 Synthetic Provider Ln",
+      email: "provider@example.test",
+      phone: "2525550107",
+      widget_session_id: SESSION_ID,
+    }));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ lead_id: LEAD_ID });
+  });
+
+  it("maps unknown domain failures to a sanitized persistence error", async () => {
+    const { mock } = installRpc({
+      ok: false,
+      error: "some_future_failure",
+      idempotent_replay: false,
+    });
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "700 Future Failure Way",
+      email: "future@example.test",
+      phone: "2525550112",
+      widget_session_id: SESSION_ID,
+    }));
+
+    expect(response.status).toBe(500);
+    expect(response.status).not.toBe(409);
+    expect(mock).toHaveBeenCalledTimes(1);
+    const body = await response.json();
+    expect(body).toMatchObject({ error: PUBLIC_LEAD_SAVE_ERROR });
+    expect(body.correlation_id).toEqual(expect.any(String));
+    expect(JSON.stringify(body)).not.toContain("some_future_failure");
   });
 });

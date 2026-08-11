@@ -109,6 +109,10 @@ export function Footer() {
           </p>
         </div>
         <div className="flex flex-wrap gap-3 md:justify-end">
+          <Link href="/privacy" className="text-[#e2c06f] hover:text-[#f4ead4]">Privacy</Link>
+          <Link href="/terms" className="text-[#e2c06f] hover:text-[#f4ead4]">Terms</Link>
+          <Link href="/accessibility" className="text-[#e2c06f] hover:text-[#f4ead4]">Accessibility</Link>
+          <Link href="/contact" className="text-[#e2c06f] hover:text-[#f4ead4]">Contact</Link>
           <Link href="/widget-preview" className="text-[#e2c06f] hover:text-[#f4ead4]">Widget Preview</Link>
           <Link href="/integrations/ourtownproperties" className="text-[#e2c06f] hover:text-[#f4ead4]">OurTown Integration</Link>
           <Link href="/social-preview" className="text-[#e2c06f] hover:text-[#f4ead4]">Social Preview</Link>
