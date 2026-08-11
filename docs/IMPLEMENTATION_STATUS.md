@@ -104,6 +104,9 @@ Updated 2026-08-11.
 - Verification: 137 Vitest files / 2,488 tests pass; 13/13 browser E2E tests pass;
   lint, strict typecheck, production build, 43-route manifest, 14/14 release-safety
   checks, dependency audit, whitespace check, and 319-commit gitleaks scan pass.
+- Non-production Vercel preview `dpl_C5Rt9Wssh4jGaqo3GHQyTs7a9R34` is READY at
+  `ask-magic-mike-il5455ptk-eyes-up-industries.vercel.app`; core public routes and
+  both health endpoints return 200 with delivery channels disabled.
 
 ## Database recovery decision
 

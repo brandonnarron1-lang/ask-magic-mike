@@ -226,3 +226,17 @@ Known verification limitations: local shell Node is 26.5.1 while the project and
 Vercel target are pinned to Node 20.x; the build passes locally but preview remains
 the Node-20 deployment proof. PHP CLI is unavailable locally, so staging must run
 `php -l` before the disabled bridge package is uploaded.
+
+### Non-production preview proof — 2026-08-11 16:12 America/New_York
+
+- Deployment: `dpl_C5Rt9Wssh4jGaqo3GHQyTs7a9R34`.
+- URL: `https://ask-magic-mike-il5455ptk-eyes-up-industries.vercel.app`.
+- Vercel state: `READY`; target: preview; production was not promoted.
+- Authenticated preview requests returned HTTP 200 for `/`, `/home-value`, `/buy`,
+  `/ask`, `/api/health/live`, and `/api/health/ready`.
+- Public health reports environment `preview`, canonical PostgreSQL configured,
+  email disabled, and notification mode disabled. No lead or external message was
+  created during this smoke test.
+- Vercel warns that Node 20 becomes unsupported for deployments created on or
+  after 2026-10-01. A deliberate Node 24 compatibility upgrade is a follow-up,
+  not an untested runtime change inside this hardening candidate.
