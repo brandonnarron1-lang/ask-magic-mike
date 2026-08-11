@@ -267,3 +267,25 @@ the Node-20 deployment proof. PHP CLI is unavailable locally, so staging must ru
   Neon while the Lead Center inbox still selected the retired Supabase read
   adapter. The follow-up patch makes inbox/detail reads provider-neutral and
   exposes provider message IDs in the protected notification view.
+
+### Lead Center follow-up deployment — 2026-08-11
+
+- PR `#123` passed the Node 20 release gate, including 2,489 unit tests,
+  typecheck, lint, build, route-manifest verification, release report, and
+  launch-authority report.
+- Local verification passed: production build; 13/13 Playwright tests; 14/14
+  release safety checks; route manifest; dependency audit; and staged
+  high-confidence secret scan.
+- Isolated production-target deployment `dpl_BGkVcCMFgeZQgnteRxRUomeJoyRv`
+  passed before promotion: Neon reachable and schema ready; Resend, provider
+  delivery, and hidden BCC configured; QA lead present in inbox/detail; provider
+  message ID rendered without recipient references; anonymous admin returned 401.
+- Post-promotion, fifteen required public/legal/health routes returned HTTP 200.
+- Audit mailbox search matched the controlled QA lead ID and `[TEST] HOME VALUE
+  LEAD` subject. Provider message ID is
+  `fe5ab262-6dd4-405b-839b-0da71ab996fa`; canonical outbox status remains sent,
+  provider Resend, attempt 1/3.
+- WordPress canonical bridge installation succeeded and the health page reports
+  `Shadow only — no forwarding`, no observed entries, and secrets hidden.
+- Our Town homepage, `/ask-mike/`, and Mike's agent profile remained HTTP 200
+  after activation.

@@ -58,5 +58,24 @@ the canonical bridge is proven.
 Authenticated inspection and a prior connector-only configuration/cache refresh
 occurred. No form, notification, legacy plugin, live page content, historic entry,
 or lead record was changed during the 2026-08-11 combined-system audit.
-PHP CLI is not installed in the local workstation, so the plugin has static
-contract coverage but still requires `php -l` on WordPress staging before upload.
+PHP CLI is not installed in the local workstation. WordPress successfully
+unpacked, installed, and activated the package, which provides the production PHP
+parse/load proof; forwarding remains disabled.
+
+## Production shadow installation — 2026-08-11
+
+- Active and retained: Ask Magic Mike `1.0.0`, Ask Magic Mike Lead Ops & Social
+  Share Upgrade `2.10.0`, Ask Magic Mike Connector `1.0.0`, Gravity Forms
+  `2.10.5`, and the existing Constant Contact integration/exclusion plugins.
+- The existing connector already targets the canonical Ask Magic Mike hostname
+  with `/value` and `/widget/v1`. The site-wide floating launcher remains off.
+- Gravity Form 5 has one active admin notification and no local BCC. Leave it
+  enabled until an exact-form canonical forwarding test proves one Gravity entry,
+  one Neon lead, and one canonical alert.
+- The legacy WordPress lead store contains six historical records and reports
+  four uncontacted. Do not bulk import, merge, suppress, or delete them without a
+  reviewed identity/dedupe reconciliation.
+- Canonical bridge `1.0.0` is installed and active. Its health page proves
+  `Shadow only — no forwarding`, no observed entries, and no displayed secrets.
+- Forwarding remains impossible until both Vercel `WORDPRESS_BRIDGE_SECRET` and
+  hosting-level WordPress secret/enable configuration are supplied securely.

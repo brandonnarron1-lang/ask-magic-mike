@@ -134,3 +134,28 @@ any bridge activation or shadow-mode test.
   is present. Supabase remains a compatibility fallback only.
 - The notification dashboard now displays the provider message ID needed for
   delivery reconciliation without exposing recipient addresses.
+
+## Production follow-up — PR #123
+
+- PR `#123` merged as `55dec0c95bf18cc056cb09955c44e8180a450466`.
+- Production deployment `dpl_BGkVcCMFgeZQgnteRxRUomeJoyRv` is canonical and
+  serves all required public, legal, widget, sitemap, and health routes.
+- Authenticated Lead Center inbox and detail reads now show canonical Neon data;
+  an anonymous request receives HTTP 401.
+- Production health reports Neon reachable, lead schema ready, Resend enabled,
+  provider delivery enabled, and hidden BCC configuration present.
+- The approved audit mailbox contains the controlled QA lead ID and `[TEST]`
+  alert. Provider message ID: `fe5ab262-6dd4-405b-839b-0da71ab996fa`.
+- The Vercel automation bypass credential was rotated, the repository Actions
+  secret was updated, and superseded bypass values were revoked.
+
+## WordPress reuse-first status
+
+- The existing Ask Magic Mike Connector is active, points to
+  `https://www.askmagicmike.com`, uses `/value` and `/widget/v1`, and keeps the
+  site-wide floating launcher disabled.
+- The existing WordPress Ask Magic Mike system has six historical records, four
+  marked uncontacted. They remain in place pending a reviewed dedupe/import plan.
+- Gravity Form 5 retains one active admin notification and an empty local BCC.
+- Ask Magic Mike Canonical Lead Bridge `1.0.0` is installed and active in
+  `Shadow only — no forwarding` mode. No entry has been forwarded or observed.

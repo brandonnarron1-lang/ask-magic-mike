@@ -34,10 +34,14 @@ one canonical lead, one internal alert, one provider message ID, provider event
 - Lead path: server validation, origin/rate controls, durable capture, additive
   consent/attribution/score enrichment, deterministic Mike fallback routing,
   internal outbox alert, bounded retry, and consent-gated consumer acknowledgment.
-- Production deployment `dpl_SDMv6Nz69aKZJFfmGB54h6MpY5yt` is Ready and
+- Production deployment `dpl_BGkVcCMFgeZQgnteRxRUomeJoyRv` is Ready and
   aliased to the canonical hostname.
 - Production Neon migration, secure Vercel environment configuration, and sender
-  DNS authentication were completed. WordPress was not published or changed.
+  DNS authentication were completed. The protected Lead Center reads canonical
+  Neon data and exposes delivery status/message IDs without recipient references.
+- The existing WordPress connector remains canonical. The signed bridge is
+  installed in shadow-only mode; no form, notification, historical record, page,
+  menu, or public CTA was replaced.
 
 ## Production proof fields
 

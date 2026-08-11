@@ -25,3 +25,10 @@
   message IDs in the notification dashboard.
 - Corrected protected health reporting to recognize the active email enablement
   variable and report BCC presence as a boolean only.
+- Merged PR `#123` and promoted production deployment
+  `dpl_BGkVcCMFgeZQgnteRxRUomeJoyRv` after authenticated Neon Lead Center checks.
+- Rotated the Vercel automation bypass credential, updated the GitHub Actions
+  secret, and revoked both superseded bypasses.
+- Installed and activated the reviewed WordPress canonical bridge in inert
+  shadow mode. Existing forms, notifications, and historical lead records were
+  not modified or imported.

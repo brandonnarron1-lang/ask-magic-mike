@@ -2,8 +2,8 @@
 
 ## Application
 
-Current production is `dpl_4yacS3NeepmZNp4AnamDF6oPA5GW`. The immediately prior
-known-good deployment is `dpl_SDMv6Nz69aKZJFfmGB54h6MpY5yt`. If smoke checks fail,
+Current production is `dpl_BGkVcCMFgeZQgnteRxRUomeJoyRv`. The immediately prior
+known-good deployment is `dpl_4yacS3NeepmZNp4AnamDF6oPA5GW`. If smoke checks fail,
 stop traffic activation and use Vercel promotion/rollback to the recorded prior
 deployment. Do not delete a deployment or force-push.
 
@@ -19,6 +19,10 @@ retain `leads`, `consents`, `audit_logs`, and delivery records.
 Remove only the named reversible Custom HTML/shortcode/widget block or deactivate
 the isolated bridge after backing up. Do not edit parent theme, `functions.php`,
 FlexMLS/IDX, or unrelated forms. Restore prior page cache only if the owner approves.
+
+The canonical bridge is currently shadow-only. Immediate rollback is deactivation
+of `Ask Magic Mike Canonical Lead Bridge`; it has not forwarded, altered, or
+imported any lead record.
 
 ## Email
 
