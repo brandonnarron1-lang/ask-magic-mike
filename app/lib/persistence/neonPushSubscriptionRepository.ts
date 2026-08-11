@@ -54,43 +54,14 @@ export class NeonPushSubscriptionRepository {
   private ensureSchema() {
     if (!this.schemaReady) {
       this.schemaReady = (async () => {
-        // Neon executes prepared statements, which intentionally reject multiple
-        // top-level commands. Keep each idempotent schema command separate.
-        await this.sql.query(`
-          DO $amm_push$
-          BEGIN
-            PERFORM pg_advisory_xact_lock(2026081119);
-            CREATE TABLE IF NOT EXISTS public.staff_push_subscriptions (
-              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              recipient_role TEXT NOT NULL CHECK (recipient_role IN ('primary', 'copy')),
-              endpoint TEXT NOT NULL UNIQUE,
-              p256dh TEXT NOT NULL,
-              auth TEXT NOT NULL,
-              user_agent TEXT,
-              is_active BOOLEAN NOT NULL DEFAULT TRUE,
-              created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-              updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-              last_sent_at TIMESTAMPTZ,
-              last_error TEXT
-            );
-            ALTER TABLE public.staff_push_subscriptions ENABLE ROW LEVEL SECURITY;
-            IF NOT EXISTS (
-              SELECT 1 FROM pg_policies
-              WHERE schemaname = 'public'
-                AND tablename = 'staff_push_subscriptions'
-                AND policyname = 'staff_push_subscriptions_deny_public'
-            ) THEN
-              CREATE POLICY staff_push_subscriptions_deny_public
-                ON public.staff_push_subscriptions
-                FOR ALL TO PUBLIC USING (FALSE) WITH CHECK (FALSE);
-            END IF;
-          END $amm_push$;
-        `);
-        await this.sql.query(`
-          CREATE INDEX IF NOT EXISTS staff_push_subscriptions_active_role_idx
-            ON public.staff_push_subscriptions(recipient_role)
-            WHERE is_active = TRUE
-        `);
+        // Schema changes belong to reviewed migrations, never a public/runtime
+        // request. The production role intentionally has no CREATE privilege.
+        const result = (await this.sql.query(
+          `SELECT to_regclass('public.staff_push_subscriptions') IS NOT NULL AS ready`,
+        )) as Array<Record<string, unknown>>;
+        if (result[0]?.ready !== true) {
+          throw new Error("push_subscription_schema_missing");
+        }
       })().catch((error) => {
         this.schemaReady = null;
         throw error;

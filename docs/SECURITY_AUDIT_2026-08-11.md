@@ -159,3 +159,38 @@ listed at the end are local candidate changes and have not been deployed.
   repository and do not log arbitrary properties or raw IP.
 - Full-history gitleaks: 319 commits, no leaks after review/allowlisting of three
   documented security-test fixture false positives.
+# Addendum: Ask Magic Mike / NellySelly isolation
+
+## Finding ISO-001
+
+- Rule ID: NEXT-ENV-001 / system boundary
+- Severity: High (resolved)
+- Location: `app/lib/persistence/neonPushSubscriptionRepository.ts`, schema readiness
+- Evidence: the runtime repository previously issued `CREATE TABLE`, `ALTER
+  TABLE`, `CREATE POLICY`, and `CREATE INDEX` while handling an authenticated
+  request. Production correctly rejected this with `permission denied for
+  schema public`.
+- Impact: request-time DDL violated least privilege and could modify whichever
+  database a deployment was accidentally configured to use.
+- Fix: runtime now performs only a read-only `to_regclass` readiness probe;
+  schema changes remain in the reviewed migration.
+- Mitigation: the production database role retains no schema-create privilege.
+- False-positive notes: none; the production error and source path matched.
+
+## Finding ISO-002
+
+- Rule ID: deployment/data isolation
+- Severity: High (preventive control added)
+- Location: `.vercel/project.json`, `scripts/amm/verify-system-isolation.mjs`,
+  `package.json`
+- Evidence: Ask Magic Mike is linked to Vercel project
+  `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; deployable code contains no NellySelly
+  identifiers; the production deployment aliases only Ask Magic Mike domains.
+- Impact: a future wrong-project link or cross-product identifier could route a
+  build, domain, or integration toward the wrong product.
+- Fix: the release gate now validates the exact Vercel team/project and rejects
+  known NellySelly identifiers from deployable code/configuration.
+- Mitigation: separate Neon organizations/projects and operator rules are
+  recorded in `docs/SYSTEM_ISOLATION.md`.
+- False-positive notes: documentation is intentionally excluded so historical
+  conflicts and isolation decisions remain auditable.
