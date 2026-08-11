@@ -76,8 +76,41 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
     // patch semantics as the former PostgREST adapter without interpolating
     // request-controlled column names.
     try {
-      await this.sql.query("UPDATE public.leads SET score = COALESCE(($1::jsonb->>'score')::smallint, score), score_factors = COALESCE($1::jsonb->'score_factors', score_factors), score_version = COALESCE($1::jsonb->>'score_version', score_version), is_test = COALESCE(($1::jsonb->>'is_test')::boolean, is_test), communication_suppressed = COALESCE(($1::jsonb->>'communication_suppressed')::boolean, communication_suppressed), email_suppressed = COALESCE(($1::jsonb->>'email_suppressed')::boolean, email_suppressed), sms_suppressed = COALESCE(($1::jsonb->>'sms_suppressed')::boolean, sms_suppressed), consent_language_text = COALESCE($1::jsonb->>'consent_language_text', consent_language_text), routing_reason = COALESCE($1::jsonb->>'routing_reason', routing_reason) WHERE id = $2::uuid", [JSON.stringify(input.leadPatch), input.leadId]);
-      await this.sql.query("UPDATE public.source_attribution SET first_touch = COALESCE($1::jsonb->'first_touch', first_touch), last_touch = COALESCE($1::jsonb->'last_touch', last_touch), click_ids = COALESCE($1::jsonb->'click_ids', click_ids), placement_id = COALESCE($1::jsonb->>'placement_id', placement_id) WHERE lead_id = $2::uuid", [JSON.stringify(input.attributionPatch), input.leadId]);
+      await this.sql.query(
+        `UPDATE public.leads SET
+           city = COALESCE(NULLIF($1::jsonb->>'city', ''), city),
+           score = COALESCE(($1::jsonb->>'score')::smallint, score),
+           score_factors = COALESCE($1::jsonb->'score_factors', score_factors),
+           score_version = COALESCE(NULLIF($1::jsonb->>'score_version', ''), score_version),
+           is_test = COALESCE(($1::jsonb->>'is_test')::boolean, is_test),
+           communication_suppressed = COALESCE(($1::jsonb->>'communication_suppressed')::boolean, communication_suppressed),
+           email_suppressed = COALESCE(($1::jsonb->>'email_suppressed')::boolean, email_suppressed),
+           sms_suppressed = COALESCE(($1::jsonb->>'sms_suppressed')::boolean, sms_suppressed),
+           consent_language_text = COALESCE(NULLIF($1::jsonb->>'consent_language_text', ''), consent_language_text),
+           consent_ip_hash = COALESCE(NULLIF($1::jsonb->>'consent_ip_hash', ''), consent_ip_hash),
+           consent_source = COALESCE(NULLIF($1::jsonb->>'consent_source', ''), consent_source),
+           consent_user_agent = COALESCE(NULLIF($1::jsonb->>'consent_user_agent', ''), consent_user_agent),
+           routing_reason = COALESCE(NULLIF($1::jsonb->>'routing_reason', ''), routing_reason),
+           target_geography = COALESCE(NULLIF($1::jsonb->>'target_geography', ''), target_geography),
+           financing = COALESCE(NULLIF($1::jsonb->>'financing', ''), financing),
+           preapproval = COALESCE(($1::jsonb->>'preapproval')::boolean, preapproval),
+           request_idempotency_key = COALESCE(NULLIF($1::jsonb->>'request_idempotency_key', ''), request_idempotency_key)
+         WHERE id = $2::uuid`,
+        [JSON.stringify(input.leadPatch), input.leadId],
+      );
+      await this.sql.query(
+        `UPDATE public.source_attribution SET
+           first_touch = COALESCE($1::jsonb->'first_touch', first_touch),
+           last_touch = COALESCE($1::jsonb->'last_touch', last_touch),
+           click_ids = COALESCE($1::jsonb->'click_ids', click_ids),
+           placement_id = COALESCE(NULLIF($1::jsonb->>'placement_id', ''), placement_id),
+           page_title = COALESCE(NULLIF($1::jsonb->>'page_title', ''), page_title),
+           listing_id = COALESCE(NULLIF($1::jsonb->>'listing_id', ''), listing_id),
+           property_id = COALESCE(NULLIF($1::jsonb->>'property_id', ''), property_id),
+           agent_id = COALESCE(NULLIF($1::jsonb->>'agent_id', ''), agent_id)
+         WHERE lead_id = $2::uuid`,
+        [JSON.stringify(input.attributionPatch), input.leadId],
+      );
       for (const consent of input.consents) {
         await this.sql.query(
           `INSERT INTO public.consents (

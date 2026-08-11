@@ -8,8 +8,13 @@ describe("NeonPostgresAdapter", () => {
 
     await adapter.enrichLeadRecord({
       leadId: "11111111-1111-4111-8111-111111111111",
-      leadPatch: { score: 91, is_test: true },
-      attributionPatch: { placement_id: "preview_qa" },
+      leadPatch: {
+        score: 91,
+        is_test: true,
+        request_idempotency_key: "22222222-2222-4222-8222-222222222222",
+        consent_source: "seller_page:seller-intake",
+      },
+      attributionPatch: { placement_id: "preview_qa", page_title: "Seller options" },
       consents: [
         {
           lead_id: "11111111-1111-4111-8111-111111111111",
@@ -22,6 +27,12 @@ describe("NeonPostgresAdapter", () => {
     });
 
     expect(query).toHaveBeenCalledTimes(3);
+    const leadSql = String(query.mock.calls[0][0]);
+    const attributionSql = String(query.mock.calls[1][0]);
+    expect(leadSql).toContain("request_idempotency_key");
+    expect(leadSql).toContain("consent_source");
+    expect(attributionSql).toContain("page_title");
+    expect(attributionSql).toContain("listing_id");
     const consentSql = String(query.mock.calls[2][0]);
     expect(consentSql).toContain("INSERT INTO public.consents (");
     expect(consentSql).toContain("lead_id, consent_type, granted");
