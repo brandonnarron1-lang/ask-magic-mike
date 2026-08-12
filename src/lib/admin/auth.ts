@@ -7,6 +7,7 @@
  */
 import { timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
+import { decodeBasicPassword } from "./edge-secret";
 
 export interface AdminAuthOk {
   ok: true;
@@ -34,7 +35,7 @@ export function checkBearerSecret(req: NextRequest, expected: string | undefined
 
 export function checkAdminAuth(req: NextRequest): AdminAuthOk | AdminAuthFail {
   const secret = process.env.ADMIN_SECRET;
-  if (!secret) {
+  if (!secret || (process.env.NODE_ENV === "production" && secret === "changeme-local")) {
     return {
       ok: false,
       status: 503,
@@ -47,6 +48,23 @@ export function checkAdminAuth(req: NextRequest): AdminAuthOk | AdminAuthFail {
   }
   // Timing-safe comparison prevents secret-length/character oracle attacks.
   // Pad to equal length first — timingSafeEqual requires identical byte lengths.
+  if (!secretsMatch(secret, supplied)) {
+    return { ok: false, status: 401, error: "unauthorized" };
+  }
+  return { ok: true, actor: "admin" };
+}
+
+/**
+ * Route-level defense for handlers under `/admin/*` that are also protected by
+ * middleware Basic Auth. Keeping the same verification in the handler prevents
+ * a future matcher/configuration regression from silently exposing the action.
+ */
+export function checkAdminBasicAuth(req: NextRequest): AdminAuthOk | AdminAuthFail {
+  const secret = process.env.ADMIN_SECRET;
+  if (!secret || (process.env.NODE_ENV === "production" && secret === "changeme-local")) {
+    return { ok: false, status: 503, error: "admin_secret_not_configured" };
+  }
+  const supplied = decodeBasicPassword(req.headers.get("authorization") || "");
   if (!secretsMatch(secret, supplied)) {
     return { ok: false, status: 401, error: "unauthorized" };
   }

@@ -20,6 +20,10 @@ function hasValidPushConfiguration() {
   );
 }
 
+function hasValidPhoneSetupConfiguration() {
+  return (process.env.PHONE_SETUP_SIGNING_SECRET || "").trim().length >= 32;
+}
+
 export async function GET() {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
@@ -33,6 +37,7 @@ export async function GET() {
         push_enabled: process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED === "true",
         push_subscription_table: false,
         push_provider_configured: hasValidPushConfiguration(),
+        phone_setup_configured: hasValidPhoneSetupConfiguration(),
         push_ready: false,
       },
       { status: 503, headers: { "Cache-Control": "no-store" } },
@@ -53,8 +58,9 @@ export async function GET() {
     const result = rows[0] || {};
     const pushEnabled = process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED === "true";
     const pushProviderConfigured = hasValidPushConfiguration();
+    const phoneSetupConfigured = hasValidPhoneSetupConfiguration();
     const pushSubscriptionTable = result.push_subscription_table === true;
-    const pushReady = !pushEnabled || (pushProviderConfigured && pushSubscriptionTable);
+    const pushReady = !pushEnabled || (pushProviderConfigured && pushSubscriptionTable && phoneSetupConfigured);
     const ready = result.capture_function === true
       && result.leads_table === true
       && result.notification_table === true
@@ -69,6 +75,7 @@ export async function GET() {
         push_enabled: pushEnabled,
         push_subscription_table: pushSubscriptionTable,
         push_provider_configured: pushProviderConfigured,
+        phone_setup_configured: phoneSetupConfigured,
         push_ready: pushReady,
       },
       { status: ready ? 200 : 503, headers: { "Cache-Control": "no-store" } },
@@ -84,6 +91,7 @@ export async function GET() {
         push_enabled: process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED === "true",
         push_subscription_table: false,
         push_provider_configured: hasValidPushConfiguration(),
+        phone_setup_configured: hasValidPhoneSetupConfiguration(),
         push_ready: false,
       },
       { status: 503, headers: { "Cache-Control": "no-store" } },

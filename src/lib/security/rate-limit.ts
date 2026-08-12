@@ -124,6 +124,8 @@ export const LIMITS = {
   analyticsEvent: { limit: 60, windowMs:       60 * 1000 },
   /** /api/chat — 20 messages per 10 minutes */
   chatMessage:    { limit: 20, windowMs: 10 * 60 * 1000 },
+  /** Short-lived staff phone setup — 10 actions per 10 minutes */
+  phoneSetup:     { limit: 10, windowMs: 10 * 60 * 1000 },
 } as const;
 
 export type LimitKey = keyof typeof LIMITS;

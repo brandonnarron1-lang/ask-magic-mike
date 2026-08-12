@@ -1,6 +1,48 @@
 # Implementation Status
 
-Updated 2026-08-11.
+Updated 2026-08-12.
+
+## Brandon phone-registration repair — 2026-08-12
+
+- Production logs isolated the failure to repeated HTTP 401 responses on the
+  Basic Auth-protected phone setup route. The former manifest also reopened that
+  same admin route from the iPhone Home Screen app.
+- A reuse-first repair preserves the existing Web Push provider, VAPID keys,
+  Neon subscription table, lead outbox, routing, and admin screen. It adds only
+  a short-lived Brandon copy-registration session and does not create a second
+  notification system.
+- The signed setup session is role-fixed to `copy`, expires in 5–30 minutes,
+  uses an HttpOnly Secure SameSite=Strict cookie, and cannot view leads, access
+  admin APIs, register Mike's primary role, or change routing.
+- Registration and test routes enforce exact same-origin requests, a dedicated
+  CSRF header, durable rate limiting, strict runtime validation, and server-side
+  role enforcement. The QA push is user-triggered, labeled `[TEST]`, and creates
+  no lead or KPI event.
+- Browser readiness is now computed independently of the admin device-list API,
+  so a list failure no longer leaves the enable button incorrectly disabled.
+- The protected admin screen now includes the missing operator workflow: generate,
+  replace, copy, or invoke the native share sheet for a 20-minute Brandon-only
+  setup link. The browser never reads or stores `ADMIN_SECRET`; the new admin
+  route revalidates Basic Auth server-side in addition to middleware protection.
+- Setup pages and claim redirects are no-index, no-referrer, and no-store. The
+  former tokenless "copy setup link" dead-end was removed; Safari handoff points
+  back to the original secure message so the claim token is preserved.
+- Local verification: 144 test files / 2,525 tests pass; strict typecheck, lint,
+  production build, 54-route manifest, 14/14 release-safety checks, and
+  production dependency audit pass. The full development audit still reports
+  18 advisories in test/lint tooling and is tracked separately from this repair.
+- Preview deployment `dpl_8aKsdtP1zi3tS1J9C1uprRvNbW9P` is Ready and its
+  branch-scoped Sensitive signing key is configured. The invite, claim, cookie,
+  Brandon-only page, CSRF guard, malformed-payload guard, and readiness endpoint
+  pass without creating a subscription or sending a notification.
+- Enhanced operator-flow Preview `dpl_Bo8ojFMzf27bjqWX9Q2Qas11XxVy` is Ready.
+  Protected invite, signed claim, scoped cookie/session, privacy headers, and
+  fail-closed subscription validation pass without a write or external send.
+- Authenticated Vercel project-domain inspection confirms the canonical project
+  exclusively owns both Ask Magic Mike custom hostnames. Legacy Ask projects and
+  NellySelly projects have no Ask Magic Mike custom-domain attachment.
+- Production activation remains gated. Production needs a separately generated
+  `PHONE_SETUP_SIGNING_SECRET` before this version can report ready.
 
 ## Complete locally or evidenced
 

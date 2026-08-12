@@ -5,6 +5,67 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Brandon phone-registration repair — 2026-08-12
+
+- Vercel production logs for deployment
+  `dpl_5cDj7c7QcCPassZvww9mGZzAfeVm` showed repeated HTTP 401 responses at
+  `/admin/notifications/phone`; production had no error-level function logs.
+  This separated an authentication/session failure from VAPID, Neon, or push
+  provider failure.
+- The installed web-app manifest previously used that Basic Auth route as its
+  `start_url`. The repair uses `/phone-alerts/setup` and a short-lived signed
+  HttpOnly cookie specifically limited to Brandon's `copy` role.
+- `pnpm run test` — PASS: 144 files, 2,521 tests.
+- `pnpm run typecheck` — PASS.
+- `pnpm run lint` — PASS.
+- `pnpm run build` — PASS; all new setup/API routes compiled as dynamic routes.
+- `pnpm run routes:assert` — PASS: 53 active routes and 13 acknowledged
+  root/source duplicates.
+- `pnpm run release:safety` — PASS: 14 checks, 0 failures.
+- `pnpm audit --prod --audit-level high` — PASS: no known production
+  vulnerabilities.
+- Full `pnpm audit --audit-level high` — FAIL: 18 existing development-only
+  advisories (4 moderate, 13 high, 1 critical), led by the Vitest 2.x toolchain.
+  No automatic major-version dependency rewrite was mixed into the phone repair.
+- Preview deployment `dpl_8aKsdtP1zi3tS1J9C1uprRvNbW9P` — READY. GitHub's
+  local release gate and all required Vercel deployment checks pass.
+- Non-mutating Preview route proof: invite 200; claim redirect 303; HttpOnly,
+  Secure, SameSite=Strict cookie flags present; authenticated Brandon-only setup
+  200; missing-CSRF request 403; malformed UUID 400; readiness 200 with
+  `phone_setup_configured=true`. No valid subscription payload or test-send
+  request was submitted.
+- No production environment, deployment, database row, lead, email, push, or SMS
+  was changed or sent during this repair and Preview verification phase.
+
+### Operator-flow hardening
+
+- Added an authenticated admin control for generating/copying/sharing the scoped
+  setup link; no secret is passed to client code or persisted in Web Storage.
+- Added route-level Basic Auth verification under `/admin/api/phone-alerts/invite`
+  as defense in depth against a future middleware matcher regression.
+- Client response validation rejects a returned invite unless it is same-origin,
+  uses the exact claim path, contains a token, and has a future expiry.
+- Claim responses now apply `no-store`, `no-referrer`, and `X-Robots-Tag:
+  noindex, nofollow, noarchive` on both success and failure paths. Setup metadata
+  is also no-index and no-referrer.
+- Removed the post-claim clean-URL copy action because it could not transfer the
+  signed session into Safari. Instructions now preserve the original secure link
+  for Safari handoff.
+- Verification after hardening: 144 test files / 2,525 tests pass; strict
+  typecheck, lint, production build, 54-route manifest, 14/14 release-safety
+  checks, production dependency audit, and whitespace checks pass.
+- Enhanced operator-flow Preview `dpl_Bo8ojFMzf27bjqWX9Q2Qas11XxVy` is Ready.
+  The branch-scoped Sensitive signing key was replaced through Vercel and the
+  deployment proved: unauthenticated invite 401; authenticated invite 200;
+  signed claim 303; scoped setup page 200; missing-session subscription request
+  401; and a valid-session malformed payload 400 before persistence. Cookie
+  flags and the no-store/no-referrer/no-index headers passed. No subscription,
+  notification, lead, external message, or database mutation was created.
+- Authenticated Vercel project-domain inspection confirms `ask-magic-mike`
+  exclusively owns `askmagicmike.com` and `www.askmagicmike.com`; the bridge and
+  legacy Ask projects have only `.vercel.app` domains, while NellySelly owns
+  only its distinct NellySelly hostnames.
+
 ## Production notification health recheck — 2026-08-12
 
 - Production Neon project `bitter-star-20214385`, branch

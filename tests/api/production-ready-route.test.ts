@@ -22,6 +22,7 @@ const pushEnvironmentKeys = [
   "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
   "VAPID_PRIVATE_KEY",
   "VAPID_SUBJECT",
+  "PHONE_SETUP_SIGNING_SECRET",
 ] as const;
 
 describe("production GET /api/health/ready", () => {
@@ -39,6 +40,7 @@ describe("production GET /api/health/ready", () => {
     delete process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
     delete process.env.VAPID_PRIVATE_KEY;
     delete process.env.VAPID_SUBJECT;
+    delete process.env.PHONE_SETUP_SIGNING_SECRET;
   });
 
   afterEach(() => {
@@ -58,6 +60,7 @@ describe("production GET /api/health/ready", () => {
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "public-test-key";
     process.env.VAPID_PRIVATE_KEY = "private-test-key";
     process.env.VAPID_SUBJECT = "mailto:alerts@example.test";
+    process.env.PHONE_SETUP_SIGNING_SECRET = "test-phone-setup-signing-secret-that-is-long-enough";
 
     const response = await GET();
     const body = await response.json();
@@ -68,6 +71,7 @@ describe("production GET /api/health/ready", () => {
       push_enabled: true,
       push_subscription_table: true,
       push_provider_configured: true,
+      phone_setup_configured: true,
       push_ready: true,
     });
   });
@@ -78,6 +82,7 @@ describe("production GET /api/health/ready", () => {
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "public-test-key";
     process.env.VAPID_PRIVATE_KEY = "private-test-key";
     process.env.VAPID_SUBJECT = "https://www.askmagicmike.com";
+    process.env.PHONE_SETUP_SIGNING_SECRET = "test-phone-setup-signing-secret-that-is-long-enough";
 
     const response = await GET();
     const body = await response.json();
@@ -89,6 +94,7 @@ describe("production GET /api/health/ready", () => {
   it("fails readiness when enabled push has incomplete provider configuration", async () => {
     process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED = "true";
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "public-test-key";
+    process.env.PHONE_SETUP_SIGNING_SECRET = "test-phone-setup-signing-secret-that-is-long-enough";
 
     const response = await GET();
     const body = await response.json();
@@ -97,11 +103,25 @@ describe("production GET /api/health/ready", () => {
     expect(body).toMatchObject({ ok: false, push_provider_configured: false, push_ready: false });
   });
 
+  it("fails readiness when enabled push is missing the scoped phone setup secret", async () => {
+    process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED = "true";
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "public-test-key";
+    process.env.VAPID_PRIVATE_KEY = "private-test-key";
+    process.env.VAPID_SUBJECT = "mailto:alerts@example.test";
+
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(body).toMatchObject({ ok: false, phone_setup_configured: false, push_ready: false });
+  });
+
   it("reports only configuration booleans and never returns VAPID values", async () => {
     process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED = "true";
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "public-secret-marker";
     process.env.VAPID_PRIVATE_KEY = "private-secret-marker";
     process.env.VAPID_SUBJECT = "mailto:secret-marker@example.test";
+    process.env.PHONE_SETUP_SIGNING_SECRET = "phone-setup-secret-marker-that-must-never-appear";
 
     const body = await (await GET()).json();
     const serialized = JSON.stringify(body);
@@ -109,5 +129,6 @@ describe("production GET /api/health/ready", () => {
     expect(serialized).not.toContain("public-secret-marker");
     expect(serialized).not.toContain("private-secret-marker");
     expect(serialized).not.toContain("secret-marker@example.test");
+    expect(serialized).not.toContain("phone-setup-secret-marker");
   });
 });
