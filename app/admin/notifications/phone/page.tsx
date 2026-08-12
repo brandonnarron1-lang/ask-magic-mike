@@ -13,7 +13,7 @@ export default function PhoneNotificationSetupPage() {
         <h1 className="mt-2 text-3xl font-bold">Free phone lead alerts</h1>
         <p className="mt-3 text-zinc-300">Encrypted Web Push uses the phone’s native notification system with no per-message fee. Alerts contain only urgency, intent, general area, score, and a secure Lead Center link—never contact details on the lock screen.</p>
         <div className="my-6 rounded-xl border border-sky-300/20 bg-sky-950/25 p-4 text-sm text-sky-100">
-          On iPhone/iPad, first use Safari’s Share menu → Add to Home Screen, open the installed Ask Magic Mike app, then return here and tap enable. Android and desktop browsers can enable directly.
+          iPhone/iPad requires the installed Home Screen app for Web Push. This page now detects ordinary Safari and Messages browsers and will not present a registration action that Apple cannot complete.
         </div>
         <PhonePushSetup publicKey={publicKey} />
       </div>
