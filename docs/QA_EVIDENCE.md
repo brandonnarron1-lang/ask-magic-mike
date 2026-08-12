@@ -5,6 +5,36 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Production notification health recheck — 2026-08-12
+
+- Production Neon project `bitter-star-20214385`, branch
+  `br-round-base-auh6h2wd` (`production`), was inspected using read-only,
+  aggregate queries. No lead, notification, or subscription row was changed.
+- Four lead records exist and all four are `is_test=true`; live-prospect count
+  is zero. The records remain excluded from production KPIs.
+- Notification history is test-only: two delivered/sent records, two historic
+  permanent failures from the superseded invalid Resend key, and two intentional
+  disabled-mode skips. There is no pending or retry backlog.
+- Production health reports PostgreSQL ready, email enabled, Web Push enabled,
+  the subscription table present, and complete VAPID configuration. No staff
+  device is registered yet, so phone delivery cannot begin until each owner
+  grants browser notification permission on the physical device.
+- Public lead-pipe health passed all nine checked routes. Protected phone setup,
+  push-subscription API, and Lead Center routes each returned HTTP 401 without
+  credentials, confirming the server-side admin boundary.
+- The phone setup now distinguishes missing server configuration from browser
+  incompatibility and does not request permission on unsupported clients.
+- The stale Vercel Preview database credential was traced to a deleted Neon
+  branch. A new persistent Neon branch named `preview`
+  (`br-morning-paper-aun3378r`) was forked from production, and only Vercel's
+  Preview-scoped `DATABASE_URL` was replaced through the secure environment
+  variable interface. No credential value was logged or committed.
+- Preview deployment `dpl_8em8uYm1JxA7oSbCiMknf7vrew5W` is Ready at
+  `https://ask-magic-mike-7c5ejyz5k-eyes-up-industries.vercel.app`.
+  `/api/health/live` and `/api/health/ready` report healthy PostgreSQL capture;
+  outbound preview email and push remain disabled, and the protected phone page
+  returns HTTP 401 without admin credentials.
+
 ## Dual internal SMS/MMS upgrade — 2026-08-11
 
 - Focused Vitest covers urgency selection, QA suppression, minimal SMS content,
