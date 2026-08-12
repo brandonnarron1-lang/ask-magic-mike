@@ -12,10 +12,10 @@ function classifyDatabaseError(error: unknown) {
 }
 
 function hasValidPushConfiguration() {
-  const subject = process.env.WEB_PUSH_VAPID_SUBJECT || "";
+  const subject = process.env.VAPID_SUBJECT || "";
   return Boolean(
-    process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY
-      && process.env.WEB_PUSH_VAPID_PRIVATE_KEY
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      && process.env.VAPID_PRIVATE_KEY
       && (subject.startsWith("mailto:") || subject.startsWith("https://")),
   );
 }

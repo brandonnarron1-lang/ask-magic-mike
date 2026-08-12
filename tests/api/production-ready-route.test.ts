@@ -19,9 +19,9 @@ import { GET } from "../../app/api/health/ready/route";
 const pushEnvironmentKeys = [
   "DATABASE_URL",
   "AGENT_PUSH_NOTIFICATIONS_ENABLED",
-  "NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY",
-  "WEB_PUSH_VAPID_PRIVATE_KEY",
-  "WEB_PUSH_VAPID_SUBJECT",
+  "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
+  "VAPID_PRIVATE_KEY",
+  "VAPID_SUBJECT",
 ] as const;
 
 describe("production GET /api/health/ready", () => {
@@ -36,9 +36,9 @@ describe("production GET /api/health/ready", () => {
     mocks.query.mockImplementation(async () => [mocks.result]);
     process.env.DATABASE_URL = "postgresql://health-check.invalid/neondb";
     process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED = "false";
-    delete process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY;
-    delete process.env.WEB_PUSH_VAPID_PRIVATE_KEY;
-    delete process.env.WEB_PUSH_VAPID_SUBJECT;
+    delete process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    delete process.env.VAPID_PRIVATE_KEY;
+    delete process.env.VAPID_SUBJECT;
   });
 
   afterEach(() => {
@@ -55,9 +55,9 @@ describe("production GET /api/health/ready", () => {
 
   it("is ready when enabled push has its table and complete VAPID configuration", async () => {
     process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED = "true";
-    process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY = "public-test-key";
-    process.env.WEB_PUSH_VAPID_PRIVATE_KEY = "private-test-key";
-    process.env.WEB_PUSH_VAPID_SUBJECT = "mailto:alerts@example.test";
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "public-test-key";
+    process.env.VAPID_PRIVATE_KEY = "private-test-key";
+    process.env.VAPID_SUBJECT = "mailto:alerts@example.test";
 
     const response = await GET();
     const body = await response.json();
@@ -75,9 +75,9 @@ describe("production GET /api/health/ready", () => {
   it("fails readiness when enabled push is missing its subscription table", async () => {
     mocks.result.push_subscription_table = false;
     process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED = "true";
-    process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY = "public-test-key";
-    process.env.WEB_PUSH_VAPID_PRIVATE_KEY = "private-test-key";
-    process.env.WEB_PUSH_VAPID_SUBJECT = "https://www.askmagicmike.com";
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "public-test-key";
+    process.env.VAPID_PRIVATE_KEY = "private-test-key";
+    process.env.VAPID_SUBJECT = "https://www.askmagicmike.com";
 
     const response = await GET();
     const body = await response.json();
@@ -88,7 +88,7 @@ describe("production GET /api/health/ready", () => {
 
   it("fails readiness when enabled push has incomplete provider configuration", async () => {
     process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED = "true";
-    process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY = "public-test-key";
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "public-test-key";
 
     const response = await GET();
     const body = await response.json();
@@ -99,9 +99,9 @@ describe("production GET /api/health/ready", () => {
 
   it("reports only configuration booleans and never returns VAPID values", async () => {
     process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED = "true";
-    process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY = "public-secret-marker";
-    process.env.WEB_PUSH_VAPID_PRIVATE_KEY = "private-secret-marker";
-    process.env.WEB_PUSH_VAPID_SUBJECT = "mailto:secret-marker@example.test";
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "public-secret-marker";
+    process.env.VAPID_PRIVATE_KEY = "private-secret-marker";
+    process.env.VAPID_SUBJECT = "mailto:secret-marker@example.test";
 
     const body = await (await GET()).json();
     const serialized = JSON.stringify(body);
