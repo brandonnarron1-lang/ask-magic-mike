@@ -1,0 +1,64 @@
+import { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const mocks = vi.hoisted(() => ({
+  findActiveById: vi.fn(),
+  send: vi.fn(),
+}));
+
+vi.mock("../../app/lib/persistence/neonPushSubscriptionRepository", () => ({
+  NeonPushSubscriptionRepository: class {
+    findActiveById = mocks.findActiveById;
+  },
+}));
+
+vi.mock("../../app/lib/leadNotificationProvider", () => ({
+  WebPushNotificationProvider: class {
+    send = mocks.send;
+  },
+}));
+
+import { POST } from "../../app/admin/api/push/test/route";
+
+const COPY_ID = "11111111-1111-4111-8111-111111111111";
+const PRIMARY_ID = "22222222-2222-4222-8222-222222222222";
+
+function request(subscriptionId: string, origin = "http://localhost") {
+  return new NextRequest("http://localhost/admin/api/push/test", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", origin },
+    body: JSON.stringify({ subscription_id: subscriptionId }),
+  });
+}
+
+describe("POST /admin/api/push/test", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.findActiveById.mockResolvedValue({ id: COPY_ID, recipientRole: "copy" });
+    mocks.send.mockResolvedValue({ ok: true, provider: "web_push", providerMessageId: "test-id" });
+  });
+
+  it("sends an unmistakable QA alert only to an active Brandon copy subscription", async () => {
+    const response = await POST(request(COPY_ID));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ ok: true, provider: "web_push", test: true });
+    expect(mocks.send).toHaveBeenCalledWith(expect.objectContaining({
+      recipient: COPY_ID,
+      subject: "[TEST] Ask Magic Mike phone alerts",
+      text: expect.stringContaining("No lead was created"),
+    }));
+  });
+
+  it("refuses primary/Mike subscriptions", async () => {
+    mocks.findActiveById.mockResolvedValue({ id: PRIMARY_ID, recipientRole: "primary" });
+    const response = await POST(request(PRIMARY_ID));
+    expect(response.status).toBe(404);
+    expect(mocks.send).not.toHaveBeenCalled();
+  });
+
+  it("enforces exact same-origin requests", async () => {
+    const response = await POST(request(COPY_ID, "https://attacker.example"));
+    expect(response.status).toBe(403);
+    expect(mocks.findActiveById).not.toHaveBeenCalled();
+  });
+});

@@ -98,6 +98,24 @@ export function PhonePushSetup({ publicKey }: { publicKey: string }) {
     }
   }
 
+  async function sendBrandonTest(id: string) {
+    setProcessing(true);
+    try {
+      const response = await fetch("/admin/api/push/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscription_id: id }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || result.ok !== true) throw new Error("push_test_failed");
+      setStatus("[TEST] Brandon phone alert sent. Confirm it appeared on this device.");
+    } catch {
+      setStatus("The Brandon test alert was not delivered. Confirm notifications are allowed, then try again.");
+    } finally {
+      setProcessing(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-amber-300/25 bg-black/60 p-5">
@@ -118,7 +136,10 @@ export function PhonePushSetup({ publicKey }: { publicKey: string }) {
           {devices.length ? devices.map((device) => (
             <div key={device.id} className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 p-3 text-sm">
               <div><strong className="text-amber-200">{device.role === "primary" ? "Mike" : "Brandon copy"}</strong><p className="mt-1 max-w-xl truncate text-zinc-400">{device.device}</p></div>
-              <button type="button" disabled={processing} onClick={() => void remove(device.id)} className="rounded-md border border-red-300/30 px-3 py-2 text-red-200 disabled:cursor-wait disabled:opacity-60">Remove</button>
+              <div className="flex shrink-0 gap-2">
+                {device.role === "copy" ? <button type="button" disabled={processing} onClick={() => void sendBrandonTest(device.id)} className="rounded-md border border-amber-300/40 px-3 py-2 text-amber-100 disabled:cursor-wait disabled:opacity-60">Send Brandon test</button> : null}
+                <button type="button" disabled={processing} onClick={() => void remove(device.id)} className="rounded-md border border-red-300/30 px-3 py-2 text-red-200 disabled:cursor-wait disabled:opacity-60">Remove</button>
+              </div>
             </div>
           )) : <p className="text-sm text-zinc-400">{loadingDevices ? "Loading registered devices…" : "No phones registered yet."}</p>}
         </div>

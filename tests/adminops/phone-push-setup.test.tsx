@@ -30,4 +30,20 @@ describe("phone push setup", () => {
     expect(screen.getByText(/This browser cannot enable phone alerts/)).toBeVisible();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it("offers a test action only for Brandon copy devices", async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({
+      ok: true,
+      subscriptions: [
+        { id: "primary-id", role: "primary", device: "Mike phone" },
+        { id: "copy-id", role: "copy", device: "Brandon phone" },
+      ],
+    }), { status: 200, headers: { "Content-Type": "application/json" } }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<PhonePushSetup publicKey="test-public-key" />);
+
+    expect(await screen.findByRole("button", { name: "Send Brandon test" })).toBeVisible();
+    expect(screen.getAllByRole("button", { name: "Send Brandon test" })).toHaveLength(1);
+  });
 });

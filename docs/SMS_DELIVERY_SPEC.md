@@ -24,6 +24,11 @@ On iOS/iPadOS, Web Push requires adding the site to the Home Screen before the
 user grants notification permission. Android and supported desktop browsers can
 subscribe directly. Removing a device deactivates its server-side capability.
 
+The protected setup page can send an unmistakable `[TEST]` Web Push only to an
+active `copy` device. That check creates no lead, does not affect KPIs, cannot
+target Mike's `primary` subscription, and is guarded by admin authentication
+plus exact same-origin validation.
+
 ## Scope
 
 This is an internal operational alert, not a consumer marketing message. The
