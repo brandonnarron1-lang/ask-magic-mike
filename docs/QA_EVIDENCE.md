@@ -24,6 +24,16 @@ All timestamps are America/New_York unless noted.
   credentials, confirming the server-side admin boundary.
 - The phone setup now distinguishes missing server configuration from browser
   incompatibility and does not request permission on unsupported clients.
+- The stale Vercel Preview database credential was traced to a deleted Neon
+  branch. A new persistent Neon branch named `preview`
+  (`br-morning-paper-aun3378r`) was forked from production, and only Vercel's
+  Preview-scoped `DATABASE_URL` was replaced through the secure environment
+  variable interface. No credential value was logged or committed.
+- Preview deployment `dpl_8em8uYm1JxA7oSbCiMknf7vrew5W` is Ready at
+  `https://ask-magic-mike-7c5ejyz5k-eyes-up-industries.vercel.app`.
+  `/api/health/live` and `/api/health/ready` report healthy PostgreSQL capture;
+  outbound preview email and push remain disabled, and the protected phone page
+  returns HTTP 401 without admin credentials.
 
 ## Dual internal SMS/MMS upgrade — 2026-08-11
 
