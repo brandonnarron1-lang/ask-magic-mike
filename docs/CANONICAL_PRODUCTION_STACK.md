@@ -21,9 +21,10 @@ This document defines the single authoritative source of truth for Ask Magic Mik
 |-------|-------|
 | Canonical Vercel project | `ask-magic-mike` |
 | Canonical production domain | `www.askmagicmike.com` |
-| Apex redirect | `askmagicmike.com` → `www.askmagicmike.com` (301, managed by Vercel) |
+| Vercel project ID | `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8` |
+| Apex redirect | `askmagicmike.com` → `www.askmagicmike.com` (308, managed by Vercel) |
 | Framework | Next.js 15 (App Router) |
-| Node version | 20.x |
+| Node version | 24.x |
 
 ### Verification command
 
@@ -39,24 +40,25 @@ node scripts/amm/verify-production-alias.mjs
 | Domain | Role | Target |
 |--------|------|--------|
 | `www.askmagicmike.com` | **Canonical production** | Vercel project `ask-magic-mike` |
-| `askmagicmike.com` | Apex redirect | → `www.askmagicmike.com` |
+| `askmagicmike.com` | Permanent apex redirect | → `www.askmagicmike.com` |
 
-### Known legacy / separate apps
+### Separate products
 
 | Project | Status | Notes |
 |---------|--------|-------|
-| `AskMagicMike.com` Vercel app (separate Next.js project) | **Do not integrate** | Separate funnel; does not feed `amm_leads`; integrate only via tracked UTM links; deploy gated on owner approval. See memory: `askmagicmike-com-vercel-domain`. |
+| NellySelly | **Strictly isolated** | Different repository, Vercel project, domains, database, and environment variables. Ask Magic Mike release checks reject NellySelly project identifiers. |
 
----
-
-## Supabase
+## Canonical database
 
 | Field | Value |
 |-------|-------|
-| Project | Production project configured via `NEXT_PUBLIC_SUPABASE_URL` |
-| Auth method | Service role key (`SUPABASE_SERVICE_ROLE_KEY`) — server-only, never in client bundle |
-| Migrations | 13 files, `00001` → `00013` (see `supabase/migrations/`) |
-| RLS | Required on all tables before production traffic |
+| Provider | Neon PostgreSQL (Free) |
+| Project | `bitter-star-20214385` |
+| Production branch | `br-round-base-auh6h2wd` |
+| Preview branch | `br-flat-math-aut6n3xu` |
+| Application credential | `DATABASE_URL` — server-only, never in client code or logs |
+| Migrations | Versioned SQL under `supabase/migrations/` (legacy directory name; applies to canonical PostgreSQL) |
+| Runtime schema access | Explicit least-privilege grants; application requests do not execute DDL |
 
 ---
 
@@ -64,7 +66,8 @@ node scripts/amm/verify-production-alias.mjs
 
 Required in Vercel production environment. See `docs/PRODUCTION_LAUNCH_GATE.md` Section 1 for the full list.
 
-**Never commit secrets.** Never set `NEXT_PUBLIC_` prefix on service-role keys. `SUPABASE_SERVICE_ROLE_KEY` must never appear in any client-side bundle.
+**Never commit secrets.** `DATABASE_URL`, VAPID private keys, email provider keys,
+and admin credentials are server-only and must never appear in a client bundle.
 
 ---
 
@@ -89,6 +92,6 @@ Before every production deploy:
 - WordPress / cPanel / DNS (ourtownproperties.com)
 - WAF / Regency
 - Vercel environment variables (set only via Vercel dashboard, not CLI)
-- Supabase service role key rotation
+- Neon role or connection-string rotation
 - MLS / FlexMLS data exports
 - Outbound email / SMS / social posting

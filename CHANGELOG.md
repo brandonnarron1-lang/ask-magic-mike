@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-08-11 — Node 24 and phone-alert readiness
+
+- Aligned local development, package runtime declarations, all CI workflows,
+  and Vercel production builds on Node 24 before the Node 20 deployment cutoff.
+- Extended production readiness checks to require the Web Push table and safe
+  VAPID configuration whenever agent push notifications are enabled.
+- Added explicit loading, retry, failure, and duplicate-action protection to
+  the authenticated phone-registration interface.
+
 ## 2026-08-11 — Reuse-first Neon hardening candidate
 
 - Preserved the existing public funnel, black-diamond visual system, canonical

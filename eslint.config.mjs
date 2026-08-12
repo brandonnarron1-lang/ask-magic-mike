@@ -30,7 +30,9 @@ export default [
   ...tseslint.configs.recommended,
 
   {
-    files: ["**/*.{js,jsx,ts,tsx}"],
+    // Include the flat config itself so Next.js can verify that its plugin is
+    // active during `next build`, in addition to linting application sources.
+    files: ["**/*.{js,jsx,mjs,cjs,ts,tsx}"],
     languageOptions: {
       globals: {
         ...globals.browser,

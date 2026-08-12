@@ -11,7 +11,7 @@ CI and Vercel are the production sources of truth; local instructions here align
 
 | Tool | Version | Source of truth |
 |------|---------|-----------------|
-| Node | 20 (LTS) | `.nvmrc`, CI `node-version: "20"` |
+| Node | 24 | `.nvmrc`, `package.json`, CI `node-version: "24"` |
 | pnpm | 10.x | `packageManager` in `package.json`, `pnpm-lock.yaml` |
 
 Vercel auto-detects pnpm from `pnpm-lock.yaml` and uses pnpm for all production builds.
@@ -20,7 +20,7 @@ CI uses `pnpm install --frozen-lockfile`. Local must match.
 ### Set up Node via nvm
 
 ```sh
-nvm install    # reads .nvmrc (Node 20)
+nvm install    # reads .nvmrc (Node 24)
 nvm use
 ```
 
