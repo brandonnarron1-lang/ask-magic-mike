@@ -35,8 +35,12 @@ Updated 2026-08-12.
   branch-scoped Sensitive signing key is configured. The invite, claim, cookie,
   Brandon-only page, CSRF guard, malformed-payload guard, and readiness endpoint
   pass without creating a subscription or sending a notification.
-- The enhanced operator-control commit requires a fresh Preview deployment and
-  route proof before production activation.
+- Enhanced operator-flow Preview `dpl_Bo8ojFMzf27bjqWX9Q2Qas11XxVy` is Ready.
+  Protected invite, signed claim, scoped cookie/session, privacy headers, and
+  fail-closed subscription validation pass without a write or external send.
+- Authenticated Vercel project-domain inspection confirms the canonical project
+  exclusively owns both Ask Magic Mike custom hostnames. Legacy Ask projects and
+  NellySelly projects have no Ask Magic Mike custom-domain attachment.
 - Production activation remains gated. Production needs a separately generated
   `PHONE_SETUP_SIGNING_SECRET` before this version can report ready.
 

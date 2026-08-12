@@ -54,6 +54,17 @@ All timestamps are America/New_York unless noted.
 - Verification after hardening: 144 test files / 2,525 tests pass; strict
   typecheck, lint, production build, 54-route manifest, 14/14 release-safety
   checks, production dependency audit, and whitespace checks pass.
+- Enhanced operator-flow Preview `dpl_Bo8ojFMzf27bjqWX9Q2Qas11XxVy` is Ready.
+  The branch-scoped Sensitive signing key was replaced through Vercel and the
+  deployment proved: unauthenticated invite 401; authenticated invite 200;
+  signed claim 303; scoped setup page 200; missing-session subscription request
+  401; and a valid-session malformed payload 400 before persistence. Cookie
+  flags and the no-store/no-referrer/no-index headers passed. No subscription,
+  notification, lead, external message, or database mutation was created.
+- Authenticated Vercel project-domain inspection confirms `ask-magic-mike`
+  exclusively owns `askmagicmike.com` and `www.askmagicmike.com`; the bridge and
+  legacy Ask projects have only `.vercel.app` domains, while NellySelly owns
+  only its distinct NellySelly hostnames.
 
 ## Production notification health recheck — 2026-08-12
 
