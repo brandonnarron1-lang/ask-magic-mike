@@ -34,6 +34,10 @@ The release also tests that request-time persistence code performs no schema
 DDL. Schema creation and policy changes are migration-only, preserving the
 runtime database role's least privilege.
 
+The runtime `service_role` receives only `SELECT`, `INSERT`, `UPDATE`, and
+`DELETE` on `staff_push_subscriptions`; schema ownership and DDL remain with the
+migration owner.
+
 ## Operator rules
 
 - Never copy `DATABASE_URL` between Ask Magic Mike and NellySelly projects.
