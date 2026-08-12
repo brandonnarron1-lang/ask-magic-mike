@@ -5,6 +5,26 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Production notification health recheck — 2026-08-12
+
+- Production Neon project `bitter-star-20214385`, branch
+  `br-round-base-auh6h2wd` (`production`), was inspected using read-only,
+  aggregate queries. No lead, notification, or subscription row was changed.
+- Four lead records exist and all four are `is_test=true`; live-prospect count
+  is zero. The records remain excluded from production KPIs.
+- Notification history is test-only: two delivered/sent records, two historic
+  permanent failures from the superseded invalid Resend key, and two intentional
+  disabled-mode skips. There is no pending or retry backlog.
+- Production health reports PostgreSQL ready, email enabled, Web Push enabled,
+  the subscription table present, and complete VAPID configuration. No staff
+  device is registered yet, so phone delivery cannot begin until each owner
+  grants browser notification permission on the physical device.
+- Public lead-pipe health passed all nine checked routes. Protected phone setup,
+  push-subscription API, and Lead Center routes each returned HTTP 401 without
+  credentials, confirming the server-side admin boundary.
+- The phone setup now distinguishes missing server configuration from browser
+  incompatibility and does not request permission on unsupported clients.
+
 ## Dual internal SMS/MMS upgrade — 2026-08-11
 
 - Focused Vitest covers urgency selection, QA suppression, minimal SMS content,

@@ -5,6 +5,19 @@ import { useCallback, useEffect, useState } from "react";
 type Role = "primary" | "copy";
 type Device = { id: string; role: Role; device: string };
 
+export function phonePushCapabilityError(publicKey: string) {
+  if (!publicKey) return "Phone alerts are not configured on the server yet.";
+  if (
+    typeof window === "undefined"
+    || !("Notification" in window)
+    || !("serviceWorker" in navigator)
+    || !("PushManager" in window)
+  ) {
+    return "This browser cannot enable phone alerts. Use Safari from an installed Home Screen app on iPhone/iPad, or a current Android or desktop browser.";
+  }
+  return null;
+}
+
 function decodeKey(value: string) {
   const padding = "=".repeat((4 - (value.length % 4)) % 4);
   const raw = atob((value + padding).replace(/-/g, "+").replace(/_/g, "/"));
@@ -25,19 +38,20 @@ export function PhonePushSetup({ publicKey }: { publicKey: string }) {
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error("subscription_list_failed");
       setDevices(Array.isArray(result.subscriptions) ? result.subscriptions : []);
-      if (markReady) setStatus("Ready to register this phone.");
+      if (markReady) setStatus(phonePushCapabilityError(publicKey) || "Ready to register this phone.");
     } catch {
       setStatus("Registered devices could not be loaded. Check your connection and try again.");
     } finally {
       setLoadingDevices(false);
     }
-  }, []);
+  }, [publicKey]);
 
   useEffect(() => { void refresh(true); }, [refresh]);
 
   async function enable() {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !publicKey) {
-      setStatus("This browser cannot enable phone alerts, or the server key is not configured.");
+    const capabilityError = phonePushCapabilityError(publicKey);
+    if (capabilityError) {
+      setStatus(capabilityError);
       return;
     }
     setProcessing(true);
