@@ -4,6 +4,39 @@ Chronological record of releases to the Ask Magic Mike production environment.
 
 ---
 
+## 2026-08-11 — Node 24 and phone-alert operational readiness
+
+**Merged:** PRs #131 and #132
+
+**Commits:** `5915e39`, `ad39197`
+
+**Canonical deployment:** `dpl_AL84Q62HmkxeyDShbfHjfXTCcdJp`
+
+### Changes
+
+- Aligned `.nvmrc`, `package.json`, all CI workflows, and Vercel on Node 24.
+- Made `/api/health/ready` validate the canonical Neon push-subscription table
+  and the exact VAPID environment contract whenever agent push is enabled.
+- Added five focused readiness tests and hardened phone registration loading,
+  failure, retry, removal, and duplicate-action states.
+- Corrected canonical infrastructure documentation for Neon and explicit
+  NellySelly isolation; removed a false Next.js ESLint-plugin build warning.
+- Cleared the stale Vercel Ignored Build Step value (`exit 0`) after it canceled
+  both preview and production Git deployments. Automatic protected-`main`
+  deployments are enabled again; setting it back to `exit 0` is the rollback.
+
+### Production proof
+
+- `/api/health/ready`: HTTP 200 with database, capture function, lead and
+  notification tables, push table, and provider configuration all ready.
+- Public routes `/`, `/ask`, `/sell`, `/value`, `/buy`, and `/widget/v1`: HTTP 200.
+- Apex: HTTP 308 to `https://www.askmagicmike.com/`.
+- Protected phone page and push API: HTTP 401 without credentials.
+- Read-only production smoke: 19 pass, 2 intentionally skipped, 0 fail.
+- Local release gate: 140 files / 2,501 tests, strict typecheck, lint, build,
+  route manifest, 14/14 safety checks, and system isolation all passed.
+- No lead, email, SMS, or push notification was created or sent by this release.
+
 ## [PR #52] Launch Candidate 6 — Go/No-Go Command Center + Launch Authority Packet
 
 **Merged:** 2026-06-26  
