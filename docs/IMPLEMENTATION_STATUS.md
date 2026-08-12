@@ -20,14 +20,23 @@ Updated 2026-08-12.
   no lead or KPI event.
 - Browser readiness is now computed independently of the admin device-list API,
   so a list failure no longer leaves the enable button incorrectly disabled.
-- Local verification: 144 test files / 2,521 tests pass; strict typecheck, lint,
-  production build, 53-route manifest, 14/14 release-safety checks, and
+- The protected admin screen now includes the missing operator workflow: generate,
+  replace, copy, or invoke the native share sheet for a 20-minute Brandon-only
+  setup link. The browser never reads or stores `ADMIN_SECRET`; the new admin
+  route revalidates Basic Auth server-side in addition to middleware protection.
+- Setup pages and claim redirects are no-index, no-referrer, and no-store. The
+  former tokenless "copy setup link" dead-end was removed; Safari handoff points
+  back to the original secure message so the claim token is preserved.
+- Local verification: 144 test files / 2,525 tests pass; strict typecheck, lint,
+  production build, 54-route manifest, 14/14 release-safety checks, and
   production dependency audit pass. The full development audit still reports
   18 advisories in test/lint tooling and is tracked separately from this repair.
 - Preview deployment `dpl_8aKsdtP1zi3tS1J9C1uprRvNbW9P` is Ready and its
   branch-scoped Sensitive signing key is configured. The invite, claim, cookie,
   Brandon-only page, CSRF guard, malformed-payload guard, and readiness endpoint
   pass without creating a subscription or sending a notification.
+- The enhanced operator-control commit requires a fresh Preview deployment and
+  route proof before production activation.
 - Production activation remains gated. Production needs a separately generated
   `PHONE_SETUP_SIGNING_SECRET` before this version can report ready.
 

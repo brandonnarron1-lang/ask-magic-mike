@@ -37,6 +37,24 @@ All timestamps are America/New_York unless noted.
 - No production environment, deployment, database row, lead, email, push, or SMS
   was changed or sent during this repair and Preview verification phase.
 
+### Operator-flow hardening
+
+- Added an authenticated admin control for generating/copying/sharing the scoped
+  setup link; no secret is passed to client code or persisted in Web Storage.
+- Added route-level Basic Auth verification under `/admin/api/phone-alerts/invite`
+  as defense in depth against a future middleware matcher regression.
+- Client response validation rejects a returned invite unless it is same-origin,
+  uses the exact claim path, contains a token, and has a future expiry.
+- Claim responses now apply `no-store`, `no-referrer`, and `X-Robots-Tag:
+  noindex, nofollow, noarchive` on both success and failure paths. Setup metadata
+  is also no-index and no-referrer.
+- Removed the post-claim clean-URL copy action because it could not transfer the
+  signed session into Safari. Instructions now preserve the original secure link
+  for Safari handoff.
+- Verification after hardening: 144 test files / 2,525 tests pass; strict
+  typecheck, lint, production build, 54-route manifest, 14/14 release-safety
+  checks, production dependency audit, and whitespace checks pass.
+
 ## Production notification health recheck — 2026-08-12
 
 - Production Neon project `bitter-star-20214385`, branch

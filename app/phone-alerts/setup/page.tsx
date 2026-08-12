@@ -1,8 +1,14 @@
 import { cookies } from "next/headers";
+import type { Metadata } from "next";
 import { PhonePushSetup } from "../../admin/notifications/phone/PhonePushSetup";
 import { PHONE_SETUP_COOKIE, verifyPhoneSetupToken } from "../../lib/phoneSetupSession";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "Secure Phone Setup | Ask Magic Mike",
+  robots: { index: false, follow: false, nocache: true },
+  referrer: "no-referrer",
+};
 
 function Unavailable({ rateLimited = false }: { rateLimited?: boolean }) {
   return (

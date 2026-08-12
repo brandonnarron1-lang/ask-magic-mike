@@ -27,6 +27,7 @@ vi.mock("../../app/lib/leadNotificationProvider", () => ({
 }));
 
 import { POST as invite } from "../../app/api/phone-alerts/invite/route";
+import { POST as adminInvite } from "../../app/admin/api/phone-alerts/invite/route";
 import { POST as subscribe } from "../../app/api/phone-alerts/subscription/route";
 import { POST as sendTest } from "../../app/api/phone-alerts/test/route";
 import { GET as claim } from "../../app/phone-alerts/setup/claim/route";
@@ -84,6 +85,20 @@ describe("passwordless Brandon phone setup routes", () => {
     expect(response.headers.get("Cache-Control")).toBe("no-store");
   });
 
+  it("lets the authenticated admin page issue the same scoped invite through Basic Auth", async () => {
+    const response = await adminInvite(post("/admin/api/phone-alerts/invite", { ttl_minutes: 20 }, {
+      authorization: `Basic ${Buffer.from("admin:test-admin-secret").toString("base64")}`,
+    }));
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.url).toMatch(/^https:\/\/www\.askmagicmike\.com\/phone-alerts\/setup\/claim\?token=/);
+
+    const denied = await adminInvite(post("/admin/api/phone-alerts/invite", {}, {
+      authorization: `Basic ${Buffer.from("admin:wrong").toString("base64")}`,
+    }));
+    expect(denied.status).toBe(401);
+  });
+
   it("exchanges a valid invite for a secure HttpOnly setup cookie and cleans the URL", async () => {
     const token = mintPhoneSetupToken().token;
     const response = await claim(new NextRequest(`https://www.askmagicmike.com/phone-alerts/setup/claim?token=${encodeURIComponent(token)}`));
@@ -102,6 +117,8 @@ describe("passwordless Brandon phone setup routes", () => {
     expect(response.status).toBe(303);
     expect(response.headers.get("location")).toContain("error=expired");
     expect(response.headers.get("set-cookie")).toBeNull();
+    expect(response.headers.get("Referrer-Policy")).toBe("no-referrer");
+    expect(response.headers.get("X-Robots-Tag")).toContain("noindex");
   });
 
   it("registers only a copy subscription with a valid setup cookie and CSRF header", async () => {

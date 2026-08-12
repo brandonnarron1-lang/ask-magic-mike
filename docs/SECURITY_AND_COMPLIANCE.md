@@ -24,6 +24,11 @@
   expiry, an HttpOnly Secure SameSite=Strict cookie, exact-origin and CSRF
   checks, rate limiting, strict schemas, and server-side `copy` role enforcement.
   They cannot access the Lead Center or register Mike's primary device.
+- The admin invite UI relies on browser-managed Basic Auth and never receives
+  `ADMIN_SECRET`. Its route repeats the Basic Auth check server-side, validates
+  exact origin and input, and returns only a bounded copy-role claim URL. The
+  client rejects cross-origin or malformed invite URLs and stores no token in
+  localStorage/sessionStorage.
 
 ## Required human/legal review
 

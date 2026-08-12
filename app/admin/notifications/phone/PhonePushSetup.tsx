@@ -154,16 +154,6 @@ export function PhonePushSetup({ publicKey, mode = "admin" }: { publicKey: strin
     }
   }
 
-  async function copySetupLink() {
-    try {
-      const path = mode === "brandon" ? "/phone-alerts/setup" : "/admin/notifications/phone";
-      await navigator.clipboard.writeText(`${window.location.origin}${path}`);
-      setStatus("Setup link copied. Open Safari, paste the link, then use Share → Add to Home Screen.");
-    } catch {
-      setStatus("In Messages, tap ••• → Open in Safari. Then use Safari Share → Add to Home Screen.");
-    }
-  }
-
   async function remove(id: string) {
     setProcessing(true);
     try {
@@ -213,12 +203,11 @@ export function PhonePushSetup({ publicKey, mode = "admin" }: { publicKey: strin
           <div className="mb-5 rounded-xl border border-sky-300/30 bg-sky-950/35 p-4 text-sky-50">
             <p className="font-bold">One-time iPhone installation required</p>
             <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm">
-              <li>In Messages, tap <strong>•••</strong> and choose <strong>Open in Safari</strong>.</li>
+              <li>{mode === "brandon" ? <>If this is not Safari, return to the original message, press and hold its <strong>secure setup link</strong>, then choose <strong>Open in Safari</strong>.</> : <>Use the <strong>Create secure setup link</strong> control above for Brandon. This protected admin URL is not his install link.</>}</li>
               <li>In Safari, tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.</li>
               <li>Open the new <strong>Magic Mike</strong> icon and return to this setup page.</li>
               <li>Tap enable and choose <strong>Allow</strong> when iPhone asks about notifications.</li>
             </ol>
-            <button type="button" onClick={() => void copySetupLink()} className="mt-4 w-full rounded-lg border border-sky-200/40 px-4 py-3 font-semibold text-sky-50">Copy setup link for Safari</button>
           </div>
         ) : null}
         {mode === "admin" ? <>

@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { checkAdminAuth, checkBearerSecret } from "@/lib/admin/auth";
+import { checkAdminAuth, checkAdminBasicAuth, checkBearerSecret } from "@/lib/admin/auth";
 import type { NextRequest } from "next/server";
 
 function fakeRequest(headers: Record<string, string> = {}, searchParams: Record<string, string> = {}): NextRequest {
@@ -52,6 +52,13 @@ describe("checkAdminAuth", () => {
   it("rejects the query-param form (secret must not appear in URLs)", () => {
     const r = checkAdminAuth(fakeRequest({}, { admin_secret: "test_secret_v1" }));
     expect(r.ok).toBe(false);
+  });
+
+  it("supports route-level verification of browser Basic Auth", () => {
+    const authorization = `Basic ${Buffer.from("admin:test_secret_v1").toString("base64")}`;
+    expect(checkAdminBasicAuth(fakeRequest({ authorization })).ok).toBe(true);
+    expect(checkAdminBasicAuth(fakeRequest({ authorization: "Basic invalid" })).ok).toBe(false);
+    expect(checkAdminBasicAuth(fakeRequest({})).ok).toBe(false);
   });
 });
 

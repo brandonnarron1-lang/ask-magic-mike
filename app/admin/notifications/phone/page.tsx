@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PhonePushSetup } from "./PhonePushSetup";
+import { PhoneSetupInvite } from "./PhoneSetupInvite";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,7 @@ export default function PhoneNotificationSetupPage() {
         <div className="my-6 rounded-xl border border-sky-300/20 bg-sky-950/25 p-4 text-sm text-sky-100">
           iPhone/iPad requires the installed Home Screen app for Web Push. This page now detects ordinary Safari and Messages browsers and will not present a registration action that Apple cannot complete.
         </div>
+        <PhoneSetupInvite />
         <PhonePushSetup publicKey={publicKey} />
       </div>
     </main>

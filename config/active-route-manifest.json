@@ -13,6 +13,7 @@
     "/admin/notifications/phone",
     "/admin/api/push/subscriptions",
     "/admin/api/push/test",
+    "/admin/api/phone-alerts/invite",
     "/admin/reporting",
     "/api/admin/health",
     "/api/admin/notifications/retry",
@@ -70,6 +71,7 @@
     ],
     "api": [
       "/admin/api/push/test",
+      "/admin/api/phone-alerts/invite",
       "/api/leads", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/phone-alerts/invite", "/api/phone-alerts/subscription", "/api/phone-alerts/test", "/api/webhooks/sms/status", "/api/widget/events",
       "/api/admin/health", "/api/admin/sla/sweep"
     ]
