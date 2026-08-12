@@ -24,7 +24,11 @@ Updated 2026-08-12.
   production build, 53-route manifest, 14/14 release-safety checks, and
   production dependency audit pass. The full development audit still reports
   18 advisories in test/lint tooling and is tracked separately from this repair.
-- Preview publication and production activation remain gated. Production needs
+- Preview deployment `dpl_8aKsdtP1zi3tS1J9C1uprRvNbW9P` is Ready and its
+  branch-scoped Sensitive signing key is configured. The invite, claim, cookie,
+  Brandon-only page, CSRF guard, malformed-payload guard, and readiness endpoint
+  pass without creating a subscription or sending a notification.
+- Production activation remains gated. Production needs a separately generated
   `PHONE_SETUP_SIGNING_SECRET` before this version can report ready.
 
 ## Complete locally or evidenced

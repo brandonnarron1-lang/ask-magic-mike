@@ -27,8 +27,15 @@ All timestamps are America/New_York unless noted.
 - Full `pnpm audit --audit-level high` — FAIL: 18 existing development-only
   advisories (4 moderate, 13 high, 1 critical), led by the Vitest 2.x toolchain.
   No automatic major-version dependency rewrite was mixed into the phone repair.
+- Preview deployment `dpl_8aKsdtP1zi3tS1J9C1uprRvNbW9P` — READY. GitHub's
+  local release gate and all required Vercel deployment checks pass.
+- Non-mutating Preview route proof: invite 200; claim redirect 303; HttpOnly,
+  Secure, SameSite=Strict cookie flags present; authenticated Brandon-only setup
+  200; missing-CSRF request 403; malformed UUID 400; readiness 200 with
+  `phone_setup_configured=true`. No valid subscription payload or test-send
+  request was submitted.
 - No production environment, deployment, database row, lead, email, push, or SMS
-  was changed or sent during this diagnostic and local verification phase.
+  was changed or sent during this repair and Preview verification phase.
 
 ## Production notification health recheck — 2026-08-12
 
