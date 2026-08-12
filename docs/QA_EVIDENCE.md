@@ -5,6 +5,31 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Brandon phone-registration repair — 2026-08-12
+
+- Vercel production logs for deployment
+  `dpl_5cDj7c7QcCPassZvww9mGZzAfeVm` showed repeated HTTP 401 responses at
+  `/admin/notifications/phone`; production had no error-level function logs.
+  This separated an authentication/session failure from VAPID, Neon, or push
+  provider failure.
+- The installed web-app manifest previously used that Basic Auth route as its
+  `start_url`. The repair uses `/phone-alerts/setup` and a short-lived signed
+  HttpOnly cookie specifically limited to Brandon's `copy` role.
+- `pnpm run test` — PASS: 144 files, 2,521 tests.
+- `pnpm run typecheck` — PASS.
+- `pnpm run lint` — PASS.
+- `pnpm run build` — PASS; all new setup/API routes compiled as dynamic routes.
+- `pnpm run routes:assert` — PASS: 53 active routes and 13 acknowledged
+  root/source duplicates.
+- `pnpm run release:safety` — PASS: 14 checks, 0 failures.
+- `pnpm audit --prod --audit-level high` — PASS: no known production
+  vulnerabilities.
+- Full `pnpm audit --audit-level high` — FAIL: 18 existing development-only
+  advisories (4 moderate, 13 high, 1 critical), led by the Vitest 2.x toolchain.
+  No automatic major-version dependency rewrite was mixed into the phone repair.
+- No production environment, deployment, database row, lead, email, push, or SMS
+  was changed or sent during this diagnostic and local verification phase.
+
 ## Production notification health recheck — 2026-08-12
 
 - Production Neon project `bitter-star-20214385`, branch

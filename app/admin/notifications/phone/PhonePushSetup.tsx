@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 type Role = "primary" | "copy";
 type Device = { id: string; role: Role; device: string };
+type SetupMode = "admin" | "brandon";
 type PhonePushCapabilities = {
   isIos: boolean;
   isStandalone: boolean;
@@ -66,32 +67,37 @@ function decodeKey(value: string) {
   return Uint8Array.from([...raw].map((character) => character.charCodeAt(0)));
 }
 
-export function PhonePushSetup({ publicKey }: { publicKey: string }) {
-  const [role, setRole] = useState<Role>("primary");
+export function PhonePushSetup({ publicKey, mode = "admin" }: { publicKey: string; mode?: SetupMode }) {
+  const [role, setRole] = useState<Role>(mode === "brandon" ? "copy" : "primary");
   const [status, setStatus] = useState("Checking this device…");
   const [devices, setDevices] = useState<Device[]>([]);
-  const [loadingDevices, setLoadingDevices] = useState(true);
+  const [registeredCopyId, setRegisteredCopyId] = useState<string | null>(null);
+  const [loadingDevices, setLoadingDevices] = useState(mode === "admin");
   const [processing, setProcessing] = useState(false);
   const [readiness, setReadiness] = useState<PhonePushReadiness | null>(null);
 
   const refresh = useCallback(async (markReady = false) => {
+    if (markReady) {
+      const current = phonePushReadiness(publicKey);
+      setReadiness(current);
+      setStatus(current.message);
+    }
+    if (mode === "brandon") {
+      setLoadingDevices(false);
+      return;
+    }
     setLoadingDevices(true);
     try {
       const response = await fetch("/admin/api/push/subscriptions", { cache: "no-store" });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error("subscription_list_failed");
       setDevices(Array.isArray(result.subscriptions) ? result.subscriptions : []);
-      if (markReady) {
-        const current = phonePushReadiness(publicKey);
-        setReadiness(current);
-        setStatus(current.message);
-      }
     } catch {
-      setStatus("Registered devices could not be loaded. Check your connection and try again.");
+      if (!markReady) setStatus("Registered devices could not be loaded. Check your connection and try again.");
     } finally {
       setLoadingDevices(false);
     }
-  }, [publicKey]);
+  }, [mode, publicKey]);
 
   useEffect(() => { void refresh(true); }, [refresh]);
 
@@ -117,16 +123,32 @@ export function PhonePushSetup({ publicKey }: { publicKey: string }) {
         userVisibleOnly: true,
         applicationServerKey: decodeKey(publicKey),
       });
-      const response = await fetch("/admin/api/push/subscriptions", {
+      const setupMode = mode === "brandon";
+      const response = await fetch(setupMode ? "/api/phone-alerts/subscription" : "/admin/api/push/subscriptions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role, subscription: subscription.toJSON() }),
+        headers: {
+          "Content-Type": "application/json",
+          ...(setupMode ? { "X-AMM-Phone-Setup": "1" } : {}),
+        },
+        body: JSON.stringify(setupMode
+          ? { subscription: subscription.toJSON() }
+          : { role, subscription: subscription.toJSON() }),
       });
-      if (!response.ok) throw new Error("subscription_registration_failed");
+      const result = await response.json().catch(() => ({})) as { id?: unknown; error?: unknown };
+      if (!response.ok) {
+        if (response.status === 401) throw new Error("phone_setup_session_expired");
+        throw new Error(typeof result.error === "string" ? result.error : "subscription_registration_failed");
+      }
+      if (setupMode && typeof result.id === "string") setRegisteredCopyId(result.id);
       await refresh();
-      setStatus(`Phone alerts enabled for the ${role === "primary" ? "Mike" : "Brandon copy"} role.`);
-    } catch {
-      setStatus("Secure phone registration failed. Check the connection and browser notification settings, then try again.");
+      setStatus(`Phone alerts enabled for the ${setupMode || role === "copy" ? "Brandon copy" : "Mike"} role.`);
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "registration_failed";
+      if (code === "phone_setup_session_expired") {
+        setStatus("This secure setup link expired. Request a fresh Brandon setup link and add it to the Home Screen again.");
+      } else {
+        setStatus(`Secure phone registration failed (${code.replace(/[^a-z0-9_-]/gi, "_").slice(0, 48)}). Check notification settings and try again.`);
+      }
     } finally {
       setProcessing(false);
     }
@@ -134,7 +156,8 @@ export function PhonePushSetup({ publicKey }: { publicKey: string }) {
 
   async function copySetupLink() {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/admin/notifications/phone`);
+      const path = mode === "brandon" ? "/phone-alerts/setup" : "/admin/notifications/phone";
+      await navigator.clipboard.writeText(`${window.location.origin}${path}`);
       setStatus("Setup link copied. Open Safari, paste the link, then use Share → Add to Home Screen.");
     } catch {
       setStatus("In Messages, tap ••• → Open in Safari. Then use Safari Share → Add to Home Screen.");
@@ -158,16 +181,26 @@ export function PhonePushSetup({ publicKey }: { publicKey: string }) {
   async function sendBrandonTest(id: string) {
     setProcessing(true);
     try {
-      const response = await fetch("/admin/api/push/test", {
+      const setupMode = mode === "brandon";
+      const response = await fetch(setupMode ? "/api/phone-alerts/test" : "/admin/api/push/test", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(setupMode ? { "X-AMM-Phone-Setup": "1" } : {}),
+        },
         body: JSON.stringify({ subscription_id: id }),
       });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok || result.ok !== true) throw new Error("push_test_failed");
+      if (response.status === 401) throw new Error("phone_setup_session_expired");
+      if (!response.ok || result.ok !== true) {
+        throw new Error(typeof result.error === "string" ? result.error : "push_test_failed");
+      }
       setStatus("[TEST] Brandon phone alert sent. Confirm it appeared on this device.");
-    } catch {
-      setStatus("The Brandon test alert was not delivered. Confirm notifications are allowed, then try again.");
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "push_test_failed";
+      setStatus(code === "phone_setup_session_expired"
+        ? "This secure setup session expired. Request a fresh Brandon setup link."
+        : `The Brandon test alert was not delivered (${code.replace(/[^a-z0-9_-]/gi, "_").slice(0, 48)}).`);
     } finally {
       setProcessing(false);
     }
@@ -188,18 +221,20 @@ export function PhonePushSetup({ publicKey }: { publicKey: string }) {
             <button type="button" onClick={() => void copySetupLink()} className="mt-4 w-full rounded-lg border border-sky-200/40 px-4 py-3 font-semibold text-sky-50">Copy setup link for Safari</button>
           </div>
         ) : null}
-        <label className="mb-2 block text-sm font-semibold text-amber-100" htmlFor="push-role">This phone belongs to</label>
-        <select id="push-role" value={role} disabled={processing} onChange={(event) => setRole(event.target.value as Role)} className="w-full rounded-lg border border-amber-300/30 bg-zinc-950 px-3 py-3 text-white disabled:cursor-not-allowed disabled:opacity-60">
-          <option value="primary">Mike — primary alert</option>
-          <option value="copy">Brandon — copy alert</option>
-        </select>
+        {mode === "admin" ? <>
+          <label className="mb-2 block text-sm font-semibold text-amber-100" htmlFor="push-role">This phone belongs to</label>
+          <select id="push-role" value={role} disabled={processing} onChange={(event) => setRole(event.target.value as Role)} className="w-full rounded-lg border border-amber-300/30 bg-zinc-950 px-3 py-3 text-white disabled:cursor-not-allowed disabled:opacity-60">
+            <option value="primary">Mike — primary alert</option>
+            <option value="copy">Brandon — copy alert</option>
+          </select>
+        </> : <p className="rounded-lg border border-amber-300/25 bg-amber-300/10 px-4 py-3 text-sm text-amber-100"><strong>Authorized destination:</strong> Brandon copy alerts only</p>}
         <button type="button" disabled={processing || !readiness?.canRegister} onClick={() => void enable()} className="mt-4 w-full rounded-lg bg-amber-400 px-4 py-3 font-bold text-black hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50">
           {processing ? "Working…" : readiness?.needsIosHomeScreen ? "Install to Home Screen first" : "Enable free phone alerts on this device"}
         </button>
         <p aria-live="polite" className="mt-3 text-sm text-zinc-300">{status}</p>
       </div>
 
-      <div>
+      {mode === "admin" ? <div>
         <h2 className="text-lg font-semibold text-white">Registered devices</h2>
         <div className="mt-3 space-y-2">
           {devices.length ? devices.map((device) => (
@@ -212,7 +247,11 @@ export function PhonePushSetup({ publicKey }: { publicKey: string }) {
             </div>
           )) : <p className="text-sm text-zinc-400">{loadingDevices ? "Loading registered devices…" : "No phones registered yet."}</p>}
         </div>
-      </div>
+      </div> : registeredCopyId ? <div className="rounded-2xl border border-emerald-300/25 bg-emerald-950/30 p-5">
+        <p className="font-semibold text-emerald-100">This device is registered for Brandon copy alerts.</p>
+        <button type="button" disabled={processing} onClick={() => void sendBrandonTest(registeredCopyId)} className="mt-4 w-full rounded-lg border border-emerald-200/40 px-4 py-3 font-bold text-emerald-50 disabled:cursor-wait disabled:opacity-60">Send Brandon test alert</button>
+        <p className="mt-3 text-xs text-emerald-100/75">The test is labeled INTERNAL QA and creates no lead or KPI event.</p>
+      </div> : null}
     </div>
   );
 }

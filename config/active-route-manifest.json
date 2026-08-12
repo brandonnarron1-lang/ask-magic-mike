@@ -25,6 +25,9 @@
     "/api/health/live",
     "/api/health/ready",
     "/api/leads",
+    "/api/phone-alerts/invite",
+    "/api/phone-alerts/subscription",
+    "/api/phone-alerts/test",
     "/api/valuation",
     "/api/webhooks/sms/status",
     "/api/widget/events",
@@ -37,6 +40,8 @@
     "/integrations/ourtownproperties",
     "/manifest.webmanifest",
     "/open-house/[propertyOrId]",
+    "/phone-alerts/setup",
+    "/phone-alerts/setup/claim",
     "/privacy",
     "/robots.txt",
     "/rent",
@@ -55,7 +60,7 @@
   "required": {
     "public": [
       "/", "/home-value", "/value", "/sell", "/we-buy-houses", "/ask", "/buy", "/rent", "/open-house/[propertyOrId]", "/thank-you",
-      "/privacy", "/terms", "/accessibility", "/contact",
+      "/privacy", "/terms", "/accessibility", "/contact", "/phone-alerts/setup", "/phone-alerts/setup/claim",
       "/widget", "/widget/v1", "/widget-preview", "/embed/ask",
       "/integrations/ourtownproperties", "/robots.txt", "/sitemap.xml", "/social-preview"
     ],
@@ -65,7 +70,7 @@
     ],
     "api": [
       "/admin/api/push/test",
-      "/api/leads", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/webhooks/sms/status", "/api/widget/events",
+      "/api/leads", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/phone-alerts/invite", "/api/phone-alerts/subscription", "/api/phone-alerts/test", "/api/webhooks/sms/status", "/api/widget/events",
       "/api/admin/health", "/api/admin/sla/sweep"
     ]
   },

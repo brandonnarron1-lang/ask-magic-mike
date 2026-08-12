@@ -1,6 +1,31 @@
 # Implementation Status
 
-Updated 2026-08-11.
+Updated 2026-08-12.
+
+## Brandon phone-registration repair — 2026-08-12
+
+- Production logs isolated the failure to repeated HTTP 401 responses on the
+  Basic Auth-protected phone setup route. The former manifest also reopened that
+  same admin route from the iPhone Home Screen app.
+- A reuse-first repair preserves the existing Web Push provider, VAPID keys,
+  Neon subscription table, lead outbox, routing, and admin screen. It adds only
+  a short-lived Brandon copy-registration session and does not create a second
+  notification system.
+- The signed setup session is role-fixed to `copy`, expires in 5–30 minutes,
+  uses an HttpOnly Secure SameSite=Strict cookie, and cannot view leads, access
+  admin APIs, register Mike's primary role, or change routing.
+- Registration and test routes enforce exact same-origin requests, a dedicated
+  CSRF header, durable rate limiting, strict runtime validation, and server-side
+  role enforcement. The QA push is user-triggered, labeled `[TEST]`, and creates
+  no lead or KPI event.
+- Browser readiness is now computed independently of the admin device-list API,
+  so a list failure no longer leaves the enable button incorrectly disabled.
+- Local verification: 144 test files / 2,521 tests pass; strict typecheck, lint,
+  production build, 53-route manifest, 14/14 release-safety checks, and
+  production dependency audit pass. The full development audit still reports
+  18 advisories in test/lint tooling and is tracked separately from this repair.
+- Preview publication and production activation remain gated. Production needs
+  `PHONE_SETUP_SIGNING_SECRET` before this version can report ready.
 
 ## Complete locally or evidenced
 

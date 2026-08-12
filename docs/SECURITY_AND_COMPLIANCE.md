@@ -20,6 +20,10 @@
 - Security headers and exact iframe `frame-ancestors` allowlist.
 - No protected-class fields or proxies in scoring, routing, targeting, or public
   recommendations; no private MLS fields are exposed.
+- Short-lived phone setup sessions use a distinct server-only HMAC key, bounded
+  expiry, an HttpOnly Secure SameSite=Strict cookie, exact-origin and CSRF
+  checks, rate limiting, strict schemas, and server-side `copy` role enforcement.
+  They cannot access the Lead Center or register Mike's primary device.
 
 ## Required human/legal review
 
@@ -31,11 +35,10 @@ guaranteed result.
 
 ## Known findings
 
-1. Production Vercel inspection did not show the service-role key, notification
-   gates, or BCC configuration; production lead delivery is therefore unproven.
-2. Current AdminOps uses a shared Basic Auth secret. It is protected server-side,
+1. Current AdminOps uses a shared Basic Auth secret. It is protected server-side,
    but per-user role/session controls remain before claiming full role-based access.
-3. The legacy root route had `postMessage('*')` paths and PII-rich PostHog fields;
+2. The legacy root route had `postMessage('*')` paths and PII-rich PostHog fields;
    the consolidation narrows message targets and analytics properties.
-4. `askmagicmike.com` has no observed email DNS authentication records; sender
-   alignment must use the verified approved brokerage/provider domain.
+3. The full development dependency audit reports advisories in the Vitest/Vite,
+   jsdom, and ESLint toolchain. Production dependencies have no known audit
+   findings; the toolchain upgrade should be handled in an isolated follow-up.

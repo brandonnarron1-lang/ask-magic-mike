@@ -54,6 +54,7 @@ declare namespace NodeJS {
 
     // Admin
     ADMIN_SECRET: string;
+    PHONE_SETUP_SIGNING_SECRET?: string;
     DATABASE_ENV?: string;
     SUPABASE_PROJECT_REF?: string;
     PRODUCTION_SUPABASE_PROJECT_REF?: string;

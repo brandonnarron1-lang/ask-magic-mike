@@ -12,8 +12,10 @@ Web Push activation requires:
 - `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
 - `VAPID_PRIVATE_KEY` (Sensitive/server-only)
 - `VAPID_SUBJECT=mailto:mike@ourtownproperties.com`
-- one device registration for the `primary` role and one for the `copy` role at
-  `/admin/notifications/phone`
+- `PHONE_SETUP_SIGNING_SECRET` (Sensitive/server-only, 32+ random characters)
+- one device registration for the `primary` role and one for the `copy` role.
+  Admin registration remains at `/admin/notifications/phone`; Brandon can use a
+  short-lived, copy-only setup session at `/phone-alerts/setup`.
 
 Each live lead creates independent push delivery records per registered device,
 with provider status, attempts, retries, and deterministic idempotency. QA leads
@@ -26,8 +28,15 @@ subscribe directly. Removing a device deactivates its server-side capability.
 
 The protected setup page can send an unmistakable `[TEST]` Web Push only to an
 active `copy` device. That check creates no lead, does not affect KPIs, cannot
-target Mike's `primary` subscription, and is guarded by admin authentication
-plus exact same-origin validation.
+target Mike's `primary` subscription, and is guarded by a short-lived signed,
+HttpOnly setup session, exact same-origin validation, an explicit request
+header, runtime schema validation, and rate limiting. The invite endpoint itself
+requires admin authentication and never changes lead routing.
+
+The installed app manifest starts at `/phone-alerts/setup`, not at the Basic
+Auth-protected admin route. This is required on iPhone because a Home Screen web
+app receives Safari cookie state when installed, while Basic Auth credentials
+are not a transferable app session.
 
 ## Scope
 
