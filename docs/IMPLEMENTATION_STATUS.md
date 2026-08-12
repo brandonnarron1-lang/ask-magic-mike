@@ -18,6 +18,9 @@ Updated 2026-08-11.
 - Production sender DNS and a restricted Resend sending key are configured and
   verified. The final public-form QA alert reached provider `delivered` state and
   the approved audit mailbox contains the hidden copy.
+- Runtime declarations, CI, and Vercel are aligned on Node 24. Production
+  readiness includes the enabled Web Push schema and provider configuration,
+  without exposing VAPID key values.
 
 ## Same-day changes in this worktree
 
