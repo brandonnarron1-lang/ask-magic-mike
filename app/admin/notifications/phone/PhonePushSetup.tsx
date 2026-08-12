@@ -4,18 +4,60 @@ import { useCallback, useEffect, useState } from "react";
 
 type Role = "primary" | "copy";
 type Device = { id: string; role: Role; device: string };
+type PhonePushCapabilities = {
+  isIos: boolean;
+  isStandalone: boolean;
+  hasNotification: boolean;
+  hasServiceWorker: boolean;
+  hasPushManager: boolean;
+};
+
+export type PhonePushReadiness = {
+  canRegister: boolean;
+  needsIosHomeScreen: boolean;
+  message: string;
+};
+
+function browserCapabilities(): PhonePushCapabilities {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
+    return { isIos: false, isStandalone: false, hasNotification: false, hasServiceWorker: false, hasPushManager: false };
+  }
+  const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
+  const isIos = /iPad|iPhone|iPod/i.test(navigator.userAgent)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  return {
+    isIos,
+    isStandalone: window.matchMedia?.("(display-mode: standalone)").matches === true || navigatorWithStandalone.standalone === true,
+    hasNotification: "Notification" in window,
+    hasServiceWorker: "serviceWorker" in navigator,
+    hasPushManager: "PushManager" in window,
+  };
+}
+
+export function phonePushReadiness(publicKey: string, capabilities = browserCapabilities()): PhonePushReadiness {
+  if (!publicKey) {
+    return { canRegister: false, needsIosHomeScreen: false, message: "Phone alerts are not configured on the server yet." };
+  }
+  if (capabilities.isIos && !capabilities.isStandalone) {
+    return {
+      canRegister: false,
+      needsIosHomeScreen: true,
+      message: "Finish iPhone setup from the installed Home Screen app. Apple blocks push registration inside Messages and ordinary Safari tabs.",
+    };
+  }
+  if (!capabilities.hasNotification || !capabilities.hasServiceWorker || !capabilities.hasPushManager) {
+    return {
+      canRegister: false,
+      needsIosHomeScreen: false,
+      message: "This browser cannot enable phone alerts. Use the installed Home Screen app on iPhone/iPad, or a current Android or desktop browser.",
+    };
+  }
+  return { canRegister: true, needsIosHomeScreen: false, message: "Ready to register this phone." };
+}
 
 export function phonePushCapabilityError(publicKey: string) {
-  if (!publicKey) return "Phone alerts are not configured on the server yet.";
-  if (
-    typeof window === "undefined"
-    || !("Notification" in window)
-    || !("serviceWorker" in navigator)
-    || !("PushManager" in window)
-  ) {
-    return "This browser cannot enable phone alerts. Use Safari from an installed Home Screen app on iPhone/iPad, or a current Android or desktop browser.";
-  }
-  return null;
+  const readiness = phonePushReadiness(publicKey);
+  return readiness.canRegister ? null : readiness.message;
 }
 
 function decodeKey(value: string) {
@@ -30,6 +72,7 @@ export function PhonePushSetup({ publicKey }: { publicKey: string }) {
   const [devices, setDevices] = useState<Device[]>([]);
   const [loadingDevices, setLoadingDevices] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [readiness, setReadiness] = useState<PhonePushReadiness | null>(null);
 
   const refresh = useCallback(async (markReady = false) => {
     setLoadingDevices(true);
@@ -38,7 +81,11 @@ export function PhonePushSetup({ publicKey }: { publicKey: string }) {
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error("subscription_list_failed");
       setDevices(Array.isArray(result.subscriptions) ? result.subscriptions : []);
-      if (markReady) setStatus(phonePushCapabilityError(publicKey) || "Ready to register this phone.");
+      if (markReady) {
+        const current = phonePushReadiness(publicKey);
+        setReadiness(current);
+        setStatus(current.message);
+      }
     } catch {
       setStatus("Registered devices could not be loaded. Check your connection and try again.");
     } finally {
@@ -49,9 +96,10 @@ export function PhonePushSetup({ publicKey }: { publicKey: string }) {
   useEffect(() => { void refresh(true); }, [refresh]);
 
   async function enable() {
-    const capabilityError = phonePushCapabilityError(publicKey);
-    if (capabilityError) {
-      setStatus(capabilityError);
+    const current = phonePushReadiness(publicKey);
+    setReadiness(current);
+    if (!current.canRegister) {
+      setStatus(current.message);
       return;
     }
     setProcessing(true);
@@ -81,6 +129,15 @@ export function PhonePushSetup({ publicKey }: { publicKey: string }) {
       setStatus("Secure phone registration failed. Check the connection and browser notification settings, then try again.");
     } finally {
       setProcessing(false);
+    }
+  }
+
+  async function copySetupLink() {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/admin/notifications/phone`);
+      setStatus("Setup link copied. Open Safari, paste the link, then use Share → Add to Home Screen.");
+    } catch {
+      setStatus("In Messages, tap ••• → Open in Safari. Then use Safari Share → Add to Home Screen.");
     }
   }
 
@@ -119,13 +176,25 @@ export function PhonePushSetup({ publicKey }: { publicKey: string }) {
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-amber-300/25 bg-black/60 p-5">
+        {readiness?.needsIosHomeScreen ? (
+          <div className="mb-5 rounded-xl border border-sky-300/30 bg-sky-950/35 p-4 text-sky-50">
+            <p className="font-bold">One-time iPhone installation required</p>
+            <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm">
+              <li>In Messages, tap <strong>•••</strong> and choose <strong>Open in Safari</strong>.</li>
+              <li>In Safari, tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.</li>
+              <li>Open the new <strong>Magic Mike</strong> icon and return to this setup page.</li>
+              <li>Tap enable and choose <strong>Allow</strong> when iPhone asks about notifications.</li>
+            </ol>
+            <button type="button" onClick={() => void copySetupLink()} className="mt-4 w-full rounded-lg border border-sky-200/40 px-4 py-3 font-semibold text-sky-50">Copy setup link for Safari</button>
+          </div>
+        ) : null}
         <label className="mb-2 block text-sm font-semibold text-amber-100" htmlFor="push-role">This phone belongs to</label>
         <select id="push-role" value={role} disabled={processing} onChange={(event) => setRole(event.target.value as Role)} className="w-full rounded-lg border border-amber-300/30 bg-zinc-950 px-3 py-3 text-white disabled:cursor-not-allowed disabled:opacity-60">
           <option value="primary">Mike — primary alert</option>
           <option value="copy">Brandon — copy alert</option>
         </select>
-        <button type="button" disabled={processing} onClick={() => void enable()} className="mt-4 w-full rounded-lg bg-amber-400 px-4 py-3 font-bold text-black hover:bg-amber-300 disabled:cursor-wait disabled:opacity-60">
-          {processing ? "Working…" : "Enable free phone alerts on this device"}
+        <button type="button" disabled={processing || !readiness?.canRegister} onClick={() => void enable()} className="mt-4 w-full rounded-lg bg-amber-400 px-4 py-3 font-bold text-black hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50">
+          {processing ? "Working…" : readiness?.needsIosHomeScreen ? "Install to Home Screen first" : "Enable free phone alerts on this device"}
         </button>
         <p aria-live="polite" className="mt-3 text-sm text-zinc-300">{status}</p>
       </div>
