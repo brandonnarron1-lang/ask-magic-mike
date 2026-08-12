@@ -21,6 +21,9 @@ Updated 2026-08-11.
 - Runtime declarations, CI, and Vercel are aligned on Node 24. Production
   readiness includes the enabled Web Push schema and provider configuration,
   without exposing VAPID key values.
+- Canonical Vercel automatic Git deployments are restored. The stale
+  `exit 0` Ignored Build Step was cleared after a forced, verified production
+  release; rollback is the immediately preceding READY deployment.
 
 ## Same-day changes in this worktree
 

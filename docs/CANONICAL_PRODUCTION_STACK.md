@@ -25,6 +25,7 @@ This document defines the single authoritative source of truth for Ask Magic Mik
 | Apex redirect | `askmagicmike.com` → `www.askmagicmike.com` (308, managed by Vercel) |
 | Framework | Next.js 15 (App Router) |
 | Node version | 24.x |
+| Automatic Git deployments | Enabled; Ignored Build Step command is empty |
 
 ### Verification command
 
