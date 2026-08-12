@@ -12,6 +12,7 @@
     "/admin/notifications",
     "/admin/notifications/phone",
     "/admin/api/push/subscriptions",
+    "/admin/api/push/test",
     "/admin/reporting",
     "/api/admin/health",
     "/api/admin/notifications/retry",
@@ -63,6 +64,7 @@
       "/admin/action-queue", "/admin/notifications", "/admin/notifications/phone", "/admin/reporting"
     ],
     "api": [
+      "/admin/api/push/test",
       "/api/leads", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/webhooks/sms/status", "/api/widget/events",
       "/api/admin/health", "/api/admin/sla/sweep"
     ]
