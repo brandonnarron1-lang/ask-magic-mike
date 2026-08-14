@@ -29,7 +29,7 @@ Vercel builds with Node 24.x. The audit workstation used Node 26.5.1, so Node
 - Apex `askmagicmike.com` returned HTTP 308 to the canonical `www` host.
 - `/api/health/live` and `/api/health/ready` reported the Neon lead pipe ready.
 - Unauthenticated `/admin` access returned HTTP 401.
-- Vercel production deployment `dpl_4krvUvVDvgK4owaQmaHHfXyWAEke` is Ready
+- Vercel production deployment `dpl_GJkS5dRAtzakPdtVJRiNAUWbWSKp` is Ready
   and serves the canonical aliases.
 - Vercel production error search found no error-level events in the prior 24h.
 - Desktop 1440x1000 and mobile 390x844 browser checks showed a responsive,
@@ -60,7 +60,8 @@ Vercel builds with Node 24.x. The audit workstation used Node 26.5.1, so Node
 - `pnpm amm:verify:isolation`: PASS.
 - `pnpm amm:verify:social-preview`: Ask Magic Mike PASS; overall BLOCKED —
   HUMAN ACTION because Facebook crawler still receives 403 on two Our Town pages.
-- Draft PR #137 release gate and all Vercel checks: PASS.
+- PR #137 release gate, merge, production deployment, and post-release checks:
+  PASS.
 - Canonical Preview `dpl_GX79R6BkfrmiCXFSzjzpDRphZzwz`: Ready;
   live/readiness probes PASS with Preview Neon and outbound email/push disabled;
   unauthenticated `/admin` returns 401.
@@ -100,3 +101,38 @@ independent `local-release-gate` and all Vercel status checks passed.
 Run the final command matrix recorded in the draft PR after every requested
 change. Production end-to-end messaging remains covered by the controlled QA
 evidence in `QA_EVIDENCE.md`; this audit deliberately did not resend it.
+
+## WordPress bridge v1.1.0 and toolchain rerun — 2026-08-14 11:42 EDT
+
+No production lead, email, SMS, push notification, consumer acknowledgment,
+database mutation, form submission, or WordPress setting was created or changed.
+Authenticated read-only inspection reconfirmed the exact field IDs for Gravity
+Forms 1–7. Every form lacks a native Consent field and retains one active legacy
+admin notification with no local BCC. The installed bridge remains version 1.0.0
+in shadow mode; it has observed saved entries from forms 6 and 7 with attempt 0
+and no canonical lead ID.
+
+The reviewed v1.1.0 package adds a mandatory per-form allowlist and remains
+fail-closed if the global flag is on without an approved form ID. Package:
+`output/release/ask-magic-mike-canonical-bridge-1.1.0.zip`; SHA-256:
+`a6a985c3cc7a4c5f357c16cb5937c407044d07071a09f6a3ae9d757085dc5633`.
+
+| Check | Result |
+| --- | --- |
+| Focused WordPress/signature tests | PASS — 2 files / 10 tests |
+| `pnpm test` | PASS — 148 files / 2,539 tests on Vitest 3.2.6 |
+| `pnpm run typecheck` | PASS |
+| `pnpm run lint` | PASS |
+| `pnpm run routes:verify` | PASS — production build / 54 routes |
+| `pnpm run release:safety` | PASS — 14/14 |
+| `pnpm run amm:verify:isolation` | PASS |
+| `pnpm run test:e2e` | PASS — 13/13 Chromium tests |
+| `pnpm audit --audit-level high` | PASS — no known vulnerabilities |
+| ZIP integrity | PASS — 3 archive entries, no errors |
+
+The workstation used Node 26.5.1 while Vercel remains pinned to the authoritative
+Node 24.x runtime. No PHP CLI is installed locally; production WordPress load is
+therefore the final PHP parse/plugin-upgrade proof and remains an activation gate.
+The read-only canonical Vercel environment-name audit did not find
+`WORDPRESS_BRIDGE_SECRET`; matching server secrets must be entered through Vercel
+and the WordPress hosting configuration in the same controlled activation window.

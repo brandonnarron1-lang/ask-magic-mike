@@ -7,8 +7,8 @@ conflict with the observed repository, live deployment, or health probes.
 
 | Asset | Evidence | Status |
 | --- | --- | --- |
-| GitHub | `brandonnarron1-lang/ask-magic-mike`, `main`, commit `8178e24106e723ddb4a302b7ac9fc1551008f697` | VERIFIED LIVE |
-| Vercel | `eyes-up-industries/ask-magic-mike`, project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`, deployment `dpl_4krvUvVDvgK4owaQmaHHfXyWAEke` | VERIFIED LIVE |
+| GitHub | `brandonnarron1-lang/ask-magic-mike`, `main`, merge commit `8ca35cf3154268edf9c9d26bd9cce91a799323f0` | VERIFIED LIVE |
+| Vercel | `eyes-up-industries/ask-magic-mike`, project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`, deployment `dpl_GJkS5dRAtzakPdtVJRiNAUWbWSKp` | VERIFIED LIVE |
 | Public host | `https://www.askmagicmike.com`; apex redirects 308 | VERIFIED LIVE |
 | Database | Neon `bitter-star-20214385`; production branch `br-round-base-auh6h2wd` | VERIFIED LIVE |
 | Brokerage/SEO | `https://www.ourtownproperties.com` WordPress | VERIFIED LIVE |
@@ -47,6 +47,8 @@ commit. No new repository or parallel lead database is warranted.
    Runtime facts remain accessible HTML/text; PII-free urgency artwork is
    selected deterministically by score and test state.
 5. NellySelly identifiers are rejected by the Ask release isolation check.
+6. Legacy Vercel projects retain their deployments for rollback evidence but no
+   longer have Git integrations, preventing duplicate builds from future pushes.
 
 ## Open GitHub work
 

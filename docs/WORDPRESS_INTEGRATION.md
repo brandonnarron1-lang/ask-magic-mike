@@ -25,8 +25,9 @@ disabled only after an owner-approved test proves the canonical alert works.
 
 The implementation package is `wordpress/ask-magic-mike-canonical-bridge/` and a
 reviewable install archive is generated at
-`output/release/ask-magic-mike-canonical-bridge-1.0.0.zip`. It is disabled unless
-`AMM_CANONICAL_BRIDGE_ENABLED === true` is defined in `wp-config.php`. The shared
+`output/release/ask-magic-mike-canonical-bridge-1.1.0.zip`. Version 1.1.0 is disabled
+unless `AMM_CANONICAL_BRIDGE_ENABLED === true` and an explicit approved subset is
+configured with `AMM_CANONICAL_BRIDGE_FORM_IDS`. The shared
 HMAC secret is read only from `AMM_CANONICAL_BRIDGE_SECRET` or the hosting
 environment and must match server-side `WORDPRESS_BRIDGE_SECRET`.
 
@@ -76,6 +77,18 @@ parse/load proof; forwarding remains disabled.
   four uncontacted. Do not bulk import, merge, suppress, or delete them without a
   reviewed identity/dedupe reconciliation.
 - Canonical bridge `1.0.0` is installed and active. Its health page proves
-  `Shadow only — no forwarding`, no observed entries, and no displayed secrets.
+  `Shadow only — no forwarding`; the initial installation showed no observed
+  entries and no displayed secrets.
 - Forwarding remains impossible until both Vercel `WORDPRESS_BRIDGE_SECRET` and
   hosting-level WordPress secret/enable configuration are supplied securely.
+
+## Live re-audit — 2026-08-14
+
+- The installed 1.0.0 bridge has observed entries from forms 6 and 7 in shadow
+  mode, proving the post-save hook is active without forwarding PII.
+- Authenticated editor inspection reconfirmed the exact field IDs used by all
+  seven mappings. No form has a Gravity Forms Consent field.
+- Every form still shows one active legacy admin notification and no local BCC.
+- Version 1.1.0 adds a mandatory per-form activation allowlist. Upgrade to 1.1.0
+  before forwarding so one controlled form can be proved without enabling all
+  seven forms simultaneously.

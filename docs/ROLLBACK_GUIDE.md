@@ -3,8 +3,9 @@
 ## Application
 
 Current production is Vercel deployment
-`dpl_4krvUvVDvgK4owaQmaHHfXyWAEke`. The immediately preceding inspected Ready
-deployment is `dpl_5cDj7c7QcCPassZvww9mGZzAfeVm`. Before a future deploy,
+`dpl_GJkS5dRAtzakPdtVJRiNAUWbWSKp` at merge commit
+`8ca35cf3154268edf9c9d26bd9cce91a799323f0`. The retained prior Ready deployment
+is `dpl_4krvUvVDvgK4owaQmaHHfXyWAEke`. Before a future deploy,
 re-inspect both IDs because aliases and deployment order can change.
 
 If critical smoke checks fail, stop activation and promote the recorded prior
@@ -26,6 +27,8 @@ failed rows. Web Push subscriptions may be revoked individually.
 
 ## WordPress
 
-Set `AMM_CANONICAL_BRIDGE_ENABLED=false` or remove only the approved embed block.
+Set `AMM_CANONICAL_BRIDGE_ENABLED=false`; for one-form rollback, remove only that
+ID from `AMM_CANONICAL_BRIDGE_FORM_IDS`. Remove only the approved embed block when
+the incident concerns an embed rather than Gravity forwarding.
 Gravity Forms remains the capture fallback. Do not alter parent theme, IDX,
 unrelated forms, pages, or SEO metadata.

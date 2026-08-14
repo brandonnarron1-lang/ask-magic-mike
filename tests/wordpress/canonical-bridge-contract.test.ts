@@ -27,6 +27,16 @@ describe("WordPress canonical bridge contract", () => {
     expect(plugin).toContain("shadow_observed");
   });
 
+  it("requires an explicit audited per-form allowlist even when globally enabled", () => {
+    expect(plugin).toContain("Version: 1.1.0");
+    expect(plugin).toContain("AMM_CANONICAL_BRIDGE_FORM_IDS");
+    expect(plugin).toContain("WORDPRESS_BRIDGE_FORM_IDS");
+    expect(plugin).toContain("enabledForForm");
+    expect(plugin).toContain("shadow_not_allowlisted");
+    expect(plugin).toContain("Configuration blocked — no forms allowlisted");
+    expect(plugin).toContain("Signing secret:");
+  });
+
   it("denies all communication permissions for legacy forms without canonical consent", () => {
     expect(plugin).toContain("'consent_email' => false");
     expect(plugin).toContain("'consent_call' => false");

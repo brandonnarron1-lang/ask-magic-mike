@@ -8,11 +8,11 @@
   previously controlled internal email delivery with hidden audit BCC.
 - VERIFIED LIVE — Ask Magic Mike and NellySelly projects/domains/databases remain
   isolated.
-- COMPLETE — READY TO MERGE — current health/release checks, analytics event
+- VERIFIED LIVE — PR #137 health/release checks, analytics event
   allowlist, admin cache/frame hardening, route-level push authorization,
   appointment throttling, safe env examples, and consolidated docs.
 - IMPLEMENTED — ACTIVATION REQUIRED — free Web Push enrollment, WordPress bridge,
-  CSP report-only rollout, and production merge/deploy of this branch.
+  CSP report-only rollout, and WordPress bridge 1.1.0 activation.
 - Single blocker to broader operation: approved people must complete their own
   phone enrollment; multi-user RBAC also needs an owner-approved roster.
 
@@ -22,17 +22,17 @@ does not claim a fabricated consumer or send another QA message.
 ## Canonical system
 
 - Repository: `https://github.com/brandonnarron1-lang/ask-magic-mike`
-- Production baseline: `main` at `8178e24106e723ddb4a302b7ac9fc1551008f697`
+- Production baseline: `main` at `8ca35cf3154268edf9c9d26bd9cce91a799323f0`
 - Vercel: `eyes-up-industries/ask-magic-mike`, production deployment
-  `dpl_4krvUvVDvgK4owaQmaHHfXyWAEke`
+  `dpl_GJkS5dRAtzakPdtVJRiNAUWbWSKp`
 - Database: Neon `bitter-star-20214385`, production branch
   `br-round-base-auh6h2wd`
 - Public app/API/Admin: active root `app/`
 - WordPress: OurTownProperties.com authority plus isolated canonical bridge
 - Supabase runtime and `src/app` duplicate routes: SUPERSEDED/reference
-- Review branch: draft PR #137; canonical Preview
-  `dpl_BZNVfpM6yFxMsNgve9mu2aKSSVm2` is Ready and the independent GitHub release
-  gate plus all Vercel checks pass
+- PR #137 is merged and post-release smoke, funnel, health, authorization,
+  isolation, and error-log checks pass. Legacy Vercel projects are disconnected
+  from Git while their deployments remain retained for evidence/rollback.
 
 ## Final URLs
 
@@ -53,7 +53,8 @@ the free-first staff-phone path.
 
 ## Completion boundary
 
-No production deployment, merge, migration, DNS change, WordPress publication,
-paid activation, production data mutation, customer contact, or new external send
-was performed. Exact remaining actions are in `OWNER_APPROVAL_QUEUE.md`; deferred
-work is in `DEFERRED_ACTIVATION_BACKLOG.md`.
+PR #137 was merged and deployed after approval. No migration, DNS change,
+WordPress publication, paid activation, production data mutation, customer
+contact, or new external send was performed during that cutover. Exact remaining
+actions are in `OWNER_APPROVAL_QUEUE.md`; deferred work is in
+`DEFERRED_ACTIVATION_BACKLOG.md`.
