@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { checkAdminBasicAuth } from "@/lib/admin/auth";
+import { getLeadCenterRbacState } from "@/lib/admin/rbac-policy";
+import { requireLeadCenterApiPermission } from "@/lib/admin/rbac-session";
 import { NeonPushSubscriptionRepository } from "../../../../lib/persistence/neonPushSubscriptionRepository";
 
 export const runtime = "nodejs";
@@ -26,7 +28,11 @@ const subscriptionSchema = z.object({
   }),
 });
 
-function authorize(request: NextRequest) {
+async function authorize(request: NextRequest) {
+  if (getLeadCenterRbacState().enabled) {
+    const result = await requireLeadCenterApiPermission(request, "notification:manage");
+    return result.ok ? null : result.response;
+  }
   const auth = checkAdminBasicAuth(request);
   if (auth.ok) return null;
   return NextResponse.json({ ok: false, error: auth.error }, {
@@ -36,7 +42,7 @@ function authorize(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const denied = authorize(request);
+  const denied = await authorize(request);
   if (denied) return denied;
   try {
     const subscriptions = await new NeonPushSubscriptionRepository().listActive();
@@ -55,7 +61,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const denied = authorize(request);
+  const denied = await authorize(request);
   if (denied) return denied;
   if (request.headers.get("origin") !== request.nextUrl.origin) {
     return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403 });
@@ -77,7 +83,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const denied = authorize(request);
+  const denied = await authorize(request);
   if (denied) return denied;
   if (request.headers.get("origin") !== request.nextUrl.origin) {
     return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403 });

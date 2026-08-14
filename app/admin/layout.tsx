@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import { isPreviewDataDisabled } from "../../src/lib/preview-security";
+import { requireLeadCenterAuthenticated } from "../../src/lib/admin/rbac-session";
 
-export default function AdminLayout({ children }: { children: ReactNode }) {
+export default async function AdminLayout({ children }: { children: ReactNode }) {
+  await requireLeadCenterAuthenticated();
   const previewReadOnly = isPreviewDataDisabled();
 
   return (

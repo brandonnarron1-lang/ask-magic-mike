@@ -1,22 +1,18 @@
 # Production Monitoring Runbook
 
-Run the existing read-only monitor; do not create synthetic leads:
+## Scheduled
 
-```bash
-TARGET_URL=https://www.askmagicmike.com pnpm run monitor:synthetic
-pnpm run amm:verify:health
-pnpm run amm:verify:funnel
-pnpm run amm:verify:isolation
-```
+- Vercel SLA sweep: hourly, dry-run unless an authorized request explicitly uses `persist=true`.
+- GitHub Actions public synthetic: hourly after this workflow reaches `main`.
 
-Then inspect Vercel production logs for HTTP 5xx, bridge authorization failures,
-`notification_failed`, and queue retry growth. In WordPress, open Settings → AMM
-Canonical Bridge and confirm only approved forms appear as forwarded. In Gravity
-Forms, reconcile each forwarded entry to one canonical lead ID.
+## Point-in-time and operator-run
 
-Escalate immediately if readiness fails, an unauthorized form forwards, a saved
-entry lacks a canonical ID, a lead has multiple internal alerts, or NellySelly
-appears in any Ask Magic Mike project/domain/database identifier.
+- `pnpm monitor-production` - nine public, health, and anonymous-admin checks.
+- `pnpm reconcile-wordpress-leads` - Neon-side WordPress identity, allowlist, idempotency, and queue check; requires `DATABASE_URL`.
+- `pnpm check-lead-sla` - assignment, contact, unassigned, duplicate, and test-suppression check; requires `DATABASE_URL`.
 
-This is a point-in-time operating procedure, not a claim of continuous external
-monitoring.
+## Failure handling
+
+Readiness/database/queue/unassigned/unsuppressed-test failures are immediate incidents. Preserve correlation IDs and records, do not resubmit a genuine lead, and use `FIRST_LIVE_LEAD_RESPONSE_RUNBOOK.md`. Normal status belongs in one daily digest; do not send minute-by-minute all-clear messages.
+
+This baseline is scheduled synthetic monitoring, not continuous 24-hour observation.

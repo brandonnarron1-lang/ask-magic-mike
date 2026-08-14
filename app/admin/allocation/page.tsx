@@ -8,6 +8,7 @@ import {
 import { loadAdminLeadNotificationSummary } from "../../lib/adminLeadNotificationView";
 import type { AdminAssignmentAuditRecord } from "../../lib/adminAssignmentAudit";
 import { assignLeadToAgentAction, unassignLeadAction, updateAgentOperationsAction } from "./actions";
+import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -294,6 +295,7 @@ export default async function AdminAllocationPage({
 }: {
   searchParams?: Promise<{ assignment_action?: string }>;
 }) {
+  await requireLeadCenterPermission("lead:assign");
   const params = searchParams ? await searchParams : {};
   const [summary, notifications] = await Promise.all([
     loadAdminAgentAllocationView(),

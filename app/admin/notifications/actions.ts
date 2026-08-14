@@ -3,10 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { retryNotification } from "../../lib/leadNotificationService";
+import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function retryLeadNotificationAction(formData: FormData) {
+  await requireLeadCenterPermission("notification:manage");
   const notificationId = String(formData.get("notification_id") ?? "");
   const confirm = formData.get("confirm") === "yes";
 

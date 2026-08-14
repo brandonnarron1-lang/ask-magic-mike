@@ -7,8 +7,10 @@ import {
   unassignLead,
   updateAgentOperations,
 } from "../../lib/adminAgentAllocationActions";
+import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 
 export async function assignLeadToAgentAction(formData: FormData) {
+  await requireLeadCenterPermission("lead:assign");
   const leadId = String(formData.get("lead_id") ?? "");
   const agentId = String(formData.get("agent_id") ?? "");
   const result = await assignLeadToAgent(leadId, agentId);
@@ -27,6 +29,7 @@ export async function assignLeadToAgentAction(formData: FormData) {
 }
 
 export async function unassignLeadAction(formData: FormData) {
+  await requireLeadCenterPermission("lead:assign");
   const leadId = String(formData.get("lead_id") ?? "");
   const result = await unassignLead(leadId);
 
@@ -44,6 +47,7 @@ export async function unassignLeadAction(formData: FormData) {
 }
 
 export async function updateAgentOperationsAction(formData: FormData) {
+  await requireLeadCenterPermission("routing:manage");
   const agentId = String(formData.get("agent_id") ?? "");
   const result = await updateAgentOperations({
     agentId,

@@ -4,6 +4,8 @@ import {
   loadAdminActionQueue,
   type AdminActionQueueItem,
 } from "../../lib/adminAppointmentFollowupOps";
+import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
+import { hasLeadCenterPermission } from "../../../src/lib/admin/rbac-policy";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -76,7 +78,18 @@ function QueueCard({ item }: { item: AdminActionQueueItem }) {
 }
 
 export default async function AdminActionQueuePage() {
-  const queue = await loadAdminActionQueue();
+  const principal = await requireLeadCenterPermission("task:manage_assigned");
+  const loadedQueue = await loadAdminActionQueue();
+  const queue = principal && !hasLeadCenterPermission(principal.role, "lead:view_all")
+    ? {
+        ...loadedQueue,
+        items: principal.agentId
+          ? loadedQueue.items.filter(
+              (item) => item.assigned_agent_id?.toLowerCase() === principal.agentId?.toLowerCase(),
+            )
+          : [],
+      }
+    : loadedQueue;
   const urgent = queue.items.filter((item) => item.priority <= 2).length;
 
   return (
