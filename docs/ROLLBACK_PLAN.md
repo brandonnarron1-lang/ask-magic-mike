@@ -2,8 +2,9 @@
 
 ## Application
 
-Current production is `dpl_BGkVcCMFgeZQgnteRxRUomeJoyRv`. The immediately prior
-known-good deployment is `dpl_4yacS3NeepmZNp4AnamDF6oPA5GW`. If smoke checks fail,
+Current production is `dpl_4krvUvVDvgK4owaQmaHHfXyWAEke`. The immediately prior
+inspected Ready deployment is `dpl_5cDj7c7QcCPassZvww9mGZzAfeVm`. Re-inspect
+both before a future release because aliases can move. If smoke checks fail,
 stop traffic activation and use Vercel promotion/rollback to the recorded prior
 deployment. Do not delete a deployment or force-push.
 

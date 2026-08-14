@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-14 — Free-first reconciliation and release hardening
+
+- Reconfirmed the existing Vercel + Neon deployment as canonical; no parallel
+  repository, database, notification engine, or visual system was introduced.
+- Updated health/startup/launch checks for the active Neon runtime and active
+  root `app/` tree.
+- Added an approved public analytics event allowlist and admin no-store/frame
+  headers.
+- Reconciled architecture, security, privacy, QA, environment, WordPress,
+  widget, phone enrollment, deployment, rollback, and owner-gate documentation.
+- Kept carrier SMS deferred and reused free Web Push for staff phone alerts.
+- No production deployment, migration, WordPress publication, DNS change,
+  external send, or production data mutation was performed.
+
 ## 2026-08-10 — Same-day lead-engine consolidation (local preparation)
 
 - Selected the mature `Projects/ask-magic-mike` repository as canonical.
