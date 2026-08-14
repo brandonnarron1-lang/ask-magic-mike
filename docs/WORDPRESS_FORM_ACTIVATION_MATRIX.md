@@ -9,7 +9,7 @@ customer data.
 | ---: | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Contact Us | name, email, phone, subject, message, CAPTCHA | general question | Blocked | Active | No native Consent field | Map page/source; controlled QA |
 | 2 | Cash Offer Form | name, phone, email, address, CAPTCHA | seller options | Blocked | Active | No native Consent field | Legal copy and controlled QA |
-| 3 | Home Value Form | address, name, email, phone, CAPTCHA | home value | **Enabled** | **Inactive duplicate** | Permissions denied by bridge | Final Neon QA-row reconciliation |
+| 3 | Home Value Form | address, name, email, phone, CAPTCHA | home value | **Enabled / accepted** | **Inactive duplicate** | Call/email/SMS denied and stored | Daily reconciliation monitoring |
 | 4 | Join Our Team | name, phone, email, license, address, CAPTCHA | recruiting/admin review | Blocked | Active | No native Consent field | Approve recruiting route |
 | 5 | Rental Property Search | name, phone, email, address, rental area, CAPTCHA | renter/property management | Blocked | Active | No native Consent field | Confirm recipient and consent |
 | 6 | Short Term Home Rentals | name, phone, email, details, CAPTCHA | rental inquiry | Blocked | Active | No native Consent field | Map details and controlled QA |

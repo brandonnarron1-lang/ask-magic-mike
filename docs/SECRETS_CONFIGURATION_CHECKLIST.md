@@ -6,7 +6,7 @@
 - [x] BCC configured as an encrypted environment variable
 - [x] Resend provider credential remains server-only
 - [x] Neon `DATABASE_URL` remains server-only and isolated from NellySelly
-- [ ] Remove the local temporary bridge-secret file after the final Neon audit
+- [x] Remove the local temporary bridge-secret and QA request files after reconciliation
 - [ ] Confirm the approved password manager holds recovery metadata
 
 Presence and successful HMAC verification are the only recorded proof. Values

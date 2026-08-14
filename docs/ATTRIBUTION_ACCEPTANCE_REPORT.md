@@ -20,3 +20,5 @@ a nested object while the API originally read top-level attribution fields. The
 normalizer now accepts both shapes and prefers canonical top-level values when
 both exist. The historical QA-only `gclid` remains absent from its original lead;
 future WordPress submissions preserve approved click IDs without a migration.
+The compatibility fix is live through PR #140 / production deployment
+`dpl_3AVXKtKCuiqytNqNQXvSKF4YBPCL`.

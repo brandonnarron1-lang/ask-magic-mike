@@ -18,3 +18,8 @@
 - Prepared a follow-up compatibility release that normalizes nested WordPress
   click IDs and restores the no-store, public-safe listing fallback routes in
   the active App Router without connecting or exposing private MLS data.
+- Merged PR #140 as `178bdefd` and deployed production
+  `dpl_3AVXKtKCuiqytNqNQXvSKF4YBPCL`.
+- Audited the actual Neon production branch, found the one incomplete controlled
+  pre-fix replay row, marked it test/suppressed, and inserted one auditable
+  before/after event. No row was deleted and no message was sent.
