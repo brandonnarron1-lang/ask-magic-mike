@@ -96,3 +96,48 @@ The focused suite includes a Production boundary regression that sets legacy Sup
 - No Gravity Form beyond Form 3 was activated.
 - No external email, SMS, Push, social post, DNS change, Vercel domain attachment,
   Production database migration, or Production deployment occurred in this QA stage.
+
+## Final branch verification
+
+Executed after the Lead Center exact-host matcher and Web Push device-label
+changes were complete:
+
+```text
+pnpm run release:gate
+PASS - isolation; 14/14 safety; 153 test files / 2,558 tests; strict
+TypeScript; ESLint; 41-page Production build; 58 active routes
+
+pnpm run test:e2e
+PASS - 13/13 Chromium tests
+
+pnpm audit --prod --audit-level=high
+PASS - no known vulnerabilities
+
+gitleaks git --no-banner --redact --log-opts='--all'
+PASS - 326 commits, no leaks found
+
+pnpm run smoke:prod
+PASS - 19 pass, 2 protected/write skips, 0 fail
+
+pnpm run amm:verify:funnel
+PASS - 15/15
+
+pnpm run amm:verify:health
+PASS - 2/2 public probes; protected detail skipped without local secret
+
+TARGET_URL=https://www.askmagicmike.com pnpm run monitor:synthetic
+PASS - 6 pass, 1 protected skip, 0 fail
+
+pnpm run monitor-production
+PASS - 9/9
+
+pnpm run amm:verify:social-preview
+DOCUMENTED EXCEPTION - 40/42; Facebook HTTP 403 on two Our Town pages
+
+vercel logs https://www.askmagicmike.com --since 1h --level error --no-follow
+PASS - no error-level logs returned
+```
+
+The local shell used Node 26.5.1 and emitted an engine warning because the
+project declares Node 24.x. All checks passed; the final GitHub release gate is
+the authoritative Node 24 validation after push.

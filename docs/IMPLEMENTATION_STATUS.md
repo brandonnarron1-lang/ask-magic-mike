@@ -2,6 +2,29 @@
 
 Updated 2026-08-14.
 
+## Phase 3 staged operations release - 2026-08-14
+
+- PR 143 closes active Production reporting and Lead Center mutations to Neon
+  only and adds audited actor propagation, exact-host Lead Center subdomain
+  handling, durable SLA-cron persistence, and human-readable Web Push device
+  labels.
+- The RBAC migration and Push device-label migration passed on isolated Neon
+  Preview only. Production remains unchanged and on shared Basic Auth.
+- Form 7 entry 1550 is preserved as `GENUINE - CONSENT RESTRICTED OR UNCLEAR`;
+  it was not contacted, marketed, marked test, or forwarded to Neon.
+- Form 1 and Form 6 audits stopped before activation because neither stores an
+  approved consent choice/version or attribution. Form 3 remains the only
+  canonical WordPress form.
+- Production read-only evidence remains healthy: 0 live leads, 6 suppressed
+  tests, 0 unsuppressed tests, 0 queue/failures, public funnel 15/15, monitor
+  9/9, and no error-level Vercel logs in the inspected hour.
+- Final staged validation passes 153 test files / 2,558 tests, strict typecheck,
+  lint, 41-page build, 58-route manifest, 14/14 safety checks, 13/13 Chromium
+  tests, dependency audit, 326-commit secret scan, and isolation.
+- Seven redacted operations PDFs are complete. Compliant refreshed `.pptx` and
+  `.xlsx` artifacts remain blocked because the required bundled artifact
+  dependency loader is unavailable; stale workbooks were not relabeled.
+
 ## Brandon phone-registration repair — 2026-08-12
 
 - Production logs isolated the failure to repeated HTTP 401 responses on the
