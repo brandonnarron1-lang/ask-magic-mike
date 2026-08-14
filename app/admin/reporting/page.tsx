@@ -8,6 +8,8 @@ import {
   type AdminReportingSummary,
   type StatusBucketKey,
 } from "../../lib/adminReportingView";
+import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
+import { hasLeadCenterPermission } from "../../../src/lib/admin/rbac-policy";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -222,9 +224,17 @@ export default async function AdminReportingPage({
 }: {
   searchParams?: Promise<{ window?: string }>;
 }) {
+  const principal = await requireLeadCenterPermission("report:view");
   const params = searchParams ? await searchParams : {};
   const windowDays = parseWindow(params.window);
   const summary = await loadAdminReportingSummary(windowDays);
+  const visibleHotLeads = !principal || hasLeadCenterPermission(principal.role, "lead:view_all")
+    ? summary.hotLeads
+    : principal.agentId
+      ? summary.hotLeads.filter(
+          (lead) => lead.assigned_agent_id?.toLowerCase() === principal.agentId?.toLowerCase(),
+        )
+      : [];
 
   return (
     <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
@@ -469,7 +479,7 @@ export default async function AdminReportingPage({
           </div>
 
           <Panel title="Hot lead indicators">
-            <HotLeadList rows={summary.hotLeads} />
+            <HotLeadList rows={visibleHotLeads} />
           </Panel>
         </div>
       </div>

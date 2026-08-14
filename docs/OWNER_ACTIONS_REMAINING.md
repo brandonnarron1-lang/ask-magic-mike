@@ -1,9 +1,16 @@
 # Owner Actions Remaining
 
-1. Complete physical Web Push enrollment on Brandon's phone when desired.
-2. Approve brokerage/legal copy and service-area decisions before coastal or
-   territory-specific promotion.
-3. Approve each additional Gravity Form activation one at a time. Form 3 is
-   accepted; no other form is allowlisted.
+| Priority | Exact action | Required person | Reason | Risk of delay | Can launch continue? | Completion and verification |
+| --- | --- | --- | --- | --- | --- | --- |
+| Immediate | Review WordPress Form 7 entry 1550 and confirm whether its existing native notification reached the intended operational inbox; perform only consent-permitted follow-up | Mike or Brandon | It has no QA markers and is preserved only in WordPress shadow storage | A possible genuine property-alert request may age without response | Yes; Form 3 and AskMagicMike.com remain live | Open Gravity Forms -> Entries -> Form 7 -> Entry 1550; do not mark it test; record actual disposition |
+| High | Approve exact marketing-consent wording before Form 7 is connected to the canonical pipeline or Constant Contact | Brokerage owner/BIC | Form 7 promises property alerts but has no explicit marketing Consent field | Form 7 remains shadow-only | Yes | Approve the displayed language/version, publish it, then run one controlled QA and verify suppression/audience exclusion |
+| High | Provide the verified staff roster and role approvals for per-user Lead Center provisioning | Brokerage owner | Users and roles must not be invented | Shared Basic Auth remains the temporary fallback | Yes for controlled operations | Complete `LEAD_CENTER_USER_ROSTER_TEMPLATE.xlsx`; verify one administrator before cutover |
+| High | Approve the Preview-only RBAC acceptance window after the roster is complete | Brokerage owner and system owner | The additive Neon migration, `BETTER_AUTH_SECRET`, first administrator, and session tests must be proven before replacing Basic Auth | Per-user access remains feature-gated and inactive | Yes; current Basic Auth stays unchanged | Apply `20260814190000_lead_center_rbac.sql` to Preview, enter the secret in Vercel Preview, provision one approved administrator, pass login/role/revoke/rollback tests, then request a separate production cutover approval |
+| High | Approve one-at-a-time QA for Forms 1 and 6 after their exact consent-default mappings and backups are documented | Brokerage owner/system owner | Both forms are technically close but cannot inherit invented communication permission | They remain WordPress shadow storage with existing native handling | Yes | Back up each form, activate only one allowlist entry, submit one fictional suppressed QA lead through the public page, verify one canonical record and one alert, then retain or roll back that form before starting the next |
+| Medium | Enroll Brandon's physical browser for Web Push | Brandon | Browser notification permission requires the device owner | Email remains the internal alert path | Yes | Open `/admin/notifications/phone`, name device, allow notifications, send one `[TEST]` push, verify deep link and revoke test |
+| Medium | Enroll Mike's physical browser for Web Push | Mike | Browser notification permission requires the device owner | Email remains the internal alert path | Yes | Follow `WEB_PUSH_ENROLLMENT_GUIDE.pdf`; verify one `[TEST]` push and secure deep link |
+| Medium | Ask the hosting operator for the ModSecurity audit rule ID and a path-scoped Meta crawler exception | Regency/Liquid Web host administrator | cPanel exposes only an unsafe domain-wide on/off switch | Facebook previews for two Our Town URLs remain blank | Yes; use AskMagicMike.com links on Facebook | Apply the narrow rule described in `SOCIAL_CRAWLER_403_ROOT_CAUSE.md`, then rerun `pnpm amm:verify:social-preview` |
+| Medium | Approve brokerage/legal copy and territory decisions before seller-options or coastal promotion | Brokerage owner/BIC | Prevents unapproved service-area and offer claims | Forms 2 and coastal promotion remain held | Yes | Approve copy in writing, then run that form's individual activation gate |
 
-No purchase, paid ad, carrier SMS, or consumer campaign is required for launch.
+No purchase, paid ad, carrier SMS, or consumer campaign is required for the
+current launch.

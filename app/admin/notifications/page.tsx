@@ -6,6 +6,7 @@ import {
 } from "../../lib/adminLeadNotificationView";
 import type { LeadNotificationRecord } from "../../lib/leadNotificationTypes";
 import { retryLeadNotificationAction } from "./actions";
+import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -127,6 +128,7 @@ export default async function AdminNotificationsPage({
 }: {
   searchParams?: Promise<{ notification_action?: string }>;
 }) {
+  await requireLeadCenterPermission("notification:manage");
   const params = searchParams ? await searchParams : {};
   const summary = await loadAdminLeadNotificationSummary();
 

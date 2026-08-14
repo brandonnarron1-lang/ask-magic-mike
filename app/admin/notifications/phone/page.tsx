@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { PhonePushSetup } from "./PhonePushSetup";
 import { PhoneSetupInvite } from "./PhoneSetupInvite";
+import { requireLeadCenterPermission } from "../../../../src/lib/admin/rbac-session";
 
 export const dynamic = "force-dynamic";
 
-export default function PhoneNotificationSetupPage() {
+export default async function PhoneNotificationSetupPage() {
+  await requireLeadCenterPermission("notification:manage");
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
   return (
     <main className="min-h-screen bg-zinc-950 px-5 py-10 text-white">

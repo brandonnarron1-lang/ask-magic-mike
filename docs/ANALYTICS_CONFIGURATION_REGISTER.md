@@ -1,13 +1,10 @@
 # Analytics Configuration Register
 
-| Surface | Current state | Next control |
-| --- | --- | --- |
-| Ask Magic Mike public events | Approved event registry enforced | Monitor rejected-event logs |
-| First/last touch | Persisted in canonical lead attribution | Keep cross-domain QA |
-| WordPress Form 3 UTMs | Verified in internal alert | Add automated bridge contract assertion |
-| GA4/GTM | Existing assets retained | Authenticated tag audit pending |
-| Meta / ads tags | No paid activation authorized | Keep QA out of audiences |
-| Test traffic | All Form 3 QA rows reconciled as test/suppressed | Keep excluded from KPIs |
-| Click IDs | Nested bridge/API compatibility deployed in PR #140 | Verify on the next approved form QA; no paid activation |
-
-No advertising, retargeting, or paid conversion campaign was activated.
+| Surface | Current state | Test handling | Next acceptance |
+|---|---|---|---|
+| AskMagicMike public app | Canonical events implemented | Test flag/suppression excluded | Reverify after next deploy |
+| WordPress Form 3 | Source, form, UTMs, click IDs verified | QA suppressed | Daily reconciliation |
+| WordPress Forms 1-2, 5-7 | Shadow or deferred | No canonical KPI inclusion | One-form acceptance matrix |
+| Form 4 recruiting | Outside consumer lead routing | Excluded | Preserve administrative purpose |
+| Admin outcomes | Data model supports stage/outcomes | Tests excluded | Enter actual outcomes only |
+| Paid media | Inactive | N/A | Separate approval required |

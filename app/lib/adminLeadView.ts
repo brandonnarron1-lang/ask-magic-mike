@@ -6,6 +6,7 @@ import {
   loadNeonAdminLeadDetail,
   loadNeonAdminLeadInbox,
 } from "./persistence/neonAdminLeadView";
+import type { LeadCenterPrincipal } from "../../src/lib/admin/rbac-policy";
 
 export {
   normalizeAdminLeadRow,
@@ -18,14 +19,14 @@ export type {
   AdminLeadView,
 } from "./persistence/supabase/adminLeadView";
 
-export function loadAdminLeadInbox(limit = 50) {
+export function loadAdminLeadInbox(limit = 50, principal: LeadCenterPrincipal | null = null) {
   return process.env.DATABASE_URL
-    ? loadNeonAdminLeadInbox(limit)
+    ? loadNeonAdminLeadInbox(limit, principal)
     : loadSupabaseAdminLeadInbox(limit);
 }
 
-export function loadAdminLeadDetail(leadId: string) {
+export function loadAdminLeadDetail(leadId: string, principal: LeadCenterPrincipal | null = null) {
   return process.env.DATABASE_URL
-    ? loadNeonAdminLeadDetail(leadId)
+    ? loadNeonAdminLeadDetail(leadId, principal)
     : loadSupabaseAdminLeadDetail(leadId);
 }

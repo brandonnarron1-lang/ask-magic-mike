@@ -25,6 +25,7 @@
     "/api/events",
     "/api/health/live",
     "/api/health/ready",
+    "/api/lead-center-auth/[...all]",
     "/api/leads",
     "/api/listings/[id]",
     "/api/listings/search",
@@ -41,6 +42,7 @@
     "/favicon.ico",
     "/home-value",
     "/integrations/ourtownproperties",
+    "/lead-center-login",
     "/manifest.webmanifest",
     "/open-house/[propertyOrId]",
     "/phone-alerts/setup",
@@ -70,6 +72,9 @@
     "admin": [
       "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation",
       "/admin/action-queue", "/admin/notifications", "/admin/notifications/phone", "/admin/reporting"
+    ],
+    "auth": [
+      "/lead-center-login", "/api/lead-center-auth/[...all]"
     ],
     "api": [
       "/admin/api/push/test",

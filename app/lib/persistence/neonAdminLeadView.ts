@@ -15,6 +15,10 @@ import {
   type AdminLeadDetailResult,
   type AdminLeadInboxResult,
 } from "./supabase/adminLeadView";
+import {
+  hasLeadCenterPermission,
+  type LeadCenterPrincipal,
+} from "../../../src/lib/admin/rbac-policy";
 
 type Query = ReturnType<typeof neon>;
 
@@ -58,15 +62,20 @@ async function optionalRows(
 }
 
 /** Provider-neutral Lead Center reads for the canonical Neon database. */
-export async function loadNeonAdminLeadInbox(limit = 50): Promise<AdminLeadInboxResult> {
+export async function loadNeonAdminLeadInbox(
+  limit = 50,
+  principal: LeadCenterPrincipal | null = null,
+): Promise<AdminLeadInboxResult> {
   const sql = queryFromEnv();
   if (!sql) return { configured: false, leads: [] };
 
   const cappedLimit = Math.max(1, Math.min(limit, 100));
   try {
+    const scoped = principal && !hasLeadCenterPermission(principal.role, "lead:view_all");
+    if (scoped && !principal.agentId) return { configured: true, leads: [] };
     const rows = await sql.query(
-      `${LEAD_SELECT} ORDER BY l.created_at DESC LIMIT $1`,
-      [cappedLimit],
+      `${LEAD_SELECT}${scoped ? " WHERE l.assigned_agent_id = $2::uuid" : ""} ORDER BY l.created_at DESC LIMIT $1`,
+      scoped ? [cappedLimit, principal?.agentId] : [cappedLimit],
     ) as Array<Record<string, unknown>>;
     return { configured: true, leads: normalizeAdminLeadRows(rows) };
   } catch {
@@ -74,16 +83,23 @@ export async function loadNeonAdminLeadInbox(limit = 50): Promise<AdminLeadInbox
   }
 }
 
-export async function loadNeonAdminLeadDetail(leadId: string): Promise<AdminLeadDetailResult> {
+export async function loadNeonAdminLeadDetail(
+  leadId: string,
+  principal: LeadCenterPrincipal | null = null,
+): Promise<AdminLeadDetailResult> {
   const sql = queryFromEnv();
   if (!sql) {
     return { configured: false, lead: null, timeline: [], appointments: [], followupTasks: [] };
   }
 
   try {
+    const scoped = principal && !hasLeadCenterPermission(principal.role, "lead:view_all");
+    if (scoped && !principal.agentId) {
+      return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], error: "lead_not_found" };
+    }
     const leadRows = await sql.query(
-      `${LEAD_SELECT} WHERE l.id = $1::uuid LIMIT 1`,
-      [leadId],
+      `${LEAD_SELECT} WHERE l.id = $1::uuid${scoped ? " AND l.assigned_agent_id = $2::uuid" : ""} LIMIT 1`,
+      scoped ? [leadId, principal?.agentId] : [leadId],
     ) as Array<Record<string, unknown>>;
     if (!leadRows[0]) {
       return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], error: "lead_not_found" };

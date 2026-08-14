@@ -83,6 +83,7 @@ export type AdminActionQueueItem = {
     | "notification_retry";
   priority: 1 | 2 | 3 | 4 | 5;
   lead_id: string;
+  assigned_agent_id: string | null;
   lead_label: string;
   owner: string;
   due_at: string | null;
@@ -699,6 +700,7 @@ export function buildDailyActionQueue(input: {
   };
   const owner = (leadId: string, agentId?: string | null) =>
     agentId || text(leadMap.get(leadId)?.assigned_agent_id) || "Unassigned";
+  const assignedAgent = (leadId: string) => text(leadMap.get(leadId)?.assigned_agent_id);
 
   for (const task of input.tasks) {
     if (!task.lead_id || task.status !== "open") continue;
@@ -712,6 +714,7 @@ export function buildDailyActionQueue(input: {
       type: overdue ? "overdue_followup" : "followup_due_today",
       priority: overdue ? 1 : 4,
       lead_id: task.lead_id,
+      assigned_agent_id: assignedAgent(task.lead_id),
       lead_label: leadLabel(task.lead_id),
       owner: owner(task.lead_id, task.agent_id),
       due_at: task.due_at,
@@ -729,6 +732,7 @@ export function buildDailyActionQueue(input: {
         type: "appointment_request_unscheduled",
         priority: 2,
         lead_id: appointment.lead_id,
+        assigned_agent_id: assignedAgent(appointment.lead_id),
         lead_label: leadLabel(appointment.lead_id),
         owner: owner(appointment.lead_id, appointment.assigned_agent_id),
         due_at: appointment.requested_at,
@@ -742,6 +746,7 @@ export function buildDailyActionQueue(input: {
         type: "appointment_needs_confirmation",
         priority: 3,
         lead_id: appointment.lead_id,
+        assigned_agent_id: assignedAgent(appointment.lead_id),
         lead_label: leadLabel(appointment.lead_id),
         owner: owner(appointment.lead_id, appointment.assigned_agent_id),
         due_at: appointment.starts_at,
@@ -755,6 +760,7 @@ export function buildDailyActionQueue(input: {
         type: "appointment_today",
         priority: 2,
         lead_id: appointment.lead_id,
+        assigned_agent_id: assignedAgent(appointment.lead_id),
         lead_label: leadLabel(appointment.lead_id),
         owner: owner(appointment.lead_id, appointment.assigned_agent_id),
         due_at: appointment.starts_at,
@@ -768,6 +774,7 @@ export function buildDailyActionQueue(input: {
         type: "appointment_no_show",
         priority: 2,
         lead_id: appointment.lead_id,
+        assigned_agent_id: assignedAgent(appointment.lead_id),
         lead_label: leadLabel(appointment.lead_id),
         owner: owner(appointment.lead_id, appointment.assigned_agent_id),
         due_at: appointment.starts_at,
@@ -796,6 +803,7 @@ export function buildDailyActionQueue(input: {
         type: "stalled_lead",
         priority: signal.key === "unassigned_assignment_sla" ? 2 : 3,
         lead_id: leadId,
+        assigned_agent_id: assignedAgent(leadId),
         lead_label: leadLabel(leadId),
         owner: owner(leadId),
         due_at: text(lead.created_at),
@@ -814,6 +822,7 @@ export function buildDailyActionQueue(input: {
       type: "notification_retry",
       priority: 5,
       lead_id: leadId,
+      assigned_agent_id: assignedAgent(leadId),
       lead_label: leadLabel(leadId),
       owner: owner(leadId, text(row.agent_id)),
       due_at: text(row.next_attempt_at),

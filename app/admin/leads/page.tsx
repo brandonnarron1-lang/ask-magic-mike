@@ -12,6 +12,7 @@ import {
   type LeadTerminalReason,
 } from "../../lib/adminLeadLifecycle";
 import { updateLeadStatusAction } from "./actions";
+import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -293,7 +294,8 @@ export default async function AdminLeadsPage({
 }: {
   searchParams?: Promise<{ filter?: string; status_action?: string }>;
 }) {
-  const inbox = await loadAdminLeadInbox();
+  const principal = await requireLeadCenterPermission("lead:view_assigned");
+  const inbox = await loadAdminLeadInbox(50, principal);
   const params = searchParams ? await searchParams : {};
   const activeFilter = params.filter || "active";
   const visibleLeads = filterLeads(inbox.leads, activeFilter);

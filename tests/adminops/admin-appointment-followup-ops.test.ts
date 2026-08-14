@@ -216,6 +216,7 @@ describe("AdminOps appointment and follow-up operations", () => {
     expect(items[0]).toMatchObject({
       lead_label: "100 Fictional Oak Lane",
       owner: "agent-1",
+      assigned_agent_id: "agent-1",
       recommended_action: "Complete or reschedule overdue follow-up",
     });
   });

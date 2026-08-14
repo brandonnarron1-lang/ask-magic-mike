@@ -16,6 +16,7 @@ import type {
   AdminFollowupTaskRow,
   AppointmentStatus,
 } from "../../../lib/adminAppointmentFollowupOps";
+import { requireLeadCenterLeadPermission } from "../../../../src/lib/admin/rbac-session";
 import {
   createAppointmentAction,
   createFollowupTaskAction,
@@ -411,9 +412,10 @@ export default async function AdminLeadDetailPage({
   searchParams?: Promise<{ status_action?: string; appointment_action?: string; followup_action?: string }>;
 }) {
   const { id } = await params;
+  const principal = await requireLeadCenterLeadPermission(id, "lead:view_assigned");
   const emptyQuery: { status_action?: string; appointment_action?: string; followup_action?: string } = {};
   const [detail, query] = await Promise.all([
-    loadAdminLeadDetail(id),
+    loadAdminLeadDetail(id, principal),
     searchParams ? searchParams : Promise.resolve(emptyQuery),
   ]);
   if (detail.configured && !detail.lead && detail.error === "lead_not_found") notFound();

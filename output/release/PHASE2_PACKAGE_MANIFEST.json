@@ -1,0 +1,431 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-08-14T22:04:29.846Z",
+  "repository": "https://github.com/brandonnarron1-lang/ask-magic-mike.git",
+  "branch": "codex/phase2-controlled-expansion-2026-08-14",
+  "base_commit": "76edb598e3c21c7d2deb27d230aa6f862f9a400e",
+  "production_mutations_included": false,
+  "safety_notes": [
+    "No production database migration was applied.",
+    "Lead Center RBAC remains disabled unless LEAD_CENTER_RBAC_ENABLED is explicitly enabled.",
+    "No WordPress form beyond canonical Form 3 was activated.",
+    "No lead, email, Web Push, SMS, consumer message, paid media, or DNS change was created by this package."
+  ],
+  "files": [
+    {
+      "path": ".env.example",
+      "bytes": 9611,
+      "sha256": "75a252b1c88c478605b0d62d7ef1c6f4f37a61b19bde3446a388185c06a31df9"
+    },
+    {
+      "path": ".gitattributes",
+      "bytes": 40,
+      "sha256": "046115a2a16618d223581aceabc9c27ac5ed56b4a4acf2a350e2ff2331411ac4"
+    },
+    {
+      "path": ".github/workflows/production-monitor.yml",
+      "bytes": 585,
+      "sha256": "346c33d20915f423ab2cdf81b28661e452de5fb1189919e348137ed1d8d412a6"
+    },
+    {
+      "path": "app/admin/action-queue/page.tsx",
+      "bytes": 6727,
+      "sha256": "78b1791ef5d05e826ac317af28a4564663ba3385bd2eadacb14dddb216ca4fce"
+    },
+    {
+      "path": "app/admin/allocation/actions.ts",
+      "bytes": 2392,
+      "sha256": "ed3d453e6b7edd473d724722359e891d95d6f489401aba171759d867462f8358"
+    },
+    {
+      "path": "app/admin/allocation/page.tsx",
+      "bytes": 22565,
+      "sha256": "82438d9afde8b93a8f1c5c33c535b4cc9c9446d1cb885713b43f6cbae52cabf7"
+    },
+    {
+      "path": "app/admin/api/phone-alerts/invite/route.ts",
+      "bytes": 934,
+      "sha256": "8736ed666a3992c0cb542aa09ded742069bfbbbd92905caca7575746b50d79fe"
+    },
+    {
+      "path": "app/admin/api/push/subscriptions/route.ts",
+      "bytes": 3901,
+      "sha256": "e9b3fbf9039373a5f13d6e5530bd57ca2401a4a014c3ebebe864a4672ed31998"
+    },
+    {
+      "path": "app/admin/api/push/test/route.ts",
+      "bytes": 2530,
+      "sha256": "260bf72041efa3aad19a773b7b916b9115e84a73bf026ff60530b6f092d74370"
+    },
+    {
+      "path": "app/admin/layout.tsx",
+      "bytes": 982,
+      "sha256": "b09ad510887e3adf60472d12966ff01d729f2a3cc933b62379a80247e811ef6e"
+    },
+    {
+      "path": "app/admin/leads/[id]/page.tsx",
+      "bytes": 26106,
+      "sha256": "cab60e2b6f159734a43526763fa51a76c5fe23ee683b4768b2dbfb07a3474ea3"
+    },
+    {
+      "path": "app/admin/leads/actions.ts",
+      "bytes": 5382,
+      "sha256": "3e584048c78c10360c9d3e5dc68139381569daf849bd5c5fde145c6853ecee53"
+    },
+    {
+      "path": "app/admin/leads/page.tsx",
+      "bytes": 14295,
+      "sha256": "61d2d269904cd3e008f77d4efc639bf8289631089fbf54e52f0461dfbd8af616"
+    },
+    {
+      "path": "app/admin/notifications/actions.ts",
+      "bytes": 1208,
+      "sha256": "467d9aba73115ffd695efcc018bfe53c2d0a6bd6ae5f2271cf6c6b05f4e2f32b"
+    },
+    {
+      "path": "app/admin/notifications/page.tsx",
+      "bytes": 8861,
+      "sha256": "773e60378eec0d61e1444b2db82bdff065b9442874714f11269e7e777d3cc9ad"
+    },
+    {
+      "path": "app/admin/notifications/phone/page.tsx",
+      "bytes": 1573,
+      "sha256": "2a6ba79bedf03a93cfacdf24ca4497dc51fe892491b2c583c4852e6340064831"
+    },
+    {
+      "path": "app/admin/reporting/page.tsx",
+      "bytes": 19760,
+      "sha256": "547f0dab1c1816c702fc86fb2d2c574ea8610ae26967407f08beaacbdb933cd9"
+    },
+    {
+      "path": "app/api/lead-center-auth/[...all]/route.ts",
+      "bytes": 803,
+      "sha256": "8f281320450e72a791874b2f9f6bbcac729e7521daa736fbe64079d6edd3dbb4"
+    },
+    {
+      "path": "app/lead-center-login/LoginForm.tsx",
+      "bytes": 2585,
+      "sha256": "a1ecae380087e4a804560245715ebbe8fdf456f64e4b39f1af10b7dc3f79ad47"
+    },
+    {
+      "path": "app/lead-center-login/page.tsx",
+      "bytes": 880,
+      "sha256": "2cc907a372a40d64e5d344fad60700ff0dfadf2b1823899b5fc1229ca04aa963"
+    },
+    {
+      "path": "app/lib/adminLeadView.ts",
+      "bytes": 1050,
+      "sha256": "1f400a4f49c7015428436f0051e7df8c577d166e1b090f7103365fff9403fa71"
+    },
+    {
+      "path": "app/lib/persistence/neonAdminLeadView.ts",
+      "bytes": 5493,
+      "sha256": "f7aa07e706425abfe50bce7d3bd737c173efe26e4c4457603339f7acc6da5d85"
+    },
+    {
+      "path": "app/lib/persistence/supabase/adminAppointmentFollowupOps.ts",
+      "bytes": 34505,
+      "sha256": "64a2917b6b8015d7b3fe70c6a1b3d11b758bf415993c2da4e5f75ba939936a75"
+    },
+    {
+      "path": "config/active-route-manifest.json",
+      "bytes": 3497,
+      "sha256": "2d9beb72ea62040a4048696c73184cb925ad5377c7d0569f6b409677a2fd9a12"
+    },
+    {
+      "path": "docs/ANALYTICS_CONFIGURATION_REGISTER.md",
+      "bytes": 708,
+      "sha256": "5cef0ea8a434fbe9e956c66b3fca3c8e9485681ddcdf6cc8a79340a01c5e3a58"
+    },
+    {
+      "path": "docs/ARCHITECTURE_PHASE2.md",
+      "bytes": 837,
+      "sha256": "bda67da747cdd01cad28649afe0c5e4cdb5a27a4173c14d8f60563759c82c228"
+    },
+    {
+      "path": "docs/ATTRIBUTION_FIELD_DICTIONARY.md",
+      "bytes": 1178,
+      "sha256": "d005789262ab3891393f21945a168c98c6559f5b4838a3fd45148e694fcc08eb"
+    },
+    {
+      "path": "docs/DAILY_CLOSING_CHECKLIST.md",
+      "bytes": 466,
+      "sha256": "05a60d40d2333a70ac1a0d8ca4274969524377cb8d9322c5b0f53287dd988ae4"
+    },
+    {
+      "path": "docs/DAILY_OPENING_CHECKLIST.md",
+      "bytes": 456,
+      "sha256": "362c1663d5439fe9aabfb4c570ba53d4177ae30f41fe50fbefc4f0c479a7522d"
+    },
+    {
+      "path": "docs/ENVIRONMENT_VARIABLE_MATRIX_PHASE2.md",
+      "bytes": 983,
+      "sha256": "5ba75197effc421ae8611c14f19d9525fe7efaed57ef8f834e8eee156083037b"
+    },
+    {
+      "path": "docs/FIRST_LIVE_LEAD_RESPONSE_RUNBOOK.md",
+      "bytes": 2166,
+      "sha256": "12b3f7527765addcbc88f11cfcca70e37d4569125356266b2e92be50d3c531f4"
+    },
+    {
+      "path": "docs/GRAVITY_FORMS_CANONICAL_INVENTORY.md",
+      "bytes": 4011,
+      "sha256": "cecac49b735f2c4af14fddd32f8916d4ec472923391827f0e55778762487bd4b"
+    },
+    {
+      "path": "docs/IMPLEMENTATION_ROADMAP_PHASE2.md",
+      "bytes": 904,
+      "sha256": "33424706ae969e18c702caea6e340170c2820c08140dd4e0d7e2b91393543333"
+    },
+    {
+      "path": "docs/LEAD_CENTER_AUTH_ROLLBACK.md",
+      "bytes": 723,
+      "sha256": "bffb90b7e07052b84ee556d064ff3a50acbc43818e5f9b0df5ba684537e70daa"
+    },
+    {
+      "path": "docs/LEAD_CENTER_RBAC_IMPLEMENTATION.md",
+      "bytes": 2101,
+      "sha256": "0592568f8dfbdafff37ccf67bee539941b104f8bcc4e132b6fa52821dc166f5a"
+    },
+    {
+      "path": "docs/MONITORING_ACCEPTANCE_REPORT.md",
+      "bytes": 549,
+      "sha256": "c6a2eb39e18c9285e600b49cc6a5b4b86988203598dfdb537f6fa97e0766d73d"
+    },
+    {
+      "path": "docs/OWNER_ACTIONS_REMAINING.md",
+      "bytes": 3917,
+      "sha256": "676a83a9e574e368f34af2f735da702e0d5c633658baa8e6401b2380d8262092"
+    },
+    {
+      "path": "docs/PHASE2_PRECHANGE_PRODUCTION_SNAPSHOT.md",
+      "bytes": 3727,
+      "sha256": "c7fd251684c482a83461bd772e8b9c5f688c779c672fad5234d98b0ce7246970"
+    },
+    {
+      "path": "docs/PHASE2_RELEASE_NOTES.md",
+      "bytes": 932,
+      "sha256": "c6aa4f0329d03535bc189ce4a6fad595924b720ee2064ae4eb83e77764a96075"
+    },
+    {
+      "path": "docs/PRODUCTION_ACCEPTANCE_PHASE2.md",
+      "bytes": 929,
+      "sha256": "f98763efee84712c4eec5a05990f2c6d3446d7bb89bc377fef0aabddf495cb5f"
+    },
+    {
+      "path": "docs/PRODUCTION_MONITORING_RUNBOOK.md",
+      "bytes": 998,
+      "sha256": "12797b456bf0265e1894b99c8bb684534219144c04c0bf7b5658ef5f9fd2ed6f"
+    },
+    {
+      "path": "docs/QA_EVIDENCE_PHASE2.md",
+      "bytes": 1578,
+      "sha256": "04ad34bedd88d8103f6fa3350eee414959f3f22998ff5b9c590b77cde4bab183"
+    },
+    {
+      "path": "docs/SECURITY_REVIEW_PHASE2.md",
+      "bytes": 1244,
+      "sha256": "c83c6e56f0a792b7e1f43fdccb18285778e5d7e84c94311800273c3dbdbb4997"
+    },
+    {
+      "path": "docs/SOCIAL_CRAWLER_403_ROOT_CAUSE.md",
+      "bytes": 1468,
+      "sha256": "eba047fc73374260e025d4117177c208d497e45a33a83bf50ec75dd6ad541e5e"
+    },
+    {
+      "path": "docs/SOCIAL_CRAWLER_FIREWALL_CHANGE.md",
+      "bytes": 810,
+      "sha256": "a1b44ffd9c417c786011e1adfb3944400d75b51322033b1077406001af0ff761"
+    },
+    {
+      "path": "docs/SOCIAL_PREVIEW_ACCEPTANCE_REPORT.md",
+      "bytes": 659,
+      "sha256": "20eec4c1bbc13998ea8655fa315cc9f8b92052d230884a391b65d7b201c0d727"
+    },
+    {
+      "path": "docs/TEST_TRAFFIC_EXCLUSION_REPORT.md",
+      "bytes": 669,
+      "sha256": "3a16b76161149a2694683ef8e9887dfc1a97405ee06f83f73d38dc1f8c65fb76"
+    },
+    {
+      "path": "docs/WEB_PUSH_ACCEPTANCE_REPORT.md",
+      "bytes": 840,
+      "sha256": "6e6325b0f04bdfafaa8d228311e0516723c622b09c4440c977ae0e30f64f391d"
+    },
+    {
+      "path": "docs/WEB_PUSH_ENROLLMENT_GUIDE.md",
+      "bytes": 923,
+      "sha256": "5856dc27277ba491bd13d74201bab647a1c229bc4c8697e859e9ca87d83337da"
+    },
+    {
+      "path": "output/phase2/pdf/ASK_MAGIC_MIKE_EMERGENCY_ROLLBACK_ONE_PAGE.pdf",
+      "bytes": 3090,
+      "sha256": "f453dae1ecec45a98c414427d8f8fe77a67e9ad0afb764faa32c127bce7b8ca2"
+    },
+    {
+      "path": "output/phase2/pdf/ASK_MAGIC_MIKE_PHASE2_EXECUTIVE_PRESENTATION.pdf",
+      "bytes": 13048,
+      "sha256": "4072d70748e6411492ba8cb448e2de7f5225e02b22b0e0f4ded518f2c89138a8"
+    },
+    {
+      "path": "output/phase2/pdf/ASK_MAGIC_MIKE_PHASE2_EXECUTIVE_SUMMARY.pdf",
+      "bytes": 3267,
+      "sha256": "bf0c2daf7e98dc9dc563591dcd95cc8672f6a35895295abc09f7057561d0c6e4"
+    },
+    {
+      "path": "output/phase2/pdf/BRANDON_SYSTEM_OWNER_GUIDE.pdf",
+      "bytes": 7237,
+      "sha256": "4ec1ab0215f52637e113e9eb05ac830955beab2a0e0369736dc93c24f3b123be"
+    },
+    {
+      "path": "output/phase2/pdf/MIKE_DAILY_LEAD_WORKFLOW.pdf",
+      "bytes": 79117,
+      "sha256": "c34597a06ae56a5c821f6d3a0609f19cbee264fffb43fd945de5bb2fe148b464"
+    },
+    {
+      "path": "output/phase2/pdf/WEB_PUSH_ENROLLMENT_GUIDE.pdf",
+      "bytes": 2837,
+      "sha256": "8f2c2beb90dce4b5a8c7f9053d20d15ff784c88d55fb33d543aa5078b6a30754"
+    },
+    {
+      "path": "output/phase2/spreadsheets/ASK_MAGIC_MIKE_OPERATING_SCOREBOARD.xlsx",
+      "bytes": 30038,
+      "sha256": "457c6d9e829120a146830b4f47f5ff05b8df0dc6da517c240037188ea9e336c0"
+    },
+    {
+      "path": "output/phase2/spreadsheets/BUDGET_AND_ROI_WORKBOOK.xlsx",
+      "bytes": 8161,
+      "sha256": "f86b58b0c10f45736b7da0082de9c0e73fe71ed2512fa2a95e2e4f9378ae35ef"
+    },
+    {
+      "path": "output/phase2/spreadsheets/EVIDENCE_AND_ASSUMPTION_REGISTER.xlsx",
+      "bytes": 7604,
+      "sha256": "85e771ea1fb01bee8038fc07de56e078308622b0145a5ff77be09c496c324875"
+    },
+    {
+      "path": "output/phase2/spreadsheets/FORM_ATTRIBUTION_ACCEPTANCE_MATRIX.xlsx",
+      "bytes": 7932,
+      "sha256": "b4d7a502fb256d2be88da6bbed88ccb1e35eef4287a656ce1c5c4e9a13338772"
+    },
+    {
+      "path": "output/phase2/spreadsheets/LEAD_CENTER_ACCESS_MATRIX.xlsx",
+      "bytes": 8348,
+      "sha256": "86ca23a91065dd5beeb4eebf81de089504345c7456150184cda9466d7b3196ea"
+    },
+    {
+      "path": "output/phase2/spreadsheets/LEAD_CENTER_USER_ROSTER_TEMPLATE.xlsx",
+      "bytes": 9213,
+      "sha256": "ccdb2071088701b21e19104db41f2808c0330274404a921e971e641e992903c3"
+    },
+    {
+      "path": "output/phase2/spreadsheets/MONITORING_ALERT_MATRIX.xlsx",
+      "bytes": 7762,
+      "sha256": "a27f3203c9a2e4503f00fdf41a99ef34a312a18a5d6385d91bfeaac8f0629ad9"
+    },
+    {
+      "path": "output/phase2/spreadsheets/TEST_LEAD_REGISTER.xlsx",
+      "bytes": 8362,
+      "sha256": "7c2376fb9f50d973165692fe7ed1007515f5b73229f755a53941e46b6447dc8e"
+    },
+    {
+      "path": "output/phase2/spreadsheets/WEB_PUSH_DEVICE_REGISTER.xlsx",
+      "bytes": 8061,
+      "sha256": "38d1d988351528856a79adc447902c47a4523b67b277327deb64795ec0841f74"
+    },
+    {
+      "path": "output/phase2/spreadsheets/WORDPRESS_FORM_ACTIVATION_MATRIX.xlsx",
+      "bytes": 14117,
+      "sha256": "6cdafdc2132df557c0f4197c2120d1cb5dfbf6bc0a309260689cedb2f273a9b6"
+    },
+    {
+      "path": "package.json",
+      "bytes": 5679,
+      "sha256": "f2fdc0c7b52ffe8690b9adb4777540baff3910d52cb20702a9ca3e42700657fe"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 271343,
+      "sha256": "1c52b9b411141bba36b80b2f9ff2da0a6cdf5c1a22bc5e36b66d8b3e63460357"
+    },
+    {
+      "path": "scripts/audit-wordpress-form-placements.mjs",
+      "bytes": 1358,
+      "sha256": "5e4b9594f6cf309008928e7af07b818224682c6aa37877cb56ece9ca4c2b0be9"
+    },
+    {
+      "path": "scripts/build-phase2-pdfs.py",
+      "bytes": 21412,
+      "sha256": "0b0cc1fd168bb0d3152184f4fb29928588138178df13b8abcca0a27c45fb6f90"
+    },
+    {
+      "path": "scripts/build-phase2-workbooks.py",
+      "bytes": 34403,
+      "sha256": "2af8edb2f24460af7fc0dfc5c53c1ba6d5f61e370a46c1edc439afdf95e014d9"
+    },
+    {
+      "path": "scripts/check-lead-sla.mjs",
+      "bytes": 1779,
+      "sha256": "bb34247119869f23bda5aa2f7a9332f5df2b06903d9da9f68de6ed249bf4d318"
+    },
+    {
+      "path": "scripts/monitor-production.mjs",
+      "bytes": 1700,
+      "sha256": "bd48c45d699f0d7fb7a841a336b34814897dec62548ee5197c5a0c3dc546f201"
+    },
+    {
+      "path": "scripts/package-phase2-release.mjs",
+      "bytes": 3136,
+      "sha256": "5d50b584f1facbc65981733f2a41b3f5d75ef9d0951c5f83885bacf543997f0a"
+    },
+    {
+      "path": "scripts/phase2-production-audit.mjs",
+      "bytes": 1724,
+      "sha256": "a4c436abd4ca1b2545cb98c8c07061b14f6c75e76a6b1cf1ed1094ee5c830763"
+    },
+    {
+      "path": "scripts/reconcile-wordpress-leads.mjs",
+      "bytes": 1919,
+      "sha256": "e3ef0fa31d57fe96397648ea8a50cafc21e2ffcb423f9b8465a7d38ed66aa305"
+    },
+    {
+      "path": "src/lib/admin/rbac-auth.ts",
+      "bytes": 2948,
+      "sha256": "48d64abb9675ba75b03e8d86e99d9cc8f7cbb69320d0071c63a7e780b7db3886"
+    },
+    {
+      "path": "src/lib/admin/rbac-client.ts",
+      "bytes": 374,
+      "sha256": "554345764afc9e70ce9a100baabd442818b686722e4d76640b667cc7992d05e0"
+    },
+    {
+      "path": "src/lib/admin/rbac-policy.ts",
+      "bytes": 2803,
+      "sha256": "7301feb0c59a3e2bfa8b2aed9c7bec026334a34e2efdf715f5570adeda238274"
+    },
+    {
+      "path": "src/lib/admin/rbac-session.ts",
+      "bytes": 4119,
+      "sha256": "7c3c415a967e9f8042fb014c1cc85e03a70cfb85b74cc8bd2e30b16443058cce"
+    },
+    {
+      "path": "src/middleware.ts",
+      "bytes": 2465,
+      "sha256": "5bbe03765525cbde3795f6121459d4b96b60746fceb7ede90d4a163b1fb570b8"
+    },
+    {
+      "path": "supabase/migrations/20260814190000_lead_center_rbac.sql",
+      "bytes": 3933,
+      "sha256": "c5336d323c23d6003f695061908e420d3ba0a653670a0ab8581be4d0300a3345"
+    },
+    {
+      "path": "tests/admin/rbac-policy.test.ts",
+      "bytes": 2405,
+      "sha256": "48ae378161273cea4f4e1f2381e072b10d4138f71c1ef683de3323b957c1f91e"
+    },
+    {
+      "path": "tests/adminops/admin-appointment-followup-ops.test.ts",
+      "bytes": 8070,
+      "sha256": "095504c9b529f7e3a440a807097bd7c5547153d1f76340ce85babd689d324a39"
+    }
+  ]
+}

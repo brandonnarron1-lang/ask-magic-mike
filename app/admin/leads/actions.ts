@@ -12,6 +12,7 @@ import {
   transitionAppointment,
   updateFollowupTask,
 } from "../../lib/adminAppointmentFollowupOps";
+import { requireLeadCenterLeadPermission } from "../../../src/lib/admin/rbac-session";
 
 function safeReturnTo(value: string) {
   return value === "/admin/leads" || value.startsWith("/admin/leads/")
@@ -21,6 +22,7 @@ function safeReturnTo(value: string) {
 
 export async function updateLeadStatusAction(formData: FormData) {
   const leadId = String(formData.get("lead_id") ?? "");
+  await requireLeadCenterLeadPermission(leadId, "lead:update_assigned");
   const status = String(formData.get("status") ?? "");
   const reason = String(formData.get("reason") ?? "") || null;
   const returnTo = safeReturnTo(String(formData.get("return_to") ?? "/admin/leads"));
@@ -46,6 +48,7 @@ export async function updateLeadStatusAction(formData: FormData) {
 
 export async function createAppointmentAction(formData: FormData) {
   const leadId = String(formData.get("lead_id") ?? "");
+  await requireLeadCenterLeadPermission(leadId, "lead:update_assigned");
   const returnTo = safeReturnTo(String(formData.get("return_to") ?? `/admin/leads/${leadId}`));
   const result = await createAppointment({
     leadId,
@@ -66,6 +69,7 @@ export async function createAppointmentAction(formData: FormData) {
 
 export async function transitionAppointmentAction(formData: FormData) {
   const leadId = String(formData.get("lead_id") ?? "");
+  await requireLeadCenterLeadPermission(leadId, "lead:update_assigned");
   const returnTo = safeReturnTo(String(formData.get("return_to") ?? `/admin/leads/${leadId}`));
   const result = await transitionAppointment({
     appointmentId: String(formData.get("appointment_id") ?? ""),
@@ -84,6 +88,7 @@ export async function transitionAppointmentAction(formData: FormData) {
 
 export async function createFollowupTaskAction(formData: FormData) {
   const leadId = String(formData.get("lead_id") ?? "");
+  await requireLeadCenterLeadPermission(leadId, "task:manage_assigned");
   const returnTo = safeReturnTo(String(formData.get("return_to") ?? `/admin/leads/${leadId}`));
   const result = await createFollowupTask({
     leadId,
@@ -100,6 +105,7 @@ export async function createFollowupTaskAction(formData: FormData) {
 
 export async function updateFollowupTaskAction(formData: FormData) {
   const leadId = String(formData.get("lead_id") ?? "");
+  await requireLeadCenterLeadPermission(leadId, "task:manage_assigned");
   const returnTo = safeReturnTo(String(formData.get("return_to") ?? `/admin/leads/${leadId}`));
   const result = await updateFollowupTask({
     taskId: String(formData.get("task_id") ?? ""),
