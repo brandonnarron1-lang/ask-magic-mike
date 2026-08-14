@@ -14,15 +14,10 @@ on them.
    assigned-scope metadata—not passwords. Impact: replace shared Basic auth with
    per-user sessions and agent-scoped data. Rollback: retain current fail-closed
    admin boundary until cutover proves complete.
-4. **Activate WordPress bridge.** Screen: Our Town WordPress plugin/hosting
-   configuration. Action: back up, upgrade shadow-only bridge 1.0.0 to reviewed
-   1.1.0, enter the shared secret through hosting config, allowlist only one exact
-   form, then run its controlled QA window. Rollback:
-   `AMM_CANONICAL_BRIDGE_ENABLED=false` or remove that form ID.
-5. **Fix Facebook crawler 403.** Screen: Our Town host/WAF/security plugin. Action:
+4. **Fix Facebook crawler 403.** Screen: Our Town host/WAF/security plugin. Action:
    permit Facebook crawler access only to public pages and retest `/ask-mike/` and
    `/agents/mike-eatmon/`. Rollback: restore prior rule.
-6. **Approve any external communication.** Name the exact QA email/push,
+5. **Approve any external communication.** Name the exact QA email/push,
    consumer acknowledgment, social/GBP/email asset, or paid campaign. No external
    publication or carrier SMS is implied by general autonomy.
 
@@ -32,3 +27,8 @@ on them.
   deployment `dpl_GJkS5dRAtzakPdtVJRiNAUWbWSKp` passed post-release smoke.
 - Git integrations were disconnected from legacy projects `ask-magic-mike-4miw`
   and `askmagicmike-domain-bridge-v29`; the canonical project remains linked.
+- WordPress bridge 1.1.0 is active with Form 3 only, the duplicate legacy Form 3
+  notification is inactive, controlled QA passed, and the pre-fix QA row is
+  reconciled without deletion.
+- PR #140 merged at `178bdefd499187d749a22af02762e38aeb6e532d` and production
+  deployment `dpl_3AVXKtKCuiqytNqNQXvSKF4YBPCL` passed post-release checks.

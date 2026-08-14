@@ -1,6 +1,6 @@
 # Implementation Status
 
-Updated 2026-08-12.
+Updated 2026-08-14.
 
 ## Brandon phone-registration repair — 2026-08-12
 
@@ -220,6 +220,12 @@ any bridge activation or shadow-mode test.
   restores `/api/listings/search` plus `/api/listings/[id]` in the active App
   Router as public-safe degraded compatibility surfaces. Our Town
   Properties/FlexMLS remains the authoritative live listing source.
+- PR #140 merged as `178bdefd` and deployed Ready as
+  `dpl_3AVXKtKCuiqytNqNQXvSKF4YBPCL`. Production reconciliation on Neon branch
+  `br-round-base-auh6h2wd` found the one incomplete pre-fix QA replay row,
+  marked it test/suppressed, and recorded a `lead.qa_suppressed` audit event.
+  The row has no notification or analytics side effects; no data was deleted.
+  Form 3 is accepted as the only allowlisted WordPress form.
 
 ## 2026-08-14 security polish
 

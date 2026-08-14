@@ -6,9 +6,9 @@ Captured 2026-08-14 after Form 3 activation and the idempotency hotfix.
 
 - Repository: `https://github.com/brandonnarron1-lang/ask-magic-mike`
 - Production branch: `main`
-- Merge: `2a9ee23c2aedc6bad5a69a1ea0d15f4ee8cd14a3`
+- Merge: `178bdefd499187d749a22af02762e38aeb6e532d`
 - Vercel project: `eyes-up-industries/ask-magic-mike`
-- Deployment: `dpl_HzxCrWNSrK491qTddxqKBMcZxvSL` (`Ready`)
+- Deployment: `dpl_3AVXKtKCuiqytNqNQXvSKF4YBPCL` (`Ready`)
 - Canonical host: `https://www.askmagicmike.com`
 - Apex: HTTP 308 to `www`
 - Database: Neon project `bitter-star-20214385`
@@ -35,8 +35,9 @@ Captured 2026-08-14 after Form 3 activation and the idempotency hotfix.
 - SMS: suppressed
 - Corrected replay: HTTP 200, `X-AMM-Idempotent-Replay: 1`, same lead
 
-## Open control
+## Reconciled control
 
-Audit the timestamp-bounded row created during the pre-fix controlled replay.
-If it exists, mark it as test and suppress it; do not delete production data.
-Further form activation is held until this reconciliation is recorded.
+The timestamp-bounded pre-fix replay row was found, marked test/suppressed, and
+given a dedicated audit record. It has zero notifications and zero analytics
+events. No data was deleted. Form 3 is accepted; further forms remain blocked
+until individually reviewed.

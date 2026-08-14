@@ -5,6 +5,26 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## WordPress Form 3 production acceptance — 2026-08-14
+
+- Bridge 1.1.0 is active with Form 3 as the only allowlisted form.
+- Gravity entry `1549` produced canonical test lead
+  `70f63f35-2478-4738-b84c-bc1a89b8482c`, one Resend internal alert, and no
+  consumer email or SMS. Gmail confirmed Mike and the hidden audit receipt.
+- Provider message ID: `bf31a582-e4a3-45cb-a7f1-5cb89121626f`; outbox status
+  `sent`, attempt 1 of 3. Transport authentication passed SPF, DKIM, and DMARC.
+- PR #139 fixed non-UUID idempotency replay. PR #140 deployed nested bridge
+  click-ID compatibility and active-router listing-safety routes.
+- The one incomplete pre-fix replay row was found on the actual production Neon
+  branch, marked test/suppressed in a guarded transaction, and given one audit
+  record. It has zero notifications and zero analytics events. Nothing was
+  deleted and no additional message was sent.
+- Complete local verification: 149 test files / 2,547 tests, strict typecheck,
+  ESLint, production build, 56-route manifest, release safety 14/14, production
+  dependency audit, and 320-commit secret scan all pass.
+- Post-deploy public smoke, funnel, health, NellySelly isolation, and synthetic
+  listing-safety monitoring pass.
+
 ## Brandon phone-registration repair — 2026-08-12
 
 - Vercel production logs for deployment

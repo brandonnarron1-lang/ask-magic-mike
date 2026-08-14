@@ -182,11 +182,13 @@ contained exactly one canonical alert.
 | Production `/api/health/live` | PASS — Postgres and email enabled |
 | Corrected signed replay | PASS — same lead, no second email |
 
-One final data audit is intentionally open: the controlled pre-fix failure may
-have committed an additional duplicate row before enrichment failed. The correct
-Neon owner session is required to identify that timestamp-bounded QA row and mark
-it `is_test=true`/suppressed if present. Do not delete it and do not activate a
-second Gravity Form until that audit is complete.
+The final production data audit found the single incomplete pre-fix replay row
+`a7b1cf10-e546-48c4-85b1-2dee424ab156`. It had no notification or analytics
+rows. A guarded transaction marked it `is_test=true` and enabled communication,
+email, and SMS suppression, then inserted one `lead.qa_suppressed` audit row.
+Post-update verification passed and no record was deleted.
+The final aggregate reported six test leads, zero live-prospect records, and
+zero unsuppressed test leads.
 
 The follow-up release candidate also restores the canonical App Router listing
 compatibility endpoints that the synthetic monitor and existing documentation
@@ -197,3 +199,10 @@ MLS provider or field is exposed. The candidate adds nested WordPress
 suite passes 149 files / 2,547 tests, typecheck and ESLint pass, release
 verification and the 56-route manifest pass, and the production build includes `/api/listings/search`
 and `/api/listings/[id]`.
+
+PR #140 merged as `178bdefd499187d749a22af02762e38aeb6e532d` and production
+deployment `dpl_3AVXKtKCuiqytNqNQXvSKF4YBPCL` reached Ready. Post-deploy public
+smoke passed 19 with two protected/write skips; funnel passed 15/15; health
+passed 2/2 public probes; isolation passed; and the read-only synthetic monitor
+passed six checks with only protected admin health skipped. Vercel reported no
+error-level logs in the post-deploy window.
