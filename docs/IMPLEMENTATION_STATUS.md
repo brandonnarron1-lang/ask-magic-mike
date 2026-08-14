@@ -206,11 +206,20 @@ any bridge activation or shadow-mode test.
   site-wide floating launcher disabled.
 - The existing WordPress Ask Magic Mike system has six historical records, four
   marked uncontacted. They remain in place pending a reviewed dedupe/import plan.
-- Gravity Form 5 retains one active admin notification and an empty local BCC.
-- Ask Magic Mike Canonical Lead Bridge `1.0.0` is installed and active in
-  `Shadow only — no forwarding` mode. It has safely observed saved entries from
-  forms 6 and 7 without forwarding them. Reviewed version 1.1.0 adds mandatory
-  per-form activation before any controlled forwarding window.
+- Ask Magic Mike Canonical Lead Bridge `1.1.0` is installed with matching HMAC
+  configuration and only Home Value Form 3 allowlisted. Forms 1, 2, and 4–7
+  remain blocked. Form 3 entry 1549 forwarded to canonical lead
+  `70f63f35-2478-4738-b84c-bc1a89b8482c`; one canonical `[TEST]` alert reached
+  Mike and the hidden audit inbox while consumer email and SMS were suppressed.
+- The exact duplicate Form 3 Gravity `Admin Notification` is Inactive. Other
+  forms and notifications were not changed.
+- PR #139 / merge `2a9ee23` corrected Neon idempotency for WordPress-style keys;
+  production replay returns the original lead without a second canonical email.
+  Additional form activation remains held for final Neon QA-row reconciliation.
+- The follow-up release candidate normalizes nested WordPress click IDs and
+  restores `/api/listings/search` plus `/api/listings/[id]` in the active App
+  Router as public-safe degraded compatibility surfaces. Our Town
+  Properties/FlexMLS remains the authoritative live listing source.
 
 ## 2026-08-14 security polish
 

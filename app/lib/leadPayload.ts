@@ -160,6 +160,9 @@ export function normalizeLeadPayload(input: Record<string, unknown>): LeadPayloa
 
 export function cleanAttribution(input: unknown): Attribution {
   const raw = input && typeof input === "object" ? (input as Record<string, unknown>) : {};
+  const clickIds = raw.click_ids && typeof raw.click_ids === "object" && !Array.isArray(raw.click_ids)
+    ? raw.click_ids as Record<string, unknown>
+    : {};
   return {
     source: cleanOptional(raw.source),
     medium: cleanOptional(raw.medium),
@@ -173,11 +176,11 @@ export function cleanAttribution(input: unknown): Attribution {
     parent_url: cleanOptional(raw.parent_url),
     embed_host: cleanOptional(raw.embed_host),
     placement: cleanOptional(raw.placement),
-    gclid: cleanOptional(raw.gclid),
-    gbraid: cleanOptional(raw.gbraid),
-    wbraid: cleanOptional(raw.wbraid),
-    fbclid: cleanOptional(raw.fbclid),
-    msclkid: cleanOptional(raw.msclkid),
+    gclid: cleanOptional(raw.gclid || clickIds.gclid),
+    gbraid: cleanOptional(raw.gbraid || clickIds.gbraid),
+    wbraid: cleanOptional(raw.wbraid || clickIds.wbraid),
+    fbclid: cleanOptional(raw.fbclid || clickIds.fbclid),
+    msclkid: cleanOptional(raw.msclkid || clickIds.msclkid),
     page_title: cleanOptional(raw.page_title),
     placement_id: cleanOptional(raw.placement_id || raw.placement),
     listing_id: cleanOptional(raw.listing_id),

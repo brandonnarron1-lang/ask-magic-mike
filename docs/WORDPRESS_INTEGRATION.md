@@ -92,3 +92,18 @@ parse/load proof; forwarding remains disabled.
 - Version 1.1.0 adds a mandatory per-form activation allowlist. Upgrade to 1.1.0
   before forwarding so one controlled form can be proved without enabling all
   seven forms simultaneously.
+
+## Controlled Form 3 activation — 2026-08-14
+
+- Bridge 1.1.0 is active with matching HMAC configuration and only Form 3
+  allowlisted. Forms 1, 2, and 4–7 remain blocked.
+- Form 3 entry 1549 forwarded on attempt 1 to canonical lead
+  `70f63f35-2478-4738-b84c-bc1a89b8482c`.
+- One `[TEST]` internal alert reached Mike and the hidden audit inbox. Consumer
+  email and carrier SMS remained suppressed.
+- The exact duplicate Form 3 `Admin Notification` is now Inactive. No other form
+  notification was changed.
+- PR #139 corrected WordPress-style idempotency on Neon; the production replay
+  returns the original lead and creates no second canonical email.
+- Further forms remain held until the timestamp-bounded pre-fix QA row is audited
+  in the correct Neon owner session.
