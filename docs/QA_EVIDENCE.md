@@ -311,6 +311,12 @@ and push test delivery, exact-origin protection for mutation, omission of push
 endpoint secrets from list responses, and pre-persistence appointment throttling.
 Read-only Preview is rejected before the durable limiter can write a bucket.
 
+Canonical Node 24 Preview `dpl_BZNVfpM6yFxMsNgve9mu2aKSSVm2` reached Ready.
+Authenticated probes returned 200 for the root and both public health endpoints;
+anonymous Admin and push API probes returned 401. A synthetic appointment POST
+returned 503 in read-only Preview before persistence or rate-limit storage.
+GitHub's independent release gate and all Vercel checks passed.
+
 ## Production QA gate (executed)
 
 The approved QA lead was submitted through the public form, stored as

@@ -31,7 +31,8 @@ does not claim a fabricated consumer or send another QA message.
 - WordPress: OurTownProperties.com authority plus isolated canonical bridge
 - Supabase runtime and `src/app` duplicate routes: SUPERSEDED/reference
 - Review branch: draft PR #137; canonical Preview
-  awaits the new hardening commit's Vercel preview and PR checks
+  `dpl_BZNVfpM6yFxMsNgve9mu2aKSSVm2` is Ready and the independent GitHub release
+  gate plus all Vercel checks pass
 
 ## Final URLs
 

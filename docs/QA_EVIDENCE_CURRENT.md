@@ -89,9 +89,13 @@ or WordPress change occurred during this rerun.
 | `gitleaks detect --source . --redact` | PASS — 315 commits, no leaks |
 | `git diff --check` | PASS |
 
-The workstation used Node 26.5.1 while the project requests Node 24.x. The
-successful Vercel preview on Node 24.x remains the authoritative runtime proof.
-The new commit must receive its own Ready preview and PR checks after push.
+The workstation used Node 26.5.1 while the project requests Node 24.x. Canonical
+Vercel Preview `dpl_BZNVfpM6yFxMsNgve9mu2aKSSVm2` is Ready on Node 24.x. Using
+an authenticated, temporary local link to the existing canonical Vercel project,
+`/`, `/api/health/live`, and `/api/health/ready` returned HTTP 200; anonymous
+`/admin` returned 401; a synthetic Preview appointment POST returned 503 before
+mutation; and anonymous `/admin/api/push/subscriptions` returned 401. GitHub's
+independent `local-release-gate` and all Vercel status checks passed.
 
 Run the final command matrix recorded in the draft PR after every requested
 change. Production end-to-end messaging remains covered by the controlled QA
