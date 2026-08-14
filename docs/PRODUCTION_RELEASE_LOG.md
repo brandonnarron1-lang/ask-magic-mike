@@ -1,5 +1,17 @@
 # Production Release Log
 
+## [PR #136] Secure Phone Setup Completion
+
+**Merged:** 2026-08-12
+**Production commit:** `8178e24106e723ddb4a302b7ac9fc1551008f697`
+**Deployment:** `dpl_4krvUvVDvgK4owaQmaHHfXyWAEke` (`READY`)
+
+- Preserved the canonical Web Push, Neon subscription, outbox, and admin systems.
+- Added signed, short-lived, Brandon-scoped phone setup sessions and the protected operator invite flow.
+- Kept carrier SMS disabled; physical iPhone enrollment remains a human activation step.
+- Verified canonical Vercel project/domain ownership and Ask Magic Mike/NellySelly isolation.
+- Production was deployed before this free-first remediation branch; this entry records the observed baseline and does not authorize another deployment.
+
 Chronological record of releases to the Ask Magic Mike production environment.
 
 ---

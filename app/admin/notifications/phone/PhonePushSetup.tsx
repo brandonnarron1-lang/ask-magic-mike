@@ -231,7 +231,7 @@ export function PhonePushSetup({ publicKey, mode = "admin" }: { publicKey: strin
               <div><strong className="text-amber-200">{device.role === "primary" ? "Mike" : "Brandon copy"}</strong><p className="mt-1 max-w-xl truncate text-zinc-400">{device.device}</p></div>
               <div className="flex shrink-0 gap-2">
                 {device.role === "copy" ? <button type="button" disabled={processing} onClick={() => void sendBrandonTest(device.id)} className="rounded-md border border-amber-300/40 px-3 py-2 text-amber-100 disabled:cursor-wait disabled:opacity-60">Send Brandon test</button> : null}
-                <button type="button" disabled={processing} onClick={() => void remove(device.id)} className="rounded-md border border-red-300/30 px-3 py-2 text-red-200 disabled:cursor-wait disabled:opacity-60">Remove</button>
+                <button type="button" disabled={processing} onClick={() => void remove(device.id)} className="rounded-md border border-ruby-400/30 px-3 py-2 text-ruby-300 disabled:cursor-wait disabled:opacity-60">Remove</button>
               </div>
             </div>
           )) : <p className="text-sm text-zinc-400">{loadingDevices ? "Loading registered devices…" : "No phones registered yet."}</p>}

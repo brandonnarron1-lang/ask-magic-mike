@@ -209,3 +209,16 @@ any bridge activation or shadow-mode test.
 - Gravity Form 5 retains one active admin notification and an empty local BCC.
 - Ask Magic Mike Canonical Lead Bridge `1.0.0` is installed and active in
   `Shadow only — no forwarding` mode. No entry has been forwarded or observed.
+
+## 2026-08-14 security polish
+
+- Admin Web Push subscription list/register/remove and test-delivery handlers
+  now enforce route-level Basic Auth as defense in depth behind middleware.
+- Public appointment follow-up requests now use a dedicated canonical Neon rate
+  limiter before parsing or persistence.
+- The complete privileged route inventory found no unprotected `/api/admin`
+  handler and no remaining middleware-only `/admin/api` handler.
+- Full local release verification is green: 2,538 tests, strict typecheck, lint,
+  production build/54-route manifest, 14/14 safety checks, 13/13 browser tests,
+  zero known production dependency vulnerabilities, and no gitleaks findings.
+- These changes remain in draft PR #137 and are not merged or deployed.

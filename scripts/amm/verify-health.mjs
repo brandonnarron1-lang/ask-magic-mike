@@ -21,9 +21,28 @@ import { fileURLToPath } from "url";
 
 export const TARGET_DEFAULT = "https://www.askmagicmike.com";
 
-/** Returns true when the response body has ok:true and the expected status field. */
-export function isHealthyResponse(body, expectedStatus) {
-  return body.ok === true && body.status === expectedStatus;
+/** Accepts both the current Neon probes and the preserved legacy probe shape. */
+export function isLiveResponse(body) {
+  return body?.ok === true && (
+    body.status === "live" || body.service === "ask-magic-mike"
+  );
+}
+
+export function isReadyResponse(body) {
+  if (body?.ok !== true) return false;
+  if (body.status === "ready") return true;
+  return body.database === "ready"
+    && body.capture_function === true
+    && body.leads_table === true
+    && body.notification_table === true
+    && body.push_ready !== false;
+}
+
+export function isAdminHealthResponse(body) {
+  return body?.ok === true
+    && body.database?.provider === "neon_postgres"
+    && body.database?.reachable === true
+    && body.database?.lead_pipe_schema_ready === true;
 }
 
 /** Returns all failed check names from a dependency response body. */
@@ -63,7 +82,7 @@ async function runChecks() {
       err("liveness probe", `HTTP ${res.status} (expected 200)`);
     } else {
       const body = await res.json();
-      isHealthyResponse(body, "live")
+      isLiveResponse(body)
         ? ok("liveness probe ok")
         : err("liveness probe", `body.ok=${body.ok} body.status=${body.status}`);
     }
@@ -77,7 +96,7 @@ async function runChecks() {
     const res = await fetch(`${TARGET}/api/health/ready`);
     if (res.status === 200) {
       const body = await res.json();
-      isHealthyResponse(body, "ready")
+      isReadyResponse(body)
         ? ok("readiness probe ok")
         : err("readiness probe", `unexpected body: ${JSON.stringify(body)}`);
     } else if (res.status === 503) {
@@ -91,32 +110,23 @@ async function runChecks() {
   }
 
   // ─── Dependencies ─────────────────────────────────────────────────────────
-  console.log("\n[Dependencies — /api/health/dependencies]");
+  console.log("\n[Protected dependency detail — /api/admin/health]");
   if (!ADMIN_SECRET) {
     console.log("  SKIP  ADMIN_SECRET not set — skipping dependency check");
   } else {
     try {
-      const res = await fetch(`${TARGET}/api/health/dependencies`, {
+      const res = await fetch(`${TARGET}/api/admin/health`, {
         headers: { "x-admin-secret": ADMIN_SECRET },
       });
 
       if (res.status === 401) {
         err("dependency check auth", "401 unauthorized — check ADMIN_SECRET");
-      } else if (res.status === 200 || res.status === 503) {
+      } else if (res.status === 200) {
         const body = await res.json();
-        const failed = getFailedChecks(body);
-
-        if (res.status === 200) {
-          ok(`all dependencies healthy (${body.summary?.passed ?? "?"}/${body.summary?.total ?? "?"} checks)`);
-          if (body.summary?.warnings > 0) {
-            console.log(`  WARN  ${body.summary.warnings} warning(s)`);
-          }
+        if (isAdminHealthResponse(body)) {
+          ok("Neon reachable and canonical lead-pipe schema ready");
         } else {
-          err(`${failed.length} dependency check(s) failed`);
-          for (const name of failed) {
-            const check = body.checks?.find((c) => c.name === name);
-            err(`  ${name}`, check?.message ?? "");
-          }
+          err("protected dependency detail", "database or lead-pipe schema is not ready");
         }
       } else {
         err("dependency check", `HTTP ${res.status}`);

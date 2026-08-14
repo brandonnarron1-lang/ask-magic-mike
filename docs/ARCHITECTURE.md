@@ -1,6 +1,12 @@
 # Architecture
 
-## Data Flow
+> Current source of truth (2026-08-14): Next.js root `app/`, Vercel project
+> `eyes-up-industries/ask-magic-mike`, and Neon PostgreSQL project
+> `bitter-star-20214385`. See `CURRENT_STATE_RECONCILIATION.md`. Sections below
+> that describe Supabase as canonical or `/api/intake/submit` as the active
+> public path are `SUPERSEDED` historical design notes retained for provenance.
+
+## Historical data flow (`SUPERSEDED`)
 
 ```
 User visits askmagicmike.com
@@ -196,8 +202,9 @@ conflict with this section.
 
 - Public application: Next.js root `app/` router in this repository, deployed as
   Vercel project `eyes-up-industries/ask-magic-mike`.
-- Canonical database: Supabase through the server-only PostgREST adapter and the
-  reviewed atomic RPC `capture_public_lead_v1`.
+- Canonical database: Neon PostgreSQL through the server-only
+  `NeonPostgresAdapter` and the reviewed atomic function
+  `capture_public_lead_v1`. The Supabase/PostgREST adapter is rollback-only.
 - Brokerage/SEO surface: `https://www.ourtownproperties.com` (WordPress,
   Beaver Builder, Gravity Forms, FlexMLS/IDX). It remains a presentation and
   attribution bridge, not a competing lead database.
@@ -210,7 +217,7 @@ conflict with this section.
 
 ## Durable request sequence
 
-`public form/widget -> runtime validation and bot controls -> atomic Supabase
+`public form/widget -> runtime validation and bot controls -> atomic Neon
 capture -> same-record consent/attribution/score enrichment -> internal notification
 outbox -> bounded provider retry -> AdminOps timeline`
 

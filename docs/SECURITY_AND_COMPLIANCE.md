@@ -29,6 +29,16 @@
   exact origin and input, and returns only a bounded copy-role claim URL. The
   client rejects cross-origin or malformed invite URLs and stores no token in
   localStorage/sessionStorage.
+- Every `/admin/api` push/phone handler now repeats Basic Auth inside the route,
+  in addition to the `/admin/:path*` middleware boundary. This prevents a future
+  matcher or routing regression from silently exposing subscription metadata,
+  registration/removal, test delivery, or invite creation. Push mutations also
+  retain exact same-origin checks.
+- Public appointment follow-up requests use a dedicated durable rate-limit
+  bucket before request-body parsing or persistence. A throttled request returns
+  HTTP 429 with a bounded `Retry-After` value and performs no appointment write.
+  Read-only Preview rejects the request before even the rate-limit bucket can
+  write, preserving the zero-mutation Preview boundary.
 
 ## Required human/legal review
 
@@ -47,3 +57,17 @@ guaranteed result.
 3. The full development dependency audit reports advisories in the Vitest/Vite,
    jsdom, and ESLint toolchain. Production dependencies have no known audit
    findings; the toolchain upgrade should be handled in an isolated follow-up.
+
+## Privileged-route hardening verification — 2026-08-14
+
+- All three active `/admin/api` route handlers contain route-level Basic Auth;
+  middleware remains the first boundary.
+- All three active `/api/admin` handlers require admin or cron authorization;
+  preview persistence remains fail-closed.
+- New regression tests cover unauthorized subscription list/register/remove,
+  unauthorized push test, sensitive endpoint omission, same-origin mutation,
+  appointment throttling, and allowed appointment pass-through.
+- Full verification passed: 148 Vitest files / 2,538 tests, strict typecheck,
+  lint, production build, 54-route manifest, 14/14 release safety checks, 13/13
+  Playwright tests, production dependency audit, whitespace check, and a
+  315-commit redacted gitleaks scan.

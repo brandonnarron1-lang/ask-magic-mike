@@ -289,6 +289,34 @@ Also run the source-level banned-copy/secret scans, widget origin tests, API
 contract/idempotency tests, notification console/retry tests, accessibility smoke,
 and local production route matrix. Record exit codes and timestamps here.
 
+## 2026-08-14 privileged-route hardening evidence
+
+No lead, email, SMS, push notification, WordPress update, database mutation, or
+production deployment was performed for this verification.
+
+- Focused admin push, passwordless phone setup, and appointment security tests:
+  PASS — 4 files / 18 tests.
+- Full Vitest suite: PASS — 148 files / 2,538 tests.
+- Strict typecheck and ESLint: PASS.
+- Production build and route manifest: PASS — 54 active routes and 13 reviewed
+  root/`src` duplicates.
+- Release safety and Ask Magic Mike isolation: PASS — 14/14 and PASS.
+- Browser E2E: PASS — 13/13 Chromium tests; admin fails closed anonymously.
+- Production dependency audit: PASS — no known vulnerabilities.
+- Gitleaks: PASS — 315 commits scanned with redaction, no leaks.
+- `git diff --check`: PASS.
+
+The tests prove route-level Basic Auth for push subscription list/register/remove
+and push test delivery, exact-origin protection for mutation, omission of push
+endpoint secrets from list responses, and pre-persistence appointment throttling.
+Read-only Preview is rejected before the durable limiter can write a bucket.
+
+Canonical Node 24 Preview `dpl_BZNVfpM6yFxMsNgve9mu2aKSSVm2` reached Ready.
+Authenticated probes returned 200 for the root and both public health endpoints;
+anonymous Admin and push API probes returned 401. A synthetic appointment POST
+returned 503 in read-only Preview before persistence or rate-limit storage.
+GitHub's independent release gate and all Vercel checks passed.
+
 ## Production QA gate (executed)
 
 The approved QA lead was submitted through the public form, stored as

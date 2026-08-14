@@ -10,7 +10,13 @@ export async function middleware(req: NextRequest) {
   if (!secret || secret === "changeme-local") {
     if (isProd) {
       // Hard fail in production — misconfigured deployment is safer than open admin
-      return new NextResponse("Admin not configured", { status: 503 });
+      return new NextResponse("Admin not configured", {
+        status: 503,
+        headers: {
+          "Cache-Control": "no-store",
+          "X-Frame-Options": "SAMEORIGIN",
+        },
+      });
     }
     // Dev fallback: accept "changeme-local" as password
   }
@@ -19,12 +25,20 @@ export async function middleware(req: NextRequest) {
   const password = decodeBasicPassword(
     req.headers.get("authorization") ?? "",
   );
-  if (await edgeSecretsMatch(effectiveSecret, password))
-    return NextResponse.next();
+  if (await edgeSecretsMatch(effectiveSecret, password)) {
+    const response = NextResponse.next();
+    response.headers.set("Cache-Control", "private, no-store");
+    response.headers.set("X-Frame-Options", "SAMEORIGIN");
+    return response;
+  }
 
   return new NextResponse("Unauthorized", {
     status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="Ask Magic Mike Admin"' },
+    headers: {
+      "Cache-Control": "no-store",
+      "WWW-Authenticate": 'Basic realm="Ask Magic Mike Admin"',
+      "X-Frame-Options": "SAMEORIGIN",
+    },
   });
 }
 

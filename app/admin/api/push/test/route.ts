@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { checkAdminBasicAuth } from "@/lib/admin/auth";
 import { WebPushNotificationProvider } from "../../../../lib/leadNotificationProvider";
 import { NeonPushSubscriptionRepository } from "../../../../lib/persistence/neonPushSubscriptionRepository";
 
@@ -9,6 +10,13 @@ export const dynamic = "force-dynamic";
 const requestSchema = z.object({ subscription_id: z.string().uuid() });
 
 export async function POST(request: NextRequest) {
+  const auth = checkAdminBasicAuth(request);
+  if (!auth.ok) {
+    return NextResponse.json({ ok: false, error: auth.error }, {
+      status: auth.status,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
   if (request.headers.get("origin") !== request.nextUrl.origin) {
     return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403 });
   }
