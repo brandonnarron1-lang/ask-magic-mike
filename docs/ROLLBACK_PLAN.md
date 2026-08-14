@@ -2,8 +2,9 @@
 
 ## Application
 
-Current production is `dpl_4krvUvVDvgK4owaQmaHHfXyWAEke`. The immediately prior
-inspected Ready deployment is `dpl_5cDj7c7QcCPassZvww9mGZzAfeVm`. Re-inspect
+Current production is `dpl_GJkS5dRAtzakPdtVJRiNAUWbWSKp` at merge commit
+`8ca35cf3154268edf9c9d26bd9cce91a799323f0`. The retained immediately prior
+Ready deployment is `dpl_4krvUvVDvgK4owaQmaHHfXyWAEke`. Re-inspect
 both before a future release because aliases can move. If smoke checks fail,
 stop traffic activation and use Vercel promotion/rollback to the recorded prior
 deployment. Do not delete a deployment or force-push.
@@ -21,9 +22,10 @@ Remove only the named reversible Custom HTML/shortcode/widget block or deactivat
 the isolated bridge after backing up. Do not edit parent theme, `functions.php`,
 FlexMLS/IDX, or unrelated forms. Restore prior page cache only if the owner approves.
 
-The canonical bridge is currently shadow-only. Immediate rollback is deactivation
-of `Ask Magic Mike Canonical Lead Bridge`; it has not forwarded, altered, or
-imported any lead record.
+The canonical bridge is currently shadow-only. Immediate rollback is
+`AMM_CANONICAL_BRIDGE_ENABLED=false`; a one-form rollback removes only that ID
+from `AMM_CANONICAL_BRIDGE_FORM_IDS`. It has not forwarded, altered, or imported
+any lead record.
 
 ## Email
 

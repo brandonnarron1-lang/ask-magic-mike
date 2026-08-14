@@ -208,7 +208,9 @@ any bridge activation or shadow-mode test.
   marked uncontacted. They remain in place pending a reviewed dedupe/import plan.
 - Gravity Form 5 retains one active admin notification and an empty local BCC.
 - Ask Magic Mike Canonical Lead Bridge `1.0.0` is installed and active in
-  `Shadow only — no forwarding` mode. No entry has been forwarded or observed.
+  `Shadow only — no forwarding` mode. It has safely observed saved entries from
+  forms 6 and 7 without forwarding them. Reviewed version 1.1.0 adds mandatory
+  per-form activation before any controlled forwarding window.
 
 ## 2026-08-14 security polish
 
@@ -218,7 +220,11 @@ any bridge activation or shadow-mode test.
   limiter before parsing or persistence.
 - The complete privileged route inventory found no unprotected `/api/admin`
   handler and no remaining middleware-only `/admin/api` handler.
-- Full local release verification is green: 2,538 tests, strict typecheck, lint,
+- Full local release verification is green: 2,539 tests, strict typecheck, lint,
   production build/54-route manifest, 14/14 safety checks, 13/13 browser tests,
-  zero known production dependency vulnerabilities, and no gitleaks findings.
-- These changes remain in draft PR #137 and are not merged or deployed.
+  zero known dependency vulnerabilities, and no gitleaks findings.
+- PR #137 merged and is production on deployment
+  `dpl_GJkS5dRAtzakPdtVJRiNAUWbWSKp`; post-release smoke, funnel, health,
+  authorization, isolation, and error-log checks passed.
+- Vitest/coverage upgraded to 3.2.6, Vite to 6.4.3, and vulnerable development
+  dependency paths pinned to compatible patched versions.

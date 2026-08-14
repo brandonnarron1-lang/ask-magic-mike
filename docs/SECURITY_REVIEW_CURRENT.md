@@ -89,3 +89,13 @@ state. Secrets were neither printed nor copied into repository artifacts.
 - Repository and history pattern scan: no verified secret; only safe placeholders.
 - No secret value, BCC value, connection string, token, or private key appears in
   this report.
+
+## Supply-chain refresh — 2026-08-14 11:42 EDT
+
+The full dependency audit identified newly published issues in development-only
+Vitest, Vite, form-data, js-yaml, and brace-expansion paths. The release now pins
+patched compatible transitive versions and upgrades Vitest plus coverage support
+from 2.1.9 to 3.2.6 with Vite 6.4.3. `pnpm audit --audit-level high` now reports
+no known vulnerabilities. The complete 2,539-test suite, lint, typecheck, build,
+route verification, release safety scan, and 13 Chromium end-to-end tests pass
+with the updated toolchain.
