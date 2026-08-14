@@ -416,6 +416,7 @@ the Node-20 deployment proof. PHP CLI is unavailable locally, so staging must ru
   `fe5ab262-6dd4-405b-839b-0da71ab996fa`; canonical outbox status remains sent,
   provider Resend, attempt 1/3.
 - WordPress canonical bridge installation succeeded and the health page reports
-  `Shadow only — no forwarding`, no observed entries, and secrets hidden.
+  `Shadow only — no forwarding` with secrets hidden. A 2026-08-14 re-audit found
+  shadow-only observations for forms 6 and 7 and no forwarding attempts.
 - Our Town homepage, `/ask-mike/`, and Mike's agent profile remained HTTP 200
   after activation.

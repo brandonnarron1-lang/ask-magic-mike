@@ -17,15 +17,19 @@ replace indexed pages, or edit the parent theme.
 ## Controlled activation
 
 1. Export Gravity Forms settings and back up WordPress files/database.
-2. Install the plugin with `AMM_CANONICAL_BRIDGE_ENABLED=false`.
+2. Install version 1.1.0 with `AMM_CANONICAL_BRIDGE_ENABLED=false` and
+   `AMM_CANONICAL_BRIDGE_FORM_IDS` empty.
 3. Set the same 32+ character `WORDPRESS_BRIDGE_SECRET` in WordPress hosting and
    Vercel using secure secret interfaces.
 4. Confirm the plugin health screen reports shadow mode and no pending error.
-5. Submit an unmistakable `is_test=true`, `INTERNAL QA — DO NOT CONTACT` record
-   through each approved form in staging/controlled production after approval.
-6. Enable forwarding for the controlled window; prove one Gravity entry maps to
+5. Add only the one approved form ID to `AMM_CANONICAL_BRIDGE_FORM_IDS`, enable
+   forwarding for the controlled window, and submit an unmistakable `is_test=true`,
+   `INTERNAL QA — DO NOT CONTACT` record through that public form.
+6. Prove one Gravity entry maps to
    one Neon lead, consent/attribution, one outbox record, and one canonical ID.
-7. Only then disable the exact duplicate Gravity notification.
+7. Remove the form ID immediately if proof fails. Repeat per form only after the
+   previous mapping is accepted.
+8. Only then disable the exact duplicate Gravity notification.
 
 Rollback: set `AMM_CANONICAL_BRIDGE_ENABLED=false`. Do not delete Gravity entries,
 bridge audit rows, or Neon records during rollback.

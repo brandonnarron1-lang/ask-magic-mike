@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Ask Magic Mike Canonical Lead Bridge
  * Description: Explicit Gravity Forms to Ask Magic Mike forwarding with HMAC signing, idempotency, retries, and reconciliation status.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Requires at least: 6.5
  * Requires PHP: 8.1
  * Author: Our Town Properties, Inc.
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 final class AMM_Canonical_Lead_Bridge {
-    private const VERSION = '1.0.0';
+    private const VERSION = '1.1.0';
     private const STATUS_OPTION = 'amm_canonical_bridge_status_v1';
     private const RETRY_HOOK = 'amm_canonical_bridge_retry_v1';
     private const MAX_ATTEMPTS = 3;
@@ -42,8 +42,43 @@ final class AMM_Canonical_Lead_Bridge {
         }
     }
 
-    private static function enabled(): bool {
+    private static function enabledGlobally(): bool {
         return defined('AMM_CANONICAL_BRIDGE_ENABLED') && AMM_CANONICAL_BRIDGE_ENABLED === true;
+    }
+
+    /**
+     * Return the exact subset of audited forms approved for forwarding.
+     *
+     * A global enable flag without this allowlist remains fail-closed. The value
+     * may be an array or a comma-separated string in wp-config.php, or a
+     * comma-separated WORDPRESS_BRIDGE_FORM_IDS hosting environment variable.
+     */
+    private static function configuredFormIds(): array {
+        $configured = defined('AMM_CANONICAL_BRIDGE_FORM_IDS')
+            ? AMM_CANONICAL_BRIDGE_FORM_IDS
+            : getenv('WORDPRESS_BRIDGE_FORM_IDS');
+        if (is_string($configured)) {
+            $configured = preg_split('/\s*,\s*/', trim($configured), -1, PREG_SPLIT_NO_EMPTY);
+        } elseif (is_int($configured)) {
+            $configured = array($configured);
+        }
+        if (!is_array($configured)) {
+            return array();
+        }
+
+        $form_ids = array();
+        foreach ($configured as $value) {
+            $form_id = absint($value);
+            if (isset(self::FORM_MAP[$form_id])) {
+                $form_ids[$form_id] = $form_id;
+            }
+        }
+        ksort($form_ids, SORT_NUMERIC);
+        return array_values($form_ids);
+    }
+
+    private static function enabledForForm(int $form_id): bool {
+        return self::enabledGlobally() && in_array($form_id, self::configuredFormIds(), true);
     }
 
     private static function secret(): string {
@@ -68,8 +103,12 @@ final class AMM_Canonical_Lead_Bridge {
             return;
         }
 
-        if (!self::enabled()) {
+        if (!self::enabledGlobally()) {
             self::record_status($form_id, $entry_id, 'shadow_observed', 0, '', '', 'Forwarding disabled; entry remains in Gravity Forms.');
+            return;
+        }
+        if (!self::enabledForForm($form_id)) {
+            self::record_status($form_id, $entry_id, 'shadow_not_allowlisted', 0, '', '', 'Form is not enabled for canonical forwarding.');
             return;
         }
 
@@ -77,13 +116,13 @@ final class AMM_Canonical_Lead_Bridge {
     }
 
     public static function retry_entry($form_id, $entry_id, $attempt): void {
-        if (!self::enabled() || !class_exists('GFAPI')) {
-            return;
-        }
         $form_id = absint($form_id);
         $entry_id = absint($entry_id);
         $attempt = absint($attempt);
-        if (!isset(self::FORM_MAP[$form_id]) || $entry_id < 1 || $attempt < 2 || $attempt > self::MAX_ATTEMPTS) {
+        if (!self::enabledForForm($form_id) || !class_exists('GFAPI')) {
+            return;
+        }
+        if ($entry_id < 1 || $attempt < 2 || $attempt > self::MAX_ATTEMPTS) {
             return;
         }
         $entry = GFAPI::get_entry($entry_id);
@@ -309,12 +348,29 @@ final class AMM_Canonical_Lead_Bridge {
             wp_die(esc_html__('You do not have permission to view this page.', 'amm-canonical-bridge'));
         }
         $statuses = array_reverse((array) get_option(self::STATUS_OPTION, array()), true);
+        $enabled_form_ids = self::configuredFormIds();
+        $signing_state = strlen(self::secret()) >= 32
+            ? __('Configured', 'amm-canonical-bridge')
+            : __('Missing or too short', 'amm-canonical-bridge');
+        if (!self::enabledGlobally()) {
+            $mode = __('Shadow only — no forwarding', 'amm-canonical-bridge');
+        } elseif (!$enabled_form_ids) {
+            $mode = __('Configuration blocked — no forms allowlisted', 'amm-canonical-bridge');
+        } else {
+            $mode = sprintf(
+                /* translators: %s is a comma-separated list of Gravity Forms IDs. */
+                __('Enabled for forms: %s', 'amm-canonical-bridge'),
+                implode(', ', $enabled_form_ids)
+            );
+        }
         ?>
         <div class="wrap">
             <h1><?php echo esc_html__('Ask Magic Mike Canonical Bridge', 'amm-canonical-bridge'); ?></h1>
             <p><strong><?php echo esc_html__('Mode:', 'amm-canonical-bridge'); ?></strong>
-                <?php echo self::enabled() ? esc_html__('Enabled', 'amm-canonical-bridge') : esc_html__('Shadow only — no forwarding', 'amm-canonical-bridge'); ?>
+                <?php echo esc_html($mode); ?>
             </p>
+            <p><strong><?php echo esc_html__('Version:', 'amm-canonical-bridge'); ?></strong> <?php echo esc_html(self::VERSION); ?></p>
+            <p><strong><?php echo esc_html__('Signing secret:', 'amm-canonical-bridge'); ?></strong> <?php echo esc_html($signing_state); ?></p>
             <p><?php echo esc_html__('Secrets remain in wp-config.php or the hosting environment and are never displayed here.', 'amm-canonical-bridge'); ?></p>
             <table class="widefat striped">
                 <thead><tr><th>Form</th><th>Entry</th><th>State</th><th>Attempt</th><th>Canonical lead</th><th>Updated</th><th>Safe error</th></tr></thead>
