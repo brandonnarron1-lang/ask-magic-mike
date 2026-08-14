@@ -12,7 +12,7 @@ placement, consent, notification, and business purpose.
 | 4 | Join Our Team Form | `/join-our-team/` (plus global Form 7) | 4 | Required name/phone/email/address; optional license; CAPTCHA and honeypot; no Consent field | Active `Admin Notification` | `NOT A LEAD FORM` for consumer routing | Keep in recruiting/admin workflow unless a verified recruiting owner and privacy policy are approved |
 | 5 | Rental Property Search | No rendered sitemap placement found | 0 | Required name/phone/email/current address; optional rental area; CAPTCHA and honeypot; no Consent field | Active `Admin Notification` | `SHADOW — MAPPING REQUIRED` | Confirm public placement, property-management owner, minimum-data need, and consent |
 | 6 | Short Term Home Rentals form | `/short-term-home-rentals/` | 18 | Required name/phone/email/details; CAPTCHA and honeypot; no Consent field | Active `Admin Notification` | `SHADOW — READY FOR QA` after consent policy is documented | Map rental inquiry, route to Mike/admin review, controlled QA, replay proof |
-| 7 | Never miss a property! | Global footer or sitewide placement on nearly all sitemap pages | 15 | Required name/email/message; optional phone; CAPTCHA and honeypot; no explicit marketing Consent field | Active `Admin Notification` | `DEFERRED — LEGAL OR BROKERAGE REVIEW` | Add explicit email/property-alert consent before canonical or Constant Contact activation; review possible live entry 1550 |
+| 7 | Never miss a property! | Global footer or sitewide placement on nearly all sitemap pages | 153 | Required name/email/message; optional phone; CAPTCHA and honeypot; no explicit marketing Consent field | Active `Admin Notification` | `DEFERRED — CONSENT RESTRICTED OR UNCLEAR` | Entry 1550 is preserved for Mike/BIC purpose-limited review; add explicit approved email/property-alert consent before canonical or Constant Contact activation |
 
 ## Shared controls
 
@@ -46,3 +46,12 @@ node scripts/audit-wordpress-form-placements.mjs
 
 Form 4 remains outside the consumer lead allocation pipeline unless the owner
 explicitly commissions a recruiting workflow.
+
+## Entry 1550 disposition
+
+Entry 1550 was reviewed on 2026-08-14 and classified `GENUINE - CONSENT
+RESTRICTED OR UNCLEAR`. It contains no QA marker and must not be treated as a
+test, but Form 7 stores no consent choice or consent-language version. The
+entry remains WordPress-only in `shadow_not_allowlisted` state with no
+canonical Neon lead ID. See `FORM7_ENTRY_1550_DISPOSITION.md`; customer PII is
+not repeated here.

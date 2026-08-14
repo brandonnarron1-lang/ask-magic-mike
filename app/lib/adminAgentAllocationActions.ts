@@ -53,6 +53,7 @@ export async function updateAgentOperations(input: {
   priorityScore: number;
   notificationEmail: boolean;
   notificationSms: boolean;
+  actor?: string;
 }): Promise<AdminAgentOperationsResult> {
   if (!validUuid(input.agentId)) {
     return { ok: false, statusCode: 400, error: "invalid_agent_id" };
@@ -83,7 +84,7 @@ export async function updateAgentOperations(input: {
   try {
     const result = await persistence.mutateAdminAgentOperations({
       agentId: input.agentId,
-      actor: AUDIT_ACTOR,
+      actor: input.actor || AUDIT_ACTOR,
       patch: {
         is_active: input.isActive,
         max_daily_leads: input.maxDailyLeads,
@@ -105,6 +106,7 @@ export async function updateAgentOperations(input: {
 export async function assignLeadToAgent(
   leadId: string,
   agentId: string,
+  options: { actor?: string } = {},
 ): Promise<AdminAgentAssignmentResult> {
   if (!validUuid(leadId)) {
     return { ok: false, statusCode: 400, error: "invalid_lead_id" };
@@ -134,7 +136,7 @@ export async function assignLeadToAgent(
       expectedAgentId: current.agentId,
       action,
       notificationMode: configuredNotificationMode(),
-      actor: AUDIT_ACTOR,
+      actor: options.actor || AUDIT_ACTOR,
       occurredAt: new Date().toISOString(),
     });
     if (!result.ok) {
@@ -156,7 +158,10 @@ export async function assignLeadToAgent(
   }
 }
 
-export async function unassignLead(leadId: string): Promise<AdminAgentAssignmentResult> {
+export async function unassignLead(
+  leadId: string,
+  options: { actor?: string } = {},
+): Promise<AdminAgentAssignmentResult> {
   if (!validUuid(leadId)) {
     return { ok: false, statusCode: 400, error: "invalid_lead_id" };
   }
@@ -180,7 +185,7 @@ export async function unassignLead(leadId: string): Promise<AdminAgentAssignment
       expectedAgentId: current.agentId,
       action: "unassigned",
       notificationMode: "disabled",
-      actor: AUDIT_ACTOR,
+      actor: options.actor || AUDIT_ACTOR,
       occurredAt: new Date().toISOString(),
     });
     if (!result.ok) {

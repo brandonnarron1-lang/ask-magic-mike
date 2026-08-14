@@ -467,7 +467,7 @@ export default async function AdminLeadDetailPage({
         {!lead ? (
           <Panel title="Lead detail status">
             <p className="text-sm text-[#d9ceb8]">
-              {detail.error || "Supabase is not configured in this environment."}
+              {detail.error || "The canonical Neon database is not configured in this environment."}
             </p>
           </Panel>
         ) : (

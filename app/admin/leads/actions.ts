@@ -22,7 +22,7 @@ function safeReturnTo(value: string) {
 
 export async function updateLeadStatusAction(formData: FormData) {
   const leadId = String(formData.get("lead_id") ?? "");
-  await requireLeadCenterLeadPermission(leadId, "lead:update_assigned");
+  const principal = await requireLeadCenterLeadPermission(leadId, "lead:update_assigned");
   const status = String(formData.get("status") ?? "");
   const reason = String(formData.get("reason") ?? "") || null;
   const returnTo = safeReturnTo(String(formData.get("return_to") ?? "/admin/leads"));
@@ -33,7 +33,10 @@ export async function updateLeadStatusAction(formData: FormData) {
     redirect(returnTo + "?status_action=confirmation_required");
   }
 
-  const result = await updateAdminLeadStatus(leadId, status, { reason });
+  const result = await updateAdminLeadStatus(leadId, status, {
+    reason,
+    actor: principal ? `lead_center:${principal.userId}` : undefined,
+  });
   revalidatePath("/admin/leads");
   if (returnTo.startsWith("/admin/leads/")) {
     revalidatePath(returnTo);
@@ -48,7 +51,7 @@ export async function updateLeadStatusAction(formData: FormData) {
 
 export async function createAppointmentAction(formData: FormData) {
   const leadId = String(formData.get("lead_id") ?? "");
-  await requireLeadCenterLeadPermission(leadId, "lead:update_assigned");
+  const principal = await requireLeadCenterLeadPermission(leadId, "lead:update_assigned");
   const returnTo = safeReturnTo(String(formData.get("return_to") ?? `/admin/leads/${leadId}`));
   const result = await createAppointment({
     leadId,
@@ -59,6 +62,7 @@ export async function createAppointmentAction(formData: FormData) {
     locationType: String(formData.get("location_type") ?? "") || "office",
     locationLabel: String(formData.get("location_label") ?? "") || null,
     meetingUrl: String(formData.get("meeting_url") ?? "") || null,
+    actor: principal ? `lead_center:${principal.userId}` : undefined,
   });
   revalidatePath("/admin/leads");
   revalidatePath("/admin/action-queue");
@@ -69,7 +73,7 @@ export async function createAppointmentAction(formData: FormData) {
 
 export async function transitionAppointmentAction(formData: FormData) {
   const leadId = String(formData.get("lead_id") ?? "");
-  await requireLeadCenterLeadPermission(leadId, "lead:update_assigned");
+  const principal = await requireLeadCenterLeadPermission(leadId, "lead:update_assigned");
   const returnTo = safeReturnTo(String(formData.get("return_to") ?? `/admin/leads/${leadId}`));
   const result = await transitionAppointment({
     appointmentId: String(formData.get("appointment_id") ?? ""),
@@ -78,6 +82,7 @@ export async function transitionAppointmentAction(formData: FormData) {
     endsAt: String(formData.get("ends_at") ?? "") || null,
     timezone: String(formData.get("timezone") ?? "") || null,
     cancellationReason: String(formData.get("cancellation_reason") ?? "") || null,
+    actor: principal ? `lead_center:${principal.userId}` : undefined,
   });
   revalidatePath("/admin/leads");
   revalidatePath("/admin/action-queue");
@@ -88,7 +93,7 @@ export async function transitionAppointmentAction(formData: FormData) {
 
 export async function createFollowupTaskAction(formData: FormData) {
   const leadId = String(formData.get("lead_id") ?? "");
-  await requireLeadCenterLeadPermission(leadId, "task:manage_assigned");
+  const principal = await requireLeadCenterLeadPermission(leadId, "task:manage_assigned");
   const returnTo = safeReturnTo(String(formData.get("return_to") ?? `/admin/leads/${leadId}`));
   const result = await createFollowupTask({
     leadId,
@@ -96,6 +101,7 @@ export async function createFollowupTaskAction(formData: FormData) {
     dueAt: String(formData.get("due_at") ?? "") || null,
     priority: String(formData.get("priority") ?? "normal"),
     note: String(formData.get("note") ?? "") || null,
+    actor: principal ? `lead_center:${principal.userId}` : undefined,
   });
   revalidatePath("/admin/leads");
   revalidatePath("/admin/action-queue");
@@ -105,13 +111,14 @@ export async function createFollowupTaskAction(formData: FormData) {
 
 export async function updateFollowupTaskAction(formData: FormData) {
   const leadId = String(formData.get("lead_id") ?? "");
-  await requireLeadCenterLeadPermission(leadId, "task:manage_assigned");
+  const principal = await requireLeadCenterLeadPermission(leadId, "task:manage_assigned");
   const returnTo = safeReturnTo(String(formData.get("return_to") ?? `/admin/leads/${leadId}`));
   const result = await updateFollowupTask({
     taskId: String(formData.get("task_id") ?? ""),
     action: String(formData.get("task_action") ?? "complete") as "complete" | "cancel" | "reschedule",
     dueAt: String(formData.get("due_at") ?? "") || null,
     outcome: String(formData.get("outcome") ?? "") || null,
+    actor: principal ? `lead_center:${principal.userId}` : undefined,
   });
   revalidatePath("/admin/leads");
   revalidatePath("/admin/action-queue");

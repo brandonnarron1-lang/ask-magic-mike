@@ -351,10 +351,10 @@ export default async function AdminAllocationPage({
               Allocation status
             </p>
             <h2 className="mt-3 font-serif text-3xl text-[#f4ead4]">
-              {summary.configured ? "Allocation data unavailable" : "Supabase not configured"}
+              {summary.configured ? "Allocation data unavailable" : "Canonical database not configured"}
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-[#d9ceb8]">
-              {summary.error || "Agent allocation renders safely empty until Supabase admin variables are configured."}
+              {summary.error || "Agent allocation renders safely empty until the canonical Neon database is configured."}
             </p>
           </section>
         ) : null}
@@ -465,7 +465,7 @@ export default async function AdminAllocationPage({
               <p className="text-sm text-[#8f8778]">
                 {summary.auditActivityConfigured
                   ? "No recent assignment audit events returned."
-                  : "Assignment audit activity is unavailable until Supabase admin variables are configured."}
+                  : "Assignment audit activity is unavailable until the canonical Neon database is configured."}
               </p>
             )}
           </Panel>

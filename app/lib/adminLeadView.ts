@@ -20,13 +20,17 @@ export type {
 } from "./persistence/supabase/adminLeadView";
 
 export function loadAdminLeadInbox(limit = 50, principal: LeadCenterPrincipal | null = null) {
-  return process.env.DATABASE_URL
-    ? loadNeonAdminLeadInbox(limit, principal)
-    : loadSupabaseAdminLeadInbox(limit);
+  if (process.env.DATABASE_URL) return loadNeonAdminLeadInbox(limit, principal);
+  const legacyAllowed = process.env.NODE_ENV === "test" ||
+    (process.env.VERCEL_ENV !== "production" && process.env.ALLOW_LEGACY_SUPABASE_FALLBACK === "true");
+  return legacyAllowed ? loadSupabaseAdminLeadInbox(limit) : loadNeonAdminLeadInbox(limit, principal);
 }
 
 export function loadAdminLeadDetail(leadId: string, principal: LeadCenterPrincipal | null = null) {
-  return process.env.DATABASE_URL
-    ? loadNeonAdminLeadDetail(leadId, principal)
-    : loadSupabaseAdminLeadDetail(leadId);
+  if (process.env.DATABASE_URL) return loadNeonAdminLeadDetail(leadId, principal);
+  const legacyAllowed = process.env.NODE_ENV === "test" ||
+    (process.env.VERCEL_ENV !== "production" && process.env.ALLOW_LEGACY_SUPABASE_FALLBACK === "true");
+  return legacyAllowed
+    ? loadSupabaseAdminLeadDetail(leadId)
+    : loadNeonAdminLeadDetail(leadId, principal);
 }

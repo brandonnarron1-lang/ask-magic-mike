@@ -8,6 +8,9 @@ export function createDefaultPersistence(
 ) {
   const neonAdapter = NeonPostgresAdapter.fromEnv(env);
   if (neonAdapter) return neonAdapter;
+  const legacyFallbackAllowed = env.NODE_ENV === "test" ||
+    (env.VERCEL_ENV !== "production" && env.ALLOW_LEGACY_SUPABASE_FALLBACK === "true");
+  if (!legacyFallbackAllowed) return null;
   const baseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
   if (!baseUrl || !serviceRoleKey) return null;

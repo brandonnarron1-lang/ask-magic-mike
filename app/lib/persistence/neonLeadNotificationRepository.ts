@@ -1,12 +1,22 @@
 import { neon } from "@neondatabase/serverless";
 import type {
+  AssignmentNotificationAgent,
+  AssignmentNotificationLead,
   LeadNotificationCreateInput,
   LeadNotificationRecord,
   LeadNotificationRepository,
 } from "../leadNotificationTypes";
-import { normalizeLeadNotificationRow } from "./supabase/leadNotificationRepository";
+import {
+  normalizeAssignmentAgentRow,
+  normalizeAssignmentLeadRow,
+  normalizeLeadNotificationRow,
+} from "./supabase/leadNotificationRepository";
 
 type Query = ReturnType<typeof neon>;
+
+function queryFromEnv(env: Record<string, string | undefined> = process.env): Query | null {
+  return env.DATABASE_URL ? neon(env.DATABASE_URL) : null;
+}
 
 const PATCH_COLUMNS = new Set([
   "status", "attempt_count", "max_attempts", "provider", "provider_message_id",
@@ -122,4 +132,39 @@ export class NeonLeadNotificationRepository implements LeadNotificationRepositor
     );
     return (rows as unknown[]).map(row).filter((value): value is LeadNotificationRecord => Boolean(value));
   }
+}
+
+export async function loadNeonLeadForNotification(
+  leadId: string,
+  env: Record<string, string | undefined> = process.env,
+): Promise<AssignmentNotificationLead | null> {
+  const sql = queryFromEnv(env);
+  if (!sql) return null;
+  const rows = await sql.query(
+    `SELECT id, created_at, status, assigned_agent_id, assigned_at,
+            assignment_status, first_name, last_name, address_raw,
+            primary_intent, timeline_months, lead_type, source,
+            source_detail, page_url, question_raw
+       FROM public.leads
+      WHERE id = $1::uuid
+      LIMIT 1`,
+    [leadId],
+  ) as Array<Record<string, unknown>>;
+  return rows[0] ? normalizeAssignmentLeadRow(rows[0]) : null;
+}
+
+export async function loadNeonAgentForNotification(
+  agentId: string,
+  env: Record<string, string | undefined> = process.env,
+): Promise<AssignmentNotificationAgent | null> {
+  const sql = queryFromEnv(env);
+  if (!sql) return null;
+  const rows = await sql.query(
+    `SELECT id, name, email, phone, notification_phone, role, is_active
+       FROM public.agents
+      WHERE id = $1::uuid
+      LIMIT 1`,
+    [agentId],
+  ) as Array<Record<string, unknown>>;
+  return rows[0] ? normalizeAssignmentAgentRow(rows[0]) : null;
 }

@@ -274,6 +274,7 @@ async function writeAudit(input: {
   beforeState: Record<string, unknown> | null;
   afterState: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+  actor?: string;
 }) {
   const url = new URL("/rest/v1/audit_logs", input.supabaseUrl);
   const response = await fetch(url, {
@@ -283,7 +284,7 @@ async function writeAudit(input: {
       Prefer: "return=minimal",
     },
     body: JSON.stringify({
-      actor: AUDIT_ACTOR,
+      actor: input.actor || AUDIT_ACTOR,
       action: input.action,
       resource_type: "lead",
       resource_id: input.leadId,
@@ -299,10 +300,10 @@ async function writeAudit(input: {
   return response.ok;
 }
 
-async function syncLeadLifecycle(leadId: string, status: AppointmentStatus, now: Date) {
+async function syncLeadLifecycle(leadId: string, status: AppointmentStatus, now: Date, actor?: string) {
   const nextLeadStatus = appointmentLeadStatus(status);
   if (!nextLeadStatus) return null;
-  return updateAdminLeadStatus(leadId, nextLeadStatus, { now });
+  return updateAdminLeadStatus(leadId, nextLeadStatus, { now, actor });
 }
 
 async function hasActiveAppointment(input: {
@@ -362,6 +363,7 @@ export async function createAppointment(input: {
   meetingUrl?: string | null;
   cancellationReason?: string | null;
   now?: Date;
+  actor?: string;
 }): Promise<AppointmentMutationResult> {
   if (!UUID.test(input.leadId)) return { ok: false, statusCode: 400, error: "invalid_lead_id" };
   const status = input.status && isAppointmentStatus(input.status) ? input.status : "requested";
@@ -406,7 +408,7 @@ export async function createAppointment(input: {
       meeting_url: text(input.meetingUrl),
       requested_at: now.toISOString(),
       cancellation_reason: status === "canceled" ? text(input.cancellationReason) : null,
-      created_by: AUDIT_ACTOR,
+      created_by: input.actor || AUDIT_ACTOR,
     }),
     cache: "no-store",
   });
@@ -416,7 +418,7 @@ export async function createAppointment(input: {
   const appointment = normalizeAppointment(rows[0] || {});
   if (!appointment) return { ok: false, statusCode: 500, error: "appointment_response_invalid" };
 
-  await syncLeadLifecycle(input.leadId, status, now);
+  await syncLeadLifecycle(input.leadId, status, now, input.actor);
   const audited = await writeAudit({
     ...config,
     action: "lead.appointment_created",
@@ -424,6 +426,7 @@ export async function createAppointment(input: {
     beforeState: null,
     afterState: { appointment_id: appointment.id, status },
     metadata: { appointment_id: appointment.id, starts_at: startsAt, timezone },
+    actor: input.actor,
   });
 
   return {
@@ -442,6 +445,7 @@ export async function transitionAppointment(input: {
   timezone?: string | null;
   cancellationReason?: string | null;
   now?: Date;
+  actor?: string;
 }): Promise<AppointmentMutationResult> {
   if (!UUID.test(input.appointmentId)) return { ok: false, statusCode: 400, error: "invalid_appointment_id" };
   if (!isAppointmentStatus(input.status)) return { ok: false, statusCode: 400, error: "invalid_appointment_status" };
@@ -525,7 +529,7 @@ export async function transitionAppointment(input: {
   const updatedRows = (await response.json().catch(() => [])) as Array<Record<string, unknown>>;
   if (!updatedRows.length) return { ok: false, statusCode: 409, error: "concurrent_appointment_update" };
 
-  await syncLeadLifecycle(current.lead_id, input.status, now);
+  await syncLeadLifecycle(current.lead_id, input.status, now, input.actor);
   const audited = await writeAudit({
     ...config,
     action: "lead.appointment_status_changed",
@@ -533,6 +537,7 @@ export async function transitionAppointment(input: {
     beforeState: { appointment_id: current.id, status: current.status },
     afterState: { appointment_id: current.id, status: input.status },
     metadata: { appointment_id: current.id, starts_at: nextStartsAt, timezone },
+    actor: input.actor,
   });
 
   return {
@@ -553,6 +558,7 @@ export async function createFollowupTask(input: {
   dueAt: string | null;
   priority?: string | null;
   note?: string | null;
+  actor?: string;
 }): Promise<FollowupMutationResult> {
   if (!UUID.test(input.leadId)) return { ok: false, statusCode: 400, error: "invalid_lead_id" };
   if (!isTaskType(input.taskType)) return { ok: false, statusCode: 400, error: "invalid_followup_type" };
@@ -580,7 +586,7 @@ export async function createFollowupTask(input: {
     body: JSON.stringify({
       lead_id: input.leadId,
       agent_id: text(lead.row.assigned_agent_id),
-      created_by: AUDIT_ACTOR,
+      created_by: input.actor || AUDIT_ACTOR,
       title: taskTitle(input.taskType),
       body: text(input.note),
       due_at: input.dueAt,
@@ -602,6 +608,7 @@ export async function createFollowupTask(input: {
     beforeState: null,
     afterState: { task_id: task.id, status: "open", task_type: input.taskType },
     metadata: { task_id: task.id, due_at: input.dueAt },
+    actor: input.actor,
   });
 
   return { ok: true, id: task.id, status: "open" };
@@ -612,6 +619,7 @@ export async function updateFollowupTask(input: {
   action: "complete" | "cancel" | "reschedule";
   dueAt?: string | null;
   outcome?: string | null;
+  actor?: string;
 }): Promise<FollowupMutationResult> {
   if (!UUID.test(input.taskId)) return { ok: false, statusCode: 400, error: "invalid_followup_id" };
   const mutation = assertDatabaseMutationAllowed();
@@ -674,6 +682,7 @@ export async function updateFollowupTask(input: {
     beforeState: { task_id: task.id, status: task.status, due_at: task.due_at },
     afterState: { task_id: task.id, status: nextStatus, due_at: input.dueAt || task.due_at },
     metadata: { task_id: task.id },
+    actor: input.actor,
   });
 
   return { ok: true, id: task.id, status: nextStatus };
