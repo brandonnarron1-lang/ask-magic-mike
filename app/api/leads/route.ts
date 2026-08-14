@@ -129,10 +129,28 @@ function isUuid(value?: string) {
   return !!value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+function deterministicSessionId(value: string): string {
+  const hex = createHash("sha256")
+    .update(`ask-magic-mike:lead-session:${value}`)
+    .digest("hex")
+    .slice(0, 32)
+    .split("");
+  // RFC 4122 variant with a name-derived version marker. The identifier is
+  // stable for a non-UUID idempotency key and never exposes the key itself.
+  hex[12] = "5";
+  hex[16] = ((Number.parseInt(hex[16], 16) & 0x3) | 0x8).toString(16);
+  const compact = hex.join("");
+  return `${compact.slice(0, 8)}-${compact.slice(8, 12)}-${compact.slice(12, 16)}-${compact.slice(16, 20)}-${compact.slice(20)}`;
+}
+
 function sessionIdFor(payload: LeadPayload): string {
-  const candidate = payload.idempotency_key || payload.widget_session_id;
-  return isUuid(candidate) && candidate
-    ? candidate
+  if (payload.idempotency_key) {
+    return isUuid(payload.idempotency_key)
+      ? payload.idempotency_key
+      : deterministicSessionId(payload.idempotency_key);
+  }
+  return isUuid(payload.widget_session_id) && payload.widget_session_id
+    ? payload.widget_session_id
     : crypto.randomUUID();
 }
 

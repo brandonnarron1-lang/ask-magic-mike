@@ -57,6 +57,50 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
 
   async captureLeadLifecycle(input: LeadLifecycleCapture): Promise<LeadLifecycleCaptureResult> {
     try {
+      const idempotencyKey = typeof input.lead.request_idempotency_key === "string"
+        ? input.lead.request_idempotency_key.trim()
+        : "";
+      if (idempotencyKey) {
+        const existingRows = await this.sql.query(
+          `SELECT id, session_id, widget_session_id, duplicate_of_lead_id,
+                  assigned_agent_id, assignment_status, request_fingerprint,
+                  public.amm_public_lead_request_fingerprint($2::jsonb, $3::jsonb) AS incoming_fingerprint
+             FROM public.leads
+            WHERE request_idempotency_key = $1
+            LIMIT 1`,
+          [idempotencyKey, JSON.stringify(input.lead), JSON.stringify(input.attribution)],
+        ) as Array<Record<string, unknown>>;
+        const existing = existingRows[0];
+        if (existing?.id && existing.session_id) {
+          if (existing.request_fingerprint !== existing.incoming_fingerprint) {
+            return {
+              ok: false,
+              error: "idempotency_conflict",
+              session_id: String(existing.session_id),
+              idempotent_replay: false,
+            };
+          }
+          return {
+            ok: true,
+            lead_id: String(existing.id),
+            session_id: String(existing.session_id),
+            widget_session_id: String(existing.widget_session_id || existing.session_id),
+            duplicate_of_lead_id: existing.duplicate_of_lead_id
+              ? String(existing.duplicate_of_lead_id)
+              : null,
+            assigned_agent_id: existing.assigned_agent_id
+              ? String(existing.assigned_agent_id)
+              : null,
+            assignment_status: existing.assignment_status === "assigned" ||
+              existing.assignment_status === "duplicate" ||
+              existing.assignment_status === "no_eligible_agent" ||
+              existing.assignment_status === "unassigned"
+              ? existing.assignment_status
+              : "unassigned",
+            idempotent_replay: true,
+          };
+        }
+      }
       const rows = await this.sql.query(
         "SELECT public.capture_public_lead_v1($1::jsonb, $2::jsonb, $3::jsonb, $4::text) AS result",
         [JSON.stringify(input.session), JSON.stringify(input.lead), JSON.stringify(input.attribution), input.notificationMode],

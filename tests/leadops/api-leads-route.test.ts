@@ -137,6 +137,26 @@ describe("POST /api/leads validation and truthful persistence", () => {
 });
 
 describe("POST /api/leads atomic lifecycle command", () => {
+  it("derives one stable UUID session from a non-UUID idempotency key", async () => {
+    const { calls } = installRpc();
+    const payload = {
+      funnel_type: "home_value",
+      lead_source_surface: "ourtownproperties",
+      address: "999 Synthetic Replay Way",
+      email: "stable-replay@example.test",
+      phone: "2525550111",
+      idempotency_key: "gf:3:1549",
+    };
+
+    expect((await POST(request(payload))).status).toBe(200);
+    expect((await POST(request(payload))).status).toBe(200);
+
+    const firstSessionId = String(calls[0].body.p_session && (calls[0].body.p_session as Record<string, unknown>).id);
+    const secondSessionId = String(calls[1].body.p_session && (calls[1].body.p_session as Record<string, unknown>).id);
+    expect(firstSessionId).toBe(secondSessionId);
+    expect(firstSessionId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+  });
+
   it("maps a home-value request, qualification, normalized identity, and attribution into one RPC", async () => {
     const { calls } = installRpc();
     const response = await POST(request({
