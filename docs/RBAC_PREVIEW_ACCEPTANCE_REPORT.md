@@ -19,7 +19,7 @@ Date: 2026-08-14
 
 ## Application status
 
-The branch includes the Neon-only persistence reconciliation and authenticated audit actor propagation. A Vercel Preview deployment and Preview-only `DATABASE_URL`, `BETTER_AUTH_SECRET`, and feature flag are still required before interactive acceptance.
+The branch includes the Neon-only persistence reconciliation and authenticated audit actor propagation. Vercel Preview deployment `dpl_7tfvdECySRg49XtkTQUkDNWTuGdh` built successfully with database readiness true and outbound notifications disabled. The next deployment adds a safe `rbac_schema_ready` probe to prove the existing Preview `DATABASE_URL` resolves to the migrated branch. A Preview-only `BETTER_AUTH_SECRET` and feature flag are still required before interactive acceptance.
 
 ## Acceptance matrix
 

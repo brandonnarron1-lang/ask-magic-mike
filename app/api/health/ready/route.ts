@@ -34,6 +34,7 @@ export async function GET() {
         capture_function: false,
         leads_table: false,
         notification_table: false,
+        rbac_schema_ready: false,
         push_enabled: process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED === "true",
         push_subscription_table: false,
         push_provider_configured: hasValidPushConfiguration(),
@@ -52,6 +53,10 @@ export async function GET() {
          to_regprocedure('public.capture_public_lead_v1(jsonb,jsonb,jsonb,text)') IS NOT NULL AS capture_function,
          to_regclass('public.leads') IS NOT NULL AS leads_table,
          to_regclass('public.lead_notifications') IS NOT NULL AS notification_table,
+         to_regclass('public.lead_center_users') IS NOT NULL
+           AND to_regclass('public.lead_center_sessions') IS NOT NULL
+           AND to_regclass('public.lead_center_accounts') IS NOT NULL
+           AS rbac_schema_ready,
          to_regclass('public.staff_push_subscriptions') IS NOT NULL AS push_subscription_table`,
       [],
     ) as Array<Record<string, unknown>>;
@@ -72,6 +77,7 @@ export async function GET() {
         capture_function: result.capture_function === true,
         leads_table: result.leads_table === true,
         notification_table: result.notification_table === true,
+        rbac_schema_ready: result.rbac_schema_ready === true,
         push_enabled: pushEnabled,
         push_subscription_table: pushSubscriptionTable,
         push_provider_configured: pushProviderConfigured,
@@ -88,6 +94,7 @@ export async function GET() {
         capture_function: false,
         leads_table: false,
         notification_table: false,
+        rbac_schema_ready: false,
         push_enabled: process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED === "true",
         push_subscription_table: false,
         push_provider_configured: hasValidPushConfiguration(),

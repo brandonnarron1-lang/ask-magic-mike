@@ -57,6 +57,8 @@ The focused suite includes a Production boundary regression that sets legacy Sup
 - Result: 13 statements executed successfully.
 - Postflight: all six RBAC tables present; user count 0; session count 0.
 - Production branch `br-round-base-auh6h2wd` was not migrated.
+- Automatic Vercel Preview deployment `dpl_7tfvdECySRg49XtkTQUkDNWTuGdh`: READY.
+- Authenticated Preview health: environment `preview`, database configured, provider `neon_postgres`, core readiness true, notifications disabled.
 
 ## Known limitations / pending proof
 
@@ -65,4 +67,3 @@ The focused suite includes a Production boundary regression that sets legacy Sup
 - Production RBAC remains disabled pending Preview acceptance and owner-approved roster.
 - No Gravity Form beyond Form 3 was activated.
 - No external email, SMS, push, social post, DNS change, or Production deployment occurred in this QA stage.
-
