@@ -141,3 +141,16 @@ PASS - no error-level logs returned
 The local shell used Node 26.5.1 and emitted an engine warning because the
 project declares Node 24.x. All checks passed; the final GitHub release gate is
 the authoritative Node 24 validation after push.
+
+## Final CI and Preview
+
+- Final staged commit: `424a159`.
+- GitHub Actions run `31850872440`, job `94926265435`: PASS in 2m29s on the
+  declared Node 24 release environment.
+- Vercel Preview `dpl_8HJpyBC8yTXFBg8n9ZiujjMTg3vs`: Ready.
+- Preview readiness: `ok=true`, database ready, core capture/lead/notification
+  tables ready, and `rbac_schema_ready=true`.
+- Preview outbound Push/provider/phone setup remains disabled by design; the
+  subscription table exists and no notification was sent.
+- Preview anonymous `/admin`: HTTP 401.
+- Preview error-level logs in the inspected interval: none returned.
