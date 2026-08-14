@@ -70,6 +70,29 @@ During Preview inspection, Vercel CLI auto-linking created an empty project name
 deployments; it was removed immediately and its local link files were deleted.
 The canonical project, domains, deployments, and data were not changed.
 
+## Privileged-route hardening rerun — 2026-08-14 10:40 EDT
+
+No production deployment, database mutation, lead submission, email, SMS, push,
+or WordPress change occurred during this rerun.
+
+| Check | Result |
+| --- | --- |
+| Focused admin-push/phone/appointment tests | PASS — 4 files / 18 tests |
+| `pnpm run amm:verify:isolation` | PASS |
+| `pnpm run release:safety` | PASS — 14/14 |
+| `pnpm test` | PASS — 148 files / 2,538 tests |
+| `pnpm typecheck` | PASS |
+| `pnpm lint` | PASS |
+| `pnpm routes:verify` | PASS — production build, 54 active routes, 13 acknowledged duplicates |
+| `pnpm test:e2e` | PASS — 13/13 Chromium tests |
+| `pnpm audit --prod` | PASS — no known vulnerabilities |
+| `gitleaks detect --source . --redact` | PASS — 315 commits, no leaks |
+| `git diff --check` | PASS |
+
+The workstation used Node 26.5.1 while the project requests Node 24.x. The
+successful Vercel preview on Node 24.x remains the authoritative runtime proof.
+The new commit must receive its own Ready preview and PR checks after push.
+
 Run the final command matrix recorded in the draft PR after every requested
 change. Production end-to-end messaging remains covered by the controlled QA
 evidence in `QA_EVIDENCE.md`; this audit deliberately did not resend it.

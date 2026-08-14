@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-08-14 — Admin push and appointment boundary polish
+
+- Added route-level Basic Auth to every `/admin/api` push handler as defense in
+  depth behind middleware.
+- Added durable throttling to public appointment follow-up requests before body
+  parsing or persistence.
+- Added security regression tests and completed the full release gate without a
+  production deployment, external message, data mutation, or WordPress change.
+
 ## 2026-08-11 — Node 24 and phone-alert readiness
 
 - Aligned local development, package runtime declarations, all CI workflows,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { checkAdminBasicAuth } from "@/lib/admin/auth";
 import { NeonPushSubscriptionRepository } from "../../../../lib/persistence/neonPushSubscriptionRepository";
 
 export const runtime = "nodejs";
@@ -25,7 +26,18 @@ const subscriptionSchema = z.object({
   }),
 });
 
-export async function GET() {
+function authorize(request: NextRequest) {
+  const auth = checkAdminBasicAuth(request);
+  if (auth.ok) return null;
+  return NextResponse.json({ ok: false, error: auth.error }, {
+    status: auth.status,
+    headers: { "Cache-Control": "no-store" },
+  });
+}
+
+export async function GET(request: NextRequest) {
+  const denied = authorize(request);
+  if (denied) return denied;
   try {
     const subscriptions = await new NeonPushSubscriptionRepository().listActive();
     return NextResponse.json({
@@ -43,6 +55,8 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = authorize(request);
+  if (denied) return denied;
   if (request.headers.get("origin") !== request.nextUrl.origin) {
     return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403 });
   }
@@ -63,6 +77,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const denied = authorize(request);
+  if (denied) return denied;
   if (request.headers.get("origin") !== request.nextUrl.origin) {
     return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403 });
   }

@@ -9,7 +9,8 @@
 - VERIFIED LIVE — Ask Magic Mike and NellySelly projects/domains/databases remain
   isolated.
 - COMPLETE — READY TO MERGE — current health/release checks, analytics event
-  allowlist, admin cache/frame hardening, safe env examples, and consolidated docs.
+  allowlist, admin cache/frame hardening, route-level push authorization,
+  appointment throttling, safe env examples, and consolidated docs.
 - IMPLEMENTED — ACTIVATION REQUIRED — free Web Push enrollment, WordPress bridge,
   CSP report-only rollout, and production merge/deploy of this branch.
 - Single blocker to broader operation: approved people must complete their own
@@ -30,7 +31,7 @@ does not claim a fabricated consumer or send another QA message.
 - WordPress: OurTownProperties.com authority plus isolated canonical bridge
 - Supabase runtime and `src/app` duplicate routes: SUPERSEDED/reference
 - Review branch: draft PR #137; canonical Preview
-  `dpl_GX79R6BkfrmiCXFSzjzpDRphZzwz` is Ready and all PR checks pass
+  awaits the new hardening commit's Vercel preview and PR checks
 
 ## Final URLs
 

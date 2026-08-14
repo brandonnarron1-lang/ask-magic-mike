@@ -1,12 +1,40 @@
 import { NextResponse } from "next/server";
+import { checkRateLimit, LIMITS, rateLimitKey } from "@/lib/security/rate-limit";
 import { requestPublicAppointment } from "../../../lib/publicAppointmentRequest";
-import { PREVIEW_READ_ONLY_MESSAGE } from "../../../../src/lib/preview-security";
+import {
+  assertDatabaseMutationAllowed,
+  PREVIEW_READ_ONLY_MESSAGE,
+} from "../../../../src/lib/preview-security";
 
 function clean(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
 export async function POST(req: Request) {
+  // Preserve the read-only Preview guarantee before the durable limiter writes
+  // a rate_limit_buckets row. Production requests continue through throttling.
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return NextResponse.json({ error: PREVIEW_READ_ONLY_MESSAGE, code: mutation.error }, {
+      status: mutation.statusCode,
+    });
+  }
+
+  const rateLimit = await checkRateLimit(
+    rateLimitKey(req.headers.get("x-forwarded-for")),
+    LIMITS.appointmentRequest.limit,
+    LIMITS.appointmentRequest.windowMs,
+    "appointmentRequest",
+  );
+  if (!rateLimit.allowed) {
+    return NextResponse.json({ error: "Too many appointment requests. Please try again shortly." }, {
+      status: 429,
+      headers: {
+        "Retry-After": String(Math.max(1, Math.ceil((rateLimit.resetAt - Date.now()) / 1000))),
+      },
+    });
+  }
+
   let raw: unknown;
   try {
     raw = await req.json();
