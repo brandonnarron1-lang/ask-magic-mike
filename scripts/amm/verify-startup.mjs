@@ -1,8 +1,8 @@
 /**
  * verify-startup.mjs
  *
- * Verifies that all required configuration is present and Supabase is
- * reachable. Intended to run against a live deployment before promoting
+ * Verifies that the active Neon-backed runtime is reachable and ready.
+ * Intended to run against a live deployment before promoting
  * a release to production traffic.
  *
  * Requires:
@@ -19,6 +19,11 @@
  */
 
 import { fileURLToPath } from "url";
+import {
+  isAdminHealthResponse,
+  isLiveResponse,
+  isReadyResponse,
+} from "./verify-health.mjs";
 
 const TARGET = process.env.TARGET_URL?.replace(/\/$/, "") ?? "https://www.askmagicmike.com";
 const ADMIN_SECRET = process.env.ADMIN_SECRET ?? "";
@@ -47,7 +52,7 @@ async function runChecks() {
     const res = await fetch(`${TARGET}/api/health/live`);
     if (res.status === 200) {
       const body = await res.json();
-      body.ok === true
+      isLiveResponse(body)
         ? ok("/api/health/live returns ok:true")
         : err("/api/health/live returned ok:false");
     } else {
@@ -63,7 +68,7 @@ async function runChecks() {
     const res = await fetch(`${TARGET}/api/health/ready`);
     if (res.status === 200) {
       const body = await res.json();
-      body.ok === true && body.status === "ready"
+      isReadyResponse(body)
         ? ok("/api/health/ready is ready")
         : err("/api/health/ready returned not-ready", JSON.stringify(body));
     } else {
@@ -77,54 +82,26 @@ async function runChecks() {
   // ─── 3. Dependency audit (admin-authenticated) ────────────────────────────
   console.log("\n[Dependencies]");
   if (!ADMIN_SECRET) {
-    console.log("  SKIP  /api/health/dependencies — ADMIN_SECRET not set");
+    console.log("  SKIP  /api/admin/health — ADMIN_SECRET not set");
   } else {
     try {
-      const res = await fetch(`${TARGET}/api/health/dependencies`, {
+      const res = await fetch(`${TARGET}/api/admin/health`, {
         headers: { "x-admin-secret": ADMIN_SECRET },
       });
       if (res.status === 200) {
         const body = await res.json();
-        ok(`/api/health/dependencies healthy (${body.summary?.passed ?? "?"}/${body.summary?.total ?? "?"} checks)`);
-
-        // Surface any failed checks individually
-        if (body.checks) {
-          for (const check of body.checks) {
-            if (check.status === "fail") {
-              err(`  dependency check failed: ${check.name}`, check.message);
-            }
-          }
-        }
-      } else if (res.status === 503) {
-        const body = await res.json().catch(() => ({}));
-        err("/api/health/dependencies degraded", `${body.summary?.failed ?? "?"} checks failed`);
-
-        if (body.checks) {
-          for (const check of body.checks) {
-            if (check.status === "fail") {
-              err(`  ${check.name}`, check.message);
-            }
-          }
-        }
+        isAdminHealthResponse(body)
+          ? ok("/api/admin/health confirms Neon lead-pipe readiness")
+          : err("/api/admin/health", "database or lead-pipe schema is not ready");
       } else {
-        err("/api/health/dependencies", `HTTP ${res.status}`);
+        err("/api/admin/health", `HTTP ${res.status}`);
       }
     } catch (e) {
-      err("/api/health/dependencies", String(e));
+      err("/api/admin/health", String(e));
     }
   }
 
   // ─── 4. Legacy health ────────────────────────────────────────────────────
-  console.log("\n[Legacy Health]");
-  try {
-    const res = await fetch(`${TARGET}/api/health`);
-    res.status === 200
-      ? ok("/api/health returns 200")
-      : err("/api/health", `HTTP ${res.status}`);
-  } catch (e) {
-    err("/api/health", String(e));
-  }
-
   // ─── Summary ─────────────────────────────────────────────────────────────
   console.log("\n" + "=".repeat(48));
   console.log(`  Checks: ${pass + fail}   PASS: ${pass}   FAIL: ${fail}`);

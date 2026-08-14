@@ -346,7 +346,7 @@ async function insertLead(payload: LeadPayload, req: Request) {
 
   const persistence = createDefaultPersistence();
   if (!persistence) {
-    console.info("Lead capture refused: missing Supabase env vars", {
+    console.info("Lead capture refused: canonical database is not configured", {
       funnel_type: payload.funnel_type,
       lead_source_surface: payload.lead_source_surface,
       address_present: Boolean(payload.address),

@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { checkRateLimit, LIMITS, rateLimitKey } from "../../../src/lib/security/rate-limit";
+import { analyticsEvents } from "../../lib/constants";
 import { isApprovedPublicOrigin } from "../../lib/publicOrigin";
 import { recordServerAnalyticsEvent, safeAnalyticsProperties } from "../../lib/serverAnalytics";
+
+const approvedEventNames = new Set<string>(analyticsEvents);
 
 export async function POST(req: Request) {
   const correlationId = crypto.randomUUID();
@@ -11,7 +14,7 @@ export async function POST(req: Request) {
   const limit = await checkRateLimit(rateLimitKey(req.headers.get("x-forwarded-for")), LIMITS.analyticsEvent.limit, LIMITS.analyticsEvent.windowMs, "analyticsEvent");
   if (!limit.allowed) return NextResponse.json({ error: "Too many events.", correlation_id: correlationId }, { status: 429 });
   const body = await req.json().catch(() => null) as Record<string, unknown> | null;
-  if (!body || typeof body.event_name !== "string" || !/^[a-z][a-z0-9_]{1,80}$/.test(body.event_name)) {
+  if (!body || typeof body.event_name !== "string" || !approvedEventNames.has(body.event_name)) {
     return NextResponse.json({ error: "Invalid event.", correlation_id: correlationId }, { status: 400 });
   }
   const properties = body.properties && typeof body.properties === "object" && !Array.isArray(body.properties) ? body.properties as Record<string, unknown> : {};

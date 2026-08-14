@@ -341,10 +341,9 @@ describe("releaseLogMentionsPr", () => {
     expect(result.ok).toBe(true);
   });
 
-  it("correctly checks the actual release log for PR #49 and #50", () => {
+  it("correctly checks the actual release log for the current production baseline", () => {
     const logPath = process.cwd() + "/docs/PRODUCTION_RELEASE_LOG.md";
-    expect(releaseLogMentionsPr(logPath, 49).ok).toBe(true);
-    // PR #50 entry is added in LC-5 — will pass after this sprint lands
+    expect(releaseLogMentionsPr(logPath, 136).ok).toBe(true);
   });
 });
 
