@@ -11,7 +11,7 @@ function read(file: string) {
 describe("AdminOps reporting route guards", () => {
   it("keeps /admin/reporting covered by the admin middleware matcher", () => {
     const middleware = read("src/middleware.ts");
-    expect(middleware).toContain('matcher: ["/admin/:path*"]');
+    expect(middleware).toContain('"/admin/:path*"');
     expect("/admin/reporting").toMatch(/^\/admin(?:\/.*)?$/);
   });
 

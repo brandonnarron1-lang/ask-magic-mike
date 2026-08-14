@@ -3,7 +3,7 @@
 These are the only remaining human gates. Complete unrelated work without waiting
 on them.
 
-1. **Enroll Brandon's phone.** Screen: `/admin/notifications/phone`. Action:
+1. **Finish the reviewed Preview/Production device-label release, then enroll Brandon's phone.** Screen: `/admin/notifications/phone`. Action:
    authenticated admin generates a short-lived `copy` link; Brandon opens it on
    his phone and grants notification permission. Impact: free internal copy
    alerts. Rollback: revoke the subscription. No credential is texted.
@@ -14,10 +14,15 @@ on them.
    assigned-scope metadata—not passwords. Impact: replace shared Basic auth with
    per-user sessions and agent-scoped data. Rollback: retain current fail-closed
    admin boundary until cutover proves complete.
-4. **Fix Facebook crawler 403.** Screen: Our Town host/WAF/security plugin. Action:
-   permit Facebook crawler access only to public pages and retest `/ask-mike/` and
-   `/agents/mike-eatmon/`. Rollback: restore prior rule.
-5. **Approve any external communication.** Name the exact QA email/push,
+4. **Approve Form 1/Form 6 consent text.** Add an unselected requested-response
+   choice and separate optional marketing choice before either form is allowlisted.
+5. **Fix Facebook crawler 403.** Screen: hosting ModSecurity audit/rule panel.
+   Action: identify the exact rule ID and apply only the GET/HEAD public-path
+   exception in `FACEBOOK_CRAWLER_FIREWALL_CHANGE.md`. Rollback: remove that one
+   exception.
+6. **Add `hub.ourtownproperties.com`.** After the reviewed deployment, attach
+   only that domain in Vercel and add only the CNAME target Vercel displays.
+7. **Approve any external communication.** Name the exact QA email/push,
    consumer acknowledgment, social/GBP/email asset, or paid campaign. No external
    publication or carrier SMS is implied by general autonomy.
 

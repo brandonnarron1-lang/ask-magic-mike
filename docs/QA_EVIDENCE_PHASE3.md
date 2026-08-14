@@ -12,7 +12,9 @@ Branch: `codex/phase3-live-operations-2026-08-14`
 - Production monitor: 9 pass.
 - Synthetic monitor: 6 pass, 1 protected-auth skip.
 - Ask Magic Mike / NellySelly isolation: pass.
-- Production Neon: 6 test leads, 0 live leads; no unsuppressed test leads; notification queue/failure count 0/0.
+- Refreshed Production Neon: 6 test leads, 0 live leads; no unsuppressed test
+  leads, unassigned live leads, or live duplicate suspicions; notification
+  queue/failure count 0/0; one Form 3 canonical QA record.
 - Production RBAC tables absent and feature flag disabled.
 
 ## Form 7 priority review
@@ -58,12 +60,39 @@ The focused suite includes a Production boundary regression that sets legacy Sup
 - Postflight: all six RBAC tables present; user count 0; session count 0.
 - Production branch `br-round-base-auh6h2wd` was not migrated.
 - Automatic Vercel Preview deployment `dpl_7tfvdECySRg49XtkTQUkDNWTuGdh`: READY.
-- Authenticated Preview health: environment `preview`, database configured, provider `neon_postgres`, core readiness true, notifications disabled.
+- Latest Vercel Preview deployment `dpl_Gi3Pdo1aJW2MXhkudaNWAkYRhMpW`: READY.
+- Authenticated Preview health: environment `preview`, database configured,
+  provider `neon_postgres`, core readiness true, `rbac_schema_ready=true`, and
+  notifications disabled.
+
+## Controlled Form 1 and Form 6 audits
+
+- Form 1: 1,337 entries; `/contact-us/`; native notification active; default
+  `/thank-you/` confirmation; no consent or attribution fields. Stopped before
+  allowlisting.
+- Form 6: 18 entries; `/short-term-home-rentals/`; native notification active;
+  default `/thank-you/` confirmation; no consent or attribution fields. Stopped
+  before allowlisting.
+- No form, notification, entry, bridge allowlist, email, or consumer message was
+  changed or sent.
+
+## Web Push, monitoring, crawler, and subdomain
+
+- Production readiness: Push enabled/provider configured/setup configured/table
+  ready; zero active devices; no Push sent.
+- Human-readable device labels implemented and accepted on Neon Preview only.
+- Active GitHub hourly monitor has a successful scheduled run; six consecutive
+  Vercel SLA cron invocations were observed, with the latest two HTTP 200.
+- Social preview matrix remains 40/42; only Facebook on two Our Town pages is
+  blocked. Focused tests show an upstream host-wide Facebook-user-agent rule.
+- `hub.ourtownproperties.com` remains absent from DNS and Vercel. Exact-host
+  redirect behavior is implemented and unit-tested but not deployed.
 
 ## Known limitations / pending proof
 
-- Vercel Preview deployment and Preview-only secrets are not yet configured for this branch.
+- Preview-only `BETTER_AUTH_SECRET` and the branch RBAC feature flag are not yet configured.
 - Fictional user/session and negative authorization tests require the Preview deployment.
 - Production RBAC remains disabled pending Preview acceptance and owner-approved roster.
 - No Gravity Form beyond Form 3 was activated.
-- No external email, SMS, push, social post, DNS change, or Production deployment occurred in this QA stage.
+- No external email, SMS, Push, social post, DNS change, Vercel domain attachment,
+  Production database migration, or Production deployment occurred in this QA stage.

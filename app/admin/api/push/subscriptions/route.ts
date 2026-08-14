@@ -19,6 +19,7 @@ function safeStoreError(error: unknown) {
 
 const subscriptionSchema = z.object({
   role: z.enum(["primary", "copy"]),
+  device_name: z.string().trim().min(2).max(64).optional(),
   subscription: z.object({
     endpoint: z.string().url().max(2048),
     keys: z.object({
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
       subscriptions: subscriptions.map((item) => ({
         id: item.id,
         role: item.recipientRole,
-        device: item.userAgent?.slice(0, 120) || "Unknown device",
+        device: item.deviceLabel || item.userAgent?.slice(0, 120) || "Unknown device",
       })),
     }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
@@ -75,6 +76,7 @@ export async function POST(request: NextRequest) {
       parsed.data.role,
       parsed.data.subscription,
       request.headers.get("user-agent"),
+      parsed.data.device_name,
     );
     return NextResponse.json({ ok: true, id: saved.id, role: saved.recipientRole }, { status: 201 });
   } catch {

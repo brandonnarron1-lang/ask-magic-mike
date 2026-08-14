@@ -70,6 +70,7 @@ describe("/admin/api/push/subscriptions route-level security", () => {
     mocks.listActive.mockResolvedValue([{
       id: SUBSCRIPTION_ID,
       recipientRole: "copy",
+      deviceLabel: "Brandon iPhone",
       userAgent: "Synthetic QA browser",
       endpoint: "https://push.example.test/private-endpoint",
     }]);
@@ -79,9 +80,31 @@ describe("/admin/api/push/subscriptions route-level security", () => {
     expect(body.subscriptions[0]).toEqual({
       id: SUBSCRIPTION_ID,
       role: "copy",
-      device: "Synthetic QA browser",
+      device: "Brandon iPhone",
     });
     expect(JSON.stringify(body)).not.toContain("private-endpoint");
+  });
+
+  it("stores an operator-readable device label without returning push capability data", async () => {
+    const response = await POST(request("POST", {
+      body: {
+        role: "copy",
+        device_name: "Brandon iPhone",
+        subscription: {
+          endpoint: "https://push.example.test/subscription",
+          keys: { p256dh: "abcdefghijklmnopqrstuvwxyz", auth: "abcdefghijklmnopqrstuvwxyz" },
+        },
+      },
+    }));
+
+    expect(response.status).toBe(201);
+    expect(mocks.upsert).toHaveBeenCalledWith(
+      "copy",
+      expect.any(Object),
+      null,
+      "Brandon iPhone",
+    );
+    expect(JSON.stringify(await response.json())).not.toContain("push.example.test");
   });
 
   it("keeps same-origin enforcement on authenticated mutations", async () => {

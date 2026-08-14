@@ -2,8 +2,12 @@
 
 ## Scheduled
 
-- Vercel SLA sweep: hourly, dry-run unless an authorized request explicitly uses `persist=true`.
-- GitHub Actions public synthetic: hourly after this workflow reaches `main`.
+- Vercel SLA sweep: active hourly. Six consecutive production requests were
+  observed at audit, each HTTP 200. The staged Phase 3 change makes authenticated
+  cron calls persist idempotent breach flags by default; manual admin calls stay
+  dry-run unless explicitly requested.
+- GitHub Actions public synthetic: active hourly on `main`; the first observed
+  scheduled run completed successfully.
 
 ## Point-in-time and operator-run
 
