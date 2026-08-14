@@ -136,3 +136,64 @@ therefore the final PHP parse/plugin-upgrade proof and remains an activation gat
 The read-only canonical Vercel environment-name audit did not find
 `WORDPRESS_BRIDGE_SECRET`; matching server secrets must be entered through Vercel
 and the WordPress hosting configuration in the same controlled activation window.
+
+## Form 3 production bridge acceptance — 2026-08-14 15:58–16:14 EDT
+
+The reviewed bridge package SHA-256 was
+`a6a985c3cc7a4c5f357c16cb5937c407044d07071a09f6a3ae9d757085dc5633`.
+Production WordPress now runs bridge 1.1.0 with a matching HMAC secret and only
+Home Value Form 3 allowlisted. Forms 1, 2, and 4–7 remain blocked.
+
+The controlled public submission used `INTERNAL QA DO NOT CONTACT`, a fictional
+address, a 555 test number, explicit internal-QA UTMs, and denied communication
+consent. Gravity Forms created entry `1549`; the bridge forwarded it on attempt
+1 to canonical lead `70f63f35-2478-4738-b84c-bc1a89b8482c` with correlation ID
+`2256b664-5b7b-42e9-bf45-4ab13ba436d3`. The public form redirected to the live
+thank-you page only after Gravity Forms accepted the entry.
+
+One canonical `[TEST] HOME VALUE LEAD` alert was delivered through Resend from
+the authenticated `notify.askmagicmike.com` sender to Mike. The hidden audit BCC
+receipt was independently confirmed without recording its private value.
+SPF, both DKIM signatures, and DMARC passed at Gmail. The delivered transport
+Message-ID is
+`<010001a001daae23-116109d3-9bae-49cb-a007-367a88d1d504-000000@email.amazonses.com>`.
+No consumer acknowledgment and no carrier SMS appeared in the audit mailbox or
+test workflow. Gravity Forms also logged its legacy `Admin Notification` as sent,
+so only that exact Form 3 notification was changed from Active to Inactive.
+
+A signed replay exposed a pre-existing Neon edge case: non-UUID WordPress keys
+generated a new session before enrichment collided with the stored key. Production
+returned one controlled HTTP 500 with `neon_enrichment_failed`; no second canonical
+email was sent. PR #139 fixed this with deterministic sessions and a
+fingerprint-checked Neon preflight. Merge `2a9ee23c2aedc6bad5a69a1ea0d15f4ee8cd14a3`
+deployed as `dpl_HzxCrWNSrK491qTddxqKBMcZxvSL`. The same signed replay then returned
+HTTP 200, `X-AMM-Idempotent-Replay: 1`, and the original lead ID. Gmail still
+contained exactly one canonical alert.
+
+| Check | Result |
+| --- | --- |
+| Release safety | PASS — 14/14 |
+| Unit/integration tests | PASS — 149 files / 2,547 tests |
+| Typecheck | PASS |
+| ESLint | PASS |
+| Route manifest | PASS — 56 active routes / 15 acknowledged root/src duplicates |
+| Production build | PASS |
+| GitHub Node 24 release gate | PASS |
+| Production `/api/health/live` | PASS — Postgres and email enabled |
+| Corrected signed replay | PASS — same lead, no second email |
+
+One final data audit is intentionally open: the controlled pre-fix failure may
+have committed an additional duplicate row before enrichment failed. The correct
+Neon owner session is required to identify that timestamp-bounded QA row and mark
+it `is_test=true`/suppressed if present. Do not delete it and do not activate a
+second Gravity Form until that audit is complete.
+
+The follow-up release candidate also restores the canonical App Router listing
+compatibility endpoints that the synthetic monitor and existing documentation
+already expected. They return a bounded, no-store, public-safe degraded result
+while the live IDX/FlexMLS authority remains on Our Town Properties; no private
+MLS provider or field is exposed. The candidate adds nested WordPress
+`attribution.click_ids` normalization. Focused tests pass 37/37, the complete
+suite passes 149 files / 2,547 tests, typecheck and ESLint pass, release
+verification and the 56-route manifest pass, and the production build includes `/api/listings/search`
+and `/api/listings/[id]`.

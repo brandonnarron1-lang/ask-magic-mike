@@ -176,6 +176,33 @@ describe("cleanAttribution — all 15 fields", () => {
     expect(a.medium).toBe("organic");
   });
 
+  it("normalizes WordPress bridge nested click IDs into canonical fields", () => {
+    const a = cleanAttribution({
+      click_ids: {
+        gclid: " wp-gclid ",
+        gbraid: "wp-gbraid",
+        wbraid: "wp-wbraid",
+        fbclid: "wp-fbclid",
+        msclkid: "wp-msclkid",
+      },
+    });
+    expect(a).toMatchObject({
+      gclid: "wp-gclid",
+      gbraid: "wp-gbraid",
+      wbraid: "wp-wbraid",
+      fbclid: "wp-fbclid",
+      msclkid: "wp-msclkid",
+    });
+  });
+
+  it("prefers canonical top-level click IDs over compatibility input", () => {
+    const a = cleanAttribution({
+      gclid: "canonical-gclid",
+      click_ids: { gclid: "legacy-gclid" },
+    });
+    expect(a.gclid).toBe("canonical-gclid");
+  });
+
   it("converts empty string fields to undefined", () => {
     const a = cleanAttribution({ source: "", medium: "  ", campaign: "valid" });
     expect(a.source).toBeUndefined();

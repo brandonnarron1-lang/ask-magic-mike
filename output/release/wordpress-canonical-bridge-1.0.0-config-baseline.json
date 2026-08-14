@@ -1,0 +1,26 @@
+{
+  "captured_at": "2026-08-14T18:24:48Z",
+  "site": "https://www.ourtownproperties.com",
+  "plugin": "Ask Magic Mike Canonical Lead Bridge",
+  "plugin_version": "1.0.0",
+  "plugin_active": true,
+  "global_forwarding_enabled": false,
+  "allowlisted_form_ids": [],
+  "signing_secret_present_in_ui": false,
+  "status_rows": [
+    {
+      "form_id": 7,
+      "entry_id": 1548,
+      "state": "shadow_observed",
+      "attempt": 0
+    },
+    {
+      "form_id": 6,
+      "entry_id": 1547,
+      "state": "shadow_observed",
+      "attempt": 0
+    }
+  ],
+  "contains_secret_values": false,
+  "contains_lead_pii": false
+}
