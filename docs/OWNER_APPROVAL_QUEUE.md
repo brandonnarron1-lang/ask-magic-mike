@@ -3,8 +3,8 @@
 These are the only remaining human gates. Complete unrelated work without waiting
 on them.
 
-1. **Review draft PR for merge/deploy.** Screen: GitHub draft PR created from
-   `codex/free-first-gap-remediation-2026-08-14`. Action: approve the exact commit
+1. **Review draft PR #137 for merge/deploy.** Screen: GitHub draft PR created
+   from `codex/free-first-gap-remediation-2026-08-14`. Action: approve the exact commit
    set. Impact: health/release checks, analytics allowlist, admin headers, current
    docs. Rollback: Vercel prior Ready deployment plus git revert. Required words:
    `APPROVE MERGE AND PRODUCTION DEPLOY <PR number>`.

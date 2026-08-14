@@ -60,6 +60,15 @@ Vercel builds with Node 24.x. The audit workstation used Node 26.5.1, so Node
 - `pnpm amm:verify:isolation`: PASS.
 - `pnpm amm:verify:social-preview`: Ask Magic Mike PASS; overall BLOCKED —
   HUMAN ACTION because Facebook crawler still receives 403 on two Our Town pages.
+- Draft PR #137 release gate and all Vercel checks: PASS.
+- Canonical Preview `dpl_GX79R6BkfrmiCXFSzjzpDRphZzwz`: Ready;
+  live/readiness probes PASS with Preview Neon and outbound email/push disabled;
+  unauthenticated `/admin` returns 401.
+
+During Preview inspection, Vercel CLI auto-linking created an empty project named
+`ask-magic-mike-free-first-2026-08-14`. Read-only inspection proved it had zero
+deployments; it was removed immediately and its local link files were deleted.
+The canonical project, domains, deployments, and data were not changed.
 
 Run the final command matrix recorded in the draft PR after every requested
 change. Production end-to-end messaging remains covered by the controlled QA

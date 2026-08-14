@@ -29,6 +29,8 @@ does not claim a fabricated consumer or send another QA message.
 - Public app/API/Admin: active root `app/`
 - WordPress: OurTownProperties.com authority plus isolated canonical bridge
 - Supabase runtime and `src/app` duplicate routes: SUPERSEDED/reference
+- Review branch: draft PR #137; canonical Preview
+  `dpl_GX79R6BkfrmiCXFSzjzpDRphZzwz` is Ready and all PR checks pass
 
 ## Final URLs
 
