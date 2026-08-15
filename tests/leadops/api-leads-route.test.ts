@@ -270,7 +270,7 @@ describe("POST /api/leads atomic lifecycle command", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("X-AMM-Idempotent-Replay")).toBe("1");
     expect(await response.json()).toMatchObject({
-      message: "Got it. Mike will follow up shortly.",
+      message: "Your request is stored for review. Mike or the approved team will follow up through the contact path you provided.",
       lead_id: LEAD_ID,
       session_id: SESSION_ID,
     });

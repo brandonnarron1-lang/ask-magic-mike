@@ -9,15 +9,18 @@
     "/admin/allocation",
     "/admin/leads",
     "/admin/leads/[id]",
+    "/admin/message-previews",
     "/admin/notifications",
     "/admin/notifications/phone",
     "/admin/api/push/subscriptions",
     "/admin/api/push/test",
     "/admin/api/phone-alerts/invite",
     "/admin/reporting",
+    "/api/admin/copilot",
     "/api/admin/health",
     "/api/admin/notifications/retry",
     "/api/admin/operations/first-live",
+    "/api/admin/qa/email",
     "/api/admin/sla/sweep",
     "/api/appointments/request",
     "/api/chat",
@@ -74,7 +77,7 @@
     ],
     "admin": [
       "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation",
-      "/admin/action-queue", "/admin/notifications", "/admin/notifications/phone", "/admin/reporting"
+      "/admin/action-queue", "/admin/message-previews", "/admin/notifications", "/admin/notifications/phone", "/admin/reporting"
     ],
     "auth": [
       "/lead-center-login", "/lead-center-password-help", "/lead-center-set-password", "/api/lead-center-auth/[...all]"
@@ -83,7 +86,7 @@
       "/admin/api/push/test",
       "/admin/api/phone-alerts/invite",
       "/api/leads", "/api/listings/search", "/api/listings/[id]", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/phone-alerts/invite", "/api/phone-alerts/subscription", "/api/phone-alerts/test", "/api/webhooks/sms/status", "/api/widget/events",
-      "/api/admin/health", "/api/admin/operations/first-live", "/api/admin/sla/sweep"
+      "/api/admin/copilot", "/api/admin/health", "/api/admin/operations/first-live", "/api/admin/qa/email", "/api/admin/sla/sweep"
     ]
   },
   "classifications": {

@@ -7,8 +7,8 @@ export function createMockEmailAdapter(): EmailAdapter {
       const now = new Date().toISOString();
       // eslint-disable-next-line no-console
       console.log("[email_mock]", {
-        to: params.to,
-        subject: params.subject,
+        recipientConfigured: Boolean(params.to),
+        subjectLen: params.subject.length,
         textLen: params.text.length,
         htmlLen: params.html.length,
         at: now,

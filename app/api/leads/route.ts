@@ -606,7 +606,7 @@ export async function POST(req: Request) {
   if (persistedLead.idempotent_replay) {
     return NextResponse.json(
       {
-        message: "Got it. Mike will follow up shortly.",
+        message: "Your request is stored for review. Mike or the approved team will follow up through the contact path you provided.",
         lead_id: persistedLead.lead_id,
         session_id: persistedLead.session_id,
         duplicate_of_lead_id: persistedLead.duplicate_of_lead_id ?? null,
@@ -661,7 +661,7 @@ export async function POST(req: Request) {
     }
   }
   return NextResponse.json({
-    message: "Got it. Mike will review your request and follow up shortly.",
+    message: "Your request is stored for review. Mike or the approved team will follow up through the contact path you provided.",
     lead_id: persistedLead.lead_id,
     session_id: persistedLead.session_id,
     duplicate_of_lead_id: persistedLead.duplicate_of_lead_id ?? null,

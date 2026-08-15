@@ -26,6 +26,9 @@ export type LeadAlertInput = {
 };
 
 function nowIso() { return new Date().toISOString(); }
+function consumerAcknowledgmentEnabled() {
+  return (process.env.CONSUMER_ACKNOWLEDGMENT_ENABLED || "false").toLowerCase() === "true";
+}
 function pushPriority(score: number) { return score >= 80 ? "[HOT]" : score >= 60 ? "[ACTIVE]" : "[NEW]"; }
 function nextAttemptAt(attempt: number) { return new Date(Date.now() + RETRY_DELAYS_MS[Math.min(Math.max(attempt - 1, 0), RETRY_DELAYS_MS.length - 1)]).toISOString(); }
 function validEmail(value: string | undefined | null): value is string {
@@ -245,6 +248,14 @@ export async function retryLeadAlertNotification(notificationId: string) {
   if (!input) return await repo.update(current.id, { status: "permanently_failed", error_code: "notification_context_missing", error_summary: "Lead context is missing for retry.", failed_at: nowIso() });
   const provider = selectNotificationProvider();
   if (current.notification_type === "consumer_ack") {
+    if (!consumerAcknowledgmentEnabled()) {
+      return await repo.update(current.id, {
+        status: "skipped",
+        error_code: "consumer_ack_disabled",
+        error_summary: "Consumer acknowledgment delivery is disabled by the release gate.",
+        failed_at: nowIso(),
+      });
+    }
     if (!input.payload.email || !input.payload.consent_email || input.payload.is_test) {
       return await repo.update(current.id, { status: "skipped", error_code: "consumer_ack_not_permitted", error_summary: "Consumer acknowledgment is not permitted for this lead.", failed_at: nowIso() });
     }
@@ -360,7 +371,12 @@ export async function enqueueLeadNotifications(input: LeadAlertInput) {
       }
     }
     let consumer: LeadNotificationRecord | null = null;
-    if (input.payload.email && input.payload.consent_email && !input.payload.is_test) {
+    if (
+      consumerAcknowledgmentEnabled() &&
+      input.payload.email &&
+      input.payload.consent_email &&
+      !input.payload.is_test
+    ) {
       const ack = renderConsumerAcknowledgment(input);
       consumer = await enqueueOne({
         leadId: input.leadId,

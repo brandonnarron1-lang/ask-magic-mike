@@ -145,6 +145,9 @@ export default async function AdminNotificationsPage({
               </p>
             </div>
             <nav className="flex flex-wrap gap-2" aria-label="Admin navigation">
+              <Link href="/admin/message-previews" className="rounded-full border border-cyan-300/35 bg-cyan-300/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-cyan-100">
+                Message previews
+              </Link>
               <Link href="/admin/notifications/phone" className="rounded-full border border-[#cda24a] bg-[#cda24a] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-black">
                 Phone alerts
               </Link>

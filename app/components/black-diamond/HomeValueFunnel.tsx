@@ -139,7 +139,10 @@ export function HomeValueFunnel({
           postToWidgetParent({ type: "askmagicmike:lead_created" }, attribution);
         }
       }
-      setLeadMessage(data.message || "Got it. Mike will follow up shortly.");
+      setLeadMessage(
+        data.message ||
+          "Your request is stored for review. Mike or the approved team will follow up through the contact path you provided.",
+      );
       setLeadReference({ leadId: data.lead_id || null, sessionId: data.session_id || null });
       setStep(4);
       trackEvent("thank_you_viewed", attribution, { funnel_name: "home_value" });
