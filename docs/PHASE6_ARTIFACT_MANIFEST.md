@@ -5,6 +5,7 @@
 - Source code, tests, migration, `.env.example`, architecture, OpenAI audit, messaging specification, copilot register, funnel audit, AI safety review, security review, compliance review, QA evidence, release notes, rollback, and production acceptance checklist.
 - Existing verified brand assets and Phase 6 baseline screenshots under `output/phase6/`.
 - A PII-free AI-assisted internal alert backdrop and its provenance/approval register under `output/phase6/visual-assets/` and `docs/PHASE6_VISUAL_ASSET_REGISTER.md`.
+- Verified local visual package: `output/phase6/ASK_MAGIC_MIKE_PHASE6_VISUAL_ASSET_PACKAGE.zip` with SHA-256 sidecar. It contains the reconciled existing brand pack, Phase 6 visual evidence, the new reviewed backdrop, source prompt, design-system register, alt/use/approval notes, and no lead PII.
 
 ## Pending generated office artifacts
 

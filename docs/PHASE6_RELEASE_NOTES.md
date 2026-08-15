@@ -28,3 +28,11 @@ Canonical Neon lead storage, deterministic scoring/routing, durable notification
 - Initial Phase 6 commit: `45a9f210066fe26e0f05e50fa14b085107411f49`
 - Initial Preview deployment: `dpl_GS3eyLz2Gwbsqf7r7FxZMcQF3Pag`
 - Public and readiness health: pass; notification mode disabled; email disabled.
+
+## Production record
+
+- Merge commit: `509b54fa8def73d48169970868338ca66c28793f`.
+- Current acceptance deployment: `dpl_BxCt1Yvq2T4hQqBUnnyPcqc4FNwq`.
+- Brandon-only QA provider ID: `fb4fdd9d-d421-482d-b062-5c2bbf6bce1c`.
+- Gmail receipt, sender-domain alignment, TLS, subject prefix, recipient isolation, and canonical CTA href verified.
+- Consumer automation and carrier SMS remain disabled; no Phase 6 database migration was applied.

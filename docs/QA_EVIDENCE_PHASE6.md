@@ -21,13 +21,24 @@ Evidence timestamp: 2026-08-15 America/New_York
 | Public capture | Preserved | Existing `/api/leads` suite passes |
 | Messaging policy | Pass | permission, template, sequence/orchestration, SMS tests |
 | AI safety | Pass | injection, redaction, delimiter, fallback tests |
+| Production deployment | Ready | `dpl_BxCt1Yvq2T4hQqBUnnyPcqc4FNwq`, merge commit `509b54fa8def73d48169970868338ca66c28793f` |
+| Production smoke | Pass | 19 pass, 2 intentional skips, 0 fail |
+| Funnel verification | Pass | 15 pass, 0 fail |
+| Production monitor | Pass | 9 pass, 0 fail |
+| Lead-pipe health | Pass | 9 routes healthy |
+| NellySelly isolation | Pass | canonical project verified; deployable code contains no NellySelly identifiers |
+| Brandon QA email provider acceptance | Pass | Resend ID `fb4fdd9d-d421-482d-b062-5c2bbf6bce1c` |
+| Brandon Gmail inbox receipt | Pass | Exact prefixed subject received at 3:56 PM America/New_York |
+| Sender alignment | Pass | mailed-by `send.notify.askmagicmike.com`; signed-by `notify.askmagicmike.com`; TLS |
+| Responsive message-preview layout | Pass | 1,152px desktop content canvas; 335px mobile column; no horizontal overflow |
+| Post-release errors/warnings | None observed | No Production error or warning log entries returned for the observed 30-minute window |
 
 ## Correctly non-passing or not yet executed
 
 - Authenticated Preview E2E: not executed until Preview database identity is proven non-Production.
 - Phase 6 Neon migration: not applied to Production.
-- Brandon-only provider email: not sent yet; the exact-recipient Production acceptance route is implemented, tested, and fail-closed.
-- Inbox receipt/reply/link checks: not executed yet.
+- Reply action: intentionally not sent; destination behavior remains a separate acceptance item.
+- Native mobile Gmail-app rendering: unavailable; responsive component viewport QA passed, while actual Gmail desktop rendering and inbox receipt were captured.
 - Carrier SMS: intentionally disabled; mock preview only.
 - Mike delivery: intentionally not tested in Phase 6.
 - Consumer delivery: intentionally disabled.
