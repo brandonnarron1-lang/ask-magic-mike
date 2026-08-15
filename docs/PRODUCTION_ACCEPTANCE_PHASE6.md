@@ -1,24 +1,51 @@
 # Production Acceptance - Phase 6
 
-Status: **NOT YET ACCEPTED FOR PRODUCTION**
+Status: **ACCEPTED FOR SAFE PRODUCTION RUNTIME; CONSUMER AUTOMATION REMAINS GATED**
 
 ## Passed locally
 
-- ESLint, strict typecheck, 2,600 tests, and production build.
+- ESLint, strict typecheck, 2,605 tests across 165 files, and production build.
 - Existing canonical lead and notification tests.
 - New AI, permission, messaging, sequence, and SMS policy tests.
 - Consumer automation and carrier SMS remain disabled.
 - Mike remains outside Phase 6 QA.
 
-## Required before acceptance
+## Production record
 
-1. Review PR 152 and the ready Preview deployment.
-2. Prove that Preview `DATABASE_URL` targets a non-Production Neon branch; the sensitive value is configured but not exportable to the CLI.
-3. Apply the additive migration to that proven Preview branch only; verify tables and grants.
-4. Run authenticated Lead Center copilot and message-preview QA with synthetic records only.
-5. Send the specifically authorized Brandon-only QA email and verify provider acceptance, inbox receipt, rendering, links, reply path, no Mike delivery, and no consumer delivery.
-6. Complete Preview smoke/funnel/monitoring, dependency audit, secret/history scan, and same-viewport visual comparison.
-7. Review Preview logs for post-deploy errors and TLS warnings.
-8. Only then merge and deploy Production, with consumer and SMS automation still disabled.
+- PR 152 merged: 2026-08-15T19:52:15Z.
+- Production commit: `509b54fa8def73d48169970868338ca66c28793f`.
+- Initial merged deployment: `dpl_3yzkZCaPbFfDAJw43NajEYC61CJM`.
+- QA-secret rotation redeployment: `dpl_BxCt1Yvq2T4hQqBUnnyPcqc4FNwq`.
+- Canonical aliases: `www.askmagicmike.com` and `askmagicmike.com`.
+- Production liveness/readiness: pass; canonical Neon configured and ready.
+- Public smoke: 19 pass, 2 intentional skips, 0 fail.
+- Funnel: 15 pass, 0 fail.
+- Production monitor: 9 pass, 0 fail.
+- Lead-pipe health: pass.
+- NellySelly isolation: pass.
+- Post-release Production errors/warnings: none returned by Vercel for the observed 30-minute window.
 
-No local test result authorizes a live migration, consumer send, carrier SMS, Mike activation, or publication by itself.
+## Brandon-only email acceptance
+
+- Exact recipient: `brandonnarron1@gmail.com`.
+- Subject: `[TEST — BRANDON QA] Phase 6 message acceptance`.
+- Provider: Resend.
+- Provider message ID: `fb4fdd9d-d421-482d-b062-5c2bbf6bce1c`.
+- Provider acceptance: pass.
+- Gmail inbox receipt: pass at 2026-08-15 3:56 PM America/New_York.
+- Sender shown by Gmail: Ask Magic Mike `<leads@notify.askmagicmike.com>`.
+- Authentication shown by Gmail: mailed-by `send.notify.askmagicmike.com`, signed-by `notify.askmagicmike.com`, TLS.
+- Canonical CTA href: pass by DOM inspection.
+- Mike delivery requested: false.
+- Consumer delivery requested: false.
+- No lead record was fabricated; the message was a synthetic, recipient-isolated rendering acceptance.
+
+## Deliberately held
+
+- The additive Phase 6 Neon migration was not applied because Preview database identity could not be proven distinct from Production. Runtime features that require those tables remain disabled.
+- Consumer acknowledgment, nurture, sequence scheduler, auto-send, and carrier SMS remain disabled.
+- Mike remains outside QA and dormant.
+- Reply was not sent during QA; reply destination behavior remains a separate acceptance item.
+- Native mobile Gmail-app rendering was not available. The live responsive component passed 390px layout measurement with no horizontal overflow; the desktop Gmail inbox render was captured separately.
+
+No test result authorizes a live migration, consumer send, carrier SMS, Mike activation, or publication by itself.
