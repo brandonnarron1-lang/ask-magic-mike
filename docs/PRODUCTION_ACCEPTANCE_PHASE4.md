@@ -42,3 +42,20 @@
 - Mike's role acceptance requires his private password activation.
 - Native office artifacts remain pending the required artifact runtime; source
   content is complete and no non-editable substitute is mislabeled.
+
+## Final deployment
+
+- Main commit: `4528fc8407070a3c82a4089841c2afffccd217ee`.
+- Production deployment: `dpl_AmnXdUZnxax3xb1LTzf26xzwDpfV`.
+- Deployment URL: `https://ask-magic-mike-1jiz74dpv-eyes-up-industries.vercel.app`.
+- Target/status: Production / Ready.
+- Canonical aliases: `https://www.askmagicmike.com` and
+  `https://askmagicmike.com`.
+- Postdeploy live/readiness: pass.
+- Postdeploy production monitor: 9/9.
+- Postdeploy live conversion funnel: 15/15.
+- New first-live route denies anonymous access with HTTP 401.
+- Vercel cron invoked the new route on Production with HTTP 200.
+- Final database reconciliation at `2026-08-15T13:40:56.001359Z`: 0 live
+  prospects, 6 suppressed QA records, 0 unsuppressed QA records, monitor index
+  ready, and no detection/escalation events because no genuine lead exists yet.
