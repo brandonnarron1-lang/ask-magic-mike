@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import os
 from pathlib import Path
 
 from openpyxl import Workbook, load_workbook
@@ -15,7 +16,7 @@ from openpyxl.worksheet.datavalidation import DataValidation
 
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "output" / "phase2" / "spreadsheets"
+OUT = Path(os.environ.get("AMM_WORKBOOK_OUTPUT_DIR", ROOT / "output" / "phase2" / "spreadsheets"))
 OUT.mkdir(parents=True, exist_ok=True)
 
 GOLD = "D9A441"
@@ -186,10 +187,11 @@ def build_activation_matrix():
     write_table(ws, headers, rows, widths=[9,28]+[14]*len(gates)+[14,22,44])
     for r in range(5,12):
         start_col=3; end_col=2+len(gates)
-        ws.cell(r,end_col+1, f'=COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"PASS")/(COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"PASS")+COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"FAIL")+COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"PENDING"))')
+        applicable = f'COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"PASS")+COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"FAIL")+COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"PENDING")'
+        ws.cell(r,end_col+1, f'=IFERROR(COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"PASS")/({applicable}),0)')
         ws.cell(r,end_col+1).number_format="0%"
-        ws.cell(r,end_col+2, f'=IF(COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"FAIL")>0,"BLOCKED",IF(COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"PENDING")>0,"NOT READY","ELIGIBLE"))')
-        ws.cell(r,end_col+3, f'=COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"PENDING")&" pending; "&COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"FAIL")&" failed"')
+        ws.cell(r,end_col+2, f'=IF(({applicable})=0,"NOT APPLICABLE",IF(COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"FAIL")>0,"BLOCKED",IF(COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"PENDING")>0,"NOT READY","ELIGIBLE")))')
+        ws.cell(r,end_col+3, f'=IF(({applicable})=0,"No applicable consumer lead gates",COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"PENDING")&" pending; "&COUNTIF(C{r}:{ws.cell(r,end_col).column_letter}{r},"FAIL")&" failed")')
     dv=DataValidation(type="list",formula1='"PASS,FAIL,N/A,PENDING"',allow_blank=False); ws.add_data_validation(dv); dv.add(f"C5:{ws.cell(11,2+len(gates)).coordinate}")
 
     ws = wb.create_sheet("QA Evidence")
@@ -266,16 +268,16 @@ def build_monitoring_matrix():
     wb,ws=base_book("Monitoring Alert Matrix","Point-in-time checks are not continuous monitoring. Status shows what is truly scheduled.")
     m=wb.create_sheet("Alert Matrix"); headers=["Monitor","Target/condition","Check type","Frequency","Severity","Owner","Alert channel","Normal reporting","Runbook","Schedule status"]
     rows=[
-        ["Liveness","/api/health/live != 200","Scheduled synthetic","Every 15 min","Critical","System owner","Failure-only email/Web Push when enrolled","Daily digest","PRODUCTION_MONITORING_RUNBOOK.md","READY - NOT YET VERIFIED SCHEDULED"],
-        ["Readiness","/api/health/ready != 200","Scheduled synthetic","Every 15 min","Critical","System owner","Failure-only","Daily digest","PRODUCTION_MONITORING_RUNBOOK.md","READY - NOT YET VERIFIED SCHEDULED"],
-        ["Public routes","/, /sell, /buy, /value, /ask, widget","Scheduled synthetic","Hourly","High","System owner","Failure-only","Daily digest","PRODUCTION_MONITORING_RUNBOOK.md","READY - NOT YET VERIFIED SCHEDULED"],
-        ["Admin denial","Anonymous /admin != 401","Scheduled synthetic","Hourly","Critical","System owner","Immediate","Daily digest","SECURITY_REVIEW_PHASE2.md","READY - NOT YET VERIFIED SCHEDULED"],
-        ["Queue failures","failed notifications > 0","Database reconciliation","Every 5 min","Critical","System owner","Immediate","Daily digest","EMAIL_DELIVERY_SPEC.md","SCRIPT REQUIRED"],
-        ["Unassigned lead","Live lead has no owner","Database reconciliation","Every 2 min","Critical","Mike/admin","Immediate","Daily digest","FIRST_LIVE_LEAD_RESPONSE_RUNBOOK.md","SCRIPT REQUIRED"],
-        ["SLA breach","Acceptance >2m or contact >5m","Database reconciliation","Every minute","High","Mike/admin","Immediate","Daily digest","FIRST_LIVE_LEAD_RESPONSE_RUNBOOK.md","SCRIPT REQUIRED"],
-        ["Unsuppressed test","Any test missing suppression","Database reconciliation","Hourly","Critical","System owner","Immediate","Daily digest","TEST_TRAFFIC_EXCLUSION_REPORT.md","SCRIPT REQUIRED"],
+        ["Liveness","/api/health/live != 200","Scheduled synthetic","Hourly","Critical","System owner","Failure-only email/Web Push when enrolled","Daily digest","PRODUCTION_MONITORING_RUNBOOK.md","ACTIVE - GITHUB SCHEDULE"],
+        ["Readiness","/api/health/ready != 200","Scheduled synthetic","Hourly","Critical","System owner","Failure-only","Daily digest","PRODUCTION_MONITORING_RUNBOOK.md","ACTIVE - GITHUB SCHEDULE"],
+        ["Public routes","/, /sell, /buy, /value, /ask, widget","Scheduled synthetic","Hourly","High","System owner","Failure-only","Daily digest","PRODUCTION_MONITORING_RUNBOOK.md","ACTIVE - 9/9 PASS"],
+        ["Admin denial","Anonymous /admin != 401","Scheduled synthetic","Hourly","Critical","System owner","Immediate","Daily digest","SECURITY_REVIEW_PHASE5.md","ACTIVE - GITHUB SCHEDULE"],
+        ["Queue failures","failed live notifications > 0","Database reconciliation","Every 2 min","Critical","System owner","Immediate","Daily digest","EMAIL_DELIVERY_SPEC.md","ACTIVE - FIRST-LIVE CRON"],
+        ["Unassigned lead","Live unsuppressed lead has no owner","Database reconciliation","Every 2 min","Critical","Mike/admin","Immediate","Daily digest","FIRST_LIVE_LEAD_RESPONSE_RUNBOOK.md","ACTIVE - FIRST-LIVE CRON"],
+        ["SLA breach","Acceptance >2m or contact >5m","Database reconciliation","Hourly","High","Mike/admin","Immediate","Daily digest","FIRST_LIVE_LEAD_RESPONSE_RUNBOOK.md","ACTIVE - SLA CRON"],
+        ["Unsuppressed test","Any QA lead is not suppressed","Database reconciliation","Every 2 min","Critical","System owner","Immediate","Daily digest","LEAD_QUEUE_INVARIANTS.md","ACTIVE - FIRST-LIVE CRON"],
         ["Unauthorized form forward","Bridge form outside allowlist","WordPress reconciliation","Hourly","Critical","System owner","Immediate","Daily digest","WORDPRESS_INTEGRATION.md","SCRIPT REQUIRED"],
-        ["NellySelly isolation","Identifier or project crossover","Release + scheduled synthetic","Daily","Critical","System owner","Immediate","Daily digest","ARCHITECTURE.md","POINT-IN-TIME PASS"],
+        ["NellySelly isolation","Identifier or project crossover","Release + source audit","Every release","Critical","System owner","Immediate","Daily digest","ARCHITECTURE.md","POINT-IN-TIME PASS"],
     ]
     title_sheet(m,"Alert Matrix","Do not send routine all-clear messages every few minutes.",len(headers)); write_table(m,headers,rows,widths=[28,45,28,18,16,22,24,18,42,34]); add_status_rules(m,"J",5,14)
     return save(wb,"MONITORING_ALERT_MATRIX.xlsx")
@@ -344,18 +346,21 @@ def build_evidence_register():
     wb,ws=base_book("Evidence and Assumption Register","Separates verified production facts from hypotheses and owner decisions.")
     e=wb.create_sheet("Evidence Register"); headers=["ID","Statement","Classification","Status","Source","Verified date","Owner","Next review","Notes"]
     rows=[
-        ["E-001","AskMagicMike.com serves the canonical app","Evidence","VERIFIED","Vercel deployment dpl_3io4gCpEE3yeDgTSGSGV1D8p5RMe","2026-08-14","System owner","After next deploy","HTTP 200; apex 308"],
+        ["E-001","AskMagicMike.com serves the canonical app","Evidence","VERIFIED","Vercel deployment dpl_3ogimm1EhHCaPkEfXLAeojrm2H8Z","2026-08-15","System owner","After next deploy","Production commit e754456cecaf6538df25bb4bf5eebe57ebf6eacb; apex redirects to www"],
         ["E-002","Form 3 creates one canonical lead and one internal alert","Evidence","VERIFIED","docs/FORM3_PRODUCTION_RECONCILIATION.md","2026-08-14","System owner","Daily","Replay idempotent"],
-        ["E-003","Neon contains six production test leads and zero live prospects at audit","Evidence","POINT-IN-TIME","Neon production aggregate","2026-08-14","System owner","Daily","Does not include WordPress shadow entry 1550"],
-        ["E-004","Web Push has zero active devices","Evidence","VERIFIED","Neon staff_push_subscriptions aggregate","2026-08-14","System owner","After enrollment","Email remains primary"],
-        ["E-005","Facebook crawler 403 is upstream of WordPress","Inference from evidence","HIGH CONFIDENCE","Crawler matrix + Wordfence absence + cPanel ModSecurity enabled","2026-08-14","Hosting operator","After rule lookup","Exact managed-rule ID not visible"],
+        ["E-003","Neon contains six suppressed QA leads and zero genuine live prospects at audit","Evidence","POINT-IN-TIME","Neon production aggregate at 2026-08-15T16:35:23Z","2026-08-15","System owner","Daily","Zero QA in Active/New; zero unsuppressed QA"],
+        ["E-004","Web Push has zero active devices","Evidence","VERIFIED","Neon staff_push_subscriptions aggregate","2026-08-15","System owner","After physical enrollment","Email remains primary"],
+        ["E-005","Meta crawler receives 403 on two Our Town URLs only","Evidence","OPEN HOSTING ACTION","40/42 crawler matrix; other crawlers and Ask Magic Mike URLs pass","2026-08-15","Hosting operator","After narrowly scoped host review","Do not weaken the firewall broadly"],
+        ["E-006","First-live and SLA monitors are scheduled","Evidence","VERIFIED","Vercel cron logs and vercel.json","2026-08-15","System owner","Daily","First-live every 2 minutes; SLA hourly"],
         ["A-001","Organic leads may reach 12/month","Assumption","UNVALIDATED","Budget model base case","2026-08-14","Brokerage owner","After 30 days","Do not present as forecasted fact"],
         ["D-001","Form 7 consent wording","Owner decision","PENDING","OWNER_ACTIONS_REMAINING.md","2026-08-14","Brokerage owner/BIC","Before Form 7 activation","No Constant Contact activation before approval"],
     ]
-    title_sheet(e,"Evidence Register","Do not convert assumptions into claims.",len(headers)); write_table(e,headers,rows,widths=[12,60,24,24,58,18,24,20,50]); add_status_rules(e,"D",5,11)
+    title_sheet(e,"Evidence Register","Do not convert assumptions into claims.",len(headers)); write_table(e,headers,rows,widths=[12,60,24,24,58,18,24,20,50]); add_status_rules(e,"D",5,12)
     return save(wb,"EVIDENCE_AND_ASSUMPTION_REGISTER.xlsx")
 
 
 builders=[build_activation_matrix,build_scoreboard,build_roster,build_access_matrix,build_push_register,build_monitoring_matrix,build_attribution_matrix,build_test_register,build_budget_roi,build_evidence_register]
-paths=[str(builder()) for builder in builders]
-print("\n".join(paths))
+
+if __name__ == "__main__":
+    paths=[str(builder()) for builder in builders]
+    print("\n".join(paths))

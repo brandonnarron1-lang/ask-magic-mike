@@ -33,6 +33,7 @@ export type AdminLeadView = {
   id: string;
   created_at: string | null;
   is_test: boolean;
+  communication_suppressed: boolean;
   status: string;
   funnel_type: string;
   lead_source_surface: string;
@@ -212,6 +213,7 @@ export function normalizeAdminLeadRow(row: Record<string, unknown>): AdminLeadVi
     id: idText(row.id),
     created_at,
     is_test: booleanValue(row.is_test),
+    communication_suppressed: booleanValue(row.communication_suppressed),
     status,
     funnel_type: firstText(row.funnel_type, row.lead_type) || "unknown",
     lead_source_surface: firstText(row.lead_source_surface, row.source) || "unknown",
@@ -247,8 +249,9 @@ export function normalizeAdminLeadRow(row: Record<string, unknown>): AdminLeadVi
   lead.primary_detail = primaryDetail(lead);
   lead.contact_summary = summarizeContact(email, phone);
   lead.attribution_summary = summarizeAttribution(attribution);
-  lead.routing_ready = !lead.is_test && status === "new" && !assignedAgentId && Boolean(email || phone);
-  lead.stalled_signals = lead.is_test
+  const excludedFromOperations = lead.is_test || lead.communication_suppressed;
+  lead.routing_ready = !excludedFromOperations && status === "new" && !assignedAgentId && Boolean(email || phone);
+  lead.stalled_signals = excludedFromOperations
     ? []
     : buildLeadStalledSignals({
         status,

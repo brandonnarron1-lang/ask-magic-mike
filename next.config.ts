@@ -21,6 +21,25 @@ const widgetFrameAncestors = {
     "frame-ancestors 'self' https://ourtownproperties.com https://www.ourtownproperties.com https://*.ourtownproperties.com",
 };
 
+const privateLeadCenterHeaders = [
+  {
+    key: "Cache-Control",
+    value: "private, no-cache, no-store, max-age=0, must-revalidate",
+  },
+  {
+    key: "Content-Security-Policy",
+    value: "frame-ancestors 'self'",
+  },
+  {
+    key: "X-Frame-Options",
+    value: "SAMEORIGIN",
+  },
+  {
+    key: "X-Robots-Tag",
+    value: "noindex, nofollow, noarchive",
+  },
+];
+
 const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
@@ -43,6 +62,22 @@ const nextConfig: NextConfig = {
       {
         source: "/widget/:path*",
         headers: [widgetFrameAncestors],
+      },
+      {
+        source: "/admin/:path*",
+        headers: privateLeadCenterHeaders,
+      },
+      {
+        source: "/lead-center-login",
+        headers: privateLeadCenterHeaders,
+      },
+      {
+        source: "/lead-center-password-help",
+        headers: privateLeadCenterHeaders,
+      },
+      {
+        source: "/lead-center-set-password",
+        headers: privateLeadCenterHeaders,
       },
     ];
   },

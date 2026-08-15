@@ -262,6 +262,13 @@ describe("findMlsMarkers", () => {
     expect(findMlsMarkers([path])).toContain(path);
   });
 
+  it("does not fail a public-safe route because its documentation names the upstream MLS boundary", () => {
+    const { writeFileSync } = require("fs");
+    const path = "/tmp/test-mls-comment-only.ts";
+    writeFileSync(path, "/** FlexMLS remains upstream. */\n// Never expose MLS data.\nexport const ok = true;");
+    expect(findMlsMarkers([path])).not.toContain(path);
+  });
+
   it("MLS_ALLOWLIST contains expected paths", () => {
     expect(MLS_ALLOWLIST).toContain("real-estate-intelligence");
     expect(MLS_ALLOWLIST).toContain("_inbox_flexmls");

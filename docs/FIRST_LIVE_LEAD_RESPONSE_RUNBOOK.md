@@ -34,9 +34,11 @@ Record attempted, contacted, appointment, nurture, signed client, closing, bad
 lead, and attributed revenue only when they actually occur. Never rewrite a live
 lead as QA, delete it for dashboard cleanliness, or use it for testing.
 
-## Current first action
+## Protected legacy entry
 
-Review WordPress Form 7 entry 1550 as a possible genuine property-alert request.
-It is not in Neon because Form 7 is intentionally not allowlisted. Do not use it
-as QA. Confirm whether the existing native notification reached its operational
-recipient, then perform only consent-permitted human follow-up.
+WordPress Form 7 entry 1550 is not the canonical first-live test case. It is a
+genuine, consent-restricted or unclear legacy request preserved outside Neon
+because Form 7 is intentionally not allowlisted. Do not use it as QA, subscribe
+it retroactively, or contact it for marketing. Preserve it for purpose-limited
+BIC review while the canonical first-genuine-lead monitor watches only durable,
+unsuppressed, non-test Neon records with valid source and consent evidence.

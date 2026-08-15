@@ -7,6 +7,13 @@ import {
 
 type Query = ReturnType<typeof neon>;
 
+export function filterOperationalRowsForLiveLeads<T extends Record<string, unknown>>(
+  rows: T[],
+  liveLeadIds: ReadonlySet<string>,
+): T[] {
+  return rows.filter((row) => typeof row.lead_id === "string" && liveLeadIds.has(row.lead_id));
+}
+
 function queryFromEnv(): Query | null {
   return process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
 }
@@ -51,25 +58,40 @@ export async function loadNeonAdminReportingSummary(
         [cutoff],
       ),
       sql.query(
-        `SELECT id, status, starts_at, lead_id, assigned_agent_id, created_at
-           FROM public.lead_appointments
-          WHERE created_at >= $1::timestamptz
-          ORDER BY created_at DESC
+        `SELECT a.id, a.status, a.starts_at, a.lead_id, a.assigned_agent_id, a.created_at
+           FROM public.lead_appointments a
+           JOIN public.leads l ON l.id = a.lead_id
+          WHERE a.created_at >= $1::timestamptz
+            AND l.is_test = false
+            AND l.communication_suppressed = false
+          ORDER BY a.created_at DESC
           LIMIT 1000`,
         [cutoff],
       ),
       sql.query(
-        `SELECT id, status, due_at, lead_id, agent_id, category, created_at
-           FROM public.tasks
-          WHERE category LIKE 'followup:%'
-            AND created_at >= $1::timestamptz
-          ORDER BY created_at DESC
+        `SELECT t.id, t.status, t.due_at, t.lead_id, t.agent_id, t.category, t.created_at
+           FROM public.tasks t
+           JOIN public.leads l ON l.id = t.lead_id
+          WHERE t.category LIKE 'followup:%'
+            AND t.created_at >= $1::timestamptz
+            AND l.is_test = false
+            AND l.communication_suppressed = false
+          ORDER BY t.created_at DESC
           LIMIT 1000`,
         [cutoff],
       ),
     ]);
 
     const normalized = (leadRows as Array<Record<string, unknown>>).map(normalizeReportingLeadRow);
+    const liveLeadIds = new Set(normalized.map((row) => row.id));
+    const liveAppointmentRows = filterOperationalRowsForLiveLeads(
+      appointmentRows as Array<Record<string, unknown>>,
+      liveLeadIds,
+    );
+    const liveFollowupRows = filterOperationalRowsForLiveLeads(
+      followupRows as Array<Record<string, unknown>>,
+      liveLeadIds,
+    );
     const agentIds = [...new Set(normalized.map((row) => row.assigned_agent_id).filter(Boolean))] as string[];
     const agentRows = agentIds.length
       ? await sql.query(
@@ -89,11 +111,10 @@ export async function loadNeonAdminReportingSummary(
       now,
       windowDays,
       agentNames,
-      appointmentRows as Array<Record<string, unknown>>,
-      followupRows as Array<Record<string, unknown>>,
+      liveAppointmentRows,
+      liveFollowupRows,
     );
   } catch {
     return emptySummary(true, windowDays, now, "Canonical Neon reporting query failed");
   }
 }
-

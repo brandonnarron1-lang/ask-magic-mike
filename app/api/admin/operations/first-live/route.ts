@@ -16,7 +16,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const report = await monitor.run({ lookbackHours: 48 });
-    const unhealthy = report.escalated > 0 || Object.values(report.states).some((count) => count > 0);
+    const unhealthy = report.escalated > 0
+      || Object.values(report.states).some((count) => count > 0)
+      || Object.values(report.queue).some((count) => count > 0);
     return NextResponse.json({ ok: !unhealthy, ...report }, { status: unhealthy ? 503 : 200, headers: NO_STORE });
   } catch {
     return NextResponse.json({ ok: false, error: "first_live_monitor_failed", correlation_id: crypto.randomUUID() }, { status: 503, headers: NO_STORE });

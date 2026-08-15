@@ -1,4 +1,4 @@
-# Meta Crawler Root Cause — Phase 4
+# Meta Crawler Root Cause — Phase 5
 
 Current result: **40 of 42 social-preview checks pass**.
 
@@ -17,7 +17,8 @@ Authenticated WordPress and cPanel inspection places enforcement upstream of
 WordPress in the host-managed ModSecurity/WAF layer. Wordfence did not observe
 the generated requests, and the cPanel account exposes only a broad per-domain
 on/off control. The exact managed-rule ID and narrow exception editor are not
-available to this account.
+available to this account. The Phase 5 rerun on 2026-08-15 reproduced the same
+two failures and no others: 40 of 42 checks passed.
 
 No firewall was weakened. The only safe remaining correction is a hosting-side,
 rule-ID-specific exception for validated Meta crawler GET/HEAD requests to the

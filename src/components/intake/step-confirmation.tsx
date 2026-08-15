@@ -70,24 +70,24 @@ const TEMPERATURE_MESSAGES: Record<
   { sub: string; eta: string }
 > = {
   urgent: {
-    sub: "You're a high-priority connection. Expect a call or text within minutes.",
-    eta: "Typically responds in < 5 minutes",
+    sub: "Your request is marked high-priority for Mike or the approved team to review.",
+    eta: "Review and follow-up are handled by the brokerage team",
   },
   hot: {
-    sub: "Your request has been flagged as a priority. Mike will be in touch shortly.",
-    eta: "Typically responds within 15 minutes",
+    sub: "Your request has been flagged as a priority for human review.",
+    eta: "Mike or the approved team will review your request",
   },
   warm: {
     sub: "Your info has been sent to Mike at Our Town Properties.",
-    eta: "Typically responds within a few hours",
+    eta: "The brokerage team will review and follow up",
   },
   nurture: {
-    sub: "Mike will follow up when the timing is right for you.",
-    eta: "Typically responds within 1 business day",
+    sub: "Your timing and request will guide the appropriate follow-up.",
+    eta: "Follow-up is based on your request and permissions",
   },
   low: {
-    sub: "Mike will reach out when there's something relevant for you.",
-    eta: "Typically responds within 1–2 business days",
+    sub: "Mike or the approved team will review what you shared.",
+    eta: "No appointment, result, or response time is implied",
   },
 };
 

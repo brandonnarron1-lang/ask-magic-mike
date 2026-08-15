@@ -1,15 +1,15 @@
 Placement,Base URL,UTM source,UTM medium,UTM campaign,UTM content,Intended lead type,Owner,Status,Date created,QR asset,Test result
-Our Town homepage,https://www.askmagicmike.com/,ourtownproperties.com,referral,owned_traffic_phase4,homepage_ask_magic_mike,General question,Mike,APPROVAL READY,2026-08-15,qr-ourtown-homepage.svg,PENDING SCAN
-Ask Mike page,https://www.askmagicmike.com/ask,ourtownproperties.com,referral,owned_traffic_phase4,ask_mike_page,General question,Mike,APPROVAL READY,2026-08-15,qr-ask-mike.svg,PENDING SCAN
-Home Value page,https://www.askmagicmike.com/home-value,ourtownproperties.com,referral,owned_traffic_phase4,home_value_page,Home value,Mike,APPROVAL READY,2026-08-15,qr-home-value.svg,PENDING SCAN
-Mike agent profile,https://www.askmagicmike.com/ask,ourtownproperties.com,referral,owned_traffic_phase4,mike_agent_profile,General question,Mike,APPROVAL READY,2026-08-15,qr-mike-profile.svg,PENDING SCAN
-Listing page,https://www.askmagicmike.com/buy,ourtownproperties.com,referral,owned_traffic_phase4,listing_page,Buyer,Mike,APPROVAL READY,2026-08-15,qr-listing.svg,PENDING SCAN
-Rental page,https://www.askmagicmike.com/buy,ourtownproperties.com,referral,owned_traffic_phase4,rental_to_buyer,Renter to buyer,Mike,APPROVAL READY,2026-08-15,qr-rental.svg,PENDING SCAN
-Email signature,https://www.askmagicmike.com/ask,ourtownproperties.com,email,owned_traffic_phase4,email_signature,General question,Mike,CONTENT APPROVAL REQUIRED,2026-08-15,qr-email-signature.svg,PENDING SCAN
-Facebook profile,https://www.askmagicmike.com/ask,facebook.com,social,owned_traffic_phase4,facebook_profile,General question,Mike,CONTENT APPROVAL REQUIRED,2026-08-15,qr-facebook-profile.svg,PENDING SCAN
-Instagram profile,https://www.askmagicmike.com/ask,instagram.com,social,owned_traffic_phase4,instagram_profile,General question,Mike,CONTENT APPROVAL REQUIRED,2026-08-15,qr-instagram-profile.svg,PENDING SCAN
-YouTube description,https://www.askmagicmike.com/ask,youtube.com,social,owned_traffic_phase4,youtube_description,General question,Mike,CONTENT APPROVAL REQUIRED,2026-08-15,qr-youtube.svg,PENDING SCAN
-Printed card,https://www.askmagicmike.com/ask,offline,qr,owned_traffic_phase4,printed_card,General question,Mike,PRINT APPROVAL REQUIRED,2026-08-15,qr-printed-card.svg,PENDING SCAN
-Open house,https://www.askmagicmike.com/open-house/ask-magic-mike,offline,qr,owned_traffic_phase4,open_house,Open house,Mike,PROPERTY CONFIG REQUIRED,2026-08-15,qr-open-house.svg,PENDING SCAN
-Yard sign,https://www.askmagicmike.com/sell,offline,qr,owned_traffic_phase4,yard_sign,Seller,Mike,PRINT APPROVAL REQUIRED,2026-08-15,qr-yard-sign.svg,PENDING SCAN
-Direct mail,https://www.askmagicmike.com/home-value,offline,qr,owned_traffic_phase4,direct_mail,Home value,Mike,CONTENT APPROVAL REQUIRED,2026-08-15,qr-direct-mail.svg,PENDING SCAN
+Our Town homepage,https://www.askmagicmike.com/,ourtownproperties.com,referral,owned_traffic_phase5,homepage_ask_magic_mike,General question,Mike,APPROVAL READY,2026-08-15,qr-our-town-homepage.svg,PASS - decoded + HTTP 200
+Ask Mike page,https://www.askmagicmike.com/ask,ourtownproperties.com,referral,owned_traffic_phase5,ask_mike_page,General question,Mike,APPROVAL READY,2026-08-15,qr-ask-mike-page.svg,PASS - decoded + HTTP 200
+Home Value page,https://www.askmagicmike.com/home-value,ourtownproperties.com,referral,owned_traffic_phase5,home_value_page,Home value,Mike,APPROVAL READY,2026-08-15,qr-home-value-page.svg,PASS - decoded + HTTP 200
+Mike agent profile,https://www.askmagicmike.com/ask,ourtownproperties.com,referral,owned_traffic_phase5,mike_agent_profile,General question,Mike,APPROVAL READY,2026-08-15,qr-mike-agent-profile.svg,PASS - decoded + HTTP 200
+Listing page,https://www.askmagicmike.com/buy,ourtownproperties.com,referral,owned_traffic_phase5,listing_page,Buyer,Mike,APPROVAL READY,2026-08-15,qr-listing-page.svg,PASS - decoded + HTTP 200
+Rental page,https://www.askmagicmike.com/buy,ourtownproperties.com,referral,owned_traffic_phase5,rental_to_buyer,Renter to buyer,Mike,APPROVAL READY,2026-08-15,qr-rental-page.svg,PASS - decoded + HTTP 200
+Email signature,https://www.askmagicmike.com/ask,ourtownproperties.com,email,owned_traffic_phase5,email_signature,General question,Mike,CONTENT APPROVAL REQUIRED,2026-08-15,qr-email-signature.svg,PASS - decoded + HTTP 200
+Facebook profile,https://www.askmagicmike.com/ask,facebook.com,social,owned_traffic_phase5,facebook_profile,General question,Mike,CONTENT APPROVAL REQUIRED,2026-08-15,qr-facebook-profile.svg,PASS - decoded + HTTP 200
+Instagram profile,https://www.askmagicmike.com/ask,instagram.com,social,owned_traffic_phase5,instagram_profile,General question,Mike,CONTENT APPROVAL REQUIRED,2026-08-15,qr-instagram-profile.svg,PASS - decoded + HTTP 200
+YouTube description,https://www.askmagicmike.com/ask,youtube.com,social,owned_traffic_phase5,youtube_description,General question,Mike,CONTENT APPROVAL REQUIRED,2026-08-15,qr-youtube-description.svg,PASS - decoded + HTTP 200
+Printed card,https://www.askmagicmike.com/ask,offline,qr,owned_traffic_phase5,printed_card,General question,Mike,PRINT APPROVAL REQUIRED,2026-08-15,qr-printed-card.svg,PASS - decoded + HTTP 200
+Open house,https://www.askmagicmike.com/open-house/ask-magic-mike,offline,qr,owned_traffic_phase5,open_house,Open house,Mike,PROPERTY CONFIG REQUIRED,2026-08-15,qr-open-house.svg,PASS - decoded + HTTP 200
+Yard sign,https://www.askmagicmike.com/sell,offline,qr,owned_traffic_phase5,yard_sign,Seller,Mike,PRINT APPROVAL REQUIRED,2026-08-15,qr-yard-sign.svg,PASS - decoded + HTTP 200
+Direct mail,https://www.askmagicmike.com/home-value,offline,qr,owned_traffic_phase5,direct_mail,Home value,Mike,CONTENT APPROVAL REQUIRED,2026-08-15,qr-direct-mail.svg,PASS - decoded + HTTP 200
