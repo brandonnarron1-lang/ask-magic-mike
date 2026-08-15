@@ -99,9 +99,15 @@ function renderRequest(record: LeadNotificationRecord, context: AssignmentNotifi
   };
 }
 
+function requiredLeadNotificationRepository(): LeadNotificationRepository {
+  const repository = createLeadNotificationRepository();
+  if (!repository) throw new Error("canonical_notification_store_not_configured");
+  return repository;
+}
+
 export class LeadNotificationService {
   constructor(
-    private readonly repo: LeadNotificationRepository = createLeadNotificationRepository(),
+    private readonly repo: LeadNotificationRepository = requiredLeadNotificationRepository(),
     private readonly provider: NotificationProvider = selectNotificationProvider(),
   ) {}
 

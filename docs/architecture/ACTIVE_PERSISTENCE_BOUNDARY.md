@@ -1,12 +1,12 @@
 # Active persistence boundary
 
-Status: local INFRA-02 architecture contract. This document does not authorize a provider or hosting migration.
+Status: historical INFRA-02 contract updated by the implemented Phase 3 Neon-only boundary. For current provider selection and call flow, see `../CANONICAL_DATA_FLOW_PHASE3.md` and `../NEON_MUTATION_RECONCILIATION.md`.
 
 ## Canonical runtime
 
 Next.js selects the repository's root `app/` tree. The `src/app/` tree remains inventoried, preserved, and inactive except where an active root route deliberately imports a reviewed implementation. The checked-in route contract is `config/active-route-manifest.json`; `pnpm run routes:verify` proves the contract against a production build.
 
-The default persistence implementation remains Supabase PostgREST. Existing server environment names remain supported:
+The default Production persistence implementation is Neon PostgreSQL through server-only `DATABASE_URL`. The following Supabase names are legacy compatibility inputs only and are not selected in Production:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -22,14 +22,14 @@ public browser
   -> root API route
      -> provider-neutral contract (app/lib/persistence/contracts.ts)
         -> default adapter factory
-           -> SupabasePostgrestAdapter
-              -> PostgREST RPC
+           -> NeonPostgresAdapter
+              -> direct parameterized SQL / atomic PostgreSQL function
                  -> short PostgreSQL transaction
 
 AdminOps page / server action
   -> provider-neutral read or mutation contract
-     -> Supabase adapter
-        -> bounded PostgREST read OR atomic PostgreSQL RPC
+     -> Neon read or mutation module
+        -> bounded parameterized SQL OR atomic PostgreSQL function
 
 /api/admin/sla/sweep (root GET route)
   -> reviewed src handler

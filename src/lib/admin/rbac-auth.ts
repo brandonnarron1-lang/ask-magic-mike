@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { admin } from "better-auth/plugins";
 import { createAccessControl } from "better-auth/plugins/access";
 import { Pool } from "pg";
+import { sendLeadCenterPasswordResetEmail } from "./rbac-password-reset-email";
 
 const statements = {
   user: [
@@ -31,6 +32,7 @@ const connectionString =
 export const leadCenterAuth = betterAuth({
   appName: "Ask Magic Mike Lead Center",
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  basePath: "/api/lead-center-auth",
   secret:
     process.env.BETTER_AUTH_SECRET ||
     "development-only-rbac-disabled-until-a-real-secret-is-configured",
@@ -45,7 +47,11 @@ export const leadCenterAuth = betterAuth({
     disableSignUp: true,
     minPasswordLength: 14,
     maxPasswordLength: 128,
+    resetPasswordTokenExpiresIn: 60 * 60,
     revokeSessionsOnPasswordReset: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendLeadCenterPasswordResetEmail({ email: user.email, name: user.name, url });
+    },
   },
   user: {
     modelName: "lead_center_users",
@@ -70,7 +76,8 @@ export const leadCenterAuth = betterAuth({
     max: 30,
     customRules: {
       "/sign-in/email": { window: 15 * 60, max: 5 },
-      "/forget-password": { window: 60 * 60, max: 3 },
+      "/request-password-reset": { window: 60 * 60, max: 3 },
+      "/reset-password": { window: 60 * 60, max: 5 },
     },
   },
   advanced: {

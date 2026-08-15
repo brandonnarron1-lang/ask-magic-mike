@@ -19,6 +19,8 @@ export type AdminReportingLeadRow = {
   email: string | null;
   phone: string | null;
   widget_session_id: string | null;
+  is_test?: boolean;
+  communication_suppressed?: boolean;
 };
 
 export type StatusBucketKey = "new" | "working" | "qualified_appointment" | "closed" | "spam_test";
@@ -122,6 +124,8 @@ const REPORTING_SELECT = [
   "email",
   "phone",
   "widget_session_id",
+  "is_test",
+  "communication_suppressed",
 ].join(",");
 
 const CONTACTED_STATUSES = new Set([
@@ -339,6 +343,9 @@ export function normalizeReportingLeadRow(row: Record<string, unknown>): AdminRe
     email: text(row.email),
     phone: text(row.phone),
     widget_session_id: text(row.widget_session_id),
+    is_test: row.is_test === true || row.is_test === "true",
+    communication_suppressed:
+      row.communication_suppressed === true || row.communication_suppressed === "true",
   };
 }
 
@@ -356,7 +363,7 @@ export function bucketLeadStatus(status: string | null | undefined): StatusBucke
 }
 
 export function isSpamOrTest(row: AdminReportingLeadRow): boolean {
-  return bucketLeadStatus(row.status) === "spam_test";
+  return Boolean(row.is_test || row.communication_suppressed) || bucketLeadStatus(row.status) === "spam_test";
 }
 
 export function isContactable(row: AdminReportingLeadRow): boolean {

@@ -5,7 +5,24 @@ import {
   hasLeadCenterSessionCookie,
 } from "@/lib/admin/rbac-policy";
 
+const LEAD_CENTER_HOST = "hub.ourtownproperties.com";
+const CANONICAL_LEAD_CENTER_URL = "https://www.askmagicmike.com/admin";
+
 export async function middleware(req: NextRequest) {
+  if (req.nextUrl.hostname.toLowerCase() === LEAD_CENTER_HOST) {
+    // The brokerage subdomain is an address shortcut, not a second app or data
+    // boundary. Drop the incoming path/query to avoid leaking identifiers or
+    // creating duplicate indexed admin URLs.
+    return NextResponse.redirect(CANONICAL_LEAD_CENTER_URL, {
+      status: 307,
+      headers: {
+        "Cache-Control": "private, no-store",
+        "Referrer-Policy": "no-referrer",
+        "X-Robots-Tag": "noindex, nofollow, noarchive",
+      },
+    });
+  }
+
   if (!req.nextUrl.pathname.startsWith("/admin")) return NextResponse.next();
 
   const rbac = getLeadCenterRbacState();
@@ -67,4 +84,12 @@ export async function middleware(req: NextRequest) {
   });
 }
 
-export const config = { matcher: ["/admin/:path*"] };
+export const config = {
+  matcher: [
+    "/admin/:path*",
+    {
+      source: "/:path*",
+      has: [{ type: "host", value: LEAD_CENTER_HOST }],
+    },
+  ],
+};

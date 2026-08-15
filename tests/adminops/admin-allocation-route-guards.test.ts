@@ -12,8 +12,8 @@ describe("AdminOps allocation route guards", () => {
   it("keeps /admin/allocation covered by the admin middleware matcher", () => {
     const middleware = read("src/middleware.ts");
     const rootMiddleware = read("middleware.ts");
-    expect(rootMiddleware).toContain('matcher: ["/admin/:path*"]');
-    expect(middleware).toContain('matcher: ["/admin/:path*"]');
+    expect(rootMiddleware).toContain('"/admin/:path*"');
+    expect(middleware).toContain('"/admin/:path*"');
     expect("/admin/allocation").toMatch(/^\/admin(?:\/.*)?$/);
   });
 

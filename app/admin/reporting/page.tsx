@@ -93,7 +93,7 @@ function EmptyNotice({ summary }: { summary: AdminReportingSummary }) {
         Reporting status
       </p>
       <h2 className="mt-3 font-serif text-3xl text-[#f4ead4]">
-        {summary.configured ? "No reporting rows returned" : "Supabase not configured"}
+        {summary.configured ? "No reporting rows returned" : "Canonical Neon database not configured"}
       </h2>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-[#d9ceb8]">
         {summary.error ||

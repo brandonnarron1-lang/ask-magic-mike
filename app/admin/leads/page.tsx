@@ -198,7 +198,7 @@ function EmptyState({ configured, error }: { configured: boolean; error?: string
       <p className="mt-3 max-w-2xl text-sm leading-6 text-[#d9ceb8]">
         {configured
           ? error || "No lead rows were returned by the configured lead store."
-          : "Supabase is not configured in this environment, so the protected inbox is empty."}
+          : "The canonical Neon database is not configured in this environment, so the protected inbox is empty."}
       </p>
     </section>
   );

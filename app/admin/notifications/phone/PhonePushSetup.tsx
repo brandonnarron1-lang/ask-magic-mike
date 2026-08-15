@@ -69,6 +69,7 @@ function decodeKey(value: string) {
 
 export function PhonePushSetup({ publicKey, mode = "admin" }: { publicKey: string; mode?: SetupMode }) {
   const [role, setRole] = useState<Role>(mode === "brandon" ? "copy" : "primary");
+  const [deviceName, setDeviceName] = useState(mode === "brandon" ? "Brandon iPhone" : "Mike iPhone");
   const [status, setStatus] = useState("Checking this device…");
   const [devices, setDevices] = useState<Device[]>([]);
   const [registeredCopyId, setRegisteredCopyId] = useState<string | null>(null);
@@ -131,8 +132,8 @@ export function PhonePushSetup({ publicKey, mode = "admin" }: { publicKey: strin
           ...(setupMode ? { "X-AMM-Phone-Setup": "1" } : {}),
         },
         body: JSON.stringify(setupMode
-          ? { subscription: subscription.toJSON() }
-          : { role, subscription: subscription.toJSON() }),
+          ? { device_name: deviceName.trim(), subscription: subscription.toJSON() }
+          : { role, device_name: deviceName.trim(), subscription: subscription.toJSON() }),
       });
       const result = await response.json().catch(() => ({})) as { id?: unknown; error?: unknown };
       if (!response.ok) {
@@ -210,6 +211,8 @@ export function PhonePushSetup({ publicKey, mode = "admin" }: { publicKey: strin
             </ol>
           </div>
         ) : null}
+        <label className="mb-2 block text-sm font-semibold text-amber-100" htmlFor="push-device-name">Device name</label>
+        <input id="push-device-name" value={deviceName} disabled={processing} maxLength={64} onChange={(event) => setDeviceName(event.target.value)} placeholder={mode === "brandon" ? "Brandon iPhone" : "Mike iPhone"} className="mb-4 w-full rounded-lg border border-amber-300/30 bg-zinc-950 px-3 py-3 text-white disabled:cursor-wait disabled:opacity-60" />
         {mode === "admin" ? <>
           <label className="mb-2 block text-sm font-semibold text-amber-100" htmlFor="push-role">This phone belongs to</label>
           <select id="push-role" value={role} disabled={processing} onChange={(event) => setRole(event.target.value as Role)} className="w-full rounded-lg border border-amber-300/30 bg-zinc-950 px-3 py-3 text-white disabled:cursor-not-allowed disabled:opacity-60">
@@ -217,7 +220,7 @@ export function PhonePushSetup({ publicKey, mode = "admin" }: { publicKey: strin
             <option value="copy">Brandon — copy alert</option>
           </select>
         </> : <p className="rounded-lg border border-amber-300/25 bg-amber-300/10 px-4 py-3 text-sm text-amber-100"><strong>Authorized destination:</strong> Brandon copy alerts only</p>}
-        <button type="button" disabled={processing || !readiness?.canRegister} onClick={() => void enable()} className="mt-4 w-full rounded-lg bg-amber-400 px-4 py-3 font-bold text-black hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50">
+        <button type="button" disabled={processing || !readiness?.canRegister || deviceName.trim().length < 2} onClick={() => void enable()} className="mt-4 w-full rounded-lg bg-amber-400 px-4 py-3 font-bold text-black hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50">
           {processing ? "Working…" : readiness?.needsIosHomeScreen ? "Install to Home Screen first" : "Enable free phone alerts on this device"}
         </button>
         <p aria-live="polite" className="mt-3 text-sm text-zinc-300">{status}</p>

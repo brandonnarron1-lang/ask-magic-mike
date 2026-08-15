@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { leadCenterAuthClient } from "../../src/lib/admin/rbac-client";
 
@@ -64,6 +65,11 @@ export function LoginForm({ enabled }: { enabled: boolean }) {
       >
         {pending ? "Signing in…" : "Open Lead Center"}
       </button>
+      <p className="text-center text-sm">
+        <Link className="text-amber-300 underline-offset-4 hover:underline" href="/lead-center-password-help">
+          Set or reset your password
+        </Link>
+      </p>
       <p id="login-status" role="status" className="min-h-6 text-sm text-rose-200">
         {error || (!enabled ? "Per-user access is staged but not active. Use the current authorized access method." : "")}
       </p>

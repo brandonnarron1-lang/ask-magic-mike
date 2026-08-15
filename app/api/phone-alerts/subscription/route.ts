@@ -12,6 +12,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const subscriptionSchema = z.object({
+  device_name: z.string().trim().min(2).max(64).optional(),
   subscription: z.object({
     endpoint: z.string().url().max(2048),
     keys: z.object({
@@ -49,6 +50,7 @@ export async function POST(request: NextRequest) {
       "copy",
       parsed.data.subscription,
       request.headers.get("user-agent"),
+      parsed.data.device_name,
     );
     return NextResponse.json({ ok: true, id: saved.id, role: "copy" }, {
       status: 201,

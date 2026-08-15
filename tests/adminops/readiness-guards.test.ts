@@ -17,7 +17,8 @@ describe("AdminOps readiness guards", () => {
     const rootMiddleware = read("middleware.ts");
     const middleware = read("src/middleware.ts");
     expect(rootMiddleware).toContain('from "./src/middleware"');
-    expect(middleware).toContain('matcher: ["/admin/:path*"]');
+    expect(middleware).toContain('"/admin/:path*"');
+    expect(rootMiddleware).toContain('value: "hub.ourtownproperties.com"');
     expect(middleware).toContain("ADMIN_SECRET");
     expect(middleware).toContain("WWW-Authenticate");
     expect(middleware).toContain("Unauthorized");

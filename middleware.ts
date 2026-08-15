@@ -9,4 +9,12 @@ export { middleware } from "./src/middleware";
 // of every single request — including "/" — causing a site-wide 500
 // (`ReferenceError: __dirname is not defined`) on 2026-07-08.
 // Keep the matcher literal, defined directly here.
-export const config = { matcher: ["/admin/:path*"] };
+export const config = {
+  matcher: [
+    "/admin/:path*",
+    {
+      source: "/:path*",
+      has: [{ type: "host", value: "hub.ourtownproperties.com" }],
+    },
+  ],
+};

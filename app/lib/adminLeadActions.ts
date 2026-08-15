@@ -36,7 +36,7 @@ function text(value: unknown): string | null {
 export async function updateAdminLeadStatus(
   leadId: string,
   status: string,
-  options: { reason?: string | null; now?: Date } = {},
+  options: { reason?: string | null; now?: Date; actor?: string } = {},
 ): Promise<AdminLeadStatusUpdateResult> {
   if (!UUID.test(leadId)) {
     return { ok: false, statusCode: 400, error: "invalid_lead_id" };
@@ -78,7 +78,7 @@ export async function updateAdminLeadStatus(
       expectedStatus: currentStatusText,
       nextStatus: status,
       patch: buildLeadLifecyclePatch(status, { nowIso, reason }),
-      actor: AUDIT_ACTOR,
+      actor: options.actor || AUDIT_ACTOR,
       reason,
       occurredAt: nowIso,
     });

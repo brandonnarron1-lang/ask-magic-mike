@@ -47,8 +47,10 @@ describe("AdminOps notification guards", () => {
   it("keeps notification controls under the protected admin matcher", () => {
     const rootMiddleware = read("middleware.ts");
     const srcMiddleware = read("src/middleware.ts");
-    expect(rootMiddleware).toContain('matcher: ["/admin/:path*"]');
-    expect(srcMiddleware).toContain('matcher: ["/admin/:path*"]');
+    expect(rootMiddleware).toContain('"/admin/:path*"');
+    expect(rootMiddleware).toContain('value: "hub.ourtownproperties.com"');
+    expect(srcMiddleware).toContain('"/admin/:path*"');
+    expect(srcMiddleware).toContain("value: LEAD_CENTER_HOST");
     expect("/admin/notifications").toMatch(/^\/admin(?:\/.*)?$/);
   });
 

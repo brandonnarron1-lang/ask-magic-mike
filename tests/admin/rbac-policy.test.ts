@@ -6,6 +6,7 @@ import {
   hasLeadCenterSessionCookie,
   type LeadCenterPrincipal,
 } from "../../src/lib/admin/rbac-policy";
+import { leadCenterAuth } from "../../src/lib/admin/rbac-auth";
 
 function principal(overrides: Partial<LeadCenterPrincipal> = {}): LeadCenterPrincipal {
   return {
@@ -19,6 +20,9 @@ function principal(overrides: Partial<LeadCenterPrincipal> = {}): LeadCenterPrin
 }
 
 describe("Lead Center RBAC policy", () => {
+  it("uses the same authentication base path as the browser client and App Router handler", () => {
+    expect(leadCenterAuth.options.basePath).toBe("/api/lead-center-auth");
+  });
   it("grants user administration and exports only to administrators", () => {
     expect(hasLeadCenterPermission("administrator", "user:manage")).toBe(true);
     expect(hasLeadCenterPermission("administrator", "lead:export")).toBe(true);

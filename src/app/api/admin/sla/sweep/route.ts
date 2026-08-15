@@ -16,9 +16,9 @@ const NO_STORE = { "Cache-Control": "no-store" };
  *   2) Cron (Vercel Cron / Inngest / external runner) —
  *      `Authorization: Bearer $CRON_SECRET`.
  *
- * Both modes accept `?persist=true` (or `{ persist: true }` body) to
- * write `compliance_flags` for each detected breach. Without it, the
- * sweep is dry-run.
+ * Authorized cron calls persist by default so the scheduled monitor creates
+ * visible, idempotent breach flags. Manual admin calls remain dry-run unless
+ * they explicitly pass `?persist=true` (or `{ persist: true }`).
  */
 async function handle(req: NextRequest) {
   const isCronAuth = checkBearerSecret(req, process.env.CRON_SECRET);
@@ -43,7 +43,7 @@ async function handle(req: NextRequest) {
       // ignore
     }
   }
-  const persist = urlPersist || bodyPersist;
+  const persist = isCronAuth || urlPersist || bodyPersist;
 
   if (persist) {
     const mutation = assertDatabaseMutationAllowed(process.env as Record<string, string | undefined>);

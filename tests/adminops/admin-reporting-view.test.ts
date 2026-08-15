@@ -370,7 +370,7 @@ describe("AdminOps reporting view model", () => {
     expect(captured[0].url.pathname).toBe("/rest/v1/leads");
     expect(captured[0].init?.method).toBeUndefined();
     expect(captured[0].url.searchParams.get("select")).toBe(
-      "id,created_at,status,lead_type,source,source_detail,page_url,timeline_months,primary_intent,assigned_agent_id,assigned_at,last_contacted_at,lead_grade,conversion_stage,address_raw,email,phone,widget_session_id",
+      "id,created_at,status,lead_type,source,source_detail,page_url,timeline_months,primary_intent,assigned_agent_id,assigned_at,last_contacted_at,lead_grade,conversion_stage,address_raw,email,phone,widget_session_id,is_test,communication_suppressed",
     );
     expect(captured[0].url.searchParams.get("created_at")).toMatch(/^gte\./);
     expect(captured[0].url.searchParams.get("order")).toBe("created_at.desc");

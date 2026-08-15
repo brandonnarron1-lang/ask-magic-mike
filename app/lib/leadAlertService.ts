@@ -48,7 +48,12 @@ export function configuredInternalSmsRecipients() {
   });
 }
 function notificationRepository(): LeadNotificationRepository {
-  return NeonLeadNotificationRepository.fromEnv() || new SupabaseLeadNotificationRepository();
+  const neonRepository = NeonLeadNotificationRepository.fromEnv();
+  if (neonRepository) return neonRepository;
+  const legacyFallbackAllowed = process.env.NODE_ENV === "test" ||
+    (process.env.VERCEL_ENV !== "production" && process.env.ALLOW_LEGACY_SUPABASE_FALLBACK === "true");
+  if (legacyFallbackAllowed) return new SupabaseLeadNotificationRepository();
+  throw new Error("canonical_notification_store_not_configured");
 }
 function replyTo(payload: LeadPayload) { return validEmail(payload.email) ? payload.email!.trim() : undefined; }
 function safeError(value: string) { return value.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[email]").replace(/\+?\d[\d\s().-]{7,}\d/g, "[phone]").slice(0, 220); }
@@ -128,7 +133,9 @@ async function loadLeadAlertInput(leadId: string, metadata: Record<string, unkno
   const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl && (!baseUrl || !serviceRoleKey)) return null;
+  const legacyFallbackAllowed = process.env.NODE_ENV === "test" ||
+    (process.env.VERCEL_ENV !== "production" && process.env.ALLOW_LEGACY_SUPABASE_FALLBACK === "true");
+  if (!databaseUrl && (!legacyFallbackAllowed || !baseUrl || !serviceRoleKey)) return null;
   const headers = { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` };
   try {
     let leads: Array<Record<string, unknown>> = [];

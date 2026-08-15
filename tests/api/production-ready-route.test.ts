@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
     capture_function: true,
     leads_table: true,
     notification_table: true,
+    rbac_schema_ready: true,
     push_subscription_table: true,
   } as Record<string, unknown>,
   query: vi.fn(),
@@ -31,6 +32,7 @@ describe("production GET /api/health/ready", () => {
       capture_function: true,
       leads_table: true,
       notification_table: true,
+      rbac_schema_ready: true,
       push_subscription_table: true,
     };
     mocks.query.mockReset();
@@ -52,7 +54,12 @@ describe("production GET /api/health/ready", () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body).toMatchObject({ ok: true, push_enabled: false, push_ready: true });
+    expect(body).toMatchObject({
+      ok: true,
+      rbac_schema_ready: true,
+      push_enabled: false,
+      push_ready: true,
+    });
   });
 
   it("is ready when enabled push has its table and complete VAPID configuration", async () => {

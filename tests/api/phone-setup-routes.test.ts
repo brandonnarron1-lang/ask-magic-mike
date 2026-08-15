@@ -123,6 +123,7 @@ describe("passwordless Brandon phone setup routes", () => {
 
   it("registers only a copy subscription with a valid setup cookie and CSRF header", async () => {
     const request = post("/api/phone-alerts/subscription", {
+      device_name: "Brandon iPhone",
       subscription: {
         endpoint: "https://push.example.test/subscription",
         keys: { p256dh: "abcdefghijklmnopqrstuvwxyz123456", auth: "abcdefghijklmnopqrstuvwxyz123456" },
@@ -130,7 +131,7 @@ describe("passwordless Brandon phone setup routes", () => {
     }, { cookie: sessionCookie(), "x-amm-phone-setup": "1" });
     const response = await subscribe(request);
     expect(response.status).toBe(201);
-    expect(mocks.upsert).toHaveBeenCalledWith("copy", expect.any(Object), null);
+    expect(mocks.upsert).toHaveBeenCalledWith("copy", expect.any(Object), null, "Brandon iPhone");
   });
 
   it("rejects registration without the scoped cookie or custom CSRF header", async () => {

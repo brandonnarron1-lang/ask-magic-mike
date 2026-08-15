@@ -10,10 +10,12 @@ import {
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 
 export async function assignLeadToAgentAction(formData: FormData) {
-  await requireLeadCenterPermission("lead:assign");
+  const principal = await requireLeadCenterPermission("lead:assign");
   const leadId = String(formData.get("lead_id") ?? "");
   const agentId = String(formData.get("agent_id") ?? "");
-  const result = await assignLeadToAgent(leadId, agentId);
+  const result = await assignLeadToAgent(leadId, agentId, {
+    actor: principal ? `lead_center:${principal.userId}` : undefined,
+  });
 
   revalidatePath("/admin/allocation");
 
@@ -29,9 +31,11 @@ export async function assignLeadToAgentAction(formData: FormData) {
 }
 
 export async function unassignLeadAction(formData: FormData) {
-  await requireLeadCenterPermission("lead:assign");
+  const principal = await requireLeadCenterPermission("lead:assign");
   const leadId = String(formData.get("lead_id") ?? "");
-  const result = await unassignLead(leadId);
+  const result = await unassignLead(leadId, {
+    actor: principal ? `lead_center:${principal.userId}` : undefined,
+  });
 
   revalidatePath("/admin/allocation");
 
@@ -47,7 +51,7 @@ export async function unassignLeadAction(formData: FormData) {
 }
 
 export async function updateAgentOperationsAction(formData: FormData) {
-  await requireLeadCenterPermission("routing:manage");
+  const principal = await requireLeadCenterPermission("routing:manage");
   const agentId = String(formData.get("agent_id") ?? "");
   const result = await updateAgentOperations({
     agentId,
@@ -57,6 +61,7 @@ export async function updateAgentOperationsAction(formData: FormData) {
     priorityScore: Number(formData.get("priority_score") ?? ""),
     notificationEmail: formData.get("notification_email") === "on",
     notificationSms: formData.get("notification_sms") === "on",
+    actor: principal ? `lead_center:${principal.userId}` : undefined,
   });
 
   revalidatePath("/admin/allocation");

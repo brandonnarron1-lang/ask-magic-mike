@@ -145,7 +145,7 @@ export default async function AdminActionQueuePage() {
               <p className="mt-3 text-sm text-[#d9ceb8]">
                 {queue.configured
                   ? "No overdue follow-ups, appointment requests, stalled leads, or retry-scheduled notifications were returned."
-                  : "Supabase is not configured in this environment."}
+                  : "The canonical Neon database is not configured in this environment."}
               </p>
             </div>
           )}

@@ -8,6 +8,7 @@ export type StaffPushSubscription = {
   endpoint: string;
   p256dh: string;
   auth: string;
+  deviceLabel: string | null;
   userAgent: string | null;
   isActive: boolean;
 };
@@ -37,6 +38,7 @@ function row(value: Record<string, unknown>): StaffPushSubscription {
     endpoint: String(value.endpoint),
     p256dh: String(value.p256dh),
     auth: String(value.auth),
+    deviceLabel: typeof value.device_label === "string" ? value.device_label : null,
     userAgent: typeof value.user_agent === "string" ? value.user_agent : null,
     isActive: value.is_active === true,
   };
@@ -73,7 +75,7 @@ export class NeonPushSubscriptionRepository {
   async listActive() {
     await this.ensureSchema();
     const rows = await this.sql.query(
-      `SELECT id, recipient_role, endpoint, p256dh, auth, user_agent, is_active
+      `SELECT id, recipient_role, endpoint, p256dh, auth, device_label, user_agent, is_active
        FROM public.staff_push_subscriptions
        WHERE is_active = TRUE ORDER BY created_at ASC`,
     );
@@ -83,7 +85,7 @@ export class NeonPushSubscriptionRepository {
   async findActiveById(id: string) {
     await this.ensureSchema();
     const rows = await this.sql.query(
-      `SELECT id, recipient_role, endpoint, p256dh, auth, user_agent, is_active
+      `SELECT id, recipient_role, endpoint, p256dh, auth, device_label, user_agent, is_active
        FROM public.staff_push_subscriptions
        WHERE id = $1::uuid AND is_active = TRUE LIMIT 1`,
       [id],
@@ -91,25 +93,33 @@ export class NeonPushSubscriptionRepository {
     return rows[0] ? row(rows[0] as Record<string, unknown>) : null;
   }
 
-  async upsert(role: StaffPushRecipientRole, input: PushSubscriptionInput, userAgent?: string | null) {
+  async upsert(role: StaffPushRecipientRole, input: PushSubscriptionInput, userAgent?: string | null, deviceLabel?: string | null) {
     if (!validEndpoint(input.endpoint) || !validKey(input.keys.p256dh) || !validKey(input.keys.auth)) {
       throw new Error("invalid_push_subscription");
     }
     await this.ensureSchema();
     const rows = await this.sql.query(
       `INSERT INTO public.staff_push_subscriptions
-         (recipient_role, endpoint, p256dh, auth, user_agent, is_active)
-       VALUES ($1, $2, $3, $4, $5, TRUE)
+         (recipient_role, endpoint, p256dh, auth, user_agent, device_label, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, TRUE)
        ON CONFLICT (endpoint) DO UPDATE SET
          recipient_role = EXCLUDED.recipient_role,
          p256dh = EXCLUDED.p256dh,
          auth = EXCLUDED.auth,
          user_agent = EXCLUDED.user_agent,
+         device_label = EXCLUDED.device_label,
          is_active = TRUE,
          updated_at = NOW(),
          last_error = NULL
-       RETURNING id, recipient_role, endpoint, p256dh, auth, user_agent, is_active`,
-      [role, input.endpoint, input.keys.p256dh, input.keys.auth, (userAgent || "").slice(0, 300) || null],
+       RETURNING id, recipient_role, endpoint, p256dh, auth, device_label, user_agent, is_active`,
+      [
+        role,
+        input.endpoint,
+        input.keys.p256dh,
+        input.keys.auth,
+        (userAgent || "").slice(0, 300) || null,
+        (deviceLabel || "").trim().slice(0, 64) || null,
+      ],
     );
     return row(rows[0] as Record<string, unknown>);
   }
