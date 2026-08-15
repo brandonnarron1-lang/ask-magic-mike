@@ -76,11 +76,15 @@ describe("normalizeAdminLeadRow", () => {
       created_at: createdAt,
       assigned_at: new Date("2026-08-15T13:50:00.000Z"),
       is_test: true,
+      status: "new",
+      email: "qa@example.test",
     });
 
     expect(lead.created_at).toBe("2026-08-15T13:45:00.000Z");
     expect(lead.assigned_at).toBe("2026-08-15T13:50:00.000Z");
     expect(lead.is_test).toBe(true);
+    expect(lead.routing_ready).toBe(false);
+    expect(lead.stalled_signals).toEqual([]);
   });
 
   it("keeps QA leads out of operational queues and groups them under test/closed", () => {
