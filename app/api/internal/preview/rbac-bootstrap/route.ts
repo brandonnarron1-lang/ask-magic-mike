@@ -151,12 +151,42 @@ export async function POST(request: NextRequest) {
           : null;
       await upsertAcceptanceUser(client, user, agentId);
     }
+
+    const testLeads = await client.query<{ id: string }>(
+      `SELECT id::text FROM public.leads
+       WHERE is_test = TRUE AND communication_suppressed = TRUE
+       ORDER BY created_at ASC LIMIT 2`,
+    );
+    const assignments = [
+      { row: testLeads.rows[0], agentId: primaryAgentId, firstName: "INTERNAL QA PRIMARY" },
+      { row: testLeads.rows[1], agentId: approvedAgentId, firstName: "INTERNAL QA AGENT" },
+    ];
+    for (const assignment of assignments) {
+      if (!assignment.row || !assignment.agentId) continue;
+      await client.query(
+        `UPDATE public.leads SET
+           first_name = $2,
+           last_name = 'DO NOT CONTACT',
+           email = NULL,
+           phone = NULL,
+           phone_normalized = NULL,
+           question_raw = 'INTERNAL QA — DO NOT CONTACT — RBAC assignment acceptance',
+           assigned_agent_id = $3::uuid,
+           assignment_status = 'assigned',
+           is_test = TRUE,
+           communication_suppressed = TRUE,
+           updated_at = NOW()
+         WHERE id = $1::uuid AND is_test = TRUE AND communication_suppressed = TRUE`,
+        [assignment.row.id, assignment.firstName, assignment.agentId],
+      );
+    }
     await client.query("COMMIT");
     return NextResponse.json({
       ok: true,
       users: parsed.data.users.length,
       roles: [...new Set(parsed.data.users.map((user) => user.role))],
       disabled_user: true,
+      assigned_test_leads: assignments.filter((assignment) => assignment.row && assignment.agentId).length,
       environment: "preview",
     });
   } catch {
