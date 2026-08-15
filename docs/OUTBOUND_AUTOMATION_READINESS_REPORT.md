@@ -11,9 +11,10 @@
 - Protected Message Review Studio and Lead Center copilot.
 - Owner-approved Phase 6 copy and visual hierarchy for internal testing and
   release preparation.
-- Additive Phase 6 schema accepted on isolated Neon Preview with seven of seven
-  tables present, RLS enabled on all seven, zero new rows, and Production
-  unchanged.
+- Additive Phase 6 schema accepted first on isolated Neon Preview and then on
+  canonical Neon Production: seven of seven tables present, RLS enabled on all
+  seven, no public/anonymous grants, and zero new rows. Existing lead,
+  notification, and session aggregates were unchanged.
 
 ## Not released
 
@@ -21,8 +22,6 @@
 - Consumer follow-up email: disabled.
 - Sequence scheduler and auto-send: disabled.
 - Carrier SMS: disabled; no approved funded provider/test-number acceptance in this phase.
-- Phase 6 database migration: applied to isolated Neon Preview only; not applied
-  to Production.
 - Held Gravity Forms: not activated.
 
 Release still requires purpose-specific consent/legal/BIC review where applicable, approved copy/cadence, sender/reply handling, bounce/complaint and cancellation acceptance, consumer-automation owner release, and for SMS an approved number/provider plus internal-number carrier acceptance.
