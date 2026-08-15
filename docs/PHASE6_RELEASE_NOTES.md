@@ -17,6 +17,8 @@
 - Public success copy confirms durable receipt without a response-time promise.
 - Consumer acknowledgment receives its own fail-closed release gate.
 - Mock providers no longer log destinations or message bodies.
+- Phase 6 privilege hardening now works on canonical Neon and on environments
+  that provision Supabase-style `anon`/`authenticated` roles.
 
 ## Preserved
 
@@ -35,4 +37,16 @@ Canonical Neon lead storage, deterministic scoring/routing, durable notification
 - Current acceptance deployment: `dpl_BxCt1Yvq2T4hQqBUnnyPcqc4FNwq`.
 - Brandon-only QA provider ID: `fb4fdd9d-d421-482d-b062-5c2bbf6bce1c`.
 - Gmail receipt, sender-domain alignment, TLS, subject prefix, recipient isolation, and canonical CTA href verified.
-- Consumer automation and carrier SMS remain disabled; no Phase 6 database migration was applied.
+- Consumer automation and carrier SMS remain disabled; no Phase 6 database
+  migration was applied to Production.
+
+## Preview migration acceptance
+
+- Authenticated Neon branch identity confirmed Preview
+  `br-morning-paper-aun3378r` is distinct from Production
+  `br-round-base-auh6h2wd`.
+- The additive migration passed on Preview with 7/7 tables, RLS on all seven,
+  zero browser-role grants, and zero new rows.
+- Production remains unmigrated with 0/7 Phase 6 tables.
+- Owner copy/visual acceptance is recorded for internal testing only; consumer
+  channels remain gated.

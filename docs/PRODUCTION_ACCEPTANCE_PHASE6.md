@@ -4,7 +4,7 @@ Status: **ACCEPTED FOR SAFE PRODUCTION RUNTIME; CONSUMER AUTOMATION REMAINS GATE
 
 ## Passed locally
 
-- ESLint, strict typecheck, 2,605 tests across 165 files, and production build.
+- ESLint, strict typecheck, 2,606 tests across 166 files, and production build.
 - Existing canonical lead and notification tests.
 - New AI, permission, messaging, sequence, and SMS policy tests.
 - Consumer automation and carrier SMS remain disabled.
@@ -42,10 +42,20 @@ Status: **ACCEPTED FOR SAFE PRODUCTION RUNTIME; CONSUMER AUTOMATION REMAINS GATE
 
 ## Deliberately held
 
-- The additive Phase 6 Neon migration was not applied because Preview database identity could not be proven distinct from Production. Runtime features that require those tables remain disabled.
+- Authenticated Neon evidence now proves Preview branch
+  `br-morning-paper-aun3378r` is distinct from Production branch
+  `br-round-base-auh6h2wd`. The additive Phase 6 migration passed on Preview:
+  seven tables present, RLS enabled on all seven, no `anon`/`authenticated`
+  grants, and zero rows. Production still has zero Phase 6 tables and was not
+  migrated. Runtime features that require those Production tables remain
+  disabled.
 - Consumer acknowledgment, nurture, sequence scheduler, auto-send, and carrier SMS remain disabled.
 - Mike remains outside QA and dormant.
 - Reply was not sent during QA; reply destination behavior remains a separate acceptance item.
 - Native mobile Gmail-app rendering was not available. The live responsive component passed 390px layout measurement with no horizontal overflow; the desktop Gmail inbox render was captured separately.
+
+Owner approval of the current copy and visual hierarchy was recorded for
+internal testing only; it does not release consumer delivery or Production
+migration.
 
 No test result authorizes a live migration, consumer send, carrier SMS, Mike activation, or publication by itself.

@@ -134,10 +134,37 @@ ALTER TABLE public.communication_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ai_lead_intelligence ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ai_usage_events ENABLE ROW LEVEL SECURITY;
 
-REVOKE ALL ON public.communication_permissions FROM anon, authenticated;
-REVOKE ALL ON public.communication_decisions FROM anon, authenticated;
-REVOKE ALL ON public.message_sequence_instances FROM anon, authenticated;
-REVOKE ALL ON public.message_sequence_step_runs FROM anon, authenticated;
-REVOKE ALL ON public.communication_events FROM anon, authenticated;
-REVOKE ALL ON public.ai_lead_intelligence FROM anon, authenticated;
-REVOKE ALL ON public.ai_usage_events FROM anon, authenticated;
+REVOKE ALL ON public.communication_permissions FROM PUBLIC;
+REVOKE ALL ON public.communication_decisions FROM PUBLIC;
+REVOKE ALL ON public.message_sequence_instances FROM PUBLIC;
+REVOKE ALL ON public.message_sequence_step_runs FROM PUBLIC;
+REVOKE ALL ON public.communication_events FROM PUBLIC;
+REVOKE ALL ON public.ai_lead_intelligence FROM PUBLIC;
+REVOKE ALL ON public.ai_usage_events FROM PUBLIC;
+
+-- Supabase commonly provisions anon/authenticated roles; canonical Neon does not.
+-- Keep the same least-privilege posture without making either provider mandatory.
+DO $phase6_privileges$
+DECLARE
+  role_name text;
+  table_name text;
+BEGIN
+  FOREACH role_name IN ARRAY ARRAY['anon', 'authenticated']
+  LOOP
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = role_name) THEN
+      FOREACH table_name IN ARRAY ARRAY[
+        'communication_permissions',
+        'communication_decisions',
+        'message_sequence_instances',
+        'message_sequence_step_runs',
+        'communication_events',
+        'ai_lead_intelligence',
+        'ai_usage_events'
+      ]
+      LOOP
+        EXECUTE format('REVOKE ALL ON TABLE public.%I FROM %I', table_name, role_name);
+      END LOOP;
+    END IF;
+  END LOOP;
+END
+$phase6_privileges$;

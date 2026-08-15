@@ -9,7 +9,7 @@ Evidence timestamp: 2026-08-15 America/New_York
 | Phase 6 unit set | Pass | 5 files, 21 tests |
 | ESLint | Pass | `pnpm lint` |
 | Strict TypeScript | Pass | `pnpm typecheck` |
-| Full repository tests | Pass | 165 files, 2,605 tests after the guarded QA-email route was added |
+| Full repository tests | Pass | 166 files, 2,606 tests including the Neon-compatible migration safety gate |
 | Production build | Pass | Next.js 15.5.21, 44 static pages generated |
 | New routes | Pass build | `/api/admin/copilot`, `/api/admin/qa/email`, `/admin/message-previews` |
 | Canonical route manifest | Pass | 64 active routes, 15 acknowledged root/src duplicates |
@@ -31,18 +31,29 @@ Evidence timestamp: 2026-08-15 America/New_York
 | Brandon Gmail inbox receipt | Pass | Exact prefixed subject received at 3:56 PM America/New_York |
 | Sender alignment | Pass | mailed-by `send.notify.askmagicmike.com`; signed-by `notify.askmagicmike.com`; TLS |
 | Responsive message-preview layout | Pass | 1,152px desktop content canvas; 335px mobile column; no horizontal overflow |
+| Neon environment identity | Pass | Authenticated console: Preview `br-morning-paper-aun3378r`; Production `br-round-base-auh6h2wd` |
+| Phase 6 Preview migration | Pass | 7/7 tables, 7/7 RLS, 0 `anon`/`authenticated` grants, 0 new rows |
+| Production migration hold | Pass | Read-only Production precheck reports 0/7 Phase 6 tables |
 | Post-release errors/warnings | None observed | No Production error or warning log entries returned for the observed 30-minute window |
 
 ## Correctly non-passing or not yet executed
 
-- Authenticated Preview E2E: not executed until Preview database identity is proven non-Production.
+- Authenticated Preview runtime E2E remains to be rerun against the merged
+  migration commit; database identity and schema acceptance now pass.
 - Phase 6 Neon migration: not applied to Production.
 - Reply action: intentionally not sent; destination behavior remains a separate acceptance item.
 - Native mobile Gmail-app rendering: unavailable; responsive component viewport QA passed, while actual Gmail desktop rendering and inbox receipt were captured.
 - Carrier SMS: intentionally disabled; mock preview only.
 - Mike delivery: intentionally not tested in Phase 6.
 - Consumer delivery: intentionally disabled.
-- Sensitive Preview `DATABASE_URL` is configured at runtime but is intentionally not exportable through the CLI. Because a distinct Preview branch cannot yet be proven from read-only evidence, no Preview mutation or migration was attempted.
+- Sensitive Preview `DATABASE_URL` remains intentionally non-exportable through
+  the CLI. Distinct branch identity was instead proven in the authenticated Neon
+  console, and the additive migration was applied only to Preview.
+
+The initial Preview transaction failed safely at an unconditional revoke of the
+nonexistent Neon `anon` role. It was explicitly rolled back, the migration was
+made provider-compatible, and the corrected transaction then passed. No partial
+DDL or data mutation survived the failed attempt.
 
 Intentional skips are not counted as passes.
 

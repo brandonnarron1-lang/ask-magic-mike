@@ -9,6 +9,11 @@
 - SMS previews, segment count, quiet hours, caps, STOP/HELP, mock idempotency.
 - AI draft suggestions with structured output and deterministic fallback.
 - Protected Message Review Studio and Lead Center copilot.
+- Owner-approved Phase 6 copy and visual hierarchy for internal testing and
+  release preparation.
+- Additive Phase 6 schema accepted on isolated Neon Preview with seven of seven
+  tables present, RLS enabled on all seven, zero new rows, and Production
+  unchanged.
 
 ## Not released
 
@@ -16,7 +21,11 @@
 - Consumer follow-up email: disabled.
 - Sequence scheduler and auto-send: disabled.
 - Carrier SMS: disabled; no approved funded provider/test-number acceptance in this phase.
-- Phase 6 database migration: not applied.
+- Phase 6 database migration: applied to isolated Neon Preview only; not applied
+  to Production.
 - Held Gravity Forms: not activated.
 
 Release still requires purpose-specific consent/legal/BIC review where applicable, approved copy/cadence, sender/reply handling, bounce/complaint and cancellation acceptance, consumer-automation owner release, and for SMS an approved number/provider plus internal-number carrier acceptance.
+
+The 2026-08-15 owner acceptance covers internal-test copy and visual hierarchy;
+it does not release any consumer channel.
