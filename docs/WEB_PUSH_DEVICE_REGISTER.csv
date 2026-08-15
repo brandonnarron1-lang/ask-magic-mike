@@ -1,0 +1,3 @@
+Owner,Role,Device label,Enrollment state,Enrolled at,Test sent,Test received,Deep link verified,Duplicate handling,Revoked at,Notes
+Brandon,copy,,NOT ENROLLED,,,,,,,Physical browser permission required
+Mike,primary,,NOT ENROLLED,,,,,,,Password activation then physical browser permission required

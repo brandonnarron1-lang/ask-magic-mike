@@ -1,0 +1,31 @@
+Day,Asset,Audience,Market,Funnel,CTA,Status,Required approval,Intended channel,Tracking placement,Source material,Compliance note
+1,What a broker-reviewed home-value review includes,Homeowners,Wilson NC,Home value,Request a review,DRAFT,BIC/content,GBP and Facebook,home_value_page,Our Town home-value page,No appraisal or guaranteed value claim
+2,Five facts to gather before selling,Homeowners,Eastern NC,Seller,Ask Mike,DRAFT,BIC/content,Facebook and blog,ask_mike_page,Public seller guidance,Educational only
+3,First-time buyer planning checklist,Buyers,Wilson NC,Buyer,Request a buying plan,DRAFT,BIC/content,Instagram carousel,instagram_profile,Public buyer guidance,No financing guarantee
+4,Rent-to-homeownership readiness questions,Renters,Wilson NC,Renter to buyer,Request a review,DRAFT,BIC/content,Facebook,rental_to_buyer,Public renter guidance,No eligibility promise
+5,How local market reviews differ from automated estimates,Homeowners,Wilson NC,Home value,Request a broker review,DRAFT,BIC/content,Short video,home_value_page,Home-value offer,No automated valuation claim
+6,What as-is discussion means and does not mean,Sellers,Eastern NC,Seller,Ask about options,DRAFT,BIC/legal,Blog and email,seller_options,Approved seller-options principles,Human review; no guaranteed offer
+7,Questions to ask before touring a home,Buyers,Eastern NC,Buyer,Request property matches,DRAFT,BIC/content,Instagram,buyer_page,Public buyer guidance,No inventory fabrication
+8,Wilson relocation planning basics,Relocating buyers,Wilson NC,Buyer,Ask Mike,DRAFT,BIC/content,YouTube outline,youtube_description,Public community sources,Avoid protected-class steering
+9,Preparing for a home-value conversation,Homeowners,Wilson NC,Home value,Request a review,DRAFT,BIC/content,GBP,home_value_page,Home-value intake,No appraisal language
+10,Open-house registration privacy explained,Open-house visitors,Eastern NC,Open house,Register for this property,DRAFT,BIC/privacy,Open-house card,open_house,Consent policy,Property-specific configuration required
+11,Three timelines sellers commonly consider,Sellers,Eastern NC,Seller,Discuss your timeline,DRAFT,BIC/content,Facebook,yard_sign,Seller intake fields,No response-time guarantee
+12,Buyer preapproval: questions for your lender,Buyers,Eastern NC,Buyer,Build a buying plan,DRAFT,BIC/content,Blog,buyer_page,Public buyer guidance,No lender advice or approval claim
+13,What happens after you submit Ask Magic Mike,Consumers,Eastern NC,General,Submit a question,DRAFT,BIC/content,Website FAQ,ask_mike_page,Current workflow,No public SLA promise
+14,Wilson seller FAQ: repairs before listing,Sellers,Wilson NC,Seller,Ask for a review,DRAFT,BIC/content,Short video,seller_options,Public seller guidance,No ROI guarantee
+15,Wilson buyer FAQ: offer preparation,Buyers,Wilson NC,Buyer,Request matches,DRAFT,BIC/content,Instagram,buyer_page,Public buyer guidance,No acceptance guarantee
+16,Property-tax records and home-value reviews,Homeowners,Eastern NC,Home value,Request a review,DRAFT,BIC/content,Blog,home_value_page,Public-record guidance,Records are one input not a valuation
+17,Planning a move within Eastern North Carolina,Movers,Eastern NC,General,Ask Mike,DRAFT,BIC/content,Email outline,email_signature,Public relocation guidance,Avoid neighborhood steering
+18,Choosing between timing and preparation,Sellers,Wilson NC,Seller,Discuss options,DRAFT,BIC/content,Facebook,seller_options,Seller intake fields,No pressure or guarantee
+19,How personalized property matches work,Buyers,Eastern NC,Buyer,Request matches,DRAFT,BIC/content,GBP,buyer_page,Buyer offer,Availability must be verified
+20,Home condition notes that help a broker review,Homeowners,Wilson NC,Home value,Request a review,DRAFT,BIC/content,Carousel,home_value_page,Home-value fields,Minimize sensitive details
+21,Crystal Coast relocation questions to research,Relocating buyers,Crystal Coast,Future opportunity,Join future content review,DRAFT — FUTURE,BIC/territory,Video outline,youtube_description,Public research,No current service-territory claim
+22,Crystal Coast seller-options research outline,Sellers,Crystal Coast,Future opportunity,None,DRAFT — FUTURE,BIC/territory,Internal outline,direct_mail,Public research,Not approved for publication
+23,How to organize a property question,Consumers,Eastern NC,General,Ask Mike,DRAFT,BIC/content,Instagram,instagram_profile,Ask flow,Do not include confidential data
+24,Rental-to-buyer budget conversation starter,Renters,Wilson NC,Renter to buyer,Request a plan,DRAFT,BIC/content,Facebook,rental_to_buyer,Buyer intake,No affordability guarantee
+25,What a listing-agent mapping changes,Listing visitors,Eastern NC,Buyer,Ask about a listing,DRAFT,BIC/content,Website FAQ,listing_page,Routing rules,Route to Mike absent approved mapping
+26,Home-selling document checklist,Sellers,Eastern NC,Seller,Ask Mike,DRAFT,BIC/content,Newsletter,email_signature,Public seller guidance,Do not request confidential docs by email
+27,Buyer geography and commute questions,Buyers,Eastern NC,Buyer,Request matches,DRAFT,BIC/fair housing,Blog,buyer_page,Public buyer guidance,Objective needs only; no steering
+28,How consent choices affect follow-up,Consumers,Eastern NC,General,Submit a request,DRAFT,BIC/privacy,Website FAQ,ask_mike_page,Consent spec,No legal conclusion
+29,One-month Ask Magic Mike learning review,Owners and operators,Eastern NC,Operations,Review measured results,DRAFT,Owner,Internal report,none,Operating scoreboard,No fabricated performance
+30,Next-month owned-traffic plan,Owners and operators,Eastern NC,Operations,Approve next queue,DRAFT,Owner/BIC,Internal presentation,none,Measured results,Paid media remains inactive
