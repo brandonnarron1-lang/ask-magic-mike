@@ -1,9 +1,19 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PasswordHelpForm } from "../../app/lead-center-password-help/PasswordHelpForm";
+import { SetPasswordForm } from "../../app/lead-center-set-password/SetPasswordForm";
+
+const searchParams = vi.hoisted(() => ({
+  current: new URLSearchParams(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => searchParams.current,
+}));
 
 afterEach(() => {
   cleanup();
+  searchParams.current = new URLSearchParams();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -41,5 +51,22 @@ describe("Lead Center password UI", () => {
     expect(screen.getByRole("button", { name: "Send secure link" })).toBeDisabled();
     expect(screen.getByText("Per-user access is not active yet.")).toBeVisible();
     await waitFor(() => expect(fetchMock).not.toHaveBeenCalled());
+  });
+
+  it("directs a consumed password link to normal sign-in without issuing another reset", () => {
+    searchParams.current = new URLSearchParams("error=INVALID_TOKEN");
+    const fetchMock = vi.fn<typeof fetch>();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<SetPasswordForm enabled />);
+
+    expect(screen.getByText("Password may already be set")).toBeVisible();
+    expect(screen.getByText(/Secure links work once/)).toBeVisible();
+    expect(screen.getByRole("link", { name: "Sign in with existing password" })).toHaveAttribute(
+      "href",
+      "/lead-center-login",
+    );
+    expect(screen.queryByLabelText("New password")).not.toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
