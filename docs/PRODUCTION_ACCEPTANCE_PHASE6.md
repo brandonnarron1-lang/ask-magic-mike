@@ -1,6 +1,6 @@
 # Production Acceptance - Phase 6
 
-Status: **ACCEPTED FOR SAFE PRODUCTION RUNTIME; CONSUMER AUTOMATION REMAINS GATED**
+Status: **PRODUCTION SCHEMA ACCEPTED; CONSUMER AUTOMATION REMAINS GATED**
 
 ## Passed locally
 
@@ -24,6 +24,10 @@ Status: **ACCEPTED FOR SAFE PRODUCTION RUNTIME; CONSUMER AUTOMATION REMAINS GATE
 - Lead-pipe health: pass.
 - NellySelly isolation: pass.
 - Post-release Production errors/warnings: none returned by Vercel for the observed 30-minute window.
+- PR 154 merged the owner-approved internal-test copy/visual packet and the
+  Preview-accepted provider-compatible migration source.
+- Current Production deployment: `dpl_875K5f4xrJdZD9WEQAftafP338uE`, merge
+  commit `83f726ce87e0e334a080464c03d8d3f04e23402d`.
 
 ## Brandon-only email acceptance
 
@@ -40,22 +44,26 @@ Status: **ACCEPTED FOR SAFE PRODUCTION RUNTIME; CONSUMER AUTOMATION REMAINS GATE
 - Consumer delivery requested: false.
 - No lead record was fabricated; the message was a synthetic, recipient-isolated rendering acceptance.
 
+## Production migration acceptance
+
+- Canonical Neon Production branch `br-round-base-auh6h2wd` received the exact
+  migration accepted on Preview, inside one `BEGIN` / `COMMIT` transaction.
+- Production acceptance: 7/7 tables present, RLS enabled on 7/7, zero grants to
+  `PUBLIC`/`anon`/`authenticated`, and zero rows across the new tables.
+- Lead and notification aggregates were unchanged: 6 suppressed tests, 0 live
+  prospects, 0 unsuppressed tests, 7 notifications, 0 pending, and 0 live
+  failures.
+- Full evidence: `docs/PHASE6_PRODUCTION_MIGRATION_ACCEPTANCE.md`.
+
 ## Deliberately held
 
-- Authenticated Neon evidence now proves Preview branch
-  `br-morning-paper-aun3378r` is distinct from Production branch
-  `br-round-base-auh6h2wd`. The additive Phase 6 migration passed on Preview:
-  seven tables present, RLS enabled on all seven, no `anon`/`authenticated`
-  grants, and zero rows. Production still has zero Phase 6 tables and was not
-  migrated. Runtime features that require those Production tables remain
-  disabled.
 - Consumer acknowledgment, nurture, sequence scheduler, auto-send, and carrier SMS remain disabled.
 - Mike remains outside QA and dormant.
 - Reply was not sent during QA; reply destination behavior remains a separate acceptance item.
 - Native mobile Gmail-app rendering was not available. The live responsive component passed 390px layout measurement with no horizontal overflow; the desktop Gmail inbox render was captured separately.
 
 Owner approval of the current copy and visual hierarchy was recorded for
-internal testing only; it does not release consumer delivery or Production
-migration.
+internal testing only; it does not release consumer delivery.
 
-No test result authorizes a live migration, consumer send, carrier SMS, Mike activation, or publication by itself.
+No test result or schema migration authorizes a consumer send, carrier SMS,
+Mike activation, or publication by itself.

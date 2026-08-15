@@ -21,7 +21,7 @@ Evidence timestamp: 2026-08-15 America/New_York
 | Public capture | Preserved | Existing `/api/leads` suite passes |
 | Messaging policy | Pass | permission, template, sequence/orchestration, SMS tests |
 | AI safety | Pass | injection, redaction, delimiter, fallback tests |
-| Production deployment | Ready | `dpl_BxCt1Yvq2T4hQqBUnnyPcqc4FNwq`, merge commit `509b54fa8def73d48169970868338ca66c28793f` |
+| Production deployment | Ready | `dpl_875K5f4xrJdZD9WEQAftafP338uE`, merge commit `83f726ce87e0e334a080464c03d8d3f04e23402d` |
 | Production smoke | Pass | 19 pass, 2 intentional skips, 0 fail |
 | Funnel verification | Pass | 15 pass, 0 fail |
 | Production monitor | Pass | 9 pass, 0 fail |
@@ -33,14 +33,14 @@ Evidence timestamp: 2026-08-15 America/New_York
 | Responsive message-preview layout | Pass | 1,152px desktop content canvas; 335px mobile column; no horizontal overflow |
 | Neon environment identity | Pass | Authenticated console: Preview `br-morning-paper-aun3378r`; Production `br-round-base-auh6h2wd` |
 | Phase 6 Preview migration | Pass | 7/7 tables, 7/7 RLS, 0 `anon`/`authenticated` grants, 0 new rows |
-| Production migration hold | Pass | Read-only Production precheck reports 0/7 Phase 6 tables |
+| Phase 6 Production migration | Pass | 7/7 tables, 7/7 RLS, 0 public/anonymous grants, 0 new rows; lead/notification/session aggregates unchanged |
 | Post-release errors/warnings | None observed | No Production error or warning log entries returned for the observed 30-minute window |
 
 ## Correctly non-passing or not yet executed
 
-- Authenticated Preview runtime E2E remains to be rerun against the merged
-  migration commit; database identity and schema acceptance now pass.
-- Phase 6 Neon migration: not applied to Production.
+- Authenticated Preview runtime E2E remains a separate regression check;
+  Production database identity, schema acceptance, and public runtime health
+  now pass.
 - Reply action: intentionally not sent; destination behavior remains a separate acceptance item.
 - Native mobile Gmail-app rendering: unavailable; responsive component viewport QA passed, while actual Gmail desktop rendering and inbox receipt were captured.
 - Carrier SMS: intentionally disabled; mock preview only.
@@ -53,7 +53,8 @@ Evidence timestamp: 2026-08-15 America/New_York
 The initial Preview transaction failed safely at an unconditional revoke of the
 nonexistent Neon `anon` role. It was explicitly rolled back, the migration was
 made provider-compatible, and the corrected transaction then passed. No partial
-DDL or data mutation survived the failed attempt.
+DDL or data mutation survived the failed attempt. The corrected, checksum-identical
+migration later passed on Production in one transaction.
 
 Intentional skips are not counted as passes.
 
@@ -65,3 +66,12 @@ Live prospects: 0 at snapshot
 Suppressed QA: 6 at snapshot
 Mike account: dormant
 Brandon administrator: active
+
+## Production post-migration invariant snapshot
+
+Migration acceptance: 7/7 tables, 7/7 RLS, 0 public/anonymous grants, 0 new rows
+Live prospects: 0
+Suppressed QA: 6
+Unsuppressed QA: 0
+Notifications: 7 total, 0 pending, 2 historical suppressed-QA failures, 0 live failures
+Active Lead Center sessions: 3

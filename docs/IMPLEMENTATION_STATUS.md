@@ -1,6 +1,22 @@
 # Implementation Status
 
-Updated 2026-08-14.
+Updated 2026-08-15.
+
+## Phase 6 Production schema acceptance — 2026-08-15
+
+- Applied `20260815193000_phase6_ai_messaging.sql` to canonical Neon Production
+  branch `br-round-base-auh6h2wd` in one transaction after isolated Preview
+  acceptance and PR 154 merge.
+- Verified 7/7 new tables, 7/7 RLS, no grants to
+  `PUBLIC`/`anon`/`authenticated`, and zero rows across the new structures.
+- Pre/post aggregates matched: 6 suppressed QA leads, 0 live prospects, 0
+  unsuppressed tests, 7 notifications, 0 pending notifications, and 0 live
+  notification failures. No existing production row changed.
+- Post-migration public smoke, 15-check funnel, 9-check monitor, 9-route
+  lead-pipe health, and NellySelly isolation all pass; no Production Vercel
+  errors or warnings were returned for the observed 30-minute window.
+- Consumer acknowledgment, nurture, auto-send, carrier SMS, held WordPress
+  forms, and Mike activation remain disabled and require their own gates.
 
 ## Full-access continuation — 2026-08-14
 

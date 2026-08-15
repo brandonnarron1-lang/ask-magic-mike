@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-08-15 — Phase 6 Production schema acceptance
+
+- Applied the Preview-accepted Phase 6 communication-permission, sequence,
+  provider-event, AI-intelligence, and AI-usage migration to canonical Neon
+  Production in one transaction.
+- Verified seven tables, RLS on all seven, zero public/anonymous grants, zero
+  new rows, and unchanged lead/notification/session aggregates.
+- Re-ran public smoke, funnel, monitoring, lead-pipe, and system-isolation
+  checks after migration; all passed and the observed Production log window
+  contained no errors or warnings.
+- Kept consumer email, nurture, auto-send, carrier SMS, Mike activation, and
+  held Gravity Forms outside this release.
+
 ## 2026-08-14 — Free-first reconciliation and release hardening
 
 - Completed isolated Preview RBAC acceptance, removed the temporary bootstrap
