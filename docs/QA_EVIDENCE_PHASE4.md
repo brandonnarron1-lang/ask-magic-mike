@@ -20,6 +20,7 @@ Date: 2026-08-15 America/New_York. Branch:
 | Production funnel | PASS | 15/15 checks |
 | System isolation | PASS | Canonical project verified; no deployable NellySelly identifiers |
 | Social preview | PARTIAL | 40/42; Facebook 403 on two Our Town paths |
+| First-live production cron | PASS | Authenticated Production invocation HTTP 200; anonymous invocation HTTP 401 |
 
 The local shell uses Node 26.5.1 while the repository requires Node 24.x. This
 produces an engine warning but no test or build failure; GitHub CI runs the
