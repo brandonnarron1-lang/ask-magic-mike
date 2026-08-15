@@ -2,6 +2,14 @@
 
 Status: **BIC/legal/provider review required before any consumer activation**
 
+## Owner design acceptance — 2026-08-15
+
+Brandon Narron approved the current Message Review Studio copy and visual
+hierarchy for internal testing and release preparation. This is a design and
+operator-copy acceptance only. Consumer delivery, carrier SMS, consent/legal/BIC
+review, provider registration, cadence, Mike activation, and Production
+migration remain pending. See `PHASE6_OWNER_COPY_VISUAL_APPROVAL.md`.
+
 ## Library submitted for review
 
 The source-of-truth registry is `src/lib/messaging/template-registry.ts`: 33 templates covering general inquiry, home value, seller, buyer, seller options, rental, short-term rental, property alerts, out-of-area, coastal review, internal alert, push, and operator call opener. The sequence source is `src/lib/messaging/sequence-engine.ts`: 8 sequences, every step approval-required.
@@ -37,3 +45,5 @@ The source-of-truth registry is `src/lib/messaging/template-registry.ts`: 33 tem
 | Property alerts | Pending | Pending | Pending | Pending | Pending | Pending | Disabled |
 | Out-of-area/coastal | Pending | N/A | Pending | Pending | Pending | Pending | Disabled |
 
+The pending entries above are intentionally unchanged: owner visual/copy
+acceptance is not a substitute for purpose-specific consumer-message approval.

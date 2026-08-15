@@ -31,7 +31,7 @@ Phase 6 extends that spine. It does not add a second lead store, notification qu
 
 ## Data additions
 
-Migration `20260815193000_phase6_ai_messaging.sql` is additive. It introduces permission evidence, communication decisions, sequence instances/steps, communication events, AI outputs, and AI usage records. All new tables have RLS enabled and revoke `anon` and `authenticated` access. Applying this migration to Production remains a separate release action.
+Migration `20260815193000_phase6_ai_messaging.sql` is additive. It introduces permission evidence, communication decisions, sequence instances/steps, communication events, AI outputs, and AI usage records. All new tables have RLS enabled, revoke `PUBLIC`, and conditionally revoke `anon` and `authenticated` when those provider-specific roles exist. The migration passed on isolated Neon Preview; applying it to Production remains a separate release action.
 
 ## Isolation
 
