@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { admin } from "better-auth/plugins";
 import { createAccessControl } from "better-auth/plugins/access";
 import { Pool } from "pg";
+import { sendLeadCenterPasswordResetEmail } from "./rbac-password-reset-email";
 
 const statements = {
   user: [
@@ -46,7 +47,11 @@ export const leadCenterAuth = betterAuth({
     disableSignUp: true,
     minPasswordLength: 14,
     maxPasswordLength: 128,
+    resetPasswordTokenExpiresIn: 60 * 60,
     revokeSessionsOnPasswordReset: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendLeadCenterPasswordResetEmail({ email: user.email, name: user.name, url });
+    },
   },
   user: {
     modelName: "lead_center_users",
@@ -71,7 +76,8 @@ export const leadCenterAuth = betterAuth({
     max: 30,
     customRules: {
       "/sign-in/email": { window: 15 * 60, max: 5 },
-      "/forget-password": { window: 60 * 60, max: 3 },
+      "/request-password-reset": { window: 60 * 60, max: 3 },
+      "/reset-password": { window: 60 * 60, max: 5 },
     },
   },
   advanced: {

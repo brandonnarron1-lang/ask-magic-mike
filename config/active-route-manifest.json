@@ -43,6 +43,8 @@
     "/home-value",
     "/integrations/ourtownproperties",
     "/lead-center-login",
+    "/lead-center-password-help",
+    "/lead-center-set-password",
     "/manifest.webmanifest",
     "/open-house/[propertyOrId]",
     "/phone-alerts/setup",
@@ -74,7 +76,7 @@
       "/admin/action-queue", "/admin/notifications", "/admin/notifications/phone", "/admin/reporting"
     ],
     "auth": [
-      "/lead-center-login", "/api/lead-center-auth/[...all]"
+      "/lead-center-login", "/lead-center-password-help", "/lead-center-set-password", "/api/lead-center-auth/[...all]"
     ],
     "api": [
       "/admin/api/push/test",

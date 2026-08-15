@@ -2,6 +2,11 @@
 
 ## 2026-08-14 — Free-first reconciliation and release hardening
 
+- Completed isolated Preview RBAC acceptance, removed the temporary bootstrap
+  surface, aligned the Better Auth server/client path, and added a gated,
+  exact-origin, one-time password activation/reset flow using the existing
+  authenticated Resend transport.
+
 - Reconfirmed the existing Vercel + Neon deployment as canonical; no parallel
   repository, database, notification engine, or visual system was introduced.
 - Updated health/startup/launch checks for the active Neon runtime and active

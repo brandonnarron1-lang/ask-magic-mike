@@ -43,12 +43,12 @@ legal opinion.
 | Check | Result |
 | --- | --- |
 | Release safety | 14/14 pass |
-| Unit/integration tests | 153 files, 2,558 tests pass |
+| Unit/integration tests | 155 files, 2,565 tests pass |
 | Chromium E2E | 13/13 pass |
 | Strict TypeScript | pass |
 | ESLint | pass |
 | Production build | pass, 41 static pages |
-| Route manifest | pass, 58 active routes |
+| Route manifest | pass, 60 active routes |
 | Production dependency audit | zero known vulnerabilities |
 | Gitleaks | 326 commits, no leaks found |
 | Public smoke | 19 pass, 2 protected/write skips, 0 fail |
@@ -65,14 +65,11 @@ passed. CI remains the authoritative Node 24 check after the final branch push.
 
 ## Unresolved controlled risks
 
-1. Preview interactive RBAC acceptance requires a branch-scoped
-   `BETTER_AUTH_SECRET`, `LEAD_CENTER_RBAC_ENABLED=true`, fictional users, and
-   the negative permission/revocation matrix.
-2. Production RBAC requires the owner-approved roster and a verified first
+1. Production RBAC requires the owner-approved roster and a verified first
    administrator before migration/cutover.
-3. The device-label migration must precede the code deployment. Reversing that
+2. The device-label migration must precede the code deployment. Reversing that
    order can make Push subscription routes fail on the missing column.
-4. The Our Town Facebook-user-agent block remains upstream; no broad security
+3. The Our Town Facebook-user-agent block remains upstream; no broad security
    reduction is acceptable.
-5. Forms 1, 2, 5, 6, and 7 lack required approved consent/routing evidence and
+4. Forms 1, 2, 5, 6, and 7 lack required approved consent/routing evidence and
    remain outside the canonical bridge. Form 4 remains recruiting-only.

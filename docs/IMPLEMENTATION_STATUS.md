@@ -2,6 +2,29 @@
 
 Updated 2026-08-14.
 
+## Full-access continuation — 2026-08-14
+
+- Isolated Preview RBAC acceptance is complete on Vercel deployment
+  `dpl_2Kpchet8VAee8oqoWi2PovznC8ct` and Neon branch
+  `br-morning-paper-aun3378r`.
+- A real path mismatch between the Better Auth server and browser client was
+  found by live acceptance and fixed at commit `9c6ed47`.
+- Administrator, primary-owner, approved-agent, analyst, disabled-user,
+  object-level assignment isolation, logout/revocation, and Production-denial
+  probes passed. Outbound notifications remained disabled.
+- Cleanup verified five banned `example.test` users and zero active Preview
+  sessions. The one-use bootstrap token and temporary bootstrap code were
+  removed.
+- Production remains on shared Basic Auth with no RBAC schema/flag change. The
+  remaining cutover prerequisite is a verified administrator login identity and
+  final roster approval.
+- Added a secure per-user account activation/reset path at
+  `/lead-center-password-help` and `/lead-center-set-password`. It uses the
+  existing authenticated Resend adapter behind a dedicated server-only gate,
+  validates the exact auth origin, issues one-use 60-minute links, avoids
+  account enumeration and BCC, and revokes existing sessions after reset. No
+  activation message was sent during implementation.
+
 ## Phase 3 staged operations release - 2026-08-14
 
 - PR 143 closes active Production reporting and Lead Center mutations to Neon
@@ -18,8 +41,8 @@ Updated 2026-08-14.
 - Production read-only evidence remains healthy: 0 live leads, 6 suppressed
   tests, 0 unsuppressed tests, 0 queue/failures, public funnel 15/15, monitor
   9/9, and no error-level Vercel logs in the inspected hour.
-- Final staged validation passes 153 test files / 2,558 tests, strict typecheck,
-  lint, 41-page build, 58-route manifest, 14/14 safety checks, 13/13 Chromium
+- Final staged validation passes 155 test files / 2,565 tests, strict typecheck,
+  lint, 41-page build, 60-route manifest, 14/14 safety checks, 13/13 Chromium
   tests, dependency audit, 326-commit secret scan, and isolation.
 - Seven redacted operations PDFs are complete. Compliant refreshed `.pptx` and
   `.xlsx` artifacts remain blocked because the required bundled artifact

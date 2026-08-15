@@ -34,10 +34,10 @@ pnpm run lint
 PASS
 
 pnpm run test
-PASS — 151 files, 2,553 tests
+PASS — 155 files, 2,565 tests
 
 pnpm run routes:verify
-PASS — production build compiled; 58 active routes; 15 acknowledged duplicates
+PASS — production build compiled; 60 active routes; 15 acknowledged duplicates
 
 pnpm run amm:verify:isolation
 PASS
@@ -88,11 +88,22 @@ The focused suite includes a Production boundary regression that sets legacy Sup
 - `hub.ourtownproperties.com` remains absent from DNS and Vercel. Exact-host
   redirect behavior is implemented and unit-tested but not deployed.
 
+## RBAC Preview acceptance completion
+
+- Branch-scoped Better Auth configuration was added without changing
+  Production; all six Preview tables reported ready.
+- Administrator, primary-owner, assigned-agent, analyst, disabled-user,
+  object-level assignment isolation, logout, and stale-session denial passed.
+- Cleanup left five banned fictional users and zero active sessions. The
+  one-use bootstrap token and source files were removed.
+- The live acceptance run found and corrected the server/client auth base-path
+  mismatch. Secure staff password activation/reset is now staged with an exact
+  origin, a dedicated send gate, 60-minute one-use tokens, no BCC, and session
+  revocation.
+
 ## Known limitations / pending proof
 
-- Preview-only `BETTER_AUTH_SECRET` and the branch RBAC feature flag are not yet configured.
-- Fictional user/session and negative authorization tests require the Preview deployment.
-- Production RBAC remains disabled pending Preview acceptance and owner-approved roster.
+- Production RBAC remains disabled pending the verified Production roster.
 - No Gravity Form beyond Form 3 was activated.
 - No external email, SMS, Push, social post, DNS change, Vercel domain attachment,
   Production database migration, or Production deployment occurred in this QA stage.
@@ -104,8 +115,8 @@ changes were complete:
 
 ```text
 pnpm run release:gate
-PASS - isolation; 14/14 safety; 153 test files / 2,558 tests; strict
-TypeScript; ESLint; 41-page Production build; 58 active routes
+PASS - isolation; 14/14 safety; 155 test files / 2,565 tests; strict
+TypeScript; ESLint; 41-page Production build; 60 active routes
 
 pnpm run test:e2e
 PASS - 13/13 Chromium tests

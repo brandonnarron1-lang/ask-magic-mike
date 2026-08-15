@@ -61,6 +61,10 @@ declare namespace NodeJS {
     PREVIEW_SUPABASE_PROJECT_REF?: string;
     ALLOW_PREVIEW_DB_MUTATION?: string;
     PREVIEW_DATA_MODE?: string;
+    LEAD_CENTER_RBAC_ENABLED?: string;
+    BETTER_AUTH_URL?: string;
+    BETTER_AUTH_SECRET?: string;
+    RBAC_PASSWORD_RESET_EMAIL_ENABLED?: string;
     SLA_ACCEPT_MS?: string;
     SLA_CONTACT_MS?: string;
   }

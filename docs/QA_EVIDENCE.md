@@ -5,6 +5,27 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Preview RBAC and secure activation acceptance — 2026-08-14
+
+- Isolated Preview role acceptance passed for administrator, primary lead
+  owner, assigned agent, read-only analyst, disabled user, object-level lead
+  isolation, logout, and stale-session denial on Vercel deployment
+  `dpl_2Kpchet8VAee8oqoWi2PovznC8ct`.
+- The browser/server auth-path mismatch found during live acceptance was fixed;
+  all Better Auth surfaces now use `/api/lead-center-auth`.
+- Five fictional `example.test` acceptance users are banned and all sessions
+  revoked. Neon verification returned five QA users, five banned users, and
+  zero active sessions. All fixtures are test-marked and suppressed.
+- The one-use Preview bootstrap token and all bootstrap source files were
+  removed; the Production bootstrap path remained HTTP 404 throughout.
+- Secure password activation/reset now uses an independently gated Resend path,
+  exact-origin link validation, one-use 60-minute tokens, non-enumerating UI,
+  no BCC, opaque idempotency, and post-reset session revocation.
+- Final release gate: 155 test files / 2,565 tests pass; strict typecheck,
+  ESLint, 41-page Production build, 60-route manifest, 14/14 safety checks,
+  isolation, dependency audit, and whitespace checks pass. No activation email
+  or other external notification was sent.
+
 ## WordPress Form 3 production acceptance — 2026-08-14
 
 - Bridge 1.1.0 is active with Form 3 as the only allowlisted form.
