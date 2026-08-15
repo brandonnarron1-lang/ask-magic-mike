@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { previewRbacBootstrapAvailable } from "../../app/api/internal/preview/rbac-bootstrap/route";
+import { previewRbacBootstrapAvailable } from "../../src/lib/admin/rbac-preview-bootstrap";
 
 const ready = {
   VERCEL_ENV: "preview",

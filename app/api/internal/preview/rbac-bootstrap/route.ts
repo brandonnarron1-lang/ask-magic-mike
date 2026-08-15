@@ -4,6 +4,7 @@ import { Pool, type PoolClient } from "pg";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { secretsMatch } from "../../../../../src/lib/admin/auth";
+import { previewRbacBootstrapAvailable } from "../../../../../src/lib/admin/rbac-preview-bootstrap";
 import { assertDatabaseMutationAllowed } from "../../../../../src/lib/preview-security";
 
 export const dynamic = "force-dynamic";
@@ -39,20 +40,6 @@ const bodySchema = z.object({
     }
   }),
 });
-
-export function previewRbacBootstrapAvailable(
-  env: Record<string, string | undefined> = process.env,
-) {
-  return (
-    env.VERCEL_ENV === "preview" &&
-    env.DATABASE_ENV === "preview" &&
-    env.PREVIEW_DATA_MODE === "enabled" &&
-    env.ALLOW_PREVIEW_DB_MUTATION === "true" &&
-    env.LEAD_CENTER_RBAC_ENABLED === "true" &&
-    Boolean(env.DATABASE_URL) &&
-    Boolean(env.RBAC_PREVIEW_BOOTSTRAP_TOKEN)
-  );
-}
 
 async function upsertAcceptanceUser(
   client: PoolClient,
