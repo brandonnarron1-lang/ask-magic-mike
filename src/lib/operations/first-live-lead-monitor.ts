@@ -15,6 +15,11 @@ type MonitorRow = {
   email_status: string | null;
 };
 
+type QueueInvariantRow = {
+  unsuppressed_qa: number | string;
+  qa_without_explicit_evidence: number | string;
+};
+
 export type FirstLiveLeadMonitorReport = {
   scanned: number;
   detected: number;
@@ -26,6 +31,10 @@ export type FirstLiveLeadMonitorReport = {
     missingInternalEmail: number;
     deliveryFailure: number;
     duplicateSuspicion: number;
+  };
+  queue: {
+    unsuppressedQa: number;
+    qaWithoutExplicitEvidence: number;
   };
 };
 
@@ -70,6 +79,7 @@ export class FirstLiveLeadMonitor {
       detected: 0,
       escalated: 0,
       states: { invalidConsent: 0, missingSource: 0, missingAssignment: 0, missingInternalEmail: 0, deliveryFailure: 0, duplicateSuspicion: 0 },
+      queue: { unsuppressedQa: 0, qaWithoutExplicitEvidence: 0 },
     };
 
     for (const row of rows) {
@@ -124,6 +134,39 @@ export class FirstLiveLeadMonitor {
         report.escalated += inserted.length;
       }
     }
+
+    const invariantRows = await this.sql.query(
+      `SELECT
+         COUNT(*) FILTER (
+           WHERE COALESCE(l.is_test, false) = true
+             AND COALESCE(l.communication_suppressed, false) = false
+         )::int AS unsuppressed_qa,
+         COUNT(*) FILTER (
+           WHERE COALESCE(l.is_test, false) = true
+             AND NOT (
+               EXISTS (
+                 SELECT 1
+                   FROM public.source_attribution s
+                  WHERE s.lead_id::text = l.id::text
+                    AND (
+                      LOWER(COALESCE(s.utm_source, '')) LIKE 'internal_qa%'
+                      OR LOWER(COALESCE(s.utm_medium, '')) = 'qa'
+                    )
+               )
+               OR EXISTS (
+                 SELECT 1
+                   FROM public.audit_logs a
+                  WHERE a.resource_type = 'lead'
+                    AND a.resource_id::text = l.id::text
+                    AND a.action IN ('lead.qa_suppressed', 'lead.test_created')
+               )
+             )
+         )::int AS qa_without_explicit_evidence
+       FROM public.leads l`,
+    ) as QueueInvariantRow[];
+    const invariant = invariantRows[0];
+    report.queue.unsuppressedQa = Number(invariant?.unsuppressed_qa ?? 0);
+    report.queue.qaWithoutExplicitEvidence = Number(invariant?.qa_without_explicit_evidence ?? 0);
 
     return report;
   }

@@ -130,6 +130,26 @@ describe("normalizeLeadPayload — canonical shape", () => {
   });
 });
 
+describe("normalizeLeadPayload — explicit QA evidence", () => {
+  it("does not classify ordinary consumer language as test traffic", () => {
+    const p = normalizeLeadPayload({
+      name: "Testa Johnson",
+      question: "I want to test the market before deciding whether to sell.",
+      is_test: false,
+    });
+
+    expect(p.is_test).toBe(false);
+  });
+
+  it("recognizes the required internal QA and do-not-contact marker pair", () => {
+    const p = normalizeLeadPayload({
+      name: "INTERNAL QA — DO NOT CONTACT",
+    });
+
+    expect(p.is_test).toBe(true);
+  });
+});
+
 // ─── cleanAttribution ─────────────────────────────────────────────────────────
 
 describe("cleanAttribution — all 15 fields", () => {

@@ -64,6 +64,7 @@ describe("normalizeAdminLeadRow", () => {
     expect(lead.status).toBe("new");
     expect(lead.created_at).toBeNull();
     expect(lead.is_test).toBe(false);
+    expect(lead.communication_suppressed).toBe(false);
     expect(lead.attribution_summary).toBe("No attribution captured");
     expect(Object.values(lead.attribution)).not.toContain(undefined);
     expect(Object.values(lead.attribution).every((value) => value === null)).toBe(true);
@@ -97,6 +98,23 @@ describe("normalizeAdminLeadRow", () => {
       "live",
       "qa",
     ]);
+  });
+
+  it("keeps suppressed non-test leads out of every operational queue", () => {
+    const live = normalizeAdminLeadRow({ id: "live", status: "new" });
+    const suppressed = normalizeAdminLeadRow({
+      id: "suppressed",
+      status: "new",
+      communication_suppressed: true,
+      email: "suppressed@example.com",
+    });
+
+    expect(suppressed.is_test).toBe(false);
+    expect(suppressed.communication_suppressed).toBe(true);
+    expect(suppressed.routing_ready).toBe(false);
+    expect(suppressed.stalled_signals).toEqual([]);
+    expect(filterAdminLeadInbox([live, suppressed], "active").map((lead) => lead.id)).toEqual(["live"]);
+    expect(filterAdminLeadInbox([live, suppressed], "closed").map((lead) => lead.id)).toEqual(["suppressed"]);
   });
 
   it("surfaces widget and legacy embed attribution fields for admin review", () => {

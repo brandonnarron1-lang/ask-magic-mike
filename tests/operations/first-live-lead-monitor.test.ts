@@ -14,7 +14,8 @@ describe("FirstLiveLeadMonitor", () => {
         duplicate_suspected: false,
         email_status: "sent",
       }])
-      .mockResolvedValueOnce([{ id: "audit-1" }]);
+      .mockResolvedValueOnce([{ id: "audit-1" }])
+      .mockResolvedValueOnce([{ unsuppressed_qa: 0, qa_without_explicit_evidence: 0 }]);
 
     const report = await new FirstLiveLeadMonitor({ query }).run();
     expect(report).toEqual({
@@ -22,8 +23,9 @@ describe("FirstLiveLeadMonitor", () => {
       detected: 1,
       escalated: 0,
       states: { invalidConsent: 0, missingSource: 0, missingAssignment: 0, missingInternalEmail: 0, deliveryFailure: 0, duplicateSuspicion: 0 },
+      queue: { unsuppressedQa: 0, qaWithoutExplicitEvidence: 0 },
     });
-    expect(query).toHaveBeenCalledTimes(2);
+    expect(query).toHaveBeenCalledTimes(3);
     const serializedCalls = JSON.stringify(query.mock.calls);
     expect(serializedCalls).not.toContain("first_name");
     expect(serializedCalls).not.toContain("last_name");
@@ -43,12 +45,26 @@ describe("FirstLiveLeadMonitor", () => {
         duplicate_suspected: true,
         email_status: "permanently_failed",
       }])
-      .mockResolvedValueOnce([{ id: "audit-2" }]);
+      .mockResolvedValueOnce([{ id: "audit-2" }])
+      .mockResolvedValueOnce([{ unsuppressed_qa: 0, qa_without_explicit_evidence: 0 }]);
 
     const report = await new FirstLiveLeadMonitor({ query }).run();
     expect(report.detected).toBe(0);
     expect(report.escalated).toBe(1);
     expect(report.states).toEqual({ invalidConsent: 1, missingSource: 0, missingAssignment: 1, missingInternalEmail: 0, deliveryFailure: 1, duplicateSuspicion: 1 });
-    expect(query).toHaveBeenCalledTimes(2);
+    expect(report.queue).toEqual({ unsuppressedQa: 0, qaWithoutExplicitEvidence: 0 });
+    expect(query).toHaveBeenCalledTimes(3);
+  });
+
+  it("surfaces unsuppressed or weakly evidenced QA classifications without reading PII", async () => {
+    const query = vi.fn()
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ unsuppressed_qa: "1", qa_without_explicit_evidence: "2" }]);
+
+    const report = await new FirstLiveLeadMonitor({ query }).run();
+
+    expect(report.scanned).toBe(0);
+    expect(report.queue).toEqual({ unsuppressedQa: 1, qaWithoutExplicitEvidence: 2 });
+    expect(JSON.stringify(query.mock.calls)).not.toContain("phone_normalized");
   });
 });

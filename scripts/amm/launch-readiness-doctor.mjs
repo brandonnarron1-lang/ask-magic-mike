@@ -146,7 +146,13 @@ export function findMlsMarkers(files) {
   const hits = [];
   for (const file of files) {
     if (MLS_ALLOWLIST.some((a) => file.includes(a))) continue;
-    const content = readFileSafe(file);
+    const content = readFileSafe(file)
+      .split("\n")
+      .filter((line) => {
+        const trimmed = line.trimStart();
+        return !trimmed.startsWith("//") && !trimmed.startsWith("*") && !trimmed.startsWith("/*");
+      })
+      .join("\n");
     if (MLS_PATTERN.test(content)) hits.push(file);
   }
   return hits;

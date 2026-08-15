@@ -194,6 +194,7 @@ function LeadCard({ lead }: { lead: AdminLeadView }) {
         </div>
         <div className="flex flex-wrap gap-2">
           {lead.is_test ? <Badge>Test</Badge> : null}
+          {!lead.is_test && lead.communication_suppressed ? <Badge>Suppressed</Badge> : null}
           <Badge>{lead.status}</Badge>
           {lead.stalled_signals.length ? <Badge>Stalled</Badge> : null}
           {lead.routing_ready ? <Badge>Routing ready</Badge> : null}

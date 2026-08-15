@@ -36,8 +36,12 @@ export function filterAdminLeadInbox(leads: AdminLeadView[], filterKey: string) 
 
   const statuses = filter.statuses as readonly string[];
   if (filter.key === "closed") {
-    return leads.filter((lead) => lead.is_test || statuses.includes(lead.status));
+    return leads.filter(
+      (lead) => lead.is_test || lead.communication_suppressed || statuses.includes(lead.status),
+    );
   }
 
-  return leads.filter((lead) => !lead.is_test && statuses.includes(lead.status));
+  return leads.filter(
+    (lead) => !lead.is_test && !lead.communication_suppressed && statuses.includes(lead.status),
+  );
 }
