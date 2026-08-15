@@ -7,6 +7,7 @@ import { scoreLead } from "../../lib/leadScoring";
 import { routeLead } from "../../lib/leadRouting";
 import { enqueueLeadNotifications } from "../../lib/leadAlertService";
 import { recordServerAnalyticsEvent } from "../../lib/serverAnalytics";
+import { createFirstLiveLeadMonitor } from "@/lib/operations/first-live-lead-monitor";
 import { isApprovedPublicOrigin } from "../../lib/publicOrigin";
 import { checkRateLimit, LIMITS, rateLimitKey } from "../../../src/lib/security/rate-limit";
 import { createDefaultPersistence } from "../../lib/persistence/defaultPersistence";
@@ -647,6 +648,16 @@ export async function POST(req: Request) {
         leadId: persistedLead.lead_id,
         properties: { notification_type: "lead_alert", status: internalStatus, is_test: payload.is_test === true },
       });
+    }
+    if (!payload.is_test) {
+      const liveMonitor = createFirstLiveLeadMonitor();
+      if (liveMonitor) {
+        try {
+          await liveMonitor.run({ leadId: persistedLead.lead_id, lookbackHours: 1 });
+        } catch {
+          console.error("First-live lead monitor failed", { error: "first_live_monitor_failed" });
+        }
+      }
     }
   }
   return NextResponse.json({

@@ -17,13 +17,14 @@ Verified 2026-08-14 without sending a push notification.
   protected admin boundary.
 
 The enrollment UI now captures a recognizable, non-secret device label and
-returns that label instead of a raw Push endpoint. The additive schema migration
-was applied and verified on Neon Preview only; Production remains unchanged.
+returns that label instead of a raw Push endpoint. Production readiness and the
+canonical Production table confirm the device-label subscription contract is
+available.
 Duplicate endpoints remain idempotent, revocation stays server-side, expired
 subscriptions are disabled, tests are copy-role-only, and deep links return to
 the protected Lead Center.
 
-Physical browser permission and the reviewed Production device-label
-migration/deploy are the remaining enrollment dependencies. No permission prompt
-was bypassed and no test notification was sent in this phase. A QR code for the
+Physical browser permission and operator sign-in are the remaining enrollment
+dependencies. No permission prompt was bypassed and no test notification was
+sent in this phase. A QR code for the
 protected enrollment route is at `docs/assets/web-push-enrollment-qr.png`.

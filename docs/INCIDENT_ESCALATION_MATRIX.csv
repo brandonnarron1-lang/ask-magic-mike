@@ -1,0 +1,13 @@
+Severity,Condition,Detection,Immediate action,Owner,Target,Escalation,Evidence
+Critical,Readiness or Neon failure,Health/production monitor,Protect stored records and stop synthetic mutation,System owner,Immediate,Owner plus hosting/Vercel as applicable,Health correlation ID
+Critical,Genuine lead persistence loss,Lead API and reconciliation,Preserve request correlation and investigate without resubmitting,System owner,Immediate,Owner and database operator,Safe logs and database audit
+Critical,Authentication bypass,RBAC tests or access review,Revoke affected sessions and restrict route,System owner,Immediate,Owner/security reviewer,Auth audit without tokens
+High,Unassigned live lead,First-live monitor and SLA sweep,Assign to Mike or admin review with reason,Administrator,Immediate,Owner escalation,Audit event
+High,Assignment target breach,SLA sweep,Notify authorized owner and record breach,Administrator,2 minutes internal target,Owner escalation,Compliance flag
+High,First-contact target breach,SLA sweep,Confirm consent and request human action,Assigned owner,5 minutes for urgent permitted contact,Administrator,Compliance flag
+High,Failed internal email,Outbox and first-live monitor,Keep lead stored; retry bounded; inspect provider status,System owner,Immediate,Owner through available secure channel,Outbox ID and provider state
+High,Notification queue failure,Outbox reconciliation,Stop duplicate sends and restore bounded processing,System owner,Immediate,Owner escalation,Queue count and correlation ID
+High,Unsuppressed QA record,Database audit,Suppress QA communication and exclude from KPIs,System owner,Immediate,Administrator,Audit event
+Warning,Missing Web Push device,Daily opening check,Complete physical enrollment when owner available,Device owner,Next available session,Administrator,Device register
+Warning,Meta crawler 403,Social preview monitor,Use AskMagicMike.com link and request narrow host exception,Hosting operator,Planned maintenance,Owner if promotional launch depends on it,42-check matrix
+Warning,Delayed monitor,GitHub/Vercel schedule review,Restore schedule and run point-in-time checks,System owner,Same day,Owner if missed twice,Workflow and cron evidence

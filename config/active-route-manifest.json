@@ -17,6 +17,7 @@
     "/admin/reporting",
     "/api/admin/health",
     "/api/admin/notifications/retry",
+    "/api/admin/operations/first-live",
     "/api/admin/sla/sweep",
     "/api/appointments/request",
     "/api/chat",
@@ -82,7 +83,7 @@
       "/admin/api/push/test",
       "/admin/api/phone-alerts/invite",
       "/api/leads", "/api/listings/search", "/api/listings/[id]", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/phone-alerts/invite", "/api/phone-alerts/subscription", "/api/phone-alerts/test", "/api/webhooks/sms/status", "/api/widget/events",
-      "/api/admin/health", "/api/admin/sla/sweep"
+      "/api/admin/health", "/api/admin/operations/first-live", "/api/admin/sla/sweep"
     ]
   },
   "classifications": {
@@ -94,6 +95,7 @@
     "/api/health/live": "inactive-src-only",
     "/api/health/ready": "active-documented-readiness-probe",
     "/api/admin/health": "active-documented-health-probe",
+    "/api/admin/operations/first-live": "active-required-by-vercel-cron",
     "/api/admin/sla/sweep": "active-required-by-vercel-cron"
   },
   "acknowledgedRootSrcDuplicates": [

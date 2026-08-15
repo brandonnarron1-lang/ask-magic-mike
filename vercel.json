@@ -3,6 +3,10 @@
     {
       "path": "/api/admin/sla/sweep",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/admin/operations/first-live",
+      "schedule": "*/2 * * * *"
     }
   ]
 }
