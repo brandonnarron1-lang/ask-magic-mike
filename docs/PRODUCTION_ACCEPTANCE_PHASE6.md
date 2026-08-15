@@ -12,9 +12,9 @@ Status: **NOT YET ACCEPTED FOR PRODUCTION**
 
 ## Required before acceptance
 
-1. Commit and push the Phase 6 branch; open a reviewable PR.
-2. Deploy Preview with Preview-scoped Neon branch and feature flags.
-3. Apply the additive migration to Preview only; verify tables and grants.
+1. Review PR 152 and the ready Preview deployment.
+2. Prove that Preview `DATABASE_URL` targets a non-Production Neon branch; the sensitive value is configured but not exportable to the CLI.
+3. Apply the additive migration to that proven Preview branch only; verify tables and grants.
 4. Run authenticated Lead Center copilot and message-preview QA with synthetic records only.
 5. Send the specifically authorized Brandon-only QA email and verify provider acceptance, inbox receipt, rendering, links, reply path, no Mike delivery, and no consumer delivery.
 6. Complete Preview smoke/funnel/monitoring, dependency audit, secret/history scan, and same-viewport visual comparison.

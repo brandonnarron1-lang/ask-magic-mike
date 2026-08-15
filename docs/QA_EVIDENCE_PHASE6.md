@@ -12,19 +12,26 @@ Evidence timestamp: 2026-08-15 America/New_York
 | Full repository tests | Pass | 164 files, 2,600 tests |
 | Production build | Pass | Next.js 15.5.21, 43 static pages generated |
 | New routes | Pass build | `/api/admin/copilot`, `/admin/message-previews` |
+| Canonical route manifest | Pass | 63 active routes, 15 acknowledged root/src duplicates |
+| Dependency audit | Pass | No known high-or-greater Production vulnerabilities |
+| Preview deployment | Ready | `dpl_GS3eyLz2Gwbsqf7r7FxZMcQF3Pag` |
+| Preview live health | Pass | Environment `preview`; Neon configured; notifications disabled; email disabled |
+| Preview ready health | Pass | Database, capture function, leads, notifications, RBAC, and push schema ready |
+| Preview runtime errors/warnings | None observed | No error or warning logs after controlled health requests |
 | Public capture | Preserved | Existing `/api/leads` suite passes |
 | Messaging policy | Pass | permission, template, sequence/orchestration, SMS tests |
 | AI safety | Pass | injection, redaction, delimiter, fallback tests |
 
 ## Correctly non-passing or not yet executed
 
-- Preview E2E: not executed until Preview deployment exists.
+- Authenticated Preview E2E: not executed until Preview database identity is proven non-Production.
 - Phase 6 Neon migration: not applied to Production.
 - Brandon-only provider email: not sent yet.
 - Inbox receipt/reply/link checks: not executed yet.
 - Carrier SMS: intentionally disabled; mock preview only.
 - Mike delivery: intentionally not tested in Phase 6.
 - Consumer delivery: intentionally disabled.
+- Sensitive Preview `DATABASE_URL` is configured at runtime but is intentionally not exportable through the CLI. Because a distinct Preview branch cannot yet be proven from read-only evidence, no Preview mutation or migration was attempted.
 
 Intentional skips are not counted as passes.
 

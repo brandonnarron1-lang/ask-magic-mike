@@ -21,3 +21,10 @@
 ## Preserved
 
 Canonical Neon lead storage, deterministic scoring/routing, durable notification outbox, retries/idempotency, WordPress bridge, attribution, existing Lead Center RBAC, Mike dormant state, and consumer automation disabled state.
+
+## Preview record
+
+- PR: https://github.com/brandonnarron1-lang/ask-magic-mike/pull/152
+- Initial Phase 6 commit: `45a9f210066fe26e0f05e50fa14b085107411f49`
+- Initial Preview deployment: `dpl_GS3eyLz2Gwbsqf7r7FxZMcQF3Pag`
+- Public and readiness health: pass; notification mode disabled; email disabled.
