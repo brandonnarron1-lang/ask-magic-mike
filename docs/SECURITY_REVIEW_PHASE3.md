@@ -5,11 +5,11 @@ Scope: staged PR 143 plus read-only Production verification
 
 ## Result
 
-No open critical or high-severity code defect was found in the staged Phase 3
-change set. The code is **not authorized for Production merge yet** because its
-Web Push device-label query requires the reviewed additive Production migration
-to run before deployment. Production remains on the Phase 2 release and retains
-the fail-closed shared Basic Auth boundary.
+No open critical or high-severity code defect was found. The required Push
+device-label migration preceded deployment, PR 143 merged, and Production RBAC
+administrator acceptance passed. A follow-up hardening patch explicitly pins
+the auth database connection to `sslmode=verify-full` to remove a future `pg`
+compatibility warning without weakening TLS.
 
 This review is an engineering security assessment, not a penetration test or
 legal opinion.
@@ -25,8 +25,8 @@ legal opinion.
 - The exact `hub.ourtownproperties.com` host is only a no-store/no-referrer/
   noindex redirect to the canonical protected `/admin` surface. Incoming path
   and query are discarded.
-- RBAC schema changes are additive and exist only on Neon Preview. Production
-  RBAC remains disabled; no user was invented or provisioned.
+- RBAC schema changes remain additive. Production contains only the approved
+  administrator and linked primary lead owner; Mike remains credentialless.
 - Web Push subscriptions are server-only, endpoint-unique, role-constrained,
   revocable, and never displayed as raw endpoints. The device-label migration
   passed on Preview only.
@@ -43,7 +43,7 @@ legal opinion.
 | Check | Result |
 | --- | --- |
 | Release safety | 14/14 pass |
-| Unit/integration tests | 155 files, 2,565 tests pass |
+| Unit/integration tests | 155 files, 2,566 tests pass |
 | Chromium E2E | 13/13 pass |
 | Strict TypeScript | pass |
 | ESLint | pass |
@@ -65,11 +65,9 @@ passed. CI remains the authoritative Node 24 check after the final branch push.
 
 ## Unresolved controlled risks
 
-1. Production RBAC requires the owner-approved roster and a verified first
-   administrator before migration/cutover.
-2. The device-label migration must precede the code deployment. Reversing that
-   order can make Push subscription routes fail on the missing column.
-3. The Our Town Facebook-user-agent block remains upstream; no broad security
+1. The Our Town Facebook-user-agent block remains upstream; no broad security
    reduction is acceptable.
-4. Forms 1, 2, 5, 6, and 7 lack required approved consent/routing evidence and
+2. Forms 1, 2, 5, 6, and 7 lack required approved consent/routing evidence and
    remain outside the canonical bridge. Form 4 remains recruiting-only.
+3. Mike's dormant account requires owner-controlled activation and an
+   assigned-lead-only acceptance check before personal use.

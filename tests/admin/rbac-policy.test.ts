@@ -6,7 +6,7 @@ import {
   hasLeadCenterSessionCookie,
   type LeadCenterPrincipal,
 } from "../../src/lib/admin/rbac-policy";
-import { leadCenterAuth } from "../../src/lib/admin/rbac-auth";
+import { leadCenterAuth, normalizeAuthDatabaseUrl } from "../../src/lib/admin/rbac-auth";
 
 function principal(overrides: Partial<LeadCenterPrincipal> = {}): LeadCenterPrincipal {
   return {
@@ -20,6 +20,13 @@ function principal(overrides: Partial<LeadCenterPrincipal> = {}): LeadCenterPrin
 }
 
 describe("Lead Center RBAC policy", () => {
+  it("pins Neon/PostgreSQL auth connections to full TLS verification", () => {
+    expect(normalizeAuthDatabaseUrl("postgresql://role:secret@example.test/db?sslmode=require"))
+      .toBe("postgresql://role:secret@example.test/db?sslmode=verify-full");
+    expect(normalizeAuthDatabaseUrl("postgresql://role:secret@example.test/db?sslmode=verify-full"))
+      .toBe("postgresql://role:secret@example.test/db?sslmode=verify-full");
+    expect(normalizeAuthDatabaseUrl("not-a-database-url")).toBe("not-a-database-url");
+  });
   it("uses the same authentication base path as the browser client and App Router handler", () => {
     expect(leadCenterAuth.options.basePath).toBe("/api/lead-center-auth");
   });

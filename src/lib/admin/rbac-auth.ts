@@ -26,8 +26,25 @@ const administrator = access.newRole({
 });
 const nonAdministrator = access.newRole({ user: [], session: [] });
 
-const connectionString =
-  process.env.DATABASE_URL || "postgresql://disabled:disabled@127.0.0.1:5432/disabled";
+export function normalizeAuthDatabaseUrl(value: string) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "postgresql:" && url.protocol !== "postgres:") return value;
+    const sslMode = url.searchParams.get("sslmode")?.toLowerCase();
+    if (sslMode === "prefer" || sslMode === "require" || sslMode === "verify-ca") {
+      // pg currently treats these modes as verify-full and warns that v9 will
+      // weaken their libpq-compatible meaning. Preserve the strong behavior.
+      url.searchParams.set("sslmode", "verify-full");
+    }
+    return url.toString();
+  } catch {
+    return value;
+  }
+}
+
+const connectionString = normalizeAuthDatabaseUrl(
+  process.env.DATABASE_URL || "postgresql://disabled:disabled@127.0.0.1:5432/disabled",
+);
 
 export const leadCenterAuth = betterAuth({
   appName: "Ask Magic Mike Lead Center",

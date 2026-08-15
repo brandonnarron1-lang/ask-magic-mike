@@ -16,13 +16,14 @@ Captured: 2026-08-14, America/New_York
 
 - `https://www.askmagicmike.com` remains the canonical public application.
 - `https://askmagicmike.com` remains the redirecting apex.
-- Production remains on shared Basic Auth for `/admin`.
-- Production RBAC tables and feature flag were not changed during Preview
-  acceptance.
+- Production RBAC is active for `/admin`; anonymous requests redirect to the
+  per-user login page.
+- All six Production RBAC tables and the Push device-label migration are ready.
 - Our Town WordPress, Gravity Forms, DNS, SMTP, mailbox settings, public pages,
   and NellySelly were not modified.
-- No email, SMS, Push, consumer acknowledgment, social post, paid ad, or vendor
-  purchase was triggered.
+- Two owner-only password activation/reset emails were sent to Brandon with no
+  BCC; no lead, consumer, Mike, SMS, Push, social, paid-ad, or vendor message was
+  triggered.
 
 ## Preview acceptance result
 
@@ -37,8 +38,10 @@ Captured: 2026-08-14, America/New_York
   exact-origin validation, non-enumerating responses, session revocation, no
   BCC, and an independent server-only send gate. No activation email was sent.
 
-## Remaining production decision
+## Production cutover result
 
-Do not create a Production administrator from public profiles or a guessed
-email. Confirm the exact administrator login identity, then follow
-`RBAC_MIGRATION_RUNBOOK.md` with Basic Auth retained as break-glass rollback.
+Brandon administrator acceptance passed and left zero active sessions. Mike is
+provisioned as the canonical primary owner with no credential/session. The
+newest Brandon reset link remains unused for permanent password selection.
+Rollback is `LEAD_CENTER_RBAC_ENABLED=false` plus a redeploy; additive tables
+remain in place.
