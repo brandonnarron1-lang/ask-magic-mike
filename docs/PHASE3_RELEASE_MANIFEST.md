@@ -23,6 +23,12 @@ Generated: 2026-08-14
   `https://ask-magic-mike-czivxzahi-eyes-up-industries.vercel.app`
 - Preview state: Ready; database and RBAC schema ready; anonymous admin HTTP
   401; no error-level logs returned in the inspected interval.
+- Final code-bearing Preview deployment:
+  `dpl_FE63usgk8JmTYRS4aPyyGPA2euJa`
+- Final code-bearing Preview URL:
+  `https://ask-magic-mike-48ux3e60x-eyes-up-industries.vercel.app`
+- Final probes: live 200; ready 200 with `rbac_schema_ready=true`; login,
+  password-help, and set-password pages 200; removed bootstrap route 404.
 
 ## Database boundaries
 
@@ -35,8 +41,8 @@ Generated: 2026-08-14
 
 ## Authoritative verification
 
-- GitHub Actions run: `31850872440`
-- Job: `94926265435`
+- GitHub Actions run: `31855717441`
+- Job: `94939988948`
 - Result: pass
 - Vercel Preview check: pass
 - Local release gate: 155 files / 2,565 tests, strict TypeScript, ESLint,

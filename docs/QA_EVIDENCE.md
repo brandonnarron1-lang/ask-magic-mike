@@ -25,6 +25,10 @@ All timestamps are America/New_York unless noted.
   ESLint, 41-page Production build, 60-route manifest, 14/14 safety checks,
   isolation, dependency audit, and whitespace checks pass. No activation email
   or other external notification was sent.
+- Final code-bearing Preview `dpl_FE63usgk8JmTYRS4aPyyGPA2euJa` is Ready.
+  Authenticated Vercel probes returned live 200, ready 200 with RBAC schema
+  ready, all three staff auth/password pages 200, and the removed bootstrap
+  route 404. GitHub Node 24 run `31855717441` passed.
 
 ## WordPress Form 3 production acceptance — 2026-08-14
 
