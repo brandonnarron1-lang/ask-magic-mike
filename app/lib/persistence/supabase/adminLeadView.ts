@@ -247,16 +247,18 @@ export function normalizeAdminLeadRow(row: Record<string, unknown>): AdminLeadVi
   lead.primary_detail = primaryDetail(lead);
   lead.contact_summary = summarizeContact(email, phone);
   lead.attribution_summary = summarizeAttribution(attribution);
-  lead.routing_ready = status === "new" && !assignedAgentId && Boolean(email || phone);
-  lead.stalled_signals = buildLeadStalledSignals({
-    status,
-    created_at,
-    assigned_agent_id: assignedAgentId,
-    assigned_at,
-    last_contacted_at,
-    lead_grade: lead.lead_grade,
-    timeline_months: lead.timeline_months,
-  });
+  lead.routing_ready = !lead.is_test && status === "new" && !assignedAgentId && Boolean(email || phone);
+  lead.stalled_signals = lead.is_test
+    ? []
+    : buildLeadStalledSignals({
+        status,
+        created_at,
+        assigned_agent_id: assignedAgentId,
+        assigned_at,
+        last_contacted_at,
+        lead_grade: lead.lead_grade,
+        timeline_months: lead.timeline_months,
+      });
   return lead;
 }
 
