@@ -16,7 +16,7 @@ No values are recorded in this report.
 | `DATABASE_ENV` | Preview, PR 143 branch | Sensitive | `preview` |
 | `PREVIEW_DATA_MODE` | Preview, PR 143 branch | Sensitive | `enabled` |
 | `ALLOW_PREVIEW_DB_MUTATION` | Preview, PR 143 branch | Sensitive | `true` |
-| `RBAC_PASSWORD_RESET_EMAIL_ENABLED` | Preview/Production | Server-only feature gate | Remains `false` until an approved account activation send |
+| `RBAC_PASSWORD_RESET_EMAIL_ENABLED` | Production | Sensitive server-only feature gate | Enabled after verified sender/origin checks |
 
 `RBAC_PREVIEW_BOOTSTRAP_TOKEN` was one-use, branch-scoped, and removed after
 acceptance. It is absent from the final branch environment inventory.
@@ -31,10 +31,8 @@ acceptance. It is absent from the final branch environment inventory.
 
 ## Production cutover requirements
 
-Before enabling Production RBAC, configure Production-only values for
-`BETTER_AUTH_SECRET`, `BETTER_AUTH_URL=https://www.askmagicmike.com`, and
-`LEAD_CENTER_RBAC_ENABLED`, but keep the flag false until the additive migration
-and verified user provisioning are complete. Never reuse the Preview secret.
-Password activation additionally requires the existing authenticated Resend
-configuration plus `RBAC_PASSWORD_RESET_EMAIL_ENABLED=true`; reset links are
-never copied to the lead-alert BCC.
+Production-only `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`,
+`LEAD_CENTER_RBAC_ENABLED`, and `RBAC_PASSWORD_RESET_EMAIL_ENABLED` are securely
+configured. The Production secret is distinct from Preview. Reset links use the
+existing authenticated Resend sender and are never copied to the lead-alert
+BCC. No value was read back or recorded.

@@ -15,15 +15,16 @@ Updated 2026-08-14.
 - Cleanup verified five banned `example.test` users and zero active Preview
   sessions. The one-use bootstrap token and temporary bootstrap code were
   removed.
-- Production remains on shared Basic Auth with no RBAC schema/flag change. The
-  remaining cutover prerequisite is a verified administrator login identity and
-  final roster approval.
+- Production RBAC is active after the additive migration, two-user provisioning,
+  and administrator acceptance. Brandon passed the complete session matrix;
+  Mike is linked to the canonical primary routing row but remains dormant.
 - Added a secure per-user account activation/reset path at
   `/lead-center-password-help` and `/lead-center-set-password`. It uses the
   existing authenticated Resend adapter behind a dedicated server-only gate,
   validates the exact auth origin, issues one-use 60-minute links, avoids
   account enumeration and BCC, and revokes existing sessions after reset. No
-  activation message was sent during implementation.
+  activation messages are delivery-verified; the newest unused owner link is
+  reserved for Brandon's permanent password choice.
 
 ## Phase 3 staged operations release - 2026-08-14
 
@@ -31,8 +32,9 @@ Updated 2026-08-14.
   only and adds audited actor propagation, exact-host Lead Center subdomain
   handling, durable SLA-cron persistence, and human-readable Web Push device
   labels.
-- The RBAC migration and Push device-label migration passed on isolated Neon
-  Preview only. Production remains unchanged and on shared Basic Auth.
+- The RBAC and Push device-label migrations passed on Preview, were applied in
+  order on Production, and were followed by a verified deployment and rollback
+  checkpoint.
 - Form 7 entry 1550 is preserved as `GENUINE - CONSENT RESTRICTED OR UNCLEAR`;
   it was not contacted, marketed, marked test, or forwarded to Neon.
 - Form 1 and Form 6 audits stopped before activation because neither stores an
@@ -41,7 +43,7 @@ Updated 2026-08-14.
 - Production read-only evidence remains healthy: 0 live leads, 6 suppressed
   tests, 0 unsuppressed tests, 0 queue/failures, public funnel 15/15, monitor
   9/9, and no error-level Vercel logs in the inspected hour.
-- Final staged validation passes 155 test files / 2,565 tests, strict typecheck,
+- Final staged validation passes 155 test files / 2,566 tests, strict typecheck,
   lint, 41-page build, 60-route manifest, 14/14 safety checks, 13/13 Chromium
   tests, dependency audit, 326-commit secret scan, and isolation.
 - Seven redacted operations PDFs are complete. Compliant refreshed `.pptx` and

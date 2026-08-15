@@ -21,7 +21,7 @@ All timestamps are America/New_York unless noted.
 - Secure password activation/reset now uses an independently gated Resend path,
   exact-origin link validation, one-use 60-minute tokens, non-enumerating UI,
   no BCC, opaque idempotency, and post-reset session revocation.
-- Final release gate: 155 test files / 2,565 tests pass; strict typecheck,
+- Final release gate: 155 test files / 2,566 tests pass; strict typecheck,
   ESLint, 41-page Production build, 60-route manifest, 14/14 safety checks,
   isolation, dependency audit, and whitespace checks pass. No activation email
   or other external notification was sent.
@@ -29,6 +29,32 @@ All timestamps are America/New_York unless noted.
   Authenticated Vercel probes returned live 200, ready 200 with RBAC schema
   ready, all three staff auth/password pages 200, and the removed bootstrap
   route 404. GitHub Node 24 run `31855717441` passed.
+
+## Production RBAC cutover — 2026-08-14
+
+- Additive Push device-label and RBAC migrations were applied in order on Neon
+  Production. The Push constraint is present; all six auth tables reported
+  ready before users were provisioned.
+- PR 143 merged as `10eefde`. Production deployment
+  `dpl_46R7PQfBPH8N5BPymTQPmeenfYd5` is Ready and canonical with per-user RBAC
+  enabled; the preceding Ready deployment remains the environment rollback.
+- Two approved users exist: one administrator and Mike as the linked primary
+  lead owner. Mike has no credential/session and received no activation email.
+- Brandon activation delivery was confirmed in Gmail from the verified sender
+  with no BCC. Acceptance passed: sign-in 200, cookie issued, lead inbox 200,
+  reporting 200, user-management 200, sign-out 200, stale session 307.
+- The temporary password/cookie were cleared from process memory. A fresh,
+  unused 60-minute owner reset link remains in Brandon's inbox for permanent
+  password selection.
+- Final database state: 2 users, 1 verified user, 1 credential account, 0
+  sessions, 1 active reset link, 3 auth audit rows, 0 live leads, 6 suppressed
+  test leads, and 0 notification backlog.
+- Post-cutover public checks pass: smoke 19/19 (2 intentional protected/write
+  skips), funnel 15/15, monitor 9/9, and health ready. No lead, consumer email,
+  SMS, Push, social post, DNS, WordPress, or NellySelly change was made.
+- A successful auth request exposed a `pg` future-compatibility warning for
+  `sslmode=require`; the follow-up hotfix normalizes it to explicit
+  `sslmode=verify-full`, preserving the current strong verification behavior.
 
 ## WordPress Form 3 production acceptance — 2026-08-14
 

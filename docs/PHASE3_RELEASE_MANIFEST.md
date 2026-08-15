@@ -9,14 +9,14 @@ Generated: 2026-08-14
 - Branch: `codex/phase3-live-operations-2026-08-14`
 - RBAC acceptance and secure-activation implementation commit: `3192b9f`
 - Base branch: `main`
-- Production commit remains: `27b9e5422bee8078afe7cd54231c291458f6aacb`
+- Production merge commit: `10eefde10563b4eb83292453595eec97ec92cd30`
 
 ## Deployments
 
 - Canonical Vercel project: `eyes-up-industries/ask-magic-mike`
 - Project ID: `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`
-- Current Production deployment remains:
-  `dpl_DTLUBvTFL8jwQtzaFrsHmRdUWmWu`
+- RBAC-enabled Production deployment:
+  `dpl_46R7PQfBPH8N5BPymTQPmeenfYd5`
 - Accepted RBAC Preview deployment:
   `dpl_2Kpchet8VAee8oqoWi2PovznC8ct`
 - Preview URL:
@@ -33,11 +33,11 @@ Generated: 2026-08-14
 ## Database boundaries
 
 - Neon project: `bitter-star-20214385`
-- Production branch: `br-round-base-auh6h2wd` - unchanged
+- Production branch: `br-round-base-auh6h2wd`
 - Preview branch: `br-morning-paper-aun3378r`
-- RBAC migration: applied on Preview only
-- Web Push device-label migration: applied on Preview only
-- Production migration/deploy: not performed
+- RBAC migration: applied on Preview and Production
+- Web Push device-label migration: applied on Preview and Production before deploy
+- Production deployment and administrator acceptance: pass
 
 ## Authoritative verification
 
@@ -45,7 +45,7 @@ Generated: 2026-08-14
 - Job: `94939988948`
 - Result: pass
 - Vercel Preview check: pass
-- Local release gate: 155 files / 2,565 tests, strict TypeScript, ESLint,
+- Local release gate: 155 files / 2,566 tests, strict TypeScript, ESLint,
   41-page build, 60 active routes, and 14/14 release-safety checks
 - Chromium: 13/13
 - Dependency audit: no known vulnerabilities
@@ -53,7 +53,7 @@ Generated: 2026-08-14
 
 ## Release order
 
-Preview RBAC acceptance is complete and the temporary bootstrap surface is
-removed. PR 143 must remain unmerged until the Production device-label migration
-is applied before code deployment. Production RBAC remains a separate,
-roster-gated cutover with shared Basic Auth retained as rollback.
+Preview and Production RBAC acceptance are complete and the temporary bootstrap
+surface is removed. Future users remain individually approval-gated. Application
+rollback is `LEAD_CENTER_RBAC_ENABLED=false` followed by redeploy; database
+tables remain additive.

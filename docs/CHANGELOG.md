@@ -6,6 +6,13 @@
   surface, aligned the Better Auth server/client path, and added a gated,
   exact-origin, one-time password activation/reset flow using the existing
   authenticated Resend transport.
+- Applied the accepted additive RBAC and Push device-label migrations to Neon
+  Production, merged PR 143, activated the approved Brandon administrator and
+  dormant Mike primary-owner identities, and passed Production session/logout
+  acceptance without changing lead or notification data.
+- Normalized auth-database SSL aliases to explicit `verify-full`, preserving
+  strong certificate/hostname verification and removing the `pg` v9 migration
+  warning from Production auth routes.
 
 - Reconfirmed the existing Vercel + Neon deployment as canonical; no parallel
   repository, database, notification engine, or visual system was introduced.

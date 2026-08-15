@@ -1,22 +1,23 @@
 # RBAC Production Cutover Report
 
 Date: 2026-08-14
-Classification: **PREVIEW ACCEPTED - SECURE ACTIVATION READY - PRODUCTION ROSTER REQUIRED**
+Classification: **PRODUCTION RBAC ACTIVE - ADMIN ACCEPTANCE PASSED**
 
 ## Production state
 
-- `LEAD_CENTER_RBAC_ENABLED` remains false/unconfigured in Production.
-- Shared Basic Auth remains the active fail-closed boundary.
-- Production RBAC tables have not been created.
-- No Production RBAC user, account, or session has been provisioned.
+- `LEAD_CENTER_RBAC_ENABLED=true` in Production.
+- All six additive RBAC tables are present on Neon Production.
+- Brandon is the verified `administrator`; Mike is provisioned as the linked
+  `primary_lead_owner` but remains dormant with no credential or session.
 - A one-time, 60-minute password activation/reset flow is implemented and
   independently gated. It reuses the authenticated Resend transport, requires
   the exact configured Better Auth origin, never BCCs reset links, uses opaque
   idempotency keys, revokes existing sessions after reset, and does not reveal
   whether an account exists.
-- Mike is verified as the proposed `primary_lead_owner`.
-- Brandon's exact administrator role and approved login identity remain an owner
-  decision. No personal/public identity was silently promoted.
+- Production administrator acceptance passed: sign-in, secure cookie, lead
+  inbox, reporting, user-management, logout, and stale-session denial.
+- The temporary acceptance credential was cleared. Brandon's newest unused
+  60-minute reset link is in the approved inbox for permanent password choice.
 
 ## Preview state
 
@@ -29,23 +30,19 @@ Classification: **PREVIEW ACCEPTED - SECURE ACTIVATION READY - PRODUCTION ROSTER
 - Acceptance cleanup left five banned `example.test` users and zero active
   sessions. The temporary bootstrap route and token were removed.
 
-## Cutover prerequisites not yet met
+## Final state
 
-1. Approve one Production administrator login identity.
-2. Approve Mike's final permissions and any additional agent/analyst users.
-3. Record export scope and agent-to-routing-row links.
-4. Apply the additive migration and configure Production-only auth values.
-5. Enable `RBAC_PASSWORD_RESET_EMAIL_ENABLED` only after the verified Resend
-   sender and Production auth origin are confirmed; send each activation link
-   only to the approved account identity.
-6. Rehearse the Basic Auth rollback with no Production user impact.
+- 2 users; 1 verified; 1 credential account; 0 sessions; 1 unused active reset
+  link; 3 auth audit rows.
+- 0 live leads; 6 suppressed tests; notification backlog 0.
+- Verified sender delivered Brandon's activation/reset messages with no BCC.
+- No Mike activation, consumer message, SMS, or Push was sent.
 
 ## Safe cutover order
 
-Follow `RBAC_MIGRATION_RUNBOOK.md`: snapshot, apply additive schema while the
-flag is off, provision only verified users, validate administrator and Mike,
-enable a restricted acceptance window, verify assignment/export/audit/revoke,
-then retain Basic Auth as break-glass until the stable acceptance period ends.
+Follow `RBAC_MIGRATION_RUNBOOK.md` for future users. Provision only a verified
+identity, link agents only to an approved canonical routing row, and run the
+same role/assignment/revocation matrix before granting access.
 
 Rollback is application-first: set the feature flag false, redeploy, verify
 Basic Auth denial/acceptance, revoke RBAC sessions, and leave additive tables in
