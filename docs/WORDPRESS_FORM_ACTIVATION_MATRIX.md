@@ -1,9 +1,10 @@
 # WordPress Form Activation Matrix
 
-The requested `.xlsx` workbook remains pending because the required spreadsheet
-artifact runtime is unavailable in this execution environment. This Markdown
-matrix is the canonical source for that workbook and contains no secrets or live
-customer data.
+The Phase 5 editable workbook is available at
+`output/phase5/spreadsheets/WORDPRESS_FORM_ACTIVATION_MATRIX.xlsx`; its rendered
+visual-QA montage is stored with the Phase 5 artifacts. This Markdown matrix is
+the concise human-readable companion and contains no secrets or live customer
+data.
 
 | ID | Form | Existing fields | Canonical type | Bridge | Legacy notification | Consent state | Next gate |
 | ---: | --- | --- | --- | --- | --- | --- | --- |

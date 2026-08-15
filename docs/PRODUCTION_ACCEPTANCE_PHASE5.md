@@ -1,11 +1,19 @@
 # Production Acceptance — Phase 5
 
-Status: **PASS FOR CONTROLLED SECURITY/MONITORING RELEASE**.
+Status: **DEPLOYED AND ACCEPTED**.
 
-The live funnel remains healthy on the verified baseline while this release
-candidate proceeds through GitHub and Vercel. No database migration, production
-lead mutation, form activation, consumer communication, carrier SMS, paid
-traffic, DNS change, or WordPress publication is part of this release.
+The stabilization-approved security, monitoring, reporting, and compliance
+release completed through GitHub PR #150 and Vercel. No database migration,
+production lead mutation, form activation, consumer communication, carrier SMS,
+paid traffic, DNS change, or WordPress publication was part of this release.
+
+## Production release
+
+- Merge commit: `29b6b45c916d1dc9e28fcc76d10c9f4d3db44c8b`
+- Source commit: `7fc9fffbe78e12c510efb76cb7d413bee0dd5d07`
+- Accepted deployment: `dpl_26FVMspdTHhsaRAMru7Ws5vkNBrM` — Ready
+- Canonical aliases: `www.askmagicmike.com` and `askmagicmike.com`
+- Release: `phase5-live-operations-2026-08-15`
 
 ## Accepted baseline
 
@@ -44,8 +52,22 @@ traffic, DNS change, or WordPress publication is part of this release.
 - Mike's private password choice, Brandon/Mike Push permission, BIC form
   approvals, and the host-managed Meta WAF exception remain human actions.
 
-Post-deployment acceptance must verify the production alias, final deployment
-state, private-page headers, liveness, readiness, monitor, crons, error logs,
-TLS warnings, queue invariants, and zero genuine-lead fabrication. Final release
-metadata and checksum are included in the Phase 5 package rather than embedding
-secret-bearing dashboard output in this document.
+## Post-deployment acceptance
+
+- Production alias resolves to the accepted Ready deployment; apex redirects
+  permanently to `www`.
+- Smoke: 19 pass, 2 intentional skips, 0 fail.
+- Funnel: 15 pass, 0 fail.
+- Production monitor: 9 pass, 0 fail.
+- Liveness and readiness pass.
+- Private Lead Center and identity pages return no-store, same-origin framing,
+  and noindex headers.
+- Two first-live cron executions on the accepted deployment returned HTTP 200;
+  the hourly SLA schedule remains configured and its baseline executions pass.
+- The reviewed post-deployment window contains zero error logs, zero warning
+  logs, and zero PostgreSQL TLS-warning matches.
+- No genuine lead was fabricated and no protected data appears in release
+  artifacts.
+
+Final release metadata and the portable SHA-256 checksum are included in the
+Phase 5 GitHub release package without secret-bearing dashboard output.
