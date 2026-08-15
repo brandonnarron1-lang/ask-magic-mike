@@ -13,9 +13,10 @@ export function createMockSmsAdapter(): SmsAdapter {
       const now = new Date().toISOString();
       // eslint-disable-next-line no-console
       console.log("[sms_mock]", {
-        to: params.to,
-        body: params.body,
-        metadata: params.metadata,
+        recipientConfigured: Boolean(params.to),
+        bodyLen: params.body.length,
+        templateSlug: typeof params.metadata?.templateSlug === "string" ? params.metadata.templateSlug : undefined,
+        leadReferencePresent: Boolean(params.metadata?.leadId),
         at: now,
       });
       return {

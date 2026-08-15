@@ -17,6 +17,7 @@ import type {
   AppointmentStatus,
 } from "../../../lib/adminAppointmentFollowupOps";
 import { requireLeadCenterLeadPermission } from "../../../../src/lib/admin/rbac-session";
+import { Phase6CopilotPanel } from "../../../../src/components/admin/phase6-copilot-panel";
 import {
   createAppointmentAction,
   createFollowupTaskAction,
@@ -488,6 +489,12 @@ export default async function AdminLeadDetailPage({
                   <Field label="Terminal reason" value={lead.closed_lost_reason || "Not set"} />
                 </dl>
               </Panel>
+
+              <Phase6CopilotPanel
+                leadId={lead.id}
+                isTest={lead.is_test}
+                suppressed={lead.communication_suppressed}
+              />
 
               <Panel title="Lifecycle controls">
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

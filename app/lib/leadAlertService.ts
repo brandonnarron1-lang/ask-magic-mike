@@ -360,7 +360,14 @@ export async function enqueueLeadNotifications(input: LeadAlertInput) {
       }
     }
     let consumer: LeadNotificationRecord | null = null;
-    if (input.payload.email && input.payload.consent_email && !input.payload.is_test) {
+    const consumerAcknowledgmentEnabled =
+      (process.env.CONSUMER_ACKNOWLEDGMENT_ENABLED || "false").toLowerCase() === "true";
+    if (
+      consumerAcknowledgmentEnabled &&
+      input.payload.email &&
+      input.payload.consent_email &&
+      !input.payload.is_test
+    ) {
       const ack = renderConsumerAcknowledgment(input);
       consumer = await enqueueOne({
         leadId: input.leadId,
