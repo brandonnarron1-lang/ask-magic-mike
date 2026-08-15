@@ -13,6 +13,10 @@ import {
 } from "../../lib/adminLeadLifecycle";
 import { updateLeadStatusAction } from "./actions";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
+import {
+  ADMIN_LEAD_INBOX_FILTERS,
+  filterAdminLeadInbox,
+} from "../../lib/adminLeadInboxFilters";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -58,41 +62,6 @@ function Badge({ children }: { children: ReactNode }) {
       {children}
     </span>
   );
-}
-
-const FILTERS = [
-  {
-    key: "active",
-    label: "Active / New",
-    statuses: ["new", "scored", "assigned", "escalated"],
-  },
-  {
-    key: "working",
-    label: "Contacted / Working",
-    statuses: ["contacted", "nurture"],
-  },
-  {
-    key: "qualified",
-    label: "Qualified / Appointment",
-    statuses: ["qualified", "appointment_requested", "appointment_set"],
-  },
-  {
-    key: "closed",
-    label: "Spam / Test / Closed",
-    statuses: ["spam", "dead", "converted"],
-  },
-  {
-    key: "all",
-    label: "All",
-    statuses: [],
-  },
-] as const;
-
-function filterLeads(leads: AdminLeadView[], filterKey: string) {
-  const filter = FILTERS.find((item) => item.key === filterKey) || FILTERS[0];
-  if (filter.key === "all") return leads;
-  const statuses = filter.statuses as readonly string[];
-  return leads.filter((lead) => statuses.includes(lead.status));
 }
 
 function StatusActionForm({
@@ -224,6 +193,7 @@ function LeadCard({ lead }: { lead: AdminLeadView }) {
           <p className="mt-2 text-sm text-[#d9ceb8]">{lead.contact_summary}</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {lead.is_test ? <Badge>Test</Badge> : null}
           <Badge>{lead.status}</Badge>
           {lead.stalled_signals.length ? <Badge>Stalled</Badge> : null}
           {lead.routing_ready ? <Badge>Routing ready</Badge> : null}
@@ -298,7 +268,7 @@ export default async function AdminLeadsPage({
   const inbox = await loadAdminLeadInbox(50, principal);
   const params = searchParams ? await searchParams : {};
   const activeFilter = params.filter || "active";
-  const visibleLeads = filterLeads(inbox.leads, activeFilter);
+  const visibleLeads = filterAdminLeadInbox(inbox.leads, activeFilter);
 
   return (
     <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
@@ -354,7 +324,7 @@ export default async function AdminLeadsPage({
         ) : (
           <section className="space-y-4">
             <nav className="flex flex-wrap gap-2" aria-label="Lead status filters">
-              {FILTERS.map((filter) => (
+              {ADMIN_LEAD_INBOX_FILTERS.map((filter) => (
                 <a
                   key={filter.key}
                   href={`/admin/leads?filter=${filter.key}`}

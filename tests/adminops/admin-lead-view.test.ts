@@ -3,6 +3,7 @@ import {
   normalizeAdminLeadRow,
   normalizeAdminLeadRows,
 } from "../../app/lib/adminLeadView";
+import { filterAdminLeadInbox } from "../../app/lib/adminLeadInboxFilters";
 
 describe("normalizeAdminLeadRow", () => {
   it("normalizes canonical LeadOps rows into an admin-safe shape", () => {
@@ -62,9 +63,36 @@ describe("normalizeAdminLeadRow", () => {
 
     expect(lead.status).toBe("new");
     expect(lead.created_at).toBeNull();
+    expect(lead.is_test).toBe(false);
     expect(lead.attribution_summary).toBe("No attribution captured");
     expect(Object.values(lead.attribution)).not.toContain(undefined);
     expect(Object.values(lead.attribution).every((value) => value === null)).toBe(true);
+  });
+
+  it("normalizes Neon Date objects and explicit test flags", () => {
+    const createdAt = new Date("2026-08-15T13:45:00.000Z");
+    const lead = normalizeAdminLeadRow({
+      id: "qa-lead",
+      created_at: createdAt,
+      assigned_at: new Date("2026-08-15T13:50:00.000Z"),
+      is_test: true,
+    });
+
+    expect(lead.created_at).toBe("2026-08-15T13:45:00.000Z");
+    expect(lead.assigned_at).toBe("2026-08-15T13:50:00.000Z");
+    expect(lead.is_test).toBe(true);
+  });
+
+  it("keeps QA leads out of operational queues and groups them under test/closed", () => {
+    const live = normalizeAdminLeadRow({ id: "live", status: "new", is_test: false });
+    const qa = normalizeAdminLeadRow({ id: "qa", status: "new", is_test: true });
+
+    expect(filterAdminLeadInbox([live, qa], "active").map((lead) => lead.id)).toEqual(["live"]);
+    expect(filterAdminLeadInbox([live, qa], "closed").map((lead) => lead.id)).toEqual(["qa"]);
+    expect(filterAdminLeadInbox([live, qa], "all").map((lead) => lead.id)).toEqual([
+      "live",
+      "qa",
+    ]);
   });
 
   it("surfaces widget and legacy embed attribution fields for admin review", () => {
