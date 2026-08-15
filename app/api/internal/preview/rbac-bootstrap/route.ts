@@ -123,6 +123,12 @@ export async function POST(request: NextRequest) {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    await client.query(
+      `DELETE FROM public.lead_center_sessions AS session
+       USING public.lead_center_users AS app_user
+       WHERE session."userId" = app_user.id AND app_user.email LIKE '%@example.test'`,
+    );
+    await client.query("DELETE FROM public.lead_center_rate_limits");
     const agents = await client.query<{ id: string; role: string }>(
       `SELECT id::text, role FROM public.agents WHERE is_active = TRUE
        ORDER BY CASE WHEN role = 'primary' THEN 0 ELSE 1 END, created_at ASC LIMIT 2`,
