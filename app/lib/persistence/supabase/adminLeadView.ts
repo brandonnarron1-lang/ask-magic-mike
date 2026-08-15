@@ -32,6 +32,7 @@ export type AdminAttributionView = {
 export type AdminLeadView = {
   id: string;
   created_at: string | null;
+  is_test: boolean;
   status: string;
   funnel_type: string;
   lead_source_surface: string;
@@ -101,6 +102,20 @@ function text(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const cleaned = value.trim();
   return cleaned || null;
+}
+
+function dateText(value: unknown): string | null {
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value.toISOString();
+  }
+  return text(value);
+}
+
+function booleanValue(value: unknown): boolean {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value === 1;
+  if (typeof value !== "string") return false;
+  return ["true", "1", "yes"].includes(value.trim().toLowerCase());
 }
 
 function idText(value: unknown): string {
@@ -189,23 +204,24 @@ export function normalizeAdminLeadRow(row: Record<string, unknown>): AdminLeadVi
   const notes = text(row.notes);
   const assignedAgentId = text(row.assigned_agent_id);
   const status = firstText(row.status) || "new";
-  const created_at = text(row.created_at);
-  const assigned_at = text(row.assigned_at);
-  const last_contacted_at = text(row.last_contacted_at);
+  const created_at = dateText(row.created_at);
+  const assigned_at = dateText(row.assigned_at);
+  const last_contacted_at = dateText(row.last_contacted_at);
 
   const lead: AdminLeadView = {
     id: idText(row.id),
     created_at,
+    is_test: booleanValue(row.is_test),
     status,
     funnel_type: firstText(row.funnel_type, row.lead_type) || "unknown",
     lead_source_surface: firstText(row.lead_source_surface, row.source) || "unknown",
     assigned_agent_id: assignedAgentId,
     assigned_at,
     last_contacted_at,
-    next_follow_up_at: text(row.next_follow_up_at),
-    converted_at: text(row.converted_at),
-    closed_won_at: text(row.closed_won_at),
-    closed_lost_at: text(row.closed_lost_at),
+    next_follow_up_at: dateText(row.next_follow_up_at),
+    converted_at: dateText(row.converted_at),
+    closed_won_at: dateText(row.closed_won_at),
+    closed_lost_at: dateText(row.closed_lost_at),
     closed_lost_reason: text(row.closed_lost_reason),
     conversion_stage: text(row.conversion_stage),
     lead_grade: text(row.lead_grade),
