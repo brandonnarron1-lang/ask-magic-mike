@@ -9,12 +9,12 @@ Evidence timestamp: 2026-08-15 America/New_York
 | Phase 6 unit set | Pass | 5 files, 21 tests |
 | ESLint | Pass | `pnpm lint` |
 | Strict TypeScript | Pass | `pnpm typecheck` |
-| Full repository tests | Pass | 164 files, 2,600 tests |
-| Production build | Pass | Next.js 15.5.21, 43 static pages generated |
-| New routes | Pass build | `/api/admin/copilot`, `/admin/message-previews` |
-| Canonical route manifest | Pass | 63 active routes, 15 acknowledged root/src duplicates |
+| Full repository tests | Pass | 165 files, 2,605 tests after the guarded QA-email route was added |
+| Production build | Pass | Next.js 15.5.21, 44 static pages generated |
+| New routes | Pass build | `/api/admin/copilot`, `/api/admin/qa/email`, `/admin/message-previews` |
+| Canonical route manifest | Pass | 64 active routes, 15 acknowledged root/src duplicates |
 | Dependency audit | Pass | No known high-or-greater Production vulnerabilities |
-| Preview deployment | Ready | `dpl_GS3eyLz2Gwbsqf7r7FxZMcQF3Pag` |
+| Preview deployment | Ready | `dpl_DeTnRQW2t5bo3N6QhiKfkZFZQk7e`, commit `9a3246d1378722e8d4cceeaeb521de34d4d2a8df`, Node.js 24.x |
 | Preview live health | Pass | Environment `preview`; Neon configured; notifications disabled; email disabled |
 | Preview ready health | Pass | Database, capture function, leads, notifications, RBAC, and push schema ready |
 | Preview runtime errors/warnings | None observed | No error or warning logs after controlled health requests |
@@ -26,7 +26,7 @@ Evidence timestamp: 2026-08-15 America/New_York
 
 - Authenticated Preview E2E: not executed until Preview database identity is proven non-Production.
 - Phase 6 Neon migration: not applied to Production.
-- Brandon-only provider email: not sent yet.
+- Brandon-only provider email: not sent yet; the exact-recipient Production acceptance route is implemented, tested, and fail-closed.
 - Inbox receipt/reply/link checks: not executed yet.
 - Carrier SMS: intentionally disabled; mock preview only.
 - Mike delivery: intentionally not tested in Phase 6.

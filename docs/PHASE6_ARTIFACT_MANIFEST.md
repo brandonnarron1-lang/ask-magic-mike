@@ -4,6 +4,7 @@
 
 - Source code, tests, migration, `.env.example`, architecture, OpenAI audit, messaging specification, copilot register, funnel audit, AI safety review, security review, compliance review, QA evidence, release notes, rollback, and production acceptance checklist.
 - Existing verified brand assets and Phase 6 baseline screenshots under `output/phase6/`.
+- A PII-free AI-assisted internal alert backdrop and its provenance/approval register under `output/phase6/visual-assets/` and `docs/PHASE6_VISUAL_ASSET_REGISTER.md`.
 
 ## Pending generated office artifacts
 
