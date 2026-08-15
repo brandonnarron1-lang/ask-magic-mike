@@ -31,6 +31,7 @@ const connectionString =
 export const leadCenterAuth = betterAuth({
   appName: "Ask Magic Mike Lead Center",
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  basePath: "/api/lead-center-auth",
   secret:
     process.env.BETTER_AUTH_SECRET ||
     "development-only-rbac-disabled-until-a-real-secret-is-configured",
