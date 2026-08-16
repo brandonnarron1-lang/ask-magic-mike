@@ -33,3 +33,9 @@ The existing Vercel Sensitive `OPENAI_API_KEY` remains the approved source. It i
 Authenticated Vercel inspection on 2026-08-16 confirmed the key is Sensitive and Production-scoped. No duplicate key was created for Preview. Production flags enable operator-only lead intelligence and durable advisory persistence; asynchronous workers and all automatic actions remain disabled for the initial release.
 
 The Phase 7 Preview branch has explicit Neon Preview identity/mutation flags and message-review access. Resend webhook ingestion remains disabled in both environments until the signing secret is configured and a signed duplicate-replay acceptance test passes.
+
+## Production verification
+
+The existing key successfully completed a deployed Responses API acceptance on synthetic, suppressed data. No duplicate OpenAI key was created. Production keeps advisory intelligence and persistence enabled while asynchronous workers and all automatic actions remain disabled.
+
+The existing Resend key successfully accepted the single authorized Brandon QA send but returned HTTP 401 for the sent-email retrieve endpoint, consistent with a send-scoped key. The key was not broadened or replaced. Provider-webhook ingestion remains disabled until a signing secret can be configured and verified.

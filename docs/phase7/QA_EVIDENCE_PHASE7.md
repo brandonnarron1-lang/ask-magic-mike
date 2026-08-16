@@ -23,9 +23,13 @@ Evidence is appended only from executed commands and deployed checks.
 - Preview migration `20260816143000`: exactly one ledger record; all three Phase 7 tables present.
 - Production migration `20260816143000`: committed in one transaction through the authenticated Neon Production SQL Editor; exactly one ledger record; all three Phase 7 tables present; zero rows added; live leads remained zero; unsuppressed test leads remained zero.
 - Existing Vercel Sensitive `OPENAI_API_KEY`: confirmed present for Production by name/scope only. Its value was never displayed, downloaded, copied, or logged.
-- Production Phase 7 AI flags were prepared with advisory intelligence and persistence enabled while async workers and automatic actions remain disabled.
+- Production provider acceptance reused that key from an unaliased Production-environment deployment. The Responses API returned a schema-valid advisory result using `gpt-5.6-luna` in 7,698 ms (491 input tokens, 796 output tokens, estimated cost $0.005267). The synthetic record remained `is_test=true`, suppressed, and non-contactable; no automatic action ran.
+- PR 156 merged to `main` at `4b4caefcd2aea2944a06df71a8cf3e3e569b969d`. Canonical Production deployment `dpl_31FNiQF1TcRw7cHZkmb8eFnRFmKc` became Ready and retained the established Ask Magic Mike aliases.
+- Post-release Production checks: smoke 19 passed with 2 intentional read-only skips; funnel 15/15; monitor 9/9; lead-pipe health passed; liveness/readiness passed; NellySelly isolation passed; no released-route runtime error cluster was observed.
+- One Brandon-only QA email was accepted by Resend. Subject: `[TEST — BRANDON QA] Phase 7 messaging release-candidate review`; provider message ID: `871e5b96-a10b-492a-bb23-9898824f0cd3`. The API confirmed `duplicate=false`, no Mike delivery, no consumer delivery, and no BCC.
+- The connected Gmail profile is `dabnelly23@gmail.com`, not the authorized recipient inbox `brandonnarron1@gmail.com`; it therefore cannot prove recipient-inbox arrival. A read-only Resend retrieve request returned HTTP 401 because the existing key is send-scoped. Evidence is correctly classified as provider accepted, not inbox delivered.
 - Resend webhook remains disabled pending a securely configured signing secret and signed-event acceptance.
 
-## Pending before final release claim
+## Remaining release boundaries
 
-Merge, Ready Production deployment, deployed OpenAI provider/fallback acceptance, Brandon-only QA inbox acceptance, Production smoke/monitoring, and final visual/package artifacts. Signed Resend webhook acceptance remains a separate disabled gate until its provider signing secret is available.
+Recipient-inbox rendering/receipt remains an owner review at the authorized Brandon inbox. Signed Resend webhook acceptance remains a separate disabled gate until its provider signing secret is available. Carrier SMS, consumer messaging, sequence scheduling, AI automatic actions, and Mike activation remain disabled.

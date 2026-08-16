@@ -8,6 +8,9 @@
 - Applied additive migration `20260816143000` once to isolated Preview and once to canonical Neon Production; all three new server-only tables are empty and Production lead-contactability counts are unchanged.
 - Kept consumer email, nurture, carrier SMS, sequence scheduling, AI automatic actions, and unsigned provider webhook ingestion disabled.
 - Produced Ready PR 156 Preview deployment `dpl_GXf3kT2543T565Me7bUowo1WYGL7`; Production application deployment and Brandon-only inbox acceptance remain the next controlled checks.
+- Merged PR 156 at `4b4caefcd2aea2944a06df71a8cf3e3e569b969d` and released Ready Production deployment `dpl_31FNiQF1TcRw7cHZkmb8eFnRFmKc`; Production smoke, funnel, monitoring, health, and isolation checks passed.
+- Completed a deployed OpenAI Responses acceptance with the existing Sensitive Production key on synthetic suppressed data; no key value was exposed and no automatic action ran.
+- Sent one controlled Brandon-only QA email. Resend accepted provider message `871e5b96-a10b-492a-bb23-9898824f0cd3`; no Mike, consumer, BCC, or SMS delivery was requested. Recipient-inbox receipt remains owner-verified because the connected Gmail profile is a different mailbox and the Resend key is send-scoped.
 
 ## 2026-08-15 — Phase 6 Production schema acceptance
 
