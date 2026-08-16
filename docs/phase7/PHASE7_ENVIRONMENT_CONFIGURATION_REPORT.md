@@ -30,3 +30,6 @@ The QA email route queries the canonical lead record and refuses an override unl
 
 The existing Vercel Sensitive `OPENAI_API_KEY` remains the approved source. It is not copied, printed, downloaded, or committed. Phase 7 verifies it only from a deployed environment and falls back deterministically on provider or model failure.
 
+Authenticated Vercel inspection on 2026-08-16 confirmed the key is Sensitive and Production-scoped. No duplicate key was created for Preview. Production flags enable operator-only lead intelligence and durable advisory persistence; asynchronous workers and all automatic actions remain disabled for the initial release.
+
+The Phase 7 Preview branch has explicit Neon Preview identity/mutation flags and message-review access. Resend webhook ingestion remains disabled in both environments until the signing secret is configured and a signed duplicate-replay acceptance test passes.
