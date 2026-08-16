@@ -51,11 +51,54 @@ describe("Phase 7 Resend webhook", () => {
     expect(await response.json()).toMatchObject({ ok: true, event_type: "delivered", matched_notification: true });
     expect(query.mock.calls.some(([statement]) => String(statement).includes("INSERT INTO public.provider_webhook_events"))).toBe(true);
     expect(query.mock.calls.some(([statement]) => String(statement).includes("INSERT INTO public.communication_events"))).toBe(true);
+    const notificationUpdate = query.mock.calls.find(([statement]) =>
+      String(statement).includes("UPDATE public.lead_notifications"));
+    expect(notificationUpdate?.[1]?.slice(0, 3)).toEqual([false, "resend_delivered", true]);
+    expect(JSON.parse(String(notificationUpdate?.[1]?.[4]))).toMatchObject({
+      provider_last_event: "delivered",
+      provider_delivery_confirmed: true,
+    });
+  });
+
+  it("records delayed delivery without marking a terminal failure", async () => {
+    const response = await POST(request({ type: "email.delivery_delayed", created_at: new Date().toISOString(), data: { email_id: "email_1" } }));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ ok: true, event_type: "delivery_delayed" });
+    const notificationUpdate = query.mock.calls.find(([statement]) =>
+      String(statement).includes("UPDATE public.lead_notifications"));
+    expect(notificationUpdate?.[1]?.slice(0, 3)).toEqual([false, "resend_delivery_delayed", false]);
+  });
+
+  it("returns an idempotent success for duplicate provider events", async () => {
+    query.mockImplementation(async (statement: string) => {
+      if (statement.includes("FROM public.provider_webhook_events")) {
+        return [{ id: "33333333-3333-4333-8333-333333333333", processing_status: "processed" }];
+      }
+      return [];
+    });
+    const response = await POST(request({ type: "email.delivered", created_at: new Date().toISOString(), data: { email_id: "email_1" } }));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ ok: true, duplicate: true, event_type: "delivered" });
+    expect(query).toHaveBeenCalledTimes(1);
   });
 
   it("suppresses email after a verified complaint", async () => {
     const response = await POST(request({ type: "email.complained", created_at: new Date().toISOString(), data: { email_id: "email_1" } }));
     expect(response.status).toBe(200);
+    expect(query.mock.calls.some(([statement]) => String(statement).includes("SET email_suppressed = true"))).toBe(true);
+  });
+
+  it("marks a verified bounce terminal and suppresses future email", async () => {
+    const response = await POST(request({ type: "email.bounced", created_at: new Date().toISOString(), data: { email_id: "email_1" } }));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ ok: true, event_type: "bounced" });
+    const notificationUpdate = query.mock.calls.find(([statement]) =>
+      String(statement).includes("UPDATE public.lead_notifications"));
+    expect(notificationUpdate?.[1]?.slice(0, 3)).toEqual([true, "resend_bounced", false]);
+    expect(JSON.parse(String(notificationUpdate?.[1]?.[4]))).toMatchObject({
+      provider_last_event: "bounced",
+      provider_terminal_failure: true,
+    });
     expect(query.mock.calls.some(([statement]) => String(statement).includes("SET email_suppressed = true"))).toBe(true);
   });
 });

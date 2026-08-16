@@ -2,6 +2,16 @@
 
 Evidence is appended only from executed commands and deployed checks.
 
+## Provider-lifecycle hardening addendum
+
+- The signed Resend route now preserves `sent_at` for accepted delivery events and records the latest normalized provider event/time in safe notification metadata.
+- `email.delivered` records an explicit delivery-confirmed marker; later open/click events cannot regress it. Bounce, complaint, and failed events retain terminal-failure handling and suppression behavior.
+- The protected Notification Center now displays the latest provider event and provider timestamp without exposing raw webhook payloads.
+- Focused webhook verification: 6 tests passed for invalid signatures, delivery metadata, delayed delivery, duplicate replay, complaint suppression, and terminal bounce handling.
+- Full release gate on 2026-08-16: 172 test files / 2,624 tests passed; typecheck, lint, optimized Next.js build, 70-route manifest, 14-control release-safety scan, and Ask Magic Mike/NellySelly isolation all passed.
+- No database migration, lead mutation, email, BCC, SMS, push notification, or consumer acknowledgment was created by this hardening pass.
+- Production event ingestion remains disabled until the Resend signing secret is created through the approved provider interface, stored securely in Vercel Production, and validated with a signed event plus duplicate replay.
+
 ## Funnel-accessibility polish addendum
 
 - Matched Production/local visual comparison: `output/phase7/screenshots/current-audit/08-before-after-comparison.jpg`.

@@ -40,6 +40,15 @@ function Badge({ children }: { children: ReactNode }) {
   );
 }
 
+function providerLifecycle(notification: LeadNotificationRecord) {
+  const event = notification.metadata.provider_last_event;
+  const occurredAt = notification.metadata.provider_last_event_at;
+  return {
+    event: typeof event === "string" && /^[a-z_]{1,40}$/.test(event) ? event : null,
+    occurredAt: typeof occurredAt === "string" ? occurredAt : null,
+  };
+}
+
 function RetryControl({ notification }: { notification: LeadNotificationRecord }) {
   if (!isNotificationRetryEligible(notification)) return null;
 
@@ -68,6 +77,7 @@ function RetryControl({ notification }: { notification: LeadNotificationRecord }
 }
 
 function NotificationCard({ notification }: { notification: LeadNotificationRecord }) {
+  const providerEvent = providerLifecycle(notification);
   return (
     <article className="rounded-lg border border-white/10 bg-[#0b0b0b] p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -102,6 +112,16 @@ function NotificationCard({ notification }: { notification: LeadNotificationReco
         <div>
           <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Next retry</dt>
           <dd className="mt-1 text-[#f4ead4]">{shortDate(notification.next_attempt_at)}</dd>
+        </div>
+        <div>
+          <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Provider event</dt>
+          <dd className="mt-1 text-[#f4ead4]">
+            {providerEvent.event ? providerEvent.event.replaceAll("_", " ") : "Not received"}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Provider event time</dt>
+          <dd className="mt-1 text-[#f4ead4]">{shortDate(providerEvent.occurredAt)}</dd>
         </div>
         <div className="sm:col-span-2 lg:col-span-4">
           <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Provider message ID</dt>
