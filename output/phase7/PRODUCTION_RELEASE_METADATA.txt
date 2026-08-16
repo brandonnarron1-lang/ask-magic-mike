@@ -4,8 +4,10 @@ Funnel accessibility PR: 158
 Funnel accessibility merge commit: fb6312d60c287477fc030d13804bde9f7c8884b2
 Evidence PR: 159
 Evidence merge commit: 5a59482aa95f82869e753e2ca96d7e8e60d35701
+Provider lifecycle hardening PR: 161
+Provider lifecycle hardening merge commit: 8f7697de5a7bf3384fb657fd5d0bbc31115dd6ad
 Behavioral Production deployment ID: dpl_3TCT4xrVCdh55xMzCoCC1qzhJrbV
-Latest canonical Production deployment ID: dpl_Fk1hcknGWLxibCV4LPZHanQcsfJV
+Latest canonical Production deployment ID: dpl_9xMNXTJP2iNdyGm3MnA42aQWTgPG
 Production URL: https://www.askmagicmike.com
 Accessibility Preview URL: https://ask-magic-mike-git-codex-phase7-funne-4131ae-eyes-up-industries.vercel.app
 Neon project: bitter-star-20214385
@@ -16,6 +18,9 @@ QA provider message ID: 871e5b96-a10b-492a-bb23-9898824f0cd3
 QA provider state proven: accepted, sent, delivered
 QA inbox state proven: yes, authorized recipient Inbox verified read-only
 OpenAI acceptance: Responses API structured output passed
+Provider lifecycle release gate: 172 files / 2,624 tests passed
+Provider lifecycle Production health: smoke, funnel, monitor, lead-pipe, isolation, error/warning logs passed
+Resend webhook ingestion: disabled pending signing-secret acceptance
 Carrier SMS: disabled
 Consumer email: disabled
 Mike activation: deferred
