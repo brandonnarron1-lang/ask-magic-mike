@@ -10,7 +10,7 @@ CANONICAL RELEASE
 - Provider lifecycle hardening PR: https://github.com/brandonnarron1-lang/ask-magic-mike/pull/161
 - Completion gap-closure PR: https://github.com/brandonnarron1-lang/ask-magic-mike/pull/163
 - Latest merge commit: 8e328fe9d26efcdba923489b37126c67e89bd62a
-- Production deployment: dpl_5zYcSWtGquNvi8UTpVTkc6brAtGA
+- Signed-webhook acceptance deployment: dpl_5g43rkAatsVi3FHyarZf7Km1jZfG
 - Public URL: https://www.askmagicmike.com
 - Database: Neon bitter-star-20214385, Production br-round-base-auh6h2wd
 
@@ -22,7 +22,7 @@ CONTROLLED ACCEPTANCE
 - No Mike, consumer, BCC, or carrier-SMS delivery was requested.
 - The authorized brandonnarron1@gmail.com Inbox contains the message; sender, subject prefix, QA banner, HTML render, and review link were verified read-only.
 - Final release handling passed 174 test files / 2,643 tests, shipped to Production, and passed public smoke 19/19, conversion funnel 15/15, synthetic monitoring 6/6, health, isolation, dependency, secret, and runtime-log checks.
-- Signed webhook ingestion remains off until its separately approved secret-creation and replay acceptance step.
+- Signed webhook ingestion is enabled. Invalid-signature rejection, one correctly signed no-PII synthetic event, durable hash-minimized Neon storage, and exact duplicate replay passed. The event matched no notification and no email was sent.
 
 INTENTIONALLY DISABLED
 - Consumer acknowledgment and nurture
@@ -30,7 +30,6 @@ INTENTIONALLY DISABLED
 - Sequence scheduler
 - AI automatic actions and async workers
 - Mike activation
-- Resend webhook ingestion pending a signing secret
 
 ARTIFACT NOTE
 The PDF release report, visual evidence, code references, migration, tests, and operating documentation are included. Editable PPTX and XLSX workbooks are not represented as complete: the required workspace artifact dependency loader was unavailable in this session, and project rules prohibit substituting other Office-generation libraries or renaming non-editable files.

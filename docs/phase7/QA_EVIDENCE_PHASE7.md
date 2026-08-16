@@ -12,7 +12,7 @@ Evidence is appended only from executed commands and deployed checks.
 - PR 161 merged at `8f7697de5a7bf3384fb657fd5d0bbc31115dd6ad`; Production deployment `dpl_9xMNXTJP2iNdyGm3MnA42aQWTgPG` became Ready with both canonical aliases.
 - Post-release checks: smoke 19 passed / 2 intentional skips; funnel 15/15; monitor 9/9; lead-pipe health passed; isolation passed; Vercel error and warning queries returned no logs.
 - No database migration, lead mutation, email, BCC, SMS, push notification, or consumer acknowledgment was created by this hardening pass.
-- Production event ingestion remains disabled until the Resend signing secret is created through the approved provider interface, stored securely in Vercel Production, and validated with a signed event plus duplicate replay.
+- Production event ingestion was enabled after the Resend signing secret was created through the approved provider interface and stored as a Sensitive Production-only Vercel variable. Deployment `dpl_5g43rkAatsVi3FHyarZf7Km1jZfG` rejected an invalid signature, accepted one correctly signed no-PII synthetic event, and returned `duplicate=true` for exact replay. Neon Production contains exactly one matching event row with `signature_verified=true`; the event was ignored because it matched no notification, and no outbound message or lead was created.
 
 ## Funnel-accessibility polish addendum
 
@@ -57,8 +57,8 @@ Evidence is appended only from executed commands and deployed checks.
 - One Brandon-only QA email was accepted by Resend. Subject: `[TEST — BRANDON QA] Phase 7 messaging release-candidate review`; provider message ID: `871e5b96-a10b-492a-bb23-9898824f0cd3`. The API confirmed `duplicate=false`, no Mike delivery, no consumer delivery, and no BCC.
 - Read-only Resend dashboard inspection confirmed `sent` and `delivered` at 10:50 AM. Read-only inspection of the already-authenticated authorized Gmail account confirmed the message in `brandonnarron1@gmail.com` Inbox with the expected sender, subject prefix, QA banner, HTML body, and review link. Evidence is stored under `output/phase7/screenshots/email-acceptance/`.
 - The Gmail connector remains attached to `dabnelly23@gmail.com`; the recipient proof came from the authenticated browser account at Gmail slot `u/0`. No mailbox write was performed.
-- Resend webhook remains disabled pending a securely configured signing secret and signed-event acceptance.
+- Resend webhook ingestion is enabled and signed-event acceptance passed. The synthetic acceptance event is not represented as a provider-delivered email.
 
 ## Remaining release boundaries
 
-Brandon recipient-inbox receipt and desktop rendering are verified. A real mobile mail-client capture, reply-path round trip, and dark-mode client capture remain optional conformance checks and were not falsely inferred from the desktop browser. Signed Resend webhook acceptance remains a separate disabled gate until its provider signing secret is securely created and configured. Carrier SMS, consumer messaging, sequence scheduling, AI automatic actions, and Mike activation remain disabled.
+Brandon recipient-inbox receipt, desktop rendering, and signed Resend webhook ingestion are verified. A real mobile mail-client capture, reply-path round trip, and dark-mode client capture remain optional conformance checks and were not falsely inferred from the desktop browser. Carrier SMS, consumer messaging, sequence scheduling, AI automatic actions, and Mike activation remain disabled.

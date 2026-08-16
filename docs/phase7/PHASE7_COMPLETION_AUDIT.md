@@ -1,10 +1,10 @@
 # Phase 7 completion audit
 
-Audit date: 2026-08-16. Canonical branch: `codex/phase7-completion-gap-closure-2026-08-16`. This ledger distinguishes implemented code, verified evidence, and external acceptance that is still gated. It does not relabel a pending provider or Office-artifact step as complete.
+Audit date: 2026-08-16. Canonical evidence branch: `codex/phase7-provider-webhook-acceptance-2026-08-16`. This ledger distinguishes implemented code, verified evidence, and external acceptance that is still gated. It does not relabel a pending Office-artifact or authenticated Copilot acceptance step as complete.
 
 | # | Criterion | State | Evidence / remaining gate |
 |---:|---|---|---|
-| 1 | Production remains healthy | VERIFIED | PR #163 Production deployment `dpl_5zYcSWtGquNvi8UTpVTkc6brAtGA` is Ready; smoke 19/19, funnel 15/15, and monitor 6/6 pass. |
+| 1 | Production remains healthy | VERIFIED | Signed-webhook acceptance deployment `dpl_5g43rkAatsVi3FHyarZf7Km1jZfG` is Ready; smoke 19/19 with two intentional skips and canonical aliases pass. |
 | 2 | Phase 6 tables power services | IMPLEMENTED | Permission, sequence, provider event, AI intelligence, and usage services use canonical Neon tables. |
 | 3 | QA recipient override is safe | VERIFIED | QA delivery contract is restricted to approved test routing. |
 | 4 | Override requires test + suppressed | VERIFIED | State-machine and recipient tests enforce both flags. |
@@ -23,7 +23,7 @@ Audit date: 2026-08-16. Canonical branch: `codex/phase7-completion-gap-closure-2
 | 17 | Bounded retries work | VERIFIED | AI max two; mock sequence max three with terminal failure. |
 | 18 | Quiet hours work | VERIFIED | `America/New_York` SMS policy tests. |
 | 19 | Frequency caps work | VERIFIED | SMS frequency policy tests. |
-| 20 | Resend webhooks verified | PARTIAL | Signature/idempotency tests pass; provider webhook creation and signed live acceptance await explicit approval. |
+| 20 | Resend webhooks verified | VERIFIED | Enabled Resend webhook `d466d4d9-6837-49ae-9343-86c54c2bd720`; invalid signature rejected; correctly signed no-PII synthetic event stored once; exact replay returned `duplicate=true`; one verified/hash-minimized Neon row. |
 | 21 | Duplicate provider events safe | VERIFIED | Duplicate replay tests. |
 | 22 | Bounce handling works | VERIFIED | Terminal state and suppression tests. |
 | 23 | Complaint handling works | VERIFIED | Complaint suppression tests. |
@@ -54,7 +54,7 @@ Audit date: 2026-08-16. Canonical branch: `codex/phase7-completion-gap-closure-2
 | 48 | Visual package exists | VERIFIED | Phase 7 visual ZIP and inventory. |
 | 49 | Tests pass | VERIFIED | 2026-08-16 full release gate: 174 test files and 2,643 tests pass; 14/14 release-safety checks and system-isolation check pass. |
 | 50 | Build passes | VERIFIED | Strict typecheck, ESLint, optimized Next.js Production build, and route manifest pass (72 active routes; 16 acknowledged root/src duplicates). |
-| 51 | Production logs clean | VERIFIED | Post-release Vercel error-log scan returned no logs/errors for the new deployment. |
+| 51 | Production logs clean | VERIFIED | Post-acceptance Vercel error-log scan returned no logs/errors for deployment `dpl_5g43rkAatsVi3FHyarZf7Km1jZfG`. |
 | 52 | NellySelly isolated | VERIFIED | Isolation check passed; no shared project/domain/database variable introduced. |
 | 53 | Legacy deployments disconnected | VERIFIED | Canonical project/domain mapping preserved. |
 | 54 | Final ZIP verified | VERIFIED | Refreshed 103-file release package passed `unzip -tq`, package secret scan, and checksum verification. |
@@ -64,4 +64,4 @@ Audit date: 2026-08-16. Canonical branch: `codex/phase7-completion-gap-closure-2
 
 ## Honest completion boundary
 
-The application-layer gaps are now closed locally and the complete release gate passes. Phase 7 must not be declared complete until post-deploy checks pass, the signed Resend webhook acceptance is approved and completed, and the required editable Office artifacts can be generated with the mandated workspace runtime.
+The application-layer gaps are closed and signed Resend webhook Production acceptance is complete. Phase 7 must not be declared complete until the current release receives authenticated Copilot acceptance and the required editable Office artifacts can be generated with the mandated workspace runtime.
