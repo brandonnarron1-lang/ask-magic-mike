@@ -24,6 +24,13 @@ All timestamps are America/New_York unless noted.
 - Consumer email, carrier SMS, Mike activation, automatic AI actions, and the
   sequence scheduler remain disabled. No external notification or production
   data mutation was performed by this gate.
+- PR `#163` GitHub release gate and Vercel checks passed. Preview deployment
+  `dpl_2uuhZkUMuu4qZTQBfw7rMdNd5eG6` is Ready. Authenticated Vercel CLI probes
+  returned live 200, ready 200, and home-value 200; the cron processor rejected
+  an unauthenticated request with 401; the inbound-SMS webhook rejected an
+  unsigned request with 401; and the Copilot mutation remained unavailable in
+  the disabled Preview RBAC environment with a truthful 409. No write or
+  external provider action occurred.
 
 ## Preview RBAC and secure activation acceptance — 2026-08-14
 
