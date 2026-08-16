@@ -2,19 +2,19 @@ import { LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../..
 
 export function LeadConsentField({ checked, onChange }: { checked?: boolean; onChange?: (checked: boolean) => void }) {
   return (
-    <div className="rounded-md border border-white/10 bg-black/25 p-3 sm:col-span-2">
-      <label className="flex items-start gap-3 text-sm leading-6 text-[#d9ceb8]">
+    <div className="rounded-md border border-white/15 bg-black/30 p-4 sm:col-span-2">
+      <label className="flex cursor-pointer items-start gap-3 text-[15px] leading-6 text-[#e4dac8]">
         <input
           type="checkbox"
           name="consent"
           value="yes"
           checked={checked}
           onChange={onChange ? (event) => onChange(event.target.checked) : undefined}
-          className="mt-1 h-4 w-4 accent-[#cda24a]"
+          className="mt-0.5 h-5 w-5 shrink-0 accent-[#cda24a]"
         />
         <span>
           {LEAD_CONSENT_LANGUAGE_TEXT}
-          <span className="mt-1 block text-[11px] uppercase tracking-[0.12em] text-[#8f8778]">
+          <span className="mt-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[#b7aa94]">
             Consent language version: {LEAD_CONSENT_LANGUAGE_VERSION}
           </span>
         </span>
