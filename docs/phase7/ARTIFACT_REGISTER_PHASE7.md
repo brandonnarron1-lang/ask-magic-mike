@@ -6,7 +6,7 @@ Date: 2026-08-16
 
 - `output/phase7/pdfs/ASK_MAGIC_MIKE_PHASE7_MESSAGING_AI_RELEASE_CANDIDATE.pdf` — eight-page release evidence report.
 - `output/phase7/ASK_MAGIC_MIKE_PHASE7_VISUAL_ASSET_PACKAGE.zip` — 31-file desktop/mobile, Message Review Studio, matched funnel-validation, recipient-email acceptance, PDF-cover, and visual-inventory package; SHA-256 `4a7b283a3f92c0a1950c2c57209ccf4bf8a7a087b80efd9cee9044c06e293ad5`.
-- `output/phase7/Ask_Magic_Mike_Phase7_Messaging_AI_Release_Candidate_Package.zip` — verified 79-file code, migration, test, documentation, PDF, recipient-inbox, and visual-evidence package; final SHA-256 is recorded in its adjacent sidecar to avoid a self-referential archive hash.
+- `output/phase7/Ask_Magic_Mike_Phase7_Messaging_AI_Release_Candidate_Package.zip` — verified 80-file code, migration, test, documentation, PDF, recipient-inbox, provider-lifecycle hardening, and visual-evidence package; final SHA-256 is recorded in its adjacent sidecar to avoid a self-referential archive hash.
 - SHA-256 sidecars for both ZIP archives.
 - `scripts/phase7/generate_release_pdf.py` — reproducible ReportLab source for the PDF.
 - `output/phase7/screenshots/email-acceptance/` — recipient Gmail render, Resend delivered-event timeline, and narrow-viewport audit captures.

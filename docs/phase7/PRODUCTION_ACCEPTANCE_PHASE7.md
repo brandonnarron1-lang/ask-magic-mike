@@ -12,6 +12,8 @@ The Phase 7 accessibility polish was merged through PR 158 at `fb6312d60c287477f
 
 Brandon-only delivery is now verified. Authenticated Resend inspection showed `sent` and `delivered`, and the authorized `brandonnarron1@gmail.com` Inbox contained the expected message with the approved sender, subject prefix, QA banner, HTML render, and protected Message Review Studio link. No mailbox write, Mike delivery, consumer delivery, BCC, or carrier SMS occurred. Evidence is stored under `output/phase7/screenshots/email-acceptance/`.
 
+Provider-lifecycle hardening merged through PR 161 at `8f7697de5a7bf3384fb657fd5d0bbc31115dd6ad`. Production deployment `dpl_9xMNXTJP2iNdyGm3MnA42aQWTgPG` is Ready, owns the established apex and `www` aliases, and passed smoke (19/19 with two intentional read-only skips), funnel (15/15), monitor (9/9), lead-pipe, isolation, and no-error/no-warning log checks. The protected Notification Center now shows normalized provider event state/time, delivery confirmation cannot be regressed by later open/click events, and delayed/duplicate/terminal-failure paths are covered. No migration or live lead mutation occurred.
+
 Carrier SMS, consumer messaging, sequence scheduling, AI automatic action, Mike activation, and Resend webhook ingestion remain disabled. Production webhook acceptance still requires the signing secret and one signed-event/duplicate-replay test.
 
 Phase 7 is deployed as a guarded release candidate; the Form 3 consumer acknowledgment pilot remains disabled behind its separate approval gate.

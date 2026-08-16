@@ -9,6 +9,8 @@ Evidence is appended only from executed commands and deployed checks.
 - The protected Notification Center now displays the latest provider event and provider timestamp without exposing raw webhook payloads.
 - Focused webhook verification: 6 tests passed for invalid signatures, delivery metadata, delayed delivery, duplicate replay, complaint suppression, and terminal bounce handling.
 - Full release gate on 2026-08-16: 172 test files / 2,624 tests passed; typecheck, lint, optimized Next.js build, 70-route manifest, 14-control release-safety scan, and Ask Magic Mike/NellySelly isolation all passed.
+- PR 161 merged at `8f7697de5a7bf3384fb657fd5d0bbc31115dd6ad`; Production deployment `dpl_9xMNXTJP2iNdyGm3MnA42aQWTgPG` became Ready with both canonical aliases.
+- Post-release checks: smoke 19 passed / 2 intentional skips; funnel 15/15; monitor 9/9; lead-pipe health passed; isolation passed; Vercel error and warning queries returned no logs.
 - No database migration, lead mutation, email, BCC, SMS, push notification, or consumer acknowledgment was created by this hardening pass.
 - Production event ingestion remains disabled until the Resend signing secret is created through the approved provider interface, stored securely in Vercel Production, and validated with a signed event plus duplicate replay.
 
