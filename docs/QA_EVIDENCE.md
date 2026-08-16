@@ -15,8 +15,8 @@ All timestamps are America/New_York unless noted.
   and the canonical signed inbound-SMS webhook.
 - `pnpm audit --prod --audit-level high` — PASS: no known Production dependency
   vulnerabilities.
-- `gitleaks detect --source . --redact --no-banner` — PASS: 369 commits and
-  approximately 11.54 MB scanned; no leaks found.
+- `gitleaks detect --source . --redact --no-banner` — PASS after final merge:
+  372 commits and approximately 11.71 MB scanned; no leaks found.
 - The existing encrypted Production `OPENAI_API_KEY` is reused unchanged on the
   canonical Ask Magic Mike Vercel project. It is read only in server code and is
   not copied, rotated, downloaded, logged, committed, or exposed through a
@@ -31,6 +31,14 @@ All timestamps are America/New_York unless noted.
   unsigned request with 401; and the Copilot mutation remained unavailable in
   the disabled Preview RBAC environment with a truthful 409. No write or
   external provider action occurred.
+- PR `#163` merged as `8e328fe9d26efcdba923489b37126c67e89bd62a`.
+  Production deployment `dpl_5zYcSWtGquNvi8UTpVTkc6brAtGA` is Ready and owns
+  the apex and `www` aliases. Read-only Production verification passed: smoke
+  19/19 with two intentional write/auth skips, conversion funnel 15/15,
+  synthetic monitor 6/6 with one intentional authenticated-health skip, and no
+  error-level Vercel logs for the deployment. No test lead, email, SMS, Push,
+  sequence step, database mutation, WordPress change, or NellySelly change was
+  made.
 
 ## Preview RBAC and secure activation acceptance — 2026-08-14
 

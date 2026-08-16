@@ -8,8 +8,9 @@ CANONICAL RELEASE
 - Accessibility polish PR: https://github.com/brandonnarron1-lang/ask-magic-mike/pull/158
 - Final merge commit: fb6312d60c287477fc030d13804bde9f7c8884b2
 - Provider lifecycle hardening PR: https://github.com/brandonnarron1-lang/ask-magic-mike/pull/161
-- Latest merge commit: 8f7697de5a7bf3384fb657fd5d0bbc31115dd6ad
-- Production deployment: dpl_9xMNXTJP2iNdyGm3MnA42aQWTgPG
+- Completion gap-closure PR: https://github.com/brandonnarron1-lang/ask-magic-mike/pull/163
+- Latest merge commit: 8e328fe9d26efcdba923489b37126c67e89bd62a
+- Production deployment: dpl_5zYcSWtGquNvi8UTpVTkc6brAtGA
 - Public URL: https://www.askmagicmike.com
 - Database: Neon bitter-star-20214385, Production br-round-base-auh6h2wd
 
@@ -20,7 +21,7 @@ CONTROLLED ACCEPTANCE
 - Provider message ID: 871e5b96-a10b-492a-bb23-9898824f0cd3
 - No Mike, consumer, BCC, or carrier-SMS delivery was requested.
 - The authorized brandonnarron1@gmail.com Inbox contains the message; sender, subject prefix, QA banner, HTML render, and review link were verified read-only.
-- Provider lifecycle handling passed 172 test files / 2,624 tests, shipped to Production, and passed public, health, isolation, and runtime-log checks.
+- Final release handling passed 174 test files / 2,643 tests, shipped to Production, and passed public smoke 19/19, conversion funnel 15/15, synthetic monitoring 6/6, health, isolation, dependency, secret, and runtime-log checks.
 - Signed webhook ingestion remains off until its separately approved secret-creation and replay acceptance step.
 
 INTENTIONALLY DISABLED

@@ -4,7 +4,7 @@ Audit date: 2026-08-16. Canonical branch: `codex/phase7-completion-gap-closure-2
 
 | # | Criterion | State | Evidence / remaining gate |
 |---:|---|---|---|
-| 1 | Production remains healthy | VERIFIED | Latest accepted Production checks passed; repeat after this release. |
+| 1 | Production remains healthy | VERIFIED | PR #163 Production deployment `dpl_5zYcSWtGquNvi8UTpVTkc6brAtGA` is Ready; smoke 19/19, funnel 15/15, and monitor 6/6 pass. |
 | 2 | Phase 6 tables power services | IMPLEMENTED | Permission, sequence, provider event, AI intelligence, and usage services use canonical Neon tables. |
 | 3 | QA recipient override is safe | VERIFIED | QA delivery contract is restricted to approved test routing. |
 | 4 | Override requires test + suppressed | VERIFIED | State-machine and recipient tests enforce both flags. |
@@ -43,7 +43,7 @@ Audit date: 2026-08-16. Canonical branch: `codex/phase7-completion-gap-closure-2
 | 37 | Public funnel visuals polished | VERIFIED | Matched before/after evidence and released accessibility fixes. |
 | 38 | Mobile visual QA passes | VERIFIED | Phase 7 responsive evidence. |
 | 39 | Desktop visual QA passes | VERIFIED | Production and inbox browser evidence. |
-| 40 | Form 3 remains healthy | VERIFIED | Canonical bridge checks; repeat after release. |
+| 40 | Form 3 remains healthy | VERIFIED | Canonical bridge checks and post-release conversion-funnel verification pass. |
 | 41 | Held forms technically mapped | VERIFIED | Form readiness matrix; activation remains held. |
 | 42 | Entry 1550 protected | VERIFIED | No import/subscription mutation. |
 | 43 | Brandon inbox acceptance passes | VERIFIED | Resend and authorized inbox evidence. |
@@ -54,11 +54,11 @@ Audit date: 2026-08-16. Canonical branch: `codex/phase7-completion-gap-closure-2
 | 48 | Visual package exists | VERIFIED | Phase 7 visual ZIP and inventory. |
 | 49 | Tests pass | VERIFIED | 2026-08-16 full release gate: 174 test files and 2,643 tests pass; 14/14 release-safety checks and system-isolation check pass. |
 | 50 | Build passes | VERIFIED | Strict typecheck, ESLint, optimized Next.js Production build, and route manifest pass (72 active routes; 16 acknowledged root/src duplicates). |
-| 51 | Production logs clean | PENDING RELEASE | Prior release clean; repeat after this merge/deploy. |
+| 51 | Production logs clean | VERIFIED | Post-release Vercel error-log scan returned no logs/errors for the new deployment. |
 | 52 | NellySelly isolated | VERIFIED | Isolation check passed; no shared project/domain/database variable introduced. |
 | 53 | Legacy deployments disconnected | VERIFIED | Canonical project/domain mapping preserved. |
-| 54 | Final ZIP verified | PENDING REFRESH | Prior ZIP verified; refresh after this release. |
-| 55 | Checksum published | PENDING REFRESH | Prior checksum published; regenerate after refresh. |
+| 54 | Final ZIP verified | VERIFIED | Refreshed 103-file release package passed `unzip -tq`, package secret scan, and checksum verification. |
+| 55 | Checksum published | VERIFIED | Final SHA-256 is recorded in the adjacent sidecar; the archive intentionally does not contain its own hash. |
 | 56 | Form 3 pilot ready but disabled | VERIFIED | Narrow release gate documented; flag remains off. |
 | 57 | Exact next approval phrase provided | VERIFIED | `APPROVE FORM 3 CONSUMER ACKNOWLEDGMENT EMAIL PILOT`. |
 
