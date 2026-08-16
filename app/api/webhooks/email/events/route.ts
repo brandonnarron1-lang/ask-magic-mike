@@ -7,6 +7,7 @@ import { normalizeEmailEvent } from "@/lib/adapters/email-webhook-normalizer";
 export const runtime = "nodejs";
 const NO_STORE = { "Cache-Control": "no-store, max-age=0" };
 const TERMINAL_FAILURES = new Set(["bounced", "complained", "suppressed", "failed"]);
+const PROVIDER_ACCEPTED_DELIVERY = new Set(["sent", "delivered", "opened", "clicked"]);
 
 function safeHeader(request: NextRequest, name: string) {
   const value = request.headers.get(name);
@@ -81,17 +82,25 @@ export async function POST(request: NextRequest) {
 
   if (notification) {
     const terminal = TERMINAL_FAILURES.has(normalized.eventType);
+    const acceptedDelivery = PROVIDER_ACCEPTED_DELIVERY.has(normalized.eventType);
     await sql.query(
       `UPDATE public.lead_notifications
           SET status = CASE WHEN $1 THEN 'permanently_failed' ELSE status END,
               error_code = CASE WHEN $1 THEN $2 ELSE error_code END,
               error_summary = CASE WHEN $1 THEN 'Provider lifecycle event requires review.' ELSE error_summary END,
               failed_at = CASE WHEN $1 THEN COALESCE(failed_at, now()) ELSE failed_at END,
+              sent_at = CASE WHEN $3 THEN COALESCE(sent_at, $4::timestamptz, now()) ELSE sent_at END,
               updated_at = now(),
-              metadata = COALESCE(metadata, '{}'::jsonb) || $3::jsonb
-        WHERE id = $4::uuid`,
+              metadata = COALESCE(metadata, '{}'::jsonb) || $5::jsonb
+        WHERE id = $6::uuid`,
       [terminal, `resend_${normalized.eventType}`,
-        JSON.stringify({ provider_last_event: normalized.eventType, provider_last_event_at: normalized.timestamp }),
+        acceptedDelivery, normalized.timestamp,
+        JSON.stringify({
+          provider_last_event: normalized.eventType,
+          provider_last_event_at: normalized.timestamp,
+          ...(normalized.eventType === "delivered" ? { provider_delivery_confirmed: true } : {}),
+          ...(terminal ? { provider_terminal_failure: true } : {}),
+        }),
         notification.id],
     );
     await sql.query(
