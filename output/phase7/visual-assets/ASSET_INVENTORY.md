@@ -10,6 +10,7 @@ This package contains current authenticated and public product screenshots used 
 - Mobile 390px: homepage, seller, home value, buyer, Ask, widget, and Lead Center active view.
 - Matched 984×964 Production-before, local-after, Preview, and released-Production validation states.
 - Local phone/consent state using synthetic, non-submitted QA values.
+- Brandon-only recipient acceptance: Gmail desktop render, Resend sent/delivered event timeline, and narrow-viewport audit captures.
 - Rendered cover of the Phase 7 PDF acceptance report.
 
 ## Design direction

@@ -10,6 +10,8 @@ Accepted: local quality gate; canonical project and NellySelly isolation; Ready 
 
 The Phase 7 accessibility polish was merged through PR 158 at `fb6312d60c287477fc030d13804bde9f7c8884b2` after the 2,621-test release gate and matched in-app-browser Preview verification. Production deployment `dpl_3TCT4xrVCdh55xMzCoCC1qzhJrbV` is Ready on Node 24.x, owns both canonical Ask Magic Mike domains, and passed post-release smoke, funnel, monitor, lead-pipe, isolation, and no-error/no-warning log checks. Production DOM verification confirmed the persistent inline alert and required marker without submitting a lead.
 
-The connected Gmail account is not the authorized recipient inbox, and the existing Resend key is send-scoped, so inbox receipt is not claimed. Brandon must review the authorized inbox for rendering and receipt. Carrier SMS, consumer messaging, sequence scheduling, AI automatic action, Mike activation, and Resend webhook ingestion remain disabled.
+Brandon-only delivery is now verified. Authenticated Resend inspection showed `sent` and `delivered`, and the authorized `brandonnarron1@gmail.com` Inbox contained the expected message with the approved sender, subject prefix, QA banner, HTML render, and protected Message Review Studio link. No mailbox write, Mike delivery, consumer delivery, BCC, or carrier SMS occurred. Evidence is stored under `output/phase7/screenshots/email-acceptance/`.
+
+Carrier SMS, consumer messaging, sequence scheduling, AI automatic action, Mike activation, and Resend webhook ingestion remain disabled. Production webhook acceptance still requires the signing secret and one signed-event/duplicate-replay test.
 
 Phase 7 is deployed as a guarded release candidate; the Form 3 consumer acknowledgment pilot remains disabled behind its separate approval gate.
