@@ -14,6 +14,8 @@ Brandon-only delivery is now verified. Authenticated Resend inspection showed `s
 
 Provider-lifecycle hardening merged through PR 161 at `8f7697de5a7bf3384fb657fd5d0bbc31115dd6ad`. Production deployment `dpl_9xMNXTJP2iNdyGm3MnA42aQWTgPG` is Ready, owns the established apex and `www` aliases, and passed smoke (19/19 with two intentional read-only skips), funnel (15/15), monitor (9/9), lead-pipe, isolation, and no-error/no-warning log checks. The protected Notification Center now shows normalized provider event state/time, delivery confirmation cannot be regressed by later open/click events, and delayed/duplicate/terminal-failure paths are covered. No migration or live lead mutation occurred.
 
-Carrier SMS, consumer messaging, sequence scheduling, AI automatic action, Mike activation, and Resend webhook ingestion remain disabled. Production webhook acceptance still requires the signing secret and one signed-event/duplicate-replay test.
+Resend webhook ingestion is now enabled and Production-verified. Webhook `d466d4d9-6837-49ae-9343-86c54c2bd720` targets the canonical HTTPS route with the exact documented event allowlist; its secret is stored as a Sensitive Production-only Vercel value. Deployment `dpl_5g43rkAatsVi3FHyarZf7Km1jZfG` rejected an invalid signature, accepted one correctly signed no-PII synthetic event, returned `duplicate=true` for exact replay, and produced exactly one verified/hash-minimized Neon event row. The synthetic event matched no notification and therefore recorded `processing_status=ignored`; no email or lead was created.
+
+Carrier SMS, consumer messaging, sequence scheduling, AI automatic action, and Mike activation remain disabled. Webhook ingestion is the only control activated by this acceptance.
 
 Phase 7 is deployed as a guarded release candidate; the Form 3 consumer acknowledgment pilot remains disabled behind its separate approval gate.

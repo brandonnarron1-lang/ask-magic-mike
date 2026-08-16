@@ -7,6 +7,15 @@ All timestamps are America/New_York unless noted.
 
 ## Phase 7 completion gap closure — 2026-08-16
 
+### Signed Resend webhook Production acceptance
+
+- Resend webhook `d466d4d9-6837-49ae-9343-86c54c2bd720` is enabled for the canonical `https://www.askmagicmike.com/api/webhooks/email/events` route and the documented eight-event allowlist.
+- The provider-issued signing secret is stored only as the Sensitive, Production-scoped Vercel variable `RESEND_WEBHOOK_SECRET`; it was not printed, committed, copied into Preview, or written into evidence.
+- Vercel deployment `dpl_5g43rkAatsVi3FHyarZf7Km1jZfG` rejected an invalid signature with HTTP 400 and `invalid_signature`.
+- One correctly signed no-PII synthetic `email.sent` payload returned HTTP 200 with `duplicate=false`; exact replay returned HTTP 200 with `duplicate=true`.
+- Neon Production contains exactly one row for event ID `msg_phase7_live_acceptance_1786914537362`, with `signature_verified=true`, payload hash `b3e5af1b0f0861316d70c77da0f04db6fac5d9830b3135d33ca00c18b114cd32`, and `processing_status=ignored` because the synthetic provider message ID matched no notification.
+- This acceptance proves deployed signature alignment, minimized durable event storage, and replay idempotency. It is not evidence of an actual provider-delivered email. No lead, notification, email, BCC, SMS, Push notification, consumer acknowledgment, or Mike message was created.
+
 - `pnpm release:gate` — PASS: Ask Magic Mike/NellySelly isolation, 14/14
   release-safety checks, 174 test files, 2,643 tests, strict typecheck, ESLint,
   optimized Next.js Production build, and the active-route manifest all pass.

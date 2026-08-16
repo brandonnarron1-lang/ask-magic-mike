@@ -8,7 +8,7 @@
 | Consumer nurture | template + sequence draft | off | not approved |
 | Carrier SMS | mock interface | off | not activated |
 | Sequence scheduler | durable state machine | off | test-only candidate |
-| Resend webhook | signed/idempotent | secret pending | deployment acceptance required |
+| Resend webhook | signed/idempotent | enabled | Production signature, durable-storage, and duplicate-replay acceptance passed |
 | AI copilot | structured/fallback | feature flagged | deployed structured-output acceptance passed |
 
 No outbound consumer automation is release-ready until a narrow purpose receives BIC/legal/owner approval and passes a suppressed Brandon test.

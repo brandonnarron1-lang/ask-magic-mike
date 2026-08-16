@@ -9,7 +9,7 @@ Provider lifecycle hardening merge commit: 8f7697de5a7bf3384fb657fd5d0bbc31115dd
 Completion gap-closure PR: 163
 Completion gap-closure merge commit: 8e328fe9d26efcdba923489b37126c67e89bd62a
 Behavioral Production deployment ID: dpl_3TCT4xrVCdh55xMzCoCC1qzhJrbV
-Latest canonical Production deployment ID: dpl_5zYcSWtGquNvi8UTpVTkc6brAtGA
+Latest canonical Production deployment ID at signed-webhook acceptance: dpl_5g43rkAatsVi3FHyarZf7Km1jZfG
 Production URL: https://www.askmagicmike.com
 Accessibility Preview URL: https://ask-magic-mike-git-codex-phase7-funne-4131ae-eyes-up-industries.vercel.app
 Neon project: bitter-star-20214385
@@ -22,7 +22,10 @@ QA inbox state proven: yes, authorized recipient Inbox verified read-only
 OpenAI acceptance: Responses API structured output passed
 Final release gate: 174 files / 2,643 tests passed
 Final Production health: smoke 19/19, funnel 15/15, monitor 6/6, isolation, dependency audit, 372-commit secret scan, and error logs passed
-Resend webhook ingestion: disabled pending signing-secret acceptance
+Resend webhook ingestion: enabled; invalid-signature rejection, signed no-PII event, durable Neon storage, and duplicate replay passed
+Resend webhook ID: d466d4d9-6837-49ae-9343-86c54c2bd720
+Synthetic acceptance event ID: msg_phase7_live_acceptance_1786914537362
+Synthetic acceptance disposition: ignored because no notification matched; no email was sent
 Carrier SMS: disabled
 Consumer email: disabled
 Mike activation: deferred
