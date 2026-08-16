@@ -15,8 +15,10 @@ describe("Phase 7 durable sequence state machine", () => {
     expect(transitionSequence("draft", "approve")).toMatchObject({ ok: false });
   });
 
-  it("stops test, suppressed, opt-out, duplicate, and terminal records", () => {
+  it("stops unsafe test, suppressed, opt-out, duplicate, and terminal records", () => {
     expect(sequenceMustStop({ isTest: true })).toMatchObject({ stop: true, reason: "test_or_suppressed" });
+    expect(sequenceMustStop({ suppressed: true })).toMatchObject({ stop: true, reason: "test_or_suppressed" });
+    expect(sequenceMustStop({ isTest: true, suppressed: true, allowSuppressedQaTest: true })).toEqual({ stop: false, reason: null });
     expect(sequenceMustStop({ optedOut: true })).toMatchObject({ stop: true, reason: "opt_out" });
     expect(sequenceMustStop({ duplicate: true })).toMatchObject({ stop: true, reason: "duplicate_consolidation" });
     expect(sequenceMustStop({ terminalStage: true })).toMatchObject({ stop: true, reason: "terminal_stage" });

@@ -45,7 +45,12 @@ export function sequenceMustStop(input: {
   duplicate?: boolean;
   isTest?: boolean;
   suppressed?: boolean;
+  allowSuppressedQaTest?: boolean;
 }) {
+  const unsafeTestState = Boolean(
+    (input.isTest || input.suppressed) &&
+    !(input.allowSuppressedQaTest && input.isTest === true && input.suppressed === true),
+  );
   const reasons: Array<[boolean | undefined, string]> = [
     [input.replied, "consumer_reply"],
     [input.contacted, "contact_recorded"],
@@ -57,7 +62,7 @@ export function sequenceMustStop(input: {
     [input.bicHold, "bic_hold"],
     [input.manuallyPaused, "manual_pause"],
     [input.duplicate, "duplicate_consolidation"],
-    [input.isTest || input.suppressed, "test_or_suppressed"],
+    [unsafeTestState, "test_or_suppressed"],
   ];
   const match = reasons.find(([active]) => active);
   return match ? { stop: true as const, reason: match[1] } : { stop: false as const, reason: null };

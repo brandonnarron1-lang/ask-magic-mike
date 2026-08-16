@@ -74,6 +74,7 @@ export async function createLeadSequence(input: {
     optedOut: lead.email_suppressed === true || lead.sms_suppressed === true,
     duplicate: Boolean(lead.master_lead_id),
     terminalStage: ["closed", "closed_won", "closed_lost", "disqualified", "spam_test"].includes(String(lead.status || "")),
+    allowSuppressedQaTest: true,
   });
   const status: SequenceStatus = stop.stop ? "blocked" : "draft";
   const instanceRows = await sql.query(
@@ -126,13 +127,13 @@ export async function transitionLeadSequence(input: {
   const sql = sqlFromEnv();
   if (!sql) return { ok: false as const, statusCode: 503, error: "database_not_configured" };
   const rows = await sql.query(
-    `SELECT msi.id, msi.status, l.is_test, l.communication_suppressed FROM public.message_sequence_instances msi
+    `SELECT msi.id, msi.sequence_id, msi.status, l.is_test, l.communication_suppressed FROM public.message_sequence_instances msi
        JOIN public.leads l ON l.id = msi.lead_id
       WHERE msi.id = $1::uuid AND msi.lead_id = $2::uuid${scopedWhere(input.principal, 3)} LIMIT 1`,
     hasLeadCenterPermission(input.principal.role, "lead:view_all")
       ? [input.sequenceInstanceId, input.leadId]
       : [input.sequenceInstanceId, input.leadId, input.principal.agentId],
-  ) as Array<{ id: string; status: SequenceStatus; is_test: boolean; communication_suppressed: boolean }>;
+  ) as Array<{ id: string; sequence_id: string; status: SequenceStatus; is_test: boolean; communication_suppressed: boolean }>;
   const current = rows[0];
   if (!current) return { ok: false as const, statusCode: 404, error: "sequence_not_found" };
   if (["approve", "activate", "begin_test"].includes(input.action) && !input.schedulerEnabled) {
@@ -154,6 +155,18 @@ export async function transitionLeadSequence(input: {
     [transition.next, input.principal.userId, input.action, current.id, current.status],
   ) as Array<{ id: string }>;
   if (!updated[0]) return { ok: false as const, statusCode: 409, error: "concurrent_sequence_update" };
+  if (input.action === "begin_test") {
+    const scheduledSteps = materializeSequence(current.sequence_id, new Date());
+    for (const step of scheduledSteps) {
+      await sql.query(
+        `UPDATE public.message_sequence_step_runs
+            SET status = 'scheduled', scheduled_at = $1::timestamptz, updated_at = now()
+          WHERE sequence_instance_id = $2::uuid AND step_index = $3
+            AND status IN ('draft', 'approval_required', 'scheduled')`,
+        [step.scheduledAt, current.id, step.stepIndex],
+      );
+    }
+  }
   await sql.query(
     `INSERT INTO public.audit_logs
       (actor, action, resource_type, resource_id, before_state, after_state, metadata)

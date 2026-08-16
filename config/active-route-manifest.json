@@ -26,6 +26,7 @@
     "/api/admin/notifications/retry",
     "/api/admin/operations/first-live",
     "/api/admin/qa/email",
+    "/api/admin/sequences/process",
     "/api/admin/sla/sweep",
     "/api/appointments/request",
     "/api/chat",
@@ -43,6 +44,7 @@
     "/api/phone-alerts/test",
     "/api/valuation",
     "/api/webhooks/email/events",
+    "/api/webhooks/sms/inbound",
     "/api/webhooks/sms/status",
     "/api/widget/events",
     "/ask",
@@ -91,8 +93,8 @@
     "api": [
       "/admin/api/push/test",
       "/admin/api/phone-alerts/invite",
-      "/api/leads", "/api/listings/search", "/api/listings/[id]", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/phone-alerts/invite", "/api/phone-alerts/subscription", "/api/phone-alerts/test", "/api/webhooks/sms/status", "/api/widget/events",
-      "/api/admin/copilot", "/api/admin/copilot/jobs", "/api/admin/copilot/jobs/process", "/api/admin/health", "/api/admin/leads/[id]/communication-permissions", "/api/admin/leads/[id]/sequences", "/api/admin/message-templates", "/api/admin/operations/first-live", "/api/admin/qa/email", "/api/admin/sla/sweep", "/api/webhooks/email/events"
+      "/api/leads", "/api/listings/search", "/api/listings/[id]", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/phone-alerts/invite", "/api/phone-alerts/subscription", "/api/phone-alerts/test", "/api/webhooks/sms/inbound", "/api/webhooks/sms/status", "/api/widget/events",
+      "/api/admin/copilot", "/api/admin/copilot/jobs", "/api/admin/copilot/jobs/process", "/api/admin/health", "/api/admin/leads/[id]/communication-permissions", "/api/admin/leads/[id]/sequences", "/api/admin/message-templates", "/api/admin/operations/first-live", "/api/admin/qa/email", "/api/admin/sequences/process", "/api/admin/sla/sweep", "/api/webhooks/email/events"
     ]
   },
   "classifications": {
@@ -105,8 +107,10 @@
     "/api/health/ready": "active-documented-readiness-probe",
     "/api/admin/health": "active-documented-health-probe",
     "/api/admin/copilot/jobs/process": "active-feature-flagged-vercel-cron",
+    "/api/admin/sequences/process": "active-feature-flagged-mock-only-cron",
     "/api/admin/operations/first-live": "active-required-by-vercel-cron",
-    "/api/admin/sla/sweep": "active-required-by-vercel-cron"
+    "/api/admin/sla/sweep": "active-required-by-vercel-cron",
+    "/api/webhooks/sms/inbound": "active-signed-or-admin-authenticated-mock-boundary"
   },
   "acknowledgedRootSrcDuplicates": [
     "/", "/admin", "/admin/leads", "/admin/leads/[id]", "/api/admin/health", "/api/admin/sla/sweep", "/api/health/live", "/api/health/ready", "/api/leads", "/api/listings/[id]", "/api/listings/search", "/api/webhooks/email/events",

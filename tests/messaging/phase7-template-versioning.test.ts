@@ -15,12 +15,22 @@ describe("Phase 7 template governance", () => {
     });
   });
 
+  it("rejects unknown render variables instead of accepting an ungoverned merge field", () => {
+    expect(renderMessageTemplate("general.email.received", { injected: "not allowed" })).toEqual({
+      ok: false,
+      error: "template_variables_unknown",
+      unknown: ["injected"],
+    });
+  });
+
   it("renders a version-pinned template without unresolved tokens", () => {
     const rendered = renderMessageTemplate("internal.lead_alert", {
       priority: "[TEST]", lead_label: "SELLER LEAD", source: "QA", intent: "Home Value",
       location: "Wilson", name: "INTERNAL QA", score: 91,
     });
     expect(rendered).toMatchObject({ ok: true, version: "phase7-v1" });
+    expect(rendered).toHaveProperty("contentHash");
+    expect((rendered as { contentHash: string }).contentHash).toMatch(/^[a-f0-9]{64}$/);
     expect(JSON.stringify(rendered)).not.toContain("{{");
   });
 
@@ -30,7 +40,8 @@ describe("Phase 7 template governance", () => {
     expect(brandon.subject).toMatch(/^\[TEST — BRANDON QA\]/);
     expect(mikeView.subject).toMatch(/^\[TEST — BRANDON QA — MIKE VIEW\]/);
     expect(brandon.html).toContain('<html lang="en">');
+    expect(brandon.html).toContain('name="color-scheme"');
     expect(brandon.html).toContain("INTERNAL QA — DO NOT CONTACT");
+    expect(brandon.contentHash).toMatch(/^[a-f0-9]{64}$/);
   });
 });
-

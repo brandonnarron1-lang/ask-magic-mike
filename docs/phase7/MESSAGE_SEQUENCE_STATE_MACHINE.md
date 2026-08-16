@@ -8,3 +8,8 @@ Stop conditions include reply, recorded contact, appointment, terminal stage, in
 
 Operational timezone is `America/New_York`. Quiet hours, frequency caps, and provider sends remain release-gated; no carrier or consumer delivery is enabled by this state machine.
 
+## Mock scheduler acceptance — 2026-08-16
+
+`/api/admin/sequences/process` now materializes and processes durable test steps behind `MESSAGE_SEQUENCE_SCHEDULER_ENABLED`. It requires cron bearer authentication and can claim only records where the sequence is in test state and the lead is simultaneously `is_test=true` and `communication_suppressed=true`. The worker uses `FOR UPDATE SKIP LOCKED`, records a purpose-specific QA decision, writes a hash-only mock delivery event, and never calls an external provider.
+
+Claimed steps abandoned for more than five minutes can be safely reclaimed. Attempts are capped at three; retryable render failures return to the schedule after five minutes and become terminal after the cap. Production consumer sequences remain disabled.
