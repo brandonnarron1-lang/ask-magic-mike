@@ -8,6 +8,8 @@ This package contains current authenticated and public product screenshots used 
 
 - Desktop 1440px: homepage, seller, home value, buyer, Ask, widget, Lead Center active view, and Message Review Studio.
 - Mobile 390px: homepage, seller, home value, buyer, Ask, widget, and Lead Center active view.
+- Matched 984×964 Production-before, local-after, Preview, and released-Production validation states.
+- Local phone/consent state using synthetic, non-submitted QA values.
 - Rendered cover of the Phase 7 PDF acceptance report.
 
 ## Design direction

@@ -5,7 +5,9 @@ CANONICAL RELEASE
 - Repository: https://github.com/brandonnarron1-lang/ask-magic-mike
 - Phase 7 PR: https://github.com/brandonnarron1-lang/ask-magic-mike/pull/156
 - Merge commit: 4b4caefcd2aea2944a06df71a8cf3e3e569b969d
-- Production deployment: dpl_31FNiQF1TcRw7cHZkmb8eFnRFmKc
+- Accessibility polish PR: https://github.com/brandonnarron1-lang/ask-magic-mike/pull/158
+- Final merge commit: fb6312d60c287477fc030d13804bde9f7c8884b2
+- Production deployment: dpl_3TCT4xrVCdh55xMzCoCC1qzhJrbV
 - Public URL: https://www.askmagicmike.com
 - Database: Neon bitter-star-20214385, Production br-round-base-auh6h2wd
 

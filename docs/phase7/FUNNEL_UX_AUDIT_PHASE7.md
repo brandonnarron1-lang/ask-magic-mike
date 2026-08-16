@@ -41,7 +41,7 @@ Audited routes: `/`, `/home-value`, `/sell`, `/value`, `/buy`, `/ask`, `/widget/
 
 - This is not a claim of full WCAG conformance.
 - A fresh authenticated Lead Center visual pass requires a valid operator session; the expired session was not bypassed.
-- Fresh 390px and 1440px in-app-browser captures, reduced-motion inspection, and a post-Preview keyboard pass remain release checks.
+- Fresh 390px and 1440px in-app-browser captures, reduced-motion inspection, and a complete keyboard-traversal pass remain future conformance checks.
 - No consumer, Mike, SMS, or live-prospect message was sent.
 
 ## Screenshot register
@@ -50,3 +50,5 @@ Audited routes: `/`, `/home-value`, `/sell`, `/value`, `/buy`, `/ask`, `/widget/
 - `output/phase7/screenshots/current-audit/07-local-inline-error-matched.jpg` — local after, same tab, viewport, and empty-address state.
 - `output/phase7/screenshots/current-audit/08-before-after-comparison.jpg` — combined visual comparison used for review.
 - `output/phase7/screenshots/current-audit/09-local-phone-consent-matched.jpg` — local phone/consent state with synthetic, non-submitted QA values.
+- `output/phase7/screenshots/current-audit/10-preview-inline-error.jpg` — Ready PR 158 Preview with the persistent alert.
+- `output/phase7/screenshots/current-audit/11-production-inline-error-released.jpg` — canonical Production after release; persistent alert confirmed, no submission.
