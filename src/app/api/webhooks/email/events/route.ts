@@ -64,11 +64,14 @@ export async function POST(req: NextRequest) {
         .maybeSingle();
       leadId = del?.lead_id ?? null;
       const statusMap: Record<EmailEventType, string> = {
+        sent: "sent",
         delivered: "delivered",
+        delivery_delayed: "sent",
         opened: "opened",
         clicked: "clicked",
         bounced: "bounced",
         complained: "failed",
+        suppressed: "failed",
         unsubscribed: "undelivered",
         failed: "failed",
         unknown: "sent",
@@ -127,12 +130,15 @@ export async function POST(req: NextRequest) {
     EmailEventType,
     "email_opened" | "email_clicked" | "email_sent" | "opt_out"
   > = {
+    sent: "email_sent",
     opened: "email_opened",
     clicked: "email_clicked",
     delivered: "email_sent",
+    delivery_delayed: "email_sent",
     bounced: "opt_out",
     unsubscribed: "opt_out",
     complained: "opt_out",
+    suppressed: "opt_out",
     failed: "email_sent",
     unknown: "email_sent",
   };

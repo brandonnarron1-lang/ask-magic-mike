@@ -25,6 +25,11 @@ export type MessageTemplate = {
   body: string;
 };
 
+export type MessageTemplateVersion = MessageTemplate & {
+  status: "approved" | "retired";
+  changeNote: string;
+};
+
 export const SEQUENCE_STOP_CONDITIONS = [
   "consumer_reply",
   "contact_recorded",
@@ -44,7 +49,7 @@ export const SEQUENCE_STOP_CONDITIONS = [
 const stops = [...SEQUENCE_STOP_CONDITIONS];
 const consumer = (input: Omit<MessageTemplate, "version" | "approval" | "stopConditions">): MessageTemplate => ({
   ...input,
-  version: "phase6-v1",
+  version: "phase7-v1",
   approval: "APPROVAL_REQUIRED",
   stopConditions: stops,
 });
@@ -88,14 +93,48 @@ export const MESSAGE_TEMPLATE_REGISTRY: MessageTemplate[] = [
   consumer({ id: "out_of_area.email.review", group: "out_of_area", channel: "email", purpose: "requested_service_response", timing: "same_day", subject: "We are reviewing your service-area request", body: "The team is reviewing whether your location is within the currently approved service area. This message does not promise a referral or service availability." }),
   consumer({ id: "coastal_review.email.review", group: "coastal_review", channel: "email", purpose: "requested_service_response", timing: "same_day", subject: "Your location request needs human review", body: "A team member will review your location and request. This message does not claim that coastal service is currently available." }),
 
-  { id: "internal.lead_alert", version: "phase6-v1", group: "general", channel: "email", purpose: "internal_alert", timing: "immediate", approval: "INTERNAL_APPROVED", stopConditions: ["duplicate_consolidation"], subject: "{{priority}} {{lead_label}} | {{source}} | {{intent}} | {{location}} | {{name}} | Score {{score}}", body: "Open the secure Lead Center for source, consent, score, assignment, delivery, and next-action facts." },
-  { id: "internal.daily_digest", version: "phase6-v1", group: "general", channel: "email", purpose: "internal_alert", timing: "daily", approval: "APPROVAL_REQUIRED", stopConditions: [], subject: "[TEST — BRANDON QA] Ask Magic Mike daily operations digest", body: "Test-only rollup of queue, delivery, consent blocks, and system health. Test and suppressed records remain excluded from production metrics." },
-  { id: "internal.push_hot", version: "phase6-v1", group: "general", channel: "push", purpose: "internal_alert", timing: "immediate", approval: "INTERNAL_APPROVED", stopConditions: ["test_or_suppressed"], body: "{{priority}} {{intent}} · {{location}} · Score {{score}} · Open secure Lead Center." },
-  { id: "operator.call_opener", version: "phase6-v1", group: "general", channel: "call", purpose: "manual_one_to_one", timing: "manual", approval: "APPROVAL_REQUIRED", stopConditions: stops, body: "Hi, this is {{operator_name}} with Our Town Properties. You asked us to review {{request_summary}}. What would be most useful to clarify first?" },
+  { id: "internal.lead_alert", version: "phase7-v1", group: "general", channel: "email", purpose: "internal_alert", timing: "immediate", approval: "INTERNAL_APPROVED", stopConditions: ["duplicate_consolidation"], subject: "{{priority}} {{lead_label}} | {{source}} | {{intent}} | {{location}} | {{name}} | Score {{score}}", body: "Open the secure Lead Center for source, consent, score, assignment, delivery, and next-action facts." },
+  { id: "internal.daily_digest", version: "phase7-v1", group: "general", channel: "email", purpose: "internal_alert", timing: "daily", approval: "APPROVAL_REQUIRED", stopConditions: [], subject: "[TEST — BRANDON QA] Ask Magic Mike daily operations digest", body: "Test-only rollup of queue, delivery, consent blocks, and system health. Test and suppressed records remain excluded from production metrics." },
+  { id: "internal.push_hot", version: "phase7-v1", group: "general", channel: "push", purpose: "internal_alert", timing: "immediate", approval: "INTERNAL_APPROVED", stopConditions: ["test_or_suppressed"], body: "{{priority}} {{intent}} · {{location}} · Score {{score}} · Open secure Lead Center." },
+  { id: "operator.call_opener", version: "phase7-v1", group: "general", channel: "call", purpose: "manual_one_to_one", timing: "manual", approval: "APPROVAL_REQUIRED", stopConditions: stops, body: "Hi, this is {{operator_name}} with Our Town Properties. You asked us to review {{request_summary}}. What would be most useful to clarify first?" },
 ];
 
 export function templatesFor(group: LeadMessageGroup, channel?: MessageTemplate["channel"]) {
   return MESSAGE_TEMPLATE_REGISTRY.filter((template) => template.group === group && (!channel || template.channel === channel));
+}
+
+const VARIABLE = /{{([a-z0-9_]+)}}/gi;
+
+export function templateVariables(template: MessageTemplate) {
+  return [...new Set([template.subject || "", template.body].flatMap((value) => [...value.matchAll(VARIABLE)].map((match) => match[1])))]
+    .sort();
+}
+
+export function renderMessageTemplate(templateId: string, variables: Record<string, string | number>) {
+  const template = MESSAGE_TEMPLATE_REGISTRY.find((candidate) => candidate.id === templateId);
+  if (!template) return { ok: false as const, error: "template_not_found" as const };
+  const required = templateVariables(template);
+  const missing = required.filter((name) => variables[name] == null || String(variables[name]).trim() === "");
+  if (missing.length) return { ok: false as const, error: "template_variables_missing" as const, missing };
+  const substitute = (value: string) => value.replace(VARIABLE, (_match, name: string) => String(variables[name] ?? ""));
+  return {
+    ok: true as const,
+    templateId: template.id,
+    version: template.version,
+    subject: template.subject ? substitute(template.subject) : null,
+    body: substitute(template.body),
+    purpose: template.purpose,
+    channel: template.channel,
+  };
+}
+
+export function templateVersionHistory(templateId: string): MessageTemplateVersion[] {
+  const template = MESSAGE_TEMPLATE_REGISTRY.find((candidate) => candidate.id === templateId);
+  if (!template) return [];
+  return [
+    { ...template, version: "phase6-v1", status: "retired", changeNote: "Phase 6 controlled-preview baseline retained for rollback reference." },
+    { ...template, status: "approved", changeNote: "Phase 7 permission-first copy, render contract, and release metadata." },
+  ];
 }
 
 function escapeHtml(value: string) {
@@ -111,9 +150,12 @@ export function renderBrandedEmail(input: {
   ctaUrl?: string;
   isTest?: boolean;
   marketing?: boolean;
+  qaAudience?: "brandon" | "mike_view";
 }) {
-  const prefix = input.isTest ? "[TEST — BRANDON QA] " : "";
-  const subject = `${prefix}${input.subject}`.slice(0, 180);
+  const prefix = input.isTest
+    ? input.qaAudience === "mike_view" ? "[TEST — BRANDON QA — MIKE VIEW] " : "[TEST — BRANDON QA] "
+    : "";
+  const subject = `${input.subject.startsWith("[TEST — BRANDON QA") ? "" : prefix}${input.subject}`.slice(0, 180);
   const text = [
     input.isTest ? "INTERNAL QA — DO NOT CONTACT" : null,
     input.heading,
@@ -127,6 +169,6 @@ export function renderBrandedEmail(input: {
   const button = input.ctaLabel && input.ctaUrl
     ? `<p style="margin:24px 0"><a href="${escapeHtml(input.ctaUrl)}" style="display:inline-block;background:#cda24a;color:#090909;text-decoration:none;padding:13px 20px;border-radius:8px;font-weight:700">${escapeHtml(input.ctaLabel)}</a></p>`
     : "";
-  const html = `<!doctype html><html><body style="margin:0;background:#f4efe4;color:#17130d;font-family:Arial,sans-serif"><div style="display:none;max-height:0;overflow:hidden">${escapeHtml(input.preheader)}</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td style="padding:24px 12px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;margin:auto;background:#fff;border:1px solid #ded2ba;border-radius:12px;overflow:hidden"><tr><td style="background:#090909;padding:22px 28px;color:#fff"><p style="margin:0;color:#d9b45b;font-size:12px;font-weight:700;letter-spacing:.14em">ASK MAGIC MIKE</p><p style="margin:8px 0 0;font-size:14px">Our Town Properties, Inc.</p></td></tr>${input.isTest ? `<tr><td style="padding:12px 28px;background:#681321;color:#fff;font-weight:700">INTERNAL QA — DO NOT CONTACT</td></tr>` : ""}<tr><td style="padding:30px 28px"><h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:28px;line-height:1.2">${escapeHtml(input.heading)}</h1><p style="margin:0;font-size:16px;line-height:1.65">${escapeHtml(input.body)}</p>${button}<p style="margin:28px 0 0;color:#6b6254;font-size:12px;line-height:1.5">Ask Magic Mike · Our Town Properties, Inc. · Wilson, North Carolina</p>${input.marketing ? `<p style="margin:10px 0 0;color:#6b6254;font-size:12px">Use the approved unsubscribe link or reply UNSUBSCRIBE to stop marketing email.</p>` : ""}</td></tr></table></td></tr></table></body></html>`;
+  const html = `<!doctype html><html lang="en"><body style="margin:0;background:#eee7d8;color:#17130d;font-family:Arial,sans-serif"><div style="display:none;max-height:0;overflow:hidden">${escapeHtml(input.preheader)}</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eee7d8"><tr><td style="padding:24px 12px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;margin:auto;background:#fff;border:1px solid #d8c9ab;border-radius:14px;overflow:hidden;box-shadow:0 18px 48px rgba(30,20,5,.12)"><tr><td style="height:5px;background:linear-gradient(90deg,#8b1020,#d9b45b,#8b1020)"></td></tr><tr><td style="background:#090909;padding:24px 28px;color:#fff"><p style="margin:0;color:#e4bf64;font-size:12px;font-weight:800;letter-spacing:.16em">ASK MAGIC MIKE</p><p style="margin:8px 0 0;font-size:14px;color:#f3ead8">Our Town Properties, Inc. · Human-reviewed real estate guidance</p></td></tr>${input.isTest ? `<tr><td style="padding:12px 28px;background:#681321;color:#fff;font-weight:800;letter-spacing:.04em">INTERNAL QA — DO NOT CONTACT</td></tr>` : ""}<tr><td style="padding:32px 28px"><p style="margin:0 0 12px;color:#8b1020;font-size:11px;font-weight:800;letter-spacing:.14em">REQUEST STATUS</p><h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:29px;line-height:1.2;color:#17130d">${escapeHtml(input.heading)}</h1><p style="margin:0;font-size:16px;line-height:1.7;color:#3d3529">${escapeHtml(input.body)}</p>${button}<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:28px;border-top:1px solid #e7dcc6"><tr><td style="padding-top:18px"><p style="margin:0;color:#6b6254;font-size:12px;line-height:1.55">Ask Magic Mike · Our Town Properties, Inc. · Wilson, North Carolina</p>${input.marketing ? `<p style="margin:10px 0 0;color:#6b6254;font-size:12px">Use the approved unsubscribe link or reply UNSUBSCRIBE to stop marketing email.</p>` : ""}</td></tr></table></td></tr></table></td></tr></table></body></html>`;
   return { subject, text, html };
 }

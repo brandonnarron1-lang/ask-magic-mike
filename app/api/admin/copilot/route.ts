@@ -5,6 +5,7 @@ import { z } from "zod";
 import { generateAiLeadIntelligence, type LeadIntelligenceFacts } from "@/lib/ai/openai-responses";
 import { requireLeadCenterApiPermission } from "@/lib/admin/rbac-session";
 import { hasLeadCenterPermission } from "@/lib/admin/rbac-policy";
+import { copilotToolsForRole } from "@/lib/ai/copilot-tool-register";
 
 const requestSchema = z.object({ leadId: z.string().uuid() });
 const NO_STORE = { "Cache-Control": "no-store, max-age=0" };
@@ -100,6 +101,20 @@ export async function POST(request: NextRequest) {
   };
 
   const result = await generateAiLeadIntelligence(facts);
+  const [permissionRows, notificationRows] = await Promise.all([
+    sql.query(
+      `SELECT channel, purpose, state, consent_version, source, evidence_at
+         FROM public.communication_permissions WHERE lead_id = $1::uuid
+        ORDER BY updated_at DESC LIMIT 25`,
+      [row.id],
+    ).catch(() => []),
+    sql.query(
+      `SELECT channel, notification_type, status, provider, updated_at
+         FROM public.lead_notifications WHERE lead_id = $1::uuid
+        ORDER BY created_at DESC LIMIT 10`,
+      [row.id],
+    ).catch(() => []),
+  ]);
   const fingerprint = createHash("sha256").update(JSON.stringify(facts)).digest("hex");
   if ((process.env.AI_INTELLIGENCE_PERSIST_ENABLED || "false").toLowerCase() === "true") {
     await Promise.all([
@@ -128,5 +143,27 @@ export async function POST(request: NextRequest) {
     ]).catch(() => undefined);
   }
 
-  return NextResponse.json(result, { headers: NO_STORE });
+  return NextResponse.json({
+    ...result,
+    context: {
+      recordedFacts: {
+        leadType: facts.leadType,
+        status: facts.status,
+        score: facts.score,
+        source: facts.source,
+        placement: facts.placement,
+        isTest: facts.isTest,
+        suppressed: facts.suppressed,
+      },
+      deterministicControls: {
+        consent: { email: facts.consentEmail, sms: facts.consentSms, call: facts.consentCall },
+        communicationPermissions: permissionRows,
+        recentNotifications: notificationRows,
+        aiCanSend: false,
+        aiCanAssign: false,
+        aiCanChangeScore: false,
+      },
+    },
+    tools: copilotToolsForRole(auth.principal.role),
+  }, { headers: NO_STORE });
 }

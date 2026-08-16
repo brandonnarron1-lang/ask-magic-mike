@@ -17,7 +17,12 @@
     "/admin/api/phone-alerts/invite",
     "/admin/reporting",
     "/api/admin/copilot",
+    "/api/admin/copilot/jobs",
+    "/api/admin/copilot/jobs/process",
     "/api/admin/health",
+    "/api/admin/leads/[id]/communication-permissions",
+    "/api/admin/leads/[id]/sequences",
+    "/api/admin/message-templates",
     "/api/admin/notifications/retry",
     "/api/admin/operations/first-live",
     "/api/admin/qa/email",
@@ -37,6 +42,7 @@
     "/api/phone-alerts/subscription",
     "/api/phone-alerts/test",
     "/api/valuation",
+    "/api/webhooks/email/events",
     "/api/webhooks/sms/status",
     "/api/widget/events",
     "/ask",
@@ -86,7 +92,7 @@
       "/admin/api/push/test",
       "/admin/api/phone-alerts/invite",
       "/api/leads", "/api/listings/search", "/api/listings/[id]", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/phone-alerts/invite", "/api/phone-alerts/subscription", "/api/phone-alerts/test", "/api/webhooks/sms/status", "/api/widget/events",
-      "/api/admin/copilot", "/api/admin/health", "/api/admin/operations/first-live", "/api/admin/qa/email", "/api/admin/sla/sweep"
+      "/api/admin/copilot", "/api/admin/copilot/jobs", "/api/admin/copilot/jobs/process", "/api/admin/health", "/api/admin/leads/[id]/communication-permissions", "/api/admin/leads/[id]/sequences", "/api/admin/message-templates", "/api/admin/operations/first-live", "/api/admin/qa/email", "/api/admin/sla/sweep", "/api/webhooks/email/events"
     ]
   },
   "classifications": {
@@ -98,11 +104,12 @@
     "/api/health/live": "inactive-src-only",
     "/api/health/ready": "active-documented-readiness-probe",
     "/api/admin/health": "active-documented-health-probe",
+    "/api/admin/copilot/jobs/process": "active-feature-flagged-vercel-cron",
     "/api/admin/operations/first-live": "active-required-by-vercel-cron",
     "/api/admin/sla/sweep": "active-required-by-vercel-cron"
   },
   "acknowledgedRootSrcDuplicates": [
-    "/", "/admin", "/admin/leads", "/admin/leads/[id]", "/api/admin/health", "/api/admin/sla/sweep", "/api/health/live", "/api/health/ready", "/api/leads", "/api/listings/[id]", "/api/listings/search",
+    "/", "/admin", "/admin/leads", "/admin/leads/[id]", "/api/admin/health", "/api/admin/sla/sweep", "/api/health/live", "/api/health/ready", "/api/leads", "/api/listings/[id]", "/api/listings/search", "/api/webhooks/email/events",
     "/ask", "/embed/ask", "/value", "/widget-preview"
   ]
 }

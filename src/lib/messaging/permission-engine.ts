@@ -35,6 +35,10 @@ export type CommunicationPermissionInput = {
   recipientIsApprovedQa?: boolean;
   autoSendEnabled?: boolean;
   humanApproved?: boolean;
+  evidence?: Record<string, unknown>;
+  consentVersion?: string | null;
+  formOrRoute?: string | null;
+  decisionSource?: string;
 };
 
 export type CommunicationPermissionDecision = {
@@ -42,6 +46,8 @@ export type CommunicationPermissionDecision = {
   code:
     | "allowed"
     | "test_record_consumer_block"
+    | "qa_record_not_test"
+    | "qa_record_not_suppressed"
     | "qa_recipient_not_approved"
     | "suppressed"
     | "legal_hold"
@@ -55,6 +61,13 @@ export type CommunicationPermissionDecision = {
     | "human_approval_required";
   explanation: string;
   requiresHumanApproval: boolean;
+  channel: MessageChannel;
+  purpose: MessagePurpose;
+  evidence: Record<string, unknown>;
+  consentVersion: string | null;
+  formOrRoute: string | null;
+  decisionSource: string;
+  decidedAt: string;
 };
 
 const INTERNAL_PURPOSES = new Set<MessagePurpose>(["internal_alert", "qa_test"]);
@@ -62,11 +75,22 @@ const INTERNAL_PURPOSES = new Set<MessagePurpose>(["internal_alert", "qa_test"])
 export function decideCommunicationPermission(
   input: CommunicationPermissionInput,
 ): CommunicationPermissionDecision {
+  const decidedAt = new Date().toISOString();
+  const detail = {
+    channel: input.channel,
+    purpose: input.purpose,
+    evidence: input.evidence || {},
+    consentVersion: input.consentVersion || null,
+    formOrRoute: input.formOrRoute || null,
+    decisionSource: input.decisionSource || "permission_engine",
+    decidedAt,
+  };
   const blocked = (code: CommunicationPermissionDecision["code"], explanation: string) => ({
     allowed: false,
     code,
     explanation,
     requiresHumanApproval: false,
+    ...detail,
   });
 
   if (input.invalidContact) return blocked("invalid_contact", "The destination is missing or invalid.");
@@ -80,8 +104,16 @@ export function decideCommunicationPermission(
   if (!internal && input.suppressed) {
     return blocked("suppressed", "Suppressed records never receive consumer communication.");
   }
-  if (input.purpose === "qa_test" && !input.recipientIsApprovedQa) {
-    return blocked("qa_recipient_not_approved", "QA delivery is restricted to the approved test recipient.");
+  if (input.purpose === "qa_test") {
+    if (input.isTest !== true) {
+      return blocked("qa_record_not_test", "QA delivery requires an explicitly test-marked record.");
+    }
+    if (input.suppressed !== true) {
+      return blocked("qa_record_not_suppressed", "QA delivery requires a suppressed test record.");
+    }
+    if (!input.recipientIsApprovedQa) {
+      return blocked("qa_recipient_not_approved", "QA delivery is restricted to the approved test recipient.");
+    }
   }
 
   if (!internal && input.consentAmbiguous) {
@@ -132,6 +164,7 @@ export function decideCommunicationPermission(
       code: "auto_send_disabled",
       explanation: "Consumer auto-send is disabled; a human-approved preview is required.",
       requiresHumanApproval: true,
+      ...detail,
     };
   }
   if (!internal && input.humanApproved !== true) {
@@ -140,6 +173,7 @@ export function decideCommunicationPermission(
       code: "human_approval_required",
       explanation: "This release requires human approval before consumer delivery.",
       requiresHumanApproval: true,
+      ...detail,
     };
   }
 
@@ -148,5 +182,6 @@ export function decideCommunicationPermission(
     code: "allowed",
     explanation: "The requested purpose, channel, consent, suppression, and release gates are satisfied.",
     requiresHumanApproval: false,
+    ...detail,
   };
 }

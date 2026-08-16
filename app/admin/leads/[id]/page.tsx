@@ -18,6 +18,7 @@ import type {
 } from "../../../lib/adminAppointmentFollowupOps";
 import { requireLeadCenterLeadPermission } from "../../../../src/lib/admin/rbac-session";
 import { Phase6CopilotPanel } from "../../../../src/components/admin/phase6-copilot-panel";
+import { Phase7MessagingControlPanel } from "../../../../src/components/admin/phase7-messaging-control-panel";
 import {
   createAppointmentAction,
   createFollowupTaskAction,
@@ -495,6 +496,8 @@ export default async function AdminLeadDetailPage({
                 isTest={lead.is_test}
                 suppressed={lead.communication_suppressed}
               />
+
+              <Phase7MessagingControlPanel leadId={lead.id} />
 
               <Panel title="Lifecycle controls">
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

@@ -3,7 +3,12 @@
 import { useState } from "react";
 import type { AiLeadIntelligenceResult } from "@/lib/ai/openai-responses";
 
-type CopilotResponse = AiLeadIntelligenceResult & { ok: boolean; error?: string };
+type CopilotResponse = AiLeadIntelligenceResult & {
+  ok: boolean;
+  error?: string;
+  context?: { deterministicControls?: { consent?: { email: boolean; sms: boolean; call: boolean }; aiCanSend?: boolean; aiCanAssign?: boolean; aiCanChangeScore?: boolean } };
+  tools?: Array<{ id: string; kind: string; humanApprovalRequired: boolean }>;
+};
 
 export function Phase6CopilotPanel({
   leadId,
@@ -41,10 +46,10 @@ export function Phase6CopilotPanel({
     <section className="rounded-lg border border-cyan-400/20 bg-[linear-gradient(145deg,rgba(14,116,144,.12),rgba(11,11,11,.96)_45%)] p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">Lead intelligence</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">Phase 7 lead intelligence</p>
           <h2 className="mt-2 text-xl font-semibold text-[#f4ead4]">Human-review copilot</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#bdb4a4]">
-            Separates recorded facts from draft suggestions. It cannot assign, score, contact, schedule, or change this lead.
+            Uses the existing encrypted OpenAI key when the release flag is enabled, with a deterministic fallback. It cannot assign, score, contact, schedule, or change this lead.
           </p>
         </div>
         <button
@@ -84,6 +89,16 @@ export function Phase6CopilotPanel({
               <div><dt className="text-xs text-[#8f8778]">Email</dt><dd className="mt-1 whitespace-pre-wrap text-sm text-[#d9ceb8]">{result.output.suggestedEmailDraft}</dd></div>
               <div><dt className="text-xs text-[#8f8778]">SMS</dt><dd className="mt-1 whitespace-pre-wrap text-sm text-[#d9ceb8]">{result.output.suggestedSmsDraft}</dd></div>
             </dl>
+          </div>
+          <div className="rounded-md border border-white/10 bg-black/30 p-4 lg:col-span-2">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan-200">Deterministic controls</p>
+            <div className="mt-3 flex flex-wrap gap-2 text-xs text-[#d9ceb8]">
+              <span className="rounded-full border border-white/10 px-3 py-1.5">Email consent: {result.context?.deterministicControls?.consent?.email ? "recorded" : "not recorded"}</span>
+              <span className="rounded-full border border-white/10 px-3 py-1.5">SMS consent: {result.context?.deterministicControls?.consent?.sms ? "recorded" : "not recorded"}</span>
+              <span className="rounded-full border border-[#7f1d1d] bg-[#2a0909] px-3 py-1.5 text-[#ffd7d7]">AI send: disabled</span>
+              <span className="rounded-full border border-[#7f1d1d] bg-[#2a0909] px-3 py-1.5 text-[#ffd7d7]">AI assignment: disabled</span>
+            </div>
+            <p className="mt-3 text-xs text-[#8f8778]">{result.tools?.length || 0} RBAC-filtered read/preview tools available. Controlled actions require human approval.</p>
           </div>
           <p className="text-xs text-[#8f8778] lg:col-span-2">
             Mode: {result.mode.replaceAll("_", " ")} · Model: {result.model} · Estimated API cost: ${result.usage.estimatedCostUsd.toFixed(4)}

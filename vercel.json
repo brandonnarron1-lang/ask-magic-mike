@@ -7,6 +7,10 @@
     {
       "path": "/api/admin/operations/first-live",
       "schedule": "*/2 * * * *"
+    },
+    {
+      "path": "/api/admin/copilot/jobs/process",
+      "schedule": "15 * * * *"
     }
   ]
 }
