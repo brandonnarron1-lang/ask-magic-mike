@@ -1,0 +1,16 @@
+Phase 7 PR: 156
+Phase 7 merge commit: 4b4caefcd2aea2944a06df71a8cf3e3e569b969d
+Production deployment ID: dpl_31FNiQF1TcRw7cHZkmb8eFnRFmKc
+Production URL: https://www.askmagicmike.com
+Preview URL: https://ask-magic-mike-4jzxrwv0i-eyes-up-industries.vercel.app
+Neon project: bitter-star-20214385
+Neon Production branch: br-round-base-auh6h2wd
+Migration: 20260816143000_phase7_messaging_release_candidate.sql
+QA provider: Resend
+QA provider message ID: 871e5b96-a10b-492a-bb23-9898824f0cd3
+QA provider state proven: accepted
+QA inbox state proven: no
+OpenAI acceptance: Responses API structured output passed
+Carrier SMS: disabled
+Consumer email: disabled
+Mike activation: deferred
