@@ -80,8 +80,8 @@ def main():
         Paragraph("1. Executive result", h1),
         Table(
             [
-                ["Production", "Ready", "dpl_31FNiQF1TcRw7cHZkmb8eFnRFmKc"],
-                ["Commit", "Merged", "4b4caefcd2aea2944a06df71a8cf3e3e569b969d"],
+                ["Production", "Ready", "dpl_3TCT4xrVCdh55xMzCoCC1qzhJrbV"],
+                ["Commit", "Merged", "fb6312d60c287477fc030d13804bde9f7c8884b2"],
                 ["Database", "Migrated", "Neon bitter-star-20214385 / production branch"],
                 ["Live prospects", "0", "No prospect fabricated for QA"],
                 ["Suppressed QA leads", "6", "0 unsuppressed"],
@@ -178,7 +178,7 @@ def main():
     story.extend([
         PageBreak(),
         Paragraph("6. Verification", h1),
-        bullet("171 test files; 2,620 tests passed.", body),
+        bullet("172 test files; 2,621 tests passed.", body),
         bullet("Strict typecheck, ESLint, and Production build passed.", body),
         bullet("70 active routes verified; release-safety scan passed 14/14.", body),
         bullet("Production smoke passed 19 checks with 2 intentional read-only skips.", body),

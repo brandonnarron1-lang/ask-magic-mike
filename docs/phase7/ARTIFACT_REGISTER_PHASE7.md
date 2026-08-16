@@ -5,8 +5,8 @@ Date: 2026-08-16
 ## Produced
 
 - `output/phase7/pdfs/ASK_MAGIC_MIKE_PHASE7_MESSAGING_AI_RELEASE_CANDIDATE.pdf` — eight-page release evidence report.
-- `output/phase7/ASK_MAGIC_MIKE_PHASE7_VISUAL_ASSET_PACKAGE.zip` — current desktop/mobile product screenshots, Message Review Studio evidence, PDF cover render, and visual inventory.
-- `output/phase7/Ask_Magic_Mike_Phase7_Messaging_AI_Release_Candidate_Package.zip` — verified 111-file code, migration, test, documentation, PDF, and visual-evidence package.
+- `output/phase7/ASK_MAGIC_MIKE_PHASE7_VISUAL_ASSET_PACKAGE.zip` — 27-file desktop/mobile, Message Review Studio, matched funnel-validation, PDF-cover, and visual-inventory package; SHA-256 `9332abe5f3b0c5600390b97e930560c23d0062697aad4edfe078e390b518a1af`.
+- `output/phase7/Ask_Magic_Mike_Phase7_Messaging_AI_Release_Candidate_Package.zip` — verified 75-file code, migration, test, documentation, PDF, and visual-evidence package; final SHA-256 is recorded in its adjacent sidecar.
 - SHA-256 sidecars for both ZIP archives.
 - `scripts/phase7/generate_release_pdf.py` — reproducible ReportLab source for the PDF.
 

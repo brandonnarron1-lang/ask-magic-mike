@@ -13,6 +13,10 @@ Evidence is appended only from executed commands and deployed checks.
 - Full release gate: 172 test files / 2,621 tests passed; typecheck, lint, optimized Next.js build, 70-route manifest, 14-control release-safety scan, and Ask Magic Mike/NellySelly isolation all passed.
 - Production dependency audit: `pnpm audit --prod --audit-level high` — no known vulnerabilities.
 - No real or QA lead, email, BCC, SMS, push notification, consumer acknowledgment, or database mutation was created by this polish audit.
+- PR 158 Preview was Ready and browser-verified at the exact empty-address state; `output/phase7/screenshots/current-audit/10-preview-inline-error.jpg` records the released artifact before merge.
+- PR 158 merged at `fb6312d60c287477fc030d13804bde9f7c8884b2`; Production deployment `dpl_3TCT4xrVCdh55xMzCoCC1qzhJrbV` became Ready with `www.askmagicmike.com` and `askmagicmike.com` aliases on Node 24.x.
+- Post-release Production checks: smoke 19 passed / 2 intentional skips; funnel 15/15; monitor 9/9; lead-pipe health passed; isolation passed; Vercel error and warning queries returned no logs.
+- Production DOM verification confirmed the persistent alert and visible required marker; `output/phase7/screenshots/current-audit/11-production-inline-error-released.jpg` records the released state. No lead was submitted.
 
 ## Local implementation slice
 

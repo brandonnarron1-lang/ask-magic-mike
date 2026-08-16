@@ -1,8 +1,10 @@
 Phase 7 PR: 156
 Phase 7 merge commit: 4b4caefcd2aea2944a06df71a8cf3e3e569b969d
-Production deployment ID: dpl_31FNiQF1TcRw7cHZkmb8eFnRFmKc
+Funnel accessibility PR: 158
+Funnel accessibility merge commit: fb6312d60c287477fc030d13804bde9f7c8884b2
+Production deployment ID: dpl_3TCT4xrVCdh55xMzCoCC1qzhJrbV
 Production URL: https://www.askmagicmike.com
-Preview URL: https://ask-magic-mike-4jzxrwv0i-eyes-up-industries.vercel.app
+Accessibility Preview URL: https://ask-magic-mike-git-codex-phase7-funne-4131ae-eyes-up-industries.vercel.app
 Neon project: bitter-star-20214385
 Neon Production branch: br-round-base-auh6h2wd
 Migration: 20260816143000_phase7_messaging_release_candidate.sql
