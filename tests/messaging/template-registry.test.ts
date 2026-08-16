@@ -20,11 +20,42 @@ describe("Phase 6 template registry", () => {
     expect(consumer.every((template) => template.approval === "APPROVAL_REQUIRED")).toBe(true);
   });
 
+  it("contains every required Phase 7 email family", () => {
+    const ids = new Set(MESSAGE_TEMPLATE_REGISTRY.map((template) => template.id));
+    for (const id of [
+      "internal.lead_alert",
+      "internal.mike_view_alert",
+      "internal.daily_digest",
+      "general.email.received",
+      "home_value.email.received",
+      "seller.email.received",
+      "buyer.email.received",
+      "seller_options.email.received",
+      "seller_options.email.human_review",
+      "rental.email.received",
+      "rental.email.availability",
+      "rental.email.timing",
+      "rental.email.territory",
+      "short_term_rental.email.received",
+      "short_term_rental.email.clarify",
+      "property_alerts.email.confirm",
+      "general.email.appointment_invitation",
+      "general.email.follow_up",
+      "general.email.close",
+      "general.email.opt_out_confirmation",
+      "internal.delivery_failure",
+      "internal.sla_breach",
+      "internal.test_render",
+      "out_of_area.internal.review",
+      "coastal_review.internal.review",
+    ]) expect(ids.has(id)).toBe(true);
+  });
+
   it("has internally valid sequence definitions", () => {
     expect(validateSequenceDefinitions()).toEqual([]);
     expect(MESSAGE_SEQUENCES).toHaveLength(8);
     const materialized = materializeSequence("home_value_review_v1", new Date("2026-08-15T12:00:00Z"));
-    expect(materialized).toHaveLength(3);
+    expect(materialized).toHaveLength(8);
     expect(materialized.every((step) => step.status === "approval_required")).toBe(true);
   });
 

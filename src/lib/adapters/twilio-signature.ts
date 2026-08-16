@@ -37,7 +37,6 @@ export interface VerifyTwilioSignatureArgs {
 export function verifyTwilioSignature(args: VerifyTwilioSignatureArgs): {
   ok: boolean;
   reason?: "missing_signature" | "missing_token" | "mismatch";
-  expected?: string;
 } {
   if (!args.providedSignature) return { ok: false, reason: "missing_signature" };
   if (!args.authToken) return { ok: false, reason: "missing_token" };
@@ -51,12 +50,12 @@ export function verifyTwilioSignature(args: VerifyTwilioSignatureArgs): {
   // Constant-time compare (length-safe).
   const provided = args.providedSignature;
   if (provided.length !== expected.length) {
-    return { ok: false, reason: "mismatch", expected };
+    return { ok: false, reason: "mismatch" };
   }
   const a = Buffer.from(provided);
   const b = Buffer.from(expected);
   if (!timingSafeEqual(a, b)) {
-    return { ok: false, reason: "mismatch", expected };
+    return { ok: false, reason: "mismatch" };
   }
   return { ok: true };
 }

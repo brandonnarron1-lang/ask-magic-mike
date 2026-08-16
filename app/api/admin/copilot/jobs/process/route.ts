@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
   try {
     const loaded = await loadLeadIntelligenceFacts(sql, job.lead_id);
     if (!loaded) throw new Error("lead_not_found");
-    const result = await generateAiLeadIntelligence(loaded.facts);
+    const result = await generateAiLeadIntelligence(loaded.facts, { dailyEstimatedCostUsd: dailyCost });
     const resultId = await persistLeadIntelligence({ sql, leadId: job.lead_id, facts: loaded.facts, result, actor: job.requested_by, feature: "async_lead_center_copilot" });
     await sql.query(
       `UPDATE public.ai_intelligence_jobs SET status = $1, result_id = $2::uuid,

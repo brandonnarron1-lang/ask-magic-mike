@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
             l.source, l.lead_source_surface, l.timeline, l.timeline_months,
             l.target_geography, l.city, l.consent_email, l.consent_sms,
             l.consent_call, l.is_test, l.communication_suppressed,
-            l.question, l.notes, l.assigned_agent_id,
+            l.question, l.notes, l.assigned_agent_id, l.routing_reason,
             sa.placement_id
        FROM public.leads l
        LEFT JOIN LATERAL (
@@ -100,8 +100,15 @@ export async function POST(request: NextRequest) {
     question: [asText(row.question), asText(row.notes)].filter(Boolean).join("\n").slice(0, 4_000),
   };
 
-  const result = await generateAiLeadIntelligence(facts);
-  const [permissionRows, notificationRows] = await Promise.all([
+  const dailyUsageRows = await sql.query(
+    `SELECT COALESCE(sum(estimated_cost_usd), 0)::numeric AS cost
+       FROM public.ai_usage_events
+      WHERE feature IN ('lead_center_copilot', 'async_lead_center_copilot')
+        AND created_at >= date_trunc('day', now())`,
+  ).catch(() => [{ cost: 0 }]) as Array<{ cost: string | number }>;
+  const dailyEstimatedCostUsd = Number(dailyUsageRows[0]?.cost || 0);
+  const result = await generateAiLeadIntelligence(facts, { dailyEstimatedCostUsd });
+  const [permissionRows, notificationRows, attributionRows, providerEventRows, priorAiRows] = await Promise.all([
     sql.query(
       `SELECT channel, purpose, state, consent_version, source, evidence_at
          FROM public.communication_permissions WHERE lead_id = $1::uuid
@@ -109,9 +116,47 @@ export async function POST(request: NextRequest) {
       [row.id],
     ).catch(() => []),
     sql.query(
-      `SELECT channel, notification_type, status, provider, updated_at
+      `SELECT channel, notification_type, status, provider, provider_message_id,
+              attempt_count, error_code, error_summary, sent_at, failed_at, updated_at
          FROM public.lead_notifications WHERE lead_id = $1::uuid
         ORDER BY created_at DESC LIMIT 10`,
+      [row.id],
+    ).catch(() => []),
+    sql.query(
+      `SELECT utm_source, utm_medium, utm_campaign, utm_content, utm_term,
+              referrer_url, landing_page, first_touch, last_touch, click_ids,
+              placement_id, page_title, listing_id, property_id, agent_id, created_at
+         FROM public.source_attribution
+        WHERE lead_id = $1::uuid
+        ORDER BY created_at ASC LIMIT 10`,
+      [row.id],
+    ).catch(() => []),
+    sql.query(
+      `SELECT pwe.provider, pwe.provider_message_id, pwe.event_type,
+              pwe.signature_verified, pwe.processing_status, pwe.error_code,
+              pwe.occurred_at, pwe.received_at, pwe.processed_at
+         FROM public.provider_webhook_events pwe
+         JOIN public.lead_notifications ln
+           ON ln.provider_message_id = pwe.provider_message_id
+          AND (ln.provider IS NULL OR lower(ln.provider) = lower(pwe.provider))
+        WHERE ln.lead_id = $1::uuid
+        ORDER BY COALESCE(pwe.occurred_at, pwe.received_at) DESC LIMIT 25`,
+      [row.id],
+    ).catch(() => []),
+    sql.query(
+      `SELECT ali.schema_version, ali.prompt_version, ali.mode, ali.model,
+              ali.output, ali.confidence, ali.created_at,
+              aue.input_tokens, aue.output_tokens, aue.estimated_cost_usd,
+              aue.latency_ms, aue.fallback_reason
+         FROM public.ai_lead_intelligence ali
+         LEFT JOIN LATERAL (
+           SELECT input_tokens, output_tokens, estimated_cost_usd, latency_ms, fallback_reason
+             FROM public.ai_usage_events
+            WHERE lead_id = ali.lead_id
+            ORDER BY created_at DESC LIMIT 1
+         ) aue ON true
+        WHERE ali.lead_id = $1::uuid
+        ORDER BY ali.created_at DESC LIMIT 1`,
       [row.id],
     ).catch(() => []),
   ]);
@@ -159,9 +204,18 @@ export async function POST(request: NextRequest) {
         consent: { email: facts.consentEmail, sms: facts.consentSms, call: facts.consentCall },
         communicationPermissions: permissionRows,
         recentNotifications: notificationRows,
+        attribution: attributionRows,
+        currentAssignment: {
+          agentId: asText(row.assigned_agent_id) || null,
+          routingReason: asText(row.routing_reason) || "not_recorded",
+        },
+        providerEvents: providerEventRows,
+        previousAiIntelligence: priorAiRows[0] || null,
         aiCanSend: false,
         aiCanAssign: false,
         aiCanChangeScore: false,
+        dailyEstimatedCostUsd,
+        dailyCostLimitUsd: Math.max(0, Number(process.env.AI_DAILY_COST_LIMIT_USD) || 1),
       },
     },
     tools: copilotToolsForRole(auth.principal.role),
