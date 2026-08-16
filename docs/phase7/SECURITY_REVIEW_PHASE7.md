@@ -10,5 +10,6 @@ High-risk paths have explicit controls:
 - AI key stays server-side; model output has no mutation authority.
 - Sequence transitions use RBAC, scope, compare-and-update, and audit.
 
-Residual deployment checks: configure webhook secret securely, apply the additive migration on Preview before Production, run dependency audit, inspect Vercel logs, and replay signed duplicate events. No NellySelly project/domain/database variable may be introduced.
+The 2026-08-16 accessibility-polish diff was also reviewed against the JavaScript, React, and Next.js secure-coding baselines. It adds no HTML injection sink, dynamic navigation, credential storage, client-side secret access, cross-origin messaging, server mutation, or authorization change. `pnpm audit --prod --audit-level high` reported no known vulnerabilities, and the repository release-safety scan passed all 14 controls.
 
+The additive Phase 7 migration is already applied on the canonical Neon Production branch and was verified without changing live lead rows. Remaining deployment checks: configure the Resend webhook secret securely before enabling webhook ingestion, inspect Vercel logs after the polish release, and replay signed duplicate events when that signing secret is available. No NellySelly project/domain/database variable may be introduced.

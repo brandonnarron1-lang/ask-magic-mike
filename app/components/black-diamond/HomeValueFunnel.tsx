@@ -158,11 +158,14 @@ export function HomeValueFunnel({
       <ProgressBar step={step} labels={stepLabels} />
 
       {step === 1 ? (
-        <form onSubmit={submitAddress} className="space-y-5" data-amm-step="address">
+        <form noValidate onSubmit={submitAddress} className="space-y-5" data-amm-step="address">
           <TextField
             label="Property address"
             value={address}
-            onChange={(event) => setAddress(event.target.value)}
+            onChange={(event) => {
+              setAddress(event.target.value);
+              if (formError) setFormError(null);
+            }}
             autoComplete="street-address"
             placeholder="123 Lake Wilson Road, Wilson, NC"
             aria-describedby={formError ? errorId : undefined}
@@ -176,11 +179,14 @@ export function HomeValueFunnel({
       ) : null}
 
       {step === 2 ? (
-        <form onSubmit={submitEmail} className="space-y-5" data-amm-step="email">
+        <form noValidate onSubmit={submitEmail} className="space-y-5" data-amm-step="email">
           <TextField
             label="Email for your valuation follow-up"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              if (formError) setFormError(null);
+            }}
             type="email"
             autoComplete="email"
             placeholder="you@example.com"
@@ -189,7 +195,14 @@ export function HomeValueFunnel({
             required
           />
           <div className="flex gap-3">
-            <button type="button" onClick={() => setStep(1)} className="amm-secondary-button px-5 py-4">
+            <button
+              type="button"
+              onClick={() => {
+                setFormError(null);
+                setStep(1);
+              }}
+              className="amm-secondary-button px-5 py-4"
+            >
               Back
             </button>
             <button className="amm-primary-button flex-1 px-5 py-4">
@@ -200,11 +213,14 @@ export function HomeValueFunnel({
       ) : null}
 
       {step === 3 ? (
-        <form onSubmit={submitPhone} className="space-y-5" data-amm-step="phone">
+        <form noValidate onSubmit={submitPhone} className="space-y-5" data-amm-step="phone">
           <TextField
             label="Phone"
             value={phone}
-            onChange={(event) => setPhone(event.target.value)}
+            onChange={(event) => {
+              setPhone(event.target.value);
+              if (formError) setFormError(null);
+            }}
             type="tel"
             autoComplete="tel"
             placeholder="252-555-0123"
@@ -219,7 +235,14 @@ export function HomeValueFunnel({
           </SelectField>
           <LeadConsentField checked={consent} onChange={setConsent} />
           <div className="flex gap-3">
-            <button type="button" onClick={() => setStep(2)} className="amm-secondary-button px-5 py-4">
+            <button
+              type="button"
+              onClick={() => {
+                setFormError(null);
+                setStep(2);
+              }}
+              className="amm-secondary-button px-5 py-4"
+            >
               Back
             </button>
             <button disabled={submitting} aria-busy={submitting} className="amm-primary-button flex-1 px-5 py-4 disabled:opacity-60">

@@ -2,6 +2,18 @@
 
 Evidence is appended only from executed commands and deployed checks.
 
+## Funnel-accessibility polish addendum
+
+- Matched Production/local visual comparison: `output/phase7/screenshots/current-audit/08-before-after-comparison.jpg`.
+- The same in-app-browser tab and 984×964 viewport were used for the empty-address before/after state.
+- Production before: browser-native validation bubble; the app DOM had no explanatory alert text.
+- Local after: visible `Required` marker, persistent `role="alert"`, and the address field exposed `aria-invalid="true"`.
+- Consent-step evidence: `output/phase7/screenshots/current-audit/09-local-phone-consent-matched.jpg`; synthetic values only and no lead submitted.
+- Targeted component verification: 3 files / 10 tests passed before the full gate.
+- Full release gate: 172 test files / 2,621 tests passed; typecheck, lint, optimized Next.js build, 70-route manifest, 14-control release-safety scan, and Ask Magic Mike/NellySelly isolation all passed.
+- Production dependency audit: `pnpm audit --prod --audit-level high` — no known vulnerabilities.
+- No real or QA lead, email, BCC, SMS, push notification, consumer acknowledgment, or database mutation was created by this polish audit.
+
 ## Local implementation slice
 
 - `pnpm typecheck`: pass on 2026-08-16.
