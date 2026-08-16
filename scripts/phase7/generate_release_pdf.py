@@ -148,9 +148,9 @@ def main():
                 ["Subject", "[TEST — BRANDON QA] Phase 7 messaging release-candidate review"],
                 ["Provider", "Resend"],
                 ["Provider message ID", "871e5b96-a10b-492a-bb23-9898824f0cd3"],
-                ["Provider result", "Accepted; duplicate=false"],
+                ["Provider result", "Accepted; sent and delivered; duplicate=false"],
                 ["Mike / consumer / BCC / SMS", "Not requested"],
-                ["Inbox receipt", "Owner review pending; not inferred"],
+                ["Inbox receipt", "Verified in brandonnarron1@gmail.com Inbox"],
             ],
             colWidths=[2.25 * inch, 6.55 * inch],
             style=TableStyle([
@@ -164,7 +164,7 @@ def main():
             ]),
         ),
         Spacer(1, 0.18 * inch),
-        Paragraph("The connected Gmail profile is a different mailbox, and the existing Resend API key is send-scoped. Receipt and rendering are therefore intentionally reported as unverified until Brandon reviews the authorized inbox.", callout),
+        Paragraph("Authenticated Resend inspection showed sent and delivered events at 10:50 AM. Read-only inspection of the authorized Gmail inbox independently confirmed the expected sender, subject prefix, QA banner, HTML render, and protected review link. No mailbox write occurred.", callout),
         PageBreak(),
         Paragraph("5. Message Review Studio", h1),
     ]

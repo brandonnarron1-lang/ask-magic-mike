@@ -2,7 +2,10 @@ Phase 7 PR: 156
 Phase 7 merge commit: 4b4caefcd2aea2944a06df71a8cf3e3e569b969d
 Funnel accessibility PR: 158
 Funnel accessibility merge commit: fb6312d60c287477fc030d13804bde9f7c8884b2
-Production deployment ID: dpl_3TCT4xrVCdh55xMzCoCC1qzhJrbV
+Evidence PR: 159
+Evidence merge commit: 5a59482aa95f82869e753e2ca96d7e8e60d35701
+Behavioral Production deployment ID: dpl_3TCT4xrVCdh55xMzCoCC1qzhJrbV
+Latest canonical Production deployment ID: dpl_Fk1hcknGWLxibCV4LPZHanQcsfJV
 Production URL: https://www.askmagicmike.com
 Accessibility Preview URL: https://ask-magic-mike-git-codex-phase7-funne-4131ae-eyes-up-industries.vercel.app
 Neon project: bitter-star-20214385
@@ -10,8 +13,8 @@ Neon Production branch: br-round-base-auh6h2wd
 Migration: 20260816143000_phase7_messaging_release_candidate.sql
 QA provider: Resend
 QA provider message ID: 871e5b96-a10b-492a-bb23-9898824f0cd3
-QA provider state proven: accepted
-QA inbox state proven: no
+QA provider state proven: accepted, sent, delivered
+QA inbox state proven: yes, authorized recipient Inbox verified read-only
 OpenAI acceptance: Responses API structured output passed
 Carrier SMS: disabled
 Consumer email: disabled

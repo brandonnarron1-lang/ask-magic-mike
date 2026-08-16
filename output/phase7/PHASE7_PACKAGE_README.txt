@@ -14,10 +14,10 @@ CANONICAL RELEASE
 CONTROLLED ACCEPTANCE
 - Existing Sensitive Production OpenAI key reused without exposure or rotation.
 - OpenAI Responses structured-output acceptance passed on synthetic suppressed data.
-- One Brandon-only QA email was accepted by Resend.
+- One Brandon-only QA email was accepted, sent, and delivered by Resend.
 - Provider message ID: 871e5b96-a10b-492a-bb23-9898824f0cd3
 - No Mike, consumer, BCC, or carrier-SMS delivery was requested.
-- Inbox receipt is not claimed: the connected Gmail profile is a different mailbox and the Resend key is send-scoped.
+- The authorized brandonnarron1@gmail.com Inbox contains the message; sender, subject prefix, QA banner, HTML render, and review link were verified read-only.
 
 INTENTIONALLY DISABLED
 - Consumer acknowledgment and nurture

@@ -15,5 +15,19 @@ Allowed subjects begin `[TEST — BRANDON QA]` or `[TEST — BRANDON QA — MIKE
 - BCC: not used.
 - Carrier SMS: not sent.
 - Source record: synthetic, `is_test=true`, and communication-suppressed.
+- Resend events: `sent` and `delivered` on 2026-08-16 at 10:50 AM.
+- Recipient-inbox result: present in the authorized `brandonnarron1@gmail.com` Inbox.
+- Recipient-side sender and subject: `Ask Magic Mike <leads@notify.askmagicmike.com>` and the required `[TEST — BRANDON QA]` prefix.
+- Recipient-side render: branded HTML, QA banner, body copy, and secure review CTA rendered in Gmail.
+- Link behavior: the review CTA resolves to the protected Message Review Studio and correctly requires a valid Lead Center session.
 
-The connected Gmail profile is a different inbox and cannot confirm receipt. The existing Resend key is send-scoped and returned HTTP 401 for the official retrieve endpoint. Inbox delivery/rendering therefore remains unverified rather than being inferred from provider acceptance.
+The Gmail connector profile remains a different mailbox, but the already-authenticated in-app browser exposed the authorized recipient inbox at Gmail account slot `u/0`. Read-only inspection confirmed the message in Inbox; no reply, forwarding, label mutation, or other mailbox write occurred. Resend independently showed `sent` and `delivered`, so delivery is supported by both provider-side and recipient-side evidence rather than inferred from the send API response.
+
+Evidence files:
+
+- `output/phase7/screenshots/email-acceptance/01-gmail-desktop-inbox-render.png`
+- `output/phase7/screenshots/email-acceptance/02-resend-delivered-events.png`
+- `output/phase7/screenshots/email-acceptance/03-gmail-mobile-inbox-render.png`
+- `output/phase7/screenshots/email-acceptance/04-resend-mobile-render.png`
+
+The Gmail desktop screenshot is the authoritative recipient render. The narrow-viewport Gmail capture documents the responsive audit attempt but is not classified as full mobile-client conformance because Gmail retained its desktop-width message canvas in the captured browser surface.
