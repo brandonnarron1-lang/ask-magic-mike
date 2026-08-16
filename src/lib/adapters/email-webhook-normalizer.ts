@@ -20,11 +20,14 @@
  */
 
 export type EmailEventType =
+  | "sent"
   | "delivered"
+  | "delivery_delayed"
   | "opened"
   | "clicked"
   | "bounced"
   | "complained"
+  | "suppressed"
   | "unsubscribed"
   | "failed"
   | "unknown";
@@ -44,11 +47,14 @@ export interface NormalizedEmailEvent {
 function classify(raw: string | undefined | null): EmailEventType {
   if (!raw) return "unknown";
   const v = raw.toLowerCase();
+  if (v.includes("delivery_delayed") || v.includes("delay")) return "delivery_delayed";
+  if (v.includes("sent")) return "sent";
   if (v.includes("deliver")) return "delivered";
   if (v.includes("open")) return "opened";
   if (v.includes("click")) return "clicked";
   if (v.includes("bounce")) return "bounced";
   if (v.includes("complain") || v.includes("spam")) return "complained";
+  if (v.includes("suppress")) return "suppressed";
   if (v.includes("unsub") || v.includes("opt-out") || v.includes("opt_out"))
     return "unsubscribed";
   if (v.includes("fail") || v.includes("dropped")) return "failed";

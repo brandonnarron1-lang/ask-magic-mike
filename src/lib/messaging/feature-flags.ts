@@ -15,6 +15,9 @@ export function messagingFeatureFlags() {
     sequenceScheduler: enabled("MESSAGE_SEQUENCE_SCHEDULER_ENABLED"),
     autoSend: enabled("MESSAGE_AUTO_SEND_ENABLED"),
     humanApprovalRequired: enabled("MESSAGE_HUMAN_APPROVAL_REQUIRED", true),
+    messagePreview: enabled("MESSAGE_PREVIEW_ENABLED", true),
+    providerWebhook: enabled("RESEND_WEBHOOK_ENABLED"),
+    aiAutomaticAction: enabled("AI_AUTOMATIC_ACTION_ENABLED"),
   } as const;
 }
 

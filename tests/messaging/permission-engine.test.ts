@@ -8,8 +8,9 @@ describe("communication permission engine", () => {
   });
 
   it("restricts QA email to the approved test recipient", () => {
-    expect(decideCommunicationPermission({ channel: "email", purpose: "qa_test", isTest: true, recipientIsApprovedQa: true }).allowed).toBe(true);
-    expect(decideCommunicationPermission({ channel: "email", purpose: "qa_test", isTest: true, recipientIsApprovedQa: false }).code).toBe("qa_recipient_not_approved");
+    expect(decideCommunicationPermission({ channel: "email", purpose: "qa_test", isTest: true, suppressed: true, recipientIsApprovedQa: true }).allowed).toBe(true);
+    expect(decideCommunicationPermission({ channel: "email", purpose: "qa_test", isTest: true, suppressed: true, recipientIsApprovedQa: false }).code).toBe("qa_recipient_not_approved");
+    expect(decideCommunicationPermission({ channel: "email", purpose: "qa_test", isTest: true, suppressed: false, recipientIsApprovedQa: true }).code).toBe("qa_record_not_suppressed");
   });
 
   it("never permits consumer messaging for test or suppressed records", () => {

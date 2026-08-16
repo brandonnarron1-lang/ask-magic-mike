@@ -11,7 +11,7 @@ describe("message orchestrator", () => {
       scheduledAt: new Date("2026-08-15T14:00:00Z"),
     });
     expect(plan.ok).toBe(true);
-    expect(plan.idempotencyKey).toContain("general.email.received:phase6-v1");
+    expect(plan.idempotencyKey).toContain("general.email.received:phase7-v1");
     expect(plan.renderedContentHash).toMatch(/^[a-f0-9]{64}$/);
   });
 
