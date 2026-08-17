@@ -1,10 +1,10 @@
 # Phase 7 completion audit
 
-Audit date: 2026-08-16. Canonical evidence branch: `codex/phase7-provider-webhook-acceptance-2026-08-16`. This ledger distinguishes implemented code, verified evidence, and external acceptance that is still gated. It does not relabel a pending Office-artifact or authenticated Copilot acceptance step as complete.
+Audit date: 2026-08-16. Canonical evidence branch: `codex/phase7-copilot-production-acceptance-evidence-2026-08-16`. This ledger distinguishes implemented code, verified evidence, and external acceptance that is still gated. It does not relabel pending editable Office artifacts as complete.
 
 | # | Criterion | State | Evidence / remaining gate |
 |---:|---|---|---|
-| 1 | Production remains healthy | VERIFIED | Signed-webhook acceptance deployment `dpl_5g43rkAatsVi3FHyarZf7Km1jZfG` is Ready; smoke 19/19 with two intentional skips and canonical aliases pass. |
+| 1 | Production remains healthy | VERIFIED | Final Copilot acceptance deployment `dpl_7uQC5a9xudCNAN1HEAiBWdBZ7iC9` is Ready; smoke 19/19 with two intentional skips and canonical aliases pass. |
 | 2 | Phase 6 tables power services | IMPLEMENTED | Permission, sequence, provider event, AI intelligence, and usage services use canonical Neon tables. |
 | 3 | QA recipient override is safe | VERIFIED | QA delivery contract is restricted to approved test routing. |
 | 4 | Override requires test + suppressed | VERIFIED | State-machine and recipient tests enforce both flags. |
@@ -37,7 +37,7 @@ Audit date: 2026-08-16. Canonical evidence branch: `codex/phase7-provider-webhoo
 | 31 | Prompt-injection tests pass | VERIFIED | Injection block test. |
 | 32 | PII tests pass | VERIFIED | Redaction-before-provider test. |
 | 33 | AI does not block capture | VERIFIED | AI is admin/async-only and optional. |
-| 34 | Copilot works | IMPLEMENTED | Authorized endpoint, context, tool register, deployed prior provider acceptance; repeat in Preview. |
+| 34 | Copilot works | VERIFIED | Authenticated Production provider acceptance on a suppressed QA lead; strict `openai_responses` output persisted with usage telemetry and no state/contact mutation. |
 | 35 | Copilot tools enforce RBAC | VERIFIED | Object scope plus role-filtering tests. |
 | 36 | Lead Center visuals polished | VERIFIED | Phase 7 visual evidence and prior Production acceptance. |
 | 37 | Public funnel visuals polished | VERIFIED | Matched before/after evidence and released accessibility fixes. |
@@ -52,9 +52,9 @@ Audit date: 2026-08-16. Canonical evidence branch: `codex/phase7-provider-webhoo
 | 46 | Editable PowerPoint exists | BLOCKED | Required workspace dependency loader is unavailable; no image-only substitute created. |
 | 47 | Current spreadsheets exist | BLOCKED | Same workspace loader limitation; Markdown/source matrices remain current. |
 | 48 | Visual package exists | VERIFIED | Phase 7 visual ZIP and inventory. |
-| 49 | Tests pass | VERIFIED | 2026-08-16 full release gate: 174 test files and 2,643 tests pass; 14/14 release-safety checks and system-isolation check pass. |
+| 49 | Tests pass | VERIFIED | 2026-08-16 schema-fix release gate: 175 test files and 2,647 tests pass; 14/14 release-safety checks and system-isolation check pass. |
 | 50 | Build passes | VERIFIED | Strict typecheck, ESLint, optimized Next.js Production build, and route manifest pass (72 active routes; 16 acknowledged root/src duplicates). |
-| 51 | Production logs clean | VERIFIED | Post-acceptance Vercel error-log scan returned no logs/errors for deployment `dpl_5g43rkAatsVi3FHyarZf7Km1jZfG`. |
+| 51 | Production logs clean | VERIFIED | Post-acceptance Vercel error-log scan returned no logs/errors from deployment `dpl_7uQC5a9xudCNAN1HEAiBWdBZ7iC9` onward. |
 | 52 | NellySelly isolated | VERIFIED | Isolation check passed; no shared project/domain/database variable introduced. |
 | 53 | Legacy deployments disconnected | VERIFIED | Canonical project/domain mapping preserved. |
 | 54 | Final ZIP verified | VERIFIED | Refreshed 103-file release package passed `unzip -tq`, package secret scan, and checksum verification. |
@@ -64,4 +64,4 @@ Audit date: 2026-08-16. Canonical evidence branch: `codex/phase7-provider-webhoo
 
 ## Honest completion boundary
 
-The application-layer gaps are closed and signed Resend webhook Production acceptance is complete. Phase 7 must not be declared complete until the current release receives authenticated Copilot acceptance and the required editable Office artifacts can be generated with the mandated workspace runtime.
+The application-layer gaps are closed; signed Resend webhook and current-release authenticated Copilot Production acceptance are complete. The only unfulfilled deliverables are the editable PowerPoint and spreadsheet artifacts, which cannot be generated truthfully until the mandated workspace dependency loader is available.

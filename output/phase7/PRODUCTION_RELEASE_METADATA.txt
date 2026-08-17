@@ -8,8 +8,11 @@ Provider lifecycle hardening PR: 161
 Provider lifecycle hardening merge commit: 8f7697de5a7bf3384fb657fd5d0bbc31115dd6ad
 Completion gap-closure PR: 163
 Completion gap-closure merge commit: 8e328fe9d26efcdba923489b37126c67e89bd62a
+Copilot canonical-schema fix PR: 166
+Copilot canonical-schema fix merge commit: 275f06e5857aceab2c79d499a3d29766c2c59c19
 Behavioral Production deployment ID: dpl_3TCT4xrVCdh55xMzCoCC1qzhJrbV
 Latest canonical Production deployment ID at signed-webhook acceptance: dpl_5g43rkAatsVi3FHyarZf7Km1jZfG
+Final canonical Production deployment ID at Copilot acceptance: dpl_7uQC5a9xudCNAN1HEAiBWdBZ7iC9
 Production URL: https://www.askmagicmike.com
 Accessibility Preview URL: https://ask-magic-mike-git-codex-phase7-funne-4131ae-eyes-up-industries.vercel.app
 Neon project: bitter-star-20214385
@@ -20,8 +23,12 @@ QA provider message ID: 871e5b96-a10b-492a-bb23-9898824f0cd3
 QA provider state proven: accepted, sent, delivered
 QA inbox state proven: yes, authorized recipient Inbox verified read-only
 OpenAI acceptance: Responses API structured output passed
-Final release gate: 174 files / 2,643 tests passed
-Final Production health: smoke 19/19, funnel 15/15, monitor 6/6, isolation, dependency audit, 372-commit secret scan, and error logs passed
+OpenAI current-release mode/model: openai_responses / gpt-5.6-luna
+OpenAI current-release usage: 835 input tokens / 964 output tokens / $0.006619 estimated / 7624 ms
+OpenAI durable audit: 1 intelligence row / 2 usage rows; latest fallback reason null
+OpenAI timeout: AI_TIMEOUT_MS=20000, encrypted Production-only
+Final release gate: 175 files / 2,647 tests passed
+Final Production health: smoke 19/19, funnel 15/15, monitor 6/6, isolation, dependency audit, 376-commit secret scan, and error logs passed
 Resend webhook ingestion: enabled; invalid-signature rejection, signed no-PII event, durable Neon storage, and duplicate replay passed
 Resend webhook ID: d466d4d9-6837-49ae-9343-86c54c2bd720
 Synthetic acceptance event ID: msg_phase7_live_acceptance_1786914537362
