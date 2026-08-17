@@ -2,6 +2,16 @@
 
 Evidence is appended only from executed commands and deployed checks.
 
+## Current-release Production Copilot acceptance
+
+- The first authenticated attempt failed closed because the deployed query still referenced payload-era columns (`funnel_type`, `lead_source_surface`, and related names). The UI reported that no lead data or communication state changed; Production logs identified the exact canonical-schema mismatch.
+- PR 166 aligned the synchronous Copilot endpoint, asynchronous Neon intelligence loader, and communication-permission repository to the canonical lead columns and added a Production-schema regression test. The full release gate passed 175 test files / 2,647 tests, typecheck, lint, optimized build, 72-route manifest, 14/14 release-safety controls, and Ask Magic Mike/NellySelly isolation. PR 166 merged as `275f06e5857aceab2c79d499a3d29766c2c59c19`.
+- Deployment `dpl_7uQC5a9xudCNAN1HEAiBWdBZ7iC9` is Ready and canonical. The existing encrypted OpenAI key was reused unchanged. Production-only `AI_TIMEOUT_MS=20000` was added after the default eight-second timeout produced a transparent deterministic fallback; no retry, model, cap, key, or automatic-action setting changed.
+- Authenticated Lead Center acceptance on suppressed test lead `59bba7cf-fe27-42c3-adb6-27b27727e5c7` returned a strict provider-backed advisory: `openai_responses`, `gpt-5.6-luna`, 835 input tokens, 964 output tokens, estimated cost `$0.006619`, and 7,624 ms latency. The result explicitly said not to call, email, or text and routed the item only to QA/operations review.
+- Read-only Neon Production verification returned one intelligence row and two usage rows (the earlier fail-closed attempt and the final success). The latest row has no fallback reason. The lead remains test-only, communication-suppressed, assigned, score 83, with unchanged assignee and null contact/follow-up timestamps.
+- Final public checks passed: smoke 19/19 with two intentional skips, funnel 15/15, and monitor 6/6 with one intentional skip. No error-level Vercel logs exist from the final deployment timestamp onward. No outbound communication or lead-state mutation occurred.
+- Final redacted repository scan covered 376 commits and found no secret leak.
+
 ## Provider-lifecycle hardening addendum
 
 - The signed Resend route now preserves `sent_at` for accepted delivery events and records the latest normalized provider event/time in safe notification metadata.

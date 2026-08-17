@@ -7,6 +7,16 @@ All timestamps are America/New_York unless noted.
 
 ## Phase 7 completion gap closure — 2026-08-16
 
+### Authenticated Production Copilot acceptance
+
+- PR `#166` repaired payload-era lead-column references in the synchronous and asynchronous Copilot paths and added a canonical-schema regression test. It merged as `275f06e5857aceab2c79d499a3d29766c2c59c19` after the release gate passed 175 test files / 2,647 tests, strict typecheck, ESLint, optimized Production build, the 72-route manifest, 14/14 release-safety controls, and Ask Magic Mike/NellySelly isolation.
+- Final Production deployment `dpl_7uQC5a9xudCNAN1HEAiBWdBZ7iC9` is Ready and owns both canonical Ask Magic Mike aliases. `AI_TIMEOUT_MS=20000` is encrypted and Production-only; the existing `OPENAI_API_KEY` was reused unchanged and never exposed or rotated.
+- An authenticated Lead Center administrator generated an advisory for suppressed QA lead `59bba7cf-fe27-42c3-adb6-27b27727e5c7`. The provider-backed result reported mode `openai_responses`, model `gpt-5.6-luna`, 835 input tokens, 964 output tokens, estimated cost `$0.006619`, 7,624 ms latency, and no fallback reason.
+- The advisory correctly treated `is_test=true` and `communication_suppressed=true` as controlling constraints, explicitly prohibited call/email/text contact, and left all controlled tools behind human approval. AI sending and AI assignment remained disabled.
+- Neon Production durably contains one intelligence row and two Copilot usage rows: the earlier fail-closed provider attempt plus the final provider success. The latest usage row is the successful result above. The lead remained `assigned`, score `83`, with the same assignee and null `last_contacted_at` / `next_follow_up_at`; no assignment, score, stage, task, appointment, message, notification, email, BCC, SMS, Push notification, or consumer action changed.
+- Post-deployment checks passed: production smoke 19/19 with two intentional auth/write skips, conversion funnel 15/15, synthetic monitor 6/6 with one intentional authenticated-health skip. Vercel returned no error-level logs from the final deployment timestamp onward. The earlier schema errors at 9:09–9:10 PM predate this deployment and are retained as truthful root-cause evidence.
+- Final redacted repository scan passed with 376 commits and no detected secret leak.
+
 ### Signed Resend webhook Production acceptance
 
 - Resend webhook `d466d4d9-6837-49ae-9343-86c54c2bd720` is enabled for the canonical `https://www.askmagicmike.com/api/webhooks/email/events` route and the documented eight-event allowlist.
