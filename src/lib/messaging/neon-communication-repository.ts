@@ -30,7 +30,7 @@ export async function loadLeadPermissionContext(leadId: string, principal: LeadC
   const leads = await sql.query(
     `SELECT id, is_test, communication_suppressed, email_suppressed, sms_suppressed,
             consent_email, consent_sms, consent_call, consent_timestamp,
-            source, lead_source_surface, source_url, assigned_agent_id
+            source, source_detail, page_url, assigned_agent_id
        FROM public.leads
       WHERE id = $1::uuid${scoped ? " AND assigned_agent_id = $2::uuid" : ""}
       LIMIT 1`,
@@ -54,8 +54,8 @@ export async function loadLeadPermissionContext(leadId: string, principal: LeadC
     consentCall: bool(row.consent_call),
     consentText: null,
     consentVersion: null,
-    source: text(row.source) || text(row.lead_source_surface),
-    formOrRoute: text(row.source_url) || text(row.lead_source_surface),
+    source: text(row.source) || text(row.source_detail),
+    formOrRoute: text(row.page_url) || text(row.source_detail),
     optedOutEmail: bool(row.email_suppressed),
     optedOutSms: bool(row.sms_suppressed),
   };
@@ -94,4 +94,3 @@ export async function evaluateAndRecordPermission(input: {
   ) as Array<{ id: string; decided_at: string }>;
   return { ok: true as const, decision, decisionId: rows[0]?.id || null, persistedAt: rows[0]?.decided_at || null };
 }
-

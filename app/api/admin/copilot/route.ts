@@ -60,11 +60,11 @@ export async function POST(request: NextRequest) {
   }
 
   const rows = await sql.query(
-    `SELECT l.id, l.funnel_type, l.status, l.score, l.score_factors,
-            l.source, l.lead_source_surface, l.timeline, l.timeline_months,
+    `SELECT l.id, l.lead_type, l.status, l.score, l.score_factors,
+            l.source, l.source_detail, l.timeline_months,
             l.target_geography, l.city, l.consent_email, l.consent_sms,
             l.consent_call, l.is_test, l.communication_suppressed,
-            l.question, l.notes, l.assigned_agent_id, l.routing_reason,
+            l.question_raw, l.notes, l.assigned_agent_id, l.routing_reason,
             sa.placement_id
        FROM public.leads l
        LEFT JOIN LATERAL (
@@ -84,20 +84,20 @@ export async function POST(request: NextRequest) {
   }
 
   const facts: LeadIntelligenceFacts = {
-    leadType: asText(row.funnel_type) || "general",
+    leadType: asText(row.lead_type) || "general",
     status: asText(row.status) || "unknown",
     score: asNumber(row.score),
     scoreExplanation: scoreExplanations(row.score_factors),
-    source: asText(row.source) || asText(row.lead_source_surface) || "unknown",
-    placement: asText(row.placement_id) || asText(row.lead_source_surface),
-    timeline: asText(row.timeline) || (asNumber(row.timeline_months) == null ? "" : `${asNumber(row.timeline_months)} months`),
+    source: asText(row.source) || asText(row.source_detail) || "unknown",
+    placement: asText(row.placement_id) || asText(row.source_detail),
+    timeline: asNumber(row.timeline_months) == null ? "" : `${asNumber(row.timeline_months)} months`,
     targetGeography: asText(row.target_geography) || asText(row.city),
     consentEmail: asBoolean(row.consent_email),
     consentSms: asBoolean(row.consent_sms),
     consentCall: asBoolean(row.consent_call),
     isTest: asBoolean(row.is_test),
     suppressed: asBoolean(row.communication_suppressed),
-    question: [asText(row.question), asText(row.notes)].filter(Boolean).join("\n").slice(0, 4_000),
+    question: [asText(row.question_raw), asText(row.notes)].filter(Boolean).join("\n").slice(0, 4_000),
   };
 
   const dailyUsageRows = await sql.query(
