@@ -6,5 +6,6 @@ The artifact system produces two editable presentations, thirteen formula-backed
 
 Current operational truth remains unchanged: zero genuine prospects, six suppressed QA records, zero unsuppressed QA, zero QA in business Active/New, zero pending notifications, and zero live notification failures. Form 3 forwarding is active; consumer acknowledgment is prepared but disabled. AI Copilot is advisory and has no automatic mutation or communication authority. Mike remains deferred.
 
-The only incomplete acceptance item is fresh authenticated Lead Center visual capture. The previous session expired and the browser correctly fails closed. Completion requires sign-in with existing staff credentials and a read-only screenshot pass; no reset, email send, or data mutation is needed.
+Authenticated Lead Center visual acceptance is complete. Brandon used the existing staff login and explicitly completed takeover; the audit then remained read-only. Desktop/mobile evidence covers the active and suppressed-test inboxes, lead detail, reporting, allocation, notification state, action queue, message previews, copilot guardrails, permission matrix, sequence workspace, and unified activity. Protected contact and identifier fields were masked and OCR-scanned before packaging.
 
+No separate users, settings, or AI-usage routes exist in the canonical application, so Phase 8 does not fabricate screenshots or claim acceptance for those nonexistent surfaces. Redacted database evidence continues to support RBAC and AI-usage facts.

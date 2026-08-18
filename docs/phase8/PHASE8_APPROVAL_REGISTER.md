@@ -8,5 +8,5 @@
 | Mike activation | Deferred | Separate operator activation acceptance required |
 | Held WordPress forms | Held | Form-specific mapping, consent, QA, and approval |
 | Resend account standing | Operational risk | Resolve unpaid invoice or approve a specific no-cost replacement path |
-| Lead Center visual acceptance | Session expired | Fresh staff sign-in, then `TAKEOVER DONE` |
+| Lead Center visual acceptance | Passed read-only | No further action |
 | Paid media | Inactive | Separate budget and launch approval required |

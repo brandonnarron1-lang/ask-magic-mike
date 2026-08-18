@@ -86,6 +86,9 @@ def render_visual_assets() -> None:
     public=OUT/"screenshots"/"public"
     for shot in public.glob("*.png"):
         shutil.copy2(shot, INTERFACES/shot.name)
+    lead_center=OUT/"screenshots"/"lead-center"
+    for shot in lead_center.glob("*.png"):
+        shutil.copy2(shot, INTERFACES/("lead-center-"+shot.name))
     for legacy in [
         REPO/"output/phase6/screenshots/after/desktop-1280-message-previews-viewport.png",
         REPO/"output/phase6/screenshots/after/mobile-390-message-previews-viewport.png",
@@ -102,9 +105,18 @@ def render_public_montages() -> None:
     montage(desktop, RENDERS/"PHASE8_PUBLIC_DESKTOP_MONTAGE.png", cols=2, tile=(720,450))
 
 
+def render_lead_center_montages() -> None:
+    lead_center=OUT/"screenshots"/"lead-center"
+    mobile=sorted(lead_center.glob("*-390.png"))
+    desktop=sorted(lead_center.glob("*-1440.png"))
+    montage(mobile, RENDERS/"PHASE8_LEAD_CENTER_MOBILE_MONTAGE.png", cols=2, tile=(420,620))
+    montage(desktop, RENDERS/"PHASE8_LEAD_CENTER_DESKTOP_MONTAGE.png", cols=2, tile=(720,450))
+
+
 if __name__ == "__main__":
     render_presentations()
     render_workbooks()
     render_visual_assets()
     render_public_montages()
-    print(f"Rendered slide, workbook, public, and visual previews under {OUT}")
+    render_lead_center_montages()
+    print(f"Rendered slide, workbook, public, Lead Center, and visual previews under {OUT}")

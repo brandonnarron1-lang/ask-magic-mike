@@ -80,7 +80,7 @@
     "primary_lead_owner_enabled": 1,
     "primary_lead_owner_verified": 0,
     "active_sessions_at_audit": 0,
-    "current_visual_audit_state": "Lead Center login required because the prior session expired"
+    "current_visual_audit_state": "passed by authenticated read-only inspection"
   },
   "operators": {
     "brandon": {
@@ -88,7 +88,7 @@
       "account_enabled": true,
       "email_verified": true,
       "qa_email_acceptance": "delivered",
-      "current_session": "expired"
+      "current_session": "authenticated for read-only Phase 8 acceptance"
     },
     "mike": {
       "role": "primary_lead_owner",
@@ -137,7 +137,10 @@
     "unexpected_browser_console_errors_or_warnings": 0,
     "expected_intentional_404_console_findings": 9,
     "capture_mode": "viewport-only",
-    "lead_center": "pending authenticated takeover"
+    "lead_center": "passed authenticated read-only at 1440x1000 and 390x844",
+    "lead_center_route_and_section_states": 12,
+    "lead_center_retained_screenshots": 24,
+    "lead_center_ocr_sensitive_pattern_findings": 0
   },
   "quality": {
     "phase_7_release_gate": "passed",

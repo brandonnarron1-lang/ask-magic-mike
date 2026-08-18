@@ -14,6 +14,20 @@
     "pass": true
   },
   {
+    "file": "renders/PHASE8_LEAD_CENTER_DESKTOP_MONTAGE.png",
+    "width": 1440,
+    "height": 2700,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "renders/PHASE8_LEAD_CENTER_MOBILE_MONTAGE.png",
+    "width": 840,
+    "height": 3720,
+    "nonempty": true,
+    "pass": true
+  },
+  {
     "file": "renders/PHASE8_PRESENTATION_VISUAL_QA_MONTAGE.png",
     "width": 1600,
     "height": 1640,

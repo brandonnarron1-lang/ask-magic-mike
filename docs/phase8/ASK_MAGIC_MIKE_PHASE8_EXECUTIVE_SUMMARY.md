@@ -4,7 +4,7 @@ Ask Magic Mike is live on the canonical Vercel project, backed by the dedicated 
 
 Current business truth: zero genuine live leads, six suppressed QA records, zero unsuppressed QA records, zero QA in business Active/New reporting, zero pending notifications, and zero live notification failures. This is a verified zero-state—not fabricated demand.
 
-The Lead Center RBAC schema is ready with one enabled/verified administrator and one enabled primary lead owner whose verification/activation remains deferred. The current browser session expired, so fresh sign-in is required for updated protected-screen screenshots.
+The Lead Center RBAC schema is ready with one enabled/verified administrator and one enabled primary lead owner whose verification/activation remains deferred. Authenticated desktop/mobile visual acceptance passed in a read-only staff session; no lead, assignment, message, or administrative state was changed.
 
 AI Copilot is operator-only and advisory. Its latest accepted synthetic run used `openai_responses` with `gpt-5.6-luna`, 835 input tokens, 964 output tokens, estimated cost $0.006619, and 7,624 ms latency. It sent no communication and mutated no assignment, score, stage, consent, task, appointment, or notification state.
 

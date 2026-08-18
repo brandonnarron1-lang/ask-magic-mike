@@ -40,7 +40,7 @@ Overall: **PASS**.
 
 ## Rendering and scans
 
-- Preview/montage images verified: 19.
-- Secret/PII files scanned: 247.
+- Preview/montage images verified: 21.
+- Secret/PII files scanned: 297.
 - Secret/PII hits: 0.
 - Visual clipping/overflow is confirmed separately in the montage inspection and public visual-acceptance report.

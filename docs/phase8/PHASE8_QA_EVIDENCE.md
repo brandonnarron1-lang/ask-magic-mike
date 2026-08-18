@@ -40,7 +40,7 @@ Commands: `npm run artifacts:build` and `npm run artifacts:verify` from `tools/a
 - Presentations: 2 pass, 40 total slides, 40 speaker-note pages, editable shapes/text/charts present.
 - Workbooks: 13 pass; formulas, filters, freeze panes, validation, and cached error scans pass after LibreOffice recalculation.
 - PDFs: 6 pass; searchable and structurally valid.
-- Preview/montage images: 19 pass.
+- Preview/montage images: public and editable-artifact set passed before protected capture; final package verification includes the added Lead Center evidence.
 - Secret/PII scan: zero findings across Phase 8 output, documentation, and isolated toolchain source.
 - Development-tool dependency note: two high `npm audit` findings are confined to PptxGenJS's transitive `image-size` package. The generator is isolated from Production and processes only trusted repository assets.
 
@@ -48,7 +48,8 @@ Commands: `npm run artifacts:build` and `npm run artifacts:verify` from `tools/a
 
 No synthetic prospect was created. No consumer email, carrier SMS, Mike activation, Form 3 acknowledgment, held WordPress form activation, database migration, DNS change, or production lead mutation occurred.
 
-## Remaining authenticated check
+## Authenticated Lead Center acceptance
 
-Lead Center visual acceptance requires a fresh existing staff sign-in because the protected session redirected to `/lead-center-login?error=session`. No password reset is needed or authorized.
+Brandon completed the existing staff sign-in and replied `TAKEOVER DONE`. Read-only acceptance covered Active/New, Test/Closed, lead detail, reporting, allocation, notifications, Action Queue, message previews, copilot guardrails, permission controls, sequence workspace, and unified activity at 1440×1000 and 390×844. No write control was used. Retained screenshots passed an OCR scan for email, phone, and UUID patterns after masking protected fields.
 
+Separate users, settings, and AI-usage routes are not present in the canonical application, so no visual claim is made for them. RBAC and AI usage remain supported by redacted aggregate database evidence.
