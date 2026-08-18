@@ -1,0 +1,1115 @@
+{
+  "generated": "2026-08-18",
+  "files": [
+    {
+      "path": "output/phase8/presentations/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION.pptx",
+      "bytes": 1734459,
+      "sha256": "4a3e15ac6493f8d813c6b5cba33252757abf2d426ddc0277df0337992dc6ead9"
+    },
+    {
+      "path": "output/phase8/presentations/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION.pptx",
+      "bytes": 1276131,
+      "sha256": "a27a36a566eaee600a77920f62453ddbb75cc1660709dc6f5c20fc4ac33148da"
+    },
+    {
+      "path": "output/phase8/workbooks/AI_COST_CONTROL_MATRIX_CURRENT.xlsx",
+      "bytes": 17104,
+      "sha256": "1ed93ccf331f8971f05a53d93ecf48a1057a4266faf6089e83e287cd92f1c076"
+    },
+    {
+      "path": "output/phase8/workbooks/AI_LEAD_INTELLIGENCE_EVAL_CURRENT.xlsx",
+      "bytes": 19724,
+      "sha256": "f51ff72a544b72b7f79d728a722cc0452d5ed65328e06a68141d50cc2aedd287"
+    },
+    {
+      "path": "output/phase8/workbooks/AI_USAGE_AND_COST_DASHBOARD_CURRENT.xlsx",
+      "bytes": 17155,
+      "sha256": "fbd0a3e99d58952a74fbba74e81ca88f248c1b32bd43973d8af846e4bc1f842e"
+    },
+    {
+      "path": "output/phase8/workbooks/ASK_MAGIC_MIKE_BUDGET_ROI_MODEL_CURRENT.xlsx",
+      "bytes": 25583,
+      "sha256": "6e59983ff1bd9e3ee034b357660bfbaca2bbc55de53ea3cd9040424d002adff9"
+    },
+    {
+      "path": "output/phase8/workbooks/ASK_MAGIC_MIKE_EVIDENCE_REGISTER_CURRENT.xlsx",
+      "bytes": 24951,
+      "sha256": "46b14175ecd36d120c1eb0220e7e8dfaf047ad33a40d163be7389dc774b983d8"
+    },
+    {
+      "path": "output/phase8/workbooks/ASK_MAGIC_MIKE_OPERATING_SCOREBOARD_CURRENT.xlsx",
+      "bytes": 42115,
+      "sha256": "d42e9316d85d5ba223fa4283848ac1bf21f32ce7ccd1cc530af11bc68e316e20"
+    },
+    {
+      "path": "output/phase8/workbooks/COMMUNICATION_PERMISSION_MATRIX_CURRENT.xlsx",
+      "bytes": 17341,
+      "sha256": "fa2ce02c03f69cba01e8424fee04d7a636746e5f0cda30e86967a388b87b04fb"
+    },
+    {
+      "path": "output/phase8/workbooks/COPILOT_PERMISSION_MATRIX_CURRENT.xlsx",
+      "bytes": 17277,
+      "sha256": "76c319855e681abe333b7c2677d3797f7c4527dd050a7e5ef416452c3ebb7f0b"
+    },
+    {
+      "path": "output/phase8/workbooks/FORM_MESSAGE_SEQUENCE_MATRIX_CURRENT.xlsx",
+      "bytes": 17546,
+      "sha256": "c1d00e5d9bfb5daf302d8e7d4178e30805bde9161b0b42cedd3555826dcff3c3"
+    },
+    {
+      "path": "output/phase8/workbooks/MESSAGE_DELIVERABILITY_DASHBOARD_CURRENT.xlsx",
+      "bytes": 17076,
+      "sha256": "6d09f1ad6e463eeced1f7aabf2863a6fcefaf4dd1ff9b0342b290bf240f514bf"
+    },
+    {
+      "path": "output/phase8/workbooks/MESSAGE_SEQUENCE_ACCEPTANCE_MATRIX_CURRENT.xlsx",
+      "bytes": 17229,
+      "sha256": "b628be0311dda222ba58b6c821665619b262262d7d7cc175c8ba6669f99c5ead"
+    },
+    {
+      "path": "output/phase8/workbooks/MESSAGE_TEMPLATE_REGISTRY_CURRENT.xlsx",
+      "bytes": 17395,
+      "sha256": "e45ea425a736ea90241f6d8ad243fb0f4146a1a6569b9b23e02d1460e80c65fc"
+    },
+    {
+      "path": "output/phase8/workbooks/PHASE7_BRANDON_EMAIL_ACCEPTANCE_CURRENT.xlsx",
+      "bytes": 17111,
+      "sha256": "1f6cf1589cc6310acddef718e308661350f53c7c5db182ec0313eed465eac7c3"
+    },
+    {
+      "path": "output/phase8/pdfs/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION.pdf",
+      "bytes": 513901,
+      "sha256": "4d748ab8a7da1762e5909df7ffd0e6b86e690ee57d8017a3574f6f312ba2fa0d"
+    },
+    {
+      "path": "output/phase8/pdfs/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION.pdf",
+      "bytes": 557120,
+      "sha256": "d86cd3bfe65c45d71597436d795478e5efe9943eee9d8868232ff73fda0cb186"
+    },
+    {
+      "path": "output/phase8/pdfs/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_SUMMARY.pdf",
+      "bytes": 3636,
+      "sha256": "52328270243e952039305a40e0abd18c1e651d9fbf241b385cf7eb5c47ce571f"
+    },
+    {
+      "path": "output/phase8/pdfs/ASK_MAGIC_MIKE_PHASE8_SYSTEM_DIAGRAMS.pdf",
+      "bytes": 5508,
+      "sha256": "bd05e968b87f044487b5e1fea0c49c3d055b52f79bcdf1bc56f4843741daea43"
+    },
+    {
+      "path": "output/phase8/pdfs/BRANDON_PHASE8_REVIEW_GUIDE.pdf",
+      "bytes": 5043,
+      "sha256": "05f6d4e56a3bf466306ef468e64d8db569dfc76d362348e3554147b928e14d61"
+    },
+    {
+      "path": "output/phase8/pdfs/FORM3_CONSUMER_ACKNOWLEDGMENT_RELEASE_GATE.pdf",
+      "bytes": 6121,
+      "sha256": "9abe256113b95d3c617ec60927883e400dc4034d30ffbb9aa2392901868d330f"
+    },
+    {
+      "path": "output/phase8/renders/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION_MONTAGE.png",
+      "bytes": 230337,
+      "sha256": "a9be1f16b938ed6c104c1e478759e994c96b4982f5f7bd81c5b83b341899c7d6"
+    },
+    {
+      "path": "output/phase8/renders/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION_MONTAGE.png",
+      "bytes": 221863,
+      "sha256": "2e9551cf613152bdfc38dc01032c60e8247317c61c3b3a476678214d503ab0cc"
+    },
+    {
+      "path": "output/phase8/renders/PHASE8_LEAD_CENTER_DESKTOP_MONTAGE.png",
+      "bytes": 969852,
+      "sha256": "c7a0d0db3813c8e5f19774907c47a212255792a3db0186e32bd9de374fd08728"
+    },
+    {
+      "path": "output/phase8/renders/PHASE8_LEAD_CENTER_MOBILE_MONTAGE.png",
+      "bytes": 1189315,
+      "sha256": "793b0f961ad43fcb6bb27340bed5ea96965667050332fc701309542801f1c2b1"
+    },
+    {
+      "path": "output/phase8/renders/PHASE8_PRESENTATION_VISUAL_QA_MONTAGE.png",
+      "bytes": 451961,
+      "sha256": "314d1cbe5e7d726cbdbd2de0873c80ad079523497cfb1711646bfaaea51e2d55"
+    },
+    {
+      "path": "output/phase8/renders/PHASE8_PUBLIC_DESKTOP_MONTAGE.png",
+      "bytes": 775782,
+      "sha256": "073d582fdf711f152a89f5202649f6ef721167b8c4e9fba340ab1cdea9b151df"
+    },
+    {
+      "path": "output/phase8/renders/PHASE8_PUBLIC_MOBILE_MONTAGE.png",
+      "bytes": 813011,
+      "sha256": "dcb2b220a17f07cea6c5168bba8355d07e747dfa382ce23df73bb3279f71b562"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-01.png",
+      "bytes": 75696,
+      "sha256": "3407a26b60fee79b74808f2fe42fb2ffd9b42d2edac154000993035d9b7fef34"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-02.png",
+      "bytes": 76956,
+      "sha256": "7e068dcf4f6d08845d9eeda22447313e9c39d952c4c2e994b9a53702e283761c"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-03.png",
+      "bytes": 71665,
+      "sha256": "2fec509addaef13716b0d0dcaaf6d8e0d2ee7713e7574ba08bbc7e5a71adc70c"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-04.png",
+      "bytes": 72460,
+      "sha256": "62d0868429627c400ff592cfc57d7d1f0bfd9f75f854925b5c412202d326e368"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-05.png",
+      "bytes": 67556,
+      "sha256": "105c2729c970bcddbcbc02f0c3cc6f95ca93d3ee9953df879f504c3e05d4e3db"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-06.png",
+      "bytes": 53149,
+      "sha256": "2b8c322ad917526bd9f963d1154181804266fa1ad5e2321ff67db0be7a3d020d"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-07.png",
+      "bytes": 73666,
+      "sha256": "135114b9acd75c5dc25b0f5b67b40d2cc3f7fb1efc2311ebcffcdde15f9284b7"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-08.png",
+      "bytes": 67423,
+      "sha256": "b2c2fed453f5fc4aa5a6bff5fec07033f7d56bdd16f79f3ac3d629e7644cd446"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-09.png",
+      "bytes": 72866,
+      "sha256": "edad61b2e183576eb7fdfb170a34a4d027027703502c54838e1cbbd3b31e58db"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-10.png",
+      "bytes": 71986,
+      "sha256": "ed027064aac65a75d1801cf739f9802a204054be70131cd6a8f3fd45bfdd7a5b"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-11.png",
+      "bytes": 71997,
+      "sha256": "d52fd0055836dbe70fdf015c899a282ca7ea9c1cce2b9914c0bd7c1d267ad7d8"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-12.png",
+      "bytes": 74667,
+      "sha256": "7d5179ecd413cadc7856737d16feaea09cdf84a8a82157069ba33e1fe863fc37"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-13.png",
+      "bytes": 70896,
+      "sha256": "5c361e48036480f77068e35c5560d85e866724f24fe1e05f880a0a359d15c905"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-14.png",
+      "bytes": 68511,
+      "sha256": "9779c038bd98c7562a470daa16e546a34a137b08ac6c79e144ff8fa8a85aab95"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-15.png",
+      "bytes": 71266,
+      "sha256": "677d1fec7c9a67bd06379a2c2e8dd8dc8118cdebd1f753b9e6508698db456f11"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-16.png",
+      "bytes": 63373,
+      "sha256": "a2d3e825d1f745c444e8aea2c0daac85f6970eee21c643cc8566d781f38dc5e5"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-17.png",
+      "bytes": 68279,
+      "sha256": "2c94bc8a5a0cf7af9c8e710e531b13c9ae116b5d1e76f78b39e543f87f3b01ca"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-18.png",
+      "bytes": 66697,
+      "sha256": "ea5775f02f53a7128f5188ede65d2279b1c12788cdc25b51c6b34566d65a7fb8"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-19.png",
+      "bytes": 66480,
+      "sha256": "9e2ac1e3ebb42badc16f4a4c00306048e1478c402980255396bec5ce553e9917"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-20.png",
+      "bytes": 71806,
+      "sha256": "c35761e92f11a58120a18044b45731859c7ef0a9a351080368440d3f3d6aed19"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-21.png",
+      "bytes": 68723,
+      "sha256": "4aa710a41b9675dc4e39a583ca08e4b2621f490c101bd40563dd95eab88e3d35"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-22.png",
+      "bytes": 65923,
+      "sha256": "72852e131e45ceb1352c76a98a9cd1c127493b96c36ff4d04d6d786ac30be587"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-23.png",
+      "bytes": 67668,
+      "sha256": "03e43c3ff30fd8a5f3fb96ec5f061b0a74a0062db815df393a6ba3f88bf8b52d"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-24.png",
+      "bytes": 67583,
+      "sha256": "f06d6b562615b9a0f501e22bf9caeb8857bd7fbd513987b20afdfe9de53c006b"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION/slide-25.png",
+      "bytes": 80140,
+      "sha256": "00c18602e0dfebbdd0d41448d9d73139318cd729d4c68a5cce16b834a0795e12"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-01.png",
+      "bytes": 90499,
+      "sha256": "4811cb1f04129dbe805a8d39a65f6a8972fbe2774961746d9e816594c6e822dd"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-02.png",
+      "bytes": 85474,
+      "sha256": "654bdae43741cbdf440d006b5ac947e2e88401b2d9bf26d91ccd9753e7a43132"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-03.png",
+      "bytes": 77034,
+      "sha256": "35f196cfef487b8e8d068ff88b8a2424d81ab403b915d8143286f2d03a3e471c"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-04.png",
+      "bytes": 73060,
+      "sha256": "2b884b81dc40f89e87c026347b3cec37a58e48a8010ca8c85ab6db7620d56b11"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-05.png",
+      "bytes": 76450,
+      "sha256": "e700b497b29d33ea3f78e8601efdb275641386177c66e5a88ec27430bebfbab8"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-06.png",
+      "bytes": 87497,
+      "sha256": "30a566e855fb5d92ef03be4aecdc5b21fb69916e899199b2179eae7bcbfc2d45"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-07.png",
+      "bytes": 90592,
+      "sha256": "90c6a8b9dbc6b274f889a45d05c8800273c24c314d4e249fba8e56df79aeb109"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-08.png",
+      "bytes": 98385,
+      "sha256": "abec47da1f6f235185ad3cd85ead709aca081ff98fddb0241a326fd0326a7e36"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-09.png",
+      "bytes": 90705,
+      "sha256": "53e8a4a0c2dddd141403983ad105c9ce0aa57237a81cd9dd35df57cf4b171fd2"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-10.png",
+      "bytes": 104105,
+      "sha256": "c22eaba4e66d1fbdf16a7852b575317313c7ec530267fb5722f62d8b393e2527"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-11.png",
+      "bytes": 88688,
+      "sha256": "e1c42dc49d8b67080258bfc6a7f7d4ba851ae161ef39750fcec0bb3296d8320f"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-12.png",
+      "bytes": 90195,
+      "sha256": "1c2c0bc672570c933fdb53135b005d44fab20c4ec878099bba0423d5c933f01d"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-13.png",
+      "bytes": 103594,
+      "sha256": "d5c1fbce84074375bf75475fd27d10bdccd4248b90fcf66be929eee2ee03e353"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-14.png",
+      "bytes": 103468,
+      "sha256": "4f720489882e70c7bcd94e5661f20b47a4ee65a9daea3ca2a8b25871c8ab7c37"
+    },
+    {
+      "path": "output/phase8/renders/slides/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION/slide-15.png",
+      "bytes": 86264,
+      "sha256": "e7b813cb8f03f6b07e3b2e5f20a03886e88d8149322772e6ce389af2692061c2"
+    },
+    {
+      "path": "output/phase8/workbook-previews/AI_COST_CONTROL_MATRIX_CURRENT.pdf",
+      "bytes": 54038,
+      "sha256": "819c58e863586c163703023dba9f8c0f4bfb8a9b2f5427fac51b197415be34f3"
+    },
+    {
+      "path": "output/phase8/workbook-previews/AI_COST_CONTROL_MATRIX_CURRENT.png",
+      "bytes": 20751,
+      "sha256": "b4e77d33d33408c47d728f2fa933a5cf41dbb354e37de2960ea39d83834045a6"
+    },
+    {
+      "path": "output/phase8/workbook-previews/AI_LEAD_INTELLIGENCE_EVAL_CURRENT.pdf",
+      "bytes": 84642,
+      "sha256": "5908673b9c370da9b349e012800edef1d1bfc46e6d3e0f4c657823d22c419767"
+    },
+    {
+      "path": "output/phase8/workbook-previews/AI_LEAD_INTELLIGENCE_EVAL_CURRENT.png",
+      "bytes": 19976,
+      "sha256": "870dad9e8a768b137b6c55252aad8cdd9c93a84b88de91c3d3983ee6cb280015"
+    },
+    {
+      "path": "output/phase8/workbook-previews/AI_USAGE_AND_COST_DASHBOARD_CURRENT.pdf",
+      "bytes": 53269,
+      "sha256": "3cb568d4df69d4e6ed70f9f78a6861f07c8da995fb91943e8d6e31fdc9cbc812"
+    },
+    {
+      "path": "output/phase8/workbook-previews/AI_USAGE_AND_COST_DASHBOARD_CURRENT.png",
+      "bytes": 21760,
+      "sha256": "e4411aa4a59c2f806ec7b6677a1454b4e2ed02aa5975bfd757b8d6b7092b67a5"
+    },
+    {
+      "path": "output/phase8/workbook-previews/ASK_MAGIC_MIKE_BUDGET_ROI_MODEL_CURRENT.pdf",
+      "bytes": 73809,
+      "sha256": "1509d49f8c2645ff38e34601c16ad2324ce11bf0305729451d1b58182e75f7d7"
+    },
+    {
+      "path": "output/phase8/workbook-previews/ASK_MAGIC_MIKE_BUDGET_ROI_MODEL_CURRENT.png",
+      "bytes": 31423,
+      "sha256": "cb4fd341004b0a119f7f0de4fc42ebb93ae8eb1086e3ec81faaa11abda1c0208"
+    },
+    {
+      "path": "output/phase8/workbook-previews/ASK_MAGIC_MIKE_EVIDENCE_REGISTER_CURRENT.pdf",
+      "bytes": 62914,
+      "sha256": "580e8faf01b09099a48effe5d370f6fc3d0d8194ca36b5eea2b171783bd7f29b"
+    },
+    {
+      "path": "output/phase8/workbook-previews/ASK_MAGIC_MIKE_EVIDENCE_REGISTER_CURRENT.png",
+      "bytes": 58158,
+      "sha256": "ae985504db0179cffea49d70d50b67b2176859d07dd1e7190df757f630caa351"
+    },
+    {
+      "path": "output/phase8/workbook-previews/ASK_MAGIC_MIKE_OPERATING_SCOREBOARD_CURRENT.pdf",
+      "bytes": 111646,
+      "sha256": "3ecde799674380367d5c986b415a1a3f47fa663f26933a6d649e53c2c5d51211"
+    },
+    {
+      "path": "output/phase8/workbook-previews/ASK_MAGIC_MIKE_OPERATING_SCOREBOARD_CURRENT.png",
+      "bytes": 37887,
+      "sha256": "1e515bd5332a17f16c08d9b996906ae8cc3c12afe3a4b8c9d0f5cde677f75da8"
+    },
+    {
+      "path": "output/phase8/workbook-previews/COMMUNICATION_PERMISSION_MATRIX_CURRENT.pdf",
+      "bytes": 60417,
+      "sha256": "e752ea02cbbf9082bff08c76fbbdcdfe7ee5fa044e7ec544f2437a77ca72a693"
+    },
+    {
+      "path": "output/phase8/workbook-previews/COMMUNICATION_PERMISSION_MATRIX_CURRENT.png",
+      "bytes": 22995,
+      "sha256": "ae6b367bee9472e2f17f30b790b934bd0fe8141e389165974a1f21f30fa7ed61"
+    },
+    {
+      "path": "output/phase8/workbook-previews/COPILOT_PERMISSION_MATRIX_CURRENT.pdf",
+      "bytes": 60380,
+      "sha256": "bfaa71b3b960f40ee8f518a9e70889ecf1a93b344cc3d42db4b6179f8453b3bf"
+    },
+    {
+      "path": "output/phase8/workbook-previews/COPILOT_PERMISSION_MATRIX_CURRENT.png",
+      "bytes": 21045,
+      "sha256": "4b3b23f7d94ff28557b20c82459e9a22612656822d641db06f878fdf5132be4e"
+    },
+    {
+      "path": "output/phase8/workbook-previews/FORM_MESSAGE_SEQUENCE_MATRIX_CURRENT.pdf",
+      "bytes": 70173,
+      "sha256": "c373d375064e7c0101980326b9a5f318b046a6c6ff634faa34ed79d61f96970c"
+    },
+    {
+      "path": "output/phase8/workbook-previews/FORM_MESSAGE_SEQUENCE_MATRIX_CURRENT.png",
+      "bytes": 22676,
+      "sha256": "1b3f893ea0cf66f283ffeb3130cccff808c2b2051920fa7a8a3b5a7f95ad16be"
+    },
+    {
+      "path": "output/phase8/workbook-previews/MESSAGE_DELIVERABILITY_DASHBOARD_CURRENT.pdf",
+      "bytes": 58699,
+      "sha256": "a9e89de02cd9211c92948523bb2b46d94e20ca383ec19125306f01e5412e41e0"
+    },
+    {
+      "path": "output/phase8/workbook-previews/MESSAGE_DELIVERABILITY_DASHBOARD_CURRENT.png",
+      "bytes": 22752,
+      "sha256": "149329519c9ea68e15395c3bcece8333c5b875df42673720f7289e5441846c49"
+    },
+    {
+      "path": "output/phase8/workbook-previews/MESSAGE_SEQUENCE_ACCEPTANCE_MATRIX_CURRENT.pdf",
+      "bytes": 56419,
+      "sha256": "181b1a9b648a621d591671ea874089827ebdb1aa18c3cd42c45b958da55471f4"
+    },
+    {
+      "path": "output/phase8/workbook-previews/MESSAGE_SEQUENCE_ACCEPTANCE_MATRIX_CURRENT.png",
+      "bytes": 23206,
+      "sha256": "7e5b0ca619b2a22e36ee70619e05137bca7457c17100a2ea9f4af45b3ba8dced"
+    },
+    {
+      "path": "output/phase8/workbook-previews/MESSAGE_TEMPLATE_REGISTRY_CURRENT.pdf",
+      "bytes": 57791,
+      "sha256": "e770094cfd55ed9bfb61bc2f16c8f102a67343b44da6bb4d1d8a11665745ecc3"
+    },
+    {
+      "path": "output/phase8/workbook-previews/MESSAGE_TEMPLATE_REGISTRY_CURRENT.png",
+      "bytes": 21009,
+      "sha256": "16a9bd31d02c405ecee56b22dd14be9adb13912d82cef56ca291f4bca77a867d"
+    },
+    {
+      "path": "output/phase8/workbook-previews/PHASE7_BRANDON_EMAIL_ACCEPTANCE_CURRENT.pdf",
+      "bytes": 52818,
+      "sha256": "9c9d1884a113a7d364dba22519de050ee52a738293c37fd845e24f201f0369d1"
+    },
+    {
+      "path": "output/phase8/workbook-previews/PHASE7_BRANDON_EMAIL_ACCEPTANCE_CURRENT.png",
+      "bytes": 22138,
+      "sha256": "554f10f08513a8357f8eb9b2deb98a8328de9c5091473a8dca40181b953b8b81"
+    },
+    {
+      "path": "output/phase8/workbook-previews/PHASE8_WORKBOOK_PREVIEW_MONTAGE.png",
+      "bytes": 326584,
+      "sha256": "0a6a7683bfb0a26cf7454a8d958fcc2f9f35b1d2753db14ed8452b85d09a911b"
+    },
+    {
+      "path": "output/phase8/visual-assets/ALT_TEXT_AND_ASSET_REGISTER.csv",
+      "bytes": 3701,
+      "sha256": "084803dcb2f6d8e403811c145cb1e60b8ffd9841986bc60d7c2032bfee36014e"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/ai-intelligence-flow.png",
+      "bytes": 81074,
+      "sha256": "0cebcce969ab02fb7049dfc744b50c8d25f1be0f85b25a6f2cd581a4f3259cd8"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/ai-intelligence-flow.svg",
+      "bytes": 3121,
+      "sha256": "82e47f848e71604eabb903c19dfc6c11b43de5ada749b52544c189dbe85a289a"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/ai-intelligence-flow.webp",
+      "bytes": 28428,
+      "sha256": "7d4077246521f52e9c4e1527d714e3fe11fd6a622a7d5ae70e37f3c922603008"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/canonical-architecture.png",
+      "bytes": 80087,
+      "sha256": "0eb09ca1ae33a596c9b9999bbae1d2a4b202034b2801a088c9aef0bbeb9a6c71"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/canonical-architecture.svg",
+      "bytes": 3155,
+      "sha256": "50a15e186ed56f8afe771dde4751a6d6663a0f73439b52100833c9aa5802e91b"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/canonical-architecture.webp",
+      "bytes": 29540,
+      "sha256": "655c7086f318f7ef71f711e3138225f3fdb530579ca32c34b5f84226718430d5"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/communication-permission-flow.png",
+      "bytes": 81785,
+      "sha256": "580dcf619d5907bcf8328610a38b746945326c62cb250ba75ea45a17a175edfd"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/communication-permission-flow.svg",
+      "bytes": 3137,
+      "sha256": "2d13e579e5b779a550402bf2bb640abc4e50936ee3b70616f60520afd3945072"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/communication-permission-flow.webp",
+      "bytes": 30136,
+      "sha256": "6c8f3b3075684fb25b351a552092ab2ac5fe938922ad3d4a18e87e6e3db41abc"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/copilot-tool-flow.png",
+      "bytes": 79381,
+      "sha256": "cbf2d23d876437caa69c90ea3e0b3fc000ee277f7c9df0239a2f8ac4f1c3324f"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/copilot-tool-flow.svg",
+      "bytes": 3110,
+      "sha256": "8fff6fadd009bcda392bb6799465ebf46c512db9df3a4a5d28b13983d999b5cf"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/copilot-tool-flow.webp",
+      "bytes": 28596,
+      "sha256": "c3a32f0606e26f33f5041a65eb10659c9b7b7079933ecaa6cb8a51323d1fabdd"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/failure-and-recovery.png",
+      "bytes": 80831,
+      "sha256": "d1b650cb165280a1f7caf43ef6ade797e58febdbb337df8923cab8a9a12ec956"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/failure-and-recovery.svg",
+      "bytes": 3134,
+      "sha256": "19d6d1485456eeb4ad18f0f12273c4a5ab297e996c32c656345cf4b880cb7a8b"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/failure-and-recovery.webp",
+      "bytes": 29172,
+      "sha256": "668775d2c7da3d22a3e400bc60799d08a05bbbbb4a6b1fab28f2ae9ef03e70b3"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/form3-release-gate.png",
+      "bytes": 83393,
+      "sha256": "7d71efebadbb62365b295728d77b87ee6207e2819c02ea12548157baea1831d5"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/form3-release-gate.svg",
+      "bytes": 3155,
+      "sha256": "08bff5d9e914fea60101ea86fc927490a6843da91d702285ccf1df6ad0643617"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/form3-release-gate.webp",
+      "bytes": 30384,
+      "sha256": "9f5319e4af5282110a118988e9a81c21a05c0efd1643be7c1912990dedc37bb2"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/lead-journey.png",
+      "bytes": 80809,
+      "sha256": "9ecda315952abfc9e89477be43faf8523d8f8c961c65ed66484f8c2c8e9424b1"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/lead-journey.svg",
+      "bytes": 3588,
+      "sha256": "3e084cef735550829429c362532d168d4d3bf393f14080c5ad1550560ef270ae"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/lead-journey.webp",
+      "bytes": 29378,
+      "sha256": "992250897556fc54cfd1ab524ef57bc322f0f074fe0134449c23af16a9e9da47"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/provider-event-flow.png",
+      "bytes": 82091,
+      "sha256": "7270344d39807c1fe84bb86af830de17eef09c4d79c98b0ed57f07e832af04ab"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/provider-event-flow.svg",
+      "bytes": 3129,
+      "sha256": "ef82ffce7e671e6436b6d4a35ce74aeec75c9fc5b51b1b77ac440358102ac961"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/provider-event-flow.webp",
+      "bytes": 29390,
+      "sha256": "8e98ac73f17d2124adc38d44831fa7589b6a1bb464e599701b51d46412abb2ed"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/sequence-state-machine.png",
+      "bytes": 80950,
+      "sha256": "c7918ac7251e4f17a11b82622815dd7e96b01460708a840da5aac7d03ebc3aea"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/sequence-state-machine.svg",
+      "bytes": 3139,
+      "sha256": "4897dda3b58a4b0d58797754cf00bc16c2e91a3107f24e76ec5c04f20cd1c760"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/sequence-state-machine.webp",
+      "bytes": 29664,
+      "sha256": "5232202087cab85947183764de1d0bdea6d2cffa5769e81adf4c1cc6ee3f82db"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/wordpress-bridge.png",
+      "bytes": 84147,
+      "sha256": "dde58d6be15f04dcfdc38d6410dba55756d597ad92c1650d44d832bc98661ec5"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/wordpress-bridge.svg",
+      "bytes": 2653,
+      "sha256": "a9dba46b2bbaad96d007822083976d6fcec20c815f550788bd0493e23c549f7f"
+    },
+    {
+      "path": "output/phase8/visual-assets/editable-diagrams/wordpress-bridge.webp",
+      "bytes": 28852,
+      "sha256": "7f1fa1f7505a6e46485792849a50577d55e3383927b37f4dad74c5c8e91da679"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/accepted-desktop-1280-message-previews-viewport.png",
+      "bytes": 85031,
+      "sha256": "682f4477c7276a447bf174c232847be3eb2f0c67ae539a649a14a97c3b2f3af5"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/accepted-mobile-390-message-previews-viewport.png",
+      "bytes": 44499,
+      "sha256": "1df4b5d5fc19718992b8bf4525e03367afe22189d0cc488c4815b821ffd53475"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/ask-1440.png",
+      "bytes": 158638,
+      "sha256": "f0702d179a7f7d502982fe1894c9b91377e7ef5eed2beb163d250771e206546a"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/ask-390.png",
+      "bytes": 75000,
+      "sha256": "eb38c67e22698762f82a4555e2568823c9326476348070c92c237602d3cf44bd"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/buyer-1440.png",
+      "bytes": 155330,
+      "sha256": "d894081d1ead2aeecae33fc6c5fefe3e4ca347b6a6a6614fa0e7018f3e81023d"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/buyer-390.png",
+      "bytes": 73453,
+      "sha256": "fab0a2de81132ea714ce93be5d8403f11ea77d9287765ad65080eaa181f93975"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/error-404-1440.png",
+      "bytes": 354942,
+      "sha256": "9f80247e271a561ea99d1242746c5f3041a7d3538c9a14d9f4332dd6c7ccd8e6"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/error-404-390.png",
+      "bytes": 217874,
+      "sha256": "2197aede875d376204625d60f3cb751361db1e75124e43df7fe96c2a998f4480"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/home-1440.png",
+      "bytes": 1280468,
+      "sha256": "3118bd68fb76d0697f114b90353d638832ac2122802c67248a6ac9d8e6c0f294"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/home-390.png",
+      "bytes": 327585,
+      "sha256": "a54bf1489facd5d7203c04e53c271640a2f31c2d631087b00203485954e14395"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/home-value-validation-390.png",
+      "bytes": 65998,
+      "sha256": "963c355672f7b485370482fab7dcf9c2e35530c201dce68b443732500a8b9749"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-action-queue-empty-1440.png",
+      "bytes": 35073,
+      "sha256": "e96cff9c754ec0782413bce4faed2b9ff7284b3e3e6968f0a796fd29f6fe0fcc"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-action-queue-empty-390.png",
+      "bytes": 32938,
+      "sha256": "972a291e1c7fef0452f6b5305eac663b49e779d91044fc7cce5aa52cbb9a289c"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-active-empty-1440.png",
+      "bytes": 40878,
+      "sha256": "b2a86a68c811530636ba92997774cafe61969f567ea4395870f3176b158c5ecf"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-active-empty-390.png",
+      "bytes": 40507,
+      "sha256": "87e2b8ce34e6f585249620d0eb05517530185c18b3f4dbcbc507e591f9510dde"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-allocation-1440.png",
+      "bytes": 60815,
+      "sha256": "ed06cc1a39af6cfeff2c8986a7197794f1fa1c4d3f86592e8f6ba6b03ad4c5da"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-allocation-390.png",
+      "bytes": 27662,
+      "sha256": "3f209128843b9192643f34a3a883b0a161e708f918dc44986bba85f1db0c60bf"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-detail-copilot-1440.png",
+      "bytes": 474061,
+      "sha256": "5389f7c25f44cfb0124b9352aa1ee3e5881478846c2dc17412c1315323a4fb79"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-detail-copilot-390.png",
+      "bytes": 38983,
+      "sha256": "d7dff02c037e629a5954315549c2ebd5ce24f58cb0942f092d470d258c6d780c"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-detail-permission-matrix-1440.png",
+      "bytes": 355089,
+      "sha256": "180bc6c18b5d67050b425950c90152c69ee1c8f9df4f75e8430d7fcf4697faba"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-detail-permission-matrix-390.png",
+      "bytes": 37270,
+      "sha256": "7ba56ac29bad116e31a13feb48bbb25cb904fe3844d2a1fd078365a5441c1679"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-detail-sequence-workspace-1440.png",
+      "bytes": 51539,
+      "sha256": "701ae1cfbdc5496ef780c8ec11003faf7f3b3ac4712199312c760cf94d4d22b0"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-detail-sequence-workspace-390.png",
+      "bytes": 33465,
+      "sha256": "9da78a6eaee84b3bcb42c4ccf3a1a2e8fcb39e41fb1861c6d28310d2c5bb04d5"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-detail-unified-activity-1440.png",
+      "bytes": 48490,
+      "sha256": "6a4266df496b023ce2197f2e03cd5701a17dd2620f8251f8a991606c686e9f93"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-detail-unified-activity-390.png",
+      "bytes": 30485,
+      "sha256": "0f31123a3e91cc8c3d9383dcab2c8f3ad5c2b03d78faf6b4e6a1208ec918f2d3"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-lead-detail-1440.png",
+      "bytes": 523606,
+      "sha256": "6f376e8f42e39c5ce3d9e6ffa54ab32e5dacdabebcf79481aab1d607463f8800"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-lead-detail-390.png",
+      "bytes": 38190,
+      "sha256": "0d8ae0e7e2ae736a281bd78f40006d801ec687b1996d48bd5aa7fec24eb0bd41"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-message-previews-1440.png",
+      "bytes": 92055,
+      "sha256": "a361e1e231d656791213bacfa76e7c3e8466e570b81c5fd9f465fe0a49c1444b"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-message-previews-390.png",
+      "bytes": 47958,
+      "sha256": "d433ea8f96ea3ea87309fdffd8f8bb2d5768a38aaa959b8c350e14c90de1afda"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-notifications-1440.png",
+      "bytes": 273499,
+      "sha256": "184dbade27c3409a3c0e66a2fa796262a1c7f07a662732fc5767649a50077dc0"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-notifications-390.png",
+      "bytes": 25606,
+      "sha256": "e58d5d6d2170ae3e10d822f4264a25b9c15a0f087cbbe77459bb64458548b626"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-reporting-empty-1440.png",
+      "bytes": 63755,
+      "sha256": "cb6b413bf36a8bfad30eaa94f6c19732333d43166844c99bb52f46e9e1a62ed6"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-reporting-empty-390.png",
+      "bytes": 28043,
+      "sha256": "32629524eed0c1b6ad32b82a3a9baa210d53290ae77916423a9f077f786f7e49"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-test-closed-1440.png",
+      "bytes": 694606,
+      "sha256": "792986012868d4176fc1428117c29b70ede368b808d90033445b795b1ef5ff66"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/lead-center-test-closed-390.png",
+      "bytes": 260767,
+      "sha256": "f5c9166b6cc691026820a8923347aebfb944c5979ce73987372de508903a6ee9"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/seller-1440.png",
+      "bytes": 157170,
+      "sha256": "68be58609f4e9c0f6bdc12efc1fc381c0279237ba625e40bb9940a7936e27cb9"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/seller-390.png",
+      "bytes": 76206,
+      "sha256": "89bf3dbd439a577e8eda32c84cda628e75eaabe4853431d829c6e6ead831ecec"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/thank-you-1440.png",
+      "bytes": 47473,
+      "sha256": "163e75a3f7a0cbdd2edfb3bec4cc0fc74ff29afa63553203a9329b826ce13bd9"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/thank-you-390.png",
+      "bytes": 43701,
+      "sha256": "3f571aef3eb90bb01c83c76b298ff95533bbed3745007b668928b2255d467751"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/value-1440.png",
+      "bytes": 126062,
+      "sha256": "da00de0b756a8d2f03dd113a6519622abd8ddba6b255cbdefbc218cce284269b"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/value-390.png",
+      "bytes": 65758,
+      "sha256": "9238638c8d54405b05b4a89455a6eb1c38639e959da7604115450d5160fab47f"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/widget-1440.png",
+      "bytes": 64918,
+      "sha256": "f19728991fb4520974d83b45112948eb34a6c50036052493eca29706606569bb"
+    },
+    {
+      "path": "output/phase8/visual-assets/interface-visuals/widget-390.png",
+      "bytes": 42075,
+      "sha256": "05d7d49d38af8511bd1ca5c7ace7804e0d5e1502aa1442c9aafae7b4bd201d18"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-active.png",
+      "bytes": 73496,
+      "sha256": "932d292cdd6b755c9250be28e1657186ed57077b5ed3c8a3df0a8eea83112f81"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-active.svg",
+      "bytes": 1160,
+      "sha256": "d75e5150eb3eafa4dd1dbd683e4aa323902fc6b7bec88d2f3401aa68bd035ef7"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-active.webp",
+      "bytes": 22410,
+      "sha256": "dc99fd629b267406718e10cdcd911c684142a85b0383802e9d23e228d0fca390"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-consent-ambiguous.png",
+      "bytes": 89097,
+      "sha256": "bf155ed33fe010c8e701e3cc400dd0b719568483c7df72e3d0a464e42789b12f"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-consent-ambiguous.svg",
+      "bytes": 1199,
+      "sha256": "c918065a195a6eac0ac3aaf053eaa3d367105cac3ab4c7f5862f4d8e5b007099"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-consent-ambiguous.webp",
+      "bytes": 29912,
+      "sha256": "28584dd84b0199d7aadba85719ed9f1700be3b82b52fd835752e78a6a7d22fa3"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-delivery-failed.png",
+      "bytes": 78979,
+      "sha256": "5ab335e763093b0b6346ba2cf56a309067b844aa5eb31f6423a1b49728e5f87c"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-delivery-failed.svg",
+      "bytes": 1195,
+      "sha256": "3e0253d6165c68b9f24f6c597aa803f57bca1e14c5ae683da4ea71c7e78712fc"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-delivery-failed.webp",
+      "bytes": 25760,
+      "sha256": "6e1ec3631c553b610297b209e2fc3f31eda0572f0850c03ad408a5459c975e57"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-hot.png",
+      "bytes": 68138,
+      "sha256": "005d7875860a27bcea56b0c8ae23be8611ddf7f68f89232b83627ee706044613"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-hot.svg",
+      "bytes": 1152,
+      "sha256": "ddc900b31f86ca6abf0ccfabdf023ee937156aab3d6e3851ce02eeb6eeee0db6"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-hot.webp",
+      "bytes": 20886,
+      "sha256": "21da772e12160c89156d6074a810deb5d48c989557079436015be2b7b6e3f784"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-new.png",
+      "bytes": 71789,
+      "sha256": "d6297f5f6db7843678cb28206f1305dbb6146d0955a04a74189445eb06366191"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-new.svg",
+      "bytes": 1152,
+      "sha256": "6857bda0b4910715779be4546289aa9f8d331887ed8d7c8157c64392335d64c9"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-new.webp",
+      "bytes": 21506,
+      "sha256": "55b25352ff54484eff4f35bc1c084938eae63e3a22ff1d29d79b59d3fabe623c"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-permission-blocked.png",
+      "bytes": 88885,
+      "sha256": "ecb5dc049baa25d394768e0bb971654b829e29ea2544c4227713e275083af5ab"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-permission-blocked.svg",
+      "bytes": 1200,
+      "sha256": "c88d728c72a261b5949c9f3a2226383dd22a96e2c89927f75cf9a3f4d38a7c5c"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-permission-blocked.webp",
+      "bytes": 29518,
+      "sha256": "87fa426eaa4b12766fc7410e7ce2e6c5ee103ee5aa76c19e9f1341250c5cfc9a"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-sequence-paused.png",
+      "bytes": 82307,
+      "sha256": "a2c6fd5b4bbdcd5a6f706abf627fb168e9269acb4b7bc234eb899111113c3ac2"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-sequence-paused.svg",
+      "bytes": 1187,
+      "sha256": "02ea0b1a772d3543f67018f56af7022ff596a2ca401cfc00546400ad26281d98"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-sequence-paused.webp",
+      "bytes": 25104,
+      "sha256": "f3a2eb0779ae817f60167455252f2b8d9eb1d52197db87af6a90136a15c3386d"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-test.png",
+      "bytes": 70064,
+      "sha256": "89e32aeee49b7f459c8c7a96609faa4cb99b27ecf6d8708b3f935e85654658ee"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-test.svg",
+      "bytes": 1161,
+      "sha256": "f2ad8f5866cb70c09d78fdd43804ae5e64f4ed912fd8ba324ded8073df7565e9"
+    },
+    {
+      "path": "output/phase8/visual-assets/lead-states/lead-state-test.webp",
+      "bytes": 20978,
+      "sha256": "45ede1c94056512b7787963816b7afb7b4844298a612ec0a55a899e0340fb998"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/brandon-qa-message.png",
+      "bytes": 106404,
+      "sha256": "7448e69895e1e80590a47c0a84adf7999234c2fb22b1120ad97d9f81c3896bba"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/brandon-qa-message.svg",
+      "bytes": 1735,
+      "sha256": "6520c955d05d88f9fc27fbcb3d3a99dbef0a29a765815edd994ec232e2b9bdd5"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/brandon-qa-message.webp",
+      "bytes": 38626,
+      "sha256": "b49bdbf07813a377d0da034ebaac08e526993c306002205010c32a9ecd5dde7b"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/consumer-acknowledgment.png",
+      "bytes": 105605,
+      "sha256": "d5497142db3fdce93f82169aaf5413734e2096edd20d94115401018fa8c2d9be"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/consumer-acknowledgment.svg",
+      "bytes": 1735,
+      "sha256": "333b9487bd1708344a99a6dab0b6e8da290e78b86cf61fb19e6595aa201b9a92"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/consumer-acknowledgment.webp",
+      "bytes": 38160,
+      "sha256": "191711ed620782a0c0573f11c677dda8054dbb5524bebc24fdf50fd9aad6cf7f"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/daily-digest.png",
+      "bytes": 99856,
+      "sha256": "8e138267db07a7a62cbef954a0d59df4a79aa405c59813e4354902743cca1eb5"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/daily-digest.svg",
+      "bytes": 1690,
+      "sha256": "80af88f77d6979e4f5d7dbb54c74e4447682ec155718535a82a64e7deaf56aca"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/daily-digest.webp",
+      "bytes": 34102,
+      "sha256": "7f4315b0a30813cd52ae832fd41c9a52bd39d321a6a8678d9eea6318e5fa9bdb"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/internal-alert.png",
+      "bytes": 103446,
+      "sha256": "ca851ac18ca19ab393680eb4f478420f80090b3ae58f248edfe610059841d3cf"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/internal-alert.svg",
+      "bytes": 1758,
+      "sha256": "d90bbd111b8778bade54a576bba2e4967998326f4bab27e763ee901f763a38ff"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/internal-alert.webp",
+      "bytes": 38514,
+      "sha256": "b25d04c4d8a1e8a8dcb29e331e0114e20ebe194fc47732c15eef2c34e9b6ef25"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/plain-text-email.png",
+      "bytes": 94849,
+      "sha256": "002ccf1aeb2b05ca0d66edf4c0866315c5ef5c8252cf9469bbdb949673c8b28c"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/plain-text-email.svg",
+      "bytes": 1680,
+      "sha256": "fcb536a9d661afead7fb6e56b7f862d829c6e262d64db62b2fa648fadeeb9966"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/plain-text-email.webp",
+      "bytes": 32236,
+      "sha256": "66c9d611fe86e51795c79b5c85109b8d4f0ee6d252327aee6915c69d318a030c"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/push-preview.png",
+      "bytes": 95912,
+      "sha256": "92f330dc866b8cafc4e3b4ef116db8319c5922daddd9a4b67cf7c757d046d01c"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/push-preview.svg",
+      "bytes": 1682,
+      "sha256": "70aebd7329a153428f8b2f19c54b07367f1ed6d14766602a6937dbe060a9a1cd"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/push-preview.webp",
+      "bytes": 33018,
+      "sha256": "8a3c8fddd6928d8b4f2aec00a5009eaafd88d545a4a4da6d979212e4ceb21027"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/sms-preview.png",
+      "bytes": 95971,
+      "sha256": "65c0ffddef3dcc55cf2293acb4c765df36665a63f5064545128ec28cefa5dde3"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/sms-preview.svg",
+      "bytes": 1669,
+      "sha256": "05d23fb576b6b1714dfc2768cbf2c1ea3a4988fca543bb9c8535e5eff4918871"
+    },
+    {
+      "path": "output/phase8/visual-assets/notification-visuals/sms-preview.webp",
+      "bytes": 31852,
+      "sha256": "0c6c376c664ec1b95b7194fc78bdf38c7ea5350c78b9419d978c6e87a009401f"
+    },
+    {
+      "path": "output/phase8/data/.gitkeep",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "output/phase8/data/current-system-state.json",
+      "bytes": 6488,
+      "sha256": "cad60f6f106a587ab349bc00316104f15279f3bf1ca515ee21bd90bf4fd424b2"
+    },
+    {
+      "path": "output/phase8/data/public-visual-metrics.json",
+      "bytes": 33638,
+      "sha256": "126fbb2c58026d16a91afcf4faf8198be6fd66e14791faffe622e85b2fd643e6"
+    },
+    {
+      "path": "output/phase8/verification/image-verification.json",
+      "bytes": 3317,
+      "sha256": "d9fa4d497724a8e550d1db786654c3d96dd066d9892651b5946c27040e6150fc"
+    },
+    {
+      "path": "output/phase8/verification/pdf-verification.json",
+      "bytes": 1069,
+      "sha256": "1956d53bfaaea84b3ddb6a4a4324cc266c6695187a926ceace152809a8767d74"
+    },
+    {
+      "path": "output/phase8/verification/presentation-verification.json",
+      "bytes": 694,
+      "sha256": "4e3ed24590c2ed1b13f90736cf73e71948998fd803dc1f57a1a5ce6a8653a64f"
+    },
+    {
+      "path": "output/phase8/verification/secret-pii-scan.json",
+      "bytes": 136,
+      "sha256": "0c69f57263b73ae1a7c6856f73a4a956735e9efc2b20b242d3f13a2c0d2fe871"
+    },
+    {
+      "path": "output/phase8/verification/workbook-verification.json",
+      "bytes": 5591,
+      "sha256": "77063a0466bf51eb83f1be41f335b0abe1b2f40f39e3b913d32a10e0a7ad6abc"
+    }
+  ]
+}

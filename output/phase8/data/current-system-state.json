@@ -1,0 +1,166 @@
+{
+  "as_of": "2026-08-18T22:30:00Z",
+  "classification": "redacted operational evidence; no PII or secrets",
+  "canonical": {
+    "repository": "https://github.com/brandonnarron1-lang/ask-magic-mike",
+    "production_branch": "main",
+    "production_commit": "58554dffb533852dfbb1887d32cfa68aebb2d2dc",
+    "production_pull_request": 167,
+    "vercel_team": "eyes-up-industries",
+    "vercel_project": "ask-magic-mike",
+    "vercel_project_id": "prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8",
+    "deployment_id": "dpl_2vgceZpCb4PSuoYffvwi7QAxYnrX",
+    "deployment_status": "Ready",
+    "database_provider": "Neon PostgreSQL",
+    "neon_organization": "org-royal-tooth-46065082",
+    "neon_project": "bitter-star-20214385",
+    "neon_branch": "br-round-base-auh6h2wd",
+    "neon_branch_name": "production"
+  },
+  "urls": {
+    "public_canonical": "https://www.askmagicmike.com",
+    "public_apex": "https://askmagicmike.com",
+    "wordpress": "https://www.ourtownproperties.com",
+    "lead_center": "https://www.askmagicmike.com/admin/leads",
+    "health_live": "https://www.askmagicmike.com/api/health/live",
+    "health_ready": "https://www.askmagicmike.com/api/health/ready"
+  },
+  "health": {
+    "live_ok": true,
+    "ready_ok": true,
+    "database_configured": true,
+    "database_ready": true,
+    "notification_mode": "production",
+    "email_enabled": true,
+    "rbac_schema_ready": true,
+    "push_ready": true,
+    "vercel_error_logs_since_current_deployment": 0,
+    "vercel_warning_logs_since_current_deployment": 0
+  },
+  "lead_counts": {
+    "genuine_live": 0,
+    "qa_total": 6,
+    "qa_suppressed": 6,
+    "qa_unsuppressed": 0,
+    "qa_in_business_active_or_new": 0,
+    "business_kpi_leads": 0
+  },
+  "notifications": {
+    "pending_or_retrying": 0,
+    "live_failures": 0,
+    "qa_permanently_failed": 2,
+    "qa_sent": 4,
+    "provider_webhook_events": 1,
+    "resend_webhook_enabled": true,
+    "resend_webhook_endpoint": "https://www.askmagicmike.com/api/webhooks/email/events",
+    "provider_account_risk": "Resend dashboard displayed an unpaid-invoice warning on 2026-08-18; no payment or plan change was made."
+  },
+  "forms": [
+    {"id": 1, "name": "Contact Us", "wordpress_active": true, "canonical_forwarding": "held", "consumer_sequence": "disabled"},
+    {"id": 2, "name": "Cash Offer Form", "wordpress_active": true, "canonical_forwarding": "held", "consumer_sequence": "disabled"},
+    {"id": 3, "name": "Home Value Form", "wordpress_active": true, "canonical_forwarding": "enabled", "bridge_version": "1.1.0", "consumer_acknowledgment": "prepared_disabled"},
+    {"id": 4, "name": "Join Our Team Form", "wordpress_active": true, "canonical_forwarding": "excluded_recruiting", "consumer_sequence": "excluded"},
+    {"id": 5, "name": "Rental Property Search", "wordpress_active": true, "canonical_forwarding": "held", "consumer_sequence": "disabled"},
+    {"id": 6, "name": "Short Term Home Rentals", "wordpress_active": true, "canonical_forwarding": "held", "consumer_sequence": "disabled"},
+    {"id": 7, "name": "Never miss a property!", "wordpress_active": true, "canonical_forwarding": "shadow_not_allowlisted", "consumer_sequence": "disabled", "protected_entry": "1550"}
+  ],
+  "wordpress_bridge": {
+    "version": "1.1.0",
+    "signing_secret_configured": true,
+    "enabled_forms": [3],
+    "latest_form_3_acceptance_state": "forwarded",
+    "held_forms_forwarded": false
+  },
+  "rbac": {
+    "schema_ready": true,
+    "administrator_users": 1,
+    "administrator_enabled": 1,
+    "administrator_verified": 1,
+    "primary_lead_owner_users": 1,
+    "primary_lead_owner_enabled": 1,
+    "primary_lead_owner_verified": 0,
+    "active_sessions_at_audit": 0,
+    "current_visual_audit_state": "passed by authenticated read-only inspection"
+  },
+  "operators": {
+    "brandon": {
+      "role": "administrator",
+      "account_enabled": true,
+      "email_verified": true,
+      "qa_email_acceptance": "delivered",
+      "current_session": "authenticated for read-only Phase 8 acceptance"
+    },
+    "mike": {
+      "role": "primary_lead_owner",
+      "account_enabled": true,
+      "email_verified": false,
+      "activation": "deferred",
+      "qa_delivery": "disabled"
+    }
+  },
+  "ai_copilot": {
+    "state": "operator_only_verified",
+    "automatic_actions": "disabled",
+    "communications_sent": false,
+    "durable_results": 2,
+    "latest": {
+      "mode": "openai_responses",
+      "model": "gpt-5.6-luna",
+      "input_tokens": 835,
+      "output_tokens": 964,
+      "estimated_cost_usd": 0.006619,
+      "latency_ms": 7624,
+      "fallback_reason": null,
+      "is_test": true,
+      "created_at": "2026-08-17T01:23:31.651512Z"
+    }
+  },
+  "messaging": {
+    "communication_permissions_rows": 0,
+    "communication_decisions_rows": 1,
+    "sequence_instances": 0,
+    "sequence_step_runs": 0,
+    "template_versions": 0,
+    "consumer_email": "disabled",
+    "consumer_sms": "disabled",
+    "carrier_sms": "disabled",
+    "sequence_scheduler": "disabled",
+    "automatic_send": "disabled",
+    "human_approval_required": true,
+    "brandon_only_qa": "historically_verified"
+  },
+  "visual_acceptance": {
+    "public_viewports_checked": [320, 375, 390, 430, 768, 1024, 1280, 1440, 1920],
+    "public_routes_checked": ["/", "/sell", "/buy", "/value", "/ask", "/widget/v1", "/thank-you", "/phase8-intentional-404"],
+    "public_checks": 72,
+    "horizontal_overflow_failures": 0,
+    "unexpected_browser_console_errors_or_warnings": 0,
+    "expected_intentional_404_console_findings": 9,
+    "capture_mode": "viewport-only",
+    "lead_center": "passed authenticated read-only at 1440x1000 and 390x844",
+    "lead_center_route_and_section_states": 12,
+    "lead_center_retained_screenshots": 24,
+    "lead_center_ocr_sensitive_pattern_findings": 0
+  },
+  "quality": {
+    "phase_7_release_gate": "passed",
+    "phase_7_test_files": 175,
+    "phase_7_tests": 2647,
+    "phase_7_release_safety_checks": "14/14",
+    "phase_8_artifact_verification": "passed"
+  },
+  "security": {
+    "secrets_exposed": false,
+    "genuine_pii_in_artifacts": false,
+    "qa_excluded_from_business_kpis": true,
+    "nellyselly_isolated": true,
+    "legacy_deployments_disconnected": true
+  },
+  "remaining_approval_gates": [
+    "Form 3 consumer acknowledgment email pilot",
+    "Any consumer email or SMS activation",
+    "Mike operator activation and delivery",
+    "Any paid vendor remediation for Resend billing risk",
+    "Any additional WordPress form forwarding"
+  ]
+}

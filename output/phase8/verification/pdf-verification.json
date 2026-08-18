@@ -1,0 +1,50 @@
+[
+  {
+    "file": "ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION.pdf",
+    "pages": 15,
+    "searchable_characters": 8128,
+    "qpdf_ok": true,
+    "blank": false,
+    "pass": true
+  },
+  {
+    "file": "ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION.pdf",
+    "pages": 25,
+    "searchable_characters": 9485,
+    "qpdf_ok": true,
+    "blank": false,
+    "pass": true
+  },
+  {
+    "file": "FORM3_CONSUMER_ACKNOWLEDGMENT_RELEASE_GATE.pdf",
+    "pages": 2,
+    "searchable_characters": 3686,
+    "qpdf_ok": true,
+    "blank": false,
+    "pass": true
+  },
+  {
+    "file": "ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_SUMMARY.pdf",
+    "pages": 1,
+    "searchable_characters": 2236,
+    "qpdf_ok": true,
+    "blank": false,
+    "pass": true
+  },
+  {
+    "file": "BRANDON_PHASE8_REVIEW_GUIDE.pdf",
+    "pages": 2,
+    "searchable_characters": 2846,
+    "qpdf_ok": true,
+    "blank": false,
+    "pass": true
+  },
+  {
+    "file": "ASK_MAGIC_MIKE_PHASE8_SYSTEM_DIAGRAMS.pdf",
+    "pages": 3,
+    "searchable_characters": 1558,
+    "qpdf_ok": true,
+    "blank": false,
+    "pass": true
+  }
+]

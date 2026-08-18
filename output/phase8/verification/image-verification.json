@@ -1,0 +1,149 @@
+[
+  {
+    "file": "renders/ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION_MONTAGE.png",
+    "width": 1600,
+    "height": 1025,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "renders/ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION_MONTAGE.png",
+    "width": 1600,
+    "height": 615,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "renders/PHASE8_LEAD_CENTER_DESKTOP_MONTAGE.png",
+    "width": 1440,
+    "height": 2700,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "renders/PHASE8_LEAD_CENTER_MOBILE_MONTAGE.png",
+    "width": 840,
+    "height": 3720,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "renders/PHASE8_PRESENTATION_VISUAL_QA_MONTAGE.png",
+    "width": 1600,
+    "height": 1640,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "renders/PHASE8_PUBLIC_DESKTOP_MONTAGE.png",
+    "width": 1440,
+    "height": 1800,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "renders/PHASE8_PUBLIC_MOBILE_MONTAGE.png",
+    "width": 840,
+    "height": 3100,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "workbook-previews/AI_COST_CONTROL_MATRIX_CURRENT.png",
+    "width": 920,
+    "height": 216,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "workbook-previews/AI_LEAD_INTELLIGENCE_EVAL_CURRENT.png",
+    "width": 955,
+    "height": 216,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "workbook-previews/AI_USAGE_AND_COST_DASHBOARD_CURRENT.png",
+    "width": 978,
+    "height": 216,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "workbook-previews/ASK_MAGIC_MIKE_BUDGET_ROI_MODEL_CURRENT.png",
+    "width": 1092,
+    "height": 197,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "workbook-previews/ASK_MAGIC_MIKE_EVIDENCE_REGISTER_CURRENT.png",
+    "width": 1102,
+    "height": 232,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "workbook-previews/ASK_MAGIC_MIKE_OPERATING_SCOREBOARD_CURRENT.png",
+    "width": 1073,
+    "height": 305,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "workbook-previews/COMMUNICATION_PERMISSION_MATRIX_CURRENT.png",
+    "width": 1024,
+    "height": 216,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "workbook-previews/COPILOT_PERMISSION_MATRIX_CURRENT.png",
+    "width": 955,
+    "height": 216,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "workbook-previews/FORM_MESSAGE_SEQUENCE_MATRIX_CURRENT.png",
+    "width": 989,
+    "height": 216,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "workbook-previews/MESSAGE_DELIVERABILITY_DASHBOARD_CURRENT.png",
+    "width": 1036,
+    "height": 216,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "workbook-previews/MESSAGE_SEQUENCE_ACCEPTANCE_MATRIX_CURRENT.png",
+    "width": 1036,
+    "height": 216,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "workbook-previews/MESSAGE_TEMPLATE_REGISTRY_CURRENT.png",
+    "width": 955,
+    "height": 216,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "workbook-previews/PHASE7_BRANDON_EMAIL_ACCEPTANCE_CURRENT.png",
+    "width": 1024,
+    "height": 216,
+    "nonempty": true,
+    "pass": true
+  },
+  {
+    "file": "workbook-previews/PHASE8_WORKBOOK_PREVIEW_MONTAGE.png",
+    "width": 1300,
+    "height": 3010,
+    "nonempty": true,
+    "pass": true
+  }
+]

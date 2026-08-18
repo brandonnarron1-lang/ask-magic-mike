@@ -1,0 +1,30 @@
+[
+  {
+    "file": "ASK_MAGIC_MIKE_PHASE8_EXECUTIVE_PRESENTATION.pptx",
+    "zip_ok": true,
+    "slides": 15,
+    "expected_slides": 15,
+    "notes": 15,
+    "editable_text_runs": 361,
+    "editable_shapes": 505,
+    "connector_or_line_elements": 762,
+    "editable_charts": 1,
+    "embedded_media": 16,
+    "pdf_pages": 15,
+    "pass": true
+  },
+  {
+    "file": "ASK_MAGIC_MIKE_CURRENT_SYSTEM_SALES_PRESENTATION.pptx",
+    "zip_ok": true,
+    "slides": 25,
+    "expected_slides": 25,
+    "notes": 25,
+    "editable_text_runs": 320,
+    "editable_shapes": 643,
+    "connector_or_line_elements": 618,
+    "editable_charts": 1,
+    "embedded_media": 26,
+    "pdf_pages": 25,
+    "pass": true
+  }
+]
