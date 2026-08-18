@@ -1,0 +1,23 @@
+{
+  "name": "ask-magic-mike-phase8-artifacts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "@playwright/test": "1.60.0",
+    "pptxgenjs": "4.0.1"
+  },
+  "scripts": {
+    "artifacts:visuals": "node scripts/capture-public-visuals.mjs",
+    "artifacts:presentations": "node scripts/generate-presentations.mjs",
+    "artifacts:workbooks": "./.venv/bin/python scripts/generate_workbooks.py",
+    "artifacts:pdf": "./.venv/bin/python scripts/generate_documents.py && ./scripts/export_office.sh",
+    "artifacts:render": "./.venv/bin/python scripts/render_artifacts.py",
+    "artifacts:verify": "./.venv/bin/python scripts/verify_artifacts.py",
+    "artifacts:package": "./.venv/bin/python scripts/package_artifacts.py",
+    "artifacts:build": "npm run artifacts:presentations && npm run artifacts:workbooks && npm run artifacts:pdf && npm run artifacts:render"
+  }
+}

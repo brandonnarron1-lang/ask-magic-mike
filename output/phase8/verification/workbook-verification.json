@@ -1,0 +1,264 @@
+[
+  {
+    "file": "ASK_MAGIC_MIKE_OPERATING_SCOREBOARD_CURRENT.xlsx",
+    "zip_ok": true,
+    "sheets": 12,
+    "sheet_names": [
+      "Executive Dashboard",
+      "Funnel",
+      "Sources",
+      "Forms",
+      "Assignment SLA",
+      "Contact SLA",
+      "Notifications",
+      "AI Usage",
+      "Communication Permissions",
+      "Message Sequences",
+      "QA Exclusions",
+      "Definitions"
+    ],
+    "formula_count": 30,
+    "freeze_panes": 12,
+    "filters": 12,
+    "validations": 5,
+    "formula_errors": [],
+    "cached_errors": [],
+    "recalculation_mode": null,
+    "pass": true
+  },
+  {
+    "file": "ASK_MAGIC_MIKE_EVIDENCE_REGISTER_CURRENT.xlsx",
+    "zip_ok": true,
+    "sheets": 7,
+    "sheet_names": [
+      "Evidence Register",
+      "Assumptions",
+      "Current Approvals",
+      "Access Gaps",
+      "Source Index",
+      "Change History",
+      "Status Definitions"
+    ],
+    "formula_count": 6,
+    "freeze_panes": 7,
+    "filters": 7,
+    "validations": 3,
+    "formula_errors": [],
+    "cached_errors": [],
+    "recalculation_mode": null,
+    "pass": true
+  },
+  {
+    "file": "ASK_MAGIC_MIKE_BUDGET_ROI_MODEL_CURRENT.xlsx",
+    "zip_ok": true,
+    "sheets": 7,
+    "sheet_names": [
+      "ROI Dashboard",
+      "AI Cost Assumptions",
+      "Messaging Assumptions",
+      "Automation Assumptions",
+      "Break-even",
+      "Commission Economics",
+      "Sources"
+    ],
+    "formula_count": 31,
+    "freeze_panes": 7,
+    "filters": 7,
+    "validations": 3,
+    "formula_errors": [],
+    "cached_errors": [],
+    "recalculation_mode": null,
+    "pass": true
+  },
+  {
+    "file": "MESSAGE_TEMPLATE_REGISTRY_CURRENT.xlsx",
+    "zip_ok": true,
+    "sheets": 4,
+    "sheet_names": [
+      "Summary",
+      "Template Registry",
+      "Definitions",
+      "Sources"
+    ],
+    "formula_count": 3,
+    "freeze_panes": 4,
+    "filters": 4,
+    "validations": 2,
+    "formula_errors": [],
+    "cached_errors": [],
+    "recalculation_mode": null,
+    "pass": true
+  },
+  {
+    "file": "COMMUNICATION_PERMISSION_MATRIX_CURRENT.xlsx",
+    "zip_ok": true,
+    "sheets": 4,
+    "sheet_names": [
+      "Summary",
+      "Permission Matrix",
+      "Definitions",
+      "Sources"
+    ],
+    "formula_count": 27,
+    "freeze_panes": 4,
+    "filters": 4,
+    "validations": 2,
+    "formula_errors": [],
+    "cached_errors": [],
+    "recalculation_mode": null,
+    "pass": true
+  },
+  {
+    "file": "MESSAGE_SEQUENCE_ACCEPTANCE_MATRIX_CURRENT.xlsx",
+    "zip_ok": true,
+    "sheets": 4,
+    "sheet_names": [
+      "Summary",
+      "Sequence Acceptance",
+      "Definitions",
+      "Sources"
+    ],
+    "formula_count": 3,
+    "freeze_panes": 4,
+    "filters": 4,
+    "validations": 2,
+    "formula_errors": [],
+    "cached_errors": [],
+    "recalculation_mode": null,
+    "pass": true
+  },
+  {
+    "file": "PHASE7_BRANDON_EMAIL_ACCEPTANCE_CURRENT.xlsx",
+    "zip_ok": true,
+    "sheets": 4,
+    "sheet_names": [
+      "Summary",
+      "Brandon Acceptance",
+      "Definitions",
+      "Sources"
+    ],
+    "formula_count": 9,
+    "freeze_panes": 4,
+    "filters": 4,
+    "validations": 2,
+    "formula_errors": [],
+    "cached_errors": [],
+    "recalculation_mode": null,
+    "pass": true
+  },
+  {
+    "file": "AI_LEAD_INTELLIGENCE_EVAL_CURRENT.xlsx",
+    "zip_ok": true,
+    "sheets": 5,
+    "sheet_names": [
+      "Summary",
+      "AI Evaluation",
+      "Scoring Rubric",
+      "Definitions",
+      "Sources"
+    ],
+    "formula_count": 53,
+    "freeze_panes": 5,
+    "filters": 5,
+    "validations": 1,
+    "formula_errors": [],
+    "cached_errors": [],
+    "recalculation_mode": null,
+    "pass": true
+  },
+  {
+    "file": "AI_COST_CONTROL_MATRIX_CURRENT.xlsx",
+    "zip_ok": true,
+    "sheets": 4,
+    "sheet_names": [
+      "Summary",
+      "AI Cost Control",
+      "Definitions",
+      "Sources"
+    ],
+    "formula_count": 3,
+    "freeze_panes": 4,
+    "filters": 4,
+    "validations": 2,
+    "formula_errors": [],
+    "cached_errors": [],
+    "recalculation_mode": null,
+    "pass": true
+  },
+  {
+    "file": "COPILOT_PERMISSION_MATRIX_CURRENT.xlsx",
+    "zip_ok": true,
+    "sheets": 4,
+    "sheet_names": [
+      "Summary",
+      "Copilot Permissions",
+      "Definitions",
+      "Sources"
+    ],
+    "formula_count": 28,
+    "freeze_panes": 4,
+    "filters": 4,
+    "validations": 2,
+    "formula_errors": [],
+    "cached_errors": [],
+    "recalculation_mode": null,
+    "pass": true
+  },
+  {
+    "file": "MESSAGE_DELIVERABILITY_DASHBOARD_CURRENT.xlsx",
+    "zip_ok": true,
+    "sheets": 4,
+    "sheet_names": [
+      "Summary",
+      "Deliverability",
+      "Definitions",
+      "Sources"
+    ],
+    "formula_count": 6,
+    "freeze_panes": 4,
+    "filters": 4,
+    "validations": 2,
+    "formula_errors": [],
+    "cached_errors": [],
+    "recalculation_mode": null,
+    "pass": true
+  },
+  {
+    "file": "AI_USAGE_AND_COST_DASHBOARD_CURRENT.xlsx",
+    "zip_ok": true,
+    "sheets": 4,
+    "sheet_names": [
+      "Summary",
+      "AI Usage",
+      "Definitions",
+      "Sources"
+    ],
+    "formula_count": 8,
+    "freeze_panes": 4,
+    "filters": 4,
+    "validations": 2,
+    "formula_errors": [],
+    "cached_errors": [],
+    "recalculation_mode": null,
+    "pass": true
+  },
+  {
+    "file": "FORM_MESSAGE_SEQUENCE_MATRIX_CURRENT.xlsx",
+    "zip_ok": true,
+    "sheets": 4,
+    "sheet_names": [
+      "Summary",
+      "Form Matrix",
+      "Definitions",
+      "Sources"
+    ],
+    "formula_count": 3,
+    "freeze_panes": 4,
+    "filters": 4,
+    "validations": 2,
+    "formula_errors": [],
+    "cached_errors": [],
+    "recalculation_mode": null,
+    "pass": true
+  }
+]
