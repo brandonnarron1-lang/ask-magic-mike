@@ -523,16 +523,19 @@ describe("sitemap and robots — canonical domain wiring", () => {
 
 describe("active root router SEO and headers", () => {
   const rootLayout = normalize(readSource("app/layout.tsx"));
+  const rootPage = normalize(readSource("app/page.tsx"));
   const rootSitemap = normalize(readSource("app/sitemap.ts"));
   const rootRobots = normalize(readSource("app/robots.ts"));
   const adminHealthRoute = normalize(readSource("app/api/admin/health/route.ts"));
   const nextConfig = normalize(readSource("next.config.ts"));
 
-  it("active root layout uses siteConfig for canonical metadata", () => {
+  it("keeps the metadata base global and the homepage canonical page-scoped", () => {
     expect(rootLayout).toContain("siteConfig.canonicalSiteUrl");
     expect(rootLayout).toMatch(/metadataBase:\s*new URL\(SITE_URL\)/);
-    expect(rootLayout).toMatch(/alternates:\s*\{\s*canonical:\s*"\/"\s*\}/);
+    expect(rootLayout).not.toContain("alternates:");
     expect(rootLayout).toMatch(/openGraph:[\s\S]{0,600}url: SITE_URL/);
+    expect(rootPage).toContain("publicPageMetadata");
+    expect(rootPage).toMatch(/path:\s*"\/"/);
   });
 
   it("active root router serves robots and sitemap from the canonical domain", () => {

@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import { BlackDiamondHeader } from "../components/black-diamond/BlackDiamondHeader";
 import { Footer } from "../components/black-diamond/BlackDiamondShell";
 import { PageTracker } from "../components/black-diamond/PageTracker";
 import { SellerIntentSection } from "../components/black-diamond/SellerIntentSection";
+import { publicPageMetadata } from "../lib/publicMetadata";
+
+export const metadata: Metadata = publicPageMetadata({
+  title: "Seller Options in Wilson, NC",
+  description: "Discuss timing, preparation, repairs, listing strategy, and possible as-is paths with Mike Eatmon and Our Town Properties before deciding how to sell.",
+  path: "/sell",
+});
 
 export default function SellPage() {
   return (

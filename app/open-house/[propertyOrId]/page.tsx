@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import { BuyerIntentSection } from "../../components/black-diamond/BuyerIntentSection";
 import { BlackDiamondHeader } from "../../components/black-diamond/BlackDiamondHeader";
 import { Footer } from "../../components/black-diamond/BlackDiamondShell";
 import { PageTracker } from "../../components/black-diamond/PageTracker";
+import { nonIndexablePageMetadata } from "../../lib/publicMetadata";
+
+export const metadata: Metadata = nonIndexablePageMetadata(
+  "Open House Interest Registration",
+  "Property-specific open-house interest and follow-up request route.",
+);
 
 function displayProperty(value: string) {
   return decodeURIComponent(value).replace(/[-_]+/g, " ").slice(0, 160);

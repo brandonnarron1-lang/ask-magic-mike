@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { PageTracker } from "../components/black-diamond/PageTracker";
+import { nonIndexablePageMetadata } from "../lib/publicMetadata";
+
+export const metadata: Metadata = nonIndexablePageMetadata(
+  "Widget Integration Preview",
+  "Internal preview surface for the Ask Magic Mike embeddable widget.",
+);
 
 export default function WidgetPreviewPage() {
   return (

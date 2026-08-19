@@ -32,7 +32,7 @@ export default function PlanPage() {
           <aside className="rounded-lg border border-[#22c6d24d] bg-[#22c6d208] p-5">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#22c6d2]">Private by design</p>
             <p className="mt-3 text-sm leading-6 text-[#d9ceb8]">
-              The planner asks for no contact details, property address, or personal narrative. It creates no lead and starts no alerts, emails, or texts.
+              The planner asks for no contact details, property address, or personal narrative. It creates no lead and starts no alerts, emails, or texts. Anonymous usage events record only controlled selections and progress.
             </p>
           </aside>
         </div>

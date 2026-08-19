@@ -51,7 +51,7 @@ The versioned local record permits only:
 - completed deterministic task IDs; and
 - generated/updated timestamps.
 
-It does not request or persist a name, email, phone, address, property ID, narrative, financial information, protected characteristic, or uploaded document. Unknown properties are stripped when stored state is parsed. Invalid, obsolete, or malformed state fails closed.
+It does not request or persist a name, email, phone, address, property ID, narrative, financial information, protected characteristic, or uploaded document. Unknown properties are stripped when stored state is parsed. Invalid, obsolete, or malformed state fails closed. The full planner record remains device-local; controlled goal, horizon, focus, task ID, and completion-count values may be transmitted as anonymous analytics events. The interface discloses this boundary and does not claim that nothing leaves the device.
 
 The planner itself creates no lead or profile. Four allowlisted analytics events may record only controlled enums, task IDs, and completion counts:
 

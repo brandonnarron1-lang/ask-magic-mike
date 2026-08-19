@@ -149,6 +149,7 @@ afterEach(() => {
   delete (process.env as Record<string, string | undefined>).AGENT_NOTIFICATION_FROM_EMAIL;
   delete (process.env as Record<string, string | undefined>).LEAD_NOTIFICATION_PRODUCTION_ENABLED;
   delete (process.env as Record<string, string | undefined>).RESEND_API_KEY;
+  delete (process.env as Record<string, string | undefined>).EMAIL_PROVIDER;
   delete (process.env as Record<string, string | undefined>).FROM_EMAIL;
   delete (process.env as Record<string, string | undefined>).VERCEL_ENV;
   delete (process.env as Record<string, string | undefined>).DATABASE_ENV;
@@ -651,6 +652,7 @@ describe("LeadNotificationService", () => {
     expect(selectNotificationProvider()).toBeInstanceOf(DisabledNotificationProvider);
 
     process.env.LEAD_NOTIFICATION_MODE = "SANDBOX";
+    process.env.EMAIL_PROVIDER = "resend";
     expect(selectNotificationProvider()).toBeInstanceOf(ResendEmailNotificationProvider);
 
     delete (process.env as Record<string, string | undefined>).LEAD_NOTIFICATION_MODE;

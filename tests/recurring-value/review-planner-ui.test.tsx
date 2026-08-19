@@ -53,7 +53,7 @@ describe("RealEstateReviewPlanner UI", () => {
       horizon: "90_days",
       focus: "clarity",
     });
-    expect(screen.getByText("Nothing sent")).toBeInTheDocument();
+    expect(screen.getByText("No contact data sent")).toBeInTheDocument();
   });
 
   it("restores progress, records an allowlisted task event, and can reset locally", async () => {
@@ -67,6 +67,25 @@ describe("RealEstateReviewPlanner UI", () => {
     fireEvent.click(screen.getByRole("button", { name: /start a different plan/i }));
     await waitFor(() => expect(window.localStorage.getItem(REVIEW_PLAN_STORAGE_KEY)).toBeNull());
     expect(screen.getByRole("button", { name: /create my plan/i })).toBeInTheDocument();
+  });
+
+  it("announces updated progress after a saved plan is restored", async () => {
+    const now = new Date().toISOString();
+    window.localStorage.setItem(REVIEW_PLAN_STORAGE_KEY, JSON.stringify({
+      version: 1,
+      goal: "seller",
+      horizon: "90_days",
+      focus: "clarity",
+      completedTaskIds: [],
+      generatedAt: now,
+      updatedAt: now,
+    }));
+
+    render(<RealEstateReviewPlanner />);
+    const task = await screen.findByRole("button", { name: /write the outcome that matters most/i });
+    expect(screen.getByText("Your saved review plan was restored from this device.")).toBeInTheDocument();
+    fireEvent.click(task);
+    expect(screen.getByText("Plan progress is 14 percent.")).toBeInTheDocument();
   });
 
   it("shows no contact, address, narrative, subscription, or send controls", () => {

@@ -107,6 +107,7 @@ export function RealEstateReviewPlanner() {
 
   function toggleTask(taskId: string) {
     if (!planState) return;
+    setRestored(false);
     const wasCompleted = planState.completedTaskIds.includes(taskId);
     const completedTaskIds = wasCompleted
       ? planState.completedTaskIds.filter((id) => id !== taskId)
@@ -161,7 +162,7 @@ export function RealEstateReviewPlanner() {
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-6 text-[#d9ceb8]">
-            No name, address, email, phone, or free text. Nothing is sent. Your selections stay on this device.
+            No name, address, email, phone, or free text. No contact or property details are sent. Anonymous planner events may record only controlled selections and progress.
           </p>
         </div>
 
@@ -232,7 +233,7 @@ export function RealEstateReviewPlanner() {
         <span className={`rounded-full border px-3 py-2 ${freshness?.stale ? "border-[#22c6d266] text-[#22c6d2]" : "border-white/10 text-[#d9ceb8]"}`}>
           {freshness?.stale ? `Refresh recommended · ${freshness.ageDays} days old` : "Current review"}
         </span>
-        <span className="rounded-full border border-white/10 px-3 py-2 text-[#d9ceb8]">Nothing sent</span>
+        <span className="rounded-full border border-white/10 px-3 py-2 text-[#d9ceb8]">No contact data sent</span>
       </div>
 
       <div className="mt-9 space-y-10">
@@ -278,7 +279,7 @@ export function RealEstateReviewPlanner() {
         <div>
           <p className="amm-eyebrow">When you want human review</p>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-[#d9ceb8]">
-            Your planner selections are not transferred. The next page is the existing secure intake, where you choose what to submit.
+            Your planner state is not prefilled into the next page. The next page is the existing secure intake, where you choose what to submit.
           </p>
         </div>
         <Link href={definition.handoffHref} onClick={trackHandoff} className="amm-primary-button px-6">{definition.handoffLabel}</Link>

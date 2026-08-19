@@ -70,7 +70,7 @@ Desktop default viewport:
 - private-by-design and organizer-only boundaries were visible before interaction;
 - `Create my plan` was visible and enabled;
 - plan creation rendered the deterministic seller plan;
-- progress began at `0` and `Nothing sent` was visible;
+- progress began at `0` and `No contact data sent` was visible;
 - completing `seller-outcome` changed `aria-pressed` to `true` and progress to `14` percent;
 - reload restored `Continue your saved plan` and retained the completed task.
 
@@ -83,7 +83,9 @@ Mobile viewport `390 × 844`:
 - footer links wrapped cleanly; and
 - full-page screenshots were visually inspected for both builder and saved-plan states.
 
-The deployed Preview repeated plan creation, task completion, 14-percent progress, `Nothing sent`, reload restoration, title/canonical route, desktop layout, and `390 × 844` mobile layout checks. Browser console check: zero `error` or `warning` entries on both local and deployed targets.
+The deployed Preview repeated plan creation, task completion, 14-percent progress, `No contact data sent`, reload restoration, title/canonical route, desktop layout, and `390 × 844` mobile layout checks. Browser console check: zero `error` or `warning` entries on both local and deployed targets.
+
+The current-base refresh corrected two Preview findings before release: privacy copy now discloses that allowlisted anonymous planner events record controlled selections and progress, and a restored plan now announces updated progress after the next task interaction.
 
 The temporary viewport override was reset and the local QA tab/server were closed after verification.
 

@@ -1,3 +1,6 @@
+import { createHash } from "node:crypto";
+import nodemailer, { type SendMailOptions } from "nodemailer";
+import type SMTPTransport from "nodemailer/lib/smtp-transport";
 import type {
   NotificationMode,
   NotificationProvider,
@@ -6,6 +9,10 @@ import type {
 } from "./leadNotificationTypes";
 import webpush from "web-push";
 import { NeonPushSubscriptionRepository } from "./persistence/neonPushSubscriptionRepository";
+import {
+  configuredEmailProvider,
+  resolveSmtpConfiguration,
+} from "./emailProviderConfiguration";
 
 export function notificationMode(): NotificationMode {
   const mode = (process.env.LEAD_NOTIFICATION_MODE || process.env.NOTIFICATION_PROVIDER_MODE || "disabled").toLowerCase();
@@ -157,6 +164,29 @@ function domainAllowed(domain: string, allowedDomains: string[]) {
   return allowedDomains.some((allowed) => domain === allowed || domain.endsWith("." + allowed));
 }
 
+function resolveSandboxBccRecipients(values: string[]) {
+  const allowedDomains = configuredSandboxAllowedDomains();
+  if (!allowedDomains.ok) return allowedDomains;
+  for (const value of values) {
+    const domain = emailDomain(value);
+    if (!domain || hasHeaderInjection(value)) {
+      return {
+        ok: false as const,
+        errorCode: "invalid_sandbox_bcc",
+        errorSummary: "Sandbox audit-copy recipient is invalid.",
+      };
+    }
+    if (!domainAllowed(domain, allowedDomains.domains)) {
+      return {
+        ok: false as const,
+        errorCode: "sandbox_bcc_not_allowlisted",
+        errorSummary: "Sandbox audit-copy recipient domain is not allowlisted.",
+      };
+    }
+  }
+  return { ok: true as const, recipients: values };
+}
+
 export function resolveSandboxEmailRecipient() {
   const recipient = (process.env.AGENT_NOTIFICATION_SANDBOX_EMAIL || "").trim();
   if (!recipient) {
@@ -212,6 +242,53 @@ function safeProviderMessageId(value: unknown) {
   const trimmed = value.trim();
   return /^[A-Za-z0-9_-]{1,120}$/.test(trimmed) ? trimmed : undefined;
 }
+
+function safeSmtpMessageId(value: unknown) {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return /^[A-Za-z0-9._@<>+-]{1,240}$/.test(trimmed) ? trimmed : undefined;
+}
+
+function deterministicSmtpMessageId(idempotencyKey: string, sender: string) {
+  const digest = createHash("sha256").update(idempotencyKey).digest("hex").slice(0, 40);
+  const domain = sender.split("@")[1] || "askmagicmike.com";
+  return `<amm-${digest}@${domain}>`;
+}
+
+function smtpFailure(error: unknown): NotificationResult {
+  const detail = typeof error === "object" && error
+    ? error as { code?: unknown; responseCode?: unknown }
+    : {};
+  const code = typeof detail.code === "string" ? detail.code.toUpperCase() : "";
+  const responseCode = Number(detail.responseCode);
+  const retryableCodes = new Set(["ETIMEDOUT", "ECONNECTION", "EDNS", "ESOCKET", "ETLS"]);
+  const retryable =
+    (Number.isFinite(responseCode) && responseCode >= 400 && responseCode < 500) ||
+    retryableCodes.has(code);
+  const errorCode = Number.isFinite(responseCode) && responseCode > 0
+    ? `smtp_response_${responseCode}`
+    : code === "EAUTH"
+      ? "smtp_auth_failed"
+      : retryable
+        ? "smtp_transport_retryable"
+        : "smtp_transport_failed";
+  return {
+    ok: false,
+    provider: "smtp",
+    retryable,
+    errorCode,
+    errorSummary: retryable
+      ? "Authenticated SMTP delivery failed before a final result and may be retried."
+      : "Authenticated SMTP delivery was rejected or could not be completed.",
+  };
+}
+
+type SmtpTransport = {
+  sendMail(options: SendMailOptions): Promise<SMTPTransport.SentMessageInfo>;
+  close(): void;
+};
+
+export type SmtpTransportFactory = (options: SMTPTransport.Options) => SmtpTransport;
 
 export class DisabledNotificationProvider implements NotificationProvider {
   name = "disabled";
@@ -345,7 +422,29 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
 
     const apiKey = process.env.RESEND_API_KEY;
     const from = process.env.AGENT_NOTIFICATION_FROM_EMAIL || process.env.RESEND_FROM || process.env.FROM_EMAIL;
-    const bcc = (request.bcc || []).filter((recipient) => Boolean(emailDomain(recipient)) && !hasHeaderInjection(recipient));
+    const requestedBcc = request.bcc || [];
+    if (requestedBcc.some((recipient) => !emailDomain(recipient) || hasHeaderInjection(recipient))) {
+      return {
+        ok: false,
+        provider: this.name,
+        retryable: false,
+        errorCode: "email_bcc_invalid",
+        errorSummary: "Email audit-copy recipient is invalid.",
+      };
+    }
+    if (this.mode === "sandbox") {
+      const sandboxBcc = resolveSandboxBccRecipients(requestedBcc);
+      if (!sandboxBcc.ok) {
+        return {
+          ok: false,
+          provider: this.name,
+          retryable: false,
+          errorCode: sandboxBcc.errorCode,
+          errorSummary: sandboxBcc.errorSummary,
+        };
+      }
+    }
+    const bcc = requestedBcc;
     if (!apiKey || !from || hasHeaderInjection(from) || (request.replyTo && (!emailDomain(request.replyTo) || hasHeaderInjection(request.replyTo)))) {
       return {
         ok: false,
@@ -400,6 +499,211 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
 
     const data = (await response.json().catch(() => ({}))) as { id?: string };
     return { ok: true, provider: this.name, providerMessageId: safeProviderMessageId(data.id) };
+  }
+}
+
+export class SmtpEmailNotificationProvider implements NotificationProvider {
+  name: "smtp" | "smtp_sandbox" | "disabled";
+  private readonly mode: "sandbox" | "production" | "invalid";
+
+  constructor(
+    mode: "sandbox" | "production",
+    private readonly transportFactory: SmtpTransportFactory = (options) =>
+      nodemailer.createTransport(options),
+  ) {
+    this.mode = mode === "sandbox" || mode === "production" ? mode : "invalid";
+    this.name = this.mode === "sandbox" ? "smtp_sandbox" : this.mode === "production" ? "smtp" : "disabled";
+  }
+
+  async send(request: NotificationRequest): Promise<NotificationResult> {
+    if (this.mode === "invalid") {
+      return {
+        ok: false,
+        provider: this.name,
+        retryable: false,
+        errorCode: "provider_mode_invalid",
+        errorSummary: "Notification provider mode is invalid.",
+      };
+    }
+    if (request.channel !== "email") {
+      return {
+        ok: false,
+        provider: this.name,
+        retryable: false,
+        errorCode: "unsupported_channel",
+        errorSummary: "SMTP provider supports email notifications only.",
+      };
+    }
+    if (!emailNotificationsEnabled()) {
+      return {
+        ok: false,
+        provider: this.name,
+        retryable: false,
+        errorCode: "email_notifications_disabled",
+        errorSummary: "Email notifications are disabled by configuration.",
+      };
+    }
+
+    let recipient = request.recipient;
+    if (this.mode === "sandbox") {
+      if (notificationMode() !== "sandbox") {
+        return {
+          ok: false,
+          provider: this.name,
+          retryable: false,
+          errorCode: "sandbox_provider_disabled",
+          errorSummary: "Sandbox notification provider is not enabled.",
+        };
+      }
+      const sandboxRecipient = resolveSandboxEmailRecipient();
+      if (!sandboxRecipient.ok) {
+        return {
+          ok: false,
+          provider: this.name,
+          retryable: false,
+          errorCode: sandboxRecipient.errorCode,
+          errorSummary: sandboxRecipient.errorSummary,
+        };
+      }
+      recipient = sandboxRecipient.recipient;
+    } else if (notificationMode() !== "production" || !productionNotificationDeliveryEnabled()) {
+      return {
+        ok: false,
+        provider: this.name,
+        retryable: false,
+        errorCode: "production_provider_disabled",
+        errorSummary: "Production notification provider is not enabled.",
+      };
+    }
+
+    const configuration = resolveSmtpConfiguration();
+    if (!configuration.ok) {
+      return {
+        ok: false,
+        provider: this.name,
+        retryable: false,
+        errorCode: configuration.errorCode,
+        errorSummary: configuration.errorSummary,
+      };
+    }
+    if (!emailDomain(recipient) || hasHeaderInjection(recipient)) {
+      return {
+        ok: false,
+        provider: this.name,
+        retryable: false,
+        errorCode: "smtp_recipient_invalid",
+        errorSummary: "SMTP recipient is missing or invalid.",
+      };
+    }
+    const requestedBcc = request.bcc || [];
+    if (requestedBcc.some((value) => !emailDomain(value) || hasHeaderInjection(value))) {
+      return {
+        ok: false,
+        provider: this.name,
+        retryable: false,
+        errorCode: "smtp_bcc_invalid",
+        errorSummary: "SMTP audit-copy recipient is invalid.",
+      };
+    }
+    if (this.mode === "sandbox") {
+      const sandboxBcc = resolveSandboxBccRecipients(requestedBcc);
+      if (!sandboxBcc.ok) {
+        return {
+          ok: false,
+          provider: this.name,
+          retryable: false,
+          errorCode: sandboxBcc.errorCode,
+          errorSummary: sandboxBcc.errorSummary,
+        };
+      }
+    }
+    const replyTo = request.replyTo || configuration.configuration.replyTo;
+    if (replyTo && (!emailDomain(replyTo) || hasHeaderInjection(replyTo))) {
+      return {
+        ok: false,
+        provider: this.name,
+        retryable: false,
+        errorCode: "smtp_reply_to_invalid",
+        errorSummary: "SMTP reply address is invalid.",
+      };
+    }
+
+    const smtp = configuration.configuration;
+    let transport: SmtpTransport;
+    try {
+      transport = this.transportFactory({
+        host: smtp.host,
+        port: smtp.port,
+        secure: smtp.secure,
+        // Port 587 must negotiate STARTTLS. Port 465 is already wrapped in
+        // implicit TLS and must not be forced through a second STARTTLS step.
+        requireTLS: !smtp.secure,
+        auth: { user: smtp.user, pass: smtp.password },
+        connectionTimeout: smtp.connectionTimeoutMs,
+        greetingTimeout: smtp.greetingTimeoutMs,
+        socketTimeout: smtp.socketTimeoutMs,
+        disableFileAccess: true,
+        disableUrlAccess: true,
+        tls: { rejectUnauthorized: true, servername: smtp.host },
+      });
+    } catch (error) {
+      return smtpFailure(error);
+    }
+
+    try {
+      const messageId = deterministicSmtpMessageId(request.idempotencyKey, smtp.fromEmail);
+      const result = await transport.sendMail({
+        from: { name: smtp.fromName, address: smtp.fromEmail },
+        to: recipient,
+        ...(requestedBcc.length ? { bcc: requestedBcc } : {}),
+        ...(replyTo ? { replyTo } : {}),
+        subject: safeSubject(request.subject),
+        text: request.text,
+        html: request.html,
+        messageId,
+        disableFileAccess: true,
+        disableUrlAccess: true,
+      });
+      const rejected = Array.isArray(result.rejected) ? result.rejected : [];
+      const accepted = Array.isArray(result.accepted) ? result.accepted : [];
+      if (rejected.length > 0) {
+        return {
+          ok: false,
+          provider: this.name,
+          retryable: false,
+          errorCode: accepted.length > 0 ? "smtp_partial_recipient_rejection" : "smtp_recipient_rejected",
+          errorSummary: accepted.length > 0
+            ? "SMTP accepted part of the delivery but rejected another protected recipient; review is required before retrying."
+            : "SMTP rejected the protected recipient list.",
+        };
+      }
+      if (accepted.length < 1 + requestedBcc.length) {
+        return {
+          ok: false,
+          provider: this.name,
+          retryable: false,
+          errorCode: "smtp_acceptance_unconfirmed",
+          errorSummary: "SMTP did not confirm every protected recipient; review is required before retrying.",
+        };
+      }
+      return {
+        ok: true,
+        provider: this.name,
+        // Some authenticated relays omit messageId from their response even
+        // after accepting the envelope. Retain the exact deterministic ID we
+        // supplied so the outbox always has a correlation identifier.
+        providerMessageId: safeSmtpMessageId(result.messageId) || messageId,
+      };
+    } catch (error) {
+      return smtpFailure(error);
+    } finally {
+      try {
+        transport.close();
+      } catch {
+        // Delivery outcome is already known. Do not turn a local cleanup error
+        // into an ambiguous retry that could duplicate the accepted message.
+      }
+    }
   }
 }
 
@@ -537,7 +841,7 @@ export class WebPushNotificationProvider implements NotificationProvider {
 class ProductionNotificationProvider implements NotificationProvider {
   name = "production_router";
   constructor(
-    private readonly email = new ResendEmailNotificationProvider("production"),
+    private readonly email = selectEmailNotificationProvider("production"),
     private readonly sms = new TwilioSmsNotificationProvider(),
     private readonly push = new WebPushNotificationProvider(),
   ) {}
@@ -546,6 +850,37 @@ class ProductionNotificationProvider implements NotificationProvider {
     if (request.channel === "push") return this.push.send(request);
     return this.email.send(request);
   }
+}
+
+class InvalidEmailNotificationProvider implements NotificationProvider {
+  name = "invalid_email_provider";
+
+  async send(_request: NotificationRequest): Promise<NotificationResult> {
+    return {
+      ok: false,
+      provider: this.name,
+      retryable: false,
+      errorCode: "email_provider_invalid",
+      errorSummary: "The configured email provider is unsupported or missing.",
+    };
+  }
+}
+
+export function selectEmailNotificationProvider(
+  mode: "sandbox" | "production",
+  options: {
+    resendTransport?: typeof fetch;
+    smtpTransportFactory?: SmtpTransportFactory;
+  } = {},
+): NotificationProvider {
+  const provider = configuredEmailProvider();
+  if (provider === "resend") {
+    return new ResendEmailNotificationProvider(mode, options.resendTransport);
+  }
+  if (provider === "smtp") {
+    return new SmtpEmailNotificationProvider(mode, options.smtpTransportFactory);
+  }
+  return new InvalidEmailNotificationProvider();
 }
 
 export function selectNotificationProvider(): NotificationProvider {
@@ -558,6 +893,6 @@ export function selectNotificationProvider(): NotificationProvider {
     }
     return new ConsoleNotificationProvider("success");
   }
-  if (mode === "sandbox") return new ResendEmailNotificationProvider("sandbox");
+  if (mode === "sandbox") return selectEmailNotificationProvider("sandbox");
   return new ProductionNotificationProvider();
 }
