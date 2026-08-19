@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { renderBrandedEmail, renderMessageTemplate, templateVersionHistory } from "@/lib/messaging/template-registry";
+import {
+  BRANDED_EMAIL_TEMPLATE_VERSION,
+  BROKERAGE_POSTAL_ADDRESS,
+  renderBrandedEmail,
+  renderMessageTemplate,
+  templateVersionHistory,
+} from "@/lib/messaging/template-registry";
 
 describe("Phase 7 template governance", () => {
   it("retains rollback history and marks the current release", () => {
@@ -43,5 +49,7 @@ describe("Phase 7 template governance", () => {
     expect(brandon.html).toContain('name="color-scheme"');
     expect(brandon.html).toContain("INTERNAL QA — DO NOT CONTACT");
     expect(brandon.contentHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(brandon.templateVersion).toBe(BRANDED_EMAIL_TEMPLATE_VERSION);
+    expect(brandon.text).toContain(BROKERAGE_POSTAL_ADDRESS);
   });
 });

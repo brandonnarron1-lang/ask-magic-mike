@@ -36,8 +36,12 @@ Any change to this text requires:
 
 ## CAN-SPAM (Email)
 
-- [ ] **TODO**: Physical mailing address in all outbound emails — use `3301 Nash St. NW Suite E, Wilson NC 27896`
-- [ ] **TODO**: Clear opt-out mechanism in every email
+- [x] Branded HTML and plain-text email renderer includes the verified brokerage
+  postal address: `3301 Nash St. NW Suite E, Wilson, NC 27896`. Marketing renders
+  also include firm identification and explicit opt-out instructions. Consumer
+  delivery remains separately approval-gated.
+- [x] Marketing renders fail closed without a valid HTTPS unsubscribe URL and
+  include the link plus reply-based instructions in HTML and plain text.
 - [ ] **TODO**: Honor opt-out requests within 10 business days → write `compliance_flags.flag_type=opt_out_email`
 - [ ] **TODO**: Subject lines not misleading
 - [ ] **TODO**: Clear identification as commercial email when applicable

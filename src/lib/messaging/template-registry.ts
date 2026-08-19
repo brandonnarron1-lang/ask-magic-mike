@@ -187,6 +187,22 @@ function escapeHtml(value: string) {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
+export const BRANDED_EMAIL_TEMPLATE_VERSION = "phase9-commercial-email-v1";
+export const BROKERAGE_POSTAL_ADDRESS = "3301 Nash St. NW Suite E, Wilson, NC 27896";
+export const MARKETING_EMAIL_DISCLOSURE = "Marketing message from Ask Magic Mike / Our Town Properties, Inc.";
+export const MARKETING_EMAIL_OPT_OUT = "Use the unsubscribe link below or reply UNSUBSCRIBE to stop marketing email.";
+
+function approvedUnsubscribeUrl(value: string | undefined) {
+  if (!value) return null;
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol !== "https:" || parsed.username || parsed.password) return null;
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
 export function renderBrandedEmail(input: {
   subject: string;
   preheader: string;
@@ -196,6 +212,7 @@ export function renderBrandedEmail(input: {
   ctaUrl?: string;
   isTest?: boolean;
   marketing?: boolean;
+  unsubscribeUrl?: string;
   qaAudience?: "brandon" | "mike_view";
   templateVersion?: string;
 }) {
@@ -203,7 +220,9 @@ export function renderBrandedEmail(input: {
     ? input.qaAudience === "mike_view" ? "[TEST — BRANDON QA — MIKE VIEW] " : "[TEST — BRANDON QA] "
     : "";
   const subject = `${input.subject.startsWith("[TEST — BRANDON QA") ? "" : prefix}${input.subject}`.slice(0, 180);
-  const templateVersion = input.templateVersion || "phase7-v1";
+  const unsubscribeUrl = input.marketing ? approvedUnsubscribeUrl(input.unsubscribeUrl) : null;
+  if (input.marketing && !unsubscribeUrl) throw new Error("marketing_unsubscribe_url_required");
+  const templateVersion = input.templateVersion || BRANDED_EMAIL_TEMPLATE_VERSION;
   const contentHash = createHash("sha256").update(JSON.stringify({
     subject,
     preheader: input.preheader,
@@ -213,6 +232,10 @@ export function renderBrandedEmail(input: {
     ctaUrl: input.ctaUrl || null,
     isTest: input.isTest === true,
     marketing: input.marketing === true,
+    unsubscribeUrl,
+    brokeragePostalAddress: BROKERAGE_POSTAL_ADDRESS,
+    marketingDisclosure: input.marketing === true ? MARKETING_EMAIL_DISCLOSURE : null,
+    marketingOptOut: input.marketing === true ? MARKETING_EMAIL_OPT_OUT : null,
     templateVersion,
   })).digest("hex");
   const text = [
@@ -223,12 +246,19 @@ export function renderBrandedEmail(input: {
     input.ctaLabel && input.ctaUrl ? `\n${input.ctaLabel}: ${input.ctaUrl}` : null,
     "",
     "Ask Magic Mike · Our Town Properties, Inc. · Wilson, North Carolina",
-    input.marketing ? "Use the approved unsubscribe link or reply UNSUBSCRIBE to stop marketing email." : null,
+    BROKERAGE_POSTAL_ADDRESS,
+    input.marketing ? MARKETING_EMAIL_DISCLOSURE : null,
+    input.marketing ? MARKETING_EMAIL_OPT_OUT : null,
+    unsubscribeUrl ? `Unsubscribe: ${unsubscribeUrl}` : null,
     `Template ${templateVersion} · Content ${contentHash.slice(0, 12)}`,
   ].filter(Boolean).join("\n");
   const button = input.ctaLabel && input.ctaUrl
     ? `<p style="margin:24px 0"><a href="${escapeHtml(input.ctaUrl)}" aria-label="${escapeHtml(input.ctaLabel)}" style="display:inline-block;background:#cda24a;color:#090909;text-decoration:none;padding:13px 20px;border-radius:8px;font-weight:700">${escapeHtml(input.ctaLabel)}</a></p>`
     : "";
-  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><title>${escapeHtml(subject)}</title></head><body style="margin:0;background:#eee7d8;color:#17130d;font-family:Arial,sans-serif"><div style="display:none;max-height:0;overflow:hidden">${escapeHtml(input.preheader)}</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eee7d8"><tr><td style="padding:24px 12px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;margin:auto;background:#fff;border:1px solid #d8c9ab;border-radius:14px;overflow:hidden;box-shadow:0 18px 48px rgba(30,20,5,.12)"><tr><td style="height:5px;background:#cda24a"></td></tr><tr><td style="background:#090909;padding:24px 28px;color:#fff"><p style="margin:0;color:#e4bf64;font-size:12px;font-weight:800;letter-spacing:.16em">ASK MAGIC MIKE</p><p style="margin:8px 0 0;font-size:14px;color:#f3ead8">Our Town Properties, Inc. · Human-reviewed real estate guidance</p></td></tr>${input.isTest ? `<tr><td style="padding:12px 28px;background:#681321;color:#fff;font-weight:800;letter-spacing:.04em">INTERNAL QA — DO NOT CONTACT</td></tr>` : ""}<tr><td style="padding:32px 28px"><p style="margin:0 0 12px;color:#8b1020;font-size:11px;font-weight:800;letter-spacing:.14em">REQUEST STATUS</p><h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:29px;line-height:1.2;color:#17130d">${escapeHtml(input.heading)}</h1><p style="margin:0;font-size:16px;line-height:1.7;color:#3d3529">${escapeHtml(input.body)}</p>${button}<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:28px;border-top:1px solid #e7dcc6"><tr><td style="padding-top:18px"><p style="margin:0;color:#6b6254;font-size:12px;line-height:1.55">Ask Magic Mike · Our Town Properties, Inc. · Wilson, North Carolina</p>${input.marketing ? `<p style="margin:10px 0 0;color:#6b6254;font-size:12px">Use the approved unsubscribe link or reply UNSUBSCRIBE to stop marketing email.</p>` : ""}<p style="margin:10px 0 0;color:#8a8175;font-size:11px">Template ${escapeHtml(templateVersion)} · Content ${contentHash.slice(0, 12)}</p></td></tr></table></td></tr></table></td></tr></table></body></html>`;
+  const identityFooter = `<p style="margin:0;color:#6b6254;font-size:12px;line-height:1.55">Ask Magic Mike · Our Town Properties, Inc. · Wilson, North Carolina<br>${escapeHtml(BROKERAGE_POSTAL_ADDRESS)}</p>`;
+  const marketingFooter = input.marketing
+    ? `<p style="margin:10px 0 0;color:#6b6254;font-size:12px">${escapeHtml(MARKETING_EMAIL_DISCLOSURE)}</p><p style="margin:10px 0 0;color:#6b6254;font-size:12px">${escapeHtml(MARKETING_EMAIL_OPT_OUT)} <a href="${escapeHtml(unsubscribeUrl || "")}" style="color:#6b6254;text-decoration:underline">Unsubscribe from marketing email</a>.</p>`
+    : "";
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><title>${escapeHtml(subject)}</title></head><body style="margin:0;background:#eee7d8;color:#17130d;font-family:Arial,sans-serif"><div style="display:none;max-height:0;overflow:hidden">${escapeHtml(input.preheader)}</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eee7d8"><tr><td style="padding:24px 12px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;margin:auto;background:#fff;border:1px solid #d8c9ab;border-radius:14px;overflow:hidden;box-shadow:0 18px 48px rgba(30,20,5,.12)"><tr><td style="height:5px;background:#cda24a"></td></tr><tr><td style="background:#090909;padding:24px 28px;color:#fff"><p style="margin:0;color:#e4bf64;font-size:12px;font-weight:800;letter-spacing:.16em">ASK MAGIC MIKE</p><p style="margin:8px 0 0;font-size:14px;color:#f3ead8">Our Town Properties, Inc. · Human-reviewed real estate guidance</p></td></tr>${input.isTest ? `<tr><td style="padding:12px 28px;background:#681321;color:#fff;font-weight:800;letter-spacing:.04em">INTERNAL QA — DO NOT CONTACT</td></tr>` : ""}<tr><td style="padding:32px 28px"><p style="margin:0 0 12px;color:#8b1020;font-size:11px;font-weight:800;letter-spacing:.14em">REQUEST STATUS</p><h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:29px;line-height:1.2;color:#17130d">${escapeHtml(input.heading)}</h1><p style="margin:0;font-size:16px;line-height:1.7;color:#3d3529">${escapeHtml(input.body)}</p>${button}<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:28px;border-top:1px solid #e7dcc6"><tr><td style="padding-top:18px">${identityFooter}${marketingFooter}<p style="margin:10px 0 0;color:#8a8175;font-size:11px">Template ${escapeHtml(templateVersion)} · Content ${contentHash.slice(0, 12)}</p></td></tr></table></td></tr></table></td></tr></table></body></html>`;
   return { subject, text, html, templateVersion, contentHash };
 }

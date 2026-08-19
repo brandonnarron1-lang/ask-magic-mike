@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { MESSAGE_TEMPLATE_REGISTRY, renderBrandedEmail } from "@/lib/messaging/template-registry";
+import {
+  BRANDED_EMAIL_TEMPLATE_VERSION,
+  BROKERAGE_POSTAL_ADDRESS,
+  MARKETING_EMAIL_DISCLOSURE,
+  MARKETING_EMAIL_OPT_OUT,
+  MESSAGE_TEMPLATE_REGISTRY,
+  renderBrandedEmail,
+} from "@/lib/messaging/template-registry";
 import { MESSAGE_SEQUENCES, materializeSequence, validateSequenceDefinitions } from "@/lib/messaging/sequence-engine";
 
 describe("Phase 6 template registry", () => {
@@ -65,5 +72,36 @@ describe("Phase 6 template registry", () => {
     expect(email.text).toContain("INTERNAL QA — DO NOT CONTACT");
     expect(email.html).toContain("Review &lt;only&gt;");
     expect(email.html).not.toContain("<only>");
+    expect(email.templateVersion).toBe(BRANDED_EMAIL_TEMPLATE_VERSION);
+    expect(email.text).toContain(BROKERAGE_POSTAL_ADDRESS);
+    expect(email.html).toContain(BROKERAGE_POSTAL_ADDRESS);
+  });
+
+  it("renders firm identity, postal address, marketing disclosure, and opt-out in text and HTML", () => {
+    const email = renderBrandedEmail({
+      subject: "Seller guidance",
+      preheader: "Seller guidance",
+      heading: "A local seller update",
+      body: "Review the approved update.",
+      marketing: true,
+      unsubscribeUrl: "https://www.askmagicmike.com/email/preferences?token=synthetic-test-token",
+    });
+    for (const output of [email.text, email.html]) {
+      expect(output).toContain("Our Town Properties, Inc.");
+      expect(output).toContain(BROKERAGE_POSTAL_ADDRESS);
+      expect(output).toContain(MARKETING_EMAIL_DISCLOSURE);
+      expect(output).toContain(MARKETING_EMAIL_OPT_OUT);
+      expect(output).toContain("https://www.askmagicmike.com/email/preferences?token=synthetic-test-token");
+    }
+    expect(email.templateVersion).toBe(BRANDED_EMAIL_TEMPLATE_VERSION);
+  });
+
+  it("fails closed when a marketing render lacks a valid HTTPS unsubscribe URL", () => {
+    const base = { subject: "Review", preheader: "Review", heading: "Review", body: "Review", marketing: true };
+    expect(() => renderBrandedEmail(base)).toThrow("marketing_unsubscribe_url_required");
+    expect(() => renderBrandedEmail({ ...base, unsubscribeUrl: "http://example.test/unsubscribe" }))
+      .toThrow("marketing_unsubscribe_url_required");
+    expect(() => renderBrandedEmail({ ...base, unsubscribeUrl: "https://user:secret@example.test/unsubscribe" }))
+      .toThrow("marketing_unsubscribe_url_required");
   });
 });
