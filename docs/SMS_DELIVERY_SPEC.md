@@ -33,10 +33,12 @@ HttpOnly setup session, exact same-origin validation, an explicit request
 header, runtime schema validation, and rate limiting. The invite endpoint itself
 requires admin authentication and never changes lead routing.
 
-The installed app manifest starts at `/phone-alerts/setup`, not at the Basic
-Auth-protected admin route. This is required on iPhone because a Home Screen web
-app receives Safari cookie state when installed, while Basic Auth credentials
-are not a transferable app session.
+The Brandon invite opens a token-scoped `/phone-alerts/install/[token]` page.
+That page serves a private, no-store manifest whose one-time `start_url` is the
+claim route. The installed iPhone web app therefore redeems the short-lived token
+inside its own isolated cookie context before opening `/phone-alerts/setup`.
+The flow does not rely on Safari transferring cookies to the Home Screen app and
+never transfers Basic Auth credentials.
 
 ## Scope
 

@@ -36,8 +36,10 @@ export async function createPhoneSetupInviteResponse(request: NextRequest) {
       Date.now(),
       (parsed.data.ttl_minutes || 20) * 60 * 1000,
     );
-    const url = new URL("/phone-alerts/setup/claim", phoneSetupResponseOrigin(request));
-    url.searchParams.set("token", token);
+    const url = new URL(
+      `/phone-alerts/install/${encodeURIComponent(token)}`,
+      phoneSetupResponseOrigin(request),
+    );
     return NextResponse.json({ ok: true, url: url.toString(), expires_at: new Date(claims.exp).toISOString() }, {
       headers: { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" },
     });

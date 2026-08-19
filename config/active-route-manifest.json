@@ -62,6 +62,8 @@
     "/lead-center-set-password",
     "/manifest.webmanifest",
     "/open-house/[propertyOrId]",
+    "/phone-alerts/install/[token]",
+    "/phone-alerts/install/[token]/manifest.webmanifest",
     "/phone-alerts/setup",
     "/phone-alerts/setup/claim",
     "/privacy",
@@ -82,7 +84,7 @@
   "required": {
     "public": [
       "/", "/home-value", "/value", "/sell", "/we-buy-houses", "/ask", "/buy", "/rent", "/open-house/[propertyOrId]", "/thank-you",
-      "/privacy", "/terms", "/accessibility", "/contact", "/phone-alerts/setup", "/phone-alerts/setup/claim",
+      "/privacy", "/terms", "/accessibility", "/contact", "/phone-alerts/install/[token]", "/phone-alerts/install/[token]/manifest.webmanifest", "/phone-alerts/setup", "/phone-alerts/setup/claim",
       "/widget", "/widget/v1", "/widget-preview", "/embed/ask",
       "/integrations/ourtownproperties", "/robots.txt", "/sitemap.xml", "/social-preview"
     ],
@@ -114,7 +116,9 @@
     "/api/admin/sequences/process": "active-feature-flagged-mock-only-cron",
     "/api/admin/operations/first-live": "active-required-by-vercel-cron",
     "/api/admin/sla/sweep": "active-required-by-vercel-cron",
-    "/api/webhooks/sms/inbound": "active-signed-or-admin-authenticated-mock-boundary"
+    "/api/webhooks/sms/inbound": "active-signed-or-admin-authenticated-mock-boundary",
+    "/phone-alerts/install/[token]": "active-short-lived-copy-only-ios-install-handoff",
+    "/phone-alerts/install/[token]/manifest.webmanifest": "active-no-store-token-scoped-install-manifest"
   },
   "acknowledgedRootSrcDuplicates": [
     "/", "/admin", "/admin/leads", "/admin/leads/[id]", "/api/admin/health", "/api/admin/sla/sweep", "/api/health/live", "/api/health/ready", "/api/leads", "/api/listings/[id]", "/api/listings/search", "/api/webhooks/email/events",

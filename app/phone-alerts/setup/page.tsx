@@ -38,7 +38,7 @@ export default async function PhoneAlertSetupPage({ searchParams }: { searchPara
         <h1 className="mt-2 text-3xl font-bold">Connect Brandon’s phone alerts</h1>
         <p className="mt-3 text-zinc-300">This temporary session can register only a Brandon copy-notification device. It cannot open the Lead Center, register Mike’s phone, view leads, or change routing.</p>
         <div className="my-6 rounded-xl border border-sky-300/20 bg-sky-950/25 p-4 text-sm text-sky-100">
-          On iPhone, open this link in Safari before choosing Share → Add to Home Screen. Apple copies the temporary setup cookie into the installed web app; Basic Auth credentials are no longer required for registration.
+          This session was redeemed inside the installed Home Screen app. Basic Auth credentials are not required, and the temporary setup token is no longer present in the URL.
         </div>
         <PhonePushSetup publicKey={publicKey} mode="brandon" />
       </div>
