@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicInfoPage } from "../components/black-diamond/PublicInfoPage";
+import { publicPageMetadata } from "../lib/publicMetadata";
+
+export const metadata: Metadata = publicPageMetadata({
+  title: "Contact Ask Magic Mike and Our Town Properties",
+  description: "Choose the appropriate public intake or brokerage contact path for a Wilson-area property, seller, buyer, renter, or general real estate question.",
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (

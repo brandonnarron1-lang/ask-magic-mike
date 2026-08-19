@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { BlackDiamondHeader } from "../components/black-diamond/BlackDiamondHeader";
 import { Footer } from "../components/black-diamond/BlackDiamondShell";
+import { nonIndexablePageMetadata } from "../lib/publicMetadata";
+
+export const metadata: Metadata = nonIndexablePageMetadata(
+  "Internal Social Preview",
+  "Internal visual review surface for Ask Magic Mike social creative.",
+);
 
 export default function SocialPreviewPage() {
   return (
