@@ -1,173 +1,106 @@
-# Production Launch Gate
+# Production Release Gate
 
-**Complete every item before deploying to production.**
+Updated 2026-08-19. Ask Magic Mike is already live. This checklist governs each
+new Production release; it is not a first-launch Supabase checklist.
 
-This is a hard checklist — not aspirational. If any item is blocked, the launch is blocked.
+## 1. Resolve the exact release
 
----
+- [ ] Canonical repository is `brandonnarron1-lang/ask-magic-mike`.
+- [ ] Base branch is current `main`; the PR is clean and mergeable.
+- [ ] Head commit, PR, Vercel Preview deployment, and rollback deployment are
+      recorded before approval.
+- [ ] The Vercel target is project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`.
+- [ ] NellySelly identifiers are absent and `pnpm amm:verify:isolation` passes.
 
-## 1. Required Environment Variables
+## 2. Prove the immutable candidate
 
-All of the following must be set in the production environment:
+- [ ] Node 24 release gate passes dependency install, release doctor, safety
+      scan, full tests, strict typecheck, lint, production build, route manifest,
+      release report, and launch-authority report.
+- [ ] The matching Vercel Preview reports Ready.
+- [ ] Public routes and any changed protected surfaces receive proportionate
+      DOM/runtime or screenshot QA. Evidence must say when screenshot, provider,
+      or device verification was not possible.
+- [ ] No secret, recipient value, database URL, token, cookie, or private VAPID
+      key appears in the diff, logs, screenshots, or artifacts.
 
-| Variable | Purpose | Required |
-|----------|---------|----------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | **REQUIRED** |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key (server-only) | **REQUIRED** |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key | **REQUIRED** |
-| `ADMIN_SECRET` | Password for `/admin` route | **REQUIRED** |
-| `NEXT_PUBLIC_SITE_URL` | Canonical site URL (e.g. `https://www.askmagicmike.com`) | **REQUIRED** |
-| `NEXT_PUBLIC_AGENT_NAME` | `Mike Eatmon` | **REQUIRED** |
-| `NEXT_PUBLIC_BROKERAGE_NAME` | `Our Town Properties` | **REQUIRED** |
-| `NEXT_PUBLIC_MARKET_AREA` | `Wilson, NC` | **REQUIRED** |
-| `NEXT_PUBLIC_AGENT_LICENSE` | NC license number | **REQUIRED** |
+## 3. Classify state changes
 
-Missing `NEXT_PUBLIC_SUPABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` in production will:
-- Return HTTP 503 on all intake API routes
-- Show a locked configuration screen on `/admin`
-- Never show mock/dev data
+Check every applicable action separately:
 
----
+- [ ] Code-only deployment
+- [ ] Additive live database migration
+- [ ] Environment-variable or provider change
+- [ ] Live WordPress form/widget/page change
+- [ ] DNS/domain mapping change
+- [ ] Internal QA email or push
+- [ ] Consumer acknowledgment, sequence, campaign, or publication
+- [ ] Production lead import, merge, suppression, or deletion
 
-## 2. Database
+An approval for one line does not authorize another. A code deployment never
+implies a send, migration, device enrollment, provider purchase, or public post.
 
-- [ ] Supabase project created
-- [ ] All migrations applied in order (`00001` → `00013`)
-- [ ] Row Level Security enabled on all tables (verified in Supabase dashboard)
-- [ ] Mike Eatmon agent row seeded (migration 00010 + upserted in 00011)
-- [ ] `sessions`, `leads`, `lead_scores`, `lead_routing`, `agents` tables exist
-- [ ] `contacts`, `consents`, `source_attribution`, `audit_logs`, `compliance_flags` tables exist
-- [ ] Test: submit one lead via `/ask` and confirm it appears in `/admin`
+## 4. Database safety when SQL changes
 
----
+- [ ] Target is canonical Neon project `bitter-star-20214385`, with Preview and
+      Production branch identities confirmed without printing connection data.
+- [ ] Migration is additive or has an explicit backup and rollback strategy.
+- [ ] Migration passed transactionally on an isolated Neon Preview branch.
+- [ ] Pre/post table, row-count, RLS/grant, and application-readiness assertions
+      are recorded.
+- [ ] Exact live-migration approval is obtained immediately before application.
 
-## 3. Admin Route Security
+No runtime or operator may silently use Supabase as a Production fallback.
 
-- [ ] `ADMIN_SECRET` is set to a strong, unique value (not `changeme-local`)
-- [ ] Accessing `/admin` without credentials returns HTTP 401
-- [ ] Accessing `/admin` with wrong password returns HTTP 401
-- [ ] If `ADMIN_SECRET` is missing or `changeme-local` in production, middleware returns 503
-- [ ] Admin dashboard shows live data (not the dev mock banner)
+## 5. Authorization and communications
 
----
+- [ ] Anonymous `/admin` redirects to `/lead-center-login`; it does not return a
+      Basic Auth challenge while Production RBAC is active.
+- [ ] Better Auth configuration, RBAC schema, role checks, assigned-lead
+      isolation, no-store policy, CSRF/same-origin controls, and audit actors pass.
+- [ ] Internal notification tests remain unmistakably `[TEST]`, suppressed from
+      KPIs, and use only approved recipients.
+- [ ] Consumer email/SMS/sequence actions have affirmative purpose-specific
+      permission, suppression checks, template/version evidence, and a separate
+      approval.
+- [ ] Marketing email has firm identity, valid postal address, and a working
+      HTTPS unsubscribe path before provider delivery can be enabled.
 
-## 4. Intake Flow Verification
+## 6. Deployment approval
 
-- [ ] Complete `/ask` flow end-to-end: question → intent → contact → consent → confirmation
-- [ ] After submission: `sessions`, `leads`, `lead_scores` rows exist in Supabase
-- [ ] `consents` table has an immutable record for each consent type granted
-- [ ] `crm_sync_log` has a `status: 'skipped'` entry (null adapter) or success entry
-- [ ] `analytics_events` has `session_created`, `intake_completed`, `lead_scored` events
-- [ ] Score, temperature, and agent assignment appear correctly in `/admin`
+Immediately before merge and Production deployment, present:
 
----
+1. PR and immutable head commit;
+2. exact Production project and affected routes;
+3. tests, Preview, and known limitations;
+4. whether migrations, sends, env changes, or publications are excluded;
+5. current rollback deployment; and
+6. one release-specific approval phrase.
 
-## 5. No Mock Data in Production
+Never reuse an approval consumed by a prior release or apply a generic approval
+to a PR created afterward.
 
-- [ ] `/admin` does not show the yellow "DEV MOCK DATA" banner
-- [ ] No `DEV_LEADS` data visible in production
-- [ ] `shouldUseDevStorage()` returns `false` when Supabase is configured
+## 7. Post-deploy proof
 
----
+- [ ] `www.askmagicmike.com` and required public routes return expected content.
+- [ ] Apex redirects 308 to the canonical `www` hostname.
+- [ ] `/api/health/live` and `/api/health/ready` return 200 with Neon and required
+      schema/provider readiness.
+- [ ] Anonymous admin access redirects to the login route; an authorized operator
+      can reach the intended protected surface.
+- [ ] Vercel alias resolves to the just-approved commit and no error-level log
+      regression appears during the observation window.
+- [ ] Storage-before-delivery, test exclusion, outbox, retry, and dedupe behavior
+      are rechecked when the release touches the lead or messaging path.
+- [ ] `PRODUCTION_CHANGE_LOG.md` and current QA evidence are updated.
 
-## 6. MLS / IDX Data
+## 8. Rollback
 
-- [ ] No MLS/IDX-derived sold comps, listing data, or confidential MLS exports in any public-facing page
-- [ ] All sold/performance data uses verified career biography statistics only
-- [ ] Any MLS import functionality is internal/admin-only and gated behind broker approval
-- [ ] Written IDX agreement obtained from MLS board before displaying live listing data
+For a code-only regression, restore the last verified Vercel deployment/alias and
+confirm health plus canonical routes. Prefer a reviewed forward fix for additive
+database changes; never drop lead, consent, notification, audit, RBAC, or session
+tables to roll back application code. Revoke only affected sessions/devices or
+pause only the affected channel when the incident is scoped.
 
----
-
-## 7. Compliance
-
-- [ ] TCPA consent language reviewed by attorney
-- [ ] Consent language version `v1` text matches exactly what is in `src/components/intake/step-consent.tsx`
-- [ ] `consent_language_version` stored on every lead record
-- [ ] SMS opt-out (STOP) handling documented and tested
-- [ ] DNC registry scrub process documented
-- [ ] AVM disclaimer present on every valuation response
-- [ ] "Equal Housing Opportunity" statement in footer
-- [ ] Agent license number (`NEXT_PUBLIC_AGENT_LICENSE`) set and visible in UI
-- [ ] Privacy policy page at `/privacy` live before launch
-- [ ] Physical mailing address in all outbound emails (`3301 Nash St. NW Suite E, Wilson NC 27896`)
-- [ ] NC General Statute § 93A compliance reviewed with broker
-
----
-
-## 8. Security
-
-- [ ] `SUPABASE_SERVICE_ROLE_KEY` not exposed in any client-side bundle (verify with `NEXT_PUBLIC_` prefix absence)
-- [x] Durable rate limiting on public capture/event routes through canonical Neon
-  - Requires `DATABASE_URL` and `public.rate_limit_buckets`
-- [ ] `Content-Security-Policy` header configured
-- [ ] Admin auth upgraded from Basic Auth to session-based auth (before high-traffic launch)
-- [ ] All intake API routes return `Cache-Control: no-store` (already implemented)
-
----
-
-## 9. CRM Adapter
-
-- [ ] CRM adapter is disabled unless credentials are explicitly set
-- [ ] If Follow Up Boss: `FUB_API_KEY` set and tested
-- [ ] If kvCORE: `KVCORE_API_KEY` and `KVCORE_BASE_URL` set and tested
-- [ ] Null adapter is active (no external writes) until CRM credentials are explicitly configured
-- [ ] `crm_sync_log` entries appear for each adapter call (success or skipped)
-
----
-
-## 10. Source Attribution
-
-- [ ] UTM parameters captured and stored in `sessions` table on first visit
-- [ ] `source_attribution` table populated for each submitted lead
-- [ ] `utm_source`, `utm_medium`, `utm_campaign` visible in `/admin` expanded row
-
----
-
-## 11. Final Sign-offs
-
-- [ ] Broker (Mike Eatmon) has reviewed all consumer-facing copy
-- [ ] All performance statistics on landing page confirmed accurate
-- [ ] Legal/compliance attorney has reviewed TCPA consent language
-- [ ] Hosting/DNS configured for `askmagicmike.com`
-- [ ] SSL certificate active
-- [ ] `NEXT_PUBLIC_SITE_URL` set to production domain (`https://www.askmagicmike.com`)
-
----
-
-## Blocked Until Resolved
-
-List any items that cannot be completed before launch and document the owner + ETA:
-
-| Item | Blocked By | Owner | ETA |
-|------|-----------|-------|-----|
-| Rate limiting (Neon) | Included in canonical database; no additional vendor | Engineering | Complete |
-| NC license # in UI | Confirm license number | Mike Eatmon | Before launch |
-| Privacy policy page | Legal review | TBD | Before launch |
-| Admin session-based auth | Engineering | TBD | Before high-traffic |
-
----
-
-## Controlled Launch Runbook
-
-For the step-by-step operator checklist, verification procedures, rollback plan, go/no-go criteria, and post-launch monitoring cadence, see:
-
-**[`docs/CONTROLLED_LAUNCH_RUNBOOK.md`](CONTROLLED_LAUNCH_RUNBOOK.md)**
-
-That document is the authoritative launch cockpit — it converts every item above into an executable owner action with verification commands and go/no-go gates.
-
-**[`docs/OWNER_ACTION_PROOF_PACK.md`](OWNER_ACTION_PROOF_PACK.md)**
-
-Evidence capture template — defines exactly what screenshot or terminal output to collect for each owner action, and where to record pass/fail. Use this alongside the runbook.
-
-**[`docs/PRODUCTION_DEPLOY_REHEARSAL.md`](PRODUCTION_DEPLOY_REHEARSAL.md)**
-
-Deployment-day minute-by-minute timeline with Stop If column for every action. Follow this top-to-bottom on launch day.
-
-**[`docs/GO_NO_GO_COMMAND_CENTER.md`](GO_NO_GO_COMMAND_CENTER.md)**
-
-Single-page launch authority decision. Current status, gate summary table, hard GO/NO-GO criteria, and final sign-off block. Run `npm run amm:launch:authority` to verify current authority status.
-
-**[`docs/CONTROLLED_TRAFFIC_ACTIVATION.md`](CONTROLLED_TRAFFIC_ACTIVATION.md)**
-
-Operator-ready private test and limited traffic activation sequence. Converts launch authority into the exact steps from private testing through WordPress CTA activation and 24-hour monitoring. Run `npm run amm:public:cta-check` before starting Stage 3.
+The exact operating sequence is in `GO_LIVE_RUNBOOK.md`. Current external gates
+are in `OWNER_APPROVAL_QUEUE.md`.

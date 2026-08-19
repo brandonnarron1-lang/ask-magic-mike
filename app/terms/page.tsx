@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import { PublicInfoPage } from "../components/black-diamond/PublicInfoPage";
+import { publicPageMetadata } from "../lib/publicMetadata";
+
+export const metadata: Metadata = publicPageMetadata({
+  title: "Terms and Real Estate Disclaimers",
+  description: "Terms, fair-housing guardrails, and real estate guidance disclaimers for the Ask Magic Mike public intake experience from Our Town Properties.",
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

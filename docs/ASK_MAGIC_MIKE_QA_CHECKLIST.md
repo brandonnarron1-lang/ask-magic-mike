@@ -1,5 +1,9 @@
 # Ask Magic Mike QA Checklist
 
+> **Historical reference.** Supabase and shared Basic Auth checks below predate
+> canonical Neon and Better Auth/RBAC. Use `QA_EVIDENCE_CURRENT.md` and
+> `PRODUCTION_LAUNCH_GATE.md` for current release acceptance.
+
 Use this checklist for production verification without relying on chat history. Do not submit production leads or mutate production data unless the specific QA pass explicitly authorizes it.
 
 For AdminOps operator procedures and incident response, use `docs/ADMINOPS_PRODUCTION_OPERATING_PACK.md`.

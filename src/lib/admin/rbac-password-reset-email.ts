@@ -1,10 +1,18 @@
 import { createHash } from "node:crypto";
-import { ResendEmailNotificationProvider } from "../../../app/lib/leadNotificationProvider";
+import {
+  selectEmailNotificationProvider,
+  type SmtpTransportFactory,
+} from "../../../app/lib/leadNotificationProvider";
 
 type PasswordResetEmailInput = {
   email: string;
   name?: string | null;
   url: string;
+};
+
+type PasswordResetEmailTransportOptions = {
+  resendTransport?: typeof fetch;
+  smtpTransportFactory?: SmtpTransportFactory;
 };
 
 function enabled(value: string | undefined) {
@@ -83,7 +91,7 @@ export function buildLeadCenterPasswordResetEmail(input: PasswordResetEmailInput
 
 export async function sendLeadCenterPasswordResetEmail(
   input: PasswordResetEmailInput,
-  transport: typeof fetch = fetch,
+  transportOptions: PasswordResetEmailTransportOptions = {},
 ) {
   if (!enabled(process.env.RBAC_PASSWORD_RESET_EMAIL_ENABLED)) {
     throw new Error("Lead Center password reset email is disabled.");
@@ -94,7 +102,10 @@ export async function sendLeadCenterPasswordResetEmail(
 
   const digest = createHash("sha256").update(input.url).digest("hex").slice(0, 32);
   const rendered = buildLeadCenterPasswordResetEmail(input);
-  const result = await new ResendEmailNotificationProvider("production", transport).send({
+  const result = await selectEmailNotificationProvider("production", {
+    resendTransport: transportOptions.resendTransport,
+    smtpTransportFactory: transportOptions.smtpTransportFactory,
+  }).send({
     notificationId: `rbac-password-reset-${digest}`,
     channel: "email",
     recipient: input.email,

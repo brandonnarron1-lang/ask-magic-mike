@@ -6,17 +6,20 @@ and scope, never values.
 | Group | Variables | Scope | Required for |
 | --- | --- | --- | --- |
 | Canonical DB | `DATABASE_URL`, `DATABASE_ENV` | server, Production/Preview separated | durable Neon capture |
-| Admin | `ADMIN_SECRET`, `AUTH_SECRET`, `CRON_SECRET` | server sensitive | Lead Center/cron |
-| Internal email | `LEAD_NOTIFICATION_TO`, `LEAD_NOTIFICATION_BCC`, `EMAIL_PROVIDER`, `EMAIL_ENABLED`, `RESEND_API_KEY`, `SMTP_*`, `LEAD_NOTIFICATION_*` | server sensitive except modes | internal alert/outbox |
+| Lead Center identity | `LEAD_CENTER_RBAC_ENABLED`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET` | server sensitive except URL | Better Auth sessions and RBAC |
+| Break-glass/operations | `ADMIN_SECRET`, `AUTH_SECRET`, `CRON_SECRET` | server sensitive | disabled-RBAC fallback and protected cron/health operations; not normal staff login |
+| Internal email | `LEAD_NOTIFICATION_TO`, `LEAD_NOTIFICATION_BCC`, `EMAIL_PROVIDER`, `EMAIL_ENABLED`, `RESEND_API_KEY`, `RESEND_WEBHOOK_*`, `SMTP_*`, `LEAD_NOTIFICATION_*` | server sensitive except modes | internal alert/outbox and provider status |
 | Staff push | `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `PHONE_SETUP_SIGNING_SECRET`, `AGENT_PUSH_NOTIFICATIONS_ENABLED` | public key browser-safe; all others server sensitive | free phone alerts |
 | Carrier SMS | `LEAD_SMS_TO`, `LEAD_SMS_COPY_TO`, `TWILIO_*`, `AGENT_SMS_NOTIFICATIONS_ENABLED` | server sensitive | deferred paid sender |
 | WordPress | `WORDPRESS_BRIDGE_SECRET`, `WORDPRESS_BRIDGE_FORM_IDS` | secret is server-sensitive on both systems; form IDs are server configuration | signed, per-form forwarding |
 | Public identity | `NEXT_PUBLIC_SITE_URL`, approved `NEXT_PUBLIC_AGENT_*` metadata | browser-safe | canonical links/copy |
-| Rate limit | Upstash variables or local fallback settings | server sensitive | distributed abuse control |
+| Rate limit | `DATABASE_URL`, `LEAD_RATE_LIMIT_PER_MINUTE`, `RATE_LIMIT_EMERGENCY_MEMORY` | server | durable Neon abuse control; emergency memory mode must be explicit |
 | Customer channels | `CUSTOMER_EMAIL_ENABLED`, `CUSTOMER_SMS_ENABLED` | server | separately approved acknowledgments |
-| Legacy rollback | `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY` | rollback only | SUPERSEDED |
+| Legacy compatibility | `ALLOW_LEGACY_SUPABASE_FALLBACK`, `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY` | non-Production only | SUPERSEDED; forbidden as a Production fallback |
 
 Production and Preview must use different Neon branches/credentials. Preview
 mutation stays fail-closed unless `DATABASE_ENV=preview`, Vercel reports Preview,
 and both explicit preview-mutation flags are enabled. NellySelly credentials,
 project IDs, domains, or database branches are forbidden in this project.
+Example values default to disabled even where Production is active; read live
+state from the health endpoints and hosting interface, never from `.env.example`.

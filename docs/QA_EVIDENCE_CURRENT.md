@@ -206,3 +206,32 @@ smoke passed 19 with two protected/write skips; funnel passed 15/15; health
 passed 2/2 public probes; isolation passed; and the read-only synthetic monitor
 passed six checks with only protected admin health skipped. Vercel reported no
 error-level logs in the post-deploy window.
+
+## Phase 9 cumulative integration rehearsal — 2026-08-19
+
+A local, unpushed integration branch rehearsed the complete pending stack from
+current Production `main` in the intended order: PRs `#178`, `#177`, `#170`,
+`#173`, then `#172`. The rehearsal used the immutable remote heads recorded on
+each PR and did not merge, deploy, migrate, publish, send, or mutate Production.
+
+The rehearsal proved that `#178` and `#170` require an intentional merge of
+`docs/GO_LIVE_RUNBOOK.md`. The stale `#172` baseline requires both
+`app/admin/layout.tsx` and `config/active-route-manifest.json` to preserve the
+owned-demand, experiments, review-planner, and revival surfaces. The resolved
+cumulative tree retained all four surfaces and passed:
+
+| Check | Result |
+| --- | --- |
+| System isolation | PASS — no deployable NellySelly identifiers |
+| Release safety | PASS — 14/14 |
+| Unit/integration tests | PASS — 191 files / 2,744 tests |
+| Strict typecheck | PASS |
+| ESLint | PASS |
+| Production build | PASS — 52 generated pages |
+| Route manifest | PASS — 78 active / 17 acknowledged root-src duplicates |
+
+The workstation used Node 26.5.1, so each final refreshed PR must still repeat
+the protected Node 24 CI and Vercel Preview checks on its exact head. Preview QA
+also confirmed that Vercel Deployment Protection redirects to SSO; without a
+valid bypass, the corrected runner now fails closed and performs no downstream
+or mutation checks.

@@ -1,5 +1,10 @@
 # Revenue Command Center — Daily Operating Guide
 
+> **Historical interface guide.** Supabase and shared Basic Auth statements below
+> describe the retired implementation. Current operators use canonical Neon and
+> Better Auth/RBAC; see `CURRENT_STATE_RECONCILIATION.md` and
+> `DOCUMENTATION_AUTHORITY.md` before acting.
+
 **This is read-only. It does not send email, SMS, calls, automations, or outbound messages.**
 
 URL: `https://www.askmagicmike.com/admin/revenue`  

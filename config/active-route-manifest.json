@@ -7,6 +7,8 @@
     "/admin",
     "/admin/action-queue",
     "/admin/allocation",
+    "/admin/distribution",
+    "/admin/experiments",
     "/admin/growth",
     "/admin/leads",
     "/admin/leads/[id]",
@@ -31,6 +33,7 @@
     "/api/admin/sequences/process",
     "/api/admin/sla/sweep",
     "/api/appointments/request",
+    "/api/experiments/event",
     "/api/chat",
     "/api/chat/message",
     "/api/chat/session",
@@ -61,6 +64,7 @@
     "/lead-center-set-password",
     "/manifest.webmanifest",
     "/open-house/[propertyOrId]",
+    "/plan",
     "/phone-alerts/setup",
     "/phone-alerts/setup/claim",
     "/privacy",
@@ -81,12 +85,12 @@
   "required": {
     "public": [
       "/", "/home-value", "/value", "/sell", "/we-buy-houses", "/ask", "/buy", "/rent", "/open-house/[propertyOrId]", "/thank-you",
-      "/privacy", "/terms", "/accessibility", "/contact", "/phone-alerts/setup", "/phone-alerts/setup/claim",
+      "/privacy", "/terms", "/accessibility", "/contact", "/plan", "/phone-alerts/setup", "/phone-alerts/setup/claim",
       "/widget", "/widget/v1", "/widget-preview", "/embed/ask",
       "/integrations/ourtownproperties", "/robots.txt", "/sitemap.xml", "/social-preview"
     ],
     "admin": [
-      "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation", "/admin/growth",
+      "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation", "/admin/distribution", "/admin/experiments", "/admin/growth",
       "/admin/action-queue", "/admin/message-previews", "/admin/notifications", "/admin/notifications/phone", "/admin/reporting",
       "/admin/revival"
     ],
@@ -96,7 +100,7 @@
     "api": [
       "/admin/api/push/test",
       "/admin/api/phone-alerts/invite",
-      "/api/leads", "/api/listings/search", "/api/listings/[id]", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/phone-alerts/invite", "/api/phone-alerts/subscription", "/api/phone-alerts/test", "/api/webhooks/sms/inbound", "/api/webhooks/sms/status", "/api/widget/events",
+      "/api/leads", "/api/listings/search", "/api/listings/[id]", "/api/valuation", "/api/appointments/request", "/api/experiments/event", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/phone-alerts/invite", "/api/phone-alerts/subscription", "/api/phone-alerts/test", "/api/webhooks/sms/inbound", "/api/webhooks/sms/status", "/api/widget/events",
       "/api/admin/copilot", "/api/admin/copilot/jobs", "/api/admin/copilot/jobs/process", "/api/admin/health", "/api/admin/leads/[id]/communication-permissions", "/api/admin/leads/[id]/sequences", "/api/admin/message-templates", "/api/admin/operations/first-live", "/api/admin/qa/email", "/api/admin/sequences/process", "/api/admin/sla/sweep", "/api/webhooks/email/events"
     ]
   },
@@ -104,7 +108,7 @@
     "/distribution": "inactive-src-only",
     "/campaigns": "inactive-src-only",
     "/admin/traffic": "inactive-src-only",
-    "/admin/distribution": "inactive-src-only",
+    "/admin/distribution": "active-protected-read-only-owned-demand-neon",
     "/admin/growth": "active-protected-read-only-phase9-schema-gated",
     "/admin/revival": "active-protected-read-only-database-revival-command",
     "/api/analytics/event": "inactive-src-only",
@@ -115,10 +119,11 @@
     "/api/admin/sequences/process": "active-feature-flagged-mock-only-cron",
     "/api/admin/operations/first-live": "active-required-by-vercel-cron",
     "/api/admin/sla/sweep": "active-required-by-vercel-cron",
-    "/api/webhooks/sms/inbound": "active-signed-or-admin-authenticated-mock-boundary"
+    "/api/webhooks/sms/inbound": "active-signed-or-admin-authenticated-mock-boundary",
+    "/plan": "active-public-device-private-recurring-value"
   },
   "acknowledgedRootSrcDuplicates": [
-    "/", "/admin", "/admin/leads", "/admin/leads/[id]", "/api/admin/health", "/api/admin/sla/sweep", "/api/health/live", "/api/health/ready", "/api/leads", "/api/listings/[id]", "/api/listings/search", "/api/webhooks/email/events",
+    "/", "/admin", "/admin/distribution", "/admin/leads", "/admin/leads/[id]", "/api/admin/health", "/api/admin/sla/sweep", "/api/health/live", "/api/health/ready", "/api/leads", "/api/listings/[id]", "/api/listings/search", "/api/webhooks/email/events",
     "/ask", "/embed/ask", "/value", "/widget-preview"
   ]
 }

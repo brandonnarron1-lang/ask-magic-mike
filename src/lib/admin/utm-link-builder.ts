@@ -14,7 +14,7 @@
 // Types
 // ---------------------------------------------------------------------------
 
-export type UtmMedium = "social_organic" | "owned_media";
+export type UtmMedium = "social_organic" | "owned_media" | "organic_local";
 
 export type PostingPlatform =
   | "facebook"

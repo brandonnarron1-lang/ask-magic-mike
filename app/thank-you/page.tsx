@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { nonIndexablePageMetadata } from "../lib/publicMetadata";
+
+export const metadata: Metadata = nonIndexablePageMetadata(
+  "Request Received",
+  "Confirmation that an Ask Magic Mike real estate request was received for human review.",
+);
 
 export default function ThankYouPage() {
   return (

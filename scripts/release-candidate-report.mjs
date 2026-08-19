@@ -168,7 +168,7 @@ function renderMarkdown(summary) {
     "",
     `## Production safety`,
     "",
-    `- Production at \`ecf59c9\` not touched, not merged, not promoted.`,
+    `- This report does not touch, merge, promote, migrate, or message Production.`,
     "",
     `## Verdict`,
     "",
@@ -281,7 +281,7 @@ async function main() {
     );
   }
   manualRemaining.push(
-    "Confirm DATABASE_ENV, ALLOW_PREVIEW_DB_MUTATION, and PREVIEW_SUPABASE_PROJECT_REF in Vercel Preview env before any mutation run."
+    "Confirm DATABASE_ENV, ALLOW_PREVIEW_DB_MUTATION, and PREVIEW_DATA_MODE in Vercel Preview env before any mutation run."
   );
   manualRemaining.push("Do not promote to production from automation.");
 

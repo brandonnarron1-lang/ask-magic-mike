@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import { BuyerIntentSection } from "../components/black-diamond/BuyerIntentSection";
 import { BlackDiamondHeader } from "../components/black-diamond/BlackDiamondHeader";
 import { Footer } from "../components/black-diamond/BlackDiamondShell";
 import { PageTracker } from "../components/black-diamond/PageTracker";
+import { publicPageMetadata } from "../lib/publicMetadata";
+
+export const metadata: Metadata = publicPageMetadata({
+  title: "Home Buying Plan for Wilson and Eastern NC",
+  description: "Request a personalized property-match and buying-plan review for Wilson or Eastern North Carolina. A local professional verifies details before presenting options.",
+  path: "/buy",
+});
 
 export default function BuyPage() {
   return (
