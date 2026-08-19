@@ -67,6 +67,8 @@ The branch was refreshed from protected `main` after the Phase 9.6 experiment-co
 
 Rendered-HTML inspection of the refreshed branch caught a homepage-only title override that the source-level route matrix did not: the page emitted `Wilson, NC Real Estate Guidance` without the Ask Magic Mike identity. The homepage now declares the full branded title, the shared helper avoids duplicating an already branded social title, and unit plus route-policy regressions cover both conditions.
 
+Preview crawl-policy inspection also found the compatibility aliases in `sitemap.xml` despite their canonical declarations pointing elsewhere. `/value` and `/we-buy-houses` remain reachable for existing links but are now excluded from the sitemap; `/home-value` and `/sell` are the only submitted canonical destinations.
+
 ## Local browser evidence
 
 Desktop and 390×844 mobile inspections covered `/home-value` and `/ask` using the optimized local server. Both routes rendered their existing responsive visual systems, correct headings, functional form controls, and route-specific document titles. The mobile viewport was reset after inspection. Browser console issues: 0.
