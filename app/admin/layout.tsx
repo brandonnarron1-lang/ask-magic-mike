@@ -9,6 +9,7 @@ const ADMIN_NAVIGATION = [
   ["Allocation", "/admin/allocation"],
   ["Reporting", "/admin/reporting"],
   ["Growth", "/admin/growth"],
+  ["Experiments", "/admin/experiments"],
   ["Notifications", "/admin/notifications"],
 ] as const;
 

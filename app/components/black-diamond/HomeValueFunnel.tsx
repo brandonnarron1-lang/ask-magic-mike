@@ -6,6 +6,8 @@ import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
 import { timelineOptions } from "../../lib/constants";
 import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
+import type { PublicExperimentContext } from "../../lib/growth/experiment-registry";
+import { recordExperimentEvent } from "../../lib/growth/public-experiment-client";
 import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
 import { LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../lib/leadConsent";
 import { postToWidgetParent } from "../../lib/widgetMessaging";
@@ -19,6 +21,7 @@ type HomeValueFunnelProps = {
   surface?: LeadSourceSurface;
   compact?: boolean;
   attributionOverrides?: Partial<Attribution>;
+  experimentContext?: PublicExperimentContext | null;
 };
 
 const stepLabels = ["Address", "Email", "Phone", "Thank you"];
@@ -28,6 +31,7 @@ export function HomeValueFunnel({
   surface = "home_value_page",
   compact = false,
   attributionOverrides = {},
+  experimentContext = null,
 }: HomeValueFunnelProps) {
   const [attribution] = useState<Attribution>(() =>
     typeof window === "undefined" ? initialAttribution : readAttribution(attributionOverrides),
@@ -46,6 +50,9 @@ export function HomeValueFunnel({
     sessionId: null,
   });
   const [submitting, setSubmitting] = useState(false);
+  const experimentProperties = experimentContext
+    ? { experiment_key: experimentContext.experimentKey, variant_key: experimentContext.variantKey }
+    : {};
 
   useEffect(() => {
     setSubmissionId(tryCreateBrowserSubmissionId());
@@ -58,10 +65,10 @@ export function HomeValueFunnel({
       setFormError("Enter the full property address so Mike can review the right home.");
       return;
     }
-    trackEvent("home_value_started", attribution, { funnel_name: "home_value", lead_source_surface: surface });
-    trackEvent("funnel_started", attribution, { funnel_name: "home_value", lead_source_surface: surface });
-    trackEvent("address_submit", attribution, { funnel_name: "home_value", step_name: "address" });
-    trackEvent("address_submitted", attribution, { funnel_name: "home_value", step_name: "address" });
+    trackEvent("home_value_started", attribution, { funnel_name: "home_value", lead_source_surface: surface, ...experimentProperties });
+    trackEvent("funnel_started", attribution, { funnel_name: "home_value", lead_source_surface: surface, ...experimentProperties });
+    trackEvent("address_submit", attribution, { funnel_name: "home_value", step_name: "address", ...experimentProperties });
+    trackEvent("address_submitted", attribution, { funnel_name: "home_value", step_name: "address", ...experimentProperties });
     if (surface === "widget") {
       postToWidgetParent({ type: "askmagicmike:lead_started" }, attribution);
     }
@@ -133,7 +140,10 @@ export function HomeValueFunnel({
       if (!res.ok) throw new Error(publicLeadErrorMessage(data.error));
       const idempotentReplay = res.headers.get("X-AMM-Idempotent-Replay") === "1";
       if (!idempotentReplay) {
-        trackEvent("lead_created", attribution, { funnel_name: "home_value", step_name: "thank_you" });
+        trackEvent("lead_created", attribution, { funnel_name: "home_value", step_name: "thank_you", ...experimentProperties });
+        if (experimentContext && data.lead_id) {
+          void recordExperimentEvent(experimentContext, "lead_created", data.lead_id);
+        }
         if (surface === "widget") {
           trackEvent("widget_lead_created", attribution, { funnel_name: "home_value" });
           postToWidgetParent({ type: "askmagicmike:lead_created" }, attribution);
