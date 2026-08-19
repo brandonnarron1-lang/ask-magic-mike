@@ -24,6 +24,7 @@ describe("Phase 9.5 search-authority route wiring", () => {
       expect(read(file), file).toContain("publicPageMetadata");
       expect(read(file), file).toContain(path);
     }
+    expect(read("app/page.tsx")).toContain('title: "Ask Magic Mike | Wilson, NC Real Estate Guidance"');
   });
 
   it("canonicalizes compatibility aliases to the full canonical route", () => {
