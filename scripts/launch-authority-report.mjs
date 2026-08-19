@@ -121,7 +121,7 @@ function renderMarkdown(s) {
     "",
     `## Production safety`,
     "",
-    `- Production at \`ecf59c9\` not touched, not merged, not promoted.`,
+    `- This report does not touch, merge, promote, migrate, or message Production.`,
     `- PROMOTION_READY does not promote. Human approval is required.`,
     "",
     `## Inputs`,

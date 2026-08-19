@@ -1,44 +1,80 @@
-# Go-Live Runbook
+# Production Release and Go-Live Runbook
 
-## Approval gates
+Updated 2026-08-19. The public funnel is live. Use this runbook for incremental,
+reversible releases and controlled owned-traffic activation.
 
-Before each external action, state the exact URL/system, action, rollback, and
-expected impact. Required approvals are separate for: secure env entry, database
-migration, production deploy, first internal QA email, consumer acknowledgment,
-WordPress publish, DNS/domain changes, and marketing publication.
+## Before merge
 
-## Sequence
+1. Fetch current `origin/main`; use an isolated worktree and preserve unrelated
+   user or agent changes.
+2. Record PR, immutable head commit, Vercel project, Preview deployment, current
+   Production deployment, and rollback deployment.
+3. Run the Node 24 release gate and confirm the Vercel Preview is Ready.
+4. Verify changed routes in the protected Preview. Separate build, DOM/runtime,
+   screenshot, database, provider-delivery, and physical-device evidence.
+5. Classify migrations, environment changes, sends, WordPress publication, DNS,
+   and external marketing as separate state changes.
+6. Present the release-specific Production gate from the PR. Do not reuse a gate.
 
-1. Review the local diff and rescue branch.
-2. Apply the additive migration to the approved non-production database.
-3. Configure Vercel production envs through the secure interface; keep email disabled
-   until sender/BCC/recipient verification.
-4. Deploy the reviewed commit to a protected preview and run route/API/widget/admin
-   checks.
-5. Obtain production deployment approval; deploy and verify `/`, `/ask`, `/sell`,
-   `/value`, `/buy`, `/rent`, `/open-house/<property-or-id>`, `/widget/v1`,
-   `/robots.txt`, `/sitemap.xml`, `/privacy`, `/terms`, `/accessibility`, and
-   `/contact`.
-6. Obtain first QA-email approval; submit one public QA lead, verify storage,
-   attribution, dashboard, Mike delivery, hidden BCC, provider ID, and no duplicate.
-7. Mark the QA record test/suppressed and exclude it from KPI reports.
-8. Obtain separate WordPress approval; publish one reversible source-tagged CTA or
-   widget placement and monitor before adding more.
+## Merge and deploy
 
-## Exact next approval gate
+1. Merge only the approved clean PR into `main` using the repository ruleset.
+2. Let the canonical Git integration deploy the resulting `main` commit to the
+   single owned Vercel project. Do not deploy from a different repository or
+   attach Ask Magic Mike domains to another project.
+3. Wait for Ready and confirm both custom aliases resolve to the approved
+   deployment. Do not promote an artifact built from a different commit.
+4. If an additive Neon Production migration is part of the release, use its own
+   exact approval, pre/post assertions, transaction boundary, and forward-fix
+   plan. A code approval alone is insufficient.
 
-The next action is a protected preview deployment of the reviewed rescue-branch
-candidate after the owner confirms the target Supabase project and enters no
-secrets in chat. Proposed action: deploy the candidate to an existing Vercel preview
-only; affected system is the `ask-magic-mike` Vercel project; rollback is delete-free
-preview abandonment and redeploy of the recorded production deployment; expected
-impact is route/API verification only, with no public alias or email send. Production
-deployment, live migration, secure env entry, first QA email, and WordPress changes
-remain separate approvals.
+## Immediate verification
 
-## Stop conditions
+Run the repository health, funnel, route, release, and isolation verifiers. At a
+minimum confirm:
 
-Stop if Supabase schema/credentials are ambiguous, email sender alignment is not
-verified, authorization is bypassed, a provider returns unknown state, a lead is not
-durable, a public page serves wrong-brand content, or any required owner takeover is
-shown. Do not guess credentials or DNS.
+- `/`, `/ask`, `/sell`, `/value`, `/home-value`, `/buy`, `/rent`,
+  `/open-house/<approved-id>`, `/widget/v1`, `/privacy`, `/terms`,
+  `/accessibility`, `/contact`, `/robots.txt`, and `/sitemap.xml`;
+- apex 308 redirect and canonical metadata;
+- live/readiness health with canonical Neon;
+- anonymous `/admin` redirect to `/lead-center-login` and authorized RBAC access;
+- no NellySelly hostname, project, database, variable, or content crossover; and
+- no error-level regression in the observed Vercel window.
+
+## Lead or messaging release verification
+
+When the change touches capture, routing, email, push, SMS, or sequences:
+
+1. Use a synthetic record marked `is_test=true` and
+   `INTERNAL QA — DO NOT CONTACT` only after the exact QA-send/mutation approval.
+2. Submit through the public form, not directly into the database.
+3. Prove one canonical lead, attribution/consent, deterministic score/routing,
+   one idempotent notification set, Lead Center visibility, and KPI exclusion.
+4. For real provider tests, prove provider message ID and final delivery or
+   failure/retry state. A 200 or queued state is not delivery proof.
+5. Never contact a genuine WordPress-only entry whose purpose or consent is
+   unclear; preserve it for BIC review.
+
+## Owned-traffic activation
+
+After the lead path and exact publication gate pass, activate one reversible
+placement at a time: canonical Our Town CTA, then approved page-specific widget,
+then tagged GBP/social/email assets. Monitor conversion, source attribution,
+duplicate rate, notification failures, and response SLA before expanding.
+Paid traffic and carrier SMS remain separate approvals.
+
+## Rollback
+
+- Code: restore the recorded prior Vercel deployment/alias; verify health and
+  canonical routes.
+- WordPress: disable only the changed placement/form ID and restore its proven
+  prior notification behavior without deleting entries.
+- Messaging: pause only the affected channel/processor; preserve lead and outbox
+  records for reconciliation.
+- RBAC: revoke affected sessions first. Disable the feature only under the
+  reviewed break-glass procedure; retain identity/audit tables.
+- Database: prefer a forward fix. Never delete or drop canonical lead, consent,
+  notification, audit, identity, or session data as an application rollback.
+
+Record the outcome in `PRODUCTION_CHANGE_LOG.md`, including anything not proven.
