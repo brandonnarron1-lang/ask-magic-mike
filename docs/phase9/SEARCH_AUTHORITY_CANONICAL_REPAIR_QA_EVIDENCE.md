@@ -6,7 +6,7 @@ Branch: `codex/phase9-search-authority-2026-08-19`
 
 Base production commit: `a9784d5686ee6bd93136f4e9a4995304db28496f`
 
-Status: local release candidate verified; Vercel Preview and CI evidence pending
+Status: local, CI, and Vercel Preview release candidate verified; production unchanged
 
 Production mutation: none
 
@@ -71,7 +71,18 @@ No lead, email, SMS, push notification, appointment, analytics mutation, databas
 
 ## Preview and CI evidence
 
-Pending branch publication. This section must be updated with the draft PR, final commit, Vercel Preview URL, GitHub release-gate result, Preview metadata matrix, and deployed desktop/mobile inspection before production approval is requested.
+- Draft PR: [#174](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/174)
+- Initial verified implementation commit: `049eb1c24caa455fe1c88df7f4347092ba6436d8`
+- Vercel Preview: `https://ask-magic-mike-esz448f42-eyes-up-industries.vercel.app`
+- Vercel deployment: pass
+- GitHub `local-release-gate` on repository-required Node 24: pass in 2m50s
+- Vercel Preview Comments: pass
+
+Authenticated browser inspection repeated the 11-route title/canonical/robots/Open Graph matrix against the deployed Preview with the same results as the local optimized build. Vercel CLI access against the canonical project confirmed Preview `robots.txt` allows `/ask`, disallows only `/admin` and `/api/`, and points to the canonical sitemap. The Preview sitemap contains `https://www.askmagicmike.com/ask`.
+
+The deployed homepage JSON-LD parsed successfully and contained exactly Organization, WebSite, and WebPage graph nodes. It contained no telephone, address, rating, or review fields. Deployed `/home-value` desktop and `/ask` at 390×844 mobile matched the existing visual system with no layout regression and 0 browser console issues.
+
+During protected-preview access, the Vercel CLI initially auto-created an empty worktree-named project instead of linking the canonical project. The mistake was detected immediately. Read-only inspection proved it was 21 seconds old with zero deployments and no domain. The empty project was permanently removed, and the worktree was explicitly relinked to `eyes-up-industries/ask-magic-mike`. No parallel deployment, environment variable, domain, application data, or NellySelly resource was created or retained.
 
 ## Rollback rehearsal
 
