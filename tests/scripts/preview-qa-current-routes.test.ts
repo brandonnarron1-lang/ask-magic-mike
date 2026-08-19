@@ -29,6 +29,7 @@ describe("preview QA current route contract", () => {
     expect(source).toContain('const manifestPath = `${installUrl.pathname}/manifest.webmanifest`');
     expect(source).toContain('startUrl.pathname === "/phone-alerts/setup/claim"');
     expect(source).toContain('record("phone_install:handoff", "pass"');
+    expect(source).toContain('private install contract failed: ${failedChecks || "unknown"}');
     expect(source).not.toContain('http("GET", startUrl');
   });
 });

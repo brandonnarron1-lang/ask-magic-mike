@@ -466,9 +466,20 @@ async function phoneInstallHandoff() {
   ) {
     record("phone_install:handoff", "pass", { http: manifest.status });
   } else {
+    const failedChecks = [
+      ["install_status", install.ok],
+      ["install_copy", install.text.includes("Install Brandon copy alerts")],
+      ["manifest_status", manifest.ok],
+      ["manifest_privacy_headers", privateManifest],
+      ["manifest_start_url", validStartUrl],
+      ["manifest_copy_scope", validCopyScope],
+    ]
+      .filter(([, passed]) => !passed)
+      .map(([name]) => name)
+      .join(", ");
     record("phone_install:handoff", "fail", {
       http: manifest.status || install.status,
-      message: "private install page or token-scoped manifest contract failed",
+      message: `private install contract failed: ${failedChecks || "unknown"}`,
     });
   }
 }
