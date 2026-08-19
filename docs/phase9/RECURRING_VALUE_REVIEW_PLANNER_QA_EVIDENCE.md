@@ -85,7 +85,7 @@ Mobile viewport `390 × 844`:
 
 The deployed Preview repeated plan creation, task completion, 14-percent progress, `No contact data sent`, reload restoration, title/canonical route, desktop layout, and `390 × 844` mobile layout checks. Browser console check: zero `error` or `warning` entries on both local and deployed targets.
 
-The current-base refresh corrected two Preview findings before release: privacy copy now discloses that allowlisted anonymous planner events record controlled selections and progress, and a restored plan now announces updated progress after the next task interaction.
+The current-base refresh corrected two Preview findings before release: privacy copy now discloses that allowlisted non-contact planner events may record controlled selections, progress, campaign attribution, and device context, and a restored plan now announces updated progress after the next task interaction.
 
 The temporary viewport override was reset and the local QA tab/server were closed after verification.
 

@@ -162,7 +162,7 @@ export function RealEstateReviewPlanner() {
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-6 text-[#d9ceb8]">
-            No name, address, email, phone, or free text. No contact or property details are sent. Anonymous planner events may record only controlled selections and progress.
+            No name, address, email, phone, or free text. No contact or property details are sent. Non-contact planner events may record controlled selections, progress, campaign attribution, and device context.
           </p>
         </div>
 

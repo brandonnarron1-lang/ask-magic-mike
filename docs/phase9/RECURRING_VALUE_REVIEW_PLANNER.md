@@ -6,7 +6,7 @@ Status: isolated implementation candidate; no production publication
 
 Canonical route: `/plan`
 
-Action class: reversible public application code; anonymous allowlisted analytics only
+Action class: reversible public application code; non-contact allowlisted analytics only
 
 Production approval gate: `APPROVE PHASE 9.4 REVIEW PLANNER MERGE AND PRODUCTION DEPLOYMENT`
 
@@ -51,7 +51,7 @@ The versioned local record permits only:
 - completed deterministic task IDs; and
 - generated/updated timestamps.
 
-It does not request or persist a name, email, phone, address, property ID, narrative, financial information, protected characteristic, or uploaded document. Unknown properties are stripped when stored state is parsed. Invalid, obsolete, or malformed state fails closed. The full planner record remains device-local; controlled goal, horizon, focus, task ID, and completion-count values may be transmitted as anonymous analytics events. The interface discloses this boundary and does not claim that nothing leaves the device.
+It does not request or persist a name, email, phone, address, property ID, narrative, financial information, protected characteristic, or uploaded document. Unknown properties are stripped when stored state is parsed. Invalid, obsolete, or malformed state fails closed. The full planner record remains device-local; controlled goal, horizon, focus, task ID, completion-count values, campaign attribution, and device context may be transmitted as non-contact analytics events. The interface discloses this boundary and does not claim that nothing leaves the device or that the events are anonymous.
 
 The planner itself creates no lead or profile. Four allowlisted analytics events may record only controlled enums, task IDs, and completion counts:
 
@@ -89,7 +89,7 @@ Assumptions:
 - browser local storage is available for most visitors;
 - visitors understand that device-local state does not sync across devices;
 - the current canonical funnels remain the only lead-creation paths; and
-- anonymous public event storage remains approved under the existing analytics contract.
+- non-contact public event storage remains approved under the existing analytics contract.
 
 ## Risks and controls
 

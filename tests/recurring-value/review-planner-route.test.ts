@@ -54,7 +54,7 @@ describe("Phase 9.4 recurring-value public route", () => {
       expect(combined).not.toContain(forbidden);
     }
     expect(component).toContain("No contact data sent");
-    expect(component).toContain("Anonymous planner events may record only controlled selections and progress");
+    expect(component).toContain("Non-contact planner events may record controlled selections, progress, campaign attribution, and device context");
     expect(component).toContain("No name, address, email, phone, or free text");
   });
 });
