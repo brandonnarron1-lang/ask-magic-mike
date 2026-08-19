@@ -186,10 +186,19 @@ export function formatFetchErrorSummary(summary) {
  *
  * @param {number}  status
  * @param {boolean} hasBypass
+ * @param {string|null|undefined} location Redirect target from a manual
+ *   redirect response, when present.
  * @returns {"ok" | "missing_bypass" | "rejected_bypass" | "network_error" | "fail"}
  */
-export function classifyAccessStatus(status, hasBypass) {
+export function classifyAccessStatus(status, hasBypass, location = "") {
   if (status === 0) return "network_error";
+  const isVercelSsoRedirect =
+    status >= 300 &&
+    status < 400 &&
+    /^https:\/\/vercel\.com\/sso-api(?:\?|$)/i.test(String(location ?? ""));
+  if (isVercelSsoRedirect) {
+    return hasBypass ? "rejected_bypass" : "missing_bypass";
+  }
   if (status >= 200 && status < 400) return "ok";
   if (status === 401 || status === 403) {
     return hasBypass ? "rejected_bypass" : "missing_bypass";

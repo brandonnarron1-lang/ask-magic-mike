@@ -194,7 +194,20 @@ describe("classifyAccessStatus", () => {
   it("returns ok for 2xx/3xx", () => {
     expect(classifyAccessStatus(200, false)).toBe("ok");
     expect(classifyAccessStatus(204, false)).toBe("ok");
-    expect(classifyAccessStatus(302, true)).toBe("ok");
+    expect(classifyAccessStatus(302, true, "https://example.com/login")).toBe(
+      "ok"
+    );
+  });
+
+  it("detects Vercel SSO redirects as protected Preview access", () => {
+    const ssoLocation =
+      "https://vercel.com/sso-api?url=https%3A%2F%2Fpreview.example";
+    expect(classifyAccessStatus(302, false, ssoLocation)).toBe(
+      "missing_bypass"
+    );
+    expect(classifyAccessStatus(302, true, ssoLocation)).toBe(
+      "rejected_bypass"
+    );
   });
 
   it("returns missing_bypass for 401/403 without bypass", () => {
