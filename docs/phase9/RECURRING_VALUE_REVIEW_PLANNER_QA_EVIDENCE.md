@@ -2,17 +2,17 @@
 
 Run date: 2026-08-19
 
-Evidence cutoff: 2026-08-19 12:16 EDT / 16:16 UTC
+Evidence cutoff: 2026-08-19 14:31 EDT / 18:31 UTC
 
 Branch: `codex/phase9-recurring-value-command-2026-08-19`
 
-Base: `origin/main` at `a9784d5686ee6bd93136f4e9a4995304db28496f`
+Base: `origin/main` at `1c9c4eedae4de3d993def32dc6d646c1be2908ca`
 
-Candidate commit: `0b904f51d33d8105de82dd53b92d13d2624678be`
+Validated implementation commits: `6b4dae3a36b867431c80cd818b29d2da75dccc3c`, `447d7bcb720de35c179344a353ba3eb85ecaa6eb`
 
-Draft PR: [#173](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/173)
+PR: [#173](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/173)
 
-Verified Preview: [Phase 9.4 `/plan`](https://ask-magic-mike-1xa95rwgk-eyes-up-industries.vercel.app/plan)
+Verified Preview: [Phase 9.4 `/plan`](https://ask-magic-mike-fm770qgh8-eyes-up-industries.vercel.app/plan)
 
 Production mutation: none
 
@@ -24,18 +24,19 @@ PASS — Phase 9.4 is ready for the exact production approval gate. The isolated
 
 | Check | Command | Result |
 |---|---|---|
-| Dependency install | `pnpm install --frozen-lockfile` | PASS; lockfile unchanged; 663 packages restored. Local shell warned that Node 26.5.1 differs from the repository's required Node 24.x. |
-| Phase 9.4 focused tests | `pnpm exec vitest run tests/recurring-value` | PASS; 3 files, 11 tests. |
+| Dependency install | `pnpm install --frozen-lockfile` | PASS; lockfile unchanged; 665 packages restored. Local shell warned that Node 26.5.1 differs from the repository's required Node 24.x. |
+| Phase 9.4 focused tests | `pnpm exec vitest run tests/recurring-value` | PASS; 3 files, 12 tests. |
 | Strict typecheck | `pnpm typecheck` | PASS. |
 | Lint | `pnpm lint` | PASS. |
-| Full regression | `pnpm test` | PASS; 180 files, 2,671 tests. |
-| Production build | `pnpm build` | PASS; Next.js 15.5.21; `/plan` prerendered static at 8.34 kB / 128 kB first load. |
-| Canonical route verification | `pnpm routes:verify` | PASS; 74 active routes and 16 acknowledged root/src duplicates. |
+| Full regression | `pnpm test` | PASS; 187 files, 2,711 tests. |
+| Production build | `pnpm build` | PASS; Next.js 15.5.21; `/plan` prerendered static at 8.38 kB / 129 kB first load. |
+| Canonical route verification | `pnpm routes:verify` | PASS; 76 active routes and 16 acknowledged root/src duplicates. |
 | Release safety scan | `pnpm release:safety` | PASS; 14/14 controls. |
 | Ask Magic Mike / NellySelly isolation | `pnpm amm:verify:isolation` | PASS; deployable code contains no NellySelly project identifiers. |
+| Production dependency audit | `pnpm audit --prod` | PASS; no known vulnerabilities. |
 | Patch hygiene | `git diff --check` | PASS. |
-| GitHub release gate | [Actions run 32275160920](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32275160920) | PASS in Node 24; release doctor, safety, 2,671 tests, typecheck, lint, build, route/cron assertion, release report, launch authority, and artifact upload all passed in 2m52s. |
-| Vercel Preview | deployment `EmxxMs5yeGSPRW297X6apRkfDaMX` | PASS; deployed commit `0b904f5` reached `READY`. |
+| GitHub release gate | [Actions run 32287453070](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32287453070) | PASS in Node 24; release doctor, safety, 2,711 tests, typecheck, lint, build, route/cron assertion, release report, launch authority, and artifact upload all passed in 2m54s. |
+| Vercel Preview | deployment `dpl_Cvxu3DT7hxFa8KoTwimJKnymtE4b` | PASS; deployed commit `447d7bc` reached `READY`. |
 
 The initial `pnpm routes:assert` correctly refused to infer routes before `.next` existed. It was replaced by the documented build-backed `pnpm routes:verify`, which passed. This was a command-order issue, not a product defect.
 
@@ -53,14 +54,14 @@ The initial `pnpm routes:assert` correctly refused to infer routes before `.next
 - no contact/address/narrative controls;
 - no lead, listing, phone-alert, subscription, send, provider, credential, or direct fetch path;
 - `/plan` registration in the App Router, sitemap, header, footer, and canonical route manifest; and
-- four anonymous planner events in the existing server allowlist.
+- four non-contact planner events in the existing server allowlist.
 
 ## Browser and visual QA
 
 Targets:
 
 - local optimized production build at `http://127.0.0.1:4319/plan`; and
-- deployed Vercel Preview at `https://ask-magic-mike-1xa95rwgk-eyes-up-industries.vercel.app/plan`.
+- deployed Vercel Preview at `https://ask-magic-mike-fm770qgh8-eyes-up-industries.vercel.app/plan`.
 
 Desktop default viewport:
 
@@ -83,7 +84,7 @@ Mobile viewport `390 × 844`:
 - footer links wrapped cleanly; and
 - full-page screenshots were visually inspected for both builder and saved-plan states.
 
-The deployed Preview repeated plan creation, task completion, 14-percent progress, `No contact data sent`, reload restoration, title/canonical route, desktop layout, and `390 × 844` mobile layout checks. Browser console check: zero `error` or `warning` entries on both local and deployed targets.
+The deployed Preview repeated plan creation, task completion, 14-percent progress, reload restoration, a second task update to 29 percent, the restored-plan live-region announcement, the canonical UTM handoff, title/canonical route, desktop layout, and `390 × 844` mobile layout checks. Browser console check: zero `error` or `warning` entries on the final Preview.
 
 The current-base refresh corrected two Preview findings before release: privacy copy now discloses that allowlisted non-contact planner events may record controlled selections, progress, campaign attribution, and device context, and a restored plan now announces updated progress after the next task interaction.
 
