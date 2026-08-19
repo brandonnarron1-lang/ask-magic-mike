@@ -5,13 +5,19 @@ unrelated repository, Preview, test, and documentation work without waiting.
 
 ## Production release gates
 
-1. PR #170 owned-demand command:
-   `APPROVE PHASE 9.1 OWNED DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT`
+Release in this cumulative order. After each approved Production deployment,
+refresh the next branch on the resulting `main` and re-establish immutable CI
+and Preview evidence before using its gate.
+
+1. PR #178 canonical operations and fail-closed Preview QA:
+   `APPROVE PHASE 9 CANONICAL OPERATIONS RECONCILIATION MERGE AND PRODUCTION DEPLOYMENT`
 2. PR #177 commercial-email compliance:
    `APPROVE PHASE 9 COMMERCIAL EMAIL COMPLIANCE MERGE AND PRODUCTION DEPLOYMENT`
-3. PR #173 device-private review planner:
+3. PR #170 owned-demand command:
+   `APPROVE PHASE 9.1 OWNED DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT`
+4. PR #173 device-private review planner:
    `APPROVE PHASE 9.4 REVIEW PLANNER MERGE AND PRODUCTION DEPLOYMENT`
-4. PR #172 database revival command, only after its branch is refreshed and its
+5. PR #172 database revival command, only after its branch is refreshed and its
    final Preview/CI evidence is re-established:
    `APPROVE PHASE 9.3 DATABASE REVIVAL COMMAND MERGE AND PRODUCTION DEPLOYMENT`
 

@@ -56,6 +56,22 @@ When the change touches capture, routing, email, push, SMS, or sequences:
 5. Never contact a genuine WordPress-only entry whose purpose or consent is
    unclear; preserve it for BIC review.
 
+## Phase 9 cumulative release sequence
+
+Release only one approved PR at a time and verify Production before advancing:
+
+1. `#178` — canonical operations documentation and fail-closed Preview QA;
+2. `#177` — commercial-email compliance rendering;
+3. `#170` — protected owned-demand command;
+4. `#173` — device-private recurring review planner; and
+5. `#172` — rebuild the database-revival command on the resulting baseline,
+   preserving read-only behavior and requiring a fresh immutable release gate.
+
+Each item retains its own exact approval phrase. Refresh any downstream branch
+after the preceding Production merge, rerun Node 24 CI and Vercel Preview, and do
+not treat this ordering as authorization to merge, deploy, publish, send, or
+mutate data.
+
 ## Owned-traffic activation
 
 After the lead path and exact publication gate pass, activate one reversible
