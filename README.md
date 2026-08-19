@@ -12,13 +12,18 @@ brokerage, listings, and SEO authority and embeds or links into this system.
 - `VERIFIED LIVE` — durable Neon capture, attribution, consent, deterministic
   scoring/routing, notification outbox, Lead Center, and public health probes.
 - `VERIFIED LIVE` — canonical `www` hostname; apex redirects with HTTP 308.
-- `IMPLEMENTED — ACTIVATION REQUIRED` — signed WordPress form forwarding and
-  free Web Push device enrollment.
-- `BLOCKED — HUMAN ACTION` — Mike and Brandon must enroll their own phones.
+- `VERIFIED LIVE` — signed Form 3 WordPress forwarding into the canonical Neon
+  record and authenticated internal email delivery.
+- `READY — OWNER ACTIVATION` — free Web Push provider and phone setup; each
+  physical device owner must complete permission and `[TEST]` receipt acceptance.
+- `OWNER ACTION` — Mike and Brandon must enroll their own phones; authenticated
+  internal email remains the active alert path until each device passes QA.
 - `DEFERRED — PAID SERVICE` — carrier SMS/MMS; Web Push is the free-first path.
 
 The source-of-truth audit is in
 [`docs/CURRENT_STATE_RECONCILIATION.md`](docs/CURRENT_STATE_RECONCILIATION.md).
+Documentation precedence and historical-packet handling are in
+[`docs/DOCUMENTATION_AUTHORITY.md`](docs/DOCUMENTATION_AUTHORITY.md).
 The remaining human gates are in
 [`docs/OWNER_APPROVAL_QUEUE.md`](docs/OWNER_APPROVAL_QUEUE.md).
 
