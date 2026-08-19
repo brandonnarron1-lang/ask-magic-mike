@@ -8,11 +8,17 @@ Branch: `codex/phase9-recurring-value-command-2026-08-19`
 
 Base: `origin/main` at `a9784d5686ee6bd93136f4e9a4995304db28496f`
 
+Candidate commit: `0b904f51d33d8105de82dd53b92d13d2624678be`
+
+Draft PR: [#173](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/173)
+
+Verified Preview: [Phase 9.4 `/plan`](https://ask-magic-mike-1xa95rwgk-eyes-up-industries.vercel.app/plan)
+
 Production mutation: none
 
 ## Result
 
-PASS — Phase 9.4 is ready for an isolated Vercel Preview. No production deployment, database migration, lead creation, provider activation, email, SMS, push, call, subscription, or public publication occurred during this verification.
+PASS — Phase 9.4 is ready for the exact production approval gate. The isolated Vercel Preview, GitHub Node 24 release gate, and deployed visual/interaction QA all passed. No production deployment, database migration, lead creation, provider activation, email, SMS, push, call, subscription, or public publication occurred during this verification.
 
 ## Automated evidence
 
@@ -28,6 +34,8 @@ PASS — Phase 9.4 is ready for an isolated Vercel Preview. No production deploy
 | Release safety scan | `pnpm release:safety` | PASS; 14/14 controls. |
 | Ask Magic Mike / NellySelly isolation | `pnpm amm:verify:isolation` | PASS; deployable code contains no NellySelly project identifiers. |
 | Patch hygiene | `git diff --check` | PASS. |
+| GitHub release gate | [Actions run 32275160920](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32275160920) | PASS in Node 24; release doctor, safety, 2,671 tests, typecheck, lint, build, route/cron assertion, release report, launch authority, and artifact upload all passed in 2m52s. |
+| Vercel Preview | deployment `EmxxMs5yeGSPRW297X6apRkfDaMX` | PASS; deployed commit `0b904f5` reached `READY`. |
 
 The initial `pnpm routes:assert` correctly refused to infer routes before `.next` existed. It was replaced by the documented build-backed `pnpm routes:verify`, which passed. This was a command-order issue, not a product defect.
 
@@ -49,7 +57,10 @@ The initial `pnpm routes:assert` correctly refused to infer routes before `.next
 
 ## Browser and visual QA
 
-Target: local optimized production build at `http://127.0.0.1:4319/plan`.
+Targets:
+
+- local optimized production build at `http://127.0.0.1:4319/plan`; and
+- deployed Vercel Preview at `https://ask-magic-mike-1xa95rwgk-eyes-up-industries.vercel.app/plan`.
 
 Desktop default viewport:
 
@@ -72,7 +83,7 @@ Mobile viewport `390 × 844`:
 - footer links wrapped cleanly; and
 - full-page screenshots were visually inspected for both builder and saved-plan states.
 
-Browser console check: zero `error` or `warning` entries.
+The deployed Preview repeated plan creation, task completion, 14-percent progress, `Nothing sent`, reload restoration, title/canonical route, desktop layout, and `390 × 844` mobile layout checks. Browser console check: zero `error` or `warning` entries on both local and deployed targets.
 
 The temporary viewport override was reset and the local QA tab/server were closed after verification.
 
@@ -103,11 +114,8 @@ The planner has no `/api/leads`, `/api/listings`, `/api/phone-alerts`, database 
 
 Rollback is source-only: revert the Phase 9.4 commit and redeploy the prior verified production commit. No schema, provider, secret, queue, lead, or server-side planner record exists to reverse. Device-local records become inert and contain no contact or property information.
 
-## Remaining pre-production evidence
+## Remaining production gate
 
-1. Open a draft PR and let GitHub CI plus Vercel Preview run in their declared Node 24 environment.
-2. Repeat the public `/plan` desktop/mobile visual smoke against the Preview URL.
-3. Confirm the Preview diff includes no migration, environment-variable, provider, cron, or messaging change.
-4. Request the exact production gate only after all checks remain green:
+The draft PR, GitHub CI, Vercel Preview, deployed desktop/mobile visual QA, interaction checks, and no-migration/no-provider/no-messaging diff review are complete. The only remaining action is the exact production approval:
 
 `APPROVE PHASE 9.4 REVIEW PLANNER MERGE AND PRODUCTION DEPLOYMENT`
