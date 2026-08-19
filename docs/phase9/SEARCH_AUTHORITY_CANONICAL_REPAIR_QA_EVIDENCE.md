@@ -4,7 +4,7 @@ Date: 2026-08-19
 
 Branch: `codex/phase9-search-authority-2026-08-19`
 
-Base production commit: `a9784d5686ee6bd93136f4e9a4995304db28496f`
+Current verified production base: `39c744e405289da019edb67398113e4c6666c466`
 
 Status: local, CI, and Vercel Preview release candidate verified; production unchanged
 
@@ -54,14 +54,16 @@ The payload parsed as JSON. A source and rendered-output scan confirmed it conta
 | focused Phase 9.5 Vitest suite | 8/8 pass |
 | `pnpm typecheck` | pass |
 | `pnpm lint` | pass |
-| `pnpm test` | 179 files, 2,668 tests pass |
-| `pnpm build` | pass; Next.js 15.5.21, 50 generated pages |
-| `pnpm routes:verify` | pass; 73 active routes, 16 acknowledged root/src duplicates |
+| `pnpm test` | 183 files, 2,686 tests pass |
+| `pnpm build` | pass; Next.js 15.5.21, 51 generated pages |
+| `pnpm routes:verify` | pass; 75 active routes, 16 acknowledged root/src duplicates |
 | `pnpm release:safety` | 14 checks pass, 0 fail |
 | `pnpm amm:verify:isolation` | pass; deployable Ask Magic Mike code contains no NellySelly project identifiers |
 | `git diff --check` | pass |
 
 The first full-test run correctly exposed one stale assertion that required a root-layout canonical. That assertion encoded the defect being repaired. It was updated to require a global metadata base and a homepage-scoped canonical, then the entire suite passed.
+
+The branch was refreshed from protected `main` after the Phase 9.6 experiment-command and no-store releases. The refreshed tree preserved the dormant experiment controls and passed the complete current-main suite above without conflicts or code changes to either subsystem.
 
 ## Local browser evidence
 
