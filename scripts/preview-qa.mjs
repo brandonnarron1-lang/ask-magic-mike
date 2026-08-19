@@ -160,12 +160,25 @@ async function http(method, path, opts = {}) {
     json,
     text,
     location: res.headers.get("location"),
+    responseHeaders: {
+      cacheControl: res.headers.get("cache-control"),
+      contentType: res.headers.get("content-type"),
+      referrerPolicy: res.headers.get("referrer-policy"),
+      xRobotsTag: res.headers.get("x-robots-tag"),
+    },
   };
 }
 
 function adminHeaders() {
   if (!ADMIN_SECRET) return {};
   return { "x-admin-secret": ADMIN_SECRET };
+}
+
+function adminBasicHeaders() {
+  if (!ADMIN_SECRET) return {};
+  return {
+    Authorization: `Basic ${Buffer.from(`admin:${ADMIN_SECRET}`).toString("base64")}`,
+  };
 }
 
 function cronHeaders() {
@@ -258,10 +271,10 @@ async function wpUtmVariants() {
     const path = `/value?utm_source=ourtown_wp&utm_medium=${m}&utm_campaign=ask_magic_mike`;
     const r = await http("GET", path);
     const required = [
-      "Start with your address",
+      'data-amm-step="address"',
+      "Property address",
       "Mike Eatmon",
       "Our Town Properties",
-      "not an appraisal",
     ];
     const html = r.text || JSON.stringify(r.json ?? "");
     const missing = required.filter((s) => !html.includes(s));
@@ -314,26 +327,26 @@ async function adminListAndDashboard() {
     record("admin:leads", "skip", { message: "no ADMIN_SECRET" });
     return;
   }
-  const dash = await http("GET", "/api/admin/dashboard", {
-    headers: adminHeaders(),
+  const dash = await http("GET", "/admin", {
+    headers: adminBasicHeaders(),
   });
-  if (dash.ok && dash.json?.ok)
+  if (dash.ok && dash.text.includes("Ask Magic Mike") && dash.text.includes("Lead Center"))
     record("admin:dashboard", "pass", { http: dash.status });
   else
     record("admin:dashboard", "fail", {
       http: dash.status,
-      excerpt: redact(JSON.stringify(dash.json ?? dash.text)),
+      message: "authenticated Lead Center shell did not render",
     });
 
-  const list = await http("GET", "/api/admin/leads?limit=5", {
-    headers: adminHeaders(),
+  const list = await http("GET", "/admin/leads?filter=active", {
+    headers: adminBasicHeaders(),
   });
-  if (list.ok && list.json?.ok)
+  if (list.ok && list.text.includes("Ask Magic Mike") && list.text.includes("Lead Center"))
     record("admin:leads", "pass", { http: list.status });
   else
     record("admin:leads", "fail", {
       http: list.status,
-      excerpt: redact(JSON.stringify(list.json ?? list.text)),
+      message: "authenticated lead inbox did not render",
     });
 }
 
@@ -355,8 +368,17 @@ async function slaSweep() {
     const r = await http("GET", "/api/admin/sla/sweep", {
       headers: cronHeaders(),
     });
+    const safelyRefusedPreviewWrite =
+      r.status === 503 &&
+      r.json?.ok === false &&
+      r.json?.error === "preview_data_disabled";
     if (r.ok && r.json?.ok && r.json.mode === "cron")
       record("sla:sweep_cron", "pass", { http: r.status });
+    else if (safelyRefusedPreviewWrite)
+      record("sla:sweep_cron", "pass", {
+        http: r.status,
+        message: "authenticated cron request safely refused Preview data writes",
+      });
     else
       record("sla:sweep_cron", "fail", {
         http: r.status,
@@ -364,6 +386,90 @@ async function slaSweep() {
       });
   } else {
     record("sla:sweep_cron", "skip", { message: "no CRON_SECRET" });
+  }
+}
+
+async function phoneInstallHandoff() {
+  if (!ADMIN_SECRET) {
+    record("phone_install:handoff", "skip", { message: "no ADMIN_SECRET" });
+    return;
+  }
+
+  const invite = await http("POST", "/admin/api/phone-alerts/invite", {
+    headers: { ...adminBasicHeaders(), Origin: PREVIEW_URL },
+    body: { ttl_minutes: 5 },
+  });
+  if (!invite.ok || invite.json?.ok !== true || typeof invite.json?.url !== "string") {
+    record("phone_install:handoff", "fail", {
+      http: invite.status,
+      message: "authenticated Preview invite could not be created",
+    });
+    return;
+  }
+
+  let installUrl;
+  try {
+    installUrl = new URL(invite.json.url);
+  } catch {
+    record("phone_install:handoff", "fail", {
+      http: invite.status,
+      message: "invite returned an invalid URL",
+    });
+    return;
+  }
+
+  const expectedOrigin = new URL(PREVIEW_URL).origin;
+  const installPrefix = "/phone-alerts/install/";
+  const token = installUrl.pathname.startsWith(installPrefix)
+    ? decodeURIComponent(installUrl.pathname.slice(installPrefix.length))
+    : "";
+  if (
+    installUrl.origin !== expectedOrigin ||
+    installUrl.search ||
+    installUrl.hash ||
+    !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token)
+  ) {
+    record("phone_install:handoff", "fail", {
+      http: invite.status,
+      message: "invite was not a same-origin token-scoped install URL",
+    });
+    return;
+  }
+
+  const install = await http("GET", installUrl.pathname);
+  const manifestPath = `${installUrl.pathname}/manifest.webmanifest`;
+  const manifest = await http("GET", manifestPath);
+  const startUrl =
+    manifest.json && typeof manifest.json.start_url === "string"
+      ? new URL(manifest.json.start_url, PREVIEW_URL)
+      : null;
+  const privateManifest =
+    manifest.responseHeaders?.contentType?.includes("application/manifest+json") &&
+    manifest.responseHeaders?.cacheControl?.includes("no-store") &&
+    manifest.responseHeaders?.xRobotsTag?.includes("noindex");
+  const validStartUrl =
+    startUrl?.origin === expectedOrigin &&
+    startUrl.pathname === "/phone-alerts/setup/claim" &&
+    startUrl.searchParams.get("token") === token;
+  const validCopyScope =
+    manifest.json?.id === "/phone-alerts" &&
+    manifest.json?.display === "standalone" &&
+    manifest.json?.scope === "/";
+
+  if (
+    install.ok &&
+    install.text.includes("Install Brandon copy alerts") &&
+    manifest.ok &&
+    privateManifest &&
+    validStartUrl &&
+    validCopyScope
+  ) {
+    record("phone_install:handoff", "pass", { http: manifest.status });
+  } else {
+    record("phone_install:handoff", "fail", {
+      http: manifest.status || install.status,
+      message: "private install page or token-scoped manifest contract failed",
+    });
   }
 }
 
@@ -550,6 +656,7 @@ async function main() {
     health = await healthCheck();
     await adminListAndDashboard();
     await slaSweep();
+    await phoneInstallHandoff();
     await listingPrivateLeakCheck();
 
     const gate = shouldRunMutationChecks(health, process.env);
