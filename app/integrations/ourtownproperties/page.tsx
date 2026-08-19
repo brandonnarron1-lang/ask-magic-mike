@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { BlackDiamondHeader } from "../../components/black-diamond/BlackDiamondHeader";
 import { Footer } from "../../components/black-diamond/BlackDiamondShell";
+import { nonIndexablePageMetadata } from "../../lib/publicMetadata";
+
+export const metadata: Metadata = nonIndexablePageMetadata(
+  "Our Town Properties Integration Guide",
+  "Operational integration instructions for the Ask Magic Mike widget on OurTownProperties.com.",
+);
 
 const snippet = `<script
   async

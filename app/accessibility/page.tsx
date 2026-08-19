@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import { PublicInfoPage } from "../components/black-diamond/PublicInfoPage";
+import { publicPageMetadata } from "../lib/publicMetadata";
+
+export const metadata: Metadata = publicPageMetadata({
+  title: "Accessibility",
+  description: "Accessibility information and a barrier-reporting path for the Ask Magic Mike public real estate guidance and lead-intake experience.",
+  path: "/accessibility",
+});
 
 export default function AccessibilityPage() {
   return (

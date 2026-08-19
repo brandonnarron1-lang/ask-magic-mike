@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import { PublicInfoPage } from "../components/black-diamond/PublicInfoPage";
+import { publicPageMetadata } from "../lib/publicMetadata";
+
+export const metadata: Metadata = publicPageMetadata({
+  title: "Privacy",
+  description: "How Ask Magic Mike and Our Town Properties handle submitted lead information, attribution, consent evidence, analytics, and communication choices.",
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

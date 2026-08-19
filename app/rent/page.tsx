@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import { BuyerIntentSection } from "../components/black-diamond/BuyerIntentSection";
 import { BlackDiamondHeader } from "../components/black-diamond/BlackDiamondHeader";
 import { Footer } from "../components/black-diamond/BlackDiamondShell";
 import { PageTracker } from "../components/black-diamond/PageTracker";
+import { publicPageMetadata } from "../lib/publicMetadata";
+
+export const metadata: Metadata = publicPageMetadata({
+  title: "Rental-to-Homeownership Plan in Wilson, NC",
+  description: "Request a practical rental-to-homeownership readiness review for Wilson or Eastern North Carolina without an affordability or eligibility promise.",
+  path: "/rent",
+});
 
 export default function RentPage() {
   return (

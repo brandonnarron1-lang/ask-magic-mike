@@ -1,8 +1,16 @@
+import type { Metadata } from "next";
 import { BlackDiamondHeader } from "../components/black-diamond/BlackDiamondHeader";
 import { Footer } from "../components/black-diamond/BlackDiamondShell";
 import { HomeValueFunnel } from "../components/black-diamond/HomeValueFunnel";
 import { PageTracker } from "../components/black-diamond/PageTracker";
 import { TrustProofStrip } from "../components/black-diamond/TrustProofStrip";
+import { publicPageMetadata } from "../lib/publicMetadata";
+
+export const metadata: Metadata = publicPageMetadata({
+  title: "Home Value Review in Wilson, NC",
+  description: "Request a broker-reviewed home value and sale-readiness conversation from Mike Eatmon and Our Town Properties. No instant automated estimate or guaranteed value.",
+  path: "/home-value",
+});
 
 export default function HomeValuePage() {
   return (
