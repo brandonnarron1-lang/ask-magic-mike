@@ -53,7 +53,10 @@ describe("RealEstateReviewPlanner UI", () => {
       horizon: "90_days",
       focus: "clarity",
     });
-    expect(screen.getByText("No contact data sent")).toBeInTheDocument();
+    const noContactStatus = screen.getByText("No contact data sent");
+    expect(noContactStatus).toBeInTheDocument();
+    expect(noContactStatus).toHaveClass("w-fit");
+    expect(noContactStatus.parentElement).toHaveClass("grid", "sm:flex", "sm:flex-wrap");
   });
 
   it("restores progress, records an allowlisted task event, and can reset locally", async () => {

@@ -226,14 +226,14 @@ export function RealEstateReviewPlanner() {
         </div>
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.12em]">
-        <span className="rounded-full border border-[#cda24a40] px-3 py-2 text-[#e2c06f]">
+      <div className="mt-6 grid items-center gap-3 text-xs font-semibold uppercase tracking-[0.12em] sm:flex sm:flex-wrap">
+        <span className="w-fit rounded-full border border-[#cda24a40] px-3 py-2 text-[#e2c06f]">
           {storageStatus === "device" ? "Saved on this device" : storageStatus === "memory" ? "Available in this tab only" : "Checking device storage"}
         </span>
-        <span className={`rounded-full border px-3 py-2 ${freshness?.stale ? "border-[#22c6d266] text-[#22c6d2]" : "border-white/10 text-[#d9ceb8]"}`}>
+        <span className={`w-fit rounded-full border px-3 py-2 ${freshness?.stale ? "border-[#22c6d266] text-[#22c6d2]" : "border-white/10 text-[#d9ceb8]"}`}>
           {freshness?.stale ? `Refresh recommended · ${freshness.ageDays} days old` : "Current review"}
         </span>
-        <span className="rounded-full border border-white/10 px-3 py-2 text-[#d9ceb8]">No contact data sent</span>
+        <span className="w-fit rounded-full border border-white/10 px-3 py-2 text-[#d9ceb8]">No contact data sent</span>
       </div>
 
       <div className="mt-9 space-y-10">
