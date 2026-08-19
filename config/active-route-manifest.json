@@ -7,6 +7,7 @@
     "/admin",
     "/admin/action-queue",
     "/admin/allocation",
+    "/admin/distribution",
     "/admin/experiments",
     "/admin/growth",
     "/admin/leads",
@@ -87,7 +88,7 @@
       "/integrations/ourtownproperties", "/robots.txt", "/sitemap.xml", "/social-preview"
     ],
     "admin": [
-      "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation", "/admin/experiments", "/admin/growth",
+      "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation", "/admin/distribution", "/admin/experiments", "/admin/growth",
       "/admin/action-queue", "/admin/message-previews", "/admin/notifications", "/admin/notifications/phone", "/admin/reporting"
     ],
     "auth": [
@@ -104,7 +105,7 @@
     "/distribution": "inactive-src-only",
     "/campaigns": "inactive-src-only",
     "/admin/traffic": "inactive-src-only",
-    "/admin/distribution": "inactive-src-only",
+    "/admin/distribution": "active-protected-read-only-owned-demand-neon",
     "/admin/growth": "active-protected-read-only-phase9-schema-gated",
     "/api/analytics/event": "inactive-src-only",
     "/api/health/live": "inactive-src-only",
@@ -117,7 +118,7 @@
     "/api/webhooks/sms/inbound": "active-signed-or-admin-authenticated-mock-boundary"
   },
   "acknowledgedRootSrcDuplicates": [
-    "/", "/admin", "/admin/leads", "/admin/leads/[id]", "/api/admin/health", "/api/admin/sla/sweep", "/api/health/live", "/api/health/ready", "/api/leads", "/api/listings/[id]", "/api/listings/search", "/api/webhooks/email/events",
+    "/", "/admin", "/admin/distribution", "/admin/leads", "/admin/leads/[id]", "/api/admin/health", "/api/admin/sla/sweep", "/api/health/live", "/api/health/ready", "/api/leads", "/api/listings/[id]", "/api/listings/search", "/api/webhooks/email/events",
     "/ask", "/embed/ask", "/value", "/widget-preview"
   ]
 }

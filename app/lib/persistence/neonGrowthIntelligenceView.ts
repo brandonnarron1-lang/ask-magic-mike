@@ -9,6 +9,7 @@ import {
   type GrowthOutcomeFact,
   type GrowthSpendFact,
 } from "../growth/intelligence";
+import type { OwnedDemandAttributionSignal } from "../growth/owned-demand";
 
 type Query = ReturnType<typeof neon>;
 type Row = Record<string, unknown>;
@@ -49,6 +50,7 @@ export interface GrowthIntelligenceView extends GrowthIntelligence {
   experiments: GrowthExperimentFact[];
   persistedOpportunities: PersistedGrowthOpportunity[];
   recommendations: PersistedGrowthRecommendation[];
+  ownedDemandSignals: OwnedDemandAttributionSignal[];
   sourceRowsRead: number;
   spendRowsRead: number;
   outcomeRowsRead: number;
@@ -104,6 +106,7 @@ function emptyView(
     experiments: [],
     persistedOpportunities: [],
     recommendations: [],
+    ownedDemandSignals: [],
     sourceRowsRead: 0,
     spendRowsRead: 0,
     outcomeRowsRead: 0,
@@ -216,6 +219,39 @@ function normalizeRecommendation(row: Row): PersistedGrowthRecommendation {
   };
 }
 
+function normalizeAttributionDimension(value: unknown) {
+  return text(value).trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+export function buildOwnedDemandAttributionSignals(
+  rows: Row[],
+): OwnedDemandAttributionSignal[] {
+  const signals = new Map<string, OwnedDemandAttributionSignal>();
+
+  for (const row of rows) {
+    const source = normalizeAttributionDimension(row.utm_source);
+    const medium = normalizeAttributionDimension(row.utm_medium);
+    const campaign = normalizeAttributionDimension(row.utm_campaign);
+    const content = normalizeAttributionDimension(row.utm_content);
+    if (!source || !medium || !campaign || !content) continue;
+
+    const key = `${source}|${medium}|${campaign}|${content}`;
+    const existing = signals.get(key);
+    if (existing) {
+      existing.leads += 1;
+    } else {
+      signals.set(key, { source, medium, campaign, content, leads: 1 });
+    }
+  }
+
+  return [...signals.values()].sort((a, b) => {
+    if (b.leads !== a.leads) return b.leads - a.leads;
+    return `${a.source}|${a.medium}|${a.campaign}|${a.content}`.localeCompare(
+      `${b.source}|${b.medium}|${b.campaign}|${b.content}`,
+    );
+  });
+}
+
 export async function loadNeonGrowthIntelligence(
   windowDays: 30 | 90 | 365 = 90,
 ): Promise<GrowthIntelligenceView> {
@@ -230,10 +266,10 @@ export async function loadNeonGrowthIntelligence(
       `SELECT l.id, l.created_at, l.status, l.conversion_stage,
               l.source, l.source_detail, l.score, l.lead_type,
               l.timeline_months, l.last_contacted_at,
-              sa.utm_source, sa.utm_medium, sa.utm_campaign, sa.is_paid
+              sa.utm_source, sa.utm_medium, sa.utm_campaign, sa.utm_content, sa.is_paid
          FROM public.leads l
          LEFT JOIN LATERAL (
-           SELECT utm_source, utm_medium, utm_campaign, is_paid
+           SELECT utm_source, utm_medium, utm_campaign, utm_content, is_paid
              FROM public.source_attribution
             WHERE lead_id = l.id
             ORDER BY created_at DESC
@@ -331,6 +367,7 @@ export async function loadNeonGrowthIntelligence(
       experiments,
       persistedOpportunities: opportunityRows.map(normalizePersistedOpportunity),
       recommendations: recommendationRows.map(normalizeRecommendation),
+      ownedDemandSignals: buildOwnedDemandAttributionSignals(leadRows),
       sourceRowsRead: leadRows.length,
       spendRowsRead: spendRows.length,
       outcomeRowsRead: outcomeRows.length,
