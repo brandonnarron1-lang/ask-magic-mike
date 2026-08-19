@@ -11,12 +11,24 @@ type EventBody = {
   surface?: unknown;
 };
 
+const NO_STORE_HEADERS = {
+  "Cache-Control": "private, no-store, max-age=0",
+  Pragma: "no-cache",
+} as const;
+
+function experimentResponse(
+  body: { active: boolean; recorded: boolean; correlation_id: string; variant_key?: string | null },
+  status: number,
+) {
+  return NextResponse.json(body, { status, headers: NO_STORE_HEADERS });
+}
+
 export async function POST(request: Request) {
   const correlationId = crypto.randomUUID();
   if (!isApprovedPublicOrigin(request.headers.get("origin"))) {
-    return NextResponse.json(
+    return experimentResponse(
       { active: false, recorded: false, correlation_id: correlationId },
-      { status: 403 },
+      403,
     );
   }
   const limit = await checkRateLimit(
@@ -26,24 +38,24 @@ export async function POST(request: Request) {
     "analyticsEvent",
   );
   if (!limit.allowed) {
-    return NextResponse.json(
+    return experimentResponse(
       { active: false, recorded: false, correlation_id: correlationId },
-      { status: 429 },
+      429,
     );
   }
 
   const body = await request.json().catch(() => null) as EventBody | null;
   if (!body || typeof body.experiment_key !== "string" ||
     typeof body.subject_key !== "string" || typeof body.event_name !== "string") {
-    return NextResponse.json(
+    return experimentResponse(
       { active: false, recorded: false, correlation_id: correlationId },
-      { status: 400 },
+      400,
     );
   }
   if (body.event_name !== "exposure" && body.event_name !== "lead_created") {
-    return NextResponse.json(
+    return experimentResponse(
       { active: false, recorded: false, correlation_id: correlationId },
-      { status: 400 },
+      400,
     );
   }
 
@@ -54,13 +66,13 @@ export async function POST(request: Request) {
     leadId: typeof body.lead_id === "string" ? body.lead_id : null,
     surface: typeof body.surface === "string" ? body.surface.slice(0, 120) : null,
   });
-  return NextResponse.json(
+  return experimentResponse(
     {
       active: outcome.active,
       recorded: outcome.recorded,
       variant_key: outcome.variantKey,
       correlation_id: correlationId,
     },
-    { status: 202 },
+    202,
   );
 }
