@@ -27,6 +27,12 @@ describe("Growth Command Center route and authority guards", () => {
     expect(page).not.toMatch(/method:\s*["'`](POST|PATCH|PUT|DELETE)["'`]/);
   });
 
+  it("keeps wide growth tables contained on mobile viewports", () => {
+    const page = read("app/admin/growth/page.tsx");
+    expect(page).toContain('className="min-w-0 rounded-2xl');
+    expect(page).toContain('className="min-w-[980px]');
+  });
+
   it("excludes test and communication-suppressed records in canonical Neon reads", () => {
     const view = read("app/lib/persistence/neonGrowthIntelligenceView.ts");
     expect(view).toContain("l.is_test = false");

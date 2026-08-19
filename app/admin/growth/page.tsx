@@ -78,7 +78,7 @@ function Panel({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#080808] p-5 shadow-[0_26px_80px_rgba(0,0,0,.34)] sm:p-6">
+    <section className="min-w-0 rounded-2xl border border-white/10 bg-[#080808] p-5 shadow-[0_26px_80px_rgba(0,0,0,.34)] sm:p-6">
       <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#d1aa53]">{eyebrow}</p>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
         <h2 className="font-serif text-2xl text-[#f4ead4] sm:text-3xl">{title}</h2>
