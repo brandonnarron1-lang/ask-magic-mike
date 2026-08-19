@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getLeadCenterRbacState } from "../../src/lib/admin/rbac-policy";
 import { SetPasswordForm } from "./SetPasswordForm";
+import { nonIndexablePageMetadata } from "../lib/publicMetadata";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = nonIndexablePageMetadata(
+  "Set Lead Center Password",
+  "Secure password selection flow for an approved Lead Center account.",
+);
 
 export default function LeadCenterSetPasswordPage() {
   const state = getLeadCenterRbacState();

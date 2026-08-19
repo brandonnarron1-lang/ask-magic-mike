@@ -17,7 +17,6 @@ const SITE_URL = siteConfig.canonicalSiteUrl;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  alternates: { canonical: "/" },
   title: {
     default: "Ask Magic Mike | Wilson, NC Real Estate Guidance",
     template: "%s | Ask Magic Mike",

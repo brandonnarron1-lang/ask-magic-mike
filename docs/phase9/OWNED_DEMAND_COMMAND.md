@@ -41,6 +41,10 @@ At implementation start, Production Growth Intelligence contained:
 
 The immediate constraint is owned-demand activation and publication evidence, not another scoring, routing, or economics dashboard.
 
+An attributed lead from an unrelated portal or referral source does not make owned
+distribution “measured.” The command reports that state only after at least one
+eligible live lead is attributed to one of its explicit owned-channel aliases.
+
 ## Architecture
 
 ```text
@@ -53,6 +57,21 @@ Canonical Neon leads + source attribution
 ```
 
 No new table or migration is required. A later publication ledger should be additive and approval-gated; channel attribution alone must never be relabeled as proof of publication.
+
+## Current-main refresh evidence — 2026-08-19
+
+- Consolidated the route with the already-deployed Experiments navigation and
+  active-route manifest; both commands remain registered.
+- Corrected the measurement state so unrelated attributed demand cannot be
+  presented as owned-channel evidence.
+- `pnpm release:gate`: passed on the merged current-main tree.
+- Full suite: 185 files / 2,707 tests passed.
+- Strict typecheck, ESLint, optimized Next.js build, and the 76-route manifest
+  passed.
+- Release safety passed 14/14; Ask Magic Mike/NellySelly isolation passed.
+- `pnpm audit --prod`: no known vulnerabilities.
+- Security review found no new client secret, raw-HTML, dynamic-code, storage,
+  navigation, outbound-request, or mutation path in the feature delta.
 
 ## Safety and compliance
 

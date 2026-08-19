@@ -77,6 +77,16 @@ describe("Owned Demand Command", () => {
     expect(result.operatorBoundary).toContain("never publishes");
   });
 
+  it("does not call unrelated attributed demand a measured owned-channel signal", () => {
+    const result = buildOwnedDemandCommand({
+      summary: summary({ leads: 3, attributedLeadRate: 100 }),
+      channels: [channel("portal", 3)],
+    });
+    expect(result.attributedLiveLeads).toBe(0);
+    expect(result.measurementState).toBe("no_live_signal");
+    expect(result.bottleneck).toContain("no lead is attributed to an owned-demand placement");
+  });
+
   it("creates canonical lowercase UTM links for every manual channel", () => {
     const result = buildOwnedDemandCommand({ summary: summary(), channels: [] });
     expect(result.channels.length).toBeGreaterThanOrEqual(6);

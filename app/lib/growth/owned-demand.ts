@@ -171,14 +171,16 @@ export function buildOwnedDemandCommand(
   });
 
   const attributedLiveLeads = channels.reduce((sum, channel) => sum + channel.attributedLeads, 0);
-  const measurementState = intelligence.summary.leads === 0
+  const measurementState = attributedLiveLeads === 0
     ? "no_live_signal"
     : intelligence.summary.attributedLeadRate < 80
       ? "partial_signal"
       : "measured";
 
   const bottleneck = measurementState === "no_live_signal"
-    ? "No eligible live lead has reached the Growth ledger in this window. The immediate constraint is owned-demand activation, not another scoring or dashboard feature."
+    ? intelligence.summary.leads === 0
+      ? "No eligible live lead has reached the Growth ledger in this window. The immediate constraint is owned-demand activation, not another scoring or dashboard feature."
+      : "Eligible live demand exists, but no lead is attributed to an owned-demand placement. Activate one tracked placement or verify its UTM mapping before treating owned distribution as measured."
     : measurementState === "partial_signal"
       ? "Live demand exists, but source attribution is incomplete. Repair tracked placements before comparing channel performance."
       : "Source measurement is usable. Compare qualified appointments and outcomes before increasing publishing effort or spend.";
