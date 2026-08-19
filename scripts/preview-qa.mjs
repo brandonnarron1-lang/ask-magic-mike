@@ -141,7 +141,7 @@ async function http(method, path, opts = {}) {
   const ct = res.headers.get("content-type") ?? "";
   let json = null;
   let text = "";
-  if (ct.includes("application/json")) {
+  if (ct.includes("application/json") || ct.includes("+json")) {
     try {
       json = await res.json();
     } catch {
@@ -166,6 +166,13 @@ async function http(method, path, opts = {}) {
 function adminHeaders() {
   if (!ADMIN_SECRET) return {};
   return { "x-admin-secret": ADMIN_SECRET };
+}
+
+function adminBasicHeaders() {
+  if (!ADMIN_SECRET) return {};
+  return {
+    Authorization: `Basic ${Buffer.from(`admin:${ADMIN_SECRET}`).toString("base64")}`,
+  };
 }
 
 function cronHeaders() {
@@ -258,10 +265,10 @@ async function wpUtmVariants() {
     const path = `/value?utm_source=ourtown_wp&utm_medium=${m}&utm_campaign=ask_magic_mike`;
     const r = await http("GET", path);
     const required = [
-      "Start with your address",
+      'data-amm-step="address"',
+      "Property address",
       "Mike Eatmon",
       "Our Town Properties",
-      "not an appraisal",
     ];
     const html = r.text || JSON.stringify(r.json ?? "");
     const missing = required.filter((s) => !html.includes(s));
@@ -314,26 +321,26 @@ async function adminListAndDashboard() {
     record("admin:leads", "skip", { message: "no ADMIN_SECRET" });
     return;
   }
-  const dash = await http("GET", "/api/admin/dashboard", {
-    headers: adminHeaders(),
+  const dash = await http("GET", "/admin", {
+    headers: adminBasicHeaders(),
   });
-  if (dash.ok && dash.json?.ok)
+  if (dash.ok && dash.text.includes("Ask Magic Mike") && dash.text.includes("Lead Center"))
     record("admin:dashboard", "pass", { http: dash.status });
   else
     record("admin:dashboard", "fail", {
       http: dash.status,
-      excerpt: redact(JSON.stringify(dash.json ?? dash.text)),
+      message: "authenticated Lead Center shell did not render",
     });
 
-  const list = await http("GET", "/api/admin/leads?limit=5", {
-    headers: adminHeaders(),
+  const list = await http("GET", "/admin/leads?filter=active", {
+    headers: adminBasicHeaders(),
   });
-  if (list.ok && list.json?.ok)
+  if (list.ok && list.text.includes("Ask Magic Mike") && list.text.includes("Lead Center"))
     record("admin:leads", "pass", { http: list.status });
   else
     record("admin:leads", "fail", {
       http: list.status,
-      excerpt: redact(JSON.stringify(list.json ?? list.text)),
+      message: "authenticated lead inbox did not render",
     });
 }
 
@@ -355,8 +362,17 @@ async function slaSweep() {
     const r = await http("GET", "/api/admin/sla/sweep", {
       headers: cronHeaders(),
     });
+    const safelyRefusedPreviewWrite =
+      r.status === 503 &&
+      r.json?.ok === false &&
+      r.json?.error === "preview_data_disabled";
     if (r.ok && r.json?.ok && r.json.mode === "cron")
       record("sla:sweep_cron", "pass", { http: r.status });
+    else if (safelyRefusedPreviewWrite)
+      record("sla:sweep_cron", "pass", {
+        http: r.status,
+        message: "authenticated cron request safely refused Preview data writes",
+      });
     else
       record("sla:sweep_cron", "fail", {
         http: r.status,

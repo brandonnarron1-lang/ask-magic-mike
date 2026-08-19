@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
+import { BRANDED_EMAIL_TEMPLATE_VERSION } from "../../src/lib/messaging/template-registry";
 
 const query = vi.fn();
 vi.mock("@neondatabase/serverless", () => ({ neon: () => ({ query }) }));
@@ -65,6 +66,8 @@ describe("Phase 7 Brandon-only QA email route", () => {
       const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
       expect(body.to).toBe("brandon@example.test");
       expect(body.subject).toMatch(/^\[TEST — BRANDON QA\]/);
+      expect(body.text).toContain("3301 Nash St. NW Suite E, Wilson, NC 27896");
+      expect(body.html).toContain("3301 Nash St. NW Suite E, Wilson, NC 27896");
       expect(body).not.toHaveProperty("bcc");
       return new Response(JSON.stringify({ id: "provider_test_1" }), { status: 200 });
     });
@@ -73,5 +76,7 @@ describe("Phase 7 Brandon-only QA email route", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ ok: true, recipient: "approved_brandon_qa", mike_delivery_requested: false, consumer_delivery_requested: false });
     expect(transport).toHaveBeenCalledTimes(1);
+    const notificationInsert = query.mock.calls.find((call) => String(call[0]).includes("INSERT INTO public.lead_notifications"));
+    expect(notificationInsert?.[1]?.[2]).toBe(BRANDED_EMAIL_TEMPLATE_VERSION);
   });
 });

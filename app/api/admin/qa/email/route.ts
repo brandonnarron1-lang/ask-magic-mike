@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { messagingFeatureFlags, approvedQaRecipientConfigured } from "@/lib/messaging/feature-flags";
 import { decideCommunicationPermission } from "@/lib/messaging/permission-engine";
-import { renderBrandedEmail } from "@/lib/messaging/template-registry";
+import { BRANDED_EMAIL_TEMPLATE_VERSION, renderBrandedEmail } from "@/lib/messaging/template-registry";
 
 const NO_STORE = { "Cache-Control": "no-store, max-age=0" };
 const requestSchema = z.object({
@@ -88,9 +88,10 @@ export async function POST(request: NextRequest) {
     ctaUrl: "https://www.askmagicmike.com/admin/message-previews",
     isTest: true,
     qaAudience: parsed.data.qaAudience,
+    templateVersion: BRANDED_EMAIL_TEMPLATE_VERSION,
   });
 
-  const idempotencyKey = `phase7-brandon-qa:${parsed.data.leadId}:${environment}:${process.env.VERCEL_GIT_COMMIT_SHA || "preview"}:${parsed.data.qaAudience}:v1`;
+  const idempotencyKey = `phase7-brandon-qa:${parsed.data.leadId}:${environment}:${process.env.VERCEL_GIT_COMMIT_SHA || "preview"}:${parsed.data.qaAudience}:${BRANDED_EMAIL_TEMPLATE_VERSION}`;
   const existingRows = await sql.query(
     `SELECT id, status, provider_message_id FROM public.lead_notifications
       WHERE idempotency_key = $1 LIMIT 1`,
@@ -108,11 +109,16 @@ export async function POST(request: NextRequest) {
       (lead_id, notification_type, channel, recipient_type, recipient_reference,
        template_version, idempotency_key, status, attempt_count, max_attempts, provider, metadata)
      VALUES ($1::uuid, 'phase7_qa_email', 'email', 'customer', 'approved_brandon_qa',
-             'phase7-v1', $2, 'processing', 1, 1, 'resend', $3::jsonb)
+             $3, $2, 'processing', 1, 1, 'resend', $4::jsonb)
      ON CONFLICT (idempotency_key)
      DO UPDATE SET updated_at = now()
      RETURNING id`,
-    [parsed.data.leadId, idempotencyKey, JSON.stringify({ is_test: true, suppressed: true, qa_audience: parsed.data.qaAudience })],
+    [
+      parsed.data.leadId,
+      idempotencyKey,
+      BRANDED_EMAIL_TEMPLATE_VERSION,
+      JSON.stringify({ is_test: true, suppressed: true, qa_audience: parsed.data.qaAudience }),
+    ],
   ) as Array<{ id: string }>;
   const notificationId = notificationRows[0]?.id;
   if (!notificationId) return NextResponse.json({ ok: false, error: "notification_record_failed" }, { status: 500, headers: NO_STORE });
