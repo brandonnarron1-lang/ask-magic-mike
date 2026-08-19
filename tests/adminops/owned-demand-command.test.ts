@@ -128,9 +128,12 @@ describe("canonical /admin/distribution route guards", () => {
     expect(view).toContain("l.communication_suppressed = false");
   });
 
-  it("contains wide tables on mobile", () => {
+  it("keeps the cadence fully readable across mobile and desktop", () => {
     expect(page).toContain('className="min-w-0 rounded-2xl');
+    expect(page).toContain('className="space-y-3 md:hidden"');
+    expect(page).toContain('className="hidden overflow-x-auto md:block"');
     expect(page).toContain('className="min-w-[760px]');
+    expect(page).toContain("Proof required");
     expect(page).toContain("break-all");
   });
 });

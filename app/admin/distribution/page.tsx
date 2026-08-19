@@ -148,7 +148,32 @@ export default async function DistributionPage() {
 
         <div className="mt-5 grid gap-5 xl:grid-cols-[1.3fr_.7fr]">
           <Panel eyebrow="Five-day cadence" title="Manual owned-demand operating plan" note="A plan is not proof of publication. Record the external URL or placement evidence after a human publishes it.">
-            <div className="overflow-x-auto">
+            <div className="space-y-3 md:hidden" aria-label="Five-day owned-demand operating plan">
+              {command.weeklyPlan.map((item) => {
+                const channel = command.channels.find((candidate) => candidate.key === item.channelKey);
+                return (
+                  <article key={item.day} className="rounded-xl border border-white/[.08] bg-black/35 p-4">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <h3 className="font-serif text-xl text-[#f0cf79]">{item.day}</h3>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.13em] text-[#d9ceb8]">
+                        {channel?.label ?? item.channelKey}
+                      </p>
+                    </div>
+                    <dl className="mt-4 space-y-4 text-xs leading-5">
+                      <div>
+                        <dt className="font-bold uppercase tracking-[0.13em] text-[#8f8778]">Objective</dt>
+                        <dd className="mt-1 text-[#c9bdab]">{item.objective}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-bold uppercase tracking-[0.13em] text-[#8f8778]">Proof required</dt>
+                        <dd className="mt-1 text-[#a99f90]">{item.proofRequired}</dd>
+                      </div>
+                    </dl>
+                  </article>
+                );
+              })}
+            </div>
+            <div className="hidden overflow-x-auto md:block">
               <table className="min-w-[760px] w-full text-left text-sm">
                 <thead className="border-b border-white/10 text-[10px] uppercase tracking-[0.14em] text-[#8f8778]">
                   <tr><th className="px-2 py-3">Day</th><th className="px-2 py-3">Channel</th><th className="px-2 py-3">Objective</th><th className="px-2 py-3">Proof required</th></tr>
