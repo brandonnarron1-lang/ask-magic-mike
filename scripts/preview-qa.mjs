@@ -141,7 +141,7 @@ async function http(method, path, opts = {}) {
   const ct = res.headers.get("content-type") ?? "";
   let json = null;
   let text = "";
-  if (ct.includes("application/json")) {
+  if (ct.includes("application/json") || ct.includes("+json")) {
     try {
       json = await res.json();
     } catch {

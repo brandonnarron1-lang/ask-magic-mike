@@ -25,6 +25,7 @@ describe("preview QA current route contract", () => {
   });
 
   it("validates the private iOS install handoff without redeeming its token", () => {
+    expect(source).toContain('ct.includes("application/json") || ct.includes("+json")');
     expect(source).toContain('http("POST", "/admin/api/phone-alerts/invite"');
     expect(source).toContain('const manifestPath = `${installUrl.pathname}/manifest.webmanifest`');
     expect(source).toContain('startUrl.pathname === "/phone-alerts/setup/claim"');
