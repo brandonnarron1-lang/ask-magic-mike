@@ -64,12 +64,16 @@ No new table or migration is required. A later publication ledger should be addi
 
 ## Current-main refresh evidence — 2026-08-19
 
+- Reconciled the branch with canonical Production commit `f2aff2b` and retained
+  the current cumulative Phase 9 release authority and fail-closed Preview QA.
 - Consolidated the route with the already-deployed Experiments navigation and
   active-route manifest; both commands remain registered.
-- Corrected the measurement state so unrelated attributed demand cannot be
-  presented as owned-channel evidence.
+- Hardened measurement so only an exact latest-touch source alias, medium,
+  campaign, and placement match is presented as an owned-demand signal.
+- Preserved Facebook and Instagram as distinct raw placement signals instead of
+  double-counting a broader Meta channel-family rollup.
 - `pnpm release:gate`: passed on the merged current-main tree.
-- Full suite: 185 files / 2,707 tests passed.
+- Full suite: 186 files / 2,712 tests passed.
 - Strict typecheck, ESLint, optimized Next.js build, and the 76-route manifest
   passed.
 - Release safety passed 14/14; Ask Magic Mike/NellySelly isolation passed.
