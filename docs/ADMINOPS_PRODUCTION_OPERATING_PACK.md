@@ -1,5 +1,10 @@
 # Ask Magic Mike AdminOps Production Operating Pack
 
+> **Historical reference — do not use its Supabase or shared Basic Auth commands
+> against Production.** Preserve this packet for audit history. Current authority
+> is `CURRENT_STATE_RECONCILIATION.md`, `PRODUCTION_LAUNCH_GATE.md`, and
+> `GO_LIVE_RUNBOOK.md`.
+
 ## 1. Purpose
 
 This is the safe operating guide for the deployed Ask Magic Mike AdminOps layer used by Our Town Properties. Public lead capture and admin operations are live production surfaces.

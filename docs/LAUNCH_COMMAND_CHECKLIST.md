@@ -1,5 +1,10 @@
 # Launch Command Checklist — Ask Magic Mike
 
+> **Historical reference — do not execute.** This checklist predates the Neon
+> Production migration and Better Auth/RBAC cutover. Use
+> `PRODUCTION_LAUNCH_GATE.md` and `GO_LIVE_RUNBOOK.md` for current commands and
+> gates.
+
 **Version:** 1.0 (Sprint V2)  
 **Last updated:** 2026-06-25  
 **Owner:** Brandon Narron  

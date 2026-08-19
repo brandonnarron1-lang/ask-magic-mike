@@ -1,61 +1,96 @@
-# Go-Live Runbook
+# Production Release and Go-Live Runbook
 
-## Approval gates
+Updated 2026-08-19. The public funnel is live. Use this runbook for incremental,
+reversible releases and controlled owned-traffic activation.
 
-Before each external action, state the exact URL/system, action, rollback, and
-expected impact. Required approvals are separate for: secure env entry, database
-migration, production deploy, first internal QA email, consumer acknowledgment,
-WordPress publish, DNS/domain changes, and marketing publication.
+## Before merge
 
-## Current baseline
+1. Fetch current `origin/main`; use an isolated worktree and preserve unrelated
+   user or agent changes.
+2. Record PR, immutable head commit, Vercel project, Preview deployment, current
+   Production deployment, and rollback deployment.
+3. Run the Node 24 release gate and confirm the Vercel Preview is Ready.
+4. Verify changed routes in the protected Preview. Separate build, DOM/runtime,
+   screenshot, database, provider-delivery, and physical-device evidence.
+5. Classify migrations, environment changes, sends, WordPress publication, DNS,
+   and external marketing as separate state changes.
+6. Present the release-specific Production gate from the PR. Do not reuse a gate.
 
-- Canonical data is Neon PostgreSQL. Supabase is compatibility-only and is not a
-  release prerequisite.
-- The public funnel, canonical capture, protected Lead Center, email provider,
-  hidden audit copy, WordPress Form 3 bridge, and test suppression have already
-  completed controlled Production acceptance.
-- Production remains on commit
-  `1c9c4eedae4de3d993def32dc6d646c1be2908ca` and Vercel deployment
-  `dpl_BCrmEB67TZDbJ9ihyLvsQkP5deD6` until another exact deployment gate is
-  granted.
+## Merge and deploy
 
-## Phase 9 release sequence
+1. Merge only the approved clean PR into `main` using the repository ruleset.
+2. Let the canonical Git integration deploy the resulting `main` commit to the
+   single owned Vercel project. Do not deploy from a different repository or
+   attach Ask Magic Mike domains to another project.
+3. Wait for Ready and confirm both custom aliases resolve to the approved
+   deployment. Do not promote an artifact built from a different commit.
+4. If an additive Neon Production migration is part of the release, use its own
+   exact approval, pre/post assertions, transaction boundary, and forward-fix
+   plan. A code approval alone is insufficient.
 
-1. Merge and Production-deploy PR `#170` only after the exact Phase 9.1 gate.
-   Verify `/admin/distribution`, RBAC denial, private/no-store behavior, Production
-   health, route manifest, and rollback checkpoint. Do not publish any draft.
-2. Refresh PR `#173` onto the resulting Production commit, rerun its release and
-   visual gates, then request the separate Phase 9.4 `/plan` deployment approval.
-3. Refresh PR `#172` only after the earlier Phase 9 merges. Keep Database Revival
-   read-only; enrollment and communication remain separately prohibited.
-4. Run SMTP connection-only verification only after its named gate. A successful
-   connection does not authorize an email.
-5. Run one controlled internal QA email only after its named send gate; verify the
-   provider message ID, Mike delivery, hidden BCC, canonical notification record,
-   retry state, suppression, and KPI exclusion.
-6. Prepare channel-specific owned-demand publication packets. Publication requires
-   a separate approval naming the account, final copy, visual, tracked URL, and
-   delete/rollback procedure.
+## Immediate verification
 
-## Exact next approval gate
+Run the repository health, funnel, route, release, and isolation verifiers. At a
+minimum confirm:
 
-Proposed action: merge PR `#170` into `main` and allow the canonical
-`eyes-up-industries/ask-magic-mike` Vercel project to deploy it to Production.
+- `/`, `/ask`, `/sell`, `/value`, `/home-value`, `/buy`, `/rent`,
+  `/open-house/<approved-id>`, `/widget/v1`, `/privacy`, `/terms`,
+  `/accessibility`, `/contact`, `/robots.txt`, and `/sitemap.xml`;
+- apex 308 redirect and canonical metadata;
+- live/readiness health with canonical Neon;
+- anonymous `/admin` redirect to `/lead-center-login` and authorized RBAC access;
+- no NellySelly hostname, project, database, variable, or content crossover; and
+- no error-level regression in the observed Vercel window.
 
-- Affected surface: protected `/admin/distribution` plus its admin navigation and
-  route-manifest entry.
-- Expected impact: authorized operators can inspect six tracked, human-reviewed
-  owned-demand drafts and observed owned-source signals. There is no public post,
-  message, provider action, spend, database write, or WordPress mutation.
-- Rollback: revert the PR `#170` merge commit or promote the immediately preceding
-  Ready Production deployment `dpl_BCrmEB67TZDbJ9ihyLvsQkP5deD6`.
-- Required approval:
-  `APPROVE PHASE 9.1 OWNED DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT`.
+## Lead or messaging release verification
 
-## Stop conditions
+When the change touches capture, routing, email, push, SMS, or sequences:
 
-Stop if the canonical Neon environment is ambiguous or unhealthy, authorization
-is bypassed, a provider returns unknown state, a lead is not durable, a public page
-serves wrong-brand content, a proposed action exceeds its named approval gate, or
-any required owner takeover is shown. Do not guess credentials, recipients, DNS,
-publication identity, or consent.
+1. Use a synthetic record marked `is_test=true` and
+   `INTERNAL QA — DO NOT CONTACT` only after the exact QA-send/mutation approval.
+2. Submit through the public form, not directly into the database.
+3. Prove one canonical lead, attribution/consent, deterministic score/routing,
+   one idempotent notification set, Lead Center visibility, and KPI exclusion.
+4. For real provider tests, prove provider message ID and final delivery or
+   failure/retry state. A 200 or queued state is not delivery proof.
+5. Never contact a genuine WordPress-only entry whose purpose or consent is
+   unclear; preserve it for BIC review.
+
+## Phase 9 cumulative release sequence
+
+Release only one approved PR at a time and verify Production before advancing:
+
+1. `#178` — canonical operations documentation and fail-closed Preview QA;
+2. `#177` — commercial-email compliance rendering;
+3. `#170` — protected owned-demand command;
+4. `#173` — device-private recurring review planner; and
+5. `#172` — rebuild the database-revival command on the resulting baseline,
+   preserving read-only behavior and requiring a fresh immutable release gate.
+
+Each item retains its own exact approval phrase. Refresh any downstream branch
+after the preceding Production merge, rerun Node 24 CI and Vercel Preview, and do
+not treat this ordering as authorization to merge, deploy, publish, send, or
+mutate data.
+
+## Owned-traffic activation
+
+After the lead path and exact publication gate pass, activate one reversible
+placement at a time: canonical Our Town CTA, then approved page-specific widget,
+then tagged GBP/social/email assets. Monitor conversion, source attribution,
+duplicate rate, notification failures, and response SLA before expanding.
+Paid traffic and carrier SMS remain separate approvals.
+
+## Rollback
+
+- Code: restore the recorded prior Vercel deployment/alias; verify health and
+  canonical routes.
+- WordPress: disable only the changed placement/form ID and restore its proven
+  prior notification behavior without deleting entries.
+- Messaging: pause only the affected channel/processor; preserve lead and outbox
+  records for reconciliation.
+- RBAC: revoke affected sessions first. Disable the feature only under the
+  reviewed break-glass procedure; retain identity/audit tables.
+- Database: prefer a forward fix. Never delete or drop canonical lead, consent,
+  notification, audit, identity, or session data as an application rollback.
+
+Record the outcome in `PRODUCTION_CHANGE_LOG.md`, including anything not proven.
