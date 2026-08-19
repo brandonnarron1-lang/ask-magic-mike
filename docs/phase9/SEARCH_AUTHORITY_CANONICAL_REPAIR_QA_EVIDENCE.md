@@ -84,6 +84,10 @@ The deployed homepage JSON-LD parsed successfully and contained exactly Organiza
 
 During protected-preview access, the Vercel CLI initially auto-created an empty worktree-named project instead of linking the canonical project. The mistake was detected immediately. Read-only inspection proved it was 21 seconds old with zero deployments and no domain. The empty project was permanently removed, and the worktree was explicitly relinked to `eyes-up-industries/ask-magic-mike`. No parallel deployment, environment variable, domain, application data, or NellySelly resource was created or retained.
 
+## Production unchanged proof
+
+After Preview verification, `pnpm smoke:prod` ran in its default read-only mode against `https://www.askmagicmike.com`: 19 checks passed, 2 authenticated/write checks were intentionally skipped, and 0 checks failed. Production remained on its pre-Phase-9.5 behavior; no merge, deployment, submission, provider call, or data mutation was performed.
+
 ## Rollback rehearsal
 
 Rollback is code-only: revert the Phase 9.5 commit and redeploy the previously verified production commit. No database, secret, provider, DNS, domain mapping, lead, queue, WordPress page, or external campaign rollback is required.
