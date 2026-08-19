@@ -6,6 +6,10 @@ import {
   isPreviewDataDisabled,
   previewDataMode,
 } from "@/lib/preview-security";
+import {
+  configuredEmailProvider,
+  smtpConfigurationReady,
+} from "../../../../../app/lib/emailProviderConfiguration";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
@@ -116,6 +120,7 @@ export async function GET(req: NextRequest) {
     agentNotificationsEnabled &&
     (leadNotificationMode === "sandbox" ||
       (leadNotificationMode === "production" && productionNotificationEnabled));
+  const emailProvider = configuredEmailProvider();
   const safety = computeHealthSafety({
     env: process.env,
     dbConfigured: databaseUrlPresent,
@@ -141,7 +146,9 @@ export async function GET(req: NextRequest) {
       database_provider: databaseUrlPresent ? "neon_postgres" : "not_configured",
       admin_secret_present: !!process.env.ADMIN_SECRET,
       cron_secret_present: !!process.env.CRON_SECRET,
-      email_provider: (process.env.EMAIL_PROVIDER ?? (process.env.RESEND_API_KEY ? "resend" : "mock")).toLowerCase(),
+      email_provider: emailProvider,
+      email_provider_configured: emailProvider !== "invalid",
+      smtp_configuration_ready: emailProvider === "smtp" && smtpConfigurationReady(),
       email_enabled: emailEnabled,
       sms_provider: (process.env.SMS_PROVIDER ?? "mock").toLowerCase(),
       sms_enabled: smsEnabled,

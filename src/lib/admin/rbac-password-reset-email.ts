@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { ResendEmailNotificationProvider } from "../../../app/lib/leadNotificationProvider";
+import { selectEmailNotificationProvider } from "../../../app/lib/leadNotificationProvider";
 
 type PasswordResetEmailInput = {
   email: string;
@@ -94,7 +94,9 @@ export async function sendLeadCenterPasswordResetEmail(
 
   const digest = createHash("sha256").update(input.url).digest("hex").slice(0, 32);
   const rendered = buildLeadCenterPasswordResetEmail(input);
-  const result = await new ResendEmailNotificationProvider("production", transport).send({
+  const result = await selectEmailNotificationProvider("production", {
+    resendTransport: transport,
+  }).send({
     notificationId: `rbac-password-reset-${digest}`,
     channel: "email",
     recipient: input.email,
