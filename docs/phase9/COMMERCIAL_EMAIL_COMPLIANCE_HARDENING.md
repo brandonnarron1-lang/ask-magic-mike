@@ -15,8 +15,10 @@ Every branded HTML and plain-text email now includes:
 
 When `marketing=true`, rendering fails closed unless the caller supplies a valid
 HTTPS unsubscribe URL without embedded credentials. Both formats include that
-link, a clear marketing-message label, and the approved unsubscribe/reply
-instruction. Transactional and QA renders keep the physical address and firm
+link, a clear marketing-message label, and the approved link-based unsubscribe
+instruction. The renderer deliberately does not promise reply-based opt-out
+processing because that inbound-email workflow is not yet operationally
+verified. Transactional and QA renders keep the physical address and firm
 identity without being mislabeled as advertising.
 
 ## Authority boundary

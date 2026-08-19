@@ -190,9 +190,9 @@ function escapeHtml(value: string) {
 export const BRANDED_EMAIL_TEMPLATE_VERSION = "phase9-commercial-email-v1";
 export const BROKERAGE_POSTAL_ADDRESS = "3301 Nash St. NW Suite E, Wilson, NC 27896";
 export const MARKETING_EMAIL_DISCLOSURE = "Marketing message from Ask Magic Mike / Our Town Properties, Inc.";
-export const MARKETING_EMAIL_OPT_OUT = "Use the unsubscribe link below or reply UNSUBSCRIBE to stop marketing email.";
+export const MARKETING_EMAIL_OPT_OUT = "Use the unsubscribe link below to stop marketing email.";
 
-function approvedUnsubscribeUrl(value: string | undefined) {
+function approvedHttpsUrl(value: string | undefined) {
   if (!value) return null;
   try {
     const parsed = new URL(value);
@@ -220,7 +220,9 @@ export function renderBrandedEmail(input: {
     ? input.qaAudience === "mike_view" ? "[TEST — BRANDON QA — MIKE VIEW] " : "[TEST — BRANDON QA] "
     : "";
   const subject = `${input.subject.startsWith("[TEST — BRANDON QA") ? "" : prefix}${input.subject}`.slice(0, 180);
-  const unsubscribeUrl = input.marketing ? approvedUnsubscribeUrl(input.unsubscribeUrl) : null;
+  const ctaUrl = approvedHttpsUrl(input.ctaUrl);
+  if (input.ctaUrl && !ctaUrl) throw new Error("unsafe_cta_url");
+  const unsubscribeUrl = input.marketing ? approvedHttpsUrl(input.unsubscribeUrl) : null;
   if (input.marketing && !unsubscribeUrl) throw new Error("marketing_unsubscribe_url_required");
   const templateVersion = input.templateVersion || BRANDED_EMAIL_TEMPLATE_VERSION;
   const contentHash = createHash("sha256").update(JSON.stringify({
@@ -229,7 +231,7 @@ export function renderBrandedEmail(input: {
     heading: input.heading,
     body: input.body,
     ctaLabel: input.ctaLabel || null,
-    ctaUrl: input.ctaUrl || null,
+    ctaUrl,
     isTest: input.isTest === true,
     marketing: input.marketing === true,
     unsubscribeUrl,
@@ -243,7 +245,7 @@ export function renderBrandedEmail(input: {
     input.heading,
     "",
     input.body,
-    input.ctaLabel && input.ctaUrl ? `\n${input.ctaLabel}: ${input.ctaUrl}` : null,
+    input.ctaLabel && ctaUrl ? `\n${input.ctaLabel}: ${ctaUrl}` : null,
     "",
     "Ask Magic Mike · Our Town Properties, Inc. · Wilson, North Carolina",
     BROKERAGE_POSTAL_ADDRESS,
@@ -252,8 +254,8 @@ export function renderBrandedEmail(input: {
     unsubscribeUrl ? `Unsubscribe: ${unsubscribeUrl}` : null,
     `Template ${templateVersion} · Content ${contentHash.slice(0, 12)}`,
   ].filter(Boolean).join("\n");
-  const button = input.ctaLabel && input.ctaUrl
-    ? `<p style="margin:24px 0"><a href="${escapeHtml(input.ctaUrl)}" aria-label="${escapeHtml(input.ctaLabel)}" style="display:inline-block;background:#cda24a;color:#090909;text-decoration:none;padding:13px 20px;border-radius:8px;font-weight:700">${escapeHtml(input.ctaLabel)}</a></p>`
+  const button = input.ctaLabel && ctaUrl
+    ? `<p style="margin:24px 0"><a href="${escapeHtml(ctaUrl)}" aria-label="${escapeHtml(input.ctaLabel)}" style="display:inline-block;background:#cda24a;color:#090909;text-decoration:none;padding:13px 20px;border-radius:8px;font-weight:700">${escapeHtml(input.ctaLabel)}</a></p>`
     : "";
   const identityFooter = `<p style="margin:0;color:#6b6254;font-size:12px;line-height:1.55">Ask Magic Mike · Our Town Properties, Inc. · Wilson, North Carolina<br>${escapeHtml(BROKERAGE_POSTAL_ADDRESS)}</p>`;
   const marketingFooter = input.marketing

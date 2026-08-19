@@ -92,6 +92,7 @@ describe("Phase 6 template registry", () => {
       expect(output).toContain(MARKETING_EMAIL_DISCLOSURE);
       expect(output).toContain(MARKETING_EMAIL_OPT_OUT);
       expect(output).toContain("https://www.askmagicmike.com/email/preferences?token=synthetic-test-token");
+      expect(output).not.toMatch(/reply\s+unsubscribe/i);
     }
     expect(email.templateVersion).toBe(BRANDED_EMAIL_TEMPLATE_VERSION);
   });
@@ -103,5 +104,11 @@ describe("Phase 6 template registry", () => {
       .toThrow("marketing_unsubscribe_url_required");
     expect(() => renderBrandedEmail({ ...base, unsubscribeUrl: "https://user:secret@example.test/unsubscribe" }))
       .toThrow("marketing_unsubscribe_url_required");
+  });
+
+  it("fails closed on unsafe CTA URL schemes and embedded credentials", () => {
+    const base = { subject: "Review", preheader: "Review", heading: "Review", body: "Review", ctaLabel: "Review" };
+    expect(() => renderBrandedEmail({ ...base, ctaUrl: "javascript:alert(1)" })).toThrow("unsafe_cta_url");
+    expect(() => renderBrandedEmail({ ...base, ctaUrl: "https://user:secret@example.test/review" })).toThrow("unsafe_cta_url");
   });
 });
