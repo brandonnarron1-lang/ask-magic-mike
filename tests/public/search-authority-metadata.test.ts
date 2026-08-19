@@ -33,6 +33,20 @@ describe("public search-authority metadata", () => {
     expect(metadata.openGraph).toMatchObject({ url: "/home-value" });
   });
 
+  it("does not duplicate an already branded title in social metadata", () => {
+    const metadata = publicPageMetadata({
+      title: "Ask Magic Mike | Wilson, NC Real Estate Guidance",
+      description: "Local real estate guidance.",
+      path: "/",
+    });
+    expect(metadata.openGraph).toMatchObject({
+      title: "Ask Magic Mike | Wilson, NC Real Estate Guidance",
+    });
+    expect(metadata.twitter).toMatchObject({
+      title: "Ask Magic Mike | Wilson, NC Real Estate Guidance",
+    });
+  });
+
   it("keeps operational and post-conversion routes out of search without using robots.txt canonicalization", () => {
     const metadata = nonIndexablePageMetadata("Request Received", "Confirmation route.");
     expect(metadata.robots).toEqual({ index: false, follow: false, nocache: true });
