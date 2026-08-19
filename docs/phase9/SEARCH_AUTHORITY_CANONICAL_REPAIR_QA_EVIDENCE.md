@@ -65,6 +65,8 @@ The first full-test run correctly exposed one stale assertion that required a ro
 
 The branch was refreshed from protected `main` after the Phase 9.6 experiment-command and no-store releases. The refreshed tree preserved the dormant experiment controls and passed the complete current-main suite above without conflicts or code changes to either subsystem.
 
+Rendered-HTML inspection of the refreshed branch caught a homepage-only title override that the source-level route matrix did not: the page emitted `Wilson, NC Real Estate Guidance` without the Ask Magic Mike identity. The homepage now declares the full branded title, the shared helper avoids duplicating an already branded social title, and unit plus route-policy regressions cover both conditions.
+
 ## Local browser evidence
 
 Desktop and 390×844 mobile inspections covered `/home-value` and `/ask` using the optimized local server. Both routes rendered their existing responsive visual systems, correct headings, functional form controls, and route-specific document titles. The mobile viewport was reset after inspection. Browser console issues: 0.
