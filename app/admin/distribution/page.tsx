@@ -134,7 +134,7 @@ export default async function DistributionPage() {
           <article className="rounded-xl border border-[#cda24a55] bg-[linear-gradient(145deg,#171108,#090909)] p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#cda24a]">Owned-source signals</p>
             <p className="mt-3 font-serif text-3xl text-[#f0cf79]">{command.attributedLiveLeads}</p>
-            <p className="mt-2 text-xs text-[#a99a7e]">Observed leads, never inferred posts or vanity reach</p>
+            <p className="mt-2 text-xs text-[#a99a7e]">Exact campaign + placement matches on the latest recorded touch</p>
           </article>
         </section>
 
@@ -201,7 +201,7 @@ export default async function DistributionPage() {
               <strong className="text-[#ff9bb2]">Still approval-gated:</strong> public posting, email campaigns, consumer SMS, provider activation, paid promotion, audience targeting, budget changes, and claims requiring broker or legal review.
             </div>
             <p className="mt-4 text-xs leading-6 text-[#8f8778]">
-              The source ledger is authoritative. No source signal is treated as proof that a post was published, viewed, or effective.
+              The source ledger is authoritative. Each signal requires an exact source, medium, campaign, and placement match; no signal is treated as proof that a post was published, viewed, or effective.
             </p>
           </Panel>
         </div>

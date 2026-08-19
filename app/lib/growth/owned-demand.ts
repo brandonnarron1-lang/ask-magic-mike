@@ -1,7 +1,15 @@
-import type { GrowthChannelEconomics, GrowthIntelligence } from "./intelligence";
+import type { GrowthIntelligence } from "./intelligence";
 import { buildUtmUrl, type UtmMedium } from "../../../src/lib/admin/utm-link-builder";
 
 export type OwnedDemandStatus = "signal_detected" | "ready_unmeasured";
+
+export interface OwnedDemandAttributionSignal {
+  source: string;
+  medium: string;
+  campaign: string;
+  content: string;
+  leads: number;
+}
 
 export interface OwnedDemandChannel {
   key: string;
@@ -132,19 +140,32 @@ function normalized(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
 }
 
-function leadsForAliases(channels: GrowthChannelEconomics[], aliases: readonly string[]) {
-  const accepted = new Set(aliases.map(normalized));
-  return channels.reduce((total, channel) => (
-    accepted.has(normalized(channel.source)) ? total + channel.leads : total
+function leadsForPlacement(
+  signals: OwnedDemandAttributionSignal[],
+  definition: (typeof CHANNEL_DEFINITIONS)[number],
+) {
+  const accepted = new Set(definition.aliases.map(normalized));
+  const campaign = normalized(CAMPAIGN);
+  const medium = normalized(definition.medium);
+  const content = normalized(definition.content);
+  return signals.reduce((total, signal) => (
+    accepted.has(normalized(signal.source)) &&
+    normalized(signal.medium) === medium &&
+    normalized(signal.campaign) === campaign &&
+    normalized(signal.content) === content
+      ? total + signal.leads
+      : total
   ), 0);
 }
 
 export function buildOwnedDemandCommand(
-  intelligence: Pick<GrowthIntelligence, "summary" | "channels">,
+  intelligence: Pick<GrowthIntelligence, "summary"> & {
+    ownedDemandSignals: OwnedDemandAttributionSignal[];
+  },
   now = new Date(),
 ): OwnedDemandCommand {
   const channels = CHANNEL_DEFINITIONS.map((definition): OwnedDemandChannel => {
-    const attributedLeads = leadsForAliases(intelligence.channels, definition.aliases);
+    const attributedLeads = leadsForPlacement(intelligence.ownedDemandSignals, definition);
     const trackedUrl = buildUtmUrl(definition.destination, {
       utm_source: definition.source,
       utm_medium: definition.medium,

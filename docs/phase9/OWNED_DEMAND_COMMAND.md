@@ -41,15 +41,19 @@ At implementation start, Production Growth Intelligence contained:
 
 The immediate constraint is owned-demand activation and publication evidence, not another scoring, routing, or economics dashboard.
 
-An attributed lead from an unrelated portal or referral source does not make owned
-distribution “measured.” The command reports that state only after at least one
-eligible live lead is attributed to one of its explicit owned-channel aliases.
+An attributed lead from an unrelated portal, referral source, older campaign, or
+different creative does not make owned distribution “measured.” The command
+reports a channel signal only when the latest recorded attribution touch matches
+that placement's normalized source alias, medium, campaign, and `utm_content`.
+Facebook and Instagram remain distinct in this raw placement view even though the
+broader Growth economics view may roll both into a Meta channel family.
 
 ## Architecture
 
 ```text
-Canonical Neon leads + source attribution
+Canonical Neon leads + latest source attribution touch
   -> neonGrowthIntelligenceView (test/suppressed excluded)
+  -> exact source + medium + campaign + utm_content placement signals
   -> buildGrowthIntelligence
   -> buildOwnedDemandCommand
   -> protected /admin/distribution
