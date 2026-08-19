@@ -183,6 +183,17 @@ describe("authenticated SMTP email provider", () => {
     });
     expect(options.auth).toEqual({ user: "smtp-user", pass: "smtp-password" });
 
+    configureSmtp();
+    process.env.SMTP_PORT = "465";
+    process.env.SMTP_SECURE = "true";
+    const implicitTlsTransport = fakeTransport();
+    await new SmtpEmailNotificationProvider("production", implicitTlsTransport.factory).send(request());
+    expect(implicitTlsTransport.factoryMock.mock.calls[0][0]).toMatchObject({
+      port: 465,
+      secure: true,
+      requireTLS: false,
+    });
+
     const message = transport.sendMail.mock.calls[0][0];
     expect(message).toMatchObject({
       from: { name: "Our Town Properties", address: "alerts@example.test" },
@@ -199,6 +210,23 @@ describe("authenticated SMTP email provider", () => {
     expect(secondTransport.sendMail.mock.calls[0][0].messageId).toBe(message.messageId);
     expect(transport.close).toHaveBeenCalledOnce();
     expect(secondTransport.close).toHaveBeenCalledOnce();
+  });
+
+  it("retains the deterministic Message-ID when an accepting relay omits its response ID", async () => {
+    const transport = fakeTransport({
+      accepted: ["mike@example.test", "audit@example.test"],
+      rejected: [],
+      messageId: undefined,
+    });
+    const result = await new SmtpEmailNotificationProvider("production", transport.factory).send(request());
+    const requestedMessageId = transport.sendMail.mock.calls[0][0].messageId;
+
+    expect(result).toEqual({
+      ok: true,
+      provider: "smtp",
+      providerMessageId: requestedMessageId,
+    });
+    expect(requestedMessageId).toMatch(/^<amm-[a-f0-9]{40}@example\.test>$/);
   });
 
   it("classifies transient failures as retryable without exposing provider details", async () => {

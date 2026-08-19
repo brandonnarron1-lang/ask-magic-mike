@@ -635,7 +635,9 @@ export class SmtpEmailNotificationProvider implements NotificationProvider {
         host: smtp.host,
         port: smtp.port,
         secure: smtp.secure,
-        requireTLS: true,
+        // Port 587 must negotiate STARTTLS. Port 465 is already wrapped in
+        // implicit TLS and must not be forced through a second STARTTLS step.
+        requireTLS: !smtp.secure,
         auth: { user: smtp.user, pass: smtp.password },
         connectionTimeout: smtp.connectionTimeoutMs,
         greetingTimeout: smtp.greetingTimeoutMs,
@@ -649,6 +651,7 @@ export class SmtpEmailNotificationProvider implements NotificationProvider {
     }
 
     try {
+      const messageId = deterministicSmtpMessageId(request.idempotencyKey, smtp.fromEmail);
       const result = await transport.sendMail({
         from: { name: smtp.fromName, address: smtp.fromEmail },
         to: recipient,
@@ -657,7 +660,7 @@ export class SmtpEmailNotificationProvider implements NotificationProvider {
         subject: safeSubject(request.subject),
         text: request.text,
         html: request.html,
-        messageId: deterministicSmtpMessageId(request.idempotencyKey, smtp.fromEmail),
+        messageId,
         disableFileAccess: true,
         disableUrlAccess: true,
       });
@@ -686,7 +689,10 @@ export class SmtpEmailNotificationProvider implements NotificationProvider {
       return {
         ok: true,
         provider: this.name,
-        providerMessageId: safeSmtpMessageId(result.messageId),
+        // Some authenticated relays omit messageId from their response even
+        // after accepting the envelope. Retain the exact deterministic ID we
+        // supplied so the outbox always has a correlation identifier.
+        providerMessageId: safeSmtpMessageId(result.messageId) || messageId,
       };
     } catch (error) {
       return smtpFailure(error);
