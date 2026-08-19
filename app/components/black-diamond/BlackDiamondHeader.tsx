@@ -27,6 +27,9 @@ export function BlackDiamondHeader({ onAsk }: HeaderProps) {
         <Link href="/sell" className="transition hover:text-[#e2c06f]">
           Sell
         </Link>
+        <Link href="/plan" className="transition hover:text-[#e2c06f]">
+          Plan
+        </Link>
         <Link href="/ask" className="transition hover:text-[#22c6d2]">
           Ask
         </Link>

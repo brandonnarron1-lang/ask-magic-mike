@@ -69,4 +69,8 @@ export const analyticsEvents = [
   "notification_queued",
   "notification_delivered",
   "notification_failed",
+  "review_plan_started",
+  "review_plan_saved",
+  "review_plan_task_completed",
+  "review_plan_handoff_clicked",
 ] as const;

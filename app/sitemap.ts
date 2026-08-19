@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ["/sell", 0.8],
     ["/buy", 0.8],
     ["/rent", 0.7],
+    ["/plan", 0.75],
     ["/we-buy-houses", 0.75],
     ["/contact", 0.55],
     ["/privacy", 0.3],

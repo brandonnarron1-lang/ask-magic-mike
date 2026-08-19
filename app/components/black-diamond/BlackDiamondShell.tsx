@@ -23,6 +23,11 @@ const paths = [
     copy: "Use a focused local-advisor chat flow for real estate questions.",
     href: "/ask",
   },
+  {
+    title: "Real Estate Review Planner",
+    copy: "Build a private, practical next-step plan and return to it on this device.",
+    href: "/plan",
+  },
 ];
 
 export function BlackDiamondShell() {
@@ -58,7 +63,7 @@ export function BlackDiamondShell() {
       <section className="bg-[#050505] px-5 py-16 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">Choose your path</p>
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {paths.map((path) => (
               <Link key={path.title} href={path.href} className="rounded-lg border border-[#cda24a33] bg-[#111113] p-6 transition hover:border-[#e2c06f]">
                 <h3 className="font-serif text-3xl text-[#f4ead4]">{path.title}</h3>
@@ -113,6 +118,7 @@ export function Footer() {
           <Link href="/terms" className="text-[#e2c06f] hover:text-[#f4ead4]">Terms</Link>
           <Link href="/accessibility" className="text-[#e2c06f] hover:text-[#f4ead4]">Accessibility</Link>
           <Link href="/contact" className="text-[#e2c06f] hover:text-[#f4ead4]">Contact</Link>
+          <Link href="/plan" className="text-[#e2c06f] hover:text-[#f4ead4]">Review Planner</Link>
           <Link href="/widget-preview" className="text-[#e2c06f] hover:text-[#f4ead4]">Widget Preview</Link>
           <Link href="/integrations/ourtownproperties" className="text-[#e2c06f] hover:text-[#f4ead4]">OurTown Integration</Link>
           <Link href="/social-preview" className="text-[#e2c06f] hover:text-[#f4ead4]">Social Preview</Link>
