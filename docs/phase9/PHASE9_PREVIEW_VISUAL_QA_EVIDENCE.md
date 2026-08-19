@@ -4,7 +4,7 @@ Date: 2026-08-18 America/New_York
 PR: [#169](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/169)  
 Branch: `codex/phase9-growth-intelligence-competitive-moat-2026-08-18`  
 QA commit: `43902926d036`  
-Decision: **Gate A passed; Gates B and C remain closed.**
+Decision at Preview completion: **Gate A passed. Gate B subsequently passed on 2026-08-19; Gate C remains closed.**
 
 ## Preview deployment
 
@@ -104,10 +104,8 @@ The local machine ran Node.js 26.5.1 and emitted the repository's expected engin
 
 ## Safety and authority result
 
-No production database migration was applied. No lead, assignment, consent, campaign, provider, email, SMS, Mike notification, paid-media, domain, WordPress, or production-deployment state was changed. NellySelly was not accessed or modified.
+At the time of this Preview QA, no production database migration had been applied. Gate B was completed separately on 2026-08-19 with evidence in `PHASE9_PRODUCTION_DATABASE_MIGRATION_EVIDENCE.md`. No lead, assignment, consent, campaign, provider, email, SMS, Mike notification, paid-media, domain, WordPress, or production-deployment state was changed by Preview QA. NellySelly was not accessed or modified.
 
-Gate A is complete. The next independently controlled actions remain:
+Gate A is complete. After the separately recorded Gate B migration, the remaining Phase 9 release action is:
 
-1. `APPROVE PHASE 9 GROWTH INTELLIGENCE DATABASE MIGRATION`
-2. after migration/rollback review, `APPROVE PHASE 9 MERGE AND PRODUCTION DEPLOYMENT`
-
+1. `APPROVE PHASE 9 MERGE AND PRODUCTION DEPLOYMENT`

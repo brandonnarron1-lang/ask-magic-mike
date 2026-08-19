@@ -257,7 +257,14 @@ Revert application code first. Preserve imported growth records for audit. Do no
 
 ## Release decision
 
-Current default decision: **HOLD FOR CI, PREVIEW QA, AND OWNER GATES.**
+Current decision as of 2026-08-19: **Gate A Preview QA and Gate B Production database migration passed. HOLD FOR GATE C MERGE AND PRODUCTION DEPLOYMENT APPROVAL.**
+
+Completed with recorded evidence:
+
+- CI and release gate;
+- Preview deployment and visual QA;
+- additive Production database migration `20260818190000`;
+- post-migration RLS, privilege, schema, lead-count, and health verification.
 
 Safe now:
 
@@ -265,11 +272,10 @@ Safe now:
 - pull request;
 - CI;
 - code and migration inspection;
-- Preview deployment after Gate A.
+- Preview deployment under the completed Gate A authority.
 
 Not approved by this document:
 
-- production database migration;
 - merge;
 - production deployment;
 - provider activation;
