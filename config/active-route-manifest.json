@@ -19,6 +19,7 @@
     "/admin/api/push/test",
     "/admin/api/phone-alerts/invite",
     "/admin/reporting",
+    "/admin/revival",
     "/api/admin/copilot",
     "/api/admin/copilot/jobs",
     "/api/admin/copilot/jobs/process",
@@ -90,7 +91,8 @@
     ],
     "admin": [
       "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation", "/admin/distribution", "/admin/experiments", "/admin/growth",
-      "/admin/action-queue", "/admin/message-previews", "/admin/notifications", "/admin/notifications/phone", "/admin/reporting"
+      "/admin/action-queue", "/admin/message-previews", "/admin/notifications", "/admin/notifications/phone", "/admin/reporting",
+      "/admin/revival"
     ],
     "auth": [
       "/lead-center-login", "/lead-center-password-help", "/lead-center-set-password", "/api/lead-center-auth/[...all]"
@@ -108,6 +110,7 @@
     "/admin/traffic": "inactive-src-only",
     "/admin/distribution": "active-protected-read-only-owned-demand-neon",
     "/admin/growth": "active-protected-read-only-phase9-schema-gated",
+    "/admin/revival": "active-protected-read-only-database-revival-command",
     "/api/analytics/event": "inactive-src-only",
     "/api/health/live": "inactive-src-only",
     "/api/health/ready": "active-documented-readiness-probe",
