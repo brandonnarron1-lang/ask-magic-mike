@@ -7,6 +7,7 @@
     "/admin",
     "/admin/action-queue",
     "/admin/allocation",
+    "/admin/experiments",
     "/admin/growth",
     "/admin/leads",
     "/admin/leads/[id]",
@@ -30,6 +31,7 @@
     "/api/admin/sequences/process",
     "/api/admin/sla/sweep",
     "/api/appointments/request",
+    "/api/experiments/event",
     "/api/chat",
     "/api/chat/message",
     "/api/chat/session",
@@ -85,7 +87,7 @@
       "/integrations/ourtownproperties", "/robots.txt", "/sitemap.xml", "/social-preview"
     ],
     "admin": [
-      "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation", "/admin/growth",
+      "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation", "/admin/experiments", "/admin/growth",
       "/admin/action-queue", "/admin/message-previews", "/admin/notifications", "/admin/notifications/phone", "/admin/reporting"
     ],
     "auth": [
@@ -94,7 +96,7 @@
     "api": [
       "/admin/api/push/test",
       "/admin/api/phone-alerts/invite",
-      "/api/leads", "/api/listings/search", "/api/listings/[id]", "/api/valuation", "/api/appointments/request", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/phone-alerts/invite", "/api/phone-alerts/subscription", "/api/phone-alerts/test", "/api/webhooks/sms/inbound", "/api/webhooks/sms/status", "/api/widget/events",
+      "/api/leads", "/api/listings/search", "/api/listings/[id]", "/api/valuation", "/api/appointments/request", "/api/experiments/event", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/phone-alerts/invite", "/api/phone-alerts/subscription", "/api/phone-alerts/test", "/api/webhooks/sms/inbound", "/api/webhooks/sms/status", "/api/widget/events",
       "/api/admin/copilot", "/api/admin/copilot/jobs", "/api/admin/copilot/jobs/process", "/api/admin/health", "/api/admin/leads/[id]/communication-permissions", "/api/admin/leads/[id]/sequences", "/api/admin/message-templates", "/api/admin/operations/first-live", "/api/admin/qa/email", "/api/admin/sequences/process", "/api/admin/sla/sweep", "/api/webhooks/email/events"
     ]
   },
