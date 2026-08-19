@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import { getLeadCenterRbacState } from "../../src/lib/admin/rbac-policy";
 import { LoginForm } from "./LoginForm";
+import { nonIndexablePageMetadata } from "../lib/publicMetadata";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = nonIndexablePageMetadata(
+  "Lead Center Sign In",
+  "Authorized Ask Magic Mike and Our Town Properties staff access only.",
+);
 
 export default function LeadCenterLoginPage() {
   const state = getLeadCenterRbacState();

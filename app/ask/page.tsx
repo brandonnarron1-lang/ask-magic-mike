@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import { AskMikeChatPanel } from "../components/black-diamond/AskMikeChatPanel";
 import { BlackDiamondHeader } from "../components/black-diamond/BlackDiamondHeader";
 import { Footer } from "../components/black-diamond/BlackDiamondShell";
 import { PageTracker } from "../components/black-diamond/PageTracker";
+import { publicPageMetadata } from "../lib/publicMetadata";
+
+export const metadata: Metadata = publicPageMetadata({
+  title: "Ask a Wilson, NC Real Estate Question",
+  description: "Ask Mike Eatmon about home value strategy, selling preparation, buyer demand, timing, or other Wilson-area real estate questions requiring local context.",
+  path: "/ask",
+});
 
 export default function AskPage() {
   return (
