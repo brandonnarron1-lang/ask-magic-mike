@@ -63,6 +63,8 @@ The pending Phase 9.4 `/plan` route already declares its own canonical metadata 
 - `/value` canonicalizes to `/home-value`.
 - `/we-buy-houses` canonicalizes to `/sell`.
 
+Compatibility aliases remain reachable to preserve existing links but are omitted from `sitemap.xml`; only their declared canonical destinations are submitted as sitemap URLs.
+
 ### Explicit noindex pages
 
 - request confirmation;
