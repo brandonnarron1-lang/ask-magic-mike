@@ -1,5 +1,11 @@
 # Controlled Launch Runbook — Ask Magic Mike
 
+> **Historical reference — do not execute as the current runbook.** This packet
+> predates the Neon and Better Auth/RBAC Production cutovers. Supabase and shared
+> Basic Auth instructions below are preserved as implementation history. Use
+> `CURRENT_STATE_RECONCILIATION.md`, `PRODUCTION_LAUNCH_GATE.md`, and
+> `GO_LIVE_RUNBOOK.md` for live operations.
+
 **Version:** LC-7 (post-merge-train #44–#52)  
 **Code state:** `main` @ `815a33a` — authority packet complete  
 **Audience:** Brandon Narron (operator), Mike Eatmon (broker/BIC)  

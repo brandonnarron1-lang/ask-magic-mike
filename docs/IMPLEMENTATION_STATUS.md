@@ -1,6 +1,32 @@
 # Implementation Status
 
-Updated 2026-08-15.
+Updated 2026-08-19.
+
+## Phase 9 Production operating checkpoint — 2026-08-19
+
+- Canonical Production remains `main` commit
+  `f2aff2b802cda3fd9c49ab80b9e379eb9c152913` on Vercel deployment
+  `dpl_FG54FQtKQqP8pqMmpe79BCUmdWJT` until a release-specific gate is granted.
+- Read-only Production smoke and funnel verification remain green. No email,
+  SMS, push, call, database write, lead creation, or public publication was
+  triggered by this checkpoint.
+- PR `#177` is first in the remaining cumulative sequence. It contains the
+  commercial-email compliance renderer hardening and retains its own exact
+  Production approval gate.
+- PR `#170` has been refreshed on the canonical Production baseline. It adds the
+  protected, read-only `/admin/distribution` Owned Demand Command and counts only
+  exact latest-touch source, medium, campaign, and placement matches. It does not
+  authorize publication, messaging, spend, or a database mutation.
+- PR `#179` remains a separate iOS phone-alert installation handoff. Physical
+  enrollment and a test alert remain separate state changes.
+- PR `#173` remains separately staged for the device-private `/plan` Review
+  Planner; PR `#172` must be refreshed later as a read-only Database Revival
+  candidate.
+- Current next release approval remains:
+  `APPROVE PHASE 9 COMMERCIAL EMAIL COMPLIANCE MERGE AND PRODUCTION DEPLOYMENT`.
+  PR `#170` separately requires
+  `APPROVE PHASE 9.1 OWNED DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT` after
+  the preceding Production release is verified.
 
 ## Phase 6 Production schema acceptance — 2026-08-15
 

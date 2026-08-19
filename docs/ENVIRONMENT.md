@@ -1,89 +1,80 @@
-# Environment Variables
+# Environment Configuration
 
-Copy `.env.example` to `.env.local` and fill in the values.
+This is the current environment guide. Copy `.env.example` to an ignored local
+file for development. Store real values only in the approved Vercel, Neon,
+WordPress, or hosting secret interface and never print them during verification.
 
-## Required for Database
+The complete name/scope register is `ENVIRONMENT_VARIABLE_MATRIX.md`.
 
-| Variable | Description |
-|----------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon (public) key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key — server-only, never exposed to browser |
+## Canonical database
 
-If these are absent, the app runs in **dev mode**: sessions and leads are logged to the console rather than saved to a database.
+| Variable | Scope | Purpose |
+| --- | --- | --- |
+| `DATABASE_URL` | Server sensitive | Canonical Neon PostgreSQL connection |
+| `DATABASE_ENV` | Server | Explicit `production`, `preview`, or `development` identity |
+| `ALLOW_PREVIEW_DB_MUTATION` | Preview server | Separate reviewed Preview-write opt-in |
+| `PREVIEW_DATA_MODE` | Preview server | Must also be `enabled` for controlled Preview writes |
 
-## Required for Production
+Production fails closed without `DATABASE_URL`; it never falls back to Supabase.
+`ALLOW_LEGACY_SUPABASE_FALLBACK` exists only for non-Production compatibility
+tests and must remain false in Production. The `supabase/migrations/` directory
+name is historical; reviewed SQL in that directory applies to canonical
+PostgreSQL.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | Full URL of the app |
-| `NEXT_PUBLIC_AGENT_NAME` | `Mike Eatmon` | Agent's display name |
-| `NEXT_PUBLIC_BROKERAGE_NAME` | `Our Town Properties` | Brokerage name |
-| `NEXT_PUBLIC_AGENT_PHONE` | — | Agent's phone in E.164 format |
-| `NEXT_PUBLIC_MARKET_AREA` | `Wilson, NC` | Market area displayed in UI |
-| `ADMIN_SECRET` | `changeme-local` | Password for `/admin` route (basic auth) |
-| `SLA_ACCEPT_MS` | `120000` | Accept SLA in milliseconds (2 min) |
-| `SLA_CONTACT_MS` | `300000` | Contact SLA in milliseconds (5 min) |
+## Lead Center identity
 
-## Optional: AI Providers
+| Variable | Scope | Purpose |
+| --- | --- | --- |
+| `LEAD_CENTER_RBAC_ENABLED` | Server | Enables Better Auth plus server-side RBAC |
+| `BETTER_AUTH_URL` | Server | Exact canonical authentication origin |
+| `BETTER_AUTH_SECRET` | Server sensitive | Better Auth signing secret |
+| `ADMIN_SECRET` | Server sensitive | Break-glass fallback and protected operational endpoints |
+| `CRON_SECRET` | Server sensitive | Scheduled operational endpoint authorization |
 
-If absent, AI-augmented features (intent enrichment, valuation narrative) are disabled.
+Production uses per-user Better Auth sessions and RBAC. When RBAC is enabled but
+its required variables are missing, admin access returns 503. Disabling RBAC is
+a separately approved rollback action; it is not the normal login workflow.
 
-| Variable | Description |
-|----------|-------------|
-| `ANTHROPIC_API_KEY` | Claude API key — checked first |
-| `OPENAI_API_KEY` | OpenAI API key — fallback if no Anthropic key |
+## Internal email and delivery ledger
 
-## Optional: CRM
+| Variables | Purpose |
+| --- | --- |
+| `EMAIL_PROVIDER`, `EMAIL_ENABLED`, `LEAD_NOTIFICATION_MODE` | Select and gate the canonical provider path |
+| `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET`, `RESEND_WEBHOOK_ENABLED` | Resend delivery and signed status callbacks |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD` | Authenticated SMTP fallback |
+| `SMTP_FROM_NAME`, `SMTP_FROM_EMAIL`, `SMTP_REPLY_TO` | Aligned sender identity |
+| `LEAD_NOTIFICATION_TO`, `LEAD_NOTIFICATION_BCC` | Approved internal destinations; values remain private |
 
-If absent, the **null adapter** is used — all CRM operations are logged as `skipped` in `crm_sync_log`. No external writes occur.
+Internal lead storage and outbox creation are independent of provider delivery.
+Provider message IDs, attempts, status, and errors remain in the protected
+notification ledger. Consumer acknowledgment and marketing have independent
+flags and permission checks.
 
-### Follow Up Boss
+## Free phone alerts and deferred carrier SMS
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `FUB_API_KEY` | — | FUB API key (enables FUB adapter) |
-| `FUB_BASE_URL` | `https://api.followupboss.com/v1` | FUB API base URL |
+Web Push uses `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`,
+`VAPID_SUBJECT`, and `AGENT_PUSH_NOTIFICATIONS_ENABLED`. Only the public VAPID
+key may reach browser code. Device enrollment requires the device owner.
 
-### kvCORE
+Carrier SMS uses the `TWILIO_*`, `LEAD_SMS_*`, and
+`AGENT_SMS_NOTIFICATIONS_ENABLED` group. It remains disabled until a compliant
+paid sender and a separately approved QA are available. Never substitute a
+consumer phone, personal wireless takeover, or unregistered sender.
 
-| Variable | Description |
-|----------|-------------|
-| `KVCORE_API_KEY` | kvCORE API key (enables kvCORE adapter) |
-| `KVCORE_BASE_URL` | kvCORE API base URL |
+## Optional adapters
 
-## Optional: Notifications
+- AI features are env-gated. Deterministic scoring and routing do not depend on
+  an AI provider.
+- CRM defaults to the null adapter until approved FUB or kvCORE credentials are
+  configured.
+- AVM providers remain optional and may not create a guaranteed valuation,
+  appraisal, or offer claim.
+- Analytics identifiers are browser-safe only when explicitly named public;
+  raw lead PII never belongs in analytics parameters.
 
-| Variable | Description |
-|----------|-------------|
-| `RESEND_API_KEY` | Resend API key for transactional email |
-| `TWILIO_ACCOUNT_SID` | Twilio account SID for SMS |
-| `TWILIO_AUTH_TOKEN` | Twilio auth token |
-| `TWILIO_FROM_PHONE` | Twilio sender phone (E.164 format) |
+## Safe defaults
 
-## Optional: AVM Providers
-
-If absent, the **mock provider** is used — deterministic estimates, no external API calls.
-
-| Variable | Description |
-|----------|-------------|
-| `ATTOM_API_KEY` | ATTOM Data API key |
-| `HOUSECANARY_API_KEY` | HouseCanary API key |
-| `HOUSECANARY_API_SECRET` | HouseCanary API secret |
-
-## Adapter Priority
-
-### CRM
-1. `FUB_API_KEY` → FollowUpBoss adapter
-2. `KVCORE_API_KEY` → kvCORE adapter
-3. No keys → null adapter (safe default)
-
-### AI
-1. `ANTHROPIC_API_KEY` → Claude
-2. `OPENAI_API_KEY` → OpenAI
-3. No keys → AI features disabled (scoring still works — it's deterministic)
-
-### AVM
-1. `ATTOM_API_KEY` → ATTOM (stub, requires implementation)
-2. `HOUSECANARY_API_KEY` → HouseCanary (stub, requires implementation)
-3. No keys → mock provider
+The example file intentionally defaults sends, consumer automation, database
+mutation, public experiments, and paid channels to disabled. Production values
+are verified through health endpoints and the hosting interface, not inferred
+from example defaults.
