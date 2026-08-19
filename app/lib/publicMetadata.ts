@@ -20,7 +20,7 @@ export function publicPageMetadata({
   path,
   canonicalPath = path,
 }: PublicMetadataInput): Metadata {
-  const socialTitle = `${title} | Ask Magic Mike`;
+  const socialTitle = title.includes("Ask Magic Mike") ? title : `${title} | Ask Magic Mike`;
   return {
     title,
     description,
