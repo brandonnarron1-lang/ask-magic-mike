@@ -17,6 +17,19 @@ declare namespace NodeJS {
 
     // Notifications
     RESEND_API_KEY?: string;
+    EMAIL_PROVIDER?: string;
+    EMAIL_ENABLED?: string;
+    SMTP_HOST?: string;
+    SMTP_PORT?: string;
+    SMTP_SECURE?: string;
+    SMTP_USER?: string;
+    SMTP_PASSWORD?: string;
+    SMTP_FROM_NAME?: string;
+    SMTP_FROM_EMAIL?: string;
+    SMTP_REPLY_TO?: string;
+    SMTP_CONNECTION_TIMEOUT_MS?: string;
+    SMTP_GREETING_TIMEOUT_MS?: string;
+    SMTP_SOCKET_TIMEOUT_MS?: string;
     LEAD_NOTIFICATION_MODE?: string;
     NOTIFICATION_PROVIDER_MODE?: string;
     AGENT_NOTIFICATIONS_ENABLED?: string;
