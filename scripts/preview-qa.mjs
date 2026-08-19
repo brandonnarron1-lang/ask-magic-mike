@@ -114,7 +114,12 @@ async function http(method, path, opts = {}) {
   }
   let res;
   try {
-    res = await fetch(url, { method, headers, body });
+    res = await fetch(url, {
+      method,
+      headers,
+      body,
+      redirect: opts.redirect ?? "follow",
+    });
   } catch (err) {
     // fetch threw before any HTTP response (DNS/TLS/socket, or an invalid
     // header value). Surface a safe, secret-free summary instead of hiding
@@ -149,7 +154,13 @@ async function http(method, path, opts = {}) {
       text = "";
     }
   }
-  return { ok: res.ok, status: res.status, json, text };
+  return {
+    ok: res.ok,
+    status: res.status,
+    json,
+    text,
+    location: res.headers.get("location"),
+  };
 }
 
 function adminHeaders() {
@@ -173,8 +184,15 @@ async function vercelPreviewAccess() {
     });
     return false;
   }
-  const r = await http("GET", "/");
-  const classification = classifyAccessStatus(r.status, BYPASS.present);
+  // Do not follow the response here. Vercel Deployment Protection redirects
+  // to an SSO page that itself returns 200; following it would create a false
+  // positive and run every subsequent assertion against the login screen.
+  const r = await http("GET", "/", { redirect: "manual" });
+  const classification = classifyAccessStatus(
+    r.status,
+    BYPASS.present,
+    r.location
+  );
   switch (classification) {
     case "ok":
       record("vercel_preview_access", "pass", {

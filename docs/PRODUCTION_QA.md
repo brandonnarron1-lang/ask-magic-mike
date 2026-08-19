@@ -1,4 +1,9 @@
 # Production QA Playbook — Ask Magic Mike
+
+> **Historical reference — do not execute as the current QA contract.** Supabase
+> and shared `ADMIN_SECRET` steps below predate canonical Neon and Better
+> Auth/RBAC. Use `QA_EVIDENCE_CURRENT.md`, `PRODUCTION_LAUNCH_GATE.md`, and
+> `GO_LIVE_RUNBOOK.md`.
 **Our Town Properties, Inc. · Wilson, NC**
 **Version:** Omega Launch Phase
 
