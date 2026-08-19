@@ -1,6 +1,33 @@
 # Implementation Status
 
-Updated 2026-08-15.
+Updated 2026-08-19.
+
+## Phase 9 Production operating checkpoint — 2026-08-19
+
+- Canonical Production remains `main` commit
+  `1c9c4eedae4de3d993def32dc6d646c1be2908ca` on Vercel deployment
+  `dpl_BCrmEB67TZDbJ9ihyLvsQkP5deD6`; both Ask Magic Mike hostnames are attached
+  to that one Ready deployment.
+- Public liveness and readiness return HTTP 200. The live response identifies
+  `neon_postgres`, reports the database and canonical capture function ready,
+  and reports production email and Web Push configuration enabled. No email,
+  SMS, push, call, database write, lead creation, or public publication was
+  triggered by this checkpoint.
+- Read-only Production evidence passes: 19 smoke checks with two intentionally
+  skipped privileged/write probes, all 9 lead-pipe routes, both public health
+  tiers, and 6 synthetic checks with the protected admin detail intentionally
+  skipped because no secret was loaded into the shell.
+- PR `#170` is the next release candidate. It adds the protected, read-only
+  `/admin/distribution` Owned Demand Command and requires the exact Phase 9.1
+  Production gate. It does not authorize publication or messaging.
+- PR `#173` is separately green for the device-private `/plan` Review Planner.
+  Production correctly returns 404 for `/plan` until that separately gated PR
+  is merged and deployed.
+- PR `#172` remains a draft, conflicting Database Revival candidate. It must be
+  refreshed after the earlier Phase 9 releases; it authorizes no enrollment,
+  communication, database mutation, or provider action.
+- Current next approval:
+  `APPROVE PHASE 9.1 OWNED DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT`.
 
 ## Phase 6 Production schema acceptance — 2026-08-15
 

@@ -7,38 +7,55 @@ expected impact. Required approvals are separate for: secure env entry, database
 migration, production deploy, first internal QA email, consumer acknowledgment,
 WordPress publish, DNS/domain changes, and marketing publication.
 
-## Sequence
+## Current baseline
 
-1. Review the local diff and rescue branch.
-2. Apply the additive migration to the approved non-production database.
-3. Configure Vercel production envs through the secure interface; keep email disabled
-   until sender/BCC/recipient verification.
-4. Deploy the reviewed commit to a protected preview and run route/API/widget/admin
-   checks.
-5. Obtain production deployment approval; deploy and verify `/`, `/ask`, `/sell`,
-   `/value`, `/buy`, `/rent`, `/open-house/<property-or-id>`, `/widget/v1`,
-   `/robots.txt`, `/sitemap.xml`, `/privacy`, `/terms`, `/accessibility`, and
-   `/contact`.
-6. Obtain first QA-email approval; submit one public QA lead, verify storage,
-   attribution, dashboard, Mike delivery, hidden BCC, provider ID, and no duplicate.
-7. Mark the QA record test/suppressed and exclude it from KPI reports.
-8. Obtain separate WordPress approval; publish one reversible source-tagged CTA or
-   widget placement and monitor before adding more.
+- Canonical data is Neon PostgreSQL. Supabase is compatibility-only and is not a
+  release prerequisite.
+- The public funnel, canonical capture, protected Lead Center, email provider,
+  hidden audit copy, WordPress Form 3 bridge, and test suppression have already
+  completed controlled Production acceptance.
+- Production remains on commit
+  `1c9c4eedae4de3d993def32dc6d646c1be2908ca` and Vercel deployment
+  `dpl_BCrmEB67TZDbJ9ihyLvsQkP5deD6` until another exact deployment gate is
+  granted.
+
+## Phase 9 release sequence
+
+1. Merge and Production-deploy PR `#170` only after the exact Phase 9.1 gate.
+   Verify `/admin/distribution`, RBAC denial, private/no-store behavior, Production
+   health, route manifest, and rollback checkpoint. Do not publish any draft.
+2. Refresh PR `#173` onto the resulting Production commit, rerun its release and
+   visual gates, then request the separate Phase 9.4 `/plan` deployment approval.
+3. Refresh PR `#172` only after the earlier Phase 9 merges. Keep Database Revival
+   read-only; enrollment and communication remain separately prohibited.
+4. Run SMTP connection-only verification only after its named gate. A successful
+   connection does not authorize an email.
+5. Run one controlled internal QA email only after its named send gate; verify the
+   provider message ID, Mike delivery, hidden BCC, canonical notification record,
+   retry state, suppression, and KPI exclusion.
+6. Prepare channel-specific owned-demand publication packets. Publication requires
+   a separate approval naming the account, final copy, visual, tracked URL, and
+   delete/rollback procedure.
 
 ## Exact next approval gate
 
-The next action is a protected preview deployment of the reviewed rescue-branch
-candidate after the owner confirms the target Supabase project and enters no
-secrets in chat. Proposed action: deploy the candidate to an existing Vercel preview
-only; affected system is the `ask-magic-mike` Vercel project; rollback is delete-free
-preview abandonment and redeploy of the recorded production deployment; expected
-impact is route/API verification only, with no public alias or email send. Production
-deployment, live migration, secure env entry, first QA email, and WordPress changes
-remain separate approvals.
+Proposed action: merge PR `#170` into `main` and allow the canonical
+`eyes-up-industries/ask-magic-mike` Vercel project to deploy it to Production.
+
+- Affected surface: protected `/admin/distribution` plus its admin navigation and
+  route-manifest entry.
+- Expected impact: authorized operators can inspect six tracked, human-reviewed
+  owned-demand drafts and observed owned-source signals. There is no public post,
+  message, provider action, spend, database write, or WordPress mutation.
+- Rollback: revert the PR `#170` merge commit or promote the immediately preceding
+  Ready Production deployment `dpl_BCrmEB67TZDbJ9ihyLvsQkP5deD6`.
+- Required approval:
+  `APPROVE PHASE 9.1 OWNED DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT`.
 
 ## Stop conditions
 
-Stop if Supabase schema/credentials are ambiguous, email sender alignment is not
-verified, authorization is bypassed, a provider returns unknown state, a lead is not
-durable, a public page serves wrong-brand content, or any required owner takeover is
-shown. Do not guess credentials or DNS.
+Stop if the canonical Neon environment is ambiguous or unhealthy, authorization
+is bypassed, a provider returns unknown state, a lead is not durable, a public page
+serves wrong-brand content, a proposed action exceeds its named approval gate, or
+any required owner takeover is shown. Do not guess credentials, recipients, DNS,
+publication identity, or consent.
