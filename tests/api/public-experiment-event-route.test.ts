@@ -42,6 +42,8 @@ describe("POST /api/experiments/event", () => {
       event_name: "exposure",
     }));
     expect(response.status).toBe(202);
+    expect(response.headers.get("cache-control")).toBe("private, no-store, max-age=0");
+    expect(response.headers.get("pragma")).toBe("no-cache");
     await expect(response.json()).resolves.toMatchObject({ active: false, recorded: false, variant_key: null });
   });
 
