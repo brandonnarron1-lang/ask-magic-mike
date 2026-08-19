@@ -36,7 +36,10 @@ describe("Phase 9.5 search-authority route wiring", () => {
     const robots = read("app/robots.ts");
     expect(robots).not.toContain('"/ask"');
     expect(robots).toContain('disallow: ["/admin", "/api/"]');
-    expect(read("app/sitemap.ts")).toContain('["/ask", 0.75]');
+    const sitemap = read("app/sitemap.ts");
+    expect(sitemap).toContain('["/ask", 0.75]');
+    expect(sitemap).not.toContain('["/value"');
+    expect(sitemap).not.toContain('["/we-buy-houses"');
   });
 
   it("marks private, operational, embed, and post-conversion routes noindex", () => {
