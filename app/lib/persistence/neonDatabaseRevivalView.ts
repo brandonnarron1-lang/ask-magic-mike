@@ -20,6 +20,8 @@ export interface DatabaseRevivalView extends DatabaseRevivalIntelligence {
   schemaReady: boolean;
   detailsVisible: boolean;
   scopedToAssignedLeads: boolean;
+  retentionPolicyConfigured: boolean;
+  retentionMaxAgeDays: number | null;
   rowsRead: number;
   rowsCapped: boolean;
   error?: string;
@@ -36,6 +38,12 @@ const PERMISSION_STATES = new Set<RevivalPermissionState>([
 
 function queryFromEnv(): DatabaseQuery | null {
   return process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) as DatabaseQuery : null;
+}
+
+function retentionMaxAgeDays(value: unknown): number | null {
+  if (value == null || value === "") return null;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 }
 
 function text(value: unknown, fallback = "") {
@@ -91,6 +99,7 @@ function normalizeRevivalLead(row: Row): RevivalLeadFact {
     nextFollowUpAt: nullableText(row.next_follow_up_at),
     assignedAgentId: nullableText(row.assigned_agent_id),
     assignedAgentName: nullableText(row.assigned_agent_name),
+    assignedAgentActive: booleanValue(row.assigned_agent_active),
     hasEmail: booleanValue(row.has_email),
     hasPhone: booleanValue(row.has_phone),
     emailSuppressed: booleanValue(row.email_suppressed),
@@ -112,15 +121,22 @@ function emptyView(input: {
   schemaReady?: boolean;
   detailsVisible: boolean;
   scopedToAssignedLeads: boolean;
+  retentionMaxAgeDays: number | null;
   now: Date;
   error?: string;
 }): DatabaseRevivalView {
   return {
-    ...buildDatabaseRevivalIntelligence({ leads: [], now: input.now }),
+    ...buildDatabaseRevivalIntelligence({
+      leads: [],
+      now: input.now,
+      retentionMaxAgeDays: input.retentionMaxAgeDays,
+    }),
     configured: input.configured,
     schemaReady: input.schemaReady || false,
     detailsVisible: input.detailsVisible,
     scopedToAssignedLeads: input.scopedToAssignedLeads,
+    retentionPolicyConfigured: input.retentionMaxAgeDays !== null,
+    retentionMaxAgeDays: input.retentionMaxAgeDays,
     rowsRead: 0,
     rowsCapped: false,
     ...(input.error ? { error: input.error } : {}),
@@ -143,10 +159,15 @@ async function detectSchema(sql: DatabaseQuery) {
 
 export async function loadNeonDatabaseRevivalView(
   principal: LeadCenterPrincipal | null,
-  options: { query?: DatabaseQuery; now?: Date } = {},
+  options: { query?: DatabaseQuery; now?: Date; retentionMaxAgeDays?: number | null } = {},
 ): Promise<DatabaseRevivalView> {
   const sql = options.query || queryFromEnv();
   const now = options.now || new Date();
+  const configuredRetentionMaxAgeDays = retentionMaxAgeDays(
+    options.retentionMaxAgeDays === undefined
+      ? process.env.REVIVAL_RETENTION_MAX_AGE_DAYS
+      : options.retentionMaxAgeDays,
+  );
   const canViewAll = Boolean(principal && hasLeadCenterPermission(principal.role, "lead:view_all"));
   const canViewAssigned = Boolean(
     principal
@@ -155,7 +176,13 @@ export async function loadNeonDatabaseRevivalView(
   );
   const detailsVisible = canViewAll || canViewAssigned;
   const scopedToAssignedLeads = Boolean(principal && !canViewAll && canViewAssigned);
-  if (!sql) return emptyView({ configured: false, detailsVisible, scopedToAssignedLeads, now });
+  if (!sql) return emptyView({
+    configured: false,
+    detailsVisible,
+    scopedToAssignedLeads,
+    retentionMaxAgeDays: configuredRetentionMaxAgeDays,
+    now,
+  });
 
   try {
     const schemaReady = await detectSchema(sql);
@@ -165,6 +192,7 @@ export async function loadNeonDatabaseRevivalView(
         schemaReady: false,
         detailsVisible,
         scopedToAssignedLeads,
+        retentionMaxAgeDays: configuredRetentionMaxAgeDays,
         now,
         error: "Database revival dependencies are not ready",
       });
@@ -177,6 +205,7 @@ export async function loadNeonDatabaseRevivalView(
          l.primary_intent, l.timeline_months, l.score, l.city, l.zip,
          l.source, l.source_detail, l.last_contacted_at, l.last_response_at,
          l.next_follow_up_at, l.assigned_agent_id, a.name AS assigned_agent_name,
+         COALESCE(a.is_active, false) AS assigned_agent_active,
          (NULLIF(trim(l.email), '') IS NOT NULL) AS has_email,
          (NULLIF(trim(COALESCE(l.phone, l.phone_normalized)), '') IS NOT NULL) AS has_phone,
          l.email_suppressed, l.sms_suppressed, l.appointment_requested,
@@ -221,6 +250,7 @@ export async function loadNeonDatabaseRevivalView(
     const intelligence = buildDatabaseRevivalIntelligence({
       leads: rows.map(normalizeRevivalLead),
       now,
+      retentionMaxAgeDays: configuredRetentionMaxAgeDays,
     });
     return {
       ...intelligence,
@@ -228,6 +258,8 @@ export async function loadNeonDatabaseRevivalView(
       schemaReady: true,
       detailsVisible,
       scopedToAssignedLeads,
+      retentionPolicyConfigured: configuredRetentionMaxAgeDays !== null,
+      retentionMaxAgeDays: configuredRetentionMaxAgeDays,
       rowsRead: rows.length,
       rowsCapped: rows.length === 1000,
       candidates: detailsVisible ? intelligence.candidates : [],
@@ -238,6 +270,7 @@ export async function loadNeonDatabaseRevivalView(
       schemaReady: false,
       detailsVisible,
       scopedToAssignedLeads,
+      retentionMaxAgeDays: configuredRetentionMaxAgeDays,
       now,
       error: "Canonical Neon database revival query failed",
     });

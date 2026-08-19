@@ -27,6 +27,7 @@ export interface RevivalLeadFact {
   nextFollowUpAt: string | null;
   assignedAgentId: string | null;
   assignedAgentName: string | null;
+  assignedAgentActive: boolean;
   hasEmail: boolean;
   hasPhone: boolean;
   emailSuppressed: boolean;
@@ -67,6 +68,7 @@ export interface RevivalCandidate {
   source: string;
   assignedAgentId: string | null;
   assignedAgentName: string | null;
+  assignedAgentActive: boolean;
   approvedChannels: string[];
   permissionEvidence: string[];
   blockingReasons: string[];
@@ -105,6 +107,8 @@ export interface DatabaseRevivalIntelligence {
   sequenceConflicts: number;
   taskConflicts: number;
   unassigned: number;
+  inactiveOwners: number;
+  retentionReviewBlocked: number;
   cohorts: RevivalCohortSummary[];
   candidates: RevivalCandidate[];
 }
@@ -270,7 +274,7 @@ function priorityFactors(input: {
   const dormancyPoints = Math.max(2, 15 - Math.floor(Math.max(0, daysDormant - thresholdDays) / 30) * 2);
   factors.push({ code: "relevance_window", points: dormancyPoints, explanation: "More recently stale relationships receive higher review priority than very old records." });
   if (approvedChannels.length) factors.push({ code: "explicit_permission", points: 20, explanation: "At least one purpose-specific permission is explicitly allowed." });
-  if (lead.assignedAgentId) factors.push({ code: "current_owner", points: 5, explanation: "An approved current owner is recorded." });
+  if (lead.assignedAgentId && lead.assignedAgentActive) factors.push({ code: "current_owner", points: 5, explanation: "An active approved current owner is recorded." });
   if (lead.city || lead.zip || lead.source) factors.push({ code: "usable_context", points: 5, explanation: "Minimized geography or source context is available for human review." });
 
   const penalties: Array<[string, number, string]> = [
@@ -281,6 +285,9 @@ function priorityFactors(input: {
     ["future_follow_up_scheduled", -20, "A future follow-up is already scheduled."],
     ["appointment_in_progress", -40, "An appointment workflow is already in progress."],
     ["unassigned", -10, "No approved current owner is recorded."],
+    ["inactive_owner", -20, "The assigned owner is inactive and must be reassigned before outreach review."],
+    ["retention_policy_unconfigured", -40, "No approved retention window is configured for revival eligibility."],
+    ["outside_retention_window", -40, "The record falls outside the configured revival retention window."],
   ];
   for (const [code, points, explanation] of penalties) {
     if (blockingReasons.includes(code)) factors.push({ code, points, explanation });
@@ -288,7 +295,11 @@ function priorityFactors(input: {
   return factors;
 }
 
-function candidateFor(lead: RevivalLeadFact, now: Date): RevivalCandidate | null {
+function candidateFor(
+  lead: RevivalLeadFact,
+  now: Date,
+  retentionMaxAgeDays: number | null,
+): RevivalCandidate | null {
   if (lead.isTest || lead.communicationSuppressed || lead.isDuplicate) return null;
   const status = normalized(lead.status);
   const conversionStage = normalized(lead.conversionStage);
@@ -296,6 +307,10 @@ function candidateFor(lead: RevivalLeadFact, now: Date): RevivalCandidate | null
   const activityAt = latestActivityAt(lead);
   if (activityAt === null) return null;
   const daysDormant = Math.max(0, Math.floor((now.getTime() - activityAt) / 86_400_000));
+  const createdAt = parsedTime(lead.createdAt);
+  const recordAgeDays = createdAt === null
+    ? null
+    : Math.max(0, Math.floor((now.getTime() - createdAt) / 86_400_000));
   const cohort = cohortFor(lead);
   if (daysDormant < cohort.thresholdDays) return null;
 
@@ -330,6 +345,9 @@ function candidateFor(lead: RevivalLeadFact, now: Date): RevivalCandidate | null
   if (nextFollowUp !== null && nextFollowUp > now.getTime()) blockingReasons.push("future_follow_up_scheduled");
   if (lead.appointmentRequested || ["appointment_requested", "appointment_set"].includes(status)) blockingReasons.push("appointment_in_progress");
   if (!lead.assignedAgentId) blockingReasons.push("unassigned");
+  else if (!lead.assignedAgentActive) blockingReasons.push("inactive_owner");
+  if (retentionMaxAgeDays === null) blockingReasons.push("retention_policy_unconfigured");
+  else if (recordAgeDays === null || recordAgeDays > retentionMaxAgeDays) blockingReasons.push("outside_retention_window");
 
   const factors = priorityFactors({ lead, daysDormant, thresholdDays: cohort.thresholdDays, approvedChannels, blockingReasons });
   const priorityScore = Math.max(0, Math.min(100, factors.reduce((sum, factor) => sum + factor.points, 0)));
@@ -369,6 +387,7 @@ function candidateFor(lead: RevivalLeadFact, now: Date): RevivalCandidate | null
     source: lead.source || lead.sourceDetail || "unknown",
     assignedAgentId: lead.assignedAgentId,
     assignedAgentName: lead.assignedAgentName,
+    assignedAgentActive: lead.assignedAgentActive,
     approvedChannels: [...new Set(approvedChannels)],
     permissionEvidence,
     blockingReasons,
@@ -388,10 +407,16 @@ function candidateFor(lead: RevivalLeadFact, now: Date): RevivalCandidate | null
 export function buildDatabaseRevivalIntelligence(input: {
   leads: RevivalLeadFact[];
   now?: Date;
+  retentionMaxAgeDays?: number | null;
 }): DatabaseRevivalIntelligence {
   const now = input.now || new Date();
+  const retentionMaxAgeDays = typeof input.retentionMaxAgeDays === "number"
+    && Number.isInteger(input.retentionMaxAgeDays)
+    && input.retentionMaxAgeDays > 0
+    ? input.retentionMaxAgeDays
+    : null;
   const candidates = input.leads
-    .map((lead) => candidateFor(lead, now))
+    .map((lead) => candidateFor(lead, now, retentionMaxAgeDays))
     .filter((candidate): candidate is RevivalCandidate => candidate !== null)
     .sort((left, right) => {
       if (left.eligibility !== right.eligibility) return left.eligibility === "draft_eligible" ? -1 : 1;
@@ -425,6 +450,9 @@ export function buildDatabaseRevivalIntelligence(input: {
     sequenceConflicts: candidates.filter((candidate) => candidate.blockingReasons.includes("sequence_conflict")).length,
     taskConflicts: candidates.filter((candidate) => candidate.blockingReasons.includes("open_task_conflict")).length,
     unassigned: candidates.filter((candidate) => candidate.blockingReasons.includes("unassigned")).length,
+    inactiveOwners: candidates.filter((candidate) => candidate.blockingReasons.includes("inactive_owner")).length,
+    retentionReviewBlocked: candidates.filter((candidate) => candidate.blockingReasons.some((reason) =>
+      reason === "retention_policy_unconfigured" || reason === "outside_retention_window")).length,
     cohorts,
     candidates,
   };

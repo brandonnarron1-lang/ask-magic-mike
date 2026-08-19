@@ -40,6 +40,7 @@ describe("Database Revival Command route and authority guards", () => {
     expect(view).toContain("l.duplicate_of_lead_id IS NULL");
     expect(view).toContain("l.status NOT IN ('dead', 'converted', 'spam')");
     expect(view).toContain("LIMIT 1000");
+    expect(view).toContain("COALESCE(a.is_active, false) AS assigned_agent_active");
     expect(view).not.toContain("l.first_name");
     expect(view).not.toContain("l.last_name");
     expect(view).not.toContain("l.question_raw");
@@ -53,6 +54,8 @@ describe("Database Revival Command route and authority guards", () => {
     expect(engine).toContain('actionClass: "draft_only" | "operator_review"');
     expect(engine).not.toContain('actionClass: "auto_send"');
     expect(engine).not.toContain("consentEmail");
+    expect(engine).toContain('blockingReasons.push("retention_policy_unconfigured")');
+    expect(engine).toContain('blockingReasons.push("inactive_owner")');
   });
 
   it("registers Revival in the canonical admin navigation and route manifest", () => {

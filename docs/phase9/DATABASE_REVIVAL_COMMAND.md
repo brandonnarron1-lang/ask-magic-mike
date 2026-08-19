@@ -23,6 +23,11 @@ The deterministic engine uses cohort-specific minimum dormancy windows:
 
 Activity age uses the latest valid value among creation, last contact, and last
 response. A newer response resets dormancy even if the lead was created long ago.
+Draft eligibility also requires an explicit owner/BIC-approved record-retention
+window in `REVIVAL_RETENTION_MAX_AGE_DAYS`. The application has no legal default:
+an unset, zero, negative, fractional, or invalid value fails closed and keeps every
+candidate in operator review. Records older than the configured maximum are also
+blocked. This setting is an operational control, not legal advice.
 
 ## Hard exclusions and conflicts
 
@@ -44,7 +49,9 @@ The engine then blocks draft eligibility when it finds:
 - an open task;
 - a future scheduled follow-up;
 - an appointment workflow; or
-- no approved current owner.
+- no approved current owner;
+- an assigned owner whose canonical `agents.is_active` state is false; or
+- a missing retention policy or a record outside the approved retention window.
 
 Generic contact presence and legacy consent flags never become ongoing marketing
 permission. The current permission ledger must contain an explicit allowed state.
@@ -59,7 +66,7 @@ internal permission-review note, never consumer-shaped copy.
 Priority is deterministic and bounded from 0–100. Positive factors include the
 existing deterministic lead score, originally stated timeline, relevance window,
 explicit permission, owner, and minimized context. Penalties identify missing
-permission, destination, ownership, and active-work conflicts. Every point and
+permission, destination, active ownership, retention review, and active-work conflicts. Every point and
 explanation is rendered to the operator.
 
 Confidence describes confidence in the review recommendation—not confidence in a
@@ -102,8 +109,11 @@ Required evidence:
 
 ## Deployment and rollback
 
-No database migration is required. Deployment adds one server-rendered route and
-one navigation link. Rollback is promotion of the prior verified Production
+No database migration is required. Deployment adds one server-rendered route,
+one navigation link, and one optional server-only policy variable. Production
+must leave `REVIVAL_RETENTION_MAX_AGE_DAYS` unset until the owner/BIC approves a
+specific value; that state is safe because every candidate remains operator review.
+Rollback is promotion of the prior verified Production
 deployment or reverting the feature commit. No lead, permission, sequence, task,
 or provider state requires data rollback.
 

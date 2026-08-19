@@ -98,7 +98,9 @@ function CandidateCard({ candidate }: { candidate: RevivalCandidate }) {
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          ["Current owner", candidate.assignedAgentName || "Unassigned"],
+          ["Current owner", candidate.assignedAgentId && !candidate.assignedAgentActive
+            ? `${candidate.assignedAgentName || "Assigned agent"} · Inactive — reassign`
+            : candidate.assignedAgentName || "Unassigned"],
           ["Status / intent", `${titleCase(candidate.status)} · ${titleCase(candidate.intent)}`],
           ["Approved paths", candidate.approvedChannels.length ? candidate.approvedChannels.map(titleCase).join(", ") : "None recorded"],
           ["Open work", `${candidate.openTaskCount} task(s) · ${candidate.sequenceStatuses.length} sequence conflict(s)`],
@@ -240,7 +242,13 @@ export default async function DatabaseRevivalPage({
           ) : null}
         </div>
 
-        <section className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7" aria-label="Database revival summary">
+        {data.configured && !data.retentionPolicyConfigured ? (
+          <div className="mt-5 rounded-2xl border border-[#a21f3d66] bg-[#21070e] p-5 text-sm leading-6 text-[#ffdbe4]">
+            <strong className="text-[#ff8ca7]">Retention approval required.</strong> No revival candidate can be draft eligible until an owner/BIC-approved maximum record age is configured. Current records remain read-only operator-review items.
+          </div>
+        ) : null}
+
+        <section className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Database revival summary">
           <MetricCard label="Rows evaluated" value={data.rowsEvaluated} note="Bounded canonical read" />
           <MetricCard label="Stale candidates" value={data.staleCandidates} note="Non-terminal, live, deduplicated" tone="cyan" />
           <MetricCard label="Draft eligible" value={data.draftEligible} note="Still requires human review and release approval" tone="green" />
@@ -248,6 +256,8 @@ export default async function DatabaseRevivalPage({
           <MetricCard label="Sequence conflicts" value={data.sequenceConflicts} note="Existing journey owns communication" />
           <MetricCard label="Task conflicts" value={data.taskConflicts} note="Open work already owns next action" />
           <MetricCard label="Unassigned" value={data.unassigned} note="Cannot proceed without an owner" tone="ruby" />
+          <MetricCard label="Inactive owners" value={data.inactiveOwners} note="Requires approved reassignment" tone="ruby" />
+          <MetricCard label="Retention review" value={data.retentionReviewBlocked} note={data.retentionPolicyConfigured ? `Outside approved ${data.retentionMaxAgeDays}-day window` : "Policy window is not configured"} tone="ruby" />
         </section>
 
         <section className="mt-5 rounded-2xl border border-white/10 bg-[#080808] p-5 sm:p-6">

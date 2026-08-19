@@ -7,6 +7,7 @@ import { loadNeonDatabaseRevivalView } from "../../app/lib/persistence/neonDatab
 import type { LeadCenterPrincipal } from "../../src/lib/admin/rbac-policy";
 
 const NOW = new Date("2026-08-19T16:00:00.000Z");
+const APPROVED_RETENTION_DAYS = 365;
 
 function lead(overrides: Partial<RevivalLeadFact> = {}): RevivalLeadFact {
   return {
@@ -27,6 +28,7 @@ function lead(overrides: Partial<RevivalLeadFact> = {}): RevivalLeadFact {
     nextFollowUpAt: null,
     assignedAgentId: "22222222-2222-4222-8222-222222222222",
     assignedAgentName: "Approved Agent",
+    assignedAgentActive: true,
     hasEmail: true,
     hasPhone: true,
     emailSuppressed: false,
@@ -82,6 +84,7 @@ function databaseRow(overrides: Record<string, unknown> = {}) {
     next_follow_up_at: value.nextFollowUpAt,
     assigned_agent_id: value.assignedAgentId,
     assigned_agent_name: value.assignedAgentName,
+    assigned_agent_active: value.assignedAgentActive,
     has_email: value.hasEmail,
     has_phone: value.hasPhone,
     email_suppressed: value.emailSuppressed,
@@ -101,7 +104,7 @@ function databaseRow(overrides: Record<string, unknown> = {}) {
 
 describe("database revival intelligence", () => {
   it("creates an explainable draft-only seller candidate from explicit ongoing permission", () => {
-    const result = buildDatabaseRevivalIntelligence({ leads: [lead()], now: NOW });
+    const result = buildDatabaseRevivalIntelligence({ leads: [lead()], now: NOW, retentionMaxAgeDays: APPROVED_RETENTION_DAYS });
     expect(result).toMatchObject({
       rowsEvaluated: 1,
       staleCandidates: 1,
@@ -137,6 +140,7 @@ describe("database revival intelligence", () => {
         propertyAlertEmailState: "not_recorded",
       })],
       now: NOW,
+      retentionMaxAgeDays: APPROVED_RETENTION_DAYS,
     });
     expect(result.draftEligible).toBe(0);
     expect(result.operatorReview).toBe(1);
@@ -166,6 +170,7 @@ describe("database revival intelligence", () => {
         assignedAgentName: null,
       })],
       now: NOW,
+      retentionMaxAgeDays: APPROVED_RETENTION_DAYS,
     });
     expect(result.candidates[0]).toMatchObject({
       cohort: "buyer_search_refresh",
@@ -197,7 +202,7 @@ describe("database revival intelligence", () => {
       lead({ id: "00000000-0000-4000-8000-000000000005", conversionStage: "closed_won" }),
       lead({ id: "00000000-0000-4000-8000-000000000006", lastContactedAt: "2026-08-01T12:00:00.000Z" }),
     ];
-    const result = buildDatabaseRevivalIntelligence({ leads: rows, now: NOW });
+    const result = buildDatabaseRevivalIntelligence({ leads: rows, now: NOW, retentionMaxAgeDays: APPROVED_RETENTION_DAYS });
     expect(result.rowsEvaluated).toBe(6);
     expect(result.staleCandidates).toBe(0);
     expect(result.candidates).toEqual([]);
@@ -211,6 +216,7 @@ describe("database revival intelligence", () => {
         lead({ id: "00000000-0000-4000-8000-000000000013", leadType: "general_question", primaryIntent: "unknown", lastContactedAt: "2026-04-01T12:00:00.000Z" }),
       ],
       now: NOW,
+      retentionMaxAgeDays: APPROVED_RETENTION_DAYS,
     });
     expect(result.candidates.map((candidate) => candidate.cohort)).toEqual(expect.arrayContaining([
       "buyer_search_refresh",
@@ -229,6 +235,7 @@ describe("database revival intelligence", () => {
         hasEmail: false,
       })],
       now: NOW,
+      retentionMaxAgeDays: APPROVED_RETENTION_DAYS,
     }).candidates[0];
     expect(smsOnly.eligibility).toBe("draft_eligible");
     expect(smsOnly.draft).toMatchObject({ channel: "sms", purpose: "marketing_nurture", subject: null });
@@ -241,6 +248,7 @@ describe("database revival intelligence", () => {
         propertyAlertEmailState: "allowed",
       })],
       now: NOW,
+      retentionMaxAgeDays: APPROVED_RETENTION_DAYS,
     }).candidates[0];
     expect(unrelated.eligibility).toBe("operator_review");
     expect(unrelated.blockingReasons).toContain("missing_explicit_permission");
@@ -248,6 +256,43 @@ describe("database revival intelligence", () => {
       channel: "internal_review",
       purpose: "permission_review",
     });
+  });
+
+  it("requires an active canonical owner before a consumer-shaped draft can be eligible", () => {
+    const result = buildDatabaseRevivalIntelligence({
+      leads: [lead({ assignedAgentActive: false })],
+      now: NOW,
+      retentionMaxAgeDays: APPROVED_RETENTION_DAYS,
+    });
+    expect(result).toMatchObject({ draftEligible: 0, operatorReview: 1, inactiveOwners: 1 });
+    expect(result.candidates[0]).toMatchObject({
+      assignedAgentActive: false,
+      eligibility: "operator_review",
+      actionClass: "operator_review",
+    });
+    expect(result.candidates[0].blockingReasons).toContain("inactive_owner");
+    expect(result.candidates[0].scoreFactors.map((factor) => factor.code)).not.toContain("current_owner");
+  });
+
+  it("fails closed without an approved retention window and blocks records outside it", () => {
+    const unconfigured = buildDatabaseRevivalIntelligence({ leads: [lead()], now: NOW });
+    expect(unconfigured).toMatchObject({ draftEligible: 0, operatorReview: 1, retentionReviewBlocked: 1 });
+    expect(unconfigured.candidates[0].blockingReasons).toContain("retention_policy_unconfigured");
+
+    const outside = buildDatabaseRevivalIntelligence({
+      leads: [lead()],
+      now: NOW,
+      retentionMaxAgeDays: 90,
+    });
+    expect(outside).toMatchObject({ draftEligible: 0, retentionReviewBlocked: 1 });
+    expect(outside.candidates[0].blockingReasons).toContain("outside_retention_window");
+
+    const approved = buildDatabaseRevivalIntelligence({
+      leads: [lead()],
+      now: NOW,
+      retentionMaxAgeDays: APPROVED_RETENTION_DAYS,
+    });
+    expect(approved).toMatchObject({ draftEligible: 1, retentionReviewBlocked: 0 });
   });
 });
 
@@ -260,7 +305,11 @@ describe("canonical Neon database revival view", () => {
         return calls.length === 1 ? [schemaRow()] : [databaseRow()];
       },
     };
-    const result = await loadNeonDatabaseRevivalView(administrator, { query, now: NOW });
+    const result = await loadNeonDatabaseRevivalView(administrator, {
+      query,
+      now: NOW,
+      retentionMaxAgeDays: APPROVED_RETENTION_DAYS,
+    });
     expect(result).toMatchObject({
       configured: true,
       schemaReady: true,
@@ -268,12 +317,15 @@ describe("canonical Neon database revival view", () => {
       scopedToAssignedLeads: false,
       rowsRead: 1,
       staleCandidates: 1,
+      retentionPolicyConfigured: true,
+      retentionMaxAgeDays: APPROVED_RETENTION_DAYS,
     });
     expect(result.candidates).toHaveLength(1);
     const sql = calls[1].query;
     expect(sql).toContain("l.is_test = false");
     expect(sql).toContain("l.communication_suppressed = false");
     expect(sql).toContain("l.duplicate_of_lead_id IS NULL");
+    expect(sql).toContain("COALESCE(a.is_active, false) AS assigned_agent_active");
     expect(sql).toContain("LIMIT 1000");
     expect(sql).not.toContain("l.first_name");
     expect(sql).not.toContain("l.last_name");
@@ -289,7 +341,7 @@ describe("canonical Neon database revival view", () => {
     };
     let call = 0;
     const query = { async query() { call += 1; return call === 1 ? [schemaRow()] : [databaseRow()]; } };
-    const result = await loadNeonDatabaseRevivalView(analyst, { query, now: NOW });
+    const result = await loadNeonDatabaseRevivalView(analyst, { query, now: NOW, retentionMaxAgeDays: APPROVED_RETENTION_DAYS });
     expect(result.detailsVisible).toBe(false);
     expect(result.staleCandidates).toBe(1);
     expect(result.candidates).toEqual([]);
@@ -298,7 +350,7 @@ describe("canonical Neon database revival view", () => {
   it("fails closed on lead-level details when no authenticated principal is supplied", async () => {
     let call = 0;
     const query = { async query() { call += 1; return call === 1 ? [schemaRow()] : [databaseRow()]; } };
-    const result = await loadNeonDatabaseRevivalView(null, { query, now: NOW });
+    const result = await loadNeonDatabaseRevivalView(null, { query, now: NOW, retentionMaxAgeDays: APPROVED_RETENTION_DAYS });
     expect(result.detailsVisible).toBe(false);
     expect(result.staleCandidates).toBe(1);
     expect(result.candidates).toEqual([]);
@@ -318,11 +370,29 @@ describe("canonical Neon database revival view", () => {
         return calls.length === 1 ? [schemaRow()] : [databaseRow()];
       },
     };
-    const result = await loadNeonDatabaseRevivalView(principal, { query, now: NOW });
+    const result = await loadNeonDatabaseRevivalView(principal, { query, now: NOW, retentionMaxAgeDays: APPROVED_RETENTION_DAYS });
     expect(result.detailsVisible).toBe(true);
     expect(result.scopedToAssignedLeads).toBe(true);
     expect(calls[1].query).toContain("l.assigned_agent_id = $1::uuid");
     expect(calls[1].params).toEqual([principal.agentId]);
+  });
+
+  it("reports an unset retention policy and keeps otherwise eligible rows in operator review", async () => {
+    let call = 0;
+    const query = { async query() { call += 1; return call === 1 ? [schemaRow()] : [databaseRow()]; } };
+    const result = await loadNeonDatabaseRevivalView(administrator, {
+      query,
+      now: NOW,
+      retentionMaxAgeDays: null,
+    });
+    expect(result).toMatchObject({
+      retentionPolicyConfigured: false,
+      retentionMaxAgeDays: null,
+      draftEligible: 0,
+      operatorReview: 1,
+      retentionReviewBlocked: 1,
+    });
+    expect(result.candidates[0].blockingReasons).toContain("retention_policy_unconfigured");
   });
 
   it("fails closed when dependencies are missing or a query fails", async () => {
