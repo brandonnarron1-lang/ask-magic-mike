@@ -230,12 +230,13 @@ export class SupabasePostgrestAdapter implements ActivePersistenceBoundary {
   }
 
   async mutateAdminLead(input: AdminLeadMutation): Promise<AdminLeadMutationResult> {
-    const result = await this.rpc("mutate_admin_lead_status_v1", {
+    const result = await this.rpc("mutate_admin_lead_status_v2", {
       p_lead_id: input.leadId,
       p_expected_status: input.expectedStatus,
       p_next_status: input.nextStatus,
       p_patch: input.patch,
       p_reason: input.reason || null,
+      p_outcome_amount_usd: input.outcomeAmountUsd ?? null,
       p_actor: input.actor,
       p_occurred_at: input.occurredAt,
     });
@@ -245,6 +246,8 @@ export class SupabasePostgrestAdapter implements ActivePersistenceBoundary {
         error:
           result.error === "lead_not_found"
             ? "lead_not_found"
+            : result.error === "invalid_outcome_amount"
+              ? "invalid_outcome_amount"
             : "concurrent_status_update",
       };
     }
@@ -252,6 +255,7 @@ export class SupabasePostgrestAdapter implements ActivePersistenceBoundary {
       ok: true,
       status: requiredString(result.status, "status"),
       auditId: typeof result.audit_id === "string" ? result.audit_id : null,
+      outcomeId: typeof result.outcome_id === "string" ? result.outcome_id : null,
       idempotentReplay: result.idempotent_replay === true,
     };
   }

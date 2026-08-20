@@ -129,6 +129,7 @@ export type AdminLeadMutation = {
   expectedStatus: string;
   nextStatus: string;
   patch: Record<string, unknown>;
+  outcomeAmountUsd?: number | null;
   actor: string;
   reason?: string | null;
   occurredAt: string;
@@ -139,9 +140,13 @@ export type AdminLeadMutationResult =
       ok: true;
       status: string;
       auditId?: string | null;
+      outcomeId?: string | null;
       idempotentReplay: boolean;
     }
-  | { ok: false; error: "lead_not_found" | "concurrent_status_update" };
+  | {
+      ok: false;
+      error: "lead_not_found" | "concurrent_status_update" | "invalid_outcome_amount";
+    };
 
 export interface AdminLeadMutationPersistence {
   mutateAdminLead(input: AdminLeadMutation): Promise<AdminLeadMutationResult>;

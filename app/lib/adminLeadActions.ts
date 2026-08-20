@@ -25,6 +25,7 @@ export type AdminLeadStatusUpdateResult =
   | { ok: false; statusCode: number; error: string };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const MONEY = /^\d{1,8}(?:\.\d{1,2})?$/;
 const AUDIT_ACTOR = "system/admin_basic_auth";
 
 function text(value: unknown): string | null {
@@ -36,13 +37,36 @@ function text(value: unknown): string | null {
 export async function updateAdminLeadStatus(
   leadId: string,
   status: string,
-  options: { reason?: string | null; now?: Date; actor?: string } = {},
+  options: {
+    reason?: string | null;
+    outcomeAmountUsd?: string | number | null;
+    now?: Date;
+    actor?: string;
+  } = {},
 ): Promise<AdminLeadStatusUpdateResult> {
   if (!UUID.test(leadId)) {
     return { ok: false, statusCode: 400, error: "invalid_lead_id" };
   }
   if (!isAdminLeadStatus(status)) {
     return { ok: false, statusCode: 400, error: "invalid_status" };
+  }
+  const rawOutcomeAmount = options.outcomeAmountUsd;
+  const hasOutcomeAmount = rawOutcomeAmount !== null &&
+    rawOutcomeAmount !== undefined &&
+    String(rawOutcomeAmount).trim() !== "";
+  if (hasOutcomeAmount && status !== "converted") {
+    return { ok: false, statusCode: 400, error: "outcome_amount_not_allowed" };
+  }
+  const outcomeAmountText = hasOutcomeAmount ? String(rawOutcomeAmount).trim() : "";
+  if (outcomeAmountText && !MONEY.test(outcomeAmountText)) {
+    return { ok: false, statusCode: 400, error: "invalid_outcome_amount" };
+  }
+  const outcomeAmountUsd = outcomeAmountText ? Number(outcomeAmountText) : null;
+  if (
+    outcomeAmountUsd !== null &&
+    (!Number.isFinite(outcomeAmountUsd) || outcomeAmountUsd > 99_999_999.99)
+  ) {
+    return { ok: false, statusCode: 400, error: "invalid_outcome_amount" };
   }
   const mutation = assertDatabaseMutationAllowed();
   if (!mutation.ok) {
@@ -78,6 +102,7 @@ export async function updateAdminLeadStatus(
       expectedStatus: currentStatusText,
       nextStatus: status,
       patch: buildLeadLifecyclePatch(status, { nowIso, reason }),
+      outcomeAmountUsd,
       actor: options.actor || AUDIT_ACTOR,
       reason,
       occurredAt: nowIso,
@@ -85,9 +110,16 @@ export async function updateAdminLeadStatus(
     if (!result.ok) {
       return {
         ok: false,
-        statusCode: result.error === "lead_not_found" ? 404 : 409,
+        statusCode: result.error === "lead_not_found"
+          ? 404
+          : result.error === "invalid_outcome_amount"
+            ? 400
+            : 409,
         error: result.error,
       };
+    }
+    if (result.idempotentReplay && outcomeAmountUsd !== null) {
+      return { ok: true, status, warning: "outcome_revenue_updated" };
     }
     return result.idempotentReplay
       ? { ok: true, status, warning: "status_already_current" }

@@ -34,7 +34,7 @@ function installStatusFetch(currentStatus: string, rpcResult: Record<string, unk
     const body = typeof init?.body === "string" ? JSON.parse(init.body) : {};
     calls.push({ url, method, body });
     if (method === "GET") return response([{ id: LEAD_ID, status: currentStatus }]);
-    if (url.includes("/rest/v1/rpc/mutate_admin_lead_status_v1")) return response(rpcResult);
+    if (url.includes("/rest/v1/rpc/mutate_admin_lead_status_v2")) return response(rpcResult);
     throw new Error(`Unexpected request ${method} ${url}`);
   }) as unknown as typeof fetch;
   return calls;
@@ -125,13 +125,14 @@ describe("atomic AdminOps lead status action", () => {
     })).resolves.toEqual({ ok: true, status: "spam" });
     expect(calls.map((call) => call.method)).toEqual(["GET", "POST"]);
     expect(calls[1].url).toBe(
-      "https://fake.supabase.co/rest/v1/rpc/mutate_admin_lead_status_v1",
+      "https://fake.supabase.co/rest/v1/rpc/mutate_admin_lead_status_v2",
     );
     expect(calls[1].body).toMatchObject({
       p_lead_id: LEAD_ID,
       p_expected_status: "qualified",
       p_next_status: "spam",
       p_reason: "internal_test",
+      p_outcome_amount_usd: null,
       p_actor: "system/admin_basic_auth",
       p_occurred_at: "2026-07-16T12:00:00.000Z",
     });
@@ -150,6 +151,29 @@ describe("atomic AdminOps lead status action", () => {
       statusCode: 409,
       error: "concurrent_status_update",
     });
+  });
+
+  it("records bounded actual brokerage revenue only with a closed-won transition", async () => {
+    const calls = installStatusFetch("qualified", {
+      ok: true,
+      status: "converted",
+      outcome_id: "55555555-5555-4555-8555-555555555555",
+      idempotent_replay: false,
+    });
+    await expect(updateAdminLeadStatus(LEAD_ID, "converted", {
+      outcomeAmountUsd: "12345.67",
+    })).resolves.toEqual({ ok: true, status: "converted" });
+    expect(calls[1].body.p_outcome_amount_usd).toBe(12345.67);
+
+    const invalidCalls = installStatusFetch("qualified", {});
+    await expect(updateAdminLeadStatus(LEAD_ID, "converted", {
+      outcomeAmountUsd: "1,234",
+    })).resolves.toMatchObject({ ok: false, error: "invalid_outcome_amount" });
+    expect(invalidCalls).toHaveLength(0);
+
+    await expect(updateAdminLeadStatus(LEAD_ID, "qualified", {
+      outcomeAmountUsd: "100",
+    })).resolves.toMatchObject({ ok: false, error: "outcome_amount_not_allowed" });
   });
 
   it("never reports partial success if audit insertion rolls back the transaction", async () => {
@@ -180,6 +204,23 @@ describe("atomic AdminOps lead status action", () => {
       p_expected_status: "contacted",
       p_next_status: "contacted",
     });
+  });
+
+  it("updates closed revenue through an idempotent same-state replay", async () => {
+    const calls = installStatusFetch("converted", {
+      ok: true,
+      status: "converted",
+      outcome_id: "55555555-5555-4555-8555-555555555555",
+      idempotent_replay: true,
+    });
+    await expect(updateAdminLeadStatus(LEAD_ID, "converted", {
+      outcomeAmountUsd: "15000.25",
+    })).resolves.toEqual({
+      ok: true,
+      status: "converted",
+      warning: "outcome_revenue_updated",
+    });
+    expect(calls[1].body.p_outcome_amount_usd).toBe(15000.25);
   });
 
   it("does not claim same-state success when database revalidation detects a stale read", async () => {

@@ -16,6 +16,7 @@ export type {
   AdminAttributionView,
   AdminLeadDetailResult,
   AdminLeadInboxResult,
+  AdminLeadOutcomeRow,
   AdminLeadView,
 } from "./persistence/supabase/adminLeadView";
 

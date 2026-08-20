@@ -13,6 +13,7 @@ import {
   updateFollowupTask,
 } from "../../lib/adminAppointmentFollowupOps";
 import { requireLeadCenterLeadPermission } from "../../../src/lib/admin/rbac-session";
+import { hasLeadCenterPermission } from "../../../src/lib/admin/rbac-policy";
 
 function safeReturnTo(value: string) {
   return value === "/admin/leads" || value.startsWith("/admin/leads/")
@@ -28,6 +29,14 @@ export async function updateLeadStatusAction(formData: FormData) {
   const returnTo = safeReturnTo(String(formData.get("return_to") ?? "/admin/leads"));
   const confirm = formData.get("confirm") === "yes";
   const action = statusActionFor(status);
+  const outcomeAmountUsd = String(formData.get("outcome_amount_usd") ?? "").trim();
+
+  if (
+    outcomeAmountUsd &&
+    (!principal || !hasLeadCenterPermission(principal.role, "lead:record_revenue"))
+  ) {
+    redirect(returnTo + "?status_action=revenue_permission_required");
+  }
 
   if (action?.requiresConfirmation && !confirm) {
     redirect(returnTo + "?status_action=confirmation_required");
@@ -35,6 +44,7 @@ export async function updateLeadStatusAction(formData: FormData) {
 
   const result = await updateAdminLeadStatus(leadId, status, {
     reason,
+    outcomeAmountUsd,
     actor: principal ? `lead_center:${principal.userId}` : undefined,
   });
   revalidatePath("/admin/leads");

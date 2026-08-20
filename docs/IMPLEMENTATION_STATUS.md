@@ -1,6 +1,53 @@
 # Implementation Status
 
-Updated 2026-08-19.
+Updated 2026-08-20.
+
+## Phase 9 operating-intelligence outcome seam — 2026-08-19
+
+- Canonical Production is `main` commit
+  `47b88bd0c568afb09373e75d270d894626dddf1a`, Vercel deployment
+  `dpl_8WyzT1bg5kj6HRnrDqwdQGvzKZfz`; public, health, canonical-domain,
+  anonymous-admin-denial, and system-isolation checks pass.
+- Reuse-first audit found that the existing Growth command center reads
+  `lead_outcomes`, but ordinary Lead Center lifecycle actions did not write
+  canonical outcomes.
+- Candidate branch `codex/phase9-operating-intelligence-20260819` adds one
+  additive v2 lifecycle RPC that commits lead state, audit, and deterministic
+  outcome together. Existing v1 remains the application rollback boundary.
+- Optional closed revenue is restricted by the existing
+  `lead:record_revenue` permission and explicitly means actual brokerage
+  revenue—not sale price, list price, estimated value, or projected commission.
+- The complete migration chain and executable outcome contract pass on
+  disposable PostgreSQL 17. The final local release gate passes 193 test files
+  / 2,763 tests, strict typecheck, lint, build, 14/14 safety checks, and
+  78-route manifest verification. The prior candidate also has independent
+  Node 24 CI proof at run `32321701327`; the hardened head requires a fresh run
+  after push.
+- A canonical-Neon-shape rehearsal found and fixed two pre-Production defects:
+  optional `anon`/`authenticated` roles no longer gate migration success, and
+  same-state revenue replay now preserves the original actor/audit evidence.
+  The revised migration applied twice with those roles absent, executed v2 as
+  `service_role`, kept backfill status invariant, prevented duplicates, and
+  preserved v1 application rollback compatibility.
+- Added a fail-closed Production cutover runner with immutable migration hash,
+  exact approval interlock, canonical unpooled Neon identity, TLS/channel
+  binding enforcement, required-schema and least-privilege checks, advisory
+  and write-boundary locks, validated mode-600 custom backup, one transaction,
+  migration-ledger write, and fail-closed postcondition verification. Eleven unit
+  contracts and a real PostgreSQL 18 synthetic rehearsal pass. The rehearsal
+  proved concurrent-run rejection, weakened-role rejection, complete rollback,
+  deterministic backfill, and a rolled-back non-idempotent `service_role`
+  transition that returned both audit and outcome IDs. Production was not
+  contacted.
+- PR `#180` prior head `13da6bc6e21e2e74a1805d75c6648150db33bb18`
+  has a Ready exact-head Preview at deployment
+  `dpl_2xFEZDKGiCWn1YUsABmRfE5ZNQUM`. Public/health checks pass, anonymous
+  Growth access is denied, and no NellySelly marker is present. The hardened
+  cutover-runner head still requires push, Node 24 CI, and exact-head Preview
+  verification. Authenticated role-specific visual QA and migration acceptance
+  remain gated.
+- No Production/Preview database, lead, message, WordPress page, DNS record, or
+  deployment was changed for this candidate.
 
 ## Phase 9 Production operating checkpoint — 2026-08-19
 
