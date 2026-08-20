@@ -208,12 +208,12 @@ conflict with this section.
 - Brokerage/SEO surface: `https://www.ourtownproperties.com` (WordPress,
   Beaver Builder, Gravity Forms, FlexMLS/IDX). It remains a presentation and
   attribution bridge, not a competing lead database.
-- Private review surface: the protected AdminOps routes under `/admin`. The current
-  same-day deployment uses the existing server-side Basic Auth boundary; a per-user
-  role/session provider is a separately tracked hardening item.
-- Outbound delivery: the existing Resend adapter and `lead_notifications` outbox,
-  with production delivery disabled until secure environment configuration and
-  explicit approval are complete.
+- Private review surface: the protected AdminOps routes under `/admin`, enforced
+  by server-side per-user Lead Center sessions, role permissions, and assigned-lead
+  object scope.
+- Outbound delivery: the existing Resend adapter and `lead_notifications` outbox.
+  Internal delivery uses the configured production boundary; consumer campaigns,
+  carrier SMS, and other external sends retain independent approval/consent gates.
 
 ## Durable request sequence
 
@@ -252,3 +252,16 @@ The rescue branch created before consolidation is
 deployment rollback or redeploy of the last known-good production commit, subject
 to owner approval. Database migrations are additive and have explicit rollback
 notes; no live migration is applied by this task.
+
+## Operating-intelligence outcome boundary (Phase 9)
+
+The existing Growth command center reads `lead_outcomes`; it is not a separate
+CRM. Lead Center lifecycle actions use the additive
+`mutate_admin_lead_status_v2` transaction so the lifecycle projection, immutable
+audit event, and one idempotent business outcome cannot drift apart.
+
+Only evidence-bearing stages map to outcomes: qualified, appointment set, closed
+won, closed lost, and disqualified. Test/suppression state is copied to the
+outcome. Optional closed revenue is actual brokerage revenue and is visible or
+mutable only through the existing `lead:record_revenue` permission. Application
+rollback returns to v1; outcome and audit records are preserved.

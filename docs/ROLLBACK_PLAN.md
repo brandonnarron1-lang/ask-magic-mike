@@ -16,6 +16,13 @@ lead rows. If the migration must be reversed before the new code is promoted, us
 the migration's reviewed down notes against the same database only after approval;
 retain `leads`, `consents`, `audit_logs`, and delivery records.
 
+For the Phase 9 outcome-ledger candidate, apply the additive v2 function before
+application deployment. Application rollback returns to the immediately prior
+Ready deployment, which calls `mutate_admin_lead_status_v1`. Preserve all
+`lead_outcomes` and audit rows. The dormant v2 function may remain installed;
+dropping it is optional and requires a separately approved database change after
+application rollback is verified.
+
 ## WordPress
 
 Remove only the named reversible Custom HTML/shortcode/widget block or deactivate

@@ -2,6 +2,28 @@
 
 Updated 2026-08-19.
 
+## Phase 9 operating-intelligence outcome seam — 2026-08-19
+
+- Canonical Production is `main` commit
+  `47b88bd0c568afb09373e75d270d894626dddf1a`, Vercel deployment
+  `dpl_8WyzT1bg5kj6HRnrDqwdQGvzKZfz`; public, health, canonical-domain,
+  anonymous-admin-denial, and system-isolation checks pass.
+- Reuse-first audit found that the existing Growth command center reads
+  `lead_outcomes`, but ordinary Lead Center lifecycle actions did not write
+  canonical outcomes.
+- Candidate branch `codex/phase9-operating-intelligence-20260819` adds one
+  additive v2 lifecycle RPC that commits lead state, audit, and deterministic
+  outcome together. Existing v1 remains the application rollback boundary.
+- Optional closed revenue is restricted by the existing
+  `lead:record_revenue` permission and explicitly means actual brokerage
+  revenue—not sale price, list price, estimated value, or projected commission.
+- The complete migration chain and executable outcome contract pass on
+  disposable PostgreSQL 17. Local release gate passes 192 test files / 2,753
+  tests, strict typecheck, lint, build, 14/14 safety checks, and 78-route
+  manifest verification. Node 24 CI and Preview visual/RBAC evidence remain.
+- No Production/Preview database, lead, message, WordPress page, DNS record, or
+  deployment was changed for this candidate.
+
 ## Phase 9 Production operating checkpoint — 2026-08-19
 
 - Canonical Production remains `main` commit

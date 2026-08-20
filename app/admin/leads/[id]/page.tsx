@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { loadAdminLeadDetail } from "../../../lib/adminLeadView";
+import {
+  loadAdminLeadDetail,
+  type AdminLeadOutcomeRow,
+} from "../../../lib/adminLeadView";
 import type { AdminLeadTimelineEvent } from "../../../lib/adminLeadTimeline";
 import {
   ADMIN_LEAD_STATUS_ACTIONS,
@@ -17,6 +20,7 @@ import type {
   AppointmentStatus,
 } from "../../../lib/adminAppointmentFollowupOps";
 import { requireLeadCenterLeadPermission } from "../../../../src/lib/admin/rbac-session";
+import { hasLeadCenterPermission } from "../../../../src/lib/admin/rbac-policy";
 import { Phase6CopilotPanel } from "../../../../src/components/admin/phase6-copilot-panel";
 import { Phase7MessagingControlPanel } from "../../../../src/components/admin/phase7-messaging-control-panel";
 import {
@@ -48,6 +52,15 @@ function statusActionMessage(code: string) {
   }
   if (code === "invalid_terminal_reason") {
     return "Choose the required reason for that terminal lifecycle action.";
+  }
+  if (code === "invalid_outcome_amount") {
+    return "Enter actual brokerage revenue as a positive dollar amount with no more than two decimal places.";
+  }
+  if (code === "revenue_permission_required") {
+    return "Your role can update the lifecycle, but only an approved lead owner or administrator can record revenue.";
+  }
+  if (code === "outcome_revenue_updated") {
+    return "Closed brokerage revenue updated without duplicating the lifecycle or outcome record.";
   }
   if (code === "updated") return "Lifecycle updated.";
   return code.replaceAll("_", " ");
@@ -127,6 +140,7 @@ function StatusActionForm({
   requiresConfirmation,
   confirmationLabel,
   reasonSet,
+  canRecordRevenue,
 }: {
   leadId: string;
   currentStatus: string;
@@ -136,6 +150,7 @@ function StatusActionForm({
   requiresConfirmation?: boolean;
   confirmationLabel?: string;
   reasonSet?: "lost" | "disqualified";
+  canRecordRevenue: boolean;
 }) {
   if (currentStatus === status) return null;
   const buttonClass =
@@ -149,6 +164,21 @@ function StatusActionForm({
       <input type="hidden" name="status" value={status} />
       <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
       {reasonSet ? <ReasonSelect set={reasonSet} /> : null}
+      {status === "converted" && canRecordRevenue ? (
+        <label className="mt-2 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+          Attributed revenue (optional)
+          <input
+            name="outcome_amount_usd"
+            inputMode="decimal"
+            pattern="\d{1,8}(?:\.\d{1,2})?"
+            placeholder="Actual brokerage revenue"
+            className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]"
+          />
+          <span className="mt-1 block normal-case tracking-normal text-[#8f8778]">
+            Brokerage revenue only—not sale price or estimated value.
+          </span>
+        </label>
+      ) : null}
       {requiresConfirmation ? (
         <label className="mt-2 flex items-start gap-2 text-[11px] leading-4 text-[#d9ceb8]">
           <input required type="checkbox" name="confirm" value="yes" className="mt-0.5" aria-label={confirmationLabel} />
@@ -406,6 +436,86 @@ function FollowupPanel({ leadId, tasks }: { leadId: string; tasks: AdminFollowup
   );
 }
 
+function money(value: number | null) {
+  if (value === null) return "Not recorded";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function OutcomePanel({
+  outcomes,
+  canViewRevenue,
+  leadId,
+  leadStatus,
+}: {
+  outcomes: AdminLeadOutcomeRow[];
+  canViewRevenue: boolean;
+  leadId: string;
+  leadStatus: string;
+}) {
+  return (
+    <Panel title="Outcome ledger">
+      {outcomes.length ? (
+        <div className="space-y-3">
+          {outcomes.map((outcome) => (
+            <article key={outcome.id} className="rounded-md border border-white/10 bg-[#080808] p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold capitalize text-[#f4ead4]">
+                    {outcome.outcome_type.replaceAll("_", " ")}
+                  </p>
+                  <p className="mt-1 text-xs text-[#8f8778]">{shortDate(outcome.occurred_at)}</p>
+                </div>
+                {canViewRevenue && outcome.outcome_type === "closed" ? (
+                  <Badge tone="cyan">{money(outcome.amount_usd)}</Badge>
+                ) : (
+                  <Badge>Recorded</Badge>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-[#8f8778]">
+          No canonical business outcome has been recorded yet.
+        </p>
+      )}
+      {canViewRevenue && leadStatus === "converted" ? (
+        <form action={updateLeadStatusAction} className="mt-4 rounded-md border border-cyan-400/20 bg-cyan-400/[.06] p-4">
+          <input type="hidden" name="lead_id" value={leadId} />
+          <input type="hidden" name="status" value="converted" />
+          <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
+          <label className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-cyan-200">
+            Update actual closed brokerage revenue
+            <input
+              required
+              name="outcome_amount_usd"
+              inputMode="decimal"
+              pattern="\d{1,8}(?:\.\d{1,2})?"
+              placeholder="Actual brokerage revenue"
+              className="mt-2 w-full rounded-md border border-cyan-400/25 bg-[#050505] px-3 py-2 text-sm text-[#f4ead4]"
+            />
+          </label>
+          <label className="mt-3 flex items-start gap-2 text-[11px] leading-4 text-[#d9ceb8]">
+            <input required type="checkbox" name="confirm" value="yes" className="mt-0.5" />
+            <span>Confirm this is actual brokerage revenue, not sale price, list price, or estimated value.</span>
+          </label>
+          <button className="mt-3 rounded-md border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-cyan-100">
+            Update closed revenue
+          </button>
+        </form>
+      ) : null}
+      <p className="mt-3 text-xs leading-5 text-[#8f8778]">
+        Qualified, appointment-set, and terminal lifecycle actions write this ledger idempotently.
+        Revenue is restricted to approved roles and must be actual brokerage revenue.
+      </p>
+    </Panel>
+  );
+}
+
 export default async function AdminLeadDetailPage({
   params,
   searchParams,
@@ -415,6 +525,9 @@ export default async function AdminLeadDetailPage({
 }) {
   const { id } = await params;
   const principal = await requireLeadCenterLeadPermission(id, "lead:view_assigned");
+  const canRecordRevenue = Boolean(
+    principal && hasLeadCenterPermission(principal.role, "lead:record_revenue"),
+  );
   const emptyQuery: { status_action?: string; appointment_action?: string; followup_action?: string } = {};
   const [detail, query] = await Promise.all([
     loadAdminLeadDetail(id, principal),
@@ -502,7 +615,13 @@ export default async function AdminLeadDetailPage({
               <Panel title="Lifecycle controls">
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                   {ADMIN_LEAD_STATUS_ACTIONS.map((action) => (
-                    <StatusActionForm key={action.status} leadId={lead.id} currentStatus={lead.status} {...action} />
+                    <StatusActionForm
+                      key={action.status}
+                      leadId={lead.id}
+                      currentStatus={lead.status}
+                      canRecordRevenue={canRecordRevenue}
+                      {...action}
+                    />
                   ))}
                 </div>
                 <p className="mt-3 text-xs leading-5 text-[#8f8778]">
@@ -511,6 +630,13 @@ export default async function AdminLeadDetailPage({
               </Panel>
 
               <AppointmentPanel leadId={lead.id} appointments={detail.appointments} />
+
+              <OutcomePanel
+                outcomes={detail.outcomes}
+                canViewRevenue={canRecordRevenue}
+                leadId={lead.id}
+                leadStatus={lead.status}
+              />
 
               <FollowupPanel leadId={lead.id} tasks={detail.followupTasks} />
 

@@ -5,6 +5,7 @@ import {
   normalizeAppointmentTimelineEvent,
   normalizeFollowupTimelineEvent,
   normalizeNotificationTimelineEvent,
+  normalizeOutcomeTimelineEvent,
 } from "../../app/lib/adminLeadTimeline";
 
 describe("AdminOps lead timeline", () => {
@@ -142,5 +143,27 @@ describe("AdminOps lead timeline", () => {
     expect(JSON.stringify([appointment, followup])).not.toContain("agent@example.test");
     expect(JSON.stringify([appointment, followup])).not.toContain("252-555-0100");
     expect(JSON.stringify([appointment, followup])).not.toContain("Authorization");
+  });
+
+  it("shows an outcome milestone without leaking revenue or metadata into the timeline", () => {
+    const outcome = normalizeOutcomeTimelineEvent({
+      id: "outcome-1",
+      outcome_type: "closed",
+      amount_usd: 15000.25,
+      source_system: "admin_lead_lifecycle",
+      metadata: { actor: "agent@example.test", note: "Private commission note" },
+      occurred_at: "2026-08-19T20:05:00.000Z",
+    });
+    expect(outcome).toEqual({
+      id: "outcome-outcome-1",
+      occurred_at: "2026-08-19T20:05:00.000Z",
+      type: "outcome",
+      label: "Outcome closed",
+      actor: "AdminOps",
+      detail: "Canonical business outcome recorded",
+    });
+    expect(JSON.stringify(outcome)).not.toContain("15000");
+    expect(JSON.stringify(outcome)).not.toContain("example.test");
+    expect(JSON.stringify(outcome)).not.toContain("commission");
   });
 });

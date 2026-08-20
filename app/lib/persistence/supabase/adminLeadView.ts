@@ -66,12 +66,21 @@ export type AdminLeadView = {
   stalled_signals: StalledLeadSignal[];
 };
 
+export type AdminLeadOutcomeRow = {
+  id: string;
+  outcome_type: string;
+  amount_usd: number | null;
+  occurred_at: string | null;
+  source_system: string | null;
+};
+
 export type AdminLeadDetailResult = {
   configured: boolean;
   lead: AdminLeadView | null;
   timeline: AdminLeadTimelineEvent[];
   appointments: AdminAppointmentRow[];
   followupTasks: AdminFollowupTaskRow[];
+  outcomes: AdminLeadOutcomeRow[];
   error?: string;
 };
 
@@ -138,6 +147,21 @@ function numberOrNull(value: unknown): number | null {
     return Number.isFinite(parsed) ? parsed : null;
   }
   return null;
+}
+
+export function normalizeAdminLeadOutcomeRow(
+  row: Record<string, unknown>,
+): AdminLeadOutcomeRow | null {
+  const id = idText(row.id);
+  const outcomeType = text(row.outcome_type);
+  if (id === "unknown" || !outcomeType) return null;
+  return {
+    id,
+    outcome_type: outcomeType,
+    amount_usd: numberOrNull(row.amount_usd),
+    occurred_at: dateText(row.occurred_at),
+    source_system: text(row.source_system),
+  };
 }
 
 function buildName(row: Record<string, unknown>): string | null {
@@ -307,7 +331,7 @@ export async function loadAdminLeadDetail(leadId: string): Promise<AdminLeadDeta
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceKey) {
-    return { configured: false, lead: null, timeline: [], appointments: [], followupTasks: [] };
+    return { configured: false, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [] };
   }
 
   const leadUrl = new URL("/rest/v1/leads", supabaseUrl);
@@ -331,6 +355,7 @@ export async function loadAdminLeadDetail(leadId: string): Promise<AdminLeadDeta
       timeline: [],
       appointments: [],
       followupTasks: [],
+      outcomes: [],
       error: `Lead detail query failed with ${leadResponse.status}`,
     };
   }
@@ -338,7 +363,7 @@ export async function loadAdminLeadDetail(leadId: string): Promise<AdminLeadDeta
   const leadRows = (await leadResponse.json().catch(() => [])) as Array<Record<string, unknown>>;
   const leadRow = leadRows[0];
   if (!leadRow) {
-    return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], error: "lead_not_found" };
+    return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], error: "lead_not_found" };
   }
   const lead = normalizeAdminLeadRow(leadRow);
 
@@ -368,7 +393,13 @@ export async function loadAdminLeadDetail(leadId: string): Promise<AdminLeadDeta
   tasksUrl.searchParams.set("order", "due_at.asc");
   tasksUrl.searchParams.set("limit", "100");
 
-  const [auditResponse, notificationResponse, appointmentsResponse, tasksResponse] = await Promise.all([
+  const outcomesUrl = new URL("/rest/v1/lead_outcomes", supabaseUrl);
+  outcomesUrl.searchParams.set("select", "id,outcome_type,amount_usd,occurred_at,source_system");
+  outcomesUrl.searchParams.set("lead_id", "eq." + leadId);
+  outcomesUrl.searchParams.set("order", "occurred_at.desc");
+  outcomesUrl.searchParams.set("limit", "100");
+
+  const [auditResponse, notificationResponse, appointmentsResponse, tasksResponse, outcomesResponse] = await Promise.all([
     fetch(auditUrl, {
       headers: {
         apikey: serviceKey,
@@ -401,6 +432,14 @@ export async function loadAdminLeadDetail(leadId: string): Promise<AdminLeadDeta
       },
       cache: "no-store",
     }),
+    fetch(outcomesUrl, {
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+        "Cache-Control": "no-store",
+      },
+      cache: "no-store",
+    }),
   ]);
 
   const auditRows = auditResponse.ok
@@ -415,18 +454,32 @@ export async function loadAdminLeadDetail(leadId: string): Promise<AdminLeadDeta
   const taskRows = tasksResponse.ok
     ? ((await tasksResponse.json().catch(() => [])) as Array<Record<string, unknown>>)
     : [];
+  const outcomeRows = outcomesResponse.ok
+    ? ((await outcomesResponse.json().catch(() => [])) as Array<Record<string, unknown>>)
+    : [];
   const appointments = appointmentRows
     .map(normalizeAppointment)
     .filter((row): row is AdminAppointmentRow => Boolean(row));
   const followupTasks = taskRows
     .map(normalizeTask)
     .filter((row): row is AdminFollowupTaskRow => Boolean(row));
+  const outcomes = outcomeRows
+    .map(normalizeAdminLeadOutcomeRow)
+    .filter((row): row is AdminLeadOutcomeRow => Boolean(row));
 
   return {
     configured: true,
     lead,
     appointments,
     followupTasks,
-    timeline: buildLeadTimeline({ lead, auditRows, notificationRows, appointmentRows: appointments, taskRows: followupTasks }),
+    outcomes,
+    timeline: buildLeadTimeline({
+      lead,
+      auditRows,
+      notificationRows,
+      appointmentRows: appointments,
+      taskRows: followupTasks,
+      outcomeRows,
+    }),
   };
 }

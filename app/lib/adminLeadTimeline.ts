@@ -14,7 +14,8 @@ export type AdminLeadTimelineEvent = {
     | "lifecycle"
     | "notification"
     | "appointment"
-    | "followup";
+    | "followup"
+    | "outcome";
   label: string;
   actor: string | null;
   detail: string;
@@ -163,6 +164,22 @@ export function normalizeFollowupTimelineEvent(row: Record<string, unknown>): Ad
   };
 }
 
+export function normalizeOutcomeTimelineEvent(
+  row: Record<string, unknown>,
+): AdminLeadTimelineEvent | null {
+  const id = text(row.id);
+  const outcomeType = text(row.outcome_type);
+  if (!id || !outcomeType) return null;
+  return {
+    id: `outcome-${id}`,
+    occurred_at: text(row.occurred_at) || text(row.created_at),
+    type: "outcome",
+    label: `Outcome ${outcomeType.replaceAll("_", " ")}`,
+    actor: "AdminOps",
+    detail: "Canonical business outcome recorded",
+  };
+}
+
 export function buildLeadTimeline(input: {
   lead: {
     id: string;
@@ -174,6 +191,7 @@ export function buildLeadTimeline(input: {
   notificationRows?: Array<Record<string, unknown>>;
   appointmentRows?: Array<Record<string, unknown>>;
   taskRows?: Array<Record<string, unknown>>;
+  outcomeRows?: Array<Record<string, unknown>>;
 }): AdminLeadTimelineEvent[] {
   const events: AdminLeadTimelineEvent[] = [
     {
@@ -213,6 +231,12 @@ export function buildLeadTimeline(input: {
 
   for (const row of input.taskRows || []) {
     const event = normalizeFollowupTimelineEvent(row);
+    if (event) events.push(event);
+  }
+
+
+  for (const row of input.outcomeRows || []) {
+    const event = normalizeOutcomeTimelineEvent(row);
     if (event) events.push(event);
   }
 

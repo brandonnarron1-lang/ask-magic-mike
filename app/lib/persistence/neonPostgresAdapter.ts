@@ -207,13 +207,28 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
   }
 
   async mutateAdminLead(input: AdminLeadMutation): Promise<AdminLeadMutationResult> {
-    const result = await this.rpc("mutate_admin_lead_status_v1", [
+    const result = await this.rpc("mutate_admin_lead_status_v2", [
       input.leadId, input.expectedStatus, input.nextStatus, JSON.stringify(input.patch),
-      input.reason || null, input.actor, input.occurredAt,
+      input.reason || null, input.outcomeAmountUsd ?? null, input.actor, input.occurredAt,
     ]);
-    if (result.ok !== true) return { ok: false, error: result.error === "lead_not_found" ? "lead_not_found" : "concurrent_status_update" };
+    if (result.ok !== true) {
+      return {
+        ok: false,
+        error: result.error === "lead_not_found"
+          ? "lead_not_found"
+          : result.error === "invalid_outcome_amount"
+            ? "invalid_outcome_amount"
+            : "concurrent_status_update",
+      };
+    }
     if (typeof result.status !== "string") throw new PersistenceUnavailableError("neon_admin_lead_response_invalid", 502);
-    return { ok: true, status: result.status, auditId: typeof result.audit_id === "string" ? result.audit_id : null, idempotentReplay: result.idempotent_replay === true };
+    return {
+      ok: true,
+      status: result.status,
+      auditId: typeof result.audit_id === "string" ? result.audit_id : null,
+      outcomeId: typeof result.outcome_id === "string" ? result.outcome_id : null,
+      idempotentReplay: result.idempotent_replay === true,
+    };
   }
 
   async mutateAdminAssignment(input: AdminAssignmentMutation): Promise<AdminAssignmentMutationResult> {
