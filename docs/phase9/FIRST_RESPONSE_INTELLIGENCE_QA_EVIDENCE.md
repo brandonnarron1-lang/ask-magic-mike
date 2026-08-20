@@ -42,6 +42,33 @@ Updated 2026-08-20. Candidate branch:
   repository requires Node 24.x, so exact-head Node 24 CI remains the runtime
   authority.
 
+## Canonical-Neon role-shape rehearsal
+
+After PR #180's production preflight identified that canonical Neon does not
+define Supabase's optional `anon` and `authenticated` roles, both stacked
+migrations were rehearsed again against disposable PostgreSQL 17 with those
+roles absent before either candidate migration ran.
+
+Evidence:
+
+- 30 prerequisite migrations applied before the stacked pair;
+- `service_role` retained `BYPASSRLS` and canonical table privileges;
+- `20260819223000_admin_outcome_ledger.sql` applied successfully;
+- `20260820013000_first_response_intelligence.sql` applied successfully;
+- both executable PostgreSQL contracts ran the protected functions as
+  `service_role` and rolled back all synthetic rows;
+- v2, v3, and the dedicated response recorder were executable by
+  `service_role`;
+- v3 and the recorder were not executable by `PUBLIC`;
+- `PUBLIC` could not select the milestone table;
+- the optional browser-role count remained zero; and
+- both stacked migrations applied a second time without duplicate rows or
+  privilege errors.
+
+The migrations now revoke optional roles conditionally. Neither optional role
+is created merely to satisfy a migration, and the public/server authorization
+boundary remains unchanged.
+
 ## Exact-head CI and Preview evidence
 
 - Response-dimension implementation commit before this evidence-only update:
@@ -79,5 +106,6 @@ or deployment was created by this verification.
 
 Before this stacked candidate can be promoted:
 
-1. refreshed exact-head checks after this evidence-only commit; and
+1. refreshed exact-head checks after the PR #180 hardening merge and Neon-role
+   compatibility update; and
 2. cumulative migration/production proof after PR #180 reaches Production.

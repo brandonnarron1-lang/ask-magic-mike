@@ -78,6 +78,8 @@ INSERT INTO public.leads (
     '95000000-0000-4000-8000-000000000001'
   );
 
+SET LOCAL ROLE service_role;
+
 SELECT public.mutate_admin_lead_status_v3(
   '94000000-0000-4000-8000-000000000001'::uuid,
   'new',
@@ -92,6 +94,8 @@ SELECT public.mutate_admin_lead_status_v3(
   'lead_center:pg17-response-qa',
   '2026-08-19 21:07:00+00'
 );
+
+RESET ROLE;
 
 SELECT pg_temp.assert_true(
   (
@@ -147,6 +151,8 @@ SELECT pg_temp.assert_true(
 );
 
 -- Same-state replay must not overwrite the original response or duplicate its audit.
+SET LOCAL ROLE service_role;
+
 SELECT public.mutate_admin_lead_status_v3(
   '94000000-0000-4000-8000-000000000001'::uuid,
   'contacted',
@@ -157,6 +163,8 @@ SELECT public.mutate_admin_lead_status_v3(
   'lead_center:pg17-response-qa',
   '2026-08-19 21:20:00+00'
 );
+
+RESET ROLE;
 
 SELECT pg_temp.assert_true(
   (
@@ -179,12 +187,18 @@ SELECT pg_temp.assert_true(
 );
 
 -- A later-stage lead may record real outreach without regressing lifecycle state.
+SET LOCAL ROLE service_role;
+
 SELECT public.record_admin_first_response_v1(
   '94000000-0000-4000-8000-000000000002'::uuid,
   'lead_center:pg17-response-qa',
   '2026-08-19 21:11:00+00',
   'admin_lead_detail'
 );
+
+RESET ROLE;
+
+SET LOCAL ROLE service_role;
 
 SELECT pg_temp.assert_true(
   (
@@ -206,6 +220,8 @@ SELECT pg_temp.assert_true(
   ) = 'invalid_response_time',
   'pre-creation response evidence is rejected'
 );
+
+RESET ROLE;
 
 SELECT pg_temp.assert_true(
   NOT EXISTS (

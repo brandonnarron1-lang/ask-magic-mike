@@ -210,7 +210,24 @@ $$;
 
 REVOKE ALL ON FUNCTION public.record_admin_first_response_v1(
   uuid, text, timestamptz, text
-) FROM PUBLIC, anon, authenticated;
+) FROM PUBLIC;
+
+DO $phase9_response_record_function_privileges$
+DECLARE
+  role_name text;
+BEGIN
+  FOREACH role_name IN ARRAY ARRAY['anon', 'authenticated']
+  LOOP
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = role_name) THEN
+      EXECUTE format(
+        'REVOKE ALL ON FUNCTION public.record_admin_first_response_v1(uuid, text, timestamptz, text) FROM %I',
+        role_name
+      );
+    END IF;
+  END LOOP;
+END
+$phase9_response_record_function_privileges$;
+
 GRANT EXECUTE ON FUNCTION public.record_admin_first_response_v1(
   uuid, text, timestamptz, text
 ) TO service_role;
@@ -274,7 +291,24 @@ $$;
 
 REVOKE ALL ON FUNCTION public.mutate_admin_lead_status_v3(
   uuid, text, text, jsonb, text, numeric, text, timestamptz
-) FROM PUBLIC, anon, authenticated;
+) FROM PUBLIC;
+
+DO $phase9_response_lifecycle_function_privileges$
+DECLARE
+  role_name text;
+BEGIN
+  FOREACH role_name IN ARRAY ARRAY['anon', 'authenticated']
+  LOOP
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = role_name) THEN
+      EXECUTE format(
+        'REVOKE ALL ON FUNCTION public.mutate_admin_lead_status_v3(uuid, text, text, jsonb, text, numeric, text, timestamptz) FROM %I',
+        role_name
+      );
+    END IF;
+  END LOOP;
+END
+$phase9_response_lifecycle_function_privileges$;
+
 GRANT EXECUTE ON FUNCTION public.mutate_admin_lead_status_v3(
   uuid, text, text, jsonb, text, numeric, text, timestamptz
 ) TO service_role;

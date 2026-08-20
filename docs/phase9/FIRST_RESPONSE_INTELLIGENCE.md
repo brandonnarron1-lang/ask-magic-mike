@@ -35,6 +35,10 @@ does not rewrite response history or fail against the immutability trigger.
 Approved lead-level retention or deletion workflows remain possible through the
 lead relationship and remove the milestone by cascade.
 
+Function grants target the canonical `service_role`. Optional Supabase browser
+roles are revoked only when present, so their absence in canonical Neon never
+becomes a migration prerequisite or weakens the `PUBLIC` denial.
+
 ## Write paths
 
 `mutate_admin_lead_status_v3` wraps the complete v2 lifecycle/outcome

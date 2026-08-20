@@ -32,6 +32,8 @@ INSERT INTO public.leads (
   true, true, 'qa-v1', '91000000-0000-4000-8000-000000000001'
 );
 
+SET LOCAL ROLE service_role;
+
 SELECT public.mutate_admin_lead_status_v2(
   '92000000-0000-4000-8000-000000000001'::uuid,
   'qualified',
@@ -65,6 +67,8 @@ SELECT public.mutate_admin_lead_status_v2(
   '2026-08-19 20:05:00+00'
 );
 
+RESET ROLE;
+
 SELECT pg_temp.assert_true(
   (SELECT status = 'converted' FROM public.leads WHERE id = '92000000-0000-4000-8000-000000000001'),
   'lead lifecycle projection committed'
@@ -94,6 +98,8 @@ SELECT pg_temp.assert_true(
 
 -- Same-state replay repairs or updates the outcome without duplicating audit or
 -- lifecycle records.
+SET LOCAL ROLE service_role;
+
 SELECT public.mutate_admin_lead_status_v2(
   '92000000-0000-4000-8000-000000000001'::uuid,
   'converted',
@@ -101,9 +107,11 @@ SELECT public.mutate_admin_lead_status_v2(
   jsonb_build_object('status', 'converted'),
   NULL,
   15000.25,
-  'system/pg17_outcome_qa',
+  'system/pg17_outcome_replay',
   '2026-08-19 20:10:00+00'
 );
+
+RESET ROLE;
 
 SELECT pg_temp.assert_true(
   (
@@ -114,6 +122,21 @@ SELECT pg_temp.assert_true(
   ),
   'idempotent replay updates revenue without duplicate outcomes'
 );
+
+SELECT pg_temp.assert_true(
+  (
+    SELECT metadata->>'actor' = 'system/pg17_outcome_qa'
+       AND metadata->>'audit_id' IS NOT NULL
+       AND metadata->>'last_replay_actor' = 'system/pg17_outcome_replay'
+       AND metadata->>'last_replay_at' = '2026-08-19T20:10:00+00:00'
+    FROM public.lead_outcomes
+    WHERE lead_id = '92000000-0000-4000-8000-000000000001'
+      AND outcome_type = 'closed'
+  ),
+  'idempotent replay preserves original actor and audit evidence'
+);
+
+SET LOCAL ROLE service_role;
 
 SELECT pg_temp.assert_true(
   (
@@ -140,5 +163,7 @@ SELECT pg_temp.assert_true(
   ) = 'invalid_outcome_amount',
   'revenue is rejected for non-close outcomes'
 );
+
+RESET ROLE;
 
 ROLLBACK;

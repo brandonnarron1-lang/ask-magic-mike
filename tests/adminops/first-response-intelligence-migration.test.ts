@@ -23,7 +23,10 @@ describe("Phase 9 first-response intelligence migration", () => {
     expect(migration).toContain("lead_response_milestones_reject_change");
     expect(migration).toContain("public.amm_reject_immutable_change()");
     expect(migration).toContain("ENABLE ROW LEVEL SECURITY");
-    expect(migration).toContain("FROM PUBLIC, anon, authenticated");
+    expect(migration).toContain("phase9_response_record_function_privileges");
+    expect(migration).toContain("phase9_response_lifecycle_function_privileges");
+    expect(migration).toContain("IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = role_name)");
+    expect(migration).not.toContain("FROM PUBLIC, anon, authenticated");
     expect(migration).toContain("TO service_role");
   });
 
