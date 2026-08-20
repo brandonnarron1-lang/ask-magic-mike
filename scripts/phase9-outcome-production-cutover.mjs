@@ -135,13 +135,17 @@ export function parseMode(argv) {
   return selected[0]?.slice(2) ?? "plan";
 }
 
-export function buildLedgerInsert(columns) {
+export function buildLedgerInsert(
+  columns,
+  version = MIGRATION_VERSION,
+  name = MIGRATION_NAME,
+) {
   const set = new Set(columns);
   if (!set.has("version")) fail("migration_ledger_version_column_missing");
 
   const names = ["version"];
   const values = ["$1"];
-  const params = [MIGRATION_VERSION];
+  const params = [version];
 
   if (set.has("statements")) {
     names.push("statements");
@@ -151,7 +155,7 @@ export function buildLedgerInsert(columns) {
   if (set.has("name")) {
     names.push("name");
     values.push(`$${params.length + 1}`);
-    params.push(MIGRATION_NAME);
+    params.push(name);
   }
 
   return {
@@ -252,7 +256,11 @@ export function redactError(value) {
  * @param {ReturnType<typeof parseProductionDatabaseUrl>} target
  * @param {Record<string, string | undefined>} parentEnv
  */
-export function postgresUtilityEnv(target, parentEnv = process.env) {
+export function postgresUtilityEnv(
+  target,
+  parentEnv = process.env,
+  applicationName = "amm_phase9_outcome_cutover",
+) {
   const childEnv = {};
   for (const key of ["PATH", "LANG", "LC_ALL", "LC_CTYPE", "TMPDIR", "TZ"]) {
     if (parentEnv[key]) childEnv[key] = parentEnv[key];
@@ -264,7 +272,7 @@ export function postgresUtilityEnv(target, parentEnv = process.env) {
   childEnv.PGPASSWORD = target.password;
   childEnv.PGSSLMODE = target.sslmode || "require";
   childEnv.PGCHANNELBINDING = target.channelBinding || "require";
-  childEnv.PGAPPNAME = "amm_phase9_outcome_cutover";
+  childEnv.PGAPPNAME = applicationName;
   return childEnv;
 }
 
@@ -297,7 +305,13 @@ async function sha256File(file) {
   return hash.digest("hex");
 }
 
-async function createBackup(target) {
+export async function createBackup(
+  target,
+  {
+    applicationName = "amm_phase9_outcome_cutover",
+    filenamePrefix = "ask-magic-mike-pre-outcome",
+  } = {},
+) {
   process.umask(0o077);
   const configured = process.env.AMM_PHASE9_BACKUP_DIR?.trim();
   const directory = configured
@@ -307,8 +321,8 @@ async function createBackup(target) {
   await chmod(directory, 0o700);
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const file = join(directory, `ask-magic-mike-pre-outcome-${timestamp}.dump`);
-  const env = postgresUtilityEnv(target);
+  const file = join(directory, `${filenamePrefix}-${timestamp}.dump`);
+  const env = postgresUtilityEnv(target, process.env, applicationName);
   try {
     runProgram(
       "pg_dump",
@@ -581,18 +595,21 @@ SELECT jsonb_build_object(
   )
 ) AS snapshot`;
 
-async function readSnapshot(client, sql) {
+export async function readSnapshot(client, sql) {
   const result = await client.query(sql);
   const snapshot = result.rows[0]?.snapshot;
   if (!snapshot || typeof snapshot !== "object") fail("production_snapshot_invalid");
   return snapshot;
 }
 
-async function connect(target) {
+export async function connect(
+  target,
+  applicationName = "amm_phase9_outcome_cutover",
+) {
   const client = new Client({
     connectionString: target.raw,
     enableChannelBinding: true,
-    application_name: "amm_phase9_outcome_cutover",
+    application_name: applicationName,
     connectionTimeoutMillis: 15_000,
     query_timeout: 130_000,
   });
@@ -693,7 +710,7 @@ function safeSnapshot(snapshot) {
   };
 }
 
-function safeBackup(backup) {
+export function safeBackup(backup) {
   if (!backup || typeof backup !== "object") return undefined;
   return {
     file: backup.file,

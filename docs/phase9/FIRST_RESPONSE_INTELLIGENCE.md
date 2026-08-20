@@ -95,19 +95,36 @@ labels describe evidence maturity and do not imply causation.
 
 ## Release order
 
-This candidate is stacked behind PR #180 and its outcome-ledger migration.
+The prerequisite release is complete. PR #180 was merged as
+`42f80b209d5d5adc984c1d8b439c7fa830d015e6`, its outcome-ledger migration was
+verified on canonical Neon Production, and Vercel deployment
+`dpl_2PQoDZLHc562SBEY7px91CAEUrin` is the healthy rollback baseline.
 
-1. apply and verify `20260819223000_admin_outcome_ledger.sql`;
-2. merge and verify PR #180 in Production;
-3. refresh this branch on the resulting `main` and re-establish exact-head CI
-   and Preview evidence;
-4. take a minimized read-only Production snapshot;
-5. apply `20260820013000_first_response_intelligence.sql`;
-6. verify table/RLS/grants/trigger/functions/backfill and zero unintended lead
-   state changes;
-7. deploy the exact application commit; and
-8. verify anonymous denial, authenticated role behavior, public/health routes,
-   Growth rendering, and rollback readiness.
+PR #181 was refreshed on that exact `main` baseline at
+`99fac18df16237ada26f65384be390e331df9f59`. Node 24 run `32422016242` and
+Preview deployment `dpl_kEtBPF8LS52kgG1LWE2ooaYZhJgT` passed before the
+cutover-runner hardening described below.
+
+The remaining order is:
+
+1. run `pnpm run phase9:first-response:cutover -- --plan` and verify the pinned
+   migration hash;
+2. run the fail-closed read-only Production preflight with an unpooled
+   `neondb_owner` connection entered only through the secure environment;
+3. receive the exact migration/merge/deployment approval phrase;
+4. run `--execute`, which acquires advisory and write-boundary locks, creates
+   and validates a mode-600 custom backup, rechecks the locked baseline, applies
+   the migration and ledger row in one transaction, and verifies every
+   postcondition before commit;
+5. merge the resulting exact PR #181 head and deploy it;
+6. verify anonymous denial, authenticated role behavior, public/health routes,
+   Growth rendering, and rollback readiness; and
+7. retain the Production backup until all application checks pass.
+
+The execute interlock is intentionally different from the completed PR #180
+approval:
+
+`APPROVE PHASE 9 FIRST RESPONSE PRODUCTION MIGRATION, PR 181 MERGE, AND PRODUCTION DEPLOYMENT`
 
 No Production step is authorized by this document.
 

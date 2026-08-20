@@ -6,7 +6,7 @@ Updated 2026-08-20.
 
 - Reuse-first audit proved that mutable `last_contacted_at` cannot support the
   required median/P75/P90 first-human-response KPI.
-- Stacked candidate branch `codex/phase9-first-response-intelligence-20260820`
+- Candidate branch `codex/phase9-first-response-intelligence-20260820`
   adds one server-only, one-row-per-lead response milestone, immutable audit
   evidence, lifecycle v3 wrapper, and protected operator “record now” action.
 - Growth reporting adds milestone coverage/sample size and P50/P75/P90 by
@@ -17,28 +17,47 @@ Updated 2026-08-20.
 - Historical backfill accepts only explicit `lead.lifecycle_changed` contact
   audits; mutable legacy contact timestamps are not promoted to evidence, and
   unavailable historical assignment is left unattributed rather than invented.
-- Complete PostgreSQL 17 migration chain, existing outcome contract, new
-  response contract (including responder deletion retention), 24 latest
-  targeted tests, strict typecheck, full lint, 2,765-test suite, production
-  build, 78-route manifest, dependency audit, secret-history scan, and
-  whitespace checks pass. Exact implementation-head Node 24 CI run
-  `32320555687` and Vercel Preview `dpl_D9FepMPCUZCC6v6wRsPnV93oCAk4` pass;
-  refreshed exact-head checks remain pending after the PR #180 hardening merge.
+- PR #180 is complete in Production at merge commit
+  `42f80b209d5d5adc984c1d8b439c7fa830d015e6`, Vercel deployment
+  `dpl_2PQoDZLHc562SBEY7px91CAEUrin`, with its outcome migration, validated
+  backup, postflight, canonical-host, health, and identity-isolation checks
+  passed.
+- PR #181 was refreshed on that exact `main` baseline at
+  `99fac18df16237ada26f65384be390e331df9f59`. Node 24 CI run `32422016242`
+  passed in 2m15s and Vercel Preview `dpl_kEtBPF8LS52kgG1LWE2ooaYZhJgT` is
+  Ready. Its refreshed local gate passed 193 files / 2,764 tests, strict
+  typecheck, lint, build, and the 78-route manifest before the additional
+  cutover hardening.
 - A canonical-Neon role-shape replay then applied both stacked migrations twice
   with `anon` and `authenticated` absent. All three protected functions ran as
   `service_role`, public function/table access remained denied, both PostgreSQL
   contracts passed, and no synthetic rows escaped their rollback transactions.
-- This candidate is dependent on PR #180 and cannot be merged or migrated ahead
-  of the verified outcome-ledger Production release.
-- No Production/Preview database, lead, notification, message, WordPress page,
-  DNS record, environment value, or Production deployment was changed. The
-  prior exact-head Preview remained read-only and migration-free.
+- Added a dedicated fail-closed PR #181 cutover runner with immutable migration
+  hash, exact approval interlock, canonical owner/endpoint checks, TLS/channel
+  binding, required-schema and role checks, advisory and write-boundary locks,
+  validated mode-600 backup, one transaction, migration-ledger insertion, and
+  source/backfill/privilege postconditions. Focused runner/migration suites pass
+  3 files / 23 tests.
+- A real PostgreSQL 18.3 rehearsal applied all 30 prerequisites, removed the
+  optional browser roles, applied PR #180 first, and then executed the new
+  runner. One suppressed synthetic contact audit produced one exact milestone;
+  every postcondition passed, the custom backup validated at 584 restore
+  entries, the service-role contract passed, and disposable state was removed.
+- The final hardened local release gate passes system isolation, 14/14 release
+  safety checks, 195 test files / 2,783 tests, strict typecheck, full lint,
+  the Next.js 15.5.21 production build, and the 78-route manifest. Production
+  dependencies report no known vulnerabilities, and the full 454-commit Git
+  history reports no secret leaks.
+- No PR #181 Production database mutation, merge, message, WordPress change,
+  DNS change, environment change, or Production deployment has occurred. The
+  remaining gates are refreshed exact-head Node 24 CI/Preview, read-only
+  Production preflight, and separately approved migration/merge/deploy.
 
 ## Phase 9 operating-intelligence outcome seam — 2026-08-19
 
 - Canonical Production is `main` commit
-  `47b88bd0c568afb09373e75d270d894626dddf1a`, Vercel deployment
-  `dpl_8WyzT1bg5kj6HRnrDqwdQGvzKZfz`; public, health, canonical-domain,
+  `42f80b209d5d5adc984c1d8b439c7fa830d015e6`, Vercel deployment
+  `dpl_2PQoDZLHc562SBEY7px91CAEUrin`; public, health, canonical-domain,
   anonymous-admin-denial, and system-isolation checks pass.
 - Reuse-first audit found that the existing Growth command center reads
   `lead_outcomes`, but ordinary Lead Center lifecycle actions did not write
@@ -71,21 +90,18 @@ Updated 2026-08-20.
   deterministic backfill, and a rolled-back non-idempotent `service_role`
   transition that returned both audit and outcome IDs. Production was not
   contacted.
-- PR `#180` prior head `13da6bc6e21e2e74a1805d75c6648150db33bb18`
-  has a Ready exact-head Preview at deployment
-  `dpl_2xFEZDKGiCWn1YUsABmRfE5ZNQUM`. Public/health checks pass, anonymous
-  Growth access is denied, and no NellySelly marker is present. The hardened
-  cutover-runner head still requires push, Node 24 CI, and exact-head Preview
-  verification. Authenticated role-specific visual QA and migration acceptance
-  remain gated.
-- No Production/Preview database, lead, message, WordPress page, DNS record, or
-  deployment was changed for this candidate.
+- PR #180 merged after exact-head CI and Preview proof. Its pinned migration ran
+  against canonical Neon with a validated custom backup, one guarded
+  transaction, and fail-closed postflight checks. The exact merge commit then
+  deployed successfully, both Ask Magic Mike hostnames served only the correct
+  identity, and the anonymous Growth boundary remained closed.
 
-## Phase 9 Production operating checkpoint — 2026-08-19
+## Phase 9 Production operating checkpoint — 2026-08-19 (superseded)
 
-- Canonical Production remains `main` commit
+- At this historical checkpoint, Production was `main` commit
   `f2aff2b802cda3fd9c49ab80b9e379eb9c152913` on Vercel deployment
-  `dpl_FG54FQtKQqP8pqMmpe79BCUmdWJT` until a release-specific gate is granted.
+  `dpl_FG54FQtKQqP8pqMmpe79BCUmdWJT`. It is superseded by the verified PR #180
+  Production release documented above.
 - Read-only Production smoke and funnel verification remain green. No email,
   SMS, push, call, database write, lead creation, or public publication was
   triggered by this checkpoint.
@@ -101,7 +117,7 @@ Updated 2026-08-20.
 - PR `#173` remains separately staged for the device-private `/plan` Review
   Planner; PR `#172` must be refreshed later as a read-only Database Revival
   candidate.
-- Current next release approval remains:
+- The approval phrase recorded at that checkpoint was:
   `APPROVE PHASE 9 COMMERCIAL EMAIL COMPLIANCE MERGE AND PRODUCTION DEPLOYMENT`.
   PR `#170` separately requires
   `APPROVE PHASE 9.1 OWNED DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT` after

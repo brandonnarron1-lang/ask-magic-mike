@@ -1,6 +1,6 @@
 # Production Release and Go-Live Runbook
 
-Updated 2026-08-19. The public funnel is live. Use this runbook for incremental,
+Updated 2026-08-20. The public funnel is live. Use this runbook for incremental,
 reversible releases and controlled owned-traffic activation.
 
 ## Before merge
@@ -56,16 +56,33 @@ When the change touches capture, routing, email, push, SMS, or sequences:
 5. Never contact a genuine WordPress-only entry whose purpose or consent is
    unclear; preserve it for BIC review.
 
-## Phase 9 cumulative release sequence
+## Current Phase 9 release sequence
 
 Release only one approved PR at a time and verify Production before advancing:
 
-1. `#178` — canonical operations documentation and fail-closed Preview QA;
-2. `#177` — commercial-email compliance rendering;
-3. `#170` — protected owned-demand command;
-4. `#173` — device-private recurring review planner; and
-5. `#172` — rebuild the database-revival command on the resulting baseline,
-   preserving read-only behavior and requiring a fresh immutable release gate.
+1. `#180` — outcome-ledger lifecycle seam: complete at merge commit
+   `42f80b209d5d5adc984c1d8b439c7fa830d015e6`, Production deployment
+   `dpl_2PQoDZLHc562SBEY7px91CAEUrin`;
+2. `#181` — first-human-response intelligence: next candidate, not yet migrated,
+   merged, or deployed; and
+3. refresh every remaining open feature PR on the resulting `main` before
+   selecting another release. Do not preserve an old queue order when its base,
+   scope, or proof has become stale.
+
+PR #181 uses:
+
+```text
+pnpm run phase9:first-response:cutover -- --plan
+pnpm run phase9:first-response:cutover -- --preflight
+pnpm run phase9:first-response:cutover -- --execute
+pnpm run phase9:first-response:cutover -- --verify
+```
+
+Enter the unpooled owner connection only through the secure environment; never
+place it in chat, a command argument, a report, or a committed file. `--execute`
+must fail unless the exact release-specific approval phrase is present. Retain
+the validated mode-600 backup until the exact application deployment and
+authenticated checks pass.
 
 Each item retains its own exact approval phrase. Refresh any downstream branch
 after the preceding Production merge, rerun Node 24 CI and Vercel Preview, and do
