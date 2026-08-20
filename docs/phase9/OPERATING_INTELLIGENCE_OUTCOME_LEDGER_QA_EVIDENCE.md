@@ -93,6 +93,63 @@ read-only environment pull. Its mode-600 temporary file was deleted
 immediately. Direct live-schema SQL therefore remains part of the approved
 database execution gate rather than being inferred from an exposed credential.
 
+## Fail-closed cutover runner rehearsal
+
+The candidate now includes
+`scripts/phase9-outcome-production-cutover.mjs` and the package command
+`phase9:outcome:cutover`. The runner accepts no connection value on a command
+argument and never prints one. Execute mode checks the exact database-specific
+approval before reading credentials.
+
+Static and pure contract result:
+
+```text
+tests/scripts/phase9-outcome-production-cutover.test.ts
+11 tests passed
+```
+
+The earlier PostgreSQL 18 rehearsal caught and fixed a malformed
+migration-ledger statement; that attempt rolled back with v2 absent and the
+ledger unchanged. The final hardened rehearsal then exercised the real runner
+with six synthetic/test/suppressed leads. A competing transaction held the
+cutover advisory lock, and the runner rejected the concurrent execution before
+backup or mutation. Removing `service_role` outcome-update privilege also made
+preflight fail closed; the final pass independently removed audit-read
+privilege and failed closed for that exact missing grant. After restoring the
+expected canonical role grants, the complete path passed:
+
+```json
+{
+  "postgres_major": 18,
+  "synthetic_leads": 6,
+  "lead_count_unchanged": true,
+  "lead_status_unchanged": true,
+  "target_outcomes": 2,
+  "target_migration_rows": 1,
+  "v1_retained": true,
+  "v2_owner": "neondb_owner",
+  "v2_security_invoker": true,
+  "v2_search_path_locked": true,
+  "service_role_v1_execute": true,
+  "service_role_execute": true,
+  "public_execute": false,
+  "browser_role_execute_count": 0,
+  "backfill_metadata_mismatches": 0,
+  "invented_revenue_rows": 0,
+  "service_role_transition_status": "qualified",
+  "service_role_transition_audit_rows": 1,
+  "service_role_transition_outcome_rows": 1,
+  "service_role_transition_rolled_back": true,
+  "backup_bytes": 8573,
+  "backup_restore_entries": 19
+}
+```
+
+The lower 15-entry backup threshold existed only on the minimal injected test
+target. The production parser hard-codes a minimum of 100 entries. All
+disposable containers, SQL fixtures, connection values, and synthetic backups
+were removed after verification. Production remained untouched.
+
 ## Application verification
 
 Targeted tests:
@@ -112,36 +169,44 @@ Full local release gate:
 pnpm run release:gate
 ```
 
-Final result:
+Final result after cutover-runner hardening:
 
 - system isolation: PASS;
 - release safety: 14/14 PASS;
-- Vitest: 192 files / 2,753 tests PASS;
+- Vitest: 193 files / 2,764 tests PASS;
 - strict typecheck: PASS;
 - ESLint: PASS;
 - Next.js production build: PASS;
 - route manifest: 78 active routes / 17 acknowledged root-`src` duplicates.
 
 The local shell used Node `26.5.1` and emitted the expected engine warning.
-GitHub Actions run `32316868621` supplied the independent Node 24 proof and
-passed every release-gate stage in 2m20s.
+Prior-head GitHub Actions run `32321701327` supplied independent Node 24 proof.
+The final hardened head requires a fresh exact-head Node 24 run after push.
+
+Additional release checks:
+
+- `pnpm audit --prod`: no known vulnerabilities;
+- `gitleaks git --redact`: 452 commits scanned, no leaks;
+- every changed or new file scanned separately: no leaks; and
+- `git diff --check`: PASS.
 
 ## Preview deployment evidence
 
 - PR: `#180`
-- commit: `0668bd31ec22f2de61549226505781825283cd97`
-- deployment: `dpl_44mpwLo47Gc35hYnomgxcxqKgku5`
-- URL: `https://ask-magic-mike-fxm5akm4d-eyes-up-industries.vercel.app`
+- prior candidate commit: `13da6bc6e21e2e74a1805d75c6648150db33bb18`
+- deployment: `dpl_2xFEZDKGiCWn1YUsABmRfE5ZNQUM`
+- URL: `https://ask-magic-mike-6og0pgmu0-eyes-up-industries.vercel.app`
 - state: Ready; target Preview; Node runtime 24.x
-- public checks: `/`, `/ask`, `/sell`, `/value`, `/buy`, `/plan`,
-  `/widget/v1`, `/api/health/live`, and `/api/health/ready` returned 200
-- anonymous checks: `/admin`, `/admin/growth`, and `/admin/leads` returned 401
-- readiness: canonical Neon reachable; capture, lead, notification, RBAC, and
-  push-subscription schema checks passed; Preview delivery remained disabled
+- public checks: `/`, `/sell`, `/buy`, `/home-value`, `/api/health/live`, and
+  `/api/health/ready` returned 200
+- anonymous check: `/admin/growth` returned 401
 - identity isolation: correct Ask Magic Mike title; no NellySelly marker in
   homepage HTML
-- Vercel error-log query: no error-level logs in the inspected ten-minute
-  window
+
+This is intentionally labeled prior-head evidence. The final hardened commit
+must receive a fresh exact-head Node 24 check and Preview receipt; those
+immutable receipts belong on PR #180 rather than in another evidence-only
+commit.
 
 No form was submitted and no Preview database mutation or external delivery was
 performed during these checks.

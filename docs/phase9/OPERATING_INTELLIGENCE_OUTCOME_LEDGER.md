@@ -77,10 +77,17 @@ v2 function:
 
 No Production step is authorized by this document alone.
 
+The fail-closed execution entry point is
+`pnpm run phase9:outcome:cutover`. Its offline plan verifies the reviewed
+migration hash. Its live modes require the canonical unpooled Neon endpoint,
+PostgreSQL/database/owner identity, secure environment entry, a validated
+custom-format backup, transaction timeouts, unchanged lead-status digest,
+service-only execution privilege, migration-ledger singularity, and exact
+database-specific approval. See `OUTCOME_LEDGER_PRODUCTION_CUTOVER.md`.
+
 ## Rollback
 
 Rollback the application to the immediately prior Ready deployment, which calls
 `mutate_admin_lead_status_v1`. Preserve `lead_outcomes` and audit rows. The v2
 function is additive and can remain dormant. Dropping it is optional and requires
 a separately reviewed database change after application rollback is proven.
-

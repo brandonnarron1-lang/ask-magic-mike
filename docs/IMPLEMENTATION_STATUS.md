@@ -50,20 +50,34 @@ Updated 2026-08-20.
   `lead:record_revenue` permission and explicitly means actual brokerage
   revenue—not sale price, list price, estimated value, or projected commission.
 - The complete migration chain and executable outcome contract pass on
-  disposable PostgreSQL 17. Local release gate passes 192 test files / 2,753
-  tests, strict typecheck, lint, build, 14/14 safety checks, and 78-route
-  manifest verification. Independent Node 24 CI run `32316868621` passes.
+  disposable PostgreSQL 17. The final local release gate passes 193 test files
+  / 2,763 tests, strict typecheck, lint, build, 14/14 safety checks, and
+  78-route manifest verification. The prior candidate also has independent
+  Node 24 CI proof at run `32321701327`; the hardened head requires a fresh run
+  after push.
 - A canonical-Neon-shape rehearsal found and fixed two pre-Production defects:
   optional `anon`/`authenticated` roles no longer gate migration success, and
   same-state revenue replay now preserves the original actor/audit evidence.
   The revised migration applied twice with those roles absent, executed v2 as
   `service_role`, kept backfill status invariant, prevented duplicates, and
   preserved v1 application rollback compatibility.
-- PR `#180` is clean and Preview deployment
-  `dpl_44mpwLo47Gc35hYnomgxcxqKgku5` is Ready. Nine public/health routes pass,
-  three anonymous Admin routes deny access, no NellySelly marker is present,
-  and the inspected error-log window is empty. Authenticated role-specific
-  visual QA and migration acceptance remain gated.
+- Added a fail-closed Production cutover runner with immutable migration hash,
+  exact approval interlock, canonical unpooled Neon identity, TLS/channel
+  binding enforcement, required-schema and least-privilege checks, advisory
+  and write-boundary locks, validated mode-600 custom backup, one transaction,
+  migration-ledger write, and fail-closed postcondition verification. Eleven unit
+  contracts and a real PostgreSQL 18 synthetic rehearsal pass. The rehearsal
+  proved concurrent-run rejection, weakened-role rejection, complete rollback,
+  deterministic backfill, and a rolled-back non-idempotent `service_role`
+  transition that returned both audit and outcome IDs. Production was not
+  contacted.
+- PR `#180` prior head `13da6bc6e21e2e74a1805d75c6648150db33bb18`
+  has a Ready exact-head Preview at deployment
+  `dpl_2xFEZDKGiCWn1YUsABmRfE5ZNQUM`. Public/health checks pass, anonymous
+  Growth access is denied, and no NellySelly marker is present. The hardened
+  cutover-runner head still requires push, Node 24 CI, and exact-head Preview
+  verification. Authenticated role-specific visual QA and migration acceptance
+  remain gated.
 - No Production/Preview database, lead, message, WordPress page, DNS record, or
   deployment was changed for this candidate.
 
