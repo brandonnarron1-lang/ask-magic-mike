@@ -36,6 +36,7 @@ describe("Phase 9 growth intelligence", () => {
           campaign: "wilson_sellers",
           score: 82,
           lastContactedAt: "2026-08-17T12:04:00.000Z",
+          firstHumanResponseAt: "2026-08-17T12:04:00.000Z",
         },
         {
           id: "lead-2",
@@ -45,6 +46,7 @@ describe("Phase 9 growth intelligence", () => {
           medium: "cpc",
           campaign: "wilson_sellers",
           lastContactedAt: "2026-08-16T12:03:00.000Z",
+          firstHumanResponseAt: "2026-08-16T12:03:00.000Z",
         },
         {
           id: "lead-3",
@@ -86,6 +88,11 @@ describe("Phase 9 growth intelligence", () => {
       attributedRevenueUsd: 8000,
       returnOnAdSpend: 20,
       speedToLeadRisks: 1,
+      firstResponseSampleSize: 2,
+      firstResponseCoverageRate: 66.7,
+      medianFirstResponseMinutes: 3.5,
+      p75FirstResponseMinutes: 3.8,
+      p90FirstResponseMinutes: 3.9,
     });
     const google = result.channels.find((channel) => channel.source === "google");
     expect(google).toMatchObject({
@@ -100,6 +107,44 @@ describe("Phase 9 growth intelligence", () => {
     const meta = result.channels.find((channel) => channel.source === "meta");
     expect(meta?.flags).toContain("spend_missing");
     expect(result.opportunities.map((row) => row.key)).toContain("complete_paid_channel_economics");
+    expect(result.opportunities.map((row) => row.key)).toContain("first_response_measurement");
+  });
+
+  it("computes interpolated first-response percentiles only from immutable evidence", () => {
+    const result = buildGrowthIntelligence({
+      now: NOW,
+      leads: [
+        ...[5, 10, 20, 40].map((minutes, index) => ({
+          id: `response-${index}`,
+          createdAt: "2026-08-18T12:00:00.000Z",
+          status: "contacted",
+          source: "organic",
+          lastContactedAt: "2026-08-18T15:00:00.000Z",
+          firstHumanResponseAt: new Date(Date.parse("2026-08-18T12:00:00.000Z") + minutes * 60_000).toISOString(),
+        })),
+        {
+          id: "legacy-only",
+          createdAt: "2026-08-18T12:00:00.000Z",
+          status: "contacted",
+          source: "organic",
+          lastContactedAt: "2026-08-18T12:01:00.000Z",
+          firstHumanResponseAt: null,
+        },
+      ],
+    });
+
+    expect(result.summary).toMatchObject({
+      firstResponseSampleSize: 4,
+      firstResponseCoverageRate: 80,
+      medianFirstResponseMinutes: 15,
+      p75FirstResponseMinutes: 25,
+      p90FirstResponseMinutes: 34,
+    });
+    expect(result.channels[0]).toMatchObject({
+      firstResponseSampleSize: 4,
+      medianFirstResponseMinutes: 15,
+      p90FirstResponseMinutes: 34,
+    });
   });
 
   it("detects dormant non-terminal leads without treating closed records as nurture candidates", () => {

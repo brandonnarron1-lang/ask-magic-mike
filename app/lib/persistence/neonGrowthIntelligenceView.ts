@@ -119,6 +119,7 @@ async function detectGrowthSchema(sql: Query) {
     `SELECT
        to_regclass('public.marketing_spend_daily') IS NOT NULL AS has_spend,
        to_regclass('public.lead_outcomes') IS NOT NULL AS has_outcomes,
+       to_regclass('public.lead_response_milestones') IS NOT NULL AS has_responses,
        to_regclass('public.growth_experiments') IS NOT NULL AS has_experiments,
        to_regclass('public.market_opportunities') IS NOT NULL AS has_opportunities,
        to_regclass('public.growth_recommendations') IS NOT NULL AS has_recommendations`,
@@ -127,6 +128,7 @@ async function detectGrowthSchema(sql: Query) {
   return {
     spend: booleanValue(row.has_spend),
     outcomes: booleanValue(row.has_outcomes),
+    responses: booleanValue(row.has_responses),
     experiments: booleanValue(row.has_experiments),
     opportunities: booleanValue(row.has_opportunities),
     recommendations: booleanValue(row.has_recommendations),
@@ -146,6 +148,7 @@ function normalizeLead(row: Row): GrowthLeadFact {
     score: nullableNumber(row.score),
     timelineMonths: nullableNumber(row.timeline_months),
     lastContactedAt: nullableText(row.last_contacted_at),
+    firstHumanResponseAt: nullableText(row.first_human_response_at),
     isPaid: booleanValue(row.is_paid),
   };
 }
@@ -262,12 +265,20 @@ export async function loadNeonGrowthIntelligence(
   const cutoff = new Date(now.getTime() - windowDays * 24 * 60 * 60 * 1000).toISOString();
   try {
     const schema = await detectGrowthSchema(sql);
+    const responseSelect = schema.responses
+      ? "rm.first_human_response_at"
+      : "NULL::timestamptz AS first_human_response_at";
+    const responseJoin = schema.responses
+      ? "LEFT JOIN public.lead_response_milestones rm ON rm.lead_id = l.id AND rm.is_test = false AND rm.communication_suppressed = false"
+      : "";
     const leadRows = await sql.query(
       `SELECT l.id, l.created_at, l.status, l.conversion_stage,
               l.source, l.source_detail, l.score, l.lead_type,
               l.timeline_months, l.last_contacted_at,
+              ${responseSelect},
               sa.utm_source, sa.utm_medium, sa.utm_campaign, sa.utm_content, sa.is_paid
          FROM public.leads l
+         ${responseJoin}
          LEFT JOIN LATERAL (
            SELECT utm_source, utm_medium, utm_campaign, utm_content, is_paid
              FROM public.source_attribution

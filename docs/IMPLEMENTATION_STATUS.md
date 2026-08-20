@@ -1,6 +1,25 @@
 # Implementation Status
 
-Updated 2026-08-19.
+Updated 2026-08-20.
+
+## Phase 9 first-human-response intelligence — 2026-08-20
+
+- Reuse-first audit proved that mutable `last_contacted_at` cannot support the
+  required median/P75/P90 first-human-response KPI.
+- Stacked candidate branch `codex/phase9-first-response-intelligence-20260820`
+  adds one server-only, one-row-per-lead response milestone, immutable audit
+  evidence, lifecycle v3 wrapper, and protected operator “record now” action.
+- Growth reporting adds milestone coverage/sample size, global P50/P75/P90, and
+  channel P50/P90. Test and suppressed rows remain excluded.
+- Historical backfill accepts only explicit `lead.lifecycle_changed` contact
+  audits; mutable legacy contact timestamps are not promoted to evidence.
+- Complete PostgreSQL 17 migration chain, existing outcome contract, new
+  response contract, 60 targeted tests, strict typecheck, changed-file lint,
+  and whitespace checks pass. Full release/Preview evidence remains pending.
+- This candidate is dependent on PR #180 and cannot be merged or migrated ahead
+  of the verified outcome-ledger Production release.
+- No Production/Preview database, lead, notification, message, WordPress page,
+  DNS record, environment value, or deployment was changed.
 
 ## Phase 9 operating-intelligence outcome seam — 2026-08-19
 

@@ -28,6 +28,12 @@ function number(value: number) {
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 }).format(value);
 }
 
+function responseMinutes(value: number | null) {
+  if (value == null) return "—";
+  if (value < 60) return `${number(value)}m`;
+  return `${number(value / 60)}h`;
+}
+
 function dateTime(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
@@ -118,14 +124,14 @@ function StateBanner({
     return (
       <div className="rounded-xl border border-[#4baab866] bg-[#06171b] px-5 py-4 text-sm leading-6 text-[#d9f5f8]">
         <strong className="text-[#7ee7f1]">Phase 9 schema gate is pending.</strong>{" "}
-        Existing live leads are being analyzed now. Spend, revenue outcomes, registered experiments, and persistent opportunity queues will populate only after the additive migration is reviewed and applied.
+        Existing live leads are being analyzed now. Spend, outcomes, immutable first-response evidence, registered experiments, and persistent opportunity queues populate only after their additive migrations are reviewed and applied.
       </div>
     );
   }
   return (
     <div className="rounded-xl border border-[#4a8c6f66] bg-[#071712] px-5 py-4 text-sm text-[#d9f4e8]">
       <strong className="text-[#83dab4]">Growth intelligence schema ready.</strong>{" "}
-      Channel economics, outcome attribution, experiments, and opportunity queues are available in the selected window.
+      Channel economics, outcome attribution, first-response percentiles, experiments, and opportunity queues are available in the selected window.
     </div>
   );
 }
@@ -233,6 +239,10 @@ export default async function GrowthCommandCenterPage({
           <MetricCard label="ROAS" value={summary.returnOnAdSpend == null ? "—" : `${number(summary.returnOnAdSpend)}x`} />
           <MetricCard label="Dormant opportunities" value={summary.staleNurtureCandidates} note="Non-terminal and stale 30+ days" />
           <MetricCard label="Response risks" value={summary.speedToLeadRisks} note="Recent, uncontacted after 15 minutes" />
+          <MetricCard label="Response coverage" value={`${summary.firstResponseCoverageRate}%`} note={`${summary.firstResponseSampleSize} immutable milestones`} />
+          <MetricCard label="Median response" value={responseMinutes(summary.medianFirstResponseMinutes)} note="P50 first human follow-up" emphasis />
+          <MetricCard label="P75 response" value={responseMinutes(summary.p75FirstResponseMinutes)} note="75% responded by this point" />
+          <MetricCard label="P90 response" value={responseMinutes(summary.p90FirstResponseMinutes)} note="Tail speed-to-lead performance" />
         </section>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-[1.45fr_.85fr]">
@@ -254,6 +264,7 @@ export default async function GrowthCommandCenterPage({
                     <th className="px-2 py-3">CPL</th>
                     <th className="px-2 py-3">Cost / close</th>
                     <th className="px-2 py-3">ROAS</th>
+                    <th className="px-2 py-3">P50 response</th>
                     <th className="px-2 py-3">Signal</th>
                   </tr>
                 </thead>
@@ -275,6 +286,10 @@ export default async function GrowthCommandCenterPage({
                       <td className="px-2 py-4">{money(channel.costPerClose)}</td>
                       <td className="px-2 py-4">{channel.returnOnAdSpend == null ? "—" : `${channel.returnOnAdSpend}x`}</td>
                       <td className="px-2 py-4">
+                        {responseMinutes(channel.medianFirstResponseMinutes)}
+                        <span className="mt-1 block text-[10px] text-[#746d62]">n={channel.firstResponseSampleSize}</span>
+                      </td>
+                      <td className="px-2 py-4">
                         <div className="flex max-w-[18rem] flex-wrap gap-1.5">
                           {channel.flags.length
                             ? channel.flags.map((flag) => <Flag key={flag} value={flag} />)
@@ -284,7 +299,7 @@ export default async function GrowthCommandCenterPage({
                     </tr>
                   )) : (
                     <tr>
-                      <td className="px-2 py-5 text-[#8f8778]" colSpan={10}>No eligible live lead rows in this window.</td>
+                      <td className="px-2 py-5 text-[#8f8778]" colSpan={11}>No eligible live lead rows in this window.</td>
                     </tr>
                   )}
                 </tbody>

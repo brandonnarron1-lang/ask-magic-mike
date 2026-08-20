@@ -24,6 +24,15 @@ export type AdminLeadStatusUpdateResult =
   | { ok: true; status: AdminLeadStatus; warning?: string }
   | { ok: false; statusCode: number; error: string };
 
+export type AdminFirstResponseResult =
+  | {
+      ok: true;
+      status: string;
+      firstHumanResponseAt: string;
+      warning?: "first_response_already_recorded";
+    }
+  | { ok: false; statusCode: number; error: string };
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MONEY = /^\d{1,8}(?:\.\d{1,2})?$/;
 const AUDIT_ACTOR = "system/admin_basic_auth";
@@ -133,5 +142,55 @@ export async function updateAdminLeadStatus(
       };
     }
     return { ok: false, statusCode: 500, error: "status_update_failed" };
+  }
+}
+
+export async function recordAdminFirstHumanResponse(
+  leadId: string,
+  options: { now?: Date; actor?: string } = {},
+): Promise<AdminFirstResponseResult> {
+  if (!UUID.test(leadId)) {
+    return { ok: false, statusCode: 400, error: "invalid_lead_id" };
+  }
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return { ok: false, statusCode: mutation.statusCode, error: mutation.error };
+  }
+  const persistence = createDefaultPersistence();
+  if (!persistence) {
+    return { ok: false, statusCode: 503, error: "lead_store_not_configured" };
+  }
+
+  try {
+    const result = await persistence.recordAdminFirstResponse({
+      leadId,
+      actor: options.actor || AUDIT_ACTOR,
+      occurredAt: (options.now || new Date()).toISOString(),
+      sourceSystem: "admin_lead_detail",
+    });
+    if (!result.ok) {
+      return {
+        ok: false,
+        statusCode: result.error === "lead_not_found" ? 404 : 400,
+        error: result.error,
+      };
+    }
+    return {
+      ok: true,
+      status: result.status,
+      firstHumanResponseAt: result.firstHumanResponseAt,
+      ...(result.idempotentReplay
+        ? { warning: "first_response_already_recorded" as const }
+        : {}),
+    };
+  } catch (error) {
+    if (error instanceof PersistenceUnavailableError) {
+      return {
+        ok: false,
+        statusCode: error.statusCode,
+        error: "first_response_record_failed",
+      };
+    }
+    return { ok: false, statusCode: 500, error: "first_response_record_failed" };
   }
 }

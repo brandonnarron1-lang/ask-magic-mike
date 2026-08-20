@@ -64,6 +64,26 @@ describe("AdminOps lead timeline", () => {
     expect(JSON.stringify([lifecycle, assignment, notification])).not.toContain("raw_provider_payload");
   });
 
+  it("renders first-response evidence without exposing milestone metadata", () => {
+    const response = normalizeAuditTimelineEvent({
+      id: "audit-response",
+      created_at: "2026-08-20T12:07:00.000Z",
+      actor: "lead_center:operator-1",
+      action: "lead.first_human_response_recorded",
+      after_state: { first_human_response_at: "2026-08-20T12:07:00.000Z" },
+      metadata: { private_note: "do not render", source: "admin_lead_detail" },
+    });
+    expect(response).toEqual({
+      id: "audit-response",
+      occurred_at: "2026-08-20T12:07:00.000Z",
+      type: "response",
+      label: "First human response recorded",
+      actor: "lead_center:operator-1",
+      detail: "Immutable speed-to-lead evidence recorded",
+    });
+    expect(JSON.stringify(response)).not.toContain("private_note");
+  });
+
   it("builds newest-first timeline and suppresses duplicate events", () => {
     const timeline = buildLeadTimeline({
       lead: {

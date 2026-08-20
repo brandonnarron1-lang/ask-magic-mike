@@ -265,3 +265,19 @@ won, closed lost, and disqualified. Test/suppression state is copied to the
 outcome. Optional closed revenue is actual brokerage revenue and is visible or
 mutable only through the existing `lead:record_revenue` permission. Application
 rollback returns to v1; outcome and audit records are preserved.
+
+## First-human-response boundary (Phase 9)
+
+`last_contacted_at` remains the mutable operational timestamp for recent-contact
+and nurture logic. It is not used as proof of first response. The server-only
+`lead_response_milestones` table stores one immutable first-human-response event
+per lead with actor, source, audit evidence, and copied test/suppression state.
+
+Lifecycle v3 wraps the complete v2 lifecycle/outcome transaction and records the
+milestone only for the explicit `contacted` action. The protected Lead Center
+also exposes an authorized, confirmation-gated “record now” action for actual
+human follow-up after a lead has advanced. Neither path sends a consumer message.
+
+Growth reporting derives P50/P75/P90 elapsed minutes from canonical lead
+creation to the milestone and excludes test/suppressed leads and milestones.
+Application rollback returns to v2; milestone and audit evidence is preserved.
