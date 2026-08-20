@@ -37,6 +37,28 @@ Updated 2026-08-20. Candidate branch:
   repository requires Node 24.x, so exact-head Node 24 CI remains the runtime
   authority.
 
+## Exact-head CI and Preview evidence
+
+- Candidate commit before this evidence-only update:
+  `53ee69c457a265599d7573bc04cb55fd424a8392`.
+- GitHub Actions Node 24 release gate:
+  [run 32318743751](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32318743751),
+  completed successfully in 2m44s.
+- Vercel Preview:
+  - deployment: `dpl_GwA2sUdQkuCdwh9v7Yz7mtbY6VNC`;
+  - URL:
+    `https://ask-magic-mike-cc96gxm1b-eyes-up-industries.vercel.app`;
+  - target/status: Preview / Ready;
+  - `/api/health/live`: 200, Ask Magic Mike, Neon configured, notifications
+    disabled, email disabled;
+  - `/api/health/ready`: 200;
+  - `/`, `/sell`, `/buy`, and `/home-value`: 200;
+  - `/admin/growth` without an authenticated Lead Center session: 401; and
+  - public HTML contained the Ask Magic Mike identity marker and no NellySelly
+    marker.
+- Preview verification was read-only. No lead was submitted, no message was
+  sent, and no database migration was applied.
+
 ## Isolation
 
 All database rows used `INTERNAL QA` identities, `.example.test` addresses,
@@ -49,6 +71,5 @@ or deployment was created by this verification.
 
 Before this stacked candidate can be promoted:
 
-1. exact-head Node 24 CI;
-2. Vercel Preview readiness and route/security verification; and
-3. refreshed cumulative proof after PR #180 reaches Production.
+1. refreshed exact-head checks after this evidence-only commit; and
+2. refreshed cumulative proof after PR #180 reaches Production.
