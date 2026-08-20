@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS public.lead_response_milestones (
   first_human_response_at timestamptz NOT NULL,
   source_system text NOT NULL,
   actor text NOT NULL,
+  responder_user_id text,
+  responder_agent_id uuid,
+  assigned_agent_id_at_response uuid,
   evidence_audit_id uuid REFERENCES public.audit_logs(id) ON DELETE SET NULL,
   is_test boolean NOT NULL DEFAULT false,
   communication_suppressed boolean NOT NULL DEFAULT false,
@@ -19,6 +22,12 @@ CREATE TABLE IF NOT EXISTS public.lead_response_milestones (
 
 CREATE INDEX IF NOT EXISTS lead_response_milestones_response_idx
   ON public.lead_response_milestones(first_human_response_at DESC);
+CREATE INDEX IF NOT EXISTS lead_response_milestones_responder_agent_idx
+  ON public.lead_response_milestones(responder_agent_id, first_human_response_at DESC)
+  WHERE responder_agent_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS lead_response_milestones_assigned_agent_idx
+  ON public.lead_response_milestones(assigned_agent_id_at_response, first_human_response_at DESC)
+  WHERE assigned_agent_id_at_response IS NOT NULL;
 
 ALTER TABLE public.lead_response_milestones ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.lead_response_milestones FROM PUBLIC;
@@ -62,6 +71,8 @@ DECLARE
   v_after_status text;
   v_audit_id uuid;
   v_milestone_id uuid;
+  v_responder_user_id text;
+  v_responder_agent_id uuid;
 BEGIN
   IF p_actor IS NULL OR btrim(p_actor) = '' OR
      p_source_system NOT IN ('admin_lead_detail', 'admin_lead_lifecycle') THEN
@@ -69,7 +80,7 @@ BEGIN
   END IF;
 
   SELECT id, status, created_at, last_contacted_at, is_test,
-         communication_suppressed
+         communication_suppressed, assigned_agent_id
     INTO v_lead
     FROM public.leads
    WHERE id = p_lead_id
@@ -96,6 +107,19 @@ BEGIN
       'first_human_response_at', v_existing.first_human_response_at,
       'idempotent_replay', true
     );
+  END IF;
+
+  -- Resolve the authenticated Lead Center actor without trusting a browser-
+  -- supplied agent ID. A user may be an administrator without an agent link;
+  -- that remains a truthful user-attributed response rather than being
+  -- silently credited to the lead's current owner.
+  IF p_actor LIKE 'lead_center:%' THEN
+    SELECT u.id, a.id
+      INTO v_responder_user_id, v_responder_agent_id
+      FROM public.lead_center_users u
+      LEFT JOIN public.agents a ON a.id::text = u."agentId"
+     WHERE u.id = substring(p_actor FROM length('lead_center:') + 1)
+     LIMIT 1;
   END IF;
 
   v_after_status := CASE
@@ -144,6 +168,9 @@ BEGIN
     first_human_response_at,
     source_system,
     actor,
+    responder_user_id,
+    responder_agent_id,
+    assigned_agent_id_at_response,
     evidence_audit_id,
     is_test,
     communication_suppressed,
@@ -153,10 +180,21 @@ BEGIN
     p_occurred_at,
     p_source_system,
     p_actor,
+    v_responder_user_id,
+    v_responder_agent_id,
+    v_lead.assigned_agent_id,
     v_audit_id,
     v_lead.is_test,
     v_lead.communication_suppressed,
-    jsonb_build_object('recording_version', 'v1')
+    jsonb_build_object(
+      'recording_version', 'v1',
+      'response_owner_evidence', CASE
+        WHEN v_responder_agent_id IS NOT NULL THEN 'responder_agent'
+        WHEN v_responder_user_id IS NOT NULL THEN 'responder_user'
+        WHEN v_lead.assigned_agent_id IS NOT NULL THEN 'assigned_owner_snapshot'
+        ELSE 'unattributed'
+      END
+    )
   ) RETURNING id INTO v_milestone_id;
 
   RETURN jsonb_build_object(
@@ -248,8 +286,14 @@ WITH first_contact_audit AS (
          a.resource_id::uuid AS lead_id,
          a.id AS audit_id,
          a.actor,
+         u.id AS responder_user_id,
+         ra.id AS responder_agent_id,
          a.created_at AS occurred_at
     FROM public.audit_logs a
+    LEFT JOIN public.lead_center_users u
+      ON a.actor = 'lead_center:' || u.id
+    LEFT JOIN public.agents ra
+      ON ra.id::text = u."agentId"
    WHERE a.resource_type = 'lead'
      AND a.action = 'lead.lifecycle_changed'
      AND a.after_state->>'status' = 'contacted'
@@ -261,6 +305,9 @@ INSERT INTO public.lead_response_milestones(
   first_human_response_at,
   source_system,
   actor,
+  responder_user_id,
+  responder_agent_id,
+  assigned_agent_id_at_response,
   evidence_audit_id,
   is_test,
   communication_suppressed,
@@ -271,12 +318,21 @@ SELECT
   a.occurred_at,
   'admin_lead_lifecycle',
   a.actor,
+  a.responder_user_id,
+  a.responder_agent_id,
+  NULL,
   a.audit_id,
   l.is_test,
   l.communication_suppressed,
   jsonb_build_object(
     'recording_version', 'v1',
     'backfilled', true,
+    'response_owner_evidence', CASE
+      WHEN a.responder_agent_id IS NOT NULL THEN 'responder_agent'
+      WHEN a.responder_user_id IS NOT NULL THEN 'responder_user'
+      ELSE 'unattributed'
+    END,
+    'assigned_owner_snapshot_available', false,
     'migration', '20260820013000_first_response_intelligence'
   )
 FROM first_contact_audit a
@@ -285,7 +341,7 @@ WHERE a.occurred_at >= l.created_at
 ON CONFLICT (lead_id) DO NOTHING;
 
 COMMENT ON TABLE public.lead_response_milestones IS
-  'Immutable first-human-response evidence for truthful speed-to-lead percentiles. Test and suppressed rows are excluded from business reporting.';
+  'Immutable first-human-response and server-resolved responder/assignment evidence for truthful speed-to-lead percentiles. Test and suppressed rows are excluded from business reporting.';
 COMMENT ON FUNCTION public.record_admin_first_response_v1(
   uuid, text, timestamptz, text
 ) IS 'Records one server-only first-human-response milestone and audit event; never sends a consumer message.';

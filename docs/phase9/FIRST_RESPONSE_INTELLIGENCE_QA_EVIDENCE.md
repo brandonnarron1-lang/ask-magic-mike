@@ -11,27 +11,32 @@ Updated 2026-08-20. Candidate branch:
 - New PostgreSQL contract passed for:
   - atomic `contacted` lifecycle and response milestone;
   - exact seven-minute elapsed response duration;
+  - server-resolved Lead Center user and linked responding-agent snapshots;
+  - assigned-agent snapshot captured at the response moment;
   - copied test/suppression state;
-  - timestamp update rejection;
+  - full-row update rejection;
   - same-state idempotent replay without overwrite or duplicate audit;
   - later-stage response recording without lifecycle regression; and
-  - rejection of response evidence before lead creation.
+  - rejection of response evidence before lead creation;
+  - user/agent deletion without milestone mutation or deletion; and
+  - historical backfill that never substitutes today's mutable assignee for an
+    unavailable response-time assignment snapshot.
 - Disposable container was removed automatically after each run.
-- Targeted Vitest result: 7 files, 60 tests passed.
+- Latest response-dimension targeted Vitest result: 3 files, 24 tests passed.
 - Strict TypeScript check passed.
 - Changed-file ESLint check passed.
 - `git diff --check` passed.
 - Full `pnpm run release:gate` passed locally on 2026-08-20:
   - system-isolation verification: passed;
   - release-safety scan: 14/14 checks passed;
-  - Vitest: 193 files, 2,763 tests passed;
+  - Vitest: 193 files, 2,765 tests passed;
   - strict TypeScript check: passed;
   - full ESLint check: passed;
   - Next.js 15.5.21 production build: passed; and
   - route manifest: 78 active routes passed, with 17 acknowledged root/source
     duplicates.
 - `pnpm audit --prod`: no known vulnerabilities.
-- `gitleaks git . --redact --log-opts="--all"`: 447 commits scanned; no
+- `gitleaks git . --redact --log-opts="--all"`: 449 commits scanned; no
   leaks found.
 - Local runtime was Node 26.5.1 and emitted the expected engine warning; the
   repository requires Node 24.x, so exact-head Node 24 CI remains the runtime
@@ -39,15 +44,15 @@ Updated 2026-08-20. Candidate branch:
 
 ## Exact-head CI and Preview evidence
 
-- Candidate commit before this evidence-only update:
-  `53ee69c457a265599d7573bc04cb55fd424a8392`.
+- Last published candidate before the response-dimension update:
+  `069d48f`.
 - GitHub Actions Node 24 release gate:
-  [run 32318743751](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32318743751),
-  completed successfully in 2m44s.
+  [run 32319025084](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32319025084),
+  completed successfully.
 - Vercel Preview:
-  - deployment: `dpl_GwA2sUdQkuCdwh9v7Yz7mtbY6VNC`;
+  - deployment: `dpl_C7zx1642ffLKCxrFVjrQHkYNVaAh`;
   - URL:
-    `https://ask-magic-mike-cc96gxm1b-eyes-up-industries.vercel.app`;
+    `https://ask-magic-mike-3wuqtinqg-eyes-up-industries.vercel.app`;
   - target/status: Preview / Ready;
   - `/api/health/live`: 200, Ask Magic Mike, Neon configured, notifications
     disabled, email disabled;
@@ -71,5 +76,6 @@ or deployment was created by this verification.
 
 Before this stacked candidate can be promoted:
 
-1. refreshed exact-head checks after this evidence-only commit; and
+1. refreshed exact-head Node 24 CI and read-only Preview checks after the
+   response-dimension commit; and
 2. refreshed cumulative proof after PR #180 reaches Production.

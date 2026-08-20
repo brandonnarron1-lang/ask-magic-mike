@@ -9,17 +9,25 @@ Updated 2026-08-20.
 - Stacked candidate branch `codex/phase9-first-response-intelligence-20260820`
   adds one server-only, one-row-per-lead response milestone, immutable audit
   evidence, lifecycle v3 wrapper, and protected operator “record now” action.
-- Growth reporting adds milestone coverage/sample size, global P50/P75/P90, and
-  channel P50/P90. Test and suppressed rows remain excluded.
+- Growth reporting adds milestone coverage/sample size and P50/P75/P90 by
+  source/campaign, lead type, and response owner. Response-owner attribution
+  uses the server-resolved responder first, then the response-time assignment
+  snapshot; it never credits today's mutable owner. Small samples are visibly
+  labeled, and test/suppressed rows remain excluded.
 - Historical backfill accepts only explicit `lead.lifecycle_changed` contact
-  audits; mutable legacy contact timestamps are not promoted to evidence.
+  audits; mutable legacy contact timestamps are not promoted to evidence, and
+  unavailable historical assignment is left unattributed rather than invented.
 - Complete PostgreSQL 17 migration chain, existing outcome contract, new
-  response contract, 60 targeted tests, strict typecheck, changed-file lint,
-  and whitespace checks pass. Full release/Preview evidence remains pending.
+  response contract (including responder deletion retention), 24 latest
+  targeted tests, strict typecheck, full lint, 2,765-test suite, production
+  build, 78-route manifest, dependency audit, secret-history scan, and
+  whitespace checks pass. Refreshed exact-head Node 24 CI and Preview evidence
+  remains pending for the response-dimension update.
 - This candidate is dependent on PR #180 and cannot be merged or migrated ahead
   of the verified outcome-ledger Production release.
 - No Production/Preview database, lead, notification, message, WordPress page,
-  DNS record, environment value, or deployment was changed.
+  DNS record, environment value, or Production deployment was changed. The
+  prior exact-head Preview remained read-only and migration-free.
 
 ## Phase 9 operating-intelligence outcome seam — 2026-08-19
 

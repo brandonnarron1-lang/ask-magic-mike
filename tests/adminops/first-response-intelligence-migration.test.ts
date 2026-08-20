@@ -15,6 +15,11 @@ describe("Phase 9 first-response intelligence migration", () => {
   it("stores one immutable, server-only milestone per lead", () => {
     expect(migration).toContain("CREATE TABLE IF NOT EXISTS public.lead_response_milestones");
     expect(migration).toContain("lead_id uuid NOT NULL UNIQUE");
+    expect(migration).toContain("responder_user_id text");
+    expect(migration).toContain("responder_agent_id uuid");
+    expect(migration).toContain("assigned_agent_id_at_response uuid");
+    expect(migration).not.toMatch(/responder_user_id text REFERENCES/i);
+    expect(migration).not.toMatch(/assigned_agent_id_at_response uuid REFERENCES/i);
     expect(migration).toContain("lead_response_milestones_reject_change");
     expect(migration).toContain("public.amm_reject_immutable_change()");
     expect(migration).toContain("ENABLE ROW LEVEL SECURITY");
@@ -29,6 +34,14 @@ describe("Phase 9 first-response intelligence migration", () => {
     expect(migration).not.toMatch(/INSERT INTO public\.lead_notifications/i);
   });
 
+  it("resolves response ownership on the server and does not invent historical assignment snapshots", () => {
+    expect(migration).toContain("LEFT JOIN public.agents a ON a.id::text = u.\"agentId\"");
+    expect(migration).toContain("v_lead.assigned_agent_id");
+    expect(migration).toContain("'response_owner_evidence'");
+    expect(migration).toContain("'assigned_owner_snapshot_available', false");
+    expect(migration).toMatch(/a\.responder_agent_id,\s+NULL,\s+a\.audit_id/);
+  });
+
   it("keeps v2 as rollback and adds contacted-state recording atomically in v3", () => {
     expect(migration).toContain("CREATE OR REPLACE FUNCTION public.mutate_admin_lead_status_v3(");
     expect(migration).toContain("public.mutate_admin_lead_status_v2(");
@@ -40,5 +53,9 @@ describe("Phase 9 first-response intelligence migration", () => {
     expect(growthView).toContain("rm.is_test = false");
     expect(growthView).toContain("rm.communication_suppressed = false");
     expect(growthView).toContain("first_human_response_at");
+    expect(growthView).toContain("rm.responder_agent_id");
+    expect(growthView).toContain("rm.responder_user_id");
+    expect(growthView).toContain("assigned_agent_id_at_response");
+    expect(growthView).not.toContain("response_assigned.id = l.assigned_agent_id");
   });
 });

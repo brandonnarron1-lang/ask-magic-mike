@@ -22,13 +22,18 @@ lead. The row includes:
 - the canonical lead ID;
 - the server-validated first response timestamp;
 - source system and authenticated actor;
+- the server-resolved Lead Center user and linked responding agent when present;
+- the lead's assigned-agent snapshot at the response moment;
 - the immutable audit-event ID;
 - copied `is_test` and `communication_suppressed` state; and
 - privacy-safe version metadata.
 
 The table is server-only, RLS-enabled, denied to public/browser roles, and
-rejects timestamp updates. Approved lead-level retention or deletion workflows
-remain possible through the lead relationship.
+rejects updates. Responder and assignment identifiers are opaque immutable
+snapshots rather than foreign keys, so a later approved user or agent removal
+does not rewrite response history or fail against the immutability trigger.
+Approved lead-level retention or deletion workflows remain possible through the
+lead relationship and remove the milestone by cascade.
 
 ## Write paths
 
@@ -66,7 +71,11 @@ The protected Growth command center reports:
 
 - immutable milestone coverage rate and sample size;
 - P50, P75, and P90 first-human-response minutes;
-- channel-level P50 and P90 with visible sample size; and
+- source/campaign P50, P75, and P90 with visible sample size;
+- lead-type P50, P75, and P90 with coverage and sample maturity;
+- response-owner P50, P75, and P90 using the server-resolved responder first,
+  then the immutable assignment snapshot, never today's mutable owner;
+- response-owner attribution coverage and an explicit unattributed bucket; and
 - a deterministic measurement-gap recommendation when coverage is below 90%.
 
 Only live leads and live milestones with both `is_test=false` and
@@ -76,7 +85,9 @@ supplied directly to the pure intelligence function.
 
 Percentiles use deterministic linear interpolation over elapsed minutes from
 canonical lead creation to the immutable response milestone. No statistical
-significance claim is made.
+significance claim is made. Samples below 5 are labeled `collecting`, samples
+from 5–19 are `directional`, and samples of 20 or more are `operational`; those
+labels describe evidence maturity and do not imply causation.
 
 ## Release order
 

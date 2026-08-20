@@ -28,6 +28,9 @@ export interface GrowthLeadFact {
   timelineMonths?: number | null;
   lastContactedAt?: string | null;
   firstHumanResponseAt?: string | null;
+  firstResponseOwnerKey?: string | null;
+  firstResponseOwnerLabel?: string | null;
+  firstResponseOwnerBasis?: "responder_agent" | "responder_user" | "assigned_owner_snapshot" | "unattributed" | null;
   isPaid?: boolean;
 }
 
@@ -90,8 +93,23 @@ export interface GrowthChannelEconomics {
   confidence: number;
   firstResponseSampleSize: number;
   medianFirstResponseMinutes: number | null;
+  p75FirstResponseMinutes: number | null;
   p90FirstResponseMinutes: number | null;
   flags: string[];
+}
+
+export interface GrowthResponseSegment {
+  key: string;
+  label: string;
+  dimension: "lead_type" | "response_owner";
+  eligibleLeads: number;
+  firstResponseSampleSize: number;
+  coverageRate: number | null;
+  medianFirstResponseMinutes: number | null;
+  p75FirstResponseMinutes: number | null;
+  p90FirstResponseMinutes: number | null;
+  sampleStatus: "collecting" | "directional" | "operational";
+  attributionBasis?: "responder_agent" | "responder_user" | "assigned_owner_snapshot" | "unattributed";
 }
 
 export interface GrowthSummary {
@@ -111,6 +129,7 @@ export interface GrowthSummary {
   speedToLeadRisks: number;
   firstResponseSampleSize: number;
   firstResponseCoverageRate: number;
+  firstResponseOwnerAttributionRate: number;
   medianFirstResponseMinutes: number | null;
   p75FirstResponseMinutes: number | null;
   p90FirstResponseMinutes: number | null;
@@ -132,6 +151,8 @@ export interface GrowthOpportunity {
 export interface GrowthIntelligence {
   summary: GrowthSummary;
   channels: GrowthChannelEconomics[];
+  responseByLeadType: GrowthResponseSegment[];
+  responseByAgent: GrowthResponseSegment[];
   opportunities: GrowthOpportunity[];
 }
 
@@ -371,6 +392,7 @@ function finalizeChannel(key: string, channel: MutableChannel): GrowthChannelEco
     flags.push("owned_channel_winner");
   }
   const medianFirstResponseMinutes = percentile(channel.firstResponseMinutes, 0.5);
+  const p75FirstResponseMinutes = percentile(channel.firstResponseMinutes, 0.75);
   const p90FirstResponseMinutes = percentile(channel.firstResponseMinutes, 0.9);
 
   return {
@@ -400,9 +422,87 @@ function finalizeChannel(key: string, channel: MutableChannel): GrowthChannelEco
     confidence,
     firstResponseSampleSize: channel.firstResponseMinutes.length,
     medianFirstResponseMinutes,
+    p75FirstResponseMinutes,
     p90FirstResponseMinutes,
     flags,
   };
+}
+
+function responseSampleStatus(sampleSize: number): GrowthResponseSegment["sampleStatus"] {
+  if (sampleSize >= 20) return "operational";
+  if (sampleSize >= 5) return "directional";
+  return "collecting";
+}
+
+function buildResponseBreakdowns(leads: GrowthLeadFact[]) {
+  const leadTypes = new Map<string, {
+    label: string;
+    eligibleLeads: number;
+    responseMinutes: number[];
+  }>();
+  const responseOwners = new Map<string, {
+    label: string;
+    basis: NonNullable<GrowthLeadFact["firstResponseOwnerBasis"]>;
+    responseMinutes: number[];
+  }>();
+
+  for (const lead of leads) {
+    const leadTypeKey = normalizeGrowthKey(lead.leadType, "unknown");
+    const leadType = leadTypes.get(leadTypeKey) ?? {
+      label: leadTypeKey.replaceAll("_", " "),
+      eligibleLeads: 0,
+      responseMinutes: [],
+    };
+    leadType.eligibleLeads += 1;
+    const minutes = firstResponseMinutes(lead);
+    if (minutes !== null) leadType.responseMinutes.push(minutes);
+    leadTypes.set(leadTypeKey, leadType);
+
+    if (minutes === null) continue;
+    const ownerKey = normalizeGrowthKey(lead.firstResponseOwnerKey, "unattributed");
+    const basis = lead.firstResponseOwnerBasis ?? "unattributed";
+    const owner = responseOwners.get(ownerKey) ?? {
+      label: String(lead.firstResponseOwnerLabel || "Unattributed responder").trim().slice(0, 120)
+        || "Unattributed responder",
+      basis,
+      responseMinutes: [],
+    };
+    owner.responseMinutes.push(minutes);
+    responseOwners.set(ownerKey, owner);
+  }
+
+  const responseByLeadType: GrowthResponseSegment[] = [...leadTypes.entries()]
+    .map(([key, row]) => ({
+      key,
+      label: row.label,
+      dimension: "lead_type" as const,
+      eligibleLeads: row.eligibleLeads,
+      firstResponseSampleSize: row.responseMinutes.length,
+      coverageRate: rate(row.responseMinutes.length, row.eligibleLeads),
+      medianFirstResponseMinutes: percentile(row.responseMinutes, 0.5),
+      p75FirstResponseMinutes: percentile(row.responseMinutes, 0.75),
+      p90FirstResponseMinutes: percentile(row.responseMinutes, 0.9),
+      sampleStatus: responseSampleStatus(row.responseMinutes.length),
+    }))
+    .sort((a, b) => b.eligibleLeads - a.eligibleLeads || a.label.localeCompare(b.label));
+
+  const responseByAgent: GrowthResponseSegment[] = [...responseOwners.entries()]
+    .map(([key, row]) => ({
+      key,
+      label: row.label,
+      dimension: "response_owner" as const,
+      eligibleLeads: row.responseMinutes.length,
+      firstResponseSampleSize: row.responseMinutes.length,
+      coverageRate: null,
+      medianFirstResponseMinutes: percentile(row.responseMinutes, 0.5),
+      p75FirstResponseMinutes: percentile(row.responseMinutes, 0.75),
+      p90FirstResponseMinutes: percentile(row.responseMinutes, 0.9),
+      sampleStatus: responseSampleStatus(row.responseMinutes.length),
+      attributionBasis: row.basis,
+    }))
+    .sort((a, b) => b.firstResponseSampleSize - a.firstResponseSampleSize || a.label.localeCompare(b.label));
+
+  return { responseByLeadType, responseByAgent };
 }
 
 function isAttributed(lead: GrowthLeadFact) {
@@ -478,6 +578,23 @@ function buildOpportunityRadar(input: {
         firstResponseCoverageRate: summary.firstResponseCoverageRate,
       },
       recommendedNextStep: "Record the immutable first-response milestone from the Lead Center whenever a human completes the first one-to-one follow-up.",
+    });
+  }
+
+  if (summary.firstResponseSampleSize > 0 && summary.firstResponseOwnerAttributionRate < 90) {
+    opportunities.push({
+      key: "first_response_owner_attribution",
+      type: "operations",
+      title: "Attribute first response to the responsible operator",
+      rationale: `${round(100 - summary.firstResponseOwnerAttributionRate, 1)}% of measured first responses lack a server-resolved Lead Center user or assignment snapshot. Agent performance is not trustworthy until that evidence is linked.`,
+      score: bounded(64 + (100 - summary.firstResponseOwnerAttributionRate) * 0.25, 0, 100),
+      confidence: 0.98,
+      actionClass: "recommend",
+      evidence: {
+        firstResponseSampleSize: summary.firstResponseSampleSize,
+        firstResponseOwnerAttributionRate: summary.firstResponseOwnerAttributionRate,
+      },
+      recommendedNextStep: "Link each approved Lead Center operator to the canonical agent roster and record future responses through the protected Lead Center action.",
     });
   }
 
@@ -635,6 +752,11 @@ export function buildGrowthIntelligence(input: {
   const measuredFirstResponses = input.leads
     .map(firstResponseMinutes)
     .filter((value): value is number => value !== null);
+  const attributedFirstResponseOwners = input.leads.filter((lead) =>
+    firstResponseMinutes(lead) !== null &&
+    normalizeGrowthKey(lead.firstResponseOwnerKey, "unattributed") !== "unattributed",
+  ).length;
+  const responseBreakdowns = buildResponseBreakdowns(input.leads);
 
   let staleNurtureCandidates = 0;
   let speedToLeadRisks = 0;
@@ -673,6 +795,10 @@ export function buildGrowthIntelligence(input: {
     speedToLeadRisks,
     firstResponseSampleSize: measuredFirstResponses.length,
     firstResponseCoverageRate: rate(measuredFirstResponses.length, input.leads.length),
+    firstResponseOwnerAttributionRate: rate(
+      attributedFirstResponseOwners,
+      measuredFirstResponses.length,
+    ),
     medianFirstResponseMinutes: percentile(measuredFirstResponses, 0.5),
     p75FirstResponseMinutes: percentile(measuredFirstResponses, 0.75),
     p90FirstResponseMinutes: percentile(measuredFirstResponses, 0.9),
@@ -684,6 +810,7 @@ export function buildGrowthIntelligence(input: {
   return {
     summary,
     channels: finalizedChannels,
+    ...responseBreakdowns,
     opportunities: buildOpportunityRadar({ summary, channels: finalizedChannels, experiments }),
   };
 }

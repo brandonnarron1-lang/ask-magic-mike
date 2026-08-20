@@ -25,30 +25,57 @@ VALUES
   ('93000000-0000-4000-8000-000000000002', '2026-08-19 21:00:00+00'),
   ('93000000-0000-4000-8000-000000000003', '2026-08-19 21:00:00+00');
 
+INSERT INTO public.agents (
+  id, name, email, role, is_active, notification_email, notification_sms
+) VALUES (
+  '95000000-0000-4000-8000-000000000001',
+  'INTERNAL QA RESPONSE AGENT',
+  'response-agent@example.test',
+  'primary',
+  true,
+  false,
+  false
+);
+
+INSERT INTO public.lead_center_users (
+  id, name, email, "emailVerified", role, "agentId"
+) VALUES (
+  'pg17-response-qa',
+  'INTERNAL QA RESPONSE USER',
+  'response-user@example.test',
+  true,
+  'administrator',
+  '95000000-0000-4000-8000-000000000001'
+);
+
 INSERT INTO public.leads (
   id, session_id, created_at, first_name, last_name, email, status, is_test,
-  communication_suppressed, consent_language_version, widget_session_id
+  communication_suppressed, consent_language_version, widget_session_id,
+  assigned_agent_id
 ) VALUES
   (
     '94000000-0000-4000-8000-000000000001',
     '93000000-0000-4000-8000-000000000001',
     '2026-08-19 21:00:00+00',
     'INTERNAL', 'QA RESPONSE', 'response-ledger@example.test', 'new',
-    true, true, 'qa-v1', '93000000-0000-4000-8000-000000000001'
+    true, true, 'qa-v1', '93000000-0000-4000-8000-000000000001',
+    '95000000-0000-4000-8000-000000000001'
   ),
   (
     '94000000-0000-4000-8000-000000000002',
     '93000000-0000-4000-8000-000000000002',
     '2026-08-19 21:00:00+00',
     'INTERNAL', 'QA LATE STAGE', 'response-late@example.test', 'qualified',
-    true, true, 'qa-v1', '93000000-0000-4000-8000-000000000002'
+    true, true, 'qa-v1', '93000000-0000-4000-8000-000000000002',
+    '95000000-0000-4000-8000-000000000001'
   ),
   (
     '94000000-0000-4000-8000-000000000003',
     '93000000-0000-4000-8000-000000000003',
     '2026-08-19 21:00:00+00',
     'INTERNAL', 'QA INVALID TIME', 'response-invalid@example.test', 'new',
-    true, true, 'qa-v1', '93000000-0000-4000-8000-000000000003'
+    true, true, 'qa-v1', '93000000-0000-4000-8000-000000000003',
+    '95000000-0000-4000-8000-000000000001'
   );
 
 SELECT public.mutate_admin_lead_status_v3(
@@ -81,10 +108,13 @@ SELECT pg_temp.assert_true(
     SELECT count(*) = 1
        AND min(first_human_response_at) = '2026-08-19 21:07:00+00'::timestamptz
        AND bool_and(is_test AND communication_suppressed)
+       AND bool_and(responder_user_id = 'pg17-response-qa')
+       AND bool_and(responder_agent_id = '95000000-0000-4000-8000-000000000001'::uuid)
+       AND bool_and(assigned_agent_id_at_response = '95000000-0000-4000-8000-000000000001'::uuid)
     FROM public.lead_response_milestones
     WHERE lead_id = '94000000-0000-4000-8000-000000000001'
   ),
-  'one immutable first-response milestone preserves test suppression'
+  'one immutable milestone preserves suppression and server-resolved response ownership'
 );
 
 SELECT pg_temp.assert_true(
@@ -184,6 +214,23 @@ SELECT pg_temp.assert_true(
     WHERE lead_id = '94000000-0000-4000-8000-000000000003'
   ),
   'invalid response creates no milestone'
+);
+
+-- Identity/roster retention changes must not rewrite or block immutable lead
+-- evidence. Opaque IDs remain until the approved lead-level retention path
+-- deletes the lead and cascades its milestone.
+DELETE FROM public.lead_center_users WHERE id = 'pg17-response-qa';
+DELETE FROM public.agents WHERE id = '95000000-0000-4000-8000-000000000001';
+
+SELECT pg_temp.assert_true(
+  (
+    SELECT responder_user_id = 'pg17-response-qa'
+       AND responder_agent_id = '95000000-0000-4000-8000-000000000001'::uuid
+       AND assigned_agent_id_at_response = '95000000-0000-4000-8000-000000000001'::uuid
+    FROM public.lead_response_milestones
+    WHERE lead_id = '94000000-0000-4000-8000-000000000001'
+  ),
+  'identity or agent removal preserves opaque response ownership evidence'
 );
 
 ROLLBACK;

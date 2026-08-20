@@ -150,6 +150,19 @@ function Flag({ value }: { value: string }) {
   );
 }
 
+function SampleStatus({ value }: { value: "collecting" | "directional" | "operational" }) {
+  const tone = value === "operational"
+    ? "border-[#4a8c6f66] bg-[#071712] text-[#83dab4]"
+    : value === "directional"
+      ? "border-[#4baab866] bg-[#06171b] text-[#7ee7f1]"
+      : "border-[#cda24a55] bg-[#171207] text-[#e4c36f]";
+  return (
+    <span className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.11em] ${tone}`}>
+      {value}
+    </span>
+  );
+}
+
 export default async function GrowthCommandCenterPage({
   searchParams,
 }: {
@@ -240,10 +253,93 @@ export default async function GrowthCommandCenterPage({
           <MetricCard label="Dormant opportunities" value={summary.staleNurtureCandidates} note="Non-terminal and stale 30+ days" />
           <MetricCard label="Response risks" value={summary.speedToLeadRisks} note="Recent, uncontacted after 15 minutes" />
           <MetricCard label="Response coverage" value={`${summary.firstResponseCoverageRate}%`} note={`${summary.firstResponseSampleSize} immutable milestones`} />
+          <MetricCard label="Response owner attribution" value={`${summary.firstResponseOwnerAttributionRate}%`} note="Server-resolved operator or assignment snapshot" />
           <MetricCard label="Median response" value={responseMinutes(summary.medianFirstResponseMinutes)} note="P50 first human follow-up" emphasis />
           <MetricCard label="P75 response" value={responseMinutes(summary.p75FirstResponseMinutes)} note="75% responded by this point" />
           <MetricCard label="P90 response" value={responseMinutes(summary.p90FirstResponseMinutes)} note="Tail speed-to-lead performance" />
         </section>
+
+        <div className="mt-5">
+          <Panel
+            eyebrow="Speed to lead"
+            title="First-human-response performance"
+            note="Immutable response evidence by required operating dimension. Small samples are labeled—not dressed up as certainty."
+          >
+            <div className="grid gap-5 xl:grid-cols-2">
+              <section className="min-w-0 rounded-xl border border-white/[.08] bg-black/30 p-4">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <h3 className="font-serif text-2xl text-[#f4ead4]">By lead type</h3>
+                    <p className="mt-1 text-xs leading-5 text-[#8f8778]">Coverage uses every eligible live lead of that type in the selected window.</p>
+                  </div>
+                </div>
+                <div className="mt-4 space-y-3">
+                  {data.responseByLeadType.length ? data.responseByLeadType.map((segment) => (
+                    <article key={segment.key} className="rounded-xl border border-white/[.08] bg-[#080808] p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <h4 className="text-sm font-semibold capitalize text-[#f4ead4]">{segment.label}</h4>
+                          <p className="mt-1 text-[10px] text-[#8f8778]">
+                            n={segment.firstResponseSampleSize} of {segment.eligibleLeads} · {segment.coverageRate}% coverage
+                          </p>
+                        </div>
+                        <SampleStatus value={segment.sampleStatus} />
+                      </div>
+                      <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
+                        {[
+                          ["P50", segment.medianFirstResponseMinutes],
+                          ["P75", segment.p75FirstResponseMinutes],
+                          ["P90", segment.p90FirstResponseMinutes],
+                        ].map(([label, value]) => (
+                          <div key={String(label)} className="rounded-lg border border-white/[.07] bg-black/30 p-2.5">
+                            <dt className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#746d62]">{label}</dt>
+                            <dd className="mt-1 font-serif text-lg text-[#f0cf79]">{responseMinutes(value as number | null)}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </article>
+                  )) : <p className="text-sm text-[#8f8778]">No eligible live lead rows in this window.</p>}
+                </div>
+              </section>
+
+              <section className="min-w-0 rounded-xl border border-white/[.08] bg-black/30 p-4">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <h3 className="font-serif text-2xl text-[#f4ead4]">By response owner</h3>
+                    <p className="mt-1 text-xs leading-5 text-[#8f8778]">Uses the server-resolved responder first, then the immutable assignment snapshot. It never uses today's mutable owner for historical credit.</p>
+                  </div>
+                </div>
+                <div className="mt-4 space-y-3">
+                  {data.responseByAgent.length ? data.responseByAgent.map((segment) => (
+                    <article key={segment.key} className="rounded-xl border border-white/[.08] bg-[#080808] p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <h4 className="text-sm font-semibold text-[#f4ead4]">{segment.label}</h4>
+                          <p className="mt-1 text-[10px] capitalize text-[#8f8778]">
+                            n={segment.firstResponseSampleSize} measured responses · {segment.attributionBasis?.replaceAll("_", " ")}
+                          </p>
+                        </div>
+                        <SampleStatus value={segment.sampleStatus} />
+                      </div>
+                      <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
+                        {[
+                          ["P50", segment.medianFirstResponseMinutes],
+                          ["P75", segment.p75FirstResponseMinutes],
+                          ["P90", segment.p90FirstResponseMinutes],
+                        ].map(([label, value]) => (
+                          <div key={String(label)} className="rounded-lg border border-white/[.07] bg-black/30 p-2.5">
+                            <dt className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#746d62]">{label}</dt>
+                            <dd className="mt-1 font-serif text-lg text-[#f0cf79]">{responseMinutes(value as number | null)}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </article>
+                  )) : <p className="text-sm text-[#8f8778]">No measured response-owner evidence in this window.</p>}
+                </div>
+              </section>
+            </div>
+          </Panel>
+        </div>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-[1.45fr_.85fr]">
           <Panel
@@ -252,7 +348,7 @@ export default async function GrowthCommandCenterPage({
             note={`${data.sourceRowsRead} lead rows · ${data.spendRowsRead} spend rows · ${data.outcomeRowsRead} outcome rows`}
           >
             <div className="overflow-x-auto">
-              <table className="min-w-[980px] w-full text-left text-sm">
+              <table className="min-w-[1040px] w-full text-left text-sm">
                 <thead className="border-b border-white/10 text-[10px] uppercase tracking-[0.14em] text-[#8f8778]">
                   <tr>
                     <th className="px-2 py-3">Source / campaign</th>
@@ -264,7 +360,7 @@ export default async function GrowthCommandCenterPage({
                     <th className="px-2 py-3">CPL</th>
                     <th className="px-2 py-3">Cost / close</th>
                     <th className="px-2 py-3">ROAS</th>
-                    <th className="px-2 py-3">P50 response</th>
+                    <th className="px-2 py-3">P50 / P75 / P90</th>
                     <th className="px-2 py-3">Signal</th>
                   </tr>
                 </thead>
@@ -286,7 +382,10 @@ export default async function GrowthCommandCenterPage({
                       <td className="px-2 py-4">{money(channel.costPerClose)}</td>
                       <td className="px-2 py-4">{channel.returnOnAdSpend == null ? "—" : `${channel.returnOnAdSpend}x`}</td>
                       <td className="px-2 py-4">
-                        {responseMinutes(channel.medianFirstResponseMinutes)}
+                        <span className="block">{responseMinutes(channel.medianFirstResponseMinutes)}</span>
+                        <span className="mt-1 block text-[10px] text-[#8f8778]">
+                          {responseMinutes(channel.p75FirstResponseMinutes)} / {responseMinutes(channel.p90FirstResponseMinutes)}
+                        </span>
                         <span className="mt-1 block text-[10px] text-[#746d62]">n={channel.firstResponseSampleSize}</span>
                       </td>
                       <td className="px-2 py-4">

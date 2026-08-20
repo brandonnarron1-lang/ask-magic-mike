@@ -84,6 +84,13 @@ function booleanValue(value: unknown) {
   return value === true || value === "true" || value === 1 || value === "1";
 }
 
+function responseOwnerBasis(value: unknown): GrowthLeadFact["firstResponseOwnerBasis"] {
+  return value === "responder_agent" || value === "responder_user" ||
+    value === "assigned_owner_snapshot" || value === "unattributed"
+    ? value
+    : null;
+}
+
 function timestamp(value: unknown) {
   if (value instanceof Date) return value.toISOString();
   const valueText = text(value).trim();
@@ -149,6 +156,9 @@ function normalizeLead(row: Row): GrowthLeadFact {
     timelineMonths: nullableNumber(row.timeline_months),
     lastContactedAt: nullableText(row.last_contacted_at),
     firstHumanResponseAt: nullableText(row.first_human_response_at),
+    firstResponseOwnerKey: nullableText(row.first_response_owner_key),
+    firstResponseOwnerLabel: nullableText(row.first_response_owner_label),
+    firstResponseOwnerBasis: responseOwnerBasis(row.first_response_owner_basis),
     isPaid: booleanValue(row.is_paid),
   };
 }
@@ -266,10 +276,45 @@ export async function loadNeonGrowthIntelligence(
   try {
     const schema = await detectGrowthSchema(sql);
     const responseSelect = schema.responses
-      ? "rm.first_human_response_at"
-      : "NULL::timestamptz AS first_human_response_at";
+      ? `rm.first_human_response_at,
+         CASE
+           WHEN rm.responder_agent_id IS NOT NULL THEN 'agent:' || rm.responder_agent_id::text
+           WHEN rm.responder_user_id IS NOT NULL THEN 'user:' || rm.responder_user_id
+           WHEN rm.assigned_agent_id_at_response IS NOT NULL THEN 'agent:' || rm.assigned_agent_id_at_response::text
+           ELSE 'unattributed'
+         END AS first_response_owner_key,
+         COALESCE(
+           response_agent.name,
+           response_user.name,
+           response_assigned.name,
+           CASE WHEN rm.responder_agent_id IS NOT NULL OR rm.responder_user_id IS NOT NULL
+             OR rm.assigned_agent_id_at_response IS NOT NULL
+             THEN 'Former or removed response owner'
+             ELSE 'Unattributed responder'
+           END
+         )
+           AS first_response_owner_label,
+         CASE
+           WHEN rm.responder_agent_id IS NOT NULL THEN 'responder_agent'
+           WHEN rm.responder_user_id IS NOT NULL THEN 'responder_user'
+           WHEN rm.assigned_agent_id_at_response IS NOT NULL THEN 'assigned_owner_snapshot'
+           ELSE 'unattributed'
+         END AS first_response_owner_basis`
+      : `NULL::timestamptz AS first_human_response_at,
+         NULL::text AS first_response_owner_key,
+         NULL::text AS first_response_owner_label,
+         NULL::text AS first_response_owner_basis`;
     const responseJoin = schema.responses
-      ? "LEFT JOIN public.lead_response_milestones rm ON rm.lead_id = l.id AND rm.is_test = false AND rm.communication_suppressed = false"
+      ? `LEFT JOIN public.lead_response_milestones rm
+           ON rm.lead_id = l.id
+          AND rm.is_test = false
+          AND rm.communication_suppressed = false
+         LEFT JOIN public.lead_center_users response_user
+           ON response_user.id = rm.responder_user_id
+         LEFT JOIN public.agents response_agent
+           ON response_agent.id = rm.responder_agent_id
+         LEFT JOIN public.agents response_assigned
+           ON response_assigned.id = rm.assigned_agent_id_at_response`
       : "";
     const leadRows = await sql.query(
       `SELECT l.id, l.created_at, l.status, l.conversion_stage,
