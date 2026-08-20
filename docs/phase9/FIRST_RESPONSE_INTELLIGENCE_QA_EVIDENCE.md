@@ -44,15 +44,15 @@ Updated 2026-08-20. Candidate branch:
 
 ## Exact-head CI and Preview evidence
 
-- Last published candidate before the response-dimension update:
-  `069d48f`.
+- Response-dimension implementation commit before this evidence-only update:
+  `627d2860bb01d86009d273614b33fc6b01b13901`.
 - GitHub Actions Node 24 release gate:
-  [run 32319025084](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32319025084),
-  completed successfully.
+  [run 32320555687](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32320555687),
+  completed successfully in 2m52s.
 - Vercel Preview:
-  - deployment: `dpl_C7zx1642ffLKCxrFVjrQHkYNVaAh`;
+  - deployment: `dpl_D9FepMPCUZCC6v6wRsPnV93oCAk4`;
   - URL:
-    `https://ask-magic-mike-3wuqtinqg-eyes-up-industries.vercel.app`;
+    `https://ask-magic-mike-bro2vmlo5-eyes-up-industries.vercel.app`;
   - target/status: Preview / Ready;
   - `/api/health/live`: 200, Ask Magic Mike, Neon configured, notifications
     disabled, email disabled;
@@ -63,6 +63,9 @@ Updated 2026-08-20. Candidate branch:
     marker.
 - Preview verification was read-only. No lead was submitted, no message was
   sent, and no database migration was applied.
+- The protected dimension cards cannot read response-owner columns in Preview
+  until the stacked migration reaches that environment. Anonymous denial,
+  public rendering, and health were verified without weakening that boundary.
 
 ## Isolation
 
@@ -76,6 +79,5 @@ or deployment was created by this verification.
 
 Before this stacked candidate can be promoted:
 
-1. refreshed exact-head Node 24 CI and read-only Preview checks after the
-   response-dimension commit; and
-2. refreshed cumulative proof after PR #180 reaches Production.
+1. refreshed exact-head checks after this evidence-only commit; and
+2. cumulative migration/production proof after PR #180 reaches Production.

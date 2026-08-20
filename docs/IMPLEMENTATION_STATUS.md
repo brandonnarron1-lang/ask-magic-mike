@@ -21,8 +21,9 @@ Updated 2026-08-20.
   response contract (including responder deletion retention), 24 latest
   targeted tests, strict typecheck, full lint, 2,765-test suite, production
   build, 78-route manifest, dependency audit, secret-history scan, and
-  whitespace checks pass. Refreshed exact-head Node 24 CI and Preview evidence
-  remains pending for the response-dimension update.
+  whitespace checks pass. Exact implementation-head Node 24 CI run
+  `32320555687` and Vercel Preview `dpl_D9FepMPCUZCC6v6wRsPnV93oCAk4` pass;
+  final evidence-only exact-head checks remain pending.
 - This candidate is dependent on PR #180 and cannot be merged or migrated ahead
   of the verified outcome-ledger Production release.
 - No Production/Preview database, lead, notification, message, WordPress page,
