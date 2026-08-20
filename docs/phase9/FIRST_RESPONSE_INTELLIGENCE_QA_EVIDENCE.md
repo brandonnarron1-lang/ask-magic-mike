@@ -170,13 +170,42 @@ Preview database mutation was performed. No lead, notification, provider send,
 consumer acknowledgment, WordPress page, DNS record, Production environment
 value, or PR #181 Production deployment was created by this verification.
 
+## Hardened cutover exact-head evidence
+
+- Hardened implementation commit:
+  `21f0d127064393daf4029240fb45398c1f84b2fc`.
+- GitHub Actions Node 24 release gate
+  [run 32426414466](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32426414466)
+  completed successfully in 2m54s. Setup, dependency installation, release
+  doctor, release safety, unit tests, strict typecheck, lint, production build,
+  route manifest, release report, launch-authority report, and artifact upload
+  all passed.
+- Exact-commit Vercel Preview:
+  - deployment: `dpl_F8u75ymqEJzpFVPfBvvyktWCRiDL`;
+  - URL:
+    `https://ask-magic-mike-3wymra2pd-eyes-up-industries.vercel.app`;
+  - target/status/runtime: Preview / Ready / Node 24;
+  - Vercel metadata linked the deployment to PR #181 and the exact hardened
+    implementation commit above;
+  - `/api/health/live` and `/api/health/ready`: 200;
+  - `/`, `/sell`, `/buy`, and `/home-value`: 200;
+  - anonymous `/admin/growth`: 401;
+  - health reported Ask Magic Mike on configured Neon with notifications and
+    email disabled in Preview;
+  - desktop and 390x844 mobile browser checks found meaningful content, no
+    framework error overlay, no console warnings/errors, no horizontal mobile
+    overflow, and a visible primary home-value CTA; and
+  - rendered public content contained the Ask Magic Mike identity marker and
+    no NellySelly marker.
+- The Preview verification was read-only. It created no lead, message,
+  notification, database write, migration, or external publication.
+
 ## Remaining evidence
 
 Before this candidate can be promoted:
 
-1. a new exact-head Node 24 CI run and Vercel Preview receipt after push;
-2. read-only canonical-Neon Production preflight;
-3. separately approved Production backup/migration, PR #181 merge, and exact
+1. read-only canonical-Neon Production preflight;
+2. separately approved Production backup/migration, PR #181 merge, and exact
    deployment; and
-4. authenticated administrator and assigned-agent visual/authorization checks
+3. authenticated administrator and assigned-agent visual/authorization checks
    plus public, health, identity-isolation, and rollback verification.
