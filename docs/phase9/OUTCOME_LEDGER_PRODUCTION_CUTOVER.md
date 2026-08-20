@@ -15,6 +15,8 @@ Canonical identity:
 - project: `bitter-star-20214385`;
 - branch: `production` / `br-round-base-auh6h2wd`;
 - unpooled endpoint: `ep-proud-bonus-autwv60g`;
+- authenticated Production hostname:
+  `ep-proud-bonus-autwv60g.c-10.us-east-1.aws.neon.tech`;
 - database: `neondb`;
 - migration owner: `neondb_owner`; and
 - application role: `service_role`.
