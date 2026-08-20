@@ -22,7 +22,7 @@ export const EXPECTED_DATABASE = "neondb";
 export const EXPECTED_OWNER = "neondb_owner";
 export const EXPECTED_ENDPOINT_ID = "ep-proud-bonus-autwv60g";
 export const EXPECTED_HOSTNAME =
-  "ep-proud-bonus-autwv60g.us-east-1.aws.neon.tech";
+  "ep-proud-bonus-autwv60g.c-10.us-east-1.aws.neon.tech";
 
 const MODULE_URL = new URL(import.meta.url);
 const ROOT = MODULE_URL.protocol === "file:"

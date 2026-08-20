@@ -18,7 +18,7 @@ import {
 } from "../../scripts/phase9-outcome-production-cutover.mjs";
 
 const productionUrl =
-  "postgresql://neondb_owner:secret%21@ep-proud-bonus-autwv60g.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+  "postgresql://neondb_owner:secret%21@ep-proud-bonus-autwv60g.c-10.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
 const runnerSource = readFileSync("scripts/phase9-outcome-production-cutover.mjs", "utf8");
 
 function preflight(overrides: Record<string, unknown> = {}) {
