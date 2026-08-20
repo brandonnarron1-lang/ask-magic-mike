@@ -20,7 +20,12 @@ Updated 2026-08-19.
 - The complete migration chain and executable outcome contract pass on
   disposable PostgreSQL 17. Local release gate passes 192 test files / 2,753
   tests, strict typecheck, lint, build, 14/14 safety checks, and 78-route
-  manifest verification. Node 24 CI and Preview visual/RBAC evidence remain.
+  manifest verification. Independent Node 24 CI run `32316868621` passes.
+- PR `#180` is clean and Preview deployment
+  `dpl_44mpwLo47Gc35hYnomgxcxqKgku5` is Ready. Nine public/health routes pass,
+  three anonymous Admin routes deny access, no NellySelly marker is present,
+  and the inspected error-log window is empty. Authenticated role-specific
+  visual QA and migration acceptance remain gated.
 - No Production/Preview database, lead, message, WordPress page, DNS record, or
   deployment was changed for this candidate.
 

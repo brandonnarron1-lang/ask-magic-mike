@@ -74,11 +74,31 @@ Final result:
 - Next.js production build: PASS;
 - route manifest: 78 active routes / 17 acknowledged root-`src` duplicates.
 
-The local shell used Node `26.5.1` and emitted the expected engine warning. The
-canonical GitHub release gate must provide the independent Node 24 proof before
-merge.
+The local shell used Node `26.5.1` and emitted the expected engine warning.
+GitHub Actions run `32316868621` supplied the independent Node 24 proof and
+passed every release-gate stage in 2m20s.
 
-## Visual and authorization checks still required in Preview
+## Preview deployment evidence
+
+- PR: `#180`
+- commit: `0668bd31ec22f2de61549226505781825283cd97`
+- deployment: `dpl_44mpwLo47Gc35hYnomgxcxqKgku5`
+- URL: `https://ask-magic-mike-fxm5akm4d-eyes-up-industries.vercel.app`
+- state: Ready; target Preview; Node runtime 24.x
+- public checks: `/`, `/ask`, `/sell`, `/value`, `/buy`, `/plan`,
+  `/widget/v1`, `/api/health/live`, and `/api/health/ready` returned 200
+- anonymous checks: `/admin`, `/admin/growth`, and `/admin/leads` returned 401
+- readiness: canonical Neon reachable; capture, lead, notification, RBAC, and
+  push-subscription schema checks passed; Preview delivery remained disabled
+- identity isolation: correct Ask Magic Mike title; no NellySelly marker in
+  homepage HTML
+- Vercel error-log query: no error-level logs in the inspected ten-minute
+  window
+
+No form was submitted and no Preview database mutation or external delivery was
+performed during these checks.
+
+## Visual and authorization checks still required before Production
 
 - administrator/primary-owner sees the optional actual-revenue field;
 - approved agent does not see revenue input or amount;
