@@ -144,7 +144,18 @@ BEGIN
       END,
       is_test = EXCLUDED.is_test,
       communication_suppressed = EXCLUDED.communication_suppressed,
-      metadata = lead_outcomes.metadata || EXCLUDED.metadata,
+      metadata = CASE
+        WHEN v_idempotent_replay THEN
+          -- A same-state replay may repair revenue, but it must not rewrite the
+          -- original transition actor, reason, or audit evidence. Record replay
+          -- provenance under separate keys instead.
+          lead_outcomes.metadata || jsonb_build_object(
+            'last_replay_actor', p_actor,
+            'last_replay_at', p_occurred_at,
+            'idempotent_replay', true
+          )
+        ELSE lead_outcomes.metadata || EXCLUDED.metadata
+      END,
       updated_at = NOW()
     RETURNING id INTO v_outcome_id;
   END IF;
@@ -161,7 +172,27 @@ $$;
 
 REVOKE ALL ON FUNCTION public.mutate_admin_lead_status_v2(
   UUID, TEXT, TEXT, JSONB, TEXT, NUMERIC, TEXT, TIMESTAMPTZ
-) FROM PUBLIC, anon, authenticated;
+) FROM PUBLIC;
+
+-- Canonical Neon has a server-only service_role but may not define the
+-- Supabase browser roles. Revoke them when present without making either role
+-- a migration prerequisite.
+DO $phase9_outcome_function_privileges$
+DECLARE
+  role_name text;
+BEGIN
+  FOREACH role_name IN ARRAY ARRAY['anon', 'authenticated']
+  LOOP
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = role_name) THEN
+      EXECUTE format(
+        'REVOKE ALL ON FUNCTION public.mutate_admin_lead_status_v2(uuid, text, text, jsonb, text, numeric, text, timestamptz) FROM %I',
+        role_name
+      );
+    END IF;
+  END LOOP;
+END
+$phase9_outcome_function_privileges$;
+
 GRANT EXECUTE ON FUNCTION public.mutate_admin_lead_status_v2(
   UUID, TEXT, TEXT, JSONB, TEXT, NUMERIC, TEXT, TIMESTAMPTZ
 ) TO service_role;

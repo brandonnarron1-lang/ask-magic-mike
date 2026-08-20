@@ -14,6 +14,9 @@ describe("Phase 9 AdminOps outcome ledger migration", () => {
     expect(migration).toContain("INSERT INTO public.lead_outcomes");
     expect(migration).toContain("ON CONFLICT (source_system, external_id)");
     expect(migration).toContain("'outcome_ledger_version', 'v2'");
+    expect(migration).toContain("'last_replay_actor', p_actor");
+    expect(migration).toContain("'last_replay_at', p_occurred_at");
+    expect(migration).toContain("WHEN v_idempotent_replay THEN");
   });
 
   it("maps only evidenced lifecycle stages and never invents revenue", () => {
@@ -30,7 +33,10 @@ describe("Phase 9 AdminOps outcome ledger migration", () => {
   });
 
   it("keeps the function server-only and preserves v1 for rollback", () => {
-    expect(migration).toContain("FROM PUBLIC, anon, authenticated");
+    expect(migration).toContain(") FROM PUBLIC;");
+    expect(migration).toContain("FOREACH role_name IN ARRAY ARRAY['anon', 'authenticated']");
+    expect(migration).toContain("IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = role_name)");
+    expect(migration).not.toContain("FROM PUBLIC, anon, authenticated");
     expect(migration).toContain("TO service_role");
     expect(migration).toContain("mutate_admin_lead_status_v1");
   });

@@ -1,6 +1,6 @@
 # Phase 9 Outcome Ledger QA Evidence
 
-Updated 2026-08-19, America/New_York.
+Updated 2026-08-20, America/New_York.
 
 ## Scope and safety
 
@@ -44,6 +44,54 @@ same-state replay:
 
 No synthetic identity represents a real consumer. No provider delivery was
 attempted.
+
+## Canonical-Neon-shape release rehearsal
+
+A second database-first rehearsal reproduced the canonical Neon role boundary
+before Production execution:
+
+- all 30 prerequisite migrations applied to disposable PostgreSQL 17;
+- the canonical server-only `service_role` had `BYPASSRLS` and table access;
+- optional Supabase browser roles `anon` and `authenticated` were removed;
+- one synthetic converted/test/suppressed lead existed before the outcome
+  migration; and
+- no live credential, lead, or provider was used.
+
+That rehearsal caught and corrected two release blockers:
+
+1. the original function privilege statement required absent `anon` and
+   `authenticated` roles, while canonical Neon intentionally has neither; and
+2. same-state revenue replay could overwrite the original transition actor and
+   audit ID with replay metadata.
+
+The revised migration conditionally revokes optional browser roles and records
+replay provenance under separate keys while preserving the original transition
+evidence. It then passed with both optional roles absent. The executable
+contract invoked v2 as `service_role`, not as the database owner, and proved:
+
+```json
+{
+  "base_migrations": 30,
+  "optional_browser_roles": 0,
+  "service_role_execute": true,
+  "public_execute": false,
+  "lead_status_unchanged_by_backfill": true,
+  "backfilled_outcomes": 1,
+  "duplicate_outcomes_after_migration_replay": 0,
+  "original_actor_and_audit_preserved_after_revenue_replay": true,
+  "v1_application_rollback_compatible": true
+}
+```
+
+The migration applied successfully twice; the second reconciliation inserted
+zero rows and the synthetic lead retained exactly one closed outcome. The prior
+v1 lifecycle function also executed successfully as `service_role` inside a
+rolled-back transaction after v2 was installed.
+
+The linked Vercel CLI correctly withheld encrypted Production values during a
+read-only environment pull. Its mode-600 temporary file was deleted
+immediately. Direct live-schema SQL therefore remains part of the approved
+database execution gate rather than being inferred from an exposed credential.
 
 ## Application verification
 
