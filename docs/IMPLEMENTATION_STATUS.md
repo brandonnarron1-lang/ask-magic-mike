@@ -54,10 +54,16 @@ Updated 2026-08-20.
   on Node 24 and passes health, public-route, anonymous-admin-denial,
   desktop/mobile rendering, console, and Ask Magic Mike/NellySelly isolation
   checks without a database write or external send.
+- The fail-closed read-only Production preflight passes against canonical Neon
+  project `bitter-star-20214385`, Production branch
+  `br-round-base-auh6h2wd`, unpooled owner endpoint
+  `ep-proud-bonus-autwv60g`. All prerequisite, schema, role, privilege, source
+  baseline, and target-absence checks are true; 6 leads and 9 audit rows remain
+  untouched, with 0 eligible historical response backfills.
 - No PR #181 Production database mutation, merge, message, WordPress change,
   DNS change, environment change, or Production deployment has occurred. The
-  remaining gates are read-only Production preflight and separately approved
-  migration/merge/deploy plus authenticated post-release acceptance.
+  remaining gates are separately approved migration/merge/deploy plus
+  authenticated post-release acceptance.
 
 ## Phase 9 operating-intelligence outcome seam — 2026-08-19
 

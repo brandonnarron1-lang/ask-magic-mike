@@ -200,12 +200,36 @@ value, or PR #181 Production deployment was created by this verification.
 - The Preview verification was read-only. It created no lead, message,
   notification, database write, migration, or external publication.
 
+## Canonical-Neon Production preflight
+
+The fail-closed read-only preflight passed on 2026-08-20 using a securely
+copied, masked connection value that was never printed or committed.
+
+- project: `bitter-star-20214385`;
+- branch: `production / br-round-base-auh6h2wd`;
+- endpoint: `ep-proud-bonus-autwv60g`;
+- database/owner: `neondb` / `neondb_owner`;
+- connection shape: unpooled with TLS and channel binding;
+- PostgreSQL: 18.4;
+- source baseline: 6 leads, 9 audit rows, and 0 eligible historical
+  first-response backfills;
+- PR #180/v2 prerequisite: present, expected owner, `SECURITY INVOKER`, locked
+  search path, and executable by `service_role`;
+- PR #181 target table, unique index, recorder, v3 function, and migration-ledger
+  entry: all absent as required;
+- `service_role`: present, `BYPASSRLS`, required schema/table privileges intact;
+- optional browser roles with protected execute/table access: 0; and
+- every preflight check returned true.
+
+The command executed only catalog/source-state reads. It created no backup,
+lock, migration, ledger entry, lead, audit event, response milestone, message,
+notification, or deployment.
+
 ## Remaining evidence
 
 Before this candidate can be promoted:
 
-1. read-only canonical-Neon Production preflight;
-2. separately approved Production backup/migration, PR #181 merge, and exact
+1. separately approved Production backup/migration, PR #181 merge, and exact
    deployment; and
-3. authenticated administrator and assigned-agent visual/authorization checks
+2. authenticated administrator and assigned-agent visual/authorization checks
    plus public, health, identity-isolation, and rollback verification.
