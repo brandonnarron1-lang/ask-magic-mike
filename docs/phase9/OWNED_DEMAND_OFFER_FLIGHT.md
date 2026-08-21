@@ -2,7 +2,8 @@
 
 Date: 2026-08-21
 
-Status: local release candidate; Production and external channels unchanged
+Status: exact Preview-verified release candidate; Production and external
+channels unchanged
 
 Base: canonical `origin/main` commit `5335697edf31eed0b8a38cd0295a4f5e7d501a3e`
 
@@ -113,6 +114,31 @@ appraisal language, or console error. Analytics endpoints are mocked only in the
 visual harness to keep this acceptance read-only.
 
 No database migration is required.
+
+## Exact Preview evidence
+
+- Code-bearing commit:
+  `a0c80eaa9b429ed48871fc221d93af5e7d6fdfa1`.
+- Ready Vercel Preview: `dpl_5UQL8LDfMvFvvi4YZ8UhLdyDFbWF` at
+  `https://ask-magic-mike-ihjwzl8rw-eyes-up-industries.vercel.app`.
+- GitHub release gate and both Vercel checks: PASS.
+- Read-only Preview HTTP/identity/listing matrix: 10/10 PASS.
+- Preview public visual matrix: 8/8 PASS at desktop and mobile sizes.
+- Anonymous protected-admin request: correctly denied with 401, Basic
+  challenge, `no-store`, and `SAMEORIGIN`.
+- No Preview lead, event, database row, email, SMS, Push notification, or
+  external publication was created.
+
+Vercel CLI created an unrelated empty helper project while establishing the
+protected Preview session:
+`amm-phase9-campaign-compliance-20260821`
+(`prj_JUyx03Rh8iABqAFepNNuPI2jJqut`). Read-only inspection shows zero
+deployments. It is not canonical and must not receive a domain, secret, or
+deployment. Delete it only after this separate exact approval:
+
+```text
+APPROVE DELETE EMPTY VERCEL HELPER PROJECT amm-phase9-campaign-compliance-20260821
+```
 
 ## Approval boundary
 

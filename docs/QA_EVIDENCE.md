@@ -7,8 +7,8 @@ All timestamps are America/New_York unless noted.
 
 ## Phase 9 campaign safety + owned-demand offer flight — 2026-08-21
 
-Status: local release gate and local Production-render visual verification are
-complete; exact-head protected Preview verification is next. Production and
+Status: local release gate, local Production-render visual verification, and
+exact code-bearing protected Preview verification are complete. Production and
 external channels remain unchanged.
 
 - Reuse audit confirmed the canonical root `/admin/distribution`, Neon Growth
@@ -56,13 +56,40 @@ external channels remain unchanged.
 - Visual inspection confirmed the active funnels remain clear and mobile-first;
   the protected three-offer command uses the existing high-resolution approved
   Mike portraits instead of the soft 150–175 px legacy derivatives.
+- Exact code-bearing commit:
+  `a0c80eaa9b429ed48871fc221d93af5e7d6fdfa1`.
+- Exact Ready Preview: `dpl_5UQL8LDfMvFvvi4YZ8UhLdyDFbWF` at
+  `https://ask-magic-mike-ihjwzl8rw-eyes-up-industries.vercel.app`.
+- Exact GitHub status: release gate PASS in 2m56s; Vercel deployment and Preview
+  comment checks PASS.
+- Protected Preview read-only matrix — PASS: `/`, `/home-value`, `/ask`, `/buy`,
+  `/rent`, `/embed/ask`, `/widget-preview`, `/api/health/live`,
+  `/api/health/ready`, and `/api/listings/search?q=Wilson&limit=3` all returned
+  200. Required active copy was present, Ask Magic Mike/NellySelly identity
+  isolation held, and the listing response exposed none of the private-field
+  denylist.
+- Protected Preview visual matrix — PASS, 8/8: `/home-value`, `/ask`,
+  `/embed/ask`, and `/widget-preview` at 1440×1000 and 390×844. All returned 200
+  with no overflow, missing required copy, steering/offer claim, or console
+  error. Analytics endpoints were intercepted with local 204 responses to keep
+  the visual run read-only. Screenshots are retained outside Git at
+  `/private/tmp/amm-pr183-preview-qa-a0c80eaa/visual/`.
+- Anonymous protected-admin proof — PASS: `/admin/distribution` returned 401
+  with a Basic challenge, `Cache-Control: no-store`, and
+  `X-Frame-Options: SAMEORIGIN`. No app credential or session was bypassed.
+- Vercel CLI unexpectedly created empty helper project
+  `amm-phase9-campaign-compliance-20260821`
+  (`prj_JUyx03Rh8iABqAFepNNuPI2jJqut`) before the worktree was relinked to the
+  canonical project. Read-only inspection confirms zero deployments. It was not
+  deleted because cleanup is a separate external-state action.
 - No lead, email, BCC, consumer acknowledgment, SMS, Push notification, social
   post, GBP post, WordPress update, Neon write, DNS change, Vercel Production
   deployment, or NellySelly change occurred.
 
-Protected exact-head Preview deployment and read-only public-route proof remain
-to be recorded before this candidate is release-ready. Authenticated Preview
-inspection remains optional owner acceptance and will not be bypassed.
+Authenticated `/admin/distribution` Preview inspection remains optional owner
+acceptance and will not be bypassed. It is not required for the public release
+candidate because the same protected route passed local authenticated rendered
+QA and exact Preview anonymous-denial proof.
 
 ## Phase 7 completion gap closure — 2026-08-16
 

@@ -31,7 +31,21 @@ Updated 2026-08-21.
   the redacted 460-commit history scan reports no secret leaks. Local
   Production-render visual QA passes 10/10 desktop/mobile route checks with no
   overflow, missing copy, prohibited claim, bare appraisal language, or console
-  error. Exact-head protected Preview verification remains in progress.
+  error.
+- Code-bearing commit `a0c80eaa9b429ed48871fc221d93af5e7d6fdfa1`
+  produced Ready Preview deployment `dpl_5UQL8LDfMvFvvi4YZ8UhLdyDFbWF` at
+  `https://ask-magic-mike-ihjwzl8rw-eyes-up-industries.vercel.app`. GitHub's
+  release gate and both Vercel checks pass. Read-only exact-Preview proof passes
+  ten public/health/listing checks and eight desktop/mobile renders with no
+  NellySelly identity, private listing field, overflow, missing required copy,
+  prohibited claim, or console error. Anonymous `/admin/distribution` access is
+  denied with 401, Basic challenge, `no-store`, and `SAMEORIGIN`; authenticated
+  Preview inspection was not bypassed.
+- During protected-Preview setup, Vercel CLI created empty helper project
+  `amm-phase9-campaign-compliance-20260821`
+  (`prj_JUyx03Rh8iABqAFepNNuPI2jJqut`). It has zero deployments and no effect on
+  the canonical project. It remains intact pending the separate exact cleanup
+  gate documented in the Phase 9 runbook.
 - Production, WordPress, Neon, email, SMS, Push, social accounts, GBP, DNS, and
   NellySelly are unchanged by this candidate.
 - Exact release gate:

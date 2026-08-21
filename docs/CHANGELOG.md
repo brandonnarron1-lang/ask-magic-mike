@@ -31,6 +31,12 @@
 - Passed 10/10 local Production-render visual checks across five active routes
   at desktop and mobile sizes with no overflow, missing required copy,
   prohibited claims, bare appraisal language, or console errors.
+- Produced exact code-bearing Preview deployment
+  `dpl_5UQL8LDfMvFvvi4YZ8UhLdyDFbWF` from commit
+  `a0c80eaa9b429ed48871fc221d93af5e7d6fdfa1`; GitHub release and Vercel
+  checks passed. Ten read-only route/health/listing checks and eight protected
+  Preview desktop/mobile renders passed, while anonymous protected-admin access
+  failed closed with 401, `no-store`, and `SAMEORIGIN`.
 - No Production deployment, database migration, lead creation, external send,
   WordPress change, social publication, DNS change, or NellySelly change was
   performed.
