@@ -43,7 +43,17 @@ describe("owned-demand publication proof migration", () => {
   it("guards optional Supabase roles and grants no client mutation access", () => {
     expect(migration).toContain("FOREACH role_name IN ARRAY ARRAY['anon', 'authenticated']");
     expect(migration).toContain("IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = role_name)");
-    expect(migration).toContain("TO service_role");
+    const serviceRevoke = migration.indexOf(
+      "REVOKE ALL ON TABLE public.owned_demand_publication_proofs FROM service_role",
+    );
+    const serviceGrant = migration.indexOf(
+      "GRANT SELECT, INSERT ON TABLE public.owned_demand_publication_proofs TO service_role",
+    );
+    expect(serviceRevoke).toBeGreaterThanOrEqual(0);
+    expect(serviceGrant).toBeGreaterThan(serviceRevoke);
+    expect(migration).not.toContain(
+      "GRANT UPDATE ON TABLE public.owned_demand_publication_proofs TO service_role",
+    );
     expect(migration).not.toContain("GRANT SELECT, INSERT ON TABLE public.owned_demand_publication_proofs TO authenticated");
   });
 });

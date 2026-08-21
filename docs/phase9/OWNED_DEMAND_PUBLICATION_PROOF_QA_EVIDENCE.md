@@ -1,7 +1,7 @@
 # Owned-Demand Publication Proof Ledger QA Evidence
 
 Date: 2026-08-21
-Status: code-bearing head passed exact-head CI and Preview; Production unchanged
+Status: local database contract and full release gate passed; final exact-head CI and Preview pending; Production unchanged
 
 ## Scope and truth boundary
 
@@ -35,11 +35,12 @@ pnpm exec vitest run \
   tests/scripts/phase9-publication-proof-production-cutover.test.ts \
   tests/adminops/owned-demand-publication-proof.test.ts \
   tests/adminops/owned-demand-publication-migration.test.ts \
+  tests/adminops/owned-demand-publication-local-db.test.ts \
   tests/adminops/owned-demand-command.test.ts \
   tests/admin/rbac-policy.test.ts
 ```
 
-Current result: PASS, 5 files / 47 tests.
+Current result: PASS, 6 files / 51 tests.
 
 Covered contracts include:
 
@@ -55,15 +56,15 @@ Covered contracts include:
 - administrator/primary-owner-only `growth:manage` permission;
 - fail-closed mutation denial when Lead Center RBAC is disabled, even if legacy
   Basic auth protects the read-only route;
-- RLS, public/browser-role revocation, UPDATE/DELETE immutability, audit event,
-  and no raw-copy database column;
+- executable PostgreSQL 17 service-role, browser-role, RLS, idempotency, audit,
+  native-host, UPDATE/DELETE immutability, rollback, and no-raw-copy contracts;
 - exact migration hash, approval phrase, canonical preflight, backup/advisory
   lock/transaction, postflight, and secret redaction.
 
 Additional completed checks:
 
-- `pnpm run release:gate` — PASS at `2026-08-21T17:30:40Z`:
-  system isolation, 14/14 release-safety controls, 199 test files / 2,821
+- `pnpm run release:gate` — PASS at `2026-08-21T18:08Z`:
+  system isolation, 14/14 release-safety controls, 200 test files / 2,825
   tests, strict typecheck, ESLint, Next.js 15.5.21 Production build, and 78
   active routes with 17 acknowledged root/src duplicates.
 - `pnpm audit --prod --audit-level high` — PASS; no known vulnerabilities.
@@ -78,29 +79,46 @@ Additional completed checks:
   `output/playwright/publication-ledger-production-local/` and intentionally
   ignored from Git.
 - `pnpm run phase9:publication-proof:cutover -- --plan` — PASS; migration hash
-  `e7dfe015e36c097effb77994c1a40f80f48625d521111f297f498610dfccea0d`
+  `c60c1a6e692d487e0adfd98d0eb3a9cff89ad77a3233b53075a4c8b63bde3ede`
   matched and output contained no connection string.
 - Draft PR [#184](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/184)
-  is mergeable and correctly stacked on PR #183. Code-bearing head
-  `371564778d1da8cff797999487e07f737e4c8673` passed the complete Node 24
+  remains correctly stacked on PR #183. Pre-database-hardening head
+  `cfc5a08967c48997b444e15b4e317cbacc0267f3` passed the complete Node 24
   release gate in GitHub run
-  [32509167043](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32509167043).
-- Exact-head Vercel Preview `dpl_G9kiNU6hNKo3mMshStMguujRpGZm` is Ready on
+  [32509835413](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32509835413).
+- Its matching Vercel Preview `dpl_FPmHXBqKc1tWZpgHG1FK79aNhzs1` is Ready on
   Node 24 at
-  `https://ask-magic-mike-h17b4db6p-eyes-up-industries.vercel.app`.
+  `https://ask-magic-mike-o7kgzmrx3-eyes-up-industries.vercel.app`.
   Protection-bypassed read-only checks returned 200 for `/`, `/home-value`,
   `/buy`, `/rent`, `/api/health/live`, and `/api/health/ready`; the live health
   response identified `ask-magic-mike`, Preview, canonical Neon configuration,
   and disabled notification sending. Anonymous `/admin/distribution` returned
   401 with Basic challenge, `no-store`, `SAMEORIGIN`, and noindex headers.
   Root identity contained Ask Magic Mike and Our Town Properties markers and no
-  NellySelly marker.
-- A fresh local Supabase startup replay applied the complete historical
-  migration chain through `20260821170000` without SQL error. Docker Desktop
-  then failed during remaining one-time service startup. A restart at
-  `2026-08-21T17:30Z` still could not expose the local daemon, and no standalone
-  PostgreSQL server binary is installed, so the final role/immutability/
-  idempotency replay is not counted as passed in this candidate. Production
+  NellySelly marker. The later database hardening intentionally supersedes this
+  exact head, so fresh CI and Preview evidence are required after push.
+- Docker Desktop was recovered with its own force-stop/start controls; no
+  container or volume was deleted. A disposable local reset applied all 33
+  migrations through `20260821170000`. The CLI returned a 502 only while
+  restarting auxiliary services after the second reset; the database recovered
+  healthy and the post-reset verifier passed.
+- `pnpm run staging:local:verify` — PASS against PostgreSQL 17.6 with no remote
+  Supabase link. The executable contract proved one proof plus one audit on the
+  first call, same-proof/no-second-audit idempotent replay, native-host
+  rejection, minimized test metadata, service-role least privilege,
+  authenticated table denial, and hard UPDATE/DELETE rejection. The transaction
+  rolled back; resulting proof/audit counts remained zero, with zero provider
+  calls, emails, or SMS.
+- The executable replay found two pre-Production defects and the candidate now
+  fixes both: PostgreSQL canonical trigger ordering made a text-based postflight
+  check false, and Supabase default privileges left `service_role` with excess
+  UPDATE/DELETE/TRUNCATE/admin rights. Postflight now uses trigger event bits,
+  and the migration revokes all service-role table rights before granting only
+  SELECT and INSERT.
+- The local Supabase PostgreSQL 17 image segfaulted on a redundant direct call
+  to the revoked function after `SET ROLE authenticated`. That unstable probe
+  was removed; function denial remains proven from the catalog ACL, while an
+  actual authenticated table read still returns SQLSTATE `42501`. Production
   Neon was not used as a substitute test target.
 
 ## Security review
@@ -134,10 +152,8 @@ development run is not counted as release evidence.
 
 ## Remaining candidate proof
 
-- complete PostgreSQL role/immutability/idempotency replay after the local
-  Docker engine is healthy;
-- after the documentation-only evidence commit, obtain a final green exact-head
-  CI and Ready Preview;
+- after the database-hardening evidence commit, obtain a final green exact-head
+  Node 24 CI run and Ready Vercel Preview;
 - do not bypass authenticated Preview access merely to render mutation controls.
   The Preview fail-closed-before-query path is covered by unit tests; the real
   authenticated record flow remains post-migration Production verification.

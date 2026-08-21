@@ -132,6 +132,7 @@ BEGIN
   END LOOP;
 
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+    EXECUTE 'REVOKE ALL ON TABLE public.owned_demand_publication_proofs FROM service_role';
     EXECUTE 'GRANT USAGE ON SCHEMA public TO service_role';
     EXECUTE 'GRANT SELECT, INSERT ON TABLE public.owned_demand_publication_proofs TO service_role';
   END IF;

@@ -72,6 +72,10 @@ function postflight(overrides: Record<string, unknown> = {}) {
     publication_function_audited: true,
     service_role_table_select: true,
     service_role_table_insert: true,
+    service_role_table_update: false,
+    service_role_table_delete: false,
+    service_role_table_truncate: false,
+    service_role_table_admin: false,
     service_role_function_execute: true,
     public_table_access: false,
     browser_role_table_access_count: 0,
@@ -135,6 +139,10 @@ describe("Phase 9 publication-proof Production cutover interlocks", () => {
       no_migration_seed_proofs: true,
     });
     expect(() => validatePostflight(preflight(), postflight({ immutable_trigger_update_delete: false }))).toThrow("immutable_trigger_update_delete");
+    expect(() => validatePostflight(preflight(), postflight({ service_role_table_update: true }))).toThrow("service_role_table_update_denied");
+    expect(() => validatePostflight(preflight(), postflight({ service_role_table_delete: true }))).toThrow("service_role_table_delete_denied");
+    expect(() => validatePostflight(preflight(), postflight({ service_role_table_truncate: true }))).toThrow("service_role_table_truncate_denied");
+    expect(() => validatePostflight(preflight(), postflight({ service_role_table_admin: true }))).toThrow("service_role_table_admin_denied");
     expect(() => validatePostflight(preflight(), postflight({ public_function_execute: true }))).toThrow("public_function_execute_denied");
     expect(() => validatePostflight(preflight(), postflight({ proof_count: 1 }))).toThrow("no_migration_seed_proofs");
   });
@@ -142,6 +150,13 @@ describe("Phase 9 publication-proof Production cutover interlocks", () => {
   it("permits read-only verification after legitimate runtime proof rows exist", () => {
     const after = postflight({ proof_count: 3 });
     expect(validatePostflight(after, after, { allowRuntimeProofs: true }).no_migration_seed_proofs).toBe(true);
+  });
+
+  it("verifies trigger events structurally instead of relying on display order", () => {
+    expect(runnerSource).toContain("t.tgtype");
+    expect(runnerSource).toContain("(tgtype & 8) = 8");
+    expect(runnerSource).toContain("(tgtype & 16) = 16");
+    expect(runnerSource).not.toContain("BEFORE UPDATE OR DELETE");
   });
 
   it("uses a backup, advisory lock, transaction, and redacted secure environment input", () => {

@@ -69,15 +69,15 @@ Release only one approved PR at a time and verify Production before advancing:
    on canonical Neon Production;
 3. `#183` — campaign safety and three-offer owned-demand flight: release-ready
    but still unmerged and Production-undeployed under its exact gate; and
-4. `#184` — owned-demand publication-proof ledger: mergeable draft stacked on
-   the exact #183 head. Code-bearing head
-   `371564778d1da8cff797999487e07f737e4c8673`, Node 24 run `32509167043`, and
-   Preview `dpl_G9kiNU6hNKo3mMshStMguujRpGZm` are green. It must not merge
-   before #183 or without its exact migration/release gate. Refresh every
-   remaining feature branch on the
-   resulting `main` before selecting another release. Do not preserve an old
-   queue order when its base,
-   scope, or proof has become stale.
+4. `#184` — owned-demand publication-proof ledger: draft stacked on the exact
+   #183 head. Pre-database-hardening head
+   `cfc5a08967c48997b444e15b4e317cbacc0267f3`, Node 24 run `32509835413`, and
+   Preview `dpl_FPmHXBqKc1tWZpgHG1FK79aNhzs1` are green. The later executable
+   database hardening requires a fresh exact-head CI/Preview cycle. It must not
+   merge before #183 or without its exact migration/release gate. Refresh every
+   remaining feature branch on the resulting `main` before selecting another
+   release. Do not preserve an old queue order when its base, scope, or proof
+   has become stale.
 
 PR #181 uses:
 
@@ -97,11 +97,16 @@ authenticated checks pass.
 The stacked publication-proof ledger uses:
 
 ```text
+pnpm run staging:local:verify
 pnpm run phase9:publication-proof:cutover -- --plan
 pnpm run phase9:publication-proof:cutover -- --preflight
 pnpm run phase9:publication-proof:cutover -- --execute
 pnpm run phase9:publication-proof:cutover -- --verify
 ```
+
+Run `staging:local:verify` only against the disposable local Supabase stack and
+only when `supabase/.temp/project-ref` is absent. It must prove the executable
+role/idempotency/audit/immutability contract before any Production preflight.
 
 Its exact approval is:
 

@@ -28,27 +28,38 @@ Updated 2026-08-21.
   approval, canonical Neon identity and prerequisite checks, advisory locks,
   one transaction, migration-ledger insertion, privilege/immutability/audit
   postconditions, and lead/audit no-change digests.
+- Added an executable PostgreSQL 17 publication-proof contract to the existing
+  isolated local staging verifier. It proves service/browser role boundaries,
+  one-proof/one-audit idempotency, unsafe-host rejection, append-only behavior,
+  synthetic rollback, and zero external calls.
+- The contract found and fixed two pre-Production defects: postflight now reads
+  trigger event bits instead of depending on PostgreSQL display order, and the
+  migration now revokes inherited `service_role` privileges before granting
+  only SELECT and INSERT. The reviewed migration hash is
+  `c60c1a6e692d487e0adfd98d0eb3a9cff89ad77a3233b53075a4c8b63bde3ede`.
 - The candidate is stacked on the exact PR #183 head
   `e9fbc48ed436c74aa9ab178c426626230f8ddf9b`; PR #183 remains unchanged and
   retains its separate campaign release gate.
 - The full local release gate passes system isolation, 14/14 safety checks,
-  199 test files / 2,821 tests, strict typecheck, ESLint, the Next.js 15.5.21
+  200 test files / 2,825 tests, strict typecheck, ESLint, the Next.js 15.5.21
   Production build, and the 78-route manifest. Production dependencies report
   no known vulnerabilities; a redacted 465-commit scan reports no secret
   leaks. Production-render Playwright checks pass 10/10 desktop/mobile routes
   with no overflow, missing required copy, prohibited claim, bare-appraisal
-  wording, or console error. The migration hash/plan gate passes. The full
-  migration chain reached the new SQL without error during local Supabase
-  startup, but Docker Desktop subsequently became unavailable, so final
-  PostgreSQL role/immutability/
-  idempotency replay remains pending and is not overstated.
-- Draft PR #184 is mergeable and correctly stacked on PR #183. Code-bearing
-  head `371564778d1da8cff797999487e07f737e4c8673` passed exact-head Node 24 CI
-  run `32509167043`. Ready Preview deployment
-  `dpl_G9kiNU6hNKo3mMshStMguujRpGZm` serves the expected public/health routes,
+  wording, or console error. The migration hash/plan gate passes. A disposable
+  local reset applied all 33 migrations through the new SQL, and
+  `staging:local:verify` passes the real PostgreSQL 17.6 role, idempotency,
+  audit, host, RLS, and immutability contract with all synthetic changes rolled
+  back.
+- Draft PR #184 is correctly stacked on PR #183. Its pre-hardening head
+  `cfc5a08967c48997b444e15b4e317cbacc0267f3` passed exact-head Node 24 CI run
+  `32509835413`. Ready Preview deployment
+  `dpl_FPmHXBqKc1tWZpgHG1FK79aNhzs1` serves the expected public/health routes,
   identifies only Ask Magic Mike/Our Town Properties, and denies anonymous
   `/admin/distribution` access with 401, Basic challenge, no-store, SAMEORIGIN,
-  and noindex controls. No Preview mutation was attempted.
+  and noindex controls. No Preview mutation was attempted. The database
+  hardening supersedes that head, so final exact-head CI/Preview must be rerun
+  after push.
 - Vercel CLI verification created empty helper project
   `amm-phase9-publication-ledger-20260821`
   (`prj_QcHch6KY1m2g0BKtOoVVFregRhho`) before the worktree was relinked to the

@@ -21,7 +21,7 @@ export const MIGRATION_VERSION = "20260821170000";
 export const MIGRATION_NAME = "owned_demand_publication_proofs";
 export const MIGRATION_FILE = `${MIGRATION_VERSION}_${MIGRATION_NAME}.sql`;
 export const MIGRATION_SHA256 =
-  "e7dfe015e36c097effb77994c1a40f80f48625d521111f297f498610dfccea0d";
+  "c60c1a6e692d487e0adfd98d0eb3a9cff89ad77a3233b53075a4c8b63bde3ede";
 export const APPLICATION_NAME = "amm_phase9_publication_proof_cutover";
 
 const MODULE_URL = new URL(import.meta.url);
@@ -114,6 +114,10 @@ export function validatePostflight(before, after, { allowRuntimeProofs = false }
     publication_function_audited: after.publication_function_audited === true,
     service_role_table_select: after.service_role_table_select === true,
     service_role_table_insert: after.service_role_table_insert === true,
+    service_role_table_update_denied: after.service_role_table_update === false,
+    service_role_table_delete_denied: after.service_role_table_delete === false,
+    service_role_table_truncate_denied: after.service_role_table_truncate === false,
+    service_role_table_admin_denied: after.service_role_table_admin === false,
     service_role_function_execute: after.service_role_function_execute === true,
     public_table_access_denied: after.public_table_access === false,
     browser_role_table_access_denied: Number(after.browser_role_table_access_count) === 0,
@@ -227,7 +231,7 @@ WITH publication_table AS (
     FROM pg_constraint c
    WHERE c.conrelid = to_regclass('public.owned_demand_publication_proofs')
 ), immutable_trigger AS (
-  SELECT t.tgenabled, pg_get_triggerdef(t.oid) AS definition
+  SELECT t.tgenabled, t.tgtype
     FROM pg_trigger t
    WHERE t.tgrelid = to_regclass('public.owned_demand_publication_proofs')
      AND t.tgname = 'owned_demand_publication_proofs_reject_change'
@@ -241,7 +245,10 @@ SELECT jsonb_build_object(
   'publication_table_rls', COALESCE((SELECT relrowsecurity FROM publication_table), false),
   'immutable_trigger', EXISTS (SELECT 1 FROM immutable_trigger),
   'immutable_trigger_enabled', COALESCE((SELECT tgenabled <> 'D' FROM immutable_trigger), false),
-  'immutable_trigger_update_delete', COALESCE((SELECT definition ILIKE '%BEFORE UPDATE OR DELETE%' FROM immutable_trigger), false),
+  'immutable_trigger_update_delete', COALESCE((
+    SELECT (tgtype & 2) = 2 AND (tgtype & 8) = 8 AND (tgtype & 16) = 16
+    FROM immutable_trigger
+  ), false),
   'channel_index', to_regclass('public.owned_demand_publication_proofs_channel_idx') IS NOT NULL,
   'campaign_index', to_regclass('public.owned_demand_publication_proofs_campaign_idx') IS NOT NULL,
   'live_index', to_regclass('public.owned_demand_publication_proofs_live_idx') IS NOT NULL,
@@ -257,6 +264,14 @@ SELECT jsonb_build_object(
   'publication_function_audited', COALESCE((SELECT definition LIKE '%growth.publication_proof_recorded%' AND definition LIKE '%external_mutation_performed%' FROM publication_function), false),
   'service_role_table_select', COALESCE(has_table_privilege('service_role', to_regclass('public.owned_demand_publication_proofs'), 'SELECT'), false),
   'service_role_table_insert', COALESCE(has_table_privilege('service_role', to_regclass('public.owned_demand_publication_proofs'), 'INSERT'), false),
+  'service_role_table_update', COALESCE(has_table_privilege('service_role', to_regclass('public.owned_demand_publication_proofs'), 'UPDATE'), false),
+  'service_role_table_delete', COALESCE(has_table_privilege('service_role', to_regclass('public.owned_demand_publication_proofs'), 'DELETE'), false),
+  'service_role_table_truncate', COALESCE(has_table_privilege('service_role', to_regclass('public.owned_demand_publication_proofs'), 'TRUNCATE'), false),
+  'service_role_table_admin', COALESCE(
+    has_table_privilege('service_role', to_regclass('public.owned_demand_publication_proofs'), 'REFERENCES')
+    OR has_table_privilege('service_role', to_regclass('public.owned_demand_publication_proofs'), 'TRIGGER'),
+    false
+  ),
   'service_role_function_execute', COALESCE((SELECT has_function_privilege('service_role', oid, 'EXECUTE') FROM publication_function), false),
   'public_table_access', EXISTS (
     SELECT 1 FROM publication_table t
