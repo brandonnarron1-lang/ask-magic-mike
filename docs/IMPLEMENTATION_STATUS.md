@@ -2,6 +2,45 @@
 
 Updated 2026-08-21.
 
+## Phase 9 exact owned-demand activation loop — 2026-08-21
+
+- Reused the existing protected `/admin/distribution` page, seven canonical
+  channel definitions, 35 exact placements, UTM builder, Neon Growth signals,
+  append-only native publication-proof ledger, Lead Center RBAC, and Preview
+  fail-closed controls. No parallel system was added.
+- Added a pure deterministic join that shows the exact lifecycle relationship
+  between current native proof and eligible first-party attribution. It never
+  infers publication from a lead signal or a lead from publication evidence.
+- Added channel-specific active-state handling, stable newest-proof selection,
+  exact proof-attribution identity validation, evidence-unavailable fail-closed
+  state, reconciliation priority for signals without active proof, and one
+  evidence-backed next operator decision.
+- The existing page now exposes compact lifecycle totals, the current priority,
+  and a collapsed audit of all exact placements while preserving separate
+  publication-proof history and channel packets.
+- Current Production aggregate truth remains six test/suppressed lead rows and
+  zero genuine live/contactable leads, owned-source signals, outcomes, spend,
+  experiments, or first-response samples. All relevant canonical schemas are
+  healthy.
+- Focused verification passes 3 files / 39 tests. The full local release gate
+  passes system isolation, 14/14 release-safety checks, 209 test files / 2,909
+  tests, strict typecheck, ESLint, optimized Next.js 15.5.21 build, and the
+  81-route manifest. Production dependencies have no known vulnerability, and
+  a redacted gitleaks history scan covered 478 commits with no finding.
+- Local protected visual QA passes 12/12 desktop/mobile checks across the reused
+  public funnels, widget surfaces, Distribution Command, and KPI target register
+  with no overflow, missing required copy, forbidden copy, or browser console
+  error. Local Node 26.5.1 is newer than the declared Node 24.x engine; exact
+  Node 24 CI and canonical Vercel Preview proof remain pending before the Draft
+  PR is release-ready.
+- No Production deployment, database migration/write, proof record, lead,
+  WordPress edit, external publication, email/SMS/Push, provider action, spend,
+  DNS change, or NellySelly action occurred.
+- This candidate is stacked on exact PR #188 head
+  `bcc0e9e5263aa9b0f94ac0377a6d1781b0176a58`. The unchanged first Production
+  gate remains:
+  `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT`.
+
 ## Phase 9 WordPress owned-traffic consolidation — 2026-08-21
 
 - Reused the live Our Town Properties pages, Gravity Forms, Canonical Lead
