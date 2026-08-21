@@ -20,9 +20,9 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    — current-router safety and Buyer discovery, only after #184 lands and #185
    is refreshed:
    `APPROVE PHASE 9 CURRENT-ROUTER SAFETY AND BUYER DISCOVERY MERGE AND PRODUCTION DEPLOYMENT`
-4. Branch `codex/phase9-owned-demand-asset-studio-20260821` — protected
-   deterministic owned-demand exports and allowlisted QR attribution, only
-   after #185 lands and this candidate is refreshed:
+4. PR [#186](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/186)
+   — protected deterministic owned-demand exports and allowlisted QR
+   attribution, only after #185 lands and #186 is refreshed:
    `APPROVE PHASE 9 OWNED-DEMAND ASSET STUDIO MERGE AND PRODUCTION DEPLOYMENT`
 
 The #184 phrase authorizes its reviewed backup-first Neon migration, exact code
@@ -75,8 +75,10 @@ change, WordPress change, provider action, or deletion.
 4. Owner/BIC: approve a registered carrier-SMS provider and sender before SMS
    activation. No free workaround may bypass registration, consent, or carrier
    rules.
-5. Owner: separately approve deletion of either empty Vercel helper project.
-   Both currently have zero deployments and no domain effect.
+5. Owner: separately approve deletion of any specifically named empty Vercel
+   helper project. The owned-demand studio helper currently has zero deployments
+   and no domain effect; its exact cleanup gate is
+   `APPROVE DELETE EMPTY VERCEL HELPER PROJECT amm-phase9-owned-demand-assets-20260821`.
 
 ## Resolved and removed from this queue
 

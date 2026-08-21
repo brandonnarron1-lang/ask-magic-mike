@@ -29,9 +29,20 @@ Updated 2026-08-21.
   Production dependencies have no known vulnerability; 471 Git commits have no
   detected secret leak. Independent OpenCV scans pass for the compressed feed,
   story, and Chromium-rendered raw SVG exemplars.
-- Candidate branch `codex/phase9-owned-demand-asset-studio-20260821` is stacked
-  on exact PR #185 head `be99a1838c1c36ffc474bc97c11ef2a88e53107c`.
-  Draft PR/exact-head Preview evidence remains to be appended after push.
+- Draft PR #186 is stacked on exact PR #185 head
+  `be99a1838c1c36ffc474bc97c11ef2a88e53107c`. Runtime hardening head
+  `bce07766ae40d8035ddac8be853dfed89248f427` passed GitHub Node 24 run
+  `32520888862` and Ready canonical Vercel Preview
+  `dpl_6i4VqGrQUFaWdgoKznLYGwkgPvtq`. Public/health routes return 200, the exact
+  seller shortlink returns 307 to the full canonical UTM URL, unknown code
+  returns 404, robots disallows `/go/`, and anonymous admin/asset access fails
+  closed with private headers. The render contains zero NellySelly markers.
+  Mutable final documentation-head identifiers belong in PR metadata.
+- The first protected-Preview probe from the unlinked worktree created empty
+  helper project `amm-phase9-owned-demand-assets-20260821`
+  (`prj_v8534MJYV5xUCp3pYqxWsmZJPifK`). It has zero deployments and no domain or
+  application effect. The worktree is relinked to the canonical Vercel project;
+  the helper is preserved pending separately approved cleanup.
 - No Production deployment, Neon migration/write, lead submission, email/SMS/
   Push send, WordPress/DNS change, external publication, QR distribution,
   spend, or NellySelly mutation occurred.

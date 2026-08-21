@@ -78,13 +78,12 @@ Node 24 CI and canonical Vercel Preview evidence, then use its separate gate:
 PR #185 has no database migration and does not authorize an external
 publication or message.
 
-### 4. Owned-demand asset studio candidate
+### 4. PR #186 — owned-demand asset studio
 
-The branch `codex/phase9-owned-demand-asset-studio-20260821` is stacked after
-#185. It adds protected deterministic 4:5/story/QR downloads and 24 allowlisted
-attribution shortlinks without adding a publisher, provider, database, or
-parallel campaign catalog. After #185 reaches Production, refresh and re-prove
-the candidate before considering:
+PR #186 is stacked after #185. It adds protected deterministic 4:5/story/QR
+downloads and 24 allowlisted attribution shortlinks without adding a publisher,
+provider, database, or parallel campaign catalog. After #185 reaches
+Production, refresh and re-prove the candidate before considering:
 
 `APPROVE PHASE 9 OWNED-DEMAND ASSET STUDIO MERGE AND PRODUCTION DEPLOYMENT`
 

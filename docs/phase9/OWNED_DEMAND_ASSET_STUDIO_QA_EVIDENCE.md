@@ -7,11 +7,12 @@ Recorded 2026-08-21 in America/New_York.
 - Branch: `codex/phase9-owned-demand-asset-studio-20260821`
 - Stack base: Draft PR #185 head
   `be99a1838c1c36ffc474bc97c11ef2a88e53107c`
+- Draft PR: #186
+- Runtime hardening head:
+  `bce07766ae40d8035ddac8be853dfed89248f427`
 - Production baseline remained PR #181 / deployment
   `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`
 - Canonical app/database/provider configuration was not mutated.
-- No Preview or Draft PR existed at the time of this local evidence entry; exact
-  head and Preview evidence must be appended after push.
 
 ## Reuse-first and route contract
 
@@ -47,6 +48,10 @@ Automated coverage proves:
 5. The first ImageMagick conversion of the stroke-based QR SVG was blank. That
    conversion was discarded. Chromium rendered the actual SVG and the
    independent scanner decoded it successfully.
+6. The first real Preview authorization check failed closed with
+   `409 rbac_not_enabled`, but the generic authorization response inherited a
+   cacheable default. The asset route now applies its private/no-store/noindex
+   policy to every authorization failure before returning it.
 
 These failures are not counted as passes; each was corrected and rerun.
 
@@ -117,19 +122,45 @@ Observed:
 - story CTA and QR remain outside the guarded top/bottom interaction zones; and
 - no NellySelly marker.
 
-## Remaining Preview proof
+## Exact runtime-head Preview proof
 
-After the candidate is committed and pushed:
+- GitHub Node 24 run `32520888862`, job `96892603764`: PASS in 3m5s.
+- Canonical Vercel deployment:
+  `dpl_6i4VqGrQUFaWdgoKznLYGwkgPvtq` / Ready.
+- URL:
+  `https://ask-magic-mike-4pf7a9l92-eyes-up-industries.vercel.app`.
+- `/`, `/api/health/live`, and `/api/health/ready`: HTTP 200.
+- Liveness identifies only `ask-magic-mike`, Preview, canonical Neon, disabled
+  notification mode, and disabled email sending.
+- Readiness confirms database, capture function, lead/notification tables, RBAC
+  schema, Push subscription table, and phone setup are ready.
+- `/go/fb-seller`: HTTP 307, no-store/noindex, exact destination
+  `https://www.askmagicmike.com/home-value?utm_source=facebook&utm_medium=social_organic&utm_campaign=amm_owned_demand_2026&utm_content=facebook_local_question_seller_review`.
+- That full canonical destination returns HTTP 200.
+- `/go/not-approved`: HTTP 404 with no-store/noindex.
+- `/robots.txt` disallows `/go/` while retaining the canonical sitemap.
+- Anonymous `/admin/distribution`: HTTP 401 with Basic challenge, no-store,
+  SAMEORIGIN, and noindex.
+- Preview RBAC mutation mode is intentionally disabled. Anonymous asset export
+  therefore fails closed with HTTP 409 `rbac_not_enabled` and now carries
+  `private, no-store`, no-referrer, `nosniff`, and noindex headers.
+- Render identity counts: Ask Magic Mike 24, Our Town Properties 34, NellySelly
+  0.
+- No Preview lead/event/database write, message, provider call, or publication
+  was attempted.
 
-1. require exact-head GitHub Node 24 release-gate success;
-2. require a Ready Preview from the canonical Vercel project;
-3. verify `/go/fb-seller` returns 307 to the exact full UTM destination and the
-   destination returns 200;
-4. verify unknown short code returns 404;
-5. verify anonymous asset download and `/admin/distribution` fail closed;
-6. verify public and readiness routes remain healthy and identify no NellySelly
-   content; and
-7. record the immutable head, run, deployment, and URL here.
+The later documentation-only head must retain the required GitHub and Vercel
+checks. Its mutable identifiers belong in PR #186 metadata rather than a
+self-referential evidence commit.
+
+The first protected-Preview probe ran before this worktree had canonical Vercel
+link metadata. It created empty helper project
+`amm-phase9-owned-demand-assets-20260821`
+(`prj_v8534MJYV5xUCp3pYqxWsmZJPifK`) and targeted that project's bypass token,
+so the resulting SSO redirects are not candidate evidence. Read-only inspection
+confirms the helper has zero deployments and no domain. The worktree was
+relinked to the canonical project before repeating verification. The helper was
+not silently deleted.
 
 No Production deployment, database migration/write, lead submission, email,
 SMS, Push, WordPress change, DNS change, external publication, print

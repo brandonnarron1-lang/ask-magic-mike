@@ -15,6 +15,8 @@
 - Kept asset generation server-authorized with `report:view`, private/no-store,
   CSP-sandboxed, noindex responses, strict channel/placement/format allowlists,
   and no database, provider, publication, or consumer-data input.
+- Applied the same private/no-store/noindex policy to failed authorization
+  responses after real Preview evidence exposed a cacheable generic 409.
 - Closed real QA defects involving unsupported renderer CSS, dense full-UTM QR
   modules, story footer/quiet-zone overlap, and image-decoder compatibility.
 - Passed the final local Node 24 release gate: 203 test files / 2,846 tests,
@@ -23,6 +25,11 @@
   dependency vulnerabilities, and a clean redacted 471-commit secret scan.
 - Independent OpenCV scans resolved both compressed feed/story QR codes and a
   Chromium render of the raw SVG to their exact approved shortlinks.
+- Runtime hardening head `bce07766ae40d8035ddac8be853dfed89248f427`
+  passed exact GitHub Node 24 run `32520888862` and Ready canonical Preview
+  `dpl_6i4VqGrQUFaWdgoKznLYGwkgPvtq`. Public and health routes passed; the exact
+  shortlink/404/robots contracts passed; anonymous admin and asset access failed
+  closed with private headers; and the render contained zero NellySelly markers.
 - No Production deployment, database migration/write, lead creation, provider
   call, external send/publication, QR distribution, WordPress/DNS change,
   spend, or NellySelly change was performed.

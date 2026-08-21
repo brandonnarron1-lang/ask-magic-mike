@@ -2,8 +2,8 @@
 
 Date: 2026-08-21
 
-Status: local, Preview-eligible release candidate; Production and external
-channels unchanged
+Status: Draft PR #186 with exact runtime-head CI and Preview proof; Production
+and external channels unchanged
 
 Branch: `codex/phase9-owned-demand-asset-studio-20260821`
 
@@ -149,7 +149,7 @@ This candidate is stacked after PR #185. The full order remains:
 1. PR #183;
 2. refreshed PR #184 and its separately approved backup-first migration;
 3. refreshed PR #185;
-4. this owned-demand asset-studio candidate.
+4. PR #186.
 
 Each downstream head must be refreshed onto the new `main`, then repeat Node 24
 CI and Vercel Preview proof. The exact future gate for this candidate is:
@@ -169,3 +169,17 @@ Before Production, close or leave the Draft PR unmerged. After a separately
 approved release, revert the candidate merge commit or promote the immediately
 preceding Ready Vercel deployment. The feature has no database migration and no
 external-provider state to unwind.
+
+## Preview helper-project note
+
+The first `vercel curl` probe ran before this new worktree had canonical link
+metadata and created empty helper project
+`amm-phase9-owned-demand-assets-20260821`
+(`prj_v8534MJYV5xUCp3pYqxWsmZJPifK`). Read-only inspection confirms zero
+deployments and no domain or application effect. The worktree was relinked to
+`eyes-up-industries/ask-magic-mike`; preserve the helper until this separate
+cleanup approval:
+
+```text
+APPROVE DELETE EMPTY VERCEL HELPER PROJECT amm-phase9-owned-demand-assets-20260821
+```
