@@ -174,6 +174,7 @@ describe("owned-demand asset route boundary", () => {
 
   it("returns private no-store assets and exposes only local download controls", () => {
     expect(route).toContain('"Cache-Control": "private, no-store, max-age=0"');
+    expect(route).toContain("auth.response.headers.set(name, value)");
     expect(route).toContain('"X-Robots-Tag": "noindex, nofollow, noarchive"');
     expect(route).toContain('"Content-Security-Policy": "default-src \'none\'; sandbox"');
     expect(page).toContain("DemandAssetLinks");

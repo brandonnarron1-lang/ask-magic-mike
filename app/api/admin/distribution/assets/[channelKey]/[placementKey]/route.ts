@@ -23,7 +23,12 @@ export async function GET(
   context: { params: Promise<{ channelKey: string; placementKey: string }> },
 ) {
   const auth = await requireLeadCenterApiPermission(request, "report:view");
-  if (!auth.ok) return auth.response;
+  if (!auth.ok) {
+    for (const [name, value] of Object.entries(NO_STORE)) {
+      auth.response.headers.set(name, value);
+    }
+    return auth.response;
+  }
 
   const { channelKey, placementKey } = await context.params;
   const format = request.nextUrl.searchParams.get("format");
