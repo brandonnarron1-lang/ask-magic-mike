@@ -5,6 +5,13 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Phase 9 owned-demand publication proof ledger — 2026-08-21
+
+The stacked additive ledger, authorization, security, migration, and cutover
+evidence is maintained in
+`docs/phase9/OWNED_DEMAND_PUBLICATION_PROOF_QA_EVIDENCE.md`. Production and all
+external channels remain unchanged.
+
 ## Phase 9 campaign safety + owned-demand offer flight — 2026-08-21
 
 - Current-run operator UX audit — PASS: desktop 1440 × 1000 and mobile

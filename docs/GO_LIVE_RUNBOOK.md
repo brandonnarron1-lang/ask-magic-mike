@@ -1,6 +1,6 @@
 # Production Release and Go-Live Runbook
 
-Updated 2026-08-20. The public funnel is live. Use this runbook for incremental,
+Updated 2026-08-21. The public funnel is live. Use this runbook for incremental,
 reversible releases and controlled owned-traffic activation.
 
 ## Before merge
@@ -63,10 +63,16 @@ Release only one approved PR at a time and verify Production before advancing:
 1. `#180` — outcome-ledger lifecycle seam: complete at merge commit
    `42f80b209d5d5adc984c1d8b439c7fa830d015e6`, Production deployment
    `dpl_2PQoDZLHc562SBEY7px91CAEUrin`;
-2. `#181` — first-human-response intelligence: next candidate, not yet migrated,
-   merged, or deployed; and
-3. refresh every remaining open feature PR on the resulting `main` before
-   selecting another release. Do not preserve an old queue order when its base,
+2. `#181` — first-human-response intelligence: complete at merge commit
+   `5335697edf31eed0b8a38cd0295a4f5e7d501a3e`, Production deployment
+   `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`, with migration `20260820013000` installed
+   on canonical Neon Production;
+3. `#183` — campaign safety and three-offer owned-demand flight: release-ready
+   but still unmerged and Production-undeployed under its exact gate; and
+4. the publication-proof ledger remains stacked on the exact #183 head and must
+   not merge before #183. Refresh every remaining feature branch on the
+   resulting `main` before selecting another release. Do not preserve an old
+   queue order when its base,
    scope, or proof has become stale.
 
 PR #181 uses:
@@ -83,6 +89,25 @@ place it in chat, a command argument, a report, or a committed file. `--execute`
 must fail unless the exact release-specific approval phrase is present. Retain
 the validated mode-600 backup until the exact application deployment and
 authenticated checks pass.
+
+The stacked publication-proof ledger uses:
+
+```text
+pnpm run phase9:publication-proof:cutover -- --plan
+pnpm run phase9:publication-proof:cutover -- --preflight
+pnpm run phase9:publication-proof:cutover -- --execute
+pnpm run phase9:publication-proof:cutover -- --verify
+```
+
+Its exact approval is:
+
+```text
+APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT
+```
+
+That approval permits only the additive migration, reviewed code merge, and
+canonical application deployment. It does not authorize a GBP/social post,
+email campaign/signature change, QR distribution, consumer message, or spend.
 
 Each item retains its own exact approval phrase. Refresh any downstream branch
 after the preceding Production merge, rerun Node 24 CI and Vercel Preview, and do

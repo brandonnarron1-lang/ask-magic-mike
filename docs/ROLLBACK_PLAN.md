@@ -28,6 +28,15 @@ table/functions or restore an older database merely to roll back application
 code. Use the validated custom backup only for a separately approved disaster
 recovery decision after confirming a forward fix is unsafe.
 
+For the stacked owned-demand publication-proof release, use only
+`phase9:publication-proof:cutover` after its exact approval. If application
+verification fails, promote the immediately preceding verified Vercel
+deployment and leave the additive `owned_demand_publication_proofs` table and
+RPC dormant. Do not delete or edit proof/audit rows. A native social, GBP,
+signature, or print placement must be rolled back in its native system under a
+separate approval, followed by an appended removal proof; application rollback
+cannot retract external content.
+
 ## WordPress
 
 Remove only the named reversible Custom HTML/shortcode/widget block or deactivate

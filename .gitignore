@@ -9,6 +9,8 @@
 /test-results
 /playwright-report
 /artifacts
+/.playwright-cli
+/output/playwright/
 /.amm-run
 
 # Next.js

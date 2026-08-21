@@ -2,6 +2,53 @@
 
 Updated 2026-08-21.
 
+## Phase 9 owned-demand publication proof ledger — 2026-08-21
+
+- Production aggregate truth is zero live demand: six test/suppressed leads,
+  zero contactable live leads, zero first-response samples, zero live delivery
+  failures, zero outcomes, zero spend, and zero overdue routing at the recorded
+  read-only observation. No PII was queried or retained.
+- Reused the protected Distribution Command, canonical Neon database, Lead
+  Center RBAC, immutable audit log, UTM builder, public funnels, and retained
+  campaign assets. No publisher, provider integration, second CRM, Supabase
+  runtime, or parallel campaign database was added.
+- Added one append-only, RLS-enabled publication-proof ledger and one idempotent
+  server-only RPC. A successful first insert creates exactly one immutable
+  `growth.publication_proof_recorded` audit event; replay creates neither a
+  duplicate proof nor duplicate audit.
+- Raw final post copy is validated and SHA-256 hashed in memory, then discarded.
+  Public evidence URLs are channel/HTTPS/host/query allowlisted both on write
+  and again on read. PII, credentials, placeholders, unsupported guarantees,
+  and known Fair Housing risk phrases fail closed.
+- Added `growth:manage` only to administrators and the primary lead owner. The
+  Server Action rechecks that permission, requires an explicit observation
+  confirmation, refuses legacy Basic-auth-only mutation sessions, uses
+  parameterized SQL, and is blocked by the existing Preview mutation guard.
+- Added a hash-pinned, backup-first Production cutover runner with exact
+  approval, canonical Neon identity and prerequisite checks, advisory locks,
+  one transaction, migration-ledger insertion, privilege/immutability/audit
+  postconditions, and lead/audit no-change digests.
+- The candidate is stacked on the exact PR #183 head
+  `e9fbc48ed436c74aa9ab178c426626230f8ddf9b`; PR #183 remains unchanged and
+  retains its separate campaign release gate.
+- The full local release gate passes system isolation, 14/14 safety checks,
+  199 test files / 2,821 tests, strict typecheck, ESLint, the Next.js 15.5.21
+  Production build, and the 78-route manifest. Production dependencies report
+  no known vulnerabilities; a redacted 465-commit scan reports no secret
+  leaks. Production-render Playwright checks pass 10/10 desktop/mobile routes
+  with no overflow, missing required copy, prohibited claim, bare-appraisal
+  wording, or console error. The migration hash/plan gate passes. The full
+  migration chain reached the new SQL without error during local Supabase startup, but Docker Desktop
+  subsequently became unavailable, so final PostgreSQL role/immutability/
+  idempotency replay remains pending and is not overstated.
+- No Production database write, code deployment, WordPress change, provider
+  call, email, SMS, social/GBP publication, print distribution, spend, DNS
+  change, or NellySelly mutation occurred.
+- Exact ledger migration/release gate:
+  `APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT`.
+- External publication remains a separate final-copy/identity/visual/URL/removal
+  approval and is not authorized by the ledger gate.
+
 ## Phase 9 campaign safety + three-offer owned-demand flight — 2026-08-21
 
 - Reused the canonical protected `/admin/distribution` command, Neon Growth

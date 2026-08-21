@@ -8,9 +8,22 @@ import {
   type OwnedDemandOfferBrief,
   type OwnedDemandOfferPlacement,
 } from "../../lib/growth/owned-demand";
+import {
+  publicationPolicyForChannel,
+  type OwnedDemandPlatformState,
+  type OwnedDemandProofType,
+} from "../../lib/growth/publication-proof";
 import { loadGrowthIntelligence } from "../../lib/growthIntelligenceView";
+import {
+  loadOwnedDemandPublicationProofLedger,
+  type OwnedDemandPublicationProofLedger,
+  type OwnedDemandPublicationProofRow,
+} from "../../lib/persistence/neonOwnedDemandPublicationProofs";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
+import { hasLeadCenterPermission } from "../../../src/lib/admin/rbac-policy";
+import { isPreviewDataDisabled } from "../../../src/lib/preview-security";
 import { CopyDemandAsset } from "./CopyDemandAsset";
+import { recordOwnedDemandPublicationProofAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -25,6 +38,220 @@ function dateTime(value: string) {
     hour: "numeric",
     minute: "2-digit",
   }).format(date);
+}
+
+function humanize(value: string) {
+  return value.replaceAll("_", " ").replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+const PUBLICATION_ACTION_MESSAGES: Record<string, { tone: string; message: string }> = {
+  proof_recorded: {
+    tone: "border-emerald-300/30 bg-emerald-300/10 text-emerald-100",
+    message: "Publication proof recorded with canonical attribution and an immutable audit event.",
+  },
+  already_recorded: {
+    tone: "border-[#4baab855] bg-[#4baab818] text-[#c6f8fc]",
+    message: "That exact proof was already recorded. No duplicate ledger row or audit event was created.",
+  },
+  confirmation_required: {
+    tone: "border-[#cda24a55] bg-[#171108] text-[#f5dfa7]",
+    message: "Confirmation is required before a native-platform observation can be recorded.",
+  },
+};
+
+function latestProofForChannel(
+  ledger: OwnedDemandPublicationProofLedger,
+  channelKey: string,
+) {
+  return ledger.proofs.find((proof) => proof.channelKey === channelKey) || null;
+}
+
+function ProofEvidence({ proof }: { proof: OwnedDemandPublicationProofRow }) {
+  return proof.evidenceUrl ? (
+    <a
+      href={proof.evidenceUrl}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="break-all text-[#9edbe2] underline decoration-[#4baab866] underline-offset-4"
+    >
+      Open public evidence
+    </a>
+  ) : (
+    <span className="break-words text-[#c9bdab]">{proof.evidenceReference || "Evidence reference unavailable"}</span>
+  );
+}
+
+function PublicationProofForm({
+  channel,
+  disabled,
+}: {
+  channel: OwnedDemandChannel;
+  disabled: boolean;
+}) {
+  const policy = publicationPolicyForChannel(channel.key);
+  if (!policy) return null;
+  const fieldClass = "mt-1 min-h-11 w-full rounded-lg border border-white/10 bg-[#050505] px-3 py-2 text-sm text-[#f4ead4] outline-none focus:border-[#4baab8] focus:ring-1 focus:ring-[#4baab8] disabled:cursor-not-allowed disabled:opacity-45";
+  const labelClass = "text-[10px] font-bold uppercase tracking-[0.13em] text-[#a99f90]";
+
+  return (
+    <form action={recordOwnedDemandPublicationProofAction} className="mt-4 space-y-4 border-t border-white/[.08] pt-4">
+      <input type="hidden" name="channel_key" value={channel.key} />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className={labelClass}>
+          Placement
+          <select name="placement_key" className={fieldClass} disabled={disabled} required>
+            <option value="general_question">General question</option>
+            {channel.offers.map((offer) => <option key={offer.key} value={offer.key}>{offer.shortLabel}</option>)}
+          </select>
+        </label>
+        <label className={labelClass}>
+          Observed state
+          <select name="platform_state" className={fieldClass} disabled={disabled} required>
+            {policy.states.map((state: OwnedDemandPlatformState) => <option key={state} value={state}>{humanize(state)}</option>)}
+          </select>
+        </label>
+        <label className={labelClass}>
+          Proof type
+          <select name="proof_type" className={fieldClass} disabled={disabled} required>
+            {policy.proofTypes.map((proofType: OwnedDemandProofType) => <option key={proofType} value={proofType}>{humanize(proofType)}</option>)}
+          </select>
+        </label>
+        <label className={labelClass}>
+          Creative asset key · optional
+          <input name="creative_asset_key" className={fieldClass} disabled={disabled} maxLength={240} autoComplete="off" />
+        </label>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className={labelClass}>
+          Public evidence URL
+          <input name="evidence_url" type="url" inputMode="url" className={fieldClass} disabled={disabled} maxLength={2048} placeholder="https://native-platform.example/post" autoComplete="off" />
+        </label>
+        <label className={labelClass}>
+          Private evidence reference
+          <input name="evidence_reference" className={fieldClass} disabled={disabled} maxLength={180} placeholder="Platform post ID or screenshot asset key" autoComplete="off" />
+        </label>
+      </div>
+      <p className="text-[11px] leading-5 text-[#7f786d]">
+        Use a public URL only for public-URL proof. Otherwise use a non-sensitive platform, screenshot, configuration, scan-test, or removal reference—never an access token, email, phone number, or secret.
+      </p>
+      <label className={labelClass}>
+        Exact final copy used
+        <textarea name="final_copy" className={`${fieldClass} min-h-36 resize-y`} disabled={disabled} minLength={20} maxLength={5000} required />
+        <span className="mt-1 block normal-case tracking-normal text-[#7f786d]">Validated and SHA-256 hashed in memory; raw copy is not retained in the database.</span>
+      </label>
+      <label className={labelClass}>
+        Approval reference
+        <input name="approval_reference" className={fieldClass} disabled={disabled} minLength={4} maxLength={160} placeholder="Owner approval 2026-08-21" autoComplete="off" required />
+      </label>
+      <label className="flex items-start gap-3 rounded-xl border border-[#cda24a33] bg-[#171108] p-3 text-xs leading-5 text-[#d8c8a9]">
+        <input name="confirm" value="yes" type="checkbox" disabled={disabled} className="mt-1 size-4 accent-[#cda24a]" required />
+        <span>I confirm that an authorized person already observed this exact state in the native platform and that this record does not itself publish, schedule, send, target, or spend.</span>
+      </label>
+      <button type="submit" disabled={disabled} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#4baab866] bg-[#4baab820] px-5 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#bff8ff] transition hover:bg-[#4baab836] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2] disabled:cursor-not-allowed disabled:opacity-45">
+        Record observed proof
+      </button>
+    </form>
+  );
+}
+
+function PublicationLedger({
+  channels,
+  ledger,
+  canManage,
+  previewReadOnly,
+  actionStatus,
+}: {
+  channels: OwnedDemandChannel[];
+  ledger: OwnedDemandPublicationProofLedger;
+  canManage: boolean;
+  previewReadOnly: boolean;
+  actionStatus?: string;
+}) {
+  const proofChannels = new Set(ledger.proofs.map((proof) => proof.channelKey)).size;
+  const liveProofs = ledger.proofs.filter((proof) => proof.platformState === "live").length;
+  const notice = actionStatus ? PUBLICATION_ACTION_MESSAGES[actionStatus] : null;
+  const disabled = previewReadOnly || !ledger.schemaReady;
+
+  return (
+    <Panel
+      eyebrow="Native-platform publication proof"
+      title="Separate what was prepared from what was actually observed."
+      note="Append-only evidence only. This ledger cannot publish content or contact a consumer."
+    >
+      <div id="publication-ledger" className="scroll-mt-24">
+        {notice ? <p className={`mb-4 rounded-xl border px-4 py-3 text-sm leading-6 ${notice.tone}`}>{notice.message}</p> : null}
+        {actionStatus && !notice ? (
+          <p className="mb-4 rounded-xl border border-[#a21f3d55] bg-[#21070e] px-4 py-3 text-sm leading-6 text-[#ffdbe4]">
+            The proof was not recorded. Review the evidence type, observed state, final copy, and approval reference, then try again.
+          </p>
+        ) : null}
+        <div className="grid gap-3 sm:grid-cols-3">
+          <article className="rounded-xl border border-white/[.08] bg-black/35 p-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8f8778]">Recorded proofs</p><p className="mt-2 font-serif text-3xl text-[#f4ead4]">{ledger.proofs.length}</p></article>
+          <article className="rounded-xl border border-white/[.08] bg-black/35 p-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8f8778]">Channels evidenced</p><p className="mt-2 font-serif text-3xl text-[#f4ead4]">{proofChannels} / {channels.length}</p></article>
+          <article className="rounded-xl border border-white/[.08] bg-black/35 p-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8f8778]">Live observations</p><p className="mt-2 font-serif text-3xl text-[#f4ead4]">{liveProofs}</p></article>
+        </div>
+
+        {!ledger.configured ? (
+          <p className="mt-4 rounded-xl border border-[#a21f3d55] bg-[#21070e] p-4 text-sm leading-6 text-[#ffdbe4]">The canonical database is not configured for this runtime. No proof can be read or recorded.</p>
+        ) : !ledger.schemaReady ? (
+          <p className="mt-4 rounded-xl border border-[#cda24a55] bg-[#171108] p-4 text-sm leading-6 text-[#f5dfa7]">The additive publication-proof migration is pending in this environment. Existing campaign drafts and attribution remain unchanged.</p>
+        ) : null}
+        {previewReadOnly ? (
+          <p className="mt-4 rounded-xl border border-[#4baab855] bg-[#06171b] p-4 text-sm leading-6 text-[#c6f8fc]">Preview is read-only. Proof controls are rendered for QA, but every database mutation fails closed.</p>
+        ) : null}
+        {!canManage ? (
+          <p className="mt-4 rounded-xl border border-white/10 bg-white/[.025] p-4 text-sm leading-6 text-[#c9bdab]">Your role can inspect publication evidence but cannot record it. An administrator or primary lead owner must confirm native-platform proof.</p>
+        ) : null}
+
+        <div className="mt-5 grid gap-4 xl:grid-cols-2">
+          {channels.map((channel) => {
+            const channelProofs = ledger.proofs.filter((proof) => proof.channelKey === channel.key);
+            const latest = latestProofForChannel(ledger, channel.key);
+            return (
+              <article key={channel.key} className="min-w-0 rounded-xl border border-white/[.08] bg-black/35 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8bbfc6]">{channel.format}</p><h3 className="mt-1 font-serif text-2xl text-[#f4ead4]">{channel.label}</h3></div>
+                  <span className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.11em] ${latest ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-200" : "border-white/10 text-[#8f8778]"}`}>
+                    {latest ? humanize(latest.platformState) : "No proof"}
+                  </span>
+                </div>
+                {latest ? (
+                  <div className="mt-4 rounded-lg border border-white/[.07] bg-[#050505] p-3 text-xs leading-5">
+                    <p className="text-[#a99f90]">Latest · {dateTime(latest.observedAt)} · {humanize(latest.placementKey)}</p>
+                    <p className="mt-2"><ProofEvidence proof={latest} /></p>
+                    <p className="mt-2 break-all text-[10px] text-[#6f6a61]">Copy hash {latest.finalCopySha256.slice(0, 16)}…</p>
+                  </div>
+                ) : <p className="mt-4 text-xs leading-5 text-[#8f8778]">A prepared draft or attributed visit is not publication proof.</p>}
+
+                {channelProofs.length > 1 ? (
+                  <details className="mt-3 rounded-lg border border-white/[.07] px-3 py-2">
+                    <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-[0.12em] text-[#a99f90]">History · {channelProofs.length} records</summary>
+                    <ul className="mt-3 space-y-3">
+                      {channelProofs.slice(1).map((proof) => (
+                        <li key={proof.id} className="border-t border-white/[.06] pt-3 text-xs leading-5 text-[#8f8778]">
+                          {dateTime(proof.observedAt)} · {humanize(proof.platformState)} · {humanize(proof.placementKey)}<br /><ProofEvidence proof={proof} />
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : null}
+
+                {canManage ? (
+                  <details className="mt-4 rounded-xl border border-[#4baab833] bg-[#061417] p-3">
+                    <summary className="cursor-pointer text-xs font-bold uppercase tracking-[0.12em] text-[#9edbe2]">Record native observation</summary>
+                    <PublicationProofForm channel={channel} disabled={disabled} />
+                  </details>
+                ) : null}
+              </article>
+            );
+          })}
+        </div>
+        <p className="mt-5 text-xs leading-6 text-[#8f8778]">
+          A ledger row proves only that an authorized operator recorded an observed native-platform state and evidence reference. It is not provider-side verification, reach, engagement, a lead, or a conversion.
+        </p>
+      </div>
+    </Panel>
+  );
 }
 
 function Panel({ eyebrow, title, note, children }: {
@@ -178,10 +405,20 @@ function ChannelCard({ channel }: { channel: OwnedDemandChannel }) {
   );
 }
 
-export default async function DistributionPage() {
-  await requireLeadCenterPermission("report:view");
-  const growth = await loadGrowthIntelligence(30);
+export default async function DistributionPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ publication_action?: string }>;
+}) {
+  const principal = await requireLeadCenterPermission("report:view");
+  const [growth, ledger, query] = await Promise.all([
+    loadGrowthIntelligence(30),
+    loadOwnedDemandPublicationProofLedger(),
+    searchParams,
+  ]);
   const command = buildOwnedDemandCommand(growth);
+  const canManage = Boolean(principal && hasLeadCenterPermission(principal.role, "growth:manage"));
+  const previewReadOnly = isPreviewDataDisabled();
   const stateLabel = command.measurementState === "no_live_signal"
     ? "Activation required"
     : command.measurementState === "partial_signal"
@@ -279,6 +516,16 @@ export default async function DistributionPage() {
 
         <div className="mt-5 grid gap-5 xl:grid-cols-2">
           {command.channels.map((channel) => <ChannelCard key={channel.key} channel={channel} />)}
+        </div>
+
+        <div className="mt-5">
+          <PublicationLedger
+            channels={command.channels}
+            ledger={ledger}
+            canManage={canManage}
+            previewReadOnly={previewReadOnly}
+            actionStatus={query?.publication_action}
+          />
         </div>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-[1.3fr_.7fr]">

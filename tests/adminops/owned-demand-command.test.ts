@@ -206,20 +206,29 @@ describe("Owned Demand Command", () => {
 describe("canonical /admin/distribution route guards", () => {
   const page = fs.readFileSync(path.join(root, "app/admin/distribution/page.tsx"), "utf8");
   const copyControl = fs.readFileSync(path.join(root, "app/admin/distribution/CopyDemandAsset.tsx"), "utf8");
+  const action = fs.readFileSync(path.join(root, "app/admin/distribution/actions.ts"), "utf8");
+  const proofStore = fs.readFileSync(path.join(root, "app/lib/persistence/neonOwnedDemandPublicationProofs.ts"), "utf8");
   const view = fs.readFileSync(path.join(root, "app/lib/persistence/neonGrowthIntelligenceView.ts"), "utf8");
   const manifest = fs.readFileSync(path.join(root, "config/active-route-manifest.json"), "utf8");
 
   it("uses the root router, canonical Neon view, and report permission", () => {
     expect(page).toContain('requireLeadCenterPermission("report:view")');
+    expect(action).toContain('requireLeadCenterPermission("growth:manage")');
     expect(page).toContain("loadGrowthIntelligence(30)");
     expect(manifest).toContain('"/admin/distribution"');
-    expect(manifest).toContain("active-protected-read-only-owned-demand-neon");
+    expect(manifest).toContain("active-protected-owned-demand-neon-append-only-publication-proof");
   });
 
-  it("remains read-only and excludes test and suppressed records upstream", () => {
-    expect(page).not.toContain("<form");
-    expect(page).not.toContain('"use server"');
-    expect(page).not.toMatch(/method:\s*["'`](POST|PUT|PATCH|DELETE)["'`]/);
+  it("adds only an append-only proof mutation while excluding test and suppressed lead records upstream", () => {
+    expect(page).toContain("<form");
+    expect(page).toContain("recordOwnedDemandPublicationProofAction");
+    expect(action).toContain('redirect("/lead-center-login?error=rbac_required")');
+    expect(action).not.toContain("system/admin_basic_auth");
+    expect(action).toContain('formData.get("confirm") !== "yes"');
+    expect(action).not.toMatch(/fetch\(|XMLHttpRequest|sendBeacon/);
+    expect(proofStore).toContain("assertDatabaseMutationAllowed");
+    expect(proofStore).toContain("WHERE is_test = false");
+    expect(proofStore).toContain("record_owned_demand_publication_proof_v1");
     expect(view).toContain("l.is_test = false");
     expect(view).toContain("l.communication_suppressed = false");
   });

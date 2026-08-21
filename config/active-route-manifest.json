@@ -108,7 +108,7 @@
     "/distribution": "inactive-src-only",
     "/campaigns": "inactive-src-only",
     "/admin/traffic": "inactive-src-only",
-    "/admin/distribution": "active-protected-read-only-owned-demand-neon",
+    "/admin/distribution": "active-protected-owned-demand-neon-append-only-publication-proof",
     "/admin/growth": "active-protected-read-only-phase9-schema-gated",
     "/admin/revival": "active-protected-read-only-database-revival-command",
     "/api/analytics/event": "inactive-src-only",

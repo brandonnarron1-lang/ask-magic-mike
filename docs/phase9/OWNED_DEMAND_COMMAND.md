@@ -60,7 +60,11 @@ Canonical Neon leads + latest source attribution touch
   -> human review in native channel editor
 ```
 
-No new table or migration is required. A later publication ledger should be additive and approval-gated; channel attribution alone must never be relabeled as proof of publication.
+At this command-only release boundary, no table or migration is required. The
+later stacked publication-proof candidate is documented in
+`OWNED_DEMAND_PUBLICATION_PROOF_LEDGER.md`; it is additive, append-only, and
+separately approval-gated. Channel attribution is still never relabeled as
+proof of publication.
 
 ## Current-main refresh evidence — 2026-08-19
 
