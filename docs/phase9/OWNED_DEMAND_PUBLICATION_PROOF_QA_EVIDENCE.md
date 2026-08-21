@@ -1,7 +1,7 @@
 # Owned-Demand Publication Proof Ledger QA Evidence
 
 Date: 2026-08-21
-Status: local release gate passed; exact-head CI and Preview pending; Production unchanged
+Status: code-bearing head passed exact-head CI and Preview; Production unchanged
 
 ## Scope and truth boundary
 
@@ -80,6 +80,21 @@ Additional completed checks:
 - `pnpm run phase9:publication-proof:cutover -- --plan` — PASS; migration hash
   `e7dfe015e36c097effb77994c1a40f80f48625d521111f297f498610dfccea0d`
   matched and output contained no connection string.
+- Draft PR [#184](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/184)
+  is mergeable and correctly stacked on PR #183. Code-bearing head
+  `371564778d1da8cff797999487e07f737e4c8673` passed the complete Node 24
+  release gate in GitHub run
+  [32509167043](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32509167043).
+- Exact-head Vercel Preview `dpl_G9kiNU6hNKo3mMshStMguujRpGZm` is Ready on
+  Node 24 at
+  `https://ask-magic-mike-h17b4db6p-eyes-up-industries.vercel.app`.
+  Protection-bypassed read-only checks returned 200 for `/`, `/home-value`,
+  `/buy`, `/rent`, `/api/health/live`, and `/api/health/ready`; the live health
+  response identified `ask-magic-mike`, Preview, canonical Neon configuration,
+  and disabled notification sending. Anonymous `/admin/distribution` returned
+  401 with Basic challenge, `no-store`, `SAMEORIGIN`, and noindex headers.
+  Root identity contained Ask Magic Mike and Our Town Properties markers and no
+  NellySelly marker.
 - A fresh local Supabase startup replay applied the complete historical
   migration chain through `20260821170000` without SQL error. Docker Desktop
   then failed during remaining one-time service startup. A restart at
@@ -121,9 +136,17 @@ development run is not counted as release evidence.
 
 - complete PostgreSQL role/immutability/idempotency replay after the local
   Docker engine is healthy;
-- create an exact-head stacked draft PR and obtain green Node 24 CI;
-- deploy a Preview and verify public routes, anonymous admin denial, read-only
-  Preview mutation behavior, and desktop/mobile authenticated rendering.
+- after the documentation-only evidence commit, obtain a final green exact-head
+  CI and Ready Preview;
+- do not bypass authenticated Preview access merely to render mutation controls.
+  The Preview fail-closed-before-query path is covered by unit tests; the real
+  authenticated record flow remains post-migration Production verification.
+
+During authenticated CLI verification, Vercel first auto-linked the worktree to
+empty helper project `amm-phase9-publication-ledger-20260821`
+(`prj_QcHch6KY1m2g0BKtOoVVFregRhho`) before the local link was corrected to the
+canonical project. The helper has zero deployments, domains, or application
+effect. It remains intact pending a separate exact cleanup approval.
 
 No Production migration, merge, deployment, provider call, publication, send,
 lead write, WordPress change, DNS change, spend, or NellySelly change occurred.

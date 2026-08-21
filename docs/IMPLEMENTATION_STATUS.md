@@ -38,9 +38,22 @@ Updated 2026-08-21.
   leaks. Production-render Playwright checks pass 10/10 desktop/mobile routes
   with no overflow, missing required copy, prohibited claim, bare-appraisal
   wording, or console error. The migration hash/plan gate passes. The full
-  migration chain reached the new SQL without error during local Supabase startup, but Docker Desktop
-  subsequently became unavailable, so final PostgreSQL role/immutability/
+  migration chain reached the new SQL without error during local Supabase
+  startup, but Docker Desktop subsequently became unavailable, so final
+  PostgreSQL role/immutability/
   idempotency replay remains pending and is not overstated.
+- Draft PR #184 is mergeable and correctly stacked on PR #183. Code-bearing
+  head `371564778d1da8cff797999487e07f737e4c8673` passed exact-head Node 24 CI
+  run `32509167043`. Ready Preview deployment
+  `dpl_G9kiNU6hNKo3mMshStMguujRpGZm` serves the expected public/health routes,
+  identifies only Ask Magic Mike/Our Town Properties, and denies anonymous
+  `/admin/distribution` access with 401, Basic challenge, no-store, SAMEORIGIN,
+  and noindex controls. No Preview mutation was attempted.
+- Vercel CLI verification created empty helper project
+  `amm-phase9-publication-ledger-20260821`
+  (`prj_QcHch6KY1m2g0BKtOoVVFregRhho`) before the worktree was relinked to the
+  canonical project. It has zero deployments and no application/domain effect;
+  it remains preserved pending a separate exact cleanup approval.
 - No Production database write, code deployment, WordPress change, provider
   call, email, SMS, social/GBP publication, print distribution, spend, DNS
   change, or NellySelly mutation occurred.

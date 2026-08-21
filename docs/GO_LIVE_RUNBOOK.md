@@ -69,8 +69,12 @@ Release only one approved PR at a time and verify Production before advancing:
    on canonical Neon Production;
 3. `#183` — campaign safety and three-offer owned-demand flight: release-ready
    but still unmerged and Production-undeployed under its exact gate; and
-4. the publication-proof ledger remains stacked on the exact #183 head and must
-   not merge before #183. Refresh every remaining feature branch on the
+4. `#184` — owned-demand publication-proof ledger: mergeable draft stacked on
+   the exact #183 head. Code-bearing head
+   `371564778d1da8cff797999487e07f737e4c8673`, Node 24 run `32509167043`, and
+   Preview `dpl_G9kiNU6hNKo3mMshStMguujRpGZm` are green. It must not merge
+   before #183 or without its exact migration/release gate. Refresh every
+   remaining feature branch on the
    resulting `main` before selecting another release. Do not preserve an old
    queue order when its base,
    scope, or proof has become stale.
@@ -108,6 +112,13 @@ APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERG
 That approval permits only the additive migration, reviewed code merge, and
 canonical application deployment. It does not authorize a GBP/social post,
 email campaign/signature change, QR distribution, consumer message, or spend.
+
+Preview verification left two empty Vercel helper projects intact:
+`amm-phase9-campaign-compliance-20260821`
+(`prj_JUyx03Rh8iABqAFepNNuPI2jJqut`) and
+`amm-phase9-publication-ledger-20260821`
+(`prj_QcHch6KY1m2g0BKtOoVVFregRhho`). Both have zero deployments and no domain
+effect. Do not delete either without a separate exact cleanup approval.
 
 Each item retains its own exact approval phrase. Refresh any downstream branch
 after the preceding Production merge, rerun Node 24 CI and Vercel Preview, and do
