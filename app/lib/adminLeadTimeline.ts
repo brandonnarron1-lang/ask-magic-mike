@@ -15,6 +15,7 @@ export type AdminLeadTimelineEvent = {
     | "notification"
     | "appointment"
     | "followup"
+    | "response"
     | "outcome";
   label: string;
   actor: string | null;
@@ -89,6 +90,17 @@ export function normalizeAuditTimelineEvent(row: Record<string, unknown>): Admin
       label: `Lifecycle changed to ${lifecycleStageLabel(status)}`,
       actor: safeActor(row.actor),
       detail: sanitizeTimelineText(reason ? `Reason: ${reason.replaceAll("_", " ")}` : "Status transition recorded"),
+    };
+  }
+
+  if (action === "lead.first_human_response_recorded") {
+    return {
+      id,
+      occurred_at: occurredAt,
+      type: "response",
+      label: "First human response recorded",
+      actor: safeActor(row.actor),
+      detail: "Immutable speed-to-lead evidence recorded",
     };
   }
 

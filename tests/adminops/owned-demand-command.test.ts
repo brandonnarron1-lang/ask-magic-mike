@@ -26,6 +26,12 @@ function summary(overrides: Partial<GrowthSummary> = {}): GrowthSummary {
     paidLeadSpendCoverageRate: 0,
     staleNurtureCandidates: 0,
     speedToLeadRisks: 0,
+    firstResponseSampleSize: 0,
+    firstResponseCoverageRate: 0,
+    firstResponseOwnerAttributionRate: 0,
+    medianFirstResponseMinutes: null,
+    p75FirstResponseMinutes: null,
+    p90FirstResponseMinutes: null,
     runningExperiments: 0,
     ...overrides,
   };

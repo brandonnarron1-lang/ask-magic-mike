@@ -265,3 +265,30 @@ won, closed lost, and disqualified. Test/suppression state is copied to the
 outcome. Optional closed revenue is actual brokerage revenue and is visible or
 mutable only through the existing `lead:record_revenue` permission. Application
 rollback returns to v1; outcome and audit records are preserved.
+
+## First-human-response boundary (Phase 9)
+
+`last_contacted_at` remains the mutable operational timestamp for recent-contact
+and nurture logic. It is not used as proof of first response. The server-only
+`lead_response_milestones` table stores one immutable first-human-response event
+per lead with actor, source, audit evidence, copied test/suppression state, the
+server-resolved responding Lead Center user/agent, and the assigned-agent
+snapshot captured at the response moment. Responder and assignment identifiers
+are opaque evidence rather than foreign keys so a later approved user or agent
+removal cannot rewrite or block retention of the milestone. Lead-level approved
+deletion still cascades through the canonical lead relationship.
+
+Lifecycle v3 wraps the complete v2 lifecycle/outcome transaction and records the
+milestone only for the explicit `contacted` action. The protected Lead Center
+also exposes an authorized, confirmation-gated “record now” action for actual
+human follow-up after a lead has advanced. Neither path sends a consumer message.
+
+Growth reporting derives P50/P75/P90 elapsed minutes from canonical lead
+creation to the milestone, excludes test/suppressed leads and milestones, and
+segments performance by source/campaign, lead type, and response owner.
+Response-owner attribution prefers the resolved responder, then the immutable
+response-time assignment snapshot, and never joins the lead's current assignee
+for historical credit. Unattributed evidence stays explicit, and every segment
+shows sample size/maturity before an operator treats it as directional or
+operational. Application rollback returns to v2; milestone and audit evidence
+is preserved.

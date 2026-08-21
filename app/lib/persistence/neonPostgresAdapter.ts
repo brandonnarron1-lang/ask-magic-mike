@@ -5,6 +5,8 @@ import type {
   AdminAgentOperationsMutationResult,
   AdminAssignmentMutation,
   AdminAssignmentMutationResult,
+  AdminFirstResponseMutation,
+  AdminFirstResponseMutationResult,
   AdminLeadMutation,
   AdminLeadMutationResult,
   AdminLeadReadRequest,
@@ -207,7 +209,7 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
   }
 
   async mutateAdminLead(input: AdminLeadMutation): Promise<AdminLeadMutationResult> {
-    const result = await this.rpc("mutate_admin_lead_status_v2", [
+    const result = await this.rpc("mutate_admin_lead_status_v3", [
       input.leadId, input.expectedStatus, input.nextStatus, JSON.stringify(input.patch),
       input.reason || null, input.outcomeAmountUsd ?? null, input.actor, input.occurredAt,
     ]);
@@ -227,6 +229,48 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
       status: result.status,
       auditId: typeof result.audit_id === "string" ? result.audit_id : null,
       outcomeId: typeof result.outcome_id === "string" ? result.outcome_id : null,
+      idempotentReplay: result.idempotent_replay === true,
+    };
+  }
+
+  async recordAdminFirstResponse(
+    input: AdminFirstResponseMutation,
+  ): Promise<AdminFirstResponseMutationResult> {
+    const result = await this.rpc("record_admin_first_response_v1", [
+      input.leadId,
+      input.actor,
+      input.occurredAt,
+      input.sourceSystem,
+    ]);
+    if (result.ok !== true) {
+      const allowed = new Set([
+        "lead_not_found",
+        "invalid_response_time",
+        "invalid_response_evidence",
+      ]);
+      return {
+        ok: false,
+        error: (allowed.has(String(result.error))
+          ? result.error
+          : "invalid_response_evidence") as Extract<
+            AdminFirstResponseMutationResult,
+            { ok: false }
+          >["error"],
+      };
+    }
+    if (
+      typeof result.status !== "string" ||
+      typeof result.milestone_id !== "string" ||
+      typeof result.first_human_response_at !== "string"
+    ) {
+      throw new PersistenceUnavailableError("neon_first_response_invalid", 502);
+    }
+    return {
+      ok: true,
+      status: result.status,
+      milestoneId: result.milestone_id,
+      auditId: typeof result.audit_id === "string" ? result.audit_id : null,
+      firstHumanResponseAt: result.first_human_response_at,
       idempotentReplay: result.idempotent_replay === true,
     };
   }

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   normalizeAdminLeadRow,
   normalizeAdminLeadRows,
+  normalizeAdminLeadFirstResponseRow,
 } from "../../app/lib/adminLeadView";
 import { filterAdminLeadInbox } from "../../app/lib/adminLeadInboxFilters";
 
@@ -183,5 +184,28 @@ describe("normalizeAdminLeadRow", () => {
   it("normalizes arrays of rows", () => {
     const leads = normalizeAdminLeadRows([{ id: "a" }, { id: "b" }]);
     expect(leads.map((lead) => lead.id)).toEqual(["a", "b"]);
+  });
+});
+
+describe("normalizeAdminLeadFirstResponseRow", () => {
+  it("derives a privacy-safe response duration from canonical timestamps", () => {
+    expect(normalizeAdminLeadFirstResponseRow({
+      id: "milestone-1",
+      first_human_response_at: "2026-08-20T12:07:30.000Z",
+      source_system: "admin_lead_detail",
+      actor: "lead_center:operator-1",
+      evidence_audit_id: "audit-1",
+    }, "2026-08-20T12:00:00.000Z")).toEqual({
+      id: "milestone-1",
+      first_human_response_at: "2026-08-20T12:07:30.000Z",
+      response_minutes: 8,
+      source_system: "admin_lead_detail",
+      actor: "lead_center:operator-1",
+      evidence_audit_id: "audit-1",
+    });
+  });
+
+  it("rejects incomplete response evidence", () => {
+    expect(normalizeAdminLeadFirstResponseRow({ id: "milestone-1" }, null)).toBeNull();
   });
 });

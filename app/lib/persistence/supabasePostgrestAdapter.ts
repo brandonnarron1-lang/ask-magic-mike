@@ -4,6 +4,8 @@ import type {
   AdminAgentOperationsMutationResult,
   AdminAssignmentMutation,
   AdminAssignmentMutationResult,
+  AdminFirstResponseMutation,
+  AdminFirstResponseMutationResult,
   AdminLeadMutation,
   AdminLeadMutationResult,
   AdminLeadReadRequest,
@@ -230,7 +232,7 @@ export class SupabasePostgrestAdapter implements ActivePersistenceBoundary {
   }
 
   async mutateAdminLead(input: AdminLeadMutation): Promise<AdminLeadMutationResult> {
-    const result = await this.rpc("mutate_admin_lead_status_v2", {
+    const result = await this.rpc("mutate_admin_lead_status_v3", {
       p_lead_id: input.leadId,
       p_expected_status: input.expectedStatus,
       p_next_status: input.nextStatus,
@@ -256,6 +258,44 @@ export class SupabasePostgrestAdapter implements ActivePersistenceBoundary {
       status: requiredString(result.status, "status"),
       auditId: typeof result.audit_id === "string" ? result.audit_id : null,
       outcomeId: typeof result.outcome_id === "string" ? result.outcome_id : null,
+      idempotentReplay: result.idempotent_replay === true,
+    };
+  }
+
+  async recordAdminFirstResponse(
+    input: AdminFirstResponseMutation,
+  ): Promise<AdminFirstResponseMutationResult> {
+    const result = await this.rpc("record_admin_first_response_v1", {
+      p_lead_id: input.leadId,
+      p_actor: input.actor,
+      p_occurred_at: input.occurredAt,
+      p_source_system: input.sourceSystem,
+    });
+    if (result.ok !== true) {
+      const allowed = new Set([
+        "lead_not_found",
+        "invalid_response_time",
+        "invalid_response_evidence",
+      ]);
+      return {
+        ok: false,
+        error: (allowed.has(String(result.error))
+          ? result.error
+          : "invalid_response_evidence") as Extract<
+            AdminFirstResponseMutationResult,
+            { ok: false }
+          >["error"],
+      };
+    }
+    return {
+      ok: true,
+      status: requiredString(result.status, "status"),
+      milestoneId: requiredString(result.milestone_id, "milestone_id"),
+      auditId: typeof result.audit_id === "string" ? result.audit_id : null,
+      firstHumanResponseAt: requiredString(
+        result.first_human_response_at,
+        "first_human_response_at",
+      ),
       idempotentReplay: result.idempotent_replay === true,
     };
   }

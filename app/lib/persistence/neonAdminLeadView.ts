@@ -11,6 +11,7 @@ import {
 } from "./supabase/adminAppointmentFollowupOps";
 import {
   normalizeAdminLeadRow,
+  normalizeAdminLeadFirstResponseRow,
   normalizeAdminLeadOutcomeRow,
   normalizeAdminLeadRows,
   type AdminLeadDetailResult,
@@ -91,23 +92,23 @@ export async function loadNeonAdminLeadDetail(
 ): Promise<AdminLeadDetailResult> {
   const sql = queryFromEnv();
   if (!sql) {
-    return { configured: false, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [] };
+    return { configured: false, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], firstResponse: null };
   }
 
   try {
     const scoped = principal && !hasLeadCenterPermission(principal.role, "lead:view_all");
     if (scoped && !principal.agentId) {
-      return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], error: "lead_not_found" };
+      return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], firstResponse: null, error: "lead_not_found" };
     }
     const leadRows = await sql.query(
       `${LEAD_SELECT} WHERE l.id = $1::uuid${scoped ? " AND l.assigned_agent_id = $2::uuid" : ""} LIMIT 1`,
       scoped ? [leadId, principal?.agentId] : [leadId],
     ) as Array<Record<string, unknown>>;
     if (!leadRows[0]) {
-      return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], error: "lead_not_found" };
+      return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], firstResponse: null, error: "lead_not_found" };
     }
 
-    const [auditRows, notificationRows, appointmentRows, taskRows, outcomeRows] = await Promise.all([
+    const [auditRows, notificationRows, appointmentRows, taskRows, outcomeRows, firstResponseRows] = await Promise.all([
       optionalRows(sql,
         `SELECT id, created_at, actor, action, resource_type, resource_id,
                 before_state, after_state, metadata
@@ -138,6 +139,15 @@ export async function loadNeonAdminLeadDetail(
           WHERE lead_id = $1::uuid
           ORDER BY occurred_at DESC LIMIT 100`,
         [leadId]),
+      optionalRows(sql,
+        `SELECT m.id, m.first_human_response_at, m.source_system, m.actor,
+                m.evidence_audit_id,
+                GREATEST(0, EXTRACT(EPOCH FROM (m.first_human_response_at - l.created_at)) / 60) AS response_minutes
+           FROM public.lead_response_milestones m
+           JOIN public.leads l ON l.id = m.lead_id
+          WHERE m.lead_id = $1::uuid
+          LIMIT 1`,
+        [leadId]),
     ]);
 
     const lead = normalizeAdminLeadRow(leadRows[0]);
@@ -150,6 +160,9 @@ export async function loadNeonAdminLeadDetail(
     const outcomes = outcomeRows
       .map(normalizeAdminLeadOutcomeRow)
       .filter((row): row is AdminLeadOutcomeRow => Boolean(row));
+    const firstResponse = firstResponseRows[0]
+      ? normalizeAdminLeadFirstResponseRow(firstResponseRows[0], lead.created_at)
+      : null;
     const timeline = buildLeadTimeline({
       lead,
       auditRows,
@@ -159,8 +172,8 @@ export async function loadNeonAdminLeadDetail(
       outcomeRows,
     }) as AdminLeadTimelineEvent[];
 
-    return { configured: true, lead, timeline, appointments, followupTasks, outcomes };
+    return { configured: true, lead, timeline, appointments, followupTasks, outcomes, firstResponse };
   } catch {
-    return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], error: "Lead detail query failed" };
+    return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], firstResponse: null, error: "Lead detail query failed" };
   }
 }

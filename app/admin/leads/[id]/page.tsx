@@ -26,6 +26,7 @@ import { Phase7MessagingControlPanel } from "../../../../src/components/admin/ph
 import {
   createAppointmentAction,
   createFollowupTaskAction,
+  recordFirstHumanResponseAction,
   transitionAppointmentAction,
   updateFollowupTaskAction,
   updateLeadStatusAction,
@@ -77,6 +78,17 @@ function operationMessage(code: string) {
     appointment_start_required: "A scheduled, confirmed, or completed appointment needs a start time.",
     appointment_end_before_start: "Appointment end time must be after the start time.",
     invalid_timezone: "Choose a valid timezone.",
+  };
+  return labels[code] || code.replaceAll("_", " ");
+}
+
+function responseActionMessage(code: string) {
+  const labels: Record<string, string> = {
+    recorded: "First human response recorded with immutable audit evidence.",
+    first_response_already_recorded: "The first human response was already recorded; no duplicate was created.",
+    confirmation_required: "Confirm that an actual one-to-one human follow-up occurred before recording the milestone.",
+    invalid_response_time: "The response time was rejected because it falls outside the lead lifecycle.",
+    first_response_record_failed: "The first response could not be recorded. No partial success was reported.",
   };
   return labels[code] || code.replaceAll("_", " ");
 }
@@ -521,14 +533,17 @@ export default async function AdminLeadDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ status_action?: string; appointment_action?: string; followup_action?: string }>;
+  searchParams?: Promise<{ status_action?: string; appointment_action?: string; followup_action?: string; response_action?: string }>;
 }) {
   const { id } = await params;
   const principal = await requireLeadCenterLeadPermission(id, "lead:view_assigned");
   const canRecordRevenue = Boolean(
     principal && hasLeadCenterPermission(principal.role, "lead:record_revenue"),
   );
-  const emptyQuery: { status_action?: string; appointment_action?: string; followup_action?: string } = {};
+  const canUpdateLead = Boolean(
+    principal && hasLeadCenterPermission(principal.role, "lead:update_assigned"),
+  );
+  const emptyQuery: { status_action?: string; appointment_action?: string; followup_action?: string; response_action?: string } = {};
   const [detail, query] = await Promise.all([
     loadAdminLeadDetail(id, principal),
     searchParams ? searchParams : Promise.resolve(emptyQuery),
@@ -576,6 +591,11 @@ export default async function AdminLeadDetailPage({
                 Follow-up result: {operationMessage(query.followup_action)}
               </p>
             ) : null}
+            {query.response_action ? (
+              <p className="rounded-md border border-cyan-400/25 bg-cyan-400/[.08] p-3 text-sm text-cyan-100">
+                Response result: {responseActionMessage(query.response_action)}
+              </p>
+            ) : null}
           </div>
         </header>
 
@@ -598,11 +618,36 @@ export default async function AdminLeadDetailPage({
                   <Field label="Created" value={shortDate(lead.created_at)} />
                   <Field label="Assigned" value={shortDate(lead.assigned_at)} />
                   <Field label="Last contacted" value={shortDate(lead.last_contacted_at)} />
+                  <Field
+                    label="First human response"
+                    value={detail.firstResponse
+                      ? `${shortDate(detail.firstResponse.first_human_response_at)} · ${detail.firstResponse.response_minutes} min`
+                      : "Not yet measured"}
+                  />
                   <Field label="Follow-up" value={shortDate(lead.next_follow_up_at)} />
                   <Field label="Conversion stage" value={lead.conversion_stage || "Not set"} />
                   <Field label="Terminal reason" value={lead.closed_lost_reason || "Not set"} />
                 </dl>
               </Panel>
+
+              {!detail.firstResponse && canUpdateLead ? (
+                <Panel title="First-response evidence">
+                  <form action={recordFirstHumanResponseAction} className="rounded-md border border-cyan-400/20 bg-cyan-400/[.06] p-4">
+                    <input type="hidden" name="lead_id" value={lead.id} />
+                    <input type="hidden" name="return_to" value={`/admin/leads/${lead.id}`} />
+                    <p className="text-sm leading-6 text-[#d9ceb8]">
+                      Use this only immediately after a real one-to-one human follow-up. It records the current server time once, preserves later lifecycle stages, and never sends a message.
+                    </p>
+                    <label className="mt-3 flex items-start gap-2 text-[11px] leading-4 text-[#d9ceb8]">
+                      <input required type="checkbox" name="confirm" value="yes" className="mt-0.5" />
+                      <span>Confirm an actual human follow-up occurred now.</span>
+                    </label>
+                    <button className="mt-3 rounded-md border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-cyan-100">
+                      Record first human response
+                    </button>
+                  </form>
+                </Panel>
+              ) : null}
 
               <Phase6CopilotPanel
                 leadId={lead.id}

@@ -11,10 +11,12 @@ import type { LeadCenterPrincipal } from "../../src/lib/admin/rbac-policy";
 export {
   normalizeAdminLeadRow,
   normalizeAdminLeadRows,
+  normalizeAdminLeadFirstResponseRow,
 } from "./persistence/supabase/adminLeadView";
 export type {
   AdminAttributionView,
   AdminLeadDetailResult,
+  AdminLeadFirstResponseRow,
   AdminLeadInboxResult,
   AdminLeadOutcomeRow,
   AdminLeadView,

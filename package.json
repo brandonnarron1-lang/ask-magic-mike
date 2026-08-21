@@ -47,6 +47,7 @@
     "monitor:synthetic": "node scripts/synthetic-monitor.mjs",
     "monitor-production": "node scripts/monitor-production.mjs",
     "phase9:outcome:cutover": "node scripts/phase9-outcome-production-cutover.mjs",
+    "phase9:first-response:cutover": "node scripts/phase9-first-response-production-cutover.mjs",
     "reconcile-wordpress-leads": "node scripts/reconcile-wordpress-leads.mjs",
     "check-lead-sla": "node scripts/check-lead-sla.mjs",
     "staging:local:up": "node scripts/staging-local-up.mjs",

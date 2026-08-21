@@ -152,6 +152,33 @@ export interface AdminLeadMutationPersistence {
   mutateAdminLead(input: AdminLeadMutation): Promise<AdminLeadMutationResult>;
 }
 
+export type AdminFirstResponseMutation = {
+  leadId: string;
+  actor: string;
+  occurredAt: string;
+  sourceSystem: "admin_lead_detail" | "admin_lead_lifecycle";
+};
+
+export type AdminFirstResponseMutationResult =
+  | {
+      ok: true;
+      status: string;
+      milestoneId: string;
+      auditId?: string | null;
+      firstHumanResponseAt: string;
+      idempotentReplay: boolean;
+    }
+  | {
+      ok: false;
+      error: "lead_not_found" | "invalid_response_time" | "invalid_response_evidence";
+    };
+
+export interface AdminFirstResponseMutationPersistence {
+  recordAdminFirstResponse(
+    input: AdminFirstResponseMutation,
+  ): Promise<AdminFirstResponseMutationResult>;
+}
+
 export type AdminAssignmentMutation = {
   leadId: string;
   agentId: string | null;
@@ -224,6 +251,7 @@ export type ActivePersistenceBoundary = LeadLifecyclePersistence &
   AppointmentIntentPersistence &
   AdminLeadReadPersistence &
   AdminLeadMutationPersistence &
+  AdminFirstResponseMutationPersistence &
   AdminAssignmentMutationPersistence &
   AdminAgentOperationsMutationPersistence &
   ReportingPersistence;

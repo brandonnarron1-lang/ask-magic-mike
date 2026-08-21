@@ -74,6 +74,15 @@ export type AdminLeadOutcomeRow = {
   source_system: string | null;
 };
 
+export type AdminLeadFirstResponseRow = {
+  id: string;
+  first_human_response_at: string;
+  response_minutes: number;
+  source_system: string;
+  actor: string;
+  evidence_audit_id: string | null;
+};
+
 export type AdminLeadDetailResult = {
   configured: boolean;
   lead: AdminLeadView | null;
@@ -81,6 +90,7 @@ export type AdminLeadDetailResult = {
   appointments: AdminAppointmentRow[];
   followupTasks: AdminFollowupTaskRow[];
   outcomes: AdminLeadOutcomeRow[];
+  firstResponse: AdminLeadFirstResponseRow | null;
   error?: string;
 };
 
@@ -161,6 +171,31 @@ export function normalizeAdminLeadOutcomeRow(
     amount_usd: numberOrNull(row.amount_usd),
     occurred_at: dateText(row.occurred_at),
     source_system: text(row.source_system),
+  };
+}
+
+export function normalizeAdminLeadFirstResponseRow(
+  row: Record<string, unknown>,
+  leadCreatedAt?: string | null,
+): AdminLeadFirstResponseRow | null {
+  const id = idText(row.id);
+  const firstHumanResponseAt = dateText(row.first_human_response_at);
+  const sourceSystem = text(row.source_system);
+  const actor = text(row.actor);
+  if (id === "unknown" || !firstHumanResponseAt || !sourceSystem || !actor) return null;
+  const explicitMinutes = numberOrNull(row.response_minutes);
+  const created = leadCreatedAt ? new Date(leadCreatedAt).getTime() : Number.NaN;
+  const responded = new Date(firstHumanResponseAt).getTime();
+  const derivedMinutes = Number.isFinite(created) && Number.isFinite(responded)
+    ? Math.max(0, Math.round((responded - created) / 60000))
+    : 0;
+  return {
+    id,
+    first_human_response_at: firstHumanResponseAt,
+    response_minutes: explicitMinutes === null ? derivedMinutes : Math.max(0, Math.round(explicitMinutes)),
+    source_system: sourceSystem,
+    actor,
+    evidence_audit_id: text(row.evidence_audit_id),
   };
 }
 
@@ -331,7 +366,7 @@ export async function loadAdminLeadDetail(leadId: string): Promise<AdminLeadDeta
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceKey) {
-    return { configured: false, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [] };
+    return { configured: false, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], firstResponse: null };
   }
 
   const leadUrl = new URL("/rest/v1/leads", supabaseUrl);
@@ -356,6 +391,7 @@ export async function loadAdminLeadDetail(leadId: string): Promise<AdminLeadDeta
       appointments: [],
       followupTasks: [],
       outcomes: [],
+      firstResponse: null,
       error: `Lead detail query failed with ${leadResponse.status}`,
     };
   }
@@ -363,7 +399,7 @@ export async function loadAdminLeadDetail(leadId: string): Promise<AdminLeadDeta
   const leadRows = (await leadResponse.json().catch(() => [])) as Array<Record<string, unknown>>;
   const leadRow = leadRows[0];
   if (!leadRow) {
-    return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], error: "lead_not_found" };
+    return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], firstResponse: null, error: "lead_not_found" };
   }
   const lead = normalizeAdminLeadRow(leadRow);
 
@@ -399,7 +435,12 @@ export async function loadAdminLeadDetail(leadId: string): Promise<AdminLeadDeta
   outcomesUrl.searchParams.set("order", "occurred_at.desc");
   outcomesUrl.searchParams.set("limit", "100");
 
-  const [auditResponse, notificationResponse, appointmentsResponse, tasksResponse, outcomesResponse] = await Promise.all([
+  const firstResponseUrl = new URL("/rest/v1/lead_response_milestones", supabaseUrl);
+  firstResponseUrl.searchParams.set("select", "id,first_human_response_at,source_system,actor,evidence_audit_id");
+  firstResponseUrl.searchParams.set("lead_id", "eq." + leadId);
+  firstResponseUrl.searchParams.set("limit", "1");
+
+  const [auditResponse, notificationResponse, appointmentsResponse, tasksResponse, outcomesResponse, firstResponseResponse] = await Promise.all([
     fetch(auditUrl, {
       headers: {
         apikey: serviceKey,
@@ -440,6 +481,14 @@ export async function loadAdminLeadDetail(leadId: string): Promise<AdminLeadDeta
       },
       cache: "no-store",
     }),
+    fetch(firstResponseUrl, {
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+        "Cache-Control": "no-store",
+      },
+      cache: "no-store",
+    }),
   ]);
 
   const auditRows = auditResponse.ok
@@ -457,6 +506,9 @@ export async function loadAdminLeadDetail(leadId: string): Promise<AdminLeadDeta
   const outcomeRows = outcomesResponse.ok
     ? ((await outcomesResponse.json().catch(() => [])) as Array<Record<string, unknown>>)
     : [];
+  const firstResponseRows = firstResponseResponse.ok
+    ? ((await firstResponseResponse.json().catch(() => [])) as Array<Record<string, unknown>>)
+    : [];
   const appointments = appointmentRows
     .map(normalizeAppointment)
     .filter((row): row is AdminAppointmentRow => Boolean(row));
@@ -466,6 +518,9 @@ export async function loadAdminLeadDetail(leadId: string): Promise<AdminLeadDeta
   const outcomes = outcomeRows
     .map(normalizeAdminLeadOutcomeRow)
     .filter((row): row is AdminLeadOutcomeRow => Boolean(row));
+  const firstResponse = firstResponseRows[0]
+    ? normalizeAdminLeadFirstResponseRow(firstResponseRows[0], lead.created_at)
+    : null;
 
   return {
     configured: true,
@@ -473,6 +528,7 @@ export async function loadAdminLeadDetail(leadId: string): Promise<AdminLeadDeta
     appointments,
     followupTasks,
     outcomes,
+    firstResponse,
     timeline: buildLeadTimeline({
       lead,
       auditRows,

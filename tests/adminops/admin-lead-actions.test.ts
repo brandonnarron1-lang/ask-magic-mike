@@ -3,6 +3,7 @@ import {
   ADMIN_LEAD_STATUS_ACTIONS,
   ADMIN_LEAD_STATUSES,
   isAdminLeadStatus,
+  recordAdminFirstHumanResponse,
   updateAdminLeadStatus,
 } from "../../app/lib/adminLeadActions";
 import {
@@ -34,7 +35,7 @@ function installStatusFetch(currentStatus: string, rpcResult: Record<string, unk
     const body = typeof init?.body === "string" ? JSON.parse(init.body) : {};
     calls.push({ url, method, body });
     if (method === "GET") return response([{ id: LEAD_ID, status: currentStatus }]);
-    if (url.includes("/rest/v1/rpc/mutate_admin_lead_status_v2")) return response(rpcResult);
+    if (url.includes("/rest/v1/rpc/mutate_admin_lead_status_v3")) return response(rpcResult);
     throw new Error(`Unexpected request ${method} ${url}`);
   }) as unknown as typeof fetch;
   return calls;
@@ -125,7 +126,7 @@ describe("atomic AdminOps lead status action", () => {
     })).resolves.toEqual({ ok: true, status: "spam" });
     expect(calls.map((call) => call.method)).toEqual(["GET", "POST"]);
     expect(calls[1].url).toBe(
-      "https://fake.supabase.co/rest/v1/rpc/mutate_admin_lead_status_v2",
+      "https://fake.supabase.co/rest/v1/rpc/mutate_admin_lead_status_v3",
     );
     expect(calls[1].body).toMatchObject({
       p_lead_id: LEAD_ID,
@@ -229,6 +230,58 @@ describe("atomic AdminOps lead status action", () => {
       ok: false,
       statusCode: 409,
       error: "concurrent_status_update",
+    });
+  });
+
+  it("records one immutable first-response milestone through the dedicated RPC", async () => {
+    const calls: Array<{ url: string; body: Record<string, unknown> }> = [];
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      const body = typeof init?.body === "string" ? JSON.parse(init.body) : {};
+      calls.push({ url, body });
+      return response({
+        ok: true,
+        status: "contacted",
+        milestone_id: "66666666-6666-4666-8666-666666666666",
+        audit_id: "77777777-7777-4777-8777-777777777777",
+        first_human_response_at: "2026-08-20T01:45:00.000Z",
+        idempotent_replay: false,
+      });
+    }) as unknown as typeof fetch;
+
+    await expect(recordAdminFirstHumanResponse(LEAD_ID, {
+      now: new Date("2026-08-20T01:45:00.000Z"),
+      actor: "lead_center:operator-1",
+    })).resolves.toEqual({
+      ok: true,
+      status: "contacted",
+      firstHumanResponseAt: "2026-08-20T01:45:00.000Z",
+    });
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toBe(
+      "https://fake.supabase.co/rest/v1/rpc/record_admin_first_response_v1",
+    );
+    expect(calls[0].body).toEqual({
+      p_lead_id: LEAD_ID,
+      p_actor: "lead_center:operator-1",
+      p_occurred_at: "2026-08-20T01:45:00.000Z",
+      p_source_system: "admin_lead_detail",
+    });
+  });
+
+  it("reports first-response idempotency without overwriting the original milestone", async () => {
+    globalThis.fetch = vi.fn(async () => response({
+      ok: true,
+      status: "qualified",
+      milestone_id: "66666666-6666-4666-8666-666666666666",
+      first_human_response_at: "2026-08-20T01:45:00.000Z",
+      idempotent_replay: true,
+    })) as unknown as typeof fetch;
+    await expect(recordAdminFirstHumanResponse(LEAD_ID)).resolves.toMatchObject({
+      ok: true,
+      status: "qualified",
+      firstHumanResponseAt: "2026-08-20T01:45:00.000Z",
+      warning: "first_response_already_recorded",
     });
   });
 

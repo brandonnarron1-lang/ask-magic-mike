@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
+  recordAdminFirstHumanResponse,
   statusActionFor,
   updateAdminLeadStatus,
 } from "../../lib/adminLeadActions";
@@ -57,6 +58,29 @@ export async function updateLeadStatusAction(formData: FormData) {
   }
 
   redirect(returnTo + "?status_action=" + (result.warning || "updated"));
+}
+
+export async function recordFirstHumanResponseAction(formData: FormData) {
+  const leadId = String(formData.get("lead_id") ?? "");
+  const principal = await requireLeadCenterLeadPermission(leadId, "lead:update_assigned");
+  const returnTo = safeReturnTo(
+    String(formData.get("return_to") ?? `/admin/leads/${leadId}`),
+  );
+  if (formData.get("confirm") !== "yes") {
+    redirect(returnTo + "?response_action=confirmation_required");
+  }
+  const result = await recordAdminFirstHumanResponse(leadId, {
+    actor: principal ? `lead_center:${principal.userId}` : undefined,
+  });
+  revalidatePath("/admin/leads");
+  revalidatePath("/admin/action-queue");
+  revalidatePath("/admin/growth");
+  revalidatePath("/admin/reporting");
+  if (returnTo.startsWith("/admin/leads/")) revalidatePath(returnTo);
+  redirect(
+    returnTo + "?response_action=" +
+      (result.ok ? result.warning || "recorded" : result.error),
+  );
 }
 
 export async function createAppointmentAction(formData: FormData) {

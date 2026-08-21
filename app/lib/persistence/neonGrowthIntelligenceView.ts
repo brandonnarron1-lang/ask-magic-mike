@@ -84,6 +84,13 @@ function booleanValue(value: unknown) {
   return value === true || value === "true" || value === 1 || value === "1";
 }
 
+function responseOwnerBasis(value: unknown): GrowthLeadFact["firstResponseOwnerBasis"] {
+  return value === "responder_agent" || value === "responder_user" ||
+    value === "assigned_owner_snapshot" || value === "unattributed"
+    ? value
+    : null;
+}
+
 function timestamp(value: unknown) {
   if (value instanceof Date) return value.toISOString();
   const valueText = text(value).trim();
@@ -119,6 +126,7 @@ async function detectGrowthSchema(sql: Query) {
     `SELECT
        to_regclass('public.marketing_spend_daily') IS NOT NULL AS has_spend,
        to_regclass('public.lead_outcomes') IS NOT NULL AS has_outcomes,
+       to_regclass('public.lead_response_milestones') IS NOT NULL AS has_responses,
        to_regclass('public.growth_experiments') IS NOT NULL AS has_experiments,
        to_regclass('public.market_opportunities') IS NOT NULL AS has_opportunities,
        to_regclass('public.growth_recommendations') IS NOT NULL AS has_recommendations`,
@@ -127,6 +135,7 @@ async function detectGrowthSchema(sql: Query) {
   return {
     spend: booleanValue(row.has_spend),
     outcomes: booleanValue(row.has_outcomes),
+    responses: booleanValue(row.has_responses),
     experiments: booleanValue(row.has_experiments),
     opportunities: booleanValue(row.has_opportunities),
     recommendations: booleanValue(row.has_recommendations),
@@ -146,6 +155,10 @@ function normalizeLead(row: Row): GrowthLeadFact {
     score: nullableNumber(row.score),
     timelineMonths: nullableNumber(row.timeline_months),
     lastContactedAt: nullableText(row.last_contacted_at),
+    firstHumanResponseAt: nullableText(row.first_human_response_at),
+    firstResponseOwnerKey: nullableText(row.first_response_owner_key),
+    firstResponseOwnerLabel: nullableText(row.first_response_owner_label),
+    firstResponseOwnerBasis: responseOwnerBasis(row.first_response_owner_basis),
     isPaid: booleanValue(row.is_paid),
   };
 }
@@ -262,12 +275,55 @@ export async function loadNeonGrowthIntelligence(
   const cutoff = new Date(now.getTime() - windowDays * 24 * 60 * 60 * 1000).toISOString();
   try {
     const schema = await detectGrowthSchema(sql);
+    const responseSelect = schema.responses
+      ? `rm.first_human_response_at,
+         CASE
+           WHEN rm.responder_agent_id IS NOT NULL THEN 'agent:' || rm.responder_agent_id::text
+           WHEN rm.responder_user_id IS NOT NULL THEN 'user:' || rm.responder_user_id
+           WHEN rm.assigned_agent_id_at_response IS NOT NULL THEN 'agent:' || rm.assigned_agent_id_at_response::text
+           ELSE 'unattributed'
+         END AS first_response_owner_key,
+         COALESCE(
+           response_agent.name,
+           response_user.name,
+           response_assigned.name,
+           CASE WHEN rm.responder_agent_id IS NOT NULL OR rm.responder_user_id IS NOT NULL
+             OR rm.assigned_agent_id_at_response IS NOT NULL
+             THEN 'Former or removed response owner'
+             ELSE 'Unattributed responder'
+           END
+         )
+           AS first_response_owner_label,
+         CASE
+           WHEN rm.responder_agent_id IS NOT NULL THEN 'responder_agent'
+           WHEN rm.responder_user_id IS NOT NULL THEN 'responder_user'
+           WHEN rm.assigned_agent_id_at_response IS NOT NULL THEN 'assigned_owner_snapshot'
+           ELSE 'unattributed'
+         END AS first_response_owner_basis`
+      : `NULL::timestamptz AS first_human_response_at,
+         NULL::text AS first_response_owner_key,
+         NULL::text AS first_response_owner_label,
+         NULL::text AS first_response_owner_basis`;
+    const responseJoin = schema.responses
+      ? `LEFT JOIN public.lead_response_milestones rm
+           ON rm.lead_id = l.id
+          AND rm.is_test = false
+          AND rm.communication_suppressed = false
+         LEFT JOIN public.lead_center_users response_user
+           ON response_user.id = rm.responder_user_id
+         LEFT JOIN public.agents response_agent
+           ON response_agent.id = rm.responder_agent_id
+         LEFT JOIN public.agents response_assigned
+           ON response_assigned.id = rm.assigned_agent_id_at_response`
+      : "";
     const leadRows = await sql.query(
       `SELECT l.id, l.created_at, l.status, l.conversion_stage,
               l.source, l.source_detail, l.score, l.lead_type,
               l.timeline_months, l.last_contacted_at,
+              ${responseSelect},
               sa.utm_source, sa.utm_medium, sa.utm_campaign, sa.utm_content, sa.is_paid
          FROM public.leads l
+         ${responseJoin}
          LEFT JOIN LATERAL (
            SELECT utm_source, utm_medium, utm_campaign, utm_content, is_paid
              FROM public.source_attribution
