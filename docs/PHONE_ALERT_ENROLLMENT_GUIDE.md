@@ -13,10 +13,16 @@ grant that permission or take over a device.
    token-scoped web-app manifest whose `start_url` points to the claim route.
 3. Add the install page to the Home Screen, leave Open as Web App enabled when
    shown, leave Safari, and open the new Magic Mike icon before expiry.
-4. The installed app redeems the token inside its own isolated cookie context,
+4. The installed app transfers the token into its own isolated cookie context,
    cleans the URL, and opens the copy-only setup page. Tap Enable notifications
    and accept the operating-system prompt.
 5. Confirm the admin page reports one active copy subscription.
+
+The install URL is a short-lived bearer capability, not a durably consumed
+single-use credential. Anyone who receives it before expiry could register a
+copy-alert device. Generate it only when Brandon is ready, share it only with
+him, and replace it if delivery is uncertain. It cannot open the Lead Center,
+register Mike, change routing, or send a consumer message.
 
 Do not rely on Safari transferring its setup cookie into the installed iPhone
 web app. WebKit documents iOS Home Screen apps as isolated and requires Web Push

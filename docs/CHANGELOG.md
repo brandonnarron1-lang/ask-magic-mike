@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-08-21 — iOS phone-alert handoff consolidation candidate
+
+- Preserved PR #179 and its original history, pushed rescue branch
+  `rescue/amm-pre-phone-handoff-consolidation-20260821-190451`, and merged the
+  exact PR #189 release-train head without reset, rebase, or force-push.
+- Retained the existing VAPID Web Push provider, Neon subscription repository,
+  Lead Center authorization, and notification outbox. No second phone-alert
+  service, carrier-SMS workaround, database, or admin surface was added.
+- Reconciled the only three expected overlaps by preserving both the current
+  `/go/[code]` route and the private phone-install routes in robots, route
+  classification, and search-authority tests.
+- Hardened phone setup link construction to Ask Magic Mike's exact owned
+  Production origins, exact Vercel deployment/branch Preview origins, or local
+  development. Our Town, NellySelly, unrelated `*.vercel.app` hosts, malformed
+  metadata, and unsafe configured fallbacks fail to the canonical Ask origin.
+- Corrected setup copy to describe the stateless token truthfully as a
+  short-lived, role-restricted bearer capability rather than implying durable
+  single-use consumption. The admin and install pages now warn that an active
+  link must be shared only with Brandon.
+- Local verification passes 211 test files / 2,920 tests, strict typecheck,
+  ESLint, 14/14 release safety, system isolation, the optimized Next.js 15.5.21
+  build, the 83-route manifest, and the Production dependency audit.
+- Mobile Playwright acceptance passes valid install, clean-URL claim, HttpOnly
+  SameSite=Strict session, copy-only setup, invalid-token fallback, and zero
+  browser errors without registering a device or sending Push.
+- No Production, Neon, Vercel, WordPress, lead, email, SMS, Push, publication,
+  DNS, spend, or NellySelly mutation occurred. Exact Node 24 CI and protected
+  Preview proof remain required before the refreshed Draft can be considered
+  release-ready.
+
 ## 2026-08-21 — Exact owned-demand activation control-loop candidate
 
 - Extended the existing protected Distribution Command with one deterministic

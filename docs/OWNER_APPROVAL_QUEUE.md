@@ -28,6 +28,19 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    — protected, append-only KPI target register, only after #186 lands and this
    candidate is refreshed against the resulting head:
    `APPROVE PHASE 9 KPI TARGET REGISTER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT`
+6. PR [#188](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/188)
+   — WordPress owned-traffic consolidation, only after #187 lands and the
+   candidate is refreshed. This gate deploys application code only and does not
+   authorize a WordPress edit:
+   `APPROVE PHASE 9 WORDPRESS OWNED-TRAFFIC CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`
+7. PR [#189](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/189)
+   — exact owned-demand activation loop, only after #188 lands and the
+   candidate is refreshed:
+   `APPROVE PHASE 9 EXACT OWNED-DEMAND ACTIVATION LOOP MERGE AND PRODUCTION DEPLOYMENT`
+8. PR [#179](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/179)
+   — iOS Home Screen Web Push handoff, only after #189 lands and the refreshed
+   candidate passes exact Node 24 CI plus protected Preview acceptance:
+   `APPROVE IOS PHONE ALERT INSTALL HANDOFF MERGE AND PRODUCTION DEPLOYMENT`
 
 The #184 and KPI-target phrases authorize their respective reviewed
 backup-first Neon migrations, exact code merge, and canonical Vercel deployment.
@@ -36,19 +49,13 @@ deployment. None authorizes recording a KPI target, a social/GBP
 post, email campaign, QR printing/distribution, consumer message, spend, DNS
 change, WordPress change, provider action, or deletion.
 
-## Deferred candidates requiring refresh and overlap review
+## Historical candidate retained for audit
 
 - PR [#182](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/182)
-  modernizes launch-authority checks and surfaces buyer discovery. It overlaps
-  #183's buyer and operational-document work. Do not release it until the
-  current stack lands, the overlap is reconciled, and exact-head evidence is
-  re-established. Its retained gate is
-  `APPROVE PHASE 9 LAUNCH AUTHORITY AND BUYER DISCOVERY MERGE AND PRODUCTION DEPLOYMENT`.
-- PR [#179](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/179)
-  repairs the iOS Home Screen Web Push handoff. Refresh it after the current
-  stack and rerun protected iPhone-install acceptance before considering
-  `APPROVE IOS PHONE ALERT INSTALL HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
-  Physical enrollment and a `[TEST]` push remain separate actions.
+  is preserved as historical evidence. Its Buyer navigation, exact Preview
+  origin, canonical-router CTA checks, and current release-safety coverage are
+  consolidated into PR #185; its duplicated launch authority is superseded by
+  #184. Do not merge PR #182 as-is.
 - PRs #92 and #119–#121 remain archive-after-review candidates. They are not a
   parallel Production release plan.
 

@@ -39,6 +39,9 @@ const originalEnv = {
   admin: process.env.ADMIN_SECRET,
   signing: process.env.PHONE_SETUP_SIGNING_SECRET,
   site: process.env.NEXT_PUBLIC_SITE_URL,
+  vercel: process.env.VERCEL_ENV,
+  vercelUrl: process.env.VERCEL_URL,
+  vercelBranchUrl: process.env.VERCEL_BRANCH_URL,
 };
 
 function sessionCookie() {
@@ -73,6 +76,9 @@ describe("passwordless Brandon phone setup routes", () => {
     if (originalEnv.admin === undefined) delete (process.env as Record<string, string | undefined>).ADMIN_SECRET; else process.env.ADMIN_SECRET = originalEnv.admin;
     if (originalEnv.signing === undefined) delete process.env.PHONE_SETUP_SIGNING_SECRET; else process.env.PHONE_SETUP_SIGNING_SECRET = originalEnv.signing;
     if (originalEnv.site === undefined) delete process.env.NEXT_PUBLIC_SITE_URL; else process.env.NEXT_PUBLIC_SITE_URL = originalEnv.site;
+    if (originalEnv.vercel === undefined) delete process.env.VERCEL_ENV; else process.env.VERCEL_ENV = originalEnv.vercel;
+    if (originalEnv.vercelUrl === undefined) delete process.env.VERCEL_URL; else process.env.VERCEL_URL = originalEnv.vercelUrl;
+    if (originalEnv.vercelBranchUrl === undefined) delete process.env.VERCEL_BRANCH_URL; else process.env.VERCEL_BRANCH_URL = originalEnv.vercelBranchUrl;
   });
 
   it("issues a short-lived link only to an authenticated same-origin admin request", async () => {
@@ -101,6 +107,43 @@ describe("passwordless Brandon phone setup routes", () => {
     expect(denied.status).toBe(401);
   });
 
+  it("constructs Preview setup links only on the exact Ask Magic Mike deployment origin", async () => {
+    process.env.VERCEL_ENV = "preview";
+    process.env.VERCEL_URL = "ask-magic-mike-exact-eyes-up-industries.vercel.app";
+    process.env.VERCEL_BRANCH_URL = "ask-magic-mike-branch-eyes-up-industries.vercel.app";
+
+    const exactOrigin = "https://ask-magic-mike-exact-eyes-up-industries.vercel.app";
+    const exactRequest = new NextRequest(`${exactOrigin}/api/phone-alerts/invite`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        origin: exactOrigin,
+        "x-admin-secret": "test-admin-secret",
+      },
+      body: JSON.stringify({ ttl_minutes: 10 }),
+    });
+    const exactResponse = await invite(exactRequest);
+    expect((await exactResponse.json()).url).toMatch(
+      /^https:\/\/ask-magic-mike-exact-eyes-up-industries\.vercel\.app\/phone-alerts\/install\//,
+    );
+
+    process.env.NEXT_PUBLIC_SITE_URL = "https://nellyselly.com";
+    const unrelatedOrigin = "https://nellyselly-preview.vercel.app";
+    const unrelatedRequest = new NextRequest(`${unrelatedOrigin}/api/phone-alerts/invite`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        origin: unrelatedOrigin,
+        "x-admin-secret": "test-admin-secret",
+      },
+      body: JSON.stringify({ ttl_minutes: 10 }),
+    });
+    const unrelatedResponse = await invite(unrelatedRequest);
+    expect((await unrelatedResponse.json()).url).toMatch(
+      /^https:\/\/www\.askmagicmike\.com\/phone-alerts\/install\//,
+    );
+  });
+
   it("exchanges a valid invite for a secure HttpOnly setup cookie and cleans the URL", async () => {
     const token = mintPhoneSetupToken().token;
     const response = await claim(new NextRequest(`https://www.askmagicmike.com/phone-alerts/setup/claim?token=${encodeURIComponent(token)}`));
@@ -114,7 +157,7 @@ describe("passwordless Brandon phone setup routes", () => {
     expect(response.headers.get("Referrer-Policy")).toBe("no-referrer");
   });
 
-  it("serves a private token-scoped install manifest whose start URL redeems inside the installed app", async () => {
+  it("serves a private token-scoped install manifest whose start URL transfers inside the installed app", async () => {
     const token = mintPhoneSetupToken().token;
     const response = await installManifest(
       new Request(`https://www.askmagicmike.com/phone-alerts/install/${encodeURIComponent(token)}/manifest.webmanifest`),

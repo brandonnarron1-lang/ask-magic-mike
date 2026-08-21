@@ -206,7 +206,7 @@ export function PhonePushSetup({ publicKey, mode = "admin" }: { publicKey: strin
             <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm">
               <li>{mode === "brandon" ? <>Return to the original message, press and hold its <strong>secure install link</strong>, then choose <strong>Open in Safari</strong>.</> : <>Use the <strong>Create secure setup link</strong> control above for Brandon. This protected admin URL is not his install link.</>}</li>
               <li>On the secure install page in Safari, tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.</li>
-              <li>Leave Safari and open the new <strong>Magic Mike</strong> icon. The installed app will redeem its own temporary setup session.</li>
+              <li>Leave Safari and open the new <strong>Magic Mike</strong> icon. The installed app will transfer its own temporary setup session.</li>
               <li>Tap enable and choose <strong>Allow</strong> when iPhone asks about notifications.</li>
             </ol>
           </div>

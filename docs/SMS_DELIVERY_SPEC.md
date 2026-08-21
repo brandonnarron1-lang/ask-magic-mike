@@ -34,11 +34,16 @@ header, runtime schema validation, and rate limiting. The invite endpoint itself
 requires admin authentication and never changes lead routing.
 
 The Brandon invite opens a token-scoped `/phone-alerts/install/[token]` page.
-That page serves a private, no-store manifest whose one-time `start_url` is the
-claim route. The installed iPhone web app therefore redeems the short-lived token
+That page serves a private, no-store manifest whose short-lived `start_url` is the
+claim route. The installed iPhone web app therefore transfers the short-lived token
 inside its own isolated cookie context before opening `/phone-alerts/setup`.
 The flow does not rely on Safari transferring cookies to the Home Screen app and
 never transfers Basic Auth credentials.
+
+The invite is a short-lived, role-restricted bearer capability. It is not a
+durably consumed one-use credential, so anyone holding it before expiry could
+register a copy-alert device. The operator UI requires private, just-in-time
+delivery to Brandon and replacement when delivery is uncertain.
 
 ## Scope
 

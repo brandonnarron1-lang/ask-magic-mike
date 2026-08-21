@@ -90,7 +90,43 @@ Production, refresh and re-prove the candidate before considering:
 External social/GBP/email publication and QR printing/distribution remain
 separate channel-specific approvals.
 
-### 3. Deferred candidates
+### 5. PR #187 — evidence-first KPI target register
+
+PR #187 is stacked after #186. Its additive Neon migration creates an immutable
+target-version register and seeds no target. After #186 reaches Production,
+refresh and re-prove it before considering its documented separate gate:
+
+`APPROVE PHASE 9 KPI TARGET REGISTER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT`
+
+### 6. PR #188 — WordPress owned-traffic consolidation
+
+PR #188 is stacked after #187. It adds a read-only structural audit and seven
+exact Our Town placements to the existing Distribution Command. Merging the
+application does not authorize changing a WordPress page, form, plugin, CTA,
+redirect, or notification. Its future code-release gate is:
+
+`APPROVE PHASE 9 WORDPRESS OWNED-TRAFFIC CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`
+
+### 7. PR #189 — exact owned-demand activation loop
+
+PR #189 is stacked after #188. It joins existing native proof to exact eligible
+first-party attribution without a migration, route, provider, publisher, or
+second source of truth. Its future code-release gate is:
+
+`APPROVE PHASE 9 EXACT OWNED-DEMAND ACTIVATION LOOP MERGE AND PRODUCTION DEPLOYMENT`
+
+### 8. Post-stack iOS phone-alert handoff
+
+- PR #179's unique token-scoped iOS Home Screen install handoff is preserved on
+  rescue branch `rescue/amm-pre-phone-handoff-consolidation-20260821-190451`
+  and locally merged on exact PR #189 head without reset, rebase, or force.
+  Its exact Preview-origin boundary now rejects arbitrary Vercel and NellySelly
+  hosts. Keep it Draft behind #183–#189; exact Node 24 CI and protected Preview
+  proof must be repeated on the refreshed head. Physical enrollment and one
+  `[TEST]` receipt remain separate human actions. Future gate:
+  `APPROVE IOS PHONE ALERT INSTALL HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
+
+### 9. Historical/deferred candidates
 
 - PR #182 audit is complete. Its Buyer navigation/path card, exact Vercel
   Preview-origin binding, canonical root-`app/` CTA authority, and modern
@@ -98,12 +134,6 @@ separate channel-specific approvals.
   `codex/phase9-current-router-safety-20260821`, stacked above #184. Its
   duplicated operational authority and launch-scanner work is superseded by
   #184. PR #182 remains Draft as historical evidence and must not merge as-is.
-- PR #179 audit is complete. Its token-scoped iOS Home Screen install handoff is
-  unique and retained. The only direct file overlap with #184 is the generated
-  route manifest. PR #179 remains Draft until the current stack lands; refresh
-  it against the final `main` and repeat exact-head Preview proof before any
-  release. Physical device enrollment and receipt confirmation remain a
-  separate human step.
 - PRs #92 and #119-#121: archive after review; they are not a parallel release
   sequence.
 

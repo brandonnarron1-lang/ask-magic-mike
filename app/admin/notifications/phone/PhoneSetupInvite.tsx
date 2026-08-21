@@ -99,7 +99,8 @@ export function PhoneSetupInvite() {
     <section className="mb-6 rounded-2xl border border-sky-300/25 bg-sky-950/25 p-5">
       <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-200">Brandon copy device</p>
       <h2 className="mt-2 text-xl font-bold text-white">Create secure setup link</h2>
-      <p className="mt-2 text-sm leading-6 text-sky-50/85">The link lasts 20 minutes and installs a one-time Brandon copy setup. The installed app redeems the session in its own protected cookie context; the link cannot open leads, change routing, or register Mike.</p>
+      <p className="mt-2 text-sm leading-6 text-sky-50/85">The link lasts 20 minutes and installs a restricted Brandon copy setup. The installed app transfers the short-lived session into its own protected cookie context; the link cannot open leads, change routing, or register Mike.</p>
+      <p className="mt-3 rounded-lg border border-amber-300/25 bg-amber-300/10 px-3 py-2 text-xs leading-5 text-amber-50"><strong>Bearer link:</strong> anyone who receives it before expiry could register a copy-alert device. Share it only with Brandon when his phone is ready, and replace it if delivery is uncertain.</p>
       <button type="button" disabled={processing} onClick={() => void generate()} className="mt-4 w-full rounded-lg bg-sky-300 px-4 py-3 font-bold text-sky-950 disabled:cursor-wait disabled:opacity-60">
         {processing ? "Generating…" : invite ? "Replace with fresh link" : "Generate Brandon setup link"}
       </button>

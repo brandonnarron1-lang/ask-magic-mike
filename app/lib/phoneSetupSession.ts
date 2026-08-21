@@ -1,5 +1,6 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
+import { isApprovedAskMagicMikeOrigin } from "./publicOrigin";
 
 export const PHONE_SETUP_COOKIE = "amm_phone_setup";
 export const PHONE_SETUP_TTL_MS = 20 * 60 * 1000;
@@ -77,22 +78,15 @@ export function canonicalSiteOrigin() {
   const fallback = "https://www.askmagicmike.com";
   try {
     const origin = new URL(process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_SITE_URL || fallback).origin;
-    if (process.env.NODE_ENV === "production" && !origin.startsWith("https://")) return fallback;
-    return origin;
+    return isApprovedAskMagicMikeOrigin(origin) ? origin : fallback;
   } catch {
     return fallback;
   }
 }
 
 export function phoneSetupResponseOrigin(request: NextRequest) {
-  const hostname = request.nextUrl.hostname.toLowerCase();
-  if (process.env.VERCEL_ENV === "preview" && hostname.endsWith(".vercel.app")) {
-    return request.nextUrl.origin;
-  }
-  if (process.env.NODE_ENV !== "production" && (hostname === "localhost" || hostname === "127.0.0.1")) {
-    return request.nextUrl.origin;
-  }
-  return canonicalSiteOrigin();
+  const requestOrigin = request.nextUrl.origin;
+  return isApprovedAskMagicMikeOrigin(requestOrigin) ? requestOrigin : canonicalSiteOrigin();
 }
 
 export function isExactSameOrigin(request: NextRequest) {

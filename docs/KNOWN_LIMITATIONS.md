@@ -47,8 +47,18 @@ and approval-gated. A queued provider state is not a delivered-state claim.
 The schema, VAPID configuration, protected setup flow, and push adapter are
 present. Each person must install/enable notifications on their own supported
 device and approve one `[TEST]` receipt. Mike's device cannot be represented by
-Brandon's enrollment. PR #179 contains a deferred iOS Home Screen handoff repair
-that must be refreshed before release.
+Brandon's enrollment. PR #179's retained iOS Home Screen handoff has been
+consolidated locally onto the current release train but still requires exact
+Node 24 CI, protected Preview proof, ordered release, and physical-device
+acceptance.
+
+The Brandon setup URL is a 5–30 minute, copy-role-only bearer capability, not a
+durably consumed single-use credential. Anyone who receives an unexpired link
+could register a copy-alert device. Generate it only when Brandon is ready,
+share it only through the intended private channel, and replace it if delivery
+is uncertain. It cannot view the Lead Center, register Mike, change routing, or
+send consumer messages; durable one-use consumption would require a separately
+reviewed server-side state/migration.
 
 ### Carrier SMS/MMS is intentionally disabled
 

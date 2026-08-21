@@ -13,8 +13,11 @@ WordPress evidence. Working systems outrank historical packets.
 | PR #184 | Stacked append-only publication-proof ledger and guarded Neon migration | **MERGE INTO CANONICAL** | Refresh after #183, then use its separate exact gate |
 | PR #185 | Clean stack above #184 containing PR #182's unique Buyer discovery, exact Preview origin, canonical-router CTA checks, and current release-safety coverage | **MERGE INTO CANONICAL** | Refresh after #184; old overlapping PR #182 must not merge as-is |
 | PR #186 | Protected deterministic 4:5/story/QR exports for the existing 24 owned-demand placements; no publisher or migration | **MERGE INTO CANONICAL** | Stacked after #185; preserve the existing campaign definitions, retained Mike imagery, and separate publication gate |
+| PR #187 | Evidence-first append-only KPI target register with privacy-minimized field telemetry and guarded Neon migration | **MERGE INTO CANONICAL** | Stacked after #186; no target is seeded or approved by merging code |
+| PR #188 | Read-only WordPress surface audit plus seven exact Our Town owned-demand placements on the existing Distribution Command | **MERGE INTO CANONICAL** | Stacked after #187; code merge does not authorize a WordPress edit or publication |
+| PR #189 | Deterministic native-publication-proof to eligible-attribution activation loop across all 35 canonical placements | **MERGE INTO CANONICAL** | Stacked after #188; no new route, database, provider, publisher, or source of truth |
 | PR #182 | Historical mixed candidate whose unique runtime/security work is now preserved on the clean consolidation branch | **REFERENCE/DOCUMENTATION** | Draft and explicitly deferred; duplicated authority docs/scanners are superseded by #184 |
-| PR #179 | Unique token-scoped iOS Home Screen Web Push handoff repair | **MERGE INTO CANONICAL** | Draft and deferred until the current release stack lands; refresh exact-head proof before release and keep physical enrollment/test separate |
+| PR #179 | Unique token-scoped iOS Home Screen Web Push handoff repair, locally merged onto exact PR #189 head with wildcard Preview-origin trust removed | **MERGE INTO CANONICAL** | Rescue branch preserves the old head; keep Draft behind #183–#189, refresh exact-head CI/Preview proof, and keep physical enrollment/test separate |
 | `/Users/brandonnarron/ask-magic-mike` | Two-commit bootstrap without canonical lead lifecycle | **OBSOLETE OR CONFLICTING** | Historical fallback only; do not merge |
 | `/Users/brandonnarron/propertylens` | Separate PropertyLens product | **REFERENCE/DOCUMENTATION** | Never treat as Ask Magic Mike runtime |
 | `/Users/brandonnarron/eyesup-hq/projects/ask-magic-mike-widget` | Asset/mobile package without canonical backend | **MERGE INTO CANONICAL** | Reuse only reviewed assets/contracts; no separate store |
@@ -40,5 +43,6 @@ WordPress evidence. Working systems outrank historical packets.
   approved registered provider.
 - External campaign platforms remain human-operated; the application records
   evidence only after the native action occurs.
-- PR #179 and PR #182 are Draft with explicit out-of-order merge warnings. No
+- PR #182 is historical and its unique work is consolidated into #185. PR #179
+  is a post-stack Draft candidate with an explicit out-of-order warning. No
   branch, commit, worktree, or exact-head evidence was deleted.

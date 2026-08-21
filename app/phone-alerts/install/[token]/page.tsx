@@ -42,7 +42,7 @@ export default async function PhoneAlertInstallPage({ params }: InstallPageProps
       <div className="mx-auto max-w-2xl">
         <p className="text-xs font-bold uppercase tracking-[0.24em] text-amber-300">Ask Magic Mike</p>
         <h1 className="mt-2 text-3xl font-bold">Install Brandon copy alerts</h1>
-        <p className="mt-3 text-zinc-300">This one-time install can register only a Brandon copy-notification device. It cannot view leads, register Mike, change routing, or send a consumer message.</p>
+        <p className="mt-3 text-zinc-300">This short-lived install link can register only a Brandon copy-notification device. It cannot view leads, register Mike, change routing, or send a consumer message.</p>
 
         <section className="my-6 rounded-2xl border border-sky-300/25 bg-sky-950/25 p-5">
           <h2 className="text-xl font-bold text-sky-50">Complete these steps before the link expires</h2>
@@ -50,12 +50,12 @@ export default async function PhoneAlertInstallPage({ params }: InstallPageProps
             <li>Make sure this page is open in Safari.</li>
             <li>Tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>. Leave <strong>Open as Web App</strong> enabled when shown.</li>
             <li>Leave Safari and open the new <strong>Magic Mike</strong> icon from the Home Screen.</li>
-            <li>The installed app will redeem the temporary link in its own secure session. Tap <strong>Enable free phone alerts</strong>, then choose <strong>Allow</strong>.</li>
+            <li>The installed app will transfer the temporary link into its own secure session. Tap <strong>Enable free phone alerts</strong>, then choose <strong>Allow</strong>.</li>
           </ol>
         </section>
 
         <div className="rounded-xl border border-amber-300/20 bg-amber-300/10 p-4 text-sm leading-6 text-amber-50">
-          Do not bookmark, forward, or reopen this link after setup. If the installed app says the session expired, generate a fresh link and repeat the installation while the new link is active.
+          This is a short-lived bearer link. Anyone who receives it before expiry could register a copy-alert device. Do not bookmark, forward, or reopen it after setup. If the installed app says the session expired, generate a fresh link and repeat the installation while the new link is active.
         </div>
       </div>
     </main>

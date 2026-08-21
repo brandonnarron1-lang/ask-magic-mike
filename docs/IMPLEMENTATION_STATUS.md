@@ -2,6 +2,38 @@
 
 Updated 2026-08-21.
 
+## iOS phone-alert handoff consolidation — 2026-08-21
+
+- PR #179's unique iOS Home Screen Web Push handoff is now locally consolidated
+  on exact PR #189 head `6a2f6799a399e1f13fc4a44eaabf61b7013b9532`.
+  Rescue branch `rescue/amm-pre-phone-handoff-consolidation-20260821-190451`
+  preserves the prior head; merge commit `b351bed` preserves both histories.
+- The candidate reuses the canonical VAPID provider, Neon
+  `staff_push_subscriptions`, notification outbox, Lead Center, and copy-role
+  policy. It adds no migration, second provider, carrier-SMS bypass, lead store,
+  or phone-number routing rule.
+- Setup tokens remain HMAC-signed, 5–30 minute bounded, fixed to `copy`, and
+  exchanged for an HttpOnly SameSite=Strict cookie. Registration/test routes
+  retain exact-origin, custom-header, strict-schema, rate-limit, active-copy-role,
+  and `[TEST]`-only controls.
+- Preview-origin construction is now exact, not wildcard-based. Only owned Ask
+  Production origins, the exact Vercel deployment/branch metadata, or local
+  development may be returned; NellySelly and arbitrary Vercel hosts cannot
+  become install-link origins.
+- The bearer capability is intentionally described without a false single-use
+  claim. Until expiry it must be sent only to Brandon; physical enrollment and
+  one separately approved `[TEST]` receipt remain human actions.
+- Focused verification passes 6 files / 38 tests. The full local candidate
+  passes 211 files / 2,920 tests, strict typecheck, ESLint, 14/14 safety,
+  Ask/NellySelly isolation, optimized build, 83-route verification, and
+  Production dependency audit. Mobile browser acceptance passes the valid,
+  invalid, and clean-URL session states with no console error and no external
+  send or subscription write.
+- Exact Node 24 GitHub CI and protected canonical Preview acceptance remain
+  pending. The candidate stays Draft and cannot bypass PRs #183–#189. Its
+  separate future gate remains:
+  `APPROVE IOS PHONE ALERT INSTALL HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
+
 ## Phase 9 exact owned-demand activation loop — 2026-08-21
 
 - Reused the existing protected `/admin/distribution` page, seven canonical

@@ -5,6 +5,35 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## iOS phone-alert handoff consolidation — 2026-08-21
+
+- Preservation: prior PR #179 head retained at rescue branch
+  `rescue/amm-pre-phone-handoff-consolidation-20260821-190451`; exact PR #189
+  head merged with both histories preserved. No force-push or discarded
+  worktree was used.
+- Focused Vitest: PASS — 6 files / 38 tests covering invite authorization,
+  exact Preview origins, NellySelly isolation, signed claim/cookie behavior,
+  private token manifest, invalid tokens, copy-only registration/test,
+  search/robots boundaries, and iOS readiness UI.
+- Full Vitest: PASS — 211 files / 2,920 tests.
+- `pnpm run typecheck`: PASS.
+- `pnpm run lint`: PASS.
+- `pnpm run release:safety`: PASS — 14/14.
+- `pnpm run amm:verify:isolation`: PASS — canonical Ask project identity and no
+  deployable NellySelly project identifier.
+- `pnpm run routes:verify`: PASS — optimized Next.js 15.5.21 build and 83 active
+  routes / 17 acknowledged duplicates.
+- `pnpm audit --prod`: PASS — no known Production dependency vulnerability.
+- Mobile Playwright at 390×844: PASS — valid install instructions, token-free
+  post-claim URL, HttpOnly SameSite=Strict local session, Brandon-copy-only
+  setup, invalid/expired fallback, and zero console errors. Local HTTP correctly
+  omits `Secure`; unit coverage proves the attribute on HTTPS. The enable/test
+  controls were not activated.
+- No subscription, Push, lead, email, SMS, analytics conversion, database write,
+  Production deployment, WordPress action, publication, or provider call was
+  made. Exact Node 24 CI, protected Vercel Preview, and secret-scan evidence are
+  still pending for the refreshed Draft head.
+
 ## Phase 9 WordPress owned-traffic consolidation — 2026-08-21
 
 - `WORDPRESS_BRIDGE_FORM_IDS=3 node scripts/audit-wordpress-form-placements.mjs` — PASS: 42 sitemap
