@@ -12,14 +12,25 @@
   demand, school-proxy, response-time, superlative, and conflicting public-phone
   claims; added dedicated regression coverage.
 - Updated the reusable visual-smoke contract so rendered QA requires the factual
-  broker-review credential instead of the removed tenure claim.
+  broker-review credential instead of the removed tenure claim, matches visible
+  copy case-insensitively, and keeps authenticated admin proof separate from
+  public Preview proof.
+- Hardened the active `/ask` route and prompt set against neighborhood,
+  school-proxy, and unverified buyer-demand guidance. The public interface now
+  frames comparisons around objective criteria supplied by the consumer.
+- Replaced two undersized legacy offer portraits with existing approved 1024 px
+  and 515×720 local Mike assets; no synthetic identity or parallel visual pack
+  was introduced.
 - Extended the UTM allowlist only for the existing canonical `/home-value`,
   `/buy`, and `/rent` routes; arbitrary and cross-system destinations remain
   blocked.
-- Passed the full local release gate: 196 test files / 2,793 tests, strict
+- Passed the full local release gate: 196 test files / 2,794 tests, strict
   typecheck, ESLint, optimized Production build, 78-route manifest, 14/14
   release-safety controls, system isolation, zero known Production dependency
   vulnerabilities, and a clean redacted 460-commit secret scan.
+- Passed 10/10 local Production-render visual checks across five active routes
+  at desktop and mobile sizes with no overflow, missing required copy,
+  prohibited claims, bare appraisal language, or console errors.
 - No Production deployment, database migration, lead creation, external send,
   WordPress change, social publication, DNS change, or NellySelly change was
   performed.

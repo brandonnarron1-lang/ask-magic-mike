@@ -61,12 +61,15 @@ offer-specific signals are summed once at the channel and command levels.
 The flight reuses retained, local Ask Magic Mike assets:
 
 - `/brand/black-diamond/hero-social-4x5.jpg` for the seller offer;
-- `/images/ask-magic-mike/brand-pack-v2/mike-action-explaining-clean.webp` for the buyer offer; and
-- `/images/ask-magic-mike/brand-pack-v2/mike-expression-friendly-clean.webp` for the renter offer.
+- `/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp` for the buyer offer; and
+- `/images/ask-magic-mike/mike-eatmon-headshot.webp` for the renter offer.
 
 These assets contain no consumer PII. The command center displays them as
 creative direction beside exact compliant copy; native-platform cropping,
 identity, property facts, and final copy still require human review.
+The buyer and renter cards deliberately use the higher-resolution retained
+portraits instead of the earlier 150–175 px derivatives found during rendered
+QA. No new likeness was generated.
 
 ## Operator workflow
 
@@ -93,15 +96,21 @@ Automated coverage proves:
 - exact source, medium, campaign, and offer-specific content values;
 - exact-once generic plus offer attribution;
 - retained local visual paths;
-- prohibited-claim and public-phone regression checks;
+- prohibited-claim, active Ask steering, and public-phone regression checks;
 - client-local clipboard behavior with no network mutation; and
 - continued test/suppressed-lead exclusion upstream.
 
-The final local release gate passes 196 test files / 2,793 tests, strict
+The final local release gate passes 196 test files / 2,794 tests, strict
 typecheck, ESLint, the optimized Next.js 15.5.21 Production build, 78-route
 manifest verification, 14/14 release-safety controls, Ask Magic Mike/NellySelly
 isolation, a Production dependency audit with no known vulnerabilities, and a
 redacted 460-commit secret scan with no findings.
+
+The fresh local Production-render run passes 10/10 desktop/mobile checks across
+the active home-value, Ask, embed, widget-preview, and protected owned-demand
+routes. It reports no overflow, missing required copy, prohibited claim, bare
+appraisal language, or console error. Analytics endpoints are mocked only in the
+visual harness to keep this acceptance read-only.
 
 No database migration is required.
 

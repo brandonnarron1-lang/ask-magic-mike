@@ -45,15 +45,20 @@ function Panel({ eyebrow, title, note, children }: {
 }
 
 function OfferFlightCard({ offer }: { offer: OwnedDemandOfferBrief }) {
+  const portraitClass = offer.key === "renter_plan"
+    ? "object-contain object-bottom transition duration-500 group-hover:scale-[1.02]"
+    : offer.key === "buyer_match"
+      ? "object-cover object-center transition duration-500 group-hover:scale-[1.02]"
+      : "object-cover object-top transition duration-500 group-hover:scale-[1.02]";
   return (
     <article className="group min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(150deg,#101010,#050505)]">
-      <div className="relative aspect-[16/10] overflow-hidden border-b border-white/10 bg-black">
+      <div className="relative aspect-[16/10] overflow-hidden border-b border-white/10 bg-[radial-gradient(circle_at_50%_35%,#282219_0%,#090909_54%,#000_100%)]">
         <Image
           src={offer.creativePath}
           alt={offer.creativeAlt}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-cover object-top transition duration-500 group-hover:scale-[1.02]"
+          className={portraitClass}
         />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_42%,rgba(0,0,0,.88))]" />
         <p className="absolute bottom-4 left-4 rounded-full border border-[#cda24a55] bg-black/75 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#f0cf79]">

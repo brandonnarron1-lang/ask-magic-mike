@@ -42,6 +42,15 @@ function retainedMarketingSource() {
   ].join("\n");
 }
 
+function activeAskSource() {
+  const repo = process.cwd();
+  return [
+    readFileSync(path.join(repo, "app/ask/page.tsx"), "utf8"),
+    readFileSync(path.join(repo, "app/components/black-diamond/AskMikeChatPanel.tsx"), "utf8"),
+    readFileSync(path.join(repo, "app/lib/constants.ts"), "utf8"),
+  ].join("\n");
+}
+
 function campaignAssetCopy() {
   return getAllCampaignAssets().flatMap(({ campaign }) => [
     campaign.name,
@@ -112,5 +121,12 @@ describe("campaign copy safety", () => {
       expect(url.searchParams.get("utm_medium")).toBeTruthy();
       expect(url.searchParams.get("utm_campaign")).toBeTruthy();
     }
+  });
+
+  it("keeps the active Ask flow on objective property criteria instead of steering prompts", () => {
+    const source = activeAskSource();
+    expect(source).not.toMatch(/\b(?:compare neighborhoods?|best neighborhoods?|school district|buyer demand|buyers looking for)\b/i);
+    expect(source).toContain("objective criteria you choose");
+    expect(source).toContain("compare properties using my stated needs");
   });
 });

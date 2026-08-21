@@ -19,12 +19,19 @@ Updated 2026-08-21.
   volume, tenure, valuation-error, demand, school-proxy, response-time,
   superlative, and direct-phone claims. Public copy preserves the current live
   office number `252-243-7700`; private routing numbers remain private.
-- Focused verification passes 6 files / 335 tests. The full local release gate
-  passes system isolation, 14/14 release-safety controls, 196 test files / 2,793
+- Hardened the active `/ask` interface and prompt set so it uses consumer-stated
+  objective criteria instead of neighborhood, school-proxy, or unverified
+  buyer-demand guidance.
+- Replaced two soft, undersized legacy offer portraits with higher-resolution
+  approved local Mike assets already in the canonical repository.
+- Focused verification passes 6 files / 336 tests. The full local release gate
+  passes system isolation, 14/14 release-safety controls, 196 test files / 2,794
   tests, strict typecheck, ESLint, the Next.js 15.5.21 Production build, and the
   78-route manifest. Production dependencies report no known vulnerabilities;
-  the redacted 460-commit history scan reports no secret leaks. Exact-head
-  protected Preview and desktop/mobile rendered QA remain in progress.
+  the redacted 460-commit history scan reports no secret leaks. Local
+  Production-render visual QA passes 10/10 desktop/mobile route checks with no
+  overflow, missing copy, prohibited claim, bare appraisal language, or console
+  error. Exact-head protected Preview verification remains in progress.
 - Production, WordPress, Neon, email, SMS, Push, social accounts, GBP, DNS, and
   NellySelly are unchanged by this candidate.
 - Exact release gate:

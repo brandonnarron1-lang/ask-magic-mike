@@ -7,8 +7,9 @@ All timestamps are America/New_York unless noted.
 
 ## Phase 9 campaign safety + owned-demand offer flight — 2026-08-21
 
-Status: local release gate complete; protected Preview visual verification is
-next. Production and external channels remain unchanged.
+Status: local release gate and local Production-render visual verification are
+complete; exact-head protected Preview verification is next. Production and
+external channels remain unchanged.
 
 - Reuse audit confirmed the canonical root `/admin/distribution`, Neon Growth
   loader, UTM builder, `/home-value`, `/buy`, `/rent`, and retained visual assets
@@ -23,9 +24,9 @@ next. Production and external channels remain unchanged.
   paths remain rejected.
 - Focused final command:
   `pnpm exec vitest run tests/compliance/value-copy.test.ts tests/compliance/campaign-copy-safety.test.ts tests/adminops/owned-demand-command.test.ts tests/admin/utm-link-builder.test.ts tests/brand/marketing-system.test.ts tests/compliance/public-distribution.test.ts`
-  — PASS, 6 files / 335 tests.
+  — PASS, 6 files / 336 tests.
 - `pnpm release:gate` — PASS: Ask Magic Mike/NellySelly isolation, 14/14
-  release-safety controls, 196 test files / 2,793 tests, strict typecheck,
+  release-safety controls, 196 test files / 2,794 tests, strict typecheck,
   ESLint, optimized Next.js 15.5.21 Production build, and 78-route manifest.
 - `pnpm typecheck` — PASS.
 - `git diff --check` — PASS.
@@ -41,12 +42,27 @@ next. Production and external channels remain unchanged.
   canonical routes/UTMs, retained local imagery, no prohibited campaign claims,
   current public office number retained, test/suppressed SQL exclusions, and
   local clipboard controls with no fetch, form, server action, or provider call.
+- Active `/ask` rendered and source-level checks reject neighborhood, school,
+  and buyer-demand steering language while requiring objective consumer-stated
+  comparison criteria.
+- `scripts/qa/visual-smoke.mjs` against a fresh local Production build — PASS,
+  10/10 checks across `/home-value`, `/ask`, `/embed/ask`, `/widget-preview`, and
+  authenticated `/admin/distribution` at desktop and mobile sizes. Every check
+  returned 200 with no horizontal overflow, missing required copy, forbidden
+  claim, bare appraisal language, or console error. The harness intercepted only
+  `/api/events` and `/api/experiments/event` with local 204 responses so this
+  rendered acceptance remained read-only. Evidence is under the gitignored
+  `artifacts/phase9-campaign-safety-20260821/` directory.
+- Visual inspection confirmed the active funnels remain clear and mobile-first;
+  the protected three-offer command uses the existing high-resolution approved
+  Mike portraits instead of the soft 150–175 px legacy derivatives.
 - No lead, email, BCC, consumer acknowledgment, SMS, Push notification, social
   post, GBP post, WordPress update, Neon write, DNS change, Vercel Production
   deployment, or NellySelly change occurred.
 
-Protected exact-head Preview deployment and desktop/mobile rendered QA remain
-to be recorded before this candidate is release-ready.
+Protected exact-head Preview deployment and read-only public-route proof remain
+to be recorded before this candidate is release-ready. Authenticated Preview
+inspection remains optional owner acceptance and will not be bypassed.
 
 ## Phase 7 completion gap closure — 2026-08-16
 
