@@ -24,6 +24,8 @@ All timestamps are America/New_York unless noted.
 - `pnpm run routes:verify`: PASS — optimized Next.js 15.5.21 build and 83 active
   routes / 17 acknowledged duplicates.
 - `pnpm audit --prod`: PASS — no known Production dependency vulnerability.
+- `gitleaks git --redact --no-banner`: PASS — 480 commits / approximately
+  13.64 MB scanned with no leak.
 - Mobile Playwright at 390×844: PASS — valid install instructions, token-free
   post-claim URL, HttpOnly SameSite=Strict local session, Brandon-copy-only
   setup, invalid/expired fallback, and zero console errors. Local HTTP correctly
@@ -31,8 +33,8 @@ All timestamps are America/New_York unless noted.
   controls were not activated.
 - No subscription, Push, lead, email, SMS, analytics conversion, database write,
   Production deployment, WordPress action, publication, or provider call was
-  made. Exact Node 24 CI, protected Vercel Preview, and secret-scan evidence are
-  still pending for the refreshed Draft head.
+  made. Exact Node 24 CI and protected Vercel Preview evidence are still pending
+  for the refreshed Draft head.
 
 ## Phase 9 WordPress owned-traffic consolidation — 2026-08-21
 

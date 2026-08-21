@@ -26,7 +26,8 @@ Updated 2026-08-21.
 - Focused verification passes 6 files / 38 tests. The full local candidate
   passes 211 files / 2,920 tests, strict typecheck, ESLint, 14/14 safety,
   Ask/NellySelly isolation, optimized build, 83-route verification, and
-  Production dependency audit. Mobile browser acceptance passes the valid,
+  Production dependency audit. A redacted 480-commit full-history scan reports
+  no secret leak. Mobile browser acceptance passes the valid,
   invalid, and clean-URL session states with no console error and no external
   send or subscription write.
 - Exact Node 24 GitHub CI and protected canonical Preview acceptance remain

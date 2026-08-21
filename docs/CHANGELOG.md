@@ -22,6 +22,8 @@
 - Local verification passes 211 test files / 2,920 tests, strict typecheck,
   ESLint, 14/14 release safety, system isolation, the optimized Next.js 15.5.21
   build, the 83-route manifest, and the Production dependency audit.
+- A redacted full-history secret scan covers 480 commits / approximately
+  13.64 MB with no leak.
 - Mobile Playwright acceptance passes valid install, clean-URL claim, HttpOnly
   SameSite=Strict session, copy-only setup, invalid-token fallback, and zero
   browser errors without registering a device or sending Push.
