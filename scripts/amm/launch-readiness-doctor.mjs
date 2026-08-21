@@ -41,6 +41,17 @@ export function collectFiles(dir, exts = [".ts", ".tsx"]) {
   return results;
 }
 
+/**
+ * Collect the source trees that can ship in the current Next.js build.
+ *
+ * The canonical application lives in root app/. The older src/ tree remains
+ * in the repository for shared modules and rollback compatibility, so release
+ * safety checks must inspect both trees instead of silently trusting one.
+ */
+export function collectDeployableFiles(root, exts = [".ts", ".tsx"]) {
+  return ["app", "src"].flatMap((dir) => collectFiles(join(root, dir), exts));
+}
+
 /** Return file contents as a string, or empty string if not found. */
 export function readFileSafe(path) {
   try {
@@ -128,7 +139,7 @@ export function findNoveltyCopy(files) {
  * Admin-only files are excluded since MLS data can be imported there.
  */
 export const MLS_PATTERN =
-  /\b(?:MATRIX|flexmls|rets\b|idx_feed|mls_number|mls_id|IDX_PIN|RETS_URL)\b/i;
+  /\b(?:matrix\s+mls|mls\s+matrix|flexmls|rets|idx_feed|mls_number|mls_id|idx_pin|rets_url)\b/i;
 
 export const MLS_ALLOWLIST = [
   "(admin)",
@@ -191,6 +202,28 @@ export function findStaleVercelUrlsInDocs(docPaths) {
  */
 export const CANONICAL_DOMAIN = "askmagicmike.com";
 
+/** Latest database-bearing Production releases the launch controls must know. */
+export const PRODUCTION_BASELINE_PRS = [180, 181];
+
+/**
+ * Production lead-pipe variables whose values must be verified in the hosting
+ * secret interface or protected health surface. Only names are inspected here.
+ */
+export const PRODUCTION_REQUIRED_ENV_NAMES = [
+  "DATABASE_URL",
+  "DATABASE_ENV",
+  "BETTER_AUTH_URL",
+  "BETTER_AUTH_SECRET",
+  "LEAD_CENTER_RBAC_ENABLED",
+  "ADMIN_SECRET",
+  "NEXT_PUBLIC_SITE_URL",
+  "NEXT_PUBLIC_AGENT_LICENSE",
+  "LEAD_NOTIFICATION_TO",
+  "LEAD_NOTIFICATION_BCC",
+  "EMAIL_PROVIDER",
+  "EMAIL_ENABLED",
+];
+
 export function checkCanonicalSiteConfig(siteConfigPath) {
   const content = readFileSafe(siteConfigPath);
   if (!content) return { ok: false, reason: "site-config.ts not found" };
@@ -219,9 +252,7 @@ if (isMain) {
   const DOCS = join(ROOT, "docs");
   const SCRIPTS = join(ROOT, "scripts");
 
-  const appFiles = collectFiles(join(ROOT, "app"), [".ts", ".tsx"]);
-  const srcFiles = collectFiles(SRC, [".ts", ".tsx"]);
-  const deployableFiles = [...appFiles, ...srcFiles];
+  const deployableFiles = collectDeployableFiles(ROOT);
 
   let passCount = 0;
   let failCount = 0;
@@ -268,14 +299,15 @@ if (isMain) {
   console.log("\n[Required docs]");
   const requiredDocs = [
     ["docs/PRODUCTION_LAUNCH_GATE.md", "Pre-launch checklist"],
-    ["docs/CONTROLLED_LAUNCH_RUNBOOK.md", "Owner action runbook"],
-    ["docs/LAUNCH_CANDIDATE_3_FINAL_GATE.md", "Final gate audit"],
+    ["docs/CURRENT_STATE_RECONCILIATION.md", "Current-state reconciliation"],
+    ["docs/CONTROLLED_TRAFFIC_ACTIVATION.md", "Controlled traffic runbook"],
     ["docs/KNOWN_BLOCKERS.md", "Known blockers"],
     ["docs/PRODUCTION_RELEASE_LOG.md", "Release log"],
     ["docs/ADMIN_OPERATIONS_GUIDE.md", "Admin ops guide"],
     ["docs/regency-wordpress-handoff.md", "WordPress handoff"],
-    ["docs/OWNER_ACTION_PROOF_PACK.md", "Owner proof pack"],
-    ["docs/PRODUCTION_DEPLOY_REHEARSAL.md", "Deploy rehearsal checklist"],
+    ["docs/GO_LIVE_RUNBOOK.md", "Go-live runbook"],
+    ["docs/OWNER_ACTIONS_REMAINING.md", "Owner action register"],
+    ["docs/ROLLBACK_PLAN.md", "Rollback plan"],
   ];
   for (const [rel, label] of requiredDocs) {
     if (existsSync(join(ROOT, rel))) {
@@ -288,7 +320,7 @@ if (isMain) {
   // ── Release log currency check ───────────────────────────────────────────
   console.log("\n[Release log currency]");
   const releaseLogPath = join(ROOT, "docs/PRODUCTION_RELEASE_LOG.md");
-  for (const prNum of [136]) {
+  for (const prNum of PRODUCTION_BASELINE_PRS) {
     const logResult = releaseLogMentionsPr(releaseLogPath, prNum);
     if (logResult.ok) {
       pass(`release log mentions PR #${prNum}`);
@@ -300,9 +332,10 @@ if (isMain) {
   // ── Stale vercel.app URLs in new operational docs ────────────────────────
   console.log("\n[Stale vercel.app URLs in operational docs]");
   const operationalDocs = [
-    join(ROOT, "docs/CONTROLLED_LAUNCH_RUNBOOK.md"),
-    join(ROOT, "docs/OWNER_ACTION_PROOF_PACK.md"),
-    join(ROOT, "docs/PRODUCTION_DEPLOY_REHEARSAL.md"),
+    join(ROOT, "docs/CURRENT_STATE_RECONCILIATION.md"),
+    join(ROOT, "docs/CONTROLLED_TRAFFIC_ACTIVATION.md"),
+    join(ROOT, "docs/GO_LIVE_RUNBOOK.md"),
+    join(ROOT, "docs/OWNER_ACTIONS_REMAINING.md"),
   ].filter(existsSync);
   const staleDocUrls = findStaleVercelUrlsInDocs(operationalDocs);
   if (staleDocUrls.length === 0) {
@@ -314,8 +347,8 @@ if (isMain) {
     );
   }
 
-  // ── Stale vercel.app URLs in src/ ────────────────────────────────────────
-  console.log("\n[Stale vercel.app URLs in src/]");
+  // ── Stale vercel.app URLs in deployable source ───────────────────────────
+  console.log("\n[Stale vercel.app URLs in app/ and src/]");
   const staleUrls = findStaleVercelUrls(deployableFiles);
   if (staleUrls.length === 0) {
     pass("no stale vercel.app URLs in deployable app/ or src/");
@@ -330,7 +363,7 @@ if (isMain) {
   console.log("\n[Prohibited red-* UI tokens]");
   const redTokens = findRedTokens(deployableFiles);
   if (redTokens.length === 0) {
-    pass("no prohibited red-* tokens in src/");
+    pass("no prohibited red-* tokens in deployable app/ or src/");
   } else {
     fail(
       `red-* tokens found in ${redTokens.length} file(s)`,
@@ -342,7 +375,7 @@ if (isMain) {
   console.log("\n[Novelty genie/lamp copy]");
   const novelty = findNoveltyCopy(deployableFiles);
   if (novelty.length === 0) {
-    pass("no prohibited genie/lamp copy in src/");
+    pass("no prohibited genie/lamp copy in deployable app/ or src/");
   } else {
     fail(
       `genie/lamp copy found in ${novelty.length} file(s)`,
@@ -351,10 +384,10 @@ if (isMain) {
   }
 
   // ── MLS/FlexMLS markers in public source ─────────────────────────────────
-  console.log("\n[MLS/FlexMLS confidential markers in public src/]");
+  console.log("\n[MLS/FlexMLS confidential markers in deployable source]");
   const mlsHits = findMlsMarkers(deployableFiles);
   if (mlsHits.length === 0) {
-    pass("no MLS/FlexMLS markers in public src/");
+    pass("no MLS/FlexMLS markers in deployable app/ or src/");
   } else {
     fail(
       `MLS markers found in ${mlsHits.length} file(s)`,
@@ -390,19 +423,7 @@ if (isMain) {
 
   // ── Owner-gated environment variable check ───────────────────────────────
   console.log("\n[Owner-gated env var checks (production — not verifiable here)]");
-  const requiredProdVars = [
-    "DATABASE_URL",
-    "ADMIN_SECRET",
-    "NEXT_PUBLIC_SITE_URL",
-    "DATABASE_ENV",
-    "PHONE_SETUP_SIGNING_SECRET",
-    "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
-    "VAPID_PRIVATE_KEY",
-    "VAPID_SUBJECT",
-    "LEAD_NOTIFICATION_TO",
-    "LEAD_NOTIFICATION_BCC",
-  ];
-  for (const v of requiredProdVars) {
+  for (const v of PRODUCTION_REQUIRED_ENV_NAMES) {
     if (process.env[v]) {
       pass(`env var present locally: ${v}`);
     } else {

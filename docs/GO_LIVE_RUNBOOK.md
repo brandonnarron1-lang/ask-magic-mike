@@ -1,6 +1,6 @@
 # Production Release and Go-Live Runbook
 
-Updated 2026-08-20. The public funnel is live. Use this runbook for incremental,
+Updated 2026-08-21. The public funnel is live. Use this runbook for incremental,
 reversible releases and controlled owned-traffic activation.
 
 ## Before merge
@@ -56,38 +56,28 @@ When the change touches capture, routing, email, push, SMS, or sequences:
 5. Never contact a genuine WordPress-only entry whose purpose or consent is
    unclear; preserve it for BIC review.
 
-## Current Phase 9 release sequence
+## Current Phase 9 release state
 
-Release only one approved PR at a time and verify Production before advancing:
+The database-bearing release sequence is complete:
 
 1. `#180` — outcome-ledger lifecycle seam: complete at merge commit
    `42f80b209d5d5adc984c1d8b439c7fa830d015e6`, Production deployment
    `dpl_2PQoDZLHc562SBEY7px91CAEUrin`;
-2. `#181` — first-human-response intelligence: next candidate, not yet migrated,
-   merged, or deployed; and
-3. refresh every remaining open feature PR on the resulting `main` before
-   selecting another release. Do not preserve an old queue order when its base,
-   scope, or proof has become stale.
+2. `#181` — first-human-response intelligence: complete at merge commit
+   `5335697edf31eed0b8a38cd0295a4f5e7d501a3e`, Production deployment
+   `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`, with migration `20260820013000` applied
+   exactly once and independently postflight-verified; and
+3. the validated mode-600 PR #180 and PR #181 backups remain retained. Do not
+   delete them as routine cleanup.
 
-PR #181 uses:
+PR #179 is the only existing open product PR. It is refreshed on the PR #181
+baseline with green Node 24 CI and a protected Ready Preview. It still requires
+its own exact merge/deploy approval. Physical iPhone enrollment and a `[TEST]`
+push are separate device/send gates.
 
-```text
-pnpm run phase9:first-response:cutover -- --plan
-pnpm run phase9:first-response:cutover -- --preflight
-pnpm run phase9:first-response:cutover -- --execute
-pnpm run phase9:first-response:cutover -- --verify
-```
-
-Enter the unpooled owner connection only through the secure environment; never
-place it in chat, a command argument, a report, or a committed file. `--execute`
-must fail unless the exact release-specific approval phrase is present. Retain
-the validated mode-600 backup until the exact application deployment and
-authenticated checks pass.
-
-Each item retains its own exact approval phrase. Refresh any downstream branch
-after the preceding Production merge, rerun Node 24 CI and Vercel Preview, and do
-not treat this ordering as authorization to merge, deploy, publish, send, or
-mutate data.
+Every new branch must start from current `main`, prove Node 24 CI and Preview,
+and retain an exact release-specific gate. Do not treat completion of #180/#181
+as authorization to merge, deploy, publish, send, or mutate another system.
 
 ## Owned-traffic activation
 

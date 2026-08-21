@@ -1,8 +1,30 @@
 # Implementation Status
 
-Updated 2026-08-20.
+Updated 2026-08-21.
 
-## Phase 9 first-human-response intelligence — 2026-08-20
+## Phase 9 first-human-response intelligence — Production 2026-08-21
+
+- PR #181 is merged at
+  `5335697edf31eed0b8a38cd0295a4f5e7d501a3e` and is live on Vercel deployment
+  `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM` (`READY`). The exact Git commit has a
+  successful Vercel status.
+- Canonical Neon migration `20260820013000` is applied exactly once on
+  Production branch `br-round-base-auh6h2wd`. Its immutable source SHA is
+  `c364c8cc33428a187bcbcf2bdfcc142f3bc0422410911076abf04307bf28459e`.
+- Database postflight reverified table, RLS, functions, roles, privileges, and
+  migration ledger. Lead/audit counts remain 6/9, all six leads are suppressed
+  QA records, and zero historical response backfills were expected or created.
+- Canonical monitor passed 9/9; apex redirects 308 to `www`; public funnel and
+  health routes return 200; anonymous Lead Center routes remain closed; no
+  Vercel error events were found in the inspected post-release window.
+- The pre-cutover custom backup remains retained with mode 600, validated
+  restore contents, and SHA-256
+  `3627b72108d59a56fc937a6b1306706df14a08ae3439a5c52e8b13141e9bc05f`.
+- No lead, email, SMS, push, WordPress publication, or consumer acknowledgment
+  was created by the release. Authenticated visual acceptance of `/admin/growth`
+  remains pending a fresh operator login; authentication will not be bypassed.
+
+### Candidate history retained below
 
 - Reuse-first audit proved that mutable `last_contacted_at` cannot support the
   required median/P75/P90 first-human-response KPI.
@@ -60,10 +82,8 @@ Updated 2026-08-20.
   `ep-proud-bonus-autwv60g`. All prerequisite, schema, role, privilege, source
   baseline, and target-absence checks are true; 6 leads and 9 audit rows remain
   untouched, with 0 eligible historical response backfills.
-- No PR #181 Production database mutation, merge, message, WordPress change,
-  DNS change, environment change, or Production deployment has occurred. The
-  remaining gates are separately approved migration/merge/deploy plus
-  authenticated post-release acceptance.
+- The statements below describe pre-release candidate evidence. They are
+  retained for traceability and are superseded by the Production result above.
 
 ## Phase 9 operating-intelligence outcome seam — 2026-08-19
 

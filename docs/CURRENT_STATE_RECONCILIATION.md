@@ -1,6 +1,6 @@
 # Current State Reconciliation
 
-Audited 2026-08-19. This document overrides older status claims when they
+Audited 2026-08-21. This document overrides older status claims when they
 conflict with observed Production, authenticated accounts, current `main`, or
 provider/database state.
 
@@ -8,8 +8,8 @@ provider/database state.
 
 | Asset | Evidence | Status |
 | --- | --- | --- |
-| GitHub | `brandonnarron1-lang/ask-magic-mike`; `main` at `1c9c4eedae4de3d993def32dc6d646c1be2908ca` | VERIFIED LIVE |
-| Vercel | `eyes-up-industries/ask-magic-mike`; project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; deployment `dpl_BCrmEB67TZDbJ9ihyLvsQkP5deD6` | VERIFIED LIVE |
+| GitHub | `brandonnarron1-lang/ask-magic-mike`; `main` at `5335697edf31eed0b8a38cd0295a4f5e7d501a3e` | VERIFIED LIVE |
+| Vercel | `eyes-up-industries/ask-magic-mike`; project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; deployment `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM` | VERIFIED LIVE |
 | Public host | `https://www.askmagicmike.com`; apex redirects 308 | VERIFIED LIVE |
 | Database | Neon `bitter-star-20214385`; Production branch `br-round-base-auh6h2wd` | VERIFIED LIVE |
 | Brokerage/SEO | `https://www.ourtownproperties.com` WordPress | VERIFIED LIVE |
@@ -18,7 +18,7 @@ provider/database state.
 | Free phone alerts | VAPID Web Push schema/provider/phone setup ready; physical device acceptance remains owner-scoped | READY — OWNER ACTIVATION |
 | NellySelly | Separate repository, project, domains, database, and environment | VERIFIED ISOLATED |
 
-Observed 2026-08-19 public evidence: `/`, `/ask`, `/home-value`, `/buy`,
+Observed 2026-08-21 public evidence: `/`, `/ask`, `/home-value`, `/buy`,
 `/api/health/live`, and `/api/health/ready` return 200. Live health reports Neon,
 Production notification mode, and email enabled. Readiness reports capture,
 lead, notification, RBAC, Push subscription/provider, and phone-setup readiness.
@@ -60,14 +60,23 @@ warranted.
 7. Internal email is active; consumer acknowledgment, nurture, automatic send,
    carrier SMS, and external publication remain independent gates.
 
-## Open release work
+## Release state
 
 | PR | Disposition | Gate |
 | --- | --- | --- |
-| #170 owned-demand command | Clean, mergeable, green Preview/CI | `APPROVE PHASE 9.1 OWNED DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT` |
-| #177 commercial-email compliance | Draft, clean, mergeable, green Preview/CI | `APPROVE PHASE 9 COMMERCIAL EMAIL COMPLIANCE MERGE AND PRODUCTION DEPLOYMENT` |
-| #173 review planner | Clean, mergeable, green Preview/CI | `APPROVE PHASE 9.4 REVIEW PLANNER MERGE AND PRODUCTION DEPLOYMENT` |
-| #172 database revival command | Draft and conflicting; preserve until prior sequence completes, then refresh | `APPROVE PHASE 9.3 DATABASE REVIVAL COMMAND MERGE AND PRODUCTION DEPLOYMENT` after refresh |
+| #170 owned-demand command | MERGED / PRODUCTION | Complete; do not rebuild |
+| #172 database revival command | MERGED / PRODUCTION | Complete; do not rebuild |
+| #173 review planner | MERGED / PRODUCTION | Complete; do not rebuild |
+| #177 commercial-email compliance | MERGED / PRODUCTION | Complete; do not rebuild |
+| #178 canonical operations reconciliation | MERGED / PRODUCTION | Complete; current docs supersede historical LC-7 packets |
+| #180 outcome ledger | MERGED / PRODUCTION | Complete at `42f80b209d5d5adc984c1d8b439c7fa830d015e6` |
+| #181 first-human-response intelligence | MERGED / PRODUCTION | Complete at `5335697edf31eed0b8a38cd0295a4f5e7d501a3e` |
+| #179 iOS phone-alert install handoff | OPEN / REFRESHED | Separate gate: `APPROVE IOS PHONE ALERT INSTALL HANDOFF MERGE AND PRODUCTION DEPLOYMENT` |
+
+PR #179 is refreshed at `d11176ece6affea5c72543ea01db627d7b52f7f2`
+with green Node 24 CI and a protected Ready Preview. Physical iPhone enrollment
+and a test push remain separate user/device actions; they are not implied by a
+code merge.
 
 PRs #119, #120, #121, and #92 predate the current consolidation. They are
 `ARCHIVE AFTER REVIEW`; none should merge without a fresh requirement/diff audit.

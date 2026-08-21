@@ -1,5 +1,10 @@
 # Production Deploy Rehearsal — Ask Magic Mike
 
+> **Historical reference — do not execute as the current rehearsal.** This
+> packet predates the Neon and Better Auth/RBAC cutovers and contains retired
+> Supabase-era steps. Use `CONTROLLED_TRAFFIC_ACTIVATION.md`,
+> `GO_LIVE_RUNBOOK.md`, and `OWNER_ACTIONS_REMAINING.md` for current operations.
+
 **Version:** LC-7 (post-merge-train #44–#52)  
 **Code state:** `main` @ `815a33a` — authority packet complete  
 **Audience:** Brandon Narron (operator)  

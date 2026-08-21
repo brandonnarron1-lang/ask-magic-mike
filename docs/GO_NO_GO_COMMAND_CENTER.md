@@ -1,5 +1,11 @@
 # Go / No-Go Command Center — Ask Magic Mike
 
+> **Historical reference — not the current authority decision.** This LC-7
+> snapshot predates the Neon and Better Auth/RBAC Production cutovers. Use
+> `CONTROLLED_TRAFFIC_ACTIVATION.md`, `GO_LIVE_RUNBOOK.md`, and
+> `OWNER_ACTIONS_REMAINING.md` for current operations; use the executable
+> `amm:launch:authority` report for current code-level checks.
+
 **Version:** LC-7 (post-merge-train #44–#52)  
 **Code state:** `main` @ `815a33a` — authority packet complete  
 **Launch authority script:** `npm run amm:launch:authority`  

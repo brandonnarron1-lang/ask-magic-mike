@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   collectFiles,
+  collectDeployableFiles,
   readFileSafe,
   findStaleVercelUrls,
   findRedTokens,
@@ -17,6 +18,8 @@ import {
   MLS_PATTERN,
   MLS_ALLOWLIST,
   CANONICAL_DOMAIN,
+  PRODUCTION_BASELINE_PRS,
+  PRODUCTION_REQUIRED_ENV_NAMES,
 } from "../../scripts/amm/launch-readiness-doctor.mjs";
 
 // ---------------------------------------------------------------------------
@@ -49,6 +52,23 @@ describe("collectFiles", () => {
     for (const f of files) {
       expect(f.endsWith(".ts") || f.endsWith(".tsx")).toBe(true);
     }
+  });
+});
+
+describe("collectDeployableFiles", () => {
+  it("collects both the canonical app tree and shared src tree", () => {
+    const files = collectDeployableFiles(process.cwd());
+    expect(files.some((file) => file.endsWith("/app/page.tsx"))).toBe(true);
+    expect(files.some((file) => file.endsWith("/src/lib/site-config.ts"))).toBe(true);
+  });
+});
+
+describe("PRODUCTION_REQUIRED_ENV_NAMES", () => {
+  it("tracks canonical Neon, Better Auth, and email variables", () => {
+    expect(PRODUCTION_REQUIRED_ENV_NAMES).toContain("DATABASE_URL");
+    expect(PRODUCTION_REQUIRED_ENV_NAMES).toContain("BETTER_AUTH_SECRET");
+    expect(PRODUCTION_REQUIRED_ENV_NAMES).toContain("LEAD_NOTIFICATION_BCC");
+    expect(PRODUCTION_REQUIRED_ENV_NAMES).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
   });
 });
 
@@ -226,8 +246,13 @@ describe("findNoveltyCopy", () => {
 // ---------------------------------------------------------------------------
 
 describe("MLS_PATTERN", () => {
-  it("matches MATRIX (MLS identifier)", () => {
-    expect(MLS_PATTERN.test("MATRIX listing 1234")).toBe(true);
+  it("matches Matrix MLS and MLS Matrix product references", () => {
+    expect(MLS_PATTERN.test("Matrix MLS listing 1234")).toBe(true);
+    expect(MLS_PATTERN.test("MLS Matrix export")).toBe(true);
+  });
+
+  it("does not match the generic word matrix", () => {
+    expect(MLS_PATTERN.test("form-readiness matrix")).toBe(false);
   });
 
   it("matches flexmls", () => {
@@ -267,6 +292,20 @@ describe("findMlsMarkers", () => {
     const path = "/tmp/test-mls-comment-only.ts";
     writeFileSync(path, "/** FlexMLS remains upstream. */\n// Never expose MLS data.\nexport const ok = true;");
     expect(findMlsMarkers([path])).not.toContain(path);
+  });
+
+  it("does not flag a harmless application readiness matrix", () => {
+    const { writeFileSync } = require("fs");
+    const path = "/tmp/test-generic-matrix-public.ts";
+    writeFileSync(path, "export const description = 'form-readiness matrix'");
+    expect(findMlsMarkers([path])).not.toContain(path);
+  });
+
+  it("flags an actual Matrix MLS reference in public source", () => {
+    const { writeFileSync } = require("fs");
+    const path = "/tmp/test-matrix-mls-public.ts";
+    writeFileSync(path, "export const source = 'Matrix MLS'");
+    expect(findMlsMarkers([path])).toContain(path);
   });
 
   it("MLS_ALLOWLIST contains expected paths", () => {
@@ -350,7 +389,9 @@ describe("releaseLogMentionsPr", () => {
 
   it("correctly checks the actual release log for the current production baseline", () => {
     const logPath = process.cwd() + "/docs/PRODUCTION_RELEASE_LOG.md";
-    expect(releaseLogMentionsPr(logPath, 136).ok).toBe(true);
+    for (const prNumber of PRODUCTION_BASELINE_PRS) {
+      expect(releaseLogMentionsPr(logPath, prNumber).ok).toBe(true);
+    }
   });
 });
 

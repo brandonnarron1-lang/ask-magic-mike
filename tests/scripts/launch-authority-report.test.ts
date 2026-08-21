@@ -66,20 +66,20 @@ describe("authority status constants", () => {
 // ---------------------------------------------------------------------------
 
 describe("REQUIRED_AUTHORITY_DOCS", () => {
-  it("includes GO_NO_GO_COMMAND_CENTER.md", () => {
-    expect(REQUIRED_AUTHORITY_DOCS).toContain("docs/GO_NO_GO_COMMAND_CENTER.md");
+  it("includes the current state reconciliation", () => {
+    expect(REQUIRED_AUTHORITY_DOCS).toContain("docs/CURRENT_STATE_RECONCILIATION.md");
   });
 
-  it("includes CONTROLLED_LAUNCH_RUNBOOK.md", () => {
-    expect(REQUIRED_AUTHORITY_DOCS).toContain("docs/CONTROLLED_LAUNCH_RUNBOOK.md");
+  it("includes the current controlled traffic runbook", () => {
+    expect(REQUIRED_AUTHORITY_DOCS).toContain("docs/CONTROLLED_TRAFFIC_ACTIVATION.md");
   });
 
-  it("includes OWNER_ACTION_PROOF_PACK.md", () => {
-    expect(REQUIRED_AUTHORITY_DOCS).toContain("docs/OWNER_ACTION_PROOF_PACK.md");
+  it("includes the current go-live runbook", () => {
+    expect(REQUIRED_AUTHORITY_DOCS).toContain("docs/GO_LIVE_RUNBOOK.md");
   });
 
-  it("includes PRODUCTION_DEPLOY_REHEARSAL.md", () => {
-    expect(REQUIRED_AUTHORITY_DOCS).toContain("docs/PRODUCTION_DEPLOY_REHEARSAL.md");
+  it("includes the current owner-action register", () => {
+    expect(REQUIRED_AUTHORITY_DOCS).toContain("docs/OWNER_ACTIONS_REMAINING.md");
   });
 
   it("includes PRODUCTION_RELEASE_LOG.md", () => {
@@ -110,10 +110,10 @@ describe("findMissingAuthorityDocs", () => {
     const { writeFileSync, mkdirSync } = require("fs");
     const tmpRoot = "/tmp/test-authority-docs";
     mkdirSync(`${tmpRoot}/docs`, { recursive: true });
-    writeFileSync(`${tmpRoot}/docs/CONTROLLED_LAUNCH_RUNBOOK.md`, "content");
+    writeFileSync(`${tmpRoot}/docs/CONTROLLED_TRAFFIC_ACTIVATION.md`, "content");
     const missing = findMissingAuthorityDocs(tmpRoot);
-    expect(missing).not.toContain("docs/CONTROLLED_LAUNCH_RUNBOOK.md");
-    expect(missing).toContain("docs/GO_NO_GO_COMMAND_CENTER.md");
+    expect(missing).not.toContain("docs/CONTROLLED_TRAFFIC_ACTIVATION.md");
+    expect(missing).toContain("docs/GO_LIVE_RUNBOOK.md");
   });
 });
 
@@ -163,11 +163,19 @@ describe("findMissingPackageScripts", () => {
 
 describe("OWNER_GATED_VARS", () => {
   it("includes all critical production env var names", () => {
-    expect(OWNER_GATED_VARS).toContain("NEXT_PUBLIC_SUPABASE_URL");
-    expect(OWNER_GATED_VARS).toContain("SUPABASE_SERVICE_ROLE_KEY");
+    expect(OWNER_GATED_VARS).toContain("DATABASE_URL");
+    expect(OWNER_GATED_VARS).toContain("DATABASE_ENV");
+    expect(OWNER_GATED_VARS).toContain("BETTER_AUTH_URL");
+    expect(OWNER_GATED_VARS).toContain("BETTER_AUTH_SECRET");
+    expect(OWNER_GATED_VARS).toContain("LEAD_CENTER_RBAC_ENABLED");
     expect(OWNER_GATED_VARS).toContain("ADMIN_SECRET");
     expect(OWNER_GATED_VARS).toContain("NEXT_PUBLIC_SITE_URL");
     expect(OWNER_GATED_VARS).toContain("NEXT_PUBLIC_AGENT_LICENSE");
+    expect(OWNER_GATED_VARS).toContain("LEAD_NOTIFICATION_TO");
+    expect(OWNER_GATED_VARS).toContain("LEAD_NOTIFICATION_BCC");
+    expect(OWNER_GATED_VARS).toContain("EMAIL_PROVIDER");
+    expect(OWNER_GATED_VARS).toContain("EMAIL_ENABLED");
+    expect(OWNER_GATED_VARS).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
   });
 
   it("does not include any var with a value embedded", () => {
@@ -206,23 +214,20 @@ describe("findMissingEnvVars", () => {
 
   it("OWNER_GATED_VARS are all missing in local test environment (expected)", () => {
     const missingInTest = findMissingEnvVars(OWNER_GATED_VARS);
-    // In the local test environment without prod secrets, all 6 should be missing
+    // In the local test environment without prod secrets, owner-gated values are missing.
     // This confirms the SKIP_OWNER behavior is correct
     expect(missingInTest.length).toBeGreaterThan(0);
   });
 });
 
 // ---------------------------------------------------------------------------
-// PR #51 release log check
+// Current production release-log check
 // ---------------------------------------------------------------------------
 
-describe("PR #51 in release log", () => {
-  it("release log contains PR #51 entry", () => {
+describe("current Production baseline in release log", () => {
+  it("release log contains PR #181 entry", () => {
     const { releaseLogMentionsPr } = require("../../scripts/amm/launch-readiness-doctor.mjs");
     const logPath = process.cwd() + "/docs/PRODUCTION_RELEASE_LOG.md";
-    const result = releaseLogMentionsPr(logPath, 51);
-    // PR #51 entry is added in LC-6 — will pass once this sprint lands
-    // For now, we verify the function works correctly
-    expect(typeof result.ok).toBe("boolean");
+    expect(releaseLogMentionsPr(logPath, 181).ok).toBe(true);
   });
 });

@@ -4,7 +4,7 @@
  *
  * Read-only Go/No-Go authority report for Ask Magic Mike.
  * Imports pure helpers from launch-readiness-doctor.mjs and adds
- * authority-specific checks (PR #51 in release log, new cockpit docs).
+ * authority-specific checks for the current Production baseline and cockpit.
  *
  * No network calls. No secrets read. No .env files read.
  * No production mutations.
@@ -29,7 +29,7 @@ import { fileURLToPath } from "url";
 
 import {
   readFileSafe,
-  collectFiles,
+  collectDeployableFiles,
   findStaleVercelUrls,
   findRedTokens,
   findNoveltyCopy,
@@ -37,6 +37,8 @@ import {
   checkCanonicalSiteConfig,
   releaseLogMentionsPr,
   findStaleVercelUrlsInDocs,
+  PRODUCTION_BASELINE_PRS,
+  PRODUCTION_REQUIRED_ENV_NAMES,
 } from "./launch-readiness-doctor.mjs";
 
 // ---------------------------------------------------------------------------
@@ -48,23 +50,16 @@ export const AUTHORITY_NOT_GO_OWNER = "NOT_GO_OWNER_ACTION_REQUIRED";
 export const AUTHORITY_NOT_GO_FAIL = "NOT_GO_FAILING_CHECKS";
 
 export const REQUIRED_AUTHORITY_DOCS = [
-  "docs/CONTROLLED_LAUNCH_RUNBOOK.md",
-  "docs/OWNER_ACTION_PROOF_PACK.md",
-  "docs/PRODUCTION_DEPLOY_REHEARSAL.md",
-  "docs/GO_NO_GO_COMMAND_CENTER.md",
+  "docs/CURRENT_STATE_RECONCILIATION.md",
+  "docs/CONTROLLED_TRAFFIC_ACTIVATION.md",
+  "docs/GO_LIVE_RUNBOOK.md",
+  "docs/OWNER_ACTIONS_REMAINING.md",
   "docs/KNOWN_BLOCKERS.md",
   "docs/PRODUCTION_RELEASE_LOG.md",
   "docs/PRODUCTION_LAUNCH_GATE.md",
 ];
 
-export const OWNER_GATED_VARS = [
-  "NEXT_PUBLIC_SUPABASE_URL",
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-  "SUPABASE_SERVICE_ROLE_KEY",
-  "ADMIN_SECRET",
-  "NEXT_PUBLIC_SITE_URL",
-  "NEXT_PUBLIC_AGENT_LICENSE",
-];
+export const OWNER_GATED_VARS = PRODUCTION_REQUIRED_ENV_NAMES;
 
 /**
  * Determine the launch authority result given check counters.
@@ -115,7 +110,7 @@ if (isMain) {
   const SRC = join(ROOT, "src");
   const SCRIPTS = join(ROOT, "scripts");
 
-  const srcFiles = collectFiles(SRC, [".ts", ".tsx"]);
+  const deployableFiles = collectDeployableFiles(ROOT);
 
   let passCount = 0;
   let failCount = 0;
@@ -168,7 +163,7 @@ if (isMain) {
   // ── Release log currency ─────────────────────────────────────────────────
   console.log("\n[Release log currency]");
   const releaseLogPath = join(ROOT, "docs/PRODUCTION_RELEASE_LOG.md");
-  for (const prNum of [49, 50, 51]) {
+  for (const prNum of PRODUCTION_BASELINE_PRS) {
     const result = releaseLogMentionsPr(releaseLogPath, prNum);
     if (result.ok) {
       pass(`release log mentions PR #${prNum}`);
@@ -180,10 +175,10 @@ if (isMain) {
   // ── Stale vercel.app URLs in operational docs ────────────────────────────
   console.log("\n[Stale vercel.app URLs in operational docs]");
   const operationalDocs = [
-    join(ROOT, "docs/CONTROLLED_LAUNCH_RUNBOOK.md"),
-    join(ROOT, "docs/OWNER_ACTION_PROOF_PACK.md"),
-    join(ROOT, "docs/PRODUCTION_DEPLOY_REHEARSAL.md"),
-    join(ROOT, "docs/GO_NO_GO_COMMAND_CENTER.md"),
+    join(ROOT, "docs/CURRENT_STATE_RECONCILIATION.md"),
+    join(ROOT, "docs/CONTROLLED_TRAFFIC_ACTIVATION.md"),
+    join(ROOT, "docs/GO_LIVE_RUNBOOK.md"),
+    join(ROOT, "docs/OWNER_ACTIONS_REMAINING.md"),
   ].filter(existsSync);
   const staleDocUrls = findStaleVercelUrlsInDocs(operationalDocs);
   if (staleDocUrls.length === 0) {
@@ -195,11 +190,11 @@ if (isMain) {
     );
   }
 
-  // ── Stale vercel.app URLs in src/ ────────────────────────────────────────
-  console.log("\n[Stale vercel.app URLs in src/]");
-  const staleUrls = findStaleVercelUrls(srcFiles);
+  // ── Stale vercel.app URLs in deployable source ───────────────────────────
+  console.log("\n[Stale vercel.app URLs in app/ and src/]");
+  const staleUrls = findStaleVercelUrls(deployableFiles);
   if (staleUrls.length === 0) {
-    pass("no stale vercel.app URLs in src/");
+    pass("no stale vercel.app URLs in deployable app/ or src/");
   } else {
     fail(
       `stale vercel.app URLs found in ${staleUrls.length} file(s)`,
@@ -209,9 +204,9 @@ if (isMain) {
 
   // ── Prohibited red-* tokens ──────────────────────────────────────────────
   console.log("\n[Prohibited red-* UI tokens]");
-  const redTokens = findRedTokens(srcFiles);
+  const redTokens = findRedTokens(deployableFiles);
   if (redTokens.length === 0) {
-    pass("no prohibited red-* tokens in src/");
+    pass("no prohibited red-* tokens in deployable app/ or src/");
   } else {
     fail(
       `red-* tokens found in ${redTokens.length} file(s)`,
@@ -221,9 +216,9 @@ if (isMain) {
 
   // ── Novelty genie/lamp copy ──────────────────────────────────────────────
   console.log("\n[Novelty genie/lamp copy]");
-  const novelty = findNoveltyCopy(srcFiles);
+  const novelty = findNoveltyCopy(deployableFiles);
   if (novelty.length === 0) {
-    pass("no prohibited genie/lamp copy in src/");
+    pass("no prohibited genie/lamp copy in deployable app/ or src/");
   } else {
     fail(
       `genie/lamp copy found in ${novelty.length} file(s)`,
@@ -231,11 +226,11 @@ if (isMain) {
     );
   }
 
-  // ── MLS/FlexMLS markers in public src/ ───────────────────────────────────
-  console.log("\n[MLS/FlexMLS confidential markers in public src/]");
-  const mlsHits = findMlsMarkers(srcFiles);
+  // ── MLS/FlexMLS markers in deployable source ─────────────────────────────
+  console.log("\n[MLS/FlexMLS confidential markers in deployable source]");
+  const mlsHits = findMlsMarkers(deployableFiles);
   if (mlsHits.length === 0) {
-    pass("no MLS/FlexMLS markers in public src/");
+    pass("no MLS/FlexMLS markers in deployable app/ or src/");
   } else {
     fail(
       `MLS markers found in ${mlsHits.length} file(s)`,
@@ -302,16 +297,16 @@ if (isMain) {
   if (authorityStatus === AUTHORITY_NOT_GO_OWNER) {
     process.stdout.write(
       `  ACTION REQUIRED: ${skipCount} owner-gated item(s) must be completed.\n` +
-      `  Procedure: docs/CONTROLLED_LAUNCH_RUNBOOK.md\n` +
-      `  Evidence:  docs/OWNER_ACTION_PROOF_PACK.md\n` +
-      `  Timeline:  docs/PRODUCTION_DEPLOY_REHEARSAL.md\n\n`
+      `  Procedure: docs/CONTROLLED_TRAFFIC_ACTIVATION.md\n` +
+      `  Runtime:   docs/GO_LIVE_RUNBOOK.md\n` +
+      `  Remaining: docs/OWNER_ACTIONS_REMAINING.md\n\n`
     );
   }
 
   if (authorityStatus === AUTHORITY_GO) {
     process.stdout.write(
-      `  All checks PASS. Controlled traffic is authorized.\n` +
-      `  Review docs/GO_NO_GO_COMMAND_CENTER.md §12 before sending traffic.\n\n`
+      `  All code-level checks PASS. Review the exact external-action gate in\n` +
+      `  docs/CONTROLLED_TRAFFIC_ACTIVATION.md before sending traffic.\n\n`
     );
   }
 }

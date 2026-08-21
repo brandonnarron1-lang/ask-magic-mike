@@ -23,7 +23,7 @@ import { fileURLToPath } from "url";
 
 import {
   readFileSafe,
-  collectFiles,
+  collectDeployableFiles,
   findStaleVercelUrls,
   findRedTokens,
   findNoveltyCopy,
@@ -43,15 +43,30 @@ export const REQUIRED_CTA_SCRIPTS = [
 ];
 
 export const REQUIRED_CTA_DOCS = [
-  "docs/GO_NO_GO_COMMAND_CENTER.md",
   "docs/CONTROLLED_TRAFFIC_ACTIVATION.md",
+  "docs/GO_LIVE_RUNBOOK.md",
+  "docs/OWNER_ACTIONS_REMAINING.md",
 ];
 
 export const REQUIRED_ROUTES = [
-  "src/app/(intake)/ask/layout.tsx",
-  "src/app/(intake)/ask/page.tsx",
-  "src/app/(campaign)/value/page.tsx",
-  "src/app/(embed)/embed/ask/page.tsx",
+  "app/layout.tsx",
+  "app/page.tsx",
+  "app/ask/page.tsx",
+  "app/home-value/page.tsx",
+  "app/value/page.tsx",
+  "app/sell/page.tsx",
+  "app/buy/page.tsx",
+  "app/embed/ask/page.tsx",
+  "app/widget/v1/page.tsx",
+];
+
+export const REQUIRED_CTA_LINKS = [
+  { file: "app/components/black-diamond/HeroSection.tsx", href: "/home-value", label: "hero_home_value" },
+  { file: "app/components/black-diamond/HeroSection.tsx", href: "/ask", label: "hero_ask" },
+  { file: "app/components/black-diamond/BlackDiamondHeader.tsx", href: "/buy", label: "header_buy" },
+  { file: "app/components/black-diamond/BlackDiamondShell.tsx", href: "/sell", label: "path_sell" },
+  { file: "app/components/black-diamond/BlackDiamondShell.tsx", href: "/buy", label: "path_buy" },
+  { file: "app/components/black-diamond/BlackDiamondShell.tsx", href: "/plan", label: "path_plan" },
 ];
 
 /**
@@ -106,9 +121,7 @@ const isMain =
   resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
 
 if (isMain) {
-  const SRC = join(ROOT, "src");
-
-  const srcFiles = collectFiles(SRC, [".ts", ".tsx"]);
+  const deployableFiles = collectDeployableFiles(ROOT);
 
   let passCount = 0;
   let failCount = 0;
@@ -128,30 +141,13 @@ if (isMain) {
   // ── CTA link checks ─────────────────────────────────────────────────────────
   console.log("[CTA links]");
 
-  const heroPath = join(SRC, "components/landing/hero-section.tsx");
-  if (fileContains(heroPath, "/ask")) {
-    pass("cta:hero_links_ask", "hero-section.tsx links to /ask");
-  } else {
-    fail("cta:hero_links_ask", "hero-section.tsx does not link to /ask");
-  }
-
-  if (fileContains(heroPath, "/value")) {
-    pass("cta:hero_links_value", "hero-section.tsx links to /value");
-  } else {
-    fail("cta:hero_links_value", "hero-section.tsx does not link to /value");
-  }
-
-  const footerPath = join(SRC, "components/landing/footer.tsx");
-  if (fileContains(footerPath, "/ask")) {
-    pass("cta:footer_links_ask", "footer.tsx links to /ask");
-  } else {
-    fail("cta:footer_links_ask", "footer.tsx does not link to /ask");
-  }
-
-  if (fileContains(footerPath, "/value")) {
-    pass("cta:footer_links_value", "footer.tsx links to /value");
-  } else {
-    fail("cta:footer_links_value", "footer.tsx does not link to /value");
+  for (const link of REQUIRED_CTA_LINKS) {
+    const path = join(ROOT, link.file);
+    if (fileContains(path, link.href)) {
+      pass(`cta:${link.label}`, `${link.file} links to ${link.href}`);
+    } else {
+      fail(`cta:${link.label}`, `${link.file} does not link to ${link.href}`);
+    }
   }
 
   // ── Route existence checks ───────────────────────────────────────────────────
@@ -169,30 +165,30 @@ if (isMain) {
   // ── Source code safety checks ────────────────────────────────────────────────
   console.log("\n[Source safety]");
 
-  const staleUrls = findStaleVercelUrls(srcFiles);
+  const staleUrls = findStaleVercelUrls(deployableFiles);
   if (staleUrls.length === 0) {
-    pass("cta:no_stale_vercel_urls", "no stale vercel.app URLs in src/");
+    pass("cta:no_stale_vercel_urls", "no stale vercel.app URLs in deployable app/ or src/");
   } else {
     fail("cta:no_stale_vercel_urls", `stale URLs in: ${staleUrls.join(", ")}`);
   }
 
-  const redTokenFiles = findRedTokens(srcFiles);
+  const redTokenFiles = findRedTokens(deployableFiles);
   if (redTokenFiles.length === 0) {
-    pass("cta:no_red_tokens", "no prohibited red-* Tailwind tokens in src/");
+    pass("cta:no_red_tokens", "no prohibited red-* Tailwind tokens in deployable app/ or src/");
   } else {
     fail("cta:no_red_tokens", `red-* tokens in: ${redTokenFiles.join(", ")}`);
   }
 
-  const noveltyFiles = findNoveltyCopy(srcFiles);
+  const noveltyFiles = findNoveltyCopy(deployableFiles);
   if (noveltyFiles.length === 0) {
-    pass("cta:no_novelty_copy", "no genie/magic lamp copy in src/");
+    pass("cta:no_novelty_copy", "no genie/magic lamp copy in deployable app/ or src/");
   } else {
     fail("cta:no_novelty_copy", `novelty copy in: ${noveltyFiles.join(", ")}`);
   }
 
-  const mlsFiles = findMlsMarkers(srcFiles);
+  const mlsFiles = findMlsMarkers(deployableFiles);
   if (mlsFiles.length === 0) {
-    pass("cta:no_mls_markers", "no MLS/IDX markers in public src/");
+    pass("cta:no_mls_markers", "no MLS/IDX markers in deployable app/ or src/");
   } else {
     fail("cta:no_mls_markers", `MLS markers in: ${mlsFiles.join(", ")}`);
   }

@@ -1,6 +1,6 @@
 # Known Operating Constraints
 
-Updated 2026-08-19. The public funnel is live; these items constrain expansion
+Updated 2026-08-21. The public funnel is live; these items constrain expansion
 or specific channels but do not invalidate canonical Neon capture and internal
 email delivery.
 
@@ -44,13 +44,16 @@ AskMagicMike.com links remain the approved Facebook fallback.
 
 ## Release sequencing
 
-Production-ready or staged work remains isolated behind release-specific gates:
+The Phase 9 owned-demand, revival, planner, email-compliance, operations,
+outcome-ledger, and first-response releases are merged and live. Do not rebuild
+or re-release them as parallel systems.
 
-- PR #170 — owned-demand command;
-- PR #177 — commercial-email compliance renderer;
-- PR #173 — device-private review planner; and
-- PR #172 — database revival command, refreshed only after its preceding release
-  sequence and then revalidated against current `main`.
+- PR #179 remains the only existing open product PR. It is a refreshed iOS
+  phone-alert installation handoff; merge/deploy and physical device enrollment
+  retain separate gates.
+- Launch-authority modernization is being prepared on a separate current-main
+  branch. Until merged, the Production product remains on PR #181 without this
+  static-control or buyer-navigation polish.
 
 Old PRs #119, #120, #121, and #92 are archive-after-review candidates, not a
 parallel release plan.

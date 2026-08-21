@@ -545,3 +545,37 @@ the Node-20 deployment proof. PHP CLI is unavailable locally, so staging must ru
   shadow-only observations for forms 6 and 7 and no forwarding attempts.
 - Our Town homepage, `/ask-mike/`, and Mike's agent profile remained HTTP 200
   after activation.
+
+## Phase 9 launch-authority and buyer-discovery candidate — 2026-08-21
+
+- Branch: `codex/phase9-launch-authority-neon-20260821`; base production merge:
+  `5335697edf31eed0b8a38cd0295a4f5e7d501a3e` (PR `#181`).
+- Scope is reuse-first: the existing `/buy` funnel is surfaced in the active
+  Black Diamond desktop navigation and homepage path grid. The canonical app,
+  lead API, Neon database, Better Auth Lead Center, WordPress bridge, and
+  notification systems were not duplicated or replaced.
+- Validation ran with Node `24.18.0`, matching the repository runtime contract:
+  - Vitest: `196` files / `2,791` tests passed.
+  - strict TypeScript: PASS.
+  - ESLint: PASS.
+  - Next.js `15.5.21` production build: PASS; `52` static pages generated.
+  - release-safety scan: `14/14` PASS across `531` deployable files.
+  - route-aware launch doctor: `27` PASS / `0` FAIL / `12` local env skips.
+  - launch-authority report: `26` PASS / `0` FAIL / `12` local owner-env skips.
+  - public CTA check: `24/24` PASS.
+  - Ask Magic Mike / NellySelly isolation: PASS.
+- Desktop and 390×844 mobile visual inspection confirmed the retained homepage,
+  five-path grid, buyer discovery surface, form controls, exact consent version,
+  and legal copy render without clipping or horizontal overflow:
+  - `output/phase9/visual-qa/home-desktop-1440.png`
+  - `output/phase9/visual-qa/buyer-desktop-1440.png`
+  - `output/phase9/visual-qa/home-mobile-390.png`
+  - `output/phase9/visual-qa/home-paths-mobile-390.png`
+  - `output/phase9/visual-qa/buyer-mobile-390-top.png`
+  - `output/phase9/visual-qa/buyer-mobile-390-consent.png`
+- A production build served on unapproved `localhost` correctly refused the
+  analytics event with HTTP `403`; that is the expected origin-allowlist
+  boundary, not a rendering failure. The same event path must be rechecked on
+  the Vercel preview hostname before merge.
+- No production deployment, database mutation, WordPress edit, form submission,
+  lead creation, or email/SMS/push delivery occurred during this candidate QA.
