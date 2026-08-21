@@ -23,15 +23,22 @@ Updated 2026-08-21.
 - The bearer capability is intentionally described without a false single-use
   claim. Until expiry it must be sent only to Brandon; physical enrollment and
   one separately approved `[TEST]` receipt remain human actions.
-- Focused verification passes 6 files / 38 tests. The full local candidate
-  passes 211 files / 2,920 tests, strict typecheck, ESLint, 14/14 safety,
+- Focused verification passes 6 files / 39 tests. The full local candidate
+  passes 211 files / 2,921 tests, strict typecheck, ESLint, 14/14 safety,
   Ask/NellySelly isolation, optimized build, 83-route verification, and
   Production dependency audit. A redacted 480-commit full-history scan reports
   no secret leak. Mobile browser acceptance passes the valid,
   invalid, and clean-URL session states with no console error and no external
   send or subscription write.
-- Exact Node 24 GitHub CI and protected canonical Preview acceptance remain
-  pending. The candidate stays Draft and cannot bypass PRs #183–#189. Its
+- A protected Preview run passed 17/17 required feature checks, skipped six
+  mutations by policy, and passed widget E2E 2/2. It also revealed that the
+  direct Preview workflow could remain green with launch authority `BLOCKED`
+  because `release:doctor` was missing. Both Preview workflows now run the
+  doctor and fail unless `release:assert` reaches `PREVIEW_READY`; local
+  orchestration proves that verdict and the regression suite fixes the order.
+- Exact Node 24 GitHub CI and protected canonical Preview authority are required
+  on the final unchanged head and recorded on the Draft PR. The candidate stays
+  Draft and cannot bypass PRs #183–#189. Its
   separate future gate remains:
   `APPROVE IOS PHONE ALERT INSTALL HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
 

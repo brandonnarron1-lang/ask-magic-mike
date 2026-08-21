@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const source = readFileSync("scripts/preview-qa.mjs", "utf8");
+const previewWorkflow = readFileSync(".github/workflows/preview-qa.yml", "utf8");
+const dispatchWorkflow = readFileSync(".github/workflows/preview-qa-dispatch.yml", "utf8");
 
 describe("preview QA current route contract", () => {
   it("probes the active Lead Center surfaces with Basic Auth", () => {
@@ -32,5 +34,19 @@ describe("preview QA current route contract", () => {
     expect(source).toContain('record("phone_install:handoff", "pass"');
     expect(source).toContain('private install contract failed: ${failedChecks || "unknown"}');
     expect(source).not.toContain('http("GET", startUrl');
+  });
+
+  it("cannot report a green Preview workflow with blocked launch authority", () => {
+    for (const workflow of [previewWorkflow, dispatchWorkflow]) {
+      const doctor = workflow.indexOf("npm run release:doctor");
+      const authority = workflow.indexOf("npm run launch:authority");
+      const strictAssert = workflow.indexOf("npm run release:assert");
+
+      expect(doctor).toBeGreaterThan(-1);
+      expect(authority).toBeGreaterThan(doctor);
+      expect(strictAssert).toBeGreaterThan(authority);
+      expect(workflow).toContain('REQUIRE_VERDICT: "PREVIEW_READY"');
+      expect(workflow).toContain('SAFE_DB_WRITE: "false"');
+    }
   });
 });

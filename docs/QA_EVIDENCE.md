@@ -11,11 +11,11 @@ All timestamps are America/New_York unless noted.
   `rescue/amm-pre-phone-handoff-consolidation-20260821-190451`; exact PR #189
   head merged with both histories preserved. No force-push or discarded
   worktree was used.
-- Focused Vitest: PASS — 6 files / 38 tests covering invite authorization,
+- Focused Vitest: PASS — 6 files / 39 tests covering invite authorization,
   exact Preview origins, NellySelly isolation, signed claim/cookie behavior,
   private token manifest, invalid tokens, copy-only registration/test,
   search/robots boundaries, and iOS readiness UI.
-- Full Vitest: PASS — 211 files / 2,920 tests.
+- Full Vitest: PASS — 211 files / 2,921 tests.
 - `pnpm run typecheck`: PASS.
 - `pnpm run lint`: PASS.
 - `pnpm run release:safety`: PASS — 14/14.
@@ -31,10 +31,22 @@ All timestamps are America/New_York unless noted.
   setup, invalid/expired fallback, and zero console errors. Local HTTP correctly
   omits `Secure`; unit coverage proves the attribute on HTTPS. The enable/test
   controls were not activated.
+- Initial protected Preview run `32536924769` on pre-workflow-fix head
+  `244e738ca1f5a26bd281d81b9383ff761c622db7`: feature QA PASS 17 / SKIP 6 /
+  FAIL 0, `phone_install:handoff` PASS, widget E2E 2/2, `SAFE_DB_WRITE=false`,
+  no external send or write. Launch authority correctly reported `BLOCKED`
+  because the direct workflow had omitted the release-doctor artifact even
+  though GitHub marked the job green.
+- Workflow hardening: both Preview workflows now run `release:doctor` before
+  `launch:authority` and then require
+  `REQUIRE_VERDICT=PREVIEW_READY npm run release:assert`. Local replay with the
+  protected Preview artifacts reaches `PREVIEW_READY` and strict assertion
+  PASS. A source regression test prevents the green-job/blocked-authority gap.
 - No subscription, Push, lead, email, SMS, analytics conversion, database write,
   Production deployment, WordPress action, publication, or provider call was
-  made. Exact Node 24 CI and protected Vercel Preview evidence are still pending
-  for the refreshed Draft head.
+  made. Exact Node 24 CI and the strict protected Preview authority workflow are
+  required on the final unchanged head; authoritative run IDs are attached to
+  Draft PR #179.
 
 ## Phase 9 WordPress owned-traffic consolidation — 2026-08-21
 

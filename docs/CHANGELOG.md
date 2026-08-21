@@ -19,7 +19,7 @@
   short-lived, role-restricted bearer capability rather than implying durable
   single-use consumption. The admin and install pages now warn that an active
   link must be shared only with Brandon.
-- Local verification passes 211 test files / 2,920 tests, strict typecheck,
+- Local verification passes 211 test files / 2,921 tests, strict typecheck,
   ESLint, 14/14 release safety, system isolation, the optimized Next.js 15.5.21
   build, the 83-route manifest, and the Production dependency audit.
 - A redacted full-history secret scan covers 480 commits / approximately
@@ -27,10 +27,16 @@
 - Mobile Playwright acceptance passes valid install, clean-URL claim, HttpOnly
   SameSite=Strict session, copy-only setup, invalid-token fallback, and zero
   browser errors without registering a device or sending Push.
+- The first protected Preview feature run passed 17 checks, intentionally
+  skipped six mutation checks, and passed widget E2E 2/2, then exposed a CI
+  truth gap: the direct Preview workflow omitted `release:doctor`, so launch
+  authority reported `BLOCKED` while the job remained green. Both Preview
+  workflows now generate doctor evidence and require
+  `REQUIRE_VERDICT=PREVIEW_READY`; a regression test enforces ordering.
 - No Production, Neon, Vercel, WordPress, lead, email, SMS, Push, publication,
-  DNS, spend, or NellySelly mutation occurred. Exact Node 24 CI and protected
-  Preview proof remain required before the refreshed Draft can be considered
-  release-ready.
+  DNS, spend, or NellySelly mutation occurred. Exact Node 24 CI and the strict
+  protected Preview authority run are mandatory on the final unchanged head;
+  authoritative remote run IDs are recorded on the Draft PR.
 
 ## 2026-08-21 — Exact owned-demand activation control-loop candidate
 
