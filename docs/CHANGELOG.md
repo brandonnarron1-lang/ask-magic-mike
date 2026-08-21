@@ -1,5 +1,32 @@
 # Changelog
 
+## 2026-08-21 — Protected owned-demand asset studio candidate
+
+- Extended the existing Distribution Command with protected 1080×1350 PNG,
+  1080×1920 PNG, and raw QR SVG downloads for all 24 canonical owned-demand
+  placements: 72 deterministic combinations with no second campaign catalog.
+- Added 24 public allowlisted `/go/[code]` 307 redirects so scan-reliable QR
+  codes retain the exact full canonical UTM destination without accepting an
+  arbitrary redirect target.
+- Reused approved Mike Eatmon imagery and the current black/gold/cream/cyan
+  visual system. Kept efficient WebP page assets and added one small JPEG export
+  derivative of the same approved renter portrait after executable renderer QA
+  rejected the PNG/WebP encodings.
+- Kept asset generation server-authorized with `report:view`, private/no-store,
+  CSP-sandboxed, noindex responses, strict channel/placement/format allowlists,
+  and no database, provider, publication, or consumer-data input.
+- Closed real QA defects involving unsupported renderer CSS, dense full-UTM QR
+  modules, story footer/quiet-zone overlap, and image-decoder compatibility.
+- Passed the final local Node 24 release gate: 203 test files / 2,846 tests,
+  strict typecheck, ESLint, optimized Next.js 15.5.21 build, 80-route manifest,
+  14/14 release-safety checks, system isolation, zero known Production
+  dependency vulnerabilities, and a clean redacted 471-commit secret scan.
+- Independent OpenCV scans resolved both compressed feed/story QR codes and a
+  Chromium render of the raw SVG to their exact approved shortlinks.
+- No Production deployment, database migration/write, lead creation, provider
+  call, external send/publication, QR distribution, WordPress/DNS change,
+  spend, or NellySelly change was performed.
+
 ## 2026-08-21 — Campaign safety and three-offer owned-demand candidate
 
 - Consolidated the existing distribution command, seller/buyer/renter funnels,

@@ -35,7 +35,7 @@ describe("Phase 9.5 search-authority route wiring", () => {
   it("allows Ask Mike crawling and lists the route in the canonical sitemap", () => {
     const robots = read("app/robots.ts");
     expect(robots).not.toContain('"/ask"');
-    expect(robots).toContain('disallow: ["/admin", "/api/"]');
+    expect(robots).toContain('disallow: ["/admin", "/api/", "/go/"]');
     const sitemap = read("app/sitemap.ts");
     expect(sitemap).toContain('["/ask", 0.75]');
     expect(sitemap).not.toContain('["/value"');

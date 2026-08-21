@@ -2,6 +2,43 @@
 
 Updated 2026-08-21.
 
+## Phase 9 protected owned-demand asset studio — 2026-08-21
+
+- Reused the existing six-channel/four-placement owned-demand command, exact UTM
+  builder, approved Mike imagery, public funnels, and Lead Center RBAC. No
+  second campaign dashboard, publisher, provider, lead store, database schema,
+  or CRM was introduced.
+- Added three protected exports for each of 24 canonical placements: 1080×1350
+  feed PNG, 1080×1920 story PNG, and raw high-error-correction QR SVG. The 72
+  combinations are derived from the same definitions used for operator copy and
+  attribution.
+- Added 24 allowlisted `/go/[code]` 307 redirects to exact full UTM destinations.
+  Unknown/malformed codes fail closed; there is no arbitrary destination or
+  open redirect. The route is no-store/noindex and robots-disallowed.
+- Asset downloads require a real `report:view` session, accept only exact
+  channel/placement/format tuples, use approved local imagery, and return
+  private/no-store, CSP-sandboxed, noindex attachments. They make no provider or
+  database call and accept no consumer data.
+- Executable QA found and closed unsupported renderer CSS, full-UTM QR density,
+  story footer overlap, and WebP/PNG decoder failures. The ordinary UI preserves
+  WebP assets; exports use retained JPEG originals plus one mechanically derived
+  JPEG of the same approved renter portrait.
+- Final local verification passes system isolation, 14/14 release-safety checks,
+  203 test files / 2,846 tests, strict typecheck, ESLint, optimized Next.js
+  15.5.21 build, and 80 active routes / 17 acknowledged root–`src` duplicates.
+  Production dependencies have no known vulnerability; 471 Git commits have no
+  detected secret leak. Independent OpenCV scans pass for the compressed feed,
+  story, and Chromium-rendered raw SVG exemplars.
+- Candidate branch `codex/phase9-owned-demand-asset-studio-20260821` is stacked
+  on exact PR #185 head `be99a1838c1c36ffc474bc97c11ef2a88e53107c`.
+  Draft PR/exact-head Preview evidence remains to be appended after push.
+- No Production deployment, Neon migration/write, lead submission, email/SMS/
+  Push send, WordPress/DNS change, external publication, QR distribution,
+  spend, or NellySelly mutation occurred.
+- Exact future release gate:
+  `APPROVE PHASE 9 OWNED-DEMAND ASSET STUDIO MERGE AND PRODUCTION DEPLOYMENT`.
+  External publication remains a separate channel-specific approval.
+
 ## Phase 9 current-router safety consolidation — 2026-08-21
 
 - Audited PRs #179 and #182 against the exact PR #183/#184 stack before writing

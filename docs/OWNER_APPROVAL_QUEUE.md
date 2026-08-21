@@ -16,11 +16,20 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    — append-only owned-demand publication-proof ledger, only after #183 lands
    and #184 is refreshed:
    `APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT`
+3. PR [#185](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/185)
+   — current-router safety and Buyer discovery, only after #184 lands and #185
+   is refreshed:
+   `APPROVE PHASE 9 CURRENT-ROUTER SAFETY AND BUYER DISCOVERY MERGE AND PRODUCTION DEPLOYMENT`
+4. Branch `codex/phase9-owned-demand-asset-studio-20260821` — protected
+   deterministic owned-demand exports and allowlisted QR attribution, only
+   after #185 lands and this candidate is refreshed:
+   `APPROVE PHASE 9 OWNED-DEMAND ASSET STUDIO MERGE AND PRODUCTION DEPLOYMENT`
 
 The #184 phrase authorizes its reviewed backup-first Neon migration, exact code
-merge, and canonical Vercel deployment. Neither phrase authorizes a social/GBP
-post, email campaign, QR distribution, consumer message, spend, DNS change, or
-deletion.
+merge, and canonical Vercel deployment. The other phrases authorize only their
+reviewed code merge and canonical deployment. None authorizes a social/GBP
+post, email campaign, QR printing/distribution, consumer message, spend, DNS
+change, WordPress change, provider action, or deletion.
 
 ## Deferred candidates requiring refresh and overlap review
 

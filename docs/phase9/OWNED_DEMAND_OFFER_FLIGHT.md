@@ -72,6 +72,13 @@ The buyer and renter cards deliberately use the higher-resolution retained
 portraits instead of the earlier 150–175 px derivatives found during rendered
 QA. No new likeness was generated.
 
+The stacked asset-studio candidate preserves those efficient WebP files for the
+operator cards and derives server exports from the retained JPEG originals. The
+renter export uses a mechanically derived JPEG of the same approved 515×720
+portrait because executable `ImageResponse` QA rejected the PNG/WebP encodings.
+It adds no new likeness or parallel visual library. See
+`OWNED_DEMAND_ASSET_STUDIO.md`.
+
 ## Operator workflow
 
 1. Sign in to the Lead Center and open `/admin/distribution`.

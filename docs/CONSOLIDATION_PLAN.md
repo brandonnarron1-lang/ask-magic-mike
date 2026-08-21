@@ -68,6 +68,29 @@ The guarded migration must run against the named Neon Production branch before
 the application artifact is promoted. The cutover verifier must pass before and
 after deployment.
 
+### 3. PR #185 — current-router safety and Buyer discovery
+
+After #184 reaches Production, refresh #185 onto the new `main`, rerun its exact
+Node 24 CI and canonical Vercel Preview evidence, then use its separate gate:
+
+`APPROVE PHASE 9 CURRENT-ROUTER SAFETY AND BUYER DISCOVERY MERGE AND PRODUCTION DEPLOYMENT`
+
+PR #185 has no database migration and does not authorize an external
+publication or message.
+
+### 4. Owned-demand asset studio candidate
+
+The branch `codex/phase9-owned-demand-asset-studio-20260821` is stacked after
+#185. It adds protected deterministic 4:5/story/QR downloads and 24 allowlisted
+attribution shortlinks without adding a publisher, provider, database, or
+parallel campaign catalog. After #185 reaches Production, refresh and re-prove
+the candidate before considering:
+
+`APPROVE PHASE 9 OWNED-DEMAND ASSET STUDIO MERGE AND PRODUCTION DEPLOYMENT`
+
+External social/GBP/email publication and QR printing/distribution remain
+separate channel-specific approvals.
+
 ### 3. Deferred candidates
 
 - PR #182 audit is complete. Its Buyer navigation/path card, exact Vercel
