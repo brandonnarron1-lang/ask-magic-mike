@@ -25,6 +25,18 @@ Updated 2026-08-21.
 - Desktop 1440px and mobile 390px Playwright inspection passes for the homepage
   and Buyer funnel. The five path cards remain balanced/stacked, consent stays
   readable, and the existing black/gold/cyan visual system remains intact.
+- Draft PR #185 is stacked on PR #184. Code-bearing head
+  `4b92d286caae09114b2aa0f84eb7b084ad26cb2a` passed Node 24 GitHub run
+  `32516288876` and Ready Preview
+  `dpl_BByVkaLDwDKnkScV4R4f5v3vbNwf`. Public/health routes return 200,
+  anonymous Distribution Command returns 401 with private headers, an exact
+  Preview origin reaches non-persisting request validation, a foreign origin is
+  rejected, and the render contains no NellySelly marker.
+- The first protected-Preview probe from the unlinked worktree created empty
+  helper project `amm-phase9-current-router-safety-20260821`
+  (`prj_iGynowHru4TBNwWgvoiSIG193Ukf`). It has zero deployments, domains, and
+  application effect. The worktree was relinked to the canonical Vercel project;
+  the helper is preserved pending separately approved cleanup.
 - No Production deployment, Neon migration/write, lead submission, email/SMS/
   push send, WordPress/DNS change, external publication, spend, or NellySelly
   mutation occurred.

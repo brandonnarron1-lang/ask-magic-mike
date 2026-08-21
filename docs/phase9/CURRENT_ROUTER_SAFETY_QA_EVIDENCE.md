@@ -10,6 +10,13 @@ Recorded 2026-08-21 in America/New_York.
 - Deferred source: Draft PR #179 retains the unique iOS install handoff
 - Production baseline remained PR #181 / deployment
   `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`
+- Draft PR: #185
+- Code-bearing head: `4b92d286caae09114b2aa0f84eb7b084ad26cb2a`
+- Exact-head GitHub run: `32516288876` / job `96878556819` / passed
+- Exact-head Vercel Preview:
+  `dpl_BByVkaLDwDKnkScV4R4f5v3vbNwf` / Ready
+- Preview URL:
+  `https://ask-magic-mike-r0ocr0xlb-eyes-up-industries.vercel.app`
 
 No Production, database, provider, WordPress, DNS, lead, message, publication,
 spend, or NellySelly mutation occurred.
@@ -69,6 +76,31 @@ errors. The local Production build intentionally rejects localhost analytics
 events with 403, so `/api/events` was fulfilled in-browser with a synthetic
 non-persisting 200 response for this visual-only audit. No event or lead write
 occurred.
+
+## Protected Preview acceptance
+
+- `/`, `/buy`, `/api/health/live`, and `/api/health/ready`: HTTP 200.
+- Liveness identifies `ask-magic-mike`, Preview, and canonical Neon; delivery
+  channels remain disabled.
+- Readiness reports the database, capture function, lead/notification tables,
+  RBAC schema, push subscription table, and phone setup ready.
+- Anonymous `/admin/distribution`: HTTP 401, Basic challenge, no-store,
+  SAMEORIGIN, and noindex.
+- Malformed `POST /api/events` from the exact deployment origin reached
+  application validation and returned HTTP 400 `Invalid event.`; no valid event
+  or persistence was attempted.
+- The same malformed request from `https://foreign.example` returned HTTP 403
+  before validation.
+- Render counts: 24 Ask Magic Mike markers, 34 Our Town Properties markers,
+  five Buyer path markers, and zero NellySelly markers.
+
+The first `vercel curl --yes` probe ran before the worktree had canonical link
+metadata and created empty helper project
+`amm-phase9-current-router-safety-20260821`
+(`prj_iGynowHru4TBNwWgvoiSIG193Ukf`). It has zero deployments and no domain,
+environment, or application effect. The worktree was relinked to
+`eyes-up-industries/ask-magic-mike`; the helper is recorded for separately
+approved cleanup and was not silently deleted.
 
 ## Rollback
 

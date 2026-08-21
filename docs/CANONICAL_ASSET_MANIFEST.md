@@ -21,6 +21,7 @@ WordPress evidence. Working systems outrank historical packets.
 | Static V8/product-page/creative packages | Presentation and media assets without canonical persistence | **ARCHIVE AFTER REVIEW** | No second app, CRM, or notification service |
 | Vercel `ask-magic-mike-4miw` and `askmagicmike-domain-bridge-v29` | No canonical Ask hostname attachment | **ARCHIVE AFTER REVIEW** | Do not attach domains or deploy |
 | Empty helpers `amm-phase9-campaign-compliance-20260821` and `amm-phase9-publication-ledger-20260821` | Zero deployments and no domain effect | **ARCHIVE AFTER REVIEW** | Preserve until separately approved cleanup |
+| Vercel `amm-phase9-current-router-safety-20260821` | CLI-created unlinked-worktree helper `prj_iGynowHru4TBNwWgvoiSIG193Ukf`; zero deployments and no domain effect | **ARCHIVE AFTER REVIEW** | Worktree is relinked to the canonical project; preserve helper until separately approved cleanup |
 | Vercel NellySelly projects | No Ask Magic Mike custom-domain ownership; zero NellySelly markers in verified Ask render | **OBSOLETE OR CONFLICTING** | Keep products, credentials, databases, and domains isolated |
 | Historical commits `daf9510`, `6601fb6`, `df2b1f3` | Reachable in canonical Git history | **REFERENCE/DOCUMENTATION** | Preserve; never reset/force-push to recreate them |
 | PRs #92 and #119–#121 | Old visual/runtime chains no longer aligned with current root router and Production baseline | **ARCHIVE AFTER REVIEW** | Not a parallel release sequence |
