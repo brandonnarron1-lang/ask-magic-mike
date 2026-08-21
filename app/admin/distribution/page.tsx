@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
+  buildOwnedDemandChannelPacket,
   buildOwnedDemandCommand,
   type OwnedDemandChannel,
   type OwnedDemandOfferBrief,
@@ -117,8 +118,12 @@ function OfferPlacement({ offer }: { offer: OwnedDemandOfferPlacement }) {
 
 function ChannelCard({ channel }: { channel: OwnedDemandChannel }) {
   const observed = channel.status === "signal_detected";
+  const channelPacket = buildOwnedDemandChannelPacket(channel);
   return (
-    <article className="min-w-0 rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#101010,#060606)] p-5">
+    <article
+      id={`channel-${channel.key}`}
+      className="min-w-0 scroll-mt-24 rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#101010,#060606)] p-5"
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8f8778]">{channel.format}</p>
@@ -151,6 +156,13 @@ function ChannelCard({ channel }: { channel: OwnedDemandChannel }) {
         <p className="text-[#8f8778]"><strong>Review:</strong> {channel.reviewNote}</p>
       </div>
 
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/[.08] bg-white/[.025] p-3">
+        <p className="max-w-md text-[11px] leading-5 text-[#8f8778]">
+          One local packet containing the general placement, all three offer variants, tracked links, and review boundaries.
+        </p>
+        <CopyDemandAsset label="Copy full channel flight" value={channelPacket} />
+      </div>
+
       <details className="group mt-5 rounded-xl border border-[#4baab833] bg-[#061417]">
         <summary className="cursor-pointer list-none px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#9edbe2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#9edbe2]">
           <span className="flex items-center justify-between gap-3">
@@ -175,6 +187,8 @@ export default async function DistributionPage() {
     : command.measurementState === "partial_signal"
       ? "Attribution repair"
       : "Measured";
+  const firstMove = command.weeklyPlan[0];
+  const firstMoveChannel = command.channels.find((channel) => channel.key === firstMove.channelKey);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_80%_0%,rgba(74,170,184,.13),transparent_30%),radial-gradient(circle_at_10%_5%,rgba(205,162,74,.12),transparent_28%),#040404] px-4 py-7 text-[#f4ead4] sm:px-6 sm:py-10">
@@ -231,6 +245,25 @@ export default async function DistributionPage() {
         <div className="mt-5 rounded-xl border border-[#cda24a55] bg-[#1a1308] px-5 py-4 text-sm leading-6 text-[#f4ead4]">
           <strong className="text-[#f0cf79]">Measured bottleneck:</strong> {command.bottleneck}
         </div>
+
+        <section className="mt-5 rounded-2xl border border-[#4baab855] bg-[linear-gradient(135deg,#06171b,#080d0e)] p-5 sm:p-6" aria-labelledby="recommended-first-move">
+          <div className="flex flex-wrap items-center justify-between gap-5">
+            <div className="max-w-3xl">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8bbfc6]">Recommended first move</p>
+              <h2 id="recommended-first-move" className="mt-2 font-serif text-2xl text-[#d8f7fa] sm:text-3xl">
+                Prepare {firstMoveChannel?.label ?? firstMove.channelKey} first.
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-[#b9ced0]">{firstMove.objective}</p>
+              <p className="mt-2 text-xs leading-5 text-[#79a4aa]"><strong className="text-[#9edbe2]">Proof required:</strong> {firstMove.proofRequired}</p>
+            </div>
+            <Link
+              href={`#channel-${firstMove.channelKey}`}
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#4baab866] bg-[#4baab818] px-5 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#bff8ff] transition hover:bg-[#4baab82b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2]"
+            >
+              Open first channel packet
+            </Link>
+          </div>
+        </section>
 
         <div className="mt-5">
           <Panel

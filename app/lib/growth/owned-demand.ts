@@ -70,6 +70,32 @@ export interface OwnedDemandCommand {
   operatorBoundary: string;
 }
 
+export function buildOwnedDemandChannelPacket(channel: OwnedDemandChannel) {
+  const sections = channel.offers.map((offer) => [
+    offer.shortLabel.toUpperCase(),
+    offer.draftTitle,
+    offer.draftBody,
+    offer.trackedUrl,
+    `Review boundary: ${offer.reviewNote}`,
+  ].join("\n"));
+
+  return [
+    `ASK MAGIC MIKE — ${channel.label.toUpperCase()} OWNED-DEMAND FLIGHT`,
+    `Format: ${channel.format}`,
+    `Campaign: ${channel.campaign}`,
+    "",
+    "GENERAL QUESTION PLACEMENT",
+    channel.draftTitle,
+    channel.draftBody,
+    channel.trackedUrl,
+    "",
+    ...sections.flatMap((section) => [section, ""]),
+    `Next human step: ${channel.operatorStep}`,
+    `Channel review: ${channel.reviewNote}`,
+    "External publication remains a separate human-reviewed approval.",
+  ].join("\n").trim();
+}
+
 const CAMPAIGN = "amm_owned_demand_2026";
 
 const OFFER_DEFINITIONS = [

@@ -84,6 +84,12 @@ QA. No new likeness was generated.
 7. Preserve the external URL or screenshot as publication proof; attribution is
    not itself publication proof.
 
+The command now converts the measured bottleneck into one visible recommended
+first move and a same-page channel jump. Each channel also exposes one
+local-only full-flight packet containing the general placement, all three offer
+placements, tracked URLs, and review boundaries. Individual draft/link controls
+remain available for narrow native-platform work.
+
 The clipboard control performs no network request. The page has no form, server
 action, provider SDK, publish call, email send, SMS send, lead mutation, or
 database mutation.
@@ -99,13 +105,15 @@ Automated coverage proves:
 - retained local visual paths;
 - prohibited-claim, active Ask steering, and public-phone regression checks;
 - client-local clipboard behavior with no network mutation; and
+- deterministic full-channel packets with all four placements and the external
+  publication approval boundary;
 - continued test/suppressed-lead exclusion upstream.
 
-The final local release gate passes 196 test files / 2,794 tests, strict
+The final local release gate passes 196 test files / 2,795 tests, strict
 typecheck, ESLint, the optimized Next.js 15.5.21 Production build, 78-route
 manifest verification, 14/14 release-safety controls, Ask Magic Mike/NellySelly
 isolation, a Production dependency audit with no known vulnerabilities, and a
-redacted 460-commit secret scan with no findings.
+redacted 464-commit secret scan with no findings.
 
 The fresh local Production-render run passes 10/10 desktop/mobile checks across
 the active home-value, Ask, embed, widget-preview, and protected owned-demand

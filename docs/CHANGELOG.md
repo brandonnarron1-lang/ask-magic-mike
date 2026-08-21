@@ -24,10 +24,16 @@
 - Extended the UTM allowlist only for the existing canonical `/home-value`,
   `/buy`, and `/rent` routes; arbitrary and cross-system destinations remain
   blocked.
-- Passed the full local release gate: 196 test files / 2,794 tests, strict
+- Added a measured-bottleneck-to-channel jump and deterministic local-only
+  full-flight packets so an operator can move the general placement plus all
+  three offer variants into native review without four separate copy actions.
+- Captured and inspected the remediated operator path at desktop and mobile;
+  the anchor lands on the intended channel, copy state is visible, document
+  width remains contained, and no browser warning/error was observed.
+- Passed the full local release gate: 196 test files / 2,795 tests, strict
   typecheck, ESLint, optimized Production build, 78-route manifest, 14/14
   release-safety controls, system isolation, zero known Production dependency
-  vulnerabilities, and a clean redacted 460-commit secret scan.
+  vulnerabilities, and a clean redacted 464-commit secret scan.
 - Passed 10/10 local Production-render visual checks across five active routes
   at desktop and mobile sizes with no overflow, missing required copy,
   prohibited claims, bare appraisal language, or console errors.

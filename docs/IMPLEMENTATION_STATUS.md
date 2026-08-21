@@ -15,6 +15,12 @@ Updated 2026-08-21.
   exactly once.
 - Added accessible local clipboard controls. They make no network request and do
   not publish, send, mutate a lead, or write to the database.
+- A current-run desktop/mobile operator audit found and closed the remaining
+  activation-path friction: the measured bottleneck now points to the first
+  recommended channel, and each channel exposes one deterministic local-only
+  packet containing its general placement, three offer placements, exact URLs,
+  and review boundaries. The shared mobile Lead Center navigation remains a
+  separately scoped cross-route polish item.
 - Audited and rewrote retained legacy campaign libraries containing unverified
   volume, tenure, valuation-error, demand, school-proxy, response-time,
   superlative, and direct-phone claims. Public copy preserves the current live
@@ -24,11 +30,11 @@ Updated 2026-08-21.
   buyer-demand guidance.
 - Replaced two soft, undersized legacy offer portraits with higher-resolution
   approved local Mike assets already in the canonical repository.
-- Focused verification passes 6 files / 336 tests. The full local release gate
-  passes system isolation, 14/14 release-safety controls, 196 test files / 2,794
+- Focused verification passes 6 files / 337 tests. The full local release gate
+  passes system isolation, 14/14 release-safety controls, 196 test files / 2,795
   tests, strict typecheck, ESLint, the Next.js 15.5.21 Production build, and the
   78-route manifest. Production dependencies report no known vulnerabilities;
-  the redacted 460-commit history scan reports no secret leaks. Local
+  the redacted 464-commit history scan reports no secret leaks. Local
   Production-render visual QA passes 10/10 desktop/mobile route checks with no
   overflow, missing copy, prohibited claim, bare appraisal language, or console
   error.

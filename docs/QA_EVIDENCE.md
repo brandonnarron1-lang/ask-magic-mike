@@ -7,6 +7,14 @@ All timestamps are America/New_York unless noted.
 
 ## Phase 9 campaign safety + owned-demand offer flight — 2026-08-21
 
+- Current-run operator UX audit — PASS: desktop 1440 × 1000 and mobile
+  390 × 844 Production renders were captured and inspected. The recommended
+  first move is present once, its same-page link lands on Google Business
+  Profile, every channel exposes the full-flight copy control, the control
+  reports its copied state, mobile document width remains contained, and no
+  browser console warning/error was observed. Accepted evidence and audit notes
+  are listed in `docs/phase9/OWNED_DEMAND_OPERATOR_UX_AUDIT.md`.
+
 Status: local release gate, local Production-render visual verification, and
 exact code-bearing protected Preview verification are complete. Production and
 external channels remain unchanged.
@@ -24,15 +32,15 @@ external channels remain unchanged.
   paths remain rejected.
 - Focused final command:
   `pnpm exec vitest run tests/compliance/value-copy.test.ts tests/compliance/campaign-copy-safety.test.ts tests/adminops/owned-demand-command.test.ts tests/admin/utm-link-builder.test.ts tests/brand/marketing-system.test.ts tests/compliance/public-distribution.test.ts`
-  — PASS, 6 files / 336 tests.
+  — PASS, 6 files / 337 tests.
 - `pnpm release:gate` — PASS: Ask Magic Mike/NellySelly isolation, 14/14
-  release-safety controls, 196 test files / 2,794 tests, strict typecheck,
+  release-safety controls, 196 test files / 2,795 tests, strict typecheck,
   ESLint, optimized Next.js 15.5.21 Production build, and 78-route manifest.
 - `pnpm typecheck` — PASS.
 - `git diff --check` — PASS.
 - `pnpm audit --prod --audit-level high` — PASS: no known Production
   dependency vulnerabilities.
-- `gitleaks detect --source . --redact --no-banner` — PASS: 460 commits and
+- `gitleaks detect --source . --redact --no-banner` — PASS: 464 commits and
   approximately 12.95 MB scanned with no leaks.
 - High-signal scan of the new command surface found no client secret reads,
   unsafe HTML/DOM sinks, dynamic execution, Web Storage credentials,

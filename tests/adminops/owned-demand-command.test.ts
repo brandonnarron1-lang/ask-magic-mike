@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  buildOwnedDemandChannelPacket,
   buildOwnedDemandCommand,
   type OwnedDemandAttributionSignal,
 } from "../../app/lib/growth/owned-demand";
@@ -183,6 +184,23 @@ describe("Owned Demand Command", () => {
     expect(copy).not.toMatch(/instant answer|exact value|best neighborhood|outperforming|guaranteed value|guaranteed result|\$\d{2,}/i);
     expect(copy).toContain("no automated appraisal or guaranteed offer");
   });
+
+  it("builds one complete, approval-bounded packet per channel", () => {
+    const result = buildOwnedDemandCommand({ summary: summary(), ownedDemandSignals: [] });
+    const facebook = result.channels.find((channel) => channel.key === "facebook");
+    expect(facebook).toBeDefined();
+
+    const packet = buildOwnedDemandChannelPacket(facebook!);
+    expect(packet).toContain("FACEBOOK OWNED-DEMAND FLIGHT");
+    expect(packet).toContain("GENERAL QUESTION PLACEMENT");
+    expect(packet).toContain(facebook!.trackedUrl);
+    for (const offer of facebook!.offers) {
+      expect(packet).toContain(offer.draftTitle);
+      expect(packet).toContain(offer.trackedUrl);
+      expect(packet).toContain(offer.reviewNote);
+    }
+    expect(packet).toContain("External publication remains a separate human-reviewed approval.");
+  });
 });
 
 describe("canonical /admin/distribution route guards", () => {
@@ -210,6 +228,10 @@ describe("canonical /admin/distribution route guards", () => {
     expect(page).toContain("CopyDemandAsset");
     expect(page).toContain("Three-offer launch flight");
     expect(page).toContain("Three offer-specific placements");
+    expect(page).toContain("Copy full channel flight");
+    expect(page).toContain("Recommended first move");
+    expect(page).toContain("Open first channel packet");
+    expect(page).toContain('href={`#channel-${firstMove.channelKey}`}');
     expect(copyControl).toContain('type="button"');
     expect(copyControl).toContain("navigator.clipboard.writeText");
     expect(copyControl).not.toMatch(/fetch\(|XMLHttpRequest|sendBeacon|<form|use server/i);
