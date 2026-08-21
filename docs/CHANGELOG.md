@@ -11,6 +11,8 @@
 - Rewrote retained campaign copy to remove unsupported performance, valuation,
   demand, school-proxy, response-time, superlative, and conflicting public-phone
   claims; added dedicated regression coverage.
+- Updated the reusable visual-smoke contract so rendered QA requires the factual
+  broker-review credential instead of the removed tenure claim.
 - Extended the UTM allowlist only for the existing canonical `/home-value`,
   `/buy`, and `/rent` routes; arbitrary and cross-system destinations remain
   blocked.

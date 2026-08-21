@@ -24,7 +24,7 @@ const REQUIRED_VALUE = [
   "Mike Eatmon",
   "Our Town Properties, Inc.",
   "Licensed in North Carolina",
-  "Selling real estate since 1993",
+  "Broker-reviewed request path",
   "Compare selling options",
   "Request direct-purchase review",
   "Ask Mike a question",
