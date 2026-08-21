@@ -230,6 +230,14 @@ describe("MLS_PATTERN", () => {
     expect(MLS_PATTERN.test("MATRIX listing 1234")).toBe(true);
   });
 
+  it("does not mistake an ordinary readiness matrix for MLS data", () => {
+    expect(MLS_PATTERN.test("Read the approved form-readiness matrix")).toBe(false);
+  });
+
+  it("matches MATRIX when listing context comes first", () => {
+    expect(MLS_PATTERN.test("listing export from MATRIX")).toBe(true);
+  });
+
   it("matches flexmls", () => {
     expect(MLS_PATTERN.test("flexmls export")).toBe(true);
   });

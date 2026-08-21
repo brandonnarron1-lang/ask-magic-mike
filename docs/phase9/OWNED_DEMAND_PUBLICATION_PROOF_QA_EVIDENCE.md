@@ -1,7 +1,7 @@
 # Owned-Demand Publication Proof Ledger QA Evidence
 
 Date: 2026-08-21
-Status: local database contract and full release gate passed; final exact-head CI and Preview pending; Production unchanged
+Status: local database contract and full release gate passed; exact-head CI and Preview are tracked on PR #184; Production unchanged
 
 ## Scope and truth boundary
 
@@ -63,13 +63,22 @@ Covered contracts include:
 
 Additional completed checks:
 
-- `pnpm run release:gate` — PASS at `2026-08-21T18:08Z`:
-  system isolation, 14/14 release-safety controls, 200 test files / 2,825
+- `pnpm run release:gate` — PASS after the operating-truth/tooling
+  reconciliation at `2026-08-21T18:32Z`: system isolation, 14/14
+  release-safety controls, 200 test files / 2,828
   tests, strict typecheck, ESLint, Next.js 15.5.21 Production build, and 78
   active routes with 17 acknowledged root/src duplicates.
+- `pnpm run amm:launch:doctor` — PASS with 25 code/document checks, zero
+  failures, and 17 authenticated-host environment verifications intentionally
+  skipped because Production secrets are not loaded locally.
+- `pnpm run amm:launch:authority` — zero code/document failures; external
+  environment verification remains owner-scoped. The current scanner checks PR
+  #181, canonical Neon/Better-Auth/Resend/Web-Push names, both deployable app
+  trees, and does not mistake an ordinary readiness matrix for MLS data.
+- Focused launch-scanner tests — PASS, 2 files / 82 tests.
 - `pnpm audit --prod --audit-level high` — PASS; no known vulnerabilities.
 - `gitleaks detect --source . --redact --no-banner` — PASS; no leaks found
-  across 465 commits and approximately 13.05 MB scanned.
+  in the redacted full-history scan.
 - `git diff --check` — PASS.
 - Production-render Playwright visual smoke — PASS, 10/10 desktop/mobile
   checks across `/home-value`, `/ask`, `/embed/ask`, `/widget-preview`, and
@@ -82,21 +91,22 @@ Additional completed checks:
   `c60c1a6e692d487e0adfd98d0eb3a9cff89ad77a3233b53075a4c8b63bde3ede`
   matched and output contained no connection string.
 - Draft PR [#184](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/184)
-  remains correctly stacked on PR #183. Pre-database-hardening head
-  `cfc5a08967c48997b444e15b4e317cbacc0267f3` passed the complete Node 24
+  remains correctly stacked on PR #183. Code-bearing database-hardening head
+  `755cf686fccea3facd0071aebbdd24734e818ccd` passed the complete Node 24
   release gate in GitHub run
-  [32509835413](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32509835413).
-- Its matching Vercel Preview `dpl_FPmHXBqKc1tWZpgHG1FK79aNhzs1` is Ready on
+  [32512057769](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32512057769).
+- Its matching Vercel Preview `dpl_4JxCp1UxebTPof1fvK55NTrrnHqY` is Ready on
   Node 24 at
-  `https://ask-magic-mike-o7kgzmrx3-eyes-up-industries.vercel.app`.
+  `https://ask-magic-mike-28htaxkie-eyes-up-industries.vercel.app`.
   Protection-bypassed read-only checks returned 200 for `/`, `/home-value`,
   `/buy`, `/rent`, `/api/health/live`, and `/api/health/ready`; the live health
   response identified `ask-magic-mike`, Preview, canonical Neon configuration,
   and disabled notification sending. Anonymous `/admin/distribution` returned
   401 with Basic challenge, `no-store`, `SAMEORIGIN`, and noindex headers.
   Root identity contained Ask Magic Mike and Our Town Properties markers and no
-  NellySelly marker. The later database hardening intentionally supersedes this
-  exact head, so fresh CI and Preview evidence are required after push.
+  NellySelly marker. The final documentation/tooling head must retain the same
+  required GitHub/Vercel checks; those mutable exact-head identifiers belong in
+  PR metadata rather than a self-referential evidence commit.
 - Docker Desktop was recovered with its own force-stop/start controls; no
   container or volume was deleted. A disposable local reset applied all 33
   migrations through `20260821170000`. The CLI returned a 502 only while
@@ -152,8 +162,8 @@ development run is not counted as release evidence.
 
 ## Remaining candidate proof
 
-- after the database-hardening evidence commit, obtain a final green exact-head
-  Node 24 CI run and Ready Vercel Preview;
+- immediately before any merge, verify PR #184's current immutable head has a
+  green Node 24 release gate and matching Ready Vercel Preview;
 - do not bypass authenticated Preview access merely to render mutation controls.
   The Preview fail-closed-before-query path is covered by unit tests; the real
   authenticated record flow remains post-migration Production verification.

@@ -128,7 +128,7 @@ export function findNoveltyCopy(files) {
  * Admin-only files are excluded since MLS data can be imported there.
  */
 export const MLS_PATTERN =
-  /\b(?:MATRIX|flexmls|rets\b|idx_feed|mls_number|mls_id|IDX_PIN|RETS_URL)\b/i;
+  /\b(?:flexmls|rets\b|idx_feed|mls_number|mls_id|IDX_PIN|RETS_URL)\b|\bMATRIX\b(?=[^\n]{0,48}\b(?:listing|mls|feed|export)\b)|\b(?:listing|mls|feed|export)\b(?=[^\n]{0,48}\bMATRIX\b)/i;
 
 export const MLS_ALLOWLIST = [
   "(admin)",
@@ -140,6 +140,26 @@ export const MLS_ALLOWLIST = [
   "listing.schema",
   "analytics/events",
   "brand-pack-assets",
+];
+
+export const REQUIRED_PRODUCTION_ENV_VARS = [
+  "DATABASE_URL",
+  "DATABASE_ENV",
+  "LEAD_CENTER_RBAC_ENABLED",
+  "BETTER_AUTH_URL",
+  "BETTER_AUTH_SECRET",
+  "ADMIN_SECRET",
+  "NEXT_PUBLIC_SITE_URL",
+  "EMAIL_PROVIDER",
+  "EMAIL_ENABLED",
+  "RESEND_API_KEY",
+  "RESEND_WEBHOOK_SECRET",
+  "LEAD_NOTIFICATION_TO",
+  "LEAD_NOTIFICATION_BCC",
+  "PHONE_SETUP_SIGNING_SECRET",
+  "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
+  "VAPID_PRIVATE_KEY",
+  "VAPID_SUBJECT",
 ];
 
 export function findMlsMarkers(files) {
@@ -288,7 +308,7 @@ if (isMain) {
   // ── Release log currency check ───────────────────────────────────────────
   console.log("\n[Release log currency]");
   const releaseLogPath = join(ROOT, "docs/PRODUCTION_RELEASE_LOG.md");
-  for (const prNum of [136]) {
+  for (const prNum of [181]) {
     const logResult = releaseLogMentionsPr(releaseLogPath, prNum);
     if (logResult.ok) {
       pass(`release log mentions PR #${prNum}`);
@@ -390,19 +410,7 @@ if (isMain) {
 
   // ── Owner-gated environment variable check ───────────────────────────────
   console.log("\n[Owner-gated env var checks (production — not verifiable here)]");
-  const requiredProdVars = [
-    "DATABASE_URL",
-    "ADMIN_SECRET",
-    "NEXT_PUBLIC_SITE_URL",
-    "DATABASE_ENV",
-    "PHONE_SETUP_SIGNING_SECRET",
-    "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
-    "VAPID_PRIVATE_KEY",
-    "VAPID_SUBJECT",
-    "LEAD_NOTIFICATION_TO",
-    "LEAD_NOTIFICATION_BCC",
-  ];
-  for (const v of requiredProdVars) {
+  for (const v of REQUIRED_PRODUCTION_ENV_VARS) {
     if (process.env[v]) {
       pass(`env var present locally: ${v}`);
     } else {

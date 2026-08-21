@@ -1,5 +1,34 @@
 # Production Release Log
 
+## [PR #181] Immutable first-human-response intelligence
+
+**Merged:** 2026-08-21
+**Production commit:** `5335697edf31eed0b8a38cd0295a4f5e7d501a3e`
+**Deployment:** `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM` (`READY`)
+**Migration:** `20260820013000_phase9_first_response_intelligence.sql`
+
+- Added one immutable first-human-response milestone per lead with actor,
+  assignment snapshot, source, and audit evidence.
+- Growth reporting now exposes test-excluded sample size and P50/P75/P90
+  response time without inferring first response from mutable contact fields.
+- The guarded Neon migration, backup, postflight, exact-head CI/Preview,
+  canonical-host, health, and identity-isolation checks passed.
+- No fabricated prospect, consumer message, campaign publication, paid spend,
+  DNS change, WordPress change, or NellySelly mutation occurred.
+
+## [PR #180] Outcome-ledger lifecycle seam
+
+**Merged:** 2026-08-20
+**Production commit:** `42f80b209d5d5adc984c1d8b439c7fa830d015e6`
+**Deployment:** `dpl_2PQoDZLHc562SBEY7px91CAEUrin` (`READY`)
+
+- Coupled evidence-bearing Lead Center lifecycle changes to one idempotent
+  business outcome and immutable audit event.
+- Preserved test/suppression state and restricted actual brokerage revenue to
+  approved roles.
+- Guarded Neon migration, backup, postflight, canonical-host, health, and
+  identity-isolation checks passed.
+
 ## [PR #137] Free-first security and reliability consolidation
 
 **Merged:** 2026-08-14

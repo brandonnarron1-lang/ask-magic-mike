@@ -41,9 +41,9 @@ Updated 2026-08-21.
   `e9fbc48ed436c74aa9ab178c426626230f8ddf9b`; PR #183 remains unchanged and
   retains its separate campaign release gate.
 - The full local release gate passes system isolation, 14/14 safety checks,
-  200 test files / 2,825 tests, strict typecheck, ESLint, the Next.js 15.5.21
+  200 test files / 2,828 tests, strict typecheck, ESLint, the Next.js 15.5.21
   Production build, and the 78-route manifest. Production dependencies report
-  no known vulnerabilities; a redacted 465-commit scan reports no secret
+  no known vulnerabilities; a redacted full-history scan reports no secret
   leaks. Production-render Playwright checks pass 10/10 desktop/mobile routes
   with no overflow, missing required copy, prohibited claim, bare-appraisal
   wording, or console error. The migration hash/plan gate passes. A disposable
@@ -51,20 +51,28 @@ Updated 2026-08-21.
   `staging:local:verify` passes the real PostgreSQL 17.6 role, idempotency,
   audit, host, RLS, and immutability contract with all synthetic changes rolled
   back.
-- Draft PR #184 is correctly stacked on PR #183. Its pre-hardening head
-  `cfc5a08967c48997b444e15b4e317cbacc0267f3` passed exact-head Node 24 CI run
-  `32509835413`. Ready Preview deployment
-  `dpl_FPmHXBqKc1tWZpgHG1FK79aNhzs1` serves the expected public/health routes,
+- Draft PR #184 is correctly stacked on PR #183. Code-bearing hardening head
+  `755cf686fccea3facd0071aebbdd24734e818ccd` passed exact-head Node 24 CI run
+  `32512057769`. Ready Preview deployment
+  `dpl_4JxCp1UxebTPof1fvK55NTrrnHqY` serves the expected public/health routes,
   identifies only Ask Magic Mike/Our Town Properties, and denies anonymous
   `/admin/distribution` access with 401, Basic challenge, no-store, SAMEORIGIN,
-  and noindex controls. No Preview mutation was attempted. The database
-  hardening supersedes that head, so final exact-head CI/Preview must be rerun
-  after push.
+  and noindex controls. No Preview mutation was attempted. A later
+  documentation-only reconciliation does not change runtime behavior; its
+  exact-head GitHub/Vercel status is kept in PR #184's required checks and
+  Preview metadata rather than frozen into this file.
 - Vercel CLI verification created empty helper project
   `amm-phase9-publication-ledger-20260821`
   (`prj_QcHch6KY1m2g0BKtOoVVFregRhho`) before the worktree was relinked to the
   canonical project. It has zero deployments and no application/domain effect;
   it remains preserved pending a separate exact cleanup approval.
+- Reconciled the current operating authority, asset manifest, consolidation
+  plan, release queue, limitations, daily Lead Center guide, architecture,
+  release log, and final report without deleting historical evidence. The
+  launch doctor/authority scanners now check PR #181, canonical
+  Neon/Better-Auth/Resend/Web-Push variable names, both deployable app trees,
+  and MLS-contextual MATRIX usage instead of falsely rejecting the ordinary
+  phrase `form-readiness matrix`. Focused scanner coverage passes 82/82.
 - No Production database write, code deployment, WordPress change, provider
   call, email, SMS, social/GBP publication, print distribution, spend, DNS
   change, or NellySelly mutation occurred.
