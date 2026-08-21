@@ -65,6 +65,8 @@
     "/manifest.webmanifest",
     "/open-house/[propertyOrId]",
     "/plan",
+    "/phone-alerts/install/[token]",
+    "/phone-alerts/install/[token]/manifest.webmanifest",
     "/phone-alerts/setup",
     "/phone-alerts/setup/claim",
     "/privacy",
@@ -85,7 +87,7 @@
   "required": {
     "public": [
       "/", "/home-value", "/value", "/sell", "/we-buy-houses", "/ask", "/buy", "/rent", "/open-house/[propertyOrId]", "/thank-you",
-      "/privacy", "/terms", "/accessibility", "/contact", "/plan", "/phone-alerts/setup", "/phone-alerts/setup/claim",
+      "/privacy", "/terms", "/accessibility", "/contact", "/plan", "/phone-alerts/install/[token]", "/phone-alerts/install/[token]/manifest.webmanifest", "/phone-alerts/setup", "/phone-alerts/setup/claim",
       "/widget", "/widget/v1", "/widget-preview", "/embed/ask",
       "/integrations/ourtownproperties", "/robots.txt", "/sitemap.xml", "/social-preview"
     ],
@@ -120,7 +122,9 @@
     "/api/admin/operations/first-live": "active-required-by-vercel-cron",
     "/api/admin/sla/sweep": "active-required-by-vercel-cron",
     "/api/webhooks/sms/inbound": "active-signed-or-admin-authenticated-mock-boundary",
-    "/plan": "active-public-device-private-recurring-value"
+    "/plan": "active-public-device-private-recurring-value",
+    "/phone-alerts/install/[token]": "active-short-lived-copy-only-ios-install-handoff",
+    "/phone-alerts/install/[token]/manifest.webmanifest": "active-no-store-token-scoped-install-manifest"
   },
   "acknowledgedRootSrcDuplicates": [
     "/", "/admin", "/admin/distribution", "/admin/leads", "/admin/leads/[id]", "/api/admin/health", "/api/admin/sla/sweep", "/api/health/live", "/api/health/ready", "/api/leads", "/api/listings/[id]", "/api/listings/search", "/api/webhooks/email/events",

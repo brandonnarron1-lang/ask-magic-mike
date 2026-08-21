@@ -40,6 +40,32 @@ const privateLeadCenterHeaders = [
   },
 ];
 
+// Phone-install links contain a short-lived, copy-role-only setup capability.
+// Keep this rule after the site-wide defaults so Next applies the stricter
+// privacy policy to every install, manifest, claim, and setup response.
+const privatePhoneAlertHeaders = [
+  {
+    key: "Cache-Control",
+    value: "private, no-cache, no-store, max-age=0, must-revalidate",
+  },
+  {
+    key: "Referrer-Policy",
+    value: "no-referrer",
+  },
+  {
+    key: "Content-Security-Policy",
+    value: "frame-ancestors 'self'",
+  },
+  {
+    key: "X-Frame-Options",
+    value: "SAMEORIGIN",
+  },
+  {
+    key: "X-Robots-Tag",
+    value: "noindex, nofollow, noarchive",
+  },
+];
+
 const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
@@ -62,6 +88,10 @@ const nextConfig: NextConfig = {
       {
         source: "/widget/:path*",
         headers: [widgetFrameAncestors],
+      },
+      {
+        source: "/phone-alerts/:path*",
+        headers: privatePhoneAlertHeaders,
       },
       {
         source: "/admin/:path*",

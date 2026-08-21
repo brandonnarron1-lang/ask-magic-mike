@@ -31,6 +31,8 @@ import { POST as adminInvite } from "../../app/admin/api/phone-alerts/invite/rou
 import { POST as subscribe } from "../../app/api/phone-alerts/subscription/route";
 import { POST as sendTest } from "../../app/api/phone-alerts/test/route";
 import { GET as claim } from "../../app/phone-alerts/setup/claim/route";
+import { GET as installManifest } from "../../app/phone-alerts/install/[token]/manifest.webmanifest/route";
+import { generateMetadata as installMetadata } from "../../app/phone-alerts/install/[token]/page";
 
 const COPY_ID = "11111111-1111-4111-8111-111111111111";
 const originalEnv = {
@@ -81,7 +83,7 @@ describe("passwordless Brandon phone setup routes", () => {
     const body = await response.json();
     expect(response.status).toBe(200);
     expect(body.ok).toBe(true);
-    expect(body.url).toMatch(/^https:\/\/www\.askmagicmike\.com\/phone-alerts\/setup\/claim\?token=/);
+    expect(body.url).toMatch(/^https:\/\/www\.askmagicmike\.com\/phone-alerts\/install\/[A-Za-z0-9_.-]+$/);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
   });
 
@@ -91,7 +93,7 @@ describe("passwordless Brandon phone setup routes", () => {
     }));
     const body = await response.json();
     expect(response.status).toBe(200);
-    expect(body.url).toMatch(/^https:\/\/www\.askmagicmike\.com\/phone-alerts\/setup\/claim\?token=/);
+    expect(body.url).toMatch(/^https:\/\/www\.askmagicmike\.com\/phone-alerts\/install\/[A-Za-z0-9_.-]+$/);
 
     const denied = await adminInvite(post("/admin/api/phone-alerts/invite", {}, {
       authorization: `Basic ${Buffer.from("admin:wrong").toString("base64")}`,
@@ -110,6 +112,44 @@ describe("passwordless Brandon phone setup routes", () => {
     expect(cookie).toContain("Secure");
     expect(cookie).toContain("SameSite=strict");
     expect(response.headers.get("Referrer-Policy")).toBe("no-referrer");
+  });
+
+  it("serves a private token-scoped install manifest whose start URL redeems inside the installed app", async () => {
+    const token = mintPhoneSetupToken().token;
+    const response = await installManifest(
+      new Request(`https://www.askmagicmike.com/phone-alerts/install/${encodeURIComponent(token)}/manifest.webmanifest`),
+      { params: Promise.resolve({ token }) },
+    );
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toContain("application/manifest+json");
+    expect(response.headers.get("Cache-Control")).toContain("no-store");
+    expect(response.headers.get("Referrer-Policy")).toBe("no-referrer");
+    expect(response.headers.get("X-Robots-Tag")).toContain("noindex");
+    expect(body).toMatchObject({
+      id: "/phone-alerts",
+      scope: "/",
+      display: "standalone",
+      start_url: `/phone-alerts/setup/claim?token=${encodeURIComponent(token)}`,
+    });
+  });
+
+  it("never emits an install manifest or manifest link for an invalid token", async () => {
+    const response = await installManifest(
+      new Request("https://www.askmagicmike.com/phone-alerts/install/invalid/manifest.webmanifest"),
+      { params: Promise.resolve({ token: "invalid" }) },
+    );
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({ error: "phone_setup_link_expired" });
+    expect((await installMetadata({ params: Promise.resolve({ token: "invalid" }) })).manifest).toBeUndefined();
+  });
+
+  it("links a valid install page to only its own token-scoped manifest", async () => {
+    const token = mintPhoneSetupToken().token;
+    const metadata = await installMetadata({ params: Promise.resolve({ token }) });
+    expect(metadata.manifest).toBe(`/phone-alerts/install/${encodeURIComponent(token)}/manifest.webmanifest`);
+    expect(metadata.robots).toMatchObject({ index: false, follow: false });
+    expect(metadata.referrer).toBe("no-referrer");
   });
 
   it("never sets a setup cookie for an invalid invite", async () => {
