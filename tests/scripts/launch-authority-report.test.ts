@@ -163,11 +163,20 @@ describe("findMissingPackageScripts", () => {
 
 describe("OWNER_GATED_VARS", () => {
   it("includes all critical production env var names", () => {
-    expect(OWNER_GATED_VARS).toContain("NEXT_PUBLIC_SUPABASE_URL");
-    expect(OWNER_GATED_VARS).toContain("SUPABASE_SERVICE_ROLE_KEY");
+    expect(OWNER_GATED_VARS).toContain("DATABASE_URL");
+    expect(OWNER_GATED_VARS).toContain("DATABASE_ENV");
+    expect(OWNER_GATED_VARS).toContain("BETTER_AUTH_SECRET");
     expect(OWNER_GATED_VARS).toContain("ADMIN_SECRET");
     expect(OWNER_GATED_VARS).toContain("NEXT_PUBLIC_SITE_URL");
-    expect(OWNER_GATED_VARS).toContain("NEXT_PUBLIC_AGENT_LICENSE");
+    expect(OWNER_GATED_VARS).toContain("RESEND_API_KEY");
+    expect(OWNER_GATED_VARS).toContain("LEAD_NOTIFICATION_BCC");
+    expect(OWNER_GATED_VARS).toContain("VAPID_PRIVATE_KEY");
+  });
+
+  it("does not request retired Supabase Production credentials", () => {
+    expect(OWNER_GATED_VARS).not.toContain("NEXT_PUBLIC_SUPABASE_URL");
+    expect(OWNER_GATED_VARS).not.toContain("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+    expect(OWNER_GATED_VARS).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
   });
 
   it("does not include any var with a value embedded", () => {
@@ -206,7 +215,8 @@ describe("findMissingEnvVars", () => {
 
   it("OWNER_GATED_VARS are all missing in local test environment (expected)", () => {
     const missingInTest = findMissingEnvVars(OWNER_GATED_VARS);
-    // In the local test environment without prod secrets, all 6 should be missing
+    // In the local test environment without Production secrets, at least one
+    // variable must be reported as an owner-scoped verification item.
     // This confirms the SKIP_OWNER behavior is correct
     expect(missingInTest.length).toBeGreaterThan(0);
   });

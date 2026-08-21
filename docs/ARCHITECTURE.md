@@ -1,8 +1,9 @@
 # Architecture
 
-> Current source of truth (2026-08-14): Next.js root `app/`, Vercel project
+> Current source of truth (2026-08-21): Next.js root `app/`, Vercel project
 > `eyes-up-industries/ask-magic-mike`, and Neon PostgreSQL project
-> `bitter-star-20214385`. See `CURRENT_STATE_RECONCILIATION.md`. Sections below
+> `bitter-star-20214385`. See `CURRENT_STATE_RECONCILIATION.md` and
+> `OWNER_APPROVAL_QUEUE.md`. Sections below
 > that describe Supabase as canonical or `/api/intake/submit` as the active
 > public path are `SUPERSEDED` historical design notes retained for provenance.
 
@@ -192,7 +193,7 @@ Every report stores the disclaimer text verbatim alongside the estimate. The `di
 **Analytics never blocks.** `trackEventNoWait()` fires and forgets. Zero risk of analytics failure causing an intake failure.
 
 **Money in cents.** All price values (sale price, estimate) are stored as BIGINT in cents to avoid floating point rounding issues.
-# Consolidated same-day lead pipe (2026-08-10)
+# Canonical Production lead pipe (refreshed 2026-08-21)
 
 This section is the active architecture decision for the Ask Magic Mike / Our Town
 Properties lead flow. Older design notes in this file remain historical unless they
@@ -225,10 +226,11 @@ Provider failure never rolls back a durable lead. A public success response is o
 returned after the atomic capture succeeds. Notification status is reported from
 the outbox, not inferred from an HTTP 200 from the public form.
 
-The existing atomic RPC remains the first durable write for compatibility with the
-current release branch. The additive enrichment call immediately patches the same
-lead/source rows and appends immutable consent evidence before the notification
-service runs; the production migration is therefore a prerequisite for promotion.
+The existing atomic RPC remains the first durable write. Additive enrichment
+patches the same lead/source rows and appends immutable consent evidence before
+the notification service runs. Any release that changes this contract must carry
+its own reviewed migration, exact approval, preflight, transaction, postflight,
+and rollback evidence before promotion.
 
 ## Active route boundary
 
@@ -247,11 +249,13 @@ fields are excluded.
 
 ## Rollback
 
-The rescue branch created before consolidation is
-`rescue/amm-pre-consolidation-20260810-162915`. Production rollback is a Vercel
-deployment rollback or redeploy of the last known-good production commit, subject
-to owner approval. Database migrations are additive and have explicit rollback
-notes; no live migration is applied by this task.
+The recorded Production baseline is PR #181 merge
+`5335697edf31eed0b8a38cd0295a4f5e7d501a3e`, Vercel deployment
+`dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`. Application rollback re-points aliases to
+the recorded prior Ready artifact. Database rollback is release-specific,
+backup-first, and evidence-preserving; lead, consent, notification, response,
+outcome, and audit records are never deleted merely to roll back application
+code.
 
 ## Operating-intelligence outcome boundary (Phase 9)
 
@@ -292,3 +296,32 @@ for historical credit. Unattributed evidence stays explicit, and every segment
 shows sample size/maturity before an operator treats it as directional or
 operational. Application rollback returns to v2; milestone and audit evidence
 is preserved.
+
+## Evidence-first KPI target boundary (Phase 9)
+
+The protected `/admin/growth/targets` route is a thin operator layer over the
+existing server-only Growth intelligence view. It does not create a second
+analytics pipeline. Thirty-eight canonical KPI definitions resolve a baseline for
+one 30-, 90-, or 365-day window and classify it as measured, directional,
+insufficient-sample, uninstrumented, or unavailable.
+
+Only a measured server-resolved baseline can carry a numeric target. The client
+cannot submit baseline values, and unsupported states remain null rather than
+rendering a false zero. Each target decision appends one immutable
+`growth_kpi_target_versions` row and one audit event through a parameterized,
+idempotent security-invoker RPC. Browser database roles have no access; the
+application rechecks `growth:manage`, fails closed in Preview, and rate-limits
+the authenticated operator. AI, providers, consumer messaging, lead routing,
+and campaign publication are outside this boundary.
+
+The same existing analytics ledger receives a narrowly allowlisted
+`web_vital_observed` event from the canonical public host in Production only.
+It carries no lead/session identity, attribution, query URL, raw IP, or raw user
+agent. The Growth view deduplicates LCP/INP/CLS metric IDs and calculates field
+P75 values; samples below the documented thresholds remain null. Accessibility,
+mobile technical success, and durable funnel completion stay explicitly
+uninstrumented until their separate human-evaluation or privacy-safe cohort
+contracts exist.
+
+Application rollback leaves the additive register dormant. Historical target
+and audit versions are retained; corrections are appended, never rewritten.

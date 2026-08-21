@@ -117,6 +117,11 @@ describe("buildUtmUrl", () => {
     expect(url).toContain("utm_content=facebook_post");
   });
 
+  it.each(["/home-value", "/sell", "/buy", "/rent"])("allows the canonical %s offer route", (pathname) => {
+    const url = buildUtmUrl(`https://www.askmagicmike.com${pathname}`, BASE_PARAMS);
+    expect(new URL(url).pathname).toBe(pathname);
+  });
+
   it("uses ? separator for URLs with no existing query string", () => {
     const url = buildUtmUrl("https://www.askmagicmike.com/ask", BASE_PARAMS);
     expect(url).toContain("?utm_source=");

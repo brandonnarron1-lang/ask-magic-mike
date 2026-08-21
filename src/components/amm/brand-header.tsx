@@ -1,14 +1,12 @@
 import Image from "next/image";
 import { Phone } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { siteConfig } from "@/lib/site-config";
 import { motion } from "./motion";
 import { brandPackAssets } from "./brand-pack-assets";
 
-const AGENT_PHONE = process.env.NEXT_PUBLIC_AGENT_PHONE ?? "+12522454337";
-const PHONE_DISPLAY = AGENT_PHONE.replace(/^\+1/, "").replace(
-  /(\d{3})(\d{3})(\d{4})/,
-  "($1) $2-$3"
-);
+const AGENT_PHONE = siteConfig.agentPhone;
+const PHONE_DISPLAY = siteConfig.agentPhoneDisplay;
 
 interface BrandHeaderProps {
   className?: string;

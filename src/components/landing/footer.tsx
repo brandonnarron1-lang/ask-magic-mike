@@ -71,11 +71,11 @@ export function Footer() {
               </div>
             </div>
             <p className="text-xs leading-relaxed text-slate-500">
-              Eastern NC&apos;s real estate AI. Instant answers, expert follow-up,
-              and the most experienced closer in Eastern North Carolina.
+              A broker-reviewed path for Wilson and Eastern North Carolina real
+              estate questions, planning, and local follow-up.
             </p>
             <div className="white-rule my-3" />
-            <p className="text-[10px] text-slate-600 tracking-wide">Since 1993 · Wilson, NC</p>
+            <p className="text-[10px] text-slate-600 tracking-wide">Our Town Properties · Wilson, NC</p>
           </div>
 
           {/* Contact */}
@@ -84,14 +84,10 @@ export function Footer() {
             <div className="space-y-2 text-xs text-slate-400">
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="status-online" aria-hidden="true" />
-                <span className="text-[11px] text-slate-500">Broker available</span>
+                <span className="text-[11px] text-slate-500">Brokerage contact</span>
               </div>
               <div>
-                <span className="text-slate-600 text-[10px] uppercase tracking-label block mb-0.5">Direct</span>
-                <a href="tel:2522454337" className="hover:text-gold-400 transition-colors">252-245-4337</a>
-              </div>
-              <div>
-                <span className="text-slate-600 text-[10px] uppercase tracking-label block mb-0.5">Office</span>
+                <span className="text-slate-600 text-[10px] uppercase tracking-label block mb-0.5">Public office</span>
                 <a href="tel:2522437700" className="hover:text-gold-400 transition-colors">252-243-7700</a>
               </div>
               <div>
@@ -109,7 +105,7 @@ export function Footer() {
             <h4 className="text-xs font-semibold tracking-label uppercase text-cream mb-4">Tools</h4>
             <div className="space-y-2 text-xs text-slate-400">
               <a href="/ask" className="block hover:text-gold-400 transition-colors">Ask a Question</a>
-              <a href="/value" className="block hover:text-gold-400 transition-colors">Home Value Estimate</a>
+              <a href="/value" className="block hover:text-gold-400 transition-colors">Home-Value Review</a>
               <a href="/distribution" className="block hover:text-gold-400 transition-colors">Partner Distribution</a>
               <a href="/campaigns" className="block hover:text-gold-400 transition-colors">Campaign Generator</a>
               <a href={siteConfig.parentBrandUrl} className="block hover:text-gold-400 transition-colors">Property Search</a>
@@ -135,9 +131,7 @@ export function Footer() {
           <span>© {new Date().getFullYear()} Our Town Properties, Inc. · Mike Eatmon, REALTOR®</span>
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-2 text-[10px] text-slate-700">
-              <span>10k+ questions answered</span>
-              <span className="text-slate-800">·</span>
-              <span>30+ yrs</span>
+              <span>Broker-reviewed guidance</span>
               <span className="text-slate-800">·</span>
               <span>Wilson NC</span>
             </span>

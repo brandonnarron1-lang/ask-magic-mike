@@ -11,34 +11,34 @@ const DEMO_EXCHANGES = [
   {
     question: "Is now a good time to buy in Wilson, NC?",
     answer:
-      "Wilson's median is around $195K — still one of the most accessible markets in Eastern NC. Inventory has loosened from the 2022 peak, and rates have moderated from their highs. If you're buying near the medical district or in the Fike school zone, you're entering markets where I've watched values hold through every cycle since I got licensed in '93.",
+      "That depends on your budget, financing readiness, timing, property needs, and the current options a person can verify. Share those details for a broker-reviewed buying-plan conversation; no property availability or financing outcome is assumed.",
     tag: "Market Timing",
-    toolCall: "Searching Wilson NC market conditions",
-    toolQuery: 'search({ market: "Wilson-NC", metrics: ["median_price", "inventory", "dom"] })',
-    sources: ["2024 MLS Data", "Rate Trends", "Inventory Analysis"],
-    confidence: 88,
-    followUps: ["What neighborhoods offer the most value?", "What's realistic for a first-time buyer?"],
+    toolCall: "Organizing buyer context for human review",
+    toolQuery: 'review({ market: "Wilson-NC", inputs: ["budget", "timing", "property_needs"] })',
+    sources: ["Consumer-provided goals", "Verified listing details", "Current lending information"],
+    confidence: 72,
+    followUps: ["What property features matter most?", "What should I verify before touring?"],
   },
   {
     question: "What makes a Wilson home worth more?",
     answer:
-      "Three things move the needle: school zone (Fike High vs. Hunt), proximity to the medical district, and lot depth. A Fike-zone home in similar condition will typically command $15–30K over a comparable address outside it.",
+      "A useful review considers the property condition, lot, improvements, location-specific facts, and verified comparable sales. Those inputs still require a person to review them; this example is not an appraisal and does not promise a specific value.",
     tag: "Home Value",
-    toolCall: "Analyzing comparable sales + school zones",
-    toolQuery: 'analyze({ type: "comps", zone: "Fike-High", filters: ["school_zone", "lot_depth"] })',
-    sources: ["School District Data", "Property Comps", "Wilson MLS"],
-    confidence: 91,
-    followUps: ["Can you show me Fike zone listings?", "What's the ROI on updating before selling?"],
+    toolCall: "Organizing property and comparable-sale factors",
+    toolQuery: 'review({ type: "property_context", inputs: ["condition", "lot", "verified_comps"] })',
+    sources: ["Public property records", "Verified comparable sales", "Consumer-provided condition"],
+    confidence: 74,
+    followUps: ["Which property facts should I gather?", "How are improvements documented?"],
   },
   {
     question: "How fast are homes selling right now?",
     answer:
-      "Well-priced homes in good condition are going under contract in 12–21 days. Overpriced or deferred-maintenance listings are sitting 60+ days and taking price cuts. Presentation and pricing discipline matter more than they did in 2021.",
+      "Timing varies by the specific property, condition, pricing, current competition, and buyer activity. A broker-reviewed conversation should use current authorized data and must not promise a contract or closing date.",
     tag: "Market Conditions",
-    toolCall: "Pulling days-on-market + absorption data",
-    toolQuery: 'query({ metrics: ["days_on_market", "absorption_rate"], period: "90d" })',
-    sources: ["Days on Market", "Price Reductions", "Absorption Rate"],
-    confidence: 85,
+    toolCall: "Preparing current property-specific timing review",
+    toolQuery: 'review({ inputs: ["property", "condition", "pricing", "current_competition"] })',
+    sources: ["Authorized current data", "Property condition", "Verified market context"],
+    confidence: 70,
     followUps: ["How should I price my Wilson home?", "What improvements reduce days on market?"],
   },
 ] as const;
@@ -173,7 +173,7 @@ export function AiDemoSection() {
             <span className="text-gold-shimmer italic">Mike delivers.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-md text-base leading-relaxed text-slate-400">
-            30 years. 2,500+ homes. Every answer draws on Mike&apos;s firsthand knowledge of Eastern NC — not generic real estate advice.
+            Illustrative intelligence organizes the property, timing, and questions for broker review. It does not invent current market facts.
           </p>
         </div>
 
@@ -482,7 +482,7 @@ export function AiDemoSection() {
 
         {/* Microcopy */}
         <p className="mt-6 text-center text-xs text-slate-600">
-          Representative examples based on real Wilson market conditions · Your question is reviewed personally by Mike Eatmon · Free · Not an appraisal.
+          Illustrative workflow only · Current facts require verification · A brokerage team member reviews the request · Not an appraisal.
         </p>
       </div>
     </section>

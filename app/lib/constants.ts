@@ -34,8 +34,8 @@ export const sellerPaths = [
 export const starterPrompts = [
   "What is my home worth?",
   "Should I sell now or wait?",
-  "What are buyers looking for in Wilson?",
-  "Can you help me compare neighborhoods?",
+  "What should I verify before choosing a home in Wilson?",
+  "Can you help me compare properties using my stated needs?",
   "What should I do before listing?",
 ];
 
@@ -69,6 +69,7 @@ export const analyticsEvents = [
   "notification_queued",
   "notification_delivered",
   "notification_failed",
+  "web_vital_observed",
   "review_plan_started",
   "review_plan_saved",
   "review_plan_task_completed",

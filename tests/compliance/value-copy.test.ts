@@ -68,7 +68,7 @@ describe("ComplianceFooter shared copy", () => {
       "Ask Magic Mike by Our Town Properties, Inc."
     );
     expect(complianceFooter).toContain("local guidance");
-    expect(complianceFooter).toContain("preliminary home value range");
+    expect(complianceFooter).toContain("broker-reviewed home-value conversation");
     expect(complianceFooter).toContain("not an appraisal");
     expect(complianceFooter).toContain(
       "does not create an agency relationship"
@@ -111,14 +111,14 @@ describe("/value page — professional trust-first copy", () => {
     expect(valueHero).toContain("Start with your address.");
     expect(valueHero).toContain("Get a local read on your home.");
     // Titan VI: prose replaced with micro-trust chips — verify presence of key trust signals
-    expect(valueHero).toContain("Wilson NC specialist");
+    expect(valueHero).toContain("Wilson-area context");
     expect(valueHero).toContain("Broker-reviewed");
   });
 
   it("uses the eyebrow and CTA copy", () => {
     expect(valueHero).toContain("Ask Magic Mike by Our Town Properties");
     // CTA copy lives inside the reusable ConversionPanel default.
-    expect(conversionPanel).toContain("See What Mike Says");
+    expect(conversionPanel).toContain("Request Home Review");
   });
 
   it("renders the three secondary path options as OptionCards", () => {
@@ -132,7 +132,7 @@ describe("/value page — professional trust-first copy", () => {
     // The line now lives in ConversionPanel (default microLine) and the
     // AiAssistBadge inline variant.
     expect(conversionPanel).toContain(
-      "Local expertise. Real answers. No call centers."
+      "Broker-reviewed guidance from Our Town Properties."
     );
   });
 
@@ -150,7 +150,7 @@ describe("/value page — professional trust-first copy", () => {
     expect(mikeTrustCard).toContain("Our Town Properties, Inc.");
     expect(mikeTrustCard).toContain("Licensed in North Carolina");
     expect(mikeTrustCard).toContain("Wilson, NC");
-    expect(mikeTrustCard).toContain("Selling real estate since 1993");
+    expect(mikeTrustCard).toContain("Broker-reviewed request path");
   });
 
   it("pulls headshot + logo from the brand-pack-v2 registry", () => {
@@ -177,7 +177,8 @@ describe("/value page — professional trust-first copy", () => {
 
   it("page metadata leads with trust-first copy", () => {
     expect(valuePage).toContain("Start with your address");
-    expect(valuePage).toContain("preliminary home value range");
+    expect(valuePage).toContain("broker-reviewed home-value and sale-readiness conversation");
+    expect(valuePage).toContain("no specific value is promised");
     expect(valuePage).not.toMatch(/guaranteed/i);
     expect(valuePage).not.toMatch(/instant cash offer/i);
   });
@@ -493,10 +494,10 @@ describe("site-config — single source of truth for brand/domain", () => {
     expect(siteConfigSrc).toContain("Wilson, NC");
   });
 
-  it("wires the agent phone through siteConfig", () => {
+  it("keeps public contact on the current brokerage office line", () => {
     expect(siteConfigSrc).toContain("agentPhone");
-    expect(siteConfigSrc).toContain("NEXT_PUBLIC_AGENT_PHONE");
-    expect(siteConfigSrc).toContain("252-245-4337");
+    expect(siteConfigSrc).toContain("252-243-7700");
+    expect(siteConfigSrc).not.toContain("252-245-4337");
   });
 });
 
@@ -543,6 +544,7 @@ describe("active root router SEO and headers", () => {
     expect(rootRobots).toContain("canonicalSiteUrl");
     expect(rootRobots).toContain("/admin");
     expect(rootRobots).toContain("/api/");
+    expect(rootRobots).toContain("/go/");
     expect(rootSitemap).toContain("siteConfig");
     expect(rootSitemap).toContain("canonicalSiteUrl");
     expect(rootSitemap).toContain("/home-value");
@@ -705,9 +707,10 @@ describe("question-input — broker trust microcopy", () => {
   });
 
   it("three-step What happens next panel contains correct steps", () => {
-    expect(questionInput).toContain("Ask your question");
-    expect(questionInput).toContain("Mike reviews it personally");
-    expect(questionInput).toContain("You get a real answer");
+    expect(questionInput).toContain("Share your question");
+    expect(questionInput).toContain("Our Town reviews it");
+    expect(questionInput).toContain("Choose follow-up");
+    expect(questionInput).not.toMatch(/personally|no call centers/i);
   });
 
   it("does NOT claim appraisal as a standalone positive (only as negation)", () => {
@@ -830,7 +833,7 @@ describe("Black Diamond V2 — confirmation value preview (step-confirmation)", 
   });
 
   it("adaptive bullets include buyer copy", () => {
-    expect(stepConfirmation).toContain("Active listings");
+    expect(stepConfirmation).toContain("Current authorized listings");
   });
 
   it("accepts question and intent props", () => {
@@ -845,11 +848,11 @@ describe("Black Diamond V2 — value funnel CTA polish (conversion-panel)", () =
   );
 
   it("uses warm CTA label default", () => {
-    expect(conversionPanel).toContain("See What Mike Says");
+    expect(conversionPanel).toContain("Request Home Review");
   });
 
   it("uses accurate micro-line copy", () => {
-    expect(conversionPanel).toContain("Local expertise. Real answers. No call centers.");
+    expect(conversionPanel).toContain("Broker-reviewed guidance from Our Town Properties.");
   });
 
   it("does NOT use the removed AI-assisted intake micro-line", () => {

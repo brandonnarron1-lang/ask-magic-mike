@@ -41,6 +41,17 @@ export interface PersistedGrowthRecommendation {
   createdAt: string;
 }
 
+export interface GrowthWebVitalsSnapshot {
+  configured: boolean;
+  lcpP75Ms: number | null;
+  lcpSampleSize: number;
+  inpP75Ms: number | null;
+  inpSampleSize: number;
+  clsP75: number | null;
+  clsSampleSize: number;
+  error?: string;
+}
+
 export interface GrowthIntelligenceView extends GrowthIntelligence {
   configured: boolean;
   schemaReady: boolean;
@@ -51,9 +62,11 @@ export interface GrowthIntelligenceView extends GrowthIntelligence {
   persistedOpportunities: PersistedGrowthOpportunity[];
   recommendations: PersistedGrowthRecommendation[];
   ownedDemandSignals: OwnedDemandAttributionSignal[];
+  webVitals: GrowthWebVitalsSnapshot;
   sourceRowsRead: number;
   spendRowsRead: number;
   outcomeRowsRead: number;
+  webVitalRowsRead: number;
 }
 
 function queryFromEnv(): Query | null {
@@ -114,9 +127,19 @@ function emptyView(
     persistedOpportunities: [],
     recommendations: [],
     ownedDemandSignals: [],
+    webVitals: {
+      configured: false,
+      lcpP75Ms: null,
+      lcpSampleSize: 0,
+      inpP75Ms: null,
+      inpSampleSize: 0,
+      clsP75: null,
+      clsSampleSize: 0,
+    },
     sourceRowsRead: 0,
     spendRowsRead: 0,
     outcomeRowsRead: 0,
+    webVitalRowsRead: 0,
     ...(error ? { error } : {}),
   };
 }
@@ -129,7 +152,8 @@ async function detectGrowthSchema(sql: Query) {
        to_regclass('public.lead_response_milestones') IS NOT NULL AS has_responses,
        to_regclass('public.growth_experiments') IS NOT NULL AS has_experiments,
        to_regclass('public.market_opportunities') IS NOT NULL AS has_opportunities,
-       to_regclass('public.growth_recommendations') IS NOT NULL AS has_recommendations`,
+       to_regclass('public.growth_recommendations') IS NOT NULL AS has_recommendations,
+       to_regclass('public.analytics_events') IS NOT NULL AS has_analytics`,
   ) as Row[];
   const row = rows[0] ?? {};
   return {
@@ -139,6 +163,7 @@ async function detectGrowthSchema(sql: Query) {
     experiments: booleanValue(row.has_experiments),
     opportunities: booleanValue(row.has_opportunities),
     recommendations: booleanValue(row.has_recommendations),
+    analytics: booleanValue(row.has_analytics),
   };
 }
 
@@ -229,6 +254,31 @@ function normalizeRecommendation(row: Row): PersistedGrowthRecommendation {
     status: text(row.status),
     generatedBy: text(row.generated_by),
     createdAt: timestamp(row.created_at),
+  };
+}
+
+function normalizeWebVitals(
+  rows: Row[],
+  configured: boolean,
+  error?: string,
+): GrowthWebVitalsSnapshot {
+  const byName = new Map(rows.map((row) => [text(row.metric_name).toUpperCase(), row]));
+  const metric = (name: "LCP" | "INP" | "CLS") => ({
+    p75: nullableNumber(byName.get(name)?.p75),
+    sampleSize: numberValue(byName.get(name)?.sample_size),
+  });
+  const lcp = metric("LCP");
+  const inp = metric("INP");
+  const cls = metric("CLS");
+  return {
+    configured,
+    lcpP75Ms: lcp.p75,
+    lcpSampleSize: lcp.sampleSize,
+    inpP75Ms: inp.p75,
+    inpSampleSize: inp.sampleSize,
+    clsP75: cls.p75,
+    clsSampleSize: cls.sampleSize,
+    ...(error ? { error } : {}),
   };
 }
 
@@ -408,6 +458,43 @@ export async function loadNeonGrowthIntelligence(
         ) as Row[]
       : [];
 
+    let webVitalRows: Row[] = [];
+    let webVitalError: string | undefined;
+    if (schema.analytics) {
+      try {
+        webVitalRows = await sql.query(
+          `WITH deduplicated AS (
+             SELECT DISTINCT ON (
+                      UPPER(properties->>'metric_code'),
+                      properties->>'metric_id'
+                    )
+                    UPPER(properties->>'metric_code') AS metric_name,
+                    (properties->>'metric_value')::numeric AS metric_value
+               FROM public.analytics_events
+              WHERE event_name = 'web_vital_observed'
+                AND occurred_at >= $1::timestamptz
+                AND properties->>'traffic_class' = 'public_production'
+                AND UPPER(properties->>'metric_code') IN ('LCP', 'INP', 'CLS')
+                AND jsonb_typeof(properties->'metric_value') = 'number'
+                AND COALESCE(properties->>'metric_id', '') ~ '^[a-zA-Z0-9._:-]{1,160}$'
+                AND COALESCE(properties->>'device_category', '') IN ('mobile', 'desktop')
+                AND COALESCE(user_agent, '') ~ '^browser/(mobile|desktop)$'
+              ORDER BY UPPER(properties->>'metric_code'),
+                       properties->>'metric_id', occurred_at DESC
+           )
+           SELECT metric_name,
+                  COUNT(*)::integer AS sample_size,
+                  percentile_cont(0.75) WITHIN GROUP (ORDER BY metric_value)::double precision AS p75
+             FROM deduplicated
+            GROUP BY metric_name
+            ORDER BY metric_name`,
+          [cutoff],
+        ) as Row[];
+      } catch {
+        webVitalError = "Canonical Web Vitals aggregate query failed";
+      }
+    }
+
     const leads = leadRows.map(normalizeLead);
     const spend = spendRows.map(normalizeSpend);
     const outcomes = outcomeRows.map(normalizeOutcome);
@@ -424,9 +511,11 @@ export async function loadNeonGrowthIntelligence(
       persistedOpportunities: opportunityRows.map(normalizePersistedOpportunity),
       recommendations: recommendationRows.map(normalizeRecommendation),
       ownedDemandSignals: buildOwnedDemandAttributionSignals(leadRows),
+      webVitals: normalizeWebVitals(webVitalRows, schema.analytics, webVitalError),
       sourceRowsRead: leadRows.length,
       spendRowsRead: spendRows.length,
       outcomeRowsRead: outcomeRows.length,
+      webVitalRowsRead: webVitalRows.reduce((total, row) => total + numberValue(row.sample_size), 0),
     };
   } catch {
     return emptyView(true, windowDays, now, "Canonical Neon growth intelligence query failed");

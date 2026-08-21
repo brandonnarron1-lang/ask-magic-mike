@@ -1,6 +1,6 @@
 # Documentation Authority
 
-Updated 2026-08-19. This register prevents dated build packets from overriding
+Updated 2026-08-21. This register prevents dated build packets from overriding
 the observed production system.
 
 ## Operating source of truth
@@ -9,14 +9,25 @@ Use these files for current decisions, in this order:
 
 1. `CURRENT_STATE_RECONCILIATION.md` — observed repository, deployment, runtime,
    database, authorization, and provider state.
-2. `CANONICAL_PRODUCTION_STACK.md` — immutable project and infrastructure
-   identities.
-3. `PRODUCTION_LAUNCH_GATE.md` — mandatory release checklist.
-4. `GO_LIVE_RUNBOOK.md` — deploy, verify, and rollback procedure.
-5. `ENVIRONMENT_VARIABLE_MATRIX.md` and `.env.example` — names, scopes, and safe
+2. `CANONICAL_ASSET_MANIFEST.md` and `CANONICAL_PRODUCTION_STACK.md` —
+   canonical repository, project, domain, database, and asset dispositions.
+3. `CONSOLIDATION_PLAN.md` — merge order, systems to retain, and systems that
+   must remain separate.
+4. `PRODUCTION_LAUNCH_GATE.md` — mandatory release checklist.
+5. `GO_LIVE_RUNBOOK.md` — deploy, verify, and rollback procedure.
+6. `ENVIRONMENT_VARIABLE_MATRIX.md` and `.env.example` — names, scopes, and safe
    defaults only; the hosting secret interface remains authoritative for values.
-6. `OWNER_APPROVAL_QUEUE.md` — exact external-action and Production gates.
-7. `QA_EVIDENCE_CURRENT.md` — latest consolidated verification evidence.
+7. `OWNER_APPROVAL_QUEUE.md` — exact external-action and Production gates.
+8. `KNOWN_BLOCKERS.md` and `KNOWN_LIMITATIONS.md` — current operating
+   constraints and truthful capability boundaries.
+9. `IMPLEMENTATION_STATUS.md`, `QA_EVIDENCE.md`, and the applicable
+   `docs/phase9/*_QA_EVIDENCE.md` file — current release evidence. Exact-head
+   GitHub checks and matching Vercel deployment metadata outrank a run ID frozen
+   into documentation.
+
+`QA_EVIDENCE_CURRENT.md` is a cumulative 2026-08-14-era evidence packet with
+later appendices. Preserve it as provenance, but do not use its first baseline
+table as the current release matrix.
 
 Authenticated Production accounts, live route behavior, current `main`, and
 provider/database state outrank every document when they conflict. Record the

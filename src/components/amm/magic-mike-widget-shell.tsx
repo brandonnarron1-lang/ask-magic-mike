@@ -37,7 +37,7 @@ const DEFAULT_MESSAGES: WidgetMessage[] = [
   {
     from: "mike",
     text:
-      "Hi, I'm Mike Eatmon at Our Town Properties. Ask me about selling, buying, or a preliminary home value range for your Wilson-area home.",
+      "Hi, I'm Mike Eatmon at Our Town Properties. Ask about selling, buying, renting, or a broker-reviewed home-value conversation for your Wilson-area property.",
   },
 ];
 

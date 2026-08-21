@@ -2,7 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  buildOwnedDemandChannelPacket,
   buildOwnedDemandCommand,
+  resolveOwnedDemandPlacement,
   type OwnedDemandAttributionSignal,
 } from "../../app/lib/growth/owned-demand";
 import type { GrowthSummary } from "../../app/lib/growth/intelligence";
@@ -77,6 +79,22 @@ describe("Owned Demand Command", () => {
     expect(result.operatorBoundary).toContain("never publishes");
   });
 
+  it("counts generic and offer-specific signals exactly once at the channel and command levels", () => {
+    const result = buildOwnedDemandCommand({
+      summary: summary({ leads: 7, attributedLeadRate: 100 }),
+      ownedDemandSignals: [
+        signal("facebook", "social_organic", "facebook_local_question", 2),
+        signal("facebook", "social_organic", "facebook_local_question_seller_review", 3),
+        signal("facebook", "social_organic", "facebook_local_question_buyer_match", 1),
+        signal("facebook", "social_organic", "facebook_local_question_renter_plan", 1),
+      ],
+    });
+    const facebook = result.channels.find((row) => row.key === "facebook");
+    expect(facebook?.attributedLeads).toBe(7);
+    expect(facebook?.offers.map((offer) => offer.attributedLeads)).toEqual([3, 1, 1]);
+    expect(result.attributedLiveLeads).toBe(7);
+  });
+
   it("does not call unrelated attributed demand a measured owned-channel signal", () => {
     const result = buildOwnedDemandCommand({
       summary: summary({ leads: 3, attributedLeadRate: 100 }),
@@ -128,32 +146,153 @@ describe("Owned Demand Command", () => {
     }
   });
 
+  it("provides exact seller, buyer, and renter links for the existing Our Town WordPress surface", () => {
+    const result = buildOwnedDemandCommand({ summary: summary(), ownedDemandSignals: [] });
+    const wordpress = result.channels.find((row) => row.key === "ourtown_wordpress");
+    expect(wordpress).toBeDefined();
+    expect(wordpress?.source).toBe("ourtownproperties");
+    expect(wordpress?.medium).toBe("owned_media");
+    expect(wordpress?.offers.map((offer) => new URL(offer.trackedUrl).pathname)).toEqual([
+      "/home-value",
+      "/buy",
+      "/rent",
+    ]);
+
+    const seller = resolveOwnedDemandPlacement("ourtown_wordpress", "seller_review");
+    expect(seller?.campaign).toBe("amm_owned_demand_2026");
+    expect(seller?.content).toBe("wordpress_ask_magic_mike_seller_review");
+    expect(seller?.trackedUrl).toContain("utm_source=ourtownproperties");
+    expect(seller?.trackedUrl).toContain("utm_medium=owned_media");
+    expect(wordpress?.namedPlacements.map((placement) => placement.placementKey)).toEqual([
+      "wordpress_homepage_ask_mike",
+      "wordpress_home_value",
+      "wordpress_we_buy_homes",
+      "wordpress_mike_agent",
+      "wordpress_listing_buyer",
+      "wordpress_rental_to_homeownership",
+      "wordpress_ask_magic_mike_embed",
+    ]);
+    expect(resolveOwnedDemandPlacement("ourtown_wordpress", "wordpress_we_buy_homes")?.trackedUrl).toContain("/sell?");
+  });
+
+  it("counts a named WordPress placement as an exact owned-demand signal", () => {
+    const result = buildOwnedDemandCommand({
+      summary: summary({ leads: 2, attributedLeadRate: 100 }),
+      ownedDemandSignals: [signal("ourtownproperties", "owned_media", "wordpress_homepage_ask_mike", 2)],
+    });
+    const wordpress = result.channels.find((row) => row.key === "ourtown_wordpress");
+    expect(wordpress?.attributedLeads).toBe(2);
+    expect(wordpress?.namedPlacements.find((row) => row.placementKey === "wordpress_homepage_ask_mike")?.attributedLeads).toBe(2);
+    expect(result.attributedLiveLeads).toBe(2);
+  });
+
+  it("creates a seller, buyer, and renter flight for every existing channel", () => {
+    const result = buildOwnedDemandCommand({ summary: summary(), ownedDemandSignals: [] });
+    expect(result.offers.map((offer) => offer.key)).toEqual(["seller_review", "buyer_match", "renter_plan"]);
+    expect(result.offers.map((offer) => new URL(offer.destination).pathname)).toEqual(["/home-value", "/buy", "/rent"]);
+
+    for (const channel of result.channels) {
+      expect(channel.offers).toHaveLength(3);
+      for (const offer of channel.offers) {
+        const url = new URL(offer.trackedUrl);
+        expect(url.origin).toBe("https://www.askmagicmike.com");
+        expect(url.pathname).toBe(new URL(offer.destination).pathname);
+        expect(url.searchParams.get("utm_source")).toBe(channel.source);
+        expect(url.searchParams.get("utm_medium")).toBe(channel.medium);
+        expect(url.searchParams.get("utm_campaign")).toBe("amm_owned_demand_2026");
+        expect(url.searchParams.get("utm_content")).toBe(offer.content);
+        expect(offer.content).toBe(`${channel.content}_${offer.key}`);
+      }
+    }
+  });
+
+  it("ships only local retained visuals and compliance-bounded offer copy", () => {
+    const result = buildOwnedDemandCommand({ summary: summary(), ownedDemandSignals: [] });
+    const offerCopy = result.offers.map((offer) => `${offer.draftTitle} ${offer.draftBody} ${offer.reviewNote}`).join(" ");
+    expect(offerCopy).not.toMatch(/instant|exact value|guaranteed result|preapproved|best neighborhood|school district|cash buyer waiting|respond in \d+/i);
+    expect(offerCopy).toContain("not an appraisal");
+    expect(offerCopy).toContain("not a lending decision");
+
+    for (const offer of result.offers) {
+      expect(offer.creativePath).toMatch(/^\/(brand|images)\//);
+      expect(fs.existsSync(path.join(root, "public", offer.creativePath))).toBe(true);
+    }
+  });
+
   it("keeps public-action and unsupported-claim language out of the drafts", () => {
     const result = buildOwnedDemandCommand({ summary: summary(), ownedDemandSignals: [] });
     const copy = result.channels.map((row) => `${row.draftTitle} ${row.draftBody}`).join(" ");
     expect(copy).not.toMatch(/instant answer|exact value|best neighborhood|outperforming|guaranteed value|guaranteed result|\$\d{2,}/i);
     expect(copy).toContain("no automated appraisal or guaranteed offer");
   });
+
+  it("builds one complete, approval-bounded packet per channel", () => {
+    const result = buildOwnedDemandCommand({ summary: summary(), ownedDemandSignals: [] });
+    const facebook = result.channels.find((channel) => channel.key === "facebook");
+    expect(facebook).toBeDefined();
+
+    const packet = buildOwnedDemandChannelPacket(facebook!);
+    expect(packet).toContain("FACEBOOK OWNED-DEMAND FLIGHT");
+    expect(packet).toContain("GENERAL QUESTION PLACEMENT");
+    expect(packet).toContain(facebook!.trackedUrl);
+    for (const offer of facebook!.offers) {
+      expect(packet).toContain(offer.draftTitle);
+      expect(packet).toContain(offer.trackedUrl);
+      expect(packet).toContain(offer.reviewNote);
+    }
+    const wordpress = result.channels.find((channel) => channel.key === "ourtown_wordpress");
+    const wordpressPacket = buildOwnedDemandChannelPacket(wordpress!);
+    expect(wordpressPacket).toContain("NAMED BROKERAGE PLACEMENTS");
+    expect(wordpressPacket).toContain("wordpress_we_buy_homes");
+    expect(packet).toContain("External publication remains a separate human-reviewed approval.");
+  });
 });
 
 describe("canonical /admin/distribution route guards", () => {
   const page = fs.readFileSync(path.join(root, "app/admin/distribution/page.tsx"), "utf8");
+  const copyControl = fs.readFileSync(path.join(root, "app/admin/distribution/CopyDemandAsset.tsx"), "utf8");
+  const action = fs.readFileSync(path.join(root, "app/admin/distribution/actions.ts"), "utf8");
+  const proofStore = fs.readFileSync(path.join(root, "app/lib/persistence/neonOwnedDemandPublicationProofs.ts"), "utf8");
   const view = fs.readFileSync(path.join(root, "app/lib/persistence/neonGrowthIntelligenceView.ts"), "utf8");
   const manifest = fs.readFileSync(path.join(root, "config/active-route-manifest.json"), "utf8");
 
   it("uses the root router, canonical Neon view, and report permission", () => {
     expect(page).toContain('requireLeadCenterPermission("report:view")');
+    expect(action).toContain('requireLeadCenterPermission("growth:manage")');
     expect(page).toContain("loadGrowthIntelligence(30)");
+    expect(page).toContain("buildOwnedDemandActivationLoop");
+    expect(page).toContain("Exact placement activation loop");
     expect(manifest).toContain('"/admin/distribution"');
-    expect(manifest).toContain("active-protected-read-only-owned-demand-neon");
+    expect(manifest).toContain("active-protected-owned-demand-neon-append-only-publication-proof");
   });
 
-  it("remains read-only and excludes test and suppressed records upstream", () => {
-    expect(page).not.toContain("<form");
-    expect(page).not.toContain('"use server"');
-    expect(page).not.toMatch(/method:\s*["'`](POST|PUT|PATCH|DELETE)["'`]/);
+  it("adds only an append-only proof mutation while excluding test and suppressed lead records upstream", () => {
+    expect(page).toContain("<form");
+    expect(page).toContain("recordOwnedDemandPublicationProofAction");
+    expect(action).toContain('redirect("/lead-center-login?error=rbac_required")');
+    expect(action).not.toContain("system/admin_basic_auth");
+    expect(action).toContain('formData.get("confirm") !== "yes"');
+    expect(action).not.toMatch(/fetch\(|XMLHttpRequest|sendBeacon/);
+    expect(proofStore).toContain("assertDatabaseMutationAllowed");
+    expect(proofStore).toContain("WHERE is_test = false");
+    expect(proofStore).toContain("record_owned_demand_publication_proof_v1");
     expect(view).toContain("l.is_test = false");
     expect(view).toContain("l.communication_suppressed = false");
+  });
+
+  it("adds local-only copy controls without adding a publishing or network mutation path", () => {
+    expect(page).toContain("CopyDemandAsset");
+    expect(page).toContain("Three-offer launch flight");
+    expect(page).toContain("Three offer-specific placements");
+    expect(page).toContain("Copy full channel flight");
+    expect(page).toContain("Next evidence-backed operator decision");
+    expect(page).toContain("Named brokerage placements");
+    expect(page).toContain("channel.namedPlacements");
+    expect(page).toContain("Open exact channel packet");
+    expect(page).toContain('href={`#channel-${next.channelKey}`}');
+    expect(copyControl).toContain('type="button"');
+    expect(copyControl).toContain("navigator.clipboard.writeText");
+    expect(copyControl).not.toMatch(/fetch\(|XMLHttpRequest|sendBeacon|<form|use server/i);
   });
 
   it("keeps the cadence fully readable across mobile and desktop", () => {

@@ -2,9 +2,9 @@
 
 ## Application
 
-Current Production is `dpl_2PQoDZLHc562SBEY7px91CAEUrin` at merge commit
-`42f80b209d5d5adc984c1d8b439c7fa830d015e6`. The retained preceding Ready
-deployment is `dpl_8WyzT1bg5kj6HRnrDqwdQGvzKZfz`. Re-inspect
+Current Production is `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM` at merge commit
+`5335697edf31eed0b8a38cd0295a4f5e7d501a3e`. The retained preceding Ready
+deployment is `dpl_2PQoDZLHc562SBEY7px91CAEUrin`. Re-inspect
 both before a future release because aliases can move. If smoke checks fail,
 stop traffic activation and use Vercel promotion/rollback to the recorded prior
 deployment. Do not delete a deployment or force-push.
@@ -27,6 +27,23 @@ dedicated response recorder may remain installed but dormant. Do not drop the
 table/functions or restore an older database merely to roll back application
 code. Use the validated custom backup only for a separately approved disaster
 recovery decision after confirming a forward fix is unsafe.
+
+For the stacked owned-demand publication-proof release, use only
+`phase9:publication-proof:cutover` after its exact approval. If application
+verification fails, promote the immediately preceding verified Vercel
+deployment and leave the additive `owned_demand_publication_proofs` table and
+RPC dormant. Do not delete or edit proof/audit rows. A native social, GBP,
+signature, or print placement must be rolled back in its native system under a
+separate approval, followed by an appended removal proof; application rollback
+cannot retract external content.
+
+For the stacked KPI target-register release, use only
+`phase9:kpi-targets:cutover` after its exact migration/merge/deploy approval. If
+application verification fails, promote the immediately preceding verified
+Vercel deployment and leave the additive `growth_kpi_target_versions` table and
+RPC dormant. Do not delete or rewrite target or audit versions. Correct an
+operator mistake by appending a corrected or retired version. The migration
+seeds no targets, so an application rollback does not require data reversal.
 
 ## WordPress
 

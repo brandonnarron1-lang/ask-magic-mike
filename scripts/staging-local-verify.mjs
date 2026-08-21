@@ -12,6 +12,18 @@ const ROUTING_SQL_PATH = path.join(
   "tests",
   "routing_sla_deadlines_pg17.sql"
 );
+const PUBLICATION_PROOF_SQL_PATH = path.join(
+  ROOT,
+  "supabase",
+  "tests",
+  "owned_demand_publication_proofs_pg17.sql"
+);
+const KPI_TARGET_SQL_PATH = path.join(
+  ROOT,
+  "supabase",
+  "tests",
+  "growth_kpi_target_register_pg17.sql"
+);
 
 function fail(message) {
   console.error(message);
@@ -87,6 +99,10 @@ const container = findDbContainer(projectId);
 const expectedMigrations = migrationFiles();
 const routingSql = fs.readFileSync(ROUTING_SQL_PATH, "utf8");
 const routing = psql(container, routingSql);
+const publicationProofSql = fs.readFileSync(PUBLICATION_PROOF_SQL_PATH, "utf8");
+const publicationProof = psql(container, publicationProofSql);
+const kpiTargetSql = fs.readFileSync(KPI_TARGET_SQL_PATH, "utf8");
+const kpiTarget = psql(container, kpiTargetSql);
 
 const schemaSql = `
 \\pset tuples_only on
@@ -103,7 +119,15 @@ objects as (
     to_regclass('public.audit_logs') is not null as audit_logs_exists,
     to_regclass('public.lead_routing') is not null as lead_routing_exists,
     to_regclass('public.lead_notifications') is not null as lead_notifications_exists,
-    to_regclass('public.source_attribution') is not null as source_attribution_exists
+    to_regclass('public.source_attribution') is not null as source_attribution_exists,
+    to_regclass('public.owned_demand_publication_proofs') is not null as publication_proofs_exists,
+    to_regclass('public.growth_kpi_target_versions') is not null as growth_kpi_targets_exists,
+    to_regprocedure(
+      'public.record_owned_demand_publication_proof_v1(text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,timestamptz,text,boolean)'
+    ) is not null as publication_proof_function_exists,
+    to_regprocedure(
+      'public.record_growth_kpi_target_version_v1(text,text,text,text,numeric,text,text,numeric,text,integer,integer,text,text,timestamptz,text,boolean)'
+    ) is not null as growth_kpi_target_function_exists
 ),
 notification_checks as (
   select
@@ -111,6 +135,44 @@ notification_checks as (
     exists(select 1 from pg_indexes where schemaname='public' and tablename='lead_notifications' and indexname='lead_notifications_idempotency_key_idx') as notification_idempotency_index_exists,
     exists(select 1 from pg_indexes where schemaname='public' and tablename='lead_notifications' and indexname='lead_notifications_status_next_attempt_idx') as notification_processing_index_exists,
     exists(select 1 from pg_trigger where tgname='lead_notifications_updated_at' and not tgisinternal) as notification_updated_at_trigger_exists
+),
+publication_checks as (
+  select
+    (select relrowsecurity from pg_class where oid = 'public.owned_demand_publication_proofs'::regclass) as publication_rls_enabled,
+    exists(
+      select 1 from pg_trigger
+      where tgrelid = 'public.owned_demand_publication_proofs'::regclass
+        and tgname = 'owned_demand_publication_proofs_reject_change'
+        and tgenabled <> 'D'
+        and not tgisinternal
+    ) as publication_immutable_trigger_exists,
+    has_table_privilege('service_role', 'public.owned_demand_publication_proofs', 'SELECT') as publication_service_select,
+    has_table_privilege('service_role', 'public.owned_demand_publication_proofs', 'INSERT') as publication_service_insert,
+    not has_table_privilege('service_role', 'public.owned_demand_publication_proofs', 'UPDATE') as publication_service_update_denied,
+    not has_table_privilege('service_role', 'public.owned_demand_publication_proofs', 'DELETE') as publication_service_delete_denied,
+    not has_table_privilege('service_role', 'public.owned_demand_publication_proofs', 'TRUNCATE') as publication_service_truncate_denied,
+    not has_table_privilege('service_role', 'public.owned_demand_publication_proofs', 'REFERENCES') as publication_service_references_denied,
+    not has_table_privilege('service_role', 'public.owned_demand_publication_proofs', 'TRIGGER') as publication_service_trigger_denied,
+    not has_table_privilege('anon', 'public.owned_demand_publication_proofs', 'SELECT') as publication_anon_select_denied,
+    not has_table_privilege('authenticated', 'public.owned_demand_publication_proofs', 'SELECT') as publication_authenticated_select_denied
+),
+kpi_target_checks as (
+  select
+    (select relrowsecurity from pg_class where oid = 'public.growth_kpi_target_versions'::regclass) as kpi_target_rls_enabled,
+    exists(
+      select 1 from pg_trigger
+      where tgrelid = 'public.growth_kpi_target_versions'::regclass
+        and tgname = 'growth_kpi_target_versions_reject_change'
+        and tgenabled <> 'D'
+        and not tgisinternal
+    ) as kpi_target_immutable_trigger_exists,
+    has_table_privilege('service_role', 'public.growth_kpi_target_versions', 'SELECT') as kpi_target_service_select,
+    has_table_privilege('service_role', 'public.growth_kpi_target_versions', 'INSERT') as kpi_target_service_insert,
+    not has_table_privilege('service_role', 'public.growth_kpi_target_versions', 'UPDATE') as kpi_target_service_update_denied,
+    not has_table_privilege('service_role', 'public.growth_kpi_target_versions', 'DELETE') as kpi_target_service_delete_denied,
+    not has_table_privilege('service_role', 'public.growth_kpi_target_versions', 'TRUNCATE') as kpi_target_service_truncate_denied,
+    not has_table_privilege('anon', 'public.growth_kpi_target_versions', 'SELECT') as kpi_target_anon_select_denied,
+    not has_table_privilege('authenticated', 'public.growth_kpi_target_versions', 'SELECT') as kpi_target_authenticated_select_denied
 ),
 data_counts as (
   select
@@ -125,6 +187,8 @@ select jsonb_build_object(
   'migrations', (select row_to_json(migrations) from migrations),
   'objects', (select row_to_json(objects) from objects),
   'notification_checks', (select row_to_json(notification_checks) from notification_checks),
+  'publication_checks', (select row_to_json(publication_checks) from publication_checks),
+  'kpi_target_checks', (select row_to_json(kpi_target_checks) from kpi_target_checks),
   'data_counts', (select row_to_json(data_counts) from data_counts)
 )::text;
 `;
@@ -147,7 +211,9 @@ const migrationOk =
 const objectsOk =
   parsed &&
   Object.values(parsed.objects ?? {}).every((value) => value === true) &&
-  Object.values(parsed.notification_checks ?? {}).every((value) => value === true);
+  Object.values(parsed.notification_checks ?? {}).every((value) => value === true) &&
+  Object.values(parsed.publication_checks ?? {}).every((value) => value === true) &&
+  Object.values(parsed.kpi_target_checks ?? {}).every((value) => value === true);
 
 const summary = {
   generated_at_utc: new Date().toISOString(),
@@ -159,6 +225,8 @@ const summary = {
   expected_final_migration: latestExpected,
   expected_final_migration_version: latestExpectedVersion,
   routing_sla_sql_passed: routing.status === 0,
+  publication_proof_sql_passed: publicationProof.status === 0,
+  kpi_target_sql_passed: kpiTarget.status === 0,
   schema_sql_passed: schema.status === 0,
   migration_status_passed: migrationOk,
   object_status_passed: !!objectsOk,
@@ -173,7 +241,14 @@ const summary = {
 
 writeJson(SUMMARY_PATH, summary);
 
-if (routing.status !== 0 || schema.status !== 0 || !migrationOk || !objectsOk) {
+if (
+  routing.status !== 0 ||
+  publicationProof.status !== 0 ||
+  kpiTarget.status !== 0 ||
+  schema.status !== 0 ||
+  !migrationOk ||
+  !objectsOk
+) {
   fail(`Local staging verification failed. Sanitized summary: ${SUMMARY_PATH}`);
 }
 

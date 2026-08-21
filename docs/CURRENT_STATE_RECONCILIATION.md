@@ -1,6 +1,6 @@
 # Current State Reconciliation
 
-Audited 2026-08-19. This document overrides older status claims when they
+Audited 2026-08-21. This document overrides older status claims when they
 conflict with observed Production, authenticated accounts, current `main`, or
 provider/database state.
 
@@ -8,8 +8,8 @@ provider/database state.
 
 | Asset | Evidence | Status |
 | --- | --- | --- |
-| GitHub | `brandonnarron1-lang/ask-magic-mike`; `main` at `1c9c4eedae4de3d993def32dc6d646c1be2908ca` | VERIFIED LIVE |
-| Vercel | `eyes-up-industries/ask-magic-mike`; project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; deployment `dpl_BCrmEB67TZDbJ9ihyLvsQkP5deD6` | VERIFIED LIVE |
+| GitHub | `brandonnarron1-lang/ask-magic-mike`; Production baseline PR #181 merge `5335697edf31eed0b8a38cd0295a4f5e7d501a3e` | VERIFIED LIVE |
+| Vercel | `eyes-up-industries/ask-magic-mike`; project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; deployment `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM` | VERIFIED LIVE |
 | Public host | `https://www.askmagicmike.com`; apex redirects 308 | VERIFIED LIVE |
 | Database | Neon `bitter-star-20214385`; Production branch `br-round-base-auh6h2wd` | VERIFIED LIVE |
 | Brokerage/SEO | `https://www.ourtownproperties.com` WordPress | VERIFIED LIVE |
@@ -18,11 +18,12 @@ provider/database state.
 | Free phone alerts | VAPID Web Push schema/provider/phone setup ready; physical device acceptance remains owner-scoped | READY — OWNER ACTIVATION |
 | NellySelly | Separate repository, project, domains, database, and environment | VERIFIED ISOLATED |
 
-Observed 2026-08-19 public evidence: `/`, `/ask`, `/home-value`, `/buy`,
-`/api/health/live`, and `/api/health/ready` return 200. Live health reports Neon,
-Production notification mode, and email enabled. Readiness reports capture,
-lead, notification, RBAC, Push subscription/provider, and phone-setup readiness.
-Anonymous `/admin` returns 307 to `/lead-center-login`, not a Basic Auth challenge.
+Observed 2026-08-21 public evidence: `/`, `/ask`, `/home-value`, `/buy`,
+`/rent`, `/api/health/live`, and `/api/health/ready` return 200. Live health
+reports canonical Neon and the Production notification boundary. The apex
+redirects permanently to `www`. Anonymous `/admin` is denied by the active
+authentication boundary; authorized Lead Center sessions are additionally
+restricted by server-side role and assigned-lead scope.
 
 No new repository, public app, provider ledger, or parallel lead database is
 warranted.
@@ -60,14 +61,24 @@ warranted.
 7. Internal email is active; consumer acknowledgment, nurture, automatic send,
    carrier SMS, and external publication remain independent gates.
 
-## Open release work
+## Current release work
 
 | PR | Disposition | Gate |
 | --- | --- | --- |
-| #170 owned-demand command | Clean, mergeable, green Preview/CI | `APPROVE PHASE 9.1 OWNED DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT` |
-| #177 commercial-email compliance | Draft, clean, mergeable, green Preview/CI | `APPROVE PHASE 9 COMMERCIAL EMAIL COMPLIANCE MERGE AND PRODUCTION DEPLOYMENT` |
-| #173 review planner | Clean, mergeable, green Preview/CI | `APPROVE PHASE 9.4 REVIEW PLANNER MERGE AND PRODUCTION DEPLOYMENT` |
-| #172 database revival command | Draft and conflicting; preserve until prior sequence completes, then refresh | `APPROVE PHASE 9.3 DATABASE REVIVAL COMMAND MERGE AND PRODUCTION DEPLOYMENT` after refresh |
+| #183 campaign safety and three-offer flight | Next separately gated release; no database migration or publisher | `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT` |
+| #184 publication-proof ledger | Draft stacked on #183; refresh after #183, then run its guarded Neon migration/release gate | `APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT` |
+| #182 launch authority/buyer discovery | Deferred overlap candidate; reconcile only after #183/#184 | Retain its gate only after fresh exact-head proof |
+| #179 iOS Web Push handoff | Deferred; code refresh and physical device acceptance remain separate | Retain its gate only after fresh exact-head proof |
 
-PRs #119, #120, #121, and #92 predate the current consolidation. They are
-`ARCHIVE AFTER REVIEW`; none should merge without a fresh requirement/diff audit.
+PRs #170, #172, #173, #177, #178, #180, and #181 are merged and removed from
+the approval queue. PRs #119, #120, #121, and #92 predate the current
+consolidation. They are `ARCHIVE AFTER REVIEW`; none should merge without a
+fresh requirement/diff audit.
+
+## Current aggregate truth
+
+The latest read-only Production observation contains six suppressed/test leads,
+zero contactable live prospects, zero measured first-human responses, zero live
+notification failures, zero outcomes, and zero spend. This is a proven,
+available funnel with no genuine demand sample yet—not evidence of a fabricated
+prospect or a conversion result.

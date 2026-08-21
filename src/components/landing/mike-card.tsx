@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Phone, Mail, MapPin, Star, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Phone, Mail, MapPin, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Reveal } from "@/components/ui/reveal";
 import { cn } from "@/lib/utils/cn";
@@ -18,17 +18,16 @@ function trackCall(surface: string) {
 
 const CREDENTIALS = [
   "Licensed NC Real Estate Broker",
-  "Licensed & Active Since 1993 — 30+ Years",
   "Our Town Properties, Inc.",
-  "Fiduciary Duty to Every Client",
+  "Brokerage Duties and Disclosures",
   "Equal Housing Opportunity",
 ];
 
 const STATS = [
-  { value: "$750M+", label: "Career Volume" },
-  { value: "2,500+", label: "Homes Sold" },
-  { value: "30+",    label: "Years Active" },
-  { value: "45mi",   label: "Service Radius" },
+  { value: "Wilson",   label: "Home Base" },
+  { value: "Human",    label: "Request Review" },
+  { value: "3",        label: "Launch Offers" },
+  { value: "Our Town", label: "Brokerage" },
 ];
 
 export function MikeCard() {
@@ -165,21 +164,17 @@ export function MikeCard() {
                 </div>
                 <p className="text-slate-400 text-sm mb-5">Broker · Our Town Properties, Inc. · Wilson, NC</p>
 
-                {/* Stars */}
-                <div className="flex items-center gap-1.5 mb-7">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-gold-400 fill-gold-400" />
-                  ))}
-                  <span className="text-xs text-slate-500 ml-2">Trusted by thousands of Eastern NC families</span>
+                {/* Brokerage context */}
+                <div className="mb-7 inline-flex w-fit items-center rounded-full border border-gold-400/20 bg-gold-400/[0.06] px-3 py-1.5">
+                  <span className="text-xs text-gold-300">Broker-reviewed guidance · Wilson, NC</span>
                 </div>
 
                 {/* Bio */}
                 <p className="text-slate-300 leading-relaxed text-sm mb-7">
-                  Over three decades representing buyers and sellers across Eastern North Carolina. Mike&apos;s
-                  track record for creative problem-solving — and getting deals across the finish line
-                  when others can&apos;t — earned him the name{" "}
-                  <em className="text-gold-400 not-italic font-semibold">&quot;Magic Mike.&quot;</em>{" "}
-                  He operates under full fiduciary duty to his clients and NC real estate law.
+                  Ask Magic Mike gives consumers a direct path to share their property or target area,
+                  timing, and questions with Mike Eatmon or the Our Town Properties team. The nickname{" "}
+                  <em className="text-gold-400 not-italic font-semibold">&quot;Magic Mike&quot;</em>{" "}
+                  identifies the service; it is not a promise of a transaction or outcome.
                 </p>
 
                 {/* Credentials */}
@@ -194,14 +189,14 @@ export function MikeCard() {
 
                 {/* Contact */}
                 <div className="flex flex-wrap gap-3 mb-7">
-                  <a href="tel:2522454337"
+                  <a href="tel:2522437700"
                     onClick={() => trackCall("mike_card_contact")}
                     className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-gold-400 transition-colors group"
                   >
                     <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-gold-400/20 bg-gold-400/[0.06] group-hover:bg-gold-400/[0.15] transition-all">
                       <Phone className="h-3.5 w-3.5 text-gold-400" />
                     </span>
-                    252-245-4337
+                    252-243-7700
                   </a>
                   <a href="https://ourtownproperties.com"
                     className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-gold-400 transition-colors group"
@@ -237,12 +232,12 @@ export function MikeCard() {
                     <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform motion-reduce:transition-none" />
                   </button>
 
-                  <a href="tel:2522454337"
+                  <a href="tel:2522437700"
                     onClick={() => trackCall("mike_card_cta")}
                     className="inline-flex items-center gap-2 rounded-xl border border-gold-400/25 px-6 py-4 text-sm font-medium text-gold-300 hover:bg-gold-400/[0.08] hover:border-gold-400/45 transition-all"
                   >
                     <Phone className="h-4 w-4" />
-                    Call Direct
+                    Call Office
                   </a>
                 </div>
 

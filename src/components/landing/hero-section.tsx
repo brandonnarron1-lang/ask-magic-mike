@@ -44,36 +44,36 @@ function MikeVisualTrustBadge() {
 ───────────────────────────────────────────────────────────────────────── */
 const HERO_CONVOS = [
   {
-    question: "What’s my home worth in Wilson?",
-    before: "Based on 12 recent comps in your area, homes like yours are trading between ",
-    highlight: "$185K–$235K",
-    after: ". School zone and lot depth will move you toward one end or the other.",
-    score: 87,
-    scoreLabel: "Seller Readiness",
+    question: "How do I start a home-value review?",
+    before: "Share the property, condition, timeline, and questions. That creates ",
+    highlight: "broker-reviewed context",
+    after: " — not an appraisal or automated valuation, and no specific value is promised.",
+    score: 76,
+    scoreLabel: "Example completeness",
   },
   {
-    question: "Is now a good time to sell?",
-    before: "Inventory is down 18% year-over-year. Well-priced homes are going under contract in ",
-    highlight: "12–21 days",
-    after: " — that’s a seller’s market. Overpriced homes are sitting 60+ days.",
-    score: 91,
-    scoreLabel: "Market Timing Signal",
+    question: "What should I include if I may sell?",
+    before: "Start with property condition, timing, and the selling paths you want to compare. ",
+    highlight: "A person verifies the facts",
+    after: " before discussing value, terms, or next steps.",
+    score: 81,
+    scoreLabel: "Example context",
   },
   {
-    question: "Which neighborhoods have the best value?",
-    before: "Fike High zone homes command ",
-    highlight: "$15–$30K premium",
-    after: " over comparable addresses. That gap has held for a decade and isn’t going away.",
-    score: 74,
-    scoreLabel: "Neighborhood Premium",
+    question: "Can you help with a property match?",
+    before: "Share your target area, property needs, budget context, and timing. ",
+    highlight: "Availability must be verified",
+    after: " and financing or appointments are never assumed.",
+    score: 73,
+    scoreLabel: "Example context",
   },
   {
-    question: "Should I wait for rates to drop?",
-    before: "Buyers who waited 6 months paid ",
-    highlight: "3–7% more",
-    after: " on average as prices climbed. Time in market almost always beats timing the market.",
-    score: 82,
-    scoreLabel: "Rate Sensitivity",
+    question: "Could renting lead toward homeownership?",
+    before: "Share your current situation and goals for ",
+    highlight: "a readiness review",
+    after: ". It is not a lending decision or promise of eligibility, affordability, or financing.",
+    score: 69,
+    scoreLabel: "Example context",
   },
 ] as const;
 
@@ -130,11 +130,11 @@ function HeroConversationPreview() {
         </div>
         <div className="min-w-0">
           <p className="text-xs font-semibold text-cream/90 leading-none">Magic Mike</p>
-          <p className="text-[10px] uppercase tracking-label text-gold-400/60 mt-0.5">AI · Wilson, NC</p>
+          <p className="text-[10px] uppercase tracking-label text-gold-400/60 mt-0.5">Illustrative workflow · Wilson, NC</p>
         </div>
         <div className="ml-auto flex items-center gap-1">
           <span className="block h-1.5 w-1.5 rounded-full bg-emerald-400/80 motion-safe:animate-pulse" aria-hidden="true" />
-          <span className="text-[10px] text-emerald-400/80 uppercase tracking-label">Live</span>
+          <span className="text-[10px] text-emerald-400/80 uppercase tracking-label">Demo</span>
         </div>
       </div>
 
@@ -293,8 +293,8 @@ function MikeHeroPortrait({ priority }: { priority?: boolean }) {
           boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,160,23,0.08), inset 0 1px 0 rgba(212,160,23,0.12)",
         }}
       >
-        <p className="font-bebas text-2xl leading-none tracking-wide text-gold-300">2,500+</p>
-        <p className="text-[9px] uppercase tracking-label text-gold-400/70 mt-0.5">Homes Sold</p>
+        <p className="font-bebas text-2xl leading-none tracking-wide text-gold-300">HUMAN</p>
+        <p className="text-[9px] uppercase tracking-label text-gold-400/70 mt-0.5">Review Path</p>
       </div>
     </div>
   );
@@ -326,21 +326,21 @@ function logHeroEvent(
    ACTIVITY LINES — rotate in the hero trust footer to signal live operation
 ───────────────────────────────────────────────────────────────────────── */
 const ACTIVITY_LINES = [
-  "Mike reviewed a question · 7 min ago",
-  "Wilson: 14 active listings · Median $195K · DOM avg 16 days",
-  "4 sellers requested valuations this week",
-  "Inventory –18% YOY · Well-priced homes moving in 12–21 days",
-  "Fike zone premium: +$15–30K vs. comparable Hunt-zone homes",
+  "Seller review · property + timing + goals",
+  "Buyer match · target area + needs + timing",
+  "Renter plan · current situation + homeownership goals",
+  "Current facts require human verification",
+  "Not an appraisal · no promised value, offer, or financing outcome",
 ] as const;
 
 /* ─────────────────────────────────────────────────────────────────────────
    STATS
 ───────────────────────────────────────────────────────────────────────── */
 const STATS = [
-  { value: "Since 1993", label: "Licensed & active" },
-  { value: "$750M+",     label: "Career sales"       },
-  { value: "2,500+",     label: "Homes sold"         },
-  { value: "Wilson, NC", label: "Home base"          },
+  { value: "Human",      label: "Brokerage review" },
+  { value: "3",          label: "Consumer paths"   },
+  { value: "Canonical",  label: "Lead intake"      },
+  { value: "Wilson, NC", label: "Home base"        },
 ];
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -648,7 +648,7 @@ export function HeroSection() {
             <div>
               <p className="text-sm font-semibold text-cream leading-snug">Mike Eatmon</p>
               <p className="text-xs text-slate-400">Broker · Our Town Properties · Wilson NC</p>
-              <p className="mt-1 text-[10px] text-gold-400/70 uppercase tracking-label">Since 1993 · 2,500+ homes</p>
+              <p className="mt-1 text-[10px] text-gold-400/70 uppercase tracking-label">Broker-reviewed intake</p>
             </div>
           </div>
 
@@ -685,8 +685,8 @@ export function HeroSection() {
             )}
           >
             <p className="text-base text-slate-400 leading-snug max-w-md">
-              Mike Eatmon has closed 2,500+ deals in Wilson — and he reviews every question you send him personally.{" "}
-              <span className="text-gold-400/70">Local expertise. Real answers.</span>
+              Share your property or target area, timing, and questions with Mike Eatmon or the Our Town Properties team.{" "}
+              <span className="text-gold-400/70">Human review. Verified context.</span>
             </p>
           </div>
 
@@ -759,7 +759,7 @@ export function HeroSection() {
                 data-cta-link="value-deep-link"
                 className="inline-flex items-center gap-1.5 rounded-full border border-gold-400/20 bg-gold-400/[0.07] px-3.5 py-1 text-[11.5px] font-medium text-gold-300 hover:border-gold-400/40 hover:text-gold-200 transition-colors"
               >
-                Seller? Get a home value estimate →
+                Seller? Request a home-value review →
               </a>
             </div>
           </div>

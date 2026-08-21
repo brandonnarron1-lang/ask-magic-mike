@@ -64,7 +64,7 @@ export function StepQuestion({
           onChange={(e) => onQuestionChange(e.target.value)}
           onKeyDown={handleKeyDown}
           rows={4}
-          placeholder="Ask anything — Mike reviews every question and follows up personally."
+          placeholder="Share the property or target area, timing, and real estate question."
           className={cn(
             "w-full bg-transparent",
             "px-4 py-3 text-cream placeholder:text-slate-600",
@@ -117,7 +117,7 @@ export function StepQuestion({
       </div>
 
       <p className="mt-3 text-[11px] text-slate-600 text-center">
-        Free · No account required · Mike reviews every question personally · ⌘↵ to send
+        No account required · Brokerage review queue · ⌘↵ to send
       </p>
     </div>
   );

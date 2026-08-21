@@ -6,10 +6,10 @@ import { Reveal } from "@/components/ui/reveal";
 import { cn } from "@/lib/utils/cn";
 
 const PROOF = [
-  { label: "Career Sales Volume",   value: "$750M+",    detail: "Eastern NC market — verified track record"      },
-  { label: "Homes Sold",            value: "2,500+",    detail: "Wilson County and surrounding communities"      },
-  { label: "Licensed & Active",     value: "Since 1993",detail: "30+ years serving buyers and sellers"           },
-  { label: "Service Area",          value: "Eastern NC",detail: "Wilson · Rocky Mount · Greenville · Smithfield" },
+  { label: "Brokerage",             value: "Our Town",     detail: "Our Town Properties, Inc."                    },
+  { label: "Home Base",             value: "Wilson",       detail: "Wilson, North Carolina"                        },
+  { label: "Review Type",           value: "Human",        detail: "Property and consumer context reviewed"        },
+  { label: "Public Office",         value: "252-243-7700", detail: "Current published brokerage number"            },
 ];
 
 export function SoldSection() {
@@ -77,8 +77,8 @@ export function SoldSection() {
           {/* Stats badge — top left */}
           <div className="absolute -top-4 -left-4 sm:-left-8 card-gradient-border">
             <div className="rounded-[15px] bg-[#0D0B07] px-5 py-4 text-center">
-              <div className="font-bebas text-4xl text-gold-400 tracking-wider leading-none">2,500+</div>
-              <div className="text-xs text-slate-400 mt-1 leading-snug">Homes sold<br/>Eastern NC</div>
+              <div className="font-bebas text-4xl text-gold-400 tracking-wider leading-none">WILSON</div>
+              <div className="text-xs text-slate-400 mt-1 leading-snug">Our Town<br/>Properties</div>
             </div>
           </div>
         </Reveal>
@@ -103,9 +103,9 @@ export function SoldSection() {
               <span className="text-gold-shimmer italic">Again.</span>
             </h2>
             <p className="text-slate-400 mb-8 leading-relaxed text-base">
-              Three decades of closed deals in Eastern NC. Not leads. Not open houses.
-              <strong className="text-cream"> Sold signs.</strong> Mike prices your home
-              to win — not to sit — and negotiates every dollar back to your side of the table.
+              A local brokerage conversation should begin with the actual property,
+              timeline, and goals. <strong className="text-cream"> Our Town Properties</strong> reviews
+              the details before discussing a listing, purchase, rental, or other next step.
             </p>
 
             {/* Proof cards */}
@@ -155,8 +155,7 @@ export function SoldSection() {
             </Reveal>
 
             <p className="text-xs text-slate-600 italic">
-              Performance statements based on Mike Eatmon&apos;s Our Town Properties career biography.
-              Individual results vary. Market conditions change.
+              No sale, price, offer, appointment, or other result is promised. Market conditions change.
             </p>
           </div>
         </Reveal>

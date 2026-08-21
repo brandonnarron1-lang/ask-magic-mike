@@ -7,7 +7,7 @@ import { publicPageMetadata } from "../lib/publicMetadata";
 
 export const metadata: Metadata = publicPageMetadata({
   title: "Ask a Wilson, NC Real Estate Question",
-  description: "Ask Mike Eatmon about home value strategy, selling preparation, buyer demand, timing, or other Wilson-area real estate questions requiring local context.",
+  description: "Ask Mike Eatmon about home-value strategy, selling preparation, property facts, timing, or other Wilson-area real estate questions requiring local context.",
   path: "/ask",
 });
 
@@ -28,7 +28,7 @@ export default function AskPage() {
               A focused local real estate advisor interface.
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-8 text-[#d9ceb8]">
-              Ask about timing, valuation strategy, neighborhoods, buyer demand, and what to do before listing. The interface stays careful with facts and routes address-specific advice to real follow-up.
+              Ask about timing, sale-readiness, property facts, and what to do before listing. The interface stays careful with facts and routes property-specific guidance to real follow-up.
             </p>
           </div>
           <AskMikeChatPanel surface="ask_page" />

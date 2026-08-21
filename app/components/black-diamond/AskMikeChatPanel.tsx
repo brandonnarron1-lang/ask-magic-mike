@@ -155,7 +155,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
           </div>
         </div>
         <div className="py-5 text-sm leading-6 text-[#d9ceb8]">
-          Ask about valuation strategy, timing, buyer demand, preparation, and neighborhood context. Address-specific advice creates a follow-up path instead of inventing market facts.
+          Ask about home-value strategy, timing, preparation, property features, and the objective criteria you choose. Property-specific guidance creates a follow-up path instead of inventing market facts.
         </div>
         <div className="grid gap-2">
           {starterPrompts.map((prompt) => (

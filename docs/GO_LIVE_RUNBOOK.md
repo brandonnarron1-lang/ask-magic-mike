@@ -1,6 +1,6 @@
 # Production Release and Go-Live Runbook
 
-Updated 2026-08-20. The public funnel is live. Use this runbook for incremental,
+Updated 2026-08-21. The public funnel is live. Use this runbook for incremental,
 reversible releases and controlled owned-traffic activation.
 
 ## Before merge
@@ -63,11 +63,29 @@ Release only one approved PR at a time and verify Production before advancing:
 1. `#180` — outcome-ledger lifecycle seam: complete at merge commit
    `42f80b209d5d5adc984c1d8b439c7fa830d015e6`, Production deployment
    `dpl_2PQoDZLHc562SBEY7px91CAEUrin`;
-2. `#181` — first-human-response intelligence: next candidate, not yet migrated,
-   merged, or deployed; and
-3. refresh every remaining open feature PR on the resulting `main` before
-   selecting another release. Do not preserve an old queue order when its base,
-   scope, or proof has become stale.
+2. `#181` — first-human-response intelligence: complete at merge commit
+   `5335697edf31eed0b8a38cd0295a4f5e7d501a3e`, Production deployment
+   `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`, with migration `20260820013000` installed
+   on canonical Neon Production;
+3. `#183` — campaign safety and three-offer owned-demand flight: release-ready
+   but still unmerged and Production-undeployed under its exact gate; and
+4. `#184` — owned-demand publication-proof ledger: draft stacked on the exact
+   #183 head. Code-bearing hardening head
+   `755cf686fccea3facd0071aebbdd24734e818ccd`, Node 24 run `32512057769`, and
+   Preview `dpl_4JxCp1UxebTPof1fvK55NTrrnHqY` are green. A later
+   documentation/tooling head must retain the same required exact-head
+   GitHub/Vercel checks. It must not merge before #183 or without its exact
+   migration/release gate. Refresh every remaining feature branch on the
+   resulting `main` before selecting another release. Do not preserve an old
+   queue order when its base, scope, or proof has become stale;
+5. `#185` — current-router safety and Buyer discovery: Draft stacked on #184;
+   refresh after #184 Production verification;
+6. `#186` — protected deterministic owned-demand assets and allowlisted QR
+   attribution: Draft stacked on #185; refresh after #185 verification; and
+7. `#187` — protected evidence-first KPI target register: Draft stacked after
+   #186, with no seeded targets and its own
+   backup-first additive migration. Refresh and re-prove it after every
+   preceding merge.
 
 PR #181 uses:
 
@@ -83,6 +101,59 @@ place it in chat, a command argument, a report, or a committed file. `--execute`
 must fail unless the exact release-specific approval phrase is present. Retain
 the validated mode-600 backup until the exact application deployment and
 authenticated checks pass.
+
+The stacked publication-proof ledger uses:
+
+```text
+pnpm run staging:local:verify
+pnpm run phase9:publication-proof:cutover -- --plan
+pnpm run phase9:publication-proof:cutover -- --preflight
+pnpm run phase9:publication-proof:cutover -- --execute
+pnpm run phase9:publication-proof:cutover -- --verify
+```
+
+Run `staging:local:verify` only against the disposable local Supabase stack and
+only when `supabase/.temp/project-ref` is absent. It must prove the executable
+role/idempotency/audit/immutability contract before any Production preflight.
+
+Its exact approval is:
+
+```text
+APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT
+```
+
+That approval permits only the additive migration, reviewed code merge, and
+canonical application deployment. It does not authorize a GBP/social post,
+email campaign/signature change, QR distribution, consumer message, or spend.
+
+The stacked KPI target register uses:
+
+```text
+pnpm run staging:local:verify
+pnpm run phase9:kpi-targets:cutover -- --plan
+pnpm run phase9:kpi-targets:cutover -- --preflight
+pnpm run phase9:kpi-targets:cutover -- --execute
+pnpm run phase9:kpi-targets:cutover -- --verify
+```
+
+Its exact approval is:
+
+```text
+APPROVE PHASE 9 KPI TARGET REGISTER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT
+```
+
+The runner must prove the canonical Neon project/branch/endpoint/database,
+publication-proof prerequisite, exact migration hash, valid backup, RLS/grant/
+immutability contract, no migration seed rows, and unchanged lead/audit state.
+The gate does not authorize recording any KPI target; target approval remains a
+separate evidence-backed operator action in the protected register.
+
+Preview verification left two empty Vercel helper projects intact:
+`amm-phase9-campaign-compliance-20260821`
+(`prj_JUyx03Rh8iABqAFepNNuPI2jJqut`) and
+`amm-phase9-publication-ledger-20260821`
+(`prj_QcHch6KY1m2g0BKtOoVVFregRhho`). Both have zero deployments and no domain
+effect. Do not delete either without a separate exact cleanup approval.
 
 Each item retains its own exact approval phrase. Refresh any downstream branch
 after the preceding Production merge, rerun Node 24 CI and Vercel Preview, and do

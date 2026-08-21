@@ -1,6 +1,373 @@
 # Implementation Status
 
-Updated 2026-08-20.
+Updated 2026-08-21.
+
+## Phase 9 exact owned-demand activation loop — 2026-08-21
+
+- Reused the existing protected `/admin/distribution` page, seven canonical
+  channel definitions, 35 exact placements, UTM builder, Neon Growth signals,
+  append-only native publication-proof ledger, Lead Center RBAC, and Preview
+  fail-closed controls. No parallel system was added.
+- Added a pure deterministic join that shows the exact lifecycle relationship
+  between current native proof and eligible first-party attribution. It never
+  infers publication from a lead signal or a lead from publication evidence.
+- Added channel-specific active-state handling, stable newest-proof selection,
+  exact proof-attribution identity validation, evidence-unavailable fail-closed
+  state, reconciliation priority for signals without active proof, and one
+  evidence-backed next operator decision.
+- The existing page now exposes compact lifecycle totals, the current priority,
+  and a collapsed audit of all exact placements while preserving separate
+  publication-proof history and channel packets.
+- Current Production aggregate truth remains six test/suppressed lead rows and
+  zero genuine live/contactable leads, owned-source signals, outcomes, spend,
+  experiments, or first-response samples. All relevant canonical schemas are
+  healthy.
+- Focused verification passes 3 files / 39 tests. The full local release gate
+  passes system isolation, 14/14 release-safety checks, 209 test files / 2,909
+  tests, strict typecheck, ESLint, optimized Next.js 15.5.21 build, and the
+  81-route manifest. Production dependencies have no known vulnerability, and
+  a redacted gitleaks history scan covered 478 commits with no finding.
+- Local protected visual QA passes 12/12 desktop/mobile checks across the reused
+  public funnels, widget surfaces, Distribution Command, and KPI target register
+  with no overflow, missing required copy, forbidden copy, or browser console
+  error. Local Node 26.5.1 is newer than the declared Node 24.x engine; exact
+  Node 24 CI and canonical Vercel Preview proof remain pending before the Draft
+  PR is release-ready.
+- No Production deployment, database migration/write, proof record, lead,
+  WordPress edit, external publication, email/SMS/Push, provider action, spend,
+  DNS change, or NellySelly action occurred.
+- This candidate is stacked on exact PR #188 head
+  `bcc0e9e5263aa9b0f94ac0377a6d1781b0176a58`. The unchanged first Production
+  gate remains:
+  `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT`.
+
+## Phase 9 WordPress owned-traffic consolidation — 2026-08-21
+
+- Reused the live Our Town Properties pages, Gravity Forms, Canonical Lead
+  Bridge 1.1.0, existing isolated iframe loader, canonical Ask Magic Mike
+  funnels, protected Distribution Command, UTM builder, publication-proof
+  ledger, and Neon lead backend. No parallel frontend, form service, CRM,
+  database, notification engine, publisher, or analytics store was introduced.
+- A read-only live sitemap audit checked 42/42 pages successfully. It found
+  Gravity Form 7 on 39 pages, while authenticated prior evidence proves only
+  Gravity Form 3 is enabled for signed canonical forwarding. This candidate
+  deliberately does not widen that allowlist.
+- The audit identified three self-canonical seller-value routes, two
+  direct-purchase routes, two Ask Mike routes, four legacy native-capture
+  pages, five pages with multiple capture systems, three direct canonical-app
+  links lacking complete placement UTMs, and two embeds lacking placement
+  `utm_content`. These are controlled consolidation candidates, not permission
+  to redirect, noindex, deactivate a plugin, or replace a form.
+- Added `pnpm amm:audit:wordpress` and a reusable parser that stores only
+  structural public evidence. It excludes WordPress nonces, cookies, form
+  values, lead data, credentials, private configuration, and arbitrary page
+  text.
+- Added the `ourtown_wordpress` owned-demand channel and seven exact named
+  placements to the existing authenticated `/admin/distribution` surface:
+  homepage Ask Mike, established home value, We Buy Homes, Mike's agent page,
+  listing/buyer, rental-to-homeownership, and the existing Ask Magic Mike
+  embed. Exact links retain canonical-host and UTM allowlists.
+- Named placements use the existing append-only publication-proof workflow;
+  WordPress proof URLs are restricted to `ourtownproperties.com`. The existing
+  QR/creative catalog now derives four WordPress general/offer assets in
+  addition to the prior 24 assets.
+- Preserved the live sitewide and page-specific telephone targets. The
+  conflicting unverified number was not added to any campaign or interface.
+- Mobile 390 x 844 visual inspection confirmed that existing black/gold
+  sections should be preserved while reducing each intent page to one durable
+  capture path. No form was submitted during visual QA.
+- Focused verification passes 5 files / 85 tests. The full release gate passes
+  208 test files / 2,901 tests, strict typecheck, ESLint, optimized Next.js
+  15.5.21 build, 81-route verification, 14/14 release-safety checks, and system
+  isolation. `pnpm audit --prod` reports no known vulnerability; redacted
+  gitleaks history inspection covered 477 commits with no finding.
+- Local Node 26.5.1 is newer than the repository's Node 24.x engine. The build
+  nevertheless completed. A webpack cache write also reported local `ENOSPC`
+  after compilation; all pages and the route manifest completed successfully,
+  and only disposable `.next` output was removed afterward.
+- No Production deployment, WordPress mutation, form or notification change,
+  database query/write, lead, external message, publication, redirect, DNS
+  change, spend, or NellySelly action occurred.
+- This candidate is stacked on exact PR #187 head
+  `cf1356f36d9248babf782b9d4c499627fc46ef7b` and remains behind PRs #183–#187.
+  The unchanged first Production gate is:
+  `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT`.
+
+## Phase 9 evidence-first KPI target register — 2026-08-21
+
+- Reused the existing Neon Growth intelligence view, protected Lead Center,
+  `growth:manage` permission, immutable audit ledger, and canonical Vercel
+  project. No second analytics product, CRM, database, provider, publisher, or
+  admin surface was introduced.
+- Defined 38 canonical KPI contracts across acquisition, response, conversion,
+  database, economics, portfolio, operations, experimentation, experience/
+  conversion quality, and trust/delivery. Each fixes a unit, direction,
+  denominator language, and minimum sample threshold.
+- Added privacy-minimized Production field telemetry for LCP, INP, and CLS on
+  exact canonical public routes. Preview, local, known QA, automation, dynamic
+  identifiers, query strings, lead/session IDs, attribution, raw IPs, and raw
+  user agents are excluded. Exact Production origin is enforced server-side;
+  sanitizer-safe metric codes are deduplicated with metric IDs before P75.
+- Kept accessibility, mobile technical success, and durable funnel completion
+  explicitly uninstrumented until human-evaluation and privacy-safe cohort
+  evidence exists; no automated accessibility or conversion claim is made.
+- Added measured, directional, insufficient-sample, uninstrumented, and
+  unavailable baseline states. The server resolves and hashes baseline evidence;
+  the browser cannot submit it. Unsupported states remain null and render as
+  `Not measured`, never a fabricated 0% or $0.
+- Added protected `/admin/growth/targets` with 30/90/365-day views, current
+  baseline cards, instrumentation backlog, immutable version history, and forms
+  shown only to an authorized `growth:manage` operator when the schema is ready
+  outside Preview.
+- Added additive migration `20260821213000`, append-only RLS target versions,
+  strict state/value/approval constraints, browser-role denial, service-role
+  least privilege, and an idempotent security-invoker RPC that appends exactly
+  one audit event per new version. No target is seeded.
+- Added Preview fail-closed checks before database/baseline resolution,
+  parameterized SQL, PII/secret rejection, React-escaped output, and a protected
+  per-operator 30/hour mutation limit.
+- Added a hash-pinned backup-first cutover runner targeting only canonical Neon
+  Production and requiring the publication-proof prerequisite. Plan, preflight,
+  execute, and verify are separate; only execute accepts the exact release gate.
+- Focused tests pass 6 files / 56 tests. The full local release gate passes 207
+  test files / 2,894 tests, system isolation, 14/14 safety checks, strict
+  typecheck, ESLint, optimized Next.js 15.5.21 build, and the 81-route manifest.
+  The disposable PostgreSQL 17.6 contract and 12/12 desktop/mobile rendered
+  checks also pass. Production dependencies have no known vulnerability, and a
+  redacted 477-commit scan found no secret leak. Exact Node 24 CI and canonical
+  Vercel Preview proof remain to be attached to the Draft PR.
+- Production aggregate truth remains six test/suppressed leads and zero genuine
+  contactable leads, response samples, outcomes, or spend. No numeric target is
+  approved or inferred from that absence.
+- No Production deployment, database query/write, target record, lead, email,
+  SMS, Push, WordPress/DNS change, external publication, spend, or NellySelly
+  action occurred.
+- Draft PR #187 is stacked on the exact PR #186 head. It remains downstream of
+  PRs #183–#186 and may not merge or migrate until each preceding release lands,
+  Production is verified, and #187 is refreshed and re-proved.
+- Exact future gate:
+  `APPROVE PHASE 9 KPI TARGET REGISTER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT`.
+
+## Phase 9 protected owned-demand asset studio — 2026-08-21
+
+- Reused the existing six-channel/four-placement owned-demand command, exact UTM
+  builder, approved Mike imagery, public funnels, and Lead Center RBAC. No
+  second campaign dashboard, publisher, provider, lead store, database schema,
+  or CRM was introduced.
+- Added three protected exports for each of 24 canonical placements: 1080×1350
+  feed PNG, 1080×1920 story PNG, and raw high-error-correction QR SVG. The 72
+  combinations are derived from the same definitions used for operator copy and
+  attribution.
+- Added 24 allowlisted `/go/[code]` 307 redirects to exact full UTM destinations.
+  Unknown/malformed codes fail closed; there is no arbitrary destination or
+  open redirect. The route is no-store/noindex and robots-disallowed.
+- Asset downloads require a real `report:view` session, accept only exact
+  channel/placement/format tuples, use approved local imagery, and return
+  private/no-store, CSP-sandboxed, noindex attachments. They make no provider or
+  database call and accept no consumer data.
+- Executable QA found and closed unsupported renderer CSS, full-UTM QR density,
+  story footer overlap, and WebP/PNG decoder failures. The ordinary UI preserves
+  WebP assets; exports use retained JPEG originals plus one mechanically derived
+  JPEG of the same approved renter portrait.
+- Final local verification passes system isolation, 14/14 release-safety checks,
+  203 test files / 2,846 tests, strict typecheck, ESLint, optimized Next.js
+  15.5.21 build, and 80 active routes / 17 acknowledged root–`src` duplicates.
+  Production dependencies have no known vulnerability; 471 Git commits have no
+  detected secret leak. Independent OpenCV scans pass for the compressed feed,
+  story, and Chromium-rendered raw SVG exemplars.
+- Draft PR #186 is stacked on exact PR #185 head
+  `be99a1838c1c36ffc474bc97c11ef2a88e53107c`. Runtime hardening head
+  `bce07766ae40d8035ddac8be853dfed89248f427` passed GitHub Node 24 run
+  `32520888862` and Ready canonical Vercel Preview
+  `dpl_6i4VqGrQUFaWdgoKznLYGwkgPvtq`. Public/health routes return 200, the exact
+  seller shortlink returns 307 to the full canonical UTM URL, unknown code
+  returns 404, robots disallows `/go/`, and anonymous admin/asset access fails
+  closed with private headers. The render contains zero NellySelly markers.
+  Mutable final documentation-head identifiers belong in PR metadata.
+- The first protected-Preview probe from the unlinked worktree created empty
+  helper project `amm-phase9-owned-demand-assets-20260821`
+  (`prj_v8534MJYV5xUCp3pYqxWsmZJPifK`). It has zero deployments and no domain or
+  application effect. The worktree is relinked to the canonical Vercel project;
+  the helper is preserved pending separately approved cleanup.
+- No Production deployment, Neon migration/write, lead submission, email/SMS/
+  Push send, WordPress/DNS change, external publication, QR distribution,
+  spend, or NellySelly mutation occurred.
+- Exact future release gate:
+  `APPROVE PHASE 9 OWNED-DEMAND ASSET STUDIO MERGE AND PRODUCTION DEPLOYMENT`.
+  External publication remains a separate channel-specific approval.
+
+## Phase 9 current-router safety consolidation — 2026-08-21
+
+- Audited PRs #179 and #182 against the exact PR #183/#184 stack before writing
+  new code. Both PRs are now Draft with explicit out-of-order merge warnings;
+  neither branch nor its evidence was deleted.
+- Reused PR #182's unique work once: the existing `/buy` funnel is now visible
+  in the Black Diamond desktop navigation and homepage path grid; Preview CORS
+  accepts only the exact Vercel deployment/branch origins supplied by the
+  platform; Production remains restricted to owned origins.
+- Modernized the release-safety scanner to inspect all 535 deployable files in
+  canonical root `app/` and delegated `src/`, current widget/listing/health
+  routes, and current Neon/Better Auth/Resend/Web Push/provider secrets.
+- Replaced the retired-router CTA authority with 24 checks against the active
+  public routes, real Black Diamond components, both deployable trees, and the
+  current owner approval/runbook documents.
+- Node 24.18 verification passes: 14/14 release-safety checks, 202 test files /
+  2,837 tests, strict typecheck, ESLint, Next.js 15.5.21 Production build, and
+  78 active routes / 17 acknowledged root–`src` duplicates. Production
+  dependencies have no known vulnerabilities; 469 Git commits have no detected
+  secret leak.
+- Desktop 1440px and mobile 390px Playwright inspection passes for the homepage
+  and Buyer funnel. The five path cards remain balanced/stacked, consent stays
+  readable, and the existing black/gold/cyan visual system remains intact.
+- Draft PR #185 is stacked on PR #184. Code-bearing head
+  `4b92d286caae09114b2aa0f84eb7b084ad26cb2a` passed Node 24 GitHub run
+  `32516288876` and Ready Preview
+  `dpl_BByVkaLDwDKnkScV4R4f5v3vbNwf`. Public/health routes return 200,
+  anonymous Distribution Command returns 401 with private headers, an exact
+  Preview origin reaches non-persisting request validation, a foreign origin is
+  rejected, and the render contains no NellySelly marker.
+- The first protected-Preview probe from the unlinked worktree created empty
+  helper project `amm-phase9-current-router-safety-20260821`
+  (`prj_iGynowHru4TBNwWgvoiSIG193Ukf`). It has zero deployments, domains, and
+  application effect. The worktree was relinked to the canonical Vercel project;
+  the helper is preserved pending separately approved cleanup.
+- No Production deployment, Neon migration/write, lead submission, email/SMS/
+  push send, WordPress/DNS change, external publication, spend, or NellySelly
+  mutation occurred.
+
+## Phase 9 owned-demand publication proof ledger — 2026-08-21
+
+- Production aggregate truth is zero live demand: six test/suppressed leads,
+  zero contactable live leads, zero first-response samples, zero live delivery
+  failures, zero outcomes, zero spend, and zero overdue routing at the recorded
+  read-only observation. No PII was queried or retained.
+- Reused the protected Distribution Command, canonical Neon database, Lead
+  Center RBAC, immutable audit log, UTM builder, public funnels, and retained
+  campaign assets. No publisher, provider integration, second CRM, Supabase
+  runtime, or parallel campaign database was added.
+- Added one append-only, RLS-enabled publication-proof ledger and one idempotent
+  server-only RPC. A successful first insert creates exactly one immutable
+  `growth.publication_proof_recorded` audit event; replay creates neither a
+  duplicate proof nor duplicate audit.
+- Raw final post copy is validated and SHA-256 hashed in memory, then discarded.
+  Public evidence URLs are channel/HTTPS/host/query allowlisted both on write
+  and again on read. PII, credentials, placeholders, unsupported guarantees,
+  and known Fair Housing risk phrases fail closed.
+- Added `growth:manage` only to administrators and the primary lead owner. The
+  Server Action rechecks that permission, requires an explicit observation
+  confirmation, refuses legacy Basic-auth-only mutation sessions, uses
+  parameterized SQL, and is blocked by the existing Preview mutation guard.
+- Added a hash-pinned, backup-first Production cutover runner with exact
+  approval, canonical Neon identity and prerequisite checks, advisory locks,
+  one transaction, migration-ledger insertion, privilege/immutability/audit
+  postconditions, and lead/audit no-change digests.
+- Added an executable PostgreSQL 17 publication-proof contract to the existing
+  isolated local staging verifier. It proves service/browser role boundaries,
+  one-proof/one-audit idempotency, unsafe-host rejection, append-only behavior,
+  synthetic rollback, and zero external calls.
+- The contract found and fixed two pre-Production defects: postflight now reads
+  trigger event bits instead of depending on PostgreSQL display order, and the
+  migration now revokes inherited `service_role` privileges before granting
+  only SELECT and INSERT. The reviewed migration hash is
+  `c60c1a6e692d487e0adfd98d0eb3a9cff89ad77a3233b53075a4c8b63bde3ede`.
+- The candidate is stacked on the exact PR #183 head
+  `e9fbc48ed436c74aa9ab178c426626230f8ddf9b`; PR #183 remains unchanged and
+  retains its separate campaign release gate.
+- The full local release gate passes system isolation, 14/14 safety checks,
+  200 test files / 2,828 tests, strict typecheck, ESLint, the Next.js 15.5.21
+  Production build, and the 78-route manifest. Production dependencies report
+  no known vulnerabilities; a redacted full-history scan reports no secret
+  leaks. Production-render Playwright checks pass 10/10 desktop/mobile routes
+  with no overflow, missing required copy, prohibited claim, bare-appraisal
+  wording, or console error. The migration hash/plan gate passes. A disposable
+  local reset applied all 33 migrations through the new SQL, and
+  `staging:local:verify` passes the real PostgreSQL 17.6 role, idempotency,
+  audit, host, RLS, and immutability contract with all synthetic changes rolled
+  back.
+- Draft PR #184 is correctly stacked on PR #183. Code-bearing hardening head
+  `755cf686fccea3facd0071aebbdd24734e818ccd` passed exact-head Node 24 CI run
+  `32512057769`. Ready Preview deployment
+  `dpl_4JxCp1UxebTPof1fvK55NTrrnHqY` serves the expected public/health routes,
+  identifies only Ask Magic Mike/Our Town Properties, and denies anonymous
+  `/admin/distribution` access with 401, Basic challenge, no-store, SAMEORIGIN,
+  and noindex controls. No Preview mutation was attempted. A later
+  documentation-only reconciliation does not change runtime behavior; its
+  exact-head GitHub/Vercel status is kept in PR #184's required checks and
+  Preview metadata rather than frozen into this file.
+- Vercel CLI verification created empty helper project
+  `amm-phase9-publication-ledger-20260821`
+  (`prj_QcHch6KY1m2g0BKtOoVVFregRhho`) before the worktree was relinked to the
+  canonical project. It has zero deployments and no application/domain effect;
+  it remains preserved pending a separate exact cleanup approval.
+- Reconciled the current operating authority, asset manifest, consolidation
+  plan, release queue, limitations, daily Lead Center guide, architecture,
+  release log, and final report without deleting historical evidence. The
+  launch doctor/authority scanners now check PR #181, canonical
+  Neon/Better-Auth/Resend/Web-Push variable names, both deployable app trees,
+  and MLS-contextual MATRIX usage instead of falsely rejecting the ordinary
+  phrase `form-readiness matrix`. Focused scanner coverage passes 82/82.
+- No Production database write, code deployment, WordPress change, provider
+  call, email, SMS, social/GBP publication, print distribution, spend, DNS
+  change, or NellySelly mutation occurred.
+- Exact ledger migration/release gate:
+  `APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT`.
+- External publication remains a separate final-copy/identity/visual/URL/removal
+  approval and is not authorized by the ledger gate.
+
+## Phase 9 campaign safety + three-offer owned-demand flight — 2026-08-21
+
+- Reused the canonical protected `/admin/distribution` command, Neon Growth
+  ledger, public funnels, UTM builder, and retained Black Diamond imagery. No
+  parallel campaign dashboard, lead store, publisher, or migration was added.
+- Added seller `/home-value`, buyer `/buy`, and renter `/rent` briefs across all
+  six existing owned channels: 18 exact channel/offer placements plus the six
+  existing general-question placements.
+- Attribution requires an exact normalized source alias, medium, campaign, and
+  complete `utm_content` match. Generic and offer-specific results are counted
+  exactly once.
+- Added accessible local clipboard controls. They make no network request and do
+  not publish, send, mutate a lead, or write to the database.
+- A current-run desktop/mobile operator audit found and closed the remaining
+  activation-path friction: the measured bottleneck now points to the first
+  recommended channel, and each channel exposes one deterministic local-only
+  packet containing its general placement, three offer placements, exact URLs,
+  and review boundaries. The shared mobile Lead Center navigation remains a
+  separately scoped cross-route polish item.
+- Audited and rewrote retained legacy campaign libraries containing unverified
+  volume, tenure, valuation-error, demand, school-proxy, response-time,
+  superlative, and direct-phone claims. Public copy preserves the current live
+  office number `252-243-7700`; private routing numbers remain private.
+- Hardened the active `/ask` interface and prompt set so it uses consumer-stated
+  objective criteria instead of neighborhood, school-proxy, or unverified
+  buyer-demand guidance.
+- Replaced two soft, undersized legacy offer portraits with higher-resolution
+  approved local Mike assets already in the canonical repository.
+- Focused verification passes 6 files / 337 tests. The full local release gate
+  passes system isolation, 14/14 release-safety controls, 196 test files / 2,795
+  tests, strict typecheck, ESLint, the Next.js 15.5.21 Production build, and the
+  78-route manifest. Production dependencies report no known vulnerabilities;
+  the redacted 464-commit history scan reports no secret leaks. Local
+  Production-render visual QA passes 10/10 desktop/mobile route checks with no
+  overflow, missing copy, prohibited claim, bare appraisal language, or console
+  error.
+- Code-bearing commit `a0c80eaa9b429ed48871fc221d93af5e7d6fdfa1`
+  produced Ready Preview deployment `dpl_5UQL8LDfMvFvvi4YZ8UhLdyDFbWF` at
+  `https://ask-magic-mike-ihjwzl8rw-eyes-up-industries.vercel.app`. GitHub's
+  release gate and both Vercel checks pass. Read-only exact-Preview proof passes
+  ten public/health/listing checks and eight desktop/mobile renders with no
+  NellySelly identity, private listing field, overflow, missing required copy,
+  prohibited claim, or console error. Anonymous `/admin/distribution` access is
+  denied with 401, Basic challenge, `no-store`, and `SAMEORIGIN`; authenticated
+  Preview inspection was not bypassed.
+- During protected-Preview setup, Vercel CLI created empty helper project
+  `amm-phase9-campaign-compliance-20260821`
+  (`prj_JUyx03Rh8iABqAFepNNuPI2jJqut`). It has zero deployments and no effect on
+  the canonical project. It remains intact pending the separate exact cleanup
+  gate documented in the Phase 9 runbook.
+- Production, WordPress, Neon, email, SMS, Push, social accounts, GBP, DNS, and
+  NellySelly are unchanged by this candidate.
+- Exact release gate:
+  `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT`.
 
 ## Phase 9 first-human-response intelligence — 2026-08-20
 
@@ -22,12 +389,11 @@ Updated 2026-08-20.
   `dpl_2PQoDZLHc562SBEY7px91CAEUrin`, with its outcome migration, validated
   backup, postflight, canonical-host, health, and identity-isolation checks
   passed.
-- PR #181 was refreshed on that exact `main` baseline at
-  `99fac18df16237ada26f65384be390e331df9f59`. Node 24 CI run `32422016242`
-  passed in 2m15s and Vercel Preview `dpl_kEtBPF8LS52kgG1LWE2ooaYZhJgT` is
-  Ready. Its refreshed local gate passed 193 files / 2,764 tests, strict
-  typecheck, lint, build, and the 78-route manifest before the additional
-  cutover hardening.
+- PR #181 completed in Production at head
+  `ed125cdfa09b7cc1a47b7c715bc15af7e6aeceea`, merge commit
+  `5335697edf31eed0b8a38cd0295a4f5e7d501a3e`, and Vercel deployment
+  `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`. Canonical public routes, health,
+  authorization, and Ask Magic Mike/NellySelly isolation checks passed.
 - A canonical-Neon role-shape replay then applied both stacked migrations twice
   with `anon` and `authenticated` absent. All three protected functions ran as
   `service_role`, public function/table access remained denied, both PostgreSQL
@@ -54,16 +420,16 @@ Updated 2026-08-20.
   on Node 24 and passes health, public-route, anonymous-admin-denial,
   desktop/mobile rendering, console, and Ask Magic Mike/NellySelly isolation
   checks without a database write or external send.
-- The fail-closed read-only Production preflight passes against canonical Neon
+- The fail-closed read-only Production preflight passed against canonical Neon
   project `bitter-star-20214385`, Production branch
   `br-round-base-auh6h2wd`, unpooled owner endpoint
   `ep-proud-bonus-autwv60g`. All prerequisite, schema, role, privilege, source
-  baseline, and target-absence checks are true; 6 leads and 9 audit rows remain
-  untouched, with 0 eligible historical response backfills.
-- No PR #181 Production database mutation, merge, message, WordPress change,
-  DNS change, environment change, or Production deployment has occurred. The
-  remaining gates are separately approved migration/merge/deploy plus
-  authenticated post-release acceptance.
+  baseline, and target-absence checks were true; 6 leads and 9 audit rows had
+  0 eligible historical response backfills.
+- Migration `20260820013000` then applied once to canonical Neon Production
+  branch `br-round-base-auh6h2wd` with the validated backup retained. Six
+  suppressed QA leads, zero live prospects, and existing audit counts remained
+  unchanged. No lead, message, WordPress, DNS, or NellySelly mutation occurred.
 
 ## Phase 9 operating-intelligence outcome seam — 2026-08-19
 
