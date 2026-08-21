@@ -49,6 +49,7 @@
     "phase9:outcome:cutover": "node scripts/phase9-outcome-production-cutover.mjs",
     "phase9:first-response:cutover": "node scripts/phase9-first-response-production-cutover.mjs",
     "phase9:publication-proof:cutover": "node scripts/phase9-publication-proof-production-cutover.mjs",
+    "amm:audit:wordpress": "node scripts/audit-wordpress-form-placements.mjs",
     "reconcile-wordpress-leads": "node scripts/reconcile-wordpress-leads.mjs",
     "check-lead-sla": "node scripts/check-lead-sla.mjs",
     "staging:local:up": "node scripts/staging-local-up.mjs",

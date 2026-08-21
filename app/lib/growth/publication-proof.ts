@@ -69,6 +69,11 @@ type ChannelPolicy = {
 };
 
 const CHANNEL_POLICIES: Record<string, ChannelPolicy> = {
+  ourtown_wordpress: {
+    states: ["live", "configured", "removed"],
+    proofTypes: ["public_url", "screenshot_reference", "configuration_reference", "removal_reference"],
+    publicHosts: ["ourtownproperties.com"],
+  },
   google_business_profile: {
     states: ["live", "scheduled", "pending_review", "not_approved", "removed"],
     proofTypes: ["public_url", "platform_reference", "removal_reference"],

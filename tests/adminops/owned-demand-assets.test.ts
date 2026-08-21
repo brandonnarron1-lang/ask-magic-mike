@@ -55,9 +55,9 @@ function dataUrlFor(relativePublicPath: string) {
 }
 
 describe("owned-demand asset studio", () => {
-  it("derives all 24 launch assets from the canonical Phase 9 placements", () => {
+  it("derives all 28 launch assets from the canonical Phase 9 placements", () => {
     const command = buildOwnedDemandCommand({ summary: emptySummary(), ownedDemandSignals: [] });
-    expect(command.channels).toHaveLength(6);
+    expect(command.channels).toHaveLength(7);
     const shortCodes = new Set<string>();
 
     for (const channel of command.channels) {
@@ -88,7 +88,7 @@ describe("owned-demand asset studio", () => {
         }
       }
     }
-    expect(shortCodes.size).toBe(24);
+    expect(shortCodes.size).toBe(28);
   });
 
   it("fails closed for unknown channels, placements, and formats", () => {
@@ -209,7 +209,7 @@ describe("owned-demand asset route boundary", () => {
         checked += 1;
       }
     }
-    expect(checked).toBe(24);
+    expect(checked).toBe(28);
 
     const missing = await resolveOwnedDemandRedirect(
       new NextRequest("https://www.askmagicmike.com/go/not-approved"),

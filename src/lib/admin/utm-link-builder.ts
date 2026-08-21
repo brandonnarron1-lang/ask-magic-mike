@@ -60,6 +60,7 @@ const APPROVED_BASE_URLS = [
   "https://www.askmagicmike.com/ask",
   "https://www.askmagicmike.com/value",
   "https://www.askmagicmike.com/home-value",
+  "https://www.askmagicmike.com/sell",
   "https://www.askmagicmike.com/buy",
   "https://www.askmagicmike.com/rent",
 ] as const;

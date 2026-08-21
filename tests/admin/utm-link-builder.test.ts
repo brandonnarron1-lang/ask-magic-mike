@@ -117,7 +117,7 @@ describe("buildUtmUrl", () => {
     expect(url).toContain("utm_content=facebook_post");
   });
 
-  it.each(["/home-value", "/buy", "/rent"])("allows the canonical %s offer route", (pathname) => {
+  it.each(["/home-value", "/sell", "/buy", "/rent"])("allows the canonical %s offer route", (pathname) => {
     const url = buildUtmUrl(`https://www.askmagicmike.com${pathname}`, BASE_PARAMS);
     expect(new URL(url).pathname).toBe(pathname);
   });

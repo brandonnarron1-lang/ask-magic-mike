@@ -108,6 +108,7 @@ function PublicationProofForm({
           <select name="placement_key" className={fieldClass} disabled={disabled} required>
             <option value="general_question">General question</option>
             {channel.offers.map((offer) => <option key={offer.key} value={offer.key}>{offer.shortLabel}</option>)}
+            {channel.namedPlacements.map((placement) => <option key={placement.placementKey} value={placement.placementKey}>{placement.placementLabel}</option>)}
           </select>
         </label>
         <label className={labelClass}>
@@ -462,6 +463,25 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
         <CopyDemandAsset label="Copy full channel flight" value={channelPacket} />
       </div>
       <DemandAssetLinks channelKey={channel.key} placementKey="general_question" />
+
+      {channel.namedPlacements.length ? (
+        <div className="mt-5 rounded-xl border border-[#4baab833] bg-[#061417] p-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9edbe2]">Named brokerage placements</p>
+          <p className="mt-2 text-xs leading-5 text-[#8f8778]">Use the exact page-specific link. Each live WordPress edit still requires its own backup, review, publication approval, and rollback proof.</p>
+          <div className="mt-3 grid gap-3 lg:grid-cols-2">
+            {channel.namedPlacements.map((placement) => (
+              <article key={placement.placementKey} className="min-w-0 rounded-lg border border-white/[.08] bg-black/35 p-3">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <p className="text-xs font-semibold text-[#f4ead4]">{placement.placementLabel}</p>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.11em] text-[#8f8778]">{placement.attributedLeads ? `${placement.attributedLeads} signal${placement.attributedLeads === 1 ? "" : "s"}` : "Unmeasured"}</span>
+                </div>
+                <code className="mt-2 block break-all text-[10px] leading-5 text-[#9edbe2]">{placement.trackedUrl}</code>
+                <div className="mt-2"><CopyDemandAsset label="Copy tracked link" value={placement.trackedUrl} /></div>
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <details className="group mt-5 rounded-xl border border-[#4baab833] bg-[#061417]">
         <summary className="cursor-pointer list-none px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#9edbe2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#9edbe2]">

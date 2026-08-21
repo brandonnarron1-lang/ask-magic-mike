@@ -5,6 +5,44 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Phase 9 WordPress owned-traffic consolidation — 2026-08-21
+
+- `WORDPRESS_BRIDGE_FORM_IDS=3 node scripts/audit-wordpress-form-placements.mjs` — PASS: 42 sitemap
+  pages fetched, 42 succeeded, zero failed; the report captured only structural
+  public evidence and compared all observed Gravity IDs against the proven
+  Form 3 bridge allowlist.
+- Public topology evidence: Form 1 on one page, Form 3 on one page, Form 4 on
+  one page, Form 6 on one page, and Form 7 on 39 pages. Five pages expose more
+  than one capture system. No form was submitted.
+- Canonical/placement evidence: three indexable seller-value pages, two
+  direct-purchase pages, two Ask Mike pages, four native legacy-capture pages,
+  three direct AskMagicMike.com links missing `utm_content`, and two iframe
+  placements missing `utm_content`.
+- Mobile Chromium inspection at 390 x 844 covered the homepage, established
+  home-value page, and Ask Magic Mike page. Existing layouts remained usable;
+  the render confirmed visible capture duplication and did not create a lead,
+  analytics conversion, provider call, or message.
+- Focused command — PASS: 5 files / 85 tests covering the WordPress audit,
+  owned-demand command, publication proof, UTM builder, and owned-demand
+  assets.
+- `pnpm release:gate` — PASS: Ask Magic Mike/NellySelly isolation, 14/14
+  release-safety controls, 208 test files / 2,901 tests, strict typecheck,
+  ESLint, optimized Next.js 15.5.21 build, and 81-route manifest.
+- `pnpm audit --prod` — PASS: no known Production dependency vulnerability.
+- `gitleaks git --redact --no-banner` — PASS: 477 commits and approximately
+  13.53 MB scanned with no leak.
+- `git diff --check` — PASS before final documentation update; it is rerun at
+  handoff.
+- Known local-only warning: Node 26.5.1 is newer than the Node 24.x project
+  engine, and webpack could not persist one disposable cache entry because the
+  local volume was nearly full. Compilation, page generation, build, and route
+  checks still passed. Exact Node 24 CI and protected Preview verification are
+  required on the Draft PR before the candidate is considered accepted.
+- Full audit rationale, page-level matrix, rollback, and stop gates are in
+  `docs/phase9/WORDPRESS_OWNED_TRAFFIC_CONSOLIDATION_AUDIT_2026-08-21.md`.
+- Production, WordPress, Neon, providers, leads, notifications, DNS, and
+  NellySelly remained unchanged.
+
 ## Phase 9 owned-demand publication proof ledger — 2026-08-21
 
 The stacked additive ledger, authorization, security, migration, and cutover
