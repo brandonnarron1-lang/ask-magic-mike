@@ -82,8 +82,8 @@ Release only one approved PR at a time and verify Production before advancing:
    refresh after #184 Production verification;
 6. `#186` — protected deterministic owned-demand assets and allowlisted QR
    attribution: Draft stacked on #185; refresh after #185 verification; and
-7. `codex/phase9-kpi-target-register-20260821` — protected evidence-first KPI
-   target register: stacked after #186, with no seeded targets and its own
+7. `#187` — protected evidence-first KPI target register: Draft stacked after
+   #186, with no seeded targets and its own
    backup-first additive migration. Refresh and re-prove it after every
    preceding merge.
 

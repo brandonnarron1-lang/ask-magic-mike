@@ -43,6 +43,9 @@ Updated 2026-08-21.
 - No Production deployment, database query/write, target record, lead, email,
   SMS, Push, WordPress/DNS change, external publication, spend, or NellySelly
   action occurred.
+- Draft PR #187 is stacked on the exact PR #186 head. It remains downstream of
+  PRs #183–#186 and may not merge or migrate until each preceding release lands,
+  Production is verified, and #187 is refreshed and re-proved.
 - Exact future gate:
   `APPROVE PHASE 9 KPI TARGET REGISTER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT`.
 

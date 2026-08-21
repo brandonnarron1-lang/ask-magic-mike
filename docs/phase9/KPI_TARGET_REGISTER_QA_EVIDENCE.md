@@ -1,7 +1,7 @@
 # Phase 9 KPI Target Register QA Evidence
 
 Date: 2026-08-21
-Status: local acceptance complete; GitHub/Preview acceptance pending; Production unchanged
+Status: local acceptance complete; Draft PR #187 opened; exact-head GitHub/Preview acceptance pending; Production unchanged
 
 ## Scope and truth boundary
 

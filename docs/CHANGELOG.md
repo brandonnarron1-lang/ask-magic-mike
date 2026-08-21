@@ -32,6 +32,8 @@
 - No Production deployment, Neon migration/write, target record, lead,
   provider call, external send/publication, WordPress/DNS change, spend, or
   NellySelly action occurred.
+- Draft PR #187 is stacked on PR #186 and remains behind the exact PR #183–#186
+  release sequence.
 
 ## 2026-08-21 — Protected owned-demand asset studio candidate
 
