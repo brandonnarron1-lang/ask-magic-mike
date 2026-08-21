@@ -11,6 +11,11 @@ import {
   type OwnedDemandOfferPlacement,
 } from "../../lib/growth/owned-demand";
 import {
+  buildOwnedDemandActivationLoop,
+  type OwnedDemandActivationLoop,
+  type OwnedDemandActivationState,
+} from "../../lib/growth/owned-demand-activation";
+import {
   publicationPolicyForChannel,
   type OwnedDemandPlatformState,
   type OwnedDemandProofType,
@@ -299,6 +304,137 @@ function MeasurementStateBanner({ measurement }: { measurement: OwnedDemandMeasu
   );
 }
 
+function activationTone(state: OwnedDemandActivationState) {
+  switch (state) {
+    case "measured_signal":
+      return "border-emerald-300/30 bg-emerald-300/10 text-emerald-200";
+    case "proof_attribution_mismatch":
+      return "border-[#ff4d6d66] bg-[#310611] text-[#ffd0da]";
+    case "signal_without_active_proof":
+      return "border-[#ef835455] bg-[#2b1008] text-[#ffc5ad]";
+    case "observed_unmeasured":
+      return "border-[#4baab855] bg-[#06171b] text-[#bff8ff]";
+    case "native_pending":
+      return "border-[#cda24a55] bg-[#171108] text-[#f5dfa7]";
+    case "native_inactive":
+      return "border-[#a21f3d55] bg-[#21070e] text-[#ffdbe4]";
+    case "prepared_not_observed":
+      return "border-white/10 bg-white/[.03] text-[#bdb2a0]";
+    case "evidence_unavailable":
+      return "border-[#a21f3d55] bg-[#21070e] text-[#ffdbe4]";
+  }
+}
+
+function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
+  const next = loop.nextPlacement;
+  const evidenceCount = (value: number) => loop.evidenceAvailable ? value : "—";
+  return (
+    <Panel
+      eyebrow="Exact placement activation loop"
+      title="Join native proof to first-party lead signals—without confusing either one."
+      note={`${loop.totalPlacements} canonical placements · test and suppressed leads remain excluded upstream`}
+    >
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6" aria-label="Owned-demand activation lifecycle totals">
+        <article className="rounded-xl border border-white/[.08] bg-black/35 p-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8f8778]">Exact placements</p>
+          <p className="mt-2 font-serif text-3xl text-[#f4ead4]">{loop.totalPlacements}</p>
+        </article>
+        <article className="rounded-xl border border-[#4baab833] bg-[#061417] p-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8bbfc6]">Current active proof</p>
+          <p className="mt-2 font-serif text-3xl text-[#a9edf4]">{evidenceCount(loop.activeProofPlacements)}</p>
+        </article>
+        <article className="rounded-xl border border-emerald-300/20 bg-emerald-300/[.06] p-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-200/70">Measured placements</p>
+          <p className="mt-2 font-serif text-3xl text-emerald-100">{evidenceCount(loop.measuredPlacements)}</p>
+        </article>
+        <article className="rounded-xl border border-[#ef835444] bg-[#2b1008] p-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#e6a085]">Signal proof review</p>
+          <p className="mt-2 font-serif text-3xl text-[#ffc5ad]">{evidenceCount(loop.signalReviewPlacements)}</p>
+        </article>
+        <article className="rounded-xl border border-[#ff4d6d55] bg-[#310611] p-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#ff9bb2]">Identity review</p>
+          <p className="mt-2 font-serif text-3xl text-[#ffd0da]">{evidenceCount(loop.identityReviewPlacements)}</p>
+        </article>
+        <article className="rounded-xl border border-[#cda24a33] bg-[#171108] p-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#cda24a]">Prepared · unobserved</p>
+          <p className="mt-2 font-serif text-3xl text-[#f0cf79]">{evidenceCount(loop.unobservedPlacements)}</p>
+        </article>
+      </div>
+
+      {!loop.evidenceAvailable ? (
+        <div className="mt-4 rounded-xl border border-[#a21f3d55] bg-[#21070e] p-4 text-sm leading-6 text-[#ffdbe4]">
+          The canonical publication-proof ledger is unavailable in this runtime. The command will not infer placement state from drafts or attribution alone. Restore the approved ledger read path before using this lifecycle view.
+        </div>
+      ) : next ? (
+        <article className="mt-4 rounded-2xl border border-[#4baab855] bg-[linear-gradient(135deg,#06171b,#080d0e)] p-5 sm:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0 max-w-4xl">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8bbfc6]">Next evidence-backed operator decision</p>
+              <h3 className="mt-2 font-serif text-2xl text-[#d8f7fa] sm:text-3xl">
+                {next.channelLabel} · {next.placementLabel}
+              </h3>
+              <p className="mt-3 text-sm leading-6 text-[#b9ced0]">{next.nextAction}</p>
+            </div>
+            <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${activationTone(next.state)}`}>
+              {next.stateLabel}
+            </span>
+          </div>
+          <code className="mt-4 block break-all rounded-lg border border-white/10 bg-black/45 p-3 text-[10px] leading-5 text-[#9edbe2]">
+            {next.trackedUrl}
+          </code>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Link
+              href={`#channel-${next.channelKey}`}
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#4baab866] bg-[#4baab818] px-5 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#bff8ff] transition hover:bg-[#4baab82b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2]"
+            >
+              Open exact channel packet
+            </Link>
+            <p className="text-xs text-[#79a4aa]">
+              {next.attributedLeads} exact live lead signal{next.attributedLeads === 1 ? "" : "s"}
+              {next.latestProof ? ` · latest proof ${humanize(next.latestProof.platformState)} ${dateTime(next.latestProof.observedAt)}` : " · no native proof recorded"}
+            </p>
+          </div>
+        </article>
+      ) : null}
+
+      <details className="group mt-4 rounded-xl border border-white/[.08] bg-black/30">
+        <summary className="cursor-pointer list-none px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#9edbe2]">
+          <span className="flex items-center justify-between gap-3">
+            Inspect all {loop.totalPlacements} exact lifecycle states
+            <span aria-hidden="true" className="text-lg transition group-open:rotate-45">+</span>
+          </span>
+        </summary>
+        <div className="grid gap-3 border-t border-white/[.08] p-3 md:grid-cols-2 xl:grid-cols-3">
+          {loop.placements.map((placement) => (
+            <article
+              key={`${placement.channelKey}:${placement.placementKey}`}
+              data-activation-state={placement.state}
+              className="min-w-0 rounded-xl border border-white/[.08] bg-[#050505] p-4"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.13em] text-[#8f8778]">{placement.channelLabel}</p>
+                  <h4 className="mt-1 text-sm font-semibold text-[#f4ead4]">{placement.placementLabel}</h4>
+                </div>
+                <span className={`rounded-full border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.1em] ${activationTone(placement.state)}`}>
+                  {placement.stateLabel}
+                </span>
+              </div>
+              <p className="mt-3 text-xs leading-5 text-[#a99f90]">{placement.nextAction}</p>
+              <dl className="mt-3 grid grid-cols-2 gap-2 text-[10px] leading-4">
+                <div><dt className="uppercase tracking-[0.1em] text-[#6f6a61]">Lead signals</dt><dd className="mt-1 text-[#d9ceb8]">{placement.attributedLeads}</dd></div>
+                <div><dt className="uppercase tracking-[0.1em] text-[#6f6a61]">Latest proof</dt><dd className="mt-1 text-[#d9ceb8]">{placement.latestProof ? humanize(placement.latestProof.platformState) : "None"}</dd></div>
+              </dl>
+            </article>
+          ))}
+        </div>
+      </details>
+
+      <p className="mt-4 text-xs leading-6 text-[#8f8778]">{loop.authorityBoundary}</p>
+    </Panel>
+  );
+}
+
 const ASSET_DOWNLOADS: ReadonlyArray<{ format: OwnedDemandAssetFormat; label: string }> = [
   { format: "feed", label: "Download 4:5 PNG" },
   { format: "story", label: "Download 9:16 PNG" },
@@ -518,6 +654,7 @@ export default async function DistributionPage({
   ]);
   const command = buildOwnedDemandCommand(growth);
   const measurement = assessOwnedDemandMeasurement(growth);
+  const activation = buildOwnedDemandActivationLoop(command, ledger);
   const canManage = Boolean(principal && hasLeadCenterPermission(principal.role, "growth:manage"));
   const previewReadOnly = isPreviewDataDisabled();
   const stateLabel = !measurement.ready
@@ -527,8 +664,6 @@ export default async function DistributionPage({
       : command.measurementState === "partial_signal"
         ? "Attribution repair"
         : "Measured";
-  const firstMove = command.weeklyPlan[0];
-  const firstMoveChannel = command.channels.find((channel) => channel.key === firstMove.channelKey);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_80%_0%,rgba(74,170,184,.13),transparent_30%),radial-gradient(circle_at_10%_5%,rgba(205,162,74,.12),transparent_28%),#040404] px-4 py-7 text-[#f4ead4] sm:px-6 sm:py-10">
@@ -597,32 +732,9 @@ export default async function DistributionPage({
             : "Prepared assets remain available for review, but measurement must recover before interpreting demand or choosing a launch channel."}
         </div>
 
-        <section className="mt-5 rounded-2xl border border-[#4baab855] bg-[linear-gradient(135deg,#06171b,#080d0e)] p-5 sm:p-6" aria-labelledby="recommended-first-move">
-          <div className="flex flex-wrap items-center justify-between gap-5">
-            <div className="max-w-3xl">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8bbfc6]">
-                {measurement.ready ? "Recommended first move" : "Prepared sequence · measurement unavailable"}
-              </p>
-              <h2 id="recommended-first-move" className="mt-2 font-serif text-2xl text-[#d8f7fa] sm:text-3xl">
-                {measurement.ready
-                  ? `Prepare ${firstMoveChannel?.label ?? firstMove.channelKey} first.`
-                  : "Restore measurement before selecting a first channel."}
-              </h2>
-              <p className="mt-3 text-sm leading-6 text-[#b9ced0]">
-                {measurement.ready
-                  ? firstMove.objective
-                  : `${firstMoveChannel?.label ?? firstMove.channelKey} remains prepared for review, but it is not a data-backed recommendation in this state.`}
-              </p>
-              <p className="mt-2 text-xs leading-5 text-[#79a4aa]"><strong className="text-[#9edbe2]">Proof required:</strong> {firstMove.proofRequired}</p>
-            </div>
-            <Link
-              href={`#channel-${firstMove.channelKey}`}
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#4baab866] bg-[#4baab818] px-5 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#bff8ff] transition hover:bg-[#4baab82b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2]"
-            >
-              {measurement.ready ? "Open first channel packet" : "Inspect prepared channel packet"}
-            </Link>
-          </div>
-        </section>
+        <div className="mt-5">
+          <ActivationControlLoop loop={activation} />
+        </div>
 
         <div className="mt-5">
           <Panel

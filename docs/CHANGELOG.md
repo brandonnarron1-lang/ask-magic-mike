@@ -1,5 +1,36 @@
 # Changelog
 
+## 2026-08-21 — Exact owned-demand activation control-loop candidate
+
+- Extended the existing protected Distribution Command with one deterministic
+  per-placement lifecycle join; no new route, dashboard, CRM, database,
+  campaign catalog, provider, publisher, or autonomous agent was created.
+- Joined the existing append-only native publication-proof ledger to exact
+  eligible first-party lead attribution across all 35 canonical general,
+  seller, buyer, renter, and named WordPress placements.
+- Added explicit evidence-unavailable, prepared/unobserved, native-pending,
+  native-inactive, observed/unmeasured, proof-attribution-mismatch,
+  signal-without-active-proof, and measured-signal states. Attribution never
+  becomes publication proof, and proof never becomes a lead or outcome claim.
+- Applied channel-specific active semantics: public `live`, approved passive
+  email-signature `configured`, and QR/print `distributed`. A configured but
+  unpublished WordPress placement remains pending.
+- Made latest-proof resolution stable for out-of-order history and ranked the
+  next operator decision by evidence integrity before activation or scale.
+- Fresh Production aggregate evidence remains six test/suppressed records and
+  zero genuine leads, outcomes, spend, or response samples. No Production or
+  external mutation occurred.
+- Focused verification passes 3 files / 39 tests. The full local release gate
+  passes system isolation, 14/14 release-safety checks, 209 test files / 2,909
+  tests, strict typecheck, ESLint, the optimized Next.js 15.5.21 build, and the
+  81-route manifest. Production dependencies have no known vulnerability, and
+  a redacted 478-commit history scan found no secret leak.
+- Local protected visual QA passes 12/12 desktop/mobile checks across the reused
+  public funnels, widget surfaces, Distribution Command, and KPI target register
+  with no overflow, missing required copy, forbidden copy, or console error.
+  Exact Node 24 CI and canonical Vercel Preview evidence remain to be attached
+  to the Draft PR.
+
 ## 2026-08-21 — WordPress owned-traffic consolidation candidate
 
 - Audited all 42 URLs in the live Our Town Properties page sitemap without

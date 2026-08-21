@@ -284,6 +284,8 @@ describe("canonical /admin/distribution route guards", () => {
     expect(page).toContain('requireLeadCenterPermission("report:view")');
     expect(action).toContain('requireLeadCenterPermission("growth:manage")');
     expect(page).toContain("loadGrowthIntelligence(30)");
+    expect(page).toContain("buildOwnedDemandActivationLoop");
+    expect(page).toContain("Exact placement activation loop");
     expect(manifest).toContain('"/admin/distribution"');
     expect(manifest).toContain("active-protected-owned-demand-neon-append-only-publication-proof");
   });
@@ -307,11 +309,11 @@ describe("canonical /admin/distribution route guards", () => {
     expect(page).toContain("Three-offer launch flight");
     expect(page).toContain("Three offer-specific placements");
     expect(page).toContain("Copy full channel flight");
-    expect(page).toContain("Recommended first move");
+    expect(page).toContain("Next evidence-backed operator decision");
     expect(page).toContain("Named brokerage placements");
     expect(page).toContain("channel.namedPlacements");
-    expect(page).toContain("Open first channel packet");
-    expect(page).toContain('href={`#channel-${firstMove.channelKey}`}');
+    expect(page).toContain("Open exact channel packet");
+    expect(page).toContain('href={`#channel-${next.channelKey}`}');
     expect(copyControl).toContain('type="button"');
     expect(copyControl).toContain("navigator.clipboard.writeText");
     expect(copyControl).not.toMatch(/fetch\(|XMLHttpRequest|sendBeacon|<form|use server/i);
