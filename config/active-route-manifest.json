@@ -10,6 +10,7 @@
     "/admin/distribution",
     "/admin/experiments",
     "/admin/growth",
+    "/admin/growth/targets",
     "/admin/leads",
     "/admin/leads/[id]",
     "/admin/message-previews",
@@ -92,7 +93,7 @@
       "/integrations/ourtownproperties", "/robots.txt", "/sitemap.xml", "/social-preview"
     ],
     "admin": [
-      "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation", "/admin/distribution", "/admin/experiments", "/admin/growth",
+      "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation", "/admin/distribution", "/admin/experiments", "/admin/growth", "/admin/growth/targets",
       "/admin/action-queue", "/admin/message-previews", "/admin/notifications", "/admin/notifications/phone", "/admin/reporting",
       "/admin/revival"
     ],
@@ -113,6 +114,7 @@
     "/admin/distribution": "active-protected-owned-demand-neon-append-only-publication-proof",
     "/api/admin/distribution/assets/[channelKey]/[placementKey]": "active-protected-read-only-owned-demand-asset-export",
     "/admin/growth": "active-protected-read-only-phase9-schema-gated",
+    "/admin/growth/targets": "active-protected-server-baselined-append-only-kpi-target-register",
     "/admin/revival": "active-protected-read-only-database-revival-command",
     "/api/analytics/event": "inactive-src-only",
     "/api/health/live": "inactive-src-only",

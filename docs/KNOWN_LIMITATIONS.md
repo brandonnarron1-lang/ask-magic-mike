@@ -19,6 +19,14 @@ rates remain low-confidence until genuine traffic produces adequate samples.
 Deterministic routing and scoring continue to work; AI summaries and statistical
 recommendations are advisory and never silently assign a lead.
 
+### Numeric KPI targets are intentionally unapproved
+
+The stacked KPI target register defines 32 metrics and can preserve measured
+baselines and operator decisions, but the current zero-live-lead aggregate does
+not support numeric conversion or economics targets. The migration seeds no
+rows. Uninstrumented, unavailable, and insufficient-sample metrics remain
+explicit until real evidence exists; they must not be presented as 0% or $0.
+
 ## 2. Messaging and staff alerts
 
 ### Internal email is live; consumer automation is not broadly enabled
@@ -96,11 +104,14 @@ securely. CSV export remains available with audit logging.
 
 ## 6. Release and publication boundaries
 
-### Two current releases remain gated
+### The current stacked releases remain gated
 
 PR #183 is the next campaign-safety/three-offer release. PR #184 is stacked on it
-and adds the publication-proof ledger plus a hash-pinned Neon migration. Neither
-is Production until its exact approval, deployment, and postflight verification.
+and adds the publication-proof ledger plus a hash-pinned Neon migration. PRs
+#185 and #186 add current-router safety and protected deterministic assets. The
+KPI target register is stacked after #186 and has its own additive migration.
+None is Production until its exact approval, refresh, deployment, and applicable
+postflight verification.
 
 ### Prepared content is not published content
 
@@ -144,3 +155,4 @@ backup-first, identity, role, hash, and postflight interlocks.
 | 5 | Approve consent wording before expanding WordPress forms | Mike/BIC approval |
 | 6 | Attach `hub.ourtownproperties.com` | DNS/Vercel approval |
 | 7 | Add MLS or CRM integrations only under an existing approved contract/account | Provider/credential approval |
+| 8 | Establish numeric KPI targets only after a measured baseline and named approval exist | Evidence plus target-specific operator approval |

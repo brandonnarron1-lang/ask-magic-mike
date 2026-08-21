@@ -9,6 +9,7 @@ const ADMIN_NAVIGATION = [
   ["Allocation", "/admin/allocation"],
   ["Reporting", "/admin/reporting"],
   ["Growth", "/admin/growth"],
+  ["Targets", "/admin/growth/targets"],
   ["Revival", "/admin/revival"],
   ["Owned demand", "/admin/distribution"],
   ["Experiments", "/admin/experiments"],

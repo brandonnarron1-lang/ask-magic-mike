@@ -296,3 +296,23 @@ for historical credit. Unattributed evidence stays explicit, and every segment
 shows sample size/maturity before an operator treats it as directional or
 operational. Application rollback returns to v2; milestone and audit evidence
 is preserved.
+
+## Evidence-first KPI target boundary (Phase 9)
+
+The protected `/admin/growth/targets` route is a thin operator layer over the
+existing server-only Growth intelligence view. It does not create a second
+analytics pipeline. Thirty-two canonical KPI definitions resolve a baseline for
+one 30-, 90-, or 365-day window and classify it as measured, directional,
+insufficient-sample, uninstrumented, or unavailable.
+
+Only a measured server-resolved baseline can carry a numeric target. The client
+cannot submit baseline values, and unsupported states remain null rather than
+rendering a false zero. Each target decision appends one immutable
+`growth_kpi_target_versions` row and one audit event through a parameterized,
+idempotent security-invoker RPC. Browser database roles have no access; the
+application rechecks `growth:manage`, fails closed in Preview, and rate-limits
+the authenticated operator. AI, providers, consumer messaging, lead routing,
+and campaign publication are outside this boundary.
+
+Application rollback leaves the additive register dormant. Historical target
+and audit versions are retained; corrections are appended, never rewritten.

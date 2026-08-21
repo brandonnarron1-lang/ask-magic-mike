@@ -77,7 +77,15 @@ Release only one approved PR at a time and verify Production before advancing:
    GitHub/Vercel checks. It must not merge before #183 or without its exact
    migration/release gate. Refresh every remaining feature branch on the
    resulting `main` before selecting another release. Do not preserve an old
-   queue order when its base, scope, or proof has become stale.
+   queue order when its base, scope, or proof has become stale;
+5. `#185` — current-router safety and Buyer discovery: Draft stacked on #184;
+   refresh after #184 Production verification;
+6. `#186` — protected deterministic owned-demand assets and allowlisted QR
+   attribution: Draft stacked on #185; refresh after #185 verification; and
+7. `codex/phase9-kpi-target-register-20260821` — protected evidence-first KPI
+   target register: stacked after #186, with no seeded targets and its own
+   backup-first additive migration. Refresh and re-prove it after every
+   preceding merge.
 
 PR #181 uses:
 
@@ -117,6 +125,28 @@ APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERG
 That approval permits only the additive migration, reviewed code merge, and
 canonical application deployment. It does not authorize a GBP/social post,
 email campaign/signature change, QR distribution, consumer message, or spend.
+
+The stacked KPI target register uses:
+
+```text
+pnpm run staging:local:verify
+pnpm run phase9:kpi-targets:cutover -- --plan
+pnpm run phase9:kpi-targets:cutover -- --preflight
+pnpm run phase9:kpi-targets:cutover -- --execute
+pnpm run phase9:kpi-targets:cutover -- --verify
+```
+
+Its exact approval is:
+
+```text
+APPROVE PHASE 9 KPI TARGET REGISTER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT
+```
+
+The runner must prove the canonical Neon project/branch/endpoint/database,
+publication-proof prerequisite, exact migration hash, valid backup, RLS/grant/
+immutability contract, no migration seed rows, and unchanged lead/audit state.
+The gate does not authorize recording any KPI target; target approval remains a
+separate evidence-backed operator action in the protected register.
 
 Preview verification left two empty Vercel helper projects intact:
 `amm-phase9-campaign-compliance-20260821`

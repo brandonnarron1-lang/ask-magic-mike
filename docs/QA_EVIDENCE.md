@@ -5,6 +5,12 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Phase 9 KPI target register — 2026-08-21
+
+Local focused, PostgreSQL, security, build, route, and rendered evidence is
+maintained in `docs/phase9/KPI_TARGET_REGISTER_QA_EVIDENCE.md`. The candidate
+contains no seeded or approved target, and Production remains unchanged.
+
 ## Phase 9 owned-demand publication proof ledger — 2026-08-21
 
 The stacked additive ledger, authorization, security, migration, and cutover

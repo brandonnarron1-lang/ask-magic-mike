@@ -18,6 +18,12 @@ const PUBLICATION_PROOF_SQL_PATH = path.join(
   "tests",
   "owned_demand_publication_proofs_pg17.sql"
 );
+const KPI_TARGET_SQL_PATH = path.join(
+  ROOT,
+  "supabase",
+  "tests",
+  "growth_kpi_target_register_pg17.sql"
+);
 
 function fail(message) {
   console.error(message);
@@ -95,6 +101,8 @@ const routingSql = fs.readFileSync(ROUTING_SQL_PATH, "utf8");
 const routing = psql(container, routingSql);
 const publicationProofSql = fs.readFileSync(PUBLICATION_PROOF_SQL_PATH, "utf8");
 const publicationProof = psql(container, publicationProofSql);
+const kpiTargetSql = fs.readFileSync(KPI_TARGET_SQL_PATH, "utf8");
+const kpiTarget = psql(container, kpiTargetSql);
 
 const schemaSql = `
 \\pset tuples_only on
@@ -113,9 +121,13 @@ objects as (
     to_regclass('public.lead_notifications') is not null as lead_notifications_exists,
     to_regclass('public.source_attribution') is not null as source_attribution_exists,
     to_regclass('public.owned_demand_publication_proofs') is not null as publication_proofs_exists,
+    to_regclass('public.growth_kpi_target_versions') is not null as growth_kpi_targets_exists,
     to_regprocedure(
       'public.record_owned_demand_publication_proof_v1(text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,timestamptz,text,boolean)'
-    ) is not null as publication_proof_function_exists
+    ) is not null as publication_proof_function_exists,
+    to_regprocedure(
+      'public.record_growth_kpi_target_version_v1(text,text,text,text,numeric,text,text,numeric,text,integer,integer,text,text,timestamptz,text,boolean)'
+    ) is not null as growth_kpi_target_function_exists
 ),
 notification_checks as (
   select
@@ -144,6 +156,24 @@ publication_checks as (
     not has_table_privilege('anon', 'public.owned_demand_publication_proofs', 'SELECT') as publication_anon_select_denied,
     not has_table_privilege('authenticated', 'public.owned_demand_publication_proofs', 'SELECT') as publication_authenticated_select_denied
 ),
+kpi_target_checks as (
+  select
+    (select relrowsecurity from pg_class where oid = 'public.growth_kpi_target_versions'::regclass) as kpi_target_rls_enabled,
+    exists(
+      select 1 from pg_trigger
+      where tgrelid = 'public.growth_kpi_target_versions'::regclass
+        and tgname = 'growth_kpi_target_versions_reject_change'
+        and tgenabled <> 'D'
+        and not tgisinternal
+    ) as kpi_target_immutable_trigger_exists,
+    has_table_privilege('service_role', 'public.growth_kpi_target_versions', 'SELECT') as kpi_target_service_select,
+    has_table_privilege('service_role', 'public.growth_kpi_target_versions', 'INSERT') as kpi_target_service_insert,
+    not has_table_privilege('service_role', 'public.growth_kpi_target_versions', 'UPDATE') as kpi_target_service_update_denied,
+    not has_table_privilege('service_role', 'public.growth_kpi_target_versions', 'DELETE') as kpi_target_service_delete_denied,
+    not has_table_privilege('service_role', 'public.growth_kpi_target_versions', 'TRUNCATE') as kpi_target_service_truncate_denied,
+    not has_table_privilege('anon', 'public.growth_kpi_target_versions', 'SELECT') as kpi_target_anon_select_denied,
+    not has_table_privilege('authenticated', 'public.growth_kpi_target_versions', 'SELECT') as kpi_target_authenticated_select_denied
+),
 data_counts as (
   select
     (select count(*) from public.leads)::int as leads_count,
@@ -158,6 +188,7 @@ select jsonb_build_object(
   'objects', (select row_to_json(objects) from objects),
   'notification_checks', (select row_to_json(notification_checks) from notification_checks),
   'publication_checks', (select row_to_json(publication_checks) from publication_checks),
+  'kpi_target_checks', (select row_to_json(kpi_target_checks) from kpi_target_checks),
   'data_counts', (select row_to_json(data_counts) from data_counts)
 )::text;
 `;
@@ -181,7 +212,8 @@ const objectsOk =
   parsed &&
   Object.values(parsed.objects ?? {}).every((value) => value === true) &&
   Object.values(parsed.notification_checks ?? {}).every((value) => value === true) &&
-  Object.values(parsed.publication_checks ?? {}).every((value) => value === true);
+  Object.values(parsed.publication_checks ?? {}).every((value) => value === true) &&
+  Object.values(parsed.kpi_target_checks ?? {}).every((value) => value === true);
 
 const summary = {
   generated_at_utc: new Date().toISOString(),
@@ -194,6 +226,7 @@ const summary = {
   expected_final_migration_version: latestExpectedVersion,
   routing_sla_sql_passed: routing.status === 0,
   publication_proof_sql_passed: publicationProof.status === 0,
+  kpi_target_sql_passed: kpiTarget.status === 0,
   schema_sql_passed: schema.status === 0,
   migration_status_passed: migrationOk,
   object_status_passed: !!objectsOk,
@@ -211,6 +244,7 @@ writeJson(SUMMARY_PATH, summary);
 if (
   routing.status !== 0 ||
   publicationProof.status !== 0 ||
+  kpiTarget.status !== 0 ||
   schema.status !== 0 ||
   !migrationOk ||
   !objectsOk

@@ -105,6 +105,22 @@ const PAGES = [
     openFirstDetails: true,
     fullPage: true,
   },
+  {
+    name: "kpi-target-register",
+    admin: true,
+    url: `${BASE}/admin/growth/targets?window=30`,
+    desktop: { width: 1440, height: 1000 },
+    mobile: { width: 390, height: 844 },
+    required: [
+      "Ask Magic Mike · KPI Target Register",
+      "Baseline first. Target second. Evidence always.",
+      "Measured baselines",
+      "Acquisition truth",
+      "Response SLA",
+      "Immutable history",
+    ],
+    fullPage: true,
+  },
 ].filter((page) => INCLUDE_ADMIN || !page.admin);
 
 await mkdir(OUT_DIR, { recursive: true });
