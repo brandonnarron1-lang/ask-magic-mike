@@ -11,8 +11,9 @@ WordPress evidence. Working systems outrank historical packets.
 | `OurTownProperties.com` WordPress | Existing SEO/FlexMLS/Gravity Forms surfaces; signed bridge 1.1.0; Form 3 only; duplicate Form 3 native alert inactive | **WORDPRESS BRIDGE ONLY** | Preserve URLs/content/entries; do not create a competing lead database |
 | PR #183 | Exact three-offer campaign-safety flight, no publisher or database migration | **MERGE INTO CANONICAL** | Next separately gated application release |
 | PR #184 | Stacked append-only publication-proof ledger and guarded Neon migration | **MERGE INTO CANONICAL** | Refresh after #183, then use its separate exact gate |
-| PR #182 | Launch-authority/buyer-discovery candidate overlapping #183 operational and buyer work | **UNKNOWN / NEEDS OWNER CONFIRMATION** | Refresh and reconcile overlap only after #183/#184 |
-| PR #179 | iOS Home Screen Web Push handoff repair | **UNKNOWN / NEEDS OWNER CONFIRMATION** | Refresh after current stack; physical enrollment/test stays separate |
+| `codex/phase9-current-router-safety-20260821` | Clean stack above #184 containing PR #182's unique Buyer discovery, exact Preview origin, canonical-router CTA checks, and current release-safety coverage | **MERGE INTO CANONICAL** | New consolidation candidate; old overlapping PR #182 must not merge as-is |
+| PR #182 | Historical mixed candidate whose unique runtime/security work is now preserved on the clean consolidation branch | **REFERENCE/DOCUMENTATION** | Draft and explicitly deferred; duplicated authority docs/scanners are superseded by #184 |
+| PR #179 | Unique token-scoped iOS Home Screen Web Push handoff repair | **MERGE INTO CANONICAL** | Draft and deferred until the current release stack lands; refresh exact-head proof before release and keep physical enrollment/test separate |
 | `/Users/brandonnarron/ask-magic-mike` | Two-commit bootstrap without canonical lead lifecycle | **OBSOLETE OR CONFLICTING** | Historical fallback only; do not merge |
 | `/Users/brandonnarron/propertylens` | Separate PropertyLens product | **REFERENCE/DOCUMENTATION** | Never treat as Ask Magic Mike runtime |
 | `/Users/brandonnarron/eyesup-hq/projects/ask-magic-mike-widget` | Asset/mobile package without canonical backend | **MERGE INTO CANONICAL** | Reuse only reviewed assets/contracts; no separate store |
@@ -36,3 +37,5 @@ WordPress evidence. Working systems outrank historical packets.
   approved registered provider.
 - External campaign platforms remain human-operated; the application records
   evidence only after the native action occurs.
+- PR #179 and PR #182 are Draft with explicit out-of-order merge warnings. No
+  branch, commit, worktree, or exact-head evidence was deleted.

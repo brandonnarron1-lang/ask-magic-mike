@@ -2,6 +2,33 @@
 
 Updated 2026-08-21.
 
+## Phase 9 current-router safety consolidation — 2026-08-21
+
+- Audited PRs #179 and #182 against the exact PR #183/#184 stack before writing
+  new code. Both PRs are now Draft with explicit out-of-order merge warnings;
+  neither branch nor its evidence was deleted.
+- Reused PR #182's unique work once: the existing `/buy` funnel is now visible
+  in the Black Diamond desktop navigation and homepage path grid; Preview CORS
+  accepts only the exact Vercel deployment/branch origins supplied by the
+  platform; Production remains restricted to owned origins.
+- Modernized the release-safety scanner to inspect all 535 deployable files in
+  canonical root `app/` and delegated `src/`, current widget/listing/health
+  routes, and current Neon/Better Auth/Resend/Web Push/provider secrets.
+- Replaced the retired-router CTA authority with 24 checks against the active
+  public routes, real Black Diamond components, both deployable trees, and the
+  current owner approval/runbook documents.
+- Node 24.18 verification passes: 14/14 release-safety checks, 202 test files /
+  2,837 tests, strict typecheck, ESLint, Next.js 15.5.21 Production build, and
+  78 active routes / 17 acknowledged root–`src` duplicates. Production
+  dependencies have no known vulnerabilities; 469 Git commits have no detected
+  secret leak.
+- Desktop 1440px and mobile 390px Playwright inspection passes for the homepage
+  and Buyer funnel. The five path cards remain balanced/stacked, consent stays
+  readable, and the existing black/gold/cyan visual system remains intact.
+- No Production deployment, Neon migration/write, lead submission, email/SMS/
+  push send, WordPress/DNS change, external publication, spend, or NellySelly
+  mutation occurred.
+
 ## Phase 9 owned-demand publication proof ledger — 2026-08-21
 
 - Production aggregate truth is zero live demand: six test/suppressed leads,

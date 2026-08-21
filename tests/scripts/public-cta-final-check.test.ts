@@ -12,6 +12,7 @@ import {
   REQUIRED_CTA_SCRIPTS,
   REQUIRED_CTA_DOCS,
   REQUIRED_ROUTES,
+  REQUIRED_CTA_LINKS,
 } from "../../scripts/amm/public-cta-final-check.mjs";
 
 const ROOT = process.cwd();
@@ -105,8 +106,8 @@ describe("findMissingRoutes", () => {
 
   it("returns the missing route when a route does not exist", () => {
     const missing = findMissingRoutes(ROOT, [
-      "src/app/(intake)/ask/layout.tsx",
-      "src/app/(intake)/ask/NONEXISTENT_FILE_xyz.tsx",
+      "app/ask/page.tsx",
+      "app/ask/NONEXISTENT_FILE_xyz.tsx",
     ]);
     expect(missing).toHaveLength(1);
     expect(missing[0]).toContain("NONEXISTENT_FILE_xyz.tsx");
@@ -119,7 +120,7 @@ describe("findMissingRoutes", () => {
   });
 
   it("does not include routes that exist in the missing list", () => {
-    const missing = findMissingRoutes(ROOT, ["src/app/(intake)/ask/layout.tsx"]);
+    const missing = findMissingRoutes(ROOT, ["app/ask/page.tsx"]);
     expect(missing).toHaveLength(0);
   });
 });
@@ -129,20 +130,24 @@ describe("findMissingRoutes", () => {
 // ---------------------------------------------------------------------------
 
 describe("REQUIRED_ROUTES", () => {
-  it("includes the /ask layout route", () => {
-    expect(REQUIRED_ROUTES).toContain("src/app/(intake)/ask/layout.tsx");
+  it("includes the canonical root layout", () => {
+    expect(REQUIRED_ROUTES).toContain("app/layout.tsx");
   });
 
   it("includes the /ask page route", () => {
-    expect(REQUIRED_ROUTES).toContain("src/app/(intake)/ask/page.tsx");
+    expect(REQUIRED_ROUTES).toContain("app/ask/page.tsx");
   });
 
-  it("includes the /value page route", () => {
-    expect(REQUIRED_ROUTES).toContain("src/app/(campaign)/value/page.tsx");
+  it("includes the seller, value, and buyer public routes", () => {
+    expect(REQUIRED_ROUTES).toContain("app/home-value/page.tsx");
+    expect(REQUIRED_ROUTES).toContain("app/value/page.tsx");
+    expect(REQUIRED_ROUTES).toContain("app/sell/page.tsx");
+    expect(REQUIRED_ROUTES).toContain("app/buy/page.tsx");
   });
 
-  it("includes the embed ask route", () => {
-    expect(REQUIRED_ROUTES).toContain("src/app/(embed)/embed/ask/page.tsx");
+  it("includes the canonical embed and widget routes", () => {
+    expect(REQUIRED_ROUTES).toContain("app/embed/ask/page.tsx");
+    expect(REQUIRED_ROUTES).toContain("app/widget/v1/page.tsx");
   });
 
   it("all routes in REQUIRED_ROUTES exist in this repo", () => {
@@ -228,12 +233,13 @@ describe("findMissingCtaDocs", () => {
 // ---------------------------------------------------------------------------
 
 describe("REQUIRED_CTA_DOCS", () => {
-  it("includes GO_NO_GO_COMMAND_CENTER.md", () => {
-    expect(REQUIRED_CTA_DOCS).toContain("docs/GO_NO_GO_COMMAND_CENTER.md");
-  });
-
   it("includes CONTROLLED_TRAFFIC_ACTIVATION.md", () => {
     expect(REQUIRED_CTA_DOCS).toContain("docs/CONTROLLED_TRAFFIC_ACTIVATION.md");
+  });
+
+  it("includes current go-live and owner-action docs", () => {
+    expect(REQUIRED_CTA_DOCS).toContain("docs/GO_LIVE_RUNBOOK.md");
+    expect(REQUIRED_CTA_DOCS).toContain("docs/OWNER_APPROVAL_QUEUE.md");
   });
 
   it("all required CTA docs exist in this repo", () => {
@@ -243,29 +249,26 @@ describe("REQUIRED_CTA_DOCS", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Integration — actual source file CTA checks
+// Integration — canonical public CTA checks
 // ---------------------------------------------------------------------------
 
-describe("hero-section.tsx CTA links", () => {
-  const heroPath = join(ROOT, "src/components/landing/hero-section.tsx");
-
-  it("links to /ask", () => {
-    expect(fileContains(heroPath, "/ask")).toBe(true);
+describe("REQUIRED_CTA_LINKS", () => {
+  it("checks the active Black Diamond components", () => {
+    expect(REQUIRED_CTA_LINKS.every((link) => link.file.startsWith("app/components/black-diamond/"))).toBe(true);
   });
 
-  it("links to /value", () => {
-    expect(fileContains(heroPath, "/value")).toBe(true);
-  });
-});
-
-describe("footer.tsx CTA links", () => {
-  const footerPath = join(ROOT, "src/components/landing/footer.tsx");
-
-  it("links to /ask", () => {
-    expect(fileContains(footerPath, "/ask")).toBe(true);
+  it("exposes existing seller, buyer, planner, home-value, and Ask paths", () => {
+    const hrefs = REQUIRED_CTA_LINKS.map((link) => link.href);
+    expect(hrefs).toContain("/home-value");
+    expect(hrefs).toContain("/sell");
+    expect(hrefs).toContain("/buy");
+    expect(hrefs).toContain("/plan");
+    expect(hrefs).toContain("/ask");
   });
 
-  it("links to /value", () => {
-    expect(fileContains(footerPath, "/value")).toBe(true);
+  it("finds every required link in its canonical source file", () => {
+    for (const link of REQUIRED_CTA_LINKS) {
+      expect(fileContains(join(ROOT, link.file), link.href), `${link.file} -> ${link.href}`).toBe(true);
+    }
   });
 });

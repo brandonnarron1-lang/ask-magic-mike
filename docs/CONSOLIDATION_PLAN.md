@@ -70,10 +70,18 @@ after deployment.
 
 ### 3. Deferred candidates
 
-- PR #182: reconcile its launch-authority and buyer-discovery changes against the
-  merged #183/#184 code before deciding whether any unique work remains.
-- PR #179: refresh the iOS Web Push handoff against current `main`; physical
-  device enrollment and receipt confirmation remain a separate human step.
+- PR #182 audit is complete. Its Buyer navigation/path card, exact Vercel
+  Preview-origin binding, canonical root-`app/` CTA authority, and modern
+  release-safety coverage are preserved on
+  `codex/phase9-current-router-safety-20260821`, stacked above #184. Its
+  duplicated operational authority and launch-scanner work is superseded by
+  #184. PR #182 remains Draft as historical evidence and must not merge as-is.
+- PR #179 audit is complete. Its token-scoped iOS Home Screen install handoff is
+  unique and retained. The only direct file overlap with #184 is the generated
+  route manifest. PR #179 remains Draft until the current stack lands; refresh
+  it against the final `main` and repeat exact-head Preview proof before any
+  release. Physical device enrollment and receipt confirmation remain a
+  separate human step.
 - PRs #92 and #119-#121: archive after review; they are not a parallel release
   sequence.
 
