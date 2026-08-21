@@ -555,7 +555,7 @@ the Node-20 deployment proof. PHP CLI is unavailable locally, so staging must ru
   lead API, Neon database, Better Auth Lead Center, WordPress bridge, and
   notification systems were not duplicated or replaced.
 - Validation ran with Node `24.18.0`, matching the repository runtime contract:
-  - Vitest: `196` files / `2,791` tests passed.
+  - Vitest: `197` files / `2,797` tests passed.
   - strict TypeScript: PASS.
   - ESLint: PASS.
   - Next.js `15.5.21` production build: PASS; `52` static pages generated.
@@ -575,7 +575,11 @@ the Node-20 deployment proof. PHP CLI is unavailable locally, so staging must ru
   - `output/phase9/visual-qa/buyer-mobile-390-consent.png`
 - A production build served on unapproved `localhost` correctly refused the
   analytics event with HTTP `403`; that is the expected origin-allowlist
-  boundary, not a rendering failure. The same event path must be rechecked on
-  the Vercel preview hostname before merge.
+  boundary, not a rendering failure. The first exact Preview probe then exposed
+  that Vercel Preview also sets `NODE_ENV=production`. The boundary now admits
+  only the exact server-provided `VERCEL_URL` and `VERCEL_BRANCH_URL` when
+  `VERCEL_ENV=preview`; arbitrary `vercel.app` origins and every Production
+  metadata override remain denied. Six focused origin-boundary tests cover the
+  behavior; the new exact-head Preview must reverify the route before merge.
 - No production deployment, database mutation, WordPress edit, form submission,
   lead creation, or email/SMS/push delivery occurred during this candidate QA.
