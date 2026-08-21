@@ -21,6 +21,7 @@ export interface OwnedDemandAssetRequest {
 }
 
 const OWNED_DEMAND_CHANNEL_CODES = {
+  ourtown_wordpress: "otp",
   google_business_profile: "gbp",
   facebook: "fb",
   instagram: "ig",

@@ -90,6 +90,24 @@ describe("owned-demand publication proof validation", () => {
     expect(cases.map((input) => validateOwnedDemandPublicationProof(input, NOW).ok)).toEqual([true, true, true]);
   });
 
+  it("records a named WordPress placement only against the brokerage public host", () => {
+    const valid = validateOwnedDemandPublicationProof(validInput({
+      channelKey: "ourtown_wordpress",
+      placementKey: "wordpress_we_buy_homes",
+      evidenceUrl: "https://www.ourtownproperties.com/we-buy-homes/",
+    }), NOW);
+    expect(valid.ok).toBe(true);
+    if (valid.ok) {
+      expect(valid.value.placement.destination).toBe("https://www.askmagicmike.com/sell");
+      expect(valid.value.placement.content).toBe("wordpress_we_buy_homes");
+    }
+    expect(validateOwnedDemandPublicationProof(validInput({
+      channelKey: "ourtown_wordpress",
+      placementKey: "wordpress_we_buy_homes",
+      evidenceUrl: "https://example.com/we-buy-homes/",
+    }), NOW).ok).toBe(false);
+  });
+
   it("rejects raw PII, secrets, placeholders, unsupported claims, and fair-housing language", () => {
     const invalidCopy = [
       "Contact owner@example.com for this broker-reviewed real estate request.",
@@ -102,6 +120,7 @@ describe("owned-demand publication proof validation", () => {
   });
 
   it("exposes only supported channel policy options", () => {
+    expect(publicationPolicyForChannel("ourtown_wordpress")?.states).toEqual(["live", "configured", "removed"]);
     expect(publicationPolicyForChannel("facebook")?.states).toEqual(["live", "scheduled", "removed"]);
     expect(publicationPolicyForChannel("qr_print")?.proofTypes).toEqual(["scan_test_reference", "removal_reference"]);
     expect(publicationPolicyForChannel("unknown")).toBeNull();

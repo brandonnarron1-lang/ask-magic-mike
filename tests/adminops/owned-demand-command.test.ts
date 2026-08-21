@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildOwnedDemandChannelPacket,
   buildOwnedDemandCommand,
+  resolveOwnedDemandPlacement,
   type OwnedDemandAttributionSignal,
 } from "../../app/lib/growth/owned-demand";
 import type { GrowthSummary } from "../../app/lib/growth/intelligence";
@@ -145,6 +146,46 @@ describe("Owned Demand Command", () => {
     }
   });
 
+  it("provides exact seller, buyer, and renter links for the existing Our Town WordPress surface", () => {
+    const result = buildOwnedDemandCommand({ summary: summary(), ownedDemandSignals: [] });
+    const wordpress = result.channels.find((row) => row.key === "ourtown_wordpress");
+    expect(wordpress).toBeDefined();
+    expect(wordpress?.source).toBe("ourtownproperties");
+    expect(wordpress?.medium).toBe("owned_media");
+    expect(wordpress?.offers.map((offer) => new URL(offer.trackedUrl).pathname)).toEqual([
+      "/home-value",
+      "/buy",
+      "/rent",
+    ]);
+
+    const seller = resolveOwnedDemandPlacement("ourtown_wordpress", "seller_review");
+    expect(seller?.campaign).toBe("amm_owned_demand_2026");
+    expect(seller?.content).toBe("wordpress_ask_magic_mike_seller_review");
+    expect(seller?.trackedUrl).toContain("utm_source=ourtownproperties");
+    expect(seller?.trackedUrl).toContain("utm_medium=owned_media");
+    expect(wordpress?.namedPlacements.map((placement) => placement.placementKey)).toEqual([
+      "wordpress_homepage_ask_mike",
+      "wordpress_home_value",
+      "wordpress_we_buy_homes",
+      "wordpress_mike_agent",
+      "wordpress_listing_buyer",
+      "wordpress_rental_to_homeownership",
+      "wordpress_ask_magic_mike_embed",
+    ]);
+    expect(resolveOwnedDemandPlacement("ourtown_wordpress", "wordpress_we_buy_homes")?.trackedUrl).toContain("/sell?");
+  });
+
+  it("counts a named WordPress placement as an exact owned-demand signal", () => {
+    const result = buildOwnedDemandCommand({
+      summary: summary({ leads: 2, attributedLeadRate: 100 }),
+      ownedDemandSignals: [signal("ourtownproperties", "owned_media", "wordpress_homepage_ask_mike", 2)],
+    });
+    const wordpress = result.channels.find((row) => row.key === "ourtown_wordpress");
+    expect(wordpress?.attributedLeads).toBe(2);
+    expect(wordpress?.namedPlacements.find((row) => row.placementKey === "wordpress_homepage_ask_mike")?.attributedLeads).toBe(2);
+    expect(result.attributedLiveLeads).toBe(2);
+  });
+
   it("creates a seller, buyer, and renter flight for every existing channel", () => {
     const result = buildOwnedDemandCommand({ summary: summary(), ownedDemandSignals: [] });
     expect(result.offers.map((offer) => offer.key)).toEqual(["seller_review", "buyer_match", "renter_plan"]);
@@ -199,6 +240,10 @@ describe("Owned Demand Command", () => {
       expect(packet).toContain(offer.trackedUrl);
       expect(packet).toContain(offer.reviewNote);
     }
+    const wordpress = result.channels.find((channel) => channel.key === "ourtown_wordpress");
+    const wordpressPacket = buildOwnedDemandChannelPacket(wordpress!);
+    expect(wordpressPacket).toContain("NAMED BROKERAGE PLACEMENTS");
+    expect(wordpressPacket).toContain("wordpress_we_buy_homes");
     expect(packet).toContain("External publication remains a separate human-reviewed approval.");
   });
 });
@@ -239,6 +284,8 @@ describe("canonical /admin/distribution route guards", () => {
     expect(page).toContain("Three offer-specific placements");
     expect(page).toContain("Copy full channel flight");
     expect(page).toContain("Recommended first move");
+    expect(page).toContain("Named brokerage placements");
+    expect(page).toContain("channel.namedPlacements");
     expect(page).toContain("Open first channel packet");
     expect(page).toContain('href={`#channel-${firstMove.channelKey}`}');
     expect(copyControl).toContain('type="button"');

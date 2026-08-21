@@ -2,6 +2,58 @@
 
 Updated 2026-08-21.
 
+## Phase 9 WordPress owned-traffic consolidation — 2026-08-21
+
+- Reused the live Our Town Properties pages, Gravity Forms, Canonical Lead
+  Bridge 1.1.0, existing isolated iframe loader, canonical Ask Magic Mike
+  funnels, protected Distribution Command, UTM builder, publication-proof
+  ledger, and Neon lead backend. No parallel frontend, form service, CRM,
+  database, notification engine, publisher, or analytics store was introduced.
+- A read-only live sitemap audit checked 42/42 pages successfully. It found
+  Gravity Form 7 on 39 pages, while authenticated prior evidence proves only
+  Gravity Form 3 is enabled for signed canonical forwarding. This candidate
+  deliberately does not widen that allowlist.
+- The audit identified three self-canonical seller-value routes, two
+  direct-purchase routes, two Ask Mike routes, four legacy native-capture
+  pages, five pages with multiple capture systems, three direct canonical-app
+  links lacking complete placement UTMs, and two embeds lacking placement
+  `utm_content`. These are controlled consolidation candidates, not permission
+  to redirect, noindex, deactivate a plugin, or replace a form.
+- Added `pnpm amm:audit:wordpress` and a reusable parser that stores only
+  structural public evidence. It excludes WordPress nonces, cookies, form
+  values, lead data, credentials, private configuration, and arbitrary page
+  text.
+- Added the `ourtown_wordpress` owned-demand channel and seven exact named
+  placements to the existing authenticated `/admin/distribution` surface:
+  homepage Ask Mike, established home value, We Buy Homes, Mike's agent page,
+  listing/buyer, rental-to-homeownership, and the existing Ask Magic Mike
+  embed. Exact links retain canonical-host and UTM allowlists.
+- Named placements use the existing append-only publication-proof workflow;
+  WordPress proof URLs are restricted to `ourtownproperties.com`. The existing
+  QR/creative catalog now derives four WordPress general/offer assets in
+  addition to the prior 24 assets.
+- Preserved the live sitewide and page-specific telephone targets. The
+  conflicting unverified number was not added to any campaign or interface.
+- Mobile 390 x 844 visual inspection confirmed that existing black/gold
+  sections should be preserved while reducing each intent page to one durable
+  capture path. No form was submitted during visual QA.
+- Focused verification passes 5 files / 85 tests. The full release gate passes
+  208 test files / 2,901 tests, strict typecheck, ESLint, optimized Next.js
+  15.5.21 build, 81-route verification, 14/14 release-safety checks, and system
+  isolation. `pnpm audit --prod` reports no known vulnerability; redacted
+  gitleaks history inspection covered 477 commits with no finding.
+- Local Node 26.5.1 is newer than the repository's Node 24.x engine. The build
+  nevertheless completed. A webpack cache write also reported local `ENOSPC`
+  after compilation; all pages and the route manifest completed successfully,
+  and only disposable `.next` output was removed afterward.
+- No Production deployment, WordPress mutation, form or notification change,
+  database query/write, lead, external message, publication, redirect, DNS
+  change, spend, or NellySelly action occurred.
+- This candidate is stacked on exact PR #187 head
+  `cf1356f36d9248babf782b9d4c499627fc46ef7b` and remains behind PRs #183–#187.
+  The unchanged first Production gate is:
+  `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT`.
+
 ## Phase 9 evidence-first KPI target register — 2026-08-21
 
 - Reused the existing Neon Growth intelligence view, protected Lead Center,

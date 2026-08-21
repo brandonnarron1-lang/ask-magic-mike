@@ -1,5 +1,41 @@
 # Changelog
 
+## 2026-08-21 — WordPress owned-traffic consolidation candidate
+
+- Audited all 42 URLs in the live Our Town Properties page sitemap without
+  submitting a form or changing WordPress. All 42 responded successfully.
+- Confirmed the existing signed Canonical Lead Bridge 1.1.0 and Gravity Form 3
+  remain the proven WordPress-to-Neon path. The candidate does not widen the
+  allowlist for the sitewide Form 7, create another lead store, or add another
+  notification engine.
+- Added a reusable, secret-minimizing public-surface audit for canonicals,
+  robots state, Gravity Form IDs, public plugin assets, safe field names,
+  consent copy, canonical-app links, placement UTMs, embeds, capture overlap,
+  and public telephone targets. It intentionally excludes nonces, cookies,
+  field values, leads, credentials, and private configuration.
+- Recorded three self-canonical seller-value pages, two direct-purchase pages,
+  two Ask Mike pages, four legacy native-capture pages, five pages with more
+  than one capture system, and five existing canonical-app link/embed
+  placements missing placement-specific `utm_content`.
+- Reused the existing protected Distribution Command to add one
+  `ourtown_wordpress` channel and seven named page placements. Their exact
+  canonical links use `ourtownproperties / owned_media /
+  amm_owned_demand_2026`, flow through the existing UTM and publication-proof
+  contracts, and do not publish or send anything.
+- Extended the existing protected QR/creative catalog from 24 to 28 general
+  and offer assets for the WordPress channel; no second media system or
+  campaign dashboard was created.
+- Preserved the audited public telephone targets exactly as published and did
+  not introduce the unverified conflicting number into new assets.
+- Focused verification passes 5 files / 85 tests. The full release gate passes
+  system isolation, 14/14 release-safety checks, 208 test files / 2,901 tests,
+  strict typecheck, ESLint, the optimized Next.js 15.5.21 build, and the
+  81-route manifest. Production dependencies have no known vulnerability, and
+  a redacted 477-commit scan found no secret leak.
+- No Production deployment, WordPress edit/publication, form or notification
+  change, Neon read/write, lead, email, SMS, Push, DNS change, redirect,
+  provider call, spend, or NellySelly action occurred.
+
 ## 2026-08-21 — Evidence-first KPI target register candidate
 
 - Added one protected, append-only KPI target register to the existing Growth

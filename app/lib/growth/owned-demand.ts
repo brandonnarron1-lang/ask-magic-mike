@@ -12,7 +12,15 @@ export interface OwnedDemandAttributionSignal {
 }
 
 export type OwnedDemandOfferKey = "seller_review" | "buyer_match" | "renter_plan";
-export type OwnedDemandPlacementKey = "general_question" | OwnedDemandOfferKey;
+export type WordPressOwnedPlacementKey =
+  | "wordpress_homepage_ask_mike"
+  | "wordpress_home_value"
+  | "wordpress_we_buy_homes"
+  | "wordpress_mike_agent"
+  | "wordpress_listing_buyer"
+  | "wordpress_rental_to_homeownership"
+  | "wordpress_ask_magic_mike_embed";
+export type OwnedDemandPlacementKey = "general_question" | OwnedDemandOfferKey | WordPressOwnedPlacementKey;
 
 export interface OwnedDemandPlacementDefinition {
   channelKey: string;
@@ -55,6 +63,11 @@ export interface OwnedDemandOfferPlacement extends OwnedDemandOfferBrief {
   status: OwnedDemandStatus;
 }
 
+export interface OwnedDemandNamedPlacement extends OwnedDemandPlacementDefinition {
+  attributedLeads: number;
+  status: OwnedDemandStatus;
+}
+
 export interface OwnedDemandChannel {
   key: string;
   label: string;
@@ -72,6 +85,7 @@ export interface OwnedDemandChannel {
   operatorStep: string;
   reviewNote: string;
   offers: OwnedDemandOfferPlacement[];
+  namedPlacements: OwnedDemandNamedPlacement[];
 }
 
 export interface OwnedDemandPlanItem {
@@ -101,6 +115,13 @@ export function buildOwnedDemandChannelPacket(channel: OwnedDemandChannel) {
     offer.trackedUrl,
     `Review boundary: ${offer.reviewNote}`,
   ].join("\n"));
+  const namedPlacements = channel.namedPlacements.length
+    ? [
+        "NAMED BROKERAGE PLACEMENTS",
+        ...channel.namedPlacements.map((placement) => `${placement.placementLabel.toUpperCase()} — ${placement.trackedUrl}`),
+        "",
+      ]
+    : [];
 
   return [
     `ASK MAGIC MIKE — ${channel.label.toUpperCase()} OWNED-DEMAND FLIGHT`,
@@ -113,6 +134,7 @@ export function buildOwnedDemandChannelPacket(channel: OwnedDemandChannel) {
     channel.trackedUrl,
     "",
     ...sections.flatMap((section) => [section, ""]),
+    ...namedPlacements,
     `Next human step: ${channel.operatorStep}`,
     `Channel review: ${channel.reviewNote}`,
     "External publication remains a separate human-reviewed approval.",
@@ -175,6 +197,20 @@ const OFFER_DEFINITIONS = [
 })[];
 
 const CHANNEL_DEFINITIONS = [
+  {
+    key: "ourtown_wordpress",
+    label: "Our Town Properties website",
+    source: "ourtownproperties",
+    aliases: ["ourtownproperties", "ourtown_wp", "ourtownproperties.com"],
+    medium: "owned_media" as const,
+    content: "wordpress_ask_magic_mike",
+    destination: "https://www.askmagicmike.com/ask",
+    format: "Named WordPress CTA or isolated embed",
+    draftTitle: "Connect an existing brokerage page to the canonical lead path",
+    draftBody: "Use one placement-specific AskMagicMike.com link or isolated embed while preserving the current Our Town Properties page, listings, SEO content, and live brokerage contact details.",
+    operatorStep: "Use the reviewed WordPress activation matrix, back up the named page, and publish only that CTA or embed after approval. Do not enable Gravity Form 7 sitewide or add another native lead database.",
+    reviewNote: "Keep Form 3 as the only proven canonical Gravity Forms forward. Search Console and Regency review are required before redirecting duplicate pages or retiring a plugin.",
+  },
   {
     key: "google_business_profile",
     label: "Google Business Profile",
@@ -261,6 +297,78 @@ const CHANNEL_DEFINITIONS = [
   },
 ] as const;
 
+const WORDPRESS_NAMED_PLACEMENT_INPUTS = [
+  {
+    placementKey: "wordpress_homepage_ask_mike",
+    placementLabel: "Homepage Ask Magic Mike",
+    destination: "https://www.askmagicmike.com/ask",
+    content: "wordpress_homepage_ask_mike",
+  },
+  {
+    placementKey: "wordpress_home_value",
+    placementLabel: "Established home-value page",
+    destination: "https://www.askmagicmike.com/home-value",
+    content: "wordpress_home_value_page",
+  },
+  {
+    placementKey: "wordpress_we_buy_homes",
+    placementLabel: "We Buy Homes",
+    destination: "https://www.askmagicmike.com/sell",
+    content: "wordpress_we_buy_homes",
+  },
+  {
+    placementKey: "wordpress_mike_agent",
+    placementLabel: "Mike agent page",
+    destination: "https://www.askmagicmike.com/ask",
+    content: "wordpress_mike_agent_page",
+  },
+  {
+    placementKey: "wordpress_listing_buyer",
+    placementLabel: "Featured and listing buyer CTA",
+    destination: "https://www.askmagicmike.com/buy",
+    content: "wordpress_listing_buyer",
+  },
+  {
+    placementKey: "wordpress_rental_to_homeownership",
+    placementLabel: "Rental-to-homeownership CTA",
+    destination: "https://www.askmagicmike.com/rent",
+    content: "wordpress_rental_to_homeownership",
+  },
+  {
+    placementKey: "wordpress_ask_magic_mike_embed",
+    placementLabel: "Ask Magic Mike iframe page",
+    destination: "https://www.askmagicmike.com/ask",
+    content: "wordpress_ask_magic_mike_embed",
+  },
+] as const satisfies readonly {
+  placementKey: WordPressOwnedPlacementKey;
+  placementLabel: string;
+  destination: string;
+  content: string;
+}[];
+
+function wordpressNamedPlacements(): OwnedDemandPlacementDefinition[] {
+  const channel = CHANNEL_DEFINITIONS.find((candidate) => candidate.key === "ourtown_wordpress");
+  if (!channel) return [];
+  return WORDPRESS_NAMED_PLACEMENT_INPUTS.map((placement) => ({
+    channelKey: channel.key,
+    channelLabel: channel.label,
+    placementKey: placement.placementKey,
+    placementLabel: placement.placementLabel,
+    source: channel.source,
+    medium: channel.medium,
+    campaign: OWNED_DEMAND_CAMPAIGN_KEY,
+    content: placement.content,
+    destination: placement.destination,
+    trackedUrl: buildUtmUrl(placement.destination, {
+      utm_source: channel.source,
+      utm_medium: channel.medium,
+      utm_campaign: OWNED_DEMAND_CAMPAIGN_KEY,
+      utm_content: placement.content,
+    }),
+  }));
+}
+
 function normalized(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
 }
@@ -271,6 +379,11 @@ export function resolveOwnedDemandPlacement(
 ): OwnedDemandPlacementDefinition | null {
   const channel = CHANNEL_DEFINITIONS.find((candidate) => candidate.key === channelKey);
   if (!channel) return null;
+
+  const namedPlacement = wordpressNamedPlacements().find((candidate) => (
+    candidate.channelKey === channelKey && candidate.placementKey === placementKey
+  ));
+  if (namedPlacement) return namedPlacement;
 
   if (placementKey === "general_question") {
     return {
@@ -397,7 +510,18 @@ export function buildOwnedDemandCommand(
         status: attributedLeads > 0 ? "signal_detected" : "ready_unmeasured",
       };
     });
-    const attributedLeads = genericAttributedLeads + offerPlacements.reduce((sum, offer) => sum + offer.attributedLeads, 0);
+    const namedPlacements = (definition.key === "ourtown_wordpress" ? wordpressNamedPlacements() : [])
+      .map((placement): OwnedDemandNamedPlacement => {
+        const attributedLeads = leadsForPlacement(intelligence.ownedDemandSignals, definition, placement.content);
+        return {
+          ...placement,
+          attributedLeads,
+          status: attributedLeads > 0 ? "signal_detected" : "ready_unmeasured",
+        };
+      });
+    const attributedLeads = genericAttributedLeads
+      + offerPlacements.reduce((sum, offer) => sum + offer.attributedLeads, 0)
+      + namedPlacements.reduce((sum, placement) => sum + placement.attributedLeads, 0);
     return {
       key: definition.key,
       label: definition.label,
@@ -415,6 +539,7 @@ export function buildOwnedDemandCommand(
       operatorStep: definition.operatorStep,
       reviewNote: definition.reviewNote,
       offers: offerPlacements,
+      namedPlacements,
     };
   });
 
@@ -442,9 +567,9 @@ export function buildOwnedDemandCommand(
     offers,
     channels,
     weeklyPlan: [
-      { day: "Monday", channelKey: "google_business_profile", objective: "Publish one useful local Q&A update", proofRequired: "Live post URL and matching tracked destination" },
-      { day: "Tuesday", channelKey: "facebook", objective: "Invite one private buyer or seller question", proofRequired: "Live post URL; no unverified market claim" },
-      { day: "Wednesday", channelKey: "linkedin", objective: "Explain one broker-review mechanism", proofRequired: "Live post URL and reviewed identity" },
+      { day: "Monday", channelKey: "ourtown_wordpress", objective: "Activate one named brokerage CTA without widening Form 7", proofRequired: "Backup, approved page ID, live link, and matching tracked destination" },
+      { day: "Tuesday", channelKey: "google_business_profile", objective: "Publish one useful local Q&A update", proofRequired: "Live post URL and matching tracked destination" },
+      { day: "Wednesday", channelKey: "facebook", objective: "Invite one private buyer or seller question", proofRequired: "Live post URL; no unverified market claim" },
       { day: "Thursday", channelKey: "instagram", objective: "Run one question prompt with a link sticker", proofRequired: "Story or bio placement screenshot and tracked URL" },
       { day: "Friday", channelKey: "qr_print", objective: "Prepare one event or open-house QR placement", proofRequired: "Two-device scan test and property facts verified" },
     ],
