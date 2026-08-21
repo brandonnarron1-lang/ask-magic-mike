@@ -69,6 +69,7 @@ export const analyticsEvents = [
   "notification_queued",
   "notification_delivered",
   "notification_failed",
+  "web_vital_observed",
   "review_plan_started",
   "review_plan_saved",
   "review_plan_task_completed",

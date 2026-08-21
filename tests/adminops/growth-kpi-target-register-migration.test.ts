@@ -32,6 +32,18 @@ describe("Growth KPI target-register migration and route guards", () => {
     expect(migration).toContain("No target rows are seeded by migration");
   });
 
+  it("pins all 38 metric contracts including experience-quality units and directions", () => {
+    expect(migration).toContain("p75_largest_contentful_paint_ms");
+    expect(migration).toContain("p75_interaction_to_next_paint_ms");
+    expect(migration).toContain("p75_cumulative_layout_shift");
+    expect(migration).toContain("critical_accessibility_issue_count");
+    expect(migration).toContain("mobile_funnel_technical_success_rate");
+    expect(migration).toContain("durable_funnel_completion_rate");
+    expect(migration).toContain("'milliseconds'");
+    expect(migration).toContain("'score'");
+    expect(migration).toContain("600000");
+  });
+
   it("records one immutable audit event without external action authority", () => {
     expect(migration).toContain("growth.kpi_target_version_recorded");
     expect(migration).toContain("external_mutation_performed");

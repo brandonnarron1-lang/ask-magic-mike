@@ -301,7 +301,7 @@ is preserved.
 
 The protected `/admin/growth/targets` route is a thin operator layer over the
 existing server-only Growth intelligence view. It does not create a second
-analytics pipeline. Thirty-two canonical KPI definitions resolve a baseline for
+analytics pipeline. Thirty-eight canonical KPI definitions resolve a baseline for
 one 30-, 90-, or 365-day window and classify it as measured, directional,
 insufficient-sample, uninstrumented, or unavailable.
 
@@ -313,6 +313,15 @@ idempotent security-invoker RPC. Browser database roles have no access; the
 application rechecks `growth:manage`, fails closed in Preview, and rate-limits
 the authenticated operator. AI, providers, consumer messaging, lead routing,
 and campaign publication are outside this boundary.
+
+The same existing analytics ledger receives a narrowly allowlisted
+`web_vital_observed` event from the canonical public host in Production only.
+It carries no lead/session identity, attribution, query URL, raw IP, or raw user
+agent. The Growth view deduplicates LCP/INP/CLS metric IDs and calculates field
+P75 values; samples below the documented thresholds remain null. Accessibility,
+mobile technical success, and durable funnel completion stay explicitly
+uninstrumented until their separate human-evaluation or privacy-safe cohort
+contracts exist.
 
 Application rollback leaves the additive register dormant. Historical target
 and audit versions are retained; corrections are appended, never rewritten.

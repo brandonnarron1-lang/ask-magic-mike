@@ -21,11 +21,17 @@ recommendations are advisory and never silently assign a lead.
 
 ### Numeric KPI targets are intentionally unapproved
 
-The stacked KPI target register defines 32 metrics and can preserve measured
+The stacked KPI target register defines 38 metrics and can preserve measured
 baselines and operator decisions, but the current zero-live-lead aggregate does
 not support numeric conversion or economics targets. The migration seeds no
 rows. Uninstrumented, unavailable, and insufficient-sample metrics remain
 explicit until real evidence exists; they must not be presented as 0% or $0.
+
+Production-only, privacy-minimized LCP, INP, and CLS field telemetry begins with
+no observations and cannot produce a numeric baseline before its documented
+sample threshold. The accessibility issue count, mobile technical-success rate,
+and durable funnel-completion rate remain explicitly uninstrumented; Web Vitals
+or automated scans are not an accessibility certification or conversion proof.
 
 ## 2. Messaging and staff alerts
 

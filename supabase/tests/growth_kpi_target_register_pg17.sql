@@ -213,6 +213,46 @@ SELECT 4, public.record_growth_kpi_target_version_v1(
   true
 );
 
+INSERT INTO pg_temp.growth_kpi_target_contract_results(sequence, payload)
+SELECT 5, public.record_growth_kpi_target_version_v1(
+  repeat('1', 64),
+  'p75_largest_contentful_paint_ms',
+  'milliseconds',
+  'lower_is_better',
+  2500,
+  'approved',
+  'measured',
+  2800,
+  repeat('2', 64),
+  75,
+  30,
+  'INTERNAL QA LCP target uses the canonical production field-metric contract.',
+  'INTERNAL_QA_LOCAL_ONLY',
+  now(),
+  'internal-qa-local',
+  true
+);
+
+INSERT INTO pg_temp.growth_kpi_target_contract_results(sequence, payload)
+SELECT 6, public.record_growth_kpi_target_version_v1(
+  repeat('3', 64),
+  'p75_cumulative_layout_shift',
+  'score',
+  'lower_is_better',
+  0.1,
+  'approved',
+  'measured',
+  0.14,
+  repeat('4', 64),
+  75,
+  30,
+  'INTERNAL QA CLS target uses the canonical production field-metric contract.',
+  'INTERNAL_QA_LOCAL_ONLY',
+  now(),
+  'internal-qa-local',
+  true
+);
+
 RESET ROLE;
 
 SELECT pg_temp.assert_true(
@@ -270,13 +310,27 @@ SELECT pg_temp.assert_true(
 SELECT pg_temp.assert_true(
   (
     SELECT count(*) = 2
+      AND bool_and((payload ->> 'ok')::boolean)
+      AND bool_and(NOT (payload ->> 'idempotent_replay')::boolean)
+      AND bool_and(payload ->> 'version_id' IS NOT NULL)
+      AND bool_and(payload ->> 'audit_id' IS NOT NULL)
+    FROM pg_temp.growth_kpi_target_contract_results
+    WHERE sequence IN (5, 6)
+  ),
+  'millisecond and score metric contracts record measured approved versions'
+);
+
+SELECT pg_temp.assert_true(
+  (
+    SELECT count(*) = 4
       AND bool_and(is_test)
       AND bool_and(recorded_by = 'internal-qa-local')
       AND bool_and(metadata ->> 'external_mutation_performed' = 'false')
       AND bool_and(metadata ->> 'browser_baseline_accepted' = 'false')
     FROM public.growth_kpi_target_versions
     WHERE idempotency_key IN (
-      repeat('a', 64), repeat('c', 64), repeat('e', 64)
+      repeat('a', 64), repeat('c', 64), repeat('e', 64),
+      repeat('1', 64), repeat('3', 64)
     )
   ),
   'only the valid draft and approved target versions exist'
@@ -284,7 +338,7 @@ SELECT pg_temp.assert_true(
 
 SELECT pg_temp.assert_true(
   (
-    SELECT count(*) = 2
+    SELECT count(*) = 4
     FROM public.audit_logs
     WHERE action = 'growth.kpi_target_version_recorded'
       AND resource_type = 'growth_kpi_target'

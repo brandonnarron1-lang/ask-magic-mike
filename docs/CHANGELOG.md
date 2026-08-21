@@ -5,9 +5,18 @@
 - Added one protected, append-only KPI target register to the existing Growth
   intelligence and Lead Center rather than introducing a second dashboard or
   analytics store.
-- Defined 32 canonical acquisition, response, conversion, database, economics,
-  portfolio, operations, experimentation, and trust/delivery KPIs with explicit
+- Defined 38 canonical acquisition, response, conversion, database, economics,
+  portfolio, operations, experimentation, experience/conversion-quality, and
+  trust/delivery KPIs with explicit
   units, direction, denominator language, and minimum sample sizes.
+- Added Production-only, canonical-host LCP/INP/CLS field telemetry through the
+  existing analytics ledger. It excludes Preview, local, QA, automation,
+  non-public routes, query strings, lead/session identity, attribution, raw IP,
+  and raw user-agent data; the server enforces the exact Production origin and
+  deduplicates sanitizer-safe metric codes plus metric IDs before computing P75.
+- Kept accessibility, mobile technical success, and durable funnel completion
+  explicitly uninstrumented until human-evaluation and privacy-safe cohort
+  evidence exists. Automated telemetry does not claim accessibility conformance.
 - Separated measured, directional, insufficient-sample, uninstrumented, and
   unavailable baselines. Unsupported values display as `Not measured`; zero
   live demand does not become a fabricated 0% or $0 baseline.
@@ -22,11 +31,11 @@
 - Added a hash-pinned, backup-first, canonical-Neon cutover runner. Its exact
   future gate does not authorize recording a target, publishing content,
   messaging a consumer, or spending money.
-- The full local release gate passes 206 test files / 2,874 tests, system
+- The full local release gate passes 207 test files / 2,894 tests, system
   isolation, 14/14 safety checks, strict typecheck, ESLint, optimized Next.js
   15.5.21 build, and the 81-route manifest. The disposable PostgreSQL 17.6
   contract and 12/12 desktop/mobile rendered checks also pass. Production
-  dependencies have no known vulnerability, and a redacted 474-commit scan
+  dependencies have no known vulnerability, and a redacted 477-commit scan
   found no secret leak. Exact Node 24 CI and canonical Preview evidence remain
   to be recorded on the Draft PR.
 - No Production deployment, Neon migration/write, target record, lead,

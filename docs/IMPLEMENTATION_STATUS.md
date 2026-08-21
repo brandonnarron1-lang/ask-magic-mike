@@ -8,10 +8,18 @@ Updated 2026-08-21.
   `growth:manage` permission, immutable audit ledger, and canonical Vercel
   project. No second analytics product, CRM, database, provider, publisher, or
   admin surface was introduced.
-- Defined 32 canonical KPI contracts across acquisition, response, conversion,
-  database, economics, portfolio, operations, experimentation, and trust/
-  delivery. Each fixes a unit, direction, denominator language, and minimum
-  sample threshold.
+- Defined 38 canonical KPI contracts across acquisition, response, conversion,
+  database, economics, portfolio, operations, experimentation, experience/
+  conversion quality, and trust/delivery. Each fixes a unit, direction,
+  denominator language, and minimum sample threshold.
+- Added privacy-minimized Production field telemetry for LCP, INP, and CLS on
+  exact canonical public routes. Preview, local, known QA, automation, dynamic
+  identifiers, query strings, lead/session IDs, attribution, raw IPs, and raw
+  user agents are excluded. Exact Production origin is enforced server-side;
+  sanitizer-safe metric codes are deduplicated with metric IDs before P75.
+- Kept accessibility, mobile technical success, and durable funnel completion
+  explicitly uninstrumented until human-evaluation and privacy-safe cohort
+  evidence exists; no automated accessibility or conversion claim is made.
 - Added measured, directional, insufficient-sample, uninstrumented, and
   unavailable baseline states. The server resolves and hashes baseline evidence;
   the browser cannot submit it. Unsupported states remain null and render as
@@ -30,12 +38,12 @@ Updated 2026-08-21.
 - Added a hash-pinned backup-first cutover runner targeting only canonical Neon
   Production and requiring the publication-proof prerequisite. Plan, preflight,
   execute, and verify are separate; only execute accepts the exact release gate.
-- Focused tests pass 3 files / 28 tests. The full local release gate passes 206
-  test files / 2,874 tests, system isolation, 14/14 safety checks, strict
+- Focused tests pass 6 files / 56 tests. The full local release gate passes 207
+  test files / 2,894 tests, system isolation, 14/14 safety checks, strict
   typecheck, ESLint, optimized Next.js 15.5.21 build, and the 81-route manifest.
   The disposable PostgreSQL 17.6 contract and 12/12 desktop/mobile rendered
   checks also pass. Production dependencies have no known vulnerability, and a
-  redacted 474-commit scan found no secret leak. Exact Node 24 CI and canonical
+  redacted 477-commit scan found no secret leak. Exact Node 24 CI and canonical
   Vercel Preview proof remain to be attached to the Draft PR.
 - Production aggregate truth remains six test/suppressed leads and zero genuine
   contactable leads, response samples, outcomes, or spend. No numeric target is

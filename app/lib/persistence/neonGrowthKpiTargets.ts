@@ -123,7 +123,7 @@ function isMetricKey(value: string): value is KpiMetricKey {
 }
 
 function isMetricUnit(value: string): value is KpiMetricUnit {
-  return ["percentage", "minutes", "count", "usd", "ratio"].includes(value);
+  return ["percentage", "minutes", "milliseconds", "count", "usd", "ratio", "score"].includes(value);
 }
 
 function isDirection(value: string): value is KpiMetricDirection {

@@ -35,13 +35,19 @@ CREATE TABLE IF NOT EXISTS public.growth_kpi_target_versions (
     'agent_conversion_rate',
     'experiment_velocity',
     'experiment_decision_quality',
+    'p75_largest_contentful_paint_ms',
+    'p75_interaction_to_next_paint_ms',
+    'p75_cumulative_layout_shift',
+    'critical_accessibility_issue_count',
+    'mobile_funnel_technical_success_rate',
+    'durable_funnel_completion_rate',
     'notification_failure_rate',
     'bounce_rate',
     'opt_out_rate',
     'complaint_rate'
   )),
   metric_unit text NOT NULL CHECK (metric_unit IN (
-    'percentage', 'minutes', 'count', 'usd', 'ratio'
+    'percentage', 'minutes', 'milliseconds', 'count', 'usd', 'ratio', 'score'
   )),
   direction text NOT NULL CHECK (direction IN (
     'higher_is_better', 'lower_is_better'
@@ -82,17 +88,21 @@ CREATE TABLE IF NOT EXISTS public.growth_kpi_target_versions (
   CHECK (
     (metric_unit = 'percentage' AND target_value BETWEEN 0 AND 100)
     OR (metric_unit = 'minutes' AND target_value BETWEEN 0 AND 10080)
+    OR (metric_unit = 'milliseconds' AND target_value BETWEEN 0 AND 600000)
     OR (metric_unit = 'count' AND target_value BETWEEN 0 AND 1000000000 AND target_value = trunc(target_value))
     OR (metric_unit = 'usd' AND target_value BETWEEN 0 AND 1000000000000)
     OR (metric_unit = 'ratio' AND target_value BETWEEN 0 AND 1000000)
+    OR (metric_unit = 'score' AND target_value BETWEEN 0 AND 100)
     OR target_value IS NULL
   ),
   CHECK (
     (metric_unit = 'percentage' AND baseline_value BETWEEN 0 AND 100)
     OR (metric_unit = 'minutes' AND baseline_value BETWEEN 0 AND 10080)
+    OR (metric_unit = 'milliseconds' AND baseline_value BETWEEN 0 AND 600000)
     OR (metric_unit = 'count' AND baseline_value BETWEEN 0 AND 1000000000 AND baseline_value = trunc(baseline_value))
     OR (metric_unit = 'usd' AND baseline_value BETWEEN 0 AND 1000000000000)
     OR (metric_unit = 'ratio' AND baseline_value BETWEEN 0 AND 1000000)
+    OR (metric_unit = 'score' AND baseline_value BETWEEN 0 AND 100)
     OR baseline_value IS NULL
   ),
   CHECK (
@@ -102,19 +112,26 @@ CREATE TABLE IF NOT EXISTS public.growth_kpi_target_versions (
       'close_rate', 'database_reactivation_rate', 'owned_demand_share',
       'rented_demand_share', 'agent_acceptance_rate', 'agent_follow_up_rate',
       'agent_conversion_rate', 'experiment_decision_quality',
+      'mobile_funnel_technical_success_rate', 'durable_funnel_completion_rate',
       'notification_failure_rate', 'bounce_rate', 'opt_out_rate', 'complaint_rate'
     ) AND metric_unit = 'percentage')
     OR (metric_key IN (
       'median_first_response_minutes', 'p75_first_response_minutes',
       'p90_first_response_minutes'
     ) AND metric_unit = 'minutes')
-    OR (metric_key IN ('stale_lead_inventory', 'experiment_velocity') AND metric_unit = 'count')
+    OR (metric_key IN (
+      'p75_largest_contentful_paint_ms', 'p75_interaction_to_next_paint_ms'
+    ) AND metric_unit = 'milliseconds')
+    OR (metric_key IN (
+      'stale_lead_inventory', 'experiment_velocity', 'critical_accessibility_issue_count'
+    ) AND metric_unit = 'count')
     OR (metric_key IN (
       'cost_per_lead', 'cost_per_qualified_lead', 'cost_per_appointment',
       'cost_per_signed_client', 'cost_per_close', 'attributed_revenue',
       'referral_cost', 'margin_after_acquisition_cost'
     ) AND metric_unit = 'usd')
     OR (metric_key = 'return_on_ad_spend' AND metric_unit = 'ratio')
+    OR (metric_key = 'p75_cumulative_layout_shift' AND metric_unit = 'score')
   ),
   CHECK (
     (metric_key IN (
@@ -123,13 +140,16 @@ CREATE TABLE IF NOT EXISTS public.growth_kpi_target_versions (
       'close_rate', 'database_reactivation_rate', 'attributed_revenue',
       'return_on_ad_spend', 'margin_after_acquisition_cost', 'owned_demand_share',
       'agent_acceptance_rate', 'agent_follow_up_rate', 'agent_conversion_rate',
-      'experiment_velocity', 'experiment_decision_quality'
+      'experiment_velocity', 'experiment_decision_quality',
+      'mobile_funnel_technical_success_rate', 'durable_funnel_completion_rate'
     ) AND direction = 'higher_is_better')
     OR (metric_key IN (
       'median_first_response_minutes', 'p75_first_response_minutes',
       'p90_first_response_minutes', 'stale_lead_inventory', 'cost_per_lead',
       'cost_per_qualified_lead', 'cost_per_appointment', 'cost_per_signed_client',
       'cost_per_close', 'referral_cost', 'rented_demand_share',
+      'p75_largest_contentful_paint_ms', 'p75_interaction_to_next_paint_ms',
+      'p75_cumulative_layout_shift', 'critical_accessibility_issue_count',
       'notification_failure_rate', 'bounce_rate', 'opt_out_rate', 'complaint_rate'
     ) AND direction = 'lower_is_better')
   ),
@@ -226,19 +246,26 @@ BEGIN
       'close_rate', 'database_reactivation_rate', 'owned_demand_share',
       'rented_demand_share', 'agent_acceptance_rate', 'agent_follow_up_rate',
       'agent_conversion_rate', 'experiment_decision_quality',
+      'mobile_funnel_technical_success_rate', 'durable_funnel_completion_rate',
       'notification_failure_rate', 'bounce_rate', 'opt_out_rate', 'complaint_rate'
     ) THEN 'percentage'
     WHEN p_metric_key IN (
       'median_first_response_minutes', 'p75_first_response_minutes',
       'p90_first_response_minutes'
     ) THEN 'minutes'
-    WHEN p_metric_key IN ('stale_lead_inventory', 'experiment_velocity') THEN 'count'
+    WHEN p_metric_key IN (
+      'p75_largest_contentful_paint_ms', 'p75_interaction_to_next_paint_ms'
+    ) THEN 'milliseconds'
+    WHEN p_metric_key IN (
+      'stale_lead_inventory', 'experiment_velocity', 'critical_accessibility_issue_count'
+    ) THEN 'count'
     WHEN p_metric_key IN (
       'cost_per_lead', 'cost_per_qualified_lead', 'cost_per_appointment',
       'cost_per_signed_client', 'cost_per_close', 'attributed_revenue',
       'referral_cost', 'margin_after_acquisition_cost'
     ) THEN 'usd'
     WHEN p_metric_key = 'return_on_ad_spend' THEN 'ratio'
+    WHEN p_metric_key = 'p75_cumulative_layout_shift' THEN 'score'
     ELSE NULL
   END;
   v_expected_direction := CASE
@@ -248,13 +275,16 @@ BEGIN
       'close_rate', 'database_reactivation_rate', 'attributed_revenue',
       'return_on_ad_spend', 'margin_after_acquisition_cost', 'owned_demand_share',
       'agent_acceptance_rate', 'agent_follow_up_rate', 'agent_conversion_rate',
-      'experiment_velocity', 'experiment_decision_quality'
+      'experiment_velocity', 'experiment_decision_quality',
+      'mobile_funnel_technical_success_rate', 'durable_funnel_completion_rate'
     ) THEN 'higher_is_better'
     WHEN p_metric_key IN (
       'median_first_response_minutes', 'p75_first_response_minutes',
       'p90_first_response_minutes', 'stale_lead_inventory', 'cost_per_lead',
       'cost_per_qualified_lead', 'cost_per_appointment', 'cost_per_signed_client',
       'cost_per_close', 'referral_cost', 'rented_demand_share',
+      'p75_largest_contentful_paint_ms', 'p75_interaction_to_next_paint_ms',
+      'p75_cumulative_layout_shift', 'critical_accessibility_issue_count',
       'notification_failure_rate', 'bounce_rate', 'opt_out_rate', 'complaint_rate'
     ) THEN 'lower_is_better'
     ELSE NULL

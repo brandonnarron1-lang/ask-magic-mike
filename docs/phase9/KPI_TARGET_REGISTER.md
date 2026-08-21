@@ -43,7 +43,7 @@ message, AI decision-maker, or parallel admin was added.
 
 ## Canonical KPI catalog
 
-The catalog contains 32 versioned definitions across these categories:
+The catalog contains 38 versioned definitions across these categories:
 
 | Category | Examples |
 |---|---|
@@ -55,10 +55,54 @@ The catalog contains 32 versioned definitions across these categories:
 | Portfolio | owned-demand and rented-demand share |
 | Operations | agent acceptance, follow-up, and conversion |
 | Experimentation | experiment velocity and decision quality |
+| Experience and conversion quality | field LCP, INP, CLS, accessibility issues, mobile technical success, and durable funnel completion |
 | Trust and delivery | notification failures, bounce, opt-out, and complaint rates |
 
 Each definition fixes its key, label, unit, preferred direction, minimum sample
 size, and denominator language. Protected-class data and proxies are not inputs.
+
+## Production field-experience boundary
+
+The existing public event ledger now accepts one strict
+`web_vital_observed` contract. The root layout mounts the Next.js
+`useReportWebVitals` reporter only when `VERCEL_ENV=production`, and the client
+reports only from `askmagicmike.com` or `www.askmagicmike.com`. Preview, local,
+known internal-QA query patterns, `navigator.webdriver`, non-public routes, and
+unrecognized routes are silent.
+
+Only LCP, INP, and CLS are accepted. The stored properties are metric code,
+metric ID, numeric value, rating, navigation type, a static allowlisted route,
+mobile/desktop class, and the fixed `public_production` traffic class. Dynamic
+open-house identifiers collapse to `/open-house/[property-or-id]`. Full URLs,
+query strings, session/lead IDs, UTMs, click IDs, cookies, raw IPs, and raw user
+agents are not part of this event; the server reduces the request user agent to
+`browser/mobile` or `browser/desktop` and rejects recognized automation. The
+server also requires Vercel Production plus an exact canonical request and
+origin, so a Preview deployment cannot relabel its observations as Production.
+The durable property uses `metric_code`, not `metric_name`, so the existing
+privacy sanitizer's conservative rejection of name-bearing keys cannot silently
+remove the measurement dimension.
+
+The Growth view deduplicates reports by metric code plus metric ID and computes
+the 75th percentile inside the selected 30-, 90-, or 365-day window. LCP and
+CLS require 75 field reports; INP requires 50. Below those operating thresholds,
+the register retains the sample count but publishes no numeric or directional
+baseline.
+
+The metric names and field-report mechanism follow the official
+[Next.js Web Vitals API](https://nextjs.org/docs/app/api-reference/functions/use-report-web-vitals)
+and [field-measurement guidance](https://web.dev/articles/vitals-field-measurement-best-practices).
+The current external “good” review thresholds—LCP at or below 2,500 ms, INP at
+or below 200 ms, and CLS at or below 0.1 at the 75th percentile—come from
+[web.dev's Core Web Vitals definition](https://web.dev/articles/defining-core-web-vitals-thresholds).
+They are review references, not seeded Ask Magic Mike targets.
+
+Accessibility stays separate from performance telemetry. The critical-issue
+metric remains `not_instrumented` until a canonical issue ledger combines
+automated findings with documented human evaluation. This follows
+[W3C/WAI evaluation guidance](https://www.w3.org/WAI/test-evaluate/): automated
+tools help, but do not by themselves determine accessibility. Nothing in this
+register claims certification or full conformance.
 
 ## Baseline state model
 
@@ -170,6 +214,8 @@ change, or provider action.
 
 - Production currently has no genuine live sample from which to approve numeric
   conversion or economics targets.
+- Production field-experience metrics begin empty and remain sample-limited
+  until genuine canonical-host traffic reaches their documented thresholds.
 - Several catalog entries remain uninstrumented until their canonical event or
   denominator exists.
 - A target is an operator-approved operating commitment, not a forecast,

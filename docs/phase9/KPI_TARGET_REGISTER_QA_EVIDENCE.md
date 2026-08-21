@@ -19,18 +19,23 @@ values as **Not measured**.
 
 ```text
 pnpm exec vitest run \
+  tests/analytics/web-vitals-reporter.test.ts \
+  tests/api/public-events-route.test.ts \
+  tests/adminops/admin-growth-route-guards.test.ts \
   tests/adminops/growth-kpi-targets.test.ts \
   tests/adminops/growth-kpi-target-register-migration.test.ts \
   tests/scripts/phase9-kpi-target-production-cutover.test.ts
 ```
 
-Result: PASS — 3 files / 28 tests.
+Result: PASS — 6 files / 56 tests.
 
-The tests cover the 32-metric catalog, baseline-state truthfulness, sample
-maturity, server baseline authority, PII/secret rejection, numeric target and
-approval gates, idempotency, SQL/RLS/privilege/immutability contracts, migration
-hash pinning, exact gate enforcement, canonical Neon identity, backup-first
-execution, and lead/audit no-change interlocks.
+The tests cover the 38-metric catalog, baseline-state truthfulness, sample
+maturity, Production-only Web Vitals reporting, canonical route and QA
+exclusions, bounded event bodies, server-derived ratings, coarse user-agent
+classification, server baseline authority, PII/secret rejection, numeric target
+and approval gates, idempotency, SQL/RLS/privilege/immutability contracts,
+migration hash pinning, exact gate enforcement, canonical Neon identity,
+backup-first execution, and lead/audit no-change interlocks.
 
 ## Disposable PostgreSQL acceptance
 
@@ -56,16 +61,16 @@ performed by this acceptance.
 - `pnpm run routes:assert`: PASS — 81 active routes and 17 acknowledged
   root/`src` duplicates.
 - `pnpm run release:gate`: PASS — system isolation, 14/14 release-safety
-  controls, 206 test files / 2,874 tests, strict typecheck, ESLint, optimized
+  controls, 207 test files / 2,894 tests, strict typecheck, ESLint, optimized
   build, and route manifest.
 - `/admin/growth/targets` is a dynamic protected route and is included in the
   required admin-route manifest.
 - Offline guarded cutover plan: PASS; migration SHA-256
-  `1feead13bdb8db3f7108deac42d03b124a795b289320235d6b2866b5fd3591f4`.
+  `99ec2b204a9ec88d57f142c5765abc125a6063de89d5624d22e878995f8bea5c`.
 - `pnpm audit --prod --audit-level high`: PASS — no known Production
   dependency vulnerabilities.
-- `gitleaks detect --source . --redact --no-banner`: PASS — 474 commits and
-  approximately 13.33 MB scanned with no detected leak.
+- `gitleaks git --redact --no-banner`: PASS — 477 commits and approximately
+  13.53 MB scanned with no detected leak.
 
 The local workstation uses Node 26.5.1 and reports the repository's expected
 24.x engine warning. The exact Node 24 GitHub proof will be recorded on the
@@ -84,7 +89,7 @@ public and authenticated operator surfaces. The harness found:
 
 Inspected screenshots show unavailable cards as **Not measured**. Evidence is
 retained under the gitignored
-`.amm-run/kpi-target-register/visual-final/` directory.
+`.amm-run/kpi-target-register/visual-web-vitals-final/` directory.
 
 ## Security review
 
@@ -92,6 +97,19 @@ retained under the gitignored
   `growth:manage`.
 - Preview mutation fails closed before any target baseline or database query.
 - Mutation is protected by the existing per-operator durable rate limiter.
+- Public telemetry keeps the existing same-origin check and durable rate limit,
+  requires JSON, and rejects request bodies above 4,096 bytes before parsing.
+- Only LCP, INP, and CLS on exact allowlisted public routes are accepted in
+  Vercel Production from an exact canonical origin. The server derives the
+  rating from the numeric value rather than trusting the
+  client, and the database query deduplicates metric IDs before P75 aggregation.
+- Query strings, attribution, lead/session identity, raw IP addresses, and raw
+  user agents are excluded; only a coarse browser/mobile or browser/desktop
+  classification is retained. Known QA is suppressed before reporting, and
+  recognized automation is rejected server-side.
+- The server maps the validated metric to `metric_code` before persistence; an
+  executable regression proves the central privacy sanitizer preserves that
+  safe dimension rather than stripping the name-bearing client field.
 - SQL is parameterized; the RPC is security-invoker with locked search path.
 - RLS and grants deny public, `anon`, and `authenticated` table/function access.
 - React escaping is retained; no unsafe HTML, browser credential, dynamic code,

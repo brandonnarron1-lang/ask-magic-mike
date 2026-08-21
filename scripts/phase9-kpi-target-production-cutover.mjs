@@ -21,7 +21,7 @@ export const MIGRATION_VERSION = "20260821213000";
 export const MIGRATION_NAME = "growth_kpi_target_register";
 export const MIGRATION_FILE = `${MIGRATION_VERSION}_${MIGRATION_NAME}.sql`;
 export const MIGRATION_SHA256 =
-  "1feead13bdb8db3f7108deac42d03b124a795b289320235d6b2866b5fd3591f4";
+  "99ec2b204a9ec88d57f142c5765abc125a6063de89d5624d22e878995f8bea5c";
 export const APPLICATION_NAME = "amm_phase9_kpi_target_cutover";
 
 const MODULE_URL = new URL(import.meta.url);
@@ -259,10 +259,18 @@ SELECT jsonb_build_object(
   'metric_contract_constraints', COALESCE((
     SELECT definitions LIKE '%useful_source_attribution_rate%'
        AND definitions LIKE '%complaint_rate%'
+       AND definitions LIKE '%p75_largest_contentful_paint_ms%'
+       AND definitions LIKE '%p75_interaction_to_next_paint_ms%'
+       AND definitions LIKE '%p75_cumulative_layout_shift%'
+       AND definitions LIKE '%critical_accessibility_issue_count%'
+       AND definitions LIKE '%mobile_funnel_technical_success_rate%'
+       AND definitions LIKE '%durable_funnel_completion_rate%'
        AND definitions LIKE '%higher_is_better%'
        AND definitions LIKE '%lower_is_better%'
        AND definitions LIKE '%percentage%'
+       AND definitions LIKE '%milliseconds%'
        AND definitions LIKE '%ratio%'
+       AND definitions LIKE '%score%'
       FROM table_constraints
   ), false),
   'evidence_state_constraints', COALESCE((
@@ -276,6 +284,7 @@ SELECT jsonb_build_object(
   ), false),
   'target_range_constraints', COALESCE((
     SELECT definitions LIKE '%10080%'
+       AND definitions LIKE '%600000%'
        AND definitions LIKE '%1000000000000%'
        AND definitions LIKE '%target_value%'
        AND definitions LIKE '%baseline_value%'

@@ -14,7 +14,14 @@ export const KPI_BASELINE_STATES = [
 ] as const;
 export type KpiBaselineState = (typeof KPI_BASELINE_STATES)[number];
 
-export type KpiMetricUnit = "percentage" | "minutes" | "count" | "usd" | "ratio";
+export type KpiMetricUnit =
+  | "percentage"
+  | "minutes"
+  | "milliseconds"
+  | "count"
+  | "usd"
+  | "ratio"
+  | "score";
 export type KpiMetricDirection = "higher_is_better" | "lower_is_better";
 export type KpiMetricCategory =
   | "acquisition"
@@ -25,6 +32,7 @@ export type KpiMetricCategory =
   | "portfolio"
   | "operations"
   | "experimentation"
+  | "experience_and_conversion_quality"
   | "trust_and_delivery";
 
 export const KPI_METRIC_DEFINITIONS = [
@@ -281,6 +289,60 @@ export const KPI_METRIC_DEFINITIONS = [
     definition: "Completed experiments meeting assignment, sample, guardrail, and documented-decision requirements divided by completed experiments.",
   },
   {
+    key: "p75_largest_contentful_paint_ms",
+    label: "75th percentile Largest Contentful Paint",
+    category: "experience_and_conversion_quality",
+    unit: "milliseconds",
+    direction: "lower_is_better",
+    minimumSampleSize: 75,
+    definition: "75th percentile LCP from deduplicated, canonical production field reports on approved public Ask Magic Mike routes; Preview, QA, automation, query strings, and consumer identifiers are excluded.",
+  },
+  {
+    key: "p75_interaction_to_next_paint_ms",
+    label: "75th percentile Interaction to Next Paint",
+    category: "experience_and_conversion_quality",
+    unit: "milliseconds",
+    direction: "lower_is_better",
+    minimumSampleSize: 50,
+    definition: "75th percentile INP from deduplicated, canonical production field reports on approved public Ask Magic Mike routes; Preview, QA, automation, query strings, and consumer identifiers are excluded.",
+  },
+  {
+    key: "p75_cumulative_layout_shift",
+    label: "75th percentile Cumulative Layout Shift",
+    category: "experience_and_conversion_quality",
+    unit: "score",
+    direction: "lower_is_better",
+    minimumSampleSize: 75,
+    definition: "75th percentile CLS score from deduplicated, canonical production field reports on approved public Ask Magic Mike routes; Preview, QA, automation, query strings, and consumer identifiers are excluded.",
+  },
+  {
+    key: "critical_accessibility_issue_count",
+    label: "Critical accessibility issue count",
+    category: "experience_and_conversion_quality",
+    unit: "count",
+    direction: "lower_is_better",
+    minimumSampleSize: 0,
+    definition: "Open critical accessibility issues supported by documented automated checks and human evaluation across the canonical funnel; this metric is not an accessibility certification.",
+  },
+  {
+    key: "mobile_funnel_technical_success_rate",
+    label: "Mobile funnel technical-success rate",
+    category: "experience_and_conversion_quality",
+    unit: "percentage",
+    direction: "higher_is_better",
+    minimumSampleSize: 50,
+    definition: "Eligible mobile funnel starts reaching a durable success or explicit safe failure state divided by eligible mobile funnel starts, using privacy-safe canonical cohorts.",
+  },
+  {
+    key: "durable_funnel_completion_rate",
+    label: "Durable funnel completion rate",
+    category: "experience_and_conversion_quality",
+    unit: "percentage",
+    direction: "higher_is_better",
+    minimumSampleSize: 50,
+    definition: "Eligible public funnel starts resulting in one durably stored, non-test lead divided by eligible public funnel starts, deduplicated by a privacy-safe canonical cohort key.",
+  },
+  {
     key: "notification_failure_rate",
     label: "Notification failure rate",
     category: "trust_and_delivery",
@@ -373,6 +435,9 @@ const UNSUPPORTED_REASONS: Partial<Record<KpiMetricKey, string>> = {
   agent_conversion_rate: "Closed outcomes are not yet joined to evidence-backed owner history at agent grain.",
   experiment_velocity: "The aggregate reports running experiments, not decisions completed inside the selected window.",
   experiment_decision_quality: "Experiment assignment, sample, guardrail, and decision-quality checks are not yet aggregated.",
+  critical_accessibility_issue_count: "Automated checks alone cannot establish accessibility. A canonical issue ledger joining automated findings with documented human evaluation is not yet instrumented.",
+  mobile_funnel_technical_success_rate: "Funnel events are not yet joined by device into privacy-safe cohorts with durable success and explicit technical-failure outcomes.",
+  durable_funnel_completion_rate: "Funnel starts and durable lead creation are not yet joined into one privacy-safe, deduplicated canonical cohort denominator.",
   notification_failure_rate: "Delivery outcomes are available in notification operations but are not yet joined into the Growth Intelligence aggregate.",
   bounce_rate: "Provider bounce events are not yet exposed in the Growth Intelligence aggregate.",
   opt_out_rate: "Purpose-specific delivered-message denominators are not yet joined to suppression events.",
@@ -455,10 +520,34 @@ function baselineValue(
       return { value: percentage(paidLeads, summary.leads), sampleSize: summary.leads, evidence: { rented_leads: paidLeads, eligible_leads: summary.leads } };
     case "agent_follow_up_rate":
       return { value: summary.firstResponseCoverageRate, sampleSize: summary.leads, evidence: { eligible_leads: summary.leads, first_response_samples: summary.firstResponseSampleSize } };
+    case "p75_largest_contentful_paint_ms":
+      return {
+        value: growth.webVitals.lcpP75Ms,
+        sampleSize: growth.webVitals.lcpSampleSize,
+        evidence: { field_reports: growth.webVitals.lcpSampleSize, aggregation: "p75", metric_code: "LCP", traffic_class: "public_production" },
+      };
+    case "p75_interaction_to_next_paint_ms":
+      return {
+        value: growth.webVitals.inpP75Ms,
+        sampleSize: growth.webVitals.inpSampleSize,
+        evidence: { field_reports: growth.webVitals.inpSampleSize, aggregation: "p75", metric_code: "INP", traffic_class: "public_production" },
+      };
+    case "p75_cumulative_layout_shift":
+      return {
+        value: growth.webVitals.clsP75,
+        sampleSize: growth.webVitals.clsSampleSize,
+        evidence: { field_reports: growth.webVitals.clsSampleSize, aggregation: "p75", metric_code: "CLS", traffic_class: "public_production" },
+      };
     default:
       return { value: null, sampleSize: 0, evidence: {} };
   }
 }
+
+const CORE_WEB_VITAL_METRICS = new Set<KpiMetricKey>([
+  "p75_largest_contentful_paint_ms",
+  "p75_interaction_to_next_paint_ms",
+  "p75_cumulative_layout_shift",
+]);
 
 export function buildKpiBaselineSnapshot(
   metricKey: KpiMetricKey,
@@ -474,6 +563,12 @@ export function buildKpiBaselineSnapshot(
   if (unsupportedReason) {
     state = "not_instrumented";
     reason = unsupportedReason;
+  } else if (
+    CORE_WEB_VITAL_METRICS.has(metricKey) &&
+    (!growth.webVitals.configured || growth.webVitals.error)
+  ) {
+    state = "unavailable";
+    reason = growth.webVitals.error || "Canonical production field telemetry is not configured.";
   } else if (!growth.configured || growth.error || !growth.schemaReady) {
     state = "unavailable";
     reason = growth.error || "Canonical Growth Intelligence is not fully available for this observation.";
@@ -481,7 +576,7 @@ export function buildKpiBaselineSnapshot(
     state = "insufficient_sample";
     reason = "The denominator or required spend/outcome evidence is empty in the selected window.";
   } else if (core.sampleSize < metric.minimumSampleSize) {
-    state = core.sampleSize >= Math.min(5, metric.minimumSampleSize)
+    state = !CORE_WEB_VITAL_METRICS.has(metricKey) && core.sampleSize >= Math.min(5, metric.minimumSampleSize)
       ? "directional"
       : "insufficient_sample";
     reason = `Only ${core.sampleSize} qualifying observations are available; ${metric.minimumSampleSize} are required for an operational baseline.`;
@@ -530,8 +625,10 @@ function targetInRange(value: number, unit: KpiMetricUnit) {
   if (value < 0) return false;
   if (unit === "percentage") return value <= 100;
   if (unit === "minutes") return value <= 10080;
+  if (unit === "milliseconds") return value <= 600_000;
   if (unit === "count") return Number.isInteger(value) && value <= 1_000_000_000;
   if (unit === "usd") return value <= 1_000_000_000_000;
+  if (unit === "score") return value <= 100;
   return value <= 1_000_000;
 }
 
@@ -611,7 +708,9 @@ export function formatKpiValue(value: number | null, unit: KpiMetricUnit) {
   if (value == null) return "Not measured";
   if (unit === "percentage") return `${value}%`;
   if (unit === "minutes") return `${value} min`;
+  if (unit === "milliseconds") return `${Math.round(value)} ms`;
   if (unit === "usd") return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(value);
   if (unit === "ratio") return `${value}x`;
+  if (unit === "score") return new Intl.NumberFormat("en-US", { maximumFractionDigits: 4 }).format(value);
   return new Intl.NumberFormat("en-US").format(value);
 }

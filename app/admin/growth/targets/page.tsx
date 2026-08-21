@@ -31,6 +31,7 @@ const CATEGORY_LABELS: Record<KpiMetricCategory, string> = {
   portfolio: "Owned versus rented demand",
   operations: "Agent operations",
   experimentation: "Learning velocity",
+  experience_and_conversion_quality: "Experience and conversion quality",
   trust_and_delivery: "Trust and delivery",
 };
 

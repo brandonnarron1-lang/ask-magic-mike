@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  KPI_METRIC_DEFINITIONS,
   buildKpiBaselineSnapshot,
+  formatKpiValue,
   validateKpiTarget,
   type KpiMetricKey,
 } from "../../app/lib/growth/kpi-targets";
@@ -15,7 +17,18 @@ import type { GrowthIntelligenceView } from "../../app/lib/persistence/neonGrowt
 
 const NOW = new Date("2026-08-21T21:30:00.000Z");
 
-function growthView(leads: GrowthLeadFact[] = []): GrowthIntelligenceView {
+function growthView(
+  leads: GrowthLeadFact[] = [],
+  webVitals: GrowthIntelligenceView["webVitals"] = {
+    configured: true,
+    lcpP75Ms: null,
+    lcpSampleSize: 0,
+    inpP75Ms: null,
+    inpSampleSize: 0,
+    clsP75: null,
+    clsSampleSize: 0,
+  },
+): GrowthIntelligenceView {
   const intelligence = buildGrowthIntelligence({ leads, now: NOW });
   return {
     ...intelligence,
@@ -27,9 +40,11 @@ function growthView(leads: GrowthLeadFact[] = []): GrowthIntelligenceView {
     persistedOpportunities: [],
     recommendations: [],
     ownedDemandSignals: [],
+    webVitals,
     sourceRowsRead: leads.length,
     spendRowsRead: 0,
     outcomeRowsRead: 0,
+    webVitalRowsRead: webVitals.lcpSampleSize + webVitals.inpSampleSize + webVitals.clsSampleSize,
   };
 }
 
@@ -74,6 +89,12 @@ class QueryStub implements GrowthKpiTargetQuery {
 }
 
 describe("Growth KPI baseline quality contract", () => {
+  it("defines the complete 38-metric operating catalog", () => {
+    expect(KPI_METRIC_DEFINITIONS).toHaveLength(38);
+    expect(KPI_METRIC_DEFINITIONS.filter((metric) => metric.category === "experience_and_conversion_quality"))
+      .toHaveLength(6);
+  });
+
   it("does not treat an empty rate as a measured zero", () => {
     const baseline = buildKpiBaselineSnapshot("useful_source_attribution_rate", growthView());
     expect(baseline.value).toBeNull();
@@ -107,6 +128,64 @@ describe("Growth KPI baseline quality contract", () => {
     const second = buildKpiBaselineSnapshot("qualification_rate", secondView);
     expect(first.evidenceSha256).toBe(second.evidenceSha256);
     expect(first.observedAt).not.toBe(second.observedAt);
+  });
+
+  it("does not expose a Core Web Vital baseline before its field sample threshold", () => {
+    const baseline = buildKpiBaselineSnapshot("p75_largest_contentful_paint_ms", growthView([], {
+      configured: true,
+      lcpP75Ms: 2_120.4,
+      lcpSampleSize: 74,
+      inpP75Ms: null,
+      inpSampleSize: 0,
+      clsP75: null,
+      clsSampleSize: 0,
+    }));
+    expect(baseline).toMatchObject({ state: "insufficient_sample", value: null, sampleSize: 74 });
+  });
+
+  it("measures production LCP, INP, and CLS only at their thresholds", () => {
+    const view = growthView([], {
+      configured: true,
+      lcpP75Ms: 2_120.4,
+      lcpSampleSize: 75,
+      inpP75Ms: 145.2,
+      inpSampleSize: 50,
+      clsP75: 0.0842,
+      clsSampleSize: 75,
+    });
+    expect(buildKpiBaselineSnapshot("p75_largest_contentful_paint_ms", view))
+      .toMatchObject({ state: "measured", value: 2_120.4, sampleSize: 75 });
+    expect(buildKpiBaselineSnapshot("p75_interaction_to_next_paint_ms", view))
+      .toMatchObject({ state: "measured", value: 145.2, sampleSize: 50 });
+    expect(buildKpiBaselineSnapshot("p75_cumulative_layout_shift", view))
+      .toMatchObject({ state: "measured", value: 0.0842, sampleSize: 75 });
+    expect(formatKpiValue(2_120.4, "milliseconds")).toBe("2120 ms");
+    expect(formatKpiValue(0.0842, "score")).toBe("0.0842");
+  });
+
+  it("keeps accessibility and funnel-quality claims explicitly uninstrumented", () => {
+    for (const metric of [
+      "critical_accessibility_issue_count",
+      "mobile_funnel_technical_success_rate",
+      "durable_funnel_completion_rate",
+    ] as const) {
+      expect(buildKpiBaselineSnapshot(metric, growthView(measuredLeads())))
+        .toMatchObject({ state: "not_instrumented", value: null });
+    }
+  });
+
+  it("marks field telemetry unavailable when the isolated aggregate fails", () => {
+    const baseline = buildKpiBaselineSnapshot("p75_interaction_to_next_paint_ms", growthView([], {
+      configured: true,
+      lcpP75Ms: null,
+      lcpSampleSize: 0,
+      inpP75Ms: null,
+      inpSampleSize: 0,
+      clsP75: null,
+      clsSampleSize: 0,
+      error: "Canonical Web Vitals aggregate query failed",
+    }));
+    expect(baseline).toMatchObject({ state: "unavailable", value: null });
   });
 });
 
@@ -158,6 +237,24 @@ describe("Growth KPI target validation", () => {
     expect(validateKpiTarget({ ...validInput(), rationale: "Contact owner@example.com before setting this evidence-backed operating target." }, baseline).ok).toBe(false);
     expect(validateKpiTarget({ ...validInput(), rationale: "Use api_key=private before setting this evidence-backed operating target." }, baseline).ok).toBe(false);
     expect(validateKpiTarget({ ...validInput(), windowDays: 90 }, baseline)).toEqual({ ok: false, error: "invalid_kpi_window" });
+  });
+
+  it("enforces millisecond and score target ranges", () => {
+    const view = growthView([], {
+      configured: true,
+      lcpP75Ms: 2_500,
+      lcpSampleSize: 75,
+      inpP75Ms: null,
+      inpSampleSize: 0,
+      clsP75: 0.09,
+      clsSampleSize: 75,
+    });
+    const lcp = buildKpiBaselineSnapshot("p75_largest_contentful_paint_ms", view);
+    const cls = buildKpiBaselineSnapshot("p75_cumulative_layout_shift", view);
+    expect(validateKpiTarget({ ...validInput("p75_largest_contentful_paint_ms"), targetValue: 600_001 }, lcp))
+      .toEqual({ ok: false, error: "invalid_kpi_target_value" });
+    expect(validateKpiTarget({ ...validInput("p75_cumulative_layout_shift"), targetValue: 100.0001 }, cls))
+      .toEqual({ ok: false, error: "invalid_kpi_target_value" });
   });
 });
 
