@@ -5,6 +5,49 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Phase 9 campaign safety + owned-demand offer flight — 2026-08-21
+
+Status: local release gate complete; protected Preview visual verification is
+next. Production and external channels remain unchanged.
+
+- Reuse audit confirmed the canonical root `/admin/distribution`, Neon Growth
+  loader, UTM builder, `/home-value`, `/buy`, `/rent`, and retained visual assets
+  already existed.
+- The first new regression run failed intentionally against the uncorrected
+  retained campaign copy, proving that unsupported claims and conflicting public
+  phone numbers were detectable. After the factual rewrite, the safety suite
+  passes.
+- The first offer-flight run also failed closed because the canonical UTM
+  allowlist did not yet include the existing `/home-value`, `/buy`, and `/rent`
+  routes. Those exact routes were added to the allowlist; arbitrary hosts and
+  paths remain rejected.
+- Focused final command:
+  `pnpm exec vitest run tests/compliance/value-copy.test.ts tests/compliance/campaign-copy-safety.test.ts tests/adminops/owned-demand-command.test.ts tests/admin/utm-link-builder.test.ts tests/brand/marketing-system.test.ts tests/compliance/public-distribution.test.ts`
+  — PASS, 6 files / 335 tests.
+- `pnpm release:gate` — PASS: Ask Magic Mike/NellySelly isolation, 14/14
+  release-safety controls, 196 test files / 2,793 tests, strict typecheck,
+  ESLint, optimized Next.js 15.5.21 Production build, and 78-route manifest.
+- `pnpm typecheck` — PASS.
+- `git diff --check` — PASS.
+- `pnpm audit --prod --audit-level high` — PASS: no known Production
+  dependency vulnerabilities.
+- `gitleaks detect --source . --redact --no-banner` — PASS: 460 commits and
+  approximately 12.95 MB scanned with no leaks.
+- High-signal scan of the new command surface found no client secret reads,
+  unsafe HTML/DOM sinks, dynamic execution, Web Storage credentials,
+  unrestricted `postMessage`, navigation mutation, or network send. A complete
+  retained-source phone scan found neither conflicting private number.
+- Verified boundaries: exact 18 offer placements, exact-once attribution,
+  canonical routes/UTMs, retained local imagery, no prohibited campaign claims,
+  current public office number retained, test/suppressed SQL exclusions, and
+  local clipboard controls with no fetch, form, server action, or provider call.
+- No lead, email, BCC, consumer acknowledgment, SMS, Push notification, social
+  post, GBP post, WordPress update, Neon write, DNS change, Vercel Production
+  deployment, or NellySelly change occurred.
+
+Protected exact-head Preview deployment and desktop/mobile rendered QA remain
+to be recorded before this candidate is release-ready.
+
 ## Phase 7 completion gap closure — 2026-08-16
 
 ### Authenticated Production Copilot acceptance

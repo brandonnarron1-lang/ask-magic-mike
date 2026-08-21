@@ -130,8 +130,9 @@ describe("Distribution page — compliance", () => {
     expect(page).toMatch(/equal housing opportunity/i);
   });
 
-  it("clarifies Mike follows up personally — does not imply instant automated responses", () => {
-    expect(page).toMatch(/follows up personally|reviews.*personally/i);
+  it("clarifies brokerage review without promising a named or instant responder", () => {
+    expect(page).toMatch(/brokerage review queue|team reviews the request/i);
+    expect(page).toMatch(/timing and the individual reviewer may vary|do not imply a named reviewer/i);
   });
 
   it("warns against using Vercel preview URLs in production embeds", () => {

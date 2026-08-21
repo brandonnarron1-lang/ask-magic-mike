@@ -35,9 +35,9 @@ const SECONDARY_OPTIONS: OptionCardProps[] = [
     Icon: Banknote,
     title: "Request direct-purchase review",
     description:
-      "Share your address and timing for a preliminary direct-purchase review — subject to review. Not an instant offer.",
+      "Share your address and timing for a human review of possible selling paths. No purchase, offer, price, or closing timeline is promised.",
     question:
-      "Please review my home for a direct-purchase preliminary estimate, subject to inspection.",
+      "Please review my home and timing so I can understand possible selling paths.",
     chip: "what_can_afford",
     ribbon: "Priority review",
     ribbonTone: "ruby",
@@ -96,10 +96,10 @@ export function ValueHero() {
               {/* Micro-trust signals replace body copy — show value, not describe it */}
               <div className="flex flex-wrap items-center gap-2 mb-7 mt-4">
                 {[
-                  "Real answers in 24 hrs",
-                  "Wilson NC specialist",
+                  "Human-reviewed request",
+                  "Wilson-area context",
                   "Broker-reviewed",
-                  "No pressure · No account",
+                  "No account required",
                 ].map((label) => (
                   <span
                     key={label}
@@ -229,15 +229,14 @@ export function ValueHero() {
                 A licensed broker on the other end.
               </h2>
               <p className="text-sm text-slate-200 leading-relaxed max-w-xl">
-                Mike Eatmon has been selling Wilson and Eastern North Carolina
-                real estate since 1993 with Our Town Properties, Inc. Your
-                request is reviewed and followed up by a real person, not an
-                auto-responder.
+                Mike Eatmon is a North Carolina real estate broker with Our Town
+                Properties, Inc. Your request enters the brokerage review queue
+                before any permitted follow-up.
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
                 <span className="text-xs text-slate-400">Licensed in North Carolina</span>
                 <span className="text-gold-400/30">·</span>
-                <span className="text-xs text-slate-400">Since 1993</span>
+                <span className="text-xs text-slate-400">Broker-reviewed request</span>
                 <span className="text-gold-400/30">·</span>
                 <span className="text-xs text-slate-400">3301 Nash St. N Suite E, Wilson, NC 27896</span>
               </div>
@@ -249,7 +248,7 @@ export function ValueHero() {
                 motion.focusGold
               )}
             >
-              Call Mike directly
+              Call the brokerage office
             </a>
           </div>
         </section>

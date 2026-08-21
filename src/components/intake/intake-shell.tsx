@@ -34,9 +34,9 @@ const STEP_LABELS = [
 ];
 
 const TRUST_STATS = [
-  { value: "2,500+", label: "Homes closed" },
-  { value: "30+ yrs", label: "Experience" },
-  { value: "$750M+", label: "Career sales" },
+  { value: "1", label: "Canonical intake" },
+  { value: "3", label: "Consumer paths" },
+  { value: "Human", label: "Request review" },
 ];
 
 /* ── Left presence panel (desktop only) ──────────────────────────────── */
@@ -81,7 +81,7 @@ function MikePresencePanel() {
           Mike Eatmon
         </h2>
         <p className="mt-1 text-sm text-slate-400">Our Town Properties, Inc.</p>
-        <p className="mt-0.5 text-xs text-slate-500">Wilson, NC · Licensed since 1993</p>
+        <p className="mt-0.5 text-xs text-slate-500">Wilson, NC · North Carolina broker</p>
       </div>
 
       {/* Stats */}
@@ -97,7 +97,7 @@ function MikePresencePanel() {
       {/* Mike quote */}
       <blockquote className="mb-7 rounded-xl border-l-2 border-gold-400/40 pl-4">
         <p className="text-sm leading-relaxed text-slate-400 italic">
-          &ldquo;I review every question personally. You get a real answer from someone who&apos;s closed deals on this street.&rdquo;
+          &ldquo;Share the property or target area, timing, and question so the brokerage team can review the actual context.&rdquo;
         </p>
         <footer className="mt-2 text-[10px] text-gold-400/60 not-italic font-medium">
           — Mike Eatmon

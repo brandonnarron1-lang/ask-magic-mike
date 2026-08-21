@@ -30,7 +30,7 @@ export function ComplianceFooter({
       )}
     >
       Ask Magic Mike by Our Town Properties, Inc. provides local guidance and a
-      preliminary home value range. This is not an appraisal and does not
+      broker-reviewed home-value conversation. This is not an appraisal and does not
       create an agency relationship unless a written brokerage agreement is
       signed. Mike Eatmon or a member of the Our Town Properties team may
       follow up.

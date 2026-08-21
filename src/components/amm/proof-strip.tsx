@@ -2,9 +2,9 @@ import { ShieldCheck, Award, TrendingUp, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 const PROOFS = [
-  { Icon: Award,         label: "30+ years · Wilson County's market authority" },
-  { Icon: TrendingUp,    label: "$750M+ in career sales · 2,500+ homes closed" },
-  { Icon: MessageSquare, label: "Mike's team follows up — not a bot" },
+  { Icon: Award,         label: "Our Town Properties · Wilson, North Carolina" },
+  { Icon: TrendingUp,    label: "Seller, buyer, and renter request paths" },
+  { Icon: MessageSquare, label: "Human review before permitted follow-up" },
   { Icon: ShieldCheck,   label: "Licensed NC Broker · Not an appraisal" },
 ];
 

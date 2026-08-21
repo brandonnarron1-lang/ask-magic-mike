@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-08-21 — Campaign safety and three-offer owned-demand candidate
+
+- Consolidated the existing distribution command, seller/buyer/renter funnels,
+  canonical UTM builder, Neon attribution, and retained visual library into one
+  protected, read-only owned-demand flight.
+- Prepared 18 exact seller, buyer, and renter placements across six existing
+  owned channels, with accessible copy controls and no automatic publication or
+  messaging path.
+- Rewrote retained campaign copy to remove unsupported performance, valuation,
+  demand, school-proxy, response-time, superlative, and conflicting public-phone
+  claims; added dedicated regression coverage.
+- Extended the UTM allowlist only for the existing canonical `/home-value`,
+  `/buy`, and `/rent` routes; arbitrary and cross-system destinations remain
+  blocked.
+- Passed the full local release gate: 196 test files / 2,793 tests, strict
+  typecheck, ESLint, optimized Production build, 78-route manifest, 14/14
+  release-safety controls, system isolation, zero known Production dependency
+  vulnerabilities, and a clean redacted 460-commit secret scan.
+- No Production deployment, database migration, lead creation, external send,
+  WordPress change, social publication, DNS change, or NellySelly change was
+  performed.
+
 ## 2026-08-16 — Phase 7 messaging and advisory AI release candidate
 
 - Added a centralized communication-permission engine, immutable template/version registry, governed sequence state machine, signed Resend event handler, hardened Brandon-only QA email boundary, durable advisory AI jobs, and operator-visible controls.

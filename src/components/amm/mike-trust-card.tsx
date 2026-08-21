@@ -5,12 +5,10 @@ import { ammTokens } from "./tokens";
 import { AiAssistBadge } from "./ai-assist-badge";
 import { VisualFrame } from "./visual-frame";
 import { brandPackAssets } from "./brand-pack-assets";
+import { siteConfig } from "@/lib/site-config";
 
-const AGENT_PHONE = process.env.NEXT_PUBLIC_AGENT_PHONE ?? "+12522454337";
-const PHONE_DISPLAY = AGENT_PHONE.replace(/^\+1/, "").replace(
-  /(\d{3})(\d{3})(\d{4})/,
-  "($1) $2-$3"
-);
+const AGENT_PHONE = siteConfig.agentPhone;
+const PHONE_DISPLAY = siteConfig.agentPhoneDisplay;
 const LICENSE = process.env.NEXT_PUBLIC_AGENT_LICENSE;
 
 interface MikeTrustCardProps {
@@ -49,7 +47,7 @@ export function MikeTrustCard({
             Mike Eatmon &middot; Our Town Properties
           </p>
           <p className="text-[11.5px] text-slate-300 truncate">
-            Licensed in NC &middot; Selling real estate since 1993
+            North Carolina broker &middot; Wilson, NC
           </p>
         </div>
       </div>
@@ -94,7 +92,7 @@ export function MikeTrustCard({
             Our Town Properties, Inc.
           </p>
           <p className="text-[12.5px] text-slate-300 mt-1">
-            Selling real estate since 1993
+            Broker-reviewed request path
           </p>
         </div>
       </div>

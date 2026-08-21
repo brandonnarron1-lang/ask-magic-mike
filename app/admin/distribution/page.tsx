@@ -1,8 +1,15 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { buildOwnedDemandCommand, type OwnedDemandChannel } from "../../lib/growth/owned-demand";
+import {
+  buildOwnedDemandCommand,
+  type OwnedDemandChannel,
+  type OwnedDemandOfferBrief,
+  type OwnedDemandOfferPlacement,
+} from "../../lib/growth/owned-demand";
 import { loadGrowthIntelligence } from "../../lib/growthIntelligenceView";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
+import { CopyDemandAsset } from "./CopyDemandAsset";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -34,6 +41,72 @@ function Panel({ eyebrow, title, note, children }: {
       </div>
       <div className="mt-5">{children}</div>
     </section>
+  );
+}
+
+function OfferFlightCard({ offer }: { offer: OwnedDemandOfferBrief }) {
+  return (
+    <article className="group min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(150deg,#101010,#050505)]">
+      <div className="relative aspect-[16/10] overflow-hidden border-b border-white/10 bg-black">
+        <Image
+          src={offer.creativePath}
+          alt={offer.creativeAlt}
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
+          className="object-cover object-top transition duration-500 group-hover:scale-[1.02]"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_42%,rgba(0,0,0,.88))]" />
+        <p className="absolute bottom-4 left-4 rounded-full border border-[#cda24a55] bg-black/75 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#f0cf79]">
+          {offer.shortLabel}
+        </p>
+      </div>
+      <div className="p-5">
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8bbfc6]">Live consumer offer</p>
+        <h3 className="mt-2 font-serif text-2xl leading-tight text-[#f4ead4]">{offer.label}</h3>
+        <p className="mt-3 text-sm leading-6 text-[#c9bdab]">{offer.draftBody}</p>
+        <p className="mt-4 rounded-xl border border-[#cda24a2f] bg-[#171108] p-3 text-xs leading-5 text-[#b9ab91]">
+          <strong className="text-[#f0cf79]">Required review:</strong> {offer.reviewNote}
+        </p>
+        <Link
+          href={offer.destination}
+          className="mt-4 inline-flex rounded-full border border-white/10 bg-white/[.03] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d9ceb8] hover:border-[#4baab866] hover:text-[#9edbe2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2]"
+        >
+          Inspect live route
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+function OfferPlacement({ offer }: { offer: OwnedDemandOfferPlacement }) {
+  const observed = offer.status === "signal_detected";
+  const completeDraft = `${offer.draftTitle}\n\n${offer.draftBody}\n\n${offer.trackedUrl}`;
+
+  return (
+    <article className="rounded-xl border border-white/[.08] bg-black/35 p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8bbfc6]">{offer.shortLabel}</p>
+          <h4 className="mt-1 text-sm font-semibold leading-5 text-[#f4ead4]">{offer.draftTitle}</h4>
+        </div>
+        <span className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.11em] ${
+          observed
+            ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-200"
+            : "border-white/10 bg-white/[.03] text-[#8f8778]"
+        }`}>
+          {observed ? `${offer.attributedLeads} signal${offer.attributedLeads === 1 ? "" : "s"}` : "Unmeasured"}
+        </span>
+      </div>
+      <p className="mt-3 text-xs leading-5 text-[#bdb2a0]">{offer.draftBody}</p>
+      <code className="mt-3 block break-all rounded-lg border border-white/[.08] bg-[#050505] p-3 text-[10px] leading-5 text-[#9edbe2]">
+        {offer.trackedUrl}
+      </code>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <CopyDemandAsset label="Copy draft + link" value={completeDraft} />
+        <CopyDemandAsset label="Copy tracked link" value={offer.trackedUrl} />
+      </div>
+      <p className="mt-3 text-[11px] leading-5 text-[#7f786d]">{offer.reviewNote}</p>
+    </article>
   );
 }
 
@@ -72,6 +145,18 @@ function ChannelCard({ channel }: { channel: OwnedDemandChannel }) {
         <p className="text-[#d7cbb7]"><strong className="text-[#f0cf79]">Next human step:</strong> {channel.operatorStep}</p>
         <p className="text-[#8f8778]"><strong>Review:</strong> {channel.reviewNote}</p>
       </div>
+
+      <details className="group mt-5 rounded-xl border border-[#4baab833] bg-[#061417]">
+        <summary className="cursor-pointer list-none px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#9edbe2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#9edbe2]">
+          <span className="flex items-center justify-between gap-3">
+            Three offer-specific placements
+            <span aria-hidden="true" className="text-lg transition group-open:rotate-45">+</span>
+          </span>
+        </summary>
+        <div className="space-y-3 border-t border-[#4baab833] p-3">
+          {channel.offers.map((offer) => <OfferPlacement key={offer.key} offer={offer} />)}
+        </div>
+      </details>
     </article>
   );
 }
@@ -115,7 +200,7 @@ export default async function DistributionPage() {
               Approved social preview
             </Link>
             <Link href="/ask" className="rounded-full border border-white/10 bg-white/[.03] px-4 py-2 text-xs font-bold uppercase tracking-[0.11em] text-[#d9ceb8] hover:border-[#4baab866] hover:text-[#9edbe2]">
-              Inspect consumer destination
+              Inspect general intake
             </Link>
           </div>
         </header>
@@ -140,6 +225,18 @@ export default async function DistributionPage() {
 
         <div className="mt-5 rounded-xl border border-[#cda24a55] bg-[#1a1308] px-5 py-4 text-sm leading-6 text-[#f4ead4]">
           <strong className="text-[#f0cf79]">Measured bottleneck:</strong> {command.bottleneck}
+        </div>
+
+        <div className="mt-5">
+          <Panel
+            eyebrow="Three-offer launch flight"
+            title="Use the funnels already in production."
+            note={`${command.channels.length * command.offers.length} exact channel + offer placements are prepared. Nothing here auto-publishes or contacts a consumer.`}
+          >
+            <div className="grid gap-4 lg:grid-cols-3">
+              {command.offers.map((offer) => <OfferFlightCard key={offer.key} offer={offer} />)}
+            </div>
+          </Panel>
         </div>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-2">

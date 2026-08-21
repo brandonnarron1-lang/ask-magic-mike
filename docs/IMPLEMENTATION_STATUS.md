@@ -1,6 +1,34 @@
 # Implementation Status
 
-Updated 2026-08-20.
+Updated 2026-08-21.
+
+## Phase 9 campaign safety + three-offer owned-demand flight — 2026-08-21
+
+- Reused the canonical protected `/admin/distribution` command, Neon Growth
+  ledger, public funnels, UTM builder, and retained Black Diamond imagery. No
+  parallel campaign dashboard, lead store, publisher, or migration was added.
+- Added seller `/home-value`, buyer `/buy`, and renter `/rent` briefs across all
+  six existing owned channels: 18 exact channel/offer placements plus the six
+  existing general-question placements.
+- Attribution requires an exact normalized source alias, medium, campaign, and
+  complete `utm_content` match. Generic and offer-specific results are counted
+  exactly once.
+- Added accessible local clipboard controls. They make no network request and do
+  not publish, send, mutate a lead, or write to the database.
+- Audited and rewrote retained legacy campaign libraries containing unverified
+  volume, tenure, valuation-error, demand, school-proxy, response-time,
+  superlative, and direct-phone claims. Public copy preserves the current live
+  office number `252-243-7700`; private routing numbers remain private.
+- Focused verification passes 6 files / 335 tests. The full local release gate
+  passes system isolation, 14/14 release-safety controls, 196 test files / 2,793
+  tests, strict typecheck, ESLint, the Next.js 15.5.21 Production build, and the
+  78-route manifest. Production dependencies report no known vulnerabilities;
+  the redacted 460-commit history scan reports no secret leaks. Exact-head
+  protected Preview and desktop/mobile rendered QA remain in progress.
+- Production, WordPress, Neon, email, SMS, Push, social accounts, GBP, DNS, and
+  NellySelly are unchanged by this candidate.
+- Exact release gate:
+  `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT`.
 
 ## Phase 9 first-human-response intelligence — 2026-08-20
 
@@ -22,12 +50,11 @@ Updated 2026-08-20.
   `dpl_2PQoDZLHc562SBEY7px91CAEUrin`, with its outcome migration, validated
   backup, postflight, canonical-host, health, and identity-isolation checks
   passed.
-- PR #181 was refreshed on that exact `main` baseline at
-  `99fac18df16237ada26f65384be390e331df9f59`. Node 24 CI run `32422016242`
-  passed in 2m15s and Vercel Preview `dpl_kEtBPF8LS52kgG1LWE2ooaYZhJgT` is
-  Ready. Its refreshed local gate passed 193 files / 2,764 tests, strict
-  typecheck, lint, build, and the 78-route manifest before the additional
-  cutover hardening.
+- PR #181 completed in Production at head
+  `ed125cdfa09b7cc1a47b7c715bc15af7e6aeceea`, merge commit
+  `5335697edf31eed0b8a38cd0295a4f5e7d501a3e`, and Vercel deployment
+  `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`. Canonical public routes, health,
+  authorization, and Ask Magic Mike/NellySelly isolation checks passed.
 - A canonical-Neon role-shape replay then applied both stacked migrations twice
   with `anon` and `authenticated` absent. All three protected functions ran as
   `service_role`, public function/table access remained denied, both PostgreSQL
@@ -54,16 +81,16 @@ Updated 2026-08-20.
   on Node 24 and passes health, public-route, anonymous-admin-denial,
   desktop/mobile rendering, console, and Ask Magic Mike/NellySelly isolation
   checks without a database write or external send.
-- The fail-closed read-only Production preflight passes against canonical Neon
+- The fail-closed read-only Production preflight passed against canonical Neon
   project `bitter-star-20214385`, Production branch
   `br-round-base-auh6h2wd`, unpooled owner endpoint
   `ep-proud-bonus-autwv60g`. All prerequisite, schema, role, privilege, source
-  baseline, and target-absence checks are true; 6 leads and 9 audit rows remain
-  untouched, with 0 eligible historical response backfills.
-- No PR #181 Production database mutation, merge, message, WordPress change,
-  DNS change, environment change, or Production deployment has occurred. The
-  remaining gates are separately approved migration/merge/deploy plus
-  authenticated post-release acceptance.
+  baseline, and target-absence checks were true; 6 leads and 9 audit rows had
+  0 eligible historical response backfills.
+- Migration `20260820013000` then applied once to canonical Neon Production
+  branch `br-round-base-auh6h2wd` with the validated backup retained. Six
+  suppressed QA leads, zero live prospects, and existing audit counts remained
+  unchanged. No lead, message, WordPress, DNS, or NellySelly mutation occurred.
 
 ## Phase 9 operating-intelligence outcome seam — 2026-08-19
 

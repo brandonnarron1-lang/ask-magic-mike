@@ -1,0 +1,140 @@
+# Phase 9 owned-demand three-offer flight
+
+Date: 2026-08-21
+
+Status: local release candidate; Production and external channels unchanged
+
+Base: canonical `origin/main` commit `5335697edf31eed0b8a38cd0295a4f5e7d501a3e`
+
+## Reuse-first decision
+
+The protected root-router `/admin/distribution` command, canonical Neon Growth
+view, public seller/buyer/renter funnels, UTM builder, and retained Black Diamond
+visual library already existed. This change organizes and hardens those assets;
+it does not create a second campaign dashboard, lead database, tracking scheme,
+or publishing engine.
+
+The repository audit also found checked-in legacy campaign libraries with
+unverified production-volume, tenure, response-time, valuation-error,
+buyer-demand, school-proxy, and direct-phone claims. Those retained libraries
+were rewritten to factual, conditional copy and placed behind a regression scan.
+The live public office number remains `252-243-7700`. Private notification
+destinations are not promoted into public marketing copy.
+
+## Offer flight
+
+| Offer | Existing route | Purpose | Required boundary |
+|---|---|---|---|
+| Seller value + readiness review | `/home-value` | Broker-reviewed property and timing intake | Not an appraisal, automated valuation, guaranteed value, or guaranteed offer |
+| Buyer property-match review | `/buy` | Human review of target area, needs, and timing | Availability, financing, and appointments require confirmation |
+| Rental-to-homeownership review | `/rent` | Human review of current rental situation and goals | Not a lending decision or promise of eligibility, affordability, or financing |
+
+Each offer is prepared for the six existing owned channels:
+
+- Google Business Profile;
+- Facebook;
+- Instagram;
+- LinkedIn;
+- approved email signatures; and
+- QR/print placements.
+
+This produces 18 exact offer placements while preserving the six existing
+general-question placements. All links use canonical
+`https://www.askmagicmike.com` destinations and the stable campaign
+`amm_owned_demand_2026`.
+
+Example placement identity:
+
+```text
+utm_source=facebook
+utm_medium=social_organic
+utm_campaign=amm_owned_demand_2026
+utm_content=facebook_local_question_seller_review
+```
+
+Attribution remains deterministic. A signal counts only when normalized source
+alias, medium, campaign, and complete placement content match. Generic and
+offer-specific signals are summed once at the channel and command levels.
+
+## Visual decision
+
+The flight reuses retained, local Ask Magic Mike assets:
+
+- `/brand/black-diamond/hero-social-4x5.jpg` for the seller offer;
+- `/images/ask-magic-mike/brand-pack-v2/mike-action-explaining-clean.webp` for the buyer offer; and
+- `/images/ask-magic-mike/brand-pack-v2/mike-expression-friendly-clean.webp` for the renter offer.
+
+These assets contain no consumer PII. The command center displays them as
+creative direction beside exact compliant copy; native-platform cropping,
+identity, property facts, and final copy still require human review.
+
+## Operator workflow
+
+1. Sign in to the Lead Center and open `/admin/distribution`.
+2. Review the measured bottleneck and eligible live-source signals.
+3. Select an existing channel and expand its three offer placements.
+4. Copy the prepared draft and exact tracked URL locally.
+5. Review identity, facts, legal copy, crop, and destination in the native
+   platform editor.
+6. Publish only under a separately approved external-publication action.
+7. Preserve the external URL or screenshot as publication proof; attribution is
+   not itself publication proof.
+
+The clipboard control performs no network request. The page has no form, server
+action, provider SDK, publish call, email send, SMS send, lead mutation, or
+database mutation.
+
+## Verification contract
+
+Automated coverage proves:
+
+- three offer placements per existing channel;
+- canonical `/home-value`, `/buy`, and `/rent` destinations;
+- exact source, medium, campaign, and offer-specific content values;
+- exact-once generic plus offer attribution;
+- retained local visual paths;
+- prohibited-claim and public-phone regression checks;
+- client-local clipboard behavior with no network mutation; and
+- continued test/suppressed-lead exclusion upstream.
+
+The final local release gate passes 196 test files / 2,793 tests, strict
+typecheck, ESLint, the optimized Next.js 15.5.21 Production build, 78-route
+manifest verification, 14/14 release-safety controls, Ask Magic Mike/NellySelly
+isolation, a Production dependency audit with no known vulnerabilities, and a
+redacted 460-commit secret scan with no findings.
+
+No database migration is required.
+
+## Approval boundary
+
+Allowed before the release gate:
+
+- local code and documentation;
+- automated tests, build, security scans, and visual QA;
+- branch, pull request, and protected Vercel Preview;
+- authenticated read-only Preview inspection.
+
+Still not authorized by this candidate:
+
+- Production merge or deployment;
+- social/GBP publication;
+- email campaign, consumer acknowledgment, SMS, Push, or call;
+- paid promotion, audience targeting, or spend;
+- WordPress, DNS, provider, or database mutation.
+
+Exact Production approval phrase:
+
+```text
+APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT
+```
+
+Any external publication remains a separate action identifying the exact
+channel, final copy, final visual, tracked link, account identity, and
+delete/rollback procedure.
+
+## Rollback
+
+Before Production, close or leave the pull request unmerged. After an approved
+release, revert its merge commit or promote the immediately preceding Ready
+Vercel deployment. No database rollback is needed because the feature is
+read-only and has no migration.
