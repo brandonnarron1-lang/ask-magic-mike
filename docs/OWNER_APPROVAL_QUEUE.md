@@ -16,9 +16,10 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    and verified, and application release evidence is attached to the PR.
 
 The #184 phrase authorizes its reviewed backup-first Neon migration, exact code
-merge, and canonical Vercel deployment. Neither phrase authorizes a social/GBP
-post, email campaign, QR distribution, consumer message, spend, DNS change, or
-deletion.
+merge, and canonical Vercel deployment. The other phrases authorize only their
+reviewed code merge and canonical deployment. None authorizes a social/GBP
+post, email campaign, QR printing/distribution, consumer message, spend, DNS
+change, WordPress change, provider action, or deletion.
 
 ## Deferred candidates requiring refresh and overlap review
 

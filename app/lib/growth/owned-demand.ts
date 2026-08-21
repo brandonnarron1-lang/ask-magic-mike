@@ -82,6 +82,15 @@ export interface OwnedDemandPlacementDefinition {
   trackedUrl: string;
 }
 
+export interface OwnedDemandCreativeDefinition extends OwnedDemandPlacementDefinition {
+  creativeHeadline: string;
+  creativeBody: string;
+  creativePath: string;
+  creativeExportPath: string;
+  creativeAlt: string;
+  reviewNote: string;
+}
+
 export interface OwnedDemandOfferBrief {
   key: OwnedDemandOfferKey;
   label: string;
@@ -177,7 +186,10 @@ const OFFER_DEFINITIONS = [
     draftTitle: "Request a broker-reviewed home-value and sale-readiness review",
     draftBody: "Thinking about selling in Wilson or Eastern North Carolina? Share the property and timing privately. Mike Eatmon or the Our Town Properties team will review the request and follow up. This is not an appraisal, automated valuation, guaranteed value, or guaranteed offer.",
     creativePath: "/brand/black-diamond/hero-social-4x5.jpg",
+    creativeExportPath: "/brand/black-diamond/hero-social-4x5.jpg",
     creativeAlt: "Mike Eatmon in front of a home at dusk",
+    creativeHeadline: "Know your options before you sell.",
+    creativeBody: "Share the property and timing for a broker-reviewed home-value and sale-readiness conversation.",
     reviewNote: "Keep the offer human-reviewed and conditional. Do not add an automated valuation, guaranteed value, guaranteed offer, or unverified response-time claim.",
   },
   {
@@ -189,7 +201,10 @@ const OFFER_DEFINITIONS = [
     draftTitle: "Request a local property-match and buying-plan review",
     draftBody: "Tell Our Town Properties what you are looking for, your target area, and your timing. The team will review the request and follow up about possible next steps. Property availability, financing, and appointments must be confirmed.",
     creativePath: "/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp",
+    creativeExportPath: "/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.jpg",
     creativeAlt: "Mike Eatmon welcoming a real estate conversation",
+    creativeHeadline: "Build a local buying plan around what matters to you.",
+    creativeBody: "Share your target area, needs, and timing for a human-reviewed property-match conversation.",
     reviewNote: "Do not imply that a property is available, financing is approved, or an appointment is booked until a person verifies it.",
   },
   {
@@ -201,10 +216,18 @@ const OFFER_DEFINITIONS = [
     draftTitle: "Explore a rental-to-homeownership readiness review",
     draftBody: "Share your current rental situation, target area, and homeownership goals with Our Town Properties. The team will review the request and discuss possible next steps. This is not a lending decision or a promise of eligibility, affordability, or financing.",
     creativePath: "/images/ask-magic-mike/mike-eatmon-headshot.webp",
+    creativeExportPath: "/images/ask-magic-mike/mike-eatmon-headshot-export.jpg",
     creativeAlt: "Mike Eatmon smiling in an Our Town Properties portrait",
+    creativeHeadline: "Explore a path from renting toward homeownership.",
+    creativeBody: "Share your current situation and goals for a human-reviewed readiness conversation.",
     reviewNote: "Do not promise eligibility, affordability, financing, inventory, or a timeline. Keep protected-class data and proxies out of targeting and copy.",
   },
-] as const satisfies readonly (OwnedDemandOfferBrief & { contentSuffix: string })[];
+] as const satisfies readonly (OwnedDemandOfferBrief & {
+  contentSuffix: string;
+  creativeHeadline: string;
+  creativeBody: string;
+  creativeExportPath: string;
+})[];
 
 const CHANNEL_DEFINITIONS = [
   {
@@ -343,6 +366,39 @@ export function resolveOwnedDemandPlacement(
       utm_campaign: OWNED_DEMAND_CAMPAIGN_KEY,
       utm_content: content,
     }),
+  };
+}
+
+export function resolveOwnedDemandCreative(
+  channelKey: string,
+  placementKey: string,
+): OwnedDemandCreativeDefinition | null {
+  const placement = resolveOwnedDemandPlacement(channelKey, placementKey);
+  const channel = CHANNEL_DEFINITIONS.find((candidate) => candidate.key === channelKey);
+  if (!placement || !channel) return null;
+
+  if (placement.placementKey === "general_question") {
+    return {
+      ...placement,
+      creativeHeadline: "Ask a local real estate question.",
+      creativeBody: "Share your situation privately with Mike Eatmon and the Our Town Properties team.",
+      creativePath: "/brand/black-diamond/hero-social-4x5.jpg",
+      creativeExportPath: "/brand/black-diamond/hero-social-4x5.jpg",
+      creativeAlt: "Mike Eatmon in front of a home at dusk",
+      reviewNote: channel.reviewNote,
+    };
+  }
+
+  const offer = OFFER_DEFINITIONS.find((candidate) => candidate.key === placement.placementKey);
+  if (!offer) return null;
+  return {
+    ...placement,
+    creativeHeadline: offer.creativeHeadline,
+    creativeBody: offer.creativeBody,
+    creativePath: offer.creativePath,
+    creativeExportPath: offer.creativeExportPath,
+    creativeAlt: offer.creativeAlt,
+    reviewNote: offer.reviewNote,
   };
 }
 

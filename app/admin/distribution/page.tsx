@@ -15,6 +15,10 @@ import {
   type OwnedDemandPlatformState,
   type OwnedDemandProofType,
 } from "../../lib/growth/publication-proof";
+import {
+  ownedDemandAssetHref,
+  type OwnedDemandAssetFormat,
+} from "../../lib/growth/owned-demand-assets";
 import { loadGrowthIntelligence } from "../../lib/growthIntelligenceView";
 import {
   loadOwnedDemandPublicationProofLedger,
@@ -294,6 +298,35 @@ function MeasurementStateBanner({ measurement }: { measurement: OwnedDemandMeasu
   );
 }
 
+const ASSET_DOWNLOADS: ReadonlyArray<{ format: OwnedDemandAssetFormat; label: string }> = [
+  { format: "feed", label: "Download 4:5 PNG" },
+  { format: "story", label: "Download 9:16 PNG" },
+  { format: "qr_svg", label: "Download QR SVG" },
+];
+
+function DemandAssetLinks({
+  channelKey,
+  placementKey,
+}: {
+  channelKey: string;
+  placementKey: string;
+}) {
+  return (
+    <div className="mt-3 flex flex-wrap gap-2" aria-label="Protected launch asset downloads">
+      {ASSET_DOWNLOADS.map((asset) => (
+        <a
+          key={asset.format}
+          href={ownedDemandAssetHref(channelKey, placementKey, asset.format)}
+          download
+          className="inline-flex min-h-9 items-center rounded-full border border-[#4baab844] bg-[#06171b] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.11em] text-[#a9eaf0] transition hover:border-[#4baab888] hover:bg-[#0a2226] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2]"
+        >
+          {asset.label}
+        </a>
+      ))}
+    </div>
+  );
+}
+
 function OfferFlightCard({ offer }: { offer: OwnedDemandOfferBrief }) {
   const portraitClass = offer.key === "renter_plan"
     ? "object-contain object-bottom transition duration-500 group-hover:scale-[1.02]"
@@ -333,7 +366,15 @@ function OfferFlightCard({ offer }: { offer: OwnedDemandOfferBrief }) {
   );
 }
 
-function OfferPlacement({ offer, measurementReady }: { offer: OwnedDemandOfferPlacement; measurementReady: boolean }) {
+function OfferPlacement({
+  channelKey,
+  offer,
+  measurementReady,
+}: {
+  channelKey: string;
+  offer: OwnedDemandOfferPlacement;
+  measurementReady: boolean;
+}) {
   const observed = offer.status === "signal_detected";
   const completeDraft = `${offer.draftTitle}\n\n${offer.draftBody}\n\n${offer.trackedUrl}`;
 
@@ -364,6 +405,7 @@ function OfferPlacement({ offer, measurementReady }: { offer: OwnedDemandOfferPl
         <CopyDemandAsset label="Copy draft + link" value={completeDraft} />
         <CopyDemandAsset label="Copy tracked link" value={offer.trackedUrl} />
       </div>
+      <DemandAssetLinks channelKey={channelKey} placementKey={offer.key} />
       <p className="mt-3 text-[11px] leading-5 text-[#7f786d]">{offer.reviewNote}</p>
     </article>
   );
@@ -419,6 +461,7 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
         </p>
         <CopyDemandAsset label="Copy full channel flight" value={channelPacket} />
       </div>
+      <DemandAssetLinks channelKey={channel.key} placementKey="general_question" />
 
       <details className="group mt-5 rounded-xl border border-[#4baab833] bg-[#061417]">
         <summary className="cursor-pointer list-none px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#9edbe2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#9edbe2]">
@@ -429,7 +472,12 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
         </summary>
         <div className="space-y-3 border-t border-[#4baab833] p-3">
           {channel.offers.map((offer) => (
-            <OfferPlacement key={offer.key} offer={offer} measurementReady={measurementReady} />
+            <OfferPlacement
+              key={offer.key}
+              channelKey={channel.key}
+              offer={offer}
+              measurementReady={measurementReady}
+            />
           ))}
         </div>
       </details>
