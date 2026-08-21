@@ -580,6 +580,17 @@ the Node-20 deployment proof. PHP CLI is unavailable locally, so staging must ru
   only the exact server-provided `VERCEL_URL` and `VERCEL_BRANCH_URL` when
   `VERCEL_ENV=preview`; arbitrary `vercel.app` origins and every Production
   metadata override remain denied. Six focused origin-boundary tests cover the
-  behavior; the new exact-head Preview must reverify the route before merge.
+  behavior.
+- Replacement Preview `dpl_HWa3HhxKPvatzqaGS3148PfdC5AV` was `READY` on Node
+  24 for exact code head `5c35a047418d912f166d4c029168a7211c1c1c2d`.
+  Protected GETs returned 200 for `/`, `/buy`, `/sell`, `/home-value`, `/plan`,
+  `/widget/v1`, liveness/readiness, robots, and sitemap; anonymous `/admin`,
+  `/admin/leads`, and `/admin/growth` returned 401. Preview health reported
+  Neon ready with notification delivery and email disabled. A malformed JSON
+  request from the exact branch origin reached event validation and returned
+  400 `Invalid event` instead of the prior origin 403; no valid event or
+  persistence call was issued. Signed-in browser inspection found the expected
+  homepage/buyer DOM, consent version `amm_contact_v2`, legal copy, and zero
+  console messages.
 - No production deployment, database mutation, WordPress edit, form submission,
   lead creation, or email/SMS/push delivery occurred during this candidate QA.
