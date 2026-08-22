@@ -2,9 +2,10 @@
 
 Date: 2026-08-21
 
-Scope: protected root-router `/admin/distribution` at desktop and mobile
-Production-render dimensions, using synthetic local-only Basic authentication
-and no database configuration.
+Scope: protected root-router `/admin/distribution` at desktop and mobile across
+two read-only states: an exact protected Preview with canonical Neon available,
+and a local Production render using synthetic local-only Basic authentication
+with no database configuration.
 
 ## User goal and accessibility target
 
@@ -21,9 +22,9 @@ avoid horizontal overflow.
 
 | Step | Surface | Health after remediation |
 |---|---|---|
-| 1 | Read command state, live-lead totals, attribution, and measured bottleneck | Healthy |
+| 1 | Distinguish measured zero from unavailable measurement | Healthy |
 | 2 | Review the three retained seller, buyer, and renter offers | Healthy |
-| 3 | Follow the recommended first move to Google Business Profile | Healthy |
+| 3 | Follow the first-channel recommendation only when measurement is ready | Healthy |
 | 4 | Copy one complete channel flight containing the general placement, three offer placements, tracked URLs, and review boundaries | Healthy |
 | 5 | Expand individual offer placements when a single draft or URL is needed | Healthy |
 
@@ -33,8 +34,9 @@ avoid horizontal overflow.
   channel drafts, tracking URLs, and approval boundaries.
 - Retained high-resolution Mike imagery is legible and consistent with the
   existing brand; no synthetic likeness was introduced.
-- The zero-live-lead state is truthful and does not infer publication,
-  impressions, demand, or success from prepared UTMs.
+- The canonical-Neon ready state may truthfully report zero eligible live leads;
+  the unavailable state renders em dashes and explicitly rejects a zero-demand
+  inference.
 - Native headings, links, buttons, details/summary controls, and visible focus
   treatments provide a sound semantic base.
 - The channel cards reflow without horizontal document overflow at the tested
@@ -42,9 +44,10 @@ avoid horizontal overflow.
 
 ## Audit finding and remediation
 
-The activation state named the constraint but did not connect it to the first
-recommended action. An operator also needed four separate copy actions to move
-one channel's general and three offer placements into a native platform review.
+The activation state originally named the constraint but did not connect it to
+the first recommended action. An operator also needed four separate copy
+actions to move one channel's general and three offer placements into a native
+platform review.
 
 The remediation adds:
 
@@ -58,6 +61,20 @@ The remediation adds:
 The packet does not publish, upload, send, write to Neon, create an audit event,
 or imply external approval. Individual copy controls remain available.
 
+A subsequent integrity pass found a more serious degraded-state risk: the
+canonical loader intentionally returns an empty view when database
+configuration, schema detection, or a query fails, but this route previously
+rendered that empty view as measured zeros and still exposed a recommended first
+channel. The remediation adds one deterministic measurement-state assessment
+and makes the route fail truthful:
+
+- ready measurement renders real numeric values and may show the measured
+  bottleneck and first-channel recommendation;
+- not-configured, schema-pending, and query-failed states render unavailable
+  values and recovery guidance;
+- prepared copy and tracked URLs remain inspectable; and
+- no unavailable state is described as zero demand.
+
 ## Remaining visible risk
 
 The shared Lead Center command navigation wraps to several rows at 390 px. It
@@ -69,8 +86,9 @@ cross-route audit.
 ## Evidence limits
 
 Screenshots prove visible hierarchy and reflow, not complete WCAG conformance.
-The current run also inspected the rendered DOM, exercised the anchor jump and
-copy-button state, checked document overflow, and reviewed browser console
+The current run also inspected the rendered DOM, exercised the healthy-state
+anchor jump and copy-button state, asserted the unavailable-state truth copy
+and em-dash metrics, checked document overflow, and reviewed browser console
 warnings/errors. Screen-reader announcements, zoom above 200%, forced colors,
 and every global-navigation keyboard sequence still require dedicated checks.
 
@@ -90,3 +108,8 @@ Accepted screenshots are retained outside Git in:
 
 No production page, lead, database row, external account, message, or
 publication changed during this audit.
+
+The measurement-unavailable desktop/mobile captures and executable browser
+assertion are retained in the gitignored local evidence directory:
+
+`artifacts/phase9-measurement-unavailable-20260821/`
