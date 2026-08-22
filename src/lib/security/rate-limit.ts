@@ -128,6 +128,8 @@ export const LIMITS = {
   phoneSetup:     { limit: 10, windowMs: 10 * 60 * 1000 },
   /** Public appointment follow-up request — 10 per 10 minutes */
   appointmentRequest: { limit: 10, windowMs: 10 * 60 * 1000 },
+  /** Privileged KPI target writes — 30 per operator per hour */
+  growthTarget: { limit: 30, windowMs: 60 * 60 * 1000 },
 } as const;
 
 export type LimitKey = keyof typeof LIMITS;

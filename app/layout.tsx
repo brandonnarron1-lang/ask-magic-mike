@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { siteConfig } from "@/lib/site-config";
+import { WebVitalsReporter } from "./components/experience/WebVitalsReporter";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -62,7 +63,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        {process.env.VERCEL_ENV === "production" ? <WebVitalsReporter /> : null}
+        {children}
+      </body>
     </html>
   );
 }

@@ -2,6 +2,61 @@
 
 Updated 2026-08-21.
 
+## Phase 9 evidence-first KPI target register — 2026-08-21
+
+- Reused the existing Neon Growth intelligence view, protected Lead Center,
+  `growth:manage` permission, immutable audit ledger, and canonical Vercel
+  project. No second analytics product, CRM, database, provider, publisher, or
+  admin surface was introduced.
+- Defined 38 canonical KPI contracts across acquisition, response, conversion,
+  database, economics, portfolio, operations, experimentation, experience/
+  conversion quality, and trust/delivery. Each fixes a unit, direction,
+  denominator language, and minimum sample threshold.
+- Added privacy-minimized Production field telemetry for LCP, INP, and CLS on
+  exact canonical public routes. Preview, local, known QA, automation, dynamic
+  identifiers, query strings, lead/session IDs, attribution, raw IPs, and raw
+  user agents are excluded. Exact Production origin is enforced server-side;
+  sanitizer-safe metric codes are deduplicated with metric IDs before P75.
+- Kept accessibility, mobile technical success, and durable funnel completion
+  explicitly uninstrumented until human-evaluation and privacy-safe cohort
+  evidence exists; no automated accessibility or conversion claim is made.
+- Added measured, directional, insufficient-sample, uninstrumented, and
+  unavailable baseline states. The server resolves and hashes baseline evidence;
+  the browser cannot submit it. Unsupported states remain null and render as
+  `Not measured`, never a fabricated 0% or $0.
+- Added protected `/admin/growth/targets` with 30/90/365-day views, current
+  baseline cards, instrumentation backlog, immutable version history, and forms
+  shown only to an authorized `growth:manage` operator when the schema is ready
+  outside Preview.
+- Added additive migration `20260821213000`, append-only RLS target versions,
+  strict state/value/approval constraints, browser-role denial, service-role
+  least privilege, and an idempotent security-invoker RPC that appends exactly
+  one audit event per new version. No target is seeded.
+- Added Preview fail-closed checks before database/baseline resolution,
+  parameterized SQL, PII/secret rejection, React-escaped output, and a protected
+  per-operator 30/hour mutation limit.
+- Added a hash-pinned backup-first cutover runner targeting only canonical Neon
+  Production and requiring the publication-proof prerequisite. Plan, preflight,
+  execute, and verify are separate; only execute accepts the exact release gate.
+- Focused tests pass 6 files / 56 tests. The full local release gate passes 207
+  test files / 2,894 tests, system isolation, 14/14 safety checks, strict
+  typecheck, ESLint, optimized Next.js 15.5.21 build, and the 81-route manifest.
+  The disposable PostgreSQL 17.6 contract and 12/12 desktop/mobile rendered
+  checks also pass. Production dependencies have no known vulnerability, and a
+  redacted 477-commit scan found no secret leak. Exact Node 24 CI and canonical
+  Vercel Preview proof remain to be attached to the Draft PR.
+- Production aggregate truth remains six test/suppressed leads and zero genuine
+  contactable leads, response samples, outcomes, or spend. No numeric target is
+  approved or inferred from that absence.
+- No Production deployment, database query/write, target record, lead, email,
+  SMS, Push, WordPress/DNS change, external publication, spend, or NellySelly
+  action occurred.
+- Draft PR #187 is stacked on the exact PR #186 head. It remains downstream of
+  PRs #183–#186 and may not merge or migrate until each preceding release lands,
+  Production is verified, and #187 is refreshed and re-proved.
+- Exact future gate:
+  `APPROVE PHASE 9 KPI TARGET REGISTER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT`.
+
 ## Phase 9 protected owned-demand asset studio — 2026-08-21
 
 - Reused the existing six-channel/four-placement owned-demand command, exact UTM

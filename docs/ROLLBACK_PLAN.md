@@ -37,6 +37,14 @@ signature, or print placement must be rolled back in its native system under a
 separate approval, followed by an appended removal proof; application rollback
 cannot retract external content.
 
+For the stacked KPI target-register release, use only
+`phase9:kpi-targets:cutover` after its exact migration/merge/deploy approval. If
+application verification fails, promote the immediately preceding verified
+Vercel deployment and leave the additive `growth_kpi_target_versions` table and
+RPC dormant. Do not delete or rewrite target or audit versions. Correct an
+operator mistake by appending a corrected or retired version. The migration
+seeds no targets, so an application rollback does not require data reversal.
+
 ## WordPress
 
 Remove only the named reversible Custom HTML/shortcode/widget block or deactivate

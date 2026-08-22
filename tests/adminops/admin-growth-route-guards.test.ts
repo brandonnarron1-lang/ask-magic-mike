@@ -45,6 +45,24 @@ describe("Growth Command Center route and authority guards", () => {
     expect(view).toContain("LIMIT 5000");
   });
 
+  it("aggregates privacy-minimized production field metrics without Preview, QA, or automation", () => {
+    const view = read("app/lib/persistence/neonGrowthIntelligenceView.ts");
+    const layout = read("app/layout.tsx");
+    const reporter = read("app/components/experience/WebVitalsReporter.tsx");
+    const eventRoute = read("app/api/events/route.ts");
+    expect(layout).toContain('process.env.VERCEL_ENV === "production"');
+    expect(reporter).toContain("CANONICAL_HOSTS");
+    expect(reporter).toContain("navigator.webdriver");
+    expect(reporter).toContain("isKnownInternalQaSearch");
+    expect(view).toContain("event_name = 'web_vital_observed'");
+    expect(view).toContain("properties->>'traffic_class' = 'public_production'");
+    expect(view).toContain("properties->>'metric_code'");
+    expect(view).toContain("DISTINCT ON");
+    expect(view).toContain("percentile_cont(0.75)");
+    expect(view).toContain("^browser/(mobile|desktop)$");
+    expect(eventRoute).toContain("coarseWebVitalUserAgent");
+  });
+
   it("keeps growth tables server-only and recommendations approval-gated", () => {
     const migration = read("supabase/migrations/20260818190000_phase9_growth_intelligence.sql");
     expect(migration).toContain("ALTER TABLE public.growth_recommendations ENABLE ROW LEVEL SECURITY");

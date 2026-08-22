@@ -24,10 +24,15 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    — protected deterministic owned-demand exports and allowlisted QR
    attribution, only after #185 lands and #186 is refreshed:
    `APPROVE PHASE 9 OWNED-DEMAND ASSET STUDIO MERGE AND PRODUCTION DEPLOYMENT`
+5. PR [#187](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/187)
+   — protected, append-only KPI target register, only after #186 lands and this
+   candidate is refreshed against the resulting head:
+   `APPROVE PHASE 9 KPI TARGET REGISTER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT`
 
-The #184 phrase authorizes its reviewed backup-first Neon migration, exact code
-merge, and canonical Vercel deployment. The other phrases authorize only their
-reviewed code merge and canonical deployment. None authorizes a social/GBP
+The #184 and KPI-target phrases authorize their respective reviewed
+backup-first Neon migrations, exact code merge, and canonical Vercel deployment.
+The other phrases authorize only their reviewed code merge and canonical
+deployment. None authorizes recording a KPI target, a social/GBP
 post, email campaign, QR printing/distribution, consumer message, spend, DNS
 change, WordPress change, provider action, or deletion.
 
