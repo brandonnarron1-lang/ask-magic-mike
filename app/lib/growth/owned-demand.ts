@@ -3,6 +3,61 @@ import { buildUtmUrl, type UtmMedium } from "../../../src/lib/admin/utm-link-bui
 
 export type OwnedDemandStatus = "signal_detected" | "ready_unmeasured";
 
+export type OwnedDemandMeasurementStatus =
+  | "ready"
+  | "not_configured"
+  | "schema_pending"
+  | "query_failed";
+
+export interface OwnedDemandMeasurementState {
+  ready: boolean;
+  status: OwnedDemandMeasurementStatus;
+  label: string;
+  title: string;
+  detail: string;
+}
+
+export function assessOwnedDemandMeasurement(input: {
+  configured: boolean;
+  schemaReady: boolean;
+  error?: string;
+}): OwnedDemandMeasurementState {
+  if (input.error) {
+    return {
+      ready: false,
+      status: "query_failed",
+      label: "Measurement unavailable",
+      title: "Growth measurement query unavailable.",
+      detail: `${input.error}. Prepared drafts remain visible, but zero values are not evidence of zero live demand and no channel should be selected from this snapshot.`,
+    };
+  }
+  if (!input.configured) {
+    return {
+      ready: false,
+      status: "not_configured",
+      label: "Measurement unavailable",
+      title: "Canonical Neon is not configured.",
+      detail: "Prepared drafts remain visible, but demand metrics and recommendations stay unavailable rather than being presented as zero.",
+    };
+  }
+  if (!input.schemaReady) {
+    return {
+      ready: false,
+      status: "schema_pending",
+      label: "Measurement unavailable",
+      title: "Growth measurement schema is incomplete.",
+      detail: "Apply and verify the reviewed additive schema before interpreting demand or selecting a launch channel. Prepared drafts remain review-only.",
+    };
+  }
+  return {
+    ready: true,
+    status: "ready",
+    label: "Measured",
+    title: "Growth measurement ready.",
+    detail: "Canonical Neon is available, test and suppressed records are excluded, and the current demand snapshot can inform the operator review.",
+  };
+}
+
 export interface OwnedDemandAttributionSignal {
   source: string;
   medium: string;

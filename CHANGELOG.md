@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-21 — Owned-demand measurement truth hardening
+
+- Distinguished healthy zero-demand measurement from missing configuration,
+  pending schema, and query failure in the existing Owned Demand Command.
+- Kept prepared campaign assets available during degraded measurement while
+  suppressing false numeric counts, bottleneck inference, and data-backed
+  channel recommendations.
+- Added unit, static-route, desktop, and mobile regression proof without a
+  database migration, external publication, provider send, or Production
+  mutation.
+
 ## 2026-08-14 — Admin push and appointment boundary polish
 
 - Added route-level Basic Auth to every `/admin/api` push handler as defense in
