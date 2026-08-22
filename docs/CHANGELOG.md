@@ -22,18 +22,24 @@
 - Reused approved real Mike Eatmon imagery and deterministic rendering. No
   generated identity, lead PII, hidden consumer targeting, or per-lead image
   generation was introduced.
+- Closed a pre-release Preview-integrity defect in the renter export. The
+  renderer intentionally resolves approved source art from the released
+  canonical host, but the renter definition referenced a branch-only JPEG.
+  It now reuses the equivalent retained Production PNG, and the executable
+  renderer test declares the correct PNG MIME type. The redundant derivative
+  was removed; no Production asset was deleted.
 - PR #187's KPI-target migration and PRs #190–#192 remain outside this
   application-only candidate. The consolidated diff contains no migration and
   performs no lead, database, publication, email, SMS, Push, DNS, spend,
   WordPress, provider, or NellySelly mutation.
-- The final post-hardening focused matrix passes 10 files / 148 tests. The full
-  local release gate passes system isolation, 14/14 release-safety checks, 205
-  test files / 2,866 tests, strict typecheck, ESLint, the optimized Next.js
-  15.5.21 build, and 80 active routes. Production dependencies have no known
-  vulnerability, a redacted 498-commit history scan found no leak, and the
-  candidate/working-tree migration scans are empty. Exact Node 24 CI,
-  exact-head Preview, and rendered visual evidence remain required before the
-  future Production gate.
+- After the retained-asset correction, the focused Node 24 matrix passes 5
+  files / 46 tests and the full Node 24 release gate passes system isolation,
+  14/14 release-safety checks, 206 test files / 2,869 tests, strict typecheck,
+  ESLint, the optimized Next.js 15.5.21 build, and 80 active routes. Production
+  dependencies have no known vulnerability, a redacted 510-commit history scan
+  found no leak, and the candidate/working-tree migration scans are empty.
+  Refreshed exact-head CI, Preview, and protected acceptance remain required
+  before the future Production gate.
 
 ## 2026-08-21 — Exact owned-demand activation control-loop candidate
 
@@ -111,9 +117,9 @@
   codes retain the exact full canonical UTM destination without accepting an
   arbitrary redirect target.
 - Reused approved Mike Eatmon imagery and the current black/gold/cream/cyan
-  visual system. Kept efficient WebP page assets and added one small JPEG export
-  derivative of the same approved renter portrait after executable renderer QA
-  rejected the PNG/WebP encodings.
+  visual system. Efficient WebP assets remain on ordinary pages; protected
+  exports use retained canonical JPEG/PNG sources that already exist on the
+  released host.
 - Kept asset generation server-authorized with `report:view`, private/no-store,
   CSP-sandboxed, noindex responses, strict channel/placement/format allowlists,
   and no database, provider, publication, or consumer-data input.

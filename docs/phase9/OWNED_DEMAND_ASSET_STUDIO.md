@@ -52,9 +52,10 @@ remote image URL, template body, consumer field, or arbitrary file name.
 - Keeps lead names, phone numbers, email addresses, property addresses, scores,
   notes, and other consumer PII out of campaign art.
 - Preserves the lighter WebP files for ordinary page display. The server export
-  path uses the retained JPEG originals, plus one mechanically derived JPEG of
-  the approved renter portrait, because the Next image renderer rejected the
-  PNG/WebP encodings during executable QA.
+  path uses retained JPEG/PNG sources that already exist on the released
+  canonical host. Final release review removed a redundant branch-only renter
+  JPEG after correcting the executable fixture's PNG MIME type and proving the
+  existing approved PNG renders successfully.
 - Includes the conditional broker-review boundary and Equal Housing
   identification in every generated feed/story image.
 - Does not generate a new likeness or use the deprecated genie motif.

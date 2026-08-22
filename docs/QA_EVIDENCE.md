@@ -7,9 +7,10 @@
   `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`, with the `www` root returning HTTP 200,
   apex redirecting HTTP 308 to `www`, `/home-value`, `/buy`, public liveness,
   and the Our Town homepage returning HTTP 200.
-- Reconfirmed PR #185 is cleanly mergeable and contains current Production at
-  code-bearing head `1593302a1354d5b8b77baa2340287a7d043dc297`. It contains no
-  database migration.
+- Reconfirmed PR #185 contains current Production and no database migration.
+  Final retained-asset code-bearing head is
+  `9a8baf935a7a68cda528ec4aee90b7cfcf5e87fc`; mergeability and exact remote
+  checks are re-established after the final documentation push.
 - Traced the complete candidate story: authenticated Distribution Command to
   existing Neon aggregate/proof reads, deterministic activation state, protected
   allowlisted feed/story/QR exports, and fixed canonical UTM shortlinks. The
@@ -28,6 +29,13 @@
   `report:view`; shortlinks accept no arbitrary destination; publication-proof
   writes remain behind server-side `growth:manage`, explicit confirmation,
   runtime validation, parameterized SQL, and the Preview mutation guard.
+- Release-path asset probe found one missed boundary: the renter export source
+  returned HTTP 404 on current Production because it was a branch-only JPEG,
+  while the route deliberately renders from the canonical host. Fix
+  `9a8baf935a7a68cda528ec4aee90b7cfcf5e87fc` reuses the equivalent approved PNG
+  already returning HTTP 200 in Production and corrects the renderer fixture's
+  PNG MIME type. The focused Node 24 matrix passes 5 files / 46 tests, including
+  all four offer types in both feed and story formats.
 - The first exact-head protected Preview run passed all endpoint and browser
   checks but exposed a workflow-integrity defect: direct Preview QA omitted
   release doctor, and neither Preview workflow asserted the generated launch
@@ -36,6 +44,12 @@
 - After that correction, the full local gate passes 206 files / 2,868 tests,
   strict typecheck, ESLint, optimized Production build, 80-route verification,
   system isolation, and 14/14 safety controls.
+- After the retained-asset correction, the complete local gate was rerun under
+  Node 24 and passes 206 files / 2,869 tests, strict typecheck, ESLint,
+  optimized Production build, 80-route verification, system isolation, and
+  14/14 safety controls. Production dependency audit reports no known
+  vulnerability; gitleaks scans 510 commits / 14.10 MB with no leak; all three
+  canonical creative source URLs return HTTP 200 with image content.
 - No Production deployment, database read/write beyond public liveness,
   publication proof, lead, email/BCC, SMS, Push, external post, WordPress edit,
   DNS change, provider action, spend, deletion, or NellySelly action occurred.

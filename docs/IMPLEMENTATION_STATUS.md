@@ -19,23 +19,28 @@ Updated 2026-08-22.
   resolve only to fixed canonical UTM destinations. The WordPress auditor is
   read-only, host-allowlisted to the apex and `www` Our Town HTTPS hosts, and
   revalidates every redirect hop.
+- Final release review found that the renter export referenced a branch-only
+  JPEG even though protected Preview rendering resolves approved source art
+  from the released canonical host. Code-bearing fix
+  `9a8baf935a7a68cda528ec4aee90b7cfcf5e87fc` now reuses the equivalent retained
+  Production PNG and corrects the executable test's PNG MIME type. The former
+  URL returned HTTP 404 on Production; all three current export sources return
+  HTTP 200 with image content.
 - The latest public WordPress audit at `2026-08-22T14:10:43.297Z` fetched 42 of
   42 sitemap pages and made no form submission or WordPress change. Current
   aggregate Production truth remains six test/suppressed records and zero
   eligible live demand, outcomes, first-response samples, spend, or proofs.
-- The final post-hardening focused matrix passes 10 files / 148 tests. The full
-  local release gate passes system isolation, 14/14 release-safety checks, 206
-  test files / 2,868 tests, strict typecheck, ESLint, the optimized Next.js
-  15.5.21 build, and 80 active routes. Production dependencies have no known
-  vulnerability, a fresh redacted scan covers 504 commits / 14.08 MB with no leak,
-  `git diff --check` passes, and committed/working-tree migration scans are
-  empty. Exact-head Node 24 GitHub run `32578413513`, canonical Vercel Preview
-  `dpl_5wkLS1u8SrG8DVGfbMyHRxxgtt9i`, protected Preview flow checks, and
-  desktop/mobile rendered acceptance all pass. PR #185 is Ready, cleanly
-  mergeable, and unchanged at application code-bearing head
-  `1593302a1354d5b8b77baa2340287a7d043dc297`; final workflow/docs-head evidence
-  is tracked on the PR. Only the exact owner gate below remains before merge
-  and Production deployment.
+- The final post-hardening focused matrix passes 5 files / 46 tests after the
+  retained-asset correction. The full local Node 24 release gate passes system
+  isolation, 14/14 release-safety checks, 206 test files / 2,869 tests, strict
+  typecheck, ESLint, the optimized Next.js 15.5.21 build, and 80 active routes.
+  Production dependencies have no known vulnerability, a fresh redacted scan
+  covers 510 commits / 14.10 MB with no leak, `git diff --check` passes, and
+  committed/working-tree migration scans are empty. Code-bearing fix head is
+  `9a8baf935a7a68cda528ec4aee90b7cfcf5e87fc`; refreshed exact-head Node 24,
+  canonical Preview, protected flow, and rendered acceptance evidence is
+  tracked on PR #185 after push so this document does not create self-referential
+  evidence churn. Production remains unchanged.
 - Protected Preview workflows now run release doctor before generating launch
   authority and must assert exact `PREVIEW_READY` afterward. This closes a
   false-green path where endpoint/browser checks passed but a missing doctor
@@ -157,9 +162,9 @@ PR #185 decision above; they are not independent release authority.
   private/no-store, CSP-sandboxed, noindex attachments. They make no provider or
   database call and accept no consumer data.
 - Executable QA found and closed unsupported renderer CSS, full-UTM QR density,
-  story footer overlap, and WebP/PNG decoder failures. The ordinary UI preserves
-  WebP assets; exports use retained JPEG originals plus one mechanically derived
-  JPEG of the same approved renter portrait.
+  story footer overlap, and WebP decoder/MIME failures. The ordinary UI preserves
+  WebP assets; exports use retained canonical JPEG/PNG sources that already
+  exist on the released host.
 - Final local verification passes system isolation, 14/14 release-safety checks,
   203 test files / 2,846 tests, strict typecheck, ESLint, optimized Next.js
   15.5.21 build, and 80 active routes / 17 acknowledged root–`src` duplicates.
