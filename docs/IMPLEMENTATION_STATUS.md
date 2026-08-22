@@ -59,13 +59,22 @@ Updated 2026-08-22.
   aggregate Production truth remains six test/suppressed records and zero
   eligible live demand, outcomes, first-response samples, spend, or proofs.
 - The final post-hardening focused matrix passes 10 files / 148 tests. The full
-  local release gate passes system isolation, 14/14 release-safety checks, 205
-  test files / 2,866 tests, strict typecheck, ESLint, the optimized Next.js
+  local release gate passes system isolation, 14/14 release-safety checks, 206
+  test files / 2,868 tests, strict typecheck, ESLint, the optimized Next.js
   15.5.21 build, and 80 active routes. Production dependencies have no known
-  vulnerability, a redacted scan covers 498 commits / 13.92 MB with no leak,
+  vulnerability, a fresh redacted scan covers 504 commits / 14.08 MB with no leak,
   `git diff --check` passes, and committed/working-tree migration scans are
-  empty. Exact Node 24 GitHub checks, canonical Vercel Preview, and rendered
-  visual acceptance remain required before release.
+  empty. Exact-head Node 24 GitHub run `32578413513`, canonical Vercel Preview
+  `dpl_5wkLS1u8SrG8DVGfbMyHRxxgtt9i`, protected Preview flow checks, and
+  desktop/mobile rendered acceptance all pass. PR #185 is Ready, cleanly
+  mergeable, and unchanged at application code-bearing head
+  `1593302a1354d5b8b77baa2340287a7d043dc297`; final workflow/docs-head evidence
+  is tracked on the PR. Only the exact owner gate below remains before merge
+  and Production deployment.
+- Protected Preview workflows now run release doctor before generating launch
+  authority and must assert exact `PREVIEW_READY` afterward. This closes a
+  false-green path where endpoint/browser checks passed but a missing doctor
+  report left launch authority `BLOCKED`.
 - This application-only candidate includes no database migration and cannot
   publish, send, spend, submit a lead, mutate WordPress, modify DNS, contact a
   consumer, or act on NellySelly.

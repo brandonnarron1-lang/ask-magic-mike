@@ -1,5 +1,45 @@
 # QA Evidence
 
+## PR #185 continuation readiness audit — 2026-08-22
+
+- Reconfirmed that current Production remains PR #184 merge
+  `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97` on Ready deployment
+  `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`, with the `www` root returning HTTP 200,
+  apex redirecting HTTP 308 to `www`, `/home-value`, `/buy`, public liveness,
+  and the Our Town homepage returning HTTP 200.
+- Reconfirmed PR #185 is cleanly mergeable and contains current Production at
+  code-bearing head `1593302a1354d5b8b77baa2340287a7d043dc297`. It contains no
+  database migration.
+- Traced the complete candidate story: authenticated Distribution Command to
+  existing Neon aggregate/proof reads, deterministic activation state, protected
+  allowlisted feed/story/QR exports, and fixed canonical UTM shortlinks. The
+  candidate contains no publisher, provider send, lead submission, WordPress
+  mutation, spend, or NellySelly action.
+- Fresh focused verification passes 6 files / 61 tests. Fresh full local release
+  verification passes system isolation, 14/14 release-safety checks, 205 files /
+  2,866 tests, strict typecheck, ESLint, optimized Next.js 15.5.21 build, and the
+  80-route manifest. The exact-head GitHub Node 24 gate remains the authoritative
+  engine result because the local shell runs Node 26.5.1.
+- `pnpm audit --prod --audit-level high` reports no known vulnerability;
+  `git diff --check` passes; and redacted `gitleaks git` scans 504 commits /
+  approximately 14.08 MB with no leak.
+- Runtime headers preserve private/no-store, noindex, frame, and content-type
+  boundaries on the protected command. Asset exports require server-side
+  `report:view`; shortlinks accept no arbitrary destination; publication-proof
+  writes remain behind server-side `growth:manage`, explicit confirmation,
+  runtime validation, parameterized SQL, and the Preview mutation guard.
+- The first exact-head protected Preview run passed all endpoint and browser
+  checks but exposed a workflow-integrity defect: direct Preview QA omitted
+  release doctor, and neither Preview workflow asserted the generated launch
+  verdict. The workflow is now required to run doctor before authority and to
+  assert exact `PREVIEW_READY`; a regression test covers both dispatch paths.
+- After that correction, the full local gate passes 206 files / 2,868 tests,
+  strict typecheck, ESLint, optimized Production build, 80-route verification,
+  system isolation, and 14/14 safety controls.
+- No Production deployment, database read/write beyond public liveness,
+  publication proof, lead, email/BCC, SMS, Push, external post, WordPress edit,
+  DNS change, provider action, spend, deletion, or NellySelly action occurred.
+
 Status: production funnel, Neon persistence, routing, suppression, outbox, and
 provider delivery are verified. No synthetic record is represented as a live
 prospect.

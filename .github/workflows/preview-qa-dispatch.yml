@@ -163,6 +163,11 @@ jobs:
       - name: Launch authority report
         run: npm run launch:authority
 
+      - name: Assert Preview-ready authority
+        env:
+          REQUIRE_VERDICT: "PREVIEW_READY"
+        run: npm run release:assert
+
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
