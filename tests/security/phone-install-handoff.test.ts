@@ -19,15 +19,18 @@ describe("tokenized phone-install security boundary", () => {
     expect(privateHeaders).toContain('value: "no-referrer"');
     expect(privateHeaders).toContain("private, no-cache, no-store");
     expect(privateHeaders).toContain("noindex, nofollow, noarchive");
+    expect(privateHeaders).toContain("default-src 'self'");
+    expect(privateHeaders).toContain("frame-ancestors 'none'");
     expect(privateHeaders).toContain("base-uri 'none'");
     expect(privateHeaders).toContain("object-src 'none'");
+    expect(privateHeaders).toContain('value: "DENY"');
     expect(routeRule).toContain("headers: privatePhoneAlertHeaders");
     expect(config.indexOf('source: "/phone-alerts/:path*"')).toBeGreaterThan(
       config.indexOf('source: "/:path*"'),
     );
   });
 
-  it("keeps the one-time bearer token server-side and out of client storage", () => {
+  it("keeps the one-time bearer token out of persistent web storage and exchanges it for a distinct HttpOnly session", () => {
     const installPage = readFileSync("app/phone-alerts/install/[token]/page.tsx", "utf8");
     const manifest = readFileSync("app/phone-alerts/install/[token]/manifest.webmanifest/route.ts", "utf8");
     const claim = readFileSync("app/phone-alerts/setup/claim/route.ts", "utf8");
@@ -37,6 +40,10 @@ describe("tokenized phone-install security boundary", () => {
     }
     expect(claim).toContain("phone-setup-claim:${claims.nonce}");
     expect(claim).toContain("productionNeedsDurability && !oneTimeClaim.durable");
-    expect(claim).toContain("existingSession?.nonce === claims.nonce");
+    expect(claim).toContain("existingSession?.inviteNonce === claims.nonce");
+    expect(claim).toContain("mintPhoneSetupSessionToken(claims)");
+    expect(claim).not.toContain("response.cookies.set(PHONE_SETUP_COOKIE, token");
+    expect(manifest).toContain('scope: "/phone-alerts/"');
+    expect(manifest).not.toContain('scope: "/"');
   });
 });

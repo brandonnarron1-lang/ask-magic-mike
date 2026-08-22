@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import type { Metadata } from "next";
 import { PhonePushSetup } from "../../admin/notifications/phone/PhonePushSetup";
-import { PHONE_SETUP_COOKIE, verifyPhoneSetupToken } from "../../lib/phoneSetupSession";
+import { PHONE_SETUP_COOKIE, verifyPhoneSetupSessionToken } from "../../lib/phoneSetupSession";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -32,7 +32,7 @@ function Unavailable({ error }: { error?: string }) {
 export default async function PhoneAlertSetupPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const params = await searchParams;
   const cookieStore = await cookies();
-  const session = verifyPhoneSetupToken(cookieStore.get(PHONE_SETUP_COOKIE)?.value);
+  const session = verifyPhoneSetupSessionToken(cookieStore.get(PHONE_SETUP_COOKIE)?.value);
   if (!session) return <Unavailable error={params.error} />;
 
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";

@@ -51,11 +51,11 @@ const privatePhoneAlertHeaders = [
   },
   {
     key: "Content-Security-Policy",
-    value: "frame-ancestors 'self'; base-uri 'none'; form-action 'self'; object-src 'none'",
+    value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'",
   },
   {
     key: "X-Frame-Options",
-    value: "SAMEORIGIN",
+    value: "DENY",
   },
   {
     key: "X-Robots-Tag",

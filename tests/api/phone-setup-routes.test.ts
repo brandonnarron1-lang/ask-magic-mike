@@ -1,6 +1,10 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PHONE_SETUP_COOKIE, mintPhoneSetupToken } from "../../app/lib/phoneSetupSession";
+import {
+  PHONE_SETUP_COOKIE,
+  mintPhoneSetupSessionToken,
+  mintPhoneSetupToken,
+} from "../../app/lib/phoneSetupSession";
 
 const mocks = vi.hoisted(() => ({
   upsert: vi.fn(),
@@ -45,7 +49,8 @@ const originalEnv = {
 };
 
 function sessionCookie() {
-  return `${PHONE_SETUP_COOKIE}=${mintPhoneSetupToken().token}`;
+  const invite = mintPhoneSetupToken();
+  return `${PHONE_SETUP_COOKIE}=${mintPhoneSetupSessionToken(invite.claims).token}`;
 }
 
 function post(path: string, body: unknown, headers: Record<string, string> = {}) {
@@ -149,6 +154,7 @@ describe("passwordless Brandon phone setup routes", () => {
     expect(response.headers.get("location")).toBe("https://www.askmagicmike.com/phone-alerts/setup");
     const cookie = response.headers.get("set-cookie") || "";
     expect(cookie).toContain(`${PHONE_SETUP_COOKIE}=`);
+    expect(cookie).not.toContain(token);
     expect(cookie).toContain("HttpOnly");
     expect(cookie).toContain("Secure");
     expect(cookie).toContain("SameSite=strict");
@@ -176,8 +182,9 @@ describe("passwordless Brandon phone setup routes", () => {
     expect(replay.headers.get("location")).toContain("error=already_claimed");
     expect(replay.headers.get("set-cookie")).toBeNull();
 
+    const setupCookie = (first.headers.get("set-cookie") || "").split(";")[0];
     const installedAppReopen = await claim(new NextRequest(claimUrl, {
-      headers: { cookie: `${PHONE_SETUP_COOKIE}=${token}` },
+      headers: { cookie: setupCookie },
     }));
     expect(installedAppReopen.headers.get("location")).toBe("https://www.askmagicmike.com/phone-alerts/setup");
     expect(installedAppReopen.headers.get("set-cookie")).toBeNull();
@@ -209,8 +216,8 @@ describe("passwordless Brandon phone setup routes", () => {
     expect(response.headers.get("Referrer-Policy")).toBe("no-referrer");
     expect(response.headers.get("X-Robots-Tag")).toContain("noindex");
     expect(body).toMatchObject({
-      id: "/phone-alerts",
-      scope: "/",
+      id: "/phone-alerts/",
+      scope: "/phone-alerts/",
       display: "standalone",
       start_url: `/phone-alerts/setup/claim?token=${encodeURIComponent(token)}`,
     });
@@ -254,6 +261,20 @@ describe("passwordless Brandon phone setup routes", () => {
     const response = await subscribe(request);
     expect(response.status).toBe(201);
     expect(mocks.upsert).toHaveBeenCalledWith("copy", expect.any(Object), null, "Brandon iPhone");
+  });
+
+  it("rejects a raw bearer invite pasted directly into the setup cookie", async () => {
+    const invite = mintPhoneSetupToken().token;
+    const request = post("/api/phone-alerts/subscription", {
+      device_name: "Brandon iPhone",
+      subscription: {
+        endpoint: "https://push.example.test/subscription",
+        keys: { p256dh: "abcdefghijklmnopqrstuvwxyz123456", auth: "abcdefghijklmnopqrstuvwxyz123456" },
+      },
+    }, { cookie: `${PHONE_SETUP_COOKIE}=${invite}`, "x-amm-phone-setup": "1" });
+
+    expect((await subscribe(request)).status).toBe(401);
+    expect(mocks.upsert).not.toHaveBeenCalled();
   });
 
   it("rejects registration without the scoped cookie or custom CSRF header", async () => {

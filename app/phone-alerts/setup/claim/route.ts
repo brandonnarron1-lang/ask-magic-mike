@@ -3,8 +3,10 @@ import { checkRateLimit, LIMITS, rateLimitKey } from "@/lib/security/rate-limit"
 import {
   PHONE_SETUP_COOKIE,
   PHONE_SETUP_MAX_TTL_MS,
+  mintPhoneSetupSessionToken,
   phoneSetupResponseOrigin,
-  verifyPhoneSetupToken,
+  verifyPhoneSetupInviteToken,
+  verifyPhoneSetupSessionToken,
 } from "../../../lib/phoneSetupSession";
 
 export const runtime = "nodejs";
@@ -32,13 +34,13 @@ export async function GET(request: NextRequest) {
   }
 
   const token = request.nextUrl.searchParams.get("token");
-  const claims = verifyPhoneSetupToken(token);
+  const claims = verifyPhoneSetupInviteToken(token);
   if (!claims) {
     return privateRedirect(new URL("/phone-alerts/setup?error=expired", origin));
   }
 
-  const existingSession = verifyPhoneSetupToken(request.cookies.get(PHONE_SETUP_COOKIE)?.value);
-  if (existingSession?.nonce === claims.nonce) {
+  const existingSession = verifyPhoneSetupSessionToken(request.cookies.get(PHONE_SETUP_COOKIE)?.value);
+  if (existingSession?.inviteNonce === claims.nonce) {
     return privateRedirect(new URL("/phone-alerts/setup", origin));
   }
 
@@ -56,13 +58,20 @@ export async function GET(request: NextRequest) {
     return privateRedirect(new URL("/phone-alerts/setup?error=already_claimed", origin));
   }
 
+  let session;
+  try {
+    session = mintPhoneSetupSessionToken(claims);
+  } catch {
+    return privateRedirect(new URL("/phone-alerts/setup?error=expired", origin));
+  }
+
   const response = privateRedirect(new URL("/phone-alerts/setup", origin));
-  response.cookies.set(PHONE_SETUP_COOKIE, token || "", {
+  response.cookies.set(PHONE_SETUP_COOKIE, session.token, {
     httpOnly: true,
     secure: request.nextUrl.protocol === "https:",
     sameSite: "strict",
     path: "/",
-    maxAge: Math.max(60, Math.floor((claims.exp - Date.now()) / 1000)),
+    maxAge: Math.max(60, Math.floor((session.claims.exp - Date.now()) / 1000)),
   });
   return response;
 }
