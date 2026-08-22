@@ -14,9 +14,9 @@ All timestamps are America/New_York unless noted.
   #189, #179, #190, #191, and #192 are Draft, mergeable, `CLEAN`, and green for
   Node CI plus Vercel. Each base OID equals the preceding head OID.
 - Cumulative ancestry: PASS — current Production main
-  `5335697edf31eed0b8a38cd0295a4f5e7d501a3e` is the merge base; the cumulative
-  tree is 0 commits behind / 44 ahead; `git merge-tree --write-tree` equals the
-  PR #192 tree `4309872bde7a8cb626255119940a094f7cac00c8`.
+  `5335697edf31eed0b8a38cd0295a4f5e7d501a3e` is the merge base with zero
+  divergent Production commits. The final ahead count and merge-rehearsal tree
+  are recorded in immutable PR #192 metadata after documentation packaging.
 - Migration inventory: PASS — only
   `20260821170000_owned_demand_publication_proofs.sql` and
   `20260821213000_growth_kpi_target_register.sql` are pending in the cumulative
@@ -30,8 +30,8 @@ All timestamps are America/New_York unless noted.
   Next.js 15.5.21 build, and route-manifest verification for 83 active routes
   with 17 acknowledged root/src duplicates.
 - `pnpm audit --prod`: PASS — no known Production dependency vulnerabilities.
-- `gitleaks git --redact --no-banner`: PASS — 490 commits and approximately
-  13.75 MB scanned with no leaks found.
+- `gitleaks git --redact --no-banner`: PASS — the complete reachable history
+  was scanned with no leaks found.
 - No Production deploy/promotion, database query/write/migration, lead,
   notification, provider call, publication, WordPress/DNS change, spend, or
   NellySelly action occurred.

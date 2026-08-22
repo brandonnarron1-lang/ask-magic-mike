@@ -9,8 +9,8 @@
   green for exact-head Node 24 plus Vercel checks. Every PR base OID exactly
   matches its predecessor head OID.
 - Verified current Production `main` is the release-train merge base, with zero
-  divergent Production commits and 44 cumulative candidate commits. A clean
-  merge rehearsal produced the exact PR #192 tree.
+  divergent Production commits. The final cumulative ahead count and clean
+  merge-rehearsal tree are retained in immutable PR #192 metadata.
 - Isolated the only two pending migrations to PR #184 publication proof and PR
   #187 KPI target register. Both offline cutover plans verified their reviewed
   SHA-256 hashes and canonical Neon dependency order without a database query.

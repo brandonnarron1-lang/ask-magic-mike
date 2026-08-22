@@ -95,7 +95,8 @@ Release only one approved PR at a time and verify Production before advancing:
 
 Items #183–#189, #179, and #190–#192 are Draft, correctly stacked in that exact
 order, GitHub `CLEAN`, and green for exact-head Node 24 plus Vercel checks. The
-cumulative #192 tree is a clean 44-commit descendant of current Production.
+cumulative #192 tree is a clean descendant of current Production; its final
+ahead count and merge-rehearsal tree are recorded in PR #192 metadata.
 Only #184 and #187 add migrations; their offline cutover plans verify the
 reviewed migration hashes and dependency order. All candidates remain unmerged
 and Production-undeployed.
