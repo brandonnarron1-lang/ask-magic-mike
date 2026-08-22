@@ -47,9 +47,11 @@ stage; the table above is authoritative for the listed mutable heads.
   passes 212 files / 2,930 tests, strict typecheck, ESLint, 14/14 safety,
   Ask/NellySelly isolation, optimized Next.js 15.5.21 build, 83-route
   verification, and Production dependency audit. Exact Node 24 CI and protected
-  Preview evidence remain to be completed on the unchanged candidate head. No
-  Production deploy, database query/write, external send, WordPress change,
-  publication, spend, or NellySelly action occurred.
+  Preview evidence are required on the final immutable candidate head and are
+  therefore recorded in PR #190 checks and release comment, not self-referenced
+  from the commit they verify. No Production deploy, database query/write,
+  external send, WordPress change, publication, spend, or NellySelly action
+  occurred.
 - Draft PR #190 is stacked on exact PR #179 head
   `9dd6684596ac8afbc52076d2c1597c12a0fa33e2`. Its immutable final head belongs
   in PR checks/Preview metadata because embedding a commit's own hash in that

@@ -59,8 +59,8 @@ Draft PR #190 is the next code-only candidate after #179. It reuses canonical
 Neon rate limiting while replacing
 persisted raw client/staff limiter keys with HMAC identifiers and bounded stale-
 bucket pruning. It adds no provider or database schema. Local verification is
-green; exact Node 24 and protected Preview proof are required before its Draft
-PR is release-ready.
+green; exact Node 24 and protected Preview proof are required on its final head
+and are maintained in PR #190 metadata rather than self-referenced in code.
 
 The latest aggregate Production observation contains only six
 suppressed/test leads and no contactable live prospect. The funnel is available

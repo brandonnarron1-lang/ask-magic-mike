@@ -34,8 +34,10 @@ All timestamps are America/New_York unless noted.
 - `pnpm audit --prod`: PASS — no known Production dependency vulnerability.
 - `git diff --check`: PASS.
 - Local Node 26.5.1 is newer than the declared Node 24.x engine. Exact Node 24
-  GitHub CI and protected canonical Vercel Preview verification remain required
-  on the final unchanged commit before release readiness.
+  GitHub CI and protected canonical Vercel Preview verification are required on
+  the final unchanged commit before release readiness. Their immutable run,
+  deployment, and smoke evidence are maintained in PR #190 metadata because a
+  commit cannot contain the downstream run that verifies itself.
 - No Production deployment, database query/write, bucket probe, lead, external
   message, WordPress change, publication, spend, DNS change, or NellySelly
   action occurred.

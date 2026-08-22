@@ -90,7 +90,8 @@ Release only one approved PR at a time and verify Production before advancing:
 
 Items #183–#189 and #179 are Draft, correctly stacked in that order, and have
 green exact-head Vercel checks. PR #190 is the next Draft candidate and must
-earn the same exact-head proof. All remain unmerged and Production-undeployed.
+retain the same exact-head proof in its PR checks and release comment. All
+remain unmerged and Production-undeployed.
 The next permitted Production action is still #183 only, under this exact gate:
 
 ```text
