@@ -2,8 +2,10 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
+  assessOwnedDemandMeasurement,
   buildOwnedDemandChannelPacket,
   buildOwnedDemandCommand,
+  type OwnedDemandMeasurementState,
   type OwnedDemandChannel,
   type OwnedDemandOfferBrief,
   type OwnedDemandOfferPlacement,
@@ -300,17 +302,22 @@ function activationTone(state: OwnedDemandActivationState) {
       return "border-white/10 bg-white/[.03] text-[#bdb2a0]";
     case "evidence_unavailable":
       return "border-[#a21f3d55] bg-[#21070e] text-[#ffdbe4]";
+    case "measurement_unavailable":
+      return "border-[#cda24a55] bg-[#171108] text-[#f5dfa7]";
   }
 }
 
 function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
   const next = loop.nextPlacement;
-  const evidenceCount = (value: number) => loop.evidenceAvailable ? value : "—";
+  const proofCount = (value: number) => loop.evidenceAvailable ? value : "—";
+  const measurementCount = (value: number) => loop.evidenceAvailable && loop.measurementAvailable ? value : "—";
   return (
     <Panel
       eyebrow="Exact placement activation loop"
       title="Join native proof to first-party lead signals—without confusing either one."
-      note={`${loop.totalPlacements} canonical placements · test and suppressed leads remain excluded upstream`}
+      note={loop.measurementAvailable
+        ? `${loop.totalPlacements} canonical placements · test and suppressed leads remain excluded upstream`
+        : `${loop.totalPlacements} canonical placements · demand measurement unavailable; no signal inference`}
     >
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6" aria-label="Owned-demand activation lifecycle totals">
         <article className="rounded-xl border border-white/[.08] bg-black/35 p-4">
@@ -319,23 +326,23 @@ function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
         </article>
         <article className="rounded-xl border border-[#4baab833] bg-[#061417] p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8bbfc6]">Current active proof</p>
-          <p className="mt-2 font-serif text-3xl text-[#a9edf4]">{evidenceCount(loop.activeProofPlacements)}</p>
+          <p className="mt-2 font-serif text-3xl text-[#a9edf4]">{proofCount(loop.activeProofPlacements)}</p>
         </article>
         <article className="rounded-xl border border-emerald-300/20 bg-emerald-300/[.06] p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-200/70">Measured placements</p>
-          <p className="mt-2 font-serif text-3xl text-emerald-100">{evidenceCount(loop.measuredPlacements)}</p>
+          <p className="mt-2 font-serif text-3xl text-emerald-100">{measurementCount(loop.measuredPlacements)}</p>
         </article>
         <article className="rounded-xl border border-[#ef835444] bg-[#2b1008] p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#e6a085]">Signal proof review</p>
-          <p className="mt-2 font-serif text-3xl text-[#ffc5ad]">{evidenceCount(loop.signalReviewPlacements)}</p>
+          <p className="mt-2 font-serif text-3xl text-[#ffc5ad]">{measurementCount(loop.signalReviewPlacements)}</p>
         </article>
         <article className="rounded-xl border border-[#ff4d6d55] bg-[#310611] p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#ff9bb2]">Identity review</p>
-          <p className="mt-2 font-serif text-3xl text-[#ffd0da]">{evidenceCount(loop.identityReviewPlacements)}</p>
+          <p className="mt-2 font-serif text-3xl text-[#ffd0da]">{proofCount(loop.identityReviewPlacements)}</p>
         </article>
         <article className="rounded-xl border border-[#cda24a33] bg-[#171108] p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#cda24a]">Prepared · unobserved</p>
-          <p className="mt-2 font-serif text-3xl text-[#f0cf79]">{evidenceCount(loop.unobservedPlacements)}</p>
+          <p className="mt-2 font-serif text-3xl text-[#f0cf79]">{proofCount(loop.unobservedPlacements)}</p>
         </article>
       </div>
 
@@ -343,6 +350,14 @@ function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
         <div className="mt-4 rounded-xl border border-[#a21f3d55] bg-[#21070e] p-4 text-sm leading-6 text-[#ffdbe4]">
           The canonical publication-proof ledger is unavailable in this runtime. The command will not infer placement state from drafts or attribution alone. Restore the approved ledger read path before using this lifecycle view.
         </div>
+      ) : !loop.measurementAvailable ? (
+        <article className="mt-4 rounded-2xl border border-[#cda24a55] bg-[linear-gradient(135deg,#171108,#080808)] p-5 sm:p-6">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#cda24a]">Prepared sequence · measurement unavailable</p>
+          <h3 className="mt-2 font-serif text-2xl text-[#f5dfa7] sm:text-3xl">Restore measurement before selecting a first channel.</h3>
+          <p className="mt-3 text-sm leading-6 text-[#c9bdab]">
+            Native proof remains inspectable, but measured placements, lead-signal review counts, and the next placement decision stay unavailable rather than being presented as zero.
+          </p>
+        </article>
       ) : next ? (
         <article className="mt-4 rounded-2xl border border-[#4baab855] bg-[linear-gradient(135deg,#06171b,#080d0e)] p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -400,7 +415,7 @@ function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
               </div>
               <p className="mt-3 text-xs leading-5 text-[#a99f90]">{placement.nextAction}</p>
               <dl className="mt-3 grid grid-cols-2 gap-2 text-[10px] leading-4">
-                <div><dt className="uppercase tracking-[0.1em] text-[#6f6a61]">Lead signals</dt><dd className="mt-1 text-[#d9ceb8]">{placement.attributedLeads}</dd></div>
+                <div><dt className="uppercase tracking-[0.1em] text-[#6f6a61]">Lead signals</dt><dd className="mt-1 text-[#d9ceb8]">{loop.measurementAvailable ? placement.attributedLeads : "—"}</dd></div>
                 <div><dt className="uppercase tracking-[0.1em] text-[#6f6a61]">Latest proof</dt><dd className="mt-1 text-[#d9ceb8]">{placement.latestProof ? humanize(placement.latestProof.platformState) : "None"}</dd></div>
               </dl>
             </article>
@@ -438,6 +453,26 @@ function DemandAssetLinks({
           {asset.label}
         </a>
       ))}
+    </div>
+  );
+}
+
+function MeasurementStateBanner({ measurement }: { measurement: OwnedDemandMeasurementState }) {
+  const tone = measurement.ready
+    ? "border-[#4a8c6f66] bg-[#071712] text-[#d9f4e8]"
+    : measurement.status === "query_failed"
+      ? "border-[#a21f3d66] bg-[#2a0710] text-[#ffdbe4]"
+      : "border-[#cda24a55] bg-[#1a1308] text-[#f4ead4]";
+  const emphasis = measurement.ready
+    ? "text-[#83dab4]"
+    : measurement.status === "query_failed"
+      ? "text-[#ff8ca7]"
+      : "text-[#f0cf79]";
+
+  return (
+    <div role={measurement.ready ? "status" : "alert"} className={`mt-5 rounded-xl border px-5 py-4 text-sm leading-6 ${tone}`}>
+      <strong className={emphasis}>{measurement.title}</strong>{" "}
+      {measurement.detail}
     </div>
   );
 }
@@ -484,9 +519,11 @@ function OfferFlightCard({ offer }: { offer: OwnedDemandOfferBrief }) {
 function OfferPlacement({
   channelKey,
   offer,
+  measurementReady,
 }: {
   channelKey: string;
   offer: OwnedDemandOfferPlacement;
+  measurementReady: boolean;
 }) {
   const observed = offer.status === "signal_detected";
   const completeDraft = `${offer.draftTitle}\n\n${offer.draftBody}\n\n${offer.trackedUrl}`;
@@ -503,7 +540,11 @@ function OfferPlacement({
             ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-200"
             : "border-white/10 bg-white/[.03] text-[#8f8778]"
         }`}>
-          {observed ? `${offer.attributedLeads} signal${offer.attributedLeads === 1 ? "" : "s"}` : "Unmeasured"}
+          {!measurementReady
+            ? "Measurement unavailable"
+            : observed
+              ? `${offer.attributedLeads} signal${offer.attributedLeads === 1 ? "" : "s"}`
+              : "Unmeasured"}
         </span>
       </div>
       <p className="mt-3 text-xs leading-5 text-[#bdb2a0]">{offer.draftBody}</p>
@@ -520,7 +561,7 @@ function OfferPlacement({
   );
 }
 
-function ChannelCard({ channel }: { channel: OwnedDemandChannel }) {
+function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChannel; measurementReady: boolean }) {
   const observed = channel.status === "signal_detected";
   const channelPacket = buildOwnedDemandChannelPacket(channel);
   return (
@@ -538,7 +579,11 @@ function ChannelCard({ channel }: { channel: OwnedDemandChannel }) {
             ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-200"
             : "border-[#cda24a55] bg-[#cda24a12] text-[#efcc76]"
         }`}>
-          {observed ? `${channel.attributedLeads} live signal${channel.attributedLeads === 1 ? "" : "s"}` : "Ready · unmeasured"}
+          {!measurementReady
+            ? "Measurement unavailable"
+            : observed
+              ? `${channel.attributedLeads} live signal${channel.attributedLeads === 1 ? "" : "s"}`
+              : "Ready · unmeasured"}
         </span>
       </div>
 
@@ -595,7 +640,14 @@ function ChannelCard({ channel }: { channel: OwnedDemandChannel }) {
           </span>
         </summary>
         <div className="space-y-3 border-t border-[#4baab833] p-3">
-          {channel.offers.map((offer) => <OfferPlacement key={offer.key} channelKey={channel.key} offer={offer} />)}
+          {channel.offers.map((offer) => (
+            <OfferPlacement
+              key={offer.key}
+              channelKey={channel.key}
+              offer={offer}
+              measurementReady={measurementReady}
+            />
+          ))}
         </div>
       </details>
     </article>
@@ -614,14 +666,17 @@ export default async function DistributionPage({
     searchParams,
   ]);
   const command = buildOwnedDemandCommand(growth);
-  const activation = buildOwnedDemandActivationLoop(command, ledger);
+  const measurement = assessOwnedDemandMeasurement(growth);
+  const activation = buildOwnedDemandActivationLoop(command, ledger, measurement.ready);
   const canManage = Boolean(principal && hasLeadCenterPermission(principal.role, "growth:manage"));
   const previewReadOnly = isPreviewDataDisabled();
-  const stateLabel = command.measurementState === "no_live_signal"
-    ? "Activation required"
-    : command.measurementState === "partial_signal"
-      ? "Attribution repair"
-      : "Measured";
+  const stateLabel = !measurement.ready
+    ? measurement.label
+    : command.measurementState === "no_live_signal"
+      ? "Activation required"
+      : command.measurementState === "partial_signal"
+        ? "Attribution repair"
+        : "Measured";
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_80%_0%,rgba(74,170,184,.13),transparent_30%),radial-gradient(circle_at_10%_5%,rgba(205,162,74,.12),transparent_28%),#040404] px-4 py-7 text-[#f4ead4] sm:px-6 sm:py-10">
@@ -657,26 +712,37 @@ export default async function DistributionPage({
           </div>
         </header>
 
+        <MeasurementStateBanner measurement={measurement} />
+
         <section className="mt-5 grid gap-3 sm:grid-cols-3" aria-label="Owned demand measurement status">
           <article className="rounded-xl border border-white/10 bg-[#0a0a0a] p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8f8778]">Eligible live leads · 30d</p>
-            <p className="mt-3 font-serif text-3xl text-[#f4ead4]">{growth.summary.leads}</p>
-            <p className="mt-2 text-xs text-[#8f8778]">Test and suppressed records excluded in SQL</p>
+            <p className="mt-3 font-serif text-3xl text-[#f4ead4]">{measurement.ready ? growth.summary.leads : "—"}</p>
+            <p className="mt-2 text-xs text-[#8f8778]">
+              {measurement.ready ? "Test and suppressed records excluded in SQL" : "Unavailable is not zero live demand"}
+            </p>
           </article>
           <article className="rounded-xl border border-white/10 bg-[#0a0a0a] p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8f8778]">Useful attribution</p>
-            <p className="mt-3 font-serif text-3xl text-[#f4ead4]">{command.attributedLeadRate}%</p>
-            <p className="mt-2 text-xs text-[#8f8778]">Canonical first-party source coverage</p>
+            <p className="mt-3 font-serif text-3xl text-[#f4ead4]">{measurement.ready ? `${command.attributedLeadRate}%` : "—"}</p>
+            <p className="mt-2 text-xs text-[#8f8778]">
+              {measurement.ready ? "Canonical first-party source coverage" : "Awaiting canonical Growth measurement"}
+            </p>
           </article>
           <article className="rounded-xl border border-[#cda24a55] bg-[linear-gradient(145deg,#171108,#090909)] p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#cda24a]">Owned-source signals</p>
-            <p className="mt-3 font-serif text-3xl text-[#f0cf79]">{command.attributedLiveLeads}</p>
-            <p className="mt-2 text-xs text-[#a99a7e]">Exact campaign + placement matches on the latest recorded touch</p>
+            <p className="mt-3 font-serif text-3xl text-[#f0cf79]">{measurement.ready ? command.attributedLiveLeads : "—"}</p>
+            <p className="mt-2 text-xs text-[#a99a7e]">
+              {measurement.ready ? "Exact campaign + placement matches on the latest recorded touch" : "No signal inference while measurement is unavailable"}
+            </p>
           </article>
         </section>
 
         <div className="mt-5 rounded-xl border border-[#cda24a55] bg-[#1a1308] px-5 py-4 text-sm leading-6 text-[#f4ead4]">
-          <strong className="text-[#f0cf79]">Measured bottleneck:</strong> {command.bottleneck}
+          <strong className="text-[#f0cf79]">{measurement.ready ? "Measured bottleneck:" : "Measurement boundary:"}</strong>{" "}
+          {measurement.ready
+            ? command.bottleneck
+            : "Prepared assets remain available for review, but measurement must recover before interpreting demand or choosing a launch channel."}
         </div>
 
         <div className="mt-5">
@@ -696,7 +762,9 @@ export default async function DistributionPage({
         </div>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-2">
-          {command.channels.map((channel) => <ChannelCard key={channel.key} channel={channel} />)}
+          {command.channels.map((channel) => (
+            <ChannelCard key={channel.key} channel={channel} measurementReady={measurement.ready} />
+          ))}
         </div>
 
         <div className="mt-5">
