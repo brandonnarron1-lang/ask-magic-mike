@@ -29,6 +29,9 @@ pre-refresh state was also preserved as remote rescue branch
 `rescue/amm-pr193-pre-exact-base-refresh-20260822-1239`.
 The final retained-asset refresh is preserved before merge as remote rescue
 branch `rescue/amm-pr193-pre-pr185-final-refresh-20260822-1344`.
+The refreshed state immediately before analytics-durability and JSON-LD
+hardening is preserved as remote rescue branch
+`rescue/amm-pr193-post-refresh-pre-analytics-durability-20260822-1347`.
 
 ## Included once
 
@@ -52,6 +55,11 @@ branch `rescue/amm-pr193-pre-pr185-final-refresh-20260822-1344`.
    tables or failed aggregate queries render an unavailable state, not a false
    zero. Outcome and delivery normalizers also fail closed when a query error is
    present, so an error cannot be displayed beside a misleading numeric zero.
+7. Public analytics persistence is awaited at both active route boundaries.
+   HTTP 202 means the canonical Neon write succeeded; an unavailable write is
+   HTTP 503 and cannot be mistaken for durable evidence. Public attribution
+   accepts controlled slugs only, and all JSON-LD surfaces use one script-safe
+   serializer.
 
 ## Deliberately excluded
 
@@ -78,6 +86,20 @@ This candidate contains **no database migration**. It reuses the existing
 Existing strong server secrets are supported as documented fallbacks to avoid a
 cutover outage. Protected health output reports only a boolean readiness value.
 No secret value may enter source, logs, screenshots, tests, or reports.
+
+## Verification checkpoint
+
+- Focused candidate matrix: 12 files / 103 tests passed.
+- Full local release gate: system isolation, 14/14 safety checks, 210 files /
+  2,901 tests, strict typecheck, ESLint, optimized Next.js 15.5.21 build, and 80
+  active routes passed with a final zero exit status.
+- `pnpm audit --prod --audit-level high`: no known vulnerability.
+- Redacted `gitleaks git`: 511 commits / approximately 14.11 MB scanned with no
+  leak.
+- `git diff --check` and base/working-tree migration scans: passed; no migration.
+- Local Node is 26.5.1 while the repository declares Node 24.x. Exact-head Node
+  24 CI, canonical Vercel Preview, and protected non-mutating Preview acceptance
+  remain mandatory after the refreshed branch is pushed.
 
 ## Risk and rollback
 

@@ -14,7 +14,13 @@ Updated 2026-08-22.
 - Public analytics now uses an event/property allowlist, bounded JSON bodies,
   exact public-origin checks, coarse browser/device classes, and sanitized UTM
   dimensions. Public callers cannot bind events to canonical lead or agent IDs;
-  the persistence repository re-applies the privacy boundary.
+  the persistence repository re-applies the privacy boundary. Public UTM and
+  placement values are limited to controlled identifier slugs, so free-form
+  names and street addresses cannot survive as attribution dimensions.
+- Both public analytics routes now await the canonical Neon write, return HTTP
+  202 only for a durable event, and return HTTP 503 when persistence is
+  unavailable. All JSON-LD script surfaces share an escaping serializer rather
+  than inserting raw `JSON.stringify` output.
 - The protected Growth Command Center adds aggregate-only outcome and delivery
   evidence for eligible non-test, non-suppressed leads. Optional-table or query
   failure renders unavailable instead of fabricating zero. A post-refresh audit
@@ -23,12 +29,12 @@ Updated 2026-08-22.
 - PR #187's KPI target register and migration remain deferred. This candidate
   contains no migration, publisher, provider send, second data store, or live
   data action.
-- Focused verification passes 10 files / 72 tests. The full local release gate
-  passes system isolation, 14/14 release-safety checks, 209 test files / 2,895
+- Focused verification passes 12 files / 103 tests. The full local release gate
+  passes system isolation, 14/14 release-safety checks, 210 test files / 2,901
   tests, strict typecheck, ESLint, the optimized Next.js 15.5.21 build, and 80
   active routes. Production dependencies have no known vulnerability; a
-  fresh redacted full-history scan reports no leak; diff and migration checks
-  are clean. The prior Node 24 CI, canonical Vercel Preview,
+  fresh redacted 511-commit full-history scan reports no leak; diff and
+  migration checks are clean. The prior Node 24 CI, canonical Vercel Preview,
   authorization, privacy, and responsive 390/1440 rendering evidence remains a
   historical checkpoint. Exact-head GitHub/Vercel and protected Preview
   evidence after the base refresh is tracked on PR #193 and remains mandatory

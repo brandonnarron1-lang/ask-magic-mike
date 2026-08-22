@@ -69,13 +69,14 @@ All timestamps are America/New_York unless noted.
 - Boundary review — PASS at checkpoint: the candidate is stacked on PR #185
   exact final head `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7`, includes no migration,
   and excludes PR #187's target register and parallel release authority.
-- Focused regression matrix — PASS: 10 files / 72 tests covering
+- Focused regression matrix — PASS: 12 files / 103 tests covering
   HMAC limiter identifiers, stale-bucket pruning, public analytics event and
   property boundaries, body/origin validation, repository defense in depth,
-  aggregate Growth outcomes/delivery, false-zero failure handling, protected
-  health output, and inherited fail-closed Preview authority.
+  durable-write acknowledgment, controlled-slug attribution, script-safe
+  JSON-LD, aggregate Growth outcomes/delivery, false-zero failure handling,
+  protected health output, and inherited fail-closed Preview authority.
 - `pnpm release:gate` — PASS on local Node 26.5.1: Ask Magic Mike/NellySelly
-  isolation, 14/14 release-safety checks, 209 test files / 2,895 tests, strict
+  isolation, 14/14 release-safety checks, 210 test files / 2,901 tests, strict
   typecheck, ESLint, optimized Next.js 15.5.21 build, and 80 active routes / 17
   acknowledged root–`src` duplicates. The repository declares Node 24.x, so
   exact Node 24 GitHub evidence remains required.
@@ -85,12 +86,14 @@ All timestamps are America/New_York unless noted.
   secrets are absent from Neon parameters; public analytics cannot attach lead
   or agent IDs; public notification lifecycle events are rejected; final
   persistence re-sanitizes dimensions and stores only a coarse user-agent class;
-  Growth SQL selects aggregate counts without recipient references or contact
-  fields.
+  both public routes await the canonical write and fail HTTP 503 when it is
+  unavailable; free-form attribution names/addresses are dropped; all JSON-LD
+  scripts use the shared escaping serializer; Growth SQL selects aggregate
+  counts without recipient references or contact fields.
 - `pnpm audit --prod --audit-level high` — PASS: no known Production dependency
   vulnerability.
-- `gitleaks git --redact --no-banner` — PASS: the refreshed full history was
-  scanned with no leak. A supplementary pattern scan found only unmistakable
+- `gitleaks git --redact --no-banner` — PASS: 511 commits / approximately 14.11
+  MB scanned with no leak. A supplementary pattern scan found only unmistakable
   test literals and documented placeholder syntax.
 - `git diff --check` and base/staged migration scans — PASS: no whitespace
   error and no migration in the candidate.
@@ -133,6 +136,11 @@ All timestamps are America/New_York unless noted.
 - GitHub and Vercel must be green on the exact refreshed PR #193 head before the
   Draft is considered release-ready. Final immutable evidence is recorded on
   the PR rather than represented by the historical Preview above.
+- Defense-in-depth residual: public responses do not yet enforce a complete
+  nonce/hash-based `script-src` CSP. Existing HSTS, content-type, referrer,
+  permissions, frame, and protected no-store/noindex controls remain intact;
+  a broad CSP change is isolated from this privacy candidate to avoid breaking
+  the established public funnel without a dedicated compatibility pass.
 - No Production deployment, migration/write, valid analytics persistence test,
   lead, email/BCC, SMS, Push, provider action, WordPress edit, external
   publication, DNS change, spend, or NellySelly action occurred.
