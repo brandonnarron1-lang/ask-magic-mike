@@ -4,7 +4,7 @@ Date: 2026-08-22
 
 Candidate branch: `codex/phase9-privacy-kpi-trust-consolidation-20260822`
 
-Base: PR #185 exact head `1593302a1354d5b8b77baa2340287a7d043dc297`
+Base: PR #185 exact final head `168937f0d6b7a90b027f39dc97f2135193c3fa72`
 
 ## Purpose
 
@@ -24,6 +24,9 @@ notification engine, CRM, publisher, or provider.
 The pre-consolidation state is preserved as remote rescue branch
 `rescue/amm-pre-phase9-trust-consolidation-20260822-1039`. Source branches and
 Git history remain intact until the consolidated candidate is accepted.
+Before refreshing this candidate onto PR #185's exact final head, its accepted
+pre-refresh state was also preserved as remote rescue branch
+`rescue/amm-pr193-pre-exact-base-refresh-20260822-1239`.
 
 ## Included once
 
@@ -45,7 +48,8 @@ Git history remain intact until the consolidated candidate is accepted.
    confirmations/complaints.
 6. KPI queries include only canonical non-test, non-suppressed leads. Missing
    tables or failed aggregate queries render an unavailable state, not a false
-   zero.
+   zero. Outcome and delivery normalizers also fail closed when a query error is
+   present, so an error cannot be displayed beside a misleading numeric zero.
 
 ## Deliberately excluded
 

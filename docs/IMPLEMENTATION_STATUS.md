@@ -4,8 +4,8 @@ Updated 2026-08-22.
 
 ## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
 
-- Audited PRs #190-#192 against PR #185 exact head
-  `1593302a1354d5b8b77baa2340287a7d043dc297` and consolidated their unique
+- Audited PRs #190-#192 against PR #185 exact final head
+  `168937f0d6b7a90b027f39dc97f2135193c3fa72` and consolidated their unique
   independent work once. Source commits, exclusions, rescue ref, and rollback
   are recorded in `docs/PHASE9_PRIVACY_KPI_TRUST_CONSOLIDATION.md`.
 - Durable Neon rate limiting now stores only versioned HMAC-SHA-256 bucket
@@ -17,22 +17,22 @@ Updated 2026-08-22.
   the persistence repository re-applies the privacy boundary.
 - The protected Growth Command Center adds aggregate-only outcome and delivery
   evidence for eligible non-test, non-suppressed leads. Optional-table or query
-  failure renders unavailable instead of fabricating zero.
+  failure renders unavailable instead of fabricating zero. A post-refresh audit
+  closed a normalization defect that previously left `configured=true` beside
+  an aggregate query error and could render misleading zero values.
 - PR #187's KPI target register and migration remain deferred. This candidate
   contains no migration, publisher, provider send, second data store, or live
   data action.
-- Focused verification passes 9 files / 69 tests. The full local release gate
-  passes system isolation, 14/14 release-safety checks, 208 test files / 2,892
+- Focused verification passes 10 files / 72 tests. The full local release gate
+  passes system isolation, 14/14 release-safety checks, 209 test files / 2,895
   tests, strict typecheck, ESLint, the optimized Next.js 15.5.21 build, and 80
   active routes. Production dependencies have no known vulnerability; a
-  redacted history scan covers 499 commits / 13.94 MB with no leak; diff and
-  migration checks are clean. Draft PR #193 code-bearing head
-  `6035131e394f3fa057acf662a204889743a69327` passes exact Node 24 GitHub CI and
-  canonical Vercel Preview `dpl_6wvQEvAZrBsgESJVfp5pdDtFvkuu`. Public route
-  identity, anonymous admin denial, protected headers, foreign-origin analytics
-  rejection, no-5xx logs, and responsive 390/1440 proof-ledger rendering pass.
-  The final evidence-only head must retain green GitHub/Vercel checks before
-  release readiness.
+  fresh redacted full-history scan reports no leak; diff and migration checks
+  are clean. The prior Node 24 CI, canonical Vercel Preview,
+  authorization, privacy, and responsive 390/1440 rendering evidence remains a
+  historical checkpoint. Exact-head GitHub/Vercel and protected Preview
+  evidence after the base refresh is tracked on PR #193 and remains mandatory
+  before release readiness.
 - Exact future application gate:
   `APPROVE PHASE 9 PRIVACY AND KPI TRUST MERGE AND PRODUCTION DEPLOYMENT`.
   No Production or external action is authorized by this status entry.
@@ -64,13 +64,14 @@ Updated 2026-08-22.
   15.5.21 build, and 80 active routes. Production dependencies have no known
   vulnerability, a fresh redacted scan covers 504 commits / 14.08 MB with no leak,
   `git diff --check` passes, and committed/working-tree migration scans are
-  empty. Exact-head Node 24 GitHub run `32578413513`, canonical Vercel Preview
-  `dpl_5wkLS1u8SrG8DVGfbMyHRxxgtt9i`, protected Preview flow checks, and
-  desktop/mobile rendered acceptance all pass. PR #185 is Ready, cleanly
-  mergeable, and unchanged at application code-bearing head
-  `1593302a1354d5b8b77baa2340287a7d043dc297`; final workflow/docs-head evidence
-  is tracked on the PR. Only the exact owner gate below remains before merge
-  and Production deployment.
+  empty. Exact-head Node 24 GitHub run `32584853104`, canonical Vercel Preview
+  `dpl_4cWbdSbt4AofDpmHkk3EvSh9g1En`, and protected Preview QA run
+  `32585009610` all pass. The protected run reports 16 pass / 6 intentional
+  write skips / 0 fail, 2/2 browser tests, 43/43 doctor checks, 14/14 safety
+  checks, and exact `PREVIEW_READY` authority. PR #185 is Ready, cleanly
+  mergeable, and unchanged at exact final head
+  `168937f0d6b7a90b027f39dc97f2135193c3fa72`. Only the exact owner gate below
+  remains before merge and Production deployment.
 - Protected Preview workflows now run release doctor before generating launch
   authority and must assert exact `PREVIEW_READY` afterward. This closes a
   false-green path where endpoint/browser checks passed but a missing doctor

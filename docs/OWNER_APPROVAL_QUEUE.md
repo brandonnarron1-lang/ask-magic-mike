@@ -39,6 +39,18 @@ provider action, or deletion.
   submission, database migration, spend, DNS change, provider action,
   deletion, or NellySelly action.
 
+## Stacked candidates after PR #185
+
+- Draft PR [#193](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/193)
+  consolidates the independent privacy, durable limiter, and aggregate KPI-trust
+  work from PRs #190–#192. It has no migration or provider action and must be
+  refreshed onto released `main` after PR #185, then rerun exact-head evidence
+  before its distinct privacy/KPI approval gate can be requested.
+- Draft PR [#194](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/194)
+  consolidates only the secure iOS Home Screen Web Push handoff. It remains
+  stacked on PR #193 and must not be merged out of order. Physical enrollment
+  and one `[TEST]` Push remain separate owner-controlled actions.
+
 ## Deferred candidates requiring refresh and overlap review
 
 - PR [#182](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/182)
@@ -48,8 +60,8 @@ provider action, or deletion.
   live-demand baseline. It is not part of PR #185.
 - PRs #186, #188, and #189 are preserved as source history; their useful work
   is consolidated into PR #185 and their former standalone gates are obsolete.
-- PRs #190–#192 remain separate overlap-review candidates and are not part of
-  the owned-demand command release.
+- PRs #190–#192 remain preserved as source history; their independently useful
+  work is consolidated once in Draft PR #193 and is not part of PR #185.
 - PR [#179](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/179)
   repairs the iOS Home Screen Web Push handoff. Refresh it after the current
   stack and rerun protected iPhone-install acceptance before considering

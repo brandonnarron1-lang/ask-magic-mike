@@ -289,7 +289,7 @@ export function buildGrowthOutcomeMetrics(
   }
 
   return {
-    configured,
+    configured: configured && !error,
     appointmentSetLeads: appointmentSetLeads.size,
     signedClientLeads: signedClientLeads.size,
     ...(error ? { error } : {}),
@@ -303,7 +303,7 @@ export function normalizeGrowthDeliverySnapshot(
 ): GrowthDeliverySnapshot {
   const row = rows[0] ?? {};
   return {
-    configured,
+    configured: configured && !error,
     terminalInternalNotifications: numberValue(row.terminal_internal_notifications),
     permanentInternalFailures: numberValue(row.permanent_internal_failures),
     eligibleEmailSends: numberValue(row.eligible_email_sends),

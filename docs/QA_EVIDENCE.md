@@ -8,7 +8,7 @@
   apex redirecting HTTP 308 to `www`, `/home-value`, `/buy`, public liveness,
   and the Our Town homepage returning HTTP 200.
 - Reconfirmed PR #185 is cleanly mergeable and contains current Production at
-  code-bearing head `1593302a1354d5b8b77baa2340287a7d043dc297`. It contains no
+  exact final head `168937f0d6b7a90b027f39dc97f2135193c3fa72`. It contains no
   database migration.
 - Traced the complete candidate story: authenticated Distribution Command to
   existing Neon aggregate/proof reads, deterministic activation state, protected
@@ -36,6 +36,11 @@
 - After that correction, the full local gate passes 206 files / 2,868 tests,
   strict typecheck, ESLint, optimized Production build, 80-route verification,
   system isolation, and 14/14 safety controls.
+- Exact-head Node 24 release run `32584853104`, Ready Preview deployment
+  `dpl_4cWbdSbt4AofDpmHkk3EvSh9g1En`, and protected Preview QA run
+  `32585009610` pass. The protected run records 16 pass / 6 intentional write
+  skips / 0 fail, 2/2 browser checks, 43/43 doctor checks, and strict
+  `PREVIEW_READY` launch authority.
 - No Production deployment, database read/write beyond public liveness,
   publication proof, lead, email/BCC, SMS, Push, external post, WordPress edit,
   DNS change, provider action, spend, deletion, or NellySelly action occurred.
@@ -48,14 +53,15 @@ All timestamps are America/New_York unless noted.
 ## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
 
 - Boundary review — PASS at checkpoint: the candidate is stacked on PR #185
-  exact head `1593302a1354d5b8b77baa2340287a7d043dc297`, includes no migration,
+  exact final head `168937f0d6b7a90b027f39dc97f2135193c3fa72`, includes no migration,
   and excludes PR #187's target register and parallel release authority.
-- Focused regression matrix — PASS: 9 files / 69 tests covering
+- Focused regression matrix — PASS: 10 files / 72 tests covering
   HMAC limiter identifiers, stale-bucket pruning, public analytics event and
   property boundaries, body/origin validation, repository defense in depth,
-  aggregate Growth outcomes/delivery, and protected health output.
+  aggregate Growth outcomes/delivery, false-zero failure handling, protected
+  health output, and inherited fail-closed Preview authority.
 - `pnpm release:gate` — PASS on local Node 26.5.1: Ask Magic Mike/NellySelly
-  isolation, 14/14 release-safety checks, 208 test files / 2,892 tests, strict
+  isolation, 14/14 release-safety checks, 209 test files / 2,895 tests, strict
   typecheck, ESLint, optimized Next.js 15.5.21 build, and 80 active routes / 17
   acknowledged root–`src` duplicates. The repository declares Node 24.x, so
   exact Node 24 GitHub evidence remains required.
@@ -69,16 +75,16 @@ All timestamps are America/New_York unless noted.
   fields.
 - `pnpm audit --prod --audit-level high` — PASS: no known Production dependency
   vulnerability.
-- `gitleaks git --redact --no-banner` — PASS: 499 commits / approximately
-  13.94 MB scanned with no leak. A supplementary pattern scan found only
-  unmistakable test literals and documented placeholder syntax.
+- `gitleaks git --redact --no-banner` — PASS: the refreshed full history was
+  scanned with no leak. A supplementary pattern scan found only unmistakable
+  test literals and documented placeholder syntax.
 - `git diff --check` and base/staged migration scans — PASS: no whitespace
   error and no migration in the candidate.
-- Draft PR #193 code-bearing head
-  `6035131e394f3fa057acf662a204889743a69327` — PASS: GitHub
-  `local-release-gate` completed on exact Node 24 in 2m59s; Vercel built the
-  canonical project on Node 24 and reported `READY`.
-- Canonical Vercel Preview — PASS: deployment
+- Historical pre-refresh PR #193 code-bearing head
+  `6035131e394f3fa057acf662a204889743a69327` passed exact Node 24 GitHub CI and
+  canonical Vercel Preview. That evidence is retained as a checkpoint, not used
+  as authority for the refreshed final head.
+- Historical canonical Vercel Preview — PASS: deployment
   `dpl_6wvQEvAZrBsgESJVfp5pdDtFvkuu`, immutable URL
   `https://ask-magic-mike-gt7gtgf0f-eyes-up-industries.vercel.app`. `/`,
   `/home-value`, `/buy`, and `/rent` returned 200 with Ask Magic Mike and Our
@@ -99,15 +105,20 @@ All timestamps are America/New_York unless noted.
   `artifacts/phase9-privacy-kpi-trust-visual/`.
 - Runtime inspection — PASS: the exact Vercel deployment reported no error logs
   and no 5xx requests after acceptance probes.
+- Post-refresh KPI truth audit — FIXED: a failed delivery aggregate query could
+  preserve `configured=true`, causing the UI to show zero beside an error.
+  Outcome and delivery normalizers now set `configured=false` whenever an error
+  exists, and regression coverage proves the protected page renders unavailable
+  values instead of false zero.
 - Preview tooling cleanup — PASS: an isolated-worktree CLI call briefly created
   an empty branch-named Vercel project because canonical `.vercel` metadata was
   absent. The target was confirmed to have no deployment or domain, removed,
   and the worktree was explicitly relinked to
   `eyes-up-industries/ask-magic-mike`. No canonical project, domain, deployment,
   environment variable, or Production alias changed.
-- The evidence-only documentation commit that records these results does not
-  alter application code. GitHub and Vercel must still be green on the final PR
-  #193 head before the Draft is considered release-ready.
+- GitHub and Vercel must be green on the exact refreshed PR #193 head before the
+  Draft is considered release-ready. Final immutable evidence is recorded on
+  the PR rather than represented by the historical Preview above.
 - No Production deployment, migration/write, valid analytics persistence test,
   lead, email/BCC, SMS, Push, provider action, WordPress edit, external
   publication, DNS change, spend, or NellySelly action occurred.
