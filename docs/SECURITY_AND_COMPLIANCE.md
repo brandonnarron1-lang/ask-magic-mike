@@ -7,8 +7,9 @@
   safe in-memory fallback only for local/degraded acknowledgement.
 - Supabase service-role/database code remains server-only; public routes never
   return provider/database errors.
-- Admin routes are server-protected and API mutations use constant-time secret
-  comparison. Current MVP auth is shared Basic Auth, not per-user RBAC.
+- Admin routes use server-validated per-user RBAC when enabled; the shared Basic
+  Auth path remains a fail-closed pre-RBAC fallback. API secret comparisons are
+  constant-time.
 - Append-only consent and audit records; no raw IP in logs, with a hash/minimization
   policy for legal review.
 - Email/SMS suppression, unsubscribe handling, test-lead exclusion, idempotency,
@@ -39,16 +40,22 @@
   response. Private/no-store, no-referrer, noindex, a self-only resource CSP,
   frame denial, and a `/phone-alerts/`-restricted PWA scope cover the entire
   phone-alert route family.
-- The admin invite UI relies on browser-managed Basic Auth and never receives
-  `ADMIN_SECRET`. Its route repeats the Basic Auth check server-side, validates
-  exact origin and input, and returns only a bounded copy-role claim URL. The
-  client rejects cross-origin or malformed invite URLs and stores no token in
+- The admin invite UI relies on the browser-managed RBAC session, or the
+  fail-closed Basic Auth fallback, and never receives `ADMIN_SECRET`. Its route
+  repeats the applicable authorization server-side, validates exact origin and
+  input, and returns only a bounded copy-role claim URL. The client rejects
+  cross-origin or malformed invite URLs and stores no token in
   localStorage/sessionStorage.
-- Every `/admin/api` push/phone handler now repeats Basic Auth inside the route,
-  in addition to the `/admin/:path*` middleware boundary. This prevents a future
+- Every `/admin/api` push/phone handler repeats route-level authorization in
+  addition to the `/admin/:path*` middleware boundary. This prevents a future
   matcher or routing regression from silently exposing subscription metadata,
   registration/removal, test delivery, or invite creation. Push mutations also
   retain exact same-origin checks.
+- In RBAC mode, the legacy secret-header phone-invite endpoint is disabled, so
+  only a Lead Center operator with `notification:manage` can mint a link. The
+  scoped copy repository rejects conflicts with existing Mike/primary
+  endpoints, and the optional setup QA Push fails closed unless its one-shot
+  guard is durable in Production.
 - Public appointment follow-up requests use a dedicated durable rate-limit
   bucket before request-body parsing or persistence. A throttled request returns
   HTTP 429 with a bounded `Retry-After` value and performs no appointment write.
@@ -65,8 +72,9 @@ guaranteed result.
 
 ## Known findings
 
-1. Current AdminOps uses a shared Basic Auth secret. It is protected server-side,
-   but per-user role/session controls remain before claiming full role-based access.
+1. Per-user Lead Center RBAC is the active target boundary; a fail-closed shared
+   Basic Auth path remains for rollback/pre-RBAC operation. Mike's dormant
+   account still requires his own activation and role-scope acceptance.
 2. The legacy root route had `postMessage('*')` paths and PII-rich PostHog fields;
    the consolidation narrows message targets and analytics properties.
 3. The full development dependency audit reports advisories in the Vitest/Vite,

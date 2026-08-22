@@ -13,8 +13,9 @@ provider, a second database, a second PWA, or device takeover automation.
 
 The consolidation branch is
 `codex/phase9-phone-handoff-consolidation-20260822`, refreshed onto exact PR
-#193 head `25818cdff887c42955c0c74cae17af5e782e62ab`. Its pre-refresh rescue ref is
-`rescue/amm-pr194-pre-exact-base-refresh-20260822-1255`.
+#193 head `008f1faa95d98058199ec01534ee39b474d2a3b2`. Its immediately preceding
+state is preserved at
+`rescue/amm-pr194-pre-pr193-final-refresh-20260822-1412`.
 
 ## Problem repaired
 
@@ -44,6 +45,11 @@ browser and installed-app cookie contexts.
    session.
 7. Production fails closed if the one-time claim cannot be durably enforced.
    The failed attempt registers no device and sends no notification.
+8. Scoped copy enrollment refuses to relabel an existing Mike/primary endpoint.
+   When RBAC is enabled, the legacy secret-header invite endpoint is disabled;
+   link creation requires the protected Lead Center permission. The optional QA
+   Push is durably one-shot per setup session and copy subscription in
+   Production.
 
 The durable guard reuses the existing `rate_limit_buckets` table. Its stored
 identifier is an HMAC-SHA-256 pseudonym; the raw nonce is not persisted. This
@@ -81,14 +87,14 @@ Mike.
 
 ## Acceptance evidence
 
-- Draft PR: #194. Post-refresh security repair code-bearing head:
-  `b62957ba5f66f98808a9e31536615ab6ea1cbee4`.
-- Focused phone/origin/Preview matrix: PASS, 8 files / 86 tests.
-- Full local release gate: PASS, 211 files / 2,912 tests, strict typecheck,
+- Draft PR: #194. Post-refresh scoped-authority code-bearing head:
+  `afc68b4060122481701514d0b2fe8630735aad8a`.
+- Focused phone/origin/Preview matrix: PASS, 9 files / 58 tests.
+- Full local release gate: PASS, 213 files / 2,926 tests, strict typecheck,
   ESLint, optimized Next.js build, 82 active routes, 14/14 safety controls, and
   Ask Magic Mike/NellySelly isolation.
 - Production dependency audit: no known vulnerabilities. Redacted full-history
-  scan: 507 commits / 14.09 MB, no leak. Candidate diff and migration scans are
+  scan: 514 commits / 14.13 MB, no leak. Candidate diff and migration scans are
   clean.
 - The earlier Node 24, Vercel Preview, protected Preview QA, and rendered browser
   evidence belong to the pre-refresh checkpoint and are historical only. Exact

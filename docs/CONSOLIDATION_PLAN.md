@@ -90,7 +90,9 @@ separate gate:
   PR #193 candidate. The refreshed implementation adds a
   durable one-time Neon claim guard, distinct bearer-invite and HttpOnly-session
   credentials, a `/phone-alerts/`-scoped installed app, exact Ask Magic Mike
-  origin isolation, and private install/manifest Preview proof. Historical PR
+  origin isolation, copy-safe endpoint persistence, RBAC-only invite creation
+  whenever RBAC is enabled, one-shot setup QA delivery, and private install/manifest Preview
+  proof. Historical PR
   #179 remains preserved but must not merge as a second stack. Physical device
   enrollment and receipt confirmation remain a separate human step.
 - PRs #92 and #119-#121: archive after review; they are not a parallel release

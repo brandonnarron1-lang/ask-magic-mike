@@ -17,8 +17,9 @@ specific expansions; they do not invalidate the live lead pipe.
   exact-head Node 24, canonical Vercel, and protected Preview evidence. It
   remains Draft and must be refreshed onto released `main` after PR #185.
 - Draft PR #194 consolidates the unique iOS handoff on PR #193. Its pre-refresh
-  state is preserved, and its refreshed exact-head evidence remains required;
-  it cannot bypass either predecessor's release gate.
+  state is preserved, and its refreshed local safety/build evidence is green.
+  Exact-head Node 24 and canonical Preview evidence remain required; it cannot
+  bypass either predecessor's release gate.
 - Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
   and #119–#121 are preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,

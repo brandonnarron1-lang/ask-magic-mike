@@ -67,18 +67,23 @@ All timestamps are America/New_York unless noted.
 ## Phase 9 iOS phone install handoff consolidation — 2026-08-22
 
 - Post-refresh security audit — PASS: PR #194 now contains exact PR #193 head
-  `25818cdff887c42955c0c74cae17af5e782e62ab`; the pre-refresh state is
-  preserved at `rescue/amm-pr194-pre-exact-base-refresh-20260822-1255`.
+  `008f1faa95d98058199ec01534ee39b474d2a3b2`; the immediately preceding state
+  is preserved at `rescue/amm-pr194-pre-pr193-final-refresh-20260822-1412`.
 - Replay-boundary repair — PASS at code-bearing commit
   `b62957ba5f66f98808a9e31536615ab6ea1cbee4`: the bearer invite and HttpOnly
   setup session are distinct signed token kinds. A raw invite pasted into the
   cookie slot is rejected, the one-time durable claim remains authoritative,
   and the installed manifest is limited to `/phone-alerts/`.
-- Fresh focused matrix — PASS: 8 files / 86 tests. Fresh full local release
-  gate — PASS: system isolation, 14/14 safety controls, 211 files / 2,912 tests,
+- Scoped-authority repair — PASS at code-bearing commit
+  `afc68b4060122481701514d0b2fe8630735aad8a`: copy enrollment cannot relabel a
+  primary endpoint; RBAC-enabled deployments reject the legacy secret-header
+  invite route; and the optional setup QA Push is a durable Production
+  one-shot per session/subscription.
+- Fresh focused matrix — PASS: 9 files / 58 tests. Fresh full local release
+  gate — PASS: system isolation, 14/14 safety controls, 213 files / 2,926 tests,
   strict typecheck, ESLint, optimized Next.js 15.5.21 build, and 82 active
   routes. `pnpm audit --prod --audit-level high` reports no known vulnerability;
-  a redacted 507-commit / 14.09 MB history scan found no leak; candidate and
+  a redacted 514-commit / 14.13 MB history scan found no leak; candidate and
   migration scans are clean.
 - The exact Node 24, Preview deployment, protected QA, and rendered screenshots
   listed below are the pre-refresh checkpoint. They prove the original handoff

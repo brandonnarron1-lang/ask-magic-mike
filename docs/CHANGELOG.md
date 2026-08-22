@@ -19,12 +19,16 @@
 - Narrowed privileged phone origins to exact Ask Magic Mike Production,
   configured Preview, and local-development origins; Our Town and NellySelly
   remain outside this setup boundary.
+- Prevented the copy-scoped enrollment session from relabeling an existing
+  Mike/primary Push endpoint, disabled the legacy secret-header invite path
+  whenever Lead Center RBAC is enabled, and made the optional QA Push a durable
+  one-shot action per setup session and copy subscription in Production.
 - Added private/no-store, no-referrer, noindex, robots, CSP, and frame controls;
   expanded Preview QA to validate the deployed invalid-token install/manifest
   failure contract without token minting/redemption, limiter persistence, phone
   registration, lead creation, or Push delivery.
-- Post-refresh focused verification passes 8 files / 86 tests and the full
-  local gate passes 211 files / 2,912 tests. Fresh exact-head Node 24, canonical
+- Post-refresh focused verification passes 9 files / 58 tests and the full
+  local gate passes 213 files / 2,926 tests. Fresh exact-head Node 24, canonical
   Preview, strict launch authority, and rendered visual evidence remain before
   the candidate's separate future Production gate.
 
