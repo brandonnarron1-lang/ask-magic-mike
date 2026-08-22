@@ -2,8 +2,10 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
+  assessOwnedDemandMeasurement,
   buildOwnedDemandChannelPacket,
   buildOwnedDemandCommand,
+  type OwnedDemandMeasurementState,
   type OwnedDemandChannel,
   type OwnedDemandOfferBrief,
   type OwnedDemandOfferPlacement,
@@ -42,6 +44,26 @@ function Panel({ eyebrow, title, note, children }: {
       </div>
       <div className="mt-5">{children}</div>
     </section>
+  );
+}
+
+function MeasurementStateBanner({ measurement }: { measurement: OwnedDemandMeasurementState }) {
+  const tone = measurement.ready
+    ? "border-[#4a8c6f66] bg-[#071712] text-[#d9f4e8]"
+    : measurement.status === "query_failed"
+      ? "border-[#a21f3d66] bg-[#2a0710] text-[#ffdbe4]"
+      : "border-[#cda24a55] bg-[#1a1308] text-[#f4ead4]";
+  const emphasis = measurement.ready
+    ? "text-[#83dab4]"
+    : measurement.status === "query_failed"
+      ? "text-[#ff8ca7]"
+      : "text-[#f0cf79]";
+
+  return (
+    <div role={measurement.ready ? "status" : "alert"} className={`mt-5 rounded-xl border px-5 py-4 text-sm leading-6 ${tone}`}>
+      <strong className={emphasis}>{measurement.title}</strong>{" "}
+      {measurement.detail}
+    </div>
   );
 }
 
@@ -84,7 +106,7 @@ function OfferFlightCard({ offer }: { offer: OwnedDemandOfferBrief }) {
   );
 }
 
-function OfferPlacement({ offer }: { offer: OwnedDemandOfferPlacement }) {
+function OfferPlacement({ offer, measurementReady }: { offer: OwnedDemandOfferPlacement; measurementReady: boolean }) {
   const observed = offer.status === "signal_detected";
   const completeDraft = `${offer.draftTitle}\n\n${offer.draftBody}\n\n${offer.trackedUrl}`;
 
@@ -100,7 +122,11 @@ function OfferPlacement({ offer }: { offer: OwnedDemandOfferPlacement }) {
             ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-200"
             : "border-white/10 bg-white/[.03] text-[#8f8778]"
         }`}>
-          {observed ? `${offer.attributedLeads} signal${offer.attributedLeads === 1 ? "" : "s"}` : "Unmeasured"}
+          {!measurementReady
+            ? "Measurement unavailable"
+            : observed
+              ? `${offer.attributedLeads} signal${offer.attributedLeads === 1 ? "" : "s"}`
+              : "Unmeasured"}
         </span>
       </div>
       <p className="mt-3 text-xs leading-5 text-[#bdb2a0]">{offer.draftBody}</p>
@@ -116,7 +142,7 @@ function OfferPlacement({ offer }: { offer: OwnedDemandOfferPlacement }) {
   );
 }
 
-function ChannelCard({ channel }: { channel: OwnedDemandChannel }) {
+function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChannel; measurementReady: boolean }) {
   const observed = channel.status === "signal_detected";
   const channelPacket = buildOwnedDemandChannelPacket(channel);
   return (
@@ -134,7 +160,11 @@ function ChannelCard({ channel }: { channel: OwnedDemandChannel }) {
             ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-200"
             : "border-[#cda24a55] bg-[#cda24a12] text-[#efcc76]"
         }`}>
-          {observed ? `${channel.attributedLeads} live signal${channel.attributedLeads === 1 ? "" : "s"}` : "Ready · unmeasured"}
+          {!measurementReady
+            ? "Measurement unavailable"
+            : observed
+              ? `${channel.attributedLeads} live signal${channel.attributedLeads === 1 ? "" : "s"}`
+              : "Ready · unmeasured"}
         </span>
       </div>
 
@@ -171,7 +201,9 @@ function ChannelCard({ channel }: { channel: OwnedDemandChannel }) {
           </span>
         </summary>
         <div className="space-y-3 border-t border-[#4baab833] p-3">
-          {channel.offers.map((offer) => <OfferPlacement key={offer.key} offer={offer} />)}
+          {channel.offers.map((offer) => (
+            <OfferPlacement key={offer.key} offer={offer} measurementReady={measurementReady} />
+          ))}
         </div>
       </details>
     </article>
@@ -182,11 +214,14 @@ export default async function DistributionPage() {
   await requireLeadCenterPermission("report:view");
   const growth = await loadGrowthIntelligence(30);
   const command = buildOwnedDemandCommand(growth);
-  const stateLabel = command.measurementState === "no_live_signal"
-    ? "Activation required"
-    : command.measurementState === "partial_signal"
-      ? "Attribution repair"
-      : "Measured";
+  const measurement = assessOwnedDemandMeasurement(growth);
+  const stateLabel = !measurement.ready
+    ? measurement.label
+    : command.measurementState === "no_live_signal"
+      ? "Activation required"
+      : command.measurementState === "partial_signal"
+        ? "Attribution repair"
+        : "Measured";
   const firstMove = command.weeklyPlan[0];
   const firstMoveChannel = command.channels.find((channel) => channel.key === firstMove.channelKey);
 
@@ -224,43 +259,62 @@ export default async function DistributionPage() {
           </div>
         </header>
 
+        <MeasurementStateBanner measurement={measurement} />
+
         <section className="mt-5 grid gap-3 sm:grid-cols-3" aria-label="Owned demand measurement status">
           <article className="rounded-xl border border-white/10 bg-[#0a0a0a] p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8f8778]">Eligible live leads · 30d</p>
-            <p className="mt-3 font-serif text-3xl text-[#f4ead4]">{growth.summary.leads}</p>
-            <p className="mt-2 text-xs text-[#8f8778]">Test and suppressed records excluded in SQL</p>
+            <p className="mt-3 font-serif text-3xl text-[#f4ead4]">{measurement.ready ? growth.summary.leads : "—"}</p>
+            <p className="mt-2 text-xs text-[#8f8778]">
+              {measurement.ready ? "Test and suppressed records excluded in SQL" : "Unavailable is not zero live demand"}
+            </p>
           </article>
           <article className="rounded-xl border border-white/10 bg-[#0a0a0a] p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8f8778]">Useful attribution</p>
-            <p className="mt-3 font-serif text-3xl text-[#f4ead4]">{command.attributedLeadRate}%</p>
-            <p className="mt-2 text-xs text-[#8f8778]">Canonical first-party source coverage</p>
+            <p className="mt-3 font-serif text-3xl text-[#f4ead4]">{measurement.ready ? `${command.attributedLeadRate}%` : "—"}</p>
+            <p className="mt-2 text-xs text-[#8f8778]">
+              {measurement.ready ? "Canonical first-party source coverage" : "Awaiting canonical Growth measurement"}
+            </p>
           </article>
           <article className="rounded-xl border border-[#cda24a55] bg-[linear-gradient(145deg,#171108,#090909)] p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#cda24a]">Owned-source signals</p>
-            <p className="mt-3 font-serif text-3xl text-[#f0cf79]">{command.attributedLiveLeads}</p>
-            <p className="mt-2 text-xs text-[#a99a7e]">Exact campaign + placement matches on the latest recorded touch</p>
+            <p className="mt-3 font-serif text-3xl text-[#f0cf79]">{measurement.ready ? command.attributedLiveLeads : "—"}</p>
+            <p className="mt-2 text-xs text-[#a99a7e]">
+              {measurement.ready ? "Exact campaign + placement matches on the latest recorded touch" : "No signal inference while measurement is unavailable"}
+            </p>
           </article>
         </section>
 
         <div className="mt-5 rounded-xl border border-[#cda24a55] bg-[#1a1308] px-5 py-4 text-sm leading-6 text-[#f4ead4]">
-          <strong className="text-[#f0cf79]">Measured bottleneck:</strong> {command.bottleneck}
+          <strong className="text-[#f0cf79]">{measurement.ready ? "Measured bottleneck:" : "Measurement boundary:"}</strong>{" "}
+          {measurement.ready
+            ? command.bottleneck
+            : "Prepared assets remain available for review, but measurement must recover before interpreting demand or choosing a launch channel."}
         </div>
 
         <section className="mt-5 rounded-2xl border border-[#4baab855] bg-[linear-gradient(135deg,#06171b,#080d0e)] p-5 sm:p-6" aria-labelledby="recommended-first-move">
           <div className="flex flex-wrap items-center justify-between gap-5">
             <div className="max-w-3xl">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8bbfc6]">Recommended first move</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8bbfc6]">
+                {measurement.ready ? "Recommended first move" : "Prepared sequence · measurement unavailable"}
+              </p>
               <h2 id="recommended-first-move" className="mt-2 font-serif text-2xl text-[#d8f7fa] sm:text-3xl">
-                Prepare {firstMoveChannel?.label ?? firstMove.channelKey} first.
+                {measurement.ready
+                  ? `Prepare ${firstMoveChannel?.label ?? firstMove.channelKey} first.`
+                  : "Restore measurement before selecting a first channel."}
               </h2>
-              <p className="mt-3 text-sm leading-6 text-[#b9ced0]">{firstMove.objective}</p>
+              <p className="mt-3 text-sm leading-6 text-[#b9ced0]">
+                {measurement.ready
+                  ? firstMove.objective
+                  : `${firstMoveChannel?.label ?? firstMove.channelKey} remains prepared for review, but it is not a data-backed recommendation in this state.`}
+              </p>
               <p className="mt-2 text-xs leading-5 text-[#79a4aa]"><strong className="text-[#9edbe2]">Proof required:</strong> {firstMove.proofRequired}</p>
             </div>
             <Link
               href={`#channel-${firstMove.channelKey}`}
               className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#4baab866] bg-[#4baab818] px-5 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#bff8ff] transition hover:bg-[#4baab82b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2]"
             >
-              Open first channel packet
+              {measurement.ready ? "Open first channel packet" : "Inspect prepared channel packet"}
             </Link>
           </div>
         </section>
@@ -278,7 +332,9 @@ export default async function DistributionPage() {
         </div>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-2">
-          {command.channels.map((channel) => <ChannelCard key={channel.key} channel={channel} />)}
+          {command.channels.map((channel) => (
+            <ChannelCard key={channel.key} channel={channel} measurementReady={measurement.ready} />
+          ))}
         </div>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-[1.3fr_.7fr]">
