@@ -294,6 +294,11 @@ Updated 2026-08-21.
   packet containing its general placement, three offer placements, exact URLs,
   and review boundaries. The shared mobile Lead Center navigation remains a
   separately scoped cross-route polish item.
+- Closed a degraded-state truth gap without adding another data layer. The
+  route now distinguishes ready, not-configured, schema-pending, and
+  query-failed Growth measurement. Unavailable measurement renders em dashes,
+  recovery guidance, and no data-backed channel recommendation; prepared copy
+  remains reviewable without being misrepresented as observed demand.
 - Audited and rewrote retained legacy campaign libraries containing unverified
   volume, tenure, valuation-error, demand, school-proxy, response-time,
   superlative, and direct-phone claims. Public copy preserves the current live
@@ -304,13 +309,16 @@ Updated 2026-08-21.
 - Replaced two soft, undersized legacy offer portraits with higher-resolution
   approved local Mike assets already in the canonical repository.
 - Focused verification passes 6 files / 337 tests. The full local release gate
-  passes system isolation, 14/14 release-safety controls, 196 test files / 2,795
+  passes system isolation, 14/14 release-safety controls, 196 test files / 2,797
   tests, strict typecheck, ESLint, the Next.js 15.5.21 Production build, and the
   78-route manifest. Production dependencies report no known vulnerabilities;
-  the redacted 464-commit history scan reports no secret leaks. Local
+  the redacted 482-commit history scan reports no secret leaks. Local
   Production-render visual QA passes 10/10 desktop/mobile route checks with no
   overflow, missing copy, prohibited claim, bare appraisal language, or console
   error.
+- A separate no-database Production-render acceptance passes at desktop and
+  mobile sizes with three unavailable metrics, no false-zero inference, no
+  measured recommendation, no overflow, and no console/page error.
 - Code-bearing commit `a0c80eaa9b429ed48871fc221d93af5e7d6fdfa1`
   produced Ready Preview deployment `dpl_5UQL8LDfMvFvvi4YZ8UhLdyDFbWF` at
   `https://ask-magic-mike-ihjwzl8rw-eyes-up-industries.vercel.app`. GitHub's
