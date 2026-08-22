@@ -12,10 +12,9 @@ Lead Center controls. Do not introduce carrier SMS, a second notification
 provider, a second database, a second PWA, or device takeover automation.
 
 The consolidation branch is
-`codex/phase9-phone-handoff-consolidation-20260822`, refreshed onto exact PR
-#193 head `008f1faa95d98058199ec01534ee39b474d2a3b2`. Its immediately preceding
-state is preserved at
-`rescue/amm-pr194-pre-pr193-final-refresh-20260822-1412`.
+`codex/phase9-phone-handoff-consolidation-20260822`, refreshed onto released PR
+#193 merge `9b82afb609674bb0209b73f8ac9622ab02733e2a`. Its immediately preceding state
+is preserved at `rescue/amm-pr194-pre-pr193-refresh-20260822-1841`.
 
 ## Problem repaired
 
@@ -87,29 +86,30 @@ separate owner-controlled action after Production release. Mike must enroll his
 own primary device; Brandon's copy-role link cannot impersonate or register
 Mike.
 
-## Acceptance evidence
+## Released-base acceptance evidence
 
-- Draft PR: #194. Post-refresh scoped-authority code-bearing head:
-  `afc68b4060122481701514d0b2fe8630735aad8a`.
+- Draft PR: #194. Released-base code head:
+  `d5da4bd8ac4b0235e140ac785d46824a198292d8`.
 - Portable Production fail-closed repair:
   `f979d808fd76a1dba82b0a7f2b922f04c75af483`.
-- Focused phone/origin/Preview matrix: PASS, 9 files / 61 tests.
-- Full local release gate: PASS, 213 files / 2,929 tests, strict typecheck,
+- Focused phone/origin/Preview matrix: PASS, 8 files / 58 tests.
+- Full exact Node 24 release gate: PASS, 214 files / 2,939 tests, strict typecheck,
   ESLint, optimized Next.js build, 82 active routes, 14/14 safety controls, and
   Ask Magic Mike/NellySelly isolation.
 - Production dependency audit: no known vulnerabilities. The redacted
   full-history scan covers approximately 14.14 MB and reports no leak.
   Candidate diff and migration scans are clean.
-- The earlier Node 24, Vercel Preview, protected Preview QA, and rendered browser
-  evidence belong to the pre-refresh checkpoint and are historical only. Exact
-  final-head Node 24, canonical Preview, strict `PREVIEW_READY`, and visual QA
-  are mandatory and are recorded on PR #194 before it can leave Draft.
+- Exact Node 24 run `32603258868`, canonical Ready Preview deployment
+  `dpl_HErSvZNK89Wh79rbi71KAZhqKdq1`, and protected Preview QA run
+  `32603437125` pass. The protected run records 17 passes, six intentional
+  write skips, zero failures, two expected browser tests, 43/43 doctor checks,
+  and strict `PREVIEW_READY`.
 
 ## Merge order and gate
 
-This candidate is stacked after PR #185 and PR #193. It must be refreshed onto
-the exact released predecessor and rerun Node 24 CI plus canonical Vercel
-Preview verification before release.
+This candidate is refreshed on released `main` after PR #193 and remains the
+sole next Draft application candidate. Passing Preview evidence is not merge or
+Production authority.
 
 Exact future application gate:
 

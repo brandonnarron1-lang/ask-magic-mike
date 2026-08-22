@@ -95,7 +95,34 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
-## Phase 9 iOS phone install handoff consolidation — 2026-08-22
+## PR #194 released-base phone handoff acceptance — 2026-08-22
+
+- PR #193 was approved and released as main merge
+  `9b82afb609674bb0209b73f8ac9622ab02733e2a`; Production acceptance passed on
+  deployment `dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a` with no migration.
+- PR #194 was refreshed onto that released baseline. Its prior exact state is
+  preserved at `rescue/amm-pr194-pre-pr193-refresh-20260822-1841`; the
+  released-base code head is `d5da4bd8ac4b0235e140ac785d46824a198292d8`.
+- Unique candidate delta: 37 files, 1,440 insertions, 159 deletions, and no
+  database migration. Focused verification passes 8 files / 58 tests.
+- Exact Node 24 release run
+  [32603258868](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32603258868)
+  passes 214 files / 2,939 tests, strict typecheck, ESLint, 14/14 safety checks,
+  and the optimized 82-route Next.js 15.5.21 build.
+- Canonical Preview deployment `dpl_HErSvZNK89Wh79rbi71KAZhqKdq1` is Ready at
+  `https://ask-magic-mike-b0vzgy747-eyes-up-industries.vercel.app` and contains
+  exact code head `d5da4bd8ac4b0235e140ac785d46824a198292d8`.
+- Protected Preview QA run
+  [32603437125](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32603437125)
+  passes on Node 24: 17 HTTP checks, six intentional write skips, zero failures,
+  two expected browser tests, 43/43 doctor checks, and strict `PREVIEW_READY`.
+  `SAFE_DB_WRITE=false`; live email/SMS are disabled; no invite, claim, lead,
+  notification, device registration, or database write occurred.
+- Production dependency audit reports no known vulnerability; candidate
+  patch-integrity, gitleaks, and migration scans pass. PR #194 remains Draft;
+  physical enrollment and a `[TEST]` Push remain separately gated.
+
+## Historical pre-released-base phone handoff evidence — 2026-08-22
 
 - Post-refresh security audit — PASS: PR #194 now contains exact PR #193 head
   `008f1faa95d98058199ec01534ee39b474d2a3b2`; the immediately preceding state
