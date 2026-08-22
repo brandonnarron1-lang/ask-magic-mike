@@ -1,6 +1,30 @@
 # QA Evidence
 
-## PR #185 continuation readiness audit — 2026-08-22
+## PR #193 released-main privacy audit — 2026-08-22
+
+- Rebased/refreshed the candidate onto released PR #185 merge
+  `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8`; `origin/main...HEAD` contains 46
+  candidate files and no database migration.
+- Confirmed anonymous Production `/admin/growth?window=90` redirects to
+  `/lead-center-login?error=session`; no Growth evidence renders without a
+  valid Lead Center session. The page itself also requires `report:view`, is
+  force-dynamic, and reads canonical Neon server-side only.
+- Confirmed the exact refreshed Preview root renders the Ask Magic Mike/Our
+  Town identity and conversion controls. Vercel deployment protection returns
+  an authentication redirect for anonymous protected requests, and the Preview
+  application fails closed to read-only mode when explicit mutation enablement
+  is absent.
+- Manual threat review found that slug syntax alone could still accept a
+  single-token name or slugified address as a public campaign dimension. The
+  boundary now requires a registered source/medium/campaign/placement value,
+  drops unregistered values, and reduces dynamic open-house identifiers to the
+  generic `open-house` class. The protected lead record remains the full
+  attribution source of truth.
+- Focused registered-attribution/privacy/API verification: 7 files / 40 tests,
+  all passed. Final exact-head Node 24 CI, Preview QA, dependency/secret scan,
+  visual acceptance, and release evidence are attached to PR #193 after push.
+
+## Historical PR #185 continuation readiness audit — 2026-08-22
 
 - Reconfirmed that current Production remains PR #184 merge
   `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97` on Ready deployment

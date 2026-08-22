@@ -9,16 +9,17 @@ specific expansions; they do not invalidate the live lead pipe.
 - PR #183 is merged and live. PR #184's backup-first Neon migration is applied
   and independently verified; its application release evidence is tracked on
   the PR.
-- PR #185 is Ready and cleanly mergeable at exact final head
-  `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7`; its Node 24 CI, canonical
-  Preview, protected-flow, security, and rendered checks pass. Its exact merge
-  and Production gate remains unreceived.
-- Draft PR #193 consolidates PRs #190–#192 on PR #185 and has been refreshed to
-  the exact final PR #185 head; exact refreshed CI/Preview evidence remains
-  required before it can become release-ready.
+- PR #185 is merged and live as `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8`.
+  Its WordPress proof-scope migration and Production application acceptance
+  passed; its gate is exhausted.
+- Draft PR #193 consolidates PRs #190–#192 on released PR #185. It is refreshed
+  to current `main`; final exact-head CI/Preview evidence remains required
+  before its distinct privacy/KPI gate can be requested.
 - Draft PR #194 consolidates the unique iOS handoff on PR #193 and must be
   refreshed only after PR #193 is finalized. PR #182 is superseded; PRs #92
   and #119–#121 are archive candidates.
+- Draft PR #195 remains stacked after PR #194 and must not be merged or deployed
+  before both predecessors are released and refreshed in order.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,
   and #181 must not be requested again.
 

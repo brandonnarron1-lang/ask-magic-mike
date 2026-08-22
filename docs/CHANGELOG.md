@@ -2,16 +2,17 @@
 
 ## 2026-08-22 — Privacy/KPI-trust final-head hardening
 
-- Refreshed PR #193 onto PR #185 exact final head
-  `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7` after preserving both the
+- Refreshed PR #193 onto released PR #185 merge
+  `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8` after preserving both the
   pre-refresh and post-refresh/pre-hardening states as remote rescue branches.
 - Made both public analytics routes await the canonical Neon write. They now
   return HTTP 202 only after durable persistence succeeds and fail truthfully
   with HTTP 503 when the ledger is unavailable; a serverless invocation can no
   longer acknowledge an event and terminate before its write completes.
-- Restricted public UTM and placement dimensions to controlled identifier
-  slugs. Free-form names, street addresses, sentences, email addresses, phone
-  numbers, full URLs, and arbitrary properties are discarded before the final
+- Restricted public UTM and placement dimensions to a registered operational
+  vocabulary. A syntactically valid slug is no longer presumed anonymous;
+  unregistered single-token names/address slugs are discarded, and open-house
+  identifiers collapse to a non-identifying placement class before the final
   repository-level privacy pass.
 - Consolidated all JSON-LD script rendering onto one serializer that escapes
   script-closing input, with source-level and executable regression coverage.
