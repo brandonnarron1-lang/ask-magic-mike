@@ -13,10 +13,15 @@ vi.mock("../../app/lib/publicOrigin", () => ({
   isApprovedPublicOrigin: () => true,
 }));
 
-vi.mock("../../app/lib/serverAnalytics", () => ({
-  recordServerAnalyticsEvent: (...args: unknown[]) => recordMock(...args),
-  safeAnalyticsProperties: (value: unknown) => value,
-}));
+vi.mock("../../app/lib/serverAnalytics", async () => {
+  const actual = await vi.importActual<typeof import("../../app/lib/serverAnalytics")>(
+    "../../app/lib/serverAnalytics",
+  );
+  return {
+    ...actual,
+    recordServerAnalyticsEvent: (...args: unknown[]) => recordMock(...args),
+  };
+});
 
 import { POST } from "../../app/api/events/route";
 
@@ -53,6 +58,12 @@ describe("POST /api/events", () => {
     expect(recordMock).not.toHaveBeenCalled();
   });
 
+  it("rejects delivery events that must come from trusted server/provider paths", async () => {
+    const response = await POST(request({ event_name: "notification_delivered" }));
+    expect(response.status).toBe(400);
+    expect(recordMock).not.toHaveBeenCalled();
+  });
+
   it("rejects an oversized event before parsing or persistence", async () => {
     const response = await POST(request({
       event_name: "funnel_started",
@@ -60,6 +71,33 @@ describe("POST /api/events", () => {
     }));
     expect(response.status).toBe(413);
     expect(recordMock).not.toHaveBeenCalled();
+  });
+
+  it("drops arbitrary and PII-bearing properties before persistence", async () => {
+    const response = await POST(request({
+      event_name: "funnel_started",
+      properties: {
+        funnel_name: "seller",
+        arbitrary: "person@example.com",
+        surface: "252-555-0100",
+      },
+      attribution: {
+        source: "person@example.com",
+        medium: "social_organic",
+        campaign: "home_value",
+      },
+    }));
+    expect(response.status).toBe(202);
+    expect(recordMock).toHaveBeenCalledWith(expect.objectContaining({
+      category: "intake",
+      properties: { funnel_name: "seller" },
+      attribution: {
+        source: undefined,
+        medium: "social_organic",
+        campaign: "home_value",
+      },
+      userAgent: "browser/desktop",
+    }));
   });
 
   it("accepts a strictly normalized Core Web Vital without lead or attribution context", async () => {

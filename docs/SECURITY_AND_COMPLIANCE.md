@@ -51,6 +51,12 @@
   HTTP 429 with a bounded `Retry-After` value and performs no appointment write.
   Read-only Preview rejects the request before even the rate-limit bucket can
   write, preserving the zero-mutation Preview boundary.
+- Both public analytics compatibility routes use exact origin checks, 4 KiB
+  bounded JSON, scalar-only schemas, public-event/property allowlists, and
+  value-level contact/secret rejection. Request IP stays inside the rate-limit
+  decision; durable analytics receives only a coarse browser/automation device
+  class. The Neon repository repeats property, UTM, path, and user-agent
+  minimization before every write.
 
 ## Required human/legal review
 
@@ -89,6 +95,33 @@ and the documented reverse-proxy assumption.
   to preserve funnel availability and emits a critical log. Vercel WAF remains
   optional defense in depth. A future reverse proxy must revalidate client-IP
   header trust before cutover.
+
+### AMM-AN-001 — resolved in the analytics privacy candidate
+
+- Rule: `NEXT-INPUT-001`, `NEXT-LOG-001`, and data-minimization boundary.
+- Severity: Medium before the fix; resolved for new writes in the candidate.
+- Location: `app/api/events/route.ts`, `src/app/api/analytics/event/route.ts`,
+  `app/lib/analytics.ts`, and
+  `src/lib/persistence/neon/analytics-event-repository.ts`.
+- Evidence: the prior public contracts accepted arbitrary `properties` and the
+  final repository filtered only PII-shaped key names. A contact value hidden
+  under an innocent key could therefore persist, while one compatibility route
+  forwarded raw user-agent data and client analytics copied full attribution to
+  browser integrations.
+- Fix: one shared fail-closed contract now enforces approved event/property
+  pairs, scalar/body/field bounds, sensitive-value rejection, known public
+  paths, sanitized UTM dimensions, internal-event exclusion, coarse user-agent
+  classification, and final-write defense in depth. Client DOM/dataLayer/
+  PostHog/postMessage payloads use the same minimized fields.
+- Verification: focused tests prove disguised email/phone values, arbitrary
+  keys, nested properties, oversized bodies, foreign origins, internal-event
+  spoofing, raw IP forwarding, raw user agents, and sensitive client attribution
+  do not cross the analytics boundary. Existing funnel, widget, UTM, review
+  planner, and Core Web Vitals dimensions remain available.
+- Residual: no code can detect intentionally encoded covert data in every
+  machine-token field. Strict key/value grammar, value-level detectors, route
+  normalization, small bounds, and server/repository repetition materially
+  constrain that risk. Historical Production rows were not read or rewritten.
 
 No additional Critical or High issue was confirmed in the touched path. The
 rate-limit module is imported only by server routes/actions and the protected

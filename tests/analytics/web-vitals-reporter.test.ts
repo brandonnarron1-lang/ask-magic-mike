@@ -89,7 +89,16 @@ describe("privacy-minimized Web Vitals contract", () => {
     const normalized = normalizeWebVitalEventProperties(validProperties());
     expect(normalized).not.toBeNull();
     const stored = safeAnalyticsProperties(toWebVitalAnalyticsProperties(normalized!));
-    expect(stored.metric_code).toBe("LCP");
+    expect(stored).toEqual({
+      metric_code: "LCP",
+      metric_id: "v5-1787346000000-123456789",
+      metric_value: 1834.57,
+      rating: "good",
+      navigation_type: "navigate",
+      route: "/home-value",
+      device_category: "mobile",
+      traffic_class: "public_production",
+    });
     expect(stored).not.toHaveProperty("metric_name");
   });
 });

@@ -3,6 +3,12 @@ import {
   NeonAnalyticsEventRepository,
   safeAnalyticsProperties,
 } from "@/lib/persistence/neon/analytics-event-repository";
+import {
+  coarseAnalyticsUserAgent,
+  safeAnalyticsDimension,
+  safeAnalyticsPath,
+  safePublicAnalyticsProperties,
+} from "@/lib/analytics/privacy";
 
 describe("safeAnalyticsProperties", () => {
   it("removes PII-shaped keys and non-scalar values", () => {
@@ -14,6 +20,47 @@ describe("safeAnalyticsProperties", () => {
         nested: { unsafe: true },
       }),
     ).toEqual({ source: "widget", score: 82 });
+  });
+
+  it("uses an allowlist and rejects sensitive values hidden under safe keys", () => {
+    expect(
+      safeAnalyticsProperties({
+        arbitrary: "person@example.com",
+        surface: "person@example.com",
+        request_surface: "Sarah",
+        funnel_name: "seller",
+        phone: "252-555-0100",
+        score: Number.POSITIVE_INFINITY,
+      }),
+    ).toEqual({ funnel_name: "seller" });
+  });
+
+  it("retains only event-specific public dimensions", () => {
+    expect(
+      safePublicAnalyticsProperties("widget_contact_submitted", {
+        hasEmail: true,
+        hasPhone: false,
+        surface: "landing_hero",
+        email: "person@example.com",
+      }),
+    ).toEqual({ hasEmail: true, hasPhone: false });
+  });
+
+  it("normalizes public paths and rejects unsafe attribution dimensions", () => {
+    expect(safeAnalyticsPath("https://www.askmagicmike.com/home-value?utm_source=facebook"))
+      .toBe("/home-value");
+    expect(safeAnalyticsPath("/open-house/3106-quinn-dr")).toBe("/open-house/[property-or-id]");
+    expect(safeAnalyticsPath("/admin/leads")).toBeNull();
+    expect(safeAnalyticsDimension("wilson-nc-sellers")).toBe("wilson-nc-sellers");
+    expect(safeAnalyticsDimension("person@example.com")).toBeNull();
+    expect(safeAnalyticsDimension("252-555-0100")).toBeNull();
+  });
+
+  it("stores only a coarse browser or automation class", () => {
+    expect(coarseAnalyticsUserAgent("Mozilla/5.0 (iPhone) Safari/605", "mobile"))
+      .toBe("browser/mobile");
+    expect(coarseAnalyticsUserAgent("curl/8.7.1")).toBe("automation/desktop");
+    expect(coarseAnalyticsUserAgent(null)).toBeNull();
   });
 });
 
@@ -46,5 +93,25 @@ describe("NeonAnalyticsEventRepository", () => {
       repository.record({ eventName: "INVALID EVENT" }),
     ).resolves.toBe(false);
     expect(query).not.toHaveBeenCalled();
+  });
+
+  it("minimizes attribution and user-agent again at the durable write boundary", async () => {
+    const query = vi.fn().mockResolvedValue([]);
+    const repository = new NeonAnalyticsEventRepository({ query });
+
+    await repository.record({
+      eventName: "page_view",
+      properties: { funnel_name: "seller", device_category: "mobile" },
+      utmSource: "person@example.com",
+      utmMedium: "social_organic",
+      utmCampaign: "home_value",
+      userAgent: "Mozilla/5.0 (iPhone) AppleWebKit/605.1.15",
+    });
+
+    const params = query.mock.calls[0][1];
+    expect(params[6]).toBeNull();
+    expect(params[7]).toBe("social_organic");
+    expect(params[8]).toBe("home_value");
+    expect(params[9]).toBe("browser/mobile");
   });
 });

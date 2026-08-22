@@ -5,6 +5,36 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Analytics privacy hardening — 2026-08-21
+
+- Preservation: exact predecessor
+  `d431bc3427720ae68167b1864e98e406206a47a3` remains on pushed rescue branch
+  `rescue/amm-pre-analytics-privacy-20260821-213020`. No force-push, reset,
+  discarded worktree, Production action, or live query was used.
+- Focused Vitest: PASS — 6 files / 49 tests covering both public event routes,
+  final Neon write minimization, browser analytics payloads, Core Web Vitals,
+  and lead-engine privacy compatibility.
+- Full `pnpm run release:gate`: PASS — Ask Magic Mike/NellySelly isolation,
+  14/14 release-safety checks, 213 files / 2,942 tests, strict typecheck,
+  ESLint, optimized Next.js 15.5.21 build, 52/52 static pages, and route
+  manifest verification (83 active / 17 acknowledged root–`src` duplicates).
+- Strict typecheck: PASS both independently and within the full release gate.
+- `git diff --check`: PASS before the evidence update and rerun at handoff.
+- `pnpm audit --prod`: PASS — no known Production dependency vulnerability.
+- `gitleaks git --redact --no-banner`: PASS — 486 commits / approximately
+  13.68 MB scanned with no leak.
+- Negative proof covers arbitrary keys, PII hidden under safe-looking keys,
+  nested properties, payloads over 4 KiB, foreign browser origins,
+  internal-event spoofing, raw IP forwarding, raw user-agent persistence,
+  sensitive browser attribution, and unknown/admin paths.
+- Positive proof retains approved funnel, widget, UTM, source/placement, review
+  planner, and complete privacy-minimized LCP/INP/CLS properties.
+- Production dependency audit, secret scan, exact Node 24 CI, protected Vercel
+  Preview, and read-only route checks are recorded on the final immutable
+  candidate head before release readiness.
+- No database migration or data remediation is part of this candidate. Existing
+  Production analytics rows were neither read nor modified.
+
 ## Durable rate-limit privacy hardening — 2026-08-21
 
 - Preservation: exact predecessor `9dd6684596ac8afbc52076d2c1597c12a0fa33e2`

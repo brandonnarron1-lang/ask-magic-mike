@@ -22,6 +22,25 @@ for scoring, routing, or targeting.
 - `is_test=true` records are excluded from KPIs and must say `INTERNAL QA — DO
   NOT CONTACT`.
 
+## Analytics minimization
+
+- Public analytics receives only approved event/property combinations and
+  bounded scalar values. Unknown keys and nested structures are dropped or
+  rejected before the ledger call.
+- Name, email, phone, address, question/message, raw URLs/query strings, raw IP,
+  secrets, provider message IDs, and raw user-agent strings are excluded from
+  analytics properties. The durable Neon repository repeats filtering even for
+  trusted server callers.
+- Public paths are reduced to a known route; open-house identifiers collapse to
+  `/open-house/[property-or-id]`. User agents retain only browser/automation and
+  coarse device class.
+- The canonical lead/attribution record still preserves approved first/last
+  touch and click IDs. Analytics minimization does not replace or weaken that
+  separate evidence record.
+- This code prevents new raw analytics writes. Any remediation of historical
+  Production rows is a separate retention/data-change decision and requires an
+  approved, audited migration; this candidate performs no live data rewrite.
+
 ## Access and disclosure
 
 Only approved staff may access Lead Center records. Agent visibility must be

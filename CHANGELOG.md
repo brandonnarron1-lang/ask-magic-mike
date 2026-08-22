@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-21 — Analytics ingestion privacy hardening
+
+- Replaced key-name-only analytics filtering with a shared public event/property
+  contract and a repeatable final-write allowlist.
+- Added value-level contact/secret rejection, bounded scalar payloads, strict
+  public event integrity, known-route normalization, sanitized UTM dimensions,
+  and coarse user-agent storage without changing the canonical Neon schema.
+- Minimized browser dataLayer/PostHog/DOM/iframe payloads and removed raw IP from
+  analytics forwarding while preserving the working funnel and Web Vitals
+  dimensions. Production data and deployment remain unchanged.
+
 ## 2026-08-21 — Durable rate-limit privacy hardening
 
 - Reused the canonical Neon rate limiter and replaced persisted raw client/

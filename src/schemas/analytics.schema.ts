@@ -1,5 +1,23 @@
 import { z } from "zod";
 
+const AnalyticsPropertyValueSchema = z.union([
+  z.string().max(200),
+  z.number().finite(),
+  z.boolean(),
+  z.null(),
+]);
+
+const AnalyticsPropertiesSchema = z
+  .record(AnalyticsPropertyValueSchema)
+  .superRefine((value, ctx) => {
+    if (Object.keys(value).length > 40) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Analytics properties are limited to 40 scalar dimensions",
+      });
+    }
+  });
+
 export const TrackEventSchema = z.object({
   eventName: z.enum([
     "session_created",
@@ -56,11 +74,10 @@ export const TrackEventSchema = z.object({
   ]),
   sessionId: z.string().uuid().optional(),
   leadId: z.string().uuid().optional(),
-  agentId: z.string().uuid().optional(),
-  properties: z.record(z.unknown()).optional().default({}),
-  utmSource: z.string().max(200).optional(),
-  utmMedium: z.string().max(200).optional(),
-  utmCampaign: z.string().max(200).optional(),
-});
+  properties: AnalyticsPropertiesSchema.optional().default({}),
+  utmSource: z.string().max(120).optional(),
+  utmMedium: z.string().max(120).optional(),
+  utmCampaign: z.string().max(120).optional(),
+}).strict();
 
 export type TrackEventInput = z.infer<typeof TrackEventSchema>;

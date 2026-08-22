@@ -8,7 +8,13 @@ import {
   toWebVitalAnalyticsProperties,
 } from "../../lib/experience/web-vitals";
 import { isApprovedPublicOrigin } from "../../lib/publicOrigin";
-import { recordServerAnalyticsEvent, safeAnalyticsProperties } from "../../lib/serverAnalytics";
+import {
+  coarseAnalyticsUserAgent,
+  isApprovedPublicAnalyticsEvent,
+  recordServerAnalyticsEvent,
+  safeAnalyticsDimension,
+  safePublicAnalyticsProperties,
+} from "../../lib/serverAnalytics";
 
 const approvedEventNames = new Set<string>(analyticsEvents);
 const MAX_EVENT_BODY_BYTES = 4_096;
@@ -65,6 +71,9 @@ export async function POST(req: Request) {
   if (typeof body.event_name !== "string" || !approvedEventNames.has(body.event_name)) {
     return NextResponse.json({ error: "Invalid event.", correlation_id: correlationId }, { status: 400 });
   }
+  if (body.event_name !== "web_vital_observed" && !isApprovedPublicAnalyticsEvent(body.event_name)) {
+    return NextResponse.json({ error: "Invalid public event.", correlation_id: correlationId }, { status: 400 });
+  }
   const properties = body.properties && typeof body.properties === "object" && !Array.isArray(body.properties) ? body.properties as Record<string, unknown> : {};
   const webVitalProperties = body.event_name === "web_vital_observed"
     ? normalizeWebVitalEventProperties(properties)
@@ -85,18 +94,24 @@ export async function POST(req: Request) {
     eventName: body.event_name,
     category: body.event_name === "web_vital_observed"
       ? "system"
-      : typeof body.event_category === "string" ? body.event_category : "system",
+      : body.event_name === "page_view" ? "session" : "intake",
     sessionId: body.event_name === "web_vital_observed" ? null : typeof body.session_id === "string" ? body.session_id : null,
     leadId: body.event_name === "web_vital_observed" ? null : typeof body.lead_id === "string" ? body.lead_id : null,
     properties: webVitalProperties
       ? toWebVitalAnalyticsProperties(webVitalProperties)
-      : safeAnalyticsProperties(properties),
+      : safePublicAnalyticsProperties(body.event_name, properties),
     attribution: body.event_name === "web_vital_observed"
       ? undefined
-      : body.attribution && typeof body.attribution === "object" ? body.attribution as { source?: string; medium?: string; campaign?: string } : undefined,
+      : body.attribution && typeof body.attribution === "object"
+        ? {
+            source: safeAnalyticsDimension((body.attribution as Record<string, unknown>).source) ?? undefined,
+            medium: safeAnalyticsDimension((body.attribution as Record<string, unknown>).medium) ?? undefined,
+            campaign: safeAnalyticsDimension((body.attribution as Record<string, unknown>).campaign) ?? undefined,
+          }
+        : undefined,
     userAgent: webVitalProperties
       ? webVitalUserAgent
-      : req.headers.get("user-agent"),
+      : coarseAnalyticsUserAgent(req.headers.get("user-agent"), properties.device_category),
   });
   return NextResponse.json({ ok: true, persisted, correlation_id: correlationId }, { status: 202 });
 }

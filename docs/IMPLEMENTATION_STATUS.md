@@ -25,6 +25,36 @@ PR #190 is stacked after #179 as documented in the next section. Historical
 feature sections below retain the local/code-bearing evidence captured at that
 stage; the table above is authoritative for the listed mutable heads.
 
+## Phase 9 analytics privacy hardening — 2026-08-21
+
+- Reused the existing public event routes, client analytics helper, canonical
+  Neon `analytics_events` table, and server ledger. No second analytics vendor,
+  database, schema, provider, or admin surface was introduced.
+- Added one shared privacy contract for explicit public event/property pairs,
+  bounded scalar payloads, sensitive-value rejection, known public paths,
+  sanitized UTM dimensions, and coarse user-agent classes. The final Neon write
+  repeats minimization for public and internal callers.
+- Removed full attribution/query/click-ID copying from browser dataLayer,
+  PostHog compatibility, DOM events, and iframe messages while retaining safe
+  funnel/source/placement/device dimensions. Lead-level first/last touch and
+  click-ID evidence remains in the canonical lead attribution record.
+- The compatibility endpoint no longer forwards raw IP to analytics, and its
+  public route now rejects internal-only events, foreign origins, nested
+  properties, and bodies over 4 KiB. Raw IP remains available only to the
+  existing durable rate-limit decision.
+- Focused verification passes 6 files / 49 tests. The full local release gate
+  passes Ask Magic Mike/NellySelly isolation, 14/14 safety checks, 213 files /
+  2,942 tests, strict typecheck, ESLint, optimized Next.js 15.5.21 build, 52/52
+  static pages, and route-manifest verification (83 active / 17 acknowledged
+  root–`src` duplicates). Exact Node 24, protected Preview, and immutable-head
+  evidence are completed before release readiness and attached to the Draft PR.
+- No Production deployment, database query/write/migration, historical-row
+  rewrite, lead, external message, WordPress change, publication, DNS change,
+  spend, or NellySelly action occurred.
+- This candidate is stacked after Draft PR #190 and cannot bypass the existing
+  PR #183–#190 order. Exact future gate:
+  `APPROVE PHASE 9 ANALYTICS PRIVACY HARDENING MERGE AND PRODUCTION DEPLOYMENT`.
+
 ## Phase 9 durable rate-limit privacy hardening — 2026-08-21
 
 - Audited the existing limiter before changing it. Production already uses the

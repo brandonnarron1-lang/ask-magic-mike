@@ -167,7 +167,7 @@ describe("same-day lead engine contract", () => {
   });
 
   it("removes sensitive keys from analytics properties", () => {
-    expect(safeAnalyticsProperties({ email: "qa@example.test", phone: "2525550100", address: "1 Synthetic QA Road", score: 92, funnel_name: "seller" })).toEqual({ score: 92 });
+    expect(safeAnalyticsProperties({ email: "qa@example.test", phone: "2525550100", address: "1 Synthetic QA Road", score: 92, funnel_name: "seller" })).toEqual({ score: 92, funnel_name: "seller" });
   });
 
   it("passes the hidden BCC and safe reply-to through the existing Resend provider", async () => {
