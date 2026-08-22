@@ -66,7 +66,8 @@ describe("Phase 9.5 search-authority route wiring", () => {
     expect(source).toContain('"@type": "WebSite"');
     expect(source).toContain('"@type": "WebPage"');
     expect(source).toContain('type="application/ld+json"');
-    expect(source).toContain('replace(/</g, "\\\\u003c")');
+    expect(source).toContain("serializeJsonLd(graph)");
+    expect(read("src/lib/security/json-ld.ts")).toContain('replace(/</g, "\\\\u003c")');
     expect(source).not.toContain("telephone:");
     expect(source).not.toContain("address:");
     expect(source).not.toContain("aggregateRating");

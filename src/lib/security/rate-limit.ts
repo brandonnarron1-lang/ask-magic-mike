@@ -1,3 +1,5 @@
+import { createHmac } from "node:crypto";
+
 /**
  * Rate limiter — Neon PostgreSQL in production, in-memory in development/test.
  *
@@ -26,6 +28,54 @@ export interface RateLimitStore {
 interface BucketEntry {
   count: number;
   windowStart: number;
+}
+
+const DURABLE_BUCKET_KEY_VERSION = "v1";
+const DURABLE_BUCKET_RETENTION_MS = 24 * 60 * 60 * 1000;
+const DURABLE_BUCKET_SECRET_MIN_LENGTH = 32;
+
+type DurableRateLimitSecretEnv = Partial<Record<
+  "RATE_LIMIT_HASH_SECRET" | "CONSENT_IP_HASH_SALT" | "CRON_SECRET" | "ADMIN_SECRET",
+  string | undefined
+>>;
+
+function durableBucketHashSecret(env: DurableRateLimitSecretEnv = process.env): string | null {
+  const candidates = [
+    env.RATE_LIMIT_HASH_SECRET,
+    env.CONSENT_IP_HASH_SALT,
+    env.CRON_SECRET,
+    env.ADMIN_SECRET,
+  ];
+  return candidates
+    .map((candidate) => candidate?.trim() || "")
+    .find((candidate) => candidate.length >= DURABLE_BUCKET_SECRET_MIN_LENGTH) || null;
+}
+
+/** Boolean-only readiness probe for protected health output and tests. */
+export function durableRateLimitHashSecretReady(env: DurableRateLimitSecretEnv = process.env): boolean {
+  return durableBucketHashSecret(env) !== null;
+}
+
+/**
+ * Build the durable identifier stored in Neon without persisting the raw
+ * client IP, staff principal, session identifier, or other limiter key.
+ *
+ * The route prefix remains visible for operations, while the sensitive key is
+ * domain-separated and HMAC-SHA-256 pseudonymized with a server-only secret.
+ */
+export function durableRateLimitBucketKey(
+  key: string,
+  prefix: LimitKey,
+  secret: string,
+): string {
+  const normalizedSecret = secret.trim();
+  if (normalizedSecret.length < DURABLE_BUCKET_SECRET_MIN_LENGTH) {
+    throw new Error("A durable rate-limit hash secret of at least 32 characters is required.");
+  }
+  const digest = createHmac("sha256", normalizedSecret)
+    .update(`ask-magic-mike:rate-limit:${DURABLE_BUCKET_KEY_VERSION}\0${prefix}\0${key}`)
+    .digest("hex");
+  return `amm:rl:${DURABLE_BUCKET_KEY_VERSION}:${prefix}:${digest}`;
 }
 
 /**
@@ -68,13 +118,27 @@ async function checkNeonRateLimit(
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) return null;
 
+  const hashSecret = durableBucketHashSecret();
+  if (!hashSecret) {
+    console.error(
+      "[rate-limit] Durable limiting is unavailable because no server-only hash secret is configured. " +
+      "Set a 32+ character RATE_LIMIT_HASH_SECRET or retain one of the documented strong server-secret fallbacks.",
+    );
+    return null;
+  }
+
   try {
     if (!_neonSql) {
       const { neon } = await import("@neondatabase/serverless");
       _neonSql = neon(databaseUrl);
     }
-    const bucketKey = `${prefix}:${key}`;
+    const bucketKey = durableRateLimitBucketKey(key, prefix, hashSecret);
     const rows = (await _neonSql`
+      WITH pruned_stale_buckets AS (
+        DELETE FROM public.rate_limit_buckets
+        WHERE window_started_at <= NOW() - (${DURABLE_BUCKET_RETENTION_MS} * INTERVAL '1 millisecond')
+        RETURNING bucket_key
+      )
       INSERT INTO public.rate_limit_buckets (bucket_key, request_count, window_started_at)
       VALUES (${bucketKey}, 1, NOW())
       ON CONFLICT (bucket_key) DO UPDATE SET
@@ -87,7 +151,8 @@ async function checkNeonRateLimit(
           WHEN public.rate_limit_buckets.window_started_at <= NOW() - (${windowMs} * INTERVAL '1 millisecond')
             THEN NOW()
           ELSE public.rate_limit_buckets.window_started_at
-        END
+        END,
+        updated_at = NOW()
       RETURNING
         request_count,
         EXTRACT(EPOCH FROM (window_started_at + (${windowMs} * INTERVAL '1 millisecond'))) * 1000 AS reset_at
@@ -161,7 +226,7 @@ export async function checkRateLimit(
   if (isProduction && !process.env.RATE_LIMIT_EMERGENCY_MEMORY) {
     console.error(
       "[rate-limit] CRITICAL: Production is using non-durable in-memory rate limiting. " +
-      "Set DATABASE_URL and apply the rate_limit_buckets migration to enable durable limits. " +
+      "Set DATABASE_URL, apply the rate_limit_buckets migration, and configure a server-only hash secret. " +
       "Set RATE_LIMIT_EMERGENCY_MEMORY=1 to acknowledge this degraded state."
     );
   }

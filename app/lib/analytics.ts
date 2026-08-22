@@ -4,6 +4,10 @@ import { analyticsEvents } from "./constants";
 import { getDeviceCategory } from "./attribution";
 import type { Attribution } from "./leadPayload";
 import { allowedWidgetParentOrigin } from "./publicOrigin";
+import {
+  safePublicAnalyticsProperties,
+  safeRegisteredPublicAnalyticsDimension,
+} from "@/lib/analytics/privacy";
 
 export type EventName = (typeof analyticsEvents)[number];
 
@@ -14,14 +18,19 @@ export function trackEvent(
 ) {
   if (typeof window === "undefined") return;
 
+  const safeProperties = safePublicAnalyticsProperties(event, {
+    ...properties,
+    current_path: window.location.pathname,
+    device_category: attribution.device_category || getDeviceCategory(),
+    placement: attribution.placement,
+    placement_id: attribution.placement_id,
+    utm_source: attribution.source,
+    utm_medium: attribution.medium,
+    utm_campaign: attribution.campaign,
+  });
   const payload = {
     event,
-    properties: {
-      ...properties,
-      ...attribution,
-      current_path: window.location.pathname + window.location.search,
-      device_category: attribution.device_category || getDeviceCategory(),
-    },
+    properties: safeProperties,
   };
 
   window.dispatchEvent(new CustomEvent("askmagicmike:event", { detail: payload }));
@@ -43,11 +52,11 @@ export function trackEvent(
     body: JSON.stringify({
       event_name: event,
       event_category: "intake",
-      properties,
+      properties: safeProperties,
       attribution: {
-        source: attribution.source,
-        medium: attribution.medium,
-        campaign: attribution.campaign,
+        source: safeRegisteredPublicAnalyticsDimension("utm_source", attribution.source) ?? undefined,
+        medium: safeRegisteredPublicAnalyticsDimension("utm_medium", attribution.medium) ?? undefined,
+        campaign: safeRegisteredPublicAnalyticsDimension("utm_campaign", attribution.campaign) ?? undefined,
       },
     }),
     keepalive: true,

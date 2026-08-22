@@ -1,94 +1,62 @@
-# Rate Limiting Durability Plan
+# Rate-Limiting Durability and Privacy
 
-## Current state (not launch-grade)
+## Current production architecture
 
-`src/lib/security/rate-limit.ts` implements an **in-memory rate limiter** backed by a plain `Map`. This works for local development but has three disqualifying properties for production:
+Ask Magic Mike uses the canonical Neon `public.rate_limit_buckets` table for
+atomic counters shared across Vercel instances. The in-memory store remains only
+for local development and an explicitly acknowledged degraded mode. No Redis,
+Upstash, paid add-on, second database, or Supabase dependency is required.
 
-| Property | In-memory (current) | Required for launch |
-|----------|--------------------|--------------------|
-| Survives cold start | No — resets to zero on every function boot | Yes |
-| Shared across instances | No — each Vercel function instance has its own store | Yes |
-| Persistent under load | No — Vercel scales horizontally; stores diverge | Yes |
+The limiter covers lead capture, intake steps and sessions, analytics, chat,
+phone setup, and public appointment requests. Each route selects a named bucket
+prefix and a bounded window/limit from `src/lib/security/rate-limit.ts`.
 
-**Practical impact:** An attacker can exhaust any single instance's window, then route to another instance (or wait for a cold start) and bypass all limits. The limiter provides best-effort protection in single-instance dev environments only.
+## Durable-key privacy
 
-The code already documents this with a TODO comment:
+Raw IP addresses, staff principals, session identifiers, and other caller keys
+must never be written to Neon. Durable bucket identifiers use this format:
 
-```
-// TODO (before launch): Replace the in-memory store with Upstash Redis
-```
+`amm:rl:v1:<route-prefix>:<HMAC-SHA-256 digest>`
 
----
+The digest is domain-separated by product, key version, and route prefix. The
+server selects the first 32-or-more-character secret in this order:
 
-## Launch-grade upgrade path: Upstash Redis
+1. `RATE_LIMIT_HASH_SECRET` (recommended dedicated secret)
+2. `CONSENT_IP_HASH_SALT`
+3. `CRON_SECRET`
+4. `ADMIN_SECRET`
 
-Upstash is a serverless Redis provider that works in Vercel Edge and Node.js runtimes. The `@upstash/ratelimit` package provides a drop-in sliding-window limiter.
+Only boolean readiness appears in the protected health response. Secret values,
+raw bucket inputs, and the HMAC key are never returned, logged, committed, or
+sent as SQL parameters.
 
-### Required packages
+## Retention and failure behavior
 
-```bash
-pnpm add @upstash/ratelimit @upstash/redis
-```
+- Each successful durable check opportunistically removes buckets whose window
+  started more than 24 hours ago.
+- Existing pre-HMAC bucket rows stop receiving updates and age out through the
+  same bounded cleanup.
+- A missing database or strong hash secret causes a critical production log and
+  an availability-first in-memory fallback; it never writes a raw identifier.
+- `RATE_LIMIT_EMERGENCY_MEMORY=1` acknowledges a controlled degraded period. It
+  does not make the fallback durable and should not remain enabled normally.
+- Database errors fail to the same bounded in-memory fallback so an abuse-store
+  incident does not take every public form offline.
 
-### Required environment variables
+## Required production configuration
 
-| Variable | Source | Note |
-|----------|--------|------|
-| `UPSTASH_REDIS_REST_URL` | Upstash console → REST API | Do not use `NEXT_PUBLIC_` prefix |
-| `UPSTASH_REDIS_REST_TOKEN` | Upstash console → REST API | Secret — server-only |
+- `DATABASE_URL` points to the Ask Magic Mike production Neon branch.
+- The canonical migration chain includes
+  `supabase/migrations/20260811155000_durable_rate_limit.sql`.
+- At least one strong secret in the documented fallback order is configured;
+  use a dedicated `RATE_LIMIT_HASH_SECRET` when practical.
+- NellySelly database URLs, secrets, projects, or aliases are forbidden.
 
-### Migration sketch
+## Verification
 
-```typescript
-// src/lib/security/rate-limit.ts — production version
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
+Automated tests prove deterministic domain separation, short-secret rejection,
+no raw key/secret SQL parameter, 24-hour pruning, `updated_at` maintenance,
+durable/in-memory behavior, and boolean-only protected health reporting.
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
-
-export const LIMITERS = {
-  intakeSubmit: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(10, "10 m"),
-    prefix: "amm:intake",
-  }),
-  sessionCreate: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(30, "10 m"),
-    prefix: "amm:session",
-  }),
-  analyticsEvent: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(60, "1 m"),
-    prefix: "amm:analytics",
-  }),
-};
-
-// Usage: const { success, remaining, reset } = await LIMITERS.intakeSubmit.limit(ip);
-```
-
-The existing `checkRateLimit` callers in `src/app/api/intake/submit/route.ts`, `src/app/api/session/create/route.ts`, and `src/app/api/analytics/event/route.ts` would each need to `await` the new async API instead of the current sync call.
-
----
-
-## Authorization gate
-
-This upgrade adds a paid external dependency (Upstash). **Do not implement without owner approval.** The Upstash free tier allows 10,000 requests/day; paid plans start at $10/month.
-
-When approved:
-1. Create Upstash account and Redis database
-2. Set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` in Vercel production environment
-3. Swap the implementation and update the three callers
-4. Deploy and verify the `X-RateLimit-Remaining` header decrements correctly across instances
-5. Remove this blocker from `docs/PRODUCTION_LAUNCH_GATE.md` Section 8
-
----
-
-## Blocking status
-
-This item is tracked as a hard launch blocker in `docs/PRODUCTION_LAUNCH_GATE.md` Section 8.
-
-Owner: TBD · ETA: Before launch
+This candidate is application-only. It requires no production migration and
+does not rotate or display any existing secret.

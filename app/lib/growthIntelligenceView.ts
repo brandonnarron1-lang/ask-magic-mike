@@ -4,6 +4,8 @@ export {
 
 export type {
   GrowthIntelligenceView,
+  GrowthDeliverySnapshot,
+  GrowthOutcomeMetricsSnapshot,
   PersistedGrowthOpportunity,
   PersistedGrowthRecommendation,
   GrowthChannelEconomics,

@@ -37,10 +37,14 @@ When a rate limit is hit, the route logs `warn("rate_limited", { request_id })` 
 Rate limits are enforced per IP. In production, the canonical Neon
 `rate_limit_buckets` table makes limits durable across serverless instances.
 Without `DATABASE_URL`, an in-memory sliding window is used for local tests only.
+Neon receives only a versioned, route-scoped HMAC bucket identifier. Raw IP,
+staff, and session keys are never durable bucket values.
 
 **Required production configuration:**
 - `DATABASE_URL` — the same server-only Neon connection used by lead capture
 - `public.rate_limit_buckets` — applied by the canonical migration chain
+- `RATE_LIMIT_HASH_SECRET` — recommended dedicated 32+ character HMAC secret;
+  documented strong server secrets provide a compatibility fallback
 
 `RATE_LIMIT_EMERGENCY_MEMORY=1` acknowledges a temporary degraded in-memory mode;
 it does not make the limiter durable.
@@ -57,7 +61,10 @@ Client-side funnel events POST to `/api/analytics/event`. Key events:
 | `intake_step_completed` | User advances a step (server-side) |
 | `session_created` | New session initialized |
 
-Events are written to the `analytics_events` Supabase table via `trackEventNoWait()` (fire-and-forget).
+Events are written to the canonical Neon `analytics_events` table via
+`trackEventNoWait()` (fire-and-forget). Public routes accept only named scalar
+dimensions, strip query strings and dynamic open-house paths, discard PII and
+click IDs, and store only a coarse browser/automation device class.
 
 ## Log Levels
 

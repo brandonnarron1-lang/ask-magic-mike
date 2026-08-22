@@ -1,7 +1,15 @@
 import {
   recordNeonAnalyticsEvent,
-  safeAnalyticsProperties,
 } from "@/lib/persistence/neon/analytics-event-repository";
+import {
+  coarseAnalyticsUserAgent,
+  isApprovedPublicAnalyticsEvent,
+  safeAnalyticsDimension,
+  safeAnalyticsProperties,
+  safePublicAnalyticsDimension,
+  safePublicAnalyticsProperties,
+  safeRegisteredPublicAnalyticsDimension,
+} from "@/lib/analytics/privacy";
 
 export type ServerAnalyticsEvent = {
   eventName: string;
@@ -13,7 +21,15 @@ export type ServerAnalyticsEvent = {
   userAgent?: string | null;
 };
 
-export { safeAnalyticsProperties };
+export {
+  coarseAnalyticsUserAgent,
+  isApprovedPublicAnalyticsEvent,
+  safeAnalyticsDimension,
+  safeAnalyticsProperties,
+  safePublicAnalyticsDimension,
+  safePublicAnalyticsProperties,
+  safeRegisteredPublicAnalyticsDimension,
+};
 
 export async function recordServerAnalyticsEvent(event: ServerAnalyticsEvent) {
   return recordNeonAnalyticsEvent({

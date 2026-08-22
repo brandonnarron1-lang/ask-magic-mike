@@ -42,3 +42,21 @@ approved: minimize collection, preserve consent/audit/delivery evidence, suppres
 rather than silently erase active records, and require an authenticated admin
 workflow for access/correction/deletion requests. Do not delete production data
 under a support request without identity verification and an audit record.
+
+## Phase 9 privacy consolidation — 2026-08-22
+
+- Durable rate-limit rows now contain only route-scoped HMAC identifiers. Raw
+  caller IP, staff, and session keys are never sent to Neon; stale pre-HMAC rows
+  age out through a 24-hour cleanup.
+- Browser analytics no longer publishes full attribution objects, referrers,
+  query strings, click IDs, or full user agents to the data layer, PostHog hook,
+  widget parent, or server ledger.
+- Public analytics attribution must match a registered operational value;
+  unregistered slug-shaped names/addresses are dropped, and listing/property
+  identifiers remain in the protected lead record rather than the event ledger.
+- Both public analytics APIs reject internal/delivery event fabrication and
+  public lead-ID association. The durable writer independently minimizes every
+  property, UTM dimension, path, and user-agent class.
+- The Growth Center outcome/delivery proof ledger reads aggregate counts only,
+  excludes test and suppressed leads, and never selects recipient references,
+  names, emails, phones, message bodies, or provider secrets.

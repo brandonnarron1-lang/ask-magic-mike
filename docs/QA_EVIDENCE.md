@@ -1,6 +1,30 @@
 # QA Evidence
 
-## PR #185 continuation readiness audit — 2026-08-22
+## PR #193 released-main privacy audit — 2026-08-22
+
+- Rebased/refreshed the candidate onto released PR #185 merge
+  `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8`; `origin/main...HEAD` contains 46
+  candidate files and no database migration.
+- Confirmed anonymous Production `/admin/growth?window=90` redirects to
+  `/lead-center-login?error=session`; no Growth evidence renders without a
+  valid Lead Center session. The page itself also requires `report:view`, is
+  force-dynamic, and reads canonical Neon server-side only.
+- Confirmed the exact refreshed Preview root renders the Ask Magic Mike/Our
+  Town identity and conversion controls. Vercel deployment protection returns
+  an authentication redirect for anonymous protected requests, and the Preview
+  application fails closed to read-only mode when explicit mutation enablement
+  is absent.
+- Manual threat review found that slug syntax alone could still accept a
+  single-token name or slugified address as a public campaign dimension. The
+  boundary now requires a registered source/medium/campaign/placement value,
+  drops unregistered values, and reduces dynamic open-house identifiers to the
+  generic `open-house` class. The protected lead record remains the full
+  attribution source of truth.
+- Focused registered-attribution/privacy/API verification: 7 files / 40 tests,
+  all passed. Final exact-head Node 24 CI, Preview QA, dependency/secret scan,
+  visual acceptance, and release evidence are attached to PR #193 after push.
+
+## Historical PR #185 continuation readiness audit — 2026-08-22
 
 - Reconfirmed that current Production remains PR #184 merge
   `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97` on Ready deployment
@@ -50,8 +74,13 @@
   Node 24 and passes 206 files / 2,869 tests, strict typecheck, ESLint,
   optimized Production build, 80-route verification, system isolation, and
   14/14 safety controls. Production dependency audit reports no known
-  vulnerability; gitleaks scans 510 commits / 14.10 MB with no leak; all three
-  canonical creative source URLs return HTTP 200 with image content.
+  vulnerability; gitleaks scans 511 commits / approximately 14.11 MB with no
+  leak; all three canonical creative source URLs return HTTP 200 with image
+  content. Exact-head Node 24 release run `32588096247`, Ready Preview
+  deployment `dpl_83UZ6iisUUWK1LyGdTahkQvAiF2Y`, and protected Preview QA run
+  `32588280489` pass. The protected run records 16 pass / 6 intentional write
+  skips / 0 fail, 2/2 browser checks, 43/43 doctor checks, and strict
+  `PREVIEW_READY` launch authority.
 - No Production deployment, database read/write beyond public liveness,
   publication proof, lead, email/BCC, SMS, Push, external post, WordPress edit,
   DNS change, provider action, spend, deletion, or NellySelly action occurred.
@@ -65,6 +94,87 @@ Status: production funnel, Neon persistence, routing, suppression, outbox, and
 provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
+
+## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
+
+- Boundary review — PASS at checkpoint: the candidate is stacked on PR #185
+  exact final head `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7`, includes no migration,
+  and excludes PR #187's target register and parallel release authority.
+- Focused regression matrix — PASS: 12 files / 103 tests covering
+  HMAC limiter identifiers, stale-bucket pruning, public analytics event and
+  property boundaries, body/origin validation, repository defense in depth,
+  durable-write acknowledgment, controlled-slug attribution, script-safe
+  JSON-LD, aggregate Growth outcomes/delivery, false-zero failure handling,
+  protected health output, and inherited fail-closed Preview authority.
+- `pnpm release:gate` — PASS on local Node 26.5.1: Ask Magic Mike/NellySelly
+  isolation, 14/14 release-safety checks, 210 test files / 2,901 tests, strict
+  typecheck, ESLint, optimized Next.js 15.5.21 build, and 80 active routes / 17
+  acknowledged root–`src` duplicates. The repository declares Node 24.x, so
+  exact Node 24 GitHub evidence remains required.
+- `pnpm typecheck` — PASS both independently and inside the release gate after
+  the aggregate Growth panel and route/privacy adaptations.
+- Security source review — PASS at checkpoint: raw limiter identifiers and
+  secrets are absent from Neon parameters; public analytics cannot attach lead
+  or agent IDs; public notification lifecycle events are rejected; final
+  persistence re-sanitizes dimensions and stores only a coarse user-agent class;
+  both public routes await the canonical write and fail HTTP 503 when it is
+  unavailable; free-form attribution names/addresses are dropped; all JSON-LD
+  scripts use the shared escaping serializer; Growth SQL selects aggregate
+  counts without recipient references or contact fields.
+- `pnpm audit --prod --audit-level high` — PASS: no known Production dependency
+  vulnerability.
+- `gitleaks git --redact --no-banner` — PASS: 511 commits / approximately 14.11
+  MB scanned with no leak. A supplementary pattern scan found only unmistakable
+  test literals and documented placeholder syntax.
+- `git diff --check` and base/staged migration scans — PASS: no whitespace
+  error and no migration in the candidate.
+- Historical pre-refresh PR #193 code-bearing head
+  `6035131e394f3fa057acf662a204889743a69327` passed exact Node 24 GitHub CI and
+  canonical Vercel Preview. That evidence is retained as a checkpoint, not used
+  as authority for the refreshed final head.
+- Historical canonical Vercel Preview — PASS: deployment
+  `dpl_6wvQEvAZrBsgESJVfp5pdDtFvkuu`, immutable URL
+  `https://ask-magic-mike-gt7gtgf0f-eyes-up-industries.vercel.app`. `/`,
+  `/home-value`, `/buy`, and `/rent` returned 200 with Ask Magic Mike and Our
+  Town identity, no application error, and no NellySelly marker.
+- Authorization and privacy probes — PASS: anonymous `/admin/growth` and
+  `/api/admin/health` returned 401; the protected Growth response included
+  `Cache-Control: no-store`, CSP `frame-ancestors 'self'`, HSTS,
+  `WWW-Authenticate`, `X-Frame-Options: SAMEORIGIN`, and
+  `X-Robots-Tag: noindex, nofollow, noarchive`. A foreign-origin public
+  analytics POST returned 403 before rate limiting or persistence. No valid
+  analytics event was submitted.
+- Responsive visual acceptance — PASS in an isolated local Preview harness
+  with no `DATABASE_URL`, all mutation flags disabled, and synthetic local-only
+  Basic Auth. At 390 x 844 and 1440 x 1000 the protected page returned 200,
+  rendered one proof-ledger panel and all eight metric cards, displayed eight
+  honest unavailable values, produced no horizontal overflow or browser error,
+  and preserved the restrained black/gold hierarchy. Evidence is gitignored at
+  `artifacts/phase9-privacy-kpi-trust-visual/`.
+- Runtime inspection — PASS: the exact Vercel deployment reported no error logs
+  and no 5xx requests after acceptance probes.
+- Post-refresh KPI truth audit — FIXED: a failed delivery aggregate query could
+  preserve `configured=true`, causing the UI to show zero beside an error.
+  Outcome and delivery normalizers now set `configured=false` whenever an error
+  exists, and regression coverage proves the protected page renders unavailable
+  values instead of false zero.
+- Preview tooling cleanup — PASS: an isolated-worktree CLI call briefly created
+  an empty branch-named Vercel project because canonical `.vercel` metadata was
+  absent. The target was confirmed to have no deployment or domain, removed,
+  and the worktree was explicitly relinked to
+  `eyes-up-industries/ask-magic-mike`. No canonical project, domain, deployment,
+  environment variable, or Production alias changed.
+- GitHub and Vercel must be green on the exact refreshed PR #193 head before the
+  Draft is considered release-ready. Final immutable evidence is recorded on
+  the PR rather than represented by the historical Preview above.
+- Defense-in-depth residual: public responses do not yet enforce a complete
+  nonce/hash-based `script-src` CSP. Existing HSTS, content-type, referrer,
+  permissions, frame, and protected no-store/noindex controls remain intact;
+  a broad CSP change is isolated from this privacy candidate to avoid breaking
+  the established public funnel without a dedicated compatibility pass.
+- No Production deployment, migration/write, valid analytics persistence test,
+  lead, email/BCC, SMS, Push, provider action, WordPress edit, external
+  publication, DNS change, spend, or NellySelly action occurred.
 
 ## Phase 9 consolidated owned-demand command — 2026-08-22
 

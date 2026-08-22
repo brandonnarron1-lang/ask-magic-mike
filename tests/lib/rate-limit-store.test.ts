@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  durableRateLimitBucketKey,
+  durableRateLimitHashSecretReady,
   InMemoryRateLimitStore,
   checkRateLimit,
   rateLimitKey,
@@ -100,5 +102,40 @@ describe("rateLimitKey", () => {
 
   it("returns 'anonymous' when IP header is empty string", () => {
     expect(rateLimitKey("")).toBe("anonymous");
+  });
+});
+
+describe("durableRateLimitBucketKey", () => {
+  it("stores a versioned HMAC identifier instead of the raw limiter key", () => {
+    const rawKey = "203.0.113.42";
+    const result = durableRateLimitBucketKey(rawKey, "intakeSubmit", "test-secret-one-32-characters-long");
+
+    expect(result).toMatch(/^amm:rl:v1:intakeSubmit:[0-9a-f]{64}$/);
+    expect(result).not.toContain(rawKey);
+    expect(result).not.toContain("test-secret-one-32-characters-long");
+  });
+
+  it("domain-separates route prefixes and server secrets", () => {
+    const rawKey = "staff-principal-id";
+    const intake = durableRateLimitBucketKey(rawKey, "intakeSubmit", "test-secret-one-32-characters-long");
+    const chat = durableRateLimitBucketKey(rawKey, "chatMessage", "test-secret-one-32-characters-long");
+    const rotated = durableRateLimitBucketKey(rawKey, "intakeSubmit", "test-secret-two-32-characters-long");
+
+    expect(intake).not.toBe(chat);
+    expect(intake).not.toBe(rotated);
+  });
+
+  it("rejects a short hash secret", () => {
+    expect(() => durableRateLimitBucketKey("key", "intakeSubmit", "   ")).toThrow(
+      "A durable rate-limit hash secret of at least 32 characters is required.",
+    );
+  });
+
+  it("requires a strong server secret but accepts the documented fallback order", () => {
+    expect(durableRateLimitHashSecretReady({ RATE_LIMIT_HASH_SECRET: "too-short" })).toBe(false);
+    expect(durableRateLimitHashSecretReady({
+      RATE_LIMIT_HASH_SECRET: "too-short",
+      CRON_SECRET: "cron-secret-fallback-with-32-characters",
+    })).toBe(true);
   });
 });

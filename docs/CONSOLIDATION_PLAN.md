@@ -78,9 +78,13 @@ separate gate:
 - PR #187's KPI target-register migration is deferred. Production has no eligible
   live-lead baseline, so deploying targets now would create precision without
   evidence. The branch remains available for later review after live demand.
-- PRs #190-#192 remain separate security/privacy/KPI-trust candidates. They are
-  not prerequisites for the owned-demand command candidate and must be reviewed
-  against the final PR #185 head before any future release.
+- PRs #190-#192 were audited against the final PR #185 head. Their independent
+  privacy, durable-limiter, and aggregate KPI-trust work is consolidated once on
+  `codex/phase9-privacy-kpi-trust-consolidation-20260822`; stale documentation
+  and PR #187's target-register dependency remain excluded. The consolidated
+  candidate is stacked on PR #185 and has its own exact-head proof and release
+  gate. Preserve the source branches until acceptance, then mark the duplicate
+  PRs superseded without deleting their history.
 - PR #179 audit is complete. Its token-scoped iOS Home Screen install handoff is
   unique and retained. The only direct file overlap with #184 is the generated
   route manifest. PR #179 remains Draft until the current stack lands; refresh
