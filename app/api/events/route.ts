@@ -6,7 +6,7 @@ import {
   coarseAnalyticsUserAgent,
   isApprovedPublicAnalyticsEvent,
   recordServerAnalyticsEvent,
-  safeAnalyticsDimension,
+  safePublicAnalyticsDimension,
   safePublicAnalyticsProperties,
 } from "../../lib/serverAnalytics";
 
@@ -80,12 +80,18 @@ export async function POST(req: Request) {
     properties: safePublicAnalyticsProperties(body.event_name, properties),
     attribution: body.attribution && typeof body.attribution === "object"
       ? {
-          source: safeAnalyticsDimension((body.attribution as Record<string, unknown>).source) ?? undefined,
-          medium: safeAnalyticsDimension((body.attribution as Record<string, unknown>).medium) ?? undefined,
-          campaign: safeAnalyticsDimension((body.attribution as Record<string, unknown>).campaign) ?? undefined,
+          source: safePublicAnalyticsDimension((body.attribution as Record<string, unknown>).source) ?? undefined,
+          medium: safePublicAnalyticsDimension((body.attribution as Record<string, unknown>).medium) ?? undefined,
+          campaign: safePublicAnalyticsDimension((body.attribution as Record<string, unknown>).campaign) ?? undefined,
         }
       : undefined,
     userAgent: coarseAnalyticsUserAgent(req.headers.get("user-agent"), properties.device_category),
   });
-  return NextResponse.json({ ok: true, persisted, correlation_id: correlationId }, { status: 202 });
+  if (!persisted) {
+    return NextResponse.json(
+      { ok: false, persisted: false, error: "Event persistence is unavailable.", correlation_id: correlationId },
+      { status: 503 },
+    );
+  }
+  return NextResponse.json({ ok: true, persisted: true, correlation_id: correlationId }, { status: 202 });
 }

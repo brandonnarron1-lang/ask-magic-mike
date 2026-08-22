@@ -51,6 +51,17 @@ describe("POST /api/events", () => {
     expect(recordMock).toHaveBeenCalledWith(expect.objectContaining({ eventName: "funnel_started" }));
   });
 
+  it("fails truthfully when the canonical event write is unavailable", async () => {
+    recordMock.mockResolvedValue(false);
+    const response = await POST(request({ event_name: "page_view", properties: { path: "/" } }));
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      persisted: false,
+      error: "Event persistence is unavailable.",
+    });
+  });
+
   it("rejects a syntactically valid but unapproved event", async () => {
     const response = await POST(request({ event_name: "manufactured_conversion" }));
     expect(response.status).toBe(400);
@@ -84,7 +95,7 @@ describe("POST /api/events", () => {
       attribution: {
         source: "person@example.com",
         medium: "social_organic",
-        campaign: "home_value",
+        campaign: "3106 Quinn Drive",
       },
     }));
     expect(response.status).toBe(202);
@@ -95,7 +106,7 @@ describe("POST /api/events", () => {
       attribution: {
         source: undefined,
         medium: "social_organic",
-        campaign: "home_value",
+        campaign: undefined,
       },
       userAgent: "browser/desktop",
     }));

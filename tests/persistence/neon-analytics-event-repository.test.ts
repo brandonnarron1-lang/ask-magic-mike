@@ -7,6 +7,7 @@ import {
   coarseAnalyticsUserAgent,
   safeAnalyticsDimension,
   safeAnalyticsPath,
+  safePublicAnalyticsDimension,
   safePublicAnalyticsProperties,
 } from "@/lib/analytics/privacy";
 
@@ -62,6 +63,23 @@ describe("safeAnalyticsProperties", () => {
     expect(safeAnalyticsDimension("wilson-nc-sellers")).toBe("wilson-nc-sellers");
     expect(safeAnalyticsDimension("person@example.com")).toBeNull();
     expect(safeAnalyticsDimension("252-555-0100")).toBeNull();
+    expect(safePublicAnalyticsDimension("wilson-nc-sellers")).toBe("wilson-nc-sellers");
+    expect(safePublicAnalyticsDimension("Sarah Johnson")).toBeNull();
+    expect(safePublicAnalyticsDimension("3106 Quinn Drive")).toBeNull();
+  });
+
+  it("restricts public attribution dimensions to controlled slugs", () => {
+    expect(safePublicAnalyticsProperties("page_view", {
+      placement: "Sarah Johnson",
+      placement_id: "open-house:listing-qa-001",
+      utm_source: "facebook",
+      utm_medium: "social organic",
+      utm_campaign: "home_value",
+    })).toEqual({
+      placement_id: "open-house:listing-qa-001",
+      utm_source: "facebook",
+      utm_campaign: "home_value",
+    });
   });
 
   it("stores only a coarse browser or automation class", () => {

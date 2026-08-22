@@ -142,10 +142,11 @@ describe("Public endpoint rate limiting", () => {
     expect(src).toContain("LIMITS.sessionCreate");
   });
 
-  it("analytics/event uses fire-and-forget trackEventNoWait", () => {
+  it("analytics/event awaits durable persistence before returning success", () => {
     const src = read("app/api/analytics/event/route.ts");
-    expect(src).toContain("trackEventNoWait");
-    expect(src).not.toContain("await trackEvent(");
+    expect(src).not.toContain("trackEventNoWait");
+    expect(src).toContain("await trackEvent(");
+    expect(src).toContain("analytics_persistence_unavailable");
   });
 });
 

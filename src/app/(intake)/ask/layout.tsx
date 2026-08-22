@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { serializeJsonLd } from "@/lib/security/json-ld";
 import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
@@ -44,7 +45,7 @@ export default function AskLayout({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: serializeJsonLd({
             "@context": "https://schema.org",
             "@type": "ContactPage",
             name: "Ask Mike a Question",

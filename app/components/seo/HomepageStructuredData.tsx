@@ -1,8 +1,5 @@
 import { siteConfig } from "@/lib/site-config";
-
-function safeJsonLd(value: unknown) {
-  return JSON.stringify(value).replace(/</g, "\\u003c");
-}
+import { serializeJsonLd } from "@/lib/security/json-ld";
 
 export function HomepageStructuredData() {
   const siteUrl = siteConfig.canonicalSiteUrl;
@@ -46,5 +43,5 @@ export function HomepageStructuredData() {
     ],
   };
 
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(graph) }} />;
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(graph) }} />;
 }

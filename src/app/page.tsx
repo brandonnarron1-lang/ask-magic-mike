@@ -6,6 +6,7 @@ import { MarketPulse } from "@/components/landing/market-pulse";
 import { SoldSection } from "@/components/landing/sold-section";
 import { FaqStrip } from "@/components/landing/faq-strip";
 import { Footer } from "@/components/landing/footer";
+import { serializeJsonLd } from "@/lib/security/json-ld";
 import { siteConfig } from "@/lib/site-config";
 
 const jsonLd = {
@@ -82,7 +83,7 @@ export default function HomePage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <main id="main-content" className="bg-[#0A0A0A]">
         <HeroSection />

@@ -17,6 +17,7 @@ const SECRET_PATTERN = /\b(?:api[_-]?key|authorization|bearer|password|private[_
 const SENSITIVE_QUERY_PATTERN = /[?&](?:address|email|first_?name|last_?name|message|name|phone|question|token)=/i;
 const DIMENSION_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:/ -]*$/;
 const IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/;
+const PUBLIC_DIMENSION_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/;
 
 const SAFE_PUBLIC_PATHS = new Set([
   "/",
@@ -52,6 +53,14 @@ const PUBLIC_ATTRIBUTION_KEYS = [
   "utm_medium",
   "utm_source",
 ] as const;
+
+const PUBLIC_SLUG_PROPERTY_KEYS = new Set([
+  "placement",
+  "placement_id",
+  "utm_campaign",
+  "utm_medium",
+  "utm_source",
+]);
 
 const PUBLIC_EVENT_PROPERTY_KEYS: Record<string, readonly string[]> = {
   session_created: ["deviceType", "referrerType"],
@@ -374,6 +383,20 @@ export function safeAnalyticsDimension(
   return candidate;
 }
 
+/**
+ * Public attribution values come from query strings and widget parameters, so
+ * they must remain controlled identifiers rather than free-form dimensions.
+ * This prevents a name, street address, or sentence from becoming analytics
+ * data even when it does not match a simple email or phone detector.
+ */
+export function safePublicAnalyticsDimension(
+  value: unknown,
+  maxLength = MAX_DIMENSION_LENGTH,
+): string | null {
+  const candidate = safeAnalyticsDimension(value, maxLength);
+  return candidate && PUBLIC_DIMENSION_PATTERN.test(candidate) ? candidate : null;
+}
+
 export function safeAnalyticsPath(value: unknown): string | null {
   if (typeof value !== "string") return null;
   let candidate = value.trim();
@@ -451,7 +474,17 @@ export function safePublicAnalyticsProperties(
   if (!eventKeys) return {};
   const allowed = new Set<string>([...PUBLIC_ATTRIBUTION_KEYS, ...eventKeys, "is_test"]);
   const safe = safeAnalyticsProperties(properties);
-  return Object.fromEntries(Object.entries(safe).filter(([key]) => allowed.has(key)));
+  const publicSafe: Record<string, string | number | boolean> = {};
+  for (const [key, value] of Object.entries(safe)) {
+    if (!allowed.has(key)) continue;
+    if (PUBLIC_SLUG_PROPERTY_KEYS.has(key)) {
+      const dimension = safePublicAnalyticsDimension(value);
+      if (dimension) publicSafe[key] = dimension;
+      continue;
+    }
+    publicSafe[key] = value;
+  }
+  return publicSafe;
 }
 
 export function coarseAnalyticsUserAgent(
