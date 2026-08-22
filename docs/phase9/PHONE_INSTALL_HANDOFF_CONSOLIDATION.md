@@ -74,6 +74,19 @@ separate owner-controlled action after Production release. Mike must enroll his
 own primary device; Brandon's copy-role link cannot impersonate or register
 Mike.
 
+## Acceptance evidence
+
+- Draft PR: #194, CLEAN/MERGEABLE at code-bearing head
+  `450e17bc3fe659b31682832ad97e659380e74136`.
+- Exact Node 24 release gate: PASS, 210 files / 2,907 tests.
+- Canonical Vercel Preview: `dpl_9YpLm3EGtF1qPuCDCwhXpgMCKu8Y`, Ready.
+- Protected read-only Preview QA: 17 pass / 6 mutation skips / 0 fail.
+- Phone invalid-token privacy contract: PASS, expected HTTP 404 manifest;
+  no invite, claim, limiter write, registration, or send.
+- Widget browser E2E: 2 expected / 0 unexpected / 0 flaky / 0 skipped.
+- Release candidate: GO. Launch authority: `PREVIEW_READY`.
+- Runtime: no error-level logs; only expected read-only SLA HTTP 503.
+
 ## Merge order and gate
 
 This candidate is stacked after PR #185 and PR #193. It must be refreshed onto

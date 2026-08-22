@@ -51,8 +51,10 @@ provider action, or deletion.
   the owned-demand command release.
 - Historical PR [#179](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/179)
   is preserved but superseded for release by the current-stack iOS handoff
-  consolidation. After #185 and #193 are released, refresh the consolidation
-  candidate, rerun Node 24/Preview acceptance, and only then consider
+  consolidation in Draft PR
+  [#194](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/194).
+  Its current code-bearing head has green Node 24/Preview evidence, but after
+  #185 and #193 are released it must be refreshed and re-proven before considering
   `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
   Physical enrollment and a `[TEST]` Push remain separately approved actions.
 - PRs #92 and #119–#121 remain archive-after-review candidates. They are not a

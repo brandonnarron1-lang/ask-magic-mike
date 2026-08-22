@@ -54,11 +54,32 @@ All timestamps are America/New_York unless noted.
   `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; the empty helper is preserved for a
   separate cleanup approval. No canonical setting, deployment, alias, domain,
   environment variable, or Production resource changed.
-- Still required: exact-head Node 24 CI, canonical Vercel Preview build and
-  private header/install-manifest probes, then the separate application gate
-  `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT` after its
-  stacked predecessors are released. Physical enrollment and a `[TEST]` Push
-  remain separate actions.
+- Draft PR #194 code-bearing head
+  `450e17bc3fe659b31682832ad97e659380e74136` — PASS: exact Node 24
+  `local-release-gate` run
+  [32583239916](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32583239916)
+  completed in 2m27s; GitHub reports the PR CLEAN/MERGEABLE.
+- Canonical Vercel Preview — PASS: deployment
+  `dpl_9YpLm3EGtF1qPuCDCwhXpgMCKu8Y` is Ready at
+  `https://ask-magic-mike-mby366s98-eyes-up-industries.vercel.app` and contains
+  exact commit `450e17bc3fe659b31682832ad97e659380e74136`.
+- Protected Preview QA — PASS: workflow
+  [32583352634](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32583352634)
+  completed in 3m26s on Node 24. The release doctor passed 43/43; HTTP QA passed
+  17 with six expected mutation skips and zero failures; widget E2E passed two
+  expected tests with zero unexpected/flaky/skipped; release-candidate verdict
+  was GO and the strict launch-authority assertion reached `PREVIEW_READY`.
+- The phone probe returned the expected private HTTP 404 manifest rejection and
+  passed no-store/no-referrer/noindex plus truthful invalid-page copy using only
+  `preview-qa-invalid-token`. `SAFE_DB_WRITE=false`, `FORCE_DB_WRITE=false`,
+  and the mutation gate remained blocked. No invite or claim route was called.
+- Runtime log review found no error-level records. The only 5xx was the expected
+  authenticated SLA-cron HTTP 503 `preview_data_disabled`, which proves Preview
+  writes were refused.
+- Still required: release #185, refresh/release #193, then refresh PR #194 onto
+  the exact predecessor and repeat final-head CI/Preview before considering
+  `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
+  Physical enrollment and a `[TEST]` Push remain separate actions.
 
 ## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
 

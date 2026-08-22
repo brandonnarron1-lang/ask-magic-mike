@@ -21,9 +21,21 @@ Updated 2026-08-22.
 - Exact Ask Magic Mike origin binding excludes Our Town, NellySelly, and
   arbitrary Vercel hostnames from this privileged handoff. Private/no-store,
   no-referrer, noindex, CSP, and robots controls cover every phone-alert route.
-- Initial focused verification passes 8 files / 84 tests. Full Node 24 gate,
-  canonical Preview, rendered iPhone/desktop QA, and exact-head evidence remain
-  required before the Draft candidate becomes release-ready.
+- Focused verification passes 8 files / 84 tests. The full local gate passes
+  210 files / 2,907 tests, strict typecheck, ESLint, optimized build, 82 active
+  routes, 14/14 safety controls, Production dependency audit, and redacted
+  history/candidate secret scans. Responsive 390/1440 install and expired-link
+  renders have no browser error or overflow.
+- Draft PR #194 code-bearing head
+  `450e17bc3fe659b31682832ad97e659380e74136` is CLEAN/MERGEABLE and passes exact
+  Node 24 GitHub CI, canonical Vercel Preview
+  `dpl_9YpLm3EGtF1qPuCDCwhXpgMCKu8Y`, 17-pass/zero-fail read-only HTTP QA,
+  widget E2E, release GO, and strict `PREVIEW_READY` authority. The phone probe
+  uses only an invalid synthetic token and performs no invite, claim, limiter
+  persistence, device registration, or send.
+- PR #194 remains stacked behind #185 and #193. It must be refreshed and
+  re-proven after those predecessors land; current green evidence does not
+  authorize an out-of-order merge or Production action.
 - Detailed decision: `docs/phase9/PHONE_INSTALL_HANDOFF_CONSOLIDATION.md`.
 - Exact future application gate:
   `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
