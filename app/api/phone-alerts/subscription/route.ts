@@ -46,8 +46,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const saved = await new NeonPushSubscriptionRepository().upsert(
-      "copy",
+    const saved = await new NeonPushSubscriptionRepository().upsertCopy(
       parsed.data.subscription,
       request.headers.get("user-agent"),
       parsed.data.device_name,
@@ -56,7 +55,11 @@ export async function POST(request: NextRequest) {
       status: 201,
       headers: { "Cache-Control": "no-store" },
     });
-  } catch {
-    return NextResponse.json({ ok: false, error: "push_subscription_save_failed" }, { status: 503 });
+  } catch (error) {
+    const roleConflict = error instanceof Error && error.message === "push_subscription_role_conflict";
+    return NextResponse.json(
+      { ok: false, error: roleConflict ? "push_subscription_role_conflict" : "push_subscription_save_failed" },
+      { status: roleConflict ? 409 : 503, headers: { "Cache-Control": "no-store" } },
+    );
   }
 }

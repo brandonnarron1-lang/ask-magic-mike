@@ -7,7 +7,7 @@ import {
 } from "../../app/lib/phoneSetupSession";
 
 const mocks = vi.hoisted(() => ({
-  upsert: vi.fn(),
+  upsertCopy: vi.fn(),
   findActiveById: vi.fn(),
   send: vi.fn(),
   checkRateLimit: vi.fn(),
@@ -21,7 +21,7 @@ vi.mock("@/lib/security/rate-limit", () => ({
 
 vi.mock("../../app/lib/persistence/neonPushSubscriptionRepository", () => ({
   NeonPushSubscriptionRepository: class {
-    upsert = mocks.upsert;
+    upsertCopy = mocks.upsertCopy;
     findActiveById = mocks.findActiveById;
   },
 }));
@@ -46,6 +46,7 @@ const originalEnv = {
   vercel: process.env.VERCEL_ENV,
   vercelUrl: process.env.VERCEL_URL,
   vercelBranchUrl: process.env.VERCEL_BRANCH_URL,
+  rbac: process.env.LEAD_CENTER_RBAC_ENABLED,
 };
 
 function sessionCookie() {
@@ -71,8 +72,9 @@ describe("passwordless Brandon phone setup routes", () => {
     process.env.ADMIN_SECRET = "test-admin-secret";
     process.env.PHONE_SETUP_SIGNING_SECRET = "test-phone-setup-signing-secret-that-is-long-enough";
     process.env.NEXT_PUBLIC_SITE_URL = "https://www.askmagicmike.com";
+    process.env.LEAD_CENTER_RBAC_ENABLED = "false";
     mocks.checkRateLimit.mockResolvedValue({ allowed: true, remaining: 9, resetAt: Date.now() + 60_000, durable: true });
-    mocks.upsert.mockResolvedValue({ id: COPY_ID, recipientRole: "copy" });
+    mocks.upsertCopy.mockResolvedValue({ id: COPY_ID, recipientRole: "copy" });
     mocks.findActiveById.mockResolvedValue({ id: COPY_ID, recipientRole: "copy" });
     mocks.send.mockResolvedValue({ ok: true, provider: "web_push" });
   });
@@ -84,6 +86,7 @@ describe("passwordless Brandon phone setup routes", () => {
     if (originalEnv.vercel === undefined) delete process.env.VERCEL_ENV; else process.env.VERCEL_ENV = originalEnv.vercel;
     if (originalEnv.vercelUrl === undefined) delete process.env.VERCEL_URL; else process.env.VERCEL_URL = originalEnv.vercelUrl;
     if (originalEnv.vercelBranchUrl === undefined) delete process.env.VERCEL_BRANCH_URL; else process.env.VERCEL_BRANCH_URL = originalEnv.vercelBranchUrl;
+    if (originalEnv.rbac === undefined) delete process.env.LEAD_CENTER_RBAC_ENABLED; else process.env.LEAD_CENTER_RBAC_ENABLED = originalEnv.rbac;
   });
 
   it("issues a short-lived link only to an authenticated same-origin admin request", async () => {
@@ -96,6 +99,16 @@ describe("passwordless Brandon phone setup routes", () => {
     expect(body.ok).toBe(true);
     expect(body.url).toMatch(/^https:\/\/www\.askmagicmike\.com\/phone-alerts\/install\/[A-Za-z0-9_.-]+$/);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
+  });
+
+  it("disables the legacy secret-header invite path once Lead Center RBAC is enabled", async () => {
+    process.env.LEAD_CENTER_RBAC_ENABLED = "true";
+    const response = await invite(post("/api/phone-alerts/invite", { ttl_minutes: 10 }, {
+      "x-admin-secret": "test-admin-secret",
+    }));
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({ ok: false, error: "legacy_admin_auth_disabled" });
   });
 
   it("lets the authenticated admin page issue the same scoped invite through Basic Auth", async () => {
@@ -260,7 +273,7 @@ describe("passwordless Brandon phone setup routes", () => {
     }, { cookie: sessionCookie(), "x-amm-phone-setup": "1" });
     const response = await subscribe(request);
     expect(response.status).toBe(201);
-    expect(mocks.upsert).toHaveBeenCalledWith("copy", expect.any(Object), null, "Brandon iPhone");
+    expect(mocks.upsertCopy).toHaveBeenCalledWith(expect.any(Object), null, "Brandon iPhone");
   });
 
   it("rejects a raw bearer invite pasted directly into the setup cookie", async () => {
@@ -274,14 +287,28 @@ describe("passwordless Brandon phone setup routes", () => {
     }, { cookie: `${PHONE_SETUP_COOKIE}=${invite}`, "x-amm-phone-setup": "1" });
 
     expect((await subscribe(request)).status).toBe(401);
-    expect(mocks.upsert).not.toHaveBeenCalled();
+    expect(mocks.upsertCopy).not.toHaveBeenCalled();
   });
 
   it("rejects registration without the scoped cookie or custom CSRF header", async () => {
     const body = { subscription: { endpoint: "https://push.example.test/x", keys: { p256dh: "abcdefghijklmnopqrstuvwxyz", auth: "abcdefghijklmnopqrstuvwxyz" } } };
     expect((await subscribe(post("/api/phone-alerts/subscription", body, { "x-amm-phone-setup": "1" }))).status).toBe(401);
     expect((await subscribe(post("/api/phone-alerts/subscription", body, { cookie: sessionCookie() }))).status).toBe(403);
-    expect(mocks.upsert).not.toHaveBeenCalled();
+    expect(mocks.upsertCopy).not.toHaveBeenCalled();
+  });
+
+  it("cannot relabel an existing Mike/primary endpoint as a Brandon copy device", async () => {
+    mocks.upsertCopy.mockRejectedValueOnce(new Error("push_subscription_role_conflict"));
+    const response = await subscribe(post("/api/phone-alerts/subscription", {
+      device_name: "Brandon iPhone",
+      subscription: {
+        endpoint: "https://push.example.test/mike-primary-endpoint",
+        keys: { p256dh: "abcdefghijklmnopqrstuvwxyz123456", auth: "abcdefghijklmnopqrstuvwxyz123456" },
+      },
+    }, { cookie: sessionCookie(), "x-amm-phone-setup": "1" }));
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({ ok: false, error: "push_subscription_role_conflict" });
   });
 
   it("sends only an unmistakable QA push to an active copy subscription", async () => {
@@ -304,6 +331,39 @@ describe("passwordless Brandon phone setup routes", () => {
       "x-amm-phone-setup": "1",
     }));
     expect(response.status).toBe(404);
+    expect(mocks.send).not.toHaveBeenCalled();
+  });
+
+  it("allows only one QA Push per setup session and copy subscription", async () => {
+    const seen = new Set<string>();
+    mocks.checkRateLimit.mockImplementation(async (key: string) => {
+      if (!key.startsWith("phone-setup-test:")) {
+        return { allowed: true, remaining: 9, resetAt: Date.now() + 60_000, durable: true };
+      }
+      const allowed = !seen.has(key);
+      seen.add(key);
+      return { allowed, remaining: 0, resetAt: Date.now() + 30 * 60_000, durable: true };
+    });
+    const cookie = sessionCookie();
+    const headers = { cookie, "x-amm-phone-setup": "1" };
+
+    expect((await sendTest(post("/api/phone-alerts/test", { subscription_id: COPY_ID }, headers))).status).toBe(200);
+    expect((await sendTest(post("/api/phone-alerts/test", { subscription_id: COPY_ID }, headers))).status).toBe(409);
+    expect(mocks.send).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails closed when Production cannot durably enforce the one-shot QA Push", async () => {
+    process.env.VERCEL_ENV = "production";
+    mocks.checkRateLimit.mockImplementation(async (key: string) => key.startsWith("phone-setup-test:")
+      ? { allowed: true, remaining: 0, resetAt: Date.now() + 60_000, durable: false }
+      : { allowed: true, remaining: 9, resetAt: Date.now() + 60_000, durable: true });
+
+    const response = await sendTest(post("/api/phone-alerts/test", { subscription_id: COPY_ID }, {
+      cookie: sessionCookie(),
+      "x-amm-phone-setup": "1",
+    }));
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ ok: false, error: "push_test_guard_unavailable" });
     expect(mocks.send).not.toHaveBeenCalled();
   });
 });

@@ -46,4 +46,18 @@ describe("tokenized phone-install security boundary", () => {
     expect(manifest).toContain('scope: "/phone-alerts/"');
     expect(manifest).not.toContain('scope: "/"');
   });
+
+  it("cannot bypass RBAC, relabel Mike's endpoint, or repeat the scoped QA Push", () => {
+    const legacyInvite = readFileSync("app/api/phone-alerts/invite/route.ts", "utf8");
+    const subscription = readFileSync("app/api/phone-alerts/subscription/route.ts", "utf8");
+    const repository = readFileSync("app/lib/persistence/neonPushSubscriptionRepository.ts", "utf8");
+    const testPush = readFileSync("app/api/phone-alerts/test/route.ts", "utf8");
+
+    expect(legacyInvite).toContain("getLeadCenterRbacState().enabled");
+    expect(legacyInvite).toContain("legacy_admin_auth_disabled");
+    expect(subscription).toContain(".upsertCopy(");
+    expect(repository).toContain("existing.recipient_role = EXCLUDED.recipient_role");
+    expect(testPush).toContain("phone-setup-test:${session.nonce}:${subscription.id}");
+    expect(testPush).toContain('process.env.VERCEL_ENV === "production" && !oneShot.durable');
+  });
 });
