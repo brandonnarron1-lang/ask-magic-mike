@@ -8,9 +8,8 @@ const jsonLd = {
   "@id": `${siteConfig.canonicalSiteUrl}/#agent`,
   name: "Mike Eatmon — Our Town Properties",
   description:
-    "Wilson and Eastern North Carolina real estate broker since 1993. " +
-    "Over $750M in career sales and 2,500+ homes closed. " +
-    "Ask Magic Mike provides AI-assisted intake with local broker follow-up.",
+    "Wilson and Eastern North Carolina real estate broker with Our Town Properties. " +
+    "Ask Magic Mike provides a source-aware intake path for local broker review.",
   url: siteConfig.canonicalSiteUrl,
   telephone: siteConfig.agentPhone,
   image: `${siteConfig.canonicalSiteUrl}/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp`,
@@ -45,7 +44,7 @@ const jsonLd = {
     itemListElement: [
       {
         "@type": "Offer",
-        itemOffered: { "@type": "Service", name: "Preliminary Home Value Review" },
+        itemOffered: { "@type": "Service", name: "Broker-Reviewed Home-Value Conversation" },
       },
       {
         "@type": "Offer",
@@ -71,13 +70,13 @@ export const metadata: Metadata = {
   title:
     "Start with your address. Get a local read on your home. | Ask Magic Mike",
   description:
-    "Ask Magic Mike by Our Town Properties helps Wilson-area homeowners see a preliminary home value range and get follow-up from Mike Eatmon's team. AI-assisted intake, local human follow-up.",
+    "Ask Magic Mike by Our Town Properties helps Wilson-area homeowners request a broker-reviewed home-value and sale-readiness conversation. Not an appraisal or automated valuation; no specific value is promised.",
   robots: { index: true, follow: true },
   openGraph: {
     title:
-      "Ask Magic Mike by Our Town Properties | Wilson, NC home value range",
+      "Ask Magic Mike by Our Town Properties | Wilson, NC home-value review",
     description:
-      "Start with your address. Mike Eatmon's Our Town Properties team follows up with local guidance. Preliminary home value range, not an appraisal.",
+      "Start with your property and timing. The Our Town Properties team reviews the request. Not an appraisal or automated valuation; no specific value is promised.",
     siteName: "Ask Magic Mike",
     type: "website",
     images: [

@@ -3,12 +3,88 @@ import { buildUtmUrl, type UtmMedium } from "../../../src/lib/admin/utm-link-bui
 
 export type OwnedDemandStatus = "signal_detected" | "ready_unmeasured";
 
+export type OwnedDemandMeasurementStatus =
+  | "ready"
+  | "not_configured"
+  | "schema_pending"
+  | "query_failed";
+
+export interface OwnedDemandMeasurementState {
+  ready: boolean;
+  status: OwnedDemandMeasurementStatus;
+  label: string;
+  title: string;
+  detail: string;
+}
+
+export function assessOwnedDemandMeasurement(input: {
+  configured: boolean;
+  schemaReady: boolean;
+  error?: string;
+}): OwnedDemandMeasurementState {
+  if (input.error) {
+    return {
+      ready: false,
+      status: "query_failed",
+      label: "Measurement unavailable",
+      title: "Growth measurement query unavailable.",
+      detail: `${input.error}. Prepared drafts remain visible, but zero values are not evidence of zero live demand and no channel should be selected from this snapshot.`,
+    };
+  }
+  if (!input.configured) {
+    return {
+      ready: false,
+      status: "not_configured",
+      label: "Measurement unavailable",
+      title: "Canonical Neon is not configured.",
+      detail: "Prepared drafts remain visible, but demand metrics and recommendations stay unavailable rather than being presented as zero.",
+    };
+  }
+  if (!input.schemaReady) {
+    return {
+      ready: false,
+      status: "schema_pending",
+      label: "Measurement unavailable",
+      title: "Growth measurement schema is incomplete.",
+      detail: "Apply and verify the reviewed additive schema before interpreting demand or selecting a launch channel. Prepared drafts remain review-only.",
+    };
+  }
+  return {
+    ready: true,
+    status: "ready",
+    label: "Measured",
+    title: "Growth measurement ready.",
+    detail: "Canonical Neon is available, test and suppressed records are excluded, and the current demand snapshot can inform the operator review.",
+  };
+}
+
 export interface OwnedDemandAttributionSignal {
   source: string;
   medium: string;
   campaign: string;
   content: string;
   leads: number;
+}
+
+export type OwnedDemandOfferKey = "seller_review" | "buyer_match" | "renter_plan";
+
+export interface OwnedDemandOfferBrief {
+  key: OwnedDemandOfferKey;
+  label: string;
+  shortLabel: string;
+  destination: string;
+  draftTitle: string;
+  draftBody: string;
+  creativePath: string;
+  creativeAlt: string;
+  reviewNote: string;
+}
+
+export interface OwnedDemandOfferPlacement extends OwnedDemandOfferBrief {
+  content: string;
+  trackedUrl: string;
+  attributedLeads: number;
+  status: OwnedDemandStatus;
 }
 
 export interface OwnedDemandChannel {
@@ -27,6 +103,7 @@ export interface OwnedDemandChannel {
   draftBody: string;
   operatorStep: string;
   reviewNote: string;
+  offers: OwnedDemandOfferPlacement[];
 }
 
 export interface OwnedDemandPlanItem {
@@ -42,12 +119,78 @@ export interface OwnedDemandCommand {
   attributedLeadRate: number;
   measurementState: "no_live_signal" | "partial_signal" | "measured";
   bottleneck: string;
+  offers: OwnedDemandOfferBrief[];
   channels: OwnedDemandChannel[];
   weeklyPlan: OwnedDemandPlanItem[];
   operatorBoundary: string;
 }
 
+export function buildOwnedDemandChannelPacket(channel: OwnedDemandChannel) {
+  const sections = channel.offers.map((offer) => [
+    offer.shortLabel.toUpperCase(),
+    offer.draftTitle,
+    offer.draftBody,
+    offer.trackedUrl,
+    `Review boundary: ${offer.reviewNote}`,
+  ].join("\n"));
+
+  return [
+    `ASK MAGIC MIKE — ${channel.label.toUpperCase()} OWNED-DEMAND FLIGHT`,
+    `Format: ${channel.format}`,
+    `Campaign: ${channel.campaign}`,
+    "",
+    "GENERAL QUESTION PLACEMENT",
+    channel.draftTitle,
+    channel.draftBody,
+    channel.trackedUrl,
+    "",
+    ...sections.flatMap((section) => [section, ""]),
+    `Next human step: ${channel.operatorStep}`,
+    `Channel review: ${channel.reviewNote}`,
+    "External publication remains a separate human-reviewed approval.",
+  ].join("\n").trim();
+}
+
 const CAMPAIGN = "amm_owned_demand_2026";
+
+const OFFER_DEFINITIONS = [
+  {
+    key: "seller_review",
+    label: "Seller value + readiness review",
+    shortLabel: "Seller review",
+    contentSuffix: "seller_review",
+    destination: "https://www.askmagicmike.com/home-value",
+    draftTitle: "Request a broker-reviewed home-value and sale-readiness review",
+    draftBody: "Thinking about selling in Wilson or Eastern North Carolina? Share the property and timing privately. Mike Eatmon or the Our Town Properties team will review the request and follow up. This is not an appraisal, automated valuation, guaranteed value, or guaranteed offer.",
+    creativePath: "/brand/black-diamond/hero-social-4x5.jpg",
+    creativeAlt: "Mike Eatmon in front of a home at dusk",
+    reviewNote: "Keep the offer human-reviewed and conditional. Do not add an automated valuation, guaranteed value, guaranteed offer, or unverified response-time claim.",
+  },
+  {
+    key: "buyer_match",
+    label: "Buyer property-match review",
+    shortLabel: "Buyer match",
+    contentSuffix: "buyer_match",
+    destination: "https://www.askmagicmike.com/buy",
+    draftTitle: "Request a local property-match and buying-plan review",
+    draftBody: "Tell Our Town Properties what you are looking for, your target area, and your timing. The team will review the request and follow up about possible next steps. Property availability, financing, and appointments must be confirmed.",
+    creativePath: "/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp",
+    creativeAlt: "Mike Eatmon welcoming a real estate conversation",
+    reviewNote: "Do not imply that a property is available, financing is approved, or an appointment is booked until a person verifies it.",
+  },
+  {
+    key: "renter_plan",
+    label: "Rental-to-homeownership review",
+    shortLabel: "Renter plan",
+    contentSuffix: "renter_plan",
+    destination: "https://www.askmagicmike.com/rent",
+    draftTitle: "Explore a rental-to-homeownership readiness review",
+    draftBody: "Share your current rental situation, target area, and homeownership goals with Our Town Properties. The team will review the request and discuss possible next steps. This is not a lending decision or a promise of eligibility, affordability, or financing.",
+    creativePath: "/images/ask-magic-mike/mike-eatmon-headshot.webp",
+    creativeAlt: "Mike Eatmon smiling in an Our Town Properties portrait",
+    reviewNote: "Do not promise eligibility, affordability, financing, inventory, or a timeline. Keep protected-class data and proxies out of targeting and copy.",
+  },
+] as const satisfies readonly (OwnedDemandOfferBrief & { contentSuffix: string })[];
 
 const CHANNEL_DEFINITIONS = [
   {
@@ -143,11 +286,12 @@ function normalized(value: string) {
 function leadsForPlacement(
   signals: OwnedDemandAttributionSignal[],
   definition: (typeof CHANNEL_DEFINITIONS)[number],
+  placementContent: string = definition.content,
 ) {
   const accepted = new Set(definition.aliases.map(normalized));
   const campaign = normalized(CAMPAIGN);
   const medium = normalized(definition.medium);
-  const content = normalized(definition.content);
+  const content = normalized(placementContent);
   return signals.reduce((total, signal) => (
     accepted.has(normalized(signal.source)) &&
     normalized(signal.medium) === medium &&
@@ -164,14 +308,32 @@ export function buildOwnedDemandCommand(
   },
   now = new Date(),
 ): OwnedDemandCommand {
+  const offers = OFFER_DEFINITIONS.map(({ contentSuffix: _contentSuffix, ...offer }) => offer);
   const channels = CHANNEL_DEFINITIONS.map((definition): OwnedDemandChannel => {
-    const attributedLeads = leadsForPlacement(intelligence.ownedDemandSignals, definition);
+    const genericAttributedLeads = leadsForPlacement(intelligence.ownedDemandSignals, definition);
     const trackedUrl = buildUtmUrl(definition.destination, {
       utm_source: definition.source,
       utm_medium: definition.medium,
       utm_campaign: CAMPAIGN,
       utm_content: definition.content,
     });
+    const offerPlacements = OFFER_DEFINITIONS.map(({ contentSuffix, ...offer }): OwnedDemandOfferPlacement => {
+      const content = `${definition.content}_${contentSuffix}`;
+      const attributedLeads = leadsForPlacement(intelligence.ownedDemandSignals, definition, content);
+      return {
+        ...offer,
+        content,
+        trackedUrl: buildUtmUrl(offer.destination, {
+          utm_source: definition.source,
+          utm_medium: definition.medium,
+          utm_campaign: CAMPAIGN,
+          utm_content: content,
+        }),
+        attributedLeads,
+        status: attributedLeads > 0 ? "signal_detected" : "ready_unmeasured",
+      };
+    });
+    const attributedLeads = genericAttributedLeads + offerPlacements.reduce((sum, offer) => sum + offer.attributedLeads, 0);
     return {
       key: definition.key,
       label: definition.label,
@@ -188,6 +350,7 @@ export function buildOwnedDemandCommand(
       draftBody: definition.draftBody,
       operatorStep: definition.operatorStep,
       reviewNote: definition.reviewNote,
+      offers: offerPlacements,
     };
   });
 
@@ -212,6 +375,7 @@ export function buildOwnedDemandCommand(
     attributedLeadRate: intelligence.summary.attributedLeadRate,
     measurementState,
     bottleneck,
+    offers,
     channels,
     weeklyPlan: [
       { day: "Monday", channelKey: "google_business_profile", objective: "Publish one useful local Q&A update", proofRequired: "Live post URL and matching tracked destination" },

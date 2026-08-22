@@ -207,9 +207,9 @@ export function QuestionInput({
           </p>
           <ol className="space-y-2">
             {([
-              ["Ask your question", "Takes about 60 seconds"],
-              ["Mike reviews it personally", "No call centers — straight to the broker"],
-              ["You get a real answer", "Phone, text, or email — your choice"],
+              ["Share your question", "Include the property or target area and timing"],
+              ["Our Town reviews it", "Your context enters the brokerage review queue"],
+              ["Choose follow-up", "Phone, text, or email when permitted"],
             ] as const).map(([step, note], i) => (
               <li key={i} className="flex items-start gap-2.5">
                 <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-gold-400/15 text-[9px] font-bold text-gold-400/80 mt-px">

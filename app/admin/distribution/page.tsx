@@ -1,8 +1,18 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { buildOwnedDemandCommand, type OwnedDemandChannel } from "../../lib/growth/owned-demand";
+import {
+  assessOwnedDemandMeasurement,
+  buildOwnedDemandChannelPacket,
+  buildOwnedDemandCommand,
+  type OwnedDemandMeasurementState,
+  type OwnedDemandChannel,
+  type OwnedDemandOfferBrief,
+  type OwnedDemandOfferPlacement,
+} from "../../lib/growth/owned-demand";
 import { loadGrowthIntelligence } from "../../lib/growthIntelligenceView";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
+import { CopyDemandAsset } from "./CopyDemandAsset";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -37,10 +47,109 @@ function Panel({ eyebrow, title, note, children }: {
   );
 }
 
-function ChannelCard({ channel }: { channel: OwnedDemandChannel }) {
-  const observed = channel.status === "signal_detected";
+function MeasurementStateBanner({ measurement }: { measurement: OwnedDemandMeasurementState }) {
+  const tone = measurement.ready
+    ? "border-[#4a8c6f66] bg-[#071712] text-[#d9f4e8]"
+    : measurement.status === "query_failed"
+      ? "border-[#a21f3d66] bg-[#2a0710] text-[#ffdbe4]"
+      : "border-[#cda24a55] bg-[#1a1308] text-[#f4ead4]";
+  const emphasis = measurement.ready
+    ? "text-[#83dab4]"
+    : measurement.status === "query_failed"
+      ? "text-[#ff8ca7]"
+      : "text-[#f0cf79]";
+
   return (
-    <article className="min-w-0 rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#101010,#060606)] p-5">
+    <div role={measurement.ready ? "status" : "alert"} className={`mt-5 rounded-xl border px-5 py-4 text-sm leading-6 ${tone}`}>
+      <strong className={emphasis}>{measurement.title}</strong>{" "}
+      {measurement.detail}
+    </div>
+  );
+}
+
+function OfferFlightCard({ offer }: { offer: OwnedDemandOfferBrief }) {
+  const portraitClass = offer.key === "renter_plan"
+    ? "object-contain object-bottom transition duration-500 group-hover:scale-[1.02]"
+    : offer.key === "buyer_match"
+      ? "object-cover object-center transition duration-500 group-hover:scale-[1.02]"
+      : "object-cover object-top transition duration-500 group-hover:scale-[1.02]";
+  return (
+    <article className="group min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(150deg,#101010,#050505)]">
+      <div className="relative aspect-[16/10] overflow-hidden border-b border-white/10 bg-[radial-gradient(circle_at_50%_35%,#282219_0%,#090909_54%,#000_100%)]">
+        <Image
+          src={offer.creativePath}
+          alt={offer.creativeAlt}
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
+          className={portraitClass}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_42%,rgba(0,0,0,.88))]" />
+        <p className="absolute bottom-4 left-4 rounded-full border border-[#cda24a55] bg-black/75 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#f0cf79]">
+          {offer.shortLabel}
+        </p>
+      </div>
+      <div className="p-5">
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8bbfc6]">Live consumer offer</p>
+        <h3 className="mt-2 font-serif text-2xl leading-tight text-[#f4ead4]">{offer.label}</h3>
+        <p className="mt-3 text-sm leading-6 text-[#c9bdab]">{offer.draftBody}</p>
+        <p className="mt-4 rounded-xl border border-[#cda24a2f] bg-[#171108] p-3 text-xs leading-5 text-[#b9ab91]">
+          <strong className="text-[#f0cf79]">Required review:</strong> {offer.reviewNote}
+        </p>
+        <Link
+          href={offer.destination}
+          className="mt-4 inline-flex rounded-full border border-white/10 bg-white/[.03] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d9ceb8] hover:border-[#4baab866] hover:text-[#9edbe2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2]"
+        >
+          Inspect live route
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+function OfferPlacement({ offer, measurementReady }: { offer: OwnedDemandOfferPlacement; measurementReady: boolean }) {
+  const observed = offer.status === "signal_detected";
+  const completeDraft = `${offer.draftTitle}\n\n${offer.draftBody}\n\n${offer.trackedUrl}`;
+
+  return (
+    <article className="rounded-xl border border-white/[.08] bg-black/35 p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8bbfc6]">{offer.shortLabel}</p>
+          <h4 className="mt-1 text-sm font-semibold leading-5 text-[#f4ead4]">{offer.draftTitle}</h4>
+        </div>
+        <span className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.11em] ${
+          observed
+            ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-200"
+            : "border-white/10 bg-white/[.03] text-[#8f8778]"
+        }`}>
+          {!measurementReady
+            ? "Measurement unavailable"
+            : observed
+              ? `${offer.attributedLeads} signal${offer.attributedLeads === 1 ? "" : "s"}`
+              : "Unmeasured"}
+        </span>
+      </div>
+      <p className="mt-3 text-xs leading-5 text-[#bdb2a0]">{offer.draftBody}</p>
+      <code className="mt-3 block break-all rounded-lg border border-white/[.08] bg-[#050505] p-3 text-[10px] leading-5 text-[#9edbe2]">
+        {offer.trackedUrl}
+      </code>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <CopyDemandAsset label="Copy draft + link" value={completeDraft} />
+        <CopyDemandAsset label="Copy tracked link" value={offer.trackedUrl} />
+      </div>
+      <p className="mt-3 text-[11px] leading-5 text-[#7f786d]">{offer.reviewNote}</p>
+    </article>
+  );
+}
+
+function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChannel; measurementReady: boolean }) {
+  const observed = channel.status === "signal_detected";
+  const channelPacket = buildOwnedDemandChannelPacket(channel);
+  return (
+    <article
+      id={`channel-${channel.key}`}
+      className="min-w-0 scroll-mt-24 rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#101010,#060606)] p-5"
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8f8778]">{channel.format}</p>
@@ -51,7 +160,11 @@ function ChannelCard({ channel }: { channel: OwnedDemandChannel }) {
             ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-200"
             : "border-[#cda24a55] bg-[#cda24a12] text-[#efcc76]"
         }`}>
-          {observed ? `${channel.attributedLeads} live signal${channel.attributedLeads === 1 ? "" : "s"}` : "Ready · unmeasured"}
+          {!measurementReady
+            ? "Measurement unavailable"
+            : observed
+              ? `${channel.attributedLeads} live signal${channel.attributedLeads === 1 ? "" : "s"}`
+              : "Ready · unmeasured"}
         </span>
       </div>
 
@@ -72,6 +185,27 @@ function ChannelCard({ channel }: { channel: OwnedDemandChannel }) {
         <p className="text-[#d7cbb7]"><strong className="text-[#f0cf79]">Next human step:</strong> {channel.operatorStep}</p>
         <p className="text-[#8f8778]"><strong>Review:</strong> {channel.reviewNote}</p>
       </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/[.08] bg-white/[.025] p-3">
+        <p className="max-w-md text-[11px] leading-5 text-[#8f8778]">
+          One local packet containing the general placement, all three offer variants, tracked links, and review boundaries.
+        </p>
+        <CopyDemandAsset label="Copy full channel flight" value={channelPacket} />
+      </div>
+
+      <details className="group mt-5 rounded-xl border border-[#4baab833] bg-[#061417]">
+        <summary className="cursor-pointer list-none px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#9edbe2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#9edbe2]">
+          <span className="flex items-center justify-between gap-3">
+            Three offer-specific placements
+            <span aria-hidden="true" className="text-lg transition group-open:rotate-45">+</span>
+          </span>
+        </summary>
+        <div className="space-y-3 border-t border-[#4baab833] p-3">
+          {channel.offers.map((offer) => (
+            <OfferPlacement key={offer.key} offer={offer} measurementReady={measurementReady} />
+          ))}
+        </div>
+      </details>
     </article>
   );
 }
@@ -80,11 +214,16 @@ export default async function DistributionPage() {
   await requireLeadCenterPermission("report:view");
   const growth = await loadGrowthIntelligence(30);
   const command = buildOwnedDemandCommand(growth);
-  const stateLabel = command.measurementState === "no_live_signal"
-    ? "Activation required"
-    : command.measurementState === "partial_signal"
-      ? "Attribution repair"
-      : "Measured";
+  const measurement = assessOwnedDemandMeasurement(growth);
+  const stateLabel = !measurement.ready
+    ? measurement.label
+    : command.measurementState === "no_live_signal"
+      ? "Activation required"
+      : command.measurementState === "partial_signal"
+        ? "Attribution repair"
+        : "Measured";
+  const firstMove = command.weeklyPlan[0];
+  const firstMoveChannel = command.channels.find((channel) => channel.key === firstMove.channelKey);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_80%_0%,rgba(74,170,184,.13),transparent_30%),radial-gradient(circle_at_10%_5%,rgba(205,162,74,.12),transparent_28%),#040404] px-4 py-7 text-[#f4ead4] sm:px-6 sm:py-10">
@@ -115,35 +254,87 @@ export default async function DistributionPage() {
               Approved social preview
             </Link>
             <Link href="/ask" className="rounded-full border border-white/10 bg-white/[.03] px-4 py-2 text-xs font-bold uppercase tracking-[0.11em] text-[#d9ceb8] hover:border-[#4baab866] hover:text-[#9edbe2]">
-              Inspect consumer destination
+              Inspect general intake
             </Link>
           </div>
         </header>
 
+        <MeasurementStateBanner measurement={measurement} />
+
         <section className="mt-5 grid gap-3 sm:grid-cols-3" aria-label="Owned demand measurement status">
           <article className="rounded-xl border border-white/10 bg-[#0a0a0a] p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8f8778]">Eligible live leads · 30d</p>
-            <p className="mt-3 font-serif text-3xl text-[#f4ead4]">{growth.summary.leads}</p>
-            <p className="mt-2 text-xs text-[#8f8778]">Test and suppressed records excluded in SQL</p>
+            <p className="mt-3 font-serif text-3xl text-[#f4ead4]">{measurement.ready ? growth.summary.leads : "—"}</p>
+            <p className="mt-2 text-xs text-[#8f8778]">
+              {measurement.ready ? "Test and suppressed records excluded in SQL" : "Unavailable is not zero live demand"}
+            </p>
           </article>
           <article className="rounded-xl border border-white/10 bg-[#0a0a0a] p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8f8778]">Useful attribution</p>
-            <p className="mt-3 font-serif text-3xl text-[#f4ead4]">{command.attributedLeadRate}%</p>
-            <p className="mt-2 text-xs text-[#8f8778]">Canonical first-party source coverage</p>
+            <p className="mt-3 font-serif text-3xl text-[#f4ead4]">{measurement.ready ? `${command.attributedLeadRate}%` : "—"}</p>
+            <p className="mt-2 text-xs text-[#8f8778]">
+              {measurement.ready ? "Canonical first-party source coverage" : "Awaiting canonical Growth measurement"}
+            </p>
           </article>
           <article className="rounded-xl border border-[#cda24a55] bg-[linear-gradient(145deg,#171108,#090909)] p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#cda24a]">Owned-source signals</p>
-            <p className="mt-3 font-serif text-3xl text-[#f0cf79]">{command.attributedLiveLeads}</p>
-            <p className="mt-2 text-xs text-[#a99a7e]">Exact campaign + placement matches on the latest recorded touch</p>
+            <p className="mt-3 font-serif text-3xl text-[#f0cf79]">{measurement.ready ? command.attributedLiveLeads : "—"}</p>
+            <p className="mt-2 text-xs text-[#a99a7e]">
+              {measurement.ready ? "Exact campaign + placement matches on the latest recorded touch" : "No signal inference while measurement is unavailable"}
+            </p>
           </article>
         </section>
 
         <div className="mt-5 rounded-xl border border-[#cda24a55] bg-[#1a1308] px-5 py-4 text-sm leading-6 text-[#f4ead4]">
-          <strong className="text-[#f0cf79]">Measured bottleneck:</strong> {command.bottleneck}
+          <strong className="text-[#f0cf79]">{measurement.ready ? "Measured bottleneck:" : "Measurement boundary:"}</strong>{" "}
+          {measurement.ready
+            ? command.bottleneck
+            : "Prepared assets remain available for review, but measurement must recover before interpreting demand or choosing a launch channel."}
+        </div>
+
+        <section className="mt-5 rounded-2xl border border-[#4baab855] bg-[linear-gradient(135deg,#06171b,#080d0e)] p-5 sm:p-6" aria-labelledby="recommended-first-move">
+          <div className="flex flex-wrap items-center justify-between gap-5">
+            <div className="max-w-3xl">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8bbfc6]">
+                {measurement.ready ? "Recommended first move" : "Prepared sequence · measurement unavailable"}
+              </p>
+              <h2 id="recommended-first-move" className="mt-2 font-serif text-2xl text-[#d8f7fa] sm:text-3xl">
+                {measurement.ready
+                  ? `Prepare ${firstMoveChannel?.label ?? firstMove.channelKey} first.`
+                  : "Restore measurement before selecting a first channel."}
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-[#b9ced0]">
+                {measurement.ready
+                  ? firstMove.objective
+                  : `${firstMoveChannel?.label ?? firstMove.channelKey} remains prepared for review, but it is not a data-backed recommendation in this state.`}
+              </p>
+              <p className="mt-2 text-xs leading-5 text-[#79a4aa]"><strong className="text-[#9edbe2]">Proof required:</strong> {firstMove.proofRequired}</p>
+            </div>
+            <Link
+              href={`#channel-${firstMove.channelKey}`}
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#4baab866] bg-[#4baab818] px-5 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#bff8ff] transition hover:bg-[#4baab82b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2]"
+            >
+              {measurement.ready ? "Open first channel packet" : "Inspect prepared channel packet"}
+            </Link>
+          </div>
+        </section>
+
+        <div className="mt-5">
+          <Panel
+            eyebrow="Three-offer launch flight"
+            title="Use the funnels already in production."
+            note={`${command.channels.length * command.offers.length} exact channel + offer placements are prepared. Nothing here auto-publishes or contacts a consumer.`}
+          >
+            <div className="grid gap-4 lg:grid-cols-3">
+              {command.offers.map((offer) => <OfferFlightCard key={offer.key} offer={offer} />)}
+            </div>
+          </Panel>
         </div>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-2">
-          {command.channels.map((channel) => <ChannelCard key={channel.key} channel={channel} />)}
+          {command.channels.map((channel) => (
+            <ChannelCard key={channel.key} channel={channel} measurementReady={measurement.ready} />
+          ))}
         </div>
 
         <div className="mt-5 grid gap-5 xl:grid-cols-[1.3fr_.7fr]">

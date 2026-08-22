@@ -42,26 +42,26 @@ function getWhatMikeWillLookAt(intent?: string, question?: string): string[] {
   const q = (question ?? "").toLowerCase();
   if (intent === "buy" || /buy|buying|afford|tour|homes? for sale|purchase/.test(q)) {
     return [
-      "Active listings that match your criteria in Wilson",
-      "Price per square foot in target neighborhoods",
-      "Wilson market absorption rate and buyer competition",
-      "Affordability in the current rate environment",
+      "Current authorized listings that may match your stated criteria",
+      "Property facts and availability that require verification",
+      "Your target area, timing, and property needs",
+      "Financing questions to confirm with an appropriate lender",
     ];
   }
   if (intent === "both") {
     return [
-      "Your home's likely value range vs. purchase budget",
+      "The property facts and purchase budget context you provide",
       "Timing — whether to sell before or after buying",
-      "Wilson inventory levels for both sides of your move",
-      "Bridge financing options and contingency strategy",
+      "Current authorized information for both sides of the move",
+      "Financing and contingency questions requiring confirmation",
     ];
   }
   // "sell" or home_worth or anything mentioning value/worth
   return [
-    "Recent comparable sales in your exact neighborhood",
-    "School zone and lot characteristics affecting value",
-    "Days on market trends for similar Wilson homes",
-    "Current list-to-sale price ratios in your area",
+    "Verified comparable sales relevant to the property",
+    "Property condition, lot, improvements, and location-specific facts",
+    "Current authorized market context for similar properties",
+    "Your timing, goals, and questions about possible selling paths",
   ];
 }
 
@@ -142,7 +142,7 @@ export function StepConfirmation({
       >
         <span className="h-1.5 w-1.5 rounded-full bg-gold-400 motion-safe:animate-pulse" />
         <p className="text-[11px] font-semibold tracking-label uppercase text-gold-300">
-          Your request is in — Mike has it
+          Your request is in — Our Town has it
         </p>
       </div>
 
@@ -187,9 +187,9 @@ export function StepConfirmation({
         </p>
         <ol className="relative space-y-0">
           {[
-            { label: "Mike receives your full request and contact info", icon: "1" },
-            { label: "He reviews it personally — not an auto-responder", icon: "2" },
-            { label: "Watch your phone or email for follow-up from Our Town Properties", icon: "3" },
+            { label: "Our Town Properties receives the stored request and consent evidence", icon: "1" },
+            { label: "The brokerage queue presents the submitted context for human review", icon: "2" },
+            { label: "Watch the permitted channel you selected for any follow-up", icon: "3" },
           ].map((item, i, arr) => (
             <li key={i} className="flex gap-3 pb-4 last:pb-0">
               {/* Timeline spine */}

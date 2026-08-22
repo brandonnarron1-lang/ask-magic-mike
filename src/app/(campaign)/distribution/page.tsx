@@ -43,10 +43,10 @@ const GENERIC_HTML_SNIPPET = `<!-- Ask Magic Mike — Generic HTML Embed -->
 // ── Hero Trust Metrics ────────────────────────────────────────────────────────
 
 const TRUST_METRICS = [
-  { num: "2,500+", label: "deals closed" },
-  { num: "30+", label: "years in Wilson" },
+  { num: "3", label: "consumer paths" },
+  { num: "1", label: "canonical backend" },
   { num: "6", label: "channels" },
-  { num: "~3 min", label: "to deploy" },
+  { num: "UTM", label: "source tracking" },
 ] as const;
 
 // ── Launch Paths ──────────────────────────────────────────────────────────────
@@ -60,7 +60,7 @@ const LAUNCH_PATHS = [
     bestFor: "WordPress, any website, sidebar",
     description:
       "Embed the intake form directly. Prospects stay on your site — no redirect, no friction.",
-    setup: "Under 5 minutes",
+    setup: "Review and install manually",
     ctaText: "Get embed code",
   },
   {
@@ -71,7 +71,7 @@ const LAUNCH_PATHS = [
     bestFor: "Facebook, Instagram, email blast",
     description:
       "Share a UTM-tracked link. Works in bio links, posts, newsletters, and text campaigns.",
-    setup: "Under 1 minute",
+    setup: "Review and place manually",
     ctaText: "Get channel links",
   },
   {
@@ -82,7 +82,7 @@ const LAUNCH_PATHS = [
     bestFor: "Yard signs, open houses, mailers",
     description:
       "Drop the QR link into any free generator. Print on signs, flyers, and door hangers.",
-    setup: "Under 2 minutes",
+    setup: "Review and test manually",
     ctaText: "Get QR links",
   },
 ] as const;
@@ -151,12 +151,12 @@ const HOW_STEPS = [
   {
     num: "02",
     label: "They answer three quick questions",
-    body: "The intake form captures their question, address, name, phone, and email in under 60 seconds. No account required.",
+    body: "The intake form captures the submitted question, property context, contact details, communication preference, source, and consent evidence. No account is required.",
   },
   {
     num: "03",
-    label: "Mike reviews and responds personally",
-    body: "Mike Eatmon or the Our Town Properties team follows up by phone, text, or email — whichever the visitor prefers. No bots. No call centers.",
+    label: "The brokerage review queue receives it",
+    body: "Mike Eatmon or the Our Town Properties team can follow up by a permitted channel after reviewing the request. Timing and the individual reviewer may vary.",
   },
 ] as const;
 
@@ -209,7 +209,7 @@ export default function DistributionPage() {
         </h1>
         <p className="max-w-xl mx-auto text-sm text-slate-400 leading-relaxed mb-6">
           Website widget, Facebook, Instagram, email, QR code, sign rider — every channel
-          with UTM attribution built in. Mike reviews every lead personally.
+          with UTM attribution built in and a protected brokerage review queue.
         </p>
 
         {/* Trust metrics */}
@@ -233,7 +233,7 @@ export default function DistributionPage() {
             href="/value"
             className="rounded-xl border border-white/[0.10] bg-white/[0.03] px-6 py-2.5 text-sm text-slate-300 hover:border-gold-400/20 hover:text-gold-300 transition-all"
           >
-            Home Value Estimate
+            Home-Value Review
           </Link>
         </div>
       </section>
@@ -286,7 +286,7 @@ export default function DistributionPage() {
             Embed Widget Snippets
           </p>
           <h2 className="font-bebas text-2xl sm:text-3xl text-cream mb-2">
-            Drop it on any site in 30 seconds.
+            Review the destination and origin policy, then install it on an approved site.
           </h2>
           <p className="text-xs text-slate-500 mb-6">
             Copy the snippet for your platform. The script loads asynchronously — it
@@ -379,7 +379,7 @@ export default function DistributionPage() {
             How It Works
           </p>
           <h2 className="font-bebas text-2xl sm:text-3xl text-cream mb-6">
-            Click → Question → Mike responds.
+            Request → Review → Permitted follow-up.
           </h2>
 
           <div className="space-y-4">
@@ -400,7 +400,7 @@ export default function DistributionPage() {
             <p className="text-[11px] text-slate-500 leading-relaxed">
               Ask Magic Mike never posts on your behalf, never automatically shares visitor
               information, and never contacts leads through automated channels. Mike Eatmon or
-              the Our Town Properties team follows up personally.
+              the Our Town Properties team reviews the request before permitted follow-up.
             </p>
           </div>
         </div>
@@ -418,7 +418,7 @@ export default function DistributionPage() {
             UTM Source Attribution
           </p>
           <h2 className="font-bebas text-2xl sm:text-3xl text-cream mb-2">
-            Know where every lead came from.
+            Preserve the source evidence submitted with each lead.
           </h2>
           <p className="text-xs text-slate-500 mb-6">
             All distribution links include standard UTM parameters. Use these in your CRM
@@ -474,7 +474,7 @@ export default function DistributionPage() {
               "Always include the Equal Housing Opportunity mark on print materials.",
               "Do not promise specific sale outcomes, on-the-spot valuations, or AVM-generated estimates.",
               "Ask Magic Mike is an intake and follow-up tool — not an MLS search, AVM, or certified property assessment service.",
-              "Mike Eatmon or the Our Town Properties team reviews every lead personally. Do not imply real-time automated responses.",
+              "Mike Eatmon or the Our Town Properties team reviews requests before permitted follow-up. Do not imply a named reviewer or real-time response.",
               "Embed scripts must always point to askmagicmike.com — never a Vercel preview-deployment URL.",
               "Our Town Properties, Inc. · Mike Eatmon, REALTOR® · Wilson, NC · Licensed NC real estate professional.",
             ].map((item, i) => (
@@ -495,7 +495,7 @@ export default function DistributionPage() {
               Ready to put Mike to work?
             </h2>
             <p className="text-sm text-slate-400 mb-6">
-              Ask a question, get a home value estimate, or open the admin widget center.
+              Ask a question, request a broker-reviewed home-value conversation, or open the admin widget center.
             </p>
             <div className="flex items-center justify-center gap-3 flex-wrap">
               <Link
@@ -508,7 +508,7 @@ export default function DistributionPage() {
                 href="/value"
                 className="rounded-xl border border-white/[0.10] bg-white/[0.03] px-6 py-2.5 text-sm text-slate-300 hover:border-gold-400/20 hover:text-gold-300 transition-all"
               >
-                Home Value Estimate
+                Home-Value Review
               </Link>
               <Link
                 href="/campaigns"

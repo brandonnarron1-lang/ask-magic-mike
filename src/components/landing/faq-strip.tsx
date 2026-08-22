@@ -154,10 +154,10 @@ export function FaqStrip() {
           >
             <div>
               <p className="text-sm font-semibold text-cream mb-1">Still have questions?</p>
-              <p className="text-xs text-slate-400">Mike picks up the phone. Try him.</p>
+              <p className="text-xs text-slate-400">Call the brokerage using its current public office line.</p>
             </div>
             <a
-              href="tel:2522454337"
+              href="tel:2522437700"
               onClick={() => trackCall("faq_strip")}
               className="inline-flex items-center gap-2.5 rounded-xl px-6 py-3 text-sm font-bold text-midnight shrink-0 transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
               style={{
@@ -166,7 +166,7 @@ export function FaqStrip() {
               }}
             >
               <Phone className="h-4 w-4" />
-              Call Mike → 252-245-4337
+              Call Our Town → 252-243-7700
             </a>
           </div>
         </Reveal>

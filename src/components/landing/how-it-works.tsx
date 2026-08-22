@@ -11,8 +11,8 @@ const STEPS = [
     n: "01",
     icon: MessageSquare,
     title: "Share Your Situation",
-    body: "Type your question or address — home value, timing, buying, selling. No forms. No gated content. Takes about 30 seconds.",
-    note: "~30 seconds",
+    body: "Share the property or target area, timing, buying or selling goal, and the context needed for review.",
+    note: "Use the secure request path",
     color: "from-gold-400/20 to-transparent",
     portrait: brandPackAssets.expressions.thinkingChin,
     portraitAlt: "Mike Eatmon listening intently",
@@ -22,8 +22,8 @@ const STEPS = [
     n: "02",
     icon: Zap,
     title: "Mike Reviews Your Details",
-    body: "Your request goes to Mike Eatmon at Our Town Properties — with your full context included. No call centers. No automated responses.",
-    note: "Routed to Mike directly",
+    body: "The request is stored with its source, consent evidence, and context before it enters the Our Town Properties review queue.",
+    note: "Durable, attributed intake",
     color: "from-gold-400/15 to-transparent",
     portrait: brandPackAssets.actions.explaining,
     portraitAlt: "Mike Eatmon reviewing your details",
@@ -121,7 +121,7 @@ export function HowItWorks() {
               <span className="text-gold-shimmer">Connect.</span>
             </h2>
             <p className="relative z-10 mt-5 text-lg text-slate-400 max-w-md mx-auto">
-              Three steps. No gatekeeping. Just answers from the man who&apos;s done it 2,500+ times.
+              Three clear steps from private request to broker-reviewed follow-up.
             </p>
           </div>
         </Reveal>

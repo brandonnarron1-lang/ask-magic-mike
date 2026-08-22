@@ -29,9 +29,13 @@ export const siteConfig = {
   agentProfileUrl: "https://www.ourtownproperties.com/agents/mike-eatmon/",
   homeValueUrl: "https://www.ourtownproperties.com/home-value/",
 
-  /** Agent direct line. */
-  agentPhone: process.env.NEXT_PUBLIC_AGENT_PHONE ?? "+12522454337",
-  agentPhoneDisplay: "252-245-4337",
+  /**
+   * Public contact line. Keep this aligned with the brokerage number currently
+   * published by Our Town Properties. Private routing numbers belong only in
+   * protected notification configuration and must never flow into public UI.
+   */
+  agentPhone: "+12522437700",
+  agentPhoneDisplay: "252-243-7700",
 
   /** Our Town Properties main office. */
   officePhone: "252-243-7700",

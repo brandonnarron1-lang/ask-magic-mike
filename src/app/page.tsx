@@ -19,7 +19,7 @@ const jsonLd = {
       telephone: siteConfig.agentPhoneDisplay,
       image: `${siteConfig.canonicalSiteUrl}/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp`,
       description:
-        "Mike Eatmon is a licensed NC real estate broker with 30+ years of experience and $750M+ in career sales serving Wilson County and Eastern NC.",
+        "Mike Eatmon is a North Carolina real estate broker with Our Town Properties serving Wilson County and Eastern North Carolina.",
       address: {
         "@type": "PostalAddress",
         streetAddress: "3301 Nash St. N Suite E",

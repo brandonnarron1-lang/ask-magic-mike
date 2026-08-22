@@ -1,12 +1,12 @@
 const FACTS = [
-  { label: "Licensed & Active Since", value: "1993",           note: "30+ years" },
-  { label: "Career Sales Volume",     value: "$750M+",         note: "Eastern NC" },
-  { label: "Homes Sold",              value: "2,500+",         note: "Wilson Co. & beyond" },
   { label: "Home Base",               value: "Wilson, NC",     note: "3301 Nash St NW" },
   { label: "Office",                  value: "252-243-7700",   note: "Our Town Properties" },
   { label: "Service Area",            value: "Wilson · Rocky Mount · Greenville", note: "Eastern NC" },
   { label: "Also Serving",            value: "Smithfield · Clayton · Kenly · Elm City", note: "& more" },
-  { label: "Brokerage",               value: "Our Town Properties, Inc.", note: "NC Licensed Broker" },
+  { label: "Brokerage",               value: "Our Town Properties, Inc.", note: "Wilson, NC" },
+  { label: "Seller Path",             value: "Home-value review", note: "Not an appraisal" },
+  { label: "Buyer Path",              value: "Property-match review", note: "Availability verified" },
+  { label: "Renter Path",             value: "Readiness review", note: "Not a lending decision" },
 ];
 
 export function MarketPulse() {
@@ -63,7 +63,7 @@ export function MarketPulse() {
             className="text-[9px] font-black tracking-label uppercase whitespace-nowrap"
             style={{ color: "#D4A017" }}
           >
-            LIVE MARKET
+            LOCAL PATHS
           </span>
         </div>
       </div>
@@ -93,8 +93,8 @@ export function MarketPulse() {
       </div>
 
       <p className="sr-only">
-        Our Town Properties — Mike Eatmon, Wilson NC real estate broker. Licensed since 1993.
-        $750M+ career sales. 2,500+ homes sold. Serving Wilson County and Eastern North Carolina.
+        Our Town Properties — Mike Eatmon, Wilson NC real estate broker. Public office
+        252-243-7700. Seller, buyer, and renter requests receive human review.
       </p>
     </div>
   );

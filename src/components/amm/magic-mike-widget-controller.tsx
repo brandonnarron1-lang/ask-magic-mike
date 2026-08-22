@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MagicMikeWidgetShell } from "./magic-mike-widget-shell";
 import { submitWidgetLead } from "@/lib/widget/submit-lead";
 import type { LeadType, TimelineBucket } from "@/lib/leads/lead-types";
+import { siteConfig } from "@/lib/site-config";
 
 /**
  * MagicMikeWidgetController — deterministic state machine that drives the
@@ -417,7 +418,7 @@ export function MagicMikeWidgetController({
         {
           from: "mike",
           text:
-            "Thanks — Mike Eatmon or the Our Town Properties team will follow up with local guidance. Preliminary home value range only; not an appraisal.",
+            "Thanks — Mike Eatmon or the Our Town Properties team will review the request for permitted follow-up. Broker-reviewed home-value conversation only; not an appraisal.",
         },
       ]}
       prompts={["Call Mike", "Ask another question"]}
@@ -653,7 +654,7 @@ function ErrorActions({
         Try again
       </button>
       <a
-        href={`tel:${process.env.NEXT_PUBLIC_AGENT_PHONE ?? "+12522454337"}`}
+        href={`tel:${siteConfig.agentPhone}`}
         onClick={onCall}
         className="rounded-md bg-gold-400 px-3 py-2 text-[13px] font-bold text-midnight text-center"
       >
@@ -679,7 +680,7 @@ function SuccessActions({
       ) : null}
       <div className="grid grid-cols-2 gap-2">
         <a
-          href={`tel:${process.env.NEXT_PUBLIC_AGENT_PHONE ?? "+12522454337"}`}
+          href={`tel:${siteConfig.agentPhone}`}
           onClick={onCall}
           className="rounded-md bg-gold-400 px-3 py-2 text-[13px] font-bold text-midnight text-center"
         >

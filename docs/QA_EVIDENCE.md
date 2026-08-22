@@ -5,6 +5,111 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Phase 9 campaign safety + owned-demand offer flight — 2026-08-21
+
+- Measurement-truth hardening — PASS: the command distinguishes ready,
+  not-configured, schema-pending, and query-failed states. Only ready
+  measurement may render numeric demand, a measured bottleneck, or a data-backed
+  first-channel recommendation. Focused unit/static coverage passes 17/17.
+- No-database Production-render browser acceptance — PASS at 1440 × 1000 and
+  390 × 844: HTTP 200, all three metrics render unavailable, false-zero and
+  measured-recommendation copy are absent, recovery guidance is present, no
+  horizontal overflow occurs, and browser console/page errors remain zero.
+  Evidence is under the gitignored
+  `artifacts/phase9-measurement-unavailable-20260821/` directory.
+
+- Current-run operator UX audit — PASS: desktop 1440 × 1000 and mobile
+  390 × 844 Production renders were captured and inspected. The recommended
+  first move is present once, its same-page link lands on Google Business
+  Profile, every channel exposes the full-flight copy control, the control
+  reports its copied state, mobile document width remains contained, and no
+  browser console warning/error was observed. Accepted evidence and audit notes
+  are listed in `docs/phase9/OWNED_DEMAND_OPERATOR_UX_AUDIT.md`.
+
+Status: local release gate, local Production-render visual verification, and
+exact code-bearing protected Preview verification are complete. Production and
+external channels remain unchanged.
+
+- Reuse audit confirmed the canonical root `/admin/distribution`, Neon Growth
+  loader, UTM builder, `/home-value`, `/buy`, `/rent`, and retained visual assets
+  already existed.
+- The first new regression run failed intentionally against the uncorrected
+  retained campaign copy, proving that unsupported claims and conflicting public
+  phone numbers were detectable. After the factual rewrite, the safety suite
+  passes.
+- The first offer-flight run also failed closed because the canonical UTM
+  allowlist did not yet include the existing `/home-value`, `/buy`, and `/rent`
+  routes. Those exact routes were added to the allowlist; arbitrary hosts and
+  paths remain rejected.
+- Focused final command:
+  `pnpm exec vitest run tests/compliance/value-copy.test.ts tests/compliance/campaign-copy-safety.test.ts tests/adminops/owned-demand-command.test.ts tests/admin/utm-link-builder.test.ts tests/brand/marketing-system.test.ts tests/compliance/public-distribution.test.ts`
+  — PASS, 6 files / 337 tests.
+- `pnpm release:gate` — PASS: Ask Magic Mike/NellySelly isolation, 14/14
+  release-safety controls, 196 test files / 2,797 tests, strict typecheck,
+  ESLint, optimized Next.js 15.5.21 Production build, and 78-route manifest.
+- `pnpm typecheck` — PASS.
+- `git diff --check` — PASS.
+- `pnpm audit --prod --audit-level high` — PASS: no known Production
+  dependency vulnerabilities.
+- `gitleaks detect --source . --redact --no-banner` — PASS: 482 commits and
+  approximately 13.64 MB scanned with no leaks.
+- High-signal scan of the new command surface found no client secret reads,
+  unsafe HTML/DOM sinks, dynamic execution, Web Storage credentials,
+  unrestricted `postMessage`, navigation mutation, or network send. A complete
+  retained-source phone scan found neither conflicting private number.
+- Verified boundaries: exact 18 offer placements, exact-once attribution,
+  canonical routes/UTMs, retained local imagery, no prohibited campaign claims,
+  current public office number retained, test/suppressed SQL exclusions, and
+  local clipboard controls with no fetch, form, server action, or provider call.
+- Active `/ask` rendered and source-level checks reject neighborhood, school,
+  and buyer-demand steering language while requiring objective consumer-stated
+  comparison criteria.
+- `scripts/qa/visual-smoke.mjs` against a fresh local Production build — PASS,
+  10/10 checks across `/home-value`, `/ask`, `/embed/ask`, `/widget-preview`, and
+  authenticated `/admin/distribution` at desktop and mobile sizes. Every check
+  returned 200 with no horizontal overflow, missing required copy, forbidden
+  claim, bare appraisal language, or console error. The harness intercepted only
+  `/api/events` and `/api/experiments/event` with local 204 responses so this
+  rendered acceptance remained read-only. Evidence is under the gitignored
+  `artifacts/phase9-campaign-safety-20260821/` directory.
+- Visual inspection confirmed the active funnels remain clear and mobile-first;
+  the protected three-offer command uses the existing high-resolution approved
+  Mike portraits instead of the soft 150–175 px legacy derivatives.
+- Exact code-bearing commit:
+  `a0c80eaa9b429ed48871fc221d93af5e7d6fdfa1`.
+- Exact Ready Preview: `dpl_5UQL8LDfMvFvvi4YZ8UhLdyDFbWF` at
+  `https://ask-magic-mike-ihjwzl8rw-eyes-up-industries.vercel.app`.
+- Exact GitHub status: release gate PASS in 2m56s; Vercel deployment and Preview
+  comment checks PASS.
+- Protected Preview read-only matrix — PASS: `/`, `/home-value`, `/ask`, `/buy`,
+  `/rent`, `/embed/ask`, `/widget-preview`, `/api/health/live`,
+  `/api/health/ready`, and `/api/listings/search?q=Wilson&limit=3` all returned
+  200. Required active copy was present, Ask Magic Mike/NellySelly identity
+  isolation held, and the listing response exposed none of the private-field
+  denylist.
+- Protected Preview visual matrix — PASS, 8/8: `/home-value`, `/ask`,
+  `/embed/ask`, and `/widget-preview` at 1440×1000 and 390×844. All returned 200
+  with no overflow, missing required copy, steering/offer claim, or console
+  error. Analytics endpoints were intercepted with local 204 responses to keep
+  the visual run read-only. Screenshots are retained outside Git at
+  `/private/tmp/amm-pr183-preview-qa-a0c80eaa/visual/`.
+- Anonymous protected-admin proof — PASS: `/admin/distribution` returned 401
+  with a Basic challenge, `Cache-Control: no-store`, and
+  `X-Frame-Options: SAMEORIGIN`. No app credential or session was bypassed.
+- Vercel CLI unexpectedly created empty helper project
+  `amm-phase9-campaign-compliance-20260821`
+  (`prj_JUyx03Rh8iABqAFepNNuPI2jJqut`) before the worktree was relinked to the
+  canonical project. Read-only inspection confirms zero deployments. It was not
+  deleted because cleanup is a separate external-state action.
+- No lead, email, BCC, consumer acknowledgment, SMS, Push notification, social
+  post, GBP post, WordPress update, Neon write, DNS change, Vercel Production
+  deployment, or NellySelly change occurred.
+
+Authenticated `/admin/distribution` Preview inspection remains optional owner
+acceptance and will not be bypassed. It is not required for the public release
+candidate because the same protected route passed local authenticated rendered
+QA and exact Preview anonymous-denial proof.
+
 ## Phase 7 completion gap closure — 2026-08-16
 
 ### Authenticated Production Copilot acceptance

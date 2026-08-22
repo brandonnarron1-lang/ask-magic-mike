@@ -1,5 +1,52 @@
 # Changelog
 
+## 2026-08-21 — Campaign safety and three-offer owned-demand candidate
+
+- Consolidated the existing distribution command, seller/buyer/renter funnels,
+  canonical UTM builder, Neon attribution, and retained visual library into one
+  protected, read-only owned-demand flight.
+- Prepared 18 exact seller, buyer, and renter placements across six existing
+  owned channels, with accessible copy controls and no automatic publication or
+  messaging path.
+- Rewrote retained campaign copy to remove unsupported performance, valuation,
+  demand, school-proxy, response-time, superlative, and conflicting public-phone
+  claims; added dedicated regression coverage.
+- Updated the reusable visual-smoke contract so rendered QA requires the factual
+  broker-review credential instead of the removed tenure claim, matches visible
+  copy case-insensitively, and keeps authenticated admin proof separate from
+  public Preview proof.
+- Hardened the active `/ask` route and prompt set against neighborhood,
+  school-proxy, and unverified buyer-demand guidance. The public interface now
+  frames comparisons around objective criteria supplied by the consumer.
+- Replaced two undersized legacy offer portraits with existing approved 1024 px
+  and 515×720 local Mike assets; no synthetic identity or parallel visual pack
+  was introduced.
+- Extended the UTM allowlist only for the existing canonical `/home-value`,
+  `/buy`, and `/rent` routes; arbitrary and cross-system destinations remain
+  blocked.
+- Added a measured-bottleneck-to-channel jump and deterministic local-only
+  full-flight packets so an operator can move the general placement plus all
+  three offer variants into native review without four separate copy actions.
+- Captured and inspected the remediated operator path at desktop and mobile;
+  the anchor lands on the intended channel, copy state is visible, document
+  width remains contained, and no browser warning/error was observed.
+- Passed the full local release gate: 196 test files / 2,795 tests, strict
+  typecheck, ESLint, optimized Production build, 78-route manifest, 14/14
+  release-safety controls, system isolation, zero known Production dependency
+  vulnerabilities, and a clean redacted 464-commit secret scan.
+- Passed 10/10 local Production-render visual checks across five active routes
+  at desktop and mobile sizes with no overflow, missing required copy,
+  prohibited claims, bare appraisal language, or console errors.
+- Produced exact code-bearing Preview deployment
+  `dpl_5UQL8LDfMvFvvi4YZ8UhLdyDFbWF` from commit
+  `a0c80eaa9b429ed48871fc221d93af5e7d6fdfa1`; GitHub release and Vercel
+  checks passed. Ten read-only route/health/listing checks and eight protected
+  Preview desktop/mobile renders passed, while anonymous protected-admin access
+  failed closed with 401, `no-store`, and `SAMEORIGIN`.
+- No Production deployment, database migration, lead creation, external send,
+  WordPress change, social publication, DNS change, or NellySelly change was
+  performed.
+
 ## 2026-08-16 — Phase 7 messaging and advisory AI release candidate
 
 - Added a centralized communication-permission engine, immutable template/version registry, governed sequence state machine, signed Resend event handler, hardened Brandon-only QA email boundary, durable advisory AI jobs, and operator-visible controls.

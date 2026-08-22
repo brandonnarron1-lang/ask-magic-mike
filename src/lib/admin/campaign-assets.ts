@@ -219,44 +219,38 @@ const COPY_BLOCKS: Record<CampaignSlug, BrandCopyBlock> = {
     id: "amm_launch",
     topic: "Ask Magic Mike Launch",
     category: "general",
-    headline: "Real Answers. Real Broker. Wilson NC.",
-    subhead: "Mike Eatmon, licensed NC broker, answers your biggest real estate questions — free.",
-    socialShort: "Got a real estate question? Ask Mike — a licensed Wilson NC broker answers free. askmagicmike.com/ask #WilsonNC",
-    socialMedium: `The most common real estate questions I hear in Wilson aren't being answered by Zillow or the news.
+    headline: "Bring your Wilson real estate question to a local review.",
+    subhead: "Share the situation with Mike Eatmon or the Our Town Properties team.",
+    socialShort: "Buying, selling, renting, or planning in Wilson? Request a local review through Ask Magic Mike. [TRACKED LINK] #WilsonNC",
+    socialMedium: `Buying, selling, renting, or planning in Wilson or Eastern North Carolina?
 
-Licensed broker. Real answers. No algorithm.
+Share your timeline, property or target area, and unanswered questions through Ask Magic Mike. Mike Eatmon or the Our Town Properties team will review the request and follow up using the preference you provide.
 
-Ask Mike anything about buying, selling, or the Wilson market: askmagicmike.com/ask
+[TRACKED LINK]
 
-#WilsonNC #RealEstate #AskMike`,
-    socialFull: `Something I've noticed after years of selling real estate in Wilson:
+#WilsonNC #AskMagicMike`,
+    socialFull: `Real estate decisions rarely fit a generic answer.
 
-People have great questions. They just don't know who to trust for a real answer.
+Ask Magic Mike gives Wilson and Eastern North Carolina consumers a direct path to share the actual property or target area, timeline, and questions with Mike Eatmon or the Our Town Properties team.
 
-Zillow gives you an algorithm. The news gives you national headlines. Neither knows what your specific neighborhood is actually doing right now.
+Property, market, lending, legal, and financial facts should be independently verified before a decision.
 
-That's why I built Ask Magic Mike.
-
-You ask. I answer. No spam, no pitch, no pressure.
-
-I'm Mike Eatmon, a licensed NC broker with Our Town Properties. I work in Wilson every day. Ask me anything.
-
-👇 askmagicmike.com/ask`,
-    emailSubject: "Got a real estate question? Ask Mike — free",
+Request a local review: [TRACKED LINK]`,
+    emailSubject: "Request a local real estate review",
     emailBody: `Hi [First Name],
 
-If you've been wondering about the Wilson NC real estate market — whether to buy, sell, or wait — I want to make it easier to get a straight answer.
+Ask Magic Mike provides a direct path to share a Wilson or Eastern North Carolina buying, selling, renting, or planning question with Mike Eatmon or the Our Town Properties team.
 
-Ask Magic Mike is a free Q&A tool I built to give Wilson homeowners and buyers honest, broker-level answers. No sales pitch. No email list. Just answers.
+Request a local review: [TRACKED LINK]
 
-Try it: askmagicmike.com/ask
+Mike Eatmon
+Our Town Properties · Wilson, NC
 
-— Mike Eatmon
-Licensed NC Broker, Our Town Properties
-Wilson, NC`,
-    cta: "Ask Mike Anything →",
+[Brokerage mailing address]
+[Unsubscribe link]`,
+    cta: "Request a Local Review →",
     flyerHeadline: "Got a Real Estate Question?",
-    flyerBody: "Get a straight answer from a licensed Wilson broker — free.",
+    flyerBody: "Scan to request broker-reviewed guidance from Our Town Properties.",
     hashtags: ["#WilsonNC", "#AskMike", "#RealEstate", "#NCRealEstate", "#OurTownProperties"],
   },
 
@@ -264,48 +258,37 @@ Wilson, NC`,
     id: "home_value",
     topic: "Home Value",
     category: "home_value",
-    headline: "What Is Your Wilson Home Worth Right Now?",
-    subhead: "Get an honest estimate from a licensed Wilson broker — not an algorithm.",
-    socialShort: "What's your Wilson NC home worth? Get a real answer from a licensed broker: askmagicmike.com/value #WilsonNC #HomeValue",
-    socialMedium: `What's your Wilson home actually worth right now?
+    headline: "Request a Wilson-area home-value and sale-readiness review.",
+    subhead: "Start with the property, condition, timeline, and questions you provide.",
+    socialShort: "Wilson-area homeowner? Request a broker-reviewed home-value conversation. Not an appraisal or guaranteed value. [TRACKED LINK]",
+    socialMedium: `A useful selling decision starts with the property, condition, timing, and your goals.
 
-Not what Zillow says. Not what your neighbor sold for two years ago.
+Share those details through Ask Magic Mike for a broker-reviewed home-value and sale-readiness conversation from Mike Eatmon or the Our Town Properties team.
 
-What a buyer in today's market — with today's rates and today's inventory — would actually pay.
+Not an appraisal, automated valuation, guaranteed value, or guaranteed offer.
 
-Licensed Wilson broker. Real answer. Free.
+[TRACKED LINK]`,
+    socialFull: `Thinking about a future move in Wilson or Eastern North Carolina?
 
-askmagicmike.com/value
+Share your property, condition, timeline, and questions through Ask Magic Mike. Mike Eatmon or the Our Town Properties team will review the request and can discuss practical next steps.
 
-#WilsonNC #HomeValue #NCRealEstate`,
-    socialFull: `I get this question every week in Wilson:
+This is broker-reviewed guidance—not an appraisal, automated valuation, guaranteed value, guaranteed offer, or promised response time.
 
-"Mike, what do you think my home is worth?"
-
-Here's what I've learned: homeowners who use online estimates are usually off by $20,000 to $40,000 — in either direction.
-
-The algorithm doesn't know that your kitchen was updated. It doesn't know what your neighbor's house actually sold for after the inspection credits. It doesn't know that three buyers are actively looking in your subdivision right now.
-
-I do.
-
-If you're curious what your Wilson home is worth — even if you're not planning to sell — ask me. I'll give you a real number with real reasoning.
-
-👇 askmagicmike.com/value`,
-    emailSubject: "What's your Wilson home worth? Here's the honest answer",
+Request a review: [TRACKED LINK]`,
+    emailSubject: "Request a Wilson-area home-value review",
     emailBody: `Hi [First Name],
 
-I've been tracking home values in your area of Wilson closely this month, and I thought you might want an update.
+If you are reviewing a possible move, you can share your Wilson-area property, timing, and questions with Mike Eatmon or the Our Town Properties team through Ask Magic Mike.
 
-Whether you're thinking about selling or just staying informed, I can give you a real broker's estimate — not an automated tool's guess.
+Request the broker-reviewed conversation: [TRACKED LINK]
 
-Get your free home value estimate: askmagicmike.com/value
+This is not an appraisal or guaranteed value.
 
-— Mike Eatmon
-Licensed NC Broker, Our Town Properties
-Wilson, NC`,
-    cta: "Get My Free Home Value Estimate →",
+[Brokerage mailing address]
+[Unsubscribe link]`,
+    cta: "Request a Home-Value Review →",
     flyerHeadline: "What's Your Wilson Home Worth?",
-    flyerBody: "Ask a licensed Wilson broker. Real estimate. No obligation.",
+    flyerBody: "Request a broker-reviewed conversation. Not an appraisal or guaranteed value.",
     hashtags: ["#WilsonNC", "#HomeValue", "#RealEstate", "#NCRealEstate", "#AskMike"],
   },
 
@@ -313,46 +296,37 @@ Wilson, NC`,
     id: "we_buy_houses",
     topic: "We Buy Houses / Cash Offers",
     category: "cash_offer",
-    headline: "Got a Cash Offer? Get a Second Opinion First.",
-    subhead: "Before you sign, ask a licensed Wilson broker if the number is fair.",
-    socialShort: "Got a 'We Buy Houses' offer on your Wilson home? Ask a licensed broker if it's fair before you sign. askmagicmike.com/ask #WilsonNC",
-    socialMedium: `Those "We Buy Houses" signs make selling easy.
+    headline: "Compare selling paths before making a commitment.",
+    subhead: "Request a human review of the property, timing, and terms actually available.",
+    socialShort: "Comparing a direct sale with a traditional listing in Wilson? Request a human review. No offer or terms are promised. [TRACKED LINK]",
+    socialMedium: `A direct-purchase path and a traditional listing involve different tradeoffs.
 
-But easy isn't always fair.
+Property condition, timing, costs, and the terms actually available all matter. Request a review from Mike Eatmon or the Our Town Properties team before deciding which path to investigate.
 
-Cash buyers move fast because they know what they're offering is below market. Here's what a licensed broker would say before you sign: askmagicmike.com/ask
+No purchase, offer, price, or closing timeline is promised.
 
-#WilsonNC #CashOffer #SellYourHome`,
-    socialFull: `Something I see regularly in Wilson:
+[TRACKED LINK]`,
+    socialFull: `Considering a direct sale for a Wilson-area property?
 
-A homeowner receives a cash offer from a "We Buy Houses" investor. It sounds good. It's fast. No repairs, no showings, no hassle.
+Ask Magic Mike provides a human-reviewed intake for comparing the property, timing, condition, and questions around a direct-purchase path or traditional listing.
 
-And then they sign — and leave $30,000 to $70,000 on the table.
+Submitting the request does not create a purchase commitment, guaranteed offer, guaranteed value, or promised closing timeline. Any actual terms depend on property review and mutual agreement.
 
-I'm not saying cash offers are bad. Sometimes they're the right call — especially for inherited properties, probate situations, or sellers who genuinely need speed over equity.
-
-But you should know what your home is worth before you decide.
-
-If you've received a cash offer on your Wilson property, let me look at it with you. I'll tell you honestly whether it's fair, low, or actually a good deal.
-
-No pitch. No listing agreement. Just an honest number.
-
-👇 askmagicmike.com/ask`,
+Request the comparison: [TRACKED LINK]`,
     emailSubject: "Received a cash offer on your Wilson home?",
     emailBody: `Hi [First Name],
 
-If you've been contacted by a cash buyer or investment company about your Wilson property, I'd encourage you to take a moment before signing anything.
+If you are comparing a direct-purchase path with a traditional listing, you can share the property, timing, and questions with Mike Eatmon or the Our Town Properties team.
 
-Cash offers are often fair — but not always. As a licensed Wilson broker, I can tell you exactly where your home stands relative to what traditional buyers would pay.
+Request a review: [TRACKED LINK]
 
-Ask me to review your offer: askmagicmike.com/ask
+No purchase, offer, price, or timing is promised by this request.
 
-— Mike Eatmon
-Licensed NC Broker, Our Town Properties
-Wilson, NC`,
-    cta: "Ask Mike to Review My Cash Offer →",
+[Brokerage mailing address]
+[Unsubscribe link]`,
+    cta: "Request a Selling-Path Review →",
     flyerHeadline: "Got a Cash Offer?",
-    flyerBody: "Find out if it's fair. Licensed Wilson broker. Free honest review.",
+    flyerBody: "Compare the documented terms and available paths before deciding.",
     hashtags: ["#WilsonNC", "#CashOffer", "#SellFast", "#NCRealEstate", "#AskMike"],
   },
 
@@ -360,48 +334,36 @@ Wilson, NC`,
     id: "ask_mike",
     topic: "Ask Mike Anything",
     category: "general",
-    headline: "Ask Wilson's Local Real Estate Authority Anything.",
-    subhead: "Buying, selling, pricing, timing — Mike Eatmon answers real questions from Wilson residents.",
-    socialShort: "Ask a licensed Wilson NC broker anything about real estate — free. No pitch. Real answers. askmagicmike.com/ask #WilsonNC",
-    socialMedium: `Real question from a Wilson resident this week:
+    headline: "Ask a local real estate question with the details that matter.",
+    subhead: "Mike Eatmon or the Our Town Properties team reviews the request.",
+    socialShort: "Have a Wilson real estate question? Share the property or target area, timeline, and context for a local review. [TRACKED LINK]",
+    socialMedium: `Buying, selling, renting, or planning in Wilson?
 
-"Should I wait until spring to list, or list now?"
+Share the property or target area, timeline, and what you need to understand through Ask Magic Mike. Mike Eatmon or the Our Town Properties team will review the request and follow up using the preference you provide.
 
-My answer: it depends on three things — and I'm going to tell you all three.
+[TRACKED LINK]`,
+    socialFull: `A useful real estate conversation starts with your actual situation.
 
-You can ask me anything about Wilson real estate. I'm a licensed broker, and I answer straight.
+Ask Magic Mike gives Wilson and Eastern North Carolina consumers a direct path to share a property or target area, timeline, communication preference, and unanswered questions with Mike Eatmon or the Our Town Properties team.
 
-askmagicmike.com/ask
+Property, market, lending, legal, and financial facts should be independently verified before a decision.
 
-#WilsonNC #RealEstate #AskMike`,
-    socialFull: `The most common question I get isn't about price.
-
-It's "Who do I trust for a straight answer?"
-
-I understand the hesitation. Real estate agents have a reputation for telling people what they want to hear. And online tools tell you what an algorithm calculated — which isn't the same as what the market will actually do.
-
-I'm Mike Eatmon. Licensed NC broker. I've been selling real estate in Wilson for years, and I've seen every kind of market.
-
-Ask Magic Mike is where you can ask me anything — buying timeline, seller pricing strategy, neighborhood comparisons, what your home is worth — and get an honest broker-level answer.
-
-Free. No email list. No follow-up sales call unless you want one.
-
-👇 askmagicmike.com/ask`,
+Request a review: [TRACKED LINK]`,
     emailSubject: "Ask me anything about Wilson NC real estate",
     emailBody: `Hi [First Name],
 
-I've been getting more questions lately from Wilson residents who want a broker's honest opinion on the market.
+Ask Magic Mike provides a direct way to share a Wilson or Eastern North Carolina real estate question with Mike Eatmon or the Our Town Properties team.
 
-I built Ask Magic Mike specifically for this. You ask, I answer — whether it's about pricing, timing, neighborhoods, or just whether now is a good time to make a move.
+Submit the request: [TRACKED LINK]
 
-Ask your question here: askmagicmike.com/ask
+Mike Eatmon
+Our Town Properties · Wilson, NC
 
-— Mike Eatmon
-Licensed NC Broker, Our Town Properties
-Wilson, NC`,
+[Brokerage mailing address]
+[Unsubscribe link]`,
     cta: "Ask Mike a Question →",
     flyerHeadline: "Ask Mike Anything.",
-    flyerBody: "Wilson's local real estate authority. Free answers. No obligation.",
+    flyerBody: "Share the property or target area, timeline, and question for local review.",
     hashtags: ["#WilsonNC", "#AskMike", "#RealEstate", "#NCRealEstate", "#LocalExpert"],
   },
 
@@ -409,48 +371,34 @@ Wilson, NC`,
     id: "wilson_authority",
     topic: "Wilson NC Local Authority",
     category: "general",
-    headline: "Wilson NC Real Estate — Straight from the Source.",
-    subhead: "Mike Eatmon has sold real estate in Wilson for years. If it matters in this market, he knows it.",
-    socialShort: "Wilson NC real estate questions? Ask the broker who works here every day. Real answers, local expertise. askmagicmike.com/ask #WilsonNC",
-    socialMedium: `National real estate news is not Wilson real estate news.
+    headline: "Wilson real estate context starts with the specific property and question.",
+    subhead: "Request a local review from Mike Eatmon or the Our Town Properties team.",
+    socialShort: "Have a Wilson real estate question? Share the property or target area and timeline for a local review. [TRACKED LINK] #WilsonNC",
+    socialMedium: `National headlines cannot answer a property-specific Wilson real estate question.
 
-What's happening in your specific neighborhood, on your specific street, in this specific market — that requires someone who actually works here.
+Share the property or target area, timeline, and what you need to verify through Ask Magic Mike. Mike Eatmon or the Our Town Properties team will review the request using available and appropriately authorized information.
 
-I'm that person.
+[TRACKED LINK]`,
+    socialFull: `Useful Wilson real estate context depends on the specific property or target area, the consumer's stated criteria, current information, and the decision being considered.
 
-Ask me anything about Wilson NC real estate: askmagicmike.com/ask
+Ask Magic Mike provides a direct request path to Mike Eatmon or the Our Town Properties team. No protected-trait inference, property availability, value, or outcome is promised.
 
-#WilsonNC #LocalExpert #OurTownProperties`,
-    socialFull: `People ask me all the time: "What's happening in the Wilson market?"
-
-The honest answer is that it depends on which part of Wilson you're asking about.
-
-The northwest quadrant is performing differently than southwest. The Forest Hills corridor has different absorption rates than Nash County Road. A home on a cul-de-sac in a school-desirable zone sells in a completely different window than one on a collector street.
-
-National headlines don't know this. Zillow doesn't know this.
-
-I know this because I've sold homes in every part of Wilson for years.
-
-If you want to know what's actually happening in your neighborhood — not what the algorithm says, and not what national news is reporting — ask me.
-
-👇 askmagicmike.com/ask`,
+Request a local review: [TRACKED LINK]`,
     emailSubject: "What the Wilson NC market is actually doing right now",
     emailBody: `Hi [First Name],
 
-You may have seen national real estate headlines lately. Most of them don't apply to Wilson.
+National headlines may not answer a property-specific Wilson real estate question.
 
-Our market is local. What matters is what's happening on your specific street — and I track that every week.
+Share the property or target area, timeline, and what you need to verify through Ask Magic Mike: [TRACKED LINK]
 
-If you'd like to know what the Wilson market is actually doing right now, I'm happy to share what I'm seeing on the ground.
+Mike Eatmon
+Our Town Properties · Wilson, NC
 
-Ask me directly: askmagicmike.com/ask
-
-— Mike Eatmon
-Licensed NC Broker, Our Town Properties
-Wilson, NC`,
-    cta: "Get Wilson's Real Market Picture →",
+[Brokerage mailing address]
+[Unsubscribe link]`,
+    cta: "Request Wilson-Area Context →",
     flyerHeadline: "Wilson NC Real Estate, Straight from the Source.",
-    flyerBody: "Local broker. Real data. No algorithms.",
+    flyerBody: "Property-specific questions reviewed with appropriately authorized information.",
     hashtags: ["#WilsonNC", "#LocalExpert", "#NCRealEstate", "#OurTownProperties", "#AskMike"],
   },
 
@@ -458,46 +406,33 @@ Wilson, NC`,
     id: "comment_lead",
     topic: "Facebook / Instagram Comment-to-Lead",
     category: "general",
-    headline: "Comment Below to Get Your Free Market Update.",
-    subhead: "Wilson NC residents comment WILSON and Mike will answer your real estate question.",
-    socialShort: `Comment WILSON below and I'll answer your #WilsonNC real estate question — free, from a licensed broker. #AskMike`,
-    socialMedium: `I want to answer your real estate question this week.
+    headline: "Comment for the private Ask Magic Mike request link.",
+    subhead: "Keep personal, property, and financial details out of public comments.",
+    socialShort: "Comment WILSON for the private Ask Magic Mike request link. Do not post personal or property details publicly. #WilsonNC",
+    socialMedium: `Have a Wilson real estate question?
 
-Comment WILSON below and I'll personally respond with what's happening in your part of Wilson NC right now.
+Comment WILSON to request the private Ask Magic Mike link. Do not place your address, phone number, email, financial details, or personal circumstances in a public comment.
 
-No pitch. No obligation. Just a licensed broker's honest take.
+The private form records your communication preference and consent evidence before follow-up.`,
+    socialFull: `Buying, selling, renting, or planning in Wilson?
 
-#WilsonNC #AskMike #RealEstate`,
-    socialFull: `Real estate questions I've heard this week in Wilson:
+Comment WILSON to request the private Ask Magic Mike link. Keep addresses, phone numbers, email addresses, financial details, and personal circumstances out of public comments.
 
-"Should I sell now or wait?"
-"What would my home list for today?"
-"Is this a buyer's market or seller's market in Wilson right now?"
-
-Every one of these deserves a real answer — not an algorithm.
-
-Comment WILSON below and I'll respond directly with what I'm seeing in your neighborhood right now.
-
-I do this because I believe an informed seller or buyer makes better decisions — and better decisions lead to better outcomes for Wilson families.
-
-Comment below. 👇`,
+The private request form captures your stated contact preference and consent evidence. Mike Eatmon or the Our Town Properties team can then review the submitted context without turning a public comment into an implied contact permission.`,
     emailSubject: "Your comment got a response from Mike",
     emailBody: `Hi [First Name],
 
-Thanks for commenting on our post! You asked about Wilson NC real estate and I want to give you a real answer.
+Thanks for requesting the private Ask Magic Mike link. Please use the form to share your Wilson real estate question and select your communication preference: [TRACKED LINK]
 
-The best way to get a personalized response is to ask your specific question here: askmagicmike.com/ask
+Do not send personal, property, or financial details in a public comment.
 
-I'll follow up personally within 24 hours.
-
-— Mike Eatmon
-Licensed NC Broker, Our Town Properties
-Wilson, NC`,
-    cta: "Comment WILSON Below →",
+Mike Eatmon
+Our Town Properties · Wilson, NC`,
+    cta: "Request the Private Link →",
     flyerHeadline: "Ask Mike a Question.",
-    flyerBody: "Comment on our posts or visit askmagicmike.com/ask — licensed Wilson broker answers free.",
+    flyerBody: "Use the private request form; do not place personal details in a public comment.",
     hashtags: ["#WilsonNC", "#AskMike", "#RealEstate", "#NCRealEstate"],
-    commentCapture: "Comment WILSON below and I'll personally respond to your real estate question — from a licensed Wilson broker.",
+    commentCapture: "Comment WILSON to request the private form link. Do not post personal or property details publicly.",
   },
 };
 
@@ -508,8 +443,8 @@ Wilson, NC`,
 const FLYER_SPECS: Record<CampaignSlug, CampaignFlyerSpec> = {
   amm_launch: {
     headline: "Got a Real Estate Question?",
-    subhead: "Ask Wilson's Licensed Broker — Free",
-    body: "Mike Eatmon, Our Town Properties\nLicensed NC Broker · Wilson, NC\nStraight answers. No algorithms. No pressure.",
+    subhead: "Request a Local Review",
+    body: "Mike Eatmon · Our Town Properties\nWilson, NC\nBroker-reviewed guidance. Property and market facts require verification.",
     cta: "Scan to Ask Mike Anything",
     qrUrl: "https://www.askmagicmike.com/ask?utm_source=qr&utm_medium=owned_media&utm_campaign=amm_launch&utm_content=qr_flyer",
     displayUrl: "askmagicmike.com/ask",
@@ -517,45 +452,45 @@ const FLYER_SPECS: Record<CampaignSlug, CampaignFlyerSpec> = {
   },
   home_value: {
     headline: "What's Your Wilson Home Worth?",
-    subhead: "Free Estimate from a Licensed Wilson Broker",
-    body: "Mike Eatmon, Our Town Properties\nLicensed NC Broker · Wilson, NC\nReal comparable sales. Real numbers. No obligation.",
-    cta: "Scan for Your Free Home Value",
+    subhead: "Request a Broker-Reviewed Conversation",
+    body: "Mike Eatmon · Our Town Properties\nWilson, NC\nNot an appraisal, automated valuation, or guaranteed value.",
+    cta: "Scan to Request a Home Review",
     qrUrl: "https://www.askmagicmike.com/value?utm_source=qr&utm_medium=owned_media&utm_campaign=home_value&utm_content=qr_flyer",
     displayUrl: "askmagicmike.com/value",
     printNote: "Print at 4×6\" or 5×7\". Ideal for door hangers, postcards, and yard sign riders.",
   },
   we_buy_houses: {
     headline: "Got a Cash Offer?",
-    subhead: "Find Out If It's Fair — Free Broker Review",
-    body: "Mike Eatmon, Our Town Properties\nLicensed NC Broker · Wilson, NC\nKnow your home's real value before you sign anything.",
-    cta: "Scan to Get a Second Opinion",
+    subhead: "Compare the Documented Selling Paths",
+    body: "Mike Eatmon · Our Town Properties\nWilson, NC\nNo purchase, offer, price, or closing timeline is promised.",
+    cta: "Scan to Request a Selling-Path Review",
     qrUrl: "https://www.askmagicmike.com/ask?utm_source=qr&utm_medium=owned_media&utm_campaign=we_buy_houses&utm_content=qr_flyer",
     displayUrl: "askmagicmike.com/ask",
     printNote: "Print at 4×6\". Place near investor yard signs or bulletin boards in Wilson.",
   },
   ask_mike: {
     headline: "Ask Mike Anything.",
-    subhead: "Wilson's Local Real Estate Authority",
-    body: "Mike Eatmon, Our Town Properties\nLicensed NC Broker · Wilson, NC\nBuying, selling, pricing, timing — real answers.",
+    subhead: "Share the Context for Local Review",
+    body: "Mike Eatmon · Our Town Properties\nWilson, NC\nBuying, selling, renting, and planning questions.",
     cta: "Scan to Ask Your Question",
     qrUrl: "https://www.askmagicmike.com/ask?utm_source=qr&utm_medium=owned_media&utm_campaign=ask_mike&utm_content=qr_flyer",
     displayUrl: "askmagicmike.com/ask",
     printNote: "Print at 4×6\" or business card size. Works at open houses, networking events, and closings.",
   },
   wilson_authority: {
-    headline: "Wilson NC Real Estate News You Can Trust.",
-    subhead: "Not National Headlines — Local Data from a Local Broker",
-    body: "Mike Eatmon, Our Town Properties\nLicensed NC Broker · Wilson, NC\nWhat's actually happening in your neighborhood.",
-    cta: "Scan for Wilson's Real Market Picture",
+    headline: "Wilson NC Real Estate Context.",
+    subhead: "Start with the Specific Property or Target Area",
+    body: "Mike Eatmon · Our Town Properties\nWilson, NC\nHuman review using appropriately authorized information.",
+    cta: "Scan to Request Local Context",
     qrUrl: "https://www.askmagicmike.com/ask?utm_source=qr&utm_medium=owned_media&utm_campaign=wilson_authority&utm_content=qr_flyer",
     displayUrl: "askmagicmike.com/ask",
     printNote: "Print at 5×7\". Strong for community boards, local businesses, and events.",
   },
   comment_lead: {
-    headline: "Follow Mike on Facebook.",
-    subhead: "Comment on Posts to Get Free Real Estate Answers",
-    body: "Mike Eatmon, Our Town Properties\nLicensed NC Broker · Wilson, NC\nComment WILSON on any post — Mike responds personally.",
-    cta: "Scan to Ask Online",
+    headline: "Ask Privately.",
+    subhead: "Keep Personal Details Out of Public Comments",
+    body: "Mike Eatmon · Our Town Properties\nWilson, NC\nUse the private form to record communication preference and consent.",
+    cta: "Scan to Open the Private Form",
     qrUrl: "https://www.askmagicmike.com/ask?utm_source=qr&utm_medium=owned_media&utm_campaign=comment_lead&utm_content=qr_flyer",
     displayUrl: "askmagicmike.com/ask",
     printNote: "Print at 4×6\". Include your Facebook page URL or QR code alongside this flyer.",
@@ -595,10 +530,10 @@ export const CAMPAIGN_CATALOG: Campaign[] = [
   {
     slug:           "home_value",
     name:           "Home Value",
-    tagline:        "What's your Wilson home worth right now?",
+    tagline:        "Broker-reviewed home-value and sale-readiness conversation",
     status:         "active",
     targetAudience: "Wilson homeowners who are curious about selling or refinancing",
-    primaryCta:     "Get My Free Home Value Estimate",
+    primaryCta:     "Request a Home-Value Review",
     landingPath:    "/value",
     category:       "home_value",
     copyBlock:      COPY_BLOCKS.home_value,
@@ -607,10 +542,10 @@ export const CAMPAIGN_CATALOG: Campaign[] = [
   {
     slug:           "we_buy_houses",
     name:           "We Buy Houses",
-    tagline:        "Got a cash offer? Get a second opinion first.",
+    tagline:        "Compare documented selling paths before deciding",
     status:         "active",
     targetAudience: "Wilson homeowners who have received cash offers from investors",
-    primaryCta:     "Ask Mike to Review My Cash Offer",
+    primaryCta:     "Request a Selling-Path Review",
     landingPath:    "/ask",
     category:       "cash_offer",
     copyBlock:      COPY_BLOCKS.we_buy_houses,
@@ -619,7 +554,7 @@ export const CAMPAIGN_CATALOG: Campaign[] = [
   {
     slug:           "ask_mike",
     name:           "Ask Mike Anything",
-    tagline:        "Direct Q&A with Wilson's local broker",
+    tagline:        "Local review of a specific real estate question",
     status:         "active",
     targetAudience: "Wilson residents with any real estate question",
     primaryCta:     "Ask Mike a Question",
@@ -630,11 +565,11 @@ export const CAMPAIGN_CATALOG: Campaign[] = [
   },
   {
     slug:           "wilson_authority",
-    name:           "Wilson Authority",
-    tagline:        "Wilson NC real estate straight from the source",
+    name:           "Wilson Local Context",
+    tagline:        "Property-specific questions with human verification",
     status:         "active",
     targetAudience: "People searching for Wilson NC real estate information online",
-    primaryCta:     "Get Wilson's Real Market Picture",
+    primaryCta:     "Request Wilson-Area Context",
     landingPath:    "/ask",
     category:       "general",
     copyBlock:      COPY_BLOCKS.wilson_authority,
@@ -644,11 +579,11 @@ export const CAMPAIGN_CATALOG: Campaign[] = [
 
 export const COMMENT_LEAD_CAMPAIGN: Campaign = {
   slug:           "comment_lead",
-  name:           "Comment-to-Lead",
-  tagline:        "Facebook / Instagram comment-capture flow",
+  name:           "Comment-to-Private-Request",
+  tagline:        "Public prompt with a private, consent-aware handoff",
   status:         "active",
   targetAudience: "Facebook and Instagram followers",
-  primaryCta:     "Comment WILSON Below",
+  primaryCta:     "Request the Private Link",
   landingPath:    "/ask",
   category:       "general",
   copyBlock:      COPY_BLOCKS.comment_lead,
