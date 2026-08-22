@@ -36,7 +36,7 @@ All timestamps are America/New_York unless noted.
   13.72 MB scanned with no leak.
 - `git diff --check`: PASS before the evidence update and rerun at handoff.
 - Immutable-head Node 24 CI, protected Vercel Preview, and read-only route
-  checks are completed before release readiness and recorded on the Draft PR.
+  checks are completed before release readiness and recorded on Draft PR #192.
 - No Production/database query or write, migration, lead mutation, notification
   send, provider call, publication, WordPress/DNS change, spend, or NellySelly
   action occurred.

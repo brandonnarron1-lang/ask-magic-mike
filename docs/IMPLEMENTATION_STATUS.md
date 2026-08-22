@@ -56,7 +56,7 @@ stage; the table above is authoritative for the listed mutable heads.
   final immutable-head authorities.
 - Preservation branch:
   `rescue/amm-pre-growth-kpi-trust-20260821-2200`. The candidate is stacked
-  after Draft PR #191 and cannot bypass PRs #183–#191. Exact future gate:
+  as Draft PR #192 after Draft PR #191 and cannot bypass PRs #183–#191. Exact future gate:
   `APPROVE PHASE 9 OUTCOME AND DELIVERY KPI TRUST MERGE AND PRODUCTION DEPLOYMENT`.
 - No migration is required. Production remains unchanged.
 
