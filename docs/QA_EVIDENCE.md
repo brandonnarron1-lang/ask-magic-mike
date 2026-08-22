@@ -41,9 +41,19 @@ All timestamps are America/New_York unless noted.
   `output/playwright/phone-handoff/install-390x844-v2.png`,
   `output/playwright/phone-handoff/install-1440x1000-v2.png`, and
   `output/playwright/phone-handoff/expired-390x844.png`.
-- No Preview token was redeemed. No Production/Neon write, migration, lead,
-  device registration, email, SMS, Push, WordPress/DNS/provider action,
+- Preview automation was tightened before dispatch to use only an invalid
+  synthetic token; it does not mint or redeem a bearer token or touch a durable
+  rate-limit bucket. No Production/Neon write, migration, lead, device
+  registration, email, SMS, Push, WordPress/DNS/provider action,
   external publication, spend, deletion, or NellySelly action occurred.
+- Protected-Preview CLI hygiene — a `vercel curl` attempt from the isolated
+  unlinked worktree auto-created empty helper project
+  `prj_Mb30U4zzULbWox6TPJ0QlJ4cVYSY`. Read-only inspection proves zero
+  deployments, empty targets/aliases, and no custom domain. The worktree was
+  immediately relinked to canonical project
+  `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; the empty helper is preserved for a
+  separate cleanup approval. No canonical setting, deployment, alias, domain,
+  environment variable, or Production resource changed.
 - Still required: exact-head Node 24 CI, canonical Vercel Preview build and
   private header/install-manifest probes, then the separate application gate
   `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT` after its

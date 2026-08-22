@@ -86,8 +86,9 @@ provider action, or deletion.
 4. Owner/BIC: approve a registered carrier-SMS provider and sender before SMS
    activation. No free workaround may bypass registration, consent, or carrier
    rules.
-5. Owner: separately approve deletion of either empty Vercel helper project.
-   Both currently have zero deployments and no domain effect.
+5. Owner: separately approve deletion of the empty Vercel helper projects
+   listed in `docs/CANONICAL_ASSET_MANIFEST.md`. Each has zero deployments and
+   no custom-domain or Production effect; none is deleted implicitly.
 
 ## Resolved and removed from this queue
 

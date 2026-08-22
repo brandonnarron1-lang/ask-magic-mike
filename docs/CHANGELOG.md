@@ -16,8 +16,9 @@
   configured Preview, and local-development origins; Our Town and NellySelly
   remain outside this setup boundary.
 - Added private/no-store, no-referrer, noindex, robots, CSP, and frame controls;
-  expanded Preview QA to validate the install/manifest contract without token
-  redemption, phone registration, lead creation, or Push delivery.
+  expanded Preview QA to validate the deployed invalid-token install/manifest
+  failure contract without token minting/redemption, limiter persistence, phone
+  registration, lead creation, or Push delivery.
 - Initial focused verification passes 8 files / 84 tests. Full Node 24 release
   gate, canonical Preview, and rendered visual evidence remain before the
   candidate's separate future Production gate.

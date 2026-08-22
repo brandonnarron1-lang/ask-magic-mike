@@ -390,75 +390,16 @@ async function slaSweep() {
 }
 
 /**
- * Validate the iOS Home Screen handoff without redeeming the bearer token,
- * registering a device, or sending a Push notification. Minting an invite is
- * an authenticated, short-lived Preview-only control-plane action; every
- * subsequent request is read-only.
+ * Exercise the iOS Home Screen routes with a deliberately invalid synthetic
+ * token. This proves the deployed private/noindex failure contract without
+ * minting or redeeming a bearer token, touching a limiter bucket, registering
+ * a device, or sending Push.
  */
 async function phoneInstallHandoff() {
-  if (!ADMIN_SECRET) {
-    record("phone_install:handoff", "skip", { message: "no ADMIN_SECRET" });
-    return;
-  }
-
-  const invite = await http("POST", "/admin/api/phone-alerts/invite", {
-    headers: { ...adminBasicHeaders(), Origin: PREVIEW_URL },
-    body: { ttl_minutes: 5 },
-  });
-  if (!invite.ok || invite.json?.ok !== true || typeof invite.json?.url !== "string") {
-    record("phone_install:handoff", "fail", {
-      http: invite.status,
-      message: "authenticated Preview invite could not be created",
-    });
-    return;
-  }
-
-  let installUrl;
-  try {
-    installUrl = new URL(invite.json.url);
-  } catch {
-    record("phone_install:handoff", "fail", {
-      http: invite.status,
-      message: "invite returned an invalid URL",
-    });
-    return;
-  }
-
-  const expectedOrigin = new URL(PREVIEW_URL).origin;
-  const installPrefix = "/phone-alerts/install/";
-  const encodedToken = installUrl.pathname.startsWith(installPrefix)
-    ? installUrl.pathname.slice(installPrefix.length)
-    : "";
-  let token = "";
-  try {
-    token = decodeURIComponent(encodedToken);
-  } catch {
-    token = "";
-  }
-  if (
-    installUrl.origin !== expectedOrigin
-    || installUrl.search
-    || installUrl.hash
-    || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token)
-  ) {
-    record("phone_install:handoff", "fail", {
-      http: invite.status,
-      message: "invite was not a same-origin token-scoped install URL",
-    });
-    return;
-  }
-
-  const install = await http("GET", installUrl.pathname);
-  const manifestPath = `${installUrl.pathname}/manifest.webmanifest`;
+  const installPath = "/phone-alerts/install/preview-qa-invalid-token";
+  const install = await http("GET", installPath);
+  const manifestPath = `${installPath}/manifest.webmanifest`;
   const manifest = await http("GET", manifestPath);
-  let startUrl = null;
-  if (manifest.json && typeof manifest.json.start_url === "string") {
-    try {
-      startUrl = new URL(manifest.json.start_url, PREVIEW_URL);
-    } catch {
-      startUrl = null;
-    }
-  }
   const privateInstall =
     install.responseHeaders?.cacheControl?.includes("no-store")
     && install.responseHeaders?.referrerPolicy === "no-referrer"
@@ -468,37 +409,26 @@ async function phoneInstallHandoff() {
     && manifest.responseHeaders?.cacheControl?.includes("no-store")
     && manifest.responseHeaders?.referrerPolicy === "no-referrer"
     && manifest.responseHeaders?.xRobotsTag?.includes("noindex");
-  const validStartUrl =
-    startUrl?.origin === expectedOrigin
-    && startUrl.pathname === "/phone-alerts/setup/claim"
-    && startUrl.searchParams.get("token") === token;
-  const validCopyScope =
-    manifest.json?.id === "/phone-alerts"
-    && manifest.json?.display === "standalone"
-    && manifest.json?.scope === "/";
-
-  if (
+  const safeInvalidPage =
     install.ok
-    && install.text.includes("Install Brandon copy alerts")
-    && privateInstall
-    && manifest.ok
-    && privateManifest
-    && validStartUrl
-    && validCopyScope
-  ) {
+    && install.text.includes("Fresh install link required")
+    && install.text.includes("No phone was registered and no notification was sent");
+  const manifestRejected =
+    manifest.status === 404
+    && manifest.json?.error === "phone_setup_link_expired";
+
+  if (safeInvalidPage && privateInstall && privateManifest && manifestRejected) {
     record("phone_install:handoff", "pass", {
       http: manifest.status,
-      message: "private install contract verified without token redemption",
+      message: "read-only private failure contract verified with an invalid synthetic token",
     });
   } else {
     const failedChecks = [
       ["install_status", install.ok],
-      ["install_copy", install.text.includes("Install Brandon copy alerts")],
+      ["safe_invalid_page", safeInvalidPage],
       ["install_privacy_headers", privateInstall],
-      ["manifest_status", manifest.ok],
       ["manifest_privacy_headers", privateManifest],
-      ["manifest_start_url", validStartUrl],
-      ["manifest_copy_scope", validCopyScope],
+      ["manifest_rejected", manifestRejected],
     ]
       .filter(([, passed]) => !passed)
       .map(([name]) => name)

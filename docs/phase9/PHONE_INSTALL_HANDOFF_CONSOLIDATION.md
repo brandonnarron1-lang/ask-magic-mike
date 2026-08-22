@@ -61,10 +61,13 @@ candidate therefore contains no database migration.
 
 ## Preview and physical-device boundaries
 
-Automated Preview QA may mint a five-minute Preview invite and fetch its install
-page and manifest. It must not redeem the manifest `start_url`, register a
-device, send Push, create a lead, or touch Production data. Preview readiness is
-not accepted unless the release-authority assertion reaches `PREVIEW_READY`.
+Automated Preview QA uses only a deliberately invalid synthetic token. It
+verifies the deployed private/noindex install failure page and rejected manifest
+without minting or redeeming a bearer token, touching a rate-limit bucket,
+registering a device, sending Push, creating a lead, or touching Production
+data. Valid-token signing/claim behavior is covered by isolated tests and the
+later physical acceptance. Preview readiness is not accepted unless the
+release-authority assertion reaches `PREVIEW_READY`.
 
 Physical Brandon enrollment and one unmistakable `[TEST]` Push receipt remain a
 separate owner-controlled action after Production release. Mike must enroll his

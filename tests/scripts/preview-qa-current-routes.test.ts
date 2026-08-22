@@ -26,13 +26,14 @@ describe("preview QA current route contract", () => {
     expect(source).toContain("authenticated cron request safely refused Preview data writes");
   });
 
-  it("validates the private iOS install handoff without redeeming its token", () => {
+  it("validates the private iOS install failure contract without minting or redeeming a token", () => {
     expect(source).toContain('ct.includes("application/json") || ct.includes("+json")');
-    expect(source).toContain('http("POST", "/admin/api/phone-alerts/invite"');
-    expect(source).toContain('const manifestPath = `${installUrl.pathname}/manifest.webmanifest`');
-    expect(source).toContain('startUrl.pathname === "/phone-alerts/setup/claim"');
+    expect(source).toContain('const installPath = "/phone-alerts/install/preview-qa-invalid-token"');
+    expect(source).toContain('const manifestPath = `${installPath}/manifest.webmanifest`');
+    expect(source).toContain('manifest.json?.error === "phone_setup_link_expired"');
     expect(source).toContain('record("phone_install:handoff", "pass"');
     expect(source).toContain('private install contract failed: ${failedChecks || "unknown"}');
+    expect(source).not.toContain('http("POST", "/admin/api/phone-alerts/invite"');
     expect(source).not.toContain('http("GET", startUrl');
   });
 
