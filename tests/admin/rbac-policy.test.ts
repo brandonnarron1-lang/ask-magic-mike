@@ -38,6 +38,13 @@ describe("Lead Center RBAC policy", () => {
     expect(hasLeadCenterPermission("read_only_analyst", "lead:view_assigned")).toBe(false);
   });
 
+  it("limits publication-proof recording to administrators and the primary lead owner", () => {
+    expect(hasLeadCenterPermission("administrator", "growth:manage")).toBe(true);
+    expect(hasLeadCenterPermission("primary_lead_owner", "growth:manage")).toBe(true);
+    expect(hasLeadCenterPermission("approved_agent", "growth:manage")).toBe(false);
+    expect(hasLeadCenterPermission("read_only_analyst", "growth:manage")).toBe(false);
+  });
+
   it("limits agents and primary owners to their assigned lead identity", () => {
     const agent = principal();
     expect(canAccessAssignedLead(agent, agent.agentId)).toBe(true);

@@ -1,28 +1,38 @@
 # Canonical Asset Manifest
 
-Audit time: initially 2026-08-10 16:29 EDT; authenticated production/WordPress
-evidence refreshed 2026-08-11. Disposition follows the consolidation directive.
+Refreshed 2026-08-21 from authenticated Production, GitHub, Vercel, Neon, and
+WordPress evidence. Working systems outrank historical packets.
 
-| Asset | Evidence | Disposition | Decision |
+| Asset | Current evidence | Disposition | Decision |
 |---|---|---|---|
-| `/Users/brandonnarron/Projects/ask-magic-mike` | Git remote `brandonnarron1-lang/ask-magic-mike`; mature Next/Neon/AdminOps code; PRs `#122` and `#123` merged to `main` | **CANONICAL** | Preserve existing untracked QA artifacts; continue through reviewed PRs |
-| Vercel `eyes-up-industries/ask-magic-mike` | Project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; production deployment `dpl_BGkVcCMFgeZQgnteRxRUomeJoyRv`; both Ask hostnames mapped correctly | **CANONICAL** | Current production project; prior deployment `dpl_4yacS3NeepmZNp4AnamDF6oPA5GW` is immediate rollback |
-| `/Users/brandonnarron/ask-magic-mike` | Two-commit bootstrap (`bd47194`); no lead, database, admin, or widget lifecycle | **OBSOLETE OR CONFLICTING** | Do not merge; keep as historical fallback only |
-| `/Users/brandonnarron/propertylens` | Separate PropertyLens product repository; unrelated public funnel | **REFERENCE/DOCUMENTATION** | Rescue branch created because it was the active workspace; not a Magic Mike runtime |
-| `/Users/brandonnarron/eyesup-hq/projects/ask-magic-mike-widget` | Asset/mobile package without its own Git repository or canonical backend | **MERGE INTO CANONICAL** | Reuse only compatible widget assets/contracts; no separate lead store |
-| `ask_magic_mike_claude_code_wp_terminal_pack_v6.zip` | Plugin-first WP package, shortcode/widget/specs, no secrets | **WORDPRESS BRIDGE ONLY** | Reuse contracts and plugin ideas after review; do not activate blindly |
-| `OurTown_AskMagicMike_Audit_LeadOps.zip` | Lead architecture, WP runbook, data schema, application-password notes | **REFERENCE/DOCUMENTATION** | Use as evidence; current authenticated production outranks it |
-| `ask_magic_mike_ourtown_wordpress_v10_assets.zip` | Creative image/video assets only | **REFERENCE/DOCUMENTATION** | No backend or lead storage |
-| V8 product-page buildpack/bridge zips | Static page and WP plugin presentation assets | **ARCHIVE AFTER REVIEW** | Do not create a second app or notification system |
-| WordPress live site | Authenticated WordPress 7.0.3; Beaver/FlexMLS/Gravity Forms IDs 1–7, six legacy AMM records, Lead Ops, canonical connector, and canonical bridge `1.0.0` active in shadow mode | **WORDPRESS BRIDGE ONLY** | Preserve pages/SEO/forms/entries; shadow observation is proven for forms 6 and 7; upgrade to reviewed bridge 1.1.0 before enabling one exact form |
-| Vercel `ask-magic-mike-4miw` | Separate Next project, no Ask hostname aliases found in production inspection | **ARCHIVE AFTER REVIEW** | Do not attach domains or deploy without explicit decision |
-| Vercel `askmagicmike-domain-bridge-v29` | Separate bridge project, no Ask hostname alias in inspected production project | **ARCHIVE AFTER REVIEW** | Reference domain history only |
-| Vercel `nellyselly-mvp` / `nellyselly-gate-b` | Separate NellySelly projects; no Ask hostname ownership in Vercel domain/project inspection | **OBSOLETE OR CONFLICTING** | Keep isolated; do not route Ask domains here |
-| Git commits `daf9510`, `6601fb6`, `df2b1f3` | Present in canonical repository and reachable from current branches | **REFERENCE/DOCUMENTATION** | Preserve history; no reset or force-push |
+| `/Users/brandonnarron/Projects/ask-magic-mike` | Remote `brandonnarron1-lang/ask-magic-mike`; mature Next.js root `app/` runtime, Neon persistence, Lead Center, widgets, email/Web Push, analytics, tests | **CANONICAL** | Preserve Git history and continue only through reviewed PRs |
+| Vercel `eyes-up-industries/ask-magic-mike` | Project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; Production `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`; `www` live and apex 308 redirect | **CANONICAL** | Sole Ask Magic Mike Production application/domain owner |
+| Neon `bitter-star-20214385` | Production branch `br-round-base-auh6h2wd`, endpoint `ep-proud-bonus-autwv60g`, database `neondb`; health ready | **CANONICAL** | One lead/event/notification/audit source of truth; no Supabase Production runtime |
+| `OurTownProperties.com` WordPress | Existing SEO/FlexMLS/Gravity Forms surfaces; signed bridge 1.1.0; Form 3 only; duplicate Form 3 native alert inactive | **WORDPRESS BRIDGE ONLY** | Preserve URLs/content/entries; do not create a competing lead database |
+| PR #183 | Exact three-offer campaign-safety flight, no publisher or database migration | **MERGE INTO CANONICAL** | Next separately gated application release |
+| PR #184 | Stacked append-only publication-proof ledger and guarded Neon migration | **MERGE INTO CANONICAL** | Refresh after #183, then use its separate exact gate |
+| PR #182 | Launch-authority/buyer-discovery candidate overlapping #183 operational and buyer work | **UNKNOWN / NEEDS OWNER CONFIRMATION** | Refresh and reconcile overlap only after #183/#184 |
+| PR #179 | iOS Home Screen Web Push handoff repair | **UNKNOWN / NEEDS OWNER CONFIRMATION** | Refresh after current stack; physical enrollment/test stays separate |
+| `/Users/brandonnarron/ask-magic-mike` | Two-commit bootstrap without canonical lead lifecycle | **OBSOLETE OR CONFLICTING** | Historical fallback only; do not merge |
+| `/Users/brandonnarron/propertylens` | Separate PropertyLens product | **REFERENCE/DOCUMENTATION** | Never treat as Ask Magic Mike runtime |
+| `/Users/brandonnarron/eyesup-hq/projects/ask-magic-mike-widget` | Asset/mobile package without canonical backend | **MERGE INTO CANONICAL** | Reuse only reviewed assets/contracts; no separate store |
+| Claude/Codex WordPress packs and August bundles | Useful shortcode, consent, widget, and bridge reference material | **WORDPRESS BRIDGE ONLY** | Reuse selectively; do not activate parallel notifications/tables |
+| Static V8/product-page/creative packages | Presentation and media assets without canonical persistence | **ARCHIVE AFTER REVIEW** | No second app, CRM, or notification service |
+| Vercel `ask-magic-mike-4miw` and `askmagicmike-domain-bridge-v29` | No canonical Ask hostname attachment | **ARCHIVE AFTER REVIEW** | Do not attach domains or deploy |
+| Empty helpers `amm-phase9-campaign-compliance-20260821` and `amm-phase9-publication-ledger-20260821` | Zero deployments and no domain effect | **ARCHIVE AFTER REVIEW** | Preserve until separately approved cleanup |
+| Vercel NellySelly projects | No Ask Magic Mike custom-domain ownership; zero NellySelly markers in verified Ask render | **OBSOLETE OR CONFLICTING** | Keep products, credentials, databases, and domains isolated |
+| Historical commits `daf9510`, `6601fb6`, `df2b1f3` | Reachable in canonical Git history | **REFERENCE/DOCUMENTATION** | Preserve; never reset/force-push to recreate them |
+| PRs #92 and #119–#121 | Old visual/runtime chains no longer aligned with current root router and Production baseline | **ARCHIVE AFTER REVIEW** | Not a parallel release sequence |
 
-## Preservation notes
+## Canonical boundaries
 
-The canonical worktree was dirty before consolidation (`app/layout.tsx`, route
-manifest, Next config, compliance test, Vitest config, new health/robots/sitemap
-files, and QA output). Those changes are preserved on the rescue branch and are not
-silently overwritten.
+- Public application: `https://www.askmagicmike.com`.
+- Brokerage/SEO authority: `https://www.ourtownproperties.com`.
+- Private operations: authenticated canonical `/admin`; hub subdomain remains
+  separately gated.
+- Database: canonical Neon only.
+- Internal email: authenticated Resend with hidden audit BCC and durable outbox.
+- Free-first phone alert: Web Push; carrier SMS remains disabled pending an
+  approved registered provider.
+- External campaign platforms remain human-operated; the application records
+  evidence only after the native action occurs.

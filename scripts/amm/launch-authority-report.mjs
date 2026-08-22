@@ -37,6 +37,7 @@ import {
   checkCanonicalSiteConfig,
   releaseLogMentionsPr,
   findStaleVercelUrlsInDocs,
+  REQUIRED_PRODUCTION_ENV_VARS,
 } from "./launch-readiness-doctor.mjs";
 
 // ---------------------------------------------------------------------------
@@ -57,14 +58,7 @@ export const REQUIRED_AUTHORITY_DOCS = [
   "docs/PRODUCTION_LAUNCH_GATE.md",
 ];
 
-export const OWNER_GATED_VARS = [
-  "NEXT_PUBLIC_SUPABASE_URL",
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-  "SUPABASE_SERVICE_ROLE_KEY",
-  "ADMIN_SECRET",
-  "NEXT_PUBLIC_SITE_URL",
-  "NEXT_PUBLIC_AGENT_LICENSE",
-];
+export const OWNER_GATED_VARS = [...REQUIRED_PRODUCTION_ENV_VARS];
 
 /**
  * Determine the launch authority result given check counters.
@@ -115,7 +109,9 @@ if (isMain) {
   const SRC = join(ROOT, "src");
   const SCRIPTS = join(ROOT, "scripts");
 
+  const appFiles = collectFiles(join(ROOT, "app"), [".ts", ".tsx"]);
   const srcFiles = collectFiles(SRC, [".ts", ".tsx"]);
+  const deployableFiles = [...appFiles, ...srcFiles];
 
   let passCount = 0;
   let failCount = 0;
@@ -168,7 +164,7 @@ if (isMain) {
   // ── Release log currency ─────────────────────────────────────────────────
   console.log("\n[Release log currency]");
   const releaseLogPath = join(ROOT, "docs/PRODUCTION_RELEASE_LOG.md");
-  for (const prNum of [49, 50, 51]) {
+  for (const prNum of [181]) {
     const result = releaseLogMentionsPr(releaseLogPath, prNum);
     if (result.ok) {
       pass(`release log mentions PR #${prNum}`);
@@ -197,9 +193,9 @@ if (isMain) {
 
   // ── Stale vercel.app URLs in src/ ────────────────────────────────────────
   console.log("\n[Stale vercel.app URLs in src/]");
-  const staleUrls = findStaleVercelUrls(srcFiles);
+  const staleUrls = findStaleVercelUrls(deployableFiles);
   if (staleUrls.length === 0) {
-    pass("no stale vercel.app URLs in src/");
+    pass("no stale vercel.app URLs in deployable app/ or src/");
   } else {
     fail(
       `stale vercel.app URLs found in ${staleUrls.length} file(s)`,
@@ -209,9 +205,9 @@ if (isMain) {
 
   // ── Prohibited red-* tokens ──────────────────────────────────────────────
   console.log("\n[Prohibited red-* UI tokens]");
-  const redTokens = findRedTokens(srcFiles);
+  const redTokens = findRedTokens(deployableFiles);
   if (redTokens.length === 0) {
-    pass("no prohibited red-* tokens in src/");
+    pass("no prohibited red-* tokens in deployable app/ or src/");
   } else {
     fail(
       `red-* tokens found in ${redTokens.length} file(s)`,
@@ -221,9 +217,9 @@ if (isMain) {
 
   // ── Novelty genie/lamp copy ──────────────────────────────────────────────
   console.log("\n[Novelty genie/lamp copy]");
-  const novelty = findNoveltyCopy(srcFiles);
+  const novelty = findNoveltyCopy(deployableFiles);
   if (novelty.length === 0) {
-    pass("no prohibited genie/lamp copy in src/");
+    pass("no prohibited genie/lamp copy in deployable app/ or src/");
   } else {
     fail(
       `genie/lamp copy found in ${novelty.length} file(s)`,
@@ -233,9 +229,9 @@ if (isMain) {
 
   // ── MLS/FlexMLS markers in public src/ ───────────────────────────────────
   console.log("\n[MLS/FlexMLS confidential markers in public src/]");
-  const mlsHits = findMlsMarkers(srcFiles);
+  const mlsHits = findMlsMarkers(deployableFiles);
   if (mlsHits.length === 0) {
-    pass("no MLS/FlexMLS markers in public src/");
+    pass("no MLS/FlexMLS markers in deployable public source");
   } else {
     fail(
       `MLS markers found in ${mlsHits.length} file(s)`,

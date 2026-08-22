@@ -67,6 +67,20 @@ export interface OwnedDemandAttributionSignal {
 }
 
 export type OwnedDemandOfferKey = "seller_review" | "buyer_match" | "renter_plan";
+export type OwnedDemandPlacementKey = "general_question" | OwnedDemandOfferKey;
+
+export interface OwnedDemandPlacementDefinition {
+  channelKey: string;
+  channelLabel: string;
+  placementKey: OwnedDemandPlacementKey;
+  placementLabel: string;
+  source: string;
+  medium: UtmMedium;
+  campaign: string;
+  content: string;
+  destination: string;
+  trackedUrl: string;
+}
 
 export interface OwnedDemandOfferBrief {
   key: OwnedDemandOfferKey;
@@ -151,7 +165,7 @@ export function buildOwnedDemandChannelPacket(channel: OwnedDemandChannel) {
   ].join("\n").trim();
 }
 
-const CAMPAIGN = "amm_owned_demand_2026";
+export const OWNED_DEMAND_CAMPAIGN_KEY = "amm_owned_demand_2026";
 
 const OFFER_DEFINITIONS = [
   {
@@ -283,13 +297,62 @@ function normalized(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
 }
 
+export function resolveOwnedDemandPlacement(
+  channelKey: string,
+  placementKey: string,
+): OwnedDemandPlacementDefinition | null {
+  const channel = CHANNEL_DEFINITIONS.find((candidate) => candidate.key === channelKey);
+  if (!channel) return null;
+
+  if (placementKey === "general_question") {
+    return {
+      channelKey: channel.key,
+      channelLabel: channel.label,
+      placementKey,
+      placementLabel: "General question",
+      source: channel.source,
+      medium: channel.medium,
+      campaign: OWNED_DEMAND_CAMPAIGN_KEY,
+      content: channel.content,
+      destination: channel.destination,
+      trackedUrl: buildUtmUrl(channel.destination, {
+        utm_source: channel.source,
+        utm_medium: channel.medium,
+        utm_campaign: OWNED_DEMAND_CAMPAIGN_KEY,
+        utm_content: channel.content,
+      }),
+    };
+  }
+
+  const offer = OFFER_DEFINITIONS.find((candidate) => candidate.key === placementKey);
+  if (!offer) return null;
+  const content = `${channel.content}_${offer.contentSuffix}`;
+  return {
+    channelKey: channel.key,
+    channelLabel: channel.label,
+    placementKey: offer.key,
+    placementLabel: offer.shortLabel,
+    source: channel.source,
+    medium: channel.medium,
+    campaign: OWNED_DEMAND_CAMPAIGN_KEY,
+    content,
+    destination: offer.destination,
+    trackedUrl: buildUtmUrl(offer.destination, {
+      utm_source: channel.source,
+      utm_medium: channel.medium,
+      utm_campaign: OWNED_DEMAND_CAMPAIGN_KEY,
+      utm_content: content,
+    }),
+  };
+}
+
 function leadsForPlacement(
   signals: OwnedDemandAttributionSignal[],
   definition: (typeof CHANNEL_DEFINITIONS)[number],
   placementContent: string = definition.content,
 ) {
   const accepted = new Set(definition.aliases.map(normalized));
-  const campaign = normalized(CAMPAIGN);
+  const campaign = normalized(OWNED_DEMAND_CAMPAIGN_KEY);
   const medium = normalized(definition.medium);
   const content = normalized(placementContent);
   return signals.reduce((total, signal) => (
@@ -314,7 +377,7 @@ export function buildOwnedDemandCommand(
     const trackedUrl = buildUtmUrl(definition.destination, {
       utm_source: definition.source,
       utm_medium: definition.medium,
-      utm_campaign: CAMPAIGN,
+      utm_campaign: OWNED_DEMAND_CAMPAIGN_KEY,
       utm_content: definition.content,
     });
     const offerPlacements = OFFER_DEFINITIONS.map(({ contentSuffix, ...offer }): OwnedDemandOfferPlacement => {
@@ -326,7 +389,7 @@ export function buildOwnedDemandCommand(
         trackedUrl: buildUtmUrl(offer.destination, {
           utm_source: definition.source,
           utm_medium: definition.medium,
-          utm_campaign: CAMPAIGN,
+          utm_campaign: OWNED_DEMAND_CAMPAIGN_KEY,
           utm_content: content,
         }),
         attributedLeads,
@@ -339,7 +402,7 @@ export function buildOwnedDemandCommand(
       label: definition.label,
       source: definition.source,
       medium: definition.medium,
-      campaign: CAMPAIGN,
+      campaign: OWNED_DEMAND_CAMPAIGN_KEY,
       content: definition.content,
       destination: definition.destination,
       trackedUrl,

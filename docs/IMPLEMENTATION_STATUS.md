@@ -1,6 +1,82 @@
 # Implementation Status
 
-Updated 2026-08-21.
+Updated 2026-08-22.
+
+## Phase 9 owned-demand publication proof ledger — 2026-08-21
+
+- Production aggregate truth is zero live demand: six test/suppressed leads,
+  zero contactable live leads, zero first-response samples, zero live delivery
+  failures, zero outcomes, zero spend, and zero overdue routing at the recorded
+  read-only observation. No PII was queried or retained.
+- Reused the protected Distribution Command, canonical Neon database, Lead
+  Center RBAC, immutable audit log, UTM builder, public funnels, and retained
+  campaign assets. No publisher, provider integration, second CRM, Supabase
+  runtime, or parallel campaign database was added.
+- Added one append-only, RLS-enabled publication-proof ledger and one idempotent
+  server-only RPC. A successful first insert creates exactly one immutable
+  `growth.publication_proof_recorded` audit event; replay creates neither a
+  duplicate proof nor duplicate audit.
+- Raw final post copy is validated and SHA-256 hashed in memory, then discarded.
+  Public evidence URLs are channel/HTTPS/host/query allowlisted both on write
+  and again on read. PII, credentials, placeholders, unsupported guarantees,
+  and known Fair Housing risk phrases fail closed.
+- Added `growth:manage` only to administrators and the primary lead owner. The
+  Server Action rechecks that permission, requires an explicit observation
+  confirmation, refuses legacy Basic-auth-only mutation sessions, uses
+  parameterized SQL, and is blocked by the existing Preview mutation guard.
+- Added a hash-pinned, backup-first Production cutover runner with exact
+  approval, canonical Neon identity and prerequisite checks, advisory locks,
+  one transaction, migration-ledger insertion, privilege/immutability/audit
+  postconditions, and lead/audit no-change digests.
+- Added an executable PostgreSQL 17 publication-proof contract to the existing
+  isolated local staging verifier. It proves service/browser role boundaries,
+  one-proof/one-audit idempotency, unsafe-host rejection, append-only behavior,
+  synthetic rollback, and zero external calls.
+- The contract found and fixed two pre-Production defects: postflight now reads
+  trigger event bits instead of depending on PostgreSQL display order, and the
+  migration now revokes inherited `service_role` privileges before granting
+  only SELECT and INSERT. The reviewed migration hash is
+  `c60c1a6e692d487e0adfd98d0eb3a9cff89ad77a3233b53075a4c8b63bde3ede`.
+- PR #183 is merged and live at Production commit
+  `b8b31fb20223ad0f0ad311fee1ee3de20d0f7ae9`. PR #184 was refreshed onto that
+  exact `main` before migration and application release.
+- The full local release gate passes system isolation, 14/14 safety checks,
+  200 test files / 2,831 tests, strict typecheck, ESLint, the Next.js 15.5.21
+  Production build, and the 78-route manifest. Production dependencies report
+  no known vulnerabilities; a redacted full-history scan reports no secret
+  leaks. Production-render Playwright checks pass 10/10 desktop/mobile routes
+  with no overflow, missing required copy, prohibited claim, bare-appraisal
+  wording, or console error. The migration hash/plan gate passes. A disposable
+  local reset applied all 33 migrations through the new SQL, and
+  `staging:local:verify` passes the real PostgreSQL 17.6 role, idempotency,
+  audit, host, RLS, and immutability contract with all synthetic changes rolled
+  back.
+- PR #184's canonical exact-head Node 24 CI, Preview, merge, and Production
+  deployment identifiers are kept in PR metadata rather than frozen into this
+  self-referential release file. The protected Preview serves expected
+  public/health routes and rejects anonymous `/admin/distribution` access.
+- Vercel CLI verification created empty helper project
+  `amm-phase9-publication-ledger-20260821`
+  (`prj_QcHch6KY1m2g0BKtOoVVFregRhho`) before the worktree was relinked to the
+  canonical project. It has zero deployments and no application/domain effect;
+  it remains preserved pending a separate exact cleanup approval.
+- Reconciled the current operating authority, asset manifest, consolidation
+  plan, release queue, limitations, daily Lead Center guide, architecture,
+  release log, and final report without deleting historical evidence. The
+  launch doctor/authority scanners now check PR #181, canonical
+  Neon/Better-Auth/Resend/Web-Push variable names, both deployable app trees,
+  and MLS-contextual MATRIX usage instead of falsely rejecting the ordinary
+  phrase `form-readiness matrix`. Focused scanner coverage passes 82/82.
+- The exact ledger migration/release gate was received on 2026-08-22. The
+  unchanged hash-pinned migration committed once after one fail-closed rollback
+  exposed and corrected a PostgreSQL 18 verifier-only catalog-render mismatch.
+  Two validated 351,600-byte backups were retained. Independent postflight
+  proves zero seeded proofs and unchanged lead/audit counts and digests.
+- No lead mutation, WordPress change, provider call, email, SMS, social/GBP
+  publication, print distribution, spend, DNS change, or NellySelly mutation
+  occurred.
+- External publication remains a separate final-copy/identity/visual/URL/removal
+  approval and is not authorized by the ledger gate.
 
 ## Phase 9 campaign safety + three-offer owned-demand flight — 2026-08-21
 

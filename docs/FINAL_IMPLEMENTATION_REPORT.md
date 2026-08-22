@@ -1,5 +1,7 @@
 # Final Implementation Report — Ask Magic Mike Lead Engine
 
+Updated 2026-08-21.
+
 This report is updated at handoff. It must distinguish local proof, staging proof,
 and production proof. A synthetic QA record is never described as a live prospect.
 
@@ -11,7 +13,7 @@ deterministic score/routing, protected AdminOps, outbox state, test suppression,
 and production health are verified. The apex redirects to `www`; no Ask hostname
 serves NellySelly content. No synthetic record is represented as a live prospect.
 
-External email delivery is now proven with a restricted replacement key and a
+External email delivery is proven with a restricted provider key and a
 verified aligned sending subdomain. The final test-marked public submission has
 one canonical lead, one internal alert, one provider message ID, provider event
 `delivered`, and one confirmed hidden copy in the approved audit mailbox.
@@ -27,21 +29,32 @@ one canonical lead, one internal alert, one provider message ID, provider event
 
 ## Deployed result
 
-- Public routes added locally: `/buy`, `/rent`, `/open-house/[propertyOrId]`,
+- Deployed public routes include `/buy`, `/rent`, `/open-house/[propertyOrId]`,
   `/thank-you`, `/privacy`, `/terms`, `/accessibility`, `/contact`, `/widget/v1`,
   `/robots.txt`, `/sitemap.xml`, `/api/events`, `/api/widget/events`,
   `/api/chat/session`, `/api/chat/message`, `/api/health/live`.
 - Lead path: server validation, origin/rate controls, durable capture, additive
   consent/attribution/score enrichment, deterministic Mike fallback routing,
   internal outbox alert, bounded retry, and consent-gated consumer acknowledgment.
-- Production deployment `dpl_BGkVcCMFgeZQgnteRxRUomeJoyRv` is Ready and
-  aliased to the canonical hostname.
+- Production baseline PR #181 is merged as
+  `5335697edf31eed0b8a38cd0295a4f5e7d501a3e`. Deployment
+  `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM` is Ready and owns the canonical
+  hostnames.
 - Production Neon migration, secure Vercel environment configuration, and sender
   DNS authentication were completed. The protected Lead Center reads canonical
   Neon data and exposes delivery status/message IDs without recipient references.
-- The existing WordPress connector remains canonical. The signed bridge is
-  installed in shadow-only mode; no form, notification, historical record, page,
-  menu, or public CTA was replaced.
+- The existing WordPress connector remains bridge-only. Signed bridge 1.1.0
+  forwards approved Home Value Form 3 into the canonical API; Gravity Forms
+  retains its local entry, and the duplicate Form 3 native notification is
+  inactive. Forms 1, 2, and 4–7 remain outside the forwarding allowlist.
+
+PR #183 is the next gated application release. PR #184 is stacked on it and
+adds the guarded publication-proof ledger migration. Neither candidate is
+Production, and neither authorizes external publication or a consumer send.
+
+The latest aggregate Production observation contains only six
+suppressed/test leads and no contactable live prospect. The funnel is available
+for genuine submissions; no synthetic QA record is counted as public demand.
 
 ## Production proof fields
 
