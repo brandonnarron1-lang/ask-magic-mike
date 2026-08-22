@@ -20,6 +20,17 @@ external channels remain unchanged.
 
 ## Phase 9 campaign safety + owned-demand offer flight — 2026-08-21
 
+- Measurement-truth hardening — PASS: the command distinguishes ready,
+  not-configured, schema-pending, and query-failed states. Only ready
+  measurement may render numeric demand, a measured bottleneck, or a data-backed
+  first-channel recommendation. Focused unit/static coverage passes 17/17.
+- No-database Production-render browser acceptance — PASS at 1440 × 1000 and
+  390 × 844: HTTP 200, all three metrics render unavailable, false-zero and
+  measured-recommendation copy are absent, recovery guidance is present, no
+  horizontal overflow occurs, and browser console/page errors remain zero.
+  Evidence is under the gitignored
+  `artifacts/phase9-measurement-unavailable-20260821/` directory.
+
 - Current-run operator UX audit — PASS: desktop 1440 × 1000 and mobile
   390 × 844 Production renders were captured and inspected. The recommended
   first move is present once, its same-page link lands on Google Business
@@ -47,14 +58,14 @@ external channels remain unchanged.
   `pnpm exec vitest run tests/compliance/value-copy.test.ts tests/compliance/campaign-copy-safety.test.ts tests/adminops/owned-demand-command.test.ts tests/admin/utm-link-builder.test.ts tests/brand/marketing-system.test.ts tests/compliance/public-distribution.test.ts`
   — PASS, 6 files / 337 tests.
 - `pnpm release:gate` — PASS: Ask Magic Mike/NellySelly isolation, 14/14
-  release-safety controls, 196 test files / 2,795 tests, strict typecheck,
+  release-safety controls, 196 test files / 2,797 tests, strict typecheck,
   ESLint, optimized Next.js 15.5.21 Production build, and 78-route manifest.
 - `pnpm typecheck` — PASS.
 - `git diff --check` — PASS.
 - `pnpm audit --prod --audit-level high` — PASS: no known Production
   dependency vulnerabilities.
-- `gitleaks detect --source . --redact --no-banner` — PASS: 464 commits and
-  approximately 12.95 MB scanned with no leaks.
+- `gitleaks detect --source . --redact --no-banner` — PASS: 482 commits and
+  approximately 13.64 MB scanned with no leaks.
 - High-signal scan of the new command surface found no client secret reads,
   unsafe HTML/DOM sinks, dynamic execution, Web Storage credentials,
   unrestricted `postMessage`, navigation mutation, or network send. A complete
