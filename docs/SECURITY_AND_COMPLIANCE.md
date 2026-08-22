@@ -71,3 +71,21 @@ guaranteed result.
   lint, production build, 54-route manifest, 14/14 release safety checks, 13/13
   Playwright tests, production dependency audit, whitespace check, and a
   315-commit redacted gitleaks scan.
+
+## Phase 9 privacy and KPI-trust hardening — 2026-08-22
+
+- Durable abuse-control identifiers are domain-separated HMAC-SHA-256 values
+  backed by a 32+ character server secret; raw caller keys are absent from SQL
+  parameters and protected health exposes readiness as a boolean only.
+- Both public analytics routes validate origin, content type, body size, event
+  name, scalar schema, event-specific dimensions, safe paths, and coarse device
+  class before asynchronous persistence.
+- Browser callers cannot write trusted notification lifecycle events or attach
+  arbitrary events to canonical lead/agent IDs. Trusted server writers retain
+  the protected association after authorization.
+- The Neon analytics repository repeats minimization at the final write boundary
+  and drops provider message IDs, raw errors, uncontrolled reasons, IPs, click
+  IDs, full URLs/referrers, and full user-agent strings.
+- Growth delivery SQL is parameterized, aggregate-only, test/suppression
+  excluded, and schema-detected. Missing optional delivery tables produce an
+  unavailable state rather than fabricated zeroes or a broken command center.

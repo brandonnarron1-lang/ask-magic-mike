@@ -5,6 +5,42 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
+
+- Boundary review — PASS at checkpoint: the candidate is stacked on PR #185
+  exact head `1593302a1354d5b8b77baa2340287a7d043dc297`, includes no migration,
+  and excludes PR #187's target register and parallel release authority.
+- Focused regression matrix — PASS: 9 files / 69 tests covering
+  HMAC limiter identifiers, stale-bucket pruning, public analytics event and
+  property boundaries, body/origin validation, repository defense in depth,
+  aggregate Growth outcomes/delivery, and protected health output.
+- `pnpm release:gate` — PASS on local Node 26.5.1: Ask Magic Mike/NellySelly
+  isolation, 14/14 release-safety checks, 208 test files / 2,892 tests, strict
+  typecheck, ESLint, optimized Next.js 15.5.21 build, and 80 active routes / 17
+  acknowledged root–`src` duplicates. The repository declares Node 24.x, so
+  exact Node 24 GitHub evidence remains required.
+- `pnpm typecheck` — PASS both independently and inside the release gate after
+  the aggregate Growth panel and route/privacy adaptations.
+- Security source review — PASS at checkpoint: raw limiter identifiers and
+  secrets are absent from Neon parameters; public analytics cannot attach lead
+  or agent IDs; public notification lifecycle events are rejected; final
+  persistence re-sanitizes dimensions and stores only a coarse user-agent class;
+  Growth SQL selects aggregate counts without recipient references or contact
+  fields.
+- `pnpm audit --prod --audit-level high` — PASS: no known Production dependency
+  vulnerability.
+- `gitleaks git --redact --no-banner` — PASS: 499 commits / approximately
+  13.94 MB scanned with no leak. A supplementary pattern scan found only
+  unmistakable test literals and documented placeholder syntax.
+- `git diff --check` and base/staged migration scans — PASS: no whitespace
+  error and no migration in the candidate.
+- Remaining exact-head evidence: exact Node 24 GitHub checks, canonical Vercel
+  Preview, protected authorization/runtime checks, rejected-request privacy
+  probes, responsive visual acceptance, and deployment-log inspection.
+- No Production deployment, migration/write, valid analytics persistence test,
+  lead, email/BCC, SMS, Push, provider action, WordPress edit, external
+  publication, DNS change, spend, or NellySelly action occurred.
+
 ## Phase 9 consolidated owned-demand command — 2026-08-22
 
 - Consolidation boundary — PASS: PR #185 contains the unique application work

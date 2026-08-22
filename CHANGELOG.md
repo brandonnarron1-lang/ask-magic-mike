@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-08-22 — Privacy and KPI-trust consolidation
+
+- Consolidated the independent privacy/security/KPI evidence from PRs #190-#192
+  onto the single PR #185 owned-demand command candidate.
+- Pseudonymized durable rate-limit buckets with versioned HMAC identifiers and
+  bounded stale-row retention.
+- Minimized public analytics to approved events and scalar dimensions, removed
+  public lead/agent binding, and repeated sanitization at the Neon write layer.
+- Added aggregate-only live outcome and notification-delivery evidence to the
+  protected Growth Command Center with honest unavailable states.
+- Excluded the deferred KPI target migration and made no Production, provider,
+  external publication, or live-data change.
+
 ## 2026-08-21 — Owned-demand measurement truth hardening
 
 - Distinguished healthy zero-demand measurement from missing configuration,

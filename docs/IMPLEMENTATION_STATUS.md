@@ -2,6 +2,36 @@
 
 Updated 2026-08-22.
 
+## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
+
+- Audited PRs #190-#192 against PR #185 exact head
+  `1593302a1354d5b8b77baa2340287a7d043dc297` and consolidated their unique
+  independent work once. Source commits, exclusions, rescue ref, and rollback
+  are recorded in `docs/PHASE9_PRIVACY_KPI_TRUST_CONSOLIDATION.md`.
+- Durable Neon rate limiting now stores only versioned HMAC-SHA-256 bucket
+  identifiers, updates bucket freshness, and removes stale records after 24
+  hours. Protected health reports only whether a suitable server secret exists.
+- Public analytics now uses an event/property allowlist, bounded JSON bodies,
+  exact public-origin checks, coarse browser/device classes, and sanitized UTM
+  dimensions. Public callers cannot bind events to canonical lead or agent IDs;
+  the persistence repository re-applies the privacy boundary.
+- The protected Growth Command Center adds aggregate-only outcome and delivery
+  evidence for eligible non-test, non-suppressed leads. Optional-table or query
+  failure renders unavailable instead of fabricating zero.
+- PR #187's KPI target register and migration remain deferred. This candidate
+  contains no migration, publisher, provider send, second data store, or live
+  data action.
+- Focused verification passes 9 files / 69 tests. The full local release gate
+  passes system isolation, 14/14 release-safety checks, 208 test files / 2,892
+  tests, strict typecheck, ESLint, the optimized Next.js 15.5.21 build, and 80
+  active routes. Production dependencies have no known vulnerability; a
+  redacted history scan covers 499 commits / 13.94 MB with no leak; diff and
+  migration checks are clean. Exact Node 24 CI, Vercel Preview, responsive
+  visual, authorization, and runtime evidence remain before release readiness.
+- Exact future application gate:
+  `APPROVE PHASE 9 PRIVACY AND KPI TRUST MERGE AND PRODUCTION DEPLOYMENT`.
+  No Production or external action is authorized by this status entry.
+
 ## Phase 9 consolidated owned-demand command — 2026-08-22
 
 - PR #185 is the single application consolidation vehicle on released PR #184

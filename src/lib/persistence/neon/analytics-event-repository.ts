@@ -1,10 +1,15 @@
 import { neon } from "@neondatabase/serverless";
+import {
+  coarseAnalyticsUserAgent,
+  safeAnalyticsDimension,
+  safeAnalyticsProperties,
+} from "@/lib/analytics/privacy";
+
+export { safeAnalyticsProperties } from "@/lib/analytics/privacy";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const EVENT_NAME_PATTERN = /^[a-z][a-z0-9_]{1,80}$/;
-const PRIVATE_KEYS =
-  /email|phone|address|name|message|question|notes|ip|user_agent|cookie|token|secret/i;
 const EVENT_CATEGORIES = new Set([
   "session",
   "intake",
@@ -32,26 +37,6 @@ export type AnalyticsEventWrite = {
   utmCampaign?: string | null;
   userAgent?: string | null;
 };
-
-function scalar(value: unknown) {
-  return typeof value === "string" ||
-    typeof value === "number" ||
-    typeof value === "boolean"
-    ? value
-    : undefined;
-}
-
-export function safeAnalyticsProperties(
-  properties: Record<string, unknown> = {},
-) {
-  return Object.fromEntries(
-    Object.entries(properties)
-      .filter(([key]) => !PRIVATE_KEYS.test(key))
-      .map(([key, value]) => [key.slice(0, 80), scalar(value)] as const)
-      .filter(([, value]) => value !== undefined)
-      .slice(0, 40),
-  );
-}
 
 function validUuid(value: string | null | undefined) {
   return value && UUID_PATTERN.test(value) ? value : null;
@@ -82,10 +67,13 @@ export class NeonAnalyticsEventRepository {
         event.eventName,
         category,
         JSON.stringify(safeAnalyticsProperties(event.properties)),
-        event.utmSource?.slice(0, 160) ?? null,
-        event.utmMedium?.slice(0, 160) ?? null,
-        event.utmCampaign?.slice(0, 160) ?? null,
-        event.userAgent?.slice(0, 500) ?? null,
+        safeAnalyticsDimension(event.utmSource),
+        safeAnalyticsDimension(event.utmMedium),
+        safeAnalyticsDimension(event.utmCampaign),
+        coarseAnalyticsUserAgent(
+          event.userAgent,
+          event.properties?.device_category ?? event.properties?.deviceType,
+        ),
       ],
     );
     return true;
