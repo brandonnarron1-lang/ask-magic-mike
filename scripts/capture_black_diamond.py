@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
@@ -21,6 +22,21 @@ def main():
         browser = p.chromium.launch()
 
         page = browser.new_page(viewport={"width": 1920, "height": 1080}, device_scale_factor=1)
+        page.route(
+            "**/api/leads",
+            lambda route: route.fulfill(
+                status=200,
+                content_type="application/json",
+                body=json.dumps(
+                    {
+                        "ok": True,
+                        "lead_id": "internal-qa-no-write",
+                        "session_id": "internal-qa-no-write",
+                        "message": "INTERNAL QA — intercepted locally; no lead was stored.",
+                    }
+                ),
+            ),
+        )
         goto(page, "/")
         shot(page, "homepage-desktop-1920.png")
 
@@ -39,11 +55,12 @@ def main():
         page.set_viewport_size({"width": 1440, "height": 1000})
         goto(page, "/home-value")
         shot(page, "home-value-step-address.png")
-        page.get_by_label("Property address").fill("123 Lake Wilson Road, Wilson, NC")
+        page.get_by_label("Property address").fill("123 INTERNAL QA DO NOT CONTACT Lane, Wilson, NC")
         page.get_by_role("button", name="Continue").click()
         page.wait_for_timeout(250)
-        shot(page, "home-value-step-email.png")
-        page.get_by_label("Email for your valuation follow-up").fill("qa@example.com")
+        shot(page, "home-value-step-contact.png")
+        page.get_by_label("Your name").fill("INTERNAL QA DO NOT CONTACT")
+        page.get_by_label("Email for your valuation follow-up").fill("internal-qa@example.test")
         page.get_by_role("button", name="Continue").click()
         page.wait_for_timeout(250)
         shot(page, "home-value-step-phone-timeline.png")

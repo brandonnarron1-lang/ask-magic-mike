@@ -1,5 +1,25 @@
 # QA Evidence
 
+## Phase 9 conversion identity polish — 2026-08-22 15:17 EDT
+
+- Current Production seller, buyer, and Ask paths were captured in the in-app
+  browser with internal-QA attribution and no lead submission.
+- The existing home-value Contact step now captures name and email; invalid
+  fields receive focus and uniquely own the inline error description.
+- Consumer footer navigation excludes internal preview/integration routes.
+- The screenshot helper intercepts `/api/leads`; visual QA cannot persist a
+  lead or trigger notifications.
+- Focused verification: 4 files / 11 tests — PASS.
+- Full local release gate: 214 files / 2,930 tests, typecheck, lint, optimized
+  build, 82 active routes, 14/14 safety, and system isolation — PASS.
+- Production dependency audit: no known vulnerability. Candidate text secret
+  scan: no leak. `git diff --check`: PASS. Migration scan: empty.
+- Full evidence:
+  `docs/phase9/CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
+- No Production deployment, migration, database write, lead, email/BCC, SMS,
+  Push, consumer acknowledgment, provider call, WordPress edit, publication,
+  spend, DNS, or NellySelly action occurred.
+
 ## PR #185 continuation readiness audit — 2026-08-22
 
 - Reconfirmed that current Production remains PR #184 merge

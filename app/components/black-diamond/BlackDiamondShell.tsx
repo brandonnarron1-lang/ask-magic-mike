@@ -118,16 +118,17 @@ export function Footer() {
             Ask Magic Mike provides general real estate guidance and lead intake for Our Town Properties. Property-specific pricing, listing strategy, agency relationships, and legal or financial decisions should be confirmed directly with a licensed professional.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3 md:justify-end">
+        <nav aria-label="Footer" className="flex flex-wrap gap-3 md:justify-end">
+          <Link href="/home-value" className="text-[#e2c06f] hover:text-[#f4ead4]">Home Value</Link>
+          <Link href="/sell" className="text-[#e2c06f] hover:text-[#f4ead4]">Sell</Link>
+          <Link href="/buy" className="text-[#e2c06f] hover:text-[#f4ead4]">Buy</Link>
+          <Link href="/ask" className="text-[#e2c06f] hover:text-[#f4ead4]">Ask Mike</Link>
+          <Link href="/plan" className="text-[#e2c06f] hover:text-[#f4ead4]">Review Planner</Link>
+          <Link href="/contact" className="text-[#e2c06f] hover:text-[#f4ead4]">Contact</Link>
           <Link href="/privacy" className="text-[#e2c06f] hover:text-[#f4ead4]">Privacy</Link>
           <Link href="/terms" className="text-[#e2c06f] hover:text-[#f4ead4]">Terms</Link>
           <Link href="/accessibility" className="text-[#e2c06f] hover:text-[#f4ead4]">Accessibility</Link>
-          <Link href="/contact" className="text-[#e2c06f] hover:text-[#f4ead4]">Contact</Link>
-          <Link href="/plan" className="text-[#e2c06f] hover:text-[#f4ead4]">Review Planner</Link>
-          <Link href="/widget-preview" className="text-[#e2c06f] hover:text-[#f4ead4]">Widget Preview</Link>
-          <Link href="/integrations/ourtownproperties" className="text-[#e2c06f] hover:text-[#f4ead4]">OurTown Integration</Link>
-          <Link href="/social-preview" className="text-[#e2c06f] hover:text-[#f4ead4]">Social Preview</Link>
-        </div>
+        </nav>
       </div>
     </footer>
   );

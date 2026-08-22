@@ -53,10 +53,15 @@ test.describe("Homepage", () => {
     expect(broken, `Broken images: ${broken.join("\n")}`).toHaveLength(0);
   });
 
-  test("footer links point to active root integration routes", async ({ page }) => {
+  test("footer keeps consumer paths visible without internal preview links", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator('a[href="/widget-preview"]')).toBeAttached();
-    await expect(page.locator('a[href="/integrations/ourtownproperties"]')).toBeAttached();
-    await expect(page.locator('a[href="/social-preview"]').first()).toBeAttached();
+    const footer = page.getByRole("contentinfo");
+    await expect(footer.getByRole("navigation", { name: "Footer" })).toBeVisible();
+    await expect(footer.locator('a[href="/home-value"]')).toBeAttached();
+    await expect(footer.locator('a[href="/buy"]')).toBeAttached();
+    await expect(footer.locator('a[href="/ask"]')).toBeAttached();
+    await expect(footer.locator('a[href="/widget-preview"]')).toHaveCount(0);
+    await expect(footer.locator('a[href="/integrations/ourtownproperties"]')).toHaveCount(0);
+    await expect(footer.locator('a[href="/social-preview"]')).toHaveCount(0);
   });
 });

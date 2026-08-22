@@ -2,6 +2,32 @@
 
 Updated 2026-08-22.
 
+## Phase 9 conversion identity polish — 2026-08-22
+
+- A fresh Production no-submit audit found that the canonical home-value path
+  omitted consumer name while the buyer path already captured it. The existing
+  Contact step now collects required name and email and sends name through the
+  canonical `/api/leads` payload; no new form or backend was created.
+- Validation now moves focus to the invalid address, name, email, or phone and
+  associates the live error only with that field. The four-stage funnel and
+  Black Diamond visual system remain intact.
+- Consumer footer navigation no longer promotes internal Widget Preview,
+  OurTown Integration, or Social Preview surfaces. Those routes remain
+  non-indexable and available for their existing operational purpose.
+- Screenshot QA now intercepts lead creation and uses unmistakable synthetic
+  identity, eliminating an accidental canonical-database write path.
+- Local evidence passes 214 test files / 2,930 tests, strict typecheck, ESLint,
+  optimized build, 82 active routes, 14/14 safety, system isolation, Python
+  compilation, dependency audit, candidate secret scan, diff check, and empty
+  migration scan. Exact Node 24 CI and canonical Preview proof remain pending.
+- This branch is stacked after PR #194 and must not merge before PRs #185,
+  #193, and #194 release and the branch is refreshed/re-proven.
+- Detailed decision and QA:
+  `docs/phase9/CONVERSION_IDENTITY_POLISH.md` and
+  `docs/phase9/CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
+- Future exact gate:
+  `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
+
 ## Phase 9 iOS phone handoff consolidation — 2026-08-22
 
 - Historical PR #179 was audited rather than merged wholesale. Its unique
