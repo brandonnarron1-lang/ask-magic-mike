@@ -97,7 +97,7 @@ export const KPI_METRIC_DEFINITIONS = [
     unit: "percentage",
     direction: "higher_is_better",
     minimumSampleSize: 20,
-    definition: "Eligible live leads with an explicitly recorded appointment-set outcome divided by eligible live leads.",
+    definition: "Eligible live leads with an explicitly recorded appointment-set outcome in the selected window divided by eligible live leads in that window.",
   },
   {
     key: "appointment_held_rate",
@@ -115,7 +115,7 @@ export const KPI_METRIC_DEFINITIONS = [
     unit: "percentage",
     direction: "higher_is_better",
     minimumSampleSize: 20,
-    definition: "Eligible live leads with an explicitly recorded signed-client outcome divided by eligible live leads.",
+    definition: "Eligible live leads with an explicitly recorded signed-client outcome in the selected window divided by eligible live leads in that window.",
   },
   {
     key: "close_rate",
@@ -178,7 +178,7 @@ export const KPI_METRIC_DEFINITIONS = [
     unit: "usd",
     direction: "lower_is_better",
     minimumSampleSize: 5,
-    definition: "Reconciled acquisition spend divided by explicitly recorded signed-client outcomes.",
+    definition: "Reconciled acquisition spend divided by explicitly recorded signed-client outcomes for the same selected window.",
   },
   {
     key: "cost_per_close",
@@ -349,7 +349,7 @@ export const KPI_METRIC_DEFINITIONS = [
     unit: "percentage",
     direction: "lower_is_better",
     minimumSampleSize: 20,
-    definition: "Final failed internal notification deliveries divided by eligible notification attempts, excluding test records from business reporting.",
+    definition: "Final failed internal notification records divided by terminal attempted internal notification records, excluding test and suppressed leads.",
   },
   {
     key: "bounce_rate",
@@ -376,7 +376,7 @@ export const KPI_METRIC_DEFINITIONS = [
     unit: "percentage",
     direction: "lower_is_better",
     minimumSampleSize: 20,
-    definition: "Provider-confirmed complaints divided by eligible delivered commercial messages.",
+    definition: "Provider-confirmed complaints divided by eligible delivered customer email messages.",
   },
 ] as const;
 
@@ -424,11 +424,8 @@ export type KpiTargetValidation =
 
 const UNSUPPORTED_REASONS: Partial<Record<KpiMetricKey, string>> = {
   contactable_rate: "Validated contactability is not yet exposed in the Growth Intelligence aggregate.",
-  appointment_set_rate: "The current aggregate groups appointment-requested and later stages; an exact appointment-set denominator is not yet available.",
   appointment_held_rate: "Appointment-held outcomes are not yet exposed as a distinct aggregate.",
-  signed_client_rate: "Signed-client outcomes are stored but not yet exposed as a distinct aggregate.",
   database_reactivation_rate: "The revival command identifies candidates, but cohort enrollment and response outcomes are not yet joined into one rate.",
-  cost_per_signed_client: "Signed-client outcomes are not yet exposed as a distinct aggregate denominator.",
   referral_cost: "Referral fees are not yet separated from revenue in the Growth Intelligence aggregate.",
   margin_after_acquisition_cost: "Gross margin and referral cost are not both available in the current aggregate.",
   agent_acceptance_rate: "Explicit assignment acceptance/claim evidence is not yet aggregated.",
@@ -438,10 +435,7 @@ const UNSUPPORTED_REASONS: Partial<Record<KpiMetricKey, string>> = {
   critical_accessibility_issue_count: "Automated checks alone cannot establish accessibility. A canonical issue ledger joining automated findings with documented human evaluation is not yet instrumented.",
   mobile_funnel_technical_success_rate: "Funnel events are not yet joined by device into privacy-safe cohorts with durable success and explicit technical-failure outcomes.",
   durable_funnel_completion_rate: "Funnel starts and durable lead creation are not yet joined into one privacy-safe, deduplicated canonical cohort denominator.",
-  notification_failure_rate: "Delivery outcomes are available in notification operations but are not yet joined into the Growth Intelligence aggregate.",
-  bounce_rate: "Provider bounce events are not yet exposed in the Growth Intelligence aggregate.",
   opt_out_rate: "Purpose-specific delivered-message denominators are not yet joined to suppression events.",
-  complaint_rate: "Provider complaint events are not yet exposed in the Growth Intelligence aggregate.",
 };
 
 function round(value: number, digits = 2) {
@@ -498,6 +492,24 @@ function baselineValue(
       return { value: summary.p90FirstResponseMinutes, sampleSize: summary.firstResponseSampleSize, evidence: { response_coverage_rate: summary.firstResponseCoverageRate } };
     case "qualification_rate":
       return { value: percentage(summary.qualified, summary.leads), sampleSize: summary.leads, evidence: { eligible_leads: summary.leads, qualified_leads: summary.qualified } };
+    case "appointment_set_rate":
+      return {
+        value: percentage(growth.outcomeMetrics.appointmentSetLeads, summary.leads),
+        sampleSize: summary.leads,
+        evidence: {
+          eligible_leads: summary.leads,
+          appointment_set_leads: growth.outcomeMetrics.appointmentSetLeads,
+        },
+      };
+    case "signed_client_rate":
+      return {
+        value: percentage(growth.outcomeMetrics.signedClientLeads, summary.leads),
+        sampleSize: summary.leads,
+        evidence: {
+          eligible_leads: summary.leads,
+          signed_client_leads: growth.outcomeMetrics.signedClientLeads,
+        },
+      };
     case "close_rate":
       return { value: percentage(summary.closes, summary.leads), sampleSize: summary.leads, evidence: { eligible_leads: summary.leads, closed_leads: summary.closes } };
     case "stale_lead_inventory":
@@ -508,6 +520,17 @@ function baselineValue(
       return { value: summary.qualified > 0 ? round(summary.spendUsd / summary.qualified) : null, sampleSize: summary.qualified, evidence: { qualified_leads: summary.qualified, spend_usd: summary.spendUsd } };
     case "cost_per_appointment":
       return { value: summary.blendedCostPerAppointment, sampleSize: summary.appointments, evidence: { appointment_progressions: summary.appointments, spend_usd: summary.spendUsd } };
+    case "cost_per_signed_client":
+      return {
+        value: growth.outcomeMetrics.signedClientLeads > 0
+          ? round(summary.spendUsd / growth.outcomeMetrics.signedClientLeads)
+          : null,
+        sampleSize: growth.outcomeMetrics.signedClientLeads,
+        evidence: {
+          signed_client_leads: growth.outcomeMetrics.signedClientLeads,
+          spend_usd: summary.spendUsd,
+        },
+      };
     case "cost_per_close":
       return { value: summary.blendedCostPerClose, sampleSize: summary.closes, evidence: { closed_leads: summary.closes, spend_usd: summary.spendUsd } };
     case "attributed_revenue":
@@ -520,6 +543,39 @@ function baselineValue(
       return { value: percentage(paidLeads, summary.leads), sampleSize: summary.leads, evidence: { rented_leads: paidLeads, eligible_leads: summary.leads } };
     case "agent_follow_up_rate":
       return { value: summary.firstResponseCoverageRate, sampleSize: summary.leads, evidence: { eligible_leads: summary.leads, first_response_samples: summary.firstResponseSampleSize } };
+    case "notification_failure_rate":
+      return {
+        value: percentage(
+          growth.delivery.permanentInternalFailures,
+          growth.delivery.terminalInternalNotifications,
+        ),
+        sampleSize: growth.delivery.terminalInternalNotifications,
+        evidence: {
+          terminal_internal_notifications: growth.delivery.terminalInternalNotifications,
+          permanent_internal_failures: growth.delivery.permanentInternalFailures,
+        },
+      };
+    case "bounce_rate":
+      return {
+        value: percentage(growth.delivery.emailBounces, growth.delivery.eligibleEmailSends),
+        sampleSize: growth.delivery.eligibleEmailSends,
+        evidence: {
+          eligible_email_sends: growth.delivery.eligibleEmailSends,
+          email_bounces: growth.delivery.emailBounces,
+        },
+      };
+    case "complaint_rate":
+      return {
+        value: percentage(
+          growth.delivery.customerComplaints,
+          growth.delivery.deliveredCustomerMessages,
+        ),
+        sampleSize: growth.delivery.deliveredCustomerMessages,
+        evidence: {
+          delivered_customer_messages: growth.delivery.deliveredCustomerMessages,
+          customer_complaints: growth.delivery.customerComplaints,
+        },
+      };
     case "p75_largest_contentful_paint_ms":
       return {
         value: growth.webVitals.lcpP75Ms,
@@ -549,6 +605,18 @@ const CORE_WEB_VITAL_METRICS = new Set<KpiMetricKey>([
   "p75_cumulative_layout_shift",
 ]);
 
+const OUTCOME_METRICS = new Set<KpiMetricKey>([
+  "appointment_set_rate",
+  "signed_client_rate",
+  "cost_per_signed_client",
+]);
+
+const DELIVERY_METRICS = new Set<KpiMetricKey>([
+  "notification_failure_rate",
+  "bounce_rate",
+  "complaint_rate",
+]);
+
 export function buildKpiBaselineSnapshot(
   metricKey: KpiMetricKey,
   growth: GrowthIntelligenceView,
@@ -569,6 +637,18 @@ export function buildKpiBaselineSnapshot(
   ) {
     state = "unavailable";
     reason = growth.webVitals.error || "Canonical production field telemetry is not configured.";
+  } else if (
+    OUTCOME_METRICS.has(metricKey) &&
+    (!growth.outcomeMetrics.configured || growth.outcomeMetrics.error)
+  ) {
+    state = "unavailable";
+    reason = growth.outcomeMetrics.error || "Canonical outcome telemetry is not configured.";
+  } else if (
+    DELIVERY_METRICS.has(metricKey) &&
+    (!growth.delivery.configured || growth.delivery.error)
+  ) {
+    state = "unavailable";
+    reason = growth.delivery.error || "Canonical notification-delivery telemetry is not configured.";
   } else if (!growth.configured || growth.error || !growth.schemaReady) {
     state = "unavailable";
     reason = growth.error || "Canonical Growth Intelligence is not fully available for this observation.";

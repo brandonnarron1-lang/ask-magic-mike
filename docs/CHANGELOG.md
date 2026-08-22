@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-08-21 — Outcome and delivery KPI trust candidate
+
+- Reused the existing protected Growth Intelligence view, 38-metric KPI target
+  register, canonical `lead_outcomes`, `lead_notifications`, and
+  `communication_events` ledgers. No schema, provider, dashboard, public event,
+  or parallel analytics store was added.
+- Replaced six explicit `not_instrumented` gaps with bounded, server-only
+  aggregates: appointment-set rate, signed-client rate, cost per signed client,
+  terminal internal-notification failure rate, email bounce rate, and customer
+  email complaint rate.
+- Counted exact outcome-ledger facts only inside the same eligible, non-test,
+  non-suppressed lead cohort. Duplicate outcome rows do not duplicate a lead in
+  a rate, and later lifecycle labels are not inferred as outcomes.
+- Counted both canonical internal-alert recipient classes (`internal` and
+  `agent`), final failures only after the outbox reaches
+  `permanently_failed`, and provider-confirmed bounce/complaint events only
+  when they join to an eligible notification.
+- Kept the query aggregate-only: no recipient reference, name, email, phone,
+  message body, subject, raw provider payload, or consumer identifier enters
+  the Growth view or KPI evidence hash.
+- Preserved truthful empty/error states. Zero denominators remain
+  insufficient-sample, missing optional ledgers are unavailable without taking
+  down core Growth reporting, and appointment-held, opt-out, funnel-quality,
+  and accessibility claims remain explicitly uninstrumented.
+- The full local release gate passes system isolation, 14/14 release-safety
+  checks, 214 test files / 2,947 tests, strict typecheck, full ESLint, the
+  optimized Next.js 15.5.21 build, 52/52 static pages, and the 83-route
+  manifest. Production dependencies have no known vulnerability, and a
+  redacted 488-commit history scan found no secret leak.
+- The candidate has no database migration and performs no Production query or
+  write, lead mutation, provider call, external send, publication, WordPress or
+  DNS change, spend, or NellySelly action.
+
 ## 2026-08-21 — iOS phone-alert handoff consolidation candidate
 
 - Preserved PR #179 and its original history, pushed rescue branch

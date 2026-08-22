@@ -323,5 +323,22 @@ mobile technical success, and durable funnel completion stay explicitly
 uninstrumented until their separate human-evaluation or privacy-safe cohort
 contracts exist.
 
+The same server-only view derives six additional trustable KPI baselines from
+ledgers already inside the canonical Neon boundary. Exact `appointment` and
+`agreement_signed` outcomes are deduplicated by lead and intersected with the
+selected eligible lead cohort. Notification delivery uses one aggregate-only
+join from `lead_notifications` to `communication_events`; both `internal` lead
+alerts and `agent` assignment alerts are counted, while provider bounce and
+complaint evidence is matched by notification ID. Test and communication-
+suppressed leads are excluded before aggregation. Only counts leave SQL—never
+recipient references, contact data, content, raw provider payloads, or event
+identifiers.
+
+Optional delivery telemetry is failure-isolated from core Growth reporting.
+Missing tables or a query error mark only the three delivery KPIs unavailable;
+an empty denominator remains insufficient-sample. This does not infer an
+appointment held, opt-out, funnel completion, accessibility result, or any
+other unsupported fact.
+
 Application rollback leaves the additive register dormant. Historical target
 and audit versions are retained; corrections are appended, never rewritten.

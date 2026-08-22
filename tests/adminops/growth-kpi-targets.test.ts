@@ -28,6 +28,20 @@ function growthView(
     clsP75: null,
     clsSampleSize: 0,
   },
+  outcomeMetrics: GrowthIntelligenceView["outcomeMetrics"] = {
+    configured: true,
+    appointmentSetLeads: 0,
+    signedClientLeads: 0,
+  },
+  delivery: GrowthIntelligenceView["delivery"] = {
+    configured: true,
+    terminalInternalNotifications: 0,
+    permanentInternalFailures: 0,
+    eligibleEmailSends: 0,
+    emailBounces: 0,
+    deliveredCustomerMessages: 0,
+    customerComplaints: 0,
+  },
 ): GrowthIntelligenceView {
   const intelligence = buildGrowthIntelligence({ leads, now: NOW });
   return {
@@ -41,6 +55,8 @@ function growthView(
     recommendations: [],
     ownedDemandSignals: [],
     webVitals,
+    outcomeMetrics,
+    delivery,
     sourceRowsRead: leads.length,
     spendRowsRead: 0,
     outcomeRowsRead: 0,
@@ -108,11 +124,72 @@ describe("Growth KPI baseline quality contract", () => {
     expect(baseline).toMatchObject({ value: 0, sampleSize: 0, state: "measured" });
   });
 
-  it("marks exact outcomes that are not yet aggregated as not instrumented", () => {
-    const baseline = buildKpiBaselineSnapshot("appointment_set_rate", growthView(measuredLeads()));
-    expect(baseline.value).toBeNull();
-    expect(baseline.state).toBe("not_instrumented");
-    expect(baseline.reason).toContain("exact appointment-set denominator");
+  it("measures exact appointment-set and signed-client outcomes without inferring later stages", () => {
+    const view = growthView(measuredLeads(), undefined, {
+      configured: true,
+      appointmentSetLeads: 5,
+      signedClientLeads: 2,
+    });
+    expect(buildKpiBaselineSnapshot("appointment_set_rate", view)).toMatchObject({
+      value: 25,
+      sampleSize: 20,
+      state: "measured",
+    });
+    expect(buildKpiBaselineSnapshot("signed_client_rate", view)).toMatchObject({
+      value: 10,
+      sampleSize: 20,
+      state: "measured",
+    });
+    const costView = {
+      ...view,
+      summary: { ...view.summary, spendUsd: 1_000 },
+      outcomeMetrics: { ...view.outcomeMetrics, signedClientLeads: 5 },
+    };
+    expect(buildKpiBaselineSnapshot("cost_per_signed_client", costView)).toMatchObject({
+      value: 200,
+      sampleSize: 5,
+      state: "measured",
+    });
+  });
+
+  it("measures terminal notification failures, bounces, and complaints from bounded aggregates", () => {
+    const view = growthView(measuredLeads(), undefined, undefined, {
+      configured: true,
+      terminalInternalNotifications: 20,
+      permanentInternalFailures: 1,
+      eligibleEmailSends: 25,
+      emailBounces: 1,
+      deliveredCustomerMessages: 20,
+      customerComplaints: 1,
+    });
+    expect(buildKpiBaselineSnapshot("notification_failure_rate", view))
+      .toMatchObject({ value: 5, sampleSize: 20, state: "measured" });
+    expect(buildKpiBaselineSnapshot("bounce_rate", view))
+      .toMatchObject({ value: 4, sampleSize: 25, state: "measured" });
+    expect(buildKpiBaselineSnapshot("complaint_rate", view))
+      .toMatchObject({ value: 5, sampleSize: 20, state: "measured" });
+  });
+
+  it("marks isolated outcome and delivery telemetry failures unavailable", () => {
+    const unavailableOutcomes = growthView(measuredLeads(), undefined, {
+      configured: false,
+      appointmentSetLeads: 0,
+      signedClientLeads: 0,
+    });
+    const unavailableDelivery = growthView(measuredLeads(), undefined, undefined, {
+      configured: true,
+      terminalInternalNotifications: 0,
+      permanentInternalFailures: 0,
+      eligibleEmailSends: 0,
+      emailBounces: 0,
+      deliveredCustomerMessages: 0,
+      customerComplaints: 0,
+      error: "Canonical notification-delivery aggregate query failed",
+    });
+    expect(buildKpiBaselineSnapshot("appointment_set_rate", unavailableOutcomes))
+      .toMatchObject({ state: "unavailable", value: null });
+    expect(buildKpiBaselineSnapshot("bounce_rate", unavailableDelivery))
+      .toMatchObject({ state: "unavailable", value: null });
   });
 
   it("promotes a rate only after the documented operational sample threshold", () => {
@@ -163,11 +240,12 @@ describe("Growth KPI baseline quality contract", () => {
     expect(formatKpiValue(0.0842, "score")).toBe("0.0842");
   });
 
-  it("keeps accessibility and funnel-quality claims explicitly uninstrumented", () => {
+  it("keeps accessibility, funnel-quality, and purpose-specific opt-out claims explicitly uninstrumented", () => {
     for (const metric of [
       "critical_accessibility_issue_count",
       "mobile_funnel_technical_success_rate",
       "durable_funnel_completion_rate",
+      "opt_out_rate",
     ] as const) {
       expect(buildKpiBaselineSnapshot(metric, growthView(measuredLeads())))
         .toMatchObject({ state: "not_instrumented", value: null });
@@ -208,24 +286,24 @@ describe("Growth KPI target validation", () => {
   });
 
   it("allows an unapproved draft while preventing false approval language", () => {
-    const baseline = buildKpiBaselineSnapshot("appointment_set_rate", growthView(measuredLeads()));
+    const baseline = buildKpiBaselineSnapshot("appointment_held_rate", growthView(measuredLeads()));
     const draft = validateKpiTarget({
-      ...validInput("appointment_set_rate"),
+      ...validInput("appointment_held_rate"),
       status: "draft",
       targetValue: null,
       approvalReference: null,
     }, baseline);
     expect(draft.ok).toBe(true);
     expect(validateKpiTarget({
-      ...validInput("appointment_set_rate"),
+      ...validInput("appointment_held_rate"),
       status: "draft",
     }, baseline)).toEqual({ ok: false, error: "draft_kpi_target_cannot_claim_approval" });
   });
 
   it("does not store a numeric draft target before a measured baseline exists", () => {
-    const baseline = buildKpiBaselineSnapshot("appointment_set_rate", growthView(measuredLeads()));
+    const baseline = buildKpiBaselineSnapshot("appointment_held_rate", growthView(measuredLeads()));
     expect(validateKpiTarget({
-      ...validInput("appointment_set_rate"),
+      ...validInput("appointment_held_rate"),
       status: "draft",
       approvalReference: null,
     }, baseline)).toEqual({ ok: false, error: "measured_kpi_baseline_required" });

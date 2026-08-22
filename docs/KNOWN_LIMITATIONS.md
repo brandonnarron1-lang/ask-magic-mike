@@ -33,6 +33,14 @@ sample threshold. The accessibility issue count, mobile technical-success rate,
 and durable funnel-completion rate remain explicitly uninstrumented; Web Vitals
 or automated scans are not an accessibility certification or conversion proof.
 
+The stacked KPI-trust candidate can resolve exact appointment-set,
+signed-client, cost-per-signed-client, final internal-notification failure,
+bounce, and complaint baselines from existing canonical ledgers. Current
+Production still has no eligible live sample, so these remain
+insufficient-sample rather than 0%. Appointment-held and purpose-specific
+opt-out rates remain uninstrumented; neither may be inferred from adjacent
+lifecycle or suppression state.
+
 ## 2. Messaging and staff alerts
 
 ### Internal email is live; consumer automation is not broadly enabled

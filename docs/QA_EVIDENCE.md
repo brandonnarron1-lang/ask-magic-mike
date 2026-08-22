@@ -5,6 +5,42 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Outcome and delivery KPI trust — 2026-08-21
+
+- Preservation: exact predecessor
+  `695bd11f3bb4727c684e4fef0186734be3c9c7fa` remains on pushed rescue branch
+  `rescue/amm-pre-growth-kpi-trust-20260821-2200`. No reset, rebase,
+  force-push, or discarded worktree was used.
+- Semantic source audit: PASS — canonical outcome values are `appointment` and
+  `agreement_signed`; canonical outbox recipient classes are `internal`,
+  `agent`, and `customer`; normalized provider events include `bounced` and
+  `complained`; final failure is `permanently_failed`.
+- Focused Vitest: PASS — 4 files / 37 tests covering exact-outcome deduplication,
+  loaded-cohort boundaries, aggregate normalization, PII-free SQL structure,
+  sample thresholds, unavailable-state isolation, existing route guards, and
+  outcome-ledger migration semantics.
+- Independent strict typecheck: PASS on local Node 26.5.1; the repository
+  declares Node 24.x, so exact Node 24 CI remains the runtime authority.
+- Focused ESLint: PASS for the two implementation files and two changed test
+  files.
+- Negative proof: the delivery aggregate returns counts only and does not
+  select recipient references, lead names, email, phone, content, subject, raw
+  provider payload, or consumer identity. Duplicate outcomes cannot inflate a
+  lead rate; zero denominators cannot render as measured zero.
+- Full `pnpm run release:gate`: PASS — Ask Magic Mike/NellySelly isolation,
+  14/14 release-safety checks, 214 files / 2,947 tests, strict typecheck, full
+  ESLint, optimized Next.js 15.5.21 build, 52/52 static pages, and route
+  manifest verification (83 active / 17 acknowledged root–`src` duplicates).
+- `pnpm audit --prod`: PASS — no known Production dependency vulnerability.
+- `gitleaks git --redact --no-banner`: PASS — 488 commits / approximately
+  13.72 MB scanned with no leak.
+- `git diff --check`: PASS before the evidence update and rerun at handoff.
+- Immutable-head Node 24 CI, protected Vercel Preview, and read-only route
+  checks are completed before release readiness and recorded on the Draft PR.
+- No Production/database query or write, migration, lead mutation, notification
+  send, provider call, publication, WordPress/DNS change, spend, or NellySelly
+  action occurred.
+
 ## Analytics privacy hardening — 2026-08-21
 
 - Preservation: exact predecessor

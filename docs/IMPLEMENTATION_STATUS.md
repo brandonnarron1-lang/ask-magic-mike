@@ -26,6 +26,40 @@ PR #191 is stacked after #190 as documented in the next section. Historical
 feature sections below retain the local/code-bearing evidence captured at that
 stage; the table above is authoritative for the listed mutable heads.
 
+## Phase 9 outcome and delivery KPI trust — 2026-08-21
+
+- Audited the existing 38-metric register before editing it. Six gaps could be
+  closed safely from canonical ledgers already in the release train; no new
+  repository, provider, schema, route, dashboard, or consumer telemetry was
+  justified.
+- The existing Growth loader now exposes two aggregate-only snapshots. Outcome
+  metrics deduplicate exact `appointment` and `agreement_signed` facts inside
+  the selected eligible lead cohort. Delivery metrics join existing outbox rows
+  to normalized provider lifecycle events while excluding test and
+  communication-suppressed leads.
+- The protected target register can now resolve appointment-set rate,
+  signed-client rate, cost per signed client, final internal-notification
+  failure rate, email bounce rate, and customer email complaint rate. Existing
+  minimum sample thresholds still control whether a value is measured,
+  directional, or hidden as insufficient.
+- Missing optional delivery tables or an isolated delivery query failure mark
+  only delivery KPIs unavailable. They do not turn core Growth Intelligence
+  unavailable and do not fabricate zero values.
+- Privacy is enforced at the SQL boundary: only six counts leave the delivery
+  aggregate. Recipient references, contact fields, content, provider payloads,
+  and raw identifiers are neither selected nor returned.
+- Local release verification passes 214 files / 2,947 tests, strict typecheck,
+  full lint, 14/14 safety, Ask Magic Mike/NellySelly isolation, optimized
+  Next.js 15.5.21 build, 52/52 static pages, and 83-route verification.
+  Production dependencies have no known vulnerability; a redacted 488-commit
+  scan found no secret leak. Exact Node 24 and protected Preview remain the
+  final immutable-head authorities.
+- Preservation branch:
+  `rescue/amm-pre-growth-kpi-trust-20260821-2200`. The candidate is stacked
+  after Draft PR #191 and cannot bypass PRs #183–#191. Exact future gate:
+  `APPROVE PHASE 9 OUTCOME AND DELIVERY KPI TRUST MERGE AND PRODUCTION DEPLOYMENT`.
+- No migration is required. Production remains unchanged.
+
 ## Phase 9 analytics privacy hardening — 2026-08-21
 
 - Reused the existing public event routes, client analytics helper, canonical
