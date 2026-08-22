@@ -28,6 +28,14 @@
   `report:view`; shortlinks accept no arbitrary destination; publication-proof
   writes remain behind server-side `growth:manage`, explicit confirmation,
   runtime validation, parameterized SQL, and the Preview mutation guard.
+- The first exact-head protected Preview run passed all endpoint and browser
+  checks but exposed a workflow-integrity defect: direct Preview QA omitted
+  release doctor, and neither Preview workflow asserted the generated launch
+  verdict. The workflow is now required to run doctor before authority and to
+  assert exact `PREVIEW_READY`; a regression test covers both dispatch paths.
+- After that correction, the full local gate passes 206 files / 2,868 tests,
+  strict typecheck, ESLint, optimized Production build, 80-route verification,
+  system isolation, and 14/14 safety controls.
 - No Production deployment, database read/write beyond public liveness,
   publication proof, lead, email/BCC, SMS, Push, external post, WordPress edit,
   DNS change, provider action, spend, deletion, or NellySelly action occurred.
