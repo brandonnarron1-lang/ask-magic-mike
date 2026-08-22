@@ -1,5 +1,38 @@
 # Production Release Log
 
+## [PR #184] Owned-demand publication-proof ledger
+
+**Migration applied:** 2026-08-22
+**Migration:** `20260821170000_owned_demand_publication_proofs.sql`
+**Migration SHA-256:** `c60c1a6e692d487e0adfd98d0eb3a9cff89ad77a3233b53075a4c8b63bde3ede`
+**Application evidence:** immutable CI, Preview, merge, and Production deployment identifiers are attached to PR #184
+
+- Added one append-only, RLS-enabled, server-only publication-proof ledger and
+  one idempotent audited recording function.
+- Backup-first migration and independent read-only postflight passed against
+  canonical Neon PostgreSQL 18; lead/audit digests were unchanged and no proof
+  row was seeded.
+- A first attempt rolled back on a verifier-only catalog-render mismatch; the
+  semantic-marker regression passed against the real PostgreSQL 18 catalog
+  before the unchanged migration was retried successfully.
+- No provider call, external publication, lead mutation, email, SMS, push,
+  WordPress/DNS change, spend, or NellySelly action occurred.
+
+## [PR #183] Campaign safety and three-offer owned-demand flight
+
+**Merged:** 2026-08-22
+**Production commit:** `b8b31fb20223ad0f0ad311fee1ee3de20d0f7ae9`
+**Deployment:** `dpl_HwVDyckyCRB1NoaNb1E82xSpr75z` (`READY`)
+
+- Added one reusable seller/buyer/renter owned-demand flight with 18 exact
+  placements across six existing owned channels.
+- Hardened measurement truth, attribution, campaign claims, Fair Housing copy,
+  and public/private phone boundaries without adding a publisher or migration.
+- Exact-head CI, mobile/desktop visual checks, health/routes, isolation, and
+  post-deploy error scan passed.
+- No external placement, message, lead, spend, DNS/WordPress change, or
+  NellySelly action occurred.
+
 ## [PR #181] Immutable first-human-response intelligence
 
 **Merged:** 2026-08-21

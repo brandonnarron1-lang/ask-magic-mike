@@ -1,14 +1,14 @@
 # Known Operating Constraints
 
-Updated 2026-08-21. The public funnel, canonical Neon capture, Lead Center, and
+Updated 2026-08-22. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
 
-## Immediate release constraint
+## Current release constraint
 
-- PR #183 is the next gated Production release.
-- PR #184 is stacked on #183 and cannot migrate or merge first. After #183,
-  refresh #184 on the new `main` and rerun exact-head CI/Preview.
+- PR #183 is merged and live. PR #184's backup-first Neon migration is applied
+  and independently verified; its application release evidence is tracked on
+  the PR.
 - PRs #182 and #179 are deferred candidates requiring a new merge-base and
   overlap audit. PRs #92 and #119–#121 are archive candidates.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,

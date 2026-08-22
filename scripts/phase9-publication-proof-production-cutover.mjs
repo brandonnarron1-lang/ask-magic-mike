@@ -89,6 +89,22 @@ export function validatePreflight(snapshot) {
   return checks;
 }
 
+export function hasSafeEvidenceConstraintMarkers(definitions) {
+  if (typeof definitions !== "string") return false;
+  return [
+    "evidence_url",
+    "google",
+    "facebook",
+    "instagram",
+    "linkedin",
+    "access[_-]?token",
+    "api[_-]?key",
+    "authorization",
+    "password",
+    "secret",
+  ].every((marker) => definitions.includes(marker));
+}
+
 export function validatePostflight(before, after, { allowRuntimeProofs = false } = {}) {
   const checks = {
     database: after.database === "neondb",
@@ -104,7 +120,9 @@ export function validatePostflight(before, after, { allowRuntimeProofs = false }
     live_index: after.live_index === true,
     canonical_attribution_constraints: after.canonical_attribution_constraints === true,
     state_proof_constraints: after.state_proof_constraints === true,
-    safe_evidence_constraints: after.safe_evidence_constraints === true,
+    safe_evidence_constraints: hasSafeEvidenceConstraintMarkers(
+      after.evidence_constraint_definitions,
+    ),
     copy_hash_constraint: after.copy_hash_constraint === true,
     publication_function_present: after.publication_function_present === true,
     publication_function_owner: after.publication_function_owner === "neondb_owner",
@@ -254,7 +272,7 @@ SELECT jsonb_build_object(
   'live_index', to_regclass('public.owned_demand_publication_proofs_live_idx') IS NOT NULL,
   'canonical_attribution_constraints', COALESCE((SELECT definitions LIKE '%amm_owned_demand_2026%' AND definitions LIKE '%facebook_local_question%' FROM table_constraints), false),
   'state_proof_constraints', COALESCE((SELECT definitions LIKE '%screenshot_reference%' AND definitions LIKE '%removal_reference%' FROM table_constraints), false),
-  'safe_evidence_constraints', COALESCE((SELECT definitions LIKE '%facebook\\.com%' AND definitions LIKE '%access[_-]?token%' FROM table_constraints), false),
+  'evidence_constraint_definitions', (SELECT definitions FROM table_constraints),
   'copy_hash_constraint', COALESCE((SELECT definitions LIKE '%final_copy_sha256%' AND definitions LIKE '%[0-9a-f]{64}%' FROM table_constraints), false),
   'publication_function_present', EXISTS (SELECT 1 FROM publication_function),
   'publication_function_owner', (SELECT function_owner FROM publication_function),

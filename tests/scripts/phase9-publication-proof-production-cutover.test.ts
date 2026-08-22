@@ -6,6 +6,7 @@ import {
   MIGRATION_SHA256,
   MIGRATION_VERSION,
   assertExecutionApproval,
+  hasSafeEvidenceConstraintMarkers,
   migrationSource,
   plan,
   validatePostflight,
@@ -62,7 +63,18 @@ function postflight(overrides: Record<string, unknown> = {}) {
     live_index: true,
     canonical_attribution_constraints: true,
     state_proof_constraints: true,
-    safe_evidence_constraints: true,
+    evidence_constraint_definitions: [
+      "evidence_url",
+      "google",
+      "facebook",
+      "instagram",
+      "linkedin",
+      "access[_-]?token",
+      "api[_-]?key",
+      "authorization",
+      "password",
+      "secret",
+    ].join(" "),
     copy_hash_constraint: true,
     publication_function_present: true,
     publication_function_owner: "neondb_owner",
@@ -157,6 +169,17 @@ describe("Phase 9 publication-proof Production cutover interlocks", () => {
     expect(runnerSource).toContain("(tgtype & 8) = 8");
     expect(runnerSource).toContain("(tgtype & 16) = 16");
     expect(runnerSource).not.toContain("BEFORE UPDATE OR DELETE");
+  });
+
+  it("verifies evidence constraints by semantic markers instead of escaped catalog formatting", () => {
+    const pg18CatalogRender = String.raw`
+      CHECK (evidence_url !~* '[?&](access[_-]?token|api[_-]?key|authorization|password|secret)='::text)
+      google\\.com facebook\\.com instagram\\.com linkedin\\.com
+    `;
+    expect(hasSafeEvidenceConstraintMarkers(pg18CatalogRender)).toBe(true);
+    expect(hasSafeEvidenceConstraintMarkers(pg18CatalogRender.replace("authorization", ""))).toBe(false);
+    expect(runnerSource).toContain("evidence_constraint_definitions");
+    expect(runnerSource).not.toContain("'safe_evidence_constraints', COALESCE");
   });
 
   it("uses a backup, advisory lock, transaction, and redacted secure environment input", () => {
