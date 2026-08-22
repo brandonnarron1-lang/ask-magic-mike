@@ -20,23 +20,24 @@ new action. None authorized a social/GBP post, email campaign, QR
 printing/distribution, consumer message, spend, DNS change, WordPress change,
 provider action, or deletion.
 
-## Next consolidated application candidate
+## Next consolidated application and schema-repair candidate
 
 - PR [#185](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/185)
   is the sole owned-demand application consolidation vehicle. It preserves the
   useful work from PRs #185, #186, #188, and #189 on released PR #184 while
   excluding PR #187's KPI-target migration and PRs #190–#192.
-- It contains no database migration and no publisher. It prepares protected
-  deterministic assets, allowlisted links, exact WordPress placement metadata,
-  and read-only lifecycle guidance in the existing Distribution Command.
-- Exact-head Node 24 CI, canonical Vercel Preview, protected-flow, security,
-  and desktop/mobile acceptance have passed. The only application release
-  phrase to request is:
-  `APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT`.
-- That future phrase will authorize only the reviewed PR #185 merge and
-  canonical Vercel Production deployment. It will not authorize a WordPress
-  edit, GBP/social/email publication, QR distribution, message, lead
-  submission, database migration, spend, DNS change, provider action,
+- Final tracing found that the existing Neon proof constraints did not yet
+  accept the WordPress tuples already validated by the application. PR #185 now
+  includes one additive constraint-only repair plus a pinned, backup-first,
+  one-transaction cutover runner. It contains no publisher or seeded proof.
+- After exact-head Node 24 CI, canonical Vercel Preview, PostgreSQL contract,
+  protected-flow, security, and desktop/mobile acceptance pass, the only
+  release phrase to request is:
+  `APPROVE PHASE 9 OWNED-DEMAND WORDPRESS PROOF MIGRATION, PR 185 MERGE, AND PRODUCTION DEPLOYMENT`.
+- That future phrase will authorize only the reviewed migration, exact PR #185
+  merge, and canonical Vercel Production deployment. It will not authorize a
+  WordPress edit, GBP/social/email publication, QR distribution, message, lead
+  submission, any other database migration, spend, DNS change, provider action,
   deletion, or NellySelly action.
 
 ## Deferred candidates requiring refresh and overlap review

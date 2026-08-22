@@ -104,6 +104,7 @@ approved cleanup and was not silently deleted.
 
 ## Rollback
 
-This candidate is additive and has no migration. Revert its single consolidation
-commit or leave the Draft PR unmerged. Production requires no rollback because
-it was not changed.
+This source-branch candidate was additive and had no migration. Its work is now
+incorporated into consolidated PR #185, whose later WordPress proof-scope repair
+and migration-specific rollback/gate supersede this historical note. Production
+was not changed by the source-branch QA recorded here.

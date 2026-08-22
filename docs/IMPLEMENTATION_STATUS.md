@@ -30,26 +30,42 @@ Updated 2026-08-22.
   42 sitemap pages and made no form submission or WordPress change. Current
   aggregate Production truth remains six test/suppressed records and zero
   eligible live demand, outcomes, first-response samples, spend, or proofs.
-- The final post-hardening focused matrix passes 5 files / 46 tests after the
-  retained-asset correction. The full local Node 24 release gate passes system
-  isolation, 14/14 release-safety checks, 206 test files / 2,869 tests, strict
-  typecheck, ESLint, the optimized Next.js 15.5.21 build, and 80 active routes.
-  Production dependencies have no known vulnerability, a fresh redacted scan
-  covers 510 commits / 14.10 MB with no leak, `git diff --check` passes, and
-  committed/working-tree migration scans are empty. Code-bearing fix head is
-  `9a8baf935a7a68cda528ec4aee90b7cfcf5e87fc`; refreshed exact-head Node 24,
-  canonical Preview, protected flow, and rendered acceptance evidence is
-  tracked on PR #185 after push so this document does not create self-referential
-  evidence churn. Production remains unchanged.
+- Before the schema repair, the post-hardening application matrix passed 5
+  files / 46 tests and the full Node 24 gate passed 206 files / 2,869 tests.
+  Those results remain useful regression history but are not final release
+  authority for the migration-bearing head. Fresh exact-head Node 24 CI,
+  canonical Preview, protected flow, rendered acceptance, dependency, secret,
+  migration, and diff evidence is tracked on PR #185 after push so this
+  document does not create self-referential evidence churn. Production remains
+  unchanged.
 - Protected Preview workflows now run release doctor before generating launch
   authority and must assert exact `PREVIEW_READY` afterward. This closes a
   false-green path where endpoint/browser checks passed but a missing doctor
   report left launch authority `BLOCKED`.
-- This application-only candidate includes no database migration and cannot
-  publish, send, spend, submit a lead, mutate WordPress, modify DNS, contact a
-  consumer, or act on NellySelly.
-- Exact future application gate:
-  `APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT`.
+- Final UI-to-Neon tracing found that the application already accepted
+  `ourtown_wordpress` and seven named placements while the released ledger
+  constraints did not. A valid operator action would pass runtime validation
+  and fail durable storage. PR #185 now includes one additive constraint-only
+  migration, `20260822195000_owned_demand_wordpress_proof_scope.sql`, to repair
+  that existing-system mismatch instead of introducing a second ledger.
+- Isolated PostgreSQL 17.11 proof passes all 11 WordPress placement tuples,
+  `live`/`configured`/`removed` state contracts, replay idempotency, foreign-host
+  rejection, cross-channel placement rejection, immutable audit creation,
+  browser-role denial, and rollback of all synthetic rows. A legacy Facebook
+  proof survived the migration unchanged.
+  The pinned production cutover runner verifies a backup, advisory/table locks,
+  one transaction, six validated v2 constraints, and unchanged lead, audit,
+  proof, function, RLS, trigger, and grant state. Production is unchanged.
+- Fresh exact-tree Node 24.18.0 verification passes system isolation, 14/14
+  release-safety controls, 207 test files / 2,879 tests, strict typecheck,
+  ESLint, the optimized Next.js 15.5.21 build, and 80 active routes. Focused
+  WordPress proof/cutover coverage passes 5 files / 55 tests. Exact remote CI,
+  canonical Preview, protected flow, and rendered evidence remain required
+  after the repaired head is pushed.
+- This candidate still cannot publish, send, spend, submit a lead, mutate
+  WordPress, modify DNS, contact a consumer, or act on NellySelly.
+- Exact future migration/application gate:
+  `APPROVE PHASE 9 OWNED-DEMAND WORDPRESS PROOF MIGRATION, PR 185 MERGE, AND PRODUCTION DEPLOYMENT`.
   External WordPress, GBP, social, email-signature, or QR publication remains a
   separate exact action and approval.
 

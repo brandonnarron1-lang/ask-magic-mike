@@ -7,10 +7,12 @@
   `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`, with the `www` root returning HTTP 200,
   apex redirecting HTTP 308 to `www`, `/home-value`, `/buy`, public liveness,
   and the Our Town homepage returning HTTP 200.
-- Reconfirmed PR #185 contains current Production and no database migration.
-  Final retained-asset code-bearing head is
-  `9a8baf935a7a68cda528ec4aee90b7cfcf5e87fc`; mergeability and exact remote
-  checks are re-established after the final documentation push.
+- Reconfirmed PR #185 contains current Production. Final UI-to-Neon tracing
+  then found that its accepted `ourtown_wordpress` tuples exceeded the released
+  ledger constraints. PR #185 now includes the additive constraint-only
+  `20260822195000_owned_demand_wordpress_proof_scope.sql` repair. Earlier
+  application-only head evidence is regression history, not release authority
+  for the repaired head.
 - Traced the complete candidate story: authenticated Distribution Command to
   existing Neon aggregate/proof reads, deterministic activation state, protected
   allowlisted feed/story/QR exports, and fixed canonical UTM shortlinks. The
@@ -54,6 +56,11 @@
   publication proof, lead, email/BCC, SMS, Push, external post, WordPress edit,
   DNS change, provider action, spend, deletion, or NellySelly action occurred.
 
+The migration, executable PostgreSQL 17, runner, compatibility, and security
+evidence for the repaired boundary is maintained in
+`docs/phase9/OWNED_DEMAND_WORDPRESS_PROOF_SCOPE_QA_EVIDENCE.md`. Exact-head
+GitHub/Vercel evidence is attached to PR #185 after push.
+
 Status: production funnel, Neon persistence, routing, suppression, outbox, and
 provider delivery are verified. No synthetic record is represented as a live
 prospect.
@@ -63,8 +70,9 @@ All timestamps are America/New_York unless noted.
 
 - Consolidation boundary — PASS: PR #185 contains the unique application work
   selected from PRs #185, #186, #188, and #189 on released PR #184. Diff review
-  finds no database migration, provider publisher, second lead store, second
-  CRM, or PR #187 KPI-target implementation.
+  finds one constraint-only WordPress proof-scope migration and no provider
+  publisher, second lead store, second CRM, or PR #187 KPI-target
+  implementation.
 - Final post-hardening focused matrix — PASS: 10 files / 148 tests covering the
   owned-demand command, asset exports, publication-proof contract, activation
   loop, WordPress audit, current-router safety, public-origin policy, UTM
@@ -93,8 +101,9 @@ All timestamps are America/New_York unless noted.
   vulnerability.
 - `gitleaks git --redact --no-banner` — PASS: 498 commits / approximately
   13.92 MB scanned with no leak.
-- `git diff --check` and committed/working-tree migration scans — PASS: no
-  whitespace error and no migration in the candidate.
+- The earlier `git diff --check` and empty-migration scan passed on the
+  application-only head. It is superseded by the repaired-head diff check,
+  migration contract, and exact-head release evidence recorded above.
 - Pending before exact-head acceptance: exact Node 24 GitHub checks, canonical
   Vercel Preview smoke/auth/origin/shortlink/asset checks, rendered
   desktop/mobile QA, and deployment-log inspection.

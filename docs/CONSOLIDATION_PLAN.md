@@ -52,8 +52,9 @@ redeploy that commit merely because an old approval prompt is repeated.
 ### 1. PR #185 — owned-demand command consolidation
 
 PR #185 is the single consolidation vehicle. It is refreshed onto the current
-Production `main` and may contain only additive, no-migration work from these
-already-built branches:
+Production `main` and contains the additive application work from these
+already-built branches plus one constraint-only repair to align the existing
+publication-proof ledger with those already-reviewed WordPress placements:
 
 - PR #185: Buyer discovery, canonical current-router CTA authority, exact Vercel
   Preview-origin binding, and modern release-safety coverage.
@@ -67,7 +68,7 @@ WordPress, or email; send a message; create a lead; or change Production data.
 After exact-head CI and Preview acceptance, merge and deploy only after this
 separate gate:
 
-`APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT`
+`APPROVE PHASE 9 OWNED-DEMAND WORDPRESS PROOF MIGRATION, PR 185 MERGE, AND PRODUCTION DEPLOYMENT`
 
 ### 2. Deferred candidates
 
@@ -117,28 +118,37 @@ separate gate:
 
 ## PR #185 consolidation risk and rollback
 
-PR #185 is application-only and must not include a database migration. Its main
-risks are authorization gaps in generated-asset routes, an open redirect in
+PR #185 contains one additive constraint-only migration. It extends the existing
+append-only ledger to the application-owned WordPress tuples; it does not create
+a table, seed proof, or alter leads. Risks include schema drift during constraint
+replacement, authorization gaps in generated-asset routes, an open redirect in
 tracked links, accidental caching/indexing of private operator data, origin drift
 between Production and Preview, and duplicate operational authority. The release
-gate must prove strict allowlists, server-side roles, `private, no-store`,
-`noindex`, attachment-safe generated files, current-root route authority, and the
-absence of a second publisher or notification path.
+gate must prove the exact legacy schema, validated v2 constraints, unchanged
+rows/RLS/grants/trigger/RPC, strict allowlists, server-side roles,
+`private, no-store`, `noindex`, attachment-safe files, current-root route
+authority, and the absence of a second publisher or notification path.
 
 Cutover sequence after explicit approval:
 
 1. Record the exact Production Vercel deployment and exact tested PR head.
-2. Confirm PR #185 contains no migration and no external publication action.
-3. Merge only the exact tested head and let the canonical Vercel project build.
-4. Verify public routes, health, anonymous admin denial, protected asset exports,
+2. Run the pinned cutover plan and preflight using the secure unpooled Neon
+   owner connection; create and validate the mode-600 backup.
+3. Apply the reviewed migration and ledger entry in one transaction, then prove
+   unchanged lead/audit/proof rows, function, RLS, trigger, and grants.
+4. Merge only the exact tested head and let the canonical Vercel project build.
+5. Verify public routes, health, anonymous admin denial, protected asset exports,
    tracked-link allowlists, responsive rendering, and runtime logs.
-5. Keep all external posts and WordPress publication behind their own approval.
+6. Keep all external posts and WordPress publication behind their own approval.
 
 Rollback:
 
 - Repoint the Production aliases to `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW` if the
   application candidate fails.
-- Preserve the Neon branch unchanged; PR #185 has no database cutover to reverse.
+- Leave the broader validated constraints installed after commit; the preceding
+  application ignores the added tuples. Do not narrow them if legitimate
+  WordPress proof may have been recorded. Prefer a forward fix and preserve all
+  proof/audit rows.
 - Disable the owned-demand asset/decision surfaces at the application layer if a
   narrow feature fault is found, without removing publication-proof evidence.
 

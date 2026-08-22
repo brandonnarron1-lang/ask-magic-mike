@@ -149,20 +149,22 @@ publication; these references do not authorize a post.
 The asset work is no longer an independently releasable stack item. It is
 incorporated into PR #185 on the released PR #184 baseline. After the complete
 consolidated head passes Node 24 CI and exact Vercel Preview proof, its only
-application gate is:
+migration/application gate is:
 
 ```text
-APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT
+APPROVE PHASE 9 OWNED-DEMAND WORDPRESS PROOF MIGRATION, PR 185 MERGE, AND PRODUCTION DEPLOYMENT
 ```
 
-That future phrase authorizes only the reviewed consolidated application merge
-and canonical Vercel deployment. It does not authorize social/GBP publication,
-email distribution, QR printing/distribution, a consumer message, database
-migration, spend, DNS, WordPress, provider, deletion, or NellySelly action.
+That future phrase authorizes only the reviewed WordPress proof-scope migration,
+consolidated application merge, and canonical Vercel deployment. It does not
+authorize social/GBP publication, email distribution, QR
+printing/distribution, a consumer message, any other database migration, spend,
+DNS, WordPress, provider, deletion, or NellySelly action.
 
 ## Rollback
 
 Before Production, leave PR #185 unmerged. After a separately approved release,
 revert its merge commit or promote the immediately preceding Ready Vercel
-deployment. The feature has no database migration and no external-provider
-state to unwind.
+deployment. The later consolidated candidate includes one additive proof-scope
+migration; leave its broader constraints installed and preserve proof/audit
+rows. There is no external-provider state to unwind.

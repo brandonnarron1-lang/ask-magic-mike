@@ -15,9 +15,12 @@ Use PR #185 to consolidate the owned-demand work already built in PRs #185,
 publisher, lead store, analytics store, or approval queue. PR #187's KPI-target
 migration and PRs #190–#192 remain separate candidates.
 
-The consolidated release candidate is application-only. It adds no database
-migration and performs no native publication, WordPress edit, email, SMS, Push,
-lead creation, spend, DNS change, provider mutation, or NellySelly action.
+Final UI-to-Neon tracing superseded the initial application-only classification.
+The consolidated release candidate includes one additive constraint-only
+migration so the existing append-only proof ledger accepts the WordPress tuples
+already reviewed in the application. It creates no second ledger and performs
+no native publication, proof seeding, WordPress edit, email, SMS, Push, lead
+creation, spend, DNS change, provider mutation, or NellySelly action.
 
 ## Why this is the next useful release
 
@@ -114,14 +117,17 @@ must remain deterministic and human-verifiable.
 
 ## Rollback and approval
 
-The candidate has no database cutover. If a future approved Production release
-fails, repoint the canonical aliases to Vercel deployment
-`dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`. Leave Neon and all publication-proof rows
-unchanged.
+The migration replaces only six validation constraints in one transaction and
+preserves the table, rows, RLS, trigger, RPC, grants, and audit behavior. A
+failed preflight, validation, or postflight rolls back before commit. If the
+application fails after commit, repoint the canonical aliases to Vercel
+deployment `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW` and leave the broader constraints
+installed. Do not narrow them after legitimate WordPress proof could exist.
+Preserve all publication-proof and audit rows.
 
-Exact future application gate:
+Exact future migration/application gate:
 
-`APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT`
+`APPROVE PHASE 9 OWNED-DEMAND WORDPRESS PROOF MIGRATION, PR 185 MERGE, AND PRODUCTION DEPLOYMENT`
 
 That gate does not authorize any WordPress edit, social/GBP/email publication,
 QR distribution, message, lead submission, spend, DNS change, or provider action.
