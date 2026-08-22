@@ -52,17 +52,35 @@ All timestamps are America/New_York unless noted.
 
 ## Phase 9 iOS phone install handoff consolidation — 2026-08-22
 
+- Post-refresh security audit — PASS: PR #194 now contains exact PR #193 head
+  `25818cdff887c42955c0c74cae17af5e782e62ab`; the pre-refresh state is
+  preserved at `rescue/amm-pr194-pre-exact-base-refresh-20260822-1255`.
+- Replay-boundary repair — PASS at code-bearing commit
+  `b62957ba5f66f98808a9e31536615ab6ea1cbee4`: the bearer invite and HttpOnly
+  setup session are distinct signed token kinds. A raw invite pasted into the
+  cookie slot is rejected, the one-time durable claim remains authoritative,
+  and the installed manifest is limited to `/phone-alerts/`.
+- Fresh focused matrix — PASS: 8 files / 86 tests. Fresh full local release
+  gate — PASS: system isolation, 14/14 safety controls, 211 files / 2,912 tests,
+  strict typecheck, ESLint, optimized Next.js 15.5.21 build, and 82 active
+  routes. `pnpm audit --prod --audit-level high` reports no known vulnerability;
+  a redacted 507-commit / 14.09 MB history scan found no leak; candidate and
+  migration scans are clean.
+- The exact Node 24, Preview deployment, protected QA, and rendered screenshots
+  listed below are the pre-refresh checkpoint. They prove the original handoff
+  but are not authority for the repaired final head; fresh exact-head evidence
+  is mandatory before PR #194 can leave Draft.
 - Reuse/overlap audit — PASS: historical PR #179 was compared against the
   verified PR #193 stack. Only its unique iPhone Home Screen cookie-context
   handoff was refreshed; obsolete stack authority and duplicate docs were not
   imported. Rescue ref:
   `rescue/amm-pre-phase9-phone-handoff-consolidation-20260822-1130`.
-- Focused phone/origin/Preview matrix — PASS: 8 files / 84 tests covering signed
+- Pre-refresh focused phone/origin/Preview matrix — PASS: 8 files / 84 tests covering signed
   expiry, exact Production and exact configured Preview origins, Our Town and
   NellySelly rejection, private manifest metadata, token cleanup, durable
   one-time claim, replay denial, matching installed-app reopen, Production
   fail-closed behavior, setup UI, robots, and non-redemptive Preview QA.
-- `pnpm release:gate` — PASS on local Node 26.5.1: Ask Magic Mike/NellySelly
+- Pre-refresh `pnpm release:gate` — PASS on local Node 26.5.1: Ask Magic Mike/NellySelly
   isolation, 14/14 release-safety controls, 210 test files / 2,907 tests,
   strict typecheck, ESLint, optimized Next.js 15.5.21 build, and 82 active
   routes / 17 acknowledged root–`src` duplicates. The project declares Node

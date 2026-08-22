@@ -12,8 +12,10 @@ Updated 2026-08-22.
   second database, phone takeover, migration, device enrollment, or send was
   added.
 - The restricted Brandon invite now opens a private token-scoped install page
-  and manifest. The installed app exchanges the signed claim into a Secure,
-  HttpOnly, SameSite=Strict cookie, then continues on a token-free URL.
+  and `/phone-alerts/`-scoped manifest. The installed app exchanges the signed
+  invite for a different server-minted Secure, HttpOnly, SameSite=Strict
+  session credential, then continues on a token-free URL. A raw invite pasted
+  into the cookie slot is rejected.
 - A canonical Neon-backed, HMAC-pseudonymized one-time nonce guard denies
   cross-browser replay. Production fails closed when durable claim enforcement
   is unavailable; an existing installed app may reopen only with its matching
@@ -21,18 +23,17 @@ Updated 2026-08-22.
 - Exact Ask Magic Mike origin binding excludes Our Town, NellySelly, and
   arbitrary Vercel hostnames from this privileged handoff. Private/no-store,
   no-referrer, noindex, CSP, and robots controls cover every phone-alert route.
-- Focused verification passes 8 files / 84 tests. The full local gate passes
-  210 files / 2,907 tests, strict typecheck, ESLint, optimized build, 82 active
+- Focused verification passes 8 files / 86 tests. The full local gate passes
+  211 files / 2,912 tests, strict typecheck, ESLint, optimized build, 82 active
   routes, 14/14 safety controls, Production dependency audit, and redacted
-  history/candidate secret scans. Responsive 390/1440 install and expired-link
-  renders have no browser error or overflow.
-- Draft PR #194 code-bearing head
-  `450e17bc3fe659b31682832ad97e659380e74136` is CLEAN/MERGEABLE and passes exact
-  Node 24 GitHub CI, canonical Vercel Preview
-  `dpl_9YpLm3EGtF1qPuCDCwhXpgMCKu8Y`, 17-pass/zero-fail read-only HTTP QA,
-  widget E2E, release GO, and strict `PREVIEW_READY` authority. The phone probe
-  uses only an invalid synthetic token and performs no invite, claim, limiter
-  persistence, device registration, or send.
+  history/candidate secret scans. The post-refresh security repair code-bearing
+  head is `b62957ba5f66f98808a9e31536615ab6ea1cbee4`.
+- The earlier exact Node 24, canonical Vercel Preview, protected HTTP/browser
+  QA, and responsive render evidence is retained as a historical checkpoint,
+  not final-head authority. Fresh exact-head evidence remains mandatory on PR
+  #194 before it can leave Draft. The automated phone probe uses only an invalid
+  synthetic token and performs no invite, claim, limiter persistence, device
+  registration, or send.
 - PR #194 remains stacked behind #185 and #193. It must be refreshed and
   re-proven after those predecessors land; current green evidence does not
   authorize an out-of-order merge or Production action.

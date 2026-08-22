@@ -1,21 +1,21 @@
 # Canonical Asset Manifest
 
-Refreshed 2026-08-21 from authenticated Production, GitHub, Vercel, Neon, and
+Refreshed 2026-08-22 from authenticated Production, GitHub, Vercel, Neon, and
 WordPress evidence. Working systems outrank historical packets.
 
 | Asset | Current evidence | Disposition | Decision |
 |---|---|---|---|
 | `/Users/brandonnarron/Projects/ask-magic-mike` | Remote `brandonnarron1-lang/ask-magic-mike`; mature Next.js root `app/` runtime, Neon persistence, Lead Center, widgets, email/Web Push, analytics, tests | **CANONICAL** | Preserve Git history and continue only through reviewed PRs |
-| Vercel `eyes-up-industries/ask-magic-mike` | Project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; Production `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`; `www` live and apex 308 redirect | **CANONICAL** | Sole Ask Magic Mike Production application/domain owner |
+| Vercel `eyes-up-industries/ask-magic-mike` | Project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; Production `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW` from `main` merge `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97`; `www` live and apex 308 redirect | **CANONICAL** | Sole Ask Magic Mike Production application/domain owner |
 | Neon `bitter-star-20214385` | Production branch `br-round-base-auh6h2wd`, endpoint `ep-proud-bonus-autwv60g`, database `neondb`; health ready | **CANONICAL** | One lead/event/notification/audit source of truth; no Supabase Production runtime |
 | `OurTownProperties.com` WordPress | Existing SEO/FlexMLS/Gravity Forms surfaces; signed bridge 1.1.0; Form 3 only; duplicate Form 3 native alert inactive | **WORDPRESS BRIDGE ONLY** | Preserve URLs/content/entries; do not create a competing lead database |
-| PR #183 | Exact three-offer campaign-safety flight, no publisher or database migration | **MERGE INTO CANONICAL** | Next separately gated application release |
-| PR #184 | Stacked append-only publication-proof ledger and guarded Neon migration | **MERGE INTO CANONICAL** | Refresh after #183, then use its separate exact gate |
+| PR #183 | Released three-offer campaign-safety flight | **REFERENCE/DOCUMENTATION** | Merged and live; its exhausted gate is not reusable |
+| PR #184 | Released append-only publication-proof ledger and verified guarded Neon migration | **REFERENCE/DOCUMENTATION** | Current Production baseline; do not rerun its migration or gate |
 | PR #185 | Clean stack above #184 containing PR #182's unique Buyer discovery, exact Preview origin, canonical-router CTA checks, and current release-safety coverage | **MERGE INTO CANONICAL** | Refresh after #184; old overlapping PR #182 must not merge as-is |
-| `codex/phase9-owned-demand-asset-studio-20260821` | Protected deterministic 4:5/story/QR exports for the existing 24 owned-demand placements; no publisher or migration | **MERGE INTO CANONICAL** | Stacked after #185; preserve the existing campaign definitions, retained Mike imagery, and separate publication gate |
+| `codex/phase9-owned-demand-asset-studio-20260821` | Historical source for protected deterministic 4:5/story/QR exports | **REFERENCE/DOCUMENTATION** | Useful work is consolidated once in PR #185; do not release as a second stack |
 | PR #182 | Historical mixed candidate whose unique runtime/security work is now preserved on the clean consolidation branch | **REFERENCE/DOCUMENTATION** | Draft and explicitly deferred; duplicated authority docs/scanners are superseded by #184 |
 | PR #179 | Historical source of the unique token-scoped iOS Home Screen Web Push handoff | **REFERENCE/DOCUMENTATION** | Preserved; useful work is refreshed once on the current PR #193 stack with stronger one-time replay protection; do not merge the old stack |
-| PR #194 / `codex/phase9-phone-handoff-consolidation-20260822` | Current-stack iOS Home Screen install handoff, durable one-time claim guard, exact AMM origin boundary, and read-only Preview contract | **MERGE INTO CANONICAL** | Green code-bearing proof; stack after #193, refresh after predecessor release; no migration/send/enrollment; require its own application gate |
+| PR #194 / `codex/phase9-phone-handoff-consolidation-20260822` | Current-stack iOS Home Screen install handoff, distinct invite/session credentials, durable one-time claim guard, exact AMM origin boundary, and read-only Preview contract | **MERGE INTO CANONICAL** | Draft stack after #193; refresh and re-prove after predecessor release; no migration/send/enrollment; require its own application gate |
 | `/Users/brandonnarron/ask-magic-mike` | Two-commit bootstrap without canonical lead lifecycle | **OBSOLETE OR CONFLICTING** | Historical fallback only; do not merge |
 | `/Users/brandonnarron/propertylens` | Separate PropertyLens product | **REFERENCE/DOCUMENTATION** | Never treat as Ask Magic Mike runtime |
 | `/Users/brandonnarron/eyesup-hq/projects/ask-magic-mike-widget` | Asset/mobile package without canonical backend | **MERGE INTO CANONICAL** | Reuse only reviewed assets/contracts; no separate store |

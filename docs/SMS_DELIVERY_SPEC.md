@@ -41,7 +41,10 @@ This is required because iPhone Push permission is available only inside the
 Home Screen app and Basic Auth is not a transferable app session. The claim is
 signed, expiring, restricted to `copy`, durably one-time, exact-origin bound,
 and exchanged for an HttpOnly cookie before redirecting to the token-free setup
-URL. Production refuses the claim when the durable guard is unavailable.
+URL. The cookie contains a separately minted signed session credential—not the
+bearer invite—so manually pasting the invite into a cookie cannot bypass the
+one-time guard. The installed manifest is scoped to `/phone-alerts/` only.
+Production refuses the claim when the durable guard is unavailable.
 
 ## Scope
 

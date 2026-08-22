@@ -20,10 +20,13 @@
 - Security headers and exact iframe `frame-ancestors` allowlist.
 - No protected-class fields or proxies in scoring, routing, targeting, or public
   recommendations; no private MLS fields are exposed.
-- Short-lived phone setup sessions use a distinct server-only HMAC key, bounded
-  expiry, an HttpOnly Secure SameSite=Strict cookie, exact-origin and CSRF
-  checks, rate limiting, strict schemas, and server-side `copy` role enforcement.
-  They cannot access the Lead Center or register Mike's primary device.
+- Short-lived phone setup invites and sessions use a distinct server-only HMAC
+  key, explicit token kinds, bounded expiry, an HttpOnly Secure SameSite=Strict
+  cookie, exact-origin and CSRF checks, rate limiting, strict schemas, and
+  server-side `copy` role enforcement. The bearer invite is exchanged for a
+  separate unpredictable session token and is never accepted directly as the
+  setup cookie. Neither credential can access the Lead Center or register
+  Mike's primary device.
 - iPhone installation uses a private, token-scoped page and manifest so the
   installed Home Screen app—not Messages or an ordinary Safari tab—performs the
   claim exchange. A durable canonical-Neon one-time guard stores only an
@@ -33,8 +36,9 @@
 - Phone-install origins are a narrower exact Ask Magic Mike allowlist than the
   general public/widget allowlist. Our Town, NellySelly, arbitrary Vercel apps,
   and attacker-controlled subdomains cannot mint or host the privileged setup
-  response. Private/no-store, no-referrer, noindex, CSP, and frame controls
-  cover the entire `/phone-alerts/` route family.
+  response. Private/no-store, no-referrer, noindex, a self-only resource CSP,
+  frame denial, and a `/phone-alerts/`-restricted PWA scope cover the entire
+  phone-alert route family.
 - The admin invite UI relies on browser-managed Basic Auth and never receives
   `ADMIN_SECRET`. Its route repeats the Basic Auth check server-side, validates
   exact origin and input, and returns only a bounded copy-role claim URL. The

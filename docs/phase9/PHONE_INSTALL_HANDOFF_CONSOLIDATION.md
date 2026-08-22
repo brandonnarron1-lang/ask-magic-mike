@@ -12,9 +12,9 @@ Lead Center controls. Do not introduce carrier SMS, a second notification
 provider, a second database, a second PWA, or device takeover automation.
 
 The consolidation branch is
-`codex/phase9-phone-handoff-consolidation-20260822`, based on exact commit
-`47781af61aee7e95f60b3432d263c9746a9f410a`. Its rescue ref is
-`rescue/amm-pre-phase9-phone-handoff-consolidation-20260822-1130`.
+`codex/phase9-phone-handoff-consolidation-20260822`, refreshed onto exact PR
+#193 head `25818cdff887c42955c0c74cae17af5e782e62ab`. Its pre-refresh rescue ref is
+`rescue/amm-pr194-pre-exact-base-refresh-20260822-1255`.
 
 ## Problem repaired
 
@@ -34,11 +34,14 @@ browser and installed-app cookie contexts.
    token from inside the installed Home Screen app.
 4. The claim route verifies signature, role, expiry, exact origin, IP throttle,
    and a durable one-time nonce guard in canonical Neon.
-5. Successful exchange creates a Secure, HttpOnly, SameSite=Strict cookie and
-   redirects to a token-free setup URL.
-6. A copied token cannot be claimed in a second browser/device. The already
-   installed app can safely reopen when it presents its matching HttpOnly
+5. Successful exchange mints a distinct signed session credential, stores only
+   that credential in a Secure, HttpOnly, SameSite=Strict cookie, and redirects
+   to a token-free setup URL. The invite itself is never accepted as a setup
    cookie.
+6. A copied invite cannot be claimed in a second browser/device or pasted into
+   the cookie slot to bypass the one-time guard. The already installed app can
+   safely reopen only when it presents its matching server-minted HttpOnly
+   session.
 7. Production fails closed if the one-time claim cannot be durably enforced.
    The failed attempt registers no device and sends no notification.
 
@@ -50,6 +53,8 @@ candidate therefore contains no database migration.
 
 - Install, manifest, claim, and setup responses are private/no-store,
   no-referrer, and noindex.
+- The installed-app manifest is restricted to `/phone-alerts/`; it does not
+  claim navigation scope over the public funnel or Lead Center.
 - `/phone-alerts/` is disallowed in `robots.txt`.
 - No token is written to localStorage, sessionStorage, analytics, or a database.
 - The bearer token remains visible in the short-lived install URL by design;
@@ -76,16 +81,19 @@ Mike.
 
 ## Acceptance evidence
 
-- Draft PR: #194, CLEAN/MERGEABLE at code-bearing head
-  `450e17bc3fe659b31682832ad97e659380e74136`.
-- Exact Node 24 release gate: PASS, 210 files / 2,907 tests.
-- Canonical Vercel Preview: `dpl_9YpLm3EGtF1qPuCDCwhXpgMCKu8Y`, Ready.
-- Protected read-only Preview QA: 17 pass / 6 mutation skips / 0 fail.
-- Phone invalid-token privacy contract: PASS, expected HTTP 404 manifest;
-  no invite, claim, limiter write, registration, or send.
-- Widget browser E2E: 2 expected / 0 unexpected / 0 flaky / 0 skipped.
-- Release candidate: GO. Launch authority: `PREVIEW_READY`.
-- Runtime: no error-level logs; only expected read-only SLA HTTP 503.
+- Draft PR: #194. Post-refresh security repair code-bearing head:
+  `b62957ba5f66f98808a9e31536615ab6ea1cbee4`.
+- Focused phone/origin/Preview matrix: PASS, 8 files / 86 tests.
+- Full local release gate: PASS, 211 files / 2,912 tests, strict typecheck,
+  ESLint, optimized Next.js build, 82 active routes, 14/14 safety controls, and
+  Ask Magic Mike/NellySelly isolation.
+- Production dependency audit: no known vulnerabilities. Redacted full-history
+  scan: 507 commits / 14.09 MB, no leak. Candidate diff and migration scans are
+  clean.
+- The earlier Node 24, Vercel Preview, protected Preview QA, and rendered browser
+  evidence belong to the pre-refresh checkpoint and are historical only. Exact
+  final-head Node 24, canonical Preview, strict `PREVIEW_READY`, and visual QA
+  are mandatory and are recorded on PR #194 before it can leave Draft.
 
 ## Merge order and gate
 

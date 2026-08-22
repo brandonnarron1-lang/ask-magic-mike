@@ -12,6 +12,10 @@
 - Added a durable, HMAC-pseudonymized, one-time canonical Neon nonce guard,
   cross-browser replay denial, safe matching-cookie reopen, and Production
   fail-closed behavior when durability is unavailable. No migration is needed.
+- Closed a post-refresh replay bypass by separating the bearer invite from the
+  server-minted HttpOnly session credential. Registration now rejects an invite
+  pasted directly into the setup cookie, and the PWA manifest is restricted to
+  the `/phone-alerts/` route family.
 - Narrowed privileged phone origins to exact Ask Magic Mike Production,
   configured Preview, and local-development origins; Our Town and NellySelly
   remain outside this setup boundary.
@@ -19,9 +23,10 @@
   expanded Preview QA to validate the deployed invalid-token install/manifest
   failure contract without token minting/redemption, limiter persistence, phone
   registration, lead creation, or Push delivery.
-- Initial focused verification passes 8 files / 84 tests. Full Node 24 release
-  gate, canonical Preview, and rendered visual evidence remain before the
-  candidate's separate future Production gate.
+- Post-refresh focused verification passes 8 files / 86 tests and the full
+  local gate passes 211 files / 2,912 tests. Fresh exact-head Node 24, canonical
+  Preview, strict launch authority, and rendered visual evidence remain before
+  the candidate's separate future Production gate.
 
 ## 2026-08-22 — Consolidated owned-demand command candidate
 

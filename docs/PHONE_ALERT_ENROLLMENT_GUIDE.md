@@ -13,8 +13,10 @@ grant that permission or take over a device.
    forward, bookmark, or paste the bearer link into another service.
 3. From the private install page choose Share → Add to Home Screen, leave Open
    as Web App enabled when shown, then launch the Magic Mike Home Screen icon.
-4. The installed app claims the token once inside its own secure cookie context
-   and removes it from the browser URL. Tap Enable free phone alerts and Allow.
+4. The installed app claims the invite once, exchanges it for a different
+   server-minted HttpOnly session inside its own secure cookie context, and
+   removes the invite from the browser URL. Tap Enable free phone alerts and
+   Allow.
 5. Confirm the admin page reports one active `copy` subscription.
 
 If the app reports that the link expired, was already claimed, or secure claim

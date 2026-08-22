@@ -88,10 +88,11 @@ separate gate:
   consolidated in Draft PR #194 on
   `codex/phase9-phone-handoff-consolidation-20260822`, stacked after the verified
   PR #193 candidate. The refreshed implementation adds a
-  durable one-time Neon claim guard, exact Ask Magic Mike origin isolation, and
-  private install/manifest Preview proof. Historical PR #179 remains preserved
-  but must not merge as a second stack. Physical device enrollment and receipt
-  confirmation remain a separate human step.
+  durable one-time Neon claim guard, distinct bearer-invite and HttpOnly-session
+  credentials, a `/phone-alerts/`-scoped installed app, exact Ask Magic Mike
+  origin isolation, and private install/manifest Preview proof. Historical PR
+  #179 remains preserved but must not merge as a second stack. Physical device
+  enrollment and receipt confirmation remain a separate human step.
 - PRs #92 and #119-#121: archive after review; they are not a parallel release
   sequence.
 
