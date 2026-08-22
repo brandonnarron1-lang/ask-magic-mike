@@ -107,10 +107,11 @@ guaranteed result.
   name, scalar schema, event-specific dimensions, safe paths, and coarse device
   class before awaited canonical persistence. HTTP 202 means the Neon write
   succeeded; an unavailable write fails truthfully with HTTP 503.
-- Public UTM and placement dimensions accept only controlled identifier slugs,
-  preventing otherwise well-formed names, street addresses, or sentences from
-  entering the analytics ledger. Every JSON-LD script surface uses a shared
-  serializer that escapes script-closing input.
+- Public UTM and placement dimensions accept only a registered operational
+  vocabulary. Slug shape alone is not trusted, so unregistered single-token
+  names/address slugs are discarded and dynamic open-house IDs reduce to a
+  generic placement class. Every JSON-LD script surface uses a shared serializer
+  that escapes script-closing input.
 - Browser callers cannot write trusted notification lifecycle events or attach
   arbitrary events to canonical lead/agent IDs. Trusted server writers retain
   the protected association after authorization.

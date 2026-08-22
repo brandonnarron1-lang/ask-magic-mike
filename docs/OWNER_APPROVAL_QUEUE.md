@@ -14,6 +14,11 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
 2. PR [#184](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/184)
    — its exact gate was received; the backup-first Neon migration is applied
    and verified, and application release evidence is attached to the PR.
+3. PR [#185](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/185)
+   — its exact gate was received; the WordPress proof-scope migration was
+   backup-first applied and verified, and reviewed application head
+   `2877fab35591c7f43c8def2ee920a12654b37a22` was merged as
+   `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8` and deployed to Production.
 
 These completed gates are exhausted and must not be reused as authority for a
 new action. None authorized a social/GBP post, email campaign, QR
@@ -22,34 +27,28 @@ provider action, or deletion.
 
 ## Next consolidated application candidate
 
-- PR [#185](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/185)
-  is the sole owned-demand application consolidation vehicle. It preserves the
-  useful work from PRs #185, #186, #188, and #189 on released PR #184 while
-  excluding PR #187's KPI-target migration and PRs #190–#192.
-- It contains no database migration and no publisher. It prepares protected
-  deterministic assets, allowlisted links, exact WordPress placement metadata,
-  and read-only lifecycle guidance in the existing Distribution Command.
-- Exact-head Node 24 CI, canonical Vercel Preview, protected-flow, security,
-  and desktop/mobile acceptance have passed. The only application release
-  phrase to request is:
-  `APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT`.
-- That future phrase will authorize only the reviewed PR #185 merge and
-  canonical Vercel Production deployment. It will not authorize a WordPress
-  edit, GBP/social/email publication, QR distribution, message, lead
-  submission, database migration, spend, DNS change, provider action,
-  deletion, or NellySelly action.
-
-## Stacked candidates after PR #185
-
 - Draft PR [#193](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/193)
-  consolidates the independent privacy, durable limiter, and aggregate KPI-trust
-  work from PRs #190–#192. It has no migration or provider action and must be
-  refreshed onto released `main` after PR #185, then rerun exact-head evidence
-  before its distinct privacy/KPI approval gate can be requested.
+  is the sole next application candidate. It consolidates the independent
+  privacy, durable limiter, and aggregate KPI-trust work from PRs #190–#192 on
+  released `main`. It contains no migration, publisher, provider send, or live
+  data action.
+- After final exact-head Node 24 CI, canonical Vercel Preview, protected-flow,
+  security, and desktop/mobile acceptance pass, its only release phrase is:
+  `APPROVE PHASE 9 PRIVACY AND KPI TRUST MERGE AND PRODUCTION DEPLOYMENT`.
+- That future phrase will authorize only the exact reviewed PR #193 merge and
+  canonical Vercel Production deployment. It will not authorize a WordPress
+  edit, GBP/social/email publication, QR distribution, message, lead submission,
+  migration, spend, DNS change, provider action, deletion, or NellySelly action.
+
+## Stacked candidates after PR #193
+
 - Draft PR [#194](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/194)
   consolidates only the secure iOS Home Screen Web Push handoff. It remains
   stacked on PR #193 and must not be merged out of order. Physical enrollment
   and one `[TEST]` Push remain separate owner-controlled actions.
+- Draft PR [#195](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/195)
+  remains stacked after PR #194 and must be refreshed and revalidated only after
+  both predecessors release in order.
 
 ## Deferred candidates requiring refresh and overlap review
 

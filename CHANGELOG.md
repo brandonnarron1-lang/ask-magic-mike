@@ -7,7 +7,8 @@
 - Pseudonymized durable rate-limit buckets with versioned HMAC identifiers and
   bounded stale-row retention.
 - Minimized public analytics to approved events and scalar dimensions, removed
-  public lead/agent binding, and repeated sanitization at the Neon write layer.
+  public lead/agent binding, restricted public attribution to a registered
+  operational vocabulary, and repeated sanitization at the Neon write layer.
 - Added aggregate-only live outcome and notification-delivery evidence to the
   protected Growth Command Center with honest unavailable states.
 - Excluded the deferred KPI target migration and made no Production, provider,

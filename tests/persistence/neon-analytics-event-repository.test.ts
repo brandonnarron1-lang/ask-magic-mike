@@ -9,6 +9,7 @@ import {
   safeAnalyticsPath,
   safePublicAnalyticsDimension,
   safePublicAnalyticsProperties,
+  safeRegisteredPublicAnalyticsDimension,
 } from "@/lib/analytics/privacy";
 
 describe("safeAnalyticsProperties", () => {
@@ -68,18 +69,23 @@ describe("safeAnalyticsProperties", () => {
     expect(safePublicAnalyticsDimension("3106 Quinn Drive")).toBeNull();
   });
 
-  it("restricts public attribution dimensions to controlled slugs", () => {
+  it("restricts public attribution dimensions to the registered vocabulary", () => {
     expect(safePublicAnalyticsProperties("page_view", {
       placement: "Sarah Johnson",
       placement_id: "open-house:listing-qa-001",
       utm_source: "facebook",
-      utm_medium: "social organic",
+      utm_medium: "social_organic",
       utm_campaign: "home_value",
     })).toEqual({
-      placement_id: "open-house:listing-qa-001",
+      placement_id: "open-house",
       utm_source: "facebook",
+      utm_medium: "social_organic",
       utm_campaign: "home_value",
     });
+    expect(safeRegisteredPublicAnalyticsDimension("utm_campaign", "SarahJohnson")).toBeNull();
+    expect(safeRegisteredPublicAnalyticsDimension("utm_campaign", "3106-quinn-drive")).toBeNull();
+    expect(safeRegisteredPublicAnalyticsDimension("utm_campaign", "amm_owned_demand_2026"))
+      .toBe("amm_owned_demand_2026");
   });
 
   it("stores only a coarse browser or automation class", () => {

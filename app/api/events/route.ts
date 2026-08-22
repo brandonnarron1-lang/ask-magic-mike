@@ -6,8 +6,8 @@ import {
   coarseAnalyticsUserAgent,
   isApprovedPublicAnalyticsEvent,
   recordServerAnalyticsEvent,
-  safePublicAnalyticsDimension,
   safePublicAnalyticsProperties,
+  safeRegisteredPublicAnalyticsDimension,
 } from "../../lib/serverAnalytics";
 
 const approvedEventNames = new Set<string>(analyticsEvents);
@@ -80,9 +80,9 @@ export async function POST(req: Request) {
     properties: safePublicAnalyticsProperties(body.event_name, properties),
     attribution: body.attribution && typeof body.attribution === "object"
       ? {
-          source: safePublicAnalyticsDimension((body.attribution as Record<string, unknown>).source) ?? undefined,
-          medium: safePublicAnalyticsDimension((body.attribution as Record<string, unknown>).medium) ?? undefined,
-          campaign: safePublicAnalyticsDimension((body.attribution as Record<string, unknown>).campaign) ?? undefined,
+          source: safeRegisteredPublicAnalyticsDimension("utm_source", (body.attribution as Record<string, unknown>).source) ?? undefined,
+          medium: safeRegisteredPublicAnalyticsDimension("utm_medium", (body.attribution as Record<string, unknown>).medium) ?? undefined,
+          campaign: safeRegisteredPublicAnalyticsDimension("utm_campaign", (body.attribution as Record<string, unknown>).campaign) ?? undefined,
         }
       : undefined,
     userAgent: coarseAnalyticsUserAgent(req.headers.get("user-agent"), properties.device_category),

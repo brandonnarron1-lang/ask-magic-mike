@@ -8,6 +8,7 @@ import {
   safeAnalyticsProperties,
   safePublicAnalyticsDimension,
   safePublicAnalyticsProperties,
+  safeRegisteredPublicAnalyticsDimension,
 } from "@/lib/analytics/privacy";
 
 export type ServerAnalyticsEvent = {
@@ -27,6 +28,7 @@ export {
   safeAnalyticsProperties,
   safePublicAnalyticsDimension,
   safePublicAnalyticsProperties,
+  safeRegisteredPublicAnalyticsDimension,
 };
 
 export async function recordServerAnalyticsEvent(event: ServerAnalyticsEvent) {
