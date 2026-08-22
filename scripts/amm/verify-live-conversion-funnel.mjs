@@ -69,9 +69,91 @@ export function hasCanonicalAskMikeLink(html) {
   return html.includes("ourtownproperties.com/ask-mike");
 }
 
-/** Returns true if an HTTP status is acceptable for the admin endpoint. */
-export function isAcceptableAdminStatus(status) {
-  return status === 401 || status === 200;
+const ADMIN_LOGIN_PATH = "/lead-center-login";
+// Authentication handoffs must remain temporary. Permanent redirects can be
+// cached across sign-in state changes and are not acceptable protection proof.
+const AUTH_REDIRECT_STATUSES = new Set([302, 303, 307]);
+
+/**
+ * Classifies the first unauthenticated response from a protected admin URL.
+ *
+ * The verifier must inspect this response with redirect: "manual". Following
+ * the redirect would turn a healthy 307 login handoff into the login page's
+ * 200 response, making a public admin route indistinguishable from a protected
+ * route.
+ */
+export function classifyAdminProtectionResponse({
+  status,
+  location = "",
+  requestUrl = "https://www.askmagicmike.com/admin/revenue",
+}) {
+  if (status === 401 || status === 403) {
+    return {
+      ok: true,
+      detail: `HTTP ${status} denies unauthenticated access`,
+    };
+  }
+
+  if (status === 200) {
+    return {
+      ok: false,
+      detail: "HTTP 200 returned to an unauthenticated request; the route may be public or a login redirect was followed",
+    };
+  }
+
+  if (!AUTH_REDIRECT_STATUSES.has(status)) {
+    return {
+      ok: false,
+      detail: `expected 401, 403, or a temporary login redirect; received HTTP ${status}`,
+    };
+  }
+
+  if (!location) {
+    return {
+      ok: false,
+      detail: `HTTP ${status} did not include a Location header`,
+    };
+  }
+
+  let request;
+  let destination;
+  try {
+    request = new URL(requestUrl);
+    destination = new URL(location, request);
+  } catch {
+    return {
+      ok: false,
+      detail: "admin redirect Location is not a valid URL",
+    };
+  }
+
+  if (destination.origin !== request.origin) {
+    return {
+      ok: false,
+      detail: `admin redirect leaves the canonical origin (${destination.origin})`,
+    };
+  }
+
+  if (destination.pathname !== ADMIN_LOGIN_PATH) {
+    return {
+      ok: false,
+      detail: `admin redirect targets ${destination.pathname}, not ${ADMIN_LOGIN_PATH}`,
+    };
+  }
+
+  const expectedReturnTo = `${request.pathname}${request.search}`;
+  const returnToValues = destination.searchParams.getAll("returnTo");
+  if (returnToValues.length !== 1 || returnToValues[0] !== expectedReturnTo) {
+    return {
+      ok: false,
+      detail: `admin login redirect does not preserve returnTo exactly once as ${expectedReturnTo}`,
+    };
+  }
+
+  return {
+    ok: true,
+    detail: `HTTP ${status} redirects to the same-origin login route with the expected return path`,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -134,11 +216,16 @@ async function runChecks() {
   } catch (e) { err("/embed/amm-loader.js", String(e)); }
 
   try {
-    const res = await fetch("https://www.askmagicmike.com/admin/revenue", { method: "HEAD", redirect: "follow" });
-    const s = res.status;
-    isAcceptableAdminStatus(s)
-      ? ok(`/admin/revenue protected (HTTP ${s} — 401=correct, 200=authenticated)`)
-      : err("/admin/revenue", `Expected 401 or 200, got ${s}`);
+    const requestUrl = "https://www.askmagicmike.com/admin/revenue";
+    const res = await fetch(requestUrl, { method: "HEAD", redirect: "manual" });
+    const result = classifyAdminProtectionResponse({
+      status: res.status,
+      location: res.headers.get("location") ?? "",
+      requestUrl,
+    });
+    result.ok
+      ? ok(`/admin/revenue protected (${result.detail})`)
+      : err("/admin/revenue", result.detail);
   } catch (e) { err("/admin/revenue", String(e)); }
 
   // -------------------------------------------------------------------------
