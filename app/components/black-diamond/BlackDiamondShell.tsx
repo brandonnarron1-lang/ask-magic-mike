@@ -37,10 +37,11 @@ const paths = [
 
 export function BlackDiamondShell() {
   return (
-    <main className="min-h-screen bg-[#050505] text-[#f4ead4]">
-      <PageTracker funnelName="homepage" />
-      <HeroSection />
-      <TrustProofStrip />
+    <>
+      <main className="min-h-screen bg-[#050505] text-[#f4ead4]">
+        <PageTracker funnelName="homepage" />
+        <HeroSection />
+        <TrustProofStrip />
 
       <section className="bg-[#080808] px-5 py-16 sm:px-8 lg:px-10">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.8fr_1.2fr] lg:items-start">
@@ -101,9 +102,10 @@ export function BlackDiamondShell() {
         </div>
       </section>
 
-      <SocialAdSupportSection />
+        <SocialAdSupportSection />
+      </main>
       <Footer />
-    </main>
+    </>
   );
 }
 

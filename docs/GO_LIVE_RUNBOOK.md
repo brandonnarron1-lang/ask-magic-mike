@@ -1,6 +1,6 @@
 # Production Release and Go-Live Runbook
 
-Updated 2026-08-21. The public funnel is live. Use this runbook for incremental,
+Updated 2026-08-22. The public funnel is live. Use this runbook for incremental,
 reversible releases and controlled owned-traffic activation.
 
 ## Before merge
@@ -60,24 +60,21 @@ When the change touches capture, routing, email, push, SMS, or sequences:
 
 Release only one approved PR at a time and verify Production before advancing:
 
-1. `#180` — outcome-ledger lifecycle seam: complete at merge commit
-   `42f80b209d5d5adc984c1d8b439c7fa830d015e6`, Production deployment
-   `dpl_2PQoDZLHc562SBEY7px91CAEUrin`;
-2. `#181` — first-human-response intelligence: complete at merge commit
-   `5335697edf31eed0b8a38cd0295a4f5e7d501a3e`, Production deployment
-   `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`, with migration `20260820013000` installed
-   on canonical Neon Production;
-3. `#183` — campaign safety and three-offer owned-demand flight: release-ready
-   but still unmerged and Production-undeployed under its exact gate; and
-4. `#184` — owned-demand publication-proof ledger: draft stacked on the exact
-   #183 head. Code-bearing hardening head
-   `755cf686fccea3facd0071aebbdd24734e818ccd`, Node 24 run `32512057769`, and
-   Preview `dpl_4JxCp1UxebTPof1fvK55NTrrnHqY` are green. A later
-   documentation/tooling head must retain the same required exact-head
-   GitHub/Vercel checks. It must not merge before #183 or without its exact
-   migration/release gate. Refresh every remaining feature branch on the
-   resulting `main` before selecting another release. Do not preserve an old
-   queue order when its base, scope, or proof has become stale.
+1. `#180` — outcome-ledger lifecycle seam: complete;
+2. `#181` — first-human-response intelligence: complete;
+3. `#183` — campaign safety and three-offer owned-demand flight: complete;
+4. `#184` — owned-demand publication-proof ledger: complete at merge commit
+   `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97`, Production deployment
+   `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`; its migration is installed and verified
+   on canonical Neon Production; and
+5. `#185` — consolidated owned-demand command plus the WordPress proof-scope
+   constraint repair: next candidate. It must pass exact-head Node 24 CI,
+   canonical Vercel Preview, executable PostgreSQL contract, protected visual
+   QA, and the migration-specific approval before any Production action.
+
+PR #193 is stacked on #185, #194 on #193, and #195 on #194. Do not merge or
+deploy them out of order. Rebase and re-prove each one after its predecessor is
+released.
 
 PR #181 uses:
 
@@ -117,6 +114,29 @@ APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERG
 That approval permits only the additive migration, reviewed code merge, and
 canonical application deployment. It does not authorize a GBP/social post,
 email campaign/signature change, QR distribution, consumer message, or spend.
+
+PR #184 and that exact gate are complete and exhausted. Do not replay them.
+
+The PR #185 WordPress proof-scope repair uses:
+
+```text
+pnpm run phase9:wordpress-proof-scope:cutover -- --plan
+pnpm run phase9:wordpress-proof-scope:cutover -- --preflight
+pnpm run phase9:wordpress-proof-scope:cutover -- --execute
+pnpm run phase9:wordpress-proof-scope:cutover -- --verify
+```
+
+Its exact approval is:
+
+```text
+APPROVE PHASE 9 OWNED-DEMAND WORDPRESS PROOF MIGRATION, PR 185 MERGE, AND PRODUCTION DEPLOYMENT
+```
+
+The runner pins the reviewed migration bytes, accepts the unpooled owner
+connection only through a secure environment, validates the backup, fails
+closed unless exactly six legacy constraints are present, and proves six
+validated v2 constraints plus unchanged rows, function, RLS, trigger, and
+grants. The gate does not authorize recording proof or publishing externally.
 
 Preview verification left two empty Vercel helper projects intact:
 `amm-phase9-campaign-compliance-20260821`

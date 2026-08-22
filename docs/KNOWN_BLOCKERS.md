@@ -9,17 +9,20 @@ specific expansions; they do not invalidate the live lead pipe.
 - PR #183 is merged and live. PR #184's backup-first Neon migration is applied
   and independently verified; its application release evidence is tracked on
   the PR.
-- PR #185 is Ready and cleanly mergeable at exact final head
-  `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7`; its Node 24 CI, canonical
-  Preview, protected-flow, security, and rendered checks pass. Its exact merge
-  and Production gate remains unreceived.
-- Draft PR #193 consolidates PRs #190–#192 on PR #185 and now has green
-  exact-head Node 24, canonical Vercel, and protected Preview evidence. It
-  remains Draft and must be refreshed onto released `main` after PR #185.
-- Draft PR #194 consolidates the unique iOS handoff on PR #193. Its pre-refresh
-  state is preserved, and its refreshed local safety/build evidence is green.
-  Exact-head Node 24 and canonical Preview evidence remain required; it cannot
-  bypass either predecessor's release gate.
+- PR #185 is merged and live as `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8`.
+  Its WordPress proof-scope migration and Production application acceptance
+  passed; its gate is exhausted.
+- PR #193 is merged and live as `9b82afb609674bb0209b73f8ac9622ab02733e2a`
+  on Vercel Production deployment `dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a`.
+  Its privacy/KPI acceptance passed, it contained no database migration, and
+  its gate is exhausted.
+- Draft PR #194 consolidates the unique iOS handoff onto released PR #193. Its
+  pre-refresh state is preserved at
+  `rescue/amm-pr194-pre-pr193-refresh-20260822-1841`; exact-head Node 24,
+  canonical Preview, protected-flow, and rendered evidence remain required
+  before its distinct release gate can be requested.
+- Draft PR #195 remains stacked after PR #194 and must not be merged or deployed
+  before both predecessors are released and refreshed in order.
 - Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
   and #119–#121 are preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,

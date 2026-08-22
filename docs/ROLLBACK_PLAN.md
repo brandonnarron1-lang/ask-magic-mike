@@ -2,12 +2,11 @@
 
 ## Application
 
-Current Production is `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM` at merge commit
-`5335697edf31eed0b8a38cd0295a4f5e7d501a3e`. The retained preceding Ready
-deployment is `dpl_2PQoDZLHc562SBEY7px91CAEUrin`. Re-inspect
-both before a future release because aliases can move. If smoke checks fail,
-stop traffic activation and use Vercel promotion/rollback to the recorded prior
-deployment. Do not delete a deployment or force-push.
+Current Production is `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW` at merge commit
+`f5f82f1bfaadea0ed20da50738ebc1f83e8dab97`. Re-inspect Production and record
+the immediately preceding Ready deployment before a future release because
+aliases can move. If smoke checks fail, stop traffic activation and promote the
+recorded prior deployment. Do not delete a deployment or force-push.
 
 ## Database
 
@@ -36,6 +35,17 @@ RPC dormant. Do not delete or edit proof/audit rows. A native social, GBP,
 signature, or print placement must be rolled back in its native system under a
 separate approval, followed by an appended removal proof; application rollback
 cannot retract external content.
+
+For PR #185, use only `phase9:wordpress-proof-scope:cutover` after its exact
+migration/merge/deploy approval. Before commit, any failed preflight, backup,
+constraint validation, or postflight assertion rolls the transaction back.
+After commit, an application rollback returns aliases to
+`dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`; leave the broader validated constraints
+installed because the preceding application ignores the added tuples. Do not
+restore narrower constraints if legitimate WordPress proof may have been
+recorded, and never delete or edit proof/audit rows. Prefer a reviewed forward
+fix. The validated backup is disaster-recovery evidence, not an automatic
+rollback instruction.
 
 ## WordPress
 

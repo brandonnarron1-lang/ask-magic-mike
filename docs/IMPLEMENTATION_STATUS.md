@@ -31,8 +31,9 @@ Updated 2026-08-22.
 ## Phase 9 iOS phone handoff consolidation — 2026-08-22
 
 - Historical PR #179 was audited rather than merged wholesale. Its unique
-  iPhone Home Screen credential-context repair is being refreshed once on the
-  verified PR #193 stack; its obsolete router/docs stack remains excluded.
+  iPhone Home Screen credential-context repair is consolidated once on released
+  PR #193 merge `9b82afb609674bb0209b73f8ac9622ab02733e2a`; its obsolete
+  router/docs stack remains excluded.
 - The existing Web Push, VAPID, Neon subscription/outbox, service worker, and
   protected phone APIs are reused. No carrier SMS, second PWA, second provider,
   second database, phone takeover, migration, device enrollment, or send was
@@ -54,22 +55,24 @@ Updated 2026-08-22.
   disabled so only an operator holding `notification:manage` can create the
   link. The optional QA Push is durably limited to one attempt per setup session
   and copy subscription in Production.
-- Focused verification passes 9 files / 61 tests. The full local gate passes
-  213 files / 2,929 tests, strict typecheck, ESLint, optimized build, 82 active
-  routes, 14/14 safety controls, Production dependency audit, and redacted
-  history/candidate secret scans. The post-refresh security repair code-bearing
-  scoped-authority head is `afc68b4060122481701514d0b2fe8630735aad8a`;
-  portable Production fail-closed repair is
-  `f979d808fd76a1dba82b0a7f2b922f04c75af483`.
-- The earlier exact Node 24, canonical Vercel Preview, protected HTTP/browser
-  QA, and responsive render evidence is retained as a historical checkpoint,
-  not final-head authority. Fresh exact-head evidence remains mandatory on PR
-  #194 before it can leave Draft. The automated phone probe uses only an invalid
-  synthetic token and performs no invite, claim, limiter persistence, device
+- Released-base focused verification passes 8 files / 58 tests. The exact Node
+  24 release gate passes 214 files / 2,939 tests, strict typecheck, ESLint,
+  optimized build, 82 active routes, and 14/14 safety controls. Production
+  dependency audit, patch-integrity, candidate secret, and migration scans pass;
+  the PR contains no database migration.
+- Draft PR #194 is cleanly mergeable on `main`. Its released-base code head is
+  `d5da4bd8ac4b0235e140ac785d46824a198292d8`; its prior state is preserved at
+  `rescue/amm-pr194-pre-pr193-refresh-20260822-1841`. Exact Node 24 run
+  `32603258868`, Ready Preview deployment
+  `dpl_HErSvZNK89Wh79rbi71KAZhqKdq1`, and protected Preview QA run
+  `32603437125` pass.
+- Protected Preview acceptance records 17 passes, six intentional write skips,
+  zero failures, two expected browser tests, 43/43 doctor checks, and strict
+  `PREVIEW_READY`. The automated phone probe uses only an invalid synthetic
+  token and performs no invite, claim, limiter persistence, device
   registration, or send.
-- PR #194 remains stacked behind #185 and #193. It must be refreshed and
-  re-proven after those predecessors land; current green evidence does not
-  authorize an out-of-order merge or Production action.
+- PR #194 remains Draft. Green evidence does not authorize merge or Production;
+  physical device enrollment and one `[TEST]` Push remain separately gated.
 - Detailed decision: `docs/phase9/PHONE_INSTALL_HANDOFF_CONSOLIDATION.md`.
 - Exact future application gate:
   `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
@@ -77,19 +80,20 @@ Updated 2026-08-22.
 
 ## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
 
-- Audited PRs #190-#192 against PR #185 exact final head
-  `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7` and consolidated their unique
+- Audited PRs #190-#192, then refreshed the consolidation onto released PR #185
+  merge `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8` and consolidated their unique
   independent work once. Source commits, exclusions, rescue ref, and rollback
   are recorded in `docs/PHASE9_PRIVACY_KPI_TRUST_CONSOLIDATION.md`.
 - Durable Neon rate limiting now stores only versioned HMAC-SHA-256 bucket
   identifiers, updates bucket freshness, and removes stale records after 24
   hours. Protected health reports only whether a suitable server secret exists.
 - Public analytics now uses an event/property allowlist, bounded JSON bodies,
-  exact public-origin checks, coarse browser/device classes, and sanitized UTM
+  exact public-origin checks, coarse browser/device classes, and registered UTM
   dimensions. Public callers cannot bind events to canonical lead or agent IDs;
-  the persistence repository re-applies the privacy boundary. Public UTM and
-  placement values are limited to controlled identifier slugs, so free-form
-  names and street addresses cannot survive as attribution dimensions.
+  the persistence repository re-applies the privacy boundary. Slug shape alone
+  is insufficient: unregistered single-token names and address slugs are
+  discarded, and open-house identifiers are reduced to a generic placement
+  class. Full attribution remains in the protected canonical lead record.
 - Both public analytics routes now await the canonical Neon write, return HTTP
   202 only for a durable event, and return HTTP 503 when persistence is
   unavailable. All JSON-LD script surfaces share an escaping serializer rather
@@ -102,23 +106,24 @@ Updated 2026-08-22.
 - PR #187's KPI target register and migration remain deferred. This candidate
   contains no migration, publisher, provider send, second data store, or live
   data action.
-- Focused verification passes 12 files / 103 tests. The full local release gate
-  passes system isolation, 14/14 release-safety checks, 210 test files / 2,901
-  tests, strict typecheck, ESLint, the optimized Next.js 15.5.21 build, and 80
+- The released-main refresh gate passed system isolation, 14/14 release-safety
+  checks, 211 test files / 2,911 tests, strict typecheck, ESLint, the optimized
+  Next.js 15.5.21 build, and 80
   active routes. Production dependencies have no known vulnerability; a
   fresh redacted 511-commit full-history scan reports no leak; diff and
   migration checks are clean. The prior Node 24 CI, canonical Vercel Preview,
   authorization, privacy, and responsive 390/1440 rendering evidence remains a
   historical checkpoint. Exact-head GitHub/Vercel and protected Preview
-  evidence after the base refresh is tracked on PR #193 and remains mandatory
-  before release readiness.
-- Exact future application gate:
-  `APPROVE PHASE 9 PRIVACY AND KPI TRUST MERGE AND PRODUCTION DEPLOYMENT`.
-  No Production or external action is authorized by this status entry.
+  evidence after the final registered-attribution patch is tracked on PR #193
+  and remains mandatory before release readiness.
+- PR #193 was approved, merged as
+  `9b82afb609674bb0209b73f8ac9622ab02733e2a`, and accepted on Production
+  deployment `dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a`. Its application gate is
+  exhausted and cannot authorize another action.
 
 ## Phase 9 consolidated owned-demand command — 2026-08-22
 
-- PR #185 is the single application consolidation vehicle on released PR #184
+- PR #185 was the single application consolidation vehicle on released PR #184
   merge `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97`. It preserves the unique
   Buyer/current-router safety work from PR #185 and the useful asset,
   WordPress-audit, and lifecycle work from PRs #186, #188, and #189.
@@ -144,30 +149,45 @@ Updated 2026-08-22.
   42 sitemap pages and made no form submission or WordPress change. Current
   aggregate Production truth remains six test/suppressed records and zero
   eligible live demand, outcomes, first-response samples, spend, or proofs.
-- The final post-hardening focused matrix passes 5 files / 46 tests after the
-  retained-asset correction. The full local Node 24 release gate passes system
-  isolation, 14/14 release-safety checks, 206 test files / 2,869 tests, strict
-  typecheck, ESLint, the optimized Next.js 15.5.21 build, and 80 active routes.
-  Production dependencies have no known vulnerability, a fresh redacted scan
-  covers 511 commits / approximately 14.11 MB with no leak, `git diff --check`
-  passes, and committed/working-tree migration scans are empty. Exact-head Node
-  24 run `32588096247`, Ready Preview `dpl_83UZ6iisUUWK1LyGdTahkQvAiF2Y`, and
-  protected Preview QA run `32588280489` pass. The protected run reports 16
-  pass / 6 intentional write skips / 0 fail, 2/2 browser tests, 43/43 doctor
-  checks, 14/14 safety checks, and exact `PREVIEW_READY` authority. PR #185 is
-  cleanly mergeable at exact final head
-  `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7`; Production remains unchanged.
+- Before the schema repair, the post-hardening application matrix passed 5
+  files / 46 tests and the full Node 24 gate passed 206 files / 2,869 tests.
+  Those results remain useful regression history but are not final release
+  authority for the migration-bearing head. Fresh exact-head Node 24 CI,
+  canonical Preview, protected flow, rendered acceptance, dependency, secret,
+  migration, and diff evidence is tracked on PR #185 after push so this
+  document does not create self-referential evidence churn. PR #185 is now
+  released as merge `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8` on Production deployment
+  `dpl_41AZkLvufuAC92h6QJeqhiyjkBcM`; the constraint-only migration was applied
+  and verified on canonical Neon before the exact reviewed application merge.
 - Protected Preview workflows now run release doctor before generating launch
   authority and must assert exact `PREVIEW_READY` afterward. This closes a
   false-green path where endpoint/browser checks passed but a missing doctor
   report left launch authority `BLOCKED`.
-- This application-only candidate includes no database migration and cannot
-  publish, send, spend, submit a lead, mutate WordPress, modify DNS, contact a
-  consumer, or act on NellySelly.
-- Exact future application gate:
-  `APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT`.
-  External WordPress, GBP, social, email-signature, or QR publication remains a
-  separate exact action and approval.
+- Final UI-to-Neon tracing found that the application already accepted
+  `ourtown_wordpress` and seven named placements while the released ledger
+  constraints did not. A valid operator action would pass runtime validation
+  and fail durable storage. PR #185 now includes one additive constraint-only
+  migration, `20260822195000_owned_demand_wordpress_proof_scope.sql`, to repair
+  that existing-system mismatch instead of introducing a second ledger.
+- Isolated PostgreSQL 17.11 proof passes all 11 WordPress placement tuples,
+  `live`/`configured`/`removed` state contracts, replay idempotency, foreign-host
+  rejection, cross-channel placement rejection, immutable audit creation,
+  browser-role denial, and rollback of all synthetic rows. A legacy Facebook
+  proof survived the migration unchanged.
+  The pinned production cutover runner verified a backup, advisory/table locks,
+  one transaction, six validated v2 constraints, and unchanged lead, audit,
+  proof, function, RLS, trigger, and grant state. No lead or proof row changed.
+- Fresh exact-tree Node 24.18.0 verification passes system isolation, 14/14
+  release-safety controls, 207 test files / 2,879 tests, strict typecheck,
+  ESLint, the optimized Next.js 15.5.21 build, and 80 active routes. Focused
+  WordPress proof/cutover coverage passes 5 files / 55 tests. Exact remote CI,
+  canonical Preview, protected flow, and rendered evidence remain required
+  after the repaired head is pushed.
+- The released PR did not publish, send, spend, submit a lead, mutate
+  WordPress, modify DNS, contact a consumer, or act on NellySelly.
+- Its migration/application gate is exhausted and must not be reused. External
+  WordPress, GBP, social, email-signature, or QR publication remains a separate
+  exact action and approval.
 
 The source-branch sections below preserve implementation history. Their old
 stack order and standalone approval phrases are superseded by the consolidated

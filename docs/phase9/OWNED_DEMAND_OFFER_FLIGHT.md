@@ -186,7 +186,8 @@ Historical release authority:
 - This candidate was released through PR #183.
 - Its former Production approval phrase is exhausted and must not be reused.
 - Its campaign-safety and three-offer definitions are reused by consolidated
-  PR #185; that consolidation has its own exact application gate.
+  PR #185; that consolidation has its own exact migration/application gate in
+  `OWNED_DEMAND_WORDPRESS_PROOF_SCOPE_QA_EVIDENCE.md`.
 
 Still not authorized by the completed PR #183 gate or by PR #185 preparation:
 
@@ -196,11 +197,11 @@ Still not authorized by the completed PR #183 gate or by PR #185 preparation:
 - paid promotion, audience targeting, or spend;
 - WordPress, DNS, provider, or database mutation.
 
-The only future application phrase for the consolidated command, after its
+The only future migration/application phrase for the consolidated command, after its
 exact-head evidence passes, is:
 
 ```text
-APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT
+APPROVE PHASE 9 OWNED-DEMAND WORDPRESS PROOF MIGRATION, PR 185 MERGE, AND PRODUCTION DEPLOYMENT
 ```
 
 Any external publication remains a separate action identifying the exact
@@ -211,5 +212,6 @@ delete/rollback procedure.
 
 Before a PR #185 Production release, leave that pull request unmerged. After an
 approved release, revert its merge commit or promote the immediately preceding
-Ready Vercel deployment. No database rollback is needed because the
-consolidated feature is application-only and has no migration.
+Ready Vercel deployment. Leave the additive broader proof constraints installed
+and preserve all proof/audit rows; see the WordPress proof-scope QA evidence for
+the migration rollback boundary.

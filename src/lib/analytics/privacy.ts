@@ -62,6 +62,173 @@ const PUBLIC_SLUG_PROPERTY_KEYS = new Set([
   "utm_source",
 ]);
 
+type PublicAttributionKey =
+  | "placement"
+  | "placement_id"
+  | "utm_campaign"
+  | "utm_medium"
+  | "utm_source";
+
+/**
+ * Public query strings are attacker-controlled. A slug-shaped value is not
+ * automatically anonymous: `SarahJohnson` and `3106-quinn-drive` are both
+ * syntactically valid slugs. Keep the analytics ledger on a registered
+ * vocabulary and retain unregistered first/last-touch values only in the
+ * protected canonical lead record.
+ */
+const PUBLIC_ATTRIBUTION_VALUE_REGISTRY: Record<PublicAttributionKey, ReadonlySet<string>> = {
+  placement: new Set([
+    "ask-page",
+    "buyer-page",
+    "home-value-page",
+    "homepage",
+    "homepage-hero",
+    "mike-agent-page",
+    "open-house",
+    "open-house-registration",
+    "ourtownproperties",
+    "rental-page",
+    "seller-page",
+    "sitewide-floating",
+    "widget",
+  ]),
+  placement_id: new Set([
+    "ask-page",
+    "buyer-page",
+    "home-value-page",
+    "homepage",
+    "homepage-hero",
+    "mike-agent-page",
+    "open-house",
+    "open-house-registration",
+    "ourtownproperties",
+    "rental-page",
+    "seller-page",
+    "sitewide-floating",
+    "widget",
+  ]),
+  utm_source: new Set([
+    "amm_dot_com",
+    "askmagicmike",
+    "askmagicmike.com",
+    "campaign_preset",
+    "chatgpt.com",
+    "direct",
+    "email",
+    "email_list",
+    "facebook",
+    "facebook.com",
+    "facebook_page",
+    "facebook_personal",
+    "google",
+    "google_business",
+    "google_business_profile",
+    "instagram",
+    "instagram.com",
+    "internal_qa",
+    "internal_qa_wordpress_bridge",
+    "launch_qa",
+    "linkedin",
+    "nextdoor",
+    "offline",
+    "ourtown_wp",
+    "ourtownproperties",
+    "ourtownproperties.com",
+    "preview_qa",
+    "qr",
+    "sms",
+    "staff_share",
+    "test",
+    "threads",
+    "video",
+    "x",
+    "youtube",
+    "youtube.com",
+  ]),
+  utm_medium: new Set([
+    "agent_profile_cta",
+    "bio",
+    "cpc",
+    "direct_purchase",
+    "drip",
+    "email",
+    "email_list",
+    "embed_widget",
+    "home_value_cta",
+    "homepage_cta",
+    "intent-link",
+    "listing_cta",
+    "mike_profile",
+    "newsletter",
+    "organic_local",
+    "organic_social",
+    "owned_media",
+    "owned_tool",
+    "paid",
+    "paid_search",
+    "paid_social",
+    "ppc",
+    "print",
+    "qa",
+    "referral",
+    "seller_page_cta",
+    "social",
+    "social_organic",
+    "social_paid",
+    "talk_to_mike",
+    "text",
+    "website",
+    "website_widget",
+  ]),
+  utm_campaign: new Set([
+    "agent-profile",
+    "agent_profile",
+    "agent_profile_cta",
+    "amm_general_wilson_2026_q3_a",
+    "amm_launch",
+    "amm_owned_demand_2026",
+    "ask-mike",
+    "ask_magic_mike",
+    "ask_magic_mike_qr",
+    "ask_mike",
+    "askmagicmike_launch",
+    "bridge_v1_1_0_acceptance",
+    "buyer-affordability",
+    "buyer-tour",
+    "buyer_match_wilson_2026_q3_a",
+    "comment_lead",
+    "direct-contact",
+    "direct_purchase_review",
+    "distribution",
+    "home-value",
+    "home_value",
+    "home_value_wilson_2026_q3_a",
+    "home_value_wilson_nc",
+    "homepage_cta",
+    "homepage_section",
+    "homepage_widget",
+    "launch_day",
+    "listing_inquiry_wilson_2026_q3_a",
+    "local_review",
+    "open-house",
+    "owned_traffic_phase5",
+    "phase_2_release_hardening",
+    "production_cutover",
+    "profile",
+    "review_planner",
+    "sell-timing",
+    "seller_options_wilson_2026_q3_a",
+    "seller_page_cta",
+    "sign-rider",
+    "we_buy_houses",
+    "website_cta",
+    "website_widget",
+    "wilson-nc-sellers",
+    "wilson_authority",
+    "wordpress_widget",
+  ]),
+};
+
 const PUBLIC_EVENT_PROPERTY_KEYS: Record<string, readonly string[]> = {
   session_created: ["deviceType", "referrerType"],
   page_view: ["context", "funnel_name", "page", "path", "route", "step_name", "surface"],
@@ -397,6 +564,23 @@ export function safePublicAnalyticsDimension(
   return candidate && PUBLIC_DIMENSION_PATTERN.test(candidate) ? candidate : null;
 }
 
+export function safeRegisteredPublicAnalyticsDimension(
+  key: PublicAttributionKey,
+  value: unknown,
+): string | null {
+  const candidate = safePublicAnalyticsDimension(value);
+  if (!candidate) return null;
+  const normalized = candidate.toLowerCase();
+
+  // Listing/property identifiers belong in the canonical lead record. The
+  // public event ledger records only the non-identifying placement class.
+  if (key === "placement_id" && normalized.startsWith("open-house:")) {
+    return "open-house";
+  }
+
+  return PUBLIC_ATTRIBUTION_VALUE_REGISTRY[key].has(normalized) ? normalized : null;
+}
+
 export function safeAnalyticsPath(value: unknown): string | null {
   if (typeof value !== "string") return null;
   let candidate = value.trim();
@@ -478,7 +662,10 @@ export function safePublicAnalyticsProperties(
   for (const [key, value] of Object.entries(safe)) {
     if (!allowed.has(key)) continue;
     if (PUBLIC_SLUG_PROPERTY_KEYS.has(key)) {
-      const dimension = safePublicAnalyticsDimension(value);
+      const dimension = safeRegisteredPublicAnalyticsDimension(
+        key as PublicAttributionKey,
+        value,
+      );
       if (dimension) publicSafe[key] = dimension;
       continue;
     }
