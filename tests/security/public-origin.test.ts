@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { isApprovedPublicOrigin } from "../../app/lib/publicOrigin";
+import {
+  isApprovedAskMagicMikeOrigin,
+  isApprovedPublicOrigin,
+} from "../../app/lib/publicOrigin";
 
 function testEnv(values: Record<string, string | undefined>) {
   return values as unknown as NodeJS.ProcessEnv;
@@ -23,6 +26,17 @@ describe("public origin boundary", () => {
     expect(isApprovedPublicOrigin("https://ask-magic-mike-abc-eyes-up-industries.vercel.app", env)).toBe(true);
     expect(isApprovedPublicOrigin("https://ask-magic-mike-git-feature-eyes-up-industries.vercel.app", env)).toBe(true);
     expect(isApprovedPublicOrigin("https://attacker-preview.vercel.app", env)).toBe(false);
+    expect(isApprovedAskMagicMikeOrigin("https://ask-magic-mike-abc-eyes-up-industries.vercel.app", env)).toBe(true);
+    expect(isApprovedAskMagicMikeOrigin("https://attacker-preview.vercel.app", env)).toBe(false);
+  });
+
+  it("keeps the phone-setup origin boundary isolated from Our Town and unrelated products", () => {
+    const production = testEnv({ NODE_ENV: "production", VERCEL_ENV: "production" });
+
+    expect(isApprovedAskMagicMikeOrigin("https://www.askmagicmike.com", production)).toBe(true);
+    expect(isApprovedAskMagicMikeOrigin("https://www.ourtownproperties.com", production)).toBe(false);
+    expect(isApprovedAskMagicMikeOrigin("https://nellyselly.com", production)).toBe(false);
+    expect(isApprovedAskMagicMikeOrigin(null, production)).toBe(false);
   });
 
   it("never trusts Preview metadata while running as Production", () => {

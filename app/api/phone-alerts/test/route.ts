@@ -4,8 +4,10 @@ import { checkRateLimit, LIMITS, rateLimitKey } from "@/lib/security/rate-limit"
 import { WebPushNotificationProvider } from "../../../lib/leadNotificationProvider";
 import { NeonPushSubscriptionRepository } from "../../../lib/persistence/neonPushSubscriptionRepository";
 import {
+  PHONE_SETUP_MAX_TTL_MS,
   hasPhoneSetupRequestHeader,
   isExactSameOrigin,
+  isProductionPhoneSetupRuntime,
   phoneSetupSessionFromRequest,
 } from "../../../lib/phoneSetupSession";
 
@@ -43,6 +45,24 @@ export async function POST(request: NextRequest) {
     if (!subscription || subscription.recipientRole !== "copy") {
       return NextResponse.json({ ok: false, error: "brandon_copy_subscription_not_found" }, { status: 404 });
     }
+    const oneShot = await checkRateLimit(
+      `phone-setup-test:${session.nonce}:${subscription.id}`,
+      1,
+      PHONE_SETUP_MAX_TTL_MS,
+      "phoneSetup",
+    );
+    if (isProductionPhoneSetupRuntime() && !oneShot.durable) {
+      return NextResponse.json(
+        { ok: false, error: "push_test_guard_unavailable" },
+        { status: 503, headers: { "Cache-Control": "no-store" } },
+      );
+    }
+    if (!oneShot.allowed) {
+      return NextResponse.json(
+        { ok: false, error: "push_test_already_sent" },
+        { status: 409, headers: { "Cache-Control": "no-store" } },
+      );
+    }
     const result = await new WebPushNotificationProvider().send({
       notificationId: `phone-test-${subscription.id}`,
       channel: "push",
@@ -54,7 +74,10 @@ export async function POST(request: NextRequest) {
     if (!result.ok) {
       return NextResponse.json({ ok: false, error: result.errorCode }, { status: result.retryable ? 503 : 422 });
     }
-    return NextResponse.json({ ok: true, provider: result.provider, test: true });
+    return NextResponse.json(
+      { ok: true, provider: result.provider, test: true },
+      { headers: { "Cache-Control": "no-store" } },
+    );
   } catch {
     return NextResponse.json({ ok: false, error: "push_test_unavailable" }, { status: 503 });
   }

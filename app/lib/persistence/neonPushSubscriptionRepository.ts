@@ -93,17 +93,26 @@ export class NeonPushSubscriptionRepository {
     return rows[0] ? row(rows[0] as Record<string, unknown>) : null;
   }
 
-  async upsert(role: StaffPushRecipientRole, input: PushSubscriptionInput, userAgent?: string | null, deviceLabel?: string | null) {
+  private async save(
+    role: StaffPushRecipientRole,
+    input: PushSubscriptionInput,
+    userAgent?: string | null,
+    deviceLabel?: string | null,
+    allowRoleChange = true,
+  ) {
     if (!validEndpoint(input.endpoint) || !validKey(input.keys.p256dh) || !validKey(input.keys.auth)) {
       throw new Error("invalid_push_subscription");
     }
     await this.ensureSchema();
     const rows = await this.sql.query(
-      `INSERT INTO public.staff_push_subscriptions
+      `INSERT INTO public.staff_push_subscriptions AS existing
          (recipient_role, endpoint, p256dh, auth, user_agent, device_label, is_active)
        VALUES ($1, $2, $3, $4, $5, $6, TRUE)
        ON CONFLICT (endpoint) DO UPDATE SET
-         recipient_role = EXCLUDED.recipient_role,
+         recipient_role = CASE
+           WHEN $7::boolean THEN EXCLUDED.recipient_role
+           ELSE existing.recipient_role
+         END,
          p256dh = EXCLUDED.p256dh,
          auth = EXCLUDED.auth,
          user_agent = EXCLUDED.user_agent,
@@ -111,6 +120,7 @@ export class NeonPushSubscriptionRepository {
          is_active = TRUE,
          updated_at = NOW(),
          last_error = NULL
+       WHERE $7::boolean OR existing.recipient_role = EXCLUDED.recipient_role
        RETURNING id, recipient_role, endpoint, p256dh, auth, device_label, user_agent, is_active`,
       [
         role,
@@ -119,9 +129,24 @@ export class NeonPushSubscriptionRepository {
         input.keys.auth,
         (userAgent || "").slice(0, 300) || null,
         (deviceLabel || "").trim().slice(0, 64) || null,
+        allowRoleChange,
       ],
     );
+    if (!rows[0]) throw new Error("push_subscription_role_conflict");
     return row(rows[0] as Record<string, unknown>);
+  }
+
+  /** Admin-only enrollment may deliberately reassign a known device role. */
+  async upsert(role: StaffPushRecipientRole, input: PushSubscriptionInput, userAgent?: string | null, deviceLabel?: string | null) {
+    return this.save(role, input, userAgent, deviceLabel, true);
+  }
+
+  /**
+   * A bearer-scoped Brandon setup session must never relabel an existing
+   * Mike/primary Push endpoint as a copy destination.
+   */
+  async upsertCopy(input: PushSubscriptionInput, userAgent?: string | null, deviceLabel?: string | null) {
+    return this.save("copy", input, userAgent, deviceLabel, false);
   }
 
   async deactivate(id: string) {

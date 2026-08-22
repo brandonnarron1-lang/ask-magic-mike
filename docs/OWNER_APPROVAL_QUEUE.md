@@ -62,11 +62,13 @@ provider action, or deletion.
   is consolidated into PR #185 and their former standalone gates are obsolete.
 - PRs #190–#192 remain preserved as source history; their independently useful
   work is consolidated once in Draft PR #193 and is not part of PR #185.
-- PR [#179](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/179)
-  repairs the iOS Home Screen Web Push handoff. Refresh it after the current
-  stack and rerun protected iPhone-install acceptance before considering
-  `APPROVE IOS PHONE ALERT INSTALL HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
-  Physical enrollment and a `[TEST]` push remain separate actions.
+- Historical PR [#179](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/179)
+  is preserved but superseded for release by the current-stack iOS handoff
+  consolidation in Draft PR
+  [#194](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/194).
+  PR #194 must be refreshed and re-proven after each predecessor release before
+  considering `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
+  Physical enrollment and a `[TEST]` Push remain separately approved actions.
 - PRs #92 and #119–#121 remain archive-after-review candidates. They are not a
   parallel Production release plan.
 
@@ -98,8 +100,9 @@ provider action, or deletion.
 4. Owner/BIC: approve a registered carrier-SMS provider and sender before SMS
    activation. No free workaround may bypass registration, consent, or carrier
    rules.
-5. Owner: separately approve deletion of either empty Vercel helper project.
-   Both currently have zero deployments and no domain effect.
+5. Owner: separately approve deletion of the empty Vercel helper projects
+   listed in `docs/CANONICAL_ASSET_MANIFEST.md`. Each has zero deployments and
+   no custom-domain or Production effect; none is deleted implicitly.
 
 ## Resolved and removed from this queue
 

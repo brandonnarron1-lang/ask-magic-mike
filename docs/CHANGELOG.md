@@ -1,5 +1,40 @@
 # Changelog
 
+## 2026-08-22 — iOS phone install handoff consolidation candidate
+
+- Audited historical PR #179 and refreshed only its unique iPhone Home Screen
+  Web Push handoff on the verified PR #193 stack. Reused the canonical Web
+  Push/VAPID/Neon/outbox/service-worker system; no carrier SMS, second provider,
+  second PWA, second data store, or device takeover path was created.
+- Added a private token-scoped install page and manifest so the installed app
+  performs the claim exchange in its own cookie context, then continues on a
+  token-free setup URL.
+- Added a durable, HMAC-pseudonymized, one-time canonical Neon nonce guard,
+  cross-browser replay denial, safe matching-cookie reopen, and Production
+  fail-closed behavior when durability is unavailable. No migration is needed.
+- Closed a post-refresh replay bypass by separating the bearer invite from the
+  server-minted HttpOnly session credential. Registration now rejects an invite
+  pasted directly into the setup cookie, and the PWA manifest is restricted to
+  the `/phone-alerts/` route family.
+- Narrowed privileged phone origins to exact Ask Magic Mike Production,
+  configured Preview, and local-development origins; Our Town and NellySelly
+  remain outside this setup boundary.
+- Prevented the copy-scoped enrollment session from relabeling an existing
+  Mike/primary Push endpoint, disabled the legacy secret-header invite path
+  whenever Lead Center RBAC is enabled, and made the optional QA Push a durable
+  one-shot action per setup session and copy subscription in Production.
+- Made Production fail-closed detection portable: Vercel Production remains
+  authoritative when its metadata is present, while owned/self-hosted
+  `NODE_ENV=production` also requires durable claim and one-shot Push guards.
+- Added private/no-store, no-referrer, noindex, robots, CSP, and frame controls;
+  expanded Preview QA to validate the deployed invalid-token install/manifest
+  failure contract without token minting/redemption, limiter persistence, phone
+  registration, lead creation, or Push delivery.
+- Post-refresh focused verification passes 9 files / 61 tests and the full
+  local gate passes 213 files / 2,929 tests. Fresh exact-head Node 24, canonical
+  Preview, strict launch authority, and rendered visual evidence remain before
+  the candidate's separate future Production gate.
+
 ## 2026-08-22 — Privacy/KPI-trust final-head hardening
 
 - Refreshed PR #193 onto PR #185 exact final head

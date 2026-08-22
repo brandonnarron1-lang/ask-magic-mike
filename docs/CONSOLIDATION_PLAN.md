@@ -84,12 +84,17 @@ separate gate:
   candidate is stacked on PR #185 and has its own exact-head proof and release
   gate. Preserve the source branches until acceptance, then mark the duplicate
   PRs superseded without deleting their history.
-- PR #179 audit is complete. Its token-scoped iOS Home Screen install handoff is
-  unique and retained. The only direct file overlap with #184 is the generated
-  route manifest. PR #179 remains Draft until the current stack lands; refresh
-  it against the final `main` and repeat exact-head Preview proof before any
-  release. Physical device enrollment and receipt confirmation remain a
-  separate human step.
+- PR #179 audit is complete. Its unique token-scoped iOS Home Screen handoff is
+  consolidated in Draft PR #194 on
+  `codex/phase9-phone-handoff-consolidation-20260822`, stacked after the verified
+  PR #193 candidate. The refreshed implementation adds a
+  durable one-time Neon claim guard, distinct bearer-invite and HttpOnly-session
+  credentials, a `/phone-alerts/`-scoped installed app, exact Ask Magic Mike
+  origin isolation, copy-safe endpoint persistence, RBAC-only invite creation
+  whenever RBAC is enabled, one-shot setup QA delivery, and private install/manifest Preview
+  proof. Historical PR
+  #179 remains preserved but must not merge as a second stack. Physical device
+  enrollment and receipt confirmation remain a separate human step.
 - PRs #92 and #119-#121: archive after review; they are not a parallel release
   sequence.
 
