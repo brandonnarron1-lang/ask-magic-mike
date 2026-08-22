@@ -71,6 +71,7 @@ describe("client replay analytics suppression", () => {
 
     await user.type(screen.getByLabelText("Property address"), "123 Replay Road, Wilson NC");
     await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.type(screen.getByLabelText("Your name"), "INTERNAL QA DO NOT CONTACT");
     await user.type(screen.getByLabelText("Email for your valuation follow-up"), "replay@example.test");
     await user.click(screen.getByRole("button", { name: "Continue" }));
     await user.type(screen.getByLabelText("Phone"), "2525550123");
@@ -78,6 +79,12 @@ describe("client replay analytics suppression", () => {
 
     expect(await screen.findByText("Your request is in.")).toBeVisible();
     expect(screen.getByText("Got it. Mike will follow up shortly.")).toBeVisible();
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/leads",
+      expect.objectContaining({
+        body: expect.stringContaining('"name":"INTERNAL QA DO NOT CONTACT"'),
+      }),
+    );
     expect(analytics.events).not.toContain("lead_created");
     expect(analytics.events).not.toContain("widget_lead_created");
     expect(

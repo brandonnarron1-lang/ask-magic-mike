@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
+import { useId, type InputHTMLAttributes, type ReactNode, type Ref, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 
 const fieldClass =
   "amm-form-field text-base";
@@ -25,14 +25,18 @@ function FieldLabel({ htmlFor, label, required }: { htmlFor: string; label: stri
   );
 }
 
-export function TextField({ label, ...props }: BaseProps & InputHTMLAttributes<HTMLInputElement>) {
+export function TextField({
+  label,
+  inputRef,
+  ...props
+}: BaseProps & InputHTMLAttributes<HTMLInputElement> & { inputRef?: Ref<HTMLInputElement> }) {
   const generatedId = useId();
   const fieldId = props.id || generatedId;
   const describedBy = props["aria-describedby"];
   return (
     <div className="block">
       <FieldLabel htmlFor={fieldId} label={label} required={props.required} />
-      <input {...props} id={fieldId} aria-describedby={describedBy} className={`${fieldClass} ${props.className || ""}`} />
+      <input ref={inputRef} {...props} id={fieldId} aria-describedby={describedBy} className={`${fieldClass} ${props.className || ""}`} />
     </div>
   );
 }
