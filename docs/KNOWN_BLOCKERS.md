@@ -6,12 +6,21 @@ specific expansions; they do not invalidate the live lead pipe.
 
 ## Current release constraint
 
-- PR #184 is merged and live. PR #185 is the next release candidate; PR #193 is
-  stacked after it. The iOS handoff consolidation is stacked after #193 and
-  cannot bypass either predecessor's exact-head release gate.
-- Historical PR #179 has been overlap-audited. Its unique handoff is preserved
-  on the current stack; the historical PR itself must not merge as a parallel
-  release. PRs #92 and #119–#121 are closed/preserved archive history.
+- PR #183 is merged and live. PR #184's backup-first Neon migration is applied
+  and independently verified; its application release evidence is tracked on
+  the PR.
+- PR #185 is Ready and cleanly mergeable at exact final head
+  `168937f0d6b7a90b027f39dc97f2135193c3fa72`; its Node 24 CI, canonical
+  Preview, protected-flow, security, and rendered checks pass. Its exact merge
+  and Production gate remains unreceived.
+- Draft PR #193 consolidates PRs #190–#192 on PR #185 and now has green
+  exact-head Node 24, canonical Vercel, and protected Preview evidence. It
+  remains Draft and must be refreshed onto released `main` after PR #185.
+- Draft PR #194 consolidates the unique iOS handoff on PR #193. Its pre-refresh
+  state is preserved, and its refreshed exact-head evidence remains required;
+  it cannot bypass either predecessor's release gate.
+- Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
+  and #119–#121 are preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,
   and #181 must not be requested again.
 

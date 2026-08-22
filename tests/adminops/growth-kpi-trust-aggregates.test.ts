@@ -48,6 +48,25 @@ describe("Growth KPI trust aggregates", () => {
     });
   });
 
+  it("renders failed outcome and delivery aggregates as unavailable instead of false zero", () => {
+    expect(buildGrowthOutcomeMetrics([], [], true, "Outcome aggregate failed")).toEqual({
+      configured: false,
+      appointmentSetLeads: 0,
+      signedClientLeads: 0,
+      error: "Outcome aggregate failed",
+    });
+    expect(normalizeGrowthDeliverySnapshot([], true, "Delivery aggregate failed")).toEqual({
+      configured: false,
+      terminalInternalNotifications: 0,
+      permanentInternalFailures: 0,
+      eligibleEmailSends: 0,
+      emailBounces: 0,
+      deliveredCustomerMessages: 0,
+      customerComplaints: 0,
+      error: "Delivery aggregate failed",
+    });
+  });
+
   it("keeps the canonical SQL aggregate test-excluded, suppression-excluded, and PII-free", () => {
     const source = readFileSync(
       join(process.cwd(), "app/lib/persistence/neonGrowthIntelligenceView.ts"),
