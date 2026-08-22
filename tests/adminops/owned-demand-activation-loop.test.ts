@@ -116,6 +116,20 @@ describe("owned-demand per-placement activation loop", () => {
     expect(result.authorityBoundary).toContain("cannot publish");
   });
 
+  it("suppresses lead-signal states and next-placement selection when Growth measurement is unavailable", () => {
+    const result = buildOwnedDemandActivationLoop(command([
+      signal("facebook", "social_organic", "facebook_local_question_seller_review", 2),
+    ]), ledger([proof()]), false);
+    expect(result.measurementAvailable).toBe(false);
+    expect(result.nextPlacement).toBeNull();
+    expect(result.measuredPlacements).toBe(0);
+    expect(result.signalReviewPlacements).toBe(0);
+    expect(placement(result, "facebook", "seller_review")).toMatchObject({
+      state: "measurement_unavailable",
+      stateLabel: "Measurement unavailable",
+    });
+  });
+
   it("enumerates every exact placement and prioritizes the audited WordPress homepage without inventing proof", () => {
     const result = buildOwnedDemandActivationLoop(command(), ledger());
     expect(result.totalPlacements).toBe(35);

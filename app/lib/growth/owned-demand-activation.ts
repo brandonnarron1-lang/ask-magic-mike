@@ -9,6 +9,7 @@ import type {
 
 export type OwnedDemandActivationState =
   | "evidence_unavailable"
+  | "measurement_unavailable"
   | "proof_attribution_mismatch"
   | "prepared_not_observed"
   | "native_pending"
@@ -33,6 +34,7 @@ export interface OwnedDemandActivationPlacement {
 export interface OwnedDemandActivationLoop {
   generatedAt: string;
   evidenceAvailable: boolean;
+  measurementAvailable: boolean;
   totalPlacements: number;
   activeProofPlacements: number;
   pendingProofPlacements: number;
@@ -83,17 +85,19 @@ const PLACEMENT_PRIORITY: readonly OwnedDemandPlacementKey[] = [
 
 const STATE_PRIORITY: Record<OwnedDemandActivationState, number> = {
   proof_attribution_mismatch: 0,
-  signal_without_active_proof: 1,
-  native_pending: 2,
-  native_inactive: 3,
-  observed_unmeasured: 4,
-  prepared_not_observed: 5,
-  measured_signal: 6,
-  evidence_unavailable: 7,
+  measurement_unavailable: 1,
+  signal_without_active_proof: 2,
+  native_pending: 3,
+  native_inactive: 4,
+  observed_unmeasured: 5,
+  prepared_not_observed: 6,
+  measured_signal: 7,
+  evidence_unavailable: 8,
 };
 
 const STATE_LABELS: Record<OwnedDemandActivationState, string> = {
   evidence_unavailable: "Evidence unavailable",
+  measurement_unavailable: "Measurement unavailable",
   proof_attribution_mismatch: "Proof · attribution mismatch",
   prepared_not_observed: "Prepared · no proof",
   native_pending: "Pending native review",
@@ -145,12 +149,19 @@ function isPendingProof(proof: OwnedDemandPublicationProofRow) {
 
 function stateForPlacement(
   evidenceAvailable: boolean,
+  measurementAvailable: boolean,
   attributedLeads: number,
   proof: OwnedDemandPublicationProofRow | null,
   proofMatchesAttribution: boolean,
 ): OwnedDemandActivationState {
   if (!evidenceAvailable) return "evidence_unavailable";
   if (proof && !proofMatchesAttribution) return "proof_attribution_mismatch";
+  if (!measurementAvailable) {
+    if (!proof) return "prepared_not_observed";
+    if (isActiveProof(proof)) return "measurement_unavailable";
+    if (isPendingProof(proof)) return "native_pending";
+    return "native_inactive";
+  }
   if (attributedLeads > 0 && (!proof || !isActiveProof(proof))) {
     return "signal_without_active_proof";
   }
@@ -166,6 +177,8 @@ function nextActionForState(state: OwnedDemandActivationState) {
   switch (state) {
     case "evidence_unavailable":
       return "Restore the canonical proof-ledger read path before inferring a placement lifecycle state.";
+    case "measurement_unavailable":
+      return "Restore canonical Growth measurement before comparing this native proof with lead signals. Do not interpret unavailable measurement as zero demand.";
     case "proof_attribution_mismatch":
       return "Reconcile the proof row with the current canonical source, campaign, content, and tracked URL before using either evidence stream.";
     case "signal_without_active_proof":
@@ -237,6 +250,7 @@ function priorityIndex(values: readonly string[], value: string) {
 export function buildOwnedDemandActivationLoop(
   command: OwnedDemandCommand,
   ledger: Pick<OwnedDemandPublicationProofLedger, "configured" | "schemaReady" | "proofs" | "error">,
+  measurementAvailable = true,
 ): OwnedDemandActivationLoop {
   const evidenceAvailable = ledger.configured && ledger.schemaReady && !ledger.error;
   const proofByPlacement = latestProofs(ledger.proofs);
@@ -251,6 +265,7 @@ export function buildOwnedDemandActivationLoop(
     );
     const state = stateForPlacement(
       evidenceAvailable,
+      measurementAvailable,
       placement.attributedLeads,
       latestProof,
       proofMatchesAttribution,
@@ -287,6 +302,7 @@ export function buildOwnedDemandActivationLoop(
   return {
     generatedAt: command.generatedAt,
     evidenceAvailable,
+    measurementAvailable,
     totalPlacements: placements.length,
     activeProofPlacements,
     pendingProofPlacements,
@@ -296,7 +312,7 @@ export function buildOwnedDemandActivationLoop(
     signalReviewPlacements: placements.filter((placement) => placement.state === "signal_without_active_proof").length,
     unobservedPlacements: placements.filter((placement) => placement.state === "prepared_not_observed").length,
     attributedLeads: placements.reduce((sum, placement) => sum + placement.attributedLeads, 0),
-    nextPlacement: evidenceAvailable
+    nextPlacement: evidenceAvailable && measurementAvailable
       ? placements.find((placement) => placement.state !== "measured_signal") || placements[0] || null
       : null,
     placements,

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  assessOwnedDemandMeasurement,
   buildOwnedDemandChannelPacket,
   buildOwnedDemandCommand,
   resolveOwnedDemandPlacement,
@@ -56,6 +57,29 @@ function signal(
 }
 
 describe("Owned Demand Command", () => {
+  it("distinguishes unavailable measurement from a truthful zero-live-demand result", () => {
+    expect(assessOwnedDemandMeasurement({ configured: false, schemaReady: false })).toMatchObject({
+      ready: false,
+      status: "not_configured",
+      label: "Measurement unavailable",
+    });
+    expect(assessOwnedDemandMeasurement({ configured: true, schemaReady: false })).toMatchObject({
+      ready: false,
+      status: "schema_pending",
+    });
+    expect(assessOwnedDemandMeasurement({
+      configured: true,
+      schemaReady: true,
+      error: "Canonical Neon growth intelligence query failed",
+    })).toMatchObject({
+      ready: false,
+      status: "query_failed",
+    });
+    const healthy = assessOwnedDemandMeasurement({ configured: true, schemaReady: true });
+    expect(healthy).toMatchObject({ ready: true, status: "ready", label: "Measured" });
+    expect(healthy.detail).toContain("test and suppressed records are excluded");
+  });
+
   it("identifies activation as the bottleneck when no eligible live leads exist", () => {
     const result = buildOwnedDemandCommand({ summary: summary(), ownedDemandSignals: [] }, new Date("2026-08-19T12:00:00Z"));
     expect(result.measurementState).toBe("no_live_signal");
@@ -293,6 +317,14 @@ describe("canonical /admin/distribution route guards", () => {
     expect(copyControl).toContain('type="button"');
     expect(copyControl).toContain("navigator.clipboard.writeText");
     expect(copyControl).not.toMatch(/fetch\(|XMLHttpRequest|sendBeacon|<form|use server/i);
+  });
+
+  it("never presents unavailable Growth measurement as zero demand or a measured recommendation", () => {
+    expect(page).toContain("assessOwnedDemandMeasurement(growth)");
+    expect(page).toContain("Unavailable is not zero live demand");
+    expect(page).toContain("Restore measurement before selecting a first channel.");
+    expect(page).toContain("Prepared sequence · measurement unavailable");
+    expect(page).toContain("measurementReady={measurement.ready}");
   });
 
   it("keeps the cadence fully readable across mobile and desktop", () => {
