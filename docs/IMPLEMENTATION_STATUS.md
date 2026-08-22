@@ -19,9 +19,10 @@ head Node 24 and Vercel checks:
 | #188 | WordPress owned-traffic audit | `35438c311f8a3a5658691aa9568a5e80e4b5ef18` | `32540568531` |
 | #189 | exact owned-demand activation loop | `f5b3165f63873dbf3b4c2719cb522b00935f72c7` | `32540823212` |
 | #179 | iOS install handoff | `9dd6684596ac8afbc52076d2c1597c12a0fa33e2` | `32540896724` |
+| #190 | durable rate-limit privacy | `d431bc3427720ae68167b1864e98e406206a47a3` | `32543177677` |
 
 Every listed PR remains Draft and correctly stacked on the row above it. Draft
-PR #190 is stacked after #179 as documented in the next section. Historical
+PR #191 is stacked after #190 as documented in the next section. Historical
 feature sections below retain the local/code-bearing evidence captured at that
 stage; the table above is authoritative for the listed mutable heads.
 
@@ -52,7 +53,7 @@ stage; the table above is authoritative for the listed mutable heads.
   rewrite, lead, external message, WordPress change, publication, DNS change,
   spend, or NellySelly action occurred.
 - This candidate is stacked after Draft PR #190 and cannot bypass the existing
-  PR #183–#190 order. Exact future gate:
+  PR #183–#190 order. It is tracked as Draft PR #191. Exact future gate:
   `APPROVE PHASE 9 ANALYTICS PRIVACY HARDENING MERGE AND PRODUCTION DEPLOYMENT`.
 
 ## Phase 9 durable rate-limit privacy hardening — 2026-08-21

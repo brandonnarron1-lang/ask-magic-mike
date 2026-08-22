@@ -31,7 +31,7 @@ All timestamps are America/New_York unless noted.
   planner, and complete privacy-minimized LCP/INP/CLS properties.
 - Production dependency audit, secret scan, exact Node 24 CI, protected Vercel
   Preview, and read-only route checks are recorded on the final immutable
-  candidate head before release readiness.
+  candidate head in Draft PR #191 before release readiness.
 - No database migration or data remediation is part of this candidate. Existing
   Production analytics rows were neither read nor modified.
 
