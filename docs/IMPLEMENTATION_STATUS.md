@@ -2,6 +2,33 @@
 
 Updated 2026-08-22.
 
+## Phase 9 iOS phone handoff consolidation — 2026-08-22
+
+- Historical PR #179 was audited rather than merged wholesale. Its unique
+  iPhone Home Screen credential-context repair is being refreshed once on the
+  verified PR #193 stack; its obsolete router/docs stack remains excluded.
+- The existing Web Push, VAPID, Neon subscription/outbox, service worker, and
+  protected phone APIs are reused. No carrier SMS, second PWA, second provider,
+  second database, phone takeover, migration, device enrollment, or send was
+  added.
+- The restricted Brandon invite now opens a private token-scoped install page
+  and manifest. The installed app exchanges the signed claim into a Secure,
+  HttpOnly, SameSite=Strict cookie, then continues on a token-free URL.
+- A canonical Neon-backed, HMAC-pseudonymized one-time nonce guard denies
+  cross-browser replay. Production fails closed when durable claim enforcement
+  is unavailable; an existing installed app may reopen only with its matching
+  HttpOnly session cookie.
+- Exact Ask Magic Mike origin binding excludes Our Town, NellySelly, and
+  arbitrary Vercel hostnames from this privileged handoff. Private/no-store,
+  no-referrer, noindex, CSP, and robots controls cover every phone-alert route.
+- Initial focused verification passes 8 files / 84 tests. Full Node 24 gate,
+  canonical Preview, rendered iPhone/desktop QA, and exact-head evidence remain
+  required before the Draft candidate becomes release-ready.
+- Detailed decision: `docs/phase9/PHONE_INSTALL_HANDOFF_CONSOLIDATION.md`.
+- Exact future application gate:
+  `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
+  Physical device enrollment and a `[TEST]` Push remain separate actions.
+
 ## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
 
 - Audited PRs #190-#192 against PR #185 exact head

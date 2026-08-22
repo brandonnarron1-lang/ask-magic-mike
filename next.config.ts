@@ -40,6 +40,29 @@ const privateLeadCenterHeaders = [
   },
 ];
 
+const privatePhoneAlertHeaders = [
+  {
+    key: "Cache-Control",
+    value: "private, no-cache, no-store, max-age=0, must-revalidate",
+  },
+  {
+    key: "Referrer-Policy",
+    value: "no-referrer",
+  },
+  {
+    key: "Content-Security-Policy",
+    value: "frame-ancestors 'self'; base-uri 'none'; form-action 'self'; object-src 'none'",
+  },
+  {
+    key: "X-Frame-Options",
+    value: "SAMEORIGIN",
+  },
+  {
+    key: "X-Robots-Tag",
+    value: "noindex, nofollow, noarchive",
+  },
+];
+
 const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
@@ -62,6 +85,10 @@ const nextConfig: NextConfig = {
       {
         source: "/widget/:path*",
         headers: [widgetFrameAncestors],
+      },
+      {
+        source: "/phone-alerts/:path*",
+        headers: privatePhoneAlertHeaders,
       },
       {
         source: "/admin/:path*",

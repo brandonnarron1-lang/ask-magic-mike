@@ -6,11 +6,12 @@ specific expansions; they do not invalidate the live lead pipe.
 
 ## Current release constraint
 
-- PR #183 is merged and live. PR #184's backup-first Neon migration is applied
-  and independently verified; its application release evidence is tracked on
-  the PR.
-- PRs #182 and #179 are deferred candidates requiring a new merge-base and
-  overlap audit. PRs #92 and #119–#121 are archive candidates.
+- PR #184 is merged and live. PR #185 is the next release candidate; PR #193 is
+  stacked after it. The iOS handoff consolidation is stacked after #193 and
+  cannot bypass either predecessor's exact-head release gate.
+- Historical PR #179 has been overlap-audited. Its unique handoff is preserved
+  on the current stack; the historical PR itself must not merge as a parallel
+  release. PRs #92 and #119–#121 are closed/preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,
   and #181 must not be requested again.
 
@@ -31,8 +32,10 @@ specific expansions; they do not invalidate the live lead pipe.
   `primary_lead_owner` account remains dormant until Mike chooses a password and
   completes assigned-lead-only acceptance.
 - Web Push infrastructure is ready, but each device owner must grant browser
-  permission and complete a controlled `[TEST]` receipt. Brandon cannot enroll
-  a device as Mike.
+  permission and complete a controlled `[TEST]` receipt. The prepared iPhone
+  handoff still requires application release, physical Home Screen installation,
+  and the owner's explicit test-send approval. Brandon cannot enroll a device
+  as Mike.
 - `hub.ourtownproperties.com` is not attached. DNS and Vercel domain mapping
   remain separately gated; canonical `/admin` remains the private entry point.
 

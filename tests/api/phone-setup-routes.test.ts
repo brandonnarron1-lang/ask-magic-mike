@@ -31,12 +31,17 @@ import { POST as adminInvite } from "../../app/admin/api/phone-alerts/invite/rou
 import { POST as subscribe } from "../../app/api/phone-alerts/subscription/route";
 import { POST as sendTest } from "../../app/api/phone-alerts/test/route";
 import { GET as claim } from "../../app/phone-alerts/setup/claim/route";
+import { GET as installManifest } from "../../app/phone-alerts/install/[token]/manifest.webmanifest/route";
+import { generateMetadata as installMetadata } from "../../app/phone-alerts/install/[token]/page";
 
 const COPY_ID = "11111111-1111-4111-8111-111111111111";
 const originalEnv = {
   admin: process.env.ADMIN_SECRET,
   signing: process.env.PHONE_SETUP_SIGNING_SECRET,
   site: process.env.NEXT_PUBLIC_SITE_URL,
+  vercel: process.env.VERCEL_ENV,
+  vercelUrl: process.env.VERCEL_URL,
+  vercelBranchUrl: process.env.VERCEL_BRANCH_URL,
 };
 
 function sessionCookie() {
@@ -71,6 +76,9 @@ describe("passwordless Brandon phone setup routes", () => {
     if (originalEnv.admin === undefined) delete (process.env as Record<string, string | undefined>).ADMIN_SECRET; else process.env.ADMIN_SECRET = originalEnv.admin;
     if (originalEnv.signing === undefined) delete process.env.PHONE_SETUP_SIGNING_SECRET; else process.env.PHONE_SETUP_SIGNING_SECRET = originalEnv.signing;
     if (originalEnv.site === undefined) delete process.env.NEXT_PUBLIC_SITE_URL; else process.env.NEXT_PUBLIC_SITE_URL = originalEnv.site;
+    if (originalEnv.vercel === undefined) delete process.env.VERCEL_ENV; else process.env.VERCEL_ENV = originalEnv.vercel;
+    if (originalEnv.vercelUrl === undefined) delete process.env.VERCEL_URL; else process.env.VERCEL_URL = originalEnv.vercelUrl;
+    if (originalEnv.vercelBranchUrl === undefined) delete process.env.VERCEL_BRANCH_URL; else process.env.VERCEL_BRANCH_URL = originalEnv.vercelBranchUrl;
   });
 
   it("issues a short-lived link only to an authenticated same-origin admin request", async () => {
@@ -81,7 +89,7 @@ describe("passwordless Brandon phone setup routes", () => {
     const body = await response.json();
     expect(response.status).toBe(200);
     expect(body.ok).toBe(true);
-    expect(body.url).toMatch(/^https:\/\/www\.askmagicmike\.com\/phone-alerts\/setup\/claim\?token=/);
+    expect(body.url).toMatch(/^https:\/\/www\.askmagicmike\.com\/phone-alerts\/install\/[A-Za-z0-9_.-]+$/);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
   });
 
@@ -91,12 +99,47 @@ describe("passwordless Brandon phone setup routes", () => {
     }));
     const body = await response.json();
     expect(response.status).toBe(200);
-    expect(body.url).toMatch(/^https:\/\/www\.askmagicmike\.com\/phone-alerts\/setup\/claim\?token=/);
+    expect(body.url).toMatch(/^https:\/\/www\.askmagicmike\.com\/phone-alerts\/install\/[A-Za-z0-9_.-]+$/);
 
     const denied = await adminInvite(post("/admin/api/phone-alerts/invite", {}, {
       authorization: `Basic ${Buffer.from("admin:wrong").toString("base64")}`,
     }));
     expect(denied.status).toBe(401);
+  });
+
+  it("constructs Preview links only on the exact Ask Magic Mike deployment origin", async () => {
+    process.env.VERCEL_ENV = "preview";
+    process.env.VERCEL_URL = "ask-magic-mike-exact-eyes-up-industries.vercel.app";
+    process.env.VERCEL_BRANCH_URL = "ask-magic-mike-branch-eyes-up-industries.vercel.app";
+
+    const exactOrigin = "https://ask-magic-mike-exact-eyes-up-industries.vercel.app";
+    const exactResponse = await invite(new NextRequest(`${exactOrigin}/api/phone-alerts/invite`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        origin: exactOrigin,
+        "x-admin-secret": "test-admin-secret",
+      },
+      body: JSON.stringify({ ttl_minutes: 10 }),
+    }));
+    expect(exactResponse.status).toBe(200);
+    expect((await exactResponse.json()).url).toMatch(
+      /^https:\/\/ask-magic-mike-exact-eyes-up-industries\.vercel\.app\/phone-alerts\/install\//,
+    );
+
+    process.env.NEXT_PUBLIC_SITE_URL = "https://nellyselly.com";
+    const unrelatedOrigin = "https://nellyselly-preview.vercel.app";
+    const unrelatedResponse = await invite(new NextRequest(`${unrelatedOrigin}/api/phone-alerts/invite`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        origin: unrelatedOrigin,
+        "x-admin-secret": "test-admin-secret",
+      },
+      body: JSON.stringify({ ttl_minutes: 10 }),
+    }));
+    expect(unrelatedResponse.status).toBe(403);
+    expect(await unrelatedResponse.json()).toEqual({ ok: false, error: "invalid_origin" });
   });
 
   it("exchanges a valid invite for a secure HttpOnly setup cookie and cleans the URL", async () => {
@@ -110,6 +153,85 @@ describe("passwordless Brandon phone setup routes", () => {
     expect(cookie).toContain("Secure");
     expect(cookie).toContain("SameSite=strict");
     expect(response.headers.get("Referrer-Policy")).toBe("no-referrer");
+  });
+
+  it("allows the installed app to reopen its claimed session but blocks token replay elsewhere", async () => {
+    const token = mintPhoneSetupToken().token;
+    const claimedNonces = new Set<string>();
+    mocks.checkRateLimit.mockImplementation(async (key: string) => {
+      if (!key.startsWith("phone-setup-claim:")) {
+        return { allowed: true, remaining: 9, resetAt: Date.now() + 60_000, durable: true };
+      }
+      const allowed = !claimedNonces.has(key);
+      claimedNonces.add(key);
+      return { allowed, remaining: allowed ? 0 : 0, resetAt: Date.now() + 30 * 60_000, durable: true };
+    });
+
+    const claimUrl = `https://www.askmagicmike.com/phone-alerts/setup/claim?token=${encodeURIComponent(token)}`;
+    const first = await claim(new NextRequest(claimUrl));
+    expect(first.headers.get("location")).toBe("https://www.askmagicmike.com/phone-alerts/setup");
+    expect(first.headers.get("set-cookie")).toContain(`${PHONE_SETUP_COOKIE}=`);
+
+    const replay = await claim(new NextRequest(claimUrl));
+    expect(replay.headers.get("location")).toContain("error=already_claimed");
+    expect(replay.headers.get("set-cookie")).toBeNull();
+
+    const installedAppReopen = await claim(new NextRequest(claimUrl, {
+      headers: { cookie: `${PHONE_SETUP_COOKIE}=${token}` },
+    }));
+    expect(installedAppReopen.headers.get("location")).toBe("https://www.askmagicmike.com/phone-alerts/setup");
+    expect(installedAppReopen.headers.get("set-cookie")).toBeNull();
+  });
+
+  it("fails closed when Production cannot durably enforce a one-time claim", async () => {
+    process.env.VERCEL_ENV = "production";
+    mocks.checkRateLimit.mockImplementation(async (key: string) => key.startsWith("phone-setup-claim:")
+      ? { allowed: false, remaining: 0, resetAt: Date.now() + 60_000, durable: false }
+      : { allowed: true, remaining: 9, resetAt: Date.now() + 60_000, durable: false });
+    const token = mintPhoneSetupToken().token;
+    const response = await claim(new NextRequest(
+      `https://www.askmagicmike.com/phone-alerts/setup/claim?token=${encodeURIComponent(token)}`,
+    ));
+    expect(response.headers.get("location")).toContain("error=claim_unavailable");
+    expect(response.headers.get("set-cookie")).toBeNull();
+  });
+
+  it("serves a private token-scoped manifest whose start URL transfers inside the installed app", async () => {
+    const token = mintPhoneSetupToken().token;
+    const response = await installManifest(
+      new Request(`https://www.askmagicmike.com/phone-alerts/install/${encodeURIComponent(token)}/manifest.webmanifest`),
+      { params: Promise.resolve({ token }) },
+    );
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toContain("application/manifest+json");
+    expect(response.headers.get("Cache-Control")).toContain("no-store");
+    expect(response.headers.get("Referrer-Policy")).toBe("no-referrer");
+    expect(response.headers.get("X-Robots-Tag")).toContain("noindex");
+    expect(body).toMatchObject({
+      id: "/phone-alerts",
+      scope: "/",
+      display: "standalone",
+      start_url: `/phone-alerts/setup/claim?token=${encodeURIComponent(token)}`,
+    });
+  });
+
+  it("never emits an install manifest or manifest link for an invalid token", async () => {
+    const response = await installManifest(
+      new Request("https://www.askmagicmike.com/phone-alerts/install/invalid/manifest.webmanifest"),
+      { params: Promise.resolve({ token: "invalid" }) },
+    );
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({ error: "phone_setup_link_expired" });
+    expect((await installMetadata({ params: Promise.resolve({ token: "invalid" }) })).manifest).toBeUndefined();
+  });
+
+  it("links a valid install page only to its own token-scoped manifest", async () => {
+    const token = mintPhoneSetupToken().token;
+    const metadata = await installMetadata({ params: Promise.resolve({ token }) });
+    expect(metadata.manifest).toBe(`/phone-alerts/install/${encodeURIComponent(token)}/manifest.webmanifest`);
+    expect(metadata.robots).toMatchObject({ index: false, follow: false });
+    expect(metadata.referrer).toBe("no-referrer");
   });
 
   it("never sets a setup cookie for an invalid invite", async () => {

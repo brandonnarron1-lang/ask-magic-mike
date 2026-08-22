@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-08-22 — iOS phone install handoff consolidation candidate
+
+- Audited historical PR #179 and refreshed only its unique iPhone Home Screen
+  Web Push handoff on the verified PR #193 stack. Reused the canonical Web
+  Push/VAPID/Neon/outbox/service-worker system; no carrier SMS, second provider,
+  second PWA, second data store, or device takeover path was created.
+- Added a private token-scoped install page and manifest so the installed app
+  performs the claim exchange in its own cookie context, then continues on a
+  token-free setup URL.
+- Added a durable, HMAC-pseudonymized, one-time canonical Neon nonce guard,
+  cross-browser replay denial, safe matching-cookie reopen, and Production
+  fail-closed behavior when durability is unavailable. No migration is needed.
+- Narrowed privileged phone origins to exact Ask Magic Mike Production,
+  configured Preview, and local-development origins; Our Town and NellySelly
+  remain outside this setup boundary.
+- Added private/no-store, no-referrer, noindex, robots, CSP, and frame controls;
+  expanded Preview QA to validate the install/manifest contract without token
+  redemption, phone registration, lead creation, or Push delivery.
+- Initial focused verification passes 8 files / 84 tests. Full Node 24 release
+  gate, canonical Preview, and rendered visual evidence remain before the
+  candidate's separate future Production gate.
+
 ## 2026-08-22 — Consolidated owned-demand command candidate
 
 - Consolidated the useful application work from PRs #185, #186, #188, and #189

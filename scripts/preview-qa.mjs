@@ -160,6 +160,12 @@ async function http(method, path, opts = {}) {
     json,
     text,
     location: res.headers.get("location"),
+    responseHeaders: {
+      cacheControl: res.headers.get("cache-control"),
+      contentType: res.headers.get("content-type"),
+      referrerPolicy: res.headers.get("referrer-policy"),
+      xRobotsTag: res.headers.get("x-robots-tag"),
+    },
   };
 }
 
@@ -383,6 +389,127 @@ async function slaSweep() {
   }
 }
 
+/**
+ * Validate the iOS Home Screen handoff without redeeming the bearer token,
+ * registering a device, or sending a Push notification. Minting an invite is
+ * an authenticated, short-lived Preview-only control-plane action; every
+ * subsequent request is read-only.
+ */
+async function phoneInstallHandoff() {
+  if (!ADMIN_SECRET) {
+    record("phone_install:handoff", "skip", { message: "no ADMIN_SECRET" });
+    return;
+  }
+
+  const invite = await http("POST", "/admin/api/phone-alerts/invite", {
+    headers: { ...adminBasicHeaders(), Origin: PREVIEW_URL },
+    body: { ttl_minutes: 5 },
+  });
+  if (!invite.ok || invite.json?.ok !== true || typeof invite.json?.url !== "string") {
+    record("phone_install:handoff", "fail", {
+      http: invite.status,
+      message: "authenticated Preview invite could not be created",
+    });
+    return;
+  }
+
+  let installUrl;
+  try {
+    installUrl = new URL(invite.json.url);
+  } catch {
+    record("phone_install:handoff", "fail", {
+      http: invite.status,
+      message: "invite returned an invalid URL",
+    });
+    return;
+  }
+
+  const expectedOrigin = new URL(PREVIEW_URL).origin;
+  const installPrefix = "/phone-alerts/install/";
+  const encodedToken = installUrl.pathname.startsWith(installPrefix)
+    ? installUrl.pathname.slice(installPrefix.length)
+    : "";
+  let token = "";
+  try {
+    token = decodeURIComponent(encodedToken);
+  } catch {
+    token = "";
+  }
+  if (
+    installUrl.origin !== expectedOrigin
+    || installUrl.search
+    || installUrl.hash
+    || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token)
+  ) {
+    record("phone_install:handoff", "fail", {
+      http: invite.status,
+      message: "invite was not a same-origin token-scoped install URL",
+    });
+    return;
+  }
+
+  const install = await http("GET", installUrl.pathname);
+  const manifestPath = `${installUrl.pathname}/manifest.webmanifest`;
+  const manifest = await http("GET", manifestPath);
+  let startUrl = null;
+  if (manifest.json && typeof manifest.json.start_url === "string") {
+    try {
+      startUrl = new URL(manifest.json.start_url, PREVIEW_URL);
+    } catch {
+      startUrl = null;
+    }
+  }
+  const privateInstall =
+    install.responseHeaders?.cacheControl?.includes("no-store")
+    && install.responseHeaders?.referrerPolicy === "no-referrer"
+    && install.responseHeaders?.xRobotsTag?.includes("noindex");
+  const privateManifest =
+    manifest.responseHeaders?.contentType?.includes("application/manifest+json")
+    && manifest.responseHeaders?.cacheControl?.includes("no-store")
+    && manifest.responseHeaders?.referrerPolicy === "no-referrer"
+    && manifest.responseHeaders?.xRobotsTag?.includes("noindex");
+  const validStartUrl =
+    startUrl?.origin === expectedOrigin
+    && startUrl.pathname === "/phone-alerts/setup/claim"
+    && startUrl.searchParams.get("token") === token;
+  const validCopyScope =
+    manifest.json?.id === "/phone-alerts"
+    && manifest.json?.display === "standalone"
+    && manifest.json?.scope === "/";
+
+  if (
+    install.ok
+    && install.text.includes("Install Brandon copy alerts")
+    && privateInstall
+    && manifest.ok
+    && privateManifest
+    && validStartUrl
+    && validCopyScope
+  ) {
+    record("phone_install:handoff", "pass", {
+      http: manifest.status,
+      message: "private install contract verified without token redemption",
+    });
+  } else {
+    const failedChecks = [
+      ["install_status", install.ok],
+      ["install_copy", install.text.includes("Install Brandon copy alerts")],
+      ["install_privacy_headers", privateInstall],
+      ["manifest_status", manifest.ok],
+      ["manifest_privacy_headers", privateManifest],
+      ["manifest_start_url", validStartUrl],
+      ["manifest_copy_scope", validCopyScope],
+    ]
+      .filter(([, passed]) => !passed)
+      .map(([name]) => name)
+      .join(", ");
+    record("phone_install:handoff", "fail", {
+      http: manifest.status || install.status,
+      message: `private install contract failed: ${failedChecks || "unknown"}`,
+    });
+  }
+}
+
 async function listingPrivateLeakCheck() {
   const r = await http("GET", "/api/listings/search?q=Wilson&limit=3");
   if (!r.ok || !r.json) {
@@ -566,6 +693,7 @@ async function main() {
     health = await healthCheck();
     await adminListAndDashboard();
     await slaSweep();
+    await phoneInstallHandoff();
     await listingPrivateLeakCheck();
 
     const gate = shouldRunMutationChecks(health, process.env);

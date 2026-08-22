@@ -24,6 +24,17 @@
   expiry, an HttpOnly Secure SameSite=Strict cookie, exact-origin and CSRF
   checks, rate limiting, strict schemas, and server-side `copy` role enforcement.
   They cannot access the Lead Center or register Mike's primary device.
+- iPhone installation uses a private, token-scoped page and manifest so the
+  installed Home Screen app—not Messages or an ordinary Safari tab—performs the
+  claim exchange. A durable canonical-Neon one-time guard stores only an
+  HMAC-pseudonymized nonce key, denies cross-context replay, and fails closed in
+  Production when durability is unavailable. The token is not stored in browser
+  storage, analytics, or the database and is removed from the URL after claim.
+- Phone-install origins are a narrower exact Ask Magic Mike allowlist than the
+  general public/widget allowlist. Our Town, NellySelly, arbitrary Vercel apps,
+  and attacker-controlled subdomains cannot mint or host the privileged setup
+  response. Private/no-store, no-referrer, noindex, CSP, and frame controls
+  cover the entire `/phone-alerts/` route family.
 - The admin invite UI relies on browser-managed Basic Auth and never receives
   `ADMIN_SECRET`. Its route repeats the Basic Auth check server-side, validates
   exact origin and input, and returns only a bounded copy-role claim URL. The

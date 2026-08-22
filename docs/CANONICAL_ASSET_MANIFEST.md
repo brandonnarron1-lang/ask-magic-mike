@@ -14,7 +14,8 @@ WordPress evidence. Working systems outrank historical packets.
 | PR #185 | Clean stack above #184 containing PR #182's unique Buyer discovery, exact Preview origin, canonical-router CTA checks, and current release-safety coverage | **MERGE INTO CANONICAL** | Refresh after #184; old overlapping PR #182 must not merge as-is |
 | `codex/phase9-owned-demand-asset-studio-20260821` | Protected deterministic 4:5/story/QR exports for the existing 24 owned-demand placements; no publisher or migration | **MERGE INTO CANONICAL** | Stacked after #185; preserve the existing campaign definitions, retained Mike imagery, and separate publication gate |
 | PR #182 | Historical mixed candidate whose unique runtime/security work is now preserved on the clean consolidation branch | **REFERENCE/DOCUMENTATION** | Draft and explicitly deferred; duplicated authority docs/scanners are superseded by #184 |
-| PR #179 | Unique token-scoped iOS Home Screen Web Push handoff repair | **MERGE INTO CANONICAL** | Draft and deferred until the current release stack lands; refresh exact-head proof before release and keep physical enrollment/test separate |
+| PR #179 | Historical source of the unique token-scoped iOS Home Screen Web Push handoff | **REFERENCE/DOCUMENTATION** | Preserved; useful work is refreshed once on the current PR #193 stack with stronger one-time replay protection; do not merge the old stack |
+| `codex/phase9-phone-handoff-consolidation-20260822` | Current-stack iOS Home Screen install handoff, durable one-time claim guard, exact AMM origin boundary, and read-only Preview contract | **MERGE INTO CANONICAL** | Stack after #193; no migration/send/enrollment; require exact-head CI/Preview and its own application gate |
 | `/Users/brandonnarron/ask-magic-mike` | Two-commit bootstrap without canonical lead lifecycle | **OBSOLETE OR CONFLICTING** | Historical fallback only; do not merge |
 | `/Users/brandonnarron/propertylens` | Separate PropertyLens product | **REFERENCE/DOCUMENTATION** | Never treat as Ask Magic Mike runtime |
 | `/Users/brandonnarron/eyesup-hq/projects/ask-magic-mike-widget` | Asset/mobile package without canonical backend | **MERGE INTO CANONICAL** | Reuse only reviewed assets/contracts; no separate store |
@@ -39,5 +40,6 @@ WordPress evidence. Working systems outrank historical packets.
   approved registered provider.
 - External campaign platforms remain human-operated; the application records
   evidence only after the native action occurs.
-- PR #179 and PR #182 are Draft with explicit out-of-order merge warnings. No
-  branch, commit, worktree, or exact-head evidence was deleted.
+- Historical PR #179 and PR #182 source branches remain preserved; their useful
+  work is consolidated on current stacks and neither is an independent release
+  vehicle. No branch, commit, worktree, or exact-head evidence was deleted.

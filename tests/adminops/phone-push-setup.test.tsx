@@ -11,7 +11,7 @@ afterEach(() => {
 
 describe("phone push setup", () => {
   it("generates and copies a short-lived Brandon link without exposing an admin secret", async () => {
-    const inviteUrl = `${window.location.origin}/phone-alerts/setup/claim?token=test-token`;
+    const inviteUrl = `${window.location.origin}/phone-alerts/install/test-token.signature`;
     const fetchMock = vi.fn(async () => new Response(JSON.stringify({
       ok: true,
       url: inviteUrl,
@@ -38,7 +38,7 @@ describe("phone push setup", () => {
   it("rejects an invite URL returned for another origin", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
       ok: true,
-      url: "https://evil.example/phone-alerts/setup/claim?token=test-token",
+      url: "https://evil.example/phone-alerts/install/test-token.signature",
       expires_at: new Date(Date.now() + 20 * 60 * 1000).toISOString(),
     }), { status: 200, headers: { "Content-Type": "application/json" } })));
 

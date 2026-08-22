@@ -1,9 +1,10 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
+import { isApprovedAskMagicMikeOrigin } from "./publicOrigin";
 
 export const PHONE_SETUP_COOKIE = "amm_phone_setup";
 export const PHONE_SETUP_TTL_MS = 20 * 60 * 1000;
-const MAX_TOKEN_TTL_MS = 30 * 60 * 1000;
+export const PHONE_SETUP_MAX_TTL_MS = 30 * 60 * 1000;
 
 export type PhoneSetupSession = {
   v: 1;
@@ -31,7 +32,7 @@ function signaturesMatch(expected: string, supplied: string) {
 export function mintPhoneSetupToken(now = Date.now(), ttlMs = PHONE_SETUP_TTL_MS) {
   const secret = signingSecret();
   if (!secret) throw new Error("phone_setup_signing_secret_missing");
-  const boundedTtl = Math.min(Math.max(ttlMs, 60_000), MAX_TOKEN_TTL_MS);
+  const boundedTtl = Math.min(Math.max(ttlMs, 60_000), PHONE_SETUP_MAX_TTL_MS);
   const claims: PhoneSetupSession = {
     v: 1,
     role: "copy",
@@ -61,7 +62,7 @@ export function verifyPhoneSetupToken(token: string | undefined | null, now = Da
       || !/^[A-Za-z0-9_-]{20,64}$/.test(parsed.nonce)
       || parsed.iat > now + 60_000
       || parsed.exp <= now
-      || parsed.exp - parsed.iat > MAX_TOKEN_TTL_MS
+      || parsed.exp - parsed.iat > PHONE_SETUP_MAX_TTL_MS
     ) return null;
     return parsed as PhoneSetupSession;
   } catch {
@@ -77,27 +78,24 @@ export function canonicalSiteOrigin() {
   const fallback = "https://www.askmagicmike.com";
   try {
     const origin = new URL(process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_SITE_URL || fallback).origin;
-    if (process.env.NODE_ENV === "production" && !origin.startsWith("https://")) return fallback;
-    return origin;
+    return isApprovedAskMagicMikeOrigin(origin) ? origin : fallback;
   } catch {
     return fallback;
   }
 }
 
 export function phoneSetupResponseOrigin(request: NextRequest) {
-  const hostname = request.nextUrl.hostname.toLowerCase();
-  if (process.env.VERCEL_ENV === "preview" && hostname.endsWith(".vercel.app")) {
-    return request.nextUrl.origin;
-  }
-  if (process.env.NODE_ENV !== "production" && (hostname === "localhost" || hostname === "127.0.0.1")) {
-    return request.nextUrl.origin;
-  }
-  return canonicalSiteOrigin();
+  const requestOrigin = request.nextUrl.origin;
+  return isApprovedAskMagicMikeOrigin(requestOrigin) ? requestOrigin : canonicalSiteOrigin();
 }
 
 export function isExactSameOrigin(request: NextRequest) {
   const origin = request.headers.get("origin");
-  return Boolean(origin && origin === request.nextUrl.origin);
+  return Boolean(
+    origin
+    && origin === request.nextUrl.origin
+    && isApprovedAskMagicMikeOrigin(origin),
+  );
 }
 
 export function hasPhoneSetupRequestHeader(request: NextRequest) {

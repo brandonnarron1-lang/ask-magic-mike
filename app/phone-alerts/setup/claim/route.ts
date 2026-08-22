@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, LIMITS, rateLimitKey } from "@/lib/security/rate-limit";
 import {
   PHONE_SETUP_COOKIE,
+  PHONE_SETUP_MAX_TTL_MS,
   phoneSetupResponseOrigin,
   verifyPhoneSetupToken,
 } from "../../../lib/phoneSetupSession";
@@ -30,13 +31,33 @@ export async function GET(request: NextRequest) {
     return privateRedirect(new URL("/phone-alerts/setup?error=rate_limited", origin));
   }
 
-  const claims = verifyPhoneSetupToken(request.nextUrl.searchParams.get("token"));
+  const token = request.nextUrl.searchParams.get("token");
+  const claims = verifyPhoneSetupToken(token);
   if (!claims) {
     return privateRedirect(new URL("/phone-alerts/setup?error=expired", origin));
   }
 
+  const existingSession = verifyPhoneSetupToken(request.cookies.get(PHONE_SETUP_COOKIE)?.value);
+  if (existingSession?.nonce === claims.nonce) {
+    return privateRedirect(new URL("/phone-alerts/setup", origin));
+  }
+
+  const oneTimeClaim = await checkRateLimit(
+    `phone-setup-claim:${claims.nonce}`,
+    1,
+    PHONE_SETUP_MAX_TTL_MS,
+    "phoneSetup",
+  );
+  const productionNeedsDurability = process.env.VERCEL_ENV === "production";
+  if (productionNeedsDurability && !oneTimeClaim.durable) {
+    return privateRedirect(new URL("/phone-alerts/setup?error=claim_unavailable", origin));
+  }
+  if (!oneTimeClaim.allowed) {
+    return privateRedirect(new URL("/phone-alerts/setup?error=already_claimed", origin));
+  }
+
   const response = privateRedirect(new URL("/phone-alerts/setup", origin));
-  response.cookies.set(PHONE_SETUP_COOKIE, request.nextUrl.searchParams.get("token") || "", {
+  response.cookies.set(PHONE_SETUP_COOKIE, token || "", {
     httpOnly: true,
     secure: request.nextUrl.protocol === "https:",
     sameSite: "strict",

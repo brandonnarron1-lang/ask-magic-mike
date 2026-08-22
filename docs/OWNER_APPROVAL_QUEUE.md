@@ -49,11 +49,12 @@ provider action, or deletion.
   is consolidated into PR #185 and their former standalone gates are obsolete.
 - PRs #190–#192 remain separate overlap-review candidates and are not part of
   the owned-demand command release.
-- PR [#179](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/179)
-  repairs the iOS Home Screen Web Push handoff. Refresh it after the current
-  stack and rerun protected iPhone-install acceptance before considering
-  `APPROVE IOS PHONE ALERT INSTALL HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
-  Physical enrollment and a `[TEST]` push remain separate actions.
+- Historical PR [#179](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/179)
+  is preserved but superseded for release by the current-stack iOS handoff
+  consolidation. After #185 and #193 are released, refresh the consolidation
+  candidate, rerun Node 24/Preview acceptance, and only then consider
+  `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
+  Physical enrollment and a `[TEST]` Push remain separately approved actions.
 - PRs #92 and #119–#121 remain archive-after-review candidates. They are not a
   parallel Production release plan.
 

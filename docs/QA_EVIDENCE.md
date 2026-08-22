@@ -5,6 +5,51 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Phase 9 iOS phone install handoff consolidation — 2026-08-22
+
+- Reuse/overlap audit — PASS: historical PR #179 was compared against the
+  verified PR #193 stack. Only its unique iPhone Home Screen cookie-context
+  handoff was refreshed; obsolete stack authority and duplicate docs were not
+  imported. Rescue ref:
+  `rescue/amm-pre-phase9-phone-handoff-consolidation-20260822-1130`.
+- Focused phone/origin/Preview matrix — PASS: 8 files / 84 tests covering signed
+  expiry, exact Production and exact configured Preview origins, Our Town and
+  NellySelly rejection, private manifest metadata, token cleanup, durable
+  one-time claim, replay denial, matching installed-app reopen, Production
+  fail-closed behavior, setup UI, robots, and non-redemptive Preview QA.
+- `pnpm release:gate` — PASS on local Node 26.5.1: Ask Magic Mike/NellySelly
+  isolation, 14/14 release-safety controls, 210 test files / 2,907 tests,
+  strict typecheck, ESLint, optimized Next.js 15.5.21 build, and 82 active
+  routes / 17 acknowledged root–`src` duplicates. The project declares Node
+  24.x, so exact Node 24 GitHub evidence remains required on the PR head.
+- `pnpm run typecheck`, `pnpm run lint`, `pnpm run release:doctor`, and
+  `pnpm run release:safety` — PASS. Before commit, the doctor reported only the
+  expected non-blocking dirty-worktree diagnostic; every blocking check passed.
+- Supply-chain and secret review — PASS: `pnpm audit --prod --audit-level high`
+  found no known Production dependency vulnerability; `gitleaks git --redact
+  --no-banner` scanned 501 commits / 14.02 MB with no leak; the staged 45.74 KB
+  candidate scan found no leak.
+- Diff and migration review — PASS: `git diff --cached --check` is clean and
+  the exact staged file list contains no SQL or migration path. The one-time
+  guard reuses the existing HMAC-pseudonymized Neon rate-limit table.
+- Rendered browser QA — PASS in a local no-provider/no-database harness. The
+  approved Mike portrait and existing black/gold/cyan system rendered at
+  390×844 and 1440×1000 with zero browser errors, no horizontal overflow, clear
+  role/device/expiry state, four install steps, and visible bearer-link warning.
+  Invalid-token rendering truthfully states that no phone was registered and no
+  notification was sent. Gitignored evidence:
+  `output/playwright/phone-handoff/install-390x844-v2.png`,
+  `output/playwright/phone-handoff/install-1440x1000-v2.png`, and
+  `output/playwright/phone-handoff/expired-390x844.png`.
+- No Preview token was redeemed. No Production/Neon write, migration, lead,
+  device registration, email, SMS, Push, WordPress/DNS/provider action,
+  external publication, spend, deletion, or NellySelly action occurred.
+- Still required: exact-head Node 24 CI, canonical Vercel Preview build and
+  private header/install-manifest probes, then the separate application gate
+  `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT` after its
+  stacked predecessors are released. Physical enrollment and a `[TEST]` Push
+  remain separate actions.
+
 ## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
 
 - Boundary review — PASS at checkpoint: the candidate is stacked on PR #185
