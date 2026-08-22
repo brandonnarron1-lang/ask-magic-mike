@@ -7,9 +7,10 @@
   `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`, with the `www` root returning HTTP 200,
   apex redirecting HTTP 308 to `www`, `/home-value`, `/buy`, public liveness,
   and the Our Town homepage returning HTTP 200.
-- Reconfirmed PR #185 is cleanly mergeable and contains current Production at
-  exact final head `168937f0d6b7a90b027f39dc97f2135193c3fa72`. It contains no
-  database migration.
+- Reconfirmed PR #185 is cleanly mergeable, contains current Production, and
+  has no database migration. Final retained-asset code-bearing head is
+  `9a8baf935a7a68cda528ec4aee90b7cfcf5e87fc`; exact final head is
+  `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7`.
 - Traced the complete candidate story: authenticated Distribution Command to
   existing Neon aggregate/proof reads, deterministic activation state, protected
   allowlisted feed/story/QR exports, and fixed canonical UTM shortlinks. The
@@ -28,6 +29,13 @@
   `report:view`; shortlinks accept no arbitrary destination; publication-proof
   writes remain behind server-side `growth:manage`, explicit confirmation,
   runtime validation, parameterized SQL, and the Preview mutation guard.
+- Release-path asset probe found one missed boundary: the renter export source
+  returned HTTP 404 on current Production because it was a branch-only JPEG,
+  while the route deliberately renders from the canonical host. Fix
+  `9a8baf935a7a68cda528ec4aee90b7cfcf5e87fc` reuses the equivalent approved PNG
+  already returning HTTP 200 in Production and corrects the renderer fixture's
+  PNG MIME type. The focused Node 24 matrix passes 5 files / 46 tests, including
+  all four offer types in both feed and story formats.
 - The first exact-head protected Preview run passed all endpoint and browser
   checks but exposed a workflow-integrity defect: direct Preview QA omitted
   release doctor, and neither Preview workflow asserted the generated launch
@@ -36,9 +44,15 @@
 - After that correction, the full local gate passes 206 files / 2,868 tests,
   strict typecheck, ESLint, optimized Production build, 80-route verification,
   system isolation, and 14/14 safety controls.
-- Exact-head Node 24 release run `32584853104`, Ready Preview deployment
-  `dpl_4cWbdSbt4AofDpmHkk3EvSh9g1En`, and protected Preview QA run
-  `32585009610` pass. The protected run records 16 pass / 6 intentional write
+- After the retained-asset correction, the complete local gate was rerun under
+  Node 24 and passes 206 files / 2,869 tests, strict typecheck, ESLint,
+  optimized Production build, 80-route verification, system isolation, and
+  14/14 safety controls. Production dependency audit reports no known
+  vulnerability; gitleaks scans 511 commits / approximately 14.11 MB with no
+  leak; all three canonical creative source URLs return HTTP 200 with image
+  content. Exact-head Node 24 release run `32588096247`, Ready Preview
+  deployment `dpl_83UZ6iisUUWK1LyGdTahkQvAiF2Y`, and protected Preview QA run
+  `32588280489` pass. The protected run records 16 pass / 6 intentional write
   skips / 0 fail, 2/2 browser checks, 43/43 doctor checks, and strict
   `PREVIEW_READY` launch authority.
 - No Production deployment, database read/write beyond public liveness,
@@ -53,7 +67,7 @@ All timestamps are America/New_York unless noted.
 ## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
 
 - Boundary review — PASS at checkpoint: the candidate is stacked on PR #185
-  exact final head `168937f0d6b7a90b027f39dc97f2135193c3fa72`, includes no migration,
+  exact final head `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7`, includes no migration,
   and excludes PR #187's target register and parallel release authority.
 - Focused regression matrix — PASS: 10 files / 72 tests covering
   HMAC limiter identifiers, stale-bucket pruning, public analytics event and

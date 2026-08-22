@@ -40,10 +40,11 @@ Automated coverage proves:
    reducing module density.
 3. Story compliance text crossed the QR quiet area. The footer moved to its own
    dark safe band and the QR remains isolated.
-4. The existing WebP buyer/renter files and then the renter PNG triggered
-   `ImageResponse` decode failures. The normal UI keeps its efficient WebP
-   assets; the export renderer uses retained JPEG originals and one
-   mechanically derived JPEG of the same approved renter portrait.
+4. The existing WebP buyer/renter files correctly exposed an unsupported export
+   path, but the first PNG retry was mislabeled as `image/jpeg` by the test
+   fixture. Final release review corrected the MIME mapping, proved the retained
+   Production PNG in both feed and story renderers, and removed the unnecessary
+   branch-only JPEG derivative.
 5. The first ImageMagick conversion of the stroke-based QR SVG was blank. That
    conversion was discarded. Chromium rendered the actual SVG and the
    independent scanner decoded it successfully.

@@ -4,7 +4,7 @@ Date: 2026-08-22
 
 Candidate branch: `codex/phase9-privacy-kpi-trust-consolidation-20260822`
 
-Base: PR #185 exact final head `168937f0d6b7a90b027f39dc97f2135193c3fa72`
+Base: PR #185 exact final head `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7`
 
 ## Purpose
 
@@ -27,6 +27,8 @@ Git history remain intact until the consolidated candidate is accepted.
 Before refreshing this candidate onto PR #185's exact final head, its accepted
 pre-refresh state was also preserved as remote rescue branch
 `rescue/amm-pr193-pre-exact-base-refresh-20260822-1239`.
+The final retained-asset refresh is preserved before merge as remote rescue
+branch `rescue/amm-pr193-pre-pr185-final-refresh-20260822-1344`.
 
 ## Included once
 

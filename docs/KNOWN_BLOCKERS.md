@@ -10,7 +10,7 @@ specific expansions; they do not invalidate the live lead pipe.
   and independently verified; its application release evidence is tracked on
   the PR.
 - PR #185 is Ready and cleanly mergeable at exact final head
-  `168937f0d6b7a90b027f39dc97f2135193c3fa72`; its Node 24 CI, canonical
+  `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7`; its Node 24 CI, canonical
   Preview, protected-flow, security, and rendered checks pass. Its exact merge
   and Production gate remains unreceived.
 - Draft PR #193 consolidates PRs #190–#192 on PR #185 and has been refreshed to
