@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ValueHero } from "@/components/campaign/value-hero";
+import { serializeJsonLd } from "@/lib/security/json-ld";
 import { siteConfig } from "@/lib/site-config";
 
 const jsonLd = {
@@ -104,7 +105,7 @@ export default function ValuePage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <ValueHero />
     </>

@@ -94,7 +94,12 @@ guaranteed result.
   parameters and protected health exposes readiness as a boolean only.
 - Both public analytics routes validate origin, content type, body size, event
   name, scalar schema, event-specific dimensions, safe paths, and coarse device
-  class before asynchronous persistence.
+  class before awaited canonical persistence. HTTP 202 means the Neon write
+  succeeded; an unavailable write fails truthfully with HTTP 503.
+- Public UTM and placement dimensions accept only controlled identifier slugs,
+  preventing otherwise well-formed names, street addresses, or sentences from
+  entering the analytics ledger. Every JSON-LD script surface uses a shared
+  serializer that escapes script-closing input.
 - Browser callers cannot write trusted notification lifecycle events or attach
   arbitrary events to canonical lead/agent IDs. Trusted server writers retain
   the protected association after authorization.
@@ -104,3 +109,8 @@ guaranteed result.
 - Growth delivery SQL is parameterized, aggregate-only, test/suppression
   excluded, and schema-detected. Missing optional delivery tables produce an
   unavailable state rather than fabricated zeroes or a broken command center.
+- Current public responses retain HSTS, `nosniff`, referrer, permissions, and
+  frame controls, while protected admin responses also retain private/no-store,
+  noindex, same-origin framing, and server authorization. A complete
+  nonce/hash-based public `script-src` CSP remains a defense-in-depth follow-up
+  requiring a dedicated compatibility pass across the established funnel.

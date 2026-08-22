@@ -6,6 +6,7 @@ import {
   isApprovedPublicAnalyticsEvent,
   safeAnalyticsDimension,
   safeAnalyticsProperties,
+  safePublicAnalyticsDimension,
   safePublicAnalyticsProperties,
 } from "@/lib/analytics/privacy";
 
@@ -24,6 +25,7 @@ export {
   isApprovedPublicAnalyticsEvent,
   safeAnalyticsDimension,
   safeAnalyticsProperties,
+  safePublicAnalyticsDimension,
   safePublicAnalyticsProperties,
 };
 

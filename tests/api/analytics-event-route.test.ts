@@ -28,12 +28,12 @@ function post(body: unknown): NextRequest {
 describe("POST /api/analytics/event", () => {
   beforeEach(() => {
     trackMock.mockReset();
-    trackMock.mockResolvedValue(undefined);
+    trackMock.mockResolvedValue(true);
   });
 
   it("accepts a known event name and calls trackEvent", async () => {
     const res = await POST(post({ eventName: "landing_page_viewed", properties: { surface: "hero" } }));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(202);
     const json = (await res.json()) as Record<string, unknown>;
     expect(json.ok).toBe(true);
     expect(trackMock).toHaveBeenCalledOnce();
@@ -74,7 +74,7 @@ describe("POST /api/analytics/event", () => {
       utmCampaign: "wilson-nc-sellers",
       properties: { surface: "landing_hero" },
     }));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(202);
     expect(trackMock).toHaveBeenCalledWith(
       expect.objectContaining({
         eventName: "cta_chip_clicked",
@@ -96,7 +96,7 @@ describe("POST /api/analytics/event", () => {
       body: JSON.stringify({ eventName: "page_view" }),
     });
     const res = await POST(req);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(202);
     expect(trackMock).toHaveBeenCalledWith(
       expect.objectContaining({
         userAgent: "browser/desktop",
@@ -115,12 +115,14 @@ describe("POST /api/analytics/event", () => {
       },
       utmSource: "person@example.com",
       utmMedium: "social_organic",
+      utmCampaign: "3106 Quinn Drive",
     }));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(202);
     expect(trackMock).toHaveBeenCalledWith(expect.objectContaining({
       properties: { path: "/home-value" },
       utmSource: undefined,
       utmMedium: "social_organic",
+      utmCampaign: undefined,
     }));
   });
 
@@ -177,18 +179,29 @@ describe("POST /api/analytics/event", () => {
     ] as const;
     for (const eventName of widgetEvents) {
       trackMock.mockReset();
-      trackMock.mockResolvedValue(undefined);
+      trackMock.mockResolvedValue(true);
       const res = await POST(post({ eventName }));
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(202);
       expect(trackMock).toHaveBeenCalledOnce();
     }
   });
 
   it("accepts an empty properties object", async () => {
     const res = await POST(post({ eventName: "session_created" }));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(202);
     expect(trackMock).toHaveBeenCalledWith(
       expect.objectContaining({ eventName: "session_created", properties: {} })
     );
+  });
+
+  it("fails truthfully when the canonical event write is unavailable", async () => {
+    trackMock.mockResolvedValue(false);
+    const res = await POST(post({ eventName: "page_view", properties: { path: "/" } }));
+    expect(res.status).toBe(503);
+    await expect(res.json()).resolves.toMatchObject({
+      ok: false,
+      persisted: false,
+      error: "analytics_persistence_unavailable",
+    });
   });
 });

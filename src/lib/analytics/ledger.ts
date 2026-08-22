@@ -2,14 +2,14 @@ import type { TrackEventParams, AnalyticsEventName } from "@/types/domain.types"
 import { recordNeonAnalyticsEvent } from "@/lib/persistence/neon/analytics-event-repository";
 import { ANALYTICS_EVENTS } from "./events";
 
-export async function trackEvent(params: TrackEventParams): Promise<void> {
+export async function trackEvent(params: TrackEventParams): Promise<boolean> {
   const eventMeta = ANALYTICS_EVENTS[params.eventName];
   if (!eventMeta) {
     console.error(`[analytics] Unknown event: ${params.eventName}`);
-    return;
+    return false;
   }
 
-  await recordNeonAnalyticsEvent({
+  return recordNeonAnalyticsEvent({
     sessionId: params.sessionId,
     leadId: params.leadId,
     agentId: params.agentId,

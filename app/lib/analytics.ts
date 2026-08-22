@@ -5,7 +5,7 @@ import { getDeviceCategory } from "./attribution";
 import type { Attribution } from "./leadPayload";
 import { allowedWidgetParentOrigin } from "./publicOrigin";
 import {
-  safeAnalyticsDimension,
+  safePublicAnalyticsDimension,
   safePublicAnalyticsProperties,
 } from "@/lib/analytics/privacy";
 
@@ -54,9 +54,9 @@ export function trackEvent(
       event_category: "intake",
       properties: safeProperties,
       attribution: {
-        source: safeAnalyticsDimension(attribution.source) ?? undefined,
-        medium: safeAnalyticsDimension(attribution.medium) ?? undefined,
-        campaign: safeAnalyticsDimension(attribution.campaign) ?? undefined,
+        source: safePublicAnalyticsDimension(attribution.source) ?? undefined,
+        medium: safePublicAnalyticsDimension(attribution.medium) ?? undefined,
+        campaign: safePublicAnalyticsDimension(attribution.campaign) ?? undefined,
       },
     }),
     keepalive: true,

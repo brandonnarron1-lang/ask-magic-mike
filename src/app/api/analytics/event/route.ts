@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TrackEventSchema } from "@/schemas/analytics.schema";
-import { trackEventNoWait } from "@/lib/analytics/ledger";
+import { trackEvent } from "@/lib/analytics/ledger";
 import {
   coarseAnalyticsUserAgent,
   isApprovedPublicAnalyticsEvent,
-  safeAnalyticsDimension,
+  safePublicAnalyticsDimension,
   safePublicAnalyticsProperties,
 } from "@/lib/analytics/privacy";
 import { checkRateLimit, rateLimitKey, LIMITS } from "@/lib/security/rate-limit";
@@ -87,15 +87,24 @@ export async function POST(req: NextRequest) {
     properties.device_category,
   ) ?? undefined;
 
-  trackEventNoWait({
+  const persisted = await trackEvent({
     eventName: parsed.data.eventName,
     sessionId: parsed.data.sessionId,
     properties,
-    utmSource: safeAnalyticsDimension(parsed.data.utmSource) ?? undefined,
-    utmMedium: safeAnalyticsDimension(parsed.data.utmMedium) ?? undefined,
-    utmCampaign: safeAnalyticsDimension(parsed.data.utmCampaign) ?? undefined,
+    utmSource: safePublicAnalyticsDimension(parsed.data.utmSource) ?? undefined,
+    utmMedium: safePublicAnalyticsDimension(parsed.data.utmMedium) ?? undefined,
+    utmCampaign: safePublicAnalyticsDimension(parsed.data.utmCampaign) ?? undefined,
     userAgent,
   });
 
-  return NextResponse.json({ ok: true }, { headers: ctx.finish(200) });
+  if (!persisted) {
+    return NextResponse.json(
+      { ok: false, persisted: false, error: "analytics_persistence_unavailable" },
+      { status: 503, headers: ctx.finish(503) },
+    );
+  }
+  return NextResponse.json(
+    { ok: true, persisted: true },
+    { status: 202, headers: ctx.finish(202) },
+  );
 }

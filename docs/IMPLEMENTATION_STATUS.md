@@ -45,7 +45,7 @@ Updated 2026-08-22.
 ## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
 
 - Audited PRs #190-#192 against PR #185 exact final head
-  `168937f0d6b7a90b027f39dc97f2135193c3fa72` and consolidated their unique
+  `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7` and consolidated their unique
   independent work once. Source commits, exclusions, rescue ref, and rollback
   are recorded in `docs/PHASE9_PRIVACY_KPI_TRUST_CONSOLIDATION.md`.
 - Durable Neon rate limiting now stores only versioned HMAC-SHA-256 bucket
@@ -54,7 +54,13 @@ Updated 2026-08-22.
 - Public analytics now uses an event/property allowlist, bounded JSON bodies,
   exact public-origin checks, coarse browser/device classes, and sanitized UTM
   dimensions. Public callers cannot bind events to canonical lead or agent IDs;
-  the persistence repository re-applies the privacy boundary.
+  the persistence repository re-applies the privacy boundary. Public UTM and
+  placement values are limited to controlled identifier slugs, so free-form
+  names and street addresses cannot survive as attribution dimensions.
+- Both public analytics routes now await the canonical Neon write, return HTTP
+  202 only for a durable event, and return HTTP 503 when persistence is
+  unavailable. All JSON-LD script surfaces share an escaping serializer rather
+  than inserting raw `JSON.stringify` output.
 - The protected Growth Command Center adds aggregate-only outcome and delivery
   evidence for eligible non-test, non-suppressed leads. Optional-table or query
   failure renders unavailable instead of fabricating zero. A post-refresh audit
@@ -63,12 +69,12 @@ Updated 2026-08-22.
 - PR #187's KPI target register and migration remain deferred. This candidate
   contains no migration, publisher, provider send, second data store, or live
   data action.
-- Focused verification passes 10 files / 72 tests. The full local release gate
-  passes system isolation, 14/14 release-safety checks, 209 test files / 2,895
+- Focused verification passes 12 files / 103 tests. The full local release gate
+  passes system isolation, 14/14 release-safety checks, 210 test files / 2,901
   tests, strict typecheck, ESLint, the optimized Next.js 15.5.21 build, and 80
   active routes. Production dependencies have no known vulnerability; a
-  fresh redacted full-history scan reports no leak; diff and migration checks
-  are clean. The prior Node 24 CI, canonical Vercel Preview,
+  fresh redacted 511-commit full-history scan reports no leak; diff and
+  migration checks are clean. The prior Node 24 CI, canonical Vercel Preview,
   authorization, privacy, and responsive 390/1440 rendering evidence remains a
   historical checkpoint. Exact-head GitHub/Vercel and protected Preview
   evidence after the base refresh is tracked on PR #193 and remains mandatory
@@ -94,24 +100,30 @@ Updated 2026-08-22.
   resolve only to fixed canonical UTM destinations. The WordPress auditor is
   read-only, host-allowlisted to the apex and `www` Our Town HTTPS hosts, and
   revalidates every redirect hop.
+- Final release review found that the renter export referenced a branch-only
+  JPEG even though protected Preview rendering resolves approved source art
+  from the released canonical host. Code-bearing fix
+  `9a8baf935a7a68cda528ec4aee90b7cfcf5e87fc` now reuses the equivalent retained
+  Production PNG and corrects the executable test's PNG MIME type. The former
+  URL returned HTTP 404 on Production; all three current export sources return
+  HTTP 200 with image content.
 - The latest public WordPress audit at `2026-08-22T14:10:43.297Z` fetched 42 of
   42 sitemap pages and made no form submission or WordPress change. Current
   aggregate Production truth remains six test/suppressed records and zero
   eligible live demand, outcomes, first-response samples, spend, or proofs.
-- The final post-hardening focused matrix passes 10 files / 148 tests. The full
-  local release gate passes system isolation, 14/14 release-safety checks, 206
-  test files / 2,868 tests, strict typecheck, ESLint, the optimized Next.js
-  15.5.21 build, and 80 active routes. Production dependencies have no known
-  vulnerability, a fresh redacted scan covers 504 commits / 14.08 MB with no leak,
-  `git diff --check` passes, and committed/working-tree migration scans are
-  empty. Exact-head Node 24 GitHub run `32584853104`, canonical Vercel Preview
-  `dpl_4cWbdSbt4AofDpmHkk3EvSh9g1En`, and protected Preview QA run
-  `32585009610` all pass. The protected run reports 16 pass / 6 intentional
-  write skips / 0 fail, 2/2 browser tests, 43/43 doctor checks, 14/14 safety
-  checks, and exact `PREVIEW_READY` authority. PR #185 is Ready, cleanly
-  mergeable, and unchanged at exact final head
-  `168937f0d6b7a90b027f39dc97f2135193c3fa72`. Only the exact owner gate below
-  remains before merge and Production deployment.
+- The final post-hardening focused matrix passes 5 files / 46 tests after the
+  retained-asset correction. The full local Node 24 release gate passes system
+  isolation, 14/14 release-safety checks, 206 test files / 2,869 tests, strict
+  typecheck, ESLint, the optimized Next.js 15.5.21 build, and 80 active routes.
+  Production dependencies have no known vulnerability, a fresh redacted scan
+  covers 511 commits / approximately 14.11 MB with no leak, `git diff --check`
+  passes, and committed/working-tree migration scans are empty. Exact-head Node
+  24 run `32588096247`, Ready Preview `dpl_83UZ6iisUUWK1LyGdTahkQvAiF2Y`, and
+  protected Preview QA run `32588280489` pass. The protected run reports 16
+  pass / 6 intentional write skips / 0 fail, 2/2 browser tests, 43/43 doctor
+  checks, 14/14 safety checks, and exact `PREVIEW_READY` authority. PR #185 is
+  cleanly mergeable at exact final head
+  `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7`; Production remains unchanged.
 - Protected Preview workflows now run release doctor before generating launch
   authority and must assert exact `PREVIEW_READY` afterward. This closes a
   false-green path where endpoint/browser checks passed but a missing doctor
@@ -233,9 +245,9 @@ PR #185 decision above; they are not independent release authority.
   private/no-store, CSP-sandboxed, noindex attachments. They make no provider or
   database call and accept no consumer data.
 - Executable QA found and closed unsupported renderer CSS, full-UTM QR density,
-  story footer overlap, and WebP/PNG decoder failures. The ordinary UI preserves
-  WebP assets; exports use retained JPEG originals plus one mechanically derived
-  JPEG of the same approved renter portrait.
+  story footer overlap, and WebP decoder/MIME failures. The ordinary UI preserves
+  WebP assets; exports use retained canonical JPEG/PNG sources that already
+  exist on the released host.
 - Final local verification passes system isolation, 14/14 release-safety checks,
   203 test files / 2,846 tests, strict typecheck, ESLint, optimized Next.js
   15.5.21 build, and 80 active routes / 17 acknowledged root–`src` duplicates.

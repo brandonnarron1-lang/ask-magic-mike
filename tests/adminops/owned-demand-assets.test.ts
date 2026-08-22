@@ -50,7 +50,11 @@ function emptySummary(): GrowthSummary {
 function dataUrlFor(relativePublicPath: string) {
   const file = path.join(root, "public", relativePublicPath);
   const extension = path.extname(file).toLowerCase();
-  const mime = extension === ".webp" ? "image/webp" : "image/jpeg";
+  const mime = extension === ".webp"
+    ? "image/webp"
+    : extension === ".png"
+      ? "image/png"
+      : "image/jpeg";
   return `data:${mime};base64,${fs.readFileSync(file).toString("base64")}`;
 }
 
@@ -153,6 +157,13 @@ describe("owned-demand asset studio", () => {
   it("keeps feed and story output aligned to current platform-safe dimensions", () => {
     expect(OWNED_DEMAND_IMAGE_SPECS.feed).toMatchObject({ width: 1080, height: 1350 });
     expect(OWNED_DEMAND_IMAGE_SPECS.story).toMatchObject({ width: 1080, height: 1920 });
+  });
+
+  it("renders renter exports from the retained Production portrait", () => {
+    const creative = resolveOwnedDemandCreative("facebook", "renter_plan");
+    expect(creative?.creativeExportPath).toBe(
+      "/images/ask-magic-mike/mike-eatmon-headshot.png",
+    );
   });
 });
 
