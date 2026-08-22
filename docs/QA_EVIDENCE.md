@@ -34,9 +34,40 @@ All timestamps are America/New_York unless noted.
   unmistakable test literals and documented placeholder syntax.
 - `git diff --check` and base/staged migration scans — PASS: no whitespace
   error and no migration in the candidate.
-- Remaining exact-head evidence: exact Node 24 GitHub checks, canonical Vercel
-  Preview, protected authorization/runtime checks, rejected-request privacy
-  probes, responsive visual acceptance, and deployment-log inspection.
+- Draft PR #193 code-bearing head
+  `6035131e394f3fa057acf662a204889743a69327` — PASS: GitHub
+  `local-release-gate` completed on exact Node 24 in 2m59s; Vercel built the
+  canonical project on Node 24 and reported `READY`.
+- Canonical Vercel Preview — PASS: deployment
+  `dpl_6wvQEvAZrBsgESJVfp5pdDtFvkuu`, immutable URL
+  `https://ask-magic-mike-gt7gtgf0f-eyes-up-industries.vercel.app`. `/`,
+  `/home-value`, `/buy`, and `/rent` returned 200 with Ask Magic Mike and Our
+  Town identity, no application error, and no NellySelly marker.
+- Authorization and privacy probes — PASS: anonymous `/admin/growth` and
+  `/api/admin/health` returned 401; the protected Growth response included
+  `Cache-Control: no-store`, CSP `frame-ancestors 'self'`, HSTS,
+  `WWW-Authenticate`, `X-Frame-Options: SAMEORIGIN`, and
+  `X-Robots-Tag: noindex, nofollow, noarchive`. A foreign-origin public
+  analytics POST returned 403 before rate limiting or persistence. No valid
+  analytics event was submitted.
+- Responsive visual acceptance — PASS in an isolated local Preview harness
+  with no `DATABASE_URL`, all mutation flags disabled, and synthetic local-only
+  Basic Auth. At 390 x 844 and 1440 x 1000 the protected page returned 200,
+  rendered one proof-ledger panel and all eight metric cards, displayed eight
+  honest unavailable values, produced no horizontal overflow or browser error,
+  and preserved the restrained black/gold hierarchy. Evidence is gitignored at
+  `artifacts/phase9-privacy-kpi-trust-visual/`.
+- Runtime inspection — PASS: the exact Vercel deployment reported no error logs
+  and no 5xx requests after acceptance probes.
+- Preview tooling cleanup — PASS: an isolated-worktree CLI call briefly created
+  an empty branch-named Vercel project because canonical `.vercel` metadata was
+  absent. The target was confirmed to have no deployment or domain, removed,
+  and the worktree was explicitly relinked to
+  `eyes-up-industries/ask-magic-mike`. No canonical project, domain, deployment,
+  environment variable, or Production alias changed.
+- The evidence-only documentation commit that records these results does not
+  alter application code. GitHub and Vercel must still be green on the final PR
+  #193 head before the Draft is considered release-ready.
 - No Production deployment, migration/write, valid analytics persistence test,
   lead, email/BCC, SMS, Push, provider action, WordPress edit, external
   publication, DNS change, spend, or NellySelly action occurred.

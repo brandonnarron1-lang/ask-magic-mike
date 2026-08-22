@@ -26,8 +26,13 @@ Updated 2026-08-22.
   tests, strict typecheck, ESLint, the optimized Next.js 15.5.21 build, and 80
   active routes. Production dependencies have no known vulnerability; a
   redacted history scan covers 499 commits / 13.94 MB with no leak; diff and
-  migration checks are clean. Exact Node 24 CI, Vercel Preview, responsive
-  visual, authorization, and runtime evidence remain before release readiness.
+  migration checks are clean. Draft PR #193 code-bearing head
+  `6035131e394f3fa057acf662a204889743a69327` passes exact Node 24 GitHub CI and
+  canonical Vercel Preview `dpl_6wvQEvAZrBsgESJVfp5pdDtFvkuu`. Public route
+  identity, anonymous admin denial, protected headers, foreign-origin analytics
+  rejection, no-5xx logs, and responsive 390/1440 proof-ledger rendering pass.
+  The final evidence-only head must retain green GitHub/Vercel checks before
+  release readiness.
 - Exact future application gate:
   `APPROVE PHASE 9 PRIVACY AND KPI TRUST MERGE AND PRODUCTION DEPLOYMENT`.
   No Production or external action is authorized by this status entry.
