@@ -1,21 +1,19 @@
 # Owner Approval Queue
 
-Updated 2026-08-21 from authenticated GitHub, Vercel, Neon, WordPress, and
+Updated 2026-08-22 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
-## Active Production release sequence
+## Completed Production release sequence
 
 Release only one approved PR at a time. Rebase the downstream PR on the exact
 new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
 
 1. PR [#183](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/183)
-   — campaign safety and three-offer owned-demand flight:
-   `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT`
+   — campaign safety and three-offer owned-demand flight is merged and live.
 2. PR [#184](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/184)
-   — append-only owned-demand publication-proof ledger, only after #183 lands
-   and #184 is refreshed:
-   `APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT`
+   — its exact gate was received; the backup-first Neon migration is applied
+   and verified, and application release evidence is attached to the PR.
 
 The #184 phrase authorizes its reviewed backup-first Neon migration, exact code
 merge, and canonical Vercel deployment. Neither phrase authorizes a social/GBP
@@ -71,7 +69,8 @@ deletion.
 
 ## Resolved and removed from this queue
 
-- PRs #170, #172, #173, #177, #178, #180, and #181 are merged; do not request
+- PRs #170, #172, #173, #177, #178, #180, #181, #183, and #184 are released;
+  do not request
   their historical approval phrases again.
 - Canonical Neon Production and Better Auth/RBAC are established.
 - Form 3 signed WordPress forwarding and duplicate native-notification shutdown

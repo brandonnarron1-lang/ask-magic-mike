@@ -1,7 +1,7 @@
 # Phase 9 Owned-Demand Publication Proof Ledger
 
-Date: 2026-08-21
-Status: stacked release candidate; Production database and application unchanged
+Date: 2026-08-22
+Status: Production migration applied and verified; application release evidence tracked on PR #184
 Canonical campaign: `amm_owned_demand_2026`
 
 ## Executive decision
@@ -193,6 +193,16 @@ APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERG
 This gate does not authorize a social/GBP/email/print publication. Each external
 placement still requires the final identity, copy, visual, URL, and removal path
 to be approved.
+
+The exact gate was received on 2026-08-22. The first guarded attempt created a
+validated backup and then rolled back because PostgreSQL 18 rendered one escaped
+catalog expression differently from the verifier's text comparison. Read-only
+preflight proved the table, function, and migration row remained absent and the
+lead/audit digests were unchanged. The verifier was changed to inspect semantic
+constraint markers, passed the real PostgreSQL 18 catalog in a rollback-only
+diagnostic, and the unchanged hash-pinned migration then committed successfully.
+Independent read-only postflight verifies one migration row, zero proof rows,
+RLS, immutability, indexes, constraints, invoker security, and least privilege.
 
 ## Rollback
 

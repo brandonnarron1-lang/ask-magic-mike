@@ -96,11 +96,11 @@ securely. CSV export remains available with audit logging.
 
 ## 6. Release and publication boundaries
 
-### Two current releases remain gated
+### Current release state
 
-PR #183 is the next campaign-safety/three-offer release. PR #184 is stacked on it
-and adds the publication-proof ledger plus a hash-pinned Neon migration. Neither
-is Production until its exact approval, deployment, and postflight verification.
+PR #183 is merged and live. PR #184's hash-pinned Neon migration is applied and
+independently verified; its exact application release evidence is tracked on the
+PR. Neither release authorizes an external placement or provider action.
 
 ### Prepared content is not published content
 
@@ -137,10 +137,9 @@ backup-first, identity, role, hash, and postflight interlocks.
 
 | Priority | Action | Gate |
 |---|---|---|
-| 1 | Release PR #183 and verify canonical Production | Exact #183 approval |
-| 2 | Refresh, migrate, and release PR #184 | Exact #184 approval |
-| 3 | Publish one approved zero-spend placement and record native proof | Channel-specific approval |
-| 4 | Activate Mike's account and enroll each owner's Web Push device | Per-person takeover/test approval |
-| 5 | Approve consent wording before expanding WordPress forms | Mike/BIC approval |
-| 6 | Attach `hub.ourtownproperties.com` | DNS/Vercel approval |
-| 7 | Add MLS or CRM integrations only under an existing approved contract/account | Provider/credential approval |
+| 1 | Reconcile the downstream stacked PRs onto released #184 and re-establish exact-head evidence | No Production mutation without its own gate |
+| 2 | Publish one approved zero-spend placement and record native proof | Channel-specific approval |
+| 3 | Activate Mike's account and enroll each owner's Web Push device | Per-person takeover/test approval |
+| 4 | Approve consent wording before expanding WordPress forms | Mike/BIC approval |
+| 5 | Attach `hub.ourtownproperties.com` | DNS/Vercel approval |
+| 6 | Add MLS or CRM integrations only under an existing approved contract/account | Provider/credential approval |

@@ -65,8 +65,8 @@ warranted.
 
 | PR | Disposition | Gate |
 | --- | --- | --- |
-| #183 campaign safety and three-offer flight | Next separately gated release; no database migration or publisher | `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT` |
-| #184 publication-proof ledger | Draft stacked on #183; refresh after #183, then run its guarded Neon migration/release gate | `APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT` |
+| #183 campaign safety and three-offer flight | Merged and live at `b8b31fb`; no publisher action occurred | Gate satisfied; external publication remains separate |
+| #184 publication-proof ledger | Exact gate received; guarded Neon migration applied and verified; application release evidence tracked on PR | Gate satisfied; external publication remains separate |
 | #182 launch authority/buyer discovery | Deferred overlap candidate; reconcile only after #183/#184 | Retain its gate only after fresh exact-head proof |
 | #179 iOS Web Push handoff | Deferred; code refresh and physical device acceptance remain separate | Retain its gate only after fresh exact-head proof |
 

@@ -1,6 +1,6 @@
 # Implementation Status
 
-Updated 2026-08-21.
+Updated 2026-08-22.
 
 ## Phase 9 current-router safety consolidation — 2026-08-21
 
@@ -76,11 +76,11 @@ Updated 2026-08-21.
   migration now revokes inherited `service_role` privileges before granting
   only SELECT and INSERT. The reviewed migration hash is
   `c60c1a6e692d487e0adfd98d0eb3a9cff89ad77a3233b53075a4c8b63bde3ede`.
-- The candidate is stacked on the exact PR #183 head
-  `e9fbc48ed436c74aa9ab178c426626230f8ddf9b`; PR #183 remains unchanged and
-  retains its separate campaign release gate.
+- PR #183 is merged and live at Production commit
+  `b8b31fb20223ad0f0ad311fee1ee3de20d0f7ae9`. PR #184 was refreshed onto that
+  exact `main` before migration and application release.
 - The full local release gate passes system isolation, 14/14 safety checks,
-  200 test files / 2,828 tests, strict typecheck, ESLint, the Next.js 15.5.21
+  200 test files / 2,831 tests, strict typecheck, ESLint, the Next.js 15.5.21
   Production build, and the 78-route manifest. Production dependencies report
   no known vulnerabilities; a redacted full-history scan reports no secret
   leaks. Production-render Playwright checks pass 10/10 desktop/mobile routes
@@ -90,16 +90,10 @@ Updated 2026-08-21.
   `staging:local:verify` passes the real PostgreSQL 17.6 role, idempotency,
   audit, host, RLS, and immutability contract with all synthetic changes rolled
   back.
-- Draft PR #184 is correctly stacked on PR #183. Code-bearing hardening head
-  `755cf686fccea3facd0071aebbdd24734e818ccd` passed exact-head Node 24 CI run
-  `32512057769`. Ready Preview deployment
-  `dpl_4JxCp1UxebTPof1fvK55NTrrnHqY` serves the expected public/health routes,
-  identifies only Ask Magic Mike/Our Town Properties, and denies anonymous
-  `/admin/distribution` access with 401, Basic challenge, no-store, SAMEORIGIN,
-  and noindex controls. No Preview mutation was attempted. A later
-  documentation-only reconciliation does not change runtime behavior; its
-  exact-head GitHub/Vercel status is kept in PR #184's required checks and
-  Preview metadata rather than frozen into this file.
+- PR #184's canonical exact-head Node 24 CI, Preview, merge, and Production
+  deployment identifiers are kept in PR metadata rather than frozen into this
+  self-referential release file. The protected Preview serves expected
+  public/health routes and rejects anonymous `/admin/distribution` access.
 - Vercel CLI verification created empty helper project
   `amm-phase9-publication-ledger-20260821`
   (`prj_QcHch6KY1m2g0BKtOoVVFregRhho`) before the worktree was relinked to the
@@ -112,11 +106,14 @@ Updated 2026-08-21.
   Neon/Better-Auth/Resend/Web-Push variable names, both deployable app trees,
   and MLS-contextual MATRIX usage instead of falsely rejecting the ordinary
   phrase `form-readiness matrix`. Focused scanner coverage passes 82/82.
-- No Production database write, code deployment, WordPress change, provider
-  call, email, SMS, social/GBP publication, print distribution, spend, DNS
-  change, or NellySelly mutation occurred.
-- Exact ledger migration/release gate:
-  `APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT`.
+- The exact ledger migration/release gate was received on 2026-08-22. The
+  unchanged hash-pinned migration committed once after one fail-closed rollback
+  exposed and corrected a PostgreSQL 18 verifier-only catalog-render mismatch.
+  Two validated 351,600-byte backups were retained. Independent postflight
+  proves zero seeded proofs and unchanged lead/audit counts and digests.
+- No lead mutation, WordPress change, provider call, email, SMS, social/GBP
+  publication, print distribution, spend, DNS change, or NellySelly mutation
+  occurred.
 - External publication remains a separate final-copy/identity/visual/URL/removal
   approval and is not authorized by the ledger gate.
 

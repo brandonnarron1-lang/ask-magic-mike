@@ -1,7 +1,7 @@
 # Owned-Demand Publication Proof Ledger QA Evidence
 
-Date: 2026-08-21
-Status: local database contract and full release gate passed; exact-head CI and Preview are tracked on PR #184; Production unchanged
+Date: 2026-08-22
+Status: Production migration and independent postflight passed; exact-head application release tracked on PR #184
 
 ## Scope and truth boundary
 
@@ -160,13 +160,13 @@ An initial development-server pass produced intermittent Next.js HMR/compiler
 rerun against a fresh optimized Production build and passed 10/10; the failed
 development run is not counted as release evidence.
 
-## Remaining candidate proof
+## Application release proof
 
-- immediately before any merge, verify PR #184's current immutable head has a
+- immediately before merge, verify PR #184's current immutable head has a
   green Node 24 release gate and matching Ready Vercel Preview;
 - do not bypass authenticated Preview access merely to render mutation controls.
-  The Preview fail-closed-before-query path is covered by unit tests; the real
-  authenticated record flow remains post-migration Production verification.
+  The Preview fail-closed-before-query path is covered by unit tests; no
+  publication proof is fabricated merely to exercise the Production control.
 
 During authenticated CLI verification, Vercel first auto-linked the worktree to
 empty helper project `amm-phase9-publication-ledger-20260821`
@@ -174,5 +174,36 @@ empty helper project `amm-phase9-publication-ledger-20260821`
 canonical project. The helper has zero deployments, domains, or application
 effect. It remains intact pending a separate exact cleanup approval.
 
-No Production migration, merge, deployment, provider call, publication, send,
-lead write, WordPress change, DNS change, spend, or NellySelly change occurred.
+No provider call, publication, send, lead write, WordPress change, DNS change,
+spend, or NellySelly change occurred.
+
+## Production migration evidence — 2026-08-22
+
+- Exact target: Neon project `bitter-star-20214385`, Production branch
+  `br-round-base-auh6h2wd`, unpooled primary endpoint
+  `ep-proud-bonus-autwv60g`, database `neondb`, owner `neondb_owner`, TLS.
+- Exact migration: `20260821170000`, SHA-256
+  `c60c1a6e692d487e0adfd98d0eb3a9cff89ad77a3233b53075a4c8b63bde3ede`.
+- Initial preflight: six leads, nine audit rows, zero proof rows, target objects
+  absent, target migration count zero, and all prerequisite/role checks true.
+- First guarded attempt: backup `3f4ca5b0e6720e87db5894a363a5c836722161469d4b89e8a02d01e8f267dce9`
+  (351,600 bytes; 646 restore entries) validated; verifier rejected a brittle
+  PostgreSQL 18 escaped-catalog comparison and the transaction rolled back.
+- Rollback proof: target table/function/migration remained absent and both the
+  lead and audit counts/digests remained identical.
+- Regression: six focused files / 54 tests passed; a rollback-only Production
+  diagnostic proved the semantic constraint markers against the actual
+  PostgreSQL 18 catalog; full local gate passed 200 files / 2,831 tests,
+  typecheck, lint, optimized build, 78-route manifest, 14/14 safety, and system
+  isolation.
+- Successful guarded attempt: second validated backup
+  `3bcb03718855523e4ebbc634556a1ce8e716a73680ae3743fe2301a71aa40f88`
+  (351,600 bytes; 646 restore entries); migration committed once.
+- Independent read-only verify: table owner/RLS, immutable UPDATE/DELETE
+  trigger, three indexes, attribution/state/evidence/hash constraints,
+  `SECURITY INVOKER` function with locked search path, idempotency, audit code,
+  service-role SELECT/INSERT/function-only rights, browser/public denial, and
+  migration count one all passed.
+- Data invariants: six leads and nine pre-existing audit rows retained identical
+  digests; zero proof rows were seeded. No lead, message, provider call,
+  publication, WordPress/DNS change, spend, or NellySelly action occurred.
