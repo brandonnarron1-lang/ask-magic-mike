@@ -57,6 +57,25 @@ Attribution remains deterministic. A signal counts only when normalized source
 alias, medium, campaign, and complete placement content match. Generic and
 offer-specific signals are summed once at the channel and command levels.
 
+## Measurement truth contract
+
+The command now evaluates the canonical Growth loader before interpreting any
+count. It distinguishes four states: ready, database not configured, schema
+pending, and query failed. Only the ready state may render numeric demand
+metrics, a measured bottleneck, or a data-backed first-channel recommendation.
+
+When measurement is unavailable:
+
+- the three metric cards render an em dash rather than a synthetic zero;
+- the page explicitly states that unavailable is not zero live demand;
+- channel and offer badges say `Measurement unavailable`;
+- the prepared five-day sequence remains visible as review material; and
+- the first-move panel directs the operator to restore measurement instead of
+  presenting the first prepared channel as evidence-backed.
+
+This preserves the reusable campaign assets during an outage without turning a
+database/configuration failure into false business intelligence.
+
 ## Visual decision
 
 The flight reuses retained, local Ask Magic Mike assets:
@@ -116,11 +135,11 @@ Automated coverage proves:
   publication approval boundary;
 - continued test/suppressed-lead exclusion upstream.
 
-The final local release gate passes 196 test files / 2,795 tests, strict
+The final local release gate passes 196 test files / 2,797 tests, strict
 typecheck, ESLint, the optimized Next.js 15.5.21 Production build, 78-route
 manifest verification, 14/14 release-safety controls, Ask Magic Mike/NellySelly
 isolation, a Production dependency audit with no known vulnerabilities, and a
-redacted 464-commit secret scan with no findings.
+redacted 482-commit secret scan with no findings.
 
 The fresh local Production-render run passes 10/10 desktop/mobile checks across
 the active home-value, Ask, embed, widget-preview, and protected owned-demand
@@ -129,6 +148,11 @@ appraisal language, or console error. Analytics endpoints are mocked only in the
 visual harness to keep this acceptance read-only.
 
 No database migration is required.
+
+A separate no-database Production-render acceptance proves the unavailable
+state at 1440 × 1000 and 390 × 844: three unavailable metrics, no false zero,
+no measured bottleneck, no data-backed channel recommendation, no horizontal
+overflow, and no browser console or page error.
 
 ## Exact Preview evidence
 
