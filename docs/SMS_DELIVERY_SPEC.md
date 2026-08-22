@@ -15,7 +15,9 @@ Web Push activation requires:
 - `PHONE_SETUP_SIGNING_SECRET` (Sensitive/server-only, 32+ random characters)
 - one device registration for the `primary` role and one for the `copy` role.
   Admin registration remains at `/admin/notifications/phone`; Brandon can use a
-  short-lived, copy-only setup session at `/phone-alerts/setup`.
+  short-lived, copy-only setup session beginning at
+  `/phone-alerts/install/[token]` and ending at token-free
+  `/phone-alerts/setup`.
 
 Each live lead creates independent push delivery records per registered device,
 with provider status, attempts, retries, and deterministic idempotency. QA leads
@@ -33,10 +35,16 @@ HttpOnly setup session, exact same-origin validation, an explicit request
 header, runtime schema validation, and rate limiting. The invite endpoint itself
 requires admin authentication and never changes lead routing.
 
-The installed app manifest starts at `/phone-alerts/setup`, not at the Basic
-Auth-protected admin route. This is required on iPhone because a Home Screen web
-app receives Safari cookie state when installed, while Basic Auth credentials
-are not a transferable app session.
+The token-scoped installed-app manifest starts at
+`/phone-alerts/setup/claim?token=…`, not at the Basic Auth-protected admin route.
+This is required because iPhone Push permission is available only inside the
+Home Screen app and Basic Auth is not a transferable app session. The claim is
+signed, expiring, restricted to `copy`, durably one-time, exact-origin bound,
+and exchanged for an HttpOnly cookie before redirecting to the token-free setup
+URL. The cookie contains a separately minted signed session credential—not the
+bearer invite—so manually pasting the invite into a cookie cannot bypass the
+one-time guard. The installed manifest is scoped to `/phone-alerts/` only.
+Production refuses the claim when the durable guard is unavailable.
 
 ## Scope
 

@@ -1,6 +1,6 @@
 # Known Limitations — Ask Magic Mike
 
-Updated 2026-08-21. This document records the current Neon/Resend/Web Push
+Updated 2026-08-22. This document records the current Neon/Resend/Web Push
 system, not the superseded Supabase/mock-email/Twilio-era architecture.
 
 ## 1. Demand and measurement
@@ -33,8 +33,10 @@ and approval-gated. A queued provider state is not a delivered-state claim.
 The schema, VAPID configuration, protected setup flow, and push adapter are
 present. Each person must install/enable notifications on their own supported
 device and approve one `[TEST]` receipt. Mike's device cannot be represented by
-Brandon's enrollment. PR #179 contains a deferred iOS Home Screen handoff repair
-that must be refreshed before release.
+Brandon's enrollment. Historical PR #179's unique iOS Home Screen handoff has
+been consolidated on the current verified stack, but it is not Production until
+its own exact application gate, merge, and deployment. Physical installation
+and test receipt remain separate human actions.
 
 ### Carrier SMS/MMS is intentionally disabled
 
@@ -137,7 +139,7 @@ backup-first, identity, role, hash, and postflight interlocks.
 
 | Priority | Action | Gate |
 |---|---|---|
-| 1 | Reconcile the downstream stacked PRs onto released #184 and re-establish exact-head evidence | No Production mutation without its own gate |
+| 1 | Release stacked candidates in order and re-establish exact-head evidence after each predecessor | No Production mutation without its own gate |
 | 2 | Publish one approved zero-spend placement and record native proof | Channel-specific approval |
 | 3 | Activate Mike's account and enroll each owner's Web Push device | Per-person takeover/test approval |
 | 4 | Approve consent wording before expanding WordPress forms | Mike/BIC approval |

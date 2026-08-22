@@ -2,6 +2,56 @@
 
 Updated 2026-08-22.
 
+## Phase 9 iOS phone handoff consolidation — 2026-08-22
+
+- Historical PR #179 was audited rather than merged wholesale. Its unique
+  iPhone Home Screen credential-context repair is consolidated once on released
+  PR #193 merge `9b82afb609674bb0209b73f8ac9622ab02733e2a`; its obsolete
+  router/docs stack remains excluded.
+- The existing Web Push, VAPID, Neon subscription/outbox, service worker, and
+  protected phone APIs are reused. No carrier SMS, second PWA, second provider,
+  second database, phone takeover, migration, device enrollment, or send was
+  added.
+- The restricted Brandon invite now opens a private token-scoped install page
+  and `/phone-alerts/`-scoped manifest. The installed app exchanges the signed
+  invite for a different server-minted Secure, HttpOnly, SameSite=Strict
+  session credential, then continues on a token-free URL. A raw invite pasted
+  into the cookie slot is rejected.
+- A canonical Neon-backed, HMAC-pseudonymized one-time nonce guard denies
+  cross-browser replay. Production fails closed when durable claim enforcement
+  is unavailable on Vercel or owned/self-hosted Production; an existing
+  installed app may reopen only with its matching HttpOnly session cookie.
+- Exact Ask Magic Mike origin binding excludes Our Town, NellySelly, and
+  arbitrary Vercel hostnames from this privileged handoff. Private/no-store,
+  no-referrer, noindex, CSP, and robots controls cover every phone-alert route.
+- The scoped copy repository cannot relabel an existing Mike/primary endpoint.
+  With Lead Center RBAC enabled, the legacy secret-header invite endpoint is
+  disabled so only an operator holding `notification:manage` can create the
+  link. The optional QA Push is durably limited to one attempt per setup session
+  and copy subscription in Production.
+- Released-base focused verification passes 8 files / 58 tests. The exact Node
+  24 release gate passes 214 files / 2,939 tests, strict typecheck, ESLint,
+  optimized build, 82 active routes, and 14/14 safety controls. Production
+  dependency audit, patch-integrity, candidate secret, and migration scans pass;
+  the PR contains no database migration.
+- Draft PR #194 is cleanly mergeable on `main`. Its released-base code head is
+  `d5da4bd8ac4b0235e140ac785d46824a198292d8`; its prior state is preserved at
+  `rescue/amm-pr194-pre-pr193-refresh-20260822-1841`. Exact Node 24 run
+  `32603258868`, Ready Preview deployment
+  `dpl_HErSvZNK89Wh79rbi71KAZhqKdq1`, and protected Preview QA run
+  `32603437125` pass.
+- Protected Preview acceptance records 17 passes, six intentional write skips,
+  zero failures, two expected browser tests, 43/43 doctor checks, and strict
+  `PREVIEW_READY`. The automated phone probe uses only an invalid synthetic
+  token and performs no invite, claim, limiter persistence, device
+  registration, or send.
+- PR #194 remains Draft. Green evidence does not authorize merge or Production;
+  physical device enrollment and one `[TEST]` Push remain separately gated.
+- Detailed decision: `docs/phase9/PHONE_INSTALL_HANDOFF_CONSOLIDATION.md`.
+- Exact future application gate:
+  `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
+  Physical device enrollment and a `[TEST]` Push remain separate actions.
+
 ## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
 
 - Audited PRs #190-#192, then refreshed the consolidation onto released PR #185
@@ -40,9 +90,10 @@ Updated 2026-08-22.
   historical checkpoint. Exact-head GitHub/Vercel and protected Preview
   evidence after the final registered-attribution patch is tracked on PR #193
   and remains mandatory before release readiness.
-- Exact future application gate:
-  `APPROVE PHASE 9 PRIVACY AND KPI TRUST MERGE AND PRODUCTION DEPLOYMENT`.
-  No Production or external action is authorized by this status entry.
+- PR #193 was approved, merged as
+  `9b82afb609674bb0209b73f8ac9622ab02733e2a`, and accepted on Production
+  deployment `dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a`. Its application gate is
+  exhausted and cannot authorize another action.
 
 ## Phase 9 consolidated owned-demand command — 2026-08-22
 

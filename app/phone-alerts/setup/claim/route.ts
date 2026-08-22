@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, LIMITS, rateLimitKey } from "@/lib/security/rate-limit";
 import {
   PHONE_SETUP_COOKIE,
+  PHONE_SETUP_MAX_TTL_MS,
+  isProductionPhoneSetupRuntime,
+  mintPhoneSetupSessionToken,
   phoneSetupResponseOrigin,
-  verifyPhoneSetupToken,
+  verifyPhoneSetupInviteToken,
+  verifyPhoneSetupSessionToken,
 } from "../../../lib/phoneSetupSession";
 
 export const runtime = "nodejs";
@@ -30,18 +34,45 @@ export async function GET(request: NextRequest) {
     return privateRedirect(new URL("/phone-alerts/setup?error=rate_limited", origin));
   }
 
-  const claims = verifyPhoneSetupToken(request.nextUrl.searchParams.get("token"));
+  const token = request.nextUrl.searchParams.get("token");
+  const claims = verifyPhoneSetupInviteToken(token);
   if (!claims) {
     return privateRedirect(new URL("/phone-alerts/setup?error=expired", origin));
   }
 
+  const existingSession = verifyPhoneSetupSessionToken(request.cookies.get(PHONE_SETUP_COOKIE)?.value);
+  if (existingSession?.inviteNonce === claims.nonce) {
+    return privateRedirect(new URL("/phone-alerts/setup", origin));
+  }
+
+  const oneTimeClaim = await checkRateLimit(
+    `phone-setup-claim:${claims.nonce}`,
+    1,
+    PHONE_SETUP_MAX_TTL_MS,
+    "phoneSetup",
+  );
+  const productionNeedsDurability = isProductionPhoneSetupRuntime();
+  if (productionNeedsDurability && !oneTimeClaim.durable) {
+    return privateRedirect(new URL("/phone-alerts/setup?error=claim_unavailable", origin));
+  }
+  if (!oneTimeClaim.allowed) {
+    return privateRedirect(new URL("/phone-alerts/setup?error=already_claimed", origin));
+  }
+
+  let session;
+  try {
+    session = mintPhoneSetupSessionToken(claims);
+  } catch {
+    return privateRedirect(new URL("/phone-alerts/setup?error=expired", origin));
+  }
+
   const response = privateRedirect(new URL("/phone-alerts/setup", origin));
-  response.cookies.set(PHONE_SETUP_COOKIE, request.nextUrl.searchParams.get("token") || "", {
+  response.cookies.set(PHONE_SETUP_COOKIE, session.token, {
     httpOnly: true,
     secure: request.nextUrl.protocol === "https:",
     sameSite: "strict",
     path: "/",
-    maxAge: Math.max(60, Math.floor((claims.exp - Date.now()) / 1000)),
+    maxAge: Math.max(60, Math.floor((session.claims.exp - Date.now()) / 1000)),
   });
   return response;
 }

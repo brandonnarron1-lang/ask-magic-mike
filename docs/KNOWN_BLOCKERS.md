@@ -12,14 +12,19 @@ specific expansions; they do not invalidate the live lead pipe.
 - PR #185 is merged and live as `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8`.
   Its WordPress proof-scope migration and Production application acceptance
   passed; its gate is exhausted.
-- Draft PR #193 consolidates PRs #190–#192 on released PR #185. It is refreshed
-  to current `main`; final exact-head CI/Preview evidence remains required
-  before its distinct privacy/KPI gate can be requested.
-- Draft PR #194 consolidates the unique iOS handoff on PR #193 and must be
-  refreshed only after PR #193 is finalized. PR #182 is superseded; PRs #92
-  and #119–#121 are archive candidates.
+- PR #193 is merged and live as `9b82afb609674bb0209b73f8ac9622ab02733e2a`
+  on Vercel Production deployment `dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a`.
+  Its privacy/KPI acceptance passed, it contained no database migration, and
+  its gate is exhausted.
+- Draft PR #194 consolidates the unique iOS handoff onto released PR #193. Its
+  pre-refresh state is preserved at
+  `rescue/amm-pr194-pre-pr193-refresh-20260822-1841`; exact-head Node 24,
+  canonical Preview, protected-flow, and rendered evidence remain required
+  before its distinct release gate can be requested.
 - Draft PR #195 remains stacked after PR #194 and must not be merged or deployed
   before both predecessors are released and refreshed in order.
+- Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
+  and #119–#121 are preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,
   and #181 must not be requested again.
 
@@ -40,8 +45,10 @@ specific expansions; they do not invalidate the live lead pipe.
   `primary_lead_owner` account remains dormant until Mike chooses a password and
   completes assigned-lead-only acceptance.
 - Web Push infrastructure is ready, but each device owner must grant browser
-  permission and complete a controlled `[TEST]` receipt. Brandon cannot enroll
-  a device as Mike.
+  permission and complete a controlled `[TEST]` receipt. The prepared iPhone
+  handoff still requires application release, physical Home Screen installation,
+  and the owner's explicit test-send approval. Brandon cannot enroll a device
+  as Mike.
 - `hub.ourtownproperties.com` is not attached. DNS and Vercel domain mapping
   remain separately gated; canonical `/admin` remains the private entry point.
 

@@ -160,6 +160,12 @@ async function http(method, path, opts = {}) {
     json,
     text,
     location: res.headers.get("location"),
+    responseHeaders: {
+      cacheControl: res.headers.get("cache-control"),
+      contentType: res.headers.get("content-type"),
+      referrerPolicy: res.headers.get("referrer-policy"),
+      xRobotsTag: res.headers.get("x-robots-tag"),
+    },
   };
 }
 
@@ -383,6 +389,57 @@ async function slaSweep() {
   }
 }
 
+/**
+ * Exercise the iOS Home Screen routes with a deliberately invalid synthetic
+ * token. This proves the deployed private/noindex failure contract without
+ * minting or redeeming a bearer token, touching a limiter bucket, registering
+ * a device, or sending Push.
+ */
+async function phoneInstallHandoff() {
+  const installPath = "/phone-alerts/install/preview-qa-invalid-token";
+  const install = await http("GET", installPath);
+  const manifestPath = `${installPath}/manifest.webmanifest`;
+  const manifest = await http("GET", manifestPath);
+  const privateInstall =
+    install.responseHeaders?.cacheControl?.includes("no-store")
+    && install.responseHeaders?.referrerPolicy === "no-referrer"
+    && install.responseHeaders?.xRobotsTag?.includes("noindex");
+  const privateManifest =
+    manifest.responseHeaders?.contentType?.includes("application/manifest+json")
+    && manifest.responseHeaders?.cacheControl?.includes("no-store")
+    && manifest.responseHeaders?.referrerPolicy === "no-referrer"
+    && manifest.responseHeaders?.xRobotsTag?.includes("noindex");
+  const safeInvalidPage =
+    install.ok
+    && install.text.includes("Fresh install link required")
+    && install.text.includes("No phone was registered and no notification was sent");
+  const manifestRejected =
+    manifest.status === 404
+    && manifest.json?.error === "phone_setup_link_expired";
+
+  if (safeInvalidPage && privateInstall && privateManifest && manifestRejected) {
+    record("phone_install:handoff", "pass", {
+      http: manifest.status,
+      message: "read-only private failure contract verified with an invalid synthetic token",
+    });
+  } else {
+    const failedChecks = [
+      ["install_status", install.ok],
+      ["safe_invalid_page", safeInvalidPage],
+      ["install_privacy_headers", privateInstall],
+      ["manifest_privacy_headers", privateManifest],
+      ["manifest_rejected", manifestRejected],
+    ]
+      .filter(([, passed]) => !passed)
+      .map(([name]) => name)
+      .join(", ");
+    record("phone_install:handoff", "fail", {
+      http: manifest.status || install.status,
+      message: `private install contract failed: ${failedChecks || "unknown"}`,
+    });
+  }
+}
+
 async function listingPrivateLeakCheck() {
   const r = await http("GET", "/api/listings/search?q=Wilson&limit=3");
   if (!r.ok || !r.json) {
@@ -566,6 +623,7 @@ async function main() {
     health = await healthCheck();
     await adminListAndDashboard();
     await slaSweep();
+    await phoneInstallHandoff();
     await listingPrivateLeakCheck();
 
     const gate = shouldRunMutationChecks(health, process.env);

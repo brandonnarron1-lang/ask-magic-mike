@@ -95,6 +95,137 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## PR #194 released-base phone handoff acceptance — 2026-08-22
+
+- PR #193 was approved and released as main merge
+  `9b82afb609674bb0209b73f8ac9622ab02733e2a`; Production acceptance passed on
+  deployment `dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a` with no migration.
+- PR #194 was refreshed onto that released baseline. Its prior exact state is
+  preserved at `rescue/amm-pr194-pre-pr193-refresh-20260822-1841`; the
+  released-base code head is `d5da4bd8ac4b0235e140ac785d46824a198292d8`.
+- Unique candidate delta: 37 files, 1,440 insertions, 159 deletions, and no
+  database migration. Focused verification passes 8 files / 58 tests.
+- Exact Node 24 release run
+  [32603258868](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32603258868)
+  passes 214 files / 2,939 tests, strict typecheck, ESLint, 14/14 safety checks,
+  and the optimized 82-route Next.js 15.5.21 build.
+- Canonical Preview deployment `dpl_HErSvZNK89Wh79rbi71KAZhqKdq1` is Ready at
+  `https://ask-magic-mike-b0vzgy747-eyes-up-industries.vercel.app` and contains
+  exact code head `d5da4bd8ac4b0235e140ac785d46824a198292d8`.
+- Protected Preview QA run
+  [32603437125](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32603437125)
+  passes on Node 24: 17 HTTP checks, six intentional write skips, zero failures,
+  two expected browser tests, 43/43 doctor checks, and strict `PREVIEW_READY`.
+  `SAFE_DB_WRITE=false`; live email/SMS are disabled; no invite, claim, lead,
+  notification, device registration, or database write occurred.
+- Production dependency audit reports no known vulnerability; candidate
+  patch-integrity, gitleaks, and migration scans pass. PR #194 remains Draft;
+  physical enrollment and a `[TEST]` Push remain separately gated.
+
+## Historical pre-released-base phone handoff evidence — 2026-08-22
+
+- Post-refresh security audit — PASS: PR #194 now contains exact PR #193 head
+  `008f1faa95d98058199ec01534ee39b474d2a3b2`; the immediately preceding state
+  is preserved at `rescue/amm-pr194-pre-pr193-final-refresh-20260822-1412`.
+- Replay-boundary repair — PASS at code-bearing commit
+  `b62957ba5f66f98808a9e31536615ab6ea1cbee4`: the bearer invite and HttpOnly
+  setup session are distinct signed token kinds. A raw invite pasted into the
+  cookie slot is rejected, the one-time durable claim remains authoritative,
+  and the installed manifest is limited to `/phone-alerts/`.
+- Scoped-authority repair — PASS at code-bearing commit
+  `afc68b4060122481701514d0b2fe8630735aad8a`: copy enrollment cannot relabel a
+  primary endpoint; RBAC-enabled deployments reject the legacy secret-header
+  invite route; and the optional setup QA Push is a durable Production
+  one-shot per session/subscription.
+- Portable Production fail-closed repair — PASS at code-bearing commit
+  `f979d808fd76a1dba82b0a7f2b922f04c75af483`: both invite claim and optional
+  QA Push now require their durable
+  guards on Vercel Production and on owned/self-hosted Production when Vercel
+  metadata is absent; Preview remains separately identified and non-mutating.
+- Fresh focused matrix — PASS: 9 files / 61 tests. Fresh full local release
+  gate — PASS: system isolation, 14/14 safety controls, 213 files / 2,929 tests,
+  strict typecheck, ESLint, optimized Next.js 15.5.21 build, and 82 active
+  routes. `pnpm audit --prod --audit-level high` reports no known vulnerability;
+  a redacted full-history scan of approximately 14.14 MB found no leak;
+  candidate and migration scans are clean.
+- The exact Node 24, Preview deployment, protected QA, and rendered screenshots
+  listed below are the pre-refresh checkpoint. They prove the original handoff
+  but are not authority for the repaired final head; fresh exact-head evidence
+  is mandatory before PR #194 can leave Draft.
+- Reuse/overlap audit — PASS: historical PR #179 was compared against the
+  verified PR #193 stack. Only its unique iPhone Home Screen cookie-context
+  handoff was refreshed; obsolete stack authority and duplicate docs were not
+  imported. Rescue ref:
+  `rescue/amm-pre-phase9-phone-handoff-consolidation-20260822-1130`.
+- Pre-refresh focused phone/origin/Preview matrix — PASS: 8 files / 84 tests covering signed
+  expiry, exact Production and exact configured Preview origins, Our Town and
+  NellySelly rejection, private manifest metadata, token cleanup, durable
+  one-time claim, replay denial, matching installed-app reopen, Production
+  fail-closed behavior, setup UI, robots, and non-redemptive Preview QA.
+- Pre-refresh `pnpm release:gate` — PASS on local Node 26.5.1: Ask Magic Mike/NellySelly
+  isolation, 14/14 release-safety controls, 210 test files / 2,907 tests,
+  strict typecheck, ESLint, optimized Next.js 15.5.21 build, and 82 active
+  routes / 17 acknowledged root–`src` duplicates. The project declares Node
+  24.x, so exact Node 24 GitHub evidence remains required on the PR head.
+- `pnpm run typecheck`, `pnpm run lint`, `pnpm run release:doctor`, and
+  `pnpm run release:safety` — PASS. Before commit, the doctor reported only the
+  expected non-blocking dirty-worktree diagnostic; every blocking check passed.
+- Supply-chain and secret review — PASS: `pnpm audit --prod --audit-level high`
+  found no known Production dependency vulnerability; `gitleaks git --redact
+  --no-banner` scanned 501 commits / 14.02 MB with no leak; the staged 45.74 KB
+  candidate scan found no leak.
+- Diff and migration review — PASS: `git diff --cached --check` is clean and
+  the exact staged file list contains no SQL or migration path. The one-time
+  guard reuses the existing HMAC-pseudonymized Neon rate-limit table.
+- Rendered browser QA — PASS in a local no-provider/no-database harness. The
+  approved Mike portrait and existing black/gold/cyan system rendered at
+  390×844 and 1440×1000 with zero browser errors, no horizontal overflow, clear
+  role/device/expiry state, four install steps, and visible bearer-link warning.
+  Invalid-token rendering truthfully states that no phone was registered and no
+  notification was sent. Gitignored evidence:
+  `output/playwright/phone-handoff/install-390x844-v2.png`,
+  `output/playwright/phone-handoff/install-1440x1000-v2.png`, and
+  `output/playwright/phone-handoff/expired-390x844.png`.
+- Preview automation was tightened before dispatch to use only an invalid
+  synthetic token; it does not mint or redeem a bearer token or touch a durable
+  rate-limit bucket. No Production/Neon write, migration, lead, device
+  registration, email, SMS, Push, WordPress/DNS/provider action,
+  external publication, spend, deletion, or NellySelly action occurred.
+- Protected-Preview CLI hygiene — a `vercel curl` attempt from the isolated
+  unlinked worktree auto-created empty helper project
+  `prj_Mb30U4zzULbWox6TPJ0QlJ4cVYSY`. Read-only inspection proves zero
+  deployments, empty targets/aliases, and no custom domain. The worktree was
+  immediately relinked to canonical project
+  `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; the empty helper is preserved for a
+  separate cleanup approval. No canonical setting, deployment, alias, domain,
+  environment variable, or Production resource changed.
+- Draft PR #194 code-bearing head
+  `450e17bc3fe659b31682832ad97e659380e74136` — PASS: exact Node 24
+  `local-release-gate` run
+  [32583239916](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32583239916)
+  completed in 2m27s; GitHub reports the PR CLEAN/MERGEABLE.
+- Canonical Vercel Preview — PASS: deployment
+  `dpl_9YpLm3EGtF1qPuCDCwhXpgMCKu8Y` is Ready at
+  `https://ask-magic-mike-mby366s98-eyes-up-industries.vercel.app` and contains
+  exact commit `450e17bc3fe659b31682832ad97e659380e74136`.
+- Protected Preview QA — PASS: workflow
+  [32583352634](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32583352634)
+  completed in 3m26s on Node 24. The release doctor passed 43/43; HTTP QA passed
+  17 with six expected mutation skips and zero failures; widget E2E passed two
+  expected tests with zero unexpected/flaky/skipped; release-candidate verdict
+  was GO and the strict launch-authority assertion reached `PREVIEW_READY`.
+- The phone probe returned the expected private HTTP 404 manifest rejection and
+  passed no-store/no-referrer/noindex plus truthful invalid-page copy using only
+  `preview-qa-invalid-token`. `SAFE_DB_WRITE=false`, `FORCE_DB_WRITE=false`,
+  and the mutation gate remained blocked. No invite or claim route was called.
+- Runtime log review found no error-level records. The only 5xx was the expected
+  authenticated SLA-cron HTTP 503 `preview_data_disabled`, which proves Preview
+  writes were refused.
+- Still required: release #185, refresh/release #193, then refresh PR #194 onto
+  the exact predecessor and repeat final-head CI/Preview before considering
+  `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
+  Physical enrollment and a `[TEST]` Push remain separate actions.
+
 ## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
 
 - Boundary review — PASS at checkpoint: the candidate is stacked on PR #185
