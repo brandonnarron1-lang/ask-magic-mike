@@ -47,6 +47,7 @@ const originalEnv = {
   vercelUrl: process.env.VERCEL_URL,
   vercelBranchUrl: process.env.VERCEL_BRANCH_URL,
   rbac: process.env.LEAD_CENTER_RBAC_ENABLED,
+  node: process.env.NODE_ENV,
 };
 
 function sessionCookie() {
@@ -64,6 +65,12 @@ function post(path: string, body: unknown, headers: Record<string, string> = {})
     },
     body: JSON.stringify(body),
   });
+}
+
+function setNodeEnv(value: string | undefined) {
+  const env = process.env as Record<string, string | undefined>;
+  if (value === undefined) delete env.NODE_ENV;
+  else env.NODE_ENV = value;
 }
 
 describe("passwordless Brandon phone setup routes", () => {
@@ -87,6 +94,7 @@ describe("passwordless Brandon phone setup routes", () => {
     if (originalEnv.vercelUrl === undefined) delete process.env.VERCEL_URL; else process.env.VERCEL_URL = originalEnv.vercelUrl;
     if (originalEnv.vercelBranchUrl === undefined) delete process.env.VERCEL_BRANCH_URL; else process.env.VERCEL_BRANCH_URL = originalEnv.vercelBranchUrl;
     if (originalEnv.rbac === undefined) delete process.env.LEAD_CENTER_RBAC_ENABLED; else process.env.LEAD_CENTER_RBAC_ENABLED = originalEnv.rbac;
+    setNodeEnv(originalEnv.node);
   });
 
   it("issues a short-lived link only to an authenticated same-origin admin request", async () => {
@@ -208,6 +216,21 @@ describe("passwordless Brandon phone setup routes", () => {
     mocks.checkRateLimit.mockImplementation(async (key: string) => key.startsWith("phone-setup-claim:")
       ? { allowed: false, remaining: 0, resetAt: Date.now() + 60_000, durable: false }
       : { allowed: true, remaining: 9, resetAt: Date.now() + 60_000, durable: false });
+    const token = mintPhoneSetupToken().token;
+    const response = await claim(new NextRequest(
+      `https://www.askmagicmike.com/phone-alerts/setup/claim?token=${encodeURIComponent(token)}`,
+    ));
+    expect(response.headers.get("location")).toContain("error=claim_unavailable");
+    expect(response.headers.get("set-cookie")).toBeNull();
+  });
+
+  it("also fails closed on owned/self-hosted Production without Vercel metadata", async () => {
+    delete process.env.VERCEL_ENV;
+    setNodeEnv("production");
+    mocks.checkRateLimit.mockImplementation(async (key: string) => key.startsWith("phone-setup-claim:")
+      ? { allowed: true, remaining: 0, resetAt: Date.now() + 60_000, durable: false }
+      : { allowed: true, remaining: 9, resetAt: Date.now() + 60_000, durable: false });
+
     const token = mintPhoneSetupToken().token;
     const response = await claim(new NextRequest(
       `https://www.askmagicmike.com/phone-alerts/setup/claim?token=${encodeURIComponent(token)}`,
@@ -364,6 +387,21 @@ describe("passwordless Brandon phone setup routes", () => {
     }));
     expect(response.status).toBe(503);
     expect(await response.json()).toEqual({ ok: false, error: "push_test_guard_unavailable" });
+    expect(mocks.send).not.toHaveBeenCalled();
+  });
+
+  it("also fails closed for QA Push on self-hosted Production", async () => {
+    delete process.env.VERCEL_ENV;
+    setNodeEnv("production");
+    mocks.checkRateLimit.mockImplementation(async (key: string) => key.startsWith("phone-setup-test:")
+      ? { allowed: true, remaining: 0, resetAt: Date.now() + 60_000, durable: false }
+      : { allowed: true, remaining: 9, resetAt: Date.now() + 60_000, durable: true });
+
+    const response = await sendTest(post("/api/phone-alerts/test", { subscription_id: COPY_ID }, {
+      cookie: sessionCookie(),
+      "x-amm-phone-setup": "1",
+    }));
+    expect(response.status).toBe(503);
     expect(mocks.send).not.toHaveBeenCalled();
   });
 });

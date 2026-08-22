@@ -3,6 +3,7 @@ import { checkRateLimit, LIMITS, rateLimitKey } from "@/lib/security/rate-limit"
 import {
   PHONE_SETUP_COOKIE,
   PHONE_SETUP_MAX_TTL_MS,
+  isProductionPhoneSetupRuntime,
   mintPhoneSetupSessionToken,
   phoneSetupResponseOrigin,
   verifyPhoneSetupInviteToken,
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
     PHONE_SETUP_MAX_TTL_MS,
     "phoneSetup",
   );
-  const productionNeedsDurability = process.env.VERCEL_ENV === "production";
+  const productionNeedsDurability = isProductionPhoneSetupRuntime();
   if (productionNeedsDurability && !oneTimeClaim.durable) {
     return privateRedirect(new URL("/phone-alerts/setup?error=claim_unavailable", origin));
   }

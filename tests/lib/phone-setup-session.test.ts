@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   mintPhoneSetupSessionToken,
   mintPhoneSetupToken,
+  isProductionPhoneSetupRuntime,
   verifyPhoneSetupSessionToken,
   verifyPhoneSetupToken,
 } from "../../app/lib/phoneSetupSession";
@@ -56,5 +57,12 @@ describe("phone setup sessions", () => {
     process.env.PHONE_SETUP_SIGNING_SECRET = "short";
     expect(() => mintPhoneSetupToken()).toThrow("phone_setup_signing_secret_missing");
     expect(verifyPhoneSetupToken("anything")).toBeNull();
+  });
+
+  it("detects both Vercel and self-hosted Production without treating Preview as Production", () => {
+    expect(isProductionPhoneSetupRuntime({ VERCEL_ENV: "production", NODE_ENV: "production" })).toBe(true);
+    expect(isProductionPhoneSetupRuntime({ VERCEL_ENV: "preview", NODE_ENV: "production" })).toBe(false);
+    expect(isProductionPhoneSetupRuntime({ VERCEL_ENV: undefined, NODE_ENV: "production" })).toBe(true);
+    expect(isProductionPhoneSetupRuntime({ VERCEL_ENV: undefined, NODE_ENV: "development" })).toBe(false);
   });
 });

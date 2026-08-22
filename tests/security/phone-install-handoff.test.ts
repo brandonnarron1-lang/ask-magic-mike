@@ -52,12 +52,14 @@ describe("tokenized phone-install security boundary", () => {
     const subscription = readFileSync("app/api/phone-alerts/subscription/route.ts", "utf8");
     const repository = readFileSync("app/lib/persistence/neonPushSubscriptionRepository.ts", "utf8");
     const testPush = readFileSync("app/api/phone-alerts/test/route.ts", "utf8");
+    const claim = readFileSync("app/phone-alerts/setup/claim/route.ts", "utf8");
 
     expect(legacyInvite).toContain("getLeadCenterRbacState().enabled");
     expect(legacyInvite).toContain("legacy_admin_auth_disabled");
     expect(subscription).toContain(".upsertCopy(");
     expect(repository).toContain("existing.recipient_role = EXCLUDED.recipient_role");
     expect(testPush).toContain("phone-setup-test:${session.nonce}:${subscription.id}");
-    expect(testPush).toContain('process.env.VERCEL_ENV === "production" && !oneShot.durable');
+    expect(testPush).toContain("isProductionPhoneSetupRuntime() && !oneShot.durable");
+    expect(claim).toContain("isProductionPhoneSetupRuntime()");
   });
 });

@@ -7,6 +7,7 @@ import {
   PHONE_SETUP_MAX_TTL_MS,
   hasPhoneSetupRequestHeader,
   isExactSameOrigin,
+  isProductionPhoneSetupRuntime,
   phoneSetupSessionFromRequest,
 } from "../../../lib/phoneSetupSession";
 
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
       PHONE_SETUP_MAX_TTL_MS,
       "phoneSetup",
     );
-    if (process.env.VERCEL_ENV === "production" && !oneShot.durable) {
+    if (isProductionPhoneSetupRuntime() && !oneShot.durable) {
       return NextResponse.json(
         { ok: false, error: "push_test_guard_unavailable" },
         { status: 503, headers: { "Cache-Control": "no-store" } },

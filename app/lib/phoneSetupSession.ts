@@ -164,3 +164,12 @@ export function isExactSameOrigin(request: NextRequest) {
 export function hasPhoneSetupRequestHeader(request: NextRequest) {
   return request.headers.get("x-amm-phone-setup") === "1";
 }
+
+/** Vercel is authoritative when present; NODE_ENV covers owned/self-hosted fallback. */
+export function isProductionPhoneSetupRuntime(
+  env: { VERCEL_ENV?: string; NODE_ENV?: string } = process.env,
+) {
+  return env.VERCEL_ENV
+    ? env.VERCEL_ENV === "production"
+    : env.NODE_ENV === "production";
+}
