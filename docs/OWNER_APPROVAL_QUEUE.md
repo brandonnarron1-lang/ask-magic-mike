@@ -29,8 +29,9 @@ provider action, or deletion.
 - It contains no database migration and no publisher. It prepares protected
   deterministic assets, allowlisted links, exact WordPress placement metadata,
   and read-only lifecycle guidance in the existing Distribution Command.
-- After full exact-head Node 24 CI and canonical Vercel Preview evidence pass,
-  the only application release phrase to request is:
+- Exact-head Node 24 CI, canonical Vercel Preview, protected-flow, security,
+  and desktop/mobile acceptance have passed. The only application release
+  phrase to request is:
   `APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT`.
 - That future phrase will authorize only the reviewed PR #185 merge and
   canonical Vercel Production deployment. It will not authorize a WordPress
