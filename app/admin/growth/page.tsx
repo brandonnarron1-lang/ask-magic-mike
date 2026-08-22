@@ -261,6 +261,58 @@ export default async function GrowthCommandCenterPage({
 
         <div className="mt-5">
           <Panel
+            eyebrow="Proof ledger"
+            title="Outcome and delivery trust"
+            note="Aggregate-only evidence from canonical live, non-suppressed records. Recipient details and message content never enter this view."
+          >
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <MetricCard
+                label="Appointment outcomes"
+                value={data.outcomeMetrics.configured ? data.outcomeMetrics.appointmentSetLeads : "—"}
+                note={data.outcomeMetrics.error || "Distinct leads with an exact appointment outcome"}
+              />
+              <MetricCard
+                label="Signed-client outcomes"
+                value={data.outcomeMetrics.configured ? data.outcomeMetrics.signedClientLeads : "—"}
+                note={data.outcomeMetrics.error || "Distinct leads with an agreement-signed outcome"}
+                emphasis
+              />
+              <MetricCard
+                label="Internal alert terminal states"
+                value={data.delivery.configured ? data.delivery.terminalInternalNotifications : "—"}
+                note={data.delivery.error || "Sent or permanently failed after at least one attempt"}
+              />
+              <MetricCard
+                label="Permanent internal failures"
+                value={data.delivery.configured ? data.delivery.permanentInternalFailures : "—"}
+                note={data.delivery.error || "Visible terminal failures requiring operational review"}
+              />
+              <MetricCard
+                label="Email delivery denominator"
+                value={data.delivery.configured ? data.delivery.eligibleEmailSends : "—"}
+                note={data.delivery.error || "Terminal email rows with a provider message ID"}
+              />
+              <MetricCard
+                label="Email bounces"
+                value={data.delivery.configured ? data.delivery.emailBounces : "—"}
+                note={data.delivery.error || "Provider-confirmed bounce events"}
+              />
+              <MetricCard
+                label="Customer delivery confirmations"
+                value={data.delivery.configured ? data.delivery.deliveredCustomerMessages : "—"}
+                note={data.delivery.error || "Delivered, opened, clicked, or complained lifecycle evidence"}
+              />
+              <MetricCard
+                label="Customer complaints"
+                value={data.delivery.configured ? data.delivery.customerComplaints : "—"}
+                note={data.delivery.error || "Provider-confirmed complaint events"}
+              />
+            </div>
+          </Panel>
+        </div>
+
+        <div className="mt-5">
+          <Panel
             eyebrow="Speed to lead"
             title="First-human-response performance"
             note="Immutable response evidence by required operating dimension. Small samples are labeled—not dressed up as certainty."

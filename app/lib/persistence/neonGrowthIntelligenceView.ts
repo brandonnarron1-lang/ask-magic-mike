@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import {
   buildGrowthIntelligence,
+  normalizeGrowthKey,
   type GrowthChannelEconomics,
   type GrowthExperimentFact,
   type GrowthIntelligence,
@@ -41,6 +42,24 @@ export interface PersistedGrowthRecommendation {
   createdAt: string;
 }
 
+export interface GrowthOutcomeMetricsSnapshot {
+  configured: boolean;
+  appointmentSetLeads: number;
+  signedClientLeads: number;
+  error?: string;
+}
+
+export interface GrowthDeliverySnapshot {
+  configured: boolean;
+  terminalInternalNotifications: number;
+  permanentInternalFailures: number;
+  eligibleEmailSends: number;
+  emailBounces: number;
+  deliveredCustomerMessages: number;
+  customerComplaints: number;
+  error?: string;
+}
+
 export interface GrowthIntelligenceView extends GrowthIntelligence {
   configured: boolean;
   schemaReady: boolean;
@@ -51,6 +70,8 @@ export interface GrowthIntelligenceView extends GrowthIntelligence {
   persistedOpportunities: PersistedGrowthOpportunity[];
   recommendations: PersistedGrowthRecommendation[];
   ownedDemandSignals: OwnedDemandAttributionSignal[];
+  outcomeMetrics: GrowthOutcomeMetricsSnapshot;
+  delivery: GrowthDeliverySnapshot;
   sourceRowsRead: number;
   spendRowsRead: number;
   outcomeRowsRead: number;
@@ -114,6 +135,20 @@ function emptyView(
     persistedOpportunities: [],
     recommendations: [],
     ownedDemandSignals: [],
+    outcomeMetrics: {
+      configured: false,
+      appointmentSetLeads: 0,
+      signedClientLeads: 0,
+    },
+    delivery: {
+      configured: false,
+      terminalInternalNotifications: 0,
+      permanentInternalFailures: 0,
+      eligibleEmailSends: 0,
+      emailBounces: 0,
+      deliveredCustomerMessages: 0,
+      customerComplaints: 0,
+    },
     sourceRowsRead: 0,
     spendRowsRead: 0,
     outcomeRowsRead: 0,
@@ -129,7 +164,9 @@ async function detectGrowthSchema(sql: Query) {
        to_regclass('public.lead_response_milestones') IS NOT NULL AS has_responses,
        to_regclass('public.growth_experiments') IS NOT NULL AS has_experiments,
        to_regclass('public.market_opportunities') IS NOT NULL AS has_opportunities,
-       to_regclass('public.growth_recommendations') IS NOT NULL AS has_recommendations`,
+       to_regclass('public.growth_recommendations') IS NOT NULL AS has_recommendations,
+       to_regclass('public.lead_notifications') IS NOT NULL AS has_notifications,
+       to_regclass('public.communication_events') IS NOT NULL AS has_communication_events`,
   ) as Row[];
   const row = rows[0] ?? {};
   return {
@@ -139,6 +176,8 @@ async function detectGrowthSchema(sql: Query) {
     experiments: booleanValue(row.has_experiments),
     opportunities: booleanValue(row.has_opportunities),
     recommendations: booleanValue(row.has_recommendations),
+    notifications: booleanValue(row.has_notifications),
+    communicationEvents: booleanValue(row.has_communication_events),
   };
 }
 
@@ -229,6 +268,49 @@ function normalizeRecommendation(row: Row): PersistedGrowthRecommendation {
     status: text(row.status),
     generatedBy: text(row.generated_by),
     createdAt: timestamp(row.created_at),
+  };
+}
+
+export function buildGrowthOutcomeMetrics(
+  leads: GrowthLeadFact[],
+  outcomes: GrowthOutcomeFact[],
+  configured: boolean,
+  error?: string,
+): GrowthOutcomeMetricsSnapshot {
+  const eligibleLeadIds = new Set(leads.map((lead) => lead.id));
+  const appointmentSetLeads = new Set<string>();
+  const signedClientLeads = new Set<string>();
+
+  for (const outcome of outcomes) {
+    if (!eligibleLeadIds.has(outcome.leadId)) continue;
+    const outcomeType = normalizeGrowthKey(outcome.outcomeType);
+    if (outcomeType === "appointment") appointmentSetLeads.add(outcome.leadId);
+    if (outcomeType === "agreement_signed") signedClientLeads.add(outcome.leadId);
+  }
+
+  return {
+    configured: configured && !error,
+    appointmentSetLeads: appointmentSetLeads.size,
+    signedClientLeads: signedClientLeads.size,
+    ...(error ? { error } : {}),
+  };
+}
+
+export function normalizeGrowthDeliverySnapshot(
+  rows: Row[],
+  configured: boolean,
+  error?: string,
+): GrowthDeliverySnapshot {
+  const row = rows[0] ?? {};
+  return {
+    configured: configured && !error,
+    terminalInternalNotifications: numberValue(row.terminal_internal_notifications),
+    permanentInternalFailures: numberValue(row.permanent_internal_failures),
+    eligibleEmailSends: numberValue(row.eligible_email_sends),
+    emailBounces: numberValue(row.email_bounces),
+    deliveredCustomerMessages: numberValue(row.delivered_customer_messages),
+    customerComplaints: numberValue(row.customer_complaints),
+    ...(error ? { error } : {}),
   };
 }
 
@@ -408,6 +490,73 @@ export async function loadNeonGrowthIntelligence(
         ) as Row[]
       : [];
 
+    let deliveryRows: Row[] = [];
+    let deliveryError: string | undefined;
+    const deliveryConfigured = schema.notifications && schema.communicationEvents;
+    if (deliveryConfigured) {
+      try {
+        deliveryRows = await sql.query(
+          `WITH eligible_notifications AS (
+             SELECT n.id, n.status, n.channel, n.recipient_type,
+                    n.provider_message_id, n.attempt_count
+               FROM public.lead_notifications n
+               JOIN public.leads l ON l.id = n.lead_id
+              WHERE n.created_at >= $1::timestamptz
+                AND l.is_test = false
+                AND l.communication_suppressed = false
+           ), event_flags AS (
+             SELECT ce.lead_notification_id,
+                    BOOL_OR(ce.event_type = 'bounced') AS bounced,
+                    BOOL_OR(ce.event_type = 'complained') AS complained,
+                    BOOL_OR(ce.event_type IN ('delivered', 'opened', 'clicked', 'complained'))
+                      AS delivery_confirmed
+               FROM public.communication_events ce
+               JOIN eligible_notifications eligible
+                 ON eligible.id = ce.lead_notification_id
+              GROUP BY ce.lead_notification_id
+           )
+           SELECT
+             COUNT(*) FILTER (
+               WHERE n.recipient_type IN ('agent', 'internal')
+                 AND n.attempt_count > 0
+                 AND n.status IN ('sent', 'permanently_failed')
+             )::integer AS terminal_internal_notifications,
+             COUNT(*) FILTER (
+               WHERE n.recipient_type IN ('agent', 'internal')
+                 AND n.attempt_count > 0
+                 AND n.status = 'permanently_failed'
+             )::integer AS permanent_internal_failures,
+             COUNT(*) FILTER (
+               WHERE n.channel = 'email'
+                 AND n.attempt_count > 0
+                 AND n.provider_message_id IS NOT NULL
+                 AND n.status IN ('sent', 'permanently_failed')
+             )::integer AS eligible_email_sends,
+             COUNT(*) FILTER (
+               WHERE n.channel = 'email'
+                 AND n.attempt_count > 0
+                 AND n.provider_message_id IS NOT NULL
+                 AND COALESCE(e.bounced, false)
+             )::integer AS email_bounces,
+             COUNT(*) FILTER (
+               WHERE n.channel = 'email'
+                 AND n.recipient_type = 'customer'
+                 AND COALESCE(e.delivery_confirmed, false)
+             )::integer AS delivered_customer_messages,
+             COUNT(*) FILTER (
+               WHERE n.channel = 'email'
+                 AND n.recipient_type = 'customer'
+                 AND COALESCE(e.complained, false)
+             )::integer AS customer_complaints
+             FROM eligible_notifications n
+             LEFT JOIN event_flags e ON e.lead_notification_id = n.id`,
+          [cutoff],
+        ) as Row[];
+      } catch {
+        deliveryError = "Canonical notification-delivery aggregate query failed";
+      }
+    }
+
     const leads = leadRows.map(normalizeLead);
     const spend = spendRows.map(normalizeSpend);
     const outcomes = outcomeRows.map(normalizeOutcome);
@@ -417,13 +566,20 @@ export async function loadNeonGrowthIntelligence(
     return {
       ...intelligence,
       configured: true,
-      schemaReady: Object.values(schema).every(Boolean),
+      schemaReady: schema.spend && schema.outcomes && schema.responses &&
+        schema.experiments && schema.opportunities && schema.recommendations,
       windowDays,
       generatedAt: now.toISOString(),
       experiments,
       persistedOpportunities: opportunityRows.map(normalizePersistedOpportunity),
       recommendations: recommendationRows.map(normalizeRecommendation),
       ownedDemandSignals: buildOwnedDemandAttributionSignals(leadRows),
+      outcomeMetrics: buildGrowthOutcomeMetrics(leads, outcomes, schema.outcomes),
+      delivery: normalizeGrowthDeliverySnapshot(
+        deliveryRows,
+        deliveryConfigured,
+        deliveryError,
+      ),
       sourceRowsRead: leadRows.length,
       spendRowsRead: spendRows.length,
       outcomeRowsRead: outcomeRows.length,

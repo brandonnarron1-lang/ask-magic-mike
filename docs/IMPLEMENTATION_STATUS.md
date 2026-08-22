@@ -2,6 +2,47 @@
 
 Updated 2026-08-22.
 
+## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
+
+- Audited PRs #190-#192 against PR #185 exact final head
+  `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7` and consolidated their unique
+  independent work once. Source commits, exclusions, rescue ref, and rollback
+  are recorded in `docs/PHASE9_PRIVACY_KPI_TRUST_CONSOLIDATION.md`.
+- Durable Neon rate limiting now stores only versioned HMAC-SHA-256 bucket
+  identifiers, updates bucket freshness, and removes stale records after 24
+  hours. Protected health reports only whether a suitable server secret exists.
+- Public analytics now uses an event/property allowlist, bounded JSON bodies,
+  exact public-origin checks, coarse browser/device classes, and sanitized UTM
+  dimensions. Public callers cannot bind events to canonical lead or agent IDs;
+  the persistence repository re-applies the privacy boundary. Public UTM and
+  placement values are limited to controlled identifier slugs, so free-form
+  names and street addresses cannot survive as attribution dimensions.
+- Both public analytics routes now await the canonical Neon write, return HTTP
+  202 only for a durable event, and return HTTP 503 when persistence is
+  unavailable. All JSON-LD script surfaces share an escaping serializer rather
+  than inserting raw `JSON.stringify` output.
+- The protected Growth Command Center adds aggregate-only outcome and delivery
+  evidence for eligible non-test, non-suppressed leads. Optional-table or query
+  failure renders unavailable instead of fabricating zero. A post-refresh audit
+  closed a normalization defect that previously left `configured=true` beside
+  an aggregate query error and could render misleading zero values.
+- PR #187's KPI target register and migration remain deferred. This candidate
+  contains no migration, publisher, provider send, second data store, or live
+  data action.
+- Focused verification passes 12 files / 103 tests. The full local release gate
+  passes system isolation, 14/14 release-safety checks, 210 test files / 2,901
+  tests, strict typecheck, ESLint, the optimized Next.js 15.5.21 build, and 80
+  active routes. Production dependencies have no known vulnerability; a
+  fresh redacted 511-commit full-history scan reports no leak; diff and
+  migration checks are clean. The prior Node 24 CI, canonical Vercel Preview,
+  authorization, privacy, and responsive 390/1440 rendering evidence remains a
+  historical checkpoint. Exact-head GitHub/Vercel and protected Preview
+  evidence after the base refresh is tracked on PR #193 and remains mandatory
+  before release readiness.
+- Exact future application gate:
+  `APPROVE PHASE 9 PRIVACY AND KPI TRUST MERGE AND PRODUCTION DEPLOYMENT`.
+  No Production or external action is authorized by this status entry.
+
 ## Phase 9 consolidated owned-demand command — 2026-08-22
 
 - PR #185 is the single application consolidation vehicle on released PR #184
@@ -35,12 +76,14 @@ Updated 2026-08-22.
   isolation, 14/14 release-safety checks, 206 test files / 2,869 tests, strict
   typecheck, ESLint, the optimized Next.js 15.5.21 build, and 80 active routes.
   Production dependencies have no known vulnerability, a fresh redacted scan
-  covers 510 commits / 14.10 MB with no leak, `git diff --check` passes, and
-  committed/working-tree migration scans are empty. Code-bearing fix head is
-  `9a8baf935a7a68cda528ec4aee90b7cfcf5e87fc`; refreshed exact-head Node 24,
-  canonical Preview, protected flow, and rendered acceptance evidence is
-  tracked on PR #185 after push so this document does not create self-referential
-  evidence churn. Production remains unchanged.
+  covers 511 commits / approximately 14.11 MB with no leak, `git diff --check`
+  passes, and committed/working-tree migration scans are empty. Exact-head Node
+  24 run `32588096247`, Ready Preview `dpl_83UZ6iisUUWK1LyGdTahkQvAiF2Y`, and
+  protected Preview QA run `32588280489` pass. The protected run reports 16
+  pass / 6 intentional write skips / 0 fail, 2/2 browser tests, 43/43 doctor
+  checks, 14/14 safety checks, and exact `PREVIEW_READY` authority. PR #185 is
+  cleanly mergeable at exact final head
+  `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7`; Production remains unchanged.
 - Protected Preview workflows now run release doctor before generating launch
   authority and must assert exact `PREVIEW_READY` afterward. This closes a
   false-green path where endpoint/browser checks passed but a missing doctor

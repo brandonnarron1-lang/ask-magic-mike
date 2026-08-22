@@ -1,5 +1,32 @@
 # Changelog
 
+## 2026-08-22 — Privacy/KPI-trust final-head hardening
+
+- Refreshed PR #193 onto PR #185 exact final head
+  `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7` after preserving both the
+  pre-refresh and post-refresh/pre-hardening states as remote rescue branches.
+- Made both public analytics routes await the canonical Neon write. They now
+  return HTTP 202 only after durable persistence succeeds and fail truthfully
+  with HTTP 503 when the ledger is unavailable; a serverless invocation can no
+  longer acknowledge an event and terminate before its write completes.
+- Restricted public UTM and placement dimensions to controlled identifier
+  slugs. Free-form names, street addresses, sentences, email addresses, phone
+  numbers, full URLs, and arbitrary properties are discarded before the final
+  repository-level privacy pass.
+- Consolidated all JSON-LD script rendering onto one serializer that escapes
+  script-closing input, with source-level and executable regression coverage.
+- The focused final-diff matrix passes 12 files / 103 tests. The complete local
+  gate passes system isolation, 14/14 release-safety checks, 210 test files /
+  2,901 tests, strict typecheck, ESLint, optimized Next.js 15.5.21 build, and 80
+  active routes. Production dependency audit reports no known vulnerability;
+  a redacted 511-commit history scan reports no leak; whitespace and migration
+  scans are clean. Exact-head Node 24 CI and canonical Preview acceptance remain
+  required after push because the local shell runs Node 26.5.1.
+- This application-only hardening contains no migration and performed no
+  Production deployment, lead/event write, email/BCC, SMS, Push, WordPress
+  change, publication, DNS change, spend, provider mutation, or NellySelly
+  action.
+
 ## 2026-08-22 — Consolidated owned-demand command candidate
 
 - Consolidated the useful application work from PRs #185, #186, #188, and #189
