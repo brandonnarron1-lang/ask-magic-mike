@@ -83,15 +83,22 @@ Release only one approved PR at a time and verify Production before advancing:
 9. `#189` — exact owned-demand activation loop, exact head
    `f5b3165f63873dbf3b4c2719cb522b00935f72c7`, Node 24 run `32540823212`;
 10. `#179` — iOS install handoff, exact head
-    `9dd6684596ac8afbc52076d2c1597c12a0fa33e2`, Node 24 run `32540896724`; and
+    `9dd6684596ac8afbc52076d2c1597c12a0fa33e2`, Node 24 run `32540896724`;
 11. `#190` — code-only durable rate-limit privacy hardening, Draft stacked on
-    exact #179. Its immutable final head, Node 24 run, and Preview deployment
-    are recorded in PR #190 metadata after final documentation reconciliation.
+    exact #179, exact head `d431bc3427720ae68167b1864e98e406206a47a3`,
+    Node 24 run `32543177677`;
+12. `#191` — code-only analytics privacy hardening, exact head
+    `695bd11f3bb4727c684e4fef0186734be3c9c7fa`, Node 24 run `32544720391`; and
+13. `#192` — aggregate-only outcome and delivery KPI trust, Draft stacked on
+    exact #191. Its immutable final head, Node 24 run, and Preview deployment
+    are recorded in PR #192 metadata after final documentation reconciliation.
 
-Items #183–#189 and #179 are Draft, correctly stacked in that order, and have
-green exact-head Vercel checks. PR #190 is the next Draft candidate and must
-retain the same exact-head proof in its PR checks and release comment. All
-remain unmerged and Production-undeployed.
+Items #183–#189, #179, and #190–#192 are Draft, correctly stacked in that exact
+order, GitHub `CLEAN`, and green for exact-head Node 24 plus Vercel checks. The
+cumulative #192 tree is a clean 44-commit descendant of current Production.
+Only #184 and #187 add migrations; their offline cutover plans verify the
+reviewed migration hashes and dependency order. All candidates remain unmerged
+and Production-undeployed.
 The next permitted Production action is still #183 only, under this exact gate:
 
 ```text

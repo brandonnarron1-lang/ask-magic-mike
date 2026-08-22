@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-08-21 — Release-train authority reconciliation
+
+- Reconciled the designated owner approval queue and go-live runbook against
+  authenticated GitHub state for the complete PR #183–#192 dependency chain,
+  including the intentionally reordered PR #179 iOS handoff.
+- Verified all eleven candidates are Draft, mergeable, GitHub `CLEAN`, and
+  green for exact-head Node 24 plus Vercel checks. Every PR base OID exactly
+  matches its predecessor head OID.
+- Verified current Production `main` is the release-train merge base, with zero
+  divergent Production commits and 44 cumulative candidate commits. A clean
+  merge rehearsal produced the exact PR #192 tree.
+- Isolated the only two pending migrations to PR #184 publication proof and PR
+  #187 KPI target register. Both offline cutover plans verified their reviewed
+  SHA-256 hashes and canonical Neon dependency order without a database query.
+- Added the missing #190–#192 gates to the authoritative queue, refreshed exact
+  immutable predecessor heads/runs, and added a regression test for PR order,
+  exact gates, evidence identity, and migration authority.
+- Production, Neon, Vercel deployments, leads, providers, WordPress, DNS,
+  publications, spend, and NellySelly remained unchanged.
+
 ## 2026-08-21 — Outcome and delivery KPI trust candidate
 
 - Reused the existing protected Growth Intelligence view, 38-metric KPI target

@@ -48,19 +48,19 @@ one canonical lead, one internal alert, one provider message ID, provider event
   retains its local entry, and the duplicate Form 3 native notification is
   inactive. Forms 1, 2, and 4–7 remain outside the forwarding allowlist.
 
-PR #183 is the next gated application release. Draft PRs #184–#189 and #179 are
-green and stacked behind it in that exact order; current immutable heads and
-Node 24 runs are recorded in `IMPLEMENTATION_STATUS.md` and
-`GO_LIVE_RUNBOOK.md`. None is Production, and no candidate authorizes external
-publication, a consumer send, spend, or a later migration merely by being in
-the stack.
+PR #183 is the next gated application release. Draft PRs #184–#189, #179, and
+#190–#192 are green and stacked behind it in that exact order; current immutable
+heads and Node 24 runs are recorded in `IMPLEMENTATION_STATUS.md`,
+`GO_LIVE_RUNBOOK.md`, and final-head PR metadata. The cumulative #192 tree is a
+clean descendant of current Production. None is Production, and no candidate
+authorizes external publication, a consumer send, spend, or a later migration
+merely by being in the stack.
 
-Draft PR #190 is the next code-only candidate after #179. It reuses canonical
-Neon rate limiting while replacing
-persisted raw client/staff limiter keys with HMAC identifiers and bounded stale-
-bucket pruning. It adds no provider or database schema. Local verification is
-green; exact Node 24 and protected Preview proof are required on its final head
-and are maintained in PR #190 metadata rather than self-referenced in code.
+PR #190 pseudonymizes durable rate-limit keys without a new provider or schema;
+PR #191 minimizes public analytics at both ingestion and final Neon write; PR
+#192 derives exact outcome and delivery KPIs from aggregate-only canonical
+ledgers. Only #184 and #187 introduce pending migrations, each behind its own
+hash-pinned, backup-first gate.
 
 The latest aggregate Production observation contains only six
 suppressed/test leads and no contactable live prospect. The funnel is available

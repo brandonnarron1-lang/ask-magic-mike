@@ -5,6 +5,37 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Release-train authority reconciliation — 2026-08-21
+
+- Preservation: exact pre-reconciliation head
+  `3a11c3d37602682f199dc30495e7dfb2097c0ab1` remains on pushed rescue branch
+  `rescue/amm-pre-release-train-authority-20260821-222739`.
+- Authenticated GitHub audit: PASS — PRs #183, #184, #185, #186, #187, #188,
+  #189, #179, #190, #191, and #192 are Draft, mergeable, `CLEAN`, and green for
+  Node CI plus Vercel. Each base OID equals the preceding head OID.
+- Cumulative ancestry: PASS — current Production main
+  `5335697edf31eed0b8a38cd0295a4f5e7d501a3e` is the merge base; the cumulative
+  tree is 0 commits behind / 44 ahead; `git merge-tree --write-tree` equals the
+  PR #192 tree `4309872bde7a8cb626255119940a094f7cac00c8`.
+- Migration inventory: PASS — only
+  `20260821170000_owned_demand_publication_proofs.sql` and
+  `20260821213000_growth_kpi_target_register.sql` are pending in the cumulative
+  diff. Both offline `--plan` commands report `migration_verified=true` against
+  their reviewed hashes and make no database connection.
+- `pnpm exec vitest run tests/scripts/release-train-authority.test.ts`: PASS —
+  1 file / 4 tests covering exact active order, one gate per release, immutable
+  predecessor evidence, and migration authority limited to #184/#187.
+- `pnpm run release:gate`: PASS — system isolation, 14/14 release-safety
+  controls, 215 test files / 2,951 tests, strict typecheck, full lint, optimized
+  Next.js 15.5.21 build, and route-manifest verification for 83 active routes
+  with 17 acknowledged root/src duplicates.
+- `pnpm audit --prod`: PASS — no known Production dependency vulnerabilities.
+- `gitleaks git --redact --no-banner`: PASS — 490 commits and approximately
+  13.75 MB scanned with no leaks found.
+- No Production deploy/promotion, database query/write/migration, lead,
+  notification, provider call, publication, WordPress/DNS change, spend, or
+  NellySelly action occurred.
+
 ## Outcome and delivery KPI trust — 2026-08-21
 
 - Preservation: exact predecessor

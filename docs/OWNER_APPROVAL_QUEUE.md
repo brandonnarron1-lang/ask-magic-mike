@@ -41,13 +41,24 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    — iOS Home Screen Web Push handoff, only after #189 lands and the refreshed
    candidate passes exact Node 24 CI plus protected Preview acceptance:
    `APPROVE IOS PHONE ALERT INSTALL HANDOFF MERGE AND PRODUCTION DEPLOYMENT`
+9. PR [#190](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/190)
+   — durable rate-limit privacy hardening, only after #179 lands and #190 is
+   refreshed against the resulting `main`:
+   `APPROVE PHASE 9 DURABLE RATE-LIMIT PRIVACY HARDENING MERGE AND PRODUCTION DEPLOYMENT`
+10. PR [#191](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/191)
+    — analytics privacy hardening, only after #190 lands and #191 is refreshed:
+    `APPROVE PHASE 9 ANALYTICS PRIVACY HARDENING MERGE AND PRODUCTION DEPLOYMENT`
+11. PR [#192](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/192)
+    — aggregate-only outcome and delivery KPI trust, only after #191 lands and
+    #192 is refreshed:
+    `APPROVE PHASE 9 OUTCOME AND DELIVERY KPI TRUST MERGE AND PRODUCTION DEPLOYMENT`
 
-The #184 and KPI-target phrases authorize their respective reviewed
-backup-first Neon migrations, exact code merge, and canonical Vercel deployment.
-The other phrases authorize only their reviewed code merge and canonical
-deployment. None authorizes recording a KPI target, a social/GBP
-post, email campaign, QR printing/distribution, consumer message, spend, DNS
-change, WordPress change, provider action, or deletion.
+Only the #184 publication-proof and #187 KPI-target-register phrases authorize
+their respective reviewed backup-first Neon migrations, exact code merge, and
+canonical Vercel deployment. Every other phrase authorizes only its reviewed
+code merge and canonical deployment. None authorizes recording a KPI target, a
+social/GBP post, email campaign, QR printing/distribution, consumer message,
+spend, DNS change, WordPress change, provider action, or deletion.
 
 ## Historical candidate retained for audit
 

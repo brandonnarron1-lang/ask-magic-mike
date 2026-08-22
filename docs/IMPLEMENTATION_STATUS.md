@@ -20,9 +20,10 @@ head Node 24 and Vercel checks:
 | #189 | exact owned-demand activation loop | `f5b3165f63873dbf3b4c2719cb522b00935f72c7` | `32540823212` |
 | #179 | iOS install handoff | `9dd6684596ac8afbc52076d2c1597c12a0fa33e2` | `32540896724` |
 | #190 | durable rate-limit privacy | `d431bc3427720ae68167b1864e98e406206a47a3` | `32543177677` |
+| #191 | analytics privacy hardening | `695bd11f3bb4727c684e4fef0186734be3c9c7fa` | `32544720391` |
 
 Every listed PR remains Draft and correctly stacked on the row above it. Draft
-PR #191 is stacked after #190 as documented in the next section. Historical
+PR #192 is stacked after #191 as documented in the next section. Historical
 feature sections below retain the local/code-bearing evidence captured at that
 stage; the table above is authoritative for the listed mutable heads.
 
