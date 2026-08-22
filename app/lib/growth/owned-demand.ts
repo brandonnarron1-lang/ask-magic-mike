@@ -238,7 +238,11 @@ const OFFER_DEFINITIONS = [
     draftTitle: "Explore a rental-to-homeownership readiness review",
     draftBody: "Share your current rental situation, target area, and homeownership goals with Our Town Properties. The team will review the request and discuss possible next steps. This is not a lending decision or a promise of eligibility, affordability, or financing.",
     creativePath: "/images/ask-magic-mike/mike-eatmon-headshot.webp",
-    creativeExportPath: "/images/ask-magic-mike/mike-eatmon-headshot-export.jpg",
+    // Keep protected Preview exports on a retained Production asset. The
+    // renderer intentionally resolves approved source images from the
+    // canonical host, so a branch-only conversion cannot be verified before
+    // release.
+    creativeExportPath: "/images/ask-magic-mike/mike-eatmon-headshot.png",
     creativeAlt: "Mike Eatmon smiling in an Our Town Properties portrait",
     creativeHeadline: "Explore a path from renting toward homeownership.",
     creativeBody: "Share your current situation and goals for a human-reviewed readiness conversation.",
