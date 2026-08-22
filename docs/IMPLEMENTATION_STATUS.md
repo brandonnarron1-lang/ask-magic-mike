@@ -2,10 +2,58 @@
 
 Updated 2026-08-21.
 
+## Current immutable release identity — 2026-08-21
+
+Production remains intentionally unchanged at main commit
+`5335697edf31eed0b8a38cd0295a4f5e7d501a3e` and Vercel deployment
+`dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`. The complete unmerged stack has green exact-
+head Node 24 and Vercel checks:
+
+| PR | Purpose | Exact head | Exact Node 24 run |
+|---|---|---|---|
+| #183 | campaign safety / three-offer flight | `95a4f210eed4f8991e96e2eee595da5907112ba9` | `32539636103` |
+| #184 | publication-proof ledger | `4b9109492bb157e45babc23aeda58b30022bae2e` | `32540355761` |
+| #185 | current-router / Buyer safety | `74b4b142ace5b7a1a258e6423638bc434ef1f532` | `32540396465` |
+| #186 | protected owned-demand assets | `d193ab52215bd4d8a29db023bbfd4b45ded821ac` | `32540497485` |
+| #187 | evidence-first KPI targets | `9d9a1e6f38dbf96e26750945a3d00e1a6fb65827` | `32540533222` |
+| #188 | WordPress owned-traffic audit | `35438c311f8a3a5658691aa9568a5e80e4b5ef18` | `32540568531` |
+| #189 | exact owned-demand activation loop | `f5b3165f63873dbf3b4c2719cb522b00935f72c7` | `32540823212` |
+| #179 | iOS install handoff | `9dd6684596ac8afbc52076d2c1597c12a0fa33e2` | `32540896724` |
+
+Every PR remains Draft and correctly stacked on the row above it. Historical
+feature sections below retain the local/code-bearing evidence captured at that
+stage; the table above is authoritative for current mutable heads.
+
+## Phase 9 durable rate-limit privacy hardening — 2026-08-21
+
+- Audited the existing limiter before changing it. Production already uses the
+  canonical Neon `rate_limit_buckets` table; an Upstash or second counter store
+  is unnecessary.
+- Replaced raw durable limiter keys with versioned, domain-separated
+  `HMAC-SHA-256` identifiers. This covers client IPs, staff principals, sessions, and any
+  future key passed through the canonical limiter.
+- Added bounded 24-hour stale-bucket pruning to the existing atomic Neon query
+  and now updates `updated_at` on every conflict path. No lead, consent,
+  attribution, notification, or analytics row is touched.
+- Added a protected health-presence flag, a preferred dedicated
+  `RATE_LIMIT_HASH_SECRET`, safe documented server-secret fallbacks, focused
+  deterministic tests, and corrected the obsolete in-memory/Upstash runbook.
+- Current Vercel Production metadata confirms `DATABASE_URL`, `CRON_SECRET`, and
+  `ADMIN_SECRET` are present, so the code-only cutover does not depend on a new
+  paid provider or immediate secret entry. Values were never read or displayed.
+- Focused verification passes 8 files / 67 tests. The full local candidate
+  passes 212 files / 2,930 tests, strict typecheck, ESLint, 14/14 safety,
+  Ask/NellySelly isolation, optimized Next.js 15.5.21 build, 83-route
+  verification, and Production dependency audit. Exact Node 24 CI and protected
+  Preview evidence remain to be completed on the unchanged candidate head. No
+  Production deploy, database query/write, external send, WordPress change,
+  publication, spend, or NellySelly action occurred.
+
 ## iOS phone-alert handoff consolidation — 2026-08-21
 
-- PR #179's unique iOS Home Screen Web Push handoff is now locally consolidated
-  on exact PR #189 head `6a2f6799a399e1f13fc4a44eaabf61b7013b9532`.
+- PR #179's unique iOS Home Screen Web Push handoff is now consolidated on exact
+  PR #189 head `f5b3165f63873dbf3b4c2719cb522b00935f72c7`, with final PR #179 head
+  `9dd6684596ac8afbc52076d2c1597c12a0fa33e2`.
   Rescue branch `rescue/amm-pre-phone-handoff-consolidation-20260821-190451`
   preserves the prior head; merge commit `b351bed` preserves both histories.
 - The candidate reuses the canonical VAPID provider, Neon
@@ -23,8 +71,8 @@ Updated 2026-08-21.
 - The bearer capability is intentionally described without a false single-use
   claim. Until expiry it must be sent only to Brandon; physical enrollment and
   one separately approved `[TEST]` receipt remain human actions.
-- Focused verification passes 6 files / 39 tests. The full local candidate
-  passes 211 files / 2,921 tests, strict typecheck, ESLint, 14/14 safety,
+- Focused verification passes 6 files / 39 tests. The exact Node 24 candidate
+  passes 211 files / 2,924 tests, strict typecheck, ESLint, 14/14 safety,
   Ask/NellySelly isolation, optimized build, 83-route verification, and
   Production dependency audit. A redacted 480-commit full-history scan reports
   no secret leak. Mobile browser acceptance passes the valid,
@@ -36,9 +84,9 @@ Updated 2026-08-21.
   because `release:doctor` was missing. Both Preview workflows now run the
   doctor and fail unless `release:assert` reaches `PREVIEW_READY`; local
   orchestration proves that verdict and the regression suite fixes the order.
-- Exact Node 24 GitHub CI and protected canonical Preview authority are required
-  on the final unchanged head and recorded on the Draft PR. The candidate stays
-  Draft and cannot bypass PRs #183–#189. Its
+- Exact Node 24 GitHub run `32540896724` and the canonical protected Vercel
+  Preview pass on the final unchanged head. The candidate stays Draft and
+  cannot bypass PRs #183–#189. Its
   separate future gate remains:
   `APPROVE IOS PHONE ALERT INSTALL HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
 
@@ -62,22 +110,21 @@ Updated 2026-08-21.
   zero genuine live/contactable leads, owned-source signals, outcomes, spend,
   experiments, or first-response samples. All relevant canonical schemas are
   healthy.
-- Focused verification passes 3 files / 39 tests. The full local release gate
-  passes system isolation, 14/14 release-safety checks, 209 test files / 2,909
+- Focused verification passes 3 files / 39 tests. The final exact Node 24 gate
+  passes system isolation, 14/14 release-safety checks, 209 test files / 2,912
   tests, strict typecheck, ESLint, optimized Next.js 15.5.21 build, and the
   81-route manifest. Production dependencies have no known vulnerability, and
   a redacted gitleaks history scan covered 478 commits with no finding.
 - Local protected visual QA passes 12/12 desktop/mobile checks across the reused
   public funnels, widget surfaces, Distribution Command, and KPI target register
   with no overflow, missing required copy, forbidden copy, or browser console
-  error. Local Node 26.5.1 is newer than the declared Node 24.x engine; exact
-  Node 24 CI and canonical Vercel Preview proof remain pending before the Draft
-  PR is release-ready.
+  error. Exact Node 24 run `32540823212` and the canonical Vercel Preview are
+  green on final PR #189 head `f5b3165f63873dbf3b4c2719cb522b00935f72c7`.
 - No Production deployment, database migration/write, proof record, lead,
   WordPress edit, external publication, email/SMS/Push, provider action, spend,
   DNS change, or NellySelly action occurred.
 - This candidate is stacked on exact PR #188 head
-  `bcc0e9e5263aa9b0f94ac0377a6d1781b0176a58`. The unchanged first Production
+  `35438c311f8a3a5658691aa9568a5e80e4b5ef18`. The unchanged first Production
   gate remains:
   `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT`.
 
@@ -129,7 +176,7 @@ Updated 2026-08-21.
   database query/write, lead, external message, publication, redirect, DNS
   change, spend, or NellySelly action occurred.
 - This candidate is stacked on exact PR #187 head
-  `cf1356f36d9248babf782b9d4c499627fc46ef7b` and remains behind PRs #183–#187.
+  `9d9a1e6f38dbf96e26750945a3d00e1a6fb65827` and remains behind PRs #183–#187.
   The unchanged first Production gate is:
   `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT`.
 
@@ -216,7 +263,7 @@ Updated 2026-08-21.
   detected secret leak. Independent OpenCV scans pass for the compressed feed,
   story, and Chromium-rendered raw SVG exemplars.
 - Draft PR #186 is stacked on exact PR #185 head
-  `be99a1838c1c36ffc474bc97c11ef2a88e53107c`. Runtime hardening head
+  `74b4b142ace5b7a1a258e6423638bc434ef1f532`. Runtime hardening head
   `bce07766ae40d8035ddac8be853dfed89248f427` passed GitHub Node 24 run
   `32520888862` and Ready canonical Vercel Preview
   `dpl_6i4VqGrQUFaWdgoKznLYGwkgPvtq`. Public/health routes return 200, the exact
@@ -311,7 +358,7 @@ Updated 2026-08-21.
   only SELECT and INSERT. The reviewed migration hash is
   `c60c1a6e692d487e0adfd98d0eb3a9cff89ad77a3233b53075a4c8b63bde3ede`.
 - The candidate is stacked on the exact PR #183 head
-  `e9fbc48ed436c74aa9ab178c426626230f8ddf9b`; PR #183 remains unchanged and
+  `95a4f210eed4f8991e96e2eee595da5907112ba9`; PR #183 remains unchanged and
   retains its separate campaign release gate.
 - The full local release gate passes system isolation, 14/14 safety checks,
   200 test files / 2,828 tests, strict typecheck, ESLint, the Next.js 15.5.21

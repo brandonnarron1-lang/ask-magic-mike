@@ -5,6 +5,41 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Durable rate-limit privacy hardening — 2026-08-21
+
+- Preservation: exact predecessor `9dd6684596ac8afbc52076d2c1597c12a0fa33e2`
+  remains on pushed rescue branch
+  `rescue/amm-pre-rate-limit-privacy-20260821-205747`. No force-push, reset, or
+  discarded worktree was used.
+- Audit result: the existing canonical limiter was already distributed through
+  Neon. The obsolete Upstash plan was documentation drift; no provider or
+  parallel counter store was added.
+- Privacy contract: deterministic tests prove the SQL parameter list contains a
+  versioned `amm:rl:v1:<prefix>:<HMAC>` identifier and contains neither the raw
+  client/staff key nor the HMAC secret. The same SQL prunes buckets older than 24
+  hours and updates the operational timestamp.
+- Focused Vitest: PASS — 8 files / 67 tests across durable/in-memory limiter
+  behavior, Neon parameter privacy, protected health output, storage safety,
+  appointment/event/experiment endpoints, and phone setup routes.
+- Full Vitest: PASS — 212 files / 2,930 tests.
+- `pnpm run typecheck`: PASS.
+- `pnpm run lint`: PASS.
+- `pnpm run release:safety`: PASS — 14/14.
+- `pnpm run amm:verify:isolation`: PASS — canonical Ask project identity and no
+  deployable NellySelly identifier.
+- `pnpm run build`: PASS — optimized Next.js 15.5.21 Production build, 52 static
+  pages generated.
+- `pnpm run routes:assert`: PASS — 83 active routes / 17 acknowledged root–`src`
+  duplicates.
+- `pnpm audit --prod`: PASS — no known Production dependency vulnerability.
+- `git diff --check`: PASS.
+- Local Node 26.5.1 is newer than the declared Node 24.x engine. Exact Node 24
+  GitHub CI and protected canonical Vercel Preview verification remain required
+  on the final unchanged commit before release readiness.
+- No Production deployment, database query/write, bucket probe, lead, external
+  message, WordPress change, publication, spend, DNS change, or NellySelly
+  action occurred.
+
 ## iOS phone-alert handoff consolidation — 2026-08-21
 
 - Preservation: prior PR #179 head retained at rescue branch
@@ -15,7 +50,7 @@ All timestamps are America/New_York unless noted.
   exact Preview origins, NellySelly isolation, signed claim/cookie behavior,
   private token manifest, invalid tokens, copy-only registration/test,
   search/robots boundaries, and iOS readiness UI.
-- Full Vitest: PASS — 211 files / 2,921 tests.
+- Final exact Node 24 Vitest: PASS — 211 files / 2,924 tests.
 - `pnpm run typecheck`: PASS.
 - `pnpm run lint`: PASS.
 - `pnpm run release:safety`: PASS — 14/14.
@@ -44,8 +79,9 @@ All timestamps are America/New_York unless noted.
   PASS. A source regression test prevents the green-job/blocked-authority gap.
 - No subscription, Push, lead, email, SMS, analytics conversion, database write,
   Production deployment, WordPress action, publication, or provider call was
-  made. Exact Node 24 CI and the strict protected Preview authority workflow are
-  required on the final unchanged head; authoritative run IDs are attached to
+  made. Exact Node 24 CI and the strict protected Preview authority workflow
+  both passed on final head `9dd6684596ac8afbc52076d2c1597c12a0fa33e2`;
+  Node 24 run `32540896724` and authoritative Preview evidence are attached to
   Draft PR #179.
 
 ## Phase 9 WordPress owned-traffic consolidation — 2026-08-21

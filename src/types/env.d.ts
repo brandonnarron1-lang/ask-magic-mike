@@ -67,7 +67,9 @@ declare namespace NodeJS {
 
     // Admin
     ADMIN_SECRET: string;
+    CRON_SECRET?: string;
     PHONE_SETUP_SIGNING_SECRET?: string;
+    DATABASE_URL?: string;
     DATABASE_ENV?: string;
     SUPABASE_PROJECT_REF?: string;
     PRODUCTION_SUPABASE_PROJECT_REF?: string;
@@ -80,5 +82,10 @@ declare namespace NodeJS {
     RBAC_PASSWORD_RESET_EMAIL_ENABLED?: string;
     SLA_ACCEPT_MS?: string;
     SLA_CONTACT_MS?: string;
+
+    // Durable abuse controls (server-only; never use NEXT_PUBLIC_ prefixes)
+    RATE_LIMIT_HASH_SECRET?: string;
+    RATE_LIMIT_EMERGENCY_MEMORY?: string;
+    CONSENT_IP_HASH_SALT?: string;
   }
 }

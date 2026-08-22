@@ -10,6 +10,7 @@ import {
   configuredEmailProvider,
   smtpConfigurationReady,
 } from "../../../../../app/lib/emailProviderConfiguration";
+import { durableRateLimitHashSecretReady } from "@/lib/security/rate-limit";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
@@ -72,6 +73,7 @@ export async function GET(req: NextRequest) {
   }
 
   const databaseUrlPresent = Boolean(process.env.DATABASE_URL);
+  const rateLimitHashSecretPresent = durableRateLimitHashSecretReady(process.env);
   let dbReachable = false;
   let captureFunction = false;
   let slaFunction = false;
@@ -146,6 +148,7 @@ export async function GET(req: NextRequest) {
       database_provider: databaseUrlPresent ? "neon_postgres" : "not_configured",
       admin_secret_present: !!process.env.ADMIN_SECRET,
       cron_secret_present: !!process.env.CRON_SECRET,
+      rate_limit_hash_secret_present: rateLimitHashSecretPresent,
       email_provider: emailProvider,
       email_provider_configured: emailProvider !== "invalid",
       smtp_configuration_ready: emailProvider === "smtp" && smtpConfigurationReady(),

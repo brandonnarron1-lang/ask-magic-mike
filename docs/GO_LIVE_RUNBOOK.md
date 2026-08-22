@@ -67,25 +67,36 @@ Release only one approved PR at a time and verify Production before advancing:
    `5335697edf31eed0b8a38cd0295a4f5e7d501a3e`, Production deployment
    `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`, with migration `20260820013000` installed
    on canonical Neon Production;
-3. `#183` — campaign safety and three-offer owned-demand flight: release-ready
-   but still unmerged and Production-undeployed under its exact gate; and
-4. `#184` — owned-demand publication-proof ledger: draft stacked on the exact
-   #183 head. Code-bearing hardening head
-   `755cf686fccea3facd0071aebbdd24734e818ccd`, Node 24 run `32512057769`, and
-   Preview `dpl_4JxCp1UxebTPof1fvK55NTrrnHqY` are green. A later
-   documentation/tooling head must retain the same required exact-head
-   GitHub/Vercel checks. It must not merge before #183 or without its exact
-   migration/release gate. Refresh every remaining feature branch on the
-   resulting `main` before selecting another release. Do not preserve an old
-   queue order when its base, scope, or proof has become stale;
-5. `#185` — current-router safety and Buyer discovery: Draft stacked on #184;
-   refresh after #184 Production verification;
+3. `#183` — campaign safety and three-offer owned-demand flight, exact head
+   `95a4f210eed4f8991e96e2eee595da5907112ba9`, Node 24 run `32539636103`;
+4. `#184` — owned-demand publication-proof ledger, exact head
+   `4b9109492bb157e45babc23aeda58b30022bae2e`, Node 24 run `32540355761`;
+5. `#185` — current-router safety and Buyer discovery, exact head
+   `74b4b142ace5b7a1a258e6423638bc434ef1f532`, Node 24 run `32540396465`;
 6. `#186` — protected deterministic owned-demand assets and allowlisted QR
-   attribution: Draft stacked on #185; refresh after #185 verification; and
-7. `#187` — protected evidence-first KPI target register: Draft stacked after
-   #186, with no seeded targets and its own
-   backup-first additive migration. Refresh and re-prove it after every
-   preceding merge.
+   attribution, exact head `d193ab52215bd4d8a29db023bbfd4b45ded821ac`,
+   Node 24 run `32540497485`;
+7. `#187` — protected evidence-first KPI target register, exact head
+   `9d9a1e6f38dbf96e26750945a3d00e1a6fb65827`, Node 24 run `32540533222`;
+8. `#188` — WordPress owned-traffic audit and exact placement plan, exact head
+   `35438c311f8a3a5658691aa9568a5e80e4b5ef18`, Node 24 run `32540568531`;
+9. `#189` — exact owned-demand activation loop, exact head
+   `f5b3165f63873dbf3b4c2719cb522b00935f72c7`, Node 24 run `32540823212`; and
+10. `#179` — iOS install handoff, exact head
+    `9dd6684596ac8afbc52076d2c1597c12a0fa33e2`, Node 24 run `32540896724`.
+
+Items #183–#189 and #179 are Draft, correctly stacked in that order, and have
+green exact-head Vercel checks. They remain unmerged and Production-undeployed.
+The next permitted Production action is still #183 only, under this exact gate:
+
+```text
+APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT
+```
+
+After each merge, verify Production, refresh every downstream branch onto the
+resulting `main`, and rerun exact Node 24 plus Vercel Preview proof. Never treat
+the stack order as authorization for a later migration, merge, deployment,
+publication, send, spend, or database mutation.
 
 PR #181 uses:
 

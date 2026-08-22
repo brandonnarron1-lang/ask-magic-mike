@@ -20,4 +20,9 @@ describe("admin health security boundary", () => {
     expect(source).toContain("neon_postgres");
     expect(source).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
   });
+
+  it("reports only rate-limit HMAC secret presence, never its value", () => {
+    expect(source).toContain("rate_limit_hash_secret_present: rateLimitHashSecretPresent");
+    expect(source).not.toContain("rate_limit_hash_secret: process.env");
+  });
 });

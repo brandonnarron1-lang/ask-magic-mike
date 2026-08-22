@@ -15,8 +15,10 @@ for scoring, routing, or targeting.
   lead.
 - Exact consent text/version, timestamp, source, allowed channels, first/last
   touch, UTMs, click IDs, and test status travel with the record.
-- IP data is minimized or hashed with `CONSENT_IP_HASH_SALT`; raw PII must not be
-  placed in URLs, analytics properties, logs, screenshots, or source control.
+- Consent IP evidence is minimized or hashed with `CONSENT_IP_HASH_SALT`.
+  Durable abuse-control buckets use a separate domain-separated HMAC and retain
+  no raw IP or staff principal. Raw PII must not be placed in URLs, analytics
+  properties, logs, screenshots, reports, or source control.
 - `is_test=true` records are excluded from KPIs and must say `INTERNAL QA — DO
   NOT CONTACT`.
 

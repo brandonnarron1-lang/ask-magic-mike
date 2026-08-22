@@ -48,9 +48,18 @@ one canonical lead, one internal alert, one provider message ID, provider event
   retains its local entry, and the duplicate Form 3 native notification is
   inactive. Forms 1, 2, and 4–7 remain outside the forwarding allowlist.
 
-PR #183 is the next gated application release. PR #184 is stacked on it and
-adds the guarded publication-proof ledger migration. Neither candidate is
-Production, and neither authorizes external publication or a consumer send.
+PR #183 is the next gated application release. Draft PRs #184–#189 and #179 are
+green and stacked behind it in that exact order; current immutable heads and
+Node 24 runs are recorded in `IMPLEMENTATION_STATUS.md` and
+`GO_LIVE_RUNBOOK.md`. None is Production, and no candidate authorizes external
+publication, a consumer send, spend, or a later migration merely by being in
+the stack.
+
+The next code-only candidate reuses canonical Neon rate limiting while replacing
+persisted raw client/staff limiter keys with HMAC identifiers and bounded stale-
+bucket pruning. It adds no provider or database schema. Local verification is
+green; exact Node 24 and protected Preview proof are required before its Draft
+PR is release-ready.
 
 The latest aggregate Production observation contains only six
 suppressed/test leads and no contactable live prospect. The funnel is available

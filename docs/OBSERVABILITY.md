@@ -34,13 +34,18 @@ When a rate limit is hit, the route logs `warn("rate_limited", { request_id })` 
 - `Retry-After: <seconds>`
 - Standard correlation headers
 
-Rate limits are enforced per IP. In production, the canonical Neon
-`rate_limit_buckets` table makes limits durable across serverless instances.
-Without `DATABASE_URL`, an in-memory sliding window is used for local tests only.
+Rate limits are enforced against a request or authenticated-principal key. In
+production, the canonical Neon `rate_limit_buckets` table makes limits durable
+across serverless instances. The durable key is a versioned, domain-separated
+HMAC; raw IPs and staff identifiers are not persisted. Buckets older than 24
+hours are pruned opportunistically. Without the database or a server-only hash
+secret, an in-memory sliding window is used with a critical degraded-mode log.
 
 **Required production configuration:**
 - `DATABASE_URL` — the same server-only Neon connection used by lead capture
 - `public.rate_limit_buckets` — applied by the canonical migration chain
+- `RATE_LIMIT_HASH_SECRET` — preferred dedicated server-only HMAC secret;
+  documented server-secret fallbacks prevent raw-key persistence during cutover
 
 `RATE_LIMIT_EMERGENCY_MEMORY=1` acknowledges a temporary degraded in-memory mode;
 it does not make the limiter durable.

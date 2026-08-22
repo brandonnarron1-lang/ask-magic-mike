@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-08-21 — Durable rate-limit privacy hardening
+
+- Reused the canonical Neon rate limiter and replaced persisted raw client/
+  principal keys with versioned, domain-separated HMAC identifiers.
+- Added 24-hour stale-bucket pruning, protected secret-readiness reporting, and
+  focused SQL-parameter privacy coverage without another provider or schema.
+- Corrected the obsolete in-memory/Upstash blocker and refreshed the exact Draft
+  PR stack; Production and all external channels remain unchanged.
+
 ## 2026-08-21 — Owned-demand measurement truth hardening
 
 - Distinguished healthy zero-demand measurement from missing configuration,
