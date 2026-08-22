@@ -71,6 +71,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Release doctor
+        run: npm run release:doctor
+
       - name: Install Playwright browsers
         run: ./node_modules/.bin/playwright install --with-deps chromium
 
@@ -120,6 +123,11 @@ jobs:
 
       - name: Launch authority report
         run: npm run launch:authority
+
+      - name: Assert Preview-ready authority
+        env:
+          REQUIRE_VERDICT: "PREVIEW_READY"
+        run: npm run release:assert
 
       - name: Upload artifacts
         if: always()

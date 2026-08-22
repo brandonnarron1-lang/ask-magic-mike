@@ -41,6 +41,15 @@ export function collectFiles(dir, exts = [".ts", ".tsx"]) {
   return results;
 }
 
+/**
+ * Collect every source tree that can ship in the current Next.js build.
+ * Root app/ is canonical; src/ remains deployable for delegated routes and
+ * shared modules, so release checks must cover both without double counting.
+ */
+export function collectDeployableFiles(root, exts = [".ts", ".tsx"]) {
+  return ["app", "src"].flatMap((dir) => collectFiles(join(root, dir), exts));
+}
+
 /** Return file contents as a string, or empty string if not found. */
 export function readFileSafe(path) {
   try {

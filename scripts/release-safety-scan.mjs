@@ -5,26 +5,24 @@
  * Runs against the on-disk source tree (no network, no preview).
  * Fails fast on:
  *
- *   A. Secret exposure — process.env.ADMIN_SECRET / SUPABASE_SERVICE_ROLE_KEY
- *      / TWILIO_AUTH_TOKEN / EMAIL_API_KEY / CRON_SECRET read inside a
- *      client component (`"use client"` directive at the top).
+ *   A. Secret exposure — any canonical database, auth, provider, signing, or
+ *      private-recipient environment variable read inside a client component
+ *      (`"use client"` directive at the top).
  *
  *   B. Public-side MLS private-field leak — `agent_remarks`, `lockbox_info`,
  *      `showing_instructions`, `compensation`, `owner_notes`,
  *      `internal_notes`, `private_remarks`, `broker_notes` referenced
- *      in a *public* API route (anything under src/app/api that is NOT
- *      under src/app/api/admin/) or in any marketing-generation path.
+ *      in a *public* API route under the canonical app/ or retained src/app/
+ *      tree (excluding admin routes), or in a marketing-generation path.
  *      The sanitizer + CSV importer + tests are explicitly allowlisted.
  *
- *   C. Widget wiring — `MagicMikeWidgetController` must have at least
- *      one consumer outside its own file. Same for
- *      `MagicMikeWidgetFloating`. `/value` must import `MagicMikeWidgetFloating`.
- *      `/widget-preview` must import `MagicMikeWidgetController` or
- *      `MagicMikeWidgetFloating`.
+ *   C. Widget wiring — the canonical `WidgetApp` must back both versioned and
+ *      compatibility routes; Preview must load the owned loader, which must
+ *      target the versioned route.
  *
- *   D. Public listing whitelist — `/api/listings/search/route.ts` and
- *      `/api/listings/[id]/route.ts` must both reference
- *      `PUBLIC_FIELD_NAMES`.
+ *   D. Public listing boundary — canonical routes must return the safe-empty
+ *      provider shape; retained provider routes must select only the public
+ *      field whitelist.
  *
  * Exit codes:
  *   0 — all checks pass
@@ -38,7 +36,10 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import { resolve, relative, join } from "node:path";
 
 const REPO_ROOT = resolve(".");
-const SRC = join(REPO_ROOT, "src");
+const DEPLOYABLE_ROOTS = [
+  join(REPO_ROOT, "app"),
+  join(REPO_ROOT, "src"),
+];
 
 /** @type {Array<{check: string; file?: string; line?: number; message: string}>} */
 const failures = [];
@@ -67,10 +68,28 @@ async function walk(dir, out = []) {
 
 const SECRET_VAR_NAMES = [
   "ADMIN_SECRET",
+  "AMM_PRODUCTION_APPROVAL",
+  "AMM_PRODUCTION_DATABASE_URL",
+  "ANTHROPIC_API_KEY",
+  "AUTH_SECRET",
+  "BETTER_AUTH_SECRET",
+  "CONSENT_IP_HASH_SALT",
+  "DATABASE_URL",
+  "FUB_API_KEY",
+  "KVCORE_API_KEY",
+  "LEAD_NOTIFICATION_BCC",
+  "OPENAI_API_KEY",
+  "PHONE_SETUP_SIGNING_SECRET",
+  "QA_EMAIL_SEND_SECRET",
+  "RESEND_API_KEY",
+  "RESEND_WEBHOOK_SECRET",
+  "SMTP_PASSWORD",
   "SUPABASE_SERVICE_ROLE_KEY",
   "TWILIO_AUTH_TOKEN",
   "EMAIL_API_KEY",
   "CRON_SECRET",
+  "VAPID_PRIVATE_KEY",
+  "WORDPRESS_BRIDGE_SECRET",
 ];
 
 async function readWithMeta(file) {
@@ -139,7 +158,8 @@ async function checkPrivateFieldLeak(files) {
     const rel = relative(REPO_ROOT, file);
     // Public API routes only — admin routes legitimately handle these.
     const isPublicApi =
-      rel.startsWith("src/app/api/") && !rel.startsWith("src/app/api/admin/");
+      (rel.startsWith("app/api/") && !rel.startsWith("app/api/admin/")) ||
+      (rel.startsWith("src/app/api/") && !rel.startsWith("src/app/api/admin/"));
     if (!isPublicApi) continue;
     const { text } = await readWithMeta(file);
     // Strip line comments + block comments before scanning.
@@ -188,80 +208,81 @@ async function checkPrivateFieldLeak(files) {
 
 /** C — widget wiring */
 async function checkWidgetWiring(files) {
-  const consumers = {
-    MagicMikeWidgetController: 0,
-    MagicMikeWidgetFloating: 0,
-  };
-  let valueHasFloating = false;
-  let previewHasControllerOrFloating = false;
+  let widgetAppConsumers = 0;
+  let versionedRouteHasWidgetApp = false;
+  let compatibilityRouteHasWidgetApp = false;
+  let previewLoadsOwnedScript = false;
   for (const file of files) {
     const rel = relative(REPO_ROOT, file);
-    // Skip the components' own definition files when counting consumers.
-    if (rel.endsWith("magic-mike-widget-controller.tsx")) continue;
-    if (rel.endsWith("magic-mike-widget-floating.tsx")) continue;
     const text = await readFile(file, "utf8");
-    if (text.includes("MagicMikeWidgetController"))
-      consumers.MagicMikeWidgetController += 1;
-    if (text.includes("MagicMikeWidgetFloating"))
-      consumers.MagicMikeWidgetFloating += 1;
-    if (
-      rel.endsWith("src/components/campaign/value-hero.tsx") &&
-      text.includes("MagicMikeWidgetFloating")
-    ) {
-      valueHasFloating = true;
+    if (rel !== "app/components/black-diamond/WidgetApp.tsx" && text.includes("WidgetApp")) {
+      widgetAppConsumers += 1;
     }
-    if (
-      rel.endsWith("src/app/widget-preview/page.tsx") &&
-      (text.includes("MagicMikeWidgetController") ||
-        text.includes("MagicMikeWidgetFloating"))
-    ) {
-      previewHasControllerOrFloating = true;
+    if (rel === "app/widget/v1/page.tsx" && text.includes("WidgetApp")) {
+      versionedRouteHasWidgetApp = true;
+    }
+    if (rel === "app/widget/page.tsx" && text.includes("WidgetApp")) {
+      compatibilityRouteHasWidgetApp = true;
+    }
+    if (rel === "app/widget-preview/page.tsx" && text.includes('src="/widget.js"')) {
+      previewLoadsOwnedScript = true;
     }
   }
-  if (consumers.MagicMikeWidgetController === 0) {
+  if (widgetAppConsumers < 2) {
     fail(
       "C. widget_wiring",
-      "MagicMikeWidgetController has no consumers — it's a ghost component"
+      `WidgetApp has only ${widgetAppConsumers} canonical consumer(s)`
     );
   }
-  if (consumers.MagicMikeWidgetFloating === 0) {
+  if (!versionedRouteHasWidgetApp) {
     fail(
       "C. widget_wiring",
-      "MagicMikeWidgetFloating has no consumers — it's a ghost component"
+      "/widget/v1 does not import or render WidgetApp"
     );
   }
-  if (!valueHasFloating) {
+  if (!compatibilityRouteHasWidgetApp) {
     fail(
       "C. widget_wiring",
-      "/value (value-hero.tsx) does not import or render MagicMikeWidgetFloating"
+      "/widget compatibility route does not import or render WidgetApp"
     );
   }
-  if (!previewHasControllerOrFloating) {
+  if (!previewLoadsOwnedScript) {
     fail(
       "C. widget_wiring",
-      "/widget-preview does not import or render MagicMikeWidgetController/Floating"
+      "/widget-preview does not load the owned /widget.js loader"
     );
+  }
+  let loader = "";
+  try {
+    loader = await readFile(join(REPO_ROOT, "public/widget.js"), "utf8");
+  } catch (err) {
+    fail("C. widget_wiring", `public/widget.js missing (${err.message})`);
+  }
+  if (!loader.includes('"/widget/v1?"')) {
+    fail("C. widget_wiring", "public/widget.js does not target /widget/v1");
   }
   pass(
     "C. widget_wiring",
-    `controller ${consumers.MagicMikeWidgetController} consumer(s); floating ${consumers.MagicMikeWidgetFloating}`
+    `WidgetApp has ${widgetAppConsumers} consumers; versioned route, alias, and owned loader are wired`
   );
 }
 
-/** D — public listing whitelist */
+/** D — public listing boundary */
 async function checkPublicListingWhitelist() {
   const required = [
-    "src/app/api/listings/search/route.ts",
-    "src/app/api/listings/[id]/route.ts",
+    ["app/api/listings/search/route.ts", "safeEmptyListingSearchResponse"],
+    ["app/api/listings/[id]/route.ts", "safeEmptyListingDetailResponse"],
+    ["src/app/api/listings/search/route.ts", "PUBLIC_FIELD_NAMES"],
+    ["src/app/api/listings/[id]/route.ts", "PUBLIC_FIELD_NAMES"],
   ];
-  for (const rel of required) {
+  for (const [rel, requiredMarker] of required) {
     const full = join(REPO_ROOT, rel);
     try {
       const text = await readFile(full, "utf8");
-      if (!text.includes("PUBLIC_FIELD_NAMES")) {
+      if (!text.includes(requiredMarker)) {
         fail(
           "D. public_listing_whitelist",
-          `${rel} does not reference PUBLIC_FIELD_NAMES`
+          `${rel} does not reference ${requiredMarker}`
         );
       }
     } catch (err) {
@@ -270,7 +291,7 @@ async function checkPublicListingWhitelist() {
   }
   pass(
     "D. public_listing_whitelist",
-    "/api/listings/search + /api/listings/[id] both reference PUBLIC_FIELD_NAMES"
+    "canonical routes fail safely and retained provider routes use PUBLIC_FIELD_NAMES"
   );
 }
 
@@ -324,6 +345,18 @@ async function checkPreviewQaBypassPlumbing() {
 /** F — /api/admin/health does not return raw env values */
 async function checkHealthEndpointShape() {
   const path = "src/app/api/admin/health/route.ts";
+  const activePath = "app/api/admin/health/route.ts";
+  try {
+    const active = await readFile(join(REPO_ROOT, activePath), "utf8");
+    if (!active.includes('from "../../../../src/app/api/admin/health/route"')) {
+      fail(
+        "F. health_endpoint_shape",
+        `${activePath} does not delegate to the reviewed health implementation`
+      );
+    }
+  } catch (err) {
+    fail("F. health_endpoint_shape", `${activePath} missing (${err.message})`);
+  }
   let text;
   try {
     text = await readFile(join(REPO_ROOT, path), "utf8");
@@ -340,11 +373,7 @@ async function checkHealthEndpointShape() {
   // (!!process.env.X) and `=== process.env.X` auth comparisons elsewhere
   // in the file are fine.
   const forbiddenInResponse = [
-    "ADMIN_SECRET",
-    "SUPABASE_SERVICE_ROLE_KEY",
-    "CRON_SECRET",
-    "TWILIO_AUTH_TOKEN",
-    "EMAIL_API_KEY",
+    ...SECRET_VAR_NAMES,
     "VERCEL_AUTOMATION_BYPASS_SECRET",
   ];
   // Capture each NextResponse.json(...) argument list. We approximate by
@@ -366,11 +395,17 @@ async function checkHealthEndpointShape() {
   }
   for (const slice of slices) {
     for (const name of forbiddenInResponse) {
-      // Skip the boolean-presence pattern.
-      const cleaned = slice.replace(
-        new RegExp(`!!\\s*process\\.env\\.${name}\\b`, "g"),
-        "__bool__"
-      );
+      // Skip the two supported boolean-presence patterns. Both return only a
+      // status bit; any other direct process.env reference remains a failure.
+      const cleaned = slice
+        .replace(
+          new RegExp(`!!\\s*process\\.env\\.${name}\\b`, "g"),
+          "__bool__"
+        )
+        .replace(
+          new RegExp(`Boolean\\(\\s*process\\.env\\.${name}\\s*\\)`, "g"),
+          "__bool__"
+        );
       if (new RegExp(`process\\.env\\.${name}\\b`).test(cleaned)) {
         fail(
           "F. health_endpoint_shape",
@@ -700,7 +735,9 @@ async function checkArtifactsGitignored() {
 }
 
 async function main() {
-  const files = await walk(SRC);
+  const files = (await Promise.all(
+    DEPLOYABLE_ROOTS.map((root) => walk(root, []))
+  )).flat();
   await checkSecretExposure(files);
   await checkPrivateFieldLeak(files);
   await checkWidgetWiring(files);

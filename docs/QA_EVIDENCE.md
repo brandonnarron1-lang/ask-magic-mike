@@ -1,9 +1,152 @@
 # QA Evidence
 
+## PR #185 continuation readiness audit — 2026-08-22
+
+- Reconfirmed that current Production remains PR #184 merge
+  `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97` on Ready deployment
+  `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`, with the `www` root returning HTTP 200,
+  apex redirecting HTTP 308 to `www`, `/home-value`, `/buy`, public liveness,
+  and the Our Town homepage returning HTTP 200.
+- Reconfirmed PR #185 contains current Production. Final UI-to-Neon tracing
+  then found that its accepted `ourtown_wordpress` tuples exceeded the released
+  ledger constraints. PR #185 now includes the additive constraint-only
+  `20260822195000_owned_demand_wordpress_proof_scope.sql` repair. Earlier
+  application-only head evidence is regression history, not release authority
+  for the repaired head.
+- Traced the complete candidate story: authenticated Distribution Command to
+  existing Neon aggregate/proof reads, deterministic activation state, protected
+  allowlisted feed/story/QR exports, and fixed canonical UTM shortlinks. The
+  candidate contains no publisher, provider send, lead submission, WordPress
+  mutation, spend, or NellySelly action.
+- Fresh focused verification passes 6 files / 61 tests. Fresh full local release
+  verification passes system isolation, 14/14 release-safety checks, 205 files /
+  2,866 tests, strict typecheck, ESLint, optimized Next.js 15.5.21 build, and the
+  80-route manifest. The exact-head GitHub Node 24 gate remains the authoritative
+  engine result because the local shell runs Node 26.5.1.
+- `pnpm audit --prod --audit-level high` reports no known vulnerability;
+  `git diff --check` passes; and redacted `gitleaks git` scans 504 commits /
+  approximately 14.08 MB with no leak.
+- Runtime headers preserve private/no-store, noindex, frame, and content-type
+  boundaries on the protected command. Asset exports require server-side
+  `report:view`; shortlinks accept no arbitrary destination; publication-proof
+  writes remain behind server-side `growth:manage`, explicit confirmation,
+  runtime validation, parameterized SQL, and the Preview mutation guard.
+- Release-path asset probe found one missed boundary: the renter export source
+  returned HTTP 404 on current Production because it was a branch-only JPEG,
+  while the route deliberately renders from the canonical host. Fix
+  `9a8baf935a7a68cda528ec4aee90b7cfcf5e87fc` reuses the equivalent approved PNG
+  already returning HTTP 200 in Production and corrects the renderer fixture's
+  PNG MIME type. The focused Node 24 matrix passes 5 files / 46 tests, including
+  all four offer types in both feed and story formats.
+- The first exact-head protected Preview run passed all endpoint and browser
+  checks but exposed a workflow-integrity defect: direct Preview QA omitted
+  release doctor, and neither Preview workflow asserted the generated launch
+  verdict. The workflow is now required to run doctor before authority and to
+  assert exact `PREVIEW_READY`; a regression test covers both dispatch paths.
+- After that correction, the full local gate passes 206 files / 2,868 tests,
+  strict typecheck, ESLint, optimized Production build, 80-route verification,
+  system isolation, and 14/14 safety controls.
+- After the retained-asset correction, the complete local gate was rerun under
+  Node 24 and passes 206 files / 2,869 tests, strict typecheck, ESLint,
+  optimized Production build, 80-route verification, system isolation, and
+  14/14 safety controls. Production dependency audit reports no known
+  vulnerability; gitleaks scans 510 commits / 14.10 MB with no leak; all three
+  canonical creative source URLs return HTTP 200 with image content.
+- No Production deployment, database read/write beyond public liveness,
+  publication proof, lead, email/BCC, SMS, Push, external post, WordPress edit,
+  DNS change, provider action, spend, deletion, or NellySelly action occurred.
+
+The migration, executable PostgreSQL 17, runner, compatibility, and security
+evidence for the repaired boundary is maintained in
+`docs/phase9/OWNED_DEMAND_WORDPRESS_PROOF_SCOPE_QA_EVIDENCE.md`. Exact-head
+GitHub/Vercel evidence is attached to PR #185 after push.
+
 Status: production funnel, Neon persistence, routing, suppression, outbox, and
 provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
+
+## Phase 9 consolidated owned-demand command — 2026-08-22
+
+- Consolidation boundary — PASS: PR #185 contains the unique application work
+  selected from PRs #185, #186, #188, and #189 on released PR #184. Diff review
+  finds one constraint-only WordPress proof-scope migration and no provider
+  publisher, second lead store, second CRM, or PR #187 KPI-target
+  implementation.
+- Final post-hardening focused matrix — PASS: 10 files / 148 tests covering the
+  owned-demand command, asset exports, publication-proof contract, activation
+  loop, WordPress audit, current-router safety, public-origin policy, UTM
+  allowlists, public route authority, and executable feed/story rendering.
+- `pnpm release:gate` — PASS on local Node 26.5.1: Ask Magic Mike/NellySelly
+  isolation, 14/14 release-safety controls, 205 test files / 2,866 tests,
+  strict typecheck, ESLint, optimized Next.js 15.5.21 build, and 80 active
+  routes / 17 acknowledged root–`src` duplicates. The repository declares Node
+  24.x, so exact Node 24 GitHub evidence is still required.
+- Read-only public WordPress audit — PASS at
+  `2026-08-22T14:10:43.297Z`: 42/42 sitemap pages fetched, zero failed, no form
+  submission, no WordPress mutation, and no secret/private-field collection.
+  The fetcher now accepts only HTTPS on `ourtownproperties.com` or
+  `www.ourtownproperties.com`, revalidates each manual redirect, and caps the
+  chain at five hops.
+- Security source review — PASS at checkpoint: protected exports use
+  server-side `report:view`; channel, placement, format, local image, short
+  code, and destination are allowlisted; asset responses are private/no-store,
+  noindex, nosniff, and sandbox SVG; shortlinks cannot accept a destination;
+  no unsafe HTML or dynamic-code sink was introduced.
+- Failure-closure regression — PASS: when Growth measurement is unavailable,
+  all placements report `measurement_unavailable`, the operator receives no
+  recommended first placement, and lead-dependent counts are not presented as
+  measured. Publication-proof availability remains an independent boundary.
+- `pnpm audit --prod --audit-level high` — PASS: no known Production dependency
+  vulnerability.
+- `gitleaks git --redact --no-banner` — PASS: 498 commits / approximately
+  13.92 MB scanned with no leak.
+- The earlier `git diff --check` and empty-migration scan passed on the
+  application-only head. It is superseded by the repaired-head diff check,
+  migration contract, and exact-head release evidence recorded above.
+- Pending before exact-head acceptance: exact Node 24 GitHub checks, canonical
+  Vercel Preview smoke/auth/origin/shortlink/asset checks, rendered
+  desktop/mobile QA, and deployment-log inspection.
+- No Production, Neon, WordPress, lead, email/BCC, SMS, Push, provider,
+  publication, QR distribution, DNS, spend, or NellySelly mutation occurred.
+
+## Phase 9 WordPress owned-traffic consolidation — 2026-08-21
+
+- `WORDPRESS_BRIDGE_FORM_IDS=3 node scripts/audit-wordpress-form-placements.mjs` — PASS: 42 sitemap
+  pages fetched, 42 succeeded, zero failed; the report captured only structural
+  public evidence and compared all observed Gravity IDs against the proven
+  Form 3 bridge allowlist.
+- Public topology evidence: Form 1 on one page, Form 3 on one page, Form 4 on
+  one page, Form 6 on one page, and Form 7 on 39 pages. Five pages expose more
+  than one capture system. No form was submitted.
+- Canonical/placement evidence: three indexable seller-value pages, two
+  direct-purchase pages, two Ask Mike pages, four native legacy-capture pages,
+  three direct AskMagicMike.com links missing `utm_content`, and two iframe
+  placements missing `utm_content`.
+- Mobile Chromium inspection at 390 x 844 covered the homepage, established
+  home-value page, and Ask Magic Mike page. Existing layouts remained usable;
+  the render confirmed visible capture duplication and did not create a lead,
+  analytics conversion, provider call, or message.
+- Focused command — PASS: 5 files / 85 tests covering the WordPress audit,
+  owned-demand command, publication proof, UTM builder, and owned-demand
+  assets.
+- `pnpm release:gate` — PASS: Ask Magic Mike/NellySelly isolation, 14/14
+  release-safety controls, 208 test files / 2,901 tests, strict typecheck,
+  ESLint, optimized Next.js 15.5.21 build, and 81-route manifest.
+- `pnpm audit --prod` — PASS: no known Production dependency vulnerability.
+- `gitleaks git --redact --no-banner` — PASS: 477 commits and approximately
+  13.53 MB scanned with no leak.
+- `git diff --check` — PASS before final documentation update; it is rerun at
+  handoff.
+- Known local-only warning: Node 26.5.1 is newer than the Node 24.x project
+  engine, and webpack could not persist one disposable cache entry because the
+  local volume was nearly full. Compilation, page generation, build, and route
+  checks still passed. Exact Node 24 CI and protected Preview verification are
+  required on the Draft PR before the candidate is considered accepted.
+- Full audit rationale, page-level matrix, rollback, and stop gates are in
+  `docs/phase9/WORDPRESS_OWNED_TRAFFIC_CONSOLIDATION_AUDIT_2026-08-21.md`.
+- Production, WordPress, Neon, providers, leads, notifications, DNS, and
+  NellySelly remained unchanged.
 
 ## Phase 9 owned-demand publication proof ledger — 2026-08-21
 

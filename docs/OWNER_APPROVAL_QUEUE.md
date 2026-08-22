@@ -15,19 +15,42 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    — its exact gate was received; the backup-first Neon migration is applied
    and verified, and application release evidence is attached to the PR.
 
-The #184 phrase authorizes its reviewed backup-first Neon migration, exact code
-merge, and canonical Vercel deployment. Neither phrase authorizes a social/GBP
-post, email campaign, QR distribution, consumer message, spend, DNS change, or
-deletion.
+These completed gates are exhausted and must not be reused as authority for a
+new action. None authorized a social/GBP post, email campaign, QR
+printing/distribution, consumer message, spend, DNS change, WordPress change,
+provider action, or deletion.
+
+## Next consolidated application and schema-repair candidate
+
+- PR [#185](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/185)
+  is the sole owned-demand application consolidation vehicle. It preserves the
+  useful work from PRs #185, #186, #188, and #189 on released PR #184 while
+  excluding PR #187's KPI-target migration and PRs #190–#192.
+- Final tracing found that the existing Neon proof constraints did not yet
+  accept the WordPress tuples already validated by the application. PR #185 now
+  includes one additive constraint-only repair plus a pinned, backup-first,
+  one-transaction cutover runner. It contains no publisher or seeded proof.
+- After exact-head Node 24 CI, canonical Vercel Preview, PostgreSQL contract,
+  protected-flow, security, and desktop/mobile acceptance pass, the only
+  release phrase to request is:
+  `APPROVE PHASE 9 OWNED-DEMAND WORDPRESS PROOF MIGRATION, PR 185 MERGE, AND PRODUCTION DEPLOYMENT`.
+- That future phrase will authorize only the reviewed migration, exact PR #185
+  merge, and canonical Vercel Production deployment. It will not authorize a
+  WordPress edit, GBP/social/email publication, QR distribution, message, lead
+  submission, any other database migration, spend, DNS change, provider action,
+  deletion, or NellySelly action.
 
 ## Deferred candidates requiring refresh and overlap review
 
 - PR [#182](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/182)
-  modernizes launch-authority checks and surfaces buyer discovery. It overlaps
-  #183's buyer and operational-document work. Do not release it until the
-  current stack lands, the overlap is reconciled, and exact-head evidence is
-  re-established. Its retained gate is
-  `APPROVE PHASE 9 LAUNCH AUTHORITY AND BUYER DISCOVERY MERGE AND PRODUCTION DEPLOYMENT`.
+  is superseded for release. Its unique Buyer/current-router work is preserved
+  in consolidated PR #185, so its former gate must not be requested or reused.
+- PR #187's KPI-target migration is deferred because Production has no eligible
+  live-demand baseline. It is not part of PR #185.
+- PRs #186, #188, and #189 are preserved as source history; their useful work
+  is consolidated into PR #185 and their former standalone gates are obsolete.
+- PRs #190–#192 remain separate overlap-review candidates and are not part of
+  the owned-demand command release.
 - PR [#179](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/179)
   repairs the iOS Home Screen Web Push handoff. Refresh it after the current
   stack and rerun protected iPhone-install acceptance before considering
@@ -70,8 +93,7 @@ deletion.
 ## Resolved and removed from this queue
 
 - PRs #170, #172, #173, #177, #178, #180, #181, #183, and #184 are released;
-  do not request
-  their historical approval phrases again.
+  do not request their historical approval phrases again.
 - Canonical Neon Production and Better Auth/RBAC are established.
 - Form 3 signed WordPress forwarding and duplicate native-notification shutdown
   passed controlled QA.

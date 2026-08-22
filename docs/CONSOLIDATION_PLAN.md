@@ -1,6 +1,6 @@
 # Consolidation Plan
 
-Refreshed 2026-08-21 from authenticated GitHub, Vercel, Neon, and WordPress
+Refreshed 2026-08-22 from authenticated GitHub, Vercel, Neon, and WordPress
 evidence. This plan organizes and strengthens the system already in service; it
 does not authorize a parallel application, database, notification engine, or CRM.
 
@@ -22,10 +22,11 @@ does not authorize a parallel application, database, notification engine, or CRM
 - Free-first phone alert: Web Push; carrier SMS remains disabled until a
   compliant registered provider is explicitly approved
 
-The Production baseline is PR #181, merge commit
-`5335697edf31eed0b8a38cd0295a4f5e7d501a3e`, deployed as
-`dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`. Do not rerun that migration or redeploy that
-commit merely because an old approval prompt is repeated.
+The Production baseline is PR #184, merge commit
+`f5f82f1bfaadea0ed20da50738ebc1f83e8dab97`, deployed as
+`dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`. Its publication-proof migration is already
+verified on the named Neon Production branch. Do not rerun that migration or
+redeploy that commit merely because an old approval prompt is repeated.
 
 ## Consolidation already completed
 
@@ -48,32 +49,44 @@ commit merely because an old approval prompt is repeated.
 
 ## Current merge order
 
-### 1. PR #183 — three-offer campaign-safety flight
+### 1. PR #185 — owned-demand command consolidation
 
-Merge and deploy only after this exact approval:
+PR #185 is the single consolidation vehicle. It is refreshed onto the current
+Production `main` and contains the additive application work from these
+already-built branches plus one constraint-only repair to align the existing
+publication-proof ledger with those already-reviewed WordPress placements:
 
-`APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT`
+- PR #185: Buyer discovery, canonical current-router CTA authority, exact Vercel
+  Preview-origin binding, and modern release-safety coverage.
+- PR #186: protected, deterministic owned-demand image assets and tracked-link
+  exports.
+- PR #188: explicit WordPress placement catalog and read-only audit tooling.
+- PR #189: deterministic activation decision support and operator UI.
 
-This is the next application release. It does not authorize publication to an
-external channel, a database migration, a message send, or a fabricated lead.
+The consolidated candidate does not publish to GBP, Facebook, Instagram,
+WordPress, or email; send a message; create a lead; or change Production data.
+After exact-head CI and Preview acceptance, merge and deploy only after this
+separate gate:
 
-### 2. PR #184 — append-only publication-proof ledger
+`APPROVE PHASE 9 OWNED-DEMAND WORDPRESS PROOF MIGRATION, PR 185 MERGE, AND PRODUCTION DEPLOYMENT`
 
-After PR #183 reaches Production, refresh PR #184 onto the new `main`, rerun its
-exact-head CI/Preview/database-contract evidence, and then use this separate gate:
+### 2. Deferred candidates
 
-`APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT`
-
-The guarded migration must run against the named Neon Production branch before
-the application artifact is promoted. The cutover verifier must pass before and
-after deployment.
-
-### 3. Deferred candidates
-
-- PR #182: reconcile its launch-authority and buyer-discovery changes against the
-  merged #183/#184 code before deciding whether any unique work remains.
-- PR #179: refresh the iOS Web Push handoff against current `main`; physical
-  device enrollment and receipt confirmation remain a separate human step.
+- PR #182 remains Draft as historical evidence. Its unique current-router safety
+  work is preserved in PR #185; its duplicated operational authority and launch
+  scanner must not merge as a second control plane.
+- PR #187's KPI target-register migration is deferred. Production has no eligible
+  live-lead baseline, so deploying targets now would create precision without
+  evidence. The branch remains available for later review after live demand.
+- PRs #190-#192 remain separate security/privacy/KPI-trust candidates. They are
+  not prerequisites for the owned-demand command candidate and must be reviewed
+  against the final PR #185 head before any future release.
+- PR #179 audit is complete. Its token-scoped iOS Home Screen install handoff is
+  unique and retained. The only direct file overlap with #184 is the generated
+  route manifest. PR #179 remains Draft until the current stack lands; refresh
+  it against the final `main` and repeat exact-head Preview proof before any
+  release. Physical device enrollment and receipt confirmation remain a
+  separate human step.
 - PRs #92 and #119-#121: archive after review; they are not a parallel release
   sequence.
 
@@ -103,34 +116,41 @@ after deployment.
   SMS gateway, or AI assignment engine.
 - PropertyLens, which is a separate product and not an Ask Magic Mike runtime.
 
-## PR #184 migration risk and rollback
+## PR #185 consolidation risk and rollback
 
-The publication-proof migration is additive and append-only. It creates the
-proof/audit contract and grants only the minimum required writer capability; it
-does not rewrite leads or publish content. Its local PostgreSQL 17 contract proves
-idempotent replay, URL revalidation, minimized metadata, immutable rows, audit
-creation, transaction rollback, and denial of direct authenticated table access.
+PR #185 contains one additive constraint-only migration. It extends the existing
+append-only ledger to the application-owned WordPress tuples; it does not create
+a table, seed proof, or alter leads. Risks include schema drift during constraint
+replacement, authorization gaps in generated-asset routes, an open redirect in
+tracked links, accidental caching/indexing of private operator data, origin drift
+between Production and Preview, and duplicate operational authority. The release
+gate must prove the exact legacy schema, validated v2 constraints, unchanged
+rows/RLS/grants/trigger/RPC, strict allowlists, server-side roles,
+`private, no-store`, `noindex`, attachment-safe files, current-root route
+authority, and the absence of a second publisher or notification path.
 
-Cutover sequence:
+Cutover sequence after explicit approval:
 
-1. Record the exact Production Vercel deployment and Neon branch/endpoint.
-2. Confirm a verified database backup/restore point using Neon branch history.
-3. Apply only the reviewed PR #184 migration to the named Production branch.
-4. Run the migration cutover verifier and stop on any mismatch.
-5. Merge the exact tested PR head and allow the canonical Vercel project to build.
-6. Verify health, authorization, public routes, and a controlled proof write.
-7. Do not publish an external campaign or send a consumer message as part of the
-   deployment.
+1. Record the exact Production Vercel deployment and exact tested PR head.
+2. Run the pinned cutover plan and preflight using the secure unpooled Neon
+   owner connection; create and validate the mode-600 backup.
+3. Apply the reviewed migration and ledger entry in one transaction, then prove
+   unchanged lead/audit/proof rows, function, RLS, trigger, and grants.
+4. Merge only the exact tested head and let the canonical Vercel project build.
+5. Verify public routes, health, anonymous admin denial, protected asset exports,
+   tracked-link allowlists, responsive rendering, and runtime logs.
+6. Keep all external posts and WordPress publication behind their own approval.
 
 Rollback:
 
-- Repoint the Production aliases to the recorded prior Ready deployment if the
-  application fails.
-- Disable the new publication-proof write path before attempting schema changes.
-- Preserve proof and audit rows; do not delete evidence during an incident.
-- Restore the Neon branch to the recorded restore point only if the database
-  contract itself is unsafe and the owner separately approves that destructive
-  recovery action.
+- Repoint the Production aliases to `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW` if the
+  application candidate fails.
+- Leave the broader validated constraints installed after commit; the preceding
+  application ignores the added tuples. Do not narrow them if legitimate
+  WordPress proof may have been recorded. Prefer a forward fix and preserve all
+  proof/audit rows.
+- Disable the owned-demand asset/decision surfaces at the application layer if a
+  narrow feature fault is found, without removing publication-proof evidence.
 
 ## Remaining human and external gates
 

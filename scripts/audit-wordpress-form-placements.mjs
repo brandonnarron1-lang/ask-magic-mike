@@ -1,42 +1,71 @@
 #!/usr/bin/env node
 
-const sitemapUrl = process.env.WORDPRESS_SITEMAP_URL
-  || "https://www.ourtownproperties.com/page-sitemap.xml";
+import {
+  inspectWordPressPage,
+  normalizeWordPressAuditUrl,
+  parseWordPressSitemap,
+  summarizeWordPressSurface,
+} from "./amm/wordpress-surface-audit-lib.mjs";
 
-const sitemapResponse = await fetch(sitemapUrl, {
-  headers: { "user-agent": "AskMagicMike-Phase2-Audit/1.0" },
-  signal: AbortSignal.timeout(20_000),
-});
+const sitemapUrl = normalizeWordPressAuditUrl(
+  process.env.WORDPRESS_SITEMAP_URL
+    || "https://www.ourtownproperties.com/page-sitemap.xml",
+);
+const canonicalBridgeFormIds = (process.env.WORDPRESS_BRIDGE_FORM_IDS || "")
+  .split(",")
+  .map((value) => Number(value.trim()))
+  .filter(Number.isInteger);
+const headers = { "user-agent": "AskMagicMike-WordPress-Surface-Audit/2.0" };
 
-if (!sitemapResponse.ok) {
-  throw new Error(`Sitemap request failed with HTTP ${sitemapResponse.status}`);
-}
-
-const sitemap = await sitemapResponse.text();
-const urls = [...sitemap.matchAll(/<loc>(https?:\/\/[^<]+)<\/loc>/g)].map((match) => match[1]);
-const placements = [];
-
-for (const url of urls) {
-  try {
-    const response = await fetch(url, {
-      headers: { "user-agent": "AskMagicMike-Phase2-Audit/1.0" },
+async function getText(url) {
+  let currentUrl = normalizeWordPressAuditUrl(url);
+  for (let redirectCount = 0; redirectCount <= 5; redirectCount += 1) {
+    const response = await fetch(currentUrl, {
+      headers,
+      redirect: "manual",
       signal: AbortSignal.timeout(20_000),
     });
-    if (!response.ok) continue;
-
-    const html = await response.text();
-    const ids = new Set();
-    for (const pattern of [
-      /gform_wrapper_(\d+)/g,
-      /id=["']gform_(\d+)["']/g,
-      /data-formid=["'](\d+)["']/g,
-    ]) {
-      for (const match of html.matchAll(pattern)) ids.add(Number(match[1]));
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location");
+      if (!location || redirectCount === 5) throw new Error("Unsafe or excessive redirect");
+      currentUrl = normalizeWordPressAuditUrl(new URL(location, currentUrl).toString());
+      continue;
     }
-    if (ids.size > 0) placements.push({ url, form_ids: [...ids].sort((a, b) => a - b) });
-  } catch {
-    // A single page timeout must not abort the inventory.
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return { response, finalUrl: currentUrl, text: await response.text() };
   }
+  throw new Error("WordPress audit redirect limit exceeded");
 }
 
-console.log(JSON.stringify({ checked_at: new Date().toISOString(), sitemap: sitemapUrl, placements }, null, 2));
+const { text: sitemap } = await getText(sitemapUrl);
+const urls = parseWordPressSitemap(sitemap).map(normalizeWordPressAuditUrl);
+const pages = [];
+
+for (let offset = 0; offset < urls.length; offset += 6) {
+  const batch = urls.slice(offset, offset + 6);
+  const inspected = await Promise.all(batch.map(async (url) => {
+    try {
+      const { response, finalUrl, text } = await getText(url);
+      return {
+        ...inspectWordPressPage(text, finalUrl),
+        requested_url: url,
+        http_status: response.status,
+      };
+    } catch (error) {
+      return {
+        url,
+        requested_url: url,
+        error: error instanceof Error ? error.message.slice(0, 120) : "request_failed",
+      };
+    }
+  }));
+  pages.push(...inspected);
+}
+
+console.log(JSON.stringify({
+  checked_at: new Date().toISOString(),
+  mode: "read_only_public_surface",
+  sitemap: sitemapUrl,
+  summary: summarizeWordPressSurface(pages, canonicalBridgeFormIds),
+  pages,
+}, null, 2));

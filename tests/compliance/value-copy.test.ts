@@ -544,6 +544,7 @@ describe("active root router SEO and headers", () => {
     expect(rootRobots).toContain("canonicalSiteUrl");
     expect(rootRobots).toContain("/admin");
     expect(rootRobots).toContain("/api/");
+    expect(rootRobots).toContain("/go/");
     expect(rootSitemap).toContain("siteConfig");
     expect(rootSitemap).toContain("canonicalSiteUrl");
     expect(rootSitemap).toContain("/home-value");

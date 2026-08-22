@@ -2,6 +2,238 @@
 
 Updated 2026-08-22.
 
+## Phase 9 consolidated owned-demand command — 2026-08-22
+
+- PR #185 is the single application consolidation vehicle on released PR #184
+  merge `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97`. It preserves the unique
+  Buyer/current-router safety work from PR #185 and the useful asset,
+  WordPress-audit, and lifecycle work from PRs #186, #188, and #189.
+- The protected `/admin/distribution` page remains the sole operator command.
+  It now derives 35 exact general, offer, and named WordPress placements from
+  one allowlisted catalog and joins current native proof to eligible
+  first-party attribution without treating either stream as proof of the other.
+- Missing Growth measurement now produces `measurement_unavailable`, hides
+  lead-dependent totals, and suppresses the recommended placement. Missing
+  publication-proof evidence separately produces `evidence_unavailable`.
+- Protected feed/story/QR exports require `report:view`; public short codes
+  resolve only to fixed canonical UTM destinations. The WordPress auditor is
+  read-only, host-allowlisted to the apex and `www` Our Town HTTPS hosts, and
+  revalidates every redirect hop.
+- Final release review found that the renter export referenced a branch-only
+  JPEG even though protected Preview rendering resolves approved source art
+  from the released canonical host. Code-bearing fix
+  `9a8baf935a7a68cda528ec4aee90b7cfcf5e87fc` now reuses the equivalent retained
+  Production PNG and corrects the executable test's PNG MIME type. The former
+  URL returned HTTP 404 on Production; all three current export sources return
+  HTTP 200 with image content.
+- The latest public WordPress audit at `2026-08-22T14:10:43.297Z` fetched 42 of
+  42 sitemap pages and made no form submission or WordPress change. Current
+  aggregate Production truth remains six test/suppressed records and zero
+  eligible live demand, outcomes, first-response samples, spend, or proofs.
+- Before the schema repair, the post-hardening application matrix passed 5
+  files / 46 tests and the full Node 24 gate passed 206 files / 2,869 tests.
+  Those results remain useful regression history but are not final release
+  authority for the migration-bearing head. Fresh exact-head Node 24 CI,
+  canonical Preview, protected flow, rendered acceptance, dependency, secret,
+  migration, and diff evidence is tracked on PR #185 after push so this
+  document does not create self-referential evidence churn. Production remains
+  unchanged.
+- Protected Preview workflows now run release doctor before generating launch
+  authority and must assert exact `PREVIEW_READY` afterward. This closes a
+  false-green path where endpoint/browser checks passed but a missing doctor
+  report left launch authority `BLOCKED`.
+- Final UI-to-Neon tracing found that the application already accepted
+  `ourtown_wordpress` and seven named placements while the released ledger
+  constraints did not. A valid operator action would pass runtime validation
+  and fail durable storage. PR #185 now includes one additive constraint-only
+  migration, `20260822195000_owned_demand_wordpress_proof_scope.sql`, to repair
+  that existing-system mismatch instead of introducing a second ledger.
+- Isolated PostgreSQL 17.11 proof passes all 11 WordPress placement tuples,
+  `live`/`configured`/`removed` state contracts, replay idempotency, foreign-host
+  rejection, cross-channel placement rejection, immutable audit creation,
+  browser-role denial, and rollback of all synthetic rows. A legacy Facebook
+  proof survived the migration unchanged.
+  The pinned production cutover runner verifies a backup, advisory/table locks,
+  one transaction, six validated v2 constraints, and unchanged lead, audit,
+  proof, function, RLS, trigger, and grant state. Production is unchanged.
+- Fresh exact-tree Node 24.18.0 verification passes system isolation, 14/14
+  release-safety controls, 207 test files / 2,879 tests, strict typecheck,
+  ESLint, the optimized Next.js 15.5.21 build, and 80 active routes. Focused
+  WordPress proof/cutover coverage passes 5 files / 55 tests. Exact remote CI,
+  canonical Preview, protected flow, and rendered evidence remain required
+  after the repaired head is pushed.
+- This candidate still cannot publish, send, spend, submit a lead, mutate
+  WordPress, modify DNS, contact a consumer, or act on NellySelly.
+- Exact future migration/application gate:
+  `APPROVE PHASE 9 OWNED-DEMAND WORDPRESS PROOF MIGRATION, PR 185 MERGE, AND PRODUCTION DEPLOYMENT`.
+  External WordPress, GBP, social, email-signature, or QR publication remains a
+  separate exact action and approval.
+
+The source-branch sections below preserve implementation history. Their old
+stack order and standalone approval phrases are superseded by the consolidated
+PR #185 decision above; they are not independent release authority.
+
+## Phase 9 exact owned-demand activation loop — 2026-08-21
+
+- Reused the existing protected `/admin/distribution` page, seven canonical
+  channel definitions, 35 exact placements, UTM builder, Neon Growth signals,
+  append-only native publication-proof ledger, Lead Center RBAC, and Preview
+  fail-closed controls. No parallel system was added.
+- Added a pure deterministic join that shows the exact lifecycle relationship
+  between current native proof and eligible first-party attribution. It never
+  infers publication from a lead signal or a lead from publication evidence.
+- Added channel-specific active-state handling, stable newest-proof selection,
+  exact proof-attribution identity validation, evidence-unavailable fail-closed
+  state, reconciliation priority for signals without active proof, and one
+  evidence-backed next operator decision.
+- The existing page now exposes compact lifecycle totals, the current priority,
+  and a collapsed audit of all exact placements while preserving separate
+  publication-proof history and channel packets.
+- Current Production aggregate truth remains six test/suppressed lead rows and
+  zero genuine live/contactable leads, owned-source signals, outcomes, spend,
+  experiments, or first-response samples. All relevant canonical schemas are
+  healthy.
+- Focused verification passes 3 files / 39 tests. The full local release gate
+  passes system isolation, 14/14 release-safety checks, 209 test files / 2,909
+  tests, strict typecheck, ESLint, optimized Next.js 15.5.21 build, and the
+  81-route manifest. Production dependencies have no known vulnerability, and
+  a redacted gitleaks history scan covered 478 commits with no finding.
+- Local protected visual QA passes 12/12 desktop/mobile checks across the reused
+  public funnels, widget surfaces, Distribution Command, and KPI target register
+  with no overflow, missing required copy, forbidden copy, or browser console
+  error. Local Node 26.5.1 is newer than the declared Node 24.x engine; exact
+  Node 24 CI and canonical Vercel Preview proof remain pending before the Draft
+  PR is release-ready.
+- No Production deployment, database migration/write, proof record, lead,
+  WordPress edit, external publication, email/SMS/Push, provider action, spend,
+  DNS change, or NellySelly action occurred.
+- This source-branch work is incorporated into consolidated PR #185. Its former
+  standalone stack and gate are historical and no longer authorize a release.
+
+## Phase 9 WordPress owned-traffic consolidation — 2026-08-21
+
+- Reused the live Our Town Properties pages, Gravity Forms, Canonical Lead
+  Bridge 1.1.0, existing isolated iframe loader, canonical Ask Magic Mike
+  funnels, protected Distribution Command, UTM builder, publication-proof
+  ledger, and Neon lead backend. No parallel frontend, form service, CRM,
+  database, notification engine, publisher, or analytics store was introduced.
+- A read-only live sitemap audit checked 42/42 pages successfully. It found
+  Gravity Form 7 on 39 pages, while authenticated prior evidence proves only
+  Gravity Form 3 is enabled for signed canonical forwarding. This candidate
+  deliberately does not widen that allowlist.
+- The audit identified three self-canonical seller-value routes, two
+  direct-purchase routes, two Ask Mike routes, four legacy native-capture
+  pages, five pages with multiple capture systems, three direct canonical-app
+  links lacking complete placement UTMs, and two embeds lacking placement
+  `utm_content`. These are controlled consolidation candidates, not permission
+  to redirect, noindex, deactivate a plugin, or replace a form.
+- Added `pnpm amm:audit:wordpress` and a reusable parser that stores only
+  structural public evidence. It excludes WordPress nonces, cookies, form
+  values, lead data, credentials, private configuration, and arbitrary page
+  text.
+- Added the `ourtown_wordpress` owned-demand channel and seven exact named
+  placements to the existing authenticated `/admin/distribution` surface:
+  homepage Ask Mike, established home value, We Buy Homes, Mike's agent page,
+  listing/buyer, rental-to-homeownership, and the existing Ask Magic Mike
+  embed. Exact links retain canonical-host and UTM allowlists.
+- Named placements use the existing append-only publication-proof workflow;
+  WordPress proof URLs are restricted to `ourtownproperties.com`. The existing
+  QR/creative catalog now derives four WordPress general/offer assets in
+  addition to the prior 24 assets.
+- Preserved the live sitewide and page-specific telephone targets. The
+  conflicting unverified number was not added to any campaign or interface.
+- Mobile 390 x 844 visual inspection confirmed that existing black/gold
+  sections should be preserved while reducing each intent page to one durable
+  capture path. No form was submitted during visual QA.
+- Focused verification passes 5 files / 85 tests. The full release gate passes
+  208 test files / 2,901 tests, strict typecheck, ESLint, optimized Next.js
+  15.5.21 build, 81-route verification, 14/14 release-safety checks, and system
+  isolation. `pnpm audit --prod` reports no known vulnerability; redacted
+  gitleaks history inspection covered 477 commits with no finding.
+- Local Node 26.5.1 is newer than the repository's Node 24.x engine. The build
+  nevertheless completed. A webpack cache write also reported local `ENOSPC`
+  after compilation; all pages and the route manifest completed successfully,
+  and only disposable `.next` output was removed afterward.
+- No Production deployment, WordPress mutation, form or notification change,
+  database query/write, lead, external message, publication, redirect, DNS
+  change, spend, or NellySelly action occurred.
+- This source-branch work is incorporated into consolidated PR #185 without
+  PR #187's KPI-target migration. Its former stack and gate are historical.
+
+## Phase 9 protected owned-demand asset studio — 2026-08-21
+
+- Reused the existing six-channel/four-placement owned-demand command, exact UTM
+  builder, approved Mike imagery, public funnels, and Lead Center RBAC. No
+  second campaign dashboard, publisher, provider, lead store, database schema,
+  or CRM was introduced.
+- Added three protected exports for each of 24 canonical placements: 1080×1350
+  feed PNG, 1080×1920 story PNG, and raw high-error-correction QR SVG. The 72
+  combinations are derived from the same definitions used for operator copy and
+  attribution.
+- Added 24 allowlisted `/go/[code]` 307 redirects to exact full UTM destinations.
+  Unknown/malformed codes fail closed; there is no arbitrary destination or
+  open redirect. The route is no-store/noindex and robots-disallowed.
+- Asset downloads require a real `report:view` session, accept only exact
+  channel/placement/format tuples, use approved local imagery, and return
+  private/no-store, CSP-sandboxed, noindex attachments. They make no provider or
+  database call and accept no consumer data.
+- Executable QA found and closed unsupported renderer CSS, full-UTM QR density,
+  story footer overlap, and WebP decoder/MIME failures. The ordinary UI preserves
+  WebP assets; exports use retained canonical JPEG/PNG sources that already
+  exist on the released host.
+- Final local verification passes system isolation, 14/14 release-safety checks,
+  203 test files / 2,846 tests, strict typecheck, ESLint, optimized Next.js
+  15.5.21 build, and 80 active routes / 17 acknowledged root–`src` duplicates.
+  Production dependencies have no known vulnerability; 471 Git commits have no
+  detected secret leak. Independent OpenCV scans pass for the compressed feed,
+  story, and Chromium-rendered raw SVG exemplars.
+- This source-branch work is incorporated into consolidated PR #185; exact-head
+  Preview evidence is required on that consolidated head.
+- No Production deployment, Neon migration/write, lead submission, email/SMS/
+  Push send, WordPress/DNS change, external publication, QR distribution,
+  spend, or NellySelly mutation occurred.
+- Its former standalone gate is superseded by the consolidated PR #185
+  application gate. External publication remains separately approval-gated.
+
+## Phase 9 current-router safety consolidation — 2026-08-21
+
+- Audited PRs #179 and #182 against the exact PR #183/#184 stack before writing
+  new code. Both PRs are now Draft with explicit out-of-order merge warnings;
+  neither branch nor its evidence was deleted.
+- Reused PR #182's unique work once: the existing `/buy` funnel is now visible
+  in the Black Diamond desktop navigation and homepage path grid; Preview CORS
+  accepts only the exact Vercel deployment/branch origins supplied by the
+  platform; Production remains restricted to owned origins.
+- Modernized the release-safety scanner to inspect all 535 deployable files in
+  canonical root `app/` and delegated `src/`, current widget/listing/health
+  routes, and current Neon/Better Auth/Resend/Web Push/provider secrets.
+- Replaced the retired-router CTA authority with 24 checks against the active
+  public routes, real Black Diamond components, both deployable trees, and the
+  current owner approval/runbook documents.
+- Node 24.18 verification passes: 14/14 release-safety checks, 202 test files /
+  2,837 tests, strict typecheck, ESLint, Next.js 15.5.21 Production build, and
+  78 active routes / 17 acknowledged root–`src` duplicates. Production
+  dependencies have no known vulnerabilities; 469 Git commits have no detected
+  secret leak.
+- Desktop 1440px and mobile 390px Playwright inspection passes for the homepage
+  and Buyer funnel. The five path cards remain balanced/stacked, consent stays
+  readable, and the existing black/gold/cyan visual system remains intact.
+- Draft PR #185 is stacked on PR #184. Code-bearing head
+  `4b92d286caae09114b2aa0f84eb7b084ad26cb2a` passed Node 24 GitHub run
+  `32516288876` and Ready Preview
+  `dpl_BByVkaLDwDKnkScV4R4f5v3vbNwf`. Public/health routes return 200,
+  anonymous Distribution Command returns 401 with private headers, an exact
+  Preview origin reaches non-persisting request validation, a foreign origin is
+  rejected, and the render contains no NellySelly marker.
+- The first protected-Preview probe from the unlinked worktree created empty
+  helper project `amm-phase9-current-router-safety-20260821`
+  (`prj_iGynowHru4TBNwWgvoiSIG193Ukf`). It has zero deployments, domains, and
+  application effect. The worktree was relinked to the canonical Vercel project;
+  the helper is preserved pending separately approved cleanup.
+- No Production deployment, Neon migration/write, lead submission, email/SMS/
+  push send, WordPress/DNS change, external publication, spend, or NellySelly
+  mutation occurred.
+
 ## Phase 9 owned-demand publication proof ledger — 2026-08-21
 
 - Production aggregate truth is zero live demand: six test/suppressed leads,
@@ -138,8 +370,8 @@ Updated 2026-08-22.
   gate documented in the Phase 9 runbook.
 - Production, WordPress, Neon, email, SMS, Push, social accounts, GBP, DNS, and
   NellySelly are unchanged by this candidate.
-- Exact release gate:
-  `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT`.
+- This historical candidate was released through PR #183. Its approval gate is
+  exhausted and is not authority for any current action.
 
 ## Phase 9 first-human-response intelligence — 2026-08-20
 

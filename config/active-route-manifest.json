@@ -23,6 +23,7 @@
     "/api/admin/copilot",
     "/api/admin/copilot/jobs",
     "/api/admin/copilot/jobs/process",
+    "/api/admin/distribution/assets/[channelKey]/[placementKey]",
     "/api/admin/health",
     "/api/admin/leads/[id]/communication-permissions",
     "/api/admin/leads/[id]/sequences",
@@ -57,6 +58,7 @@
     "/contact",
     "/embed/ask",
     "/favicon.ico",
+    "/go/[code]",
     "/home-value",
     "/integrations/ourtownproperties",
     "/lead-center-login",
@@ -85,7 +87,7 @@
   "required": {
     "public": [
       "/", "/home-value", "/value", "/sell", "/we-buy-houses", "/ask", "/buy", "/rent", "/open-house/[propertyOrId]", "/thank-you",
-      "/privacy", "/terms", "/accessibility", "/contact", "/plan", "/phone-alerts/setup", "/phone-alerts/setup/claim",
+      "/privacy", "/terms", "/accessibility", "/contact", "/go/[code]", "/plan", "/phone-alerts/setup", "/phone-alerts/setup/claim",
       "/widget", "/widget/v1", "/widget-preview", "/embed/ask",
       "/integrations/ourtownproperties", "/robots.txt", "/sitemap.xml", "/social-preview"
     ],
@@ -101,7 +103,7 @@
       "/admin/api/push/test",
       "/admin/api/phone-alerts/invite",
       "/api/leads", "/api/listings/search", "/api/listings/[id]", "/api/valuation", "/api/appointments/request", "/api/experiments/event", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/phone-alerts/invite", "/api/phone-alerts/subscription", "/api/phone-alerts/test", "/api/webhooks/sms/inbound", "/api/webhooks/sms/status", "/api/widget/events",
-      "/api/admin/copilot", "/api/admin/copilot/jobs", "/api/admin/copilot/jobs/process", "/api/admin/health", "/api/admin/leads/[id]/communication-permissions", "/api/admin/leads/[id]/sequences", "/api/admin/message-templates", "/api/admin/operations/first-live", "/api/admin/qa/email", "/api/admin/sequences/process", "/api/admin/sla/sweep", "/api/webhooks/email/events"
+      "/api/admin/copilot", "/api/admin/copilot/jobs", "/api/admin/copilot/jobs/process", "/api/admin/distribution/assets/[channelKey]/[placementKey]", "/api/admin/health", "/api/admin/leads/[id]/communication-permissions", "/api/admin/leads/[id]/sequences", "/api/admin/message-templates", "/api/admin/operations/first-live", "/api/admin/qa/email", "/api/admin/sequences/process", "/api/admin/sla/sweep", "/api/webhooks/email/events"
     ]
   },
   "classifications": {
@@ -109,6 +111,7 @@
     "/campaigns": "inactive-src-only",
     "/admin/traffic": "inactive-src-only",
     "/admin/distribution": "active-protected-owned-demand-neon-append-only-publication-proof",
+    "/api/admin/distribution/assets/[channelKey]/[placementKey]": "active-protected-read-only-owned-demand-asset-export",
     "/admin/growth": "active-protected-read-only-phase9-schema-gated",
     "/admin/revival": "active-protected-read-only-database-revival-command",
     "/api/analytics/event": "inactive-src-only",
@@ -120,6 +123,7 @@
     "/api/admin/operations/first-live": "active-required-by-vercel-cron",
     "/api/admin/sla/sweep": "active-required-by-vercel-cron",
     "/api/webhooks/sms/inbound": "active-signed-or-admin-authenticated-mock-boundary",
+    "/go/[code]": "active-public-allowlisted-owned-demand-attribution-redirect",
     "/plan": "active-public-device-private-recurring-value"
   },
   "acknowledgedRootSrcDuplicates": [

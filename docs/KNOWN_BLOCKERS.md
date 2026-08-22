@@ -9,6 +9,10 @@ specific expansions; they do not invalidate the live lead pipe.
 - PR #183 is merged and live. PR #184's backup-first Neon migration is applied
   and independently verified; its application release evidence is tracked on
   the PR.
+- PR #185 is Ready and cleanly mergeable at exact code-bearing head
+  `1593302a1354d5b8b77baa2340287a7d043dc297`; its Node 24 CI, canonical
+  Preview, protected-flow, security, and rendered checks pass. Its exact merge
+  and Production gate remains unreceived.
 - PRs #182 and #179 are deferred candidates requiring a new merge-base and
   overlap audit. PRs #92 and #119–#121 are archive candidates.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,

@@ -19,6 +19,11 @@ const paths = [
     href: "/sell",
   },
   {
+    title: "Buyer Property Match",
+    copy: "Request a local buying-plan and property-match review for Wilson or Eastern North Carolina.",
+    href: "/buy",
+  },
+  {
     title: "Ask Mike",
     copy: "Use a focused local-advisor chat flow for real estate questions.",
     href: "/ask",
@@ -63,7 +68,7 @@ export function BlackDiamondShell() {
       <section className="bg-[#050505] px-5 py-16 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">Choose your path</p>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             {paths.map((path) => (
               <Link key={path.title} href={path.href} className="rounded-lg border border-[#cda24a33] bg-[#111113] p-6 transition hover:border-[#e2c06f]">
                 <h3 className="font-serif text-3xl text-[#f4ead4]">{path.title}</h3>
