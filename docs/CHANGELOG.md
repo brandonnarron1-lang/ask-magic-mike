@@ -55,18 +55,21 @@
   It now reuses the equivalent retained Production PNG, and the executable
   renderer test declares the correct PNG MIME type. The redundant derivative
   was removed; no Production asset was deleted.
+- Final UI-to-Neon tracing found a pre-release contract mismatch: the server
+  accepted `ourtown_wordpress` and its reviewed placements while the released
+  append-only ledger constraints did not. Added one constraint-only migration
+  that extends the existing ledger, preserves prior rows/RLS/grants/trigger/RPC,
+  and validates all replacement constraints in the same transaction.
+- Added an executable PostgreSQL 17 contract covering all 11 WordPress tuples,
+  state semantics, idempotency, immutable audit, browser-role denial, foreign
+  host rejection, and rollback, plus a pinned backup-first Production cutover
+  runner with exact legacy-schema and postflight drift checks.
 - PR #187's KPI-target migration and PRs #190–#192 remain outside this
-  application-only candidate. The consolidated diff contains no migration and
-  performs no lead, database, publication, email, SMS, Push, DNS, spend,
-  WordPress, provider, or NellySelly mutation.
-- After the retained-asset correction, the focused Node 24 matrix passes 5
-  files / 46 tests and the full Node 24 release gate passes system isolation,
-  14/14 release-safety checks, 206 test files / 2,869 tests, strict typecheck,
-  ESLint, the optimized Next.js 15.5.21 build, and 80 active routes. Production
-  dependencies have no known vulnerability, a redacted 510-commit history scan
-  found no leak, and the candidate/working-tree migration scans are empty.
-  Refreshed exact-head CI, Preview, and protected acceptance remain required
-  before the future Production gate.
+  candidate. The repair performs no lead, proof, publication, email, SMS, Push,
+  DNS, spend, WordPress, provider, or NellySelly mutation. Earlier application-
+  only test totals remain regression history; fresh exact-head Node 24 CI,
+  Preview, protected acceptance, dependency, secret, and migration evidence is
+  required for the migration-bearing head before its new Production gate.
 
 ## 2026-08-21 — Exact owned-demand activation control-loop candidate
 

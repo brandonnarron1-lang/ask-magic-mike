@@ -1,5 +1,9 @@
 # Next Release Plan — Ask Magic Mike Launch Operations Readiness
 
+> Historical planning note: its no-migration scope predates consolidated PR
+> #185's WordPress proof-ledger contract repair. Current release authority is
+> `docs/phase9/OWNED_DEMAND_WORDPRESS_PROOF_SCOPE_QA_EVIDENCE.md`.
+
 Generated from code + live inspection on 2026-06-18.  
 **Note:** Gap B (admin funnel metrics in UI) resolved by PR #39 (2026-06-26) — `followUpDue`, `neverContacted`, funnel tiles, and Today's Operations panel are now live. Remaining gaps: E (og:url), A (prod smoke script), G (launch gate doc).
 
