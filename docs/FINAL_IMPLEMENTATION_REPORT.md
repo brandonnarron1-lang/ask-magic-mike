@@ -55,7 +55,8 @@ Node 24 runs are recorded in `IMPLEMENTATION_STATUS.md` and
 publication, a consumer send, spend, or a later migration merely by being in
 the stack.
 
-The next code-only candidate reuses canonical Neon rate limiting while replacing
+Draft PR #190 is the next code-only candidate after #179. It reuses canonical
+Neon rate limiting while replacing
 persisted raw client/staff limiter keys with HMAC identifiers and bounded stale-
 bucket pruning. It adds no provider or database schema. Local verification is
 green; exact Node 24 and protected Preview proof are required before its Draft

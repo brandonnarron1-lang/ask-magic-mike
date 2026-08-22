@@ -39,6 +39,9 @@ All timestamps are America/New_York unless noted.
 - No Production deployment, database query/write, bucket probe, lead, external
   message, WordPress change, publication, spend, DNS change, or NellySelly
   action occurred.
+- Draft PR #190 is stacked on exact PR #179 head
+  `9dd6684596ac8afbc52076d2c1597c12a0fa33e2`. Required checks retain the final
+  immutable candidate head and exact Node 24/Preview evidence.
 
 ## iOS phone-alert handoff consolidation — 2026-08-21
 

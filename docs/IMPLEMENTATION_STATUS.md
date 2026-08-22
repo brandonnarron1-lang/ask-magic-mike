@@ -20,9 +20,10 @@ head Node 24 and Vercel checks:
 | #189 | exact owned-demand activation loop | `f5b3165f63873dbf3b4c2719cb522b00935f72c7` | `32540823212` |
 | #179 | iOS install handoff | `9dd6684596ac8afbc52076d2c1597c12a0fa33e2` | `32540896724` |
 
-Every PR remains Draft and correctly stacked on the row above it. Historical
+Every listed PR remains Draft and correctly stacked on the row above it. Draft
+PR #190 is stacked after #179 as documented in the next section. Historical
 feature sections below retain the local/code-bearing evidence captured at that
-stage; the table above is authoritative for current mutable heads.
+stage; the table above is authoritative for the listed mutable heads.
 
 ## Phase 9 durable rate-limit privacy hardening — 2026-08-21
 
@@ -39,8 +40,9 @@ stage; the table above is authoritative for current mutable heads.
   `RATE_LIMIT_HASH_SECRET`, safe documented server-secret fallbacks, focused
   deterministic tests, and corrected the obsolete in-memory/Upstash runbook.
 - Current Vercel Production metadata confirms `DATABASE_URL`, `CRON_SECRET`, and
-  `ADMIN_SECRET` are present, so the code-only cutover does not depend on a new
-  paid provider or immediate secret entry. Values were never read or displayed.
+  `ADMIN_SECRET` are present. The protected candidate health flag verifies that
+  at least one accepted fallback is 32+ characters without reading or displaying
+  any value; a new paid provider is not required.
 - Focused verification passes 8 files / 67 tests. The full local candidate
   passes 212 files / 2,930 tests, strict typecheck, ESLint, 14/14 safety,
   Ask/NellySelly isolation, optimized Next.js 15.5.21 build, 83-route
@@ -48,6 +50,12 @@ stage; the table above is authoritative for current mutable heads.
   Preview evidence remain to be completed on the unchanged candidate head. No
   Production deploy, database query/write, external send, WordPress change,
   publication, spend, or NellySelly action occurred.
+- Draft PR #190 is stacked on exact PR #179 head
+  `9dd6684596ac8afbc52076d2c1597c12a0fa33e2`. Its immutable final head belongs
+  in PR checks/Preview metadata because embedding a commit's own hash in that
+  commit is impossible. It must not bypass PRs #183–#189 or #179.
+- Exact future gate:
+  `APPROVE PHASE 9 DURABLE RATE-LIMIT PRIVACY HARDENING MERGE AND PRODUCTION DEPLOYMENT`.
 
 ## iOS phone-alert handoff consolidation — 2026-08-21
 

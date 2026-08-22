@@ -81,12 +81,16 @@ Release only one approved PR at a time and verify Production before advancing:
 8. `#188` — WordPress owned-traffic audit and exact placement plan, exact head
    `35438c311f8a3a5658691aa9568a5e80e4b5ef18`, Node 24 run `32540568531`;
 9. `#189` — exact owned-demand activation loop, exact head
-   `f5b3165f63873dbf3b4c2719cb522b00935f72c7`, Node 24 run `32540823212`; and
+   `f5b3165f63873dbf3b4c2719cb522b00935f72c7`, Node 24 run `32540823212`;
 10. `#179` — iOS install handoff, exact head
-    `9dd6684596ac8afbc52076d2c1597c12a0fa33e2`, Node 24 run `32540896724`.
+    `9dd6684596ac8afbc52076d2c1597c12a0fa33e2`, Node 24 run `32540896724`; and
+11. `#190` — code-only durable rate-limit privacy hardening, Draft stacked on
+    exact #179. Its immutable final head, Node 24 run, and Preview deployment
+    are recorded in PR #190 metadata after final documentation reconciliation.
 
 Items #183–#189 and #179 are Draft, correctly stacked in that order, and have
-green exact-head Vercel checks. They remain unmerged and Production-undeployed.
+green exact-head Vercel checks. PR #190 is the next Draft candidate and must
+earn the same exact-head proof. All remain unmerged and Production-undeployed.
 The next permitted Production action is still #183 only, under this exact gate:
 
 ```text
