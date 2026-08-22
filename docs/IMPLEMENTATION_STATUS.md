@@ -18,8 +18,8 @@ Updated 2026-08-22.
   into the cookie slot is rejected.
 - A canonical Neon-backed, HMAC-pseudonymized one-time nonce guard denies
   cross-browser replay. Production fails closed when durable claim enforcement
-  is unavailable; an existing installed app may reopen only with its matching
-  HttpOnly session cookie.
+  is unavailable on Vercel or owned/self-hosted Production; an existing
+  installed app may reopen only with its matching HttpOnly session cookie.
 - Exact Ask Magic Mike origin binding excludes Our Town, NellySelly, and
   arbitrary Vercel hostnames from this privileged handoff. Private/no-store,
   no-referrer, noindex, CSP, and robots controls cover every phone-alert route.
@@ -28,11 +28,13 @@ Updated 2026-08-22.
   disabled so only an operator holding `notification:manage` can create the
   link. The optional QA Push is durably limited to one attempt per setup session
   and copy subscription in Production.
-- Focused verification passes 9 files / 58 tests. The full local gate passes
-  213 files / 2,926 tests, strict typecheck, ESLint, optimized build, 82 active
+- Focused verification passes 9 files / 61 tests. The full local gate passes
+  213 files / 2,929 tests, strict typecheck, ESLint, optimized build, 82 active
   routes, 14/14 safety controls, Production dependency audit, and redacted
   history/candidate secret scans. The post-refresh security repair code-bearing
-  head is `afc68b4060122481701514d0b2fe8630735aad8a`.
+  scoped-authority head is `afc68b4060122481701514d0b2fe8630735aad8a`;
+  portable Production fail-closed repair is
+  `f979d808fd76a1dba82b0a7f2b922f04c75af483`.
 - The earlier exact Node 24, canonical Vercel Preview, protected HTTP/browser
   QA, and responsive render evidence is retained as a historical checkpoint,
   not final-head authority. Fresh exact-head evidence remains mandatory on PR

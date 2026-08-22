@@ -32,8 +32,11 @@
   installed Home Screen app—not Messages or an ordinary Safari tab—performs the
   claim exchange. A durable canonical-Neon one-time guard stores only an
   HMAC-pseudonymized nonce key, denies cross-context replay, and fails closed in
-  Production when durability is unavailable. The token is not stored in browser
-  storage, analytics, or the database and is removed from the URL after claim.
+  Production when durability is unavailable. Vercel Production is authoritative
+  when its runtime metadata exists; otherwise owned/self-hosted
+  `NODE_ENV=production` receives the same fail-closed treatment. The token is
+  not stored in browser storage, analytics, or the database and is removed from
+  the URL after claim.
 - Phone-install origins are a narrower exact Ask Magic Mike allowlist than the
   general public/widget allowlist. Our Town, NellySelly, arbitrary Vercel apps,
   and attacker-controlled subdomains cannot mint or host the privileged setup

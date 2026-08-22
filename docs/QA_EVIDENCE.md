@@ -79,12 +79,17 @@ All timestamps are America/New_York unless noted.
   primary endpoint; RBAC-enabled deployments reject the legacy secret-header
   invite route; and the optional setup QA Push is a durable Production
   one-shot per session/subscription.
-- Fresh focused matrix — PASS: 9 files / 58 tests. Fresh full local release
-  gate — PASS: system isolation, 14/14 safety controls, 213 files / 2,926 tests,
+- Portable Production fail-closed repair — PASS at code-bearing commit
+  `f979d808fd76a1dba82b0a7f2b922f04c75af483`: both invite claim and optional
+  QA Push now require their durable
+  guards on Vercel Production and on owned/self-hosted Production when Vercel
+  metadata is absent; Preview remains separately identified and non-mutating.
+- Fresh focused matrix — PASS: 9 files / 61 tests. Fresh full local release
+  gate — PASS: system isolation, 14/14 safety controls, 213 files / 2,929 tests,
   strict typecheck, ESLint, optimized Next.js 15.5.21 build, and 82 active
   routes. `pnpm audit --prod --audit-level high` reports no known vulnerability;
-  a redacted 514-commit / 14.13 MB history scan found no leak; candidate and
-  migration scans are clean.
+  a redacted full-history scan of approximately 14.14 MB found no leak;
+  candidate and migration scans are clean.
 - The exact Node 24, Preview deployment, protected QA, and rendered screenshots
   listed below are the pre-refresh checkpoint. They prove the original handoff
   but are not authority for the repaired final head; fresh exact-head evidence
