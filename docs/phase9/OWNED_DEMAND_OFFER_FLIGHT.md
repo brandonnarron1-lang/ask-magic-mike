@@ -181,14 +181,14 @@ APPROVE DELETE EMPTY VERCEL HELPER PROJECT amm-phase9-campaign-compliance-202608
 
 ## Approval boundary
 
-Allowed before the release gate:
+Historical release authority:
 
-- local code and documentation;
-- automated tests, build, security scans, and visual QA;
-- branch, pull request, and protected Vercel Preview;
-- authenticated read-only Preview inspection.
+- This candidate was released through PR #183.
+- Its former Production approval phrase is exhausted and must not be reused.
+- Its campaign-safety and three-offer definitions are reused by consolidated
+  PR #185; that consolidation has its own exact application gate.
 
-Still not authorized by this candidate:
+Still not authorized by the completed PR #183 gate or by PR #185 preparation:
 
 - Production merge or deployment;
 - social/GBP publication;
@@ -196,10 +196,11 @@ Still not authorized by this candidate:
 - paid promotion, audience targeting, or spend;
 - WordPress, DNS, provider, or database mutation.
 
-Exact Production approval phrase:
+The only future application phrase for the consolidated command, after its
+exact-head evidence passes, is:
 
 ```text
-APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT
+APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT
 ```
 
 Any external publication remains a separate action identifying the exact
@@ -208,7 +209,7 @@ delete/rollback procedure.
 
 ## Rollback
 
-Before Production, close or leave the pull request unmerged. After an approved
-release, revert its merge commit or promote the immediately preceding Ready
-Vercel deployment. No database rollback is needed because the feature is
-read-only and has no migration.
+Before a PR #185 Production release, leave that pull request unmerged. After an
+approved release, revert its merge commit or promote the immediately preceding
+Ready Vercel deployment. No database rollback is needed because the
+consolidated feature is application-only and has no migration.

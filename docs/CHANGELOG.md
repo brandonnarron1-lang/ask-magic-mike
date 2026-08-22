@@ -1,5 +1,40 @@
 # Changelog
 
+## 2026-08-22 — Consolidated owned-demand command candidate
+
+- Consolidated the useful application work from PRs #185, #186, #188, and #189
+  into PR #185 on top of the released PR #184 Production baseline. No third
+  application, lead store, CRM, campaign catalog, publisher, or analytics
+  system was created.
+- Added Buyer discovery to the active Black Diamond interface, exact Vercel
+  Preview origins, protected deterministic feed/story/QR exports, allowlisted
+  shortlinks, seven named Our Town WordPress placements, and one deterministic
+  native-proof/first-party-attribution lifecycle in the existing Distribution
+  Command.
+- Made the lifecycle fail closed when either Growth measurement or native
+  publication evidence is unavailable. An unavailable measurement stream can
+  no longer produce a recommended first channel or display lead-dependent
+  totals as if they were measured.
+- Hardened the read-only WordPress audit to accept only HTTPS on the apex and
+  `www` Our Town hosts, revalidate every redirect, and stop after five hops.
+  The latest audit fetched all 42 public sitemap pages without a form
+  submission or WordPress mutation.
+- Reused approved real Mike Eatmon imagery and deterministic rendering. No
+  generated identity, lead PII, hidden consumer targeting, or per-lead image
+  generation was introduced.
+- PR #187's KPI-target migration and PRs #190–#192 remain outside this
+  application-only candidate. The consolidated diff contains no migration and
+  performs no lead, database, publication, email, SMS, Push, DNS, spend,
+  WordPress, provider, or NellySelly mutation.
+- The final post-hardening focused matrix passes 10 files / 148 tests. The full
+  local release gate passes system isolation, 14/14 release-safety checks, 205
+  test files / 2,866 tests, strict typecheck, ESLint, the optimized Next.js
+  15.5.21 build, and 80 active routes. Production dependencies have no known
+  vulnerability, a redacted 498-commit history scan found no leak, and the
+  candidate/working-tree migration scans are empty. Exact Node 24 CI,
+  exact-head Preview, and rendered visual evidence remain required before the
+  future Production gate.
+
 ## 2026-08-21 — Exact owned-demand activation control-loop candidate
 
 - Extended the existing protected Distribution Command with one deterministic

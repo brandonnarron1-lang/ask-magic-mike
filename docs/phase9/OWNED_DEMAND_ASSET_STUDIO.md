@@ -2,13 +2,14 @@
 
 Date: 2026-08-21
 
-Status: local, Preview-eligible release candidate; Production and external
+Status: incorporated into consolidated PR #185; Production and external
 channels unchanged
 
-Branch: `codex/phase9-owned-demand-asset-studio-20260821`
+Release branch: `codex/phase9-current-router-safety-20260821`
 
-Stack base: Draft PR #185 head
-`be99a1838c1c36ffc474bc97c11ef2a88e53107c`
+Source branch history is preserved. Its former standalone stack and approval
+gate are superseded by the consolidated PR #185 decision recorded in
+`docs/phase9/OWNED_DEMAND_COMMAND_DECISION_2026-08-22.md`.
 
 ## Decision
 
@@ -144,28 +145,23 @@ publication; these references do not authorize a post.
 
 ## Release order and gate
 
-This candidate is stacked after PR #185. The full order remains:
-
-1. PR #183;
-2. refreshed PR #184 and its separately approved backup-first migration;
-3. refreshed PR #185;
-4. this owned-demand asset-studio candidate.
-
-Each downstream head must be refreshed onto the new `main`, then repeat Node 24
-CI and Vercel Preview proof. The exact future gate for this candidate is:
+The asset work is no longer an independently releasable stack item. It is
+incorporated into PR #185 on the released PR #184 baseline. After the complete
+consolidated head passes Node 24 CI and exact Vercel Preview proof, its only
+application gate is:
 
 ```text
-APPROVE PHASE 9 OWNED-DEMAND ASSET STUDIO MERGE AND PRODUCTION DEPLOYMENT
+APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT
 ```
 
-That phrase authorizes only this application merge and canonical Vercel
-deployment. It does not authorize social/GBP publication, email distribution,
-QR printing/distribution, a consumer message, database migration, spend, DNS,
-WordPress, provider, deletion, or NellySelly action.
+That future phrase authorizes only the reviewed consolidated application merge
+and canonical Vercel deployment. It does not authorize social/GBP publication,
+email distribution, QR printing/distribution, a consumer message, database
+migration, spend, DNS, WordPress, provider, deletion, or NellySelly action.
 
 ## Rollback
 
-Before Production, close or leave the Draft PR unmerged. After a separately
-approved release, revert the candidate merge commit or promote the immediately
-preceding Ready Vercel deployment. The feature has no database migration and no
-external-provider state to unwind.
+Before Production, leave PR #185 unmerged. After a separately approved release,
+revert its merge commit or promote the immediately preceding Ready Vercel
+deployment. The feature has no database migration and no external-provider
+state to unwind.

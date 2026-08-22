@@ -322,12 +322,15 @@ function activationTone(state: OwnedDemandActivationState) {
       return "border-white/10 bg-white/[.03] text-[#bdb2a0]";
     case "evidence_unavailable":
       return "border-[#a21f3d55] bg-[#21070e] text-[#ffdbe4]";
+    case "measurement_unavailable":
+      return "border-[#cda24a55] bg-[#171108] text-[#f5dfa7]";
   }
 }
 
 function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
   const next = loop.nextPlacement;
   const evidenceCount = (value: number) => loop.evidenceAvailable ? value : "—";
+  const joinedCount = (value: number) => loop.evidenceAvailable && loop.measurementAvailable ? value : "—";
   return (
     <Panel
       eyebrow="Exact placement activation loop"
@@ -345,25 +348,30 @@ function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
         </article>
         <article className="rounded-xl border border-emerald-300/20 bg-emerald-300/[.06] p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-200/70">Measured placements</p>
-          <p className="mt-2 font-serif text-3xl text-emerald-100">{evidenceCount(loop.measuredPlacements)}</p>
+          <p className="mt-2 font-serif text-3xl text-emerald-100">{joinedCount(loop.measuredPlacements)}</p>
         </article>
         <article className="rounded-xl border border-[#ef835444] bg-[#2b1008] p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#e6a085]">Signal proof review</p>
-          <p className="mt-2 font-serif text-3xl text-[#ffc5ad]">{evidenceCount(loop.signalReviewPlacements)}</p>
+          <p className="mt-2 font-serif text-3xl text-[#ffc5ad]">{joinedCount(loop.signalReviewPlacements)}</p>
         </article>
         <article className="rounded-xl border border-[#ff4d6d55] bg-[#310611] p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#ff9bb2]">Identity review</p>
-          <p className="mt-2 font-serif text-3xl text-[#ffd0da]">{evidenceCount(loop.identityReviewPlacements)}</p>
+          <p className="mt-2 font-serif text-3xl text-[#ffd0da]">{joinedCount(loop.identityReviewPlacements)}</p>
         </article>
         <article className="rounded-xl border border-[#cda24a33] bg-[#171108] p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#cda24a]">Prepared · unobserved</p>
-          <p className="mt-2 font-serif text-3xl text-[#f0cf79]">{evidenceCount(loop.unobservedPlacements)}</p>
+          <p className="mt-2 font-serif text-3xl text-[#f0cf79]">{joinedCount(loop.unobservedPlacements)}</p>
         </article>
       </div>
 
       {!loop.evidenceAvailable ? (
         <div className="mt-4 rounded-xl border border-[#a21f3d55] bg-[#21070e] p-4 text-sm leading-6 text-[#ffdbe4]">
           The canonical publication-proof ledger is unavailable in this runtime. The command will not infer placement state from drafts or attribution alone. Restore the approved ledger read path before using this lifecycle view.
+        </div>
+      ) : !loop.measurementAvailable ? (
+        <div className="mt-4 rounded-xl border border-[#cda24a55] bg-[#171108] p-4 text-sm leading-6 text-[#f5dfa7]">
+          <strong className="text-[#f0cf79]">Prepared sequence · measurement unavailable.</strong>{" "}
+          Restore measurement before selecting a first channel. Native proof remains visible, but unavailable first-party attribution cannot support a placement recommendation.
         </div>
       ) : next ? (
         <article className="mt-4 rounded-2xl border border-[#4baab855] bg-[linear-gradient(135deg,#06171b,#080d0e)] p-5 sm:p-6">
@@ -422,7 +430,7 @@ function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
               </div>
               <p className="mt-3 text-xs leading-5 text-[#a99f90]">{placement.nextAction}</p>
               <dl className="mt-3 grid grid-cols-2 gap-2 text-[10px] leading-4">
-                <div><dt className="uppercase tracking-[0.1em] text-[#6f6a61]">Lead signals</dt><dd className="mt-1 text-[#d9ceb8]">{placement.attributedLeads}</dd></div>
+                <div><dt className="uppercase tracking-[0.1em] text-[#6f6a61]">Lead signals</dt><dd className="mt-1 text-[#d9ceb8]">{loop.measurementAvailable ? placement.attributedLeads : "—"}</dd></div>
                 <div><dt className="uppercase tracking-[0.1em] text-[#6f6a61]">Latest proof</dt><dd className="mt-1 text-[#d9ceb8]">{placement.latestProof ? humanize(placement.latestProof.platformState) : "None"}</dd></div>
               </dl>
             </article>
@@ -654,7 +662,7 @@ export default async function DistributionPage({
   ]);
   const command = buildOwnedDemandCommand(growth);
   const measurement = assessOwnedDemandMeasurement(growth);
-  const activation = buildOwnedDemandActivationLoop(command, ledger);
+  const activation = buildOwnedDemandActivationLoop(command, ledger, measurement.ready);
   const canManage = Boolean(principal && hasLeadCenterPermission(principal.role, "growth:manage"));
   const previewReadOnly = isPreviewDataDisabled();
   const stateLabel = !measurement.ready

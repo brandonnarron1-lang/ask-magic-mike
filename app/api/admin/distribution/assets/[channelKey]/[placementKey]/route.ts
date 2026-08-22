@@ -13,6 +13,7 @@ export const runtime = "nodejs";
 
 const NO_STORE = {
   "Cache-Control": "private, no-store, max-age=0",
+  "Cross-Origin-Resource-Policy": "same-origin",
   "Referrer-Policy": "no-referrer",
   "X-Content-Type-Options": "nosniff",
   "X-Robots-Tag": "noindex, nofollow, noarchive",

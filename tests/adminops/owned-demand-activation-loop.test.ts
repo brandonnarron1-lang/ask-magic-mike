@@ -116,6 +116,16 @@ describe("owned-demand per-placement activation loop", () => {
     expect(result.authorityBoundary).toContain("cannot publish");
   });
 
+  it("keeps native proof inspectable but disables placement selection when Growth measurement is unavailable", () => {
+    const result = buildOwnedDemandActivationLoop(command(), ledger([proof()]), false);
+    expect(result.evidenceAvailable).toBe(true);
+    expect(result.measurementAvailable).toBe(false);
+    expect(result.activeProofPlacements).toBe(1);
+    expect(result.nextPlacement).toBeNull();
+    expect(result.placements.every((row) => row.state === "measurement_unavailable")).toBe(true);
+    expect(result.placements[0]?.nextAction).toContain("Restore measurement before selecting a first channel");
+  });
+
   it("enumerates every exact placement and prioritizes the audited WordPress homepage without inventing proof", () => {
     const result = buildOwnedDemandActivationLoop(command(), ledger());
     expect(result.totalPlacements).toBe(35);

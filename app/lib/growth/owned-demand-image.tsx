@@ -11,6 +11,7 @@ import type { OwnedDemandCreativeDefinition } from "./owned-demand";
 const PRIVATE_ASSET_HEADERS = {
   "Cache-Control": "private, no-store, max-age=0",
   "Content-Security-Policy": "default-src 'none'; sandbox",
+  "Cross-Origin-Resource-Policy": "same-origin",
   "Referrer-Policy": "no-referrer",
   "X-Content-Type-Options": "nosniff",
   "X-Robots-Tag": "noindex, nofollow, noarchive",

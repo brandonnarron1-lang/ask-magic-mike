@@ -6,6 +6,26 @@ const HTML_ENTITY_MAP = {
   quot: '"',
 };
 
+const WORDPRESS_AUDIT_HOSTS = new Set([
+  "ourtownproperties.com",
+  "www.ourtownproperties.com",
+]);
+
+export function normalizeWordPressAuditUrl(value) {
+  const parsed = new URL(String(value ?? ""));
+  if (
+    parsed.protocol !== "https:" ||
+    parsed.username ||
+    parsed.password ||
+    parsed.port ||
+    !WORDPRESS_AUDIT_HOSTS.has(parsed.hostname.toLowerCase())
+  ) {
+    throw new Error("WordPress audit URL is outside the exact approved HTTPS hosts");
+  }
+  parsed.hash = "";
+  return parsed.toString();
+}
+
 const DUPLICATE_ROUTE_CLUSTERS = {
   seller_value: [
     "/how-much-is-your-home-worth/",

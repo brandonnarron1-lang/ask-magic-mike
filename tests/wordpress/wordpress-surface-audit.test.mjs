@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   inspectWordPressPage,
+  normalizeWordPressAuditUrl,
   parseWordPressSitemap,
   summarizeWordPressSurface,
 } from "../../scripts/amm/wordpress-surface-audit-lib.mjs";
@@ -29,6 +30,15 @@ const PAGE = `<!doctype html>
 </html>`;
 
 describe("WordPress public-surface audit", () => {
+  it("allows only exact Our Town HTTPS audit targets", () => {
+    expect(normalizeWordPressAuditUrl("https://www.ourtownproperties.com/page-sitemap.xml#top"))
+      .toBe("https://www.ourtownproperties.com/page-sitemap.xml");
+    expect(() => normalizeWordPressAuditUrl("https://evil.example/ourtownproperties.com"))
+      .toThrow(/outside the exact approved HTTPS hosts/);
+    expect(() => normalizeWordPressAuditUrl("http://127.0.0.1:3000/private"))
+      .toThrow(/outside the exact approved HTTPS hosts/);
+  });
+
   it("parses sitemap locations without duplicates", () => {
     expect(parseWordPressSitemap(`
       <urlset>

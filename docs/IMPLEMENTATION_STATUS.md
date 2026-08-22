@@ -2,6 +2,47 @@
 
 Updated 2026-08-22.
 
+## Phase 9 consolidated owned-demand command — 2026-08-22
+
+- PR #185 is the single application consolidation vehicle on released PR #184
+  merge `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97`. It preserves the unique
+  Buyer/current-router safety work from PR #185 and the useful asset,
+  WordPress-audit, and lifecycle work from PRs #186, #188, and #189.
+- The protected `/admin/distribution` page remains the sole operator command.
+  It now derives 35 exact general, offer, and named WordPress placements from
+  one allowlisted catalog and joins current native proof to eligible
+  first-party attribution without treating either stream as proof of the other.
+- Missing Growth measurement now produces `measurement_unavailable`, hides
+  lead-dependent totals, and suppresses the recommended placement. Missing
+  publication-proof evidence separately produces `evidence_unavailable`.
+- Protected feed/story/QR exports require `report:view`; public short codes
+  resolve only to fixed canonical UTM destinations. The WordPress auditor is
+  read-only, host-allowlisted to the apex and `www` Our Town HTTPS hosts, and
+  revalidates every redirect hop.
+- The latest public WordPress audit at `2026-08-22T14:10:43.297Z` fetched 42 of
+  42 sitemap pages and made no form submission or WordPress change. Current
+  aggregate Production truth remains six test/suppressed records and zero
+  eligible live demand, outcomes, first-response samples, spend, or proofs.
+- The final post-hardening focused matrix passes 10 files / 148 tests. The full
+  local release gate passes system isolation, 14/14 release-safety checks, 205
+  test files / 2,866 tests, strict typecheck, ESLint, the optimized Next.js
+  15.5.21 build, and 80 active routes. Production dependencies have no known
+  vulnerability, a redacted scan covers 498 commits / 13.92 MB with no leak,
+  `git diff --check` passes, and committed/working-tree migration scans are
+  empty. Exact Node 24 GitHub checks, canonical Vercel Preview, and rendered
+  visual acceptance remain required before release.
+- This application-only candidate includes no database migration and cannot
+  publish, send, spend, submit a lead, mutate WordPress, modify DNS, contact a
+  consumer, or act on NellySelly.
+- Exact future application gate:
+  `APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT`.
+  External WordPress, GBP, social, email-signature, or QR publication remains a
+  separate exact action and approval.
+
+The source-branch sections below preserve implementation history. Their old
+stack order and standalone approval phrases are superseded by the consolidated
+PR #185 decision above; they are not independent release authority.
+
 ## Phase 9 exact owned-demand activation loop — 2026-08-21
 
 - Reused the existing protected `/admin/distribution` page, seven canonical
@@ -36,10 +77,8 @@ Updated 2026-08-22.
 - No Production deployment, database migration/write, proof record, lead,
   WordPress edit, external publication, email/SMS/Push, provider action, spend,
   DNS change, or NellySelly action occurred.
-- This candidate is stacked on exact PR #188 head
-  `bcc0e9e5263aa9b0f94ac0377a6d1781b0176a58`. The unchanged first Production
-  gate remains:
-  `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT`.
+- This source-branch work is incorporated into consolidated PR #185. Its former
+  standalone stack and gate are historical and no longer authorize a release.
 
 ## Phase 9 WordPress owned-traffic consolidation — 2026-08-21
 
@@ -88,10 +127,8 @@ Updated 2026-08-22.
 - No Production deployment, WordPress mutation, form or notification change,
   database query/write, lead, external message, publication, redirect, DNS
   change, spend, or NellySelly action occurred.
-- This candidate is stacked on exact PR #187 head
-  `cf1356f36d9248babf782b9d4c499627fc46ef7b` and remains behind PRs #183–#187.
-  The unchanged first Production gate is:
-  `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT`.
+- This source-branch work is incorporated into consolidated PR #185 without
+  PR #187's KPI-target migration. Its former stack and gate are historical.
 
 ## Phase 9 protected owned-demand asset studio — 2026-08-21
 
@@ -120,15 +157,13 @@ Updated 2026-08-22.
   Production dependencies have no known vulnerability; 471 Git commits have no
   detected secret leak. Independent OpenCV scans pass for the compressed feed,
   story, and Chromium-rendered raw SVG exemplars.
-- Candidate branch `codex/phase9-owned-demand-asset-studio-20260821` is stacked
-  on exact PR #185 head `be99a1838c1c36ffc474bc97c11ef2a88e53107c`.
-  Draft PR/exact-head Preview evidence remains to be appended after push.
+- This source-branch work is incorporated into consolidated PR #185; exact-head
+  Preview evidence is required on that consolidated head.
 - No Production deployment, Neon migration/write, lead submission, email/SMS/
   Push send, WordPress/DNS change, external publication, QR distribution,
   spend, or NellySelly mutation occurred.
-- Exact future release gate:
-  `APPROVE PHASE 9 OWNED-DEMAND ASSET STUDIO MERGE AND PRODUCTION DEPLOYMENT`.
-  External publication remains a separate channel-specific approval.
+- Its former standalone gate is superseded by the consolidated PR #185
+  application gate. External publication remains separately approval-gated.
 
 ## Phase 9 current-router safety consolidation — 2026-08-21
 
@@ -305,8 +340,8 @@ Updated 2026-08-22.
   gate documented in the Phase 9 runbook.
 - Production, WordPress, Neon, email, SMS, Push, social accounts, GBP, DNS, and
   NellySelly are unchanged by this candidate.
-- Exact release gate:
-  `APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT`.
+- This historical candidate was released through PR #183. Its approval gate is
+  exhausted and is not authority for any current action.
 
 ## Phase 9 first-human-response intelligence — 2026-08-20
 

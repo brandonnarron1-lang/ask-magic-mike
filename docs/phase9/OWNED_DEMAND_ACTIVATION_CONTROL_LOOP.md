@@ -1,7 +1,7 @@
 # Phase 9 owned-demand activation control loop
 
 Date: 2026-08-21
-Status: stacked feature candidate; Production remains unchanged
+Status: incorporated into consolidated PR #185; Production remains unchanged
 Authority: protected observation, deterministic reconciliation, and operator guidance only
 
 ## Executive decision
@@ -71,6 +71,7 @@ queue, autonomous agent, or second source of truth.
 | State | What is proven | Required interpretation |
 |---|---|---|
 | `evidence_unavailable` | The proof ledger cannot be read safely | Make no placement-state inference |
+| `measurement_unavailable` | Growth measurement cannot be read safely | Show no lead-dependent recommendation or measured count |
 | `proof_attribution_mismatch` | A latest proof key exists but its canonical source/campaign/content/link identity no longer matches | Reconcile stale or inconsistent identity before using either evidence stream |
 | `prepared_not_observed` | A canonical draft/link exists; no proof exists | Preparation is not publication |
 | `native_pending` | Latest proof is scheduled, pending review, or a non-live WordPress configuration | Inspect the native state; do not call it live |
@@ -146,23 +147,17 @@ must still be attached to the Draft PR before any Production request.
 
 ## Release authority and rollback
 
-This candidate is stacked on exact PR #188 head
-`bcc0e9e5263aa9b0f94ac0377a6d1781b0176a58`. The unchanged first Production
-gate for the stack remains:
+This source-branch work is incorporated into PR #185 on the released PR #184
+baseline. Its former standalone stack and gates are historical. After the
+complete consolidated head passes Node 24 CI and exact Vercel Preview proof,
+the only application gate is:
 
 ```text
-APPROVE PHASE 9 CAMPAIGN SAFETY AND THREE-OFFER OWNED-DEMAND FLIGHT MERGE AND PRODUCTION DEPLOYMENT
+APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT
 ```
 
-After PRs #183 through #188 land sequentially and are re-proved, this
-candidate's future exact gate is:
-
-```text
-APPROVE PHASE 9 OWNED-DEMAND ACTIVATION LOOP MERGE AND PRODUCTION DEPLOYMENT
-```
-
-Neither phrase authorizes a WordPress edit, GBP/social post, email-signature
-change, QR distribution, email/SMS/Push send, provider change, paid promotion,
-or consumer contact. Before Production, rollback is closing the Draft PR. After
-an approved release, revert the merge commit or promote the prior Ready Vercel
-deployment. No database rollback is required.
+That future phrase does not authorize a WordPress edit, GBP/social post,
+email-signature change, QR distribution, email/SMS/Push send, provider change,
+paid promotion, or consumer contact. Before Production, rollback is leaving PR
+#185 unmerged. After an approved release, revert its merge commit or promote the
+prior Ready Vercel deployment. No database rollback is required.

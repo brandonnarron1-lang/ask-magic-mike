@@ -5,6 +5,48 @@ provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
+## Phase 9 consolidated owned-demand command — 2026-08-22
+
+- Consolidation boundary — PASS: PR #185 contains the unique application work
+  selected from PRs #185, #186, #188, and #189 on released PR #184. Diff review
+  finds no database migration, provider publisher, second lead store, second
+  CRM, or PR #187 KPI-target implementation.
+- Final post-hardening focused matrix — PASS: 10 files / 148 tests covering the
+  owned-demand command, asset exports, publication-proof contract, activation
+  loop, WordPress audit, current-router safety, public-origin policy, UTM
+  allowlists, public route authority, and executable feed/story rendering.
+- `pnpm release:gate` — PASS on local Node 26.5.1: Ask Magic Mike/NellySelly
+  isolation, 14/14 release-safety controls, 205 test files / 2,866 tests,
+  strict typecheck, ESLint, optimized Next.js 15.5.21 build, and 80 active
+  routes / 17 acknowledged root–`src` duplicates. The repository declares Node
+  24.x, so exact Node 24 GitHub evidence is still required.
+- Read-only public WordPress audit — PASS at
+  `2026-08-22T14:10:43.297Z`: 42/42 sitemap pages fetched, zero failed, no form
+  submission, no WordPress mutation, and no secret/private-field collection.
+  The fetcher now accepts only HTTPS on `ourtownproperties.com` or
+  `www.ourtownproperties.com`, revalidates each manual redirect, and caps the
+  chain at five hops.
+- Security source review — PASS at checkpoint: protected exports use
+  server-side `report:view`; channel, placement, format, local image, short
+  code, and destination are allowlisted; asset responses are private/no-store,
+  noindex, nosniff, and sandbox SVG; shortlinks cannot accept a destination;
+  no unsafe HTML or dynamic-code sink was introduced.
+- Failure-closure regression — PASS: when Growth measurement is unavailable,
+  all placements report `measurement_unavailable`, the operator receives no
+  recommended first placement, and lead-dependent counts are not presented as
+  measured. Publication-proof availability remains an independent boundary.
+- `pnpm audit --prod --audit-level high` — PASS: no known Production dependency
+  vulnerability.
+- `gitleaks git --redact --no-banner` — PASS: 498 commits / approximately
+  13.92 MB scanned with no leak.
+- `git diff --check` and committed/working-tree migration scans — PASS: no
+  whitespace error and no migration in the candidate.
+- Pending before exact-head acceptance: exact Node 24 GitHub checks, canonical
+  Vercel Preview smoke/auth/origin/shortlink/asset checks, rendered
+  desktop/mobile QA, and deployment-log inspection.
+- No Production, Neon, WordPress, lead, email/BCC, SMS, Push, provider,
+  publication, QR distribution, DNS, spend, or NellySelly mutation occurred.
+
 ## Phase 9 WordPress owned-traffic consolidation — 2026-08-21
 
 - `WORDPRESS_BRIDGE_FORM_IDS=3 node scripts/audit-wordpress-form-placements.mjs` — PASS: 42 sitemap
