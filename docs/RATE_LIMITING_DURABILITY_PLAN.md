@@ -47,8 +47,10 @@ sent as SQL parameters.
   same bounded cleanup.
 - A missing database or strong hash secret causes a critical production log and
   an availability-first in-memory fallback; it never writes a raw identifier.
-- `RATE_LIMIT_EMERGENCY_MEMORY=1` acknowledges a controlled degraded period. It
-  does not make the fallback durable and should not remain enabled normally.
+- `RATE_LIMIT_EMERGENCY_MEMORY=1` acknowledges a controlled degraded period. The
+  parser accepts only the exact trimmed value `1`; `false`, `0`, `true`, and all
+  other values remain disabled. It does not make the fallback durable and
+  should not remain enabled normally.
 - Database errors fail to the same bounded in-memory fallback so an abuse-store
   incident does not take every public form offline.
 
