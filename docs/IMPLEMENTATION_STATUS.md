@@ -21,7 +21,7 @@ Updated 2026-08-23.
 - Exact local Node 24.18.0 verification passes 4 focused files / 45 tests, the
   complete 216-file / 2,969-test suite, strict typecheck, ESLint, the optimized
   Next.js 15.5.21 build, 52 static pages, 82 active routes, 14/14 release
-  safety, system isolation, a no-vulnerability Production dependency audit,
+  safety, 43/43 release doctor, system isolation, a no-vulnerability Production dependency audit,
   and a redacted 544-commit secret scan. The diff contains no migration.
 - No Production secret, deployment, request write, lead, event, notification,
   email, SMS, Push, WordPress edit, publication, DNS change, spend, deletion,

@@ -33,7 +33,7 @@ All commands use Node 24.18.0 and pnpm 10.30.3.
 | Optimized Next.js 15.5.21 build | PASS — 52 static pages / 82 active routes |
 | System isolation | PASS — no deployable NellySelly identifier |
 | Release safety | PASS — 14/14 |
-| Release doctor before commit | HEALTHY — 42 pass / 1 expected non-blocking dirty-tree result |
+| Release doctor after implementation commit | HEALTHY — 43/43 |
 | Production dependency audit | PASS — no known vulnerability |
 | Full-history redacted secret scan | PASS — 544 commits / approximately 14.51 MB / no leak |
 | Diff and migration review | PASS — no whitespace defect and no migration |
