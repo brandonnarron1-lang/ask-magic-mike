@@ -9,7 +9,12 @@ import { enqueueLeadNotifications } from "../../lib/leadAlertService";
 import { recordServerAnalyticsEvent } from "../../lib/serverAnalytics";
 import { createFirstLiveLeadMonitor } from "@/lib/operations/first-live-lead-monitor";
 import { isApprovedPublicOrigin } from "../../lib/publicOrigin";
-import { checkRateLimit, LIMITS, rateLimitKey } from "../../../src/lib/security/rate-limit";
+import {
+  checkRateLimit,
+  LIMITS,
+  nonDurableRateLimitFallbackAllowed,
+  rateLimitKey,
+} from "../../../src/lib/security/rate-limit";
 import { createDefaultPersistence } from "../../lib/persistence/defaultPersistence";
 import type { LeadLifecycleCaptureResult } from "../../lib/persistence/contracts";
 import {
@@ -526,10 +531,7 @@ export async function POST(req: Request) {
   if (!rateLimit.allowed) {
     return NextResponse.json({ error: "Too many requests. Please try again shortly.", correlation_id: correlationId }, { status: 429, headers: { "Retry-After": String(Math.max(1, Math.ceil((rateLimit.resetAt - Date.now()) / 1000))), "X-AMM-Correlation-Id": correlationId } });
   }
-  const isProductionRuntime = process.env.VERCEL_ENV
-    ? process.env.VERCEL_ENV === "production"
-    : process.env.NODE_ENV === "production";
-  if (isProductionRuntime && !rateLimit.durable && !process.env.RATE_LIMIT_EMERGENCY_MEMORY) {
+  if (!rateLimit.durable && !nonDurableRateLimitFallbackAllowed()) {
     return NextResponse.json({ error: "Lead intake is temporarily unavailable.", correlation_id: correlationId }, { status: 503, headers: { "X-AMM-Correlation-Id": correlationId } });
   }
 

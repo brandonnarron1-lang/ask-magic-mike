@@ -6,6 +6,8 @@ import {
   durableRateLimitRequired,
   InMemoryRateLimitStore,
   checkRateLimit,
+  nonDurableRateLimitFallbackAllowed,
+  rateLimitEmergencyMemoryEnabled,
   rateLimitKey,
 } from "@/lib/security/rate-limit";
 
@@ -162,5 +164,42 @@ describe("durableRateLimitRequired", () => {
     expect(durableRateLimitRequired({ NODE_ENV: "production" })).toBe(true);
     expect(durableRateLimitRequired({ NODE_ENV: "development" })).toBe(false);
     expect(durableRateLimitRequired({ NODE_ENV: "test" })).toBe(false);
+  });
+});
+
+describe("rateLimitEmergencyMemoryEnabled", () => {
+  it("remains disabled when unset or configured with truthy-looking alternatives", () => {
+    expect(rateLimitEmergencyMemoryEnabled({})).toBe(false);
+    for (const value of ["", "0", "false", "true", "yes", "enabled"]) {
+      expect(rateLimitEmergencyMemoryEnabled({ RATE_LIMIT_EMERGENCY_MEMORY: value })).toBe(false);
+    }
+  });
+
+  it("enables break-glass memory mode only with the documented exact value", () => {
+    expect(rateLimitEmergencyMemoryEnabled({ RATE_LIMIT_EMERGENCY_MEMORY: "1" })).toBe(true);
+    expect(rateLimitEmergencyMemoryEnabled({ RATE_LIMIT_EMERGENCY_MEMORY: " 1 " })).toBe(true);
+  });
+});
+
+describe("nonDurableRateLimitFallbackAllowed", () => {
+  it("rejects non-durable fallback in Production unless break-glass mode is exact", () => {
+    expect(nonDurableRateLimitFallbackAllowed({ VERCEL_ENV: "production" })).toBe(false);
+    expect(nonDurableRateLimitFallbackAllowed({
+      VERCEL_ENV: "production",
+      RATE_LIMIT_EMERGENCY_MEMORY: "false",
+    })).toBe(false);
+    expect(nonDurableRateLimitFallbackAllowed({
+      VERCEL_ENV: "production",
+      RATE_LIMIT_EMERGENCY_MEMORY: "1",
+    })).toBe(true);
+  });
+
+  it("allows the expected development, test, and Preview fallback behavior", () => {
+    expect(nonDurableRateLimitFallbackAllowed({ NODE_ENV: "development" })).toBe(true);
+    expect(nonDurableRateLimitFallbackAllowed({ NODE_ENV: "test" })).toBe(true);
+    expect(nonDurableRateLimitFallbackAllowed({
+      VERCEL_ENV: "preview",
+      NODE_ENV: "production",
+    })).toBe(true);
   });
 });
