@@ -13,6 +13,21 @@ This document defines the single authoritative source of truth for Ask Magic Mik
 | Branch protection | GitHub Ruleset ID 17291635 (require PRs + status checks on `main`) |
 | Bypass procedure | See `docs/PRODUCTION_RELEASE_LOG.md` — Merge Procedure section |
 
+## Current verified release
+
+| Field | Value |
+|-------|-------|
+| Release | PR #195 — conversion identity polish |
+| Reviewed head | `db13953fc5f6d24a684f66c9a1c10c6b929b72b3` |
+| Production `main` | `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` |
+| Vercel deployment | `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` |
+| Immutable URL | `https://ask-magic-mike-5cwi0njdx-eyes-up-industries.vercel.app` |
+| Verified | 2026-08-23; Vercel Ready, canonical `www` 200, apex 308, 18/18 public/readiness monitor checks |
+
+The previous known-good rollback deployment is
+`dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J` at
+`https://ask-magic-mike-1dcuw0yj6-eyes-up-industries.vercel.app`.
+
 ---
 
 ## Vercel Project

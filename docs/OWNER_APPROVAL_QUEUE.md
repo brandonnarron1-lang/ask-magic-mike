@@ -1,6 +1,6 @@
 # Owner Approval Queue
 
-Updated 2026-08-22 from authenticated GitHub, Vercel, Neon, WordPress, and
+Updated 2026-08-23 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
@@ -35,73 +35,66 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    `5a3c5c7f2463ea399c21b616ff249f6c67e156b6` and accepted on Production
    deployment `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. It contained no migration,
    device enrollment, carrier SMS, or send.
+7. PR [#195](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/195)
+   — its exact conversion-identity gate was received; reviewed head
+   `db13953fc5f6d24a684f66c9a1c10c6b929b72b3` was merged as
+   `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and accepted on Production
+   deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. It contained no migration,
+   lead submission, message, WordPress change, or external publication.
 
 These completed gates are exhausted and must not be reused as authority for a
 new action. None authorized a social/GBP post, email campaign, QR
 printing/distribution, consumer message, spend, DNS change, WordPress change,
 provider action, or deletion.
 
-## Next consolidated application candidate
-
-- Draft PR [#195](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/195)
-  is the sole next application candidate. It reuses the canonical home-value
-  funnel and adds required seller identity, field-specific focus/error
-  ownership, consumer-only footer navigation, and mutation-free visual QA.
-- It is refreshed onto released PR #194 merge
-  `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`; the prior stacked head is
-  preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
-  Local and exact-head Node 24 proof, immutable Vercel Preview, and protected
-  no-write QA are green at
-  `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`; its gate is now evidence-ready
-  but remains unconsumed.
-- Its only application release phrase is:
-  `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
-- That future phrase will authorize only the exact reviewed PR #195 merge and
-  canonical Vercel Production deployment. It will not authorize a WordPress
-  edit, GBP/social/email publication, QR distribution, message, lead
-  submission, migration, device enrollment, test Push, spend, DNS change,
-  provider action, deletion, or NellySelly action.
-
-## Stacked attribution-trust candidate after PR #195
+## Next application candidate
 
 - Draft PR [#197](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/197)
-  on branch `codex/phase9-legacy-wordpress-attribution-trust-20260822` is
-  stacked behind PR #195. It separates narrowly recognized legacy Our Town
-  attribution evidence from exact owned-demand KPIs without changing stored
-  attribution.
-- It cannot merge before PR #195. After PR #195 releases, preserve a rescue
-  ref, refresh this candidate onto exact `main`, and rerun Node 24 CI,
-  canonical Preview, protected visual QA, and release-safety checks. The current
-  branch is already aligned with PR #195's exact hardened head; the prior state
-  is preserved at
-  `rescue/amm-pr197-pre-pr195-final-refresh-20260822-2226`. Exact Node 24,
-  immutable Preview, and protected no-write QA are green. This does not replace
-  the post-release `main` refresh.
-- Its later application-only phrase is:
+  on branch `codex/phase9-legacy-wordpress-attribution-trust-20260822` is the
+  sole next application candidate. It separates narrowly recognized legacy Our
+  Town attribution evidence from exact owned-demand KPIs without changing
+  stored attribution.
+- PR #195 has released. PR #197 was refreshed onto exact Production `main`
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`; pre-reconciliation application
+  head `3ef57919aedc6413301bf55c34cf7c570b3fed08` is preserved at
+  `rescue/amm-pr197-pre-authority-reconciliation-20260823-1048`.
+- This branch also repairs the authoritative operating documents that still
+  described PR #195 as pending. Exact final head
+  `677604df8b1d27f78ba4aee5b7b111548bf603b2` is green on Node 24 CI,
+  immutable Preview, protected no-write QA, and release safety.
+- Its only application release phrase is:
   `APPROVE PHASE 9 LEGACY WORDPRESS ATTRIBUTION TRUST MERGE AND PRODUCTION DEPLOYMENT`.
-- That phrase will not authorize a WordPress edit, crawler/firewall exception,
-  lead submission, consumer or internal message, publication, migration,
-  physical phone enrollment, test Push, spend, DNS change, provider action,
-  deletion, or NellySelly action.
+- That phrase will authorize only the exact reviewed PR #197 merge and canonical
+  Vercel Production deployment. It will not authorize a WordPress edit,
+  crawler/firewall exception, lead submission, consumer or internal message,
+  publication, migration, physical phone enrollment, test Push, spend, DNS
+  change, provider action, deletion, or NellySelly action.
 
-## Stacked WordPress activation candidate after PR #197
+## Stacked candidates after PR #197
 
 - Draft PR [#198](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/198)
-  is stacked behind PR #197. It adds protected, rollback-ready, read-only
-  readiness manifests for three exact brokerage placements and cannot publish
-  or edit WordPress.
-- Its pre-stack head is preserved at
-  `rescue/amm-pr198-pre-pr197-stack-refresh-20260822-2247`. After PRs #195 and
-  #197 release in order, preserve another rescue ref, refresh this candidate
-  onto exact `main`, and rerun Node 24 CI, canonical Preview, protected browser
-  QA, and release-safety checks.
-- Local stack, security, build, and responsive no-write acceptance are green;
-  exact-head remote evidence remains required after push.
-- Its later application-only phrase is:
+  is stacked behind #197. Pre-current-base head
+  `85321a0dbeb98d7c6f105f6405a224e8e13727f2` is preserved at
+  `rescue/amm-pr198-pre-pr197-authority-reconciliation-20260823-1119`. Exact
+  refreshed head `284fdcf3119112c75d6cd1f0b9d1a3ae392ad3c4` exposes protected,
+  rollback-ready, read-only readiness manifests for three exact WordPress
+  placements; it cannot edit or publish WordPress. Local proof, Node 24 run
+  `32648535214`, immutable Preview `dpl_Hosse7DCA9Q3846g1DiPzJzyk76q`, and
+  protected no-write run `32648735387` are green. It must still refresh onto
+  exact `main` after #197 releases before its gate is eligible:
   `APPROVE PHASE 9 WORDPRESS ACTIVATION CHANGE SET MERGE AND PRODUCTION DEPLOYMENT`.
-- Even after PR #198 is released, a WordPress publication remains a separate
-  action. The first proposed write is the homepage link only, and its gate is:
+- Even after #198 releases, the first WordPress write remains a separate action:
   `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`.
+- Draft PR [#199](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/199)
+  is stacked behind #198. Pre-current-base head
+  `ec51f8cda97631f481f6f640d3ba9da60ccfc190` is preserved at
+  `rescue/amm-pr199-pre-pr198-authority-reconciliation-20260823-1131`. The branch
+  now incorporates exact proven PR #198 head
+  `284fdcf3119112c75d6cd1f0b9d1a3ae392ad3c4` without application-code conflict.
+  It contains no migration, remains silent in Preview, and requires fresh exact
+  proof. After both predecessors release it must refresh and re-prove before its
+  later exact gate:
+  `APPROVE PHASE 9 FIELD EXPERIENCE TRUST MERGE, PRODUCTION DEPLOYMENT, AND FIELD TELEMETRY ACTIVATION`.
 
 ## Stacked field-experience candidate after PR #198
 
@@ -111,15 +104,14 @@ provider action, or deletion.
   targets.
 - The candidate uses the existing public analytics route and ledger, writes no
   telemetry in Preview, and contains no migration. It cannot release before
-  PRs #195, #197, and #198 release in order and it is refreshed and re-proven
-  on exact `main`.
+  PRs #197 and #198 release in order and it is refreshed and re-proven on exact
+  `main`.
 - Draft PR [#199](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/199)
-  is CLEAN/MERGEABLE and stacked on PR #198. Local release, dependency, secret,
-  migration, and protected desktop/mobile no-write evidence is green. Exact
-  implementation-head Node 24 run `32616089694`, immutable Ready Preview
-  `dpl_29jgCSDEGQfgQS6pHKbB8zEyPHBA`, and protected no-write run `32616278530`
-  pass with strict `PREVIEW_READY`. This does not make the later gate eligible
-  ahead of the predecessor stack or replace the required post-release refresh.
+  retains green historical implementation proof at Node 24 run `32616089694`,
+  immutable Ready Preview `dpl_29jgCSDEGQfgQS6pHKbB8zEyPHBA`, and protected
+  no-write run `32616278530`. Its current-base reconciliation requires fresh
+  exact-head proof. Neither proof makes the later gate eligible ahead of the
+  predecessor stack or replaces the required post-release refresh.
 - Its later exact gate is:
   `APPROVE PHASE 9 FIELD EXPERIENCE TRUST MERGE, PRODUCTION DEPLOYMENT, AND FIELD TELEMETRY ACTIVATION`.
 - That phrase will authorize only the exact reviewed application release and
@@ -180,7 +172,7 @@ provider action, or deletion.
 
 ## Resolved and removed from this queue
 
-- PRs #170, #172, #173, #177, #178, #180, #181, #183, #184, #193, and #194 are released;
+- PRs #170, #172, #173, #177, #178, #180, #181, #183-#185, and #193-#196 are released;
   do not request their historical approval phrases again.
 - Canonical Neon Production and Better Auth/RBAC are established.
 - Form 3 signed WordPress forwarding and duplicate native-notification shutdown

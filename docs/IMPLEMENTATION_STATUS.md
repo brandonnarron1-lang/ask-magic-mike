@@ -1,6 +1,6 @@
 # Implementation Status
 
-Updated 2026-08-22.
+Updated 2026-08-23.
 
 ## Phase 9 field-experience trust — 2026-08-22
 
@@ -30,13 +30,18 @@ Updated 2026-08-22.
   390×844 shows one main landmark, no overflow or framework overlay, truthful
   unavailable field evidence, zero console findings, GET-only application
   traffic, and no Preview telemetry.
-- **Remote acceptance:** exact implementation commit
-  `7d4446e0674414c8ba4157fa268aa4dda5c833d0` passes Node 24 run `32616089694`.
-  Immutable Preview `dpl_29jgCSDEGQfgQS6pHKbB8zEyPHBA` is Ready, and protected
-  no-write run `32616278530` passes 17 read-only checks / 6 intentional write
-  skips / 0 failures, widget 2/2, doctor 43/43, and strict `PREVIEW_READY`.
-  Draft PR [#199](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/199)
-  is CLEAN/MERGEABLE and stacked on PR #198.
+- **Historical implementation acceptance:** commit
+  `7d4446e0674414c8ba4157fa268aa4dda5c833d0` passed Node 24 run `32616089694`,
+  immutable Preview `dpl_29jgCSDEGQfgQS6pHKbB8zEyPHBA`, and protected no-write
+  run `32616278530` with 17 read-only checks / 6 intentional write skips / 0
+  failures, widget 2/2, doctor 43/43, and strict `PREVIEW_READY`.
+- **Current-base reconciliation:** pre-refresh PR #199 head
+  `ec51f8cda97631f481f6f640d3ba9da60ccfc190` is preserved at
+  `rescue/amm-pr199-pre-pr198-authority-reconciliation-20260823-1131`. Exact
+  proven PR #198 head `284fdcf3119112c75d6cd1f0b9d1a3ae392ad3c4` composes without
+  application-code, route, migration, manifest, or test conflict; four
+  cumulative operating documents required authority reconciliation. Fresh
+  exact-head Node 24 and protected Preview proof remain required after push.
 - **No migration or activation:** Production remains unchanged and no telemetry
   event was sent. Full scope: `docs/phase9/FIELD_EXPERIENCE_TRUST.md`.
 
@@ -44,9 +49,10 @@ Updated 2026-08-22.
 
 - **Stacked safely:** Draft PR
   [#198](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/198)
-  now follows PR #197, which follows PR #195. Its pre-stack head is preserved
-  at `rescue/amm-pr198-pre-pr197-stack-refresh-20260822-2247`; application code
-  composed without conflict.
+  follows PR #197, which follows released PR #195. Pre-current-base head
+  `85321a0dbeb98d7c6f105f6405a224e8e13727f2` is preserved at
+  `rescue/amm-pr198-pre-pr197-authority-reconciliation-20260823-1119`; exact
+  refreshed head is `284fdcf3119112c75d6cd1f0b9d1a3ae392ad3c4`.
 - **Implemented locally, not published:** the existing authenticated
   `/admin/distribution` command now exposes read-only readiness-manifest links
   for three established Our Town WordPress placements.
@@ -66,14 +72,16 @@ Updated 2026-08-22.
 - **Recommended first action:** one separately approved homepage CTA href
   replacement only. No WordPress publication is included in this application
   candidate.
-- **Final local acceptance:** 4 focused files / 37 stack tests, 217 full files /
+- **Final local acceptance:** 4 focused files / 50 stack tests, 217 full files /
   2,967 tests, strict typecheck, ESLint, optimized Next.js 15.5.21 build,
   83/17 route manifest, 14/14 release safety, 43/43 release doctor, dependency,
-  secret, diff, and empty migration scans pass. At 1440×1000 and 390×844 the
-  protected command shows three manifest controls, one main landmark, truthful
-  unavailable states, no overflow or framework overlay, zero console findings,
-  and GET-only application traffic. Exact-head Node 24 and protected Vercel
-  Preview evidence remain required after push.
+  secret, diff, and empty migration scans pass.
+- **Exact remote acceptance:** Node 24 run `32648535214`, immutable Ready Preview
+  `dpl_Hosse7DCA9Q3846g1DiPzJzyk76q`, and protected no-write run `32648735387`
+  pass at the exact refreshed head with 17 read-only checks / 6 intentional
+  write skips / 0 failures, widget 2/2, doctor 43/43, safety 14/14, and strict
+  `PREVIEW_READY`. Database writes and live email/SMS/provider delivery remained
+  disabled. This stacked proof does not replace the required post-#197 refresh.
 - Detailed scope and rollback:
   `docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md`.
 
@@ -93,26 +101,32 @@ Updated 2026-08-22.
 - Stored source attribution is unchanged. The protected Distribution Command
   renders compatibility evidence separately from exact owned-demand evidence;
   exact KPI totals and activation lifecycle states remain uninflated.
-- This candidate is intentionally stacked after PR #195 and cannot use PR
-  #195's future approval. It contains no migration or external mutation.
+- PR #195 is released. This candidate is refreshed onto its exact Production
+  merge and cannot reuse PR #195's exhausted approval. It contains no migration
+  or external mutation.
 - Draft PR [#197](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/197)
-  targets the PR #195 branch, preventing an accidental direct-to-`main` release.
-- The branch now contains PR #195's exact hardened head
-  `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`; its prior state is preserved at
-  `rescue/amm-pr197-pre-pr195-final-refresh-20260822-2226`.
-- Refreshed local verification passes 2 focused files / 24 tests, 215 full
+  targets exact released `main` and is the sole next application candidate.
+- The branch contains PR #195 Production merge
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`. Pre-authority-reconciliation
+  application head `3ef57919aedc6413301bf55c34cf7c570b3fed08` is preserved at
+  `rescue/amm-pr197-pre-authority-reconciliation-20260823-1048`.
+- Pre-reconciliation verification passed 2 focused files / 24 tests, 215 full
   files / 2,954 tests, strict typecheck, ESLint, optimized build, 82/17 route
   manifest, 14/14 release safety, 43/43 release doctor,
   dependency/secret/diff/migration scans, and desktop/mobile Playwright QA
-  with no overflow, console finding, or application POST in the counted
-  session. Exact Node 24 run `32613233315`, immutable Preview deployment
-  `dpl_7Te37sRe67UzVpNAydAp4LoFqtBv`, and protected no-write Preview QA run
-  `32613410434` pass with 17 pass / 6 safe skip / 0 fail, widget 2/2, doctor
-  43/43, and strict `PREVIEW_READY`.
+  with no overflow, console finding, or application POST. Exact Node 24 run
+  `32647409395`, immutable Preview deployment
+  `dpl_7xUMJFKswVQECAe39UMiec9sr8Nw`, and protected no-write Preview QA run
+  `32647599316` pass with 17 pass / 6 safe skip / 0 fail, widget 2/2, doctor
+  43/43, and strict `PREVIEW_READY` at exact reconciled head
+  `677604df8b1d27f78ba4aee5b7b111548bf603b2`.
+- Operating authority repair now records the released PR #195 deployment,
+  current PR #197-#199 sequence, and the 2026-08-23 read-only Neon aggregate
+  without introducing a second dashboard or claiming a live prospect.
 - Detailed decision:
   `docs/phase9/LEGACY_WORDPRESS_ATTRIBUTION_TRUST.md`.
-- Future exact application gate, eligible only after PR #195 releases and this
-  branch is refreshed and re-proven on exact `main`:
+- Exact application gate, eligible only after the reconciled branch is
+  re-proven on exact `main`:
   `APPROVE PHASE 9 LEGACY WORDPRESS ATTRIBUTION TRUST MERGE AND PRODUCTION DEPLOYMENT`.
 
 ## Phase 9 conversion identity polish — 2026-08-22
@@ -146,8 +160,11 @@ Updated 2026-08-22.
 - Detailed decision and QA:
   `docs/phase9/CONVERSION_IDENTITY_POLISH.md` and
   `docs/phase9/CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
-- Future exact gate:
-  `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
+- PR #195 reviewed head `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`
+  was approved, merged as `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`,
+  and accepted on Vercel Production deployment
+  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Its gate is exhausted and cannot authorize
+  a later release or external action.
 
 ## Phase 9 iOS phone handoff consolidation — 2026-08-22
 

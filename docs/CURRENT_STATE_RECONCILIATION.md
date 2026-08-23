@@ -1,6 +1,6 @@
 # Current State Reconciliation
 
-Audited 2026-08-21. This document overrides older status claims when they
+Audited 2026-08-23. This document overrides older status claims when they
 conflict with observed Production, authenticated accounts, current `main`, or
 provider/database state.
 
@@ -8,8 +8,8 @@ provider/database state.
 
 | Asset | Evidence | Status |
 | --- | --- | --- |
-| GitHub | `brandonnarron1-lang/ask-magic-mike`; Production baseline PR #181 merge `5335697edf31eed0b8a38cd0295a4f5e7d501a3e` | VERIFIED LIVE |
-| Vercel | `eyes-up-industries/ask-magic-mike`; project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; deployment `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM` | VERIFIED LIVE |
+| GitHub | `brandonnarron1-lang/ask-magic-mike`; Production baseline PR #195 merge `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` | VERIFIED LIVE |
+| Vercel | `eyes-up-industries/ask-magic-mike`; project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` | VERIFIED LIVE |
 | Public host | `https://www.askmagicmike.com`; apex redirects 308 | VERIFIED LIVE |
 | Database | Neon `bitter-star-20214385`; Production branch `br-round-base-auh6h2wd` | VERIFIED LIVE |
 | Brokerage/SEO | `https://www.ourtownproperties.com` WordPress | VERIFIED LIVE |
@@ -18,12 +18,14 @@ provider/database state.
 | Free phone alerts | VAPID Web Push schema/provider/phone setup ready; physical device acceptance remains owner-scoped | READY — OWNER ACTIVATION |
 | NellySelly | Separate repository, project, domains, database, and environment | VERIFIED ISOLATED |
 
-Observed 2026-08-21 public evidence: `/`, `/ask`, `/home-value`, `/buy`,
-`/rent`, `/api/health/live`, and `/api/health/ready` return 200. Live health
-reports canonical Neon and the Production notification boundary. The apex
-redirects permanently to `www`. Anonymous `/admin` is denied by the active
-authentication boundary; authorized Lead Center sessions are additionally
-restricted by server-side role and assigned-lead scope.
+Observed 2026-08-23 public evidence: `/`, `/ask`, `/sell`, `/value`, `/buy`,
+`/widget/v1`, `/robots.txt`, `/sitemap.xml`, `/api/health/live`, and
+`/api/health/ready` return 200. Two independent point-in-time monitors passed
+18/18 checks. Live health reports canonical Neon and the Production
+notification boundary. The apex redirects permanently to `www`. Anonymous
+`/admin` redirects to the active session login boundary with private/no-store
+headers; authorized Lead Center sessions remain restricted by server-side role
+and assigned-lead scope. The Our Town Properties homepage also returns 200.
 
 No new repository, public app, provider ledger, or parallel lead database is
 warranted.
@@ -65,20 +67,23 @@ warranted.
 
 | PR | Disposition | Gate |
 | --- | --- | --- |
-| #183 campaign safety and three-offer flight | Merged and live at `b8b31fb`; no publisher action occurred | Gate satisfied; external publication remains separate |
-| #184 publication-proof ledger | Exact gate received; guarded Neon migration applied and verified; application release evidence tracked on PR | Gate satisfied; external publication remains separate |
-| #182 launch authority/buyer discovery | Deferred overlap candidate; reconcile only after #183/#184 | Retain its gate only after fresh exact-head proof |
-| #179 iOS Web Push handoff | Deferred; code refresh and physical device acceptance remain separate | Retain its gate only after fresh exact-head proof |
+| #195 conversion identity polish | Reviewed head `db13953fc5f6d24a684f66c9a1c10c6b929b72b3` merged as `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and accepted on `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` | Gate satisfied and exhausted; no migration or external publication |
+| #197 legacy WordPress attribution trust | Draft refreshed onto released `main`; pre-authority-reconciliation application head `3ef57919aedc6413301bf55c34cf7c570b3fed08` is preserved and the final exact head/evidence is tracked on the PR | Sole next application candidate; fresh exact-head proof and distinct gate required |
+| #198 WordPress activation change set | Draft `85321a0dbeb98d7c6f105f6405a224e8e13727f2`, stacked behind #197 | Refresh and re-prove after #197 releases; application release cannot publish WordPress |
+| #199 field-experience trust | Draft `ec51f8cda97631f481f6f640d3ba9da60ccfc190`, stacked behind #198 | Refresh and re-prove after predecessor releases; later gate includes minimized telemetry activation |
 
-PRs #170, #172, #173, #177, #178, #180, and #181 are merged and removed from
-the approval queue. PRs #119, #120, #121, and #92 predate the current
+PRs #170, #172, #173, #177, #178, #180, #181, #183-#185, #193-#196 are
+merged and removed from the approval queue. PRs #119, #120, #121, and #92 predate the current
 consolidation. They are `ARCHIVE AFTER REVIEW`; none should merge without a
 fresh requirement/diff audit.
 
 ## Current aggregate truth
 
-The latest read-only Production observation contains six suppressed/test leads,
-zero contactable live prospects, zero measured first-human responses, zero live
-notification failures, zero outcomes, and zero spend. This is a proven,
-available funnel with no genuine demand sample yet—not evidence of a fabricated
-prospect or a conversion result.
+A read-only Production aggregate was re-executed against Neon on 2026-08-23. It
+contains six test leads, all six suppressed, and zero live or contactable
+prospects. It also reports zero eligible first-response samples, live
+notification queue/failures/sends, outcomes, spend rows, active experiments,
+open opportunities, open recommendations, or live SLA breaches. All measured
+schema capabilities are present. This is a proven, available funnel whose
+current bottleneck is genuine demand—not evidence of a fabricated prospect or
+conversion result.

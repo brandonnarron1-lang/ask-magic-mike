@@ -64,14 +64,26 @@
   final exact-head checks are retained on Draft PR #199 without changing the
   application scope or making the later Production gate eligible.
 
-## Phase 9 WordPress activation change-set evidence — 2026-08-22
+### Current-base reconciliation — 2026-08-23
 
-- Dependency composition — PASS: PR #197 exact head
-  `0fff501b550b12bda860570b1c74bdbdab0b2888` merged without application-code
-  conflict after PR #198 head `808021468e1910e1d88f071575fd5e73c991d085`
-  was preserved at
-  `rescue/amm-pr198-pre-pr197-stack-refresh-20260822-2247`. Only four cumulative
-  evidence documents required manual reconciliation.
+- Pre-current-base PR #199 head
+  `ec51f8cda97631f481f6f640d3ba9da60ccfc190` is preserved locally and remotely
+  at `rescue/amm-pr199-pre-pr198-authority-reconciliation-20260823-1131`.
+- Exact proven PR #198 head `284fdcf3119112c75d6cd1f0b9d1a3ae392ad3c4`
+  merged without application-code, route, migration, manifest, or test conflict.
+  Four cumulative operating documents required authority reconciliation.
+- PR #199 still contains no database migration and Preview field telemetry
+  remains disabled. Fresh final-head local, Node 24, immutable Preview, and
+  protected no-write evidence remain required after push.
+
+## Phase 9 WordPress activation current-base reconciliation — 2026-08-23
+
+- Dependency composition — PASS: current PR #197 exact head
+  `677604df8b1d27f78ba4aee5b7b111548bf603b2` merged without application-code,
+  route, migration, WordPress-manifest, or test conflict after PR #198 head
+  `85321a0dbeb98d7c6f105f6405a224e8e13727f2` was preserved locally and remotely
+  at `rescue/amm-pr198-pre-pr197-authority-reconciliation-20260823-1119`. Five
+  cumulative operating-evidence documents required manual reconciliation.
 - Final read-only live loader acceptance at 21:40 America/New_York — PASS. The exact
   public homepage, established home-value page, We Buy Homes page, and public
   WordPress page index were fetched through exact-host HTTPS allowlists. All
@@ -86,7 +98,7 @@
 - Isolated route execution — PASS: an authorized synthetic principal received
   the bounded private JSON attachment; unauthorized and unknown-placement paths
   retained privacy headers and performed no public WordPress fetch.
-- Focused WordPress/change-set matrix — PASS: 4 files / 42 tests. Coverage
+- Focused WordPress/change-set matrix — PASS: 4 files / 50 tests. Coverage
   includes exact legacy and already-canonical states; duplicate, missing,
   foreign, insecure, lookalike, page-ID drift, and page-index failures; raw
   HTML/telephone exclusion; deterministic hashing; API RBAC/no-store headers;
@@ -121,8 +133,51 @@
   pages, five multi-capture pages, and Form 3 as the only supplied canonical
   bridge allowlist. These are preserved audit findings, not permission for a
   bulk cleanup.
-- Exact-head Node 24 CI, canonical Vercel Preview, and protected no-write QA
-  remain required after push before this Draft becomes Preview-ready.
+- Exact-head Node 24 CI — PASS: run `32648535214`, job `97216445734`, artifact
+  `9495571914`, digest
+  `sha256:d9bfd642e513207b7d428e4d105980cdb75779f0350c3eaee8a5cb65eea4a705`.
+- Immutable Vercel Preview — PASS: Ready deployment
+  `dpl_Hosse7DCA9Q3846g1DiPzJzyk76q` at exact commit
+  `284fdcf3119112c75d6cd1f0b9d1a3ae392ad3c4`, Node 24.x.
+- Protected no-write QA — PASS: run `32648735387`, job `97216938178`, artifact
+  `9495626682`, digest
+  `sha256:fbada8fafedbc3bef2f43db6177c0156707f5a8440f5ff373a711cb60ef619cd`;
+  17 pass / 6 intentional mutation skips / 0 fail, widget 2/2, doctor 43/43,
+  safety 14/14, and strict `PREVIEW_READY`. Database mutation and live
+  email/SMS/provider delivery remained disabled.
+
+## PR #195 Production acceptance and PR #197 authority reconciliation — 2026-08-23
+
+- GitHub `main` is `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`, the
+  PR #195 merge of reviewed head
+  `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`. Its Vercel status is success.
+- Canonical Production deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` is Ready
+  at immutable URL
+  `https://ask-magic-mike-5cwi0njdx-eyes-up-industries.vercel.app`; both public
+  aliases resolve to it and the apex returns 308 to `www`.
+- `node scripts/monitor-production.mjs` passed 9/9 public, readiness, and
+  anonymous-admin checks. `node scripts/amm/lead-pipe-health-check.mjs` passed
+  9/9 funnel, widget, sitemap, robots, and liveness checks. The Our Town
+  Properties homepage returned HTTP 200.
+- A saved aggregate-only Production query was inspected for mutating verbs,
+  re-executed read-only in the signed-in Neon Production SQL editor, and then
+  the editor layout was restored. It returned 0 live/contactable leads, 6 test
+  leads, all 6 suppressed; 0 eligible first-response samples, live notification
+  activity, outcomes, spend rows, active experiments, open opportunities,
+  recommendations, or SLA breaches. All measured schema capabilities were
+  present. No PII or secret was copied into this evidence.
+- PR #197 pre-authority-reconciliation application head
+  `3ef57919aedc6413301bf55c34cf7c570b3fed08` is preserved locally and remotely
+  at `rescue/amm-pr197-pre-authority-reconciliation-20260823-1048`.
+- This reconciliation updates only operating authority and evidence files. It
+  performs no Production deploy, database/schema/data mutation, lead/form
+  submission, email/BCC, SMS, Push, provider action, WordPress edit/publication,
+  DNS/cache change, spend, deletion, or NellySelly action.
+- Final reconciled PR #197 head
+  `677604df8b1d27f78ba4aee5b7b111548bf603b2` passed the complete local gate,
+  exact Node 24 CI, immutable Vercel Preview, and protected no-write QA. Exact
+  workflow, deployment, artifact, and digest identifiers are recorded on PR
+  #197, avoiding stale identifiers in cumulative docs.
 
 ## Phase 9 conversion identity polish — 2026-08-22 15:17 EDT
 

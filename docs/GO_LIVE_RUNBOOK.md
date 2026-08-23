@@ -60,21 +60,23 @@ When the change touches capture, routing, email, push, SMS, or sequences:
 
 Release only one approved PR at a time and verify Production before advancing:
 
-1. `#180` — outcome-ledger lifecycle seam: complete;
-2. `#181` — first-human-response intelligence: complete;
-3. `#183` — campaign safety and three-offer owned-demand flight: complete;
-4. `#184` — owned-demand publication-proof ledger: complete at merge commit
-   `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97`, Production deployment
-   `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`; its migration is installed and verified
-   on canonical Neon Production; and
-5. `#185` — consolidated owned-demand command plus the WordPress proof-scope
-   constraint repair: next candidate. It must pass exact-head Node 24 CI,
-   canonical Vercel Preview, executable PostgreSQL contract, protected visual
-   QA, and the migration-specific approval before any Production action.
+1. `#180`, `#181`, `#183`, `#184`, `#185`, `#193`, `#196`, `#194`, and `#195`
+   are complete. Current Production is PR #195 merge
+   `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` on Ready deployment
+   `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`; every completed gate is exhausted.
+2. `#197` — legacy WordPress attribution trust and authority reconciliation —
+   is the sole next application candidate. It contains no migration or
+   WordPress change and requires its distinct exact-head gate.
+3. `#198` — WordPress activation change set — follows #197. Its application
+   release exposes read-only readiness manifests but cannot publish WordPress.
+4. `#199` — field-experience trust — follows #198. It contains no migration;
+   its later gate explicitly includes minimized Production telemetry activation.
 
-PR #193 is stacked on #185, #194 on #193, and #195 on #194. Do not merge or
-deploy them out of order. Rebase and re-prove each one after its predecessor is
-released.
+Do not merge or deploy the Draft stack out of order. After each predecessor
+release, preserve the downstream head, refresh onto exact `main`, and re-prove
+Node 24 CI, immutable Preview, protected no-write QA, release safety, and
+rollback before using the next distinct gate. WordPress publication remains a
+separate page-specific action even after PR #198 releases.
 
 PR #181 uses:
 

@@ -1,5 +1,70 @@
 # Production Release Log
 
+## [PR #195] Conversion identity polish
+
+**Merged:** 2026-08-23
+**Reviewed head:** `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`
+**Production commit:** `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`
+**Deployment:** `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` (`READY`)
+
+- Added required seller identity to the existing home-value funnel, precise
+  focus/error ownership, consumer-only footer navigation, and mutation-free
+  visual QA.
+- Post-release point-in-time monitors passed 18/18 public/readiness checks;
+  canonical `www` returns 200, apex redirects 308, and anonymous `/admin`
+  remains session-denied with private/no-store behavior.
+- No migration, lead submission, message, provider call, WordPress change,
+  external publication, spend, DNS change, or NellySelly action occurred.
+
+## [PR #194] Secure iOS phone-alert handoff consolidation
+
+**Merged:** 2026-08-22
+**Production commit:** `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`
+**Deployment:** `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J` (`READY`)
+
+- Consolidated the unique one-time, token-scoped Home Screen handoff from
+  historical PR #179 into the canonical Web Push system.
+- Added durable claim and QA-send guards, exact-origin isolation, restricted
+  copy-role persistence, and server-side RBAC authority.
+- No migration, device enrollment, carrier SMS, Push send, or provider purchase
+  occurred. Physical enrollment and a `[TEST]` receipt remain owner actions.
+
+## [PR #196] Live-verifier authorization hardening
+
+**Merged:** 2026-08-22
+**Production commit:** `c08abe1168840b99ccba07866bbec8cf7a6752fb`
+**Deployment:** `dpl_sew1CoF13dtfJTsvasDJf6vyndj8` (`READY`)
+
+- Bound live verification to the established private server authorization
+  boundary rather than broadening public or break-glass access.
+- Contained no migration, external message, lead mutation, or publication.
+
+## [PR #193] Privacy and KPI-trust consolidation
+
+**Merged:** 2026-08-22
+**Production commit:** `9b82afb609674bb0209b73f8ac9622ab02733e2a`
+**Deployment:** `dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a` (`READY`)
+
+- Consolidated durable rate-limit privacy, bounded analytics attribution, and
+  honest outcome/delivery aggregate reporting from PRs #190-#192.
+- Excluded PR #187's KPI-target migration and contained no Production schema
+  change, provider send, or public publication.
+
+## [PR #185] Consolidated owned-demand command
+
+**Merged:** 2026-08-22
+**Production commit:** `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8`
+**Deployment:** `dpl_41AZkLvufuAC92h6QJeqhiyjkBcM` (`READY`)
+**Migration:** `20260822195000_owned_demand_wordpress_proof_scope.sql`
+
+- Consolidated buyer/current-router authority, deterministic owned-demand
+  assets, WordPress placement audit, and activation decision support without a
+  second publisher or notification engine.
+- Applied the additive proof-scope constraint repair backup-first and verified
+  unchanged lead/audit/proof evidence before the exact application release.
+- No WordPress page, social/GBP/email channel, lead, message, or spend was
+  published or created by the release.
+
 ## [PR #184] Owned-demand publication-proof ledger
 
 **Migration applied:** 2026-08-22
