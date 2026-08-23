@@ -60,9 +60,27 @@ Updated 2026-08-23.
 - **Recommended first action:** after this application stack is eventually
   released, prepare one separately approved homepage href replacement using a
   fresh matching manifest and verified WordPress revision.
-- **Verification:** current-stack local, exact-head CI, immutable Preview,
-  protected no-write route, responsive UI, dependency, secret, route, safety,
-  and isolation evidence remain to be sealed on the final fast-track head.
+- **Fresh public precondition proof:** at 20:37:18 UTC, the actual Node 24
+  server implementation fetched the three exact WordPress pages and published
+  page index through fixed HTTPS allowlists. Homepage page 149, home-value page
+  3952, and We Buy Homes page 3631 each returned `legacy_match_ready`, one
+  current/rollback link, one proposed canonical link, zero lookalikes,
+  `publicationAuthorized=false`, and `mutationPerformed=false`. Public index,
+  page-record, and homepage probes returned HTTP 200; no authenticated or write
+  request was made.
+- **Local acceptance:** exact Node 24.18.0 passes 3 focused files / 36 tests,
+  all 223 files / 3,010 tests, strict typecheck, ESLint, optimized Next.js
+  15.5.21 build with 52 static pages, 83/17 route proof, safety 14/14, doctor
+  43/43, isolation, and a no-vulnerability Production dependency audit.
+- **Rendered acceptance:** the optimized local Production build passes at
+  1440×1000 and 390×844 with one main, document width equal to viewport width,
+  three protected manifest links, zero writable forms in the deliberately
+  database-unconfigured read-only runtime, GET-only browser requests, and zero
+  console warnings/errors. Focused visual inspection confirms the WordPress
+  card and controls are restrained, legible, and correctly stacked.
+- **Verification remaining:** final redacted candidate secret/diff/migration
+  checks, exact-head CI, immutable Preview, and protected no-write runtime
+  acceptance remain to be sealed.
 - Plan and rollback:
   `docs/phase9/OWNED_TRAFFIC_ACTIVATION_FAST_TRACK.md` and
   `docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md`.

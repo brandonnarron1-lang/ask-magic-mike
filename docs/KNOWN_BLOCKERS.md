@@ -1,6 +1,6 @@
 # Known Operating Constraints
 
-Updated 2026-08-22. The public funnel, canonical Neon capture, Lead Center, and
+Updated 2026-08-23. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
 
@@ -9,6 +9,11 @@ specific expansions; they do not invalidate the live lead pipe.
 - Three existing public WordPress CTAs are now provably identifiable through
   read-only manifests, but no page has been changed. The current links remain
   live and reversible.
+- The fresh 2026-08-23 20:37 UTC server-runtime audit returned
+  `legacy_match_ready` for exact page IDs 149, 3952, and 3631 with one current
+  link each, zero lookalikes, and no blockers. These are readiness facts only;
+  every manifest still reports `publicationAuthorized=false` and
+  `mutationPerformed=false`.
 - The homepage is the only recommended first publication. It still requires a
   fresh matching readiness manifest, verified page-149 revision/backup, the
   exact phrase

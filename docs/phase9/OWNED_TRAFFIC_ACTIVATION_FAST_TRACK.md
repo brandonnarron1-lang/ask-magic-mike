@@ -2,7 +2,7 @@
 
 Date: 2026-08-23
 
-Status: implementation plan recorded before consolidation
+Status: local consolidation and read-only runtime audit complete; remote proof pending
 
 External mutation: none
 
@@ -111,6 +111,32 @@ all proposed links.
    intercepted.
 6. Open a Draft stacked PR and record exact-head CI, immutable Preview, and
    protected no-write evidence.
+
+## Local acceptance completed
+
+- Consolidated only the reviewed, unique PR #197/#198 commits onto exact sealed
+  PR #204 head; no historical branch merge or duplicate subsystem was used.
+- Exact Node 24.18.0 passes the 3-file / 36-test focused matrix, complete
+  223-file / 3,010-test suite, strict typecheck, ESLint, optimized Next.js
+  15.5.21 build with 52 static pages, 83 active / 17 acknowledged route proof,
+  14/14 release safety, 43/43 release doctor, system isolation, and a
+  no-vulnerability Production dependency audit.
+- At 2026-08-23 20:37:18 UTC, the same bundled server implementation fetched
+  the exact public WordPress pages and page index through its HTTPS allowlist.
+  All three placements returned `legacy_match_ready`, the reviewed page IDs,
+  one unambiguous current href, one rollback href, one proposed canonical href,
+  zero lookalike hrefs, `publicationAuthorized=false`, and
+  `mutationPerformed=false`.
+- WordPress returned HTTP 200 for the page index, page 149 record, and homepage.
+  The index reported 42 published pages. No login, nonce, cookie, page revision,
+  form submission, cache purge, or write method was used.
+- Responsive protected-screen acceptance passed against the optimized local
+  Production build at 1440×1000 and 390×844: one main, exact-width documents,
+  three manifest links, zero writable forms in the read-only runtime, zero
+  console warnings/errors, and a GET-only request ledger. The WordPress card
+  and all three manifest controls remain legible and correctly stacked.
+- Exact-head remote CI, immutable Preview, and protected no-write proof remain
+  before the Draft candidate can be sealed.
 
 ## Rollback
 

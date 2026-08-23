@@ -1,5 +1,69 @@
 # QA Evidence
 
+## Phase 9 owned-traffic fast-track — 2026-08-23
+
+- Production aggregate audit at 20:23 UTC — read-only PASS: 6 total leads, all
+  6 unmistakably test/suppressed; 0 live or contactable leads; 0 unsafe tests;
+  0 live notifications, outcomes, revenue, first-response samples, spend rows,
+  experiments, or non-test owned-demand publication proofs. No PII or database
+  credential entered repository files or command output.
+- Reuse-first consolidation — PASS: only the reviewed unique PR #197
+  attribution-trust commit and PR #198 WordPress-manifest commits were applied
+  to exact sealed PR #204 head. Rescue branch
+  `rescue/amm-pre-owned-traffic-fast-track-20260823-1625` preserves the base.
+  No database migration is present.
+- Exact Node 24.18.0 local acceptance — PASS: 3 focused files / 36 tests; full
+  223 files / 3,010 tests; strict typecheck; ESLint; optimized Next.js 15.5.21
+  build with 52 static pages; 83 active / 17 acknowledged route proof; release
+  safety 14/14; release doctor 43/43; system isolation; and Production
+  dependency audit with no known vulnerability.
+- Public WordPress transport check — PASS at 20:36 UTC: published page index,
+  page-149 record, and homepage returned HTTP 200 with expected JSON/HTML
+  content types. The page index reported 42 published pages.
+- Actual server-runtime manifest audit — PASS at
+  `2026-08-23T20:37:18.057Z`. The bundled Node server implementation performed
+  GET-only public fetches through exact-host HTTPS allowlists and returned:
+  - `wordpress_homepage_ask_mike`: page 149, modified
+    `2026-06-01T20:53:21`, one current/rollback href, one canonical proposed
+    href, zero lookalikes, precondition
+    `8634d945fb0ccdb2b556bdc66e31b199cb0d5b4e9c95991fc5e2c00307884dc3`;
+  - `wordpress_home_value`: page 3952, modified
+    `2026-06-06T02:10:06`, one current/rollback href, one canonical proposed
+    href, zero lookalikes, precondition
+    `7487f7e499a67e0a047cb9d141048f98ec927f84a98cec6ba1fc058efb716fe7`;
+  - `wordpress_we_buy_homes`: page 3631, modified
+    `2026-06-03T21:32:21`, one current/rollback href, one canonical proposed
+    href, zero lookalikes, precondition
+    `e8c3cdb946c1f0a12dfe331495b94c744e99c39410d9feb71e1ed484fb4eb4a3`.
+- All three returned `legacy_match_ready`, no blockers,
+  `publicationAuthorized=false`, and `mutationPerformed=false`. No WordPress
+  login, cookie, nonce, revision, edit, cache purge, form submission, lead,
+  analytics write, notification, publication proof, or external message was
+  created.
+- The manifest transport uses fixed approved hosts, manual redirect
+  revalidation, a 20-second timeout, content-type checks, streaming 3 MB cap,
+  and transient raw HTML. The protected download route is GET-only,
+  placement-allowlisted, server-authorized with `report:view`, private/no-store,
+  noindex, same-origin, and never renders or logs raw page HTML.
+- Responsive optimized local Production render — PASS at 1440×1000 and
+  390×844. Both viewports rendered one main landmark, exact document/viewport
+  width, three protected readiness-manifest links, truthful measurement-
+  unavailable copy, and zero console warnings/errors. The deliberately
+  database-unconfigured/RBAC-disabled local inspection runtime rendered zero
+  writable forms; the browser request ledger contained only GETs and no
+  POST/PUT/PATCH/DELETE request.
+- Focused visual inspection — PASS: approved existing portraits and Black
+  Diamond styling remain intact; the Our Town WordPress card spans the desktop
+  command grid; mobile changes to one column without clipping; tracked URLs
+  wrap; and all three manifest controls remain visible, distinct, and usable.
+  Gitignored evidence:
+  `output/playwright/phase9-owned-traffic-fast-track/distribution-desktop-1440x1000.png`,
+  `distribution-mobile-390x844.png`,
+  `wordpress-manifests-desktop-1440.png`, and
+  `wordpress-manifests-mobile-390.png`.
+- Exact-head remote CI, immutable Preview, and protected no-write runtime
+  evidence remain pending on the final Draft head.
+
 ## Phase 9 conversion-journey fast-track live audit — 2026-08-23
 
 - Browser: Chromium-compatible Playwright CLI at 390×844 against canonical
