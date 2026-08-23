@@ -16,27 +16,60 @@ def goto(page, path):
     page.goto(BASE_URL + path, wait_until="networkidle")
 
 
+def install_no_write_routes(page):
+    page.route(
+        "**/api/events",
+        lambda route: route.fulfill(
+            status=202,
+            content_type="application/json",
+            body=json.dumps(
+                {
+                    "ok": True,
+                    "persisted": True,
+                    "test_intercepted": True,
+                }
+            ),
+        ),
+    )
+    page.route(
+        "**/api/experiments/event",
+        lambda route: route.fulfill(
+            status=202,
+            content_type="application/json",
+            body=json.dumps(
+                {
+                    "active": False,
+                    "recorded": False,
+                    "variant_key": None,
+                    "test_intercepted": True,
+                }
+            ),
+        ),
+    )
+    page.route(
+        "**/api/leads",
+        lambda route: route.fulfill(
+            status=200,
+            content_type="application/json",
+            body=json.dumps(
+                {
+                    "ok": True,
+                    "lead_id": "internal-qa-no-write",
+                    "session_id": "internal-qa-no-write",
+                    "message": "INTERNAL QA — intercepted locally; no lead was stored.",
+                }
+            ),
+        ),
+    )
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
         browser = p.chromium.launch()
 
         page = browser.new_page(viewport={"width": 1920, "height": 1080}, device_scale_factor=1)
-        page.route(
-            "**/api/leads",
-            lambda route: route.fulfill(
-                status=200,
-                content_type="application/json",
-                body=json.dumps(
-                    {
-                        "ok": True,
-                        "lead_id": "internal-qa-no-write",
-                        "session_id": "internal-qa-no-write",
-                        "message": "INTERNAL QA — intercepted locally; no lead was stored.",
-                    }
-                ),
-            ),
-        )
+        install_no_write_routes(page)
         goto(page, "/")
         shot(page, "homepage-desktop-1920.png")
 

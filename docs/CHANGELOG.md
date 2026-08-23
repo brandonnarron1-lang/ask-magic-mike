@@ -32,8 +32,9 @@
 - Removed internal preview/integration links from the shared consumer footer
   and replaced them with canonical buyer, seller, home-value, Ask Mike, planner,
   contact, legal, and accessibility paths.
-- Made the historical screenshot helper intercept `/api/leads`, preventing
-  visual QA from creating a lead even when database configuration is present.
+- Made the historical screenshot helper intercept `/api/leads`, `/api/events`,
+  and `/api/experiments/event`, preventing visual QA from creating a lead or
+  writing analytics/experiment evidence when database configuration is present.
 - No Production mutation, migration, lead, notification, provider call,
   WordPress edit, publication, spend, DNS, or NellySelly action occurred.
 

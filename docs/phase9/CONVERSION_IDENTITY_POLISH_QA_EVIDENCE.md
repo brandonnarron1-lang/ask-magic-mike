@@ -4,6 +4,30 @@ Captured: 2026-08-22 15:17 EDT
 
 Production mutation: none
 
+## No-write visual-harness hardening — 2026-08-22 22:07 EDT
+
+- A fresh browser walk confirmed the candidate funnel and found that the
+  historical screenshot helper intercepted `/api/leads` but not the page-load
+  `/api/events` and `/api/experiments/event` calls. A visual run against an
+  enabled environment could therefore write analytics or experiment exposure
+  evidence despite creating no lead.
+- The helper now installs explicit synthetic responses for all three routes
+  before opening any page. Experiment exposure is acknowledged as inactive and
+  unrecorded; lead creation remains an unmistakable `INTERNAL QA DO NOT
+  CONTACT` interception.
+- The updated full screenshot matrix completed locally. Server logs contained
+  only GET requests across homepage, Home Value, seller, Ask, widget,
+  integration, and social-preview surfaces: no application POST reached the
+  local Next.js server.
+- Focused safety/validation/replay coverage passes, Python compilation passes,
+  and `git diff --check` passes. Final-head Node 24, canonical Preview, and
+  protected no-write Preview evidence remain mandatory after push.
+- Independent mobile browser acceptance at 402 px reports no horizontal
+  overflow, correct focus/error ownership, no console/page error, zero axe
+  WCAG A/AA violations, and one color-contrast incomplete determination caused
+  by the card gradient rather than a confirmed violation. No `/api/leads`
+  request occurred.
+
 ## Released-main integration proof — 2026-08-22 20:02 EDT
 
 - Released base: PR #194 merge

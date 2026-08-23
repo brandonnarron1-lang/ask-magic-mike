@@ -44,14 +44,15 @@ Updated 2026-08-22.
 - Consumer footer navigation no longer promotes internal Widget Preview,
   OurTown Integration, or Social Preview surfaces. Those routes remain
   non-indexable and available for their existing operational purpose.
-- Screenshot QA now intercepts lead creation and uses unmistakable synthetic
-  identity, eliminating an accidental canonical-database write path.
+- Screenshot QA now intercepts lead creation, durable analytics, and public
+  experiment events and uses unmistakable synthetic identity, eliminating all
+  page-triggered application write paths observed in the full capture matrix.
 - Released-main refresh evidence passes exact Node 24.18.0, 215 test files /
   2,950 tests, strict typecheck, ESLint, optimized build, 82 active routes,
   14/14 safety, 43/43 doctor, system isolation, eight Chromium homepage/widget
   checks, dependency audit, candidate secret scan, diff check, and empty
-  migration scan. Exact-head GitHub Node 24 CI and canonical protected Preview
-  proof remain pending after push.
+  migration scan. The final no-write-harness head still requires exact-head
+  GitHub Node 24 CI and canonical protected Preview proof after push.
 - The branch is refreshed onto released PR #194 merge
   `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`; its prior stacked head is
   preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
