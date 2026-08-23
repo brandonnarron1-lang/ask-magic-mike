@@ -14,6 +14,16 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
 2. PR [#184](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/184)
    — its exact gate was received; the backup-first Neon migration is applied
    and verified, and application release evidence is attached to the PR.
+3. PR [#185](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/185)
+   — its exact gate was received; the WordPress proof-scope migration was
+   backup-first applied and verified, and reviewed application head
+   `2877fab35591c7f43c8def2ee920a12654b37a22` was merged as
+   `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8` and deployed to Production.
+4. PR [#193](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/193)
+   — its exact gate was received; privacy/KPI head
+   `21fdb5b3490cdc0517518578878a8db5d1b683a7` was merged as
+   `9b82afb609674bb0209b73f8ac9622ab02733e2a` and accepted on Vercel Production
+   deployment `dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a`. It contained no migration.
 
 These completed gates are exhausted and must not be reused as authority for a
 new action. None authorized a social/GBP post, email campaign, QR
@@ -22,34 +32,25 @@ provider action, or deletion.
 
 ## Next consolidated application candidate
 
-- PR [#185](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/185)
-  is the sole owned-demand application consolidation vehicle. It preserves the
-  useful work from PRs #185, #186, #188, and #189 on released PR #184 while
-  excluding PR #187's KPI-target migration and PRs #190–#192.
-- It contains no database migration and no publisher. It prepares protected
-  deterministic assets, allowlisted links, exact WordPress placement metadata,
-  and read-only lifecycle guidance in the existing Distribution Command.
-- Exact-head Node 24 CI, canonical Vercel Preview, protected-flow, security,
-  and desktop/mobile acceptance have passed. The only application release
-  phrase to request is:
-  `APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT`.
-- That future phrase will authorize only the reviewed PR #185 merge and
-  canonical Vercel Production deployment. It will not authorize a WordPress
-  edit, GBP/social/email publication, QR distribution, message, lead
-  submission, database migration, spend, DNS change, provider action,
-  deletion, or NellySelly action.
-
-## Stacked candidates after PR #185
-
-- Draft PR [#193](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/193)
-  consolidates the independent privacy, durable limiter, and aggregate KPI-trust
-  work from PRs #190–#192. It has no migration or provider action and must be
-  refreshed onto released `main` after PR #185, then rerun exact-head evidence
-  before its distinct privacy/KPI approval gate can be requested.
 - Draft PR [#194](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/194)
-  consolidates only the secure iOS Home Screen Web Push handoff. It remains
-  stacked on PR #193 and must not be merged out of order. Physical enrollment
-  and one `[TEST]` Push remain separate owner-controlled actions.
+  is the sole next application candidate. It consolidates only the secure iOS
+  Home Screen Web Push handoff on released `main` and contains no migration,
+  carrier SMS, second provider, device enrollment, or send.
+- Its released-base Node 24 CI, canonical Vercel Preview, protected-flow,
+  security, and browser acceptance pass. It remains Draft. Its only application
+  release phrase is:
+  `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
+- That future phrase will authorize only the exact reviewed PR #194 merge and
+  canonical Vercel Production deployment. It will not authorize a WordPress
+  edit, GBP/social/email publication, QR distribution, message, lead submission,
+  migration, physical phone enrollment, test Push, spend, DNS change, provider
+  action, deletion, or NellySelly action.
+
+## Stacked candidates after PR #194
+
+- Draft PR [#195](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/195)
+  remains stacked after PR #194 and must be refreshed and revalidated only after
+  PR #194 releases.
 
 ## Deferred candidates requiring refresh and overlap review
 
@@ -61,13 +62,13 @@ provider action, or deletion.
 - PRs #186, #188, and #189 are preserved as source history; their useful work
   is consolidated into PR #185 and their former standalone gates are obsolete.
 - PRs #190–#192 remain preserved as source history; their independently useful
-  work is consolidated once in Draft PR #193 and is not part of PR #185.
+  work was consolidated once in released PR #193 and is not part of PR #185.
 - Historical PR [#179](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/179)
   is preserved but superseded for release by the current-stack iOS handoff
   consolidation in Draft PR
   [#194](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/194).
-  PR #194 must be refreshed and re-proven after each predecessor release before
-  considering `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
+  PR #194 has been refreshed and re-proven on released `main`; its exact gate
+  remains unreceived.
   Physical enrollment and a `[TEST]` Push remain separately approved actions.
 - PRs #92 and #119–#121 remain archive-after-review candidates. They are not a
   parallel Production release plan.

@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 import {
   hasStaleVercelUrl,
   hasCanonicalAskMikeLink,
-  isAcceptableAdminStatus,
+  classifyAdminProtectionResponse,
   hasConfidentialMlsLeak,
   hasSecretLeak,
 } from "../../scripts/amm/verify-live-conversion-funnel.mjs";
@@ -63,28 +63,131 @@ describe("hasCanonicalAskMikeLink", () => {
 });
 
 // ---------------------------------------------------------------------------
-// isAcceptableAdminStatus
+// classifyAdminProtectionResponse
 // ---------------------------------------------------------------------------
 
-describe("isAcceptableAdminStatus", () => {
-  it("accepts HTTP 401 (unauthenticated — expected)", () => {
-    expect(isAcceptableAdminStatus(401)).toBe(true);
+describe("classifyAdminProtectionResponse", () => {
+  const requestUrl = "https://www.askmagicmike.com/admin/revenue";
+
+  it("accepts HTTP 401 as an explicit unauthenticated denial", () => {
+    expect(classifyAdminProtectionResponse({ status: 401, requestUrl }).ok).toBe(true);
   });
 
-  it("accepts HTTP 200 (authenticated session)", () => {
-    expect(isAcceptableAdminStatus(200)).toBe(true);
+  it("accepts HTTP 403 as an explicit unauthenticated denial", () => {
+    expect(classifyAdminProtectionResponse({ status: 403, requestUrl }).ok).toBe(true);
   });
 
-  it("rejects HTTP 302 redirect", () => {
-    expect(isAcceptableAdminStatus(302)).toBe(false);
+  it("accepts the production same-origin 307 login handoff", () => {
+    const result = classifyAdminProtectionResponse({
+      status: 307,
+      location: "/lead-center-login?returnTo=%2Fadmin%2Frevenue",
+      requestUrl,
+    });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("accepts an absolute same-origin login handoff", () => {
+    const result = classifyAdminProtectionResponse({
+      status: 302,
+      location: "https://www.askmagicmike.com/lead-center-login?returnTo=%2Fadmin%2Frevenue",
+      requestUrl,
+    });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it.each([301, 308])("rejects permanent HTTP %s authentication redirects", (status) => {
+    const result = classifyAdminProtectionResponse({
+      status,
+      location: "/lead-center-login?returnTo=%2Fadmin%2Frevenue",
+      requestUrl,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.detail).toContain("temporary login redirect");
+  });
+
+  it("rejects HTTP 200 because this verifier sends no authenticated session", () => {
+    const result = classifyAdminProtectionResponse({ status: 200, requestUrl });
+
+    expect(result.ok).toBe(false);
+    expect(result.detail).toContain("route may be public");
+  });
+
+  it("rejects a redirect with no Location header", () => {
+    expect(classifyAdminProtectionResponse({ status: 307, requestUrl }).ok).toBe(false);
+  });
+
+  it("rejects an external login redirect", () => {
+    const result = classifyAdminProtectionResponse({
+      status: 307,
+      location: "https://example.com/lead-center-login?returnTo=%2Fadmin%2Frevenue",
+      requestUrl,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.detail).toContain("leaves the canonical origin");
+  });
+
+  it("rejects a redirect to a public page", () => {
+    const result = classifyAdminProtectionResponse({
+      status: 307,
+      location: "/?returnTo=%2Fadmin%2Frevenue",
+      requestUrl,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.detail).toContain("not /lead-center-login");
+  });
+
+  it("rejects a login redirect that loses the requested admin path", () => {
+    const result = classifyAdminProtectionResponse({
+      status: 307,
+      location: "/lead-center-login?returnTo=%2Fadmin",
+      requestUrl,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.detail).toContain("does not preserve returnTo");
+  });
+
+  it("rejects ambiguous duplicate returnTo parameters", () => {
+    const result = classifyAdminProtectionResponse({
+      status: 307,
+      location:
+        "/lead-center-login?returnTo=%2Fadmin%2Frevenue&returnTo=%2Fadmin%2Fleads",
+      requestUrl,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.detail).toContain("returnTo exactly once");
+  });
+
+  it("preserves the query string when the protected request has one", () => {
+    const result = classifyAdminProtectionResponse({
+      status: 307,
+      location:
+        "/lead-center-login?returnTo=%2Fadmin%2Frevenue%3Ffilter%3Dactive",
+      requestUrl: `${requestUrl}?filter=active`,
+    });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects a malformed absolute Location header", () => {
+    const result = classifyAdminProtectionResponse({
+      status: 307,
+      location: "http://[",
+      requestUrl,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.detail).toContain("not a valid URL");
   });
 
   it("rejects HTTP 500", () => {
-    expect(isAcceptableAdminStatus(500)).toBe(false);
-  });
-
-  it("rejects HTTP 403", () => {
-    expect(isAcceptableAdminStatus(403)).toBe(false);
+    expect(classifyAdminProtectionResponse({ status: 500, requestUrl }).ok).toBe(false);
   });
 });
 

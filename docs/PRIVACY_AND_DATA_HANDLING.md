@@ -51,6 +51,9 @@ under a support request without identity verification and an audit record.
 - Browser analytics no longer publishes full attribution objects, referrers,
   query strings, click IDs, or full user agents to the data layer, PostHog hook,
   widget parent, or server ledger.
+- Public analytics attribution must match a registered operational value;
+  unregistered slug-shaped names/addresses are dropped, and listing/property
+  identifiers remain in the protected lead record rather than the event ledger.
 - Both public analytics APIs reject internal/delivery event fabrication and
   public lead-ID association. The durable writer independently minimizes every
   property, UTM dimension, path, and user-agent class.

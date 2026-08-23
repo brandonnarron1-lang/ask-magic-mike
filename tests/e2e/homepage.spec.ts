@@ -1,6 +1,18 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Homepage", () => {
+  test.beforeEach(async ({ page }) => {
+    // Keep browser QA deterministic and DB-mutation-free. The analytics API's
+    // durable persistence contract is covered separately at the route layer.
+    await page.route("**/api/events", async (route) => {
+      await route.fulfill({
+        status: 202,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, persisted: true, test_intercepted: true }),
+      });
+    });
+  });
+
   test("page title and canonical metadata are present", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveTitle(/Ask Magic Mike/);

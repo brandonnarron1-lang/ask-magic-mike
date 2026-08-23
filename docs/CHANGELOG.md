@@ -51,16 +51,17 @@
 
 ## 2026-08-22 — Privacy/KPI-trust final-head hardening
 
-- Refreshed PR #193 onto PR #185 exact final head
-  `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7` after preserving both the
+- Refreshed PR #193 onto released PR #185 merge
+  `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8` after preserving both the
   pre-refresh and post-refresh/pre-hardening states as remote rescue branches.
 - Made both public analytics routes await the canonical Neon write. They now
   return HTTP 202 only after durable persistence succeeds and fail truthfully
   with HTTP 503 when the ledger is unavailable; a serverless invocation can no
   longer acknowledge an event and terminate before its write completes.
-- Restricted public UTM and placement dimensions to controlled identifier
-  slugs. Free-form names, street addresses, sentences, email addresses, phone
-  numbers, full URLs, and arbitrary properties are discarded before the final
+- Restricted public UTM and placement dimensions to a registered operational
+  vocabulary. A syntactically valid slug is no longer presumed anonymous;
+  unregistered single-token names/address slugs are discarded, and open-house
+  identifiers collapse to a non-identifying placement class before the final
   repository-level privacy pass.
 - Consolidated all JSON-LD script rendering onto one serializer that escapes
   script-closing input, with source-level and executable regression coverage.
@@ -104,18 +105,21 @@
   It now reuses the equivalent retained Production PNG, and the executable
   renderer test declares the correct PNG MIME type. The redundant derivative
   was removed; no Production asset was deleted.
+- Final UI-to-Neon tracing found a pre-release contract mismatch: the server
+  accepted `ourtown_wordpress` and its reviewed placements while the released
+  append-only ledger constraints did not. Added one constraint-only migration
+  that extends the existing ledger, preserves prior rows/RLS/grants/trigger/RPC,
+  and validates all replacement constraints in the same transaction.
+- Added an executable PostgreSQL 17 contract covering all 11 WordPress tuples,
+  state semantics, idempotency, immutable audit, browser-role denial, foreign
+  host rejection, and rollback, plus a pinned backup-first Production cutover
+  runner with exact legacy-schema and postflight drift checks.
 - PR #187's KPI-target migration and PRs #190–#192 remain outside this
-  application-only candidate. The consolidated diff contains no migration and
-  performs no lead, database, publication, email, SMS, Push, DNS, spend,
-  WordPress, provider, or NellySelly mutation.
-- After the retained-asset correction, the focused Node 24 matrix passes 5
-  files / 46 tests and the full Node 24 release gate passes system isolation,
-  14/14 release-safety checks, 206 test files / 2,869 tests, strict typecheck,
-  ESLint, the optimized Next.js 15.5.21 build, and 80 active routes. Production
-  dependencies have no known vulnerability, a redacted 510-commit history scan
-  found no leak, and the candidate/working-tree migration scans are empty.
-  Refreshed exact-head CI, Preview, and protected acceptance remain required
-  before the future Production gate.
+  candidate. The repair performs no lead, proof, publication, email, SMS, Push,
+  DNS, spend, WordPress, provider, or NellySelly mutation. Earlier application-
+  only test totals remain regression history; fresh exact-head Node 24 CI,
+  Preview, protected acceptance, dependency, secret, and migration evidence is
+  required for the migration-bearing head before its new Production gate.
 
 ## 2026-08-21 — Exact owned-demand activation control-loop candidate
 

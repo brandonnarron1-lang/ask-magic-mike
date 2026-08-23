@@ -120,4 +120,9 @@ Any publication pilot must separately identify the exact channel, final copy, fi
 
 ## Rollback
 
-Before Production, close the pull request or leave it unmerged. After an approved release, revert the Phase 9.1 merge commit or promote the immediately preceding Ready Vercel deployment. No database rollback is required because this change is read-only and has no migration.
+This source-branch command was read-only and had no migration. It is now
+incorporated into consolidated PR #185, whose later WordPress proof-scope
+migration, exact gate, and rollback boundary are authoritative. Before
+Production, leave PR #185 unmerged. After an approved release, promote the
+immediately preceding Ready Vercel deployment if the application fails, while
+preserving the additive proof constraints and all proof/audit rows.

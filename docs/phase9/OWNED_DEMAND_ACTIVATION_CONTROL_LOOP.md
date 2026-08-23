@@ -150,14 +150,16 @@ must still be attached to the Draft PR before any Production request.
 This source-branch work is incorporated into PR #185 on the released PR #184
 baseline. Its former standalone stack and gates are historical. After the
 complete consolidated head passes Node 24 CI and exact Vercel Preview proof,
-the only application gate is:
+the only migration/application gate is:
 
 ```text
-APPROVE PHASE 9 OWNED-DEMAND COMMAND MERGE AND PRODUCTION DEPLOYMENT
+APPROVE PHASE 9 OWNED-DEMAND WORDPRESS PROOF MIGRATION, PR 185 MERGE, AND PRODUCTION DEPLOYMENT
 ```
 
 That future phrase does not authorize a WordPress edit, GBP/social post,
 email-signature change, QR distribution, email/SMS/Push send, provider change,
 paid promotion, or consumer contact. Before Production, rollback is leaving PR
 #185 unmerged. After an approved release, revert its merge commit or promote the
-prior Ready Vercel deployment. No database rollback is required.
+prior Ready Vercel deployment. Leave the additive broader proof constraints
+installed and preserve proof/audit rows; use a reviewed forward fix for schema
+issues.

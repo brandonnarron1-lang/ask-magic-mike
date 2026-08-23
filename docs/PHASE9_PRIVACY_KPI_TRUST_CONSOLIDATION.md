@@ -4,7 +4,9 @@ Date: 2026-08-22
 
 Candidate branch: `codex/phase9-privacy-kpi-trust-consolidation-20260822`
 
-Base: PR #185 exact final head `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7`
+Base: released `main` at PR #185 merge
+`44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8` (reviewed PR head
+`2877fab35591c7f43c8def2ee920a12654b37a22`)
 
 ## Purpose
 
@@ -32,6 +34,9 @@ branch `rescue/amm-pr193-pre-pr185-final-refresh-20260822-1344`.
 The refreshed state immediately before analytics-durability and JSON-LD
 hardening is preserved as remote rescue branch
 `rescue/amm-pr193-post-refresh-pre-analytics-durability-20260822-1347`.
+The state after the released-main refresh and immediately before registered
+public-attribution hardening is preserved locally as
+`rescue/amm-pr193-pre-registered-attribution-20260822-1757`.
 
 ## Included once
 
@@ -57,9 +62,10 @@ hardening is preserved as remote rescue branch
    present, so an error cannot be displayed beside a misleading numeric zero.
 7. Public analytics persistence is awaited at both active route boundaries.
    HTTP 202 means the canonical Neon write succeeded; an unavailable write is
-   HTTP 503 and cannot be mistaken for durable evidence. Public attribution
-   accepts controlled slugs only, and all JSON-LD surfaces use one script-safe
-   serializer.
+   HTTP 503 and cannot be mistaken for durable evidence. Public attribution is
+   limited to a registered operational vocabulary, not merely slug-shaped
+   input. Listing/property identifiers are reduced to a non-identifying
+   placement class, and all JSON-LD surfaces use one script-safe serializer.
 
 ## Deliberately excluded
 
@@ -89,10 +95,17 @@ No secret value may enter source, logs, screenshots, tests, or reports.
 
 ## Verification checkpoint
 
-- Focused candidate matrix: 12 files / 103 tests passed.
-- Full local release gate: system isolation, 14/14 safety checks, 210 files /
-  2,901 tests, strict typecheck, ESLint, optimized Next.js 15.5.21 build, and 80
-  active routes passed with a final zero exit status.
+- Final-hardening full local release gate: system isolation, 14/14 safety
+  checks, 211 files / 2,911 tests, strict typecheck, ESLint, optimized Next.js
+  15.5.21 build, and 80 active routes passed with a final zero exit status.
+- Released-main refresh Node 24 GitHub gate: run `32600300237`, job
+  `97097452937`, passed. Canonical Preview deployment
+  `dpl_EaDdSsLYwca8qkic4aSbSTJBGaSc` reached Ready before the final registered-
+  attribution patch.
+- Registered-attribution focused matrix: 7 files / 40 tests passed. The final
+  exact-head Node 24, Preview, and protected acceptance evidence is attached to
+  PR #193 after the final push so this document does not create self-referential
+  evidence churn.
 - `pnpm audit --prod --audit-level high`: no known vulnerability.
 - Redacted `gitleaks git`: 511 commits / approximately 14.11 MB scanned with no
   leak.
@@ -103,9 +116,11 @@ No secret value may enter source, logs, screenshots, tests, or reports.
 
 ## Risk and rollback
 
-Primary risks are over-filtering a useful analytics dimension, event inflation
-from an untrusted public analytics caller, an unavailable optional aggregate
-table, or an application regression in the protected Growth view. Canonical
+Primary risks are over-filtering an unregistered analytics dimension, event
+inflation from an untrusted public analytics caller, an unavailable optional
+aggregate table, or an application regression in the protected Growth view.
+Unregistered attribution remains available in the protected canonical lead
+record and can be reviewed before being added to the analytics registry. Canonical
 lead attribution, consent, scoring, routing, notifications, and audit records do
 not depend on the public analytics route.
 

@@ -4,8 +4,8 @@ import { trackEvent } from "@/lib/analytics/ledger";
 import {
   coarseAnalyticsUserAgent,
   isApprovedPublicAnalyticsEvent,
-  safePublicAnalyticsDimension,
   safePublicAnalyticsProperties,
+  safeRegisteredPublicAnalyticsDimension,
 } from "@/lib/analytics/privacy";
 import { checkRateLimit, rateLimitKey, LIMITS } from "@/lib/security/rate-limit";
 import { requestContext } from "@/lib/observability/request";
@@ -91,9 +91,9 @@ export async function POST(req: NextRequest) {
     eventName: parsed.data.eventName,
     sessionId: parsed.data.sessionId,
     properties,
-    utmSource: safePublicAnalyticsDimension(parsed.data.utmSource) ?? undefined,
-    utmMedium: safePublicAnalyticsDimension(parsed.data.utmMedium) ?? undefined,
-    utmCampaign: safePublicAnalyticsDimension(parsed.data.utmCampaign) ?? undefined,
+    utmSource: safeRegisteredPublicAnalyticsDimension("utm_source", parsed.data.utmSource) ?? undefined,
+    utmMedium: safeRegisteredPublicAnalyticsDimension("utm_medium", parsed.data.utmMedium) ?? undefined,
+    utmCampaign: safeRegisteredPublicAnalyticsDimension("utm_campaign", parsed.data.utmCampaign) ?? undefined,
     userAgent,
   });
 

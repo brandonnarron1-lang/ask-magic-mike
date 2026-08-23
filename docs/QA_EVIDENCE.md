@@ -20,17 +20,43 @@
   Push, consumer acknowledgment, provider call, WordPress edit, publication,
   spend, DNS, or NellySelly action occurred.
 
-## PR #185 continuation readiness audit — 2026-08-22
+## PR #193 released-main privacy audit — 2026-08-22
+
+- Rebased/refreshed the candidate onto released PR #185 merge
+  `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8`; `origin/main...HEAD` contains 46
+  candidate files and no database migration.
+- Confirmed anonymous Production `/admin/growth?window=90` redirects to
+  `/lead-center-login?error=session`; no Growth evidence renders without a
+  valid Lead Center session. The page itself also requires `report:view`, is
+  force-dynamic, and reads canonical Neon server-side only.
+- Confirmed the exact refreshed Preview root renders the Ask Magic Mike/Our
+  Town identity and conversion controls. Vercel deployment protection returns
+  an authentication redirect for anonymous protected requests, and the Preview
+  application fails closed to read-only mode when explicit mutation enablement
+  is absent.
+- Manual threat review found that slug syntax alone could still accept a
+  single-token name or slugified address as a public campaign dimension. The
+  boundary now requires a registered source/medium/campaign/placement value,
+  drops unregistered values, and reduces dynamic open-house identifiers to the
+  generic `open-house` class. The protected lead record remains the full
+  attribution source of truth.
+- Focused registered-attribution/privacy/API verification: 7 files / 40 tests,
+  all passed. Final exact-head Node 24 CI, Preview QA, dependency/secret scan,
+  visual acceptance, and release evidence are attached to PR #193 after push.
+
+## Historical PR #185 continuation readiness audit — 2026-08-22
 
 - Reconfirmed that current Production remains PR #184 merge
   `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97` on Ready deployment
   `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`, with the `www` root returning HTTP 200,
   apex redirecting HTTP 308 to `www`, `/home-value`, `/buy`, public liveness,
   and the Our Town homepage returning HTTP 200.
-- Reconfirmed PR #185 is cleanly mergeable, contains current Production, and
-  has no database migration. Final retained-asset code-bearing head is
-  `9a8baf935a7a68cda528ec4aee90b7cfcf5e87fc`; exact final head is
-  `24be0afef1d836ee6eb9fd912d5a1afe6b677ea7`.
+- Reconfirmed PR #185 contains current Production. Final UI-to-Neon tracing
+  then found that its accepted `ourtown_wordpress` tuples exceeded the released
+  ledger constraints. PR #185 now includes the additive constraint-only
+  `20260822195000_owned_demand_wordpress_proof_scope.sql` repair. Earlier
+  application-only head evidence is regression history, not release authority
+  for the repaired head.
 - Traced the complete candidate story: authenticated Distribution Command to
   existing Neon aggregate/proof reads, deterministic activation state, protected
   allowlisted feed/story/QR exports, and fixed canonical UTM shortlinks. The
@@ -79,12 +105,44 @@
   publication proof, lead, email/BCC, SMS, Push, external post, WordPress edit,
   DNS change, provider action, spend, deletion, or NellySelly action occurred.
 
+The migration, executable PostgreSQL 17, runner, compatibility, and security
+evidence for the repaired boundary is maintained in
+`docs/phase9/OWNED_DEMAND_WORDPRESS_PROOF_SCOPE_QA_EVIDENCE.md`. Exact-head
+GitHub/Vercel evidence is attached to PR #185 after push.
+
 Status: production funnel, Neon persistence, routing, suppression, outbox, and
 provider delivery are verified. No synthetic record is represented as a live
 prospect.
 All timestamps are America/New_York unless noted.
 
-## Phase 9 iOS phone install handoff consolidation — 2026-08-22
+## PR #194 released-base phone handoff acceptance — 2026-08-22
+
+- PR #193 was approved and released as main merge
+  `9b82afb609674bb0209b73f8ac9622ab02733e2a`; Production acceptance passed on
+  deployment `dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a` with no migration.
+- PR #194 was refreshed onto that released baseline. Its prior exact state is
+  preserved at `rescue/amm-pr194-pre-pr193-refresh-20260822-1841`; the
+  released-base code head is `d5da4bd8ac4b0235e140ac785d46824a198292d8`.
+- Unique candidate delta: 37 files, 1,440 insertions, 159 deletions, and no
+  database migration. Focused verification passes 8 files / 58 tests.
+- Exact Node 24 release run
+  [32603258868](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32603258868)
+  passes 214 files / 2,939 tests, strict typecheck, ESLint, 14/14 safety checks,
+  and the optimized 82-route Next.js 15.5.21 build.
+- Canonical Preview deployment `dpl_HErSvZNK89Wh79rbi71KAZhqKdq1` is Ready at
+  `https://ask-magic-mike-b0vzgy747-eyes-up-industries.vercel.app` and contains
+  exact code head `d5da4bd8ac4b0235e140ac785d46824a198292d8`.
+- Protected Preview QA run
+  [32603437125](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32603437125)
+  passes on Node 24: 17 HTTP checks, six intentional write skips, zero failures,
+  two expected browser tests, 43/43 doctor checks, and strict `PREVIEW_READY`.
+  `SAFE_DB_WRITE=false`; live email/SMS are disabled; no invite, claim, lead,
+  notification, device registration, or database write occurred.
+- Production dependency audit reports no known vulnerability; candidate
+  patch-integrity, gitleaks, and migration scans pass. PR #194 remains Draft;
+  physical enrollment and a `[TEST]` Push remain separately gated.
+
+## Historical pre-released-base phone handoff evidence — 2026-08-22
 
 - Post-refresh security audit — PASS: PR #194 now contains exact PR #193 head
   `008f1faa95d98058199ec01534ee39b474d2a3b2`; the immediately preceding state
@@ -273,8 +331,9 @@ All timestamps are America/New_York unless noted.
 
 - Consolidation boundary — PASS: PR #185 contains the unique application work
   selected from PRs #185, #186, #188, and #189 on released PR #184. Diff review
-  finds no database migration, provider publisher, second lead store, second
-  CRM, or PR #187 KPI-target implementation.
+  finds one constraint-only WordPress proof-scope migration and no provider
+  publisher, second lead store, second CRM, or PR #187 KPI-target
+  implementation.
 - Final post-hardening focused matrix — PASS: 10 files / 148 tests covering the
   owned-demand command, asset exports, publication-proof contract, activation
   loop, WordPress audit, current-router safety, public-origin policy, UTM
@@ -303,8 +362,9 @@ All timestamps are America/New_York unless noted.
   vulnerability.
 - `gitleaks git --redact --no-banner` — PASS: 498 commits / approximately
   13.92 MB scanned with no leak.
-- `git diff --check` and committed/working-tree migration scans — PASS: no
-  whitespace error and no migration in the candidate.
+- The earlier `git diff --check` and empty-migration scan passed on the
+  application-only head. It is superseded by the repaired-head diff check,
+  migration contract, and exact-head release evidence recorded above.
 - Pending before exact-head acceptance: exact Node 24 GitHub checks, canonical
   Vercel Preview smoke/auth/origin/shortlink/asset checks, rendered
   desktop/mobile QA, and deployment-log inspection.

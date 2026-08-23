@@ -93,9 +93,9 @@ describe("POST /api/events", () => {
         surface: "252-555-0100",
       },
       attribution: {
-        source: "person@example.com",
+        source: "SarahJohnson",
         medium: "social_organic",
-        campaign: "3106 Quinn Drive",
+        campaign: "3106-quinn-drive",
       },
     }));
     expect(response.status).toBe(202);

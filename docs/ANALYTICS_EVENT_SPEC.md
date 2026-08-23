@@ -43,8 +43,10 @@ the server ledger directly.
   properties and bounded lengths/numeric ranges.
 - URLs lose query strings; dynamic open-house routes normalize to
   `/open-house/[property-or-id]`; admin/private paths are rejected.
-- UTM source/medium/campaign are syntax-checked and PII-shaped values are
-  discarded. Click IDs remain only in the canonical lead attribution record.
+- Public UTM source/medium/campaign and placement values must match the
+  registered operational vocabulary after syntax/PII checks. Unregistered
+  values are discarded from analytics, while full attribution and click IDs
+  remain only in the protected canonical lead record.
 - User agent persists only as `browser|automation` plus
   `desktop|mobile|tablet|unknown`.
 - Public listing IDs may be retained as bounded identifiers; arbitrary internal,
@@ -57,7 +59,8 @@ the server ledger directly.
 method (`referral`, `organic`, `social_organic`, `email`, `qr`, or an approved
 paid medium); `utm_campaign` names the approved offer/flight; `utm_content`
 identifies the exact placement or creative. Sensitive lead data never belongs
-in a UTM value.
+in a UTM value. Register a newly approved public source, medium, campaign, or
+placement in the privacy boundary before expecting it in the analytics ledger.
 
 Cross-domain GA4/GTM activation and external publication remain separate
 approval-controlled actions. The server-side ledger works independently of
