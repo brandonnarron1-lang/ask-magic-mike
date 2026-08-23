@@ -2,6 +2,39 @@
 
 Updated 2026-08-23.
 
+## Phase 9 public hero delivery fast-track — 2026-08-23
+
+- **Reuse decision:** apply only PR #201 implementation commit
+  `1ca7ff00eacbc7da6d9b861431109c3d009c6861` on exact sealed PR #203 head
+  `cfe26742af03e737e2a65ced023e1b995e9010bc`. Preserve the released Black
+  Diamond composition, Mike imagery, Our Town identity, copy, CTAs, routes,
+  attribution, forms, and canonical lead pipe.
+- **Live evidence:** a fresh write-intercepted Production audit at 390 × 844
+  loaded one 289,876-byte mobile hero; 1440 × 900 loaded one 503,788-byte
+  desktop hero. Both current elements report `loading=auto` and
+  `fetchPriority=auto`, with zero browser warnings/errors.
+- **Implementation:** use the existing Next.js `getImageProps` optimizer at the
+  established 768-pixel art-direction breakpoint, intrinsic dimensions,
+  `sizes="100vw"`, eager loading, and high fetch priority. No artwork, copy, or
+  layout is regenerated.
+- **Local acceptance:** exact Node 24.18.0 passes 4 focused files / 15 tests,
+  the complete 221-file / 2,993-test suite, strict typecheck, ESLint, optimized
+  Next.js build with 52 static pages, 82/17 route-manifest proof, 14/14 release
+  safety, system isolation, a no-vulnerability Production dependency audit,
+  empty migration delta, and redacted staged secret scan.
+- **Rendered acceptance:** fresh write-intercepted optimized builds load one
+  hero resource per viewport: 56,792 bytes at 390 × 844 and 108,706 bytes at
+  1440 × 900. Art direction, identity, H1, CTAs, eager/high priority, one main,
+  and zero overflow remain correct with zero browser warnings/errors.
+- **Dependency:** this candidate follows PR #203, which follows PR #202. It is
+  not release-eligible until both predecessors release in order, this branch is
+  refreshed onto exact `main`, and fresh exact-head proof passes.
+- **Safety:** no migration or Production mutation. Local and remote acceptance
+  are required before any later release gate is eligible.
+- Detailed scope:
+  `docs/phase9/PUBLIC_HERO_DELIVERY_TRUST.md` and
+  `docs/phase9/PUBLIC_HERO_DELIVERY_TRUST_QA_EVIDENCE.md`.
+
 ## Phase 9 conversion-journey integrity fast-track — 2026-08-23
 
 - **Live evidence:** a 390×844 Production audit intercepted lead/event and

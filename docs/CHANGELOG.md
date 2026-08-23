@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-08-23 — Public hero delivery fast-track candidate
+
+- Reused PR #201's isolated responsive-image implementation on exact sealed PR
+  #203 instead of recreating the Black Diamond hero or waiting behind unrelated
+  WordPress and field-telemetry candidates.
+- Preserved the approved artwork, composition, copy, CTAs, attribution, routes,
+  forms, and lead backend while moving only hero delivery to Next.js responsive
+  image source sets with intrinsic dimensions and explicit LCP priority.
+- A fresh no-write Production audit measured the retained static hero at
+  289,876 bytes on 390 × 844 mobile and 503,788 bytes on 1440 × 900 desktop;
+  both currently report automatic loading and fetch priority.
+- Fresh optimized local proof loads exactly one art-directed hero response:
+  56,792 bytes on mobile and 108,706 bytes on desktop, with eager/high
+  priority, no horizontal overflow, and zero browser warnings/errors.
+- Exact Node 24 acceptance passes 221 files / 2,993 tests, strict typecheck,
+  ESLint, optimized build with 52 static pages, 82/17 route-manifest proof,
+  14/14 release safety, system isolation, and a clean Production dependency
+  audit.
+- No migration, Production action, lead/event write, message, WordPress edit,
+  publication, spend, DNS change, deletion, or NellySelly action occurred.
+
 ## 2026-08-23 — Durable rate-limit readiness candidate
 
 - Closed a false-green observability path where Production could return ready
