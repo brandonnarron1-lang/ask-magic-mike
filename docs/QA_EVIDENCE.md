@@ -74,13 +74,16 @@
   `publish` status are ignored, every ambiguity/lookalike count changes the
   precondition hash, and chunked upstream bodies are cancelled before exceeding
   the 3 MB cap.
-- Focused WordPress/change-set matrix — PASS: 3 files / 39 tests. Coverage
+- Isolated route execution — PASS: an authorized synthetic principal received
+  the bounded private JSON attachment; unauthorized and unknown-placement paths
+  retained privacy headers and performed no public WordPress fetch.
+- Focused WordPress/change-set matrix — PASS: 4 files / 42 tests. Coverage
   includes exact legacy and already-canonical states; duplicate, missing,
   foreign, insecure, lookalike, page-ID drift, and page-index failures; raw
   HTML/telephone exclusion; deterministic hashing; API RBAC/no-store headers;
   existing surface-audit compatibility; and database placement-registry parity.
-- Full local release gate — PASS: system isolation, 14/14 safety controls, 215
-  test files / 2,959 tests, strict TypeScript, full ESLint, optimized Next.js
+- Full local release gate — PASS: system isolation, 14/14 safety controls, 216
+  test files / 2,962 tests, strict TypeScript, full ESLint, optimized Next.js
   15.5.21 build, and 83 active routes / 17 acknowledged root-source
   duplicates. The new route is explicitly required and classified in the
   canonical route manifest.
