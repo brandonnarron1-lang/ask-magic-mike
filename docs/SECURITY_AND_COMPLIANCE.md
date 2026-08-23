@@ -65,6 +65,34 @@
   Read-only Preview rejects the request before even the rate-limit bucket can
   write, preserving the zero-mutation Preview boundary.
 
+## WordPress activation-manifest boundary — 2026-08-22
+
+- The new endpoint is GET-only, force-dynamic, and protected server-side by
+  Lead Center `report:view`; the Distribution UI link is convenience, not the
+  authorization boundary.
+- The route parameter is runtime-checked against three exact placement keys.
+  No request URL, query parameter, header, cookie, page content, or page-index
+  value can select the outbound destination.
+- Server-side fetches use fixed exact HTTPS Our Town hosts, reject credentials
+  and nonstandard ports, revalidate every redirect hop, limit redirects,
+  enforce content type and response size, and use a bounded timeout. Unsafe,
+  insecure, or lookalike AskMagicMike links make the manifest fail closed.
+- Public WordPress index rows are runtime-validated and minimized before use;
+  TypeScript types are not treated as validation. Duplicate/missing page rows,
+  page-ID drift, duplicate hrefs, malformed JSON, and fetch failures cannot
+  produce a ready state.
+- Responses are private/no-store JSON attachments with `nosniff`, same-origin
+  resource policy, no referrer, no indexing, and a deny-all sandbox CSP. They
+  contain no raw HTML, cookies, request headers, environment values, lead data,
+  database data, or form values.
+- Every manifest emits `publicationAuthorized=false`,
+  `approvalRequired=true`, and `mutationPerformed=false`. A future write must
+  independently require a fresh SHA-256 precondition, recoverable WordPress
+  revision/backup, and the exact page-specific owner gate.
+- Security review found no state-changing verb, SQL/file/subprocess sink,
+  arbitrary URL fetch, redirect, CORS relaxation, browser-storage credential,
+  raw HTML render, provider send, or secret exposure in the candidate.
+
 ## Required human/legal review
 
 The brokerage/BIC should approve consent language/version, retention/deletion,

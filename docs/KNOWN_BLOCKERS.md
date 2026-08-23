@@ -4,6 +4,22 @@ Updated 2026-08-22. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
 
+## WordPress owned-demand publication boundary
+
+- Three existing public WordPress CTAs are now provably identifiable through
+  read-only manifests, but no page has been changed. The current links remain
+  live and reversible.
+- The homepage is the only recommended first publication. It still requires a
+  fresh matching readiness manifest, verified page-149 revision/backup, the
+  exact phrase
+  `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`,
+  and post-publication public/mobile/analytics acceptance.
+- A readiness manifest is not proof of publication or demand. Do not create a
+  publication-proof row until an authorized operator actually publishes the
+  exact link and supplies public evidence.
+- Home-value page 3952 and We Buy Homes page 3631 remain later independent
+  decisions. Do not bulk-edit them under the homepage gate.
+
 ## Current release constraint
 
 - PR #183 is merged and live. PR #184's backup-first Neon migration is applied

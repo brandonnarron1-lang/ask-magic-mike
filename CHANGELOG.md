@@ -23,7 +23,19 @@
   events in screenshot QA so visual capture performs no application writes.
 - No Production, database, notification, provider, WordPress, or publication
   action was performed.
+## 2026-08-22 — WordPress owned-demand activation change set
 
+- Reused the protected Distribution Command and canonical owned-demand UTM
+  registry to generate live, placement-specific WordPress readiness manifests.
+- Added exact-host public page and page-index inspection, redirect and size
+  limits, one-target classification, rollback hrefs, page-ID checks, and
+  deterministic SHA-256 preconditions.
+- Added protected private/no-store JSON downloads for the existing homepage,
+  home-value, and We Buy Homes placements plus fail-closed security coverage.
+- Verified all three live public placements as `legacy_match_ready`; selected
+  only the homepage CTA as the recommended first separately approved edit.
+- Performed no WordPress edit, publication, form submission, message send,
+  database migration, Production deployment, DNS change, cache purge, or spend.
 ## 2026-08-22 — Privacy and KPI-trust consolidation
 
 - Consolidated the independent privacy/security/KPI evidence from PRs #190-#192
