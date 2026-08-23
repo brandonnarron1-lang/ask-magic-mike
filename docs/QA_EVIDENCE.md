@@ -1075,7 +1075,8 @@ Candidate branch:
 stacked on the unmerged conversion-identity candidate at
 `69879eac61cad4624945a1534914c8cb2e9d2424`; it is not authorized for Production
 until that dependency is released and this branch is refreshed from released
-`main`.
+`main`. Draft PR [#197](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/197)
+uses that dependency branch as its base.
 
 No Production deployment, database migration or write, lead submission, email,
 SMS, Push notification, WordPress edit, DNS change, public publication, spend,

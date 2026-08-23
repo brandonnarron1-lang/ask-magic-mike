@@ -62,9 +62,11 @@ provider action, or deletion.
 
 ## Stacked attribution-trust candidate after PR #195
 
-- Branch `codex/phase9-legacy-wordpress-attribution-trust-20260822` is stacked
-  behind PR #195. It separates narrowly recognized legacy Our Town attribution
-  evidence from exact owned-demand KPIs without changing stored attribution.
+- Draft PR [#197](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/197)
+  on branch `codex/phase9-legacy-wordpress-attribution-trust-20260822` is
+  stacked behind PR #195. It separates narrowly recognized legacy Our Town
+  attribution evidence from exact owned-demand KPIs without changing stored
+  attribution.
 - It cannot merge before PR #195. After PR #195 releases, preserve a rescue
   ref, refresh this candidate onto exact `main`, and rerun Node 24 CI,
   canonical Preview, protected visual QA, and release-safety checks.

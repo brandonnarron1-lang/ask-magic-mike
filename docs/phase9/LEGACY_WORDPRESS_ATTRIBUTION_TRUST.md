@@ -4,6 +4,9 @@ Date: 2026-08-22
 
 Candidate branch: `codex/phase9-legacy-wordpress-attribution-trust-20260822`
 
+Draft pull request: [#197](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/197),
+intentionally based on the PR #195 branch rather than `main`.
+
 Release order: after the exact PR #195 conversion-identity release, with a
 fresh released-main refresh and exact-head verification.
 

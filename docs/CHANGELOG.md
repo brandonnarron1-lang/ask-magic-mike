@@ -11,9 +11,12 @@
   lifecycle states so historical traffic cannot inflate a current KPI.
 - Added protected operator labels that distinguish exact signals, legacy
   signals requiring a UTM update, and genuinely unmeasured placements.
-- Focused Node 24 verification passes six files / 64 tests plus strict
-  typecheck. Full stack, Preview, visual, dependency, secret, and release-safety
-  proof remain required before this stacked candidate reaches its own gate.
+- Draft PR #197 is intentionally stacked on PR #195. Local Node 24 verification
+  passes six focused files / 64 tests and 215 full files / 2,954 tests, strict
+  typecheck, ESLint, optimized build, 82/17 route manifest, 14/14 release
+  safety, 43/43 release doctor, dependency/secret/diff checks, and desktop/mobile
+  visual QA with no overflow or console findings. Exact-head CI and canonical
+  Preview proof remain required.
 - No migration, Production deployment, database write, lead, message,
   WordPress change, publication, DNS change, spend, provider mutation, or
   NellySelly action occurred.

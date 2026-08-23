@@ -26,9 +26,9 @@ specific expansions; they do not invalidate the live lead pipe.
   is preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
   It must pass exact-head GitHub CI and protected Preview before its distinct
   conversion-identity release gate can be considered.
-- The legacy WordPress attribution-trust branch is stacked behind PR #195. Its
-  compatibility counts are deliberately excluded from exact KPI and activation
-  states; it must be refreshed after PR #195 before its own gate is eligible.
+- Draft PR #197 is stacked behind PR #195. Its compatibility counts are
+  deliberately excluded from exact KPI and activation states; it must be
+  refreshed after PR #195 before its own gate is eligible.
 - Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
   and #119–#121 are preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,
