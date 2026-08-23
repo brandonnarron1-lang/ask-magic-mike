@@ -24,6 +24,17 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    `21fdb5b3490cdc0517518578878a8db5d1b683a7` was merged as
    `9b82afb609674bb0209b73f8ac9622ab02733e2a` and accepted on Vercel Production
    deployment `dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a`. It contained no migration.
+5. PR [#196](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/196)
+   — its exact verifier gate was received; reviewed head
+   `c8e19c8e822e585bc4b27c7abc47adf3a88fc8ad` was merged as
+   `c08abe1168840b99ccba07866bbec8cf7a6752fb` and accepted on Production
+   deployment `dpl_sew1CoF13dtfJTsvasDJf6vyndj8`. It contained no migration.
+6. PR [#194](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/194)
+   — its exact iOS handoff gate was received after the PR #196 release. Final
+   reviewed head `851ebe530ac6a91a4e410f26538d29c1bf43f1c6` was merged as
+   `5a3c5c7f2463ea399c21b616ff249f6c67e156b6` and accepted on Production
+   deployment `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. It contained no migration,
+   device enrollment, or send.
 
 These completed gates are exhausted and must not be reused as authority for a
 new action. None authorized a social/GBP post, email campaign, QR
@@ -32,25 +43,22 @@ provider action, or deletion.
 
 ## Next consolidated application candidate
 
-- Draft PR [#194](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/194)
-  is the sole next application candidate. It consolidates only the secure iOS
-  Home Screen Web Push handoff on released `main` and contains no migration,
-  carrier SMS, second provider, device enrollment, or send.
-- Its released-base Node 24 CI, canonical Vercel Preview, protected-flow,
-  security, and browser acceptance pass. It remains Draft. Its only application
-  release phrase is:
-  `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
-- That future phrase will authorize only the exact reviewed PR #194 merge and
-  canonical Vercel Production deployment. It will not authorize a WordPress
-  edit, GBP/social/email publication, QR distribution, message, lead submission,
-  migration, physical phone enrollment, test Push, spend, DNS change, provider
-  action, deletion, or NellySelly action.
-
-## Stacked candidates after PR #194
-
 - Draft PR [#195](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/195)
-  remains stacked after PR #194 and must be refreshed and revalidated only after
-  PR #194 releases.
+  is the sole next application candidate. It reuses the canonical home-value
+  funnel and adds required seller identity, field-specific focus/error
+  ownership, consumer-only footer navigation, and mutation-free visual QA.
+- It is refreshed onto released PR #194 merge
+  `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`; the prior stacked head is
+  preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
+  Local exact Node 24 and Chromium proof pass. Exact-head GitHub CI and
+  protected Vercel Preview remain required after push.
+- Its only application release phrase is:
+  `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
+- That future phrase will authorize only the exact reviewed PR #195 merge and
+  canonical Vercel Production deployment. It will not authorize a WordPress
+  edit, GBP/social/email publication, QR distribution, message, lead
+  submission, migration, device enrollment, test Push, spend, DNS change,
+  provider action, deletion, or NellySelly action.
 
 ## Deferred candidates requiring refresh and overlap review
 
@@ -64,11 +72,8 @@ provider action, or deletion.
 - PRs #190–#192 remain preserved as source history; their independently useful
   work was consolidated once in released PR #193 and is not part of PR #185.
 - Historical PR [#179](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/179)
-  is preserved but superseded for release by the current-stack iOS handoff
-  consolidation in Draft PR
+  is preserved but superseded by the released current-stack iOS handoff in PR
   [#194](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/194).
-  PR #194 has been refreshed and re-proven on released `main`; its exact gate
-  remains unreceived.
   Physical enrollment and a `[TEST]` Push remain separately approved actions.
 - PRs #92 and #119–#121 remain archive-after-review candidates. They are not a
   parallel Production release plan.

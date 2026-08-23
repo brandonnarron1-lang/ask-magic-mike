@@ -139,8 +139,14 @@ All timestamps are America/New_York unless noted.
   `SAFE_DB_WRITE=false`; live email/SMS are disabled; no invite, claim, lead,
   notification, device registration, or database write occurred.
 - Production dependency audit reports no known vulnerability; candidate
-  patch-integrity, gitleaks, and migration scans pass. PR #194 remains Draft;
-  physical enrollment and a `[TEST]` Push remain separately gated.
+  patch-integrity, gitleaks, and migration scans pass. The entries above are
+  the released-PR193 checkpoint.
+- Final PR #194 head `851ebe530ac6a91a4e410f26538d29c1bf43f1c6`
+  subsequently passed run `32606142473`, Preview
+  `dpl_7nhaV5tpS4YArtgKVV9PfVBRHq4H`, and protected run `32606286620`, then was
+  merged as `5a3c5c7f2463ea399c21b616ff249f6c67e156b6` and accepted on Production
+  `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. Physical enrollment and a `[TEST]` Push
+  remain separately gated.
 
 ## Historical pre-released-base phone handoff evidence — 2026-08-22
 

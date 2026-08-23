@@ -2,7 +2,7 @@
 
 Date: 2026-08-22
 
-Status: local candidate stacked after PR #194; Production unchanged
+Status: released-main candidate refreshed after PR #194; Production unchanged
 
 ## Reuse-first decision
 
@@ -43,6 +43,10 @@ A fresh no-submit audit of the live seller, buyer, and Ask Mike paths found:
   accessibility links inside a named footer navigation landmark.
 - Made the screenshot helper intercept `/api/leads` and return an unmistakable
   local QA response. Its synthetic identity says `INTERNAL QA DO NOT CONTACT`.
+- Kept the shared footer outside the page `<main>` so browsers and assistive
+  technology expose a real top-level `contentinfo` landmark.
+- Intercepts `/api/events` in homepage browser QA so the visual test cannot
+  depend on or mutate a configured database.
 
 ## Boundaries
 
@@ -56,12 +60,15 @@ A fresh no-submit audit of the live seller, buyer, and Ask Mike paths found:
 
 ## Stack and rollback
 
-The candidate starts from PR #194 exact head
-`be566d7fb66501d7321eaf3367c3070408a47aff`, itself stacked on PR #193 and PR
-#185. It must not merge out of order. Rollback is an application revert; there
-is no migration or external state to reverse.
+The candidate is refreshed onto released PR #194 merge
+`5a3c5c7f2463ea399c21b616ff249f6c67e156b6`, which already contains released
+PR #196 verifier hardening. The prior stacked head is preserved at
+`rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`. The integration
+merge is `401e9e3ce57e9c466d132ef091c221ecf5e54d4e`; its only automatic conflict
+was this repository's cumulative QA-evidence document. Rollback is an
+application revert; there is no candidate migration or external state to
+reverse.
 
-Future exact gate after all predecessors release and this branch is refreshed
-and re-proven:
+Future exact gate after exact-head GitHub and protected Preview proof:
 
 `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`

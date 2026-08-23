@@ -16,13 +16,16 @@ specific expansions; they do not invalidate the live lead pipe.
   on Vercel Production deployment `dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a`.
   Its privacy/KPI acceptance passed, it contained no database migration, and
   its gate is exhausted.
-- Draft PR #194 consolidates the unique iOS handoff onto released PR #193. Its
-  pre-refresh state is preserved at
-  `rescue/amm-pr194-pre-pr193-refresh-20260822-1841`; exact-head Node 24,
-  canonical Preview, protected-flow, and rendered evidence remain required
-  before its distinct release gate can be requested.
-- Draft PR #195 remains stacked after PR #194 and must not be merged or deployed
-  before both predecessors are released and refreshed in order.
+- PR #196 verifier hardening is merged and live as
+  `c08abe1168840b99ccba07866bbec8cf7a6752fb`; its gate is exhausted.
+- PR #194 iOS handoff is merged and live as
+  `5a3c5c7f2463ea399c21b616ff249f6c67e156b6` on Production deployment
+  `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. Its application gate is exhausted;
+  physical enrollment and a `[TEST]` Push remain separate actions.
+- Draft PR #195 is refreshed onto exact released main. Its prior stacked state
+  is preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
+  It must pass exact-head GitHub CI and protected Preview before its distinct
+  conversion-identity release gate can be considered.
 - Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
   and #119–#121 are preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,
