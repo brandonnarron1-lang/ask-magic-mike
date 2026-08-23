@@ -2,6 +2,30 @@
 
 Updated 2026-08-22.
 
+## Phase 9 legacy WordPress attribution trust — 2026-08-22
+
+- A fresh read-only audit fetched all 42 Our Town sitemap pages. Ask Magic Mike
+  public CTA checks passed 24/24; the social-preview audit passed 40/42 and
+  confirmed the existing Facebook-crawler block on two Our Town pages.
+- The audit reconfirmed three legacy direct links and two embeds with valid
+  source/campaign identity but no placement content. Five pages also expose
+  overlapping capture systems. These findings do not authorize a WordPress
+  edit, redirect, plugin change, or crawler-rule exception.
+- The canonical Neon Growth read model now recognizes only five audited legacy
+  source + medium + campaign + exact HTTPS referrer-path combinations. Unknown,
+  mismatched, foreign-host, non-HTTPS, port-bearing, already-tagged, and
+  referrer-less rows fail closed.
+- Stored source attribution is unchanged. The protected Distribution Command
+  renders compatibility evidence separately from exact owned-demand evidence;
+  exact KPI totals and activation lifecycle states remain uninflated.
+- This candidate is intentionally stacked after PR #195 and cannot use PR
+  #195's future approval. It contains no migration or external mutation.
+- Detailed decision:
+  `docs/phase9/LEGACY_WORDPRESS_ATTRIBUTION_TRUST.md`.
+- Future exact application gate, eligible only after PR #195 releases and this
+  branch is refreshed and re-proven on exact `main`:
+  `APPROVE PHASE 9 LEGACY WORDPRESS ATTRIBUTION TRUST MERGE AND PRODUCTION DEPLOYMENT`.
+
 ## Phase 9 conversion identity polish — 2026-08-22
 
 - A fresh Production no-submit audit found that the canonical home-value path

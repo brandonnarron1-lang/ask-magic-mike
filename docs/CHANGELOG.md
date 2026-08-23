@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-08-22 — Legacy WordPress attribution-trust candidate
+
+- Reused the existing Neon Growth view and protected Distribution Command;
+  no analytics store, campaign catalog, WordPress form, or dashboard was added.
+- Added a fail-closed compatibility classifier for the five exact Our Town
+  referrer-path and legacy-UTM combinations verified on the public site.
+- Preserved every stored UTM and referrer record. Compatibility evidence is
+  labeled separately and excluded from exact owned-demand totals and placement
+  lifecycle states so historical traffic cannot inflate a current KPI.
+- Added protected operator labels that distinguish exact signals, legacy
+  signals requiring a UTM update, and genuinely unmeasured placements.
+- Focused Node 24 verification passes six files / 64 tests plus strict
+  typecheck. Full stack, Preview, visual, dependency, secret, and release-safety
+  proof remain required before this stacked candidate reaches its own gate.
+- No migration, Production deployment, database write, lead, message,
+  WordPress change, publication, DNS change, spend, provider mutation, or
+  NellySelly action occurred.
+
 ## 2026-08-22 — Conversion identity and public-navigation polish candidate
 
 - Reused the canonical home-value funnel and added required consumer name

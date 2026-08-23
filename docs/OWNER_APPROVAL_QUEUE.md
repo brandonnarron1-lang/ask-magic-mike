@@ -60,6 +60,21 @@ provider action, or deletion.
   submission, migration, device enrollment, test Push, spend, DNS change,
   provider action, deletion, or NellySelly action.
 
+## Stacked attribution-trust candidate after PR #195
+
+- Branch `codex/phase9-legacy-wordpress-attribution-trust-20260822` is stacked
+  behind PR #195. It separates narrowly recognized legacy Our Town attribution
+  evidence from exact owned-demand KPIs without changing stored attribution.
+- It cannot merge before PR #195. After PR #195 releases, preserve a rescue
+  ref, refresh this candidate onto exact `main`, and rerun Node 24 CI,
+  canonical Preview, protected visual QA, and release-safety checks.
+- Its later application-only phrase is:
+  `APPROVE PHASE 9 LEGACY WORDPRESS ATTRIBUTION TRUST MERGE AND PRODUCTION DEPLOYMENT`.
+- That phrase will not authorize a WordPress edit, crawler/firewall exception,
+  lead submission, consumer or internal message, publication, migration,
+  physical phone enrollment, test Push, spend, DNS change, provider action,
+  deletion, or NellySelly action.
+
 ## Deferred candidates requiring refresh and overlap review
 
 - PR [#182](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/182)
