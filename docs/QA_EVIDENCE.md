@@ -13,7 +13,7 @@
   `rescue/amm-pre-owned-traffic-fast-track-20260823-1625` preserves the base.
   No database migration is present.
 - Exact Node 24.18.0 local acceptance — PASS: 3 focused files / 36 tests; full
-  223 files / 3,010 tests; strict typecheck; ESLint; optimized Next.js 15.5.21
+  223 files / 3,011 tests; strict typecheck; ESLint; optimized Next.js 15.5.21
   build with 52 static pages; 83 active / 17 acknowledged route proof; release
   safety 14/14; release doctor 43/43; system isolation; and Production
   dependency audit with no known vulnerability.
@@ -61,7 +61,12 @@
   `distribution-mobile-390x844.png`,
   `wordpress-manifests-desktop-1440.png`, and
   `wordpress-manifests-mobile-390.png`.
-- Draft PR #205 remote application-head acceptance — PASS. GitHub Node 24 run
+- PR #205 now includes refreshed PR #204 head
+  `bd16a115af9f4b17dccab0bb7dad41682816be5d` through clean ordered merge
+  `52a9b31cbab8da2e2ac251fe483bbbbd9a3f34e8`; the prior sealed head is
+  preserved at `rescue/amm-pr205-pre-pr204-refresh-20260823-173028`. Fresh
+  exact-head remote proof is required and recorded in PR #205.
+- Superseded pre-refresh remote application-head acceptance — PASS. GitHub Node 24 run
   `32665394864` completed successfully against exact SHA
   `a1e8a4940f8d9eefe21bc6f43514e2e4941e8e31`; Vercel deployment
   `dpl_5AWNXqLf5k9Gc8UEqK2hA1AHiLFH` is READY, target Preview, Node 24, and

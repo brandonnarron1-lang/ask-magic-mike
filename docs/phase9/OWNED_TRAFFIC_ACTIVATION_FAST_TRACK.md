@@ -2,7 +2,7 @@
 
 Date: 2026-08-23
 
-Status: Draft PR #205 application/evidence acceptance complete; ordered release pending
+Status: Draft PR #205 ordered stack refreshed; exact-head remote proof pending
 
 External mutation: none
 
@@ -29,10 +29,13 @@ dashboard, scoring model, AI feature, or visual redesign.
 ## Canonical stack
 
 - Repository: `brandonnarron1-lang/ask-magic-mike`
-- Base: PR #204 exact head
-  `abffd2796f5bcea331b1d285cf572dde1838d579`
+- Base: refreshed PR #204 exact head
+  `bd16a115af9f4b17dccab0bb7dad41682816be5d`, included through clean ordered
+  merge `52a9b31cbab8da2e2ac251fe483bbbbd9a3f34e8`
 - Pre-consolidation rescue branch:
   `rescue/amm-pre-owned-traffic-fast-track-20260823-1625`
+- Pre-refresh sealed-head rescue branch:
+  `rescue/amm-pr205-pre-pr204-refresh-20260823-173028`
 - Database: existing Neon Production branch; no migration is part of this
   fast-track
 - Public app: existing Ask Magic Mike Next.js application
@@ -117,7 +120,7 @@ all proposed links.
 - Consolidated only the reviewed, unique PR #197/#198 commits onto exact sealed
   PR #204 head; no historical branch merge or duplicate subsystem was used.
 - Exact Node 24.18.0 passes the 3-file / 36-test focused matrix, complete
-  223-file / 3,010-test suite, strict typecheck, ESLint, optimized Next.js
+  223-file / 3,011-test suite, strict typecheck, ESLint, optimized Next.js
   15.5.21 build with 52 static pages, 83 active / 17 acknowledged route proof,
   14/14 release safety, 43/43 release doctor, system isolation, and a
   no-vulnerability Production dependency audit.
@@ -135,11 +138,12 @@ all proposed links.
   three manifest links, zero writable forms in the read-only runtime, zero
   console warnings/errors, and a GET-only request ledger. The WordPress card
   and all three manifest controls remain legible and correctly stacked.
-- The application/evidence head is sealed by exact-head remote CI, immutable
-  Preview, and protected no-write proof recorded below. Any later refresh onto
-  `main` must repeat that evidence before release eligibility is reconsidered.
+- The refreshed application/evidence head requires exact-head remote CI,
+  immutable Preview, and protected no-write proof recorded in PR #205. Any
+  later retarget to `main` must repeat that evidence before release eligibility
+  is reconsidered.
 
-## Remote acceptance
+## Superseded pre-refresh remote acceptance
 
 - Draft PR #205 application/evidence head
   `a1e8a4940f8d9eefe21bc6f43514e2e4941e8e31` is cleanly mergeable on the exact

@@ -54,8 +54,12 @@ Updated 2026-08-23.
   safely suppressed QA leads and zero live/contactable leads, outcomes,
   response samples, spend, experiments, or non-test publication proofs.
 - **Reuse decision:** transplant only the unique reviewed application work from
-  PRs #197 and #198 onto exact sealed PR #204 head. The rescue reference is
-  `rescue/amm-pre-owned-traffic-fast-track-20260823-1625`.
+  PRs #197 and #198 onto PR #204, now refreshed through exact predecessor head
+  `bd16a115af9f4b17dccab0bb7dad41682816be5d`. Clean ordered merge
+  `52a9b31cbab8da2e2ac251fe483bbbbd9a3f34e8` carries it into PR #205. Rescue
+  references `rescue/amm-pre-owned-traffic-fast-track-20260823-1625` and
+  `rescue/amm-pr205-pre-pr204-refresh-20260823-173028` preserve both earlier
+  boundaries.
 - **Scope:** separate audited legacy Our Town attribution from exact KPI
   evidence, and expose authenticated GET-only readiness manifests for the
   existing homepage, home-value, and We Buy Homes WordPress CTAs.
@@ -73,8 +77,9 @@ Updated 2026-08-23.
   `publicationAuthorized=false`, and `mutationPerformed=false`. Public index,
   page-record, and homepage probes returned HTTP 200; no authenticated or write
   request was made.
-- **Local acceptance:** exact Node 24.18.0 passes 3 focused files / 36 tests,
-  all 223 files / 3,010 tests, strict typecheck, ESLint, optimized Next.js
+- **Local acceptance:** after the ordered refresh, exact Node 24.18.0 passes 3
+  focused files / 36 tests, all 223 files / 3,011 tests, strict typecheck,
+  ESLint, optimized Next.js
   15.5.21 build with 52 static pages, 83/17 route proof, safety 14/14, doctor
   43/43, isolation, and a no-vulnerability Production dependency audit.
 - **Rendered acceptance:** the optimized local Production build passes at
@@ -87,7 +92,7 @@ Updated 2026-08-23.
   exact-head CI, immutable Preview, and protected no-write runtime acceptance
   are sealed below. Any later refresh onto `main` must repeat the exact-head
   proof before release eligibility is reconsidered.
-- **Remote acceptance:** Draft PR #205 head
+- **Superseded pre-refresh remote acceptance:** Draft PR #205 head
   `a1e8a4940f8d9eefe21bc6f43514e2e4941e8e31` is cleanly mergeable and passes
   Node 24 run `32665394864`, READY Preview
   `dpl_5AWNXqLf5k9Gc8UEqK2hA1AHiLFH`, and protected run `32665666025`: 17
@@ -99,9 +104,10 @@ Updated 2026-08-23.
 - **Final local integrity:** no migration delta, no known Production dependency
   vulnerability, clean diff, and gitleaks scanned 560 commits / approximately
   14.71 MB with no leak.
-- **Release status:** keep Draft behind #202 → #203 → #204. No Production gate
-  is issued; after predecessors release, refresh onto exact `main` and repeat
-  exact-head proof.
+- **Release status:** keep Draft behind #202 → #203 → #204. The refreshed head
+  requires fresh exact-head CI/Preview/protected proof recorded in PR #205. No
+  Production gate is issued; after predecessors release, retarget to exact
+  `main` and repeat exact-head proof.
 - Plan and rollback:
   `docs/phase9/OWNED_TRAFFIC_ACTIVATION_FAST_TRACK.md` and
   `docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md`.
