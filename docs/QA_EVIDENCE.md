@@ -42,7 +42,7 @@
   notification, publication proof, database read/write, external send, DNS
   change, Production deployment, spend, deletion, or NellySelly action occurred.
 - Production dependency audit — PASS: no known vulnerability. Working-tree
-  gitleaks scanned approximately 65.35 KB of the unique candidate delta with no
+  gitleaks scanned approximately 72.92 KB of the unique candidate delta with no
   leak; candidate-pattern, diff-integrity, and empty migration scans passed.
 - Rendered no-write acceptance — PASS: lead, durable event, and experiment
   routes were intercepted before navigation. The protected Distribution Command
