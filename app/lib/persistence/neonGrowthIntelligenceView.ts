@@ -10,7 +10,10 @@ import {
   type GrowthOutcomeFact,
   type GrowthSpendFact,
 } from "../growth/intelligence";
-import type { OwnedDemandAttributionSignal } from "../growth/owned-demand";
+import {
+  OWNED_DEMAND_CAMPAIGN_KEY,
+  type OwnedDemandAttributionSignal,
+} from "../growth/owned-demand";
 
 type Query = ReturnType<typeof neon>;
 type Row = Record<string, unknown>;
@@ -318,24 +321,112 @@ function normalizeAttributionDimension(value: unknown) {
   return text(value).trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
 }
 
+const LEGACY_WORDPRESS_SOURCE_ALIASES = new Set([
+  "ourtown_wp",
+  "ourtownproperties",
+  "ourtownproperties_com",
+]);
+
+const LEGACY_WORDPRESS_REFERRER_MAP: Record<string, {
+  medium: string;
+  content: string;
+}> = {
+  "/": {
+    medium: "homepage_cta",
+    content: "wordpress_homepage_ask_mike",
+  },
+  "/how-much-is-your-home-worth/": {
+    medium: "home_value_page",
+    content: "wordpress_home_value_page",
+  },
+  "/we-buy-homes/": {
+    medium: "seller_page_cta",
+    content: "wordpress_we_buy_homes",
+  },
+  "/ask-magic-mike/": {
+    medium: "referral",
+    content: "wordpress_ask_magic_mike_embed",
+  },
+  "/ask-mike/": {
+    medium: "referral",
+    content: "wordpress_ask_magic_mike_embed",
+  },
+};
+
+function legacyWordPressReferrerPath(value: unknown) {
+  try {
+    const parsed = new URL(text(value));
+    const host = parsed.hostname.toLowerCase();
+    if (
+      parsed.protocol !== "https:" ||
+      parsed.username ||
+      parsed.password ||
+      parsed.port ||
+      (host !== "ourtownproperties.com" && host !== "www.ourtownproperties.com")
+    ) {
+      return null;
+    }
+    return parsed.pathname.endsWith("/") ? parsed.pathname : `${parsed.pathname}/`;
+  } catch {
+    return null;
+  }
+}
+
+function legacyWordPressCompatibilitySignal(row: Row): OwnedDemandAttributionSignal | null {
+  const source = normalizeAttributionDimension(row.utm_source);
+  const medium = normalizeAttributionDimension(row.utm_medium);
+  const campaign = normalizeAttributionDimension(row.utm_campaign);
+  const content = normalizeAttributionDimension(row.utm_content);
+  const referrerPath = legacyWordPressReferrerPath(row.referrer_url);
+  const mapped = referrerPath ? LEGACY_WORDPRESS_REFERRER_MAP[referrerPath] : null;
+
+  if (
+    content ||
+    !mapped ||
+    !LEGACY_WORDPRESS_SOURCE_ALIASES.has(source) ||
+    campaign !== "website_widget" ||
+    medium !== mapped.medium
+  ) {
+    return null;
+  }
+
+  return {
+    source: "ourtownproperties",
+    medium: "owned_media",
+    campaign: OWNED_DEMAND_CAMPAIGN_KEY,
+    content: mapped.content,
+    leads: 1,
+    basis: "legacy_wordpress_compatibility",
+  };
+}
+
 export function buildOwnedDemandAttributionSignals(
   rows: Row[],
 ): OwnedDemandAttributionSignal[] {
   const signals = new Map<string, OwnedDemandAttributionSignal>();
 
   for (const row of rows) {
-    const source = normalizeAttributionDimension(row.utm_source);
-    const medium = normalizeAttributionDimension(row.utm_medium);
-    const campaign = normalizeAttributionDimension(row.utm_campaign);
-    const content = normalizeAttributionDimension(row.utm_content);
+    const compatibility = legacyWordPressCompatibilitySignal(row);
+    const source = compatibility?.source ?? normalizeAttributionDimension(row.utm_source);
+    const medium = compatibility?.medium ?? normalizeAttributionDimension(row.utm_medium);
+    const campaign = compatibility?.campaign ?? normalizeAttributionDimension(row.utm_campaign);
+    const content = compatibility?.content ?? normalizeAttributionDimension(row.utm_content);
     if (!source || !medium || !campaign || !content) continue;
 
-    const key = `${source}|${medium}|${campaign}|${content}`;
+    const basis = compatibility?.basis ?? "exact";
+    const key = `${basis}|${source}|${medium}|${campaign}|${content}`;
     const existing = signals.get(key);
     if (existing) {
       existing.leads += 1;
     } else {
-      signals.set(key, { source, medium, campaign, content, leads: 1 });
+      signals.set(key, {
+        source,
+        medium,
+        campaign,
+        content,
+        leads: 1,
+        ...(compatibility?.basis ? { basis: compatibility.basis } : {}),
+      });
     }
   }
 
@@ -403,11 +494,12 @@ export async function loadNeonGrowthIntelligence(
               l.source, l.source_detail, l.score, l.lead_type,
               l.timeline_months, l.last_contacted_at,
               ${responseSelect},
-              sa.utm_source, sa.utm_medium, sa.utm_campaign, sa.utm_content, sa.is_paid
+              sa.utm_source, sa.utm_medium, sa.utm_campaign, sa.utm_content,
+              sa.referrer_url, sa.is_paid
          FROM public.leads l
          ${responseJoin}
          LEFT JOIN LATERAL (
-           SELECT utm_source, utm_medium, utm_campaign, utm_content, is_paid
+           SELECT utm_source, utm_medium, utm_campaign, utm_content, referrer_url, is_paid
              FROM public.source_attribution
             WHERE lead_id = l.id
             ORDER BY created_at DESC
