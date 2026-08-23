@@ -85,8 +85,9 @@ provider action, or deletion.
   acceptance, Widget 2/2, doctor 43/43, and `PREVIEW_READY`. It must remain
   Draft until PR #202 releases, then refresh onto exact `main` and repeat proof
   before a separate gate can be issued. PR #202's gate does not authorize it.
-- Draft PRs #197–#201 remain preserved. PR #203 does not authorize, merge,
-  delete, or silently supersede #197–#199 or #201.
+- PRs #197, #198, #200, and #201 are closed as proven superseded Drafts with
+  their branches preserved. PR #199 remains open and unique; PR #203 does not
+  authorize its field-experience work.
 
 ## Owned-traffic activation fast-track after PR #204
 
@@ -106,6 +107,22 @@ provider action, or deletion.
 - Application release cannot edit WordPress. The first later proposed write is
   one homepage href only and still requires:
   `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`.
+
+## Field-experience fast-track after PR #205
+
+- Branch `codex/phase9-field-experience-fast-track-20260823` preserves PR
+  #199's exact head under
+  `rescue/amm-pr199-pre-fast-track-20260823-175922` and imports only its unique
+  Production field-performance capability onto exact PR #205.
+- PR #187's KPI-target migration and numeric targets remain excluded. The
+  candidate contains no migration and cannot write telemetry in Preview.
+- Local Node 24 acceptance passes 5 focused files / 29 tests, all 226 files /
+  3,031 tests, typecheck, lint, optimized build, route proof, 14/14 safety,
+  isolation, and the Production dependency audit. Exact-head remote and
+  protected browser proof remain pending.
+- It has no Production gate. It must remain behind #202 → #203 → #204 → #205,
+  refresh onto exact `main` after those releases, and repeat full proof before
+  any field-telemetry activation phrase becomes eligible.
 
 ## Deferred candidates requiring refresh and overlap review
 

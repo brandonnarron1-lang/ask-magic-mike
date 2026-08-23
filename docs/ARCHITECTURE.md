@@ -115,12 +115,24 @@ SLA timers are stored as absolute timestamps in `lead_routing`:
 
 ### Analytics Ledger (`src/lib/analytics/`)
 
-Fire-and-forget. Never throws. Falls back to `console.log` if Supabase is not configured.
+Canonical analytics writes use the server-side Neon repository. Public callers
+pass exact event, origin, body-size, rate-limit, property, path, attribution-
+registry, and PII-minimization checks; a successful HTTP 202 means the write
+completed, while unavailable persistence fails truthfully with HTTP 503.
+Trusted server/provider paths can associate events with canonical entities only
+after their own authorization and durable operation.
 
 ```
-trackEvent(params) → void (async, never awaited in critical path)
-trackEventNoWait(params) → void (sync wrapper, swallows errors)
+browser trackEvent(params) → minimized POST /api/events (non-blocking UX)
+public route → runtime validation → Neon analytics_events
+trusted operation → server ledger → Neon analytics_events
 ```
+
+The dependent field-experience candidate reuses this ledger for Production-only
+LCP/INP/CLS. It writes no lead/session/attribution identity, converts the raw
+browser metric ID to a domain-separated digest, and lets the protected Growth
+read model calculate bounded, digest-deduplicated P75 evidence by mobile and
+desktop. Preview renders no reporter and performs no telemetry write.
 
 ### Valuation (`src/lib/valuation/`)
 

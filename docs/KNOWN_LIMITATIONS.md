@@ -19,6 +19,14 @@ rates remain low-confidence until genuine traffic produces adequate samples.
 Deterministic routing and scoring continue to work; AI summaries and statistical
 recommendations are advisory and never silently assign a lead.
 
+### Field-performance telemetry is prepared, not yet active
+
+The dependent field-experience candidate can collect privacy-minimized LCP,
+INP, and CLS after its own Production gate. Preview is intentionally silent and
+current Production has no observations from this reporter. Browser headers are
+not authentication, so future aggregates remain rate-limited, deduplicated,
+sample-labeled, and advisory rather than treated as transaction truth.
+
 ## 2. Messaging and staff alerts
 
 ### Internal email is live; consumer automation is not broadly enabled

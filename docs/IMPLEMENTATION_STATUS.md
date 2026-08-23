@@ -2,6 +2,36 @@
 
 Updated 2026-08-23.
 
+## Phase 9 field-experience trust fast-track — 2026-08-23
+
+- **Reuse decision:** preserve PR #199 exact head
+  `7690e54b3c1d225d09ab8838774c4ac9c6316cce` at
+  `rescue/amm-pr199-pre-fast-track-20260823-175922`, then apply only its unique
+  field-experience implementation to canonical PR #205 head
+  `b9bbf61e60d94e980ea2453560966e1730655592`. PR #187's KPI-target migration,
+  numeric targets, and stale stack remain excluded.
+- **Collection boundary:** the root app reports only LCP, INP, and CLS on exact
+  canonical Production hosts and registered public routes. Preview,
+  automation, known internal QA, private routes, and malformed callers fail
+  closed before persistence.
+- **Privacy upgrade:** durable observations have no lead/session association or
+  attribution and retain no query, raw URL, raw agent, IP, cookie, token, or raw
+  metric ID. A domain-separated SHA-256 digest supports bounded duplicate
+  suppression without preserving the browser-generated identifier.
+- **Protected intelligence:** the existing Growth Command Center shows
+  aggregate-only overall/mobile/desktop P75 values with truthful unavailable
+  states and sample-maturity labels. The query is fixed, parameterized,
+  deduplicated, and capped at 25,000 recent eligible rows.
+- **Local acceptance:** exact Node 24.18.0 passes 5 focused files / 29 tests,
+  all 226 files / 3,031 tests, strict typecheck, ESLint, optimized Next.js
+  15.5.21 build with 52 static pages, 83/17 route proof, safety 14/14, system
+  isolation, and a no-vulnerability Production dependency audit.
+- **Release status:** no migration or Production mutation. Exact-head GitHub
+  CI, immutable Preview, protected no-write browser proof, and final clean-tree
+  doctor evidence remain required after commit and push. No Production gate is
+  issued.
+- Detailed scope: `docs/phase9/FIELD_EXPERIENCE_TRUST.md`.
+
 ## Phase 9 public hero delivery fast-track — 2026-08-23
 
 - **Reuse decision:** apply only PR #201 implementation commit

@@ -1,5 +1,40 @@
 # QA Evidence
 
+## Phase 9 field-experience fast-track — 2026-08-23
+
+- Source preservation — PASS: donor PR #199 exact head
+  `7690e54b3c1d225d09ab8838774c4ac9c6316cce` is preserved at
+  `rescue/amm-pr199-pre-fast-track-20260823-175922`; the new branch starts at
+  canonical PR #205 exact head
+  `b9bbf61e60d94e980ea2453560966e1730655592`. No donor branch was rewritten.
+- Scope isolation — PASS: only the 18-file field-experience application,
+  tests, and focused specifications were imported. PR #187's migration,
+  target register, numeric KPI UI, stale release evidence, and unrelated stack
+  remain excluded.
+- Privacy hardening — PASS: the API revalidates exact canonical Production
+  origin, bounded metric/value/path/device dimensions, and a coarse normal-
+  browser class. Lead/session identity, attribution, click IDs, queries, raw
+  URLs, raw agents, IPs, cookies, tokens, and raw metric IDs are absent from the
+  durable contract; metric IDs become deterministic domain-separated SHA-256
+  digests before persistence.
+- Focused Node 24.18.0 contracts — PASS: 5 files / 29 tests cover route
+  normalization, open-house identifier collapse, value/rating bounds, raw-ID
+  digesting, exact-origin enforcement, QA/automation/private-route suppression,
+  actual reporter payload minimization, API persistence truth, aggregate P75,
+  deduplication, and unavailable-state rendering.
+- Full local acceptance — PASS: 226 test files / 3,031 tests, strict
+  typecheck, full ESLint, optimized Next.js 15.5.21 build with 52 static pages,
+  83 active / 17 acknowledged route proof, release safety 14/14, system
+  isolation, and Production dependency audit with no known vulnerability.
+- Release doctor — expected pre-commit state: all 42 blocking/non-clean checks
+  pass and only the explicitly nonblocking `git.tree_clean` check reports the
+  uncommitted candidate. It must rerun 43/43 after commit.
+- No migration or runtime mutation — PASS: no database migration, Production
+  deployment, analytics write, lead, email, SMS, Push, WordPress edit,
+  publication, DNS change, spend, deletion, or NellySelly action occurred.
+- Exact-head Node 24 CI, immutable Vercel Preview, protected no-write browser
+  QA, and runtime-log evidence remain pending until commit and push.
+
 ## Phase 9 owned-traffic fast-track — 2026-08-23
 
 - Production aggregate audit at 20:23 UTC — read-only PASS: 6 total leads, all

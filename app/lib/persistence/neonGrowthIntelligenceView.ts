@@ -63,6 +63,23 @@ export interface GrowthDeliverySnapshot {
   error?: string;
 }
 
+export interface GrowthWebVitalMetricSnapshot {
+  p75: number | null;
+  sampleSize: number;
+  mobileP75: number | null;
+  mobileSampleSize: number;
+  desktopP75: number | null;
+  desktopSampleSize: number;
+}
+
+export interface GrowthWebVitalsSnapshot {
+  configured: boolean;
+  lcp: GrowthWebVitalMetricSnapshot;
+  inp: GrowthWebVitalMetricSnapshot;
+  cls: GrowthWebVitalMetricSnapshot;
+  error?: string;
+}
+
 export interface GrowthIntelligenceView extends GrowthIntelligence {
   configured: boolean;
   schemaReady: boolean;
@@ -75,9 +92,11 @@ export interface GrowthIntelligenceView extends GrowthIntelligence {
   ownedDemandSignals: OwnedDemandAttributionSignal[];
   outcomeMetrics: GrowthOutcomeMetricsSnapshot;
   delivery: GrowthDeliverySnapshot;
+  webVitals: GrowthWebVitalsSnapshot;
   sourceRowsRead: number;
   spendRowsRead: number;
   outcomeRowsRead: number;
+  webVitalRowsRead: number;
 }
 
 function queryFromEnv(): Query | null {
@@ -152,9 +171,11 @@ function emptyView(
       deliveredCustomerMessages: 0,
       customerComplaints: 0,
     },
+    webVitals: normalizeGrowthWebVitals([], false),
     sourceRowsRead: 0,
     spendRowsRead: 0,
     outcomeRowsRead: 0,
+    webVitalRowsRead: 0,
     ...(error ? { error } : {}),
   };
 }
@@ -169,7 +190,8 @@ async function detectGrowthSchema(sql: Query) {
        to_regclass('public.market_opportunities') IS NOT NULL AS has_opportunities,
        to_regclass('public.growth_recommendations') IS NOT NULL AS has_recommendations,
        to_regclass('public.lead_notifications') IS NOT NULL AS has_notifications,
-       to_regclass('public.communication_events') IS NOT NULL AS has_communication_events`,
+       to_regclass('public.communication_events') IS NOT NULL AS has_communication_events,
+       to_regclass('public.analytics_events') IS NOT NULL AS has_analytics`,
   ) as Row[];
   const row = rows[0] ?? {};
   return {
@@ -181,6 +203,7 @@ async function detectGrowthSchema(sql: Query) {
     recommendations: booleanValue(row.has_recommendations),
     notifications: booleanValue(row.has_notifications),
     communicationEvents: booleanValue(row.has_communication_events),
+    analytics: booleanValue(row.has_analytics),
   };
 }
 
@@ -313,6 +336,52 @@ export function normalizeGrowthDeliverySnapshot(
     emailBounces: numberValue(row.email_bounces),
     deliveredCustomerMessages: numberValue(row.delivered_customer_messages),
     customerComplaints: numberValue(row.customer_complaints),
+    ...(error ? { error } : {}),
+  };
+}
+
+function emptyWebVitalMetric(): GrowthWebVitalMetricSnapshot {
+  return {
+    p75: null,
+    sampleSize: 0,
+    mobileP75: null,
+    mobileSampleSize: 0,
+    desktopP75: null,
+    desktopSampleSize: 0,
+  };
+}
+
+export function normalizeGrowthWebVitals(
+  rows: Row[],
+  configured: boolean,
+  error?: string,
+): GrowthWebVitalsSnapshot {
+  const byMetricAndDevice = new Map(
+    rows.map((row) => [
+      `${text(row.metric_name).toUpperCase()}:${text(row.device_category).toLowerCase()}`,
+      row,
+    ]),
+  );
+  const metric = (metricName: "LCP" | "INP" | "CLS"): GrowthWebVitalMetricSnapshot => {
+    const all = byMetricAndDevice.get(`${metricName}:all`);
+    const mobile = byMetricAndDevice.get(`${metricName}:mobile`);
+    const desktop = byMetricAndDevice.get(`${metricName}:desktop`);
+    return {
+      ...emptyWebVitalMetric(),
+      p75: nullableNumber(all?.p75),
+      sampleSize: numberValue(all?.sample_size),
+      mobileP75: nullableNumber(mobile?.p75),
+      mobileSampleSize: numberValue(mobile?.sample_size),
+      desktopP75: nullableNumber(desktop?.p75),
+      desktopSampleSize: numberValue(desktop?.sample_size),
+    };
+  };
+
+  return {
+    configured: configured && !error,
+    lcp: metric("LCP"),
+    inp: metric("INP"),
+    cls: metric("CLS"),
     ...(error ? { error } : {}),
   };
 }
@@ -649,6 +718,57 @@ export async function loadNeonGrowthIntelligence(
       }
     }
 
+    let webVitalRows: Row[] = [];
+    let webVitalError: string | undefined;
+    if (schema.analytics) {
+      try {
+        webVitalRows = await sql.query(
+          `WITH candidates AS (
+             SELECT UPPER(properties->>'metric_code') AS metric_name,
+                    properties->>'metric_id' AS metric_id,
+                    (properties->>'metric_value')::double precision AS metric_value,
+                    properties->>'device_category' AS device_category,
+                    occurred_at
+               FROM public.analytics_events
+              WHERE event_name = 'web_vital_observed'
+                AND occurred_at >= $1::timestamptz
+                AND properties->>'traffic_class' = 'public_production'
+                AND UPPER(properties->>'metric_code') IN ('LCP', 'INP', 'CLS')
+                AND jsonb_typeof(properties->'metric_value') = 'number'
+                AND COALESCE(properties->>'metric_id', '') ~ '^[a-zA-Z0-9._:-]{1,160}$'
+                AND COALESCE(properties->>'device_category', '') IN ('mobile', 'desktop')
+                AND COALESCE(user_agent, '') ~ '^browser/(mobile|desktop)$'
+                AND (properties->>'metric_value')::double precision >= 0
+                AND (
+                  (UPPER(properties->>'metric_code') IN ('LCP', 'INP')
+                    AND (properties->>'metric_value')::double precision <= 600000)
+                  OR
+                  (UPPER(properties->>'metric_code') = 'CLS'
+                    AND (properties->>'metric_value')::double precision <= 100)
+                )
+              ORDER BY occurred_at DESC
+              LIMIT 25000
+           ), deduplicated AS (
+             SELECT DISTINCT ON (metric_name, metric_id)
+                    metric_name, metric_id, metric_value, device_category, occurred_at
+               FROM candidates
+              ORDER BY metric_name, metric_id, occurred_at DESC
+           )
+           SELECT metric_name,
+                  CASE WHEN GROUPING(device_category) = 1 THEN 'all' ELSE device_category END
+                    AS device_category,
+                  COUNT(*)::integer AS sample_size,
+                  percentile_cont(0.75) WITHIN GROUP (ORDER BY metric_value)::double precision AS p75
+             FROM deduplicated
+            GROUP BY GROUPING SETS ((metric_name), (metric_name, device_category))
+            ORDER BY metric_name, device_category`,
+          [cutoff],
+        ) as Row[];
+      } catch {
+        webVitalError = "Canonical field-experience aggregate query failed";
+      }
+    }
+
     const leads = leadRows.map(normalizeLead);
     const spend = spendRows.map(normalizeSpend);
     const outcomes = outcomeRows.map(normalizeOutcome);
@@ -672,9 +792,13 @@ export async function loadNeonGrowthIntelligence(
         deliveryConfigured,
         deliveryError,
       ),
+      webVitals: normalizeGrowthWebVitals(webVitalRows, schema.analytics, webVitalError),
       sourceRowsRead: leadRows.length,
       spendRowsRead: spendRows.length,
       outcomeRowsRead: outcomeRows.length,
+      webVitalRowsRead: webVitalRows
+        .filter((row) => text(row.device_category).toLowerCase() === "all")
+        .reduce((total, row) => total + numberValue(row.sample_size), 0),
     };
   } catch {
     return emptyView(true, windowDays, now, "Canonical Neon growth intelligence query failed");

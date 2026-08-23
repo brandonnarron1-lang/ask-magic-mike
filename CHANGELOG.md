@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-08-23 — Field-experience trust fast-track candidate
+
+- Preserved PR #199 and its exact head, then transplanted only its unique
+  privacy-safe field-performance capability onto canonical PR #205.
+- Added Production-only LCP/INP/CLS reporting for exact public routes through
+  the existing durable event boundary and protected Growth Command Center.
+- Removed lead, session, attribution, query, raw URL, raw user-agent, and raw
+  metric-ID identity from the stored contract; metric IDs are reduced to
+  domain-separated SHA-256 digests before persistence.
+- Added component-level proof for canonical emission and QA, automation,
+  private-route, and noncanonical-host suppression.
+- Passed 5 focused files / 29 tests, all 226 files / 3,031 tests, strict
+  typecheck, ESLint, optimized build, route proof, release safety, system
+  isolation, and the Production dependency audit.
+- No migration, Production action, field event, lead, message, WordPress edit,
+  publication, spend, DNS change, deletion, or NellySelly action occurred.
+
 ## 2026-08-23 — Conversion-journey integrity fast-track candidate
 
 - Reused the already-reviewed PR #200 application and test changes on top of
