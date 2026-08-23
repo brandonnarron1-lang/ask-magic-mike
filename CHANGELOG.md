@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-08-22 — Conversion identity polish
+
+- Added required seller identity to the existing four-stage home-value funnel.
+- Improved invalid-field focus and precise accessible error association.
+- Kept internal preview routes out of consumer footer navigation.
+- Hard-intercepted lead creation, durable analytics, and public experiment
+  events in screenshot QA so visual capture performs no application writes.
+- No Production, database, notification, provider, WordPress, or publication
+  action was performed.
+
 ## 2026-08-22 — Privacy and KPI-trust consolidation
 
 - Consolidated the independent privacy/security/KPI evidence from PRs #190-#192

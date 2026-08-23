@@ -1,5 +1,26 @@
 # QA Evidence
 
+## Phase 9 conversion identity polish — 2026-08-22 15:17 EDT
+
+- Current Production seller, buyer, and Ask paths were captured in the in-app
+  browser with internal-QA attribution and no lead submission.
+- The existing home-value Contact step now captures name and email; invalid
+  fields receive focus and uniquely own the inline error description.
+- Consumer footer navigation excludes internal preview/integration routes.
+- The screenshot helper intercepts `/api/leads`, `/api/events`, and
+  `/api/experiments/event`; visual QA cannot persist a lead, trigger
+  notifications, or write analytics/experiment evidence.
+- Focused verification: 4 files / 11 tests — PASS.
+- Full local release gate: 214 files / 2,930 tests, typecheck, lint, optimized
+  build, 82 active routes, 14/14 safety, and system isolation — PASS.
+- Production dependency audit: no known vulnerability. Candidate text secret
+  scan: no leak. `git diff --check`: PASS. Migration scan: empty.
+- Full evidence:
+  `docs/phase9/CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
+- No Production deployment, migration, database write, lead, email/BCC, SMS,
+  Push, consumer acknowledgment, provider call, WordPress edit, publication,
+  spend, DNS, or NellySelly action occurred.
+
 ## PR #193 released-main privacy audit — 2026-08-22
 
 - Rebased/refreshed the candidate onto released PR #185 merge
@@ -119,8 +140,14 @@ All timestamps are America/New_York unless noted.
   `SAFE_DB_WRITE=false`; live email/SMS are disabled; no invite, claim, lead,
   notification, device registration, or database write occurred.
 - Production dependency audit reports no known vulnerability; candidate
-  patch-integrity, gitleaks, and migration scans pass. PR #194 remains Draft;
-  physical enrollment and a `[TEST]` Push remain separately gated.
+  patch-integrity, gitleaks, and migration scans pass. The entries above are
+  the released-PR193 checkpoint.
+- Final PR #194 head `851ebe530ac6a91a4e410f26538d29c1bf43f1c6`
+  subsequently passed run `32606142473`, Preview
+  `dpl_7nhaV5tpS4YArtgKVV9PfVBRHq4H`, and protected run `32606286620`, then was
+  merged as `5a3c5c7f2463ea399c21b616ff249f6c67e156b6` and accepted on Production
+  `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. Physical enrollment and a `[TEST]` Push
+  remain separately gated.
 
 ## Historical pre-released-base phone handoff evidence — 2026-08-22
 
