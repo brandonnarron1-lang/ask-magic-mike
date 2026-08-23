@@ -48,7 +48,9 @@ staff, and session keys are never durable bucket values.
   pseudonymization only during a degraded compatibility fallback
 
 `RATE_LIMIT_EMERGENCY_MEMORY=1` acknowledges a temporary degraded in-memory mode;
-it does not make the limiter durable.
+only the exact trimmed value `1` enables this break-glass path. Values such as
+`false`, `0`, or `true` remain disabled, and the flag never makes the limiter
+durable.
 
 ## Analytics Events
 

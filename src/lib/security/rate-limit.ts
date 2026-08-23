@@ -41,6 +41,10 @@ type DurableRateLimitSecretEnv = Partial<Record<
 
 type RateLimitRuntimeEnv = Partial<Record<"VERCEL_ENV" | "NODE_ENV", string | undefined>>;
 
+type RateLimitEmergencyEnv = Partial<Record<"RATE_LIMIT_EMERGENCY_MEMORY", string | undefined>>;
+
+type RateLimitFallbackEnv = RateLimitRuntimeEnv & RateLimitEmergencyEnv;
+
 function durableBucketHashSecret(env: DurableRateLimitSecretEnv = process.env): string | null {
   const candidates = [
     env.RATE_LIMIT_HASH_SECRET,
@@ -68,6 +72,20 @@ export function durableRateLimitDedicatedSecretReady(
 /** Preview is read-only; every real production runtime requires shared limiting. */
 export function durableRateLimitRequired(env: RateLimitRuntimeEnv = process.env): boolean {
   return env.VERCEL_ENV ? env.VERCEL_ENV === "production" : env.NODE_ENV === "production";
+}
+
+/** Break-glass mode is deliberately narrow: only the documented exact value enables it. */
+export function rateLimitEmergencyMemoryEnabled(
+  env: RateLimitEmergencyEnv = process.env,
+): boolean {
+  return env.RATE_LIMIT_EMERGENCY_MEMORY?.trim() === "1";
+}
+
+/** Non-durable limiting is normal off Production and break-glass-only on Production. */
+export function nonDurableRateLimitFallbackAllowed(
+  env: RateLimitFallbackEnv = process.env,
+): boolean {
+  return !durableRateLimitRequired(env) || rateLimitEmergencyMemoryEnabled(env);
 }
 
 /**
@@ -261,7 +279,7 @@ export async function checkRateLimit(
   if (neonResult) return neonResult;
 
   // Production without credentials: fail-open with critical log
-  if (isProduction && !process.env.RATE_LIMIT_EMERGENCY_MEMORY) {
+  if (isProduction && !nonDurableRateLimitFallbackAllowed()) {
     console.error(
       "[rate-limit] CRITICAL: Production is using non-durable in-memory rate limiting. " +
       "Set DATABASE_URL, apply the rate_limit_buckets migration, and configure a server-only hash secret. " +
