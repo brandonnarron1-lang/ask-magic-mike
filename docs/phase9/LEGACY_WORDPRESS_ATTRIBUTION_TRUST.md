@@ -93,14 +93,34 @@ surfaces or weaken the host firewall.
 
 ## Verification
 
-Required before release:
+Completed locally on the stacked candidate:
 
-1. focused compatibility, exact-KPI, and fail-closed tests;
-2. full Node 24 test, typecheck, lint, build, route, and release-safety gate;
-3. secret, dependency, diff, and migration scans;
-4. canonical Vercel Preview and protected `/admin/distribution` visual QA;
-5. read-only Production health comparison; and
-6. exact released-main refresh after PR #195.
+- focused compatibility, exact-KPI, and fail-closed checks: 6 files / 64 tests;
+- full Node 24 suite: 215 files / 2,954 tests;
+- strict typecheck, ESLint, and Next.js 15.5.21 optimized build;
+- route manifest: 82 active / 17 acknowledged root/`src` duplicates;
+- release safety: 14/14;
+- release doctor: 43 pass / 0 fail / 0 skip;
+- Ask Magic Mike launch doctor: 25 pass / 0 fail / 17 expected local-only
+  Production-environment skips;
+- public CTA audit: 24/24;
+- Production dependency audit, candidate-range gitleaks, `git diff --check`,
+  and no-migration scan; and
+- local Production-mode visual QA at 1440 × 1000 and 390 × 844, with no
+  horizontal overflow, no clipped mobile elements, and 0 console errors or
+  warnings.
+
+The visual run intentionally omitted canonical Neon and therefore proved the
+truthful unavailable state: exact owned-source and legacy compatibility cards
+render separately, both show `—`, and neither infers zero or a compatibility
+count without measurement.
+
+Still required before release:
+
+1. exact-head GitHub CI;
+2. canonical Vercel Preview and protected Preview verification;
+3. read-only Production health comparison; and
+4. exact released-main refresh after PR #195.
 
 ## Rollback
 

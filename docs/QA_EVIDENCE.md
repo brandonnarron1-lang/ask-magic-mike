@@ -1067,3 +1067,61 @@ the Node-20 deployment proof. PHP CLI is unavailable locally, so staging must ru
   shadow-only observations for forms 6 and 7 and no forwarding attempts.
 - Our Town homepage, `/ask-mike/`, and Mike's agent profile remained HTTP 200
   after activation.
+
+## Phase 9 legacy WordPress attribution-trust candidate — 2026-08-22 20:40 EDT
+
+Candidate branch:
+`codex/phase9-legacy-wordpress-attribution-trust-20260822`. This candidate is
+stacked on the unmerged conversion-identity candidate at
+`69879eac61cad4624945a1534914c8cb2e9d2424`; it is not authorized for Production
+until that dependency is released and this branch is refreshed from released
+`main`.
+
+No Production deployment, database migration or write, lead submission, email,
+SMS, Push notification, WordPress edit, DNS change, public publication, spend,
+or NellySelly action occurred during this verification.
+
+| Check | Result |
+| --- | --- |
+| Focused compatibility/KPI/fail-closed suite | PASS — 6 files / 64 tests |
+| Full Node 24 test suite | PASS — 215 files / 2,954 tests |
+| Strict typecheck | PASS |
+| ESLint | PASS |
+| Next.js optimized Production build | PASS — Next.js 15.5.21 |
+| Route manifest | PASS — 82 active / 17 acknowledged root/`src` duplicates |
+| Release safety | PASS — 14/14 |
+| Release doctor | PASS — 43 pass / 0 fail / 0 skip |
+| Ask Magic Mike launch doctor | PASS — 25 pass / 0 fail / 17 expected local-only Production-environment skips |
+| Public CTA audit | PASS — 24/24 |
+| Production dependency audit | PASS — no known high-severity Production vulnerabilities |
+| Candidate-range gitleaks scan | PASS — 2 candidate commits / approximately 20 KB / no leaks |
+| `git diff --check` | PASS |
+| Candidate migration scan | PASS — no database migration |
+
+Local Production-mode visual QA used an ephemeral synthetic Basic Auth secret
+and `LEAD_CENTER_RBAC_ENABLED=false` only in the local process. Neither value was
+committed, logged in this evidence, entered in Vercel, or used against a remote
+environment. Canonical Neon was deliberately absent, so the protected
+Distribution Command rendered `Measurement unavailable` and displayed `—`
+rather than converting missing measurement into zero.
+
+| Visual check | Result |
+| --- | --- |
+| `/admin/distribution` with local Basic Auth | PASS — HTTP 200, one `main`, correct protected workspace |
+| Desktop 1440 × 1000 | PASS — legacy card visible; no horizontal overflow |
+| Mobile 390 × 844 | PASS — no horizontal overflow and no clipped elements |
+| Legacy compatibility boundary | PASS — `Legacy WordPress signals` and `No compatibility inference while measurement is unavailable` render separately from exact owned-source signals |
+| Browser console | PASS — 0 errors / 0 warnings |
+
+Local visual artifacts:
+
+- `output/playwright/phase9-legacy-wordpress-attribution-trust/.playwright-cli/page-2026-08-23T00-38-53-695Z.png`
+  — desktop command header and four-card measurement boundary.
+- `output/playwright/phase9-legacy-wordpress-attribution-trust/.playwright-cli/page-2026-08-23T00-39-21-308Z.png`
+  — mobile command header.
+- `output/playwright/phase9-legacy-wordpress-attribution-trust/.playwright-cli/page-2026-08-23T00-39-51-209Z.png`
+  — focused mobile exact-versus-legacy signal separation.
+
+Exact-head GitHub CI, canonical Vercel Preview, protected Preview QA, and the
+released-main refresh remain required before the separate merge/deploy gate can
+be requested.
