@@ -43,8 +43,26 @@
 - No Production deployment, database/schema mutation, analytics event, lead,
   email/BCC, SMS, Push, provider call, WordPress edit, publication, spend, DNS,
   deletion, or NellySelly action occurred.
-- Exact-head Node 24 CI, immutable Vercel Preview, and protected no-write
-  Preview QA remain pending until the branch is committed and pushed.
+- Exact implementation-head Node 24 CI — PASS at commit
+  `7d4446e0674414c8ba4157fa268aa4dda5c833d0`: GitHub run `32616089694`, job
+  `97136953306`, completed in 3m14s with every release-gate step green. Artifact
+  `9487010100` has digest
+  `sha256:38213bd5aaf561c5f5514253bdf4d1631769437ca9fae2f481f04441b2d715e4`.
+- Immutable Vercel Preview — PASS: deployment
+  `dpl_29jgCSDEGQfgQS6pHKbB8zEyPHBA` is Ready at
+  `https://ask-magic-mike-hvxclwjwz-eyes-up-industries.vercel.app`, target
+  `preview`, for the exact implementation head.
+- Protected no-write Preview QA — PASS: GitHub run `32616278530`, job
+  `97137445316`, completed in 3m49s with 17 pass / 6 intentional mutation skips /
+  0 fail, widget browser E2E 2/2, release doctor 43/43, clean release/launch
+  reports, and strict `PREVIEW_READY`. The health proof resolved exact build
+  commit/branch and a reachable Neon Preview configuration while
+  `SAFE_DB_WRITE=false`, provider delivery disabled, and the mutation gate
+  blocked. Artifact `9487073255` has digest
+  `sha256:de9f5115f8930948d90c474881746de2da8471d8044450cf605e662760a3bc23`.
+- Evidence-only documentation follows that accepted implementation commit; its
+  final exact-head checks are retained on Draft PR #199 without changing the
+  application scope or making the later Production gate eligible.
 
 ## Phase 9 WordPress activation change-set evidence — 2026-08-22
 

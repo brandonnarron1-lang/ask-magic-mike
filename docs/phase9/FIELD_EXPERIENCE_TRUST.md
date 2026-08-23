@@ -101,6 +101,11 @@ deletion is not part of rollback authority.
   landmark, no horizontal overflow, no framework overlay, zero console
   findings, GET-only application traffic, truthful unavailable evidence, and
   no Preview field-telemetry request.
-- Exact-head Node 24 CI, immutable Vercel Preview, and protected Preview QA are
-  still required after push and before this dependent candidate can be called
-  Preview-ready.
+- Exact implementation commit `7d4446e0674414c8ba4157fa268aa4dda5c833d0`
+  passes Node 24 run `32616089694`. Immutable Preview
+  `dpl_29jgCSDEGQfgQS6pHKbB8zEyPHBA` is Ready and protected no-write run
+  `32616278530` passes 17 read-only checks / 6 intentional mutation skips / 0
+  failures, widget 2/2, doctor 43/43, and strict `PREVIEW_READY`.
+- Draft PR #199 is stacked on PR #198. It still must wait for predecessors,
+  refresh onto exact released `main`, and be re-proven before its later
+  Production gate is eligible.
