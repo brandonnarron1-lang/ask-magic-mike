@@ -1,5 +1,37 @@
 # QA Evidence
 
+## PR #195 Production acceptance and PR #197 authority reconciliation — 2026-08-23
+
+- GitHub `main` is `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`, the
+  PR #195 merge of reviewed head
+  `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`. Its Vercel status is success.
+- Canonical Production deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` is Ready
+  at immutable URL
+  `https://ask-magic-mike-5cwi0njdx-eyes-up-industries.vercel.app`; both public
+  aliases resolve to it and the apex returns 308 to `www`.
+- `node scripts/monitor-production.mjs` passed 9/9 public, readiness, and
+  anonymous-admin checks. `node scripts/amm/lead-pipe-health-check.mjs` passed
+  9/9 funnel, widget, sitemap, robots, and liveness checks. The Our Town
+  Properties homepage returned HTTP 200.
+- A saved aggregate-only Production query was inspected for mutating verbs,
+  re-executed read-only in the signed-in Neon Production SQL editor, and then
+  the editor layout was restored. It returned 0 live/contactable leads, 6 test
+  leads, all 6 suppressed; 0 eligible first-response samples, live notification
+  activity, outcomes, spend rows, active experiments, open opportunities,
+  recommendations, or SLA breaches. All measured schema capabilities were
+  present. No PII or secret was copied into this evidence.
+- PR #197 pre-authority-reconciliation application head
+  `3ef57919aedc6413301bf55c34cf7c570b3fed08` is preserved locally and remotely
+  at `rescue/amm-pr197-pre-authority-reconciliation-20260823-1048`.
+- This reconciliation updates only operating authority and evidence files. It
+  performs no Production deploy, database/schema/data mutation, lead/form
+  submission, email/BCC, SMS, Push, provider action, WordPress edit/publication,
+  DNS/cache change, spend, deletion, or NellySelly action.
+- The final reconciled PR #197 head still requires the complete local gate,
+  exact Node 24 CI, immutable Vercel Preview, and protected no-write QA. Exact
+  workflow, deployment, artifact, and digest identifiers are recorded on the
+  PR after those checks finish, avoiding stale identifiers in cumulative docs.
+
 ## Phase 9 conversion identity polish — 2026-08-22 15:17 EDT
 
 - Current Production seller, buyer, and Ask paths were captured in the in-app

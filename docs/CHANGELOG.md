@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-08-23 — Production authority reconciliation
+
+- Recorded released PR #195 merge
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and Ready deployment
+  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` as the canonical Production baseline.
+- Made PR #197 the sole next application candidate and preserved its prior
+  exact application head at
+  `rescue/amm-pr197-pre-authority-reconciliation-20260823-1048`.
+- Reconciled the #197 -> #198 -> #199 sequence and current read-only Neon
+  aggregate without changing Production, WordPress, lead data, notifications,
+  providers, DNS, spend, or NellySelly.
+
 ## 2026-08-22 — Legacy WordPress attribution-trust candidate
 
 - Reused the existing Neon Growth view and protected Distribution Command;

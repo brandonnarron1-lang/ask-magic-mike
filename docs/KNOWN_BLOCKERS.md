@@ -1,6 +1,6 @@
 # Known Operating Constraints
 
-Updated 2026-08-22. The public funnel, canonical Neon capture, Lead Center, and
+Updated 2026-08-23. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
 
@@ -22,20 +22,27 @@ specific expansions; they do not invalidate the live lead pipe.
   `5a3c5c7f2463ea399c21b616ff249f6c67e156b6` on Production deployment
   `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. Its application gate is exhausted;
   physical enrollment and a `[TEST]` Push remain separate actions.
-- Draft PR #195 is refreshed onto exact released main. Its prior stacked state
-  is preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
-  Exact-head GitHub CI and protected Preview are green at
-  `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`; only its distinct unconsumed
-  conversion-identity release gate remains.
-- Draft PR #197 is stacked behind PR #195. Its compatibility counts are
-  deliberately excluded from exact KPI and activation states. It is aligned
-  with PR #195's current exact head and locally re-proven, but it must still be
-  refreshed onto released `main` after PR #195 and receive fresh remote proof
-  before its own gate is eligible.
+- PR #195 conversion identity polish is merged and live as
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` on Production deployment
+  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Its application gate is exhausted; it
+  contained no migration, lead submission, message, or external publication.
+- Draft PR #197 is the sole next application candidate. Its compatibility
+  counts are deliberately excluded from exact KPI and activation states. It is
+  refreshed onto released PR #195 `main`; pre-document-reconciliation head
+  `3ef57919aedc6413301bf55c34cf7c570b3fed08` is preserved at
+  `rescue/amm-pr197-pre-authority-reconciliation-20260823-1048`. The final
+  reconciled head must receive fresh exact-head CI, immutable Preview, and
+  protected no-write QA before its gate is eligible.
+- Draft PR #198 remains stacked behind #197. Its readiness manifests cannot
+  edit or publish WordPress. It must refresh and re-prove after #197 releases;
+  every WordPress publication remains separately gated.
+- Draft PR #199 remains stacked behind #198. It has no migration and sends no
+  Preview telemetry. It must follow both predecessors, refresh, and re-prove
+  before a later gate can authorize minimized Production field observations.
 - Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
   and #119–#121 are preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,
-  and #181 must not be requested again.
+  #181, #183-#185, and #193-#196 must not be requested again.
 
 ## Human and BIC decisions
 
@@ -83,7 +90,9 @@ path/method-specific exception after the host identifies the exact managed rule.
 
 ## Truthful demand constraint
 
-Current aggregate Production evidence contains only suppressed/test leads and
-no contactable live prospect. A working funnel can be guaranteed; genuine demand
-cannot be fabricated. Test leads remain labeled, suppressed, and excluded from
-KPIs.
+A read-only Neon Production aggregate re-executed on 2026-08-23 contains six
+test leads, all suppressed, and zero live/contactable prospects, eligible
+response samples, live notification activity, outcomes, spend rows, active
+experiments, open opportunities, or open recommendations. A working funnel can
+be guaranteed; genuine demand cannot be fabricated. Test leads remain labeled,
+suppressed, and excluded from KPIs.

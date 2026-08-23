@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-08-23 — Production authority reconciliation
+
+- Recorded the approved PR #195 merge
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`, Ready deployment
+  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`, canonical alias behavior, and exhausted
+  release gate in the operating source-of-truth files.
+- Reconciled PR #197 as the sole next application candidate and preserved its
+  pre-document-repair application head at
+  `rescue/amm-pr197-pre-authority-reconciliation-20260823-1048`.
+- Recorded the required #197 -> #198 -> #199 sequencing and retained separate
+  WordPress, messaging, phone, telemetry, migration, publication, and spend
+  gates.
+- Re-executed the privacy-safe Neon Production aggregate read: 0 live or
+  contactable leads, 6 test leads, all suppressed, and no eligible response,
+  delivery, outcome, spend, experiment, opportunity, recommendation, or SLA
+  sample. No PII or secret was added to documentation.
+- No Production deploy, database mutation, lead, notification, provider call,
+  WordPress edit, publication, spend, DNS change, deletion, or NellySelly action
+  occurred during this reconciliation.
+
 ## 2026-08-22 — Legacy attribution-trust dependent refresh
 
 - Refreshed the stacked legacy WordPress attribution candidate onto PR #195's
