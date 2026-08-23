@@ -27,8 +27,9 @@ specific expansions; they do not invalidate the live lead pipe.
   `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`; its gate is exhausted.
 - Draft PR #202 is the immediate durability correction. It remains unmerged
   behind its dedicated Production-secret/merge/deploy gate.
-- A local conversion-journey fast-track candidate reuses only PR #200's unique
-  application and test work on top of exact PR #202. It is not release-eligible
+- Draft PR #203 reuses only PR #200's unique application and test work on top
+  of exact PR #202. Its application head has exact-head CI, immutable Preview,
+  protected no-write runtime, and browser proof, but it is not release-eligible
   until PR #202 releases, it refreshes onto exact `main`, and fresh exact-head
   proof passes.
 - PRs #197–#201 remain preserved. The fast-track review does not authorize,

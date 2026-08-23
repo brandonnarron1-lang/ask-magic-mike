@@ -78,10 +78,16 @@ provider action, or deletion.
 
 ## Application candidates after the durability correction
 
-- Draft PR #197 is the first existing application candidate and must be
-  refreshed onto the exact durability release before its own gate can be used.
-- Draft PRs #198–#201 remain ordered behind #197. Their approvals are not
-  implied by the durability gate and none may be merged out of sequence.
+- Draft PR [#203](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/203)
+  fast-tracks only PR #200's unique conversion-journey work on top of exact PR
+  #202. Application head `a86eece1f2b18ceb064d109912c5b77314d2aca9` has
+  exact-head CI, READY immutable Preview, protected 17-pass/6-write-skip
+  acceptance, Widget 2/2, doctor 43/43, and `PREVIEW_READY`. It must remain
+  Draft until PR #202 releases, then refresh onto exact `main` and repeat proof
+  before a separate gate can be issued. PR #202's gate does not authorize it.
+- Draft PRs #197–#201 remain preserved and unchanged. PR #203 only replaces PR
+  #200's delayed release position; it does not authorize, merge, delete, or
+  silently supersede #197–#199 or #201.
 
 ## Deferred candidates requiring refresh and overlap review
 

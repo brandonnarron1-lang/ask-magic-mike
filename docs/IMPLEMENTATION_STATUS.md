@@ -31,9 +31,16 @@ Updated 2026-08-23.
   invalid-submit focus recovery, exact `renter_page` payload identity, immutable
   Buyer first touch, and refreshed Renter last touch. Lead/event routes were
   mocked before navigation; no durable write occurred.
-- **Safety:** no migration or Production mutation. Exact-head CI, canonical
-  Preview, and protected no-write proof remain required before a later release
-  gate is eligible.
+- **Remote acceptance:** Draft PR #203 application head
+  `a86eece1f2b18ceb064d109912c5b77314d2aca9` passes exact-head GitHub Node 24
+  run `32660966818`, READY Preview `dpl_DQUyVzLXPmvyjghqUVzPtqoDuHcq`, and
+  protected no-write run `32661259833`: 17 pass / 6 intentional write skips /
+  0 fail, Widget 2/2, doctor 43/43, safety 14/14, release candidate GO,
+  `PREVIEW_READY`, and zero fatal/error/warning runtime logs.
+- **Safety:** no migration or Production mutation. This evidence-only seal
+  still requires its own exact-head CI/Preview status. PR #203 cannot release
+  before PR #202 and must then be refreshed onto exact `main` and re-proven
+  before a separate later gate is eligible.
 - Detailed scope:
   docs/phase9/CONVERSION_JOURNEY_INTEGRITY.md and
   docs/phase9/CONVERSION_JOURNEY_INTEGRITY_QA_EVIDENCE.md.

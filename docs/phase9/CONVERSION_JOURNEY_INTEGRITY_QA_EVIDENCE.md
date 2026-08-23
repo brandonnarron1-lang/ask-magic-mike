@@ -94,10 +94,27 @@ files / 2,991 tests, strict typecheck, ESLint, optimized Next.js 15.5.21 build
 with 52 static pages, 82 active / 17 acknowledged duplicate routes, 14/14
 release safety, system isolation, no-vulnerability Production dependency
 audit, diff integrity, an empty migration delta, and a staged redacted Gitleaks
-scan of approximately 28.73 KB with no leak. Exact-head GitHub Node 24 CI,
-immutable Vercel Preview, and protected no-write Preview QA remain required
-after push. No PR #202 or historical approval can authorize this later
-candidate.
+scan of approximately 28.73 KB with no leak.
+
+Application head `a86eece1f2b18ceb064d109912c5b77314d2aca9` passed exact-head
+GitHub Node 24 release run `32660966818` (job `97246974974`, artifact
+`9498765744`, digest
+`sha256:aad3bc9d8dfc9d12eef95aaa80848eac59e5432e2b53dd04860f33b091a9fd73`).
+Vercel Preview deployment `dpl_DQUyVzLXPmvyjghqUVzPtqoDuHcq` is READY at
+`https://ask-magic-mike-a0x610tpg-eyes-up-industries.vercel.app`; its build log
+identifies the exact branch and application commit. Protected no-write run
+`32661259833` (job `97247695421`, artifact `9498840303`, digest
+`sha256:9130e7665cabdce978543e594288587f2fc59095d5999524fb7d70cf4727a034`)
+passed 17 read-only checks with six intentional write skips and zero failures,
+Widget 2/2, release doctor 43/43, release safety 14/14, release candidate GO,
+and `PREVIEW_READY`. Runtime log queries returned zero fatal, error, or warning
+entries. Health identified exact commit `a86eece...`, Preview application and
+database environments, `safe_for_preview_mutation=false`, and live email/SMS
+disabled.
+
+This evidence-only documentation seal must receive its own exact-head CI and
+Preview checks before the Draft PR is considered fully sealed. No PR #202 or
+historical approval can authorize this later candidate.
 
 ## Safety boundary
 
