@@ -65,6 +65,12 @@ specific expansions; they do not invalidate the live lead pipe.
   without application-code conflict. It must receive fresh exact proof, then
   still follow both predecessors and refresh after their releases before a later
   gate can authorize minimized Production field observations.
+- The conversion-journey integrity branch is stacked after exact sealed PR
+  #199 head `7690e54b3c1d225d09ab8838774c4ac9c6316cce`. It fixes only fresh
+  last-touch context, renter source identity, buyer-family replay KPIs, and
+  either-or contact clarity; it contains no migration. It cannot bypass or
+  reuse the gates for PRs #197-#199 and must refresh and re-prove after those
+  predecessors release.
 - Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
   and #119–#121 are preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,

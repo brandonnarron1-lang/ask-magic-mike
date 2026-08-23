@@ -50,6 +50,11 @@ describe("normalizeLeadPayload — lead_source_surface defaults", () => {
     expect(p.lead_source_surface).toBe("ask_page");
   });
 
+  it("keeps renter intake distinct from the buyer page", () => {
+    const p = normalizeLeadPayload({ funnel_type: "renter" });
+    expect(p.lead_source_surface).toBe("renter_page");
+  });
+
   it("defaults widget funnel to widget surface", () => {
     const p = normalizeLeadPayload({ funnel_type: "widget" });
     expect(p.lead_source_surface).toBe("widget");
@@ -63,6 +68,11 @@ describe("normalizeLeadPayload — lead_source_surface defaults", () => {
   it("preserves explicit surface when valid", () => {
     const p = normalizeLeadPayload({ funnel_type: "seller", lead_source_surface: "ourtownproperties" });
     expect(p.lead_source_surface).toBe("ourtownproperties");
+  });
+
+  it("preserves an explicit renter surface", () => {
+    const p = normalizeLeadPayload({ funnel_type: "renter", lead_source_surface: "renter_page" });
+    expect(p.lead_source_surface).toBe("renter_page");
   });
 });
 
@@ -152,7 +162,7 @@ describe("normalizeLeadPayload — explicit QA evidence", () => {
 
 // ─── cleanAttribution ─────────────────────────────────────────────────────────
 
-describe("cleanAttribution — all 15 fields", () => {
+describe("cleanAttribution — canonical fields", () => {
   const ALL_FIELDS = {
     source: "facebook",
     medium: "paid_social",
@@ -168,14 +178,30 @@ describe("cleanAttribution — all 15 fields", () => {
     placement: "homepage-hero",
     gclid: "abc123",
     fbclid: "def456",
+    page_title: "Home Value | Ask Magic Mike",
     device_category: "mobile",
   };
 
-  it("preserves all 15 attribution fields", () => {
+  it("preserves every canonical attribution field", () => {
     const a = cleanAttribution(ALL_FIELDS);
     for (const [key, value] of Object.entries(ALL_FIELDS)) {
       expect(a[key as keyof typeof a]).toBe(value);
     }
+  });
+
+  it("preserves page title inside first-touch and last-touch snapshots", () => {
+    const a = cleanAttribution({
+      first_touch: { source: "ourtownproperties", page_title: "Home Value | Ask Magic Mike" },
+      last_touch: { source: "facebook", page_title: "Buyer Plan | Ask Magic Mike" },
+    });
+    expect(a.first_touch).toMatchObject({
+      source: "ourtownproperties",
+      page_title: "Home Value | Ask Magic Mike",
+    });
+    expect(a.last_touch).toMatchObject({
+      source: "facebook",
+      page_title: "Buyer Plan | Ask Magic Mike",
+    });
   });
 
   it("returns empty attribution for null input", () => {

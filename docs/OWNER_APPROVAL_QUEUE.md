@@ -95,6 +95,18 @@ provider action, or deletion.
   proof. After both predecessors release it must refresh and re-prove before its
   later exact gate:
   `APPROVE PHASE 9 FIELD EXPERIENCE TRUST MERGE, PRODUCTION DEPLOYMENT, AND FIELD TELEMETRY ACTIVATION`.
+- The branch `codex/phase9-conversion-journey-integrity-20260823` is stacked
+  after exact sealed PR #199 head
+  `7690e54b3c1d225d09ab8838774c4ac9c6316cce`. It has no migration and cannot
+  release before PRs #197-#199. After those predecessors release, it must
+  refresh onto exact `main`, repeat exact-head proof, and receive its own later
+  application gate:
+  `APPROVE PHASE 9 CONVERSION JOURNEY INTEGRITY MERGE AND PRODUCTION DEPLOYMENT`.
+- That later phrase will authorize only the exact reviewed application merge
+  and canonical Vercel Production deployment. It will not authorize a form
+  submission, database migration, message, WordPress/social publication,
+  device enrollment, spend, DNS change, deletion, provider purchase, or
+  NellySelly action.
 
 ## Stacked field-experience candidate after PR #198
 

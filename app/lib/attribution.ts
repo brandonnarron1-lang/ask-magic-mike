@@ -21,12 +21,37 @@ function touchSnapshot(value: Attribution) {
     listing_id: value.listing_id,
     property_id: value.property_id,
     agent_id: value.agent_id,
+    page_title: value.page_title,
     gclid: value.gclid,
     gbraid: value.gbraid,
     wbraid: value.wbraid,
     fbclid: value.fbclid,
     msclkid: value.msclkid,
   };
+}
+
+function firstParam(params: URLSearchParams, ...keys: string[]) {
+  for (const key of keys) {
+    const value = params.get(key)?.trim();
+    if (value) return value;
+  }
+  return undefined;
+}
+
+function storedAttribution() {
+  try {
+    return window.sessionStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function persistAttribution(attribution: Attribution) {
+  try {
+    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(attribution));
+  } catch {
+    // Attribution improves operations but must never break the public funnel.
+  }
 }
 
 export const initialAttribution: Attribution = {
@@ -45,13 +70,21 @@ export function readAttribution(overrides: Partial<Attribution> = {}): Attributi
 
   const params = new URLSearchParams(window.location.search);
   const currentPath = window.location.pathname + window.location.search;
-  const stored = window.sessionStorage.getItem(STORAGE_KEY);
+  const currentReferrer = document.referrer || undefined;
+  const currentPageTitle = document.title || undefined;
+  const stored = storedAttribution();
 
   if (stored) {
     try {
       const parsed = JSON.parse(stored) as Attribution;
       const attribution = {
         ...parsed,
+        source: firstParam(params, "utm_source", "source") || parsed.source,
+        medium: firstParam(params, "utm_medium", "medium") || parsed.medium,
+        campaign: firstParam(params, "utm_campaign", "campaign") || parsed.campaign,
+        content: firstParam(params, "utm_content") || parsed.content,
+        term: firstParam(params, "utm_term") || parsed.term,
+        referrer: currentReferrer || parsed.referrer,
         current_path: currentPath,
         device_category: getDeviceCategory(),
         parent_url: params.get("parent_url") || parsed.parent_url,
@@ -66,29 +99,38 @@ export function readAttribution(overrides: Partial<Attribution> = {}): Attributi
         wbraid: params.get("wbraid") || parsed.wbraid,
         fbclid: params.get("fbclid") || parsed.fbclid,
         msclkid: params.get("msclkid") || parsed.msclkid,
+        page_title: currentPageTitle || parsed.page_title,
         ...overrides,
       };
       attribution.first_touch = parsed.first_touch || touchSnapshot(parsed);
-      attribution.last_touch = touchSnapshot(attribution);
-      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(attribution));
+      attribution.last_touch = touchSnapshot({
+        ...attribution,
+        landing_page: window.location.href,
+        current_path: currentPath,
+      });
+      persistAttribution(attribution);
       return attribution;
     } catch {
-      window.sessionStorage.removeItem(STORAGE_KEY);
+      try {
+        window.sessionStorage.removeItem(STORAGE_KEY);
+      } catch {
+        // Continue with an in-memory attribution record below.
+      }
     }
   }
 
   const attribution: Attribution = {
-    source: params.get("utm_source") || params.get("source") || undefined,
-    medium: params.get("utm_medium") || params.get("medium") || undefined,
-    campaign: params.get("utm_campaign") || params.get("campaign") || undefined,
-    content: params.get("utm_content") || undefined,
-    term: params.get("utm_term") || undefined,
+    source: firstParam(params, "utm_source", "source"),
+    medium: firstParam(params, "utm_medium", "medium"),
+    campaign: firstParam(params, "utm_campaign", "campaign"),
+    content: firstParam(params, "utm_content"),
+    term: firstParam(params, "utm_term"),
     gclid: params.get("gclid") || undefined,
     gbraid: params.get("gbraid") || undefined,
     wbraid: params.get("wbraid") || undefined,
     fbclid: params.get("fbclid") || undefined,
     msclkid: params.get("msclkid") || undefined,
-    referrer: document.referrer || undefined,
+    referrer: currentReferrer,
     landing_page: window.location.href,
     initial_path: currentPath,
     current_path: currentPath,
@@ -99,6 +141,7 @@ export function readAttribution(overrides: Partial<Attribution> = {}): Attributi
     listing_id: params.get("listing_id") || undefined,
     property_id: params.get("property_id") || undefined,
     agent_id: params.get("agent_id") || undefined,
+    page_title: currentPageTitle,
     device_category: getDeviceCategory(),
     created_at: new Date().toISOString(),
     ...overrides,
@@ -107,6 +150,6 @@ export function readAttribution(overrides: Partial<Attribution> = {}): Attributi
   attribution.first_touch = touchSnapshot(attribution);
   attribution.last_touch = touchSnapshot(attribution);
 
-  window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(attribution));
+  persistAttribution(attribution);
   return attribution;
 }

@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-08-23 — Conversion-journey integrity candidate
+
+- Reused the active Black Diamond attribution adapter and existing fresh-UTM
+  precedence rule to keep first touch immutable while updating true last-touch
+  campaign, page, title, placement, and click-ID context.
+- Separated the renter source surface from `buyer_page` across capture,
+  analytics privacy, and alert reconstruction without adding a route or store.
+- Brought buyer/renter/open-house replay analytics to parity with Home Value
+  and seller so an idempotent response cannot emit a second `lead_created` KPI.
+- Added a restrained, accessible email-or-phone requirement and recoverable
+  focus/error state inside the existing buyer-family form.
+- Added focused attribution, source, contact, privacy, and replay contracts.
+  No migration, Production action, lead, message, WordPress edit, publication,
+  spend, DNS change, deletion, or NellySelly action occurred.
+
 ## 2026-08-23 — Production authority reconciliation
 
 - Recorded the approved PR #195 merge

@@ -2,6 +2,41 @@
 
 Updated 2026-08-23.
 
+## Phase 9 conversion-journey integrity — 2026-08-23
+
+- **Reuse decision:** the released Black Diamond forms, `/api/leads`, Neon
+  lifecycle, replay header, analytics privacy registry, and alert adapter are
+  extended in place. No parallel form, API, store, dashboard, provider, route,
+  or visual system was created.
+- **Attribution integrity:** first touch remains immutable; fresh tagged visits
+  now update current and last-touch campaign/page context. Untagged internal
+  steps retain the acquired campaign, and unavailable session storage fails
+  open without breaking capture.
+- **Source integrity:** renter capture is represented as `renter_page` instead
+  of `buyer_page` through normalization, public analytics, direct capture, and
+  internal alert reconstruction.
+- **KPI integrity:** buyer, renter, and open-house idempotent replays retain
+  their truthful success state but no longer emit a fresh `lead_created` event.
+- **Conversion clarity:** the existing buyer-family form now explains that
+  email or phone is required, associates the either-or requirement with both
+  fields, focuses Email after a blank submit, and announces the recoverable
+  error without changing consent or required lead data.
+- **Local acceptance:** 4 focused files / 42 tests, Node 24.18.0 system
+  isolation, 14/14 release safety, full 221-file / 2,991-test suite, strict
+  typecheck, ESLint, optimized Next.js 15.5.21 build with 52 static pages,
+  83/17 route-manifest proof, dependency/leak/migration-delta checks, and local
+  mobile visual/error inspection pass. Exact-head GitHub Node 24, immutable
+  Preview, and protected no-write proof remain required after push.
+- **Stack:** branch
+  `codex/phase9-conversion-journey-integrity-20260823` starts from exact sealed
+  PR #199 head `7690e54b3c1d225d09ab8838774c4ac9c6316cce`, preserved at
+  `rescue/amm-pr200-base-pr199-20260823-1204`. It cannot release before PRs
+  #197-#199 and must refresh after each predecessor release.
+- **No migration or activation:** Production remains unchanged. Detailed scope
+  and evidence:
+  `docs/phase9/CONVERSION_JOURNEY_INTEGRITY.md` and
+  `docs/phase9/CONVERSION_JOURNEY_INTEGRITY_QA_EVIDENCE.md`.
+
 ## Phase 9 field-experience trust — 2026-08-22
 
 - **Reuse decision:** Draft PR #187 remains deferred; only its unique

@@ -174,7 +174,7 @@ async function loadLeadAlertInput(leadId: string, metadata: Record<string, unkno
     const funnelType = row.lead_type === "buyer" ? "buyer" : row.lead_type === "renter" ? "renter" : row.lead_type === "open_house" ? "open_house" : row.lead_type === "seller" ? "seller" : row.lead_type === "home_value" ? "home_value" : "chat";
     const payload: LeadPayload = {
       funnel_type: funnelType,
-      lead_source_surface: row.source === "widget" ? "widget" : row.lead_type === "buyer" || row.lead_type === "renter" ? "buyer_page" : row.lead_type === "open_house" ? "open_house" : row.lead_type === "seller" ? "seller_page" : "home_value_page",
+      lead_source_surface: row.source === "widget" ? "widget" : row.lead_type === "buyer" ? "buyer_page" : row.lead_type === "renter" ? "renter_page" : row.lead_type === "open_house" ? "open_house" : row.lead_type === "seller" ? "seller_page" : "home_value_page",
       lead_type: typeof row.lead_type === "string" ? row.lead_type : undefined,
       address: typeof row.address_raw === "string" ? row.address_raw : undefined,
       property_address: typeof row.address_raw === "string" ? row.address_raw : undefined,

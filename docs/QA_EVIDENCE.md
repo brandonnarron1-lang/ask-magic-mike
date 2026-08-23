@@ -1,5 +1,46 @@
 # QA Evidence
 
+## Phase 9 conversion-journey integrity evidence — 2026-08-23
+
+- Live no-submit visual audit — PASS: released homepage, Home Value, seller,
+  buyer, Ask Mike, and renter paths were inspected on desktop/mobile with
+  explicit internal-QA query values. Existing Black Diamond identity,
+  responsive composition, primary actions, and public navigation remained
+  healthy; no lead, appointment, chat, or message action occurred.
+- Reuse and gap proof — PASS: the active Black Diamond stored-attribution path
+  did not refresh UTM fields after the first touch; `/rent` supplied
+  `buyer_page`; and BuyerIntentSection lacked the existing replay suppression
+  already used by Home Value and seller. No duplicate subsystem was added.
+- Focused contracts — PASS: 4 files / 42 tests cover first/last touch, fresh
+  UTM replacement, untagged navigation, storage failure, renter surface,
+  analytics privacy, either-or contact semantics/focus, replay suppression,
+  and one new-lead analytics event.
+- Exact local Node 24 gate — PASS: Node 24.18.0 system isolation, 14/14 release
+  safety, 221 files / 2,991 tests, strict TypeScript, ESLint, optimized Next.js
+  15.5.21 build with 52 generated static pages, and 83 active / 17
+  acknowledged-duplicate route-manifest proof.
+- Local mobile visual/error acceptance — PASS: the candidate preserved the
+  released layout and added only one restrained helper line. Blank submit made
+  no lead request, focused Email, set both either-or fields invalid, associated
+  requirement and alert IDs, retained zero horizontal overflow, and produced
+  zero browser warnings/errors.
+- Candidate base — exact sealed PR #199 head
+  `7690e54b3c1d225d09ab8838774c4ac9c6316cce`, preserved at
+  `rescue/amm-pr200-base-pr199-20260823-1204`.
+- Candidate migration delta — empty. No Production deploy, schema/data change,
+  lead, notification, provider call, WordPress edit, publication, spend, DNS,
+  deletion, or NellySelly action occurred.
+- Candidate security and dependency review — PASS: attribution storage contains
+  no auth/session/provider secret, stored and URL values remain untrusted and
+  server-normalized, React adds no HTML sink, persistence remains parameterized,
+  the Production dependency audit has no known vulnerability, staged gitleaks
+  found no leak, patch integrity passed, and the migration delta is empty.
+- Exact-head GitHub Node 24, immutable Preview, and protected no-write checks
+  remain pending after push.
+- Detailed scope and evidence:
+  `docs/phase9/CONVERSION_JOURNEY_INTEGRITY.md` and
+  `docs/phase9/CONVERSION_JOURNEY_INTEGRITY_QA_EVIDENCE.md`.
+
 ## Phase 9 field-experience trust evidence — 2026-08-22
 
 - Candidate base — PASS: exact stacked PR #198 head

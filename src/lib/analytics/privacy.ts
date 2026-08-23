@@ -446,6 +446,7 @@ const ENUM_VALUES: Partial<Record<string, ReadonlySet<string>>> = {
     "homepage",
     "open_house",
     "ourtownproperties",
+    "renter_page",
     "seller_page",
     "widget",
   ]),
