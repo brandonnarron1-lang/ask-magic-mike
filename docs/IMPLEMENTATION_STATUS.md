@@ -5,8 +5,12 @@ Updated 2026-08-23.
 ## Phase 9 public hero delivery fast-track — 2026-08-23
 
 - **Reuse decision:** apply only PR #201 implementation commit
-  `1ca7ff00eacbc7da6d9b861431109c3d009c6861` on exact sealed PR #203 head
-  `cfe26742af03e737e2a65ced023e1b995e9010bc`. Preserve the released Black
+  `1ca7ff00eacbc7da6d9b861431109c3d009c6861` on refreshed PR #203 head
+  `6da82fe6d9a87f0ced6da5f4cdae04defea5e4ae`. Clean ordered merge
+  `010e18fcf610997948fcf694361c4b6b2423884f` carries that predecessor into
+  PR #204; rescue branch
+  `rescue/amm-pr204-pre-pr203-refresh-20260823-173028` preserves the prior
+  sealed head. Preserve the released Black
   Diamond composition, Mike imagery, Our Town identity, copy, CTAs, routes,
   attribution, forms, and canonical lead pipe.
 - **Live evidence:** a fresh write-intercepted Production audit at 390 × 844
@@ -17,8 +21,9 @@ Updated 2026-08-23.
   established 768-pixel art-direction breakpoint, intrinsic dimensions,
   `sizes="100vw"`, eager loading, and high fetch priority. No artwork, copy, or
   layout is regenerated.
-- **Local acceptance:** exact Node 24.18.0 passes 4 focused files / 15 tests,
-  the complete 221-file / 2,993-test suite, strict typecheck, ESLint, optimized
+- **Local acceptance:** after the ordered refresh, exact Node 24.18.0 passes 4
+  focused files / 15 tests, the complete 221-file / 2,994-test suite, strict
+  typecheck, ESLint, optimized
   Next.js build with 52 static pages, 82/17 route-manifest proof, 14/14 release
   safety, system isolation, a no-vulnerability Production dependency audit,
   empty migration delta, and redacted staged secret scan.
@@ -26,7 +31,7 @@ Updated 2026-08-23.
   hero resource per viewport: 56,792 bytes at 390 × 844 and 108,706 bytes at
   1440 × 900. Art direction, identity, H1, CTAs, eager/high priority, one main,
   and zero overflow remain correct with zero browser warnings/errors.
-- **Remote acceptance:** Draft PR #204 application head
+- **Superseded pre-refresh remote acceptance:** Draft PR #204 application head
   `e1024cd1234dc5b200ed953705127f9efa4bb8fd` passes GitHub run `32662812090`,
   READY Preview `dpl_CVWc7vVZ2Ju8qv7KanpYshn4uKKS`, and protected no-write run
   `32662942232`: 17 pass / 6 intentional write skips / 0 fail, Widget 2/2,
@@ -36,9 +41,9 @@ Updated 2026-08-23.
 - **Dependency:** this candidate follows PR #203, which follows PR #202. It is
   not release-eligible until both predecessors release in order, this branch is
   refreshed onto exact `main`, and fresh exact-head proof passes.
-- **Safety:** no migration or Production mutation. Local and remote acceptance
-  are complete for the application head. This evidence-only seal still requires
-  its own exact-head CI/Preview/protected proof. No Production gate is issued.
+- **Safety:** no migration or Production mutation. The refreshed Draft head
+  requires fresh exact-head CI/Preview/protected proof recorded in PR #204. No
+  Production gate is issued.
 - Detailed scope:
   `docs/phase9/PUBLIC_HERO_DELIVERY_TRUST.md` and
   `docs/phase9/PUBLIC_HERO_DELIVERY_TRUST_QA_EVIDENCE.md`.

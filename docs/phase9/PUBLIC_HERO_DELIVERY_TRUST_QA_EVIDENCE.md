@@ -8,8 +8,11 @@ Production mutation: none
 
 ## Fast-track composition and live source evidence
 
-The candidate starts from exact sealed PR #203 head
-`cfe26742af03e737e2a65ced023e1b995e9010bc` and reuses only PR #201
+The candidate now includes refreshed PR #203 head
+`6da82fe6d9a87f0ced6da5f4cdae04defea5e4ae` through clean ordered merge
+`010e18fcf610997948fcf694361c4b6b2423884f`; rescue branch
+`rescue/amm-pr204-pre-pr203-refresh-20260823-173028` preserves the prior sealed
+head. It reuses only PR #201
 implementation commit `1ca7ff00eacbc7da6d9b861431109c3d009c6861`.
 The original PR #201 and its older stack remain unchanged.
 
@@ -47,7 +50,7 @@ pnpm `10.30.3`, and Next.js `15.5.21`.
 | Check | Result |
 | --- | --- |
 | Focused hero + adjacent funnel/attribution tests | PASS · 4 files / 15 tests |
-| Full Vitest suite | PASS · 221 files / 2,993 tests |
+| Full Vitest suite | PASS · 221 files / 2,994 tests |
 | Strict TypeScript | PASS |
 | ESLint | PASS |
 | Optimized Production build | PASS · 52 static pages |
@@ -99,7 +102,7 @@ claim about real-user LCP. The stacked field-experience candidate remains the
 canonical way to collect privacy-safe Production LCP/INP/CLS evidence after its
 separate release gate and sufficient genuine traffic.
 
-## Application-head remote acceptance
+## Superseded pre-refresh application-head remote acceptance
 
 Application head: `e1024cd1234dc5b200ed953705127f9efa4bb8fd`
 
@@ -124,9 +127,10 @@ high fetch priority. With browser image negotiation, the immutable Preview
 served a 56,744-byte mobile WebP at width 640 and a 108,706-byte desktop WebP at
 width 1920. Runtime logs contained 0 fatal, 0 error, and 0 warning entries.
 
-This evidence-only seal must pass its own exact-head CI, matching immutable
-Preview, and protected no-write acceptance. Its results supersede application-
-head evidence for branch identity but do not create Production authority.
+The refreshed Draft head must pass fresh exact-head CI, a matching immutable
+Preview, and protected no-write acceptance recorded in PR #204. Those results
+supersede this pre-refresh evidence for branch identity but do not create
+Production authority.
 
 ## Rollback proof
 
