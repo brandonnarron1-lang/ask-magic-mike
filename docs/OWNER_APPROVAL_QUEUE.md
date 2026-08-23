@@ -24,6 +24,12 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    `21fdb5b3490cdc0517518578878a8db5d1b683a7` was merged as
    `9b82afb609674bb0209b73f8ac9622ab02733e2a` and accepted on Vercel Production
    deployment `dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a`. It contained no migration.
+5. PR [#194](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/194)
+   — its exact gate was received; iOS handoff head
+   `851ebe530ac6a91a4e410f26538d29c1bf43f1c6` was merged as
+   `5a3c5c7f2463ea399c21b616ff249f6c67e156b6` and accepted on canonical Vercel
+   Production deployment `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. It contained no
+   migration, carrier SMS, device enrollment, or message send.
 
 These completed gates are exhausted and must not be reused as authority for a
 new action. None authorized a social/GBP post, email campaign, QR
@@ -32,25 +38,40 @@ provider action, or deletion.
 
 ## Next consolidated application candidate
 
-- Draft PR [#194](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/194)
-  is the sole next application candidate. It consolidates only the secure iOS
-  Home Screen Web Push handoff on released `main` and contains no migration,
-  carrier SMS, second provider, device enrollment, or send.
-- Its released-base Node 24 CI, canonical Vercel Preview, protected-flow,
-  security, and browser acceptance pass. It remains Draft. Its only application
+- Draft PR [#195](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/195)
+  is the sole next application candidate. It polishes public conversion
+  identity and navigation on released `main` and contains no migration,
+  WordPress mutation, message send, provider action, or spend.
+- Its released-base Node 24 CI and canonical Vercel Preview pass. It remains
+  Draft. Its only application
   release phrase is:
-  `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
-- That future phrase will authorize only the exact reviewed PR #194 merge and
+  `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
+- That future phrase will authorize only the exact reviewed PR #195 merge and
   canonical Vercel Production deployment. It will not authorize a WordPress
   edit, GBP/social/email publication, QR distribution, message, lead submission,
   migration, physical phone enrollment, test Push, spend, DNS change, provider
   action, deletion, or NellySelly action.
 
-## Stacked candidates after PR #194
+## Stacked candidates after PR #195
 
-- Draft PR [#195](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/195)
-  remains stacked after PR #194 and must be refreshed and revalidated only after
-  PR #194 releases.
+- Draft PR [#197](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/197)
+  remains stacked on PR #195. It separates legacy WordPress attribution
+  evidence from canonical live-source measurement. After PR #195 releases, it
+  must be rebased on the exact new `main` and pass exact-head Node 24 CI,
+  canonical Preview, and protected browser QA before its distinct gate can be
+  used:
+  `APPROVE PHASE 9 LEGACY WORDPRESS ATTRIBUTION TRUST MERGE AND PRODUCTION DEPLOYMENT`.
+- Draft PR [#198](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/198)
+  is a standalone, read-only WordPress activation change-set candidate based on
+  released `main`. It adds protected, rollback-ready readiness manifests for
+  three exact brokerage placements but cannot publish or edit WordPress. Because
+  it overlaps the owned-demand surface, refresh it after PRs #195 and #197, then
+  rerun exact-head acceptance before using its distinct application gate:
+  `APPROVE PHASE 9 WORDPRESS ACTIVATION CHANGE SET MERGE AND PRODUCTION DEPLOYMENT`.
+- Even after PR #198 is released, one exact WordPress page publication remains a
+  separate action. The first proposed write is the homepage link only, and its
+  gate is:
+  `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`.
 
 ## Deferred candidates requiring refresh and overlap review
 
@@ -64,11 +85,9 @@ provider action, or deletion.
 - PRs #190–#192 remain preserved as source history; their independently useful
   work was consolidated once in released PR #193 and is not part of PR #185.
 - Historical PR [#179](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/179)
-  is preserved but superseded for release by the current-stack iOS handoff
-  consolidation in Draft PR
+  is preserved but superseded for release by the released iOS handoff
+  consolidation in PR
   [#194](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/194).
-  PR #194 has been refreshed and re-proven on released `main`; its exact gate
-  remains unreceived.
   Physical enrollment and a `[TEST]` Push remain separately approved actions.
 - PRs #92 and #119–#121 remain archive-after-review candidates. They are not a
   parallel Production release plan.
@@ -107,7 +126,7 @@ provider action, or deletion.
 
 ## Resolved and removed from this queue
 
-- PRs #170, #172, #173, #177, #178, #180, #181, #183, and #184 are released;
+- PRs #170, #172, #173, #177, #178, #180, #181, #183, #184, #193, and #194 are released;
   do not request their historical approval phrases again.
 - Canonical Neon Production and Better Auth/RBAC are established.
 - Form 3 signed WordPress forwarding and duplicate native-notification shutdown
