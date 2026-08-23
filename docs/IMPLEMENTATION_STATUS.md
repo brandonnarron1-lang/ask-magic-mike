@@ -43,6 +43,30 @@ Updated 2026-08-23.
   `docs/phase9/PUBLIC_HERO_DELIVERY_TRUST.md` and
   `docs/phase9/PUBLIC_HERO_DELIVERY_TRUST_QA_EVIDENCE.md`.
 
+## Phase 9 owned-traffic activation fast-track — 2026-08-23
+
+- **Production evidence:** aggregate-only Neon reads at 20:23 UTC report six
+  safely suppressed QA leads and zero live/contactable leads, outcomes,
+  response samples, spend, experiments, or non-test publication proofs.
+- **Reuse decision:** transplant only the unique reviewed application work from
+  PRs #197 and #198 onto exact sealed PR #204 head. The rescue reference is
+  `rescue/amm-pre-owned-traffic-fast-track-20260823-1625`.
+- **Scope:** separate audited legacy Our Town attribution from exact KPI
+  evidence, and expose authenticated GET-only readiness manifests for the
+  existing homepage, home-value, and We Buy Homes WordPress CTAs.
+- **Safety:** no stored attribution rewrite, migration, Production action,
+  WordPress edit, form replacement, provider send, spend, DNS change, deletion,
+  or NellySelly action. A readiness manifest cannot authorize publication.
+- **Recommended first action:** after this application stack is eventually
+  released, prepare one separately approved homepage href replacement using a
+  fresh matching manifest and verified WordPress revision.
+- **Verification:** current-stack local, exact-head CI, immutable Preview,
+  protected no-write route, responsive UI, dependency, secret, route, safety,
+  and isolation evidence remain to be sealed on the final fast-track head.
+- Plan and rollback:
+  `docs/phase9/OWNED_TRAFFIC_ACTIVATION_FAST_TRACK.md` and
+  `docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md`.
+
 ## Phase 9 conversion-journey integrity fast-track — 2026-08-23
 
 - **Live evidence:** a 390×844 Production audit intercepted lead/event and
@@ -153,8 +177,10 @@ Updated 2026-08-23.
   2,950 tests, strict typecheck, ESLint, optimized build, 82 active routes,
   14/14 safety, 43/43 doctor, system isolation, eight Chromium homepage/widget
   checks, dependency audit, candidate secret scan, diff check, and empty
-  migration scan. The final no-write-harness head still requires exact-head
-  GitHub Node 24 CI and canonical protected Preview proof after push.
+  migration scan. Final exact-head Node 24 run `32612226020`, immutable Preview
+  deployment `dpl_az7g38CUEynxgqxMAuLoWJEv52Td`, and protected no-write QA run
+  `32612370721` pass with 17 pass / 6 safe skip / 0 fail, widget 2/2, doctor
+  43/43, and strict `PREVIEW_READY`.
 - The branch is refreshed onto released PR #194 merge
   `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`; its prior stacked head is
   preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.

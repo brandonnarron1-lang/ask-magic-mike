@@ -48,8 +48,11 @@ specific expansions; they do not invalidate the live lead pipe.
   protected no-write runtime, and browser proof, but it is not release-eligible
   until PR #202 releases, it refreshes onto exact `main`, and fresh exact-head
   proof passes.
-- PRs #197–#201 remain preserved. The fast-track review does not authorize,
-  merge, delete, or silently supersede any of them.
+- PRs #197–#201 remain preserved. Their useful attribution/WordPress,
+  conversion, performance, and visual work is not deleted or silently merged.
+- The current local owned-traffic fast-track reuses only PRs #197 and #198 on
+  top of sealed PR #204. It remains behind the ordered #202 → #203 → #204 stack,
+  has no Production gate, and cannot authorize a WordPress publication.
 - Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
   and #119–#121 are preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,

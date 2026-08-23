@@ -63,6 +63,12 @@
   spend, DNS, or NellySelly action occurred.
 ## Phase 9 WordPress activation change-set evidence — 2026-08-22
 
+- Dependency composition — PASS: PR #197 exact head
+  `0fff501b550b12bda860570b1c74bdbdab0b2888` merged without application-code
+  conflict after PR #198 head `808021468e1910e1d88f071575fd5e73c991d085`
+  was preserved at
+  `rescue/amm-pr198-pre-pr197-stack-refresh-20260822-2247`. Only four cumulative
+  evidence documents required manual reconciliation.
 - Final read-only live loader acceptance at 21:40 America/New_York — PASS. The exact
   public homepage, established home-value page, We Buy Homes page, and public
   WordPress page index were fetched through exact-host HTTPS allowlists. All
@@ -82,8 +88,9 @@
   foreign, insecure, lookalike, page-ID drift, and page-index failures; raw
   HTML/telephone exclusion; deterministic hashing; API RBAC/no-store headers;
   existing surface-audit compatibility; and database placement-registry parity.
-- Full local release gate — PASS: system isolation, 14/14 safety controls, 216
-  test files / 2,962 tests, strict TypeScript, full ESLint, optimized Next.js
+- Final stacked local release gate — PASS: system isolation, 14/14 safety
+  controls, 217 test files / 2,967 tests, strict TypeScript, full ESLint,
+  optimized Next.js
   15.5.21 build, and 83 active routes / 17 acknowledged root-source
   duplicates. The new route is explicitly required and classified in the
   canonical route manifest.
@@ -96,8 +103,15 @@
   notification, publication proof, database read/write, external send, DNS
   change, Production deployment, spend, deletion, or NellySelly action occurred.
 - Production dependency audit — PASS: no known vulnerability. Working-tree
-  gitleaks, candidate-pattern, and patch-integrity scans passed with no secret
-  finding.
+  gitleaks scanned approximately 65.35 KB of the unique candidate delta with no
+  leak; candidate-pattern, diff-integrity, and empty migration scans passed.
+- Rendered no-write acceptance — PASS: lead, durable event, and experiment
+  routes were intercepted before navigation. The protected Distribution Command
+  rendered three readiness links at 1440×1000 and 390×844, one `main`, truthful
+  unavailable values, no horizontal overflow or framework overlay, and zero
+  console errors/warnings. Application requests were GET-only. The named
+  brokerage placement card now spans the desktop command grid and retains its
+  single-column mobile stack.
 - Whole-site WordPress public-surface audit — PASS as a read-only check: 42/42
   sitemap pages fetched, zero failed. It reconfirmed exactly three incomplete
   direct canonical links, two incomplete embeds, four legacy native-capture

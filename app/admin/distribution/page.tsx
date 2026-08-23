@@ -580,7 +580,9 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
   return (
     <article
       id={`channel-${channel.key}`}
-      className="min-w-0 scroll-mt-24 rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#101010,#060606)] p-5"
+      className={`min-w-0 scroll-mt-24 rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#101010,#060606)] p-5 ${
+        channel.namedPlacements.length ? "xl:col-span-2" : ""
+      }`}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">

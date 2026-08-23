@@ -85,9 +85,20 @@ provider action, or deletion.
   acceptance, Widget 2/2, doctor 43/43, and `PREVIEW_READY`. It must remain
   Draft until PR #202 releases, then refresh onto exact `main` and repeat proof
   before a separate gate can be issued. PR #202's gate does not authorize it.
-- Draft PRs #197–#201 remain preserved and unchanged. PR #203 only replaces PR
-  #200's delayed release position; it does not authorize, merge, delete, or
-  silently supersede #197–#199 or #201.
+- Draft PRs #197–#201 remain preserved. PR #203 does not authorize, merge,
+  delete, or silently supersede #197–#199 or #201.
+
+## Owned-traffic activation fast-track after PR #204
+
+- The local candidate on
+  `codex/phase9-owned-traffic-fast-track-20260823` reuses only PR #197's
+  attribution-trust work and PR #198's read-only WordPress manifests on exact
+  sealed PR #204 head.
+- It has no Production gate. It must remain Draft behind #202 → #203 → #204,
+  then refresh onto exact `main` and repeat exact-head proof.
+- Application release cannot edit WordPress. The first later proposed write is
+  one homepage href only and still requires:
+  `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`.
 
 ## Deferred candidates requiring refresh and overlap review
 
