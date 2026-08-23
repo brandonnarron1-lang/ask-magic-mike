@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-08-22 — Legacy WordPress attribution-trust candidate
+
+- Reused the existing Neon Growth view and protected Distribution Command;
+  no analytics store, campaign catalog, WordPress form, or dashboard was added.
+- Added a fail-closed compatibility classifier for the five exact Our Town
+  referrer-path and legacy-UTM combinations verified on the public site.
+- Preserved every stored UTM and referrer record. Compatibility evidence is
+  labeled separately and excluded from exact owned-demand totals and placement
+  lifecycle states so historical traffic cannot inflate a current KPI.
+- Added protected operator labels that distinguish exact signals, legacy
+  signals requiring a UTM update, and genuinely unmeasured placements.
+- Draft PR #197 is intentionally stacked on PR #195 and is now aligned with its
+  exact hardened head `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`. The prior PR #197
+  state is preserved at
+  `rescue/amm-pr197-pre-pr195-final-refresh-20260822-2226`.
+- Refreshed local verification passes 2 focused files / 24 tests and 215 full
+  files / 2,954 tests, strict typecheck, ESLint, optimized build, 82/17 route
+  manifest, 14/14 release safety, 43/43 release doctor,
+  dependency/secret/diff/migration checks, and desktop/mobile visual QA with
+  no overflow, console finding, or application POST in the counted session.
+  Exact-head Node 24 CI and canonical Preview proof remain required.
+- No migration, Production deployment, database write, lead, message,
+  WordPress change, publication, DNS change, spend, canonical-provider change,
+  or NellySelly action occurred. A QA CLI auto-link briefly created an empty
+  Vercel project; after proving it had no deployments, domains, environment
+  variables, or Git link, the exact project was deleted and verified absent.
+
+## 2026-08-22 — Conversion identity and public-navigation polish candidate
+
+- Reused the canonical home-value funnel and added required consumer name
+  capture to its existing Contact step without increasing funnel length.
+- Added invalid-field focus and field-specific error association for address,
+  name, email, and phone.
+- Removed internal preview/integration links from the shared consumer footer
+  and replaced them with canonical buyer, seller, home-value, Ask Mike, planner,
+  contact, legal, and accessibility paths.
+- Made the historical screenshot helper intercept `/api/leads`, `/api/events`,
+  and `/api/experiments/event`, preventing visual QA from creating a lead or
+  writing analytics/experiment evidence when database configuration is present.
+- No Production mutation, migration, lead, notification, provider call,
+  WordPress edit, publication, spend, DNS, or NellySelly action occurred.
+
 ## 2026-08-22 — iOS phone install handoff consolidation candidate
 
 - Audited historical PR #179 and refreshed only its unique iPhone Home Screen

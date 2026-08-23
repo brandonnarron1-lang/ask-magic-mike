@@ -46,6 +46,7 @@ function signal(
   content: string,
   leads: number,
   campaign = "amm_owned_demand_2026",
+  basis?: "legacy_wordpress_compatibility",
 ): OwnedDemandAttributionSignal {
   return {
     source,
@@ -53,6 +54,7 @@ function signal(
     campaign,
     content,
     leads,
+    ...(basis ? { basis } : {}),
   };
 }
 
@@ -157,6 +159,76 @@ describe("Owned Demand Command", () => {
     ]);
   });
 
+  it("recognizes only the audited legacy WordPress tuples as compatibility evidence", () => {
+    const signals = buildOwnedDemandAttributionSignals([
+      {
+        utm_source: "ourtownproperties",
+        utm_medium: "homepage_cta",
+        utm_campaign: "website_widget",
+        utm_content: null,
+        referrer_url: "https://www.ourtownproperties.com/",
+      },
+      {
+        utm_source: "ourtownproperties",
+        utm_medium: "home_value_page",
+        utm_campaign: "website_widget",
+        utm_content: null,
+        referrer_url: "https://www.ourtownproperties.com/how-much-is-your-home-worth/?private=value",
+      },
+      {
+        utm_source: "ourtownproperties",
+        utm_medium: "seller_page_cta",
+        utm_campaign: "website_widget",
+        utm_content: null,
+        referrer_url: "https://www.ourtownproperties.com/we-buy-homes/",
+      },
+      {
+        utm_source: "ourtownproperties",
+        utm_medium: "referral",
+        utm_campaign: "website_widget",
+        utm_content: null,
+        referrer_url: "https://www.ourtownproperties.com/ask-mike/",
+      },
+    ]);
+
+    expect(signals).toHaveLength(4);
+    expect(signals.every((row) => row.basis === "legacy_wordpress_compatibility")).toBe(true);
+    expect(signals.map((row) => row.content).sort()).toEqual([
+      "wordpress_ask_magic_mike_embed",
+      "wordpress_home_value_page",
+      "wordpress_homepage_ask_mike",
+      "wordpress_we_buy_homes",
+    ]);
+    expect(signals.every((row) => row.source === "ourtownproperties")).toBe(true);
+    expect(signals.every((row) => row.medium === "owned_media")).toBe(true);
+    expect(signals.every((row) => row.campaign === "amm_owned_demand_2026")).toBe(true);
+  });
+
+  it("fails closed for lookalike, mismatched, or already-tagged legacy WordPress rows", () => {
+    const base = {
+      utm_source: "ourtownproperties",
+      utm_medium: "homepage_cta",
+      utm_campaign: "website_widget",
+      utm_content: null,
+      referrer_url: "https://www.ourtownproperties.com/",
+    };
+    const signals = buildOwnedDemandAttributionSignals([
+      { ...base, referrer_url: "https://ourtownproperties.com.example.invalid/" },
+      { ...base, referrer_url: "http://www.ourtownproperties.com/" },
+      { ...base, referrer_url: "https://www.ourtownproperties.com:444/" },
+      { ...base, referrer_url: "https://www.ourtownproperties.com/unreviewed-page/" },
+      { ...base, utm_medium: "referral" },
+      { ...base, utm_campaign: "different_campaign" },
+      { ...base, utm_content: "already_tagged" },
+      { ...base, utm_source: "unapproved_source" },
+      { ...base, referrer_url: null },
+    ]);
+
+    expect(signals).toEqual([
+      signal("ourtownproperties", "homepage_cta", "already_tagged", 1, "website_widget"),
+    ]);
+  });
+
   it("creates canonical lowercase UTM links for every manual channel", () => {
     const result = buildOwnedDemandCommand({ summary: summary(), ownedDemandSignals: [] });
     expect(result.channels.length).toBeGreaterThanOrEqual(6);
@@ -208,6 +280,56 @@ describe("Owned Demand Command", () => {
     expect(wordpress?.attributedLeads).toBe(2);
     expect(wordpress?.namedPlacements.find((row) => row.placementKey === "wordpress_homepage_ask_mike")?.attributedLeads).toBe(2);
     expect(result.attributedLiveLeads).toBe(2);
+  });
+
+  it("surfaces legacy WordPress evidence separately without inflating exact KPIs", () => {
+    const result = buildOwnedDemandCommand({
+      summary: summary({ leads: 3, attributedLeadRate: 100 }),
+      ownedDemandSignals: [
+        signal(
+          "ourtownproperties",
+          "owned_media",
+          "wordpress_homepage_ask_mike",
+          2,
+          "amm_owned_demand_2026",
+          "legacy_wordpress_compatibility",
+        ),
+        signal("ourtownproperties", "owned_media", "wordpress_homepage_ask_mike", 1),
+      ],
+    });
+    const wordpress = result.channels.find((row) => row.key === "ourtown_wordpress");
+    const homepage = wordpress?.namedPlacements.find(
+      (row) => row.placementKey === "wordpress_homepage_ask_mike",
+    );
+
+    expect(result.attributedLiveLeads).toBe(1);
+    expect(result.legacyAttributedLiveLeads).toBe(2);
+    expect(wordpress?.attributedLeads).toBe(1);
+    expect(wordpress?.legacyAttributedLeads).toBe(2);
+    expect(homepage?.attributedLeads).toBe(1);
+    expect(homepage?.legacyAttributedLeads).toBe(2);
+  });
+
+  it("keeps legacy-only evidence out of exact measurement state and explains the repair", () => {
+    const result = buildOwnedDemandCommand({
+      summary: summary({ leads: 2, attributedLeadRate: 100 }),
+      ownedDemandSignals: [
+        signal(
+          "ourtownproperties",
+          "owned_media",
+          "wordpress_ask_magic_mike_embed",
+          2,
+          "amm_owned_demand_2026",
+          "legacy_wordpress_compatibility",
+        ),
+      ],
+    });
+
+    expect(result.attributedLiveLeads).toBe(0);
+    expect(result.legacyAttributedLiveLeads).toBe(2);
+    expect(result.measurementState).toBe("no_live_signal");
+    expect(result.bottleneck).toContain("legacy Our Town placement tuple");
+    expect(result.bottleneck).toContain("do not count compatibility evidence as an exact KPI");
   });
 
   it("creates a seller, buyer, and renter flight for every existing channel", () => {
@@ -288,6 +410,10 @@ describe("canonical /admin/distribution route guards", () => {
     expect(page).toContain("Exact placement activation loop");
     expect(manifest).toContain('"/admin/distribution"');
     expect(manifest).toContain("active-protected-owned-demand-neon-append-only-publication-proof");
+    expect(view).toContain("sa.referrer_url");
+    expect(page).toContain("Legacy WordPress signals");
+    expect(page).toContain("legacyAttributedLeads");
+    expect(page).not.toContain("referrer_url");
   });
 
   it("adds only an append-only proof mutation while excluding test and suppressed lead records upstream", () => {

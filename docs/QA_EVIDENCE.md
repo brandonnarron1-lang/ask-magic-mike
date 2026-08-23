@@ -47,6 +47,27 @@
   UI acceptance remain required after push before this becomes release
   authority.
 
+## Phase 9 conversion identity polish — 2026-08-22 15:17 EDT
+
+- Current Production seller, buyer, and Ask paths were captured in the in-app
+  browser with internal-QA attribution and no lead submission.
+- The existing home-value Contact step now captures name and email; invalid
+  fields receive focus and uniquely own the inline error description.
+- Consumer footer navigation excludes internal preview/integration routes.
+- The screenshot helper intercepts `/api/leads`, `/api/events`, and
+  `/api/experiments/event`; visual QA cannot persist a lead, trigger
+  notifications, or write analytics/experiment evidence.
+- Focused verification: 4 files / 11 tests — PASS.
+- Full local release gate: 214 files / 2,930 tests, typecheck, lint, optimized
+  build, 82 active routes, 14/14 safety, and system isolation — PASS.
+- Production dependency audit: no known vulnerability. Candidate text secret
+  scan: no leak. `git diff --check`: PASS. Migration scan: empty.
+- Full evidence:
+  `docs/phase9/CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
+- No Production deployment, migration, database write, lead, email/BCC, SMS,
+  Push, consumer acknowledgment, provider call, WordPress edit, publication,
+  spend, DNS, or NellySelly action occurred.
+
 ## PR #193 released-main privacy audit — 2026-08-22
 
 - Rebased/refreshed the candidate onto released PR #185 merge
@@ -166,8 +187,14 @@ All timestamps are America/New_York unless noted.
   `SAFE_DB_WRITE=false`; live email/SMS are disabled; no invite, claim, lead,
   notification, device registration, or database write occurred.
 - Production dependency audit reports no known vulnerability; candidate
-  patch-integrity, gitleaks, and migration scans pass. PR #194 remains Draft;
-  physical enrollment and a `[TEST]` Push remain separately gated.
+  patch-integrity, gitleaks, and migration scans pass. The entries above are
+  the released-PR193 checkpoint.
+- Final PR #194 head `851ebe530ac6a91a4e410f26538d29c1bf43f1c6`
+  subsequently passed run `32606142473`, Preview
+  `dpl_7nhaV5tpS4YArtgKVV9PfVBRHq4H`, and protected run `32606286620`, then was
+  merged as `5a3c5c7f2463ea399c21b616ff249f6c67e156b6` and accepted on Production
+  `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. Physical enrollment and a `[TEST]` Push
+  remain separately gated.
 
 ## Historical pre-released-base phone handoff evidence — 2026-08-22
 
@@ -1088,3 +1115,131 @@ the Node-20 deployment proof. PHP CLI is unavailable locally, so staging must ru
   shadow-only observations for forms 6 and 7 and no forwarding attempts.
 - Our Town homepage, `/ask-mike/`, and Mike's agent profile remained HTTP 200
   after activation.
+
+## Phase 9 legacy WordPress attribution-trust candidate — 2026-08-22 20:40 EDT
+
+Candidate branch:
+`codex/phase9-legacy-wordpress-attribution-trust-20260822`. This candidate is
+stacked on the unmerged conversion-identity candidate at
+`69879eac61cad4624945a1534914c8cb2e9d2424`; it is not authorized for Production
+until that dependency is released and this branch is refreshed from released
+`main`. Draft PR [#197](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/197)
+uses that dependency branch as its base.
+
+No Production deployment, database migration or write, lead submission, email,
+SMS, Push notification, WordPress edit, DNS change, public publication, spend,
+or NellySelly action occurred during this verification.
+
+During a protected-Preview probe, `vercel curl` auto-linked this temporary
+worktree to an unintended new Vercel project before making the request. The
+exact project was immediately audited: zero deployments, zero domains, zero
+environment variables, no Git link, and one generated protection-bypass entry.
+It was deleted by exact project ID, a follow-up GET returned 404, and this
+worktree was relinked to canonical project `ask-magic-mike`
+(`prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`). No canonical project setting, deployment,
+alias, domain, or Production runtime changed. The failed probe is not counted as
+protected Preview proof; the secret-backed GitHub dispatcher remains the
+authoritative remote verification path.
+
+| Check | Result |
+| --- | --- |
+| Focused compatibility/KPI/fail-closed suite | PASS — 6 files / 64 tests |
+| Full Node 24 test suite | PASS — 215 files / 2,954 tests |
+| Strict typecheck | PASS |
+| ESLint | PASS |
+| Next.js optimized Production build | PASS — Next.js 15.5.21 |
+| Route manifest | PASS — 82 active / 17 acknowledged root/`src` duplicates |
+| Release safety | PASS — 14/14 |
+| Release doctor | PASS — 43 pass / 0 fail / 0 skip |
+| Ask Magic Mike launch doctor | PASS — 25 pass / 0 fail / 17 expected local-only Production-environment skips |
+| Public CTA audit | PASS — 24/24 |
+| Production dependency audit | PASS — no known high-severity Production vulnerabilities |
+| Candidate-range gitleaks scan | PASS — 2 candidate commits / approximately 20 KB / no leaks |
+| `git diff --check` | PASS |
+| Candidate migration scan | PASS — no database migration |
+
+Local Production-mode visual QA used an ephemeral synthetic Basic Auth secret
+and `LEAD_CENTER_RBAC_ENABLED=false` only in the local process. Neither value was
+committed, logged in this evidence, entered in Vercel, or used against a remote
+environment. Canonical Neon was deliberately absent, so the protected
+Distribution Command rendered `Measurement unavailable` and displayed `—`
+rather than converting missing measurement into zero.
+
+| Visual check | Result |
+| --- | --- |
+| `/admin/distribution` with local Basic Auth | PASS — HTTP 200, one `main`, correct protected workspace |
+| Desktop 1440 × 1000 | PASS — legacy card visible; no horizontal overflow |
+| Mobile 390 × 844 | PASS — no horizontal overflow and no clipped elements |
+| Legacy compatibility boundary | PASS — `Legacy WordPress signals` and `No compatibility inference while measurement is unavailable` render separately from exact owned-source signals |
+| Browser console | PASS — 0 errors / 0 warnings |
+
+Local visual artifacts:
+
+- `output/playwright/phase9-legacy-wordpress-attribution-trust/.playwright-cli/page-2026-08-23T00-38-53-695Z.png`
+  — desktop command header and four-card measurement boundary.
+- `output/playwright/phase9-legacy-wordpress-attribution-trust/.playwright-cli/page-2026-08-23T00-39-21-308Z.png`
+  — mobile command header.
+- `output/playwright/phase9-legacy-wordpress-attribution-trust/.playwright-cli/page-2026-08-23T00-39-51-209Z.png`
+  — focused mobile exact-versus-legacy signal separation.
+
+Exact-head GitHub CI, canonical Vercel Preview, protected Preview QA, and the
+released-main refresh remain required before the separate merge/deploy gate can
+be requested.
+
+## PR #197 hardened dependency refresh — 2026-08-22 22:33 EDT
+
+PR #195 exact head
+`db13953fc5f6d24a684f66c9a1c10c6b929b72b3` was merged into the clean PR #197
+worktree as `4848a5f`. The prior PR #197 head `39f2ace6c621c088f477d807bf1ad0eb57cb229e`
+is preserved at
+`rescue/amm-pr197-pre-pr195-final-refresh-20260822-2226` locally and on origin.
+
+| Refreshed check | Result |
+| --- | --- |
+| Focused attribution + capture safety | PASS — 2 files / 24 tests |
+| Full local suite | PASS — 215 files / 2,954 tests |
+| System isolation | PASS |
+| Release safety | PASS — 14/14 |
+| Strict typecheck | PASS |
+| ESLint | PASS |
+| Next.js optimized Production build | PASS — Next.js 15.5.21 |
+| Route manifest | PASS — 82 active / 17 acknowledged duplicates |
+| Release doctor | PASS — 43/43 |
+| Production dependency audit | PASS — no known vulnerability |
+| Candidate diff and gitleaks | PASS — approximately 39.79 KB / no leak |
+| Candidate migration scan | PASS — empty |
+
+The local host used Node 26.5.1 and therefore emitted the expected engine
+warning for the repository's required Node 24.x runtime. Exact Node 24 remote
+CI remains authoritative and is required on the final pushed head.
+
+The first browser process opened the public root before installing analytics
+interception and received one expected local-origin 403 from `/api/events`.
+That process was closed and is not counted as clean visual evidence. It made no
+database write. The final named session began at `about:blank`, installed
+synthetic interception for `/api/leads`, `/api/events`, and
+`/api/experiments/event`, set only an ephemeral local Basic Auth value, and
+then navigated to `/admin/distribution` with canonical Neon deliberately absent.
+
+| Final browser boundary | Result |
+| --- | --- |
+| Protected route | PASS — HTTP 200, meaningful content, one `main` |
+| Exact vs legacy measurement | PASS — separately labeled, both truthful `—` while unavailable |
+| Missing measurement | PASS — unavailable is not presented as zero |
+| Desktop | PASS — no overlay, no overflow |
+| Mobile 390 × 844 | PASS — 375 CSS-pixel document width, no overflow |
+| Interaction | PASS — 35-state disclosure opens and remains overflow-free |
+| Console | PASS — 0 errors / 0 warnings |
+| Network | PASS — GET-only application requests; no lead or event POST |
+
+Exact refreshed artifacts:
+
+- `output/playwright/phase9-legacy-wordpress-attribution-trust/.playwright-cli/page-2026-08-23T02-31-21-009Z.png`
+  — desktop protected command frame.
+- `output/playwright/phase9-legacy-wordpress-attribution-trust/.playwright-cli/page-2026-08-23T02-31-58-448Z.png`
+  — mobile protected command frame.
+
+No Production deployment, database write, lead submission, message, provider
+request, WordPress change, DNS/cache action, publication, spend, deletion, or
+NellySelly action occurred. Exact-head Node 24 CI and canonical protected
+Preview evidence remain required before this Draft advances.

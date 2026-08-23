@@ -64,6 +64,12 @@ export interface OwnedDemandAttributionSignal {
   campaign: string;
   content: string;
   leads: number;
+  /**
+   * Omitted values are exact, recorded UTM tuples. Compatibility signals are
+   * derived in memory from the narrow, audited Our Town legacy tuple map and
+   * must never be presented as exact campaign evidence.
+   */
+  basis?: "legacy_wordpress_compatibility";
 }
 
 export type OwnedDemandOfferKey = "seller_review" | "buyer_match" | "renter_plan";
@@ -120,6 +126,7 @@ export interface OwnedDemandOfferPlacement extends OwnedDemandOfferBrief {
 
 export interface OwnedDemandNamedPlacement extends OwnedDemandPlacementDefinition {
   attributedLeads: number;
+  legacyAttributedLeads: number;
   status: OwnedDemandStatus;
 }
 
@@ -133,6 +140,7 @@ export interface OwnedDemandChannel {
   destination: string;
   trackedUrl: string;
   attributedLeads: number;
+  legacyAttributedLeads: number;
   status: OwnedDemandStatus;
   format: string;
   draftTitle: string;
@@ -153,6 +161,7 @@ export interface OwnedDemandPlanItem {
 export interface OwnedDemandCommand {
   generatedAt: string;
   attributedLiveLeads: number;
+  legacyAttributedLiveLeads: number;
   attributedLeadRate: number;
   measurementState: "no_live_signal" | "partial_signal" | "measured";
   bottleneck: string;
@@ -523,12 +532,14 @@ function leadsForPlacement(
   signals: OwnedDemandAttributionSignal[],
   definition: (typeof CHANNEL_DEFINITIONS)[number],
   placementContent: string = definition.content,
+  basis: "exact" | "legacy_wordpress_compatibility" = "exact",
 ) {
   const accepted = new Set(definition.aliases.map(normalized));
   const campaign = normalized(OWNED_DEMAND_CAMPAIGN_KEY);
   const medium = normalized(definition.medium);
   const content = normalized(placementContent);
   return signals.reduce((total, signal) => (
+    (basis === "exact" ? signal.basis == null : signal.basis === basis) &&
     accepted.has(normalized(signal.source)) &&
     normalized(signal.medium) === medium &&
     normalized(signal.campaign) === campaign &&
@@ -572,15 +583,26 @@ export function buildOwnedDemandCommand(
     const namedPlacements = (definition.key === "ourtown_wordpress" ? wordpressNamedPlacements() : [])
       .map((placement): OwnedDemandNamedPlacement => {
         const attributedLeads = leadsForPlacement(intelligence.ownedDemandSignals, definition, placement.content);
+        const legacyAttributedLeads = leadsForPlacement(
+          intelligence.ownedDemandSignals,
+          definition,
+          placement.content,
+          "legacy_wordpress_compatibility",
+        );
         return {
           ...placement,
           attributedLeads,
+          legacyAttributedLeads,
           status: attributedLeads > 0 ? "signal_detected" : "ready_unmeasured",
         };
       });
     const attributedLeads = genericAttributedLeads
       + offerPlacements.reduce((sum, offer) => sum + offer.attributedLeads, 0)
       + namedPlacements.reduce((sum, placement) => sum + placement.attributedLeads, 0);
+    const legacyAttributedLeads = namedPlacements.reduce(
+      (sum, placement) => sum + placement.legacyAttributedLeads,
+      0,
+    );
     return {
       key: definition.key,
       label: definition.label,
@@ -591,6 +613,7 @@ export function buildOwnedDemandCommand(
       destination: definition.destination,
       trackedUrl,
       attributedLeads,
+      legacyAttributedLeads,
       status: attributedLeads > 0 ? "signal_detected" : "ready_unmeasured",
       format: definition.format,
       draftTitle: definition.draftTitle,
@@ -603,6 +626,10 @@ export function buildOwnedDemandCommand(
   });
 
   const attributedLiveLeads = channels.reduce((sum, channel) => sum + channel.attributedLeads, 0);
+  const legacyAttributedLiveLeads = channels.reduce(
+    (sum, channel) => sum + channel.legacyAttributedLeads,
+    0,
+  );
   const measurementState = attributedLiveLeads === 0
     ? "no_live_signal"
     : intelligence.summary.attributedLeadRate < 80
@@ -610,7 +637,9 @@ export function buildOwnedDemandCommand(
       : "measured";
 
   const bottleneck = measurementState === "no_live_signal"
-    ? intelligence.summary.leads === 0
+    ? legacyAttributedLiveLeads > 0
+      ? `${legacyAttributedLiveLeads} eligible lead${legacyAttributedLiveLeads === 1 ? " has" : "s have"} a narrowly recognized legacy Our Town placement tuple, but no exact owned-demand campaign identity. Preserve the raw attribution, replace one named WordPress link with its canonical UTM URL after approval, and do not count compatibility evidence as an exact KPI.`
+      : intelligence.summary.leads === 0
       ? "No eligible live lead has reached the Growth ledger in this window. The immediate constraint is owned-demand activation, not another scoring or dashboard feature."
       : "Eligible live demand exists, but no lead is attributed to an owned-demand placement. Activate one tracked placement or verify its UTM mapping before treating owned distribution as measured."
     : measurementState === "partial_signal"
@@ -620,6 +649,7 @@ export function buildOwnedDemandCommand(
   return {
     generatedAt: now.toISOString(),
     attributedLiveLeads,
+    legacyAttributedLiveLeads,
     attributedLeadRate: intelligence.summary.attributedLeadRate,
     measurementState,
     bottleneck,

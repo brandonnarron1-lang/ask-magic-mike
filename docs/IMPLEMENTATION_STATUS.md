@@ -26,6 +26,73 @@ Updated 2026-08-22.
 - Detailed scope and rollback:
   `docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md`.
 
+## Phase 9 legacy WordPress attribution trust — 2026-08-22
+
+- A fresh read-only audit fetched all 42 Our Town sitemap pages. Ask Magic Mike
+  public CTA checks passed 24/24; the social-preview audit passed 40/42 and
+  confirmed the existing Facebook-crawler block on two Our Town pages.
+- The audit reconfirmed three legacy direct links and two embeds with valid
+  source/campaign identity but no placement content. Five pages also expose
+  overlapping capture systems. These findings do not authorize a WordPress
+  edit, redirect, plugin change, or crawler-rule exception.
+- The canonical Neon Growth read model now recognizes only five audited legacy
+  source + medium + campaign + exact HTTPS referrer-path combinations. Unknown,
+  mismatched, foreign-host, non-HTTPS, port-bearing, already-tagged, and
+  referrer-less rows fail closed.
+- Stored source attribution is unchanged. The protected Distribution Command
+  renders compatibility evidence separately from exact owned-demand evidence;
+  exact KPI totals and activation lifecycle states remain uninflated.
+- This candidate is intentionally stacked after PR #195 and cannot use PR
+  #195's future approval. It contains no migration or external mutation.
+- Draft PR [#197](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/197)
+  targets the PR #195 branch, preventing an accidental direct-to-`main` release.
+- The branch now contains PR #195's exact hardened head
+  `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`; its prior state is preserved at
+  `rescue/amm-pr197-pre-pr195-final-refresh-20260822-2226`.
+- Refreshed local verification passes 2 focused files / 24 tests, 215 full
+  files / 2,954 tests, strict typecheck, ESLint, optimized build, 82/17 route
+  manifest, 14/14 release safety, 43/43 release doctor,
+  dependency/secret/diff/migration scans, and desktop/mobile Playwright QA
+  with no overflow, console finding, or application POST in the counted
+  session. Exact Node 24 CI and canonical Preview verification remain pending.
+- Detailed decision:
+  `docs/phase9/LEGACY_WORDPRESS_ATTRIBUTION_TRUST.md`.
+- Future exact application gate, eligible only after PR #195 releases and this
+  branch is refreshed and re-proven on exact `main`:
+  `APPROVE PHASE 9 LEGACY WORDPRESS ATTRIBUTION TRUST MERGE AND PRODUCTION DEPLOYMENT`.
+
+## Phase 9 conversion identity polish — 2026-08-22
+
+- A fresh Production no-submit audit found that the canonical home-value path
+  omitted consumer name while the buyer path already captured it. The existing
+  Contact step now collects required name and email and sends name through the
+  canonical `/api/leads` payload; no new form or backend was created.
+- Validation now moves focus to the invalid address, name, email, or phone and
+  associates the live error only with that field. The four-stage funnel and
+  Black Diamond visual system remain intact.
+- Consumer footer navigation no longer promotes internal Widget Preview,
+  OurTown Integration, or Social Preview surfaces. Those routes remain
+  non-indexable and available for their existing operational purpose.
+- Screenshot QA now intercepts lead creation, durable analytics, and public
+  experiment events and uses unmistakable synthetic identity, eliminating all
+  page-triggered application write paths observed in the full capture matrix.
+- Released-main refresh evidence passes exact Node 24.18.0, 215 test files /
+  2,950 tests, strict typecheck, ESLint, optimized build, 82 active routes,
+  14/14 safety, 43/43 doctor, system isolation, eight Chromium homepage/widget
+  checks, dependency audit, candidate secret scan, diff check, and empty
+  migration scan. The final no-write-harness head still requires exact-head
+  GitHub Node 24 CI and canonical protected Preview proof after push.
+- The branch is refreshed onto released PR #194 merge
+  `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`; its prior stacked head is
+  preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
+  The only automatic conflict was the cumulative QA evidence document; the
+  application merge was clean.
+- Detailed decision and QA:
+  `docs/phase9/CONVERSION_IDENTITY_POLISH.md` and
+  `docs/phase9/CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
+- Future exact gate:
+  `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
+
 ## Phase 9 iOS phone handoff consolidation — 2026-08-22
 
 - Historical PR #179 was audited rather than merged wholesale. Its unique
@@ -53,28 +120,32 @@ Updated 2026-08-22.
   disabled so only an operator holding `notification:manage` can create the
   link. The optional QA Push is durably limited to one attempt per setup session
   and copy subscription in Production.
-- Released-base focused verification passes 8 files / 58 tests. The exact Node
-  24 release gate passes 214 files / 2,939 tests, strict typecheck, ESLint,
-  optimized build, 82 active routes, and 14/14 safety controls. Production
-  dependency audit, patch-integrity, candidate secret, and migration scans pass;
-  the PR contains no database migration.
-- Draft PR #194 is cleanly mergeable on `main`. Its released-base code head is
-  `d5da4bd8ac4b0235e140ac785d46824a198292d8`; its prior state is preserved at
-  `rescue/amm-pr194-pre-pr193-refresh-20260822-1841`. Exact Node 24 run
-  `32603258868`, Ready Preview deployment
-  `dpl_HErSvZNK89Wh79rbi71KAZhqKdq1`, and protected Preview QA run
-  `32603437125` pass.
+- Final released-base verification passes exact Node 24.18.0, 214 files / 2,949
+  tests, strict typecheck, ESLint, optimized build, 82 active routes, 14/14
+  safety, and 43/43 doctor checks. Production dependency audit,
+  patch-integrity, candidate secret, and migration scans pass; PR #194 contains
+  no database migration.
+- PR #194 final reviewed head
+  `851ebe530ac6a91a4e410f26538d29c1bf43f1c6` was refreshed onto released PR
+  #196 base `c08abe1168840b99ccba07866bbec8cf7a6752fb`; its prior state is preserved
+  at `rescue/amm-pr194-pre-pr196-refresh-20260822-1945`. Exact Node 24 run
+  `32606142473`, Ready Preview deployment
+  `dpl_7nhaV5tpS4YArtgKVV9PfVBRHq4H`, and protected Preview QA run
+  `32606286620` pass.
 - Protected Preview acceptance records 17 passes, six intentional write skips,
   zero failures, two expected browser tests, 43/43 doctor checks, and strict
   `PREVIEW_READY`. The automated phone probe uses only an invalid synthetic
   token and performs no invite, claim, limiter persistence, device
   registration, or send.
-- PR #194 remains Draft. Green evidence does not authorize merge or Production;
-  physical device enrollment and one `[TEST]` Push remain separately gated.
+- PR #194 was approved and merged as
+  `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`, then accepted on Production
+  deployment `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. Read-only acceptance passed
+  conversion 15/15, smoke 19 pass / two intentional skips / zero failures,
+  canonical Neon/RBAC/Push readiness, private invalid-install behavior, apex
+  redirect, and zero deployment error logs.
 - Detailed decision: `docs/phase9/PHONE_INSTALL_HANDOFF_CONSOLIDATION.md`.
-- Exact future application gate:
-  `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
-  Physical device enrollment and a `[TEST]` Push remain separate actions.
+- The PR #194 application gate is exhausted. Physical device enrollment and a
+  `[TEST]` Push remain separate actions.
 
 ## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
 

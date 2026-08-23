@@ -575,6 +575,7 @@ function OfferPlacement({
 
 function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChannel; measurementReady: boolean }) {
   const observed = channel.status === "signal_detected";
+  const hasLegacyEvidence = channel.legacyAttributedLeads > 0;
   const channelPacket = buildOwnedDemandChannelPacket(channel);
   return (
     <article
@@ -595,6 +596,8 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
             ? "Measurement unavailable"
             : observed
               ? `${channel.attributedLeads} live signal${channel.attributedLeads === 1 ? "" : "s"}`
+              : hasLegacyEvidence
+                ? `${channel.legacyAttributedLeads} legacy signal${channel.legacyAttributedLeads === 1 ? "" : "s"}`
               : "Ready · unmeasured"}
         </span>
       </div>
@@ -634,7 +637,13 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
               <article key={placement.placementKey} className="min-w-0 rounded-lg border border-white/[.08] bg-black/35 p-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <p className="text-xs font-semibold text-[#f4ead4]">{placement.placementLabel}</p>
-                  <span className="text-[9px] font-bold uppercase tracking-[0.11em] text-[#8f8778]">{placement.attributedLeads ? `${placement.attributedLeads} signal${placement.attributedLeads === 1 ? "" : "s"}` : "Unmeasured"}</span>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.11em] text-[#8f8778]">
+                    {placement.attributedLeads
+                      ? `${placement.attributedLeads} exact signal${placement.attributedLeads === 1 ? "" : "s"}`
+                      : placement.legacyAttributedLeads
+                        ? `${placement.legacyAttributedLeads} legacy signal${placement.legacyAttributedLeads === 1 ? "" : "s"} · update UTM`
+                        : "Unmeasured"}
+                  </span>
                 </div>
                 <code className="mt-2 block break-all text-[10px] leading-5 text-[#9edbe2]">{placement.trackedUrl}</code>
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -729,7 +738,7 @@ export default async function DistributionPage({
 
         <MeasurementStateBanner measurement={measurement} />
 
-        <section className="mt-5 grid gap-3 sm:grid-cols-3" aria-label="Owned demand measurement status">
+        <section className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Owned demand measurement status">
           <article className="rounded-xl border border-white/10 bg-[#0a0a0a] p-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8f8778]">Eligible live leads · 30d</p>
             <p className="mt-3 font-serif text-3xl text-[#f4ead4]">{measurement.ready ? growth.summary.leads : "—"}</p>
@@ -749,6 +758,13 @@ export default async function DistributionPage({
             <p className="mt-3 font-serif text-3xl text-[#f0cf79]">{measurement.ready ? command.attributedLiveLeads : "—"}</p>
             <p className="mt-2 text-xs text-[#a99a7e]">
               {measurement.ready ? "Exact campaign + placement matches on the latest recorded touch" : "No signal inference while measurement is unavailable"}
+            </p>
+          </article>
+          <article className="rounded-xl border border-[#4baab855] bg-[linear-gradient(145deg,#06171b,#090909)] p-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8bbfc6]">Legacy WordPress signals</p>
+            <p className="mt-3 font-serif text-3xl text-[#a9edf4]">{measurement.ready ? command.legacyAttributedLiveLeads : "—"}</p>
+            <p className="mt-2 text-xs text-[#79a4aa]">
+              {measurement.ready ? "Audited compatibility evidence · excluded from exact owned-demand KPIs" : "No compatibility inference while measurement is unavailable"}
             </p>
           </article>
         </section>

@@ -1,0 +1,177 @@
+# Phase 9 legacy WordPress attribution trust
+
+Date: 2026-08-22
+
+Candidate branch: `codex/phase9-legacy-wordpress-attribution-trust-20260822`
+
+Draft pull request: [#197](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/197),
+intentionally based on the PR #195 branch rather than `main`.
+
+Release order: after the exact PR #195 conversion-identity release, with a
+fresh released-main refresh and exact-head verification.
+
+Current dependency alignment: PR #195 exact hardened head
+`db13953fc5f6d24a684f66c9a1c10c6b929b72b3`, integrated by merge commit
+`4848a5f`. Prior PR #197 state:
+`rescue/amm-pr197-pre-pr195-final-refresh-20260822-2226`.
+
+## Decision
+
+Reuse the existing Neon Growth view and Owned Demand Command. Do not rewrite
+stored attribution, create a second analytics table, add another WordPress
+form, or describe historical links as exact campaign evidence.
+
+The public Our Town audit fetched 42 of 42 sitemap pages and found three live
+AskMagicMike.com links and two live embeds using the pre-owned-demand tuple:
+
+- source `ourtownproperties`;
+- campaign `website_widget`;
+- one audited legacy medium;
+- no `utm_content`; and
+- an exact Our Town referrer page.
+
+Those links remain useful traffic paths, but they cannot satisfy the new exact
+`amm_owned_demand_2026` placement contract. Ignoring them hides real evidence;
+silently relabeling them inflates a KPI. This candidate therefore adds a
+narrow, read-only compatibility classification and reports it separately.
+
+## Exact compatibility map
+
+Every condition in a row must match. Unknown pages, hosts, protocols, ports,
+campaigns, mediums, sources, or already-tagged records fail closed.
+
+| Exact HTTPS Our Town referrer path | Recorded legacy medium | Compatibility placement |
+| --- | --- | --- |
+| `/` | `homepage_cta` | `wordpress_homepage_ask_mike` |
+| `/how-much-is-your-home-worth/` | `home_value_page` | `wordpress_home_value_page` |
+| `/we-buy-homes/` | `seller_page_cta` | `wordpress_we_buy_homes` |
+| `/ask-magic-mike/` | `referral` | `wordpress_ask_magic_mike_embed` |
+| `/ask-mike/` | `referral` | `wordpress_ask_magic_mike_embed` |
+
+Accepted source aliases are limited to the historical Our Town values already
+recognized by the canonical channel. The recorded campaign must be exactly
+`website_widget`, and `utm_content` must be absent.
+
+## KPI boundary
+
+- Raw `source_attribution` rows are not changed.
+- Full referrer values are used only in the protected server read model to
+  validate the exact owned host and path; they are not returned to the UI.
+- Exact owned-demand counts continue to require the canonical source, medium,
+  campaign, and content tuple recorded on the latest eligible touch.
+- Compatibility counts carry the explicit
+  `legacy_wordpress_compatibility` basis.
+- Compatibility evidence is shown separately in Distribution Command and is
+  excluded from exact channel totals, activation lifecycle states, and the
+  exact owned-demand KPI.
+- Test and communication-suppressed leads remain excluded by the existing SQL
+  boundary before either count is built.
+
+## Operational meaning
+
+A compatibility count proves only that an eligible lead has the exact audited
+legacy tuple and exact Our Town referrer path. It does not prove publication,
+campaign identity, consumer consent, qualification, appointment, signed
+agreement, close, or revenue.
+
+The repair remains the same: after a page-specific backup and exact WordPress
+publication approval, replace one named link with the canonical tracked URL
+already generated in `/admin/distribution`. Preserve Form 3 as the only proven
+canonical Gravity Forms forward.
+
+The separate public audit also continues to report:
+
+- two Our Town pages blocked for the Facebook crawler;
+- three untagged direct links;
+- two incompletely tagged embeds;
+- overlapping indexable intent pages; and
+- multiple capture systems on five pages.
+
+This application candidate does not change any of those public WordPress
+surfaces or weaken the host firewall.
+
+## Database, provider, and consumer impact
+
+- Database migration: none.
+- Database write: none.
+- Lead or analytics write: none.
+- Email, SMS, Push, or consumer acknowledgment: none.
+- WordPress page, plugin, form, notification, or redirect change: none.
+- Publication, DNS, spend, canonical provider configuration, or NellySelly
+  action: none. A QA CLI auto-link briefly created an empty Vercel project with
+  no deployment, domain, environment variable, or Git link; it was audited,
+  deleted by exact ID, and verified absent before release evidence continued.
+
+## Verification
+
+Completed locally on the stacked candidate:
+
+- focused compatibility, exact-KPI, and fail-closed checks: 6 files / 64 tests;
+- full Node 24 suite: 215 files / 2,954 tests;
+- strict typecheck, ESLint, and Next.js 15.5.21 optimized build;
+- route manifest: 82 active / 17 acknowledged root/`src` duplicates;
+- release safety: 14/14;
+- release doctor: 43 pass / 0 fail / 0 skip;
+- Ask Magic Mike launch doctor: 25 pass / 0 fail / 17 expected local-only
+  Production-environment skips;
+- public CTA audit: 24/24;
+- Production dependency audit, candidate-range gitleaks, `git diff --check`,
+  and no-migration scan; and
+- local Production-mode visual QA at 1440 × 1000 and 390 × 844, with no
+  horizontal overflow, no clipped mobile elements, and 0 console errors or
+  warnings.
+
+The visual run intentionally omitted canonical Neon and therefore proved the
+truthful unavailable state: exact owned-source and legacy compatibility cards
+render separately, both show `—`, and neither infers zero or a compatibility
+count without measurement.
+
+Still required before release:
+
+1. exact-head GitHub CI;
+2. canonical Vercel Preview and protected Preview verification;
+3. read-only Production health comparison; and
+4. exact released-main refresh after PR #195, even if that released commit is
+   byte-identical to the currently integrated dependency head.
+
+## Hardened dependency refresh verification
+
+After PR #195 added pre-navigation interception for lead, analytics, and
+experiment writes, that exact head was merged into this candidate and both
+boundaries were re-proven together.
+
+- focused attribution plus capture-safety tests: 2 files / 24 tests;
+- full local suite: 215 files / 2,954 tests;
+- system isolation, release safety 14/14, strict typecheck, ESLint, optimized
+  Next.js 15.5.21 build, 82/17 route manifest, and release doctor 43/43;
+- no known Production dependency vulnerability;
+- candidate diff, secret, and migration scans passed; and
+- protected local browser proof at desktop and 390 × 844 mobile: meaningful
+  content, one `main`, no framework overlay, exact and legacy cards rendered
+  separately, truthful unavailable copy, disclosure interaction working, no
+  horizontal overflow, zero console errors/warnings, and no application POST
+  in the counted session.
+
+A preliminary public-root navigation was discarded after the loopback origin
+correctly received HTTP 403 from `/api/events`; it performed no write. The
+counted session started at `about:blank`, installed synthetic responses for
+`/api/leads`, `/api/events`, and `/api/experiments/event` before navigation,
+then opened only the protected Distribution Command.
+
+## Rollback
+
+This is application-only. Repoint the canonical aliases to the recorded prior
+Vercel Production deployment or revert the candidate merge. Neon and WordPress
+require no rollback because neither is mutated.
+
+## Release authority
+
+This document and a green Preview are evidence, not Production authority. The
+future application-only gate is:
+
+`APPROVE PHASE 9 LEGACY WORDPRESS ATTRIBUTION TRUST MERGE AND PRODUCTION DEPLOYMENT`
+
+That phrase must not be accepted before PR #195 is released and this candidate
+is refreshed and re-proven on exact `main`. It does not authorize a WordPress
+edit, crawler/firewall exception, lead submission, message, publication,
+migration, spend, DNS change, provider action, deletion, or NellySelly action.
