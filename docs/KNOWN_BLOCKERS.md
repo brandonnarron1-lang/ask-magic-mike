@@ -55,6 +55,10 @@ specific expansions; they do not invalidate the live lead pipe.
   #197 release in order, it must be refreshed onto exact `main` and re-proven
   before its own application gate is eligible. Any WordPress publication still
   requires a separate page-specific gate.
+- The field-experience branch is stacked after PR #198. It has no migration and
+  remains silent in Preview; a later exact gate must explicitly authorize its
+  Production deployment and resulting privacy-minimized LCP/INP/CLS telemetry.
+  It does not make PR #187's target-register migration eligible.
 - Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
   and #119–#121 are preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,

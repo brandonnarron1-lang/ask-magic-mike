@@ -2,6 +2,38 @@
 
 Updated 2026-08-22.
 
+## Phase 9 field-experience trust — 2026-08-22
+
+- **Reuse decision:** Draft PR #187 remains deferred; only its unique
+  privacy-safe real-user measurement concept is being consolidated after PR
+  #198. Its KPI-target register, migration, stale base, and numeric targets are
+  excluded.
+- **Canonical implementation:** the root application reports LCP, INP, and CLS
+  only on exact Ask Magic Mike Production hosts and registered public routes.
+  The existing `/api/events`, durable rate limit, Neon `analytics_events`,
+  Growth Command Center, and `report:view` boundary are reused.
+- **Privacy and security:** Preview, automation, QA, admin/API routes, lead and
+  session identity, attribution, click IDs, query strings, raw URLs, full user
+  agents, and PII are excluded. The server repeats runtime validation, derives
+  rating, rejects non-canonical Production requests, and persists only named
+  bounded dimensions.
+- **Truthful dashboard:** fixed parameterized SQL reads at most 25,000 recent
+  eligible rows, deduplicates metric IDs, and shows overall/mobile/desktop P75
+  with explicit sample maturity. Missing or failed evidence is unavailable,
+  never synthetic zero.
+- **Local acceptance:** 5 focused files / 28 tests and the full 219-file /
+  2,982-test suite pass with strict typecheck, full ESLint, optimized Next.js
+  15.5.21 build, 52 generated static pages, 83/17 route manifest, 14/14 release
+  safety, system isolation, dependency audit, candidate leak/pattern/diff
+  checks, and an empty migration delta.
+- **Responsive no-write acceptance:** protected Growth QA at 1440×1000 and
+  390×844 shows one main landmark, no overflow or framework overlay, truthful
+  unavailable field evidence, zero console findings, GET-only application
+  traffic, and no Preview telemetry. Exact-head Node 24 CI and immutable
+  protected Vercel Preview proof remain pending until push.
+- **No migration or activation:** Production remains unchanged and no telemetry
+  event was sent. Full scope: `docs/phase9/FIELD_EXPERIENCE_TRUST.md`.
+
 ## Phase 9 WordPress owned-demand activation change set — 2026-08-22
 
 - **Stacked safely:** Draft PR

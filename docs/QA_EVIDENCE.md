@@ -1,5 +1,51 @@
 # QA Evidence
 
+## Phase 9 field-experience trust evidence — 2026-08-22
+
+- Candidate base — PASS: exact stacked PR #198 head
+  `7b652ec5df3df437859b8109f0e32206de8f488e`; preserved at
+  `rescue/amm-pre-field-experience-trust-20260822-2315` before implementation.
+- Scope audit — PASS: only PR #187's unique privacy-safe field measurement is
+  reused. Its KPI-target migration, numeric target register, stale stack, and
+  asset-studio overlap remain excluded.
+- Focused contracts — PASS: 5 test files / 28 tests covering normal browser vs
+  automation classification, public-route normalization, QA exclusion, bounded
+  metric/rating validation, exact Production origin, property minimization,
+  public API persistence truth, Preview rejection, aggregate normalization,
+  missing-evidence truth, bounded/deduplicated SQL, and protected UI copy.
+- Strict TypeScript and focused ESLint — PASS. Local Node is 26.5.1 while the
+  repository requires Node 24; exact remote Node 24 remains authoritative.
+- Full local release gate — PASS: Ask Magic Mike/NellySelly isolation, 14/14
+  release-safety controls, 219 test files / 2,982 tests, strict TypeScript,
+  full ESLint, optimized Next.js 15.5.21 build, 52 generated static pages, and
+  83 active routes / 17 acknowledged root-source duplicates.
+- Dependency and candidate integrity — PASS: Production dependency audit found
+  no known vulnerability; gitleaks scanned approximately 68.64 KB of the
+  candidate patch with no leak; added-line credential patterns, diff integrity,
+  and the empty migration delta passed.
+- Local protected visual acceptance — PASS at 1440×1000 and 390×844. Synthetic
+  local Basic authentication was used with RBAC disabled, no `DATABASE_URL`,
+  Preview classification, `SAFE_DB_WRITE=false`, and delivery providers
+  disabled. Lead, durable event, and experiment routes were intercepted before
+  navigation. The Growth view rendered one `main`, no horizontal overflow,
+  no framework overlay, zero console errors/warnings, GET-only application
+  traffic, and a truthful unavailable field-evidence state with no synthetic
+  value. Preview mode emitted no field telemetry.
+- Rendered artifacts:
+  `output/playwright/phase9-field-experience-trust/growth-desktop-1440x1000.png`,
+  `growth-mobile-390x844.png`, `growth-field-panel-desktop.png`, and
+  `growth-field-panel-mobile.png` in the same ignored evidence directory.
+- Security review — PASS for the candidate boundary: no browser secret/env
+  dependency, HTML sink, untrusted navigation, cross-origin destination,
+  session/lead binding, raw PII/agent persistence, dynamic SQL, unbounded body,
+  or unbounded aggregate scan. Exact origin is defense-in-depth, not an
+  authentication claim; the dashboard keeps evidence aggregate and advisory.
+- No Production deployment, database/schema mutation, analytics event, lead,
+  email/BCC, SMS, Push, provider call, WordPress edit, publication, spend, DNS,
+  deletion, or NellySelly action occurred.
+- Exact-head Node 24 CI, immutable Vercel Preview, and protected no-write
+  Preview QA remain pending until the branch is committed and pushed.
+
 ## Phase 9 WordPress activation change-set evidence — 2026-08-22
 
 - Dependency composition — PASS: PR #197 exact head

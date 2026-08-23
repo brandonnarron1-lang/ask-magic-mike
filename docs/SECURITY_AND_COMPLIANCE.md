@@ -103,6 +103,23 @@ purchase or valuation copy. Product language stays conditional and human-reviewe
 broker-reviewed local guidance, not an appraisal, no fabricated availability or
 guaranteed result.
 
+## Field-experience telemetry boundary — 2026-08-22
+
+- The client reporter contains no secret or environment-dependent server trust
+  decision and runs only when the server renders it for Vercel Production.
+- The public API uses exact canonical origin, existing durable rate limiting,
+  a 4 KB streaming body cap, runtime type/enum/range/path validation, a coarse
+  normal-browser requirement, and truthful persistence status.
+- Stored observations contain no lead/session association, attribution, click
+  IDs, queries, raw URLs, raw IPs, cookies, tokens, PII, or full user agents.
+- Aggregate SQL is fixed and parameterized, bounded to 25,000 recent eligible
+  rows, metric-ID deduplicated, and protected behind server-side `report:view`.
+- Origin and user-agent headers can be spoofed by a determined non-browser
+  caller. The event is therefore a rate-limited aggregate signal—not an
+  authentication, legal, conversion, or assignment authority.
+- Production activation remains explicitly gated. Preview renders no reporter
+  and sends no field event.
+
 ## Known findings
 
 1. Per-user Lead Center RBAC is the active target boundary; a fail-closed shared

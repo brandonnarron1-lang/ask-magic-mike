@@ -103,6 +103,28 @@ provider action, or deletion.
   action. The first proposed write is the homepage link only, and its gate is:
   `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`.
 
+## Stacked field-experience candidate after PR #198
+
+- Branch `codex/phase9-field-experience-trust-20260822` is stacked behind PR
+  #198 and extracts only the privacy-safe LCP/INP/CLS capability preserved in
+  deferred PR #187. It excludes PR #187's KPI-target migration and numeric
+  targets.
+- The candidate uses the existing public analytics route and ledger, writes no
+  telemetry in Preview, and contains no migration. It cannot release before
+  PRs #195, #197, and #198 release in order and it is refreshed and re-proven
+  on exact `main`.
+- Local release, dependency, secret, migration, and protected desktop/mobile
+  no-write evidence is green. Exact-head Node 24 and immutable Vercel Preview
+  evidence still must pass after the branch is pushed; this does not make the
+  later gate eligible ahead of the predecessor stack.
+- Its later exact gate is:
+  `APPROVE PHASE 9 FIELD EXPERIENCE TRUST MERGE, PRODUCTION DEPLOYMENT, AND FIELD TELEMETRY ACTIVATION`.
+- That phrase will authorize only the exact reviewed application release and
+  minimized Production LCP/INP/CLS observations. It will not authorize a
+  numeric target, migration, lead/form submission, message, WordPress/social
+  publication, device enrollment, spend, DNS change, deletion, provider
+  purchase, or NellySelly action.
+
 ## Deferred candidates requiring refresh and overlap review
 
 - PR [#182](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/182)

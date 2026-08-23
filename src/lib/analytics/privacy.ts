@@ -281,6 +281,16 @@ const PUBLIC_EVENT_PROPERTY_KEYS: Record<string, readonly string[]> = {
   widget_lead_created: ["funnel_name", "step_name"],
   widget_cta_clicked: ["cta"],
   widget_submit_failed: [],
+  web_vital_observed: [
+    "device_category",
+    "metric_code",
+    "metric_id",
+    "metric_value",
+    "navigation_type",
+    "rating",
+    "route",
+    "traffic_class",
+  ],
   review_plan_started: ["focus", "goal", "horizon"],
   review_plan_saved: ["completed_count", "focus", "goal", "horizon"],
   review_plan_task_completed: ["completed_count", "focus", "goal", "horizon", "task_id"],
@@ -439,6 +449,15 @@ const ENUM_VALUES: Partial<Record<string, ReadonlySet<string>>> = {
     "seller_page",
     "widget",
   ]),
+  metric_code: new Set(["LCP", "INP", "CLS"]),
+  navigation_type: new Set([
+    "navigate",
+    "reload",
+    "prerender",
+    "back-forward",
+    "back-forward-cache",
+    "restore",
+  ]),
   leadType: new Set([
     "agent_referral",
     "buyer",
@@ -465,6 +484,7 @@ const ENUM_VALUES: Partial<Record<string, ReadonlySet<string>>> = {
     "seller_page",
     "widget",
   ]),
+  rating: new Set(["good", "needs-improvement", "poor"]),
   step_name: new Set([
     "address",
     "appointment_request",
@@ -508,6 +528,7 @@ const ENUM_VALUES: Partial<Record<string, ReadonlySet<string>>> = {
     "6_plus_months",
     "unknown",
   ]),
+  traffic_class: new Set(["public_production"]),
 };
 
 const PUBLIC_ANALYTICS_EVENTS = new Set(Object.keys(PUBLIC_EVENT_PROPERTY_KEYS));

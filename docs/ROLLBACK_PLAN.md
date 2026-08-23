@@ -2,11 +2,17 @@
 
 ## Application
 
-Current Production is `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW` at merge commit
-`f5f82f1bfaadea0ed20da50738ebc1f83e8dab97`. Re-inspect Production and record
+Current Production is `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J` at merge commit
+`5a3c5c7f2463ea399c21b616ff249f6c67e156b6`. Re-inspect Production and record
 the immediately preceding Ready deployment before a future release because
 aliases can move. If smoke checks fail, stop traffic activation and promote the
 recorded prior deployment. Do not delete a deployment or force-push.
+
+For the dependent field-experience candidate, application rollback to the prior
+accepted Vercel deployment removes the reporter and Growth panel code. It has
+no schema rollback. Preserve any minimized `web_vital_observed` rows already
+written; the prior application ignores them. Data deletion remains a separate
+approved action, not an automatic rollback step.
 
 ## Database
 

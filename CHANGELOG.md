@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-08-22 — Privacy-safe field-experience trust candidate
+
+- Extracted the useful LCP/INP/CLS capability from deferred PR #187 without its
+  KPI-target migration, stale release stack, or numeric target UI.
+- Added a Production-only, canonical-host reporter and strict server runtime
+  contract on the existing rate-limited `/api/events` path.
+- Minimized durable observations to normalized public route, metric/value,
+  navigation type, mobile/desktop class, server-derived rating, and coarse
+  browser class—without lead, session, attribution, query, PII, or raw agent.
+- Added bounded, deduplicated P75 aggregates and truthful mobile/desktop sample
+  maturity to the protected Growth Command Center.
+- Passed the full 219-file / 2,982-test local release gate, optimized build,
+  dependency/leak/migration checks, and protected desktop/mobile no-write QA.
+- Performed no Production deployment, migration, analytics write, lead, message,
+  WordPress/publication, DNS, spend, deletion, or NellySelly action.
+
 ## 2026-08-22 — WordPress owned-demand activation change set
 
 - Stacked the candidate behind PR #197 after preserving its released-main state

@@ -22,11 +22,11 @@ does not authorize a parallel application, database, notification engine, or CRM
 - Free-first phone alert: Web Push; carrier SMS remains disabled until a
   compliant registered provider is explicitly approved
 
-The Production baseline is PR #184, merge commit
-`f5f82f1bfaadea0ed20da50738ebc1f83e8dab97`, deployed as
-`dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`. Its publication-proof migration is already
-verified on the named Neon Production branch. Do not rerun that migration or
-redeploy that commit merely because an old approval prompt is repeated.
+The current Production baseline is PR #194 merge
+`5a3c5c7f2463ea399c21b616ff249f6c67e156b6`, deployed as
+`dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. Completed historical gates are exhausted;
+do not rerun a migration or redeploy an old commit merely because its approval
+prompt is repeated.
 
 ## Consolidation already completed
 
@@ -49,12 +49,20 @@ redeploy that commit merely because an old approval prompt is repeated.
 
 ## Current merge order
 
-### 1. PR #185 — owned-demand command consolidation
+The next application-only sequence is PR #195, then PR #197, then PR #198,
+then the field-experience trust candidate. Each downstream branch must be
+refreshed onto the exact newly released `main` and re-proven before its own gate
+is eligible. PR #187 remains deferred; only its unique no-migration field
+measurement concept is reused after the current stack.
 
-PR #185 is the single consolidation vehicle. It is refreshed onto the current
-Production `main` and contains the additive application work from these
-already-built branches plus one constraint-only repair to align the existing
-publication-proof ledger with those already-reviewed WordPress placements:
+## Historical completed consolidation
+
+### PR #185 — owned-demand command consolidation
+
+Released PR #185 was the single consolidation vehicle for the additive
+application work from these already-built branches plus one constraint-only
+repair aligning the publication-proof ledger with reviewed WordPress
+placements:
 
 - PR #185: Buyer discovery, canonical current-router CTA authority, exact Vercel
   Preview-origin binding, and modern release-safety coverage.
@@ -63,14 +71,11 @@ publication-proof ledger with those already-reviewed WordPress placements:
 - PR #188: explicit WordPress placement catalog and read-only audit tooling.
 - PR #189: deterministic activation decision support and operator UI.
 
-The consolidated candidate does not publish to GBP, Facebook, Instagram,
-WordPress, or email; send a message; create a lead; or change Production data.
-After exact-head CI and Preview acceptance, merge and deploy only after this
-separate gate:
+PR #185 is merged and live as
+`44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8`. Its historical gate is exhausted
+and cannot authorize a new migration, merge, deployment, placement, or message.
 
-`APPROVE PHASE 9 OWNED-DEMAND WORDPRESS PROOF MIGRATION, PR 185 MERGE, AND PRODUCTION DEPLOYMENT`
-
-### 2. Deferred candidates
+### Deferred and superseded candidates
 
 - PR #182 remains Draft as historical evidence. Its unique current-router safety
   work is preserved in PR #185; its duplicated operational authority and launch
@@ -78,24 +83,19 @@ separate gate:
 - PR #187's KPI target-register migration is deferred. Production has no eligible
   live-lead baseline, so deploying targets now would create precision without
   evidence. The branch remains available for later review after live demand.
-- PRs #190-#192 were audited against the final PR #185 head. Their independent
-  privacy, durable-limiter, and aggregate KPI-trust work is consolidated once on
-  `codex/phase9-privacy-kpi-trust-consolidation-20260822`; stale documentation
-  and PR #187's target-register dependency remain excluded. The consolidated
-  candidate is stacked on PR #185 and has its own exact-head proof and release
-  gate. Preserve the source branches until acceptance, then mark the duplicate
-  PRs superseded without deleting their history.
-- PR #179 audit is complete. Its unique token-scoped iOS Home Screen handoff is
-  consolidated in Draft PR #194 on
-  `codex/phase9-phone-handoff-consolidation-20260822`, stacked after the verified
-  PR #193 candidate. The refreshed implementation adds a
+- PRs #190-#192 were audited and their independent privacy, durable-limiter,
+  and aggregate KPI-trust work was consolidated once in released PR #193;
+  stale documentation and PR #187's target-register dependency remain
+  excluded.
+- PR #179 audit is complete. Its unique token-scoped iOS Home Screen handoff was
+  consolidated in released PR #194. The implementation includes a
   durable one-time Neon claim guard, distinct bearer-invite and HttpOnly-session
   credentials, a `/phone-alerts/`-scoped installed app, exact Ask Magic Mike
   origin isolation, copy-safe endpoint persistence, RBAC-only invite creation
   whenever RBAC is enabled, one-shot setup QA delivery, and private install/manifest Preview
-  proof. Historical PR
-  #179 remains preserved but must not merge as a second stack. Physical device
-  enrollment and receipt confirmation remain a separate human step.
+  proof. Historical PR #179 remains preserved but must not merge as a second
+  stack. Physical device enrollment and receipt confirmation remain separate
+  human actions.
 - PRs #92 and #119-#121: archive after review; they are not a parallel release
   sequence.
 
