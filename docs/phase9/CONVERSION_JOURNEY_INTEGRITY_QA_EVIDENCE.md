@@ -51,8 +51,7 @@ npm run test -- --run \
 
 Result: 4 files / 42 tests passed.
 
-The isolated fast-track complete suite passes 220 files / 2,991 tests on Node
-24.18.0.
+The refreshed fast-track complete suite passes on Node 24.18.0.
 
 ## Local rendered acceptance
 
@@ -85,17 +84,21 @@ The isolated fast-track complete suite passes 220 files / 2,991 tests on Node
 
 ## Fast-track local gate and remaining exact-head proof
 
-The isolated branch starts from exact final PR #202 head
-`26047176b78006230ce6064a5ee53f9c0561ef2a` and reuses exact PR #200
+The branch now includes exact final PR #202 head
+`37aa69421a70a177504e9ccaed99fef75852849e` through clean merge
+`3b5aef0aea2254c4b410393bb84ad1e1b61b7510`; rescue branch
+`rescue/amm-pr203-pre-pr202-refresh-20260823-173028` preserves the previous
+sealed head. It reuses exact PR #200
 implementation commit `91e05c06a7adfceba22d35c36cb7a2105da9a36b`. Application
 and test files applied without conflict; the original PR #200 remains
-unchanged. Exact Node 24.18.0 local proof passes 4 focused files / 42 tests, 220
-files / 2,991 tests, strict typecheck, ESLint, optimized Next.js 15.5.21 build
+unchanged. Exact Node 24.18.0 local proof passes 4 focused files / 42 tests and
+the complete suite, strict typecheck, ESLint, optimized Next.js 15.5.21 build
 with 52 static pages, 82 active / 17 acknowledged duplicate routes, 14/14
 release safety, system isolation, no-vulnerability Production dependency
 audit, diff integrity, an empty migration delta, and a staged redacted Gitleaks
 scan of approximately 28.73 KB with no leak.
 
+The following pre-refresh evidence is retained for audit but superseded.
 Application head `a86eece1f2b18ceb064d109912c5b77314d2aca9` passed exact-head
 GitHub Node 24 release run `32660966818` (job `97246974974`, artifact
 `9498765744`, digest
@@ -112,8 +115,8 @@ entries. Health identified exact commit `a86eece...`, Preview application and
 database environments, `safe_for_preview_mutation=false`, and live email/SMS
 disabled.
 
-This evidence-only documentation seal must receive its own exact-head CI and
-Preview checks before the Draft PR is considered fully sealed. No PR #202 or
+The refreshed Draft head must receive its own exact-head CI and Preview checks,
+recorded in PR #203, before it is considered fully sealed. No PR #202 or
 historical approval can authorize this later candidate.
 
 ## Safety boundary

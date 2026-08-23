@@ -46,8 +46,12 @@ database write, provider change, spend, DNS change, or NellySelly mutation.
 ## Release order
 
 This candidate follows Draft PR #203, which follows the immediate durability
-PR #202. PR #201 remains unchanged as source history. After PR #202 and PR #203
-release in order, this branch must refresh onto exact `main` and repeat
+PR #202. It now includes refreshed PR #203 head
+`6da82fe6d9a87f0ced6da5f4cdae04defea5e4ae` through clean ordered merge
+`010e18fcf610997948fcf694361c4b6b2423884f`; rescue branch
+`rescue/amm-pr204-pre-pr203-refresh-20260823-173028` preserves the prior sealed
+head. PR #201 remains unchanged as source history. After PR #202 and PR #203
+release in order, this branch must retarget to exact `main` and repeat
 exact-head CI, immutable Preview, protected no-write, and responsive visual
 proof before a separate merge/deployment gate can be issued. No historical
 approval authorizes this candidate.
