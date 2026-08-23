@@ -73,6 +73,35 @@ claim about real-user LCP. The stacked field-experience candidate remains the
 canonical way to collect privacy-safe Production LCP/INP/CLS evidence after its
 separate release gate and sufficient genuine traffic.
 
+## Immutable remote implementation evidence
+
+- Draft PR: [#201](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/201)
+- Implementation head: `1ca7ff00eacbc7da6d9b861431109c3d009c6861`
+- GitHub Node 24 run: `32654093014`, job `97230060500` — PASS in 2m28s
+- Release artifact: `9497005411`
+- Release artifact digest:
+  `sha256:d434031ee26f4396f6738b3d7258cc43287ca8d596a6d14ee46f16d2c8425f3b`
+- Vercel Preview: `dpl_3JSoFzE6aV4haxCHnwMuUJ2Jfh3u` — READY, Preview,
+  Next.js, exact implementation head
+- Immutable Preview URL:
+  `https://ask-magic-mike-49k64exjf-eyes-up-industries.vercel.app`
+- Protected no-write QA run: `32654251078`, job `97230444249` — PASS in
+  3m45s
+- Protected QA artifact: `9497063683`
+- Protected QA artifact digest:
+  `sha256:02b071194a183af22432bb9f468329d9c5dd469a43d2ff838d48e5c353026cc4`
+- Preview route/auth checks: 17 pass / 6 intentional mutation skips / 0 fail
+- Widget browser E2E: 2 expected / 0 unexpected / 0 flaky / 0 skipped
+- Release doctor: 43 pass / 0 fail / 0 skip
+- Authority: `PREVIEW_READY`; `SAFE_DB_WRITE=false`, Preview mutation blocked,
+  health `safe_for_preview_mutation=false`, live email/SMS disabled
+
+The protected workflow checked out the target branch and recorded exact
+implementation commit `1ca7ff00eacbc7da6d9b861431109c3d009c6861` in its report.
+The documentation-only evidence seal that records these identifiers must also
+receive exact-final-head CI and Preview proof; it does not alter the accepted
+application behavior.
+
 ## Rollback proof
 
 The change is application-only and additive. Reverting its implementation

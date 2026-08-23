@@ -2,7 +2,7 @@
 
 Date: 2026-08-23
 
-Status: stacked release candidate; Production unchanged
+Status: stacked Draft PR #201; Production unchanged
 
 ## Reuse-first decision
 
@@ -45,7 +45,7 @@ database write, provider change, spend, DNS change, or NellySelly mutation.
 
 ## Release order
 
-This candidate is stacked after Draft PRs #197, #198, #199, and #200. Those
+Draft PR #201 is stacked after Draft PRs #197, #198, #199, and #200. Those
 predecessors must be released and this branch refreshed before its own exact
 merge and Production deployment approval can be used.
 

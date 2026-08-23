@@ -107,6 +107,20 @@ provider action, or deletion.
   submission, database migration, message, WordPress/social publication,
   device enrollment, spend, DNS change, deletion, provider purchase, or
   NellySelly action.
+- Draft PR [#201](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/201)
+  is stacked behind #200. It preserves the approved Black Diamond identity and
+  moves only the existing art-directed homepage hero onto responsive Next.js
+  image delivery. Implementation head
+  `1ca7ff00eacbc7da6d9b861431109c3d009c6861` is green on Node 24, immutable
+  READY Preview, protected no-write QA, and cold mobile/desktop visual checks.
+  It has no migration. After PRs #197-#200 release, it must refresh onto exact
+  `main`, repeat exact-head proof, and receive its own later gate:
+  `APPROVE PHASE 9 PUBLIC HERO DELIVERY TRUST MERGE AND PRODUCTION DEPLOYMENT`.
+- That later phrase will authorize only the exact reviewed PR #201 application
+  merge and canonical Vercel Production deployment. It will not authorize a
+  database write, lead submission, message, WordPress/social/GBP publication,
+  device enrollment, spend, DNS/provider change, deletion, or NellySelly
+  action.
 
 ## Stacked field-experience candidate after PR #198
 
