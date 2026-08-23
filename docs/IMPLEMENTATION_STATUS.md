@@ -78,9 +78,25 @@ Updated 2026-08-23.
   database-unconfigured read-only runtime, GET-only browser requests, and zero
   console warnings/errors. Focused visual inspection confirms the WordPress
   card and controls are restrained, legible, and correctly stacked.
-- **Verification remaining:** final redacted candidate secret/diff/migration
-  checks, exact-head CI, immutable Preview, and protected no-write runtime
-  acceptance remain to be sealed.
+- **Verification boundary:** candidate secret/diff/migration integrity,
+  exact-head CI, immutable Preview, and protected no-write runtime acceptance
+  are sealed below. Any later refresh onto `main` must repeat the exact-head
+  proof before release eligibility is reconsidered.
+- **Remote acceptance:** Draft PR #205 head
+  `a1e8a4940f8d9eefe21bc6f43514e2e4941e8e31` is cleanly mergeable and passes
+  Node 24 run `32665394864`, READY Preview
+  `dpl_5AWNXqLf5k9Gc8UEqK2hA1AHiLFH`, and protected run `32665666025`: 17
+  read-only passes / 6 intentional mutation skips / 0 failures, Widget 2/2,
+  doctor 43/43, safety 14/14, release candidate GO, `PREVIEW_READY`, and zero
+  fatal/error/warning deployment logs. Preview RBAC is disabled, so the
+  manifest route truthfully returns 409 before a WordPress fetch; its
+  authorized `report:view` path passes isolated route execution tests.
+- **Final local integrity:** no migration delta, no known Production dependency
+  vulnerability, clean diff, and gitleaks scanned 560 commits / approximately
+  14.71 MB with no leak.
+- **Release status:** keep Draft behind #202 → #203 → #204. No Production gate
+  is issued; after predecessors release, refresh onto exact `main` and repeat
+  exact-head proof.
 - Plan and rollback:
   `docs/phase9/OWNED_TRAFFIC_ACTIVATION_FAST_TRACK.md` and
   `docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md`.

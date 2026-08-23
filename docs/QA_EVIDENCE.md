@@ -61,8 +61,32 @@
   `distribution-mobile-390x844.png`,
   `wordpress-manifests-desktop-1440.png`, and
   `wordpress-manifests-mobile-390.png`.
-- Exact-head remote CI, immutable Preview, and protected no-write runtime
-  evidence remain pending on the final Draft head.
+- Draft PR #205 remote application-head acceptance — PASS. GitHub Node 24 run
+  `32665394864` completed successfully against exact SHA
+  `a1e8a4940f8d9eefe21bc6f43514e2e4941e8e31`; Vercel deployment
+  `dpl_5AWNXqLf5k9Gc8UEqK2hA1AHiLFH` is READY, target Preview, Node 24, and
+  records the same SHA and PR at
+  `https://ask-magic-mike-pv8mtuv39-eyes-up-industries.vercel.app`.
+- Protected exact-head run `32665666025` — PASS in 3m45s with
+  `SAFE_DB_WRITE=false`: 17 read-only passes, 6 intentional mutation skips, 0
+  failures; Widget browser E2E 2/2; doctor 43/43; safety 14/14; release
+  candidate GO; launch verdict `PREVIEW_READY`. Artifact `9499989400` digest:
+  `sha256:797352c0262fd03078a5ce9e5c4b422518bb052eece95bab4d908477c1e4e365`.
+- Preview health reported exact commit `a1e8a49`, Preview Neon, mutation safety
+  false, and live email/SMS disabled. Direct public root, home-value, and both
+  health endpoints returned HTTP 200. Anonymous `/admin/distribution` returned
+  HTTP 401 with no-store, Basic challenge, SAMEORIGIN, and noindex controls.
+- Preview `LEAD_CENTER_RBAC_ENABLED` is false. The manifest route therefore
+  returned HTTP 409 `rbac_not_enabled` before any WordPress fetch, for both a
+  valid and unknown placement. Authorized synthetic `report:view`, denied,
+  unknown-placement, headers, and no-fetch-before-auth contracts pass the
+  isolated route suite. Perform one authenticated runtime download only after
+  the ordered stack reaches an RBAC-enabled environment and before any
+  separately approved WordPress publication.
+- Vercel deployment-log queries since creation returned fatal=0, error=0, and
+  warning=0. No lead, database write, form submission, notification, email,
+  SMS, Push, WordPress mutation, publication proof, provider action, DNS
+  change, spend, deletion, or NellySelly action occurred.
 
 ## Phase 9 conversion-journey fast-track live audit — 2026-08-23
 

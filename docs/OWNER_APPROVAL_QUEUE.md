@@ -90,12 +90,19 @@ provider action, or deletion.
 
 ## Owned-traffic activation fast-track after PR #204
 
-- The local candidate on
-  `codex/phase9-owned-traffic-fast-track-20260823` reuses only PR #197's
+- Draft PR [#205](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/205)
+  on `codex/phase9-owned-traffic-fast-track-20260823` reuses only PR #197's
   attribution-trust work and PR #198's read-only WordPress manifests on exact
   sealed PR #204 head.
+- Application/evidence head
+  `a1e8a4940f8d9eefe21bc6f43514e2e4941e8e31` has green Node 24 CI, a READY
+  exact-head Vercel Preview, protected 17-pass/6-mutation-skip acceptance,
+  Widget 2/2, doctor 43/43, and `PREVIEW_READY`.
 - It has no Production gate. It must remain Draft behind #202 → #203 → #204,
-  then refresh onto exact `main` and repeat exact-head proof.
+  then refresh onto exact `main` and repeat exact-head proof. Preview RBAC is
+  disabled, so the manifest download remains fail-closed there; an
+  authenticated role-bound runtime download is still required after ordering
+  and before any WordPress publication.
 - Application release cannot edit WordPress. The first later proposed write is
   one homepage href only and still requires:
   `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`.

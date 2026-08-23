@@ -55,9 +55,14 @@ specific expansions; they do not invalidate the live lead pipe.
   proof passes.
 - PRs #197–#201 remain preserved. Their useful attribution/WordPress,
   conversion, performance, and visual work is not deleted or silently merged.
-- The current local owned-traffic fast-track reuses only PRs #197 and #198 on
-  top of sealed PR #204. It remains behind the ordered #202 → #203 → #204 stack,
+- Draft PR #205 reuses only PRs #197 and #198 on top of sealed PR #204. Its
+  exact application head has green CI, immutable Preview, protected no-write,
+  and browser proof. It remains behind the ordered #202 → #203 → #204 stack,
   has no Production gate, and cannot authorize a WordPress publication.
+- Preview Lead Center RBAC is disabled; therefore the manifest API fails closed
+  with HTTP 409 before public-page fetch. The role-bound handler contract passes
+  isolated tests, but an authenticated runtime download must pass after release
+  ordering and before any separately approved WordPress edit.
 - Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
   and #119–#121 are preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,

@@ -2,7 +2,7 @@
 
 Date: 2026-08-23
 
-Status: local consolidation and read-only runtime audit complete; remote proof pending
+Status: Draft PR #205 application/evidence acceptance complete; ordered release pending
 
 External mutation: none
 
@@ -135,8 +135,33 @@ all proposed links.
   three manifest links, zero writable forms in the read-only runtime, zero
   console warnings/errors, and a GET-only request ledger. The WordPress card
   and all three manifest controls remain legible and correctly stacked.
-- Exact-head remote CI, immutable Preview, and protected no-write proof remain
-  before the Draft candidate can be sealed.
+- The application/evidence head is sealed by exact-head remote CI, immutable
+  Preview, and protected no-write proof recorded below. Any later refresh onto
+  `main` must repeat that evidence before release eligibility is reconsidered.
+
+## Remote acceptance
+
+- Draft PR #205 application/evidence head
+  `a1e8a4940f8d9eefe21bc6f43514e2e4941e8e31` is cleanly mergeable on the exact
+  PR #204 base.
+- GitHub Node 24 release run `32665394864` passed the full release gate.
+- Vercel Preview deployment `dpl_5AWNXqLf5k9Gc8UEqK2hA1AHiLFH` is READY on
+  Node 24 at
+  `https://ask-magic-mike-pv8mtuv39-eyes-up-industries.vercel.app` and records
+  PR #205, the exact branch, and the exact head SHA.
+- Protected run `32665666025` enforced `SAFE_DB_WRITE=false` and passed 17
+  read-only checks with 6 intentional mutation skips and 0 failures, Widget
+  browser E2E 2/2, doctor 43/43, safety 14/14, release candidate GO, and
+  `PREVIEW_READY`. Artifact `9499989400` has digest
+  `sha256:797352c0262fd03078a5ce9e5c4b422518bb052eece95bab4d908477c1e4e365`.
+- Preview health identifies the exact head, Preview Neon, live email/SMS off,
+  and mutation safety off. Deployment log queries returned zero fatal, error,
+  or warning entries.
+- Preview intentionally has Lead Center RBAC disabled. Direct anonymous Admin
+  access fails with HTTP 401, and the manifest API fails closed with HTTP 409
+  before any WordPress fetch. The authorized `report:view` execution contract
+  passes isolated route tests. An authenticated runtime download remains a
+  post-ordering acceptance item before any WordPress publication.
 
 ## Rollback
 
