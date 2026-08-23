@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-08-22 — Legacy attribution-trust dependent refresh
+
+- Refreshed the stacked legacy WordPress attribution candidate onto PR #195's
+  exact hardened head `db13953fc5f6d24a684f66c9a1c10c6b929b72b3` after preserving
+  the prior candidate at
+  `rescue/amm-pr197-pre-pr195-final-refresh-20260822-2226`.
+- Revalidated that legacy compatibility evidence remains separate from exact
+  owned-demand KPIs while inheriting write-free visual capture for leads,
+  analytics events, and experiment exposures.
+- Re-ran focused, full-suite, typecheck, lint, build, route, release-doctor,
+  dependency, secret, migration, desktop, and mobile checks without a
+  Production, database, WordPress, notification, or publication action.
+
 ## 2026-08-22 — Conversion identity polish
 
 - Added required seller identity to the existing four-stage home-value funnel.

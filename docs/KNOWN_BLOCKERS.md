@@ -24,11 +24,14 @@ specific expansions; they do not invalidate the live lead pipe.
   physical enrollment and a `[TEST]` Push remain separate actions.
 - Draft PR #195 is refreshed onto exact released main. Its prior stacked state
   is preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
-  It must pass exact-head GitHub CI and protected Preview before its distinct
-  conversion-identity release gate can be considered.
+  Exact-head GitHub CI and protected Preview are green at
+  `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`; only its distinct unconsumed
+  conversion-identity release gate remains.
 - Draft PR #197 is stacked behind PR #195. Its compatibility counts are
-  deliberately excluded from exact KPI and activation states; it must be
-  refreshed after PR #195 before its own gate is eligible.
+  deliberately excluded from exact KPI and activation states. It is aligned
+  with PR #195's current exact head and locally re-proven, but it must still be
+  refreshed onto released `main` after PR #195 and receive fresh remote proof
+  before its own gate is eligible.
 - Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
   and #119–#121 are preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,

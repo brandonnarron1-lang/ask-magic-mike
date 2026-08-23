@@ -1138,3 +1138,61 @@ Local visual artifacts:
 Exact-head GitHub CI, canonical Vercel Preview, protected Preview QA, and the
 released-main refresh remain required before the separate merge/deploy gate can
 be requested.
+
+## PR #197 hardened dependency refresh — 2026-08-22 22:33 EDT
+
+PR #195 exact head
+`db13953fc5f6d24a684f66c9a1c10c6b929b72b3` was merged into the clean PR #197
+worktree as `4848a5f`. The prior PR #197 head `39f2ace6c621c088f477d807bf1ad0eb57cb229e`
+is preserved at
+`rescue/amm-pr197-pre-pr195-final-refresh-20260822-2226` locally and on origin.
+
+| Refreshed check | Result |
+| --- | --- |
+| Focused attribution + capture safety | PASS — 2 files / 24 tests |
+| Full local suite | PASS — 215 files / 2,954 tests |
+| System isolation | PASS |
+| Release safety | PASS — 14/14 |
+| Strict typecheck | PASS |
+| ESLint | PASS |
+| Next.js optimized Production build | PASS — Next.js 15.5.21 |
+| Route manifest | PASS — 82 active / 17 acknowledged duplicates |
+| Release doctor | PASS — 43/43 |
+| Production dependency audit | PASS — no known vulnerability |
+| Candidate diff and gitleaks | PASS — approximately 39.79 KB / no leak |
+| Candidate migration scan | PASS — empty |
+
+The local host used Node 26.5.1 and therefore emitted the expected engine
+warning for the repository's required Node 24.x runtime. Exact Node 24 remote
+CI remains authoritative and is required on the final pushed head.
+
+The first browser process opened the public root before installing analytics
+interception and received one expected local-origin 403 from `/api/events`.
+That process was closed and is not counted as clean visual evidence. It made no
+database write. The final named session began at `about:blank`, installed
+synthetic interception for `/api/leads`, `/api/events`, and
+`/api/experiments/event`, set only an ephemeral local Basic Auth value, and
+then navigated to `/admin/distribution` with canonical Neon deliberately absent.
+
+| Final browser boundary | Result |
+| --- | --- |
+| Protected route | PASS — HTTP 200, meaningful content, one `main` |
+| Exact vs legacy measurement | PASS — separately labeled, both truthful `—` while unavailable |
+| Missing measurement | PASS — unavailable is not presented as zero |
+| Desktop | PASS — no overlay, no overflow |
+| Mobile 390 × 844 | PASS — 375 CSS-pixel document width, no overflow |
+| Interaction | PASS — 35-state disclosure opens and remains overflow-free |
+| Console | PASS — 0 errors / 0 warnings |
+| Network | PASS — GET-only application requests; no lead or event POST |
+
+Exact refreshed artifacts:
+
+- `output/playwright/phase9-legacy-wordpress-attribution-trust/.playwright-cli/page-2026-08-23T02-31-21-009Z.png`
+  — desktop protected command frame.
+- `output/playwright/phase9-legacy-wordpress-attribution-trust/.playwright-cli/page-2026-08-23T02-31-58-448Z.png`
+  — mobile protected command frame.
+
+No Production deployment, database write, lead submission, message, provider
+request, WordPress change, DNS/cache action, publication, spend, deletion, or
+NellySelly action occurred. Exact-head Node 24 CI and canonical protected
+Preview evidence remain required before this Draft advances.

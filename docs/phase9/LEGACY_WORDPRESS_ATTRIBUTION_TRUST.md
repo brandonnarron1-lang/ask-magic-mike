@@ -10,6 +10,11 @@ intentionally based on the PR #195 branch rather than `main`.
 Release order: after the exact PR #195 conversion-identity release, with a
 fresh released-main refresh and exact-head verification.
 
+Current dependency alignment: PR #195 exact hardened head
+`db13953fc5f6d24a684f66c9a1c10c6b929b72b3`, integrated by merge commit
+`4848a5f`. Prior PR #197 state:
+`rescue/amm-pr197-pre-pr195-final-refresh-20260822-2226`.
+
 ## Decision
 
 Reuse the existing Neon Growth view and Owned Demand Command. Do not rewrite
@@ -126,7 +131,32 @@ Still required before release:
 1. exact-head GitHub CI;
 2. canonical Vercel Preview and protected Preview verification;
 3. read-only Production health comparison; and
-4. exact released-main refresh after PR #195.
+4. exact released-main refresh after PR #195, even if that released commit is
+   byte-identical to the currently integrated dependency head.
+
+## Hardened dependency refresh verification
+
+After PR #195 added pre-navigation interception for lead, analytics, and
+experiment writes, that exact head was merged into this candidate and both
+boundaries were re-proven together.
+
+- focused attribution plus capture-safety tests: 2 files / 24 tests;
+- full local suite: 215 files / 2,954 tests;
+- system isolation, release safety 14/14, strict typecheck, ESLint, optimized
+  Next.js 15.5.21 build, 82/17 route manifest, and release doctor 43/43;
+- no known Production dependency vulnerability;
+- candidate diff, secret, and migration scans passed; and
+- protected local browser proof at desktop and 390 × 844 mobile: meaningful
+  content, one `main`, no framework overlay, exact and legacy cards rendered
+  separately, truthful unavailable copy, disclosure interaction working, no
+  horizontal overflow, zero console errors/warnings, and no application POST
+  in the counted session.
+
+A preliminary public-root navigation was discarded after the loopback origin
+correctly received HTTP 403 from `/api/events`; it performed no write. The
+counted session started at `about:blank`, installed synthetic responses for
+`/api/leads`, `/api/events`, and `/api/experiments/event` before navigation,
+then opened only the protected Distribution Command.
 
 ## Rollback
 

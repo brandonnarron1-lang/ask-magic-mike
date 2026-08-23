@@ -50,9 +50,10 @@ provider action, or deletion.
 - It is refreshed onto released PR #194 merge
   `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`; the prior stacked head is
   preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
-  Local exact Node 24 and Chromium proof pass. The final no-write-harness head
-  must also have green exact-head GitHub CI and protected Vercel Preview
-  evidence attached to PR #195 before its gate is consumable.
+  Local and exact-head Node 24 proof, immutable Vercel Preview, and protected
+  no-write QA are green at
+  `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`; its gate is now evidence-ready
+  but remains unconsumed.
 - Its only application release phrase is:
   `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
 - That future phrase will authorize only the exact reviewed PR #195 merge and
@@ -70,7 +71,11 @@ provider action, or deletion.
   attribution.
 - It cannot merge before PR #195. After PR #195 releases, preserve a rescue
   ref, refresh this candidate onto exact `main`, and rerun Node 24 CI,
-  canonical Preview, protected visual QA, and release-safety checks.
+  canonical Preview, protected visual QA, and release-safety checks. The current
+  branch is already aligned with PR #195's exact hardened head; the prior state
+  is preserved at
+  `rescue/amm-pr197-pre-pr195-final-refresh-20260822-2226`, and refreshed local
+  evidence is green. This does not replace the post-release `main` refresh.
 - Its later application-only phrase is:
   `APPROVE PHASE 9 LEGACY WORDPRESS ATTRIBUTION TRUST MERGE AND PRODUCTION DEPLOYMENT`.
 - That phrase will not authorize a WordPress edit, crawler/firewall exception,

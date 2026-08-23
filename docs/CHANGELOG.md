@@ -11,12 +11,16 @@
   lifecycle states so historical traffic cannot inflate a current KPI.
 - Added protected operator labels that distinguish exact signals, legacy
   signals requiring a UTM update, and genuinely unmeasured placements.
-- Draft PR #197 is intentionally stacked on PR #195. Local Node 24 verification
-  passes six focused files / 64 tests and 215 full files / 2,954 tests, strict
-  typecheck, ESLint, optimized build, 82/17 route manifest, 14/14 release
-  safety, 43/43 release doctor, dependency/secret/diff checks, and desktop/mobile
-  visual QA with no overflow or console findings. Exact-head CI and canonical
-  Preview proof remain required.
+- Draft PR #197 is intentionally stacked on PR #195 and is now aligned with its
+  exact hardened head `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`. The prior PR #197
+  state is preserved at
+  `rescue/amm-pr197-pre-pr195-final-refresh-20260822-2226`.
+- Refreshed local verification passes 2 focused files / 24 tests and 215 full
+  files / 2,954 tests, strict typecheck, ESLint, optimized build, 82/17 route
+  manifest, 14/14 release safety, 43/43 release doctor,
+  dependency/secret/diff/migration checks, and desktop/mobile visual QA with
+  no overflow, console finding, or application POST in the counted session.
+  Exact-head Node 24 CI and canonical Preview proof remain required.
 - No migration, Production deployment, database write, lead, message,
   WordPress change, publication, DNS change, spend, canonical-provider change,
   or NellySelly action occurred. A QA CLI auto-link briefly created an empty

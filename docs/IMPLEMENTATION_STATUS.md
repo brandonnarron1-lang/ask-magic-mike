@@ -22,10 +22,15 @@ Updated 2026-08-22.
   #195's future approval. It contains no migration or external mutation.
 - Draft PR [#197](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/197)
   targets the PR #195 branch, preventing an accidental direct-to-`main` release.
-- Local verification passes 6 focused files / 64 tests, 215 full files / 2,954
-  tests, strict typecheck, ESLint, optimized build, 82/17 route manifest,
-  14/14 release safety, 43/43 release doctor, dependency/secret/diff scans, and
-  desktop/mobile Playwright QA with no overflow or console findings.
+- The branch now contains PR #195's exact hardened head
+  `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`; its prior state is preserved at
+  `rescue/amm-pr197-pre-pr195-final-refresh-20260822-2226`.
+- Refreshed local verification passes 2 focused files / 24 tests, 215 full
+  files / 2,954 tests, strict typecheck, ESLint, optimized build, 82/17 route
+  manifest, 14/14 release safety, 43/43 release doctor,
+  dependency/secret/diff/migration scans, and desktop/mobile Playwright QA
+  with no overflow, console finding, or application POST in the counted
+  session. Exact Node 24 CI and canonical Preview verification remain pending.
 - Detailed decision:
   `docs/phase9/LEGACY_WORDPRESS_ATTRIBUTION_TRUST.md`.
 - Future exact application gate, eligible only after PR #195 releases and this
