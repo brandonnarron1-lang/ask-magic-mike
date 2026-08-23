@@ -12,14 +12,18 @@ Updated 2026-08-23.
 - The candidate reuses the existing Neon `rate_limit_buckets` table and HMAC
   implementation. It adds no provider, database, migration, route, dashboard,
   lead store, or public form.
-- Production readiness now requires the table and strong secret and returns
-  only boolean dependency state. Vercel Preview remains read-only and is not
-  made dependent on a Production secret.
+- Production readiness now requires the exact table schema/upsert target,
+  schema and CRUD privileges, effective RLS access, and the dedicated
+  `RATE_LIMIT_HASH_SECRET`; it returns only boolean dependency state. Vercel
+  Preview remains read-only and is not made dependent on a Production secret.
 - The synthetic monitor now validates the body contract rather than accepting
   HTTP 200 alone. Against unchanged Production it truthfully reports 8/9,
   proving the prior false-green path is closed by the candidate.
-- Exact local Node 24.18.0 verification passes 4 focused files / 45 tests, the
-  complete 216-file / 2,969-test suite, strict typecheck, ESLint, the optimized
+- The exact read-only capability query passed on canonical Neon Production in
+  35 ms with all four store booleans true. This proves the database object and
+  SQL-editor role; deployed health must still prove the exact Vercel role.
+- Exact local Node 24.18.0 verification passes 6 focused files / 58 tests, the
+  complete 218-file / 2,982-test suite, strict typecheck, ESLint, the optimized
   Next.js 15.5.21 build, 52 static pages, 82 active routes, 14/14 release
   safety, 43/43 release doctor, system isolation, a no-vulnerability Production dependency audit,
   and a redacted 544-commit secret scan. The diff contains no migration.
@@ -29,13 +33,11 @@ Updated 2026-08-23.
 - Decision and evidence:
   `docs/phase9/DURABLE_RATE_LIMIT_READINESS.md` and
   `docs/phase9/DURABLE_RATE_LIMIT_READINESS_QA_EVIDENCE.md`.
-- Draft PR #202 reviewed head
-  `8a2fa4d7d8150e6f1825ba3dfc04b163784a8a24` has green GitHub Node 24 run
-  `32655836987`, READY exact-SHA Preview
-  `dpl_3Dj8wBXnKLYrS9EoXLhkrLgBsKyy`, and protected Preview run
-  `32656042058`. Acceptance records 17 passes, six intentional mutation skips,
-  zero failures, 2/2 Chromium widget checks, 43/43 doctor, no Preview error
-  logs, and `PREVIEW_READY` authority.
+- Draft PR #202 head `6067512e744d99cd30b74fdab1ce25f5f58b1ebd`
+  and its green CI/Preview evidence are superseded because they checked table
+  existence but not exact schema, runtime privileges, or RLS capability. The
+  hardened head is pending commit/push and must receive fresh exact-head Node
+  24 CI, canonical Preview, protected acceptance, logs, and launch authority.
 - Exact future gate:
   `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
 

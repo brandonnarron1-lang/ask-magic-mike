@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   durableRateLimitBucketKey,
+  durableRateLimitDedicatedSecretReady,
   durableRateLimitHashSecretReady,
   durableRateLimitRequired,
   InMemoryRateLimitStore,
@@ -136,6 +137,16 @@ describe("durableRateLimitBucketKey", () => {
     expect(durableRateLimitHashSecretReady({ RATE_LIMIT_HASH_SECRET: "too-short" })).toBe(false);
     expect(durableRateLimitHashSecretReady({
       RATE_LIMIT_HASH_SECRET: "too-short",
+      CRON_SECRET: "cron-secret-fallback-with-32-characters",
+    })).toBe(true);
+  });
+
+  it("requires the dedicated secret for production readiness", () => {
+    expect(durableRateLimitDedicatedSecretReady({
+      CRON_SECRET: "cron-secret-fallback-with-32-characters",
+    })).toBe(false);
+    expect(durableRateLimitDedicatedSecretReady({
+      RATE_LIMIT_HASH_SECRET: "dedicated-rate-limit-secret-32-characters",
       CRON_SECRET: "cron-secret-fallback-with-32-characters",
     })).toBe(true);
   });

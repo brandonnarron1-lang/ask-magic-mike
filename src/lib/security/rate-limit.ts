@@ -58,6 +58,13 @@ export function durableRateLimitHashSecretReady(env: DurableRateLimitSecretEnv =
   return durableBucketHashSecret(env) !== null;
 }
 
+/** Production readiness requires the purpose-specific secret, not a reused credential. */
+export function durableRateLimitDedicatedSecretReady(
+  env: DurableRateLimitSecretEnv = process.env,
+): boolean {
+  return (env.RATE_LIMIT_HASH_SECRET?.trim().length || 0) >= DURABLE_BUCKET_SECRET_MIN_LENGTH;
+}
+
 /** Preview is read-only; every real production runtime requires shared limiting. */
 export function durableRateLimitRequired(env: RateLimitRuntimeEnv = process.env): boolean {
   return env.VERCEL_ENV ? env.VERCEL_ENV === "production" : env.NODE_ENV === "production";

@@ -1,6 +1,6 @@
 # Production Release and Go-Live Runbook
 
-Updated 2026-08-22. The public funnel is live. Use this runbook for incremental,
+Updated 2026-08-23. The public funnel is live. Use this runbook for incremental,
 reversible releases and controlled owned-traffic activation.
 
 ## Before merge
@@ -56,25 +56,47 @@ When the change touches capture, routing, email, push, SMS, or sequences:
 5. Never contact a genuine WordPress-only entry whose purpose or consent is
    unclear; preserve it for BIC review.
 
+## Durable rate-limit readiness release
+
+For PR #202, add only the dedicated 32-or-more-character
+`RATE_LIMIT_HASH_SECRET` through the Ask Magic Mike Vercel Production secret
+interface under its exact combined gate. Never display, copy into chat, or
+persist the value in a shell argument or file. The old immutable deployment
+does not gain the new value; only a subsequent build does.
+
+Before merge, the read-only store probe must report `table`, `schema`,
+`permissions`, `rls`, and `ready` true when run with the intended secure runtime
+connection:
+
+```text
+pnpm run rate-limit:verify-store
+```
+
+After the exact merge commit reaches Production, require HTTP 200 from
+`/api/health/ready` and literal true for `rate_limit_required`,
+`rate_limit_table`, `rate_limit_schema_ready`,
+`rate_limit_permissions_ready`, `rate_limit_rls_ready`,
+`rate_limit_store_ready`, `rate_limit_secret_ready`, and `rate_limit_ready`.
+Then execute only the approved malformed analytics request, verify HTTP 400,
+confirm no event/lead/message write, inspect the runtime log window, and rerun
+the nine-check monitor. Any false flag or new fallback log triggers rollback to
+the recorded prior deployment. Do not delete the ignored Upstash variables;
+that remains a separate cleanup action.
+
 ## Current Phase 9 release sequence
 
 Release only one approved PR at a time and verify Production before advancing:
 
-1. `#180` — outcome-ledger lifecycle seam: complete;
-2. `#181` — first-human-response intelligence: complete;
-3. `#183` — campaign safety and three-offer owned-demand flight: complete;
-4. `#184` — owned-demand publication-proof ledger: complete at merge commit
-   `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97`, Production deployment
-   `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`; its migration is installed and verified
-   on canonical Neon Production; and
-5. `#185` — consolidated owned-demand command plus the WordPress proof-scope
-   constraint repair: next candidate. It must pass exact-head Node 24 CI,
-   canonical Vercel Preview, executable PostgreSQL contract, protected visual
-   QA, and the migration-specific approval before any Production action.
+1. `#180`, `#181`, `#183`, `#184`, `#185`, `#193`, `#196`, `#194`, and
+   `#195` are complete and their gates are exhausted.
+2. `#202` is the next isolated durability candidate. Its earlier proof is
+   superseded; use only the hardened exact-head evidence and its dedicated gate.
+3. After #202 is accepted on Production, refresh and re-prove #197 on the exact
+   new `main`. PRs #198–#201 remain ordered behind #197 and retain separate
+   gates.
 
-PR #193 is stacked on #185, #194 on #193, and #195 on #194. Do not merge or
-deploy them out of order. Rebase and re-prove each one after its predecessor is
-released.
+Do not merge or deploy candidates out of order. Rebase and re-prove each one
+after its predecessor is released.
 
 PR #181 uses:
 

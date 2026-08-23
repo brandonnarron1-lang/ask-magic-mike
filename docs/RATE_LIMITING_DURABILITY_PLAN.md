@@ -26,13 +26,15 @@ must never be written to Neon. Durable bucket identifiers use this format:
 `amm:rl:v1:<route-prefix>:<HMAC-SHA-256 digest>`
 
 The digest is domain-separated by product, key version, and route prefix. The
-server selects the first 32-or-more-character secret in this order:
+limiter runtime selects the first 32-or-more-character secret in this order:
 
-1. `RATE_LIMIT_HASH_SECRET` (recommended dedicated secret)
+1. `RATE_LIMIT_HASH_SECRET` (required for Production readiness)
 2. `CONSENT_IP_HASH_SALT`
 3. `CRON_SECRET`
 4. `ADMIN_SECRET`
 
+Production readiness requires the purpose-specific first option even though
+the compatibility fallbacks preserve pseudonymization in a degraded runtime.
 Only boolean readiness appears in health responses. Secret values,
 raw bucket inputs, and the HMAC key are never returned, logged, committed, or
 sent as SQL parameters.
@@ -55,17 +57,23 @@ sent as SQL parameters.
 - `DATABASE_URL` points to the Ask Magic Mike production Neon branch.
 - The canonical migration chain includes
   `supabase/migrations/20260811155000_durable_rate_limit.sql`.
-- At least one strong secret in the documented fallback order is configured;
-  use a dedicated `RATE_LIMIT_HASH_SECRET` when practical.
+- A dedicated 32-or-more-character `RATE_LIMIT_HASH_SECRET` is configured.
+- The runtime role has schema `USAGE`, table `SELECT/INSERT/UPDATE/DELETE`, and
+  effective RLS access to the canonical bucket table.
+- A valid, ready, non-partial single-key unique index exists on `bucket_key` so
+  the runtime `ON CONFLICT (bucket_key)` statement is executable.
 - NellySelly database URLs, secrets, projects, or aliases are forbidden.
 
 ## Verification
 
 Automated tests prove deterministic domain separation, short-secret rejection,
-no raw key/secret SQL parameter, 24-hour pruning, `updated_at` maintenance,
-durable/in-memory behavior, Production/Preview runtime separation, and
-boolean-only health reporting. The Production monitor validates the readiness
-body contract rather than status alone.
+dedicated-secret readiness, no raw key/secret SQL parameter, 24-hour pruning,
+`updated_at` maintenance, durable/in-memory behavior, Production/Preview
+runtime separation, fail-closed capability mapping, and boolean-only health
+reporting. The Production monitor validates the readiness body contract rather
+than status alone. `pnpm run rate-limit:verify-store` performs the same
+read-only store check when `DATABASE_URL` is supplied through a secure process
+environment; it emits safe booleans only.
 
 The candidate requires one new encrypted Production-only
 `RATE_LIMIT_HASH_SECRET` plus an application deployment. It requires no

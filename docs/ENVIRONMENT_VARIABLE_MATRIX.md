@@ -13,7 +13,7 @@ and scope, never values.
 | Carrier SMS | `LEAD_SMS_TO`, `LEAD_SMS_COPY_TO`, `TWILIO_*`, `AGENT_SMS_NOTIFICATIONS_ENABLED` | server sensitive | deferred paid sender |
 | WordPress | `WORDPRESS_BRIDGE_SECRET`, `WORDPRESS_BRIDGE_FORM_IDS` | secret is server-sensitive on both systems; form IDs are server configuration | signed, per-form forwarding |
 | Public identity | `NEXT_PUBLIC_SITE_URL`, approved `NEXT_PUBLIC_AGENT_*` metadata | browser-safe | canonical links/copy |
-| Rate limit | `DATABASE_URL`, `RATE_LIMIT_HASH_SECRET`, `CONSENT_IP_HASH_SALT`, `CRON_SECRET`, `ADMIN_SECRET`, `LEAD_RATE_LIMIT_PER_MINUTE`, `RATE_LIMIT_EMERGENCY_MEMORY` | server sensitive | HMAC-pseudonymized durable Neon abuse control; dedicated hash secret preferred and emergency memory mode must be explicit |
+| Rate limit | `DATABASE_URL`, `RATE_LIMIT_HASH_SECRET`, `CONSENT_IP_HASH_SALT`, `CRON_SECRET`, `ADMIN_SECRET`, `LEAD_RATE_LIMIT_PER_MINUTE`, `RATE_LIMIT_EMERGENCY_MEMORY` | server sensitive | HMAC-pseudonymized durable Neon abuse control; dedicated hash secret is required for Production readiness and emergency memory mode must be explicit |
 | Customer channels | `CUSTOMER_EMAIL_ENABLED`, `CUSTOMER_SMS_ENABLED` | server | separately approved acknowledgments |
 | Legacy compatibility | `ALLOW_LEGACY_SUPABASE_FALLBACK`, `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY` | non-Production only | SUPERSEDED; forbidden as a Production fallback |
 

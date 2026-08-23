@@ -47,6 +47,18 @@ recorded, and never delete or edit proof/audit rows. Prefer a reviewed forward
 fix. The validated backup is disaster-recovery evidence, not an automatic
 rollback instruction.
 
+## Phase 9 durable rate-limit readiness
+
+PR #202 has no migration. Before release, record the exact prior Ready Vercel
+deployment. If any store-capability, dedicated-secret, malformed-request, log,
+or monitor acceptance check fails, restore that deployment/alias first. The
+prior immutable deployment does not gain a newly added Vercel environment
+value retroactively. After rollback health is proven, remove only the newly
+added `RATE_LIMIT_HASH_SECRET` from future Production builds if the incident
+requires it; never display or copy its value. Do not alter or delete
+`rate_limit_buckets` rows as part of application rollback. Stale encrypted
+Upstash variable removal remains a separate, unapproved cleanup.
+
 ## WordPress
 
 Remove only the named reversible Custom HTML/shortcode/widget block or deactivate

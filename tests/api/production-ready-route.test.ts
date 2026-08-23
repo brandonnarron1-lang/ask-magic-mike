@@ -7,6 +7,9 @@ const mocks = vi.hoisted(() => ({
     notification_table: true,
     rbac_schema_ready: true,
     rate_limit_table: true,
+    rate_limit_schema_ready: true,
+    rate_limit_permissions_ready: true,
+    rate_limit_rls_ready: true,
     push_subscription_table: true,
   } as Record<string, unknown>,
   query: vi.fn(),
@@ -40,6 +43,9 @@ describe("production GET /api/health/ready", () => {
       notification_table: true,
       rbac_schema_ready: true,
       rate_limit_table: true,
+      rate_limit_schema_ready: true,
+      rate_limit_permissions_ready: true,
+      rate_limit_rls_ready: true,
       push_subscription_table: true,
     };
     mocks.query.mockReset();
@@ -70,6 +76,10 @@ describe("production GET /api/health/ready", () => {
       ok: true,
       rbac_schema_ready: true,
       rate_limit_table: true,
+      rate_limit_schema_ready: true,
+      rate_limit_permissions_ready: true,
+      rate_limit_rls_ready: true,
+      rate_limit_store_ready: true,
       rate_limit_secret_ready: true,
       rate_limit_required: true,
       rate_limit_ready: true,
@@ -110,6 +120,10 @@ describe("production GET /api/health/ready", () => {
       ok: false,
       database: "not_configured",
       rate_limit_table: false,
+      rate_limit_schema_ready: false,
+      rate_limit_permissions_ready: false,
+      rate_limit_rls_ready: false,
+      rate_limit_store_ready: false,
       rate_limit_secret_ready: true,
       rate_limit_required: true,
       rate_limit_ready: false,
@@ -127,6 +141,10 @@ describe("production GET /api/health/ready", () => {
       ok: false,
       database: "connection_failed",
       rate_limit_table: false,
+      rate_limit_schema_ready: false,
+      rate_limit_permissions_ready: false,
+      rate_limit_rls_ready: false,
+      rate_limit_store_ready: false,
       rate_limit_secret_ready: true,
       rate_limit_required: true,
       rate_limit_ready: false,
@@ -158,10 +176,77 @@ describe("production GET /api/health/ready", () => {
     expect(body).toMatchObject({
       ok: false,
       rate_limit_table: false,
+      rate_limit_store_ready: false,
       rate_limit_secret_ready: true,
       rate_limit_required: true,
       rate_limit_ready: false,
     });
+  });
+
+  it("fails readiness when the limiter table schema or conflict target is incomplete", async () => {
+    mocks.result.rate_limit_schema_ready = false;
+
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(body).toMatchObject({
+      ok: false,
+      rate_limit_table: true,
+      rate_limit_schema_ready: false,
+      rate_limit_permissions_ready: true,
+      rate_limit_rls_ready: true,
+      rate_limit_store_ready: false,
+      rate_limit_ready: false,
+    });
+  });
+
+  it("fails readiness when the runtime role lacks a required limiter table privilege", async () => {
+    mocks.result.rate_limit_permissions_ready = false;
+
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(body).toMatchObject({
+      ok: false,
+      rate_limit_schema_ready: true,
+      rate_limit_permissions_ready: false,
+      rate_limit_rls_ready: true,
+      rate_limit_store_ready: false,
+      rate_limit_ready: false,
+    });
+  });
+
+  it("fails readiness when row-level security would reject the runtime role", async () => {
+    mocks.result.rate_limit_rls_ready = false;
+
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(body).toMatchObject({
+      ok: false,
+      rate_limit_schema_ready: true,
+      rate_limit_permissions_ready: true,
+      rate_limit_rls_ready: false,
+      rate_limit_store_ready: false,
+      rate_limit_ready: false,
+    });
+  });
+
+  it("uses read-only catalog checks for schema, privileges, and row-level-security capability", async () => {
+    await GET();
+
+    const query = String(mocks.query.mock.calls[0]?.[0] || "");
+    expect(query).toContain("information_schema.columns");
+    expect(query).toContain("has_schema_privilege");
+    expect(query).toContain("has_table_privilege");
+    expect(query).toContain("pg_index");
+    expect(query).toContain("indpred IS NULL");
+    expect(query).toContain("relforcerowsecurity");
+    expect(query).toContain("rolbypassrls");
+    expect(query).not.toMatch(/\b(?:INSERT\s+INTO|UPDATE\s+public\.|DELETE\s+FROM)\b/i);
   });
 
   it("fails readiness when no strong server-only rate-limit secret is available", async () => {
@@ -173,26 +258,29 @@ describe("production GET /api/health/ready", () => {
     expect(response.status).toBe(503);
     expect(body).toMatchObject({
       ok: false,
+      database: "ready",
       rate_limit_table: true,
+      rate_limit_store_ready: true,
       rate_limit_secret_ready: false,
       rate_limit_required: true,
       rate_limit_ready: false,
     });
   });
 
-  it("accepts the documented strong server-secret fallback without identifying it", async () => {
+  it("does not let a reused strong server credential satisfy production readiness", async () => {
     delete process.env.RATE_LIMIT_HASH_SECRET;
     process.env.CRON_SECRET = "test-cron-secret-fallback-that-is-long-enough";
 
     const response = await GET();
     const body = await response.json();
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(503);
     expect(body).toMatchObject({
-      ok: true,
-      rate_limit_secret_ready: true,
+      ok: false,
+      rate_limit_store_ready: true,
+      rate_limit_secret_ready: false,
       rate_limit_required: true,
-      rate_limit_ready: true,
+      rate_limit_ready: false,
     });
     expect(JSON.stringify(body)).not.toContain("CRON_SECRET");
     expect(JSON.stringify(body)).not.toContain(process.env.CRON_SECRET);
@@ -210,6 +298,7 @@ describe("production GET /api/health/ready", () => {
     expect(body).toMatchObject({
       ok: true,
       rate_limit_table: false,
+      rate_limit_store_ready: false,
       rate_limit_secret_ready: false,
       rate_limit_required: false,
       rate_limit_ready: true,

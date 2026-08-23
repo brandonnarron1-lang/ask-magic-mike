@@ -55,13 +55,14 @@ provider action, or deletion.
 - Draft PR [#202](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/202)
   on branch `codex/phase9-durable-rate-limit-readiness-20260823` is an isolated,
   main-based candidate that makes Production readiness require the existing
-  Neon table and strong secret, and makes the monitor validate that contract.
-  It creates no second limiter or database and contains no migration.
-- Its reviewed application head has green Node 24 CI, a READY canonical
-  Preview, protected 17-pass/6-write-skip acceptance, 2/2 Chromium widget
-  checks, 43/43 doctor, and `PREVIEW_READY` authority. Exact-head checks after
-  the documentation-only evidence seal remain required before the gate is
-  consumable.
+  Neon table's exact schema/upsert target, runtime privileges, RLS access, and
+  dedicated secret, and makes the monitor validate that contract. It creates
+  no second limiter or database and contains no migration.
+- The exact read-only catalog probe passed on canonical Neon Production. The
+  SQL-editor role is proven, while the encrypted Vercel role must still prove
+  itself through deployed health. Earlier PR evidence is superseded; the
+  hardened head requires fresh exact-head CI, Preview, protected acceptance,
+  logs, artifact digests, and launch authority before the gate is consumable.
 - Its only combined configuration/application release phrase is:
   `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
 - That phrase will authorize one encrypted Production-only secret entry, the
@@ -70,6 +71,8 @@ provider action, or deletion.
   400. It will not authorize a lead, analytics event, email, SMS, Push,
   WordPress change, publication, spend, DNS change, migration, deletion, or
   NellySelly action.
+- Stale encrypted Upstash variable names are ignored by canonical code. Their
+  deletion is not included in this gate.
 
 ## Application candidates after the durability correction
 

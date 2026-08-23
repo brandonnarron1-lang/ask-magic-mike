@@ -32,7 +32,7 @@ durable limiter dependencies. Vercel Production and owned/self-hosted
   proves the documented `CRON_SECRET`/`ADMIN_SECRET` fallbacks are not currently
   suitable for this use. No secret value was retrieved, displayed, or written.
 - The previous status-only monitor passed 9/9. The candidate contract monitor
-  correctly reports 8/9 against the unchanged deployment because the three new
+  correctly reports 8/9 against the unchanged deployment because the durable
   limiter-readiness fields are absent.
 
 ## Security finding
@@ -46,8 +46,10 @@ durable limiter dependencies. Vercel Production and owned/self-hosted
 - Impact: counters are not shared across serverless instances, so distributed
   abuse can exceed the intended route limits. The evidence does not show a lead
   loss, secret disclosure, or cross-system access.
-- Fix: require a durable table plus a suitable server-only HMAC secret for
-  Production readiness, and make the monitor validate the response contract.
+- Fix: require the exact durable table shape, a valid single-column upsert
+  conflict target, schema/table privileges, effective RLS bypass, and a
+  purpose-specific server-only HMAC secret for Production readiness. The
+  monitor validates the complete response contract.
 - Mitigation: the current bounded memory limiter remains availability-first
   until the exact secure secret/deploy gate is approved.
 - False-positive notes: Vercel runtime logs and the current public readiness
@@ -59,14 +61,27 @@ durable limiter dependencies. Vercel Production and owned/self-hosted
 
 - `rate_limit_required`
 - `rate_limit_table`
+- `rate_limit_schema_ready`
+- `rate_limit_permissions_ready`
+- `rate_limit_rls_ready`
+- `rate_limit_store_ready`
 - `rate_limit_secret_ready`
 - `rate_limit_ready`
 
-Production returns HTTP 503 unless the table and strong server secret are both
-available. No secret name selected by fallback, secret value, database URL,
-bucket key, IP address, or caller identifier is returned. The hourly synthetic
-monitor requires the same boolean contract rather than accepting HTTP 200
-alone.
+Production returns HTTP 503 unless every store capability and the dedicated
+`RATE_LIMIT_HASH_SECRET` are ready. A reused cron, admin, or consent secret can
+still preserve HMAC pseudonymization in a degraded runtime, but it cannot make
+Production readiness green. No role name, secret value, database URL, bucket
+key, IP address, or caller identifier is returned. The hourly synthetic monitor
+requires the same boolean contract rather than accepting HTTP 200 alone.
+
+The capability probe is read-only. It checks PostgreSQL catalogs and privilege
+functions only; it does not insert, update, delete, count, or reveal limiter
+rows. On the authenticated Neon `production` branch it returned one row with
+all four store booleans true in 35 ms. That validates the object and SQL-editor
+role. The exact Vercel runtime role remains unproven until the candidate
+Preview/Production health response executes the same query through its own
+`DATABASE_URL`.
 
 ## Controlled activation
 
@@ -80,7 +95,8 @@ After exact approval:
    only. Do not reuse or copy any NellySelly value.
 4. Merge only the reviewed candidate and let Vercel build that exact merge.
 5. Verify the custom domains resolve to the new READY deployment and
-   `/api/health/ready` reports all limiter booleans true.
+   `/api/health/ready` reports every limiter capability, dedicated-secret, and
+   aggregate readiness boolean true.
 6. Send one approved-origin malformed analytics request that executes the
    limiter and then returns HTTP 400 before event persistence. This creates only
    a pseudonymous aggregate limiter bucket—no lead, analytics event, email,
@@ -94,6 +110,10 @@ If acceptance fails, immediately restore Production deployment
 after the prior deployment is restored. The candidate has no migration and
 does not alter lead, notification, consent, attribution, assignment, or audit
 records.
+
+The encrypted `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` names are
+stale configuration and are ignored by the canonical Neon implementation.
+Deleting them is a separate cleanup action and is not authorized by this gate.
 
 ## Exact gate
 

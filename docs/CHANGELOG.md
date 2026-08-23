@@ -6,17 +6,20 @@
   and pass the synthetic monitor while public event routes used non-durable
   per-instance rate limiting.
 - Reused the canonical Neon limiter and added boolean-only Production checks
-  for the existing bucket table and a suitable server-only HMAC secret.
+  for the exact table shape/upsert target, schema and CRUD privileges,
+  effective RLS access, and a dedicated server-only HMAC secret.
+- Added a read-only store-capability verifier with safe boolean-only output;
+  the exact query passed against the authenticated Neon Production branch.
 - Made the synthetic monitor validate the readiness response contract instead
   of treating HTTP 200 as sufficient proof.
 - Kept isolated Vercel Preview read-only and independent of Production secrets.
-- Local Node 24 acceptance passes 216 files / 2,969 tests, strict typecheck,
+- Local Node 24 acceptance passes 218 files / 2,982 tests, strict typecheck,
   ESLint, optimized build, 82 routes, 14/14 safety, system isolation,
   43/43 release doctor, dependency audit, redacted 544-commit secret scan, and
   no-migration review.
-- PR #202 reviewed application head passes exact Node 24 CI, a READY canonical
-  Vercel Preview, protected 17-pass/6-write-skip acceptance, 2/2 Chromium
-  widget checks, 43/43 doctor, zero Preview error logs, and `PREVIEW_READY`.
+- Prior PR #202 CI/Preview proof is retained but superseded because it did not
+  prove schema/upsert, runtime privileges, or RLS capability. Fresh exact-head
+  remote evidence is required for the hardened candidate.
 - No Production secret, deployment, migration, lead/event write, notification,
   email, SMS, Push, WordPress edit, publication, DNS, spend, deletion, or
   NellySelly action occurred.
