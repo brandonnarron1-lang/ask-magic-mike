@@ -49,7 +49,8 @@ durable limiter dependencies. Vercel Production and owned/self-hosted
 - Fix: require the exact durable table shape, a valid single-column upsert
   conflict target, schema/table privileges, effective RLS bypass, and a
   purpose-specific server-only HMAC secret for Production readiness. The
-  monitor validates the complete response contract.
+  monitor validates the complete response contract. Durable-store failures log
+  only a bounded error code, never the raw driver error object.
 - Mitigation: the current bounded memory limiter remains availability-first
   until the exact secure secret/deploy gate is approved.
 - False-positive notes: Vercel runtime logs and the current public readiness
