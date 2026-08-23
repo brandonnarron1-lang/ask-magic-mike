@@ -24,6 +24,10 @@ import {
   ownedDemandAssetHref,
   type OwnedDemandAssetFormat,
 } from "../../lib/growth/owned-demand-assets";
+import {
+  isWordPressActivationPlacementKey,
+  wordpressActivationManifestHref,
+} from "../../lib/growth/wordpress-activation-change-set";
 import { loadGrowthIntelligence } from "../../lib/growthIntelligenceView";
 import {
   loadOwnedDemandPublicationProofLedger,
@@ -472,6 +476,19 @@ function DemandAssetLinks({
   );
 }
 
+function WordPressActivationManifestLink({ placementKey }: { placementKey: string }) {
+  if (!isWordPressActivationPlacementKey(placementKey)) return null;
+  return (
+    <Link
+      href={wordpressActivationManifestHref(placementKey)}
+      prefetch={false}
+      className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#4baab866] bg-[#4baab818] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.11em] text-[#bff8ff] transition hover:bg-[#4baab82b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2]"
+    >
+      Download live readiness manifest
+    </Link>
+  );
+}
+
 function OfferFlightCard({ offer }: { offer: OwnedDemandOfferBrief }) {
   const portraitClass = offer.key === "renter_plan"
     ? "object-contain object-bottom transition duration-500 group-hover:scale-[1.02]"
@@ -611,7 +628,7 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
       {channel.namedPlacements.length ? (
         <div className="mt-5 rounded-xl border border-[#4baab833] bg-[#061417] p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9edbe2]">Named brokerage placements</p>
-          <p className="mt-2 text-xs leading-5 text-[#8f8778]">Use the exact page-specific link. Each live WordPress edit still requires its own backup, review, publication approval, and rollback proof.</p>
+          <p className="mt-2 text-xs leading-5 text-[#8f8778]">Use the exact page-specific link. Readiness manifests inspect only the public page and WordPress page index; they do not publish. Each live WordPress edit still requires its own backup, review, exact publication approval, and rollback proof.</p>
           <div className="mt-3 grid gap-3 lg:grid-cols-2">
             {channel.namedPlacements.map((placement) => (
               <article key={placement.placementKey} className="min-w-0 rounded-lg border border-white/[.08] bg-black/35 p-3">
@@ -620,7 +637,10 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
                   <span className="text-[9px] font-bold uppercase tracking-[0.11em] text-[#8f8778]">{placement.attributedLeads ? `${placement.attributedLeads} signal${placement.attributedLeads === 1 ? "" : "s"}` : "Unmeasured"}</span>
                 </div>
                 <code className="mt-2 block break-all text-[10px] leading-5 text-[#9edbe2]">{placement.trackedUrl}</code>
-                <div className="mt-2"><CopyDemandAsset label="Copy tracked link" value={placement.trackedUrl} /></div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <CopyDemandAsset label="Copy tracked link" value={placement.trackedUrl} />
+                  <WordPressActivationManifestLink placementKey={placement.placementKey} />
+                </div>
               </article>
             ))}
           </div>

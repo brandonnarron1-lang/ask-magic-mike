@@ -2,6 +2,29 @@
 
 Updated 2026-08-22.
 
+## Phase 9 WordPress owned-demand activation change set — 2026-08-22
+
+- **Implemented locally, not published:** the existing authenticated
+  `/admin/distribution` command now exposes read-only readiness-manifest links
+  for three established Our Town WordPress placements.
+- **Live public read passed:** homepage page ID 149, home-value page ID 3952,
+  and We Buy Homes page ID 3631 each resolved one exact legacy href, one exact
+  rollback value, and one canonical proposed URL with complete placement-level
+  attribution. Every manifest reported `mutationPerformed=false`.
+- **Reuse result:** no new funnel, lead API, lead store, dashboard, publisher,
+  form, notification engine, or analytics vocabulary was added. The package
+  reuses the canonical owned-demand resolver and Lead Center `report:view`
+  boundary.
+- **Safety result:** exact HTTPS host allowlists, redirect revalidation,
+  response limits, page-ID checks, duplicate/missing-target rejection,
+  deterministic SHA-256 preconditions, private/no-store headers, and raw-HTML
+  exclusion are implemented and covered.
+- **Recommended first action:** one separately approved homepage CTA href
+  replacement only. No WordPress publication is included in this application
+  candidate.
+- Detailed scope and rollback:
+  `docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md`.
+
 ## Phase 9 iOS phone handoff consolidation — 2026-08-22
 
 - Historical PR #179 was audited rather than merged wholesale. Its unique

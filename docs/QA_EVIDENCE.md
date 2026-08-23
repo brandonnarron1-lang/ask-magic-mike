@@ -1,5 +1,45 @@
 # QA Evidence
 
+## Phase 9 WordPress activation change-set evidence — 2026-08-22
+
+- Final read-only live loader acceptance at 21:27 America/New_York — PASS. The exact
+  public homepage, established home-value page, We Buy Homes page, and public
+  WordPress page index were fetched through exact-host HTTPS allowlists. All
+  three manifests reported `legacy_match_ready`, their reviewed page IDs
+  (149, 3952, and 3631), one current/rollback href, one canonical proposed
+  href, deterministic SHA-256 evidence, `publicationAuthorized=false`, and
+  `mutationPerformed=false`.
+- Focused WordPress/change-set matrix — PASS: 3 files / 18 tests. Coverage
+  includes exact legacy and already-canonical states; duplicate, missing,
+  foreign, insecure, lookalike, page-ID drift, and page-index failures; raw
+  HTML/telephone exclusion; deterministic hashing; API RBAC/no-store headers;
+  existing surface-audit compatibility; and database placement-registry parity.
+- Full local release gate — PASS: system isolation, 14/14 safety controls, 215
+  test files / 2,958 tests, strict TypeScript, full ESLint, optimized Next.js
+  15.5.21 build, and 83 active routes / 17 acknowledged root-source
+  duplicates. The new route is explicitly required and classified in the
+  canonical route manifest.
+- Strict TypeScript check — PASS in the local shell. The repository requires
+  Node 24; exact-head Node 24 CI remains the authoritative engine result after
+  push because this local shell is Node 26.5.1.
+- Focused ESLint initially found one unnecessary regex escape; it was corrected
+  before final verification. No behavior or security boundary was relaxed.
+- No login, WordPress write, page revision, cache purge, form submission, lead,
+  notification, publication proof, database read/write, external send, DNS
+  change, Production deployment, spend, deletion, or NellySelly action occurred.
+- Production dependency audit — PASS: no known vulnerability. Working-tree
+  gitleaks, candidate-pattern, and patch-integrity scans passed with no secret
+  finding.
+- Whole-site WordPress public-surface audit — PASS as a read-only check: 42/42
+  sitemap pages fetched, zero failed. It reconfirmed exactly three incomplete
+  direct canonical links, two incomplete embeds, four legacy native-capture
+  pages, five multi-capture pages, and Form 3 as the only supplied canonical
+  bridge allowlist. These are preserved audit findings, not permission for a
+  bulk cleanup.
+- Exact-head Node 24 CI, canonical Vercel Preview, protected route, and rendered
+  UI acceptance remain required after push before this becomes release
+  authority.
+
 ## PR #193 released-main privacy audit — 2026-08-22
 
 - Rebased/refreshed the candidate onto released PR #185 merge
