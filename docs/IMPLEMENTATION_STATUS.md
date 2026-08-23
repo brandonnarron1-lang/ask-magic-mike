@@ -29,7 +29,7 @@ Updated 2026-08-23.
   complete 218-file / 2,983-test suite, strict typecheck, ESLint, the optimized
   Next.js 15.5.21 build, 52 static pages, 82 active routes, 14/14 release
   safety, 43/43 release doctor, system isolation, a no-vulnerability Production
-  dependency audit, and a redacted 548-commit secret scan. The diff contains no
+  dependency audit, and a redacted full-history secret scan. The diff contains no
   migration.
 - No Production secret, deployment, request write, lead, event, notification,
   email, SMS, Push, WordPress edit, publication, DNS change, spend, deletion,

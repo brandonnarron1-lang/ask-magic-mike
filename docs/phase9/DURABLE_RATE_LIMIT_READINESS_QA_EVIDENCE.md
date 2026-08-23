@@ -57,7 +57,7 @@ All commands use Node 24.18.0 and pnpm 10.30.3.
 | Release safety | PASS — 14/14 |
 | Release doctor after implementation commit | HEALTHY — 43/43 |
 | Production dependency audit | PASS — no known vulnerability |
-| Full-history redacted secret scan | PASS — 548 commits / approximately 14.56 MB / no leak |
+| Full-history redacted secret scan | PASS — no leak |
 | Diff and migration review | PASS — no whitespace defect and no migration |
 
 The limiter privacy test now forces a Neon failure containing a synthetic

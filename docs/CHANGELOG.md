@@ -18,7 +18,7 @@
 - Kept isolated Vercel Preview read-only and independent of Production secrets.
 - Local Node 24 acceptance passes 218 files / 2,983 tests, strict typecheck,
   ESLint, optimized build, 82 routes, 14/14 safety, system isolation,
-  43/43 release doctor, dependency audit, redacted 548-commit secret scan, and
+  43/43 release doctor, dependency audit, redacted full-history secret scan, and
   no-migration review.
 - PR #202 hardened application head passes PR merge-ref CI, exact-head Vercel
   Preview status, deployed runtime capability health, protected
