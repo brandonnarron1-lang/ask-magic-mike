@@ -29,6 +29,13 @@ Updated 2026-08-23.
 - Decision and evidence:
   `docs/phase9/DURABLE_RATE_LIMIT_READINESS.md` and
   `docs/phase9/DURABLE_RATE_LIMIT_READINESS_QA_EVIDENCE.md`.
+- Draft PR #202 reviewed head
+  `8a2fa4d7d8150e6f1825ba3dfc04b163784a8a24` has green GitHub Node 24 run
+  `32655836987`, READY exact-SHA Preview
+  `dpl_3Dj8wBXnKLYrS9EoXLhkrLgBsKyy`, and protected Preview run
+  `32656042058`. Acceptance records 17 passes, six intentional mutation skips,
+  zero failures, 2/2 Chromium widget checks, 43/43 doctor, no Preview error
+  logs, and `PREVIEW_READY` authority.
 - Exact future gate:
   `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
 

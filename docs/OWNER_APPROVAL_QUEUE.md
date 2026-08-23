@@ -52,10 +52,16 @@ provider action, or deletion.
 - Production runtime evidence shows 17 requests used the availability-first
   memory limiter because no suitable server-only HMAC secret was available.
   The current readiness endpoint and prior monitor remained green.
-- Branch `codex/phase9-durable-rate-limit-readiness-20260823` is an isolated,
+- Draft PR [#202](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/202)
+  on branch `codex/phase9-durable-rate-limit-readiness-20260823` is an isolated,
   main-based candidate that makes Production readiness require the existing
   Neon table and strong secret, and makes the monitor validate that contract.
   It creates no second limiter or database and contains no migration.
+- Its reviewed application head has green Node 24 CI, a READY canonical
+  Preview, protected 17-pass/6-write-skip acceptance, 2/2 Chromium widget
+  checks, 43/43 doctor, and `PREVIEW_READY` authority. Exact-head checks after
+  the documentation-only evidence seal remain required before the gate is
+  consumable.
 - Its only combined configuration/application release phrase is:
   `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
 - That phrase will authorize one encrypted Production-only secret entry, the

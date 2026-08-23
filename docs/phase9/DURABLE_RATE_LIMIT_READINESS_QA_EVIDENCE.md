@@ -40,8 +40,30 @@ All commands use Node 24.18.0 and pnpm 10.30.3.
 
 ## Remote evidence
 
-Exact-head GitHub Node 24 CI, canonical Vercel Preview, and protected Preview QA
-will be attached after the Draft PR is pushed. Production remains unchanged.
+Draft PR: [#202](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/202)
+
+- Reviewed implementation/evidence head:
+  `8a2fa4d7d8150e6f1825ba3dfc04b163784a8a24`.
+- GitHub Node 24 release run `32655836987`, job `97234315833`: PASS.
+- Release artifact `9497448582`:
+  `sha256:a0e228be2437019c96fcb0645fef563b17f5df27410f74ead25d850d9e36d860`.
+- Canonical Vercel Preview deployment
+  `dpl_3Dj8wBXnKLYrS9EoXLhkrLgBsKyy`: READY, exact reviewed head.
+- Immutable Preview URL:
+  `https://ask-magic-mike-9qy59tvc0-eyes-up-industries.vercel.app`.
+- Protected Preview QA run `32656042058`, job `97234854132`: PASS.
+- Preview artifact `9497505410`:
+  `sha256:fc11119a2c8603e0e1ee6231847b9d6134ab52eb4c4f9d082af9c3f83137bde4`.
+- Acceptance: 17 pass / 6 intentional mutation skips / 0 fail; Widget
+  Chromium 2 expected / 0 unexpected / 0 flaky / 0 skipped; release doctor
+  43/43; launch authority `PREVIEW_READY`.
+- `SAFE_DB_WRITE=false`; no lead, note, task, SLA, suppression, email, SMS,
+  Push, analytics, or database mutation was executed.
+- Vercel reported no error/fatal logs for the Preview deployment during the
+  acceptance window.
+
+The evidence-seal commit is documentation-only. Its exact-head GitHub/Vercel
+checks remain mandatory after push. Production remains unchanged.
 
 ## Known boundary
 
