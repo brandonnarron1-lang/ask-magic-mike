@@ -50,8 +50,9 @@ provider action, or deletion.
 - It is refreshed onto released PR #194 merge
   `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`; the prior stacked head is
   preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
-  Local exact Node 24 and Chromium proof pass. Exact-head GitHub CI and
-  protected Vercel Preview remain required after push.
+  Local exact Node 24 and Chromium proof pass. The final no-write-harness head
+  must also have green exact-head GitHub CI and protected Vercel Preview
+  evidence attached to PR #195 before its gate is consumable.
 - Its only application release phrase is:
   `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
 - That future phrase will authorize only the exact reviewed PR #195 merge and

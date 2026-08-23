@@ -7,8 +7,9 @@
 - The existing home-value Contact step now captures name and email; invalid
   fields receive focus and uniquely own the inline error description.
 - Consumer footer navigation excludes internal preview/integration routes.
-- The screenshot helper intercepts `/api/leads`; visual QA cannot persist a
-  lead or trigger notifications.
+- The screenshot helper intercepts `/api/leads`, `/api/events`, and
+  `/api/experiments/event`; visual QA cannot persist a lead, trigger
+  notifications, or write analytics/experiment evidence.
 - Focused verification: 4 files / 11 tests — PASS.
 - Full local release gate: 214 files / 2,930 tests, typecheck, lint, optimized
   build, 82 active routes, 14/14 safety, and system isolation — PASS.

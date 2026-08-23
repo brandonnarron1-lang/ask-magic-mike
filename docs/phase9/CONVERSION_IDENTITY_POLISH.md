@@ -41,12 +41,14 @@ A fresh no-submit audit of the live seller, buyer, and Ask Mike paths found:
 - Replaced internal-preview footer links with consumer paths for Home Value,
   Sell, Buy, Ask Mike, Review Planner, and Contact; retained legal and
   accessibility links inside a named footer navigation landmark.
-- Made the screenshot helper intercept `/api/leads` and return an unmistakable
-  local QA response. Its synthetic identity says `INTERNAL QA DO NOT CONTACT`.
+- Made the screenshot helper intercept `/api/leads`, `/api/events`, and
+  `/api/experiments/event`. It returns unmistakable local QA responses, never
+  reaches a configured lead/event store, and uses the synthetic identity
+  `INTERNAL QA DO NOT CONTACT`.
 - Kept the shared footer outside the page `<main>` so browsers and assistive
   technology expose a real top-level `contentinfo` landmark.
-- Intercepts `/api/events` in homepage browser QA so the visual test cannot
-  depend on or mutate a configured database.
+- Intercepts `/api/events` in homepage browser QA so that test cannot depend on
+  or mutate a configured database.
 
 ## Boundaries
 
