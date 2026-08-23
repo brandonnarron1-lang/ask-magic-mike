@@ -2,6 +2,30 @@
 
 Updated 2026-08-23.
 
+## Phase 9 public hero delivery trust — 2026-08-23
+
+- **Reuse decision:** preserve the released Black Diamond composition, Mike
+  imagery, Our Town identity, copy, CTAs, routes, attribution, and lead flow;
+  optimize only delivery of the existing mobile and desktop hero files.
+- **Implementation:** the likely homepage LCP artwork now uses Next.js
+  responsive optimizer source sets with the established 768-pixel art-direction
+  breakpoint, intrinsic dimensions, `sizes="100vw"`, eager loading, and high
+  fetch priority.
+- **Measured local transfer:** one cold hero request per viewport; 56,792-byte
+  body at 390 × 844 versus the 289,876-byte retained mobile source (80.4%
+  smaller), and 108,706 bytes at 1440 × 900 versus the 503,788-byte retained
+  desktop source (78.4% smaller). These are local transfer facts, not claimed
+  real-user LCP scores.
+- **Acceptance:** Node 24.18.0 focused 2-file / 9-test run, full 222-file /
+  2,993-test suite, strict typecheck, ESLint, optimized Next.js 15.5.21 build,
+  system isolation, 14/14 release safety, and cold mobile/desktop visual checks
+  pass. Each viewport loaded one correct optimized art-directed source with no
+  horizontal overflow.
+- **No activation:** Production, WordPress, social/GBP, providers, messages,
+  data, DNS, spend, and NellySelly remain unchanged. Scope and evidence:
+  `docs/phase9/PUBLIC_HERO_DELIVERY_TRUST.md` and
+  `docs/phase9/PUBLIC_HERO_DELIVERY_TRUST_QA_EVIDENCE.md`.
+
 ## Phase 9 conversion-journey integrity — 2026-08-23
 
 - **Reuse decision:** the released Black Diamond forms, `/api/leads`, Neon

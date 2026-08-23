@@ -1,9 +1,32 @@
 "use client";
 
+import { getImageProps } from "next/image";
 import Link from "next/link";
 import { trackEvent } from "../../lib/analytics";
 import { readAttribution } from "../../lib/attribution";
 import { BlackDiamondHeader } from "./BlackDiamondHeader";
+
+const { props: mobileHeroProps } = getImageProps({
+  src: "/brand/black-diamond/hero-home-mobile.webp",
+  alt: "",
+  width: 1080,
+  height: 1920,
+  sizes: "100vw",
+  quality: 75,
+  loading: "eager",
+  fetchPriority: "high",
+});
+
+const { props: { srcSet: desktopHeroSrcSet } } = getImageProps({
+  src: "/brand/black-diamond/hero-home-desktop.webp",
+  alt: "",
+  width: 2880,
+  height: 1620,
+  sizes: "100vw",
+  quality: 75,
+  loading: "eager",
+  fetchPriority: "high",
+});
 
 export function HeroSection() {
   function trackHero(destination: string) {
@@ -16,11 +39,9 @@ export function HeroSection() {
   return (
     <section className="relative min-h-[96svh] overflow-hidden">
       <picture className="absolute inset-0">
-        <source media="(max-width: 767px)" srcSet="/brand/black-diamond/hero-home-mobile.webp" />
-        <source srcSet="/brand/black-diamond/hero-home-desktop.webp" />
+        <source media="(min-width: 768px)" srcSet={desktopHeroSrcSet} sizes="100vw" />
         <img
-          src="/brand/black-diamond/hero-home-desktop.jpg"
-          alt=""
+          {...mobileHeroProps}
           className="h-full w-full object-cover object-[64%_center] md:object-center"
         />
       </picture>

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-08-23 — Phase 9 public hero delivery trust candidate
+
+- Preserved the approved Black Diamond hero artwork and responsive art
+  direction while moving delivery to Next.js-generated responsive image source
+  sets.
+- Added eager/high-priority LCP discovery, intrinsic dimensions, and explicit
+  viewport sizing without changing copy, routes, tracking, forms, or lead data.
+- Added focused regression coverage and a release/rollback brief; Production
+  remains unchanged pending the exact future gate.
+
 ## 2026-08-23 — Production authority reconciliation
 
 - Recorded released PR #195 merge
