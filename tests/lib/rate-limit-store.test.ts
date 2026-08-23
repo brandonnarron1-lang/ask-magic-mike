@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   durableRateLimitBucketKey,
   durableRateLimitHashSecretReady,
+  durableRateLimitRequired,
   InMemoryRateLimitStore,
   checkRateLimit,
   rateLimitKey,
@@ -137,5 +138,18 @@ describe("durableRateLimitBucketKey", () => {
       RATE_LIMIT_HASH_SECRET: "too-short",
       CRON_SECRET: "cron-secret-fallback-with-32-characters",
     })).toBe(true);
+  });
+});
+
+describe("durableRateLimitRequired", () => {
+  it("uses Vercel environment authority before NODE_ENV", () => {
+    expect(durableRateLimitRequired({ VERCEL_ENV: "production", NODE_ENV: "production" })).toBe(true);
+    expect(durableRateLimitRequired({ VERCEL_ENV: "preview", NODE_ENV: "production" })).toBe(false);
+  });
+
+  it("requires durability for non-Vercel production runtimes", () => {
+    expect(durableRateLimitRequired({ NODE_ENV: "production" })).toBe(true);
+    expect(durableRateLimitRequired({ NODE_ENV: "development" })).toBe(false);
+    expect(durableRateLimitRequired({ NODE_ENV: "test" })).toBe(false);
   });
 });

@@ -1,6 +1,36 @@
 # Implementation Status
 
-Updated 2026-08-22.
+Updated 2026-08-23.
+
+## Phase 9 durable rate-limit readiness — 2026-08-23
+
+- Authenticated Vercel evidence found 17 paired error occurrences on the two
+  public event routes: Production had a canonical database but no suitable
+  server-only HMAC secret and therefore used the availability-first per-instance
+  memory limiter. The existing public readiness endpoint still returned HTTP
+  200 and the status-only monitor passed 9/9.
+- The candidate reuses the existing Neon `rate_limit_buckets` table and HMAC
+  implementation. It adds no provider, database, migration, route, dashboard,
+  lead store, or public form.
+- Production readiness now requires the table and strong secret and returns
+  only boolean dependency state. Vercel Preview remains read-only and is not
+  made dependent on a Production secret.
+- The synthetic monitor now validates the body contract rather than accepting
+  HTTP 200 alone. Against unchanged Production it truthfully reports 8/9,
+  proving the prior false-green path is closed by the candidate.
+- Exact local Node 24.18.0 verification passes 4 focused files / 45 tests, the
+  complete 216-file / 2,969-test suite, strict typecheck, ESLint, the optimized
+  Next.js 15.5.21 build, 52 static pages, 82 active routes, 14/14 release
+  safety, system isolation, a no-vulnerability Production dependency audit,
+  and a redacted 544-commit secret scan. The diff contains no migration.
+- No Production secret, deployment, request write, lead, event, notification,
+  email, SMS, Push, WordPress edit, publication, DNS change, spend, deletion,
+  or NellySelly action occurred.
+- Decision and evidence:
+  `docs/phase9/DURABLE_RATE_LIMIT_READINESS.md` and
+  `docs/phase9/DURABLE_RATE_LIMIT_READINESS_QA_EVIDENCE.md`.
+- Exact future gate:
+  `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
 
 ## Phase 9 conversion identity polish — 2026-08-22
 
@@ -31,8 +61,9 @@ Updated 2026-08-22.
 - Detailed decision and QA:
   `docs/phase9/CONVERSION_IDENTITY_POLISH.md` and
   `docs/phase9/CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
-- Future exact gate:
-  `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
+- PR #195 was approved and merged as
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`, then accepted on Production
+  deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Its gate is exhausted.
 
 ## Phase 9 iOS phone handoff consolidation — 2026-08-22
 

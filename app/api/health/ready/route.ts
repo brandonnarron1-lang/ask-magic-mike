@@ -1,5 +1,9 @@
 import { neon } from "@neondatabase/serverless";
 import { NextResponse } from "next/server";
+import {
+  durableRateLimitHashSecretReady,
+  durableRateLimitRequired,
+} from "@/lib/security/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +30,9 @@ function hasValidPhoneSetupConfiguration() {
 
 export async function GET() {
   const databaseUrl = process.env.DATABASE_URL;
+  const rateLimitSecretReady = durableRateLimitHashSecretReady();
+  const rateLimitRequired = durableRateLimitRequired();
+  const missingDatabaseRateLimitReady = !rateLimitRequired;
   if (!databaseUrl) {
     return NextResponse.json(
       {
@@ -35,6 +42,10 @@ export async function GET() {
         leads_table: false,
         notification_table: false,
         rbac_schema_ready: false,
+        rate_limit_table: false,
+        rate_limit_secret_ready: rateLimitSecretReady,
+        rate_limit_required: rateLimitRequired,
+        rate_limit_ready: missingDatabaseRateLimitReady,
         push_enabled: process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED === "true",
         push_subscription_table: false,
         push_provider_configured: hasValidPushConfiguration(),
@@ -57,6 +68,7 @@ export async function GET() {
            AND to_regclass('public.lead_center_sessions') IS NOT NULL
            AND to_regclass('public.lead_center_accounts') IS NOT NULL
            AS rbac_schema_ready,
+         to_regclass('public.rate_limit_buckets') IS NOT NULL AS rate_limit_table,
          to_regclass('public.staff_push_subscriptions') IS NOT NULL AS push_subscription_table`,
       [],
     ) as Array<Record<string, unknown>>;
@@ -66,9 +78,12 @@ export async function GET() {
     const phoneSetupConfigured = hasValidPhoneSetupConfiguration();
     const pushSubscriptionTable = result.push_subscription_table === true;
     const pushReady = !pushEnabled || (pushProviderConfigured && pushSubscriptionTable && phoneSetupConfigured);
+    const rateLimitTable = result.rate_limit_table === true;
+    const rateLimitReady = !rateLimitRequired || (rateLimitTable && rateLimitSecretReady);
     const ready = result.capture_function === true
       && result.leads_table === true
       && result.notification_table === true
+      && rateLimitReady
       && pushReady;
     return NextResponse.json(
       {
@@ -78,6 +93,10 @@ export async function GET() {
         leads_table: result.leads_table === true,
         notification_table: result.notification_table === true,
         rbac_schema_ready: result.rbac_schema_ready === true,
+        rate_limit_table: rateLimitTable,
+        rate_limit_secret_ready: rateLimitSecretReady,
+        rate_limit_required: rateLimitRequired,
+        rate_limit_ready: rateLimitReady,
         push_enabled: pushEnabled,
         push_subscription_table: pushSubscriptionTable,
         push_provider_configured: pushProviderConfigured,
@@ -95,6 +114,10 @@ export async function GET() {
         leads_table: false,
         notification_table: false,
         rbac_schema_ready: false,
+        rate_limit_table: false,
+        rate_limit_secret_ready: rateLimitSecretReady,
+        rate_limit_required: rateLimitRequired,
+        rate_limit_ready: missingDatabaseRateLimitReady,
         push_enabled: process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED === "true",
         push_subscription_table: false,
         push_provider_configured: hasValidPushConfiguration(),

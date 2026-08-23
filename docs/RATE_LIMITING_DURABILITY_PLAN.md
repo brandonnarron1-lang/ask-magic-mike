@@ -1,11 +1,18 @@
 # Rate-Limiting Durability and Privacy
 
-## Current production architecture
+## Canonical architecture and current deployment state
 
-Ask Magic Mike uses the canonical Neon `public.rate_limit_buckets` table for
+Ask Magic Mike is designed to use the canonical Neon
+`public.rate_limit_buckets` table for
 atomic counters shared across Vercel instances. The in-memory store remains only
 for local development and an explicitly acknowledged degraded mode. No Redis,
 Upstash, paid add-on, second database, or Supabase dependency is required.
+
+Authenticated runtime evidence on 2026-08-23 found that the current Production
+deployment had no suitable 32-or-more-character server-only hash secret. The
+two public event routes therefore used the availability-first memory fallback.
+This document must not describe durability as live again until the dedicated
+Production secret and readiness candidate pass controlled acceptance.
 
 The limiter covers lead capture, intake steps and sessions, analytics, chat,
 phone setup, and public appointment requests. Each route selects a named bucket
@@ -26,7 +33,7 @@ server selects the first 32-or-more-character secret in this order:
 3. `CRON_SECRET`
 4. `ADMIN_SECRET`
 
-Only boolean readiness appears in the protected health response. Secret values,
+Only boolean readiness appears in health responses. Secret values,
 raw bucket inputs, and the HMAC key are never returned, logged, committed, or
 sent as SQL parameters.
 
@@ -56,7 +63,10 @@ sent as SQL parameters.
 
 Automated tests prove deterministic domain separation, short-secret rejection,
 no raw key/secret SQL parameter, 24-hour pruning, `updated_at` maintenance,
-durable/in-memory behavior, and boolean-only protected health reporting.
+durable/in-memory behavior, Production/Preview runtime separation, and
+boolean-only health reporting. The Production monitor validates the readiness
+body contract rather than status alone.
 
-This candidate is application-only. It requires no production migration and
-does not rotate or display any existing secret.
+The candidate requires one new encrypted Production-only
+`RATE_LIMIT_HASH_SECRET` plus an application deployment. It requires no
+database migration and does not rotate or display any existing secret.

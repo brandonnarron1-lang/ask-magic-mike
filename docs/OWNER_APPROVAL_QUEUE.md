@@ -1,6 +1,6 @@
 # Owner Approval Queue
 
-Updated 2026-08-22 from authenticated GitHub, Vercel, Neon, WordPress, and
+Updated 2026-08-23 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
@@ -35,31 +35,42 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    `5a3c5c7f2463ea399c21b616ff249f6c67e156b6` and accepted on Production
    deployment `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. It contained no migration,
    device enrollment, or send.
+7. PR [#195](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/195)
+   — its exact conversion-identity gate was received; reviewed head
+   `db13953071aa5dca59b74b671c2ed4592c53494f` was merged as
+   `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and accepted on Production
+   deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. It contained no migration,
+   form submission, or message send.
 
 These completed gates are exhausted and must not be reused as authority for a
 new action. None authorized a social/GBP post, email campaign, QR
 printing/distribution, consumer message, spend, DNS change, WordPress change,
 provider action, or deletion.
 
-## Next consolidated application candidate
+## Immediate Production durability candidate
 
-- Draft PR [#195](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/195)
-  is the sole next application candidate. It reuses the canonical home-value
-  funnel and adds required seller identity, field-specific focus/error
-  ownership, consumer-only footer navigation, and mutation-free visual QA.
-- It is refreshed onto released PR #194 merge
-  `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`; the prior stacked head is
-  preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
-  Local exact Node 24 and Chromium proof pass. The final no-write-harness head
-  must also have green exact-head GitHub CI and protected Vercel Preview
-  evidence attached to PR #195 before its gate is consumable.
-- Its only application release phrase is:
-  `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
-- That future phrase will authorize only the exact reviewed PR #195 merge and
-  canonical Vercel Production deployment. It will not authorize a WordPress
-  edit, GBP/social/email publication, QR distribution, message, lead
-  submission, migration, device enrollment, test Push, spend, DNS change,
-  provider action, deletion, or NellySelly action.
+- Production runtime evidence shows 17 requests used the availability-first
+  memory limiter because no suitable server-only HMAC secret was available.
+  The current readiness endpoint and prior monitor remained green.
+- Branch `codex/phase9-durable-rate-limit-readiness-20260823` is an isolated,
+  main-based candidate that makes Production readiness require the existing
+  Neon table and strong secret, and makes the monitor validate that contract.
+  It creates no second limiter or database and contains no migration.
+- Its only combined configuration/application release phrase is:
+  `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
+- That phrase will authorize one encrypted Production-only secret entry, the
+  exact reviewed candidate merge/deploy, and one malformed event request that
+  writes only an HMAC-pseudonymized rate-limit bucket before returning HTTP
+  400. It will not authorize a lead, analytics event, email, SMS, Push,
+  WordPress change, publication, spend, DNS change, migration, deletion, or
+  NellySelly action.
+
+## Application candidates after the durability correction
+
+- Draft PR #197 is the first existing application candidate and must be
+  refreshed onto the exact durability release before its own gate can be used.
+- Draft PRs #198–#201 remain ordered behind #197. Their approvals are not
+  implied by the durability gate and none may be merged out of sequence.
 
 ## Deferred candidates requiring refresh and overlap review
 

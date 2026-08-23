@@ -39,6 +39,8 @@ type DurableRateLimitSecretEnv = Partial<Record<
   string | undefined
 >>;
 
+type RateLimitRuntimeEnv = Partial<Record<"VERCEL_ENV" | "NODE_ENV", string | undefined>>;
+
 function durableBucketHashSecret(env: DurableRateLimitSecretEnv = process.env): string | null {
   const candidates = [
     env.RATE_LIMIT_HASH_SECRET,
@@ -54,6 +56,11 @@ function durableBucketHashSecret(env: DurableRateLimitSecretEnv = process.env): 
 /** Boolean-only readiness probe for protected health output and tests. */
 export function durableRateLimitHashSecretReady(env: DurableRateLimitSecretEnv = process.env): boolean {
   return durableBucketHashSecret(env) !== null;
+}
+
+/** Preview is read-only; every real production runtime requires shared limiting. */
+export function durableRateLimitRequired(env: RateLimitRuntimeEnv = process.env): boolean {
+  return env.VERCEL_ENV ? env.VERCEL_ENV === "production" : env.NODE_ENV === "production";
 }
 
 /**
@@ -215,9 +222,7 @@ export async function checkRateLimit(
 ): Promise<RateLimitResult> {
   // Next.js sets NODE_ENV=production for every optimized Vercel build,
   // including isolated previews. VERCEL_ENV is authoritative when present.
-  const isProduction = process.env.VERCEL_ENV
-    ? process.env.VERCEL_ENV === "production"
-    : process.env.NODE_ENV === "production";
+  const isProduction = durableRateLimitRequired();
 
   const neonResult = await checkNeonRateLimit(key, limit, windowMs, prefix);
   if (neonResult) return neonResult;

@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
     leads_table: true,
     notification_table: true,
     rbac_schema_ready: true,
+    rate_limit_table: true,
     push_subscription_table: true,
   } as Record<string, unknown>,
   query: vi.fn(),
@@ -24,6 +25,11 @@ const pushEnvironmentKeys = [
   "VAPID_PRIVATE_KEY",
   "VAPID_SUBJECT",
   "PHONE_SETUP_SIGNING_SECRET",
+  "RATE_LIMIT_HASH_SECRET",
+  "CONSENT_IP_HASH_SALT",
+  "CRON_SECRET",
+  "ADMIN_SECRET",
+  "VERCEL_ENV",
 ] as const;
 
 describe("production GET /api/health/ready", () => {
@@ -33,12 +39,18 @@ describe("production GET /api/health/ready", () => {
       leads_table: true,
       notification_table: true,
       rbac_schema_ready: true,
+      rate_limit_table: true,
       push_subscription_table: true,
     };
     mocks.query.mockReset();
     mocks.query.mockImplementation(async () => [mocks.result]);
     process.env.DATABASE_URL = "postgresql://health-check.invalid/neondb";
     process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED = "false";
+    process.env.VERCEL_ENV = "production";
+    process.env.RATE_LIMIT_HASH_SECRET = "test-rate-limit-hash-secret-that-is-long-enough";
+    delete process.env.CONSENT_IP_HASH_SALT;
+    delete process.env.CRON_SECRET;
+    delete (process.env as Record<string, string | undefined>).ADMIN_SECRET;
     delete process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
     delete process.env.VAPID_PRIVATE_KEY;
     delete process.env.VAPID_SUBJECT;
@@ -57,6 +69,10 @@ describe("production GET /api/health/ready", () => {
     expect(body).toMatchObject({
       ok: true,
       rbac_schema_ready: true,
+      rate_limit_table: true,
+      rate_limit_secret_ready: true,
+      rate_limit_required: true,
+      rate_limit_ready: true,
       push_enabled: false,
       push_ready: true,
     });
@@ -83,6 +99,40 @@ describe("production GET /api/health/ready", () => {
     });
   });
 
+  it("fails safely when the production database is not configured", async () => {
+    delete process.env.DATABASE_URL;
+
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(body).toMatchObject({
+      ok: false,
+      database: "not_configured",
+      rate_limit_table: false,
+      rate_limit_secret_ready: true,
+      rate_limit_required: true,
+      rate_limit_ready: false,
+    });
+  });
+
+  it("fails safely when the readiness query cannot inspect Neon", async () => {
+    mocks.query.mockRejectedValueOnce(new Error("connection refused"));
+
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(body).toMatchObject({
+      ok: false,
+      database: "connection_failed",
+      rate_limit_table: false,
+      rate_limit_secret_ready: true,
+      rate_limit_required: true,
+      rate_limit_ready: false,
+    });
+  });
+
   it("fails readiness when enabled push is missing its subscription table", async () => {
     mocks.result.push_subscription_table = false;
     process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED = "true";
@@ -96,6 +146,74 @@ describe("production GET /api/health/ready", () => {
 
     expect(response.status).toBe(503);
     expect(body).toMatchObject({ ok: false, push_subscription_table: false, push_ready: false });
+  });
+
+  it("fails readiness when the durable rate-limit table is missing", async () => {
+    mocks.result.rate_limit_table = false;
+
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(body).toMatchObject({
+      ok: false,
+      rate_limit_table: false,
+      rate_limit_secret_ready: true,
+      rate_limit_required: true,
+      rate_limit_ready: false,
+    });
+  });
+
+  it("fails readiness when no strong server-only rate-limit secret is available", async () => {
+    delete process.env.RATE_LIMIT_HASH_SECRET;
+
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(body).toMatchObject({
+      ok: false,
+      rate_limit_table: true,
+      rate_limit_secret_ready: false,
+      rate_limit_required: true,
+      rate_limit_ready: false,
+    });
+  });
+
+  it("accepts the documented strong server-secret fallback without identifying it", async () => {
+    delete process.env.RATE_LIMIT_HASH_SECRET;
+    process.env.CRON_SECRET = "test-cron-secret-fallback-that-is-long-enough";
+
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      ok: true,
+      rate_limit_secret_ready: true,
+      rate_limit_required: true,
+      rate_limit_ready: true,
+    });
+    expect(JSON.stringify(body)).not.toContain("CRON_SECRET");
+    expect(JSON.stringify(body)).not.toContain(process.env.CRON_SECRET);
+  });
+
+  it("does not require durable limiter dependencies in an isolated Vercel Preview", async () => {
+    process.env.VERCEL_ENV = "preview";
+    delete process.env.RATE_LIMIT_HASH_SECRET;
+    mocks.result.rate_limit_table = false;
+
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      ok: true,
+      rate_limit_table: false,
+      rate_limit_secret_ready: false,
+      rate_limit_required: false,
+      rate_limit_ready: true,
+    });
   });
 
   it("fails readiness when enabled push has incomplete provider configuration", async () => {
@@ -129,6 +247,7 @@ describe("production GET /api/health/ready", () => {
     process.env.VAPID_PRIVATE_KEY = "private-secret-marker";
     process.env.VAPID_SUBJECT = "mailto:secret-marker@example.test";
     process.env.PHONE_SETUP_SIGNING_SECRET = "phone-setup-secret-marker-that-must-never-appear";
+    process.env.RATE_LIMIT_HASH_SECRET = "rate-limit-secret-marker-that-must-never-appear";
 
     const body = await (await GET()).json();
     const serialized = JSON.stringify(body);
@@ -137,5 +256,6 @@ describe("production GET /api/health/ready", () => {
     expect(serialized).not.toContain("private-secret-marker");
     expect(serialized).not.toContain("secret-marker@example.test");
     expect(serialized).not.toContain("phone-setup-secret-marker");
+    expect(serialized).not.toContain("rate-limit-secret-marker");
   });
 });
