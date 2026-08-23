@@ -75,6 +75,7 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
     await expect(widget.getByRole("heading", { name: "Ask Magic Mike" })).toBeVisible();
     await widget.getByLabel("Property address").fill("123 Nash St NW, Wilson NC");
     await widget.getByRole("button", { name: "Continue" }).click();
+    await widget.getByLabel("Your name").fill("INTERNAL QA DO NOT CONTACT");
     await widget.getByLabel("Email for your valuation follow-up").fill("jane+qa@example.com");
     await widget.getByRole("button", { name: "Continue" }).click();
     await widget.getByLabel("Phone").fill("+12525550100");
@@ -88,6 +89,7 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
     expect(String(body.widget_session_id).length).toBeGreaterThan(8);
     expect(body.funnel_type).toBe("widget");
     expect(body.lead_source_surface).toBe("widget");
+    expect(body.name).toBe("INTERNAL QA DO NOT CONTACT");
     expect(body.email).toBe("jane+qa@example.com");
     expect(body.phone).toBe("+12525550100");
     expect(body.address).toBe("123 Nash St NW, Wilson NC");
@@ -113,6 +115,7 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
     const widget = page.frameLocator('iframe[title="Ask Magic Mike widget"]');
     await widget.getByLabel("Property address").fill("123 Nash St NW, Wilson NC");
     await widget.getByRole("button", { name: "Continue" }).click();
+    await widget.getByLabel("Your name").fill("INTERNAL QA DO NOT CONTACT");
     await widget.getByLabel("Email for your valuation follow-up").fill("jane+qa@example.com");
     await widget.getByRole("button", { name: "Continue" }).click();
     await widget.getByLabel("Phone").fill("+12525550100");

@@ -2,6 +2,37 @@
 
 Updated 2026-08-22.
 
+## Phase 9 conversion identity polish — 2026-08-22
+
+- A fresh Production no-submit audit found that the canonical home-value path
+  omitted consumer name while the buyer path already captured it. The existing
+  Contact step now collects required name and email and sends name through the
+  canonical `/api/leads` payload; no new form or backend was created.
+- Validation now moves focus to the invalid address, name, email, or phone and
+  associates the live error only with that field. The four-stage funnel and
+  Black Diamond visual system remain intact.
+- Consumer footer navigation no longer promotes internal Widget Preview,
+  OurTown Integration, or Social Preview surfaces. Those routes remain
+  non-indexable and available for their existing operational purpose.
+- Screenshot QA now intercepts lead creation and uses unmistakable synthetic
+  identity, eliminating an accidental canonical-database write path.
+- Released-main refresh evidence passes exact Node 24.18.0, 215 test files /
+  2,950 tests, strict typecheck, ESLint, optimized build, 82 active routes,
+  14/14 safety, 43/43 doctor, system isolation, eight Chromium homepage/widget
+  checks, dependency audit, candidate secret scan, diff check, and empty
+  migration scan. Exact-head GitHub Node 24 CI and canonical protected Preview
+  proof remain pending after push.
+- The branch is refreshed onto released PR #194 merge
+  `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`; its prior stacked head is
+  preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
+  The only automatic conflict was the cumulative QA evidence document; the
+  application merge was clean.
+- Detailed decision and QA:
+  `docs/phase9/CONVERSION_IDENTITY_POLISH.md` and
+  `docs/phase9/CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
+- Future exact gate:
+  `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
+
 ## Phase 9 iOS phone handoff consolidation — 2026-08-22
 
 - Historical PR #179 was audited rather than merged wholesale. Its unique
@@ -29,28 +60,32 @@ Updated 2026-08-22.
   disabled so only an operator holding `notification:manage` can create the
   link. The optional QA Push is durably limited to one attempt per setup session
   and copy subscription in Production.
-- Released-base focused verification passes 8 files / 58 tests. The exact Node
-  24 release gate passes 214 files / 2,939 tests, strict typecheck, ESLint,
-  optimized build, 82 active routes, and 14/14 safety controls. Production
-  dependency audit, patch-integrity, candidate secret, and migration scans pass;
-  the PR contains no database migration.
-- Draft PR #194 is cleanly mergeable on `main`. Its released-base code head is
-  `d5da4bd8ac4b0235e140ac785d46824a198292d8`; its prior state is preserved at
-  `rescue/amm-pr194-pre-pr193-refresh-20260822-1841`. Exact Node 24 run
-  `32603258868`, Ready Preview deployment
-  `dpl_HErSvZNK89Wh79rbi71KAZhqKdq1`, and protected Preview QA run
-  `32603437125` pass.
+- Final released-base verification passes exact Node 24.18.0, 214 files / 2,949
+  tests, strict typecheck, ESLint, optimized build, 82 active routes, 14/14
+  safety, and 43/43 doctor checks. Production dependency audit,
+  patch-integrity, candidate secret, and migration scans pass; PR #194 contains
+  no database migration.
+- PR #194 final reviewed head
+  `851ebe530ac6a91a4e410f26538d29c1bf43f1c6` was refreshed onto released PR
+  #196 base `c08abe1168840b99ccba07866bbec8cf7a6752fb`; its prior state is preserved
+  at `rescue/amm-pr194-pre-pr196-refresh-20260822-1945`. Exact Node 24 run
+  `32606142473`, Ready Preview deployment
+  `dpl_7nhaV5tpS4YArtgKVV9PfVBRHq4H`, and protected Preview QA run
+  `32606286620` pass.
 - Protected Preview acceptance records 17 passes, six intentional write skips,
   zero failures, two expected browser tests, 43/43 doctor checks, and strict
   `PREVIEW_READY`. The automated phone probe uses only an invalid synthetic
   token and performs no invite, claim, limiter persistence, device
   registration, or send.
-- PR #194 remains Draft. Green evidence does not authorize merge or Production;
-  physical device enrollment and one `[TEST]` Push remain separately gated.
+- PR #194 was approved and merged as
+  `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`, then accepted on Production
+  deployment `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. Read-only acceptance passed
+  conversion 15/15, smoke 19 pass / two intentional skips / zero failures,
+  canonical Neon/RBAC/Push readiness, private invalid-install behavior, apex
+  redirect, and zero deployment error logs.
 - Detailed decision: `docs/phase9/PHONE_INSTALL_HANDOFF_CONSOLIDATION.md`.
-- Exact future application gate:
-  `APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`.
-  Physical device enrollment and a `[TEST]` Push remain separate actions.
+- The PR #194 application gate is exhausted. Physical device enrollment and a
+  `[TEST]` Push remain separate actions.
 
 ## Phase 9 privacy and KPI-trust consolidation — 2026-08-22
 

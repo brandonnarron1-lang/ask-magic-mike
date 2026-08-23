@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-22 — Conversion identity and public-navigation polish candidate
+
+- Reused the canonical home-value funnel and added required consumer name
+  capture to its existing Contact step without increasing funnel length.
+- Added invalid-field focus and field-specific error association for address,
+  name, email, and phone.
+- Removed internal preview/integration links from the shared consumer footer
+  and replaced them with canonical buyer, seller, home-value, Ask Mike, planner,
+  contact, legal, and accessibility paths.
+- Made the historical screenshot helper intercept `/api/leads`, preventing
+  visual QA from creating a lead even when database configuration is present.
+- No Production mutation, migration, lead, notification, provider call,
+  WordPress edit, publication, spend, DNS, or NellySelly action occurred.
+
 ## 2026-08-22 — iOS phone install handoff consolidation candidate
 
 - Audited historical PR #179 and refreshed only its unique iPhone Home Screen

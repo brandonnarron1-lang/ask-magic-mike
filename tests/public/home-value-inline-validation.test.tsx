@@ -34,17 +34,33 @@ describe("home-value inline validation", () => {
       "Enter the full property address so Mike can review the right home.",
     );
     expect(address).toHaveAttribute("aria-invalid", "true");
+    expect(address).toHaveFocus();
 
     await user.type(address, "INTERNAL QA DO NOT CONTACT");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Continue" }));
 
+    const name = screen.getByLabelText("Your name");
     const email = screen.getByLabelText("Email for your valuation follow-up");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Enter your name so Mike knows who requested the review.",
+    );
+    expect(name).toHaveAttribute("aria-invalid", "true");
+    expect(email).toHaveAttribute("aria-invalid", "false");
+    expect(name).toHaveAttribute("aria-describedby", "home-value-form-error");
+    expect(email).not.toHaveAttribute("aria-describedby");
+    expect(name).toHaveFocus();
+
+    await user.type(name, "INTERNAL QA DO NOT CONTACT");
     await user.click(screen.getByRole("button", { name: "Continue" }));
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Enter a valid email for your valuation follow-up.",
     );
     expect(email).toHaveAttribute("aria-invalid", "true");
+    expect(email).toHaveAttribute("aria-describedby", "home-value-form-error");
+    expect(name).not.toHaveAttribute("aria-describedby");
+    expect(email).toHaveFocus();
 
     await user.type(email, "internal-qa@example.com");
     await user.click(screen.getByRole("button", { name: "Continue" }));
@@ -55,5 +71,6 @@ describe("home-value inline validation", () => {
       "Enter a phone number with area code.",
     );
     expect(phone).toHaveAttribute("aria-invalid", "true");
+    expect(phone).toHaveFocus();
   });
 });

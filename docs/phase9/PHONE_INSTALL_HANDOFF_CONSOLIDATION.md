@@ -86,39 +86,37 @@ separate owner-controlled action after Production release. Mike must enroll his
 own primary device; Brandon's copy-role link cannot impersonate or register
 Mike.
 
-## Released-base acceptance evidence
+## Released acceptance evidence
 
-- Draft PR: #194. Released-base code head:
-  `d5da4bd8ac4b0235e140ac785d46824a198292d8`.
+- PR #194 final reviewed head:
+  `851ebe530ac6a91a4e410f26538d29c1bf43f1c6`; released-main base:
+  `c08abe1168840b99ccba07866bbec8cf7a6752fb`.
 - Portable Production fail-closed repair:
   `f979d808fd76a1dba82b0a7f2b922f04c75af483`.
-- Focused phone/origin/Preview matrix: PASS, 8 files / 58 tests.
-- Full exact Node 24 release gate: PASS, 214 files / 2,939 tests, strict typecheck,
-  ESLint, optimized Next.js build, 82 active routes, 14/14 safety controls, and
-  Ask Magic Mike/NellySelly isolation.
+- Full exact Node 24 release gate: PASS, 214 files / 2,949 tests, strict
+  typecheck, ESLint, optimized Next.js build, 82 active routes, 14/14 safety
+  controls, 43/43 doctor checks, and Ask Magic Mike/NellySelly isolation.
 - Production dependency audit: no known vulnerabilities. The redacted
   full-history scan covers approximately 14.14 MB and reports no leak.
   Candidate diff and migration scans are clean.
-- Exact Node 24 run `32603258868`, canonical Ready Preview deployment
-  `dpl_HErSvZNK89Wh79rbi71KAZhqKdq1`, and protected Preview QA run
-  `32603437125` pass. The protected run records 17 passes, six intentional
+- Exact Node 24 run `32606142473`, canonical Ready Preview deployment
+  `dpl_7nhaV5tpS4YArtgKVV9PfVBRHq4H`, and protected Preview QA run
+  `32606286620` pass. The protected run records 17 passes, six intentional
   write skips, zero failures, two expected browser tests, 43/43 doctor checks,
   and strict `PREVIEW_READY`.
+- Approved head was merged as
+  `5a3c5c7f2463ea399c21b616ff249f6c67e156b6` and accepted on Production
+  deployment `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. Read-only acceptance passed
+  conversion 15/15, smoke 19 pass / two skips / zero failures, private invalid
+  install/manifest behavior, canonical readiness, and zero deployment errors.
 
-## Merge order and gate
+## Released boundary
 
-This candidate is refreshed on released `main` after PR #193 and remains the
-sole next Draft application candidate. Passing Preview evidence is not merge or
-Production authority.
-
-Exact future application gate:
-
-`APPROVE PHASE 9 IOS PHONE HANDOFF MERGE AND PRODUCTION DEPLOYMENT`
-
-That gate authorizes only the reviewed application merge and canonical Vercel
-deployment. It does not authorize device enrollment, a test Push, carrier SMS,
-email, lead submission, database migration, external publication, WordPress,
-DNS, spend, provider purchase, deletion, or NellySelly action.
+The exact application gate was received and exhausted by the reviewed merge and
+canonical Vercel deployment above. It did not authorize device enrollment, a
+test Push, carrier SMS, email, lead submission, database migration, external
+publication, WordPress, DNS, spend, provider purchase, deletion, or NellySelly
+action. Those boundaries remain intact.
 
 ## Rollback
 

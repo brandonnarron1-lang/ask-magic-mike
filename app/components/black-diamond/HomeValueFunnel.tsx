@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { trackEvent } from "../../lib/analytics";
 import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
@@ -24,7 +24,9 @@ type HomeValueFunnelProps = {
   experimentContext?: PublicExperimentContext | null;
 };
 
-const stepLabels = ["Address", "Email", "Phone", "Thank you"];
+type HomeValueField = "address" | "name" | "email" | "phone";
+
+const stepLabels = ["Address", "Contact", "Phone", "Thank you"];
 const errorId = "home-value-form-error";
 
 export function HomeValueFunnel({
@@ -38,12 +40,17 @@ export function HomeValueFunnel({
   );
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [step, setStep] = useState(1);
+  const addressRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
   const [address, setAddress] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [timeline, setTimeline] = useState(timelineOptions[1]);
   const [consent, setConsent] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<{ message: string; field?: HomeValueField } | null>(null);
   const [leadMessage, setLeadMessage] = useState<string | null>(null);
   const [leadReference, setLeadReference] = useState<{ leadId: string | null; sessionId: string | null }>({
     leadId: null,
@@ -58,11 +65,20 @@ export function HomeValueFunnel({
     setSubmissionId(tryCreateBrowserSubmissionId());
   }, []);
 
+  useEffect(() => {
+    if (step === 2) nameRef.current?.focus();
+    if (step === 3) phoneRef.current?.focus();
+  }, [step]);
+
   function submitAddress(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError(null);
     if (clean(address).length < 5) {
-      setFormError("Enter the full property address so Mike can review the right home.");
+      setFormError({
+        message: "Enter the full property address so Mike can review the right home.",
+        field: "address",
+      });
+      addressRef.current?.focus();
       return;
     }
     trackEvent("home_value_started", attribution, { funnel_name: "home_value", lead_source_surface: surface, ...experimentProperties });
@@ -78,8 +94,20 @@ export function HomeValueFunnel({
   function submitEmail(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError(null);
+    if (clean(name).length < 2) {
+      setFormError({
+        message: "Enter your name so Mike knows who requested the review.",
+        field: "name",
+      });
+      nameRef.current?.focus();
+      return;
+    }
     if (!email.includes("@") || email.length < 6) {
-      setFormError("Enter a valid email for your valuation follow-up.");
+      setFormError({
+        message: "Enter a valid email for your valuation follow-up.",
+        field: "email",
+      });
+      emailRef.current?.focus();
       return;
     }
     trackEvent("email_submit", attribution, { funnel_name: "home_value", step_name: "email" });
@@ -93,11 +121,12 @@ export function HomeValueFunnel({
     setLeadMessage(null);
 
     if (clean(phone).replace(/\D/g, "").length < 10) {
-      setFormError("Enter a phone number with area code.");
+      setFormError({ message: "Enter a phone number with area code.", field: "phone" });
+      phoneRef.current?.focus();
       return;
     }
     if (!submissionId) {
-      setFormError("This browser could not create a secure submission reference. Refresh and try again.");
+      setFormError({ message: "This browser could not create a secure submission reference. Refresh and try again." });
       return;
     }
 
@@ -115,6 +144,7 @@ export function HomeValueFunnel({
           funnel_type: surface === "widget" ? "widget" : "home_value",
           lead_source_surface: surface,
           address: clean(address),
+          name: clean(name),
           email: clean(email),
           phone: clean(phone),
           timeline,
@@ -157,7 +187,7 @@ export function HomeValueFunnel({
       setStep(4);
       trackEvent("thank_you_viewed", attribution, { funnel_name: "home_value" });
     } catch (error) {
-      setFormError(publicLeadErrorMessage(error instanceof Error ? error.message : undefined));
+      setFormError({ message: publicLeadErrorMessage(error instanceof Error ? error.message : undefined) });
     } finally {
       setSubmitting(false);
     }
@@ -171,6 +201,7 @@ export function HomeValueFunnel({
         <form noValidate onSubmit={submitAddress} className="space-y-5" data-amm-step="address">
           <TextField
             label="Property address"
+            inputRef={addressRef}
             value={address}
             onChange={(event) => {
               setAddress(event.target.value);
@@ -178,8 +209,8 @@ export function HomeValueFunnel({
             }}
             autoComplete="street-address"
             placeholder="123 Lake Wilson Road, Wilson, NC"
-            aria-describedby={formError ? errorId : undefined}
-            aria-invalid={Boolean(formError)}
+            aria-describedby={formError?.field === "address" ? errorId : undefined}
+            aria-invalid={formError?.field === "address"}
             required
           />
           <button className="amm-primary-button w-full px-5 py-4">
@@ -189,9 +220,24 @@ export function HomeValueFunnel({
       ) : null}
 
       {step === 2 ? (
-        <form noValidate onSubmit={submitEmail} className="space-y-5" data-amm-step="email">
+        <form noValidate onSubmit={submitEmail} className="space-y-5" data-amm-step="contact">
+          <TextField
+            label="Your name"
+            inputRef={nameRef}
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value);
+              if (formError) setFormError(null);
+            }}
+            autoComplete="name"
+            placeholder="Your name"
+            aria-describedby={formError?.field === "name" ? errorId : undefined}
+            aria-invalid={formError?.field === "name"}
+            required
+          />
           <TextField
             label="Email for your valuation follow-up"
+            inputRef={emailRef}
             value={email}
             onChange={(event) => {
               setEmail(event.target.value);
@@ -200,8 +246,8 @@ export function HomeValueFunnel({
             type="email"
             autoComplete="email"
             placeholder="you@example.com"
-            aria-describedby={formError ? errorId : undefined}
-            aria-invalid={Boolean(formError)}
+            aria-describedby={formError?.field === "email" ? errorId : undefined}
+            aria-invalid={formError?.field === "email"}
             required
           />
           <div className="flex gap-3">
@@ -226,6 +272,7 @@ export function HomeValueFunnel({
         <form noValidate onSubmit={submitPhone} className="space-y-5" data-amm-step="phone">
           <TextField
             label="Phone"
+            inputRef={phoneRef}
             value={phone}
             onChange={(event) => {
               setPhone(event.target.value);
@@ -234,8 +281,8 @@ export function HomeValueFunnel({
             type="tel"
             autoComplete="tel"
             placeholder="252-555-0123"
-            aria-describedby={formError ? errorId : undefined}
-            aria-invalid={Boolean(formError)}
+            aria-describedby={formError?.field === "phone" ? errorId : undefined}
+            aria-invalid={formError?.field === "phone"}
             required
           />
           <SelectField label="Timeline" value={timeline} onChange={(event) => setTimeline(event.target.value)}>
@@ -294,7 +341,7 @@ export function HomeValueFunnel({
 
       {formError ? (
         <p id={errorId} className="mt-4 rounded-md border border-[#6e162680] bg-[#6e16261f] p-3 text-sm text-[#ffcabd]" role="alert">
-          {formError}
+          {formError.message}
         </p>
       ) : null}
     </LuxuryCard>
