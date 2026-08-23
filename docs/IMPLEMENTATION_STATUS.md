@@ -4,6 +4,11 @@ Updated 2026-08-22.
 
 ## Phase 9 WordPress owned-demand activation change set — 2026-08-22
 
+- **Stacked safely:** Draft PR
+  [#198](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/198)
+  now follows PR #197, which follows PR #195. Its pre-stack head is preserved
+  at `rescue/amm-pr198-pre-pr197-stack-refresh-20260822-2247`; application code
+  composed without conflict.
 - **Implemented locally, not published:** the existing authenticated
   `/admin/distribution` command now exposes read-only readiness-manifest links
   for three established Our Town WordPress placements.
@@ -23,6 +28,14 @@ Updated 2026-08-22.
 - **Recommended first action:** one separately approved homepage CTA href
   replacement only. No WordPress publication is included in this application
   candidate.
+- **Final local acceptance:** 4 focused files / 37 stack tests, 217 full files /
+  2,967 tests, strict typecheck, ESLint, optimized Next.js 15.5.21 build,
+  83/17 route manifest, 14/14 release safety, 43/43 release doctor, dependency,
+  secret, diff, and empty migration scans pass. At 1440×1000 and 390×844 the
+  protected command shows three manifest controls, one main landmark, truthful
+  unavailable states, no overflow or framework overlay, zero console findings,
+  and GET-only application traffic. Exact-head Node 24 and protected Vercel
+  Preview evidence remain required after push.
 - Detailed scope and rollback:
   `docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md`.
 
@@ -54,7 +67,10 @@ Updated 2026-08-22.
   manifest, 14/14 release safety, 43/43 release doctor,
   dependency/secret/diff/migration scans, and desktop/mobile Playwright QA
   with no overflow, console finding, or application POST in the counted
-  session. Exact Node 24 CI and canonical Preview verification remain pending.
+  session. Exact Node 24 run `32613233315`, immutable Preview deployment
+  `dpl_7Te37sRe67UzVpNAydAp4LoFqtBv`, and protected no-write Preview QA run
+  `32613410434` pass with 17 pass / 6 safe skip / 0 fail, widget 2/2, doctor
+  43/43, and strict `PREVIEW_READY`.
 - Detailed decision:
   `docs/phase9/LEGACY_WORDPRESS_ATTRIBUTION_TRUST.md`.
 - Future exact application gate, eligible only after PR #195 releases and this
@@ -80,8 +96,10 @@ Updated 2026-08-22.
   2,950 tests, strict typecheck, ESLint, optimized build, 82 active routes,
   14/14 safety, 43/43 doctor, system isolation, eight Chromium homepage/widget
   checks, dependency audit, candidate secret scan, diff check, and empty
-  migration scan. The final no-write-harness head still requires exact-head
-  GitHub Node 24 CI and canonical protected Preview proof after push.
+  migration scan. Final exact-head Node 24 run `32612226020`, immutable Preview
+  deployment `dpl_az7g38CUEynxgqxMAuLoWJEv52Td`, and protected no-write QA run
+  `32612370721` pass with 17 pass / 6 safe skip / 0 fail, widget 2/2, doctor
+  43/43, and strict `PREVIEW_READY`.
 - The branch is refreshed onto released PR #194 merge
   `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`; its prior stacked head is
   preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.

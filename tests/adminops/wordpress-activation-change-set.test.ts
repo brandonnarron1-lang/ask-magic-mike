@@ -235,6 +235,7 @@ describe("WordPress activation API and operator boundary", () => {
     expect(route).not.toMatch(/searchParams|DATABASE_URL|INSERT|UPDATE|DELETE|email|sms|send\(/i);
     expect(page).toContain("Download live readiness manifest");
     expect(page).toContain("they do not publish");
+    expect(page).toContain('channel.namedPlacements.length ? "xl:col-span-2" : ""');
   });
 
   it("registers the protected route explicitly in the canonical root-router contract", () => {

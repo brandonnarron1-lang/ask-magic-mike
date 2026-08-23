@@ -88,6 +88,22 @@ WordPress index status and fails closed for an unknown placement, duplicate href
 duplicate page record, missing target, page-ID drift, unsafe link, fetch error,
 or already-canonical placement.
 
+## Stack and interface acceptance
+
+This candidate is deliberately stacked after PR #197 and PR #195 instead of
+re-implementing either feature against `main`. Its pre-stack head is preserved
+at `rescue/amm-pr198-pre-pr197-stack-refresh-20260822-2247`. The application
+merge was conflict-free; only cumulative release-history evidence needed
+reconciliation.
+
+The named brokerage placement card spans the existing two-column command grid
+at desktop widths so its exact links and three readiness controls use the
+available workspace. The established single-column mobile presentation is
+unchanged. Counted 1440×1000 and 390×844 browser sessions used synthetic local
+Basic Auth, no database configuration, disabled notification providers, and
+pre-navigation interception of every known application write endpoint. They
+recorded no application POST, console finding, overflow, or framework overlay.
+
 ## First publication candidate
 
 Only the homepage CTA is the recommended first action. It is the broadest

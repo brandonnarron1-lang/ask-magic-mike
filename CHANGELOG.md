@@ -2,6 +2,10 @@
 
 ## 2026-08-22 — WordPress owned-demand activation change set
 
+- Stacked the candidate behind PR #197 after preserving its released-main state
+  at `rescue/amm-pr198-pre-pr197-stack-refresh-20260822-2247`; application code
+  composed without conflict and only cumulative release evidence required
+  reconciliation.
 - Reused the protected Distribution Command and canonical owned-demand UTM
   registry to generate live, placement-specific WordPress readiness manifests.
 - Added exact-host public page and page-index inspection, redirect and size
@@ -12,6 +16,8 @@
   rejected-link signal.
 - Added protected private/no-store JSON downloads for the existing homepage,
   home-value, and We Buy Homes placements plus fail-closed security coverage.
+- Expanded the brokerage placement card across the desktop command grid while
+  preserving the existing mobile stack, eliminating an avoidable blank column.
 - Verified all three live public placements as `legacy_match_ready`; selected
   only the homepage CTA as the recommended first separately approved edit.
 - Performed no WordPress edit, publication, form submission, message send,

@@ -47,7 +47,14 @@ specific expansions; they do not invalidate the live lead pipe.
   deliberately excluded from exact KPI and activation states. It is aligned
   with PR #195's current exact head and locally re-proven, but it must still be
   refreshed onto released `main` after PR #195 and receive fresh remote proof
-  before its own gate is eligible.
+  before its own gate is eligible. Current stacked Node 24, immutable Preview,
+  and protected no-write QA are green but do not replace that refresh.
+- Draft PR #198 is stacked behind PR #197. Its protected readiness manifests
+  cannot edit or publish WordPress. Its pre-stack head is preserved at
+  `rescue/amm-pr198-pre-pr197-stack-refresh-20260822-2247`; after PRs #195 and
+  #197 release in order, it must be refreshed onto exact `main` and re-proven
+  before its own application gate is eligible. Any WordPress publication still
+  requires a separate page-specific gate.
 - Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
   and #119–#121 are preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,

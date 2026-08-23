@@ -74,8 +74,9 @@ provider action, or deletion.
   canonical Preview, protected visual QA, and release-safety checks. The current
   branch is already aligned with PR #195's exact hardened head; the prior state
   is preserved at
-  `rescue/amm-pr197-pre-pr195-final-refresh-20260822-2226`, and refreshed local
-  evidence is green. This does not replace the post-release `main` refresh.
+  `rescue/amm-pr197-pre-pr195-final-refresh-20260822-2226`. Exact Node 24,
+  immutable Preview, and protected no-write QA are green. This does not replace
+  the post-release `main` refresh.
 - Its later application-only phrase is:
   `APPROVE PHASE 9 LEGACY WORDPRESS ATTRIBUTION TRUST MERGE AND PRODUCTION DEPLOYMENT`.
 - That phrase will not authorize a WordPress edit, crawler/firewall exception,
@@ -94,6 +95,8 @@ provider action, or deletion.
   #197 release in order, preserve another rescue ref, refresh this candidate
   onto exact `main`, and rerun Node 24 CI, canonical Preview, protected browser
   QA, and release-safety checks.
+- Local stack, security, build, and responsive no-write acceptance are green;
+  exact-head remote evidence remains required after push.
 - Its later application-only phrase is:
   `APPROVE PHASE 9 WORDPRESS ACTIVATION CHANGE SET MERGE AND PRODUCTION DEPLOYMENT`.
 - Even after PR #198 is released, a WordPress publication remains a separate
