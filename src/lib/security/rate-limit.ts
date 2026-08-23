@@ -123,6 +123,29 @@ export class InMemoryRateLimitStore implements RateLimitStore {
 
 let _neonSql: ReturnType<typeof import("@neondatabase/serverless")["neon"]> | null = null;
 
+function classifyDurableStoreError(error: unknown):
+  | "authentication_failed"
+  | "permission_denied"
+  | "connection_failed"
+  | "query_failed" {
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+  if (message.includes("authentication") || message.includes("password")) {
+    return "authentication_failed";
+  }
+  if (message.includes("permission") || message.includes("privilege")) {
+    return "permission_denied";
+  }
+  if (
+    message.includes("connect")
+    || message.includes("fetch")
+    || message.includes("network")
+    || message.includes("timeout")
+  ) {
+    return "connection_failed";
+  }
+  return "query_failed";
+}
+
 async function checkNeonRateLimit(
   key: string,
   limit: number,
@@ -180,7 +203,10 @@ async function checkNeonRateLimit(
       durable: true,
     };
   } catch (error) {
-    console.error("[rate-limit] Failed to use Neon durable rate limiting:", error);
+    console.error(
+      "[rate-limit] Failed to use Neon durable rate limiting; "
+      + `error_code=${classifyDurableStoreError(error)}`,
+    );
     _neonSql = null;
     return null;
   }

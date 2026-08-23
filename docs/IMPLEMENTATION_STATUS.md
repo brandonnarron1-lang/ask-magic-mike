@@ -103,14 +103,17 @@ Updated 2026-08-23.
 - The synthetic monitor now validates the body contract rather than accepting
   HTTP 200 alone. Against unchanged Production it truthfully reports 8/9,
   proving the prior false-green path is closed by the candidate.
+- A final security pass replaced the raw Neon driver error object with one of
+  four bounded operational codes. The privacy regression test injects a
+  synthetic private failure marker and proves it never reaches `console.error`.
 - The exact read-only capability query passed on canonical Neon Production in
   35 ms with all four store booleans true. This proves the database object and
   SQL-editor role; deployed health must still prove the exact Vercel role.
-- Exact local Node 24.18.0 verification passes 6 focused files / 58 tests, the
-  complete 218-file / 2,982-test suite, strict typecheck, ESLint, the optimized
+- Exact local Node 24.18.0 verification passes 6 focused files / 59 tests, the
+  complete 218-file / 2,983-test suite, strict typecheck, ESLint, the optimized
   Next.js 15.5.21 build, 52 static pages, 82 active routes, 14/14 release
   safety, 43/43 release doctor, system isolation, a no-vulnerability Production
-  dependency audit, and a redacted 548-commit secret scan. The diff contains no
+  dependency audit, and a redacted full-history secret scan. The diff contains no
   migration.
 - No Production secret, deployment, request write, lead, event, notification,
   email, SMS, Push, WordPress edit, publication, DNS change, spend, deletion,
