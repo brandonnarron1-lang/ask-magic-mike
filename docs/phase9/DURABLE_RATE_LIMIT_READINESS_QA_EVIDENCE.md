@@ -49,9 +49,10 @@ All commands use Node 24.18.0 and pnpm 10.30.3.
 | --- | --- |
 | Frozen dependency install | PASS |
 | Focused route/helper/monitor/script contract tests | PASS — 6 files / 59 tests |
+| Break-glass semantic regression | PASS — 5 files / 83 tests |
 | Strict typecheck | PASS |
 | ESLint | PASS |
-| Full Vitest suite | PASS — 218 files / 2,983 tests |
+| Full Vitest suite | PASS — 218 files / 2,987 tests |
 | Optimized Next.js 15.5.21 build | PASS — 52 static pages / 82 active routes |
 | System isolation | PASS — no deployable NellySelly identifier |
 | Release safety | PASS — 14/14 |
@@ -64,6 +65,15 @@ The limiter privacy test now forces a Neon failure containing a synthetic
 private connection marker. Runtime output contains only
 `authentication_failed`, `permission_denied`, `connection_failed`, or
 `query_failed`; the raw marker is absent.
+
+The previous exact candidate head
+`37aa69421a70a177504e9ccaed99fef75852849e` is preserved at
+`rescue/amm-pr202-pre-emergency-flag-hardening-20260823-184617`. Review found
+that any non-empty `RATE_LIMIT_EMERGENCY_MEMORY` string could previously be
+interpreted as enabled. The shared parser and the public-lead availability gate
+now accept only the exact trimmed value `1`; `false`, `0`, `true`, and other
+truthy-looking values remain disabled. This change touched no Production
+variable, deployment, lead, database row, message, or public content.
 
 ## Authenticated Neon capability proof
 
