@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildWordPressActivationChangeSet,
+  loadWordPressActivationChangeSet,
   normalizeWordPressActivationUrl,
   type WordPressPageIndexRow,
 } from "../../app/lib/growth/wordpress-activation-change-set";
@@ -33,6 +34,10 @@ function buildHome(html: string, pageRows: WordPressPageIndexRow[] = [HOME_ROW])
     generatedAt: GENERATED_AT,
   });
 }
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe("WordPress owned-demand activation change set", () => {
   it("classifies one exact legacy homepage CTA as ready without performing a mutation", () => {
@@ -105,10 +110,24 @@ describe("WordPress owned-demand activation change set", () => {
     });
     expect(buildHome(homeHtml([LEGACY_HOME_HREF]), [HOME_ROW, { ...HOME_ROW, id: 150 }]).status)
       .toBe("ambiguous_target");
+    expect(buildHome(homeHtml([LEGACY_HOME_HREF]), [{
+      id: HOME_ROW.id,
+      link: HOME_ROW.link,
+    }])).toMatchObject({
+      status: "page_id_unresolved",
+      publicationBlocked: true,
+    });
     expect(buildWordPressActivationChangeSet({
       placementKey: "wordpress_homepage_ask_mike",
       html: homeHtml([LEGACY_HOME_HREF]),
-      pageRows: [null, 7, { id: "149", link: HOME_ROW.link }, HOME_ROW],
+      pageRows: [
+        null,
+        7,
+        { id: "149", link: HOME_ROW.link },
+        { id: 149, link: HOME_ROW.link },
+        { ...HOME_ROW, status: "draft" },
+        HOME_ROW,
+      ],
       generatedAt: GENERATED_AT,
     }).status).toBe("legacy_match_ready");
   });
@@ -118,6 +137,12 @@ describe("WordPress owned-demand activation change set", () => {
     const second = buildHome(homeHtml([LEGACY_HOME_HREF]));
     expect(first.preconditionSha256).toMatch(/^[a-f0-9]{64}$/);
     expect(second.preconditionSha256).toBe(first.preconditionSha256);
+    const ambiguous = buildHome(homeHtml([
+      LEGACY_HOME_HREF,
+      "https://askmagicmike.com.evil.example/value?utm_source=ourtownproperties&utm_medium=homepage_cta&utm_campaign=website_widget",
+    ]));
+    expect(ambiguous.status).toBe("ambiguous_target");
+    expect(ambiguous.preconditionSha256).not.toBe(first.preconditionSha256);
     const serialized = JSON.stringify(first);
     expect(serialized).not.toContain("252-243-7700");
     expect(serialized).not.toContain("must-not-enter-manifest");
@@ -138,6 +163,43 @@ describe("WordPress owned-demand activation change set", () => {
         /outside the exact approved HTTPS hosts/,
       );
     }
+  });
+
+  it("cancels an upstream body as soon as the streaming response cap is exceeded", async () => {
+    let cancelled = false;
+    const oversizedBody = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(2_000_000));
+        controller.enqueue(new Uint8Array(1_100_000));
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    vi.stubGlobal("fetch", vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url.includes("/wp-json/")) {
+        return new Response(JSON.stringify([HOME_ROW]), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }
+      return new Response(oversizedBody, {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    }));
+
+    const changeSet = await loadWordPressActivationChangeSet(
+      "wordpress_homepage_ask_mike",
+    );
+    expect(changeSet).toMatchObject({
+      status: "fetch_failed",
+      fetchErrorCode: "wordpress_page_fetch_failed",
+      publicationBlocked: true,
+      mutationPerformed: false,
+    });
+    expect(cancelled).toBe(true);
   });
 });
 

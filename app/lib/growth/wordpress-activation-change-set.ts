@@ -238,7 +238,7 @@ function safePageRows(rows: readonly unknown[]): WordPressPageIndexRow[] {
       Number(candidate.id) <= 0 ||
       typeof candidate.link !== "string" ||
       candidate.link.length > 2_048 ||
-      (candidate.status !== undefined && candidate.status !== "publish")
+      candidate.status !== "publish"
     ) {
       continue;
     }
@@ -261,12 +261,15 @@ function safePageRows(rows: readonly unknown[]): WordPressPageIndexRow[] {
 
 function hashPrecondition(input: {
   placementKey: WordPressActivationPlacementKey;
+  status: WordPressActivationStatus;
   sourcePage: string;
   pageId: number | null;
   pageModifiedGmt: string | null;
   currentHref: string | null;
   proposedHref: string;
   currentHrefOccurrences: number;
+  askMagicMikeHrefOccurrences: number;
+  rejectedLookalikeHrefOccurrences: number;
 }) {
   return createHash("sha256").update(JSON.stringify(input)).digest("hex");
 }
@@ -368,12 +371,15 @@ export function buildWordPressActivationChangeSet(input: {
   const proposedHref = proposed.toString();
   const preconditionSha256 = hashPrecondition({
     placementKey: target.placementKey,
+    status,
     sourcePage: target.sourcePage,
     pageId,
     pageModifiedGmt,
     currentHref,
     proposedHref,
     currentHrefOccurrences: currentMatches.length,
+    askMagicMikeHrefOccurrences: hrefs.length,
+    rejectedLookalikeHrefOccurrences,
   });
 
   return {
@@ -417,12 +423,15 @@ function buildFetchFailureChangeSet(
   const proposedHref = normalizeAskMagicMikeUrl(placement.trackedUrl, target.sourcePage).toString();
   const preconditionSha256 = hashPrecondition({
     placementKey,
+    status: "fetch_failed",
     sourcePage: target.sourcePage,
     pageId: null,
     pageModifiedGmt: null,
     currentHref: null,
     proposedHref,
     currentHrefOccurrences: 0,
+    askMagicMikeHrefOccurrences: 0,
+    rejectedLookalikeHrefOccurrences: 0,
   });
   return {
     schemaVersion: "amm.wordpress_activation_change_set.v1",
@@ -455,6 +464,28 @@ function buildFetchFailureChangeSet(
   };
 }
 
+async function readResponseTextWithLimit(response: Response) {
+  if (!response.body) throw new Error("upstream_response_missing_body");
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      totalBytes += value.byteLength;
+      if (totalBytes > MAX_RESPONSE_BYTES) {
+        await reader.cancel("upstream_response_too_large");
+        throw new Error("upstream_response_too_large");
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)), totalBytes).toString("utf8");
+}
+
 async function fetchAllowlistedWordPressText(url: string, expectedContentType: "html" | "json") {
   let currentUrl = normalizeWordPressActivationUrl(url);
   for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount += 1) {
@@ -480,11 +511,7 @@ async function fetchAllowlistedWordPressText(url: string, expectedContentType: "
     }
     const contentLength = Number(response.headers.get("content-length") ?? 0);
     if (contentLength > MAX_RESPONSE_BYTES) throw new Error("upstream_response_too_large");
-    const text = await response.text();
-    if (Buffer.byteLength(text, "utf8") > MAX_RESPONSE_BYTES) {
-      throw new Error("upstream_response_too_large");
-    }
-    return text;
+    return readResponseTextWithLimit(response);
   }
   throw new Error("redirect_limit_exceeded");
 }

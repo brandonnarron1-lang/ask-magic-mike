@@ -27,7 +27,7 @@ form, send a message, change DNS, purge a cache, or touch Production data.
 
 ## Current public evidence
 
-Final read-only checks at 2026-08-22 21:27 America/New_York produced:
+Final read-only checks at 2026-08-22 21:40 America/New_York produced:
 
 | Placement | Public page | WordPress page ID | Current public href | Proposed canonical href | Status |
 | --- | --- | ---: | --- | --- | --- |
@@ -42,14 +42,15 @@ omit placement-level `utm_content` and all route to the generic legacy
 
 The live manifest hashes at that observation were:
 
-- homepage: `d744602ca060fa12bd4e9cfd811477ed1ae22db3414e265e63a2a4f57253600a`;
-- home value: `27521753db7cf6bd1dae2943ab9547357416493058d817ba6d5992a1b81bdb99`;
-- We Buy Homes: `d02ed7b91a345f357b768e8fb279b6da0f99c68d9a4dc9507414086f90b6584b`.
+- homepage: `8634d945fb0ccdb2b556bdc66e31b199cb0d5b4e9c95991fc5e2c00307884dc3`;
+- home value: `7487f7e499a67e0a047cb9d141048f98ec927f84a98cec6ba1fc058efb716fe7`;
+- We Buy Homes: `e8c3cdb946c1f0a12dfe331495b94c744e99c39410d9feb71e1ed484fb4eb4a3`.
 
 These hashes are evidence, not reusable write authority. A fresh manifest must
-match immediately before any publication because the page modification time,
-page ID, current href, proposed href, placement, and occurrence count are all
-part of the precondition.
+match immediately before any publication because the status, page modification
+time, page ID, current href, proposed href, placement, matching-link count,
+total Ask Magic Mike link count, and rejected lookalike/insecure-link count are
+all part of the precondition.
 
 ## Implemented boundary
 
@@ -81,8 +82,9 @@ It does not retain raw HTML, page copy, telephone numbers, form values,
 credentials, cookies, tokens, database data, or lead PII.
 
 The loader validates HTTPS, exact hostnames, no credentials, no nonstandard
-port, every redirect hop, content type, response status, response size, and a
-20-second timeout. It fails closed for an unknown placement, duplicate href,
+port, every redirect hop, content type, response status, and a 3 MB streaming
+response limit with a 20-second timeout. It requires an explicit published
+WordPress index status and fails closed for an unknown placement, duplicate href,
 duplicate page record, missing target, page-ID drift, unsafe link, fetch error,
 or already-canonical placement.
 

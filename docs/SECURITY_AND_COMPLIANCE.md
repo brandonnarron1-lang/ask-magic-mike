@@ -75,19 +75,21 @@
   value can select the outbound destination.
 - Server-side fetches use fixed exact HTTPS Our Town hosts, reject credentials
   and nonstandard ports, revalidate every redirect hop, limit redirects,
-  enforce content type and response size, and use a bounded timeout. Unsafe,
-  insecure, or lookalike AskMagicMike links make the manifest fail closed.
+  enforce content type and a 3 MB streaming response cap, and use a bounded
+  timeout. Unsafe, insecure, or lookalike AskMagicMike links make the manifest
+  fail closed.
 - Public WordPress index rows are runtime-validated and minimized before use;
-  TypeScript types are not treated as validation. Duplicate/missing page rows,
-  page-ID drift, duplicate hrefs, malformed JSON, and fetch failures cannot
-  produce a ready state.
+  TypeScript types are not treated as validation, and an explicit `publish`
+  status is mandatory. Duplicate/missing page rows, page-ID drift, duplicate
+  hrefs, malformed JSON, and fetch failures cannot produce a ready state.
 - Responses are private/no-store JSON attachments with `nosniff`, same-origin
   resource policy, no referrer, no indexing, and a deny-all sandbox CSP. They
   contain no raw HTML, cookies, request headers, environment values, lead data,
   database data, or form values.
 - Every manifest emits `publicationAuthorized=false`,
   `approvalRequired=true`, and `mutationPerformed=false`. A future write must
-  independently require a fresh SHA-256 precondition, recoverable WordPress
+  independently require a fresh SHA-256 precondition covering every
+  safety-relevant status and link-count signal, recoverable WordPress
   revision/backup, and the exact page-specific owner gate.
 - Security review found no state-changing verb, SQL/file/subprocess sink,
   arbitrary URL fetch, redirect, CORS relaxation, browser-storage credential,

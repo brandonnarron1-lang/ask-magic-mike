@@ -7,6 +7,9 @@
 - Added exact-host public page and page-index inspection, redirect and size
   limits, one-target classification, rollback hrefs, page-ID checks, and
   deterministic SHA-256 preconditions.
+- Hardened public reads with an explicit published-row requirement, a 3 MB
+  streaming cap, and precondition hashes that include every ambiguity and
+  rejected-link signal.
 - Added protected private/no-store JSON downloads for the existing homepage,
   home-value, and We Buy Homes placements plus fail-closed security coverage.
 - Verified all three live public placements as `legacy_match_ready`; selected
