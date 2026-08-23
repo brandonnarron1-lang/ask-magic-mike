@@ -19,6 +19,28 @@ Rescue: `rescue/amm-pre-durable-rate-limit-readiness-20260823-1335`
 - No request body, lead, PII, secret, email, SMS, Push, WordPress mutation,
   analytics write, or database write was used for diagnosis.
 
+## Final pre-release re-audit (read-only)
+
+- At 2026-08-23T21:10Z, canonical Production remained on
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`. The candidate monitor again
+  returned the expected 8/9: every public route and anonymous-admin boundary
+  passed, while only the old readiness body lacked the durable-limiter fields.
+- The encrypted Vercel Production inventory contains sensitive `DATABASE_URL`
+  and no `RATE_LIMIT_HASH_SECRET` or `RATE_LIMIT_EMERGENCY_MEMORY`. Two encrypted
+  `UPSTASH_REDIS_REST_*` names remain present but are unused by this code and
+  remain outside the approved release scope. No value was retrieved or shown.
+- Production emitted nine rate-limit-matching runtime log entries in the prior
+  24-hour query window, confirming the operational drift remains live.
+- The canonical immutable candidate Preview returned HTTP 200 with database,
+  table, exact schema/upsert target, CRUD privileges, effective RLS, and
+  aggregate store capability all true through the deployed Vercel runtime
+  role. Preview correctly reported `rate_limit_required=false`, dedicated
+  secret false, and aggregate readiness true.
+- Vercel intentionally excludes variables typed `sensitive` from local
+  `vercel env run`; therefore a local `database_not_configured` result is not
+  evidence that the deployed runtime lacks `DATABASE_URL`. No variable was
+  downgraded, copied, exported, or persisted to work around that control.
+
 ## Local verification
 
 All commands use Node 24.18.0 and pnpm 10.30.3.
@@ -26,17 +48,22 @@ All commands use Node 24.18.0 and pnpm 10.30.3.
 | Check | Result |
 | --- | --- |
 | Frozen dependency install | PASS |
-| Focused route/helper/monitor/script contract tests | PASS — 6 files / 58 tests |
+| Focused route/helper/monitor/script contract tests | PASS — 6 files / 59 tests |
 | Strict typecheck | PASS |
 | ESLint | PASS |
-| Full Vitest suite | PASS — 218 files / 2,982 tests |
+| Full Vitest suite | PASS — 218 files / 2,983 tests |
 | Optimized Next.js 15.5.21 build | PASS — 52 static pages / 82 active routes |
 | System isolation | PASS — no deployable NellySelly identifier |
 | Release safety | PASS — 14/14 |
 | Release doctor after implementation commit | HEALTHY — 43/43 |
 | Production dependency audit | PASS — no known vulnerability |
-| Full-history redacted secret scan | PASS — 548 commits / approximately 14.56 MB / no leak |
+| Full-history redacted secret scan | PASS — no leak |
 | Diff and migration review | PASS — no whitespace defect and no migration |
+
+The limiter privacy test now forces a Neon failure containing a synthetic
+private connection marker. Runtime output contains only
+`authentication_failed`, `permission_denied`, `connection_failed`, or
+`query_failed`; the raw marker is absent.
 
 ## Authenticated Neon capability proof
 

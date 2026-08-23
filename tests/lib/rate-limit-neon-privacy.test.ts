@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const neonState = vi.hoisted(() => ({
   calls: [] as Array<{ text: string; values: unknown[] }>,
+  failure: null as Error | null,
   neon: vi.fn(),
 }));
 
@@ -9,6 +10,7 @@ vi.mock("@neondatabase/serverless", () => ({
   neon: (...args: unknown[]) => {
     neonState.neon(...args);
     return async (strings: TemplateStringsArray, ...values: unknown[]) => {
+      if (neonState.failure) throw neonState.failure;
       neonState.calls.push({ text: strings.join("?"), values });
       return [{ request_count: 1, reset_at: Date.now() + 60_000 }];
     };
@@ -21,6 +23,7 @@ describe("Neon durable rate-limit privacy", () => {
   beforeEach(() => {
     vi.resetModules();
     neonState.calls.length = 0;
+    neonState.failure = null;
     neonState.neon.mockClear();
     process.env.DATABASE_URL = "postgresql://rate-limit.invalid/neondb";
     process.env.RATE_LIMIT_HASH_SECRET = "unit-test-rate-limit-secret-32-chars";
@@ -30,6 +33,7 @@ describe("Neon durable rate-limit privacy", () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     process.env = { ...originalEnv };
   });
 
@@ -52,5 +56,22 @@ describe("Neon durable rate-limit privacy", () => {
         expect.stringMatching(/^amm:rl:v1:intakeSubmit:[0-9a-f]{64}$/),
       ]),
     );
+  });
+
+  it("redacts Neon failure details from runtime logs", async () => {
+    const credentialMarker = "SYNTHETIC_PRIVATE_CONNECTION_DETAIL_DO_NOT_LOG";
+    neonState.failure = new Error(`connect failed; detail=${credentialMarker}`);
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { checkRateLimit } = await import("@/lib/security/rate-limit");
+
+    const result = await checkRateLimit("203.0.113.43", 10, 60_000, "intakeSubmit");
+
+    expect(result).toMatchObject({ allowed: true, durable: false });
+    expect(consoleError).toHaveBeenCalledWith(
+      "[rate-limit] Failed to use Neon durable rate limiting; error_code=connection_failed",
+    );
+    const serializedCalls = JSON.stringify(consoleError.mock.calls);
+    expect(serializedCalls).not.toContain(credentialMarker);
+    expect(serializedCalls).not.toContain("SYNTHETIC_PRIVATE_CONNECTION_DETAIL");
   });
 });

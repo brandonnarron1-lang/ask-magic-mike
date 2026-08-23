@@ -12,10 +12,13 @@
   the exact query passed against the authenticated Neon Production branch.
 - Made the synthetic monitor validate the readiness response contract instead
   of treating HTTP 200 as sufficient proof.
+- Replaced raw Neon limiter-error logging with bounded operational error codes;
+  a regression test proves credential-like connection details cannot enter
+  Vercel logs when the durable store fails.
 - Kept isolated Vercel Preview read-only and independent of Production secrets.
-- Local Node 24 acceptance passes 218 files / 2,982 tests, strict typecheck,
+- Local Node 24 acceptance passes 218 files / 2,983 tests, strict typecheck,
   ESLint, optimized build, 82 routes, 14/14 safety, system isolation,
-  43/43 release doctor, dependency audit, redacted 548-commit secret scan, and
+  43/43 release doctor, dependency audit, redacted full-history secret scan, and
   no-migration review.
 - PR #202 hardened application head passes PR merge-ref CI, exact-head Vercel
   Preview status, deployed runtime capability health, protected

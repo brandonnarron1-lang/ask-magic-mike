@@ -72,6 +72,12 @@ connection:
 pnpm run rate-limit:verify-store
 ```
 
+Vercel variables typed `sensitive` are intentionally unavailable to local
+`vercel env run`. Do not weaken the variable type, export a database URL, or
+interpret a local `database_not_configured` result as deployed-runtime failure.
+Use the protected candidate health endpoint to prove the encrypted Vercel
+runtime role, and use the public Production health endpoint after deployment.
+
 After the exact merge commit reaches Production, require HTTP 200 from
 `/api/health/ready` and literal true for `rate_limit_required`,
 `rate_limit_table`, `rate_limit_schema_ready`,
