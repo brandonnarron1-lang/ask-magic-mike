@@ -92,7 +92,10 @@ surfaces or weaken the host firewall.
 - Lead or analytics write: none.
 - Email, SMS, Push, or consumer acknowledgment: none.
 - WordPress page, plugin, form, notification, or redirect change: none.
-- Publication, DNS, spend, provider, or NellySelly action: none.
+- Publication, DNS, spend, canonical provider configuration, or NellySelly
+  action: none. A QA CLI auto-link briefly created an empty Vercel project with
+  no deployment, domain, environment variable, or Git link; it was audited,
+  deleted by exact ID, and verified absent before release evidence continued.
 
 ## Verification
 

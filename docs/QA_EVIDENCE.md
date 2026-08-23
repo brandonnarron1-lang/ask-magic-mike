@@ -1082,6 +1082,17 @@ No Production deployment, database migration or write, lead submission, email,
 SMS, Push notification, WordPress edit, DNS change, public publication, spend,
 or NellySelly action occurred during this verification.
 
+During a protected-Preview probe, `vercel curl` auto-linked this temporary
+worktree to an unintended new Vercel project before making the request. The
+exact project was immediately audited: zero deployments, zero domains, zero
+environment variables, no Git link, and one generated protection-bypass entry.
+It was deleted by exact project ID, a follow-up GET returned 404, and this
+worktree was relinked to canonical project `ask-magic-mike`
+(`prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`). No canonical project setting, deployment,
+alias, domain, or Production runtime changed. The failed probe is not counted as
+protected Preview proof; the secret-backed GitHub dispatcher remains the
+authoritative remote verification path.
+
 | Check | Result |
 | --- | --- |
 | Focused compatibility/KPI/fail-closed suite | PASS — 6 files / 64 tests |

@@ -18,8 +18,10 @@
   visual QA with no overflow or console findings. Exact-head CI and canonical
   Preview proof remain required.
 - No migration, Production deployment, database write, lead, message,
-  WordPress change, publication, DNS change, spend, provider mutation, or
-  NellySelly action occurred.
+  WordPress change, publication, DNS change, spend, canonical-provider change,
+  or NellySelly action occurred. A QA CLI auto-link briefly created an empty
+  Vercel project; after proving it had no deployments, domains, environment
+  variables, or Git link, the exact project was deleted and verified absent.
 
 ## 2026-08-22 — Conversion identity and public-navigation polish candidate
 
