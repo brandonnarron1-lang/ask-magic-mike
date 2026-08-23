@@ -26,10 +26,20 @@ Updated 2026-08-23.
   all 226 files / 3,031 tests, strict typecheck, ESLint, optimized Next.js
   15.5.21 build with 52 static pages, 83/17 route proof, safety 14/14, system
   isolation, and a no-vulnerability Production dependency audit.
-- **Release status:** no migration or Production mutation. Exact-head GitHub
-  CI, immutable Preview, protected no-write browser proof, and final clean-tree
-  doctor evidence remain required after commit and push. No Production gate is
-  issued.
+- **Remote acceptance:** Draft PR #206 application head
+  `1954f8ee63f0de40c5c7326f34b7acf6be94cf27` is cleanly mergeable and passes
+  GitHub Node 24 run `32669693059`, READY immutable Vercel Preview
+  `dpl_8LnG6VoGbskJpERDGXbf7YNDHDCL`, and protected no-write run
+  `32669923014`: 17 read-only passes / 6 intentional mutation skips / 0
+  failures, Widget 2/2, doctor 43/43, safety 14/14, release-candidate GO, and
+  `PREVIEW_READY`. Preview fatal/error/warning log queries each returned zero.
+- **Rendered acceptance:** exact optimized build is visually clean at
+  1440x1000 and 390x844 with one main, no horizontal overflow, truthful
+  unavailable-state rendering, zero `/api/events` requests, and zero browser
+  warnings/errors.
+- **Release status:** no migration or Production mutation. Keep Draft behind
+  #202 → #203 → #204 → #205. The final documentation-only head must retain
+  green exact-head checks recorded on PR #206; no Production gate is issued.
 - Detailed scope: `docs/phase9/FIELD_EXPERIENCE_TRUST.md`.
 
 ## Phase 9 public hero delivery fast-track — 2026-08-23

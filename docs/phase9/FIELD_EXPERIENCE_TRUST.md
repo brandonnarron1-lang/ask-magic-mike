@@ -1,7 +1,7 @@
 # Phase 9 field-experience trust
 
-Updated 2026-08-23. This is a dependent, application-only fast-track candidate
-stacked after canonical PR #205. Donor PR #199 remains preserved at exact head
+Updated 2026-08-23. Draft PR #206 is a dependent, application-only fast-track
+candidate stacked after canonical PR #205. Donor PR #199 remains preserved at exact head
 `7690e54b3c1d225d09ab8838774c4ac9c6316cce` and rescue branch
 `rescue/amm-pr199-pre-fast-track-20260823-175922`. The candidate is not active
 in Production and contains no database
@@ -97,7 +97,23 @@ deletion is not part of rollback authority.
 
 ## Acceptance evidence
 
-Acceptance evidence is recorded only after this fast-track branch completes
-focused and full local verification, exact-head Node 24 CI, immutable Vercel
-Preview deployment, and protected no-write browser QA. Donor-branch counts are
-historical context and are not treated as proof for this refreshed head.
+Application head `1954f8ee63f0de40c5c7326f34b7acf6be94cf27`
+passes focused and full local verification, clean-tree doctor 43/43, exact-head
+Node 24 run `32669693059`, READY immutable Vercel Preview
+`dpl_8LnG6VoGbskJpERDGXbf7YNDHDCL`, and protected no-write run `32669923014`.
+The protected run reports 17 read-only passes, six intentional mutation skips,
+zero failures, Widget 2/2, safety 14/14, release-candidate GO, and
+`PREVIEW_READY`; its artifact is `9501125995` with digest
+`sha256:b621ef368072a69ca2592cd173300e23a91f0226b93deca45b220c686913d9fd`.
+
+Responsive optimized-build inspection passes at 1440x1000 and 390x844 with
+one main landmark, no width overflow, no framework overlay, truthful unavailable
+field evidence, no `/api/events` request, and no browser warning/error. Vercel
+runtime queries return fatal=0, error=0, and warning=0. Preview remains
+write-disabled and does not render the Production-only reporter.
+
+No migration, Production deployment, analytics write, lead, message,
+WordPress edit, publication, spend, DNS change, deletion, or NellySelly action
+occurred. The documentation-only evidence commit's exact-head checks are kept
+on PR #206 to avoid creating a recursive evidence-commit loop. Donor-branch
+counts remain historical context and are not treated as proof for this head.

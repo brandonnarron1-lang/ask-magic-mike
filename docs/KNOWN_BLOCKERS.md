@@ -54,16 +54,17 @@ specific expansions; they do not invalidate the live lead pipe.
   until PR #202 releases, it refreshes onto exact `main`, and fresh exact-head
   proof passes.
 - PRs #197, #198, #200, and #201 are closed as proven superseded Drafts; every
-  branch and rescue reference remains preserved. PR #199 remains open because
-  its field-experience capability is unique, while its successor is being
-  fast-tracked separately after PR #205.
+  branch and rescue reference remains preserved. PR #199's exact head is
+  preserved, and Draft PR #206 is its reviewed current-stack successor after
+  PR #205.
 - Draft PR #205 reuses only PRs #197 and #198 on top of sealed PR #204. Its
   exact application head has green CI, immutable Preview, protected no-write,
   and browser proof. It remains behind the ordered #202 → #203 → #204 stack,
   has no Production gate, and cannot authorize a WordPress publication.
-- The field-experience fast-track branch follows PR #205 and imports only PR
+- Draft PR #206 follows PR #205 and imports only PR
   #199's unique privacy-safe LCP/INP/CLS capability. It contains no migration,
-  excludes PR #187's target register, and has no Production gate. Production
+  excludes PR #187's target register, has exact-head Preview/no-write evidence,
+  and has no Production gate. Production
   telemetry cannot activate until the ordered #202 → #203 → #204 → #205 stack
   releases and this candidate is refreshed and re-proven on exact `main`.
 - Preview Lead Center RBAC is disabled; therefore the manifest API fails closed

@@ -26,14 +26,41 @@
   typecheck, full ESLint, optimized Next.js 15.5.21 build with 52 static pages,
   83 active / 17 acknowledged route proof, release safety 14/14, system
   isolation, and Production dependency audit with no known vulnerability.
-- Release doctor — expected pre-commit state: all 42 blocking/non-clean checks
-  pass and only the explicitly nonblocking `git.tree_clean` check reports the
-  uncommitted candidate. It must rerun 43/43 after commit.
+- Clean-tree release doctor — PASS: 43/43 after application commit
+  `1954f8ee63f0de40c5c7326f34b7acf6be94cf27`; safety remains 14/14.
+- Exact-application-head Node 24 CI — PASS: GitHub run `32669693059` completed
+  successfully against `1954f8ee63f0de40c5c7326f34b7acf6be94cf27`.
+  Artifact `9501059810` has digest
+  `sha256:9192efec527ad360ac349feb495703778d6a58c88b1e69afb68dfd25413c6d59`.
+- Immutable Vercel Preview — PASS: deployment
+  `dpl_8LnG6VoGbskJpERDGXbf7YNDHDCL` is READY at
+  `https://ask-magic-mike-e2x6qk1os-eyes-up-industries.vercel.app`; the
+  authenticated deployment record names the exact branch and application
+  commit `1954f8e`. Preview cannot render or persist the reporter because
+  `VERCEL_ENV=preview`.
+- Protected no-write runtime acceptance — PASS: GitHub run `32669923014`
+  completed 17 read-only passes, six intentional mutation skips, zero
+  failures, Widget browser E2E 2/2, release doctor 43/43, safety 14/14,
+  release-candidate GO, and `PREVIEW_READY`. Artifact `9501125995` has digest
+  `sha256:b621ef368072a69ca2592cd173300e23a91f0226b93deca45b220c686913d9fd`.
+  Preview Neon was reachable and schema-ready while `SAFE_DB_WRITE=false`;
+  live email and SMS were disabled.
+- Optimized-build responsive visual acceptance — PASS at 1440x1000 and
+  390x844. Both renders have one main landmark, document width equal to the
+  viewport, no clipping/overflow/framework overlay, truthful field-evidence-
+  unavailable copy, zero `/api/events` requests, and zero browser
+  warnings/errors. The inspected screenshots are intentionally gitignored at
+  `output/playwright/phase9-field-experience-fast-track/growth-desktop-1440x1000.png`
+  and
+  `output/playwright/phase9-field-experience-fast-track/growth-mobile-390x844.png`.
+- Preview runtime-log review — PASS: the latest 500 request records contain
+  only `info` entries (200=200, 202=270, 204=20, and expected protected-route
+  401=10); separate fatal, error, and warning queries each returned zero.
 - No migration or runtime mutation — PASS: no database migration, Production
   deployment, analytics write, lead, email, SMS, Push, WordPress edit,
   publication, DNS change, spend, deletion, or NellySelly action occurred.
-- Exact-head Node 24 CI, immutable Vercel Preview, protected no-write browser
-  QA, and runtime-log evidence remain pending until commit and push.
+  Final documentation-head checks are recorded on Draft PR #206 so this
+  evidence seal does not create a recursive commit loop.
 
 ## Phase 9 owned-traffic fast-track — 2026-08-23
 

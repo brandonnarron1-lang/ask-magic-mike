@@ -110,7 +110,8 @@ provider action, or deletion.
 
 ## Field-experience fast-track after PR #205
 
-- Branch `codex/phase9-field-experience-fast-track-20260823` preserves PR
+- Draft PR [#206](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/206)
+  on branch `codex/phase9-field-experience-fast-track-20260823` preserves PR
   #199's exact head under
   `rescue/amm-pr199-pre-fast-track-20260823-175922` and imports only its unique
   Production field-performance capability onto exact PR #205.
@@ -118,8 +119,13 @@ provider action, or deletion.
   candidate contains no migration and cannot write telemetry in Preview.
 - Local Node 24 acceptance passes 5 focused files / 29 tests, all 226 files /
   3,031 tests, typecheck, lint, optimized build, route proof, 14/14 safety,
-  isolation, and the Production dependency audit. Exact-head remote and
-  protected browser proof remain pending.
+  isolation, and the Production dependency audit. Application head
+  `1954f8ee63f0de40c5c7326f34b7acf6be94cf27` also passes exact-head GitHub run
+  `32669693059`, READY immutable Preview
+  `dpl_8LnG6VoGbskJpERDGXbf7YNDHDCL`, protected run `32669923014`, Widget 2/2,
+  17 read-only passes / six intentional mutation skips / zero failures,
+  doctor 43/43, `PREVIEW_READY`, responsive visual QA, and zero Preview
+  fatal/error/warning logs.
 - It has no Production gate. It must remain behind #202 → #203 → #204 → #205,
   refresh onto exact `main` after those releases, and repeat full proof before
   any field-telemetry activation phrase becomes eligible.
