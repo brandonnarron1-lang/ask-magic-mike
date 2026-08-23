@@ -15,11 +15,15 @@
 - Kept isolated Vercel Preview read-only and independent of Production secrets.
 - Local Node 24 acceptance passes 218 files / 2,982 tests, strict typecheck,
   ESLint, optimized build, 82 routes, 14/14 safety, system isolation,
-  43/43 release doctor, dependency audit, redacted 544-commit secret scan, and
+  43/43 release doctor, dependency audit, redacted 548-commit secret scan, and
   no-migration review.
-- Prior PR #202 CI/Preview proof is retained but superseded because it did not
-  prove schema/upsert, runtime privileges, or RLS capability. Fresh exact-head
-  remote evidence is required for the hardened candidate.
+- PR #202 hardened application head passes PR merge-ref CI, exact-head Vercel
+  Preview status, deployed runtime capability health, protected
+  17-pass/6-write-skip acceptance, Widget 2/2, 43/43 doctor, zero Preview
+  warning/error/fatal logs, and `PREVIEW_READY`. Prior proof is retained but
+  superseded because it did not prove schema/upsert, privileges, or RLS.
+- The hardening overlays the synthetic PR #197–#201 stack without executable
+  conflicts; only the cumulative go-live runbook needs later reconciliation.
 - No Production secret, deployment, migration, lead/event write, notification,
   email, SMS, Push, WordPress edit, publication, DNS, spend, deletion, or
   NellySelly action occurred.

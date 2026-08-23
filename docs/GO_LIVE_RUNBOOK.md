@@ -160,12 +160,19 @@ closed unless exactly six legacy constraints are present, and proves six
 validated v2 constraints plus unchanged rows, function, RLS, trigger, and
 grants. The gate does not authorize recording proof or publishing externally.
 
-Preview verification left two empty Vercel helper projects intact:
+Preview verification left these empty Vercel helper projects intact:
 `amm-phase9-campaign-compliance-20260821`
 (`prj_JUyx03Rh8iABqAFepNNuPI2jJqut`) and
 `amm-phase9-publication-ledger-20260821`
-(`prj_QcHch6KY1m2g0BKtOoVVFregRhho`). Both have zero deployments and no domain
-effect. Do not delete either without a separate exact cleanup approval.
+(`prj_QcHch6KY1m2g0BKtOoVVFregRhho`),
+`amm-phase9-current-router-safety-20260821`
+(`prj_iGynowHru4TBNwWgvoiSIG193Ukf`),
+`amm-phase9-phone-handoff-consolidation-20260822`
+(`prj_Mb30U4zzULbWox6TPJ0QlJ4cVYSY`), and
+`amm-phase9-durable-rate-limit-readiness-20260823`
+(`prj_Da74SJxkGLrCa1oqkRo2cOmlaAkB`). All have zero deployments and no custom
+domain or Production effect. Do not delete any without a separate exact cleanup
+approval.
 
 Each item retains its own exact approval phrase. Refresh any downstream branch
 after the preceding Production merge, rerun Node 24 CI and Vercel Preview, and do

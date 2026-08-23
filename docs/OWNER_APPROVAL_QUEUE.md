@@ -58,11 +58,13 @@ provider action, or deletion.
   Neon table's exact schema/upsert target, runtime privileges, RLS access, and
   dedicated secret, and makes the monitor validate that contract. It creates
   no second limiter or database and contains no migration.
-- The exact read-only catalog probe passed on canonical Neon Production. The
-  SQL-editor role is proven, while the encrypted Vercel role must still prove
-  itself through deployed health. Earlier PR evidence is superseded; the
-  hardened head requires fresh exact-head CI, Preview, protected acceptance,
-  logs, artifact digests, and launch authority before the gate is consumable.
+- The exact read-only catalog probe passed on canonical Neon Production, and
+  deployed Preview health proves the encrypted Preview runtime role. Hardened
+  application head `abd2269b77496024a20d172e83a5404f013c5a43` has green PR
+  merge-ref CI, exact-head Vercel status, protected 17-pass/6-write-skip
+  acceptance, Widget 2/2, doctor 43/43, zero Preview warning/error/fatal logs,
+  and `PREVIEW_READY`. The documentation-only evidence seal still requires its
+  own final-head checks before the gate is consumable.
 - Its only combined configuration/application release phrase is:
   `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
 - That phrase will authorize one encrypted Production-only secret entry, the

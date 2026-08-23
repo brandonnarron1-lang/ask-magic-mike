@@ -25,19 +25,28 @@ Updated 2026-08-23.
 - Exact local Node 24.18.0 verification passes 6 focused files / 58 tests, the
   complete 218-file / 2,982-test suite, strict typecheck, ESLint, the optimized
   Next.js 15.5.21 build, 52 static pages, 82 active routes, 14/14 release
-  safety, 43/43 release doctor, system isolation, a no-vulnerability Production dependency audit,
-  and a redacted 544-commit secret scan. The diff contains no migration.
+  safety, 43/43 release doctor, system isolation, a no-vulnerability Production
+  dependency audit, and a redacted 548-commit secret scan. The diff contains no
+  migration.
 - No Production secret, deployment, request write, lead, event, notification,
   email, SMS, Push, WordPress edit, publication, DNS change, spend, deletion,
   or NellySelly action occurred.
 - Decision and evidence:
   `docs/phase9/DURABLE_RATE_LIMIT_READINESS.md` and
   `docs/phase9/DURABLE_RATE_LIMIT_READINESS_QA_EVIDENCE.md`.
-- Draft PR #202 head `6067512e744d99cd30b74fdab1ce25f5f58b1ebd`
-  and its green CI/Preview evidence are superseded because they checked table
-  existence but not exact schema, runtime privileges, or RLS capability. The
-  hardened head is pending commit/push and must receive fresh exact-head Node
-  24 CI, canonical Preview, protected acceptance, logs, and launch authority.
+- Draft PR #202 application head
+  `abd2269b77496024a20d172e83a5404f013c5a43` passes GitHub run
+  `32659072474`, READY Preview `dpl_FvHmNSQLKq9EGp24LPijSfPAW3Me`, deployed
+  runtime capability health, and protected run `32659271882`. Acceptance is 17
+  pass / 6 write skips / 0 fail, Widget 2/2, doctor 43/43, release candidate GO,
+  `PREVIEW_READY`, and 0 warning/error/fatal logs. Earlier head `6067512...` and
+  its evidence are retained but superseded.
+- Overlaying this hardening on the existing synthetic PR #197–#201 stack caused
+  no executable conflict; only the cumulative go-live runbook conflicted.
+- Protected CLI verification created one empty, zero-deployment helper project
+  and immediately relinked the worktree to canonical Ask Magic Mike. The helper
+  is recorded in the asset manifest and preserved for separately approved
+  cleanup.
 - Exact future gate:
   `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
 

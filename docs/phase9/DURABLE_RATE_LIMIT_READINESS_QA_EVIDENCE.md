@@ -35,7 +35,7 @@ All commands use Node 24.18.0 and pnpm 10.30.3.
 | Release safety | PASS — 14/14 |
 | Release doctor after implementation commit | HEALTHY — 43/43 |
 | Production dependency audit | PASS — no known vulnerability |
-| Full-history redacted secret scan | PASS — 544 commits / approximately 14.51 MB / no leak |
+| Full-history redacted secret scan | PASS — 548 commits / approximately 14.56 MB / no leak |
 | Diff and migration review | PASS — no whitespace defect and no migration |
 
 ## Authenticated Neon capability proof
@@ -68,11 +68,54 @@ Draft PR: [#202](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/202)
   existence and a usable secret, not the exact schema/upsert target, runtime
   privileges, or RLS capability. It is not releasable evidence.
 
-## Current exact-head evidence
+## Hardened application-head remote evidence
 
-Pending commit and push of the hardened candidate. Exact-head GitHub Node 24
-CI, canonical Vercel Preview, protected no-write acceptance, logs, artifact
-digests, and launch authority remain mandatory. Production remains unchanged.
+- Application head: `abd2269b77496024a20d172e83a5404f013c5a43`.
+- GitHub run `32659072474`, job `97242352114`: PASS. The workflow status is
+  attached to that head and executes the clean PR merge ref
+  `c126025ea7b90fb2830ae7e18fbf592bbb2b237d`, whose parents are exact base
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and exact application head.
+- Release artifact `9498271868`:
+  `sha256:392a18b8be74d3d5adb726bc459263ffd7fa69c70121a38a5566901607c7ff0a`.
+- Canonical Vercel Preview `dpl_FvHmNSQLKq9EGp24LPijSfPAW3Me`: READY and
+  linked by the successful Vercel status on the exact application head.
+- Immutable Preview URL:
+  `https://ask-magic-mike-h9c94yzgp-eyes-up-industries.vercel.app`.
+- Deployed Preview health: HTTP 200; core database and all four store
+  capabilities true; `rate_limit_required=false`, dedicated-secret false, and
+  aggregate rate-limit readiness true as designed for isolated Preview.
+- Protected Preview run `32659271882`, job `97242839107`: PASS against the
+  exact application head with `SAFE_DB_WRITE=false` hard-pinned.
+- Preview artifact `9498333700`:
+  `sha256:6d1fe179c33690bba278a127200f8ca62da73cacadc636a1f1fd158e64833698`.
+- Acceptance: 17 pass / 6 intentional mutation skips / 0 fail; Widget
+  Chromium 2 expected / 0 unexpected / 0 flaky / 0 skipped; release doctor
+  43/43; release candidate GO; launch authority `PREVIEW_READY`.
+- Preview runtime logs after health and acceptance: 0 warning / 0 error / 0
+  fatal.
+- `SAFE_DB_WRITE=false`; no lead, note, task, SLA, suppression, email, SMS,
+  Push, analytics, or database mutation ran.
+
+The evidence-seal commit is documentation-only. Its own GitHub/Vercel checks
+remain mandatory after push; final-head evidence belongs in the PR record to
+avoid an endless evidence-commit loop. Production remains unchanged.
+
+## Stack compatibility preflight
+
+The hardened application commit was overlaid on the existing synthetic
+PR #197–#201 stack. Every executable/configuration file merged automatically;
+only the cumulative `docs/GO_LIVE_RUNBOOK.md` required later editorial
+reconciliation. The preflight merge was aborted cleanly and no source PR was
+changed.
+
+## Vercel CLI hygiene note
+
+The first protected `vercel curl` from the isolated worktree auto-created empty
+helper project `amm-phase9-durable-rate-limit-readiness-20260823`
+(`prj_Da74SJxkGLrCa1oqkRo2cOmlaAkB`). It has zero deployments and no domain,
+environment, alias, or Production effect. The worktree was immediately relinked
+to canonical project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`. The empty helper is
+preserved pending separate cleanup approval.
 
 ## Known boundary
 
