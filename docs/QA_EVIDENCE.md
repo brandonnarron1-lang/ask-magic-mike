@@ -1329,3 +1329,36 @@ the Node-20 deployment proof. PHP CLI is unavailable locally, so staging must ru
   shadow-only observations for forms 6 and 7 and no forwarding attempts.
 - Our Town homepage, `/ask-mike/`, and Mike's agent profile remained HTTP 200
   after activation.
+
+## Phase 9 mobile-native publication handoff — 2026-08-23
+
+This downstream candidate performed no Production deployment, database write,
+lead submission, email/SMS/Push delivery, native-platform publication,
+WordPress/DNS edit, spend, or NellySelly operation.
+
+- Canonical Production was inspected with aggregate-only SQL at
+  `2026-08-23T23:21:50Z`: six suppressed test leads, zero live/contactable
+  leads, zero owned-demand proof rows, zero source/outcome rows, and zero active
+  distribution rows. No identity or contact field was selected.
+- Security-focused handoff tests: PASS — 4 files / 50 tests, including all 16
+  approved channel/offer placements, separate prepare/share gestures,
+  cancellation, unsupported browsers, bounded files, and disguised non-PNG
+  rejection.
+- Full Vitest suite: PASS — 227 files / 3,043 tests.
+- Strict TypeScript and full ESLint: PASS.
+- Optimized Next.js 15.5.21 / Node 24 build: PASS — 52 generated pages and 83
+  active routes; the protected Distribution Command is 2.84 kB route code.
+- Route manifest: PASS — 83 active routes / 17 acknowledged root-`src`
+  duplicates.
+- Release safety: PASS — 14/14.
+- Ask Magic Mike/NellySelly deployable-source isolation: PASS.
+- Production dependency audit: PASS — no known vulnerabilities.
+- `git diff --check`: PASS.
+
+The first operator tap reads one exact authenticated, same-origin, private
+`image/png` asset with `no-store`; the second invokes the OS share chooser.
+The client validates canonical host/path/UTMs, safe copy bounds, filename,
+media type, five-megabyte maximum, and PNG byte signature. A resolved share
+promise records no publication proof and makes no database or provider call.
+The existing copy/download and separately gated proof-ledger controls remain
+authoritative.

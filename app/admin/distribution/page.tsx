@@ -24,6 +24,7 @@ import {
   ownedDemandAssetHref,
   type OwnedDemandAssetFormat,
 } from "../../lib/growth/owned-demand-assets";
+import { resolveNativePublicationHandoff } from "../../lib/growth/native-publication-handoff";
 import {
   isWordPressActivationPlacementKey,
   wordpressActivationManifestHref,
@@ -38,6 +39,7 @@ import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session
 import { hasLeadCenterPermission } from "../../../src/lib/admin/rbac-policy";
 import { isPreviewDataDisabled } from "../../../src/lib/preview-security";
 import { CopyDemandAsset } from "./CopyDemandAsset";
+import { NativePublicationHandoff } from "./NativePublicationHandoff";
 import { recordOwnedDemandPublicationProofAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -539,6 +541,7 @@ function OfferPlacement({
 }) {
   const observed = offer.status === "signal_detected";
   const completeDraft = `${offer.draftTitle}\n\n${offer.draftBody}\n\n${offer.trackedUrl}`;
+  const nativeHandoff = resolveNativePublicationHandoff(channelKey, offer.key);
 
   return (
     <article className="rounded-xl border border-white/[.08] bg-black/35 p-4">
@@ -568,6 +571,7 @@ function OfferPlacement({
         <CopyDemandAsset label="Copy tracked link" value={offer.trackedUrl} />
       </div>
       <DemandAssetLinks channelKey={channelKey} placementKey={offer.key} />
+      {nativeHandoff ? <NativePublicationHandoff {...nativeHandoff} /> : null}
       <p className="mt-3 text-[11px] leading-5 text-[#7f786d]">{offer.reviewNote}</p>
     </article>
   );
@@ -577,6 +581,7 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
   const observed = channel.status === "signal_detected";
   const hasLegacyEvidence = channel.legacyAttributedLeads > 0;
   const channelPacket = buildOwnedDemandChannelPacket(channel);
+  const nativeHandoff = resolveNativePublicationHandoff(channel.key, "general_question");
   return (
     <article
       id={`channel-${channel.key}`}
@@ -629,6 +634,7 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
         <CopyDemandAsset label="Copy full channel flight" value={channelPacket} />
       </div>
       <DemandAssetLinks channelKey={channel.key} placementKey="general_question" />
+      {nativeHandoff ? <NativePublicationHandoff {...nativeHandoff} /> : null}
 
       {channel.namedPlacements.length ? (
         <div className="mt-5 rounded-xl border border-[#4baab833] bg-[#061417] p-4">
