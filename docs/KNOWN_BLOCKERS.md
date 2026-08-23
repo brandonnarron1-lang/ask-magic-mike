@@ -65,7 +65,7 @@ specific expansions; they do not invalidate the live lead pipe.
   without application-code conflict. It must receive fresh exact proof, then
   still follow both predecessors and refresh after their releases before a later
   gate can authorize minimized Production field observations.
-- The conversion-journey integrity branch is stacked after exact sealed PR
+- Draft PR #200, the conversion-journey integrity candidate, is stacked after exact sealed PR
   #199 head `7690e54b3c1d225d09ab8838774c4ac9c6316cce`. It fixes only fresh
   last-touch context, renter source identity, buyer-family replay KPIs, and
   either-or contact clarity; it contains no migration. It cannot bypass or

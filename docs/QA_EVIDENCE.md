@@ -35,8 +35,16 @@
   server-normalized, React adds no HTML sink, persistence remains parameterized,
   the Production dependency audit has no known vulnerability, staged gitleaks
   found no leak, patch integrity passed, and the migration delta is empty.
-- Exact-head GitHub Node 24, immutable Preview, and protected no-write checks
-  remain pending after push.
+- Exact implementation-head remote proof — PASS: head
+  `91e05c06a7adfceba22d35c36cb7a2105da9a36b` passed Node 24 run
+  `32651530900` and immutable Ready Preview
+  `dpl_Gfqyi1ES1a5QsqtJJb8NimYXjWyc`. Protected run `32651752850` passed 17
+  read-only checks / 6 intentional mutation skips / 0 fail, widget 2/2, doctor
+  43/43, and `PREVIEW_READY`. Release and Preview artifact digests are retained
+  on Draft PR #200.
+- Exact Preview mobile no-submit proof — PASS: one main landmark, no overflow
+  or browser diagnostics, visible and associated either-or contact recovery,
+  Email focus, and no `/api/leads` resource request.
 - Detailed scope and evidence:
   `docs/phase9/CONVERSION_JOURNEY_INTEGRITY.md` and
   `docs/phase9/CONVERSION_JOURNEY_INTEGRITY_QA_EVIDENCE.md`.

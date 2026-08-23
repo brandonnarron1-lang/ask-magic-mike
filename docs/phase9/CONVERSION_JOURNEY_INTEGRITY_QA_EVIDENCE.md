@@ -69,14 +69,32 @@ Result: 4 files / 42 tests passed.
 - `gitleaks --staged --redact=100`, dependency audit, patch-integrity, and empty
   migration-delta checks pass.
 
-## Remaining exact-head proof
+## Exact implementation-head proof
 
 The commit tree passes the complete local Node 24.18.0 release gate: system
 isolation, 14/14 release safety, 221 files / 2,991 tests, strict typecheck,
 ESLint, optimized Next.js 15.5.21 build with 52 static pages, and the 83 active /
-17 acknowledged-duplicate route manifest. Exact-head GitHub Node 24 CI,
-immutable Vercel Preview, and protected no-write Preview QA still must pass
-after push. No predecessor approval can authorize this later candidate.
+17 acknowledged-duplicate route manifest.
+
+- Implementation head `91e05c06a7adfceba22d35c36cb7a2105da9a36b` passed GitHub
+  Node 24 run `32651530900`; artifact `9496355011` has digest
+  `sha256:22b28178ac354022397b1cba5bd25c5757e555be363e09afb4b9b41cf23a3e94`.
+- Immutable Vercel Preview deployment
+  `dpl_Gfqyi1ES1a5QsqtJJb8NimYXjWyc` is Ready at
+  `https://ask-magic-mike-qz90dikjl-eyes-up-industries.vercel.app` for that
+  exact implementation head.
+- Protected no-write run `32651752850` passed 17 read-only checks with 6
+  intentional mutation skips and 0 failures, widget browser E2E 2/2, release
+  doctor 43/43, and `PREVIEW_READY`. Artifact `9496422921` has digest
+  `sha256:07a9354cbb7e484df92e4e9df369321ae25b4cda17d448c80ce4bda33e112464`.
+- The chosen in-app browser confirmed the immutable mobile Preview retained one
+  main landmark, zero overflow and diagnostics, Email focus recovery, associated
+  either-or contact errors, and no `/api/leads` resource request after a blank
+  submit.
+
+This evidence-only documentation follows the proven implementation. Exact
+final-PR-head checks are retained on Draft PR #200. No predecessor approval can
+authorize this later candidate.
 
 ## Safety boundary
 

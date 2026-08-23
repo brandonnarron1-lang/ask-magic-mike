@@ -95,8 +95,8 @@ provider action, or deletion.
   proof. After both predecessors release it must refresh and re-prove before its
   later exact gate:
   `APPROVE PHASE 9 FIELD EXPERIENCE TRUST MERGE, PRODUCTION DEPLOYMENT, AND FIELD TELEMETRY ACTIVATION`.
-- The branch `codex/phase9-conversion-journey-integrity-20260823` is stacked
-  after exact sealed PR #199 head
+- Draft PR [#200](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/200)
+  on `codex/phase9-conversion-journey-integrity-20260823` is stacked after exact sealed PR #199 head
   `7690e54b3c1d225d09ab8838774c4ac9c6316cce`. It has no migration and cannot
   release before PRs #197-#199. After those predecessors release, it must
   refresh onto exact `main`, repeat exact-head proof, and receive its own later

@@ -2,7 +2,7 @@
 
 Date: 2026-08-23
 
-Status: stacked Draft candidate; Production unchanged
+Status: stacked Draft PR #200; Production unchanged
 
 ## Reuse-first decision
 
@@ -63,6 +63,8 @@ healthy. Four narrower integrity gaps remained:
 - No new visual asset or redesign. Existing Black Diamond typography, spacing,
   colors, controls, photography, and mobile composition remain authoritative.
 - The local validation exercise stopped before any `/api/leads` request.
+- The immutable Preview repeated that no-submit validation with no
+  `/api/leads` resource request, no provider delivery, and no data mutation.
 
 ## Stack and rollback
 
