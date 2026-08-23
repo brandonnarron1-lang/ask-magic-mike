@@ -13,6 +13,7 @@ export type LeadSourceSurface =
   | "home_value_page"
   | "seller_page"
   | "buyer_page"
+  | "renter_page"
   | "open_house"
   | "ask_page"
   | "widget"
@@ -214,6 +215,7 @@ function normalizeSurface(input: unknown, funnelType: FunnelType): LeadSourceSur
     input === "home_value_page" ||
     input === "seller_page" ||
     input === "buyer_page" ||
+    input === "renter_page" ||
     input === "open_house" ||
     input === "ask_page" ||
     input === "widget" ||
@@ -222,7 +224,8 @@ function normalizeSurface(input: unknown, funnelType: FunnelType): LeadSourceSur
     return input;
   }
   if (funnelType === "seller") return "seller_page";
-  if (funnelType === "buyer" || funnelType === "renter") return "buyer_page";
+  if (funnelType === "buyer") return "buyer_page";
+  if (funnelType === "renter") return "renter_page";
   if (funnelType === "open_house") return "open_house";
   if (funnelType === "chat") return "ask_page";
   if (funnelType === "widget") return "widget";
@@ -247,6 +250,7 @@ function cleanAttributionSnapshot(input: unknown) {
     "listing_id",
     "property_id",
     "agent_id",
+    "page_title",
     "gclid",
     "gbraid",
     "wbraid",

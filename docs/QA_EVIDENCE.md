@@ -1,5 +1,35 @@
 # QA Evidence
 
+## Phase 9 conversion-journey fast-track live audit — 2026-08-23
+
+- Browser: Chromium-compatible Playwright CLI at 390×844 against canonical
+  Production.
+- Before navigation, mocked /api/leads, /api/events,
+  /api/experiments/event, /api/widget/events, Google Analytics/GTM, and
+  Facebook collection requests. No lead, durable application event, provider
+  message, or third-party analytics write was permitted.
+- Homepage rendered one main landmark, correct brokerage identity, working
+  public paths, and zero console warnings/errors. The existing Home Value
+  intake advanced from synthetic address to required name/email without a lead
+  request.
+- Buyer page rendered required consent and the existing form. Blank submit
+  displayed “Add an email or phone number so Mike can follow up,” made no lead
+  request, but retained focus on “Request Buyer Plan.” This is direct current
+  Production evidence for the recoverability fix already implemented in PR
+  #200.
+- Exact Node 24 fast-track acceptance passes 4 focused files / 42 tests, the
+  complete 220-file / 2,991-test suite, strict typecheck, ESLint, optimized
+  build with 52 static pages, 82/17 route proof, system isolation, release
+  safety 14/14, dependency audit, diff/migration integrity, and staged redacted
+  secret scan.
+- Optimized local Buyer and Renter acceptance at 390×844 confirms one main, no
+  horizontal overflow, zero console warnings/errors, first and repeated Email
+  focus recovery, exact `renter_page` payload identity, immutable Buyer first
+  touch, and refreshed Renter last touch. Every lead/event request was mocked.
+- No form completion, consent acceptance, lead submission, database write,
+  email, SMS, Push, WordPress edit, publication, DNS change, spend, deletion,
+  or NellySelly action occurred.
+
 ## Phase 9 conversion identity polish — 2026-08-22 15:17 EDT
 
 - Current Production seller, buyer, and Ask paths were captured in the in-app

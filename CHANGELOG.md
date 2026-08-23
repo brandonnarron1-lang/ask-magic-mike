@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-23 — Conversion-journey integrity fast-track candidate
+
+- Reused the already-reviewed PR #200 application and test changes on top of
+  exact PR #202 head instead of rebuilding the buyer/renter/open-house flow.
+- Current mobile Production no-write audit reconfirmed that blank Buyer submit
+  shows the either-or contact error while focus remains on the submit button.
+- The isolated candidate preserves first touch, refreshes truthful last touch,
+  separates renter source identity, suppresses replay KPI inflation, and makes
+  contact recovery accessible.
+- Every application and test file applied cleanly; only cumulative operating
+  documents required reconciliation. No migration, Production action, lead,
+  message, WordPress edit, publication, spend, DNS change, deletion, or
+  NellySelly action occurred.
+
 ## 2026-08-22 — Conversion identity polish
 
 - Added required seller identity to the existing four-stage home-value funnel.

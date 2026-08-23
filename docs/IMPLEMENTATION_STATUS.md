@@ -2,6 +2,42 @@
 
 Updated 2026-08-23.
 
+## Phase 9 conversion-journey integrity fast-track — 2026-08-23
+
+- **Live evidence:** a 390×844 Production audit intercepted lead/event and
+  third-party analytics writes before navigation. Homepage address-to-contact
+  progression worked with zero browser warnings/errors. On /buy, a blank
+  submit rendered the correct email-or-phone status but left focus on the
+  submit button, reproducing the recoverability defect fixed by PR #200.
+- **Reuse decision:** exact PR #200 application/tests were applied to exact PR
+  #202 head. All application and test files composed cleanly; only five
+  cumulative status documents required current-authority reconciliation.
+- **Scope:** immutable first touch, fresh tagged last touch, renter-page
+  identity, replay-safe lead-created analytics, and accessible either-or
+  contact recovery. No form, endpoint, database, provider, dashboard, route
+  family, or visual system was added.
+- **Dependency:** this local candidate is based on PR #202 final head
+  26047176b78006230ce6064a5ee53f9c0561ef2a. It cannot release before PR #202
+  and must be refreshed onto the exact resulting main before any later gate is
+  eligible.
+- **Local acceptance:** exact Node 24.18.0 passes 4 focused files / 42 tests,
+  the complete 220-file / 2,991-test suite, strict typecheck, ESLint, optimized
+  Next.js 15.5.21 build with 52 static pages, 82/17 route-manifest proof,
+  system isolation, release safety 14/14, no-vulnerability Production
+  dependency audit, diff integrity, empty migration delta, and a redacted
+  staged secret scan.
+- **Rendered acceptance:** optimized local mobile Buyer and Renter paths have
+  one main, no horizontal overflow, zero browser warnings/errors, repeated
+  invalid-submit focus recovery, exact `renter_page` payload identity, immutable
+  Buyer first touch, and refreshed Renter last touch. Lead/event routes were
+  mocked before navigation; no durable write occurred.
+- **Safety:** no migration or Production mutation. Exact-head CI, canonical
+  Preview, and protected no-write proof remain required before a later release
+  gate is eligible.
+- Detailed scope:
+  docs/phase9/CONVERSION_JOURNEY_INTEGRITY.md and
+  docs/phase9/CONVERSION_JOURNEY_INTEGRITY_QA_EVIDENCE.md.
+
 ## Phase 9 durable rate-limit readiness — 2026-08-23
 
 - Authenticated Vercel evidence found 17 paired error occurrences on the two

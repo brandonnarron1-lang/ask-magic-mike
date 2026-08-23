@@ -22,10 +22,17 @@ specific expansions; they do not invalidate the live lead pipe.
   `5a3c5c7f2463ea399c21b616ff249f6c67e156b6` on Production deployment
   `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. Its application gate is exhausted;
   physical enrollment and a `[TEST]` Push remain separate actions.
-- Draft PR #195 is refreshed onto exact released main. Its prior stacked state
-  is preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
-  It must pass exact-head GitHub CI and protected Preview before its distinct
-  conversion-identity release gate can be considered.
+- PR #195 conversion identity polish is merged and live as
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` on Production deployment
+  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`; its gate is exhausted.
+- Draft PR #202 is the immediate durability correction. It remains unmerged
+  behind its dedicated Production-secret/merge/deploy gate.
+- A local conversion-journey fast-track candidate reuses only PR #200's unique
+  application and test work on top of exact PR #202. It is not release-eligible
+  until PR #202 releases, it refreshes onto exact `main`, and fresh exact-head
+  proof passes.
+- PRs #197–#201 remain preserved. The fast-track review does not authorize,
+  merge, delete, or silently supersede any of them.
 - Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
   and #119–#121 are preserved archive history.
 - Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,
