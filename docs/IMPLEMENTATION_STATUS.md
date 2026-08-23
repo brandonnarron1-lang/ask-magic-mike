@@ -57,12 +57,14 @@ Updated 2026-08-23.
   identity, replay-safe lead-created analytics, and accessible either-or
   contact recovery. No form, endpoint, database, provider, dashboard, route
   family, or visual system was added.
-- **Dependency:** this local candidate is based on PR #202 final head
-  26047176b78006230ce6064a5ee53f9c0561ef2a. It cannot release before PR #202
-  and must be refreshed onto the exact resulting main before any later gate is
-  eligible.
-- **Local acceptance:** exact Node 24.18.0 passes 4 focused files / 42 tests,
-  the complete 220-file / 2,991-test suite, strict typecheck, ESLint, optimized
+- **Dependency:** this candidate now includes PR #202 final head
+  `37aa69421a70a177504e9ccaed99fef75852849e` through clean merge commit
+  `3b5aef0aea2254c4b410393bb84ad1e1b61b7510`. Rescue branch
+  `rescue/amm-pr203-pre-pr202-refresh-20260823-173028` preserves the previous
+  sealed head. It cannot release before PR #202 and must be retargeted to the
+  exact resulting `main` before any later gate is eligible.
+- **Local acceptance:** after the ordered refresh, exact Node 24.18.0 passes 4
+  focused files / 42 tests and the complete suite, strict typecheck, ESLint, optimized
   Next.js 15.5.21 build with 52 static pages, 82/17 route-manifest proof,
   system isolation, release safety 14/14, no-vulnerability Production
   dependency audit, diff integrity, empty migration delta, and a redacted
@@ -72,14 +74,15 @@ Updated 2026-08-23.
   invalid-submit focus recovery, exact `renter_page` payload identity, immutable
   Buyer first touch, and refreshed Renter last touch. Lead/event routes were
   mocked before navigation; no durable write occurred.
-- **Remote acceptance:** Draft PR #203 application head
+- **Superseded pre-refresh remote acceptance:** Draft PR #203 application head
   `a86eece1f2b18ceb064d109912c5b77314d2aca9` passes exact-head GitHub Node 24
   run `32660966818`, READY Preview `dpl_DQUyVzLXPmvyjghqUVzPtqoDuHcq`, and
   protected no-write run `32661259833`: 17 pass / 6 intentional write skips /
   0 fail, Widget 2/2, doctor 43/43, safety 14/14, release candidate GO,
   `PREVIEW_READY`, and zero fatal/error/warning runtime logs.
-- **Safety:** no migration or Production mutation. This evidence-only seal
-  still requires its own exact-head CI/Preview status. PR #203 cannot release
+- **Safety:** no migration or Production mutation. The refreshed Draft head
+  requires fresh exact-head CI/Preview/protected status recorded in PR #203.
+  PR #203 cannot release
   before PR #202 and must then be refreshed onto exact `main` and re-proven
   before a separate later gate is eligible.
 - Detailed scope:

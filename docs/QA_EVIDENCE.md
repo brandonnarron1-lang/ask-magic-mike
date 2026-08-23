@@ -17,8 +17,8 @@
   request, but retained focus on “Request Buyer Plan.” This is direct current
   Production evidence for the recoverability fix already implemented in PR
   #200.
-- Exact Node 24 fast-track acceptance passes 4 focused files / 42 tests, the
-  complete 220-file / 2,991-test suite, strict typecheck, ESLint, optimized
+- Exact Node 24 fast-track acceptance passes 4 focused files / 42 tests and the
+  complete suite, strict typecheck, ESLint, optimized
   build with 52 static pages, 82/17 route proof, system isolation, release
   safety 14/14, dependency audit, diff/migration integrity, and staged redacted
   secret scan.
@@ -26,7 +26,13 @@
   horizontal overflow, zero console warnings/errors, first and repeated Email
   focus recovery, exact `renter_page` payload identity, immutable Buyer first
   touch, and refreshed Renter last touch. Every lead/event request was mocked.
-- Draft PR #203 application head
+- PR #203 now includes final PR #202 head
+  `37aa69421a70a177504e9ccaed99fef75852849e` through clean merge
+  `3b5aef0aea2254c4b410393bb84ad1e1b61b7510`; the previous head is preserved
+  at `rescue/amm-pr203-pre-pr202-refresh-20260823-173028`. Fresh exact-head
+  remote proof is required and is recorded in the PR rather than inferred from
+  the following superseded evidence.
+- Superseded pre-refresh Draft PR #203 application head
   `a86eece1f2b18ceb064d109912c5b77314d2aca9` passes GitHub Node 24 release run
   `32660966818` and Vercel Preview `dpl_DQUyVzLXPmvyjghqUVzPtqoDuHcq` is READY
   at `https://ask-magic-mike-a0x610tpg-eyes-up-industries.vercel.app`. The
