@@ -66,15 +66,18 @@ healthy. Four narrower integrity gaps remained:
 
 ## Dependency, reuse, and rollback
 
-The fast-track branch starts from exact final PR #202 head
-`26047176b78006230ce6064a5ee53f9c0561ef2a`. It reuses the unique PR #200
+The fast-track branch includes exact final PR #202 head
+`37aa69421a70a177504e9ccaed99fef75852849e` through clean ordered merge
+`3b5aef0aea2254c4b410393bb84ad1e1b61b7510`. Rescue branch
+`rescue/amm-pr203-pre-pr202-refresh-20260823-173028` preserves the previous
+sealed head. It reuses the unique PR #200
 implementation commit `91e05c06a7adfceba22d35c36cb7a2105da9a36b` without
 merging PRs #197–#199. Every application and test file applied cleanly; only
 the five cumulative operating documents required reconciliation with current
 Production authority. The original Draft PR #200 branch remains unchanged.
 
 This candidate cannot release before PR #202. After PR #202 releases, preserve
-this branch, refresh it onto the exact resulting `main`, and repeat exact-head
+this branch, retarget it to the exact resulting `main`, and repeat exact-head
 Node 24, Preview, protected no-write, and visual proof before requesting its
 own gate.
 
