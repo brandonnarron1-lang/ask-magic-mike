@@ -26,11 +26,19 @@ Updated 2026-08-23.
   hero resource per viewport: 56,792 bytes at 390 × 844 and 108,706 bytes at
   1440 × 900. Art direction, identity, H1, CTAs, eager/high priority, one main,
   and zero overflow remain correct with zero browser warnings/errors.
+- **Remote acceptance:** Draft PR #204 application head
+  `e1024cd1234dc5b200ed953705127f9efa4bb8fd` passes GitHub run `32662812090`,
+  READY Preview `dpl_CVWc7vVZ2Ju8qv7KanpYshn4uKKS`, and protected no-write run
+  `32662942232`: 17 pass / 6 intentional write skips / 0 fail, Widget 2/2,
+  doctor 43/43, safety 14/14, release candidate GO, `PREVIEW_READY`, and zero
+  fatal/error/warning runtime logs. Deployed browser-negotiated image responses
+  are 56,744 bytes mobile and 108,706 bytes desktop.
 - **Dependency:** this candidate follows PR #203, which follows PR #202. It is
   not release-eligible until both predecessors release in order, this branch is
   refreshed onto exact `main`, and fresh exact-head proof passes.
 - **Safety:** no migration or Production mutation. Local and remote acceptance
-  are required before any later release gate is eligible.
+  are complete for the application head. This evidence-only seal still requires
+  its own exact-head CI/Preview/protected proof. No Production gate is issued.
 - Detailed scope:
   `docs/phase9/PUBLIC_HERO_DELIVERY_TRUST.md` and
   `docs/phase9/PUBLIC_HERO_DELIVERY_TRUST_QA_EVIDENCE.md`.

@@ -59,11 +59,9 @@ pnpm `10.30.3`, and Next.js `15.5.21`.
 | Staged secret scan | PASS · no leaks found |
 | `git diff --check` | PASS |
 
-The release doctor is `HEALTHY`: 42 checks pass and its sole nonblocking local
-failure is the expected uncommitted candidate tree. It will be rerun after the
-candidate commit. Exact-head remote acceptance remains required. No migration
-was added. No database, email, SMS, Push, WordPress, social, Google Business
-Profile, DNS, provider, spend, or Production action occurred.
+After the application commit, the clean-tree release doctor passed 43/43. No
+migration was added. No database, email, SMS, Push, WordPress, social, Google
+Business Profile, DNS, provider, spend, or Production action occurred.
 
 ## Current fast-track cold-browser responsive proof
 
@@ -100,6 +98,35 @@ These local transfer measurements are deterministic acceptance evidence, not a
 claim about real-user LCP. The stacked field-experience candidate remains the
 canonical way to collect privacy-safe Production LCP/INP/CLS evidence after its
 separate release gate and sufficient genuine traffic.
+
+## Application-head remote acceptance
+
+Application head: `e1024cd1234dc5b200ed953705127f9efa4bb8fd`
+
+| Proof | Exact evidence |
+| --- | --- |
+| GitHub Node 24 CI | run `32662812090` · job `97251432771` · PASS |
+| CI artifact | `9499214457` · `sha256:d0fe367719098b9bafe210299cdea209d6c07e77544d22810448d70bc6549dae` |
+| Vercel Preview | `dpl_CVWc7vVZ2Ju8qv7KanpYshn4uKKS` · READY · immutable `https://ask-magic-mike-fjlaoqny6-eyes-up-industries.vercel.app` |
+| GitHub deployment identity | exact ref and SHA `e1024cd1234dc5b200ed953705127f9efa4bb8fd` |
+| Protected no-write QA | run `32662942232` · job `97251747115` · PASS |
+| Protected artifact | `9499255540` · `sha256:2571e0a4c82caff5521435012f01820cc4c09fa696eb21a872bb593926215dec` |
+
+Protected acceptance returned 17 pass / 6 intentional mutation skips / 0 fail,
+Widget 2/2, release safety 14/14, release doctor 43/43, release candidate GO,
+and `PREVIEW_READY`. Health identified the exact application commit and Preview
+runtime/database identity; `safe_for_preview_mutation=false`, live email/SMS
+disabled, and provider delivery disabled. No write test ran.
+
+Authenticated read-only inspection of the deployed markup confirmed the mobile
+and desktop `srcSet`, intrinsic dimensions, `sizes="100vw"`, eager loading, and
+high fetch priority. With browser image negotiation, the immutable Preview
+served a 56,744-byte mobile WebP at width 640 and a 108,706-byte desktop WebP at
+width 1920. Runtime logs contained 0 fatal, 0 error, and 0 warning entries.
+
+This evidence-only seal must pass its own exact-head CI, matching immutable
+Preview, and protected no-write acceptance. Its results supersede application-
+head evidence for branch identity but do not create Production authority.
 
 ## Rollback proof
 

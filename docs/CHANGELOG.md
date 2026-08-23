@@ -18,6 +18,11 @@
   ESLint, optimized build with 52 static pages, 82/17 route-manifest proof,
   14/14 release safety, system isolation, and a clean Production dependency
   audit.
+- PR #204 application head passes exact-head GitHub CI, a matching immutable
+  Vercel Preview, protected 17-pass/6-write-skip acceptance, Widget 2/2,
+  release doctor 43/43, release candidate GO, `PREVIEW_READY`, and zero
+  Preview warning/error/fatal logs. Deployed browser-negotiated hero variants
+  are 56,744 bytes mobile and 108,706 bytes desktop.
 - No migration, Production action, lead/event write, message, WordPress edit,
   publication, spend, DNS change, deletion, or NellySelly action occurred.
 
