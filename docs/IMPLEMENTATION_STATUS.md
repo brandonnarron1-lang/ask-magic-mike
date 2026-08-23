@@ -181,9 +181,10 @@ Updated 2026-08-23.
   reuses the canonical owned-demand resolver and Lead Center `report:view`
   boundary.
 - **Safety result:** exact HTTPS host allowlists, redirect revalidation,
-  response limits, page-ID checks, duplicate/missing-target rejection,
-  deterministic SHA-256 preconditions, private/no-store headers, and raw-HTML
-  exclusion are implemented and covered.
+  a 3 MB streaming response cap, explicit published-row validation, page-ID
+  checks, duplicate/missing-target rejection, deterministic SHA-256
+  preconditions covering every ambiguity signal, private/no-store headers, and
+  raw-HTML exclusion are implemented and covered.
 - **Recommended first action:** one separately approved homepage CTA href
   replacement only. No WordPress publication is included in this application
   candidate.
