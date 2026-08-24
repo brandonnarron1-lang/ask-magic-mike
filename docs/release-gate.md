@@ -139,9 +139,11 @@ not override an unsafe verdict**. This is intentional.
 
 `npm run preview:e2e` runs `tests/e2e/widget-preview-flow.spec.ts`,
 which drives the widget on `/widget-preview` from intent → contact →
-success and intercepts `POST /api/leads` via Playwright's `page.route`.
-No real lead is ever created. The spec also covers the error path by
-intercepting with `500`. Bypass headers are wired through
+success and intercepts `POST /api/leads`, `/api/events`,
+`/api/analytics/event`, `/api/experiments/event`, and `/api/widget/events`
+via Playwright's `page.route`. No real lead or browser telemetry row is ever
+created. The spec also covers the error path by intercepting the lead call with
+`500`. Bypass headers are wired through
 `extraHTTPHeaders` so protected previews work without printing the
 token.
 

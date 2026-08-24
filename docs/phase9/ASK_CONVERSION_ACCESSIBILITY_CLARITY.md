@@ -5,7 +5,7 @@ Date: 2026-08-23
 Status: stacked candidate refreshed onto exact PR #210; Production unchanged
 
 Stack base: refreshed PR #210 head
-`7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9`
+`3ed8d050edd386aa0cd4a83d230ff3170d24a306`
 
 ## Decision
 

@@ -79,9 +79,12 @@ datasets, or generated media.
 ## Release order and authority
 
 This candidate was refreshed onto exact sealed Draft PR #214 head
-`3ac0885a6f19fc479266457cff760ef836094470`. The pre-refresh candidate remains
+`94e3d66190df138d42c1321adfeb0cefb0478545`. The immediately prior candidate
+head `0e47db8780c7257f0d445d75e034aacd535c06a4` remains
 recoverable at
-`rescue/amm-pr215-pre-pr214-seal-sync-20260824-1329`. Release order remains:
+`rescue/amm-pr215-pre-final-pr214-cutover-hygiene-20260824-174316`. The earlier
+recovery branch `rescue/amm-pr215-pre-pr214-seal-sync-20260824-1329` remains
+historical. Release order remains:
 
 1. PR #209 durability release;
 2. PR #210 canonical alias consolidation;
