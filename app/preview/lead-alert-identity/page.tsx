@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default function LeadAlertIdentityPreviewPage() {
-  if (!leadAlertIdentityPreviewEnabled(process.env.VERCEL_ENV)) notFound();
+  if (!leadAlertIdentityPreviewEnabled(process.env.VERCEL_ENV, process.env.NODE_ENV)) notFound();
 
   return (
     <main className="min-h-screen bg-[#050505] px-4 py-8 text-[#f4ead4] sm:px-6">

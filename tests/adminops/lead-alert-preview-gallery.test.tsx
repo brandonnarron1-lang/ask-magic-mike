@@ -20,10 +20,11 @@ describe("lead-alert preview gallery", () => {
   it("keeps the visual acceptance route unavailable in Production", () => {
     const source = readFileSync("app/preview/lead-alert-identity/page.tsx", "utf8");
 
-    expect(leadAlertIdentityPreviewEnabled("production")).toBe(false);
-    expect(leadAlertIdentityPreviewEnabled("preview")).toBe(true);
-    expect(leadAlertIdentityPreviewEnabled(undefined)).toBe(true);
-    expect(source).toContain("leadAlertIdentityPreviewEnabled(process.env.VERCEL_ENV)");
+    expect(leadAlertIdentityPreviewEnabled("production", "development")).toBe(false);
+    expect(leadAlertIdentityPreviewEnabled("preview", "production")).toBe(true);
+    expect(leadAlertIdentityPreviewEnabled(undefined, "production")).toBe(false);
+    expect(leadAlertIdentityPreviewEnabled(undefined, "development")).toBe(true);
+    expect(source).toContain("leadAlertIdentityPreviewEnabled(process.env.VERCEL_ENV, process.env.NODE_ENV)");
     expect(source).toContain("notFound()");
     expect(source).toContain("robots: { index: false");
   });
