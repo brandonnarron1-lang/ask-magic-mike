@@ -132,6 +132,34 @@ the local engine warning is recorded rather than treated as release evidence.
 - no DNS, domain, secret, billing, spend, deletion, or NellySelly action; and
 - no merge or Production deployment.
 
+## Runtime skip-focus correction — 2026-08-24
+
+The signed-in browser loaded refreshed exact-head Preview commit
+`1b7eccafe13882b282b8fae98c93f534b5a967bc` and confirmed the intended title,
+consumer copy, first-position skip link, `#page-content` target, required
+question label, help relationship, 2,000-character maximum, no framework
+overlay, no NellySelly identity, and an empty console log. No field was typed
+and no request was submitted.
+
+That same runtime check found a narrow defect: activating the skip link
+prevented hash navigation, but focus returned to the activated anchor instead
+of remaining on `section#page-content`. This contradicts the intended keyboard
+contract even though the component unit test passed.
+
+- Preserved the affected head at remote rescue branch
+  `rescue/amm-pr211-pre-runtime-skip-focus-20260824-0418`.
+- Added a deferred, connected-target refocus after the existing synchronous
+  focus call so browser activation finalization cannot strand focus on the
+  skip control.
+- Extended the focused test to model a browser restoring anchor focus and then
+  prove the deferred callback returns focus to the content target.
+- Focused verification passes 2 files / 10 tests with no warning, strict
+  typecheck passes, targeted ESLint passes, and the staged secret scan is clean.
+
+The former Preview and protected no-write run are historical diagnostic
+evidence only. Fresh full Node 24, immutable Preview, protected no-write, and
+signed-browser keyboard proof are required for the corrected exact head.
+
 ## Refreshed stack evidence boundary — 2026-08-24
 
 - Preserved pre-refresh PR #211 head

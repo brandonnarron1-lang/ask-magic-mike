@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-24 — PR #211 runtime skip-link focus hardening
+
+- Preserved the refreshed PR #211 head at remote rescue branch
+  `rescue/amm-pr211-pre-runtime-skip-focus-20260824-0418`.
+- Signed-browser acceptance of the protected exact-head Preview found that the
+  skip link prevented default navigation but the browser restored focus to the
+  activated anchor after its handler completed.
+- Reused the existing skip link and content target, adding one bounded deferred
+  refocus instead of another navigation or accessibility system.
+- Added regression coverage that simulates post-handler anchor refocus and
+  proves the content target is restored after the activation cycle.
+- Submitted no form and changed no Production deployment, database, lead,
+  message, WordPress surface, DNS, spend, deletion, or NellySelly system.
+
 ## 2026-08-24 — PR #211 stack refresh onto refreshed PR #210
 
 - Preserved PR #211's pre-refresh head at remote rescue branch

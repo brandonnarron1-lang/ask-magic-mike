@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-08-24 — PR #211 runtime skip-link focus hardening
+
+- Protected Preview DOM and field semantics passed, but a real keyboard
+  activation check showed focus returning to the skip link after the click
+  handler instead of remaining on `#page-content`.
+- Preserved the pre-fix candidate at
+  `rescue/amm-pr211-pre-runtime-skip-focus-20260824-0418`.
+- The shared header now reasserts the same content-target focus once the
+  browser activation cycle completes; the target and route contract are
+  unchanged.
+- Regression coverage now models the browser refocus edge case. Fresh exact-
+  head CI, Preview, and keyboard proof remain mandatory before release.
+
 ## 2026-08-24 — PR #211 stack refresh onto refreshed PR #210
 
 - Preserved the former PR #211 head at
