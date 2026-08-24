@@ -1,5 +1,24 @@
 # QA Evidence
 
+## Phase 9 funnel-event identity-integrity refresh — 2026-08-24
+
+- Draft PR #216 reuses the established funnel/session UUID and canonical event
+  ledger after exact final Draft PR #215
+  `2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`.
+- Former PR #216 head `253480326312d42a159323176d69e87f47262921`
+  is preserved at
+  `rescue/amm-pr216-pre-final-pr215-cutover-hygiene-20260824-180325`.
+- Product application code merged intact. The release harness retained PR
+  #216's stronger shared catch-all mutation interceptor and upgraded the
+  inherited endpoint-specific source assertion to that contract.
+- Prior candidate local, CI, Preview, browser, and runtime-log evidence is
+  historical. Fresh exact-head Node 24, immutable Preview, protected no-write,
+  security, isolation, and zero-mutation runtime proof are required.
+- No Production, database, lead/event, message, provider, WordPress, DNS,
+  publication, spend, deletion, or NellySelly action occurred.
+- Full scope:
+  `docs/phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY_QA_EVIDENCE.md`.
+
 ## Phase 9 home-value completion-integrity refresh — 2026-08-24
 
 - Draft PR #215 reuses the canonical Home Value funnel and lead command after

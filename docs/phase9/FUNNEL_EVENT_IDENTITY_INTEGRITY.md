@@ -104,7 +104,9 @@ registered QA traffic remain excluded from Production KPI queries.
 ## Release order and authority
 
 This candidate starts from exact Draft PR #215 head
-`0e47db8780c7257f0d445d75e034aacd535c06a4` and follows:
+`2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`. The immediately prior PR #216
+head `253480326312d42a159323176d69e87f47262921` is preserved at
+`rescue/amm-pr216-pre-final-pr215-cutover-hygiene-20260824-180325`. It follows:
 
 1. PR #209 durability release;
 2. PR #210 canonical alias consolidation;

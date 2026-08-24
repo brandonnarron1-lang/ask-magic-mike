@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-08-24 — PR #216 refresh onto final PR #215 cutover hygiene
+
+- Preserved former PR #216 head `253480326312d42a159323176d69e87f47262921`
+  at `rescue/amm-pr216-pre-final-pr215-cutover-hygiene-20260824-180325`.
+- Merged exact final PR #215 head
+  `2d020358da1d7f95ebf82c47c0f1c0e83d6216d2` while preserving first-contact
+  durability and the funnel-event identity design.
+- Kept PR #216's shared fail-closed first-party API mutation interceptor and
+  updated the inherited endpoint-specific source test to enforce that stronger
+  catch-all contract.
+- Prior PR #216 proof is historical; fresh exact-head CI, immutable Preview,
+  intercepted browser acceptance, and zero-write runtime evidence are mandatory.
+- No Production, environment, database, lead/event, notification, provider,
+  WordPress, DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-24 — Funnel-event identity-integrity candidate
 
 - Existing form UUIDs now connect pre-lead funnel stages to eventual durable

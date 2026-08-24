@@ -4,7 +4,7 @@ Date: 2026-08-24
 
 Scope: the Phase 9 browser-to-canonical-analytics identity change only
 
-Base: `0e47db8780c7257f0d445d75e034aacd535c06a4` (stacked after sealed Draft PR #215)
+Base: `2d020358da1d7f95ebf82c47c0f1c0e83d6216d2` (stacked after final Draft PR #215)
 
 Production impact: none; no merge, deployment, environment-variable change, database migration, or live write was performed.
 

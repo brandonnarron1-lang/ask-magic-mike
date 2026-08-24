@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-08-24 — PR #216 refresh onto final PR #215 cutover hygiene
+
+- Preserved former PR #216 head `253480326312d42a159323176d69e87f47262921`
+  at `rescue/amm-pr216-pre-final-pr215-cutover-hygiene-20260824-180325`.
+- Merged exact final PR #215 head
+  `2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`, retaining the ordered PR #209
+  through PR #215 release, no-write, no-send, and first-contact durability
+  contracts.
+- Preserved the existing funnel UUID, canonical event route, server-owned
+  conversion authority, consent-channel integrity, and shared fail-closed
+  Preview mutation interceptor.
+- Reconciled PR #215's older endpoint-specific browser contract to PR #216's
+  stronger shared catch-all boundary and upgraded the inherited source-level
+  regression test to enforce the stronger design.
+- Invalidated older PR #216 proof pending fresh exact-head Node 24, immutable
+  Preview, write-intercepted browser, security, and deployment-log verification.
+- Changed no Production deployment, environment, database row, lead, event,
+  message, provider, WordPress surface, DNS, spend, deletion, or NellySelly
+  system.
+
 ## 2026-08-24 — Funnel-event identity-integrity candidate
 
 - Reused each form's existing submission/idempotency UUID to connect Home

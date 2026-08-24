@@ -9,9 +9,13 @@ Draft PR:
 [#216](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/216)
 
 Parent: exact Draft PR #215 head
-`0e47db8780c7257f0d445d75e034aacd535c06a4`
+`2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`
 
-Pre-refresh head preservation:
+Immediately prior head preservation:
+`rescue/amm-pr216-pre-final-pr215-cutover-hygiene-20260824-180325` at
+`253480326312d42a159323176d69e87f47262921`.
+
+Earlier pre-refresh head preservation:
 `rescue/amm-pr216-pre-pr215-seal-sync-20260824-1353` at
 `e2b2c06edcc48bec1beb0218abf7bfc5ffc967c4`.
 
@@ -20,6 +24,12 @@ Refreshed code-bearing head:
 
 No-write harness repair head:
 `90108d8b386a264ae8e536e6503043f79f7a14ae`.
+
+The final-parent refresh retained the stronger shared catch-all mutation
+boundary and upgraded PR #215's inherited endpoint-specific source test to
+that contract. All local, CI, Preview, browser, and runtime-log results below
+predating this refresh are historical until repeated on the current GitHub PR
+head.
 
 ## Design rejection evidence
 

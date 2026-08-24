@@ -7,7 +7,7 @@ Updated 2026-08-24.
 - **Reuse decision:** the stacked candidate extends only the existing browser
   submission UUID, `POST /api/events`, Neon analytics repository, and atomic
   lead command in Draft PR #216 on exact Draft PR #215 head
-  `0e47db8780c7257f0d445d75e034aacd535c06a4`; no tracker, cookie, form, API,
+  `2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`; no tracker, cookie, form, API,
   database, CRM, provider, or notification system is added.
 - **Conflict prevented:** inspection proved that pre-creating `sessions` for
   anonymous events would make `capture_public_lead_v1` return an idempotency
@@ -52,6 +52,14 @@ Updated 2026-08-24.
   first-party POST/PUT/PATCH/DELETE, with approved synthetic responses and an
   explicit unexpected-mutation ledger. Replacement exact-head Preview and
   protected proof remain mandatory before sealing.
+- **Parent refresh:** former PR #216 head
+  `253480326312d42a159323176d69e87f47262921` is preserved at
+  `rescue/amm-pr216-pre-final-pr215-cutover-hygiene-20260824-180325`. Exact final
+  PR #215 merged with product application code intact. The only code-level
+  integration was to retain PR #216's stronger shared catch-all Preview
+  mutation boundary and update PR #215's inherited endpoint-specific source
+  assertion to that contract. Every prior local, CI, Preview, and browser seal
+  is historical until repeated on the current GitHub head.
 - **Safety:** no Production, environment, schema, lead, message, provider,
   WordPress/DNS, publication, spend, deletion, or NellySelly action. The
   superseded Preview run may have stored privacy-minimized analytics telemetry;
