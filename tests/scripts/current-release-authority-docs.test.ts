@@ -20,6 +20,9 @@ const canonicalAliasDecision = readDoc(
 const canonicalAliasEvidence = readDoc(
   "phase9/CANONICAL_ALIAS_CONSOLIDATION_QA_EVIDENCE.md"
 );
+const durableRateLimitRehearsal = readDoc(
+  "phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md"
+);
 
 const operatingDocs = [
   currentState,
@@ -41,7 +44,7 @@ const productionGate =
 const previewMutationGate =
   "APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA";
 const pr209SealedParent =
-  "1d1d8d4f8e0970f3f6a1b80ab9ff2bebcd40216d";
+  "b28b380f2cc3f9b63b2c0048b398e97a88dfee4b";
 const canonicalAliasGate =
   "APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT";
 const askAccessibilityGate =
@@ -171,7 +174,7 @@ describe("current release-authority documentation", () => {
       expect(doc).toContain(pr209SealedParent);
     }
     expect(canonicalAliasEvidence).toContain(
-      "rescue/amm-pr210-pre-release-ledger-integrity-sync-20260824-0617"
+      "rescue/amm-pr210-pre-final-pr209-cutover-hygiene-20260824-162615"
     );
   });
 
@@ -201,7 +204,12 @@ describe("current release-authority documentation", () => {
   it("binds the go-live and rollback runbooks to the atomic PR #209 candidate", () => {
     expect(goLiveRunbook).toContain("For PR #209, add only the dedicated");
     expect(goLiveRunbook).toMatch(/`#209` is the sole next atomic application candidate/);
+    expect(goLiveRunbook).toContain("phase9:durable-rate-limit:readiness");
     expect(rollbackPlan).toContain("PR #209 has no migration. Before release");
+    expect(rollbackPlan).toContain("phase9:durable-rate-limit:readiness");
+    expect(durableRateLimitRehearsal).toContain(productionGate);
+    expect(durableRateLimitRehearsal).toContain(productionDeployment);
+    expect(durableRateLimitRehearsal).toMatch(/writes nothing/i);
   });
 
   it("preserves incremental PRs as evidence without independent authority", () => {

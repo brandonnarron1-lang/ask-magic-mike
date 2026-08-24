@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-24 — PR #210 refresh onto final PR #209 cutover hygiene
+
+- Preserved former PR #210 head `7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9`
+  at `rescue/amm-pr210-pre-final-pr209-cutover-hygiene-20260824-162615`.
+- Merged exact final PR #209 head
+  `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b`, retaining its read-only cutover
+  guard and fail-closed Preview browser telemetry interception.
+- Resolved the sole additive release-authority test conflict while preserving
+  PR #210's redirect/monitor contracts and both candidates' evidence ledgers.
+- Invalidated older PR #210 checks pending fresh exact-head Node 24 and
+  protected no-write Preview proof.
+- Changed no Production deployment, environment, database row, lead, event,
+  message, WordPress surface, DNS, spend, deletion, or NellySelly system.
+
 ## 2026-08-24 — PR #210 refresh onto release-ledger-sealed PR #209
 
 - Preserved the former PR #210 head at remote rescue branch

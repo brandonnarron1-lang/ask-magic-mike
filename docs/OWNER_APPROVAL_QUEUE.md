@@ -106,9 +106,9 @@ gate and must not be merged out of order:
    consolidates `/value` and `/we-buy-houses` onto the canonical conversion
    routes with permanent, query-preserving redirects and a matching Production
    monitor contract. It is synchronized with exact PR #209 candidate
-   `1d1d8d4f8e0970f3f6a1b80ab9ff2bebcd40216d`; the immediately prior PR #210
+   `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b`; the immediately prior PR #210
    head is preserved at
-   `rescue/amm-pr210-pre-release-ledger-integrity-sync-20260824-0617`.
+   `rescue/amm-pr210-pre-final-pr209-cutover-hygiene-20260824-162615`.
    Fresh exact-head proof remains mandatory. After PR #209 is released, retarget
    or refresh #210 onto the exact new `main`, repeat proof, then require
    `APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`.
