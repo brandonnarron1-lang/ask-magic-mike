@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-08-23 — Canonical campaign-alias consolidation candidate
+
+- Reused the existing Phase 9.5 metadata, sitemap, crawl-policy, and structured-
+  data implementation; no parallel SEO/content system was created.
+- Added permanent `/value` → `/home-value` and `/we-buy-houses` → `/sell`
+  redirects through the canonical Next.js configuration.
+- Proved the redirects preserve UTM parameters and click IDs exactly, retaining
+  first/last-touch attribution for historical WordPress, QR, social, and email
+  links.
+- Changed the remaining active public internal `/value` link to point directly
+  at `/home-value`.
+- Deliberately omitted deprecated FAQ rich-result markup, unsupported AI-search
+  files, generated location pages, and unverified business claims.
+- No Production deployment, database change/write, lead, message, WordPress
+  edit, DNS change, spend, or NellySelly action occurred.
+
 ## 2026-08-23 — Atomic release-authority reconciliation
 
 - Reconciled the operating source-of-truth documents to the accepted PR #195
