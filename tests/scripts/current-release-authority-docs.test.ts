@@ -14,6 +14,9 @@ const knownBlockers = readDoc("KNOWN_BLOCKERS.md");
 const knownLimitations = readDoc("KNOWN_LIMITATIONS.md");
 const goLiveRunbook = readDoc("GO_LIVE_RUNBOOK.md");
 const rollbackPlan = readDoc("ROLLBACK_PLAN.md");
+const durableRateLimitRehearsal = readDoc(
+  "phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md"
+);
 
 const operatingDocs = [
   currentState,
@@ -159,7 +162,12 @@ describe("current release-authority documentation", () => {
   it("binds the go-live and rollback runbooks to the atomic PR #209 candidate", () => {
     expect(goLiveRunbook).toContain("For PR #209, add only the dedicated");
     expect(goLiveRunbook).toMatch(/`#209` is the sole next atomic application candidate/);
+    expect(goLiveRunbook).toContain("phase9:durable-rate-limit:readiness");
     expect(rollbackPlan).toContain("PR #209 has no migration. Before release");
+    expect(rollbackPlan).toContain("phase9:durable-rate-limit:readiness");
+    expect(durableRateLimitRehearsal).toContain(productionGate);
+    expect(durableRateLimitRehearsal).toContain(productionDeployment);
+    expect(durableRateLimitRehearsal).toMatch(/writes nothing/i);
   });
 
   it("preserves incremental PRs as evidence without independent authority", () => {
