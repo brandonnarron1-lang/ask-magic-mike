@@ -100,7 +100,9 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
   test("happy path: intent → questions → contact → success (intercepted)", async ({
     page,
   }) => {
-    const capture = await installNoWriteInterception(page);
+    const capture = await installNoWriteInterception(page, {
+      simulatePublicBrowser: true,
+    });
 
     await page.goto("/widget-preview");
     await expect(page.getByRole("heading", { name: /Wilson real estate/i })).toBeVisible();
@@ -140,6 +142,7 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
   test("error path: intercepted 500 surfaces widget-error", async ({ page }) => {
     const capture = await installNoWriteInterception(page, {
       leadFailure: { status: 500, error: "intercepted_failure" },
+      simulatePublicBrowser: true,
     });
 
     await page.goto("/widget-preview");
@@ -160,7 +163,9 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
 
 test.describe("Public keyboard access (DB-mutation-free)", () => {
   test("skip link transfers focus to the shared main-content target", async ({ page }) => {
-    const capture = await installNoWriteInterception(page);
+    const capture = await installNoWriteInterception(page, {
+      simulatePublicBrowser: true,
+    });
 
     await page.goto("/ask");
     await page.keyboard.press("Tab");

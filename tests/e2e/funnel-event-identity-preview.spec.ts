@@ -94,7 +94,9 @@ for (const viewport of viewports) {
     page.on("console", (message) => {
       if (message.type() === "error") consoleErrors.push(message.text());
     });
-    const capture = await installNoWriteInterception(page);
+    const capture = await installNoWriteInterception(page, {
+      simulatePublicBrowser: true,
+    });
 
     // Home Value
     let eventStart = capture.events.length;
@@ -194,6 +196,7 @@ for (const viewport of viewports) {
 test("intercepted durable failure is recoverable, linked, private, and non-converting", async ({ page }) => {
   const capture = await installNoWriteInterception(page, {
     leadFailure: { status: 503, error: "temporarily_unavailable" },
+    simulatePublicBrowser: true,
   });
   await page.goto("/home-value?utm_source=internal_qa&utm_medium=qa&utm_campaign=funnel_identity_failure");
   await page.getByLabel("Property address").fill("789 INTERNAL QA Road, Wilson, NC");

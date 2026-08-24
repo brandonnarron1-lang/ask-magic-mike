@@ -110,9 +110,31 @@ The current read-only live cross-domain preflight repeated the documented HOLD
 with the four blocker codes listed above, tag-inert Ask server HTML, and no
 NellySelly identity collision.
 
-Protected Preview browser evidence remains pending until this resolved tree is
-committed and deployed as an immutable non-Production Preview. It must run only
-against that exact rehearsal head and retain the shared no-write safeguards.
+Replacement protected Preview browser evidence remains pending until the
+harness repair is committed and deployed as an immutable non-Production
+Preview. It must run only against that exact rehearsal head and retain the
+shared no-write safeguards.
+
+### Superseded first exact-Preview attempt
+
+Merge commit `c3103bb6746bbeab3d23133b73f889ffe633787c` passed GitHub Release
+Gate run `32767472474` and deployed READY as Preview
+`dpl_4x8iAdJKqBNxEqQndHuRFYvgHeRP`. Protected run `32767829945` passed the
+read-only HTTP gate and its genuine-automation external-analytics isolation
+scenario, then failed six public-behavior scenarios because PR #212's client
+automation suppression correctly emitted no `/api/events` requests for the
+older interceptor-based identity assertions.
+
+The mismatch did not expose a runtime write: the shared route handler remained
+fail-closed, the browser suite reported zero captured event requests rather
+than an escaped request, and the dedicated isolation scenario observed no
+application mutation or Google runtime.
+
+The replacement harness keeps runtime automation suppression intact. Public
+funnel scenarios now opt into an ordinary-browser simulation only after the
+shared POST/PUT/PATCH/DELETE interceptor is active; the dedicated automation
+scenario remains unmodified. Exact-head GitHub, immutable Preview, and
+protected no-write reruns are mandatory before this repair is accepted.
 
 ## Rollback and authority
 

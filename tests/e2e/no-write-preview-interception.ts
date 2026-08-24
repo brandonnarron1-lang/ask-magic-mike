@@ -18,9 +18,18 @@ type LeadFailure = {
 
 type NoWriteOptions = {
   leadFailure?: LeadFailure;
+  /**
+   * Exercise ordinary public-browser analytics behavior while every mutating
+   * request is already blocked by this helper. Leave false when the scenario
+   * is specifically proving automated-browser suppression.
+   */
+  simulatePublicBrowser?: boolean;
 };
 
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+const PUBLIC_BROWSER_USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) " +
+  "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36";
 
 function jsonBody(request: { postDataJSON(): unknown }): JsonRecord {
   try {
@@ -49,14 +58,6 @@ export async function installNoWriteInterception(
     experiments: [],
     unexpectedMutations: [],
   };
-
-  await page.addInitScript(() => {
-    const state = window as Window & { __ammBrowserEvents?: unknown[] };
-    state.__ammBrowserEvents = [];
-    window.addEventListener("askmagicmike:event", (event) => {
-      state.__ammBrowserEvents?.push((event as CustomEvent).detail);
-    });
-  });
 
   await page.route("**/api/**", async (route) => {
     const request = route.request();
@@ -151,6 +152,35 @@ export async function installNoWriteInterception(
       body: JSON.stringify({ ok: false, error: "unexpected_preview_write_blocked" }),
     });
   });
+
+  // Install the public-browser simulation only after the fail-closed route is
+  // active. This lets the suite inspect the requests a real visitor would
+  // issue without weakening application automation exclusion or allowing a
+  // request to escape to Preview. The init script applies to child frames too.
+  await page.addInitScript(
+    ({ simulatePublicBrowser, userAgent }) => {
+      if (simulatePublicBrowser) {
+        Object.defineProperty(navigator, "webdriver", {
+          configurable: true,
+          get: () => false,
+        });
+        Object.defineProperty(navigator, "userAgent", {
+          configurable: true,
+          get: () => userAgent,
+        });
+      }
+
+      const state = window as Window & { __ammBrowserEvents?: unknown[] };
+      state.__ammBrowserEvents = [];
+      window.addEventListener("askmagicmike:event", (event) => {
+        state.__ammBrowserEvents?.push((event as CustomEvent).detail);
+      });
+    },
+    {
+      simulatePublicBrowser: options.simulatePublicBrowser === true,
+      userAgent: PUBLIC_BROWSER_USER_AGENT,
+    },
+  );
 
   return capture;
 }
