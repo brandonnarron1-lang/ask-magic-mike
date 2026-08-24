@@ -62,10 +62,14 @@ provider action, or deletion.
 - The latest branch-only security review also bounds the emergency memory
   limiter and isolates fallback counters by route. The pre-hardening head is
   preserved at
-  `rescue/amm-pr209-pre-memory-fallback-hardening-20260824-0333`. The final
-  worktree tree passes the full Node 24 gate; exact-head Preview and protected
-  no-write evidence must still pass after commit/push before the gate is
-  requestable.
+  `rescue/amm-pr209-pre-memory-fallback-hardening-20260824-0333`. Treat the
+  current GitHub PR head—not a commit literal embedded in this mutable file—as
+  the release candidate. Immediately before using the gate, require that head
+  to remain Draft, cleanly mergeable against the recorded Production base, and
+  green in the full Node 24 release gate, exact Vercel Preview, protected
+  no-write acceptance, Widget E2E, dependency audit, secret scan, and current
+  Production preflight. If the head moves, every prior exact-head seal becomes
+  historical evidence and the complete proof must be repeated.
 - The exact pre-reconciliation application/security head
   `b4e76f795d74d6a7c0947b16150cdb9c6c63e23a` passed 228 files / 3,054 tests,
   strict typecheck, ESLint, optimized build, 83-route proof, 14/14 safety,
