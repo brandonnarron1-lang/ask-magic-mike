@@ -2,6 +2,7 @@
 
 import { analyticsEvents } from "./constants";
 import { getDeviceCategory } from "./attribution";
+import { isBrowserAutomation } from "./browserAutomation";
 import type { Attribution } from "./leadPayload";
 import { allowedWidgetParentOrigin } from "./publicOrigin";
 import {
@@ -9,6 +10,7 @@ import {
   safePublicAnalyticsProperties,
   safeRegisteredPublicAnalyticsDimension,
 } from "@/lib/analytics/privacy";
+import { publishExternalAnalyticsEvent } from "./externalAnalytics";
 
 export type EventName = (typeof analyticsEvents)[number];
 
@@ -53,21 +55,18 @@ export function trackEvent(
 
   window.dispatchEvent(new CustomEvent("askmagicmike:event", { detail: payload }));
 
-  const maybeWindow = window as Window & {
-    dataLayer?: unknown[];
-    posthog?: { capture?: (name: string, props: Record<string, unknown>) => void };
-    parent?: Window;
-  };
+  publishExternalAnalyticsEvent(event, safeProperties);
 
-  maybeWindow.dataLayer?.push(payload);
-  maybeWindow.posthog?.capture?.(event, payload.properties);
+  const maybeWindow = window as Window & { parent?: Window };
 
   // The browser event remains useful for GA/GTM/PostHog, while this small
   // server ledger gives the lead pipe an auditable event without sending PII.
   // A valid form/session UUID lets the server join funnel steps to the lead it
   // later stores. Invalid or absent identifiers fail closed to an unlinked
-  // event rather than becoming an arbitrary analytics dimension.
-  if (!isCanonicalLedgerProtectedEvent(event)) {
+  // event rather than becoming an arbitrary analytics dimension. Automated
+  // browser verification may exercise the UI but must not create first-party
+  // ledger rows.
+  if (!isCanonicalLedgerProtectedEvent(event) && !isBrowserAutomation()) {
     const sessionId = options.sessionId && UUID_PATTERN.test(options.sessionId)
       ? options.sessionId
       : undefined;

@@ -295,6 +295,43 @@
 - No Production secret, deployment, migration, lead/event write, notification,
   email, SMS, Push, WordPress edit, publication, DNS, spend, deletion, or
   NellySelly action occurred.
+## 2026-08-24 — Consent-gated cross-domain measurement candidate
+
+- Reused the GTM container publicly verified on Our Town Properties and kept
+  the canonical Neon event ledger authoritative; no second analytics or
+  identity system was added.
+- Added exact Production/container isolation, basic analytics consent, fixed
+  denial of advertising purposes, Preview/private/embed/internal-QA exclusion,
+  sanitized flat GTM events, accessible preferences, and updated privacy copy.
+- Added focused runtime, component, privacy, and NellySelly-isolation tests plus
+  an authenticated activation and rollback runbook.
+- Hardened protected Preview QA to fail if any consent surface, approved GTM
+  marker, Google measurement request, analytics data layer, or application
+  write appears; browser interception prevents the write/request from leaving
+  the runner even when the assertion fails.
+- Isolated local Playwright on a dedicated loopback port with server reuse
+  disabled after detecting an unrelated application on port 3000.
+- Refined protected browser write evidence to the exact application origin
+  after an intercepted Vercel platform validation POST exposed an overbroad
+  assertion; all mutating requests remain blocked at the runner boundary.
+- Added a dedicated data layer and dual client/API automation exclusion after a
+  browser-routing error exposed the prior KPI-trust gap. One confirmed live
+  page-view row and one exposure attempt are disclosed; no lead or message was
+  created and no Production cleanup was attempted.
+- Added independent GTM-boundary revalidation of consent, container identity,
+  registered event names, property privacy, and `is_test` exclusion.
+- Added a public, read-only activation preflight and recorded the current
+  brokerage consent-order blocker: GTM and its Google tag initialize before the
+  deferred cookie-choice provider, so cross-domain activation remains `HOLD`.
+- Extended the existing canonical WordPress bridge to a release-packaged 1.2.0
+  candidate with an independently disabled Basic Consent loader pinned to the
+  audited container. The loader treats only the provider's exact `allow` value
+  as consent and adds no legacy noscript bypass.
+- Updated the public preflight to require the canonical gate before the cookie
+  provider and reject legacy GTM bootstrap/noscript coexistence. Preserved the
+  prior bridge packages for rollback; no live WordPress change occurred.
+- No external analytics tag, Google/Vercel setting, Production deployment,
+  provider, WordPress, publication, spend, or NellySelly action was performed.
 
 ## 2026-08-22 — Conversion identity and public-navigation polish candidate
 

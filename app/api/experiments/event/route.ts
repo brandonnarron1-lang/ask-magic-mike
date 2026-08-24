@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkRateLimit, LIMITS, rateLimitKey } from "../../../../src/lib/security/rate-limit";
+import { isAutomatedBrowserUserAgent } from "../../../lib/browserAutomation";
 import { isApprovedPublicOrigin } from "../../../lib/publicOrigin";
 import { recordPublicExperimentEvent } from "../../../lib/persistence/neonPublicExperimentRepository";
 
@@ -17,7 +18,13 @@ const NO_STORE_HEADERS = {
 } as const;
 
 function experimentResponse(
-  body: { active: boolean; recorded: boolean; correlation_id: string; variant_key?: string | null },
+  body: {
+    active: boolean;
+    recorded: boolean;
+    correlation_id: string;
+    variant_key?: string | null;
+    excluded?: "automation";
+  },
   status: number,
 ) {
   return NextResponse.json(body, { status, headers: NO_STORE_HEADERS });
@@ -29,6 +36,17 @@ export async function POST(request: Request) {
     return experimentResponse(
       { active: false, recorded: false, correlation_id: correlationId },
       403,
+    );
+  }
+  if (isAutomatedBrowserUserAgent(request.headers.get("user-agent"))) {
+    return experimentResponse(
+      {
+        active: false,
+        recorded: false,
+        excluded: "automation",
+        correlation_id: correlationId,
+      },
+      202,
     );
   }
   const limit = await checkRateLimit(

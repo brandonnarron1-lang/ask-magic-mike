@@ -232,6 +232,38 @@
   documents required reconciliation. No migration, Production action, lead,
   message, WordPress edit, publication, spend, DNS change, deletion, or
   NellySelly action occurred.
+## 2026-08-24 — Cross-domain measurement candidate
+
+- Added a fail-closed, consent-gated loader for the existing Our Town GTM
+  container without adding another analytics store.
+- Kept advertising consent denied and excluded Preview, private, embedded,
+  automated, internal-QA, and noncanonical-host traffic.
+- Added an accessible analytics choice, footer preferences, privacy disclosure,
+  sanitized GTM event contract, tests, activation proof, and rollback guidance.
+- Added protected-Preview HTML and real-browser release assertions proving the
+  analytics runtime remains absent and all mutating application requests remain
+  intercepted.
+- Prevented local E2E from silently reusing an unrelated application server.
+- Kept all browser mutations intercepted while distinguishing the canonical
+  application origin from Vercel protection-platform validation traffic.
+- Added dedicated data-layer isolation plus client/API automation exclusion so
+  browser verification cannot enter first-party KPI ledgers.
+- Revalidated consent, approved container identity, event registration,
+  property privacy, and test exclusion at the final GTM publication boundary.
+- Added a read-only cross-domain activation preflight. Current public evidence
+  correctly returns `HOLD` because the brokerage Google tag initializes before
+  its deferred cookie-choice provider.
+- Extended the existing canonical WordPress bridge to a release-packaged 1.2.0
+  candidate with a separate, default-off Basic Consent loader. It accepts only
+  the existing provider's exact `allow` state, pins the audited GTM container,
+  and fails closed without a Google request or data layer for all other states.
+- Hardened the preflight to reject legacy GTM head/noscript coexistence and
+  preserved the 1.1.0/1.0.0 rollback packages. No live WordPress change was
+  made.
+- No Production configuration, deployment, lead, communication, provider,
+  WordPress, publication, or NellySelly mutation was performed. One confirmed
+  live page-view row and one exposure attempt from an initial browser-routing
+  error are disclosed in the QA evidence; no Production cleanup was attempted.
 
 ## 2026-08-22 — Conversion identity polish
 

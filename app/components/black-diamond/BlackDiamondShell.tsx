@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AnalyticsPreferencesButton } from "../analytics/ExternalAnalyticsConsent";
 import { AskMikeChatPanel } from "./AskMikeChatPanel";
 import { HeroSection } from "./HeroSection";
 import { HomeValueFunnel } from "./HomeValueFunnel";
@@ -128,6 +129,7 @@ export function Footer() {
           <Link href="/plan" className="text-[#e2c06f] hover:text-[#f4ead4]">Review Planner</Link>
           <Link href="/contact" className="text-[#e2c06f] hover:text-[#f4ead4]">Contact</Link>
           <Link href="/privacy" className="text-[#e2c06f] hover:text-[#f4ead4]">Privacy</Link>
+          <AnalyticsPreferencesButton />
           <Link href="/terms" className="text-[#e2c06f] hover:text-[#f4ead4]">Terms</Link>
           <Link href="/accessibility" className="text-[#e2c06f] hover:text-[#f4ead4]">Accessibility</Link>
         </nav>
