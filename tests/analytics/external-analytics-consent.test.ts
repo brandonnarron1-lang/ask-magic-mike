@@ -205,6 +205,40 @@ describe("basic-consent external analytics runtime", () => {
     })).toBe(false);
   });
 
+  it("revalidates consent, event registration, privacy, and test exclusion at the GTM boundary", () => {
+    writeExternalAnalyticsConsent("granted");
+    loadExternalAnalytics(OUR_TOWN_GTM_CONTAINER_ID);
+    const analyticsWindow = window as TestAnalyticsWindow;
+    const before = analyticsWindow.ammDataLayer?.length ?? 0;
+
+    expect(publishExternalAnalyticsEvent("unregistered_event", {
+      funnel_name: "seller",
+    })).toBe(false);
+    expect(publishExternalAnalyticsEvent("page_view", {
+      funnel_name: "seller",
+      is_test: true,
+    })).toBe(false);
+    expect(analyticsWindow.ammDataLayer).toHaveLength(before);
+
+    expect(publishExternalAnalyticsEvent("page_view", {
+      funnel_name: "seller",
+      arbitrary_contact_field: "person@example.com",
+      is_test: false,
+    })).toBe(true);
+    expect(analyticsWindow.ammDataLayer?.slice(before)).toEqual([{
+      funnel_name: "seller",
+      event_source: "ask_magic_mike",
+      event_schema_version: "amm_public_v1",
+      traffic_class: "public_production",
+      event: "page_view",
+    }]);
+
+    window.localStorage.setItem(EXTERNAL_ANALYTICS_CONSENT_STORAGE_KEY, "denied");
+    expect(publishExternalAnalyticsEvent("page_view", {
+      funnel_name: "seller",
+    })).toBe(false);
+  });
+
   it("remembers QA classification for the session and refuses a later untagged page", () => {
     setPage("/home-value?utm_source=internal_qa&utm_medium=qa");
     expect(isExternalAnalyticsEligibleBrowser()).toBe(false);

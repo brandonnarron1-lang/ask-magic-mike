@@ -1,6 +1,10 @@
 "use client";
 
-import { safeAnalyticsPath } from "@/lib/analytics/privacy";
+import {
+  isApprovedPublicAnalyticsEvent,
+  safeAnalyticsPath,
+  safePublicAnalyticsProperties,
+} from "@/lib/analytics/privacy";
 import { isBrowserAutomation } from "./browserAutomation";
 import { isApprovedOurTownGtmContainerId } from "./googleTagConfig";
 
@@ -305,10 +309,23 @@ export function publishExternalAnalyticsEvent(
   if (typeof window === "undefined") return false;
   const analyticsWindow = window as ExternalAnalyticsWindow;
   if (!analyticsWindow.__ammExternalAnalyticsActive) return false;
+  if (readExternalAnalyticsConsent() !== "granted") return false;
+  if (!isApprovedOurTownGtmContainerId(
+    analyticsWindow.__ammExternalAnalyticsContainerId,
+  )) return false;
   if (!isExternalAnalyticsEligibleBrowser()) return false;
+  if (!isApprovedPublicAnalyticsEvent(event)) return false;
+
+  // Treat the GTM boundary as an independent privacy boundary. Callers already
+  // sanitize public events, but a future direct caller must not be able to add
+  // a contact field, unregistered dimension, or test event to the browser tag.
+  const safeProperties = safePublicAnalyticsProperties(event, properties);
+  if (safeProperties.is_test === true) return false;
+  delete safeProperties.is_test;
+
   analyticsWindow.ammDataLayer ??= [];
   const payload = {
-    ...properties,
+    ...safeProperties,
     event_source: "ask_magic_mike",
     event_schema_version: EXTERNAL_ANALYTICS_SCHEMA_VERSION,
     traffic_class: "public_production",

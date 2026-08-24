@@ -16,6 +16,11 @@
   application origin from Vercel protection-platform validation traffic.
 - Added dedicated data-layer isolation plus client/API automation exclusion so
   browser verification cannot enter first-party KPI ledgers.
+- Revalidated consent, approved container identity, event registration,
+  property privacy, and test exclusion at the final GTM publication boundary.
+- Added a read-only cross-domain activation preflight. Current public evidence
+  correctly returns `HOLD` because the brokerage Google tag initializes before
+  its deferred cookie-choice provider.
 - No Production configuration, deployment, lead, communication, provider,
   WordPress, publication, or NellySelly mutation was performed. One confirmed
   live page-view row and one exposure attempt from an initial browser-routing

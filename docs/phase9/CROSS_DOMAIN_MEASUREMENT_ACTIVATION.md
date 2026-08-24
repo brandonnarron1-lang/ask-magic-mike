@@ -1,6 +1,6 @@
 # Phase 9 Cross-Domain Measurement Activation
 
-Status: **code candidate; inert until an exact Production gate**
+Status: **code candidate; activation HOLD pending brokerage consent sequencing**
 
 Date: 2026-08-24
 
@@ -23,6 +23,17 @@ Read-only public checks on 2026-08-24 found:
   container.
 - `https://www.askmagicmike.com/` and `/ask` returned HTTP 200 but loaded no
   GTM, direct Google tag, Meta Pixel, or Vercel Web Analytics script.
+- Authenticated browser inspection found a visible Our Town **Cookie Policy**
+  choice with **Decline** and **Allow cookies**. Server HTML nevertheless starts
+  `GTM-KZMCSLTJ` synchronously before the deferred cookie-choice provider. The
+  public container payload exposes one Google tag (`G-RQRBB1G270`) firing on
+  `gtm.init`, and no earlier default-denied consent command was detectable in
+  the page source. This is an activation blocker, not proof of consent-safe
+  cross-domain measurement.
+- The existing Our Town homepage CTA points to the canonical Ask Magic Mike
+  hostname with registered source/medium/campaign values. Its `/value`
+  compatibility path remains functional and is covered by the separately
+  sequenced canonical-alias candidate.
 - The public Our Town container payload references one GA4 destination and
   Google consent/linker capabilities. That public payload does not prove the
   GA4 Admin domain list, internal-traffic rules, consent overview, or published
@@ -52,7 +63,10 @@ The candidate adds one production-only loader with these boundaries:
 6. Decline stores only a device-local choice. Revocation sends a denied update,
    stops application event publication, removes the loader, and clears known
    Ask Magic Mike analytics cookies.
-7. The existing browser event sanitizer remains authoritative. GTM receives a
+7. The existing browser event sanitizer remains authoritative. The external
+   publication boundary independently rechecks consent, the approved container,
+   the public event registry, the property allowlist, and `is_test` exclusion.
+   GTM receives a
    dedicated `ammDataLayer` containing flat event objects with only allowlisted
    dimensions plus fixed
    `event_source`, schema version, and `public_production` traffic class. Raw
@@ -72,38 +86,61 @@ linking decorates navigation with `_gl` after consent:
 that basic consent mode blocks tags and sends no data before a choice:
 <https://developers.google.com/tag-platform/security/concepts/consent-mode>.
 
+## Activation preflight
+
+Run the read-only public contract before opening any configuration gate:
+
+```bash
+pnpm run amm:verify:cross-domain
+```
+
+The command checks the public brokerage bootstrap, approved container identity,
+Google destination identity, Ask Magic Mike server-side tag inertia, consent
+ordering, and NellySelly isolation. It intentionally returns `HOLD` while the
+current brokerage consent ordering remains unresolved. A passing static check
+is necessary but not sufficient; authenticated GTM/GA4 and clean-browser
+network proof are still required.
+
 ## Authenticated activation checklist
 
 This checklist is intentionally separate from code review:
 
-1. In the existing Google Tag / GA4 property, verify the destination belongs to
-   Our Town Properties and not NellySelly.
-2. Verify both `ourtownproperties.com` and `askmagicmike.com` are included in
+1. Repair or explicitly approve the Our Town consent sequence. For the stated
+   basic-consent contract, no Google tag or measurement request may initialize
+   before the visitor grants analytics. Do not merely hide the banner or assume
+   the visible cookie choice controls the earlier GTM bootstrap.
+2. In authenticated GTM Preview/Consent Overview, prove the Google tag does not
+   fire before the approved choice and that Decline keeps analytics and all
+   advertising purposes denied.
+3. In the existing Google Tag / GA4 property, verify destination
+   `G-RQRBB1G270` belongs to Our Town Properties and not NellySelly.
+4. Verify both `ourtownproperties.com` and `askmagicmike.com` are included in
    **Configure your domains** for the same web stream.
-3. Review GTM Consent Overview and every published tag. Reject any tag that can
+5. Review every published tag. Reject any tag that can
    send user-provided data, lead fields, enhanced-conversion contact data, or
    advertising data outside the approved consent contract.
-4. Review the live OurTownProperties.com consent surface with the owner/legal
-   reviewer. A consent control was not detectable in the server-rendered public
-   HTML audit. Do not activate cross-domain cookie identity until both domains'
-   consent behavior is approved and coherent.
-5. Confirm GA4 internal/developer traffic handling excludes controlled QA and
+6. Review the live OurTownProperties.com and AskMagicMike.com consent surfaces
+   with the owner/legal reviewer. Do not activate cross-domain cookie identity
+   until both domains' consent behavior is approved and coherent.
+7. Confirm GA4 internal/developer traffic handling excludes controlled QA and
    staff verification without filtering genuine public demand.
-6. Add `NEXT_PUBLIC_GTM_CONTAINER_ID` to **Production only** in the canonical
+8. Rerun `pnpm run amm:verify:cross-domain` and require `REVIEW_READY` before
+   entering a Vercel value.
+9. Add `NEXT_PUBLIC_GTM_CONTAINER_ID` to **Production only** in the canonical
    Vercel project. Do not add it to Preview.
-7. Merge the exact green candidate and allow Vercel Git integration to build
+10. Merge the exact green candidate and allow Vercel Git integration to build
    the same commit for Production.
-8. In a clean browser, prove Decline creates no Google request and no `_ga*`
+11. In a clean browser, prove Decline creates no Google request and no `_ga*`
    cookie. Then separately choose Allow and prove the approved container loads.
-9. Navigate through an existing tagged Our Town link to Ask Magic Mike. Verify
+12. Navigate through an existing tagged Our Town link to Ask Magic Mike. Verify
    `_gl` is present, both pages use the same GA4 destination/client identity,
    the destination returns 200, and UTMs remain intact.
-10. Verify one sanitized `page_view` and one non-contact funnel event in Tag
+13. Verify one sanitized `page_view` and one non-contact funnel event in Tag
    Assistant/GA4 DebugView. Do not submit a lead and do not use a genuine
    consumer identity for this measurement acceptance.
-11. Recheck Production runtime errors and the canonical Neon event ledger.
-12. Run a no-write browser verifier and confirm automation creates no
-    first-party event/experiment POST and no external Google request.
+14. Recheck Production runtime errors and the canonical Neon event ledger.
+15. Run a no-write browser verifier and confirm automation creates no
+   first-party event/experiment POST and no external Google request.
 
 ## Rollback
 
@@ -117,7 +154,9 @@ the release gate.
 ## Exact Production gate
 
 No Google account setting, Vercel environment value, merge, or Production
-deployment is authorized by preparing this candidate. After exact-head CI and
-Preview proof pass, the required phrase is:
+deployment is authorized by preparing this candidate. The phrase below is not
+requestable while the public preflight returns `HOLD`. After the consent-order
+blocker, authenticated review, exact-head CI, and Preview proof all pass, the
+required phrase is:
 
 `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`

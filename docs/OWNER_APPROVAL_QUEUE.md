@@ -11,13 +11,16 @@ queue covers only actions that still require a human or external-system gate.
   container and canonical Neon ledger with explicit basic consent, advertising
   consent denied, private/Preview/QA exclusion, and exact container isolation.
 - No Google, Vercel environment, merge, or Production deployment setting has
-  changed. Full local gates and Production-simulated desktop/mobile QA pass;
-  exact Node 24 CI and immutable no-write Preview remain before its gate is
-  requestable.
+  changed. Exact Node 24 CI, immutable no-write Preview, and desktop/mobile
+  Ask-side consent QA pass.
+- A follow-up live audit found the brokerage page starts GTM and its Google tag
+  before the deferred cookie-choice provider. The read-only cross-domain
+  preflight therefore returns `HOLD`. The gate is not requestable until that
+  ordering and authenticated GTM/GA4 domain/consent configuration pass.
 - One live page-view row and one experiment-exposure attempt from the initial
   browser-routing error are disclosed in the QA evidence. No lead or message
   was created. Cleanup is not included in this candidate's release phrase.
-- Its only configuration/release phrase is:
+- After the hold clears, its only configuration/release phrase is:
   `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
 - That phrase will not authorize a lead submission, email/SMS/Push, WordPress
   edit, marketing publication, spend, DNS change, database mutation, deletion,

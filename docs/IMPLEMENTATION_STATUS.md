@@ -17,6 +17,15 @@ Updated 2026-08-24.
   Analytics may be granted; advertising storage/user data/personalization stay
   denied. Decline/revocation and an accessible footer preference control are
   implemented, with corresponding privacy copy.
+- The external publication boundary now independently rechecks current consent,
+  exact container identity, registered public event names, property privacy,
+  and `is_test` exclusion instead of trusting future callers to sanitize.
+- Follow-up authenticated browser/public-container inspection found the Our Town
+  page starts GTM synchronously and its Google tag fires on `gtm.init` before
+  the deferred cookie-choice provider. The new read-only
+  `amm:verify:cross-domain` preflight therefore reports `HOLD`; no Production
+  measurement activation is eligible until brokerage consent sequencing and
+  authenticated GTM/GA4 review pass.
 - KPI trust now excludes HeadlessChrome/Playwright/Puppeteer on both the client
   and the public analytics/experiment APIs. A disclosed first browser-routing
   error emitted one confirmed live page-view row and one exposure attempt; no

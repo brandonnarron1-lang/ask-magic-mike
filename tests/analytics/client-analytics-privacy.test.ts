@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { trackEvent } from "../../app/lib/analytics";
 import { analyticsEvents } from "../../app/lib/constants";
 import { recordExperimentEvent } from "../../app/lib/growth/public-experiment-client";
+import { EXTERNAL_ANALYTICS_CONSENT_STORAGE_KEY } from "../../app/lib/externalAnalytics";
+import { OUR_TOWN_GTM_CONTAINER_ID } from "../../app/lib/googleTagConfig";
 import {
   isApprovedPublicAnalyticsEvent,
   safePublicAnalyticsProperties,
@@ -11,7 +13,23 @@ import {
 type TestAnalyticsWindow = Window & {
   ammDataLayer?: unknown[];
   __ammExternalAnalyticsActive?: boolean;
+  __ammExternalAnalyticsContainerId?: string;
 };
+
+function installLocalStorage() {
+  const values = new Map<string, string>();
+  Object.defineProperty(window, "localStorage", {
+    configurable: true,
+    value: {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => values.set(key, value),
+      removeItem: (key: string) => values.delete(key),
+      clear: () => values.clear(),
+      key: (index: number) => [...values.keys()][index] ?? null,
+      get length() { return values.size; },
+    },
+  });
+}
 
 function setCanonicalPage(path = "/") {
   const url = new URL(path, "https://www.askmagicmike.com");
@@ -30,6 +48,8 @@ function setCanonicalPage(path = "/") {
 }
 
 beforeEach(() => {
+  installLocalStorage();
+  window.localStorage.clear();
   setCanonicalPage();
   window.sessionStorage.clear();
   Object.defineProperty(window, "matchMedia", {
@@ -51,6 +71,8 @@ afterEach(() => {
   const browser = window as TestAnalyticsWindow;
   delete browser.ammDataLayer;
   delete browser.__ammExternalAnalyticsActive;
+  delete browser.__ammExternalAnalyticsContainerId;
+  window.localStorage.clear();
   window.sessionStorage.clear();
 });
 
@@ -106,6 +128,11 @@ describe("client analytics privacy boundary", () => {
     const browser = window as TestAnalyticsWindow;
     browser.ammDataLayer = [];
     browser.__ammExternalAnalyticsActive = true;
+    browser.__ammExternalAnalyticsContainerId = OUR_TOWN_GTM_CONTAINER_ID;
+    window.localStorage.setItem(
+      EXTERNAL_ANALYTICS_CONSENT_STORAGE_KEY,
+      "granted",
+    );
 
     trackEvent(
       "page_view",

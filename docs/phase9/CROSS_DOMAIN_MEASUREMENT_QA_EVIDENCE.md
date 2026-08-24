@@ -145,10 +145,41 @@ afterward. The candidate now blocks automation in both clients and APIs; any
 cleanup of the one confirmed telemetry row remains a separate Production-data
 approval decision.
 
+## Follow-up brokerage consent-order audit
+
+Authenticated read-only browser and public-source inspection on 2026-08-24
+found stronger evidence than the earlier server-HTML-only note:
+
+- the rendered Our Town homepage exposes a **Cookie Policy** choice with
+  **Decline** and **Allow cookies**;
+- the server HTML starts `GTM-KZMCSLTJ` synchronously, then references the
+  cookie-choice provider with a deferred script;
+- the public GTM payload contains destination `G-RQRBB1G270`, configured as a
+  Google tag that fires on `gtm.init`;
+- no default-denied consent command preceding the GTM bootstrap was detectable
+  in the public page source;
+- the Ask Magic Mike homepage remains free of a server-side Google bootstrap;
+- the Our Town homepage has one canonical Ask Magic Mike CTA with registered
+  `ourtownproperties` / `homepage_cta` / `website_widget` attribution; and
+- no NellySelly container or domain identity appeared in the inspected public
+  measurement sources.
+
+This evidence makes activation `HOLD` until brokerage consent sequencing and
+authenticated GTM/GA4 configuration are repaired or explicitly approved. The
+new `pnpm run amm:verify:cross-domain` operator preflight encodes the public,
+read-only portion of that boundary and fails closed while the current order
+persists.
+
+The browser page load may have generated an ordinary event in the already-live
+Our Town Google tag because that tag currently initializes before the visible
+choice. No consent button was clicked, form submitted, page edited, account
+setting changed, or Production data cleanup attempted.
+
 ## Explicit non-actions
 
-Except for the two disclosed automatic telemetry attempts above, preparing and
-testing this branch performs no Google/GA4/GTM mutation, Vercel environment
+Except for the two disclosed Ask Magic Mike telemetry attempts and the possible
+existing Our Town page-view described above, preparing and testing this branch
+performs no Google/GA4/GTM mutation, Vercel environment
 change, Production deployment, database migration, lead submission, email/BCC,
 SMS, Push, consumer acknowledgment, WordPress edit, external publication,
 spend, DNS/cache change, deletion, or NellySelly action.

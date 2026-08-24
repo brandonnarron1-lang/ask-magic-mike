@@ -23,6 +23,11 @@
   browser-routing error exposed the prior KPI-trust gap. One confirmed live
   page-view row and one exposure attempt are disclosed; no lead or message was
   created and no Production cleanup was attempted.
+- Added independent GTM-boundary revalidation of consent, container identity,
+  registered event names, property privacy, and `is_test` exclusion.
+- Added a public, read-only activation preflight and recorded the current
+  brokerage consent-order blocker: GTM and its Google tag initialize before the
+  deferred cookie-choice provider, so cross-domain activation remains `HOLD`.
 - No external analytics tag, Google/Vercel setting, Production deployment,
   provider, WordPress, publication, spend, or NellySelly action was performed.
 
