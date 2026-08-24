@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-08-24 — Completed-release ledger integrity
+
+- Reconciled the seven completed Phase 9 application releases against
+  authenticated GitHub head/merge records and Vercel READY Production
+  deployments.
+- Corrected the PR #195 head mismatch and completed the PR #183–#185 authority
+  chains without changing any current release gate.
+- Added executable coverage requiring each completed owner-queue entry to
+  retain its exact PR head, merge commit, and Production deployment ID.
+- No runtime, Production, environment, database, lead, event, notification,
+  WordPress, DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-24 — PR #209 emergency-limiter security hardening
 
 - A Next.js/React security review found that the non-durable fallback retained

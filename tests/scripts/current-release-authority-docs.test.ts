@@ -34,6 +34,50 @@ const productionGate =
   "APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT";
 const previewMutationGate =
   "APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA";
+const completedReleaseLedger = [
+  {
+    pr: 183,
+    head: "95a4f210eed4f8991e96e2eee595da5907112ba9",
+    merge: "b8b31fb20223ad0f0ad311fee1ee3de20d0f7ae9",
+    deployment: "dpl_HwVDyckyCRB1NoaNb1E82xSpr75z",
+  },
+  {
+    pr: 184,
+    head: "ed5da234ee34d06eb121084e01c97d79b08a815e",
+    merge: "f5f82f1bfaadea0ed20da50738ebc1f83e8dab97",
+    deployment: "dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW",
+  },
+  {
+    pr: 185,
+    head: "2877fab35591c7f43c8def2ee920a12654b37a22",
+    merge: "44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8",
+    deployment: "dpl_41AZkLvufuAC92h6QJeqhiyjkBcM",
+  },
+  {
+    pr: 193,
+    head: "21fdb5b3490cdc0517518578878a8db5d1b683a7",
+    merge: "9b82afb609674bb0209b73f8ac9622ab02733e2a",
+    deployment: "dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a",
+  },
+  {
+    pr: 196,
+    head: "c8e19c8e822e585bc4b27c7abc47adf3a88fc8ad",
+    merge: "c08abe1168840b99ccba07866bbec8cf7a6752fb",
+    deployment: "dpl_sew1CoF13dtfJTsvasDJf6vyndj8",
+  },
+  {
+    pr: 194,
+    head: "851ebe530ac6a91a4e410f26538d29c1bf43f1c6",
+    merge: "5a3c5c7f2463ea399c21b616ff249f6c67e156b6",
+    deployment: "dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J",
+  },
+  {
+    pr: 195,
+    head: "db13953fc5f6d24a684f66c9a1c10c6b929b72b3",
+    merge: productionCommit,
+    deployment: productionDeployment,
+  },
+] as const;
 
 describe("current release-authority documentation", () => {
   it("identifies the accepted Production commit and deployment", () => {
@@ -47,6 +91,15 @@ describe("current release-authority documentation", () => {
     ]) {
       expect(doc).toContain(productionCommit);
       expect(doc).toContain(productionDeployment);
+    }
+  });
+
+  it("records each completed release as an exact head, merge, and Production deployment chain", () => {
+    for (const release of completedReleaseLedger) {
+      expect(ownerQueue).toContain(`PR [#${release.pr}]`);
+      expect(ownerQueue).toContain(release.head);
+      expect(ownerQueue).toContain(release.merge);
+      expect(ownerQueue).toContain(release.deployment);
     }
   });
 

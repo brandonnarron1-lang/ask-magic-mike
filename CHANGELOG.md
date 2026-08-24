@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-24 — Completed-release ledger integrity
+
+- Reconciled every completed Phase 9 release in the owner queue against
+  authenticated GitHub PR heads/merge commits and Vercel READY Production
+  deployments.
+- Corrected the recorded PR #195 reviewed head and filled the missing exact
+  head/merge/deployment chains for PRs #183 through #185.
+- Added a regression contract covering all seven completed release chains so
+  historical approval evidence cannot silently drift.
+- Preserved the pre-change PR #209 head at
+  `rescue/amm-pr209-pre-release-ledger-integrity-20260824-0605`. No Production,
+  environment, database, lead, event, message, WordPress, DNS, publication,
+  spend, deletion, or NellySelly action occurred.
+
 ## 2026-08-24 — PR #209 emergency-limiter security hardening
 
 - Preserved the exact reviewed candidate at remote rescue branch
