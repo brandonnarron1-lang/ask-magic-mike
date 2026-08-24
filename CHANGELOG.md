@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-24 — PR #210 stack refresh onto the sealed PR #209 candidate
+
+- Preserved PR #210's pre-refresh head at remote rescue branch
+  `rescue/amm-pr210-pre-pr209-security-sync-20260824-0401`.
+- Merged exact PR #209 candidate
+  `6eb89264d59c8d25a711a1ffa178828343772f75` into the stacked alias branch.
+- Resolved the sole conflict in `docs/CHANGELOG.md` by preserving both release
+  records; the redirect implementation and monitor contract had no overlap with
+  PR #209's limiter hardening.
+- Invalidated the older PR #210 exact-head evidence pending fresh Node 24,
+  Preview, and protected no-write verification.
+- Changed no Production deployment, environment, database row, lead, message,
+  WordPress surface, DNS, spend, deletion, or NellySelly system.
+
 ## 2026-08-24 — PR #209 emergency-limiter security hardening
 
 - Preserved the exact reviewed candidate at remote rescue branch

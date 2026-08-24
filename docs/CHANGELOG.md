@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-08-24 — PR #210 stack refresh onto sealed PR #209
+
+- Preserved the former PR #210 head at
+  `rescue/amm-pr210-pre-pr209-security-sync-20260824-0401`.
+- Synchronized the branch with exact PR #209 candidate
+  `6eb89264d59c8d25a711a1ffa178828343772f75` before any Production action.
+- The only merge conflict was additive release history in this file. Both
+  records were retained; application redirect files did not overlap.
+- Prior PR #210 CI and Preview remain historical evidence only. The refreshed
+  head must repeat the complete exact-head proof before its later gate is
+  requestable.
+
 ## 2026-08-24 — PR #209 emergency-limiter security hardening
 
 - A Next.js/React security review found that the non-durable fallback retained

@@ -2,9 +2,10 @@
 
 Date: 2026-08-23
 
-Status: isolated stacked candidate; no Production change
+Status: stacked candidate refreshed onto sealed PR #209; no Production change
 
-Base: exact PR #209 head `c04655cc04135f89cf9b401a631bc503c8c70057`
+Stack base: exact PR #209 candidate
+`6eb89264d59c8d25a711a1ffa178828343772f75`
 
 ## Decision
 
@@ -43,7 +44,7 @@ Unchanged:
 
 - forms, API contracts, database, scoring, routing, notifications, authentication, analytics storage, WordPress, DNS, Vercel Production settings, NellySelly, and all lead data;
 - existing compatibility page source files, retained for history and simple rollback; and
-- accepted Production commit/deployment and sealed PR #209.
+- accepted Production commit/deployment and sealed PR #209 behavior.
 
 ## Verification contract
 
@@ -68,9 +69,10 @@ Revert this candidate commit and redeploy the prior accepted tree. No database o
 ## Production authority
 
 No Production action is authorized by this document or by any earlier approval.
-This stacked candidate remains separate from the sealed PR #209. PR #209 must
-be merged and accepted first; this branch must then be refreshed onto that
-exact released `main` and repeat exact-head CI and Preview proof.
+This stacked candidate remains separate from sealed PR #209. It is synchronized
+with PR #209's exact reviewed candidate, but PR #209 must still be merged and
+accepted first. PR #210 must then be retargeted/refreshed onto that exact
+released `main` and repeat exact-head CI and Preview proof before release.
 
 Only the following later phrase may authorize the exact reviewed PR #210
 code-only merge and matching Vercel Production deployment:

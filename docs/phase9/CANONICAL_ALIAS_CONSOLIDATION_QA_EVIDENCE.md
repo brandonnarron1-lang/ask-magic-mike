@@ -2,7 +2,8 @@
 
 Date: 2026-08-23 (America/New_York)
 
-Candidate base: `c04655cc04135f89cf9b401a631bc503c8c70057`
+Stack base: exact PR #209 candidate
+`6eb89264d59c8d25a711a1ffa178828343772f75`
 
 Environment: isolated local worktree; no Production mutation
 
@@ -144,11 +145,30 @@ with transient missing generated files. The build completed successfully and a
 serial typecheck immediately passed with no diagnostic. Exact-head CI runs
 these phases in order and remains the authoritative Node 24 result.
 
+## PR #209 security-seal stack refresh — 2026-08-24
+
+- Preserved pre-refresh PR #210 head
+  `c86356b487acfd8bca6b56d35f647bb7851eb2ef` at remote rescue branch
+  `rescue/amm-pr210-pre-pr209-security-sync-20260824-0401`.
+- Merged exact sealed PR #209 candidate
+  `6eb89264d59c8d25a711a1ffa178828343772f75` into the stacked branch.
+- The merge-base audit showed no application-file overlap between PR #209's
+  limiter hardening and PR #210's redirect/monitor implementation. The sole
+  conflict was additive history in `docs/CHANGELOG.md`; both records were
+  retained.
+- The older PR #210 CI, Preview, browser, and runtime proof above remains valid
+  historical evidence for its former head only. It does not authorize the
+  refreshed candidate. Fresh exact-head verification is mandatory.
+- No Production environment, merge, deployment, database/lead/event write,
+  message, WordPress edit, DNS change, publication, spend, deletion, or
+  NellySelly action occurred.
+
 ## Remaining gate
 
-PR #209 must be released first. PR #210 must then be refreshed onto the exact
-new `main` and repeat exact-head verification. Only after that refresh may this
-separate phrase authorize its exact reviewed merge and matching Production
+PR #209 must be released first. PR #210 is synchronized with its exact sealed
+candidate, but must still be retargeted/refreshed onto the accepted new `main`
+and repeat exact-head verification. Only after that post-release refresh may
+this separate phrase authorize its reviewed merge and matching Production
 deployment:
 
 `APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`
