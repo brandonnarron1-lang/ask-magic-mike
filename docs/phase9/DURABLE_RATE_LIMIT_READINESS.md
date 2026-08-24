@@ -16,6 +16,12 @@ HMAC-SHA-256 bucket-key implementation in
 durable limiter dependencies. Vercel Production and owned/self-hosted
 `NODE_ENV=production` runtimes do.
 
+The non-durable fallback is now explicitly resource-bounded: it reclaims
+expired entries, caps active identifiers at 10,000, fails closed for unseen
+identifiers once full, and partitions identifiers by the same typed route key
+used by Neon. This keeps Preview and break-glass behavior available without an
+unbounded process-memory structure or cross-route allowance collisions.
+
 ## Current authenticated evidence
 
 - Canonical Production deployment:

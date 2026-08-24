@@ -27,12 +27,14 @@ export interface RateLimitStore {
 
 interface BucketEntry {
   count: number;
-  windowStart: number;
+  expiresAt: number;
 }
 
 const DURABLE_BUCKET_KEY_VERSION = "v1";
 const DURABLE_BUCKET_RETENTION_MS = 24 * 60 * 60 * 1000;
 const DURABLE_BUCKET_SECRET_MIN_LENGTH = 32;
+const IN_MEMORY_RATE_LIMIT_MAX_BUCKETS = 10_000;
+const IN_MEMORY_RATE_LIMIT_SWEEP_INTERVAL = 256;
 
 type DurableRateLimitSecretEnv = Partial<Record<
   "RATE_LIMIT_HASH_SECRET" | "CONSENT_IP_HASH_SALT" | "CRON_SECRET" | "ADMIN_SECRET",
@@ -117,25 +119,65 @@ export function durableRateLimitBucketKey(
  * - Resets on every cold start
  * - Each serverless instance has independent state
  * - No shared state across horizontal scale-out
+ *
+ * The emergency store is still bounded. Expired buckets are reclaimed and new
+ * identifiers fail closed once the cap is reached, preventing an attacker from
+ * turning unique-IP traffic into unbounded process memory growth.
  */
 export class InMemoryRateLimitStore implements RateLimitStore {
   private readonly store = new Map<string, BucketEntry>();
+  private checksSinceSweep = 0;
+
+  constructor(private readonly maxBuckets = IN_MEMORY_RATE_LIMIT_MAX_BUCKETS) {
+    if (!Number.isSafeInteger(maxBuckets) || maxBuckets < 1) {
+      throw new Error("In-memory rate-limit capacity must be a positive safe integer.");
+    }
+  }
+
+  private sweepExpired(now: number) {
+    for (const [bucketKey, entry] of this.store) {
+      if (entry.expiresAt <= now) this.store.delete(bucketKey);
+    }
+    this.checksSinceSweep = 0;
+  }
 
   check(key: string, limit: number, windowMs: number): RateLimitResult {
     const now   = Date.now();
-    const entry = this.store.get(key);
+    let entry = this.store.get(key);
 
-    if (!entry || now - entry.windowStart > windowMs) {
-      this.store.set(key, { count: 1, windowStart: now });
+    if (entry && entry.expiresAt <= now) {
+      this.store.delete(key);
+      entry = undefined;
+    }
+
+    if (!entry) {
+      this.checksSinceSweep += 1;
+      if (
+        this.checksSinceSweep >= IN_MEMORY_RATE_LIMIT_SWEEP_INTERVAL
+        || this.store.size >= this.maxBuckets
+      ) {
+        this.sweepExpired(now);
+      }
+
+      if (this.store.size >= this.maxBuckets) {
+        return {
+          allowed: false,
+          remaining: 0,
+          resetAt: now + windowMs,
+          durable: false,
+        };
+      }
+
+      this.store.set(key, { count: 1, expiresAt: now + windowMs });
       return { allowed: true, remaining: limit - 1, resetAt: now + windowMs, durable: false };
     }
 
     if (entry.count >= limit) {
-      return { allowed: false, remaining: 0, resetAt: entry.windowStart + windowMs, durable: false };
+      return { allowed: false, remaining: 0, resetAt: entry.expiresAt, durable: false };
     }
 
     entry.count += 1;
-    return { allowed: true, remaining: limit - entry.count, resetAt: entry.windowStart + windowMs, durable: false };
+    return { allowed: true, remaining: limit - entry.count, resetAt: entry.expiresAt, durable: false };
   }
 }
 
@@ -287,7 +329,9 @@ export async function checkRateLimit(
     );
   }
 
-  return _memStore.check(key, limit, windowMs);
+  // Match the durable bucket contract: activity on one route must never consume
+  // another route's fallback allowance during Preview or emergency operation.
+  return _memStore.check(`${prefix}\0${key}`, limit, windowMs);
 }
 
 /**
