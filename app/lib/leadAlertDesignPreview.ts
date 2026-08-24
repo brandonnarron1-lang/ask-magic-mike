@@ -7,8 +7,12 @@ type PreviewBand = "hot" | "active" | "new";
 
 export function leadAlertIdentityPreviewEnabled(
   vercelEnvironment: string | undefined = process.env.VERCEL_ENV,
+  nodeEnvironment: string | undefined = process.env.NODE_ENV,
 ) {
-  return vercelEnvironment !== "production";
+  if (vercelEnvironment !== undefined) {
+    return vercelEnvironment === "preview" || vercelEnvironment === "development";
+  }
+  return nodeEnvironment !== "production";
 }
 
 const PREVIEW_SCORE: Record<PreviewBand, number> = {

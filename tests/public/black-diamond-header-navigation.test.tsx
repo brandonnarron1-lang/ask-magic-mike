@@ -77,6 +77,20 @@ describe("Black Diamond responsive navigation", () => {
     expect(screen.queryByRole("navigation", { name: "Mobile primary navigation" })).not.toBeInTheDocument();
   });
 
+  it("does not redirect focus when Escape is pressed while the menu is closed", () => {
+    render(<BlackDiamondHeader />);
+
+    const askLink = screen.getByRole("link", { name: "Ask Mike" });
+    askLink.focus();
+    fireEvent.keyDown(askLink, { key: "Escape" });
+
+    expect(askLink).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Open site navigation" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  });
+
   it("closes when the user points outside the navigation", () => {
     render(<BlackDiamondHeader />);
 

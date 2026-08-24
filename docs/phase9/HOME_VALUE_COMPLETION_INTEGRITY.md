@@ -46,6 +46,9 @@ Integrity** passed artifact validation and rendered in the authenticated app.
 - The funnel is three steps: Address, Contact, Thank you.
 - Name and email remain required on the current Home Value UI; phone is clearly
   labeled optional and is validated only when supplied.
+- Email and phone use one client/server validation contract. Phone submissions
+  must contain 10–15 digits after formatting is removed, preventing the newly
+  allowed phone-only path from durably storing an unusable seven-digit number.
 - The first valid Contact submission calls the existing `POST /api/leads` path.
 - The existing browser submission UUID remains both the header and payload
   idempotency key.
@@ -75,8 +78,10 @@ datasets, or generated media.
 
 ## Release order and authority
 
-This candidate starts from exact Draft PR #214 head
-`8a0e951606829c954078bb6abfe4c13a6319d461` and follows:
+This candidate was refreshed onto exact sealed Draft PR #214 head
+`3ac0885a6f19fc479266457cff760ef836094470`. The pre-refresh candidate remains
+recoverable at
+`rescue/amm-pr215-pre-pr214-seal-sync-20260824-1329`. Release order remains:
 
 1. PR #209 durability release;
 2. PR #210 canonical alias consolidation;
