@@ -2,8 +2,8 @@
 
 ## Application
 
-Current Production is `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J` at merge commit
-`5a3c5c7f2463ea399c21b616ff249f6c67e156b6`. Re-inspect Production and record
+Current Production is `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` at merge commit
+`b450b41c66c6740bd20571cdbe7d8caf82e92d5e`. Re-inspect Production and record
 the immediately preceding Ready deployment before a future release because
 aliases can move. If smoke checks fail, stop traffic activation and promote the
 recorded prior deployment. Do not delete a deployment or force-push.
