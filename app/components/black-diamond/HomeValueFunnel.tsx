@@ -82,10 +82,24 @@ export function HomeValueFunnel({
       addressRef.current?.focus();
       return;
     }
-    trackEvent("home_value_started", attribution, { funnel_name: "home_value", lead_source_surface: surface, ...experimentProperties }, eventOptions);
-    trackEvent("funnel_started", attribution, { funnel_name: "home_value", lead_source_surface: surface, ...experimentProperties }, eventOptions);
-    trackEvent("address_submit", attribution, { funnel_name: "home_value", step_name: "address", ...experimentProperties }, eventOptions);
-    trackEvent("address_submitted", attribution, { funnel_name: "home_value", step_name: "address", ...experimentProperties }, eventOptions);
+    // Passive effects normally create this identifier before a person can
+    // interact. Recover synchronously as well so an unusually fast first tap
+    // cannot create unlinked address-stage telemetry.
+    const activeSubmissionId = submissionId ?? tryCreateBrowserSubmissionId();
+    if (!activeSubmissionId) {
+      setFormError({
+        message: "This browser could not create a secure submission reference. Refresh and try again.",
+        field: "address",
+      });
+      addressRef.current?.focus();
+      return;
+    }
+    if (!submissionId) setSubmissionId(activeSubmissionId);
+    const addressEventOptions = { sessionId: activeSubmissionId };
+    trackEvent("home_value_started", attribution, { funnel_name: "home_value", lead_source_surface: surface, ...experimentProperties }, addressEventOptions);
+    trackEvent("funnel_started", attribution, { funnel_name: "home_value", lead_source_surface: surface, ...experimentProperties }, addressEventOptions);
+    trackEvent("address_submit", attribution, { funnel_name: "home_value", step_name: "address", ...experimentProperties }, addressEventOptions);
+    trackEvent("address_submitted", attribution, { funnel_name: "home_value", step_name: "address", ...experimentProperties }, addressEventOptions);
     if (surface === "widget") {
       postToWidgetParent({ type: "askmagicmike:lead_started" }, attribution);
     }

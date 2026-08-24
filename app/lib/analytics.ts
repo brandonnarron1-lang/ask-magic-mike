@@ -14,7 +14,7 @@ export type EventName = (typeof analyticsEvents)[number];
 
 type TrackEventOptions = {
   /**
-   * Anonymous UUID already used by the matching lead submission. It is sent
+   * Pseudonymous UUID already used by the matching lead submission. It is sent
    * only to the canonical first-party ledger; browser analytics integrations
    * continue to receive the event name and privacy-allowlisted dimensions.
    */

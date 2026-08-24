@@ -6,10 +6,21 @@ function read(path: string) {
 }
 
 describe("funnel-event identity operating contract", () => {
-  it("keeps anonymous analytics from occupying the canonical session primary key", () => {
+  it("keeps pseudonymous analytics from occupying the canonical session primary key", () => {
     const repository = read("src/lib/persistence/neon/analytics-event-repository.ts");
     expect(repository).toContain("properties.funnel_session_id = funnelSessionId");
     expect(repository).not.toContain("INSERT INTO public.sessions");
+  });
+
+  it("recovers an identity synchronously before the first Home Value event", () => {
+    const funnel = read("app/components/black-diamond/HomeValueFunnel.tsx");
+    expect(funnel).toContain(
+      "const activeSubmissionId = submissionId ?? tryCreateBrowserSubmissionId()",
+    );
+    expect(funnel).toContain("const addressEventOptions = { sessionId: activeSubmissionId }");
+    expect(funnel.indexOf("const addressEventOptions")).toBeLessThan(
+      funnel.indexOf('trackEvent("home_value_started"'),
+    );
   });
 
   it("keeps the post-release verifier aggregate-only and test-excluded", () => {
