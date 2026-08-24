@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-08-24 — PR #209 emergency-limiter security hardening
+
+- Preserved the exact reviewed candidate at remote rescue branch
+  `rescue/amm-pr209-pre-memory-fallback-hardening-20260824-0333`.
+- Bounded the Preview/emergency in-memory limiter to 10,000 active identifiers,
+  reclaimed expired entries, and made unseen identifiers fail closed at
+  capacity instead of allowing unbounded process-memory growth.
+- Partitioned fallback counters by the same typed route prefix used by Neon so
+  analytics, chat, lead, appointment, and staff-setup traffic cannot consume
+  one another's degraded-mode allowance.
+- Added dedicated capacity, expiry-reclamation, and route-isolation regression
+  tests plus a structured security review.
+- Changed no Production environment, deployment, database row, lead, event,
+  message, WordPress surface, DNS, NellySelly system, or external provider.
+
 ## 2026-08-23 — Field-experience trust fast-track candidate
 
 - Preserved PR #199 and its exact head, then transplanted only its unique

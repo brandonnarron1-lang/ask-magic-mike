@@ -59,6 +59,13 @@ provider action, or deletion.
   current application release vehicle. It consolidates the reviewed work from
   PRs #202 through #208 once and binds Preview write authority to the actual
   server-only Neon endpoint.
+- The latest branch-only security review also bounds the emergency memory
+  limiter and isolates fallback counters by route. The pre-hardening head is
+  preserved at
+  `rescue/amm-pr209-pre-memory-fallback-hardening-20260824-0333`. The final
+  worktree tree passes the full Node 24 gate; exact-head Preview and protected
+  no-write evidence must still pass after commit/push before the gate is
+  requestable.
 - The exact pre-reconciliation application/security head
   `b4e76f795d74d6a7c0947b16150cdb9c6c63e23a` passed 228 files / 3,054 tests,
   strict typecheck, ESLint, optimized build, 83-route proof, 14/14 safety,

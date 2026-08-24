@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-08-24 — PR #209 emergency-limiter security hardening
+
+- A Next.js/React security review found that the non-durable fallback retained
+  every unique identifier for the process lifetime and omitted the route
+  partition used by the canonical Neon limiter.
+- The fallback now has a 10,000-identifier cap, opportunistic expiry cleanup,
+  fail-closed capacity behavior, and typed route isolation.
+- Full post-change Node 24 verification passes 229 test files / 3,064 tests,
+  strict typecheck, ESLint, 14/14 release safety, optimized build, all 83 active
+  routes, the Production dependency audit, and tracked-history/changed-file
+  secret scans. Exact-head Preview evidence remains mandatory after push.
+- No migration, Production action, secret entry, lead/event write, message,
+  WordPress edit, publication, DNS change, spend, deletion, or NellySelly
+  action occurred.
+
 ## 2026-08-23 — Atomic release-authority reconciliation
 
 - Reconciled the operating source-of-truth documents to the accepted PR #195
