@@ -68,15 +68,18 @@ notification, provider call, or database write was created.
 
 ## Automated local evidence
 
-Focused command:
+Focused command under Node 24.18.0:
 
 ```bash
-pnpm exec vitest run \
+pnpm vitest run \
+  tests/recurring-value/review-planner-route.test.ts \
   tests/public/black-diamond-header-navigation.test.tsx \
   tests/public/ask-conversion-accessibility.test.tsx
 ```
 
-Result: 2 files / 8 tests passed.
+Result: 3 files / 11 tests passed. The recurring-value contract now recognizes
+the shared header's typed navigation registry while still requiring the exact
+`/plan` destination and label.
 
 Focused ESLint command:
 
@@ -95,11 +98,30 @@ non-wrapping narrow-header contracts, open/close state, Escape/focus return,
 outside-pointer dismissal, full-width Ask treatment, retained Ask tracking,
 retained PR #211 skip-link behavior, and the Next.js smooth-scroll declaration.
 
-## Pending exact-head evidence
+Full local release evidence under Node 24.18.0:
 
-The documentation commit changes the PR head. Before any later release claim,
-run and record the full Node 24 suite, strict typecheck, ESLint, optimized
-build, route manifest, release safety, release doctor, dependency audit,
-history/changed-file secret scans, system isolation, immutable Vercel Preview,
-protected no-write acceptance, current-parent identity, and Preview runtime
-logs. No Production gate is eligible until the ordered predecessors release.
+- Vitest: 232 files / 3,082 tests passed;
+- strict TypeScript: passed;
+- full ESLint: passed;
+- optimized Next.js 15.5.21 build: passed, 52 generated pages;
+- route manifest: passed, 83 active routes / 17 acknowledged root-`src`
+  duplicates;
+- release safety: 14/14 passed;
+- Ask Magic Mike / NellySelly deployable-source isolation: passed;
+- Production dependency audit: no known vulnerabilities;
+- redacted full-history gitleaks: 596 commits scanned, no leak; and
+- `git diff --check`: passed.
+
+The first remote gate run found one stale source-string assertion for the Plan
+link after the header moved to one typed navigation registry. It failed with
+3,081 tests already passing. The contract was repaired to assert the exact
+registry destination and label, and the complete local suite then passed
+3,082/3,082.
+
+## Pending immutable exact-head evidence
+
+After this evidence and compatibility-test commit is pushed, rerun and record
+the GitHub release gate, clean-tree release doctor, immutable Vercel Preview,
+protected no-write acceptance, exact parent/head identity, fresh 320/390/
+desktop visual/interaction acceptance, and Preview runtime logs. No Production
+gate is eligible until the ordered predecessors release.

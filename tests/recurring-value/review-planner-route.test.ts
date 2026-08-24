@@ -10,7 +10,9 @@ describe("Phase 9.4 recurring-value public route", () => {
     expect(existsSync(join(root, "app/plan/page.tsx"))).toBe(true);
     expect(read("app/plan/page.tsx")).toContain('alternates: { canonical: "/plan" }');
     expect(read("app/sitemap.ts")).toContain('["/plan", 0.75]');
-    expect(read("app/components/black-diamond/BlackDiamondHeader.tsx")).toContain('href="/plan"');
+    expect(read("app/components/black-diamond/BlackDiamondHeader.tsx")).toContain(
+      '{ href: "/plan", label: "Plan"',
+    );
     expect(read("app/components/black-diamond/BlackDiamondShell.tsx")).toContain("Review Planner");
 
     const manifest = JSON.parse(read("config/active-route-manifest.json"));

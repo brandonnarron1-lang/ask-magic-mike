@@ -3,14 +3,24 @@
 ## Phase 9 responsive conversion-identity polish — 2026-08-24
 
 - Draft PR #213 reuses the shared public header after exact Draft PR #211.
-- Focused React acceptance: 2 files / 8 tests passed.
+- Focused compatibility/React acceptance: 3 files / 11 tests passed.
 - Focused ESLint: passed.
+- Full Node 24.18.0 local acceptance: 232 files / 3,082 tests, strict
+  TypeScript, full ESLint, optimized Next.js 15.5.21 build with 52 generated
+  pages, 83/17 route proof, release safety 14/14, system isolation, no known
+  Production dependency vulnerabilities, 596-commit redacted gitleaks scan,
+  and whitespace verification all passed.
+- The initial remote run correctly rejected one stale Plan-link source-string
+  assertion after navigation became data-driven; the contract now asserts the
+  exact typed registry destination and label, and the full suite passes.
 - Fresh in-app visual/interaction QA passed at 1280×720, 390×844, and 320×700.
 - Buyer→Seller path switch, menu auto-close, outside-pointer close,
   Escape/focus return, current-route semantics, no narrow overflow, and zero
   fresh console warnings/errors were observed.
 - No field was filled and no lead/event/message/provider/database write was
   created.
+- Immutable exact-head Preview and protected no-write proof remain pending
+  after the evidence commit; Production remains unchanged.
 - Full evidence:
   `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
 

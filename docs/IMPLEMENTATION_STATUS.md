@@ -16,15 +16,23 @@ Updated 2026-08-24.
   navigation landmarks, active-route `aria-current`, 44-pixel trigger,
   Escape/focus return, outside-pointer close, narrow-phone sizing, and the
   existing smooth-scroll declaration expected by Next.js.
-- **Local acceptance:** 2 focused files / 8 tests and focused ESLint pass.
+- **Local acceptance:** 3 focused files / 11 tests, all 232 files / 3,082
+  tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build with
+  52 generated pages, 83/17 route proof, release safety 14/14, system
+  isolation, no known Production dependency vulnerabilities, a redacted
+  596-commit gitleaks scan, and whitespace verification pass.
   In-app browser checks at 1280×720, 390×844, and 320×700 prove complete
   labels, current-route state, Buyer→Seller navigation, automatic close,
   outside-click close, Escape focus return, no horizontal overflow, and a
   warning/error-free fresh console.
+- **Compatibility correction:** the first remote run rejected one stale
+  source-string assertion for the Plan link after navigation moved into one
+  typed registry. The contract now requires the exact registry destination
+  and label; the full suite passes. Immutable exact-head remote proof remains
+  pending after the evidence commit.
 - **Safety:** no field fill, submit, migration, Production action, lead/event,
   message, provider call, WordPress/DNS change, publication, spend, deletion,
-  or NellySelly action. Full exact-head remote evidence remains pending after
-  the documentation commit.
+  or NellySelly action.
 - Detailed scope:
   `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH.md` and
   `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
