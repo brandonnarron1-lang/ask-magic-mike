@@ -1,7 +1,7 @@
 # Phase 9 funnel-event identity integrity
 
 Date: 2026-08-24
-Status: Draft stacked candidate after Draft PR #215; Production unchanged
+Status: Draft PR #216 stacked after Draft PR #215; Production unchanged
 
 ## Decision
 

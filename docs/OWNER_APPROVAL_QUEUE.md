@@ -153,8 +153,22 @@ gate and must not be merged out of order:
    exact `main`, repeat complete exact-head proof, then require
    `APPROVE PHASE 9 HOME-VALUE COMPLETION INTEGRITY MERGE AND PRODUCTION DEPLOYMENT`.
 
+7. Draft PR [#216](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/216)
+   reuses the exact PR #215 head and the existing submission/idempotency UUID,
+   canonical event route, Neon event ledger, and atomic lead command. Initial
+   reviewed implementation/security commit
+   `f3e96f396f2b09d1fec6a0c35a2e730c73f2d4ea` links privacy-minimized funnel
+   stages without pre-creating `sessions` and rejects browser-authored
+   lead/widget creation, qualification, appointment-request, and notification
+   outcomes. It has no migration, provider, cookie, form, endpoint, or
+   Production configuration change. Treat the current GitHub PR head—not this
+   implementation commit—as the final release candidate. After PR #215
+   releases, refresh it onto exact `main`, repeat complete exact-head and
+   write-intercepted Preview proof, then require
+   `APPROVE PHASE 9 FUNNEL EVENT IDENTITY INTEGRITY MERGE AND PRODUCTION DEPLOYMENT`.
+
 The historical shorter conversion-identity phrase released PR #195 and is
-exhausted; it cannot authorize PR #213, PR #214, or the home-value candidate.
+exhausted; it cannot authorize PR #213, PR #214, PR #215, or PR #216.
 
 None of these later phrases can authorize another PR, secret, database write,
 form submission, notification, WordPress/DNS change, publication, spend,

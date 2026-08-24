@@ -6,7 +6,7 @@ Updated 2026-08-24.
 
 - **Reuse decision:** the stacked candidate extends only the existing browser
   submission UUID, `POST /api/events`, Neon analytics repository, and atomic
-  lead command on exact Draft PR #215 head
+  lead command in Draft PR #216 on exact Draft PR #215 head
   `985079d1574daf9707a24e469b5a0954cf3cae`; no tracker, cookie, form, API,
   database, CRM, provider, or notification system is added.
 - **Conflict prevented:** inspection proved that pre-creating `sessions` for
