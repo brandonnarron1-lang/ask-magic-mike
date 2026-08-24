@@ -2,7 +2,8 @@
  * Browser-level widget flow.
  *
  * Drives the widget on /widget-preview from intent pick → contact submit
- * → success state, *intercepting* POST /api/leads so no DB write occurs.
+ * → success state, intercepting POST /api/leads and every browser telemetry
+ * endpoint so no lead, event, experiment, or widget-event write occurs.
  *
  * Runs against:
  *   - PREVIEW_URL if set (with optional Vercel protection bypass header)
@@ -13,7 +14,7 @@
  * VERCEL_BYPASS_SECRET. The header is added via Playwright's
  * extraHTTPHeaders. The token is never logged.
  */
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page, type Route } from "@playwright/test";
 
 function resolveBypassSecret(): string | null {
   return (
@@ -42,7 +43,26 @@ test.use({
   extraHTTPHeaders: bypassHeaders(),
 });
 
+async function fulfillInterceptedTelemetry(route: Route): Promise<void> {
+  await route.fulfill({
+    status: 202,
+    contentType: "application/json",
+    body: JSON.stringify({ ok: true, persisted: false, test_intercepted: true }),
+  });
+}
+
+async function installNoWriteTelemetryRoutes(page: Page): Promise<void> {
+  await page.route("**/api/events", fulfillInterceptedTelemetry);
+  await page.route("**/api/analytics/event", fulfillInterceptedTelemetry);
+  await page.route("**/api/experiments/event", fulfillInterceptedTelemetry);
+  await page.route("**/api/widget/events", fulfillInterceptedTelemetry);
+}
+
 test.describe("Widget preview flow (DB-mutation-free)", () => {
+  test.beforeEach(async ({ page }) => {
+    await installNoWriteTelemetryRoutes(page);
+  });
+
   test("happy path: intent → questions → contact → success (intercepted)", async ({
     page,
   }) => {
