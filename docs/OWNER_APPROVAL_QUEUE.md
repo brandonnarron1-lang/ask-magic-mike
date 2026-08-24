@@ -107,8 +107,8 @@ gate and must not be merged out of order:
 2. Draft PR [#211](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/211)
    retains the shared skip-to-content path and clearer required Ask intake.
    It is synchronized with refreshed PR #210 head
-   `5b884d5eca43fb4dcd1111c59c78a85c54698db1`; former head `d529b553` is
-   preserved at `rescue/amm-pr211-pre-pr210-refresh-20260824-0405`. Fresh
+   `3704cbf78bfd7361435987943854159b22978532`; the pre-final-parent head is
+   preserved at `rescue/amm-pr211-pre-final-pr210-refresh-20260824-0529`. Fresh
    exact-head proof remains mandatory, and it later requires
    `APPROVE PHASE 9 ASK CONVERSION ACCESSIBILITY MERGE AND PRODUCTION DEPLOYMENT`
    after a fresh exact-main refresh and proof.
