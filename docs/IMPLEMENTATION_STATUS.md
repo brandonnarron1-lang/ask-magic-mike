@@ -21,13 +21,23 @@ Updated 2026-08-24.
   and the public analytics/experiment APIs. A disclosed first browser-routing
   error emitted one confirmed live page-view row and one exposure attempt; no
   lead or communication was created, and no Production row was altered.
-- Verification passes 5 focused files / 31 tests, the full 217-file / 2,969-test
+- Verification passes 5 focused files / 34 tests, the full 217-file / 2,971-test
   suite, strict typecheck, full ESLint, optimized build, 82-route manifest,
   14/14 release safety, 43/43 release doctor, isolation, dependency,
   history-secret, diff, and empty migration checks. Desktop/mobile
   Production-simulated consent QA also passes.
-  Exact Node 24 CI and immutable no-write Preview remain before requesting
-  Production authority.
+  Exact Node 24 run `32690780827`, READY Vercel Preview
+  `dpl_2i9oeFx4y77bFc9fy2stojYPbnWZ`, and protected no-write dispatcher
+  `32691073871` also pass on `a16e8d63607be77168fe4d65c4a4fdd4accbf7fb`.
+  The final release-gate hardening adds direct Preview HTML/browser assertions
+  for no Google runtime and no application write; exact-head reruns follow.
+- Local Playwright no longer reuses an arbitrary process on port 3000. It owns
+  isolated loopback port 3210 by default and fails on collision; the unrelated
+  CaseFile Truth process discovered during QA was left untouched.
+- Vercel CLI created empty helper project
+  `amm-phase9-cross-domain-measurement-20260824-001` while the new worktree was
+  unlinked. It has no code/domain/Production effect, is not the canonical
+  project, and remains preserved pending separately approved cleanup.
 - Detailed design and evidence:
   `docs/phase9/CROSS_DOMAIN_MEASUREMENT_ACTIVATION.md` and
   `docs/phase9/CROSS_DOMAIN_MEASUREMENT_QA_EVIDENCE.md`.

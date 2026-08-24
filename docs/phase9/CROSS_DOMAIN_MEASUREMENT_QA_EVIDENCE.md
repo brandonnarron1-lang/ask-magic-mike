@@ -14,8 +14,8 @@ Rescue ref: `rescue/amm-pre-cross-domain-measurement-20260824-0010`
   Mike homepage and `/ask` HTTP 200 with no external tag.
 - Full repository-history search: no prior GTM loader or `NEXT_PUBLIC_GTM_*`
   implementation found.
-- Focused privacy/KPI Vitest: 5 files / 31 tests pass.
-- Full Vitest: 217 files / 2,969 tests pass.
+- Focused privacy/KPI and release-harness Vitest: 5 files / 34 tests pass.
+- Full Vitest: 217 files / 2,971 tests pass.
 - Strict TypeScript: pass after the optimized build completed.
 - Full ESLint: pass.
 - Optimized Next.js build: pass; 52 generated static pages.
@@ -55,15 +55,56 @@ The focused contracts prove:
 - footer preference reopening and accessible controls; and
 - continued sanitized server-ledger publication independent of the GTM gate.
 
-## Pending exact-head evidence
+## Exact-head CI and Preview evidence
 
-Before requesting Production authority, attach:
+Initial code-bearing commit `a16e8d63607be77168fe4d65c4a4fdd4accbf7fb`
+passed GitHub Node 24 release run
+[`32690780827`](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32690780827):
 
-- exact Node 24 GitHub CI run and artifact digest;
-- immutable Vercel Preview deployment ID/URL, READY status, and exact candidate
-  commit metadata; and
-- protected Preview proof that no GTM script, consent panel, Google request,
-  application POST, lead, email, SMS, Push, or database mutation occurs.
+- 217 test files / 2,969 tests, strict typecheck, full ESLint, optimized build,
+  82-route manifest, 14/14 release safety, and 43/43 release doctor passed;
+- release artifact `9507217836`, digest
+  `sha256:d4df2aa451530fa59acc5099875b619062d3e84a72f4ddeee0a43cf09fe0be7e`;
+- Vercel Preview deployment `dpl_2i9oeFx4y77bFc9fy2stojYPbnWZ` reached
+  READY at
+  `https://ask-magic-mike-cuq63lasx-eyes-up-industries.vercel.app`; and
+- both Vercel checks passed on the same commit.
+
+Protected no-write dispatcher run
+[`32691073871`](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32691073871)
+checked out the exact commit, hard-pinned `SAFE_DB_WRITE=false`, and passed:
+
+- 17 read-only Preview checks, six intentional mutation skips, and zero
+  failures;
+- both intercepted widget browser scenarios with zero unexpected tests;
+- `PREVIEW_READY` launch authority;
+- artifact `9507311595`, digest
+  `sha256:fbfe5d2b25d2ba1e5fe80a72f5461d2c358a7aeeddab88b4494a3bb56ddfe0d9`.
+
+The follow-up release-gate hardening adds explicit protected-Preview HTML and
+Playwright assertions for no consent surface, no approved GTM marker, no Google
+measurement request, no analytics data layer, and no application write. All
+three isolated local Chromium scenarios pass. Final exact-head evidence for
+that release-harness/documentation commit is attached to the Draft PR after CI
+and the protected dispatcher complete.
+
+During the local rerun, port 3000 belonged to an unrelated CaseFile Truth
+development server. The prior shared Playwright configuration reused it, which
+correctly failed the widget assertions but could have produced a false result
+for a generic absence check. No process was stopped or altered. Local Ask Magic
+Mike E2E now owns loopback port 3210 by default and refuses server reuse; a port
+collision fails visibly. Protected Preview runs remain bound to their exact
+Vercel URL.
+
+## Local tooling disclosure
+
+An authenticated `vercel curl` attempt from the previously unlinked worktree
+created empty helper project `amm-phase9-cross-domain-measurement-20260824-001`
+(`prj_o4fTpG5p5yx1lmYDjd55orc67WzT`). It did not receive code, a Production
+deployment, domain, environment value, or canonical-project mutation. The
+worktree is now linked locally to canonical project `ask-magic-mike`
+(`prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`). The empty helper remains untouched until
+a separate exact cleanup approval is granted.
 
 ## Observed live test telemetry
 

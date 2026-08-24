@@ -10,6 +10,12 @@
   sanitized flat GTM events, accessible preferences, and updated privacy copy.
 - Added focused runtime, component, privacy, and NellySelly-isolation tests plus
   an authenticated activation and rollback runbook.
+- Hardened protected Preview QA to fail if any consent surface, approved GTM
+  marker, Google measurement request, analytics data layer, or application
+  write appears; browser interception prevents the write/request from leaving
+  the runner even when the assertion fails.
+- Isolated local Playwright on a dedicated loopback port with server reuse
+  disabled after detecting an unrelated application on port 3000.
 - Added a dedicated data layer and dual client/API automation exclusion after a
   browser-routing error exposed the prior KPI-trust gap. One confirmed live
   page-view row and one exposure attempt are disclosed; no lead or message was

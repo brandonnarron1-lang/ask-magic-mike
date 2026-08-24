@@ -8,6 +8,10 @@
   automated, internal-QA, and noncanonical-host traffic.
 - Added an accessible analytics choice, footer preferences, privacy disclosure,
   sanitized GTM event contract, tests, activation proof, and rollback guidance.
+- Added protected-Preview HTML and real-browser release assertions proving the
+  analytics runtime remains absent and all mutating application requests remain
+  intercepted.
+- Prevented local E2E from silently reusing an unrelated application server.
 - Added dedicated data-layer isolation plus client/API automation exclusion so
   browser verification cannot enter first-party KPI ledgers.
 - No Production configuration, deployment, lead, communication, provider,

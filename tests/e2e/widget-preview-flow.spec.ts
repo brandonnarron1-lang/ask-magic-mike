@@ -37,9 +37,82 @@ function bypassHeaders(): Record<string, string> {
 }
 
 const PREVIEW_URL = process.env.PREVIEW_URL?.replace(/\/$/, "") ?? "";
+const LOCAL_E2E_PORT = process.env.AMM_E2E_PORT ?? "3210";
+const BASE_URL = PREVIEW_URL || `http://127.0.0.1:${LOCAL_E2E_PORT}`;
 test.use({
-  baseURL: PREVIEW_URL || "http://localhost:3000",
+  baseURL: BASE_URL,
   extraHTTPHeaders: bypassHeaders(),
+});
+
+test.describe("Preview external-analytics isolation (mutation-free)", () => {
+  test("loads no Google measurement runtime and attempts no application write", async ({
+    page,
+  }) => {
+    const applicationWrites: string[] = [];
+    const externalAnalyticsRequests: string[] = [];
+    const analyticsHosts = new Set([
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "analytics.google.com",
+      "stats.g.doubleclick.net",
+      "googleads.g.doubleclick.net",
+    ]);
+
+    await page.route("**/*", async (route) => {
+      const request = route.request();
+      const requestUrl = new URL(request.url());
+      const method = request.method().toUpperCase();
+
+      if (analyticsHosts.has(requestUrl.hostname)) {
+        externalAnalyticsRequests.push(request.url());
+        await route.abort("blockedbyclient");
+        return;
+      }
+
+      if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+        applicationWrites.push(`${method} ${requestUrl.pathname}`);
+        await route.fulfill({
+          status: 204,
+          body: "",
+        });
+        return;
+      }
+
+      // The Vercel bypass header is same-origin infrastructure authority. Do
+      // not forward it to any unrelated host if the page adds a new resource.
+      const headers = { ...request.headers() };
+      if (requestUrl.origin !== new URL(BASE_URL).origin) {
+        delete headers["x-vercel-protection-bypass"];
+        delete headers["x-vercel-set-bypass-cookie"];
+      }
+      await route.fallback({ headers });
+    });
+
+    await page.goto("/");
+    await page.waitForLoadState("domcontentloaded");
+    await page.waitForTimeout(750);
+
+    await expect(page.getByTestId("external-analytics-consent")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Analytics preferences" })).toHaveCount(0);
+
+    const runtime = await page.evaluate(() => ({
+      scriptPresent: Boolean(
+        document.querySelector('script[src*="googletagmanager.com/gtm.js"]'),
+      ),
+      dataLayerPresent: Object.prototype.hasOwnProperty.call(window, "ammDataLayer"),
+      runtimeMarker: document.documentElement.dataset.ammExternalAnalytics ?? null,
+      storedConsent: window.localStorage.getItem("amm_external_analytics_consent_v1"),
+    }));
+
+    expect(runtime).toEqual({
+      scriptPresent: false,
+      dataLayerPresent: false,
+      runtimeMarker: null,
+      storedConsent: null,
+    });
+    expect(externalAnalyticsRequests).toEqual([]);
+    expect(applicationWrites).toEqual([]);
+  });
 });
 
 test.describe("Widget preview flow (DB-mutation-free)", () => {
