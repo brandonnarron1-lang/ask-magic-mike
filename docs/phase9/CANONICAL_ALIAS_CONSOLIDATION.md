@@ -4,7 +4,7 @@ Date: 2026-08-23
 
 Status: isolated stacked candidate; no Production change
 
-Base: exact PR #209 head `2ccc654cb131d1a448234225fc18670893f84251`
+Base: exact PR #209 head `c04655cc04135f89cf9b401a631bc503c8c70057`
 
 ## Decision
 
@@ -33,6 +33,9 @@ Changed:
 
 - `next.config.ts`: two permanent, query-preserving redirects;
 - `app/contact/page.tsx`: canonical home-value internal link;
+- `scripts/monitor-production.mjs` and its shared contract: canonical-document
+  availability plus exact status/destination checks for both compatibility
+  redirects;
 - focused redirect/attribution tests; and
 - this decision record.
 
@@ -50,6 +53,11 @@ The focused test executes the real Next.js redirect configuration and proves, fo
 2. origin remains `https://www.askmagicmike.com`;
 3. path resolves to the intended canonical route; and
 4. `utm_source`, `utm_medium`, `utm_campaign`, and `gclid` survive exactly.
+
+The Production monitor must also check `/home-value` as the canonical `200`
+document and require each compatibility path to return its exact `308`
+destination. This prevents the release from making its own synthetic monitor
+fail merely because canonicalization is working as designed.
 
 Full typecheck, lint, tests, optimized build, route-manifest, release-safety, isolation, dependency, and secret-scan evidence must pass before this candidate is eligible for review.
 
