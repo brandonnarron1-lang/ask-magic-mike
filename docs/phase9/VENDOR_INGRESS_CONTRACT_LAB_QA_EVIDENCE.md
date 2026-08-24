@@ -75,12 +75,27 @@ pnpm release:doctor
 42 pass · 1 non-blocking pre-commit dirty-tree finding · 0 blocking failures
 
 gitleaks git --staged --redact --no-banner
-57.52 KB exact staged candidate scanned · no leaks found
+57.71 KB exact staged candidate scanned · no leaks found
 ```
 
-Release doctor will be repeated after the candidate is committed; the only
-current failure is the expected uncommitted-change state while this evidence is
-being authored.
+Clean-commit integrity:
+
+```text
+pnpm release:doctor
+43 pass · 0 fail · 0 skip
+
+gitleaks git --redact --no-banner --log-opts='--all'
+Full tracked history scanned · no leaks found
+
+git merge-base --is-ancestor a6098ab4... HEAD
+PASS
+
+git rev-list --count a6098ab4...HEAD
+1 code commit before this evidence-only seal
+
+git diff --check a6098ab4...HEAD
+PASS
+```
 
 An earlier command accidentally selected the complete suite rather than the
 focused files. That run provided useful broad regression evidence: 241 files
@@ -94,8 +109,6 @@ signing material. This was a test defect, not a product-code failure.
 The following must be completed after documentation, lint, and review settle
 the final candidate head:
 
-- clean-commit release doctor;
-- tracked-history secret scan;
 - immutable Vercel Preview;
 - authenticated desktop/mobile visual and interaction QA;
 - exact Preview log audit proving no mutation or provider call; and

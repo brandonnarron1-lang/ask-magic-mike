@@ -21,9 +21,10 @@ Updated 2026-08-24.
 - **Current local acceptance:** 5 focused files / 30 tests, all 242 files /
   3,152 tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build,
   86/17 route proof, 14/14 release safety, Production dependency audit, and
-  system isolation pass on Node 24.18.0. Clean-commit secret/release-doctor,
-  immutable Preview, browser, and deployment-log proof remain pending before
-  this candidate is sealed.
+  system isolation pass on Node 24.18.0. Clean-commit release doctor is 43/43,
+  staged and full tracked-history secret scans report no finding, and exact-base
+  ancestry/diff proof passes. Immutable Preview, browser, and deployment-log
+  proof remain pending before this candidate is sealed.
 - **Safety:** no Production, environment, schema, database row, lead/event,
   message, provider credential/call, WordPress/DNS, publication, spend,
   deletion, or NellySelly action.
