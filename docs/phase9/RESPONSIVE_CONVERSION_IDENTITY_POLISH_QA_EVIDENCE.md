@@ -5,8 +5,8 @@ Date: 2026-08-24
 Candidate: Draft PR #213 on
 `codex/phase9-conversion-identity-polish-20260824`
 
-Parent: exact Draft PR #211 head
-`6eacc33d16e34897c97288e48cd736433a3d9e15`
+Parent: exact final Draft PR #211 head
+`5d566a4a14d4a7cb67175683fdf099e8d62747b7`
 
 ## Screenshot-first audit
 
@@ -125,3 +125,23 @@ the GitHub release gate, clean-tree release doctor, immutable Vercel Preview,
 protected no-write acceptance, exact parent/head identity, fresh 320/390/
 desktop visual/interaction acceptance, and Preview runtime logs. No Production
 gate is eligible until the ordered predecessors release.
+
+## Final PR #211 cutover-hygiene refresh — 2026-08-24
+
+- Preserved prior PR #213 head
+  `431ae9eebba7d38712305fa257f118cf0e498a89` at remote rescue branch
+  `rescue/amm-pr213-pre-final-pr211-cutover-hygiene-20260824-170330`.
+- Merged exact final PR #211 head
+  `5d566a4a14d4a7cb67175683fdf099e8d62747b7`, retaining all upstream durable
+  rate-limit, canonical-alias, Ask semantics, skip-focus, and browser no-write
+  contracts once.
+- Merge conflicts were limited to additive changelog history. The responsive
+  header implementation and its tests merged without manual application-file
+  resolution.
+- Earlier CI, Preview, interaction, geometry, and console evidence is now
+  historical. The refreshed exact head must repeat full Node 24, immutable
+  Preview, responsive-navigation, protected Chromium, and zero-mutation
+  runtime proof before this candidate is sealed.
+- No Production environment, merge, deployment, database/lead/event write,
+  AI/provider request, message, WordPress edit, DNS change, publication, spend,
+  deletion, or NellySelly action occurred.

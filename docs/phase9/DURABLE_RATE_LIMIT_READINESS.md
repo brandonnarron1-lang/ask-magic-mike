@@ -110,6 +110,13 @@ After exact approval:
    SMS, Push, or consumer acknowledgment.
 7. Confirm no new durable-limiter error appears and rerun the 9-check monitor.
 
+Before approval, run the fail-closed rehearsal documented in
+`docs/phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md`. It verifies the exact
+current PR head, checks, immutable Preview, Production rollback deployment,
+canonical Vercel link, Production variable names/scopes, and read-only Preview
+capability booleans. It cannot enter a secret, merge, deploy, write data, or
+touch NellySelly.
+
 ## Rollback
 
 If acceptance fails, immediately restore Production deployment

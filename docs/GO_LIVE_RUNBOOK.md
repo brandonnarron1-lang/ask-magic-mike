@@ -64,6 +64,22 @@ interface under its exact combined gate. Never display, copy into chat, or
 persist the value in a shell argument or file. The old immutable deployment
 does not gain the new value; only a subsequent build does.
 
+Before requesting or using that gate, run the no-write operator rehearsal from
+the exact candidate head. It resolves the live PR/Vercel Preview itself and
+requires an existing checkout linked to the canonical Vercel project so it
+cannot auto-create a helper project:
+
+```text
+pnpm run phase9:durable-rate-limit:readiness -- --plan
+AMM_VERCEL_PROJECT_CWD=/absolute/path/to/linked/ask-magic-mike \
+  pnpm run phase9:durable-rate-limit:readiness -- --preflight
+```
+
+Do not continue unless the second command reports `READY_FOR_EXACT_GATE`. It
+checks names/scopes and boolean health only, never a secret value. It refuses
+all execute, merge, and deploy modes. Full behavior and failure boundaries are
+in `docs/phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md`.
+
 Before merge, the read-only store probe must report `table`, `schema`,
 `permissions`, `rls`, and `ready` true when run with the intended secure runtime
 connection:

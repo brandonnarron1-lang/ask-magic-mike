@@ -106,18 +106,18 @@ gate and must not be merged out of order:
    consolidates `/value` and `/we-buy-houses` onto the canonical conversion
    routes with permanent, query-preserving redirects and a matching Production
    monitor contract. It is synchronized with exact PR #209 candidate
-   `1d1d8d4f8e0970f3f6a1b80ab9ff2bebcd40216d`; the immediately prior PR #210
+   `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b`; the immediately prior PR #210
    head is preserved at
-   `rescue/amm-pr210-pre-release-ledger-integrity-sync-20260824-0617`.
+   `rescue/amm-pr210-pre-final-pr209-cutover-hygiene-20260824-162615`.
    Fresh exact-head proof remains mandatory. After PR #209 is released, retarget
    or refresh #210 onto the exact new `main`, repeat proof, then require
    `APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`.
 2. Draft PR [#211](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/211)
    retains the shared skip-to-content path and clearer required Ask intake.
    It is synchronized with exact clean PR #210 head
-   `7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9`; the immediately prior PR #211
+   `3ed8d050edd386aa0cd4a83d230ff3170d24a306`; the immediately prior PR #211
    head is preserved at
-   `rescue/amm-pr211-pre-pr210-ledger-sync-20260824-0632`. Fresh exact-head
+   `rescue/amm-pr211-pre-final-pr210-cutover-hygiene-20260824-164445`. Fresh exact-head
    proof remains mandatory, and it later requires
    `APPROVE PHASE 9 ASK CONVERSION ACCESSIBILITY MERGE AND PRODUCTION DEPLOYMENT`
    after a fresh exact-main refresh and proof.
@@ -125,26 +125,30 @@ gate and must not be merged out of order:
    reuses the shared Black Diamond public header to restore complete mobile
    Home Value / Sell / Buy / Plan / Ask navigation, current-route semantics,
    and keyboard-safe dismissal without changing a funnel, form, route, API,
-   database, or visual system. It is based on exact Draft PR #211 head
-   `6eacc33d16e34897c97288e48cd736433a3d9e15` and must remain after #211 in
-   release order. After all predecessors release, refresh onto exact `main`,
-   repeat full exact-head proof, then require
+   database, or visual system. It is synchronized with exact clean PR #211 head
+   `5d566a4a14d4a7cb67175683fdf099e8d62747b7`; the immediately prior PR #213
+   head is preserved at
+   `rescue/amm-pr213-pre-final-pr211-cutover-hygiene-20260824-170330`. It must
+   remain after #211 in release order. After all predecessors release, refresh
+   onto exact `main`, repeat full exact-head proof, then require
    `APPROVE PHASE 9 RESPONSIVE CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
-4. Draft PR [#212](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/212)
-   reuses the existing Google container and canonical event ledger for
-   consent-gated cross-domain measurement. It must be refreshed after the
-   selected application sequence and requires authenticated Google/Vercel
-   configuration review plus
-   `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
-
-5. Draft PR [#214](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/214)
+4. Draft PR [#214](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/214)
    reuses the canonical notification renderer, approved Mike/Our Town assets,
    urgency selector, and protected Message Review Studio for
-   `lead_alert_email_v3`. It is based on exact Draft PR #213 head
-   `d666289f91962cd836e87aec6cb3d809e93e72a7` and must remain after #213 in
-   release order. After all predecessors release, refresh onto exact `main`,
-   repeat full exact-head and no-send visual proof, then require
+   `lead_alert_email_v3`. It is synchronized with exact final Draft PR #213 head
+   `3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea`; the immediately prior PR #214
+   head is preserved at
+   `rescue/amm-pr214-pre-final-pr213-cutover-hygiene-20260824-172407`. It must
+   remain after #213 in release order. After all predecessors release, refresh
+   onto exact `main`, repeat full exact-head and no-send visual proof, then require
    `APPROVE PHASE 9 LEAD-ALERT BRAND IDENTITY V3 MERGE AND PRODUCTION DEPLOYMENT`.
+
+5. Draft PR [#212](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/212)
+   is a separate HOLD candidate that reuses the existing Google container and
+   canonical event ledger for consent-gated cross-domain measurement. It must
+   be refreshed only after the selected application sequence and requires
+   authenticated Google/Vercel configuration review plus
+   `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
 
 The historical shorter conversion-identity phrase released PR #195 and is
 exhausted; it cannot authorize PR #213 or PR #214.

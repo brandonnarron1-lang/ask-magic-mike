@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-08-24 — PR #214 refresh onto final PR #213 cutover hygiene
+
+- Preserved former PR #214 head `3ac0885a6f19fc479266457cff760ef836094470`
+  at `rescue/amm-pr214-pre-final-pr213-cutover-hygiene-20260824-172407`.
+- Merged exact final PR #213 head
+  `3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea` without application conflict.
+- Retained the approved exact identity assets, accessible HTML/plain-text lead
+  facts, template-pinned retries, synthetic no-send gallery, and Production-404
+  acceptance-route contract.
+- Prior PR #214 proof is historical; fresh exact-head CI, protected Preview,
+  no-send visual acceptance, and zero-delivery runtime evidence remain
+  mandatory.
+- No Production, environment, database, lead/event, notification, provider,
+  WordPress, DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-24 — Lead-alert brand identity v3 candidate
 
 - The current email alert remained operationally complete, but its decorative
@@ -22,6 +37,19 @@
   corrected 390 × 844 acceptance with no horizontal overflow or browser/runtime
   warning/error entries; supply-chain and history-secret scans are clean.
 
+## 2026-08-24 — PR #213 refresh onto final PR #211 cutover hygiene
+
+- Preserved former PR #213 head `431ae9eebba7d38712305fa257f118cf0e498a89`
+  at `rescue/amm-pr213-pre-final-pr211-cutover-hygiene-20260824-170330`.
+- Merged exact final PR #211 head
+  `5d566a4a14d4a7cb67175683fdf099e8d62747b7` without application conflict.
+- Retained the existing Black Diamond header extension, mobile intent menu,
+  active-route state, narrow-phone behavior, and Escape focus safeguard.
+- Prior PR #213 proof is historical; fresh exact-head CI, protected Preview,
+  navigation, and zero-write runtime proof remain mandatory.
+- No Production, environment, database, lead/event, notification, WordPress,
+  DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-24 — Responsive conversion-identity navigation candidate
 
 - Screenshot-first review confirmed the released Black Diamond identity and
@@ -35,6 +63,18 @@
 - Local in-app-browser acceptance passed at 1280×720, 390×844, and 320×700,
   including a real local Buyer→Seller switch, no overflow, and a clean fresh
   browser console.
+
+## 2026-08-24 — PR #211 refresh onto final PR #210 cutover hygiene
+
+- Preserved former PR #211 head `6eacc33d16e34897c97288e48cd736433a3d9e15`
+  at `rescue/amm-pr211-pre-final-pr210-cutover-hygiene-20260824-164445`.
+- Merged exact final PR #210 head
+  `3ed8d050edd386aa0cd4a83d230ff3170d24a306` while retaining the entire final
+  PR #209 durability/no-write contract.
+- Preserved the shared skip-link focus behavior and Ask field semantics, and
+  reconciled only additive history and release-authority declarations.
+- Prior PR #211 proof is historical; fresh exact-head CI, protected Preview,
+  keyboard, and zero-write runtime evidence remain mandatory.
 - No Production, environment, database, lead/event, notification, WordPress,
   DNS, publication, spend, deletion, or NellySelly mutation occurred.
 
@@ -76,6 +116,20 @@
   header, and shared content-target implementation did not overlap.
 - Prior PR #211 CI and Preview are historical evidence only. The refreshed head
   must repeat exact-head proof before its later gate is requestable.
+
+## 2026-08-24 — PR #210 refresh onto final PR #209 cutover hygiene
+
+- Preserved former PR #210 head `7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9`
+  at `rescue/amm-pr210-pre-final-pr209-cutover-hygiene-20260824-162615`.
+- Merged exact final PR #209 head
+  `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b`, retaining its read-only cutover
+  guard and fail-closed Preview browser telemetry interception.
+- Resolved the sole additive release-authority test conflict while preserving
+  PR #210's redirect/monitor contracts and both candidates' evidence ledgers.
+- Prior PR #210 proof is historical; fresh exact-head CI, Preview identity,
+  browser no-write evidence, and deployment-log proof remain mandatory.
+- No Production, environment, database, lead, event, notification, WordPress,
+  DNS, publication, spend, deletion, or NellySelly mutation occurred.
 
 ## 2026-08-24 — PR #210 refresh onto release-ledger-sealed PR #209
 

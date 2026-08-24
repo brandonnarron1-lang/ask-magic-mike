@@ -5,8 +5,16 @@ Date: 2026-08-24
 Candidate: Draft PR #214 on
 `codex/phase9-lead-alert-brand-identity-20260824`
 
-Parent: exact Draft PR #213 head
-`d666289f91962cd836e87aec6cb3d809e93e72a7`
+Parent: exact final Draft PR #213 head
+`3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea`
+
+Refresh preservation: former PR #214 head
+`3ac0885a6f19fc479266457cff760ef836094470` is preserved at
+`rescue/amm-pr214-pre-final-pr213-cutover-hygiene-20260824-172407`.
+
+The evidence below records the preserved candidate baseline. It is historical
+until fresh exact-head Node 24, immutable Preview, protected no-write, no-send
+browser, and deployment-log proof are appended after the parent refresh.
 
 ## Scope and no-send boundary
 
