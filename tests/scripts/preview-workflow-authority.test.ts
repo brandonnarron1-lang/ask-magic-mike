@@ -19,6 +19,9 @@ describe("Preview workflow launch authority", () => {
       expect(strictAssert).toBeGreaterThan(authority);
       expect(source).toContain('REQUIRE_VERDICT: "PREVIEW_READY"');
       expect(source).toContain('SAFE_DB_WRITE: "false"');
+      expect(source).toContain(
+        "npm run --silent preview:e2e -- --reporter=json > artifacts/widget-e2e-report.json",
+      );
     },
   );
 });
