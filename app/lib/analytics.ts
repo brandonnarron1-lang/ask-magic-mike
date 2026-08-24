@@ -2,12 +2,14 @@
 
 import { analyticsEvents } from "./constants";
 import { getDeviceCategory } from "./attribution";
+import { isBrowserAutomation } from "./browserAutomation";
 import type { Attribution } from "./leadPayload";
 import { allowedWidgetParentOrigin } from "./publicOrigin";
 import {
   safePublicAnalyticsProperties,
   safeRegisteredPublicAnalyticsDimension,
 } from "@/lib/analytics/privacy";
+import { publishExternalAnalyticsEvent } from "./externalAnalytics";
 
 export type EventName = (typeof analyticsEvents)[number];
 
@@ -35,32 +37,30 @@ export function trackEvent(
 
   window.dispatchEvent(new CustomEvent("askmagicmike:event", { detail: payload }));
 
-  const maybeWindow = window as Window & {
-    dataLayer?: unknown[];
-    posthog?: { capture?: (name: string, props: Record<string, unknown>) => void };
-    parent?: Window;
-  };
+  publishExternalAnalyticsEvent(event, safeProperties);
 
-  maybeWindow.dataLayer?.push(payload);
-  maybeWindow.posthog?.capture?.(event, payload.properties);
+  const maybeWindow = window as Window & { parent?: Window };
 
-  // The browser event remains useful for GA/GTM/PostHog, while this small
-  // server ledger gives the lead pipe an auditable event without sending PII.
-  void window.fetch("/api/events", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      event_name: event,
-      event_category: "intake",
-      properties: safeProperties,
-      attribution: {
-        source: safeRegisteredPublicAnalyticsDimension("utm_source", attribution.source) ?? undefined,
-        medium: safeRegisteredPublicAnalyticsDimension("utm_medium", attribution.medium) ?? undefined,
-        campaign: safeRegisteredPublicAnalyticsDimension("utm_campaign", attribution.campaign) ?? undefined,
-      },
-    }),
-    keepalive: true,
-  }).catch(() => undefined);
+  // The in-page event remains available to first-party UI listeners, while
+  // this small server ledger gives the lead pipe an auditable event without
+  // sending PII.
+  if (!isBrowserAutomation()) {
+    void window.fetch("/api/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event_name: event,
+        event_category: "intake",
+        properties: safeProperties,
+        attribution: {
+          source: safeRegisteredPublicAnalyticsDimension("utm_source", attribution.source) ?? undefined,
+          medium: safeRegisteredPublicAnalyticsDimension("utm_medium", attribution.medium) ?? undefined,
+          campaign: safeRegisteredPublicAnalyticsDimension("utm_campaign", attribution.campaign) ?? undefined,
+        },
+      }),
+      keepalive: true,
+    }).catch(() => undefined);
+  }
 
   if (window.parent && window.parent !== window) {
     const parentOrigin = allowedWidgetParentOrigin(attribution.parent_url);

@@ -2,11 +2,12 @@
 
 ## Application
 
-Current Production is `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J` at merge commit
-`5a3c5c7f2463ea399c21b616ff249f6c67e156b6`. Re-inspect Production and record
-the immediately preceding Ready deployment before a future release because
-aliases can move. If smoke checks fail, stop traffic activation and promote the
-recorded prior deployment. Do not delete a deployment or force-push.
+Current Production is `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` at merge commit
+`b450b41c66c6740bd20571cdbe7d8caf82e92d5e`. The prior accepted Production
+deployment is `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. Re-inspect both immediately
+before a future release because aliases can move. If smoke checks fail, stop
+traffic activation and promote the recorded prior Ready deployment. Do not
+delete a deployment or force-push.
 
 For the dependent field-experience candidate, application rollback to the prior
 accepted Vercel deployment removes the reporter and Growth panel code. It has
@@ -71,10 +72,20 @@ Remove only the named reversible Custom HTML/shortcode/widget block or deactivat
 the isolated bridge after backing up. Do not edit parent theme, `functions.php`,
 FlexMLS/IDX, or unrelated forms. Restore prior page cache only if the owner approves.
 
-The canonical bridge is currently shadow-only. Immediate rollback is
-`AMM_CANONICAL_BRIDGE_ENABLED=false`; a one-form rollback removes only that ID
-from `AMM_CANONICAL_BRIDGE_FORM_IDS`. It has not forwarded, altered, or imported
-any lead record.
+Canonical bridge 1.1.0 is currently active only for the already-approved Form 3
+path. Preserve its exact enable flag, allowlist, HMAC secret, endpoint, Gravity
+entry, and notification state during a 1.2.0 upgrade. Lead-forwarding rollback
+is `AMM_CANONICAL_BRIDGE_ENABLED=false`; a one-form rollback removes only that
+ID from `AMM_CANONICAL_BRIDGE_FORM_IDS`. Do not use a measurement issue as
+authority to disable Form 3 or delete a WordPress/Neon record.
+
+Bridge 1.2.0 measurement rollback is independently
+`AMM_GOOGLE_MEASUREMENT_ENABLED=false`. Preserve the pre-change GTM head and
+noscript source and the 1.1.0 archive before installation. If controlled QA
+fails, disable the measurement flag first; reinstall 1.1.0 and restore the
+exact prior GTM source only when required by the approved rollback. Do not
+change the cookie-choice provider, purge unrelated cache, edit the parent
+theme, or touch NellySelly.
 
 ## Email
 

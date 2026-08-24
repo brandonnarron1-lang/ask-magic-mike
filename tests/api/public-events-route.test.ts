@@ -25,13 +25,13 @@ vi.mock("../../app/lib/serverAnalytics", async () => {
 
 import { POST } from "../../app/api/events/route";
 
-function request(body: unknown) {
+function request(body: unknown, userAgent = "Mozilla/5.0 Chrome/140") {
   return new Request("https://www.askmagicmike.com/api/events", {
     method: "POST",
     headers: {
       "content-type": "application/json",
       origin: "https://www.askmagicmike.com",
-      "user-agent": "Mozilla/5.0 Chrome/140",
+      "user-agent": userAgent,
     },
     body: JSON.stringify(body),
   });
@@ -54,6 +54,21 @@ describe("POST /api/events", () => {
     const response = await POST(request({ event_name: "funnel_started", properties: { funnel_name: "seller" } }));
     expect(response.status).toBe(202);
     expect(recordMock).toHaveBeenCalledWith(expect.objectContaining({ eventName: "funnel_started" }));
+  });
+
+  it("accepts but does not persist automated-browser telemetry", async () => {
+    const response = await POST(request(
+      { event_name: "page_view", properties: { path: "/home-value" } },
+      "Mozilla/5.0 HeadlessChrome/140",
+    ));
+    expect(response.status).toBe(202);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: true,
+      persisted: false,
+      excluded: "automation",
+    });
+    expect(rateLimitMock).not.toHaveBeenCalled();
+    expect(recordMock).not.toHaveBeenCalled();
   });
 
   it("fails truthfully when the canonical event write is unavailable", async () => {
@@ -156,7 +171,7 @@ describe("POST /api/events", () => {
     });
   });
 
-  it("rejects Web Vitals outside canonical Production or from automation", async () => {
+  it("rejects Web Vitals outside canonical Production and excludes automation without persistence", async () => {
     vi.stubEnv("VERCEL_ENV", "preview");
     const previewResponse = await POST(request({
       event_name: "web_vital_observed",
@@ -196,7 +211,13 @@ describe("POST /api/events", () => {
       }),
     });
     const automationResponse = await POST(automationRequest);
-    expect(automationResponse.status).toBe(400);
+    expect(automationResponse.status).toBe(202);
+    await expect(automationResponse.json()).resolves.toMatchObject({
+      ok: true,
+      persisted: false,
+      excluded: "automation",
+    });
+    expect(rateLimitMock).toHaveBeenCalledTimes(1);
     expect(recordMock).not.toHaveBeenCalled();
   });
 

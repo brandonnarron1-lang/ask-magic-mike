@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { siteConfig } from "@/lib/site-config";
+import { ExternalAnalyticsConsentManager } from "./components/analytics/ExternalAnalyticsConsent";
 import { WebVitalsReporter } from "./components/experience/WebVitalsReporter";
+import { resolveProductionGtmContainerId } from "./lib/googleTagConfig";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -61,9 +63,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gtmContainerId = resolveProductionGtmContainerId({
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    NEXT_PUBLIC_GTM_CONTAINER_ID: process.env.NEXT_PUBLIC_GTM_CONTAINER_ID,
+  });
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable}`}
+      data-amm-external-analytics={gtmContainerId ? "available" : undefined}
+    >
       <body className="antialiased">
+        <ExternalAnalyticsConsentManager gtmContainerId={gtmContainerId} />
         {process.env.VERCEL_ENV === "production" ? <WebVitalsReporter /> : null}
         {children}
       </body>

@@ -1,6 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const PREVIEW_URL = process.env.PREVIEW_URL?.replace(/\/$/, "") ?? "";
+const LOCAL_E2E_PORT = process.env.AMM_E2E_PORT ?? "3210";
+const LOCAL_E2E_URL = `http://127.0.0.1:${LOCAL_E2E_PORT}`;
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -8,7 +10,7 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
-    baseURL: PREVIEW_URL || "http://localhost:3000",
+    baseURL: PREVIEW_URL || LOCAL_E2E_URL,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -18,9 +20,11 @@ export default defineConfig({
   webServer: PREVIEW_URL
     ? undefined
     : {
-        command: "NODE_ENV=development ./node_modules/.bin/next dev",
-        url: "http://localhost:3000",
-        reuseExistingServer: true,
+        command: `NODE_ENV=development ./node_modules/.bin/next dev --hostname 127.0.0.1 --port ${LOCAL_E2E_PORT}`,
+        url: LOCAL_E2E_URL,
+        // Never attach Ask Magic Mike QA to an unrelated app that happens to
+        // own the local port. A collision must fail visibly.
+        reuseExistingServer: false,
         timeout: 120_000,
       },
   projects: [

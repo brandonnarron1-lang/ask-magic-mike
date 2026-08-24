@@ -239,6 +239,20 @@
 - No form completion, consent acceptance, lead submission, database write,
   email, SMS, Push, WordPress edit, publication, DNS change, spend, deletion,
   or NellySelly action occurred.
+## Phase 9 WordPress Basic Consent bridge 1.2.0 — 2026-08-24
+
+- Extended the existing canonical plugin in place with a separately disabled,
+  exact-allow Basic Consent loader; no second bridge or analytics system.
+- Focused WordPress/preflight verification: 3 files / 23 tests — PASS.
+- PHP 8.1 CLI syntax in an isolated container — PASS. Archive/source parity and
+  SHA-256 verification — PASS. `git diff --check` — PASS.
+- Release artifact:
+  `output/release/ask-magic-mike-canonical-bridge-1.2.0.zip`, SHA-256
+  `6fdab89876c297e376c7e957436b97aa782c8df628c89225edc4cadad6ee6b54`.
+- Detailed evidence:
+  `docs/phase9/CROSS_DOMAIN_MEASUREMENT_QA_EVIDENCE.md`.
+- No live WordPress, GTM/GA4, Vercel, database, lead, notification, cookie,
+  cache, DNS, publication, deletion, or NellySelly mutation occurred.
 
 ## Phase 9 conversion identity polish — 2026-08-22 15:17 EDT
 

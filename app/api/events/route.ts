@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { checkRateLimit, LIMITS, rateLimitKey } from "../../../src/lib/security/rate-limit";
 import { analyticsEvents } from "../../lib/constants";
+import { isAutomatedBrowserUserAgent } from "../../lib/browserAutomation";
 import {
   normalizeWebVitalEventProperties,
   toWebVitalAnalyticsProperties,
@@ -60,6 +61,12 @@ export async function POST(req: Request) {
   const correlationId = crypto.randomUUID();
   if (!isApprovedPublicOrigin(req.headers.get("origin"))) {
     return NextResponse.json({ error: "This event origin is not approved.", correlation_id: correlationId }, { status: 403 });
+  }
+  if (isAutomatedBrowserUserAgent(req.headers.get("user-agent"))) {
+    return NextResponse.json(
+      { ok: true, persisted: false, excluded: "automation", correlation_id: correlationId },
+      { status: 202 },
+    );
   }
   const limit = await checkRateLimit(rateLimitKey(req.headers.get("x-forwarded-for")), LIMITS.analyticsEvent.limit, LIMITS.analyticsEvent.windowMs, "analyticsEvent");
   if (!limit.allowed) return NextResponse.json({ error: "Too many events.", correlation_id: correlationId }, { status: 429 });

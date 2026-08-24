@@ -290,6 +290,76 @@ Updated 2026-08-24.
   cleanup.
 - Exact future gate:
   `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
+## Phase 9 cross-domain measurement candidate — 2026-08-24
+
+- Read-only live and repository-history audits prove Our Town currently loads
+  one GTM container, Ask Magic Mike loads no external analytics tag, and no
+  prior GTM loader is hidden in repository history.
+- The candidate reuses the existing Our Town container and canonical Neon event
+  ledger. It adds no second GA4 property, PostHog project, Meta Pixel, Vercel
+  analytics stream, lead store, or identity database.
+- Production resolution accepts only the exact container observed on Our Town;
+  Preview, private/admin, operational, iframe/widget, automation, and internal-
+  QA contexts fail closed. This explicitly prevents NellySelly mixing.
+- Basic consent mode sends no Google request before an explicit choice.
+  Analytics may be granted; advertising storage/user data/personalization stay
+  denied. Decline/revocation and an accessible footer preference control are
+  implemented, with corresponding privacy copy.
+- The external publication boundary now independently rechecks current consent,
+  exact container identity, registered public event names, property privacy,
+  and `is_test` exclusion instead of trusting future callers to sanitize.
+- Follow-up authenticated browser/public-container inspection found the Our Town
+  page starts GTM synchronously and its Google tag fires on `gtm.init` before
+  the deferred cookie-choice provider. The new read-only
+  `amm:verify:cross-domain` preflight therefore reports `HOLD`; no Production
+  measurement activation is eligible until brokerage consent sequencing and
+  authenticated GTM/GA4 review pass.
+- The existing canonical WordPress bridge is upgraded locally from 1.1.0 to a
+  reversible 1.2.0 package. Its independently disabled Basic Consent gate runs
+  before normal head output, accepts only
+  `vv_cookieconsent_status=allow`, pins `GTM-KZMCSLTJ`, and contains no
+  noscript bypass. The verifier now rejects coexistence with the current legacy
+  GTM head/noscript source. Focused behavior/security coverage passes 23/23 and
+  PHP 8.1 syntax passes. No live WordPress change occurred.
+- The post-upgrade local Node 24 release gate passes isolation, 14/14 safety,
+  219 test files / 2,990 tests, strict typecheck, full ESLint, optimized build,
+  and the 82-route manifest. Exact-head GitHub/Preview evidence is still
+  required after commit and push.
+- KPI trust now excludes HeadlessChrome/Playwright/Puppeteer on both the client
+  and the public analytics/experiment APIs. A disclosed first browser-routing
+  error emitted one confirmed live page-view row and one exposure attempt; no
+  lead or communication was created, and no Production row was altered.
+- Verification passes 5 focused files / 35 tests, the full 217-file / 2,972-test
+  suite, strict typecheck, full ESLint, optimized build, 82-route manifest,
+  14/14 release safety, 43/43 release doctor, isolation, dependency,
+  history-secret, diff, and empty migration checks. Desktop/mobile
+  Production-simulated consent QA also passes.
+  Exact Node 24 run `32690780827`, READY Vercel Preview
+  `dpl_2i9oeFx4y77bFc9fy2stojYPbnWZ`, and protected no-write dispatcher
+  `32691073871` also pass on `a16e8d63607be77168fe4d65c4a4fdd4accbf7fb`.
+  The final release-gate hardening adds direct Preview HTML/browser assertions
+  for no Google runtime and no application write; exact-head reruns follow.
+- Harness commit `90857fe2fd904474f51e995c8a0dadbaa49fdeb0` passed Node
+  24 CI `32691794254` and READY Preview
+  `dpl_3Wpmi9gqHphqCVsBKtWAgebXPLUf`. Protected run `32691992594` passed the
+  18-check HTTP gate but caught one intercepted external Vercel
+  `/login/validate` POST in an overbroad application-write assertion. Exact
+  origin classification is now used; every mutating request remains blocked.
+- Local Playwright no longer reuses an arbitrary process on port 3000. It owns
+  isolated loopback port 3210 by default and fails on collision; the unrelated
+  CaseFile Truth process discovered during QA was left untouched.
+- Vercel CLI created empty helper project
+  `amm-phase9-cross-domain-measurement-20260824-001` while the new worktree was
+  unlinked. It has no code/domain/Production effect, is not the canonical
+  project, and remains preserved pending separately approved cleanup.
+- Detailed design and evidence:
+  `docs/phase9/CROSS_DOMAIN_MEASUREMENT_ACTIVATION.md` and
+  `docs/phase9/CROSS_DOMAIN_MEASUREMENT_QA_EVIDENCE.md`.
+- First exact gate after final package/PR evidence:
+  `APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA`.
+- Later application gate after WordPress runtime proof and authenticated GTM/GA4
+  review:
+  `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
 
 ## Phase 9 conversion identity polish — 2026-08-22
 
@@ -319,6 +389,11 @@ Updated 2026-08-24.
   preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
   The only automatic conflict was the cumulative QA evidence document; the
   application merge was clean.
+- PR #195 head `db13953fc5f6d24a684f66c9a1c10c6b929b72b3` was merged as
+  Production/main `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and accepted on
+  Vercel deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Fresh read-only
+  acceptance passes 15/15 conversion checks and 19/19 Production smoke checks
+  with two intentional authenticated/write skips.
 - Detailed decision and QA:
   `docs/phase9/CONVERSION_IDENTITY_POLISH.md` and
   `docs/phase9/CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.

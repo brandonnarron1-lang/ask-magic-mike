@@ -74,6 +74,7 @@
     "amm:verify:startup": "node scripts/amm/verify-startup.mjs",
     "amm:verify:health": "node scripts/amm/verify-health.mjs",
     "amm:verify:isolation": "node scripts/amm/verify-system-isolation.mjs",
+    "amm:verify:cross-domain": "node scripts/amm/verify-cross-domain-measurement.mjs",
     "amm:health:lead-pipe": "node scripts/amm/lead-pipe-health-check.mjs",
     "amm:verify:release": "node scripts/amm/verify-release.mjs"
   },

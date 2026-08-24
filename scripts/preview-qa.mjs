@@ -6,6 +6,8 @@
  *   - vercel_preview_access — early access precheck. Detects 401/403 from
  *     Vercel Deployment Protection and fails fast with a clear remedy.
  *   - Public funnel HTTP 200 + required-copy spot-checks
+ *   - Preview analytics isolation: no external Google loader, approved GTM
+ *     container marker, consent surface, or analytics runtime marker
  *   - GET /api/admin/health (auth required)
  *   - Admin REST: dashboard / leads / list filters
  *   - SLA sweep with admin auth + optional cron-secret auth
@@ -262,6 +264,33 @@ async function publicRoutes() {
         excerpt: redact(r.text ?? JSON.stringify(r.json)),
       });
     }
+  }
+}
+
+async function previewAnalyticsIsolation() {
+  const r = await http("GET", "/");
+  const html = r.text || JSON.stringify(r.json ?? "");
+  const forbiddenMarkers = [
+    "googletagmanager.com/gtm.js",
+    "GTM-KZMCSLTJ",
+    'data-testid="external-analytics-consent"',
+    "Help improve the Ask Magic Mike experience?",
+    "ammExternalAnalytics",
+  ];
+  const found = forbiddenMarkers.filter((marker) => html.includes(marker));
+
+  if (r.ok && found.length === 0) {
+    record("preview:external_analytics_off", "pass", {
+      http: r.status,
+      message: "no external analytics or consent runtime rendered in Preview",
+    });
+  } else {
+    record("preview:external_analytics_off", "fail", {
+      http: r.status,
+      message: found.length
+        ? `forbidden Preview marker(s): ${found.join(", ")}`
+        : "homepage request failed",
+    });
   }
 }
 
@@ -619,6 +648,7 @@ async function main() {
   let health = null;
   if (accessOk) {
     await publicRoutes();
+    await previewAnalyticsIsolation();
     await wpUtmVariants();
     health = await healthCheck();
     await adminListAndDashboard();

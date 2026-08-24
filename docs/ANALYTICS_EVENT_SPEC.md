@@ -82,3 +82,20 @@ placement in the privacy boundary before expecting it in the analytics ledger.
 Cross-domain GA4/GTM activation and external publication remain separate
 approval-controlled actions. The server-side ledger works independently of
 those tools.
+
+## Consent-gated GTM candidate
+
+The external measurement candidate reuses the GTM container already observed
+on OurTownProperties.com. It does not create another analytics store. The
+container is resolved only on canonical Production, only from the exact
+allowlisted public identifier, and only after an explicit analytics choice.
+Preview, automation, private/admin, operational-preview, iframe/widget, and
+known internal-QA contexts remain external-tag free.
+
+Browser events keep the existing sanitizer, then publish a flat GTM object with
+the event name, allowlisted properties, fixed `ask_magic_mike` source,
+`amm_public_v1` schema, and `public_production` traffic class. Advertising
+storage, advertising user data, and ad personalization remain denied. A
+dedicated `ammDataLayer` prevents this controlled queue from colliding with an
+unrelated browser tag runtime. The Neon ledger continues regardless of the
+optional Google Analytics choice.

@@ -19,10 +19,14 @@ vi.mock("../../app/lib/persistence/neonPublicExperimentRepository", () => ({
 
 import { POST } from "../../app/api/experiments/event/route";
 
-function request(body: unknown, origin = "https://www.askmagicmike.com") {
+function request(
+  body: unknown,
+  origin = "https://www.askmagicmike.com",
+  userAgent = "Mozilla/5.0 Chrome/140",
+) {
   return new Request("https://www.askmagicmike.com/api/experiments/event", {
     method: "POST",
-    headers: { "content-type": "application/json", origin },
+    headers: { "content-type": "application/json", origin, "user-agent": userAgent },
     body: JSON.stringify(body),
   });
 }
@@ -45,6 +49,26 @@ describe("POST /api/experiments/event", () => {
     expect(response.headers.get("cache-control")).toBe("private, no-store, max-age=0");
     expect(response.headers.get("pragma")).toBe("no-cache");
     await expect(response.json()).resolves.toMatchObject({ active: false, recorded: false, variant_key: null });
+  });
+
+  it("accepts but does not persist automated-browser experiment exposure", async () => {
+    const response = await POST(request(
+      {
+        experiment_key: "home_value_trust_promise_v1",
+        subject_key: "a".repeat(64),
+        event_name: "exposure",
+      },
+      "https://www.askmagicmike.com",
+      "Mozilla/5.0 HeadlessChrome/140",
+    ));
+    expect(response.status).toBe(202);
+    await expect(response.json()).resolves.toMatchObject({
+      active: false,
+      recorded: false,
+      excluded: "automation",
+    });
+    expect(rateLimitMock).not.toHaveBeenCalled();
+    expect(recordMock).not.toHaveBeenCalled();
   });
 
   it("rejects unapproved origins before repository access", async () => {
