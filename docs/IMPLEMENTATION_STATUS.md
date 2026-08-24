@@ -5,7 +5,7 @@ Updated 2026-08-24.
 ## Phase 9 lead-alert brand identity — 2026-08-24
 
 - **Reuse decision:** extend only the canonical lead-alert HTML renderer and
-  protected Message Review Studio on exact Draft PR #213 head
+  protected Message Review Studio in Draft PR #214 on exact Draft PR #213 head
   `d666289f91962cd836e87aec6cb3d809e93e72a7`. Preserve score bands, routing,
   recipients, outbox, BCC, providers, retry, suppression, and delivery gates.
 - **Implementation:** `lead_alert_email_v3` composes the approved Our Town logo
@@ -15,9 +15,11 @@ Updated 2026-08-24.
 - **Ledger integrity:** stored v1/v2 email alerts retain the legacy renderer on
   retry; unknown recorded template versions fail closed instead of silently
   changing content.
-- **Local acceptance:** focused lead-alert/notification tests, strict
-  TypeScript, and focused ESLint pass. Full release and rendered browser proof
-  are recorded in the branch QA evidence before PR sealing.
+- **Local acceptance:** Node 24 passes 234 files / 3,088 tests, strict
+  TypeScript, full ESLint, optimized Next.js 15.5.21 build, 84/17 route proof,
+  14/14 release safety, Ask Magic Mike / NellySelly deployable-source
+  isolation, and whitespace verification. Immutable exact-head Preview and
+  rendered browser proof are recorded before PR sealing.
 - **Safety:** no generated likeness was accepted; no lead, email/BCC, SMS/MMS,
   Push, consumer acknowledgment, provider call, database write/migration,
   Production action, WordPress/DNS change, publication, spend, deletion, or

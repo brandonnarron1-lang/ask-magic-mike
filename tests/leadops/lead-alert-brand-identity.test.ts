@@ -55,6 +55,10 @@ describe("lead-alert brand identity", () => {
     expect(rendered.html).toContain("/images/ask-magic-mike/brand-pack-v2/mike-avatar-circle-256.webp");
     expect(rendered.html).toContain('alt="Our Town Properties, Inc."');
     expect(rendered.html).toContain('alt="Mike Eatmon, Broker and REALTOR"');
+    expect(rendered.html).toContain('width="136"');
+    expect(rendered.html).toContain('width="80"');
+    expect(rendered.html).toContain("table-layout:fixed");
+    expect(rendered.html).toContain("overflow-wrap:anywhere");
     expect(rendered.html).toContain(rendered.visualTemplate.backgroundAssetPath);
     expect(rendered.html).not.toContain("data:image/");
     expect(rendered.html).not.toContain("LEAD_NOTIFICATION_BCC");

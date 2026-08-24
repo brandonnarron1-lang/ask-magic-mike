@@ -137,8 +137,17 @@ gate and must not be merged out of order:
    configuration review plus
    `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
 
+5. Draft PR [#214](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/214)
+   reuses the canonical notification renderer, approved Mike/Our Town assets,
+   urgency selector, and protected Message Review Studio for
+   `lead_alert_email_v3`. It is based on exact Draft PR #213 head
+   `d666289f91962cd836e87aec6cb3d809e93e72a7` and must remain after #213 in
+   release order. After all predecessors release, refresh onto exact `main`,
+   repeat full exact-head and no-send visual proof, then require
+   `APPROVE PHASE 9 LEAD-ALERT BRAND IDENTITY V3 MERGE AND PRODUCTION DEPLOYMENT`.
+
 The historical shorter conversion-identity phrase released PR #195 and is
-exhausted; it cannot authorize PR #213.
+exhausted; it cannot authorize PR #213 or PR #214.
 
 None of these later phrases can authorize another PR, secret, database write,
 form submission, notification, WordPress/DNS change, publication, spend,

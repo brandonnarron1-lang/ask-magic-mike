@@ -5,7 +5,8 @@
 Lead persistence is independent of email. After the atomic lead capture commits:
 
 1. Create one internal alert outbox row keyed by
-   `lead_alert:<lead_id>:lead_alert_email_v1`.
+   `lead_alert:<lead_id>:lead_alert_email_v3` for new alerts. Historical v1/v2
+   rows retain their recorded version and renderer during retry.
 2. Send to `LEAD_NOTIFICATION_TO` (default `mike@ourtownproperties.com`) and the
    secure `LEAD_NOTIFICATION_BCC` value, if configured. The BCC address is never
    rendered in the subject/body or logs.
