@@ -8,6 +8,45 @@ Production base: `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`
 
 Rescue ref: `rescue/amm-pre-cross-domain-measurement-20260824-0010`
 
+WordPress pre-change rescue ref:
+`rescue/amm-pr212-pre-wordpress-consent-bridge-20260824-0244`
+
+## Canonical WordPress bridge 1.2.0 consent repair candidate
+
+- The existing canonical plugin was extended in place; no second plugin,
+  consent banner, analytics property, lead database, or notification path was
+  added.
+- Lead forwarding remains independently controlled by
+  `AMM_CANONICAL_BRIDGE_ENABLED` plus its existing per-form allowlist.
+  Measurement independently defaults off behind
+  `AMM_GOOGLE_MEASUREMENT_ENABLED === true`.
+- The same-origin loader is rendered at `wp_head` priority 0, is pinned to
+  `GTM-KZMCSLTJ`, and requires the existing provider cookie to equal the exact
+  value `vv_cookieconsent_status=allow` before creating `dataLayer` or a Google
+  request.
+- Behavioral coverage proves missing, deny, dismiss, unknown, malformed,
+  wrong-container, and wrong-cookie states fail closed; explicit allow loads
+  one exact GTM runtime without duplication; an asynchronous allow is observed.
+- Static security coverage rejects dynamic-code execution, HTML injection,
+  cross-window messaging, and browser-navigation primitives in the loader.
+- The public preflight now recognizes only the canonical Basic Consent marker,
+  requires it before the existing cookie provider, and independently rejects a
+  legacy GTM bootstrap, GTM noscript bypass, alternate container, Ask-side
+  preconsent Google runtime, and NellySelly identity collision.
+- Focused Vitest: 3 files / 23 tests pass. PHP 8.1 CLI syntax check in an
+  isolated container: no syntax errors. `git diff --check`: pass.
+- Full local Node 24 release gate: system isolation pass, release safety 14/14,
+  219 test files / 2,990 tests, strict typecheck, full ESLint, optimized Next.js
+  build, and 82 active routes / 17 acknowledged duplicates — pass.
+- Release archive:
+  `output/release/ask-magic-mike-canonical-bridge-1.2.0.zip`.
+  SHA-256:
+  `6fdab89876c297e376c7e957436b97aa782c8df628c89225edc4cadad6ee6b54`.
+  Preserved 1.1.0 and 1.0.0 rollback archives remain untouched.
+- No WordPress file, setting, page, form, cookie, cache, GTM/GA4 account,
+  Production deployment, lead, notification, database row, or NellySelly
+  system was changed while preparing this package.
+
 ## Completed local evidence
 
 - Read-only live audit: Our Town HTTP 200 with one GTM container; Ask Magic

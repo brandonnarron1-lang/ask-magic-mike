@@ -17,6 +17,13 @@ queue covers only actions that still require a human or external-system gate.
   before the deferred cookie-choice provider. The read-only cross-domain
   preflight therefore returns `HOLD`. The gate is not requestable until that
   ordering and authenticated GTM/GA4 domain/consent configuration pass.
+- Canonical bridge 1.2.0 now contains the prepared, disabled-by-default repair.
+  It preserves the approved Form 3 bridge and replaces no indexed page or
+  cookie provider. Its first exact gate, after final PR/package evidence, is:
+  `APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA`.
+- That WordPress phrase authorizes backup, 1.2.0 installation, preservation of
+  current Form 3 settings, exact legacy GTM head/noscript removal, measurement
+  flag enablement, and reversible source/deny/allow/network QA only.
 - One live page-view row and one experiment-exposure attempt from the initial
   browser-routing error are disclosed in the QA evidence. No lead or message
   was created. Cleanup is not included in this candidate's release phrase.
@@ -57,31 +64,24 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    `5a3c5c7f2463ea399c21b616ff249f6c67e156b6` and accepted on Production
    deployment `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. It contained no migration,
    device enrollment, or send.
+7. PR [#195](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/195)
+   — its exact conversion-identity gate was received. Reviewed head
+   `db13953fc5f6d24a684f66c9a1c10c6b929b72b3` was merged as
+   `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and accepted on Production
+   deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Fresh read-only verification
+   passes 15/15 funnel and 19/19 smoke checks.
 
 These completed gates are exhausted and must not be reused as authority for a
 new action. None authorized a social/GBP post, email campaign, QR
 printing/distribution, consumer message, spend, DNS change, WordPress change,
 provider action, or deletion.
 
-## Next consolidated application candidate
+## Completed conversion identity release
 
-- Draft PR [#195](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/195)
-  is the sole next application candidate. It reuses the canonical home-value
-  funnel and adds required seller identity, field-specific focus/error
-  ownership, consumer-only footer navigation, and mutation-free visual QA.
-- It is refreshed onto released PR #194 merge
-  `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`; the prior stacked head is
-  preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
-  Local exact Node 24 and Chromium proof pass. The final no-write-harness head
-  must also have green exact-head GitHub CI and protected Vercel Preview
-  evidence attached to PR #195 before its gate is consumable.
-- Its only application release phrase is:
-  `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
-- That future phrase will authorize only the exact reviewed PR #195 merge and
-  canonical Vercel Production deployment. It will not authorize a WordPress
-  edit, GBP/social/email publication, QR distribution, message, lead
-  submission, migration, device enrollment, test Push, spend, DNS change,
-  provider action, deletion, or NellySelly action.
+- PR #195's approval phrase is exhausted. The application change is already on
+  main and live; repeating that phrase must not trigger a redundant deployment
+  or authorize any WordPress, Google, Vercel-environment, message, publication,
+  spend, DNS, deletion, or NellySelly action.
 
 ## Deferred candidates requiring refresh and overlap review
 

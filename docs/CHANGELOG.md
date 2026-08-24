@@ -28,6 +28,13 @@
 - Added a public, read-only activation preflight and recorded the current
   brokerage consent-order blocker: GTM and its Google tag initialize before the
   deferred cookie-choice provider, so cross-domain activation remains `HOLD`.
+- Extended the existing canonical WordPress bridge to a release-packaged 1.2.0
+  candidate with an independently disabled Basic Consent loader pinned to the
+  audited container. The loader treats only the provider's exact `allow` value
+  as consent and adds no legacy noscript bypass.
+- Updated the public preflight to require the canonical gate before the cookie
+  provider and reject legacy GTM bootstrap/noscript coexistence. Preserved the
+  prior bridge packages for rollback; no live WordPress change occurred.
 - No external analytics tag, Google/Vercel setting, Production deployment,
   provider, WordPress, publication, spend, or NellySelly action was performed.
 

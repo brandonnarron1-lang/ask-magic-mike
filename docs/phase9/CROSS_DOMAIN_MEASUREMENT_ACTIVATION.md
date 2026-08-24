@@ -1,6 +1,6 @@
 # Phase 9 Cross-Domain Measurement Activation
 
-Status: **code candidate; activation HOLD pending brokerage consent sequencing**
+Status: **code and WordPress 1.2.0 package candidate; live activation HOLD**
 
 Date: 2026-08-24
 
@@ -41,29 +41,43 @@ Read-only public checks on 2026-08-24 found:
 - Git history, remote branches, and the current repository contain no prior
   GTM loader to recover. The privacy-minimized Neon event ledger already exists
   and is reused.
+- The existing canonical WordPress bridge—not a new plugin—now contains a
+  disabled-by-default Basic Consent loader candidate. It is pinned to
+  `GTM-KZMCSLTJ`, executes before normal head output, and accepts only the
+  provider's exact `vv_cookieconsent_status=allow` state. No WordPress file,
+  page, cache, cookie setting, or GTM source has been changed live.
 
 ## Runtime contract
 
-The candidate adds one production-only loader with these boundaries:
+The candidate uses one approved GTM container through two consent-bound domain
+loaders with these boundaries:
 
-1. `NEXT_PUBLIC_GTM_CONTAINER_ID` is public configuration, not a credential.
-2. The loader resolves only when `VERCEL_ENV=production` and the value exactly
+1. On Our Town, canonical bridge 1.2.0 exposes no Google runtime unless
+   `AMM_GOOGLE_MEASUREMENT_ENABLED=true` and the existing provider cookie is
+   exactly `allow`. Missing, deny, dismiss, malformed, and unknown states are
+   inert. The loader has no advertising grant or noscript fallback.
+2. The WordPress gate appears at `wp_head` priority 0 and pins the exact fixed
+   Google URL/container in browser code. The current legacy GTM head bootstrap
+   and matching noscript iframe must be removed in the same controlled change;
+   coexistence is a release blocker.
+3. `NEXT_PUBLIC_GTM_CONTAINER_ID` is public configuration, not a credential.
+4. The Ask loader resolves only when `VERCEL_ENV=production` and the value exactly
    matches the container observed on OurTownProperties.com. A typo or a
    NellySelly container fails closed.
-3. Preview, local development, Vercel aliases, automation, private/admin,
+5. Preview, local development, Vercel aliases, automation, private/admin,
    phone-alert, operational-preview, iframe/embed, widget, and internal-QA
    contexts load no Google script.
-4. Basic consent mode is used: no Google script or request is created before
+6. Basic consent mode is used: no Google script or request is created before
    the visitor chooses **Allow analytics**.
-5. Before the approved container loads, consent commands default analytics and
+7. Before the approved Ask container loads, consent commands default analytics and
    all advertising purposes to denied. Only `analytics_storage` is updated to
    granted after the explicit choice. `ad_storage`, `ad_user_data`, and
    `ad_personalization` remain denied; ads-data redaction stays enabled and URL
    passthrough stays disabled.
-6. Decline stores only a device-local choice. Revocation sends a denied update,
+8. Decline stores only a device-local choice. Revocation sends a denied update,
    stops application event publication, removes the loader, and clears known
    Ask Magic Mike analytics cookies.
-7. The existing browser event sanitizer remains authoritative. The external
+9. The existing browser event sanitizer remains authoritative. The external
    publication boundary independently rechecks consent, the approved container,
    the public event registry, the property allowlist, and `is_test` exclusion.
    GTM receives a
@@ -72,9 +86,9 @@ The candidate adds one production-only loader with these boundaries:
    `event_source`, schema version, and `public_production` traffic class. Raw
    name, email, phone, address, message, click ID, referrer, lead ID, agent ID,
    and provider identifiers are not copied from the lead payload.
-8. The footer exposes an accessible Analytics preferences control. The privacy
+10. The footer exposes an accessible Analytics preferences control. The privacy
    page states the optional purpose and exclusions.
-9. Browser automation is excluded before first-party analytics/experiment
+11. Browser automation is excluded before first-party analytics/experiment
    fetches. Both public APIs independently accept-but-discard known automation
    user agents before rate limiting or persistence, protecting KPI trust when a
    browser runner hides `navigator.webdriver`.
@@ -94,69 +108,84 @@ Run the read-only public contract before opening any configuration gate:
 pnpm run amm:verify:cross-domain
 ```
 
-The command checks the public brokerage bootstrap, approved container identity,
-Google destination identity, Ask Magic Mike server-side tag inertia, consent
-ordering, and NellySelly isolation. It intentionally returns `HOLD` while the
-current brokerage consent ordering remains unresolved. A passing static check
-is necessary but not sufficient; authenticated GTM/GA4 and clean-browser
+The command checks for the canonical Basic Consent marker before the existing
+cookie provider, rejects any legacy GTM bootstrap or noscript bypass, verifies
+the approved container and Google destination identities, proves Ask Magic
+Mike server-side tag inertia, and checks NellySelly isolation. It intentionally
+returns `HOLD` against the current live brokerage source. A passing static
+check is necessary but not sufficient; authenticated GTM/GA4 and clean-browser
 network proof are still required.
 
 ## Authenticated activation checklist
 
 This checklist is intentionally separate from code review:
 
-1. Repair or explicitly approve the Our Town consent sequence. For the stated
-   basic-consent contract, no Google tag or measurement request may initialize
-   before the visitor grants analytics. Do not merely hide the banner or assume
-   the visible cookie choice controls the earlier GTM bootstrap.
-2. In authenticated GTM Preview/Consent Overview, prove the Google tag does not
+1. Use the separate WordPress gate below to back up the site, install canonical
+   bridge 1.2.0 with measurement initially disabled, remove only the exact
+   legacy GTM head/noscript source, enable the gate, and run controlled
+   deny/allow/source/network QA. Preserve the active Form 3 bridge settings.
+2. Require the public preflight to return `REVIEW_READY`; otherwise immediately
+   disable the measurement flag and follow the WordPress rollback.
+3. In authenticated GTM Preview/Consent Overview, prove the Google tag does not
    fire before the approved choice and that Decline keeps analytics and all
    advertising purposes denied.
-3. In the existing Google Tag / GA4 property, verify destination
+4. In the existing Google Tag / GA4 property, verify destination
    `G-RQRBB1G270` belongs to Our Town Properties and not NellySelly.
-4. Verify both `ourtownproperties.com` and `askmagicmike.com` are included in
+5. Verify both `ourtownproperties.com` and `askmagicmike.com` are included in
    **Configure your domains** for the same web stream.
-5. Review every published tag. Reject any tag that can
+6. Review every published tag. Reject any tag that can
    send user-provided data, lead fields, enhanced-conversion contact data, or
    advertising data outside the approved consent contract.
-6. Review the live OurTownProperties.com and AskMagicMike.com consent surfaces
+7. Review the live OurTownProperties.com and AskMagicMike.com consent surfaces
    with the owner/legal reviewer. Do not activate cross-domain cookie identity
    until both domains' consent behavior is approved and coherent.
-7. Confirm GA4 internal/developer traffic handling excludes controlled QA and
+8. Confirm GA4 internal/developer traffic handling excludes controlled QA and
    staff verification without filtering genuine public demand.
-8. Rerun `pnpm run amm:verify:cross-domain` and require `REVIEW_READY` before
+9. Rerun `pnpm run amm:verify:cross-domain` and require `REVIEW_READY` before
    entering a Vercel value.
-9. Add `NEXT_PUBLIC_GTM_CONTAINER_ID` to **Production only** in the canonical
+10. Add `NEXT_PUBLIC_GTM_CONTAINER_ID` to **Production only** in the canonical
    Vercel project. Do not add it to Preview.
-10. Merge the exact green candidate and allow Vercel Git integration to build
+11. Merge the exact green candidate and allow Vercel Git integration to build
    the same commit for Production.
-11. In a clean browser, prove Decline creates no Google request and no `_ga*`
+12. In a clean browser, prove Decline creates no Google request and no `_ga*`
    cookie. Then separately choose Allow and prove the approved container loads.
-12. Navigate through an existing tagged Our Town link to Ask Magic Mike. Verify
+13. Navigate through an existing tagged Our Town link to Ask Magic Mike. Verify
    `_gl` is present, both pages use the same GA4 destination/client identity,
    the destination returns 200, and UTMs remain intact.
-13. Verify one sanitized `page_view` and one non-contact funnel event in Tag
+14. Verify one sanitized `page_view` and one non-contact funnel event in Tag
    Assistant/GA4 DebugView. Do not submit a lead and do not use a genuine
    consumer identity for this measurement acceptance.
-14. Recheck Production runtime errors and the canonical Neon event ledger.
-15. Run a no-write browser verifier and confirm automation creates no
+15. Recheck Production runtime errors and the canonical Neon event ledger.
+16. Run a no-write browser verifier and confirm automation creates no
    first-party event/experiment POST and no external Google request.
 
 ## Rollback
 
-Fast rollback is to remove `NEXT_PUBLIC_GTM_CONTAINER_ID` from Production and
-redeploy the prior known-good commit. The server resolves a missing value to
-`null`, so no consent panel, Google script, or GTM event publication remains.
-No database migration or data rollback is involved. If the deployed code itself
-must be reverted, promote the prior READY Production deployment documented at
-the release gate.
+WordPress rollback is independent: set `AMM_GOOGLE_MEASUREMENT_ENABLED=false`.
+If necessary, restore the exact preserved legacy source and reinstall the
+preserved 1.1.0 package. Do not change the Form 3 bridge flag/allowlist or delete
+WordPress/Neon records. Ask rollback is to remove
+`NEXT_PUBLIC_GTM_CONTAINER_ID` from Production and redeploy/promote the prior
+known-good commit. The server resolves a missing value to `null`, so no Ask
+consent panel, Google script, or GTM event publication remains. No database
+migration or data rollback is involved.
 
 ## Exact Production gate
 
-No Google account setting, Vercel environment value, merge, or Production
-deployment is authorized by preparing this candidate. The phrase below is not
-requestable while the public preflight returns `HOLD`. After the consent-order
-blocker, authenticated review, exact-head CI, and Preview proof all pass, the
-required phrase is:
+No WordPress, Google, Vercel, merge, or Production deployment action is
+authorized by preparing this candidate. The first narrowly scoped gate, after
+the 1.2.0 package and rollback digest are release-sealed, is:
+
+`APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA`
+
+That phrase authorizes only backup, 1.2.0 installation, preservation of current
+Form 3 settings, exact legacy GTM head/noscript removal, measurement-flag
+enablement, and reversible deny/allow/source/network QA. It does not authorize
+the Vercel environment value, PR merge, Ask Production deployment, form/lead
+submission, message, publication, spend, DNS, deletion, or NellySelly action.
+
+The later application phrase is not requestable while the public preflight
+returns `HOLD`. After the WordPress gate, authenticated review, exact-head CI,
+and Preview proof all pass, the required phrase is:
 
 `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`

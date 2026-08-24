@@ -21,6 +21,13 @@
 - Added a read-only cross-domain activation preflight. Current public evidence
   correctly returns `HOLD` because the brokerage Google tag initializes before
   its deferred cookie-choice provider.
+- Extended the existing canonical WordPress bridge to a release-packaged 1.2.0
+  candidate with a separate, default-off Basic Consent loader. It accepts only
+  the existing provider's exact `allow` state, pins the audited GTM container,
+  and fails closed without a Google request or data layer for all other states.
+- Hardened the preflight to reject legacy GTM head/noscript coexistence and
+  preserved the 1.1.0/1.0.0 rollback packages. No live WordPress change was
+  made.
 - No Production configuration, deployment, lead, communication, provider,
   WordPress, publication, or NellySelly mutation was performed. One confirmed
   live page-view row and one exposure attempt from an initial browser-routing

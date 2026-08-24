@@ -6,6 +6,13 @@ const plugin = readFileSync(
   resolve(process.cwd(), "wordpress/ask-magic-mike-canonical-bridge/ask-magic-mike-canonical-bridge.php"),
   "utf8",
 );
+const consentGate = readFileSync(
+  resolve(
+    process.cwd(),
+    "wordpress/ask-magic-mike-canonical-bridge/assets/amm-consent-gate.js",
+  ),
+  "utf8",
+);
 
 describe("WordPress canonical bridge contract", () => {
   it("uses the post-save Gravity Forms hook and an explicit 1-7 allowlist", () => {
@@ -28,7 +35,7 @@ describe("WordPress canonical bridge contract", () => {
   });
 
   it("requires an explicit audited per-form allowlist even when globally enabled", () => {
-    expect(plugin).toContain("Version: 1.1.0");
+    expect(plugin).toContain("Version: 1.2.0");
     expect(plugin).toContain("AMM_CANONICAL_BRIDGE_FORM_IDS");
     expect(plugin).toContain("WORDPRESS_BRIDGE_FORM_IDS");
     expect(plugin).toContain("enabledForForm");
@@ -47,5 +54,30 @@ describe("WordPress canonical bridge contract", () => {
     expect(plugin).toContain("'gf:' . $form_id . ':' . $entry_id");
     expect(plugin).toContain("private const MAX_ATTEMPTS = 3");
     expect(plugin).toContain("wp_schedule_single_event");
+  });
+
+  it("keeps measurement independently disabled unless explicitly enabled", () => {
+    expect(plugin).toContain("AMM_GOOGLE_MEASUREMENT_ENABLED");
+    expect(plugin).toContain("AMM_GOOGLE_MEASUREMENT_ENABLED === true");
+    expect(plugin).toContain("add_action('wp_head'");
+    expect(plugin).toContain("'render_measurement_gate'), 0");
+    expect(plugin).toContain('data-amm-consent-gate="basic-v1"');
+    expect(plugin).toContain("GTM-KZMCSLTJ");
+    expect(plugin).toContain("vv_cookieconsent_status");
+    expect(plugin).toContain("Disabled — no Google measurement loader");
+  });
+
+  it("ships a fixed Basic Consent loader with no legacy noscript bypass", () => {
+    expect(consentGate).toContain('EXPECTED_CONTAINER = "GTM-KZMCSLTJ"');
+    expect(consentGate).toContain('EXPLICIT_ALLOW = "allow"');
+    expect(consentGate).toContain("document.cookie");
+    expect(consentGate).toContain("window.dataLayer");
+    expect(consentGate).toContain('ad_storage: "denied"');
+    expect(consentGate).toContain('ad_user_data: "denied"');
+    expect(consentGate).toContain('ad_personalization: "denied"');
+    expect(consentGate).toContain('analytics_storage: "granted"');
+    expect(consentGate).toContain('"ads_data_redaction", true');
+    expect(consentGate).toContain('"url_passthrough", false');
+    expect(plugin).not.toContain("googletagmanager.com/ns.html");
   });
 });

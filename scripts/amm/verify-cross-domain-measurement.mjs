@@ -9,6 +9,7 @@
 import { fileURLToPath } from "node:url";
 
 export const APPROVED_GTM_CONTAINER_ID = "GTM-KZMCSLTJ";
+export const BASIC_CONSENT_GATE_VERSION = "basic-v1";
 
 export function extractGtmContainerIds(source) {
   return [...new Set(String(source).match(/GTM-[A-Z0-9]+/g) ?? [])].sort();
@@ -30,16 +31,30 @@ export function inspectCrossDomainMeasurementContract({
 }) {
   const brokerageContainers = extractGtmContainerIds(brokerageHtml);
   const measurementIds = extractGoogleMeasurementIds(containerSource);
-  const gtmBootstrapIndex = String(brokerageHtml).indexOf(
-    "www.googletagmanager.com/gtm.js",
+  const brokerageSource = String(brokerageHtml);
+  const basicConsentGateIndex = firstMatchIndex(
+    brokerageSource,
+    /data-amm-consent-gate\s*=\s*["']basic-v1["']/i,
   );
-  const consentDefaultIndex = firstMatchIndex(
-    String(brokerageHtml),
-    /["']consent["']\s*,\s*["']default["']/i,
-  );
-  const cookieChoiceProviderIndex = String(brokerageHtml).indexOf(
+  const cookieChoiceProviderIndex = brokerageSource.indexOf(
     "data.processwebsitedata.com/cscripts/",
   );
+  const legacyGtmBootstrapDetected =
+    /www\.googletagmanager\.com\/gtm\.js(?:\?|["'])/i.test(brokerageSource);
+  const legacyGtmNoscriptDetected =
+    /www\.googletagmanager\.com\/ns\.html\?id=GTM-[A-Z0-9]+/i.test(
+      brokerageSource,
+    );
+  const canonicalBasicGateDetected =
+    basicConsentGateIndex >= 0 &&
+    new RegExp(
+      `data-amm-gtm-container\\s*=\\s*["']${APPROVED_GTM_CONTAINER_ID}["']`,
+      "i",
+    ).test(brokerageSource);
+  const basicGatePrecedesCookieChoiceProvider =
+    basicConsentGateIndex >= 0 &&
+    cookieChoiceProviderIndex >= 0 &&
+    basicConsentGateIndex < cookieChoiceProviderIndex;
   const googleTagFiresOnInitialization =
     /"function":"__googtag"/.test(containerSource) &&
     /"arg1":"gtm\.init"/.test(containerSource) &&
@@ -57,21 +72,17 @@ export function inspectCrossDomainMeasurementContract({
   ) {
     blockers.push("brokerage_container_identity_mismatch");
   }
-  if (
-    gtmBootstrapIndex < 0 ||
-    consentDefaultIndex < 0 ||
-    consentDefaultIndex > gtmBootstrapIndex
-  ) {
-    blockers.push("brokerage_consent_default_not_before_gtm");
+  if (!canonicalBasicGateDetected) {
+    blockers.push("brokerage_basic_consent_gate_missing");
   }
-  if (
-    cookieChoiceProviderIndex < 0 ||
-    (gtmBootstrapIndex >= 0 && cookieChoiceProviderIndex > gtmBootstrapIndex)
-  ) {
-    blockers.push("brokerage_cookie_choice_provider_not_before_gtm");
+  if (!basicGatePrecedesCookieChoiceProvider) {
+    blockers.push("brokerage_basic_gate_not_before_cookie_choice_provider");
   }
-  if (googleTagFiresOnInitialization) {
-    blockers.push("brokerage_google_tag_fires_on_initialization");
+  if (legacyGtmBootstrapDetected) {
+    blockers.push("brokerage_legacy_gtm_bootstrap_present");
+  }
+  if (legacyGtmNoscriptDetected) {
+    blockers.push("brokerage_legacy_gtm_noscript_present");
   }
   if (askHasServerGoogleBootstrap) {
     blockers.push("ask_production_has_preconsent_google_bootstrap");
@@ -86,15 +97,11 @@ export function inspectCrossDomainMeasurementContract({
     facts: {
       brokerageContainers,
       measurementIds,
-      gtmBootstrapDetected: gtmBootstrapIndex >= 0,
-      consentDefaultPrecedesGtm:
-        consentDefaultIndex >= 0 &&
-        gtmBootstrapIndex >= 0 &&
-        consentDefaultIndex < gtmBootstrapIndex,
-      cookieChoiceProviderPrecedesGtm:
-        cookieChoiceProviderIndex >= 0 &&
-        gtmBootstrapIndex >= 0 &&
-        cookieChoiceProviderIndex < gtmBootstrapIndex,
+      canonicalBasicGateDetected,
+      basicGatePrecedesCookieChoiceProvider,
+      cookieChoiceProviderDetected: cookieChoiceProviderIndex >= 0,
+      legacyGtmBootstrapDetected,
+      legacyGtmNoscriptDetected,
       googleTagFiresOnInitialization,
       askHasServerGoogleBootstrap,
       identityCollisionDetected,
@@ -131,6 +138,10 @@ async function run() {
   console.log(`Verdict: ${result.readyForAuthenticatedActivationReview ? "REVIEW_READY" : "HOLD"}`);
   console.log(`Approved brokerage container: ${result.facts.brokerageContainers.join(", ") || "not detected"}`);
   console.log(`Google measurement destinations: ${result.facts.measurementIds.join(", ") || "not detected"}`);
+  console.log(`Canonical Basic Consent gate detected: ${result.facts.canonicalBasicGateDetected}`);
+  console.log(`Legacy GTM bootstrap present: ${result.facts.legacyGtmBootstrapDetected}`);
+  console.log(`Legacy GTM noscript present: ${result.facts.legacyGtmNoscriptDetected}`);
+  console.log(`Container tags fire after permitted load: ${result.facts.googleTagFiresOnInitialization}`);
   console.log(`Ask server HTML is tag-inert: ${!result.facts.askHasServerGoogleBootstrap}`);
   console.log(`NellySelly identity collision: ${result.facts.identityCollisionDetected}`);
   for (const blocker of result.blockers) console.log(`BLOCKER ${blocker}`);

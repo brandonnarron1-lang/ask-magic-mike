@@ -26,6 +26,17 @@ Updated 2026-08-24.
   `amm:verify:cross-domain` preflight therefore reports `HOLD`; no Production
   measurement activation is eligible until brokerage consent sequencing and
   authenticated GTM/GA4 review pass.
+- The existing canonical WordPress bridge is upgraded locally from 1.1.0 to a
+  reversible 1.2.0 package. Its independently disabled Basic Consent gate runs
+  before normal head output, accepts only
+  `vv_cookieconsent_status=allow`, pins `GTM-KZMCSLTJ`, and contains no
+  noscript bypass. The verifier now rejects coexistence with the current legacy
+  GTM head/noscript source. Focused behavior/security coverage passes 23/23 and
+  PHP 8.1 syntax passes. No live WordPress change occurred.
+- The post-upgrade local Node 24 release gate passes isolation, 14/14 safety,
+  219 test files / 2,990 tests, strict typecheck, full ESLint, optimized build,
+  and the 82-route manifest. Exact-head GitHub/Preview evidence is still
+  required after commit and push.
 - KPI trust now excludes HeadlessChrome/Playwright/Puppeteer on both the client
   and the public analytics/experiment APIs. A disclosed first browser-routing
   error emitted one confirmed live page-view row and one exposure attempt; no
@@ -56,7 +67,10 @@ Updated 2026-08-24.
 - Detailed design and evidence:
   `docs/phase9/CROSS_DOMAIN_MEASUREMENT_ACTIVATION.md` and
   `docs/phase9/CROSS_DOMAIN_MEASUREMENT_QA_EVIDENCE.md`.
-- Future exact gate:
+- First exact gate after final package/PR evidence:
+  `APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA`.
+- Later application gate after WordPress runtime proof and authenticated GTM/GA4
+  review:
   `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
 
 ## Phase 9 conversion identity polish — 2026-08-22
@@ -78,18 +92,23 @@ Updated 2026-08-24.
   2,950 tests, strict typecheck, ESLint, optimized build, 82 active routes,
   14/14 safety, 43/43 doctor, system isolation, eight Chromium homepage/widget
   checks, dependency audit, candidate secret scan, diff check, and empty
-  migration scan. The final no-write-harness head still requires exact-head
-  GitHub Node 24 CI and canonical protected Preview proof after push.
+  migration scan. The final no-write-harness head passed exact-head GitHub Node
+  24 CI and canonical protected Preview proof.
 - The branch is refreshed onto released PR #194 merge
   `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`; its prior stacked head is
   preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
   The only automatic conflict was the cumulative QA evidence document; the
   application merge was clean.
+- PR #195 head `db13953fc5f6d24a684f66c9a1c10c6b929b72b3` was merged as
+  Production/main `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and accepted on
+  Vercel deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Fresh read-only
+  acceptance passes 15/15 conversion checks and 19/19 Production smoke checks
+  with two intentional authenticated/write skips.
 - Detailed decision and QA:
   `docs/phase9/CONVERSION_IDENTITY_POLISH.md` and
   `docs/phase9/CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
-- Future exact gate:
-  `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
+- Its approval phrase is exhausted and must not be reused for another merge or
+  deployment.
 
 ## Phase 9 iOS phone handoff consolidation — 2026-08-22
 
