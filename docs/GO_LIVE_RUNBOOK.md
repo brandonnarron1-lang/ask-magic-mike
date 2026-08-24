@@ -58,7 +58,7 @@ When the change touches capture, routing, email, push, SMS, or sequences:
 
 ## Durable rate-limit readiness release
 
-For PR #202, add only the dedicated 32-or-more-character
+For PR #209, add only the dedicated 32-or-more-character
 `RATE_LIMIT_HASH_SECRET` through the Ask Magic Mike Vercel Production secret
 interface under its exact combined gate. Never display, copy into chat, or
 persist the value in a shell argument or file. The old immutable deployment
@@ -95,11 +95,11 @@ Release only one approved PR at a time and verify Production before advancing:
 
 1. `#180`, `#181`, `#183`, `#184`, `#185`, `#193`, `#196`, `#194`, and
    `#195` are complete and their gates are exhausted.
-2. `#202` is the next isolated durability candidate. Its earlier proof is
-   superseded; use only the hardened exact-head evidence and its dedicated gate.
-3. After #202 is accepted on Production, refresh and re-prove #197 on the exact
-   new `main`. PRs #198–#201 remain ordered behind #197 and retain separate
-   gates.
+2. `#209` is the sole next atomic application candidate. It contains the
+   reviewed cumulative work from #202 through #208 once; those incremental PRs
+   have no independent merge or Production authority.
+3. Any later stacked candidate remains non-authoritative until #209 is accepted,
+   refreshed onto the exact new `main`, re-proven, and given its own exact gate.
 
 Do not merge or deploy candidates out of order. Rebase and re-prove each one
 after its predecessor is released.

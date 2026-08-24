@@ -12,6 +12,8 @@ const consolidationPlan = readDoc("CONSOLIDATION_PLAN.md");
 const ownerQueue = readDoc("OWNER_APPROVAL_QUEUE.md");
 const knownBlockers = readDoc("KNOWN_BLOCKERS.md");
 const knownLimitations = readDoc("KNOWN_LIMITATIONS.md");
+const goLiveRunbook = readDoc("GO_LIVE_RUNBOOK.md");
+const rollbackPlan = readDoc("ROLLBACK_PLAN.md");
 
 const operatingDocs = [
   currentState,
@@ -21,6 +23,8 @@ const operatingDocs = [
   ownerQueue,
   knownBlockers,
   knownLimitations,
+  goLiveRunbook,
+  rollbackPlan,
 ].join("\n");
 
 const productionCommit =
@@ -81,11 +85,20 @@ describe("current release-authority documentation", () => {
       "PR #185 is the single consolidation vehicle",
       "The Production baseline is PR #184",
       "PR #183 is merged and live. PR #184",
+      "For PR #202, add only the dedicated",
+      "PR #202 has no migration. Before release",
+      "#202` is the next isolated durability candidate",
     ];
 
     for (const staleClaim of staleAuthorityClaims) {
       expect(operatingDocs).not.toContain(staleClaim);
     }
+  });
+
+  it("binds the go-live and rollback runbooks to the atomic PR #209 candidate", () => {
+    expect(goLiveRunbook).toContain("For PR #209, add only the dedicated");
+    expect(goLiveRunbook).toMatch(/`#209` is the sole next atomic application candidate/);
+    expect(rollbackPlan).toContain("PR #209 has no migration. Before release");
   });
 
   it("preserves incremental PRs as evidence without independent authority", () => {

@@ -161,3 +161,34 @@ Production acceptance is not claimable until the dedicated encrypted secret is
 entered under the exact gate and the merged deployment reports every store
 capability true, `rate_limit_required=true`, `rate_limit_secret_ready=true`, and
 `rate_limit_ready=true` through the exact Vercel runtime role.
+
+## Atomic PR #209 security-proof refresh — 2026-08-23
+
+- Preserved the reviewed pre-refresh head `2ccc654cb131d1a448234225fc18670893f84251`
+  at remote rescue ref
+  `rescue/amm-pr209-pre-security-proof-20260823-2313` before changing anything.
+- Independent `NEXT-DOS-001`, `NEXT-SECRETS-001/002`, `NEXT-INJECT-001`, and
+  `NEXT-LOG-001` review confirmed that durable identifiers are
+  HMAC-SHA-256 pseudonyms, Neon values are parameterized, the capability probe
+  is read-only, raw driver errors are reduced to bounded codes, and no
+  rate-limit server module enters a client bundle.
+- [Vercel's request-header contract](https://vercel.com/docs/headers/request-headers)
+  confirms that Vercel overwrites `x-forwarded-for` to prevent spoofing and
+  supplies the public client IP. The existing limiter-key source is therefore
+  retained for this Vercel-hosted deployment.
+- Added a route-level regression proving canonical Production `/api/leads`
+  returns HTTP 503 before body parsing or persistence when the limiter is
+  non-durable and the exact break-glass value is absent. No request, database,
+  lead, event, or provider mutation is involved.
+- Corrected the go-live and rollback runbooks so PR #209, not superseded
+  incremental PR #202, is the sole next atomic application release candidate.
+  The documentation contract now covers both operating files.
+- Focused post-change matrix: 10 files / 109 tests passed. Full local matrix:
+  229 files / 3,061 tests passed; strict typecheck, ESLint, optimized Next.js
+  15.5.21 build, 84 app-manifest entries, 14/14 release safety, Ask/NellySelly
+  isolation, and Production dependency audit all passed.
+- Local execution used Node 26.5.1 while the repository requires Node 24.x.
+  Exact-head Node 24 GitHub CI and the canonical Vercel Preview remain required
+  after push. Playwright/browser mutation QA was not run and no Production
+  secret, merge, deployment, database write, message, WordPress change, or
+  NellySelly action occurred.
