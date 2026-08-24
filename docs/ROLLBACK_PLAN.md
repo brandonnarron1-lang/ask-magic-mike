@@ -55,7 +55,7 @@ rollback instruction.
 
 ## Phase 9 durable rate-limit readiness
 
-PR #202 has no migration. Before release, record the exact prior Ready Vercel
+PR #209 has no migration. Before release, record the exact prior Ready Vercel
 deployment. If any store-capability, dedicated-secret, malformed-request, log,
 or monitor acceptance check fails, restore that deployment/alias first. The
 prior immutable deployment does not gain a newly added Vercel environment
