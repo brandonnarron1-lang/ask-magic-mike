@@ -18,7 +18,7 @@ export default function PlanPage() {
         <div className="mx-auto max-w-7xl"><BlackDiamondHeader /></div>
       </section>
 
-      <section className="px-5 pb-12 pt-10 sm:px-8 sm:pb-16 lg:px-10 lg:pt-16">
+      <section id="page-content" tabIndex={-1} className="px-5 pb-12 pt-10 sm:px-8 sm:pb-16 lg:px-10 lg:pt-16">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_22rem] lg:items-end">
           <div>
             <p className="amm-eyebrow">Real Estate Review Planner</p>

@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-08-23 — Ask conversion clarity and keyboard-access candidate
+
+- Preserved the existing Black Diamond visual system, Ask chat API, canonical
+  lead preparation path, analytics, attribution, and 2,000-character server
+  contract; no new funnel, AI provider, lead store, or component system was
+  created.
+- Replaced product-centric “interface” language on `/ask` with a shorter
+  consumer action and a clear visible question label.
+- Added required, named, bounded, and mobile-keyboard-aware semantics to the
+  existing Ask question input without collecting another data field.
+- Added one reusable focus-visible skip link to the shared public header and a
+  real programmatically focusable content target on every surface using that
+  header.
+- Added DOM and source contracts for link order, focus movement, field
+  semantics, server-limit parity, and complete shared-header target coverage.
+- No migration, Production action, lead/event write, AI/provider request,
+  message, WordPress edit, publication, spend, DNS change, deletion, or
+  NellySelly action occurred.
+
 ## 2026-08-23 — Canonical campaign-alias consolidation candidate
 
 - Reused the existing Phase 9.5 metadata, sitemap, crawl-policy, and structured-

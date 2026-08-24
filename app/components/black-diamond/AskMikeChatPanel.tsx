@@ -144,7 +144,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
     >
       <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#22c6d2]">Ask Mike</p>
       <h2 className="mt-3 font-serif text-3xl leading-tight text-[#f4ead4]">
-        A local-advisor interface for practical real estate decisions.
+        Start with the real estate question on your mind.
       </h2>
       <div className="mt-6 rounded-lg border border-white/10 bg-black/45 p-4">
         <div className="flex items-center gap-3 border-b border-white/10 pb-4">
@@ -218,20 +218,29 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
         ) : null}
         <form onSubmit={submit} className="mt-5">
           <label className="block">
-            <span className="sr-only">Ask Mike message</span>
+            <span className="mb-2 block text-sm font-semibold text-[#f4ead4]">
+              Your real estate question <span className="font-normal text-[#8f8778]">(required)</span>
+            </span>
             <input
+              type="text"
+              name="question"
               value={input}
               onChange={(event) => setInput(event.target.value)}
               onFocus={() => markStarted("message_focus")}
               placeholder="Ask Mike a real estate question..."
+              required
+              maxLength={2_000}
+              autoComplete="off"
+              enterKeyHint="send"
+              aria-describedby="ask-mike-question-help"
               className="amm-form-field rounded-full bg-black/60"
             />
           </label>
-          <button disabled={submitting} aria-busy={submitting} className="amm-cyan-button mt-3 w-full px-5 py-3 disabled:opacity-60">
+          <button type="submit" disabled={submitting} aria-busy={submitting} className="amm-cyan-button mt-3 w-full px-5 py-3 disabled:opacity-60">
             {submitting ? "Sending" : "Send Question"}
           </button>
         </form>
-        <p className="mt-4 text-xs leading-5 text-[#8f8778]">
+        <p id="ask-mike-question-help" className="mt-4 text-xs leading-5 text-[#8f8778]">
           For pricing, listing strategy, or property-specific facts, Mike or the Our Town Properties team should verify details directly.
         </p>
       </div>

@@ -26,7 +26,7 @@ export default function OurTownIntegrationPage() {
           <BlackDiamondHeader />
         </div>
       </section>
-      <section className="px-5 py-14 sm:px-8 lg:px-10">
+      <section id="page-content" tabIndex={-1} className="px-5 py-14 sm:px-8 lg:px-10">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.85fr_1.15fr]">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">OurTownProperties.com integration</p>

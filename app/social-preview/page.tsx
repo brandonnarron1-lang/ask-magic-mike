@@ -17,7 +17,7 @@ export default function SocialPreviewPage() {
           <BlackDiamondHeader />
         </div>
       </section>
-      <section className="px-5 py-14 sm:px-8 lg:px-10">
+      <section id="page-content" tabIndex={-1} className="px-5 py-14 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">Social previews</p>
           <h1 className="mt-4 max-w-3xl font-serif text-5xl leading-tight sm:text-6xl">

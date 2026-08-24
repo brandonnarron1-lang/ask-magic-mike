@@ -10,7 +10,7 @@ export default function NotFound() {
           <BlackDiamondHeader />
         </div>
       </section>
-      <section className="amm-section">
+      <section id="page-content" tabIndex={-1} className="amm-section">
         <div className="amm-container grid min-h-[56svh] gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
             <p className="amm-eyebrow">Page not found</p>

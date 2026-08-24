@@ -1,5 +1,35 @@
 # QA Evidence
 
+## Phase 9 Ask conversion clarity and keyboard access — 2026-08-23
+
+- Production read-only DOM inspection — PASS for evidence collection: `/ask`
+  returned its route-specific title, one main landmark, one question field,
+  and no framework-error state. The first focusable control was the logo link;
+  no skip link was present. No form, prompt, lead, AI request, or event was
+  submitted.
+- Official mechanism review — PASS: W3C WCAG 2.2 Technique G1 describes a
+  first focusable link that bypasses repeated content and moves focus to main
+  content; WAI form guidance recommends an associated label, visible required
+  instruction, the native `required` attribute, and input bounds that match
+  the process.
+- Focused Node 24.18.0 verification — PASS: 3 files / 11 tests for shared-
+  header focus targeting, Ask field semantics, server-limit parity, all 12
+  target surfaces, existing public UX behavior, and home-value validation.
+- Full local verification — PASS: 231 files / 3,065 tests, strict typecheck,
+  full ESLint, optimized Next.js build with 52 generated static pages,
+  83 active / 17 acknowledged routes, release safety 14/14, and Ask Magic Mike
+  / NellySelly isolation. Production dependency audit reports no known
+  vulnerability; redacted full-history gitleaks scans 574 commits with no
+  leak.
+- Screenshot evidence — unavailable, not inferred: browser capture timed out
+  on `/`, `/ask`, and a neutral control page. No blank, partial, stale, or
+  indirect screenshot was accepted. Exact-head Vercel Preview responsive and
+  focus-visible acceptance remains required before a release gate is valid.
+- External-state boundary — PASS: no database migration/read/write, lead,
+  analytics event, AI/provider request, email/BCC, SMS, Push, consumer
+  acknowledgment, WordPress edit, publication, DNS change, spend, deletion, or
+  NellySelly action occurred.
+
 ## Phase 9 field-experience fast-track — 2026-08-23
 
 - Source preservation — PASS: donor PR #199 exact head

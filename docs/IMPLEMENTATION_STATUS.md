@@ -2,6 +2,38 @@
 
 Updated 2026-08-23.
 
+## Phase 9 Ask conversion clarity and keyboard access — 2026-08-23
+
+- **Reuse decision:** stack only the focused Ask/public-header correction on
+  canonical alias candidate `e41957ee6abe62a5ec15207cb3574efd6fc79ecc`.
+  Rescue ref `rescue/amm-pre-ask-conversion-accessibility-20260823-2235`
+  preserves the exact pre-change state.
+- **Evidence:** the current rendered Production DOM has one main landmark and
+  a labeled Ask field but no skip link; the active source still used
+  product-centric “advisor interface” language and allowed a blank Send action
+  to no-op before the server's required-message boundary.
+- **Implementation:** the shared Black Diamond header now exposes the first
+  focusable `Skip to main content` link, focuses one `#page-content` target,
+  and retains an href fallback. All 12 shared-header surfaces provide that
+  target with `tabIndex={-1}`. `/ask` uses consumer-action copy and a visible
+  required label; its existing field now declares the canonical 2,000-
+  character limit, name, type, autocomplete behavior, mobile enter hint, and
+  contextual description.
+- **Local acceptance:** exact Node 24.18.0 passes 3 focused files / 11 tests,
+  all 231 files / 3,065 tests, strict typecheck, ESLint, optimized Next.js
+  15.5.21 build with 52 static pages, 83/17 route proof, release safety 14/14,
+  system isolation, a no-vulnerability Production dependency audit, and a
+  redacted 574-commit secret scan with no leaks.
+- **Evidence limit:** current in-app screenshot capture timed out on both the
+  target and a neutral control page, so no screenshot was accepted and no
+  visual-audit claim is made. DOM/source/unit evidence is complete for this
+  narrow behavior; exact-head Preview visual acceptance remains mandatory.
+- **Safety:** no migration or external mutation. This candidate follows the
+  sealed PR #209 and Draft PR #210 stack; it has no independent authority to
+  merge or deploy.
+- Detailed scope: `docs/phase9/ASK_CONVERSION_ACCESSIBILITY_CLARITY.md` and
+  `docs/phase9/ASK_CONVERSION_ACCESSIBILITY_CLARITY_QA_EVIDENCE.md`.
+
 ## Phase 9 field-experience trust fast-track — 2026-08-23
 
 - **Reuse decision:** preserve PR #199 exact head
