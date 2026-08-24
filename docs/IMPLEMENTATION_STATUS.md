@@ -1,6 +1,6 @@
 # Implementation Status
 
-Updated 2026-08-23.
+Updated 2026-08-24.
 
 ## Phase 9 Ask conversion clarity and keyboard access — 2026-08-23
 
@@ -24,10 +24,15 @@ Updated 2026-08-23.
   15.5.21 build with 52 static pages, 83/17 route proof, release safety 14/14,
   system isolation, a no-vulnerability Production dependency audit, and a
   redacted 574-commit secret scan with no leaks.
+- **Protected Preview acceptance:** the exact candidate head
+  `af22494d96bc3fe1ec930a24f350e4b3e863fe2f` renders on its immutable Vercel
+  Preview. Fresh in-app checks prove skip-link focus treatment and target
+  activation, native empty-submit blocking with no API request, 390x844
+  no-overflow geometry, and a warning/error-free inspected console.
 - **Evidence limit:** current in-app screenshot capture timed out on both the
-  target and a neutral control page, so no screenshot was accepted and no
-  visual-audit claim is made. DOM/source/unit evidence is complete for this
-  narrow behavior; exact-head Preview visual acceptance remains mandatory.
+  target and a neutral control page; the operating-system fallback returned an
+  unusable black virtual-surface frame. No screenshot was accepted and no
+  screenshot-level visual-audit or full-accessibility claim is made.
 - **Safety:** no migration or external mutation. This candidate follows the
   sealed PR #209 and Draft PR #210 stack; it has no independent authority to
   merge or deploy.

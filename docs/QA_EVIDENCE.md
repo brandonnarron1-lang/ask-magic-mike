@@ -23,8 +23,16 @@
   leak.
 - Screenshot evidence — unavailable, not inferred: browser capture timed out
   on `/`, `/ask`, and a neutral control page. No blank, partial, stale, or
-  indirect screenshot was accepted. Exact-head Vercel Preview responsive and
-  focus-visible acceptance remains required before a release gate is valid.
+  indirect screenshot was accepted.
+- Exact-head protected Preview — PASS for narrow rendered contracts on
+  2026-08-24 at commit `af22494d96bc3fe1ec930a24f350e4b3e863fe2f`:
+  route/title/content loaded, the focused skip control rendered inside the
+  viewport with an explicit outline and focus shadow, activation focused
+  `#page-content`, empty native validation generated no `/api/*` request,
+  390x844 geometry had no horizontal overflow, and the inspected console had
+  no warning or error. Screenshot-level visual acceptance and full-WCAG claims
+  remain explicitly unproven because both integrated and operating-system
+  capture paths failed to return a usable frame.
 - External-state boundary — PASS: no database migration/read/write, lead,
   analytics event, AI/provider request, email/BCC, SMS, Push, consumer
   acknowledgment, WordPress edit, publication, DNS change, spend, deletion, or
