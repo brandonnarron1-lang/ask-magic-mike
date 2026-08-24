@@ -1,5 +1,23 @@
 # QA Evidence
 
+## Phase 9 home-value completion-integrity refresh — 2026-08-24
+
+- Draft PR #215 reuses the canonical Home Value funnel and lead command after
+  exact final Draft PR #214 `94e3d66190df138d42c1321adfeb0cefb0478545`.
+- Former PR #215 head `0e47db8780c7257f0d445d75e034aacd535c06a4`
+  is preserved at
+  `rescue/amm-pr215-pre-final-pr214-cutover-hygiene-20260824-174316`.
+- The parent merge conflicted only in additive changelog and release-order
+  documentation. No funnel, API, lead, notification, provider, or analytics
+  application file required manual conflict resolution.
+- Prior candidate local, CI, Preview, and browser evidence is historical. Fresh
+  exact-head Node 24, immutable Preview, protected no-write, write-intercepted
+  interaction, security, isolation, and deployment-log proof are required.
+- No Production, database, lead/event, message, provider, WordPress, DNS,
+  publication, spend, deletion, or NellySelly action occurred.
+- Full scope:
+  `docs/phase9/HOME_VALUE_COMPLETION_INTEGRITY_QA_EVIDENCE.md`.
+
 ## Phase 9 lead-alert brand identity v3 refresh — 2026-08-24
 
 - Draft PR #214 reuses the canonical notification renderer, approved Mike/Our

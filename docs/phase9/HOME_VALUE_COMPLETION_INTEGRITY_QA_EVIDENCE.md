@@ -6,10 +6,17 @@ Candidate: Draft PR #215 on
 `codex/phase9-home-value-completion-integrity-20260824`
 
 Parent: exact sealed Draft PR #214 head
-`3ac0885a6f19fc479266457cff760ef836094470`
+`94e3d66190df138d42c1321adfeb0cefb0478545`
 
 Pre-refresh recovery branch:
-`rescue/amm-pr215-pre-pr214-seal-sync-20260824-1329`
+`rescue/amm-pr215-pre-final-pr214-cutover-hygiene-20260824-174316`
+
+The earlier `rescue/amm-pr215-pre-pr214-seal-sync-20260824-1329` ref remains
+historical. The final-parent refresh conflicted only in additive changelog and
+release-order documentation. No funnel, API, lead-lifecycle, notification,
+provider, or analytics application file required manual conflict resolution.
+Every local, CI, Preview, and browser result below predating this refresh is
+historical until repeated on the current GitHub PR head.
 
 ## Data-quality evidence
 

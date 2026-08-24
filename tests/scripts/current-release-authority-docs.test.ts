@@ -38,6 +38,12 @@ const leadAlertIdentityDecision = readDoc(
 const leadAlertIdentityEvidence = readDoc(
   "phase9/LEAD_ALERT_BRAND_IDENTITY_QA_EVIDENCE.md"
 );
+const homeValueCompletionDecision = readDoc(
+  "phase9/HOME_VALUE_COMPLETION_INTEGRITY.md"
+);
+const homeValueCompletionEvidence = readDoc(
+  "phase9/HOME_VALUE_COMPLETION_INTEGRITY_QA_EVIDENCE.md"
+);
 const durableRateLimitRehearsal = readDoc(
   "phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md"
 );
@@ -69,6 +75,8 @@ const pr211SealedParent =
   "5d566a4a14d4a7cb67175683fdf099e8d62747b7";
 const pr213SealedParent =
   "3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea";
+const pr214SealedParent =
+  "94e3d66190df138d42c1321adfeb0cefb0478545";
 const canonicalAliasGate =
   "APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT";
 const askAccessibilityGate =
@@ -77,6 +85,8 @@ const responsiveIdentityGate =
   "APPROVE PHASE 9 RESPONSIVE CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT";
 const leadAlertIdentityGate =
   "APPROVE PHASE 9 LEAD-ALERT BRAND IDENTITY V3 MERGE AND PRODUCTION DEPLOYMENT";
+const homeValueCompletionGate =
+  "APPROVE PHASE 9 HOME-VALUE COMPLETION INTEGRITY MERGE AND PRODUCTION DEPLOYMENT";
 const crossDomainGate =
   "APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT";
 const completedReleaseLedger = [
@@ -184,6 +194,7 @@ describe("current release-authority documentation", () => {
     const pr211 = ownerQueue.indexOf("Draft PR [#211]");
     const pr213 = ownerQueue.indexOf("Draft PR [#213]");
     const pr214 = ownerQueue.indexOf("Draft PR [#214]");
+    const pr215 = ownerQueue.indexOf("Draft PR [#215]");
     const pr212 = ownerQueue.indexOf("Draft PR [#212]");
 
     expect(pr209).toBeGreaterThanOrEqual(0);
@@ -191,11 +202,13 @@ describe("current release-authority documentation", () => {
     expect(pr211).toBeGreaterThan(pr210);
     expect(pr213).toBeGreaterThan(pr211);
     expect(pr214).toBeGreaterThan(pr213);
-    expect(pr212).toBeGreaterThan(pr214);
+    expect(pr215).toBeGreaterThan(pr214);
+    expect(pr212).toBeGreaterThan(pr215);
     expect(ownerQueue).toContain(canonicalAliasGate);
     expect(ownerQueue).toContain(askAccessibilityGate);
     expect(ownerQueue).toContain(responsiveIdentityGate);
     expect(ownerQueue).toContain(leadAlertIdentityGate);
+    expect(ownerQueue).toContain(homeValueCompletionGate);
     expect(ownerQueue).toContain(crossDomainGate);
   });
 
@@ -248,6 +261,19 @@ describe("current release-authority documentation", () => {
     }
     expect(leadAlertIdentityEvidence).toContain(
       "rescue/amm-pr214-pre-final-pr213-cutover-hygiene-20260824-172407"
+    );
+  });
+
+  it("binds PR #215's stacked authority to the current sealed PR #214 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      homeValueCompletionDecision,
+      homeValueCompletionEvidence,
+    ]) {
+      expect(doc).toContain(pr214SealedParent);
+    }
+    expect(homeValueCompletionEvidence).toContain(
+      "rescue/amm-pr215-pre-final-pr214-cutover-hygiene-20260824-174316"
     );
   });
 

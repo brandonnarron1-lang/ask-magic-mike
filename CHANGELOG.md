@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-08-24 — PR #215 refresh onto final PR #214 cutover hygiene
+
+- Preserved former PR #215 head `0e47db8780c7257f0d445d75e034aacd535c06a4`
+  at `rescue/amm-pr215-pre-final-pr214-cutover-hygiene-20260824-174316`.
+- Merged exact final PR #214 head
+  `94e3d66190df138d42c1321adfeb0cefb0478545`, retaining the ordered PR #209
+  through PR #214 release, no-write, and no-send contracts.
+- Preserved the existing Home Value funnel, canonical lead command, shared
+  contact validation, first-valid-contact durable write, optional-phone
+  semantics, and privacy-safe durable-failure telemetry.
+- Conflicts were limited to additive changelog and release-order documentation;
+  no funnel, API, lead, notification, provider, or analytics application file
+  required manual conflict resolution.
+- Invalidated older PR #215 proof pending fresh exact-head Node 24, immutable
+  Preview, write-intercepted browser, security, and deployment-log verification.
+- Changed no Production deployment, environment, database row, lead, event,
+  message, provider, WordPress surface, DNS, spend, deletion, or NellySelly
+  system.
+
 ## 2026-08-24 — Home-value completion-integrity candidate
 
 - Reused the current Home Value form and canonical lead command, moving the

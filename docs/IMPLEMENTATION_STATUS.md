@@ -6,7 +6,7 @@ Updated 2026-08-24.
 
 - **Reuse decision:** Draft PR #215 extends the released Home Value funnel and
   canonical lead command on exact Draft PR #214 head
-  `3ac0885a6f19fc479266457cff760ef836094470`; add no form, endpoint, database,
+  `94e3d66190df138d42c1321adfeb0cefb0478545`; add no form, endpoint, database,
   CRM, provider, notification path, or analytics system.
 - **Evidence:** one bounded, aggregate-only Production sequence reached
   `contact_submitted` but not `lead_created`. Missing historical session and
@@ -17,12 +17,15 @@ Updated 2026-08-24.
   the API contract, apply the same bounded email/phone validation in the UI and
   API, prevent call-consent evidence without a phone, and emit a privacy-
   allowlisted `lead_submit_failed` event on durable failure.
-- **Local acceptance:** the refreshed Node 24 run passes 234 files / 3,095
-  tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build, 84/17
-  route proof, 14/14 safety, deployable-source isolation, no known Production
-  dependency vulnerabilities, a redacted 614-commit history scan, and
-  whitespace proof. Final exact-head immutable write-intercepted Preview proof
-  remains mandatory.
+- **Parent refresh:** former head `0e47db8780c7257f0d445d75e034aacd535c06a4`
+  is preserved at
+  `rescue/amm-pr215-pre-final-pr214-cutover-hygiene-20260824-174316`. Exact final
+  PR #214 merged with conflicts limited to additive changelog and release-order
+  documentation; no application file required manual conflict resolution.
+- **Acceptance boundary:** all prior PR #215 local, CI, and Preview evidence is
+  historical after the parent refresh. Fresh exact-head Node 24, immutable
+  Preview, protected no-write, write-intercepted interaction, security,
+  isolation, and deployment-log proof are mandatory before its later gate.
 - **Safety:** no Production, environment, database, lead/event, message,
   provider, WordPress/DNS, publication, spend, deletion, or NellySelly action.
 - Detailed scope:

@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-08-24 — PR #215 refresh onto final PR #214 cutover hygiene
+
+- Preserved former PR #215 head `0e47db8780c7257f0d445d75e034aacd535c06a4`
+  at `rescue/amm-pr215-pre-final-pr214-cutover-hygiene-20260824-174316`.
+- Merged exact final PR #214 head
+  `94e3d66190df138d42c1321adfeb0cefb0478545` without application conflict.
+- Retained first-valid-contact durable storage, optional phone, shared bounded
+  contact validation, consent-channel accuracy, privacy-safe failure telemetry,
+  and the canonical idempotent lead lifecycle.
+- Prior PR #215 proof is historical; fresh exact-head CI, immutable Preview,
+  write-intercepted browser acceptance, and zero-delivery runtime evidence are
+  mandatory.
+- No Production, environment, database, lead/event, notification, provider,
+  WordPress, DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-24 — Home-value completion-integrity candidate
 
 - Reused the canonical Black Diamond Home Value funnel and atomic lead command
