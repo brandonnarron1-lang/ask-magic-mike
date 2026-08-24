@@ -175,7 +175,22 @@ export async function GET(req: NextRequest) {
       capture_function: captureFunction,
       sla_function: slaFunction,
       tables: tablePresence,
-      identity: { database_env: safety.identity.database_env },
+      identity: {
+        database_env: safety.identity.database_env,
+        preview_endpoint_id_configured:
+          safety.identity.preview_endpoint_id_configured,
+        production_endpoint_id_configured:
+          safety.identity.production_endpoint_id_configured,
+        endpoint_identity_configured:
+          safety.identity.endpoint_identity_configured,
+        endpoint_ids_distinct: safety.identity.endpoint_ids_distinct,
+        database_neon_endpoint_resolved:
+          safety.identity.database_neon_endpoint_resolved,
+        preview_endpoint_match: safety.identity.preview_endpoint_match,
+        production_endpoint_match: safety.identity.production_endpoint_match,
+        preview_identity_confirmed:
+          safety.identity.preview_identity_confirmed,
+      },
     },
     safety: {
       live_sms_disabled: safety.live_sms_disabled,

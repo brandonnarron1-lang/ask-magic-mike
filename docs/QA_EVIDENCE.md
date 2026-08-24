@@ -1399,3 +1399,18 @@ read-only guard, proof validation, deduplication, append-only Neon write, and
 audit event were not modified. A resolved share promise merely reveals the
 review link; an operator must still observe the platform and deliberately submit
 the existing proof form.
+
+## Phase 9 Neon Preview endpoint attestation — 2026-08-23
+
+The release candidate now verifies the actual Neon endpoint before either the
+application or QA automation may write in Preview. Full evidence, categorical
+health contract, branch/endpoint mapping, tests, and no-action record are in
+[`phase9/NEON_PREVIEW_ENDPOINT_ATTESTATION_QA_EVIDENCE.md`](./phase9/NEON_PREVIEW_ENDPOINT_ATTESTATION_QA_EVIDENCE.md).
+
+- Focused security proof: PASS — 5 files / 30 tests.
+- Full Vitest: PASS — 228 files / 3,054 tests.
+- Typecheck, ESLint, optimized build, 83-route manifest: PASS.
+- Release safety: PASS — 14/14.
+- Isolation, dependency audit, 571-commit gitleaks, whitespace: PASS.
+- Production/Preview database writes, sends, migrations, merges, deployments,
+  WordPress/DNS edits, and NellySelly actions: none.

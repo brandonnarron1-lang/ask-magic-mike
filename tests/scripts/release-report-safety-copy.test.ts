@@ -22,6 +22,8 @@ describe("active release-report safety copy", () => {
 
   it("documents the canonical preview mutation controls", () => {
     expect(releaseCandidateSource).toContain("DATABASE_ENV");
+    expect(releaseCandidateSource).toContain("PREVIEW_NEON_ENDPOINT_ID");
+    expect(releaseCandidateSource).toContain("PRODUCTION_NEON_ENDPOINT_ID");
     expect(releaseCandidateSource).toContain("ALLOW_PREVIEW_DB_MUTATION");
     expect(releaseCandidateSource).toContain("PREVIEW_DATA_MODE");
     expect(releaseCandidateSource).not.toContain("PREVIEW_SUPABASE_PROJECT_REF");

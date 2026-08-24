@@ -25,4 +25,13 @@ describe("admin health security boundary", () => {
     expect(source).toContain("rate_limit_hash_secret_present: rateLimitHashSecretPresent");
     expect(source).not.toContain("rate_limit_hash_secret: process.env");
   });
+
+  it("reports Neon identity as booleans without returning IDs or URLs", () => {
+    expect(source).toContain("endpoint_identity_configured");
+    expect(source).toContain("preview_endpoint_match");
+    expect(source).toContain("production_endpoint_match");
+    expect(source).not.toContain("PREVIEW_NEON_ENDPOINT_ID:");
+    expect(source).not.toContain("PRODUCTION_NEON_ENDPOINT_ID:");
+    expect(source).not.toContain("database_url: process.env.DATABASE_URL");
+  });
 });

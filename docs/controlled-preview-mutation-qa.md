@@ -9,8 +9,8 @@ to any GitHub workflow.
 
 - Mutation changes state. The default QA path must be reversible by
   closing a tab.
-- Even on a preview database, an accidental mutation against a project
-  ref that turns out to be production is irreversible.
+- Even on a preview database, an accidental mutation through a connection
+  string that turns out to target Production is irreversible.
 - CI can be hijacked, branches can be force-pushed, secrets can be
   rotated mid-flight. The only reliable safeguard against a "this is
   preview, I promise" mistake is to require a human approver to type
@@ -21,16 +21,18 @@ to any GitHub workflow.
 All of the following must be true before any mutation run:
 
 1. `DATABASE_ENV=preview` in the preview env.
-2. `SUPABASE_PROJECT_REF` is set to a non-production project ref.
-3. `PRODUCTION_SUPABASE_PROJECT_REF` is set to the production ref so
-   the health endpoint can verify a non-match.
-4. `PREVIEW_SUPABASE_PROJECT_REF` is set to the preview ref so the
-   health endpoint can verify a match.
-5. `PREVIEW_DATA_MODE=enabled` in the preview env only.
-6. `ALLOW_PREVIEW_DB_MUTATION=true` in the preview env only.
-7. `/api/admin/health` returns `safety.safe_for_preview_mutation: true`.
-8. Migration `00012` is applied to the preview project.
-9. `ENABLE_SMS=false` and `ENABLE_EMAIL=false` — no live sends.
+2. `DATABASE_URL` is scoped to the isolated Neon Preview branch only.
+3. `PREVIEW_NEON_ENDPOINT_ID` is the endpoint ID for that Preview branch.
+4. `PRODUCTION_NEON_ENDPOINT_ID` is the separate Production endpoint ID.
+5. The two expected endpoint IDs are valid and distinct.
+6. The endpoint parsed from `DATABASE_URL` exactly matches Preview and does
+   not match Production. `/api/admin/health` reports this with booleans only;
+   it never returns the URL or either endpoint ID.
+7. `PREVIEW_DATA_MODE=enabled` in the branch-scoped preview env only.
+8. `ALLOW_PREVIEW_DB_MUTATION=true` in the branch-scoped preview env only.
+9. `/api/admin/health` returns `safety.safe_for_preview_mutation: true`.
+10. Migration `00012` is applied to the Preview branch.
+11. `ENABLE_SMS=false` and `ENABLE_EMAIL=false` — no live sends.
 
 ## Non-mutating precheck (always run this first)
 
@@ -74,8 +76,7 @@ These tags exist so cleanup can target QA rows only.
 
 ## Cleanup plan
 
-Run in the preview Supabase project's SQL editor — never in
-production.
+Run in the isolated Neon Preview branch SQL editor — never in Production.
 
 ```sql
 -- Sanity-check the preview ref first.
@@ -113,13 +114,15 @@ cleanup against a database you cannot positively identify as preview.
 ## Strict no-go list
 
 - Live SMS or email enabled in preview env. → no.
-- Production Supabase ref detected by `/api/admin/health`. → no.
+- Parsed database endpoint matches Production. → no.
+- Expected Neon endpoint IDs are missing, invalid, or equal. → no.
+- Parsed database endpoint does not exactly match approved Preview. → no.
 - Migration 00012 not applied. → no.
 - `PREVIEW_DATA_MODE=disabled` or unset. → no.
 - `ALLOW_PREVIEW_DB_MUTATION=false` or unset. → no.
 - Health endpoint unreachable. → no.
-- Operator cannot verify the preview Supabase project from the
-  Supabase dashboard. → no.
+- Operator cannot verify the isolated Preview branch and endpoint in the Neon
+  dashboard. → no.
 
 Mutation QA is not a sprint task. It is the last safety brace before
 promotion. Take the extra five minutes.

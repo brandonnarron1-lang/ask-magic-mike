@@ -58,6 +58,7 @@ migration owner.
   dedicated Ask Magic Mike project.
 - Historical/documentation references are retained only to record the domain
   conflict and the isolation decision.
-- Ask Magic Mike's push schema was applied only to Neon branch
-  `br-flat-math-aut6n3xu` in project `bitter-star-20214385`.
+- Ask Magic Mike's isolated Preview branch is `br-morning-paper-aun3378r` in
+  project `bitter-star-20214385`; Production remains
+  `br-round-base-auh6h2wd` in that same Ask Magic Mike-only project.
 - No NellySelly database, deployment, domain, or credential was changed.

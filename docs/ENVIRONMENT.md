@@ -12,10 +12,15 @@ The complete name/scope register is `ENVIRONMENT_VARIABLE_MATRIX.md`.
 | --- | --- | --- |
 | `DATABASE_URL` | Server sensitive | Canonical Neon PostgreSQL connection |
 | `DATABASE_ENV` | Server | Explicit `production`, `preview`, or `development` identity |
+| `PREVIEW_NEON_ENDPOINT_ID` | Preview server | Expected Neon Preview endpoint ID; no connection URL or credential |
+| `PRODUCTION_NEON_ENDPOINT_ID` | Preview server | Production endpoint ID that Preview must never match |
 | `ALLOW_PREVIEW_DB_MUTATION` | Preview server | Separate reviewed Preview-write opt-in |
 | `PREVIEW_DATA_MODE` | Preview server | Must also be `enabled` for controlled Preview writes |
 
 Production fails closed without `DATABASE_URL`; it never falls back to Supabase.
+Preview writes additionally fail closed unless the endpoint parsed from
+`DATABASE_URL` exactly matches the expected Preview endpoint, does not match the
+Production endpoint, and the two expected endpoint IDs are valid and distinct.
 `ALLOW_LEGACY_SUPABASE_FALLBACK` exists only for non-Production compatibility
 tests and must remain false in Production. The `supabase/migrations/` directory
 name is historical; reviewed SQL in that directory applies to canonical

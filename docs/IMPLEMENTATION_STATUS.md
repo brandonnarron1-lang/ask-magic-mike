@@ -1214,3 +1214,23 @@ any bridge activation or shadow-mode test.
   authorization, isolation, and error-log checks passed.
 - Vitest/coverage upgraded to 3.2.6, Vite to 6.4.3, and vulnerable development
   dependency paths pinned to compatible patched versions.
+
+## Phase 9 Neon Preview endpoint attestation — 2026-08-23
+
+- Draft PR #209 now binds Preview mutation authority to the actual Neon
+  endpoint parsed from server-only `DATABASE_URL`; labels and toggles alone are
+  insufficient.
+- The application write guard and protected health/QA gate both require an
+  exact Preview endpoint match, an explicit Production non-match, and valid,
+  distinct expected endpoint IDs.
+- Protected health output remains categorical-only. Connection strings,
+  credentials, and raw endpoint identifiers are never returned.
+- Canonical infrastructure documentation now identifies Preview branch
+  `br-morning-paper-aun3378r` and Production branch
+  `br-round-base-auh6h2wd`; Ask Magic Mike/NellySelly isolation remains intact.
+- Local release verification passed with 3,054 tests, strict typecheck, lint,
+  optimized build, 83-route manifest, 14/14 release safety checks, zero known
+  Production dependency vulnerabilities, and no gitleaks findings.
+- No Preview mutation flags, Production secrets, database rows, migrations,
+  sends, merges, deployments, WordPress changes, or NellySelly systems were
+  touched.

@@ -56,7 +56,9 @@ node scripts/amm/verify-production-alias.mjs
 | Provider | Neon PostgreSQL (Free) |
 | Project | `bitter-star-20214385` |
 | Production branch | `br-round-base-auh6h2wd` |
-| Preview branch | `br-flat-math-aut6n3xu` |
+| Production endpoint | `ep-proud-bonus-autwv60g` |
+| Preview branch | `br-morning-paper-aun3378r` |
+| Preview endpoint | `ep-billowing-paper-au4tdhz8` |
 | Application credential | `DATABASE_URL` — server-only, never in client code or logs |
 | Migrations | Versioned SQL under `supabase/migrations/` (legacy directory name; applies to canonical PostgreSQL) |
 | Runtime schema access | Explicit least-privilege grants; application requests do not execute DDL |

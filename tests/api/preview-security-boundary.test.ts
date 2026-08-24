@@ -14,6 +14,9 @@ afterEach(() => {
   delete (process.env as Record<string, string | undefined>).SUPABASE_SERVICE_ROLE_KEY;
   delete (process.env as Record<string, string | undefined>).VERCEL_ENV;
   delete (process.env as Record<string, string | undefined>).DATABASE_ENV;
+  delete (process.env as Record<string, string | undefined>).DATABASE_URL;
+  delete (process.env as Record<string, string | undefined>).PREVIEW_NEON_ENDPOINT_ID;
+  delete (process.env as Record<string, string | undefined>).PRODUCTION_NEON_ENDPOINT_ID;
   delete (process.env as Record<string, string | undefined>).PREVIEW_DATA_MODE;
   delete (process.env as Record<string, string | undefined>).ALLOW_PREVIEW_DB_MUTATION;
 });
@@ -46,6 +49,32 @@ describe("Preview security boundary", () => {
   it("allows local or production code paths to use their existing guards outside Preview", () => {
     expect(assertDatabaseMutationAllowed({ DATABASE_ENV: "development" })).toEqual({ ok: true });
     expect(assertDatabaseMutationAllowed({ VERCEL_ENV: "production", DATABASE_ENV: "production" })).toEqual({ ok: true });
+  });
+
+  it("requires exact Neon Preview endpoint attestation before Preview writes", () => {
+    const previewEndpoint = "ep-amm-preview-qa123456";
+    const productionEndpoint = "ep-amm-production-qa654321";
+    const env = {
+      VERCEL_ENV: "preview",
+      DATABASE_ENV: "preview",
+      DATABASE_URL: `postgresql://${previewEndpoint}-pooler.c-2.us-east-1.aws.neon.tech/neondb`,
+      PREVIEW_NEON_ENDPOINT_ID: previewEndpoint,
+      PRODUCTION_NEON_ENDPOINT_ID: productionEndpoint,
+      PREVIEW_DATA_MODE: "enabled",
+      ALLOW_PREVIEW_DB_MUTATION: "true",
+    };
+
+    expect(assertDatabaseMutationAllowed(env)).toEqual({ ok: true });
+    expect(
+      assertDatabaseMutationAllowed({
+        ...env,
+        DATABASE_URL: `postgresql://${productionEndpoint}.us-east-2.aws.neon.tech/neondb`,
+      }),
+    ).toMatchObject({
+      ok: false,
+      statusCode: 503,
+      error: "preview_data_disabled",
+    });
   });
 
   it("blocks Supabase admin client construction in Preview read-only mode even when a key is present", () => {
