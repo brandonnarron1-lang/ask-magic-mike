@@ -9,7 +9,14 @@ Draft PR:
 [#216](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/216)
 
 Parent: exact Draft PR #215 head
-`985079d1574daf970fa7a24e469b5a0954cf3cae`
+`0e47db8780c7257f0d445d75e034aacd535c06a4`
+
+Pre-refresh head preservation:
+`rescue/amm-pr216-pre-pr215-seal-sync-20260824-1353` at
+`e2b2c06edcc48bec1beb0218abf7bfc5ffc967c4`.
+
+Refreshed code-bearing head:
+`0c45a33b706d7e8a02501ccf83baf24a83ec107d`.
 
 ## Design rejection evidence
 
@@ -41,7 +48,7 @@ pnpm vitest run \
   tests/public/appointment-funnel-identity.test.tsx
 ```
 
-The exact focused matrix passed 10 files / 71 tests.
+The exact focused matrix passed 10 files / 72 tests.
 
 Covered contracts:
 
@@ -55,6 +62,9 @@ Covered contracts:
   `funnel_session_id`, with no `sessions` insert;
 - Home Value, buyer, seller, Ask chat, and appointment events share their
   existing lead/session UUID;
+- Home Value's first address interaction synchronously creates or reuses that
+  UUID before emitting an event, with truthful failure when secure browser
+  crypto is unavailable;
 - seller/buyer contact-channel consent reflects supplied fields;
 - replay does not emit a new conversion;
 - durable failures remain visible and emit one linked allowlisted event; and
@@ -62,8 +72,9 @@ Covered contracts:
 
 ## Complete local release evidence
 
-- full Vitest: 237 files / 3,119 tests passed;
-- local protected-Preview contract: 6/6 mutation-free browser tests passed;
+- full Vitest: 237 files / 3,123 tests passed;
+- protected branch-owned Preview contract: 6/6 mutation-free browser tests
+  passed;
 - strict TypeScript: passed;
 - full ESLint: passed;
 - optimized Next.js 15.5.21 build: passed, 52 generated pages;
@@ -71,13 +82,17 @@ Covered contracts:
 - release safety: 14/14 passed;
 - Ask Magic Mike / NellySelly deployable-source isolation: passed;
 - Production dependency audit: no known vulnerabilities;
-- redacted tracked-history scan: no leaks; and
+- redacted tracked-history scan: 615 commits, no leaks; and
 - `git diff --check`: passed.
 
-The final PR head must repeat changed-file secret scanning, focused/full tests,
-typecheck, lint, optimized build/route proof, release safety, isolation,
-dependency audit, and whitespace proof after every code/evidence change.
-Immutable Preview proof remains mandatory before sealing.
+GitHub Release Gate run
+[#32760061703](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32760061703)
+passed on the exact code-bearing head. Immutable Vercel Preview deployment
+`dpl_A3oZ7CvoAGe8mu6aUmp3r9ivMUXb` is READY at
+`https://ask-magic-mike-avruwnthn-eyes-up-industries.vercel.app`. Its runtime
+warning/error/fatal query returned no entries. A later evidence-only seal must
+still pass its own exact-head Release Gate and immutable Preview checks; the
+Draft PR body records that final immutable head.
 
 The candidate-specific threat review and residual-risk record is
 `docs/phase9/FUNNEL_EVENT_IDENTITY_SECURITY_REVIEW.md`.
@@ -90,27 +105,35 @@ page navigation it intercepts all same-origin `/api/**` POST requests. The
 approved lead, event, legacy-event, appointment, chat, and experiment paths
 receive synthetic responses; any other POST is blocked and fails the test.
 
-Local Chromium acceptance passed 3/3 tests:
+Protected branch-owned run
+[#32760498269](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32760498269)
+passed all 6 expected browser tests with 0 unexpected, 0 flaky, and 0 skipped:
 
 - Home Value, seller, buyer, and Ask successful paths at 1,440 × 1,000;
 - the same four paths at 390 × 844; and
 - a durable Home Value failure with recoverable UI, one linked
   `lead_submit_failed`, and no conversion.
 
-The tests prove valid UUID continuity into the intercepted lead body and
+The three funnel-identity scenarios and the three existing widget scenarios
+prove valid UUID continuity into the intercepted lead body and
 privacy-allowlisted event requests, browser-visible fresh conversion signals,
 no browser-authored protected outcome request, no synthetic PII in event
 bodies, no unexpected POST, no provider call, no console error, and no
-horizontal overflow. Four PNG viewport artifacts are retained by the Preview
-workflow. Ask replay/fresh conversion behavior also has direct component
-coverage.
+horizontal overflow. Artifact `9532615770` records `SAFE_DB_WRITE=false`, a
+reachable database with mutation disabled, disabled live email/SMS/provider
+delivery, and launch authority `PREVIEW_READY`. Four PNG viewport artifacts
+were visually inspected; desktop and mobile Home Value/Ask states preserve the
+existing black/gold/teal identity with no visible clipping, overflow,
+unreadable state, or brand break. The captures are synthetic intercepted
+acceptance, not real leads. The in-app screenshot channel was unavailable, so
+no fresh in-app screenshot is claimed. Ask replay/fresh conversion behavior
+also has direct component coverage.
 
-The existing protected dispatcher first passed exact candidate head
+The existing protected dispatcher first passed exact historical candidate head
 `045fbff2cb368d68440c0f22b6928cef1cc01995` in run
 [#32743481075](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32743481075)
-with `SAFE_DB_WRITE=false`. The final enhanced-suite head still requires its
-own immutable Preview run before PR sealing; the earlier run is evidence, not
-substitute authority.
+with `SAFE_DB_WRITE=false`. It is retained as historical evidence only; the
+branch-owned exact code-head run above is authoritative for the expanded suite.
 
 The first enhanced branch-owned run,
 [#32745542999](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32745542999),

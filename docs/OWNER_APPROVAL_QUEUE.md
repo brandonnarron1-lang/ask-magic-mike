@@ -158,17 +158,23 @@ gate and must not be merged out of order:
    `APPROVE PHASE 9 HOME-VALUE COMPLETION INTEGRITY MERGE AND PRODUCTION DEPLOYMENT`.
 
 7. Draft PR [#216](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/216)
-   reuses the exact PR #215 head and the existing submission/idempotency UUID,
-   canonical event route, Neon event ledger, and atomic lead command. Initial
-   reviewed implementation/security commit
-   `f3e96f396f2b09d1fec6a0c35a2e730c73f2d4ea` links privacy-minimized funnel
-   stages without pre-creating `sessions` and rejects browser-authored
+   reuses exact sealed PR #215 head
+   `0e47db8780c7257f0d445d75e034aacd535c06a4` and the existing
+   submission/idempotency UUID, canonical event route, Neon event ledger, and
+   atomic lead command. The pre-refresh head is preserved at
+   `rescue/amm-pr216-pre-pr215-seal-sync-20260824-1353`. Refreshed
+   code-bearing head `0c45a33b706d7e8a02501ccf83baf24a83ec107d` links
+   privacy-minimized funnel stages without pre-creating `sessions`, closes the
+   first-interaction Home Value identity edge, and rejects browser-authored
    lead/widget creation, qualification, appointment-request, and notification
-   outcomes. It has no migration, provider, cookie, form, endpoint, or
-   Production configuration change. Treat the current GitHub PR head—not this
-   implementation commit—as the final release candidate. After PR #215
-   releases, refresh it onto exact `main`, repeat complete exact-head and
-   write-intercepted Preview proof, then require
+   outcomes. GitHub Release Gate `32760061703`, immutable Preview deployment
+   `dpl_A3oZ7CvoAGe8mu6aUmp3r9ivMUXb`, and branch-owned protected run
+   `32760498269` passed with all first-party POSTs intercepted. It has no
+   migration, provider, cookie, form, endpoint, or Production configuration
+   change. Treat the current GitHub PR head—not the code-bearing head named
+   here—as the final release candidate. After PR #215 releases, refresh it onto
+   exact `main`, repeat complete exact-head and write-intercepted Preview proof,
+   then require
    `APPROVE PHASE 9 FUNNEL EVENT IDENTITY INTEGRITY MERGE AND PRODUCTION DEPLOYMENT`.
 
 The historical shorter conversion-identity phrase released PR #195 and is

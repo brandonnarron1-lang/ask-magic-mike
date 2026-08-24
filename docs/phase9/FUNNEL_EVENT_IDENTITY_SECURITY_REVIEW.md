@@ -4,13 +4,25 @@ Date: 2026-08-24
 
 Scope: the Phase 9 browser-to-canonical-analytics identity change only
 
-Base: `985079d1574daf970fa7a24e469b5a0954cf3cae` (stacked after Draft PR #215)
+Base: `0e47db8780c7257f0d445d75e034aacd535c06a4` (stacked after sealed Draft PR #215)
 
 Production impact: none; no merge, deployment, environment-variable change, database migration, or live write was performed.
 
 ## Result
 
-No Critical, High, Medium, or Low security defect was found in the candidate-specific path after focused review. The change preserves the existing first-party origin check, rate limit, bounded request body, public event/property allowlists, coarse user-agent handling, and parameterized Neon insert. It does not create a browser-authored canonical conversion or a pre-lead `sessions` row.
+Focused review found one low-probability integrity edge: Home Value's first
+address interaction could theoretically occur before its passive client effect
+initialized the submission UUID. Code-bearing head
+`0c45a33b706d7e8a02501ccf83baf24a83ec107d` closes that edge by synchronously
+creating or reusing the UUID before the first event and failing truthfully if
+secure browser UUID generation is unavailable. Regression coverage proves the
+first event and later durable command share the same identity.
+
+No Critical, High, Medium, or Low candidate-specific defect remains after that
+fix. The change preserves the existing first-party origin check, rate limit,
+bounded request body, public event/property allowlists, coarse user-agent
+handling, and parameterized Neon insert. It does not create a browser-authored
+canonical conversion or a pre-lead `sessions` row.
 
 This is a scoped review of the changed funnel-event identity behavior, not a claim that every unrelated application surface has been re-audited.
 
@@ -22,6 +34,7 @@ This is a scoped review of the changed funnel-event identity behavior, not a cla
 | Browser injects a lead, agent, or arbitrary database identifier | Public routes set `leadId: null`, `agentId: null`, and `sessionId: null`. A candidate funnel identity must match a UUID at runtime. It is carried only as `funnelSessionId` and injected by `NeonAnalyticsEventRepository` after the normal public-property sanitizer runs. | A public visitor can generate an arbitrary valid UUID, so the identifier is correlation evidence, not authentication or ownership proof. |
 | Public property overrides the protected correlation identity | `safePublicAnalyticsProperties` strips unregistered fields. `NeonAnalyticsEventRepository.record` then overwrites `properties.funnel_session_id` only from the separately validated repository argument. Contract and repository tests cover attempted override. | None identified in this path. |
 | Existing UUID blocks atomic lead capture | The candidate deliberately does not pre-create or update `public.sessions`. Funnel events retain a null foreign key until the established lead-capture transaction creates the session. | Pre-submit events remain pseudonymous properties and are joinable only after a matching successful lead submission. |
+| First interaction outruns passive UUID setup | Home Value synchronously calls the established secure UUID helper before its first address event and reuses the result for later steps and the durable lead command. Component and source-contract tests cover the earliest interaction. | A browser without secure UUID generation cannot continue that event path; the user sees a truthful recoverable failure instead of silently creating unlinked telemetry. |
 | PII reaches analytics, URLs, browser integrations, or logs | Event properties pass through event-specific and global privacy allowlists; the UUID is excluded from GA/GTM/PostHog/custom-event properties and appears only in the first-party request body. The repository logs only the event name plus a normalized error message on failure. | The pseudonymous funnel UUID becomes linkable to a lead after submission and must follow the approved analytics retention/access policy. |
 | SQL injection or malformed identifier reaches Neon | UUIDs are runtime-validated; event names and categories are allowlisted/pattern-checked; the insert uses positional parameters and explicit PostgreSQL casts. | None identified in this path. |
 | Oversized, cross-origin, or high-rate event flood | Both public event routes enforce an exact approved-origin check, rate limiting before body parsing, JSON content type, and a 4,096-byte streaming body limit. | A same-origin attacker can still create rate-limited non-conversion funnel noise. Funnel events remain telemetry, not an authorization or billing source. Durable shared rate-limit readiness is controlled by the earlier stacked release gate. |
@@ -37,10 +50,10 @@ This is a scoped review of the changed funnel-event identity behavior, not a cla
 - Changed client/server files were scanned for raw HTML sinks, string-to-code execution, wildcard `postMessage`, and browser-stored auth/session tokens; no candidate-specific hit was found.
 - `pnpm audit --prod` reported no known production dependency vulnerability.
 - The tracked Git history was scanned with redacted output; no secret leak was reported.
-- Local Chromium executed fresh and replay Ask conversion behavior plus all
-  four public funnels at desktop/mobile sizes with every mutation intercepted;
-  no unexpected POST, provider call, console error, PII-bearing event, or
-  protected event-ledger request occurred.
+- Protected branch-owned browser run `32760498269` executed fresh and replay
+  Ask conversion behavior plus all four public funnels at desktop/mobile sizes
+  with every mutation intercepted; no unexpected POST, provider call, console
+  error, PII-bearing event, or protected event-ledger request occurred.
 - The first protected remote run exposed file-scoped bypass configuration;
   all new tests stopped on Vercel authentication before a funnel field or
   mutation. Both suites now import one shared secret-safe configuration, and

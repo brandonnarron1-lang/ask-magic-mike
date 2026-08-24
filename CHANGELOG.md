@@ -15,15 +15,25 @@
   integrations retain their success events.
 - Added linked privacy-safe failure telemetry, chat idempotency, buyer thank-you
   telemetry, and channel-specific buyer/seller permission evidence.
+- Closed a first-interaction identity edge in Home Value by creating or reusing
+  the submission UUID synchronously before its first address event. If secure
+  browser UUID generation is unavailable, the funnel now fails truthfully
+  instead of emitting an unlinked event.
 - Aligned Ask's fresh browser conversion signal with the other stored funnels
   while suppressing idempotent replay, and expanded the existing no-write
   Preview runner across Home Value, seller, buyer, and Ask at desktop/mobile
   sizes plus one recoverable failure path. Every first-party POST is
   intercepted and unexpected writes fail the run.
-- Node 24 acceptance passes 10 focused files / 71 tests, all 237 files / 3,119
-  tests, 6/6 mutation-free browser tests, strict typecheck, full ESLint,
-  optimized build/84-route proof, 14/14 release safety, isolation, Production
-  dependency audit, and redacted history scan. Production remains unchanged.
+- Refreshed code-bearing head `0c45a33b706d7e8a02501ccf83baf24a83ec107d`
+  passes 10 focused files / 72 tests, all 237 files / 3,123 tests, strict
+  typecheck, full ESLint, optimized build/84-route proof, 14/14 release safety,
+  isolation, Production dependency audit, and a 615-commit redacted history
+  scan. GitHub Release Gate run `32760061703` passed.
+- Immutable Preview deployment `dpl_A3oZ7CvoAGe8mu6aUmp3r9ivMUXb` is READY at
+  `ask-magic-mike-avruwnthn-eyes-up-industries.vercel.app`. Branch-owned
+  protected run `32760498269` passed 6/6 browser tests with every first-party
+  POST intercepted, provider delivery disabled, and database mutation false.
+  Production remains unchanged.
 
 ## 2026-08-24 — Home-value completion-integrity candidate
 

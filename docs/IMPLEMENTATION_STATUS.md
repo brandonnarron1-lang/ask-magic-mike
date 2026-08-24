@@ -7,7 +7,7 @@ Updated 2026-08-24.
 - **Reuse decision:** the stacked candidate extends only the existing browser
   submission UUID, `POST /api/events`, Neon analytics repository, and atomic
   lead command in Draft PR #216 on exact Draft PR #215 head
-  `985079d1574daf970fa7a24e469b5a0954cf3cae`; no tracker, cookie, form, API,
+  `0e47db8780c7257f0d445d75e034aacd535c06a4`; no tracker, cookie, form, API,
   database, CRM, provider, or notification system is added.
 - **Conflict prevented:** inspection proved that pre-creating `sessions` for
   anonymous events would make `capture_public_lead_v1` return an idempotency
@@ -17,7 +17,9 @@ Updated 2026-08-24.
   protected repository-injected analytics property, then naturally match
   `sessions.id` when durable lead capture succeeds. Home Value, seller,
   buyer/renter/open-house, Ask lead preparation, and appointment events share
-  the established UUID.
+  the established UUID. Home Value synchronously creates or reuses that UUID
+  before the first address event, so its earliest stage cannot outrun passive
+  client initialization; unavailable secure browser crypto fails truthfully.
 - **KPI authority:** browser success remains available to GA/GTM/PostHog and
   widget parents, while `/api/events` rejects browser-authored lead/widget
   creation, qualification, appointment-request, and notification outcomes. The
@@ -29,18 +31,22 @@ Updated 2026-08-24.
   and public properties. Buyer/seller email/call permission now requires the
   corresponding supplied contact method. Historical null-session events are
   not backfilled or reclassified.
-- **Current acceptance:** Node 24.18.0 passes 10 focused files / 71 tests, all
-  237 files / 3,119 tests, 6/6 mutation-free browser tests, strict TypeScript,
-  full ESLint, optimized Next.js
-  15.5.21 build, 84/17 route proof, 14/14 release safety, deployable-source
-  isolation, no known Production dependency vulnerabilities, a redacted
-  tracked-history scan, and whitespace proof. Immutable no-write Preview and
-  final exact-head proof remain mandatory before sealing. The persistent
-  protected-Preview runner now intercepts every first-party POST while testing
-  Home Value, seller, buyer, and Ask success at desktop/mobile sizes plus a
-  durable-failure path; local Chromium passes 3/3 with no unexpected POST,
-  provider call, PII-bearing event, protected ledger outcome, console error,
-  or horizontal overflow.
+- **Current acceptance:** refreshed code-bearing head
+  `0c45a33b706d7e8a02501ccf83baf24a83ec107d` on Node 24.18.0 passes 10
+  focused files / 72 tests, all 237 files / 3,123 tests, strict TypeScript,
+  full ESLint, optimized Next.js 15.5.21 build, 84/17 route proof, 14/14
+  release safety, deployable-source isolation, no known Production dependency
+  vulnerabilities, a 615-commit redacted tracked-history scan, and whitespace
+  proof. GitHub Release Gate run `32760061703` passed. Immutable Preview
+  deployment `dpl_A3oZ7CvoAGe8mu6aUmp3r9ivMUXb` is READY at
+  `ask-magic-mike-avruwnthn-eyes-up-industries.vercel.app`; branch-owned
+  protected run `32760498269` passed all 6 expected browser tests with every
+  first-party POST intercepted, provider delivery disabled, database mutation
+  false, and no unexpected/flaky/skipped test. Four retained PNG artifacts
+  were visually inspected at desktop/mobile sizes with no clipping, overflow,
+  unreadable state, or brand break. The in-app screenshot channel was not used
+  because it is unavailable in this session; protected CI artifacts are the
+  visual evidence.
 - **Safety:** no Production, environment, schema/data, lead/event, message,
   provider, WordPress/DNS, publication, spend, deletion, or NellySelly action.
 - Detailed scope:

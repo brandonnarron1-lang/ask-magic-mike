@@ -63,6 +63,10 @@ unclassified evidence, and no historical conversion rate is claimed.
   qualification, appointment, and delivery truth remain server-owned records.
 - Home Value, seller, buyer/renter/open-house, Ask chat preparation, and
   appointment CTA events reuse their existing submission/session UUIDs.
+- Home Value creates or reuses that UUID synchronously before its first address
+  interaction event. If secure browser UUID generation is unavailable, the
+  funnel surfaces a truthful local failure instead of emitting an unlinked
+  first-stage row.
 - Seller and buyer channel permission payloads now record email/call consent
   only when that contact method was actually supplied, matching the existing
   API normalization boundary.
@@ -99,7 +103,7 @@ registered QA traffic remain excluded from Production KPI queries.
 ## Release order and authority
 
 This candidate starts from exact Draft PR #215 head
-`985079d1574daf970fa7a24e469b5a0954cf3cae` and follows:
+`0e47db8780c7257f0d445d75e034aacd535c06a4` and follows:
 
 1. PR #209 durability release;
 2. PR #210 canonical alias consolidation;

@@ -14,15 +14,23 @@
 - Failure events remain allowlisted and PII-free; Home Value, buyer, seller,
   Ask preparation, and appointment flows now share the existing submission
   identity and have focused regression coverage.
+- Home Value now creates or reuses its established submission UUID
+  synchronously before the first address interaction event. Secure UUID
+  generation failure is surfaced truthfully instead of producing an unlinked
+  first-stage row.
 - Ask emits a browser-only conversion only after fresh durable capture, not an
   idempotent replay. The existing protected-Preview runner now executes all
   four public funnels at 1,440 × 1,000 and 390 × 844 plus a failure path, with
   every first-party POST intercepted and PNG evidence retained.
-- Node 24 proof passes 10 focused files / 71 tests, all 237 files / 3,119 tests,
-  6/6 mutation-free browser tests, strict TypeScript, full ESLint, optimized
-  build/84-route proof, 14/14 safety, isolation, the Production dependency
-  audit, and a redacted tracked-history scan. No Production or external-system
-  action occurred.
+- Refreshed code-bearing head `0c45a33b706d7e8a02501ccf83baf24a83ec107d`
+  passes 10 focused files / 72 tests, all 237 files / 3,123 tests, strict
+  TypeScript, full ESLint, optimized build/84-route proof, 14/14 safety,
+  isolation, the Production dependency audit, and a 615-commit redacted
+  tracked-history scan. GitHub Release Gate run `32760061703` passed.
+- Immutable Preview deployment `dpl_A3oZ7CvoAGe8mu6aUmp3r9ivMUXb` is READY;
+  protected branch run `32760498269` passed 6/6 mutation-free browser tests
+  with provider delivery disabled and database mutation false. No Production
+  or external-system action occurred.
 
 ## 2026-08-24 — Home-value completion-integrity candidate
 
