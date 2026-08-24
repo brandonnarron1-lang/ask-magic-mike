@@ -255,6 +255,11 @@ Updated 2026-08-24.
 - A final security pass replaced the raw Neon driver error object with one of
   four bounded operational codes. The privacy regression test injects a
   synthetic private failure marker and proves it never reaches `console.error`.
+- A second exact-candidate review found two emergency-path defects: the memory
+  fallback had no identifier cap and did not partition keys by route. It now
+  reclaims expired entries, caps active identifiers at 10,000, fails closed for
+  new identifiers at capacity, and mirrors the durable route partition. See
+  `docs/phase9/PR209_SECURITY_REVIEW.md`.
 - The exact read-only capability query passed on canonical Neon Production in
   35 ms with all four store booleans true. This proves the database object and
   SQL-editor role; deployed health must still prove the exact Vercel role.

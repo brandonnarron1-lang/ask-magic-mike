@@ -2,7 +2,8 @@
 
 Date: 2026-08-23 (America/New_York)
 
-Candidate base: `c04655cc04135f89cf9b401a631bc503c8c70057`
+Stack base: exact PR #209 candidate
+`6eb89264d59c8d25a711a1ffa178828343772f75`
 
 Environment: isolated local worktree; no Production mutation
 
@@ -102,12 +103,72 @@ readiness contract. Every canonical public page, widget, liveness check, and
 anonymous admin denial passed. This run submitted no form or event and changed
 no external state.
 
-## Remaining acceptance
+## Immutable Preview and exact-head acceptance — 2026-08-24
 
-Before any Production proposal:
+Application head `ae9386d77380b25192b21e786925fa7ff99dcaa5` is sealed:
 
-1. commit and push the exact candidate;
-2. obtain exact-head Node 24 CI;
-3. create an immutable Vercel Preview only;
-4. verify both Preview redirects and canonical destination pages; and
-5. keep merge/deploy behind a new exact approval gate.
+- GitHub Node 24 release gate
+  [32687148073](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32687148073)
+  passed unit tests, strict typecheck, ESLint, optimized build, route manifest,
+  release-candidate report, and launch-authority report;
+- release artifact `9506092188` has digest
+  `sha256:fed0b12cd7adc677d32c68f8ee2c224473f311e97f7a55723552d867bf7e337c`;
+- Vercel deployment `dpl_7k2xDm3nysKd7iDCgmW1LbboRbBq` is READY at
+  `https://ask-magic-mike-l79zod1lq-eyes-up-industries.vercel.app` and is
+  bound to PR #210 and the exact application head;
+- authenticated navigation from `/value` landed on `/home-value` while
+  preserving `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, and
+  `gclid`; the destination emitted the canonical
+  `https://www.askmagicmike.com/home-value` and the route-specific title;
+- authenticated navigation from `/we-buy-houses` landed on `/sell` while
+  preserving `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, and
+  `fbclid`; the destination emitted the canonical
+  `https://www.askmagicmike.com/sell` and the route-specific title;
+- the inspected browser emitted no warning or error; and
+- deployment-scoped Vercel log inspection found no error, warning, or fatal
+  record in the acceptance window.
+
+The browser follows redirects, so the exact `308` status and exact `Location`
+contract remain proven by the real Next.js configuration test and optimized
+server smoke. The deployed navigation proves the protected Preview actually
+lands on the same canonical destinations with attribution intact.
+
+No form, API mutation, analytics event, lead, email, SMS, Push, consumer
+acknowledgment, database write, environment change, WordPress edit, DNS change,
+publication, spend, deletion, or NellySelly action occurred.
+
+The release-sealing documentation/test diff passed 3 focused files / 27 tests,
+ESLint, optimized build, release safety 14/14, system isolation, and
+`git diff --check`. A typecheck launched concurrently with the optimized build
+observed `.next/types` while Next.js was regenerating that directory and failed
+with transient missing generated files. The build completed successfully and a
+serial typecheck immediately passed with no diagnostic. Exact-head CI runs
+these phases in order and remains the authoritative Node 24 result.
+
+## PR #209 security-seal stack refresh — 2026-08-24
+
+- Preserved pre-refresh PR #210 head
+  `c86356b487acfd8bca6b56d35f647bb7851eb2ef` at remote rescue branch
+  `rescue/amm-pr210-pre-pr209-security-sync-20260824-0401`.
+- Merged exact sealed PR #209 candidate
+  `6eb89264d59c8d25a711a1ffa178828343772f75` into the stacked branch.
+- The merge-base audit showed no application-file overlap between PR #209's
+  limiter hardening and PR #210's redirect/monitor implementation. The sole
+  conflict was additive history in `docs/CHANGELOG.md`; both records were
+  retained.
+- The older PR #210 CI, Preview, browser, and runtime proof above remains valid
+  historical evidence for its former head only. It does not authorize the
+  refreshed candidate. Fresh exact-head verification is mandatory.
+- No Production environment, merge, deployment, database/lead/event write,
+  message, WordPress edit, DNS change, publication, spend, deletion, or
+  NellySelly action occurred.
+
+## Remaining gate
+
+PR #209 must be released first. PR #210 is synchronized with its exact sealed
+candidate, but must still be retargeted/refreshed onto the accepted new `main`
+and repeat exact-head verification. Only after that post-release refresh may
+this separate phrase authorize its reviewed merge and matching Production
+deployment:
+
+`APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`

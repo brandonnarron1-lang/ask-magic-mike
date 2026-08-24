@@ -192,3 +192,30 @@ capability true, `rate_limit_required=true`, `rate_limit_secret_ready=true`, and
   after push. Playwright/browser mutation QA was not run and no Production
   secret, merge, deployment, database write, message, WordPress change, or
   NellySelly action occurred.
+
+## Emergency-fallback security hardening — 2026-08-24
+
+- Preserved exact pre-change head
+  `c04655cc04135f89cf9b401a631bc503c8c70057` at remote rescue branch
+  `rescue/amm-pr209-pre-memory-fallback-hardening-20260824-0333`.
+- `NEXT-DOS-001 / AMM-RL-002`: the in-memory fallback previously retained every
+  unique key until that exact key returned after expiry. It now caps active
+  identifiers at 10,000, opportunistically removes expired entries, and fails
+  closed for a new identifier if capacity remains full.
+- `NEXT-DOS-001 / AMM-RL-003`: the durable path partitioned counters by route,
+  while the shared memory fallback did not. The fallback now uses the same
+  typed route prefix, preventing one surface from consuming another surface's
+  allowance.
+- Official Vercel documentation reconfirms that Vercel overwrites
+  `x-forwarded-for` with the public client IP to prevent spoofing, so no custom
+  proxy-derived identity mechanism was introduced.
+- Post-change verification passes 5 focused files / 65 tests and the complete
+  Node 24 release gate: 229 test files / 3,064 tests, strict typecheck, ESLint,
+  14/14 release safety, optimized build, and all 83 active routes. The
+  Production dependency audit reports zero known vulnerabilities. Gitleaks
+  reports no leak across 584 tracked commits and no leak in any changed file.
+  Exact-head Preview and protected no-write evidence remain mandatory after the
+  implementation commit is pushed.
+- No Production secret, merge, deployment, database/lead/event write, message,
+  WordPress edit, DNS change, provider action, spend, deletion, or NellySelly
+  action occurred.
