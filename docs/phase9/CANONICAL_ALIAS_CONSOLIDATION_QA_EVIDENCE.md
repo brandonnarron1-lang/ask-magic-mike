@@ -2,7 +2,7 @@
 
 Date: 2026-08-23 (America/New_York)
 
-Candidate base: `2ccc654cb131d1a448234225fc18670893f84251`
+Candidate base: `c04655cc04135f89cf9b401a631bc503c8c70057`
 
 Environment: isolated local worktree; no Production mutation
 
@@ -31,7 +31,7 @@ The redirect test executes the real `next.config.ts` configuration through Next.
 
 | Command | Result |
 |---|---|
-| `pnpm run test` | PASS — 230 files, 3,062 tests |
+| `pnpm run test` | PASS — 230 files, 3,066 tests |
 | `pnpm run typecheck` | PASS — strict TypeScript, no diagnostics |
 | `pnpm run lint` | PASS — ESLint, no diagnostics |
 | `pnpm run build` | PASS — Next.js 15.5.21 optimized build, 52 generated pages |
@@ -39,7 +39,7 @@ The redirect test executes the real `next.config.ts` configuration through Next.
 | `pnpm run release:safety` | PASS — 14/14 controls |
 | `pnpm run amm:verify:isolation` | PASS — deployable code contains no NellySelly project identifiers |
 | `pnpm audit --prod --audit-level high` | PASS — no known Production dependency vulnerabilities |
-| `gitleaks git --redact --no-banner --log-opts='--all'` | PASS — 573 commits, no leaks |
+| `gitleaks git --redact --no-banner --log-opts='--all'` | PASS — 576 commits, no leaks |
 | `git diff --check` | PASS |
 | migration-diff check | PASS — no migration changed |
 
@@ -69,6 +69,38 @@ The local server was stopped after proof.
 - no DNS, Search Console, Business Profile, social, paid traffic, purchase, or cache action;
 - no NellySelly access or change; and
 - no branch, worktree, deployment, lead, or historical artifact deleted.
+
+## Release-train monitor reconciliation — 2026-08-23 23:35 EDT
+
+A final compatibility audit found that the inherited Production monitor still
+expected `/value` to return `200`. That expectation would become false as soon
+as this candidate correctly activated the permanent redirect. The candidate now
+uses one shared, tested route contract that checks:
+
+- canonical `/home-value` → `200`;
+- compatibility `/value` → `308` with exact `Location: /home-value`; and
+- compatibility `/we-buy-houses` → `308` with exact `Location: /sell`.
+
+Focused verification:
+
+```text
+pnpm exec vitest run tests/scripts/monitor-contracts.test.mjs tests/public/canonical-alias-redirects.test.ts
+PASS — 2 files, 20 tests
+node --check scripts/monitor-production.mjs
+PASS
+node --check scripts/lib/monitor-contracts.mjs
+PASS
+git diff --check
+PASS
+```
+
+The corrected monitor was also run read-only against unchanged Production. It
+reported `8/11`, with exactly the three expected pre-release failures: the two
+compatibility routes still return their historical `200` documents, and the
+accepted Production deployment does not yet expose the durable-limiter
+readiness contract. Every canonical public page, widget, liveness check, and
+anonymous admin denial passed. This run submitted no form or event and changed
+no external state.
 
 ## Remaining acceptance
 

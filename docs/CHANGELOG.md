@@ -11,6 +11,9 @@
   links.
 - Changed the remaining active public internal `/value` link to point directly
   at `/home-value`.
+- Reconciled the Production monitor with the new route contract: it now checks
+  `/home-value` as the canonical `200` document and verifies both compatibility
+  aliases return the intended `308` destination.
 - Deliberately omitted deprecated FAQ rich-result markup, unsupported AI-search
   files, generated location pages, and unverified business claims.
 - No Production deployment, database change/write, lead, message, WordPress
