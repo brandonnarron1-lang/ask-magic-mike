@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-24 — PR #211 refresh onto release-ledger-sealed PR #210
+
+- Preserved prior PR #211 head at
+  `rescue/amm-pr211-pre-pr210-ledger-sync-20260824-0632`.
+- Merged exact PR #210 parent `7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9`
+  while retaining the Ask keyboard behavior and all upstream authority checks.
+- Former PR #211 checks are historical only. Exact-head CI, protected Preview,
+  no-write browser acceptance, and skip-link focus transfer must be repeated.
+- No Production, environment, database, lead/event, notification, WordPress,
+  DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-24 — PR #211 runtime skip-link focus hardening
 
 - Protected Preview DOM and field semantics passed, but the integrated
@@ -28,6 +39,17 @@
 - Prior PR #211 CI and Preview are historical evidence only. The refreshed head
   must repeat exact-head proof before its later gate is requestable.
 
+## 2026-08-24 — PR #210 refresh onto release-ledger-sealed PR #209
+
+- Preserved the pre-refresh PR #210 head at
+  `rescue/amm-pr210-pre-release-ledger-integrity-sync-20260824-0617`.
+- Merged exact sealed parent `1d1d8d4f8e0970f3f6a1b80ab9ff2bebcd40216d`
+  without changing the alias implementation or any external system.
+- Preserved the canonical-alias gate contracts and the completed-release ledger
+  integrity coverage from PR #209.
+- Prior PR #210 checks are now historical only; exact-head CI, Preview identity,
+  no-write runtime QA, and browser proof must be repeated before later release.
+
 ## 2026-08-24 — PR #210 stack refresh onto sealed PR #209
 
 - Preserved the former PR #210 head at
@@ -39,6 +61,18 @@
 - Prior PR #210 CI and Preview remain historical evidence only. The refreshed
   head must repeat the complete exact-head proof before its later gate is
   requestable.
+
+## 2026-08-24 — Completed-release ledger integrity
+
+- Reconciled the seven completed Phase 9 application releases against
+  authenticated GitHub head/merge records and Vercel READY Production
+  deployments.
+- Corrected the PR #195 head mismatch and completed the PR #183–#185 authority
+  chains without changing any current release gate.
+- Added executable coverage requiring each completed owner-queue entry to
+  retain its exact PR head, merge commit, and Production deployment ID.
+- No runtime, Production, environment, database, lead, event, notification,
+  WordPress, DNS, publication, spend, deletion, or NellySelly mutation occurred.
 
 ## 2026-08-24 — PR #209 emergency-limiter security hardening
 

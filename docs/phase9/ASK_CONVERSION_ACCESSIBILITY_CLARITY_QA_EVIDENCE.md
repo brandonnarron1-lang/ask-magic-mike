@@ -205,3 +205,21 @@ could not perform a reliable first Tab.
 - No Production environment, merge, deployment, database/lead/event write,
   AI/provider request, message, WordPress edit, DNS change, publication, spend,
   deletion, or NellySelly action occurred.
+
+## Release-ledger parent refresh — 2026-08-24
+
+- Preserved prior PR #211 head
+  `2cb2689d007c7a381879d7eb29f5196785ccd223` at remote rescue branch
+  `rescue/amm-pr211-pre-pr210-ledger-sync-20260824-0632`.
+- Merged exact clean PR #210 head
+  `7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9`, which contains the exact sealed
+  PR #209 parent and its completed-release authority repair once.
+- Conflicts were limited to additive changelog and QA history. Resolution
+  retains the Ask copy, required-input semantics, skip-link focus behavior,
+  canonical redirects, monitoring contracts, and completed-release ledger.
+- Former PR #211 CI, Preview, keyboard, geometry, and console evidence is now
+  historical. The refreshed exact head must repeat full Node 24, protected
+  no-write Preview, and three-test Chromium keyboard acceptance.
+- No Production environment, merge, deployment, database/lead/event write,
+  AI/provider request, message, WordPress edit, DNS change, publication, spend,
+  deletion, or NellySelly action occurred.

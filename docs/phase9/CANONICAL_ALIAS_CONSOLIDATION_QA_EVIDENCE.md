@@ -3,7 +3,7 @@
 Date: 2026-08-23 (America/New_York)
 
 Stack base: exact PR #209 candidate
-`d0691a6938afa67c22c4e1bc0adc322963fa2d55`
+`1d1d8d4f8e0970f3f6a1b80ab9ff2bebcd40216d`
 
 Environment: isolated local worktree; no Production mutation
 
@@ -178,6 +178,24 @@ these phases in order and remains the authoritative Node 24 result.
 - A new exact PR #210 head must repeat CI and protected Preview proof. The
   current head is resolved from GitHub and sealed in PR evidence rather than
   hard-coded into this mutable file.
+- No Production environment, merge, deployment, database/lead/event write,
+  message, WordPress edit, DNS change, publication, spend, deletion, or
+  NellySelly action occurred.
+
+## Completed-release ledger parent refresh — 2026-08-24
+
+- Preserved prior PR #210 head
+  `3704cbf78bfd7361435987943854159b22978532` at remote rescue branch
+  `rescue/amm-pr210-pre-release-ledger-integrity-sync-20260824-0617`.
+- Merged exact current PR #209 head
+  `1d1d8d4f8e0970f3f6a1b80ab9ff2bebcd40216d` after its completed-release
+  authority repair and protected no-write reseal.
+- The only conflicts were additive changelog entries and the release-authority
+  regression file. Resolution retains PR #210's downstream gates and all seven
+  authenticated completed-release head/merge/deployment chains from PR #209.
+- Focused release-authority verification passed 9/9 immediately after conflict
+  resolution. All prior PR #210 CI, Preview, browser, and runtime evidence is
+  now historical and must be repeated for the new exact head.
 - No Production environment, merge, deployment, database/lead/event write,
   message, WordPress edit, DNS change, publication, spend, deletion, or
   NellySelly action occurred.
