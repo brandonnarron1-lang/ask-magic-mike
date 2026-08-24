@@ -2,6 +2,31 @@
 
 Updated 2026-08-24.
 
+## Phase 9 home-value completion integrity — 2026-08-24
+
+- **Reuse decision:** extend the released Home Value funnel and canonical lead
+  command on exact Draft PR #214 head
+  `8a0e951606829c954078bb6abfe4c13a6319d461`; add no form, endpoint, database,
+  CRM, provider, notification path, or analytics system.
+- **Evidence:** one bounded, aggregate-only Production sequence reached
+  `contact_submitted` but not `lead_created`. Missing historical session and
+  funnel dimensions prevent identity or prospect classification; the record is
+  explicitly unclassified and no conversion rate is claimed.
+- **Implementation:** persist from the first valid Contact step, make phone
+  optional on the current email-first Home Value UI, accept email or phone at
+  the API contract, prevent call-consent evidence without a phone, and emit a
+  privacy-allowlisted `lead_submit_failed` event on durable failure.
+- **Local acceptance:** the first complete Node 24 run passes 234 files / 3,092
+  tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build, 84/17
+  route proof, 14/14 safety, deployable-source isolation, no known Production
+  dependency vulnerabilities, and whitespace proof. Final exact-head and
+  immutable write-intercepted Preview proof remain mandatory.
+- **Safety:** no Production, environment, database, lead/event, message,
+  provider, WordPress/DNS, publication, spend, deletion, or NellySelly action.
+- Detailed scope:
+  `docs/phase9/HOME_VALUE_COMPLETION_INTEGRITY.md` and
+  `docs/phase9/HOME_VALUE_COMPLETION_INTEGRITY_QA_EVIDENCE.md`.
+
 ## Phase 9 lead-alert brand identity — 2026-08-24
 
 - **Reuse decision:** extend only the canonical lead-alert HTML renderer and

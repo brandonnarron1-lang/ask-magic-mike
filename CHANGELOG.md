@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-08-24 — Home-value completion-integrity candidate
+
+- Reused the current Home Value form and canonical lead command, moving the
+  durable write from a separate required-phone screen to the first valid
+  contact submission.
+- Combined name, required email, optional phone, timeline, and existing consent
+  evidence into one Contact step; API callers may provide email or phone.
+- Preserved the idempotency, attribution, scoring, routing, outbox, widget, and
+  truthful success contracts while preventing call consent without a phone.
+- Added bounded aggregate evidence, an executed reproducibility notebook, and
+  privacy-allowlisted durable-failure telemetry with no error text or PII.
+- Initial Node 24 proof passes 234 files / 3,092 tests, strict typecheck,
+  ESLint, optimized build/84-route proof, 14/14 safety, isolation, dependency
+  audit, and whitespace verification. Production remains unchanged.
+
 ## 2026-08-24 — Lead-alert brand identity v3 candidate
 
 - Reused the existing urgency selector, notification outbox, approved Our Town

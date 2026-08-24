@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-08-24 — Home-value completion-integrity candidate
+
+- Reused the canonical Black Diamond Home Value funnel and atomic lead command
+  instead of adding another form, API, database, notification path, or CRM.
+- Moved durable storage to the first valid contact step and collapsed the
+  separate required-phone screen into one email-first Contact step with
+  optional phone.
+- Kept the API flexible for address plus email or phone, preserved
+  idempotency/attribution/scoring/routing/outbox behavior, and prevented call
+  permission from being recorded without a phone number.
+- Added aggregate-only reproducible Production evidence and a privacy-safe
+  `lead_submit_failed` event that cannot carry error text or PII.
+- Initial Node 24 acceptance passes 234 files / 3,092 tests, typecheck, ESLint,
+  optimized build/84-route proof, 14/14 safety, isolation, dependency audit,
+  and whitespace proof. Exact-head Preview acceptance remains pending.
+- No Production, database, lead/event, message, provider, WordPress/DNS,
+  publication, spend, deletion, or NellySelly action occurred.
+
 ## 2026-08-24 — Lead-alert brand identity v3 candidate
 
 - The current email alert remained operationally complete, but its decorative
