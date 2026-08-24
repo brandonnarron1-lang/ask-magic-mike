@@ -1,6 +1,6 @@
 # Documentation Authority
 
-Updated 2026-08-21. This register prevents dated build packets from overriding
+Updated 2026-08-23. This register prevents dated build packets from overriding
 the observed production system.
 
 ## Operating source of truth
@@ -24,6 +24,12 @@ Use these files for current decisions, in this order:
    `docs/phase9/*_QA_EVIDENCE.md` file — current release evidence. Exact-head
    GitHub checks and matching Vercel deployment metadata outrank a run ID frozen
    into documentation.
+
+Current release authority is intentionally singular: Draft PR #209 supersedes
+the incremental #202 through #208 stack for release while preserving every PR
+and branch as review evidence. A historical gate attached to an earlier PR or
+an already released application cannot authorize a new merge, deployment,
+mutation, send, or publication.
 
 `QA_EVIDENCE_CURRENT.md` is a cumulative 2026-08-14-era evidence packet with
 later appendices. Preserve it as provenance, but do not use its first baseline

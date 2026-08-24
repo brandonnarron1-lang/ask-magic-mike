@@ -47,106 +47,58 @@ new action. None authorized a social/GBP post, email campaign, QR
 printing/distribution, consumer message, spend, DNS change, WordPress change,
 provider action, or deletion.
 
-## Immediate Production durability candidate
+## Atomic Production durability candidate
 
-- Production runtime evidence shows 17 requests used the availability-first
-  memory limiter because no suitable server-only HMAC secret was available.
-  The current readiness endpoint and prior monitor remained green.
-- Draft PR [#202](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/202)
-  on branch `codex/phase9-durable-rate-limit-readiness-20260823` is an isolated,
-  main-based candidate that makes Production readiness require the existing
-  Neon table's exact schema/upsert target, runtime privileges, RLS access, and
-  dedicated secret, and makes the monitor validate that contract. It creates
-  no second limiter or database and contains no migration.
-- The exact read-only catalog probe passed on canonical Neon Production, and
-  deployed Preview health proves the encrypted Preview runtime role. Hardened
-  application head `abd2269b77496024a20d172e83a5404f013c5a43` has green PR
-  merge-ref CI, exact-head Vercel status, protected 17-pass/6-write-skip
-  acceptance, Widget 2/2, doctor 43/43, zero Preview warning/error/fatal logs,
-  and `PREVIEW_READY`. The documentation-only evidence seal still requires its
-  own final-head checks before the gate is consumable.
-- Its only combined configuration/application release phrase is:
+- Fresh 2026-08-23 read-only Production checks pass the public conversion
+  verifier 15/15 and smoke 19/19 with two intentional skips. The candidate
+  monitor reports 8/9 because the deployed readiness body does not prove the
+  required durable limiter contract. This is the one immediate Production
+  correction.
+- Draft PR [#209](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/209)
+  on branch `codex/phase9-controlled-release-candidate-20260823` is the sole
+  current application release vehicle. It consolidates the reviewed work from
+  PRs #202 through #208 once and binds Preview write authority to the actual
+  server-only Neon endpoint.
+- The exact pre-reconciliation application/security head
+  `b4e76f795d74d6a7c0947b16150cdb9c6c63e23a` passed 228 files / 3,054 tests,
+  strict typecheck, ESLint, optimized build, 83-route proof, 14/14 safety,
+  isolation, dependency and history-secret scans, exact Vercel Preview, 17
+  no-write passes with six intentional write skips, Widget 2/2, and categorical
+  exact Preview endpoint match/Production non-match. The final PR head must
+  repeat exact-head proof after this authority reconciliation.
+- Optional isolated synthetic Preview mutation and cleanup requires:
+  `APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA`.
+- The only combined Production configuration/application release phrase is:
   `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
-- That phrase will authorize one encrypted Production-only secret entry, the
-  exact reviewed candidate merge/deploy, and one malformed event request that
-  writes only an HMAC-pseudonymized rate-limit bucket before returning HTTP
-  400. It will not authorize a lead, analytics event, email, SMS, Push,
-  WordPress change, publication, spend, DNS change, migration, deletion, or
-  NellySelly action.
-- Stale encrypted Upstash variable names are ignored by canonical code. Their
-  deletion is not included in this gate.
+- The Production phrase authorizes one encrypted Production-only durability
+  secret, the exact reviewed PR #209 merge/deploy, and one malformed non-lead
+  request that writes only an HMAC-pseudonymized rate-limit bucket before
+  returning HTTP 400. It does not authorize a lead, analytics event, email,
+  SMS, Push, WordPress change, publication, spend, DNS change, migration,
+  deletion, or NellySelly action.
+- Stale encrypted Upstash variable names remain ignored. Their deletion is not
+  included in this gate.
 
-## Application candidates after the durability correction
+## Superseded and deferred release records
 
-- Draft PR [#203](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/203)
-  fast-tracks only PR #200's unique conversion-journey work on top of exact PR
-  #202. Application head `a86eece1f2b18ceb064d109912c5b77314d2aca9` has
-  exact-head CI, READY immutable Preview, protected 17-pass/6-write-skip
-  acceptance, Widget 2/2, doctor 43/43, and `PREVIEW_READY`. It must remain
-  Draft until PR #202 releases, then refresh onto exact `main` and repeat proof
-  before a separate gate can be issued. PR #202's gate does not authorize it.
-- PRs #197, #198, #200, and #201 are closed as proven superseded Drafts with
-  their branches preserved. PR #199 remains open and unique; PR #203 does not
-  authorize its field-experience work.
-
-## Owned-traffic activation fast-track after PR #204
-
-- Draft PR [#205](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/205)
-  on `codex/phase9-owned-traffic-fast-track-20260823` reuses only PR #197's
-  attribution-trust work and PR #198's read-only WordPress manifests on exact
-  sealed PR #204 head.
-- Application/evidence head
-  `a1e8a4940f8d9eefe21bc6f43514e2e4941e8e31` has green Node 24 CI, a READY
-  exact-head Vercel Preview, protected 17-pass/6-mutation-skip acceptance,
-  Widget 2/2, doctor 43/43, and `PREVIEW_READY`.
-- It has no Production gate. It must remain Draft behind #202 → #203 → #204,
-  then refresh onto exact `main` and repeat exact-head proof. Preview RBAC is
-  disabled, so the manifest download remains fail-closed there; an
-  authenticated role-bound runtime download is still required after ordering
-  and before any WordPress publication.
-- Application release cannot edit WordPress. The first later proposed write is
-  one homepage href only and still requires:
-  `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`.
-
-## Field-experience fast-track after PR #205
-
-- Draft PR [#206](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/206)
-  on branch `codex/phase9-field-experience-fast-track-20260823` preserves PR
-  #199's exact head under
-  `rescue/amm-pr199-pre-fast-track-20260823-175922` and imports only its unique
-  Production field-performance capability onto exact PR #205.
-- PR #187's KPI-target migration and numeric targets remain excluded. The
-  candidate contains no migration and cannot write telemetry in Preview.
-- Local Node 24 acceptance passes 5 focused files / 29 tests, all 226 files /
-  3,031 tests, typecheck, lint, optimized build, route proof, 14/14 safety,
-  isolation, and the Production dependency audit. Application head
-  `1954f8ee63f0de40c5c7326f34b7acf6be94cf27` also passes exact-head GitHub run
-  `32669693059`, READY immutable Preview
-  `dpl_8LnG6VoGbskJpERDGXbf7YNDHDCL`, protected run `32669923014`, Widget 2/2,
-  17 read-only passes / six intentional mutation skips / zero failures,
-  doctor 43/43, `PREVIEW_READY`, responsive visual QA, and zero Preview
-  fatal/error/warning logs.
-- It has no Production gate. It must remain behind #202 → #203 → #204 → #205,
-  refresh onto exact `main` after those releases, and repeat full proof before
-  any field-telemetry activation phrase becomes eligible.
-
-## Deferred candidates requiring refresh and overlap review
-
-- PR [#182](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/182)
-  is superseded for release. Its unique Buyer/current-router work is preserved
-  in consolidated PR #185, so its former gate must not be requested or reused.
-- PR #187's KPI-target migration is deferred because Production has no eligible
-  live-demand baseline. It is not part of PR #185.
-- PRs #186, #188, and #189 are preserved as source history; their useful work
-  is consolidated into PR #185 and their former standalone gates are obsolete.
-- PRs #190–#192 remain preserved as source history; their independently useful
-  work was consolidated once in released PR #193 and is not part of PR #185.
-- Historical PR [#179](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/179)
-  is preserved but superseded by the released current-stack iOS handoff in PR
-  [#194](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/194).
-  Physical enrollment and a `[TEST]` Push remain separately approved actions.
-- PRs #92 and #119–#121 remain archive-after-review candidates. They are not a
+- PRs #202 through #208 remain open or preserved only as incremental review
+  evidence. PR #209 contains their reviewed cumulative application work once.
+  They have no independent release authority and may not be merged or deployed
+  under an old gate.
+- PRs #197, #198, #200, and #201 are closed with branches preserved. PR #199's
+  unique field-experience work is included once in PR #209 through its reviewed
+  current-stack successor.
+- PR #187's KPI-target migration remains deferred because Production has no
+  eligible live-demand baseline. It is not part of PR #209.
+- PR #182 and historical PR #179 are superseded by already released current-
+  stack work. Physical Web Push enrollment and a `[TEST]` receipt remain
+  separate per-person actions.
+- PRs #92 and #119 through #121 remain archive-after-review history, not a
   parallel Production release plan.
+
+The first later WordPress mutation remains exactly one homepage href and still
+requires `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`
+after a fresh matching manifest and verified page-149 rollback.
 
 ## People and brokerage decisions
 

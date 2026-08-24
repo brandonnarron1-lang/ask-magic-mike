@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-23 — Atomic release-authority reconciliation
+
+- Reconciled the operating source-of-truth documents to the accepted PR #195
+  Production commit/deployment and one canonical Draft application candidate,
+  PR #209.
+- Preserved PRs #202 through #208 as incremental review evidence while removing
+  their stale independent release authority from current operator guidance.
+- Separated the optional Neon-attested Preview mutation gate, the combined
+  Production durability secret/merge/deploy gate, and the later one-href
+  WordPress publication gate.
+- Added a five-check executable documentation contract that rejects known stale
+  stacked-release claims. No application behavior, Production state, database,
+  message, publication, DNS, spend, or NellySelly state changed.
+
 ## 2026-08-23 — Public hero delivery fast-track candidate
 
 - Reused PR #201's isolated responsive-image implementation on exact sealed PR

@@ -27,6 +27,12 @@ This document defines the single authoritative source of truth for Ask Magic Mik
 | Node version | 24.x |
 | Automatic Git deployments | Enabled; Ignored Build Step command is empty |
 
+Current accepted Production release: PR #195 merge
+`b450b41c66c6740bd20571cdbe7d8caf82e92d5e`, deployment
+`dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Draft PR #209 is the sole current
+application release candidate and has no Production authority until its exact
+gate is received.
+
 ### Verification command
 
 ```bash
@@ -94,7 +100,7 @@ Before every production deploy:
 
 - WordPress / cPanel / DNS (ourtownproperties.com)
 - WAF / Regency
-- Vercel environment variables (set only via Vercel dashboard, not CLI)
+- Production Vercel environment-variable changes without their exact gate
 - Neon role or connection-string rotation
 - MLS / FlexMLS data exports
 - Outbound email / SMS / social posting

@@ -1414,3 +1414,21 @@ health contract, branch/endpoint mapping, tests, and no-action record are in
 - Isolation, dependency audit, 571-commit gitleaks, whitespace: PASS.
 - Production/Preview database writes, sends, migrations, merges, deployments,
   WordPress/DNS edits, and NellySelly actions: none.
+
+## Phase 9 atomic release-authority reconciliation — 2026-08-23
+
+- Fresh GitHub main: PR #195 merge
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`.
+- Fresh Vercel Production: `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`, `READY`.
+- `pnpm run amm:verify:funnel`: PASS — 15/15.
+- `pnpm run smoke:prod`: PASS — 19 pass / two intentional skips / zero fail;
+  read-only mode, no session or lead creation.
+- `pnpm run monitor-production`: expected gate signal — 8/9. The candidate
+  rejects the current Production readiness body because durable rate-limit
+  schema/permission/store/secret readiness is not yet proven by the deployed
+  contract.
+- `tests/scripts/current-release-authority-docs.test.ts`: PASS — 5/5.
+- No lead read or write, provider send, environment change, merge, deployment,
+  migration, publication, DNS change, deletion, spend, or NellySelly action.
+- Detailed evidence:
+  [`phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md`](./phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md).

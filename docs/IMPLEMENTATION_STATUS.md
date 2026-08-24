@@ -1234,3 +1234,22 @@ any bridge activation or shadow-mode test.
 - No Preview mutation flags, Production secrets, database rows, migrations,
   sends, merges, deployments, WordPress changes, or NellySelly systems were
   touched.
+
+## Phase 9 atomic release-authority reconciliation — 2026-08-23
+
+- Fresh authenticated GitHub/Vercel and read-only public checks confirm PR #195
+  merge `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and Production deployment
+  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` remain the accepted live baseline.
+- PR #209 is now the sole documented application release candidate. PRs #202
+  through #208 remain preserved as incremental review evidence with no
+  independent merge or Production authority.
+- Current authority docs now expose one optional Preview-mutation gate, one
+  combined Production durability/merge/deploy gate, and the later independent
+  one-href WordPress homepage gate without reusing any consumed approval.
+- Added an executable five-check documentation contract so known stale stacked-
+  release claims cannot silently return to the operating source of truth.
+- Fresh public evidence passes conversion 15/15 and smoke 19/19 with two
+  intentional skips. Candidate monitoring truthfully reports 8/9 until the
+  durable Production limiter contract is released.
+- Full decision and no-action record:
+  [`phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md`](./phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md).
