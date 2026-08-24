@@ -18,7 +18,10 @@ Object.defineProperty(window, "matchMedia", {
   }),
 });
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 describe("home-value inline validation", () => {
   it("keeps required-field errors visible, associated, and recoverable", async () => {
@@ -62,6 +65,14 @@ describe("home-value inline validation", () => {
     expect(name).not.toHaveAttribute("aria-describedby");
     expect(email).toHaveFocus();
 
+    await user.type(email, "internal-qa@example");
+    await user.click(screen.getByRole("button", { name: "Request Valuation" }));
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Enter a valid email for your valuation follow-up.",
+    );
+    expect(email).toHaveFocus();
+
+    await user.clear(email);
     await user.type(email, "internal-qa@example.com");
     const phone = screen.getByLabelText("Phone (optional)");
     expect(phone).not.toBeRequired();
@@ -71,6 +82,14 @@ describe("home-value inline validation", () => {
       "Enter a phone number with area code.",
     );
     expect(phone).toHaveAttribute("aria-invalid", "true");
+    expect(phone).toHaveFocus();
+
+    await user.clear(phone);
+    await user.type(phone, "1234567890123456");
+    await user.click(screen.getByRole("button", { name: "Request Valuation" }));
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Enter a phone number with area code.",
+    );
     expect(phone).toHaveFocus();
   });
 

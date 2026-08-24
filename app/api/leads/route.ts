@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { normalizeLeadPayload, type LeadPayload } from "../../lib/leadPayload";
+import { isValidLeadEmail, isValidLeadPhone } from "../../lib/leadContactValidation";
 import { PUBLIC_LEAD_SAVE_ERROR } from "../../lib/publicLeadErrors";
 import { consentGrantedForCall, consentGrantedForEmail, consentGrantedForSms, LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../lib/leadConsent";
 import { scoreLead } from "../../lib/leadScoring";
@@ -491,11 +492,11 @@ function validateLead(payload: LeadPayload) {
     return "Email or phone is required for open-house registration.";
   }
 
-  if (payload.email && (payload.email.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(payload.email))) {
+  if (payload.email && !isValidLeadEmail(payload.email)) {
     return "Enter a valid email address.";
   }
 
-  if (payload.phone && (payload.phone.length > 40 || !/^[+()\d\s.-]{7,40}$/.test(payload.phone))) {
+  if (payload.phone && !isValidLeadPhone(payload.phone)) {
     return "Enter a valid phone number.";
   }
 

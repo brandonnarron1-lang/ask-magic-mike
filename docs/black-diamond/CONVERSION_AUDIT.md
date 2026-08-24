@@ -1,6 +1,12 @@
 # Conversion Audit — Ask Magic Mike
 **Black Diamond Certification · 2026-06-27**
 
+> Historical baseline. The 2026-08-24 Home Value completion-integrity update
+> supersedes the Home Value friction notes below: `/value` resolves to the
+> canonical `/home-value` intake, and that flow is now Address → Contact →
+> Thank you. Name and email remain required on that UI, phone is optional, and
+> the existing canonical lead command runs from the first valid Contact step.
+
 ---
 
 ## Funnel Map
@@ -80,7 +86,7 @@ No generic "Click Here" or "Submit" found. No dead-end pages found.
 | Friction Point | Severity | Status |
 |---------------|----------|--------|
 | 3-step intake (intent → address → contact) | Low | Steps are minimal; each is one question |
-| Phone required in step 3 | Medium | Required for SLA/contact — intentional |
+| Phone required in legacy generic intake | Medium | Current Home Value intake makes phone optional; other flows retain their approved contracts |
 | Email required in step 3 | Medium | Required for CRM sync — intentional |
 | No "skip" on non-critical fields | Low | All fields in step 3 are required |
 | SMS consent checkbox before submit | Low | Required; clearly labeled |

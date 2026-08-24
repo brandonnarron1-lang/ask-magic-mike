@@ -6,6 +6,7 @@ import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
 import { timelineOptions } from "../../lib/constants";
 import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
+import { isValidLeadEmail, isValidLeadPhone } from "../../lib/leadContactValidation";
 import type { PublicExperimentContext } from "../../lib/growth/experiment-registry";
 import { recordExperimentEvent } from "../../lib/growth/public-experiment-client";
 import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
@@ -102,7 +103,7 @@ export function HomeValueFunnel({
       nameRef.current?.focus();
       return;
     }
-    if (!email.includes("@") || email.length < 6) {
+    if (!isValidLeadEmail(clean(email))) {
       setFormError({
         message: "Enter a valid email for your valuation follow-up.",
         field: "email",
@@ -110,7 +111,7 @@ export function HomeValueFunnel({
       emailRef.current?.focus();
       return;
     }
-    if (clean(phone) && clean(phone).replace(/\D/g, "").length < 10) {
+    if (clean(phone) && !isValidLeadPhone(clean(phone))) {
       setFormError({ message: "Enter a phone number with area code.", field: "phone" });
       phoneRef.current?.focus();
       return;

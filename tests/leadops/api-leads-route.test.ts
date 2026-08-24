@@ -89,6 +89,8 @@ describe("POST /api/leads validation and truthful persistence", () => {
   it.each([
     [{ funnel_type: "home_value", email: "a@example.test", phone: "2525550100" }, "Address is required."],
     [{ funnel_type: "home_value", address: "1 Synthetic St" }, "Email or phone is required"],
+    [{ funnel_type: "home_value", address: "1 Synthetic St", email: "qa@example", phone: "2525550100" }, "valid email"],
+    [{ funnel_type: "home_value", address: "1 Synthetic St", phone: "5550100" }, "valid phone"],
     [{ funnel_type: "seller", address: "1 Synthetic St" }, "Property address and phone are required"],
     [{ funnel_type: "chat" }, "Question is required"],
     [{ funnel_type: "appointment" }, "Email or phone is required"],
