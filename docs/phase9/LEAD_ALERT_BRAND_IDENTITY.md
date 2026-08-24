@@ -1,6 +1,6 @@
 # Phase 9 lead-alert brand identity
 
-Date: 2026-08-24  
+Date: 2026-08-24
 Status: downstream Draft candidate; no Production authority
 
 ## Decision

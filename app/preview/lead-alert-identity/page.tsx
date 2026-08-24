@@ -7,12 +7,12 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: "Lead Alert Identity Preview | Ask Magic Mike",
+  title: "Lead Alert Identity Preview",
   robots: { index: false, follow: false, noarchive: true },
 };
 
 export default function LeadAlertIdentityPreviewPage() {
-  if (!leadAlertIdentityPreviewEnabled(process.env.VERCEL_ENV)) notFound();
+  if (!leadAlertIdentityPreviewEnabled(process.env.VERCEL_ENV, process.env.NODE_ENV)) notFound();
 
   return (
     <main className="min-h-screen bg-[#050505] px-4 py-8 text-[#f4ead4] sm:px-6">
