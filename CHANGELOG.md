@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-08-24 — Cross-domain measurement candidate
+
+- Added a fail-closed, consent-gated loader for the existing Our Town GTM
+  container without adding another analytics store.
+- Kept advertising consent denied and excluded Preview, private, embedded,
+  automated, internal-QA, and noncanonical-host traffic.
+- Added an accessible analytics choice, footer preferences, privacy disclosure,
+  sanitized GTM event contract, tests, activation proof, and rollback guidance.
+- Added dedicated data-layer isolation plus client/API automation exclusion so
+  browser verification cannot enter first-party KPI ledgers.
+- No Production configuration, deployment, lead, communication, provider,
+  WordPress, publication, or NellySelly mutation was performed. One confirmed
+  live page-view row and one exposure attempt from an initial browser-routing
+  error are disclosed in the QA evidence; no Production cleanup was attempted.
+
 ## 2026-08-22 — Conversion identity polish
 
 - Added required seller identity to the existing four-stage home-value funnel.

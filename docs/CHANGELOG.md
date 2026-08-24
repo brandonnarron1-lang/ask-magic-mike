@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-08-24 — Consent-gated cross-domain measurement candidate
+
+- Reused the GTM container publicly verified on Our Town Properties and kept
+  the canonical Neon event ledger authoritative; no second analytics or
+  identity system was added.
+- Added exact Production/container isolation, basic analytics consent, fixed
+  denial of advertising purposes, Preview/private/embed/internal-QA exclusion,
+  sanitized flat GTM events, accessible preferences, and updated privacy copy.
+- Added focused runtime, component, privacy, and NellySelly-isolation tests plus
+  an authenticated activation and rollback runbook.
+- Added a dedicated data layer and dual client/API automation exclusion after a
+  browser-routing error exposed the prior KPI-trust gap. One confirmed live
+  page-view row and one exposure attempt are disclosed; no lead or message was
+  created and no Production cleanup was attempted.
+- No external analytics tag, Google/Vercel setting, Production deployment,
+  provider, WordPress, publication, spend, or NellySelly action was performed.
+
 ## 2026-08-22 — Conversion identity and public-navigation polish candidate
 
 - Reused the canonical home-value funnel and added required consumer name

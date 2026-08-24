@@ -4,12 +4,14 @@ import {
   HOME_VALUE_TRUST_EXPERIMENT,
   type PublicExperimentContext,
 } from "./experiment-registry";
+import { isBrowserAutomation } from "../browserAutomation";
 
 export async function recordExperimentEvent(
   context: PublicExperimentContext,
   eventName: "exposure" | "lead_created",
   leadId?: string | null,
 ) {
+  if (isBrowserAutomation()) return null;
   try {
     const response = await fetch("/api/experiments/event", {
       method: "POST",

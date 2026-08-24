@@ -1,6 +1,38 @@
 # Implementation Status
 
-Updated 2026-08-22.
+Updated 2026-08-24.
+
+## Phase 9 cross-domain measurement candidate — 2026-08-24
+
+- Read-only live and repository-history audits prove Our Town currently loads
+  one GTM container, Ask Magic Mike loads no external analytics tag, and no
+  prior GTM loader is hidden in repository history.
+- The candidate reuses the existing Our Town container and canonical Neon event
+  ledger. It adds no second GA4 property, PostHog project, Meta Pixel, Vercel
+  analytics stream, lead store, or identity database.
+- Production resolution accepts only the exact container observed on Our Town;
+  Preview, private/admin, operational, iframe/widget, automation, and internal-
+  QA contexts fail closed. This explicitly prevents NellySelly mixing.
+- Basic consent mode sends no Google request before an explicit choice.
+  Analytics may be granted; advertising storage/user data/personalization stay
+  denied. Decline/revocation and an accessible footer preference control are
+  implemented, with corresponding privacy copy.
+- KPI trust now excludes HeadlessChrome/Playwright/Puppeteer on both the client
+  and the public analytics/experiment APIs. A disclosed first browser-routing
+  error emitted one confirmed live page-view row and one exposure attempt; no
+  lead or communication was created, and no Production row was altered.
+- Verification passes 5 focused files / 31 tests, the full 217-file / 2,969-test
+  suite, strict typecheck, full ESLint, optimized build, 82-route manifest,
+  14/14 release safety, 43/43 release doctor, isolation, dependency,
+  history-secret, diff, and empty migration checks. Desktop/mobile
+  Production-simulated consent QA also passes.
+  Exact Node 24 CI and immutable no-write Preview remain before requesting
+  Production authority.
+- Detailed design and evidence:
+  `docs/phase9/CROSS_DOMAIN_MEASUREMENT_ACTIVATION.md` and
+  `docs/phase9/CROSS_DOMAIN_MEASUREMENT_QA_EVIDENCE.md`.
+- Future exact gate:
+  `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
 
 ## Phase 9 conversion identity polish — 2026-08-22
 
