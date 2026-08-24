@@ -1,8 +1,28 @@
 # QA Evidence
 
+## Phase 9 lead-alert brand identity v3 refresh — 2026-08-24
+
+- Draft PR #214 reuses the canonical notification renderer, approved Mike/Our
+  Town identity assets, existing urgency backgrounds, protected Message Review
+  Studio, outbox, and provider controls; it does not create a notification or
+  lead system.
+- Former PR #214 head `3ac0885a6f19fc479266457cff760ef836094470` is
+  preserved at
+  `rescue/amm-pr214-pre-final-pr213-cutover-hygiene-20260824-172407`.
+- Exact final PR #213 parent
+  `3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea` merged with conflicts limited to
+  additive changelog history; no alert-renderer application file conflicted.
+- Prior candidate CI, Preview, and screenshot evidence is historical. Fresh
+  exact-head Node 24, immutable Preview, protected no-write, no-send rendered
+  acceptance, and deployment-log proof are required before the later gate.
+- No Production, database, lead/event, message, provider, WordPress, DNS,
+  publication, spend, deletion, or NellySelly action occurred.
+- Full scope: `docs/phase9/LEAD_ALERT_BRAND_IDENTITY_QA_EVIDENCE.md`.
+
 ## Phase 9 responsive conversion-identity polish — 2026-08-24
 
-- Draft PR #213 reuses the shared public header after exact Draft PR #211.
+- Draft PR #213 reuses the shared public header after exact final Draft PR #211
+  `5d566a4a14d4a7cb67175683fdf099e8d62747b7`.
 - Focused compatibility/React acceptance: 3 files / 11 tests passed.
 - Focused ESLint: passed.
 - Full Node 24.18.0 local acceptance: 232 files / 3,082 tests, strict
@@ -21,6 +41,9 @@
   created.
 - Immutable exact-head Preview and protected no-write proof remain pending
   after the evidence commit; Production remains unchanged.
+- The former PR #213 head is preserved at
+  `rescue/amm-pr213-pre-final-pr211-cutover-hygiene-20260824-170330`; earlier
+  exact-head evidence is historical until the refreshed head is reproved.
 - Full evidence:
   `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
 

@@ -223,3 +223,24 @@ could not perform a reliable first Tab.
 - No Production environment, merge, deployment, database/lead/event write,
   AI/provider request, message, WordPress edit, DNS change, publication, spend,
   deletion, or NellySelly action occurred.
+
+## Final PR #210 cutover-hygiene refresh — 2026-08-24
+
+- Preserved prior PR #211 head
+  `6eacc33d16e34897c97288e48cd736433a3d9e15` at remote rescue branch
+  `rescue/amm-pr211-pre-final-pr210-cutover-hygiene-20260824-164445`.
+- Merged exact final PR #210 head
+  `3ed8d050edd386aa0cd4a83d230ff3170d24a306`, retaining the final PR #209
+  cutover preflight, browser no-write hardening, canonical alias redirects, and
+  Production monitor contracts once.
+- Conflicts were limited to additive changelogs and the release-authority
+  documentation test. Resolution retains the Ask copy, required-input
+  semantics, shared skip-link focus behavior, and every upstream safety
+  contract.
+- Earlier CI, Preview, and browser evidence remains historical. The resulting
+  exact head must repeat full Node 24 verification, immutable Preview proof,
+  the three-test protected Chromium acceptance, and a zero-mutation runtime
+  log review before this candidate is sealed.
+- No Production environment, merge, deployment, database/lead/event write,
+  AI/provider request, message, WordPress edit, DNS change, publication, spend,
+  deletion, or NellySelly action occurred.

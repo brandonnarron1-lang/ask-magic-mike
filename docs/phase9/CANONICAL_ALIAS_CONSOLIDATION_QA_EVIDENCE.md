@@ -200,9 +200,31 @@ these phases in order and remains the authoritative Node 24 result.
   message, WordPress edit, DNS change, publication, spend, deletion, or
   NellySelly action occurred.
 
+## Final PR #209 cutover-hygiene stack refresh — 2026-08-24
+
+- Preserved the prior PR #210 head
+  `7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9` at remote rescue branch
+  `rescue/amm-pr210-pre-final-pr209-cutover-hygiene-20260824-162615`.
+- Merged exact final PR #209 candidate
+  `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b` into the isolated PR #210
+  rehearsal branch after GitHub reported the stacked PR as conflicting.
+- The sole conflict was the additive release-authority regression declaration.
+  Resolution retains PR #210's canonical-alias decision/evidence contracts and
+  PR #209's read-only durable-rate-limit rehearsal plus browser telemetry
+  no-write contract.
+- A direct pre-resolution comparison showed that leaving PR #210 stale would
+  remove the new cutover guard and telemetry-interception coverage. The merged
+  tree retains those files and tests instead of silently regressing them.
+- All earlier PR #210 CI, Preview, browser, and runtime evidence remains
+  historical only. The reconciled exact head must repeat the complete Node 24
+  and protected no-write proof before the source PR is updated.
+- No Production environment, merge, deployment, database/lead/event write,
+  message, WordPress edit, DNS change, publication, spend, deletion, or
+  NellySelly action occurred.
+
 ## Remaining gate
 
-PR #209 must be released first. PR #210 is synchronized with its exact sealed
+PR #209 must be released first. PR #210 is synchronized with its exact final
 candidate, but must still be retargeted/refreshed onto the accepted new `main`
 and repeat exact-head verification. Only after that post-release refresh may
 this separate phrase authorize its reviewed merge and matching Production

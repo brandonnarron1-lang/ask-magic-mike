@@ -219,3 +219,23 @@ capability true, `rate_limit_required=true`, `rate_limit_secret_ready=true`, and
 - No Production secret, merge, deployment, database/lead/event write, message,
   WordPress edit, DNS change, provider action, spend, deletion, or NellySelly
   action occurred.
+
+## Browser-proof telemetry hygiene correction — 2026-08-24
+
+The first exact-head protected browser pass after adding the release rehearsal
+was green at the workflow level but was not accepted as no-write proof. Vercel
+logs for Preview deployment `dpl_Cz3Fspm7hAes3CRiLvVSGZrshMdA` between
+2026-08-24T20:01:30Z and 2026-08-24T20:06:15Z showed 25 HTTP 202 requests to
+`POST /api/events`. The browser spec intercepted `/api/leads` but not client
+telemetry. Those requests targeted the isolated Preview runtime, not
+Production, and no lead, email, SMS, Push, WordPress, DNS, or NellySelly action
+occurred. They are nevertheless treated as possible Preview event writes and
+the run is retained only as defect evidence.
+
+The widget browser harness now installs fail-closed `page.route` handlers before
+navigation for `/api/events`, `/api/analytics/event`,
+`/api/experiments/event`, and `/api/widget/events`, in addition to the existing
+lead interception. Release safety now rejects a widget spec missing any of
+those routes, and a static contract test verifies installation precedes both
+browser scenarios. Exact-head CI, protected browser QA, and a zero mutation-path
+Vercel log window remain mandatory after the correction is pushed.

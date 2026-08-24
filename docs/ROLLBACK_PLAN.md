@@ -65,6 +65,11 @@ requires it; never display or copy its value. Do not alter or delete
 `rate_limit_buckets` rows as part of application rollback. Stale encrypted
 Upstash variable removal remains a separate, unapproved cleanup.
 
+The `phase9:durable-rate-limit:readiness` rehearsal has no rollback step: it
+accepts only plan or authenticated read-only preflight modes, refuses an
+unlinked Vercel checkout, and performs no secret entry, merge, deployment,
+database/event write, provider send, or configuration change.
+
 ## WordPress
 
 Remove only the named reversible Custom HTML/shortcode/widget block or deactivate

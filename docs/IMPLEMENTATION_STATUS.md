@@ -32,8 +32,8 @@ Updated 2026-08-24.
 ## Phase 9 lead-alert brand identity — 2026-08-24
 
 - **Reuse decision:** extend only the canonical lead-alert HTML renderer and
-  protected Message Review Studio in Draft PR #214 on exact Draft PR #213 head
-  `d666289f91962cd836e87aec6cb3d809e93e72a7`. Preserve score bands, routing,
+  protected Message Review Studio in Draft PR #214 on exact final Draft PR #213
+  head `3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea`. Preserve score bands, routing,
   recipients, outbox, BCC, providers, retry, suppression, and delivery gates.
 - **Implementation:** `lead_alert_email_v3` composes the approved Our Town logo
   and Mike avatar over the existing privacy-safe HOT/ACTIVE/NEW/QA backgrounds.
@@ -42,7 +42,7 @@ Updated 2026-08-24.
 - **Ledger integrity:** stored v1/v2 email alerts retain the legacy renderer on
   retry; unknown recorded template versions fail closed instead of silently
   changing content.
-- **Local acceptance:** Node 24 passes 234 files / 3,088 tests, strict
+- **Historical candidate acceptance:** the former head passed 234 files / 3,088 tests, strict
   TypeScript, full ESLint, optimized Next.js 15.5.21 build, 84/17 route proof,
   14/14 release safety, Ask Magic Mike / NellySelly deployable-source
   isolation, no known Production dependency vulnerabilities, a redacted
@@ -51,7 +51,14 @@ Updated 2026-08-24.
   is READY on immutable Preview deployment
   `dpl_CX5UbqeFUVE9BDdVCmhpttmNyy3Q`; 1280 × 720 and 390 × 844 rendered
   acceptance passes with zero horizontal overflow, no send controls, and a
-  clean browser/runtime-error log.
+  clean browser/runtime-error log. This proof is historical until the refreshed
+  head is reverified.
+- **Parent refresh:** former PR #214 head
+  `3ac0885a6f19fc479266457cff760ef836094470` is preserved at
+  `rescue/amm-pr214-pre-final-pr213-cutover-hygiene-20260824-172407`; exact final
+  PR #213 merged with conflicts limited to additive changelog history. Fresh
+  exact-head CI, immutable Preview, no-send visual, and deployment-log proof
+  are mandatory before the later gate can be requested.
 - **Safety:** no generated likeness was accepted; no lead, email/BCC, SMS/MMS,
   Push, consumer acknowledgment, provider call, database write/migration,
   Production action, WordPress/DNS change, publication, spend, deletion, or
@@ -61,7 +68,7 @@ Updated 2026-08-24.
 ## Phase 9 responsive conversion-identity polish — 2026-08-24
 
 - **Reuse decision:** extend only the shared `BlackDiamondHeader` on exact
-  Draft PR #211 head `6eacc33d16e34897c97288e48cd736433a3d9e15`;
+  final Draft PR #211 head `5d566a4a14d4a7cb67175683fdf099e8d62747b7`;
   preserve the existing Black Diamond identity, Ask CTA, skip link, routes,
   forms, lead command, consent, analytics, and providers.
 - **Evidence:** fresh exact-Preview screenshots show healthy desktop/mobile
@@ -89,6 +96,10 @@ Updated 2026-08-24.
 - **Safety:** no field fill, submit, migration, Production action, lead/event,
   message, provider call, WordPress/DNS change, publication, spend, deletion,
   or NellySelly action.
+- **Parent refresh:** former PR #213 head `431ae9eebba7d38712305fa257f118cf0e498a89`
+  is preserved at
+  `rescue/amm-pr213-pre-final-pr211-cutover-hygiene-20260824-170330`; fresh
+  exact-head proof is required after the conflict-free application merge.
 - Detailed scope:
   `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH.md` and
   `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
