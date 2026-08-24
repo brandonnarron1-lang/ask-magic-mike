@@ -6,7 +6,7 @@ Updated 2026-08-24.
 
 - **Reuse decision:** Draft PR #215 extends the released Home Value funnel and
   canonical lead command on exact Draft PR #214 head
-  `8a0e951606829c954078bb6abfe4c13a6319d461`; add no form, endpoint, database,
+  `3ac0885a6f19fc479266457cff760ef836094470`; add no form, endpoint, database,
   CRM, provider, notification path, or analytics system.
 - **Evidence:** one bounded, aggregate-only Production sequence reached
   `contact_submitted` but not `lead_created`. Missing historical session and
@@ -14,13 +14,15 @@ Updated 2026-08-24.
   explicitly unclassified and no conversion rate is claimed.
 - **Implementation:** persist from the first valid Contact step, make phone
   optional on the current email-first Home Value UI, accept email or phone at
-  the API contract, prevent call-consent evidence without a phone, and emit a
-  privacy-allowlisted `lead_submit_failed` event on durable failure.
-- **Local acceptance:** the first complete Node 24 run passes 234 files / 3,092
+  the API contract, apply the same bounded email/phone validation in the UI and
+  API, prevent call-consent evidence without a phone, and emit a privacy-
+  allowlisted `lead_submit_failed` event on durable failure.
+- **Local acceptance:** the refreshed Node 24 run passes 234 files / 3,095
   tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build, 84/17
   route proof, 14/14 safety, deployable-source isolation, no known Production
-  dependency vulnerabilities, and whitespace proof. Final exact-head and
-  immutable write-intercepted Preview proof remain mandatory.
+  dependency vulnerabilities, a redacted 614-commit history scan, and
+  whitespace proof. Final exact-head immutable write-intercepted Preview proof
+  remains mandatory.
 - **Safety:** no Production, environment, database, lead/event, message,
   provider, WordPress/DNS, publication, spend, deletion, or NellySelly action.
 - Detailed scope:

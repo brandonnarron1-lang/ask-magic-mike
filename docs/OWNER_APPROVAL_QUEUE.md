@@ -140,17 +140,21 @@ gate and must not be merged out of order:
 5. Draft PR [#214](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/214)
    reuses the canonical notification renderer, approved Mike/Our Town assets,
    urgency selector, and protected Message Review Studio for
-   `lead_alert_email_v3`. It is based on exact Draft PR #213 head
-   `d666289f91962cd836e87aec6cb3d809e93e72a7` and must remain after #213 in
+   `lead_alert_email_v3`. It is based on sealed Draft PR #213 head
+   `431ae9eebba7d38712305fa257f118cf0e498a89`; its sealed head is
+   `3ac0885a6f19fc479266457cff760ef836094470`, and it must remain after #213 in
    release order. After all predecessors release, refresh onto exact `main`,
    repeat full exact-head and no-send visual proof, then require
    `APPROVE PHASE 9 LEAD-ALERT BRAND IDENTITY V3 MERGE AND PRODUCTION DEPLOYMENT`.
 
 6. Draft PR [#215](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/215)
-   reuses the exact PR #214 head and moves durable capture to the first valid
-   contact step, with email required on the current UI and phone optional. It
-   has no schema or provider change. After PR #214 releases, refresh it onto
-   exact `main`, repeat complete exact-head proof, then require
+   reuses exact PR #214 head
+   `3ac0885a6f19fc479266457cff760ef836094470` and moves durable capture to the
+   first valid contact step, with email required on the current UI and phone
+   optional. It has no schema or provider change, and applies one shared
+   contact-validation contract at both the browser and API boundaries. After
+   PR #214 releases, refresh it onto exact `main`, repeat complete exact-head
+   proof, then require
    `APPROVE PHASE 9 HOME-VALUE COMPLETION INTEGRITY MERGE AND PRODUCTION DEPLOYMENT`.
 
 The historical shorter conversion-identity phrase released PR #195 and is

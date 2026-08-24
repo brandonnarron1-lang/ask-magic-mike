@@ -5,8 +5,11 @@ Date: 2026-08-24
 Candidate: Draft PR #215 on
 `codex/phase9-home-value-completion-integrity-20260824`
 
-Parent: exact Draft PR #214 head
-`8a0e951606829c954078bb6abfe4c13a6319d461`
+Parent: exact sealed Draft PR #214 head
+`3ac0885a6f19fc479266457cff760ef836094470`
+
+Pre-refresh recovery branch:
+`rescue/amm-pr215-pre-pr214-seal-sync-20260824-1329`
 
 ## Data-quality evidence
 
@@ -42,12 +45,14 @@ pnpm exec vitest run \
   tests/leadops/public-error-hygiene.test.ts
 ```
 
-Result before the final consent-channel assertion: 5 files / 34 tests passed.
-The final exact-head run supersedes this intermediate count.
+Result after the shared browser/API contact-validation correction: 5 files /
+36 tests passed. Coverage includes malformed email, short phone, overlong
+phone, email-only durable success, consent-channel accuracy, and safe durable-
+failure telemetry.
 
 Full local release proof before documentation sealing:
 
-- Vitest: 234 files / 3,092 tests passed;
+- Vitest: 234 files / 3,095 tests passed;
 - strict TypeScript: passed;
 - full ESLint: passed;
 - optimized Next.js 15.5.21 build: passed, 52 generated pages;
@@ -55,7 +60,12 @@ Full local release proof before documentation sealing:
 - release safety: 14/14 passed;
 - Ask Magic Mike / NellySelly deployable-source isolation: passed;
 - Production dependency audit: no known vulnerabilities; and
+- redacted gitleaks history scan: 614 commits / no leaks; and
 - `git diff --check`: passed.
+
+The local release doctor was healthy with 42 passing checks and one expected,
+non-blocking detached-worktree branch-name check. The branch-aware GitHub gate
+remains authoritative for the final exact head.
 
 The final branch head must repeat focused/full tests, typecheck, lint, optimized
 build/route proof, release safety, isolation, dependency audit, redacted secret

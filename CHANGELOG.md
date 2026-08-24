@@ -9,11 +9,15 @@
   evidence into one Contact step; API callers may provide email or phone.
 - Preserved the idempotency, attribution, scoring, routing, outbox, widget, and
   truthful success contracts while preventing call consent without a phone.
+- Aligned browser and API contact validation so malformed email, short phone,
+  and overlong phone values fail before persistence; the phone-only API path
+  now requires 10–15 digits.
 - Added bounded aggregate evidence, an executed reproducibility notebook, and
   privacy-allowlisted durable-failure telemetry with no error text or PII.
-- Initial Node 24 proof passes 234 files / 3,092 tests, strict typecheck,
+- Refreshed Node 24 proof passes 234 files / 3,095 tests, strict typecheck,
   ESLint, optimized build/84-route proof, 14/14 safety, isolation, dependency
-  audit, and whitespace verification. Production remains unchanged.
+  audit, a 614-commit redacted secret scan, and whitespace verification.
+  Production remains unchanged.
 
 ## 2026-08-24 — Lead-alert brand identity v3 candidate
 

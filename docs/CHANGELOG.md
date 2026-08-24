@@ -10,11 +10,14 @@
 - Kept the API flexible for address plus email or phone, preserved
   idempotency/attribution/scoring/routing/outbox behavior, and prevented call
   permission from being recorded without a phone number.
+- Reused one contact-validation helper at the browser and API boundaries so
+  malformed email plus short/overlong phone values cannot reach persistence.
 - Added aggregate-only reproducible Production evidence and a privacy-safe
   `lead_submit_failed` event that cannot carry error text or PII.
-- Initial Node 24 acceptance passes 234 files / 3,092 tests, typecheck, ESLint,
+- Refreshed Node 24 acceptance passes 234 files / 3,095 tests, typecheck, ESLint,
   optimized build/84-route proof, 14/14 safety, isolation, dependency audit,
-  and whitespace proof. Exact-head Preview acceptance remains pending.
+  a 614-commit redacted secret scan, and whitespace proof. Exact-head Preview
+  acceptance remains pending.
 - No Production, database, lead/event, message, provider, WordPress/DNS,
   publication, spend, deletion, or NellySelly action occurred.
 
