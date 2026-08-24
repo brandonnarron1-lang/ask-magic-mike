@@ -4,13 +4,17 @@
 
 - Preserved the refreshed PR #211 head at remote rescue branch
   `rescue/amm-pr211-pre-runtime-skip-focus-20260824-0418`.
-- Signed-browser acceptance of the protected exact-head Preview found that the
-  skip link prevented default navigation but the browser restored focus to the
-  activated anchor after its handler completed.
+- Signed-browser locator/CUA acceptance of the protected exact-head Preview
+  could not prove that focus remained on the content target after activation.
+  That ambiguity was treated as release-blocking rather than accepted as a
+  browser-tool artifact.
 - Reused the existing skip link and content target, adding one bounded deferred
   refocus instead of another navigation or accessibility system.
 - Added regression coverage that simulates post-handler anchor refocus and
   proves the content target is restored after the activation cycle.
+- Added a no-write Playwright Tab/Enter contract to the already executed
+  Preview browser suite; local Chromium proves the skip link is first and
+  transfers focus to `#page-content` without submitting data.
 - Submitted no form and changed no Production deployment, database, lead,
   message, WordPress surface, DNS, spend, deletion, or NellySelly system.
 

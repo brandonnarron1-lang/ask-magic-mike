@@ -141,10 +141,11 @@ question label, help relationship, 2,000-character maximum, no framework
 overlay, no NellySelly identity, and an empty console log. No field was typed
 and no request was submitted.
 
-That same runtime check found a narrow defect: activating the skip link
-prevented hash navigation, but focus returned to the activated anchor instead
-of remaining on `section#page-content`. This contradicts the intended keyboard
-contract even though the component unit test passed.
+That same locator/CUA runtime check did not retain focus on
+`section#page-content` after activation. A follow-up CUA attempt also could not
+move initial body focus with Tab, so this is not accepted as definitive browser
+behavior. It is a release-blocking evidence ambiguity that the component unit
+test alone could not resolve.
 
 - Preserved the affected head at remote rescue branch
   `rescue/amm-pr211-pre-runtime-skip-focus-20260824-0418`.
@@ -155,10 +156,20 @@ contract even though the component unit test passed.
   prove the deferred callback returns focus to the content target.
 - Focused verification passes 2 files / 10 tests with no warning, strict
   typecheck passes, targeted ESLint passes, and the staged secret scan is clean.
+- Preserved the next exact head at
+  `rescue/amm-pr211-pre-runtime-e2e-proof-20260824-0426` before extending the
+  already executed protected-Preview browser file.
+- Added an intercepted Chromium Tab/Enter contract that loads `/ask`, blocks
+  all applicable analytics/event endpoints, proves the skip control receives
+  first focus, activates it, and proves `#page-content` receives focus.
+- Local Playwright now passes 3/3 tests in that no-write file: two existing
+  intercepted widget paths plus the new keyboard-focus path.
 
 The former Preview and protected no-write run are historical diagnostic
-evidence only. Fresh full Node 24, immutable Preview, protected no-write, and
-signed-browser keyboard proof are required for the corrected exact head.
+evidence only. Fresh full Node 24, immutable Preview, and protected no-write
+Playwright proof are required for the corrected exact head. Integrated
+signed-browser focus output remains non-authoritative because that control path
+could not perform a reliable first Tab.
 
 ## Refreshed stack evidence boundary — 2026-08-24
 

@@ -2,9 +2,10 @@
 
 ## 2026-08-24 — PR #211 runtime skip-link focus hardening
 
-- Protected Preview DOM and field semantics passed, but a real keyboard
-  activation check showed focus returning to the skip link after the click
-  handler instead of remaining on `#page-content`.
+- Protected Preview DOM and field semantics passed, but the integrated
+  locator/CUA path did not retain focus on `#page-content` after activation.
+  Because that path could not reliably perform a first Tab either, the result
+  is recorded as an ambiguity rather than definitive browser behavior.
 - Preserved the pre-fix candidate at
   `rescue/amm-pr211-pre-runtime-skip-focus-20260824-0418`.
 - The shared header now reasserts the same content-target focus once the
@@ -12,6 +13,9 @@
   unchanged.
 - Regression coverage now models the browser refocus edge case. Fresh exact-
   head CI, Preview, and keyboard proof remain mandatory before release.
+- The existing protected Preview browser file now also runs a fully intercepted
+  Tab/Enter test. Local Chromium passes all three tests with no application
+  write.
 
 ## 2026-08-24 — PR #211 stack refresh onto refreshed PR #210
 

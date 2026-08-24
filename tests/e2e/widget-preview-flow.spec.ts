@@ -123,3 +123,30 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
     await expect(widget.getByText("intercepted_failure")).toBeVisible();
   });
 });
+
+test.describe("Public keyboard access (DB-mutation-free)", () => {
+  test("skip link transfers focus to the shared main-content target", async ({ page }) => {
+    for (const endpoint of [
+      "**/api/analytics/event",
+      "**/api/events",
+      "**/api/experiments/event",
+    ]) {
+      await page.route(endpoint, async (route) => {
+        await route.fulfill({
+          status: 202,
+          contentType: "application/json",
+          body: JSON.stringify({ ok: true, intercepted: true }),
+        });
+      });
+    }
+
+    await page.goto("/ask");
+    await page.keyboard.press("Tab");
+
+    const skip = page.getByRole("link", { name: "Skip to main content" });
+    await expect(skip).toBeFocused();
+
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#page-content")).toBeFocused();
+  });
+});

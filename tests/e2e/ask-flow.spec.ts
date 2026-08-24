@@ -42,7 +42,7 @@ test("active Ask Mike flow uses intercepted chat and lead persistence", async ({
   });
 
   await page.goto("/ask");
-  await expect(page.getByRole("heading", { name: /focused local real estate advisor/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Ask Mike\. Get a practical local next step\./i })).toBeVisible();
   await page.getByLabel(/Your real estate question/).fill("What should I prepare before listing in Wilson?");
   await page.getByRole("button", { name: "Send Question" }).click();
 
