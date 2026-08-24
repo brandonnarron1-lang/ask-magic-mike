@@ -102,12 +102,53 @@ readiness contract. Every canonical public page, widget, liveness check, and
 anonymous admin denial passed. This run submitted no form or event and changed
 no external state.
 
-## Remaining acceptance
+## Immutable Preview and exact-head acceptance — 2026-08-24
 
-Before any Production proposal:
+Application head `ae9386d77380b25192b21e786925fa7ff99dcaa5` is sealed:
 
-1. commit and push the exact candidate;
-2. obtain exact-head Node 24 CI;
-3. create an immutable Vercel Preview only;
-4. verify both Preview redirects and canonical destination pages; and
-5. keep merge/deploy behind a new exact approval gate.
+- GitHub Node 24 release gate
+  [32687148073](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32687148073)
+  passed unit tests, strict typecheck, ESLint, optimized build, route manifest,
+  release-candidate report, and launch-authority report;
+- release artifact `9506092188` has digest
+  `sha256:fed0b12cd7adc677d32c68f8ee2c224473f311e97f7a55723552d867bf7e337c`;
+- Vercel deployment `dpl_7k2xDm3nysKd7iDCgmW1LbboRbBq` is READY at
+  `https://ask-magic-mike-l79zod1lq-eyes-up-industries.vercel.app` and is
+  bound to PR #210 and the exact application head;
+- authenticated navigation from `/value` landed on `/home-value` while
+  preserving `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, and
+  `gclid`; the destination emitted the canonical
+  `https://www.askmagicmike.com/home-value` and the route-specific title;
+- authenticated navigation from `/we-buy-houses` landed on `/sell` while
+  preserving `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, and
+  `fbclid`; the destination emitted the canonical
+  `https://www.askmagicmike.com/sell` and the route-specific title;
+- the inspected browser emitted no warning or error; and
+- deployment-scoped Vercel log inspection found no error, warning, or fatal
+  record in the acceptance window.
+
+The browser follows redirects, so the exact `308` status and exact `Location`
+contract remain proven by the real Next.js configuration test and optimized
+server smoke. The deployed navigation proves the protected Preview actually
+lands on the same canonical destinations with attribution intact.
+
+No form, API mutation, analytics event, lead, email, SMS, Push, consumer
+acknowledgment, database write, environment change, WordPress edit, DNS change,
+publication, spend, deletion, or NellySelly action occurred.
+
+The release-sealing documentation/test diff passed 3 focused files / 27 tests,
+ESLint, optimized build, release safety 14/14, system isolation, and
+`git diff --check`. A typecheck launched concurrently with the optimized build
+observed `.next/types` while Next.js was regenerating that directory and failed
+with transient missing generated files. The build completed successfully and a
+serial typecheck immediately passed with no diagnostic. Exact-head CI runs
+these phases in order and remains the authoritative Node 24 result.
+
+## Remaining gate
+
+PR #209 must be released first. PR #210 must then be refreshed onto the exact
+new `main` and repeat exact-head verification. Only after that refresh may this
+separate phrase authorize its exact reviewed merge and matching Production
+deployment:
+
+`APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`

@@ -79,6 +79,33 @@ provider action, or deletion.
 - Stale encrypted Upstash variable names remain ignored. Their deletion is not
   included in this gate.
 
+## Later sequential candidates — no current release authority
+
+These candidates preserve already-built work. They are not part of PR #209's
+gate and must not be merged out of order:
+
+1. Draft PR [#210](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/210)
+   consolidates `/value` and `/we-buy-houses` onto the canonical conversion
+   routes with permanent, query-preserving redirects and a matching Production
+   monitor contract. After PR #209 is released, rebase #210 onto the exact new
+   `main`, repeat exact-head CI/Preview proof, then require
+   `APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`.
+2. Draft PR [#211](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/211)
+   retains the shared skip-to-content path and clearer required Ask intake.
+   It remains behind #210 and later requires
+   `APPROVE PHASE 9 ASK CONVERSION ACCESSIBILITY MERGE AND PRODUCTION DEPLOYMENT`
+   after a fresh exact-main refresh and proof.
+3. Draft PR [#212](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/212)
+   reuses the existing Google container and canonical event ledger for
+   consent-gated cross-domain measurement. It must be refreshed after the
+   selected application sequence and requires authenticated Google/Vercel
+   configuration review plus
+   `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
+
+None of these later phrases can authorize another PR, secret, database write,
+form submission, notification, WordPress/DNS change, publication, spend,
+deletion, or NellySelly action.
+
 ## Superseded and deferred release records
 
 - PRs #202 through #208 remain open or preserved only as incremental review

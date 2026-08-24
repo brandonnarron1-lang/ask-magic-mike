@@ -67,4 +67,16 @@ Revert this candidate commit and redeploy the prior accepted tree. No database o
 
 ## Production authority
 
-No Production action is authorized by this document or by any earlier approval. This stacked candidate remains separate from the sealed PR #209 and requires its own exact approval after Preview evidence is complete.
+No Production action is authorized by this document or by any earlier approval.
+This stacked candidate remains separate from the sealed PR #209. PR #209 must
+be merged and accepted first; this branch must then be refreshed onto that
+exact released `main` and repeat exact-head CI and Preview proof.
+
+Only the following later phrase may authorize the exact reviewed PR #210
+code-only merge and matching Vercel Production deployment:
+
+`APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`
+
+That phrase does not authorize PR #209's durability secret, a database or
+environment change, a lead or message, WordPress/DNS/Search Console mutation,
+publication, spend, deletion, or any NellySelly action.

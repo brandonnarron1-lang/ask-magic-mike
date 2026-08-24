@@ -34,6 +34,12 @@ const productionGate =
   "APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT";
 const previewMutationGate =
   "APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA";
+const canonicalAliasGate =
+  "APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT";
+const askAccessibilityGate =
+  "APPROVE PHASE 9 ASK CONVERSION ACCESSIBILITY MERGE AND PRODUCTION DEPLOYMENT";
+const crossDomainGate =
+  "APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT";
 
 describe("current release-authority documentation", () => {
   it("identifies the accepted Production commit and deployment", () => {
@@ -76,6 +82,21 @@ describe("current release-authority documentation", () => {
       expect(doc).toContain(productionGate);
     }
     expect(previewMutationGate).not.toBe(productionGate);
+  });
+
+  it("orders later candidates behind the sole immediate PR #209 gate", () => {
+    const pr209 = ownerQueue.indexOf("Draft PR [#209]");
+    const pr210 = ownerQueue.indexOf("Draft PR [#210]");
+    const pr211 = ownerQueue.indexOf("Draft PR [#211]");
+    const pr212 = ownerQueue.indexOf("Draft PR [#212]");
+
+    expect(pr209).toBeGreaterThanOrEqual(0);
+    expect(pr210).toBeGreaterThan(pr209);
+    expect(pr211).toBeGreaterThan(pr210);
+    expect(pr212).toBeGreaterThan(pr211);
+    expect(ownerQueue).toContain(canonicalAliasGate);
+    expect(ownerQueue).toContain(askAccessibilityGate);
+    expect(ownerQueue).toContain(crossDomainGate);
   });
 
   it("does not retain superseded stacked-release authority in operating docs", () => {
