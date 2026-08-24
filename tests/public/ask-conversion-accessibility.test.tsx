@@ -17,6 +17,7 @@ vi.mock("next/image", () => ({
 }));
 
 vi.mock("../../app/lib/analytics", () => ({ trackEvent: vi.fn() }));
+vi.mock("next/navigation", () => ({ usePathname: () => "/ask" }));
 
 import { AskMikeChatPanel } from "../../app/components/black-diamond/AskMikeChatPanel";
 import { BlackDiamondHeader } from "../../app/components/black-diamond/BlackDiamondHeader";
