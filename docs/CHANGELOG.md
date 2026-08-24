@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-24 — PR #211 stack refresh onto refreshed PR #210
+
+- Preserved the former PR #211 head at
+  `rescue/amm-pr211-pre-pr210-refresh-20260824-0405`.
+- Synchronized the accessibility candidate with exact refreshed PR #210 head
+  `5b884d5eca43fb4dcd1111c59c78a85c54698db1` before any Production action.
+- The only merge conflict was additive release history in this file. The Ask,
+  header, and shared content-target implementation did not overlap.
+- Prior PR #211 CI and Preview are historical evidence only. The refreshed head
+  must repeat exact-head proof before its later gate is requestable.
+
 ## 2026-08-24 — PR #210 stack refresh onto sealed PR #209
 
 - Preserved the former PR #210 head at

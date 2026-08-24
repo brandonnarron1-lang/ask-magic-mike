@@ -131,3 +131,21 @@ the local engine warning is recorded rather than treated as release evidence.
 - no WordPress edit or publication;
 - no DNS, domain, secret, billing, spend, deletion, or NellySelly action; and
 - no merge or Production deployment.
+
+## Refreshed stack evidence boundary — 2026-08-24
+
+- Preserved pre-refresh PR #211 head
+  `d529b553d6d822c50c398b10fec25f0d90b9ba38` at remote rescue branch
+  `rescue/amm-pr211-pre-pr210-refresh-20260824-0405`.
+- Merged exact refreshed PR #210 head
+  `5b884d5eca43fb4dcd1111c59c78a85c54698db1`, which contains sealed PR #209
+  candidate `6eb89264d59c8d25a711a1ffa178828343772f75` once.
+- Merge simulation and the actual merge found no accessibility application-file
+  conflict. The sole conflict was additive release history in
+  `docs/CHANGELOG.md`; all records were retained.
+- Earlier CI, Preview, keyboard, mobile-geometry, and console evidence above is
+  valid historical evidence for the former head only. Fresh exact-head proof is
+  mandatory for the refreshed candidate.
+- No Production environment, merge, deployment, database/lead/event write,
+  AI/provider request, message, WordPress edit, DNS change, publication, spend,
+  deletion, or NellySelly action occurred.

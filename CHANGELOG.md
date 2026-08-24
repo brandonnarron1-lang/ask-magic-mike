@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-24 — PR #211 stack refresh onto refreshed PR #210
+
+- Preserved PR #211's pre-refresh head at remote rescue branch
+  `rescue/amm-pr211-pre-pr210-refresh-20260824-0405`.
+- Merged exact refreshed PR #210 head
+  `5b884d5eca43fb4dcd1111c59c78a85c54698db1`, carrying the sealed PR #209
+  security candidate and the canonical redirect work once.
+- Resolved the sole additive changelog conflict while preserving every release
+  record; accessibility application files did not overlap the refreshed stack.
+- Invalidated older PR #211 exact-head evidence pending fresh Node 24, Preview,
+  keyboard, mobile-geometry, and protected no-write proof.
+- Changed no Production deployment, database, lead, message, WordPress surface,
+  DNS, spend, deletion, or NellySelly system.
+
 ## 2026-08-24 — PR #210 stack refresh onto the sealed PR #209 candidate
 
 - Preserved PR #210's pre-refresh head at remote rescue branch

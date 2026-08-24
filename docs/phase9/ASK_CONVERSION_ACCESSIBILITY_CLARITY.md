@@ -2,7 +2,10 @@
 
 Date: 2026-08-23
 
-Status: isolated stacked candidate; Production unchanged
+Status: stacked candidate refreshed onto exact PR #210; Production unchanged
+
+Stack base: refreshed PR #210 head
+`5b884d5eca43fb4dcd1111c59c78a85c54698db1`
 
 ## Decision
 
@@ -107,7 +110,9 @@ Action class: application code and Preview preparation are autonomous;
 Production merge/deployment is owner-gated.
 
 No migration, secret, provider, consumer send, WordPress, DNS, spend, or
-NellySelly action is part of this candidate.
+NellySelly action is part of this candidate. PR #209 and PR #210 must be
+accepted in order before this branch can be retargeted/refreshed onto the exact
+released `main` and independently considered for Production.
 
 Rollback is one application revert. No data or external system needs reversal.
 
