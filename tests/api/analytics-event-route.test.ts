@@ -78,11 +78,13 @@ describe("POST /api/analytics/event", () => {
     expect(trackMock).toHaveBeenCalledWith(
       expect.objectContaining({
         eventName: "cta_chip_clicked",
+        funnelSessionId: "00000000-0000-4000-8000-000000000001",
         utmSource: "facebook",
         utmMedium: "paid_social",
         utmCampaign: "wilson-nc-sellers",
       })
     );
+    expect(trackMock.mock.calls[0][0]).not.toHaveProperty("sessionId");
   });
 
   it("uses IP only for abuse control and forwards a coarse user-agent class", async () => {
@@ -141,6 +143,18 @@ describe("POST /api/analytics/event", () => {
     expect(trackMock).not.toHaveBeenCalled();
   });
 
+  it.each(["lead_created", "widget_lead_created", "lead_qualified", "appointment_requested"])(
+    "rejects browser-authored canonical outcome %s",
+    async (eventName) => {
+      const res = await POST(post({
+        eventName,
+        sessionId: "00000000-0000-4000-8000-000000000001",
+      }));
+      expect(res.status).toBe(422);
+      expect(trackMock).not.toHaveBeenCalled();
+    },
+  );
+
   it("rejects nested properties and oversized bodies", async () => {
     const nested = await POST(post({
       eventName: "page_view",
@@ -174,7 +188,6 @@ describe("POST /api/analytics/event", () => {
     const widgetEvents = [
       "widget_opened",
       "widget_started",
-      "widget_lead_created",
       "widget_submit_failed",
     ] as const;
     for (const eventName of widgetEvents) {

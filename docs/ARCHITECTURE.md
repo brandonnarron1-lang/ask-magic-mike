@@ -128,6 +128,15 @@ public route → runtime validation → Neon analytics_events
 trusted operation → server ledger → Neon analytics_events
 ```
 
+Form funnels reuse their existing browser submission/idempotency UUID as a
+protected `funnel_session_id` property. It is absent from browser analytics
+dimensions and does not create a `sessions` row. If lead storage succeeds, the
+atomic capture reuses that UUID as `sessions.id`; aggregate queries can then
+join the pre-lead steps without weakening lifecycle atomicity. Browser-authored
+lead/widget creation, qualification, appointment-request, and notification
+outcome rows are refused; server post-storage `lead_created` is the canonical
+lead-conversion authority.
+
 The dependent field-experience candidate reuses this ledger for Production-only
 LCP/INP/CLS. It writes no lead/session/attribution identity, converts the raw
 browser metric ID to a domain-separated digest, and lets the protected Growth
@@ -194,7 +203,11 @@ Every report stores the disclaimer text verbatim alongside the estimate. The `di
 
 ## Key Design Decisions
 
-**Session-first.** Sessions are created on page load before any lead data exists. This captures attribution and abandonment analytics even when no form is submitted.
+**Pseudonymous funnel identity first; canonical session on durable capture.**
+Public funnel events may carry the existing random submission UUID in protected
+analytics context, but analytics never insert `sessions`. The atomic lead
+lifecycle creates the canonical session and lead together so an early event
+cannot occupy the session key or block capture.
 
 **Scoring is deterministic.** No AI in the scoring path. The `scorer_version` field allows replaying historical scores against a new algorithm without data loss.
 
@@ -202,7 +215,9 @@ Every report stores the disclaimer text verbatim alongside the estimate. The `di
 
 **Consent is immutable.** `consent_timestamp` is never updated. The `consent_language_version` ties each record to the exact text shown at consent time.
 
-**Analytics never blocks.** `trackEventNoWait()` fires and forgets. Zero risk of analytics failure causing an intake failure.
+**Analytics never blocks lead storage.** Browser event recording is non-blocking
+and can fail independently. A lead success state depends only on durable lead
+capture; canonical conversion is written server-side afterward.
 
 **Money in cents.** All price values (sale price, estimate) are stored as BIGINT in cents to avoid floating point rounding issues.
 # Canonical Production lead pipe (refreshed 2026-08-21)

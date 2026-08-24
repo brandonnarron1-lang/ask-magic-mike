@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-08-24 — Funnel-event identity-integrity candidate
+
+- Reused each form's existing submission/idempotency UUID to connect Home
+  Value, seller, buyer/renter/open-house, Ask, and appointment funnel events to
+  the eventual canonical lead without adding another tracker or store.
+- Rejected an early-session design after source proof showed it would collide
+  with atomic lead capture; no migration or database row was created.
+- Kept the UUID out of browser analytics properties and stored it only as
+  validated protected Neon event context.
+- Made server post-storage `lead_created` the sole canonical lead conversion;
+  browser-authored lead/widget creation, qualification, appointment-request,
+  and notification outcomes now fail closed while approved browser
+  integrations retain their success events.
+- Added linked privacy-safe failure telemetry, chat idempotency, buyer thank-you
+  telemetry, and channel-specific buyer/seller permission evidence.
+- Node 24 acceptance passes 10 focused files / 69 tests, all 237 files / 3,116
+  tests, strict typecheck, full ESLint, optimized build/84-route proof, 14/14
+  release safety, isolation, Production dependency audit, and redacted history
+  scan. Production remains unchanged.
+
 ## 2026-08-24 — Home-value completion-integrity candidate
 
 - Reused the current Home Value form and canonical lead command, moving the

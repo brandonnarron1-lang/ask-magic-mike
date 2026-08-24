@@ -1,4 +1,5 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { ImgHTMLAttributes } from "react";
@@ -21,6 +22,7 @@ vi.mock("next/navigation", () => ({ usePathname: () => "/ask" }));
 
 import { AskMikeChatPanel } from "../../app/components/black-diamond/AskMikeChatPanel";
 import { BlackDiamondHeader } from "../../app/components/black-diamond/BlackDiamondHeader";
+import { trackEvent } from "../../app/lib/analytics";
 
 const root = process.cwd();
 
@@ -45,6 +47,8 @@ function read(path: string) {
 afterEach(() => {
   vi.useRealTimers();
   cleanup();
+  vi.clearAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe("Ask Mike conversion clarity and keyboard access", () => {
@@ -98,6 +102,50 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
     const chatRoute = read("app/api/chat/route.ts");
     expect(chatRoute).toContain("message.length > 2_000");
     expect(chatRoute).toContain("Message must be 2,000 characters or fewer.");
+  });
+
+  it("keeps a chat answer visible and links a privacy-safe lead-preparation failure", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input) === "/api/chat/message") {
+        return new Response(JSON.stringify({ message: "Synthetic answer for internal QA." }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (String(input) === "/api/leads") {
+        const payload = JSON.parse(String(init?.body)) as Record<string, unknown>;
+        expect(init?.headers).toMatchObject({ "Idempotency-Key": payload.idempotency_key });
+        expect(payload.widget_session_id).toBe(payload.idempotency_key);
+        return new Response(JSON.stringify({ error: "Lead storage failed." }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      throw new Error(`Unexpected request: ${String(input)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<AskMikeChatPanel />);
+
+    await user.type(screen.getByLabelText(/Your real estate question/), "How should I prepare to sell?");
+    await user.click(screen.getByRole("button", { name: "Send Question" }));
+
+    expect(await screen.findByText("Synthetic answer for internal QA.")).toBeVisible();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /appointment request path could not be prepared/i,
+    );
+    await waitFor(() => {
+      const failureCall = vi.mocked(trackEvent).mock.calls.find(([event]) => event === "lead_submit_failed");
+      expect(failureCall).toBeDefined();
+      expect(failureCall?.[2]).toEqual({
+        funnel_name: "ask_mike_chat",
+        lead_source_surface: "ask_page",
+        step_name: "message_sent",
+      });
+      expect(failureCall?.[3]?.sessionId).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      );
+    });
   });
 
   it("keeps every shared-header surface wired to one keyboard-focus destination", () => {

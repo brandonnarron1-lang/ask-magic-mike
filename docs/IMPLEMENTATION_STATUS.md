@@ -2,6 +2,43 @@
 
 Updated 2026-08-24.
 
+## Phase 9 funnel-event identity integrity — 2026-08-24
+
+- **Reuse decision:** the stacked candidate extends only the existing browser
+  submission UUID, `POST /api/events`, Neon analytics repository, and atomic
+  lead command on exact Draft PR #215 head
+  `985079d1574daf9707a24e469b5a0954cf3cae`; no tracker, cookie, form, API,
+  database, CRM, provider, or notification system is added.
+- **Conflict prevented:** inspection proved that pre-creating `sessions` for
+  anonymous events would make `capture_public_lead_v1` return an idempotency
+  conflict and could block a real lead. That approach was removed before any
+  commit or database use.
+- **Implementation:** validated pseudonymous funnel UUIDs are stored only as a
+  protected repository-injected analytics property, then naturally match
+  `sessions.id` when durable lead capture succeeds. Home Value, seller,
+  buyer/renter/open-house, Ask lead preparation, and appointment events share
+  the established UUID.
+- **KPI authority:** browser success remains available to GA/GTM/PostHog and
+  widget parents, while `/api/events` rejects browser-authored lead/widget
+  creation, qualification, appointment-request, and notification outcomes. The
+  server's post-storage event is the only canonical lead-conversion row;
+  replay cannot inflate it.
+- **Privacy/consent:** the UUID is absent from browser dimensions, URLs, PII,
+  and public properties. Buyer/seller email/call permission now requires the
+  corresponding supplied contact method. Historical null-session events are
+  not backfilled or reclassified.
+- **Current acceptance:** Node 24.18.0 passes 10 focused files / 69 tests, all
+  237 files / 3,116 tests, strict TypeScript, full ESLint, optimized Next.js
+  15.5.21 build, 84/17 route proof, 14/14 release safety, deployable-source
+  isolation, no known Production dependency vulnerabilities, a redacted
+  603-commit history scan, and whitespace proof. Immutable no-write Preview and
+  final exact-head proof remain mandatory before sealing.
+- **Safety:** no Production, environment, schema/data, lead/event, message,
+  provider, WordPress/DNS, publication, spend, deletion, or NellySelly action.
+- Detailed scope:
+  `docs/phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY.md` and
+  `docs/phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY_QA_EVIDENCE.md`.
+
 ## Phase 9 home-value completion integrity — 2026-08-24
 
 - **Reuse decision:** Draft PR #215 extends the released Home Value funnel and

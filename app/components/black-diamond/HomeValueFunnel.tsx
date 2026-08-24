@@ -60,6 +60,7 @@ export function HomeValueFunnel({
   const experimentProperties = experimentContext
     ? { experiment_key: experimentContext.experimentKey, variant_key: experimentContext.variantKey }
     : {};
+  const eventOptions = { sessionId: submissionId };
 
   useEffect(() => {
     setSubmissionId(tryCreateBrowserSubmissionId());
@@ -80,10 +81,10 @@ export function HomeValueFunnel({
       addressRef.current?.focus();
       return;
     }
-    trackEvent("home_value_started", attribution, { funnel_name: "home_value", lead_source_surface: surface, ...experimentProperties });
-    trackEvent("funnel_started", attribution, { funnel_name: "home_value", lead_source_surface: surface, ...experimentProperties });
-    trackEvent("address_submit", attribution, { funnel_name: "home_value", step_name: "address", ...experimentProperties });
-    trackEvent("address_submitted", attribution, { funnel_name: "home_value", step_name: "address", ...experimentProperties });
+    trackEvent("home_value_started", attribution, { funnel_name: "home_value", lead_source_surface: surface, ...experimentProperties }, eventOptions);
+    trackEvent("funnel_started", attribution, { funnel_name: "home_value", lead_source_surface: surface, ...experimentProperties }, eventOptions);
+    trackEvent("address_submit", attribution, { funnel_name: "home_value", step_name: "address", ...experimentProperties }, eventOptions);
+    trackEvent("address_submitted", attribution, { funnel_name: "home_value", step_name: "address", ...experimentProperties }, eventOptions);
     if (surface === "widget") {
       postToWidgetParent({ type: "askmagicmike:lead_started" }, attribution);
     }
@@ -121,13 +122,13 @@ export function HomeValueFunnel({
     }
 
     setSubmitting(true);
-    trackEvent("email_submit", attribution, { funnel_name: "home_value", step_name: "contact" });
+    trackEvent("email_submit", attribution, { funnel_name: "home_value", step_name: "contact" }, eventOptions);
     if (clean(phone)) {
-      trackEvent("phone_submit", attribution, { funnel_name: "home_value", step_name: "contact" });
+      trackEvent("phone_submit", attribution, { funnel_name: "home_value", step_name: "contact" }, eventOptions);
     }
-    trackEvent("timeline_selected", attribution, { funnel_name: "home_value", timeline });
-    trackEvent("contact_submitted", attribution, { funnel_name: "home_value", lead_source_surface: surface, step_name: "contact" });
-    if (consent) trackEvent("consent_accepted", attribution, { funnel_name: "home_value", consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION });
+    trackEvent("timeline_selected", attribution, { funnel_name: "home_value", timeline }, eventOptions);
+    trackEvent("contact_submitted", attribution, { funnel_name: "home_value", lead_source_surface: surface, step_name: "contact" }, eventOptions);
+    if (consent) trackEvent("consent_accepted", attribution, { funnel_name: "home_value", consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION }, eventOptions);
 
     try {
       const res = await fetch("/api/leads", {
@@ -163,12 +164,12 @@ export function HomeValueFunnel({
       if (!res.ok) throw new Error(publicLeadErrorMessage(data.error));
       const idempotentReplay = res.headers.get("X-AMM-Idempotent-Replay") === "1";
       if (!idempotentReplay) {
-        trackEvent("lead_created", attribution, { funnel_name: "home_value", step_name: "thank_you", ...experimentProperties });
+        trackEvent("lead_created", attribution, { funnel_name: "home_value", step_name: "thank_you", ...experimentProperties }, eventOptions);
         if (experimentContext && data.lead_id) {
           void recordExperimentEvent(experimentContext, "lead_created", data.lead_id);
         }
         if (surface === "widget") {
-          trackEvent("widget_lead_created", attribution, { funnel_name: "home_value" });
+          trackEvent("widget_lead_created", attribution, { funnel_name: "home_value" }, eventOptions);
           postToWidgetParent({ type: "askmagicmike:lead_created" }, attribution);
         }
       }
@@ -178,13 +179,13 @@ export function HomeValueFunnel({
       );
       setLeadReference({ leadId: data.lead_id || null, sessionId: data.session_id || null });
       setStep(3);
-      trackEvent("thank_you_viewed", attribution, { funnel_name: "home_value" });
+      trackEvent("thank_you_viewed", attribution, { funnel_name: "home_value" }, eventOptions);
     } catch (error) {
       trackEvent("lead_submit_failed", attribution, {
         funnel_name: "home_value",
         lead_source_surface: surface,
         step_name: "contact",
-      });
+      }, eventOptions);
       setFormError({ message: publicLeadErrorMessage(error instanceof Error ? error.message : undefined) });
     } finally {
       setSubmitting(false);

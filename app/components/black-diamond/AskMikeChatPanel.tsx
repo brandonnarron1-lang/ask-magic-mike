@@ -51,7 +51,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
       funnel_name: "ask_mike_chat",
       step_name: stepName,
       lead_source_surface: surface,
-    });
+    }, { sessionId: chatSessionId });
     if (surface === "widget") {
       postToWidgetParent({ type: "askmagicmike:chat_started" }, attribution);
     }
@@ -73,7 +73,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
     trackEvent("chat_message_sent", attribution, {
       funnel_name: "ask_mike_chat",
       lead_source_surface: surface,
-    });
+    }, { sessionId: chatSessionId });
 
     try {
       const res = await fetch("/api/chat/message", {
@@ -97,7 +97,10 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
         leadPreparationInFlightRef.current = true;
         const leadRes = await fetch("/api/leads", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Idempotency-Key": chatSessionId,
+          },
           body: JSON.stringify({
             funnel_type: "chat",
             lead_source_surface: surface,
@@ -105,6 +108,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
             status: "new",
             assigned_agent_id: null,
             widget_session_id: chatSessionId,
+            idempotency_key: chatSessionId,
             attribution,
           }),
         });
@@ -121,6 +125,11 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
           sessionId: leadData.session_id || chatSessionId,
         });
       } catch {
+        trackEvent("lead_submit_failed", attribution, {
+          funnel_name: "ask_mike_chat",
+          lead_source_surface: surface,
+          step_name: "message_sent",
+        }, { sessionId: chatSessionId });
         setChatError("Mike's answer came through, but the appointment request path could not be prepared. You can still submit the home-value form for direct follow-up.");
       } finally {
         leadPreparationInFlightRef.current = false;

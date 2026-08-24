@@ -34,6 +34,7 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
   const [contactInvalid, setContactInvalid] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
   const [leadReference, setLeadReference] = useState<{ leadId: string | null; sessionId: string | null }>({ leadId: null, sessionId: null });
+  const eventOptions = { sessionId: submissionId };
 
   useEffect(() => setSubmissionId(tryCreateBrowserSubmissionId()), []);
 
@@ -48,13 +49,15 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
     const form = event.currentTarget;
     const data = new FormData(form);
     const intent = preset;
+    const email = clean(data.get("buyer-email"));
+    const phone = clean(data.get("buyer-phone"));
     const payload = {
       funnel_type: intent,
       lead_type: intent,
       lead_source_surface: surface,
       name: clean(data.get("buyer-name")),
-      email: clean(data.get("buyer-email")),
-      phone: clean(data.get("buyer-phone")),
+      email,
+      phone,
       target_geography: clean(data.get("buyer-area")),
       property_id: propertyId || undefined,
       timeline: clean(data.get("buyer-timeline")),
@@ -62,8 +65,8 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
       preapproval: data.get("buyer-preapproval") === "yes",
       question: clean(data.get("buyer-question")),
       consent,
-      consent_email: consent,
-      consent_call: consent,
+      consent_email: consent && Boolean(email),
+      consent_call: consent && Boolean(phone),
       consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
       consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
       consent_source: `${surface}:buyer-intake`,
@@ -90,9 +93,9 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
     setSubmitting(true);
     setMessage(null);
     setContactInvalid(false);
-    trackEvent("funnel_started", attribution, { funnel_name: intent, lead_source_surface: surface });
-    trackEvent("contact_submitted", attribution, { funnel_name: intent, lead_source_surface: surface });
-    if (consent) trackEvent("consent_accepted", attribution, { funnel_name: intent, consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION });
+    trackEvent("funnel_started", attribution, { funnel_name: intent, lead_source_surface: surface }, eventOptions);
+    trackEvent("contact_submitted", attribution, { funnel_name: intent, lead_source_surface: surface }, eventOptions);
+    if (consent) trackEvent("consent_accepted", attribution, { funnel_name: intent, consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION }, eventOptions);
 
     try {
       const response = await fetch("/api/leads", {
@@ -111,9 +114,15 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
       setContactInvalid(false);
       setSubmissionId(tryCreateBrowserSubmissionId());
       if (!idempotentReplay) {
-        trackEvent("lead_created", attribution, { funnel_name: intent, lead_source_surface: surface });
+        trackEvent("lead_created", attribution, { funnel_name: intent, lead_source_surface: surface }, eventOptions);
       }
+      trackEvent("thank_you_viewed", attribution, { funnel_name: intent }, eventOptions);
     } catch (error) {
+      trackEvent("lead_submit_failed", attribution, {
+        funnel_name: intent,
+        lead_source_surface: surface,
+        step_name: "contact",
+      }, eventOptions);
       setMessage(publicLeadErrorMessage(error instanceof Error ? error.message : undefined));
       setSuccess(false);
     } finally {

@@ -535,6 +535,15 @@ const ENUM_VALUES: Partial<Record<string, ReadonlySet<string>>> = {
 };
 
 const PUBLIC_ANALYTICS_EVENTS = new Set(Object.keys(PUBLIC_EVENT_PROPERTY_KEYS));
+const CANONICAL_LEDGER_PROTECTED_EVENTS = new Set([
+  "lead_created",
+  "widget_lead_created",
+  "lead_qualified",
+  "appointment_requested",
+  "notification_queued",
+  "notification_delivered",
+  "notification_failed",
+]);
 
 function decoded(value: string) {
   try {
@@ -672,6 +681,14 @@ export function safeAnalyticsProperties(
 
 export function isApprovedPublicAnalyticsEvent(eventName: string) {
   return PUBLIC_ANALYTICS_EVENTS.has(eventName);
+}
+
+/**
+ * These events may be displayed to browser analytics after a trusted outcome,
+ * but a public ingestion route must never author their canonical Neon row.
+ */
+export function isCanonicalLedgerProtectedEvent(eventName: string) {
+  return CANONICAL_LEDGER_PROTECTED_EVENTS.has(eventName);
 }
 
 export function safePublicAnalyticsProperties(

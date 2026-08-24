@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-08-24 — Funnel-event identity-integrity candidate
+
+- Existing form UUIDs now connect pre-lead funnel stages to eventual durable
+  sessions through protected first-party event context; no cookie, endpoint,
+  table, tracker, or migration was added.
+- Verification caught and removed a proposed early `sessions` insert that
+  would have triggered the atomic lead command's idempotency-conflict guard.
+- Browser GA/GTM/PostHog/widget success signals remain intact, but the canonical
+  event route rejects browser-authored lead/widget creation, qualification,
+  appointment-request, and notification outcomes and retains the server's
+  post-storage `lead_created` as the only lead-conversion authority.
+- Failure events remain allowlisted and PII-free; Home Value, buyer, seller,
+  Ask preparation, and appointment flows now share the existing submission
+  identity and have focused regression coverage.
+- Node 24 proof passes 10 focused files / 69 tests, all 237 files / 3,116 tests,
+  strict TypeScript, full ESLint, optimized build/84-route proof, 14/14 safety,
+  isolation, the Production dependency audit, and a redacted 603-commit history
+  scan. No Production or external-system action occurred.
+
 ## 2026-08-24 — Home-value completion-integrity candidate
 
 - Reused the canonical Black Diamond Home Value funnel and atomic lead command

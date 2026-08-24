@@ -16,10 +16,10 @@ again before every durable write.
 
 ## Browser-authorized events
 
-The current public registry includes page/session, funnel, address, intent,
-timeline, contact, consent, CTA, chat, appointment-request, widget, lead-created
-count, thank-you, privacy-safe lead-submit failure, and private review-planner
-events used by the live interfaces. `lead_submit_failed` records only the
+The current browser registry includes page/session, funnel, address, intent,
+timeline, contact, consent, CTA, chat, appointment-request, widget,
+browser-visible conversion, thank-you, privacy-safe lead-submit failure, and
+private review-planner events used by the live interfaces. `lead_submit_failed` records only the
 registered `funnel_name`, `lead_source_surface`, and `step_name`; the browser
 cannot attach an error string, contact detail, address, provider response, or
 canonical lead identifier.
@@ -30,6 +30,35 @@ events listed below.
 Public callers cannot associate an event with a canonical lead ID or agent ID.
 Server-side lead creation, routing, notification, and admin operations write
 their own lead-associated events after authorization and durable persistence.
+
+### Funnel identity and conversion authority
+
+Home Value, seller, buyer/renter/open-house, Ask lead preparation, and
+appointment actions reuse the cryptographically random UUID already used by
+the matching lead submission. The UUID is sent only as top-level first-party
+request context. It is not exposed in the browser analytics properties,
+PostHog payload, data layer, URL, or widget parent message.
+
+`POST /api/events` validates the UUID and passes it to the Neon repository as
+protected context. The repository injects it into
+`properties.funnel_session_id` after the normal property allowlist. It never
+pre-creates `public.sessions`; successful atomic lead capture later reuses the
+same UUID as canonical `sessions.id`. Aggregate funnel queries may join on
+`COALESCE(session_id::text, properties->>'funnel_session_id')`.
+
+The identifier is pseudonymous operational data and becomes linkable to a lead
+only after that lead is durably stored. It is not unique-person, consent, or
+prospect proof and follows the protected analytics retention/deletion policy.
+Historical null-session events are not backfilled or reclassified.
+
+`lead_created`, `widget_lead_created`, `lead_qualified`, and
+`appointment_requested` may remain visible to approved browser integrations
+after a successful response, but the client does not post them to the canonical
+event endpoint. The endpoint also rejects direct browser-authored attempts.
+Only `POST /api/leads` writes canonical `lead_created`, after durable lead
+storage and with the protected lead/session association. Qualification and
+appointment truth remain server-owned records. Idempotent replay does not
+create another conversion row.
 
 ### Field-experience event
 
@@ -52,7 +81,8 @@ browser telemetry as authenticated transaction evidence.
 
 `notification_queued`, `notification_delivered`, and `notification_failed` are
 never accepted from a browser. They are generated only by the canonical lead
-and provider lifecycle paths. Internal scoring, routing, CRM, SLA, assignment,
+and provider lifecycle paths. Public ingestion also rejects qualification and
+appointment-request outcomes. Internal scoring, routing, CRM, SLA, assignment,
 delivery, listing, and admin events likewise bypass the public endpoint and use
 the server ledger directly.
 
@@ -72,6 +102,8 @@ the server ledger directly.
   `desktop|mobile|tablet|unknown`.
 - Public listing IDs may be retained as bounded identifiers; arbitrary internal,
   routing, task, or provider identifiers are not analytics dimensions.
+- A validated funnel UUID is retained only as repository-injected protected
+  context. Public properties cannot supply or override it.
 
 ## Stable UTM convention
 

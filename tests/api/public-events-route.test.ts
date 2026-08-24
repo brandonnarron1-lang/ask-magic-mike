@@ -56,6 +56,42 @@ describe("POST /api/events", () => {
     expect(recordMock).toHaveBeenCalledWith(expect.objectContaining({ eventName: "funnel_started" }));
   });
 
+  it("persists a valid anonymous funnel identity without pre-creating a canonical session", async () => {
+    const sessionId = "11111111-1111-4111-8111-111111111111";
+    const response = await POST(request({
+      event_name: "address_submitted",
+      session_id: sessionId,
+      properties: {
+        funnel_name: "home_value",
+        step_name: "address",
+        current_path: "/home-value",
+        funnel_session_id: "22222222-2222-4222-8222-222222222222",
+      },
+    }));
+
+    expect(response.status).toBe(202);
+    expect(recordMock).toHaveBeenCalledWith(expect.objectContaining({
+      eventName: "address_submitted",
+      sessionId: null,
+      funnelSessionId: sessionId,
+      leadId: null,
+    }));
+    expect(recordMock.mock.calls[0][0].properties).not.toHaveProperty("funnel_session_id");
+  });
+
+  it("does not persist a malformed funnel identifier", async () => {
+    const response = await POST(request({
+      event_name: "funnel_started",
+      session_id: "person@example.com",
+      properties: { funnel_name: "seller" },
+    }));
+
+    expect(response.status).toBe(202);
+    const event = recordMock.mock.calls[0][0] as Record<string, unknown>;
+    expect(event.sessionId).toBeNull();
+    expect(event).not.toHaveProperty("funnelSessionId");
+  });
+
   it("fails truthfully when the canonical event write is unavailable", async () => {
     recordMock.mockResolvedValue(false);
     const response = await POST(request({ event_name: "page_view", properties: { path: "/" } }));
@@ -77,6 +113,19 @@ describe("POST /api/events", () => {
     expect(response.status).toBe(400);
     expect(recordMock).not.toHaveBeenCalled();
   });
+
+  it.each(["lead_created", "widget_lead_created", "lead_qualified", "appointment_requested"])(
+    "rejects browser-authored canonical outcome event %s",
+    async (eventName) => {
+      const response = await POST(request({
+        event_name: eventName,
+        session_id: "11111111-1111-4111-8111-111111111111",
+        properties: { funnel_name: "home_value" },
+      }));
+      expect(response.status).toBe(400);
+      expect(recordMock).not.toHaveBeenCalled();
+    },
+  );
 
   it("rejects an oversized event before parsing or persistence", async () => {
     const response = await POST(request({

@@ -140,10 +140,62 @@ describe("buyer-family contact and replay integrity", () => {
     render(<BuyerIntentSection />);
 
     await user.type(screen.getByLabelText("Email"), "internal-qa@example.test");
+    await user.click(screen.getByRole("checkbox", { name: /Our Town Properties may contact me/i }));
     await user.click(screen.getByRole("button", { name: "Request Buyer Plan" }));
 
     expect(await screen.findByText("Synthetic new lead accepted.")).toBeVisible();
     expect(analytics.events.filter((eventName) => eventName === "lead_created")).toHaveLength(1);
+
+    const leadCall = fetchMock.mock.calls.find(([input]) => String(input) === "/api/leads");
+    expect(leadCall).toBeDefined();
+    const leadPayload = JSON.parse(String(leadCall?.[1]?.body)) as Record<string, unknown>;
+    expect(leadPayload.consent_email).toBe(true);
+    expect(leadPayload.consent_call).toBe(false);
+    expect(typeof leadPayload.idempotency_key).toBe("string");
+
+    const eventBodies = fetchMock.mock.calls
+      .filter(([input]) => String(input) === "/api/events")
+      .map(([, init]) => JSON.parse(String(init?.body)) as Record<string, unknown>);
+    expect(eventBodies.length).toBeGreaterThan(0);
+    expect(eventBodies.every((body) => body.session_id === leadPayload.idempotency_key)).toBe(true);
+    expect(eventBodies.map((body) => body.event_name)).toContain("thank_you_viewed");
+    expect(eventBodies.map((body) => body.event_name)).not.toContain("lead_created");
+
+    analytics.cleanup();
+  });
+
+  it("keeps a durable failure on the form and records a linked privacy-safe failure event", async () => {
+    const user = userEvent.setup();
+    const analytics = recordAnalytics();
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, _init?: RequestInit) => {
+      if (String(input) === "/api/leads") {
+        return new Response(JSON.stringify({ error: "Lead storage failed." }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return new Response(null, { status: 202 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<BuyerIntentSection />);
+
+    await user.type(screen.getByLabelText("Email"), "internal-qa@example.test");
+    await user.click(screen.getByRole("button", { name: "Request Buyer Plan" }));
+
+    expect(await screen.findByRole("alert")).toBeVisible();
+    expect(analytics.events).toContain("lead_submit_failed");
+    expect(analytics.events).not.toContain("lead_created");
+
+    const leadCall = fetchMock.mock.calls.find(([input]) => String(input) === "/api/leads");
+    const leadPayload = JSON.parse(String(leadCall?.[1]?.body)) as Record<string, unknown>;
+    const failureCall = fetchMock.mock.calls.find(([, init]) => {
+      if (!init?.body) return false;
+      const body = JSON.parse(String(init.body)) as Record<string, unknown>;
+      return body.event_name === "lead_submit_failed";
+    });
+    const failureBody = JSON.parse(String(failureCall?.[1]?.body)) as Record<string, unknown>;
+    expect(failureBody.session_id).toBe(leadPayload.idempotency_key);
+    expect(failureBody).not.toHaveProperty("error");
 
     analytics.cleanup();
   });

@@ -18,7 +18,11 @@ Object.defineProperty(window, "matchMedia", {
   }),
 });
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+  window.sessionStorage.clear();
+});
 
 describe("home-value inline validation", () => {
   it("keeps required-field errors visible, associated, and recoverable", async () => {
@@ -115,6 +119,12 @@ describe("home-value inline validation", () => {
       consent_call: false,
     });
     expect(typeof body.idempotency_key).toBe("string");
+    const eventBodies = fetchMock.mock.calls
+      .filter(([input]) => String(input) === "/api/events")
+      .map(([, init]) => JSON.parse(String(init?.body)) as Record<string, unknown>);
+    expect(eventBodies.length).toBeGreaterThan(0);
+    expect(eventBodies.every((event) => event.session_id === body.idempotency_key)).toBe(true);
+    expect(eventBodies.map((event) => event.event_name)).not.toContain("lead_created");
   });
 
   it("keeps a failed durable write on the contact step and emits only safe failure telemetry", async () => {
@@ -124,7 +134,7 @@ describe("home-value inline validation", () => {
       events.push(String((event as CustomEvent<{ event?: string }>).detail?.event));
     };
     window.addEventListener("askmagicmike:event", listener);
-    vi.stubGlobal("fetch", vi.fn(async (input: URL | RequestInfo) => {
+    const fetchMock = vi.fn(async (input: URL | RequestInfo, _init?: RequestInit) => {
       if (String(input) === "/api/leads") {
         return new Response(JSON.stringify({ error: "intercepted_failure" }), {
           status: 500,
@@ -132,7 +142,8 @@ describe("home-value inline validation", () => {
         });
       }
       return new Response(JSON.stringify({ accepted: true }), { status: 202 });
-    }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
 
     render(<HomeValueFunnel />);
     await user.type(screen.getByLabelText("Property address"), "101 Internal QA Lane, Wilson NC");
@@ -145,6 +156,14 @@ describe("home-value inline validation", () => {
     expect(screen.getByText("Step 2 of 3")).toBeVisible();
     expect(events).toContain("lead_submit_failed");
     expect(events).not.toContain("lead_created");
+    const leadCall = fetchMock.mock.calls.find(([input]) => String(input) === "/api/leads");
+    const leadBody = JSON.parse(String(leadCall?.[1]?.body)) as Record<string, unknown>;
+    const failureBody = fetchMock.mock.calls
+      .filter(([input]) => String(input) === "/api/events")
+      .map(([, init]) => JSON.parse(String(init?.body)) as Record<string, unknown>)
+      .find((event) => event.event_name === "lead_submit_failed");
+    expect(failureBody?.session_id).toBe(leadBody.idempotency_key);
+    expect(failureBody).not.toHaveProperty("error");
     window.removeEventListener("askmagicmike:event", listener);
   });
 });

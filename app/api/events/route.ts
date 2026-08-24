@@ -14,6 +14,7 @@ import { isApprovedPublicOrigin } from "../../lib/publicOrigin";
 import {
   coarseAnalyticsUserAgent,
   isApprovedPublicAnalyticsEvent,
+  isCanonicalLedgerProtectedEvent,
   recordServerAnalyticsEvent,
   safePublicAnalyticsProperties,
   safeRegisteredPublicAnalyticsDimension,
@@ -21,6 +22,12 @@ import {
 
 const approvedEventNames = new Set<string>(analyticsEvents);
 const MAX_EVENT_BODY_BYTES = 4_096;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function publicEventSessionId(value: unknown) {
+  return typeof value === "string" && UUID_PATTERN.test(value) ? value : null;
+}
 
 async function readBoundedJson(req: Request) {
   const contentType = req.headers.get("content-type")?.split(";", 1)[0]?.trim().toLowerCase();
@@ -80,6 +87,9 @@ export async function POST(req: Request) {
   if (!isApprovedPublicAnalyticsEvent(body.event_name)) {
     return NextResponse.json({ error: "Invalid public event.", correlation_id: correlationId }, { status: 400 });
   }
+  if (isCanonicalLedgerProtectedEvent(body.event_name)) {
+    return NextResponse.json({ error: "Invalid public event.", correlation_id: correlationId }, { status: 400 });
+  }
   const properties = body.properties && typeof body.properties === "object" && !Array.isArray(body.properties) ? body.properties as Record<string, unknown> : {};
   const webVitalProperties = body.event_name === "web_vital_observed"
     ? normalizeWebVitalEventProperties(properties)
@@ -96,14 +106,18 @@ export async function POST(req: Request) {
   ) {
     return NextResponse.json({ error: "Invalid experience event.", correlation_id: correlationId }, { status: 400 });
   }
+  const funnelSessionId = webVitalProperties ? null : publicEventSessionId(body.session_id);
   const persisted = await recordServerAnalyticsEvent({
     eventName: body.event_name,
     category: body.event_name === "web_vital_observed"
       ? "system"
       : body.event_name === "page_view" ? "session" : "intake",
-    sessionId: body.event_name === "web_vital_observed"
-      ? null
-      : typeof body.session_id === "string" ? body.session_id : null,
+    // Public forms send the UUID that will become the canonical session ID if
+    // lead storage succeeds. Keep it as a protected funnel identity until that
+    // session actually exists; pre-creating `sessions` would collide with the
+    // atomic lead-capture contract.
+    sessionId: null,
+    ...(funnelSessionId ? { funnelSessionId } : {}),
     leadId: null,
     properties: safePublicAnalyticsProperties(
       body.event_name,

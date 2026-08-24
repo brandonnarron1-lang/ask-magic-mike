@@ -4,6 +4,7 @@ import { trackEvent } from "@/lib/analytics/ledger";
 import {
   coarseAnalyticsUserAgent,
   isApprovedPublicAnalyticsEvent,
+  isCanonicalLedgerProtectedEvent,
   safePublicAnalyticsProperties,
   safeRegisteredPublicAnalyticsDimension,
 } from "@/lib/analytics/privacy";
@@ -77,6 +78,9 @@ export async function POST(req: NextRequest) {
   if (!isApprovedPublicAnalyticsEvent(parsed.data.eventName)) {
     return NextResponse.json({ error: "event_not_public" }, { status: 422 });
   }
+  if (isCanonicalLedgerProtectedEvent(parsed.data.eventName)) {
+    return NextResponse.json({ error: "event_not_public" }, { status: 422 });
+  }
 
   const properties = safePublicAnalyticsProperties(
     parsed.data.eventName,
@@ -89,7 +93,7 @@ export async function POST(req: NextRequest) {
 
   const persisted = await trackEvent({
     eventName: parsed.data.eventName,
-    sessionId: parsed.data.sessionId,
+    funnelSessionId: parsed.data.sessionId,
     properties,
     utmSource: safeRegisteredPublicAnalyticsDimension("utm_source", parsed.data.utmSource) ?? undefined,
     utmMedium: safeRegisteredPublicAnalyticsDimension("utm_medium", parsed.data.utmMedium) ?? undefined,

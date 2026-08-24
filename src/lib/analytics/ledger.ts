@@ -11,6 +11,7 @@ export async function trackEvent(params: TrackEventParams): Promise<boolean> {
 
   return recordNeonAnalyticsEvent({
     sessionId: params.sessionId,
+    funnelSessionId: params.funnelSessionId,
     leadId: params.leadId,
     agentId: params.agentId,
     eventName: params.eventName,

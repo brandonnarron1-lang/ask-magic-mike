@@ -143,4 +143,83 @@ describe("client analytics privacy boundary", () => {
       campaign: "home_value",
     });
   });
+
+  it("links first-party funnel events with a valid anonymous submission UUID", () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 202 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const sessionId = "11111111-1111-4111-8111-111111111111";
+
+    trackEvent(
+      "contact_submitted",
+      { source: "direct" },
+      {
+        funnel_name: "buyer",
+        lead_source_surface: "buyer_page",
+        step_name: "contact",
+      },
+      { sessionId },
+    );
+
+    const serverBody = JSON.parse(String(fetchMock.mock.calls[0][1]?.body)) as {
+      session_id?: string;
+      properties: Record<string, unknown>;
+    };
+    expect(serverBody.session_id).toBe(sessionId);
+    expect(serverBody.properties).not.toHaveProperty("session_id");
+  });
+
+  it("drops a malformed session identifier instead of treating it as analytics data", () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 202 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    trackEvent(
+      "funnel_started",
+      { source: "direct" },
+      { funnel_name: "seller", lead_source_surface: "seller_page" },
+      { sessionId: "person@example.com" },
+    );
+
+    const serverBody = JSON.parse(String(fetchMock.mock.calls[0][1]?.body)) as {
+      session_id?: string;
+    };
+    expect(serverBody).not.toHaveProperty("session_id");
+  });
+
+  it("keeps lead-created visible to browser analytics without duplicating the server ledger", () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 202 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const browser = window as Window & { dataLayer?: unknown[] };
+    browser.dataLayer = [];
+
+    trackEvent(
+      "lead_created",
+      { source: "direct" },
+      { funnel_name: "seller", lead_source_surface: "seller_page" },
+      { sessionId: "11111111-1111-4111-8111-111111111111" },
+    );
+
+    expect(browser.dataLayer).toEqual([
+      expect.objectContaining({ event: "lead_created" }),
+    ]);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps widget conversion visible to browser analytics without duplicating the server ledger", () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 202 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const browser = window as Window & { dataLayer?: unknown[] };
+    browser.dataLayer = [];
+
+    trackEvent(
+      "widget_lead_created",
+      { source: "ourtownproperties" },
+      { funnel_name: "home_value" },
+      { sessionId: "11111111-1111-4111-8111-111111111111" },
+    );
+
+    expect(browser.dataLayer).toEqual([
+      expect.objectContaining({ event: "widget_lead_created" }),
+    ]);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 });
