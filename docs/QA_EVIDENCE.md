@@ -1,5 +1,27 @@
 # QA Evidence
 
+## Phase 9 completed-release ledger integrity — 2026-08-24
+
+- GitHub authority — PASS: PRs #183, #184, #185, #193, #196, #194, and #195
+  are merged; their authenticated `headRefOid` and `mergeCommit` values match
+  the corrected owner queue exactly.
+- Vercel authority — PASS: each corresponding deployment ID resolves in the
+  canonical `eyes-up-industries/ask-magic-mike` project as `READY`, target
+  `production`, branch `main`, and the exact GitHub merge SHA.
+- Defect corrected — PASS: the former PR #195 reviewed-head literal
+  `db13953071aa5dca59b74b671c2ed4592c53494f` did not match GitHub; the queue
+  now records `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`.
+- Historical completeness — PASS: PRs #183 through #185 now include the same
+  head → merge → Production-deployment chain already recorded for later
+  releases.
+- Regression contract — PASS: the focused Node 24 release-authority suite
+  requires all seven exact chains and rejects the incorrect PR #195 literal.
+- Rescue and non-action boundary — PASS: pre-change PR #209 head
+  `d0691a6938afa67c22c4e1bc0adc322963fa2d55` is preserved remotely at
+  `rescue/amm-pr209-pre-release-ledger-integrity-20260824-0605`. No Production,
+  environment, database, lead/event, message, WordPress, DNS, publication,
+  spend, deletion, or NellySelly change occurred.
+
 ## Phase 9 field-experience fast-track — 2026-08-23
 
 - Source preservation — PASS: donor PR #199 exact head
