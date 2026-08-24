@@ -16,6 +16,9 @@
 - Full local Node 24 proof passes 234 files / 3,088 tests, strict typecheck,
   full ESLint, optimized Next.js build, 84-route proof, 14/14 release safety,
   and Ask Magic Mike / NellySelly isolation.
+- Screenshot comparison caught and corrected narrow-email overflow; exact
+  Preview proof now measures equal client/scroll widths at 390 × 844, preserves
+  all three urgency states at 1280 × 720, and reports no browser/runtime errors.
 - No Production, environment, database, lead/event, email/BCC, SMS/MMS, Push,
   WordPress, DNS, publication, spend, deletion, or NellySelly action occurred.
 

@@ -18,8 +18,13 @@ Updated 2026-08-24.
 - **Local acceptance:** Node 24 passes 234 files / 3,088 tests, strict
   TypeScript, full ESLint, optimized Next.js 15.5.21 build, 84/17 route proof,
   14/14 release safety, Ask Magic Mike / NellySelly deployable-source
-  isolation, and whitespace verification. Immutable exact-head Preview and
-  rendered browser proof are recorded before PR sealing.
+  isolation, no known Production dependency vulnerabilities, a redacted
+  599-commit history scan with no leaks, and whitespace verification. Exact
+  application head `46a9af538302951f1190df24a8bdf64f3be07450`
+  is READY on immutable Preview deployment
+  `dpl_CX5UbqeFUVE9BDdVCmhpttmNyy3Q`; 1280 × 720 and 390 × 844 rendered
+  acceptance passes with zero horizontal overflow, no send controls, and a
+  clean browser/runtime-error log.
 - **Safety:** no generated likeness was accepted; no lead, email/BCC, SMS/MMS,
   Push, consumer acknowledgment, provider call, database write/migration,
   Production action, WordPress/DNS change, publication, spend, deletion, or

@@ -18,7 +18,9 @@
   used; exact approved source assets provide the higher-trust result.
 - Full local Node 24 proof passes 234 files / 3,088 tests, strict typecheck,
   full ESLint, optimized build, 84-route proof, 14/14 safety, and deployable-
-  source isolation. Immutable Preview/browser evidence remains to be sealed.
+  source isolation. The exact application Preview passes 1280 × 720 and
+  corrected 390 × 844 acceptance with no horizontal overflow or browser/runtime
+  warning/error entries; supply-chain and history-secret scans are clean.
 
 ## 2026-08-24 — Responsive conversion-identity navigation candidate
 
