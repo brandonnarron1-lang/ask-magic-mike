@@ -188,3 +188,20 @@ could not perform a reliable first Tab.
 - No Production environment, merge, deployment, database/lead/event write,
   AI/provider request, message, WordPress edit, DNS change, publication, spend,
   deletion, or NellySelly action occurred.
+
+## Final parent authority refresh — 2026-08-24
+
+- Preserved the prior stacked head at
+  `rescue/amm-pr211-pre-final-pr210-refresh-20260824-0529`.
+- Merged current PR #210 parent
+  `3704cbf78bfd7361435987943854159b22978532`, which contains current PR #209
+  parent `d0691a6938afa67c22c4e1bc0adc322963fa2d55` once.
+- The parent delta is governance documentation plus release-authority tests. It
+  has no overlap with the Ask copy, required-input, skip-link, focus, or E2E
+  implementation.
+- A new exact PR #211 head must repeat CI and protected Preview proof. The
+  current head is resolved from GitHub and sealed in PR evidence rather than
+  hard-coded into this mutable file.
+- No Production environment, merge, deployment, database/lead/event write,
+  AI/provider request, message, WordPress edit, DNS change, publication, spend,
+  deletion, or NellySelly action occurred.

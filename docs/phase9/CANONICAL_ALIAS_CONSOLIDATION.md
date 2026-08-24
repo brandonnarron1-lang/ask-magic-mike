@@ -5,7 +5,7 @@ Date: 2026-08-23
 Status: stacked candidate refreshed onto sealed PR #209; no Production change
 
 Stack base: exact PR #209 candidate
-`6eb89264d59c8d25a711a1ffa178828343772f75`
+`d0691a6938afa67c22c4e1bc0adc322963fa2d55`
 
 ## Decision
 
