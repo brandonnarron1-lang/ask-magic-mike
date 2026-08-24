@@ -62,10 +62,14 @@ provider action, or deletion.
 - The latest branch-only security review also bounds the emergency memory
   limiter and isolates fallback counters by route. The pre-hardening head is
   preserved at
-  `rescue/amm-pr209-pre-memory-fallback-hardening-20260824-0333`. Exact head
-  `6eb89264d59c8d25a711a1ffa178828343772f75` passes the Node 24 release gate,
-  exact Vercel Preview, protected 17-pass/6-write-skip acceptance, Widget 2/2,
-  and `PREVIEW_READY`; its exact Production gate is requestable.
+  `rescue/amm-pr209-pre-memory-fallback-hardening-20260824-0333`. Treat the
+  current GitHub PR head—not a commit literal embedded in this mutable file—as
+  the release candidate. Immediately before using the gate, require that head
+  to remain Draft, cleanly mergeable against the recorded Production base, and
+  green in the full Node 24 release gate, exact Vercel Preview, protected
+  no-write acceptance, Widget E2E, dependency audit, secret scan, and current
+  Production preflight. If the head moves, every prior exact-head seal becomes
+  historical evidence and the complete proof must be repeated.
 - The exact pre-reconciliation application/security head
   `b4e76f795d74d6a7c0947b16150cdb9c6c63e23a` passed 228 files / 3,054 tests,
   strict typecheck, ESLint, optimized build, 83-route proof, 14/14 safety,
@@ -95,8 +99,8 @@ gate and must not be merged out of order:
    consolidates `/value` and `/we-buy-houses` onto the canonical conversion
    routes with permanent, query-preserving redirects and a matching Production
    monitor contract. It is synchronized with exact PR #209 candidate
-   `6eb89264d59c8d25a711a1ffa178828343772f75`; pre-refresh head `c86356b` is
-   preserved at `rescue/amm-pr210-pre-pr209-security-sync-20260824-0401`.
+   `d0691a6938afa67c22c4e1bc0adc322963fa2d55`; the pre-final-parent head is
+   preserved at `rescue/amm-pr210-pre-final-pr209-refresh-20260824-0527`.
    Fresh exact-head proof remains mandatory. After PR #209 is released, retarget
    or refresh #210 onto the exact new `main`, repeat proof, then require
    `APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`.

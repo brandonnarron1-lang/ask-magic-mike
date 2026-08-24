@@ -101,6 +101,12 @@ describe("current release-authority documentation", () => {
     expect(ownerQueue).toContain(crossDomainGate);
   });
 
+  it("resolves the mutable PR head from GitHub instead of self-pinning it", () => {
+    expect(ownerQueue).toMatch(/current GitHub PR head/i);
+    expect(ownerQueue).toMatch(/If the head moves[\s\S]*proof must be repeated/i);
+    expect(ownerQueue).not.toMatch(/Exact head\s+`[0-9a-f]{40}`\s+passes/i);
+  });
+
   it("does not retain superseded stacked-release authority in operating docs", () => {
     const staleAuthorityClaims = [
       "Draft PR #202 is the immediate durability correction",

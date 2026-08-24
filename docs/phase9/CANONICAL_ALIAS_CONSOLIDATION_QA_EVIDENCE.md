@@ -3,7 +3,7 @@
 Date: 2026-08-23 (America/New_York)
 
 Stack base: exact PR #209 candidate
-`6eb89264d59c8d25a711a1ffa178828343772f75`
+`d0691a6938afa67c22c4e1bc0adc322963fa2d55`
 
 Environment: isolated local worktree; no Production mutation
 
@@ -159,6 +159,25 @@ these phases in order and remains the authoritative Node 24 result.
 - The older PR #210 CI, Preview, browser, and runtime proof above remains valid
   historical evidence for its former head only. It does not authorize the
   refreshed candidate. Fresh exact-head verification is mandatory.
+- No Production environment, merge, deployment, database/lead/event write,
+  message, WordPress edit, DNS change, publication, spend, deletion, or
+  NellySelly action occurred.
+
+## Mutable-head authority refresh — 2026-08-24
+
+- Preserved the prior stacked head at
+  `rescue/amm-pr210-pre-final-pr209-refresh-20260824-0527`.
+- Merged current PR #209 parent
+  `d0691a6938afa67c22c4e1bc0adc322963fa2d55`.
+- The parent change is governance documentation plus its executable authority
+  test. It changes no redirect, monitor, form, API, database, authentication,
+  analytics, or messaging behavior.
+- Resolved the two governance-only conflicts by retaining both PR #209's
+  GitHub-resolved mutable-head rule and PR #210's separate downstream ordering
+  and approval contract.
+- A new exact PR #210 head must repeat CI and protected Preview proof. The
+  current head is resolved from GitHub and sealed in PR evidence rather than
+  hard-coded into this mutable file.
 - No Production environment, merge, deployment, database/lead/event write,
   message, WordPress edit, DNS change, publication, spend, deletion, or
   NellySelly action occurred.
