@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-08-24 — Vendor ingress contract lab candidate
+
+- Reused the existing Phase 9 vendor-neutral normalizer instead of creating a
+  second lead API, provider router, database, or CRM.
+- Added one `growth:manage`-protected contract lab for Zillow Tech Connect,
+  Follow Up Boss, Meta Lead Ads, and Google Ads lead forms using only fixed
+  `INTERNAL QA — DO NOT CONTACT` profiles.
+- Implemented constant-time Follow Up Boss, Meta, and Google verification
+  primitives aligned to current first-party documentation; Zillow fails closed
+  until its authenticated provider onboarding contract is available.
+- Added a forward-compatible Google `user_column_data` adapter while preserving
+  `lead_id`, click attribution, explicit `is_test`, and review-only consent.
+- Made unknown vendor test state an explicit review reason instead of silently
+  classifying an event as live.
+- The protected API accepts only a 512-byte profile selector and contains no
+  database client, SQL, provider fetch, caller-supplied payload, message send,
+  or live activation path.
+- No Production, environment, database, lead/event, message, provider,
+  WordPress, DNS, publication, spend, deletion, or NellySelly action occurred.
+
 ## 2026-08-24 — PR #216 refresh onto final PR #215 cutover hygiene
 
 - Preserved former PR #216 head `253480326312d42a159323176d69e87f47262921`

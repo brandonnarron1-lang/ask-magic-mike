@@ -267,6 +267,7 @@ export default async function GrowthCommandCenterPage({
                 ["Allocation", "/admin/allocation"],
                 ["Action queue", "/admin/action-queue"],
                 ["Experiments", "/admin/experiments"],
+                ["Vendor ingress", "/admin/growth/vendor-ingress"],
               ].map(([label, href]) => (
                 <Link
                   key={href}

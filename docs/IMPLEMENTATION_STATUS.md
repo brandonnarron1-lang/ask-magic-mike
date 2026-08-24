@@ -2,6 +2,35 @@
 
 Updated 2026-08-24.
 
+## Phase 9 vendor ingress contract lab — 2026-08-24
+
+- **Reuse decision:** this candidate extends the existing Phase 9
+  `vendor-ingress.ts` normalization contract on exact sealed Draft PR #216 head
+  `a6098ab4ee7a13d024bafc08264628e2691a8e06`; it adds no parallel lead API,
+  database, CRM, provider router, webhook store, or notification path.
+- **Implementation:** one `growth:manage`-protected page and one same-origin,
+  512-byte API exercise fixed Zillow, Follow Up Boss, Meta, and Google test
+  profiles. Follow Up Boss and Meta verify their documented raw-body HMAC
+  contracts, Google maps documented `user_column_data`, and Zillow fails closed
+  until authenticated provider onboarding supplies the real contract.
+- **Truth boundary:** every run is `isTest=true` and `INTERNAL QA — DO NOT
+  CONTACT`; caller-supplied payloads, raw-payload retention, provider calls,
+  database writes, lead creation, and live activation are structurally absent.
+  The shared normalizer now treats missing test state as a review reason and
+  continues to refuse inferred channel consent.
+- **Current local acceptance:** 5 focused files / 30 tests, all 242 files /
+  3,152 tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build,
+  86/17 route proof, 14/14 release safety, Production dependency audit, and
+  system isolation pass on Node 24.18.0. Clean-commit secret/release-doctor,
+  immutable Preview, browser, and deployment-log proof remain pending before
+  this candidate is sealed.
+- **Safety:** no Production, environment, schema, database row, lead/event,
+  message, provider credential/call, WordPress/DNS, publication, spend,
+  deletion, or NellySelly action.
+- Detailed scope:
+  `docs/phase9/VENDOR_INGRESS_CONTRACT_LAB.md` and
+  `docs/phase9/VENDOR_INGRESS_CONTRACT_LAB_QA_EVIDENCE.md`.
+
 ## Phase 9 funnel-event identity integrity — 2026-08-24
 
 - **Reuse decision:** the stacked candidate extends only the existing browser
@@ -31,39 +60,28 @@ Updated 2026-08-24.
   and public properties. Buyer/seller email/call permission now requires the
   corresponding supplied contact method. Historical null-session events are
   not backfilled or reclassified.
-- **Current acceptance:** refreshed code-bearing head
-  `0c45a33b706d7e8a02501ccf83baf24a83ec107d` on Node 24.18.0 passes 10
-  focused files / 72 tests, all 237 files / 3,123 tests, strict TypeScript,
-  full ESLint, optimized Next.js 15.5.21 build, 84/17 route proof, 14/14
-  release safety, deployable-source isolation, no known Production dependency
-  vulnerabilities, a 615-commit redacted tracked-history scan, and whitespace
-  proof. GitHub Release Gate run `32760061703` passed.
-- **Proof correction:** Vercel logs for later exact-head protected run
-  `32761949512` recorded `/api/events` POSTs while the older widget scenarios
-  ran. Those scenarios intercepted `/api/leads` but not passive telemetry. The
-  run remains valid visual/behavior evidence, but not no-write authority. No
-  lead, provider, notification, or canonical conversion was created;
-  privacy-minimized Preview analytics rows may have been written.
-- **Harness repair:** prior head
-  `727c534f6f77b8a7acfe51eba361da57e6671cb4` is preserved at
-  `rescue/amm-pr216-pre-widget-no-write-proof-fix-20260824-1432`.
-  Code-bearing head `90108d8b386a264ae8e536e6503043f79f7a14ae`
-  makes both browser suites use one shared fail-closed interceptor for every
-  first-party POST/PUT/PATCH/DELETE, with approved synthetic responses and an
-  explicit unexpected-mutation ledger. Replacement exact-head Preview and
-  protected proof remain mandatory before sealing.
+- **Final acceptance:** exact head
+  `a6098ab4ee7a13d024bafc08264628e2691a8e06` on Node 24.18.0 passes the full
+  release gate: 239 test files / 3,137 tests, strict TypeScript, full ESLint,
+  optimized Next.js 15.5.21 build, 84/17 route proof, 14/14 release safety,
+  43/43 release doctor, dependency audit, 623-commit secret scan, system
+  isolation, ancestry, diff, and clean-worktree proof. GitHub Release Gate run
+  `32783621433` passed.
+- **Preview/browser proof:** immutable READY deployment
+  `dpl_877eN8Y6nDkiBwR1vGqrqUyfhmCe` passed exact-candidate workflow
+  `32784319137`: 17 protected read-only checks, 6 deliberate mutation skips,
+  and 6/6 desktop/mobile browser scenarios across Ask, Home Value, and widget
+  identity with zero unexpected writes. The exact Vercel window contained zero
+  POST/PUT/PATCH/DELETE requests and zero warning/error/fatal logs.
 - **Parent refresh:** former PR #216 head
   `253480326312d42a159323176d69e87f47262921` is preserved at
   `rescue/amm-pr216-pre-final-pr215-cutover-hygiene-20260824-180325`. Exact final
   PR #215 merged with product application code intact. The only code-level
   integration was to retain PR #216's stronger shared catch-all Preview
   mutation boundary and update PR #215's inherited endpoint-specific source
-  assertion to that contract. Every prior local, CI, Preview, and browser seal
-  is historical until repeated on the current GitHub head.
+  assertion to that contract.
 - **Safety:** no Production, environment, schema, lead, message, provider,
-  WordPress/DNS, publication, spend, deletion, or NellySelly action. The
-  superseded Preview run may have stored privacy-minimized analytics telemetry;
-  it did not create a lead or canonical conversion.
+  WordPress/DNS, publication, spend, deletion, or NellySelly action.
 - Detailed scope:
   `docs/phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY.md` and
   `docs/phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY_QA_EVIDENCE.md`.
