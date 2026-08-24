@@ -42,6 +42,7 @@ describe("release safety current-router coverage", () => {
 
   it("requires the mutation-free public-funnel browser acceptance contract", () => {
     expect(scanner).toContain("tests/e2e/funnel-event-identity-preview.spec.ts");
+    expect(scanner).toContain("tests/e2e/preview-test-config.ts");
     expect(scanner).toContain('page.route("**/api/**"');
     expect(scanner).toContain("unexpected_preview_write_blocked");
     expect(scanner).toContain('pathname === "/api/analytics/event"');

@@ -9,6 +9,9 @@
  */
 import { mkdirSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
+import { previewTestUse } from "./preview-test-config";
+
+test.use(previewTestUse);
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

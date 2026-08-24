@@ -112,6 +112,17 @@ with `SAFE_DB_WRITE=false`. The final enhanced-suite head still requires its
 own immutable Preview run before PR sealing; the earlier run is evidence, not
 substitute authority.
 
+The first enhanced branch-owned run,
+[#32745542999](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32745542999),
+truthfully failed before reaching a funnel field. Its artifact showed that the
+stored Vercel bypass header was scoped to the older widget spec, so all three
+new tests remained on Vercel's sign-in page and timed out waiting for
+`Property address`. The older widget tests and the read-only Preview QA passed.
+No funnel request, application mutation, provider call, or database write
+occurred. The correction moves the unchanged secret-safe header construction
+into `tests/e2e/preview-test-config.ts` and requires both browser suites to use
+that one shared configuration; release safety now guards the linkage.
+
 ## Required write-intercepted browser acceptance
 
 The immutable Preview test intercepts `/api/leads`, `/api/events`,

@@ -41,6 +41,11 @@ This is a scoped review of the changed funnel-event identity behavior, not a cla
   four public funnels at desktop/mobile sizes with every mutation intercepted;
   no unexpected POST, provider call, console error, PII-bearing event, or
   protected event-ledger request occurred.
+- The first protected remote run exposed file-scoped bypass configuration;
+  all new tests stopped on Vercel authentication before a funnel field or
+  mutation. Both suites now import one shared secret-safe configuration, and
+  the release-safety scanner requires that shared linkage without reading or
+  logging the secret value.
 - Focused tests, the full test suite, typecheck, lint, production build, route proof, release-safety checks, and Ask/Nelly deployable-source isolation passed before candidate sealing. Exact-head evidence is recorded in `docs/phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY_QA_EVIDENCE.md` and the Draft PR.
 
 ## Deferred policy decisions

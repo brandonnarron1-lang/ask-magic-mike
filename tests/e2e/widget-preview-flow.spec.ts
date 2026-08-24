@@ -14,33 +14,9 @@
  * extraHTTPHeaders. The token is never logged.
  */
 import { test, expect } from "@playwright/test";
+import { previewTestUse } from "./preview-test-config";
 
-function resolveBypassSecret(): string | null {
-  return (
-    process.env.VERCEL_AUTOMATION_BYPASS_SECRET ||
-    process.env.VERCEL_PROTECTION_BYPASS_TOKEN ||
-    process.env.VERCEL_BYPASS_SECRET ||
-    null
-  );
-}
-
-function bypassHeaders(): Record<string, string> {
-  const secret = resolveBypassSecret();
-  if (!secret) return {};
-  const headers: Record<string, string> = {
-    "x-vercel-protection-bypass": secret,
-  };
-  if ((process.env.SET_VERCEL_BYPASS_COOKIE ?? "false").toLowerCase() === "true") {
-    headers["x-vercel-set-bypass-cookie"] = "true";
-  }
-  return headers;
-}
-
-const PREVIEW_URL = process.env.PREVIEW_URL?.replace(/\/$/, "") ?? "";
-test.use({
-  baseURL: PREVIEW_URL || "http://localhost:3000",
-  extraHTTPHeaders: bypassHeaders(),
-});
+test.use(previewTestUse);
 
 test.describe("Widget preview flow (DB-mutation-free)", () => {
   test("happy path: intent → questions → contact → success (intercepted)", async ({

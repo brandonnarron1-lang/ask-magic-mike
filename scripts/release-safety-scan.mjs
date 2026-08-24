@@ -510,11 +510,14 @@ async function checkMutationGateContract() {
 async function checkWidgetE2eInterception() {
   const path = "tests/e2e/widget-preview-flow.spec.ts";
   const funnelPath = "tests/e2e/funnel-event-identity-preview.spec.ts";
+  const previewConfigPath = "tests/e2e/preview-test-config.ts";
   let text;
   let funnelText;
+  let previewConfigText;
   try {
     text = await readFile(join(REPO_ROOT, path), "utf8");
     funnelText = await readFile(join(REPO_ROOT, funnelPath), "utf8");
+    previewConfigText = await readFile(join(REPO_ROOT, previewConfigPath), "utf8");
   } catch (err) {
     fail("I. widget_e2e", `mutation-free browser spec missing (${err.message})`);
     return;
@@ -534,6 +537,7 @@ async function checkWidgetE2eInterception() {
     );
   }
   const funnelRequired = [
+    'import { previewTestUse } from "./preview-test-config"',
     'page.route("**/api/**"',
     'request.method() !== "POST"',
     'pathname === "/api/leads"',
@@ -554,9 +558,27 @@ async function checkWidgetE2eInterception() {
       );
     }
   }
+  if (!text.includes('import { previewTestUse } from "./preview-test-config"') ||
+      !text.includes("test.use(previewTestUse)")) {
+    fail(
+      "I. widget_e2e",
+      `${path} does not use the shared protected-Preview configuration`
+    );
+  }
+  for (const phrase of [
+    "VERCEL_AUTOMATION_BYPASS_SECRET",
+    '"x-vercel-protection-bypass"',
+  ]) {
+    if (!previewConfigText.includes(phrase)) {
+      fail(
+        "I. widget_e2e",
+        `${previewConfigPath} is missing ${JSON.stringify(phrase)}`
+      );
+    }
+  }
   pass(
     "I. widget_e2e",
-    "widget and public-funnel suites intercept every mutating first-party request before navigation"
+    "widget and public-funnel suites share protected access and intercept every mutating first-party request before navigation"
   );
 }
 
