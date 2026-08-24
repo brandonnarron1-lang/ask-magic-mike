@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-08-24 — PR #211 refresh onto release-ledger-sealed PR #210
+
+- Preserved the former PR #211 head at remote rescue branch
+  `rescue/amm-pr211-pre-pr210-ledger-sync-20260824-0632`.
+- Merged exact clean PR #210 head
+  `7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9`, including its exact sealed
+  PR #209 parent and completed-release authority repair.
+- Retained the shared skip-link/Ask semantics, canonical redirects, monitor
+  contracts, and release-authority regression coverage without duplicating any
+  application system.
+- Invalidated former PR #211 evidence pending fresh exact-head Node 24,
+  protected no-write Preview, and real-browser keyboard verification.
+- Changed no Production deployment, environment, database row, lead, event,
+  message, WordPress surface, DNS, spend, deletion, or NellySelly system.
+
 ## 2026-08-24 — PR #211 runtime skip-link focus hardening
 
 - Preserved the refreshed PR #211 head at remote rescue branch
@@ -32,6 +47,19 @@
 - Changed no Production deployment, database, lead, message, WordPress surface,
   DNS, spend, deletion, or NellySelly system.
 
+## 2026-08-24 — PR #210 refresh onto release-ledger-sealed PR #209
+
+- Preserved the former PR #210 head at remote rescue branch
+  `rescue/amm-pr210-pre-release-ledger-integrity-sync-20260824-0617`.
+- Merged exact sealed PR #209 head
+  `1d1d8d4f8e0970f3f6a1b80ab9ff2bebcd40216d` into the canonical-alias branch.
+- Retained both PR #210's redirect/monitor authority and PR #209's corrected
+  completed-release ledger plus regression contract.
+- Invalidated the former PR #210 CI and Preview proof pending a fresh exact-head
+  Node 24 gate and protected no-write Preview run.
+- Changed no Production deployment, environment, database row, lead, event,
+  message, WordPress surface, DNS, spend, deletion, or NellySelly system.
+
 ## 2026-08-24 — PR #210 stack refresh onto the sealed PR #209 candidate
 
 - Preserved PR #210's pre-refresh head at remote rescue branch
@@ -45,6 +73,20 @@
   Preview, and protected no-write verification.
 - Changed no Production deployment, environment, database row, lead, message,
   WordPress surface, DNS, spend, deletion, or NellySelly system.
+
+## 2026-08-24 — Completed-release ledger integrity
+
+- Reconciled every completed Phase 9 release in the owner queue against
+  authenticated GitHub PR heads/merge commits and Vercel READY Production
+  deployments.
+- Corrected the recorded PR #195 reviewed head and filled the missing exact
+  head/merge/deployment chains for PRs #183 through #185.
+- Added a regression contract covering all seven completed release chains so
+  historical approval evidence cannot silently drift.
+- Preserved the pre-change PR #209 head at
+  `rescue/amm-pr209-pre-release-ledger-integrity-20260824-0605`. No Production,
+  environment, database, lead, event, message, WordPress, DNS, publication,
+  spend, deletion, or NellySelly action occurred.
 
 ## 2026-08-24 — PR #209 emergency-limiter security hardening
 

@@ -1,6 +1,6 @@
 # Owner Approval Queue
 
-Updated 2026-08-23 from authenticated GitHub, Vercel, Neon, WordPress, and
+Updated 2026-08-24 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
@@ -10,15 +10,22 @@ Release only one approved PR at a time. Rebase the downstream PR on the exact
 new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
 
 1. PR [#183](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/183)
-   — campaign safety and three-offer owned-demand flight is merged and live.
+   — campaign safety and three-offer owned-demand flight head
+   `95a4f210eed4f8991e96e2eee595da5907112ba9` was merged as
+   `b8b31fb20223ad0f0ad311fee1ee3de20d0f7ae9` and accepted on Production
+   deployment `dpl_HwVDyckyCRB1NoaNb1E82xSpr75z`.
 2. PR [#184](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/184)
-   — its exact gate was received; the backup-first Neon migration is applied
-   and verified, and application release evidence is attached to the PR.
+   — its exact gate was received; reviewed head
+   `ed5da234ee34d06eb121084e01c97d79b08a815e` was merged as
+   `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97` and accepted on Production
+   deployment `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`. The backup-first Neon
+   migration is applied and verified.
 3. PR [#185](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/185)
    — its exact gate was received; the WordPress proof-scope migration was
    backup-first applied and verified, and reviewed application head
    `2877fab35591c7f43c8def2ee920a12654b37a22` was merged as
-   `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8` and deployed to Production.
+   `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8` and accepted on Production
+   deployment `dpl_41AZkLvufuAC92h6QJeqhiyjkBcM`.
 4. PR [#193](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/193)
    — its exact gate was received; privacy/KPI head
    `21fdb5b3490cdc0517518578878a8db5d1b683a7` was merged as
@@ -37,7 +44,7 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    device enrollment, or send.
 7. PR [#195](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/195)
    — its exact conversion-identity gate was received; reviewed head
-   `db13953071aa5dca59b74b671c2ed4592c53494f` was merged as
+   `db13953fc5f6d24a684f66c9a1c10c6b929b72b3` was merged as
    `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and accepted on Production
    deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. It contained no migration,
    form submission, or message send.
@@ -99,17 +106,19 @@ gate and must not be merged out of order:
    consolidates `/value` and `/we-buy-houses` onto the canonical conversion
    routes with permanent, query-preserving redirects and a matching Production
    monitor contract. It is synchronized with exact PR #209 candidate
-   `d0691a6938afa67c22c4e1bc0adc322963fa2d55`; the pre-final-parent head is
-   preserved at `rescue/amm-pr210-pre-final-pr209-refresh-20260824-0527`.
+   `1d1d8d4f8e0970f3f6a1b80ab9ff2bebcd40216d`; the immediately prior PR #210
+   head is preserved at
+   `rescue/amm-pr210-pre-release-ledger-integrity-sync-20260824-0617`.
    Fresh exact-head proof remains mandatory. After PR #209 is released, retarget
    or refresh #210 onto the exact new `main`, repeat proof, then require
    `APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`.
 2. Draft PR [#211](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/211)
    retains the shared skip-to-content path and clearer required Ask intake.
-   It is synchronized with refreshed PR #210 head
-   `3704cbf78bfd7361435987943854159b22978532`; the pre-final-parent head is
-   preserved at `rescue/amm-pr211-pre-final-pr210-refresh-20260824-0529`. Fresh
-   exact-head proof remains mandatory, and it later requires
+   It is synchronized with exact clean PR #210 head
+   `7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9`; the immediately prior PR #211
+   head is preserved at
+   `rescue/amm-pr211-pre-pr210-ledger-sync-20260824-0632`. Fresh exact-head
+   proof remains mandatory, and it later requires
    `APPROVE PHASE 9 ASK CONVERSION ACCESSIBILITY MERGE AND PRODUCTION DEPLOYMENT`
    after a fresh exact-main refresh and proof.
 3. Draft PR [#212](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/212)

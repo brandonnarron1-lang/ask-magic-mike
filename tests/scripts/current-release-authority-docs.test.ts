@@ -14,6 +14,18 @@ const knownBlockers = readDoc("KNOWN_BLOCKERS.md");
 const knownLimitations = readDoc("KNOWN_LIMITATIONS.md");
 const goLiveRunbook = readDoc("GO_LIVE_RUNBOOK.md");
 const rollbackPlan = readDoc("ROLLBACK_PLAN.md");
+const canonicalAliasDecision = readDoc(
+  "phase9/CANONICAL_ALIAS_CONSOLIDATION.md"
+);
+const canonicalAliasEvidence = readDoc(
+  "phase9/CANONICAL_ALIAS_CONSOLIDATION_QA_EVIDENCE.md"
+);
+const askAccessibilityDecision = readDoc(
+  "phase9/ASK_CONVERSION_ACCESSIBILITY_CLARITY.md"
+);
+const askAccessibilityEvidence = readDoc(
+  "phase9/ASK_CONVERSION_ACCESSIBILITY_CLARITY_QA_EVIDENCE.md"
+);
 
 const operatingDocs = [
   currentState,
@@ -34,12 +46,60 @@ const productionGate =
   "APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT";
 const previewMutationGate =
   "APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA";
+const pr209SealedParent =
+  "1d1d8d4f8e0970f3f6a1b80ab9ff2bebcd40216d";
+const pr210SealedParent =
+  "7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9";
 const canonicalAliasGate =
   "APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT";
 const askAccessibilityGate =
   "APPROVE PHASE 9 ASK CONVERSION ACCESSIBILITY MERGE AND PRODUCTION DEPLOYMENT";
 const crossDomainGate =
   "APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT";
+const completedReleaseLedger = [
+  {
+    pr: 183,
+    head: "95a4f210eed4f8991e96e2eee595da5907112ba9",
+    merge: "b8b31fb20223ad0f0ad311fee1ee3de20d0f7ae9",
+    deployment: "dpl_HwVDyckyCRB1NoaNb1E82xSpr75z",
+  },
+  {
+    pr: 184,
+    head: "ed5da234ee34d06eb121084e01c97d79b08a815e",
+    merge: "f5f82f1bfaadea0ed20da50738ebc1f83e8dab97",
+    deployment: "dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW",
+  },
+  {
+    pr: 185,
+    head: "2877fab35591c7f43c8def2ee920a12654b37a22",
+    merge: "44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8",
+    deployment: "dpl_41AZkLvufuAC92h6QJeqhiyjkBcM",
+  },
+  {
+    pr: 193,
+    head: "21fdb5b3490cdc0517518578878a8db5d1b683a7",
+    merge: "9b82afb609674bb0209b73f8ac9622ab02733e2a",
+    deployment: "dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a",
+  },
+  {
+    pr: 196,
+    head: "c8e19c8e822e585bc4b27c7abc47adf3a88fc8ad",
+    merge: "c08abe1168840b99ccba07866bbec8cf7a6752fb",
+    deployment: "dpl_sew1CoF13dtfJTsvasDJf6vyndj8",
+  },
+  {
+    pr: 194,
+    head: "851ebe530ac6a91a4e410f26538d29c1bf43f1c6",
+    merge: "5a3c5c7f2463ea399c21b616ff249f6c67e156b6",
+    deployment: "dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J",
+  },
+  {
+    pr: 195,
+    head: "db13953fc5f6d24a684f66c9a1c10c6b929b72b3",
+    merge: productionCommit,
+    deployment: productionDeployment,
+  },
+] as const;
 
 describe("current release-authority documentation", () => {
   it("identifies the accepted Production commit and deployment", () => {
@@ -53,6 +113,15 @@ describe("current release-authority documentation", () => {
     ]) {
       expect(doc).toContain(productionCommit);
       expect(doc).toContain(productionDeployment);
+    }
+  });
+
+  it("records each completed release as an exact head, merge, and Production deployment chain", () => {
+    for (const release of completedReleaseLedger) {
+      expect(ownerQueue).toContain(`PR [#${release.pr}]`);
+      expect(ownerQueue).toContain(release.head);
+      expect(ownerQueue).toContain(release.merge);
+      expect(ownerQueue).toContain(release.deployment);
     }
   });
 
@@ -99,6 +168,32 @@ describe("current release-authority documentation", () => {
     expect(ownerQueue).toContain(canonicalAliasGate);
     expect(ownerQueue).toContain(askAccessibilityGate);
     expect(ownerQueue).toContain(crossDomainGate);
+  });
+
+  it("binds PR #210's stacked authority to the current sealed PR #209 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      canonicalAliasDecision,
+      canonicalAliasEvidence,
+    ]) {
+      expect(doc).toContain(pr209SealedParent);
+    }
+    expect(canonicalAliasEvidence).toContain(
+      "rescue/amm-pr210-pre-release-ledger-integrity-sync-20260824-0617"
+    );
+  });
+
+  it("binds PR #211's stacked authority to the current sealed PR #210 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      askAccessibilityDecision,
+      askAccessibilityEvidence,
+    ]) {
+      expect(doc).toContain(pr210SealedParent);
+    }
+    expect(askAccessibilityEvidence).toContain(
+      "rescue/amm-pr211-pre-pr210-ledger-sync-20260824-0632"
+    );
   });
 
   it("resolves the mutable PR head from GitHub instead of self-pinning it", () => {
