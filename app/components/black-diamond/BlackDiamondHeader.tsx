@@ -13,6 +13,12 @@ function focusPageContent(event: MouseEvent<HTMLAnchorElement>) {
   if (!target) return;
   event.preventDefault();
   target.focus();
+  // Some browsers restore focus to the activated anchor after its click
+  // handler finishes. Reassert focus once that activation cycle completes so
+  // keyboard users reliably land on the intended content target.
+  window.setTimeout(() => {
+    if (target.isConnected) target.focus();
+  }, 0);
 }
 
 export function BlackDiamondHeader({ onAsk }: HeaderProps) {

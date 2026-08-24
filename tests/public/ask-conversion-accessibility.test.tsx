@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { ImgHTMLAttributes } from "react";
@@ -41,7 +41,10 @@ function read(path: string) {
   return readFileSync(join(root, path), "utf8");
 }
 
-afterEach(() => cleanup());
+afterEach(() => {
+  vi.useRealTimers();
+  cleanup();
+});
 
 describe("Ask Mike conversion clarity and keyboard access", () => {
   it("makes the skip link the first public-header control and points it at one focus target", () => {
@@ -57,8 +60,13 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
     expect(skip).toHaveAttribute("href", "#page-content");
     expect(skip).toHaveClass("sr-only", "focus:not-sr-only");
     expect(document.querySelector("header a, header button, header input")).toBe(skip);
+    vi.useFakeTimers();
     fireEvent.click(skip);
     expect(content).toHaveFocus();
+    skip.focus();
+    act(() => vi.runAllTimers());
+    expect(content).toHaveFocus();
+    vi.useRealTimers();
   });
 
   it("gives the chat question a visible required label and the same limit as the API", () => {
