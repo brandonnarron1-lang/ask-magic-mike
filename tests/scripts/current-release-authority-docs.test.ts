@@ -42,6 +42,8 @@ describe("current release-authority documentation", () => {
       assetManifest,
       canonicalStack,
       consolidationPlan,
+      ownerQueue,
+      rollbackPlan,
     ]) {
       expect(doc).toContain(productionCommit);
       expect(doc).toContain(productionDeployment);
