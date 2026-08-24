@@ -59,7 +59,7 @@ export function BlackDiamondHeader({ onAsk }: HeaderProps) {
   }
 
   function handleMobileNavigationKeyDown(event: KeyboardEvent<HTMLElement>) {
-    if (event.key !== "Escape") return;
+    if (!mobileNavigationOpen || event.key !== "Escape") return;
     event.preventDefault();
     closeMobileNavigation();
     mobileNavigationButton.current?.focus();
