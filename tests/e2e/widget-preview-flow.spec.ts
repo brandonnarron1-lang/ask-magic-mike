@@ -2,7 +2,8 @@
  * Browser-level widget flow.
  *
  * Drives the widget on /widget-preview from intent pick → contact submit
- * → success state, *intercepting* POST /api/leads so no DB write occurs.
+ * → success state, intercepting every mutating first-party API request before
+ * navigation so no lead, analytics row, provider call, or queue write occurs.
  *
  * Runs against:
  *   - PREVIEW_URL if set (with optional Vercel protection bypass header)
@@ -14,6 +15,7 @@
  * extraHTTPHeaders. The token is never logged.
  */
 import { test, expect } from "@playwright/test";
+import { installNoWriteInterception } from "./no-write-preview-interception";
 import { previewTestUse } from "./preview-test-config";
 
 test.use(previewTestUse);
@@ -22,26 +24,7 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
   test("happy path: intent → questions → contact → success (intercepted)", async ({
     page,
   }) => {
-    let interceptedPayload: Record<string, unknown> | null = null;
-
-    await page.route("**/api/leads", async (route) => {
-      const req = route.request();
-      try {
-        interceptedPayload = req.postDataJSON() as Record<string, unknown>;
-      } catch {
-        interceptedPayload = {};
-      }
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          ok: true,
-          lead_id: "qa_intercepted_lead",
-          status: "accepted",
-          mock: true,
-        }),
-      });
-    });
+    const capture = await installNoWriteInterception(page);
 
     await page.goto("/widget-preview");
     await expect(page.getByRole("heading", { name: /Wilson real estate/i })).toBeVisible();
@@ -58,8 +41,9 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
     await expect(widget.getByText("Your request is in.")).toBeVisible();
 
     // Assert the intercepted payload includes the canonical fields.
-    expect(interceptedPayload).not.toBeNull();
-    const body = interceptedPayload as unknown as Record<string, unknown>;
+    await expect.poll(() => capture.events.length).toBeGreaterThan(0);
+    expect(capture.leads).toHaveLength(1);
+    const body = capture.leads[0];
     expect(typeof body.widget_session_id).toBe("string");
     expect(String(body.widget_session_id).length).toBeGreaterThan(8);
     expect(body.funnel_type).toBe("widget");
@@ -74,15 +58,12 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
       campaign: "parent-site-widget",
       placement: "sitewide-floating",
     });
+    expect(capture.unexpectedMutations).toEqual([]);
   });
 
   test("error path: intercepted 500 surfaces widget-error", async ({ page }) => {
-    await page.route("**/api/leads", async (route) => {
-      await route.fulfill({
-        status: 500,
-        contentType: "application/json",
-        body: JSON.stringify({ ok: false, error: "intercepted_failure" }),
-      });
+    const capture = await installNoWriteInterception(page, {
+      leadFailure: { status: 500, error: "intercepted_failure" },
     });
 
     await page.goto("/widget-preview");
@@ -95,24 +76,15 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
     await widget.getByLabel("Phone (optional)").fill("+12525550100");
     await widget.getByRole("button", { name: "Request Valuation" }).click();
     await expect(widget.getByText("intercepted_failure")).toBeVisible();
+    await expect.poll(() => capture.events.length).toBeGreaterThan(0);
+    expect(capture.leads).toHaveLength(1);
+    expect(capture.unexpectedMutations).toEqual([]);
   });
 });
 
 test.describe("Public keyboard access (DB-mutation-free)", () => {
   test("skip link transfers focus to the shared main-content target", async ({ page }) => {
-    for (const endpoint of [
-      "**/api/analytics/event",
-      "**/api/events",
-      "**/api/experiments/event",
-    ]) {
-      await page.route(endpoint, async (route) => {
-        await route.fulfill({
-          status: 202,
-          contentType: "application/json",
-          body: JSON.stringify({ ok: true, intercepted: true }),
-        });
-      });
-    }
+    const capture = await installNoWriteInterception(page);
 
     await page.goto("/ask");
     await page.keyboard.press("Tab");
@@ -122,5 +94,8 @@ test.describe("Public keyboard access (DB-mutation-free)", () => {
 
     await page.keyboard.press("Enter");
     await expect(page.locator("#page-content")).toBeFocused();
+    await expect.poll(() => capture.events.length).toBeGreaterThan(0);
+    expect(capture.leads).toHaveLength(0);
+    expect(capture.unexpectedMutations).toEqual([]);
   });
 });

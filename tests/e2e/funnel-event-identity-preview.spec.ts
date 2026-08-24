@@ -9,6 +9,11 @@
  */
 import { mkdirSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
+import {
+  installNoWriteInterception,
+  type JsonRecord,
+  type NoWriteCapture,
+} from "./no-write-preview-interception";
 import { previewTestUse } from "./preview-test-config";
 
 test.use(previewTestUse);
@@ -26,134 +31,6 @@ const PROTECTED_OUTCOMES = new Set([
   "notification_failed",
 ]);
 
-type JsonRecord = Record<string, unknown>;
-
-type Capture = {
-  leads: JsonRecord[];
-  events: JsonRecord[];
-  chatMessages: JsonRecord[];
-  appointments: JsonRecord[];
-  experiments: JsonRecord[];
-  unexpectedPosts: string[];
-};
-
-function jsonBody(request: { postDataJSON(): unknown }): JsonRecord {
-  try {
-    return request.postDataJSON() as JsonRecord;
-  } catch {
-    return {};
-  }
-}
-
-async function installNoWriteInterception(page: Page, failLead = false) {
-  const capture: Capture = {
-    leads: [],
-    events: [],
-    chatMessages: [],
-    appointments: [],
-    experiments: [],
-    unexpectedPosts: [],
-  };
-
-  await page.addInitScript(() => {
-    const state = window as Window & { __ammBrowserEvents?: unknown[] };
-    state.__ammBrowserEvents = [];
-    window.addEventListener("askmagicmike:event", (event) => {
-      state.__ammBrowserEvents?.push((event as CustomEvent).detail);
-    });
-  });
-
-  await page.route("**/api/**", async (route) => {
-    const request = route.request();
-    if (request.method() !== "POST") {
-      await route.continue();
-      return;
-    }
-
-    const pathname = new URL(request.url()).pathname;
-    const body = jsonBody(request);
-
-    if (pathname === "/api/leads") {
-      capture.leads.push(body);
-      if (failLead) {
-        await route.fulfill({
-          status: 503,
-          contentType: "application/json",
-          body: JSON.stringify({ ok: false, error: "temporarily_unavailable" }),
-        });
-        return;
-      }
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          ok: true,
-          lead_id: `qa_intercepted_${capture.leads.length}`,
-          session_id: body.widget_session_id,
-          message: "INTERNAL QA — intercepted before durable storage.",
-        }),
-      });
-      return;
-    }
-
-    if (pathname === "/api/events" || pathname === "/api/analytics/event") {
-      capture.events.push(body);
-      await route.fulfill({
-        status: 202,
-        contentType: "application/json",
-        body: JSON.stringify({ ok: true, intercepted: true }),
-      });
-      return;
-    }
-
-    if (pathname === "/api/chat/message") {
-      capture.chatMessages.push(body);
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          message: "INTERNAL QA — synthetic local answer; no provider called.",
-        }),
-      });
-      return;
-    }
-
-    if (pathname === "/api/appointments/request") {
-      capture.appointments.push(body);
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          ok: true,
-          status: "requested",
-          appointment_id: "qa_intercepted_appointment",
-          appointment_status: "requested",
-        }),
-      });
-      return;
-    }
-
-    if (pathname === "/api/experiments/event") {
-      capture.experiments.push(body);
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ active: false, recorded: false, intercepted: true }),
-      });
-      return;
-    }
-
-    capture.unexpectedPosts.push(pathname);
-    await route.fulfill({
-      status: 503,
-      contentType: "application/json",
-      body: JSON.stringify({ ok: false, error: "unexpected_preview_write_blocked" }),
-    });
-  });
-
-  return capture;
-}
-
 async function browserEvents(page: Page): Promise<JsonRecord[]> {
   return page.evaluate(() => {
     const state = window as Window & { __ammBrowserEvents?: JsonRecord[] };
@@ -170,7 +47,7 @@ async function expectNoHorizontalOverflow(page: Page) {
 }
 
 async function expectLinkedEvents(
-  capture: Capture,
+  capture: NoWriteCapture,
   startIndex: number,
   sessionId: string,
   expectedNames: string[],
@@ -309,13 +186,15 @@ for (const viewport of viewports) {
 
     expect(capture.chatMessages).toHaveLength(1);
     expect(capture.appointments).toHaveLength(0);
-    expect(capture.unexpectedPosts).toEqual([]);
+    expect(capture.unexpectedMutations).toEqual([]);
     expect(consoleErrors).toEqual([]);
   });
 }
 
 test("intercepted durable failure is recoverable, linked, private, and non-converting", async ({ page }) => {
-  const capture = await installNoWriteInterception(page, true);
+  const capture = await installNoWriteInterception(page, {
+    leadFailure: { status: 503, error: "temporarily_unavailable" },
+  });
   await page.goto("/home-value?utm_source=internal_qa&utm_medium=qa&utm_campaign=funnel_identity_failure");
   await page.getByLabel("Property address").fill("789 INTERNAL QA Road, Wilson, NC");
   await page.getByRole("button", { name: "Continue" }).click();
@@ -335,5 +214,5 @@ test("intercepted durable failure is recoverable, linked, private, and non-conve
   );
   const emitted = await browserEvents(page);
   expect(emitted.some((entry) => entry.event === "lead_created")).toBe(false);
-  expect(capture.unexpectedPosts).toEqual([]);
+  expect(capture.unexpectedMutations).toEqual([]);
 });

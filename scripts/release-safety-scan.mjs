@@ -506,55 +506,66 @@ async function checkMutationGateContract() {
   );
 }
 
-/** I — widget e2e must intercept /api/leads so no real lead is created */
+/** I — every Preview browser suite must share one fail-closed API mutation boundary */
 async function checkWidgetE2eInterception() {
   const path = "tests/e2e/widget-preview-flow.spec.ts";
   const funnelPath = "tests/e2e/funnel-event-identity-preview.spec.ts";
+  const interceptionPath = "tests/e2e/no-write-preview-interception.ts";
   const previewConfigPath = "tests/e2e/preview-test-config.ts";
   let text;
   let funnelText;
+  let interceptionText;
   let previewConfigText;
   try {
     text = await readFile(join(REPO_ROOT, path), "utf8");
     funnelText = await readFile(join(REPO_ROOT, funnelPath), "utf8");
+    interceptionText = await readFile(join(REPO_ROOT, interceptionPath), "utf8");
     previewConfigText = await readFile(join(REPO_ROOT, previewConfigPath), "utf8");
   } catch (err) {
     fail("I. widget_e2e", `mutation-free browser spec missing (${err.message})`);
     return;
   }
-  if (!/page\.route\(\s*['"`]\*\*\/api\/leads['"`]/.test(text)) {
-    fail(
-      "I. widget_e2e",
-      `${path} does not intercept POST /api/leads via page.route`
-    );
+  const sharedImport = 'from "./no-write-preview-interception"';
+  for (const [specPath, specText] of [
+    [path, text],
+    [funnelPath, funnelText],
+  ]) {
+    if (!specText.includes(sharedImport) ||
+        !specText.includes("installNoWriteInterception(page")) {
+      fail(
+        "I. widget_e2e",
+        `${specPath} does not use the shared no-write interception boundary`
+      );
+    }
   }
-  // Belt and braces: ensure the spec doesn't use route.continue() which
-  // would let the real request through.
-  if (/route\.continue\s*\(/.test(text)) {
-    fail(
-      "I. widget_e2e",
-      `${path} uses route.continue() — real /api/leads request can pass`
-    );
-  }
-  const funnelRequired = [
-    'import { previewTestUse } from "./preview-test-config"',
+  const interceptionRequired = [
     'page.route("**/api/**"',
-    'request.method() !== "POST"',
+    'new Set(["POST", "PUT", "PATCH", "DELETE"])',
     'pathname === "/api/leads"',
     'pathname === "/api/events"',
     'pathname === "/api/analytics/event"',
     'pathname === "/api/appointments/request"',
     'pathname === "/api/chat/message"',
     'pathname === "/api/experiments/event"',
+    "unexpectedMutations.push",
     "unexpected_preview_write_blocked",
+  ];
+  for (const phrase of interceptionRequired) {
+    if (!interceptionText.includes(phrase)) {
+      fail(
+        "I. widget_e2e",
+        `${interceptionPath} is missing no-write contract ${JSON.stringify(phrase)}`
+      );
+    }
+  }
+  for (const phrase of [
     '{ name: "desktop", width: 1440, height: 1000 }',
     '{ name: "mobile", width: 390, height: 844 }',
-  ];
-  for (const phrase of funnelRequired) {
+  ]) {
     if (!funnelText.includes(phrase)) {
       fail(
         "I. widget_e2e",
-        `${funnelPath} is missing no-write contract ${JSON.stringify(phrase)}`
+        `${funnelPath} is missing viewport contract ${JSON.stringify(phrase)}`
       );
     }
   }
@@ -578,7 +589,7 @@ async function checkWidgetE2eInterception() {
   }
   pass(
     "I. widget_e2e",
-    "widget and public-funnel suites share protected access and intercept every mutating first-party request before navigation"
+    "widget and public-funnel suites share protected access and one fail-closed first-party API mutation boundary"
   );
 }
 
