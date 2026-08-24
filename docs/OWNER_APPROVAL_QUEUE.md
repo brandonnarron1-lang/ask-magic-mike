@@ -121,12 +121,24 @@ gate and must not be merged out of order:
    proof remains mandatory, and it later requires
    `APPROVE PHASE 9 ASK CONVERSION ACCESSIBILITY MERGE AND PRODUCTION DEPLOYMENT`
    after a fresh exact-main refresh and proof.
-3. Draft PR [#212](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/212)
+3. Draft PR [#213](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/213)
+   reuses the shared Black Diamond public header to restore complete mobile
+   Home Value / Sell / Buy / Plan / Ask navigation, current-route semantics,
+   and keyboard-safe dismissal without changing a funnel, form, route, API,
+   database, or visual system. It is based on exact Draft PR #211 head
+   `6eacc33d16e34897c97288e48cd736433a3d9e15` and must remain after #211 in
+   release order. After all predecessors release, refresh onto exact `main`,
+   repeat full exact-head proof, then require
+   `APPROVE PHASE 9 RESPONSIVE CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
+4. Draft PR [#212](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/212)
    reuses the existing Google container and canonical event ledger for
    consent-gated cross-domain measurement. It must be refreshed after the
    selected application sequence and requires authenticated Google/Vercel
    configuration review plus
    `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
+
+The historical shorter conversion-identity phrase released PR #195 and is
+exhausted; it cannot authorize PR #213.
 
 None of these later phrases can authorize another PR, secret, database write,
 form submission, notification, WordPress/DNS change, publication, spend,

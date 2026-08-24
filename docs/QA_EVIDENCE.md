@@ -1,5 +1,19 @@
 # QA Evidence
 
+## Phase 9 responsive conversion-identity polish — 2026-08-24
+
+- Draft PR #213 reuses the shared public header after exact Draft PR #211.
+- Focused React acceptance: 2 files / 8 tests passed.
+- Focused ESLint: passed.
+- Fresh in-app visual/interaction QA passed at 1280×720, 390×844, and 320×700.
+- Buyer→Seller path switch, menu auto-close, outside-pointer close,
+  Escape/focus return, current-route semantics, no narrow overflow, and zero
+  fresh console warnings/errors were observed.
+- No field was filled and no lead/event/message/provider/database write was
+  created.
+- Full evidence:
+  `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
+
 ## Phase 9 Ask conversion clarity and keyboard access — 2026-08-23
 
 - Production read-only DOM inspection — PASS for evidence collection: `/ask`

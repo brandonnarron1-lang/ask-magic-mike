@@ -2,6 +2,33 @@
 
 Updated 2026-08-24.
 
+## Phase 9 responsive conversion-identity polish — 2026-08-24
+
+- **Reuse decision:** extend only the shared `BlackDiamondHeader` on exact
+  Draft PR #211 head `6eacc33d16e34897c97288e48cd736433a3d9e15`;
+  preserve the existing Black Diamond identity, Ask CTA, skip link, routes,
+  forms, lead command, consent, analytics, and providers.
+- **Evidence:** fresh exact-Preview screenshots show healthy desktop/mobile
+  identity and conversion surfaces, but the full intent navigation is hidden
+  below `md`, leaving only an implicit logo return or distant footer for path
+  switching.
+- **Implementation:** Draft PR #213 adds one compact intent menu, labeled
+  navigation landmarks, active-route `aria-current`, 44-pixel trigger,
+  Escape/focus return, outside-pointer close, narrow-phone sizing, and the
+  existing smooth-scroll declaration expected by Next.js.
+- **Local acceptance:** 2 focused files / 8 tests and focused ESLint pass.
+  In-app browser checks at 1280×720, 390×844, and 320×700 prove complete
+  labels, current-route state, Buyer→Seller navigation, automatic close,
+  outside-click close, Escape focus return, no horizontal overflow, and a
+  warning/error-free fresh console.
+- **Safety:** no field fill, submit, migration, Production action, lead/event,
+  message, provider call, WordPress/DNS change, publication, spend, deletion,
+  or NellySelly action. Full exact-head remote evidence remains pending after
+  the documentation commit.
+- Detailed scope:
+  `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH.md` and
+  `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
+
 ## Phase 9 Ask conversion clarity and keyboard access — 2026-08-23
 
 - **Reuse decision:** stack only the focused Ask/public-header correction on

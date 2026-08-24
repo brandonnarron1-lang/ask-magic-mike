@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-08-24 — Responsive conversion-identity navigation candidate
+
+- Screenshot-first review confirmed the released Black Diamond identity and
+  forms remain strong while the shared mobile header hides every intent path
+  except Ask.
+- Draft PR #213 extends that one shared header with labeled mobile/desktop
+  navigation, current-route semantics, a compact premium intent panel,
+  Escape/focus return, outside-pointer dismissal, and narrow-phone sizing.
+- The existing Ask CTA, PR #211 skip link, routes, attribution, consent, forms,
+  lead command, visual tokens, and legal copy are preserved.
+- Local in-app-browser acceptance passed at 1280×720, 390×844, and 320×700,
+  including a real local Buyer→Seller switch, no overflow, and a clean fresh
+  browser console.
+- No Production, environment, database, lead/event, notification, WordPress,
+  DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-24 — PR #211 refresh onto release-ledger-sealed PR #210
 
 - Preserved prior PR #211 head at

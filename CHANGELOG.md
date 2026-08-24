@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-08-24 — Responsive conversion-identity navigation candidate
+
+- Reused the shared Black Diamond public header instead of adding a navigation
+  or visual system.
+- Added a compact mobile Home Value / Sell / Buy / Plan / Ask menu while
+  retaining the visible Ask CTA and PR #211 skip link.
+- Added current-route semantics and visual treatment to desktop and mobile,
+  Escape/focus-return behavior, outside-pointer dismissal, and 320-pixel-safe
+  sizing.
+- Declared the existing smooth-scroll behavior for clean Next.js route
+  transitions without changing motion behavior.
+- Added 5 navigation regression tests; the combined focused suite passes 2
+  files / 8 tests and focused ESLint passes.
+- Created Draft PR #213 after exact PR #211. No Production, environment,
+  database, lead/event, notification, WordPress, DNS, publication, spend,
+  deletion, or NellySelly action occurred.
+
 ## 2026-08-24 — PR #211 refresh onto release-ledger-sealed PR #210
 
 - Preserved the former PR #211 head at remote rescue branch
