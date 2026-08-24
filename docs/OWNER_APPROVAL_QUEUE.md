@@ -106,18 +106,18 @@ gate and must not be merged out of order:
    consolidates `/value` and `/we-buy-houses` onto the canonical conversion
    routes with permanent, query-preserving redirects and a matching Production
    monitor contract. It is synchronized with exact PR #209 candidate
-   `1d1d8d4f8e0970f3f6a1b80ab9ff2bebcd40216d`; the immediately prior PR #210
+   `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b`; the immediately prior PR #210
    head is preserved at
-   `rescue/amm-pr210-pre-release-ledger-integrity-sync-20260824-0617`.
+   `rescue/amm-pr210-pre-final-pr209-cutover-hygiene-20260824-162615`.
    Fresh exact-head proof remains mandatory. After PR #209 is released, retarget
    or refresh #210 onto the exact new `main`, repeat proof, then require
    `APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`.
 2. Draft PR [#211](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/211)
    retains the shared skip-to-content path and clearer required Ask intake.
    It is synchronized with exact clean PR #210 head
-   `7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9`; the immediately prior PR #211
+   `3ed8d050edd386aa0cd4a83d230ff3170d24a306`; the immediately prior PR #211
    head is preserved at
-   `rescue/amm-pr211-pre-pr210-ledger-sync-20260824-0632`. Fresh exact-head
+   `rescue/amm-pr211-pre-final-pr210-cutover-hygiene-20260824-164445`. Fresh exact-head
    proof remains mandatory, and it later requires
    `APPROVE PHASE 9 ASK CONVERSION ACCESSIBILITY MERGE AND PRODUCTION DEPLOYMENT`
    after a fresh exact-main refresh and proof.

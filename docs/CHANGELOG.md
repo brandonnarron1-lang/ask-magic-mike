@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-24 — PR #211 refresh onto final PR #210 cutover hygiene
+
+- Preserved former PR #211 head `6eacc33d16e34897c97288e48cd736433a3d9e15`
+  at `rescue/amm-pr211-pre-final-pr210-cutover-hygiene-20260824-164445`.
+- Merged exact final PR #210 head
+  `3ed8d050edd386aa0cd4a83d230ff3170d24a306` while retaining the entire final
+  PR #209 durability/no-write contract.
+- Preserved the shared skip-link focus behavior and Ask field semantics, and
+  reconciled only additive history and release-authority declarations.
+- Prior PR #211 proof is historical; fresh exact-head CI, protected Preview,
+  keyboard, and zero-write runtime evidence remain mandatory.
+- No Production, environment, database, lead/event, notification, WordPress,
+  DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-24 — PR #211 refresh onto release-ledger-sealed PR #210
 
 - Preserved prior PR #211 head at
@@ -38,6 +52,20 @@
   header, and shared content-target implementation did not overlap.
 - Prior PR #211 CI and Preview are historical evidence only. The refreshed head
   must repeat exact-head proof before its later gate is requestable.
+
+## 2026-08-24 — PR #210 refresh onto final PR #209 cutover hygiene
+
+- Preserved former PR #210 head `7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9`
+  at `rescue/amm-pr210-pre-final-pr209-cutover-hygiene-20260824-162615`.
+- Merged exact final PR #209 head
+  `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b`, retaining its read-only cutover
+  guard and fail-closed Preview browser telemetry interception.
+- Resolved the sole additive release-authority test conflict while preserving
+  PR #210's redirect/monitor contracts and both candidates' evidence ledgers.
+- Prior PR #210 proof is historical; fresh exact-head CI, Preview identity,
+  browser no-write evidence, and deployment-log proof remain mandatory.
+- No Production, environment, database, lead, event, notification, WordPress,
+  DNS, publication, spend, deletion, or NellySelly mutation occurred.
 
 ## 2026-08-24 — PR #210 refresh onto release-ledger-sealed PR #209
 
