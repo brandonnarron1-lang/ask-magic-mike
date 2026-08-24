@@ -148,6 +148,48 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
     });
   });
 
+  it.each([
+    { label: "fresh durable capture", replay: false, emitsConversion: true },
+    { label: "idempotent replay", replay: true, emitsConversion: false },
+  ])("keeps Ask browser conversion aligned with $label", async ({ replay, emitsConversion }) => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input) === "/api/chat/message") {
+        return new Response(JSON.stringify({ message: "Synthetic answer for internal QA." }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (String(input) === "/api/leads") {
+        const payload = JSON.parse(String(init?.body)) as Record<string, unknown>;
+        return new Response(JSON.stringify({
+          lead_id: "qa_intercepted_chat_lead",
+          session_id: payload.widget_session_id,
+        }), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            ...(replay ? { "X-AMM-Idempotent-Replay": "1" } : {}),
+          },
+        });
+      }
+      throw new Error(`Unexpected request: ${String(input)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<AskMikeChatPanel />);
+
+    await user.type(screen.getByLabelText(/Your real estate question/), "What should I verify before listing?");
+    await user.click(screen.getByRole("button", { name: "Send Question" }));
+
+    expect(await screen.findByText("Synthetic answer for internal QA.")).toBeVisible();
+    expect(await screen.findByRole("button", { name: "Request a conversation" })).toBeVisible();
+    await waitFor(() => {
+      expect(
+        vi.mocked(trackEvent).mock.calls.some(([event]) => event === "lead_created"),
+      ).toBe(emitsConversion);
+    });
+  });
+
   it("keeps every shared-header surface wired to one keyboard-focus destination", () => {
     const sharedHeaderSurfaces = [
       "app/ask/page.tsx",

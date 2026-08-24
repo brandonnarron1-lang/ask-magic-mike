@@ -7,7 +7,7 @@ Updated 2026-08-24.
 - **Reuse decision:** the stacked candidate extends only the existing browser
   submission UUID, `POST /api/events`, Neon analytics repository, and atomic
   lead command in Draft PR #216 on exact Draft PR #215 head
-  `985079d1574daf9707a24e469b5a0954cf3cae`; no tracker, cookie, form, API,
+  `985079d1574daf970fa7a24e469b5a0954cf3cae`; no tracker, cookie, form, API,
   database, CRM, provider, or notification system is added.
 - **Conflict prevented:** inspection proved that pre-creating `sessions` for
   anonymous events would make `capture_public_lead_v1` return an idempotency
@@ -22,17 +22,25 @@ Updated 2026-08-24.
   widget parents, while `/api/events` rejects browser-authored lead/widget
   creation, qualification, appointment-request, and notification outcomes. The
   server's post-storage event is the only canonical lead-conversion row;
-  replay cannot inflate it.
+  replay cannot inflate it. Ask now emits its browser-only conversion signal
+  after a fresh successful durable response, matching the other funnels, and
+  suppresses that signal on idempotent replay.
 - **Privacy/consent:** the UUID is absent from browser dimensions, URLs, PII,
   and public properties. Buyer/seller email/call permission now requires the
   corresponding supplied contact method. Historical null-session events are
   not backfilled or reclassified.
-- **Current acceptance:** Node 24.18.0 passes 10 focused files / 69 tests, all
-  237 files / 3,116 tests, strict TypeScript, full ESLint, optimized Next.js
+- **Current acceptance:** Node 24.18.0 passes 10 focused files / 71 tests, all
+  237 files / 3,119 tests, 6/6 mutation-free browser tests, strict TypeScript,
+  full ESLint, optimized Next.js
   15.5.21 build, 84/17 route proof, 14/14 release safety, deployable-source
   isolation, no known Production dependency vulnerabilities, a redacted
-  603-commit history scan, and whitespace proof. Immutable no-write Preview and
-  final exact-head proof remain mandatory before sealing.
+  tracked-history scan, and whitespace proof. Immutable no-write Preview and
+  final exact-head proof remain mandatory before sealing. The persistent
+  protected-Preview runner now intercepts every first-party POST while testing
+  Home Value, seller, buyer, and Ask success at desktop/mobile sizes plus a
+  durable-failure path; local Chromium passes 3/3 with no unexpected POST,
+  provider call, PII-bearing event, protected ledger outcome, console error,
+  or horizontal overflow.
 - **Safety:** no Production, environment, schema/data, lead/event, message,
   provider, WordPress/DNS, publication, spend, deletion, or NellySelly action.
 - Detailed scope:

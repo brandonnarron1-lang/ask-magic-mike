@@ -509,11 +509,14 @@ async function checkMutationGateContract() {
 /** I — widget e2e must intercept /api/leads so no real lead is created */
 async function checkWidgetE2eInterception() {
   const path = "tests/e2e/widget-preview-flow.spec.ts";
+  const funnelPath = "tests/e2e/funnel-event-identity-preview.spec.ts";
   let text;
+  let funnelText;
   try {
     text = await readFile(join(REPO_ROOT, path), "utf8");
+    funnelText = await readFile(join(REPO_ROOT, funnelPath), "utf8");
   } catch (err) {
-    fail("I. widget_e2e", `${path} missing (${err.message})`);
+    fail("I. widget_e2e", `mutation-free browser spec missing (${err.message})`);
     return;
   }
   if (!/page\.route\(\s*['"`]\*\*\/api\/leads['"`]/.test(text)) {
@@ -530,9 +533,30 @@ async function checkWidgetE2eInterception() {
       `${path} uses route.continue() — real /api/leads request can pass`
     );
   }
+  const funnelRequired = [
+    'page.route("**/api/**"',
+    'request.method() !== "POST"',
+    'pathname === "/api/leads"',
+    'pathname === "/api/events"',
+    'pathname === "/api/analytics/event"',
+    'pathname === "/api/appointments/request"',
+    'pathname === "/api/chat/message"',
+    'pathname === "/api/experiments/event"',
+    "unexpected_preview_write_blocked",
+    '{ name: "desktop", width: 1440, height: 1000 }',
+    '{ name: "mobile", width: 390, height: 844 }',
+  ];
+  for (const phrase of funnelRequired) {
+    if (!funnelText.includes(phrase)) {
+      fail(
+        "I. widget_e2e",
+        `${funnelPath} is missing no-write contract ${JSON.stringify(phrase)}`
+      );
+    }
+  }
   pass(
     "I. widget_e2e",
-    `${path} intercepts /api/leads with route.fulfill (no real lead creation)`
+    "widget and public-funnel suites intercept every mutating first-party request before navigation"
   );
 }
 

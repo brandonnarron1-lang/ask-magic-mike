@@ -14,10 +14,15 @@
 - Failure events remain allowlisted and PII-free; Home Value, buyer, seller,
   Ask preparation, and appointment flows now share the existing submission
   identity and have focused regression coverage.
-- Node 24 proof passes 10 focused files / 69 tests, all 237 files / 3,116 tests,
-  strict TypeScript, full ESLint, optimized build/84-route proof, 14/14 safety,
-  isolation, the Production dependency audit, and a redacted 603-commit history
-  scan. No Production or external-system action occurred.
+- Ask emits a browser-only conversion only after fresh durable capture, not an
+  idempotent replay. The existing protected-Preview runner now executes all
+  four public funnels at 1,440 × 1,000 and 390 × 844 plus a failure path, with
+  every first-party POST intercepted and PNG evidence retained.
+- Node 24 proof passes 10 focused files / 71 tests, all 237 files / 3,119 tests,
+  6/6 mutation-free browser tests, strict TypeScript, full ESLint, optimized
+  build/84-route proof, 14/14 safety, isolation, the Production dependency
+  audit, and a redacted tracked-history scan. No Production or external-system
+  action occurred.
 
 ## 2026-08-24 — Home-value completion-integrity candidate
 

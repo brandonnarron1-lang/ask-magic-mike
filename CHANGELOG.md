@@ -15,10 +15,15 @@
   integrations retain their success events.
 - Added linked privacy-safe failure telemetry, chat idempotency, buyer thank-you
   telemetry, and channel-specific buyer/seller permission evidence.
-- Node 24 acceptance passes 10 focused files / 69 tests, all 237 files / 3,116
-  tests, strict typecheck, full ESLint, optimized build/84-route proof, 14/14
-  release safety, isolation, Production dependency audit, and redacted history
-  scan. Production remains unchanged.
+- Aligned Ask's fresh browser conversion signal with the other stored funnels
+  while suppressing idempotent replay, and expanded the existing no-write
+  Preview runner across Home Value, seller, buyer, and Ask at desktop/mobile
+  sizes plus one recoverable failure path. Every first-party POST is
+  intercepted and unexpected writes fail the run.
+- Node 24 acceptance passes 10 focused files / 71 tests, all 237 files / 3,119
+  tests, 6/6 mutation-free browser tests, strict typecheck, full ESLint,
+  optimized build/84-route proof, 14/14 release safety, isolation, Production
+  dependency audit, and redacted history scan. Production remains unchanged.
 
 ## 2026-08-24 — Home-value completion-integrity candidate
 

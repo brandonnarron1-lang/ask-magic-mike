@@ -119,6 +119,20 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
         };
         if (!leadRes.ok) throw new Error(publicLeadErrorMessage(leadData.error));
         if (!leadData.lead_id) throw new Error("lead_preparation_failed");
+        const idempotentReplay = leadRes.headers.get("X-AMM-Idempotent-Replay") === "1";
+        if (!idempotentReplay) {
+          trackEvent("lead_created", attribution, {
+            funnel_name: "ask_mike_chat",
+            lead_source_surface: surface,
+          }, { sessionId: chatSessionId });
+          if (surface === "widget") {
+            trackEvent("widget_lead_created", attribution, {
+              funnel_name: "ask_mike_chat",
+              lead_source_surface: surface,
+            }, { sessionId: chatSessionId });
+            postToWidgetParent({ type: "askmagicmike:lead_created" }, attribution);
+          }
+        }
         leadPreparedRef.current = true;
         setLeadReference({
           leadId: leadData.lead_id,

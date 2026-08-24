@@ -73,7 +73,15 @@ unclassified evidence, and no historical conversion rate is claimed.
   Contact data, addresses, raw errors, provider responses, and lead IDs remain
   excluded.
 - Ask lead preparation now sends the existing chat UUID as both header and
-  body idempotency evidence.
+  body idempotency evidence. A fresh durable Ask capture now emits the same
+  browser-only `lead_created` signal as the other public funnels; an
+  idempotent replay does not emit it, and the public event route still refuses
+  it as canonical ledger input.
+- The existing protected-Preview browser runner now includes Home Value,
+  seller, buyer, and Ask desktop/mobile acceptance. One catch-all route blocks
+  every unexpected first-party POST, while the six approved mutation surfaces
+  are fulfilled synthetically before any request can reach Neon, Resend, the
+  notification queue, OpenAI, or another provider.
 
 ## KPI and privacy interpretation
 

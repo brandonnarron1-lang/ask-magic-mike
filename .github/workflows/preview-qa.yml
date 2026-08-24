@@ -108,14 +108,12 @@ jobs:
           SAFE_DB_WRITE: "false"
         run: npm run preview:qa
 
-      - name: Widget browser e2e
+      - name: Mutation-free browser e2e
         if: inputs.run_browser_e2e == 'true'
         env:
           PREVIEW_URL: ${{ steps.pick_url.outputs.preview_url }}
         run: |
-          ./node_modules/.bin/playwright test \
-            tests/e2e/widget-preview-flow.spec.ts \
-            --reporter=json > artifacts/widget-e2e-report.json
+          npm run preview:e2e -- --reporter=json > artifacts/widget-e2e-report.json
         continue-on-error: false
 
       - name: Release candidate report
@@ -137,4 +135,5 @@ jobs:
           path: |
             artifacts/*.json
             artifacts/*.md
+            artifacts/*.png
           if-no-files-found: ignore

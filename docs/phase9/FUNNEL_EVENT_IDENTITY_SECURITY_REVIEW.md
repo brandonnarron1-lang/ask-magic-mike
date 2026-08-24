@@ -4,7 +4,7 @@ Date: 2026-08-24
 
 Scope: the Phase 9 browser-to-canonical-analytics identity change only
 
-Base: `985079d1574daf9707a24e469b5a0954cf3cae` (stacked after Draft PR #215)
+Base: `985079d1574daf970fa7a24e469b5a0954cf3cae` (stacked after Draft PR #215)
 
 Production impact: none; no merge, deployment, environment-variable change, database migration, or live write was performed.
 
@@ -27,6 +27,7 @@ This is a scoped review of the changed funnel-event identity behavior, not a cla
 | Oversized, cross-origin, or high-rate event flood | Both public event routes enforce an exact approved-origin check, rate limiting before body parsing, JSON content type, and a 4,096-byte streaming body limit. | A same-origin attacker can still create rate-limited non-conversion funnel noise. Funnel events remain telemetry, not an authorization or billing source. Durable shared rate-limit readiness is controlled by the earlier stacked release gate. |
 | Widget `postMessage` leaks data to an unexpected parent | `app/lib/analytics.ts` derives an allowlisted parent origin and supplies it as the exact `targetOrigin`; no wildcard target is introduced. Only privacy-allowlisted event dimensions are sent. | Parent-side handlers remain responsible for their own exact-origin and schema validation. |
 | Replay creates duplicate canonical conversions | Browser conversion events are excluded from canonical ingestion. Durable lead creation and its canonical event continue to use the established lead idempotency transaction. | Replayed non-conversion funnel telemetry can create additional rate-limited rows; it cannot create a canonical lead conversion through these routes. |
+| Browser acceptance accidentally creates a lead, event, message, or provider call | The persistent Preview test installs one catch-all `/api/**` POST interceptor before navigation. Known mutation surfaces receive synthetic responses; an unknown POST is blocked and fails the run. `SAFE_DB_WRITE` remains hard-pinned to false in the dispatcher. | A future new non-`/api/**` mutation transport must be added to the interception contract before browser acceptance can cover it. No such candidate transport exists. |
 
 ## Verification performed
 
@@ -36,6 +37,10 @@ This is a scoped review of the changed funnel-event identity behavior, not a cla
 - Changed client/server files were scanned for raw HTML sinks, string-to-code execution, wildcard `postMessage`, and browser-stored auth/session tokens; no candidate-specific hit was found.
 - `pnpm audit --prod` reported no known production dependency vulnerability.
 - The tracked Git history was scanned with redacted output; no secret leak was reported.
+- Local Chromium executed fresh and replay Ask conversion behavior plus all
+  four public funnels at desktop/mobile sizes with every mutation intercepted;
+  no unexpected POST, provider call, console error, PII-bearing event, or
+  protected event-ledger request occurred.
 - Focused tests, the full test suite, typecheck, lint, production build, route proof, release-safety checks, and Ask/Nelly deployable-source isolation passed before candidate sealing. Exact-head evidence is recorded in `docs/phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY_QA_EVIDENCE.md` and the Draft PR.
 
 ## Deferred policy decisions
