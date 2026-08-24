@@ -63,6 +63,16 @@ describe("client analytics privacy boundary", () => {
       focus: "preparation",
       task_id: "verify-property-facts",
     });
+    expect(safePublicAnalyticsProperties("lead_submit_failed", {
+      funnel_name: "home_value",
+      lead_source_surface: "home_value_page",
+      step_name: "contact",
+      error: "person@example.com",
+    })).toEqual({
+      funnel_name: "home_value",
+      lead_source_surface: "home_value_page",
+      step_name: "contact",
+    });
   });
 
   it("publishes only approved dimensions to browser analytics and the server ledger", () => {

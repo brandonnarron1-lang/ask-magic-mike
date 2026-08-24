@@ -88,7 +88,7 @@ describe("POST /api/leads validation and truthful persistence", () => {
 
   it.each([
     [{ funnel_type: "home_value", email: "a@example.test", phone: "2525550100" }, "Address is required."],
-    [{ funnel_type: "home_value", address: "1 Synthetic St", phone: "2525550100" }, "Email and phone are required"],
+    [{ funnel_type: "home_value", address: "1 Synthetic St" }, "Email or phone is required"],
     [{ funnel_type: "seller", address: "1 Synthetic St" }, "Property address and phone are required"],
     [{ funnel_type: "chat" }, "Question is required"],
     [{ funnel_type: "appointment" }, "Email or phone is required"],
@@ -173,6 +173,26 @@ describe("POST /api/leads validation and truthful persistence", () => {
 });
 
 describe("POST /api/leads atomic lifecycle command", () => {
+  it.each([
+    [{ email: "email-only@example.test" }, "email"],
+    [{ phone: "2525550110" }, "phone"],
+  ])("durably accepts a home-value request with %s as its only contact method", async (contact, expectedMethod) => {
+    const { calls } = installRpc();
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "88 Synthetic Contact Lane",
+      name: "INTERNAL QA DO NOT CONTACT",
+      ...contact,
+    }));
+
+    expect(response.status).toBe(200);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toContain("/rest/v1/rpc/capture_public_lead_v1");
+    const lead = calls[0].body.p_lead as Record<string, unknown>;
+    expect(expectedMethod === "email" ? lead.normalized_email : lead.normalized_phone).toBeTruthy();
+  });
+
   it("derives one stable UUID session from a non-UUID idempotency key", async () => {
     const { calls } = installRpc();
     const payload = {

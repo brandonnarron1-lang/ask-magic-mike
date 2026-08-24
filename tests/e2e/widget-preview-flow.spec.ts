@@ -77,8 +77,7 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
     await widget.getByRole("button", { name: "Continue" }).click();
     await widget.getByLabel("Your name").fill("INTERNAL QA DO NOT CONTACT");
     await widget.getByLabel("Email for your valuation follow-up").fill("jane+qa@example.com");
-    await widget.getByRole("button", { name: "Continue" }).click();
-    await widget.getByLabel("Phone").fill("+12525550100");
+    await widget.getByLabel("Phone (optional)").fill("+12525550100");
     await widget.getByRole("button", { name: "Request Valuation" }).click();
     await expect(widget.getByText("Your request is in.")).toBeVisible();
 
@@ -117,8 +116,7 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
     await widget.getByRole("button", { name: "Continue" }).click();
     await widget.getByLabel("Your name").fill("INTERNAL QA DO NOT CONTACT");
     await widget.getByLabel("Email for your valuation follow-up").fill("jane+qa@example.com");
-    await widget.getByRole("button", { name: "Continue" }).click();
-    await widget.getByLabel("Phone").fill("+12525550100");
+    await widget.getByLabel("Phone (optional)").fill("+12525550100");
     await widget.getByRole("button", { name: "Request Valuation" }).click();
     await expect(widget.getByText("intercepted_failure")).toBeVisible();
   });

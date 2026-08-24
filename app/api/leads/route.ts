@@ -465,9 +465,10 @@ function validateLead(payload: LeadPayload) {
 
   if (
     (payload.funnel_type === "home_value" || payload.funnel_type === "widget") &&
-    (!payload.email || !payload.phone)
+    !payload.email &&
+    !payload.phone
   ) {
-    return "Email and phone are required for a home value request.";
+    return "Email or phone is required for a home value request.";
   }
 
   if (payload.funnel_type === "seller" && (!payload.address || !payload.phone)) {

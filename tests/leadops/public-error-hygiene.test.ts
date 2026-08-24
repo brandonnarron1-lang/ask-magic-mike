@@ -20,8 +20,8 @@ describe("public lead error hygiene", () => {
   });
 
   it("keeps normal validation copy intact", () => {
-    expect(publicLeadErrorMessage("Email and phone are required for a home value request.")).toBe(
-      "Email and phone are required for a home value request.",
+    expect(publicLeadErrorMessage("Email or phone is required for a home value request.")).toBe(
+      "Email or phone is required for a home value request.",
     );
   });
 

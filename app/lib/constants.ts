@@ -52,6 +52,7 @@ export const analyticsEvents = [
   "address_submit",
   "email_submit",
   "phone_submit",
+  "lead_submit_failed",
   "seller_form_submit",
   "widget_opened",
   "widget_closed",

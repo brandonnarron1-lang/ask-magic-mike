@@ -18,7 +18,11 @@ again before every durable write.
 
 The current public registry includes page/session, funnel, address, intent,
 timeline, contact, consent, CTA, chat, appointment-request, widget, lead-created
-count, thank-you, and private review-planner events used by the live interfaces.
+count, thank-you, privacy-safe lead-submit failure, and private review-planner
+events used by the live interfaces. `lead_submit_failed` records only the
+registered `funnel_name`, `lead_source_surface`, and `step_name`; the browser
+cannot attach an error string, contact detail, address, provider response, or
+canonical lead identifier.
 An automated contract test proves every browser event exported by
 `app/lib/constants.ts` remains accepted except the trusted notification lifecycle
 events listed below.

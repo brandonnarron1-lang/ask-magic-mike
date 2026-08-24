@@ -251,6 +251,7 @@ const PUBLIC_EVENT_PROPERTY_KEYS: Record<string, readonly string[]> = {
   email_submitted: ["funnel_name", "step_name"],
   phone_submit: ["funnel_name", "step_name"],
   phone_submitted: ["funnel_name", "step_name"],
+  lead_submit_failed: ["funnel_name", "lead_source_surface", "step_name"],
   consent_accepted: ["consent_language_version", "funnel_name"],
   consent_granted: ["consent_language_version", "funnel_name"],
   consent_declined: ["consent_language_version", "funnel_name"],
@@ -489,6 +490,7 @@ const ENUM_VALUES: Partial<Record<string, ReadonlySet<string>>> = {
   step_name: new Set([
     "address",
     "appointment_request",
+    "contact",
     "email",
     "hero",
     "landing",

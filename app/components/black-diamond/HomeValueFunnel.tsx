@@ -26,7 +26,7 @@ type HomeValueFunnelProps = {
 
 type HomeValueField = "address" | "name" | "email" | "phone";
 
-const stepLabels = ["Address", "Contact", "Phone", "Thank you"];
+const stepLabels = ["Address", "Contact", "Thank you"];
 const errorId = "home-value-form-error";
 
 export function HomeValueFunnel({
@@ -67,7 +67,6 @@ export function HomeValueFunnel({
 
   useEffect(() => {
     if (step === 2) nameRef.current?.focus();
-    if (step === 3) phoneRef.current?.focus();
   }, [step]);
 
   function submitAddress(event: FormEvent<HTMLFormElement>) {
@@ -91,9 +90,10 @@ export function HomeValueFunnel({
     setStep(2);
   }
 
-  function submitEmail(event: FormEvent<HTMLFormElement>) {
+  async function submitContact(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError(null);
+    setLeadMessage(null);
     if (clean(name).length < 2) {
       setFormError({
         message: "Enter your name so Mike knows who requested the review.",
@@ -110,17 +110,7 @@ export function HomeValueFunnel({
       emailRef.current?.focus();
       return;
     }
-    trackEvent("email_submit", attribution, { funnel_name: "home_value", step_name: "email" });
-    trackEvent("contact_submitted", attribution, { funnel_name: "home_value", step_name: "email" });
-    setStep(3);
-  }
-
-  async function submitPhone(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setFormError(null);
-    setLeadMessage(null);
-
-    if (clean(phone).replace(/\D/g, "").length < 10) {
+    if (clean(phone) && clean(phone).replace(/\D/g, "").length < 10) {
       setFormError({ message: "Enter a phone number with area code.", field: "phone" });
       phoneRef.current?.focus();
       return;
@@ -131,9 +121,12 @@ export function HomeValueFunnel({
     }
 
     setSubmitting(true);
-    trackEvent("phone_submit", attribution, { funnel_name: "home_value", step_name: "phone_timeline" });
+    trackEvent("email_submit", attribution, { funnel_name: "home_value", step_name: "contact" });
+    if (clean(phone)) {
+      trackEvent("phone_submit", attribution, { funnel_name: "home_value", step_name: "contact" });
+    }
     trackEvent("timeline_selected", attribution, { funnel_name: "home_value", timeline });
-    trackEvent("contact_submitted", attribution, { funnel_name: "home_value", step_name: "phone" });
+    trackEvent("contact_submitted", attribution, { funnel_name: "home_value", lead_source_surface: surface, step_name: "contact" });
     if (consent) trackEvent("consent_accepted", attribution, { funnel_name: "home_value", consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION });
 
     try {
@@ -154,7 +147,7 @@ export function HomeValueFunnel({
           idempotency_key: submissionId,
           consent,
           consent_email: consent,
-          consent_call: consent,
+          consent_call: consent && Boolean(clean(phone)),
           consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
           consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
           consent_source: `${surface}:home-value`,
@@ -184,9 +177,14 @@ export function HomeValueFunnel({
           "Your request is stored for review. Mike or the approved team will follow up through the contact path you provided.",
       );
       setLeadReference({ leadId: data.lead_id || null, sessionId: data.session_id || null });
-      setStep(4);
+      setStep(3);
       trackEvent("thank_you_viewed", attribution, { funnel_name: "home_value" });
     } catch (error) {
+      trackEvent("lead_submit_failed", attribution, {
+        funnel_name: "home_value",
+        lead_source_surface: surface,
+        step_name: "contact",
+      });
       setFormError({ message: publicLeadErrorMessage(error instanceof Error ? error.message : undefined) });
     } finally {
       setSubmitting(false);
@@ -220,7 +218,7 @@ export function HomeValueFunnel({
       ) : null}
 
       {step === 2 ? (
-        <form noValidate onSubmit={submitEmail} className="space-y-5" data-amm-step="contact">
+        <form noValidate onSubmit={submitContact} className="space-y-5" data-amm-step="contact">
           <TextField
             label="Your name"
             inputRef={nameRef}
@@ -250,28 +248,8 @@ export function HomeValueFunnel({
             aria-invalid={formError?.field === "email"}
             required
           />
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setFormError(null);
-                setStep(1);
-              }}
-              className="amm-secondary-button px-5 py-4"
-            >
-              Back
-            </button>
-            <button className="amm-primary-button flex-1 px-5 py-4">
-              Continue
-            </button>
-          </div>
-        </form>
-      ) : null}
-
-      {step === 3 ? (
-        <form noValidate onSubmit={submitPhone} className="space-y-5" data-amm-step="phone">
           <TextField
-            label="Phone"
+            label="Phone (optional)"
             inputRef={phoneRef}
             value={phone}
             onChange={(event) => {
@@ -283,7 +261,6 @@ export function HomeValueFunnel({
             placeholder="252-555-0123"
             aria-describedby={formError?.field === "phone" ? errorId : undefined}
             aria-invalid={formError?.field === "phone"}
-            required
           />
           <SelectField label="Timeline" value={timeline} onChange={(event) => setTimeline(event.target.value)}>
             {timelineOptions.map((option) => (
@@ -296,7 +273,7 @@ export function HomeValueFunnel({
               type="button"
               onClick={() => {
                 setFormError(null);
-                setStep(2);
+                setStep(1);
               }}
               className="amm-secondary-button px-5 py-4"
             >
@@ -309,7 +286,7 @@ export function HomeValueFunnel({
         </form>
       ) : null}
 
-      {step === 4 ? (
+      {step === 3 ? (
         <div className="space-y-5" data-amm-step="thank-you">
           <h3 className="font-serif text-3xl text-[#f4ead4]">Your request is in.</h3>
           <p className="text-[#d9ceb8]">
