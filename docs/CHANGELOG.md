@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-08-24 — Lead-alert brand identity v3 candidate
+
+- The current email alert remained operationally complete, but its decorative
+  hero did not visibly identify Mike or Our Town at the first-response moment.
+- `lead_alert_email_v3` now composes the exact approved logo, exact approved
+  Mike portrait, and existing deterministic urgency background in email-safe
+  presentation markup; consumer details remain selectable HTML/plain text and
+  never become raster PII.
+- Historical v1/v2 outbox retries remain template-pinned. Unknown stored
+  versions fail closed and remain visible instead of silently changing content.
+- The protected Message Review Studio and a Preview/local-only, Production-404
+  route expose three `[TEST]` synthetic renders with no recipient, provider,
+  queue, lead, mutation control, or send path.
+- The attempted built-in identity-preserving AI composite was rejected by the
+  generation safety system. No alternate model or approximated likeness was
+  used; exact approved source assets provide the higher-trust result.
+- Full local Node 24 proof passes 234 files / 3,088 tests, strict typecheck,
+  full ESLint, optimized build, 84-route proof, 14/14 safety, and deployable-
+  source isolation. Immutable Preview/browser evidence remains to be sealed.
+
 ## 2026-08-24 — Responsive conversion-identity navigation candidate
 
 - Screenshot-first review confirmed the released Black Diamond identity and

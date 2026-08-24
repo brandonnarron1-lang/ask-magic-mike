@@ -7,7 +7,7 @@ import {
   visualAssetUrl,
 } from "./leadAlertVisualTemplates";
 
-export const LEAD_ALERT_TEMPLATE_VERSION = "lead_alert_email_v2";
+export const LEAD_ALERT_TEMPLATE_VERSION = "lead_alert_email_v3";
 export const LEAD_ALERT_SMS_TEMPLATE_VERSION = "lead_alert_sms_v2";
 export const CONSUMER_ACK_TEMPLATE_VERSION = "consumer_ack_email_v1";
 
@@ -65,7 +65,7 @@ function leadName(payload: LeadPayload) {
   return safe(payload.name || [payload.first_name, payload.last_name].filter(Boolean).join(" "), payload.is_test ? "INTERNAL QA" : "Unknown name");
 }
 
-export function renderLeadAlert(input: {
+export type LeadAlertRenderInput = {
   leadId: string;
   sessionId: string;
   correlationId: string;
@@ -74,9 +74,16 @@ export function renderLeadAlert(input: {
   routing: LeadRoutingDecision;
   submittedAt: string;
   duplicateOfLeadId?: string | null;
-}) {
+};
+
+function renderLeadAlertWithMode(
+  input: LeadAlertRenderInput,
+  mode: "delivery" | "design_preview",
+  visualVersion: "legacy_v2" | "brand_v3",
+) {
   const { payload, score, routing } = input;
-  const isTest = payload.is_test === true;
+  const isDesignPreview = mode === "design_preview";
+  const isTest = payload.is_test === true || isDesignPreview;
   const tag = priority(score.score, isTest);
   const label = leadLabel(payload);
   const source = safe(routing.sourceLabel, "Unknown source");
@@ -92,11 +99,22 @@ export function renderLeadAlert(input: {
   const factorText = score.factors.map((factor) => `${factor.label} (+${factor.points})`).join("; ") || "No qualifying factors recorded.";
   const consentText = [payload.consent_email ? "email" : null, payload.consent_call ? "call" : null, payload.consent_sms ? "sms" : null].filter(Boolean).join(", ") || "none recorded";
   const duplicateText = input.duplicateOfLeadId ? `Duplicate of ${input.duplicateOfLeadId}` : "No prior master lead linked";
-  const visual = selectLeadAlertVisualTemplate(payload, score);
+  const visual = selectLeadAlertVisualTemplate(
+    isDesignPreview ? { is_test: false } : payload,
+    score,
+  );
+  const recordStatus = isDesignPreview
+    ? "INTERNAL DESIGN PREVIEW — NO LEAD EXISTS"
+    : isTest
+      ? "QA TEST — DO NOT CONTACT"
+      : "LIVE PROSPECT";
+  const nextAction = isDesignPreview
+    ? "No action. This is a read-only synthetic template preview."
+    : "Review the source and contact context in Lead Center; do not contact a QA test lead.";
 
   const lines = [
     `${tag} ${label}`,
-    `SLA priority: ${score.grade.toUpperCase()} | owner: ${routing.owner} | ${isTest ? "QA TEST — DO NOT CONTACT" : "LIVE PROSPECT"}`,
+    `SLA priority: ${score.grade.toUpperCase()} | owner: ${routing.owner} | ${recordStatus}`,
     "",
     `Lead: ${name}`,
     `Phone: ${safePhone || "Not provided"}`,
@@ -125,7 +143,7 @@ export function renderLeadAlert(input: {
     `Lead Center: ${leadCenterUrl}`,
     `Lead ID: ${input.leadId}`,
     `Correlation ID: ${input.correlationId}`,
-    "Next action: review the source and contact context in Lead Center; do not contact a QA test lead.",
+    `Next action: ${nextAction}`,
     "Not a survey.",
   ];
   const text = lines.join("\n");
@@ -137,11 +155,34 @@ export function renderLeadAlert(input: {
     ["Placement", payload.attribution.placement_id || payload.attribution.placement || "Not provided"], ["Consent", `${consentText}; ${payload.consent_language_version || "not recorded"}`],
     ["Duplicate/master", duplicateText], ["Assignment", `${routing.owner}; ${routing.routingReason}`], ["Submitted", input.submittedAt],
   ];
-  const visualHeader = shouldRenderLeadAlertVisual()
-    ? `<img src="${html(visualAssetUrl(visual.backgroundAssetPath))}" width="560" alt="" role="presentation" style="display:block;width:100%;max-width:560px;height:110px;object-fit:cover;object-position:center;opacity:.92"/>`
-    : "";
-  const htmlBody = `<div style="margin:0;padding:0;background:#090909;font-family:Arial,sans-serif;color:#f8fafc;line-height:1.5"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;margin:0 auto;background:#101010;border:1px solid ${html(visual.accent)}"><tr><td>${visualHeader}<div style="padding:24px"><p style="margin:0 0 6px;color:${html(visual.accent)};font-weight:700;letter-spacing:.08em;font-size:12px">${html(visual.eyebrow)}</p><h1 style="margin:0 0 8px;color:#fff;font-size:25px">${html(tag)} ${html(label)}</h1><p style="margin:0 0 20px"><strong>${html(isTest ? "QA TEST — DO NOT CONTACT" : "LIVE PROSPECT")}</strong></p><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #4b3b14">${rows.map(([key, value]) => `<tr><td style="padding:8px 14px 8px 0;color:#d4a72c;font-weight:700;vertical-align:top;width:38%">${html(key)}</td><td style="padding:8px 0;color:#f8fafc">${html(value)}</td></tr>`).join("")}</table><p style="margin:20px 0"><a href="${html(leadCenterUrl)}" style="display:inline-block;background:${html(visual.accent)};color:#fff;padding:12px 18px;text-decoration:none;font-weight:700">Open secure Lead Center</a></p><p style="color:#cbd5e1;font-size:12px">Lead ID: ${html(input.leadId)}<br/>Correlation ID: ${html(input.correlationId)}</p><p style="color:#cbd5e1">Next action: review the source and contact context in Lead Center; do not contact a QA test lead.</p><p style="color:#94a3b8;font-size:12px">Not a survey.</p></div></td></tr></table></div>`;
+  const visualHeader = !shouldRenderLeadAlertVisual()
+    ? ""
+    : visualVersion === "legacy_v2"
+      ? `<img src="${html(visualAssetUrl(visual.backgroundAssetPath))}" width="560" alt="" role="presentation" style="display:block;width:100%;max-width:560px;height:110px;object-fit:cover;object-position:center;opacity:.92"/>`
+      : `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#080808"><tr><td background="${html(visualAssetUrl(visual.backgroundAssetPath))}" style="background-color:#080808;background-image:url('${html(visualAssetUrl(visual.backgroundAssetPath))}');background-position:center;background-size:cover"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td style="padding:18px 8px 18px 18px;vertical-align:middle"><img src="${html(visualAssetUrl("/images/ask-magic-mike/our-town-properties-logo.webp"))}" width="150" alt="Our Town Properties, Inc." style="display:block;width:150px;max-width:100%;height:auto;border:0"/><p style="margin:8px 0 3px;color:#f4ead4;font-size:11px;font-weight:700;letter-spacing:.16em">ASK MAGIC MIKE</p><p style="margin:0;color:${html(visual.accent)};font-size:11px;font-weight:700;letter-spacing:.08em">${html(visual.eyebrow)}</p></td><td width="118" align="right" valign="bottom" style="padding:12px 14px 12px 0"><img src="${html(visualAssetUrl("/images/ask-magic-mike/brand-pack-v2/mike-avatar-circle-256.webp"))}" width="96" alt="Mike Eatmon, Broker and REALTOR" style="display:block;width:96px;max-width:96px;height:96px;border:0;border-radius:999px"/></td></tr></table></td></tr></table>`;
+  const htmlBody = `<div style="margin:0;padding:0;background:#090909;font-family:Arial,sans-serif;color:#f8fafc;line-height:1.5"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;margin:0 auto;background:#101010;border:1px solid ${html(visual.accent)}"><tr><td>${visualHeader}<div style="padding:24px"><p style="margin:0 0 6px;color:${html(visual.accent)};font-weight:700;letter-spacing:.08em;font-size:12px">${html(visual.eyebrow)}</p><h1 style="margin:0 0 8px;color:#fff;font-size:25px">${html(tag)} ${html(label)}</h1><p style="margin:0 0 20px"><strong>${html(recordStatus)}</strong></p><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #4b3b14">${rows.map(([key, value]) => `<tr><td style="padding:8px 14px 8px 0;color:#d4a72c;font-weight:700;vertical-align:top;width:38%">${html(key)}</td><td style="padding:8px 0;color:#f8fafc">${html(value)}</td></tr>`).join("")}</table><p style="margin:20px 0"><a href="${html(leadCenterUrl)}" style="display:inline-block;background:${html(visual.accent)};color:#fff;padding:12px 18px;text-decoration:none;font-weight:700">Open secure Lead Center</a></p><p style="color:#cbd5e1;font-size:12px">Lead ID: ${html(input.leadId)}<br/>Correlation ID: ${html(input.correlationId)}</p><p style="color:#cbd5e1">Next action: ${html(nextAction)}</p><p style="color:#94a3b8;font-size:12px">Not a survey.</p></div></td></tr></table></div>`;
   return { subject, text, html: htmlBody, leadName: name, safeEmail, safePhone, visualTemplate: visual };
+}
+
+export function renderLeadAlert(input: LeadAlertRenderInput) {
+  return renderLeadAlertWithMode(input, "delivery", "brand_v3");
+}
+
+export function renderLeadAlertDesignPreview(input: LeadAlertRenderInput) {
+  return renderLeadAlertWithMode(input, "design_preview", "brand_v3");
+}
+
+export function renderLeadAlertForTemplateVersion(
+  input: LeadAlertRenderInput,
+  templateVersion: string,
+) {
+  if (templateVersion === LEAD_ALERT_TEMPLATE_VERSION) {
+    return renderLeadAlertWithMode(input, "delivery", "brand_v3");
+  }
+  if (templateVersion === "lead_alert_email_v1" || templateVersion === "lead_alert_email_v2") {
+    return renderLeadAlertWithMode(input, "delivery", "legacy_v2");
+  }
+  return null;
 }
 
 export function renderConsumerAcknowledgment(input: { payload: LeadPayload }) {

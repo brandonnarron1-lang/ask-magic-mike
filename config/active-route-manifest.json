@@ -73,6 +73,7 @@
     "/phone-alerts/setup",
     "/phone-alerts/setup/claim",
     "/privacy",
+    "/preview/lead-alert-identity",
     "/robots.txt",
     "/rent",
     "/sell",
@@ -130,7 +131,8 @@
     "/go/[code]": "active-public-allowlisted-owned-demand-attribution-redirect",
     "/phone-alerts/install/[token]": "active-private-one-time-copy-device-install-handoff",
     "/phone-alerts/install/[token]/manifest.webmanifest": "active-private-token-scoped-install-manifest",
-    "/plan": "active-public-device-private-recurring-value"
+    "/plan": "active-public-device-private-recurring-value",
+    "/preview/lead-alert-identity": "preview-only-synthetic-no-send-production-404"
   },
   "acknowledgedRootSrcDuplicates": [
     "/", "/admin", "/admin/distribution", "/admin/leads", "/admin/leads/[id]", "/api/admin/health", "/api/admin/sla/sweep", "/api/health/live", "/api/health/ready", "/api/leads", "/api/listings/[id]", "/api/listings/search", "/api/webhooks/email/events",

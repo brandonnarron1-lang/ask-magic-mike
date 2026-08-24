@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-08-24 — Lead-alert brand identity v3 candidate
+
+- Reused the existing urgency selector, notification outbox, approved Our Town
+  logo, approved Mike portrait, and privacy-safe urgency backgrounds instead of
+  creating another lead or notification system.
+- Upgraded new internal email alerts to `lead_alert_email_v3`, keeping every
+  lead fact as accessible HTML/plain text and adding recognizable Mike / Our
+  Town identity only in the decorative header.
+- Added version-pinned v1/v2 retry rendering and a fail-closed result for an
+  unsupported stored template version.
+- Added a three-band synthetic no-send review gallery to the protected Message
+  Review Studio and a Preview/local-only acceptance route that returns 404 on
+  Production.
+- Full local Node 24 proof passes 234 files / 3,088 tests, strict typecheck,
+  full ESLint, optimized Next.js build, 84-route proof, 14/14 release safety,
+  and Ask Magic Mike / NellySelly isolation.
+- No Production, environment, database, lead/event, email/BCC, SMS/MMS, Push,
+  WordPress, DNS, publication, spend, deletion, or NellySelly action occurred.
+
 ## 2026-08-24 — Responsive conversion-identity navigation candidate
 
 - Reused the shared Black Diamond public header instead of adding a navigation
