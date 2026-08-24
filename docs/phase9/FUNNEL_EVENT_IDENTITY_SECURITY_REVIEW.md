@@ -24,6 +24,15 @@ bounded request body, public event/property allowlists, coarse user-agent
 handling, and parameterized Neon insert. It does not create a browser-authored
 canonical conversion or a pre-lead `sessions` row.
 
+Release-proof review later found a separate QA-harness safety defect: the
+legacy widget scenarios intercepted `/api/leads` but allowed passive
+`/api/events` requests to reach the immutable Preview. This did not expose a
+Production application authorization flaw or create a lead, provider call, or
+canonical conversion, but privacy-minimized Preview telemetry may have been
+stored. Code-bearing head `90108d8b386a264ae8e536e6503043f79f7a14ae`
+fixes the harness by making both suites share one fail-closed API mutation
+boundary. Earlier protected runs are not accepted as no-write proof.
+
 This is a scoped review of the changed funnel-event identity behavior, not a claim that every unrelated application surface has been re-audited.
 
 ## Threat review and evidence
@@ -40,7 +49,7 @@ This is a scoped review of the changed funnel-event identity behavior, not a cla
 | Oversized, cross-origin, or high-rate event flood | Both public event routes enforce an exact approved-origin check, rate limiting before body parsing, JSON content type, and a 4,096-byte streaming body limit. | A same-origin attacker can still create rate-limited non-conversion funnel noise. Funnel events remain telemetry, not an authorization or billing source. Durable shared rate-limit readiness is controlled by the earlier stacked release gate. |
 | Widget `postMessage` leaks data to an unexpected parent | `app/lib/analytics.ts` derives an allowlisted parent origin and supplies it as the exact `targetOrigin`; no wildcard target is introduced. Only privacy-allowlisted event dimensions are sent. | Parent-side handlers remain responsible for their own exact-origin and schema validation. |
 | Replay creates duplicate canonical conversions | Browser conversion events are excluded from canonical ingestion. Durable lead creation and its canonical event continue to use the established lead idempotency transaction. | Replayed non-conversion funnel telemetry can create additional rate-limited rows; it cannot create a canonical lead conversion through these routes. |
-| Browser acceptance accidentally creates a lead, event, message, or provider call | The persistent Preview test installs one catch-all `/api/**` POST interceptor before navigation. Known mutation surfaces receive synthetic responses; an unknown POST is blocked and fails the run. `SAFE_DB_WRITE` remains hard-pinned to false in the dispatcher. | A future new non-`/api/**` mutation transport must be added to the interception contract before browser acceptance can cover it. No such candidate transport exists. |
+| Browser acceptance accidentally creates a lead, event, message, or provider call | Both persistent Preview suites install the same catch-all `/api/**` interceptor before navigation. Known POST commands receive synthetic responses; every other POST/PUT/PATCH/DELETE is blocked and recorded. `SAFE_DB_WRITE` remains hard-pinned to false in the dispatcher. | A future new non-`/api/**` mutation transport must be added to the interception contract before browser acceptance can cover it. No such candidate transport exists. |
 
 ## Verification performed
 
@@ -50,10 +59,10 @@ This is a scoped review of the changed funnel-event identity behavior, not a cla
 - Changed client/server files were scanned for raw HTML sinks, string-to-code execution, wildcard `postMessage`, and browser-stored auth/session tokens; no candidate-specific hit was found.
 - `pnpm audit --prod` reported no known production dependency vulnerability.
 - The tracked Git history was scanned with redacted output; no secret leak was reported.
-- Protected branch-owned browser run `32760498269` executed fresh and replay
-  Ask conversion behavior plus all four public funnels at desktop/mobile sizes
-  with every mutation intercepted; no unexpected POST, provider call, console
-  error, PII-bearing event, or protected event-ledger request occurred.
+- Protected runs through `32761949512` executed the intended browser behavior,
+  but Vercel runtime logs later proved the legacy widget scenarios allowed
+  passive `/api/events` requests through. They remain visual/behavior evidence
+  only and are superseded as no-write authority.
 - The first protected remote run exposed file-scoped bypass configuration;
   all new tests stopped on Vercel authentication before a funnel field or
   mutation. Both suites now import one shared secret-safe configuration, and

@@ -82,10 +82,11 @@ unclassified evidence, and no historical conversion rate is claimed.
   idempotent replay does not emit it, and the public event route still refuses
   it as canonical ledger input.
 - The existing protected-Preview browser runner now includes Home Value,
-  seller, buyer, and Ask desktop/mobile acceptance. One catch-all route blocks
-  every unexpected first-party POST, while the six approved mutation surfaces
-  are fulfilled synthetically before any request can reach Neon, Resend, the
-  notification queue, OpenAI, or another provider.
+  seller, buyer, Ask, and widget desktop/mobile acceptance. Both suites install
+  one shared catch-all before navigation. It intercepts every first-party
+  POST/PUT/PATCH/DELETE, synthetically fulfills approved mutation surfaces, and
+  blocks plus records every unexpected mutation before it can reach Neon,
+  Resend, the notification queue, OpenAI, or another provider.
 
 ## KPI and privacy interpretation
 

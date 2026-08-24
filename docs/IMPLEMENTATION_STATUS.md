@@ -37,18 +37,25 @@ Updated 2026-08-24.
   full ESLint, optimized Next.js 15.5.21 build, 84/17 route proof, 14/14
   release safety, deployable-source isolation, no known Production dependency
   vulnerabilities, a 615-commit redacted tracked-history scan, and whitespace
-  proof. GitHub Release Gate run `32760061703` passed. Immutable Preview
-  deployment `dpl_A3oZ7CvoAGe8mu6aUmp3r9ivMUXb` is READY at
-  `ask-magic-mike-avruwnthn-eyes-up-industries.vercel.app`; branch-owned
-  protected run `32760498269` passed all 6 expected browser tests with every
-  first-party POST intercepted, provider delivery disabled, database mutation
-  false, and no unexpected/flaky/skipped test. Four retained PNG artifacts
-  were visually inspected at desktop/mobile sizes with no clipping, overflow,
-  unreadable state, or brand break. The in-app screenshot channel was not used
-  because it is unavailable in this session; protected CI artifacts are the
-  visual evidence.
-- **Safety:** no Production, environment, schema/data, lead/event, message,
-  provider, WordPress/DNS, publication, spend, deletion, or NellySelly action.
+  proof. GitHub Release Gate run `32760061703` passed.
+- **Proof correction:** Vercel logs for later exact-head protected run
+  `32761949512` recorded `/api/events` POSTs while the older widget scenarios
+  ran. Those scenarios intercepted `/api/leads` but not passive telemetry. The
+  run remains valid visual/behavior evidence, but not no-write authority. No
+  lead, provider, notification, or canonical conversion was created;
+  privacy-minimized Preview analytics rows may have been written.
+- **Harness repair:** prior head
+  `727c534f6f77b8a7acfe51eba361da57e6671cb4` is preserved at
+  `rescue/amm-pr216-pre-widget-no-write-proof-fix-20260824-1432`.
+  Code-bearing head `90108d8b386a264ae8e536e6503043f79f7a14ae`
+  makes both browser suites use one shared fail-closed interceptor for every
+  first-party POST/PUT/PATCH/DELETE, with approved synthetic responses and an
+  explicit unexpected-mutation ledger. Replacement exact-head Preview and
+  protected proof remain mandatory before sealing.
+- **Safety:** no Production, environment, schema, lead, message, provider,
+  WordPress/DNS, publication, spend, deletion, or NellySelly action. The
+  superseded Preview run may have stored privacy-minimized analytics telemetry;
+  it did not create a lead or canonical conversion.
 - Detailed scope:
   `docs/phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY.md` and
   `docs/phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY_QA_EVIDENCE.md`.

@@ -21,16 +21,23 @@
 - Ask emits a browser-only conversion only after fresh durable capture, not an
   idempotent replay. The existing protected-Preview runner now executes all
   four public funnels at 1,440 × 1,000 and 390 × 844 plus a failure path, with
-  every first-party POST intercepted and PNG evidence retained.
+  PNG evidence retained.
 - Refreshed code-bearing head `0c45a33b706d7e8a02501ccf83baf24a83ec107d`
   passes 10 focused files / 72 tests, all 237 files / 3,123 tests, strict
   TypeScript, full ESLint, optimized build/84-route proof, 14/14 safety,
   isolation, the Production dependency audit, and a 615-commit redacted
   tracked-history scan. GitHub Release Gate run `32760061703` passed.
-- Immutable Preview deployment `dpl_A3oZ7CvoAGe8mu6aUmp3r9ivMUXb` is READY;
-  protected branch run `32760498269` passed 6/6 mutation-free browser tests
-  with provider delivery disabled and database mutation false. No Production
-  or external-system action occurred.
+- Exact-Preview logs later proved the older widget scenarios intercepted the
+  lead command but allowed passive `/api/events` telemetry to reach Preview.
+  Protected run `32761949512` therefore remains valid visual/behavior evidence
+  but is superseded as no-write proof. No lead, provider, notification, or
+  canonical conversion was created; privacy-minimized Preview analytics rows
+  may have been written.
+- Preserved prior head `727c534f6f77b8a7acfe51eba361da57e6671cb4`
+  at `rescue/amm-pr216-pre-widget-no-write-proof-fix-20260824-1432`.
+  Code-bearing head `90108d8b386a264ae8e536e6503043f79f7a14ae`
+  centralizes both browser suites on one fail-closed POST/PUT/PATCH/DELETE API
+  interceptor. Replacement exact-head protected proof is mandatory.
 
 ## 2026-08-24 — Home-value completion-integrity candidate
 

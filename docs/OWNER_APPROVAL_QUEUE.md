@@ -163,18 +163,22 @@ gate and must not be merged out of order:
    submission/idempotency UUID, canonical event route, Neon event ledger, and
    atomic lead command. The pre-refresh head is preserved at
    `rescue/amm-pr216-pre-pr215-seal-sync-20260824-1353`. Refreshed
-   code-bearing head `0c45a33b706d7e8a02501ccf83baf24a83ec107d` links
+   initial refreshed code-bearing head
+   `0c45a33b706d7e8a02501ccf83baf24a83ec107d` links
    privacy-minimized funnel stages without pre-creating `sessions`, closes the
    first-interaction Home Value identity edge, and rejects browser-authored
    lead/widget creation, qualification, appointment-request, and notification
-   outcomes. GitHub Release Gate `32760061703`, immutable Preview deployment
-   `dpl_A3oZ7CvoAGe8mu6aUmp3r9ivMUXb`, and branch-owned protected run
-   `32760498269` passed with all first-party POSTs intercepted. It has no
-   migration, provider, cookie, form, endpoint, or Production configuration
-   change. Treat the current GitHub PR head—not the code-bearing head named
-   here—as the final release candidate. After PR #215 releases, refresh it onto
-   exact `main`, repeat complete exact-head and write-intercepted Preview proof,
-   then require
+   outcomes. A later log audit invalidated older protected runs as no-write
+   proof because widget telemetry reached Preview after only `/api/leads` was
+   intercepted. Prior head `727c534f6f77b8a7acfe51eba361da57e6671cb4`
+   is preserved at
+   `rescue/amm-pr216-pre-widget-no-write-proof-fix-20260824-1432`; repair head
+   `90108d8b386a264ae8e536e6503043f79f7a14ae` gives both browser suites one
+   fail-closed mutation boundary. It has no migration, provider, cookie, form,
+   endpoint, or Production configuration change. Treat the current GitHub PR
+   head—not the code-bearing heads named here—as the final release candidate.
+   After PR #215 releases, refresh it onto exact `main`, repeat complete
+   exact-head and write-intercepted Preview proof, then require
    `APPROVE PHASE 9 FUNNEL EVENT IDENTITY INTEGRITY MERGE AND PRODUCTION DEPLOYMENT`.
 
 The historical shorter conversion-identity phrase released PR #195 and is

@@ -22,18 +22,24 @@
 - Aligned Ask's fresh browser conversion signal with the other stored funnels
   while suppressing idempotent replay, and expanded the existing no-write
   Preview runner across Home Value, seller, buyer, and Ask at desktop/mobile
-  sizes plus one recoverable failure path. Every first-party POST is
-  intercepted and unexpected writes fail the run.
+  sizes plus one recoverable failure path.
 - Refreshed code-bearing head `0c45a33b706d7e8a02501ccf83baf24a83ec107d`
   passes 10 focused files / 72 tests, all 237 files / 3,123 tests, strict
   typecheck, full ESLint, optimized build/84-route proof, 14/14 release safety,
   isolation, Production dependency audit, and a 615-commit redacted history
   scan. GitHub Release Gate run `32760061703` passed.
-- Immutable Preview deployment `dpl_A3oZ7CvoAGe8mu6aUmp3r9ivMUXb` is READY at
-  `ask-magic-mike-avruwnthn-eyes-up-industries.vercel.app`. Branch-owned
-  protected run `32760498269` passed 6/6 browser tests with every first-party
-  POST intercepted, provider delivery disabled, and database mutation false.
-  Production remains unchanged.
+- A later exact-Preview log audit found that the older widget scenarios only
+  intercepted `/api/leads`; passive `/api/events` requests reached Preview
+  during protected run `32761949512`. No lead, provider, notification, or
+  canonical conversion was created, but privacy-minimized Preview analytics
+  rows may have been written, so that run is not accepted as no-write proof.
+- Preserved that head at
+  `rescue/amm-pr216-pre-widget-no-write-proof-fix-20260824-1432`. Code-bearing
+  head `90108d8b386a264ae8e536e6503043f79f7a14ae` makes both browser suites use
+  one fail-closed interceptor for POST/PUT/PATCH/DELETE, synthetically fulfills
+  approved commands, and blocks plus records every unexpected mutation.
+  Replacement exact-head protected proof is mandatory. Production remains
+  unchanged.
 
 ## 2026-08-24 — Home-value completion-integrity candidate
 

@@ -18,6 +18,9 @@ Pre-refresh head preservation:
 Refreshed code-bearing head:
 `0c45a33b706d7e8a02501ccf83baf24a83ec107d`.
 
+No-write harness repair head:
+`90108d8b386a264ae8e536e6503043f79f7a14ae`.
+
 ## Design rejection evidence
 
 The first repository implementation attempted to create a privacy-minimized
@@ -73,8 +76,7 @@ Covered contracts:
 ## Complete local release evidence
 
 - full Vitest: 237 files / 3,123 tests passed;
-- protected branch-owned Preview contract: 6/6 mutation-free browser tests
-  passed;
+- protected branch-owned Preview contract: 6/6 browser behavior tests passed;
 - strict TypeScript: passed;
 - full ESLint: passed;
 - optimized Next.js 15.5.21 build: passed, 52 generated pages;
@@ -99,41 +101,73 @@ The candidate-specific threat review and residual-risk record is
 
 ## Automated write-intercepted browser acceptance
 
-`tests/e2e/funnel-event-identity-preview.spec.ts` extends the existing
-protected-Preview runner rather than creating a second QA system. Before each
-page navigation it intercepts all same-origin `/api/**` POST requests. The
-approved lead, event, legacy-event, appointment, chat, and experiment paths
-receive synthetic responses; any other POST is blocked and fails the test.
+`tests/e2e/no-write-preview-interception.ts` extends the existing
+protected-Preview runner rather than creating a second QA system. Both the
+widget and funnel specs install it before navigation. It intercepts all
+same-origin `/api/**` POST/PUT/PATCH/DELETE requests. Approved lead, event,
+legacy-event, appointment, chat, and experiment commands receive synthetic
+responses; every other mutation is blocked, recorded, and fails acceptance.
 
 Protected branch-owned run
 [#32760498269](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32760498269)
-passed all 6 expected browser tests with 0 unexpected, 0 flaky, and 0 skipped:
+passed all 6 expected browser behavior tests with 0 unexpected, 0 flaky, and 0
+skipped:
 
 - Home Value, seller, buyer, and Ask successful paths at 1,440 × 1,000;
 - the same four paths at 390 × 844; and
 - a durable Home Value failure with recoverable UI, one linked
   `lead_submit_failed`, and no conversion.
 
-The three funnel-identity scenarios and the three existing widget scenarios
-prove valid UUID continuity into the intercepted lead body and
+The three funnel-identity scenarios prove valid UUID continuity into the
+intercepted lead body and
 privacy-allowlisted event requests, browser-visible fresh conversion signals,
 no browser-authored protected outcome request, no synthetic PII in event
 bodies, no unexpected POST, no provider call, no console error, and no
-horizontal overflow. Artifact `9532615770` records `SAFE_DB_WRITE=false`, a
-reachable database with mutation disabled, disabled live email/SMS/provider
-delivery, and launch authority `PREVIEW_READY`. Four PNG viewport artifacts
+horizontal overflow. Four PNG viewport artifacts
 were visually inspected; desktop and mobile Home Value/Ask states preserve the
 existing black/gold/teal identity with no visible clipping, overflow,
 unreadable state, or brand break. The captures are synthetic intercepted
 acceptance, not real leads. The in-app screenshot channel was unavailable, so
 no fresh in-app screenshot is claimed. Ask replay/fresh conversion behavior
-also has direct component coverage.
+also has direct component coverage. A later runtime-log audit invalidated the
+legacy widget scenarios as mutation-free evidence, as recorded below.
+
+## No-write proof correction
+
+Final-head candidate `727c534f6f77b8a7acfe51eba361da57e6671cb4`
+passed Release Gate run
+[#32761529229](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32761529229)
+and protected run
+[#32761949512](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32761949512).
+Artifact `9533139161` recorded `SAFE_DB_WRITE=false`, 17 read-only passes, 6
+deliberate mutation skips, 6/6 browser behavior tests, provider delivery
+disabled, and database mutation authority false.
+
+That artifact was not accepted at face value. Vercel runtime logs for exact
+deployment `dpl_DsTEW137TJR2H1Gc3yTT6ujSegMj` recorded 23 successful
+`POST /api/events` requests during the protected browser window. Source review
+proved the full-funnel suite used a catch-all route, while the legacy widget
+success/error scenarios intercepted only `/api/leads`. No lead, provider,
+notification, or canonical conversion was created, but privacy-minimized
+Preview analytics rows may have been stored. Run `32761949512` therefore
+remains valid visual/behavior evidence and is superseded as no-write authority.
+
+Prior head `727c534f6f77b8a7acfe51eba361da57e6671cb4` is preserved at
+`rescue/amm-pr216-pre-widget-no-write-proof-fix-20260824-1432`. Repair head
+`90108d8b386a264ae8e536e6503043f79f7a14ae` centralizes both suites on
+`tests/e2e/no-write-preview-interception.ts`, which intercepts every
+first-party POST/PUT/PATCH/DELETE before navigation. Approved commands receive
+synthetic responses; every unknown mutation is blocked, recorded, and fails
+acceptance. The release-safety scanner and release doctor now verify that both
+suites import this shared boundary. A replacement exact-head immutable Preview
+run plus a zero-request runtime-log delta is mandatory before sealing.
 
 The existing protected dispatcher first passed exact historical candidate head
 `045fbff2cb368d68440c0f22b6928cef1cc01995` in run
 [#32743481075](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32743481075)
 with `SAFE_DB_WRITE=false`. It is retained as historical evidence only; the
-branch-owned exact code-head run above is authoritative for the expanded suite.
+replacement exact repair-head run required above is the only eligible no-write
+authority for the expanded suite.
 
 The first enhanced branch-owned run,
 [#32745542999](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32745542999),
@@ -179,4 +213,6 @@ non-zero, and do not classify an anonymous UUID as a person or prospect.
 No Production, environment, database row/migration, lead/event, notification,
 email/BCC, consumer acknowledgment, SMS/MMS, Push, provider, WordPress/GTM/GA4,
 DNS, publication, spend, deletion, or NellySelly action is authorized by this
-candidate or its browser proof.
+candidate or its browser proof. Superseded run `32761949512` may have stored
+privacy-minimized Preview telemetry despite that intended boundary; it is
+disclosed above and is not represented as accepted no-write proof.
