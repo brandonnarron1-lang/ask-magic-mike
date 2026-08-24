@@ -2,7 +2,8 @@
 
 ## Phase 9 responsive conversion-identity polish — 2026-08-24
 
-- Draft PR #213 reuses the shared public header after exact Draft PR #211.
+- Draft PR #213 reuses the shared public header after exact final Draft PR #211
+  `5d566a4a14d4a7cb67175683fdf099e8d62747b7`.
 - Focused compatibility/React acceptance: 3 files / 11 tests passed.
 - Focused ESLint: passed.
 - Full Node 24.18.0 local acceptance: 232 files / 3,082 tests, strict
@@ -21,6 +22,9 @@
   created.
 - Immutable exact-head Preview and protected no-write proof remain pending
   after the evidence commit; Production remains unchanged.
+- The former PR #213 head is preserved at
+  `rescue/amm-pr213-pre-final-pr211-cutover-hygiene-20260824-170330`; earlier
+  exact-head evidence is historical until the refreshed head is reproved.
 - Full evidence:
   `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
 

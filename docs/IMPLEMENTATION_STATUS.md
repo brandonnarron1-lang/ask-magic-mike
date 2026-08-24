@@ -5,7 +5,7 @@ Updated 2026-08-24.
 ## Phase 9 responsive conversion-identity polish — 2026-08-24
 
 - **Reuse decision:** extend only the shared `BlackDiamondHeader` on exact
-  Draft PR #211 head `6eacc33d16e34897c97288e48cd736433a3d9e15`;
+  final Draft PR #211 head `5d566a4a14d4a7cb67175683fdf099e8d62747b7`;
   preserve the existing Black Diamond identity, Ask CTA, skip link, routes,
   forms, lead command, consent, analytics, and providers.
 - **Evidence:** fresh exact-Preview screenshots show healthy desktop/mobile
@@ -33,6 +33,10 @@ Updated 2026-08-24.
 - **Safety:** no field fill, submit, migration, Production action, lead/event,
   message, provider call, WordPress/DNS change, publication, spend, deletion,
   or NellySelly action.
+- **Parent refresh:** former PR #213 head `431ae9eebba7d38712305fa257f118cf0e498a89`
+  is preserved at
+  `rescue/amm-pr213-pre-final-pr211-cutover-hygiene-20260824-170330`; fresh
+  exact-head proof is required after the conflict-free application merge.
 - Detailed scope:
   `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH.md` and
   `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.

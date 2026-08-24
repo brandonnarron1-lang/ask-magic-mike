@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-08-24 — PR #213 refresh onto final PR #211 cutover hygiene
+
+- Preserved former PR #213 head `431ae9eebba7d38712305fa257f118cf0e498a89`
+  at `rescue/amm-pr213-pre-final-pr211-cutover-hygiene-20260824-170330`.
+- Merged exact final PR #211 head
+  `5d566a4a14d4a7cb67175683fdf099e8d62747b7`, retaining the complete PR #209
+  cutover/no-write and PR #210/PR #211 redirect/accessibility contracts.
+- Preserved PR #213's shared responsive navigation, active-route semantics,
+  narrow-phone layout, and closed-menu Escape focus correction.
+- Conflicts were limited to additive changelog history; no application file
+  required manual conflict resolution.
+- Invalidated older PR #213 proof pending fresh exact-head Node 24, protected
+  Preview, responsive-navigation, and zero-write runtime verification.
+- Changed no Production deployment, environment, database row, lead, event,
+  message, WordPress surface, DNS, spend, deletion, or NellySelly system.
+
 ## 2026-08-24 — Responsive conversion-identity navigation candidate
 
 - Reused the shared Black Diamond public header instead of adding a navigation
@@ -16,6 +32,22 @@
 - Created Draft PR #213 after exact PR #211. No Production, environment,
   database, lead/event, notification, WordPress, DNS, publication, spend,
   deletion, or NellySelly action occurred.
+
+## 2026-08-24 — PR #211 refresh onto final PR #210 cutover hygiene
+
+- Preserved former PR #211 head `6eacc33d16e34897c97288e48cd736433a3d9e15`
+  at `rescue/amm-pr211-pre-final-pr210-cutover-hygiene-20260824-164445`.
+- Merged exact final PR #210 head
+  `3ed8d050edd386aa0cd4a83d230ff3170d24a306`, retaining the canonical redirects,
+  monitor contract, PR #209 cutover guard, and browser telemetry no-write rules.
+- Preserved PR #211's shared skip link, focus targets, consumer Ask semantics,
+  and real-browser keyboard contract.
+- Resolved additive release-history and authority-test conflicts without
+  creating another funnel, header, monitor, or E2E system.
+- Invalidated older PR #211 checks pending fresh exact-head Node 24, protected
+  Preview, keyboard, and zero-write runtime proof.
+- Changed no Production deployment, environment, database row, lead, event,
+  message, WordPress surface, DNS, spend, deletion, or NellySelly system.
 
 ## 2026-08-24 — PR #211 refresh onto release-ledger-sealed PR #210
 
@@ -63,6 +95,20 @@
   keyboard, mobile-geometry, and protected no-write proof.
 - Changed no Production deployment, database, lead, message, WordPress surface,
   DNS, spend, deletion, or NellySelly system.
+
+## 2026-08-24 — PR #210 refresh onto final PR #209 cutover hygiene
+
+- Preserved former PR #210 head `7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9`
+  at `rescue/amm-pr210-pre-final-pr209-cutover-hygiene-20260824-162615`.
+- Merged exact final PR #209 head
+  `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b`, retaining its read-only cutover
+  guard and fail-closed Preview browser telemetry interception.
+- Resolved the sole additive release-authority test conflict while preserving
+  PR #210's redirect/monitor contracts and both candidates' evidence ledgers.
+- Invalidated older PR #210 checks pending fresh exact-head Node 24 and
+  protected no-write Preview proof.
+- Changed no Production deployment, environment, database row, lead, event,
+  message, WordPress surface, DNS, spend, deletion, or NellySelly system.
 
 ## 2026-08-24 — PR #210 refresh onto release-ledger-sealed PR #209
 

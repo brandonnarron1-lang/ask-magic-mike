@@ -26,6 +26,15 @@ const askAccessibilityDecision = readDoc(
 const askAccessibilityEvidence = readDoc(
   "phase9/ASK_CONVERSION_ACCESSIBILITY_CLARITY_QA_EVIDENCE.md"
 );
+const responsiveIdentityDecision = readDoc(
+  "phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH.md"
+);
+const responsiveIdentityEvidence = readDoc(
+  "phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md"
+);
+const durableRateLimitRehearsal = readDoc(
+  "phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md"
+);
 
 const operatingDocs = [
   currentState,
@@ -47,13 +56,17 @@ const productionGate =
 const previewMutationGate =
   "APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA";
 const pr209SealedParent =
-  "1d1d8d4f8e0970f3f6a1b80ab9ff2bebcd40216d";
+  "b28b380f2cc3f9b63b2c0048b398e97a88dfee4b";
 const pr210SealedParent =
-  "7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9";
+  "3ed8d050edd386aa0cd4a83d230ff3170d24a306";
+const pr211SealedParent =
+  "5d566a4a14d4a7cb67175683fdf099e8d62747b7";
 const canonicalAliasGate =
   "APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT";
 const askAccessibilityGate =
   "APPROVE PHASE 9 ASK CONVERSION ACCESSIBILITY MERGE AND PRODUCTION DEPLOYMENT";
+const responsiveIdentityGate =
+  "APPROVE PHASE 9 RESPONSIVE CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT";
 const crossDomainGate =
   "APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT";
 const completedReleaseLedger = [
@@ -159,14 +172,17 @@ describe("current release-authority documentation", () => {
     const pr209 = ownerQueue.indexOf("Draft PR [#209]");
     const pr210 = ownerQueue.indexOf("Draft PR [#210]");
     const pr211 = ownerQueue.indexOf("Draft PR [#211]");
+    const pr213 = ownerQueue.indexOf("Draft PR [#213]");
     const pr212 = ownerQueue.indexOf("Draft PR [#212]");
 
     expect(pr209).toBeGreaterThanOrEqual(0);
     expect(pr210).toBeGreaterThan(pr209);
     expect(pr211).toBeGreaterThan(pr210);
-    expect(pr212).toBeGreaterThan(pr211);
+    expect(pr213).toBeGreaterThan(pr211);
+    expect(pr212).toBeGreaterThan(pr213);
     expect(ownerQueue).toContain(canonicalAliasGate);
     expect(ownerQueue).toContain(askAccessibilityGate);
+    expect(ownerQueue).toContain(responsiveIdentityGate);
     expect(ownerQueue).toContain(crossDomainGate);
   });
 
@@ -179,7 +195,7 @@ describe("current release-authority documentation", () => {
       expect(doc).toContain(pr209SealedParent);
     }
     expect(canonicalAliasEvidence).toContain(
-      "rescue/amm-pr210-pre-release-ledger-integrity-sync-20260824-0617"
+      "rescue/amm-pr210-pre-final-pr209-cutover-hygiene-20260824-162615"
     );
   });
 
@@ -192,7 +208,20 @@ describe("current release-authority documentation", () => {
       expect(doc).toContain(pr210SealedParent);
     }
     expect(askAccessibilityEvidence).toContain(
-      "rescue/amm-pr211-pre-pr210-ledger-sync-20260824-0632"
+      "rescue/amm-pr211-pre-final-pr210-cutover-hygiene-20260824-164445"
+    );
+  });
+
+  it("binds PR #213's stacked authority to the current sealed PR #211 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      responsiveIdentityDecision,
+      responsiveIdentityEvidence,
+    ]) {
+      expect(doc).toContain(pr211SealedParent);
+    }
+    expect(responsiveIdentityEvidence).toContain(
+      "rescue/amm-pr213-pre-final-pr211-cutover-hygiene-20260824-170330"
     );
   });
 
@@ -222,7 +251,12 @@ describe("current release-authority documentation", () => {
   it("binds the go-live and rollback runbooks to the atomic PR #209 candidate", () => {
     expect(goLiveRunbook).toContain("For PR #209, add only the dedicated");
     expect(goLiveRunbook).toMatch(/`#209` is the sole next atomic application candidate/);
+    expect(goLiveRunbook).toContain("phase9:durable-rate-limit:readiness");
     expect(rollbackPlan).toContain("PR #209 has no migration. Before release");
+    expect(rollbackPlan).toContain("phase9:durable-rate-limit:readiness");
+    expect(durableRateLimitRehearsal).toContain(productionGate);
+    expect(durableRateLimitRehearsal).toContain(productionDeployment);
+    expect(durableRateLimitRehearsal).toMatch(/writes nothing/i);
   });
 
   it("preserves incremental PRs as evidence without independent authority", () => {

@@ -506,7 +506,7 @@ async function checkMutationGateContract() {
   );
 }
 
-/** I — widget e2e must intercept /api/leads so no real lead is created */
+/** I — widget e2e must intercept lead and telemetry writes */
 async function checkWidgetE2eInterception() {
   const path = "tests/e2e/widget-preview-flow.spec.ts";
   let text;
@@ -522,6 +522,20 @@ async function checkWidgetE2eInterception() {
       `${path} does not intercept POST /api/leads via page.route`
     );
   }
+  for (const endpoint of [
+    "events",
+    "analytics/event",
+    "experiments/event",
+    "widget/events",
+  ]) {
+    const literal = `page.route("**/api/${endpoint}"`;
+    if (!text.includes(literal)) {
+      fail(
+        "I. widget_e2e",
+        `${path} does not intercept POST /api/${endpoint} via page.route`
+      );
+    }
+  }
   // Belt and braces: ensure the spec doesn't use route.continue() which
   // would let the real request through.
   if (/route\.continue\s*\(/.test(text)) {
@@ -532,7 +546,7 @@ async function checkWidgetE2eInterception() {
   }
   pass(
     "I. widget_e2e",
-    `${path} intercepts /api/leads with route.fulfill (no real lead creation)`
+    `${path} intercepts lead and telemetry endpoints with route.fulfill (no browser DB writes)`
   );
 }
 
