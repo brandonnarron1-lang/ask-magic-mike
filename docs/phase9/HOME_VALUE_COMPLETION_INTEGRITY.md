@@ -1,7 +1,7 @@
 # Phase 9 home-value completion integrity
 
 Date: 2026-08-24
-Status: downstream Draft candidate; Production unchanged
+Status: Draft PR #215, stacked after Draft PR #214; Production unchanged
 
 ## Decision
 
@@ -83,7 +83,7 @@ This candidate starts from exact Draft PR #214 head
 3. PR #211 Ask conversion accessibility;
 4. PR #213 responsive conversion identity;
 5. PR #214 lead-alert brand identity v3; and
-6. this home-value completion-integrity candidate.
+6. Draft PR #215, this home-value completion-integrity candidate.
 
 It has no current Production authority. After every predecessor is accepted,
 refresh onto exact `main`, repeat Node 24, immutable Preview, protected

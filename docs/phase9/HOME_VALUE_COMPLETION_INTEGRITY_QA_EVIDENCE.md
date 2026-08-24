@@ -2,7 +2,7 @@
 
 Date: 2026-08-24
 
-Candidate branch:
+Candidate: Draft PR #215 on
 `codex/phase9-home-value-completion-integrity-20260824`
 
 Parent: exact Draft PR #214 head

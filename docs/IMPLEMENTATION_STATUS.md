@@ -4,8 +4,8 @@ Updated 2026-08-24.
 
 ## Phase 9 home-value completion integrity — 2026-08-24
 
-- **Reuse decision:** extend the released Home Value funnel and canonical lead
-  command on exact Draft PR #214 head
+- **Reuse decision:** Draft PR #215 extends the released Home Value funnel and
+  canonical lead command on exact Draft PR #214 head
   `8a0e951606829c954078bb6abfe4c13a6319d461`; add no form, endpoint, database,
   CRM, provider, notification path, or analytics system.
 - **Evidence:** one bounded, aggregate-only Production sequence reached

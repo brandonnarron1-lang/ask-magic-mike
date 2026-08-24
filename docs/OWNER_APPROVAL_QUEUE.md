@@ -146,11 +146,10 @@ gate and must not be merged out of order:
    repeat full exact-head and no-send visual proof, then require
    `APPROVE PHASE 9 LEAD-ALERT BRAND IDENTITY V3 MERGE AND PRODUCTION DEPLOYMENT`.
 
-6. The prepared home-value completion-integrity branch reuses the exact PR
-   #214 head and moves durable capture to the first valid contact step, with
-   email required on the current UI and phone optional. It has no schema or
-   provider change and must be opened as a Draft PR only after local and
-   write-intercepted browser proof. After PR #214 releases, refresh it onto
+6. Draft PR [#215](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/215)
+   reuses the exact PR #214 head and moves durable capture to the first valid
+   contact step, with email required on the current UI and phone optional. It
+   has no schema or provider change. After PR #214 releases, refresh it onto
    exact `main`, repeat complete exact-head proof, then require
    `APPROVE PHASE 9 HOME-VALUE COMPLETION INTEGRITY MERGE AND PRODUCTION DEPLOYMENT`.
 
