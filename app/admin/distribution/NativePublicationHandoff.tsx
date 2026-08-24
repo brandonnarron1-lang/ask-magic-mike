@@ -5,6 +5,18 @@ import { useId, useState } from "react";
 export const NATIVE_PUBLICATION_MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 const APPROVED_DESTINATION_PATHS = new Set(["/ask", "/home-value", "/buy", "/rent"]);
+const APPROVED_PROOF_CHANNELS = new Set([
+  "google_business_profile",
+  "facebook",
+  "instagram",
+  "linkedin",
+]);
+const APPROVED_PROOF_PLACEMENTS = new Set([
+  "general_question",
+  "seller_review",
+  "buyer_match",
+  "renter_plan",
+]);
 const APPROVED_UTM_MEDIA = new Set(["organic_local", "social_organic"]);
 const REQUIRED_UTM_KEYS = ["utm_campaign", "utm_content", "utm_medium", "utm_source"];
 const SAFE_UTM_VALUE = /^[a-z0-9_-]{1,96}$/;
@@ -23,6 +35,7 @@ export interface NativePublicationHandoffProps {
   assetHref: string;
   channelLabel: string;
   filename: string;
+  proofHref: string;
   shareText: string;
   shareTitle: string;
   trackedUrl: string;
@@ -45,8 +58,31 @@ function hasUnsafeControlCharacter(value: string) {
   });
 }
 
+function trustedProofHref(value: string) {
+  if (!value.startsWith("/admin/distribution?") || value.startsWith("//")) return false;
+
+  try {
+    const url = new URL(value, "https://www.askmagicmike.com");
+    const channel = url.searchParams.get("proof_channel") ?? "";
+    const placement = url.searchParams.get("proof_placement") ?? "";
+    const expectedSearch = `?proof_channel=${channel}&proof_placement=${placement}`;
+    const expectedHash = `#publication-proof-${channel}`;
+    return url.origin === "https://www.askmagicmike.com"
+      && !url.username
+      && !url.password
+      && url.pathname === "/admin/distribution"
+      && url.search === expectedSearch
+      && url.hash === expectedHash
+      && value === `${url.pathname}${url.search}${url.hash}`
+      && APPROVED_PROOF_CHANNELS.has(channel)
+      && APPROVED_PROOF_PLACEMENTS.has(placement);
+  } catch {
+    return false;
+  }
+}
+
 function trustedHandoffInput(input: NativePublicationHandoffProps) {
-  if (!/^[a-z0-9-]+\.png$/.test(input.filename)) return false;
+  if (!/^[a-z0-9-]+\.png$/.test(input.filename) || !trustedProofHref(input.proofHref)) return false;
   if (!/^\/api\/admin\/distribution\/assets\/[a-z_]+\/[a-z_]+\?format=(feed|story)$/.test(input.assetHref)) {
     return false;
   }
@@ -211,6 +247,19 @@ export function NativePublicationHandoff(props: NativePublicationHandoffProps) {
           {label}
         </button>
       </div>
+      {state === "handed_off" ? (
+        <div className="mt-3 border-t border-[#4baab833] pt-3">
+          <a
+            href={props.proofHref}
+            className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#cda24a66] bg-[#171108] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.11em] text-[#f0cf79] transition hover:bg-[#251b0c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0cf79]"
+          >
+            Review matching proof requirements
+          </a>
+          <p className="mt-2 text-[11px] leading-5 text-[#8f8778]">
+            Share-sheet handoff is not publication proof. Record only after an authorized person observes the exact native-platform state.
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }

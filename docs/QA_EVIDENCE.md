@@ -1362,3 +1362,40 @@ media type, five-megabyte maximum, and PNG byte signature. A resolved share
 promise records no publication proof and makes no database or provider call.
 The existing copy/download and separately gated proof-ledger controls remain
 authoritative.
+
+## Phase 9 native-handoff publication-proof return — 2026-08-23
+
+This stacked candidate performed no Production deployment, database write,
+lead submission, email/SMS/Push delivery, native-platform publication,
+WordPress/DNS edit, spend, secret entry, or NellySelly operation.
+
+- Exact share-to-proof tests: PASS — 10 tests. All 16 native channel/placement
+  pairs produce one canonical relative proof URL. Missing, array-shaped,
+  unknown, traversal-shaped, non-native, and foreign-origin values fail closed.
+- Existing owned-demand command, activation, and append-only proof suites: PASS
+  — 4 files / 56 tests.
+- Full Vitest suite: PASS — 227 files / 3,045 tests.
+- Strict TypeScript and full ESLint: PASS.
+- Optimized Next.js 15.5.21 build: PASS — 52 generated pages and 83 active
+  routes; `/admin/distribution` remains server-rendered.
+- Route manifest: PASS — 83 active routes / 17 acknowledged root-`src`
+  duplicates.
+- Release safety: PASS — 14/14.
+- Ask Magic Mike/NellySelly deployable-source isolation: PASS.
+- Production dependency audit: PASS — no known vulnerabilities.
+- Release doctor: HEALTHY — its only pre-commit, non-blocking failure was the
+  intentionally dirty working tree under verification.
+- `git diff --check`: PASS.
+- In-app Browser visual/DOM QA: PASS at 1,425×990 and 375×812. The existing
+  native-handoff cards showed no horizontal overflow or visual regression; the
+  exact Facebook / seller-review return highlighted only the Facebook proof
+  card. A non-native placement query rendered zero focused cards and no selected
+  notice.
+
+The URL carries only canonical channel and placement identifiers. It never
+carries final copy, evidence, approval context, consumer data, credentials, or
+secrets. The existing `growth:manage` server-action authorization, Preview
+read-only guard, proof validation, deduplication, append-only Neon write, and
+audit event were not modified. A resolved share promise merely reveals the
+review link; an operator must still observe the platform and deliberately submit
+the existing proof form.

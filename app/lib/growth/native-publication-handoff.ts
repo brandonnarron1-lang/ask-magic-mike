@@ -16,9 +16,26 @@ export interface NativePublicationHandoffDefinition {
   assetHref: string;
   channelLabel: string;
   filename: string;
+  proofHref: string;
   shareText: string;
   shareTitle: string;
   trackedUrl: string;
+}
+
+export interface NativePublicationProofFocus {
+  channelKey: string;
+  channelLabel: string;
+  placementKey: string;
+  placementLabel: string;
+  proofHref: string;
+}
+
+function nativePublicationProofHref(channelKey: string, placementKey: string) {
+  const params = new URLSearchParams({
+    proof_channel: channelKey,
+    proof_placement: placementKey,
+  });
+  return `/admin/distribution?${params.toString()}#publication-proof-${channelKey}`;
 }
 
 export function resolveNativePublicationHandoff(
@@ -38,8 +55,32 @@ export function resolveNativePublicationHandoff(
     assetHref: ownedDemandAssetHref(channelKey, placementKey, format),
     channelLabel: creative.channelLabel,
     filename: asset.filename,
+    proofHref: nativePublicationProofHref(channelKey, placementKey),
     shareText: `${creative.creativeBody}\n\n${creative.trackedUrl}`,
     shareTitle: creative.creativeHeadline,
     trackedUrl: creative.trackedUrl,
+  };
+}
+
+/**
+ * Resolve only a canonical native channel + placement pair into a read-only
+ * publication-proof focus. Query-string input is untrusted and fails closed.
+ */
+export function resolveNativePublicationProofFocus(
+  channelKey: unknown,
+  placementKey: unknown,
+): NativePublicationProofFocus | null {
+  if (typeof channelKey !== "string" || typeof placementKey !== "string") return null;
+
+  const handoff = resolveNativePublicationHandoff(channelKey, placementKey);
+  const creative = resolveOwnedDemandCreative(channelKey, placementKey);
+  if (!handoff || !creative) return null;
+
+  return {
+    channelKey: creative.channelKey,
+    channelLabel: creative.channelLabel,
+    placementKey: creative.placementKey,
+    placementLabel: creative.placementLabel,
+    proofHref: handoff.proofHref,
   };
 }

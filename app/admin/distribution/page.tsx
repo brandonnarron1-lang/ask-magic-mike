@@ -24,7 +24,11 @@ import {
   ownedDemandAssetHref,
   type OwnedDemandAssetFormat,
 } from "../../lib/growth/owned-demand-assets";
-import { resolveNativePublicationHandoff } from "../../lib/growth/native-publication-handoff";
+import {
+  resolveNativePublicationHandoff,
+  resolveNativePublicationProofFocus,
+  type NativePublicationProofFocus,
+} from "../../lib/growth/native-publication-handoff";
 import {
   isWordPressActivationPlacementKey,
   wordpressActivationManifestHref,
@@ -101,9 +105,11 @@ function ProofEvidence({ proof }: { proof: OwnedDemandPublicationProofRow }) {
 function PublicationProofForm({
   channel,
   disabled,
+  defaultPlacementKey,
 }: {
   channel: OwnedDemandChannel;
   disabled: boolean;
+  defaultPlacementKey?: string;
 }) {
   const policy = publicationPolicyForChannel(channel.key);
   if (!policy) return null;
@@ -116,7 +122,7 @@ function PublicationProofForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <label className={labelClass}>
           Placement
-          <select name="placement_key" className={fieldClass} disabled={disabled} required>
+          <select name="placement_key" className={fieldClass} disabled={disabled} defaultValue={defaultPlacementKey ?? "general_question"} required>
             <option value="general_question">General question</option>
             {channel.offers.map((offer) => <option key={offer.key} value={offer.key}>{offer.shortLabel}</option>)}
             {channel.namedPlacements.map((placement) => <option key={placement.placementKey} value={placement.placementKey}>{placement.placementLabel}</option>)}
@@ -178,12 +184,14 @@ function PublicationLedger({
   canManage,
   previewReadOnly,
   actionStatus,
+  proofFocus,
 }: {
   channels: OwnedDemandChannel[];
   ledger: OwnedDemandPublicationProofLedger;
   canManage: boolean;
   previewReadOnly: boolean;
   actionStatus?: string;
+  proofFocus: NativePublicationProofFocus | null;
 }) {
   const proofChannels = new Set(ledger.proofs.map((proof) => proof.channelKey)).size;
   const liveProofs = ledger.proofs.filter((proof) => proof.platformState === "live").length;
@@ -225,8 +233,18 @@ function PublicationLedger({
           {channels.map((channel) => {
             const channelProofs = ledger.proofs.filter((proof) => proof.channelKey === channel.key);
             const latest = latestProofForChannel(ledger, channel.key);
+            const isFocused = proofFocus?.channelKey === channel.key;
             return (
-              <article key={channel.key} className="min-w-0 rounded-xl border border-white/[.08] bg-black/35 p-4">
+              <article
+                key={channel.key}
+                id={`publication-proof-${channel.key}`}
+                data-publication-proof-focus={isFocused ? "true" : undefined}
+                className={`min-w-0 scroll-mt-24 rounded-xl border p-4 ${
+                  isFocused
+                    ? "border-[#f0cf79] bg-[linear-gradient(145deg,#171108,#070707)] shadow-[0_0_0_1px_rgba(240,207,121,.18),0_20px_60px_rgba(0,0,0,.35)]"
+                    : "border-white/[.08] bg-black/35"
+                }`}
+              >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8bbfc6]">{channel.format}</p><h3 className="mt-1 font-serif text-2xl text-[#f4ead4]">{channel.label}</h3></div>
                   <span className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.11em] ${latest ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-200" : "border-white/10 text-[#8f8778]"}`}>
@@ -240,6 +258,12 @@ function PublicationLedger({
                     <p className="mt-2 break-all text-[10px] text-[#6f6a61]">Copy hash {latest.finalCopySha256.slice(0, 16)}…</p>
                   </div>
                 ) : <p className="mt-4 text-xs leading-5 text-[#8f8778]">A prepared draft or attributed visit is not publication proof.</p>}
+
+                {isFocused ? (
+                  <p className="mt-4 rounded-lg border border-[#cda24a55] bg-[#211708] px-3 py-2 text-xs leading-5 text-[#f5dfa7]">
+                    Selected from native handoff · <strong className="text-[#f0cf79]">{proofFocus.placementLabel}</strong>. Verify the platform first; this focus does not claim or record publication.
+                  </p>
+                ) : null}
 
                 {channelProofs.length > 1 ? (
                   <details className="mt-3 rounded-lg border border-white/[.07] px-3 py-2">
@@ -255,9 +279,13 @@ function PublicationLedger({
                 ) : null}
 
                 {canManage ? (
-                  <details className="mt-4 rounded-xl border border-[#4baab833] bg-[#061417] p-3">
+                  <details open={isFocused || undefined} className="mt-4 rounded-xl border border-[#4baab833] bg-[#061417] p-3">
                     <summary className="cursor-pointer text-xs font-bold uppercase tracking-[0.12em] text-[#9edbe2]">Record native observation</summary>
-                    <PublicationProofForm channel={channel} disabled={disabled} />
+                    <PublicationProofForm
+                      channel={channel}
+                      disabled={disabled}
+                      defaultPlacementKey={isFocused ? proofFocus.placementKey : undefined}
+                    />
                   </details>
                 ) : null}
               </article>
@@ -689,7 +717,11 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
 export default async function DistributionPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ publication_action?: string }>;
+  searchParams?: Promise<{
+    publication_action?: string;
+    proof_channel?: string | string[];
+    proof_placement?: string | string[];
+  }>;
 }) {
   const principal = await requireLeadCenterPermission("report:view");
   const [growth, ledger, query] = await Promise.all([
@@ -701,6 +733,7 @@ export default async function DistributionPage({
   const measurement = assessOwnedDemandMeasurement(growth);
   const activation = buildOwnedDemandActivationLoop(command, ledger, measurement.ready);
   const canManage = Boolean(principal && hasLeadCenterPermission(principal.role, "growth:manage"));
+  const proofFocus = resolveNativePublicationProofFocus(query?.proof_channel, query?.proof_placement);
   const previewReadOnly = isPreviewDataDisabled();
   const stateLabel = !measurement.ready
     ? measurement.label
@@ -813,6 +846,7 @@ export default async function DistributionPage({
             canManage={canManage}
             previewReadOnly={previewReadOnly}
             actionStatus={query?.publication_action}
+            proofFocus={proofFocus}
           />
         </div>
 
