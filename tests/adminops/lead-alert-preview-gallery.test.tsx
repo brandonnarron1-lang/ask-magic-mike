@@ -25,6 +25,8 @@ describe("lead-alert preview gallery", () => {
     expect(leadAlertIdentityPreviewEnabled(undefined, "production")).toBe(false);
     expect(leadAlertIdentityPreviewEnabled(undefined, "development")).toBe(true);
     expect(source).toContain("leadAlertIdentityPreviewEnabled(process.env.VERCEL_ENV, process.env.NODE_ENV)");
+    expect(source).toContain('title: "Lead Alert Identity Preview"');
+    expect(source).not.toContain("Lead Alert Identity Preview | Ask Magic Mike");
     expect(source).toContain("notFound()");
     expect(source).toContain("robots: { index: false");
   });

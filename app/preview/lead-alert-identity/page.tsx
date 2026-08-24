@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: "Lead Alert Identity Preview | Ask Magic Mike",
+  title: "Lead Alert Identity Preview",
   robots: { index: false, follow: false, noarchive: true },
 };
 
