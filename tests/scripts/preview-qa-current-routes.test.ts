@@ -36,6 +36,14 @@ describe("preview QA current route contract", () => {
     expect(playwrightConfig).not.toContain("reuseExistingServer: true");
   });
 
+  it("classifies writes against the exact app origin while blocking every mutating request", () => {
+    const e2eSource = readFileSync("tests/e2e/widget-preview-flow.spec.ts", "utf8");
+    expect(e2eSource).toContain("requestUrl.origin === APPLICATION_ORIGIN");
+    expect(e2eSource).toContain('["POST", "PUT", "PATCH", "DELETE"]');
+    expect(e2eSource).toContain("await route.fulfill({");
+    expect(e2eSource).not.toContain("await route.continue(");
+  });
+
   it("accepts only the explicit read-only Preview cron refusal", () => {
     expect(source).toContain('r.json?.error === "preview_data_disabled"');
     expect(source).toContain("authenticated cron request safely refused Preview data writes");

@@ -21,7 +21,7 @@ Updated 2026-08-24.
   and the public analytics/experiment APIs. A disclosed first browser-routing
   error emitted one confirmed live page-view row and one exposure attempt; no
   lead or communication was created, and no Production row was altered.
-- Verification passes 5 focused files / 34 tests, the full 217-file / 2,971-test
+- Verification passes 5 focused files / 35 tests, the full 217-file / 2,972-test
   suite, strict typecheck, full ESLint, optimized build, 82-route manifest,
   14/14 release safety, 43/43 release doctor, isolation, dependency,
   history-secret, diff, and empty migration checks. Desktop/mobile
@@ -31,6 +31,12 @@ Updated 2026-08-24.
   `32691073871` also pass on `a16e8d63607be77168fe4d65c4a4fdd4accbf7fb`.
   The final release-gate hardening adds direct Preview HTML/browser assertions
   for no Google runtime and no application write; exact-head reruns follow.
+- Harness commit `90857fe2fd904474f51e995c8a0dadbaa49fdeb0` passed Node
+  24 CI `32691794254` and READY Preview
+  `dpl_3Wpmi9gqHphqCVsBKtWAgebXPLUf`. Protected run `32691992594` passed the
+  18-check HTTP gate but caught one intercepted external Vercel
+  `/login/validate` POST in an overbroad application-write assertion. Exact
+  origin classification is now used; every mutating request remains blocked.
 - Local Playwright no longer reuses an arbitrary process on port 3000. It owns
   isolated loopback port 3210 by default and fails on collision; the unrelated
   CaseFile Truth process discovered during QA was left untouched.

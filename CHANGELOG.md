@@ -12,6 +12,8 @@
   analytics runtime remains absent and all mutating application requests remain
   intercepted.
 - Prevented local E2E from silently reusing an unrelated application server.
+- Kept all browser mutations intercepted while distinguishing the canonical
+  application origin from Vercel protection-platform validation traffic.
 - Added dedicated data-layer isolation plus client/API automation exclusion so
   browser verification cannot enter first-party KPI ledgers.
 - No Production configuration, deployment, lead, communication, provider,

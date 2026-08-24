@@ -14,8 +14,8 @@ Rescue ref: `rescue/amm-pre-cross-domain-measurement-20260824-0010`
   Mike homepage and `/ask` HTTP 200 with no external tag.
 - Full repository-history search: no prior GTM loader or `NEXT_PUBLIC_GTM_*`
   implementation found.
-- Focused privacy/KPI and release-harness Vitest: 5 files / 34 tests pass.
-- Full Vitest: 217 files / 2,971 tests pass.
+- Focused privacy/KPI and release-harness Vitest: 5 files / 35 tests pass.
+- Full Vitest: 217 files / 2,972 tests pass.
 - Strict TypeScript: pass after the optimized build completed.
 - Full ESLint: pass.
 - Optimized Next.js build: pass; 52 generated static pages.
@@ -87,6 +87,24 @@ measurement request, no analytics data layer, and no application write. All
 three isolated local Chromium scenarios pass. Final exact-head evidence for
 that release-harness/documentation commit is attached to the Draft PR after CI
 and the protected dispatcher complete.
+
+Release-harness commit `90857fe2fd904474f51e995c8a0dadbaa49fdeb0`
+passed exact Node 24 run
+[`32691794254`](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32691794254)
+and READY Preview deployment `dpl_3Wpmi9gqHphqCVsBKtWAgebXPLUf`. The release
+artifact is `9507538658`, digest
+`sha256:d489dc3d4d96a498a698f530c1e657340a2628c19df1f900f853d20db5e688e7`.
+
+Its first protected dispatcher run
+[`32691992594`](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32691992594)
+passed 18 read-only checks—including `preview:external_analytics_off`—with six
+intentional mutation skips and zero failures. Both existing widget scenarios
+passed. The new browser assertion alone failed because it intercepted an
+external Vercel protection-platform `POST /login/validate` and classified every
+mutating URL as an application write. The request was fulfilled locally by the
+runner and did not leave the browser. The assertion now counts writes only on
+the exact Ask Magic Mike application origin while still intercepting every
+mutating request on every origin. A clean exact-head rerun is required.
 
 During the local rerun, port 3000 belonged to an unrelated CaseFile Truth
 development server. The prior shared Playwright configuration reused it, which

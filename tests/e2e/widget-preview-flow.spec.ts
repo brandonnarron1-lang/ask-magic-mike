@@ -39,6 +39,7 @@ function bypassHeaders(): Record<string, string> {
 const PREVIEW_URL = process.env.PREVIEW_URL?.replace(/\/$/, "") ?? "";
 const LOCAL_E2E_PORT = process.env.AMM_E2E_PORT ?? "3210";
 const BASE_URL = PREVIEW_URL || `http://127.0.0.1:${LOCAL_E2E_PORT}`;
+const APPLICATION_ORIGIN = new URL(BASE_URL).origin;
 test.use({
   baseURL: BASE_URL,
   extraHTTPHeaders: bypassHeaders(),
@@ -70,7 +71,11 @@ test.describe("Preview external-analytics isolation (mutation-free)", () => {
       }
 
       if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
-        applicationWrites.push(`${method} ${requestUrl.pathname}`);
+        if (requestUrl.origin === APPLICATION_ORIGIN) {
+          applicationWrites.push(`${method} ${requestUrl.pathname}`);
+        }
+        // Block every mutating request from leaving the runner, including
+        // deployment-protection/platform validation outside the app origin.
         await route.fulfill({
           status: 204,
           body: "",
@@ -81,7 +86,7 @@ test.describe("Preview external-analytics isolation (mutation-free)", () => {
       // The Vercel bypass header is same-origin infrastructure authority. Do
       // not forward it to any unrelated host if the page adds a new resource.
       const headers = { ...request.headers() };
-      if (requestUrl.origin !== new URL(BASE_URL).origin) {
+      if (requestUrl.origin !== APPLICATION_ORIGIN) {
         delete headers["x-vercel-protection-bypass"];
         delete headers["x-vercel-set-bypass-cookie"];
       }

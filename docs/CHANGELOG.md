@@ -16,6 +16,9 @@
   the runner even when the assertion fails.
 - Isolated local Playwright on a dedicated loopback port with server reuse
   disabled after detecting an unrelated application on port 3000.
+- Refined protected browser write evidence to the exact application origin
+  after an intercepted Vercel platform validation POST exposed an overbroad
+  assertion; all mutating requests remain blocked at the runner boundary.
 - Added a dedicated data layer and dual client/API automation exclusion after a
   browser-routing error exposed the prior KPI-trust gap. One confirmed live
   page-view row and one exposure attempt are disclosed; no lead or message was
