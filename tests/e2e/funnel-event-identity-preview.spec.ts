@@ -323,7 +323,7 @@ test("intercepted durable failure is recoverable, linked, private, and non-conve
   await page.getByLabel("Email for your valuation follow-up").fill("failure-funnel-qa@example.com");
   await page.getByRole("button", { name: "Request Valuation" }).click();
 
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.locator("#home-value-form-error")).toBeVisible();
   const failedLead = capture.leads.at(-1) as JsonRecord;
   const sessionId = String(failedLead.widget_session_id);
   await expectLinkedEvents(
