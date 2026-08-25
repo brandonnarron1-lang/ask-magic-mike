@@ -2,6 +2,40 @@
 
 Updated 2026-08-25.
 
+## Phase 9 channel-economics truth hardening — 2026-08-25
+
+- **Reuse decision:** this stacked candidate extends exact sealed PR #222 head
+  `08e0d345dd52a01d5da9a42b10dde982cbcce606`, the canonical Growth Command
+  Center, Neon lead/outcome/spend reads, and deterministic opportunity radar. It
+  adds no parallel dashboard, CRM, database, provider adapter, AI estimator, or
+  write path.
+- **Truth correction:** `referral_paid` amounts are now recorded costs rather
+  than revenue. Repeated typed outcomes use the latest evidence snapshot, and
+  signed-client counts, CPQL, cost per signed client, fee burden, and tracked
+  contribution are exposed with explicit definitions.
+- **Unknown is not zero:** ROAS and tracked contribution are withheld unless
+  every close has actual brokerage-revenue evidence and every portal/referral
+  close has explicit fee evidence. Partial coverage blocks `scale_candidate`
+  and creates exact-count reconciliation opportunities.
+- **Authority boundary:** `/admin/growth` remains server-authorized,
+  aggregate-only, and read-only. It cannot write an outcome, assign a lead,
+  send a message, publish, call a provider, change spend, or touch WordPress,
+  DNS, Production, or NellySelly. Tracked contribution is explicitly not net
+  income.
+- **Current acceptance:** exact Node 24.18.0 passes 5 focused files / 63 tests,
+  all 263 files / 3,289 tests, strict TypeScript, full ESLint, optimized Next.js
+  15.5.21 build, 95/17 route proof, 14/14 release safety, deployable-source
+  isolation, Production dependency audit, and full Git-history secret scan.
+  Per-close fee matching also rejects unrelated-channel and same-channel
+  non-close fee evidence. Local authenticated Chromium passes 2/2
+  desktop/mobile scenarios with zero mutation requests, page/console errors,
+  or page overflow. Exact-head GitHub,
+  immutable Preview, and protected hosted-browser sealing remain pending.
+  Production remains unchanged and PR #209 remains the first release gate.
+- Detailed design and evidence:
+  `docs/phase9/CHANNEL_ECONOMICS_TRUTH.md` and
+  `docs/phase9/CHANNEL_ECONOMICS_TRUTH_QA_EVIDENCE.md`.
+
 ## Phase 9 local-demand decision packets — 2026-08-25
 
 - **Reuse decision:** this stacked candidate extends the canonical Growth

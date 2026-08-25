@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-08-25 — Channel-economics truth candidate
+
+- Reused the canonical Growth Command Center, Neon outcome/spend ledgers, and
+  deterministic intelligence engine instead of creating a finance dashboard,
+  CRM, provider adapter, database, or AI estimator.
+- Corrected `referral_paid` so it is a referral cost and can never inflate
+  attributed revenue or ROAS.
+- Added signed-client economics, CPQL, recorded fee burden, tracked
+  contribution, and explicit closed-revenue/referral-fee coverage.
+- Missing or partial evidence is now unknown rather than zero: it withholds
+  ROAS/contribution and blocks scale recommendations until every applicable
+  close is reviewed.
+- Kept the Growth surface server-authorized, aggregate-only, read-only, and
+  explicit that tracked contribution is not net income.
+- No Production, environment, database, lead/event, communication, provider,
+  WordPress/DNS, publication, spend, deletion, or NellySelly action occurred.
+
 ## 2026-08-25 — Local-demand decision packets candidate
 
 - Reused the canonical Growth Command Center and persisted Search

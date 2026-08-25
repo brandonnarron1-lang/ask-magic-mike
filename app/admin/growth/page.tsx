@@ -142,7 +142,14 @@ function StateBanner({
 
 function Flag({ value }: { value: string }) {
   const label = value.replaceAll("_", " ");
-  const critical = ["spend_missing", "conversion_tracking_gap", "appointment_gap"].includes(value);
+  const critical = [
+    "spend_missing",
+    "conversion_tracking_gap",
+    "appointment_gap",
+    "closed_revenue_missing",
+    "referral_fee_review_required",
+    "negative_tracked_contribution",
+  ].includes(value);
   return (
     <span className={`rounded-full border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.1em] ${
       critical
@@ -332,11 +339,34 @@ export default async function GrowthCommandCenterPage({
           <MetricCard label="Leads" value={summary.leads} note={`${summary.attributedLeadRate}% usefully attributed`} />
           <MetricCard label="Qualified" value={summary.qualified} note="Score or lifecycle qualified" />
           <MetricCard label="Appointments" value={summary.appointments} note="Requested or later" />
+          <MetricCard label="Signed clients" value={summary.agreements} note="Agreement-signed or later evidence" emphasis />
           <MetricCard label="Closes" value={summary.closes} note="Outcome-led when available" emphasis />
           <MetricCard label="Tracked spend" value={money(summary.spendUsd)} note={`${summary.paidLeadSpendCoverageRate}% paid-lead spend coverage`} />
-          <MetricCard label="Attributed revenue" value={money(summary.attributedRevenueUsd)} note="Closed and referral outcomes" emphasis />
+          <MetricCard
+            label="Attributed revenue"
+            value={money(summary.attributedRevenueUsd)}
+            note={`${summary.closedRevenueRecordCount}/${summary.closes} closed outcomes carry actual brokerage revenue`}
+            emphasis
+          />
+          <MetricCard
+            label="Recorded referral fees"
+            value={money(summary.referralFeesUsd)}
+            note={summary.referralFeeExpectedCloseCount
+              ? `${summary.referralFeeRecordCount}/${summary.referralFeeExpectedCloseCount} portal/referral closes reviewed; never added to revenue`
+              : "No portal/referral close requires fee evidence in this window"}
+          />
+          <MetricCard
+            label="Tracked contribution"
+            value={money(summary.trackedContributionUsd)}
+            note={summary.trackedContributionRate == null
+              ? "Requires complete paid-spend, closed-revenue, and applicable referral-fee evidence"
+              : `${number(summary.trackedContributionRate)}% after tracked spend and recorded referral fees; not net income`}
+            emphasis
+          />
           <MetricCard label="Blended CPL" value={money(summary.blendedCostPerLead)} />
+          <MetricCard label="Blended CPQL" value={money(summary.blendedCostPerQualifiedLead)} />
           <MetricCard label="Cost / appointment" value={money(summary.blendedCostPerAppointment)} />
+          <MetricCard label="Cost / signed client" value={money(summary.blendedCostPerSignedClient)} />
           <MetricCard label="Cost / close" value={money(summary.blendedCostPerClose)} />
           <MetricCard label="ROAS" value={summary.returnOnAdSpend == null ? "—" : `${number(summary.returnOnAdSpend)}x`} />
           <MetricCard label="Dormant opportunities" value={summary.staleNurtureCandidates} note="Non-terminal and stale 30+ days" />
@@ -533,17 +563,21 @@ export default async function GrowthCommandCenterPage({
             note={`${data.sourceRowsRead} lead rows · ${data.spendRowsRead} spend rows · ${data.outcomeRowsRead} outcome rows`}
           >
             <div className="overflow-x-auto">
-              <table className="min-w-[1040px] w-full text-left text-sm">
+              <table className="min-w-[1440px] w-full text-left text-sm">
                 <thead className="border-b border-white/10 text-[10px] uppercase tracking-[0.14em] text-[#8f8778]">
                   <tr>
                     <th className="px-2 py-3">Source / campaign</th>
                     <th className="px-2 py-3">Leads</th>
                     <th className="px-2 py-3">Qualified</th>
                     <th className="px-2 py-3">Appts.</th>
+                    <th className="px-2 py-3">Signed</th>
                     <th className="px-2 py-3">Closes</th>
                     <th className="px-2 py-3">Spend</th>
-                    <th className="px-2 py-3">CPL</th>
+                    <th className="px-2 py-3">CPL / CPQL</th>
+                    <th className="px-2 py-3">Cost / appt. / signed</th>
                     <th className="px-2 py-3">Cost / close</th>
+                    <th className="px-2 py-3">Revenue / referral fees</th>
+                    <th className="px-2 py-3">Tracked contribution</th>
                     <th className="px-2 py-3">ROAS</th>
                     <th className="px-2 py-3">P50 / P75 / P90</th>
                     <th className="px-2 py-3">Signal</th>
@@ -561,10 +595,36 @@ export default async function GrowthCommandCenterPage({
                       <td className="px-2 py-4">{channel.leads}</td>
                       <td className="px-2 py-4">{channel.qualified}</td>
                       <td className="px-2 py-4">{channel.appointments}</td>
+                      <td className="px-2 py-4 text-[#f0cf79]">{channel.agreements}</td>
                       <td className="px-2 py-4 text-[#f0cf79]">{channel.closes}</td>
                       <td className="px-2 py-4">{money(channel.spendUsd)}</td>
-                      <td className="px-2 py-4">{money(channel.costPerLead)}</td>
+                      <td className="px-2 py-4">
+                        <span className="block">{money(channel.costPerLead)}</span>
+                        <span className="mt-1 block text-[10px] text-[#8f8778]">{money(channel.costPerQualifiedLead)} qualified</span>
+                      </td>
+                      <td className="px-2 py-4">
+                        <span className="block">{money(channel.costPerAppointment)}</span>
+                        <span className="mt-1 block text-[10px] text-[#8f8778]">{money(channel.costPerSignedClient)} signed</span>
+                      </td>
                       <td className="px-2 py-4">{money(channel.costPerClose)}</td>
+                      <td className="px-2 py-4">
+                        <span className="block text-[#f0cf79]">{money(channel.attributedRevenueUsd)}</span>
+                        <span className="mt-1 block text-[10px] text-[#8f8778]">
+                          Revenue evidence {channel.closedRevenueRecordCount}/{channel.closes}
+                        </span>
+                        <span className="mt-1 block text-[10px] text-[#8f8778]">
+                          {money(channel.referralFeesUsd)} recorded fees
+                          {channel.referralFeeExpectedCloseCount
+                            ? ` · evidence ${channel.referralFeeRecordCount}/${channel.referralFeeExpectedCloseCount}`
+                            : " · no fee review required"}
+                        </span>
+                      </td>
+                      <td className="px-2 py-4">
+                        <span className="block">{money(channel.trackedContributionUsd)}</span>
+                        <span className="mt-1 block text-[10px] text-[#8f8778]">
+                          {channel.trackedContributionRate == null ? "Evidence incomplete" : `${number(channel.trackedContributionRate)}% tracked`}
+                        </span>
+                      </td>
                       <td className="px-2 py-4">{channel.returnOnAdSpend == null ? "—" : `${channel.returnOnAdSpend}x`}</td>
                       <td className="px-2 py-4">
                         <span className="block">{responseMinutes(channel.medianFirstResponseMinutes)}</span>
@@ -583,7 +643,7 @@ export default async function GrowthCommandCenterPage({
                     </tr>
                   )) : (
                     <tr>
-                      <td className="px-2 py-5 text-[#8f8778]" colSpan={11}>No eligible live lead rows in this window.</td>
+                      <td className="px-2 py-5 text-[#8f8778]" colSpan={15}>No eligible live lead rows in this window.</td>
                     </tr>
                   )}
                 </tbody>

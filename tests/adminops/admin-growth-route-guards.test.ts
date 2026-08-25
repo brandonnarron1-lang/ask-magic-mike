@@ -30,10 +30,13 @@ describe("Growth Command Center route and authority guards", () => {
   it("keeps wide growth tables contained on mobile viewports", () => {
     const page = read("app/admin/growth/page.tsx");
     expect(page).toContain('className="min-w-0 rounded-2xl');
-    expect(page).toContain('className="min-w-[1040px]');
+    expect(page).toContain('className="min-w-[1440px]');
     expect(page).toContain("By lead type");
     expect(page).toContain("By response owner");
     expect(page).toContain("never uses today's mutable owner");
+    expect(page).toContain("Recorded referral fees");
+    expect(page).toContain("Tracked contribution");
+    expect(page).toContain("not net income");
   });
 
   it("excludes test and communication-suppressed records in canonical Neon reads", () => {

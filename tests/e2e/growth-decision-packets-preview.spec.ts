@@ -29,7 +29,7 @@ const allowedPacketLinks = new Set([
 const applicationOrigin = new URL(previewTestUse.baseURL).origin;
 
 for (const viewport of viewports) {
-  test(`decision packets remain protected, contained, and read-only on ${viewport.name}`, async ({ page }) => {
+  test(`growth economics and decision packets remain protected, contained, and read-only on ${viewport.name}`, async ({ page }) => {
     mkdirSync("artifacts", { recursive: true });
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
 
@@ -60,6 +60,10 @@ for (const viewport of viewports) {
         name: "Own the demand. Measure the money. Improve the machine.",
       }),
     ).toBeVisible();
+    await expect(page.getByText("Recorded referral fees", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("Tracked contribution", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("Cost / signed client", { exact: true }).first()).toBeVisible();
+    await expect(page.getByRole("columnheader", { name: "Revenue / referral fees" })).toBeAttached();
 
     const packetHeading = page.getByRole("heading", {
       name: "Local-demand decision packets",
@@ -98,7 +102,7 @@ for (const viewport of viewports) {
     expect(pageErrors).toEqual([]);
 
     await page.screenshot({
-      path: `artifacts/growth-decision-packets-${viewport.name}.png`,
+      path: `artifacts/growth-channel-economics-${viewport.name}.png`,
       fullPage: true,
     });
   });
