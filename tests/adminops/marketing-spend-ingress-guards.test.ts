@@ -60,6 +60,15 @@ describe("marketing-spend ingress source boundaries", () => {
     expect(env).not.toMatch(/GROWTH_SPEND_IMPORT_ENABLED=(true|1)/);
   });
 
+  it("contains wide spend tables on mobile and labels the hidden file control", () => {
+    const workbench = read("app/admin/growth/spend-ingress/spend-ingress-workbench.tsx");
+    expect(workbench).toContain('className="grid min-w-0 gap-5');
+    expect(workbench).toContain('className="mt-4 max-w-full overflow-x-auto"');
+    expect(workbench.match(/min-w-0/g)?.length ?? 0).toBeGreaterThanOrEqual(6);
+    expect(workbench).toContain('aria-label="Select canonical daily-spend CSV file"');
+    expect(workbench).toContain("tabIndex={-1}");
+  });
+
   it("makes the executable PostgreSQL contract part of isolated local staging verification", () => {
     const verifier = read("scripts/staging-local-verify.mjs");
     expect(verifier).toContain("marketing_spend_ingress_pg17.sql");

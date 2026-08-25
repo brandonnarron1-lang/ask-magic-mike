@@ -135,8 +135,8 @@ export function SpendIngressWorkbench({
   );
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[1.05fr_.95fr]">
-      <section className="rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#0d0d0d,#070707)] p-5 sm:p-6">
+    <div className="grid min-w-0 gap-5 xl:grid-cols-[1.05fr_.95fr]">
+      <section className="min-w-0 rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#0d0d0d,#070707)] p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#d1aa53]">Step 1 · Local source</p>
@@ -161,7 +161,7 @@ export function SpendIngressWorkbench({
           rows={14}
           spellCheck={false}
           placeholder="spend_date,channel_key,…"
-          className="mt-2 w-full rounded-xl border border-white/10 bg-black/50 p-3 font-mono text-xs leading-6 text-[#e8dcc5] outline-none transition placeholder:text-[#5f594f] focus:border-[#cda24a99] focus:ring-2 focus:ring-[#cda24a33]"
+          className="mt-2 w-full min-w-0 max-w-full rounded-xl border border-white/10 bg-black/50 p-3 font-mono text-xs leading-6 text-[#e8dcc5] outline-none transition placeholder:text-[#5f594f] focus:border-[#cda24a99] focus:ring-2 focus:ring-[#cda24a33]"
         />
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <input
@@ -171,6 +171,8 @@ export function SpendIngressWorkbench({
             onChange={(event) => void readFile(event.target.files?.[0])}
             className="sr-only"
             id="spend-csv-file"
+            aria-label="Select canonical daily-spend CSV file"
+            tabIndex={-1}
           />
           <button
             type="button"
@@ -194,7 +196,7 @@ export function SpendIngressWorkbench({
         </p>
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#0d0d0d,#070707)] p-5 sm:p-6" aria-live="polite">
+      <section className="min-w-0 rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#0d0d0d,#070707)] p-5 sm:p-6" aria-live="polite">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#d1aa53]">Step 2 · Contract preview</p>
         <h2 className="mt-2 font-serif text-3xl text-[#f4ead4]">Review normalized truth</h2>
 
@@ -266,9 +268,9 @@ export function SpendIngressWorkbench({
       </section>
 
       {preview?.ok && preview.rows.length ? (
-        <section className="rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#0d0d0d,#070707)] p-5 sm:p-6 xl:col-span-2">
+        <section className="min-w-0 rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#0d0d0d,#070707)] p-5 sm:p-6 xl:col-span-2">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#d1aa53]">Normalized rows</p>
-          <div className="mt-4 overflow-x-auto">
+          <div className="mt-4 max-w-full overflow-x-auto">
             <table className="min-w-[1040px] w-full text-left text-sm">
               <thead className="border-b border-white/10 text-[10px] uppercase tracking-[0.14em] text-[#8f8778]">
                 <tr>
@@ -311,7 +313,7 @@ export function SpendIngressWorkbench({
         </section>
       ) : null}
 
-      <section className="rounded-2xl border border-[#cda24a33] bg-[#080808] p-5 sm:p-6 xl:col-span-2">
+      <section className="min-w-0 rounded-2xl border border-[#cda24a33] bg-[#080808] p-5 sm:p-6 xl:col-span-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#d1aa53]">Step 3 · Explicit Production authority</p>
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <div>
