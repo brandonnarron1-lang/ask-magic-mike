@@ -53,6 +53,13 @@ links, and every non-read HTTP request, and captures full-page screenshots. The
 spec passed locally at both widths against the truthful unconfigured/empty
 state. Hosted exact-head execution remains part of the Preview seal below.
 
+The stacked Preview suite was also reconciled with the intentional automation
+exclusion introduced by the sealed cross-domain measurement base. Playwright
+now proves privacy-safe browser events and zero canonical event requests from
+automation; existing unit and component suites continue to prove that genuine
+consumer browsers send the same anonymous submission UUID to the first-party
+ledger. The complete mutation-free browser set passes 15/15 locally.
+
 ## Executable PostgreSQL 17 proof
 
 A disposable, unexposed `postgres:17-alpine` container was created with only a
@@ -101,6 +108,7 @@ Runtime: Node `v24.18.0`, pnpm `10.30.3`.
 | Production dependency audit | PASS — no known vulnerabilities |
 | Touched-path security review | PASS — no actionable finding |
 | Growth decision-packet browser acceptance | PASS — 2/2 local desktop/mobile checks |
+| Complete mutation-free browser suite | PASS — 15/15 local checks |
 | `git diff --check` | PASS |
 | Release doctor before commit | HEALTHY — 42 pass / one expected nonblocking dirty-tree finding |
 | Release doctor on clean code-bearing commit | HEALTHY — 43 pass / 0 fail / 0 skip |

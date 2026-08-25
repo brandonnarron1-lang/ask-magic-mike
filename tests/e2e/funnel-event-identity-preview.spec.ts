@@ -4,8 +4,9 @@
  * Every mutating first-party API request is intercepted before navigation.
  * The suite therefore proves browser behavior against an immutable protected
  * Preview without writing a lead/event, calling a provider, or queueing a
- * notification. Server-owned outcome events may remain browser-visible for
- * approved analytics integrations, but must never reach the public event API.
+ * notification. Automated browsers are intentionally excluded from the
+ * canonical event ledger; privacy-safe browser events remain observable for
+ * acceptance while unit coverage proves consumer-browser session linkage.
  */
 import { mkdirSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
@@ -20,16 +21,6 @@ test.use(previewTestUse);
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-const PROTECTED_OUTCOMES = new Set([
-  "lead_created",
-  "widget_lead_created",
-  "lead_qualified",
-  "appointment_requested",
-  "notification_queued",
-  "notification_delivered",
-  "notification_failed",
-]);
 
 async function browserEvents(page: Page): Promise<JsonRecord[]> {
   return page.evaluate(() => {
@@ -46,33 +37,27 @@ async function expectNoHorizontalOverflow(page: Page) {
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1);
 }
 
-async function expectLinkedEvents(
+async function expectAutomatedBrowserEvents(
+  page: Page,
   capture: NoWriteCapture,
-  startIndex: number,
+  canonicalEventStart: number,
   sessionId: string,
   expectedNames: string[],
   piiMarkers: string[],
 ) {
   expect(sessionId).toMatch(UUID_PATTERN);
   for (const name of expectedNames) {
-    await expect.poll(() =>
-      capture.events.slice(startIndex).some((entry) => entry.event_name === name),
+    await expect.poll(async () =>
+      (await browserEvents(page)).some((entry) => entry.event === name),
     ).toBe(true);
   }
 
-  const linked = capture.events
-    .slice(startIndex)
-    .filter((entry) => expectedNames.includes(String(entry.event_name)));
-  expect(linked.length).toBeGreaterThanOrEqual(expectedNames.length);
-  for (const event of linked) expect(event.session_id).toBe(sessionId);
-
-  const serialized = JSON.stringify(capture.events.slice(startIndex));
+  const emitted = await browserEvents(page);
+  const relevant = emitted.filter((entry) => expectedNames.includes(String(entry.event)));
+  expect(relevant.length).toBeGreaterThanOrEqual(expectedNames.length);
+  const serialized = JSON.stringify(emitted);
   for (const marker of piiMarkers) expect(serialized).not.toContain(marker);
-  expect(
-    capture.events.slice(startIndex).filter((event) =>
-      PROTECTED_OUTCOMES.has(String(event.event_name)),
-    ),
-  ).toEqual([]);
+  expect(capture.events.slice(canonicalEventStart)).toEqual([]);
 }
 
 async function expectBrowserConversion(page: Page, eventName = "lead_created") {
@@ -109,7 +94,8 @@ for (const viewport of viewports) {
     await expect(page.getByText("Your request is in.")).toBeVisible();
     const homeLead = capture.leads.at(-1) as JsonRecord;
     const homeSessionId = String(homeLead.widget_session_id);
-    await expectLinkedEvents(
+    await expectAutomatedBrowserEvents(
+      page,
       capture,
       eventStart,
       homeSessionId,
@@ -132,7 +118,8 @@ for (const viewport of viewports) {
     await expect(page.getByText("INTERNAL QA — intercepted before durable storage.")).toBeVisible();
     const sellerLead = capture.leads.at(-1) as JsonRecord;
     const sellerSessionId = String(sellerLead.widget_session_id);
-    await expectLinkedEvents(
+    await expectAutomatedBrowserEvents(
+      page,
       capture,
       eventStart,
       sellerSessionId,
@@ -154,7 +141,8 @@ for (const viewport of viewports) {
     await expect(page.getByText("INTERNAL QA — intercepted before durable storage.")).toBeVisible();
     const buyerLead = capture.leads.at(-1) as JsonRecord;
     const buyerSessionId = String(buyerLead.widget_session_id);
-    await expectLinkedEvents(
+    await expectAutomatedBrowserEvents(
+      page,
       capture,
       eventStart,
       buyerSessionId,
@@ -173,7 +161,8 @@ for (const viewport of viewports) {
     await expect.poll(() => capture.leads.length).toBe(4);
     const askLead = capture.leads.at(-1) as JsonRecord;
     const askSessionId = String(askLead.widget_session_id);
-    await expectLinkedEvents(
+    await expectAutomatedBrowserEvents(
+      page,
       capture,
       eventStart,
       askSessionId,
@@ -205,7 +194,8 @@ test("intercepted durable failure is recoverable, linked, private, and non-conve
   await expect(page.locator("#home-value-form-error")).toBeVisible();
   const failedLead = capture.leads.at(-1) as JsonRecord;
   const sessionId = String(failedLead.widget_session_id);
-  await expectLinkedEvents(
+  await expectAutomatedBrowserEvents(
+    page,
     capture,
     0,
     sessionId,
