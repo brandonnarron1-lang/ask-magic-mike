@@ -63,6 +63,7 @@ describe("privacy-minimized Google Business Profile performance CSV", () => {
         websiteClicks: 3,
         callClicks: 2,
         directionRequests: 1,
+        conversations: 0,
       },
       sourceCoverage: "operator_reviewed_aggregate_report",
       rawCsvRetained: false,
@@ -113,6 +114,22 @@ describe("privacy-minimized Google Business Profile performance CSV", () => {
 
     const formula = parseLocalProfilePerformanceCsv(csv(csvRow({ profile_key: "=IMPORTXML(A1)" })), { now: NOW });
     expect(formula.issues[0]).toMatchObject({ field: "profile_key", code: "unknown_profile" });
+  });
+
+  it("rejects Google's retired Business Profile conversation metric", () => {
+    const retired = parseLocalProfilePerformanceCsv(csv(csvRow({
+      metric: "business_conversations",
+      value: "12",
+    })), { now: NOW });
+
+    expect(retired.ok).toBe(false);
+    expect(retired.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        field: "metric",
+        code: "unknown_metric",
+      }),
+    ]));
+    expect(JSON.stringify(retired.rows)).not.toContain("business_conversations");
   });
 
   it("rejects duplicate metrics, mixed report identity, and unapproved profiles", () => {
@@ -188,6 +205,7 @@ describe("privacy-minimized Google Business Profile performance CSV", () => {
     expect(summary).toMatchObject({
       impressions_total: 1500,
       interactions_total: 6,
+      conversations: 0,
       opportunity_type: "local_profile_interaction_gap",
     });
     expect(JSON.stringify({ rows, summary })).not.toMatch(/search_keyword|location_id|oauth|consumer/i);

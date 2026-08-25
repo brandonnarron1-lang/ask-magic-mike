@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-08-25 — Local-demand decision packets candidate
+
+- Reused the canonical Growth Command Center and persisted Search
+  Console/Business Profile opportunities instead of creating another dashboard,
+  provider connector, CRM, database, or AI agent.
+- Added deterministic decision packets with type-allowlisted aggregate evidence,
+  confidence, freshness, source context, one owner-review next decision, and
+  explicit non-execution limitations.
+- Removed Google's retired `business_conversations` metric from active CSV
+  acceptance, fixed the legacy compatibility total to zero, and added a
+  forward-only Neon guard against new/revised canonical signals claiming it.
+- Preserved historical evidence and excluded raw queries, arbitrary URLs,
+  consumer data, provider IDs, fingerprints, and arbitrary JSON fields from the
+  rendered packet.
+- No Production, environment, database row, lead/event, communication,
+  provider call, WordPress/DNS, publication, spend, deletion, or NellySelly
+  action occurred.
+
 ## 2026-08-25 — Cross-domain measurement consolidation candidate
 
 - Reused the already-reviewed PR #212 application, WordPress bridge, tests,

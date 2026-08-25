@@ -6,8 +6,15 @@ Candidate branch: `codex/phase9-local-profile-performance-ingress-20260824`
 
 Base: PR #219 head `5486bed20272d2a661bc28a0e3a4a4576b2cb11f`
 
-Status: local release candidate verified; Preview PR/deployment evidence pending;
-Production unchanged
+Status: historical PR #220 evidence, superseded on the stacked local-demand
+decision-packet candidate by a current-metric truth guard; Production unchanged
+
+> 2026-08-25 truth-hardening note: Google documents that Business Profile chat
+> and call history ended July 31, 2024 and that `BUSINESS_CONVERSATIONS` is no
+> longer available. The stacked candidate rejects that metric in TypeScript,
+> fixes its compatibility summary value at zero, and adds a forward-only Neon
+> trigger guard. The exact PR #220 test/deployment counts below remain immutable
+> historical evidence for the earlier head, not proof for the stacked head.
 
 ## Executive result
 
@@ -80,7 +87,8 @@ start_date,end_date,profile_key,data_state,metric,value,source_system
 
 The only initial profile key is `ourtown_properties_primary`. Approved metrics
 are desktop/mobile Search/Maps impressions, website clicks, call clicks,
-direction requests, conversations, and bookings. The parser rejects foreign
+direction requests, and bookings. The parser rejects the retired
+`business_conversations` metric, foreign
 profiles, mixed report identities, duplicate metrics, formulas, unknown or
 sensitive columns, malformed/future dates, negative or oversized values,
 control characters, oversized bodies, and more than 32 rows.

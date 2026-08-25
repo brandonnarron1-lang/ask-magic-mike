@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { loadGrowthIntelligence } from "../../lib/growthIntelligenceView";
+import {
+  buildOpportunityDecisionPacket,
+  type GrowthOpportunityFreshness,
+} from "../../lib/growth/opportunity-decision";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 
 export const dynamic = "force-dynamic";
@@ -159,6 +163,27 @@ function SampleStatus({ value }: { value: "collecting" | "directional" | "operat
   return (
     <span className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.11em] ${tone}`}>
       {value}
+    </span>
+  );
+}
+
+function FreshnessStatus({
+  value,
+  label,
+}: {
+  value: GrowthOpportunityFreshness;
+  label: string;
+}) {
+  const tone = value === "current"
+    ? "border-[#4a8c6f66] bg-[#071712] text-[#83dab4]"
+    : value === "recent"
+      ? "border-[#4baab866] bg-[#06171b] text-[#7ee7f1]"
+      : value === "stale"
+        ? "border-[#a21f3d66] bg-[#2a0710] text-[#ff9ab1]"
+        : "border-white/10 bg-white/[.03] text-[#a89c8b]";
+  return (
+    <span className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.11em] ${tone}`}>
+      {label}
     </span>
   );
 }
@@ -670,22 +695,78 @@ export default async function GrowthCommandCenterPage({
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
           <Panel
             eyebrow="Persistent queue"
-            title="Reviewed market opportunities"
-            note="Rows appear after the Phase 9 migration and an approved ingestion or review process writes minimized evidence."
+            title="Local-demand decision packets"
+            note="Persisted signals become bounded review packets. Evidence is allowlisted; execution remains separately approved and audited."
           >
-            <div className="space-y-2">
-              {data.persistedOpportunities.length ? data.persistedOpportunities.map((item) => (
-                <article key={item.key} className="flex items-start justify-between gap-4 rounded-lg border border-white/10 bg-black/30 p-4">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-[#8f8778]">
-                      {item.type} · {item.status} · {item.actionClass.replaceAll("_", " ")}
-                    </p>
-                    <h3 className="mt-2 text-sm font-semibold text-[#f4ead4]">{item.title}</h3>
-                    <p className="mt-2 text-xs leading-5 text-[#a89c8b]">{item.rationale}</p>
-                  </div>
-                  <strong className="font-serif text-2xl text-[#f0cf79]">{number(item.score)}</strong>
-                </article>
-              )) : <p className="text-sm leading-6 text-[#8f8778]">No persisted opportunity rows.</p>}
+            <div className="space-y-3">
+              {data.persistedOpportunities.length ? data.persistedOpportunities.map((item) => {
+                const packet = buildOpportunityDecisionPacket(item, {
+                  now: new Date(data.generatedAt),
+                });
+                return (
+                  <article key={item.key} className="rounded-xl border border-white/10 bg-[linear-gradient(145deg,#0d0d0d,#060606)] p-4 sm:p-5">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div className="min-w-0 flex-1">
+                        <p className="break-words text-[10px] font-bold uppercase tracking-[0.14em] text-[#8f8778]">
+                          {item.type.replaceAll("_", " ")}
+                        </p>
+                        <h3 className="mt-2 font-serif text-xl text-[#f4ead4]">{item.title}</h3>
+                      </div>
+                      <div className="flex items-end gap-4 text-right">
+                        <div>
+                          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#746d62]">Score</p>
+                          <strong className="mt-1 block font-serif text-2xl text-[#f0cf79]">{number(item.score)}</strong>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#746d62]">Confidence</p>
+                          <strong className="mt-1 block font-serif text-2xl text-[#d8c9aa]">{packet.confidencePercent}%</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Flag value={item.status} />
+                      <Flag value={item.actionClass} />
+                      <Flag value={packet.confidenceLabel} />
+                      <FreshnessStatus value={packet.freshness} label={packet.freshnessLabel} />
+                    </div>
+
+                    {packet.context.length || packet.evidenceWindow ? (
+                      <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.11em] text-[#8f8778]">
+                        {[...packet.context, packet.evidenceWindow].filter(Boolean).join(" · ")}
+                      </p>
+                    ) : null}
+                    <p className="mt-3 text-xs leading-5 text-[#a89c8b]">{item.rationale}</p>
+
+                    {packet.evidence.length ? (
+                      <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        {packet.evidence.map((evidence) => (
+                          <div key={evidence.key} className="rounded-lg border border-white/[.07] bg-black/35 p-3">
+                            <dt className="text-[9px] font-bold uppercase tracking-[0.11em] text-[#746d62]">{evidence.label}</dt>
+                            <dd className="mt-1 text-sm font-semibold text-[#e2d5bd]">{evidence.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    ) : (
+                      <p className="mt-4 rounded-lg border border-dashed border-white/10 p-3 text-xs text-[#8f8778]">
+                        No allowlisted evidence fields are available for this opportunity type.
+                      </p>
+                    )}
+
+                    <div className="mt-4 rounded-lg border border-[#cda24a33] bg-[#171107] p-4">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#d1aa53]">Recommended next decision</p>
+                      <p className="mt-2 text-xs leading-5 text-[#e2d5bd]">{packet.nextDecision}</p>
+                    </div>
+                    <p className="mt-3 text-[10px] leading-5 text-[#746d62]">{packet.limitation}</p>
+                    <Link
+                      href={packet.sourceHref}
+                      className="mt-4 inline-flex min-h-10 items-center rounded-lg border border-[#cda24a55] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.11em] text-[#e4c36f] transition hover:border-[#cda24a] hover:text-[#f0cf79] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f0cf79]"
+                    >
+                      {packet.sourceLabel}
+                    </Link>
+                  </article>
+                );
+              }) : <p className="text-sm leading-6 text-[#8f8778]">No persisted opportunity rows.</p>}
             </div>
           </Panel>
 

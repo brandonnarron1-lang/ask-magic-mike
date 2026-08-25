@@ -32,7 +32,6 @@ export const LOCAL_PROFILE_METRICS = [
   "website_clicks",
   "call_clicks",
   "business_direction_requests",
-  "business_conversations",
   "business_bookings",
 ] as const;
 
@@ -85,6 +84,7 @@ export interface LocalProfilePerformanceTotals {
   websiteClicks: number;
   callClicks: number;
   directionRequests: number;
+  /** Legacy database-contract field. The retired metric is rejected and this remains zero. */
   conversations: number;
   bookings: number;
 }
@@ -271,9 +271,9 @@ function totalsFor(rows: LocalProfilePerformanceImportRow[]): LocalProfilePerfor
   const websiteClicks = values.get("website_clicks") ?? 0;
   const callClicks = values.get("call_clicks") ?? 0;
   const directionRequests = values.get("business_direction_requests") ?? 0;
-  const conversations = values.get("business_conversations") ?? 0;
+  const conversations = 0;
   const bookings = values.get("business_bookings") ?? 0;
-  const interactions = websiteClicks + callClicks + directionRequests + conversations + bookings;
+  const interactions = websiteClicks + callClicks + directionRequests + bookings;
   return {
     impressions,
     interactions,

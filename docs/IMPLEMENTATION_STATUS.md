@@ -2,6 +2,39 @@
 
 Updated 2026-08-25.
 
+## Phase 9 local-demand decision packets — 2026-08-25
+
+- **Reuse decision:** this stacked candidate extends the canonical Growth
+  Command Center, exact sealed PR #221 head, persisted Neon opportunity ledger,
+  and existing Search Console/Business Profile workbenches. It adds no second
+  dashboard, CRM, provider connector, lead store, AI agent, campaign system, or
+  publication path.
+- **Implementation:** persisted opportunities now expose only type-allowlisted
+  aggregate evidence, bounded geography/segment context, confidence, evidence
+  freshness, a deterministic next review decision, source-workbench handoff,
+  and an explicit limitation. Raw queries, URLs, consumer data, provider IDs,
+  fingerprints, arbitrary evidence, and secret material are not rendered.
+- **Source-truth correction:** Google's retired `business_conversations` metric
+  is removed from active CSV acceptance. The legacy summary contract pins its
+  compatibility field to zero, while additive migration
+  `20260825060000_local_demand_metric_truth_guard.sql` rejects every new or
+  revised canonical GBP signal claiming the retired metric. Existing rows are
+  not scanned, rewritten, or deleted.
+- **Authority boundary:** `/admin/growth` remains server-authorized and
+  read-only. The packet builder is deterministic; it cannot publish, send,
+  assign, mutate a profile, spend, call Google, create a lead, or touch
+  WordPress, DNS, Production, or NellySelly.
+- **Current acceptance:** exact Node 24.18.0 passes the final focused 4 files /
+  22 tests, all 263 files / 3,283 tests, strict TypeScript, full ESLint,
+  optimized Next.js 15.5.21 build, 95/17 route proof, 14/14 release safety,
+  deployable-source isolation, and Production dependency audit. Disposable
+  PostgreSQL 17 proves insert/update rejection, historical preservation, and
+  role denial. Exact-head GitHub/Preview/browser sealing remains pending;
+  Production is unchanged.
+- Detailed design and local evidence:
+  `docs/phase9/LOCAL_DEMAND_DECISION_PACKETS.md` and
+  `docs/phase9/LOCAL_DEMAND_DECISION_PACKETS_QA_EVIDENCE.md`.
+
 ## Phase 9 cross-domain measurement consolidation — 2026-08-25
 
 - **Reuse decision:** exact PR #212 head

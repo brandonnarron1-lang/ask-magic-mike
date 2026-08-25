@@ -30,6 +30,7 @@ export interface PersistedGrowthOpportunity {
   geography: string | null;
   segment: string | null;
   detectedAt: string;
+  evidence: Record<string, unknown>;
 }
 
 export interface PersistedGrowthRecommendation {
@@ -125,6 +126,11 @@ function nullableNumber(value: unknown) {
 
 function booleanValue(value: unknown) {
   return value === true || value === "true" || value === 1 || value === "1";
+}
+
+function boundedObject(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).slice(0, 64));
 }
 
 function responseOwnerBasis(value: unknown): GrowthLeadFact["firstResponseOwnerBasis"] {
@@ -279,6 +285,7 @@ function normalizePersistedOpportunity(row: Row): PersistedGrowthOpportunity {
     geography: nullableText(row.geography),
     segment: nullableText(row.segment),
     detectedAt: timestamp(row.detected_at),
+    evidence: boundedObject(row.evidence),
   };
 }
 
@@ -632,7 +639,8 @@ export async function loadNeonGrowthIntelligence(
     const opportunityRows = schema.opportunities
       ? await sql.query(
           `SELECT opportunity_key, opportunity_type, title, rationale, score,
-                  confidence, action_class, status, geography, segment, detected_at
+                  confidence, action_class, status, geography, segment, detected_at,
+                  evidence
              FROM public.market_opportunities
             WHERE status IN ('detected', 'accepted', 'planned', 'active')
             ORDER BY score DESC, detected_at DESC

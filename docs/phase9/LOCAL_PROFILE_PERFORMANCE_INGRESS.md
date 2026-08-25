@@ -44,9 +44,8 @@ system, or CRM.
 ## Current official mechanism
 
 Google currently documents that verified Business Profile owners/managers can
-inspect and download profile performance data, including views, searches,
-website clicks, call-button clicks, direction requests, messages, and other
-applicable interactions:
+inspect profile performance data such as views, searches, website clicks,
+call-button clicks, direction requests, and applicable booking interactions:
 
 - https://support.google.com/business/answer/9918094?hl=en
 
@@ -56,6 +55,12 @@ require separate GBP API access:
 
 - https://developers.google.com/my-business/reference/performance/rest
 - https://developers.google.com/my-business/reference/performance/rpc/google.mybusiness.performance.v1
+
+Google ended Business Profile chat and call-history features on July 31, 2024,
+and documents that `BUSINESS_CONVERSATIONS` is no longer available in the
+Performance API:
+
+- https://support.google.com/business/answer/14919056?hl=en
 
 This candidate deliberately accepts a reviewed, normalized aggregate CSV. It
 does not request OAuth, call Google, create API credentials, store a Google
@@ -71,8 +76,14 @@ The initial allowlist is:
 - website clicks;
 - call-button clicks;
 - direction requests;
-- conversations; and
 - bookings.
+
+`business_conversations` is rejected by the parser. The legacy v1 database
+summary keeps a `conversations` field fixed at zero solely so the already-
+reviewed atomic import contract stays compatible. Additive migration
+`20260825060000_local_demand_metric_truth_guard.sql` also rejects any new or
+revised canonical Google Business Profile signal that claims the retired
+metric. It does not scan, rewrite, or delete historical evidence.
 
 Unknown columns, unknown metrics, mixed profile/window identity, duplicate
 metrics, future dates, oversized values, spreadsheet formulas, control
