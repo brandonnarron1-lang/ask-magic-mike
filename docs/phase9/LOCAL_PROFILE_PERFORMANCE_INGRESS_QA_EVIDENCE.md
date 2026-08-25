@@ -196,6 +196,48 @@ Generated local evidence:
 Artifacts are intentionally ignored by Git and will be regenerated against the
 immutable Preview URL.
 
+## Immutable Preview evidence
+
+Draft PR [#220](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/220)
+was opened directly on PR #219 head
+`5486bed20272d2a661bc28a0e3a4a4576b2cb11f`.
+
+The first code-bearing candidate is:
+
+- commit: `814c2df4c17dac48edb2580db97447c2d63a515f`;
+- Vercel deployment: `dpl_EFb7Vzs65KoNWDXJLNr59caV92fS`;
+- immutable URL:
+  `https://ask-magic-mike-6c4elo41l-eyes-up-industries.vercel.app`;
+- Vercel state: `READY`; and
+- GitHub Release Gate run:
+  [32808025256](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32808025256),
+  PASS in 3m15s.
+
+Protected, mutation-free Preview QA run
+[32808693945](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32808693945)
+checked out that exact commit and passed:
+
+- 17 HTTP/auth/privacy checks;
+- six intentional `SAFE_DB_WRITE=false` mutation skips;
+- zero failures;
+- all 12 Playwright scenarios across the funnel identity, widget, spend,
+  organic-search, and local-profile suites;
+- zero unexpected, skipped, or flaky browser results; and
+- `PREVIEW_READY` release authority assertion.
+
+The immutable screenshots were downloaded and visually inspected. Desktop
+renders the complete table and sealed Production authority. Mobile renders
+every metric as a contained card with complete multi-digit values, class,
+signal/confidence, and date window. Preview identity is explicit, receipt reads
+are sealed because the Preview database endpoint is not attested for this
+branch, and no commit request was made.
+
+A first secure dispatcher run
+[32808315095](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/32808315095)
+also passed 17/6/0, but its default-branch workflow definition contained only
+the three legacy widget browser cases. That limited artifact was not treated as
+full visual evidence; the branch-native 12/12 run above is authoritative.
+
 ## No-action ledger
 
 This candidate performed no:

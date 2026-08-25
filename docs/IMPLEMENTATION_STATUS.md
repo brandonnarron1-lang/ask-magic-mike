@@ -1581,6 +1581,11 @@ any bridge activation or shadow-mode test.
 - Local proof passes 3,234 tests, PostgreSQL 17 contract/parity, typecheck,
   lint, optimized build, 95-route manifest, 14/14 safety, isolation, dependency
   and secret audits, and 2/2 responsive browser scenarios.
+- Draft PR #220 is clean/mergeable on PR #219. Code-bearing Preview deployment
+  `dpl_EFb7Vzs65KoNWDXJLNr59caV92fS` is `READY`; Release Gate run
+  `32808025256` and protected Preview QA run `32808693945` pass. Preview proof
+  is 17 pass / six intentional mutation skips / zero fail plus 12/12 current
+  browser scenarios.
 - Production and external systems are unchanged. The candidate must remain
   stacked after PR #219 and the already ordered release train.
 - Evidence:

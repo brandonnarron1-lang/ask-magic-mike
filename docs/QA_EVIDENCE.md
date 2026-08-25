@@ -1605,6 +1605,11 @@ it performs no Google call, profile edit, message, or publication.
   full-history secret scan, and whitespace checks: PASS.
 - Desktop/mobile Playwright: PASS — 2/2, zero commit calls, zero console/page
   errors, no document overflow, and complete responsive metric rendering.
+- Immutable exact-head Vercel Preview: READY —
+  `dpl_EFb7Vzs65KoNWDXJLNr59caV92fS` at commit `814c2df4c17`.
+- GitHub Release Gate run `32808025256`: PASS; protected Preview QA run
+  `32808693945`: PASS — 17 checks / six intentional mutation skips / zero
+  failures and 12/12 current browser scenarios.
 - Release doctor: HEALTHY — its only pre-commit finding was the intentional,
   non-blocking dirty working tree.
 - Production/Preview writes, real imports, provider calls, sends, publications,
