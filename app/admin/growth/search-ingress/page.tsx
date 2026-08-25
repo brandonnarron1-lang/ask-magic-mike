@@ -27,6 +27,7 @@ export default async function OrganicSearchIngressPage() {
   const state = await loadOrganicSearchIngressState();
   const commitReady = state.configured && state.schemaReady && state.importEnabled &&
     state.mutationAllowed && state.productionIdentityConfirmed;
+  const receiptReadSealed = state.error === "organic_search_database_identity_unconfirmed";
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_82%_0%,rgba(31,128,110,.2),transparent_34%),radial-gradient(circle_at_12%_10%,rgba(205,162,74,.11),transparent_30%),#040404] px-4 py-7 text-[#f4ead4] sm:px-6 sm:py-10">
@@ -84,8 +85,14 @@ export default async function OrganicSearchIngressPage() {
         </div>
 
         {state.error ? (
-          <p className="mt-5 rounded-xl border border-[#a21f3d66] bg-[#2a0710] p-4 text-sm text-[#ffdbe4]">
-            Organic-search ingress state could not be read safely. No write was attempted.
+          <p className={`mt-5 rounded-xl border p-4 text-sm leading-6 ${
+            receiptReadSealed
+              ? "border-[#cda24a55] bg-[#171207] text-[#f3db9c]"
+              : "border-[#a21f3d66] bg-[#2a0710] text-[#ffdbe4]"
+          }`}>
+            {receiptReadSealed
+              ? "Receipt reads are sealed in this Preview. Its configured database endpoint is not attested for this branch, so no receipt query or write was attempted. Synthetic validation remains available."
+              : "Organic-search ingress state could not be read safely. No query or write was attempted."}
           </p>
         ) : null}
 

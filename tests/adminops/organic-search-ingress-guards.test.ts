@@ -57,4 +57,11 @@ describe("organic-search ingress release boundaries", () => {
     expect(manifest.required.api).toEqual(expect.arrayContaining([preview, commit]));
     expect(read("app/admin/growth/page.tsx")).toContain('"Organic radar", "/admin/growth/search-ingress"');
   });
+
+  it("renders an unconfirmed Preview endpoint as a truthful sealed read state", () => {
+    const page = read("app/admin/growth/search-ingress/page.tsx");
+    expect(page).toContain('state.error === "organic_search_database_identity_unconfirmed"');
+    expect(page).toContain("Receipt reads are sealed in this Preview.");
+    expect(page).toContain("no receipt query or write was attempted");
+  });
 });
