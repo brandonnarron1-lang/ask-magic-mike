@@ -108,13 +108,23 @@ and Production Neon endpoint attestation, parameterized SQL, owner-only
 function authority, immutable dimension/fact/batch audits, generic client
 errors, and no secret-bearing browser import.
 
-The pre-commit release doctor reports 42 pass / one expected nonblocking dirty-
-tree check. Clean-head doctor, staged secret scan, CI, and Preview evidence are
-recorded after the exact candidate is committed.
+### Clean code-bearing commit
+
+```text
+commit 9cbbc5731c928f9fd98226b6757132cdf1fc2dca
+exact base d04984b4d162f13c79af261beb55a82f15a86b80 is an ancestor
+release doctor 43 pass / 0 fail / 0 skip
+staged gitleaks 148.84 KiB / no leaks
+git diff --check PASS
+clean worktree PASS
+```
+
+The evidence update following that code-bearing commit is documentation-only.
+GitHub CI and immutable Preview evidence are required again at the final Draft
+PR head before sealing.
 
 ## Pending exact-head evidence
 
-- clean-head release doctor, staged secret scan, ancestry, and diff proof;
 - GitHub Release Gate;
 - immutable Vercel Preview;
 - authenticated desktop/mobile visual and keyboard QA;

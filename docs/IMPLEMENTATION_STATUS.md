@@ -30,8 +30,10 @@ Updated 2026-08-24.
   isolation, script syntax, and whitespace checks pass on Node 24.18.0. A fresh
   disposable PostgreSQL 17.11 rebuild of all 35 migrations passes executable
   insert/replay/revision, malformed-date, identity, synthetic-refusal, audit,
-  immutability, role-denial, and rollback contracts. Clean-head CI, immutable
-  Preview, browser, and log evidence remain pending.
+  immutability, role-denial, and rollback contracts. Exact code-bearing commit
+  `9cbbc5731c928f9fd98226b6757132cdf1fc2dca` has clean 43/43 release doctor,
+  staged/full-history secret, exact-base ancestry, and diff proof. CI,
+  immutable Preview, browser, and log evidence remain pending.
 - **Release order:** the current first Production gate remains PR #209. This
   stacked candidate cannot leapfrog PRs #209–#217 and requires its own later,
   exact migration/merge/deploy approval; importing one reviewed real report is
