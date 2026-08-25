@@ -163,7 +163,16 @@ part of rollback and requires a separate destructive-data decision.
 
 ## Current release decision
 
-**Preview candidate only.** No Production migration, environment change,
-merge, deployment, spend import, provider action, lead action, message,
-WordPress change, DNS change, purchase, deletion, or NellySelly action has been
-performed by this candidate.
+**Sealed Draft Preview candidate only.** The exact code-bearing head
+`ed02f26af99911253f398ec5c1448e183a5dd976` passed GitHub Release Gate run
+`32795263654`, deployed READY as immutable Preview
+`dpl_2E7rVLVQy5wHnabTwcCSjpwSjpS6`, and passed protected QA run `32795486986`.
+The protected verifier recorded 17 pass / 6 intentional skip / 0 fail, all 8
+browser scenarios passed, desktop/mobile visual QA passed, no commit request was
+made, and the exact-deployment runtime audit found no error/fatal log, commit
+endpoint call, or provider activity.
+
+PR #218 remains Draft, open, clean, and mergeable. No Production migration,
+environment change, merge, deployment, spend import, provider action, lead
+action, message, WordPress change, DNS change, purchase, deletion, or
+NellySelly action has been performed by this candidate.

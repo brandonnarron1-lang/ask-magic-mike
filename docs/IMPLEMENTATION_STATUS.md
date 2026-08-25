@@ -24,16 +24,21 @@ Updated 2026-08-24.
   Production-endpoint attestation. This feature cannot contact a provider,
   change a budget, launch a campaign, create a lead, send a message, or touch
   WordPress, DNS, or NellySelly.
-- **Current local acceptance:** 5 focused files / 29 tests, all 247 files /
-  3,181 tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build,
+- **Acceptance:** 5 focused files / 30 tests, all 247 files / 3,182 tests,
+  strict TypeScript, full ESLint, optimized Next.js 15.5.21 build,
   89/17 route proof, 14/14 release safety, Production dependency audit, system
   isolation, script syntax, and whitespace checks pass on Node 24.18.0. A fresh
   disposable PostgreSQL 17.11 rebuild of all 35 migrations passes executable
   insert/replay/revision, malformed-date, identity, synthetic-refusal, audit,
   immutability, role-denial, and rollback contracts. Exact code-bearing commit
-  `9cbbc5731c928f9fd98226b6757132cdf1fc2dca` has clean 43/43 release doctor,
-  staged/full-history secret, exact-base ancestry, and diff proof. CI,
-  immutable Preview, browser, and log evidence remain pending.
+  `ed02f26af99911253f398ec5c1448e183a5dd976` has clean 43/43 release doctor,
+  staged/full-history secret, exact-base ancestry, and diff proof. GitHub
+  Release Gate `32795263654`, immutable Preview
+  `dpl_2E7rVLVQy5wHnabTwcCSjpwSjpS6`, and protected QA `32795486986` pass.
+  All 8 browser scenarios pass, including authenticated 1280 px and 390 px
+  spend-workbench proof with zero commit requests, zero overflow, and zero
+  browser errors. The exact-deployment log audit found no error/fatal log,
+  commit endpoint call, provider action, or spend-ingress API request.
 - **Release order:** the current first Production gate remains PR #209. This
   stacked candidate cannot leapfrog PRs #209–#217 and requires its own later,
   exact migration/merge/deploy approval; importing one reviewed real report is

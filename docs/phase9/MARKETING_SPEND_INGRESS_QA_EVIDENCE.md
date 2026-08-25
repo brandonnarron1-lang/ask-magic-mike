@@ -25,7 +25,7 @@ pnpm exec vitest run \
   tests/api/marketing-spend-ingress-routes.test.ts
 
 5 files passed
-29 tests passed
+30 tests passed
 ```
 
 The focused suite proves deterministic fingerprints, quoted CSV compatibility,
@@ -35,7 +35,8 @@ Production Neon endpoint attestation, cross-project read refusal before any
 query, stale-preview refusal, exact confirmation, no raw CSV in the database
 payload, database-function-only mutation, safe conflict mapping, minimized
 receipt reads, same-origin/RBAC enforcement, and private no-store/noindex
-headers.
+headers. A source-level route guard also proves the protected browser Preview
+test cannot call the commit API.
 
 ### Strict TypeScript
 
@@ -49,7 +50,7 @@ PASS
 ```text
 pnpm test
 247 test files passed
-3,181 tests passed
+3,182 tests passed
 
 pnpm lint
 PASS
@@ -61,7 +62,7 @@ Next.js 15.5.21 optimized Production build PASS
 ```
 
 The protected page and both bounded APIs are present in the build. The spend
-workbench adds approximately 4.12 kB route size and keeps the established 102
+workbench adds approximately 4.16 kB route size and keeps the established 102
 kB shared first-load bundle unchanged.
 
 ### Executable PostgreSQL 17 contract
@@ -99,6 +100,11 @@ gitleaks git --redact --no-banner --log-opts='--all'
                                      PASS — 625 commits, no leaks
 ```
 
+An exploratory repository-directory scan also traversed generated dependency
+and `.next` artifacts and produced 14 redacted generated-artifact findings. It
+is not candidate evidence. Exact staged-file scans for every candidate commit
+and the full Git-history scan above are clean.
+
 The focused security review found no raw-HTML sink, dynamic navigation,
 provider fetch, client secret read, unparameterized application SQL, raw CSV
 logging/storage, or cross-origin mutation path in the new surface. It hardened
@@ -108,10 +114,12 @@ and Production Neon endpoint attestation, parameterized SQL, owner-only
 function authority, immutable dimension/fact/batch audits, generic client
 errors, and no secret-bearing browser import.
 
-### Clean code-bearing commit
+### Clean code-bearing commits
 
 ```text
 commit 9cbbc5731c928f9fd98226b6757132cdf1fc2dca
+commit 8b7271ebef06e61368eb474e3be5d6cf2c8f1fa9
+commit ed02f26af99911253f398ec5c1448e183a5dd976
 exact base d04984b4d162f13c79af261beb55a82f15a86b80 is an ancestor
 release doctor 43 pass / 0 fail / 0 skip
 staged gitleaks 148.84 KiB / no leaks
@@ -119,17 +127,83 @@ git diff --check PASS
 clean worktree PASS
 ```
 
-The evidence update following that code-bearing commit is documentation-only.
-GitHub CI and immutable Preview evidence are required again at the final Draft
-PR head before sealing.
+`9cbbc573` implements the contract. `8b7271e` fixes the visual defect found by
+mobile QA. `ed02f26` adds the durable browser contract and deploys the exact
+visually tested behavior.
 
-## Pending exact-head evidence
+## Exact-head Preview evidence
 
-- GitHub Release Gate;
-- immutable Vercel Preview;
-- authenticated desktop/mobile visual and keyboard QA;
-- Preview API/RBAC/no-write runtime QA; and
-- exact deployment-log audit proving no mutation or provider call.
+### GitHub and immutable deployment
+
+```text
+Exact head: ed02f26af99911253f398ec5c1448e183a5dd976
+Release Gate run: 32795263654 — PASS
+Immutable Preview:
+https://ask-magic-mike-o64ycgkev-eyes-up-industries.vercel.app
+Vercel deployment: dpl_2E7rVLVQy5wHnabTwcCSjpwSjpS6 — READY
+Protected QA run: 32795486986 — PASS
+```
+
+The protected verifier recorded 17 read-only checks passed, 6 intentionally
+skipped, and 0 failed. Mutation authority remained false with the expected
+reason `SAFE_DB_WRITE not set`.
+
+### Authenticated browser and visual proof
+
+All 8 protected browser scenarios passed, including the spend-ingress workbench
+at 1280 x 720 and 390 x 844. The scenarios authenticated through the established
+Preview boundary, generated the preview result from the canonical parser,
+blocked and counted any commit request, and proved:
+
+- one validation interaction per viewport and zero commit requests;
+- the commit control remained disabled before and after validation;
+- zero console errors and zero page errors;
+- zero unlabeled inputs and zero unnamed buttons;
+- keyboard-visible focus, with the hidden file input skipped and its visible
+  file-selector control focusable;
+- synthetic and sealed-state copy remained visible; and
+- document width equaled viewport width at desktop and mobile.
+
+Artifacts:
+
+```text
+preview-qa-artifacts/spend-ingress-desktop.png
+preview-qa-artifacts/spend-ingress-mobile.png
+```
+
+The first exact-build mobile run found a genuine 1,098 px document width at a
+390 px viewport, caused by an unconstrained grid item and the wide normalized-
+row table. It also exposed a hidden-file-input labeling/focus gap. The candidate
+was corrected with `min-w-0`, explicit max-width and horizontal table
+containment, constrained textarea sizing, an accessible file-input label, and
+removal of the hidden input from the tab order. A source guard and both deployed
+viewport scenarios now prevent regression.
+
+### Exact deployment-log audit
+
+The final bounded runtime audit was scoped to
+`dpl_2E7rVLVQy5wHnabTwcCSjpwSjpS6` in the Preview environment:
+
+```text
+error/fatal logs: 0
+query `/commit`: 0 logs
+query `provider`: 0 logs
+spend-ingress API requests: 0
+spend-ingress page traffic: 2 authenticated GET + 2 expected unauthenticated
+                              GET + 2 HEAD
+status totals: 116 x 200, 16 x 204, 12 x 401, 1 x 307, 1 x 404, 1 x 503
+```
+
+The 401s are the expected first protected-page requests before Preview
+authentication. The single 404 is the verifier's invalid synthetic-token case;
+the 503 is the intentionally refused SLA cron check. No spend-ingress commit,
+provider call, database write, campaign action, or message occurred.
+
+## Release state
+
+PR #218 remains Draft, open, clean, and mergeable. Production remains on the
+previously verified deployment. No Production migration, environment change,
+merge, deployment, import, or provider action has been performed.
 
 ## Truth statement
 

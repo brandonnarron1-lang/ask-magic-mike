@@ -15,9 +15,19 @@
   replay idempotency, insert/revision/unchanged reconciliation, immutable
   before/after audits for dimension and daily-fact creation/revision, and
   append-only minimized receipts; raw CSV is never persisted.
-- Added 29 focused parser, persistence, migration, guard, and route tests plus a
+- Added 30 focused parser, persistence, migration, guard, and route tests plus a
   PostgreSQL 17 executable contract covering all 35 migrations, malformed-date
   safety, role denial, immutability, and rollback.
+- Added authenticated desktop/mobile Preview scenarios that derive the preview
+  response from the canonical parser, intercept any commit call, prove keyboard
+  and label behavior, and preserve screenshots. Their first mobile run exposed
+  and then verified the correction of a 1,098 px overflow defect at a 390 px
+  viewport and a hidden-file-input focus/label gap.
+- Sealed exact code-bearing head `ed02f26af99911253f398ec5c1448e183a5dd976`
+  with GitHub Release Gate `32795263654`, READY immutable Preview
+  `dpl_2E7rVLVQy5wHnabTwcCSjpwSjpS6`, protected QA `32795486986`, 8/8 browser
+  scenarios, and an exact-deployment log audit showing no error/fatal log,
+  commit endpoint call, provider activity, or spend-ingress API request.
 - No Production, environment, Neon, lead/event, message, provider, campaign,
   budget, WordPress, DNS, publication, purchase, deletion, or NellySelly action
   occurred.
