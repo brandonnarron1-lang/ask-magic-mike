@@ -16,9 +16,12 @@ describe("marketing-spend ingress source boundaries", () => {
       expect(source).toContain("privateSpendIngressResponse");
     }
     const http = read("app/lib/growth/spend-ingress-http.ts");
-    expect(http).toContain('origin === new URL(request.url).origin');
-    expect(http).toContain('fetchSite === "same-origin"');
-    expect(http).toContain('"Cache-Control": "private, no-store, max-age=0"');
+    const sharedHttp = read("app/lib/growth/ingress-http.ts");
+    expect(http).toContain("return ingressSameOrigin(request)");
+    expect(http).toContain("privateIngressResponse");
+    expect(sharedHttp).toContain('origin === new URL(request.url).origin');
+    expect(sharedHttp).toContain('fetchSite === "same-origin"');
+    expect(sharedHttp).toContain('"Cache-Control": "private, no-store, max-age=0"');
   });
 
   it("keeps validation no-write and mutation feature-gated, revalidated, and Preview-safe", () => {

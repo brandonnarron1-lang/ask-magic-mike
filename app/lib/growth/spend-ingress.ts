@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { parseBoundedCsvMatrix } from "./bounded-csv";
 
 export const SPEND_INGRESS_VERSION = "marketing_spend_csv_v1";
 export const SPEND_INGRESS_MAX_BYTES = 128 * 1024;
@@ -129,95 +130,12 @@ const INTEGER = /^(?:0|[1-9][0-9]{0,9})$/;
 const FORMULA_PREFIX = /^[=+@-]/;
 const SYNTHETIC_MARKER = /(?:^|[^a-z0-9])(?:qa|test|demo|synthetic)(?:$|[^a-z0-9])/i;
 
-type MatrixResult =
-  | { ok: true; rows: string[][] }
-  | { ok: false; code: string; message: string };
-
 function roundMoney(value: number) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
 function sha256(value: string) {
   return createHash("sha256").update(value, "utf8").digest("hex");
-}
-
-function parseCsvMatrix(input: string): MatrixResult {
-  if (input.includes("\u0000")) {
-    return { ok: false, code: "null_byte", message: "CSV contains a prohibited null byte." };
-  }
-
-  const rows: string[][] = [];
-  let row: string[] = [];
-  let field = "";
-  let quoted = false;
-  let justClosedQuote = false;
-
-  const pushField = () => {
-    row.push(field);
-    field = "";
-    justClosedQuote = false;
-  };
-  const pushRow = () => {
-    pushField();
-    if (row.some((value) => value.trim() !== "")) rows.push(row);
-    row = [];
-  };
-
-  for (let index = 0; index < input.length; index += 1) {
-    const character = input[index];
-    if (quoted) {
-      if (character === '"') {
-        if (input[index + 1] === '"') {
-          field += '"';
-          index += 1;
-        } else {
-          quoted = false;
-          justClosedQuote = true;
-        }
-      } else {
-        field += character;
-      }
-    } else if (justClosedQuote) {
-      if (character === ",") pushField();
-      else if (character === "\n" || character === "\r") {
-        pushRow();
-        if (character === "\r" && input[index + 1] === "\n") index += 1;
-      } else if (character !== " " && character !== "\t") {
-        return {
-          ok: false,
-          code: "invalid_quote_boundary",
-          message: "A quoted CSV field has characters after its closing quote.",
-        };
-      }
-    } else if (character === '"') {
-      if (field.trim() !== "") {
-        return {
-          ok: false,
-          code: "invalid_quote_boundary",
-          message: "A quote begins inside an unquoted CSV field.",
-        };
-      }
-      field = "";
-      quoted = true;
-    } else if (character === ",") {
-      pushField();
-    } else if (character === "\n" || character === "\r") {
-      pushRow();
-      if (character === "\r" && input[index + 1] === "\n") index += 1;
-    } else {
-      field += character;
-    }
-
-    if (field.length > 512) {
-      return { ok: false, code: "cell_too_long", message: "A CSV cell exceeds 512 characters." };
-    }
-  }
-
-  if (quoted) {
-    return { ok: false, code: "unclosed_quote", message: "CSV contains an unclosed quoted field." };
-  }
-  if (field !== "" || row.length > 0) pushRow();
-  return { ok: true, rows };
 }
 
 function strictDate(value: string, now: Date) {
@@ -341,7 +259,7 @@ export function parseMarketingSpendCsv(
     }]);
   }
 
-  const matrix = parseCsvMatrix(csv.replace(/^\uFEFF/, ""));
+  const matrix = parseBoundedCsvMatrix(csv.replace(/^\uFEFF/, ""));
   if (!matrix.ok) {
     return emptyPreview([{ row: 0, field: null, code: matrix.code, message: matrix.message }]);
   }
