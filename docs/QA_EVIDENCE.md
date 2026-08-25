@@ -1580,10 +1580,11 @@ health contract, branch/endpoint mapping, tests, and no-action record are in
 ## Phase 9 organic-search ingress — 2026-08-24
 
 Draft PR #219 adds a protected, safe-off, privacy-minimized owned-page evidence
-ingress. Local proof passes 38 focused tests, 3,206 full tests, the executable
+ingress. Proof passes 39 focused tests, 3,207 full tests, the executable
 PostgreSQL 17 atomic/replay/rejection/privilege contract, strict TypeScript,
 ESLint, Node 24 optimized build, 92-route manifest, 14/14 safety, system
-isolation, dependency audit, staged secret scan, and two desktop/mobile
-Playwright scenarios with zero commit calls. Production is unchanged and no
+isolation, dependency audit, staged secret scan, 17/6/0 protected Preview QA,
+and 10/10 Playwright scenarios with zero commit calls. Runtime deployment
+`dpl_FcBUJ7hDxKu7oeMpXb8UuVHpkkCz` is `READY`; Production is unchanged and no
 Search Console access or real report import occurred. Full evidence:
 [`phase9/ORGANIC_SEARCH_INGRESS_QA_EVIDENCE.md`](./phase9/ORGANIC_SEARCH_INGRESS_QA_EVIDENCE.md).

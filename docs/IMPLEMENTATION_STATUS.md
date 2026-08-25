@@ -1549,9 +1549,13 @@ any bridge activation or shadow-mode test.
   immutable receipts/audits, exact replay, and operator-state preservation.
 - Safe default is `GROWTH_SEARCH_IMPORT_ENABLED=false`; Production and Preview
   database identity remains exact-endpoint attested.
-- Local proof passes: 38 focused tests, 3,206 full tests, PostgreSQL 17 contract,
+- Proof passes: 39 focused tests, 3,207 full tests, PostgreSQL 17 contract,
   typecheck, lint, Node 24 build, 92-route manifest, 14/14 safety, isolation,
-  dependency audit, staged secret scan, and two desktop/mobile browser cases.
+  dependency audit, staged secret scan, and exact-head protected Preview QA.
+- Runtime code head `5552a1a` is `READY` at immutable deployment
+  `dpl_FcBUJ7hDxKu7oeMpXb8UuVHpkkCz`; Release Gate run `32801867752` and
+  protected QA run `32801994614` pass. Remote evidence is 17 pass / six
+  intentional skip / zero fail and 10/10 browser cases with zero commit calls.
 - No Search Console access, Production migration/configuration/merge/deployment,
   real import, page publication, lead/message/campaign action, WordPress/DNS
   edit, purchase, deletion, or NellySelly action occurred.

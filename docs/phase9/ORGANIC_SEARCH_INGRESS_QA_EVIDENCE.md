@@ -8,7 +8,7 @@ Branch: `codex/phase9-organic-search-ingress-20260824`
 
 Base: `cd087e5c5c0fda82a3175b86b550c966120eb2ab`
 
-Code-bearing commit: `ddc944fc10dd994ba79365c608a42534e91f7e57`
+Latest code-bearing commit: `5552a1a77f17f94656952126c69fb003e11fbf95`
 
 ## Evidence boundary
 
@@ -32,7 +32,7 @@ pnpm exec vitest run \
   tests/adminops/neon-marketing-spend-ingress.test.ts
 
 7 files passed
-38 tests passed
+39 tests passed
 ```
 
 The suite proves exact headers and report identity, bounded RFC-style CSV,
@@ -84,7 +84,7 @@ rolled back, and the fresh contract passed. No remote database was involved.
 ```text
 pnpm test
 252 test files passed
-3,206 tests passed
+3,207 tests passed
 
 pnpm typecheck
 PASS
@@ -156,13 +156,66 @@ value passed. No real credential was read or emitted.
 
 ## Immutable Preview evidence
 
-Pending exact-head Vercel Preview and protected branch-native QA. This section
-must be replaced with the deployment ID, immutable URL, GitHub run IDs, browser
-counts, and bounded log audit before PR #219 is called sealed.
+```text
+Exact runtime head: 5552a1a77f17f94656952126c69fb003e11fbf95
+Release Gate:       32801867752 · PASS
+Immutable Preview:  https://ask-magic-mike-qlrl9o1cg-eyes-up-industries.vercel.app
+Vercel deployment:  dpl_FcBUJ7hDxKu7oeMpXb8UuVHpkkCz · READY
+Protected QA:       32801994614 · PASS
+```
+
+The branch-native runner checked out the exact code head, installed with the
+frozen lockfile on Node 24, and passed release safety, 252 files / 3,207 tests,
+strict TypeScript, ESLint, optimized build, release doctor 43/43, protected QA,
+browser E2E, release report `GO`, launch authority `PREVIEW_READY`, and the exact
+verdict assertion.
+
+Protected remote results:
+
+```text
+read-only verifier: 17 pass · 6 intentional skip · 0 fail
+browser E2E:         10 expected · 0 unexpected · 0 flaky · 0 skipped
+mutation gate:       blocked · SAFE_DB_WRITE not set
+provider delivery:   disabled
+live email / SMS:    disabled / disabled
+```
+
+The two organic-radar scenarios again passed at desktop and mobile dimensions:
+one intercepted validation and zero commit calls per viewport, no overflow,
+unlabeled input, console error, or page error. Exact deployed screenshots are in
+the protected run artifact as `organic-search-ingress-desktop.png` and
+`organic-search-ingress-mobile.png`.
+
+Visual review of the first immutable Preview found that an expected unattested
+Preview endpoint appeared as a generic red read error. Code head `5552a1a`
+preserves the same fail-closed behavior but renders a precise amber sealed-read
+notice: no receipt query or write occurred, while synthetic validation remains
+available. The final deployed screenshots and source guard prove that correction.
+
+### Exact-deployment log audit
+
+A bounded latest-1,000 request sample for the deployment contained 820 HTTP
+200, 160 HTTP 204, 20 expected initial HTTP 401, and only `info` level entries.
+Separate deployment-scoped queries avoid relying on that sample cap:
+
+```text
+search-ingress page: 2 GET 200 · 2 expected GET 401 · 2 HEAD 204
+preview API:         0 requests (browser route interception)
+commit API:          0 requests
+provider query:      0 matches
+error level:         0
+fatal level:         0
+```
+
+The expected 401s are the initial protected-page requests before Vercel
+automation authentication. No organic-search commit, database mutation,
+provider call, page publication, lead action, or message occurred.
 
 ## Release state and truth statement
 
-PR #219 remains Draft and stacked after PR #218. Production remains unchanged.
+PR #219 remains Draft and stacked after PR #218. Its runtime candidate is sealed
+at the exact code head above; a later documentation-only head does not change
+runtime behavior. Production remains unchanged.
 The candidate proves that a specifically reviewed owned-page report can be
 validated and later reconciled atomically after separate authority. It does not
 prove that Search Console was accessed, an export is complete, any real search

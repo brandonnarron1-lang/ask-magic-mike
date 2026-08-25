@@ -8,7 +8,7 @@ Branch: `codex/phase9-organic-search-ingress-20260824`
 
 Exact base: sealed Draft PR #218 head `cd087e5c5c0fda82a3175b86b550c966120eb2ab`
 
-Code-bearing commit: `ddc944fc10dd994ba79365c608a42534e91f7e57`
+Latest code-bearing commit: `5552a1a77f17f94656952126c69fb003e11fbf95`
 
 ## Decision
 
@@ -195,8 +195,14 @@ a separate destructive-data decision.
 
 ## Current release decision
 
-**Draft stacked Preview candidate only.** Local application, database, security,
-and rendered-browser evidence passes. No Production migration, environment
-change, merge, deployment, Search Console access, import, publication, lead
-action, message, WordPress/DNS change, purchase, deletion, or NellySelly action
-has been performed by PR #219.
+**Sealed Draft stacked Preview candidate only.** Code head
+`5552a1a77f17f94656952126c69fb003e11fbf95` passed Release Gate run
+`32801867752`, deployed `READY` as immutable Preview
+`dpl_FcBUJ7hDxKu7oeMpXb8UuVHpkkCz`, and passed protected branch-native QA run
+`32801994614`. The protected verifier recorded 17 pass / 6 intentional skip /
+0 fail; all 10 browser cases passed; release doctor reported 43 pass / 0 fail /
+0 skip; and launch authority was `PREVIEW_READY` with writes disabled.
+
+No Production migration, environment change, merge, deployment, Search Console
+access, import, publication, lead action, message, WordPress/DNS change,
+purchase, deletion, or NellySelly action has been performed by PR #219.
