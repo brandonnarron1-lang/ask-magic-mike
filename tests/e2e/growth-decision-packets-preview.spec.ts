@@ -26,6 +26,7 @@ const allowedPacketLinks = new Set([
   "/admin/growth/search-ingress",
   "/admin/growth/local-profile-ingress",
 ]);
+const applicationOrigin = new URL(previewTestUse.baseURL).origin;
 
 for (const viewport of viewports) {
   test(`decision packets remain protected, contained, and read-only on ${viewport.name}`, async ({ page }) => {
@@ -41,8 +42,12 @@ for (const viewport of viewports) {
     });
     page.on("pageerror", (error) => pageErrors.push(String(error)));
     page.on("request", (request) => {
-      if (!["GET", "HEAD", "OPTIONS"].includes(request.method())) {
-        mutationRequests.push(`${request.method()} ${new URL(request.url()).pathname}`);
+      const target = new URL(request.url());
+      if (
+        target.origin === applicationOrigin &&
+        !["GET", "HEAD", "OPTIONS"].includes(request.method())
+      ) {
+        mutationRequests.push(`${request.method()} ${target.pathname}`);
       }
     });
 

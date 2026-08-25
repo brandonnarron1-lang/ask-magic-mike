@@ -49,7 +49,7 @@ The release candidate also includes a deployed-browser acceptance spec for the
 authenticated Growth Command Center. It exercises desktop and mobile widths,
 requires a 200 response and meaningful rendered content, rejects framework
 error overlays, console/page errors, horizontal overflow, non-allowlisted packet
-links, and every non-read HTTP request, and captures full-page screenshots. The
+links, and every same-origin non-read HTTP request, and captures full-page screenshots. The
 spec passed locally at both widths against the truthful unconfigured/empty
 state. Hosted exact-head execution remains part of the Preview seal below.
 
