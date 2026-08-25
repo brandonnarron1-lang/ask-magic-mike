@@ -223,3 +223,32 @@ Paid traffic and carrier SMS remain separate approvals.
   notification, audit, identity, or session data as an application rollback.
 
 Record the outcome in `PRODUCTION_CHANGE_LOG.md`, including anything not proven.
+
+## Organic-search ingress candidate (PR #219)
+
+PR #219 is downstream of PR #218 and remains non-authoritative until the full
+predecessor train is released in order. Before any future release:
+
+1. refresh PR #219 onto the exact accepted `main`;
+2. rerun focused tests, the executable PostgreSQL 17 contract, full Vitest,
+   typecheck, lint, Node 24 build, route manifest, release safety, isolation,
+   dependency audit, secret scan, and immutable Preview/browser QA;
+3. confirm `GROWTH_SEARCH_IMPORT_ENABLED=false` in the target deployment;
+4. apply only `20260824220000_organic_search_ingress.sql` through the established
+   secure owner connection after the exact migration/merge/deploy approval;
+5. deploy the exact reviewed commit and prove protected page access, safe-off
+   commit behavior, health, routes, and logs; and
+6. leave Search Console access and report import unperformed.
+
+The future release gate is:
+
+```text
+APPROVE PHASE 9 ORGANIC SEARCH INGRESS MIGRATION, PR 219 MERGE, AND PRODUCTION DEPLOYMENT
+```
+
+To import later, first export one exact Search Console **Pages** report without
+the Queries dimension, validate it in the protected workbench, review every
+identity/metric/opportunity and the exact fingerprint, then request the separate
+report-specific gate documented in
+`phase9/ORGANIC_SEARCH_INGRESS_RELEASE_GATE.md`. Disable the feature gate again
+after the single reviewed import and reconcile the immutable receipt/audit.

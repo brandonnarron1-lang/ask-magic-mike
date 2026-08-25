@@ -86,3 +86,17 @@ any lead record.
 Set `EMAIL_ENABLED=false` / notification mode `disabled` to stop provider sends while
 preserving outbox rows. Do not delete failed delivery records; investigate and retry
 with the same idempotency key after correction.
+
+## Phase 9 organic-search ingress
+
+PR #219 is additive and safe-off. Before an import, rollback is to keep or set
+`GROWTH_SEARCH_IMPORT_ENABLED=false`, restore the immediately preceding verified
+Vercel deployment if application behavior regresses, and leave the empty
+`organic_search_import_batches` table plus owner-only function dormant. Do not
+drop the migration merely to roll back code.
+
+After a separately authorized report import, disable the feature gate and
+restore the prior application if needed, but preserve `market_signals`,
+`market_opportunities`, immutable import receipts, and audit rows. Prefer a
+reviewed forward correction. Deleting or rewriting organic-search evidence is a
+separate destructive-data action and is not authorized by application rollback.

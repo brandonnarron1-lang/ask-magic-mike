@@ -346,3 +346,21 @@ for historical credit. Unattributed evidence stays explicit, and every segment
 shows sample size/maturity before an operator treats it as directional or
 operational. Application rollback returns to v2; milestone and audit evidence
 is preserved.
+
+## Privacy-minimized organic-search ingress boundary (Phase 9)
+
+The Growth Command Center reuses `market_signals` and `market_opportunities` as
+the only organic-demand read model. The protected Search Console workbench does
+not add a provider connection or a parallel analytics store. It accepts one
+operator-reviewed owned-page report, validates it without writing, and sends
+only normalized page metrics and deterministic evidence to the owner-only
+`import_organic_search_batch_v1` transaction after a separate gate.
+
+Raw CSV, Search Console query text, credentials, and provider payloads are never
+durable inputs. Only approved Ask Magic Mike and Our Town page hosts pass.
+Signal, confidence, opportunity category, and score factors are deterministic;
+AI neither scores nor publishes. Import receipts and audits are immutable,
+exact replays are idempotent, and existing operator status/action class is
+preserved. `GROWTH_SEARCH_IMPORT_ENABLED=false` keeps deployments inert by
+default, while exact Neon endpoint attestation prevents Preview or cross-project
+mutation.

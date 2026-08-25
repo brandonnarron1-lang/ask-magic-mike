@@ -479,3 +479,20 @@ npm run release:report
 # Review artifacts/release-candidate-report.md
 # No production promotion without explicit human approval.
 ```
+
+## Phase 9 organic-search ingress implementation notes — 2026-08-24
+
+- Reused the spend ingress's bounded CSV and private HTTP behavior by extracting
+  shared primitives; spend parser and API contracts remain unchanged and fully
+  covered by regression tests.
+- Search evidence uses only the Search Console Pages dimension. The importer
+  rejects unknown headers, including query text, and records the source coverage
+  caveat because Google exports are not guaranteed exhaustive.
+- Page/opportunity identities are stable SHA-256 digests. PostgreSQL calls the
+  Supabase/Neon `extensions.digest` function with an explicit schema to avoid
+  search-path ambiguity.
+- The database function is intentionally `SECURITY INVOKER` and owner-only.
+  Browser-facing roles have no table or function authority.
+- The workbench can validate while the schema or Production gate is absent, but
+  every commit condition must be true simultaneously. Synthetic examples are
+  permanently non-importable.

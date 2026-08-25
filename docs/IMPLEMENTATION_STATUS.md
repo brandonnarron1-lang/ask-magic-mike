@@ -1535,3 +1535,27 @@ any bridge activation or shadow-mode test.
   durable Production limiter contract is released.
 - Full decision and no-action record:
   [`phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md`](./phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md).
+
+## Phase 9 organic-search opportunity ingress — 2026-08-24
+
+- Draft PR #219 is stacked after sealed PR #218 and cannot leapfrog PR #209.
+- The existing Growth Command Center now has a protected, Preview-first
+  `/admin/growth/search-ingress` workbench and bounded preview/commit APIs.
+- One exact owned-page Search Console report can be normalized into existing
+  `market_signals` and advisory `market_opportunities`; no query text, raw CSV,
+  provider payload, or credential is retained.
+- Deterministic thresholds and visible factor points replace opaque AI scoring.
+- An additive PostgreSQL 17 contract provides owner-only atomic reconciliation,
+  immutable receipts/audits, exact replay, and operator-state preservation.
+- Safe default is `GROWTH_SEARCH_IMPORT_ENABLED=false`; Production and Preview
+  database identity remains exact-endpoint attested.
+- Local proof passes: 38 focused tests, 3,206 full tests, PostgreSQL 17 contract,
+  typecheck, lint, Node 24 build, 92-route manifest, 14/14 safety, isolation,
+  dependency audit, staged secret scan, and two desktop/mobile browser cases.
+- No Search Console access, Production migration/configuration/merge/deployment,
+  real import, page publication, lead/message/campaign action, WordPress/DNS
+  edit, purchase, deletion, or NellySelly action occurred.
+- Evidence and exact gates:
+  [`phase9/ORGANIC_SEARCH_INGRESS_RELEASE_GATE.md`](./phase9/ORGANIC_SEARCH_INGRESS_RELEASE_GATE.md)
+  and
+  [`phase9/ORGANIC_SEARCH_INGRESS_QA_EVIDENCE.md`](./phase9/ORGANIC_SEARCH_INGRESS_QA_EVIDENCE.md).
