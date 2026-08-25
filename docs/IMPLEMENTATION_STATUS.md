@@ -1563,3 +1563,25 @@ any bridge activation or shadow-mode test.
   [`phase9/ORGANIC_SEARCH_INGRESS_RELEASE_GATE.md`](./phase9/ORGANIC_SEARCH_INGRESS_RELEASE_GATE.md)
   and
   [`phase9/ORGANIC_SEARCH_INGRESS_QA_EVIDENCE.md`](./phase9/ORGANIC_SEARCH_INGRESS_QA_EVIDENCE.md).
+
+## Phase 9 local-profile performance ingress — 2026-08-25
+
+- Added a protected `/admin/growth/local-profile-ingress` workbench to the
+  existing Growth Command Center; no parallel dashboard or database was made.
+- Added bounded preview/commit APIs for one allowlisted, aggregate Google
+  Business Profile performance report contract.
+- Added deterministic signal normalization and one explainable
+  `local_profile_interaction_gap` opportunity policy.
+- Added an additive immutable receipt table and owner-only PostgreSQL import
+  function with server-side score/fingerprint recomputation, advisory locking,
+  exact replay, atomic reconciliation, and operator-state preservation.
+- Safe default is `GROWTH_LOCAL_PROFILE_IMPORT_ENABLED=false`; synthetic input
+  cannot commit and real input also requires endpoint/database/write
+  attestation, exact fingerprint, report reference, and typed confirmation.
+- Local proof passes 3,234 tests, PostgreSQL 17 contract/parity, typecheck,
+  lint, optimized build, 95-route manifest, 14/14 safety, isolation, dependency
+  and secret audits, and 2/2 responsive browser scenarios.
+- Production and external systems are unchanged. The candidate must remain
+  stacked after PR #219 and the already ordered release train.
+- Evidence:
+  [`phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS_QA_EVIDENCE.md`](./phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS_QA_EVIDENCE.md).

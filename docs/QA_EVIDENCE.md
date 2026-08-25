@@ -1588,3 +1588,28 @@ and 10/10 Playwright scenarios with zero commit calls. Runtime deployment
 `dpl_FcBUJ7hDxKu7oeMpXb8UuVHpkkCz` is `READY`; Production is unchanged and no
 Search Console access or real report import occurred. Full evidence:
 [`phase9/ORGANIC_SEARCH_INGRESS_QA_EVIDENCE.md`](./phase9/ORGANIC_SEARCH_INGRESS_QA_EVIDENCE.md).
+
+## Phase 9 local-profile performance ingress — 2026-08-25
+
+The existing Growth Intelligence system now has a bounded, protected candidate
+for reviewed aggregate Google Business Profile performance reports. It retains
+no raw CSV, search terms, provider location IDs, credentials, or consumer PII;
+it performs no Google call, profile edit, message, or publication.
+
+- Focused contract: PASS — 5 files / 27 tests.
+- Full Vitest: PASS — 257 files / 3,234 tests.
+- PostgreSQL 17 atomic/replay/rejection/rollback/privilege contract: PASS.
+- JS-to-PostgreSQL normalized-payload parity: PASS.
+- Node 24 strict TypeScript, ESLint, optimized Next.js 15.5.21 build, 95-route
+  manifest, 14/14 release safety, system isolation, dependency audit,
+  full-history secret scan, and whitespace checks: PASS.
+- Desktop/mobile Playwright: PASS — 2/2, zero commit calls, zero console/page
+  errors, no document overflow, and complete responsive metric rendering.
+- Release doctor: HEALTHY — its only pre-commit finding was the intentional,
+  non-blocking dirty working tree.
+- Production/Preview writes, real imports, provider calls, sends, publications,
+  merges, deployments, configuration changes, purchases, and NellySelly
+  actions: none.
+
+Full evidence:
+[`phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS_QA_EVIDENCE.md`](./phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS_QA_EVIDENCE.md).

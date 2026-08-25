@@ -655,6 +655,28 @@
 - Completed a deployed OpenAI Responses acceptance with the existing Sensitive Production key on synthetic suppressed data; no key value was exposed and no automatic action ran.
 - Sent one controlled Brandon-only QA email. Resend accepted provider message `871e5b96-a10b-492a-bb23-9898824f0cd3`; no Mike, consumer, BCC, or SMS delivery was requested. Recipient-inbox receipt remains owner-verified because the connected Gmail profile is a different mailbox and the Resend key is send-scoped.
 
+## 2026-08-25 — Phase 9 local-profile performance ingress candidate
+
+- Extended the existing Growth Command Center with a protected, bounded
+  aggregate Google Business Profile performance-report workbench.
+- Reused canonical Neon market-signal, opportunity, and audit ledgers; no
+  parallel CRM, dashboard, database, OAuth integration, or publisher was
+  introduced.
+- Added deterministic privacy-minimized parsing, scoring, opportunity logic,
+  preview/commit APIs, immutable receipts, exact replay, and a server-recomputed
+  PostgreSQL 17 import contract.
+- Kept commit authority disabled by default and separated application/schema
+  release, feature-gate enablement, and each real report import into explicit
+  review gates.
+- Corrected and regression-tested responsive metric rendering after visual QA
+  found mobile table clipping.
+- Passed 3,234 tests, PostgreSQL contract/parity proof, strict typecheck, lint,
+  optimized build, 95-route verification, 14/14 safety, isolation, dependency
+  and secret scans, and desktop/mobile visual QA.
+- No Production/Preview data mutation, Google call, profile edit, publication,
+  send, merge, deployment, environment change, purchase, WordPress/DNS edit,
+  or NellySelly action occurred.
+
 ## 2026-08-15 — Phase 6 Production schema acceptance
 
 - Applied the Preview-accepted Phase 6 communication-permission, sequence,

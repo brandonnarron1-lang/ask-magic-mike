@@ -270,6 +270,7 @@ export default async function GrowthCommandCenterPage({
                 ["Vendor ingress", "/admin/growth/vendor-ingress"],
                 ["Spend ingress", "/admin/growth/spend-ingress"],
                 ["Organic radar", "/admin/growth/search-ingress"],
+                ["Local profile", "/admin/growth/local-profile-ingress"],
               ].map(([label, href]) => (
                 <Link
                   key={href}

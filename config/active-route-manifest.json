@@ -10,6 +10,7 @@
     "/admin/distribution",
     "/admin/experiments",
     "/admin/growth",
+    "/admin/growth/local-profile-ingress",
     "/admin/growth/search-ingress",
     "/admin/growth/spend-ingress",
     "/admin/growth/vendor-ingress",
@@ -29,6 +30,8 @@
     "/api/admin/distribution/assets/[channelKey]/[placementKey]",
     "/api/admin/distribution/wordpress-change-set/[placementKey]",
     "/api/admin/growth/vendor-ingress/test",
+    "/api/admin/growth/local-profile-ingress/commit",
+    "/api/admin/growth/local-profile-ingress/preview",
     "/api/admin/growth/search-ingress/commit",
     "/api/admin/growth/search-ingress/preview",
     "/api/admin/growth/spend-ingress/commit",
@@ -106,6 +109,7 @@
     "admin": [
       "/admin", "/admin/leads", "/admin/leads/[id]", "/admin/allocation", "/admin/distribution", "/admin/experiments", "/admin/growth",
       "/admin/growth/vendor-ingress",
+      "/admin/growth/local-profile-ingress",
       "/admin/growth/search-ingress",
       "/admin/growth/spend-ingress",
       "/admin/action-queue", "/admin/message-previews", "/admin/notifications", "/admin/notifications/phone", "/admin/reporting",
@@ -118,7 +122,7 @@
       "/admin/api/push/test",
       "/admin/api/phone-alerts/invite",
       "/api/leads", "/api/listings/search", "/api/listings/[id]", "/api/valuation", "/api/appointments/request", "/api/experiments/event", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/phone-alerts/invite", "/api/phone-alerts/subscription", "/api/phone-alerts/test", "/api/webhooks/sms/inbound", "/api/webhooks/sms/status", "/api/widget/events",
-      "/api/admin/copilot", "/api/admin/copilot/jobs", "/api/admin/copilot/jobs/process", "/api/admin/distribution/assets/[channelKey]/[placementKey]", "/api/admin/distribution/wordpress-change-set/[placementKey]", "/api/admin/growth/vendor-ingress/test", "/api/admin/growth/search-ingress/preview", "/api/admin/growth/search-ingress/commit", "/api/admin/growth/spend-ingress/preview", "/api/admin/growth/spend-ingress/commit", "/api/admin/health", "/api/admin/leads/[id]/communication-permissions", "/api/admin/leads/[id]/sequences", "/api/admin/message-templates", "/api/admin/operations/first-live", "/api/admin/qa/email", "/api/admin/sequences/process", "/api/admin/sla/sweep", "/api/webhooks/email/events"
+      "/api/admin/copilot", "/api/admin/copilot/jobs", "/api/admin/copilot/jobs/process", "/api/admin/distribution/assets/[channelKey]/[placementKey]", "/api/admin/distribution/wordpress-change-set/[placementKey]", "/api/admin/growth/vendor-ingress/test", "/api/admin/growth/local-profile-ingress/preview", "/api/admin/growth/local-profile-ingress/commit", "/api/admin/growth/search-ingress/preview", "/api/admin/growth/search-ingress/commit", "/api/admin/growth/spend-ingress/preview", "/api/admin/growth/spend-ingress/commit", "/api/admin/health", "/api/admin/leads/[id]/communication-permissions", "/api/admin/leads/[id]/sequences", "/api/admin/message-templates", "/api/admin/operations/first-live", "/api/admin/qa/email", "/api/admin/sequences/process", "/api/admin/sla/sweep", "/api/webhooks/email/events"
     ]
   },
   "classifications": {
@@ -131,6 +135,9 @@
     "/admin/growth": "active-protected-read-only-phase9-schema-gated",
     "/admin/growth/vendor-ingress": "active-protected-synthetic-no-write-vendor-contract-lab",
     "/api/admin/growth/vendor-ingress/test": "active-protected-synthetic-no-write-no-provider-call",
+    "/admin/growth/local-profile-ingress": "active-protected-preview-first-feature-gated-aggregate-local-profile-performance-ingress",
+    "/api/admin/growth/local-profile-ingress/preview": "active-protected-bounded-no-write-no-raw-or-provider-identity-retention",
+    "/api/admin/growth/local-profile-ingress/commit": "active-protected-feature-gated-atomic-audited-neon-mutation-no-provider-or-profile-call",
     "/admin/growth/search-ingress": "active-protected-preview-first-feature-gated-owned-page-search-evidence-ingress",
     "/api/admin/growth/search-ingress/preview": "active-protected-bounded-no-write-no-query-or-raw-retention",
     "/api/admin/growth/search-ingress/commit": "active-protected-feature-gated-atomic-audited-neon-mutation-no-provider-call",

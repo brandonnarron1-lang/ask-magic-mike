@@ -39,7 +39,7 @@
     "preview:find": "node scripts/find-vercel-preview.mjs",
     "preview:wait": "node scripts/wait-for-vercel-preview.mjs",
     "preview:qa": "node scripts/preview-qa.mjs",
-    "preview:e2e": "./node_modules/.bin/playwright test tests/e2e/widget-preview-flow.spec.ts tests/e2e/funnel-event-identity-preview.spec.ts tests/e2e/spend-ingress-preview.spec.ts tests/e2e/organic-search-ingress-preview.spec.ts",
+    "preview:e2e": "./node_modules/.bin/playwright test tests/e2e/widget-preview-flow.spec.ts tests/e2e/funnel-event-identity-preview.spec.ts tests/e2e/spend-ingress-preview.spec.ts tests/e2e/organic-search-ingress-preview.spec.ts tests/e2e/local-profile-performance-ingress-preview.spec.ts",
     "release:gate": "pnpm run amm:verify:isolation && pnpm run release:safety && pnpm run test && pnpm run typecheck && pnpm run lint && pnpm run routes:verify",
     "release:report": "node scripts/release-candidate-report.mjs",
     "release:assert": "node scripts/assert-release-candidate.mjs",
