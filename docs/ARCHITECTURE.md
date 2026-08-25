@@ -143,6 +143,29 @@ browser metric ID to a domain-separated digest, and lets the protected Growth
 read model calculate bounded, digest-deduplicated P75 evidence by mobile and
 desktop. Preview renders no reporter and performs no telemetry write.
 
+### Growth economics and controlled spend ingress
+
+The Growth Command Center reads the existing canonical Neon tables
+`marketing_channels`, `marketing_campaigns`, and `marketing_spend_daily` for
+channel economics. It does not infer spend, revenue, or ROI from analytics
+events.
+
+The feature-gated spend workbench accepts one exact canonical CSV contract and
+performs a no-write server preview first. A later authorized commit revalidates
+the original bounded CSV, verifies the reviewed SHA-256 batch fingerprint, and
+calls the owner-only `import_marketing_spend_batch_v1` transaction. That
+function serializes imports, refuses synthetic or conflicting identities,
+reconciles campaign-day facts, and writes immutable per-row and aggregate audit
+evidence plus a minimized append-only receipt. Exact replay returns the prior
+receipt without duplicating spend. Raw CSV is never retained.
+
+`GROWTH_SPEND_IMPORT_ENABLED=false` is the deployment-safe default. A commit
+also requires explicit Production runtime/database labels and a distinct exact
+match to the configured Ask Magic Mike Production Neon endpoint. Preview,
+public/browser database roles, and the legacy service role have no mutation
+authority. The ingress has no provider client and cannot launch a campaign,
+change a budget, create a lead, or send a message.
+
 ### Valuation (`src/lib/valuation/`)
 
 Provider abstraction. Mock provider returns deterministic estimates based on zip code prefix. Real providers (ATTOM, HouseCanary) are stubs.

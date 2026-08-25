@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-08-24 — Marketing-spend ledger ingress candidate
+
+- Reused the canonical growth schema, Growth Command Center, KPI engine,
+  `growth:manage` RBAC, and immutable audit ledger after full-history inspection
+  found no prior spend importer.
+- Added one protected paste/file workbench and bounded same-origin preview and
+  commit APIs for an exact 19-column canonical CSV contract.
+- Added deterministic row/batch fingerprints, strict date/identity/metric and
+  formula validation, all-identity synthetic/QA refusal, stale-review
+  protection, exact Ask Magic Mike Production-endpoint attestation, and a safe-
+  disabled `GROWTH_SPEND_IMPORT_ENABLED=false` default.
+- Added an owner-only atomic PostgreSQL function with serialized imports, exact
+  replay idempotency, insert/revision/unchanged reconciliation, immutable
+  before/after audits for dimension and daily-fact creation/revision, and
+  append-only minimized receipts; raw CSV is never persisted.
+- Added 29 focused parser, persistence, migration, guard, and route tests plus a
+  PostgreSQL 17 executable contract covering all 35 migrations, malformed-date
+  safety, role denial, immutability, and rollback.
+- No Production, environment, Neon, lead/event, message, provider, campaign,
+  budget, WordPress, DNS, publication, purchase, deletion, or NellySelly action
+  occurred.
+
 ## 2026-08-24 — Vendor ingress contract lab candidate
 
 - Reused the existing Phase 9 vendor-neutral normalizer instead of creating a

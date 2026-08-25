@@ -2,6 +2,44 @@
 
 Updated 2026-08-24.
 
+## Phase 9 marketing-spend ledger ingress — 2026-08-24
+
+- **Reuse decision:** repository, migration-history, and branch searches found
+  the existing canonical `marketing_channels`, `marketing_campaigns`,
+  `marketing_spend_daily`, Growth Command Center, KPI calculations,
+  `growth:manage` permission, and immutable audit ledger—but no spend importer.
+  This candidate extends those assets on exact sealed Draft PR #217 head
+  `d04984b4d162f13c79af261beb55a82f15a86b80`; it adds no parallel database,
+  dashboard, provider adapter, campaign manager, or lead system.
+- **Implementation:** one protected paste/file workbench, two same-origin
+  bounded APIs, a strict 19-column CSV v1 normalizer, deterministic row/batch
+  fingerprints, minimized receipts, and one owner-only atomic Neon function.
+  Raw CSV is never persisted. Exact replay is idempotent; channel, campaign,
+  and daily-fact creation/revision retain immutable before/after evidence;
+  conflicting identities and synthetic/QA markers in any identity field fail
+  closed.
+- **Authority boundary:** `GROWTH_SPEND_IMPORT_ENABLED=false` is the safe
+  default. Preview cannot mutate, browser/database roles cannot execute the
+  import contract, and commits also require exact configured Ask Magic Mike
+  Production-endpoint attestation. This feature cannot contact a provider,
+  change a budget, launch a campaign, create a lead, send a message, or touch
+  WordPress, DNS, or NellySelly.
+- **Current local acceptance:** 5 focused files / 29 tests, all 247 files /
+  3,181 tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build,
+  89/17 route proof, 14/14 release safety, Production dependency audit, system
+  isolation, script syntax, and whitespace checks pass on Node 24.18.0. A fresh
+  disposable PostgreSQL 17.11 rebuild of all 35 migrations passes executable
+  insert/replay/revision, malformed-date, identity, synthetic-refusal, audit,
+  immutability, role-denial, and rollback contracts. Clean-head CI, immutable
+  Preview, browser, and log evidence remain pending.
+- **Release order:** the current first Production gate remains PR #209. This
+  stacked candidate cannot leapfrog PRs #209–#217 and requires its own later,
+  exact migration/merge/deploy approval; importing one reviewed real report is
+  an additional report-specific approval.
+- Detailed scope:
+  `docs/phase9/MARKETING_SPEND_INGRESS_RELEASE_GATE.md` and
+  `docs/phase9/MARKETING_SPEND_INGRESS_QA_EVIDENCE.md`.
+
 ## Phase 9 vendor ingress contract lab — 2026-08-24
 
 - **Reuse decision:** this candidate extends the existing Phase 9
@@ -18,13 +56,18 @@ Updated 2026-08-24.
   database writes, lead creation, and live activation are structurally absent.
   The shared normalizer now treats missing test state as a review reason and
   continues to refuse inferred channel consent.
-- **Current local acceptance:** 5 focused files / 30 tests, all 242 files /
-  3,152 tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build,
-  86/17 route proof, 14/14 release safety, Production dependency audit, and
-  system isolation pass on Node 24.18.0. Clean-commit release doctor is 43/43,
-  staged and full tracked-history secret scans report no finding, and exact-base
-  ancestry/diff proof passes. Immutable Preview, browser, and deployment-log
-  proof remain pending before this candidate is sealed.
+- **Final acceptance:** exact head
+  `d04984b4d162f13c79af261beb55a82f15a86b80` passes 5 focused files / 30
+  tests, all 242 files / 3,152 tests, strict TypeScript, full ESLint, optimized
+  Next.js 15.5.21 build, 86/17 route proof, 14/14 release safety, 43/43 release
+  doctor, Production dependency audit, system isolation, exact-base ancestry,
+  and secret/diff checks on Node 24.18.0. GitHub Release Gate run
+  `32787289181` passed.
+- **Preview/browser proof:** immutable READY deployment
+  `dpl_AZJxhg7Gvvrdh7JzSpQhGU4hN4iJ` passed protected workflow
+  `32787700195`: 17 read-only checks, 6 deliberate mutation skips, and 6/6
+  desktop/mobile browser scenarios with zero horizontal overflow, zero
+  unexpected writes, zero POST requests, and zero error-level deployment logs.
 - **Safety:** no Production, environment, schema, database row, lead/event,
   message, provider credential/call, WordPress/DNS, publication, spend,
   deletion, or NellySelly action.
