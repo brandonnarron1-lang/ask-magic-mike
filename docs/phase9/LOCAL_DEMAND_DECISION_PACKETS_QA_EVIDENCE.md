@@ -45,6 +45,14 @@ Result: 4 focused files / 22 tests PASS after the final validation hardening.
 The broader adjacent suite passed 7 files / 36 tests before that final edge-case
 test was added.
 
+The release candidate also includes a deployed-browser acceptance spec for the
+authenticated Growth Command Center. It exercises desktop and mobile widths,
+requires a 200 response and meaningful rendered content, rejects framework
+error overlays, console/page errors, horizontal overflow, non-allowlisted packet
+links, and every non-read HTTP request, and captures full-page screenshots. The
+spec passed locally at both widths against the truthful unconfigured/empty
+state. Hosted exact-head execution remains part of the Preview seal below.
+
 ## Executable PostgreSQL 17 proof
 
 A disposable, unexposed `postgres:17-alpine` container was created with only a
@@ -92,6 +100,7 @@ Runtime: Node `v24.18.0`, pnpm `10.30.3`.
 | Ask/NellySelly deployable-source isolation | PASS |
 | Production dependency audit | PASS — no known vulnerabilities |
 | Touched-path security review | PASS — no actionable finding |
+| Growth decision-packet browser acceptance | PASS — 2/2 local desktop/mobile checks |
 | `git diff --check` | PASS |
 | Release doctor before commit | HEALTHY — 42 pass / one expected nonblocking dirty-tree finding |
 | Release doctor on clean code-bearing commit | HEALTHY — 43 pass / 0 fail / 0 skip |
@@ -129,6 +138,7 @@ pnpm run routes:assert
 pnpm run release:safety
 pnpm run amm:verify:isolation
 pnpm audit --prod --audit-level=high
+pnpm exec playwright test tests/e2e/growth-decision-packets-preview.spec.ts
 git diff --check
 ```
 
