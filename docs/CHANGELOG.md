@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-08-25 — PR #212 cross-domain measurement consolidation
+
+- Reused exact PR #212 head
+  `758154ca73b64f24f2df8f183ba8b3f6f82f769a` and reconciled it onto exact
+  PR #220 head `5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3`; no parallel analytics store,
+  browser identity, WordPress forwarding path, or deployment was created.
+- Preserved the cumulative train's canonical lead/event authority, valid
+  pseudonymous funnel identity, server-owned conversion outcomes, Web Vitals
+  privacy boundary, and automation/no-write Preview controls.
+- Kept both activation boundaries disabled: Ask requires exact Production-only
+  configuration plus explicit consent, and WordPress bridge 1.2.0 requires its
+  separate default-off constant plus the existing cookie provider's exact
+  `allow` state.
+- Retained the public preflight `HOLD` until the brokerage's legacy pre-consent
+  GTM head/noscript bootstrap is replaced under its independent owner gate.
+- No Production, environment, database, lead/event, notification, provider,
+  WordPress, DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-24 — PR #216 refresh onto final PR #215 cutover hygiene
 
 - Preserved former PR #216 head `253480326312d42a159323176d69e87f47262921`
@@ -379,7 +397,6 @@
 - No Production secret, deployment, migration, lead/event write, notification,
   email, SMS, Push, WordPress edit, publication, DNS, spend, deletion, or
   NellySelly action occurred.
-
 ## 2026-08-22 — Conversion identity and public-navigation polish candidate
 
 - Reused the canonical home-value funnel and added required consumer name

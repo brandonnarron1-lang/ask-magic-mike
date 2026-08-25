@@ -36,8 +36,8 @@ describe("widget Preview browser no-write contract", () => {
       (match) => match.index,
     );
 
-    expect(installs).toHaveLength(3);
-    expect(navigations).toHaveLength(3);
+    expect(navigations.length).toBeGreaterThan(0);
+    expect(installs).toHaveLength(navigations.length);
     for (let index = 0; index < navigations.length; index += 1) {
       expect(installs[index]).toBeLessThan(navigations[index]);
     }

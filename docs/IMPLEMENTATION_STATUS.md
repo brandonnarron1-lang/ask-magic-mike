@@ -1,6 +1,45 @@
 # Implementation Status
 
-Updated 2026-08-24.
+Updated 2026-08-25.
+
+## Phase 9 cross-domain measurement consolidation — 2026-08-25
+
+- **Reuse decision:** exact PR #212 head
+  `758154ca73b64f24f2df8f183ba8b3f6f82f769a` contains the existing reviewed
+  consent-gated Ask runtime, WordPress bridge 1.2.0, release package, verifier,
+  tests, and activation/rollback runbooks. It is being reconciled onto exact
+  sealed PR #220 head `5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3`
+  instead of creating a second analytics implementation.
+- **Authority boundary:** the cumulative train's canonical Neon event ledger,
+  server-owned conversion outcomes, valid pseudonymous funnel identity, Web
+  Vitals privacy controls, and automated-browser exclusion remain authoritative.
+  External analytics receives only registered public events and allowlisted
+  dimensions through the dedicated `ammDataLayer`; no PII or test traffic is
+  eligible.
+- **Fail-closed activation:** Ask requires exact Production-only container
+  configuration and explicit analytics consent. Advertising storage, user data,
+  and personalization stay denied. The canonical WordPress bridge has its own
+  default-off flag and requires the current consent provider's exact `allow`
+  state. Neither boundary is activated by this consolidation.
+- **Live hold:** the read-only public preflight remains `HOLD` because Our Town
+  currently initializes legacy GTM head/noscript code before the deferred
+  cookie-choice provider. WordPress replacement and controlled runtime QA need
+  their own later owner gate before Ask-side measurement can be considered.
+- **Local acceptance:** exact Node 24.18.0 passes 9 focused files / 77 tests,
+  all 261 files / 3,275 tests, strict TypeScript, full ESLint, optimized Next.js
+  15.5.21 build, 95 active routes / 17 acknowledged duplicates, 14/14 release
+  safety, and system isolation. Isolated Chromium passes 4/4 mutation-blocked
+  runtime scenarios. PHP 8.1 syntax, package integrity, source/archive parity,
+  and checksum verification pass for the refreshed bridge 1.2.0 artifact.
+- **Release order:** PR #209 remains the first Production gate. This stacked
+  candidate may not leapfrog PRs #209–#220 and still requires fresh exact-head
+  CI, immutable Preview, protected no-write browser evidence, and its own later
+  approval. No Production, environment, database, lead/event, communication,
+  WordPress, DNS, publication, spend, deletion, provider, or NellySelly action
+  has occurred.
+- Detailed design and historical evidence:
+  `docs/phase9/CROSS_DOMAIN_MEASUREMENT_ACTIVATION.md` and
+  `docs/phase9/CROSS_DOMAIN_MEASUREMENT_QA_EVIDENCE.md`.
 
 ## Phase 9 marketing-spend ledger ingress — 2026-08-24
 
@@ -530,7 +569,6 @@ Updated 2026-08-24.
   cleanup.
 - Exact future gate:
   `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
-
 ## Phase 9 conversion identity polish — 2026-08-22
 
 - A fresh Production no-submit audit found that the canonical home-value path
@@ -559,6 +597,11 @@ Updated 2026-08-24.
   preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
   The only automatic conflict was the cumulative QA evidence document; the
   application merge was clean.
+- PR #195 head `db13953fc5f6d24a684f66c9a1c10c6b929b72b3` was merged as
+  Production/main `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and accepted on
+  Vercel deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Fresh read-only
+  acceptance passes 15/15 conversion checks and 19/19 Production smoke checks
+  with two intentional authenticated/write skips.
 - Detailed decision and QA:
   `docs/phase9/CONVERSION_IDENTITY_POLISH.md` and
   `docs/phase9/CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.

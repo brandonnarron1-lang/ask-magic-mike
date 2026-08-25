@@ -8,6 +8,17 @@ the immediately preceding Ready deployment before a future release because
 aliases can move. If smoke checks fail, stop traffic activation and promote the
 recorded prior deployment. Do not delete a deployment or force-push.
 
+For cross-domain measurement, the pre-activation rollback is to leave the Ask
+Production configuration unset and keep
+`AMM_GOOGLE_MEASUREMENT_ENABLED` disabled in WordPress. After a separately
+approved WordPress activation, disable that constant and restore the backed-up
+1.1.0 bridge/source configuration through the reviewed rollback procedure; do
+not reintroduce a pre-consent GTM head/noscript bootstrap. After a separately
+approved Ask activation, remove the measurement configuration and promote the
+recorded prior Ready deployment if application smoke checks fail. Preserve the
+canonical first-party event ledger; external-tag rollback does not authorize
+event deletion.
+
 For the dependent field-experience candidate, application rollback to the prior
 accepted Vercel deployment removes the reporter and Growth panel code. It has
 no schema rollback. Preserve any minimized `web_vital_observed` rows already
@@ -76,10 +87,20 @@ Remove only the named reversible Custom HTML/shortcode/widget block or deactivat
 the isolated bridge after backing up. Do not edit parent theme, `functions.php`,
 FlexMLS/IDX, or unrelated forms. Restore prior page cache only if the owner approves.
 
-The canonical bridge is currently shadow-only. Immediate rollback is
-`AMM_CANONICAL_BRIDGE_ENABLED=false`; a one-form rollback removes only that ID
-from `AMM_CANONICAL_BRIDGE_FORM_IDS`. It has not forwarded, altered, or imported
-any lead record.
+Canonical bridge 1.1.0 is currently active only for the already-approved Form 3
+path. Preserve its exact enable flag, allowlist, HMAC secret, endpoint, Gravity
+entry, and notification state during a 1.2.0 upgrade. Lead-forwarding rollback
+is `AMM_CANONICAL_BRIDGE_ENABLED=false`; a one-form rollback removes only that
+ID from `AMM_CANONICAL_BRIDGE_FORM_IDS`. Do not use a measurement issue as
+authority to disable Form 3 or delete a WordPress/Neon record.
+
+Bridge 1.2.0 measurement rollback is independently
+`AMM_GOOGLE_MEASUREMENT_ENABLED=false`. Preserve the pre-change GTM head and
+noscript source and the 1.1.0 archive before installation. If controlled QA
+fails, disable the measurement flag first; reinstall 1.1.0 and restore the
+exact prior GTM source only when required by the approved rollback. Do not
+change the cookie-choice provider, purge unrelated cache, edit the parent
+theme, or touch NellySelly.
 
 ## Email
 

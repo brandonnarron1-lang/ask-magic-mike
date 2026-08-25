@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-08-25 — Cross-domain measurement consolidation candidate
+
+- Reused the already-reviewed PR #212 application, WordPress bridge, tests,
+  release package, and activation runbooks instead of creating another
+  analytics implementation.
+- Consolidated that consent-gated measurement work onto exact PR #220 head
+  `5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3`, preserving the newer funnel
+  identity, durable KPI authority, privacy minimization, automation exclusion,
+  and read-only Preview controls.
+- External analytics remains fail closed: the Ask runtime requires the exact
+  approved Production container, explicit analytics consent, a canonical
+  public route, and non-QA/non-automated traffic. Advertising purposes remain
+  denied and the dedicated `ammDataLayer` receives only allowlisted fields.
+- The canonical WordPress bridge remains independently disabled by default;
+  its 1.2.0 Basic Consent loader requires the existing provider's exact
+  `allow` state and rejects coexistence with the legacy GTM bootstrap.
+- No Production configuration, deployment, migration, lead/event write,
+  communication, WordPress edit, publication, spend, DNS, deletion, provider,
+  or NellySelly action occurred.
+
 ## 2026-08-24 — Marketing-spend ledger ingress candidate
 
 - Reused the canonical growth schema, Growth Command Center, KPI engine,
@@ -386,7 +406,6 @@
   documents required reconciliation. No migration, Production action, lead,
   message, WordPress edit, publication, spend, DNS change, deletion, or
   NellySelly action occurred.
-
 ## 2026-08-22 — Conversion identity polish
 
 - Added required seller identity to the existing four-stage home-value funnel.

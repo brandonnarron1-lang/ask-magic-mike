@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Ask Magic Mike Canonical Lead Bridge
- * Description: Explicit Gravity Forms to Ask Magic Mike forwarding with HMAC signing, idempotency, retries, and reconciliation status.
- * Version: 1.1.0
+ * Description: Explicit Gravity Forms forwarding plus an opt-in, consent-gated Google measurement bridge for Our Town Properties.
+ * Version: 1.2.0
  * Requires at least: 6.5
  * Requires PHP: 8.1
  * Author: Our Town Properties, Inc.
@@ -14,10 +14,12 @@ if (!defined('ABSPATH')) {
 }
 
 final class AMM_Canonical_Lead_Bridge {
-    private const VERSION = '1.1.0';
+    private const VERSION = '1.2.0';
     private const STATUS_OPTION = 'amm_canonical_bridge_status_v1';
     private const RETRY_HOOK = 'amm_canonical_bridge_retry_v1';
     private const MAX_ATTEMPTS = 3;
+    private const GOOGLE_MEASUREMENT_CONTAINER = 'GTM-KZMCSLTJ';
+    private const GOOGLE_MEASUREMENT_COOKIE = 'vv_cookieconsent_status';
 
     /** Exact audited Gravity Forms allowlist. No form is discovered or guessed. */
     private const FORM_MAP = array(
@@ -31,6 +33,7 @@ final class AMM_Canonical_Lead_Bridge {
     );
 
     public static function boot(): void {
+        add_action('wp_head', array(__CLASS__, 'render_measurement_gate'), 0);
         add_action('gform_after_submission', array(__CLASS__, 'after_submission'), 20, 2);
         add_action(self::RETRY_HOOK, array(__CLASS__, 'retry_entry'), 10, 3);
         add_action('admin_menu', array(__CLASS__, 'register_health_page'));
@@ -44,6 +47,41 @@ final class AMM_Canonical_Lead_Bridge {
 
     private static function enabledGlobally(): bool {
         return defined('AMM_CANONICAL_BRIDGE_ENABLED') && AMM_CANONICAL_BRIDGE_ENABLED === true;
+    }
+
+    private static function measurementEnabled(): bool {
+        return defined('AMM_GOOGLE_MEASUREMENT_ENABLED') && AMM_GOOGLE_MEASUREMENT_ENABLED === true;
+    }
+
+    /**
+     * Render a same-origin Basic Consent Mode loader before other head output.
+     *
+     * The loader is inert unless the existing cookie-choice provider records
+     * the exact value "allow". It never creates dataLayer or contacts Google
+     * for missing, denied, dismissed, malformed, or unknown consent state.
+     * Legacy GTM head and noscript snippets must be removed before this flag is
+     * enabled; the release verifier enforces that single-loader invariant.
+     */
+    public static function render_measurement_gate(): void {
+        if (!self::measurementEnabled()) {
+            return;
+        }
+
+        $asset_url = add_query_arg(
+            'ver',
+            self::VERSION,
+            plugins_url('assets/amm-consent-gate.js', __FILE__)
+        );
+        printf(
+            "\n<!-- AMM Basic Consent Gate %s: explicit allow only -->\n" .
+            '<script id="amm-basic-consent-gate" data-amm-consent-gate="basic-v1" ' .
+            'data-amm-gtm-container="%s" data-amm-consent-cookie="%s" ' .
+            'data-no-optimize="1" data-cfasync="false" src="%s"></script>' . "\n",
+            esc_attr(self::VERSION),
+            esc_attr(self::GOOGLE_MEASUREMENT_CONTAINER),
+            esc_attr(self::GOOGLE_MEASUREMENT_COOKIE),
+            esc_url($asset_url)
+        );
     }
 
     /**
@@ -352,6 +390,9 @@ final class AMM_Canonical_Lead_Bridge {
         $signing_state = strlen(self::secret()) >= 32
             ? __('Configured', 'amm-canonical-bridge')
             : __('Missing or too short', 'amm-canonical-bridge');
+        $measurement_mode = self::measurementEnabled()
+            ? __('Enabled — explicit allow only', 'amm-canonical-bridge')
+            : __('Disabled — no Google measurement loader', 'amm-canonical-bridge');
         if (!self::enabledGlobally()) {
             $mode = __('Shadow only — no forwarding', 'amm-canonical-bridge');
         } elseif (!$enabled_form_ids) {
@@ -371,6 +412,8 @@ final class AMM_Canonical_Lead_Bridge {
             </p>
             <p><strong><?php echo esc_html__('Version:', 'amm-canonical-bridge'); ?></strong> <?php echo esc_html(self::VERSION); ?></p>
             <p><strong><?php echo esc_html__('Signing secret:', 'amm-canonical-bridge'); ?></strong> <?php echo esc_html($signing_state); ?></p>
+            <p><strong><?php echo esc_html__('Google measurement:', 'amm-canonical-bridge'); ?></strong> <?php echo esc_html($measurement_mode); ?></p>
+            <p><?php echo esc_html__('Legacy GTM head and noscript snippets must be removed before the measurement gate is enabled. The gate loads only GTM-KZMCSLTJ after the existing consent cookie equals allow.', 'amm-canonical-bridge'); ?></p>
             <p><?php echo esc_html__('Secrets remain in wp-config.php or the hosting environment and are never displayed here.', 'amm-canonical-bridge'); ?></p>
             <table class="widefat striped">
                 <thead><tr><th>Form</th><th>Entry</th><th>State</th><th>Attempt</th><th>Canonical lead</th><th>Updated</th><th>Safe error</th></tr></thead>

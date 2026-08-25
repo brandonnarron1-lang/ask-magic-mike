@@ -1,8 +1,39 @@
 # Owner Approval Queue
 
-Updated 2026-08-24 from authenticated GitHub, Vercel, Neon, WordPress, and
+Updated 2026-08-25 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
+
+## Cross-domain measurement consolidation — later, not currently requestable
+
+- Branch `codex/phase9-cross-domain-measurement-consolidation-20260825`
+  consolidates exact PR #212 onto exact sealed PR #220 head. It reuses the
+  existing Our Town GTM container and canonical Neon ledger with explicit basic
+  consent, advertising consent denied, private/Preview/QA exclusion, exact
+  container isolation, and the newer cumulative KPI/privacy controls.
+- No Google, Vercel environment, merge, or Production deployment setting has
+  changed. Local exact Node 24 release-gate and isolated no-write Chromium QA
+  pass; fresh cumulative exact-head CI and immutable protected Preview evidence
+  remain required after commit and push.
+- A follow-up live audit found the brokerage page starts GTM and its Google tag
+  before the deferred cookie-choice provider. The read-only cross-domain
+  preflight therefore returns `HOLD`. The gate is not requestable until that
+  ordering and authenticated GTM/GA4 domain/consent configuration pass.
+- Canonical bridge 1.2.0 contains the prepared, disabled-by-default repair.
+  It preserves the approved Form 3 bridge and replaces no indexed page or
+  cookie provider. Its first exact gate, after final PR/package evidence, is:
+  `APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA`.
+- That WordPress phrase authorizes backup, 1.2.0 installation, preservation of
+  current Form 3 settings, exact legacy GTM head/noscript removal, measurement
+  flag enablement, and reversible source/deny/allow/network QA only.
+- One live page-view row and one experiment-exposure attempt from the initial
+  browser-routing error are disclosed in the QA evidence. No lead or message
+  was created. Cleanup is not included in this candidate's release phrase.
+- After the hold clears, its only configuration/release phrase is:
+  `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
+- That phrase will not authorize a lead submission, email/SMS/Push, WordPress
+  edit, marketing publication, spend, DNS change, database mutation, deletion,
+  or NellySelly action.
 
 ## Completed Production release sequence
 
@@ -47,7 +78,8 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    `db13953fc5f6d24a684f66c9a1c10c6b929b72b3` was merged as
    `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and accepted on Production
    deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. It contained no migration,
-   form submission, or message send.
+   form submission, or message send. Fresh read-only verification passes 15/15
+   funnel and 19/19 smoke checks.
 
 These completed gates are exhausted and must not be reused as authority for a
 new action. None authorized a social/GBP post, email campaign, QR

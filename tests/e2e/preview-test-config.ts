@@ -22,8 +22,9 @@ function bypassHeaders(): Record<string, string> {
 }
 
 const previewUrl = process.env.PREVIEW_URL?.replace(/\/$/, "") ?? "";
+const localE2ePort = process.env.AMM_E2E_PORT ?? "3210";
 
 export const previewTestUse = {
-  baseURL: previewUrl || "http://localhost:3000",
+  baseURL: previewUrl || `http://127.0.0.1:${localE2ePort}`,
   extraHTTPHeaders: bypassHeaders(),
 };

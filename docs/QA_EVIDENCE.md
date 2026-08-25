@@ -1,5 +1,46 @@
 # QA Evidence
 
+## Phase 9 cross-domain measurement consolidation — 2026-08-25
+
+- Exact PR #212 head
+  `758154ca73b64f24f2df8f183ba8b3f6f82f769a` was merged without committing
+  onto exact PR #220 head `5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3`
+  in a dedicated worktree. Its implementation, WordPress bridge 1.2.0 package,
+  tests, and runbooks were reused rather than rewritten.
+- Conflict resolution preserves the newer canonical funnel UUID, server-owned
+  conversion outcomes, Web Vitals path, protected no-write browser harness,
+  exact-origin widget checks, and automated-browser KPI exclusion while adding
+  the consent-gated dedicated `ammDataLayer` boundary.
+- Both application and WordPress measurement activation remain disabled. The
+  current read-only public preflight is still expected to return `HOLD` until
+  separately approved WordPress consent-order remediation and runtime QA.
+- **Local acceptance:** focused integration/privacy/WordPress coverage passes
+  9 files / 77 tests. The complete Node 24.18.0 release gate passes system
+  isolation, 14/14 safety checks, all 261 files / 3,275 tests, strict
+  TypeScript, ESLint, optimized Next.js 15.5.21 build, and 95 active routes / 17
+  acknowledged duplicates. Local isolated Chromium passes 4/4 no-write
+  scenarios covering external-analytics absence, widget success/error, and
+  keyboard focus.
+- **Package acceptance:** PHP 8.1 syntax, ZIP integrity, source/archive parity,
+  and SHA-256 sidecar verification pass for bridge 1.2.0. The current package
+  digest is
+  `9b9534e7fdf078b60ed4f32c72fad93ed7632cf5702fc9a4fa58eefe26bf902c`.
+- **Live read-only preflight:** truthful verdict `HOLD`; the approved brokerage
+  container and destination remain `GTM-KZMCSLTJ` / `G-RQRBB1G270`, Ask server
+  HTML remains tag-inert, and no NellySelly identity collision is present. The
+  canonical Basic Consent gate is absent while legacy GTM head and noscript
+  bootstraps remain. No consent choice, form, account, database, or deployment
+  write occurred.
+- **Security/dependency evidence:** Production dependency audit reports no known
+  vulnerabilities; Gitleaks reports no leak in the 123.24 KB staged candidate
+  or 636-commit history; the migration diff is empty; `.env.example` adds only
+  the public configuration name and safe comments.
+- Fresh exact-head secret/dependency scans, immutable Preview, and protected
+  browser results remain mandatory after the merge commit and push.
+- No Production, environment, database, lead/event, communication, WordPress,
+  GTM/GA4, DNS, publication, spend, deletion, provider, or NellySelly mutation
+  occurred during consolidation.
+
 ## Phase 9 funnel-event identity-integrity refresh — 2026-08-24
 
 - Draft PR #216 reuses the established funnel/session UUID and canonical event
@@ -345,7 +386,6 @@
 - No form completion, consent acceptance, lead submission, database write,
   email, SMS, Push, WordPress edit, publication, DNS change, spend, deletion,
   or NellySelly action occurred.
-
 ## Phase 9 conversion identity polish — 2026-08-22 15:17 EDT
 
 - Current Production seller, buyer, and Ask paths were captured in the in-app
