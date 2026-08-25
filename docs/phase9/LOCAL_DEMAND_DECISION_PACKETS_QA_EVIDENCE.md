@@ -10,6 +10,9 @@ Base: exact sealed PR #221 head
 Status: local exact-engine candidate verified; immutable Preview and protected
 browser evidence pending; Production unchanged
 
+Code-bearing commit:
+`5d550c5e76005f898cbe0482b12ca982359e46e8`
+
 ## Executive result
 
 The canonical Growth Command Center now converts already-persisted organic and
@@ -91,6 +94,7 @@ Runtime: Node `v24.18.0`, pnpm `10.30.3`.
 | Touched-path security review | PASS — no actionable finding |
 | `git diff --check` | PASS |
 | Release doctor before commit | HEALTHY — 42 pass / one expected nonblocking dirty-tree finding |
+| Release doctor on clean code-bearing commit | HEALTHY — 43 pass / 0 fail / 0 skip |
 
 ## Security review
 

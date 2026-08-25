@@ -29,8 +29,10 @@ Updated 2026-08-25.
   optimized Next.js 15.5.21 build, 95/17 route proof, 14/14 release safety,
   deployable-source isolation, and Production dependency audit. Disposable
   PostgreSQL 17 proves insert/update rejection, historical preservation, and
-  role denial. Exact-head GitHub/Preview/browser sealing remains pending;
-  Production is unchanged.
+  role denial. Clean code-bearing commit
+  `5d550c5e76005f898cbe0482b12ca982359e46e8` passes 43/43 release doctor.
+  Exact-head GitHub/Preview/browser sealing remains pending; Production is
+  unchanged.
 - Detailed design and local evidence:
   `docs/phase9/LOCAL_DEMAND_DECISION_PACKETS.md` and
   `docs/phase9/LOCAL_DEMAND_DECISION_PACKETS_QA_EVIDENCE.md`.
