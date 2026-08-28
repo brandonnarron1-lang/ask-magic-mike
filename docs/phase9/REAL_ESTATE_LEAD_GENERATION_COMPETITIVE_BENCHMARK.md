@@ -129,11 +129,11 @@ Legend:
 | Experiment registry and deterministic variants | Mature growth platforms | PHASE 9 PR | Approval state, guardrails, sample floor, practical uplift, documented decision |
 | Opportunity radar | Predictive seller and database systems | PHASE 9 PR | Deterministic detection of spend gaps, stale database, response risk, concentration, and scale candidates |
 | Persistent market-signal ledger | SmartZip/Fello/Revaluate class | PHASE 9 PR | Evidence, confidence, geography, segment, source, observation time |
-| Database reactivation campaigns | BoomTown, Ylopo, Fello | NEXT + OWNER GATE | Build consent-aware cohorts and drafts; no enrollment or send without approval |
-| Listing and homeowner alert engine | CINC, Ylopo, RealScout, Homebot | NEXT | Connect permitted MLS/property data and consumer preferences |
+| Database reactivation campaigns | BoomTown, Ylopo, Fello | PHASE 9 PR + OWNER GATE | Permission-aware cohorts and internal drafts are built; no enrollment or send without a separately bounded approval |
+| Listing and homeowner alert engine | CINC, Ylopo, RealScout, Homebot | PHASE 9 PR FOUNDATION + NEXT + OWNER GATE | Device-private recurring-value planning and purpose-specific permission foundations are built; provider-backed inventory and alerts still require permitted MLS/property data, preferences, frequency, and delivery approval |
 | Server-side ad conversion feedback | Meta CAPI, Google enhanced conversions | NEXT + OWNER GATE | Require credentials, privacy review, event mapping, and test mode |
 | Live portal and CRM webhooks | Portal/FUB ecosystem | NEXT + OWNER GATE | Add signed, idempotent endpoints after provider contracts are selected |
-| Approved autonomous nurture | Lofty, Structurely, Fello | NEXT + OWNER GATE | Start with test records and human approval; consumer send remains off |
+| Approved autonomous nurture | Lofty, Structurely, Fello | PHASE 9 PR FOUNDATION + OWNER GATE | Templates, sequence state, permission checks, suppression, and no-send drafts exist; consumer send remains off pending a named bounded pilot |
 | Autonomous budget changes | Agentic ad platforms | BLOCKED BY DEFAULT | Recommendations only; no autonomous spend authority |
 | Autonomous public publishing | AI marketing platforms | BLOCKED BY DEFAULT | Draft and QA only unless an explicit publishing policy is approved |
 

@@ -1,6 +1,6 @@
 # OTP Facebook Crawler Apache Evidence — 2026-08-28
 
-## Outcome
+## Diagnostic outcome
 
 The exact denial is proven and no Production change was made.
 
@@ -33,6 +33,14 @@ unknown ModSecurity rule needed discovery is superseded.
 No raw client IP, cPanel session URL, secret, credential, or private log payload
 is retained in this evidence file.
 
+## Approved follow-up test
+
+The subsequently approved account-root `.htaccess` trial was completed and
+rolled back on 2026-08-28. It proved that the account layer cannot supersede
+the earlier server-global authorization decision. Current Production behavior
+and the original `.htaccess` hash are restored. See
+[`OTP_FACEBOOK_CRAWLER_ACCOUNT_OVERRIDE_TEST_2026-08-28.md`](./OTP_FACEBOOK_CRAWLER_ACCOUNT_OVERRIDE_TEST_2026-08-28.md).
+
 ## Why the remediation is bounded
 
 Apache documents that `SetEnvIf` directives are applied in order and that a
@@ -52,6 +60,7 @@ public images, and `GET`/`HEAD` only.
 
 ## Next controlled action
 
-Submit the prepared hosting-operator request or approve the exact narrow test
-gate documented in
+Have a root/WHM hosting administrator execute the already-reviewed per-vhost
+change documented in
 [FACEBOOK_CRAWLER_FIREWALL_CHANGE.md](../FACEBOOK_CRAWLER_FIREWALL_CHANGE.md).
+Do not repeat the account-root workaround.

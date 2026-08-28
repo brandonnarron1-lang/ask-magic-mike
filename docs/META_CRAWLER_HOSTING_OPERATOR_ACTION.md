@@ -24,6 +24,13 @@ as Off, and the account's root `.htaccess` has no matching user-agent or
 authorization deny. This is therefore not a WordPress, plugin, robots.txt,
 Vercel, or ModSecurity-rule-ID issue.
 
+An approved account-root `.htaccess` trial of the same narrow expression was
+also completed on 2026-08-28. It parsed but could not supersede the earlier
+server-global authorization decision; the byte-identical backup was restored.
+The cPanel userdata include is root-owned. This ticket therefore requests the
+supported root/WHM per-vhost implementation, not another WordPress or
+`.htaccess` change.
+
 ## Requested change
 
 Please add a supported **per-account/per-vhost** override that unsets
@@ -51,3 +58,6 @@ and use a graceful reload.
 
 Full technical contract:
 [FACEBOOK_CRAWLER_FIREWALL_CHANGE.md](./FACEBOOK_CRAWLER_FIREWALL_CHANGE.md).
+
+Completed account-level test evidence:
+[OTP_FACEBOOK_CRAWLER_ACCOUNT_OVERRIDE_TEST_2026-08-28.md](./phase9/OTP_FACEBOOK_CRAWLER_ACCOUNT_OVERRIDE_TEST_2026-08-28.md).

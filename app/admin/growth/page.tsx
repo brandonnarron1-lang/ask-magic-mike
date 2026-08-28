@@ -10,6 +10,11 @@ import {
   formatGrowthBaselineValue,
   type GrowthBaselineState,
 } from "../../lib/growth/baseline-target-readiness";
+import {
+  buildGrowthCapabilityLedger,
+  growthCapabilityStateLabel,
+  type GrowthCapabilityState,
+} from "../../lib/growth/capability-ledger";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 
 export const dynamic = "force-dynamic";
@@ -196,6 +201,25 @@ function BaselineStatePill({ value }: { value: GrowthBaselineState }) {
   );
 }
 
+function CapabilityStatePill({ value }: { value: GrowthCapabilityState }) {
+  const tone = value === "production_live"
+    ? "border-[#4a8c6f66] bg-[#071712] text-[#83dab4]"
+    : value === "release_candidate"
+      ? "border-[#4baab866] bg-[#06171b] text-[#7ee7f1]"
+      : value === "operator_gate"
+        ? "border-[#cda24a66] bg-[#171207] text-[#e4c36f]"
+        : value === "host_gate"
+          ? "border-[#d9783666] bg-[#1d0f07] text-[#f2a36d]"
+          : value === "external_dependency"
+            ? "border-[#8f6eb766] bg-[#120b1c] text-[#cbb1ef]"
+            : "border-[#a21f3d66] bg-[#2a0710] text-[#ff9ab1]";
+  return (
+    <span className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.11em] ${tone}`}>
+      {growthCapabilityStateLabel(value)}
+    </span>
+  );
+}
+
 function FreshnessStatus({
   value,
   label,
@@ -288,6 +312,9 @@ export default async function GrowthCommandCenterPage({
   const data = await loadGrowthIntelligence(windowDays);
   const summary = data.summary;
   const baselineReadiness = buildGrowthBaselineReadiness(data);
+  const capabilityLedger = buildGrowthCapabilityLedger({
+    currentTailInProduction: process.env.VERCEL_ENV === "production",
+  });
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_75%_0%,rgba(145,19,50,.17),transparent_34%),radial-gradient(circle_at_15%_15%,rgba(205,162,74,.11),transparent_30%),#040404] px-4 py-7 text-[#f4ead4] sm:px-6 sm:py-10">
@@ -357,6 +384,94 @@ export default async function GrowthCommandCenterPage({
 
         <div className="mt-5">
           <StateBanner configured={data.configured} schemaReady={data.schemaReady} error={data.error} />
+        </div>
+
+        <div className="mt-5">
+          <Panel
+            eyebrow="Capability authority ledger"
+            title="Build once. Activate deliberately."
+            note="This is the canonical map of implemented capability, release state, external dependency, and prohibited authority. It performs no mutation and grants no approval."
+          >
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5" aria-label="Capability authority summary">
+              <MetricCard
+                label="Production live"
+                value={capabilityLedger.counts.production_live}
+                note="Established operating capability"
+                emphasis
+              />
+              <MetricCard
+                label="Reviewed candidate"
+                value={capabilityLedger.counts.release_candidate}
+                note="Preserve the existing release train"
+              />
+              <MetricCard
+                label="Human or host gate"
+                value={capabilityLedger.counts.operator_gate + capabilityLedger.counts.host_gate}
+                note="Prepared, not authorized"
+              />
+              <MetricCard
+                label="External dependency"
+                value={capabilityLedger.counts.external_dependency}
+                note="Contract, credentials, or licensed data"
+              />
+              <MetricCard
+                label="Prohibited"
+                value={capabilityLedger.counts.prohibited}
+                note="No unrestricted autonomy"
+              />
+            </div>
+
+            <div className="mt-4 rounded-xl border border-[#4baab833] bg-[#061317] px-4 py-3 text-xs leading-6 text-[#c7e7eb]">
+              Rendering context: <strong className="text-[#7ee7f1]">{capabilityLedger.generatedFor.replaceAll("_", " ")}</strong>. A reviewed candidate is not Production merely because its tests or Preview deployment pass.
+            </div>
+
+            <details className="group mt-4 rounded-xl border border-white/10 bg-black/30 p-4">
+              <summary className="cursor-pointer list-none text-xs font-bold uppercase tracking-[0.12em] text-[#d8c9aa] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f0cf79]">
+                <span className="inline-flex items-center gap-2">
+                  <span aria-hidden="true" className="text-[#d1aa53] transition group-open:rotate-90">›</span>
+                  Inspect all {capabilityLedger.items.length} capability decisions
+                </span>
+              </summary>
+              <div className="mt-4 grid gap-3 lg:grid-cols-2" aria-label="Canonical capability decisions">
+                {capabilityLedger.items.map((item) => (
+                  <article key={item.key} className="min-w-0 rounded-xl border border-white/[.08] bg-[#080808] p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.13em] text-[#8f8778]">{item.domain}</p>
+                        <h3 className="mt-2 font-serif text-xl text-[#f4ead4]">{item.label}</h3>
+                      </div>
+                      <CapabilityStatePill value={item.state} />
+                    </div>
+                    <p className="mt-3 text-xs leading-6 text-[#b8ad9c]">{item.summary}</p>
+                    <div className="mt-4 rounded-lg border border-white/[.07] bg-black/35 p-3">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.13em] text-[#8f8778]">Existing evidence</p>
+                      <ul className="mt-2 list-disc space-y-1.5 pl-4 text-[11px] leading-5 text-[#a89c8b]">
+                        {item.evidence.map((evidence) => <li key={evidence}>{evidence}</li>)}
+                      </ul>
+                    </div>
+                    <div className="mt-3 rounded-lg border border-[#cda24a33] bg-[#171107] p-3">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.13em] text-[#d1aa53]">Next allowed action</p>
+                      <p className="mt-2 text-[11px] leading-5 text-[#e2d5bd]">{item.nextAction}</p>
+                    </div>
+                    {item.approvalGate ? (
+                      <details className="mt-3 rounded-lg border border-[#a21f3d44] bg-[#19080d] p-3">
+                        <summary className="cursor-pointer text-[9px] font-bold uppercase tracking-[0.13em] text-[#ff9ab1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff9ab1]">
+                          Exact unconsumed approval gate
+                        </summary>
+                        <code className="mt-2 block whitespace-pre-wrap break-words text-[10px] leading-5 text-[#ffdbe4]">{item.approvalGate}</code>
+                      </details>
+                    ) : null}
+                    <Link
+                      href={item.href}
+                      className="mt-4 inline-flex min-h-10 items-center rounded-lg border border-white/10 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.11em] text-[#d8c9aa] transition hover:border-[#cda24a66] hover:text-[#f0cf79] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f0cf79]"
+                    >
+                      Open existing system
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            </details>
+          </Panel>
         </div>
 
         <div className="mt-5">
@@ -694,7 +809,12 @@ export default async function GrowthCommandCenterPage({
             title="Channel truth table"
             note={`${data.sourceRowsRead} lead rows · ${data.spendRowsRead} spend rows · ${data.outcomeRowsRead} outcome rows`}
           >
-            <div className="overflow-x-auto">
+            <div
+              className="overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f0cf79]"
+              role="region"
+              aria-label="Scrollable channel economics table"
+              tabIndex={0}
+            >
               <table className="min-w-[1440px] w-full text-left text-sm">
                 <thead className="border-b border-white/10 text-[10px] uppercase tracking-[0.14em] text-[#8f8778]">
                   <tr>
@@ -1008,7 +1128,7 @@ export default async function GrowthCommandCenterPage({
           </div>
         </Panel>
 
-        <footer className="mt-6 border-t border-white/10 py-6 text-xs leading-5 text-[#746d62]">
+        <footer className="mt-6 border-t border-white/10 py-6 text-xs leading-5 text-[#8f8778]">
           Growth Intelligence is internal operational software. It is not a valuation engine, lending decision system,
           fair-housing targeting tool, legal advisor, or authority to contact consumers. Test and suppressed records remain excluded.
         </footer>

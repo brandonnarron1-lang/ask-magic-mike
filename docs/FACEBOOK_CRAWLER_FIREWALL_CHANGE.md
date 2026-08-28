@@ -1,7 +1,7 @@
 # Facebook Crawler Apache Change Sheet
 
-Status: **NOT APPLIED — EXACT DIRECTIVE FOUND; HOST-LEVEL CHANGE STILL
-REQUIRED**.
+Status: **ACCOUNT-LEVEL TEST COMPLETED AND ROLLED BACK — ROOT/WHM HOST-LEVEL
+CHANGE STILL REQUIRED**.
 
 ## Exact cause
 
@@ -13,6 +13,18 @@ The relevant directives are lines 11 and 24 of
 
 This is an Apache `authz_core` denial. It is not a ModSecurity transaction and
 does not have a ModSecurity rule ID.
+
+## Account-level test result
+
+The exact test gate was consumed on 2026-08-28. A byte-backed-up, account-root
+`.htaccess` implementation of the same bounded expression parsed successfully
+but did not supersede the earlier server-global authorization decision. The two
+HTML pages remained 403, so the original `.htaccess` was restored immediately
+and its SHA-256 matched the retained backup. The supported userdata include is
+root-owned. Do not repeat the `.htaccess` workaround.
+
+Evidence:
+[`phase9/OTP_FACEBOOK_CRAWLER_ACCOUNT_OVERRIDE_TEST_2026-08-28.md`](./phase9/OTP_FACEBOOK_CRAWLER_ACCOUNT_OVERRIDE_TEST_2026-08-28.md).
 
 ## Preferred hosting-operator action
 
@@ -80,9 +92,13 @@ gracefully reload Apache through the host's supported process, and rerun the
 same matrix. Do not alter WordPress or Ask Magic Mike application code for this
 rollback.
 
-## Approval gate
+## Approval status
 
-No live hosting change is authorized by this document. The exact approval
-phrase for the prepared test is:
+The exact account-level test approval was received and consumed:
 
 `APPROVE NARROW OTP FACEBOOK CRAWLER APACHE OVERRIDE TEST`
+
+That test is complete and rolled back. It must not be shown as unconsumed or
+used to justify a broader exception. The reviewed root/WHM action remains
+unexecuted because the cPanel account cannot write the supported include or
+reload Apache. No hosting ticket was submitted.

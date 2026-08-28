@@ -21,6 +21,7 @@ describe("Growth Command Center route and authority guards", () => {
   it("keeps the Growth Command Center read-only", () => {
     const page = read("app/admin/growth/page.tsx");
     const readiness = read("app/lib/growth/baseline-target-readiness.ts");
+    const capabilities = read("app/lib/growth/capability-ledger.ts");
     expect(page).not.toContain("<form");
     expect(page).not.toContain('"use server"');
     expect(page).not.toContain("'use server'");
@@ -29,6 +30,14 @@ describe("Growth Command Center route and authority guards", () => {
     expect(page).toContain("Numeric target entry is disabled");
     expect(page).toContain('href={baselineReadiness.priorityHref}');
     expect(readiness).toContain("targetEntryEnabled: false");
+    expect(page).toContain("Capability authority ledger");
+    expect(page).toContain("A reviewed candidate is not Production");
+    expect(page).toContain('href={item.href}');
+    expect(page).toContain('aria-label="Scrollable channel economics table"');
+    expect(page).toContain("tabIndex={0}");
+    expect(capabilities).not.toContain("fetch(");
+    expect(capabilities).not.toContain('"use server"');
+    expect(capabilities).not.toMatch(/method:\s*["'`](POST|PATCH|PUT|DELETE)["'`]/);
   });
 
   it("keeps wide growth tables contained on mobile viewports", () => {

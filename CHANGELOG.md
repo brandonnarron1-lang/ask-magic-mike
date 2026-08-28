@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-08-28 — Capability authority ledger candidate
+
+- Added one typed, read-only capability ledger to the existing protected Growth
+  Command Center so Production, reviewed candidates, operator/host gates,
+  external dependencies, and prohibited autonomy remain visibly distinct.
+- Reconciled the competitive benchmark with already-built database revival,
+  recurring-value planning, messaging, and provider-contract foundations to
+  prevent parallel rebuilds.
+- Added no route, migration, package, provider call, public surface, mutation,
+  secret, or Production change.
+
+## 2026-08-28 — OTP Facebook crawler account override acceptance test
+
+- Executed the explicitly approved, four-path GET/HEAD-only account-root
+  Apache trial after creating a byte-identical backup.
+- Proved the directive parsed but could not supersede the earlier
+  server-global authorization decision; the social matrix remained 40/42.
+- Restored the original `.htaccess`, verified its SHA-256 against the retained
+  backup, moved that backup outside the public root, and reconfirmed normal
+  browser and sensitive-route behavior.
+- Proved the supported per-vhost include is root-owned, so no additional
+  WordPress or `.htaccess` workaround should be built. No active hosting,
+  application, database, communication, DNS, publication, or NellySelly change
+  remains from the test.
+
 ## 2026-08-28 — OTP Facebook crawler Apache diagnosis candidate
 
 - Replaced the superseded unknown-ModSecurity-rule hypothesis with the exact

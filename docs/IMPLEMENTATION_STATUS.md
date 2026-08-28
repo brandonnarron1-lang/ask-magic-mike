@@ -1861,11 +1861,51 @@ any bridge activation or shadow-mode test.
 - The error surface is `authz_core` `AH01630`, the cPanel production-domain
   ModSecurity control reports Off, and no matching root `.htaccess` rule exists.
 - The former unknown-ModSecurity-rule-ID instruction is superseded by one
-  host-operator, per-vhost/account override specification limited to GET/HEAD
-  and four exact public paths.
-- No host file, firewall, Apache service, cache, WordPress, Vercel, database,
-  communication provider, DNS, Production app, or NellySelly state was changed.
+  host-operator, per-vhost override specification limited to GET/HEAD and four
+  exact public paths.
+- The exact account-level test approval was received and consumed. A backed-up
+  document-root `.htaccess` trial parsed, but the two HTML pages remained 403
+  because the server-global authz decision had already been made. Acceptance
+  failed, so the original file was restored byte-for-byte and the backup was
+  retained outside the public web root.
+- Post-rollback proof matches the 40/42 baseline: normal browsers return 200;
+  Facebook remains denied on the two pages, a non-allowlisted path, login,
+  admin, REST POST, and XML-RPC POST. The supported cPanel userdata include is
+  root-owned and unavailable to the account.
+- No active host-file override, firewall change, Apache reload, cache purge,
+  WordPress edit, Vercel/database change, communication, DNS, Production app,
+  or NellySelly action remains from the test.
 - Evidence and controlled change contract:
   [`phase9/OTP_FACEBOOK_CRAWLER_APACHE_EVIDENCE_2026-08-28.md`](./phase9/OTP_FACEBOOK_CRAWLER_APACHE_EVIDENCE_2026-08-28.md)
   and
   [`FACEBOOK_CRAWLER_FIREWALL_CHANGE.md`](./FACEBOOK_CRAWLER_FIREWALL_CHANGE.md).
+- Controlled test evidence:
+  [`phase9/OTP_FACEBOOK_CRAWLER_ACCOUNT_OVERRIDE_TEST_2026-08-28.md`](./phase9/OTP_FACEBOOK_CRAWLER_ACCOUNT_OVERRIDE_TEST_2026-08-28.md).
+
+## Phase 9 capability authority ledger candidate — 2026-08-28
+
+- Reconciled the current competitive benchmark against executable code and the
+  ordered release/approval records instead of treating every benchmark feature
+  as a greenfield gap.
+- Added a pure typed ledger that separates established Production capability,
+  reviewed application candidates, operator/host gates, external dependencies,
+  and intentionally prohibited autonomy.
+- Rendered the ledger inside the existing `/admin/growth` route after its
+  `report:view` authorization boundary. The section contains no form, fetch,
+  server action, provider call, or mutation path.
+- Existing exact unconsumed WordPress and PR 209 gates are displayed as
+  authority facts but cannot be created, consumed, or broadened by the page.
+  The completed-and-rolled-back crawler test is recorded as a root/WHM access
+  dependency and its consumed approval is not displayed again.
+- Final local acceptance passes 267 files / 3,316 tests, strict typecheck, full
+  lint, optimized Next.js 15.5.21 build, 95/17 route proof, 14/14 safety,
+  deployable-source isolation, zero known Production dependency
+  vulnerabilities, and desktop/mobile no-write browser QA with zero axe A/AA
+  violations. Exact-head CI and immutable Preview proof remain pending.
+- No route, migration, dependency, environment variable, secret, database,
+  public page, provider, communication, WordPress, DNS, hosting, Production, or
+  NellySelly state changed.
+- Implementation and boundary contract:
+  [`phase9/CAPABILITY_AUTHORITY_LEDGER.md`](./phase9/CAPABILITY_AUTHORITY_LEDGER.md).
+- QA evidence:
+  [`phase9/CAPABILITY_AUTHORITY_LEDGER_QA_EVIDENCE.md`](./phase9/CAPABILITY_AUTHORITY_LEDGER_QA_EVIDENCE.md).
