@@ -107,6 +107,22 @@ describe("POST /api/events", () => {
     expect(recordMock).not.toHaveBeenCalled();
   });
 
+  it("accepts but does not rate-limit or persist ordinary Preview telemetry", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const response = await POST(request({
+      event_name: "page_view",
+      properties: { path: "/ask" },
+    }));
+    expect(response.status).toBe(202);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: true,
+      persisted: false,
+      excluded: "preview_read_only",
+    });
+    expect(rateLimitMock).not.toHaveBeenCalled();
+    expect(recordMock).not.toHaveBeenCalled();
+  });
+
   it("fails truthfully when the canonical event write is unavailable", async () => {
     recordMock.mockResolvedValue(false);
     const response = await POST(request({ event_name: "page_view", properties: { path: "/" } }));
@@ -220,7 +236,7 @@ describe("POST /api/events", () => {
     });
   });
 
-  it("rejects Web Vitals outside canonical Production and excludes automation before persistence", async () => {
+  it("suppresses Web Vitals in read-only Preview and excludes automation before persistence", async () => {
     vi.stubEnv("VERCEL_ENV", "preview");
     const previewResponse = await POST(request({
       event_name: "web_vital_observed",
@@ -235,7 +251,12 @@ describe("POST /api/events", () => {
         traffic_class: "public_production",
       },
     }));
-    expect(previewResponse.status).toBe(400);
+    expect(previewResponse.status).toBe(202);
+    await expect(previewResponse.json()).resolves.toMatchObject({
+      ok: true,
+      persisted: false,
+      excluded: "preview_read_only",
+    });
 
     vi.stubEnv("VERCEL_ENV", "production");
     const automationRequest = new Request("https://www.askmagicmike.com/api/events", {

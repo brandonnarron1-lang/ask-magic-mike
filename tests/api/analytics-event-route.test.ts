@@ -5,7 +5,7 @@
  * optional attribution passthrough, and that valid payloads reach the analytics
  * ledger. The ledger is mocked — no Supabase or network.
  */
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const trackMock = vi.fn();
@@ -27,8 +27,13 @@ function post(body: unknown): NextRequest {
 
 describe("POST /api/analytics/event", () => {
   beforeEach(() => {
+    vi.stubEnv("VERCEL_ENV", "production");
     trackMock.mockReset();
     trackMock.mockResolvedValue(true);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("accepts a known event name and calls trackEvent", async () => {
@@ -40,6 +45,18 @@ describe("POST /api/analytics/event", () => {
     expect(trackMock).toHaveBeenCalledWith(
       expect.objectContaining({ eventName: "landing_page_viewed" })
     );
+  });
+
+  it("accepts but does not rate-limit or persist ordinary Preview telemetry", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const res = await POST(post({ eventName: "page_view", properties: { path: "/ask" } }));
+    expect(res.status).toBe(202);
+    await expect(res.json()).resolves.toMatchObject({
+      ok: true,
+      persisted: false,
+      excluded: "preview_read_only",
+    });
+    expect(trackMock).not.toHaveBeenCalled();
   });
 
   it("returns 422 for unknown event names", async () => {

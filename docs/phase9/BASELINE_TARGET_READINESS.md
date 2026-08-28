@@ -141,7 +141,7 @@ These are evidence thresholds, not performance goals.
 ## Local acceptance
 
 - Exact Node 24.18.0 release gate: PASS.
-- Vitest: 264 files / 3,296 tests passed.
+- Vitest: 264 files / 3,299 tests passed.
 - TypeScript strict check, full ESLint, and optimized Next.js 15.5.21 build:
   PASS.
 - Route contract: 95 active routes / 17 acknowledged root-`src` duplicates.
@@ -154,6 +154,31 @@ These are evidence thresholds, not performance goals.
 - Local screenshot evidence was written only to the gitignored `artifacts/`
   directory. The local page used a synthetic local-only Basic credential and an
   unconfigured database state; it did not connect to or mutate Production.
+
+## Hosted Preview safety correction
+
+Direct verification of the first immutable Preview exposed a pre-existing
+exception to its read-only banner: ordinary browser page-view telemetry could
+reach the canonical event repository before the Preview mutation guard. One
+privacy-minimized `/ask` page-view was accepted at
+`2026-08-28T20:11:40.295751Z` on the Neon `preview` branch. An identical
+aggregate-only query against Production branch `br-round-base-auh6h2wd`
+returned zero rows. No lead, identity, contact, outcome, message, recipient,
+credential, or raw payload was queried.
+
+The candidate now applies the existing endpoint-attested
+`assertDatabaseMutationAllowed` guard before durable rate limiting or
+persistence in all browser-facing analytics/experiment routes:
+
+- `POST /api/events` and its `/api/widget/events` alias;
+- `POST /api/analytics/event`; and
+- `POST /api/experiments/event`.
+
+Read-only Preview responses remain accepted for browser ergonomics but state
+`persisted: false` and `excluded: preview_read_only`. Automated-browser
+suppression remains earlier than the guard. The Preview-only evidence row was
+not deleted; Production data remained unchanged. Fresh exact-head release and
+hosted suppression proof supersede the first Preview's evidence.
 
 ## Rollback
 

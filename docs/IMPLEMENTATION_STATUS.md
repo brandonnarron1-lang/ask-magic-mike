@@ -29,14 +29,23 @@ Updated 2026-08-28.
   `report:view` protected, and read-only. It has no form, server action, target
   value, database query/write, migration, message, provider call, publication,
   spend, WordPress/DNS, deployment, deletion, or NellySelly action.
+- **Hosted safety correction:** exact Preview QA found one inherited ordinary-
+  browser telemetry path that bypassed the Preview write guard. One
+  privacy-minimized `/ask` page-view was accepted on the Neon Preview branch;
+  an aggregate check proved zero matching rows on Production. The candidate now
+  applies the existing endpoint-aware Preview mutation guard before rate-limit
+  or persistence work in all public analytics and experiment event routes.
+  Focused containment proof passes 4 files / 46 tests.
 - **Current acceptance:** focused Growth coverage passes 6 files / 38 tests.
-  Exact Node 24.18.0 passes the complete release gate: 264 files / 3,296 tests,
+  Exact Node 24.18.0 passes the complete release gate: 264 files / 3,299 tests,
   strict typecheck, full ESLint, optimized Next.js 15.5.21 build, 95/17 route
   proof, 14/14 safety, and NellySelly isolation. Authenticated Chromium passes
   390×844 and 1,440×1,000 acceptance with HTTP 200, all 42 contracts, target
   lock, exact containment, no overlay/error, and zero mutation requests.
-  Exact-head security scans, GitHub CI, immutable Preview, and protected hosted
-  no-write proof remain pending.
+  The previously sealed exact-head GitHub/Preview proof is historical after the
+  safety correction. The corrected tree passes the full local release gate;
+  fresh exact-commit secret scans, CI, immutable Preview, and hosted suppression
+  proof remain mandatory.
 - Detailed design: `docs/phase9/BASELINE_TARGET_READINESS.md`.
 
 ## Phase 9 lead-intent default truth — 2026-08-28

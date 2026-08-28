@@ -36,6 +36,17 @@ Production has no observations from this reporter. Browser headers are not
 authentication, so future aggregates remain rate-limited, deduplicated,
 sample-labeled, and advisory rather than treated as transaction truth.
 
+### Preview database identity must be attested before any controlled write
+
+The current Vercel Preview has a reachable Neon credential but does not expose
+the expected Preview/Production endpoint-ID configuration in protected health.
+It therefore remains categorically read-only. Public analytics and experiment
+routes now enforce that same endpoint-aware guard before rate limiting or
+persistence. One privacy-minimized page-view created while this inherited gap
+was being diagnosed exists only on the Neon Preview branch; an aggregate check
+found no matching Production row. Do not enable Preview mutation until the
+separate endpoint-attestation gate passes.
+
 ## 2. Messaging and staff alerts
 
 ### Internal email is live; consumer automation is not broadly enabled

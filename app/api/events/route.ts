@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { assertDatabaseMutationAllowed } from "../../../src/lib/preview-security";
 import { checkRateLimit, LIMITS, rateLimitKey } from "../../../src/lib/security/rate-limit";
 import { analyticsEvents } from "../../lib/constants";
 import { isAutomatedBrowserUserAgent } from "../../lib/browserAutomation";
@@ -72,6 +73,18 @@ export async function POST(req: Request) {
   if (isAutomatedBrowserUserAgent(req.headers.get("user-agent"))) {
     return NextResponse.json(
       { ok: true, persisted: false, excluded: "automation", correlation_id: correlationId },
+      { status: 202 },
+    );
+  }
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return NextResponse.json(
+      {
+        ok: true,
+        persisted: false,
+        excluded: "preview_read_only",
+        correlation_id: correlationId,
+      },
       { status: 202 },
     );
   }

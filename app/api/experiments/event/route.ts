@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { assertDatabaseMutationAllowed } from "../../../../src/lib/preview-security";
 import { checkRateLimit, LIMITS, rateLimitKey } from "../../../../src/lib/security/rate-limit";
 import { isAutomatedBrowserUserAgent } from "../../../lib/browserAutomation";
 import { isApprovedPublicOrigin } from "../../../lib/publicOrigin";
@@ -23,7 +24,7 @@ function experimentResponse(
     recorded: boolean;
     correlation_id: string;
     variant_key?: string | null;
-    excluded?: "automation";
+    excluded?: "automation" | "preview_read_only";
   },
   status: number,
 ) {
@@ -44,6 +45,18 @@ export async function POST(request: Request) {
         active: false,
         recorded: false,
         excluded: "automation",
+        correlation_id: correlationId,
+      },
+      202,
+    );
+  }
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return experimentResponse(
+      {
+        active: false,
+        recorded: false,
+        excluded: "preview_read_only",
         correlation_id: correlationId,
       },
       202,

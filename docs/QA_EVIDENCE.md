@@ -20,7 +20,7 @@
   tests/adminops/admin-growth-route-guards.test.ts` passes 2 files / 12 tests;
   the widened Growth suite passes 6 files / 38 tests.
 - **Exact local release gate:** with Node 24.18.0, `pnpm release:gate` passes
-  deployable-source isolation, 14/14 release safety, all 264 files / 3,296
+  deployable-source isolation, 14/14 release safety, all 264 files / 3,299
   tests, strict typecheck, full ESLint, optimized Next.js 15.5.21 build, and 95
   active routes / 17 acknowledged duplicates.
 - **Truth cases covered:** no-live activation lock, no target payload,
@@ -32,11 +32,27 @@
   lock, and all 42 disclosed contracts. Both viewports had exact document/client
   width, zero error overlay, zero console/page errors, and zero non-read request.
   Screenshots are retained only in gitignored local artifacts.
-- Exact-head dependency/history secret scans, GitHub CI, immutable Vercel
-  Preview, and protected hosted no-write proof remain pending.
-- No Production, environment, database write, migration, target, lead/event,
-  notification, provider, publication, spend, WordPress/DNS, deletion, or
-  NellySelly action occurred.
+- **Hosted safety finding and containment:** direct authenticated verification
+  of exact Preview commit `d800a03b3f472c17a9b75213e0e5a3d5817f6fc0`
+  exposed an inherited gap: an ordinary browser page view reached
+  `POST /api/events` before the Preview read-only guard. Aggregate-only Neon
+  checks found exactly one privacy-minimized `/ask` page-view at
+  `2026-08-28T20:11:40.295751Z` on branch `preview` and zero matching rows on
+  Production branch `br-round-base-auh6h2wd`. No identity, contact, lead,
+  outcome, message, or raw payload was read. The Preview-only row was preserved
+  rather than deleted.
+- **Safety correction:** `/api/events` (and `/api/widget/events`),
+  `/api/analytics/event`, and `/api/experiments/event` now call the existing
+  endpoint-aware Preview mutation guard before rate limiting or persistence.
+  Ordinary Preview telemetry returns truthful `persisted: false` /
+  `preview_read_only`; automated-browser exclusion remains earlier in the
+  chain. Focused route and boundary proof passes 4 files / 46 tests.
+- The corrected tree passes the complete Node 24.18.0 release gate. Fresh
+  exact-commit dependency/history scans, GitHub CI, immutable Vercel Preview,
+  and protected hosted suppression proof remain required after commit/push.
+- No Production row, environment, migration, target, lead, notification,
+  provider, publication, spend, WordPress/DNS, deletion, or NellySelly action
+  occurred.
 
 ## Phase 9 cross-domain measurement consolidation — 2026-08-25
 

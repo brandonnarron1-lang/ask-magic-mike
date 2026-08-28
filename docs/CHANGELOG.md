@@ -15,8 +15,18 @@
   audit, and direct handoff to the existing Distribution Command.
 - Recorded the aggregate-only Production baseline and current Neon allowance
   risk without exposing PII or embedding a stale provider value in the app.
-- No Production, database, target, lead/event, message, provider, publication,
-  spend, WordPress/DNS, deletion, or NellySelly mutation occurred.
+- Closed an inherited Preview-safety gap found during direct hosted QA. All
+  public analytics/experiment persistence routes now apply the existing
+  endpoint-aware Preview mutation guard before durable rate limiting or event
+  storage. Automated-browser suppression remains intact, and ordinary Preview
+  telemetry returns a truthful non-persisted response.
+- Aggregate-only incident reconciliation proved the single QA page-view landed
+  only on the Neon Preview branch; the identical Production time/path window
+  contained zero rows. The Preview artifact was preserved rather than hidden by
+  deletion.
+- No Production row/configuration, target, lead, message, provider,
+  publication, spend, WordPress/DNS, deletion, or NellySelly mutation occurred;
+  the single preserved Preview analytics artifact is documented above.
 
 ## 2026-08-25 — PR #212 cross-domain measurement consolidation
 
