@@ -183,9 +183,9 @@ describe("/value page — professional trust-first copy", () => {
     expect(valuePage).not.toMatch(/instant cash offer/i);
   });
 
-  it("page metadata points at the brand-pack Mike headshot for OG image", () => {
+  it("page metadata points at the wide identity-preserving social card", () => {
     expect(valuePage).toContain(
-      "/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp"
+      "mikePlatformAssets.openGraphCard"
     );
     expect(valuePage).not.toMatch(/MLS|flexmls/i);
   });

@@ -2,6 +2,42 @@
 
 Updated 2026-08-28.
 
+## Phase 9 identity-safe wide social preview — 2026-08-28
+
+- **Reuse decision:** the candidate keeps the approved Black Diamond hero,
+  exact Our Town logo, existing 4:5/9:16 campaign exports, shared metadata
+  registry, and `/social-preview` review surface. It adds no second visual
+  system, lead path, database, provider, or publishing tool.
+- **Identity and format correction:** metadata now references one 1200x630
+  crawler card composed deterministically from the untouched approved Mike
+  photograph and logo. The committed JPEG is 160,316 bytes with SHA-256
+  `68dea02d8b4beb24eb864363c2c0d30adc1c98f4d5f37872a32848dad037c713`.
+  The reviewed AI concept was rejected for facial drift and is not used by the
+  application.
+- **Crawler truth:** a fresh live 42-check matrix passed 40 checks. Every tested
+  AskMagicMike.com browser/social profile returned HTTP 200. Our Town returned
+  HTTP 403 only to user agents containing `facebookexternalhit`, including on
+  public pages, images, robots, login, admin, and REST paths; `Facebot` and
+  `meta-externalagent/1.1` returned 200. This is an upstream host rule, not a
+  page or WordPress-content defect, and the candidate does not weaken it.
+- **Current acceptance:** exact Node 24.18.0 passes focused metadata/image
+  coverage (4 files / 175 tests), the complete release gate (265 files / 3,304
+  tests), strict TypeScript, full ESLint, optimized Next.js 15.5.21 build,
+  95/17 route proof, 14/14 safety, deployable-source isolation, zero known
+  Production dependency vulnerabilities, deterministic asset regeneration,
+  whitespace proof, and responsive desktop/mobile browser QA. The mobile
+  document width equals its client width. Release doctor passes 43/43 on the
+  clean code-bearing commit; redacted Gitleaks scans find no leak in the 239.33
+  KB candidate patch or the 647-commit history. Immutable Preview sealing
+  remains in progress.
+- **Authority boundary:** Production remains on
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`; PR #209 remains the first release
+  gate. No Production/Preview data mutation, merge, deployment, lead/message,
+  provider call, WordPress/DNS edit, publication, spend, deletion, or
+  NellySelly action occurred.
+- Detailed evidence: `docs/phase9/SOCIAL_PREVIEW_WIDE_CARD.md` and
+  `design-qa.md`.
+
 ## Phase 9 baseline and target readiness — 2026-08-28
 
 - **Production truth:** a read-only canonical Neon aggregate at

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
+import { mikePlatformAssets } from "@/lib/mikePlatformAssets";
 import { siteConfig } from "@/lib/site-config";
 import { ExternalAnalyticsConsentManager } from "./components/analytics/ExternalAnalyticsConsent";
 import { WebVitalsReporter } from "./components/experience/WebVitalsReporter";
@@ -37,10 +38,10 @@ export const metadata: Metadata = {
     siteName: "Ask Magic Mike",
     images: [
       {
-        url: "/brand/black-diamond/hero-social-4x5.jpg",
-        width: 1080,
-        height: 1350,
-        alt: "Mike Eatmon with luxury lakefront property at dusk",
+        url: mikePlatformAssets.openGraphCard.src,
+        width: mikePlatformAssets.openGraphCard.width,
+        height: mikePlatformAssets.openGraphCard.height,
+        alt: mikePlatformAssets.openGraphCard.alt,
       },
     ],
     locale: "en_US",
@@ -55,7 +56,7 @@ export const metadata: Metadata = {
     title: "Ask Magic Mike | Wilson, NC Real Estate Guidance",
     description:
       "Local home value guidance and seller strategy from Our Town Properties.",
-    images: ["/brand/black-diamond/hero-social-4x5.jpg"],
+    images: [mikePlatformAssets.openGraphCard.src],
   },
 };
 

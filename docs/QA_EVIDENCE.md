@@ -1,5 +1,45 @@
 # QA Evidence
 
+## Phase 9 identity-safe wide social preview — 2026-08-28
+
+- `pnpm run amm:verify:social-preview`: 40/42 live checks passed. Ask Magic
+  Mike root, Ask, and Value surfaces returned 200 with Open Graph metadata for
+  browser, Facebook, X, LinkedIn, Slack, and Discord profiles. The only failures
+  were Our Town's `/ask-mike/` and `/agents/mike-eatmon/` for Facebook.
+- A path/UA matrix reproduced one identical Apache 403 body for every tested
+  public/private Our Town path whenever the user agent contained
+  `facebookexternalhit`; browser, `Facebot`, and
+  `meta-externalagent/1.1` controls did not reproduce it. The exact managed rule
+  ID still requires authenticated hosting audit-log evidence; no broad firewall
+  bypass was attempted.
+- `pnpm run amm:generate:social-card`: generated 1200x630, 160,316-byte JPEG;
+  output SHA-256
+  `68dea02d8b4beb24eb864363c2c0d30adc1c98f4d5f37872a32848dad037c713`,
+  source SHA-256
+  `e96c83acaa4555ce0bb4e62fda7db18cd8b6c0a2476efd1987a9f5843ec70aa4`,
+  and logo SHA-256
+  `d6f9cf50829416c348985307e68b111f8e46665a1c603810b46b55b377c32d49`.
+- Focused Vitest: PASS — 4 files / 175 tests. Complete release gate: PASS —
+  265 files / 3,304 tests, strict typecheck, full ESLint, optimized Next.js
+  15.5.21 build, 95 active routes / 17 acknowledged duplicates, 14/14 release
+  safety checks, and deployable-source isolation.
+- Production dependency audit: PASS — no known vulnerabilities. Deterministic
+  regeneration reproduced the exact output and lineage hashes. Release doctor:
+  HEALTHY — 43/43 on the clean code-bearing commit. Redacted Gitleaks: PASS —
+  239.33 KB staged candidate plus 647 commits / 16.13 MB, no leaks.
+  `git diff --check`: PASS.
+- Local browser visual/DOM QA: PASS at 1440x1000 and 390x844. The exact card,
+  identity-preservation label, review heading, navigation, and footer rendered;
+  mobile had no horizontal overflow. Post-fix reloads produced no new browser
+  error or warning.
+- AI-assisted hierarchy output was reviewed and rejected for identity drift.
+  The shipped asset uses only deterministic composition of the approved source
+  photograph and exact logo. Full source/final and browser evidence is recorded
+  in `design-qa.md`.
+- Immutable Preview proof is pending on the code-bearing commit. Production,
+  Preview data, WordPress, DNS, email, SMS, lead records, providers, and
+  NellySelly remained unchanged.
+
 ## Release-authority deduplication — 2026-08-28
 
 - Authenticated GitHub evidence showed PRs #187 and #212 were both open Drafts,

@@ -44,12 +44,12 @@ export const mikePlatformAssets = {
     alt: "Mike Eatmon, broker at Our Town Properties — Wilson, NC real estate",
     use: "Desktop website hero plate",
   },
-  /** Open Graph / link-preview card (square 1:1 — accepted by all major platforms). */
+  /** Open Graph / link-preview card (1.91:1 wide safe-zone composition). */
   openGraphCard: {
-    src: `${PLATFORM_CROPS_BASE}/mike-headshot-source.webp`,
-    width: 1024,
-    height: 1024,
-    alt: "Ask Magic Mike — Wilson, NC property review assistant by Our Town Properties",
+    src: "/brand/black-diamond/og-card-1200x630.jpg",
+    width: 1200,
+    height: 630,
+    alt: "Ask Magic Mike real estate guidance from Mike Eatmon and Our Town Properties in Wilson, North Carolina",
     use: "Open Graph / Twitter summary_large_image card",
   },
   /**

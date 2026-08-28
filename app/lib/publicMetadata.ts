@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
+import { mikePlatformAssets } from "@/lib/mikePlatformAssets";
 
-const SOCIAL_IMAGE = {
-  url: "/brand/black-diamond/hero-social-4x5.jpg",
-  width: 1080,
-  height: 1350,
-  alt: "Ask Magic Mike real estate guidance from Our Town Properties in Wilson, North Carolina",
-};
+const SOCIAL_IMAGE = mikePlatformAssets.openGraphCard;
 
 type PublicMetadataInput = {
   title: string;
@@ -32,13 +28,18 @@ export function publicPageMetadata({
       description,
       url: canonicalPath,
       siteName: "Ask Magic Mike",
-      images: [SOCIAL_IMAGE],
+      images: [{
+        url: SOCIAL_IMAGE.src,
+        width: SOCIAL_IMAGE.width,
+        height: SOCIAL_IMAGE.height,
+        alt: SOCIAL_IMAGE.alt,
+      }],
     },
     twitter: {
       card: "summary_large_image",
       title: socialTitle,
       description,
-      images: [SOCIAL_IMAGE.url],
+      images: [SOCIAL_IMAGE.src],
     },
   };
 }

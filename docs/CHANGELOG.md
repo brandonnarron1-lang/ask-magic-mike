@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-08-28 — Identity-safe wide social preview card
+
+- Reused the approved Black Diamond desktop hero, exact Our Town Properties
+  logo, shared public metadata registry, and existing non-indexed Social Preview
+  route; no parallel brand, campaign, funnel, or publishing system was added.
+- Replaced the portrait Open Graph metadata target with a deterministic
+  1200x630 JPEG built from the untouched approved Mike photograph and logo.
+  An AI-assisted layout concept was rejected when it changed identity details
+  and was not shipped.
+- Added reproducible generation, physical JPEG dimension tests, shared metadata
+  assertions, and desktop/mobile visual evidence with zero horizontal overflow.
+- Reconfirmed the live crawler matrix at 40/42: AskMagicMike.com serves all six
+  tested crawler profiles, while the Our Town host blocks only user agents
+  containing `facebookexternalhit` through one upstream host-wide rule.
+- No Production merge/deployment, environment, database, lead, message,
+  provider, publication, WordPress/DNS, deletion, spend, or NellySelly action
+  occurred.
+
 ## 2026-08-28 — Release-authority deduplication
 
 - Proved with Git ancestry that exact PR #212 is already contained by

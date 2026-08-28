@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { mikePlatformAssets } from "@/lib/mikePlatformAssets";
 import { BlackDiamondHeader } from "../components/black-diamond/BlackDiamondHeader";
 import { Footer } from "../components/black-diamond/BlackDiamondShell";
 import { nonIndexablePageMetadata } from "../lib/publicMetadata";
@@ -21,8 +22,9 @@ export default function SocialPreviewPage() {
         <div className="mx-auto max-w-7xl">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">Social previews</p>
           <h1 className="mt-4 max-w-3xl font-serif text-5xl leading-tight sm:text-6xl">
-            Overlay-ready ad surfaces with live HTML copy.
+            Crawler cards and campaign surfaces, reviewed at their real ratios.
           </h1>
+          <LinkPreviewFrame />
           <div className="mt-10 grid gap-8 lg:grid-cols-2">
             <AdFrame type="feed" />
             <AdFrame type="story" />
@@ -43,6 +45,42 @@ utm_content=feed_4x5_black_diamond`}
   );
 }
 
+function LinkPreviewFrame() {
+  return (
+    <div className="mt-10 rounded-lg border border-[#cda24a33] bg-[#0b0b0d] p-4 sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#e2c06f]">
+            Open Graph / X large card
+          </p>
+          <h2 className="mt-2 text-xl font-semibold text-[#f4ead4]">
+            Exact 1200×630 crawler asset
+          </h2>
+        </div>
+        <span className="rounded-full border border-[#cda24a55] px-3 py-1 text-xs font-semibold text-[#d9ceb8]">
+          Identity-preserving source crop
+        </span>
+      </div>
+      <div
+        data-testid="og-card-preview"
+        className="relative mt-5 aspect-[1200/630] overflow-hidden rounded-lg border border-[#cda24a33] bg-black"
+      >
+        <Image
+          src={mikePlatformAssets.openGraphCard.src}
+          alt={mikePlatformAssets.openGraphCard.alt}
+          fill
+          priority
+          className="object-cover"
+          sizes="(max-width: 1280px) calc(100vw - 40px), 1200px"
+        />
+      </div>
+      <p className="mt-4 max-w-4xl text-sm leading-6 text-[#d9ceb8]">
+        This is the exact metadata image served to link crawlers. The approved Mike photograph and Our Town logo remain source-faithful; portrait feed and story exports stay separate below.
+      </p>
+    </div>
+  );
+}
+
 function AdFrame({ type }: { type: "feed" | "story" }) {
   const story = type === "story";
   return (
@@ -52,6 +90,7 @@ function AdFrame({ type }: { type: "feed" | "story" }) {
           src={story ? "/brand/black-diamond/hero-social-story.jpg" : "/brand/black-diamond/hero-social-4x5.jpg"}
           alt={story ? "9:16 Ask Magic Mike ad plate" : "4:5 Ask Magic Mike ad plate"}
           fill
+          priority
           className="object-cover"
           sizes={story ? "360px" : "420px"}
         />
