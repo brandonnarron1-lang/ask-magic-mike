@@ -2,6 +2,43 @@
 
 Updated 2026-08-28.
 
+## Phase 9 baseline and target readiness — 2026-08-28
+
+- **Production truth:** a read-only canonical Neon aggregate at
+  `2026-08-28T19:45:52.419594+00:00` confirms 6 total lead rows, all 6
+  test/suppressed, with 0 eligible live/contactable leads, outcomes,
+  first-response milestones, spend rows/dollars, market signals,
+  opportunities, or non-test publication proofs. No PII was returned.
+- **Reuse decision:** the candidate extends the existing protected Growth
+  Command Center and current lead/response/outcome/spend/delivery/Web-Vitals
+  aggregates. It reuses and updates PR #187's vetted metric vocabulary while
+  excluding that stale candidate's migration, target writer, separate target
+  page, and numeric target lifecycle.
+- **Truth control:** 42 fixed evidence contracts now distinguish measured,
+  directional, insufficient, not-instrumented, and unavailable states. Zero
+  eligible live demand locks every demand-dependent baseline and target; QA
+  rows cannot become a denominator. Unknown is never rendered as measured zero.
+- **Operator path:** the existing `/admin/growth` page now exposes one compact
+  readiness gate, sample-state totals, `Target entry: Locked`, a collapsed
+  evidence audit, and a direct handoff to the existing
+  `/admin/distribution` command. No parallel dashboard or lead system exists.
+- **Provider risk:** canonical Production health is HTTP 200/ready, while Neon
+  showed 93% of monthly compute allowance consumed at the check time. The
+  changing provider value is documented rather than hard-coded into the app.
+- **Authority boundary:** the feature is aggregate-only, server-rendered,
+  `report:view` protected, and read-only. It has no form, server action, target
+  value, database query/write, migration, message, provider call, publication,
+  spend, WordPress/DNS, deployment, deletion, or NellySelly action.
+- **Current acceptance:** focused Growth coverage passes 6 files / 38 tests.
+  Exact Node 24.18.0 passes the complete release gate: 264 files / 3,296 tests,
+  strict typecheck, full ESLint, optimized Next.js 15.5.21 build, 95/17 route
+  proof, 14/14 safety, and NellySelly isolation. Authenticated Chromium passes
+  390×844 and 1,440×1,000 acceptance with HTTP 200, all 42 contracts, target
+  lock, exact containment, no overlay/error, and zero mutation requests.
+  Exact-head security scans, GitHub CI, immutable Preview, and protected hosted
+  no-write proof remain pending.
+- Detailed design: `docs/phase9/BASELINE_TARGET_READINESS.md`.
+
 ## Phase 9 lead-intent default truth — 2026-08-28
 
 - **Reuse decision:** the candidate extends the existing Seller and Buyer

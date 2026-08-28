@@ -1,6 +1,6 @@
 # Known Limitations — Ask Magic Mike
 
-Updated 2026-08-23. This document records the current Neon/Resend/Web Push
+Updated 2026-08-28. This document records the current Neon/Resend/Web Push
 system, not the superseded Supabase/mock-email/Twilio-era architecture.
 
 ## 1. Demand and measurement
@@ -18,6 +18,15 @@ Predictions, experiments, source comparisons, response percentiles, and outcome
 rates remain low-confidence until genuine traffic produces adequate samples.
 Deterministic routing and scoring continue to work; AI summaries and statistical
 recommendations are advisory and never silently assign a lead.
+
+### Numeric operating targets remain disabled
+
+The protected Growth Command Center now names 42 baseline evidence contracts,
+their sample thresholds, and their readiness states. Production still has no
+eligible live-demand denominator, so target entry remains locked. Directional
+samples are visible when they exist but cannot become an approved target. A
+future durable target lifecycle requires measured evidence plus a separate
+owner-reviewed decision; QA rows cannot unlock it.
 
 ### Field-performance telemetry is prepared, not yet active
 
@@ -109,9 +118,11 @@ securely. CSV export remains available with audit logging.
 
 Current accepted Production is PR #195 merge
 `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` on deployment
-`dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Draft PR #209 is the sole current
-application candidate. It does not authorize an external placement, provider
-action, message, migration, or publication.
+`dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Draft PR #209 is the first release gate in
+the ordered #209–#224 application train; later candidates cannot bypass it.
+The baseline-readiness candidate is stacked on exact PR #224 and does not
+authorize an external placement, provider action, message, migration, target,
+or publication.
 
 Current Production returns healthy public pages but does not yet prove the
 durable limiter contract that PR #209 requires. Candidate monitoring therefore

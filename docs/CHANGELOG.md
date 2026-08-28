@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-08-28 — Baseline and target-readiness control
+
+- Added a read-only baseline-readiness layer to the existing protected Growth
+  Command Center; no parallel dashboard, target database, or write route was
+  created.
+- Reused and updated PR #187's reviewed KPI vocabulary against the current
+  canonical Growth aggregates while deliberately excluding its stale migration
+  and numeric target writer.
+- Classified 42 evidence contracts as measured, directional, insufficient,
+  not instrumented, or unavailable. Demand-dependent metrics remain unmeasured
+  when eligible live demand is zero, even if naive arithmetic would show zero.
+- Added a compact activation gate, explicit target lock, collapsed evidence
+  audit, and direct handoff to the existing Distribution Command.
+- Recorded the aggregate-only Production baseline and current Neon allowance
+  risk without exposing PII or embedding a stale provider value in the app.
+- No Production, database, target, lead/event, message, provider, publication,
+  spend, WordPress/DNS, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-25 — PR #212 cross-domain measurement consolidation
 
 - Reused exact PR #212 head

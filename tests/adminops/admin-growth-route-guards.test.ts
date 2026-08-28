@@ -20,11 +20,15 @@ describe("Growth Command Center route and authority guards", () => {
 
   it("keeps the Growth Command Center read-only", () => {
     const page = read("app/admin/growth/page.tsx");
+    const readiness = read("app/lib/growth/baseline-target-readiness.ts");
     expect(page).not.toContain("<form");
     expect(page).not.toContain('"use server"');
     expect(page).not.toContain("'use server'");
     expect(page).not.toContain("fetch(");
     expect(page).not.toMatch(/method:\s*["'`](POST|PATCH|PUT|DELETE)["'`]/);
+    expect(page).toContain("Numeric target entry is disabled");
+    expect(page).toContain('href={baselineReadiness.priorityHref}');
+    expect(readiness).toContain("targetEntryEnabled: false");
   });
 
   it("keeps wide growth tables contained on mobile viewports", () => {

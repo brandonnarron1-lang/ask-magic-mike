@@ -1,5 +1,43 @@
 # QA Evidence
 
+## Phase 9 baseline and target readiness — 2026-08-28
+
+- **Canonical Production baseline:** a saved aggregate-only SELECT in Neon
+  returned 6 total lead rows, all 6 test/suppressed, and zero eligible live or
+  contactable leads, outcomes, response milestones, spend rows/dollars, market
+  signals, opportunities, and non-test publication proofs at
+  `2026-08-28T19:45:52.419594+00:00`. It returned no lead identity, contact,
+  message, address, recipient, credential, or raw event data.
+- **Public health:** `/api/health/live` and `/api/health/ready` returned HTTP 200;
+  canonical Neon, capture function, tables, RBAC, Push, and phone readiness were
+  true. Production remained pinned to
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`.
+- **Provider observation:** Neon Production compute was active and the account
+  displayed 93% monthly compute allowance consumed at check time. No provider,
+  billing, branch, or database setting was changed.
+- **Focused implementation proof:** `pnpm exec vitest run
+  tests/adminops/growth-baseline-target-readiness.test.ts
+  tests/adminops/admin-growth-route-guards.test.ts` passes 2 files / 12 tests;
+  the widened Growth suite passes 6 files / 38 tests.
+- **Exact local release gate:** with Node 24.18.0, `pnpm release:gate` passes
+  deployable-source isolation, 14/14 release safety, all 264 files / 3,296
+  tests, strict typecheck, full ESLint, optimized Next.js 15.5.21 build, and 95
+  active routes / 17 acknowledged duplicates.
+- **Truth cases covered:** no-live activation lock, no target payload,
+  measured owner-review readiness, directional-but-not-ready evidence,
+  unavailable subsystem handling, explicit instrumentation gaps, PII-safe
+  contactability gap, and unit formatting without fabricated zero.
+- **Authenticated browser proof:** local Chromium at 390×844 and 1,440×1,000
+  returned HTTP 200, rendered the protected Growth heading, explicit target
+  lock, and all 42 disclosed contracts. Both viewports had exact document/client
+  width, zero error overlay, zero console/page errors, and zero non-read request.
+  Screenshots are retained only in gitignored local artifacts.
+- Exact-head dependency/history secret scans, GitHub CI, immutable Vercel
+  Preview, and protected hosted no-write proof remain pending.
+- No Production, environment, database write, migration, target, lead/event,
+  notification, provider, publication, spend, WordPress/DNS, deletion, or
+  NellySelly action occurred.
+
 ## Phase 9 cross-domain measurement consolidation — 2026-08-25
 
 - Exact PR #212 head

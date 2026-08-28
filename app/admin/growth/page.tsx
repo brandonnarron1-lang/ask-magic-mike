@@ -5,6 +5,11 @@ import {
   buildOpportunityDecisionPacket,
   type GrowthOpportunityFreshness,
 } from "../../lib/growth/opportunity-decision";
+import {
+  buildGrowthBaselineReadiness,
+  formatGrowthBaselineValue,
+  type GrowthBaselineState,
+} from "../../lib/growth/baseline-target-readiness";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 
 export const dynamic = "force-dynamic";
@@ -174,6 +179,23 @@ function SampleStatus({ value }: { value: "collecting" | "directional" | "operat
   );
 }
 
+function BaselineStatePill({ value }: { value: GrowthBaselineState }) {
+  const tone = value === "measured"
+    ? "border-[#4a8c6f66] bg-[#071712] text-[#83dab4]"
+    : value === "directional"
+      ? "border-[#4baab866] bg-[#06171b] text-[#7ee7f1]"
+      : value === "insufficient_sample"
+        ? "border-[#cda24a55] bg-[#171207] text-[#e4c36f]"
+        : value === "not_instrumented"
+          ? "border-[#8f6eb766] bg-[#120b1c] text-[#cbb1ef]"
+          : "border-[#a21f3d66] bg-[#2a0710] text-[#ff9ab1]";
+  return (
+    <span className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.11em] ${tone}`}>
+      {value.replaceAll("_", " ")}
+    </span>
+  );
+}
+
 function FreshnessStatus({
   value,
   label,
@@ -265,6 +287,7 @@ export default async function GrowthCommandCenterPage({
   const windowDays = parseWindow(params.window);
   const data = await loadGrowthIntelligence(windowDays);
   const summary = data.summary;
+  const baselineReadiness = buildGrowthBaselineReadiness(data);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_75%_0%,rgba(145,19,50,.17),transparent_34%),radial-gradient(circle_at_15%_15%,rgba(205,162,74,.11),transparent_30%),#040404] px-4 py-7 text-[#f4ead4] sm:px-6 sm:py-10">
@@ -295,6 +318,7 @@ export default async function GrowthCommandCenterPage({
             <nav className="flex flex-wrap gap-2" aria-label="Lead Center navigation">
               {[
                 ["Lead inbox", "/admin/leads"],
+                ["Distribution", "/admin/distribution"],
                 ["Reporting", "/admin/reporting"],
                 ["Allocation", "/admin/allocation"],
                 ["Action queue", "/admin/action-queue"],
@@ -333,6 +357,114 @@ export default async function GrowthCommandCenterPage({
 
         <div className="mt-5">
           <StateBanner configured={data.configured} schemaReady={data.schemaReady} error={data.error} />
+        </div>
+
+        <div className="mt-5">
+          <Panel
+            eyebrow="Baseline and target readiness"
+            title={baselineReadiness.gateLabel}
+            note={`Canonical ${windowDays}-day evidence only. Numeric target entry is disabled; this view cannot record or approve a target.`}
+          >
+            <div className={`rounded-xl border p-5 ${
+              baselineReadiness.gate === "activation_required"
+                ? "border-[#cda24a66] bg-[linear-gradient(135deg,#1b1206,#090705)]"
+                : baselineReadiness.gate === "owner_review_possible"
+                  ? "border-[#4a8c6f66] bg-[#071712]"
+                  : baselineReadiness.gate === "unavailable"
+                    ? "border-[#a21f3d66] bg-[#2a0710]"
+                    : "border-[#4baab866] bg-[#06171b]"
+            }`}>
+              <div className="flex flex-wrap items-start justify-between gap-5">
+                <div className="max-w-4xl">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#d1aa53]">
+                    Next evidence-backed decision
+                  </p>
+                  <p className="mt-3 text-sm leading-7 text-[#e2d5bd]">{baselineReadiness.priorityAction}</p>
+                </div>
+                <Link
+                  href={baselineReadiness.priorityHref}
+                  className="inline-flex min-h-11 items-center rounded-lg border border-[#cda24a66] bg-black/30 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#f0cf79] transition hover:border-[#f0cf79] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f0cf79]"
+                >
+                  {baselineReadiness.priorityHref === "/admin/distribution"
+                    ? "Open existing Distribution Command"
+                    : "Review Growth evidence"}
+                </Link>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+              <MetricCard
+                label="Eligible live leads"
+                value={summary.leads}
+                note="QA and suppressed rows excluded"
+                emphasis
+              />
+              <MetricCard
+                label="Measured baselines"
+                value={baselineReadiness.counts.measured}
+                note="Minimum evidence threshold met"
+              />
+              <MetricCard
+                label="Directional"
+                value={baselineReadiness.counts.directional}
+                note="Visible, never target-ready"
+              />
+              <MetricCard
+                label="Still collecting"
+                value={baselineReadiness.counts.insufficient_sample}
+                note="Unknown is not zero"
+              />
+              <MetricCard
+                label="Instrumentation gaps"
+                value={baselineReadiness.counts.not_instrumented}
+                note="Named evidence contracts only"
+              />
+              <MetricCard
+                label="Unavailable"
+                value={baselineReadiness.counts.unavailable}
+                note="Required aggregate could not be read"
+              />
+              <MetricCard
+                label="Target entry"
+                value="Locked"
+                note={`${baselineReadiness.ownerReviewReadyCount} metric(s) evidence-ready for owner review`}
+              />
+            </div>
+
+            <details className="group mt-4 rounded-xl border border-white/10 bg-black/30 p-4">
+              <summary className="cursor-pointer list-none text-xs font-bold uppercase tracking-[0.12em] text-[#d8c9aa] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f0cf79]">
+                <span className="inline-flex items-center gap-2">
+                  <span aria-hidden="true" className="text-[#d1aa53] transition group-open:rotate-90">›</span>
+                  Inspect all {baselineReadiness.metrics.length} evidence contracts
+                </span>
+              </summary>
+              <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {baselineReadiness.metrics.map((metric) => (
+                  <article key={metric.key} className="rounded-xl border border-white/[.08] bg-[#080808] p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.13em] text-[#746d62]">
+                          {metric.category} · {metric.direction.replaceAll("_", " ")}
+                        </p>
+                        <h3 className="mt-2 text-sm font-semibold text-[#f4ead4]">{metric.label}</h3>
+                      </div>
+                      <BaselineStatePill value={metric.state} />
+                    </div>
+                    <p className="mt-4 font-serif text-2xl text-[#f0cf79]">
+                      {formatGrowthBaselineValue(metric.value, metric.unit)}
+                    </p>
+                    <p className="mt-1 text-[10px] text-[#746d62]">
+                      n={metric.sampleSize} · threshold {metric.minimumSampleSize}
+                    </p>
+                    <p className="mt-3 text-xs leading-5 text-[#a89c8b]">{metric.reason}</p>
+                    <p className="mt-3 border-t border-white/[.07] pt-3 text-[10px] leading-5 text-[#746d62]">
+                      {metric.definition}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </details>
+          </Panel>
         </div>
 
         <section className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6" aria-label="Growth performance metrics">
