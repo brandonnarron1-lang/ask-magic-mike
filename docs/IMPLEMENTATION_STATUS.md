@@ -1849,3 +1849,23 @@ any bridge activation or shadow-mode test.
   [`phase9/PUBLIC_OWNED_REFERRAL_HANDOFF.md`](./phase9/PUBLIC_OWNED_REFERRAL_HANDOFF.md).
 - QA evidence:
   [`phase9/PUBLIC_OWNED_REFERRAL_HANDOFF_QA_EVIDENCE.md`](./phase9/PUBLIC_OWNED_REFERRAL_HANDOFF_QA_EVIDENCE.md).
+
+## Phase 9 OTP Facebook crawler exact Apache diagnosis — 2026-08-28
+
+- Fresh production checks remain 40/42: only the Our Town `/ask-mike/` and
+  Mike-agent pages return 403 to `facebookexternalhit`; Ask Magic Mike and all
+  tested non-Facebook social crawlers pass.
+- Authenticated cPanel/Apache inspection located the exact server-global
+  directives: `facebookexternalhit` is assigned to `bad_bots`, then denied by
+  `Require not env bad_bots` in `pre_virtualhost_global.conf`.
+- The error surface is `authz_core` `AH01630`, the cPanel production-domain
+  ModSecurity control reports Off, and no matching root `.htaccess` rule exists.
+- The former unknown-ModSecurity-rule-ID instruction is superseded by one
+  host-operator, per-vhost/account override specification limited to GET/HEAD
+  and four exact public paths.
+- No host file, firewall, Apache service, cache, WordPress, Vercel, database,
+  communication provider, DNS, Production app, or NellySelly state was changed.
+- Evidence and controlled change contract:
+  [`phase9/OTP_FACEBOOK_CRAWLER_APACHE_EVIDENCE_2026-08-28.md`](./phase9/OTP_FACEBOOK_CRAWLER_APACHE_EVIDENCE_2026-08-28.md)
+  and
+  [`FACEBOOK_CRAWLER_FIREWALL_CHANGE.md`](./FACEBOOK_CRAWLER_FIREWALL_CHANGE.md).

@@ -7,21 +7,25 @@ blocked with HTTP 403 on the two exact public Our Town paths; browser, X,
 LinkedIn, Slack, Discord, Googlebot, and Bingbot behavior remains available.
 AskMagicMike.com Meta previews pass.
 
-Authenticated WordPress, Wordfence visibility, cPanel, ModSecurity controls,
-public HTTP behavior, and hosting-layer evidence were reviewed in the prior
-phase. The account exposes only a broad domain-level ModSecurity control—not a
-managed-rule ID or narrow exception editor. A broad disablement would weaken
-login, admin, form, and API protection, so it was not used.
+Authenticated WordPress, Wordfence visibility, cPanel, public HTTP behavior,
+Apache access/error logs, and readable hosting includes have now been reviewed.
+The production-domain cPanel ModSecurity control reports Off. The exact denial
+is instead a server-global Apache `authz_core` policy: `facebookexternalhit` is
+classified as `bad_bots`, followed by `Require not env bad_bots`. The live error
+surface records `AH01630: client denied by server configuration`.
 
-Required hosting-operator action: identify the managed WAF rule that blocks
-validated Meta crawler GET/HEAD requests and exempt only:
+Required hosting-operator action: confirm include order and add a reversible
+per-account or per-vhost override below the global classification, limited to
+the Facebook crawler user-agent profile, GET/HEAD requests, and only:
 
 - `/ask-mike/`
 - `/agents/mike-eatmon/`
 
-Do not trust a user-agent alone; validate Meta source ranges at the hosting
-layer. Do not exempt POST, login, admin, REST writes, forms, XML-RPC, or any
-other path.
+Do not edit the shared global include. Do not exempt POST, login, admin, REST
+writes, forms, XML-RPC, or any other path. Follow the reviewed change packet in
+`META_CRAWLER_HOSTING_OPERATOR_ACTION.md`, run `apachectl configtest`, and use a
+graceful reload. The exact approval gate is
+`APPROVE NARROW OTP FACEBOOK CRAWLER APACHE OVERRIDE TEST`.
 
 Rollback: remove the exact path/method/source-scoped exception and rerun the
 42-check matrix. No application rollback is needed because no app or WordPress

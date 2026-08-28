@@ -1,26 +1,53 @@
 # Meta Crawler Hosting-Operator Action
 
-Owner: Our Town Properties hosting provider or managed-WAF operator.
+Owner: Our Town Properties hosting provider / Apache administrator.
 
-Current evidence: Facebook's validated preview crawler receives HTTP 403 only
-on these two public pages; 40 of 42 acceptance checks pass.
+## Ticket summary
+
+Our Town Properties' public Open Graph pages return HTTP 403 only to
+`facebookexternalhit`; browser and LinkedIn/X/Slack/Discord checks return 200.
+The production acceptance matrix is 40/42.
+
+Authenticated cPanel and Apache diagnostics have located the exact cause:
+
+```text
+/etc/apache2/conf.d/includes/pre_virtualhost_global.conf:11
+SetEnvIfNoCase User-Agent "facebookexternalhit" bad_bots
+
+/etc/apache2/conf.d/includes/pre_virtualhost_global.conf:24
+Require not env bad_bots
+```
+
+The live error log records `AH01630: client denied by server configuration`
+from `authz_core`. cPanel reports the production domain's ModSecurity control
+as Off, and the account's root `.htaccess` has no matching user-agent or
+authorization deny. This is therefore not a WordPress, plugin, robots.txt,
+Vercel, or ModSecurity-rule-ID issue.
+
+## Requested change
+
+Please add a supported **per-account/per-vhost** override that unsets
+`bad_bots` only for `GET`/`HEAD`, `facebookexternalhit/`, and these exact public
+paths:
 
 - `/ask-mike/`
 - `/agents/mike-eatmon/`
+- `/wp-content/plugins/ask-magic-mike-lead-ops-social-upgrade/assets/social/02_open_graph_card_1200x630_safe_zone.jpg`
+- `/wp-content/uploads/amm_og_card_1200x630.jpg`
 
-Required action: identify the managed ModSecurity/WAF rule ID in the request log
-and create one exception limited to validated Meta source ranges, `GET` and
-`HEAD`, and the two exact paths above.
+Please do not disable the global bot policy, edit a cPanel-generated file,
+exempt POST/admin/login/REST/form/XML-RPC routes, or make an all-path
+user-agent exception. Confirm the include order, run `apachectl configtest`,
+and use a graceful reload.
 
-Do not disable ModSecurity, trust a user-agent alone, or exempt POST, login,
-admin, REST writes, forms, XML-RPC, or any other path.
+## Acceptance and rollback
 
-Verification:
+- We will rerun `pnpm run amm:verify:social-preview` and require 42/42.
+- The four exact public paths must return 200 to the crawler.
+- Non-allowlisted paths and all sensitive routes must retain their prior
+  behavior.
+- Rollback is removal of only the new per-vhost/account override, followed by
+  config test, graceful reload, and the same verification matrix.
 
-1. Run `pnpm amm:verify:social-preview` and require 42/42.
-2. Confirm both Open Graph images return HTTP 200 to the validated crawler.
-3. Confirm LinkedIn, X, Slack, Discord, Googlebot, Bingbot, browsers, login,
-   admin, and form protections remain unchanged.
-
-Rollback: remove only the new rule-ID/path/method/source exception and rerun the
-42-check matrix. No application or WordPress code rollback is required.
+Full technical contract:
+[FACEBOOK_CRAWLER_FIREWALL_CHANGE.md](./FACEBOOK_CRAWLER_FIREWALL_CHANGE.md).

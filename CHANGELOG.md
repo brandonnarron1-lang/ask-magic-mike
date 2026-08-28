@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-08-28 — OTP Facebook crawler Apache diagnosis candidate
+
+- Replaced the superseded unknown-ModSecurity-rule hypothesis with the exact
+  live cause: a server-global Apache `SetEnvIfNoCase` mapping of
+  `facebookexternalhit` to `bad_bots`, denied by `Require not env bad_bots`.
+- Added a bounded host-operator remediation, acceptance, rollback, and exact
+  approval gate without editing Apache, `.htaccess`, WordPress, Vercel, DNS,
+  cache, Production data, communications, or NellySelly.
+
 ## 2026-08-28 — Public owned-referral handoff candidate
 
 - Replaced the internal-facing homepage social-asset promotion with a

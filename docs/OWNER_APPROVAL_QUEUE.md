@@ -271,9 +271,10 @@ after a fresh matching manifest and verified page-149 rollback.
 
 ## Infrastructure and publication gates
 
-1. Hosting operator: identify the exact ModSecurity rule blocking the Facebook
-   crawler on selected WordPress URLs before approving one narrow GET/HEAD
-   exception. Do not weaken global bot protection.
+1. Hosting operator: apply the prepared per-vhost/account override for the
+   exact Apache `facebookexternalhit -> bad_bots` classification, limited to
+   GET/HEAD and four public paths. Do not edit the generated global include or
+   weaken global bot protection. See `FACEBOOK_CRAWLER_FIREWALL_CHANGE.md`.
 2. DNS/Vercel owner: approve attachment of `hub.ourtownproperties.com` and the
    exact Vercel-provided CNAME. Canonical `/admin` remains available meanwhile.
 3. Owner: approve each exact internal test send, consumer acknowledgment,

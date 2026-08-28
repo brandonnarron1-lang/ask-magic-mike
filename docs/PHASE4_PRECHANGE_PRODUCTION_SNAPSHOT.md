@@ -62,8 +62,10 @@ Database query timestamp: `2026-08-15T13:18:15.306684Z`.
 - Social preview matrix: 40 of 42. Only Facebook's crawler receives HTTP 403
   from Our Town `/ask-mike/` and `/agents/mike-eatmon/`; other tested crawlers
   and AskMagicMike.com pass.
-- Evidence places the block in hosting ModSecurity/WAF upstream of WordPress;
-  the cPanel account does not expose the exact rule ID or a narrow exception UI.
+- Later authenticated evidence (2026-08-28) located the exact upstream Apache
+  `authz_core` rule: `facebookexternalhit` is mapped to `bad_bots`, then denied
+  by `Require not env bad_bots`. The former unknown-ModSecurity-rule hypothesis
+  is superseded; the narrow host override remains unapplied.
 - Ask Magic Mike system-isolation verification passed. Deployable code contains
   no NellySelly project identifiers and the canonical Vercel project is distinct.
 
