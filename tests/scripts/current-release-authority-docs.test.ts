@@ -206,7 +206,7 @@ describe("current release-authority documentation", () => {
     const pr214 = ownerQueue.indexOf("Draft PR [#214]");
     const pr215 = ownerQueue.indexOf("Draft PR [#215]");
     const pr216 = ownerQueue.indexOf("Draft PR [#216]");
-    const pr212 = ownerQueue.indexOf("Draft PR [#212]");
+    const laterTrain = ownerQueue.indexOf("Draft PRs #217 through #225");
 
     expect(pr209).toBeGreaterThanOrEqual(0);
     expect(pr210).toBeGreaterThan(pr209);
@@ -215,7 +215,9 @@ describe("current release-authority documentation", () => {
     expect(pr214).toBeGreaterThan(pr213);
     expect(pr215).toBeGreaterThan(pr214);
     expect(pr216).toBeGreaterThan(pr215);
-    expect(pr212).toBeGreaterThan(pr216);
+    expect(laterTrain).toBeGreaterThan(pr216);
+    expect(ownerQueue).not.toContain("Draft PR [#212]");
+    expect(ownerQueue).toMatch(/PR #221 is the sole cross-domain candidate/i);
     expect(ownerQueue).toContain(canonicalAliasGate);
     expect(ownerQueue).toContain(askAccessibilityGate);
     expect(ownerQueue).toContain(responsiveIdentityGate);
@@ -223,6 +225,22 @@ describe("current release-authority documentation", () => {
     expect(ownerQueue).toContain(homeValueCompletionGate);
     expect(ownerQueue).toContain(funnelEventIdentityGate);
     expect(ownerQueue).toContain(crossDomainGate);
+  });
+
+  it("keeps superseded PRs #187 and #212 as preserved evidence without parallel authority", () => {
+    for (const doc of [currentState, assetManifest, ownerQueue]) {
+      expect(doc).toMatch(/(?:PR )?#187[^\n]*(?:closed|superseded)/i);
+      expect(doc).toMatch(/(?:PR )?#212[^\n]*(?:closed|superseded|preserved)/i);
+    }
+    expect(assetManifest).toContain("Closed PR #187");
+    expect(assetManifest).toContain("Closed PR #212");
+    expect(ownerQueue).not.toMatch(/PR \[#212\][\s\S]{0,200}separate HOLD candidate/i);
+    expect(ownerQueue).toMatch(
+      /branch, commits,[\s\S]{0,40}migration, tests, and evidence preserved/i
+    );
+    expect(ownerQueue).toMatch(
+      /branch,[\s\S]{0,40}consent repair package, evidence, and rollback materials remain preserved/i
+    );
   });
 
   it("binds PR #210's stacked authority to the current sealed PR #209 parent", () => {

@@ -1,13 +1,17 @@
 # Owner Approval Queue
 
-Updated 2026-08-25 from authenticated GitHub, Vercel, Neon, WordPress, and
+Updated 2026-08-28 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
 ## Cross-domain measurement consolidation — later, not currently requestable
 
-- Branch `codex/phase9-cross-domain-measurement-consolidation-20260825`
-  consolidates exact PR #212 onto exact sealed PR #220 head. It reuses the
+- Draft PR #221 on branch
+  `codex/phase9-cross-domain-measurement-consolidation-20260825` contains exact
+  PR #212 as an ancestor and consolidates it onto exact sealed PR #220 head.
+  PR #212 is closed as superseded with its branch, commits, package, evidence,
+  and rollback assets preserved. PR #221 is the only cross-domain application
+  candidate. It reuses the
   existing Our Town GTM container and canonical Neon ledger with explicit basic
   consent, advertising consent denied, private/Preview/QA exclusion, exact
   container isolation, and the newer cumulative KPI/privacy controls.
@@ -211,12 +215,11 @@ gate and must not be merged out of order:
    exact-head and write-intercepted Preview proof, then require
    `APPROVE PHASE 9 FUNNEL EVENT IDENTITY INTEGRITY MERGE AND PRODUCTION DEPLOYMENT`.
 
-7. Draft PR [#212](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/212)
-   is a separate HOLD candidate that reuses the existing Google container and
-   canonical event ledger for consent-gated cross-domain measurement. It must
-   be refreshed only after the selected application sequence and requires
-   authenticated Google/Vercel configuration review plus
-   `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
+7. Draft PRs #217 through #225 continue the same ordered stack after #216.
+   PR #221 is the sole cross-domain candidate; PR #225 is the current
+   evidence-first baseline/target-readiness tail. None may leapfrog PR #209 or
+   a predecessor. Each must be refreshed onto the exact newly accepted base,
+   re-proved, and receive its own documented gate before merge or Production.
 
 The historical shorter conversion-identity phrase released PR #195 and is
 exhausted; it cannot authorize PR #213, PR #214, PR #215, or PR #216.
@@ -227,15 +230,20 @@ deletion, or NellySelly action.
 
 ## Superseded and deferred release records
 
-- PRs #202 through #208 remain open or preserved only as incremental review
+- PRs #202 through #208 remain preserved only as incremental review
   evidence. PR #209 contains their reviewed cumulative application work once.
   They have no independent release authority and may not be merged or deployed
   under an old gate.
 - PRs #197, #198, #200, and #201 are closed with branches preserved. PR #199's
   unique field-experience work is included once in PR #209 through its reviewed
   current-stack successor.
-- PR #187's KPI-target migration remains deferred because Production has no
-  eligible live-demand baseline. It is not part of PR #209.
+- PR #187 is closed as superseded by PR #225, with its branch, commits,
+  migration, tests, and evidence preserved. Its KPI-target migration and
+  parallel target writer remain excluded because Production has no eligible
+  live-demand baseline.
+- PR #212 is closed as superseded by its exact descendant PR #221. Its branch,
+  consent repair package, evidence, and rollback materials remain preserved;
+  it has no independent release authority.
 - PR #182 and historical PR #179 are superseded by already released current-
   stack work. Physical Web Push enrollment and a `[TEST]` receipt remain
   separate per-person actions.

@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-28 — Release-authority deduplication
+
+- Proved with Git ancestry that exact PR #212 is already contained by
+  consolidated PR #221, then closed PR #212 as superseded without deleting its
+  branch, commits, WordPress package, evidence, or rollback assets.
+- Closed PR #187 as superseded by PR #225's evidence-first read-only baseline
+  replacement. Its separate target page/writer and migration remain preserved
+  as historical reference and are not authorized for release.
+- Removed the contradictory parallel PR #212 and PR #187 release records from
+  the current owner queue and canonical asset manifest. PR #209 remains the
+  sole immediate Production vehicle; the later ordered stack remains Draft.
+- No merge, deployment, environment, database, target, lead, message, provider,
+  publication, spend, WordPress/DNS, deletion, or NellySelly action occurred.
+
 ## 2026-08-28 — Baseline and target-readiness control
 
 - Added a read-only baseline-readiness layer to the existing protected Growth

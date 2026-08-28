@@ -74,7 +74,9 @@ warranted.
 | #195 conversion identity polish | Merged and live at `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` | Gate exhausted; it authorizes no later action |
 | #209 atomic controlled release candidate | Canonical Draft candidate; cumulative application work from #202 through #208 plus fail-closed Neon Preview endpoint attestation | Exact Preview-mutation and Production gates remain separate |
 | #202 through #208 | Preserved incremental review records superseded for release by #209 | No independent merge or Production authority |
-| #187 KPI target register | Deferred until eligible live-demand evidence exists | No current release gate |
+| #221 / #212 cross-domain measurement | #221 is the ordered consolidated Draft; #212 is closed as an exact preserved ancestor | #212 has no independent gate; #221 remains held behind predecessors and live consent remediation |
+| #225 baseline/target readiness | Current ordered Draft tail; read-only evidence replacement for #187 | No target writer, migration, or Production authority |
+| #187 KPI target register | Closed as superseded; branch, migration, and evidence preserved | No current release gate |
 
 PR #209 must remain Draft until its exact-head checks match the proposed
 deployment and the applicable exact gate is received. The conversion-identity

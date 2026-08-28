@@ -1,6 +1,6 @@
 # Canonical Asset Manifest
 
-Refreshed 2026-08-23 from authenticated Production, GitHub, Vercel, Neon, and
+Refreshed 2026-08-28 from authenticated Production, GitHub, Vercel, Neon, and
 WordPress evidence. Working systems outrank historical packets.
 
 | Asset | Current evidence | Disposition | Decision |
@@ -12,7 +12,10 @@ WordPress evidence. Working systems outrank historical packets.
 | PRs #183, #184, #185, #193, #196, #194, and #195 | Released campaign, proof-ledger, owned-demand, privacy/KPI, verifier, iOS handoff, and conversion-identity work culminating in Production `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` | **REFERENCE/DOCUMENTATION** | Released; every application/migration gate is exhausted and not reusable |
 | PR #209 / `codex/phase9-controlled-release-candidate-20260823` | Atomic cumulative application candidate from #202 through #208 plus fail-closed Neon Preview endpoint attestation and current release-authority reconciliation | **MERGE INTO CANONICAL** | Sole current application release vehicle; remain Draft until exact-head proof and exact Production gate |
 | PRs #202 through #208 | Incremental review branches whose cumulative work is represented once in PR #209 | **REFERENCE/DOCUMENTATION** | Preserve branches, rescue refs, checks, and evidence; no independent merge or Production authority |
-| PR #187 | Evidence-first KPI target register with migration | **UNKNOWN / NEEDS OWNER CONFIRMATION** | Defer until genuine eligible demand supplies a defensible baseline; not part of PR #209 |
+| PR #221 | Ordered cross-domain measurement consolidation containing exact PR #212 as an ancestor | **MERGE INTO CANONICAL** | Sole cross-domain candidate; remains held behind predecessors and live consent remediation |
+| Closed PR #212 | Preserved source candidate for consent-gated runtime and WordPress bridge 1.2.0 | **REFERENCE/DOCUMENTATION** | Closed as superseded by PR #221 with all history, package evidence, and rollback assets preserved |
+| PR #225 | Read-only 42-contract baseline and target-readiness layer on the existing Growth Command Center | **MERGE INTO CANONICAL** | Reuses existing aggregates and Distribution Command; no target writer or migration; remains ordered after every predecessor |
+| Closed PR #187 | Historical KPI target register, separate target page/writer, and migration | **REFERENCE/DOCUMENTATION** | Superseded by PR #225's evidence-first read-only replacement; preserve history but do not revive its parallel gate before genuine eligible demand exists |
 | `codex/phase9-owned-demand-asset-studio-20260821` | Historical source for protected deterministic 4:5/story/QR exports | **REFERENCE/DOCUMENTATION** | Useful work is consolidated once in PR #185; do not release as a second stack |
 | PR #182 | Historical mixed candidate whose unique runtime/security work is preserved in the released current stack | **REFERENCE/DOCUMENTATION** | Superseded; duplicated authority docs/scanners must not merge as a second control plane |
 | PR #179 | Historical source of the unique token-scoped iOS Home Screen Web Push handoff | **REFERENCE/DOCUMENTATION** | Superseded by released PR #194; preserve history, but do not merge the old stack |
@@ -42,7 +45,7 @@ WordPress evidence. Working systems outrank historical packets.
   approved registered provider.
 - External campaign platforms remain human-operated; the application records
   evidence only after the native action occurs.
-- Historical PR #179, PR #182, PR #187, and incremental PRs #202 through #208
+- Historical PR #179, PR #182, closed PR #187, closed PR #212, and incremental PRs #202 through #208
   remain preserved. Their released or candidate work is represented once in
   the current stack, and none is an independent release vehicle. No branch,
   commit, worktree, or exact-head evidence was deleted.

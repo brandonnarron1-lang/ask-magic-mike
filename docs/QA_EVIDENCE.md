@@ -1,5 +1,26 @@
 # QA Evidence
 
+## Release-authority deduplication — 2026-08-28
+
+- Authenticated GitHub evidence showed PRs #187 and #212 were both open Drafts,
+  while current authority documents already described their replacement or
+  consolidation.
+- Exact Git ancestry proves PR #212 head
+  `758154ca73b64f24f2df8f183ba8b3f6f82f769a` is an ancestor of PR #221 head
+  `65eb466a2e7991364efe2db78044006ebcdf8b5d`; PR #221 is itself an ancestor of
+  current PR #225. Selected bridge source is byte-identical, while later
+  application files contain reviewed cumulative hardening.
+- PR #225 intentionally lacks PR #187's target page, target action, target
+  repository, and KPI-target migration while retaining the new read-only
+  baseline-readiness contract. PR #187 therefore cannot be a parallel release
+  vehicle.
+- PRs #187 and #212 were closed with explanatory comments; their branches,
+  commits, rescue refs, migrations/packages, tests, evidence, and rollback
+  assets remain recoverable. No branch was deleted or force-pushed.
+- No merge, deployment, environment, database, lead/event, communication,
+  provider, WordPress/GTM/GA4, DNS, publication, spend, deletion, or NellySelly
+  mutation occurred.
+
 ## Phase 9 baseline and target readiness — 2026-08-28
 
 - **Canonical Production baseline:** a saved aggregate-only SELECT in Neon
@@ -47,9 +68,17 @@
   Ordinary Preview telemetry returns truthful `persisted: false` /
   `preview_read_only`; automated-browser exclusion remains earlier in the
   chain. Focused route and boundary proof passes 4 files / 46 tests.
-- The corrected tree passes the complete Node 24.18.0 release gate. Fresh
-  exact-commit dependency/history scans, GitHub CI, immutable Vercel Preview,
-  and protected hosted suppression proof remain required after commit/push.
+- Corrected exact head `a65cde03c0d8505ad00732f862c37841ccca9a04`
+  passes the complete Node 24.18.0 release gate, 43/43 release doctor,
+  646-commit Gitleaks scan, GitHub run `33208548943`, and immutable Vercel
+  Preview at
+  `https://ask-magic-mike-4tfi1h5y3-eyes-up-industries.vercel.app`.
+  Authenticated Growth HTML proves all 42 contracts, zero eligible live leads,
+  and target entry locked. PII-free hosted POSTs to `/api/events`,
+  `/api/widget/events`, and `/api/experiments/event` return HTTP 202 with
+  `preview_read_only`; a subsequent aggregate-only Neon Preview query found
+  zero new `/ask` page-view rows. Exact-deployment logs contained 29 info and
+  zero warning/error/fatal entries.
 - No Production row, environment, migration, target, lead, notification,
   provider, publication, spend, WordPress/DNS, deletion, or NellySelly action
   occurred.

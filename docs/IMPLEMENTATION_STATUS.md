@@ -13,7 +13,8 @@ Updated 2026-08-28.
   Command Center and current lead/response/outcome/spend/delivery/Web-Vitals
   aggregates. It reuses and updates PR #187's vetted metric vocabulary while
   excluding that stale candidate's migration, target writer, separate target
-  page, and numeric target lifecycle.
+  page, and numeric target lifecycle. PR #187 is now closed as superseded with
+  its branch, commits, migration, tests, and evidence preserved.
 - **Truth control:** 42 fixed evidence contracts now distinguish measured,
   directional, insufficient, not-instrumented, and unavailable states. Zero
   eligible live demand locks every demand-dependent baseline and target; QA
@@ -36,16 +37,19 @@ Updated 2026-08-28.
   applies the existing endpoint-aware Preview mutation guard before rate-limit
   or persistence work in all public analytics and experiment event routes.
   Focused containment proof passes 4 files / 46 tests.
-- **Current acceptance:** focused Growth coverage passes 6 files / 38 tests.
-  Exact Node 24.18.0 passes the complete release gate: 264 files / 3,299 tests,
-  strict typecheck, full ESLint, optimized Next.js 15.5.21 build, 95/17 route
-  proof, 14/14 safety, and NellySelly isolation. Authenticated Chromium passes
-  390×844 and 1,440×1,000 acceptance with HTTP 200, all 42 contracts, target
-  lock, exact containment, no overlay/error, and zero mutation requests.
-  The previously sealed exact-head GitHub/Preview proof is historical after the
-  safety correction. The corrected tree passes the full local release gate;
-  fresh exact-commit secret scans, CI, immutable Preview, and hosted suppression
-  proof remain mandatory.
+- **Current acceptance:** corrected exact head
+  `a65cde03c0d8505ad00732f862c37841ccca9a04` passes focused Growth coverage
+  (6 files / 38 tests), focused Preview containment (4 files / 46 tests), and
+  the complete Node 24.18.0 release gate: 264 files / 3,299 tests, strict
+  typecheck, full ESLint, optimized Next.js 15.5.21 build, 95/17 route proof,
+  14/14 safety, and NellySelly isolation. Release doctor is 43/43, the
+  646-commit Gitleaks scan is clean, and GitHub run `33208548943` passes.
+  Immutable Preview
+  `https://ask-magic-mike-4tfi1h5y3-eyes-up-industries.vercel.app` reports the
+  exact head, renders all 42 contracts with target entry locked, returns 202
+  `preview_read_only` on every active public event path, and produced zero new
+  post-fix `/ask` page-view rows in an aggregate-only Neon Preview check.
+  Production remains on `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`.
 - Detailed design: `docs/phase9/BASELINE_TARGET_READINESS.md`.
 
 ## Phase 9 lead-intent default truth — 2026-08-28
@@ -150,7 +154,9 @@ Updated 2026-08-28.
   consent-gated Ask runtime, WordPress bridge 1.2.0, release package, verifier,
   tests, and activation/rollback runbooks. It is being reconciled onto exact
   sealed PR #220 head `5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3`
-  instead of creating a second analytics implementation.
+  instead of creating a second analytics implementation. Git ancestry now
+  proves PR #212 is contained in PR #221; PR #212 is closed as superseded with
+  its branch and every artifact preserved.
 - **Authority boundary:** the cumulative train's canonical Neon event ledger,
   server-owned conversion outcomes, valid pseudonymous funnel identity, Web
   Vitals privacy controls, and automated-browser exclusion remain authoritative.
