@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { AnalyticsPreferencesButton } from "../analytics/ExternalAnalyticsConsent";
 import { AskMikeChatPanel } from "./AskMikeChatPanel";
+import { ConsumerReferralHandoff } from "./ConsumerReferralHandoff";
 import { HeroSection } from "./HeroSection";
 import { HomeValueFunnel } from "./HomeValueFunnel";
 import { PageTracker } from "./PageTracker";
 import { SellerIntentSection } from "./SellerIntentSection";
-import { SocialAdSupportSection } from "./SocialAdSupportSection";
 import { TrustProofStrip } from "./TrustProofStrip";
 
 const paths = [
@@ -103,7 +103,7 @@ export function BlackDiamondShell() {
         </div>
       </section>
 
-        <SocialAdSupportSection />
+      <ConsumerReferralHandoff surface="homepage" />
       </main>
       <Footer />
     </>

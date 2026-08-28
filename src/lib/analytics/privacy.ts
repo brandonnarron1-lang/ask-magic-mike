@@ -113,6 +113,7 @@ const PUBLIC_ATTRIBUTION_VALUE_REGISTRY: Record<PublicAttributionKey, ReadonlySe
     "askmagicmike.com",
     "campaign_preset",
     "chatgpt.com",
+    "consumer_share",
     "direct",
     "email",
     "email_list",
@@ -296,6 +297,8 @@ const PUBLIC_EVENT_PROPERTY_KEYS: Record<string, readonly string[]> = {
   review_plan_saved: ["completed_count", "focus", "goal", "horizon"],
   review_plan_task_completed: ["completed_count", "focus", "goal", "horizon", "task_id"],
   review_plan_handoff_clicked: ["completed_count", "focus", "goal", "horizon"],
+  referral_share_handoff: ["share_method", "surface"],
+  referral_link_copied: ["share_method", "surface"],
 };
 
 const STRING_PROPERTY_KEYS = new Set([
@@ -339,6 +342,7 @@ const STRING_PROPERTY_KEYS = new Set([
   "rating",
   "referrerType",
   "request_surface",
+  "share_method",
   "source",
   "status",
   "step_name",
@@ -486,6 +490,7 @@ const ENUM_VALUES: Partial<Record<string, ReadonlySet<string>>> = {
     "seller_page",
     "widget",
   ]),
+  share_method: new Set(["clipboard", "native"]),
   rating: new Set(["good", "needs-improvement", "poor"]),
   step_name: new Set([
     "address",

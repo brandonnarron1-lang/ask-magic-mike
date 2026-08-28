@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-28 — Public owned-referral handoff candidate
+
+- Replaced the internal-facing homepage social-asset promotion with a
+  consumer-facing Share/Copy referral handoff using the existing Black Diamond
+  identity and approved 1200×630 social card.
+- Added a fixed canonical `/ask` referral URL, privacy-allowlisted handoff/copy
+  events, native Web Share capability detection, and a Clipboard/manual-copy
+  fallback.
+- Added no publisher, provider, lead store, external send, database migration,
+  Production mutation, or NellySelly dependency.
+
 ## 2026-08-28 — Lead-intent default truth candidate
 
 - Reused the current Seller and Buyer intake, canonical lead lifecycle command,

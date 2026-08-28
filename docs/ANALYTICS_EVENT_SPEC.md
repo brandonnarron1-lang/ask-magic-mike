@@ -119,6 +119,22 @@ Cross-domain GA4/GTM activation and external publication remain separate
 approval-controlled actions. The server-side ledger works independently of
 those tools.
 
+## Public owned-referral handoff
+
+The homepage's generic referral handoff emits only
+`referral_share_handoff` or `referral_link_copied`, with the registered
+`surface=homepage` and `share_method=native|clipboard` dimensions. A native
+handoff means the browser accepted the share request; it is not delivery,
+publication, recipient, click, or referral proof. A Clipboard event means the
+fixed URL was copied; it is not evidence the link was distributed.
+
+Cancelled/failed native sharing and Clipboard-denied manual selection write no
+success event. The shared destination uses `utm_source=consumer_share`,
+`utm_medium=referral`, `utm_campaign=amm_owned_demand_2026`, and
+`utm_content=homepage_referral_share`. The packet is generated from constants
+and contains no visitor URL, lead/session identifier, contact detail, form
+answer, saved plan, click ID, or free text.
+
 ## Consent-gated GTM candidate
 
 The external measurement candidate reuses the GTM container already observed

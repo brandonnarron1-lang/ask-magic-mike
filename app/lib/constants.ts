@@ -75,4 +75,6 @@ export const analyticsEvents = [
   "review_plan_saved",
   "review_plan_task_completed",
   "review_plan_handoff_clicked",
+  "referral_share_handoff",
+  "referral_link_copied",
 ] as const;

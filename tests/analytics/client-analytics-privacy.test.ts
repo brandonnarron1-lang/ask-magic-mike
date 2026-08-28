@@ -8,6 +8,7 @@ import { OUR_TOWN_GTM_CONTAINER_ID } from "../../app/lib/googleTagConfig";
 import {
   isApprovedPublicAnalyticsEvent,
   safePublicAnalyticsProperties,
+  safeRegisteredPublicAnalyticsDimension,
 } from "../../src/lib/analytics/privacy";
 
 type TestAnalyticsWindow = Window & {
@@ -130,6 +131,18 @@ describe("client analytics privacy boundary", () => {
       lead_source_surface: "home_value_page",
       step_name: "contact",
     });
+    expect(safePublicAnalyticsProperties("referral_share_handoff", {
+      surface: "homepage",
+      share_method: "native",
+      email: "person@example.com",
+      destination: "2525550100",
+    })).toEqual({
+      surface: "homepage",
+      share_method: "native",
+    });
+    expect(
+      safeRegisteredPublicAnalyticsDimension("utm_source", "consumer_share"),
+    ).toBe("consumer_share");
   });
 
   it("publishes only approved dimensions to browser analytics and the server ledger", () => {
