@@ -60,8 +60,8 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
       phone,
       target_geography: clean(data.get("buyer-area")),
       property_id: propertyId || undefined,
-      timeline: clean(data.get("buyer-timeline")),
-      financing: clean(data.get("buyer-financing")),
+      timeline: clean(data.get("buyer-timeline")) || undefined,
+      financing: clean(data.get("buyer-financing")) || undefined,
       preapproval: data.get("buyer-preapproval") === "yes",
       question: clean(data.get("buyer-question")),
       consent,
@@ -171,10 +171,12 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
           onInput={clearContactValidation}
         />
         <TextField name="buyer-area" label={openHouse ? "Property or event location" : renter ? "Target area" : "Target area or property"} placeholder={propertyLabel || "Wilson or Eastern NC"} defaultValue={propertyLabel} />
-        <SelectField name="buyer-timeline" label="Timeline" defaultValue="30-60 days">
+        <SelectField name="buyer-timeline" label="Timeline (optional)" defaultValue="">
+          <option value="">Select a timeline</option>
           <option>ASAP</option><option>30-60 days</option><option>3-6 months</option><option>Just planning</option>
         </SelectField>
-        <SelectField name="buyer-financing" label="Financing context" defaultValue="Not sure yet">
+        <SelectField name="buyer-financing" label="Financing context (optional)" defaultValue="">
+          <option value="">Select financing context</option>
           <option>Preapproved</option><option>Working with a lender</option><option>Cash</option><option>Not sure yet</option>
         </SelectField>
         <label className="flex items-center gap-3 text-sm text-[#d9ceb8]">

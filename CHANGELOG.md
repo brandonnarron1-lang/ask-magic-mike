@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-08-28 — Lead-intent default truth candidate
+
+- Reused the current Seller and Buyer intake, canonical lead lifecycle command,
+  deterministic scoring, and qualification logic instead of creating another
+  form, lead store, router, or intelligence layer.
+- Removed silently asserted condition, timeline, and financing defaults from
+  untouched forms; optional values now begin blank and are omitted until the
+  consumer explicitly selects them.
+- Preserved unknown timeline as `null`, awarded it zero points, and required an
+  explicit urgent timeline before seller A-grade qualification.
+- Added form-payload and atomic lifecycle regressions plus same-viewport mobile
+  before/after evidence without changing the released visual system.
+- No Production, environment, database row, lead/event, communication,
+  provider, WordPress/DNS, deployment, publication, deletion, or NellySelly
+  action occurred.
+
 ## 2026-08-25 — Channel-economics truth candidate
 
 - Reused the canonical Growth Command Center, Neon outcome/spend ledgers, and

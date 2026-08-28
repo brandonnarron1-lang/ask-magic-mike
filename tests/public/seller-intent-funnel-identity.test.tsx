@@ -51,6 +51,8 @@ describe("seller funnel identity integrity", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<SellerIntentSection />);
 
+    expect(screen.getByLabelText("Condition (optional)")).toHaveValue("");
+    expect(screen.getByLabelText("Timeline (optional)")).toHaveValue("");
     await user.type(screen.getByLabelText("Property address"), "123 Internal QA Road, Wilson NC");
     await user.type(screen.getByLabelText("Phone required"), "2525550194");
     await user.click(screen.getByRole("checkbox", { name: /Our Town Properties may contact me/i }));
@@ -61,6 +63,8 @@ describe("seller funnel identity integrity", () => {
     const leadPayload = JSON.parse(String(leadCall?.[1]?.body)) as Record<string, unknown>;
     expect(leadPayload.consent_call).toBe(true);
     expect(leadPayload.consent_email).toBe(false);
+    expect(leadPayload).not.toHaveProperty("condition");
+    expect(leadPayload).not.toHaveProperty("timeline");
     expect(typeof leadPayload.idempotency_key).toBe("string");
 
     const events = analyticsBodies(fetchMock);
@@ -86,11 +90,17 @@ describe("seller funnel identity integrity", () => {
 
     await user.type(screen.getByLabelText("Property address"), "456 Internal QA Lane, Wilson NC");
     await user.type(screen.getByLabelText("Phone required"), "2525550194");
+    await user.selectOptions(screen.getByLabelText("Condition (optional)"), "Needs major repairs");
+    await user.selectOptions(screen.getByLabelText("Timeline (optional)"), "30-60 days");
     await user.click(screen.getByRole("button", { name: "Send Seller Details" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent("Lead storage failed.");
     const leadCall = fetchMock.mock.calls.find(([input]) => String(input) === "/api/leads");
     const leadPayload = JSON.parse(String(leadCall?.[1]?.body)) as Record<string, unknown>;
+    expect(leadPayload).toMatchObject({
+      condition: "Needs major repairs",
+      timeline: "30-60 days",
+    });
     const events = analyticsBodies(fetchMock);
     const failures = events.filter((event) => event.event_name === "lead_submit_failed");
     expect(failures).toHaveLength(1);

@@ -53,8 +53,8 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
       name: clean(formData.get("seller-name")) || undefined,
       email: email || undefined,
       phone,
-      condition: clean(formData.get("condition")),
-      timeline: clean(formData.get("seller-timeline")),
+      condition: clean(formData.get("condition")) || undefined,
+      timeline: clean(formData.get("seller-timeline")) || undefined,
       notes: clean(formData.get("notes")) || undefined,
       consent,
       consent_email: consent && Boolean(email),
@@ -144,16 +144,18 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
         <TextField name="seller-phone" required type="tel" label="Phone required" placeholder="Phone" />
         <TextField name="seller-email" type="email" label="Email optional" placeholder="Email" />
         <label className="block">
-          <span className="text-sm font-semibold text-[#f4ead4]">Condition</span>
-          <select name="condition" className="amm-form-field text-base">
+          <span className="text-sm font-semibold text-[#f4ead4]">Condition (optional)</span>
+          <select name="condition" defaultValue="" className="amm-form-field text-base">
+            <option value="">Select condition</option>
             {conditionOptions.map((option) => (
               <option key={option}>{option}</option>
             ))}
           </select>
         </label>
         <label className="block">
-          <span className="text-sm font-semibold text-[#f4ead4]">Timeline</span>
-          <select name="seller-timeline" className="amm-form-field text-base">
+          <span className="text-sm font-semibold text-[#f4ead4]">Timeline (optional)</span>
+          <select name="seller-timeline" defaultValue="" className="amm-form-field text-base">
+            <option value="">Select timeline</option>
             {timelineOptions.map((option) => (
               <option key={option}>{option}</option>
             ))}

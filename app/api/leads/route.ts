@@ -74,13 +74,13 @@ function primaryIntentFor(leadType: string, payload: LeadPayload) {
 
 function timelineMonthsFor(input?: string) {
   const value = (input || "").toLowerCase();
-  if (!value) return 24;
+  if (!value) return null;
   if (/\basap\b|immediate|as soon|right away|0\s*[-–]\s*30|under 30|this month/.test(value)) return 0;
   if (/30\s*[-–]\s*60|60\s*[-–]\s*90|31\s*[-–]\s*90|next 90|90 days/.test(value)) return 3;
   if (/3\s*[-–]\s*6|three\s*[-–]\s*six|3 to 6/.test(value)) return 6;
   if (/6\s*[-–]\s*12|six\s*[-–]\s*twelve|6 to 12/.test(value)) return 12;
   if (/12\+|12 plus|more than 12|next year|just planning|just curious|not sure|unknown/.test(value)) return 24;
-  return 24;
+  return null;
 }
 
 function splitName(payload: LeadPayload) {
@@ -234,7 +234,13 @@ function qualificationFor(payload: LeadPayload) {
   const hasProperty = Boolean(payload.address || payload.property_address);
   const sellerIntent = primaryIntentFor(leadType, payload) === "sell";
 
-  if (sellerIntent && hasProperty && hasContact && timelineMonths <= 3) {
+  if (
+    sellerIntent &&
+    hasProperty &&
+    hasContact &&
+    timelineMonths !== null &&
+    timelineMonths <= 3
+  ) {
     return { status: "qualified", lead_grade: "A" };
   }
   if (sellerIntent && hasProperty && hasContact) {

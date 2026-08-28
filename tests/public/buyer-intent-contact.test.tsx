@@ -50,6 +50,8 @@ describe("buyer-family contact and replay integrity", () => {
 
     const email = screen.getByLabelText("Email");
     const phone = screen.getByLabelText("Phone");
+    expect(screen.getByLabelText("Timeline (optional)")).toHaveValue("");
+    expect(screen.getByLabelText("Financing context (optional)")).toHaveValue("");
     const requirement = screen.getByText(/Email or phone is required for follow-up/i);
     expect(requirement).toBeVisible();
     expect(email).toHaveAttribute("aria-describedby", "buyer-contact-requirement");
@@ -101,6 +103,8 @@ describe("buyer-family contact and replay integrity", () => {
     render(<BuyerIntentSection surface="renter_page" preset="renter" />);
 
     await user.type(screen.getByLabelText("Phone"), "2525550194");
+    await user.selectOptions(screen.getByLabelText("Timeline (optional)"), "3-6 months");
+    await user.selectOptions(screen.getByLabelText("Financing context (optional)"), "Cash");
     await user.click(screen.getByRole("button", { name: "Request Renter Review" }));
 
     expect(await screen.findByText("Synthetic replay accepted.")).toBeVisible();
@@ -112,6 +116,8 @@ describe("buyer-family contact and replay integrity", () => {
       lead_type: "renter",
       lead_source_surface: "renter_page",
       phone: "2525550194",
+      timeline: "3-6 months",
+      financing: "Cash",
     });
     expect(analytics.events).toContain("funnel_started");
     expect(analytics.events).toContain("contact_submitted");
@@ -151,6 +157,8 @@ describe("buyer-family contact and replay integrity", () => {
     const leadPayload = JSON.parse(String(leadCall?.[1]?.body)) as Record<string, unknown>;
     expect(leadPayload.consent_email).toBe(true);
     expect(leadPayload.consent_call).toBe(false);
+    expect(leadPayload).not.toHaveProperty("timeline");
+    expect(leadPayload).not.toHaveProperty("financing");
     expect(typeof leadPayload.idempotency_key).toBe("string");
 
     const eventBodies = fetchMock.mock.calls

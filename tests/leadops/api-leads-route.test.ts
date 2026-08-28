@@ -293,6 +293,29 @@ describe("POST /api/leads atomic lifecycle command", () => {
     expect(await chatResponse.json()).toHaveProperty("message");
   });
 
+  it("keeps an omitted seller timeline unknown instead of manufacturing urgency", async () => {
+    const { calls } = installRpc();
+    const response = await POST(request({
+      funnel_type: "seller",
+      lead_source_surface: "seller_page",
+      address: "220 Synthetic Truth Lane",
+      phone: "2525550120",
+      widget_session_id: SESSION_ID,
+    }));
+
+    expect(response.status).toBe(200);
+    const lead = calls[0].body.p_lead as Record<string, unknown>;
+    expect(lead.timeline_months).toBeNull();
+    expect(lead.lead_grade).toBe("B");
+    expect(lead.score).toBe(45);
+    expect(lead.score_factors).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        code: "timeline_unknown",
+        points: 0,
+      }),
+    ]));
+  });
+
   it("returns the canonical lead on an idempotent replay", async () => {
     installRpc(success({ idempotent_replay: true }));
     const response = await POST(request({

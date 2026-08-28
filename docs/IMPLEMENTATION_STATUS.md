@@ -1,6 +1,32 @@
 # Implementation Status
 
-Updated 2026-08-25.
+Updated 2026-08-28.
+
+## Phase 9 lead-intent default truth — 2026-08-28
+
+- **Reuse decision:** the candidate extends the existing Seller and Buyer
+  forms, canonical lead lifecycle command, deterministic score, qualification
+  contract, and regression suites. It adds no parallel funnel, lead store,
+  CRM, router, provider, notification path, or visual system.
+- **Truth correction:** untouched forms no longer assert `Move-in ready`,
+  `ASAP`, `30-60 days`, or `Not sure yet`. Optional selects begin blank and
+  omitted fields remain unknown through browser serialization and canonical
+  persistence.
+- **Decision integrity:** unknown timeline now contributes zero score points,
+  persists as `null`, and cannot earn seller A-grade urgency. Explicit planning
+  answers retain their existing compatibility mapping.
+- **Current acceptance:** 4 focused files / 44 tests and all 263 files / 3,290
+  tests pass, as do strict TypeScript, ESLint, optimized Next.js 15.5.21 build,
+  95/17 route proof, 14/14 release safety, NellySelly isolation, Production
+  dependency audit, and a 643-commit secret scan. Same-viewport mobile
+  before/after review found no layout regression. Exact-head hosted sealing is
+  pending until the candidate is committed and receives a Vercel Preview.
+- **Authority boundary:** no existing Production row is rewritten; no
+  migration, lead/event, communication, provider, WordPress, DNS, deployment,
+  publication, deletion, or NellySelly action occurred. Production remains
+  unchanged and the established first release gate still controls promotion.
+- Detailed design and evidence:
+  `docs/phase9/LEAD_INTENT_DEFAULT_TRUTH.md`.
 
 ## Phase 9 channel-economics truth hardening — 2026-08-25
 
