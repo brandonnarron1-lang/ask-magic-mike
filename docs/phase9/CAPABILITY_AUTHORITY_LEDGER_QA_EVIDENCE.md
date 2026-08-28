@@ -2,7 +2,7 @@
 
 Date: 2026-08-28
 
-Status: local candidate accepted; immutable CI/Preview evidence pending
+Status: local candidate accepted; immutable exact-head evidence refresh pending
 
 ## Scope and release identity
 
@@ -24,6 +24,7 @@ Commands ran with Node 24.18.0 and pnpm 10.30.3:
 
 ```text
 pnpm vitest run tests/adminops/growth-capability-ledger.test.ts tests/adminops/admin-growth-route-guards.test.ts
+ADMIN_SECRET=changeme-local AMM_E2E_PORT=3217 playwright test tests/e2e/growth-decision-packets-preview.spec.ts --reporter=line
 pnpm run release:gate
 pnpm audit --prod --audit-level=high
 git diff --check
@@ -32,6 +33,7 @@ git diff --check
 Results:
 
 - focused capability/auth coverage: 2 files / 11 tests passed;
+- focused protected browser coverage: desktop and mobile, 2/2 passed;
 - system isolation: passed; no deployable NellySelly identifier;
 - release safety: 14/14 passed;
 - full Vitest suite: 267 files / 3,316 tests passed;
@@ -74,6 +76,23 @@ region with a visible focus treatment. The final pass is clean. Full-page
 screenshots and the machine-readable report remain in the ignored local
 `artifacts/capability-ledger-qa/` directory and are not part of deployable
 source.
+
+## Protected Preview selector hardening
+
+The first protected Preview workflow completed its release-safety scan, unit
+tests, typecheck, lint, build, release doctor, and read-only Preview QA. Its
+mutation-free browser step then rejected two assertions because a global
+`.first()` locator selected an identically named metric inside the existing
+collapsed baseline-evidence disclosure instead of the visible performance
+metric. The report recorded 13 expected tests and two unexpected selector
+failures; it did not record a product error, failed durable write, external
+request, or mutation.
+
+The browser contract now scopes the three economics assertions to the named
+`Growth performance metrics` region. The focused desktop/mobile suite and the
+full release gate pass locally. A fresh exact-head protected Preview run is
+required after this hardening commit; the failed run is retained as evidence
+rather than hidden or relabeled.
 
 ## Approved host test reconciliation
 

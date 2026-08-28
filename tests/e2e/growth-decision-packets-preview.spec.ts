@@ -60,9 +60,12 @@ for (const viewport of viewports) {
         name: "Own the demand. Measure the money. Improve the machine.",
       }),
     ).toBeVisible();
-    await expect(page.getByText("Recorded referral fees", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("Tracked contribution", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("Cost / signed client", { exact: true }).first()).toBeVisible();
+    const performanceMetrics = page.getByRole("region", {
+      name: "Growth performance metrics",
+    });
+    await expect(performanceMetrics.getByText("Recorded referral fees", { exact: true })).toBeVisible();
+    await expect(performanceMetrics.getByText("Tracked contribution", { exact: true })).toBeVisible();
+    await expect(performanceMetrics.getByText("Cost / signed client", { exact: true })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Revenue / referral fees" })).toBeAttached();
 
     const packetHeading = page.getByRole("heading", {
