@@ -28,8 +28,12 @@ Updated 2026-08-28.
   whitespace proof, and responsive desktop/mobile browser QA. The mobile
   document width equals its client width. Release doctor passes 43/43 on the
   clean code-bearing commit; redacted Gitleaks scans find no leak in the 239.33
-  KB candidate patch or the 647-commit history. Immutable Preview sealing
-  remains in progress.
+  KB candidate patch or the 647-commit history. Code-bearing head
+  `4683a7c752a40e29ba80ddcda150a0e4fbc5b07c` passes GitHub Release Gate run
+  `33213057838` and immutable Vercel Preview deployment
+  `dpl_DqsFHqTMWp4JTuhnWVAQoDLU4XZm`; the hosted card, root/Ask/Value metadata,
+  direct 1200x630 asset, responsive review surface, and clean runtime-log window
+  are verified.
 - **Authority boundary:** Production remains on
   `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`; PR #209 remains the first release
   gate. No Production/Preview data mutation, merge, deployment, lead/message,

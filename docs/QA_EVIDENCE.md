@@ -36,9 +36,23 @@
   The shipped asset uses only deterministic composition of the approved source
   photograph and exact logo. Full source/final and browser evidence is recorded
   in `design-qa.md`.
-- Immutable Preview proof is pending on the code-bearing commit. Production,
-  Preview data, WordPress, DNS, email, SMS, lead records, providers, and
-  NellySelly remained unchanged.
+- Exact code-bearing head
+  `4683a7c752a40e29ba80ddcda150a0e4fbc5b07c` is cleanly mergeable and passes
+  GitHub Release Gate run `33213057838`. Immutable Vercel Preview deployment
+  `dpl_DqsFHqTMWp4JTuhnWVAQoDLU4XZm` is `READY` at
+  `https://ask-magic-mike-e2r699dzk-eyes-up-industries.vercel.app`.
+- Authenticated in-app Browser proof: `/social-preview` returned the correct
+  heading, identity-preservation label, non-index metadata, exact wide-card
+  render, navigation, footer, and equal document/client width. Direct asset
+  navigation returned one complete 1200x630 image. `/`, `/ask`, and `/value`
+  rendered canonical Production URLs plus the 1200x630 wide-card Open Graph and
+  `summary_large_image` metadata; `/value` resolved to canonical `/home-value`.
+- Exact deployment logs recorded HTTP 200 for the review route, image optimizer,
+  root, Ask, and Home Value. Preview-only passive telemetry returned HTTP 202
+  through the established read-only guard. The checked window contained zero
+  4xx, 5xx, warning, or error result. No form was submitted.
+- Production, Preview data, WordPress, DNS, email, SMS, lead records, providers,
+  and NellySelly remained unchanged.
 
 ## Release-authority deduplication — 2026-08-28
 

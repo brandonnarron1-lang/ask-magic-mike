@@ -1,6 +1,7 @@
 # Phase 9 Social Preview Wide Card
 
-Status: Draft candidate; no Production deployment or external publication.
+Status: Draft candidate; immutable Preview accepted; no Production deployment
+or external publication.
 
 ## Reuse decision
 
