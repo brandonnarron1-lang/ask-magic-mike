@@ -1,6 +1,6 @@
 # Owner Approval Queue
 
-Updated 2026-08-24 from authenticated GitHub, Vercel, Neon, WordPress, and
+Updated 2026-08-28 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
@@ -48,76 +48,51 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and accepted on Production
    deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. It contained no migration,
    form submission, or message send.
+8. PR [#209](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/209)
+   — its exact combined durability gate was received; reviewed head
+   `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b` was merged as
+   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and accepted on Production
+   deployment `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. The encrypted
+   Production-only limiter secret, all readiness booleans, bounded malformed
+   request, 9/9 monitor, same-commit Node 24 release gate, and clean log window
+   were verified. It contained no migration, lead, valid analytics event,
+   notification, message, WordPress, DNS, publication, spend, or NellySelly
+   action.
 
 These completed gates are exhausted and must not be reused as authority for a
 new action. None authorized a social/GBP post, email campaign, QR
 printing/distribution, consumer message, spend, DNS change, WordPress change,
 provider action, or deletion.
 
-## Atomic Production durability candidate
+## Completed Production durability release
 
-- Fresh 2026-08-23 read-only Production checks pass the public conversion
-  verifier 15/15 and smoke 19/19 with two intentional skips. The candidate
-  monitor reports 8/9 because the deployed readiness body does not prove the
-  required durable limiter contract. This is the one immediate Production
-  correction.
-- Draft PR [#209](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/209)
-  on branch `codex/phase9-controlled-release-candidate-20260823` is the sole
-  current application release vehicle. It consolidates the reviewed work from
-  PRs #202 through #208 once and binds Preview write authority to the actual
-  server-only Neon endpoint.
-- The latest branch-only security review also bounds the emergency memory
-  limiter and isolates fallback counters by route. The pre-hardening head is
-  preserved at
-  `rescue/amm-pr209-pre-memory-fallback-hardening-20260824-0333`. Treat the
-  current GitHub PR head—not a commit literal embedded in this mutable file—as
-  the release candidate. Immediately before using the gate, require that head
-  to remain Draft, cleanly mergeable against the recorded Production base, and
-  green in the full Node 24 release gate, exact Vercel Preview, protected
-  no-write acceptance, Widget E2E, dependency audit, secret scan, and current
-  Production preflight. If the head moves, every prior exact-head seal becomes
-  historical evidence and the complete proof must be repeated.
-- The exact pre-reconciliation application/security head
-  `b4e76f795d74d6a7c0947b16150cdb9c6c63e23a` passed 228 files / 3,054 tests,
-  strict typecheck, ESLint, optimized build, 83-route proof, 14/14 safety,
-  isolation, dependency and history-secret scans, exact Vercel Preview, 17
-  no-write passes with six intentional write skips, Widget 2/2, and categorical
-  exact Preview endpoint match/Production non-match. The final PR head must
-  repeat exact-head proof after this authority reconciliation.
-- Optional isolated synthetic Preview mutation and cleanup requires:
-  `APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA`.
-- The only combined Production configuration/application release phrase is:
-  `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
-- The Production phrase authorizes one encrypted Production-only durability
-  secret, the exact reviewed PR #209 merge/deploy, and one malformed non-lead
-  request that writes only an HMAC-pseudonymized rate-limit bucket before
-  returning HTTP 400. It does not authorize a lead, analytics event, email,
-  SMS, Push, WordPress change, publication, spend, DNS change, migration,
-  deletion, or NellySelly action.
-- Stale encrypted Upstash variable names remain ignored. Their deletion is not
-  included in this gate.
+- PR #209 is merged, accepted, and documented in
+  `docs/phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md`.
+- Its exact gate is consumed and cannot authorize any later candidate, secret,
+  database action, message, publication, or cleanup.
+- Stale encrypted Upstash variable names remain ignored. Their deletion was not
+  included and remains a separate action.
 
-## Later sequential candidates — no current release authority
+## Next sequential candidates — no current release authority
 
 These candidates preserve already-built work. They are not part of PR #209's
-gate and must not be merged out of order:
+consumed gate and must not be merged out of order:
 
 1. Draft PR [#210](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/210)
    consolidates `/value` and `/we-buy-houses` onto the canonical conversion
    routes with permanent, query-preserving redirects and a matching Production
-   monitor contract. It is synchronized with exact PR #209 candidate
-   `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b`; the immediately prior PR #210
-   head is preserved at
-   `rescue/amm-pr210-pre-final-pr209-cutover-hygiene-20260824-162615`.
-   Fresh exact-head proof remains mandatory. After PR #209 is released, retarget
-   or refresh #210 onto the exact new `main`, repeat proof, then require
+   monitor contract. It has been merged forward onto accepted PR #209 `main`
+   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` without force-pushing; the
+   immediately prior PR #210 head is preserved at
+   `rescue/amm-pr210-pre-main-cutover-20260828-210054`.
+   Fresh exact-head proof remains mandatory before requesting
    `APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`.
 2. Draft PR [#211](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/211)
    retains the shared skip-to-content path and clearer required Ask intake.
-   It is synchronized with exact clean PR #210 head
-   `3ed8d050edd386aa0cd4a83d230ff3170d24a306`; the immediately prior PR #211
+   It is synchronized without force push with exact sealed PR #210 head
+   `93af400494a94a8d8aedb09ece16bbff4dfd214b`; the immediately prior PR #211
    head is preserved at
-   `rescue/amm-pr211-pre-final-pr210-cutover-hygiene-20260824-164445`. Fresh exact-head
+   `rescue/amm-pr211-pre-pr210-exact-seal-20260828-213129`. Fresh exact-head
    proof remains mandatory, and it later requires
    `APPROVE PHASE 9 ASK CONVERSION ACCESSIBILITY MERGE AND PRODUCTION DEPLOYMENT`
    after a fresh exact-main refresh and proof.

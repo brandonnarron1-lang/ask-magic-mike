@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-08-28 — PR #211 refresh onto exact sealed PR #210
+
+- Preserved prior PR #211 head `5d566a4a14d4a7cb67175683fdf099e8d62747b7`
+  at `rescue/amm-pr211-pre-pr210-exact-seal-20260828-213129`.
+- Merged exact sealed PR #210 head
+  `93af400494a94a8d8aedb09ece16bbff4dfd214b` without force push. Conflicts
+  were limited to additive history, implementation status, and release-
+  authority records; application files did not overlap.
+- Preserved PR #210's redirects and accepted Production ledger alongside PR
+  #211's Ask semantics, shared skip link, focus target, and keyboard tests.
+- Prior PR #211 proof is historical. Fresh exact-head CI, protected Preview,
+  keyboard, and zero-write runtime evidence are mandatory.
+- No Production, environment, database, lead/event, notification, WordPress,
+  DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
+## 2026-08-28 — PR #210 refresh onto accepted PR #209 Production
+
+- Recorded accepted PR #209 Production merge
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; its durability gate is exhausted.
+- Preserved prior PR #210 head `3ed8d050edd386aa0cd4a83d230ff3170d24a306`
+  at `rescue/amm-pr210-pre-main-cutover-20260828-210054` and merged accepted
+  `main` forward without force push.
+- Kept PR #210 limited to canonical query-preserving redirects plus matching
+  monitor/tests. Fresh exact-head Node 24 and protected Preview proof remain
+  mandatory before its separate release gate.
+- No Production, environment, database, lead, event, notification, WordPress,
+  DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-24 — PR #211 refresh onto final PR #210 cutover hygiene
 
 - Preserved former PR #211 head `6eacc33d16e34897c97288e48cd736433a3d9e15`
