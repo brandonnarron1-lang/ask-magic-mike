@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-08-28 — PR #215 exact-parent application acceptance
+
+- Reused the canonical Home Value funnel and `POST /api/leads` command on exact
+  sealed PR #214 head `81a2c7544318d630437ed3e86cbea029c5c9b57d`;
+  the exact application/parent-refresh head is
+  `eff8fc04449fab4fd34cd0fb69735e6787d0b382`.
+- Passed 236 files / 3,108 tests, strict typecheck, ESLint, the optimized
+  52-page build, 84/17 route proof, release doctor 43/43, safety 14/14,
+  Ask/Nelly isolation, dependency audit, a 646-commit redacted secret scan,
+  and whitespace verification.
+- GitHub Release Gate run `33229869967` passed with artifact `9708168965`
+  (`sha256:09f00d64c6f9c9ab593529c5a67da4981ce5d350eec4700fc3d59a30620af2c2`).
+- Immutable Preview deployment `dpl_8qNH7Ry1gSPqdSwHrRNM3Y9LHhZR` is READY at
+  `https://ask-magic-mike-ao5u74sfz-eyes-up-industries.vercel.app`.
+- Protected no-write run `33230015801` checked out the exact application head
+  and passed 17 read-only checks, six deliberate mutation skips, 3/3
+  write-intercepted browser checks, release-candidate `GO`, and
+  `PREVIEW_READY`. Artifact `9708219853` has digest
+  `sha256:17c4339d2c62846df1191b5a94acd107c78a130d09cac40ba40d899eadd1e6e9`.
+- Current-run 1280, 390, and 320 visual acceptance found no horizontal
+  overflow; empty submission focused the address field and exposed a specific
+  live-region error without creating a lead. Preview logs contained four
+  page-load analytics POSTs, no lead/delivery/provider request, and no
+  warning/error/fatal record.
+- This evidence-only seal changes no Production deployment, environment,
+  database schema/lead, notification, provider, WordPress, DNS, publication,
+  spend, deletion, or NellySelly system. The resulting documentation head must
+  repeat exact-head CI and protected Preview proof before the later gate.
+
 ## 2026-08-28 — PR #215 refresh onto exact sealed PR #214
 
 - Preserved prior PR #215 head `2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`

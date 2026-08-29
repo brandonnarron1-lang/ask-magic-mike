@@ -65,10 +65,19 @@ Updated 2026-08-28.
   merged with conflicts limited to additive changelog, QA-evidence, and
   release-authority records; no application file required manual conflict
   resolution.
-- **Acceptance boundary:** all prior PR #215 local, CI, and Preview evidence is
-  historical after the parent refresh. Fresh exact-head Node 24, immutable
-  Preview, protected no-write, write-intercepted interaction, security,
-  isolation, and deployment-log proof are mandatory before its later gate.
+- **Application acceptance:** exact parent-refresh head
+  `eff8fc04449fab4fd34cd0fb69735e6787d0b382` passed 236 files / 3,108 tests,
+  strict types, lint, optimized build, 84/17 route proof, doctor 43/43, safety
+  14/14, isolation, dependency/secret checks, Release Gate `33229869967`,
+  READY Preview `dpl_8qNH7Ry1gSPqdSwHrRNM3Y9LHhZR`, and protected no-write
+  run `33230015801` with 17 pass / 6 intentional skips / 0 fail and 3/3
+  intercepted browser checks.
+- **Acceptance boundary:** current-run desktop/390/320 inspection found no
+  horizontal overflow and proved empty-address focus/error behavior without a
+  lead. Four Preview page-load telemetry POSTs were recorded explicitly; no
+  lead/delivery/provider request occurred. The resulting evidence-only head
+  still requires its own exact-head CI and protected Preview proof before the
+  later gate.
 - **Safety:** no Production, environment, database, lead/event, message,
   provider, WordPress/DNS, publication, spend, deletion, or NellySelly action.
 - Detailed scope:

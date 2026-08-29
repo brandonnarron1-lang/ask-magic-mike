@@ -16,8 +16,10 @@ historical. The exact-parent refresh conflicted only in additive changelog,
 QA-evidence, and release-authority records. No funnel, API, lead-lifecycle,
 notification, provider, or analytics application file required manual conflict
 resolution.
-Every local, CI, Preview, and browser result below predating this refresh is
-historical until repeated on the current GitHub PR head.
+The exact application/parent-refresh head is
+`eff8fc04449fab4fd34cd0fb69735e6787d0b382`. The evidence-only commit that
+records its results must repeat exact-head CI and protected Preview proof before
+the later release gate.
 
 ## Data-quality evidence
 
@@ -53,27 +55,71 @@ pnpm exec vitest run \
   tests/leadops/public-error-hygiene.test.ts
 ```
 
-Result after the shared browser/API contact-validation correction: 5 files /
-36 tests passed. Coverage includes malformed email, short phone, overlong
-phone, email-only durable success, consent-channel accuracy, and safe durable-
-failure telemetry.
+Result on the exact application head, including the release-authority contract:
+6 files / 50 tests passed. Coverage includes malformed email, short phone,
+overlong phone, email-only durable success, consent-channel accuracy, safe
+durable-failure telemetry, and exact predecessor/recovery authority.
 
 Full local release proof before documentation sealing:
 
-- Vitest: 234 files / 3,095 tests passed;
+- Vitest: 236 files / 3,108 tests passed;
 - strict TypeScript: passed;
 - full ESLint: passed;
 - optimized Next.js 15.5.21 build: passed, 52 generated pages;
 - route manifest: 84 active routes / 17 acknowledged root-`src` duplicates;
+- release doctor: 43/43 passed;
 - release safety: 14/14 passed;
 - Ask Magic Mike / NellySelly deployable-source isolation: passed;
 - Production dependency audit: no known vulnerabilities; and
-- redacted gitleaks history scan: 614 commits / no leaks; and
+- redacted gitleaks history scan: 646 commits / no leaks; and
 - `git diff --check`: passed.
 
-The local release doctor was healthy with 42 passing checks and one expected,
-non-blocking detached-worktree branch-name check. The branch-aware GitHub gate
-remains authoritative for the final exact head.
+GitHub Release Gate run `33229869967` passed against exact application head
+`eff8fc04449fab4fd34cd0fb69735e6787d0b382`. Artifact `9708168965` has digest
+`sha256:09f00d64c6f9c9ab593529c5a67da4981ce5d350eec4700fc3d59a30620af2c2`.
+
+## Immutable Preview and protected no-write acceptance
+
+Vercel deployment `dpl_8qNH7Ry1gSPqdSwHrRNM3Y9LHhZR` is READY at
+`https://ask-magic-mike-ao5u74sfz-eyes-up-industries.vercel.app` and records the
+exact application head and PR #215 branch.
+
+Protected GitHub run `33230015801` checked out exact target `eff8fc0` and
+passed:
+
+- 236 files / 3,108 tests, typecheck, lint, optimized build, release doctor,
+  and release safety;
+- 17 read-only Preview checks, six deliberate `SAFE_DB_WRITE=false` mutation
+  skips, and zero failures;
+- 3/3 browser checks with lead and telemetry endpoints intercepted, zero
+  unexpected, flaky, or skipped tests;
+- release-candidate `GO`; and
+- launch authority `PREVIEW_READY`.
+
+Artifact `9708219853` has digest
+`sha256:17c4339d2c62846df1191b5a94acd107c78a130d09cac40ba40d899eadd1e6e9`.
+
+## Current-run exact Preview visual acceptance
+
+The in-app Browser inspected the exact immutable Preview at 1280 × 720,
+390 × 844, and 320 × 700. Every width had document width equal to client width.
+The empty-address path focused the address field and rendered the specific
+live-region alert “Enter the full property address so Mike can review the right
+home.” No contact identity was entered and no lead endpoint was called.
+
+Accepted current-run captures are stored outside the repository at:
+
+- `/Users/brandonnarron/.codex/artifacts/amm-pr215-visual-qa-20260829/01-home-value-desktop-1280x720.jpg`;
+- `/Users/brandonnarron/.codex/artifacts/amm-pr215-visual-qa-20260829/02-home-value-mobile-390x844.jpg`;
+- `/Users/brandonnarron/.codex/artifacts/amm-pr215-visual-qa-20260829/03-home-value-mobile-validation-390x844.jpg`; and
+- `/Users/brandonnarron/.codex/artifacts/amm-pr215-visual-qa-20260829/04-home-value-mobile-320x700.jpg`.
+
+The exact deployment window contained 49 info-level request records: 40 GET,
+five OPTIONS, and four page-load telemetry POSTs (two `/api/events`, two
+`/api/experiments/event`). It contained no `/api/leads`, notification, webhook,
+message, or provider request and no warning/error/fatal record. The telemetry
+POSTs are recorded as Preview visual-inspection side effects; they are not lead
+or delivery proof.
 
 The final branch head must repeat focused/full tests, typecheck, lint, optimized
 build/route proof, release safety, isolation, dependency audit, redacted secret

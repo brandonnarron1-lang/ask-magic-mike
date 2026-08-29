@@ -10,11 +10,23 @@
 - The parent merge conflicted only in additive changelog, QA-evidence, and
   release-authority records. No funnel, API, lead, notification, provider, or
   analytics application file required manual conflict resolution.
-- Prior candidate local, CI, Preview, and browser evidence is historical. Fresh
-  exact-head Node 24, immutable Preview, protected no-write, write-intercepted
-  interaction, security, isolation, and deployment-log proof are required.
-- No Production, database, lead/event, message, provider, WordPress, DNS,
-  publication, spend, deletion, or NellySelly action occurred.
+- Exact application/parent-refresh head
+  `eff8fc04449fab4fd34cd0fb69735e6787d0b382` passed 236 files / 3,108 tests,
+  typecheck, lint, 52-page build, 84/17 routes, doctor 43/43, safety 14/14,
+  Ask/Nelly isolation, dependency audit, 646-commit gitleaks, and whitespace.
+- GitHub gate `33229869967` and immutable Preview
+  `dpl_8qNH7Ry1gSPqdSwHrRNM3Y9LHhZR` passed for that exact head. Protected run
+  `33230015801` passed 17 read-only checks, six intentional mutation skips,
+  3/3 intercepted browser checks, `GO`, and `PREVIEW_READY`.
+- Current-run 1280 × 720, 390 × 844, and 320 × 700 visual checks found no
+  horizontal overflow. Empty Continue focused the address input and announced
+  a specific inline alert without a lead request.
+- Preview logs recorded four page-load telemetry POSTs to `/api/events` and
+  `/api/experiments/event`; no `/api/leads`, notification, webhook, message,
+  or provider request occurred, and all 49 records were info-level.
+- No Production, schema, lead, message, provider, WordPress, DNS, publication,
+  spend, deletion, or NellySelly action occurred. The evidence-only seal must
+  repeat exact-head CI/Preview proof before the later release gate.
 - Full scope:
   `docs/phase9/HOME_VALUE_COMPLETION_INTEGRITY_QA_EVIDENCE.md`.
 

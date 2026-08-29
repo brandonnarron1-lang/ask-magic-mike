@@ -130,8 +130,11 @@ browser, and runtime checks before any gate becomes requestable.
    optional. Its immediately prior head is preserved at
    `rescue/amm-pr215-pre-pr214-exact-seal-20260828-224229`. It adds
    no schema or provider and applies one shared contact-validation contract at
-   the browser and API boundaries. After PR #214 releases, refresh it onto exact
-   `main`, repeat complete exact-head proof, then require
+   the browser and API boundaries. Exact parent-refresh application head
+   `eff8fc04449fab4fd34cd0fb69735e6787d0b382` passed local, CI, immutable
+   Preview, protected no-write, intercepted-browser, responsive, and runtime-log
+   acceptance. The evidence-only seal must repeat exact-head proof. After PR
+   #214 releases, refresh it onto exact `main`, repeat complete proof, then require
    `APPROVE PHASE 9 HOME-VALUE COMPLETION INTEGRITY MERGE AND PRODUCTION DEPLOYMENT`.
 
 6. Draft PR [#212](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/212)

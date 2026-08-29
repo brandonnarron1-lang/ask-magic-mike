@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-08-28 — PR #215 exact-parent application acceptance
+
+- Exact application head `eff8fc04449fab4fd34cd0fb69735e6787d0b382`
+  reuses sealed PR #214 `81a2c7544318d630437ed3e86cbea029c5c9b57d`
+  and passed the complete local Node 24 release bar: 236 files / 3,108 tests,
+  strict types, lint, 52-page build, 84/17 route proof, doctor 43/43, safety
+  14/14, isolation, dependency audit, 646-commit secret scan, and whitespace.
+- Release Gate `33229869967` / artifact `9708168965` passed. Immutable Preview
+  `dpl_8qNH7Ry1gSPqdSwHrRNM3Y9LHhZR` is READY.
+- Protected run `33230015801` / artifact `9708219853` passed 17 read-only
+  checks, six deliberate no-write skips, 3/3 intercepted browser checks,
+  release-candidate `GO`, and `PREVIEW_READY`.
+- Current-run desktop and narrow-mobile visual evidence found no horizontal
+  overflow and proved specific empty-address focus/error behavior without a
+  lead submission. Runtime logs contained only four page-load telemetry POSTs,
+  no lead/delivery/provider request, and no warning/error/fatal record.
+- Production stayed on `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`.
+  This documentation-only seal must be re-proved at its resulting exact head.
+
 ## 2026-08-28 — PR #215 refresh onto exact sealed PR #214
 
 - Preserved prior PR #215 head `2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`
