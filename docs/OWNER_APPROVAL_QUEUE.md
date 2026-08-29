@@ -160,16 +160,30 @@ browser, and runtime checks before any gate becomes requestable.
    endpoint, or Production configuration change. Treat the current GitHub PR
    head—not the historical code-bearing heads named here—as the final release
    candidate; all earlier local, CI, Preview, browser, and runtime proof must be
-   repeated on that exact head. Exact parent-refresh application head
-   `70198a7bb8467ac741b3c0977bd0ed95b8b5dbda` passed complete local, CI,
+   repeated on that exact head. Exact sealed head
+   `211485df28fc818ab783ed357df8486f1460d5e2` passed complete local, CI,
    immutable Preview, protected no-write, six-scenario browser, visual, and
-   runtime-log acceptance. The documentation-only evidence seal must repeat
-   exact-head proof.
+   runtime-log acceptance. Release Gate `33231948183` and exact-branch
+   protected run `33232071508` are the final PR #216 evidence authority.
    After PR #215 releases, refresh it onto exact `main`, repeat complete
    exact-head and write-intercepted Preview proof, then require
    `APPROVE PHASE 9 FUNNEL EVENT IDENTITY INTEGRITY MERGE AND PRODUCTION DEPLOYMENT`.
 
-7. Draft PR [#212](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/212)
+7. Draft PR [#217](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/217)
+   reuses exact sealed PR #216 head
+   `211485df28fc818ab783ed357df8486f1460d5e2`, the existing vendor-neutral
+   normalizer, and the authenticated Growth Intelligence surface. Its former
+   head `d04984b4d162f13c79af261beb55a82f15a86b80` is preserved at
+   `rescue/amm-pr217-pre-pr216-exact-seal-20260828-234940`. It adds only a
+   fixed-profile, `growth:manage`-protected synthetic contract lab for Zillow,
+   Follow Up Boss, Meta, and Google; it accepts no caller-supplied lead payload,
+   calls no provider, writes no database, and creates no lead or message. Prior
+   proof is historical until repeated on the current GitHub PR head. After PR
+   #216 releases, refresh it onto exact `main`, repeat complete exact-head and
+   protected no-write proof, then require
+   `APPROVE PHASE 9 VENDOR INGRESS CONTRACT LAB MERGE AND PRODUCTION DEPLOYMENT`.
+
+8. Draft PR [#212](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/212)
    is a separate HOLD candidate that reuses the existing Google container and
    canonical event ledger for consent-gated cross-domain measurement. It must
    be refreshed only after the selected application sequence and requires
@@ -177,7 +191,7 @@ browser, and runtime checks before any gate becomes requestable.
    `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
 
 The historical shorter conversion-identity phrase released PR #195 and is
-exhausted; it cannot authorize PR #213, PR #214, PR #215, or PR #216.
+exhausted; it cannot authorize PR #213, PR #214, PR #215, PR #216, or PR #217.
 
 None of these later phrases can authorize another PR, secret, database write,
 form submission, notification, WordPress/DNS change, publication, spend,

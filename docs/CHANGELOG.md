@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-08-28 — PR #217 refresh onto exact sealed PR #216
+
+- Preserved former PR #217 head
+  `d04984b4d162f13c79af261beb55a82f15a86b80` at
+  `rescue/amm-pr217-pre-pr216-exact-seal-20260828-234940`.
+- Merged exact sealed PR #216 head
+  `211485df28fc818ab783ed357df8486f1460d5e2` without force push at application
+  head `e616170657861c3dd83fae43b28bef9cf89506af`. Product application files
+  merged automatically; only additive history ledgers conflicted.
+- Retained the existing vendor-neutral normalizer and the protected,
+  fixed-profile, no-write/no-provider-call contract lab. Prior PR #217 evidence
+  is historical pending fresh exact-head proof.
+- Production remains `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` /
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; no Production, environment, database,
+  lead/event, message, provider, WordPress, DNS, publication, spend, deletion,
+  or NellySelly mutation occurred.
+
 ## 2026-08-28 — PR #216 exact-parent application acceptance
 
 - Exact application head `70198a7bb8467ac741b3c0977bd0ed95b8b5dbda`

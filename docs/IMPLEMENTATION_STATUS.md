@@ -9,7 +9,8 @@ Updated 2026-08-28.
 - Merged exact sealed PR #216 head
   `211485df28fc818ab783ed357df8486f1460d5e2` without force push. Application
   files merged automatically; only additive release-history ledgers required
-  manual reconciliation.
+  manual reconciliation. Exact-parent application head is
+  `e616170657861c3dd83fae43b28bef9cf89506af`.
 - PR #217 remains Draft with no Production authority. All proof from the former
   head is historical until fresh exact-head Node 24, immutable Preview,
   protected no-write browser, security, isolation, and runtime-log checks pass.
@@ -31,8 +32,8 @@ Updated 2026-08-28.
   The shared normalizer now treats missing test state as a review reason and
   continues to refuse inferred channel consent.
 - **Historical local acceptance:** former PR #217 head passed 5 focused files /
-  30 tests, all 242 files /
-  3,152 tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build,
+  30 tests, all 242 files / 3,152 tests, strict TypeScript, full ESLint,
+  optimized Next.js 15.5.21 build,
   86/17 route proof, 14/14 release safety, Production dependency audit, and
   system isolation pass on Node 24.18.0. Clean-commit release doctor is 43/43,
   staged and full tracked-history secret scans report no finding, and exact-base

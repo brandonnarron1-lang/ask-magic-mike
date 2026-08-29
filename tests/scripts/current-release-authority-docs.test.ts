@@ -51,6 +51,12 @@ const funnelEventIdentityDecision = readDoc(
 const funnelEventIdentityEvidence = readDoc(
   "phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY_QA_EVIDENCE.md"
 );
+const vendorIngressDecision = readDoc(
+  "phase9/VENDOR_INGRESS_CONTRACT_LAB.md"
+);
+const vendorIngressEvidence = readDoc(
+  "phase9/VENDOR_INGRESS_CONTRACT_LAB_QA_EVIDENCE.md"
+);
 const durableRateLimitRehearsal = readDoc(
   "phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md"
 );
@@ -94,6 +100,8 @@ const pr214SealedParent =
   "81a2c7544318d630437ed3e86cbea029c5c9b57d";
 const pr215SealedParent =
   "c53cec6043525b593b254c457efdbbe5a29c0520";
+const pr216SealedParent =
+  "211485df28fc818ab783ed357df8486f1460d5e2";
 const canonicalAliasGate =
   "APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT";
 const askAccessibilityGate =
@@ -106,6 +114,8 @@ const homeValueCompletionGate =
   "APPROVE PHASE 9 HOME-VALUE COMPLETION INTEGRITY MERGE AND PRODUCTION DEPLOYMENT";
 const funnelEventIdentityGate =
   "APPROVE PHASE 9 FUNNEL EVENT IDENTITY INTEGRITY MERGE AND PRODUCTION DEPLOYMENT";
+const vendorIngressGate =
+  "APPROVE PHASE 9 VENDOR INGRESS CONTRACT LAB MERGE AND PRODUCTION DEPLOYMENT";
 const crossDomainGate =
   "APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT";
 const pr210Rescue =
@@ -120,6 +130,8 @@ const pr215Rescue =
   "rescue/amm-pr215-pre-pr214-exact-seal-20260828-224229";
 const pr216Rescue =
   "rescue/amm-pr216-pre-pr215-exact-seal-20260828-231335";
+const pr217Rescue =
+  "rescue/amm-pr217-pre-pr216-exact-seal-20260828-234940";
 
 const completedReleaseLedger = [
   {
@@ -245,6 +257,7 @@ describe("current release-authority documentation", () => {
     const pr214 = ownerQueue.indexOf("Draft PR [#214]");
     const pr215 = ownerQueue.indexOf("Draft PR [#215]");
     const pr216 = ownerQueue.indexOf("Draft PR [#216]");
+    const pr217 = ownerQueue.indexOf("Draft PR [#217]");
     const pr212 = ownerQueue.indexOf("Draft PR [#212]");
 
     expect(completedPr209).toBeGreaterThanOrEqual(0);
@@ -254,13 +267,15 @@ describe("current release-authority documentation", () => {
     expect(pr214).toBeGreaterThan(pr213);
     expect(pr215).toBeGreaterThan(pr214);
     expect(pr216).toBeGreaterThan(pr215);
-    expect(pr212).toBeGreaterThan(pr216);
+    expect(pr217).toBeGreaterThan(pr216);
+    expect(pr212).toBeGreaterThan(pr217);
     expect(ownerQueue).toContain(canonicalAliasGate);
     expect(ownerQueue).toContain(askAccessibilityGate);
     expect(ownerQueue).toContain(responsiveIdentityGate);
     expect(ownerQueue).toContain(leadAlertIdentityGate);
     expect(ownerQueue).toContain(homeValueCompletionGate);
     expect(ownerQueue).toContain(funnelEventIdentityGate);
+    expect(ownerQueue).toContain(vendorIngressGate);
     expect(ownerQueue).toContain(crossDomainGate);
   });
 
@@ -334,6 +349,19 @@ describe("current release-authority documentation", () => {
       expect(doc).toContain(pr215SealedParent);
     }
     expect(funnelEventIdentityEvidence).toContain(pr216Rescue);
+  });
+
+  it("binds PR #217's stacked authority to the current sealed PR #216 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      vendorIngressDecision,
+      vendorIngressEvidence,
+    ]) {
+      expect(doc).toContain(pr216SealedParent);
+      expect(doc).toContain(vendorIngressGate);
+    }
+    expect(ownerQueue).toContain(pr217Rescue);
+    expect(vendorIngressEvidence).toContain(pr217Rescue);
   });
 
   it("resolves the mutable PR head from GitHub instead of self-pinning it", () => {

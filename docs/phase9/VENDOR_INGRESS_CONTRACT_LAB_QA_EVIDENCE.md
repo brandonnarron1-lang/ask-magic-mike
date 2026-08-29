@@ -4,7 +4,15 @@ Date: 2026-08-24
 
 Branch: `codex/phase9-vendor-ingress-contract-lab-20260824`
 
-Base: `a6098ab4ee7a13d024bafc08264628e2691a8e06`
+Base: sealed Draft PR #216 head
+`211485df28fc818ab783ed357df8486f1460d5e2`
+
+Former PR #217 head `d04984b4d162f13c79af261beb55a82f15a86b80`
+is preserved at
+`rescue/amm-pr217-pre-pr216-exact-seal-20260828-234940`. Exact-parent
+application head is `e616170657861c3dd83fae43b28bef9cf89506af`.
+The evidence below was collected on the former head and is historical until
+repeated on the current exact head.
 
 ## Scope
 
@@ -13,7 +21,7 @@ provider account, credential, webhook, database, lead, message, campaign,
 WordPress surface, Vercel environment, Production deployment, or NellySelly
 system was used.
 
-## Completed local evidence
+## Historical local evidence
 
 Node runtime: `v24.18.0`.
 
@@ -87,13 +95,13 @@ pnpm release:doctor
 gitleaks git --redact --no-banner --log-opts='--all'
 Full tracked history scanned · no leaks found
 
-git merge-base --is-ancestor a6098ab4... HEAD
+git merge-base --is-ancestor 211485df... HEAD
 PASS
 
-git rev-list --count a6098ab4...HEAD
-1 code commit before this evidence-only seal
+git rev-list --count 211485df...HEAD
+3 commits through the exact-parent application merge
 
-git diff --check a6098ab4...HEAD
+git diff --check 211485df...HEAD
 PASS
 ```
 
@@ -113,6 +121,16 @@ the final candidate head:
 - authenticated desktop/mobile visual and interaction QA;
 - exact Preview log audit proving no mutation or provider call; and
 - clean diff, ancestry, and worktree proof.
+
+The only later Production gate for this lab is:
+
+```text
+APPROVE PHASE 9 VENDOR INGRESS CONTRACT LAB MERGE AND PRODUCTION DEPLOYMENT
+```
+
+It has not been supplied and cannot authorize provider activation, credentials,
+webhook registration, lead import, messaging, database mutation, WordPress,
+DNS, spend, or any other release.
 
 ## Acceptance assertions
 

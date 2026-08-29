@@ -1,5 +1,30 @@
 # QA Evidence
 
+## Phase 9 vendor-ingress contract-lab refresh — 2026-08-28
+
+- Draft PR #217 reuses the existing vendor-neutral normalizer after exact
+  sealed Draft PR #216 `211485df28fc818ab783ed357df8486f1460d5e2`.
+- Former PR #217 head `d04984b4d162f13c79af261beb55a82f15a86b80`
+  is preserved at
+  `rescue/amm-pr217-pre-pr216-exact-seal-20260828-234940`; exact-parent
+  application head is `e616170657861c3dd83fae43b28bef9cf89506af`.
+- Product application files merged automatically. Conflicts were limited to
+  additive release-history ledgers; no provider contract, normalizer, route,
+  UI, or test file required manual conflict resolution.
+- Security review confirmed server-side `growth:manage` enforcement, strict
+  same-origin POST handling, bounded JSON, fixed profile IDs, private response
+  headers, React escaping, constant-time comparisons, and no database/network
+  client or raw-payload/signing-material response. Current first-party Follow
+  Up Boss and Google documentation still matches the implemented synthetic
+  contract examples.
+- Former-head local proof is historical. Fresh exact-head focused/full tests,
+  types, lint, build, route, safety, isolation, dependency, secret, immutable
+  Preview, protected no-write browser, and runtime-log proof remain mandatory.
+- No Production, environment, database, lead/event, message, provider,
+  WordPress, DNS, publication, spend, deletion, or NellySelly action occurred.
+- Full scope:
+  `docs/phase9/VENDOR_INGRESS_CONTRACT_LAB_QA_EVIDENCE.md`.
+
 ## Phase 9 funnel-event identity-integrity refresh — 2026-08-28
 
 - Draft PR #216 reuses the established funnel/session UUID and canonical event
