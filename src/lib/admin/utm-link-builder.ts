@@ -260,6 +260,6 @@ export function buildUtmCopyBank(): UtmCopyBank {
     blockedDomain:        "ourtownproperties.com",
     disclaimer:
       "Copy manually into the native platform. This page never posts for you. " +
-      "ourtownproperties.com links must not be posted on Facebook until the host WAF is fixed.",
+      "ourtownproperties.com links must not be posted on Facebook until the bounded host Apache correction passes 42/42.",
   };
 }

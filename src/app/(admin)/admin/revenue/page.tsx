@@ -398,7 +398,7 @@ export default async function RevenueCommandPage() {
             </div>
 
             <p className="text-[10.5px] text-slate-600 italic">
-              This card is read-only. It does not trigger any host actions. Contact the host administrator to apply the WAF whitelist.
+              This card is read-only. It does not trigger host actions. Give the host administrator the reviewed bounded Apache change packet.
             </p>
           </div>
         </section>

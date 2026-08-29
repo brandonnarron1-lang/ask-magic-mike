@@ -135,7 +135,7 @@ export default async function TrafficCommandPage() {
               <p className="text-[11px] text-slate-500 mt-1">
                 {launchReadiness.otpFacebookLinksSafe
                   ? "ourtownproperties.com Facebook preview OK"
-                  : "Pending Regency/host WAF whitelist"}
+                  : "Bounded host Apache correction pending"}
               </p>
             </div>
             {/* Primary posting domain */}
