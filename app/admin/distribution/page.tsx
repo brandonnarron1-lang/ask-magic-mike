@@ -33,6 +33,7 @@ import {
   isWordPressActivationPlacementKey,
   wordpressActivationManifestHref,
 } from "../../lib/growth/wordpress-activation-change-set";
+import { wordpressSellerIntentDecisionManifestHref } from "../../lib/growth/wordpress-seller-intent-decision";
 import { loadGrowthIntelligence } from "../../lib/growthIntelligenceView";
 import {
   loadOwnedDemandPublicationProofLedger,
@@ -698,6 +699,31 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
               </article>
             ))}
           </div>
+          {channel.key === "ourtown_wordpress" ? (
+            <article className="mt-3 rounded-lg border border-[#cda24a55] bg-[#171108] p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="max-w-3xl">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#f0cf79]">
+                    Seller-intent consolidation hold
+                  </p>
+                  <h4 className="mt-2 text-sm font-semibold text-[#f4ead4]">
+                    Choose the canonical seller page and capture owner before publishing another CTA.
+                  </h4>
+                  <p className="mt-2 text-xs leading-5 text-[#b9ab91]">
+                    The protected packet compares the existing We Buy Homes and We Buy Houses surfaces, records duplicate form and SEO preconditions, and deliberately withholds a tracked publication link. It cannot edit WordPress, submit a lead, or send a notification.
+                  </p>
+                </div>
+                <Link
+                  href={wordpressSellerIntentDecisionManifestHref()}
+                  prefetch={false}
+                  data-seller-intent-decision-manifest="true"
+                  className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#cda24a66] bg-[#cda24a16] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.11em] text-[#f5dfa7] transition hover:bg-[#cda24a25] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0cf79]"
+                >
+                  Download decision packet
+                </Link>
+              </div>
+            </article>
+          ) : null}
         </div>
       ) : null}
 

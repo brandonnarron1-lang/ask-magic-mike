@@ -6,7 +6,9 @@
 **Broker:** Mike Eatmon  
 **Market:** Wilson, NC / Eastern NC  
 **Date:** 2026-06-28  
-**Status:** `/ask-mike/` embed page is LIVE. Homepage CTA links to it with UTMs. Remaining: verify UTM pass-through is working, confirm leads appear in admin.
+**Status:** HISTORICAL REFERENCE — DO NOT PUBLISH THESE SNIPPETS DIRECTLY. The protected Lead Center Distribution Command and its live readiness/decision manifests supersede this packet for current activation work.
+
+> **Publication hold (2026-08-29):** Snippets A–C predate the canonical owned-demand UTM registry and still contain legacy `/value` links. The public seller surfaces `/we-buy-homes/` and `/we-buy-houses/` are both self-canonical, while `/we-buy-houses/` currently exposes a native AMM form plus Gravity Form 7 and no canonical Ask Magic Mike link. Do not add, replace, redirect, noindex, or publish a seller CTA from this document. Use the authenticated `/admin/distribution` seller-intent decision packet first; it deliberately withholds a tracked publication href until the canonical page, capture owner, duplicate-page disposition, and placement key are approved.
 
 ---
 
@@ -21,9 +23,9 @@
 
 ---
 
-## Exact Snippets to Install
+## Historical snippets — reference only, not approved to install
 
-> For each snippet: log into WP Admin → Pages → [target page] → Launch Beaver Builder (or Block Editor) → add Custom HTML block → paste → save → publish.
+> Historical procedure only—do not execute it from this packet. A future approved change set must identify one exact page ID, href, backup, precondition hash, acceptance test, and rollback before any WordPress publication.
 
 ---
 

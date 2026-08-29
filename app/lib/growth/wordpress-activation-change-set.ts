@@ -15,7 +15,7 @@ const ASK_MAGIC_MIKE_HOSTS = new Set([
 const MAX_RESPONSE_BYTES = 3_000_000;
 const MAX_REDIRECTS = 5;
 const FETCH_TIMEOUT_MS = 20_000;
-const WORDPRESS_PAGE_INDEX_URL =
+export const WORDPRESS_PAGE_INDEX_URL =
   "https://www.ourtownproperties.com/wp-json/wp/v2/pages?per_page=100&_fields=id,link,slug,status,modified_gmt";
 
 export const WORDPRESS_ACTIVATION_PLACEMENT_KEYS = [
@@ -228,7 +228,7 @@ function normalizedPageUrl(value: string) {
   return parsed.toString();
 }
 
-function safePageRows(rows: readonly unknown[]): WordPressPageIndexRow[] {
+export function safeWordPressPageRows(rows: readonly unknown[]): WordPressPageIndexRow[] {
   const safeRows: WordPressPageIndexRow[] = [];
   for (const row of rows) {
     if (!row || typeof row !== "object" || Array.isArray(row)) continue;
@@ -331,7 +331,7 @@ export function buildWordPressActivationChangeSet(input: {
   const currentMatches = legacyMatches.length ? legacyMatches : proposedMatches;
   const currentHref = currentMatches.length ? currentMatches[0].toString() : null;
 
-  const rows = safePageRows(input.pageRows).filter((row) => {
+  const rows = safeWordPressPageRows(input.pageRows).filter((row) => {
     try {
       return normalizedPageUrl(row.link) === normalizedPageUrl(target.sourcePage);
     } catch {
@@ -486,7 +486,10 @@ async function readResponseTextWithLimit(response: Response) {
   return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)), totalBytes).toString("utf8");
 }
 
-async function fetchAllowlistedWordPressText(url: string, expectedContentType: "html" | "json") {
+export async function fetchAllowlistedWordPressText(
+  url: string,
+  expectedContentType: "html" | "json",
+) {
   let currentUrl = normalizeWordPressActivationUrl(url);
   for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount += 1) {
     const response = await fetch(currentUrl, {

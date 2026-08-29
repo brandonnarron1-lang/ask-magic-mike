@@ -222,6 +222,7 @@ describe("WordPress activation API and operator boundary", () => {
     expect(route).toContain('requireLeadCenterApiPermission(request, "report:view")');
     expect(route).toContain("isWordPressActivationPlacementKey(placementKey)");
     expect(route).toContain("loadWordPressActivationChangeSet(placementKey)");
+    expect(route).toContain("loadWordPressSellerIntentDecisionManifest()");
     expect(route).toContain('"Cache-Control": "private, no-store, max-age=0"');
     expect(route).toContain('"Content-Security-Policy": "default-src \'none\'; sandbox"');
     expect(route).toContain('"Cross-Origin-Resource-Policy": "same-origin"');
@@ -234,6 +235,8 @@ describe("WordPress activation API and operator boundary", () => {
     expect(route).not.toMatch(/export async function (?:POST|PUT|PATCH|DELETE)/);
     expect(route).not.toMatch(/searchParams|DATABASE_URL|INSERT|UPDATE|DELETE|email|sms|send\(/i);
     expect(page).toContain("Download live readiness manifest");
+    expect(page).toContain("Download decision packet");
+    expect(page).toContain('data-seller-intent-decision-manifest="true"');
     expect(page).toContain("they do not publish");
     expect(page).toContain('channel.namedPlacements.length ? "xl:col-span-2" : ""');
   });
