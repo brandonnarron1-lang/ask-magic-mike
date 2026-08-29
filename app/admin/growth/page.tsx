@@ -694,7 +694,16 @@ export default async function GrowthCommandCenterPage({
             title="Channel truth table"
             note={`${data.sourceRowsRead} lead rows · ${data.spendRowsRead} spend rows · ${data.outcomeRowsRead} outcome rows`}
           >
-            <div className="overflow-x-auto">
+            <p id="channel-economics-scroll-help" className="mb-3 text-[10px] leading-5 text-[#8f8778]">
+              Scroll horizontally or use the arrow keys to review every evidence column.
+            </p>
+            <div
+              aria-describedby="channel-economics-scroll-help"
+              aria-label="Channel economics table"
+              className="overflow-x-auto rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f0cf79]"
+              role="region"
+              tabIndex={0}
+            >
               <table className="min-w-[1440px] w-full text-left text-sm">
                 <thead className="border-b border-white/10 text-[10px] uppercase tracking-[0.14em] text-[#8f8778]">
                   <tr>
