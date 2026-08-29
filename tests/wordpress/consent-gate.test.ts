@@ -17,7 +17,11 @@ type FakeElement = {
   id?: string;
   src?: string;
   referrerPolicy?: string;
-  parentNode?: { insertBefore: (node: FakeElement) => void };
+  parentNode?: {
+    insertBefore: (node: FakeElement) => void;
+    removeChild: (node: FakeElement) => void;
+  };
+  remove?: () => void;
   getAttribute: (name: string) => string | null;
 };
 
@@ -37,6 +41,17 @@ function createHarness({
   const windowListeners = new Map<string, Array<() => void>>();
   const intervalCallbacks: Array<() => void> = [];
   const timeoutCallbacks: Array<() => void> = [];
+  const cookieWrites: string[] = [];
+  const cookieStore = new Map<string, string>();
+
+  for (const part of cookie.split(";")) {
+    const separator = part.indexOf("=");
+    if (separator < 1) continue;
+    cookieStore.set(
+      decodeURIComponent(part.slice(0, separator).trim()),
+      part.slice(separator + 1).trim(),
+    );
+  }
 
   const attributes: Record<string, string> = {
     "data-amm-consent-gate": gate,
@@ -44,12 +59,25 @@ function createHarness({
     "data-amm-consent-cookie": cookieName,
   };
 
+  function removeInserted(node: FakeElement) {
+    const index = inserted.indexOf(node);
+    if (index >= 0) inserted.splice(index, 1);
+  }
+
+  function insert(node: FakeElement) {
+    node.parentNode = {
+      insertBefore: insert,
+      removeChild: removeInserted,
+    };
+    node.remove = () => removeInserted(node);
+    inserted.push(node);
+  }
+
   const currentScript: FakeElement = {
     id: "amm-basic-consent-gate",
     parentNode: {
-      insertBefore(node) {
-        inserted.push(node);
-      },
+      insertBefore: insert,
+      removeChild: removeInserted,
     },
     getAttribute(name) {
       return attributes[name] ?? null;
@@ -57,12 +85,12 @@ function createHarness({
   };
 
   const document = {
-    cookie,
+    cookie: "",
     currentScript,
     visibilityState: "visible",
     head: {
       appendChild(node: FakeElement) {
-        inserted.push(node);
+        insert(node);
       },
     },
     addEventListener(name: string, callback: () => void) {
@@ -89,6 +117,29 @@ function createHarness({
     },
   };
 
+  Object.defineProperty(document, "cookie", {
+    configurable: true,
+    get() {
+      return Array.from(cookieStore.entries())
+        .map(([name, value]) => `${encodeURIComponent(name)}=${value}`)
+        .join("; ");
+    },
+    set(value: string) {
+      cookieWrites.push(value);
+      const [pair, ...attributes] = value.split(";").map((part) => part.trim());
+      const separator = pair.indexOf("=");
+      if (separator < 1) return;
+      const name = decodeURIComponent(pair.slice(0, separator));
+      const nextValue = pair.slice(separator + 1);
+      const expired = attributes.some((attribute) =>
+        /^max-age=0$/i.test(attribute) ||
+        /^expires=thu, 01 jan 1970 00:00:00 gmt$/i.test(attribute),
+      );
+      if (expired) cookieStore.delete(name);
+      else cookieStore.set(name, nextValue);
+    },
+  });
+
   let nextTimer = 1;
   const window = {
     addEventListener(name: string, callback: () => void) {
@@ -111,7 +162,7 @@ function createHarness({
     clearInterval: (timer: number) => void;
     setInterval: (callback: () => void, delay: number) => number;
     setTimeout: (callback: () => void, delay: number) => number;
-    dataLayer?: Array<Record<string, unknown>>;
+    dataLayer?: Array<unknown>;
   };
 
   vm.runInNewContext(source, {
@@ -128,6 +179,7 @@ function createHarness({
     document,
     documentListeners,
     inserted,
+    cookieWrites,
     intervalCallbacks,
     timeoutCallbacks,
     window,
@@ -213,6 +265,53 @@ describe("WordPress Basic Consent measurement gate", () => {
     expect(harness.inserted[0]?.src).toBe(
       "https://www.googletagmanager.com/gtm.js?id=GTM-KZMCSLTJ",
     );
+  });
+
+  it("revokes analytics, clears only Google cookies, and never double-loads after withdrawal", () => {
+    const harness = createHarness({
+      cookie: [
+        "vv_cookieconsent_status=allow",
+        "_ga=GA1.1.123.456",
+        "_ga_TEST=GS1.1.123.456",
+        "_gid=GA1.1.456.789",
+        "session_cookie=keep",
+      ].join("; "),
+    });
+
+    expect(harness.inserted).toHaveLength(1);
+    expect(Array.from(harness.window.dataLayer ?? [])).toHaveLength(5);
+
+    harness.document.cookie = "vv_cookieconsent_status=deny";
+    for (const callback of harness.intervalCallbacks) callback();
+
+    expect(harness.inserted).toHaveLength(0);
+    const dataLayer = Array.from(harness.window.dataLayer ?? []);
+    expect(dataLayer).toHaveLength(6);
+    expect(Array.from(dataLayer[5] as ArrayLike<unknown>)).toEqual([
+      "consent",
+      "update",
+      {
+        ad_storage: "denied",
+        ad_user_data: "denied",
+        ad_personalization: "denied",
+        analytics_storage: "denied",
+      },
+    ]);
+    expect(harness.document.cookie).not.toContain("_ga=");
+    expect(harness.document.cookie).not.toContain("_ga_TEST=");
+    expect(harness.document.cookie).not.toContain("_gid=");
+    expect(harness.document.cookie).toContain("session_cookie=keep");
+    expect(harness.cookieWrites).toEqual(expect.arrayContaining([
+      expect.stringContaining("_ga=; Max-Age=0"),
+      expect.stringContaining("_ga_TEST=; Max-Age=0"),
+      expect.stringContaining("_gid=; Max-Age=0"),
+      expect.stringContaining("Domain=.ourtownproperties.com"),
+    ]));
+
+    harness.document.cookie = "vv_cookieconsent_status=allow";
+    for (const callback of harness.intervalCallbacks) callback();
+    expect(harness.inserted).toHaveLength(0);
+    expect(Array.from(harness.window.dataLayer ?? [])).toHaveLength(6);
   });
 
   it("fails closed if plugin markup supplies any other gate identity", () => {

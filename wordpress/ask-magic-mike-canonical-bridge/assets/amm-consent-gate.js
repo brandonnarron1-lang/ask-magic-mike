@@ -6,8 +6,7 @@
   var EXPECTED_COOKIE = "vv_cookieconsent_status";
   var EXPLICIT_ALLOW = "allow";
   var GOOGLE_SCRIPT_ID = "amm-google-tag-manager";
-  var POLL_INTERVAL_MS = 250;
-  var MAX_POLL_ATTEMPTS = 240;
+  var CONSENT_WATCH_INTERVAL_MS = 1000;
 
   var gateScript = document.currentScript;
   if (
@@ -20,8 +19,8 @@
   }
 
   var loaded = false;
-  var pollAttempts = 0;
-  var pollTimer = null;
+  var initialized = false;
+  var revoked = false;
 
   function readCookie(name) {
     var encodedName = encodeURIComponent(name) + "=";
@@ -45,33 +44,73 @@
     return readCookie(EXPECTED_COOKIE) === EXPLICIT_ALLOW;
   }
 
-  function existingGoogleScriptIsCanonical() {
-    var existing = document.getElementById(GOOGLE_SCRIPT_ID);
-    return Boolean(
-      existing &&
-      existing.getAttribute("src") ===
-        "https://www.googletagmanager.com/gtm.js?id=" + EXPECTED_CONTAINER,
+  function queueGoogleCommand() {
+    window.dataLayer.push(arguments);
+  }
+
+  function isGoogleCookie(name) {
+    return (
+      name === "_ga" ||
+      name === "_gid" ||
+      name === "_gat" ||
+      name.indexOf("_ga_") === 0 ||
+      name.indexOf("_gat_") === 0 ||
+      name.indexOf("_gac_") === 0 ||
+      name.indexOf("_gcl_") === 0
     );
   }
 
-  function stopPolling() {
-    if (pollTimer !== null) {
-      window.clearInterval(pollTimer);
-      pollTimer = null;
+  function expireGoogleCookies() {
+    var parts = String(document.cookie || "").split(";");
+    for (var index = 0; index < parts.length; index += 1) {
+      var cookieName = parts[index].split("=", 1)[0].trim();
+      if (!cookieName || !isGoogleCookie(cookieName)) {
+        continue;
+      }
+      var expiration =
+        encodeURIComponent(cookieName) +
+        "=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; SameSite=Lax";
+      document.cookie = expiration;
+      document.cookie = expiration + "; Domain=.ourtownproperties.com";
     }
   }
 
+  function removeGoogleScript() {
+    var existing = document.getElementById(GOOGLE_SCRIPT_ID);
+    if (!existing) {
+      return;
+    }
+    if (typeof existing.remove === "function") {
+      existing.remove();
+    } else if (existing.parentNode) {
+      existing.parentNode.removeChild(existing);
+    }
+  }
+
+  function revokeGoogleConsent() {
+    if (!initialized || !loaded) {
+      return false;
+    }
+    queueGoogleCommand("consent", "update", {
+      ad_storage: "denied",
+      ad_user_data: "denied",
+      ad_personalization: "denied",
+      analytics_storage: "denied",
+    });
+    expireGoogleCookies();
+    removeGoogleScript();
+    loaded = false;
+    revoked = true;
+    return true;
+  }
+
   function loadGoogleTagManager() {
-    if (loaded || !hasExplicitAllow()) {
+    if (loaded || revoked || !hasExplicitAllow()) {
       return false;
     }
 
     if (document.getElementById(GOOGLE_SCRIPT_ID)) {
-      loaded = existingGoogleScriptIsCanonical();
-      if (loaded) {
-        stopPolling();
-      }
-      return loaded;
+      return false;
     }
 
     var firstScript = document.getElementsByTagName("script")[0];
@@ -80,10 +119,6 @@
     }
 
     window.dataLayer = window.dataLayer || [];
-    function queueGoogleCommand() {
-      window.dataLayer.push(arguments);
-    }
-
     queueGoogleCommand("consent", "default", {
       ad_storage: "denied",
       ad_user_data: "denied",
@@ -113,20 +148,17 @@
       document.head.appendChild(googleScript);
     }
 
+    initialized = true;
     loaded = true;
-    stopPolling();
     return true;
   }
 
   function checkConsent() {
-    if (loadGoogleTagManager()) {
+    if (hasExplicitAllow()) {
+      loadGoogleTagManager();
       return;
     }
-
-    pollAttempts += 1;
-    if (pollAttempts >= MAX_POLL_ATTEMPTS) {
-      stopPolling();
-    }
+    revokeGoogleConsent();
   }
 
   function checkAfterInteraction() {
@@ -144,7 +176,5 @@
   window.addEventListener("pageshow", checkConsent);
 
   checkConsent();
-  if (!loaded) {
-    pollTimer = window.setInterval(checkConsent, POLL_INTERVAL_MS);
-  }
+  window.setInterval(checkConsent, CONSENT_WATCH_INTERVAL_MS);
 })();

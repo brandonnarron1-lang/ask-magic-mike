@@ -56,6 +56,43 @@ describe("POST /api/events", () => {
     expect(recordMock).toHaveBeenCalledWith(expect.objectContaining({ eventName: "funnel_started" }));
   });
 
+  it("fails closed in read-only Preview before limiter or event persistence", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("DATABASE_ENV", "preview");
+    vi.stubEnv("PREVIEW_DATA_MODE", "disabled");
+    vi.stubEnv("ALLOW_PREVIEW_DB_MUTATION", "false");
+
+    const response = await POST(request({
+      event_name: "page_view",
+      properties: { current_path: "/" },
+    }));
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get("cache-control")).toBe("private, no-store, max-age=0");
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      persisted: false,
+      code: "preview_data_disabled",
+    });
+    expect(rateLimitMock).not.toHaveBeenCalled();
+    expect(recordMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a missing browser Origin before rate limiting or persistence", async () => {
+    const response = await POST(new Request("https://www.askmagicmike.com/api/events", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "user-agent": "Mozilla/5.0 Chrome/140",
+      },
+      body: JSON.stringify({ event_name: "funnel_started" }),
+    }));
+
+    expect(response.status).toBe(403);
+    expect(rateLimitMock).not.toHaveBeenCalled();
+    expect(recordMock).not.toHaveBeenCalled();
+  });
+
   it("persists a valid anonymous funnel identity without pre-creating a canonical session", async () => {
     const sessionId = "11111111-1111-4111-8111-111111111111";
     const response = await POST(request({
@@ -235,7 +272,12 @@ describe("POST /api/events", () => {
         traffic_class: "public_production",
       },
     }));
-    expect(previewResponse.status).toBe(400);
+    expect(previewResponse.status).toBe(503);
+    await expect(previewResponse.json()).resolves.toMatchObject({
+      ok: false,
+      persisted: false,
+      code: "preview_data_disabled",
+    });
 
     vi.stubEnv("VERCEL_ENV", "production");
     const automationRequest = new Request("https://www.askmagicmike.com/api/events", {

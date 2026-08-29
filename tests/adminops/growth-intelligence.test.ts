@@ -240,6 +240,50 @@ describe("Phase 9 growth intelligence", () => {
     expect(result.channels[0].flags).not.toContain("referral_fee_review_required");
   });
 
+  it("treats an explicit zero referral fee as reviewed evidence rather than missing data", () => {
+    const result = buildGrowthIntelligence({
+      now: NOW,
+      leads: [{
+        id: "portal-zero-fee",
+        createdAt: "2026-08-10T12:00:00.000Z",
+        status: "closed",
+        source: "zillow",
+        medium: "referral",
+        campaign: "zero_fee_review",
+      }],
+      spend: [{
+        source: "zillow",
+        medium: "referral",
+        campaign: "zero_fee_review",
+        spendUsd: 250,
+      }],
+      outcomes: [
+        {
+          leadId: "portal-zero-fee",
+          outcomeType: "closed",
+          amountUsd: 5000,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+        {
+          leadId: "portal-zero-fee",
+          outcomeType: "referral_paid",
+          amountUsd: 0,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(result.summary).toMatchObject({
+      referralFeesUsd: 0,
+      referralFeeRecordCount: 1,
+      referralFeeExpectedCloseCount: 1,
+      referralFeeCoverageRate: 100,
+      trackedContributionUsd: 4750,
+      returnOnAdSpend: 20,
+    });
+    expect(result.channels[0].flags).not.toContain("referral_fee_review_required");
+  });
+
   it("withholds scale recommendations when portal referral-fee evidence is missing", () => {
     const result = buildGrowthIntelligence({
       now: NOW,
