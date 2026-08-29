@@ -1,5 +1,32 @@
 # Changelog
 
+## 2026-08-28 — PR #216 exact-parent application acceptance
+
+- Exact application/parent-refresh head
+  `70198a7bb8467ac741b3c0977bd0ed95b8b5dbda` passes 12 focused files / 89
+  tests, all 239 files / 3,137 tests, strict typecheck, ESLint, the optimized
+  52-page build, 84/17 route proof, release doctor 43/43, safety 14/14,
+  Ask/Nelly isolation, dependency audit, a 647-commit redacted secret scan,
+  and whitespace verification.
+- GitHub Release Gate run `33231179999` passed with artifact `9708564416`
+  (`sha256:aedb154485d8dd63fadfb227340988fea1a85dc9176689dde9a2c0f10651d36a`).
+- Immutable Preview `dpl_52wRTaBSYs1d6rGKmtMmetB8V2Cs` is READY at
+  `https://ask-magic-mike-h7ylc9by3-eyes-up-industries.vercel.app`.
+- Exact-branch protected run `33231584499` passed 17 read-only checks, six
+  deliberate mutation skips, all six widget/funnel browser tests, release-
+  candidate `GO`, and `PREVIEW_READY`. Artifact `9708684727` has digest
+  `sha256:b48ce2c006ceefd217f6f6e622b7514bb17842be19ec63e7b0a63f38db9e232f`.
+- Review caught that the default-branch bootstrap dispatcher still ran only
+  three widget checks. Its read-only results remain valid, but the exact-branch
+  workflow above is the acceptance authority for all six scenarios.
+- Four generated desktop/mobile Home Value and Ask captures were visually
+  inspected as readable, contained, branded synthetic states. Direct Vercel
+  log filters for POST/PUT/PATCH/DELETE and warning/error/fatal each returned
+  zero records during the protected window.
+- Production remains on `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` /
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. This documentation-only seal must repeat
+  exact-head CI and protected Preview proof before the later release gate.
+
 ## 2026-08-28 — PR #216 refresh onto exact sealed PR #215
 
 - Preserved prior PR #216 head `a6098ab4ee7a13d024bafc08264628e2691a8e06`

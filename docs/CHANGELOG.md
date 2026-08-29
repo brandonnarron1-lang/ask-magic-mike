@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-08-28 — PR #216 exact-parent application acceptance
+
+- Exact application head `70198a7bb8467ac741b3c0977bd0ed95b8b5dbda`
+  passed 239 files / 3,137 tests, strict types, lint, 52-page build, 84/17
+  route proof, doctor 43/43, safety 14/14, isolation, dependency audit,
+  647-commit secret scan, and whitespace.
+- Release Gate `33231179999` / artifact `9708564416` passed. Immutable Preview
+  `dpl_52wRTaBSYs1d6rGKmtMmetB8V2Cs` is READY.
+- Exact-branch protected run `33231584499` / artifact `9708684727` passed 17
+  read-only checks, six deliberate no-write skips, 6/6 intercepted browser
+  checks, release-candidate `GO`, and `PREVIEW_READY`.
+- The older default-branch bootstrap proved only its three widget checks; the
+  exact-branch workflow is the authority for the complete six-scenario suite.
+- Four desktop/mobile generated captures passed manual readability/containment
+  review. Method- and level-filtered Preview logs showed no escaped mutation
+  and no warning/error/fatal record.
+- Production stayed on `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` /
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; the evidence-only seal must now repeat
+  exact-head proof.
+
 ## 2026-08-28 — PR #216 refresh onto exact sealed PR #215
 
 - Preserved prior PR #216 head `a6098ab4ee7a13d024bafc08264628e2691a8e06`

@@ -103,6 +103,16 @@ Updated 2026-08-28.
   catch-all Preview mutation boundary remains intact. Every prior local, CI,
   Preview, and browser seal is historical until repeated on the resulting
   exact GitHub head.
+- **Exact-parent application acceptance:** head
+  `70198a7bb8467ac741b3c0977bd0ed95b8b5dbda` passes 239 files / 3,137 tests,
+  strict types, lint, 52-page build, 84/17 route proof, doctor 43/43, safety
+  14/14, isolation, dependency audit, 647-commit secret scan, and whitespace.
+  Release Gate `33231179999` passed. Preview
+  `dpl_52wRTaBSYs1d6rGKmtMmetB8V2Cs` is READY; exact-branch protected run
+  `33231584499` passed 17 read-only checks, six deliberate mutation skips,
+  6/6 intercepted browser checks, `GO`, and `PREVIEW_READY`. Runtime filters
+  found no escaped mutation or warning/error/fatal record. The documentation-
+  only evidence seal must repeat exact-head proof.
 - **Safety:** no Production, environment, schema, lead, message, provider,
   WordPress/DNS, publication, spend, deletion, or NellySelly action. The
   superseded Preview run may have stored privacy-minimized analytics telemetry;

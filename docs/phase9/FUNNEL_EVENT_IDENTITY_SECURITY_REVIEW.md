@@ -69,6 +69,10 @@ This is a scoped review of the changed funnel-event identity behavior, not a cla
   the release-safety scanner requires that shared linkage without reading or
   logging the secret value.
 - Focused tests, the full test suite, typecheck, lint, production build, route proof, release-safety checks, and Ask/Nelly deployable-source isolation passed before candidate sealing. Exact-head evidence is recorded in `docs/phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY_QA_EVIDENCE.md` and the Draft PR.
+- Exact-parent application head `70198a7bb8467ac741b3c0977bd0ed95b8b5dbda`
+  passed the complete release bar and exact-branch protected run `33231584499`.
+  Six intercepted browser checks passed, and direct runtime-log filters found
+  no POST/PUT/PATCH/DELETE or warning/error/fatal record during that window.
 
 ## Deferred policy decisions
 

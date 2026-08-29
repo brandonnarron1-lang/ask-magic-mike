@@ -160,7 +160,11 @@ browser, and runtime checks before any gate becomes requestable.
    endpoint, or Production configuration change. Treat the current GitHub PR
    head—not the historical code-bearing heads named here—as the final release
    candidate; all earlier local, CI, Preview, browser, and runtime proof must be
-   repeated on that exact head.
+   repeated on that exact head. Exact parent-refresh application head
+   `70198a7bb8467ac741b3c0977bd0ed95b8b5dbda` passed complete local, CI,
+   immutable Preview, protected no-write, six-scenario browser, visual, and
+   runtime-log acceptance. The documentation-only evidence seal must repeat
+   exact-head proof.
    After PR #215 releases, refresh it onto exact `main`, repeat complete
    exact-head and write-intercepted Preview proof, then require
    `APPROVE PHASE 9 FUNNEL EVENT IDENTITY INTEGRITY MERGE AND PRODUCTION DEPLOYMENT`.

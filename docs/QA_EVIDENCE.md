@@ -12,8 +12,22 @@
   additive changelog/QA records and the executable release-authority test;
   PR #216's stronger shared catch-all mutation interceptor remains intact.
 - Prior candidate local, CI, Preview, browser, and runtime-log evidence is
-  historical. Fresh exact-head Node 24, immutable Preview, protected no-write,
-  security, isolation, and zero-mutation runtime proof are required.
+  historical. Exact application/parent-refresh head
+  `70198a7bb8467ac741b3c0977bd0ed95b8b5dbda` passed 12 focused files / 89
+  tests, all 239 files / 3,137 tests, typecheck, lint, 52-page build, 84/17
+  routes, doctor 43/43, safety 14/14, Ask/Nelly isolation, dependency audit,
+  647-commit gitleaks, and whitespace.
+- GitHub gate `33231179999` passed with artifact `9708564416`. Immutable
+  Preview `dpl_52wRTaBSYs1d6rGKmtMmetB8V2Cs` is READY at
+  `https://ask-magic-mike-h7ylc9by3-eyes-up-industries.vercel.app`.
+- Exact-branch protected run `33231584499` passed 17 read-only checks, six
+  deliberate mutation skips, 6/6 intercepted browser checks, `GO`, and
+  `PREVIEW_READY`; artifact `9708684727` has digest
+  `sha256:b48ce2c006ceefd217f6f6e622b7514bb17842be19ec63e7b0a63f38db9e232f`.
+- Four desktop/mobile Home Value and Ask PNGs passed manual containment and
+  readability review. Direct Preview-log filters returned zero
+  POST/PUT/PATCH/DELETE and zero warning/error/fatal records for the protected
+  window. The evidence-only seal must repeat proof on its resulting exact head.
 - No Production, database, lead/event, message, provider, WordPress, DNS,
   publication, spend, deletion, or NellySelly action occurred.
 - Full scope:
