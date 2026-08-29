@@ -14,6 +14,7 @@ const knownBlockers = readDoc("KNOWN_BLOCKERS.md");
 const knownLimitations = readDoc("KNOWN_LIMITATIONS.md");
 const goLiveRunbook = readDoc("GO_LIVE_RUNBOOK.md");
 const rollbackPlan = readDoc("ROLLBACK_PLAN.md");
+const implementationStatus = readDoc("IMPLEMENTATION_STATUS.md");
 const canonicalAliasDecision = readDoc(
   "phase9/CANONICAL_ALIAS_CONSOLIDATION.md"
 );
@@ -35,6 +36,15 @@ const responsiveIdentityEvidence = readDoc(
 const durableRateLimitRehearsal = readDoc(
   "phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md"
 );
+const durableRateLimitAcceptance = readDoc(
+  "phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md"
+);
+const durableRateLimitDecision = readDoc(
+  "phase9/DURABLE_RATE_LIMIT_READINESS.md"
+);
+const atomicAuthorityDecision = readDoc(
+  "phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md"
+);
 
 const operatingDocs = [
   currentState,
@@ -49,18 +59,17 @@ const operatingDocs = [
 ].join("\n");
 
 const productionCommit =
-  "b450b41c66c6740bd20571cdbe7d8caf82e92d5e";
-const productionDeployment = "dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW";
-const productionGate =
+  "a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca";
+const productionDeployment = "dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj";
+const rollbackCommit = "b450b41c66c6740bd20571cdbe7d8caf82e92d5e";
+const rollbackDeployment = "dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW";
+const completedDurabilityGate =
   "APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT";
-const previewMutationGate =
-  "APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA";
-const pr209SealedParent =
-  "b28b380f2cc3f9b63b2c0048b398e97a88dfee4b";
+const pr209Head = "b28b380f2cc3f9b63b2c0048b398e97a88dfee4b";
 const pr210SealedParent =
-  "3ed8d050edd386aa0cd4a83d230ff3170d24a306";
+  "93af400494a94a8d8aedb09ece16bbff4dfd214b";
 const pr211SealedParent =
-  "5d566a4a14d4a7cb67175683fdf099e8d62747b7";
+  "c5700eda5e32ff6ead9a985c86b811a3c46e1e66";
 const canonicalAliasGate =
   "APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT";
 const askAccessibilityGate =
@@ -69,6 +78,13 @@ const responsiveIdentityGate =
   "APPROVE PHASE 9 RESPONSIVE CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT";
 const crossDomainGate =
   "APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT";
+const pr210Rescue =
+  "rescue/amm-pr210-pre-main-cutover-20260828-210054";
+const pr211Rescue =
+  "rescue/amm-pr211-pre-pr210-exact-seal-20260828-213129";
+const pr213Rescue =
+  "rescue/amm-pr213-pre-pr211-exact-seal-20260828-215231";
+
 const completedReleaseLedger = [
   {
     pr: 183,
@@ -109,27 +125,41 @@ const completedReleaseLedger = [
   {
     pr: 195,
     head: "db13953fc5f6d24a684f66c9a1c10c6b929b72b3",
+    merge: rollbackCommit,
+    deployment: rollbackDeployment,
+  },
+  {
+    pr: 209,
+    head: pr209Head,
     merge: productionCommit,
     deployment: productionDeployment,
   },
 ] as const;
 
 describe("current release-authority documentation", () => {
-  it("identifies the accepted Production commit and deployment", () => {
+  it("identifies the accepted PR #209 Production commit and deployment", () => {
     for (const doc of [
       currentState,
       assetManifest,
       canonicalStack,
       consolidationPlan,
       ownerQueue,
-      rollbackPlan,
+      knownBlockers,
+      knownLimitations,
+      goLiveRunbook,
+      canonicalAliasDecision,
+      canonicalAliasEvidence,
+      durableRateLimitAcceptance,
+      durableRateLimitDecision,
+      atomicAuthorityDecision,
+      implementationStatus,
     ]) {
       expect(doc).toContain(productionCommit);
       expect(doc).toContain(productionDeployment);
     }
   });
 
-  it("records each completed release as an exact head, merge, and Production deployment chain", () => {
+  it("records every completed release as an exact head, merge, and deployment chain", () => {
     for (const release of completedReleaseLedger) {
       expect(ownerQueue).toContain(`PR [#${release.pr}]`);
       expect(ownerQueue).toContain(release.head);
@@ -138,7 +168,20 @@ describe("current release-authority documentation", () => {
     }
   });
 
-  it("identifies PR #209 as the sole atomic application candidate", () => {
+  it("marks the PR #209 durability gate consumed and non-reusable", () => {
+    expect(durableRateLimitRehearsal).toContain(completedDurabilityGate);
+    expect(durableRateLimitRehearsal).toContain(pr209Head);
+    expect(durableRateLimitRehearsal).toContain(productionCommit);
+    expect(durableRateLimitRehearsal).toContain(productionDeployment);
+    expect(durableRateLimitRehearsal).toMatch(/consumed[\s\S]*exhausted/i);
+    expect(durableRateLimitAcceptance).toMatch(
+      /consumed PR #209 gate is exhausted/i
+    );
+    expect(ownerQueue).toMatch(/completed gates are exhausted/i);
+    expect(goLiveRunbook).toMatch(/exact gate is exhausted/i);
+  });
+
+  it("identifies PR #210 as the next distinct application candidate", () => {
     for (const doc of [
       currentState,
       assetManifest,
@@ -148,35 +191,25 @@ describe("current release-authority documentation", () => {
       knownBlockers,
       knownLimitations,
     ]) {
-      expect(doc).toMatch(/PR #209|PR \[#209\]/);
+      expect(doc).toMatch(/PR #210|PR \[#210\]/);
     }
 
-    expect(consolidationPlan).toMatch(
-      /sole\s+current application release vehicle/i
-    );
-    expect(ownerQueue).toMatch(/sole\s+current application release vehicle/i);
-    expect(knownBlockers).toMatch(
-      /sole\s+current application release candidate/i
-    );
+    expect(consolidationPlan).toContain(canonicalAliasGate);
+    expect(ownerQueue).toContain(canonicalAliasGate);
+    expect(canonicalAliasDecision).toContain(canonicalAliasGate);
+    expect(canonicalAliasEvidence).toContain(canonicalAliasGate);
+    expect(canonicalAliasGate).not.toBe(completedDurabilityGate);
   });
 
-  it("keeps Preview mutation and Production release as distinct exact gates", () => {
-    for (const doc of [consolidationPlan, ownerQueue, knownBlockers]) {
-      expect(doc).toContain(previewMutationGate);
-      expect(doc).toContain(productionGate);
-    }
-    expect(previewMutationGate).not.toBe(productionGate);
-  });
-
-  it("orders later candidates behind the sole immediate PR #209 gate", () => {
-    const pr209 = ownerQueue.indexOf("Draft PR [#209]");
+  it("orders PR #210 and later candidates after completed PR #209", () => {
+    const completedPr209 = ownerQueue.indexOf("PR [#209]");
     const pr210 = ownerQueue.indexOf("Draft PR [#210]");
     const pr211 = ownerQueue.indexOf("Draft PR [#211]");
     const pr213 = ownerQueue.indexOf("Draft PR [#213]");
     const pr212 = ownerQueue.indexOf("Draft PR [#212]");
 
-    expect(pr209).toBeGreaterThanOrEqual(0);
-    expect(pr210).toBeGreaterThan(pr209);
+    expect(completedPr209).toBeGreaterThanOrEqual(0);
+    expect(pr210).toBeGreaterThan(completedPr209);
     expect(pr211).toBeGreaterThan(pr210);
     expect(pr213).toBeGreaterThan(pr211);
     expect(pr212).toBeGreaterThan(pr213);
@@ -186,16 +219,19 @@ describe("current release-authority documentation", () => {
     expect(ownerQueue).toContain(crossDomainGate);
   });
 
-  it("binds PR #210's stacked authority to the current sealed PR #209 parent", () => {
+  it("binds PR #210 to accepted main and preserves its pre-refresh head", () => {
     for (const doc of [
       ownerQueue,
       canonicalAliasDecision,
       canonicalAliasEvidence,
     ]) {
-      expect(doc).toContain(pr209SealedParent);
+      expect(doc).toContain(productionCommit);
     }
-    expect(canonicalAliasEvidence).toContain(
-      "rescue/amm-pr210-pre-final-pr209-cutover-hygiene-20260824-162615"
+    expect(ownerQueue).toContain(pr210Rescue);
+    expect(canonicalAliasEvidence).toContain(pr210Rescue);
+    expect(canonicalAliasEvidence).toMatch(/without force push/i);
+    expect(canonicalAliasEvidence).toMatch(
+      /Fresh exact-head Node[\s\S]*mandatory/i
     );
   });
 
@@ -207,9 +243,8 @@ describe("current release-authority documentation", () => {
     ]) {
       expect(doc).toContain(pr210SealedParent);
     }
-    expect(askAccessibilityEvidence).toContain(
-      "rescue/amm-pr211-pre-final-pr210-cutover-hygiene-20260824-164445"
-    );
+    expect(ownerQueue).toContain(pr211Rescue);
+    expect(askAccessibilityEvidence).toContain(pr211Rescue);
   });
 
   it("binds PR #213's stacked authority to the current sealed PR #211 parent", () => {
@@ -220,9 +255,7 @@ describe("current release-authority documentation", () => {
     ]) {
       expect(doc).toContain(pr211SealedParent);
     }
-    expect(responsiveIdentityEvidence).toContain(
-      "rescue/amm-pr213-pre-final-pr211-cutover-hygiene-20260824-170330"
-    );
+    expect(responsiveIdentityEvidence).toContain(pr213Rescue);
   });
 
   it("resolves the mutable PR head from GitHub instead of self-pinning it", () => {
@@ -231,32 +264,30 @@ describe("current release-authority documentation", () => {
     expect(ownerQueue).not.toMatch(/Exact head\s+`[0-9a-f]{40}`\s+passes/i);
   });
 
-  it("does not retain superseded stacked-release authority in operating docs", () => {
+  it("keeps the accepted rollback deployment immutable", () => {
+    expect(rollbackPlan).toContain(rollbackDeployment);
+    expect(rollbackPlan).toContain(productionDeployment);
+    expect(durableRateLimitRehearsal).toContain(rollbackDeployment);
+    expect(durableRateLimitAcceptance).toContain(rollbackCommit);
+    expect(durableRateLimitAcceptance).toContain(rollbackDeployment);
+  });
+
+  it("does not retain superseded release authority in operating docs", () => {
     const staleAuthorityClaims = [
       "Draft PR #202 is the immediate durability correction",
       "Release stacked candidates in order",
       "PR #185 is the single consolidation vehicle",
       "The Production baseline is PR #184",
       "PR #183 is merged and live. PR #184",
-      "For PR #202, add only the dedicated",
-      "PR #202 has no migration. Before release",
       "#202` is the next isolated durability candidate",
+      "sole current application release vehicle",
+      "sole current application release candidate",
+      "#209` is the sole next atomic application candidate",
     ];
 
     for (const staleClaim of staleAuthorityClaims) {
       expect(operatingDocs).not.toContain(staleClaim);
     }
-  });
-
-  it("binds the go-live and rollback runbooks to the atomic PR #209 candidate", () => {
-    expect(goLiveRunbook).toContain("For PR #209, add only the dedicated");
-    expect(goLiveRunbook).toMatch(/`#209` is the sole next atomic application candidate/);
-    expect(goLiveRunbook).toContain("phase9:durable-rate-limit:readiness");
-    expect(rollbackPlan).toContain("PR #209 has no migration. Before release");
-    expect(rollbackPlan).toContain("phase9:durable-rate-limit:readiness");
-    expect(durableRateLimitRehearsal).toContain(productionGate);
-    expect(durableRateLimitRehearsal).toContain(productionDeployment);
-    expect(durableRateLimitRehearsal).toMatch(/writes nothing/i);
   });
 
   it("preserves incremental PRs as evidence without independent authority", () => {

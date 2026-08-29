@@ -1,9 +1,9 @@
 # Phase 9 — Canonical Alias Consolidation QA Evidence
 
-Date: 2026-08-23 (America/New_York)
+Date: 2026-08-23; refreshed 2026-08-28 (America/New_York)
 
-Stack base: exact PR #209 candidate
-`1d1d8d4f8e0970f3f6a1b80ab9ff2bebcd40216d`
+Current stack base: accepted PR #209 `main`
+`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`
 
 Environment: isolated local worktree; no Production mutation
 
@@ -222,12 +222,31 @@ these phases in order and remains the authoritative Node 24 result.
   message, WordPress edit, DNS change, publication, spend, deletion, or
   NellySelly action occurred.
 
+## Accepted-Production main refresh — 2026-08-28
+
+- PR #209 is accepted on Production at merge
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`, deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`.
+- Preserved the immediately prior PR #210 head
+  `3ed8d050edd386aa0cd4a83d230ff3170d24a306` at remote rescue branch
+  `rescue/amm-pr210-pre-main-cutover-20260828-210054`.
+- Merged accepted `main` into the isolated PR #210 worktree without force push.
+  The pre-documentation merge head was
+  `7122f9b5ebe202e6fb23b7746c98182bea7b001a`.
+- The unique PR #210 application scope remains the two query-preserving
+  permanent compatibility redirects and their monitor/tests. The refresh adds
+  no migration, environment variable, provider, database, notification,
+  WordPress, DNS, publication, or NellySelly action.
+- Prior PR #210 CI and Preview results remain historical. Fresh exact-head Node
+  24 CI, immutable Preview identity, redirect/query proof, protected browser
+  no-write verification, and deployment-log review are mandatory after the
+  reconciled branch is pushed.
+
 ## Remaining gate
 
-PR #209 must be released first. PR #210 is synchronized with its exact final
-candidate, but must still be retargeted/refreshed onto the accepted new `main`
-and repeat exact-head verification. Only after that post-release refresh may
-this separate phrase authorize its reviewed merge and matching Production
+PR #209 is released and accepted. PR #210 must still be pushed normally,
+retargeted to `main`, and repeat exact-head verification. Only after that proof
+may this separate phrase authorize its reviewed merge and matching Production
 deployment:
 
 `APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`

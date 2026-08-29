@@ -244,3 +244,27 @@ could not perform a reliable first Tab.
 - No Production environment, merge, deployment, database/lead/event write,
   AI/provider request, message, WordPress edit, DNS change, publication, spend,
   deletion, or NellySelly action occurred.
+
+## Exact sealed PR #210 refresh — 2026-08-28
+
+- Revalidated accepted Production at PR #209 merge
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`, deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`, with every durable limiter readiness
+  boolean true.
+- Preserved prior PR #211 head
+  `5d566a4a14d4a7cb67175683fdf099e8d62747b7` at remote rescue branch
+  `rescue/amm-pr211-pre-pr210-exact-seal-20260828-213129`.
+- Merged exact sealed PR #210 head
+  `93af400494a94a8d8aedb09ece16bbff4dfd214b` without force push. The only
+  conflicts were additive changelog, implementation-status, and executable
+  release-authority records; no application file overlapped PR #210's redirect
+  implementation.
+- Retained the accepted PR #209 ledger, PR #210 canonical redirects and monitor
+  contracts, and PR #211 Ask copy, required semantics, shared skip-link focus,
+  and three-test browser contract once.
+- Former PR #211 CI, Preview, and browser evidence is historical. Fresh exact-
+  head Node 24, immutable Preview identity, protected no-write QA, three-test
+  Chromium acceptance, and deployment-log review remain mandatory after push.
+- No Production environment, merge, deployment, database/lead/event write,
+  AI/provider request, notification, WordPress edit, DNS change, publication,
+  spend, deletion, or NellySelly action occurred.

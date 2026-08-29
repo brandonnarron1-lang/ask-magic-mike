@@ -1,11 +1,53 @@
 # Implementation Status
 
-Updated 2026-08-24.
+Updated 2026-08-28.
+
+## Current accepted release — 2026-08-28
+
+- PR #209 reviewed head `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b`
+  merged as `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and passed
+  same-commit Production acceptance on deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`.
+- The dedicated encrypted Production limiter secret is present by name/scope;
+  every durable limiter readiness boolean is true and strict monitoring passes
+  9/9. The exact gate is consumed and exhausted.
+- Draft PR #210 is the next ordered application candidate, sealed at exact head
+  `93af400494a94a8d8aedb09ece16bbff4dfd214b`; it remains unmerged and
+  un-deployed pending its separate exact gate.
+- No PR #210 Production, environment, database, lead, event, notification,
+  WordPress, DNS, publication, spend, deletion, or NellySelly mutation has
+  occurred.
+- Immutable acceptance evidence:
+  `docs/phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md`.
+
+## PR #211 downstream reconciliation — 2026-08-28
+
+- Preserved prior PR #211 head `5d566a4a14d4a7cb67175683fdf099e8d62747b7`
+  at `rescue/amm-pr211-pre-pr210-exact-seal-20260828-213129`.
+- Merged exact sealed PR #210 head
+  `93af400494a94a8d8aedb09ece16bbff4dfd214b` without force push while
+  preserving the existing Ask clarity, shared skip link, focus target, and
+  keyboard contracts.
+- PR #211 remains Draft with no Production authority. Former proof is
+  historical until fresh exact-head Node 24 and protected no-write Preview QA
+  pass.
+
+## PR #213 downstream reconciliation — 2026-08-28
+
+- Preserved prior PR #213 head `3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea`
+  at `rescue/amm-pr213-pre-pr211-exact-seal-20260828-215231`.
+- Merged exact sealed PR #211 head
+  `c5700eda5e32ff6ead9a985c86b811a3c46e1e66` without force push. Application
+  files merged without manual resolution; only additive history and executable
+  release-authority records conflicted.
+- PR #213 remains Draft with no Production authority. Its responsive menu and
+  focus contracts require fresh exact-head Node 24, immutable Preview,
+  screenshot-first responsive, browser-interaction, and no-write runtime proof.
 
 ## Phase 9 responsive conversion-identity polish — 2026-08-24
 
 - **Reuse decision:** extend only the shared `BlackDiamondHeader` on exact
-  final Draft PR #211 head `5d566a4a14d4a7cb67175683fdf099e8d62747b7`;
+  sealed Draft PR #211 head `c5700eda5e32ff6ead9a985c86b811a3c46e1e66`;
   preserve the existing Black Diamond identity, Ask CTA, skip link, routes,
   forms, lead command, consent, analytics, and providers.
 - **Evidence:** fresh exact-Preview screenshots show healthy desktop/mobile
@@ -33,10 +75,11 @@ Updated 2026-08-24.
 - **Safety:** no field fill, submit, migration, Production action, lead/event,
   message, provider call, WordPress/DNS change, publication, spend, deletion,
   or NellySelly action.
-- **Parent refresh:** former PR #213 head `431ae9eebba7d38712305fa257f118cf0e498a89`
+- **Current parent refresh:** former PR #213 head
+  `3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea`
   is preserved at
-  `rescue/amm-pr213-pre-final-pr211-cutover-hygiene-20260824-170330`; fresh
-  exact-head proof is required after the conflict-free application merge.
+  `rescue/amm-pr213-pre-pr211-exact-seal-20260828-215231`; fresh exact-head
+  proof is required after the conflict-free application merge.
 - Detailed scope:
   `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH.md` and
   `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
@@ -77,7 +120,6 @@ Updated 2026-08-24.
   merge or deploy.
 - Detailed scope: `docs/phase9/ASK_CONVERSION_ACCESSIBILITY_CLARITY.md` and
   `docs/phase9/ASK_CONVERSION_ACCESSIBILITY_CLARITY_QA_EVIDENCE.md`.
-
 ## Phase 9 field-experience trust fast-track — 2026-08-23
 
 - **Reuse decision:** preserve PR #199 exact head
@@ -1318,13 +1360,14 @@ any bridge activation or shadow-mode test.
 
 ## Phase 9 atomic release-authority reconciliation — 2026-08-23
 
-- Fresh authenticated GitHub/Vercel and read-only public checks confirm PR #195
+- Fresh authenticated GitHub/Vercel and read-only public checks confirmed at
+  that time that PR #195
   merge `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and Production deployment
-  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` remain the accepted live baseline.
-- PR #209 is now the sole documented application release candidate. PRs #202
+  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` were the accepted live baseline.
+- PR #209 became the sole documented application release candidate. PRs #202
   through #208 remain preserved as incremental review evidence with no
   independent merge or Production authority.
-- Current authority docs now expose one optional Preview-mutation gate, one
+- The then-current authority docs exposed one optional Preview-mutation gate, one
   combined Production durability/merge/deploy gate, and the later independent
   one-href WordPress homepage gate without reusing any consumed approval.
 - Added an executable five-check documentation contract so known stale stacked-
