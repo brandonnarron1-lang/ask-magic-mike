@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const rateLimitMock = vi.fn();
 const recordMock = vi.fn();
@@ -38,10 +38,15 @@ function request(
 
 describe("POST /api/experiments/event", () => {
   beforeEach(() => {
+    vi.stubEnv("VERCEL_ENV", "production");
     rateLimitMock.mockReset();
     rateLimitMock.mockResolvedValue({ allowed: true });
     recordMock.mockReset();
     recordMock.mockResolvedValue({ active: false, recorded: false, variantKey: null, reason: "disabled" });
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("returns an inert accepted response when the server-side gate is disabled", async () => {
@@ -54,6 +59,28 @@ describe("POST /api/experiments/event", () => {
     expect(response.headers.get("cache-control")).toBe("private, no-store, max-age=0");
     expect(response.headers.get("pragma")).toBe("no-cache");
     await expect(response.json()).resolves.toMatchObject({ active: false, recorded: false, variant_key: null });
+  });
+
+  it("fails closed in read-only Preview before limiter or experiment persistence", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("DATABASE_ENV", "preview");
+    vi.stubEnv("PREVIEW_DATA_MODE", "disabled");
+    vi.stubEnv("ALLOW_PREVIEW_DB_MUTATION", "false");
+
+    const response = await POST(request({
+      experiment_key: "home_value_trust_promise_v1",
+      subject_key: "a".repeat(64),
+      event_name: "exposure",
+    }));
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({
+      active: false,
+      recorded: false,
+      error: "preview_data_disabled",
+    });
+    expect(rateLimitMock).not.toHaveBeenCalled();
+    expect(recordMock).not.toHaveBeenCalled();
   });
 
   it("accepts but does not persist automated-browser experiment exposure", async () => {

@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { checkRateLimit, LIMITS, rateLimitKey } from "../../../../src/lib/security/rate-limit";
+import {
+  assertDatabaseMutationAllowed,
+} from "../../../../src/lib/preview-security";
 import { isAutomatedBrowserUserAgent } from "../../../lib/browserAutomation";
 import { readBoundedIngressJson } from "../../../lib/growth/ingress-http";
 import { isApprovedPublicOrigin } from "../../../lib/publicOrigin";
@@ -32,6 +35,8 @@ function experimentResponse(
     correlation_id: string;
     variant_key?: string | null;
     excluded?: "automation";
+    error?: "preview_data_disabled";
+    message?: string;
   },
   status: number,
 ) {
@@ -56,6 +61,22 @@ export async function POST(request: Request) {
         correlation_id: correlationId,
       },
       202,
+    );
+  }
+  // Preserve the same fail-closed Preview boundary as lead and appointment
+  // capture. This guard must run before the shared limiter because that limiter
+  // is itself a durable database write when DATABASE_URL is configured.
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return experimentResponse(
+      {
+        active: false,
+        recorded: false,
+        error: mutation.error,
+        message: mutation.publicMessage,
+        correlation_id: correlationId,
+      },
+      mutation.statusCode,
     );
   }
   const limit = await checkRateLimit(
