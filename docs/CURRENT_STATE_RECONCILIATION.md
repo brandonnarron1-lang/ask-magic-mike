@@ -77,11 +77,11 @@ warranted.
 | #221 / #212 cross-domain measurement | #221 is the ordered consolidated Draft; #212 is closed as an exact preserved ancestor | #212 has no independent gate; #221 remains held behind predecessors and live consent remediation |
 | #225 baseline/target readiness | Ordered read-only evidence replacement for #187 | No target writer, migration, or Production authority |
 | #226 release-authority deduplication | Documentation/test-only Draft on exact #225; closed #187 and #212 remain recoverable evidence | No application or independent Production authority; eventual merge requires its own narrow gate after #225 |
-| #227 through #233 | Ordered social identity, referral, host guidance, capability, organic experiment, Google Business Profile format, and planner-metadata candidates; exact current tail is Draft PR #233 on sealed PR #232 | No candidate may bypass PR #210 or an immediate predecessor; every application release requires refresh, complete exact-head proof, and its own gate |
+| #227 through #234 | Ordered social identity, referral, host guidance, capability, organic experiment, Google Business Profile format, planner-metadata, and notification-operations candidates; exact current tail is Draft PR #234 on sealed PR #233 | No candidate may bypass PR #210 or an immediate predecessor; every application release requires refresh, complete exact-head proof, and its own gate |
 | #187 KPI target register | Closed as superseded; branch, migration, and evidence preserved | No current release gate |
 
 PR #209 is complete and its gate is exhausted. PR #210 is the next ordered
-application candidate; no prior approval authorizes it. PR #233 is the current
+application candidate; no prior approval authorizes it. PR #234 is the current
 reviewed Draft tail, not the next release vehicle. PRs #92 and #119 through
 #121 remain `ARCHIVE AFTER REVIEW`; none should merge without a fresh
 requirement/diff audit.

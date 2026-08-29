@@ -99,6 +99,9 @@ const durableRateLimitDecision = readDoc(
 const atomicAuthorityDecision = readDoc(
   "phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md"
 );
+const notificationOperationsDecision = readDoc(
+  "phase9/NOTIFICATION_OPERATIONS_TRUTH.md"
+);
 
 const operatingDocs = [
   currentState,
@@ -194,6 +197,8 @@ const gbpSquareAssetGate =
   "APPROVE PHASE 9 GOOGLE BUSINESS PROFILE SQUARE ASSETS MERGE AND PRODUCTION DEPLOYMENT";
 const plannerSocialIdentityGate =
   "APPROVE PHASE 9 REVIEW PLANNER SOCIAL IDENTITY MERGE AND PRODUCTION DEPLOYMENT";
+const notificationOperationsGate =
+  "APPROVE PHASE 9 NOTIFICATION OPERATIONS TRUTH MERGE AND PRODUCTION DEPLOYMENT";
 const pr210Rescue =
   "rescue/amm-pr210-pre-main-cutover-20260828-210054";
 const pr211Rescue =
@@ -380,6 +385,7 @@ describe("current release-authority documentation", () => {
     const pr231 = ownerQueue.indexOf("Draft PR [#231]", pr230 + 1);
     const pr232 = ownerQueue.indexOf("Draft PR [#232]", pr231 + 1);
     const pr233 = ownerQueue.indexOf("Draft PR [#233]", pr232 + 1);
+    const pr234 = ownerQueue.indexOf("Draft PR [#234]", pr233 + 1);
 
     expect(completedPr209).toBeGreaterThanOrEqual(0);
     expect(pr210).toBeGreaterThan(completedPr209);
@@ -406,6 +412,7 @@ describe("current release-authority documentation", () => {
     expect(pr231).toBeGreaterThan(pr230);
     expect(pr232).toBeGreaterThan(pr231);
     expect(pr233).toBeGreaterThan(pr232);
+    expect(pr234).toBeGreaterThan(pr233);
     expect(ownerQueue).not.toContain("Draft PR [#212]");
     expect(ownerQueue).toMatch(/PR #221\s+is the sole cross-domain candidate/i);
     expect(ownerQueue).toContain(canonicalAliasGate);
@@ -426,10 +433,13 @@ describe("current release-authority documentation", () => {
     expect(ownerQueue).toContain(releaseAuthorityGate);
     expect(ownerQueue).toContain(gbpSquareAssetGate);
     expect(ownerQueue).toContain(plannerSocialIdentityGate);
+    expect(ownerQueue).toContain(notificationOperationsGate);
+    expect(notificationOperationsDecision).toContain(notificationOperationsGate);
     expect(assetManifest).toContain("PR #232");
     expect(assetManifest).toContain("PR #233");
-    expect(currentState).toContain("#227 through #233");
-    expect(currentState).toMatch(/PR #233[\s\S]*current[\s\S]*Draft tail/i);
+    expect(assetManifest).toContain("PR #234");
+    expect(currentState).toContain("#227 through #234");
+    expect(currentState).toMatch(/PR #234[\s\S]*current[\s\S]*Draft tail/i);
     expect(currentState).not.toContain("Current ordered application Draft tail");
   });
 

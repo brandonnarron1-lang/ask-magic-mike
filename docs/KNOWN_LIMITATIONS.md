@@ -138,7 +138,7 @@ Current accepted Production is PR #209 merge
 `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Draft PR #210 is the next ordered
 application candidate. It does not authorize an external placement, provider
 action, message, migration, or publication.
-PRs #225 through the current reviewed tail, PR #233, remain an ordered Draft
+PRs #225 through the current reviewed tail, PR #234, remain an ordered Draft
 train and cannot bypass PR #210 or any immediate predecessor. Their protected
 growth, social-asset, and metadata capabilities do not authorize an external
 placement, provider action, message, migration, target, Production data change,

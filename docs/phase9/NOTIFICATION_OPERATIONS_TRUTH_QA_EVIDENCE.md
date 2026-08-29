@@ -3,6 +3,9 @@
 Date: 2026-08-29  
 Status: local implementation evidence; remote exact-head proof pending
 
+Draft PR: [#234](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/234)
+Implementation head: `ba56f7b3ac98912c206eeb56fde4b004be78ea64`
+
 ## Baseline and audit
 
 - Exact parent: sealed PR #233 head
@@ -64,4 +67,3 @@ These checks belong to the final pushed head. No Production/Preview database
 write, lead, event, email, SMS, Push, retry, provider call, secret entry,
 deployment, merge, WordPress/DNS change, publication, spend, deletion, or
 NellySelly action occurred during this evidence pass.
-

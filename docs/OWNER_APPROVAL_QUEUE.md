@@ -435,6 +435,18 @@ gate before merge or Production.
    candidate is refreshed, and exact-head proof is repeated may it request
    `APPROVE PHASE 9 REVIEW PLANNER SOCIAL IDENTITY MERGE AND PRODUCTION DEPLOYMENT`.
 
+24. Draft PR [#234](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/234)
+   reuses the canonical Neon notification outbox and protected Lead Center to
+   replace recent-sample KPI ambiguity with exact live-only operations truth.
+   Implementation head `ba56f7b3ac98912c206eeb56fde4b004be78ea64`
+   is stacked on exact sealed PR #233 head
+   `ff67874eacdb44d7653c964ce395ae7bafd54910`, preserved at
+   `rescue/amm-pr234-base-pr233-20260829-171619`. It adds no migration, queue,
+   provider, database, public route, bulk retry, or automatic send. Only after
+   PR #233 and every predecessor are accepted, this candidate is refreshed,
+   and complete exact-head proof is repeated may it request
+   `APPROVE PHASE 9 NOTIFICATION OPERATIONS TRUTH MERGE AND PRODUCTION DEPLOYMENT`.
+
 The historical shorter conversion-identity phrase released PR #195 and is
 exhausted; it cannot authorize PR #213 or any later candidate.
 

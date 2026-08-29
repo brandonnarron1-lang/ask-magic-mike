@@ -20,7 +20,8 @@ Updated 2026-08-29.
   Preview, protected visual/contract QA, and log proof remain pending.
 - **Authority boundary:** exact parent is sealed PR #233 head
   `ff67874eacdb44d7653c964ce395ae7bafd54910`, preserved at
-  `rescue/amm-pr234-base-pr233-20260829-171619`. Production remains PR #209
+  `rescue/amm-pr234-base-pr233-20260829-171619`. Draft PR #234 implementation
+  head is `ba56f7b3ac98912c206eeb56fde4b004be78ea64`. Production remains PR #209
   merge `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
   `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; PR #210 remains first in release order.
 - Decision/evidence:

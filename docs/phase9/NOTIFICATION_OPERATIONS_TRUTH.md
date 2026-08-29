@@ -54,7 +54,7 @@ PII-free operational counts for authenticated monitoring.
 
 ## Lineage and release order
 
-The candidate starts from exact sealed PR #233 head
+Draft PR #234 starts from exact sealed PR #233 head
 `ff67874eacdb44d7653c964ce395ae7bafd54910`, preserved at
 `rescue/amm-pr234-base-pr233-20260829-171619`. It is an ordered downstream
 candidate only. PR #210 remains the first eligible application release and no
@@ -78,4 +78,3 @@ then-current Production `main`, and exact-head CI/Preview/protected proof is
 repeated may it request:
 
 `APPROVE PHASE 9 NOTIFICATION OPERATIONS TRUTH MERGE AND PRODUCTION DEPLOYMENT`
-
