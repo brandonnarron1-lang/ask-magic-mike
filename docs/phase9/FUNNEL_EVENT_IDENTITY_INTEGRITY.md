@@ -1,6 +1,6 @@
 # Phase 9 funnel-event identity integrity
 
-Date: 2026-08-24
+Date: 2026-08-28
 Status: Draft PR #216 stacked after Draft PR #215; Production unchanged
 
 ## Decision
@@ -103,10 +103,13 @@ registered QA traffic remain excluded from Production KPI queries.
 
 ## Release order and authority
 
-This candidate starts from exact Draft PR #215 head
-`2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`. The immediately prior PR #216
-head `253480326312d42a159323176d69e87f47262921` is preserved at
-`rescue/amm-pr216-pre-final-pr215-cutover-hygiene-20260824-180325`. It follows:
+This candidate starts from exact sealed Draft PR #215 head
+`c53cec6043525b593b254c457efdbbe5a29c0520`. The immediately prior PR #216
+head `a6098ab4ee7a13d024bafc08264628e2691a8e06` is preserved at
+`rescue/amm-pr216-pre-pr215-exact-seal-20260828-231335`. Application files
+merged automatically; conflicts were limited to additive changelog/QA records
+and the executable release-authority test. All earlier proof is historical
+until repeated on the resulting exact head. It follows:
 
 1. PR #209 durability release;
 2. PR #210 canonical alias consolidation;

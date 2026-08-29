@@ -1,6 +1,6 @@
 # Known Operating Constraints
 
-Updated 2026-08-23. The public funnel, canonical Neon capture, Lead Center, and
+Updated 2026-08-28. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
 
@@ -27,27 +27,22 @@ specific expansions; they do not invalidate the live lead pipe.
 
 ## Current release constraint
 
-- Current accepted Production is PR #195 merge
-  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` on deployment
-  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Its conversion-identity gate and every
-  earlier completed release gate are exhausted.
-- Fresh read-only Production checks pass conversion 15/15 and smoke 19/19 with
-  two intentional skips. Candidate monitoring reports 8/9 because current
-  deployed readiness does not prove the durable rate-limit contract. Public
-  pages remain reachable; this is a durability-readiness failure, not a funnel
-  outage.
-- Draft PR #209 is the sole current application release candidate. It contains
-  PRs #202 through #208's reviewed cumulative work once plus fail-closed Neon
-  Preview endpoint attestation. Those incremental PRs are preserved as review
-  evidence and have no independent release authority.
-- PR #209 has no database migration and keeps Preview writes, email, SMS, Push,
-  consumer acknowledgment, WordPress publication, paid media, and NellySelly
-  access disabled. Its final head must pass fresh exact-head CI, Preview,
-  protected no-write, browser, dependency, secret, diff, and isolation proof.
-- Controlled synthetic Preview mutation/cleanup requires
-  `APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA`.
-- Production secret entry, exact PR #209 merge, and matching deployment require
-  `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
+- Current accepted Production is PR #209 merge
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Its durability gate and every earlier
+  completed release gate are exhausted.
+- Fresh read-only Production checks pass conversion 15/15, smoke 19/19 with two
+  intentional skips, and strict monitoring 9/9. Every durable limiter
+  capability and the dedicated-secret contract is ready.
+- Draft PR #210 is the next ordered application release candidate. It contains
+  only query-preserving permanent compatibility redirects, one canonical
+  internal link, and the matching monitor/tests. It adds no migration or
+  external-system action.
+- PR #210 must pass fresh exact-head Node 24 CI, immutable Preview, protected
+  no-write browser proof, redirect/attribution checks, dependency/secret/diff
+  scans, and isolation proof before its separate gate is requestable.
+- Its only later application gate is
+  `APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`.
 - Preview Lead Center RBAC remains disabled, so the WordPress manifest API
   fails closed there. An authenticated role-bound runtime download is required
   after application release and before any separately approved WordPress edit.
@@ -95,9 +90,11 @@ specific expansions; they do not invalidate the live lead pipe.
 
 ## External platform constraint
 
-The Our Town hosting WAF blocks FacebookExternalHit on selected WordPress URLs.
-Use AskMagicMike.com links as the approved fallback. Apply only a documented,
-path/method-specific exception after the host identifies the exact managed rule.
+The Our Town server-global Apache authorization policy blocks
+FacebookExternalHit on selected WordPress URLs. An approved account-level
+`.htaccess` test could not supersede it and was rolled back byte-for-byte. Use
+AskMagicMike.com links as the current fallback; only a root/WHM per-vhost,
+path/method-specific correction is now appropriate.
 
 ## Truthful demand constraint
 
