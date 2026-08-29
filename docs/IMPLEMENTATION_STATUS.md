@@ -17,11 +17,15 @@ Updated 2026-08-29.
   persists as `null`, and cannot earn seller A-grade urgency. Explicit
   planning-horizon answers retain their compatibility mapping; `not sure`,
   `unknown`, and unrecognized text do not become 24 months.
-- **Current acceptance:** after reconciliation onto exact sealed PR #223 head
-  `18be077b1b6b8a595af2bb5dbd4a94d736dad65c`, exact Node 24.18.0 focused
-  acceptance passes 4 files / 48 tests. Final exact-head local, CI, immutable
-  Preview, protected browser, security, isolation, and runtime-log evidence is
-  bound to PR #224 before any promotion.
+- **Current acceptance:** the previously sealed PR #224 head
+  `5c75b8f919442c05b607eb666c5595023057d94d` is preserved at
+  `rescue/amm-pr224-pre-pr223-accessibility-seal-20260829-1210`. The candidate
+  now inherits exact accessibility-refreshed PR #223 head
+  `1d893f4c23ca53a1b852a1953b953b40e6f997f3` through merge `614a67a` without
+  a force push. Exact Node 24.18.0 focused acceptance passes 4 files / 48 tests,
+  strict TypeScript and targeted ESLint. Final exact-head CI, immutable Preview,
+  protected browser, security, isolation, and runtime-log evidence is bound to
+  PR #224 before any promotion.
 - **Authority boundary:** no existing Production row is rewritten; no
   migration, lead/event, communication, provider, WordPress, DNS, deployment,
   publication, deletion, or NellySelly action occurred. Production remains

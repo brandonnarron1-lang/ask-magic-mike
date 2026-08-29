@@ -2,6 +2,11 @@
 
 ## 2026-08-29 — Lead-intent default truth candidate
 
+- Preserved the previously sealed PR #224 head
+  `5c75b8f919442c05b607eb666c5595023057d94d` at
+  `rescue/amm-pr224-pre-pr223-accessibility-seal-20260829-1210`, then merged
+  accessibility-refreshed PR #223 head
+  `1d893f4c23ca53a1b852a1953b953b40e6f997f3` without a force push.
 - Reused the current Seller and Buyer intake, canonical lead lifecycle command,
   deterministic scoring, and qualification logic instead of creating another
   form, lead store, router, or intelligence layer.
