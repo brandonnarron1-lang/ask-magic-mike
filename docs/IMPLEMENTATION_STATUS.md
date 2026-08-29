@@ -28,7 +28,7 @@ Updated 2026-08-29.
   whitespace proof, and responsive desktop/mobile browser QA. The mobile
   document width equals its client width. Release doctor passes 43/43 on the
   restacked candidate; redacted Gitleaks scans find no leak in the exact
-  two-commit / 24.12 KB PR #226 delta or the 668-commit / 16.33 MB history.
+  PR #226 delta or full repository history.
   Original code-bearing head `4683a7c752a40e29ba80ddcda150a0e4fbc5b07c`
   passed GitHub Release Gate run `33213057838` and immutable Vercel Preview
   deployment `dpl_DqsFHqTMWp4JTuhnWVAQoDLU4XZm`. The branch is now reconciled

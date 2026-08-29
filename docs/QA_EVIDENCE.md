@@ -25,8 +25,8 @@
   safety checks, and deployable-source isolation.
 - Production dependency audit: PASS — no known vulnerabilities. Deterministic
   regeneration reproduced the exact output and lineage hashes. Release doctor:
-  HEALTHY — 43/43. Redacted Gitleaks: PASS — exact PR #226 delta scanned two
-  commits / 24.12 KB and full history scanned 668 commits / 16.33 MB, no leaks.
+  HEALTHY — 43/43. Redacted Gitleaks: PASS — the exact PR #226 delta and full
+  repository history contain no detected leak.
   `git diff --check`: PASS.
 - Fresh in-app Browser visual/DOM QA: PASS at 1280x900 and 390x844. The exact card,
   identity-preservation label, review heading, navigation, and footer rendered;
