@@ -1,7 +1,27 @@
 # Changelog
 
+## 2026-08-29 — Organic experiment briefs exact-parent refresh
+
+- Preserved the prior PR #231 head at
+  `rescue/amm-pr231-pre-pr230-parent-refresh-20260829-150534`, then merged exact
+  sealed PR #230 head `680e257d8e35b2033638e84b09c742608268fc20`
+  through normal merge commit `b840152` without rebase, reset, force push, or
+  branch deletion.
+- Reused the existing protected Search Console workbench and deterministic
+  opportunity model to produce internal, non-publishing experiment briefs;
+  no CMS, database, AI writer, provider, route, or lead system was added.
+- Hardened the disclosure summary to valid phrasing-content markup while
+  preserving the approved Black Diamond layout, native keyboard behavior, and
+  responsive disclosure pattern; added a regression for that HTML contract.
+- Added no Production, environment, migration, database write, provider call,
+  public copy, WordPress edit, communication, spend, DNS, or NellySelly action.
+
 ## 2026-08-29 — Capability authority ledger candidate
 
+- Preserved the prior PR #230 head at
+  `rescue/amm-pr230-pre-pr229-parent-refresh-20260829-143600`, then merged exact
+  sealed PR #229 head `ab24fc0ef2eef10f9b368d57909d899dd053d204`
+  without rebase, reset, force push, or branch deletion.
 - Added one typed, read-only capability ledger to the existing protected Growth
   Command Center so Production, reviewed candidates, operator/host gates,
   external dependencies, and prohibited autonomy remain visibly distinct.
@@ -11,6 +31,9 @@
 - Replaced the consumed PR #209 durability gate and superseded homepage-only
   WordPress gate with the current ordered-candidate and consent-runtime gates;
   the ledger no longer presents historical authority as actionable.
+- Reconciled the inherited keyboard-scroll help with one stable accessible name
+  for the channel-economics region so the latest parent contract, browser query,
+  and static authorization guard agree.
 - Added no route, migration, package, provider call, public surface, mutation,
   secret, or Production change.
 
@@ -42,10 +65,12 @@
 - Consolidated historical operator aliases onto the canonical root-cause and
   change sheets so no active runbook still asks for a nonexistent ModSecurity
   rule ID.
-- Sealed exact code-and-copy head `4be6088e4a0a58441542f638f388ab9e8886b7ff`
-  with a green GitHub release gate, immutable `READY` Vercel Preview, 18/6/0
-  no-write Preview checks, 4/4 browser checks, and a clean 38-request runtime
-  window with no warning, error, fatal record, or unexpected 5xx.
+- Tightened diagnosis reuse to the exact two known Our Town URLs, Facebook
+  crawler identity, and HTTP 403 result; every partial, different-path, or
+  different-status failure now fails closed to generic investigation guidance.
+- Added an explicit two-host condition to the representative Apache expression
+  and switched header reads to `req_novary` so the bounded access-control test
+  does not fragment caches by Host or User-Agent.
 
 ## 2026-08-29 — Public owned-referral handoff candidate
 
@@ -58,8 +83,34 @@
 - Added no publisher, provider, lead store, external send, database migration,
   Production mutation, or NellySelly dependency.
 
+## 2026-08-29 — PR #225 refresh onto exact sealed PR #224
+
+- Preserved the previously sealed PR #225 head
+  `60599703cf8ac5e65794b696aefaebc6353bbdf0` at
+  `rescue/amm-pr225-pre-pr224-parent-refresh-20260829-1224` before changing the
+  stacked candidate.
+- Merged exact sealed PR #224 head
+  `2effb45e2a324c25875dcf7d24019eae8dfdad38` without rebase, reset, force
+  push, or conflict at reconciliation commit
+  `eab49cbe2926f3726d289473c308363e1f03de9e`.
+- Retained PR #224's truthful blank lead-intent defaults and PR #223's named,
+  focusable, keyboard-scrollable channel-economics region while keeping PR
+  #225's baseline register read-only and target entry locked.
+- Exact Node 24.18.0 local acceptance passes 10 focused files / 99 tests,
+  strict TypeScript, targeted ESLint, release safety 14/14, sealed-parent
+  ancestry, and whitespace checks. Fresh exact-head GitHub, immutable Preview,
+  protected browser/visual, and runtime-log evidence remains mandatory.
+- No Production, environment, database row, target, lead/event, communication,
+  provider, WordPress/DNS, deployment, publication, deletion, or NellySelly
+  action occurred.
+
 ## 2026-08-29 — Lead-intent default truth candidate
 
+- Preserved the previously sealed PR #224 head
+  `5c75b8f919442c05b607eb666c5595023057d94d` at
+  `rescue/amm-pr224-pre-pr223-accessibility-seal-20260829-1210`, then merged
+  accessibility-refreshed PR #223 head
+  `1d893f4c23ca53a1b852a1953b953b40e6f997f3` without a force push.
 - Reused the current Seller and Buyer intake, canonical lead lifecycle command,
   deterministic scoring, and qualification logic instead of creating another
   form, lead store, router, or intelligence layer.
@@ -98,6 +149,9 @@
   close is reviewed.
 - Kept the Growth surface server-authorized, aggregate-only, read-only, and
   explicit that tracked contribution is not net income.
+- Made the intentionally wide channel-economics table an explicitly named,
+  keyboard-focusable scroll region with visible focus and arrow-key guidance;
+  protected browser acceptance now proves keyboard horizontal movement.
 - Former-head test and visual proof is historical until the refreshed exact
   head passes local, CI, immutable Preview, protected browser, security,
   isolation, and runtime-log acceptance.

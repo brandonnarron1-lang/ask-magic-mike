@@ -10,6 +10,7 @@ import {
   parseOrganicSearchCsv,
   type OrganicSearchImportRow,
 } from "../../app/lib/growth/organic-search-ingress";
+import { readFileSync } from "node:fs";
 
 const NOW = new Date("2026-08-28T16:00:00.000Z");
 
@@ -37,6 +38,17 @@ function row(overrides: Record<string, string> = {}) {
 }
 
 describe("organic-search experiment briefs", () => {
+  it("keeps the disclosure summary within the HTML phrasing-content contract", () => {
+    const source = readFileSync(
+      "app/admin/growth/search-ingress/organic-search-ingress-workbench.tsx",
+      "utf8",
+    );
+    const summary = source.match(/<summary[\s\S]*?<\/summary>/)?.[0] ?? "";
+
+    expect(summary).toContain("<span");
+    expect(summary).not.toMatch(/<(?:div|p|section|article)\b/);
+  });
+
   it("turns a validated click-capture signal into a bounded internal decision packet", () => {
     const brief = buildOrganicSearchExperimentBrief(row());
 

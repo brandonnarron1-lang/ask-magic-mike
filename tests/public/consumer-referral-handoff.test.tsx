@@ -80,7 +80,9 @@ describe("public owned-referral handoff", () => {
 
   it("hands the generic packet to the native share sheet after a direct click", async () => {
     const share = vi.fn().mockResolvedValue(undefined);
+    const canShare = vi.fn().mockReturnValue(true);
     setNavigatorCapability("share", share);
+    setNavigatorCapability("canShare", canShare);
     render(<ConsumerReferralHandoff surface="homepage" />);
 
     fireEvent.click(screen.getByRole("button", { name: "Share Ask Magic Mike" }));
@@ -88,6 +90,7 @@ describe("public owned-referral handoff", () => {
     await waitFor(() => expect(share).toHaveBeenCalledWith(
       buildPublicReferralPacket("homepage"),
     ));
+    expect(canShare).toHaveBeenCalledWith(buildPublicReferralPacket("homepage"));
     expect(trackEventMock).toHaveBeenCalledWith(
       "referral_share_handoff",
       expect.objectContaining({ source: "direct" }),
@@ -101,6 +104,7 @@ describe("public owned-referral handoff", () => {
   it("does not claim a handoff when the user cancels the native chooser", async () => {
     const share = vi.fn().mockRejectedValue(new DOMException("Canceled", "AbortError"));
     setNavigatorCapability("share", share);
+    setNavigatorCapability("canShare", vi.fn().mockReturnValue(true));
     render(<ConsumerReferralHandoff surface="homepage" />);
 
     fireEvent.click(screen.getByRole("button", { name: "Share Ask Magic Mike" }));
@@ -133,11 +137,32 @@ describe("public owned-referral handoff", () => {
     );
   });
 
+  it("falls back to Clipboard when native sharing cannot confirm the packet", async () => {
+    const share = vi.fn();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    setNavigatorCapability("share", share);
+    setNavigatorCapability("clipboard", { writeText });
+    render(<ConsumerReferralHandoff surface="homepage" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Share Ask Magic Mike" }));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(
+      buildPublicReferralPacket("homepage").url,
+    ));
+    expect(share).not.toHaveBeenCalled();
+    expect(trackEventMock).toHaveBeenCalledWith(
+      "referral_link_copied",
+      expect.objectContaining({ source: "direct" }),
+      { surface: "homepage", share_method: "clipboard" },
+    );
+  });
+
   it("does not record success when the native share request is blocked", async () => {
     const share = vi.fn().mockRejectedValue(
       new DOMException("Blocked by permissions policy", "NotAllowedError"),
     );
     setNavigatorCapability("share", share);
+    setNavigatorCapability("canShare", vi.fn().mockReturnValue(true));
     render(<ConsumerReferralHandoff surface="homepage" />);
 
     fireEvent.click(screen.getByRole("button", { name: "Share Ask Magic Mike" }));
