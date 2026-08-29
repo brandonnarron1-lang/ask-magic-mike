@@ -41,13 +41,25 @@ Exact Node `24.18.0`, pnpm `10.30.3`:
 ## Browser acceptance contract
 
 The existing Black Diamond visual system remains canonical. Desktop and mobile
-acceptance must prove:
+optimized-production-build acceptance passes 3 / 3 intercepted scenarios and
+proves:
 
 - Seller and Buyer optional controls begin blank and remain keyboard-usable;
 - no client console or page errors;
 - no horizontal page overflow;
 - untouched payloads omit optional intent evidence;
 - the browser suite stays mutation-free against Vercel Preview.
+
+Gitignored local visual evidence:
+
+- desktop Buyer and Seller, 1440 x 1000;
+- mobile Buyer and Seller, 390 x 844.
+
+The mobile captures were scrolled to the optional controls before capture so
+the blank prompts and unchecked preapproval affirmation are directly visible.
+Per-image local hashes are deliberately not treated as release authority
+because font/render timing can vary across equivalent browser runs. The exact
+hosted artifact digest is bound in PR #224 and is the immutable visual proof.
 
 ## Security and privacy review contract
 
