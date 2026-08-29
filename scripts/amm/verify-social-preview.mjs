@@ -125,15 +125,34 @@ export function hasConfidentialMlsLeak(html) {
  * any different failure remains unknown and must not inherit that diagnosis.
  */
 export function buildCrawlerRemediation(blockedSummary) {
-  const isKnownOtpFacebookBlock =
-    blockedSummary.length > 0 &&
-    blockedSummary.every(({ url, crawler }) => {
+  const expectedOtpFacebookPaths = new Set([
+    "/ask-mike/",
+    "/agents/mike-eatmon/",
+  ]);
+  const observedOtpFacebookPaths = new Set();
+
+  const hasOnlyExpectedOtpFacebookBlocks = blockedSummary.every(
+    ({ url, crawler, status }) => {
       try {
-        return new URL(url).hostname === "www.ourtownproperties.com" && crawler === "facebook";
+        const parsed = new URL(url);
+        const isExpected =
+          parsed.hostname === "www.ourtownproperties.com" &&
+          expectedOtpFacebookPaths.has(parsed.pathname) &&
+          crawler === "facebook" &&
+          status === 403;
+
+        if (isExpected) observedOtpFacebookPaths.add(parsed.pathname);
+        return isExpected;
       } catch {
         return false;
       }
-    });
+    }
+  );
+
+  const isKnownOtpFacebookBlock =
+    blockedSummary.length === expectedOtpFacebookPaths.size &&
+    hasOnlyExpectedOtpFacebookBlocks &&
+    observedOtpFacebookPaths.size === expectedOtpFacebookPaths.size;
 
   if (isKnownOtpFacebookBlock) {
     return [
@@ -259,9 +278,11 @@ async function runChecks() {
       const { status, html } = await fetchHtmlWithAgent(target.url, CRAWLER_AGENTS.browser);
       baselineStatus = status;
       baselineHtml = html;
-      status === 200
-        ? ok(`Browser baseline: HTTP ${status}`)
-        : err(`Browser baseline: HTTP ${status}`);
+      if (status === 200) {
+        ok(`Browser baseline: HTTP ${status}`);
+      } else {
+        err(`Browser baseline: HTTP ${status}`);
+      }
     } catch (e) {
       err("Browser baseline: fetch failed", String(e));
     }
@@ -308,16 +329,20 @@ async function runChecks() {
 
     // Step 4: stale Vercel URL check
     if (target.checkStale && baselineHtml) {
-      !hasStaleVercelUrl(baselineHtml)
-        ? ok("No stale ask-magic-mike.vercel.app URL")
-        : err("STALE URL: ask-magic-mike.vercel.app found in HTML");
+      if (hasStaleVercelUrl(baselineHtml)) {
+        err("STALE URL: ask-magic-mike.vercel.app found in HTML");
+      } else {
+        ok("No stale ask-magic-mike.vercel.app URL");
+      }
     }
 
     // Step 5: canonical ask-mike link check
     if (target.checkAskMike && baselineHtml) {
-      hasCanonicalAskMikeLink(baselineHtml)
-        ? ok("Canonical ourtownproperties.com/ask-mike link present")
-        : warn("Canonical ask-mike link not detected (may use a different CTA path)");
+      if (hasCanonicalAskMikeLink(baselineHtml)) {
+        ok("Canonical ourtownproperties.com/ask-mike link present");
+      } else {
+        warn("Canonical ask-mike link not detected (may use a different CTA path)");
+      }
     }
   }
 

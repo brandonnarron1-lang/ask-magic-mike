@@ -50,6 +50,11 @@ describe("Growth Command Center route and authority guards", () => {
     expect(page).toContain("Recorded referral fees");
     expect(page).toContain("Tracked contribution");
     expect(page).toContain("not net income");
+    expect(page).toContain('aria-label="Channel economics table"');
+    expect(page).toContain('aria-describedby="channel-economics-scroll-help"');
+    expect(page).toContain('role="region"');
+    expect(page).toContain("tabIndex={0}");
+    expect(page).toContain("Scroll horizontally or use the arrow keys");
   });
 
   it("excludes test and communication-suppressed records in canonical Neon reads", () => {

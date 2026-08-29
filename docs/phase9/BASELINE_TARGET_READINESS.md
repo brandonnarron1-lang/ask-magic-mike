@@ -179,23 +179,18 @@ These are evidence thresholds, not performance goals.
 
 ## Current post-stack acceptance
 
-- Original PR #225 head `a65cde03c0d8505ad00732f862c37841ccca9a04`
-  is preserved at
-  `rescue/amm-pr225-pre-pr224-exact-seal-20260829-050048`.
+- The previously sealed PR #225 head
+  `60599703cf8ac5e65794b696aefaebc6353bbdf0` is preserved at
+  `rescue/amm-pr225-pre-pr224-parent-refresh-20260829-1224`; the original
+  implementation remains recoverable at the earlier documented rescue.
 - Exact sealed PR #224 head
-  `5c75b8f919442c05b607eb666c5595023057d94d` was merged without rebase or
-  force push at `0bb1a6d77d4daf830a4dc7681e3a3d5650332286`.
-- Code-bearing hardening head is
-  `1289244c44d0c336b4ed242293febe15d5b75914`.
-- Exact Node 24.18.0 passes deployable-source Ask/Nelly isolation, release
-  safety 14/14, all 264 Vitest files / 3,324 tests, strict TypeScript, full
-  ESLint, optimized Next.js 15.5.21 build with 59 generated static pages, and
-  95 active routes / 17 acknowledged duplicates. Focused acceptance passes 8
-  files / 117 tests.
-- Release doctor passes 43/43 and the Production dependency audit reports no
-  known vulnerability. Redacted gitleaks reports no finding across all 668
-  commits or the exact five-commit sealed-parent delta. Sealed-parent ancestry,
-  whitespace, clean tracked tree, and focused security review pass.
+  `2effb45e2a324c25875dcf7d24019eae8dfdad38` was merged without rebase,
+  reset, force push, or conflict at reconciliation commit
+  `eab49cbe2926f3726d289473c308363e1f03de9e`.
+- Exact Node 24.18.0 passes 10 focused files / 99 tests, strict TypeScript,
+  targeted ESLint, release safety 14/14, sealed-parent ancestry, and whitespace
+  checks. The prior exact head's 264-file / 3,324-test full release evidence is
+  historical until fresh exact-head CI supersedes it.
 - The hosted browser contract scopes duplicate economics labels to their visible
   performance section and independently opens, verifies, and closes the new
   readiness audit. Immutable Preview, protected hosted browser/visual QA,
@@ -237,7 +232,7 @@ cleanup exists because this candidate adds no migration and performs no write.
 ## Release boundary
 
 This candidate is stacked on exact sealed Draft PR #224 head
-`5c75b8f919442c05b607eb666c5595023057d94d`. It cannot bypass PR #210 or any
+`2effb45e2a324c25875dcf7d24019eae8dfdad38`. It cannot bypass PR #210 or any
 predecessor and does not create a new authorization shortcut. Production
 remains exact commit `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`.
 
