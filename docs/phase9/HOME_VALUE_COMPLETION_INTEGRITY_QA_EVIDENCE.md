@@ -1,20 +1,21 @@
 # Home-value completion integrity QA evidence
 
-Date: 2026-08-24
+Date: 2026-08-28
 
 Candidate: Draft PR #215 on
 `codex/phase9-home-value-completion-integrity-20260824`
 
 Parent: exact sealed Draft PR #214 head
-`94e3d66190df138d42c1321adfeb0cefb0478545`
+`81a2c7544318d630437ed3e86cbea029c5c9b57d`
 
 Pre-refresh recovery branch:
-`rescue/amm-pr215-pre-final-pr214-cutover-hygiene-20260824-174316`
+`rescue/amm-pr215-pre-pr214-exact-seal-20260828-224229`
 
 The earlier `rescue/amm-pr215-pre-pr214-seal-sync-20260824-1329` ref remains
-historical. The final-parent refresh conflicted only in additive changelog and
-release-order documentation. No funnel, API, lead-lifecycle, notification,
-provider, or analytics application file required manual conflict resolution.
+historical. The exact-parent refresh conflicted only in additive changelog,
+QA-evidence, and release-authority records. No funnel, API, lead-lifecycle,
+notification, provider, or analytics application file required manual conflict
+resolution.
 Every local, CI, Preview, and browser result below predating this refresh is
 historical until repeated on the current GitHub PR head.
 

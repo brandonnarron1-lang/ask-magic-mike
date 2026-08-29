@@ -27,11 +27,11 @@ This document defines the single authoritative source of truth for Ask Magic Mik
 | Node version | 24.x |
 | Automatic Git deployments | Enabled; Ignored Build Step command is empty |
 
-Current accepted Production release: PR #195 merge
-`b450b41c66c6740bd20571cdbe7d8caf82e92d5e`, deployment
-`dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Draft PR #209 is the sole current
-application release candidate and has no Production authority until its exact
-gate is received.
+Current accepted Production release: PR #209 merge
+`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`, deployment
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Draft PR #210 is the next ordered
+application release candidate and has no Production authority until its fresh
+exact-head proof and separate gate are complete.
 
 ### Verification command
 

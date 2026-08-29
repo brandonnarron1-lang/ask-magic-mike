@@ -1,19 +1,46 @@
 # Changelog
 
-## 2026-08-24 — PR #215 refresh onto final PR #214 cutover hygiene
+## 2026-08-28 — PR #215 refresh onto exact sealed PR #214
 
-- Preserved former PR #215 head `0e47db8780c7257f0d445d75e034aacd535c06a4`
-  at `rescue/amm-pr215-pre-final-pr214-cutover-hygiene-20260824-174316`.
-- Merged exact final PR #214 head
-  `94e3d66190df138d42c1321adfeb0cefb0478545` without application conflict.
+- Preserved prior PR #215 head `2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`
+  at `rescue/amm-pr215-pre-pr214-exact-seal-20260828-224229`.
+- Merged exact sealed PR #214 head
+  `81a2c7544318d630437ed3e86cbea029c5c9b57d` without force push. Conflicts
+  were limited to additive history, QA evidence, and release-authority records;
+  application files merged without manual resolution.
 - Retained first-valid-contact durable storage, optional phone, shared bounded
   contact validation, consent-channel accuracy, privacy-safe failure telemetry,
   and the canonical idempotent lead lifecycle.
 - Prior PR #215 proof is historical; fresh exact-head CI, immutable Preview,
-  write-intercepted browser acceptance, and zero-delivery runtime evidence are
-  mandatory.
+  write-intercepted browser acceptance, and protected no-write runtime evidence
+  are mandatory.
 - No Production, environment, database, lead/event, notification, provider,
   WordPress, DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
+## 2026-08-24 — PR #215 refresh onto final PR #214 cutover hygiene
+
+- Preserved former PR #215 head `0e47db8780c7257f0d445d75e034aacd535c06a4`
+  at `rescue/amm-pr215-pre-final-pr214-cutover-hygiene-20260824-174316`.
+- Merged exact former PR #214 head
+  `94e3d66190df138d42c1321adfeb0cefb0478545` without application conflict.
+- Retained first-valid-contact durable storage, optional phone, shared bounded
+  contact validation, consent-channel accuracy, privacy-safe failure telemetry,
+  and the canonical idempotent lead lifecycle.
+
+## 2026-08-28 — PR #214 refresh onto exact sealed PR #213
+
+- Preserved prior PR #214 head `94e3d66190df138d42c1321adfeb0cefb0478545`
+  at `rescue/amm-pr214-pre-pr213-exact-seal-20260828-222353`.
+- Merged exact sealed PR #213 head
+  `d2a1bf01d0962e07dd1e460acd4c295e145cf6a8` without force push. Conflicts
+  were limited to additive history and release-authority records; application
+  files merged without manual resolution.
+- Preserved the approved exact identity assets, accessible HTML/plain-text lead
+  facts, template-pinned retries, synthetic no-send gallery, and Production-404
+  acceptance-route contract on top of the current responsive conversion shell.
+- Prior PR #214 proof is historical. Fresh exact-head CI, immutable Preview,
+  current-run visual acceptance, and protected no-send runtime evidence remain
+  mandatory.
 
 ## 2026-08-24 — Home-value completion-integrity candidate
 
@@ -29,10 +56,6 @@
   malformed email plus short/overlong phone values cannot reach persistence.
 - Added aggregate-only reproducible Production evidence and a privacy-safe
   `lead_submit_failed` event that cannot carry error text or PII.
-- Refreshed Node 24 acceptance passes 234 files / 3,095 tests, typecheck, ESLint,
-  optimized build/84-route proof, 14/14 safety, isolation, dependency audit,
-  a 614-commit redacted secret scan, and whitespace proof. Exact-head Preview
-  acceptance remains pending.
 - No Production, database, lead/event, message, provider, WordPress/DNS,
   publication, spend, deletion, or NellySelly action occurred.
 
@@ -72,6 +95,51 @@
   source isolation. The exact application Preview passes 1280 × 720 and
   corrected 390 × 844 acceptance with no horizontal overflow or browser/runtime
   warning/error entries; supply-chain and history-secret scans are clean.
+## 2026-08-28 — PR #213 refresh onto exact sealed PR #211
+
+- Preserved prior PR #213 head `3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea`
+  at `rescue/amm-pr213-pre-pr211-exact-seal-20260828-215231`.
+- Merged exact sealed PR #211 head
+  `c5700eda5e32ff6ead9a985c86b811a3c46e1e66` without force push. Conflicts
+  were limited to additive history and release-authority records; application
+  files merged without manual resolution.
+- Preserved the established Black Diamond system, PR #211 Ask/keyboard
+  contracts, and PR #213's one shared mobile intent menu, active-route state,
+  narrow-phone behavior, and focus-safe dismissal.
+- Former PR #213 proof is historical. Fresh exact-head CI, immutable Preview,
+  screenshot-first responsive audit, browser interaction, and no-write runtime
+  evidence remain mandatory.
+- No Production, environment, database, lead/event, notification, WordPress,
+  DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
+## 2026-08-28 — PR #211 refresh onto exact sealed PR #210
+
+- Preserved prior PR #211 head `5d566a4a14d4a7cb67175683fdf099e8d62747b7`
+  at `rescue/amm-pr211-pre-pr210-exact-seal-20260828-213129`.
+- Merged exact sealed PR #210 head
+  `93af400494a94a8d8aedb09ece16bbff4dfd214b` without force push. Conflicts
+  were limited to additive history, implementation status, and release-
+  authority records; application files did not overlap.
+- Preserved PR #210's redirects and accepted Production ledger alongside PR
+  #211's Ask semantics, shared skip link, focus target, and keyboard tests.
+- Prior PR #211 proof is historical. Fresh exact-head CI, protected Preview,
+  keyboard, and zero-write runtime evidence are mandatory.
+- No Production, environment, database, lead/event, notification, WordPress,
+  DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
+## 2026-08-28 — PR #210 refresh onto accepted PR #209 Production
+
+- Recorded accepted PR #209 Production merge
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; its durability gate is exhausted.
+- Preserved prior PR #210 head `3ed8d050edd386aa0cd4a83d230ff3170d24a306`
+  at `rescue/amm-pr210-pre-main-cutover-20260828-210054` and merged accepted
+  `main` forward without force push.
+- Kept PR #210 limited to canonical query-preserving redirects plus matching
+  monitor/tests. Fresh exact-head Node 24 and protected Preview proof remain
+  mandatory before its separate release gate.
+- No Production, environment, database, lead, event, notification, WordPress,
+  DNS, publication, spend, deletion, or NellySelly mutation occurred.
 
 ## 2026-08-24 — PR #213 refresh onto final PR #211 cutover hygiene
 
