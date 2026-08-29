@@ -14,6 +14,12 @@
 - Prior PR #217 proof is historical pending fresh exact-head Node 24, immutable
   Preview, protected no-write browser, security, isolation, and runtime-log
   verification.
+- Reconciliation head `5721a62f40a0d2c63475ca43608be066dddb018a`
+  passes 6 focused files / 46 tests, all 242 files / 3,153 tests, strict types,
+  lint, optimized 53-page build, 86/17 route proof, doctor 43/43, safety 14/14,
+  isolation, dependency audit, a 649-commit secret scan, ancestry, whitespace,
+  clean-tree, and focused security review. Exact-head CI and protected Preview
+  proof remain mandatory after this documentation-only seal.
 - Changed no Production deployment, environment, database row, lead, event,
   message, provider, WordPress surface, DNS, publication, spend, deletion, or
   NellySelly system.

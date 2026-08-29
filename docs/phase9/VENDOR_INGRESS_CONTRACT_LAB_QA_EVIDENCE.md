@@ -112,6 +112,55 @@ safe documentation label `google_key` as well as an actual key value. The
 assertion was corrected to prohibit returned credential fields and synthetic
 signing material. This was a test defect, not a product-code failure.
 
+## Current exact-parent local evidence — 2026-08-29
+
+Exact release-authority reconciliation head:
+`5721a62f40a0d2c63475ca43608be066dddb018a`.
+
+All commands below ran on Node `v24.18.0` with the frozen pnpm lockfile:
+
+```text
+6 focused files / 46 tests PASS
+242 full-suite files / 3,153 tests PASS
+strict TypeScript PASS
+full ESLint PASS
+Next.js 15.5.21 optimized build PASS
+53 generated pages
+86 active routes / 17 acknowledged root/src duplicates
+release doctor 43/43 PASS
+release safety 14/14 PASS
+Ask/Nelly system isolation PASS
+Production dependency audit: no known vulnerabilities
+gitleaks: 649 reachable commits / ~16.21 MB / no leaks
+git diff --check PASS
+sealed-parent ancestry PASS / 4 candidate commits
+clean worktree PASS
+```
+
+The focused security review found no actionable defect in the new boundary:
+
+- both page and route enforce `growth:manage` server-side;
+- the cookie-authenticated POST requires exact same-origin `Origin` and rejects
+  an explicit non-same-origin `Sec-Fetch-Site`;
+- JSON is streamed and capped at 512 bytes before parsing;
+- the body accepts exactly one allowlisted profile key and no lead payload;
+- the only new browser request is a fixed same-origin API path;
+- React renders returned strings through normal escaped JSX;
+- HMAC/key comparisons reject malformed input and use `timingSafeEqual` only
+  after equal-length checks;
+- private responses are non-cacheable, noindex, nosniff, no-referrer, and
+  same-origin; and
+- source and diff scans found no provider/database client, dynamic outbound URL,
+  client secret, raw signing material response, dangerous HTML sink, or
+  NellySelly identifier.
+
+Current Follow Up Boss and Google first-party documentation was rechecked on
+2026-08-28 and continues to match the synthetic signature, envelope, field,
+`lead_id`, `google_key`, and forward-compatible unknown-field behavior recorded
+by the lab. Zillow remains contract-gated and no authenticated contract is
+invented. The documentation-only seal after this record must repeat exact-head
+CI and protected Preview proof.
+
 ## Pending exact-head release evidence
 
 The following must be completed after documentation, lint, and review settle

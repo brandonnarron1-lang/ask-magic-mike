@@ -17,9 +17,13 @@
   client or raw-payload/signing-material response. Current first-party Follow
   Up Boss and Google documentation still matches the implemented synthetic
   contract examples.
-- Former-head local proof is historical. Fresh exact-head focused/full tests,
-  types, lint, build, route, safety, isolation, dependency, secret, immutable
-  Preview, protected no-write browser, and runtime-log proof remain mandatory.
+- Former-head local proof is historical. Exact-parent reconciliation head
+  `5721a62f40a0d2c63475ca43608be066dddb018a` passes 6 focused files / 46
+  tests, all 242 files / 3,153 tests, strict types before and after build, lint,
+  53-page build, 86/17 routes, doctor 43/43, safety 14/14, Ask/Nelly isolation,
+  dependency audit, 649-commit gitleaks, ancestry, whitespace, and clean-tree
+  proof on Node 24.18.0. Immutable Preview, protected no-write browser, and
+  runtime-log proof remain mandatory after the documentation-only seal.
 - No Production, environment, database, lead/event, message, provider,
   WordPress, DNS, publication, spend, deletion, or NellySelly action occurred.
 - Full scope:

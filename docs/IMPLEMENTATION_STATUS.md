@@ -39,6 +39,16 @@ Updated 2026-08-28.
   staged and full tracked-history secret scans report no finding, and exact-base
   ancestry/diff proof. All of that evidence must be repeated on the refreshed
   exact head before this candidate is sealed.
+- **Current exact-parent local acceptance:** reconciliation head
+  `5721a62f40a0d2c63475ca43608be066dddb018a` passes 6 focused files / 46
+  tests, all 242 files / 3,153 tests, strict TypeScript before and after build,
+  full ESLint, optimized Next.js 15.5.21 build with 53 generated pages, 86/17
+  route proof, release doctor 43/43, safety 14/14, Ask/Nelly isolation,
+  Production dependency audit, a 649-commit redacted secret scan, ancestry,
+  whitespace, and clean-worktree proof on Node 24.18.0. The focused Next.js and
+  React security review found no actionable defect. Exact-head GitHub CI,
+  immutable Preview, authenticated visual/interaction, no-write, and runtime-log
+  proof remain pending after the documentation-only seal.
 - **Safety:** no Production, environment, schema, database row, lead/event,
   message, provider credential/call, WordPress/DNS, publication, spend,
   deletion, or NellySelly action.

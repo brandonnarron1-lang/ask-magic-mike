@@ -12,6 +12,12 @@
 - Retained the existing vendor-neutral normalizer and the protected,
   fixed-profile, no-write/no-provider-call contract lab. Prior PR #217 evidence
   is historical pending fresh exact-head proof.
+- Reconciliation head `5721a62f40a0d2c63475ca43608be066dddb018a`
+  passes 6 focused files / 46 tests, all 242 files / 3,153 tests, strict types,
+  lint, 53-page build, 86/17 route proof, doctor 43/43, safety 14/14, isolation,
+  dependency audit, 649-commit gitleaks, ancestry, whitespace, clean-tree, and
+  focused security review. Exact-head CI and protected Preview proof remain
+  mandatory after the documentation-only seal.
 - Production remains `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` /
   `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; no Production, environment, database,
   lead/event, message, provider, WordPress, DNS, publication, spend, deletion,
