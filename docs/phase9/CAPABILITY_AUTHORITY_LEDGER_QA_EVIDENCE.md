@@ -2,13 +2,15 @@
 
 Date: 2026-08-29
 
-Status: local candidate accepted; immutable exact-head evidence refresh pending
+Status: behavior-bearing head accepted; final evidence-only seal pending
 
 ## Scope and release identity
 
 - branch: `codex/phase9-capability-ledger-20260828`
 - exact sealed parent: `8c4d637207b2252520d61a005e193e370567c5cc`
 - parent candidate: Draft PR 229
+- behavior-bearing candidate head:
+  `20dd97ed44d692103e3e2e1935950a4e31467b5d`
 - accepted Production authority: PR 209 merge
   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`
 - first pending application candidate: Draft PR 210
@@ -133,6 +135,33 @@ browsers and four non-Facebook social crawlers passed on both Our Town pages,
 and only Facebook remained denied with HTTP 403 on `/ask-mike/` and Mike's
 agent profile. No request used a mutating method and no host policy changed.
 
+## Immutable behavior-bearing proof
+
+- GitHub exact-head Release Gate run `33251641125` passed against full SHA
+  `20dd97ed44d692103e3e2e1935950a4e31467b5d` in 3m38s. Its
+  `release-gate-artifacts` artifact is `9714580519`, digest
+  `sha256:20a240fffa93460d72c40be4708848192509b92ec2cfeb365be4df391a492b10`.
+- Vercel Preview deployment `dpl_7q3dL5CHBMRAXDdp7qs1LmnfqXDV` is `READY`
+  at `https://ask-magic-mike-c5pmtkii1-eyes-up-industries.vercel.app` with
+  target `preview`, branch `codex/phase9-capability-ledger-20260828`, full build
+  commit `20dd97ed44d692103e3e2e1935950a4e31467b5d`, and Node 24 runtime.
+- Protected no-write run `33251829052` passed in 4m10s. Its
+  `preview-qa-dispatch-artifacts` artifact is `9714641968`, digest
+  `sha256:9c344ec5027e34f180541d4146375f73e9a88afc92a9fdfc21761e998b338b70`.
+- The protected artifact reports 43/43 release-doctor checks, 14/14 safety,
+  18 Preview checks passed, six intentional write skips, zero failure, four
+  expected browser tests, zero unexpected/flaky/skipped browser tests,
+  release-candidate `GO`, and launch authority `PREVIEW_READY`.
+- Vercel protection was accepted by the redacted automation header. The exact
+  Preview database was reachable and schema-ready, while the mutation gate
+  remained blocked because `SAFE_DB_WRITE=false`; live email and SMS were also
+  disabled. No lead, event, note, task, SLA write, webhook write, email, SMS, or
+  Push occurred.
+- The QA request window produced 38 Vercel runtime records, all `info`: 31 HTTP
+  200, four 204, one 307, the expected invalid-token 404, and the expected
+  fail-closed Preview cron 503. Methods were 34 GET and four OPTIONS; there was
+  no POST/PATCH/PUT/DELETE and no warning, error, or fatal record.
+
 ## No-action boundary
 
 No merge, Production deployment, Vercel Production environment change, Neon
@@ -140,15 +169,13 @@ migration/write, lead/test submission, email/SMS/Push, WordPress content/form
 publication, DNS change, provider activation, paid spend, public post, data
 deletion, or NellySelly action occurred.
 
-## Remaining immutable proof
+## Final evidence-only seal boundary
 
-After commit and push, this candidate still requires:
-
-1. exact-head GitHub Release Gate;
-2. immutable Vercel Preview identity;
-3. protected no-write Preview QA;
-4. clean/mergeable Draft PR evidence; and
-5. confirmation that canonical Production still owns its recorded baseline.
+This documentation update changes no executable behavior. After it is committed
+and pushed, the final documentation-only head still requires a fresh exact-head
+GitHub Release Gate, a matching READY Preview identity, clean/mergeable Draft PR
+proof, and confirmation that canonical Production still owns its recorded
+baseline. The accepted behavior-bearing Preview proof above remains immutable.
 
 PR #209's durability gate is consumed. This candidate cannot bypass PR #210 or
 any later predecessor and cannot reuse historical Production authority.
