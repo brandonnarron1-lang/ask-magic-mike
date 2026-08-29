@@ -44,10 +44,15 @@ Updated 2026-08-29.
   evidence exists. All 42 contract keys are unique.
 - **Current acceptance:** PR #225 was reconciled onto exact sealed PR #224 head
   `5c75b8f919442c05b607eb666c5595023057d94d` at merge commit
-  `0bb1a6d77d4daf830a4dc7681e3a3d5650332286`. Exact Node 24.18.0 focused
-  acceptance passes 8 files / 117 tests; strict typecheck and focused ESLint
-  pass. Full release, secret, immutable Preview, hosted browser, and runtime-log
-  evidence remain mandatory on the final exact head.
+  `0bb1a6d77d4daf830a4dc7681e3a3d5650332286`; code-bearing hardening head is
+  `1289244c44d0c336b4ed242293febe15d5b75914`. Exact Node 24.18.0 passes
+  deployable-source Ask/Nelly isolation, safety 14/14, 264 files / 3,324 tests,
+  strict typecheck, full ESLint, optimized 59-page build, 95 active routes / 17
+  acknowledged duplicates, doctor 43/43, zero known Production dependency
+  vulnerabilities, 667-commit and exact four-commit redacted gitleaks scans,
+  sealed-parent ancestry, whitespace, and focused security review. Immutable
+  Preview, hosted browser/visual, runtime-log, and GitHub CI evidence remain
+  mandatory on the final pushed head.
 - Detailed design: `docs/phase9/BASELINE_TARGET_READINESS.md`.
 
 ## Phase 9 lead-intent default truth — 2026-08-29

@@ -32,6 +32,10 @@
   unknown; blended costs require complete paid-channel spend attribution; and
   the agent first-follow-up rate remains uninstrumented until an agent-grain
   assigned-lead denominator exists.
+- Post-stack local acceptance passes the complete 3,324-test release gate,
+  strict types, full lint, optimized 59-page build, route contract, doctor,
+  Production dependency audit, 667-commit plus exact-delta redacted secret
+  scans, sealed-parent ancestry, whitespace, and focused security review.
 - No Production row/configuration, target, lead, message, provider,
   publication, spend, WordPress/DNS, deletion, or NellySelly mutation occurred;
   the single preserved Preview analytics artifact is documented above.

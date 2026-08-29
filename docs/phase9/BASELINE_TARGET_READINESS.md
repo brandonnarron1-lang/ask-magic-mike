@@ -185,11 +185,20 @@ These are evidence thresholds, not performance goals.
 - Exact sealed PR #224 head
   `5c75b8f919442c05b607eb666c5595023057d94d` was merged without rebase or
   force push at `0bb1a6d77d4daf830a4dc7681e3a3d5650332286`.
-- Exact Node 24.18.0 focused acceptance passes 8 files / 117 tests, strict
-  TypeScript, focused ESLint, and whitespace checks.
-- Fresh full release, exact-commit secret scans, immutable Preview, protected
-  hosted browser, and runtime-log evidence remain required on the final exact
-  head before the candidate can be sealed.
+- Code-bearing hardening head is
+  `1289244c44d0c336b4ed242293febe15d5b75914`.
+- Exact Node 24.18.0 passes deployable-source Ask/Nelly isolation, release
+  safety 14/14, all 264 Vitest files / 3,324 tests, strict TypeScript, full
+  ESLint, optimized Next.js 15.5.21 build with 59 generated static pages, and
+  95 active routes / 17 acknowledged duplicates. Focused acceptance passes 8
+  files / 117 tests.
+- Release doctor passes 43/43 and the Production dependency audit reports no
+  known vulnerability. Redacted gitleaks reports no finding across all 667
+  commits or the exact four-commit sealed-parent delta. Sealed-parent ancestry,
+  whitespace, clean tracked tree, and focused security review pass.
+- Immutable Preview, protected hosted browser/visual QA, exact-deployment
+  runtime-log proof, and GitHub CI remain required on the final pushed head
+  before the candidate can be sealed.
 
 ## Hosted Preview safety correction
 

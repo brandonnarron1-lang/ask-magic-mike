@@ -61,11 +61,22 @@
   cost is withheld until every paid channel has spend attribution; agent
   follow-up remains uninstrumented without an agent-grain denominator; and all
   42 keys are unique.
-- **Current focused acceptance:** exact Node 24.18.0 passes 8 files / 117 tests,
-  strict typecheck, focused ESLint, and whitespace checks. Fresh full release,
-  exact-commit dependency/history scans, GitHub CI, immutable Vercel Preview,
-  protected hosted browser, and runtime-log proof remain required after the
-  final commit/push.
+- **Post-stack local acceptance:** exact Node 24.18.0 passes deployable-source
+  Ask/Nelly isolation, release safety 14/14, all 264 Vitest files / 3,324 tests,
+  strict typecheck, full ESLint, optimized Next.js 15.5.21 build with all 59
+  static pages, and 95 active routes / 17 acknowledged duplicates. Focused
+  acceptance remains 8 files / 117 tests.
+- **Release hygiene:** release doctor passes 43/43; the Production dependency
+  audit reports no known vulnerability; redacted gitleaks reports no finding
+  across all 667 commits or the exact four-commit sealed-parent delta;
+  sealed-parent ancestry, whitespace, and clean tracked-tree checks pass.
+- **Focused security review:** `/admin/growth` remains server-authorized through
+  `report:view`, force-dynamic, aggregate-only, and write-free. Public event
+  origins remain allowlisted, ordinary Preview fails closed before durable
+  limiter/body/repository work, and no raw HTML, browser secret, target writer,
+  migration, or additional database query was added.
+- GitHub CI, immutable Vercel Preview, protected hosted browser/visual QA, and
+  exact-deployment runtime-log proof remain required after the final push.
 - No Production row, environment, migration, target, lead, notification,
   provider, publication, spend, WordPress/DNS, deletion, or NellySelly action
   occurred.
