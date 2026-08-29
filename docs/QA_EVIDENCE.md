@@ -1,5 +1,29 @@
 # QA Evidence
 
+## Phase 9 OTP Facebook crawler Apache diagnosis — 2026-08-29
+
+- Exact code-and-copy head
+  `4be6088e4a0a58441542f638f388ab9e8886b7ff` passes the Node 24.18.0
+  release gate: 266 files / 3,340 tests, strict typecheck, full lint,
+  optimized 59-page build, 95 active routes / 17 acknowledged duplicates,
+  14/14 release safety, 43/43 release doctor, deployable-source isolation,
+  zero known Production dependency vulnerabilities, and redacted secret scans.
+- GitHub Release Gate run `33250286860` passed. Immutable Preview
+  `dpl_6Zv5KKMe8C1fHtqUTjFMUHU7Qf1M` is `READY` at the same exact head.
+- Hosted no-write run `33250361995` passed 18 checks with six intentional
+  mutation skips and zero failures, plus 4/4 browser cases with zero
+  unexpected, flaky, or skipped results. Its verdict is `PREVIEW_READY`.
+- The exact Preview log window contains 38 information-level requests and no
+  warning, error, or fatal record. Its only 5xx is the expected fail-closed
+  Preview SLA-sweep 503; no lead, event, database mutation, email, SMS, Push,
+  or provider delivery occurred.
+- Read-only live crawler verification remains truthfully 40/42. Only the two
+  expected Our Town Facebook checks fail; the corrected verifier emits the
+  bounded Apache operator action and no stale broad-WAF instruction.
+- Production remains unchanged at commit
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`.
+
 ## Phase 9 identity-safe wide social preview — 2026-08-29
 
 - `pnpm run amm:verify:social-preview`: 40/42 live checks passed. Ask Magic

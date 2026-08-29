@@ -14,6 +14,10 @@
 - Consolidated historical operator aliases onto the canonical root-cause and
   change sheets so no active runbook still asks for a nonexistent ModSecurity
   rule ID.
+- Sealed exact code-and-copy head `4be6088e4a0a58441542f638f388ab9e8886b7ff`
+  with a green GitHub release gate, immutable `READY` Vercel Preview, 18/6/0
+  no-write Preview checks, 4/4 browser checks, and a clean 38-request runtime
+  window with no warning, error, fatal record, or unexpected 5xx.
 
 ## 2026-08-29 — Public owned-referral handoff candidate
 

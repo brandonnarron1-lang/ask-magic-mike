@@ -2100,6 +2100,13 @@ any bridge activation or shadow-mode test.
   safety, deployable-source isolation, release doctor 43/43, and a Production
   dependency audit with no known vulnerability. Redacted Gitleaks finds no
   leak in the sealed-parent delta or 674-commit history.
+- Exact code-and-copy head
+  `4be6088e4a0a58441542f638f388ab9e8886b7ff` passed GitHub Release Gate run
+  `33250286860`. Immutable Preview
+  `dpl_6Zv5KKMe8C1fHtqUTjFMUHU7Qf1M` is `READY`; hosted no-write QA run
+  `33250361995` passed 18 checks / six intentional mutation skips / zero
+  failures and 4/4 browser cases with verdict `PREVIEW_READY`. Its 38-request
+  log window contains no warning, error, fatal record, or unexpected 5xx.
 - No host file, firewall, Apache service, cache, WordPress, Vercel, database,
   communication provider, DNS, Production app, or NellySelly state was changed.
 - Evidence and controlled change contract:
