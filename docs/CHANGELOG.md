@@ -13,8 +13,15 @@
   oversized/active-content, and added-query rejection coverage.
 - Corrected portrait/text collision and transparent-renter over-cropping found
   during original-pixel visual QA. No AI-generated or altered likeness ships.
-- No Production/Preview deployment, database, secret, lead, message, provider,
-  publication, WordPress/DNS, spend, deletion, or NellySelly action occurred.
+- Passed exact-head GitHub CI, immutable Vercel Preview, protected mutation-free
+  hosted QA, 4/4 browser cases, and runtime-log review on the code-bearing
+  commit. Preview returned `PREVIEW_READY`; no lead or database mutation ran.
+- Disclosed and removed one empty project auto-created by `vercel curl` from an
+  unlinked worktree after confirming it had no deployment or Production URL;
+  the worktree now points to canonical `ask-magic-mike`.
+- No Production deployment, database write, canonical secret/configuration,
+  lead, message, provider, publication, WordPress/DNS, spend, business-data
+  deletion, or NellySelly action occurred.
 
 ## 2026-08-29 — Identity-safe wide social preview card
 

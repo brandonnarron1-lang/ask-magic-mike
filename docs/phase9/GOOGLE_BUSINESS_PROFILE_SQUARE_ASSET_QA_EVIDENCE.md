@@ -2,8 +2,10 @@
 
 Date: 2026-08-29
 
-Status: local acceptance passed on the exact candidate tree; exact-commit CI,
-immutable Preview, and protected hosted verification pending
+Status: code-bearing commit passed local acceptance, exact-commit CI, immutable
+Preview, protected mutation-free hosted QA, and runtime-log review. The final
+documentation seal is accepted only when its external exact-head reruns pass;
+those self-referential results belong in PR #232 rather than another commit.
 
 ## Source and scope
 
@@ -11,6 +13,10 @@ immutable Preview, and protected hosted verification pending
   (PR #231).
 - Feature branch:
   `codex/phase9-google-business-profile-square-assets-20260829`.
+- Draft PR: [#232](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/232),
+  stacked on the exact sealed PR #231 head rather than `main`.
+- Code-bearing commit:
+  `d0e058da82c852e609d92d737d88aa5d5b6dbf48`.
 - Pre-change rescue branch:
   `rescue/amm-pre-gbp-square-20260829-0918`.
 - Canonical repository:
@@ -37,6 +43,60 @@ All project verification used exact Node `24.18.0` and pnpm `10.30.3`.
 | `pnpm run release:doctor` | Expected pre-Preview state: 42 pass / 1 fail; only missing Preview QA report |
 | `pnpm run release:report` | Expected `NO-GO`; sole blocker is `preview_qa_report_missing` |
 | `pnpm run launch:authority` | `LOCAL_READY`; protected Preview QA remains required |
+
+## Exact-commit CI and hosted Preview
+
+The code-bearing commit was verified without database writes or external
+publication:
+
+| Evidence | Result |
+|---|---|
+| GitHub Release Gate | Run [`33255361223`](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33255361223) passed on exact head `d0e058da82c852e609d92d737d88aa5d5b6dbf48` |
+| Immutable Vercel Preview | Deployment `dpl_BJjuZsmDVeU9kVHnnrm9ZQm6eJkN` is `READY` at `https://ask-magic-mike-45rjfm7c1-eyes-up-industries.vercel.app` |
+| Deployed identity | Protected health reported commit `d0e058da82c852e609d92d737d88aa5d5b6dbf48`, the exact feature branch, Node Production mode, and Vercel Preview mode |
+| Protected hosted QA | Dispatch run [`33255500962`](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33255500962) checked out the exact commit and passed 18 read-only checks / 6 intentional mutation skips / 0 failures |
+| Browser QA | 4 expected / 0 skipped / 0 unexpected / 0 flaky cases |
+| Release authority | Release candidate `GO`; launch authority `PREVIEW_READY`; `release:assert` passed |
+
+The protected QA used the repository-held Vercel bypass secret in header mode;
+the value was masked and never printed or copied. `SAFE_DB_WRITE=false` and
+`FORCE_DB_WRITE=false`. The health contract independently reported
+`safe_for_preview_mutation=false`, live email/SMS disabled, provider delivery
+disabled, and `allow_preview_db_mutation=false`. All six lead/database mutation
+checks therefore skipped by contract.
+
+The hosted run passed public funnels, Preview analytics isolation, three
+WordPress UTM variants, secret-leak inspection, health, protected admin shell,
+lead inbox, read-only SLA boundaries, private phone-install failure handling,
+listing search, and private-listing-field exclusion. The exact 720x720 renderer
+and protected asset response remain covered by the focused server tests and
+original-pixel render evidence below; the hosted Preview has no reusable human
+Lead Center session, so the evidence does not overclaim a session-authenticated
+download.
+
+## Runtime log review
+
+The exact immutable deployment log window contained zero `error` records. Its
+only 5xx response was the expected `GET /api/admin/sla/sweep` HTTP 503 safety
+refusal exercised by hosted QA while Preview writes were disabled. It was an
+`info`-level serverless request, not an exception.
+
+## Vercel worktree-link cleanup
+
+During a manual read-only `vercel curl` attempt, the CLI treated the unlinked
+worktree as a new project and created the empty project
+`amm-gbp-square-assets-20260829` plus a protection-bypass token scoped to that
+empty project. The token could not bypass the canonical deployment, and both
+requests remained Vercel SSO 302 responses.
+
+Before cleanup, the project was resolved exactly as
+`prj_EzSvIbokQKEPpNyXmeM6eGLg4qHq`, created at 09:41:36 EDT, with no Production
+URL and no deployments. It was removed immediately, including its unused
+project-scoped token, and the local worktree was relinked to the established
+canonical project `ask-magic-mike` (`prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`). A
+fresh project listing confirmed the temporary project absent. No canonical
+domain, environment value, deployment, protection setting, or repository link
+was changed.
 
 Expected synthetic test stderr about deliberately absent persistence and
 in-memory rate-limit fixtures remained inside passing negative-path tests. It
@@ -120,12 +180,15 @@ generating a new likeness.
 
 No test submitted a lead, wrote canonical or Preview Neon, sent email/SMS/Push,
 called Google or another provider, opened a native share target, recorded
-publication proof, changed Vercel environment/configuration, deployed
-Production, edited WordPress/DNS, spent, deleted data, or interacted with
-NellySelly.
+publication proof, changed canonical Vercel environment/configuration,
+deployed Production, edited WordPress/DNS, spent, deleted business data, or
+interacted with NellySelly. The temporary empty Vercel project creation and
+immediate removal are disclosed above rather than hidden.
 
-This document is evidence, not release or publication authority. Exact-commit
-Node 24 CI, immutable Vercel Preview identity, authenticated protected-route
-verification, clean runtime logs, and a separately explicit merge/Production
-gate remain required. Any native Google Business Profile publication remains a
-different external-action approval.
+This document is evidence, not release or publication authority. The final
+documentation-seal commit is valid only after exact-head Node 24 CI, immutable
+Vercel Preview identity, protected hosted QA, and runtime-log review pass and
+are recorded on PR #232. A content-only follow-up commit must not invalidate
+that proof. A separately explicit merge/Production gate remains required after
+the earlier ordered release train. Any native Google Business Profile
+publication remains a different external-action approval.

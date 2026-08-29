@@ -21,14 +21,23 @@ Updated 2026-08-29.
   optimized 59-page Next.js build, and 95/17 route proof. Diff-level redacted
   Gitleaks and the Production dependency audit are clean. Original-pixel QA
   passes the reference/square comparison and four-placement matrix after
-  correcting the first render's buyer collision and renter crop. Exact-commit
-  CI, immutable Preview, protected hosted verification, and runtime-log
-  evidence remain pending.
+  correcting the first render's buyer collision and renter crop. Exact
+  code-bearing head `d0e058da82c852e609d92d737d88aa5d5b6dbf48`
+  passed Release Gate run `33255361223`. Immutable Preview
+  `dpl_BJjuZsmDVeU9kVHnnrm9ZQm6eJkN` is `READY`; protected run
+  `33255500962` passed 18 checks / six intentional mutation skips / zero
+  failures plus 4/4 browser cases and returned `PREVIEW_READY`. The log window
+  contained zero errors and only the expected no-write SLA 503. The final
+  documentation seal remains conditioned on exact-head repetition recorded on
+  PR #232 without a self-invalidating content-only follow-up commit.
 - **Authority boundary:** Production remains
   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. No Production/Preview
-  deployment, environment, database, lead/event, email/SMS/Push, provider,
-  publication/proof, WordPress/DNS, spend, deletion, or NellySelly mutation
-  occurred.
+  data write, canonical environment/configuration, lead/event,
+  email/SMS/Push, provider, publication/proof, WordPress/DNS, spend, business
+  data deletion, or NellySelly mutation occurred. A CLI-created empty Vercel
+  worktree project was verified to have no deployment or Production URL,
+  removed immediately, and the worktree was relinked to canonical
+  `ask-magic-mike`; exact evidence is in the QA record.
 - Detailed design and evidence:
   `docs/phase9/GOOGLE_BUSINESS_PROFILE_SQUARE_ASSET.md` and
   `docs/phase9/GOOGLE_BUSINESS_PROFILE_SQUARE_ASSET_QA_EVIDENCE.md`.
