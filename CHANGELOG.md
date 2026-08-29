@@ -1,7 +1,14 @@
 # Changelog
 
-## 2026-08-25 — Local-demand decision packets candidate
+## 2026-08-29 — Local-demand decision packets candidate
 
+- Preserved prior PR #222 head
+  `08e0d345dd52a01d5da9a42b10dde982cbcce606` at
+  `rescue/amm-pr222-pre-pr221-exact-seal-20260829-031605`, then reconciled the
+  candidate onto exact sealed PR #221 head
+  `61e152cb7ce03fd1904a06f30435dbe7ef36c4e1` without a force push.
+- Kept PR #221's final funnel-identity browser proof unchanged; PR #222 adds
+  only its separate authenticated Growth Command Center visual acceptance.
 - Reused the canonical Growth Command Center and persisted Search
   Console/Business Profile opportunities instead of creating another dashboard,
   provider connector, CRM, database, or AI agent.
@@ -18,13 +25,13 @@
   provider call, WordPress/DNS, publication, spend, deletion, or NellySelly
   action occurred.
 
-## 2026-08-25 — Cross-domain measurement consolidation candidate
+## 2026-08-29 — Cross-domain measurement consolidation candidate
 
 - Reused the already-reviewed PR #212 application, WordPress bridge, tests,
   release package, and activation runbooks instead of creating another
   analytics implementation.
-- Consolidated that consent-gated measurement work onto exact PR #220 head
-  `5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3`, preserving the newer funnel
+- Reconciled that consent-gated measurement work onto exact sealed PR #220 head
+  `19689e95d824d7d06e5f3b60cd18335f53018c93`, preserving the newer funnel
   identity, durable KPI authority, privacy minimization, automation exclusion,
   and read-only Preview controls.
 - External analytics remains fail closed: the Ask runtime requires the exact
@@ -34,10 +41,70 @@
 - The canonical WordPress bridge remains independently disabled by default;
   its 1.2.0 Basic Consent loader requires the existing provider's exact
   `allow` state and rejects coexistence with the legacy GTM bootstrap.
+- Hardened both public browser analytics routes to require a present approved
+  Origin, bounded experiment JSON at 4,096 bytes with exact input contracts,
+  and added explicit WordPress allow-to-deny revocation with Google-only cookie
+  expiry and duplicate-runtime prevention.
 - No Production configuration, deployment, migration, lead/event write,
   communication, WordPress edit, publication, spend, DNS, deletion, provider,
   or NellySelly action occurred.
+## 2026-08-29 — PR #219 refresh onto exact sealed PR #218
 
+- Preserved prior PR #219 head `5486bed20272d2a661bc28a0e3a4a4576b2cb11f`
+  at `rescue/amm-pr219-pre-pr218-exact-seal-20260829-004949`.
+- Merged exact sealed PR #218 head
+  `f065d8801bec295c99185d846ff4bc38de2a0a6f` without force push at
+  reconciliation head `f2754d0e1858c1afcf639977051f3488ab591f89`.
+  Product, API, migration, shared-ingress, route, and test files merged without
+  conflict.
+- Retained the canonical Growth Command Center, growth ledgers, shared bounded
+  ingress transport, endpoint attestation, RBAC, audit ledger, spend contract,
+  and safe-disabled organic-search contract. No parallel analytics product,
+  database, dashboard, OAuth client, provider adapter, or publisher was added.
+- Reconciled head `5d598cc2228b6564af883a9716aedf1aa28cb2fb`
+  passes isolation, safety 14/14, 252 files / 3,210 tests, strict types, lint,
+  optimized 57-page build, 92/17 routes, doctor 43/43, dependency audit,
+  653-commit gitleaks, exact-parent ancestry, whitespace, and focused security
+  review on Node 24.18.0.
+- A fresh disposable PostgreSQL 17.11 cluster applied all 36 migrations and
+  passed both spend and organic contracts with denied browser/legacy-role
+  execution and zero synthetic rows or receipts after rollback. Exact-head CI,
+  immutable Preview, protected no-commit browser/visual, and runtime-log proof
+  remain pending after the documentation-only evidence seal.
+- Changed no Production deployment, environment, Neon object or row, Search
+  Console property, import, page, lead, message, provider, campaign/budget,
+  WordPress surface, DNS, purchase, deletion, or NellySelly system.
+
+## 2026-08-29 — PR #218 refresh onto exact sealed PR #217
+
+- Preserved prior PR #218 head `cd087e5c5c0fda82a3175b86b550c966120eb2ab`
+  at `rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928`.
+- Merged exact sealed PR #217 head
+  `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf` without force push at
+  exact-parent merge head `693af26f3fb536f62784b475cbbebebfde28ff9f`.
+  Application, API, migration, and test files merged automatically; conflicts
+  were limited to two additive release-history ledgers.
+- Retained the existing Growth Command Center, canonical growth schema,
+  `growth:manage` boundary, immutable audit ledger, bounded CSV contract, and
+  safe-disabled import gate. No parallel database, dashboard, importer,
+  provider adapter, campaign manager, CRM, or analytics ledger was created.
+- Former-head proof is historical until fresh exact-head Node 24, disposable
+  PostgreSQL 17, immutable Preview, protected no-commit browser, security,
+  isolation, and runtime-log verification pass.
+- Exact-parent code-bearing/reconciliation head
+  `894643a60bd9fb50b441dccb3d2d3d8e6b5c805b` passes 6 focused files / 47
+  tests, all 247 files / 3,184 tests, strict TypeScript before and after build,
+  full ESLint, optimized 55-page Next.js 15.5.21 build, 89/17 route proof,
+  doctor 43/43, safety 14/14, Ask/Nelly isolation, Production dependency audit,
+  651-commit gitleaks, ancestry, whitespace, and focused security review.
+- A fresh disposable PostgreSQL 17.11 cluster applied all 35 migrations and
+  passed the spend contract; the synthetic transaction rolled back to zero
+  test channels, campaigns, and receipts. Fresh exact-head CI, immutable
+  Preview, protected browser/visual, and runtime logs remain mandatory after
+  the documentation-only seal.
+- Changed no Production deployment, environment, Neon object or row, spend,
+  lead, message, provider, campaign, budget, WordPress surface, DNS,
+  publication, purchase, deletion, or NellySelly system.
 ## 2026-08-24 — Marketing-spend ledger ingress candidate
 
 - Reused the canonical growth schema, Growth Command Center, KPI engine,
@@ -70,6 +137,30 @@
   budget, WordPress, DNS, publication, purchase, deletion, or NellySelly action
   occurred.
 
+## 2026-08-28 — PR #217 refresh onto exact sealed PR #216
+
+- Preserved prior PR #217 head `d04984b4d162f13c79af261beb55a82f15a86b80`
+  at `rescue/amm-pr217-pre-pr216-exact-seal-20260828-234940`.
+- Merged exact sealed PR #216 head
+  `211485df28fc818ab783ed357df8486f1460d5e2` without force push. Product
+  application files merged automatically; conflicts were limited to additive
+  release-history ledgers.
+- Retained the existing vendor-neutral normalizer and protected synthetic
+  contract lab. No parallel lead API, provider router, database, CRM, webhook
+  store, or notification path was created.
+- Prior PR #217 proof is historical pending fresh exact-head Node 24, immutable
+  Preview, protected no-write browser, security, isolation, and runtime-log
+  verification.
+- Reconciliation head `5721a62f40a0d2c63475ca43608be066dddb018a`
+  passes 6 focused files / 46 tests, all 242 files / 3,153 tests, strict types,
+  lint, optimized 53-page build, 86/17 route proof, doctor 43/43, safety 14/14,
+  isolation, dependency audit, a 649-commit secret scan, ancestry, whitespace,
+  clean-tree, and focused security review. Exact-head CI and protected Preview
+  proof remain mandatory after this documentation-only seal.
+- Changed no Production deployment, environment, database row, lead, event,
+  message, provider, WordPress surface, DNS, publication, spend, deletion, or
+  NellySelly system.
+
 ## 2026-08-24 — Vendor ingress contract lab candidate
 
 - Reused the existing Phase 9 vendor-neutral normalizer instead of creating a
@@ -89,6 +180,51 @@
   or live activation path.
 - No Production, environment, database, lead/event, message, provider,
   WordPress, DNS, publication, spend, deletion, or NellySelly action occurred.
+
+## 2026-08-28 — PR #216 exact-parent application acceptance
+
+- Exact application/parent-refresh head
+  `70198a7bb8467ac741b3c0977bd0ed95b8b5dbda` passes 12 focused files / 89
+  tests, all 239 files / 3,137 tests, strict typecheck, ESLint, the optimized
+  52-page build, 84/17 route proof, release doctor 43/43, safety 14/14,
+  Ask/Nelly isolation, dependency audit, a 647-commit redacted secret scan,
+  and whitespace verification.
+- GitHub Release Gate run `33231179999` passed with artifact `9708564416`
+  (`sha256:aedb154485d8dd63fadfb227340988fea1a85dc9176689dde9a2c0f10651d36a`).
+- Immutable Preview `dpl_52wRTaBSYs1d6rGKmtMmetB8V2Cs` is READY at
+  `https://ask-magic-mike-h7ylc9by3-eyes-up-industries.vercel.app`.
+- Exact-branch protected run `33231584499` passed 17 read-only checks, six
+  deliberate mutation skips, all six widget/funnel browser tests, release-
+  candidate `GO`, and `PREVIEW_READY`. Artifact `9708684727` has digest
+  `sha256:b48ce2c006ceefd217f6f6e622b7514bb17842be19ec63e7b0a63f38db9e232f`.
+- Review caught that the default-branch bootstrap dispatcher still ran only
+  three widget checks. Its read-only results remain valid, but the exact-branch
+  workflow above is the acceptance authority for all six scenarios.
+- Four generated desktop/mobile Home Value and Ask captures were visually
+  inspected as readable, contained, branded synthetic states. Direct Vercel
+  log filters for POST/PUT/PATCH/DELETE and warning/error/fatal each returned
+  zero records during the protected window.
+- Production remains on `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` /
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. This documentation-only seal must repeat
+  exact-head CI and protected Preview proof before the later release gate.
+
+## 2026-08-28 — PR #216 refresh onto exact sealed PR #215
+
+- Preserved prior PR #216 head `a6098ab4ee7a13d024bafc08264628e2691a8e06`
+  at `rescue/amm-pr216-pre-pr215-exact-seal-20260828-231335`.
+- Merged exact sealed PR #215 head
+  `c53cec6043525b593b254c457efdbbe5a29c0520` without force push. Application
+  files merged automatically; conflicts were limited to additive changelog,
+  QA-evidence, and executable release-authority records.
+- Retained the existing funnel UUID, canonical event route, server-owned
+  conversion authority, consent-channel integrity, and shared fail-closed
+  Preview mutation interceptor.
+- Prior PR #216 proof is historical pending fresh exact-head Node 24,
+  immutable Preview, write-intercepted browser, security, isolation, and
+  zero-mutation runtime verification.
+- Changed no Production deployment, environment, database row, lead, event,
+  message, provider, WordPress surface, DNS, publication, spend, deletion, or
+  NellySelly system.
 
 ## 2026-08-24 — PR #216 refresh onto final PR #215 cutover hygiene
 
@@ -150,7 +286,51 @@
   approved commands, and blocks plus records every unexpected mutation.
   Replacement exact-head protected proof is mandatory. Production remains
   unchanged.
+## 2026-08-28 — PR #215 exact-parent application acceptance
 
+- Reused the canonical Home Value funnel and `POST /api/leads` command on exact
+  sealed PR #214 head `81a2c7544318d630437ed3e86cbea029c5c9b57d`;
+  the exact application/parent-refresh head is
+  `eff8fc04449fab4fd34cd0fb69735e6787d0b382`.
+- Passed 236 files / 3,108 tests, strict typecheck, ESLint, the optimized
+  52-page build, 84/17 route proof, release doctor 43/43, safety 14/14,
+  Ask/Nelly isolation, dependency audit, a 646-commit redacted secret scan,
+  and whitespace verification.
+- GitHub Release Gate run `33229869967` passed with artifact `9708168965`
+  (`sha256:09f00d64c6f9c9ab593529c5a67da4981ce5d350eec4700fc3d59a30620af2c2`).
+- Immutable Preview deployment `dpl_8qNH7Ry1gSPqdSwHrRNM3Y9LHhZR` is READY at
+  `https://ask-magic-mike-ao5u74sfz-eyes-up-industries.vercel.app`.
+- Protected no-write run `33230015801` checked out the exact application head
+  and passed 17 read-only checks, six deliberate mutation skips, 3/3
+  write-intercepted browser checks, release-candidate `GO`, and
+  `PREVIEW_READY`. Artifact `9708219853` has digest
+  `sha256:17c4339d2c62846df1191b5a94acd107c78a130d09cac40ba40d899eadd1e6e9`.
+- Current-run 1280, 390, and 320 visual acceptance found no horizontal
+  overflow; empty submission focused the address field and exposed a specific
+  live-region error without creating a lead. Preview logs contained four
+  page-load analytics POSTs, no lead/delivery/provider request, and no
+  warning/error/fatal record.
+- This evidence-only seal changes no Production deployment, environment,
+  database schema/lead, notification, provider, WordPress, DNS, publication,
+  spend, deletion, or NellySelly system. The resulting documentation head must
+  repeat exact-head CI and protected Preview proof before the later gate.
+
+## 2026-08-28 — PR #215 refresh onto exact sealed PR #214
+
+- Preserved prior PR #215 head `2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`
+  at `rescue/amm-pr215-pre-pr214-exact-seal-20260828-224229`.
+- Merged exact sealed PR #214 head
+  `81a2c7544318d630437ed3e86cbea029c5c9b57d` without force push. Conflicts
+  were limited to additive changelog, QA-evidence, and executable release-
+  authority records; application files merged without manual resolution.
+- Retained the canonical Home Value funnel, shared lead command, first-valid-
+  contact durable write, optional-phone semantics, bounded contact validation,
+  consent-channel accuracy, and privacy-safe durable-failure telemetry.
+- Invalidated former PR #215 proof pending fresh exact-head Node 24, immutable
+  Preview, write-intercepted interaction, and protected no-write runtime proof.
+- Changed no Production deployment, environment, database row, lead, event,
+  notification, provider, WordPress surface, DNS, publication, spend, deletion,
+  or NellySelly system.
 ## 2026-08-24 — PR #215 refresh onto final PR #214 cutover hygiene
 
 - Preserved former PR #215 head `0e47db8780c7257f0d445d75e034aacd535c06a4`
@@ -188,6 +368,23 @@
   ESLint, optimized build/84-route proof, 14/14 safety, isolation, dependency
   audit, a 614-commit redacted secret scan, and whitespace verification.
   Production remains unchanged.
+## 2026-08-28 — PR #214 refresh onto exact sealed PR #213
+
+- Preserved prior PR #214 head `94e3d66190df138d42c1321adfeb0cefb0478545`
+  at `rescue/amm-pr214-pre-pr213-exact-seal-20260828-222353`.
+- Merged exact sealed PR #213 head
+  `d2a1bf01d0962e07dd1e460acd4c295e145cf6a8` without force push. Conflicts
+  were limited to additive changelog and executable release-authority records;
+  application files merged without manual resolution.
+- Retained the existing urgency selector, notification outbox, approved Our
+  Town/Mike assets, accessible HTML/plain-text facts, version-pinned retries,
+  synthetic no-send gallery, and Production-404 acceptance-route safeguard.
+- Invalidated former PR #214 proof pending fresh exact-head Node 24, immutable
+  Preview, current-run visual/interaction audit, and protected no-send runtime
+  verification.
+- Changed no Production deployment, environment, database row, lead, event,
+  notification, provider, WordPress surface, DNS, publication, spend, deletion,
+  or NellySelly system.
 
 ## 2026-08-24 — PR #214 refresh onto final PR #213 cutover hygiene
 
@@ -227,6 +424,54 @@
   all three urgency states at 1280 × 720, and reports no browser/runtime errors.
 - No Production, environment, database, lead/event, email/BCC, SMS/MMS, Push,
   WordPress, DNS, publication, spend, deletion, or NellySelly action occurred.
+## 2026-08-28 — PR #213 refresh onto exact sealed PR #211
+
+- Preserved prior PR #213 head `3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea`
+  at `rescue/amm-pr213-pre-pr211-exact-seal-20260828-215231`.
+- Merged exact sealed PR #211 head
+  `c5700eda5e32ff6ead9a985c86b811a3c46e1e66` without force push. Conflicts
+  were limited to additive changelog and executable release-authority records;
+  application files merged without manual resolution.
+- Retained PR #211's Ask clarity, skip-link focus, and current Production
+  ledger together with PR #213's single shared responsive navigation,
+  active-route semantics, narrow-phone behavior, and Escape focus safeguard.
+- Invalidated former PR #213 proof pending fresh exact-head Node 24, immutable
+  Preview, screenshot-first responsive audit, browser interaction, and no-write
+  runtime verification.
+- Changed no Production deployment, environment, database row, lead, event,
+  notification, WordPress surface, DNS, publication, spend, deletion, or
+  NellySelly system.
+
+## 2026-08-28 — PR #211 refresh onto exact sealed PR #210
+
+- Preserved prior PR #211 head `5d566a4a14d4a7cb67175683fdf099e8d62747b7`
+  at `rescue/amm-pr211-pre-pr210-exact-seal-20260828-213129`.
+- Merged exact sealed PR #210 head
+  `93af400494a94a8d8aedb09ece16bbff4dfd214b` without force push. The only
+  conflicts were additive changelog, implementation-status, and executable
+  release-authority records; application files did not overlap.
+- Retained PR #210's canonical redirects and current PR #209 acceptance ledger
+  together with PR #211's existing Ask clarity, shared skip link, focus target,
+  and real-browser keyboard contracts.
+- Invalidated former PR #211 proof pending fresh exact-head Node 24, protected
+  Preview, keyboard, and zero-write runtime verification.
+- Changed no Production deployment, environment, database row, lead, event,
+  notification, WordPress surface, DNS, publication, spend, deletion, or
+  NellySelly system.
+
+## 2026-08-28 — PR #210 refresh onto accepted PR #209 Production
+
+- Recorded accepted PR #209 Production merge
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; its durability gate is exhausted.
+- Preserved prior PR #210 head `3ed8d050edd386aa0cd4a83d230ff3170d24a306`
+  at `rescue/amm-pr210-pre-main-cutover-20260828-210054` and merged accepted
+  `main` forward without force push.
+- Retained only PR #210's canonical query-preserving redirects and monitor/test
+  scope. Fresh exact-head Node 24 and protected Preview proof remain required.
+- Changed no Production deployment, environment, database row, lead, event,
+  notification, WordPress surface, DNS, publication, spend, deletion, or
+  NellySelly system.
 
 ## 2026-08-24 — PR #213 refresh onto final PR #211 cutover hygiene
 
@@ -323,7 +568,6 @@
   keyboard, mobile-geometry, and protected no-write proof.
 - Changed no Production deployment, database, lead, message, WordPress surface,
   DNS, spend, deletion, or NellySelly system.
-
 ## 2026-08-24 — PR #210 refresh onto final PR #209 cutover hygiene
 
 - Preserved former PR #210 head `7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9`

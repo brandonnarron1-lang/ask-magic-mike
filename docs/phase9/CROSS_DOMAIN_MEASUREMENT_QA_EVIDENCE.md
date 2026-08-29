@@ -1,21 +1,94 @@
 # Phase 9 Cross-Domain Measurement QA Evidence
 
-Date: 2026-08-25
+Date: 2026-08-29
 
 Consolidated branch:
 `codex/phase9-cross-domain-measurement-consolidation-20260825`
 
-Cumulative base: exact PR #220 head
-`5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3`
+Cumulative base: exact sealed PR #220 head
+`19689e95d824d7d06e5f3b60cd18335f53018c93`
 
 Imported source: exact PR #212 head
 `758154ca73b64f24f2df8f183ba8b3f6f82f769a`
 
 Consolidation rescue ref:
-`rescue/amm-pr220-pre-cross-domain-consolidation-20260825-0042`
+`rescue/amm-pr221-pre-pr220-exact-seal-20260829-020318`
 
 WordPress pre-change rescue ref:
 `rescue/amm-pr212-pre-wordpress-consent-bridge-20260824-0244`
+
+No Production action is authorized by this evidence. The later application
+gate remains
+`APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`
+and is not requestable while the separate WordPress consent-order preflight is
+`HOLD`. Exact application-head release, immutable Preview, protected no-write,
+browser, and runtime-log proof is complete; the final documentation-only head
+must repeat the automated exact-head checks before the Draft PR is sealed.
+
+## Exact application-head acceptance and Preview mutation repair
+
+- Final application head
+  `735cc8930eb595b550adf69ace1d6fef3b82a939` preserves the pre-repair head
+  `84ab4568ced52ece1846fd5844046a5229d6da71` at
+  `rescue/amm-pr221-pre-preview-mutation-guard-20260829-0238`.
+- A first ordinary headed-Chrome load of the superseded Preview truthfully
+  exposed a missing server boundary: at `2026-08-29T06:36:50Z`, deployment
+  `dpl_GF9F6hp1GcPG5zEwNC9nJG9KLeq5` accepted one `POST /api/events` with HTTP
+  202. The PII-free payload was `page_view`, `funnel_name=homepage`,
+  `step_name=landing`, path `/`, desktop, and empty attribution. The response
+  reported `persisted=true` with correlation
+  `2a2ce77e-2f0c-4a74-a7de-cd076fc0af16`. It created no lead, contact,
+  notification, provider message, or Production write. The row remains intact;
+  cleanup was not authorized.
+- The repair applies the existing endpoint-attested Preview mutation guard to
+  both `/api/events` and `/api/experiments/event` after exact-origin and
+  automation checks but before rate limiting or repository access. Read-only
+  Preview now returns `503`, `persisted=false`,
+  `code=preview_data_disabled`, and `private, no-store`. The existing controlled
+  Preview mutation contract still requires both `PREVIEW_DATA_MODE=enabled`
+  and `ALLOW_PREVIEW_DB_MUTATION=true`; neither was enabled here.
+- Focused regression coverage passes 3 files / 35 tests. Targeted ESLint,
+  strict TypeScript, whitespace, and the complete local release gate pass. The
+  local gate ran on Node 26.5.1 with the repository's Node 24 warning and passed
+  261 files / 3,291 tests, full ESLint, optimized Next.js 15.5.21 build with
+  59/59 static pages, 95 active routes / 17 acknowledged duplicates, isolation,
+  and release safety 14/14. Exact CI below supplies the authoritative Node 24
+  runtime proof.
+- GitHub Node 24 Release Gate
+  [`33239065433`](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33239065433)
+  checked out exact head `735cc8930eb595b550adf69ace1d6fef3b82a939`
+  and passed in 3m24s. Artifact `9710833622` has digest
+  `sha256:ee126700d5aad0eea80b0c3f39d9a4fb5464e71f60878600a63377c7f37b4d79`.
+- Immutable Preview `dpl_8bWUx49oChfNeUrQpErDA9XxwK24` is READY at
+  `https://ask-magic-mike-59ia015w8-eyes-up-industries.vercel.app` and its
+  deployment metadata resolves to the same exact commit and PR #221 branch.
+- Protected no-write dispatcher
+  [`33239236233`](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33239236233)
+  checked out the exact head, hard-pinned `SAFE_DB_WRITE=false`, passed the
+  Node 24 release gate, release doctor 43/43, 18 read-only Preview checks, six
+  intentional mutation skips, and 4/4 expected browser scenarios with zero
+  unexpected, flaky, or skipped scenarios. It emitted `PREVIEW_READY`.
+  Artifact `9710883656` has digest
+  `sha256:8945aa55bf739a4a1ba9e8c02e42053af877d99a3a3f1d19c82fc20ffa82301`.
+- The protected health snapshot binds to the exact commit and reports
+  `vercel_env=preview`, `database_env=preview`,
+  `safe_for_preview_mutation=false`, and email/SMS disabled.
+- A fresh ordinary headed-Chrome load then caused the same automatic PII-free
+  page-view request. At `2026-08-29T06:50:36Z`, the repaired Preview returned
+  HTTP 503 before persistence; browser evidence confirms `private, no-store`,
+  and Vercel runtime logs bind `POST /api/events 503` to the exact deployment.
+  Browser-only route interception was installed after that proof for every
+  remaining mutation surface, so subsequent visual navigation could not write.
+- Nine full-page captures were inspected: `/`, `/ask`, `/home-value`,
+  `/widget-preview`, and `/privacy` at 1440x1100, plus the first four routes at
+  390x844. All completed with no horizontal overflow or browser warning/error.
+  The only initially incomplete asset was the lazy header logo; it completed at
+  its expected 256x108 intrinsic size after the ordinary lazy-load delay.
+- The exact visual window contains no warning, error, or fatal runtime log.
+  After browser interception, the deployment recorded only expected GET/OPTIONS
+  traffic. Production remains unchanged at commit
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`, deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`, state READY.
 
 ## Consolidated-branch local evidence
 
@@ -25,7 +98,8 @@ WordPress pre-change rescue ref:
   server-owned conversion outcomes, Web Vitals, dedicated no-write interceptor,
   and exact application-origin checks. A query-only navigation into internal QA
   now tears down an already-loaded analytics runtime and reloads cleanly.
-- Focused integration/privacy/WordPress verification: 9 files / 77 tests pass.
+- Former-head integration/privacy/WordPress verification: 9 files / 77 tests
+  passed before exact PR #220 reconciliation.
 - Complete Node 24.18.0 release gate: system isolation, 14/14 safety checks,
   261 test files / 3,275 tests, strict typecheck, full ESLint, optimized Next.js
   15.5.21 build, and 95 active routes / 17 acknowledged duplicates pass.
@@ -51,9 +125,28 @@ WordPress pre-change rescue ref:
   the 123.24 KB staged candidate and all 636 commits with no leak. The migration
   diff is empty, and `.env.example` contains only the public configuration name
   plus safe comments.
-- Exact-head CI, immutable Vercel Preview, protected dispatcher, deployment-log,
-  dependency, and secret evidence remain pending until the merge commit is
-  pushed. Production and WordPress activation remain unchanged.
+- Fresh exact application-head CI, immutable Vercel Preview, protected
+  dispatcher, browser, deployment-log, dependency, and secret evidence pass as
+  recorded above. Production and WordPress activation remain unchanged.
+
+## Post-reconciliation hardening evidence
+
+- Browser-facing `POST /api/events` and `POST /api/experiments/event` now
+  require a present exact approved Origin; missing Origin fails with 403 before
+  rate limiting or canonical repository access. The shared origin helper was
+  deliberately left unchanged for existing server-to-server contracts.
+- Experiment requests reuse the established bounded ingress reader, require
+  `application/json`, cap both declared and streamed bodies at 4,096 bytes,
+  and validate the registered key shape, exact 64-hex subject key, event/lead
+  consistency, UUID, and bounded public-path surface before Neon access.
+- WordPress consent withdrawal now pushes a denied Consent Mode update,
+  expires only recognized Google measurement cookies on the current host and
+  brokerage domain, detaches the injected GTM script, preserves unrelated
+  cookies, and refuses a duplicate same-page runtime after re-allow.
+- Focused Node 24.18.0 verification passes 4 files / 46 tests. Strict
+  TypeScript and targeted ESLint pass. ZIP integrity and `git diff --check`
+  pass. The later Preview mutation regression passes 3 files / 35 tests, and
+  full exact application-head release, CI, Preview, and browser proof pass.
 
 ## Canonical WordPress bridge 1.2.0 consent repair candidate
 
@@ -70,7 +163,9 @@ WordPress pre-change rescue ref:
   request.
 - Behavioral coverage proves missing, deny, dismiss, unknown, malformed,
   wrong-container, and wrong-cookie states fail closed; explicit allow loads
-  one exact GTM runtime without duplication; an asynchronous allow is observed.
+  one exact GTM runtime without duplication; an asynchronous allow is observed;
+  and allow-to-deny revocation removes the script and Google cookies without
+  clearing unrelated cookies or duplicating a runtime on same-page re-allow.
 - Static security coverage rejects dynamic-code execution, HTML injection,
   cross-window messaging, and browser-navigation primitives in the loader.
 - The public preflight now recognizes only the canonical Basic Consent marker,
@@ -85,10 +180,10 @@ WordPress pre-change rescue ref:
 - Release archive:
   `output/release/ask-magic-mike-canonical-bridge-1.2.0.zip`.
   SHA-256:
-  `9b9534e7fdf078b60ed4f32c72fad93ed7632cf5702fc9a4fa58eefe26bf902c`.
-  The consolidation refresh changes only the README rollback instruction so it
-  does not recommend restoring the legacy pre-consent GTM bootstrap; source,
-  archive, and sidecar are verified together on the consolidated branch.
+  `9e8ea868281f2d3395afccdb37da063f16129471656cfd37dca47557043cc4eb`.
+  The consolidation refresh includes consent-revocation hardening and the
+  README rollback/acceptance contract; source, archive, and sidecar are
+  verified together on the consolidated branch.
   Preserved 1.1.0 and 1.0.0 rollback archives remain untouched.
 - No WordPress file, setting, page, form, cookie, cache, GTM/GA4 account,
   Production deployment, lead, notification, database row, or NellySelly
