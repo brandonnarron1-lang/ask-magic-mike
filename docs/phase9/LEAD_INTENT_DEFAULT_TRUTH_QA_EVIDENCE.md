@@ -9,9 +9,16 @@ Production mutation: none
 - Original PR #224 head: `01658f164752de88faefbcf27fcbe98921e6870d`.
 - Preserved remote rescue branch:
   `rescue/amm-pr224-pre-pr223-exact-seal-20260829-043332`.
-- Exact sealed parent PR #223 head:
+- Earlier exact sealed parent PR #223 head:
   `18be077b1b6b8a595af2bb5dbd4a94d736dad65c`.
-- Reconciliation merge: `0a8764d`.
+- Earlier reconciliation merge: `0a8764d`.
+- Previously sealed PR #224 head:
+  `5c75b8f919442c05b607eb666c5595023057d94d`.
+- Fresh remote rescue branch:
+  `rescue/amm-pr224-pre-pr223-accessibility-seal-20260829-1210`.
+- Accessibility-refreshed exact parent PR #223 head:
+  `1d893f4c23ca53a1b852a1953b953b40e6f997f3`.
+- Accessibility reconciliation merge: `614a67a`.
 - Final exact candidate identity, GitHub runs, Vercel deployment, artifact
   digests, and runtime evidence are bound in PR #224 after commit.
 
@@ -25,11 +32,12 @@ Production mutation: none
 | `Just planning` | exact answer retained | 24 months | timeline +0 | planning, not urgency |
 | Checked preapproval affirmation | `preapproval: true` | `true` | existing +10 | explicit evidence only |
 
-## Local pre-commit acceptance
+## Local reconciliation acceptance
 
 Exact Node `24.18.0`, pnpm `10.30.3`:
 
 - focused form/API/scoring matrix: 4 files / 48 tests passed;
+- strict TypeScript and targeted changed-surface ESLint passed;
 - reconciled full suite before the final added planning-horizon regression:
   263 files / 3,310 tests passed;
 - strict TypeScript, ESLint, Ask/Nelly isolation, release safety 14/14,

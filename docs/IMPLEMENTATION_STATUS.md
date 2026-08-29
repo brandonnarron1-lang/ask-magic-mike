@@ -45,6 +45,34 @@ Updated 2026-08-29.
 - Detailed evidence: `docs/phase9/SOCIAL_PREVIEW_WIDE_CARD.md` and
   `design-qa.md`.
 
+## Phase 9 release-authority deduplication — 2026-08-29
+
+- **Authenticated disposition:** GitHub reports PRs #187 and #212 closed and
+  unmerged with their source branches intact. Their final owner comments record
+  supersession by PRs #225 and #221 respectively; no branch or evidence was
+  deleted.
+- **Ancestry proof:** exact PR #212 head
+  `758154ca73b64f24f2df8f183ba8b3f6f82f769a` is an ancestor of current PR
+  #221 head `61e152cb7ce03fd1904a06f30435dbe7ef36c4e1`, which is an ancestor of
+  exact PR #225 head `f33c87f27bfcbbcad3b5566aefd80909d25303bb`.
+- **History-preserving refresh:** former PR #226 head
+  `ae666aa6c31ed3726155e110f065b64d4b445040` is preserved at
+  `rescue/amm-pr226-pre-pr225-parent-refresh-20260829-1249`. Exact PR #225 was
+  reconciled through normal merge
+  `954d66cfe629a9d14a73cd1d405ff9535b9de28b`; conflicts were limited to
+  additive implementation-status and QA ledgers.
+- **Authority boundary:** this Draft changes only seven documentation/test
+  files. It adds no application route, dashboard, writer, migration, provider,
+  CRM, publisher, consumer workflow, lead/message path, Production authority,
+  or NellySelly dependency. PR #210 remains the first ordered Production
+  candidate.
+- **Refreshed-parent local acceptance:** exact Node 24.18.0 passes the focused
+  release-authority contract 22/22, strict TypeScript, targeted ESLint, release
+  safety 14/14, deployable-source Ask/NellySelly isolation, Production
+  dependency audit, ancestry, and whitespace checks. Final branch-bound CI,
+  immutable Preview, protected no-write/browser QA, and runtime-log evidence
+  remain mandatory on the final pushed head.
+
 ## Phase 9 baseline and target readiness — 2026-08-29
 
 - **Production truth:** a read-only canonical Neon aggregate at
@@ -86,22 +114,26 @@ Updated 2026-08-29.
   and incomplete paid-channel cost baselines remain unmeasured; agent
   first-follow-up remains explicitly uninstrumented until agent-grain assignment
   evidence exists. All 42 contract keys are unique.
-- **Current acceptance:** PR #225 was reconciled onto exact sealed PR #224 head
-  `5c75b8f919442c05b607eb666c5595023057d94d` at merge commit
-  `0bb1a6d77d4daf830a4dc7681e3a3d5650332286`; code-bearing hardening head is
-  `1289244c44d0c336b4ed242293febe15d5b75914`, and sealed exact head is
-  `60599703cf8ac5e65794b696aefaebc6353bbdf0`. Exact Node 24.18.0 passes
-  deployable-source Ask/Nelly isolation, safety 14/14, 264 files / 3,324 tests,
-  strict typecheck, full ESLint, optimized 59-page build, 95 active routes / 17
-  acknowledged duplicates, doctor 43/43, zero known Production dependency
-  vulnerabilities, 668-commit and exact five-commit redacted gitleaks scans,
-  sealed-parent ancestry, whitespace, and focused security review. GitHub
-  Release Gate run `33245866380` and replacement hosted Preview run
-  `33246030523` pass on the exact head. Immutable Preview
-  `https://ask-magic-mike-mgs7m26oa-eyes-up-industries.vercel.app` passes 18
-  read-only checks, six deliberate mutation skips, 15/15 browser checks,
-  desktop/mobile visual review, and runtime review with no warning, error, or
-  fatal logs. Production remains unchanged at
+- **Current acceptance:** the previously sealed PR #225 head
+  `60599703cf8ac5e65794b696aefaebc6353bbdf0` is preserved at
+  `rescue/amm-pr225-pre-pr224-parent-refresh-20260829-1224`. Exact sealed PR
+  #224 head `2effb45e2a324c25875dcf7d24019eae8dfdad38` was merged without rebase,
+  reset, force push, or conflict at reconciliation commit
+  `eab49cbe2926f3726d289473c308363e1f03de9e`. The refreshed tree retains the
+  inherited lead-intent truth and keyboard-accessible channel-economics region.
+  Final exact head `f33c87f27bfcbbcad3b5566aefd80909d25303bb`
+  passes branch-bound GitHub Release Gate `33263356616`: Node 24, doctor
+  43/43, safety 14/14, 264 files / 3,324 tests, strict typecheck, full ESLint,
+  optimized 59-page build, and 95 active routes / 17 acknowledged duplicates.
+  Immutable Preview `dpl_9MNpd2ETo9Zgdd25NKfgue2ScQ7U` is READY at
+  `https://ask-magic-mike-fuedubfue-eyes-up-industries.vercel.app`; protected
+  run `33263505472` passes 18 read-only checks, six deliberate mutation skips,
+  15/15 browser checks, responsive before/after review, and exact-deployment
+  runtime inspection with zero warning, error, fatal, or mutating-method log.
+  The only 5xx is the expected read-only Preview SLA refusal. The hosted
+  browser contract scopes legacy economics labels to their visible section and
+  directly exercises the collapsed readiness audit, avoiding duplicate-text
+  ambiguity. Production remains unchanged at
   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`.
 - Detailed design: `docs/phase9/BASELINE_TARGET_READINESS.md`.
 
@@ -120,11 +152,15 @@ Updated 2026-08-29.
   persists as `null`, and cannot earn seller A-grade urgency. Explicit
   planning-horizon answers retain their compatibility mapping; `not sure`,
   `unknown`, and unrecognized text do not become 24 months.
-- **Current acceptance:** after reconciliation onto exact sealed PR #223 head
-  `18be077b1b6b8a595af2bb5dbd4a94d736dad65c`, exact Node 24.18.0 focused
-  acceptance passes 4 files / 48 tests. Final exact-head local, CI, immutable
-  Preview, protected browser, security, isolation, and runtime-log evidence is
-  bound to PR #224 before any promotion.
+- **Current acceptance:** the previously sealed PR #224 head
+  `5c75b8f919442c05b607eb666c5595023057d94d` is preserved at
+  `rescue/amm-pr224-pre-pr223-accessibility-seal-20260829-1210`. The candidate
+  now inherits exact accessibility-refreshed PR #223 head
+  `1d893f4c23ca53a1b852a1953b953b40e6f997f3` through merge `614a67a` without
+  a force push. Exact Node 24.18.0 focused acceptance passes 4 files / 48 tests,
+  strict TypeScript and targeted ESLint. Final exact-head CI, immutable Preview,
+  protected browser, security, isolation, and runtime-log evidence is bound to
+  PR #224 before any promotion.
 - **Authority boundary:** no existing Production row is rewritten; no
   migration, lead/event, communication, provider, WordPress, DNS, deployment,
   publication, deletion, or NellySelly action occurred. Production remains
