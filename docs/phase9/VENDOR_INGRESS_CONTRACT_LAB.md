@@ -4,7 +4,16 @@ Date: 2026-08-24
 
 Branch: `codex/phase9-vendor-ingress-contract-lab-20260824`
 
-Stacked base: Draft PR #216 exact head `a6098ab4ee7a13d024bafc08264628e2691a8e06`
+Stacked base: sealed Draft PR #216 exact head
+`211485df28fc818ab783ed357df8486f1460d5e2`
+
+Prior PR #217 head `d04984b4d162f13c79af261beb55a82f15a86b80`
+is preserved at
+`rescue/amm-pr217-pre-pr216-exact-seal-20260828-234940`. The sealed parent was
+merged without force push at application head
+`e616170657861c3dd83fae43b28bef9cf89506af`; product files merged automatically
+and only additive release ledgers required manual reconciliation. All proof from
+the former head is historical until repeated on the current exact PR head.
 
 ## Decision
 

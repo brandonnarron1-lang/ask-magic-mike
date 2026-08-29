@@ -6,9 +6,21 @@ Draft PR: [#219](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/219)
 
 Branch: `codex/phase9-organic-search-ingress-20260824`
 
-Exact base: sealed Draft PR #218 head `cd087e5c5c0fda82a3175b86b550c966120eb2ab`
+Exact base: sealed Draft PR #218 head `f065d8801bec295c99185d846ff4bc38de2a0a6f`
 
 Latest code-bearing commit: `5552a1a77f17f94656952126c69fb003e11fbf95`
+
+Pre-refresh PR #219 head `5486bed20272d2a661bc28a0e3a4a4576b2cb11f`
+is preserved at
+`rescue/amm-pr219-pre-pr218-exact-seal-20260829-004949`. Exact PR #218 was
+merged without force push at reconciliation head
+`f2754d0e1858c1afcf639977051f3488ab591f89`. The prior CI, Preview, browser,
+PostgreSQL, visual, and runtime evidence below remains historical until the
+resulting exact GitHub PR head repeats the complete proof. Reconciled head
+`5d598cc2228b6564af883a9716aedf1aa28cb2fb` has now passed the complete local
+Node 24 and disposable PostgreSQL 17 proof. Exact-head CI, immutable Preview,
+protected browser/visual, and runtime-log evidence remain pending after the
+documentation-only evidence seal.
 
 ## Decision
 
@@ -146,11 +158,13 @@ fails closed before any write.
 
 ## Release order and exact gates
 
-PR #219 is stacked after PR #218 and its full ordered predecessor chain. It may
-not move ahead of the current first gate:
+PR #209 is accepted and its durability gate is consumed and exhausted. PR #219
+is stacked after PR #218 and its full ordered predecessor chain. It may not
+move ahead of the current first pending candidate, PR #210, whose separate gate
+is:
 
 ```text
-APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT
+APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT
 ```
 
 After every predecessor is released, PR #219 is refreshed onto exact `main`,
@@ -195,13 +209,16 @@ a separate destructive-data decision.
 
 ## Current release decision
 
-**Sealed Draft stacked Preview candidate only.** Code head
-`5552a1a77f17f94656952126c69fb003e11fbf95` passed Release Gate run
-`32801867752`, deployed `READY` as immutable Preview
-`dpl_FcBUJ7hDxKu7oeMpXb8UuVHpkkCz`, and passed protected branch-native QA run
-`32801994614`. The protected verifier recorded 17 pass / 6 intentional skip /
-0 fail; all 10 browser cases passed; release doctor reported 43 pass / 0 fail /
-0 skip; and launch authority was `PREVIEW_READY` with writes disabled.
+**Refreshed Draft stacked candidate only.** Reconciled head
+`5d598cc2228b6564af883a9716aedf1aa28cb2fb` passes the complete local Node 24,
+security, isolation, dependency, secret-history, and disposable PostgreSQL 17
+proof. The historical code head
+`5552a1a77f17f94656952126c69fb003e11fbf95` passed its earlier Release Gate,
+immutable Preview, protected no-write browser, visual, PostgreSQL, and runtime
+checks. Those remote results do not authorize or prove the refreshed exact
+head. Fresh exact-head CI, immutable Preview, protected no-write browser/visual
+QA, and exact-window runtime logs are mandatory after the documentation-only
+evidence seal before the PR #219 gate can be requested.
 
 No Production migration, environment change, merge, deployment, Search Console
 access, import, publication, lead action, message, WordPress/DNS change,

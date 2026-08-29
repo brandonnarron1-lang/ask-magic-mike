@@ -1,6 +1,6 @@
 # Known Limitations — Ask Magic Mike
 
-Updated 2026-08-23. This document records the current Neon/Resend/Web Push
+Updated 2026-08-28. This document records the current Neon/Resend/Web Push
 system, not the superseded Supabase/mock-email/Twilio-era architecture.
 
 ## 1. Demand and measurement
@@ -19,13 +19,13 @@ rates remain low-confidence until genuine traffic produces adequate samples.
 Deterministic routing and scoring continue to work; AI summaries and statistical
 recommendations are advisory and never silently assign a lead.
 
-### Field-performance telemetry is prepared, not yet active
+### Field-performance telemetry is active but not decision-grade yet
 
-The atomic PR #209 candidate can collect privacy-minimized LCP, INP, and CLS
-only after its Production gate. Preview is intentionally silent and current
-Production has no observations from this reporter. Browser headers are not
-authentication, so future aggregates remain rate-limited, deduplicated,
-sample-labeled, and advisory rather than treated as transaction truth.
+PR #209 activated the privacy-minimized LCP, INP, and CLS reporter. There is not
+yet enough genuine Production traffic to treat those observations as a stable
+baseline. Browser headers are not authentication, so aggregates remain
+rate-limited, deduplicated, sample-labeled, and advisory rather than
+transaction truth.
 
 ## 2. Messaging and staff alerts
 
@@ -69,10 +69,11 @@ existence of an entry.
 
 ### Facebook crawler access is constrained on selected Our Town URLs
 
-The hosting WAF blocks FacebookExternalHit on selected WordPress paths. Use
-AskMagicMike.com links as the current social fallback. Any exception must name
-the exact managed rule, path, and GET/HEAD methods; global bot protection must
-not be weakened.
+The server-global Apache authorization policy blocks FacebookExternalHit on
+selected WordPress paths. The account-level `.htaccess` trial was ineffective
+and fully rolled back. Use AskMagicMike.com links as the current social
+fallback; the remaining correction requires a root/WHM per-vhost rule limited
+to the reviewed public paths and GET/HEAD methods.
 
 ## 4. Operator identity and private entry point
 
@@ -107,16 +108,15 @@ securely. CSV export remains available with audit logging.
 
 ### Current release state
 
-Current accepted Production is PR #195 merge
-`b450b41c66c6740bd20571cdbe7d8caf82e92d5e` on deployment
-`dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Draft PR #209 is the sole current
+Current accepted Production is PR #209 merge
+`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Draft PR #210 is the next ordered
 application candidate. It does not authorize an external placement, provider
 action, message, migration, or publication.
 
-Current Production returns healthy public pages but does not yet prove the
-durable limiter contract that PR #209 requires. Candidate monitoring therefore
-reports 8/9 until the purpose-specific Production secret and matching code are
-released together under the exact gate.
+Current Production proves every durable limiter capability and the dedicated
+secret contract; strict monitoring passes 9/9. PR #210 is limited to canonical
+redirect consolidation and must receive its own fresh exact-head proof and gate.
 
 ### Prepared content is not published content
 
@@ -153,8 +153,8 @@ backup-first, identity, role, hash, and postflight interlocks.
 
 | Priority | Action | Gate |
 |---|---|---|
-| 1 | Complete optional Neon-attested synthetic Preview mutation and cleanup proof | Exact Preview-mutation approval |
-| 2 | Release atomic PR #209 with the dedicated durability secret and matching exact-head evidence | Exact Production gate |
+| 1 | Complete fresh exact-head PR #210 redirect/attribution Preview proof | No Production authority |
+| 2 | Release PR #210 only after its separate exact gate | Canonical-alias Production gate |
 | 3 | Publish one approved zero-spend placement and record native proof | Channel-specific approval |
 | 4 | Activate Mike's account and enroll each owner's Web Push device | Per-person takeover/test approval |
 | 5 | Approve consent wording before expanding WordPress forms | Mike/BIC approval |
