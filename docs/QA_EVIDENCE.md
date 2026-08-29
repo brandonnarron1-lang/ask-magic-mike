@@ -1,54 +1,142 @@
 # QA Evidence
 
-## Phase 9 funnel-event identity-integrity refresh — 2026-08-24
+## Phase 9 marketing-spend ingress refresh — 2026-08-29
+
+- Draft PR #218 reuses the canonical growth schema, Growth Command Center,
+  audited spend ledger, and safe-disabled import gate after exact sealed Draft
+  PR #217 `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf`.
+- Former PR #218 head `cd087e5c5c0fda82a3175b86b550c966120eb2ab`
+  is preserved at
+  `rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928`; exact-parent merge
+  head is `693af26f3fb536f62784b475cbbebebfde28ff9f`.
+- Application, API, migration, and test files merged automatically. Conflicts
+  were limited to two additive release-history ledgers; no parser,
+  persistence, SQL, route, RBAC, workbench, or browser-test file required
+  manual conflict resolution.
+- Former-head local, disposable PostgreSQL, CI, Preview, browser, visual, and
+  runtime-log proof is historical. Fresh exact-head proof is mandatory before
+  the separate migration/merge/deploy gate.
+- Exact-parent code-bearing/reconciliation head
+  `894643a60bd9fb50b441dccb3d2d3d8e6b5c805b` passes 6 focused files / 47
+  tests, all 247 files / 3,184 tests, strict types before and after build, lint,
+  optimized 55-page build, 89/17 routes, doctor 43/43, safety 14/14, isolation,
+  dependency audit, 651-commit gitleaks, ancestry, whitespace, and focused
+  security review on Node 24.18.0.
+- A fresh disposable PostgreSQL 17.11 cluster applied 35 migrations and passed
+  the transaction, role-denial, immutability, replay, revision, malformed-date,
+  identity-conflict, and rollback contract. The stopped cluster was moved to
+  Trash; no synthetic row remained before shutdown.
+- No Production, environment, Neon object or row, spend, lead, message,
+  provider, campaign/budget, WordPress, DNS, publication, purchase, deletion,
+  or NellySelly action occurred.
+- Full scope:
+  `docs/phase9/MARKETING_SPEND_INGRESS_QA_EVIDENCE.md`.
+
+## Phase 9 vendor-ingress contract-lab refresh — 2026-08-28
+
+- Draft PR #217 reuses the existing vendor-neutral normalizer after exact
+  sealed Draft PR #216 `211485df28fc818ab783ed357df8486f1460d5e2`.
+- Former PR #217 head `d04984b4d162f13c79af261beb55a82f15a86b80`
+  is preserved at
+  `rescue/amm-pr217-pre-pr216-exact-seal-20260828-234940`; exact-parent
+  application head is `e616170657861c3dd83fae43b28bef9cf89506af`.
+- Product application files merged automatically. Conflicts were limited to
+  additive release-history ledgers; no provider contract, normalizer, route,
+  UI, or test file required manual conflict resolution.
+- Security review confirmed server-side `growth:manage` enforcement, strict
+  same-origin POST handling, bounded JSON, fixed profile IDs, private response
+  headers, React escaping, constant-time comparisons, and no database/network
+  client or raw-payload/signing-material response. Current first-party Follow
+  Up Boss and Google documentation still matches the implemented synthetic
+  contract examples.
+- Former-head local proof is historical. Exact-parent reconciliation head
+  `5721a62f40a0d2c63475ca43608be066dddb018a` passes 6 focused files / 46
+  tests, all 242 files / 3,153 tests, strict types before and after build, lint,
+  53-page build, 86/17 routes, doctor 43/43, safety 14/14, Ask/Nelly isolation,
+  dependency audit, 649-commit gitleaks, ancestry, whitespace, and clean-tree
+  proof on Node 24.18.0. Immutable Preview, protected no-write browser, and
+  runtime-log proof remain mandatory after the documentation-only seal.
+- No Production, environment, database, lead/event, message, provider,
+  WordPress, DNS, publication, spend, deletion, or NellySelly action occurred.
+- Full scope:
+  `docs/phase9/VENDOR_INGRESS_CONTRACT_LAB_QA_EVIDENCE.md`.
+
+## Phase 9 funnel-event identity-integrity refresh — 2026-08-28
 
 - Draft PR #216 reuses the established funnel/session UUID and canonical event
-  ledger after exact final Draft PR #215
-  `2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`.
-- Former PR #216 head `253480326312d42a159323176d69e87f47262921`
+  ledger after exact sealed Draft PR #215
+  `c53cec6043525b593b254c457efdbbe5a29c0520`.
+- Former PR #216 head `a6098ab4ee7a13d024bafc08264628e2691a8e06`
   is preserved at
-  `rescue/amm-pr216-pre-final-pr215-cutover-hygiene-20260824-180325`.
-- Product application code merged intact. The release harness retained PR
-  #216's stronger shared catch-all mutation interceptor and upgraded the
-  inherited endpoint-specific source assertion to that contract.
+  `rescue/amm-pr216-pre-pr215-exact-seal-20260828-231335`.
+- Product application code merged automatically. Conflicts were limited to
+  additive changelog/QA records and the executable release-authority test;
+  PR #216's stronger shared catch-all mutation interceptor remains intact.
 - Prior candidate local, CI, Preview, browser, and runtime-log evidence is
-  historical. Fresh exact-head Node 24, immutable Preview, protected no-write,
-  security, isolation, and zero-mutation runtime proof are required.
+  historical. Exact application/parent-refresh head
+  `70198a7bb8467ac741b3c0977bd0ed95b8b5dbda` passed 12 focused files / 89
+  tests, all 239 files / 3,137 tests, typecheck, lint, 52-page build, 84/17
+  routes, doctor 43/43, safety 14/14, Ask/Nelly isolation, dependency audit,
+  647-commit gitleaks, and whitespace.
+- GitHub gate `33231179999` passed with artifact `9708564416`. Immutable
+  Preview `dpl_52wRTaBSYs1d6rGKmtMmetB8V2Cs` is READY at
+  `https://ask-magic-mike-h7ylc9by3-eyes-up-industries.vercel.app`.
+- Exact-branch protected run `33231584499` passed 17 read-only checks, six
+  deliberate mutation skips, 6/6 intercepted browser checks, `GO`, and
+  `PREVIEW_READY`; artifact `9708684727` has digest
+  `sha256:b48ce2c006ceefd217f6f6e622b7514bb17842be19ec63e7b0a63f38db9e232f`.
+- Four desktop/mobile Home Value and Ask PNGs passed manual containment and
+  readability review. Direct Preview-log filters returned zero
+  POST/PUT/PATCH/DELETE and zero warning/error/fatal records for the protected
+  window. The evidence-only seal must repeat proof on its resulting exact head.
 - No Production, database, lead/event, message, provider, WordPress, DNS,
   publication, spend, deletion, or NellySelly action occurred.
 - Full scope:
   `docs/phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY_QA_EVIDENCE.md`.
 
-## Phase 9 home-value completion-integrity refresh — 2026-08-24
+## Phase 9 home-value completion-integrity refresh — 2026-08-28
 
 - Draft PR #215 reuses the canonical Home Value funnel and lead command after
-  exact final Draft PR #214 `94e3d66190df138d42c1321adfeb0cefb0478545`.
-- Former PR #215 head `0e47db8780c7257f0d445d75e034aacd535c06a4`
+  exact sealed Draft PR #214 `81a2c7544318d630437ed3e86cbea029c5c9b57d`.
+- Former PR #215 head `2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`
   is preserved at
-  `rescue/amm-pr215-pre-final-pr214-cutover-hygiene-20260824-174316`.
-- The parent merge conflicted only in additive changelog and release-order
-  documentation. No funnel, API, lead, notification, provider, or analytics
-  application file required manual conflict resolution.
-- Prior candidate local, CI, Preview, and browser evidence is historical. Fresh
-  exact-head Node 24, immutable Preview, protected no-write, write-intercepted
-  interaction, security, isolation, and deployment-log proof are required.
-- No Production, database, lead/event, message, provider, WordPress, DNS,
-  publication, spend, deletion, or NellySelly action occurred.
+  `rescue/amm-pr215-pre-pr214-exact-seal-20260828-224229`.
+- The parent merge conflicted only in additive changelog, QA-evidence, and
+  release-authority records. No funnel, API, lead, notification, provider, or
+  analytics application file required manual conflict resolution.
+- Exact application/parent-refresh head
+  `eff8fc04449fab4fd34cd0fb69735e6787d0b382` passed 236 files / 3,108 tests,
+  typecheck, lint, 52-page build, 84/17 routes, doctor 43/43, safety 14/14,
+  Ask/Nelly isolation, dependency audit, 646-commit gitleaks, and whitespace.
+- GitHub gate `33229869967` and immutable Preview
+  `dpl_8qNH7Ry1gSPqdSwHrRNM3Y9LHhZR` passed for that exact head. Protected run
+  `33230015801` passed 17 read-only checks, six intentional mutation skips,
+  3/3 intercepted browser checks, `GO`, and `PREVIEW_READY`.
+- Current-run 1280 × 720, 390 × 844, and 320 × 700 visual checks found no
+  horizontal overflow. Empty Continue focused the address input and announced
+  a specific inline alert without a lead request.
+- Preview logs recorded four page-load telemetry POSTs to `/api/events` and
+  `/api/experiments/event`; no `/api/leads`, notification, webhook, message,
+  or provider request occurred, and all 49 records were info-level.
+- No Production, schema, lead, message, provider, WordPress, DNS, publication,
+  spend, deletion, or NellySelly action occurred. The evidence-only seal must
+  repeat exact-head CI/Preview proof before the later release gate.
 - Full scope:
   `docs/phase9/HOME_VALUE_COMPLETION_INTEGRITY_QA_EVIDENCE.md`.
 
-## Phase 9 lead-alert brand identity v3 refresh — 2026-08-24
+## Phase 9 lead-alert brand identity v3 refresh — 2026-08-28
 
 - Draft PR #214 reuses the canonical notification renderer, approved Mike/Our
   Town identity assets, existing urgency backgrounds, protected Message Review
   Studio, outbox, and provider controls; it does not create a notification or
   lead system.
-- Former PR #214 head `3ac0885a6f19fc479266457cff760ef836094470` is
+- Former PR #214 head `94e3d66190df138d42c1321adfeb0cefb0478545` is
   preserved at
-  `rescue/amm-pr214-pre-final-pr213-cutover-hygiene-20260824-172407`.
-- Exact final PR #213 parent
-  `3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea` merged with conflicts limited to
-  additive changelog history; no alert-renderer application file conflicted.
+  `rescue/amm-pr214-pre-pr213-exact-seal-20260828-222353`.
+- Exact sealed PR #213 parent
+  `d2a1bf01d0962e07dd1e460acd4c295e145cf6a8` merged with conflicts limited to
+  additive changelog and release-authority records; no alert-renderer
+  application file conflicted.
 - Prior candidate CI, Preview, and screenshot evidence is historical. Fresh
   exact-head Node 24, immutable Preview, protected no-write, no-send rendered
   acceptance, and deployment-log proof are required before the later gate.

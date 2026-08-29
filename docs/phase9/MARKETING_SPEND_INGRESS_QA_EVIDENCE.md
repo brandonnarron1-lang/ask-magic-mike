@@ -2,15 +2,71 @@
 
 Date: 2026-08-24
 Branch: `codex/phase9-spend-ledger-ingress-20260824`
-Base: `d04984b4d162f13c79af261beb55a82f15a86b80`
+Base: `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf`
+
+Refresh record: former PR #218 head
+`cd087e5c5c0fda82a3175b86b550c966120eb2ab` is preserved at
+`rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928`. Exact-parent merge head
+is `693af26f3fb536f62784b475cbbebebfde28ff9f`.
 
 ## Evidence boundary
 
-Evidence covers a protected, feature-gated spend-ingestion candidate. It uses
+The detailed evidence below was collected on the former head and is retained
+as historical regression context until repeated on the refreshed exact head.
+It covers a protected, feature-gated spend-ingestion candidate. It uses
 only synthetic local CSVs and a disposable PostgreSQL 17.11 cluster. No Neon
 branch, Production database, lead, provider account, campaign, budget, message,
 WordPress surface, DNS record, Vercel Production environment, purchase,
 deletion, or NellySelly system was touched.
+
+## Refreshed exact-parent local evidence — 2026-08-29
+
+Exact-parent code-bearing/reconciliation head:
+
+```text
+894643a60bd9fb50b441dccb3d2d3d8e6b5c805b
+```
+
+Application proof on Node 24.18.0:
+
+```text
+6 focused files / 47 tests PASS
+247 test files / 3,184 tests PASS
+strict TypeScript before and after build PASS
+full ESLint PASS
+Next.js 15.5.21 optimized build PASS — 55 generated pages
+route manifest PASS — 89 active / 17 acknowledged root-src duplicates
+release doctor PASS — 43/43
+release safety PASS — 14/14
+Ask Magic Mike / NellySelly isolation PASS
+Production dependency audit PASS — no known vulnerabilities
+gitleaks PASS — 651 commits / no leaks
+exact-parent ancestry and diff whitespace PASS
+```
+
+Focused Next.js, React, browser, API, and SQL review found no actionable
+security defect: server-side `growth:manage` authorization, exact same-origin
+POST checks, streamed request bounds, private response headers, React escaping,
+server-only environment reads, parameterized SQL, Production endpoint
+attestation, safe-disabled import authority, owner-only function execution, and
+append-only audit/receipt controls remain intact.
+
+Fresh disposable PostgreSQL proof:
+
+```text
+PostgreSQL 17.11 (Homebrew)
+35 migrations applied in lexical order
+supabase/tests/marketing_spend_ingress_pg17.sql PASS
+anon/authenticated/service_role function execution denied
+synthetic transaction ROLLBACK
+0 synthetic channels / 0 campaigns / 0 receipts retained
+```
+
+The stopped disposable cluster was moved to Trash after verification. No Neon,
+remote database, Production environment, spend, lead, provider, campaign,
+budget, message, WordPress, DNS, or NellySelly system was touched. Fresh
+exact-head GitHub, immutable Preview, authenticated no-commit visual, and
+runtime-log evidence remain mandatory after the documentation-only seal.
 
 ## Completed evidence
 
@@ -120,7 +176,7 @@ errors, and no secret-bearing browser import.
 commit 9cbbc5731c928f9fd98226b6757132cdf1fc2dca
 commit 8b7271ebef06e61368eb474e3be5d6cf2c8f1fa9
 commit ed02f26af99911253f398ec5c1448e183a5dd976
-exact base d04984b4d162f13c79af261beb55a82f15a86b80 is an ancestor
+historical exact base d04984b4d162f13c79af261beb55a82f15a86b80 is an ancestor
 release doctor 43 pass / 0 fail / 0 skip
 staged gitleaks 148.84 KiB / no leaks
 git diff --check PASS
@@ -204,6 +260,19 @@ provider call, database write, campaign action, or message occurred.
 PR #218 remains Draft, open, clean, and mergeable. Production remains on the
 previously verified deployment. No Production migration, environment change,
 merge, deployment, import, or provider action has been performed.
+
+The former-head evidence is not current merge/deploy authority. Fresh
+exact-head application, disposable PostgreSQL, CI, immutable Preview,
+protected no-commit browser/visual, and runtime-log proof remains mandatory.
+
+The separate release gate remains:
+
+```text
+APPROVE PHASE 9 MARKETING SPEND INGRESS MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT
+```
+
+It does not authorize a spend import, provider action, campaign/budget change,
+lead/message action, or any other pending release.
 
 ## Truth statement
 

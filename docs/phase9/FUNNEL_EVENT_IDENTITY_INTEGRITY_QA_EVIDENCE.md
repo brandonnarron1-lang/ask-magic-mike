@@ -1,6 +1,6 @@
 # Funnel-event identity integrity QA evidence
 
-Date: 2026-08-24
+Date: 2026-08-28
 
 Candidate branch:
 `codex/phase9-funnel-event-identity-20260824`
@@ -8,12 +8,12 @@ Candidate branch:
 Draft PR:
 [#216](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/216)
 
-Parent: exact Draft PR #215 head
-`2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`
+Parent: exact sealed Draft PR #215 head
+`c53cec6043525b593b254c457efdbbe5a29c0520`
 
 Immediately prior head preservation:
-`rescue/amm-pr216-pre-final-pr215-cutover-hygiene-20260824-180325` at
-`253480326312d42a159323176d69e87f47262921`.
+`rescue/amm-pr216-pre-pr215-exact-seal-20260828-231335` at
+`a6098ab4ee7a13d024bafc08264628e2691a8e06`.
 
 Earlier pre-refresh head preservation:
 `rescue/amm-pr216-pre-pr215-seal-sync-20260824-1353` at
@@ -25,11 +25,50 @@ Refreshed code-bearing head:
 No-write harness repair head:
 `90108d8b386a264ae8e536e6503043f79f7a14ae`.
 
-The final-parent refresh retained the stronger shared catch-all mutation
-boundary and upgraded PR #215's inherited endpoint-specific source test to
-that contract. All local, CI, Preview, browser, and runtime-log results below
-predating this refresh are historical until repeated on the current GitHub PR
-head.
+The exact-parent refresh merged all application files automatically and
+retained the stronger shared catch-all mutation boundary. Conflicts were
+limited to additive changelog/QA records and the executable release-authority
+test. All local, CI, Preview, browser, and runtime-log results below predating
+this refresh are historical until repeated on the current GitHub PR head.
+
+## Exact-parent application acceptance
+
+Exact application/parent-refresh head:
+`70198a7bb8467ac741b3c0977bd0ed95b8b5dbda`.
+
+- Focused identity, route, persistence, consent, Preview-interception, and
+  release-authority suite: 12 files / 89 tests passed.
+- Full Node 24 release bar: 239 files / 3,137 tests, strict TypeScript, ESLint,
+  optimized Next.js 15.5.21 build with 52 generated pages, 84 active / 17
+  acknowledged duplicate routes, doctor 43/43, safety 14/14, Ask/Nelly
+  isolation, no known Production dependency vulnerabilities, 647-commit
+  redacted gitleaks scan, and whitespace proof passed.
+- GitHub Release Gate
+  [#33231179999](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33231179999)
+  passed with artifact `9708564416` and digest
+  `sha256:aedb154485d8dd63fadfb227340988fea1a85dc9176689dde9a2c0f10651d36a`.
+- Immutable Preview deployment `dpl_52wRTaBSYs1d6rGKmtMmetB8V2Cs` is READY at
+  `https://ask-magic-mike-h7ylc9by3-eyes-up-industries.vercel.app`.
+- The default-branch bootstrap run `33231352049` passed 17 read-only checks and
+  three widget checks, but log inspection proved that its older workflow did
+  not execute the funnel spec. It is retained as valid partial evidence only.
+- Exact-branch protected run
+  [#33231584499](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33231584499)
+  is the authoritative result: 17 read-only passes, six deliberate mutation
+  skips, 6/6 widget/funnel browser checks, zero unexpected/flaky/skipped,
+  release-candidate `GO`, and `PREVIEW_READY`. Artifact `9708684727` has digest
+  `sha256:b48ce2c006ceefd217f6f6e622b7514bb17842be19ec63e7b0a63f38db9e232f`.
+- Four generated desktop/mobile Home Value and Ask captures were manually
+  inspected. Synthetic/intercepted states were readable, contained, and
+  consistent with the retained black/gold/teal visual system.
+- Direct Vercel runtime-log queries for POST, PUT, PATCH, and DELETE each
+  returned zero records for the protected window; warning, error, and fatal
+  queries also returned zero. No lead, event write, notification, provider,
+  or other first-party mutation escaped browser interception.
+- Production remained on commit
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. The evidence-only seal must repeat CI and
+  protected Preview proof on its resulting exact head.
 
 ## Design rejection evidence
 
