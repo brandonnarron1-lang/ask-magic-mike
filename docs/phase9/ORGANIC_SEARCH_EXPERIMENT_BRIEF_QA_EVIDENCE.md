@@ -140,7 +140,7 @@ Results before sealing:
 - protected local browser acceptance: desktop and mobile, 2/2 passed;
 - system isolation: passed; deployable source contains no NellySelly project identifier;
 - release safety: 14/14 passed;
-- full Vitest suite: 268 files / 3,321 tests passed;
+- full Vitest suite: 268 files / 3,351 tests passed;
 - strict TypeScript: passed;
 - full ESLint: passed;
 - Next.js 15.5.21 optimized Production build: passed;
@@ -151,9 +151,9 @@ Results before sealing:
 
 Secret evidence:
 
-- repository history: gitleaks 8.30.1 scanned 644 commits / approximately
-  16.11 MB with no leak; and
-- staged candidate: gitleaks scanned approximately 48 KB with no leak.
+- repository history: gitleaks 8.30.1 scanned 679 commits / approximately
+  16.38 MB with no leak; and
+- exact PR 230 parent delta: gitleaks scanned approximately 56 KB with no leak.
 
 The expected test-only durable-rate-limit warnings exercise fail-closed regression
 paths; they are not evidence of a current Production blocker. The accepted
@@ -180,8 +180,12 @@ React, and browser security boundaries:
   fragments, control characters, email-like paths, foreign hosts, and
   NellySelly pages before a brief can exist.
 
-The focused dangerous-sink scan found only the two pre-existing same-origin
-Preview/commit fetches. No new security finding remains open in this change.
+The focused dangerous-sink scan found the two pre-existing same-origin
+Preview/commit fetches, one user-initiated clipboard write of deterministic
+plain text, and immutable official-reference links. It found no HTML injection,
+dynamic execution, client secret read, storage, redirect, cross-origin request,
+or operator-controlled link destination. No security finding remains open in
+this change.
 
 ## Desktop, mobile, and accessibility acceptance
 
