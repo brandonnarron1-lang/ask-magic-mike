@@ -1,6 +1,6 @@
 # Funnel-event identity integrity QA evidence
 
-Date: 2026-08-24
+Date: 2026-08-28
 
 Candidate branch:
 `codex/phase9-funnel-event-identity-20260824`
@@ -8,12 +8,12 @@ Candidate branch:
 Draft PR:
 [#216](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/216)
 
-Parent: exact Draft PR #215 head
-`2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`
+Parent: exact sealed Draft PR #215 head
+`c53cec6043525b593b254c457efdbbe5a29c0520`
 
 Immediately prior head preservation:
-`rescue/amm-pr216-pre-final-pr215-cutover-hygiene-20260824-180325` at
-`253480326312d42a159323176d69e87f47262921`.
+`rescue/amm-pr216-pre-pr215-exact-seal-20260828-231335` at
+`a6098ab4ee7a13d024bafc08264628e2691a8e06`.
 
 Earlier pre-refresh head preservation:
 `rescue/amm-pr216-pre-pr215-seal-sync-20260824-1353` at
@@ -25,11 +25,11 @@ Refreshed code-bearing head:
 No-write harness repair head:
 `90108d8b386a264ae8e536e6503043f79f7a14ae`.
 
-The final-parent refresh retained the stronger shared catch-all mutation
-boundary and upgraded PR #215's inherited endpoint-specific source test to
-that contract. All local, CI, Preview, browser, and runtime-log results below
-predating this refresh are historical until repeated on the current GitHub PR
-head.
+The exact-parent refresh merged all application files automatically and
+retained the stronger shared catch-all mutation boundary. Conflicts were
+limited to additive changelog/QA records and the executable release-authority
+test. All local, CI, Preview, browser, and runtime-log results below predating
+this refresh are historical until repeated on the current GitHub PR head.
 
 ## Design rejection evidence
 

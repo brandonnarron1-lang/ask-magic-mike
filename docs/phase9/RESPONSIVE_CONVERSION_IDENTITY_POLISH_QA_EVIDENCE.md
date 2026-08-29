@@ -5,10 +5,27 @@ Date: 2026-08-24
 Candidate: Draft PR #213 on
 `codex/phase9-conversion-identity-polish-20260824`
 
-Parent: exact final Draft PR #211 head
-`5d566a4a14d4a7cb67175683fdf099e8d62747b7`
+Parent: exact sealed Draft PR #211 head
+`c5700eda5e32ff6ead9a985c86b811a3c46e1e66`
 
-## Screenshot-first audit
+## Current PR #211 exact-seal refresh — 2026-08-28
+
+- Preserved prior PR #213 head
+  `3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea` at remote rescue branch
+  `rescue/amm-pr213-pre-pr211-exact-seal-20260828-215231`.
+- Merged exact sealed PR #211 head
+  `c5700eda5e32ff6ead9a985c86b811a3c46e1e66` while retaining the responsive
+  header implementation and all upstream accepted-Production, redirect, Ask,
+  keyboard, and no-write contracts once.
+- Application files merged without manual resolution. Conflicts were limited
+  to additive changelog and executable release-authority records.
+- All evidence below predates this refresh and is historical until fresh
+  exact-head Node 24, immutable Preview, screenshot-first responsive audit,
+  browser interaction, and no-write runtime proof pass.
+- No Production, environment, database, lead/event, notification, WordPress,
+  DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
+## Historical screenshot-first audit
 
 The exact PR #209 Preview was inspected before implementation at:
 
