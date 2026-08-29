@@ -1,6 +1,6 @@
 # Notification Operations Truth QA Evidence
 
-Date: 2026-08-29  
+Date: 2026-08-29
 Status: local implementation evidence; remote exact-head proof pending
 
 Draft PR: [#234](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/234)
@@ -54,7 +54,27 @@ Result:
   idempotency, bounded retry, concurrent claim, reassignment, Preview no-send,
   recipient, SMS, and provider-mode safety.
 
-## Pending exact-head proof
+## Complete local release proof
+
+The final application and documentation candidate passes:
+
+- deployable-source Ask Magic Mike / NellySelly isolation;
+- 14/14 release-safety controls;
+- all 270 test files / 3,366 tests;
+- strict TypeScript;
+- full repository ESLint;
+- optimized Next.js 15.5.21 build with 59 generated static pages;
+- route manifest with 95 active routes and 17 acknowledged root/src wrappers;
+- release doctor: 43 pass / 0 fail / 0 skip;
+- Production dependency audit: no known vulnerability; and
+- redacted Gitleaks exact range scan: two candidate commits, no leak.
+
+The local shell uses Node 26.5.1 while the repository requires Node 24.x.
+GitHub's exact-head Node 24 release gate remains the runtime authority. The
+local release-candidate report is intentionally `NO-GO` only because protected
+Preview QA has not yet been attached; all other local prerequisites pass.
+
+## Pending exact-head remote proof
 
 - Complete local release gate.
 - Redacted diff/history secret scan.

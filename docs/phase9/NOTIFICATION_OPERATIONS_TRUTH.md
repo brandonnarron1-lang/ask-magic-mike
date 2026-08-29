@@ -1,6 +1,6 @@
 # Phase 9 Notification Operations Truth
 
-Date: 2026-08-29  
+Date: 2026-08-29
 Status: reviewed local candidate; no Production authority
 
 ## Decision
