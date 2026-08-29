@@ -46,6 +46,17 @@ files named in the script. The committed JPEG is canonical: another host must
 not silently substitute fallback fonts. The script prints output dimensions,
 size, and SHA-256 lineage and contains no network or provider call.
 
+## Parent-refresh boundary
+
+Final sealed PR #226 head
+`1a912d29e608d872a84d70c7563e91134d369741` was merged normally into this
+Draft through reconciliation commit
+`89b57a7d16beb4f1c157d2f7fca6e49982623f10`. The former PR #227 head
+`cf92b9cb64a7cc5b70c98d629cc86d2289fbfedb` is preserved at
+`rescue/amm-pr227-pre-pr226-parent-refresh-20260829-131437`. Conflicts were
+limited to additive status/evidence ledgers; the exact 17-file feature delta,
+approved source assets, output JPEG hash, and rollback surface remain unchanged.
+
 ## Current crawler boundary
 
 The 2026-08-28 live matrix remains 40/42. AskMagicMike.com returns 200 to the

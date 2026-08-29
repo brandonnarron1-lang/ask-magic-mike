@@ -5,10 +5,13 @@ Decision date: 2026-08-29
 Canonical repository: `brandonnarron1-lang/ask-magic-mike`
 
 Release position: stacked on exact sealed Draft PR #227 head
-`cf92b9cb64a7cc5b70c98d629cc86d2289fbfedb`. Original PR #228 head
-`c755764846a3aa2708def5c47cc36e6fa700941d` is preserved at
-`rescue/amm-pr228-pre-pr227-exact-seal-20260829-0636`; reconciliation used a
-normal merge, not a rebase or force-push.
+`ee1dd462665e423c17a69b6ab7d1c3a7a70a1409`. Former PR #228 head
+`b1bd4b2012c037f4a71806b449541cdcfdd758b6` is preserved at
+`rescue/amm-pr228-pre-pr227-parent-refresh-20260829-133619`; exact-parent
+reconciliation used normal merge
+`38a22f5627f2b8f7293d9f65bf3a4f27b7475044`, not a rebase or force-push. The
+earlier source rescue
+`rescue/amm-pr228-pre-pr227-exact-seal-20260829-0636` also remains intact.
 
 ## Decision
 
@@ -33,8 +36,8 @@ This closes a specific gap found in the reuse-first audit:
 The homepage now offers two explicit, user-controlled actions:
 
 1. `Share Ask Magic Mike` invokes the browser's native share chooser only from
-   the button click, only when `navigator.share` is available, and only when an
-   available `navigator.canShare` capability probe accepts the fixed packet.
+   the button click, only when both `navigator.share` and `navigator.canShare`
+   are available, and only when `navigator.canShare` accepts the fixed packet.
 2. `Copy referral link` copies the same fixed URL when Clipboard is available.
    If Clipboard is denied or unsupported, the visible read-only URL is focused
    and selected for manual copy.

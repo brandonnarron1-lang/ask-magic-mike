@@ -30,8 +30,34 @@
 - Added no publisher, provider, lead store, external send, database migration,
   Production mutation, or NellySelly dependency.
 
+## 2026-08-29 — PR #225 refresh onto exact sealed PR #224
+
+- Preserved the previously sealed PR #225 head
+  `60599703cf8ac5e65794b696aefaebc6353bbdf0` at
+  `rescue/amm-pr225-pre-pr224-parent-refresh-20260829-1224` before changing the
+  stacked candidate.
+- Merged exact sealed PR #224 head
+  `2effb45e2a324c25875dcf7d24019eae8dfdad38` without rebase, reset, force
+  push, or conflict at reconciliation commit
+  `eab49cbe2926f3726d289473c308363e1f03de9e`.
+- Retained PR #224's truthful blank lead-intent defaults and PR #223's named,
+  focusable, keyboard-scrollable channel-economics region while keeping PR
+  #225's baseline register read-only and target entry locked.
+- Exact Node 24.18.0 local acceptance passes 10 focused files / 99 tests,
+  strict TypeScript, targeted ESLint, release safety 14/14, sealed-parent
+  ancestry, and whitespace checks. Fresh exact-head GitHub, immutable Preview,
+  protected browser/visual, and runtime-log evidence remains mandatory.
+- No Production, environment, database row, target, lead/event, communication,
+  provider, WordPress/DNS, deployment, publication, deletion, or NellySelly
+  action occurred.
+
 ## 2026-08-29 — Lead-intent default truth candidate
 
+- Preserved the previously sealed PR #224 head
+  `5c75b8f919442c05b607eb666c5595023057d94d` at
+  `rescue/amm-pr224-pre-pr223-accessibility-seal-20260829-1210`, then merged
+  accessibility-refreshed PR #223 head
+  `1d893f4c23ca53a1b852a1953b953b40e6f997f3` without a force push.
 - Reused the current Seller and Buyer intake, canonical lead lifecycle command,
   deterministic scoring, and qualification logic instead of creating another
   form, lead store, router, or intelligence layer.
@@ -70,6 +96,9 @@
   close is reviewed.
 - Kept the Growth surface server-authorized, aggregate-only, read-only, and
   explicit that tracked contribution is not net income.
+- Made the intentionally wide channel-economics table an explicitly named,
+  keyboard-focusable scroll region with visible focus and arrow-key guidance;
+  protected browser acceptance now proves keyboard horizontal movement.
 - Former-head test and visual proof is historical until the refreshed exact
   head passes local, CI, immutable Preview, protected browser, security,
   isolation, and runtime-log acceptance.
