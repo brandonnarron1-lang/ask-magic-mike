@@ -1,15 +1,17 @@
 # QA Evidence
 
-## Release-authority deduplication — 2026-08-28
+## Release-authority deduplication — 2026-08-29
 
 - Authenticated GitHub evidence showed PRs #187 and #212 were both open Drafts,
   while current authority documents already described their replacement or
   consolidation.
 - Exact Git ancestry proves PR #212 head
   `758154ca73b64f24f2df8f183ba8b3f6f82f769a` is an ancestor of PR #221 head
-  `65eb466a2e7991364efe2db78044006ebcdf8b5d`; PR #221 is itself an ancestor of
-  current PR #225. Selected bridge source is byte-identical, while later
-  application files contain reviewed cumulative hardening.
+  `61e152cb7ce03fd1904a06f30435dbe7ef36c4e1`; current PR #221 is itself an
+  ancestor of exact PR #225 head
+  `f33c87f27bfcbbcad3b5566aefd80909d25303bb`. Selected bridge source is
+  byte-identical, while later application files contain reviewed cumulative
+  hardening.
 - PR #225 intentionally lacks PR #187's target page, target action, target
   repository, and KPI-target migration while retaining the new read-only
   baseline-readiness contract. PR #187 therefore cannot be a parallel release
@@ -18,9 +20,19 @@
   commits, rescue refs, migrations/packages, tests, evidence, and rollback
   assets remain recoverable. No branch was deleted or force-pushed.
 - The final Draft was reconciled onto sealed PR #225 through a normal branch
-  merge. No Production merge/deployment, environment, database, lead/event,
+  merge. Former PR #226 head `ae666aa6c31ed3726155e110f065b64d4b445040`
+  is preserved at
+  `rescue/amm-pr226-pre-pr225-parent-refresh-20260829-1249`; exact PR #225 was
+  merged at `954d66cfe629a9d14a73cd1d405ff9535b9de28b`. Conflicts were limited to
+  additive implementation-status and QA evidence. No Production
+  merge/deployment, environment, database, lead/event,
   communication, provider, WordPress/GTM/GA4, DNS, publication, spend,
   deletion, or NellySelly mutation occurred.
+- Exact Node 24.18.0 refreshed-parent checks pass the focused executable
+  authority contract 22/22, strict typecheck, targeted ESLint, release safety
+  14/14, deployable-source Ask/NellySelly isolation, Production dependency
+  audit with no known vulnerability, ancestry, and whitespace checks. These
+  local results are not substitutes for final exact-head GitHub/Preview proof.
 
 ## Phase 9 baseline and target readiness — 2026-08-29
 

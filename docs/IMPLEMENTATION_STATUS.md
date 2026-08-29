@@ -2,6 +2,34 @@
 
 Updated 2026-08-29.
 
+## Phase 9 release-authority deduplication — 2026-08-29
+
+- **Authenticated disposition:** GitHub reports PRs #187 and #212 closed and
+  unmerged with their source branches intact. Their final owner comments record
+  supersession by PRs #225 and #221 respectively; no branch or evidence was
+  deleted.
+- **Ancestry proof:** exact PR #212 head
+  `758154ca73b64f24f2df8f183ba8b3f6f82f769a` is an ancestor of current PR
+  #221 head `61e152cb7ce03fd1904a06f30435dbe7ef36c4e1`, which is an ancestor of
+  exact PR #225 head `f33c87f27bfcbbcad3b5566aefd80909d25303bb`.
+- **History-preserving refresh:** former PR #226 head
+  `ae666aa6c31ed3726155e110f065b64d4b445040` is preserved at
+  `rescue/amm-pr226-pre-pr225-parent-refresh-20260829-1249`. Exact PR #225 was
+  reconciled through normal merge
+  `954d66cfe629a9d14a73cd1d405ff9535b9de28b`; conflicts were limited to
+  additive implementation-status and QA ledgers.
+- **Authority boundary:** this Draft changes only seven documentation/test
+  files. It adds no application route, dashboard, writer, migration, provider,
+  CRM, publisher, consumer workflow, lead/message path, Production authority,
+  or NellySelly dependency. PR #210 remains the first ordered Production
+  candidate.
+- **Refreshed-parent local acceptance:** exact Node 24.18.0 passes the focused
+  release-authority contract 22/22, strict TypeScript, targeted ESLint, release
+  safety 14/14, deployable-source Ask/NellySelly isolation, Production
+  dependency audit, ancestry, and whitespace checks. Final branch-bound CI,
+  immutable Preview, protected no-write/browser QA, and runtime-log evidence
+  remain mandatory on the final pushed head.
+
 ## Phase 9 baseline and target readiness — 2026-08-29
 
 - **Production truth:** a read-only canonical Neon aggregate at

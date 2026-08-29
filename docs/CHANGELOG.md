@@ -12,6 +12,12 @@
   the current owner queue and canonical asset manifest. PR #210 remains the
   next ordered application candidate; the later ordered stack remains Draft.
 - Reconciled sealed PR #225 into this Draft with a normal branch merge. No
+  Former PR #226 head `ae666aa6c31ed3726155e110f065b64d4b445040`
+  remains preserved at
+  `rescue/amm-pr226-pre-pr225-parent-refresh-20260829-1249`; exact PR #225
+  head `f33c87f27bfcbbcad3b5566aefd80909d25303bb` was merged at
+  reconciliation commit `954d66cfe629a9d14a73cd1d405ff9535b9de28b`.
+  No rebase, force push, reset, or branch deletion occurred. No
   Production merge/deployment, environment, database, target, lead, message,
   provider, publication, spend, WordPress/DNS, deletion, or NellySelly action
   occurred.
