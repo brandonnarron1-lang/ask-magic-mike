@@ -13,9 +13,16 @@
   ingress transport, endpoint attestation, RBAC, audit ledger, spend contract,
   and safe-disabled organic-search contract. No parallel analytics product,
   database, dashboard, OAuth client, provider adapter, or publisher was added.
-- Former-head proof is historical pending fresh exact-head Node 24, disposable
-  PostgreSQL 17, immutable Preview, protected no-commit browser/visual,
-  security, isolation, and runtime-log verification.
+- Reconciled head `5d598cc2228b6564af883a9716aedf1aa28cb2fb`
+  passes isolation, safety 14/14, 252 files / 3,210 tests, strict types, lint,
+  optimized 57-page build, 92/17 routes, doctor 43/43, dependency audit,
+  653-commit gitleaks, exact-parent ancestry, whitespace, and focused security
+  review on Node 24.18.0.
+- A fresh disposable PostgreSQL 17.11 cluster applied all 36 migrations and
+  passed both spend and organic contracts with denied browser/legacy-role
+  execution and zero synthetic rows or receipts after rollback. Exact-head CI,
+  immutable Preview, protected no-commit browser/visual, and runtime-log proof
+  remain pending after the documentation-only evidence seal.
 - Changed no Production deployment, environment, Neon object or row, Search
   Console property, import, page, lead, message, provider, campaign/budget,
   WordPress surface, DNS, purchase, deletion, or NellySelly system.

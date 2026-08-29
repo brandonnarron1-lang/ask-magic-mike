@@ -16,10 +16,21 @@ Updated 2026-08-29.
   shared bounded ingress transport, endpoint attestation, `growth:manage`
   permission, and audit system. It adds no Google/provider connection,
   parallel database/dashboard, content publisher, lead path, or message path.
+- Reconciled head `5d598cc2228b6564af883a9716aedf1aa28cb2fb`
+  passes isolation, safety 14/14, 252 files / 3,210 tests, strict TypeScript,
+  ESLint, the optimized 57-page Next.js 15.5.21 build, 92/17 route proof,
+  release doctor 43/43, zero known Production dependency vulnerabilities,
+  653-commit gitleaks, exact-parent ancestry, whitespace, and focused security
+  review on Node 24.18.0.
+- A fresh disposable PostgreSQL 17.11 cluster applied all 36 migrations and
+  passed both spend and organic executable contracts. Execution remained
+  denied to anon, authenticated, and service roles; rollback left zero
+  synthetic rows or receipts. The stopped cluster was moved recoverably to
+  Trash and no remote database was connected.
 - PR #219 remains Draft with `GROWTH_SEARCH_IMPORT_ENABLED=false` and no
-  Production or import authority. Its prior local, PostgreSQL, CI, Preview,
-  browser, visual, and runtime evidence is historical until repeated on the
-  refreshed exact head.
+  Production or import authority. Fresh exact-head GitHub CI, immutable
+  Preview, protected no-commit browser/visual, and bounded runtime-log proof
+  remain mandatory after the documentation-only evidence seal.
 
 ## PR #218 downstream reconciliation — 2026-08-29
 

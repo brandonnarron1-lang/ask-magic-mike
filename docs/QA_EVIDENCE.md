@@ -14,9 +14,20 @@
   conflict. The existing spend-ingress parser, transport, and database-
   identity behavior remains represented by its regression suite and the
   combined Preview browser command retains both spend and organic scenarios.
-- Former-head local, disposable PostgreSQL, CI, Preview, browser, visual, and
-  runtime-log proof is historical. Fresh exact-head proof is mandatory before
-  the separate PR #219 migration/merge/deploy gate.
+- Reconciled head `5d598cc2228b6564af883a9716aedf1aa28cb2fb`
+  passes isolation, safety 14/14, all 252 files / 3,210 tests, strict types,
+  lint, optimized 57-page build, 92/17 routes, doctor 43/43, dependency audit,
+  653-commit gitleaks, ancestry, whitespace, and focused security review on
+  Node 24.18.0.
+- A fresh disposable PostgreSQL 17.11 cluster applied all 36 migrations and
+  passed both spend and organic executable contracts. Browser and legacy-role
+  function execution remained denied, every synthetic transaction rolled
+  back, and zero synthetic rows or receipts remained. The stopped cluster was
+  moved to Trash; no remote database was connected.
+- Former-head CI, Preview, browser, visual, and runtime-log proof remains
+  historical. Fresh exact-head remote proof is mandatory after the
+  documentation-only evidence seal and before the separate PR #219
+  migration/merge/deploy gate.
 - No Production, environment, Neon object or row, Search Console access,
   import, publication, lead, message, provider, campaign/budget, WordPress,
   DNS, purchase, deletion, or NellySelly action occurred.

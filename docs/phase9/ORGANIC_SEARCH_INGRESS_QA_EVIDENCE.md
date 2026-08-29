@@ -25,11 +25,60 @@ database, Search Console property, provider credential, page, lead, message,
 campaign, budget, WordPress/DNS surface, purchase, deletion, or NellySelly
 system was touched.
 
-The detailed results below are immutable historical proof for the pre-refresh
-head. They establish the feature contract but do not prove or authorize the
-current GitHub PR head. The refreshed branch must repeat every applicable local,
-PostgreSQL 17, exact-head CI, immutable Preview, browser, visual, and runtime-
-log check.
+The original detailed results below remain immutable historical proof for the
+pre-refresh head. Fresh local and PostgreSQL proof for the reconciled head is
+recorded next. Exact-head GitHub CI, immutable Preview, browser, visual, and
+runtime-log proof remain mandatory after the documentation-only evidence seal.
+
+## Fresh reconciled-head local seal — 2026-08-29
+
+Code-and-governance head `5d598cc2228b6564af883a9716aedf1aa28cb2fb`
+is an exact descendant of sealed PR #218
+`f065d8801bec295c99185d846ff4bc38de2a0a6f`. The exact-parent reconciliation
+merge has that PR #218 head as its second parent, and `git diff --check` is
+clean.
+
+```text
+Node 24.18.0
+Ask Magic Mike / NellySelly isolation PASS
+release safety PASS — 14/14
+full Vitest PASS — 252 files / 3,210 tests
+strict TypeScript PASS
+full ESLint PASS
+Next.js 15.5.21 optimized build PASS — 57 static-generation tasks
+route manifest PASS — 92 active / 17 acknowledged root-src duplicates
+release doctor PASS — 43/43
+Production dependency audit PASS — no known vulnerabilities
+gitleaks PASS — 653 commits / 16.24 MB / no leaks
+```
+
+Focused Next.js, React, browser, API, and SQL review found no actionable new
+security defect. The candidate retains server-side `growth:manage`, exact
+same-origin checks before authentication, bounded streamed input, private
+responses, React-escaped operator data, server-only environment access,
+parameterized SQL, exact Production endpoint attestation, disabled import
+authority, `SECURITY INVOKER`, owner-connected execution, revoked browser and
+legacy-role execution, immutable receipts, and atomic replay handling. The
+exact PR diff adds no unsafe HTML, dynamic code execution, browser storage, or
+cross-origin navigation sink.
+
+Fresh disposable database proof:
+
+```text
+PostgreSQL 17.11 (Homebrew)
+36 migrations applied in lexical order
+supabase/tests/marketing_spend_ingress_pg17.sql PASS
+supabase/tests/organic_search_ingress_pg17.sql PASS
+anon/authenticated/service_role execution denied for both import functions
+both synthetic transactions ROLLBACK
+0 synthetic channels / campaigns / spend rows / receipts retained
+0 synthetic organic signals / opportunities / receipts retained
+```
+
+The unexposed local cluster was stopped and moved recoverably to Trash at
+`amm-pr219-pg17.4uq7CJ-20260829-010146`. No Neon or other remote database was
+connected. A documentation-only evidence commit follows this proof; the full
+release gate and all remote proof must bind to that resulting exact head.
 
 ## Focused contract proof
 

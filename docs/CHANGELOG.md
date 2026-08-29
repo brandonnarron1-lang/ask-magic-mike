@@ -10,10 +10,16 @@
   reconciliation head `f2754d0e1858c1afcf639977051f3488ab591f89`.
   Product, API, migration, shared-ingress, route, and test files merged without
   conflict.
-- Retained the existing growth ledgers and controls; prior PR #219 proof is
-  historical pending fresh exact-head application, PostgreSQL, Preview,
-  protected no-commit browser, visual, security, isolation, and runtime-log
-  evidence.
+- Retained the existing growth ledgers and controls. Reconciled head
+  `5d598cc2228b6564af883a9716aedf1aa28cb2fb` passes isolation, safety 14/14,
+  252 files / 3,210 tests, strict types, lint, optimized 57-page build, 92/17
+  routes, doctor 43/43, dependency audit, 653-commit gitleaks, exact-parent
+  ancestry, whitespace, and focused security review on Node 24.18.0.
+- A fresh disposable PostgreSQL 17.11 cluster applied all 36 migrations and
+  passed both ingress contracts with denied browser/legacy-role execution and
+  zero synthetic residue after rollback. Exact-head CI, immutable Preview,
+  protected no-commit browser/visual, and runtime-log evidence remain pending
+  after the documentation-only evidence seal.
 - Production remains `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` /
   `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; no Production, environment, Neon, Search
   Console, import, publication, lead, message, provider, campaign/budget,

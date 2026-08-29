@@ -16,7 +16,11 @@ is preserved at
 merged without force push at reconciliation head
 `f2754d0e1858c1afcf639977051f3488ab591f89`. The prior CI, Preview, browser,
 PostgreSQL, visual, and runtime evidence below remains historical until the
-resulting exact GitHub PR head repeats the complete proof.
+resulting exact GitHub PR head repeats the complete proof. Reconciled head
+`5d598cc2228b6564af883a9716aedf1aa28cb2fb` has now passed the complete local
+Node 24 and disposable PostgreSQL 17 proof. Exact-head CI, immutable Preview,
+protected browser/visual, and runtime-log evidence remain pending after the
+documentation-only evidence seal.
 
 ## Decision
 
@@ -205,12 +209,16 @@ a separate destructive-data decision.
 
 ## Current release decision
 
-**Refreshed Draft stacked candidate only.** The historical code head
+**Refreshed Draft stacked candidate only.** Reconciled head
+`5d598cc2228b6564af883a9716aedf1aa28cb2fb` passes the complete local Node 24,
+security, isolation, dependency, secret-history, and disposable PostgreSQL 17
+proof. The historical code head
 `5552a1a77f17f94656952126c69fb003e11fbf95` passed its earlier Release Gate,
 immutable Preview, protected no-write browser, visual, PostgreSQL, and runtime
-checks. Those results do not authorize or prove the refreshed exact head. Fresh
-Node 24 CI, immutable Preview, protected no-write browser/visual QA, and exact-
-window runtime logs are mandatory before the PR #219 gate can be requested.
+checks. Those remote results do not authorize or prove the refreshed exact
+head. Fresh exact-head CI, immutable Preview, protected no-write browser/visual
+QA, and exact-window runtime logs are mandatory after the documentation-only
+evidence seal before the PR #219 gate can be requested.
 
 No Production migration, environment change, merge, deployment, Search Console
 access, import, publication, lead action, message, WordPress/DNS change,
