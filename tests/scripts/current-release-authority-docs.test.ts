@@ -190,6 +190,10 @@ const baselineReadinessGate =
   "APPROVE PHASE 9 BASELINE AND TARGET READINESS MERGE AND PRODUCTION DEPLOYMENT";
 const releaseAuthorityGate =
   "APPROVE PHASE 9 RELEASE AUTHORITY DEDUPLICATION MERGE";
+const gbpSquareAssetGate =
+  "APPROVE PHASE 9 GOOGLE BUSINESS PROFILE SQUARE ASSETS MERGE AND PRODUCTION DEPLOYMENT";
+const plannerSocialIdentityGate =
+  "APPROVE PHASE 9 REVIEW PLANNER SOCIAL IDENTITY MERGE AND PRODUCTION DEPLOYMENT";
 const pr210Rescue =
   "rescue/amm-pr210-pre-main-cutover-20260828-210054";
 const pr211Rescue =
@@ -369,6 +373,13 @@ describe("current release-authority documentation", () => {
     const pr224 = ownerQueue.indexOf("Draft PR [#224]", pr223 + 1);
     const pr225 = ownerQueue.indexOf("Draft PR [#225]", pr224 + 1);
     const pr226 = ownerQueue.indexOf("Draft PR [#226]", pr225 + 1);
+    const pr227 = ownerQueue.indexOf("Draft PR [#227]", pr226 + 1);
+    const pr228 = ownerQueue.indexOf("Draft PR [#228]", pr227 + 1);
+    const pr229 = ownerQueue.indexOf("Draft PR [#229]", pr228 + 1);
+    const pr230 = ownerQueue.indexOf("Draft PR [#230]", pr229 + 1);
+    const pr231 = ownerQueue.indexOf("Draft PR [#231]", pr230 + 1);
+    const pr232 = ownerQueue.indexOf("Draft PR [#232]", pr231 + 1);
+    const pr233 = ownerQueue.indexOf("Draft PR [#233]", pr232 + 1);
 
     expect(completedPr209).toBeGreaterThanOrEqual(0);
     expect(pr210).toBeGreaterThan(completedPr209);
@@ -388,6 +399,13 @@ describe("current release-authority documentation", () => {
     expect(pr224).toBeGreaterThan(pr223);
     expect(pr225).toBeGreaterThan(pr224);
     expect(pr226).toBeGreaterThan(pr225);
+    expect(pr227).toBeGreaterThan(pr226);
+    expect(pr228).toBeGreaterThan(pr227);
+    expect(pr229).toBeGreaterThan(pr228);
+    expect(pr230).toBeGreaterThan(pr229);
+    expect(pr231).toBeGreaterThan(pr230);
+    expect(pr232).toBeGreaterThan(pr231);
+    expect(pr233).toBeGreaterThan(pr232);
     expect(ownerQueue).not.toContain("Draft PR [#212]");
     expect(ownerQueue).toMatch(/PR #221\s+is the sole cross-domain candidate/i);
     expect(ownerQueue).toContain(canonicalAliasGate);
@@ -406,6 +424,13 @@ describe("current release-authority documentation", () => {
     expect(ownerQueue).toContain(leadIntentGate);
     expect(ownerQueue).toContain(baselineReadinessGate);
     expect(ownerQueue).toContain(releaseAuthorityGate);
+    expect(ownerQueue).toContain(gbpSquareAssetGate);
+    expect(ownerQueue).toContain(plannerSocialIdentityGate);
+    expect(assetManifest).toContain("PR #232");
+    expect(assetManifest).toContain("PR #233");
+    expect(currentState).toContain("#227 through #233");
+    expect(currentState).toMatch(/PR #233[\s\S]*current[\s\S]*Draft tail/i);
+    expect(currentState).not.toContain("Current ordered application Draft tail");
   });
 
   it("keeps superseded PRs #187 and #212 as preserved evidence without parallel authority", () => {

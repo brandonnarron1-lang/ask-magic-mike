@@ -2,6 +2,39 @@
 
 Updated 2026-08-29.
 
+## Phase 9 review planner social identity — 2026-08-29
+
+- **Observed defect:** the indexable `/plan` route declared the correct
+  canonical URL but inherited the homepage Open Graph URL because it was the
+  lone public route still using a partial route-local metadata object.
+- **Reuse decision:** the route now uses the established
+  `publicPageMetadata` helper with `path: "/plan"`; no route, component, visual
+  system, social card, analytics contract, lead path, or planner behavior was
+  rebuilt.
+- **Result:** canonical and `og:url` now both resolve to
+  `https://www.askmagicmike.com/plan`; title, description, robots, Twitter
+  metadata, and the canonical Ask Magic Mike card remain aligned.
+- **Lineage:** exact parent is sealed PR #232 head
+  `2687f98a26cb05c309136cacc136890f16d15ea8`. Runtime-fix head
+  `90534b548244ce9aae38cc7f16dea3745d0cc5ee` is preserved at
+  `rescue/amm-pr233-pre-authority-reconciliation-20260829-2105` before the
+  release-authority documentation reconciliation.
+- **Acceptance:** the first sealed head passed 269 files / 3,362 tests, strict
+  typecheck, full ESLint, optimized 59-page build, 14/14 release safety, and
+  protected Preview HTTP/metadata proof on deployment
+  `dpl_6kWfXipnQBEcmxa9vrP9ndnvesQc`. Final exact-head CI and protected Preview
+  evidence must be repeated and pinned in PR #233 after this documentation
+  reconciliation.
+- **Authority boundary:** Production remains
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. PR #210 remains the first ordered
+  application candidate. This tail cannot leapfrog any predecessor and adds no
+  migration, provider, WordPress, publication, lead/message, spend, deletion,
+  or NellySelly action.
+- Decision and evidence:
+  `docs/phase9/PLAN_SOCIAL_IDENTITY.md` and
+  `docs/phase9/PLAN_SOCIAL_IDENTITY_QA_EVIDENCE.md`.
+
 ## Phase 9 Google Business Profile square asset — 2026-08-29
 
 - **Reuse decision:** this candidate extends the existing Distribution Command,

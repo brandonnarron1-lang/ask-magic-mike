@@ -413,6 +413,28 @@ gate before merge or Production.
    and reverified may it request
    `APPROVE PHASE 9 ORGANIC PAGE EXPERIMENT BRIEFS MERGE AND PRODUCTION DEPLOYMENT`.
 
+22. Draft PR [#232](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/232)
+   reuses the canonical protected Distribution Command and exact sealed PR
+   #231 head `16a633fc5d77ed7c911e9a276f6a1f561ad63fda` to add the missing
+   720x720 Google Business Profile format without creating a second creative
+   studio or publisher. Its exact sealed head is
+   `2687f98a26cb05c309136cacc136890f16d15ea8`. The application release cannot
+   publish to Google and cannot leapfrog any predecessor. Only after PR #231
+   and every predecessor are accepted, the candidate is refreshed, and its
+   complete exact-head proof is repeated may it request
+   `APPROVE PHASE 9 GOOGLE BUSINESS PROFILE SQUARE ASSETS MERGE AND PRODUCTION DEPLOYMENT`.
+
+23. Draft PR [#233](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/233)
+   repairs the review planner's inherited homepage Open Graph URL by reusing
+   the shared public metadata contract on exact sealed PR #232. Runtime-fix
+   head `90534b548244ce9aae38cc7f16dea3745d0cc5ee` remains preserved at
+   `rescue/amm-pr233-pre-authority-reconciliation-20260829-2105`; the final
+   exact candidate SHA and repeated immutable proof are pinned in the PR seal.
+   It adds no route, provider, migration, lead path, publisher, or external
+   action. Only after PR #232 and every predecessor are accepted, this
+   candidate is refreshed, and exact-head proof is repeated may it request
+   `APPROVE PHASE 9 REVIEW PLANNER SOCIAL IDENTITY MERGE AND PRODUCTION DEPLOYMENT`.
+
 The historical shorter conversion-identity phrase released PR #195 and is
 exhausted; it cannot authorize PR #213 or any later candidate.
 

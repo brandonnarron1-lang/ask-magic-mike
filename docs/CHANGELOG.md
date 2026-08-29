@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-08-29 — Review planner canonical and social identity alignment
+
+- Reused the shared public metadata contract for `/plan` instead of retaining
+  a route-local partial metadata object.
+- Corrected the inherited homepage Open Graph URL while preserving the
+  planner's established canonical URL, title, description, social card,
+  indexability, route, UI, local-only storage, and no-lead/no-send boundary.
+- Added direct canonical, robots, Open Graph, Twitter, and route-registration
+  regression coverage.
+- Reconciled PRs #232 and #233 into the canonical owner queue and asset
+  manifest so the documented release order matches the Git graph.
+- Preserved the first sealed runtime-fix head at
+  `rescue/amm-pr233-pre-authority-reconciliation-20260829-2105` before this
+  documentation reconciliation; no history was rewritten.
+- No Production deployment, database/secret/WordPress change, lead/message,
+  provider action, publication, spend, deletion, or NellySelly interaction
+  occurred.
+
 ## 2026-08-29 — Google Business Profile 1:1 native asset
 
 - Preserved the prior PR #232 head at
