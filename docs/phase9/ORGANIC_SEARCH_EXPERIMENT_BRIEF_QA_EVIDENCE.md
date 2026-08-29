@@ -2,8 +2,15 @@
 
 Date: 2026-08-29
 Branch: `codex/phase9-organic-experiment-brief-20260828`
-Parent: exact sealed PR 230 head `883ddec3f8b3796ba8be3fe41e5cd326e1a16d`
+Parent: exact sealed PR 230 head `680e257d8e35b2033638e84b09c742608268fc20`
 State: downstream Draft release candidate; no Production authority
+
+Refresh lineage:
+
+- prior candidate head preserved at
+  `rescue/amm-pr231-pre-pr230-parent-refresh-20260829-150534`;
+- exact-parent normal merge commit: `b840152`;
+- no rebase, reset, force push, branch deletion, or Production mutation.
 
 ## Executive decision
 
@@ -25,9 +32,10 @@ This candidate adds one pure deterministic builder and renders its output inside
 Primary sources reviewed on 2026-08-28:
 
 1. [Google — Creating helpful, reliable, people-first content](https://developers.google.com/search/docs/fundamentals/creating-helpful-content) says content should serve an existing audience, demonstrate first-hand expertise, clearly identify who created it, avoid exaggerated headings, and avoid extensive search-first automation.
-2. [Google — Control your snippets in search results](https://developers.google.com/search/docs/appearance/snippet) explains that snippets are primarily generated from page content and may use a page-specific meta description when it better represents the page.
-3. [Google — Performance report dimensions and data groupings](https://support.google.com/webmasters/answer/17011259) documents anonymized-query omissions, row truncation, canonical URL aggregation, and high-impression/low-CTR review as an opportunity—not a guarantee.
-4. [Google — Crawling and indexing](https://developers.google.com/search/docs/crawling-indexing) identifies crawlable links, valid metadata, redirects, canonical handling, and A/B testing impact as separate technical controls.
+2. [Google — Influence title links in search results](https://developers.google.com/search/docs/appearance/title-link) explains that title links are generated from multiple visible and metadata sources and should remain descriptive rather than stuffed or boilerplate.
+3. [Google — Control your snippets in search results](https://developers.google.com/search/docs/appearance/snippet) explains that snippets are primarily generated from page content and may use a page-specific meta description when it better represents the page.
+4. [Google — Performance report dimensions and data groupings](https://support.google.com/webmasters/answer/17011259) documents anonymized-query omissions, row truncation, canonical URL aggregation, and high-impression/low-CTR review as an opportunity—not a guarantee.
+5. [Google — Crawling and indexing](https://developers.google.com/search/docs/crawling-indexing) identifies crawlable links, valid metadata, redirects, canonical handling, and A/B testing impact as separate technical controls.
 
 Implementation consequences:
 
@@ -134,13 +142,14 @@ pnpm audit --prod
 git diff --check
 ```
 
-Results before sealing:
+Results before sealing after the exact-parent refresh:
 
-- focused organic-search and capability coverage: 3 files / 17 tests passed;
+- focused organic-search, authorization, migration, and authority coverage:
+  9 files / 65 tests passed;
 - protected local browser acceptance: desktop and mobile, 2/2 passed;
 - system isolation: passed; deployable source contains no NellySelly project identifier;
 - release safety: 14/14 passed;
-- full Vitest suite: 268 files / 3,351 tests passed;
+- full Vitest suite: 268 files / 3,357 tests passed;
 - strict TypeScript: passed;
 - full ESLint: passed;
 - Next.js 15.5.21 optimized Production build: passed;
@@ -149,11 +158,9 @@ Results before sealing:
 - Production dependency audit: no known vulnerabilities; and
 - whitespace check: passed.
 
-Secret evidence:
-
-- repository history: gitleaks 8.30.1 scanned 679 commits / approximately
-  16.38 MB with no leak; and
-- exact PR 230 parent delta: gitleaks scanned approximately 56 KB with no leak.
+Fresh exact-parent and full-history Gitleaks results are pinned in the immutable
+Draft PR seal after the final commit. Keeping mutable scan counts out of this
+file avoids an evidence-only commit that would immediately stale its own SHA.
 
 The expected test-only durable-rate-limit warnings exercise fail-closed regression
 paths; they are not evidence of a current Production blocker. The accepted
@@ -170,6 +177,8 @@ React, and browser security boundaries:
   operator-controlled link;
 - reference destinations are immutable application constants on official
   Google HTTPS hosts and open with `rel="noopener noreferrer"`;
+- native disclosure summaries contain only valid phrasing content; no `div`,
+  paragraph, section, or article is nested directly inside `summary`;
 - the pure builder imports no environment, database, authentication, provider,
   filesystem, or network module;
 - the workbench adds no storage, dynamic code, HTML injection, redirect,
@@ -210,6 +219,11 @@ For both viewports, the test proved:
 - zero browser console errors and zero page errors occurred; and
 - the copy result has a polite live-region announcement and is reset whenever
   source CSV changes.
+
+The exact-parent hardening pass additionally confirms that the native summary
+uses valid phrasing-content markup. This changes no visible hierarchy or
+interaction; it removes an HTML content-model ambiguity that could otherwise
+produce inconsistent assistive-technology behavior.
 
 Manual screenshot review compared the candidate with the existing protected
 Growth workbench design system. The final surface preserves the established

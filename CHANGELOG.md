@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-08-29 — Organic experiment briefs exact-parent refresh
+
+- Preserved the prior PR #231 head at
+  `rescue/amm-pr231-pre-pr230-parent-refresh-20260829-150534`, then merged exact
+  sealed PR #230 head `680e257d8e35b2033638e84b09c742608268fc20`
+  through normal merge commit `b840152` without rebase, reset, force push, or
+  branch deletion.
+- Reused the existing protected Search Console workbench and deterministic
+  opportunity model to produce internal, non-publishing experiment briefs;
+  no CMS, database, AI writer, provider, route, or lead system was added.
+- Hardened the disclosure summary to valid phrasing-content markup while
+  preserving the approved Black Diamond layout, native keyboard behavior, and
+  responsive disclosure pattern; added a regression for that HTML contract.
+- Added no Production, environment, migration, database write, provider call,
+  public copy, WordPress edit, communication, spend, DNS, or NellySelly action.
+
 ## 2026-08-29 — Capability authority ledger candidate
 
 - Preserved the prior PR #230 head at

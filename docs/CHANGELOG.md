@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-08-29 — Organic experiment briefs exact-parent refresh
+
+- Preserved the prior PR #231 head at
+  `rescue/amm-pr231-pre-pr230-parent-refresh-20260829-150534`, then merged exact
+  sealed PR #230 head `680e257d8e35b2033638e84b09c742608268fc20`
+  through normal merge commit `b840152` without rewriting branch history.
+- Kept the feature inside the existing protected organic-search workbench and
+  retained its deterministic, privacy-minimized, no-provider/no-publication
+  authority boundary.
+- Replaced invalid flow-content children inside the native disclosure summary
+  with phrasing-content elements, preserving the existing visual layout while
+  improving HTML and assistive-technology interoperability.
+- Added no route, schema, migration, provider, secret, public copy, lead path,
+  WordPress action, communication, spend, DNS change, or NellySelly dependency.
+
 ## 2026-08-29 — Identity-safe wide social preview card
 
 - Reused the approved Black Diamond desktop hero, exact Our Town Properties

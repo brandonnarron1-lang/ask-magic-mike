@@ -366,6 +366,53 @@ gate before merge or Production.
    its narrow gate is
    `APPROVE PHASE 9 RELEASE AUTHORITY DEDUPLICATION MERGE`.
 
+17. Draft PR [#227](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/227)
+   reuses the exact PR #226 design and metadata system to add one identity-safe
+   1200×630 social preview. Its sealed head is
+   `ee1dd462665e423c17a69b6ab7d1c3a7a70a1409`; it adds no publisher, message,
+   lead path, database, or provider. After every predecessor releases and the
+   candidate is refreshed and reverified, its narrow gate is
+   `APPROVE PHASE 9 IDENTITY-SAFE WIDE SOCIAL PREVIEW MERGE`.
+
+18. Draft PR [#228](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/228)
+   reuses the existing homepage, canonical `/ask` funnel, Web Share capability
+   detection, Clipboard fallback, and privacy-safe event contract. Its sealed
+   head is `3c01eeb2dc133d6463d2ce19904ac3a08f56284c`; it creates no sender,
+   publisher, lead store, or provider. After PR #227 and every predecessor are
+   accepted and this candidate is refreshed and reverified, its narrow gate is
+   `APPROVE PHASE 9 PRIVACY-SAFE PUBLIC REFERRAL HANDOFF MERGE`.
+
+19. Draft PR [#229](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/229)
+   records the exact Our Town Facebook-crawler Apache diagnosis and bounded
+   operator guidance. Its sealed head is
+   `ab24fc0ef2eef10f9b368d57909d899dd053d204`. The separate account-level
+   override test was consumed, failed acceptance, and was rolled back
+   byte-for-byte; it is not reusable authority. The application candidate's
+   future narrow gate is
+   `APPROVE PHASE 9 OTP FACEBOOK CRAWLER DIAGNOSIS AND OPERATOR GUIDANCE MERGE`;
+   any root/WHM host action remains separately scoped.
+
+20. Draft PR [#230](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/230)
+   adds one read-only capability/authority ledger inside the existing protected
+   Growth Command Center. Its exact sealed head is
+   `680e257d8e35b2033638e84b09c742608268fc20`; it adds no route, migration,
+   provider, secret, public surface, or mutation path. It cannot leapfrog PR
+   #210 or any predecessor. After the ordered refresh and complete exact-head
+   proof, its future narrow gate is
+   `APPROVE PHASE 9 CAPABILITY AUTHORITY LEDGER MERGE AND PRODUCTION DEPLOYMENT`.
+
+21. Draft PR [#231](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/231)
+   reuses the protected organic-search workbench and exact sealed PR #230 head
+   `680e257d8e35b2033638e84b09c742608268fc20` to add deterministic,
+   internal-review-only page experiment briefs. The pre-refresh head is
+   preserved at
+   `rescue/amm-pr231-pre-pr230-parent-refresh-20260829-150534`; the current
+   exact candidate SHA and immutable proof are pinned in the PR seal. The
+   briefs do not create public copy or authorize a WordPress edit. Only after
+   PR #230 and every predecessor are accepted and this candidate is refreshed
+   and reverified may it request
+   `APPROVE PHASE 9 ORGANIC PAGE EXPERIMENT BRIEFS MERGE AND PRODUCTION DEPLOYMENT`.
+
 The historical shorter conversion-identity phrase released PR #195 and is
 exhausted; it cannot authorize PR #213 or any later candidate.
 

@@ -2197,3 +2197,29 @@ any bridge activation or shadow-mode test.
   [`phase9/CAPABILITY_AUTHORITY_LEDGER.md`](./phase9/CAPABILITY_AUTHORITY_LEDGER.md).
 - QA evidence:
   [`phase9/CAPABILITY_AUTHORITY_LEDGER_QA_EVIDENCE.md`](./phase9/CAPABILITY_AUTHORITY_LEDGER_QA_EVIDENCE.md).
+
+## Phase 9 bounded organic page experiment briefs — 2026-08-29
+
+- Reused the existing protected Search Console CSV workbench, validated owned
+  page rows, deterministic opportunity scores, and Growth authority ledger.
+- Added a pure builder for internal-review-only experiment briefs containing
+  owner inputs, one-change scope, evidence-aware measurement, real-estate and
+  Fair Housing guardrails, stop conditions, and immutable official references.
+- Briefs produce no public copy and perform no provider call, live-page fetch,
+  database write, campaign, message, spend, redirect, or publication action.
+- Preserved the prior PR #231 head at
+  `rescue/amm-pr231-pre-pr230-parent-refresh-20260829-150534`, then merged exact
+  sealed PR #230 head `680e257d8e35b2033638e84b09c742608268fc20`
+  through normal merge commit `b840152`.
+- The refresh hardening replaced invalid flow-content children inside the
+  native disclosure summary with phrasing-content elements while retaining the
+  established Black Diamond visual hierarchy and responsive behavior.
+- Exact local Node 24 acceptance passes 9 focused files / 65 tests and 268
+  files / 3,357 full tests, plus strict typecheck and targeted lint. Final full
+  lint/build/safety/isolation, secret scans, immutable Preview, protected
+  no-write browser proof, runtime logs, and Production non-mutation evidence
+  remain bound to the final PR seal rather than a self-referential docs commit.
+- No Production, Vercel environment, Neon, WordPress, DNS, provider,
+  communication, publication, spend, deletion, or NellySelly mutation occurred.
+- Decision and QA evidence:
+  [`phase9/ORGANIC_SEARCH_EXPERIMENT_BRIEF_QA_EVIDENCE.md`](./phase9/ORGANIC_SEARCH_EXPERIMENT_BRIEF_QA_EVIDENCE.md).

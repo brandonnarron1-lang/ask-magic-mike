@@ -378,21 +378,21 @@ export function OrganicSearchIngressWorkbench({
             {displayedBriefs.map((brief, index) => (
               <details key={brief.key} className="group rounded-xl border border-white/10 bg-black/35 p-4">
                 <summary className="cursor-pointer list-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#7ee7f1]">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8bbfc6]">
+                  <span className="flex flex-wrap items-start justify-between gap-3">
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#8bbfc6]">
                         {String(index + 1).padStart(2, "0")} · Internal review only · {words(brief.opportunityType)}
-                      </p>
-                      <p className="mt-2 break-words text-sm font-semibold text-[#f4ead4]">{brief.pageUrl}</p>
-                      <p className="mt-2 text-xs leading-5 text-[#a89c8b]">{brief.objective}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
+                      </span>
+                      <span className="mt-2 block break-words text-sm font-semibold text-[#f4ead4]">{brief.pageUrl}</span>
+                      <span className="mt-2 block text-xs leading-5 text-[#a89c8b]">{brief.objective}</span>
+                    </span>
+                    <span className="flex items-center gap-2">
                       <span className="rounded-full border border-[#cda24a55] bg-[#171108] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#f0cf79]">
                         Score {brief.opportunityScore}
                       </span>
                       <span aria-hidden="true" className="text-xl text-[#7ee7f1] transition group-open:rotate-90">›</span>
-                    </div>
-                  </div>
+                    </span>
+                  </span>
                 </summary>
 
                 <div className="mt-5 border-t border-white/[.08] pt-5">
