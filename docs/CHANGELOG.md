@@ -18,6 +18,12 @@
 
 ## 2026-08-29 — Baseline and target-readiness control
 
+- Preserved the previously sealed PR #225 head
+  `60599703cf8ac5e65794b696aefaebc6353bbdf0` at
+  `rescue/amm-pr225-pre-pr224-parent-refresh-20260829-1224`, then merged exact
+  sealed PR #224 head `2effb45e2a324c25875dcf7d24019eae8dfdad38`
+  without rewriting history at reconciliation commit
+  `eab49cbe2926f3726d289473c308363e1f03de9e`.
 - Added a read-only baseline-readiness layer to the existing protected Growth
   Command Center; no parallel dashboard, target database, or write route was
   created.
@@ -48,10 +54,13 @@
   unknown; blended costs require complete paid-channel spend attribution; and
   the agent first-follow-up rate remains uninstrumented until an agent-grain
   assigned-lead denominator exists.
-- Post-stack local acceptance passes the complete 3,324-test release gate,
-  strict types, full lint, optimized 59-page build, route contract, doctor,
-  Production dependency audit, 668-commit plus exact-delta redacted secret
-  scans, sealed-parent ancestry, whitespace, and focused security review.
+- The prior exact head passed the complete 3,324-test release gate, strict
+  types, full lint, optimized 59-page build, route contract, doctor, Production
+  dependency audit, 668-commit plus exact-delta redacted secret scans, and
+  focused security review. The refreshed exact-parent tree independently
+  passes 10 focused files / 99 tests, strict TypeScript, targeted ESLint,
+  release safety 14/14, sealed-parent ancestry, and whitespace checks; fresh
+  exact-head CI and hosted evidence is still required.
 - Scoped hosted economics assertions to the visible performance section and
   added direct open/verify/close coverage for the collapsed readiness audit,
   removing duplicate-text ambiguity without changing application behavior.
