@@ -2,8 +2,8 @@
 
 ## Application
 
-Current Production is `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` at merge commit
-`b450b41c66c6740bd20571cdbe7d8caf82e92d5e`. Re-inspect Production and record
+Current Production is `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` at merge commit
+`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. Re-inspect Production and record
 the immediately preceding Ready deployment before a future release because
 aliases can move. If smoke checks fail, stop traffic activation and promote the
 recorded prior deployment. Do not delete a deployment or force-push.
@@ -55,20 +55,25 @@ rollback instruction.
 
 ## Phase 9 durable rate-limit readiness
 
-PR #209 has no migration. Before release, record the exact prior Ready Vercel
-deployment. If any store-capability, dedicated-secret, malformed-request, log,
-or monitor acceptance check fails, restore that deployment/alias first. The
-prior immutable deployment does not gain a newly added Vercel environment
-value retroactively. After rollback health is proven, remove only the newly
-added `RATE_LIMIT_HASH_SECRET` from future Production builds if the incident
-requires it; never display or copy its value. Do not alter or delete
-`rate_limit_buckets` rows as part of application rollback. Stale encrypted
-Upstash variable removal remains a separate, unapproved cleanup.
+PR #209 had no migration and passed Production acceptance. Its immediate
+rollback deployment remains `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. If a later
+incident requires that rollback, restore the prior deployment/aliases first.
+The prior immutable deployment does not gain the newly added Vercel environment
+value retroactively. After rollback health is proven, remove only
+`RATE_LIMIT_HASH_SECRET` from future Production builds if the incident requires
+it; never display or copy its value. Do not alter or delete
+`rate_limit_buckets` rows. Stale encrypted Upstash variable removal remains a
+separate, unapproved cleanup.
 
 The `phase9:durable-rate-limit:readiness` rehearsal has no rollback step: it
 accepts only plan or authenticated read-only preflight modes, refuses an
 unlinked Vercel checkout, and performs no secret entry, merge, deployment,
 database/event write, provider send, or configuration change.
+
+PR #210 has no migration or environment change. If its canonical redirect
+acceptance fails, restore `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` and its aliases.
+Do not change the durable limiter secret, database, limiter rows, lead/event
+records, WordPress, or DNS as part of that application rollback.
 
 ## WordPress
 

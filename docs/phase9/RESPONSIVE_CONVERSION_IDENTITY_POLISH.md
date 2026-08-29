@@ -63,12 +63,12 @@ lead score, routing rule, contact field, or legal disclaimer changed.
 
 ## Dependency and release order
 
-Draft PR #213 is synchronized with exact final Draft PR #211 head
-`5d566a4a14d4a7cb67175683fdf099e8d62747b7`. Its immediately prior head is
+Draft PR #213 is synchronized with exact sealed Draft PR #211 head
+`c5700eda5e32ff6ead9a985c86b811a3c46e1e66`. Its immediately prior head is
 preserved at
-`rescue/amm-pr213-pre-final-pr211-cutover-hygiene-20260824-170330`. Its order is:
+`rescue/amm-pr213-pre-pr211-exact-seal-20260828-215231`. Its order is:
 
-1. PR #209 durability release;
+1. accepted PR #209 durability release;
 2. PR #210 canonical alias consolidation;
 3. PR #211 Ask conversion accessibility; and
 4. PR #213 responsive conversion-identity polish.
