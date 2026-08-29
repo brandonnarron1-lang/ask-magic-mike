@@ -109,6 +109,22 @@ export function buildGrowthCapabilityLedger({
       href: "/admin/growth",
     },
     {
+      key: "organic_search_experiment_briefs",
+      label: "Organic page experiment briefs",
+      domain: "measure",
+      state: applicationState,
+      summary: "Validated Search Console page evidence now produces deterministic internal experiment briefs with owner-input requirements, one-variable scope, outcome-aware measurement, guardrails, and stop conditions; it does not generate final public copy or publish anything.",
+      evidence: [
+        "Existing privacy-minimized organic-search ingress remains the only source of page metrics",
+        "Page-specific decision packets retain no query text, raw CSV, consumer PII, or provider payload",
+        "Google-aligned people-first review, qualified-outcome diagnostics, accessibility checks, and explicit authority boundaries",
+      ],
+      nextAction: currentTailInProduction
+        ? "Use the protected workbench to prepare one owner-reviewed page experiment at a time, then request the separate publication authority only after Preview and compliance review."
+        : "Preserve this read-only candidate in the ordered release train; do not publish a page or bypass the existing first Production gate.",
+      href: "/admin/growth/search-ingress",
+    },
+    {
       key: "durable_release_train",
       label: "Durable limiter and cumulative release train",
       domain: "govern",

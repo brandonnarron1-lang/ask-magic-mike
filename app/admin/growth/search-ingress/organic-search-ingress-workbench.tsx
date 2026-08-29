@@ -2,6 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import {
+  buildOrganicSearchExperimentBrief,
+  formatOrganicSearchExperimentBrief,
+  type OrganicSearchExperimentBrief,
+} from "../../../lib/growth/organic-search-experiment-brief";
 import type { OrganicSearchIngressPreview } from "../../../lib/growth/organic-search-ingress";
 
 interface CommitReceipt {
@@ -52,12 +57,14 @@ export function OrganicSearchIngressWorkbench({
   const [busy, setBusy] = useState<"validate" | "commit" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<CommitReceipt | null>(null);
+  const [copiedBriefKey, setCopiedBriefKey] = useState<string | null>(null);
 
   function replaceCsv(value: string) {
     setCsv(value);
     setPreview(null);
     setReceipt(null);
     setError(null);
+    setCopiedBriefKey(null);
   }
 
   async function readFile(file: File | undefined) {
@@ -137,10 +144,29 @@ export function OrganicSearchIngressWorkbench({
     }
   }
 
+  async function copyBrief(brief: OrganicSearchExperimentBrief) {
+    setError(null);
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("clipboard_unavailable");
+      await navigator.clipboard.writeText(formatOrganicSearchExperimentBrief(brief));
+      setCopiedBriefKey(brief.key);
+    } catch {
+      setCopiedBriefKey(null);
+      setError("The internal experiment brief could not be copied on this device.");
+    }
+  }
+
   const canCommit = Boolean(
     commitReady && preview?.ok && preview.batchFingerprint && !preview.synthetic &&
     approvalReference.trim().length >= 4 && confirmation === confirmationPhrase && !busy,
   );
+  const experimentBriefs = (preview?.ok ? preview.rows : [])
+    .map(buildOrganicSearchExperimentBrief)
+    .filter((brief): brief is OrganicSearchExperimentBrief => brief !== null)
+    .sort((left, right) =>
+      right.opportunityScore - left.opportunityScore || left.pageUrl.localeCompare(right.pageUrl),
+    );
+  const displayedBriefs = experimentBriefs.slice(0, 25);
 
   return (
     <div className="grid min-w-0 gap-5 xl:grid-cols-[1.05fr_.95fr]">
@@ -323,6 +349,162 @@ export function OrganicSearchIngressWorkbench({
                 ))}
               </tbody>
             </table>
+          </div>
+        </section>
+      ) : null}
+
+      {displayedBriefs.length ? (
+        <section className="min-w-0 rounded-2xl border border-[#4baab844] bg-[linear-gradient(145deg,#071317,#070707)] p-5 sm:p-6 xl:col-span-2">
+          <p aria-live="polite" className="sr-only">
+            {copiedBriefKey ? "Internal organic search experiment brief copied to the clipboard." : ""}
+          </p>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div className="max-w-4xl">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#7ee7f1]">Deterministic decision packets</p>
+              <h2 className="mt-2 font-serif text-3xl text-[#f4ead4]">Turn evidence into one bounded page experiment</h2>
+              <p className="mt-3 text-sm leading-6 text-[#b8ad9c]">
+                These internal briefs connect each explainable page signal to a people-first review, owner-supplied facts,
+                one primary metric, guardrails, and stop conditions. They generate no public copy, make no provider call,
+                write no data, and grant no publication authority.
+              </p>
+            </div>
+            <p className="text-xs text-[#8f8778]">
+              Showing {displayedBriefs.length} of {experimentBriefs.length} scored page{experimentBriefs.length === 1 ? "" : "s"}
+            </p>
+          </div>
+
+          <div className="mt-5 space-y-3">
+            {displayedBriefs.map((brief, index) => (
+              <details key={brief.key} className="group rounded-xl border border-white/10 bg-black/35 p-4">
+                <summary className="cursor-pointer list-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#7ee7f1]">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8bbfc6]">
+                        {String(index + 1).padStart(2, "0")} · Internal review only · {words(brief.opportunityType)}
+                      </p>
+                      <p className="mt-2 break-words text-sm font-semibold text-[#f4ead4]">{brief.pageUrl}</p>
+                      <p className="mt-2 text-xs leading-5 text-[#a89c8b]">{brief.objective}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full border border-[#cda24a55] bg-[#171108] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#f0cf79]">
+                        Score {brief.opportunityScore}
+                      </span>
+                      <span aria-hidden="true" className="text-xl text-[#7ee7f1] transition group-open:rotate-90">›</span>
+                    </div>
+                  </div>
+                </summary>
+
+                <div className="mt-5 border-t border-white/[.08] pt-5">
+                  <dl className="grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
+                    {[
+                      ["Window", brief.evidence.window],
+                      ["Impressions", brief.evidence.impressions.toLocaleString()],
+                      ["Clicks", brief.evidence.clicks.toLocaleString()],
+                      ["CTR", percent(brief.evidence.ctr)],
+                      ["Avg. position", brief.evidence.averagePosition.toFixed(1)],
+                      ["Confidence", `${brief.confidencePercent}%`],
+                    ].map(([label, value]) => (
+                      <div key={label} className="rounded-lg border border-white/[.07] bg-[#050505] p-3">
+                        <dt className="text-[10px] font-bold uppercase tracking-[0.11em] text-[#8f8778]">{label}</dt>
+                        <dd className="mt-2 text-sm text-[#e8dcc5]">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+
+                  <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                    <div className="rounded-xl border border-[#cda24a33] bg-[#171108] p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#d1aa53]">Reader task to verify</p>
+                      <p className="mt-2 text-xs leading-6 text-[#e2d5bd]">{brief.readerTask}</p>
+                    </div>
+                    <div className="rounded-xl border border-[#4baab833] bg-[#06171b] p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#7ee7f1]">Single-change scope</p>
+                      <p className="mt-2 text-xs leading-6 text-[#c7e7eb]">{brief.singleChangeScope}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-xl border border-white/[.08] bg-[#080808] p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8f8778]">Testable hypothesis</p>
+                    <p className="mt-2 text-sm leading-6 text-[#d8cdb9]">{brief.hypothesis}</p>
+                  </div>
+
+                  <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                    <div className="rounded-xl border border-white/[.08] bg-black/30 p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8f8778]">Required owner inputs</p>
+                      <ol className="mt-3 list-decimal space-y-2 pl-5 text-xs leading-5 text-[#b8ad9c]">
+                        {brief.requiredInputs.map((item) => <li key={item}>{item}</li>)}
+                      </ol>
+                    </div>
+                    <div className="rounded-xl border border-white/[.08] bg-black/30 p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8f8778]">Review steps</p>
+                      <ol className="mt-3 list-decimal space-y-2 pl-5 text-xs leading-5 text-[#b8ad9c]">
+                        {brief.reviewSteps.map((item) => <li key={item}>{item}</li>)}
+                      </ol>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-xl border border-[#4a8c6f44] bg-[#071712] p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#83dab4]">Primary decision metric</p>
+                        <p className="mt-2 text-base font-semibold text-[#d9f4e8]">
+                          {brief.primaryMetric.label} · baseline {brief.primaryMetric.baseline}
+                        </p>
+                      </div>
+                      <span className="rounded-full border border-[#4a8c6f55] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#83dab4]">
+                        {words(brief.primaryMetric.key)}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-xs leading-6 text-[#b9d9c9]">{brief.primaryMetric.decisionRule}</p>
+                    <ul className="mt-3 list-disc space-y-1.5 pl-5 text-xs leading-5 text-[#9fbeaf]">
+                      {brief.measurementPlan.map((item) => <li key={item}>{item}</li>)}
+                    </ul>
+                  </div>
+
+                  <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                    <div className="rounded-xl border border-[#cda24a33] bg-[#171108] p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#d1aa53]">Guardrails</p>
+                      <ul className="mt-3 list-disc space-y-2 pl-5 text-xs leading-5 text-[#d8c9aa]">
+                        {brief.guardrails.map((item) => <li key={item}>{item}</li>)}
+                      </ul>
+                    </div>
+                    <div className="rounded-xl border border-[#a21f3d44] bg-[#19080d] p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#ff9ab1]">Stop conditions</p>
+                      <ul className="mt-3 list-disc space-y-2 pl-5 text-xs leading-5 text-[#ffdbe4]">
+                        {brief.stopConditions.map((item) => <li key={item}>{item}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-xl border border-[#a21f3d44] bg-[#19080d] p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#ff9ab1]">Authority boundary</p>
+                    <p className="mt-2 text-xs leading-6 text-[#ffdbe4]">{brief.authority}</p>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => void copyBrief(brief)}
+                      className="min-h-11 rounded-full border border-[#4baab866] bg-[#06171b] px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-[#7ee7f1] transition hover:border-[#7ee7f1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7ee7f1]"
+                    >
+                      {copiedBriefKey === brief.key ? "Internal brief copied" : "Copy internal brief"}
+                    </button>
+                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs leading-5 text-[#8f8778]">
+                      {brief.references.map((reference) => (
+                        <a
+                          key={reference.href}
+                          href={reference.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline decoration-white/20 underline-offset-4 transition hover:text-[#c7e7eb]"
+                        >
+                          {reference.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </details>
+            ))}
           </div>
         </section>
       ) : null}

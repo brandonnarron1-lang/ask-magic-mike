@@ -77,6 +77,19 @@ for (const viewport of viewports) {
     await expect(page.getByText("This is unmistakably synthetic and cannot be committed.")).toBeVisible();
     await expect(page.getByText("Normalized owned pages")).toBeVisible();
     await expect(page.getByText("Raw CSV / queries retained:")).toBeVisible();
+    await expect(page.getByRole("heading", {
+      name: "Turn evidence into one bounded page experiment",
+    })).toBeVisible();
+    await expect(page.getByText(/Internal review only · organic click capture gap/i)).toBeVisible();
+    await page.getByText(/Internal review only · organic click capture gap/i).click();
+    await expect(page.getByText("Reader task to verify")).toBeVisible();
+    await expect(page.getByText("Single-change scope")).toBeVisible();
+    await expect(page.getByText("Primary decision metric")).toBeVisible();
+    await expect(page.getByText("Authority boundary")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Copy internal brief" })).toBeVisible();
+    await expect(page.getByRole("link", {
+      name: "Google · Helpful, reliable, people-first content",
+    })).toHaveAttribute("rel", "noreferrer");
     await expect(commit).toBeDisabled();
 
     const textarea = page.getByRole("textbox", {

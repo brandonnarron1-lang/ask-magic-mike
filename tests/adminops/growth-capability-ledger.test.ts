@@ -13,7 +13,7 @@ describe("Growth capability authority ledger", () => {
     expect(ledger.generatedFor).toBe("preview_or_local");
     expect(ledger.counts).toEqual({
       production_live: 3,
-      release_candidate: 2,
+      release_candidate: 3,
       operator_gate: 2,
       host_gate: 1,
       external_dependency: 2,
@@ -29,10 +29,11 @@ describe("Growth capability authority ledger", () => {
     const ledger = buildGrowthCapabilityLedger({ currentTailInProduction: true });
 
     expect(ledger.generatedFor).toBe("production");
-    expect(ledger.counts.production_live).toBe(5);
+    expect(ledger.counts.production_live).toBe(6);
     expect(ledger.counts.release_candidate).toBe(0);
     expect(ledger.items.find((item) => item.key === "durable_release_train")?.approvalGate).toBeUndefined();
     expect(ledger.items.find((item) => item.key === "revival_and_review_planner")?.state).toBe("production_live");
+    expect(ledger.items.find((item) => item.key === "organic_search_experiment_briefs")?.state).toBe("production_live");
     expect(ledger.items.find((item) => item.key === "owned_traffic_publication")?.state).toBe("operator_gate");
     expect(ledger.items.find((item) => item.key === "facebook_preview_recovery")?.state).toBe("host_gate");
   });
