@@ -19,15 +19,15 @@
   `e96c83acaa4555ce0bb4e62fda7db18cd8b6c0a2476efd1987a9f5843ec70aa4`,
   and logo SHA-256
   `d6f9cf50829416c348985307e68b111f8e46665a1c603810b46b55b377c32d49`.
-- Post-restack focused Vitest: PASS — 4 files / 143 tests. Complete release
-  gate: PASS — 265 files / 3,329 tests, strict typecheck, full ESLint, optimized Next.js
-  15.5.21 build, 95 active routes / 17 acknowledged duplicates, 14/14 release
-  safety checks, and deployable-source isolation.
+- Final-parent local focused Vitest: PASS — 4 files / 144 tests. Strict
+  typecheck, targeted ESLint (including an explicit `--no-ignore` pass over the
+  generator), 14/14 release safety checks, and deployable-source isolation all
+  pass. Final branch-bound full release-gate evidence is recorded only after the
+  refreshed head is pushed and independently checked.
 - Production dependency audit: PASS — no known vulnerabilities. Deterministic
-  regeneration reproduced the exact output and lineage hashes. Release doctor:
-  HEALTHY — 43/43. Redacted Gitleaks: PASS — the exact PR #226 delta and full
-  repository history contain no detected leak.
-  `git diff --check`: PASS.
+  regeneration reproduced the exact output and lineage hashes. Ancestry and
+  `git diff --check` pass against exact sealed PR #226 head
+  `1a912d29e608d872a84d70c7563e91134d369741`.
 - Fresh in-app Browser visual/DOM QA: PASS at 1280x900 and 390x844. The exact card,
   identity-preservation label, review heading, navigation, and footer rendered;
   mobile had no horizontal overflow. Post-fix reloads produced no new browser
@@ -36,13 +36,13 @@
   The shipped asset uses only deterministic composition of the approved source
   photograph and exact logo. Full source/final and browser evidence is recorded
   in `design-qa.md`.
-- Original code-bearing head
-  `4683a7c752a40e29ba80ddcda150a0e4fbc5b07c` remains preserved and passed
-  GitHub Release Gate run `33213057838`. PR #227 is now reconciled through a
-  normal merge onto sealed PR #226 head
-  `ae666aa6c31ed3726155e110f065b64d4b445040`; original PR #227 head
-  `10b1a43720c67b8218c110db488e5513a8d6c566` is preserved at
-  `rescue/amm-pr227-pre-pr226-exact-seal-20260829-0611`.
+- Former PR #227 head `cf92b9cb64a7cc5b70c98d629cc86d2289fbfedb`
+  is preserved at
+  `rescue/amm-pr227-pre-pr226-parent-refresh-20260829-131437`. Final sealed PR
+  #226 head `1a912d29e608d872a84d70c7563e91134d369741` was reconciled through normal
+  merge `89b57a7d16beb4f1c157d2f7fca6e49982623f10`; conflicts were limited to
+  additive status/evidence ledgers. Earlier source rescue
+  `rescue/amm-pr227-pre-pr226-exact-seal-20260829-0611` remains intact.
 - Authenticated in-app Browser proof: `/social-preview` returned the correct
   heading, identity-preservation label, non-index metadata, exact wide-card
   render, navigation, footer, and equal document/client width. Direct asset

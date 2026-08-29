@@ -20,22 +20,22 @@ Updated 2026-08-29.
   public pages, images, robots, login, admin, and REST paths; `Facebot` and
   `meta-externalagent/1.1` returned 200. This is an upstream host rule, not a
   page or WordPress-content defect, and the candidate does not weaken it.
-- **Current acceptance:** exact Node 24.18.0 passes focused metadata/image and
-  release-authority coverage (4 files / 143 tests), the complete release gate (265 files / 3,329
-  tests), strict TypeScript, full ESLint, optimized Next.js 15.5.21 build,
-  95/17 route proof, 14/14 safety, deployable-source isolation, zero known
-  Production dependency vulnerabilities, deterministic asset regeneration,
-  whitespace proof, and responsive desktop/mobile browser QA. The mobile
-  document width equals its client width. Release doctor passes 43/43 on the
-  restacked candidate; redacted Gitleaks scans find no leak in the exact
-  PR #226 delta or full repository history.
-  Original code-bearing head `4683a7c752a40e29ba80ddcda150a0e4fbc5b07c`
-  passed GitHub Release Gate run `33213057838` and immutable Vercel Preview
-  deployment `dpl_DqsFHqTMWp4JTuhnWVAQoDLU4XZm`. The branch is now reconciled
-  through a normal merge onto sealed PR #226 head
-  `ae666aa6c31ed3726155e110f065b64d4b445040`; original PR #227 head
-  `10b1a43720c67b8218c110db488e5513a8d6c566` is preserved at
-  `rescue/amm-pr227-pre-pr226-exact-seal-20260829-0611`.
+- **Refreshed-parent local acceptance:** exact Node 24.18.0 passes focused
+  metadata/image/release-authority coverage (4 files / 144 tests), strict
+  TypeScript, targeted ESLint including the normally ignored generator,
+  14/14 release safety, deployable-source isolation, zero known Production
+  dependency vulnerabilities, deterministic byte-for-byte asset regeneration,
+  ancestry, and whitespace proof. Source/candidate comparison reconfirms the
+  exact approved Mike portrait, logo, crop, safe zones, visual hierarchy, and
+  claim-safe copy. Final branch-bound CI, immutable Preview, protected no-write
+  browser QA, and runtime-log proof remain mandatory on the final pushed head.
+- **History-preserving parent refresh:** former PR #227 head
+  `cf92b9cb64a7cc5b70c98d629cc86d2289fbfedb` is preserved at
+  `rescue/amm-pr227-pre-pr226-parent-refresh-20260829-131437`. Final sealed PR
+  #226 head `1a912d29e608d872a84d70c7563e91134d369741` was reconciled through normal
+  merge `89b57a7d16beb4f1c157d2f7fca6e49982623f10`; conflicts were limited to
+  additive implementation-status and QA ledgers. The earlier source rescue
+  `rescue/amm-pr227-pre-pr226-exact-seal-20260829-0611` also remains intact.
 - **Authority boundary:** Production remains on
   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. This Draft is stacked after
   sealed PR #226 and has no independent Production authority. No
