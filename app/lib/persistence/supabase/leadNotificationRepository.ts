@@ -74,6 +74,7 @@ export function normalizeLeadNotificationRow(row: Record<string, unknown>): Lead
     sent_at: text(row.sent_at),
     failed_at: text(row.failed_at),
     metadata: objectValue(row.metadata),
+    lead_is_test: boolValue(row.lead_is_test),
   };
 }
 

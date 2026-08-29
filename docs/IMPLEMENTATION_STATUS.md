@@ -2,6 +2,31 @@
 
 Updated 2026-08-29.
 
+## Phase 9 notification operations truth — 2026-08-29
+
+- **Reuse decision:** canonical Neon outbox, Lead Center, provider lifecycle
+  metadata, and one-record retry remain authoritative. No second queue,
+  notification database, provider, dashboard, CRM, or migration was added.
+- **Observed gap:** the protected page's cards counted only its latest 50 rows
+  and mixed QA history with live operations. Exact queue depth, due retries,
+  stuck work, provider confirmation, orphan integrity, and last success were
+  not available to the operator or protected health monitor.
+- **Candidate result:** one read-only aggregate query now reports exact
+  live-only totals, separate QA exclusion, stale thresholds, provider accepted
+  versus confirmed state, provider terminal failures, and bounded timestamps.
+  Recent QA records are labeled; fallback counts are explicitly sample-only.
+- **Initial acceptance:** 4 focused files / 42 tests, strict TypeScript, and
+  targeted ESLint pass. Complete local release gate, exact-head CI, immutable
+  Preview, protected visual/contract QA, and log proof remain pending.
+- **Authority boundary:** exact parent is sealed PR #233 head
+  `ff67874eacdb44d7653c964ce395ae7bafd54910`, preserved at
+  `rescue/amm-pr234-base-pr233-20260829-171619`. Production remains PR #209
+  merge `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; PR #210 remains first in release order.
+- Decision/evidence:
+  `docs/phase9/NOTIFICATION_OPERATIONS_TRUTH.md` and
+  `docs/phase9/NOTIFICATION_OPERATIONS_TRUTH_QA_EVIDENCE.md`.
+
 ## Phase 9 review planner social identity — 2026-08-29
 
 - **Observed defect:** the indexable `/plan` route declared the correct

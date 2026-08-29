@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-08-29 — Exact notification operations truth
+
+- Reused the canonical Neon `lead_notifications` outbox and protected Lead
+  Center rather than adding another queue, database, provider, or dashboard.
+- Replaced recent-sample KPI ambiguity with exact live-only operational totals;
+  QA records are excluded and disclosed separately.
+- Added retry-due, stale pending/processing, orphan, provider-confirmation,
+  provider-terminal-failure, oldest-actionable, and last-success signals.
+- Preserved existing provider IDs, lifecycle history, safe errors, bounded
+  attempts, and confirmed one-record retry behavior.
+- Added PII-free aggregate notification status to protected admin health and
+  clear sample-only fallback copy when exact totals are unavailable.
+- Passed the initial focused 4-file / 42-test matrix, strict TypeScript, and
+  targeted ESLint. Complete exact-head release proof remains pending.
+- No migration, Production/Preview data write, notification send/retry,
+  provider/secret action, merge/deployment, WordPress/DNS edit, publication,
+  spend, deletion, or NellySelly interaction occurred.
+
 ## 2026-08-29 — Review planner canonical and social identity alignment
 
 - Reused the shared public metadata contract for `/plan` instead of retaining

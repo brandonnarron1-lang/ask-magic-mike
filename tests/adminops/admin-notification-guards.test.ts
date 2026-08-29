@@ -86,6 +86,9 @@ describe("AdminOps notification guards", () => {
     const page = read("app/admin/notifications/page.tsx");
     expect(page).toContain("Provider message ID");
     expect(page).toContain("notification.provider_message_id");
+    expect(page).toContain("Exact canonical-store totals exclude");
+    expect(page).toContain("QA test");
+    expect(page).toContain("Provider confirmation is distinct from provider acceptance");
     expect(page).not.toContain("recipient_reference");
   });
 

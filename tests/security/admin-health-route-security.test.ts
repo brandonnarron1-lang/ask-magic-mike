@@ -34,4 +34,12 @@ describe("admin health security boundary", () => {
     expect(source).not.toContain("PRODUCTION_NEON_ENDPOINT_ID:");
     expect(source).not.toContain("database_url: process.env.DATABASE_URL");
   });
+
+  it("exposes protected aggregate notification health without recipients or message bodies", () => {
+    expect(source).toContain("operations_query_ready");
+    expect(source).toContain("live_queue_depth");
+    expect(source).toContain("test_records_excluded");
+    expect(source).not.toContain("recipient_reference:");
+    expect(source).not.toContain("question_raw:");
+  });
 });
