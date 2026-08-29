@@ -20,22 +20,22 @@ Updated 2026-08-29.
   public pages, images, robots, login, admin, and REST paths; `Facebot` and
   `meta-externalagent/1.1` returned 200. This is an upstream host rule, not a
   page or WordPress-content defect, and the candidate does not weaken it.
-- **Current acceptance:** exact Node 24.18.0 passes focused metadata/image and
-  release-authority coverage (4 files / 143 tests), the complete release gate (265 files / 3,329
-  tests), strict TypeScript, full ESLint, optimized Next.js 15.5.21 build,
-  95/17 route proof, 14/14 safety, deployable-source isolation, zero known
-  Production dependency vulnerabilities, deterministic asset regeneration,
-  whitespace proof, and responsive desktop/mobile browser QA. The mobile
-  document width equals its client width. Release doctor passes 43/43 on the
-  restacked candidate; redacted Gitleaks scans find no leak in the exact
-  PR #226 delta or full repository history.
-  Original code-bearing head `4683a7c752a40e29ba80ddcda150a0e4fbc5b07c`
-  passed GitHub Release Gate run `33213057838` and immutable Vercel Preview
-  deployment `dpl_DqsFHqTMWp4JTuhnWVAQoDLU4XZm`. The branch is now reconciled
-  through a normal merge onto sealed PR #226 head
-  `ae666aa6c31ed3726155e110f065b64d4b445040`; original PR #227 head
-  `10b1a43720c67b8218c110db488e5513a8d6c566` is preserved at
-  `rescue/amm-pr227-pre-pr226-exact-seal-20260829-0611`.
+- **Refreshed-parent local acceptance:** exact Node 24.18.0 passes focused
+  metadata/image/release-authority coverage (4 files / 144 tests), strict
+  TypeScript, targeted ESLint including the normally ignored generator,
+  14/14 release safety, deployable-source isolation, zero known Production
+  dependency vulnerabilities, deterministic byte-for-byte asset regeneration,
+  ancestry, and whitespace proof. Source/candidate comparison reconfirms the
+  exact approved Mike portrait, logo, crop, safe zones, visual hierarchy, and
+  claim-safe copy. Final branch-bound CI, immutable Preview, protected no-write
+  browser QA, and runtime-log proof remain mandatory on the final pushed head.
+- **History-preserving parent refresh:** former PR #227 head
+  `cf92b9cb64a7cc5b70c98d629cc86d2289fbfedb` is preserved at
+  `rescue/amm-pr227-pre-pr226-parent-refresh-20260829-131437`. Final sealed PR
+  #226 head `1a912d29e608d872a84d70c7563e91134d369741` was reconciled through normal
+  merge `89b57a7d16beb4f1c157d2f7fca6e49982623f10`; conflicts were limited to
+  additive implementation-status and QA ledgers. The earlier source rescue
+  `rescue/amm-pr227-pre-pr226-exact-seal-20260829-0611` also remains intact.
 - **Authority boundary:** Production remains on
   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. This Draft is stacked after
   sealed PR #226 and has no independent Production authority. No
@@ -44,6 +44,34 @@ Updated 2026-08-29.
   occurred.
 - Detailed evidence: `docs/phase9/SOCIAL_PREVIEW_WIDE_CARD.md` and
   `design-qa.md`.
+
+## Phase 9 release-authority deduplication — 2026-08-29
+
+- **Authenticated disposition:** GitHub reports PRs #187 and #212 closed and
+  unmerged with their source branches intact. Their final owner comments record
+  supersession by PRs #225 and #221 respectively; no branch or evidence was
+  deleted.
+- **Ancestry proof:** exact PR #212 head
+  `758154ca73b64f24f2df8f183ba8b3f6f82f769a` is an ancestor of current PR
+  #221 head `61e152cb7ce03fd1904a06f30435dbe7ef36c4e1`, which is an ancestor of
+  exact PR #225 head `f33c87f27bfcbbcad3b5566aefd80909d25303bb`.
+- **History-preserving refresh:** former PR #226 head
+  `ae666aa6c31ed3726155e110f065b64d4b445040` is preserved at
+  `rescue/amm-pr226-pre-pr225-parent-refresh-20260829-1249`. Exact PR #225 was
+  reconciled through normal merge
+  `954d66cfe629a9d14a73cd1d405ff9535b9de28b`; conflicts were limited to
+  additive implementation-status and QA ledgers.
+- **Authority boundary:** this Draft changes only seven documentation/test
+  files. It adds no application route, dashboard, writer, migration, provider,
+  CRM, publisher, consumer workflow, lead/message path, Production authority,
+  or NellySelly dependency. PR #210 remains the first ordered Production
+  candidate.
+- **Refreshed-parent local acceptance:** exact Node 24.18.0 passes the focused
+  release-authority contract 22/22, strict TypeScript, targeted ESLint, release
+  safety 14/14, deployable-source Ask/NellySelly isolation, Production
+  dependency audit, ancestry, and whitespace checks. Final branch-bound CI,
+  immutable Preview, protected no-write/browser QA, and runtime-log evidence
+  remain mandatory on the final pushed head.
 
 ## Phase 9 baseline and target readiness — 2026-08-29
 
@@ -86,22 +114,26 @@ Updated 2026-08-29.
   and incomplete paid-channel cost baselines remain unmeasured; agent
   first-follow-up remains explicitly uninstrumented until agent-grain assignment
   evidence exists. All 42 contract keys are unique.
-- **Current acceptance:** PR #225 was reconciled onto exact sealed PR #224 head
-  `5c75b8f919442c05b607eb666c5595023057d94d` at merge commit
-  `0bb1a6d77d4daf830a4dc7681e3a3d5650332286`; code-bearing hardening head is
-  `1289244c44d0c336b4ed242293febe15d5b75914`, and sealed exact head is
-  `60599703cf8ac5e65794b696aefaebc6353bbdf0`. Exact Node 24.18.0 passes
-  deployable-source Ask/Nelly isolation, safety 14/14, 264 files / 3,324 tests,
-  strict typecheck, full ESLint, optimized 59-page build, 95 active routes / 17
-  acknowledged duplicates, doctor 43/43, zero known Production dependency
-  vulnerabilities, 668-commit and exact five-commit redacted gitleaks scans,
-  sealed-parent ancestry, whitespace, and focused security review. GitHub
-  Release Gate run `33245866380` and replacement hosted Preview run
-  `33246030523` pass on the exact head. Immutable Preview
-  `https://ask-magic-mike-mgs7m26oa-eyes-up-industries.vercel.app` passes 18
-  read-only checks, six deliberate mutation skips, 15/15 browser checks,
-  desktop/mobile visual review, and runtime review with no warning, error, or
-  fatal logs. Production remains unchanged at
+- **Current acceptance:** the previously sealed PR #225 head
+  `60599703cf8ac5e65794b696aefaebc6353bbdf0` is preserved at
+  `rescue/amm-pr225-pre-pr224-parent-refresh-20260829-1224`. Exact sealed PR
+  #224 head `2effb45e2a324c25875dcf7d24019eae8dfdad38` was merged without rebase,
+  reset, force push, or conflict at reconciliation commit
+  `eab49cbe2926f3726d289473c308363e1f03de9e`. The refreshed tree retains the
+  inherited lead-intent truth and keyboard-accessible channel-economics region.
+  Final exact head `f33c87f27bfcbbcad3b5566aefd80909d25303bb`
+  passes branch-bound GitHub Release Gate `33263356616`: Node 24, doctor
+  43/43, safety 14/14, 264 files / 3,324 tests, strict typecheck, full ESLint,
+  optimized 59-page build, and 95 active routes / 17 acknowledged duplicates.
+  Immutable Preview `dpl_9MNpd2ETo9Zgdd25NKfgue2ScQ7U` is READY at
+  `https://ask-magic-mike-fuedubfue-eyes-up-industries.vercel.app`; protected
+  run `33263505472` passes 18 read-only checks, six deliberate mutation skips,
+  15/15 browser checks, responsive before/after review, and exact-deployment
+  runtime inspection with zero warning, error, fatal, or mutating-method log.
+  The only 5xx is the expected read-only Preview SLA refusal. The hosted
+  browser contract scopes legacy economics labels to their visible section and
+  directly exercises the collapsed readiness audit, avoiding duplicate-text
+  ambiguity. Production remains unchanged at
   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`.
 - Detailed design: `docs/phase9/BASELINE_TARGET_READINESS.md`.
 
@@ -120,11 +152,15 @@ Updated 2026-08-29.
   persists as `null`, and cannot earn seller A-grade urgency. Explicit
   planning-horizon answers retain their compatibility mapping; `not sure`,
   `unknown`, and unrecognized text do not become 24 months.
-- **Current acceptance:** after reconciliation onto exact sealed PR #223 head
-  `18be077b1b6b8a595af2bb5dbd4a94d736dad65c`, exact Node 24.18.0 focused
-  acceptance passes 4 files / 48 tests. Final exact-head local, CI, immutable
-  Preview, protected browser, security, isolation, and runtime-log evidence is
-  bound to PR #224 before any promotion.
+- **Current acceptance:** the previously sealed PR #224 head
+  `5c75b8f919442c05b607eb666c5595023057d94d` is preserved at
+  `rescue/amm-pr224-pre-pr223-accessibility-seal-20260829-1210`. The candidate
+  now inherits exact accessibility-refreshed PR #223 head
+  `1d893f4c23ca53a1b852a1953b953b40e6f997f3` through merge `614a67a` without
+  a force push. Exact Node 24.18.0 focused acceptance passes 4 files / 48 tests,
+  strict TypeScript and targeted ESLint. Final exact-head CI, immutable Preview,
+  protected browser, security, isolation, and runtime-log evidence is bound to
+  PR #224 before any promotion.
 - **Authority boundary:** no existing Production row is rewritten; no
   migration, lead/event, communication, provider, WordPress, DNS, deployment,
   publication, deletion, or NellySelly action occurred. Production remains
@@ -2039,26 +2075,30 @@ any bridge activation or shadow-mode test.
   a consumer-facing, generic referral handoff; the non-indexed social review
   route remains available for controlled review but is no longer promoted to
   consumers from the homepage.
-- Added direct-click native Web Share, an available `canShare` capability
-  probe, Clipboard copy, and a visible manual-copy fallback without a
-  third-party script, provider, popup, database, or sender.
+- Added direct-click native Web Share only after an available `canShare`
+  capability probe accepts the fixed packet, plus Clipboard copy and a visible
+  manual-copy fallback without a third-party script, provider, popup, database,
+  or sender.
 - Added exact `consumer_share` / `referral` / `amm_owned_demand_2026` /
   `homepage_referral_share` attribution and two bounded events whose labels do
   not overclaim delivery or publication.
 - The packet cannot contain form answers, saved plan state, current URL,
   session/lead IDs, contact details, click IDs, or free text.
-- Focused acceptance passes 36 tests on Node 24.18.0. The post-restack local
-  gate passes 266 files / 3,338 tests, strict typecheck, full lint, optimized
-  Next.js 15.5.21 build with 59 static pages, 95 active routes / 17 acknowledged
-  duplicates, 14/14 release safety, deployable-source isolation, clean-tree
-  release doctor 43/43, and zero known Production dependency vulnerabilities.
-  Redacted Gitleaks reports no leak across 671 commits / approximately 16.34 MB
-  or the two-commit sealed-parent delta / approximately 32.93 KB.
-- Original head `c755764846a3aa2708def5c47cc36e6fa700941d` is preserved at
-  `rescue/amm-pr228-pre-pr227-exact-seal-20260829-0636`. The candidate was
+- Exact-parent focused acceptance passes 37 tests on Node 24.18.0, strict
+  typecheck, targeted lint, 14/14 release safety, deployable-source isolation,
+  `git diff --check`, and the Production dependency audit with no known
+  vulnerability. Historical pre-refresh proof also passed 266 files / 3,338
+  tests, full lint, optimized Next.js 15.5.21 build with 59 static pages, 95
+  active routes / 17 acknowledged duplicates, clean-tree release doctor 43/43,
+  and redacted full/delta Gitleaks scans. Fresh exact-head CI, Preview,
+  no-write browser QA, runtime-log, and secret-scan proof remain mandatory.
+- Former head `b1bd4b2012c037f4a71806b449541cdcfdd758b6` is preserved at
+  `rescue/amm-pr228-pre-pr227-parent-refresh-20260829-133619`. The candidate was
   reconciled through normal merge commit
-  `9b4b748f1513d6a00ed713e9fe5cd45c4546af98` onto exact sealed PR #227 head
-  `cf92b9cb64a7cc5b70c98d629cc86d2289fbfedb`; no rebase or force-push was used.
+  `38a22f5627f2b8f7293d9f65bf3a4f27b7475044` onto exact sealed PR #227 head
+  `ee1dd462665e423c17a69b6ab7d1c3a7a70a1409`; no rebase or force-push was used.
+  The earlier source rescue
+  `rescue/amm-pr228-pre-pr227-exact-seal-20260829-0636` also remains intact.
 - Prior desktop/mobile no-write browser QA reports no overflow, console/page
   error, bad response, external request, or internal `/social-preview` link;
   axe reports zero automated WCAG A/AA violations on the new section. Fresh
@@ -2090,23 +2130,21 @@ any bridge activation or shadow-mode test.
   this exact OTP Facebook-only condition from unknown crawler failures. They no
   longer recommend Cloudflare Bot Fight Mode, a broad user-agent allowlist, or
   a ModSecurity rule-ID search.
-- Focused no-network regression coverage passes 108 tests across the verifier,
+- Focused no-network regression coverage passes 111 tests across the verifier,
   Traffic readiness, and Launch Control modules. A fresh read-only live run
   remains truthfully 40/42 and prints the bounded host change packet instead of
   the superseded broad bypass.
-- Exact Node 24.18.0 local acceptance passes 266 files / 3,340 tests, strict
-  typecheck, full lint, optimized Next.js 15.5.21 build with 59 generated
-  static pages, 95 active / 17 acknowledged duplicate routes, 14/14 release
-  safety, deployable-source isolation, release doctor 43/43, and a Production
-  dependency audit with no known vulnerability. Redacted Gitleaks finds no
-  leak in the sealed-parent delta or 674-commit history.
-- Exact code-and-copy head
-  `4be6088e4a0a58441542f638f388ab9e8886b7ff` passed GitHub Release Gate run
-  `33250286860`. Immutable Preview
-  `dpl_6Zv5KKMe8C1fHtqUTjFMUHU7Qf1M` is `READY`; hosted no-write QA run
-  `33250361995` passed 18 checks / six intentional mutation skips / zero
-  failures and 4/4 browser cases with verdict `PREVIEW_READY`. Its 38-request
-  log window contains no warning, error, fatal record, or unexpected 5xx.
+- Diagnosis reuse now requires the exact two known paths, crawler, and HTTP 403
+  result; partial, alternate-path, and alternate-status failures stay unknown.
+  The proposed host expression also enforces the two allowed hostnames and uses
+  `req_novary` to avoid cache fragmentation by Host or User-Agent.
+- Exact PR #229 head
+  `ab24fc0ef2eef10f9b368d57909d899dd053d204` passed 266 files / 3,345 tests,
+  strict typecheck, full lint, optimized build with 59 generated pages, 14/14
+  release safety, 43/43 release doctor, dependency audit, source isolation,
+  and exact-delta/full-history Gitleaks. Release Gate `33267688596`, immutable
+  Preview `dpl_9pRRE8JHQG28ohxhFgcJwbRufKdf`, and protected QA `33267872275`
+  passed with `GO` / `PREVIEW_READY` while all mutations remained fail-closed.
 - After PR #229 was sealed, the separately approved account-level test was
   consumed. A backed-up document-root `.htaccess` trial parsed, but the two
   HTML pages remained 403 because the earlier server-global authorization
@@ -2144,11 +2182,14 @@ any bridge activation or shadow-mode test.
   Town consent-runtime gate; the page cannot create, consume, or broaden either
   approval. The completed-and-rolled-back crawler test is recorded only as a
   root/WHM access dependency.
-- Final local acceptance passes 267 files / 3,346 tests, strict typecheck, full
+- Final local acceptance passes 267 files / 3,351 tests, strict typecheck, full
   lint, optimized Next.js 15.5.21 build, 95/17 route proof, 14/14 safety,
   deployable-source isolation, zero known Production dependency
   vulnerabilities, and desktop/mobile no-write browser QA with zero axe A/AA
-  violations. Exact-head CI and immutable Preview proof remain pending.
+  violations. After the exact PR #229 parent refresh, fresh final-head CI,
+  immutable Preview, protected QA, visual/runtime, and Production non-mutation
+  evidence are pinned in the PR seal without a self-referential evidence-only
+  commit.
 - No route, migration, dependency, environment variable, secret, database,
   public page, provider, communication, WordPress, DNS, hosting, Production, or
   NellySelly state changed.

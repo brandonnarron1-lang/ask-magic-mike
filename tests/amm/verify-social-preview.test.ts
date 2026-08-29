@@ -56,6 +56,55 @@ describe("buildCrawlerRemediation", () => {
     expect(guidance).toContain("differs from the known");
     expect(guidance).not.toContain("bad_bots");
   });
+
+  it.each([
+    {
+      label: "only one expected OTP page fails",
+      blocks: [
+        {
+          url: "https://www.ourtownproperties.com/ask-mike/",
+          crawler: "facebook",
+          status: 403,
+        },
+      ],
+    },
+    {
+      label: "a different OTP path fails",
+      blocks: [
+        {
+          url: "https://www.ourtownproperties.com/ask-mike/",
+          crawler: "facebook",
+          status: 403,
+        },
+        {
+          url: "https://www.ourtownproperties.com/wp-login.php",
+          crawler: "facebook",
+          status: 403,
+        },
+      ],
+    },
+    {
+      label: "the expected paths fail with a different status",
+      blocks: [
+        {
+          url: "https://www.ourtownproperties.com/ask-mike/",
+          crawler: "facebook",
+          status: 429,
+        },
+        {
+          url: "https://www.ourtownproperties.com/agents/mike-eatmon/",
+          crawler: "facebook",
+          status: 429,
+        },
+      ],
+    },
+  ])("fails closed when $label", ({ blocks }) => {
+    const guidance = buildCrawlerRemediation(blocks);
+    const message = guidance.join(" ").toLowerCase();
+
+    expect(message).toContain("differs from the known");
+    expect(message).not.toContain("bad_bots");
+  });
 });
 
 // ---------------------------------------------------------------------------

@@ -2,15 +2,21 @@
 
 Date: 2026-08-29
 
-Status: behavior-bearing head accepted; final evidence-only seal pending
+Status: exact-parent refresh accepted locally; immutable exact-head PR seal pending
 
 ## Scope and release identity
 
 - branch: `codex/phase9-capability-ledger-20260828`
-- exact sealed parent: `8c4d637207b2252520d61a005e193e370567c5cc`
+- exact sealed parent: `ab24fc0ef2eef10f9b368d57909d899dd053d204`
 - parent candidate: Draft PR 229
-- behavior-bearing candidate head:
+- prior PR 230 head preserved at:
+  `rescue/amm-pr230-pre-pr229-parent-refresh-20260829-143600`
+- exact parent-refresh merge:
+  `bbb2833cff744bff28deadeedf64cb1117ffe570`
+- historical pre-refresh behavior-bearing candidate head:
   `20dd97ed44d692103e3e2e1935950a4e31467b5d`
+- historical pre-refresh evidence head:
+  `883ddec3f8b3796ba8beeb3fe41e5cd326e1a16d`
 - accepted Production authority: PR 209 merge
   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`
 - first pending application candidate: Draft PR 210
@@ -39,11 +45,12 @@ git diff --check
 
 Results:
 
-- focused capability/auth/authority coverage: 3 files / 33 tests passed;
+- focused capability/auth/authority coverage: 3 files / 34 tests passed after
+  the exact-parent accessible-name reconciliation;
 - focused protected browser coverage: desktop and mobile, 2/2 passed;
 - system isolation: passed; no deployable NellySelly identifier;
 - release safety: 14/14 passed;
-- full Vitest suite: 267 files / 3,346 tests passed;
+- full Vitest suite: 267 files / 3,351 tests passed;
 - strict TypeScript: passed;
 - full ESLint: passed;
 - Next.js 15.5.21 optimized build: passed;
@@ -135,7 +142,11 @@ browsers and four non-Facebook social crawlers passed on both Our Town pages,
 and only Facebook remained denied with HTTP 403 on `/ask-mike/` and Mike's
 agent profile. No request used a mutating method and no host policy changed.
 
-## Immutable behavior-bearing proof
+## Historical immutable behavior-bearing proof
+
+The following artifacts remain valid evidence for the pre-refresh capability
+behavior. They do not replace the fresh exact-head checks required after the
+PR #229 parent refresh.
 
 - GitHub exact-head Release Gate run `33251641125` passed against full SHA
   `20dd97ed44d692103e3e2e1935950a4e31467b5d` in 3m38s. Its
@@ -169,13 +180,14 @@ migration/write, lead/test submission, email/SMS/Push, WordPress content/form
 publication, DNS change, provider activation, paid spend, public post, data
 deletion, or NellySelly action occurred.
 
-## Final evidence-only seal boundary
+## Exact-head seal boundary
 
-This documentation update changes no executable behavior. After it is committed
-and pushed, the final documentation-only head still requires a fresh exact-head
-GitHub Release Gate, a matching READY Preview identity, clean/mergeable Draft PR
-proof, and confirmation that canonical Production still owns its recorded
-baseline. The accepted behavior-bearing Preview proof above remains immutable.
+This repository file intentionally does not name its own final commit. After the
+last behavior/documentation commit is pushed, fresh exact-head GitHub Release
+Gate, matching READY Preview, protected no-write QA, visual/runtime evidence,
+clean/mergeable Draft proof, and canonical Production non-mutation are pinned in
+the PR body and immutable seal comment. No evidence-only follow-up commit is
+required. The historical behavior-bearing Preview proof above remains immutable.
 
 PR #209's durability gate is consumed. This candidate cannot bypass PR #210 or
 any later predecessor and cannot reuse historical Production authority.
