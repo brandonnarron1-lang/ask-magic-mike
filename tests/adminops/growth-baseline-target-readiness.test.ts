@@ -133,6 +133,30 @@ describe("Growth baseline and target readiness", () => {
     expect(JSON.stringify(register)).not.toContain("targetValue");
   });
 
+  it("keeps reconciled spend visible when it produces no eligible lead without unlocking targets", () => {
+    const register = buildGrowthBaselineReadiness(growthView({
+      spend: [{
+        source: "google",
+        medium: "cpc",
+        campaign: "seller_search",
+        spendUsd: 250,
+      }],
+    }));
+
+    expect(register.gate).toBe("activation_required");
+    expect(register.ownerReviewReadyCount).toBe(0);
+    expect(metric(register, "tracked_spend")).toMatchObject({
+      state: "measured",
+      value: 250,
+      sampleSize: 1,
+      ownerReviewReady: false,
+    });
+    expect(metric(register, "cost_per_lead")).toMatchObject({
+      state: "insufficient_sample",
+      value: null,
+    });
+  });
+
   it("opens only evidence-backed metrics for owner review and records no target", () => {
     const leads = measuredLeads();
     const spend: GrowthSpendFact[] = [{
@@ -197,6 +221,127 @@ describe("Growth baseline and target readiness", () => {
     });
   });
 
+  it("withholds dollar totals until close-revenue and referral-fee coverage is complete", () => {
+    const leads: GrowthLeadFact[] = Array.from({ length: 3 }, (_, index) => ({
+      id: `portal-close-${index + 1}`,
+      createdAt: "2026-08-20T12:00:00.000Z",
+      status: "closed",
+      source: "zillow",
+      medium: "referral",
+      campaign: "portal",
+    }));
+    const partialOutcomes: GrowthOutcomeFact[] = [
+      {
+        leadId: leads[0].id,
+        outcomeType: "closed",
+        amountUsd: 5_000,
+        occurredAt: "2026-08-26T12:00:00.000Z",
+      },
+      {
+        leadId: leads[0].id,
+        outcomeType: "referral_paid",
+        amountUsd: 500,
+        occurredAt: "2026-08-26T12:01:00.000Z",
+      },
+    ];
+    const spend: GrowthSpendFact[] = [{
+      source: "zillow",
+      medium: "referral",
+      campaign: "portal",
+      spendUsd: 600,
+    }];
+    const partial = buildGrowthBaselineReadiness(growthView({
+      leads,
+      spend,
+      outcomes: partialOutcomes,
+    }));
+
+    expect(metric(partial, "attributed_revenue")).toMatchObject({
+      state: "insufficient_sample",
+      value: null,
+      sampleSize: 1,
+    });
+    expect(metric(partial, "recorded_referral_fees")).toMatchObject({
+      state: "insufficient_sample",
+      value: null,
+      sampleSize: 1,
+    });
+    expect(metric(partial, "recorded_referral_fees").reason).toContain("absent row is unknown");
+
+    const completeOutcomes: GrowthOutcomeFact[] = leads.flatMap((lead, index) => ([
+      {
+        leadId: lead.id,
+        outcomeType: "closed",
+        amountUsd: 5_000,
+        occurredAt: "2026-08-26T12:00:00.000Z",
+      },
+      {
+        leadId: lead.id,
+        outcomeType: "referral_paid",
+        amountUsd: index === 0 ? 500 : 0,
+        occurredAt: "2026-08-26T12:01:00.000Z",
+      },
+    ]));
+    const complete = buildGrowthBaselineReadiness(growthView({
+      leads,
+      spend,
+      outcomes: completeOutcomes,
+    }));
+
+    expect(metric(complete, "attributed_revenue")).toMatchObject({
+      state: "measured",
+      value: 15_000,
+      sampleSize: 3,
+    });
+    expect(metric(complete, "recorded_referral_fees")).toMatchObject({
+      state: "measured",
+      value: 500,
+      sampleSize: 3,
+      ownerReviewReady: false,
+    });
+  });
+
+  it("withholds blended cost baselines while any paid lead channel lacks spend", () => {
+    const leads: GrowthLeadFact[] = Array.from({ length: 10 }, (_, index) => ({
+      id: `paid-${index + 1}`,
+      createdAt: "2026-08-20T12:00:00.000Z",
+      status: "qualified",
+      source: index < 5 ? "google" : "facebook",
+      medium: index < 5 ? "cpc" : "paid_social",
+      campaign: "seller_demand",
+      isPaid: true,
+    }));
+    const partial = buildGrowthBaselineReadiness(growthView({
+      leads,
+      spend: [{
+        source: "google",
+        medium: "cpc",
+        campaign: "seller_demand",
+        spendUsd: 100,
+      }],
+    }));
+
+    expect(metric(partial, "tracked_spend")).toMatchObject({ state: "measured", value: 100 });
+    expect(metric(partial, "cost_per_lead")).toMatchObject({
+      state: "insufficient_sample",
+      value: null,
+    });
+    expect(metric(partial, "cost_per_lead").reason).toContain("complete paid-channel spend coverage");
+
+    const complete = buildGrowthBaselineReadiness(growthView({
+      leads,
+      spend: [
+        { source: "google", medium: "cpc", campaign: "seller_demand", spendUsd: 100 },
+        { source: "facebook", medium: "paid_social", campaign: "seller_demand", spendUsd: 100 },
+      ],
+    }));
+    expect(metric(complete, "cost_per_lead")).toMatchObject({
+      state: "measured",
+      value: 20,
+      sampleSize: 10,
+    });
+  });
+
   it("separates missing subsystem evidence from a real measured zero", () => {
     const register = buildGrowthBaselineReadiness(growthView({
       leads: measuredLeads(),
@@ -219,6 +364,20 @@ describe("Growth baseline and target readiness", () => {
     });
     expect(metric(register, "contactable_rate").reason).toContain("Raw contact details must not be added");
     expect(metric(register, "durable_funnel_completion_rate").state).toBe("not_instrumented");
+    expect(metric(register, "agent_first_follow_up_rate")).toMatchObject({
+      state: "not_instrumented",
+      value: null,
+      ownerReviewReady: false,
+    });
+    expect(metric(register, "agent_first_follow_up_rate").reason).toContain("assigned-lead denominator");
+  });
+
+  it("publishes one unique snapshot for every reviewed evidence contract", () => {
+    const register = buildGrowthBaselineReadiness(growthView());
+    const keys = register.metrics.map((item) => item.key);
+
+    expect(keys).toHaveLength(42);
+    expect(new Set(keys).size).toBe(42);
   });
 
   it("formats unavailable and measured values without fabricating units", () => {

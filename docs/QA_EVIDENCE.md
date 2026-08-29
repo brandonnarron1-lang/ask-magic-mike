@@ -1,6 +1,6 @@
 # QA Evidence
 
-## Phase 9 baseline and target readiness — 2026-08-28
+## Phase 9 baseline and target readiness — 2026-08-29
 
 - **Canonical Production baseline:** a saved aggregate-only SELECT in Neon
   returned 6 total lead rows, all 6 test/suppressed, and zero eligible live or
@@ -8,10 +8,12 @@
   signals, opportunities, and non-test publication proofs at
   `2026-08-28T19:45:52.419594+00:00`. It returned no lead identity, contact,
   message, address, recipient, credential, or raw event data.
-- **Public health:** `/api/health/live` and `/api/health/ready` returned HTTP 200;
-  canonical Neon, capture function, tables, RBAC, Push, and phone readiness were
-  true. Production remained pinned to
-  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`.
+- **Historical public health at baseline capture:** `/api/health/live` and
+  `/api/health/ready` returned HTTP 200; canonical Neon, capture function,
+  tables, RBAC, Push, and phone readiness were true. The later accepted
+  Production authority is exact commit
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`; the aggregate snapshot was not
+  relabeled as a fresh query during stack reconciliation.
 - **Provider observation:** Neon Production compute was active and the account
   displayed 93% monthly compute allowance consumed at check time. No provider,
   billing, branch, or database setting was changed.
@@ -19,7 +21,8 @@
   tests/adminops/growth-baseline-target-readiness.test.ts
   tests/adminops/admin-growth-route-guards.test.ts` passes 2 files / 12 tests;
   the widened Growth suite passes 6 files / 38 tests.
-- **Exact local release gate:** with Node 24.18.0, `pnpm release:gate` passes
+- **Former-head exact local release gate:** with Node 24.18.0,
+  `pnpm release:gate` passed
   deployable-source isolation, 14/14 release safety, all 264 files / 3,299
   tests, strict typecheck, full ESLint, optimized Next.js 15.5.21 build, and 95
   active routes / 17 acknowledged duplicates.
@@ -44,12 +47,25 @@
 - **Safety correction:** `/api/events` (and `/api/widget/events`),
   `/api/analytics/event`, and `/api/experiments/event` now call the existing
   endpoint-aware Preview mutation guard before rate limiting or persistence.
-  Ordinary Preview telemetry returns truthful `persisted: false` /
-  `preview_read_only`; automated-browser exclusion remains earlier in the
-  chain. Focused route and boundary proof passes 4 files / 46 tests.
-- The corrected tree passes the complete Node 24.18.0 release gate. Fresh
+  Ordinary Preview telemetry fails closed with HTTP 503, `persisted: false`,
+  and `preview_data_disabled`; automated-browser exclusion remains earlier in
+  the chain.
+- **Stack reconciliation:** original PR #225 head
+  `a65cde03c0d8505ad00732f862c37841ccca9a04` is preserved at
+  `rescue/amm-pr225-pre-pr224-exact-seal-20260829-050048`. Exact sealed PR #224
+  head `5c75b8f919442c05b607eb666c5595023057d94d` was merged without rebase or
+  force push at `0bb1a6d77d4daf830a4dc7681e3a3d5650332286`.
+- **Definition-to-source data-quality proof:** focused cases prove tracked spend
+  remains visible without eligible leads; partial close revenue and referral
+  fees remain unknown; explicit zero referral fee is valid evidence; blended
+  cost is withheld until every paid channel has spend attribution; agent
+  follow-up remains uninstrumented without an agent-grain denominator; and all
+  42 keys are unique.
+- **Current focused acceptance:** exact Node 24.18.0 passes 8 files / 117 tests,
+  strict typecheck, focused ESLint, and whitespace checks. Fresh full release,
   exact-commit dependency/history scans, GitHub CI, immutable Vercel Preview,
-  and protected hosted suppression proof remain required after commit/push.
+  protected hosted browser, and runtime-log proof remain required after the
+  final commit/push.
 - No Production row, environment, migration, target, lead, notification,
   provider, publication, spend, WordPress/DNS, deletion, or NellySelly action
   occurred.

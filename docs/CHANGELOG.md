@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026-08-28 — Baseline and target-readiness control
+## 2026-08-29 — Baseline and target-readiness control
 
 - Added a read-only baseline-readiness layer to the existing protected Growth
   Command Center; no parallel dashboard, target database, or write route was
@@ -24,6 +24,14 @@
   only on the Neon Preview branch; the identical Production time/path window
   contained zero rows. The Preview artifact was preserved rather than hidden by
   deletion.
+- Reconciled the candidate onto sealed PR #224 without rewriting history and
+  retained one canonical fail-closed HTTP 503 Preview mutation contract across
+  public analytics and experiment routes.
+- Added a definition-to-source data-quality pass: tracked spend stays visible
+  when lead volume is zero; partial close-revenue/referral-fee totals remain
+  unknown; blended costs require complete paid-channel spend attribution; and
+  the agent first-follow-up rate remains uninstrumented until an agent-grain
+  assigned-lead denominator exists.
 - No Production row/configuration, target, lead, message, provider,
   publication, spend, WordPress/DNS, deletion, or NellySelly mutation occurred;
   the single preserved Preview analytics artifact is documented above.

@@ -1,6 +1,6 @@
 # Known Limitations — Ask Magic Mike
 
-Updated 2026-08-28. This document records the current Neon/Resend/Web Push
+Updated 2026-08-29. This document records the current Neon/Resend/Web Push
 system, not the superseded Supabase/mock-email/Twilio-era architecture.
 
 ## 1. Demand and measurement
@@ -27,6 +27,11 @@ eligible live-demand denominator, so target entry remains locked. Directional
 samples are visible when they exist but cannot become an approved target. A
 future durable target lifecycle requires measured evidence plus a separate
 owner-reviewed decision; QA rows cannot unlock it.
+
+Reconciled spend can be measured as independent context even when lead volume
+is zero, but that does not unlock a conversion or economics target. Partial
+close-revenue, referral-fee, or paid-channel spend coverage remains unknown
+rather than rendering a deceptively low dollar or cost value.
 
 ### Field-performance telemetry is active but not decision-grade yet
 

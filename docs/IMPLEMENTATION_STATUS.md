@@ -2,7 +2,7 @@
 
 Updated 2026-08-29.
 
-## Phase 9 baseline and target readiness — 2026-08-28
+## Phase 9 baseline and target readiness — 2026-08-29
 
 - **Production truth:** a read-only canonical Neon aggregate at
   `2026-08-28T19:45:52.419594+00:00` confirms 6 total lead rows, all 6
@@ -27,25 +27,27 @@ Updated 2026-08-29.
   changing provider value is documented rather than hard-coded into the app.
 - **Authority boundary:** the feature is aggregate-only, server-rendered,
   `report:view` protected, and read-only. It has no form, server action, target
-  value, database query/write, migration, message, provider call, publication,
-  spend, WordPress/DNS, deployment, deletion, or NellySelly action.
+  value, additional database query, database write, migration, message,
+  provider call, publication, spend, WordPress/DNS, deployment, deletion, or
+  NellySelly action.
 - **Hosted safety correction:** exact Preview QA found one inherited ordinary-
   browser telemetry path that bypassed the Preview write guard. One
   privacy-minimized `/ask` page-view was accepted on the Neon Preview branch;
   an aggregate check proved zero matching rows on Production. The candidate now
   applies the existing endpoint-aware Preview mutation guard before rate-limit
   or persistence work in all public analytics and experiment event routes.
-  Focused containment proof passes 4 files / 46 tests.
-- **Current acceptance:** focused Growth coverage passes 6 files / 38 tests.
-  Exact Node 24.18.0 passes the complete release gate: 264 files / 3,299 tests,
-  strict typecheck, full ESLint, optimized Next.js 15.5.21 build, 95/17 route
-  proof, 14/14 safety, and NellySelly isolation. Authenticated Chromium passes
-  390×844 and 1,440×1,000 acceptance with HTTP 200, all 42 contracts, target
-  lock, exact containment, no overlay/error, and zero mutation requests.
-  The previously sealed exact-head GitHub/Preview proof is historical after the
-  safety correction. The corrected tree passes the full local release gate;
-  fresh exact-commit secret scans, CI, immutable Preview, and hosted suppression
-  proof remain mandatory.
+  The reconciled contract fails closed with HTTP 503 and no-store semantics.
+- **Data-quality correction:** tracked spend is visible without a lead
+  denominator but cannot unlock a target; partial revenue/referral-fee totals
+  and incomplete paid-channel cost baselines remain unmeasured; agent
+  first-follow-up remains explicitly uninstrumented until agent-grain assignment
+  evidence exists. All 42 contract keys are unique.
+- **Current acceptance:** PR #225 was reconciled onto exact sealed PR #224 head
+  `5c75b8f919442c05b607eb666c5595023057d94d` at merge commit
+  `0bb1a6d77d4daf830a4dc7681e3a3d5650332286`. Exact Node 24.18.0 focused
+  acceptance passes 8 files / 117 tests; strict typecheck and focused ESLint
+  pass. Full release, secret, immutable Preview, hosted browser, and runtime-log
+  evidence remain mandatory on the final exact head.
 - Detailed design: `docs/phase9/BASELINE_TARGET_READINESS.md`.
 
 ## Phase 9 lead-intent default truth — 2026-08-29
