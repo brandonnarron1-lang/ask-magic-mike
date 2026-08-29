@@ -1,14 +1,21 @@
 # Phase 9 channel-economics truth QA evidence
 
-Date: 2026-08-25
+Date: 2026-08-29
 
 Candidate branch: `codex/phase9-channel-economics-truth-20260825`
 
 Base: exact sealed PR #222 head
-`08e0d345dd52a01d5da9a42b10dde982cbcce606`
+`c6ff9157e66705128a283b98096f74ca8247cdab`
 
-Status: local release and browser verification complete; immutable Preview and
-protected hosted browser evidence pending; Production unchanged
+Preserved original head:
+`rescue/amm-pr223-pre-pr222-exact-seal-20260829-040442` at
+`294e08fc8524e515364c7a7bd49cfe8413d3d08c`
+
+Reconciliation merge: `66e27e897cf23d1b60e47d74807e0d05c8c9fdf5`
+
+Status: reconciliation and refreshed focused verification complete; fresh full
+local, immutable Preview, protected hosted-browser, and runtime-log evidence
+pending; Production unchanged
 
 ## Story under test
 
@@ -40,12 +47,13 @@ The focused suite currently proves:
 - the Growth route remains server-authorized and read-only; and
 - owned-demand decision systems compile against the expanded canonical summary.
 
-Current result: 5 focused files / 63 tests PASS. The final local release pass
-used exact Node 24.18.0 and pnpm 10.30.3 and is recorded below.
+Current refreshed result: 5 focused files / 64 tests PASS on exact Node 24.18.0
+and pnpm 10.30.3. This includes a dedicated proof that an explicit zero
+referral fee completes the review while an absent fee remains unknown.
 
-## Local release result
+## Former-head local release result — historical
 
-The complete local release gate passes:
+The original PR #223 head previously passed:
 
 - system isolation: PASS;
 - release safety: 14/14 PASS;
@@ -61,9 +69,10 @@ The complete local release gate passes:
 - exact staged-content gitleaks scan: PASS across approximately 41.6 KB; and
 - `git diff --check`: PASS.
 
-The dirty-tree release doctor reports 42 passing checks and its one expected,
-nonblocking dirty-tree failure. A clean-tree doctor run remains part of the
-post-commit seal.
+Those results and screenshots do not seal the refreshed head. A fresh full
+local gate, clean-tree doctor, exact-head GitHub CI, immutable Preview,
+protected browser suite, visual inspection, and runtime-log review remain
+required below.
 
 ## Security review
 
@@ -78,7 +87,7 @@ external provider call. Persisted labels render through normal React escaping.
 Errors remain generic, and no actionable security issue was found in the
 touched scope.
 
-## Local protected-browser proof
+## Former-head local protected-browser proof — historical
 
 Exact Node 24 Chromium Playwright passes 2/2 authenticated desktop and mobile
 scenarios for `/admin/growth`:
@@ -146,5 +155,7 @@ scans above passed.
 
 No Production deployment, Vercel environment edit, Neon connection, schema or
 row mutation, lead/event/message, provider action, WordPress/DNS change,
-publication, spend, deletion, or NellySelly action occurred. The first pending
-Production gate remains PR #209.
+publication, spend, deletion, or NellySelly action occurred. Production remains
+on its current PR #209 authority. The separate current live-action gate remains
+the explicitly named Our Town Basic Consent bridge installation/runtime-QA
+gate; this Draft candidate does not consume or broaden it.
