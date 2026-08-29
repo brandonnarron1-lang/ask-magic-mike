@@ -2130,23 +2130,24 @@ any bridge activation or shadow-mode test.
   this exact OTP Facebook-only condition from unknown crawler failures. They no
   longer recommend Cloudflare Bot Fight Mode, a broad user-agent allowlist, or
   a ModSecurity rule-ID search.
-- Focused no-network regression coverage passes 108 tests across the verifier,
+- Focused no-network regression coverage passes 111 tests across the verifier,
   Traffic readiness, and Launch Control modules. A fresh read-only live run
   remains truthfully 40/42 and prints the bounded host change packet instead of
   the superseded broad bypass.
-- Exact Node 24.18.0 local acceptance passes 266 files / 3,340 tests, strict
-  typecheck, full lint, optimized Next.js 15.5.21 build with 59 generated
-  static pages, 95 active / 17 acknowledged duplicate routes, 14/14 release
-  safety, deployable-source isolation, release doctor 43/43, and a Production
-  dependency audit with no known vulnerability. Redacted Gitleaks finds no
-  leak in the sealed-parent delta or 674-commit history.
-- Exact code-and-copy head
-  `4be6088e4a0a58441542f638f388ab9e8886b7ff` passed GitHub Release Gate run
-  `33250286860`. Immutable Preview
-  `dpl_6Zv5KKMe8C1fHtqUTjFMUHU7Qf1M` is `READY`; hosted no-write QA run
-  `33250361995` passed 18 checks / six intentional mutation skips / zero
-  failures and 4/4 browser cases with verdict `PREVIEW_READY`. Its 38-request
-  log window contains no warning, error, fatal record, or unexpected 5xx.
+- Diagnosis reuse now requires the exact two known paths, crawler, and HTTP 403
+  result; partial, alternate-path, and alternate-status failures stay unknown.
+  The proposed host expression also enforces the two allowed hostnames and uses
+  `req_novary` to avoid cache fragmentation by Host or User-Agent.
+- The latest sealed PR #228 parent
+  `3c01eeb2dc133d6463d2ce19904ac3a08f56284c` was merged normally at
+  `1757c696af05ec35730f7e9f716ccb58ec7dc1f2`; the prior PR #229 head is
+  preserved at
+  `rescue/amm-pr229-pre-pr228-parent-refresh-20260829-140600`. No rebase,
+  reset, force push, or history deletion was used.
+- Earlier green Release Gate / Preview evidence remains historical evidence for
+  the pre-hardening candidate. Final immutable head, artifact, Preview, hosted
+  no-write, runtime, and visual evidence is pinned in PR #229 after the branch
+  is pushed, rather than creating a self-referential evidence-only commit.
 - No host file, firewall, Apache service, cache, WordPress, Vercel, database,
   communication provider, DNS, Production app, or NellySelly state was changed.
 - Evidence and controlled change contract:

@@ -34,12 +34,15 @@ confirm include order on this cPanel build and run `apachectl configtest`
 before a graceful reload. A representative operator-reviewed expression is:
 
 ```apache
-SetEnvIfExpr "tolower(req('User-Agent')) =~ m#^facebookexternalhit/# && %{REQUEST_METHOD} =~ m#^(GET|HEAD)$# && %{REQUEST_URI} =~ m#^/(?:ask-mike/?|agents/mike-eatmon/?|wp-content/plugins/ask-magic-mike-lead-ops-social-upgrade/assets/social/02_open_graph_card_1200x630_safe_zone\.jpg|wp-content/uploads/amm_og_card_1200x630\.jpg)$#" !bad_bots
+SetEnvIfExpr "tolower(req_novary('Host')) =~ m#^(?:www\.)?ourtownproperties\.com(?::[0-9]+)?$# && tolower(req_novary('User-Agent')) =~ m#^facebookexternalhit/# && %{REQUEST_METHOD} =~ m#^(GET|HEAD)$# && %{REQUEST_URI} =~ m#^/(?:ask-mike/?|agents/mike-eatmon/?|wp-content/plugins/ask-magic-mike-lead-ops-social-upgrade/assets/social/02_open_graph_card_1200x630_safe_zone\.jpg|wp-content/uploads/amm_og_card_1200x630\.jpg)$#" !bad_bots
 ```
 
 This snippet is a change specification, not a command to paste blindly. The
 host must place it in the supported per-account/per-vhost include after the
-global classifier and before authorization is evaluated.
+global classifier and before authorization is evaluated. The expression keeps
+the hostname constraint explicit even inside a vhost include and uses
+`req_novary` so this access-control check does not add `Host` or `User-Agent`
+to the response's `Vary` header.
 
 ## Prohibited shortcuts
 

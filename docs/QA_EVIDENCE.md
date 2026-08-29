@@ -2,21 +2,22 @@
 
 ## Phase 9 OTP Facebook crawler Apache diagnosis — 2026-08-29
 
-- Exact code-and-copy head
-  `4be6088e4a0a58441542f638f388ab9e8886b7ff` passes the Node 24.18.0
-  release gate: 266 files / 3,340 tests, strict typecheck, full lint,
-  optimized 59-page build, 95 active routes / 17 acknowledged duplicates,
-  14/14 release safety, 43/43 release doctor, deployable-source isolation,
-  zero known Production dependency vulnerabilities, and redacted secret scans.
-- GitHub Release Gate run `33250286860` passed. Immutable Preview
-  `dpl_6Zv5KKMe8C1fHtqUTjFMUHU7Qf1M` is `READY` at the same exact head.
-- Hosted no-write run `33250361995` passed 18 checks with six intentional
-  mutation skips and zero failures, plus 4/4 browser cases with zero
-  unexpected, flaky, or skipped results. Its verdict is `PREVIEW_READY`.
-- The exact Preview log window contains 38 information-level requests and no
-  warning, error, or fatal record. Its only 5xx is the expected fail-closed
-  Preview SLA-sweep 503; no lead, event, database mutation, email, SMS, Push,
-  or provider delivery occurred.
+- The latest sealed PR #228 parent
+  `3c01eeb2dc133d6463d2ce19904ac3a08f56284c` was reconciled by normal merge
+  `1757c696af05ec35730f7e9f716ccb58ec7dc1f2`; the prior PR #229 head is
+  preserved at
+  `rescue/amm-pr229-pre-pr228-parent-refresh-20260829-140600`.
+- Focused no-network regression coverage passes 111 tests. The verifier now
+  reuses the known Apache diagnosis only for the exact two expected paths,
+  Facebook crawler, and HTTP 403 outcome. Partial, different-path, and
+  different-status failures remain unknown and fail closed.
+- The reviewed host expression independently constrains both allowed hostnames
+  and uses Apache `req_novary` header access to avoid adding Host or User-Agent
+  to `Vary`. Official Apache 2.4 syntax and ordering references remain linked
+  from the canonical evidence file.
+- Earlier green Release Gate, immutable Preview, no-write QA, and clean runtime
+  results remain historical pre-hardening proof. Final exact-head remote proof
+  is pinned in PR #229 after push and is not written back into this commit.
 - Read-only live crawler verification remains truthfully 40/42. Only the two
   expected Our Town Facebook checks fail; the corrected verifier emits the
   bounded Apache operator action and no stale broad-WAF instruction.

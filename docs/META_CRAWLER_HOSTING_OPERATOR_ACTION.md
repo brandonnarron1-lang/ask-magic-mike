@@ -38,7 +38,9 @@ paths:
 Please do not disable the global bot policy, edit a cPanel-generated file,
 exempt POST/admin/login/REST/form/XML-RPC routes, or make an all-path
 user-agent exception. Confirm the include order, run `apachectl configtest`,
-and use a graceful reload.
+and use a graceful reload. The reviewed expression in the full contract keeps
+the two allowed hostnames explicit and uses Apache's `req_novary` lookup to
+avoid varying cache entries by Host or User-Agent.
 
 ## Acceptance and rollback
 

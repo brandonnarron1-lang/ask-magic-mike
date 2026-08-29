@@ -46,6 +46,8 @@ Primary references:
 
 - Apache 2.4 `mod_setenvif` / `SetEnvIfExpr` syntax and ordered evaluation:
   <https://httpd.apache.org/docs/current/mod/mod_setenvif.html>
+- Apache 2.4 expression variables and `req_novary` behavior:
+  <https://httpd.apache.org/docs/current/expr.html>
 - Apache 2.4 access-control guidance and User-Agent warning:
   <https://httpd.apache.org/docs/2.4/howto/access.html>
 
@@ -62,45 +64,31 @@ Primary references:
 - Original PR #229 head
   `0a139e41a565a3ff7a672b0a41a27d7c8a1ea07f` is preserved at
   `rescue/amm-pr229-pre-pr228-exact-seal-20260829-0713`.
-- The branch was reconciled by normal merge commit
-  `979592187da72e45fe6e3387bba4722e8551e615` onto exact sealed PR #228
-  head `b1bd4b2012c037f4a71806b449541cdcfdd758b6`; no rebase or force push
-  was used.
-- Final code-and-copy head
-  `4be6088e4a0a58441542f638f388ab9e8886b7ff` passes exact Node 24.18.0
-  isolation, 14/14 release safety, 266 test files / 3,340 tests, strict
-  typecheck, full lint, optimized Next.js 15.5.21 build with 59 generated
-  static pages, and route proof with 95 active / 17 acknowledged duplicate
-  routes.
-- Release doctor is healthy at 43/43. Production dependency audit reports no
-  known vulnerability. Redacted Gitleaks reports no leak across the two-commit
-  parent delta (approximately 31.89 KB) or 674-commit repository history
-  (approximately 16.36 MB).
+- A later PR #228 hardening required a second parent refresh. The current exact
+  sealed PR #228 parent `3c01eeb2dc133d6463d2ce19904ac3a08f56284c`
+  was reconciled by normal merge
+  `1757c696af05ec35730f7e9f716ccb58ec7dc1f2`. The previous PR #229 head is
+  preserved at
+  `rescue/amm-pr229-pre-pr228-parent-refresh-20260829-140600`; no rebase,
+  reset, force push, or history deletion was used.
+- The verifier's known-cause classifier now requires the exact two expected
+  Our Town paths, Facebook crawler, and HTTP 403 result. Any partial,
+  different-path, or different-status failure remains unknown and receives
+  generic investigation guidance.
+- The representative host expression now makes the two allowed hostnames an
+  explicit condition and uses `req_novary` for Host and User-Agent so the
+  access-control check does not fragment response caches by those headers.
+- Focused no-network regression coverage passes 111 tests across the verifier,
+  Traffic readiness, and Launch Control modules.
 - A fresh read-only live verifier run remains 40/42: Ask Magic Mike is fully
   available to every tested crawler, and only the two expected Our Town
   Facebook checks return 403. The verifier now prints the bounded Apache
   action instead of the superseded broad-WAF instructions.
-- GitHub Release Gate run `33250286860` passed every step for head
-  `4be6088e4a0a58441542f638f388ab9e8886b7ff`. Artifact `9714180289` has
-  digest
-  `sha256:a269ec98b55a40cb653443bed2a6fa37ca95c34eb08af82e715dc06a62003e6d`.
-- Immutable Vercel Preview deployment
-  `dpl_6Zv5KKMe8C1fHtqUTjFMUHU7Qf1M` is `READY` at
-  `https://ask-magic-mike-4cl6yz9hc-eyes-up-industries.vercel.app` and is
-  bound to the same exact code-and-copy head.
-- Hosted no-write Preview QA run `33250361995` checked out the exact branch
-  head and passed 18 checks with six intentional mutation skips and zero
-  failures. Browser E2E passed 4/4 with zero unexpected, flaky, or skipped
-  cases. The authority verdict is `PREVIEW_READY`; database mutation, live
-  email, and live SMS were all disabled. Artifact `9714213564` has digest
-  `sha256:b37b8186884d17a9565a68a936b2e685441ee03debe6610e85324ce2be4ab102`.
-- The exact Preview runtime window contains 38 information-level requests:
-  31 HTTP 200, four HTTP 204, one HTTP 307, one expected invalid-token 404,
-  and one expected fail-closed Preview SLA-sweep 503. There are no warning,
-  error, or fatal records and no unexpected 5xx response.
-- This repository evidence is intentionally bound to the last behavior-bearing
-  head. The subsequent evidence-only seal and its exact-head checks are pinned
-  in PR #229 rather than creating an endless evidence-commit loop.
+- Earlier green Release Gate, immutable Preview, protected no-write QA, and
+  clean runtime evidence remains historical proof for the pre-hardening
+  candidate. Final exact-head runs, immutable deployment, artifacts, digests,
+  and runtime evidence are pinned in PR #229 after push rather than creating a
+  self-referential evidence-only commit.
 - Production remains on authority commit
   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and deployment
   `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`.
