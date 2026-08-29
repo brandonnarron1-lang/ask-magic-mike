@@ -11,22 +11,24 @@ Updated 2026-08-29.
 - **Truth correction:** untouched forms no longer assert `Move-in ready`,
   `ASAP`, `30-60 days`, or `Not sure yet`. Optional selects begin blank and
   omitted fields remain unknown through browser serialization and canonical
-  persistence.
+  persistence. An unchecked buyer preapproval affirmation is omitted rather
+  than persisted as a false consumer statement.
 - **Decision integrity:** unknown timeline now contributes zero score points,
-  persists as `null`, and cannot earn seller A-grade urgency. Explicit planning
-  answers retain their existing compatibility mapping.
-- **Current acceptance:** 4 focused files / 44 tests and all 263 files / 3,290
-  tests pass, as do strict TypeScript, ESLint, optimized Next.js 15.5.21 build,
-  95/17 route proof, 14/14 release safety, NellySelly isolation, Production
-  dependency audit, and a 643-commit secret scan. Same-viewport mobile
-  before/after review found no layout regression. Exact-head hosted sealing is
-  pending until the candidate is committed and receives a Vercel Preview.
+  persists as `null`, and cannot earn seller A-grade urgency. Explicit
+  planning-horizon answers retain their compatibility mapping; `not sure`,
+  `unknown`, and unrecognized text do not become 24 months.
+- **Current acceptance:** after reconciliation onto exact sealed PR #223 head
+  `18be077b1b6b8a595af2bb5dbd4a94d736dad65c`, exact Node 24.18.0 focused
+  acceptance passes 4 files / 48 tests. Final exact-head local, CI, immutable
+  Preview, protected browser, security, isolation, and runtime-log evidence is
+  bound to PR #224 before any promotion.
 - **Authority boundary:** no existing Production row is rewritten; no
   migration, lead/event, communication, provider, WordPress, DNS, deployment,
   publication, deletion, or NellySelly action occurred. Production remains
   unchanged and the established first release gate still controls promotion.
 - Detailed design and evidence:
-  `docs/phase9/LEAD_INTENT_DEFAULT_TRUTH.md`.
+  `docs/phase9/LEAD_INTENT_DEFAULT_TRUTH.md` and
+  `docs/phase9/LEAD_INTENT_DEFAULT_TRUTH_QA_EVIDENCE.md`.
 
 ## Phase 9 channel-economics truth hardening — 2026-08-29
 

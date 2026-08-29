@@ -8,8 +8,12 @@
 - Removed silently asserted condition, timeline, and financing defaults from
   untouched forms; optional values now begin blank and are omitted until the
   consumer explicitly selects them.
-- Preserved unknown timeline as `null`, awarded it zero points, and required an
-  explicit urgent timeline before seller A-grade qualification.
+- Removed the untouched buyer preapproval assertion; the field is omitted
+  unless the consumer affirmatively checks it.
+- Preserved missing, unrecognized, and explicitly uncertain timelines as
+  `null`, awarded them zero points, and required an explicit urgent timeline
+  before seller A-grade qualification. Only actual planning-horizon answers
+  retain the 24-month compatibility mapping.
 - Added form-payload and atomic lifecycle regressions plus same-viewport mobile
   before/after evidence without changing the released visual system.
 - No Production, environment, database row, lead/event, communication,
