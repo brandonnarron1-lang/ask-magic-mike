@@ -2094,6 +2094,12 @@ any bridge activation or shadow-mode test.
   Traffic readiness, and Launch Control modules. A fresh read-only live run
   remains truthfully 40/42 and prints the bounded host change packet instead of
   the superseded broad bypass.
+- Exact Node 24.18.0 local acceptance passes 266 files / 3,340 tests, strict
+  typecheck, full lint, optimized Next.js 15.5.21 build with 59 generated
+  static pages, 95 active / 17 acknowledged duplicate routes, 14/14 release
+  safety, deployable-source isolation, release doctor 43/43, and a Production
+  dependency audit with no known vulnerability. Redacted Gitleaks finds no
+  leak in the sealed-parent delta or 674-commit history.
 - No host file, firewall, Apache service, cache, WordPress, Vercel, database,
   communication provider, DNS, Production app, or NellySelly state was changed.
 - Evidence and controlled change contract:
