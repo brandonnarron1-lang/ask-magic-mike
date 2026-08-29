@@ -59,12 +59,14 @@ The complete local release gate passed:
 - full ESLint: PASS;
 - optimized Next.js build: PASS, 59 static pages generated;
 - route manifest: PASS, 95 active routes / 17 acknowledged duplicates;
-- Production dependency audit and final exact-head Gitleaks scans remain to be
-  refreshed after the post-restack commit;
+- Production dependency audit: no known vulnerability;
+- redacted full-history Gitleaks: 671 commits / approximately 16.34 MB / no
+  detected leak;
+- exact sealed-parent delta Gitleaks: two commits / approximately 32.93 KB / no
+  detected leak; and
 - `git diff --check`: PASS.
 
-The clean-tree release doctor will be rerun after the post-restack commit; its
-43 substantive contracts remain covered by the complete release gate.
+Clean-tree release doctor: **43/43 PASS** with no failure or skip.
 
 ## No-write browser acceptance
 
@@ -148,6 +150,6 @@ conformance or replace human assistive-technology review.
 
 After commit and push, seal the Draft PR's immutable head, CI release gate,
 Vercel Preview deployment identity, protected no-write hosted browser pass,
-Preview runtime logs, clean-tree release doctor, dependency audit, and exact
-secret scans. Production stays on `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`;
+Preview runtime logs, and fresh exact-head visual/accessibility evidence.
+Production stays on `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`;
 PR #209's consumed historical approval cannot authorize this Draft.

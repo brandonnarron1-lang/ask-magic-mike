@@ -2050,7 +2050,10 @@ any bridge activation or shadow-mode test.
 - Focused acceptance passes 36 tests on Node 24.18.0. The post-restack local
   gate passes 266 files / 3,338 tests, strict typecheck, full lint, optimized
   Next.js 15.5.21 build with 59 static pages, 95 active routes / 17 acknowledged
-  duplicates, 14/14 release safety, and deployable-source isolation.
+  duplicates, 14/14 release safety, deployable-source isolation, clean-tree
+  release doctor 43/43, and zero known Production dependency vulnerabilities.
+  Redacted Gitleaks reports no leak across 671 commits / approximately 16.34 MB
+  or the two-commit sealed-parent delta / approximately 32.93 KB.
 - Original head `c755764846a3aa2708def5c47cc36e6fa700941d` is preserved at
   `rescue/amm-pr228-pre-pr227-exact-seal-20260829-0636`. The candidate was
   reconciled through normal merge commit
