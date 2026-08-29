@@ -42,19 +42,21 @@ Updated 2026-08-29.
   and incomplete paid-channel cost baselines remain unmeasured; agent
   first-follow-up remains explicitly uninstrumented until agent-grain assignment
   evidence exists. All 42 contract keys are unique.
-- **Current acceptance:** PR #225 was reconciled onto exact sealed PR #224 head
-  `5c75b8f919442c05b607eb666c5595023057d94d` at merge commit
-  `0bb1a6d77d4daf830a4dc7681e3a3d5650332286`; code-bearing hardening head is
-  `1289244c44d0c336b4ed242293febe15d5b75914`. Exact Node 24.18.0 passes
-  deployable-source Ask/Nelly isolation, safety 14/14, 264 files / 3,324 tests,
-  strict typecheck, full ESLint, optimized 59-page build, 95 active routes / 17
-  acknowledged duplicates, doctor 43/43, zero known Production dependency
-  vulnerabilities, 668-commit and exact five-commit redacted gitleaks scans,
-  sealed-parent ancestry, whitespace, and focused security review. Immutable
-  Preview, hosted browser/visual, runtime-log, and GitHub CI evidence are
-  mandatory on one final pushed head. The hosted browser contract now scopes
-  legacy economics labels to their visible section and directly exercises the
-  new collapsed readiness audit, avoiding duplicate-text ambiguity.
+- **Current acceptance:** the previously sealed PR #225 head
+  `60599703cf8ac5e65794b696aefaebc6353bbdf0` is preserved at
+  `rescue/amm-pr225-pre-pr224-parent-refresh-20260829-1224`. Exact sealed PR
+  #224 head `2effb45e2a324c25875dcf7d24019eae8dfdad38` was merged without rebase,
+  reset, force push, or conflict at reconciliation commit
+  `eab49cbe2926f3726d289473c308363e1f03de9e`. The refreshed tree retains the
+  inherited lead-intent truth and keyboard-accessible channel-economics region.
+  Exact Node 24.18.0 local acceptance passes 10 focused files / 99 tests,
+  strict typecheck, targeted ESLint, release safety 14/14, sealed-parent
+  ancestry, and whitespace checks. The prior exact head's complete 264-file /
+  3,324-test release proof is historical; fresh immutable Preview, protected
+  browser/visual, runtime-log, and GitHub CI evidence is mandatory on one final
+  pushed head. The hosted browser contract scopes legacy economics labels to
+  their visible section and directly exercises the collapsed readiness audit,
+  avoiding duplicate-text ambiguity.
 - Detailed design: `docs/phase9/BASELINE_TARGET_READINESS.md`.
 
 ## Phase 9 lead-intent default truth — 2026-08-29
