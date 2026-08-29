@@ -2,6 +2,34 @@
 
 Updated 2026-08-29.
 
+## Phase 9 WordPress homepage visibility truth — 2026-08-29
+
+- **Measured constraint:** authenticated Production Growth/Distribution shows
+  zero eligible live leads, zero measured owned placements, and a prepared
+  homepage placement. Public visual QA then found that placement is hidden, so
+  another dashboard or an href-only publication would not solve demand.
+- **Candidate result:** WordPress readiness schema v2 joins the exact target's
+  CTA-container ancestry to exact public `display:none !important` selectors,
+  records privacy-safe visibility counts, binds them into the precondition
+  hash, and returns `hidden_target` / `publicationBlocked=true`.
+- **Live read-only proof:** page 149, one legacy/rollback href, zero lookalikes,
+  one hidden target, two hidden selectors, and precondition
+  `60614f9ce7f7e7fe165a6c3cf0d142a6669faf497fee4f94386aff34827d0638`.
+  Home-value and We Buy Homes remain separate `visible_candidate` decisions.
+- **Local acceptance:** exact Node 24.18.0 release gate passes 271 files / 3,374
+  tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build, 95/17
+  route proof, 14/14 safety, system isolation, dependency audit, diff scan, and
+  redacted delta secret scan.
+- **Authority boundary:** Draft PR #236 is stacked on exact sealed PR #235 head
+  `b2d73a770f952ece5c89ec1741b09399fe632b21`. Code-bearing head is
+  `d432e90618dbe26b6aa66f50b9f39d545f81b2de`; final exact-head CI, immutable
+  Preview, protected QA, and runtime evidence will be pinned in the PR seal.
+  Production remains PR #209 and PR #210 remains first in release order. No
+  Production, WordPress, database, provider, message, DNS, publication, spend,
+  deletion, or NellySelly mutation occurred.
+- Decision and rollback:
+  [`phase9/WORDPRESS_HOMEPAGE_VISIBILITY_TRUTH.md`](./phase9/WORDPRESS_HOMEPAGE_VISIBILITY_TRUTH.md).
+
 ## Phase 9 WordPress seller-intent truth — 2026-08-29
 
 - **Reuse decision:** the canonical Ask Magic Mike `/sell` funnel, existing

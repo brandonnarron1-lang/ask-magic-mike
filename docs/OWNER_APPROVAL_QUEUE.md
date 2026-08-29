@@ -447,6 +447,26 @@ gate before merge or Production.
    and complete exact-head proof is repeated may it request
    `APPROVE PHASE 9 NOTIFICATION OPERATIONS TRUTH MERGE AND PRODUCTION DEPLOYMENT`.
 
+25. Draft PR [#235](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/235)
+   reuses the canonical `/sell` funnel and protected WordPress manifest route
+   to expose a fail-closed decision packet for the live `/we-buy-homes/` and
+   `/we-buy-houses/` conflict. Its exact sealed head is
+   `b2d73a770f952ece5c89ec1741b09399fe632b21` on exact PR #234 head
+   `5ff3d1079f50e5f05c7000edda75aacefa4a31c5`. It creates no funnel, form,
+   publisher, migration, provider, or mutation path. It remains ordered after
+   PR #234 and every predecessor; its final gate is pinned in its PR seal.
+
+26. Draft PR [#236](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/236)
+   reuses exact sealed PR #235 head
+   `b2d73a770f952ece5c89ec1741b09399fe632b21` and upgrades the existing
+   protected WordPress readiness contract so hidden markup cannot be reported
+   as an activatable placement. Code-bearing head
+   `d432e90618dbe26b6aa66f50b9f39d545f81b2de` adds no migration, publisher,
+   WordPress write, lead path, provider, or external action. After PR #235 and
+   every predecessor release, refresh and repeat exact-head proof, then require
+   `APPROVE PHASE 9 WORDPRESS CTA VISIBILITY TRUTH MERGE AND PRODUCTION DEPLOYMENT`.
+   That gate cannot publish WordPress.
+
 The historical shorter conversion-identity phrase released PR #195 and is
 exhausted; it cannot authorize PR #213 or any later candidate.
 
