@@ -26,6 +26,12 @@ Updated 2026-08-29.
   identifiers are validated before repository access. WordPress withdrawal
   sends a denied update, removes the injected tag and only Google cookies, and
   prevents duplicate same-page runtime loading.
+- **Preview data hardening:** final application head
+  `735cc8930eb595b550adf69ace1d6fef3b82a939` applies the existing
+  endpoint-attested Preview mutation guard to both telemetry routes before rate
+  limiting or repository access. Read-only Preview returns HTTP 503 with
+  `private, no-store`; controlled Preview mutation remains a two-flag explicit
+  exception and was not enabled.
 - **Live hold:** the read-only public preflight remains `HOLD` because Our Town
   currently initializes legacy GTM head/noscript code before the deferred
   cookie-choice provider. WordPress replacement and controlled runtime QA need
@@ -36,12 +42,20 @@ Updated 2026-08-29.
   safety, and system isolation. Isolated Chromium passes 4/4 mutation-blocked
   runtime scenarios. PHP 8.1 syntax, package integrity, source/archive parity,
   and checksum verification pass for the refreshed bridge 1.2.0 artifact.
+- **Exact application-head evidence:** Node 24 run `33239065433`, immutable
+  Preview `dpl_8bWUx49oChfNeUrQpErDA9XxwK24`, and protected run `33239236233`
+  pass 261 files / 3,291 tests, typecheck, lint, build, isolation, safety 14/14,
+  doctor 43/43, 18 read-only checks, six intentional mutation skips, 4/4 browser
+  scenarios, and `PREVIEW_READY`. Nine inspected desktop/mobile captures have
+  no overflow or console warning/error; runtime logs show the expected 503 and
+  no warning/error/fatal entry.
 - **Release order:** PR #209's Production authority is consumed and cannot be
-  reused. This candidate follows exact sealed PR #220 and still requires fresh
-  exact-head CI, immutable Preview, protected no-write browser evidence, and
-  its own later approval. No Production, environment, database, lead/event, communication,
-  WordPress, DNS, publication, spend, deletion, provider, or NellySelly action
-  has occurred.
+  reused. This candidate follows exact sealed PR #220 and still requires its
+  own later approval after the separate WordPress gate. One PII-free automatic
+  Preview page-view was persisted on superseded head `84ab4568...`, disclosed,
+  and left intact; no lead or communication resulted. No Production,
+  environment, WordPress, DNS, publication, spend, deletion, provider, or
+  NellySelly action has occurred.
 - Detailed design and historical evidence:
   `docs/phase9/CROSS_DOMAIN_MEASUREMENT_ACTIVATION.md` and
   `docs/phase9/CROSS_DOMAIN_MEASUREMENT_QA_EVIDENCE.md`.

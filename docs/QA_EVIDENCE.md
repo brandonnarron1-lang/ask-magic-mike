@@ -16,6 +16,11 @@
   applies exact identifier/context validation, and gives WordPress an explicit
   allow-to-deny revocation path with Google-only cookie expiry and duplicate
   runtime prevention.
+- Final application head `735cc8930eb595b550adf69ace1d6fef3b82a939`
+  also applies the endpoint-attested Preview mutation guard to both public
+  telemetry routes before rate limiting or repository access. A normal hosted
+  browser page view received HTTP 503 and `private, no-store` on the immutable
+  Preview; controlled Preview mutation flags stayed off.
 - Both application and WordPress measurement activation remain disabled. The
   current read-only public preflight is still expected to return `HOLD` until
   separately approved WordPress consent-order remediation and runtime QA.
@@ -32,8 +37,20 @@
   `9e8ea868281f2d3395afccdb37da063f16129471656cfd37dca47557043cc4eb`.
 - **Current focused acceptance:** Node 24.18.0 passes 4 files / 46 tests for
   public events, public experiments, WordPress consent behavior, and package
-  contracts. Strict TypeScript, targeted ESLint, ZIP integrity, and whitespace
-  checks pass. Full exact-head release/CI/Preview evidence remains pending.
+  contracts. The later Preview mutation regression passes 3 files / 35 tests.
+  Strict TypeScript, targeted ESLint, ZIP integrity, and whitespace checks pass.
+- **Exact application-head acceptance:** GitHub Node 24 run `33239065433`
+  passes 261 files / 3,291 tests, strict typecheck, lint, optimized build,
+  isolation, and safety 14/14. Immutable Preview
+  `dpl_8bWUx49oChfNeUrQpErDA9XxwK24` is READY. Protected run `33239236233`
+  passes release doctor 43/43, 18 read-only checks, six intentional mutation
+  skips, 4/4 expected browser scenarios, and `PREVIEW_READY` with
+  `SAFE_DB_WRITE=false`.
+- **Hosted visual/runtime acceptance:** nine full-page desktop/mobile captures
+  across `/`, `/ask`, `/home-value`, `/widget-preview`, and `/privacy` show no
+  horizontal overflow; browser console has zero warnings/errors. Exact Preview
+  logs bind the expected `/api/events` refusal to HTTP 503 and contain no
+  warning/error/fatal entry in the visual window.
 - **Live read-only preflight:** truthful verdict `HOLD`; the approved brokerage
   container and destination remain `GTM-KZMCSLTJ` / `G-RQRBB1G270`, Ask server
   HTML remains tag-inert, and no NellySelly identity collision is present. The
@@ -44,11 +61,13 @@
   vulnerabilities; Gitleaks reports no leak in the 123.24 KB staged candidate
   or 636-commit history; the migration diff is empty; `.env.example` adds only
   the public configuration name and safe comments.
-- Fresh exact-head secret/dependency scans, immutable Preview, and protected
-  browser results remain mandatory after the merge commit and push.
-- No Production, environment, database, lead/event, communication, WordPress,
-  GTM/GA4, DNS, publication, spend, deletion, provider, or NellySelly mutation
-  occurred during consolidation.
+- The final documentation-only seal must repeat exact-head CI and protected
+  Preview checks; no second evidence commit will be used to create a loop.
+- One PII-free homepage `page_view` was persisted by the superseded Preview at
+  `2026-08-29T06:36:50Z` before the server repair. It created no lead, identity,
+  communication, or Production write and was not deleted. Otherwise no
+  Production, environment, database, communication, WordPress, GTM/GA4, DNS,
+  publication, spend, deletion, provider, or NellySelly mutation occurred.
 
 ## Phase 9 local-profile performance ingress refresh — 2026-08-29
 

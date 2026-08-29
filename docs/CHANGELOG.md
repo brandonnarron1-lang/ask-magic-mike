@@ -20,6 +20,23 @@
   same-page runtime.
 - Retained the public preflight `HOLD` until the brokerage's legacy pre-consent
   GTM head/noscript bootstrap is replaced under its independent owner gate.
+- Added the existing endpoint-attested Preview mutation guard to both public
+  telemetry routes before rate limiting or repository access. Read-only Preview
+  now fails closed with 503/no-store; the two-flag controlled Preview exception
+  remains disabled.
+- Disclosed one PII-free automatic homepage `page_view` persisted by the
+  superseded Preview before the server repair. It created no lead, identity,
+  notification, message, or Production write and remains intact.
+- Final application head `735cc8930eb595b550adf69ace1d6fef3b82a939`
+  passes exact Node 24 CI (`33239065433`), immutable Preview
+  `dpl_8bWUx49oChfNeUrQpErDA9XxwK24`, protected no-write run `33239236233`,
+  18 read-only checks, six intentional mutation skips, 4/4 browser scenarios,
+  nine inspected desktop/mobile captures, and clean warning/error/fatal logs.
+- Production remains `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` /
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; no WordPress, Google, environment,
+  Production, lead, communication, DNS, spend, deletion, or NellySelly action
+  occurred.
+
 ## 2026-08-29 — PR #220 refresh onto exact sealed PR #219
 
 - Preserved former PR #220 head

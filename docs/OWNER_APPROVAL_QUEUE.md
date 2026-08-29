@@ -13,9 +13,10 @@ queue covers only actions that still require a human or external-system gate.
   consent, advertising consent denied, private/Preview/QA exclusion, exact
   container isolation, and the newer cumulative KPI/privacy controls.
 - No Google, Vercel environment, Production deployment setting, or WordPress
-  surface has changed. Former-head local Node 24 release-gate and isolated
-  no-write Chromium QA passed; fresh cumulative exact-head CI and immutable
-  protected Preview evidence remain required after reconciliation and hardening.
+  surface has changed. Final application head `735cc893...` passes exact Node 24
+  CI, immutable Preview, protected no-write QA, desktop/mobile visual review,
+  and runtime-log review. Read-only Preview now refuses first-party telemetry
+  writes server-side before rate limiting or repository access.
 - A follow-up live audit found the brokerage page starts GTM and its Google tag
   before the deferred cookie-choice provider. The read-only cross-domain
   preflight therefore returns `HOLD`. The gate is not requestable until that
@@ -27,9 +28,11 @@ queue covers only actions that still require a human or external-system gate.
 - That WordPress phrase authorizes backup, 1.2.0 installation, preservation of
   current Form 3 settings, exact legacy GTM head/noscript removal, measurement
   flag enablement, and reversible source/deny/allow/network QA only.
-- One live page-view row and one experiment-exposure attempt from the initial
-  browser-routing error are disclosed in the QA evidence. No lead or message
-  was created. Cleanup is not included in this candidate's release phrase.
+- One live Production page-view row and one Production experiment-exposure
+  attempt from the earlier 2026-08-24 browser-routing error remain disclosed.
+  A separate superseded PR #221 Preview also persisted one PII-free automatic
+  homepage page-view before the new server guard. No lead or message was
+  created. Cleanup is not included in either candidate's release phrase.
 - After the hold clears, its only configuration/release phrase is:
   `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
 - That phrase will not authorize a lead submission, email/SMS/Push, WordPress

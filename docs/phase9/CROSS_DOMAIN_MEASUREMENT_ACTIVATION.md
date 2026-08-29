@@ -8,7 +8,10 @@ Draft PR #221 consolidates exact reviewed PR #212 onto exact sealed PR #220
 head `19689e95d824d7d06e5f3b60cd18335f53018c93`. It has no independent
 Production authority and requires
 `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`
-only after the separate WordPress consent-order gate and fresh exact-head proof.
+only after the separate WordPress consent-order gate. Exact application-head
+release, immutable Preview, protected no-write, browser, and runtime-log proof
+passes at `735cc8930eb595b550adf69ace1d6fef3b82a939`; the final documentation-only
+head still receives a fresh automated exact-head seal before PR readiness.
 
 ## Reuse-first decision
 
@@ -52,6 +55,14 @@ Read-only public checks on 2026-08-24 found:
   `GTM-KZMCSLTJ`, executes before normal head output, and accepts only the
   provider's exact `vv_cookieconsent_status=allow` state. No WordPress file,
   page, cache, cookie setting, or GTM source has been changed live.
+- Read-only Preview now fails closed at the server as well as in the browser.
+  Both first-party telemetry write routes invoke the existing endpoint-attested
+  Preview mutation guard before rate limiting or repository access. A normal
+  browser page view against exact application head `735cc893...` received HTTP
+  503 with `private, no-store`; email/SMS and safe Preview mutation remained off.
+- The superseded Preview accepted one PII-free automatic homepage `page_view`
+  before that repair. It is disclosed in the QA evidence and remains untouched;
+  no lead, message, notification, or Production data was involved.
 
 ## Runtime contract
 
