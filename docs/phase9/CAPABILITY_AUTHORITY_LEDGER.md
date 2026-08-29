@@ -1,6 +1,6 @@
 # Phase 9 Capability Authority Ledger
 
-Date: 2026-08-28
+Date: 2026-08-29
 
 Status: isolated read-only candidate; no Production action
 
@@ -50,7 +50,8 @@ The ledger covers:
   routing, Lead Center, and notification outbox;
 - the approved signed Gravity Form 3 bridge;
 - outcome, attributed-revenue, and immutable first-response intelligence;
-- PR 209 durable-rate-limit authority and the cumulative ordered candidate train;
+- accepted PR 209 durable-rate-limit authority and the later ordered candidate
+  train, with the consumed PR 209 gate excluded;
 - permission-aware database revival and the device-private review planner;
 - prepared owned-traffic WordPress publication;
 - the exact Our Town Facebook-crawler Apache remediation and the completed,
@@ -63,10 +64,11 @@ The ledger covers:
 
 Every item contains existing evidence, one next allowed action, and a link to an
 already-protected operating surface. Exact gates are displayed only while they
-remain unconsumed; the ledger cannot create or consume an approval. The approved
-account-level Facebook-crawler gate was consumed on 2026-08-28, failed its 42/42
-acceptance condition, and was rolled back. The ledger therefore records a
-root/WHM dependency instead of repeating that gate.
+remain unconsumed; the ledger cannot create or consume an approval. The PR 209
+durability gate and the approved account-level Facebook-crawler gate are both
+consumed and absent. The crawler test failed its 42/42 acceptance condition and
+was rolled back, so the ledger records a root/WHM dependency instead of
+repeating that gate.
 
 ## Architecture
 
@@ -97,7 +99,8 @@ root/WHM dependency instead of repeating that gate.
 
 Required checks:
 
-- Preview/local state keeps the current application tail labeled as a candidate;
+- Preview/local state keeps the current application tail labeled as a candidate
+  and identifies PR #210 as the first pending predecessor;
 - Production state promotes only application-bound candidates;
 - WordPress, hosting, provider, consumer-send, and prohibited states remain
   separate in every runtime;
@@ -110,7 +113,7 @@ Required checks:
 - strict typecheck, lint, full tests, optimized build, route manifest,
   release-safety, dependency audit, secret scan, and protected Preview visual QA.
 
-Local acceptance passes 267 files / 3,316 tests, strict typecheck, full lint,
+Local acceptance passes 267 files / 3,346 tests, strict typecheck, full lint,
 optimized Next.js 15.5.21 build, 95/17 route proof, 14/14 release safety,
 deployable-source isolation, zero known Production dependency vulnerabilities,
 and responsive desktop/mobile no-write visual QA with zero axe A/AA violations.
@@ -128,16 +131,14 @@ communication, analytics, or consumer state to reverse.
 
 ## Release position
 
-This candidate is stacked after Draft PR 229 and cannot bypass PR 209 or any
-predecessor. It does not consume, replace, or broaden the first Production gate:
-
-`APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`
-
-The later application-only gate, eligible only after predecessor release and
-fresh exact-head proof, is:
+PR #209 is accepted in Production and its exact durability gate is consumed.
+This candidate is stacked after Draft PR #229, while PR #210 remains the first
+pending application candidate. PR #230 cannot bypass PR #210 or any later
+predecessor. Its future application-only gate, eligible only after predecessor
+release and fresh exact-head proof, is:
 
 `APPROVE PHASE 9 CAPABILITY AUTHORITY LEDGER MERGE AND PRODUCTION DEPLOYMENT`
 
-Neither phrase authorizes a WordPress edit, hosting change, database migration,
+That phrase does not authorize a WordPress edit, hosting change, database migration,
 lead/test submission, notification, consumer communication, provider activation,
 publication, paid spend, DNS change, deletion, or NellySelly action.

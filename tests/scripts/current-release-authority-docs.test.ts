@@ -4,7 +4,13 @@ import { describe, expect, it } from "vitest";
 
 const readDoc = (name: string) =>
   readFileSync(resolve(process.cwd(), "docs", name), "utf8");
+const readRepoFile = (name: string) =>
+  readFileSync(resolve(process.cwd(), name), "utf8");
 
+const readme = readRepoFile("README.md");
+const capabilityLedgerSource = readRepoFile(
+  "app/lib/growth/capability-ledger.ts"
+);
 const currentState = readDoc("CURRENT_STATE_RECONCILIATION.md");
 const assetManifest = readDoc("CANONICAL_ASSET_MANIFEST.md");
 const canonicalStack = readDoc("CANONICAL_PRODUCTION_STACK.md");
@@ -113,6 +119,12 @@ const rollbackCommit = "b450b41c66c6740bd20571cdbe7d8caf82e92d5e";
 const rollbackDeployment = "dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW";
 const completedDurabilityGate =
   "APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT";
+const capabilityLedgerGate =
+  "APPROVE PHASE 9 CAPABILITY AUTHORITY LEDGER MERGE AND PRODUCTION DEPLOYMENT";
+const currentWordPressGate =
+  "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA";
+const staleWordPressHomepageGate =
+  "APPROVE PHASE 9 OUR TOWN HOME PAGE ASK MAGIC MIKE CTA AND WIDGET PUBLICATION";
 const pr209Head = "b28b380f2cc3f9b63b2c0048b398e97a88dfee4b";
 const pr210SealedParent =
   "93af400494a94a8d8aedb09ece16bbff4dfd214b";
@@ -275,6 +287,19 @@ describe("current release-authority documentation", () => {
     );
     expect(ownerQueue).toMatch(/completed gates are exhausted/i);
     expect(goLiveRunbook).toMatch(/exact gate is exhausted/i);
+  });
+
+  it("keeps the capability ledger aligned with the current release authority", () => {
+    expect(readme).toContain(productionCommit);
+    expect(readme).toMatch(/PR #210[\s\S]*first pending/i);
+    expect(readme).not.toContain(
+      "PR #209 is the sole atomic application candidate"
+    );
+
+    expect(capabilityLedgerSource).toContain(capabilityLedgerGate);
+    expect(capabilityLedgerSource).toContain(currentWordPressGate);
+    expect(capabilityLedgerSource).not.toContain(completedDurabilityGate);
+    expect(capabilityLedgerSource).not.toContain(staleWordPressHomepageGate);
   });
 
   it("identifies PR #210 as the next distinct application candidate", () => {

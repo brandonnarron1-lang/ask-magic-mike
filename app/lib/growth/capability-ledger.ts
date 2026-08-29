@@ -35,11 +35,11 @@ export interface GrowthCapabilityLedger {
   counts: Record<GrowthCapabilityState, number>;
 }
 
-const CURRENT_TAIL_GATE =
-  "APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT";
+const CAPABILITY_LEDGER_GATE =
+  "APPROVE PHASE 9 CAPABILITY AUTHORITY LEDGER MERGE AND PRODUCTION DEPLOYMENT";
 
-const WORDPRESS_GATE =
-  "APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION";
+const CURRENT_WORDPRESS_GATE =
+  "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA";
 
 function currentApplicationState(
   currentTailInProduction: boolean,
@@ -109,21 +109,21 @@ export function buildGrowthCapabilityLedger({
       href: "/admin/growth",
     },
     {
-      key: "durable_release_train",
-      label: "Durable limiter and cumulative release train",
+      key: "ordered_release_train",
+      label: "Accepted durability and ordered release train",
       domain: "govern",
       state: applicationState,
-      summary: "The reviewed cumulative candidate adds the Neon-backed limiter, fail-closed readiness, current conversion/accessibility hardening, growth controls, and later sequential improvements without changing Production ahead of the release gate.",
+      summary: "PR 209's Neon-backed limiter and fail-closed readiness are already accepted in Production. The later conversion, accessibility, growth, and operating improvements remain an ordered Draft train until each predecessor and exact release gate is satisfied.",
       evidence: [
-        "Atomic PR 209 is the first release authority",
-        "Exact-head CI, protected no-write Preview QA, rollback, and Neon capability proofs",
-        "Later Draft candidates remain ordered and cannot leapfrog the first gate",
+        "PR 209 is live at the accepted Production authority commit and its durability gate is consumed",
+        "PR 210 remains the first pending application candidate",
+        "Later Drafts preserve exact-head CI, protected no-write Preview QA, rollback, and cannot leapfrog predecessors",
       ],
       nextAction: currentTailInProduction
-        ? "Keep the durable readiness contract green and release later candidates only in their reviewed order."
-        : "Use the existing exact PR 209 gate; do not create another limiter, release vehicle, or competing deployment.",
+        ? "Keep the accepted durability contract green and release each later candidate only from its reviewed exact head."
+        : "Start with PR 210 and preserve the reviewed order. The capability-ledger gate is not requestable until every predecessor is accepted and this exact head is refreshed.",
       href: "/admin/reporting",
-      ...(!currentTailInProduction ? { approvalGate: CURRENT_TAIL_GATE } : {}),
+      ...(!currentTailInProduction ? { approvalGate: CAPABILITY_LEDGER_GATE } : {}),
     },
     {
       key: "revival_and_review_planner",
@@ -142,19 +142,19 @@ export function buildGrowthCapabilityLedger({
       href: "/admin/revival",
     },
     {
-      key: "owned_traffic_publication",
-      label: "Owned-traffic publication",
+      key: "wordpress_consent_and_owned_traffic",
+      label: "Our Town consent bridge and owned traffic",
       domain: "activate",
       state: "operator_gate",
-      summary: "Source-tagged Ask Magic Mike placements, rollback manifests, creative assets, and publication proof are prepared, but the live WordPress CTA has not been changed.",
+      summary: "The signed Form 3 bridge is live. Basic-consent bridge 1.2.0, legacy GTM removal, controlled runtime QA, and later source-tagged owned-traffic publication remain separate reversible WordPress actions.",
       evidence: [
-        "Homepage, home-value, We Buy Houses, and agent-page placement audits",
-        "Exact current href, replacement href, rollback href, and page fingerprint",
-        "Publication authority remains false until the named gate is received",
+        "Form 3 signed forwarding is accepted and remains unchanged",
+        "Consent bridge 1.2.0 package, legacy GTM inventory, rollback, and runtime QA contract are prepared",
+        "Homepage and selected page publication remains a later independent action after consent-runtime acceptance",
       ],
-      nextAction: "Publish one reversible homepage CTA only after the exact WordPress gate, then verify attribution and canonical storage before expanding placements.",
+      nextAction: "Run only the exact consent-bridge, GTM-removal, and controlled-QA gate first. Treat any later homepage or page-placement publication as a separate approval and acceptance cycle.",
       href: "/admin/distribution",
-      approvalGate: WORDPRESS_GATE,
+      approvalGate: CURRENT_WORDPRESS_GATE,
     },
     {
       key: "facebook_preview_recovery",

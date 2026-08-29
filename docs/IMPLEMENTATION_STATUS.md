@@ -959,7 +959,7 @@ Updated 2026-08-29.
   and immediately relinked the worktree to canonical Ask Magic Mike. The helper
   is recorded in the asset manifest and preserved for separately approved
   cleanup.
-- Exact future gate:
+- Historical gate consumed on 2026-08-28; it is exhausted and not reusable:
   `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
 ## Phase 9 conversion identity polish — 2026-08-22
 
@@ -2127,7 +2127,7 @@ any bridge activation or shadow-mode test.
 - Controlled test evidence:
   [`phase9/OTP_FACEBOOK_CRAWLER_ACCOUNT_OVERRIDE_TEST_2026-08-28.md`](./phase9/OTP_FACEBOOK_CRAWLER_ACCOUNT_OVERRIDE_TEST_2026-08-28.md).
 
-## Phase 9 capability authority ledger candidate — 2026-08-28
+## Phase 9 capability authority ledger candidate — 2026-08-29
 
 - Reconciled the current competitive benchmark against executable code and the
   ordered release/approval records instead of treating every benchmark feature
@@ -2138,11 +2138,13 @@ any bridge activation or shadow-mode test.
 - Rendered the ledger inside the existing `/admin/growth` route after its
   `report:view` authorization boundary. The section contains no form, fetch,
   server action, provider call, or mutation path.
-- Existing exact unconsumed WordPress and PR 209 gates are displayed as
-  authority facts but cannot be created, consumed, or broadened by the page.
-  The completed-and-rolled-back crawler test is recorded as a root/WHM access
-  dependency and its consumed approval is not displayed again.
-- Final local acceptance passes 267 files / 3,316 tests, strict typecheck, full
+- The ledger excludes PR #209's consumed durability gate and the consumed
+  account-level crawler-test gate. It displays the future PR #230 application
+  gate with an explicit PR #210-first ordering warning, plus the current Our
+  Town consent-runtime gate; the page cannot create, consume, or broaden either
+  approval. The completed-and-rolled-back crawler test is recorded only as a
+  root/WHM access dependency.
+- Final local acceptance passes 267 files / 3,346 tests, strict typecheck, full
   lint, optimized Next.js 15.5.21 build, 95/17 route proof, 14/14 safety,
   deployable-source isolation, zero known Production dependency
   vulnerabilities, and desktop/mobile no-write browser QA with zero axe A/AA

@@ -8,6 +8,9 @@
 - Reconciled the competitive benchmark with already-built database revival,
   recurring-value planning, messaging, and provider-contract foundations to
   prevent parallel rebuilds.
+- Replaced the consumed PR #209 durability gate and superseded homepage-only
+  WordPress gate with the current ordered-candidate and consent-runtime gates;
+  the ledger no longer presents historical authority as actionable.
 - Added no route, migration, package, provider call, public surface, mutation,
   secret, or Production change.
 
