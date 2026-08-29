@@ -1,8 +1,8 @@
 # Organic search experiment brief — decision and QA evidence
 
-Date: 2026-08-28
+Date: 2026-08-29
 Branch: `codex/phase9-organic-experiment-brief-20260828`
-Parent: sealed PR 230 head `dc5d9868fe23efb27b429c073b2c2e11a8c9f5e0`
+Parent: exact sealed PR 230 head `883ddec3f8b3796ba8be3fe41e5cd326e1a16d`
 State: downstream Draft release candidate; no Production authority
 
 ## Executive decision
@@ -86,15 +86,21 @@ The output contains no:
 
 ## Authority and release boundary
 
-This candidate is read-only application code. It can be tested and deployed to an immutable protected Preview without a Production action. It cannot bypass Draft PR 209, consume the existing first Production gate, or make a later candidate the release authority.
+This candidate is read-only application code. It can be tested and deployed to an immutable protected Preview without a Production action. PR 209 and its durable-rate-limit gate are already accepted in canonical Production at `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`; that consumed approval cannot be reused.
 
-The exact first Production gate remains:
+PR 210 remains the first pending application candidate. PR 230 is the exact sealed parent of this candidate, and its future application gate remains:
 
 ```text
-APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT
+APPROVE PHASE 9 CAPABILITY AUTHORITY LEDGER MERGE AND PRODUCTION DEPLOYMENT
 ```
 
-Even after application release, an experiment brief is not authority to edit or publish WordPress. A later page-specific publication request must identify the reviewed page, exact change, rollback, Preview evidence, measurement window, and one approval.
+That PR 230 gate is not requestable until PR 210 and every predecessor are accepted and PR 230 is refreshed on the resulting exact sealed head. PR 231 cannot leapfrog it. PR 231's own future application gate is:
+
+```text
+APPROVE PHASE 9 ORGANIC PAGE EXPERIMENT BRIEFS MERGE AND PRODUCTION DEPLOYMENT
+```
+
+That PR 231 gate is not requestable until PR 230 is accepted and this candidate is refreshed, reverified, and resealed on the resulting exact parent. Even after application release, an experiment brief is not authority to edit or publish WordPress. The current independent WordPress action remains the separately reviewed basic-consent bridge 1.2.0 installation, legacy GTM removal, and controlled runtime QA gate. Any later page-specific publication request must identify the reviewed page, exact change, rollback, Preview evidence, measurement window, and one approval.
 
 ## Rollback
 
@@ -149,9 +155,10 @@ Secret evidence:
   16.11 MB with no leak; and
 - staged candidate: gitleaks scanned approximately 48 KB with no leak.
 
-The expected test-only durable-rate-limit warnings confirm the unchanged first
-Production blocker rather than a failure in this candidate. No Production
-secret was entered and no degraded-state override was added.
+The expected test-only durable-rate-limit warnings exercise fail-closed regression
+paths; they are not evidence of a current Production blocker. The accepted
+Production readiness baseline remains green. No Production secret was entered
+and no degraded-state override was added.
 
 ## Security review
 
@@ -162,7 +169,7 @@ React, and browser security boundaries:
 - the imported page URL is displayed as text, never converted into a clickable
   operator-controlled link;
 - reference destinations are immutable application constants on official
-  Google HTTPS hosts and open with `rel="noreferrer"`;
+  Google HTTPS hosts and open with `rel="noopener noreferrer"`;
 - the pure builder imports no environment, database, authentication, provider,
   filesystem, or network module;
 - the workbench adds no storage, dynamic code, HTML injection, redirect,

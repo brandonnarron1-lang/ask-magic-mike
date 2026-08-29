@@ -19,9 +19,9 @@ describe("Growth capability authority ledger", () => {
       external_dependency: 2,
       prohibited: 1,
     });
-    expect(ledger.items.find((item) => item.key === "durable_release_train")).toMatchObject({
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")).toMatchObject({
       state: "release_candidate",
-      approvalGate: "APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT",
+      approvalGate: "APPROVE PHASE 9 CAPABILITY AUTHORITY LEDGER MERGE AND PRODUCTION DEPLOYMENT",
     });
   });
 
@@ -31,10 +31,10 @@ describe("Growth capability authority ledger", () => {
     expect(ledger.generatedFor).toBe("production");
     expect(ledger.counts.production_live).toBe(6);
     expect(ledger.counts.release_candidate).toBe(0);
-    expect(ledger.items.find((item) => item.key === "durable_release_train")?.approvalGate).toBeUndefined();
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.approvalGate).toBeUndefined();
     expect(ledger.items.find((item) => item.key === "revival_and_review_planner")?.state).toBe("production_live");
     expect(ledger.items.find((item) => item.key === "organic_search_experiment_briefs")?.state).toBe("production_live");
-    expect(ledger.items.find((item) => item.key === "owned_traffic_publication")?.state).toBe("operator_gate");
+    expect(ledger.items.find((item) => item.key === "wordpress_consent_and_owned_traffic")?.state).toBe("operator_gate");
     expect(ledger.items.find((item) => item.key === "facebook_preview_recovery")?.state).toBe("host_gate");
   });
 
@@ -67,18 +67,21 @@ describe("Growth capability authority ledger", () => {
     ]);
   });
 
-  it("retains only unconsumed gates and records the completed host test", () => {
+  it("retains only current or future gates and records the completed host test", () => {
     const ledger = buildGrowthCapabilityLedger({ currentTailInProduction: false });
     const gates = ledger.items.flatMap((item) => item.approvalGate ? [item.approvalGate] : []);
     const facebookRecovery = ledger.items.find((item) => item.key === "facebook_preview_recovery");
 
     expect(gates).toEqual([
-      "APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT",
-      "APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION",
+      "APPROVE PHASE 9 CAPABILITY AUTHORITY LEDGER MERGE AND PRODUCTION DEPLOYMENT",
+      "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA",
     ]);
     expect(facebookRecovery?.approvalGate).toBeUndefined();
     expect(facebookRecovery?.summary).toContain("byte-identical backup was restored");
     expect(facebookRecovery?.nextAction).toContain("root/WHM hosting administrator");
+    expect(JSON.stringify(ledger)).not.toContain("DURABLE RATE-LIMIT READINESS SECRET ENTRY");
+    expect(JSON.stringify(ledger)).not.toContain("HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION");
+    expect(JSON.stringify(ledger)).not.toContain("NARROW OTP FACEBOOK CRAWLER APACHE OVERRIDE TEST");
     expect(JSON.stringify(ledger)).not.toContain("APPROVE ALL");
   });
 });

@@ -89,7 +89,7 @@ for (const viewport of viewports) {
     await expect(page.getByRole("button", { name: "Copy internal brief" })).toBeVisible();
     await expect(page.getByRole("link", {
       name: "Google · Helpful, reliable, people-first content",
-    })).toHaveAttribute("rel", "noreferrer");
+    })).toHaveAttribute("rel", "noopener noreferrer");
     await expect(commit).toBeDisabled();
 
     const textarea = page.getByRole("textbox", {

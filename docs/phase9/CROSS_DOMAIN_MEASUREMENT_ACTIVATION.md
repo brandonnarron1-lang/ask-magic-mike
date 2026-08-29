@@ -2,7 +2,16 @@
 
 Status: **code and WordPress 1.2.0 package candidate; live activation HOLD**
 
-Date: 2026-08-24
+Date: 2026-08-29
+
+Draft PR #221 consolidates exact reviewed PR #212 onto exact sealed PR #220
+head `19689e95d824d7d06e5f3b60cd18335f53018c93`. It has no independent
+Production authority and requires
+`APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`
+only after the separate WordPress consent-order gate. Exact application-head
+release, immutable Preview, protected no-write, browser, and runtime-log proof
+passes at `735cc8930eb595b550adf69ace1d6fef3b82a939`; the final documentation-only
+head still receives a fresh automated exact-head seal before PR readiness.
 
 ## Reuse-first decision
 
@@ -46,6 +55,14 @@ Read-only public checks on 2026-08-24 found:
   `GTM-KZMCSLTJ`, executes before normal head output, and accepts only the
   provider's exact `vv_cookieconsent_status=allow` state. No WordPress file,
   page, cache, cookie setting, or GTM source has been changed live.
+- Read-only Preview now fails closed at the server as well as in the browser.
+  Both first-party telemetry write routes invoke the existing endpoint-attested
+  Preview mutation guard before rate limiting or repository access. A normal
+  browser page view against exact application head `735cc893...` received HTTP
+  503 with `private, no-store`; email/SMS and safe Preview mutation remained off.
+- The superseded Preview accepted one PII-free automatic homepage `page_view`
+  before that repair. It is disclosed in the QA evidence and remains untouched;
+  no lead, message, notification, or Production data was involved.
 
 ## Runtime contract
 
@@ -55,7 +72,10 @@ loaders with these boundaries:
 1. On Our Town, canonical bridge 1.2.0 exposes no Google runtime unless
    `AMM_GOOGLE_MEASUREMENT_ENABLED=true` and the existing provider cookie is
    exactly `allow`. Missing, deny, dismiss, malformed, and unknown states are
-   inert. The loader has no advertising grant or noscript fallback.
+   inert. The loader has no advertising grant or noscript fallback. A later
+   withdrawal pushes analytics and advertising purposes back to denied,
+   expires only recognized Google cookies, and detaches the injected script;
+   same-page re-allow stays fail closed against duplicate runtime loading.
 2. The WordPress gate appears at `wp_head` priority 0 and pins the exact fixed
    Google URL/container in browser code. The current legacy GTM head bootstrap
    and matching noscript iframe must be removed in the same controlled change;
@@ -149,6 +169,8 @@ This checklist is intentionally separate from code review:
    the same commit for Production.
 12. In a clean browser, prove Decline creates no Google request and no `_ga*`
    cookie. Then separately choose Allow and prove the approved container loads.
+   Withdraw the choice and prove a denied update, Google-cookie expiry, script
+   detachment, unrelated-cookie preservation, and no duplicate same-page load.
 13. Navigate through an existing tagged Our Town link to Ask Magic Mike. Verify
    `_gl` is present, both pages use the same GA4 destination/client identity,
    the destination returns 200, and UTMs remain intact.

@@ -13,6 +13,7 @@
 - Form 7: brokerage/legal consent decision and immediate owner review of preserved entry 1550.
 - RBAC: roster, migration, administrator provisioning, Preview acceptance, then feature flag.
 - Web Push: physical device permission.
-- Facebook crawler: hosting rule-ID lookup and narrow exception.
+- Facebook crawler: bounded per-vhost/account Apache override and 42/42
+  acceptance; no ModSecurity rule-ID lookup remains.
 
 No pending gate blocks genuine submissions through AskMagicMike.com or verified Form 3.

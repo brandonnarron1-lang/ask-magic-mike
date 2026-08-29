@@ -70,6 +70,9 @@ const OPPORTUNITY_TYPES = new Set<OrganicSearchOpportunityType>([
   "organic_visibility_gap",
 ]);
 
+const DATA_STATES = new Set(["final", "fresh"]);
+const DEVICES = new Set(["all", "desktop", "mobile", "tablet"]);
+
 const OFFICIAL_REFERENCES: readonly OrganicSearchExperimentReference[] = [
   {
     label: "Google · Helpful, reliable, people-first content",
@@ -115,6 +118,7 @@ function ownedPage(row: OrganicSearchImportRow) {
     const url = new URL(row.pageUrl);
     return url.protocol === "https:" &&
       OWNED_HOSTS.has(url.hostname) &&
+      url.hostname === row.pageHost &&
       !url.username &&
       !url.password &&
       !url.search &&
@@ -209,6 +213,9 @@ export function buildOrganicSearchExperimentBrief(
     !boundedMetric(row.position, 1, 1_000) ||
     !boundedMetric(row.confidence, 0, 1) ||
     !boundedMetric(opportunity.score, 0, 100) ||
+    !Number.isInteger(opportunity.score) ||
+    !DATA_STATES.has(row.dataState) ||
+    !DEVICES.has(row.device) ||
     !boundedMetric(opportunity.policyCtrThreshold, 0, 1)
   ) return null;
 

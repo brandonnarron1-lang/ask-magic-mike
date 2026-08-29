@@ -71,23 +71,25 @@ Anything labeled `FAIL` in the output. Common causes and fixes:
 FAIL  facebook: HTTP 403 — BLOCKED
 ```
 
-**What it means:** The host (usually OTP WordPress via Cloudflare) is blocking the crawler's user agent.
+**What it means:** A hosting-layer rule is blocking the crawler before
+WordPress handles the request. For the current Our Town failure, authenticated
+2026-08-28 evidence identifies the exact Apache `authz_core` chain:
+`facebookexternalhit -> bad_bots -> Require not env bad_bots`.
 
 **Why it matters:** When Mike or a team member shares a link to `ourtownproperties.com/ask-mike/` on Facebook, LinkedIn, Slack, or Discord, the platform sends its crawler user agent to generate the preview card. If the crawler is blocked, the post shows no preview — reducing click-through significantly.
 
-**Remediation (OTP WordPress / Cloudflare):**
+**Remediation (current OTP Apache host):**
 
-1. Log in to Cloudflare dashboard for `ourtownproperties.com`
-2. Navigate to **Security → WAF → Firewall Rules** (or **Bot Fight Mode**)
-3. Create an allow rule for these user agent strings:
-   - `facebookexternalhit`
-   - `Twitterbot`
-   - `LinkedInBot`
-   - `Slackbot`
-   - `Discordbot`
-4. If using **Bot Fight Mode**, add these bots to the **Known Bots** allow list
-5. If using a different WAF or host security plugin (Wordfence, iThemes), add these user agents to the whitelist
-6. Re-run: `pnpm run amm:verify:social-preview`
+1. Do not create a broad user-agent allowlist and do not disable ModSecurity,
+   Wordfence, or the global bot policy.
+2. Give the hosting administrator
+   `META_CRAWLER_HOSTING_OPERATOR_ACTION.md` and the canonical bounded contract
+   `FACEBOOK_CRAWLER_FIREWALL_CHANGE.md`.
+3. Require a per-account/per-vhost override limited to GET/HEAD and the four
+   reviewed public paths, followed by `apachectl configtest` and a graceful
+   reload through the host's supported process.
+4. Re-run `pnpm run amm:verify:social-preview` and require 42/42 while
+   confirming sensitive and non-allowlisted paths retain their prior behavior.
 
 **Remediation (AMM / Vercel):**
 

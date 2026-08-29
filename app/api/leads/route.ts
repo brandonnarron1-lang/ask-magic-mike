@@ -79,7 +79,7 @@ function timelineMonthsFor(input?: string) {
   if (/30\s*[-–]\s*60|60\s*[-–]\s*90|31\s*[-–]\s*90|next 90|90 days/.test(value)) return 3;
   if (/3\s*[-–]\s*6|three\s*[-–]\s*six|3 to 6/.test(value)) return 6;
   if (/6\s*[-–]\s*12|six\s*[-–]\s*twelve|6 to 12/.test(value)) return 12;
-  if (/12\+|12 plus|more than 12|next year|just planning|just curious|not sure|unknown/.test(value)) return 24;
+  if (/12\+|12 plus|more than 12|next year|just planning|just curious/.test(value)) return 24;
   return null;
 }
 

@@ -439,7 +439,8 @@ const APPROVED_CANONICAL_DOMAIN = "askmagicmike.com" as const;
 
 /**
  * Returns true if the URL is safe to use as a primary social sharing URL.
- * OTP domain is blocked for Facebook until Regency/host WAF is resolved.
+ * OTP domain is blocked for Facebook until the bounded host Apache correction
+ * passes the 42/42 social-preview verifier.
  */
 export function isSocialSafeUrl(url: string): boolean {
   try {

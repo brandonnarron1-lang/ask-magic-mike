@@ -6,29 +6,30 @@
  * Tracks which posting domains are safe RIGHT NOW, why OTP Facebook
  * links are blocked, and what the operator should do next.
  *
- * To mark OTP Facebook links safe: change OTP_FACEBOOK_SAFE to true
- * AND document the Regency/host WAF whitelist confirmation here.
+ * To mark OTP Facebook links safe: change OTP_FACEBOOK_SAFE to true only after
+ * the bounded host Apache correction is recorded and the verifier reaches
+ * 42/42.
  */
 
 // ---------------------------------------------------------------------------
 // Constants — single source of truth for launch gate state
 // ---------------------------------------------------------------------------
 
-/** AMM links (askmagicmike.com) are Vercel-hosted and have no social crawler WAF block. */
+/** AMM links are Vercel-hosted and have no observed social-crawler block. */
 const AMM_LINKS_SAFE = true;
 
 /**
- * OTP Facebook links are blocked at the Liquid Web / cPanel WAF level.
- * facebookexternalhit/1.1 receives HTTP 403 on ourtownproperties.com.
- * Set to true ONLY after Regency/host confirms WAF whitelist is applied
- * and pnpm run amm:verify:social-preview returns 42/42.
+ * OTP Facebook links are denied by a server-global Apache authz rule:
+ * facebookexternalhit -> bad_bots -> Require not env bad_bots.
+ * Set to true only after the host applies the bounded per-vhost/account
+ * correction and pnpm run amm:verify:social-preview returns 42/42.
  */
 const OTP_FACEBOOK_SAFE = false;
 
 const RECOMMENDED_PRIMARY_POSTING_DOMAIN = "askmagicmike.com";
 const BLOCKED_DOMAIN = "ourtownproperties.com";
 const BLOCKER_REASON =
-  "facebookexternalhit/1.1 returns HTTP 403 on ourtownproperties.com — pending Regency/host WAF whitelist";
+  "facebookexternalhit/1.1 returns HTTP 403 on ourtownproperties.com — proven host Apache bad_bots rule; bounded override pending";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -81,7 +82,7 @@ export function buildLaunchReadiness(): LaunchReadiness {
       url: "https://www.ourtownproperties.com/agents/mike-eatmon/",
       platform: "Facebook",
       reason:
-        "Same host WAF block. Facebook cannot scrape OG tags. Post the AMM value page instead.",
+        "Same host Apache authorization block. Facebook cannot scrape OG tags. Post the AMM value page instead.",
     },
   ];
 
@@ -103,23 +104,23 @@ export function buildLaunchReadiness(): LaunchReadiness {
     },
     {
       step: 4,
-      action: "Contact Regency/Liquid Web to whitelist facebookexternalhit for ourtownproperties.com",
+      action: "Send the bounded OTP Facebook crawler Apache change packet to Regency/Liquid Web",
       status: OTP_FACEBOOK_SAFE ? "done" : "blocked",
       blockerNote: OTP_FACEBOOK_SAFE
         ? undefined
-        : "External host action required — no code change resolves this",
+        : "External host action required — use the reviewed per-vhost/account override, not a broad whitelist",
     },
     {
       step: 5,
       action:
-        "After host WAF fix: run pnpm run amm:verify:social-preview and confirm 42/42. Then post OTP links.",
+        "After the bounded host Apache correction: run pnpm run amm:verify:social-preview and confirm 42/42. Then post OTP links.",
       status: OTP_FACEBOOK_SAFE ? "done" : "blocked",
       blockerNote: OTP_FACEBOOK_SAFE ? undefined : "Waiting on step 4",
     },
   ];
 
   const nextBestAction = AMM_LINKS_SAFE
-    ? "Post askmagicmike.com links now. Use the UTM Copy Bank to get pre-built tracked links for each platform. Do not post ourtownproperties.com links on Facebook until Regency resolves the WAF block."
+    ? "Post askmagicmike.com links now. Use the UTM Copy Bank to get pre-built tracked links for each platform. Do not post ourtownproperties.com links on Facebook until the host correction passes 42/42."
     : "AMM links are not verified safe. Run pnpm run amm:verify:social-preview before posting.";
 
   return {
@@ -131,6 +132,6 @@ export function buildLaunchReadiness(): LaunchReadiness {
     doNotPostList,
     launchChecklist,
     nextBestAction,
-    socialPreviewScore: "40/42 — AMM 3/3 ✓, OTP 2 Facebook blocks pending host fix",
+    socialPreviewScore: "40/42 — AMM 3/3 ✓, OTP 2 Facebook blocks pending bounded host correction",
   };
 }

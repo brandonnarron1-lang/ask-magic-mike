@@ -61,12 +61,12 @@ export function computeLaunchDimensions(
     detail: traffic.ammLinksSafe
       ? traffic.otpFacebookLinksSafe
         ? "All posting domains verified safe."
-        : "AMM links safe. OTP Facebook blocked — WAF fix pending at Regency/Liquid Web."
+        : "AMM links safe. OTP Facebook blocked — bounded Apache host correction pending at Regency/Liquid Web."
       : "AMM funnel not verified. Run pnpm run amm:verify:social-preview.",
     ownerAction: !traffic.ammLinksSafe
       ? "Run pnpm run amm:verify:social-preview before posting."
       : !traffic.otpFacebookLinksSafe
-      ? "Contact Regency/Liquid Web to whitelist facebookexternalhit for ourtownproperties.com."
+      ? "Send Regency/Liquid Web the reviewed bounded OTP Facebook crawler Apache change packet."
       : undefined,
   });
 

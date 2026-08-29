@@ -66,6 +66,20 @@ export function ConsumerReferralHandoff({
       return;
     }
 
+    if (typeof navigator.canShare === "function") {
+      try {
+        if (!navigator.canShare(packet)) {
+          await copyReferralLink();
+          return;
+        }
+      } catch {
+        // Treat an inconsistent capability probe as unavailable and keep the
+        // visitor on the explicit, privacy-safe Clipboard/manual-copy path.
+        await copyReferralLink();
+        return;
+      }
+    }
+
     try {
       await navigator.share(packet);
       recordHandoff("referral_share_handoff", "native");

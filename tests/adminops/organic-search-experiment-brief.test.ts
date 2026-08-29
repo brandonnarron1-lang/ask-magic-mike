@@ -117,11 +117,15 @@ describe("organic-search experiment briefs", () => {
     const valid = row();
     const cases: OrganicSearchImportRow[] = [
       { ...valid, pageUrl: "https://nellyselly.com/home-value", pageHost: "nellyselly.com" },
+      { ...valid, pageHost: "askmagicmike.com" },
       { ...valid, pageUrl: "https://www.askmagicmike.com/home-value?email=private@example.com" },
       { ...valid, pagePath: "/sell" },
       { ...valid, rowFingerprint: "not-a-fingerprint" },
       { ...valid, startDate: "2026-02-31" },
       { ...valid, clicks: valid.impressions + 1 },
+      { ...valid, dataState: "forged" as OrganicSearchImportRow["dataState"] },
+      { ...valid, device: "television" as OrganicSearchImportRow["device"] },
+      { ...valid, opportunity: { ...valid.opportunity!, score: 78.5 } },
       { ...valid, opportunity: null },
     ];
 

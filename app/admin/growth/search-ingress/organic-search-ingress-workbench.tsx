@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   buildOrganicSearchExperimentBrief,
   formatOrganicSearchExperimentBrief,
@@ -146,6 +146,7 @@ export function OrganicSearchIngressWorkbench({
 
   async function copyBrief(brief: OrganicSearchExperimentBrief) {
     setError(null);
+    setCopiedBriefKey(null);
     try {
       if (!navigator.clipboard?.writeText) throw new Error("clipboard_unavailable");
       await navigator.clipboard.writeText(formatOrganicSearchExperimentBrief(brief));
@@ -160,13 +161,13 @@ export function OrganicSearchIngressWorkbench({
     commitReady && preview?.ok && preview.batchFingerprint && !preview.synthetic &&
     approvalReference.trim().length >= 4 && confirmation === confirmationPhrase && !busy,
   );
-  const experimentBriefs = (preview?.ok ? preview.rows : [])
+  const experimentBriefs = useMemo(() => (preview?.ok ? preview.rows : [])
     .map(buildOrganicSearchExperimentBrief)
     .filter((brief): brief is OrganicSearchExperimentBrief => brief !== null)
     .sort((left, right) =>
       right.opportunityScore - left.opportunityScore || left.pageUrl.localeCompare(right.pageUrl),
-    );
-  const displayedBriefs = experimentBriefs.slice(0, 25);
+    ), [preview]);
+  const displayedBriefs = useMemo(() => experimentBriefs.slice(0, 25), [experimentBriefs]);
 
   return (
     <div className="grid min-w-0 gap-5 xl:grid-cols-[1.05fr_.95fr]">
@@ -494,7 +495,7 @@ export function OrganicSearchIngressWorkbench({
                           key={reference.href}
                           href={reference.href}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           className="underline decoration-white/20 underline-offset-4 transition hover:text-[#c7e7eb]"
                         >
                           {reference.label}

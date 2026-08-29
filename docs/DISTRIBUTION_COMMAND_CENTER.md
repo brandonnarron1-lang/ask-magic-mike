@@ -145,7 +145,7 @@ The plan is derived from content opportunities matched to each platform's audien
 # Confirm AMM funnel is live before posting
 pnpm run amm:verify:funnel
 
-# Check social preview status (40/42 expected until host WAF fix)
+# Check social preview status (40/42 expected until the bounded host Apache fix)
 pnpm run amm:verify:social-preview || true
 
 # Full validation

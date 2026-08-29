@@ -87,9 +87,9 @@ must remain attributable to the signed-in operator.
 - Gravity Forms retains the local entry; duplicate native Form 3 email is inactive.
 - Forms 1, 2, and 4–7 remain outside the bridge allowlist pending approved
   field/consent contracts.
-- Selected Our Town URLs are blocked for FacebookExternalHit by the hosting WAF.
-  Use AskMagicMike.com campaign links until the host approves a narrow
-  path/method-specific exception.
+- Selected Our Town URLs are blocked for FacebookExternalHit by the proven
+  server-global Apache `authz_core` rule. Use AskMagicMike.com campaign links
+  until the host applies and verifies the bounded per-vhost/account override.
 
 ## Escalate immediately
 

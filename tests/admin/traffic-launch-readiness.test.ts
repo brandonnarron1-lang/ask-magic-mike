@@ -10,7 +10,7 @@ describe("buildLaunchReadiness", () => {
     expect(r.ammLinksSafe).toBe(true);
   });
 
-  it("marks OTP Facebook links as NOT safe (WAF block pending)", () => {
+  it("marks OTP Facebook links as NOT safe (host Apache correction pending)", () => {
     const r = buildLaunchReadiness();
     expect(r.otpFacebookLinksSafe).toBe(false);
   });
@@ -25,10 +25,11 @@ describe("buildLaunchReadiness", () => {
     expect(r.blockedDomain).toBe("ourtownproperties.com");
   });
 
-  it("blocker reason references WAF / facebookexternalhit", () => {
+  it("blocker reason references the exact Apache condition", () => {
     const r = buildLaunchReadiness();
     expect(r.blockerReason.toLowerCase()).toContain("facebookexternalhit");
     expect(r.blockerReason.toLowerCase()).toContain("403");
+    expect(r.blockerReason.toLowerCase()).toContain("bad_bots");
   });
 
   it("doNotPostList contains ourtownproperties.com Facebook entries", () => {
@@ -63,15 +64,16 @@ describe("buildLaunchReadiness", () => {
     expect(r.launchChecklist.length).toBeGreaterThanOrEqual(4);
   });
 
-  it("launchChecklist includes a step about the host WAF fix", () => {
+  it("launchChecklist includes a step about the bounded host Apache fix", () => {
     const r = buildLaunchReadiness();
-    const wafStep = r.launchChecklist.find(
+    const hostStep = r.launchChecklist.find(
       (step) =>
         step.action.toLowerCase().includes("regency") ||
-        step.action.toLowerCase().includes("waf")
+        step.action.toLowerCase().includes("apache")
     );
-    expect(wafStep).toBeDefined();
-    expect(wafStep?.status).toBe("blocked");
+    expect(hostStep).toBeDefined();
+    expect(hostStep?.status).toBe("blocked");
+    expect(hostStep?.action.toLowerCase()).not.toContain("whitelist");
   });
 
   it("launchChecklist has steps numbered sequentially from 1", () => {
