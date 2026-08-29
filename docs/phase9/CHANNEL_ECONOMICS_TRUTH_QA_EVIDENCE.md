@@ -13,9 +13,10 @@ Preserved original head:
 
 Reconciliation merge: `66e27e897cf23d1b60e47d74807e0d05c8c9fdf5`
 
-Status: reconciliation and refreshed focused verification complete; fresh full
-local, immutable Preview, protected hosted-browser, and runtime-log evidence
-pending; Production unchanged
+Status: reconciliation, refreshed full local release, and local protected
+browser verification complete on the code-bearing head; exact final GitHub,
+immutable Preview, protected hosted-browser, and runtime-log evidence pending;
+Production unchanged
 
 ## Story under test
 
@@ -50,6 +51,64 @@ The focused suite currently proves:
 Current refreshed result: 5 focused files / 64 tests PASS on exact Node 24.18.0
 and pnpm 10.30.3. This includes a dedicated proof that an explicit zero
 referral fee completes the review while an absent fee remains unknown.
+
+## Refreshed code-bearing local release result
+
+Code-bearing head: `f52e661bcca09824eafc1c7006102ba9716a16b2`
+
+The complete local release gate passes:
+
+- system isolation: PASS;
+- release safety: 14/14 PASS;
+- Vitest: 263 files / 3,306 tests PASS;
+- strict TypeScript: PASS;
+- full ESLint: PASS;
+- optimized Next.js 15.5.21 build: PASS, 59 generated pages;
+- route manifest: PASS, 95 active routes / 17 acknowledged duplicates;
+- clean-tree release doctor: 43/43 PASS;
+- Production dependency audit: no known vulnerabilities;
+- full Git-history gitleaks: PASS across 662 commits and approximately
+  16.30 MB;
+- exact PR #222-to-code-bearing-head delta gitleaks: PASS across approximately
+  63.32 KB;
+- exact sealed PR #222 ancestry: PASS; and
+- `git diff --check`: PASS.
+
+## Refreshed local protected-browser proof
+
+The optimized production build was served locally with an isolated non-live
+Basic Auth value. The Playwright CLI and canonical acceptance suite verified:
+
+- protected `/admin/growth?window=90` returns the complete Growth Command
+  Center;
+- signed-client, recorded-referral-fee, tracked-contribution, and CPQL truth
+  states render;
+- the unconfigured local database state shows no invented economics;
+- the request ledger contains only GET requests;
+- zero console warnings or errors and no framework error overlay;
+- exact document/viewport containment at 1,280 px and 390 px viewports;
+- one contained horizontal table scroller on mobile; and
+- the canonical Chromium suite passes 2/2 desktop/mobile scenarios with zero
+  same-origin mutation requests, page errors, console errors, or page overflow.
+
+Local screenshots are gitignored evidence only:
+
+- `output/playwright/pr223-local/growth-channel-economics-desktop.png` —
+  1,265 × 4,227, SHA-256
+  `aefdd095d93f07c95a2cb7a5266e6de4cc18f17ae56b9ee95afed618b4591091`;
+- `output/playwright/pr223-local/growth-channel-economics-mobile.png` —
+  375 × 10,546, SHA-256
+  `1bbae4e78194f5a880cb00c80eb1c1f51d1bc918d527567294a45e42df42f124`;
+- `output/playwright/pr223-local/growth-metrics-mobile.png` — 358 × 2,874,
+  SHA-256
+  `c940fa542be058d0772b0fa989cf9c9fb29cd65fdc9cb0d8d947c23280ffeacb`;
+- `output/playwright/pr223-local/growth-economics-mobile.png` — 358 × 1,006,
+  SHA-256
+  `d51c2cc1bc4d651ae4a085355ebb0a1aeaa647841f8b8cf1c36ebcba297d500a`.
+
+Visual inspection confirms the desktop hierarchy remains restrained and
+legible; mobile cards stack without clipping; and the intentionally wide
+economics table stays inside its own scroller rather than widening the page.
 
 ## Former-head local release result — historical
 

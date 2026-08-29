@@ -23,6 +23,13 @@
 - Former-head test and visual proof is historical until the refreshed exact
   head passes local, CI, immutable Preview, protected browser, security,
   isolation, and runtime-log acceptance.
+- Refreshed code-bearing head `f52e661bcca09824eafc1c7006102ba9716a16b2`
+  passes exact Node 24 isolation, safety 14/14, 263 files / 3,306 tests,
+  strict types, lint, optimized 59-page build, 95/17 route proof, doctor 43/43,
+  Production dependency audit, 662-commit gitleaks, focused security review,
+  and 2/2 authenticated desktop/mobile read-only browser scenarios. Exact
+  GitHub, immutable Preview, hosted visual, and runtime-log sealing remain
+  pending.
 - No Production, environment, database, lead/event, communication, provider,
   WordPress/DNS, publication, spend, deletion, or NellySelly action occurred.
 

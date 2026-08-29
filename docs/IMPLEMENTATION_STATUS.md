@@ -25,14 +25,21 @@ Updated 2026-08-29.
   send a message, publish, call a provider, change spend, or touch WordPress,
   DNS, Production, or NellySelly. Tracked contribution is explicitly not net
   income.
-- **Current acceptance:** the original head's Node 24, focused/full suite,
-  typecheck, lint, build, security, and local browser evidence is historical
-  after reconciliation. Fresh exact-head local, GitHub, immutable Preview,
-  protected browser, visual, isolation, and runtime-log acceptance is pending.
-  Per-close fee matching is designed to reject unrelated-channel and
-  same-channel non-close fee evidence. Production remains unchanged at the
-  current PR #209 release authority; this Draft candidate has no Production
-  authority.
+- **Current acceptance:** refreshed code-bearing head
+  `f52e661bcca09824eafc1c7006102ba9716a16b2` passes exact Node 24.18.0
+  isolation, safety 14/14, all 263 files / 3,306 tests, strict TypeScript,
+  full ESLint, optimized Next.js 15.5.21 build with 59 generated pages, 95/17
+  route proof, clean-tree doctor 43/43, Production dependency audit,
+  662-commit and exact-delta gitleaks, ancestry, whitespace, and focused
+  Next.js/React security review. Per-close fee matching rejects
+  unrelated-channel and same-channel non-close evidence; a dedicated test
+  proves explicit zero fee is valid review evidence. Authenticated local
+  production-build browser acceptance passes 2/2 desktop/mobile scenarios,
+  while CLI inspection confirms only GET requests, zero console errors or
+  warnings, contained table overflow, and readable truth states. Exact GitHub,
+  immutable Preview, protected hosted-browser, and runtime-log sealing remain
+  pending. Production remains unchanged at the current PR #209 release
+  authority; this Draft candidate has no Production authority.
 - Detailed design and evidence:
   `docs/phase9/CHANNEL_ECONOMICS_TRUTH.md` and
   `docs/phase9/CHANNEL_ECONOMICS_TRUTH_QA_EVIDENCE.md`.
