@@ -18,6 +18,9 @@ Writes `artifacts/preview-qa-report.json` and `.md`. Exits nonzero on any
 failure. Mutation tests require `SAFE_DB_WRITE=true` AND the preview
 health endpoint reporting `safe_for_preview_mutation: true`. See
 [release-gate.md](./release-gate.md) for the full layered gate.
+That verdict requires valid, distinct `PREVIEW_NEON_ENDPOINT_ID` and
+`PRODUCTION_NEON_ENDPOINT_ID` values and an exact match between the endpoint
+parsed from Preview's server-only `DATABASE_URL` and the approved Preview ID.
 
 ### Testing protected Vercel previews
 

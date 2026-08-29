@@ -65,6 +65,36 @@
   Read-only Preview rejects the request before even the rate-limit bucket can
   write, preserving the zero-mutation Preview boundary.
 
+## WordPress activation-manifest boundary — 2026-08-22
+
+- The new endpoint is GET-only, force-dynamic, and protected server-side by
+  Lead Center `report:view`; the Distribution UI link is convenience, not the
+  authorization boundary.
+- The route parameter is runtime-checked against three exact placement keys.
+  No request URL, query parameter, header, cookie, page content, or page-index
+  value can select the outbound destination.
+- Server-side fetches use fixed exact HTTPS Our Town hosts, reject credentials
+  and nonstandard ports, revalidate every redirect hop, limit redirects,
+  enforce content type and a 3 MB streaming response cap, and use a bounded
+  timeout. Unsafe, insecure, or lookalike AskMagicMike links make the manifest
+  fail closed.
+- Public WordPress index rows are runtime-validated and minimized before use;
+  TypeScript types are not treated as validation, and an explicit `publish`
+  status is mandatory. Duplicate/missing page rows, page-ID drift, duplicate
+  hrefs, malformed JSON, and fetch failures cannot produce a ready state.
+- Responses are private/no-store JSON attachments with `nosniff`, same-origin
+  resource policy, no referrer, no indexing, and a deny-all sandbox CSP. They
+  contain no raw HTML, cookies, request headers, environment values, lead data,
+  database data, or form values.
+- Every manifest emits `publicationAuthorized=false`,
+  `approvalRequired=true`, and `mutationPerformed=false`. A future write must
+  independently require a fresh SHA-256 precondition covering every
+  safety-relevant status and link-count signal, recoverable WordPress
+  revision/backup, and the exact page-specific owner gate.
+- Security review found no state-changing verb, SQL/file/subprocess sink,
+  arbitrary URL fetch, redirect, CORS relaxation, browser-storage credential,
+  raw HTML render, provider send, or secret exposure in the candidate.
+
 ## Required human/legal review
 
 The brokerage/BIC should approve consent language/version, retention/deletion,
@@ -72,6 +102,25 @@ TCPA/email practices, Equal Housing language, sender identity, and any direct-
 purchase or valuation copy. Product language stays conditional and human-reviewed:
 broker-reviewed local guidance, not an appraisal, no fabricated availability or
 guaranteed result.
+
+## Field-experience telemetry boundary — 2026-08-22
+
+- The client reporter contains no secret or environment-dependent server trust
+  decision and runs only when the server renders it for Vercel Production.
+- The public API uses exact canonical origin, existing durable rate limiting,
+  a 4 KB streaming body cap, runtime type/enum/range/path validation, a coarse
+  normal-browser requirement, and truthful persistence status.
+- Stored observations contain no lead/session association, attribution, click
+  IDs, queries, raw URLs, raw metric IDs, raw IPs, cookies, tokens, PII, or full
+  user agents. Browser metric IDs become domain-separated SHA-256 digests before
+  persistence and are used only for bounded duplicate suppression.
+- Aggregate SQL is fixed and parameterized, bounded to 25,000 recent eligible
+  rows, metric-ID deduplicated, and protected behind server-side `report:view`.
+- Origin and user-agent headers can be spoofed by a determined non-browser
+  caller. The event is therefore a rate-limited aggregate signal—not an
+  authentication, legal, conversion, or assignment authority.
+- Production activation remains explicitly gated. Preview renders no reporter
+  and sends no field event.
 
 ## Known findings
 

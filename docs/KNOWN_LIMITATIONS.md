@@ -1,6 +1,6 @@
 # Known Limitations — Ask Magic Mike
 
-Updated 2026-08-22. This document records the current Neon/Resend/Web Push
+Updated 2026-08-23. This document records the current Neon/Resend/Web Push
 system, not the superseded Supabase/mock-email/Twilio-era architecture.
 
 ## 1. Demand and measurement
@@ -19,6 +19,14 @@ rates remain low-confidence until genuine traffic produces adequate samples.
 Deterministic routing and scoring continue to work; AI summaries and statistical
 recommendations are advisory and never silently assign a lead.
 
+### Field-performance telemetry is prepared, not yet active
+
+The atomic PR #209 candidate can collect privacy-minimized LCP, INP, and CLS
+only after its Production gate. Preview is intentionally silent and current
+Production has no observations from this reporter. Browser headers are not
+authentication, so future aggregates remain rate-limited, deduplicated,
+sample-labeled, and advisory rather than treated as transaction truth.
+
 ## 2. Messaging and staff alerts
 
 ### Internal email is live; consumer automation is not broadly enabled
@@ -33,10 +41,9 @@ and approval-gated. A queued provider state is not a delivered-state claim.
 The schema, VAPID configuration, protected setup flow, and push adapter are
 present. Each person must install/enable notifications on their own supported
 device and approve one `[TEST]` receipt. Mike's device cannot be represented by
-Brandon's enrollment. Historical PR #179's unique iOS Home Screen handoff has
-been consolidated on the current verified stack, but it is not Production until
-its own exact application gate, merge, and deployment. Physical installation
-and test receipt remain separate human actions.
+Brandon's enrollment. Historical PR #179's unique iOS Home Screen handoff was
+consolidated and released through PR #194 on the current verified stack.
+Physical installation and test receipt remain separate human actions.
 
 ### Carrier SMS/MMS is intentionally disabled
 
@@ -100,9 +107,16 @@ securely. CSV export remains available with audit logging.
 
 ### Current release state
 
-PR #183 is merged and live. PR #184's hash-pinned Neon migration is applied and
-independently verified; its exact application release evidence is tracked on the
-PR. Neither release authorizes an external placement or provider action.
+Current accepted Production is PR #195 merge
+`b450b41c66c6740bd20571cdbe7d8caf82e92d5e` on deployment
+`dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Draft PR #209 is the sole current
+application candidate. It does not authorize an external placement, provider
+action, message, migration, or publication.
+
+Current Production returns healthy public pages but does not yet prove the
+durable limiter contract that PR #209 requires. Candidate monitoring therefore
+reports 8/9 until the purpose-specific Production secret and matching code are
+released together under the exact gate.
 
 ### Prepared content is not published content
 
@@ -139,9 +153,9 @@ backup-first, identity, role, hash, and postflight interlocks.
 
 | Priority | Action | Gate |
 |---|---|---|
-| 1 | Release stacked candidates in order and re-establish exact-head evidence after each predecessor | No Production mutation without its own gate |
-| 2 | Publish one approved zero-spend placement and record native proof | Channel-specific approval |
-| 3 | Activate Mike's account and enroll each owner's Web Push device | Per-person takeover/test approval |
-| 4 | Approve consent wording before expanding WordPress forms | Mike/BIC approval |
-| 5 | Attach `hub.ourtownproperties.com` | DNS/Vercel approval |
-| 6 | Add MLS or CRM integrations only under an existing approved contract/account | Provider/credential approval |
+| 1 | Complete optional Neon-attested synthetic Preview mutation and cleanup proof | Exact Preview-mutation approval |
+| 2 | Release atomic PR #209 with the dedicated durability secret and matching exact-head evidence | Exact Production gate |
+| 3 | Publish one approved zero-spend placement and record native proof | Channel-specific approval |
+| 4 | Activate Mike's account and enroll each owner's Web Push device | Per-person takeover/test approval |
+| 5 | Approve consent wording before expanding WordPress forms | Mike/BIC approval |
+| 6 | Attach `hub.ourtownproperties.com`, or add MLS/CRM integrations under an approved contract | Exact DNS/provider approval |

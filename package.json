@@ -46,6 +46,8 @@
     "launch:authority": "node scripts/launch-authority-report.mjs",
     "monitor:synthetic": "node scripts/synthetic-monitor.mjs",
     "monitor-production": "node scripts/monitor-production.mjs",
+    "rate-limit:verify-store": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/verify-rate-limit-store-capability.mts",
+    "phase9:durable-rate-limit:readiness": "node scripts/phase9-durable-rate-limit-release-readiness.mjs",
     "phase9:outcome:cutover": "node scripts/phase9-outcome-production-cutover.mjs",
     "phase9:first-response:cutover": "node scripts/phase9-first-response-production-cutover.mjs",
     "phase9:publication-proof:cutover": "node scripts/phase9-publication-proof-production-cutover.mjs",

@@ -1,6 +1,15 @@
 # Staging Environment Certification
 
-Status: secondary Supabase project rejected for immediate staging reuse.
+Status: **SUPERSEDED — HISTORICAL SUPABASE REJECTION RECORD**.
+
+The current isolated hosted Preview database is Neon branch
+`br-morning-paper-aun3378r`. Its active controls are documented in
+`PREVIEW_SECURITY_BOUNDARY.md` and `controlled-preview-mutation-qa.md`. The
+Supabase details below are retained only as evidence of the rejected legacy
+option and must not be used as current setup instructions.
+
+Original status: secondary Supabase project rejected for immediate staging
+reuse.
 
 Tested main SHA: `05fa55a13c96baf992e7a2c89894b73ed590b8d4`
 

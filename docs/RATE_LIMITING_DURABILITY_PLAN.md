@@ -1,11 +1,18 @@
 # Rate-Limiting Durability and Privacy
 
-## Current production architecture
+## Canonical architecture and current deployment state
 
-Ask Magic Mike uses the canonical Neon `public.rate_limit_buckets` table for
+Ask Magic Mike is designed to use the canonical Neon
+`public.rate_limit_buckets` table for
 atomic counters shared across Vercel instances. The in-memory store remains only
 for local development and an explicitly acknowledged degraded mode. No Redis,
 Upstash, paid add-on, second database, or Supabase dependency is required.
+
+Authenticated runtime evidence on 2026-08-23 found that the current Production
+deployment had no suitable 32-or-more-character server-only hash secret. The
+two public event routes therefore used the availability-first memory fallback.
+This document must not describe durability as live again until the dedicated
+Production secret and readiness candidate pass controlled acceptance.
 
 The limiter covers lead capture, intake steps and sessions, analytics, chat,
 phone setup, and public appointment requests. Each route selects a named bucket
@@ -19,14 +26,16 @@ must never be written to Neon. Durable bucket identifiers use this format:
 `amm:rl:v1:<route-prefix>:<HMAC-SHA-256 digest>`
 
 The digest is domain-separated by product, key version, and route prefix. The
-server selects the first 32-or-more-character secret in this order:
+limiter runtime selects the first 32-or-more-character secret in this order:
 
-1. `RATE_LIMIT_HASH_SECRET` (recommended dedicated secret)
+1. `RATE_LIMIT_HASH_SECRET` (required for Production readiness)
 2. `CONSENT_IP_HASH_SALT`
 3. `CRON_SECRET`
 4. `ADMIN_SECRET`
 
-Only boolean readiness appears in the protected health response. Secret values,
+Production readiness requires the purpose-specific first option even though
+the compatibility fallbacks preserve pseudonymization in a degraded runtime.
+Only boolean readiness appears in health responses. Secret values,
 raw bucket inputs, and the HMAC key are never returned, logged, committed, or
 sent as SQL parameters.
 
@@ -38,8 +47,10 @@ sent as SQL parameters.
   same bounded cleanup.
 - A missing database or strong hash secret causes a critical production log and
   an availability-first in-memory fallback; it never writes a raw identifier.
-- `RATE_LIMIT_EMERGENCY_MEMORY=1` acknowledges a controlled degraded period. It
-  does not make the fallback durable and should not remain enabled normally.
+- `RATE_LIMIT_EMERGENCY_MEMORY=1` acknowledges a controlled degraded period. The
+  parser accepts only the exact trimmed value `1`; `false`, `0`, `true`, and all
+  other values remain disabled. It does not make the fallback durable and
+  should not remain enabled normally.
 - Database errors fail to the same bounded in-memory fallback so an abuse-store
   incident does not take every public form offline.
 
@@ -48,15 +59,24 @@ sent as SQL parameters.
 - `DATABASE_URL` points to the Ask Magic Mike production Neon branch.
 - The canonical migration chain includes
   `supabase/migrations/20260811155000_durable_rate_limit.sql`.
-- At least one strong secret in the documented fallback order is configured;
-  use a dedicated `RATE_LIMIT_HASH_SECRET` when practical.
+- A dedicated 32-or-more-character `RATE_LIMIT_HASH_SECRET` is configured.
+- The runtime role has schema `USAGE`, table `SELECT/INSERT/UPDATE/DELETE`, and
+  effective RLS access to the canonical bucket table.
+- A valid, ready, non-partial single-key unique index exists on `bucket_key` so
+  the runtime `ON CONFLICT (bucket_key)` statement is executable.
 - NellySelly database URLs, secrets, projects, or aliases are forbidden.
 
 ## Verification
 
 Automated tests prove deterministic domain separation, short-secret rejection,
-no raw key/secret SQL parameter, 24-hour pruning, `updated_at` maintenance,
-durable/in-memory behavior, and boolean-only protected health reporting.
+dedicated-secret readiness, no raw key/secret SQL parameter, 24-hour pruning,
+`updated_at` maintenance, durable/in-memory behavior, Production/Preview
+runtime separation, fail-closed capability mapping, and boolean-only health
+reporting. The Production monitor validates the readiness body contract rather
+than status alone. `pnpm run rate-limit:verify-store` performs the same
+read-only store check when `DATABASE_URL` is supplied through a secure process
+environment; it emits safe booleans only.
 
-This candidate is application-only. It requires no production migration and
-does not rotate or display any existing secret.
+The candidate requires one new encrypted Production-only
+`RATE_LIMIT_HASH_SECRET` plus an application deployment. It requires no
+database migration and does not rotate or display any existing secret.

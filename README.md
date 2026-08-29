@@ -19,6 +19,9 @@ brokerage, listings, and SEO authority and embeds or links into this system.
 - `OWNER ACTION` — Mike and Brandon must enroll their own phones; authenticated
   internal email remains the active alert path until each device passes QA.
 - `DEFERRED — PAID SERVICE` — carrier SMS/MMS; Web Push is the free-first path.
+- `DRAFT RELEASE GATE` — PR #209 is the sole atomic application candidate. It
+  closes the Production durable-rate-limit readiness gap and remains unmerged
+  until its exact Preview/Production evidence and approval gates are satisfied.
 
 The source-of-truth audit is in
 [`docs/CURRENT_STATE_RECONCILIATION.md`](docs/CURRENT_STATE_RECONCILIATION.md).

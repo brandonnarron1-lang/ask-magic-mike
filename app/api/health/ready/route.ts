@@ -1,5 +1,13 @@
 import { neon } from "@neondatabase/serverless";
 import { NextResponse } from "next/server";
+import {
+  durableRateLimitDedicatedSecretReady,
+  durableRateLimitRequired,
+} from "@/lib/security/rate-limit";
+import {
+  evaluateRateLimitStoreCapability,
+  RATE_LIMIT_STORE_CAPABILITY_SELECT,
+} from "@/lib/security/rate-limit-readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +34,9 @@ function hasValidPhoneSetupConfiguration() {
 
 export async function GET() {
   const databaseUrl = process.env.DATABASE_URL;
+  const rateLimitSecretReady = durableRateLimitDedicatedSecretReady();
+  const rateLimitRequired = durableRateLimitRequired();
+  const missingDatabaseRateLimitReady = !rateLimitRequired;
   if (!databaseUrl) {
     return NextResponse.json(
       {
@@ -35,6 +46,14 @@ export async function GET() {
         leads_table: false,
         notification_table: false,
         rbac_schema_ready: false,
+        rate_limit_table: false,
+        rate_limit_schema_ready: false,
+        rate_limit_permissions_ready: false,
+        rate_limit_rls_ready: false,
+        rate_limit_store_ready: false,
+        rate_limit_secret_ready: rateLimitSecretReady,
+        rate_limit_required: rateLimitRequired,
+        rate_limit_ready: missingDatabaseRateLimitReady,
         push_enabled: process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED === "true",
         push_subscription_table: false,
         push_provider_configured: hasValidPushConfiguration(),
@@ -57,6 +76,7 @@ export async function GET() {
            AND to_regclass('public.lead_center_sessions') IS NOT NULL
            AND to_regclass('public.lead_center_accounts') IS NOT NULL
            AS rbac_schema_ready,
+         ${RATE_LIMIT_STORE_CAPABILITY_SELECT},
          to_regclass('public.staff_push_subscriptions') IS NOT NULL AS push_subscription_table`,
       [],
     ) as Array<Record<string, unknown>>;
@@ -66,18 +86,30 @@ export async function GET() {
     const phoneSetupConfigured = hasValidPhoneSetupConfiguration();
     const pushSubscriptionTable = result.push_subscription_table === true;
     const pushReady = !pushEnabled || (pushProviderConfigured && pushSubscriptionTable && phoneSetupConfigured);
-    const ready = result.capture_function === true
+    const rateLimitStore = evaluateRateLimitStoreCapability(result);
+    const rateLimitReady = !rateLimitRequired || (rateLimitStore.ready && rateLimitSecretReady);
+    const coreDatabaseReady = result.capture_function === true
       && result.leads_table === true
-      && result.notification_table === true
+      && result.notification_table === true;
+    const ready = coreDatabaseReady
+      && rateLimitReady
       && pushReady;
     return NextResponse.json(
       {
         ok: ready,
-        database: ready ? "ready" : "schema_incomplete",
+        database: coreDatabaseReady ? "ready" : "schema_incomplete",
         capture_function: result.capture_function === true,
         leads_table: result.leads_table === true,
         notification_table: result.notification_table === true,
         rbac_schema_ready: result.rbac_schema_ready === true,
+        rate_limit_table: rateLimitStore.table,
+        rate_limit_schema_ready: rateLimitStore.schema,
+        rate_limit_permissions_ready: rateLimitStore.permissions,
+        rate_limit_rls_ready: rateLimitStore.rls,
+        rate_limit_store_ready: rateLimitStore.ready,
+        rate_limit_secret_ready: rateLimitSecretReady,
+        rate_limit_required: rateLimitRequired,
+        rate_limit_ready: rateLimitReady,
         push_enabled: pushEnabled,
         push_subscription_table: pushSubscriptionTable,
         push_provider_configured: pushProviderConfigured,
@@ -95,6 +127,14 @@ export async function GET() {
         leads_table: false,
         notification_table: false,
         rbac_schema_ready: false,
+        rate_limit_table: false,
+        rate_limit_schema_ready: false,
+        rate_limit_permissions_ready: false,
+        rate_limit_rls_ready: false,
+        rate_limit_store_ready: false,
+        rate_limit_secret_ready: rateLimitSecretReady,
+        rate_limit_required: rateLimitRequired,
+        rate_limit_ready: missingDatabaseRateLimitReady,
         push_enabled: process.env.AGENT_PUSH_NOTIFICATIONS_ENABLED === "true",
         push_subscription_table: false,
         push_provider_configured: hasValidPushConfiguration(),

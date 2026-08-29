@@ -27,6 +27,12 @@ This document defines the single authoritative source of truth for Ask Magic Mik
 | Node version | 24.x |
 | Automatic Git deployments | Enabled; Ignored Build Step command is empty |
 
+Current accepted Production release: PR #195 merge
+`b450b41c66c6740bd20571cdbe7d8caf82e92d5e`, deployment
+`dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Draft PR #209 is the sole current
+application release candidate and has no Production authority until its exact
+gate is received.
+
 ### Verification command
 
 ```bash
@@ -56,7 +62,9 @@ node scripts/amm/verify-production-alias.mjs
 | Provider | Neon PostgreSQL (Free) |
 | Project | `bitter-star-20214385` |
 | Production branch | `br-round-base-auh6h2wd` |
-| Preview branch | `br-flat-math-aut6n3xu` |
+| Production endpoint | `ep-proud-bonus-autwv60g` |
+| Preview branch | `br-morning-paper-aun3378r` |
+| Preview endpoint | `ep-billowing-paper-au4tdhz8` |
 | Application credential | `DATABASE_URL` — server-only, never in client code or logs |
 | Migrations | Versioned SQL under `supabase/migrations/` (legacy directory name; applies to canonical PostgreSQL) |
 | Runtime schema access | Explicit least-privilege grants; application requests do not execute DDL |
@@ -92,7 +100,7 @@ Before every production deploy:
 
 - WordPress / cPanel / DNS (ourtownproperties.com)
 - WAF / Regency
-- Vercel environment variables (set only via Vercel dashboard, not CLI)
+- Production Vercel environment-variable changes without their exact gate
 - Neon role or connection-string rotation
 - MLS / FlexMLS data exports
 - Outbound email / SMS / social posting

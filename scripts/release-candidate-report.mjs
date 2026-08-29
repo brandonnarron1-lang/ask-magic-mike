@@ -281,7 +281,7 @@ async function main() {
     );
   }
   manualRemaining.push(
-    "Confirm DATABASE_ENV, ALLOW_PREVIEW_DB_MUTATION, and PREVIEW_DATA_MODE in Vercel Preview env before any mutation run."
+    "Confirm DATABASE_ENV, PREVIEW_NEON_ENDPOINT_ID, PRODUCTION_NEON_ENDPOINT_ID, ALLOW_PREVIEW_DB_MUTATION, and PREVIEW_DATA_MODE in the branch-scoped Vercel Preview environment before any mutation run."
   );
   manualRemaining.push("Do not promote to production from automation.");
 

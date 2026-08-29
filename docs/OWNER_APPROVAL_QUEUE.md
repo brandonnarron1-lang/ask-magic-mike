@@ -1,6 +1,6 @@
 # Owner Approval Queue
 
-Updated 2026-08-22 from authenticated GitHub, Vercel, Neon, WordPress, and
+Updated 2026-08-24 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
@@ -10,15 +10,22 @@ Release only one approved PR at a time. Rebase the downstream PR on the exact
 new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
 
 1. PR [#183](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/183)
-   — campaign safety and three-offer owned-demand flight is merged and live.
+   — campaign safety and three-offer owned-demand flight head
+   `95a4f210eed4f8991e96e2eee595da5907112ba9` was merged as
+   `b8b31fb20223ad0f0ad311fee1ee3de20d0f7ae9` and accepted on Production
+   deployment `dpl_HwVDyckyCRB1NoaNb1E82xSpr75z`.
 2. PR [#184](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/184)
-   — its exact gate was received; the backup-first Neon migration is applied
-   and verified, and application release evidence is attached to the PR.
+   — its exact gate was received; reviewed head
+   `ed5da234ee34d06eb121084e01c97d79b08a815e` was merged as
+   `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97` and accepted on Production
+   deployment `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW`. The backup-first Neon
+   migration is applied and verified.
 3. PR [#185](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/185)
    — its exact gate was received; the WordPress proof-scope migration was
    backup-first applied and verified, and reviewed application head
    `2877fab35591c7f43c8def2ee920a12654b37a22` was merged as
-   `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8` and deployed to Production.
+   `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8` and accepted on Production
+   deployment `dpl_41AZkLvufuAC92h6QJeqhiyjkBcM`.
 4. PR [#193](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/193)
    — its exact gate was received; privacy/KPI head
    `21fdb5b3490cdc0517518578878a8db5d1b683a7` was merged as
@@ -35,49 +42,81 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    `5a3c5c7f2463ea399c21b616ff249f6c67e156b6` and accepted on Production
    deployment `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. It contained no migration,
    device enrollment, or send.
+7. PR [#195](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/195)
+   — its exact conversion-identity gate was received; reviewed head
+   `db13953fc5f6d24a684f66c9a1c10c6b929b72b3` was merged as
+   `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and accepted on Production
+   deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. It contained no migration,
+   form submission, or message send.
 
 These completed gates are exhausted and must not be reused as authority for a
 new action. None authorized a social/GBP post, email campaign, QR
 printing/distribution, consumer message, spend, DNS change, WordPress change,
 provider action, or deletion.
 
-## Next consolidated application candidate
+## Atomic Production durability candidate
 
-- Draft PR [#195](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/195)
-  is the sole next application candidate. It reuses the canonical home-value
-  funnel and adds required seller identity, field-specific focus/error
-  ownership, consumer-only footer navigation, and mutation-free visual QA.
-- It is refreshed onto released PR #194 merge
-  `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`; the prior stacked head is
-  preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
-  Local exact Node 24 and Chromium proof pass. The final no-write-harness head
-  must also have green exact-head GitHub CI and protected Vercel Preview
-  evidence attached to PR #195 before its gate is consumable.
-- Its only application release phrase is:
-  `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
-- That future phrase will authorize only the exact reviewed PR #195 merge and
-  canonical Vercel Production deployment. It will not authorize a WordPress
-  edit, GBP/social/email publication, QR distribution, message, lead
-  submission, migration, device enrollment, test Push, spend, DNS change,
-  provider action, deletion, or NellySelly action.
+- Fresh 2026-08-23 read-only Production checks pass the public conversion
+  verifier 15/15 and smoke 19/19 with two intentional skips. The candidate
+  monitor reports 8/9 because the deployed readiness body does not prove the
+  required durable limiter contract. This is the one immediate Production
+  correction.
+- Draft PR [#209](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/209)
+  on branch `codex/phase9-controlled-release-candidate-20260823` is the sole
+  current application release vehicle. It consolidates the reviewed work from
+  PRs #202 through #208 once and binds Preview write authority to the actual
+  server-only Neon endpoint.
+- The latest branch-only security review also bounds the emergency memory
+  limiter and isolates fallback counters by route. The pre-hardening head is
+  preserved at
+  `rescue/amm-pr209-pre-memory-fallback-hardening-20260824-0333`. Treat the
+  current GitHub PR head—not a commit literal embedded in this mutable file—as
+  the release candidate. Immediately before using the gate, require that head
+  to remain Draft, cleanly mergeable against the recorded Production base, and
+  green in the full Node 24 release gate, exact Vercel Preview, protected
+  no-write acceptance, Widget E2E, dependency audit, secret scan, and current
+  Production preflight. If the head moves, every prior exact-head seal becomes
+  historical evidence and the complete proof must be repeated.
+- The exact pre-reconciliation application/security head
+  `b4e76f795d74d6a7c0947b16150cdb9c6c63e23a` passed 228 files / 3,054 tests,
+  strict typecheck, ESLint, optimized build, 83-route proof, 14/14 safety,
+  isolation, dependency and history-secret scans, exact Vercel Preview, 17
+  no-write passes with six intentional write skips, Widget 2/2, and categorical
+  exact Preview endpoint match/Production non-match. The final PR head must
+  repeat exact-head proof after this authority reconciliation.
+- Optional isolated synthetic Preview mutation and cleanup requires:
+  `APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA`.
+- The only combined Production configuration/application release phrase is:
+  `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
+- The Production phrase authorizes one encrypted Production-only durability
+  secret, the exact reviewed PR #209 merge/deploy, and one malformed non-lead
+  request that writes only an HMAC-pseudonymized rate-limit bucket before
+  returning HTTP 400. It does not authorize a lead, analytics event, email,
+  SMS, Push, WordPress change, publication, spend, DNS change, migration,
+  deletion, or NellySelly action.
+- Stale encrypted Upstash variable names remain ignored. Their deletion is not
+  included in this gate.
 
-## Deferred candidates requiring refresh and overlap review
+## Superseded and deferred release records
 
-- PR [#182](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/182)
-  is superseded for release. Its unique Buyer/current-router work is preserved
-  in consolidated PR #185, so its former gate must not be requested or reused.
-- PR #187's KPI-target migration is deferred because Production has no eligible
-  live-demand baseline. It is not part of PR #185.
-- PRs #186, #188, and #189 are preserved as source history; their useful work
-  is consolidated into PR #185 and their former standalone gates are obsolete.
-- PRs #190–#192 remain preserved as source history; their independently useful
-  work was consolidated once in released PR #193 and is not part of PR #185.
-- Historical PR [#179](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/179)
-  is preserved but superseded by the released current-stack iOS handoff in PR
-  [#194](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/194).
-  Physical enrollment and a `[TEST]` Push remain separately approved actions.
-- PRs #92 and #119–#121 remain archive-after-review candidates. They are not a
+- PRs #202 through #208 remain open or preserved only as incremental review
+  evidence. PR #209 contains their reviewed cumulative application work once.
+  They have no independent release authority and may not be merged or deployed
+  under an old gate.
+- PRs #197, #198, #200, and #201 are closed with branches preserved. PR #199's
+  unique field-experience work is included once in PR #209 through its reviewed
+  current-stack successor.
+- PR #187's KPI-target migration remains deferred because Production has no
+  eligible live-demand baseline. It is not part of PR #209.
+- PR #182 and historical PR #179 are superseded by already released current-
+  stack work. Physical Web Push enrollment and a `[TEST]` receipt remain
+  separate per-person actions.
+- PRs #92 and #119 through #121 remain archive-after-review history, not a
   parallel Production release plan.
+
+The first later WordPress mutation remains exactly one homepage href and still
+requires `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`
+after a fresh matching manifest and verified page-149 rollback.
 
 ## People and brokerage decisions
 

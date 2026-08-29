@@ -1,3 +1,5 @@
+import { computeNeonEndpointAttestation } from "@/lib/security/neon-endpoint-identity";
+
 export type PreviewDataMode = "disabled" | "enabled" | "unknown";
 
 export type PreviewMutationCheck =
@@ -28,7 +30,12 @@ export function previewDataMode(env: Record<string, string | undefined> = proces
 
 export function isPreviewDataDisabled(env: Record<string, string | undefined> = process.env) {
   if (!isPreviewRuntime(env)) return false;
-  return previewDataMode(env) !== "enabled" || normalized(env.ALLOW_PREVIEW_DB_MUTATION) !== "true";
+  const endpoint = computeNeonEndpointAttestation(env);
+  return (
+    previewDataMode(env) !== "enabled" ||
+    normalized(env.ALLOW_PREVIEW_DB_MUTATION) !== "true" ||
+    !endpoint.preview_endpoint_identity_confirmed
+  );
 }
 
 export function serviceRoleAvailable(env: Record<string, string | undefined> = process.env) {

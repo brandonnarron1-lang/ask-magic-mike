@@ -1,6 +1,15 @@
 import { NextResponse } from "next/server";
 import { checkRateLimit, LIMITS, rateLimitKey } from "../../../src/lib/security/rate-limit";
 import { analyticsEvents } from "../../lib/constants";
+import {
+  normalizeWebVitalEventProperties,
+  toWebVitalAnalyticsProperties,
+} from "../../lib/experience/web-vitals";
+import {
+  coarseWebVitalUserAgent,
+  isCanonicalProductionWebVitalRequest,
+  webVitalMetricDigest,
+} from "../../lib/experience/web-vitals-server";
 import { isApprovedPublicOrigin } from "../../lib/publicOrigin";
 import {
   coarseAnalyticsUserAgent,
@@ -72,20 +81,51 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid public event.", correlation_id: correlationId }, { status: 400 });
   }
   const properties = body.properties && typeof body.properties === "object" && !Array.isArray(body.properties) ? body.properties as Record<string, unknown> : {};
+  const webVitalProperties = body.event_name === "web_vital_observed"
+    ? normalizeWebVitalEventProperties(properties)
+    : null;
+  if (body.event_name === "web_vital_observed" && !webVitalProperties) {
+    return NextResponse.json({ error: "Invalid experience event.", correlation_id: correlationId }, { status: 400 });
+  }
+  const webVitalUserAgent = webVitalProperties
+    ? coarseWebVitalUserAgent(req.headers.get("user-agent"), webVitalProperties.device_category)
+    : null;
+  if (
+    webVitalProperties &&
+    (!isCanonicalProductionWebVitalRequest(req) || !webVitalUserAgent?.startsWith("browser/"))
+  ) {
+    return NextResponse.json({ error: "Invalid experience event.", correlation_id: correlationId }, { status: 400 });
+  }
   const persisted = await recordServerAnalyticsEvent({
     eventName: body.event_name,
-    category: body.event_name === "page_view" ? "session" : "intake",
-    sessionId: typeof body.session_id === "string" ? body.session_id : null,
+    category: body.event_name === "web_vital_observed"
+      ? "system"
+      : body.event_name === "page_view" ? "session" : "intake",
+    sessionId: body.event_name === "web_vital_observed"
+      ? null
+      : typeof body.session_id === "string" ? body.session_id : null,
     leadId: null,
-    properties: safePublicAnalyticsProperties(body.event_name, properties),
-    attribution: body.attribution && typeof body.attribution === "object"
+    properties: safePublicAnalyticsProperties(
+      body.event_name,
+      webVitalProperties
+        ? {
+            ...toWebVitalAnalyticsProperties(webVitalProperties),
+            metric_id: webVitalMetricDigest(webVitalProperties.metric_id),
+          }
+        : properties,
+    ),
+    attribution: body.event_name === "web_vital_observed"
+      ? undefined
+      : body.attribution && typeof body.attribution === "object"
       ? {
           source: safeRegisteredPublicAnalyticsDimension("utm_source", (body.attribution as Record<string, unknown>).source) ?? undefined,
           medium: safeRegisteredPublicAnalyticsDimension("utm_medium", (body.attribution as Record<string, unknown>).medium) ?? undefined,
           campaign: safeRegisteredPublicAnalyticsDimension("utm_campaign", (body.attribution as Record<string, unknown>).campaign) ?? undefined,
         }
       : undefined,
-    userAgent: coarseAnalyticsUserAgent(req.headers.get("user-agent"), properties.device_category),
+    userAgent: webVitalProperties
+      ? webVitalUserAgent
+      : coarseAnalyticsUserAgent(req.headers.get("user-agent"), properties.device_category),
   });
   if (!persisted) {
     return NextResponse.json(

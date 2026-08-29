@@ -43,12 +43,12 @@ describe("client analytics privacy boundary", () => {
     });
     expect(safePublicAnalyticsProperties("funnel_started", {
       funnel_name: "renter",
-      lead_source_surface: "buyer_page",
+      lead_source_surface: "renter_page",
       experiment_key: "home_value_path",
       variant_key: "broker_review",
     })).toEqual({
       funnel_name: "renter",
-      lead_source_surface: "buyer_page",
+      lead_source_surface: "renter_page",
       experiment_key: "home_value_path",
       variant_key: "broker_review",
     });

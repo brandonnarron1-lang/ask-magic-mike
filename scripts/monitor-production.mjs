@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { evaluateReadinessContract } from "./lib/monitor-contracts.mjs";
+
 const base = (process.env.TARGET_URL || "https://www.askmagicmike.com").replace(/\/$/, "");
 const timeoutMs = Number(process.env.MONITOR_TIMEOUT_MS || 12_000);
 const checks = [
@@ -22,14 +24,24 @@ async function check([name, path, expected]) {
       signal: AbortSignal.timeout(timeoutMs),
       headers: { "User-Agent": "AskMagicMike-Production-Monitor/1.0" },
     });
+    const statusOk = (Array.isArray(expected) ? expected : [expected]).includes(response.status);
+    let contract;
+    if (name === "ready") {
+      try {
+        contract = evaluateReadinessContract(await response.json());
+      } catch {
+        contract = evaluateReadinessContract(null);
+      }
+    }
     return {
       name,
       path,
       expected,
       actual: response.status,
-      ok: (Array.isArray(expected) ? expected : [expected]).includes(response.status),
+      ok: statusOk && (contract?.ok ?? true),
       duration_ms: Date.now() - started,
       cache_control: response.headers.get("cache-control"),
+      ...(contract ? { contract_checks: contract.checks } : {}),
     };
   } catch (error) {
     return {

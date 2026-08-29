@@ -1,6 +1,258 @@
 # Implementation Status
 
-Updated 2026-08-22.
+Updated 2026-08-23.
+
+## Phase 9 field-experience trust fast-track — 2026-08-23
+
+- **Reuse decision:** preserve PR #199 exact head
+  `7690e54b3c1d225d09ab8838774c4ac9c6316cce` at
+  `rescue/amm-pr199-pre-fast-track-20260823-175922`, then apply only its unique
+  field-experience implementation to canonical PR #205 head
+  `b9bbf61e60d94e980ea2453560966e1730655592`. PR #187's KPI-target migration,
+  numeric targets, and stale stack remain excluded.
+- **Collection boundary:** the root app reports only LCP, INP, and CLS on exact
+  canonical Production hosts and registered public routes. Preview,
+  automation, known internal QA, private routes, and malformed callers fail
+  closed before persistence.
+- **Privacy upgrade:** durable observations have no lead/session association or
+  attribution and retain no query, raw URL, raw agent, IP, cookie, token, or raw
+  metric ID. A domain-separated SHA-256 digest supports bounded duplicate
+  suppression without preserving the browser-generated identifier.
+- **Protected intelligence:** the existing Growth Command Center shows
+  aggregate-only overall/mobile/desktop P75 values with truthful unavailable
+  states and sample-maturity labels. The query is fixed, parameterized,
+  deduplicated, and capped at 25,000 recent eligible rows.
+- **Local acceptance:** exact Node 24.18.0 passes 5 focused files / 29 tests,
+  all 226 files / 3,031 tests, strict typecheck, ESLint, optimized Next.js
+  15.5.21 build with 52 static pages, 83/17 route proof, safety 14/14, system
+  isolation, and a no-vulnerability Production dependency audit.
+- **Remote acceptance:** Draft PR #206 application head
+  `1954f8ee63f0de40c5c7326f34b7acf6be94cf27` is cleanly mergeable and passes
+  GitHub Node 24 run `32669693059`, READY immutable Vercel Preview
+  `dpl_8LnG6VoGbskJpERDGXbf7YNDHDCL`, and protected no-write run
+  `32669923014`: 17 read-only passes / 6 intentional mutation skips / 0
+  failures, Widget 2/2, doctor 43/43, safety 14/14, release-candidate GO, and
+  `PREVIEW_READY`. Preview fatal/error/warning log queries each returned zero.
+- **Rendered acceptance:** exact optimized build is visually clean at
+  1440x1000 and 390x844 with one main, no horizontal overflow, truthful
+  unavailable-state rendering, zero `/api/events` requests, and zero browser
+  warnings/errors.
+- **Release status:** no migration or Production mutation. Keep Draft behind
+  #202 → #203 → #204 → #205. The final documentation-only head must retain
+  green exact-head checks recorded on PR #206; no Production gate is issued.
+- Detailed scope: `docs/phase9/FIELD_EXPERIENCE_TRUST.md`.
+
+## Phase 9 public hero delivery fast-track — 2026-08-23
+
+- **Reuse decision:** apply only PR #201 implementation commit
+  `1ca7ff00eacbc7da6d9b861431109c3d009c6861` on refreshed PR #203 head
+  `6da82fe6d9a87f0ced6da5f4cdae04defea5e4ae`. Clean ordered merge
+  `010e18fcf610997948fcf694361c4b6b2423884f` carries that predecessor into
+  PR #204; rescue branch
+  `rescue/amm-pr204-pre-pr203-refresh-20260823-173028` preserves the prior
+  sealed head. Preserve the released Black
+  Diamond composition, Mike imagery, Our Town identity, copy, CTAs, routes,
+  attribution, forms, and canonical lead pipe.
+- **Live evidence:** a fresh write-intercepted Production audit at 390 × 844
+  loaded one 289,876-byte mobile hero; 1440 × 900 loaded one 503,788-byte
+  desktop hero. Both current elements report `loading=auto` and
+  `fetchPriority=auto`, with zero browser warnings/errors.
+- **Implementation:** use the existing Next.js `getImageProps` optimizer at the
+  established 768-pixel art-direction breakpoint, intrinsic dimensions,
+  `sizes="100vw"`, eager loading, and high fetch priority. No artwork, copy, or
+  layout is regenerated.
+- **Local acceptance:** after the ordered refresh, exact Node 24.18.0 passes 4
+  focused files / 15 tests, the complete 221-file / 2,994-test suite, strict
+  typecheck, ESLint, optimized
+  Next.js build with 52 static pages, 82/17 route-manifest proof, 14/14 release
+  safety, system isolation, a no-vulnerability Production dependency audit,
+  empty migration delta, and redacted staged secret scan.
+- **Rendered acceptance:** fresh write-intercepted optimized builds load one
+  hero resource per viewport: 56,792 bytes at 390 × 844 and 108,706 bytes at
+  1440 × 900. Art direction, identity, H1, CTAs, eager/high priority, one main,
+  and zero overflow remain correct with zero browser warnings/errors.
+- **Superseded pre-refresh remote acceptance:** Draft PR #204 application head
+  `e1024cd1234dc5b200ed953705127f9efa4bb8fd` passes GitHub run `32662812090`,
+  READY Preview `dpl_CVWc7vVZ2Ju8qv7KanpYshn4uKKS`, and protected no-write run
+  `32662942232`: 17 pass / 6 intentional write skips / 0 fail, Widget 2/2,
+  doctor 43/43, safety 14/14, release candidate GO, `PREVIEW_READY`, and zero
+  fatal/error/warning runtime logs. Deployed browser-negotiated image responses
+  are 56,744 bytes mobile and 108,706 bytes desktop.
+- **Dependency:** this candidate follows PR #203, which follows PR #202. It is
+  not release-eligible until both predecessors release in order, this branch is
+  refreshed onto exact `main`, and fresh exact-head proof passes.
+- **Safety:** no migration or Production mutation. The refreshed Draft head
+  requires fresh exact-head CI/Preview/protected proof recorded in PR #204. No
+  Production gate is issued.
+- Detailed scope:
+  `docs/phase9/PUBLIC_HERO_DELIVERY_TRUST.md` and
+  `docs/phase9/PUBLIC_HERO_DELIVERY_TRUST_QA_EVIDENCE.md`.
+
+## Phase 9 owned-traffic activation fast-track — 2026-08-23
+
+- **Production evidence:** aggregate-only Neon reads at 20:23 UTC report six
+  safely suppressed QA leads and zero live/contactable leads, outcomes,
+  response samples, spend, experiments, or non-test publication proofs.
+- **Reuse decision:** transplant only the unique reviewed application work from
+  PRs #197 and #198 onto PR #204, now refreshed through exact predecessor head
+  `bd16a115af9f4b17dccab0bb7dad41682816be5d`. Clean ordered merge
+  `52a9b31cbab8da2e2ac251fe483bbbbd9a3f34e8` carries it into PR #205. Rescue
+  references `rescue/amm-pre-owned-traffic-fast-track-20260823-1625` and
+  `rescue/amm-pr205-pre-pr204-refresh-20260823-173028` preserve both earlier
+  boundaries.
+- **Scope:** separate audited legacy Our Town attribution from exact KPI
+  evidence, and expose authenticated GET-only readiness manifests for the
+  existing homepage, home-value, and We Buy Homes WordPress CTAs.
+- **Safety:** no stored attribution rewrite, migration, Production action,
+  WordPress edit, form replacement, provider send, spend, DNS change, deletion,
+  or NellySelly action. A readiness manifest cannot authorize publication.
+- **Recommended first action:** after this application stack is eventually
+  released, prepare one separately approved homepage href replacement using a
+  fresh matching manifest and verified WordPress revision.
+- **Fresh public precondition proof:** at 20:37:18 UTC, the actual Node 24
+  server implementation fetched the three exact WordPress pages and published
+  page index through fixed HTTPS allowlists. Homepage page 149, home-value page
+  3952, and We Buy Homes page 3631 each returned `legacy_match_ready`, one
+  current/rollback link, one proposed canonical link, zero lookalikes,
+  `publicationAuthorized=false`, and `mutationPerformed=false`. Public index,
+  page-record, and homepage probes returned HTTP 200; no authenticated or write
+  request was made.
+- **Local acceptance:** after the ordered refresh, exact Node 24.18.0 passes 3
+  focused files / 36 tests, all 223 files / 3,011 tests, strict typecheck,
+  ESLint, optimized Next.js
+  15.5.21 build with 52 static pages, 83/17 route proof, safety 14/14, doctor
+  43/43, isolation, and a no-vulnerability Production dependency audit.
+- **Rendered acceptance:** the optimized local Production build passes at
+  1440×1000 and 390×844 with one main, document width equal to viewport width,
+  three protected manifest links, zero writable forms in the deliberately
+  database-unconfigured read-only runtime, GET-only browser requests, and zero
+  console warnings/errors. Focused visual inspection confirms the WordPress
+  card and controls are restrained, legible, and correctly stacked.
+- **Verification boundary:** candidate secret/diff/migration integrity,
+  exact-head CI, immutable Preview, and protected no-write runtime acceptance
+  are sealed below. Any later refresh onto `main` must repeat the exact-head
+  proof before release eligibility is reconsidered.
+- **Superseded pre-refresh remote acceptance:** Draft PR #205 head
+  `a1e8a4940f8d9eefe21bc6f43514e2e4941e8e31` is cleanly mergeable and passes
+  Node 24 run `32665394864`, READY Preview
+  `dpl_5AWNXqLf5k9Gc8UEqK2hA1AHiLFH`, and protected run `32665666025`: 17
+  read-only passes / 6 intentional mutation skips / 0 failures, Widget 2/2,
+  doctor 43/43, safety 14/14, release candidate GO, `PREVIEW_READY`, and zero
+  fatal/error/warning deployment logs. Preview RBAC is disabled, so the
+  manifest route truthfully returns 409 before a WordPress fetch; its
+  authorized `report:view` path passes isolated route execution tests.
+- **Final local integrity:** no migration delta, no known Production dependency
+  vulnerability, clean diff, and gitleaks scanned 560 commits / approximately
+  14.71 MB with no leak.
+- **Release status:** keep Draft behind #202 → #203 → #204. The refreshed head
+  requires fresh exact-head CI/Preview/protected proof recorded in PR #205. No
+  Production gate is issued; after predecessors release, retarget to exact
+  `main` and repeat exact-head proof.
+- Plan and rollback:
+  `docs/phase9/OWNED_TRAFFIC_ACTIVATION_FAST_TRACK.md` and
+  `docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md`.
+
+## Phase 9 conversion-journey integrity fast-track — 2026-08-23
+
+- **Live evidence:** a 390×844 Production audit intercepted lead/event and
+  third-party analytics writes before navigation. Homepage address-to-contact
+  progression worked with zero browser warnings/errors. On /buy, a blank
+  submit rendered the correct email-or-phone status but left focus on the
+  submit button, reproducing the recoverability defect fixed by PR #200.
+- **Reuse decision:** exact PR #200 application/tests were applied to exact PR
+  #202 head. All application and test files composed cleanly; only five
+  cumulative status documents required current-authority reconciliation.
+- **Scope:** immutable first touch, fresh tagged last touch, renter-page
+  identity, replay-safe lead-created analytics, and accessible either-or
+  contact recovery. No form, endpoint, database, provider, dashboard, route
+  family, or visual system was added.
+- **Dependency:** this candidate now includes PR #202 final head
+  `37aa69421a70a177504e9ccaed99fef75852849e` through clean merge commit
+  `3b5aef0aea2254c4b410393bb84ad1e1b61b7510`. Rescue branch
+  `rescue/amm-pr203-pre-pr202-refresh-20260823-173028` preserves the previous
+  sealed head. It cannot release before PR #202 and must be retargeted to the
+  exact resulting `main` before any later gate is eligible.
+- **Local acceptance:** after the ordered refresh, exact Node 24.18.0 passes 4
+  focused files / 42 tests and the complete suite, strict typecheck, ESLint, optimized
+  Next.js 15.5.21 build with 52 static pages, 82/17 route-manifest proof,
+  system isolation, release safety 14/14, no-vulnerability Production
+  dependency audit, diff integrity, empty migration delta, and a redacted
+  staged secret scan.
+- **Rendered acceptance:** optimized local mobile Buyer and Renter paths have
+  one main, no horizontal overflow, zero browser warnings/errors, repeated
+  invalid-submit focus recovery, exact `renter_page` payload identity, immutable
+  Buyer first touch, and refreshed Renter last touch. Lead/event routes were
+  mocked before navigation; no durable write occurred.
+- **Superseded pre-refresh remote acceptance:** Draft PR #203 application head
+  `a86eece1f2b18ceb064d109912c5b77314d2aca9` passes exact-head GitHub Node 24
+  run `32660966818`, READY Preview `dpl_DQUyVzLXPmvyjghqUVzPtqoDuHcq`, and
+  protected no-write run `32661259833`: 17 pass / 6 intentional write skips /
+  0 fail, Widget 2/2, doctor 43/43, safety 14/14, release candidate GO,
+  `PREVIEW_READY`, and zero fatal/error/warning runtime logs.
+- **Safety:** no migration or Production mutation. The refreshed Draft head
+  requires fresh exact-head CI/Preview/protected status recorded in PR #203.
+  PR #203 cannot release
+  before PR #202 and must then be refreshed onto exact `main` and re-proven
+  before a separate later gate is eligible.
+- Detailed scope:
+  docs/phase9/CONVERSION_JOURNEY_INTEGRITY.md and
+  docs/phase9/CONVERSION_JOURNEY_INTEGRITY_QA_EVIDENCE.md.
+
+## Phase 9 durable rate-limit readiness — 2026-08-23
+
+- Authenticated Vercel evidence found 17 paired error occurrences on the two
+  public event routes: Production had a canonical database but no suitable
+  server-only HMAC secret and therefore used the availability-first per-instance
+  memory limiter. The existing public readiness endpoint still returned HTTP
+  200 and the status-only monitor passed 9/9.
+- The candidate reuses the existing Neon `rate_limit_buckets` table and HMAC
+  implementation. It adds no provider, database, migration, route, dashboard,
+  lead store, or public form.
+- Production readiness now requires the exact table schema/upsert target,
+  schema and CRUD privileges, effective RLS access, and the dedicated
+  `RATE_LIMIT_HASH_SECRET`; it returns only boolean dependency state. Vercel
+  Preview remains read-only and is not made dependent on a Production secret.
+- The synthetic monitor now validates the body contract rather than accepting
+  HTTP 200 alone. Against unchanged Production it truthfully reports 8/9,
+  proving the prior false-green path is closed by the candidate.
+- A final security pass replaced the raw Neon driver error object with one of
+  four bounded operational codes. The privacy regression test injects a
+  synthetic private failure marker and proves it never reaches `console.error`.
+- A second exact-candidate review found two emergency-path defects: the memory
+  fallback had no identifier cap and did not partition keys by route. It now
+  reclaims expired entries, caps active identifiers at 10,000, fails closed for
+  new identifiers at capacity, and mirrors the durable route partition. See
+  `docs/phase9/PR209_SECURITY_REVIEW.md`.
+- The exact read-only capability query passed on canonical Neon Production in
+  35 ms with all four store booleans true. This proves the database object and
+  SQL-editor role; deployed health must still prove the exact Vercel role.
+- Exact local Node 24.18.0 verification passes 6 focused files / 59 tests, the
+  complete 218-file / 2,983-test suite, strict typecheck, ESLint, the optimized
+  Next.js 15.5.21 build, 52 static pages, 82 active routes, 14/14 release
+  safety, 43/43 release doctor, system isolation, a no-vulnerability Production
+  dependency audit, and a redacted full-history secret scan. The diff contains no
+  migration.
+- No Production secret, deployment, request write, lead, event, notification,
+  email, SMS, Push, WordPress edit, publication, DNS change, spend, deletion,
+  or NellySelly action occurred.
+- Decision and evidence:
+  `docs/phase9/DURABLE_RATE_LIMIT_READINESS.md` and
+  `docs/phase9/DURABLE_RATE_LIMIT_READINESS_QA_EVIDENCE.md`.
+- Draft PR #202 application head
+  `abd2269b77496024a20d172e83a5404f013c5a43` passes GitHub run
+  `32659072474`, READY Preview `dpl_FvHmNSQLKq9EGp24LPijSfPAW3Me`, deployed
+  runtime capability health, and protected run `32659271882`. Acceptance is 17
+  pass / 6 write skips / 0 fail, Widget 2/2, doctor 43/43, release candidate GO,
+  `PREVIEW_READY`, and 0 warning/error/fatal logs. Earlier head `6067512...` and
+  its evidence are retained but superseded.
+- Overlaying this hardening on the existing synthetic PR #197–#201 stack caused
+  no executable conflict; only the cumulative go-live runbook conflicted.
+- Protected CLI verification created one empty, zero-deployment helper project
+  and immediately relinked the worktree to canonical Ask Magic Mike. The helper
+  is recorded in the asset manifest and preserved for separately approved
+  cleanup.
+- Exact future gate:
+  `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
 
 ## Phase 9 conversion identity polish — 2026-08-22
 
@@ -21,8 +273,10 @@ Updated 2026-08-22.
   2,950 tests, strict typecheck, ESLint, optimized build, 82 active routes,
   14/14 safety, 43/43 doctor, system isolation, eight Chromium homepage/widget
   checks, dependency audit, candidate secret scan, diff check, and empty
-  migration scan. The final no-write-harness head still requires exact-head
-  GitHub Node 24 CI and canonical protected Preview proof after push.
+  migration scan. Final exact-head Node 24 run `32612226020`, immutable Preview
+  deployment `dpl_az7g38CUEynxgqxMAuLoWJEv52Td`, and protected no-write QA run
+  `32612370721` pass with 17 pass / 6 safe skip / 0 fail, widget 2/2, doctor
+  43/43, and strict `PREVIEW_READY`.
 - The branch is refreshed onto released PR #194 merge
   `5a3c5c7f2463ea399c21b616ff249f6c67e156b6`; its prior stacked head is
   preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
@@ -31,8 +285,33 @@ Updated 2026-08-22.
 - Detailed decision and QA:
   `docs/phase9/CONVERSION_IDENTITY_POLISH.md` and
   `docs/phase9/CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
-- Future exact gate:
-  `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
+- PR #195 was approved and merged as
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`, then accepted on Production
+  deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Its gate is exhausted.
+
+## Phase 9 WordPress owned-demand activation change set — 2026-08-22
+
+- **Implemented locally, not published:** the existing authenticated
+  `/admin/distribution` command now exposes read-only readiness-manifest links
+  for three established Our Town WordPress placements.
+- **Live public read passed:** homepage page ID 149, home-value page ID 3952,
+  and We Buy Homes page ID 3631 each resolved one exact legacy href, one exact
+  rollback value, and one canonical proposed URL with complete placement-level
+  attribution. Every manifest reported `mutationPerformed=false`.
+- **Reuse result:** no new funnel, lead API, lead store, dashboard, publisher,
+  form, notification engine, or analytics vocabulary was added. The package
+  reuses the canonical owned-demand resolver and Lead Center `report:view`
+  boundary.
+- **Safety result:** exact HTTPS host allowlists, redirect revalidation,
+  a 3 MB streaming response cap, explicit published-row validation, page-ID
+  checks, duplicate/missing-target rejection, deterministic SHA-256
+  preconditions covering every ambiguity signal, private/no-store headers, and
+  raw-HTML exclusion are implemented and covered.
+- **Recommended first action:** one separately approved homepage CTA href
+  replacement only. No WordPress publication is included in this application
+  candidate.
+- Detailed scope and rollback:
+  `docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md`.
 
 ## Phase 9 iOS phone handoff consolidation — 2026-08-22
 
@@ -940,3 +1219,42 @@ any bridge activation or shadow-mode test.
   authorization, isolation, and error-log checks passed.
 - Vitest/coverage upgraded to 3.2.6, Vite to 6.4.3, and vulnerable development
   dependency paths pinned to compatible patched versions.
+
+## Phase 9 Neon Preview endpoint attestation — 2026-08-23
+
+- Draft PR #209 now binds Preview mutation authority to the actual Neon
+  endpoint parsed from server-only `DATABASE_URL`; labels and toggles alone are
+  insufficient.
+- The application write guard and protected health/QA gate both require an
+  exact Preview endpoint match, an explicit Production non-match, and valid,
+  distinct expected endpoint IDs.
+- Protected health output remains categorical-only. Connection strings,
+  credentials, and raw endpoint identifiers are never returned.
+- Canonical infrastructure documentation now identifies Preview branch
+  `br-morning-paper-aun3378r` and Production branch
+  `br-round-base-auh6h2wd`; Ask Magic Mike/NellySelly isolation remains intact.
+- Local release verification passed with 3,054 tests, strict typecheck, lint,
+  optimized build, 83-route manifest, 14/14 release safety checks, zero known
+  Production dependency vulnerabilities, and no gitleaks findings.
+- No Preview mutation flags, Production secrets, database rows, migrations,
+  sends, merges, deployments, WordPress changes, or NellySelly systems were
+  touched.
+
+## Phase 9 atomic release-authority reconciliation — 2026-08-23
+
+- Fresh authenticated GitHub/Vercel and read-only public checks confirm PR #195
+  merge `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and Production deployment
+  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` remain the accepted live baseline.
+- PR #209 is now the sole documented application release candidate. PRs #202
+  through #208 remain preserved as incremental review evidence with no
+  independent merge or Production authority.
+- Current authority docs now expose one optional Preview-mutation gate, one
+  combined Production durability/merge/deploy gate, and the later independent
+  one-href WordPress homepage gate without reusing any consumed approval.
+- Added an executable five-check documentation contract so known stale stacked-
+  release claims cannot silently return to the operating source of truth.
+- Fresh public evidence passes conversion 15/15 and smoke 19/19 with two
+  intentional skips. Candidate monitoring truthfully reports 8/9 until the
+  durable Production limiter contract is released.
+- Full decision and no-action record:
+  [`phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md`](./phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md).

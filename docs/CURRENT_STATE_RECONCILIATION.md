@@ -1,6 +1,6 @@
 # Current State Reconciliation
 
-Audited 2026-08-21. This document overrides older status claims when they
+Audited 2026-08-23. This document overrides older status claims when they
 conflict with observed Production, authenticated accounts, current `main`, or
 provider/database state.
 
@@ -8,8 +8,8 @@ provider/database state.
 
 | Asset | Evidence | Status |
 | --- | --- | --- |
-| GitHub | `brandonnarron1-lang/ask-magic-mike`; Production baseline PR #181 merge `5335697edf31eed0b8a38cd0295a4f5e7d501a3e` | VERIFIED LIVE |
-| Vercel | `eyes-up-industries/ask-magic-mike`; project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; deployment `dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM` | VERIFIED LIVE |
+| GitHub | `brandonnarron1-lang/ask-magic-mike`; Production baseline PR #195 merge `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` | VERIFIED LIVE |
+| Vercel | `eyes-up-industries/ask-magic-mike`; project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` | VERIFIED LIVE |
 | Public host | `https://www.askmagicmike.com`; apex redirects 308 | VERIFIED LIVE |
 | Database | Neon `bitter-star-20214385`; Production branch `br-round-base-auh6h2wd` | VERIFIED LIVE |
 | Brokerage/SEO | `https://www.ourtownproperties.com` WordPress | VERIFIED LIVE |
@@ -18,12 +18,18 @@ provider/database state.
 | Free phone alerts | VAPID Web Push schema/provider/phone setup ready; physical device acceptance remains owner-scoped | READY — OWNER ACTIVATION |
 | NellySelly | Separate repository, project, domains, database, and environment | VERIFIED ISOLATED |
 
-Observed 2026-08-21 public evidence: `/`, `/ask`, `/home-value`, `/buy`,
-`/rent`, `/api/health/live`, and `/api/health/ready` return 200. Live health
-reports canonical Neon and the Production notification boundary. The apex
-redirects permanently to `www`. Anonymous `/admin` is denied by the active
-authentication boundary; authorized Lead Center sessions are additionally
+Observed 2026-08-23 public evidence: the conversion verifier passes 15/15 and
+the read-only Production smoke passes 19 checks with two intentional skips.
+`/`, `/ask`, `/sell`, `/value`, `/buy`, `/widget/v1`, `/api/health/live`, and
+`/api/health/ready` return 200. The apex redirects permanently to `www`.
+Anonymous private routes are denied or temporarily redirected to the
+same-origin login route; authorized Lead Center sessions are additionally
 restricted by server-side role and assigned-lead scope.
+
+The current Production readiness body does not prove the durable limiter
+contract required by Draft PR #209. The candidate monitor therefore reports
+8/9 rather than accepting HTTP 200 alone. This is the known Production
+durability gate, not a public-funnel outage.
 
 No new repository, public app, provider ledger, or parallel lead database is
 warranted.
@@ -61,24 +67,26 @@ warranted.
 7. Internal email is active; consumer acknowledgment, nurture, automatic send,
    carrier SMS, and external publication remain independent gates.
 
-## Current release work
+## Current release authority
 
 | PR | Disposition | Gate |
 | --- | --- | --- |
-| #183 campaign safety and three-offer flight | Merged and live at `b8b31fb`; no publisher action occurred | Gate satisfied; external publication remains separate |
-| #184 publication-proof ledger | Exact gate received; guarded Neon migration applied and verified; application release evidence tracked on PR | Gate satisfied; external publication remains separate |
-| #182 launch authority/buyer discovery | Deferred overlap candidate; reconcile only after #183/#184 | Retain its gate only after fresh exact-head proof |
-| #179 iOS Web Push handoff | Deferred; code refresh and physical device acceptance remain separate | Retain its gate only after fresh exact-head proof |
+| #195 conversion identity polish | Merged and live at `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` | Gate exhausted; it authorizes no later action |
+| #209 atomic controlled release candidate | Canonical Draft candidate; cumulative application work from #202 through #208 plus fail-closed Neon Preview endpoint attestation | Exact Preview-mutation and Production gates remain separate |
+| #202 through #208 | Preserved incremental review records superseded for release by #209 | No independent merge or Production authority |
+| #187 KPI target register | Deferred until eligible live-demand evidence exists | No current release gate |
 
-PRs #170, #172, #173, #177, #178, #180, and #181 are merged and removed from
-the approval queue. PRs #119, #120, #121, and #92 predate the current
-consolidation. They are `ARCHIVE AFTER REVIEW`; none should merge without a
+PR #209 must remain Draft until its exact-head checks match the proposed
+deployment and the applicable exact gate is received. The conversion-identity
+gate used for PR #195 is exhausted and cannot authorize PR #209. PRs #92 and
+#119 through #121 remain `ARCHIVE AFTER REVIEW`; none should merge without a
 fresh requirement/diff audit.
 
 ## Current aggregate truth
 
-The latest read-only Production observation contains six suppressed/test leads,
-zero contactable live prospects, zero measured first-human responses, zero live
-notification failures, zero outcomes, and zero spend. This is a proven,
-available funnel with no genuine demand sample yet—not evidence of a fabricated
-prospect or a conversion result.
+The latest protected aggregate Production observation contains six
+suppressed/test leads, zero contactable live prospects, zero measured
+first-human responses, zero live notification failures, zero outcomes, and
+zero spend. The 2026-08-23 public checks did not submit a form or read lead
+records. This is a proven, available funnel with no genuine demand sample
+yet—not evidence of a fabricated prospect or a conversion result.

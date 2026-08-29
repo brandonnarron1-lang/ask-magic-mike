@@ -27,6 +27,23 @@ Public callers cannot associate an event with a canonical lead ID or agent ID.
 Server-side lead creation, routing, notification, and admin operations write
 their own lead-associated events after authorization and durable persistence.
 
+### Field-experience event
+
+`web_vital_observed` is a special Production-only browser event. It accepts
+only LCP, INP, or CLS from an exact canonical Ask Magic Mike origin and a
+registered public route. Its server-normalized properties are `metric_code`,
+a domain-separated SHA-256 `metric_id` digest, rounded `metric_value`, server-derived `rating`,
+`navigation_type`, normalized `route`, `device_category`, and the fixed
+`public_production` traffic class.
+
+The browser-generated metric identifier is never stored raw; its deterministic
+digest supports duplicate suppression without retaining the high-entropy source
+value. This event always has null lead/session association and no attribution. Preview,
+automation, known internal QA, private routes, dynamic property identifiers,
+query strings, and raw user agents are excluded. The protected Growth Command
+deduplicates metric IDs and calculates bounded P75 aggregates; it does not treat
+browser telemetry as authenticated transaction evidence.
+
 ## Trusted server/provider events
 
 `notification_queued`, `notification_delivered`, and `notification_failed` are

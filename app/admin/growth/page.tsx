@@ -163,6 +163,66 @@ function SampleStatus({ value }: { value: "collecting" | "directional" | "operat
   );
 }
 
+type WebVitalMetric = {
+  p75: number | null;
+  sampleSize: number;
+  mobileP75: number | null;
+  mobileSampleSize: number;
+  desktopP75: number | null;
+  desktopSampleSize: number;
+};
+
+function webVitalSampleStatus(sampleSize: number): "collecting" | "directional" | "operational" {
+  if (sampleSize >= 200) return "operational";
+  if (sampleSize >= 75) return "directional";
+  return "collecting";
+}
+
+function webVitalValue(metric: "LCP" | "INP" | "CLS", value: number | null) {
+  if (value == null) return "—";
+  if (metric === "CLS") return new Intl.NumberFormat("en-US", { maximumFractionDigits: 3 }).format(value);
+  if (metric === "LCP") return `${number(value / 1_000)}s`;
+  return `${number(value)}ms`;
+}
+
+function WebVitalCard({
+  metric,
+  label,
+  threshold,
+  data,
+}: {
+  metric: "LCP" | "INP" | "CLS";
+  label: string;
+  threshold: string;
+  data: WebVitalMetric;
+}) {
+  return (
+    <article className="rounded-xl border border-white/10 bg-[linear-gradient(145deg,#0d0d0d,#070707)] p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8f8778]">{metric} · P75</p>
+          <h3 className="mt-2 text-sm font-semibold text-[#f4ead4]">{label}</h3>
+        </div>
+        <SampleStatus value={webVitalSampleStatus(data.sampleSize)} />
+      </div>
+      <p className="mt-4 font-serif text-4xl text-[#f0cf79]">{webVitalValue(metric, data.p75)}</p>
+      <p className="mt-1 text-[10px] text-[#746d62]">n={data.sampleSize} deduplicated field observations · {threshold}</p>
+      <dl className="mt-4 grid grid-cols-2 gap-2">
+        <div className="rounded-lg border border-white/[.07] bg-black/30 p-3">
+          <dt className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#746d62]">Mobile</dt>
+          <dd className="mt-1 font-serif text-xl text-[#d8c9aa]">{webVitalValue(metric, data.mobileP75)}</dd>
+          <dd className="mt-1 text-[9px] text-[#746d62]">n={data.mobileSampleSize}</dd>
+        </div>
+        <div className="rounded-lg border border-white/[.07] bg-black/30 p-3">
+          <dt className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#746d62]">Desktop</dt>
+          <dd className="mt-1 font-serif text-xl text-[#d8c9aa]">{webVitalValue(metric, data.desktopP75)}</dd>
+          <dd className="mt-1 text-[9px] text-[#746d62]">n={data.desktopSampleSize}</dd>
+        </div>
+      </dl>
+    </article>
+  );
+}
+
 export default async function GrowthCommandCenterPage({
   searchParams,
 }: {
@@ -308,6 +368,50 @@ export default async function GrowthCommandCenterPage({
                 note={data.delivery.error || "Provider-confirmed complaint events"}
               />
             </div>
+          </Panel>
+        </div>
+
+        <div className="mt-5">
+          <Panel
+            eyebrow="Field experience"
+            title="Real-user conversion performance"
+            note={`Privacy-minimized Production observations for exact public routes in the selected ${windowDays}-day window. Preview, automated, internal-QA, lead, session, attribution, query-string, and raw user-agent data are excluded.`}
+          >
+            {data.webVitals.configured ? (
+              <>
+                <div className="grid gap-3 lg:grid-cols-3">
+                  <WebVitalCard
+                    metric="LCP"
+                    label="Largest Contentful Paint"
+                    threshold="good ≤2.5s"
+                    data={data.webVitals.lcp}
+                  />
+                  <WebVitalCard
+                    metric="INP"
+                    label="Interaction to Next Paint"
+                    threshold="good ≤200ms"
+                    data={data.webVitals.inp}
+                  />
+                  <WebVitalCard
+                    metric="CLS"
+                    label="Cumulative Layout Shift"
+                    threshold="good ≤0.1"
+                    data={data.webVitals.cls}
+                  />
+                </div>
+                <p className="mt-4 text-xs leading-6 text-[#8f8778]">
+                  {data.webVitalRowsRead} deduplicated metric observations read. “Collecting,” “directional,” and
+                  “operational” describe sample maturity only; they are not a formal Core Web Vitals, accessibility,
+                  or conversion certification.
+                </p>
+              </>
+            ) : (
+              <div className="rounded-xl border border-[#cda24a55] bg-[#171207] p-4 text-sm leading-6 text-[#d8c9aa]">
+                <strong className="text-[#f0cf79]">Field evidence unavailable.</strong>{" "}
+                {data.webVitals.error ?? "The canonical analytics ledger is not available in this environment."}{" "}
+                No synthetic performance value is displayed.
+              </div>
+            )}
           </Panel>
         </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
 import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
@@ -31,9 +31,17 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
   const [message, setMessage] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [consent, setConsent] = useState(false);
+  const [contactInvalid, setContactInvalid] = useState(false);
+  const emailRef = useRef<HTMLInputElement>(null);
   const [leadReference, setLeadReference] = useState<{ leadId: string | null; sessionId: string | null }>({ leadId: null, sessionId: null });
 
   useEffect(() => setSubmissionId(tryCreateBrowserSubmissionId()), []);
+
+  function clearContactValidation() {
+    if (!contactInvalid) return;
+    setContactInvalid(false);
+    setMessage(null);
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -69,6 +77,8 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
     if (!payload.email && !payload.phone) {
       setMessage("Add an email or phone number so Mike can follow up.");
       setSuccess(false);
+      setContactInvalid(true);
+      emailRef.current?.focus();
       return;
     }
     if (!submissionId) {
@@ -79,6 +89,7 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
 
     setSubmitting(true);
     setMessage(null);
+    setContactInvalid(false);
     trackEvent("funnel_started", attribution, { funnel_name: intent, lead_source_surface: surface });
     trackEvent("contact_submitted", attribution, { funnel_name: intent, lead_source_surface: surface });
     if (consent) trackEvent("consent_accepted", attribution, { funnel_name: intent, consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION });
@@ -91,13 +102,17 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
       });
       const result = (await response.json()) as { message?: string; error?: string; lead_id?: string; session_id?: string };
       if (!response.ok) throw new Error(publicLeadErrorMessage(result.error));
+      const idempotentReplay = response.headers.get("X-AMM-Idempotent-Replay") === "1";
       setMessage(result.message || "Got it. Mike will review your request and follow up.");
       setLeadReference({ leadId: result.lead_id || null, sessionId: result.session_id || submissionId });
       setSuccess(true);
       form.reset();
       setConsent(false);
+      setContactInvalid(false);
       setSubmissionId(tryCreateBrowserSubmissionId());
-      trackEvent("lead_created", attribution, { funnel_name: intent, lead_source_surface: surface });
+      if (!idempotentReplay) {
+        trackEvent("lead_created", attribution, { funnel_name: intent, lead_source_surface: surface });
+      }
     } catch (error) {
       setMessage(publicLeadErrorMessage(error instanceof Error ? error.message : undefined));
       setSuccess(false);
@@ -118,9 +133,34 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
         Share the basics. Mike or the approved team can review the request and follow up with practical next steps.
       </p>
       <form onSubmit={submit} className="mt-6 grid gap-4 sm:grid-cols-2" aria-describedby={message ? "buyer-form-status" : undefined}>
+        <p
+          id="buyer-contact-requirement"
+          className={`text-xs leading-5 sm:col-span-2 ${contactInvalid ? "text-[#ffcabd]" : "text-[#b7aa94]"}`}
+        >
+          Email or phone is required for follow-up. Name, area, and planning details are optional but help Mike prepare.
+        </p>
         <TextField name="buyer-name" label="Name" autoComplete="name" placeholder="Your name" />
-        <TextField name="buyer-email" label="Email" type="email" autoComplete="email" placeholder="you@example.com" />
-        <TextField name="buyer-phone" label="Phone" type="tel" autoComplete="tel" placeholder="Phone" />
+        <TextField
+          name="buyer-email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          placeholder="you@example.com"
+          inputRef={emailRef}
+          aria-invalid={contactInvalid || undefined}
+          aria-describedby={contactInvalid ? "buyer-contact-requirement buyer-form-status" : "buyer-contact-requirement"}
+          onInput={clearContactValidation}
+        />
+        <TextField
+          name="buyer-phone"
+          label="Phone"
+          type="tel"
+          autoComplete="tel"
+          placeholder="Phone"
+          aria-invalid={contactInvalid || undefined}
+          aria-describedby={contactInvalid ? "buyer-contact-requirement buyer-form-status" : "buyer-contact-requirement"}
+          onInput={clearContactValidation}
+        />
         <TextField name="buyer-area" label={openHouse ? "Property or event location" : renter ? "Target area" : "Target area or property"} placeholder={propertyLabel || "Wilson or Eastern NC"} defaultValue={propertyLabel} />
         <SelectField name="buyer-timeline" label="Timeline" defaultValue="30-60 days">
           <option>ASAP</option><option>30-60 days</option><option>3-6 months</option><option>Just planning</option>
@@ -142,7 +182,7 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
         </button>
       </form>
       {message ? (
-        <div id="buyer-form-status" className={`mt-4 rounded-md border p-4 text-sm leading-6 ${success ? "border-[#cda24a55] bg-[#cda24a14] text-[#f4ead4]" : "border-[#6e162680] bg-[#6e16261f] text-[#ffcabd]"}`} role="status" aria-live="polite">
+        <div id="buyer-form-status" className={`mt-4 rounded-md border p-4 text-sm leading-6 ${success ? "border-[#cda24a55] bg-[#cda24a14] text-[#f4ead4]" : "border-[#6e162680] bg-[#6e16261f] text-[#ffcabd]"}`} role={success ? "status" : "alert"} aria-live={success ? "polite" : "assertive"}>
           <p>{message}</p>
           {success && leadReference.leadId ? <div className="mt-4"><AppointmentRequestCTA leadId={leadReference.leadId} sessionId={leadReference.sessionId} requestSurface={surface} funnelName={preset} attribution={attribution} compact /></div> : null}
         </div>

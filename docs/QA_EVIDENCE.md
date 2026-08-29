@@ -1,5 +1,229 @@
 # QA Evidence
 
+## Phase 9 completed-release ledger integrity — 2026-08-24
+
+- GitHub authority — PASS: PRs #183, #184, #185, #193, #196, #194, and #195
+  are merged; their authenticated `headRefOid` and `mergeCommit` values match
+  the corrected owner queue exactly.
+- Vercel authority — PASS: each corresponding deployment ID resolves in the
+  canonical `eyes-up-industries/ask-magic-mike` project as `READY`, target
+  `production`, branch `main`, and the exact GitHub merge SHA.
+- Defect corrected — PASS: the former PR #195 reviewed-head literal
+  `db13953071aa5dca59b74b671c2ed4592c53494f` did not match GitHub; the queue
+  now records `db13953fc5f6d24a684f66c9a1c10c6b929b72b3`.
+- Historical completeness — PASS: PRs #183 through #185 now include the same
+  head → merge → Production-deployment chain already recorded for later
+  releases.
+- Regression contract — PASS: the focused Node 24 release-authority suite
+  requires all seven exact chains and rejects the incorrect PR #195 literal.
+- Rescue and non-action boundary — PASS: pre-change PR #209 head
+  `d0691a6938afa67c22c4e1bc0adc322963fa2d55` is preserved remotely at
+  `rescue/amm-pr209-pre-release-ledger-integrity-20260824-0605`. No Production,
+  environment, database, lead/event, message, WordPress, DNS, publication,
+  spend, deletion, or NellySelly change occurred.
+
+## Phase 9 field-experience fast-track — 2026-08-23
+
+- Source preservation — PASS: donor PR #199 exact head
+  `7690e54b3c1d225d09ab8838774c4ac9c6316cce` is preserved at
+  `rescue/amm-pr199-pre-fast-track-20260823-175922`; the new branch starts at
+  canonical PR #205 exact head
+  `b9bbf61e60d94e980ea2453560966e1730655592`. No donor branch was rewritten.
+- Scope isolation — PASS: only the 18-file field-experience application,
+  tests, and focused specifications were imported. PR #187's migration,
+  target register, numeric KPI UI, stale release evidence, and unrelated stack
+  remain excluded.
+- Privacy hardening — PASS: the API revalidates exact canonical Production
+  origin, bounded metric/value/path/device dimensions, and a coarse normal-
+  browser class. Lead/session identity, attribution, click IDs, queries, raw
+  URLs, raw agents, IPs, cookies, tokens, and raw metric IDs are absent from the
+  durable contract; metric IDs become deterministic domain-separated SHA-256
+  digests before persistence.
+- Focused Node 24.18.0 contracts — PASS: 5 files / 29 tests cover route
+  normalization, open-house identifier collapse, value/rating bounds, raw-ID
+  digesting, exact-origin enforcement, QA/automation/private-route suppression,
+  actual reporter payload minimization, API persistence truth, aggregate P75,
+  deduplication, and unavailable-state rendering.
+- Full local acceptance — PASS: 226 test files / 3,031 tests, strict
+  typecheck, full ESLint, optimized Next.js 15.5.21 build with 52 static pages,
+  83 active / 17 acknowledged route proof, release safety 14/14, system
+  isolation, and Production dependency audit with no known vulnerability.
+- Clean-tree release doctor — PASS: 43/43 after application commit
+  `1954f8ee63f0de40c5c7326f34b7acf6be94cf27`; safety remains 14/14.
+- Exact-application-head Node 24 CI — PASS: GitHub run `32669693059` completed
+  successfully against `1954f8ee63f0de40c5c7326f34b7acf6be94cf27`.
+  Artifact `9501059810` has digest
+  `sha256:9192efec527ad360ac349feb495703778d6a58c88b1e69afb68dfd25413c6d59`.
+- Immutable Vercel Preview — PASS: deployment
+  `dpl_8LnG6VoGbskJpERDGXbf7YNDHDCL` is READY at
+  `https://ask-magic-mike-e2x6qk1os-eyes-up-industries.vercel.app`; the
+  authenticated deployment record names the exact branch and application
+  commit `1954f8e`. Preview cannot render or persist the reporter because
+  `VERCEL_ENV=preview`.
+- Protected no-write runtime acceptance — PASS: GitHub run `32669923014`
+  completed 17 read-only passes, six intentional mutation skips, zero
+  failures, Widget browser E2E 2/2, release doctor 43/43, safety 14/14,
+  release-candidate GO, and `PREVIEW_READY`. Artifact `9501125995` has digest
+  `sha256:b621ef368072a69ca2592cd173300e23a91f0226b93deca45b220c686913d9fd`.
+  Preview Neon was reachable and schema-ready while `SAFE_DB_WRITE=false`;
+  live email and SMS were disabled.
+- Optimized-build responsive visual acceptance — PASS at 1440x1000 and
+  390x844. Both renders have one main landmark, document width equal to the
+  viewport, no clipping/overflow/framework overlay, truthful field-evidence-
+  unavailable copy, zero `/api/events` requests, and zero browser
+  warnings/errors. The inspected screenshots are intentionally gitignored at
+  `output/playwright/phase9-field-experience-fast-track/growth-desktop-1440x1000.png`
+  and
+  `output/playwright/phase9-field-experience-fast-track/growth-mobile-390x844.png`.
+- Preview runtime-log review — PASS: the latest 500 request records contain
+  only `info` entries (200=200, 202=270, 204=20, and expected protected-route
+  401=10); separate fatal, error, and warning queries each returned zero.
+- No migration or runtime mutation — PASS: no database migration, Production
+  deployment, analytics write, lead, email, SMS, Push, WordPress edit,
+  publication, DNS change, spend, deletion, or NellySelly action occurred.
+  Final documentation-head checks are recorded on Draft PR #206 so this
+  evidence seal does not create a recursive commit loop.
+
+## Phase 9 owned-traffic fast-track — 2026-08-23
+
+- Production aggregate audit at 20:23 UTC — read-only PASS: 6 total leads, all
+  6 unmistakably test/suppressed; 0 live or contactable leads; 0 unsafe tests;
+  0 live notifications, outcomes, revenue, first-response samples, spend rows,
+  experiments, or non-test owned-demand publication proofs. No PII or database
+  credential entered repository files or command output.
+- Reuse-first consolidation — PASS: only the reviewed unique PR #197
+  attribution-trust commit and PR #198 WordPress-manifest commits were applied
+  to exact sealed PR #204 head. Rescue branch
+  `rescue/amm-pre-owned-traffic-fast-track-20260823-1625` preserves the base.
+  No database migration is present.
+- Exact Node 24.18.0 local acceptance — PASS: 3 focused files / 36 tests; full
+  223 files / 3,011 tests; strict typecheck; ESLint; optimized Next.js 15.5.21
+  build with 52 static pages; 83 active / 17 acknowledged route proof; release
+  safety 14/14; release doctor 43/43; system isolation; and Production
+  dependency audit with no known vulnerability.
+- Public WordPress transport check — PASS at 20:36 UTC: published page index,
+  page-149 record, and homepage returned HTTP 200 with expected JSON/HTML
+  content types. The page index reported 42 published pages.
+- Actual server-runtime manifest audit — PASS at
+  `2026-08-23T20:37:18.057Z`. The bundled Node server implementation performed
+  GET-only public fetches through exact-host HTTPS allowlists and returned:
+  - `wordpress_homepage_ask_mike`: page 149, modified
+    `2026-06-01T20:53:21`, one current/rollback href, one canonical proposed
+    href, zero lookalikes, precondition
+    `8634d945fb0ccdb2b556bdc66e31b199cb0d5b4e9c95991fc5e2c00307884dc3`;
+  - `wordpress_home_value`: page 3952, modified
+    `2026-06-06T02:10:06`, one current/rollback href, one canonical proposed
+    href, zero lookalikes, precondition
+    `7487f7e499a67e0a047cb9d141048f98ec927f84a98cec6ba1fc058efb716fe7`;
+  - `wordpress_we_buy_homes`: page 3631, modified
+    `2026-06-03T21:32:21`, one current/rollback href, one canonical proposed
+    href, zero lookalikes, precondition
+    `e8c3cdb946c1f0a12dfe331495b94c744e99c39410d9feb71e1ed484fb4eb4a3`.
+- All three returned `legacy_match_ready`, no blockers,
+  `publicationAuthorized=false`, and `mutationPerformed=false`. No WordPress
+  login, cookie, nonce, revision, edit, cache purge, form submission, lead,
+  analytics write, notification, publication proof, or external message was
+  created.
+- The manifest transport uses fixed approved hosts, manual redirect
+  revalidation, a 20-second timeout, content-type checks, streaming 3 MB cap,
+  and transient raw HTML. The protected download route is GET-only,
+  placement-allowlisted, server-authorized with `report:view`, private/no-store,
+  noindex, same-origin, and never renders or logs raw page HTML.
+- Responsive optimized local Production render — PASS at 1440×1000 and
+  390×844. Both viewports rendered one main landmark, exact document/viewport
+  width, three protected readiness-manifest links, truthful measurement-
+  unavailable copy, and zero console warnings/errors. The deliberately
+  database-unconfigured/RBAC-disabled local inspection runtime rendered zero
+  writable forms; the browser request ledger contained only GETs and no
+  POST/PUT/PATCH/DELETE request.
+- Focused visual inspection — PASS: approved existing portraits and Black
+  Diamond styling remain intact; the Our Town WordPress card spans the desktop
+  command grid; mobile changes to one column without clipping; tracked URLs
+  wrap; and all three manifest controls remain visible, distinct, and usable.
+  Gitignored evidence:
+  `output/playwright/phase9-owned-traffic-fast-track/distribution-desktop-1440x1000.png`,
+  `distribution-mobile-390x844.png`,
+  `wordpress-manifests-desktop-1440.png`, and
+  `wordpress-manifests-mobile-390.png`.
+- PR #205 now includes refreshed PR #204 head
+  `bd16a115af9f4b17dccab0bb7dad41682816be5d` through clean ordered merge
+  `52a9b31cbab8da2e2ac251fe483bbbbd9a3f34e8`; the prior sealed head is
+  preserved at `rescue/amm-pr205-pre-pr204-refresh-20260823-173028`. Fresh
+  exact-head remote proof is required and recorded in PR #205.
+- Superseded pre-refresh remote application-head acceptance — PASS. GitHub Node 24 run
+  `32665394864` completed successfully against exact SHA
+  `a1e8a4940f8d9eefe21bc6f43514e2e4941e8e31`; Vercel deployment
+  `dpl_5AWNXqLf5k9Gc8UEqK2hA1AHiLFH` is READY, target Preview, Node 24, and
+  records the same SHA and PR at
+  `https://ask-magic-mike-pv8mtuv39-eyes-up-industries.vercel.app`.
+- Protected exact-head run `32665666025` — PASS in 3m45s with
+  `SAFE_DB_WRITE=false`: 17 read-only passes, 6 intentional mutation skips, 0
+  failures; Widget browser E2E 2/2; doctor 43/43; safety 14/14; release
+  candidate GO; launch verdict `PREVIEW_READY`. Artifact `9499989400` digest:
+  `sha256:797352c0262fd03078a5ce9e5c4b422518bb052eece95bab4d908477c1e4e365`.
+- Preview health reported exact commit `a1e8a49`, Preview Neon, mutation safety
+  false, and live email/SMS disabled. Direct public root, home-value, and both
+  health endpoints returned HTTP 200. Anonymous `/admin/distribution` returned
+  HTTP 401 with no-store, Basic challenge, SAMEORIGIN, and noindex controls.
+- Preview `LEAD_CENTER_RBAC_ENABLED` is false. The manifest route therefore
+  returned HTTP 409 `rbac_not_enabled` before any WordPress fetch, for both a
+  valid and unknown placement. Authorized synthetic `report:view`, denied,
+  unknown-placement, headers, and no-fetch-before-auth contracts pass the
+  isolated route suite. Perform one authenticated runtime download only after
+  the ordered stack reaches an RBAC-enabled environment and before any
+  separately approved WordPress publication.
+- Vercel deployment-log queries since creation returned fatal=0, error=0, and
+  warning=0. No lead, database write, form submission, notification, email,
+  SMS, Push, WordPress mutation, publication proof, provider action, DNS
+  change, spend, deletion, or NellySelly action occurred.
+
+## Phase 9 conversion-journey fast-track live audit — 2026-08-23
+
+- Browser: Chromium-compatible Playwright CLI at 390×844 against canonical
+  Production.
+- Before navigation, mocked /api/leads, /api/events,
+  /api/experiments/event, /api/widget/events, Google Analytics/GTM, and
+  Facebook collection requests. No lead, durable application event, provider
+  message, or third-party analytics write was permitted.
+- Homepage rendered one main landmark, correct brokerage identity, working
+  public paths, and zero console warnings/errors. The existing Home Value
+  intake advanced from synthetic address to required name/email without a lead
+  request.
+- Buyer page rendered required consent and the existing form. Blank submit
+  displayed “Add an email or phone number so Mike can follow up,” made no lead
+  request, but retained focus on “Request Buyer Plan.” This is direct current
+  Production evidence for the recoverability fix already implemented in PR
+  #200.
+- Exact Node 24 fast-track acceptance passes 4 focused files / 42 tests and the
+  complete suite, strict typecheck, ESLint, optimized
+  build with 52 static pages, 82/17 route proof, system isolation, release
+  safety 14/14, dependency audit, diff/migration integrity, and staged redacted
+  secret scan.
+- Optimized local Buyer and Renter acceptance at 390×844 confirms one main, no
+  horizontal overflow, zero console warnings/errors, first and repeated Email
+  focus recovery, exact `renter_page` payload identity, immutable Buyer first
+  touch, and refreshed Renter last touch. Every lead/event request was mocked.
+- PR #203 now includes final PR #202 head
+  `37aa69421a70a177504e9ccaed99fef75852849e` through clean merge
+  `3b5aef0aea2254c4b410393bb84ad1e1b61b7510`; the previous head is preserved
+  at `rescue/amm-pr203-pre-pr202-refresh-20260823-173028`. Fresh exact-head
+  remote proof is required and is recorded in the PR rather than inferred from
+  the following superseded evidence.
+- Superseded pre-refresh Draft PR #203 application head
+  `a86eece1f2b18ceb064d109912c5b77314d2aca9` passes GitHub Node 24 release run
+  `32660966818` and Vercel Preview `dpl_DQUyVzLXPmvyjghqUVzPtqoDuHcq` is READY
+  at `https://ask-magic-mike-a0x610tpg-eyes-up-industries.vercel.app`. The
+  deployment build log names that exact branch and commit.
+- Protected no-write run `32661259833` passed 17 read-only checks with six
+  intentional write skips and zero failures, Widget 2/2, release doctor 43/43,
+  safety 14/14, release candidate GO, and `PREVIEW_READY`. The machine-readable
+  artifact is `9498840303` with digest
+  `sha256:9130e7665cabdce978543e594288587f2fc59095d5999524fb7d70cf4727a034`.
+  Preview runtime log queries returned fatal=0, error=0, warning=0.
+- No form completion, consent acceptance, lead submission, database write,
+  email, SMS, Push, WordPress edit, publication, DNS change, spend, deletion,
+  or NellySelly action occurred.
+
 ## Phase 9 conversion identity polish — 2026-08-22 15:17 EDT
 
 - Current Production seller, buyer, and Ask paths were captured in the in-app
@@ -20,7 +244,66 @@
 - No Production deployment, migration, database write, lead, email/BCC, SMS,
   Push, consumer acknowledgment, provider call, WordPress edit, publication,
   spend, DNS, or NellySelly action occurred.
+## Phase 9 WordPress activation change-set evidence — 2026-08-22
 
+- Dependency composition — PASS: PR #197 exact head
+  `0fff501b550b12bda860570b1c74bdbdab0b2888` merged without application-code
+  conflict after PR #198 head `808021468e1910e1d88f071575fd5e73c991d085`
+  was preserved at
+  `rescue/amm-pr198-pre-pr197-stack-refresh-20260822-2247`. Only four cumulative
+  evidence documents required manual reconciliation.
+- Final read-only live loader acceptance at 21:40 America/New_York — PASS. The exact
+  public homepage, established home-value page, We Buy Homes page, and public
+  WordPress page index were fetched through exact-host HTTPS allowlists. All
+  three manifests reported `legacy_match_ready`, their reviewed page IDs
+  (149, 3952, and 3631), one current/rollback href, one canonical proposed
+  href, deterministic SHA-256 evidence, `publicationAuthorized=false`, and
+  `mutationPerformed=false`.
+- Final hardening acceptance — PASS: malformed index rows without explicit
+  `publish` status are ignored, every ambiguity/lookalike count changes the
+  precondition hash, and chunked upstream bodies are cancelled before exceeding
+  the 3 MB cap.
+- Isolated route execution — PASS: an authorized synthetic principal received
+  the bounded private JSON attachment; unauthorized and unknown-placement paths
+  retained privacy headers and performed no public WordPress fetch.
+- Focused WordPress/change-set matrix — PASS: 4 files / 42 tests. Coverage
+  includes exact legacy and already-canonical states; duplicate, missing,
+  foreign, insecure, lookalike, page-ID drift, and page-index failures; raw
+  HTML/telephone exclusion; deterministic hashing; API RBAC/no-store headers;
+  existing surface-audit compatibility; and database placement-registry parity.
+- Final stacked local release gate — PASS: system isolation, 14/14 safety
+  controls, 217 test files / 2,967 tests, strict TypeScript, full ESLint,
+  optimized Next.js
+  15.5.21 build, and 83 active routes / 17 acknowledged root-source
+  duplicates. The new route is explicitly required and classified in the
+  canonical route manifest.
+- Strict TypeScript check — PASS in the local shell. The repository requires
+  Node 24; exact-head Node 24 CI remains the authoritative engine result after
+  push because this local shell is Node 26.5.1.
+- Focused ESLint initially found one unnecessary regex escape; it was corrected
+  before final verification. No behavior or security boundary was relaxed.
+- No login, WordPress write, page revision, cache purge, form submission, lead,
+  notification, publication proof, database read/write, external send, DNS
+  change, Production deployment, spend, deletion, or NellySelly action occurred.
+- Production dependency audit — PASS: no known vulnerability. Working-tree
+  gitleaks scanned approximately 65.35 KB of the unique candidate delta with no
+  leak; candidate-pattern, diff-integrity, and empty migration scans passed.
+- Rendered no-write acceptance — PASS: lead, durable event, and experiment
+  routes were intercepted before navigation. The protected Distribution Command
+  rendered three readiness links at 1440×1000 and 390×844, one `main`, truthful
+  unavailable values, no horizontal overflow or framework overlay, and zero
+  console errors/warnings. Application requests were GET-only. The named
+  brokerage placement card now spans the desktop command grid and retains its
+  single-column mobile stack.
+- Whole-site WordPress public-surface audit — PASS as a read-only check: 42/42
+  sitemap pages fetched, zero failed. It reconfirmed exactly three incomplete
+  direct canonical links, two incomplete embeds, four legacy native-capture
+  pages, five multi-capture pages, and Form 3 as the only supplied canonical
+  bridge allowlist. These are preserved audit findings, not permission for a
+  bulk cleanup.
+- Exact-head Node 24 CI, canonical Vercel Preview, protected route, and rendered
+  UI acceptance remain required after push before this becomes release
+  authority.
 ## PR #193 released-main privacy audit — 2026-08-22
 
 - Rebased/refreshed the candidate onto released PR #185 merge
@@ -1068,3 +1351,106 @@ the Node-20 deployment proof. PHP CLI is unavailable locally, so staging must ru
   shadow-only observations for forms 6 and 7 and no forwarding attempts.
 - Our Town homepage, `/ask-mike/`, and Mike's agent profile remained HTTP 200
   after activation.
+
+## Phase 9 mobile-native publication handoff — 2026-08-23
+
+This downstream candidate performed no Production deployment, database write,
+lead submission, email/SMS/Push delivery, native-platform publication,
+WordPress/DNS edit, spend, or NellySelly operation.
+
+- Canonical Production was inspected with aggregate-only SQL at
+  `2026-08-23T23:21:50Z`: six suppressed test leads, zero live/contactable
+  leads, zero owned-demand proof rows, zero source/outcome rows, and zero active
+  distribution rows. No identity or contact field was selected.
+- Security-focused handoff tests: PASS — 4 files / 50 tests, including all 16
+  approved channel/offer placements, separate prepare/share gestures,
+  cancellation, unsupported browsers, bounded files, and disguised non-PNG
+  rejection.
+- Full Vitest suite: PASS — 227 files / 3,043 tests.
+- Strict TypeScript and full ESLint: PASS.
+- Optimized Next.js 15.5.21 / Node 24 build: PASS — 52 generated pages and 83
+  active routes; the protected Distribution Command is 2.84 kB route code.
+- Route manifest: PASS — 83 active routes / 17 acknowledged root-`src`
+  duplicates.
+- Release safety: PASS — 14/14.
+- Ask Magic Mike/NellySelly deployable-source isolation: PASS.
+- Production dependency audit: PASS — no known vulnerabilities.
+- `git diff --check`: PASS.
+
+The first operator tap reads one exact authenticated, same-origin, private
+`image/png` asset with `no-store`; the second invokes the OS share chooser.
+The client validates canonical host/path/UTMs, safe copy bounds, filename,
+media type, five-megabyte maximum, and PNG byte signature. A resolved share
+promise records no publication proof and makes no database or provider call.
+The existing copy/download and separately gated proof-ledger controls remain
+authoritative.
+
+## Phase 9 native-handoff publication-proof return — 2026-08-23
+
+This stacked candidate performed no Production deployment, database write,
+lead submission, email/SMS/Push delivery, native-platform publication,
+WordPress/DNS edit, spend, secret entry, or NellySelly operation.
+
+- Exact share-to-proof tests: PASS — 10 tests. All 16 native channel/placement
+  pairs produce one canonical relative proof URL. Missing, array-shaped,
+  unknown, traversal-shaped, non-native, and foreign-origin values fail closed.
+- Existing owned-demand command, activation, and append-only proof suites: PASS
+  — 4 files / 56 tests.
+- Full Vitest suite: PASS — 227 files / 3,045 tests.
+- Strict TypeScript and full ESLint: PASS.
+- Optimized Next.js 15.5.21 build: PASS — 52 generated pages and 83 active
+  routes; `/admin/distribution` remains server-rendered.
+- Route manifest: PASS — 83 active routes / 17 acknowledged root-`src`
+  duplicates.
+- Release safety: PASS — 14/14.
+- Ask Magic Mike/NellySelly deployable-source isolation: PASS.
+- Production dependency audit: PASS — no known vulnerabilities.
+- Release doctor: HEALTHY — its only pre-commit, non-blocking failure was the
+  intentionally dirty working tree under verification.
+- `git diff --check`: PASS.
+- In-app Browser visual/DOM QA: PASS at 1,425×990 and 375×812. The existing
+  native-handoff cards showed no horizontal overflow or visual regression; the
+  exact Facebook / seller-review return highlighted only the Facebook proof
+  card. A non-native placement query rendered zero focused cards and no selected
+  notice.
+
+The URL carries only canonical channel and placement identifiers. It never
+carries final copy, evidence, approval context, consumer data, credentials, or
+secrets. The existing `growth:manage` server-action authorization, Preview
+read-only guard, proof validation, deduplication, append-only Neon write, and
+audit event were not modified. A resolved share promise merely reveals the
+review link; an operator must still observe the platform and deliberately submit
+the existing proof form.
+
+## Phase 9 Neon Preview endpoint attestation — 2026-08-23
+
+The release candidate now verifies the actual Neon endpoint before either the
+application or QA automation may write in Preview. Full evidence, categorical
+health contract, branch/endpoint mapping, tests, and no-action record are in
+[`phase9/NEON_PREVIEW_ENDPOINT_ATTESTATION_QA_EVIDENCE.md`](./phase9/NEON_PREVIEW_ENDPOINT_ATTESTATION_QA_EVIDENCE.md).
+
+- Focused security proof: PASS — 5 files / 30 tests.
+- Full Vitest: PASS — 228 files / 3,054 tests.
+- Typecheck, ESLint, optimized build, 83-route manifest: PASS.
+- Release safety: PASS — 14/14.
+- Isolation, dependency audit, 571-commit gitleaks, whitespace: PASS.
+- Production/Preview database writes, sends, migrations, merges, deployments,
+  WordPress/DNS edits, and NellySelly actions: none.
+
+## Phase 9 atomic release-authority reconciliation — 2026-08-23
+
+- Fresh GitHub main: PR #195 merge
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`.
+- Fresh Vercel Production: `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`, `READY`.
+- `pnpm run amm:verify:funnel`: PASS — 15/15.
+- `pnpm run smoke:prod`: PASS — 19 pass / two intentional skips / zero fail;
+  read-only mode, no session or lead creation.
+- `pnpm run monitor-production`: expected gate signal — 8/9. The candidate
+  rejects the current Production readiness body because durable rate-limit
+  schema/permission/store/secret readiness is not yet proven by the deployed
+  contract.
+- `tests/scripts/current-release-authority-docs.test.ts`: PASS — 5/5.
+- No lead read or write, provider send, environment change, merge, deployment,
+  migration, publication, DNS change, deletion, spend, or NellySelly action.
+- Detailed evidence:
+  [`phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md`](./phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md).

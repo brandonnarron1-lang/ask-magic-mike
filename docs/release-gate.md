@@ -115,12 +115,11 @@ every excerpt.
 ## Database identity and mutation safety
 
 `/api/admin/health` is the **single source of truth** for whether the
-QA runner may mutate the database. Five env vars feed the verdict:
+QA runner may mutate the database. These env vars feed the verdict:
 
 - `DATABASE_ENV` — `preview` / `production` / `development`
-- `SUPABASE_PROJECT_REF` — project ref of the active Supabase
-- `PRODUCTION_SUPABASE_PROJECT_REF` — the production ref to refuse
-- `PREVIEW_SUPABASE_PROJECT_REF` — the preview ref to accept
+- `PREVIEW_NEON_ENDPOINT_ID` — expected Preview endpoint ID
+- `PRODUCTION_NEON_ENDPOINT_ID` — Production endpoint ID to refuse
 - `ALLOW_PREVIEW_DB_MUTATION` — explicit opt-in; default `false`
 - `PREVIEW_DATA_MODE` — `disabled` / `enabled`; default `disabled`
 
@@ -128,9 +127,9 @@ QA runner may mutate the database. Five env vars feed the verdict:
 holds: preview runtime, `PREVIEW_DATA_MODE=enabled`,
 `ALLOW_PREVIEW_DB_MUTATION=true`, DB configured and reachable,
 migration 00012 applied, live SMS/email disabled,
-supabase ref does not match production ref, supabase ref matches
-preview ref (or `DATABASE_ENV=preview` with no production ref
-configured). If identity is unknown, the answer is `false`.
+the endpoint parsed from `DATABASE_URL` is a valid Neon endpoint, the expected
+IDs are valid and distinct, the parsed endpoint exactly matches Preview, and it
+does not match Production. Missing or unknown identity returns `false`.
 
 `shouldRunMutationChecks` in `scripts/preview-qa-lib.mjs` refuses to
 mutate when the health endpoint says unsafe — **`FORCE_DB_WRITE` does
@@ -140,9 +139,11 @@ not override an unsafe verdict**. This is intentional.
 
 `npm run preview:e2e` runs `tests/e2e/widget-preview-flow.spec.ts`,
 which drives the widget on `/widget-preview` from intent → contact →
-success and intercepts `POST /api/leads` via Playwright's `page.route`.
-No real lead is ever created. The spec also covers the error path by
-intercepting with `500`. Bypass headers are wired through
+success and intercepts `POST /api/leads`, `/api/events`,
+`/api/analytics/event`, `/api/experiments/event`, and `/api/widget/events`
+via Playwright's `page.route`. No real lead or browser telemetry row is ever
+created. The spec also covers the error path by intercepting the lead call with
+`500`. Bypass headers are wired through
 `extraHTTPHeaders` so protected previews work without printing the
 token.
 

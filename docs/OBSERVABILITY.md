@@ -43,11 +43,14 @@ staff, and session keys are never durable bucket values.
 **Required production configuration:**
 - `DATABASE_URL` — the same server-only Neon connection used by lead capture
 - `public.rate_limit_buckets` — applied by the canonical migration chain
-- `RATE_LIMIT_HASH_SECRET` — recommended dedicated 32+ character HMAC secret;
-  documented strong server secrets provide a compatibility fallback
+- `RATE_LIMIT_HASH_SECRET` — required dedicated 32+ character HMAC secret for
+  Production readiness; documented strong server secrets preserve
+  pseudonymization only during a degraded compatibility fallback
 
 `RATE_LIMIT_EMERGENCY_MEMORY=1` acknowledges a temporary degraded in-memory mode;
-it does not make the limiter durable.
+only the exact trimmed value `1` enables this break-glass path. Values such as
+`false`, `0`, or `true` remain disabled, and the flag never makes the limiter
+durable.
 
 ## Analytics Events
 

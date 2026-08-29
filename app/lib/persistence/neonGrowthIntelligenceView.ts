@@ -10,7 +10,10 @@ import {
   type GrowthOutcomeFact,
   type GrowthSpendFact,
 } from "../growth/intelligence";
-import type { OwnedDemandAttributionSignal } from "../growth/owned-demand";
+import {
+  OWNED_DEMAND_CAMPAIGN_KEY,
+  type OwnedDemandAttributionSignal,
+} from "../growth/owned-demand";
 
 type Query = ReturnType<typeof neon>;
 type Row = Record<string, unknown>;
@@ -60,6 +63,23 @@ export interface GrowthDeliverySnapshot {
   error?: string;
 }
 
+export interface GrowthWebVitalMetricSnapshot {
+  p75: number | null;
+  sampleSize: number;
+  mobileP75: number | null;
+  mobileSampleSize: number;
+  desktopP75: number | null;
+  desktopSampleSize: number;
+}
+
+export interface GrowthWebVitalsSnapshot {
+  configured: boolean;
+  lcp: GrowthWebVitalMetricSnapshot;
+  inp: GrowthWebVitalMetricSnapshot;
+  cls: GrowthWebVitalMetricSnapshot;
+  error?: string;
+}
+
 export interface GrowthIntelligenceView extends GrowthIntelligence {
   configured: boolean;
   schemaReady: boolean;
@@ -72,9 +92,11 @@ export interface GrowthIntelligenceView extends GrowthIntelligence {
   ownedDemandSignals: OwnedDemandAttributionSignal[];
   outcomeMetrics: GrowthOutcomeMetricsSnapshot;
   delivery: GrowthDeliverySnapshot;
+  webVitals: GrowthWebVitalsSnapshot;
   sourceRowsRead: number;
   spendRowsRead: number;
   outcomeRowsRead: number;
+  webVitalRowsRead: number;
 }
 
 function queryFromEnv(): Query | null {
@@ -149,9 +171,11 @@ function emptyView(
       deliveredCustomerMessages: 0,
       customerComplaints: 0,
     },
+    webVitals: normalizeGrowthWebVitals([], false),
     sourceRowsRead: 0,
     spendRowsRead: 0,
     outcomeRowsRead: 0,
+    webVitalRowsRead: 0,
     ...(error ? { error } : {}),
   };
 }
@@ -166,7 +190,8 @@ async function detectGrowthSchema(sql: Query) {
        to_regclass('public.market_opportunities') IS NOT NULL AS has_opportunities,
        to_regclass('public.growth_recommendations') IS NOT NULL AS has_recommendations,
        to_regclass('public.lead_notifications') IS NOT NULL AS has_notifications,
-       to_regclass('public.communication_events') IS NOT NULL AS has_communication_events`,
+       to_regclass('public.communication_events') IS NOT NULL AS has_communication_events,
+       to_regclass('public.analytics_events') IS NOT NULL AS has_analytics`,
   ) as Row[];
   const row = rows[0] ?? {};
   return {
@@ -178,6 +203,7 @@ async function detectGrowthSchema(sql: Query) {
     recommendations: booleanValue(row.has_recommendations),
     notifications: booleanValue(row.has_notifications),
     communicationEvents: booleanValue(row.has_communication_events),
+    analytics: booleanValue(row.has_analytics),
   };
 }
 
@@ -314,8 +340,133 @@ export function normalizeGrowthDeliverySnapshot(
   };
 }
 
+function emptyWebVitalMetric(): GrowthWebVitalMetricSnapshot {
+  return {
+    p75: null,
+    sampleSize: 0,
+    mobileP75: null,
+    mobileSampleSize: 0,
+    desktopP75: null,
+    desktopSampleSize: 0,
+  };
+}
+
+export function normalizeGrowthWebVitals(
+  rows: Row[],
+  configured: boolean,
+  error?: string,
+): GrowthWebVitalsSnapshot {
+  const byMetricAndDevice = new Map(
+    rows.map((row) => [
+      `${text(row.metric_name).toUpperCase()}:${text(row.device_category).toLowerCase()}`,
+      row,
+    ]),
+  );
+  const metric = (metricName: "LCP" | "INP" | "CLS"): GrowthWebVitalMetricSnapshot => {
+    const all = byMetricAndDevice.get(`${metricName}:all`);
+    const mobile = byMetricAndDevice.get(`${metricName}:mobile`);
+    const desktop = byMetricAndDevice.get(`${metricName}:desktop`);
+    return {
+      ...emptyWebVitalMetric(),
+      p75: nullableNumber(all?.p75),
+      sampleSize: numberValue(all?.sample_size),
+      mobileP75: nullableNumber(mobile?.p75),
+      mobileSampleSize: numberValue(mobile?.sample_size),
+      desktopP75: nullableNumber(desktop?.p75),
+      desktopSampleSize: numberValue(desktop?.sample_size),
+    };
+  };
+
+  return {
+    configured: configured && !error,
+    lcp: metric("LCP"),
+    inp: metric("INP"),
+    cls: metric("CLS"),
+    ...(error ? { error } : {}),
+  };
+}
+
 function normalizeAttributionDimension(value: unknown) {
   return text(value).trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+const LEGACY_WORDPRESS_SOURCE_ALIASES = new Set([
+  "ourtown_wp",
+  "ourtownproperties",
+  "ourtownproperties_com",
+]);
+
+const LEGACY_WORDPRESS_REFERRER_MAP: Record<string, {
+  medium: string;
+  content: string;
+}> = {
+  "/": {
+    medium: "homepage_cta",
+    content: "wordpress_homepage_ask_mike",
+  },
+  "/how-much-is-your-home-worth/": {
+    medium: "home_value_page",
+    content: "wordpress_home_value_page",
+  },
+  "/we-buy-homes/": {
+    medium: "seller_page_cta",
+    content: "wordpress_we_buy_homes",
+  },
+  "/ask-magic-mike/": {
+    medium: "referral",
+    content: "wordpress_ask_magic_mike_embed",
+  },
+  "/ask-mike/": {
+    medium: "referral",
+    content: "wordpress_ask_magic_mike_embed",
+  },
+};
+
+function legacyWordPressReferrerPath(value: unknown) {
+  try {
+    const parsed = new URL(text(value));
+    const host = parsed.hostname.toLowerCase();
+    if (
+      parsed.protocol !== "https:" ||
+      parsed.username ||
+      parsed.password ||
+      parsed.port ||
+      (host !== "ourtownproperties.com" && host !== "www.ourtownproperties.com")
+    ) {
+      return null;
+    }
+    return parsed.pathname.endsWith("/") ? parsed.pathname : `${parsed.pathname}/`;
+  } catch {
+    return null;
+  }
+}
+
+function legacyWordPressCompatibilitySignal(row: Row): OwnedDemandAttributionSignal | null {
+  const source = normalizeAttributionDimension(row.utm_source);
+  const medium = normalizeAttributionDimension(row.utm_medium);
+  const campaign = normalizeAttributionDimension(row.utm_campaign);
+  const content = normalizeAttributionDimension(row.utm_content);
+  const referrerPath = legacyWordPressReferrerPath(row.referrer_url);
+  const mapped = referrerPath ? LEGACY_WORDPRESS_REFERRER_MAP[referrerPath] : null;
+
+  if (
+    content ||
+    !mapped ||
+    !LEGACY_WORDPRESS_SOURCE_ALIASES.has(source) ||
+    campaign !== "website_widget" ||
+    medium !== mapped.medium
+  ) {
+    return null;
+  }
+
+  return {
+    source: "ourtownproperties",
+    medium: "owned_media",
+    campaign: OWNED_DEMAND_CAMPAIGN_KEY,
+    content: mapped.content,
+    leads: 1,
+    basis: "legacy_wordpress_compatibility",
+  };
 }
 
 export function buildOwnedDemandAttributionSignals(
@@ -324,18 +475,27 @@ export function buildOwnedDemandAttributionSignals(
   const signals = new Map<string, OwnedDemandAttributionSignal>();
 
   for (const row of rows) {
-    const source = normalizeAttributionDimension(row.utm_source);
-    const medium = normalizeAttributionDimension(row.utm_medium);
-    const campaign = normalizeAttributionDimension(row.utm_campaign);
-    const content = normalizeAttributionDimension(row.utm_content);
+    const compatibility = legacyWordPressCompatibilitySignal(row);
+    const source = compatibility?.source ?? normalizeAttributionDimension(row.utm_source);
+    const medium = compatibility?.medium ?? normalizeAttributionDimension(row.utm_medium);
+    const campaign = compatibility?.campaign ?? normalizeAttributionDimension(row.utm_campaign);
+    const content = compatibility?.content ?? normalizeAttributionDimension(row.utm_content);
     if (!source || !medium || !campaign || !content) continue;
 
-    const key = `${source}|${medium}|${campaign}|${content}`;
+    const basis = compatibility?.basis ?? "exact";
+    const key = `${basis}|${source}|${medium}|${campaign}|${content}`;
     const existing = signals.get(key);
     if (existing) {
       existing.leads += 1;
     } else {
-      signals.set(key, { source, medium, campaign, content, leads: 1 });
+      signals.set(key, {
+        source,
+        medium,
+        campaign,
+        content,
+        leads: 1,
+        ...(compatibility?.basis ? { basis: compatibility.basis } : {}),
+      });
     }
   }
 
@@ -403,11 +563,12 @@ export async function loadNeonGrowthIntelligence(
               l.source, l.source_detail, l.score, l.lead_type,
               l.timeline_months, l.last_contacted_at,
               ${responseSelect},
-              sa.utm_source, sa.utm_medium, sa.utm_campaign, sa.utm_content, sa.is_paid
+              sa.utm_source, sa.utm_medium, sa.utm_campaign, sa.utm_content,
+              sa.referrer_url, sa.is_paid
          FROM public.leads l
          ${responseJoin}
          LEFT JOIN LATERAL (
-           SELECT utm_source, utm_medium, utm_campaign, utm_content, is_paid
+           SELECT utm_source, utm_medium, utm_campaign, utm_content, referrer_url, is_paid
              FROM public.source_attribution
             WHERE lead_id = l.id
             ORDER BY created_at DESC
@@ -557,6 +718,57 @@ export async function loadNeonGrowthIntelligence(
       }
     }
 
+    let webVitalRows: Row[] = [];
+    let webVitalError: string | undefined;
+    if (schema.analytics) {
+      try {
+        webVitalRows = await sql.query(
+          `WITH candidates AS (
+             SELECT UPPER(properties->>'metric_code') AS metric_name,
+                    properties->>'metric_id' AS metric_id,
+                    (properties->>'metric_value')::double precision AS metric_value,
+                    properties->>'device_category' AS device_category,
+                    occurred_at
+               FROM public.analytics_events
+              WHERE event_name = 'web_vital_observed'
+                AND occurred_at >= $1::timestamptz
+                AND properties->>'traffic_class' = 'public_production'
+                AND UPPER(properties->>'metric_code') IN ('LCP', 'INP', 'CLS')
+                AND jsonb_typeof(properties->'metric_value') = 'number'
+                AND COALESCE(properties->>'metric_id', '') ~ '^[a-zA-Z0-9._:-]{1,160}$'
+                AND COALESCE(properties->>'device_category', '') IN ('mobile', 'desktop')
+                AND COALESCE(user_agent, '') ~ '^browser/(mobile|desktop)$'
+                AND (properties->>'metric_value')::double precision >= 0
+                AND (
+                  (UPPER(properties->>'metric_code') IN ('LCP', 'INP')
+                    AND (properties->>'metric_value')::double precision <= 600000)
+                  OR
+                  (UPPER(properties->>'metric_code') = 'CLS'
+                    AND (properties->>'metric_value')::double precision <= 100)
+                )
+              ORDER BY occurred_at DESC
+              LIMIT 25000
+           ), deduplicated AS (
+             SELECT DISTINCT ON (metric_name, metric_id)
+                    metric_name, metric_id, metric_value, device_category, occurred_at
+               FROM candidates
+              ORDER BY metric_name, metric_id, occurred_at DESC
+           )
+           SELECT metric_name,
+                  CASE WHEN GROUPING(device_category) = 1 THEN 'all' ELSE device_category END
+                    AS device_category,
+                  COUNT(*)::integer AS sample_size,
+                  percentile_cont(0.75) WITHIN GROUP (ORDER BY metric_value)::double precision AS p75
+             FROM deduplicated
+            GROUP BY GROUPING SETS ((metric_name), (metric_name, device_category))
+            ORDER BY metric_name, device_category`,
+          [cutoff],
+        ) as Row[];
+      } catch {
+        webVitalError = "Canonical field-experience aggregate query failed";
+      }
+    }
+
     const leads = leadRows.map(normalizeLead);
     const spend = spendRows.map(normalizeSpend);
     const outcomes = outcomeRows.map(normalizeOutcome);
@@ -580,9 +792,13 @@ export async function loadNeonGrowthIntelligence(
         deliveryConfigured,
         deliveryError,
       ),
+      webVitals: normalizeGrowthWebVitals(webVitalRows, schema.analytics, webVitalError),
       sourceRowsRead: leadRows.length,
       spendRowsRead: spendRows.length,
       outcomeRowsRead: outcomeRows.length,
+      webVitalRowsRead: webVitalRows
+        .filter((row) => text(row.device_category).toLowerCase() === "all")
+        .reduce((total, row) => total + numberValue(row.sample_size), 0),
     };
   } catch {
     return emptyView(true, windowDays, now, "Canonical Neon growth intelligence query failed");

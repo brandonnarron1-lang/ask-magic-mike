@@ -27,17 +27,25 @@ export interface RateLimitStore {
 
 interface BucketEntry {
   count: number;
-  windowStart: number;
+  expiresAt: number;
 }
 
 const DURABLE_BUCKET_KEY_VERSION = "v1";
 const DURABLE_BUCKET_RETENTION_MS = 24 * 60 * 60 * 1000;
 const DURABLE_BUCKET_SECRET_MIN_LENGTH = 32;
+const IN_MEMORY_RATE_LIMIT_MAX_BUCKETS = 10_000;
+const IN_MEMORY_RATE_LIMIT_SWEEP_INTERVAL = 256;
 
 type DurableRateLimitSecretEnv = Partial<Record<
   "RATE_LIMIT_HASH_SECRET" | "CONSENT_IP_HASH_SALT" | "CRON_SECRET" | "ADMIN_SECRET",
   string | undefined
 >>;
+
+type RateLimitRuntimeEnv = Partial<Record<"VERCEL_ENV" | "NODE_ENV", string | undefined>>;
+
+type RateLimitEmergencyEnv = Partial<Record<"RATE_LIMIT_EMERGENCY_MEMORY", string | undefined>>;
+
+type RateLimitFallbackEnv = RateLimitRuntimeEnv & RateLimitEmergencyEnv;
 
 function durableBucketHashSecret(env: DurableRateLimitSecretEnv = process.env): string | null {
   const candidates = [
@@ -54,6 +62,32 @@ function durableBucketHashSecret(env: DurableRateLimitSecretEnv = process.env): 
 /** Boolean-only readiness probe for protected health output and tests. */
 export function durableRateLimitHashSecretReady(env: DurableRateLimitSecretEnv = process.env): boolean {
   return durableBucketHashSecret(env) !== null;
+}
+
+/** Production readiness requires the purpose-specific secret, not a reused credential. */
+export function durableRateLimitDedicatedSecretReady(
+  env: DurableRateLimitSecretEnv = process.env,
+): boolean {
+  return (env.RATE_LIMIT_HASH_SECRET?.trim().length || 0) >= DURABLE_BUCKET_SECRET_MIN_LENGTH;
+}
+
+/** Preview is read-only; every real production runtime requires shared limiting. */
+export function durableRateLimitRequired(env: RateLimitRuntimeEnv = process.env): boolean {
+  return env.VERCEL_ENV ? env.VERCEL_ENV === "production" : env.NODE_ENV === "production";
+}
+
+/** Break-glass mode is deliberately narrow: only the documented exact value enables it. */
+export function rateLimitEmergencyMemoryEnabled(
+  env: RateLimitEmergencyEnv = process.env,
+): boolean {
+  return env.RATE_LIMIT_EMERGENCY_MEMORY?.trim() === "1";
+}
+
+/** Non-durable limiting is normal off Production and break-glass-only on Production. */
+export function nonDurableRateLimitFallbackAllowed(
+  env: RateLimitFallbackEnv = process.env,
+): boolean {
+  return !durableRateLimitRequired(env) || rateLimitEmergencyMemoryEnabled(env);
 }
 
 /**
@@ -85,29 +119,92 @@ export function durableRateLimitBucketKey(
  * - Resets on every cold start
  * - Each serverless instance has independent state
  * - No shared state across horizontal scale-out
+ *
+ * The emergency store is still bounded. Expired buckets are reclaimed and new
+ * identifiers fail closed once the cap is reached, preventing an attacker from
+ * turning unique-IP traffic into unbounded process memory growth.
  */
 export class InMemoryRateLimitStore implements RateLimitStore {
   private readonly store = new Map<string, BucketEntry>();
+  private checksSinceSweep = 0;
+
+  constructor(private readonly maxBuckets = IN_MEMORY_RATE_LIMIT_MAX_BUCKETS) {
+    if (!Number.isSafeInteger(maxBuckets) || maxBuckets < 1) {
+      throw new Error("In-memory rate-limit capacity must be a positive safe integer.");
+    }
+  }
+
+  private sweepExpired(now: number) {
+    for (const [bucketKey, entry] of this.store) {
+      if (entry.expiresAt <= now) this.store.delete(bucketKey);
+    }
+    this.checksSinceSweep = 0;
+  }
 
   check(key: string, limit: number, windowMs: number): RateLimitResult {
     const now   = Date.now();
-    const entry = this.store.get(key);
+    let entry = this.store.get(key);
 
-    if (!entry || now - entry.windowStart > windowMs) {
-      this.store.set(key, { count: 1, windowStart: now });
+    if (entry && entry.expiresAt <= now) {
+      this.store.delete(key);
+      entry = undefined;
+    }
+
+    if (!entry) {
+      this.checksSinceSweep += 1;
+      if (
+        this.checksSinceSweep >= IN_MEMORY_RATE_LIMIT_SWEEP_INTERVAL
+        || this.store.size >= this.maxBuckets
+      ) {
+        this.sweepExpired(now);
+      }
+
+      if (this.store.size >= this.maxBuckets) {
+        return {
+          allowed: false,
+          remaining: 0,
+          resetAt: now + windowMs,
+          durable: false,
+        };
+      }
+
+      this.store.set(key, { count: 1, expiresAt: now + windowMs });
       return { allowed: true, remaining: limit - 1, resetAt: now + windowMs, durable: false };
     }
 
     if (entry.count >= limit) {
-      return { allowed: false, remaining: 0, resetAt: entry.windowStart + windowMs, durable: false };
+      return { allowed: false, remaining: 0, resetAt: entry.expiresAt, durable: false };
     }
 
     entry.count += 1;
-    return { allowed: true, remaining: limit - entry.count, resetAt: entry.windowStart + windowMs, durable: false };
+    return { allowed: true, remaining: limit - entry.count, resetAt: entry.expiresAt, durable: false };
   }
 }
 
 let _neonSql: ReturnType<typeof import("@neondatabase/serverless")["neon"]> | null = null;
+
+function classifyDurableStoreError(error: unknown):
+  | "authentication_failed"
+  | "permission_denied"
+  | "connection_failed"
+  | "query_failed" {
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+  if (message.includes("authentication") || message.includes("password")) {
+    return "authentication_failed";
+  }
+  if (message.includes("permission") || message.includes("privilege")) {
+    return "permission_denied";
+  }
+  if (
+    message.includes("connect")
+    || message.includes("fetch")
+    || message.includes("network")
+    || message.includes("timeout")
+  ) {
+    return "connection_failed";
+  }
+  return "query_failed";
+}
 
 async function checkNeonRateLimit(
   key: string,
@@ -166,7 +263,10 @@ async function checkNeonRateLimit(
       durable: true,
     };
   } catch (error) {
-    console.error("[rate-limit] Failed to use Neon durable rate limiting:", error);
+    console.error(
+      "[rate-limit] Failed to use Neon durable rate limiting; "
+      + `error_code=${classifyDurableStoreError(error)}`,
+    );
     _neonSql = null;
     return null;
   }
@@ -215,15 +315,13 @@ export async function checkRateLimit(
 ): Promise<RateLimitResult> {
   // Next.js sets NODE_ENV=production for every optimized Vercel build,
   // including isolated previews. VERCEL_ENV is authoritative when present.
-  const isProduction = process.env.VERCEL_ENV
-    ? process.env.VERCEL_ENV === "production"
-    : process.env.NODE_ENV === "production";
+  const isProduction = durableRateLimitRequired();
 
   const neonResult = await checkNeonRateLimit(key, limit, windowMs, prefix);
   if (neonResult) return neonResult;
 
   // Production without credentials: fail-open with critical log
-  if (isProduction && !process.env.RATE_LIMIT_EMERGENCY_MEMORY) {
+  if (isProduction && !nonDurableRateLimitFallbackAllowed()) {
     console.error(
       "[rate-limit] CRITICAL: Production is using non-durable in-memory rate limiting. " +
       "Set DATABASE_URL, apply the rate_limit_buckets migration, and configure a server-only hash secret. " +
@@ -231,7 +329,9 @@ export async function checkRateLimit(
     );
   }
 
-  return _memStore.check(key, limit, windowMs);
+  // Match the durable bucket contract: activity on one route must never consume
+  // another route's fallback allowance during Preview or emergency operation.
+  return _memStore.check(`${prefix}\0${key}`, limit, windowMs);
 }
 
 /**

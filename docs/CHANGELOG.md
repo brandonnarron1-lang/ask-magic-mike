@@ -1,5 +1,103 @@
 # Changelog
 
+## 2026-08-24 — Completed-release ledger integrity
+
+- Reconciled the seven completed Phase 9 application releases against
+  authenticated GitHub head/merge records and Vercel READY Production
+  deployments.
+- Corrected the PR #195 head mismatch and completed the PR #183–#185 authority
+  chains without changing any current release gate.
+- Added executable coverage requiring each completed owner-queue entry to
+  retain its exact PR head, merge commit, and Production deployment ID.
+- No runtime, Production, environment, database, lead, event, notification,
+  WordPress, DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
+## 2026-08-24 — PR #209 emergency-limiter security hardening
+
+- A Next.js/React security review found that the non-durable fallback retained
+  every unique identifier for the process lifetime and omitted the route
+  partition used by the canonical Neon limiter.
+- The fallback now has a 10,000-identifier cap, opportunistic expiry cleanup,
+  fail-closed capacity behavior, and typed route isolation.
+- Full post-change Node 24 verification passes 229 test files / 3,064 tests,
+  strict typecheck, ESLint, 14/14 release safety, optimized build, all 83 active
+  routes, the Production dependency audit, and tracked-history/changed-file
+  secret scans. Exact-head Preview evidence remains mandatory after push.
+- No migration, Production action, secret entry, lead/event write, message,
+  WordPress edit, publication, DNS change, spend, deletion, or NellySelly
+  action occurred.
+
+## 2026-08-23 — Atomic release-authority reconciliation
+
+- Reconciled the operating source-of-truth documents to the accepted PR #195
+  Production commit/deployment and one canonical Draft application candidate,
+  PR #209.
+- Preserved PRs #202 through #208 as incremental review evidence while removing
+  their stale independent release authority from current operator guidance.
+- Separated the optional Neon-attested Preview mutation gate, the combined
+  Production durability secret/merge/deploy gate, and the later one-href
+  WordPress publication gate.
+- Added a five-check executable documentation contract that rejects known stale
+  stacked-release claims. No application behavior, Production state, database,
+  message, publication, DNS, spend, or NellySelly state changed.
+
+## 2026-08-23 — Public hero delivery fast-track candidate
+
+- Reused PR #201's isolated responsive-image implementation on exact sealed PR
+  #203 instead of recreating the Black Diamond hero or waiting behind unrelated
+  WordPress and field-telemetry candidates.
+- Preserved the approved artwork, composition, copy, CTAs, attribution, routes,
+  forms, and lead backend while moving only hero delivery to Next.js responsive
+  image source sets with intrinsic dimensions and explicit LCP priority.
+- A fresh no-write Production audit measured the retained static hero at
+  289,876 bytes on 390 × 844 mobile and 503,788 bytes on 1440 × 900 desktop;
+  both currently report automatic loading and fetch priority.
+- Fresh optimized local proof loads exactly one art-directed hero response:
+  56,792 bytes on mobile and 108,706 bytes on desktop, with eager/high
+  priority, no horizontal overflow, and zero browser warnings/errors.
+- Exact Node 24 acceptance passes 221 files / 2,993 tests, strict typecheck,
+  ESLint, optimized build with 52 static pages, 82/17 route-manifest proof,
+  14/14 release safety, system isolation, and a clean Production dependency
+  audit.
+- PR #204 application head passes exact-head GitHub CI, a matching immutable
+  Vercel Preview, protected 17-pass/6-write-skip acceptance, Widget 2/2,
+  release doctor 43/43, release candidate GO, `PREVIEW_READY`, and zero
+  Preview warning/error/fatal logs. Deployed browser-negotiated hero variants
+  are 56,744 bytes mobile and 108,706 bytes desktop.
+- No migration, Production action, lead/event write, message, WordPress edit,
+  publication, spend, DNS change, deletion, or NellySelly action occurred.
+
+## 2026-08-23 — Durable rate-limit readiness candidate
+
+- Closed a false-green observability path where Production could return ready
+  and pass the synthetic monitor while public event routes used non-durable
+  per-instance rate limiting.
+- Reused the canonical Neon limiter and added boolean-only Production checks
+  for the exact table shape/upsert target, schema and CRUD privileges,
+  effective RLS access, and a dedicated server-only HMAC secret.
+- Added a read-only store-capability verifier with safe boolean-only output;
+  the exact query passed against the authenticated Neon Production branch.
+- Made the synthetic monitor validate the readiness response contract instead
+  of treating HTTP 200 as sufficient proof.
+- Replaced raw Neon limiter-error logging with bounded operational error codes;
+  a regression test proves credential-like connection details cannot enter
+  Vercel logs when the durable store fails.
+- Kept isolated Vercel Preview read-only and independent of Production secrets.
+- Local Node 24 acceptance passes 218 files / 2,983 tests, strict typecheck,
+  ESLint, optimized build, 82 routes, 14/14 safety, system isolation,
+  43/43 release doctor, dependency audit, redacted full-history secret scan, and
+  no-migration review.
+- PR #202 hardened application head passes PR merge-ref CI, exact-head Vercel
+  Preview status, deployed runtime capability health, protected
+  17-pass/6-write-skip acceptance, Widget 2/2, 43/43 doctor, zero Preview
+  warning/error/fatal logs, and `PREVIEW_READY`. Prior proof is retained but
+  superseded because it did not prove schema/upsert, privileges, or RLS.
+- The hardening overlays the synthetic PR #197–#201 stack without executable
+  conflicts; only the cumulative go-live runbook needs later reconciliation.
+- No Production secret, deployment, migration, lead/event write, notification,
+  email, SMS, Push, WordPress edit, publication, DNS, spend, deletion, or
+  NellySelly action occurred.
+
 ## 2026-08-22 — Conversion identity and public-navigation polish candidate
 
 - Reused the canonical home-value funnel and added required consumer name

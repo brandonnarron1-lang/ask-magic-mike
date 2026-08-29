@@ -17,6 +17,9 @@ const ENV_KEYS = [
   "POSTHOG_API_KEY",
   "AGENT_NOTIFICATIONS_ENABLED",
   "LEAD_NOTIFICATION_MODE",
+  "DATABASE_URL",
+  "RATE_LIMIT_HASH_SECRET",
+  "RATE_LIMIT_EMERGENCY_MEMORY",
 ] as const;
 const original = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
 
@@ -133,6 +136,39 @@ describe("POST /api/leads validation and truthful persistence", () => {
     }));
     expect(response.status).toBe(503);
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("fails closed before parsing or persistence when Production durable limiting is unavailable", async () => {
+    const mutableEnv = process.env as Record<string, string | undefined>;
+    const originalNodeEnv = mutableEnv.NODE_ENV;
+    const fetchSpy = vi.fn();
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubGlobal("fetch", fetchSpy);
+    mutableEnv.NODE_ENV = "production";
+    process.env.VERCEL_ENV = "production";
+    delete process.env.DATABASE_URL;
+    delete process.env.RATE_LIMIT_HASH_SECRET;
+    delete process.env.RATE_LIMIT_EMERGENCY_MEMORY;
+
+    try {
+      const response = await POST(request({
+        funnel_type: "home_value",
+        lead_source_surface: "home_value_page",
+        address: "4 Synthetic Durable Way",
+        email: "durable-guard@example.test",
+        phone: "2525550104",
+      }));
+
+      expect(response.status).toBe(503);
+      expect(await response.json()).toMatchObject({
+        error: "Lead intake is temporarily unavailable.",
+      });
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(consoleError).toHaveBeenCalled();
+    } finally {
+      if (originalNodeEnv === undefined) delete mutableEnv.NODE_ENV;
+      else mutableEnv.NODE_ENV = originalNodeEnv;
+    }
   });
 });
 

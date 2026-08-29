@@ -1,5 +1,65 @@
 # Changelog
 
+## 2026-08-24 — Completed-release ledger integrity
+
+- Reconciled every completed Phase 9 release in the owner queue against
+  authenticated GitHub PR heads/merge commits and Vercel READY Production
+  deployments.
+- Corrected the recorded PR #195 reviewed head and filled the missing exact
+  head/merge/deployment chains for PRs #183 through #185.
+- Added a regression contract covering all seven completed release chains so
+  historical approval evidence cannot silently drift.
+- Preserved the pre-change PR #209 head at
+  `rescue/amm-pr209-pre-release-ledger-integrity-20260824-0605`. No Production,
+  environment, database, lead, event, message, WordPress, DNS, publication,
+  spend, deletion, or NellySelly action occurred.
+
+## 2026-08-24 — PR #209 emergency-limiter security hardening
+
+- Preserved the exact reviewed candidate at remote rescue branch
+  `rescue/amm-pr209-pre-memory-fallback-hardening-20260824-0333`.
+- Bounded the Preview/emergency in-memory limiter to 10,000 active identifiers,
+  reclaimed expired entries, and made unseen identifiers fail closed at
+  capacity instead of allowing unbounded process-memory growth.
+- Partitioned fallback counters by the same typed route prefix used by Neon so
+  analytics, chat, lead, appointment, and staff-setup traffic cannot consume
+  one another's degraded-mode allowance.
+- Added dedicated capacity, expiry-reclamation, and route-isolation regression
+  tests plus a structured security review.
+- Changed no Production environment, deployment, database row, lead, event,
+  message, WordPress surface, DNS, NellySelly system, or external provider.
+
+## 2026-08-23 — Field-experience trust fast-track candidate
+
+- Preserved PR #199 and its exact head, then transplanted only its unique
+  privacy-safe field-performance capability onto canonical PR #205.
+- Added Production-only LCP/INP/CLS reporting for exact public routes through
+  the existing durable event boundary and protected Growth Command Center.
+- Removed lead, session, attribution, query, raw URL, raw user-agent, and raw
+  metric-ID identity from the stored contract; metric IDs are reduced to
+  domain-separated SHA-256 digests before persistence.
+- Added component-level proof for canonical emission and QA, automation,
+  private-route, and noncanonical-host suppression.
+- Passed 5 focused files / 29 tests, all 226 files / 3,031 tests, strict
+  typecheck, ESLint, optimized build, route proof, release safety, system
+  isolation, and the Production dependency audit.
+- No migration, Production action, field event, lead, message, WordPress edit,
+  publication, spend, DNS change, deletion, or NellySelly action occurred.
+
+## 2026-08-23 — Conversion-journey integrity fast-track candidate
+
+- Reused the already-reviewed PR #200 application and test changes on top of
+  exact PR #202 head instead of rebuilding the buyer/renter/open-house flow.
+- Current mobile Production no-write audit reconfirmed that blank Buyer submit
+  shows the either-or contact error while focus remains on the submit button.
+- The isolated candidate preserves first touch, refreshes truthful last touch,
+  separates renter source identity, suppresses replay KPI inflation, and makes
+  contact recovery accessible.
+- Every application and test file applied cleanly; only cumulative operating
+  documents required reconciliation. No migration, Production action, lead,
+  message, WordPress edit, publication, spend, DNS change, deletion, or
+  NellySelly action occurred.
+
 ## 2026-08-22 — Conversion identity polish
 
 - Added required seller identity to the existing four-stage home-value funnel.
@@ -9,7 +69,28 @@
   events in screenshot QA so visual capture performs no application writes.
 - No Production, database, notification, provider, WordPress, or publication
   action was performed.
+## 2026-08-22 — WordPress owned-demand activation change set
 
+- Stacked the candidate behind PR #197 after preserving its released-main state
+  at `rescue/amm-pr198-pre-pr197-stack-refresh-20260822-2247`; application code
+  composed without conflict and only cumulative release evidence required
+  reconciliation.
+- Reused the protected Distribution Command and canonical owned-demand UTM
+  registry to generate live, placement-specific WordPress readiness manifests.
+- Added exact-host public page and page-index inspection, redirect and size
+  limits, one-target classification, rollback hrefs, page-ID checks, and
+  deterministic SHA-256 preconditions.
+- Hardened public reads with an explicit published-row requirement, a 3 MB
+  streaming cap, and precondition hashes that include every ambiguity and
+  rejected-link signal.
+- Added protected private/no-store JSON downloads for the existing homepage,
+  home-value, and We Buy Homes placements plus fail-closed security coverage.
+- Expanded the brokerage placement card across the desktop command grid while
+  preserving the existing mobile stack, eliminating an avoidable blank column.
+- Verified all three live public placements as `legacy_match_ready`; selected
+  only the homepage CTA as the recommended first separately approved edit.
+- Performed no WordPress edit, publication, form submission, message send,
+  database migration, Production deployment, DNS change, cache purge, or spend.
 ## 2026-08-22 — Privacy and KPI-trust consolidation
 
 - Consolidated the independent privacy/security/KPI evidence from PRs #190-#192

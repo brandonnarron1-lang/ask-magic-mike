@@ -1,12 +1,14 @@
-import { isPreviewDataDisabled, previewDataMode } from "@/lib/preview-security";
+import { previewDataMode } from "@/lib/preview-security";
+import { computeNeonEndpointAttestation } from "@/lib/security/neon-endpoint-identity";
 
 /**
- * Provider-neutral mutation-safety policy for `/api/admin/health`.
+ * Canonical Neon mutation-safety policy for `/api/admin/health`.
  *
  * Preview writes are deliberately opt-in. A Vercel preview alone is not
- * enough: the database must also be explicitly labelled `DATABASE_ENV=preview`.
- * This prevents a preview deployment from mutating production when its
- * DATABASE_URL was copied into the wrong environment scope.
+ * enough: the database must also be explicitly labelled `DATABASE_ENV=preview`
+ * and its parsed Neon endpoint must match the approved Preview endpoint while
+ * refusing the Production endpoint. This prevents copied or mis-scoped
+ * Production credentials from becoming writable in Preview.
  */
 
 export interface HealthSafetyInput {
@@ -22,6 +24,13 @@ export interface DatabaseIdentity {
   database_env: "preview" | "production" | "development" | "unknown";
   database_env_explicit: boolean;
   vercel_env: "preview" | "production" | "development" | "unknown";
+  preview_endpoint_id_configured: boolean;
+  production_endpoint_id_configured: boolean;
+  endpoint_identity_configured: boolean;
+  endpoint_ids_distinct: boolean;
+  database_neon_endpoint_resolved: boolean;
+  preview_endpoint_match: boolean;
+  production_endpoint_match: boolean;
   preview_identity_confirmed: boolean;
 }
 
@@ -63,14 +72,27 @@ export function computeDatabaseIdentity(
 ): DatabaseIdentity {
   const explicitDatabaseEnv = normalizeEnvironment(env.DATABASE_ENV);
   const vercelEnv = normalizeEnvironment(env.VERCEL_ENV);
+  const endpoint = computeNeonEndpointAttestation(env);
 
   return {
     database_env:
       explicitDatabaseEnv !== "unknown" ? explicitDatabaseEnv : vercelEnv,
     database_env_explicit: explicitDatabaseEnv !== "unknown",
     vercel_env: vercelEnv,
+    preview_endpoint_id_configured:
+      endpoint.preview_endpoint_id_configured,
+    production_endpoint_id_configured:
+      endpoint.production_endpoint_id_configured,
+    endpoint_identity_configured: endpoint.endpoint_identity_configured,
+    endpoint_ids_distinct: endpoint.endpoint_ids_distinct,
+    database_neon_endpoint_resolved:
+      endpoint.database_neon_endpoint_resolved,
+    preview_endpoint_match: endpoint.preview_endpoint_match,
+    production_endpoint_match: endpoint.production_endpoint_match,
     preview_identity_confirmed:
-      explicitDatabaseEnv === "preview" && vercelEnv === "preview",
+      explicitDatabaseEnv === "preview" &&
+      vercelEnv === "preview" &&
+      endpoint.preview_endpoint_identity_confirmed,
   };
 }
 
@@ -79,15 +101,38 @@ export function computeHealthSafety(input: HealthSafetyInput): HealthSafety {
   const allowPreviewMutation =
     (input.env.ALLOW_PREVIEW_DB_MUTATION ?? "false").toLowerCase() === "true";
   const isPreviewRuntime = identity.vercel_env === "preview";
-  const previewDisabled = isPreviewDataDisabled(input.env);
+  const previewDisabled = previewDataMode(input.env) !== "enabled";
+  const previewEnvironmentLabelsConfirmed =
+    identity.database_env_explicit &&
+    identity.database_env === "preview" &&
+    identity.vercel_env === "preview";
 
   const blockers: string[] = [];
 
   if (!isPreviewRuntime) blockers.push("not_preview_runtime");
   if (!identity.database_env_explicit)
     blockers.push("database_env_not_explicit");
-  if (!identity.preview_identity_confirmed)
+  if (!previewEnvironmentLabelsConfirmed)
     blockers.push("database_identity_not_preview");
+  if (!identity.preview_endpoint_id_configured)
+    blockers.push("preview_neon_endpoint_id_not_configured");
+  if (!identity.production_endpoint_id_configured)
+    blockers.push("production_neon_endpoint_id_not_configured");
+  if (
+    identity.endpoint_identity_configured &&
+    !identity.endpoint_ids_distinct
+  )
+    blockers.push("neon_endpoint_ids_not_distinct");
+  if (!identity.database_neon_endpoint_resolved)
+    blockers.push("database_neon_endpoint_unresolved");
+  if (
+    identity.database_neon_endpoint_resolved &&
+    identity.preview_endpoint_id_configured &&
+    !identity.preview_endpoint_match
+  )
+    blockers.push("database_neon_endpoint_not_preview");
+  if (identity.production_endpoint_match)
+    blockers.push("database_neon_endpoint_matches_production");
   if (previewDisabled) blockers.push("preview_data_disabled");
   if (!allowPreviewMutation) blockers.push("allow_preview_db_mutation_not_set");
   if (!input.dbConfigured) blockers.push("db_not_configured");
@@ -101,6 +146,22 @@ export function computeHealthSafety(input: HealthSafetyInput): HealthSafety {
   if (!input.env.ADMIN_SECRET) warnings.push("admin_secret_missing");
   if (!identity.database_env_explicit)
     warnings.push("database_env_not_explicit");
+  if (!identity.endpoint_identity_configured)
+    warnings.push("neon_endpoint_identity_not_configured");
+  if (
+    identity.endpoint_identity_configured &&
+    !identity.endpoint_ids_distinct
+  )
+    warnings.push("neon_endpoint_ids_not_distinct");
+  if (input.env.DATABASE_URL && !identity.database_neon_endpoint_resolved)
+    warnings.push("database_neon_endpoint_unresolved");
+  if (
+    identity.database_neon_endpoint_resolved &&
+    !identity.preview_endpoint_match
+  )
+    warnings.push("database_neon_endpoint_not_preview");
+  if (identity.production_endpoint_match)
+    warnings.push("database_neon_endpoint_matches_production");
   if (isPreviewRuntime && previewDataMode(input.env) !== "enabled")
     warnings.push("preview_data_disabled");
   if (input.smsEnabled) warnings.push("live_sms_enabled");

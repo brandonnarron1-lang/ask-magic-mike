@@ -1,21 +1,21 @@
 # Canonical Asset Manifest
 
-Refreshed 2026-08-22 from authenticated Production, GitHub, Vercel, Neon, and
+Refreshed 2026-08-23 from authenticated Production, GitHub, Vercel, Neon, and
 WordPress evidence. Working systems outrank historical packets.
 
 | Asset | Current evidence | Disposition | Decision |
 |---|---|---|---|
 | `/Users/brandonnarron/Projects/ask-magic-mike` | Remote `brandonnarron1-lang/ask-magic-mike`; mature Next.js root `app/` runtime, Neon persistence, Lead Center, widgets, email/Web Push, analytics, tests | **CANONICAL** | Preserve Git history and continue only through reviewed PRs |
-| Vercel `eyes-up-industries/ask-magic-mike` | Project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; Production `dpl_ANYodUJ7VcceRRDAfpX6APkSKUcW` from `main` merge `f5f82f1bfaadea0ed20da50738ebc1f83e8dab97`; `www` live and apex 308 redirect | **CANONICAL** | Sole Ask Magic Mike Production application/domain owner |
-| Neon `bitter-star-20214385` | Production branch `br-round-base-auh6h2wd`, endpoint `ep-proud-bonus-autwv60g`, database `neondb`; health ready | **CANONICAL** | One lead/event/notification/audit source of truth; no Supabase Production runtime |
+| Vercel `eyes-up-industries/ask-magic-mike` | Project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; Production `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` from `main` merge `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`; `www` live and apex 308 redirect | **CANONICAL** | Sole Ask Magic Mike Production application/domain owner |
+| Neon `bitter-star-20214385` | Production branch `br-round-base-auh6h2wd`, endpoint `ep-proud-bonus-autwv60g`, database `neondb`; canonical capture is healthy while durable-limiter readiness remains the PR #209 gate | **CANONICAL** | One lead/event/notification/audit source of truth; no Supabase Production runtime |
 | `OurTownProperties.com` WordPress | Existing SEO/FlexMLS/Gravity Forms surfaces; signed bridge 1.1.0; Form 3 only; duplicate Form 3 native alert inactive | **WORDPRESS BRIDGE ONLY** | Preserve URLs/content/entries; do not create a competing lead database |
-| PR #183 | Released three-offer campaign-safety flight | **REFERENCE/DOCUMENTATION** | Merged and live; its exhausted gate is not reusable |
-| PR #184 | Released append-only publication-proof ledger and verified guarded Neon migration | **REFERENCE/DOCUMENTATION** | Current Production baseline; do not rerun its migration or gate |
-| PR #185 | Clean stack above #184 containing PR #182's unique Buyer discovery, exact Preview origin, canonical-router CTA checks, and current release-safety coverage | **MERGE INTO CANONICAL** | Refresh after #184; old overlapping PR #182 must not merge as-is |
+| PRs #183, #184, #185, #193, #196, #194, and #195 | Released campaign, proof-ledger, owned-demand, privacy/KPI, verifier, iOS handoff, and conversion-identity work culminating in Production `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` | **REFERENCE/DOCUMENTATION** | Released; every application/migration gate is exhausted and not reusable |
+| PR #209 / `codex/phase9-controlled-release-candidate-20260823` | Atomic cumulative application candidate from #202 through #208 plus fail-closed Neon Preview endpoint attestation and current release-authority reconciliation | **MERGE INTO CANONICAL** | Sole current application release vehicle; remain Draft until exact-head proof and exact Production gate |
+| PRs #202 through #208 | Incremental review branches whose cumulative work is represented once in PR #209 | **REFERENCE/DOCUMENTATION** | Preserve branches, rescue refs, checks, and evidence; no independent merge or Production authority |
+| PR #187 | Evidence-first KPI target register with migration | **UNKNOWN / NEEDS OWNER CONFIRMATION** | Defer until genuine eligible demand supplies a defensible baseline; not part of PR #209 |
 | `codex/phase9-owned-demand-asset-studio-20260821` | Historical source for protected deterministic 4:5/story/QR exports | **REFERENCE/DOCUMENTATION** | Useful work is consolidated once in PR #185; do not release as a second stack |
-| PR #182 | Historical mixed candidate whose unique runtime/security work is now preserved on the clean consolidation branch | **REFERENCE/DOCUMENTATION** | Draft and explicitly deferred; duplicated authority docs/scanners are superseded by #184 |
-| PR #179 | Historical source of the unique token-scoped iOS Home Screen Web Push handoff | **REFERENCE/DOCUMENTATION** | Preserved; useful work is refreshed once on the current PR #193 stack with stronger one-time replay protection; do not merge the old stack |
-| PR #194 / `codex/phase9-phone-handoff-consolidation-20260822` | Current-stack iOS Home Screen install handoff, distinct invite/session credentials, durable one-time claim/QA-send guards, RBAC-only invite creation whenever RBAC is enabled, copy-safe endpoint enrollment, exact AMM origin boundary, and read-only Preview contract | **MERGE INTO CANONICAL** | Draft stack after #193; refresh and re-prove after predecessor release; no migration/send/enrollment; require its own application gate |
+| PR #182 | Historical mixed candidate whose unique runtime/security work is preserved in the released current stack | **REFERENCE/DOCUMENTATION** | Superseded; duplicated authority docs/scanners must not merge as a second control plane |
+| PR #179 | Historical source of the unique token-scoped iOS Home Screen Web Push handoff | **REFERENCE/DOCUMENTATION** | Superseded by released PR #194; preserve history, but do not merge the old stack |
 | `/Users/brandonnarron/ask-magic-mike` | Two-commit bootstrap without canonical lead lifecycle | **OBSOLETE OR CONFLICTING** | Historical fallback only; do not merge |
 | `/Users/brandonnarron/propertylens` | Separate PropertyLens product | **REFERENCE/DOCUMENTATION** | Never treat as Ask Magic Mike runtime |
 | `/Users/brandonnarron/eyesup-hq/projects/ask-magic-mike-widget` | Asset/mobile package without canonical backend | **MERGE INTO CANONICAL** | Reuse only reviewed assets/contracts; no separate store |
@@ -25,6 +25,7 @@ WordPress evidence. Working systems outrank historical packets.
 | Empty helpers `amm-phase9-campaign-compliance-20260821` and `amm-phase9-publication-ledger-20260821` | Zero deployments and no domain effect | **ARCHIVE AFTER REVIEW** | Preserve until separately approved cleanup |
 | Vercel `amm-phase9-current-router-safety-20260821` | CLI-created unlinked-worktree helper `prj_iGynowHru4TBNwWgvoiSIG193Ukf`; zero deployments and no domain effect | **ARCHIVE AFTER REVIEW** | Worktree is relinked to the canonical project; preserve helper until separately approved cleanup |
 | Vercel `amm-phase9-phone-handoff-consolidation-20260822` | CLI-created helper `prj_Mb30U4zzULbWox6TPJ0QlJ4cVYSY`; zero deployments, empty targets/aliases, only its default unused `vercel.app` project domain | **ARCHIVE AFTER REVIEW** | Created when protected `vercel curl` auto-linked an isolated worktree; worktree was immediately relinked to canonical `ask-magic-mike`; preserve until separately approved cleanup |
+| Vercel `amm-phase9-durable-rate-limit-readiness-20260823` | CLI-created helper `prj_Da74SJxkGLrCa1oqkRo2cOmlaAkB`; zero deployments and no custom-domain, environment, alias, or Production effect | **ARCHIVE AFTER REVIEW** | Created when protected `vercel curl` auto-linked an isolated worktree; worktree was immediately relinked to canonical `ask-magic-mike`; preserve until separately approved cleanup |
 | Vercel NellySelly projects | No Ask Magic Mike custom-domain ownership; zero NellySelly markers in verified Ask render | **OBSOLETE OR CONFLICTING** | Keep products, credentials, databases, and domains isolated |
 | Historical commits `daf9510`, `6601fb6`, `df2b1f3` | Reachable in canonical Git history | **REFERENCE/DOCUMENTATION** | Preserve; never reset/force-push to recreate them |
 | PRs #92 and #119–#121 | Old visual/runtime chains no longer aligned with current root router and Production baseline | **ARCHIVE AFTER REVIEW** | Not a parallel release sequence |
@@ -41,6 +42,7 @@ WordPress evidence. Working systems outrank historical packets.
   approved registered provider.
 - External campaign platforms remain human-operated; the application records
   evidence only after the native action occurs.
-- Historical PR #179 and PR #182 source branches remain preserved; their useful
-  work is consolidated on current stacks and neither is an independent release
-  vehicle. No branch, commit, worktree, or exact-head evidence was deleted.
+- Historical PR #179, PR #182, PR #187, and incremental PRs #202 through #208
+  remain preserved. Their released or candidate work is represented once in
+  the current stack, and none is an independent release vehicle. No branch,
+  commit, worktree, or exact-head evidence was deleted.

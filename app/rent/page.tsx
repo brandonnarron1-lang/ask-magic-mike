@@ -23,7 +23,7 @@ export default function RentPage() {
             <h1 className="mt-4 font-serif text-5xl leading-tight text-[#f4ead4] sm:text-6xl">Make the next housing decision with a local plan.</h1>
             <p className="mt-5 max-w-xl text-lg leading-8 text-[#d9ceb8]">Request a practical rental-to-homeownership readiness review for Wilson or Eastern North Carolina. A human will review the details before sharing next steps.</p>
           </div>
-          <BuyerIntentSection surface="buyer_page" preset="renter" />
+          <BuyerIntentSection surface="renter_page" preset="renter" />
         </div>
       </section>
       <Footer />

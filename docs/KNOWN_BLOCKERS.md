@@ -1,35 +1,59 @@
 # Known Operating Constraints
 
-Updated 2026-08-22. The public funnel, canonical Neon capture, Lead Center, and
+Updated 2026-08-23. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
 
+## WordPress owned-demand publication boundary
+
+- Three existing public WordPress CTAs are now provably identifiable through
+  read-only manifests, but no page has been changed. The current links remain
+  live and reversible.
+- The fresh 2026-08-23 20:37 UTC server-runtime audit returned
+  `legacy_match_ready` for exact page IDs 149, 3952, and 3631 with one current
+  link each, zero lookalikes, and no blockers. These are readiness facts only;
+  every manifest still reports `publicationAuthorized=false` and
+  `mutationPerformed=false`.
+- The homepage is the only recommended first publication. It still requires a
+  fresh matching readiness manifest, verified page-149 revision/backup, the
+  exact phrase
+  `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`,
+  and post-publication public/mobile/analytics acceptance.
+- A readiness manifest is not proof of publication or demand. Do not create a
+  publication-proof row until an authorized operator actually publishes the
+  exact link and supplies public evidence.
+- Home-value page 3952 and We Buy Homes page 3631 remain later independent
+  decisions. Do not bulk-edit them under the homepage gate.
+
 ## Current release constraint
 
-- PR #183 is merged and live. PR #184's backup-first Neon migration is applied
-  and independently verified; its application release evidence is tracked on
-  the PR.
-- PR #185 is merged and live as `44a7483400bdb9b4a10ecdf0883edc4bf96d4ab8`.
-  Its WordPress proof-scope migration and Production application acceptance
-  passed; its gate is exhausted.
-- PR #193 is merged and live as `9b82afb609674bb0209b73f8ac9622ab02733e2a`
-  on Vercel Production deployment `dpl_HkKHY5nF8DeF5azY1CuHAbHGNp3a`.
-  Its privacy/KPI acceptance passed, it contained no database migration, and
-  its gate is exhausted.
-- PR #196 verifier hardening is merged and live as
-  `c08abe1168840b99ccba07866bbec8cf7a6752fb`; its gate is exhausted.
-- PR #194 iOS handoff is merged and live as
-  `5a3c5c7f2463ea399c21b616ff249f6c67e156b6` on Production deployment
-  `dpl_3FWSKSu9jXvC2FTPuojVpt8mgm8J`. Its application gate is exhausted;
-  physical enrollment and a `[TEST]` Push remain separate actions.
-- Draft PR #195 is refreshed onto exact released main. Its prior stacked state
-  is preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
-  It must pass exact-head GitHub CI and protected Preview before its distinct
-  conversion-identity release gate can be considered.
-- Historical PR #179 is superseded by PR #194. PR #182 is superseded; PRs #92
-  and #119–#121 are preserved archive history.
-- Historical gates for already merged PRs #170, #172, #173, #177, #178, #180,
-  and #181 must not be requested again.
+- Current accepted Production is PR #195 merge
+  `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` on deployment
+  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Its conversion-identity gate and every
+  earlier completed release gate are exhausted.
+- Fresh read-only Production checks pass conversion 15/15 and smoke 19/19 with
+  two intentional skips. Candidate monitoring reports 8/9 because current
+  deployed readiness does not prove the durable rate-limit contract. Public
+  pages remain reachable; this is a durability-readiness failure, not a funnel
+  outage.
+- Draft PR #209 is the sole current application release candidate. It contains
+  PRs #202 through #208's reviewed cumulative work once plus fail-closed Neon
+  Preview endpoint attestation. Those incremental PRs are preserved as review
+  evidence and have no independent release authority.
+- PR #209 has no database migration and keeps Preview writes, email, SMS, Push,
+  consumer acknowledgment, WordPress publication, paid media, and NellySelly
+  access disabled. Its final head must pass fresh exact-head CI, Preview,
+  protected no-write, browser, dependency, secret, diff, and isolation proof.
+- Controlled synthetic Preview mutation/cleanup requires
+  `APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA`.
+- Production secret entry, exact PR #209 merge, and matching deployment require
+  `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
+- Preview Lead Center RBAC remains disabled, so the WordPress manifest API
+  fails closed there. An authenticated role-bound runtime download is required
+  after application release and before any separately approved WordPress edit.
+- PR #187's KPI-target migration remains excluded until eligible genuine demand
+  supplies a defensible baseline. Historical PR #179, PR #182, PRs #92 and
+  #119 through #121 remain superseded or archive history.
 
 ## Human and BIC decisions
 
