@@ -1,6 +1,6 @@
 # Phase 9 public owned-referral handoff QA evidence
 
-Refreshed: 2026-08-29 06:42 EDT
+Refreshed: 2026-08-29 06:58 EDT
 
 Branch: `codex/phase9-owned-referral-handoff-20260828`
 
@@ -13,6 +13,9 @@ preserved at
 
 Restack method: normal merge commit
 `9b4b748f1513d6a00ed713e9fe5cd45c4546af98`; no rebase or force-push
+
+Code-bearing evidence head:
+`0442abc1cf0d9a14c5ffd21d1673561aff575db5`
 
 Production mutation: none
 
@@ -146,10 +149,66 @@ conformance or replace human assistive-technology review.
 - Production, WordPress, Vercel Production, Neon Production, email/BCC, SMS,
   Push, DNS, publication, spend, and NellySelly remain unchanged.
 
-## Pending refreshed exact-head evidence
+## Refreshed immutable code-head evidence
 
-After commit and push, seal the Draft PR's immutable head, CI release gate,
-Vercel Preview deployment identity, protected no-write hosted browser pass,
-Preview runtime logs, and fresh exact-head visual/accessibility evidence.
-Production stays on `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`;
+GitHub Release Gate run
+[`33248609881`](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33248609881)
+completed successfully against exact code-bearing head
+`0442abc1cf0d9a14c5ffd21d1673561aff575db5`. Artifact
+`9713663618` has digest
+`sha256:b88ccee766d35cdbdedae2b705a72ac5ae7b9477ef801044c7e55972db59410c`.
+
+The immutable Vercel Preview was:
+
+- deployment: `dpl_AwzuekRKTR4UkM41YohrZAzS8xFX`;
+- URL:
+  `https://ask-magic-mike-covvyfir2-eyes-up-industries.vercel.app`;
+- target/status: `preview` / `READY`; and
+- build commit: `0442abc1cf0d9a14c5ffd21d1673561aff575db5`.
+
+Protected no-write acceptance run
+[`33248758409`](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33248758409)
+checked out that exact target commit while the bootstrap workflow remained on
+`main`. Artifact `9713722051` has digest
+`sha256:1ef8fea1569f6f42f7166d4c45d2a7cf4d1677784c09de8a9bd166769bde5893`.
+Results:
+
+- Preview QA: **18 pass / 6 safe write skips / 0 fail**;
+- browser E2E: **4 expected / 0 unexpected / 0 flaky / 0 skipped**;
+- release doctor: **43/43 pass**;
+- release candidate: **GO**, no blocker; and
+- launch authority: **PREVIEW_READY**.
+
+The mutation gate stayed blocked because `SAFE_DB_WRITE` was false. Preview
+health reported `database_env=preview`, `safe_for_preview_mutation=false`,
+`live_sms_disabled=true`, and `live_email_disabled=true`. No lead,
+notification, email, SMS, Push, appointment, publication, or database write
+was authorized by this run.
+
+Filtered runtime-log queries against the exact deployment returned **0 error**
+and **0 warning** records. Two information-level 503 responses were expected
+fail-closed Preview behavior:
+
+- authenticated `GET /api/admin/sla/sweep` safely refused a Preview data
+  write; and
+- `POST /api/events` safely refused Preview event persistence while
+  `safe_for_preview_mutation=false`.
+
+Fresh in-app Browser inspection used the immutable Preview at desktop
+`1440 x 1000` and mobile `390 x 844`. The reference and candidate captures
+were reviewed together. The compatibility hardening changed no DOM, styling,
+or asset source, and the comparison found no regression in image crop,
+typography, spacing, borders, button hierarchy, URL field, status region,
+responsive stacking, or horizontal overflow. The exact Preview's browser log
+buffer was empty. No real native share chooser, Clipboard write, analytics
+write, recipient, or external send was invoked during this refreshed visual
+pass; behavior-level native/Clipboard cases remain covered by the automated
+tests and mutation-free hosted browser suite above.
+
+The documentation-only seal commit created by this refresh necessarily changes
+the Draft PR head without changing runtime code. Its final CI and Preview
+identities are recorded in the PR body and seal comment after rerunning the
+same gates, avoiding a recursive sequence of evidence-only commits.
+
+Production stays on `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`.
 PR #209's consumed historical approval cannot authorize this Draft.
