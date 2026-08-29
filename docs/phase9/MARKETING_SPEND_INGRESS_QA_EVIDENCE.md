@@ -19,6 +19,55 @@ branch, Production database, lead, provider account, campaign, budget, message,
 WordPress surface, DNS record, Vercel Production environment, purchase,
 deletion, or NellySelly system was touched.
 
+## Refreshed exact-parent local evidence — 2026-08-29
+
+Exact-parent code-bearing/reconciliation head:
+
+```text
+894643a60bd9fb50b441dccb3d2d3d8e6b5c805b
+```
+
+Application proof on Node 24.18.0:
+
+```text
+6 focused files / 47 tests PASS
+247 test files / 3,184 tests PASS
+strict TypeScript before and after build PASS
+full ESLint PASS
+Next.js 15.5.21 optimized build PASS — 55 generated pages
+route manifest PASS — 89 active / 17 acknowledged root-src duplicates
+release doctor PASS — 43/43
+release safety PASS — 14/14
+Ask Magic Mike / NellySelly isolation PASS
+Production dependency audit PASS — no known vulnerabilities
+gitleaks PASS — 651 commits / no leaks
+exact-parent ancestry and diff whitespace PASS
+```
+
+Focused Next.js, React, browser, API, and SQL review found no actionable
+security defect: server-side `growth:manage` authorization, exact same-origin
+POST checks, streamed request bounds, private response headers, React escaping,
+server-only environment reads, parameterized SQL, Production endpoint
+attestation, safe-disabled import authority, owner-only function execution, and
+append-only audit/receipt controls remain intact.
+
+Fresh disposable PostgreSQL proof:
+
+```text
+PostgreSQL 17.11 (Homebrew)
+35 migrations applied in lexical order
+supabase/tests/marketing_spend_ingress_pg17.sql PASS
+anon/authenticated/service_role function execution denied
+synthetic transaction ROLLBACK
+0 synthetic channels / 0 campaigns / 0 receipts retained
+```
+
+The stopped disposable cluster was moved to Trash after verification. No Neon,
+remote database, Production environment, spend, lead, provider, campaign,
+budget, message, WordPress, DNS, or NellySelly system was touched. Fresh
+exact-head GitHub, immutable Preview, authenticated no-commit visual, and
+runtime-log evidence remain mandatory after the documentation-only seal.
+
 ## Completed evidence
 
 ### Parser, persistence, migration, guard, and API tests

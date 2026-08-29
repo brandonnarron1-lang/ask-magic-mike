@@ -16,6 +16,16 @@
 - Former-head local, disposable PostgreSQL, CI, Preview, browser, visual, and
   runtime-log proof is historical. Fresh exact-head proof is mandatory before
   the separate migration/merge/deploy gate.
+- Exact-parent code-bearing/reconciliation head
+  `894643a60bd9fb50b441dccb3d2d3d8e6b5c805b` passes 6 focused files / 47
+  tests, all 247 files / 3,184 tests, strict types before and after build, lint,
+  optimized 55-page build, 89/17 routes, doctor 43/43, safety 14/14, isolation,
+  dependency audit, 651-commit gitleaks, ancestry, whitespace, and focused
+  security review on Node 24.18.0.
+- A fresh disposable PostgreSQL 17.11 cluster applied 35 migrations and passed
+  the transaction, role-denial, immutability, replay, revision, malformed-date,
+  identity-conflict, and rollback contract. The stopped cluster was moved to
+  Trash; no synthetic row remained before shutdown.
 - No Production, environment, Neon object or row, spend, lead, message,
   provider, campaign/budget, WordPress, DNS, publication, purchase, deletion,
   or NellySelly action occurred.

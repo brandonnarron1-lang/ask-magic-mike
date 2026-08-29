@@ -180,6 +180,17 @@ authority. Fresh exact-head Node 24, disposable PostgreSQL 17, immutable
 Preview, protected no-commit browser/visual, security, isolation, and bounded
 runtime-log evidence must pass before the gate above can be used.
 
+Current exact-parent code-bearing/reconciliation head
+`894643a60bd9fb50b441dccb3d2d3d8e6b5c805b` passes 6 focused files / 47
+tests, all 247 files / 3,184 tests, strict TypeScript before and after build,
+full ESLint, optimized Next.js 15.5.21 build with 55 generated pages, 89/17
+route proof, release doctor 43/43, safety 14/14, Ask/Nelly isolation,
+Production dependency audit, 651-commit gitleaks, ancestry, whitespace, and
+focused security review. A fresh disposable PostgreSQL 17.11 cluster applied
+all 35 migrations and passed the executable spend contract with role denial and
+zero synthetic rows after rollback. Exact-head CI/Preview proof remains
+mandatory after the documentation-only seal.
+
 PR #218 remains Draft, open, clean, and mergeable. No Production migration,
 environment change, merge, deployment, spend import, provider action, lead
 action, message, WordPress change, DNS change, purchase, deletion, or

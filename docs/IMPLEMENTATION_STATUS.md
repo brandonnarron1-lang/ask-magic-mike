@@ -15,6 +15,18 @@ Updated 2026-08-29.
   Production authority. Former local, PostgreSQL, CI, Preview, browser, visual,
   and runtime-log proof is historical until repeated on the refreshed exact
   head.
+- Exact-parent code-bearing/reconciliation head
+  `894643a60bd9fb50b441dccb3d2d3d8e6b5c805b` passes 6 focused files / 47
+  tests, all 247 files / 3,184 tests, strict TypeScript before and after build,
+  full ESLint, optimized Next.js 15.5.21 build with 55 generated pages, 89/17
+  route proof, release doctor 43/43, safety 14/14, Ask/Nelly isolation,
+  Production dependency audit, a 651-commit redacted secret scan, ancestry,
+  whitespace, and focused Next.js/React/SQL security review on Node 24.18.0.
+- A fresh disposable PostgreSQL 17.11 cluster applied all 35 migrations. The
+  spend-ingress executable contract passed, role execution remained denied,
+  and rollback left zero synthetic channels, campaigns, or receipts. Fresh
+  exact-head GitHub CI, immutable Preview, protected no-commit browser/visual,
+  and bounded runtime-log proof remain pending after the documentation seal.
 
 ## PR #217 downstream reconciliation — 2026-08-28
 

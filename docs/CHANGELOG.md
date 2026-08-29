@@ -14,6 +14,15 @@
   spend-ingress contract, and safe-disabled import boundary. Former-head proof
   is historical pending fresh exact-head application, PostgreSQL, Preview,
   protected no-commit browser, security, isolation, and runtime-log evidence.
+- Exact-parent code-bearing/reconciliation head
+  `894643a60bd9fb50b441dccb3d2d3d8e6b5c805b` passes 6 focused files / 47
+  tests, all 247 files / 3,184 tests, strict types before and after build,
+  lint, optimized 55-page build, 89/17 routes, doctor 43/43, safety 14/14,
+  isolation, dependency audit, 651-commit gitleaks, ancestry, whitespace, and
+  focused security review. A disposable PostgreSQL 17.11 rebuild applied 35
+  migrations, passed the transaction contract, and retained zero synthetic
+  rows after rollback. Exact-head CI/Preview evidence remains pending after the
+  documentation-only seal.
 - Production remains `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` /
   `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; no Production, environment, Neon, spend,
   lead, message, provider, campaign/budget, WordPress, DNS, publication,

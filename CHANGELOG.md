@@ -16,6 +16,17 @@
 - Former-head proof is historical until fresh exact-head Node 24, disposable
   PostgreSQL 17, immutable Preview, protected no-commit browser, security,
   isolation, and runtime-log verification pass.
+- Exact-parent code-bearing/reconciliation head
+  `894643a60bd9fb50b441dccb3d2d3d8e6b5c805b` passes 6 focused files / 47
+  tests, all 247 files / 3,184 tests, strict TypeScript before and after build,
+  full ESLint, optimized 55-page Next.js 15.5.21 build, 89/17 route proof,
+  doctor 43/43, safety 14/14, Ask/Nelly isolation, Production dependency audit,
+  651-commit gitleaks, ancestry, whitespace, and focused security review.
+- A fresh disposable PostgreSQL 17.11 cluster applied all 35 migrations and
+  passed the spend contract; the synthetic transaction rolled back to zero
+  test channels, campaigns, and receipts. Fresh exact-head CI, immutable
+  Preview, protected browser/visual, and runtime logs remain mandatory after
+  the documentation-only seal.
 - Changed no Production deployment, environment, Neon object or row, spend,
   lead, message, provider, campaign, budget, WordPress surface, DNS,
   publication, purchase, deletion, or NellySelly system.
