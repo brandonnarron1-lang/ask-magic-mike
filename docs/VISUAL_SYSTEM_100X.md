@@ -184,14 +184,19 @@ import { isSocialSafeUrl, isCanonicalAmmUrl } from "@/lib/brand/visual-system";
 
 // Canonical domain only — use for all social sharing URLs
 isSocialSafeUrl("https://askmagicmike.com/ask")  // → true
-isSocialSafeUrl("https://ourtownproperties.com")  // → false (host WAF blocks facebookexternalhit)
+isSocialSafeUrl("https://ourtownproperties.com")  // → false while the current Apache authz rule blocks facebookexternalhit
 isSocialSafeUrl("https://ask-magic-mike.vercel.app")  // → false (preview URL)
 
 // Confirm a URL is the canonical AMM domain before using in OG/social meta
 isCanonicalAmmUrl("https://askmagicmike.com")  // → true
 ```
 
-**Rule:** All social share links and OG `og:url` tags MUST use `askmagicmike.com`. Never use `ourtownproperties.com` in social meta — Regency/host WAF returns HTTP 403 to `facebookexternalhit`. This is a permanent external constraint, not fixable in code.
+**Rule:** Until the live verifier reaches 42/42, all social share links and OG
+`og:url` tags MUST use `askmagicmike.com`. Do not use
+`ourtownproperties.com` in social meta while the hosting-level Apache
+`authz_core` rule returns HTTP 403 to `facebookexternalhit`. The correction is
+a controlled host configuration action, not an application-code change; see
+`FACEBOOK_CRAWLER_FIREWALL_CHANGE.md`.
 
 ---
 

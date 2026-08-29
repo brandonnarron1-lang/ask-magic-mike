@@ -42,6 +42,13 @@ caller may choose any User-Agent string. The proposed override therefore does
 not grant broad trust to the name; it is constrained to two public pages, two
 public images, and `GET`/`HEAD` only.
 
+Primary references:
+
+- Apache 2.4 `mod_setenvif` / `SetEnvIfExpr` syntax and ordered evaluation:
+  <https://httpd.apache.org/docs/current/mod/mod_setenvif.html>
+- Apache 2.4 access-control guidance and User-Agent warning:
+  <https://httpd.apache.org/docs/2.4/howto/access.html>
+
 ## Production boundary
 
 - No Apache include or `.htaccess` was edited.

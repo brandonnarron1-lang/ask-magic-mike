@@ -99,7 +99,7 @@ Before every production deploy:
 ## Out-of-scope systems (do not touch without owner approval)
 
 - WordPress / cPanel / DNS (ourtownproperties.com)
-- WAF / Regency
+- hosting Apache / Regency-Liquid Web configuration
 - Production Vercel environment-variable changes without their exact gate
 - Neon role or connection-string rotation
 - MLS / FlexMLS data exports

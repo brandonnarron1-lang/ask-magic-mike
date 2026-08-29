@@ -30,7 +30,7 @@ Run these checks before the first real marketing push:
 # 1. Verify funnel end-to-end (15 checks)
 pnpm run amm:verify:funnel
 
-# 2. Check social previews (40/42 expected — OTP FB blocked by WAF)
+# 2. Check social previews (40/42 expected — OTP FB blocked by host Apache)
 pnpm run amm:verify:social-preview || true
 
 # 3. Full build
@@ -48,7 +48,7 @@ All should be green. 40/42 on social preview is the current expected floor (not 
 
 ### Day 1: Soft Launch Post (Facebook)
 
-**Target profile:** Brandon Narron personal Facebook (no OTP page to start — OTP FB previews blocked by WAF).
+**Target profile:** Brandon Narron personal Facebook (no OTP page to start — OTP FB previews blocked by the host Apache rule).
 
 **UTM-tagged link for Day 1:**
 ```
@@ -136,7 +136,9 @@ The WordPress site has the AMM widget available at `/ask-mike/`. Optionally prom
 
 ### Step 3: OTP Facebook
 
-Until the cPanel ModSecurity rule is whitelisted, do NOT share OTP domain links on Facebook. Use `askmagicmike.com` links exclusively. See **Facebook WAF Blocker** section below.
+Until the bounded hosting-level Apache correction passes 42/42, do NOT share
+OTP domain links on Facebook. Use `askmagicmike.com` links exclusively. See
+**Facebook Apache Blocker** below.
 
 ---
 
@@ -191,20 +193,25 @@ All attributed sessions appear in the Traffic Command Center within ~30 seconds.
 
 ---
 
-## Facebook WAF Blocker
+## Facebook Apache Blocker
 
-**Situation:** Regency shared hosting (cPanel, user `wilsonho`) has a ModSecurity rule that blocks `facebookexternalhit` user-agent from `ourtownproperties.com`. Facebook won't render OG previews for OTP domain links.
+**Situation:** Authenticated diagnostics identified a server-global Apache
+`authz_core` rule that maps `facebookexternalhit` to `bad_bots` and denies that
+environment class on `ourtownproperties.com`. Facebook will not render OG
+previews for OTP-domain links while the matrix remains 40/42.
 
 **Impact:** Can't share `ourtownproperties.com` links on Facebook with link previews.
 
 **Workaround (in use):** Share `askmagicmike.com` links on Facebook. AMM domain is hosted on Vercel and returns 200 to facebookexternalhit. Link previews work correctly.
 
-**Fix (needs cPanel access):**
-1. Log into cPanel for `wilsonho` at Regency
-2. Security → ModSecurity → Tools → Hits List
-3. Find the rule ID firing on `facebookexternalhit` from `ourtownproperties.com`
-4. Add a `SecRuleRemoveById <rule_id>` directive in `.htaccess` (or ask host to whitelist)
-5. Re-run `pnpm run amm:verify:social-preview` — target 42/42
+**Fix (hosting administrator required):**
+1. Follow `META_CRAWLER_HOSTING_OPERATOR_ACTION.md`.
+2. Add only the reviewed per-account/per-vhost override after confirming
+   include order; do not edit cPanel-generated files or disable ModSecurity.
+3. Run `apachectl configtest`, use the host's graceful reload process, and
+   retain the exact rollback artifact.
+4. Re-run `pnpm run amm:verify:social-preview` — target 42/42 — and verify
+   sensitive and non-allowlisted paths retain their prior protection.
 
 ---
 
@@ -241,7 +248,7 @@ All attributed sessions appear in the Traffic Command Center within ~30 seconds.
 
 ### Social preview fails
 - Run `pnpm run amm:verify:social-preview || true`
-- 40/42 is the expected floor (OTP FB 403 = external WAF)
+- 40/42 is the expected floor (OTP FB 403 = external Apache rule)
 - If AMM pages drop below 42: check Vercel logs, confirm og:image is accessible
 
 ### Production out of sync with branch

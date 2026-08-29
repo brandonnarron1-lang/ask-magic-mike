@@ -9,9 +9,10 @@
 - A path/UA matrix reproduced one identical Apache 403 body for every tested
   public/private Our Town path whenever the user agent contained
   `facebookexternalhit`; browser, `Facebot`, and
-  `meta-externalagent/1.1` controls did not reproduce it. The exact managed rule
-  ID still requires authenticated hosting audit-log evidence; no broad firewall
-  bypass was attempted.
+  `meta-externalagent/1.1` controls did not reproduce it. Later authenticated
+  Apache evidence identified the exact `facebookexternalhit -> bad_bots`
+  classifier and `Require not env bad_bots` denial; there is no ModSecurity
+  rule ID to discover. No broad firewall bypass was attempted.
 - `pnpm run amm:generate:social-card`: generated 1200x630, 160,316-byte JPEG;
   output SHA-256
   `68dea02d8b4beb24eb864363c2c0d30adc1c98f4d5f37872a32848dad037c713`,

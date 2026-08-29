@@ -2086,6 +2086,14 @@ any bridge activation or shadow-mode test.
 - The former unknown-ModSecurity-rule-ID instruction is superseded by one
   host-operator, per-vhost/account override specification limited to GET/HEAD
   and four exact public paths.
+- The live verifier and existing Traffic/Revenue admin guidance now distinguish
+  this exact OTP Facebook-only condition from unknown crawler failures. They no
+  longer recommend Cloudflare Bot Fight Mode, a broad user-agent allowlist, or
+  a ModSecurity rule-ID search.
+- Focused no-network regression coverage passes 108 tests across the verifier,
+  Traffic readiness, and Launch Control modules. A fresh read-only live run
+  remains truthfully 40/42 and prints the bounded host change packet instead of
+  the superseded broad bypass.
 - No host file, firewall, Apache service, cache, WordPress, Vercel, database,
   communication provider, DNS, Production app, or NellySelly state was changed.
 - Evidence and controlled change contract:

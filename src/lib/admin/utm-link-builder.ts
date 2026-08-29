@@ -7,7 +7,7 @@
  * All output URLs use only approved AMM base domains.
  * ourtownproperties.com and vercel.app URLs are explicitly rejected
  * for Facebook posting because facebookexternalhit receives HTTP 403
- * on ourtownproperties.com (pending Regency/host WAF fix).
+ * on ourtownproperties.com (pending the bounded host Apache correction).
  */
 
 // ---------------------------------------------------------------------------

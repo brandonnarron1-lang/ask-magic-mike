@@ -65,7 +65,7 @@ Run after every wave of design changes.
 ## Social Preview / Domain Safety
 
 - [ ] All public/social links use `askmagicmike.com` as the canonical domain
-- [ ] `ourtownproperties.com` NOT used in social share URLs (WAF blocks `facebookexternalhit`)
+- [ ] `ourtownproperties.com` NOT used in social share URLs while the host Apache rule blocks `facebookexternalhit`
 - [ ] OG image at `/og` renders `askmagicmike.com` branding
 - [ ] `robots.txt` and `sitemap.xml` reference `askmagicmike.com`
 

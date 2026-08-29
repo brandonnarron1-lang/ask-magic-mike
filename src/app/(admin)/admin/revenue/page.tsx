@@ -354,20 +354,19 @@ export default async function RevenueCommandPage() {
               <span className="text-amber-400 font-bold text-sm mt-0.5 flex-shrink-0">⚠</span>
               <div>
                 <p className="text-[12px] font-semibold text-amber-300">
-                  Facebook preview blocker: Pending host cPanel / ModSecurity whitelist
+                  Facebook preview blocker: Pending bounded host Apache correction
                 </p>
                 <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
                   <span className="font-semibold text-slate-300">What&apos;s blocked:</span>{" "}
                   <code className="text-slate-400 text-[10px]">facebookexternalhit/1.1</code> returns HTTP 403 site-wide on ourtownproperties.com.
-                  Diagnosed as a host-level cPanel ModSecurity rule — NOT a WordPress or .htaccess issue.
-                  WordPress .htaccess is clean (verified via WP .htaccess Editor plugin).
+                  Authenticated diagnostics identify the server-global Apache
+                  <code className="text-slate-400 text-[10px]"> bad_bots</code> authorization rule — not WordPress, .htaccess, or a ModSecurity rule ID.
                 </p>
                 <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
                   <span className="font-semibold text-slate-300">Fix required:</span>{" "}
-                  cPanel &rsaquo; Security &rsaquo; ModSecurity &rsaquo; find the rule firing on{" "}
-                  <code className="text-[10px] text-slate-400">facebookexternalhit</code> in the
-                  &ldquo;Hits List&rdquo;, then whitelist that rule ID for ourtownproperties.com, or
-                  ask the host (Regency / Liquid Web) to allow facebookexternalhit and bare Mozilla/5.0.
+                  give Regency / Liquid Web the reviewed per-vhost/account change packet, limited to
+                  four public GET/HEAD paths. Do not request an all-path user-agent whitelist or a
+                  ModSecurity disablement; require config test, rollback, and 42/42 verification.
                 </p>
               </div>
             </div>
@@ -375,8 +374,8 @@ export default async function RevenueCommandPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
               {[
                 { label: "AMM Funnel Links",        status: "safe",    detail: "UTM-tracked links verified via synthetic test lead" },
-                { label: "OTP → AMM Social Links",  status: "pending", detail: "Wait for WAF whitelist before Facebook sharing" },
-                { label: "Social Preview Score",    status: "partial", detail: "40/42 PASS (last verified 2026-06-23). Two FB 403s remain." },
+                { label: "OTP → AMM Social Links",  status: "pending", detail: "Use AMM links until the host correction passes 42/42" },
+                { label: "Social Preview Score",    status: "partial", detail: "40/42 PASS. Two OTP Facebook 403s remain." },
               ].map((item) => (
                 <div key={item.label} className={`rounded-lg border px-3 py-2.5 ${
                   item.status === "safe"    ? "border-emerald-500/30 bg-emerald-500/[0.04]"

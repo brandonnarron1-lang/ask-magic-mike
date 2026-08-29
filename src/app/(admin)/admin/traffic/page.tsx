@@ -261,11 +261,11 @@ export default async function TrafficCommandPage() {
             ))}
           </div>
           <p className="text-[11px] text-slate-600 mt-3">
-            Resolution: Contact Regency / Liquid Web support. Request{" "}
+            Resolution: send Regency / Liquid Web the reviewed bounded Apache
+            change packet for{" "}
             <code className="text-amber-400 text-[10px]">facebookexternalhit/1.1</code>{" "}
-            be whitelisted in the cPanel WAF for{" "}
-            <code className="text-amber-400 text-[10px]">ourtownproperties.com</code>.
-            After confirmation, run{" "}
+            on four public GET/HEAD paths. Do not request a broad whitelist or
+            disable ModSecurity. After the host records the scoped correction, run{" "}
             <code className="text-amber-400 text-[10px]">pnpm run amm:verify:social-preview</code>{" "}
             to confirm 42/42.
           </p>

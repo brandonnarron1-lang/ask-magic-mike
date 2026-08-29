@@ -8,6 +8,12 @@
 - Added a bounded host-operator remediation, acceptance, rollback, and exact
   approval gate without editing Apache, `.htaccess`, WordPress, Vercel, DNS,
   cache, Production data, communications, or NellySelly.
+- Replaced the verifier and existing admin surfaces' stale broad-WAF whitelist
+  instructions with diagnosis-aware, fail-closed guidance; an unknown crawler
+  failure can no longer inherit the OTP Apache diagnosis.
+- Consolidated historical operator aliases onto the canonical root-cause and
+  change sheets so no active runbook still asks for a nonexistent ModSecurity
+  rule ID.
 
 ## 2026-08-29 — Public owned-referral handoff candidate
 
