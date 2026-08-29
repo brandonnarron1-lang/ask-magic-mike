@@ -1,13 +1,20 @@
 # Phase 9 local-profile performance ingress QA evidence
 
-Date: 2026-08-25
+Original evidence date: 2026-08-25
+
+Downstream reconciliation date: 2026-08-29
 
 Candidate branch: `codex/phase9-local-profile-performance-ingress-20260824`
 
-Base: PR #219 head `5486bed20272d2a661bc28a0e3a4a4576b2cb11f`
+Current base: exact sealed PR #219 head
+`b628fc00fc6b03d89871c65d884fe649db025968`
 
-Status: local release candidate verified; Preview PR/deployment evidence pending;
-Production unchanged
+Preserved former head:
+`rescue/amm-pr220-pre-pr219-exact-seal-20260829-012049`
+
+Status: exact-parent reconciliation in local verification; former CI, Preview,
+browser, visual, and runtime-log evidence is historical until repeated on the
+current GitHub PR head; Production unchanged
 
 ## Executive result
 
@@ -22,7 +29,15 @@ This is an extension of the existing Lead Center and Neon ledgers. It is not a
 parallel CRM, dashboard, database, provider connector, campaign system, or
 publication tool.
 
-## Measured Production reason
+The former PR #220 head `5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3`
+was preserved before change. Exact sealed PR #219 was merged normally, without
+force push, at exact-parent merge commit
+`61c162143cb9892f88a2318d32888ba2d644f329`. The product, API, migration,
+route, and focused test files merged without conflict; only release-governance
+documentation is being reconciled to the accepted PR #209 baseline and the
+current sealed stack.
+
+## Historical measured Production reason
 
 A read-only aggregate query against canonical Neon Production at
 `2026-08-25T03:16:33.786264Z` returned:
@@ -150,7 +165,7 @@ migration run reached the new migration successfully; its Studio service later
 became unhealthy. The isolated PostgreSQL 17 contract above is the
 authoritative database proof for this candidate.
 
-## Application verification
+## Historical pre-refresh application verification
 
 Exact-engine verification used Node `v24.18.0`.
 
@@ -196,11 +211,12 @@ Generated local evidence:
 Artifacts are intentionally ignored by Git and will be regenerated against the
 immutable Preview URL.
 
-## Immutable Preview evidence
+## Historical immutable Preview evidence
 
 Draft PR [#220](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/220)
-was opened directly on PR #219 head
-`5486bed20272d2a661bc28a0e3a4a4576b2cb11f`.
+was originally opened directly on the former PR #219 head
+`5486bed20272d2a661bc28a0e3a4a4576b2cb11f`. The evidence in this section is
+preserved for provenance but cannot authorize the refreshed PR head.
 
 The first code-bearing candidate is:
 
@@ -255,15 +271,12 @@ This candidate performed no:
 
 ## Ordered release authority
 
-This candidate is stacked after PR #219 and cannot leapfrog the existing
-ordered release train. The first still-pending Production gate remains:
-
-```text
-APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT
-```
-
-After the prior train is accepted and this exact candidate has an immutable
-Preview, the later safe-off application/schema gate will be:
+PR #209 is accepted and its durability gate is exhausted. PR #210 remains the
+first pending application candidate. This candidate is stacked after exact
+sealed PR #219 head `b628fc00fc6b03d89871c65d884fe649db025968`
+and cannot leapfrog PRs #210 through #219. After the prior train is accepted
+and the current PR #220 head has fresh immutable Preview evidence, its safe-off
+application/schema gate will be:
 
 ```text
 APPROVE PHASE 9 LOCAL PROFILE PERFORMANCE INGRESS PRODUCTION MIGRATION, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT

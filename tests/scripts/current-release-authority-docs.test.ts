@@ -69,6 +69,12 @@ const organicSearchIngressDecision = readDoc(
 const organicSearchIngressEvidence = readDoc(
   "phase9/ORGANIC_SEARCH_INGRESS_QA_EVIDENCE.md"
 );
+const localProfileIngressDecision = readDoc(
+  "phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS.md"
+);
+const localProfileIngressEvidence = readDoc(
+  "phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS_QA_EVIDENCE.md"
+);
 const durableRateLimitRehearsal = readDoc(
   "phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md"
 );
@@ -118,6 +124,8 @@ const pr217SealedParent =
   "8a6b92039bb82c1158db514c2c2f064ceb9cbbcf";
 const pr218SealedParent =
   "f065d8801bec295c99185d846ff4bc38de2a0a6f";
+const pr219SealedParent =
+  "b628fc00fc6b03d89871c65d884fe649db025968";
 const canonicalAliasGate =
   "APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT";
 const askAccessibilityGate =
@@ -136,6 +144,10 @@ const marketingSpendIngressGate =
   "APPROVE PHASE 9 MARKETING SPEND INGRESS MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT";
 const organicSearchIngressGate =
   "APPROVE PHASE 9 ORGANIC SEARCH INGRESS MIGRATION, PR 219 MERGE, AND PRODUCTION DEPLOYMENT";
+const localProfileIngressGate =
+  "APPROVE PHASE 9 LOCAL PROFILE PERFORMANCE INGRESS PRODUCTION MIGRATION, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT";
+const localProfileImportGate =
+  "APPROVE LOCAL PROFILE PERFORMANCE IMPORT GATE ENABLEMENT AND SAME-COMMIT PRODUCTION REDEPLOYMENT";
 const crossDomainGate =
   "APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT";
 const pr210Rescue =
@@ -156,6 +168,8 @@ const pr218Rescue =
   "rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928";
 const pr219Rescue =
   "rescue/amm-pr219-pre-pr218-exact-seal-20260829-004949";
+const pr220Rescue =
+  "rescue/amm-pr220-pre-pr219-exact-seal-20260829-012049";
 
 const completedReleaseLedger = [
   {
@@ -283,6 +297,8 @@ describe("current release-authority documentation", () => {
     const pr216 = ownerQueue.indexOf("Draft PR [#216]");
     const pr217 = ownerQueue.indexOf("Draft PR [#217]");
     const pr218 = ownerQueue.indexOf("Draft PR [#218]");
+    const pr219 = ownerQueue.indexOf("Draft PR [#219]");
+    const pr220 = ownerQueue.indexOf("Draft PR [#220]");
     const pr212 = ownerQueue.indexOf("Draft PR [#212]");
 
     expect(completedPr209).toBeGreaterThanOrEqual(0);
@@ -294,7 +310,9 @@ describe("current release-authority documentation", () => {
     expect(pr216).toBeGreaterThan(pr215);
     expect(pr217).toBeGreaterThan(pr216);
     expect(pr218).toBeGreaterThan(pr217);
-    expect(pr212).toBeGreaterThan(pr218);
+    expect(pr219).toBeGreaterThan(pr218);
+    expect(pr220).toBeGreaterThan(pr219);
+    expect(pr212).toBeGreaterThan(pr220);
     expect(ownerQueue).toContain(canonicalAliasGate);
     expect(ownerQueue).toContain(askAccessibilityGate);
     expect(ownerQueue).toContain(responsiveIdentityGate);
@@ -303,6 +321,8 @@ describe("current release-authority documentation", () => {
     expect(ownerQueue).toContain(funnelEventIdentityGate);
     expect(ownerQueue).toContain(vendorIngressGate);
     expect(ownerQueue).toContain(marketingSpendIngressGate);
+    expect(ownerQueue).toContain(organicSearchIngressGate);
+    expect(ownerQueue).toContain(localProfileIngressGate);
     expect(ownerQueue).toContain(crossDomainGate);
   });
 
@@ -417,6 +437,22 @@ describe("current release-authority documentation", () => {
     expect(organicSearchIngressEvidence).toContain(pr219Rescue);
     expect(organicSearchIngressDecision).toContain(canonicalAliasGate);
     expect(organicSearchIngressDecision).not.toContain(completedDurabilityGate);
+  });
+
+  it("binds PR #220's stacked authority to the current sealed PR #219 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      localProfileIngressDecision,
+      localProfileIngressEvidence,
+    ]) {
+      expect(doc).toContain(pr219SealedParent);
+      expect(doc).toContain(localProfileIngressGate);
+      expect(doc).toContain(localProfileImportGate);
+    }
+    expect(localProfileIngressDecision).not.toContain(completedDurabilityGate);
+    expect(localProfileIngressEvidence).not.toContain(completedDurabilityGate);
+    expect(ownerQueue).toContain(pr220Rescue);
+    expect(localProfileIngressEvidence).toContain(pr220Rescue);
   });
 
   it("resolves the mutable PR head from GitHub instead of self-pinning it", () => {

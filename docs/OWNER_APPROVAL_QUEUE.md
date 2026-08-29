@@ -218,7 +218,30 @@ browser, and runtime checks before any gate becomes requestable.
    That gate keeps `GROWTH_SEARCH_IMPORT_ENABLED=false`; importing one exact
    reviewed report requires a later report-specific approval.
 
-10. Draft PR [#212](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/212)
+10. Draft PR [#220](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/220)
+   reuses exact sealed PR #219 head
+   `b628fc00fc6b03d89871c65d884fe649db025968`, the existing Growth Command
+   Center, shared bounded ingress transport, `market_signals`, advisory
+   `market_opportunities`, `growth:manage` RBAC, exact Neon endpoint guards,
+   and immutable audit ledger. Its former head
+   `5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3` is preserved at
+   `rescue/amm-pr220-pre-pr219-exact-seal-20260829-012049`. It adds one
+   privacy-minimized, safe-disabled aggregate Google Business Profile
+   performance-report contract; it retains no raw CSV, search terms, provider
+   location IDs, credentials, or consumer PII, calls no Google/provider API,
+   and cannot edit a profile, publish content, create a lead, send a message,
+   or cross into NellySelly. Former proof is historical until repeated on the
+   current GitHub PR head. After PR #219 releases, refresh it onto exact
+   `main`, apply the reviewed additive migration, repeat complete exact-head
+   and protected no-commit proof, then require
+   `APPROVE PHASE 9 LOCAL PROFILE PERFORMANCE INGRESS PRODUCTION MIGRATION, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
+   That gate keeps `GROWTH_LOCAL_PROFILE_IMPORT_ENABLED=false`; enabling real
+   commit authority requires the separate
+   `APPROVE LOCAL PROFILE PERFORMANCE IMPORT GATE ENABLEMENT AND SAME-COMMIT PRODUCTION REDEPLOYMENT`
+   gate, and each report still requires its reviewed reference, exact
+   fingerprint, and authenticated typed confirmation.
+
+11. Draft PR [#212](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/212)
    is a separate HOLD candidate that reuses the existing Google container and
    canonical event ledger for consent-gated cross-domain measurement. It must
    be refreshed only after the selected application sequence and requires
@@ -227,7 +250,7 @@ browser, and runtime checks before any gate becomes requestable.
 
 The historical shorter conversion-identity phrase released PR #195 and is
 exhausted; it cannot authorize PR #213, PR #214, PR #215, PR #216, PR #217,
-PR #218, or PR #219.
+PR #218, PR #219, or PR #220.
 
 None of these later phrases can authorize another PR, secret, database write,
 form submission, notification, WordPress/DNS change, publication, spend,

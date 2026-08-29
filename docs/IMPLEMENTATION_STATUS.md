@@ -2,6 +2,29 @@
 
 Updated 2026-08-29.
 
+## PR #220 downstream reconciliation — 2026-08-29
+
+- Preserved prior PR #220 head `5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3`
+  at `rescue/amm-pr220-pre-pr219-exact-seal-20260829-012049` before change.
+- Merged exact sealed PR #219 head
+  `b628fc00fc6b03d89871c65d884fe649db025968` normally, without force push,
+  at exact-parent merge commit
+  `61c162143cb9892f88a2318d32888ba2d644f329`. Product, API, migration,
+  route, and focused-test files merged without conflict.
+- The candidate reuses the authenticated Growth Command Center, shared bounded
+  ingress transport, canonical `market_signals` and advisory
+  `market_opportunities`, exact Neon endpoint guards, `growth:manage` RBAC,
+  and immutable audit ledger. It adds no parallel CRM, database, dashboard,
+  Google/provider connector, profile editor, publisher, lead path, or message
+  path.
+- The preserved original head passes all five focused files / 27 tests on Node
+  24.18.0. Fresh exact-parent full local, PostgreSQL 17, CI, immutable Preview,
+  protected no-commit browser/visual, and bounded runtime-log proof remains in
+  progress on the current PR head.
+- PR #220 remains Draft with `GROWTH_LOCAL_PROFILE_IMPORT_ENABLED=false` and
+  no Production, migration, feature-gate, report-import, Google, WordPress,
+  DNS, lead/message, or NellySelly authority.
+
 ## PR #219 downstream reconciliation — 2026-08-29
 
 - Preserved prior PR #219 head `5486bed20272d2a661bc28a0e3a4a4576b2cb11f`
