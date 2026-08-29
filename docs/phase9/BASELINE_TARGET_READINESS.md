@@ -1,6 +1,6 @@
 # Phase 9 Baseline and Target Readiness
 
-Date: 2026-08-28
+Date: 2026-08-29
 Status: stacked read-only release candidate; Production unchanged
 
 ## Executive decision
@@ -87,8 +87,30 @@ When the selected window has zero eligible live leads, every demand-dependent
 metric remains `insufficient_sample` even if an arithmetic implementation could
 produce zero. That prevents `$0`, `0%`, and zero-count QA artifacts from being
 misrepresented as an operating baseline. Independent field-experience metrics
-may mature from genuine Production traffic, but they do not unlock conversion
-or economics targets.
+may mature from genuine Production traffic, and reconciled spend remains visible
+even when it produced no eligible lead. Neither can unlock conversion or
+economics targets without a genuine lead denominator.
+
+## Post-stack data-quality hardening
+
+Reconciliation onto sealed PR #224 added a definition-to-source quality audit
+across all 42 contracts. The audit preserved the catalog but closed four
+decision risks:
+
+- reconciled spend is independent operational context and no longer disappears
+  merely because eligible lead volume is zero;
+- attributed revenue and recorded referral-fee totals remain unmeasured until
+  every applicable close has explicit evidence, including an explicit zero fee
+  when no fee was incurred;
+- blended cost metrics remain unmeasured while any paid lead channel lacks spend
+  or any spend channel lacks matching conversion attribution; and
+- the agent first-follow-up rate is explicitly `not_instrumented` until an
+  immutable assigned-lead denominator exists at agent grain. The existing
+  system-wide first-response rate is not duplicated under an agent label.
+
+These rules prevent partial dollar totals, decorative zeroes, and duplicate
+system metrics from increasing the measured-baseline count or unlocking owner
+review. They add no target, query, migration, or write path.
 
 ## Current operator experience
 
@@ -138,7 +160,7 @@ These are evidence thresholds, not performance goals.
 - NellySelly repositories, domains, projects, data, and environment variables
   remain outside scope and untouched.
 
-## Local acceptance
+## Former-head local acceptance — historical
 
 - Exact Node 24.18.0 release gate: PASS.
 - Vitest: 264 files / 3,299 tests passed.
@@ -154,6 +176,31 @@ These are evidence thresholds, not performance goals.
 - Local screenshot evidence was written only to the gitignored `artifacts/`
   directory. The local page used a synthetic local-only Basic credential and an
   unconfigured database state; it did not connect to or mutate Production.
+
+## Current post-stack acceptance
+
+- Original PR #225 head `a65cde03c0d8505ad00732f862c37841ccca9a04`
+  is preserved at
+  `rescue/amm-pr225-pre-pr224-exact-seal-20260829-050048`.
+- Exact sealed PR #224 head
+  `5c75b8f919442c05b607eb666c5595023057d94d` was merged without rebase or
+  force push at `0bb1a6d77d4daf830a4dc7681e3a3d5650332286`.
+- Code-bearing hardening head is
+  `1289244c44d0c336b4ed242293febe15d5b75914`.
+- Exact Node 24.18.0 passes deployable-source Ask/Nelly isolation, release
+  safety 14/14, all 264 Vitest files / 3,324 tests, strict TypeScript, full
+  ESLint, optimized Next.js 15.5.21 build with 59 generated static pages, and
+  95 active routes / 17 acknowledged duplicates. Focused acceptance passes 8
+  files / 117 tests.
+- Release doctor passes 43/43 and the Production dependency audit reports no
+  known vulnerability. Redacted gitleaks reports no finding across all 668
+  commits or the exact five-commit sealed-parent delta. Sealed-parent ancestry,
+  whitespace, clean tracked tree, and focused security review pass.
+- The hosted browser contract scopes duplicate economics labels to their visible
+  performance section and independently opens, verifies, and closes the new
+  readiness audit. Immutable Preview, protected hosted browser/visual QA,
+  exact-deployment runtime-log proof, and GitHub CI are required on one final
+  pushed head before the candidate can be sealed.
 
 ## Hosted Preview safety correction
 
@@ -174,11 +221,12 @@ persistence in all browser-facing analytics/experiment routes:
 - `POST /api/analytics/event`; and
 - `POST /api/experiments/event`.
 
-Read-only Preview responses remain accepted for browser ergonomics but state
-`persisted: false` and `excluded: preview_read_only`. Automated-browser
-suppression remains earlier than the guard. The Preview-only evidence row was
-not deleted; Production data remained unchanged. Fresh exact-head release and
-hosted suppression proof supersede the first Preview's evidence.
+Read-only Preview responses fail closed with HTTP 503, `persisted: false`, and
+`preview_data_disabled` before durable rate limiting or repository access.
+Automated-browser suppression remains earlier than the guard. The Preview-only
+evidence row was not deleted; Production data remained unchanged. Fresh
+exact-head release and hosted suppression proof supersede the first Preview's
+evidence.
 
 ## Rollback
 
@@ -188,13 +236,15 @@ cleanup exists because this candidate adds no migration and performs no write.
 
 ## Release boundary
 
-This candidate is stacked on exact Draft PR #224 head
-`01658f164752de88faefbcf27fcbe98921e6870d`. It cannot release before the
-established PR train and does not create a new authorization shortcut. The
-existing first Production gate remains:
+This candidate is stacked on exact sealed Draft PR #224 head
+`5c75b8f919442c05b607eb666c5595023057d94d`. It cannot bypass PR #210 or any
+predecessor and does not create a new authorization shortcut. Production
+remains exact commit `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`.
+
+The eventual PR #225 gate is:
 
 ```text
-APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT
+APPROVE PHASE 9 BASELINE AND TARGET READINESS MERGE AND PRODUCTION DEPLOYMENT
 ```
 
 That gate does not authorize a target record, external publication, consumer

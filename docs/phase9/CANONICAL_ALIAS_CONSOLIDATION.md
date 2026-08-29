@@ -2,10 +2,11 @@
 
 Date: 2026-08-23
 
-Status: stacked candidate refreshed onto final exact PR #209; no Production change
+Status: Draft candidate refreshed onto accepted PR #209 Production; no PR #210 Production change
 
-Stack base: exact PR #209 candidate
-`b28b380f2cc3f9b63b2c0048b398e97a88dfee4b`
+Accepted Production base: PR #209 merge
+`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`, deployment
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`
 
 ## Decision
 
@@ -69,12 +70,12 @@ Revert this candidate commit and redeploy the prior accepted tree. No database o
 ## Production authority
 
 No Production action is authorized by this document or by any earlier approval.
-This stacked candidate remains separate from sealed PR #209. It is synchronized
-with PR #209's exact reviewed candidate, but PR #209 must still be merged and
-accepted first. PR #210 must then be retargeted/refreshed onto that exact
-released `main` and repeat exact-head CI and Preview proof before release.
+PR #209 is merged and accepted, and this branch has been merged forward onto
+that exact released `main` without rewriting history. PR #210 remains Draft and
+must repeat exact-head Node 24 CI and protected Preview proof before its gate is
+requestable.
 
-Only the following later phrase may authorize the exact reviewed PR #210
+Only the following phrase may authorize the exact reviewed PR #210
 code-only merge and matching Vercel Production deployment:
 
 `APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`

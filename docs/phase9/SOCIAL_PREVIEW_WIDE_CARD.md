@@ -41,9 +41,10 @@ Local regeneration is explicit and reviewable:
 pnpm run amm:generate:social-card
 ```
 
-The generator requires ImageMagick and the named local typography sources. It
-prints output dimensions, size, and SHA-256 lineage and contains no network or
-provider call.
+The generator requires ImageMagick and the three exact macOS Supplemental font
+files named in the script. The committed JPEG is canonical: another host must
+not silently substitute fallback fonts. The script prints output dimensions,
+size, and SHA-256 lineage and contains no network or provider call.
 
 ## Current crawler boundary
 

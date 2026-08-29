@@ -109,6 +109,13 @@ for (const viewport of viewports) {
     // Seller
     eventStart = capture.events.length;
     await page.goto("/sell?utm_source=internal_qa&utm_medium=qa&utm_campaign=funnel_identity_preview");
+    await expect(page.getByLabel("Condition (optional)")).toHaveValue("");
+    await expect(page.getByLabel("Timeline (optional)")).toHaveValue("");
+    await page.getByLabel("Condition (optional)").scrollIntoViewIfNeeded();
+    await page.screenshot({
+      path: `artifacts/lead-intent-defaults-${viewport.name}-seller.png`,
+      fullPage: false,
+    });
     await page.getByLabel("Property address").fill("456 INTERNAL QA Street, Wilson, NC");
     await page.getByLabel("Name optional").fill("INTERNAL QA DO NOT CONTACT");
     await page.getByLabel("Phone required").fill("2525550101");
@@ -117,6 +124,8 @@ for (const viewport of viewports) {
     await page.getByRole("button", { name: "Send Seller Details" }).click();
     await expect(page.getByText("INTERNAL QA — intercepted before durable storage.")).toBeVisible();
     const sellerLead = capture.leads.at(-1) as JsonRecord;
+    expect(sellerLead).not.toHaveProperty("condition");
+    expect(sellerLead).not.toHaveProperty("timeline");
     const sellerSessionId = String(sellerLead.widget_session_id);
     await expectAutomatedBrowserEvents(
       page,
@@ -132,6 +141,16 @@ for (const viewport of viewports) {
     // Buyer
     eventStart = capture.events.length;
     await page.goto("/buy?utm_source=internal_qa&utm_medium=qa&utm_campaign=funnel_identity_preview");
+    await expect(page.getByLabel("Timeline (optional)")).toHaveValue("");
+    await expect(page.getByLabel("Financing context (optional)")).toHaveValue("");
+    await expect(page.getByRole("checkbox", {
+      name: /I have a preapproval or lender conversation underway/i,
+    })).not.toBeChecked();
+    await page.getByLabel("Timeline (optional)").scrollIntoViewIfNeeded();
+    await page.screenshot({
+      path: `artifacts/lead-intent-defaults-${viewport.name}-buyer.png`,
+      fullPage: false,
+    });
     await page.getByLabel("Name").fill("INTERNAL QA DO NOT CONTACT");
     await page.getByLabel("Email").fill("buyer-funnel-qa@example.com");
     await page.getByLabel("Phone").fill("2525550102");
@@ -140,6 +159,9 @@ for (const viewport of viewports) {
     await page.getByRole("button", { name: "Request Buyer Plan" }).click();
     await expect(page.getByText("INTERNAL QA — intercepted before durable storage.")).toBeVisible();
     const buyerLead = capture.leads.at(-1) as JsonRecord;
+    expect(buyerLead).not.toHaveProperty("timeline");
+    expect(buyerLead).not.toHaveProperty("financing");
+    expect(buyerLead).not.toHaveProperty("preapproval");
     const buyerSessionId = String(buyerLead.widget_session_id);
     await expectAutomatedBrowserEvents(
       page,

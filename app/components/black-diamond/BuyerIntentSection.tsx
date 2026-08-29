@@ -62,7 +62,7 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
       property_id: propertyId || undefined,
       timeline: clean(data.get("buyer-timeline")) || undefined,
       financing: clean(data.get("buyer-financing")) || undefined,
-      preapproval: data.get("buyer-preapproval") === "yes",
+      preapproval: data.has("buyer-preapproval") ? true : undefined,
       question: clean(data.get("buyer-question")),
       consent,
       consent_email: consent && Boolean(email),

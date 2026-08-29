@@ -306,8 +306,57 @@ describe("POST /api/leads atomic lifecycle command", () => {
     expect(response.status).toBe(200);
     const lead = calls[0].body.p_lead as Record<string, unknown>;
     expect(lead.timeline_months).toBeNull();
+    expect(lead.financing).toBeNull();
+    expect(lead.preapproval).toBeNull();
     expect(lead.lead_grade).toBe("B");
     expect(lead.score).toBe(45);
+    expect(lead.score_factors).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        code: "timeline_unknown",
+        points: 0,
+      }),
+    ]));
+  });
+
+  it.each(["Not sure yet", "Unknown", "Prefer not to say"])(
+    "keeps an explicit uncertain timeline unknown: %s",
+    async (timeline) => {
+      const { calls } = installRpc();
+      const response = await POST(request({
+        funnel_type: "buyer",
+        lead_source_surface: "buyer_page",
+        phone: "2525550120",
+        timeline,
+        widget_session_id: SESSION_ID,
+      }));
+
+      expect(response.status).toBe(200);
+      const lead = calls[0].body.p_lead as Record<string, unknown>;
+      expect(lead.timeline_months).toBeNull();
+      expect(lead.score_factors).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          code: "timeline_unknown",
+          points: 0,
+        }),
+      ]));
+    },
+  );
+
+  it("retains an explicit planning horizon without manufacturing urgency", async () => {
+    const { calls } = installRpc();
+    const response = await POST(request({
+      funnel_type: "seller",
+      lead_source_surface: "seller_page",
+      address: "221 Synthetic Planning Lane",
+      phone: "2525550120",
+      timeline: "Just planning",
+      widget_session_id: SESSION_ID,
+    }));
+
+    expect(response.status).toBe(200);
+    const lead = calls[0].body.p_lead as Record<string, unknown>;
+    expect(lead.timeline_months).toBe(24);
+    expect(lead.lead_grade).toBe("B");
     expect(lead.score_factors).toEqual(expect.arrayContaining([
       expect.objectContaining({
         code: "timeline_unknown",

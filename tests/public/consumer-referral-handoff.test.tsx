@@ -23,7 +23,7 @@ vi.mock("../../app/lib/attribution", () => ({
 }));
 
 function setNavigatorCapability(
-  key: "share" | "clipboard",
+  key: "share" | "canShare" | "clipboard",
   value: unknown,
 ) {
   Object.defineProperty(navigator, key, {
@@ -36,6 +36,7 @@ beforeEach(() => {
   trackEventMock.mockClear();
   readAttributionMock.mockClear();
   setNavigatorCapability("share", undefined);
+  setNavigatorCapability("canShare", undefined);
   setNavigatorCapability("clipboard", undefined);
 });
 
@@ -107,6 +108,45 @@ describe("public owned-referral handoff", () => {
     await waitFor(() => expect(share).toHaveBeenCalledOnce());
     expect(trackEventMock).not.toHaveBeenCalled();
     expect(screen.getByText("Nothing is sent until you choose a person or copy the link.")).toBeVisible();
+  });
+
+  it("falls back to Clipboard when the browser rejects the packet capability", async () => {
+    const share = vi.fn();
+    const canShare = vi.fn().mockReturnValue(false);
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    setNavigatorCapability("share", share);
+    setNavigatorCapability("canShare", canShare);
+    setNavigatorCapability("clipboard", { writeText });
+    render(<ConsumerReferralHandoff surface="homepage" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Share Ask Magic Mike" }));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(
+      buildPublicReferralPacket("homepage").url,
+    ));
+    expect(canShare).toHaveBeenCalledWith(buildPublicReferralPacket("homepage"));
+    expect(share).not.toHaveBeenCalled();
+    expect(trackEventMock).toHaveBeenCalledWith(
+      "referral_link_copied",
+      expect.objectContaining({ source: "direct" }),
+      { surface: "homepage", share_method: "clipboard" },
+    );
+  });
+
+  it("does not record success when the native share request is blocked", async () => {
+    const share = vi.fn().mockRejectedValue(
+      new DOMException("Blocked by permissions policy", "NotAllowedError"),
+    );
+    setNavigatorCapability("share", share);
+    render(<ConsumerReferralHandoff surface="homepage" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Share Ask Magic Mike" }));
+
+    await waitFor(() => expect(share).toHaveBeenCalledOnce());
+    expect(trackEventMock).not.toHaveBeenCalled();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Native sharing is unavailable here. Use Copy referral link instead.",
+    );
   });
 
   it("copies the fixed referral URL when native sharing is unavailable", async () => {
