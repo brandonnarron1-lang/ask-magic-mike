@@ -1,8 +1,9 @@
 # Phase 9 channel-economics truth hardening
 
-Date: 2026-08-25
+Date: 2026-08-29
 
-Status: stacked implementation candidate; Production and external systems unchanged
+Status: refreshed stacked Draft candidate on exact sealed PR #222; Production
+and external systems unchanged
 
 Authority: read-only interpretation of canonical lead, spend, and outcome evidence
 
@@ -11,6 +12,12 @@ Authority: read-only interpretation of canonical lead, spend, and outcome eviden
 Upgrade the existing Growth Command Center and deterministic intelligence engine
 instead of creating another dashboard, finance database, CRM, provider adapter,
 or AI estimator.
+
+Original PR #223 head `294e08fc8524e515364c7a7bd49cfe8413d3d08c`
+is preserved at
+`rescue/amm-pr223-pre-pr222-exact-seal-20260829-040442`. The refreshed
+candidate is reconciled onto exact sealed PR #222 head
+`c6ff9157e66705128a283b98096f74ca8247cdab` without a force push.
 
 The audit proved two material accounting defects in the existing calculation:
 
@@ -100,8 +107,9 @@ separately approved release, rollback is a forward revert or promotion of the
 last accepted Vercel deployment. No schema rollback is needed because this
 candidate has no migration.
 
-The ordered release train remains authoritative. This candidate cannot leapfrog
-PR #209 or any intervening candidate. Its eventual gate is:
+The ordered release train remains authoritative. This candidate cannot
+leapfrog its sealed predecessors or independently reuse any consumed Production
+authority. Its eventual gate is:
 
 ```text
 APPROVE PHASE 9 CHANNEL ECONOMICS TRUTH MERGE AND PRODUCTION DEPLOYMENT

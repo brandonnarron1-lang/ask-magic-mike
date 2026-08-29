@@ -1,20 +1,20 @@
 # Lead-alert brand identity v3 QA evidence
 
-Date: 2026-08-24
+Date: 2026-08-28
 
 Candidate: Draft PR #214 on
 `codex/phase9-lead-alert-brand-identity-20260824`
 
-Parent: exact final Draft PR #213 head
-`3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea`
+Parent: exact sealed Draft PR #213 head
+`d2a1bf01d0962e07dd1e460acd4c295e145cf6a8`
 
 Refresh preservation: former PR #214 head
-`3ac0885a6f19fc479266457cff760ef836094470` is preserved at
-`rescue/amm-pr214-pre-final-pr213-cutover-hygiene-20260824-172407`.
+`94e3d66190df138d42c1321adfeb0cefb0478545` is preserved at
+`rescue/amm-pr214-pre-pr213-exact-seal-20260828-222353`.
 
 The evidence below records the preserved candidate baseline. It is historical
 until fresh exact-head Node 24, immutable Preview, protected no-write, no-send
-browser, and deployment-log proof are appended after the parent refresh.
+browser, and deployment-log proof are appended after this parent refresh.
 
 ## Scope and no-send boundary
 
