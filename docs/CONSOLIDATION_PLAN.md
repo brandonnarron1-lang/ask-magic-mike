@@ -1,6 +1,6 @@
 # Consolidation Plan
 
-Refreshed 2026-08-23 from authenticated GitHub, Vercel, Neon, and WordPress
+Refreshed 2026-08-28 from authenticated GitHub, Vercel, Neon, and WordPress
 evidence. This plan organizes and strengthens the system already in service; it
 does not authorize a parallel application, database, notification engine, or CRM.
 
@@ -22,10 +22,10 @@ does not authorize a parallel application, database, notification engine, or CRM
 - Free-first phone alert: Web Push; carrier SMS remains disabled until a
   compliant registered provider is explicitly approved
 
-The Production baseline is PR #195, merge commit
-`b450b41c66c6740bd20571cdbe7d8caf82e92d5e`, deployed as
-`dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Do not redeploy that commit or reuse its
-conversion-identity approval merely because an old approval prompt is repeated.
+The Production baseline is PR #209, merge commit
+`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`, deployed as
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Its combined durability gate and every
+earlier release gate are exhausted and cannot authorize a later candidate.
 
 ## Consolidation already completed
 
@@ -48,32 +48,36 @@ conversion-identity approval merely because an old approval prompt is repeated.
 
 ## Current release consolidation
 
-### 1. PR #209 — atomic controlled release candidate
+### 1. PR #209 — accepted atomic controlled release
 
-Draft PR #209 is the sole current application release vehicle. It contains the
+PR #209 merged and passed same-commit Production acceptance. It contains the
 reviewed cumulative work from incremental PRs #202 through #208 once, plus the
-fail-closed Neon endpoint attestation that prevents Preview mutation when a
-Production connection is mislabeled as Preview.
+fail-closed Neon endpoint attestation and durable Neon rate-limit contract.
 
 The incremental PRs remain immutable review records, but none has independent
 merge or Production authority. This removes the risk of seven intermediate
 Production deployments, contradictory gates, or partial feature ordering.
 
-PR #209 contains no database migration and does not enable consumer messaging,
-carrier SMS, Push delivery, WordPress publication, paid media, DNS changes, or
-NellySelly access. Its two remaining action classes are deliberately separate:
+PR #209 contained no database migration. Its Production-only encrypted secret,
+exact merge, bounded malformed request, 9/9 monitor, and clean log window are
+recorded in
+`docs/phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md`.
 
-- isolated synthetic Preview mutation and cleanup:
-  `APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA`;
-- one encrypted Production-only durability secret, exact reviewed PR #209
-  merge, and matching same-commit Production deployment:
-  `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
+### 2. PR #210 — canonical alias consolidation candidate
 
-Neither phrase authorizes an email, SMS, Push, consumer acknowledgment, lead,
-WordPress edit, external publication, spend, DNS change, data deletion, or
-NellySelly action.
+Draft PR #210 is the next ordered application release vehicle. It changes only
+the two established compatibility paths, one internal link, and the matching
+monitor/tests. It is refreshed onto the accepted PR #209 `main` without a force
+push and adds no migration, provider, form, database, notification, WordPress,
+DNS, publication, spend, or NellySelly action.
 
-### 2. Preserved and deferred candidates
+After fresh exact-head Node 24 CI, immutable Preview, no-write browser proof,
+redirect/attribution checks, dependency audit, and secret scan, only this phrase
+may authorize its merge and matching Production deployment:
+
+`APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`
+
+### 3. Preserved and deferred candidates
 
 - PRs #202 through #208 are superseded for release by PR #209. Their branches,
   checks, evidence, and rescue refs remain preserved.
@@ -111,33 +115,30 @@ NellySelly action.
   SMS gateway, or AI assignment engine.
 - PropertyLens, which is a separate product and not an Ask Magic Mike runtime.
 
-## PR #209 release risk and rollback
+## PR #210 release risk and rollback
 
-The immediate risk is configuration/application mismatch: entering the
-durability secret without deploying the code, deploying the code without the
-secret, or allowing Preview labels to conceal a Production database URL. PR
-#209 addresses this with one combined Production gate, exact-head evidence,
-categorical endpoint attestation, and a fail-closed readiness contract.
+The immediate risk is search and campaign continuity: an incorrect permanent
+redirect could discard attribution, point at the wrong canonical route, or make
+the monitor fail after otherwise-correct canonicalization. PR #210 addresses
+that with exact path/status/location contracts and query-preservation tests.
 
 Cutover sequence after explicit approval:
 
-1. Record the exact Production deployment and exact tested PR #209 head.
-2. Enter only the purpose-specific encrypted Production durability secret.
-3. Merge only that exact head and allow the canonical Vercel project to deploy.
-4. Prove the deployment commit, Production alias, durable limiter capability,
-   health/readiness body, public funnels, anonymous admin denial, and logs.
-5. Send a malformed non-lead request to exercise one pseudonymized limiter
-   bucket only; verify no lead, event, notification, or message was created.
-6. Keep all external sends, WordPress changes, publications, and data actions
-   behind their own gates.
+1. Record exact `main`, PR #210 head, Preview, Production, and rollback identity.
+2. Merge only that exact head and allow the canonical Vercel project to deploy.
+3. Prove `/value` returns 308 to `/home-value` and `/we-buy-houses` returns 308
+   to `/sell`, preserving the approved UTM and click-ID query set exactly.
+4. Prove both canonical destinations return 200, readiness remains 9/9,
+   anonymous admin denial remains intact, and the exact log window is clean.
+5. Keep all external sends, WordPress changes, publications, data actions, and
+   later PRs behind their own gates.
 
 Rollback:
 
 - Repoint the Production aliases to
-  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` if the application candidate fails.
-- Remove or disable the new purpose-specific secret only if rollback evidence
-  requires it; do not change `DATABASE_URL` or delete limiter rows as part of
-  application rollback.
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` if PR #210 acceptance fails.
+- Do not change `DATABASE_URL`, `RATE_LIMIT_HASH_SECRET`, or limiter rows as part
+  of PR #210 application rollback.
 - Preserve every audit, lead, notification, and publication-proof record.
 
 ## Remaining human and external gates
