@@ -1,7 +1,17 @@
 # Phase 9 Durable Rate-Limit Readiness
 
 Date: 2026-08-23
-Status: Draft candidate; no Production mutation or deployment
+Status: accepted in Production 2026-08-28; exact gate consumed and exhausted
+
+## Accepted outcome
+
+PR #209 reviewed head `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b`
+merged as `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and passed
+same-commit Production acceptance on deployment
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. All durable limiter readiness booleans are
+true and strict monitoring passes 9/9. The prior deployment
+`dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` remains the immediate application rollback.
+See `docs/phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md`.
 
 ## Decision
 
@@ -22,7 +32,7 @@ identifiers once full, and partitions identifiers by the same typed route key
 used by Neon. This keeps Preview and break-glass behavior available without an
 unbounded process-memory structure or cross-route allowance collisions.
 
-## Current authenticated evidence
+## Pre-release authenticated evidence
 
 - Canonical Production deployment:
   `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`, commit
@@ -90,9 +100,9 @@ role. The exact Vercel runtime role remains unproven until the candidate
 Preview/Production health response executes the same query through its own
 `DATABASE_URL`.
 
-## Controlled activation
+## Historical controlled activation
 
-After exact approval:
+The consumed exact approval authorized this completed sequence:
 
 1. Reconfirm `origin/main`, the reviewed PR head, current Production deployment,
    and the Ask Magic Mike Vercel project identity.
@@ -110,7 +120,7 @@ After exact approval:
    SMS, Push, or consumer acknowledgment.
 7. Confirm no new durable-limiter error appears and rerun the 9-check monitor.
 
-Before approval, run the fail-closed rehearsal documented in
+Before approval, the operator ran the fail-closed rehearsal documented in
 `docs/phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md`. It verifies the exact
 current PR head, checks, immutable Preview, Production rollback deployment,
 canonical Vercel link, Production variable names/scopes, and read-only Preview
@@ -129,6 +139,9 @@ The encrypted `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` names are
 stale configuration and are ignored by the canonical Neon implementation.
 Deleting them is a separate cleanup action and is not authorized by this gate.
 
-## Exact gate
+## Consumed exact gate
 
 `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`
+
+This phrase is historical and must not be reused for PR #210 or any later
+commit, deployment, secret, migration, or external action.

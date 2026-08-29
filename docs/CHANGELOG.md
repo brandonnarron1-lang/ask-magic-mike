@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-28 — PR #210 refresh onto accepted PR #209 Production
+
+- Recorded accepted PR #209 Production merge
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; its durability gate is exhausted.
+- Preserved prior PR #210 head `3ed8d050edd386aa0cd4a83d230ff3170d24a306`
+  at `rescue/amm-pr210-pre-main-cutover-20260828-210054` and merged accepted
+  `main` forward without force push.
+- Kept PR #210 limited to canonical query-preserving redirects plus matching
+  monitor/tests. Fresh exact-head Node 24 and protected Preview proof remain
+  mandatory before its separate release gate.
+- No Production, environment, database, lead, event, notification, WordPress,
+  DNS, publication, spend, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-24 — PR #210 refresh onto final PR #209 cutover hygiene
 
 - Preserved former PR #210 head `7aad6b88cd3f34dab7fc9db94fd6ddfb34a1bfa9`

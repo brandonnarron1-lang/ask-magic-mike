@@ -1,6 +1,8 @@
 # Phase 9 Durable Rate-Limit Readiness QA Evidence
 
 Date: 2026-08-23
+Status: historical pre-release evidence; accepted Production outcome recorded
+in `docs/phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md`
 Branch: `codex/phase9-durable-rate-limit-readiness-20260823`
 Base: `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`
 Rescue: `rescue/amm-pre-durable-rate-limit-readiness-20260823-1335`

@@ -1,6 +1,24 @@
 # Implementation Status
 
-Updated 2026-08-23.
+Updated 2026-08-28.
+
+## Current accepted release — 2026-08-28
+
+- PR #209 reviewed head `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b`
+  merged as `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and passed
+  same-commit Production acceptance on deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`.
+- The dedicated encrypted Production limiter secret is present by name/scope;
+  every durable limiter readiness boolean is true and strict monitoring passes
+  9/9. The exact gate is consumed and exhausted.
+- Draft PR #210 is the next ordered application candidate after a no-force-push
+  refresh onto accepted `main`. It remains unmerged and un-deployed pending
+  fresh exact-head Node 24 and protected Preview proof plus its separate gate.
+- No PR #210 Production, environment, database, lead, event, notification,
+  WordPress, DNS, publication, spend, deletion, or NellySelly mutation has
+  occurred.
+- Immutable acceptance evidence:
+  `docs/phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md`.
 
 ## Phase 9 field-experience trust fast-track — 2026-08-23
 
@@ -1242,13 +1260,14 @@ any bridge activation or shadow-mode test.
 
 ## Phase 9 atomic release-authority reconciliation — 2026-08-23
 
-- Fresh authenticated GitHub/Vercel and read-only public checks confirm PR #195
+- Fresh authenticated GitHub/Vercel and read-only public checks confirmed at
+  that time that PR #195
   merge `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and Production deployment
-  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` remain the accepted live baseline.
-- PR #209 is now the sole documented application release candidate. PRs #202
+  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` were the accepted live baseline.
+- PR #209 became the sole documented application release candidate. PRs #202
   through #208 remain preserved as incremental review evidence with no
   independent merge or Production authority.
-- Current authority docs now expose one optional Preview-mutation gate, one
+- The then-current authority docs exposed one optional Preview-mutation gate, one
   combined Production durability/merge/deploy gate, and the later independent
   one-href WordPress homepage gate without reusing any consumed approval.
 - Added an executable five-check documentation contract so known stale stacked-
