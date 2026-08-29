@@ -57,6 +57,12 @@ const vendorIngressDecision = readDoc(
 const vendorIngressEvidence = readDoc(
   "phase9/VENDOR_INGRESS_CONTRACT_LAB_QA_EVIDENCE.md"
 );
+const marketingSpendIngressDecision = readDoc(
+  "phase9/MARKETING_SPEND_INGRESS_RELEASE_GATE.md"
+);
+const marketingSpendIngressEvidence = readDoc(
+  "phase9/MARKETING_SPEND_INGRESS_QA_EVIDENCE.md"
+);
 const durableRateLimitRehearsal = readDoc(
   "phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md"
 );
@@ -102,6 +108,8 @@ const pr215SealedParent =
   "c53cec6043525b593b254c457efdbbe5a29c0520";
 const pr216SealedParent =
   "211485df28fc818ab783ed357df8486f1460d5e2";
+const pr217SealedParent =
+  "8a6b92039bb82c1158db514c2c2f064ceb9cbbcf";
 const canonicalAliasGate =
   "APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT";
 const askAccessibilityGate =
@@ -116,6 +124,8 @@ const funnelEventIdentityGate =
   "APPROVE PHASE 9 FUNNEL EVENT IDENTITY INTEGRITY MERGE AND PRODUCTION DEPLOYMENT";
 const vendorIngressGate =
   "APPROVE PHASE 9 VENDOR INGRESS CONTRACT LAB MERGE AND PRODUCTION DEPLOYMENT";
+const marketingSpendIngressGate =
+  "APPROVE PHASE 9 MARKETING SPEND INGRESS MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT";
 const crossDomainGate =
   "APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT";
 const pr210Rescue =
@@ -132,6 +142,8 @@ const pr216Rescue =
   "rescue/amm-pr216-pre-pr215-exact-seal-20260828-231335";
 const pr217Rescue =
   "rescue/amm-pr217-pre-pr216-exact-seal-20260828-234940";
+const pr218Rescue =
+  "rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928";
 
 const completedReleaseLedger = [
   {
@@ -258,6 +270,7 @@ describe("current release-authority documentation", () => {
     const pr215 = ownerQueue.indexOf("Draft PR [#215]");
     const pr216 = ownerQueue.indexOf("Draft PR [#216]");
     const pr217 = ownerQueue.indexOf("Draft PR [#217]");
+    const pr218 = ownerQueue.indexOf("Draft PR [#218]");
     const pr212 = ownerQueue.indexOf("Draft PR [#212]");
 
     expect(completedPr209).toBeGreaterThanOrEqual(0);
@@ -268,7 +281,8 @@ describe("current release-authority documentation", () => {
     expect(pr215).toBeGreaterThan(pr214);
     expect(pr216).toBeGreaterThan(pr215);
     expect(pr217).toBeGreaterThan(pr216);
-    expect(pr212).toBeGreaterThan(pr217);
+    expect(pr218).toBeGreaterThan(pr217);
+    expect(pr212).toBeGreaterThan(pr218);
     expect(ownerQueue).toContain(canonicalAliasGate);
     expect(ownerQueue).toContain(askAccessibilityGate);
     expect(ownerQueue).toContain(responsiveIdentityGate);
@@ -276,6 +290,7 @@ describe("current release-authority documentation", () => {
     expect(ownerQueue).toContain(homeValueCompletionGate);
     expect(ownerQueue).toContain(funnelEventIdentityGate);
     expect(ownerQueue).toContain(vendorIngressGate);
+    expect(ownerQueue).toContain(marketingSpendIngressGate);
     expect(ownerQueue).toContain(crossDomainGate);
   });
 
@@ -362,6 +377,19 @@ describe("current release-authority documentation", () => {
     }
     expect(ownerQueue).toContain(pr217Rescue);
     expect(vendorIngressEvidence).toContain(pr217Rescue);
+  });
+
+  it("binds PR #218's stacked authority to the current sealed PR #217 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      marketingSpendIngressDecision,
+      marketingSpendIngressEvidence,
+    ]) {
+      expect(doc).toContain(pr217SealedParent);
+      expect(doc).toContain(marketingSpendIngressGate);
+    }
+    expect(ownerQueue).toContain(pr218Rescue);
+    expect(marketingSpendIngressEvidence).toContain(pr218Rescue);
   });
 
   it("resolves the mutable PR head from GitHub instead of self-pinning it", () => {

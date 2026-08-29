@@ -1,6 +1,20 @@
 # Implementation Status
 
-Updated 2026-08-28.
+Updated 2026-08-29.
+
+## PR #218 downstream reconciliation — 2026-08-29
+
+- Preserved prior PR #218 head `cd087e5c5c0fda82a3175b86b550c966120eb2ab`
+  at `rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928`.
+- Merged exact sealed PR #217 head
+  `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf` without force push. Application,
+  API, migration, and test files merged automatically; only `CHANGELOG.md` and
+  this additive release ledger required manual reconciliation. Exact-parent
+  merge head is `693af26f3fb536f62784b475cbbebebfde28ff9f`.
+- PR #218 remains Draft with `GROWTH_SPEND_IMPORT_ENABLED=false` and no
+  Production authority. Former local, PostgreSQL, CI, Preview, browser, visual,
+  and runtime-log proof is historical until repeated on the refreshed exact
+  head.
 
 ## PR #217 downstream reconciliation — 2026-08-28
 
@@ -11,9 +25,10 @@ Updated 2026-08-28.
   files merged automatically; only additive release-history ledgers required
   manual reconciliation. Exact-parent application head is
   `e616170657861c3dd83fae43b28bef9cf89506af`.
-- PR #217 remains Draft with no Production authority. All proof from the former
-  head is historical until fresh exact-head Node 24, immutable Preview,
-  protected no-write browser, security, isolation, and runtime-log checks pass.
+- PR #217 remains Draft with no Production authority. Exact sealed head
+  `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf` passed complete local, CI,
+  immutable Preview, protected no-write browser, visual, security, isolation,
+  and runtime-log acceptance.
 
 ## Phase 9 marketing-spend ledger ingress — 2026-08-24
 
@@ -22,7 +37,7 @@ Updated 2026-08-28.
   `marketing_spend_daily`, Growth Command Center, KPI calculations,
   `growth:manage` permission, and immutable audit ledger—but no spend importer.
   This candidate extends those assets on exact sealed Draft PR #217 head
-  `d04984b4d162f13c79af261beb55a82f15a86b80`; it adds no parallel database,
+  `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf`; it adds no parallel database,
   dashboard, provider adapter, campaign manager, or lead system.
 - **Implementation:** one protected paste/file workbench, two same-origin
   bounded APIs, a strict 19-column CSV v1 normalizer, deterministic row/batch
@@ -37,7 +52,8 @@ Updated 2026-08-28.
   Production-endpoint attestation. This feature cannot contact a provider,
   change a budget, launch a campaign, create a lead, send a message, or touch
   WordPress, DNS, or NellySelly.
-- **Acceptance:** 5 focused files / 30 tests, all 247 files / 3,182 tests,
+- **Historical acceptance:** former code-bearing head passed 5 focused files /
+  30 tests, all 247 files / 3,182 tests,
   strict TypeScript, full ESLint, optimized Next.js 15.5.21 build,
   89/17 route proof, 14/14 release safety, Production dependency audit, system
   isolation, script syntax, and whitespace checks pass on Node 24.18.0. A fresh
@@ -51,9 +67,11 @@ Updated 2026-08-28.
   All 8 browser scenarios pass, including authenticated 1280 px and 390 px
   spend-workbench proof with zero commit requests, zero overflow, and zero
   browser errors. The exact-deployment log audit found no error/fatal log,
-  commit endpoint call, provider action, or spend-ingress API request.
-- **Release order:** the current first Production gate remains PR #209. This
-  stacked candidate cannot leapfrog PRs #209–#217 and requires its own later,
+  commit endpoint call, provider action, or spend-ingress API request. That
+  proof must be repeated on the refreshed exact head before release.
+- **Release order:** PR #209 is accepted; Draft PR #210 remains the first
+  pending application candidate. This stacked candidate cannot leapfrog PRs
+  #210–#217 and requires its own later,
   exact migration/merge/deploy approval; importing one reviewed real report is
   an additional report-specific approval.
 - Detailed scope:

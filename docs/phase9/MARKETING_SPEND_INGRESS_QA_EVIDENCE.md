@@ -2,11 +2,18 @@
 
 Date: 2026-08-24
 Branch: `codex/phase9-spend-ledger-ingress-20260824`
-Base: `d04984b4d162f13c79af261beb55a82f15a86b80`
+Base: `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf`
+
+Refresh record: former PR #218 head
+`cd087e5c5c0fda82a3175b86b550c966120eb2ab` is preserved at
+`rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928`. Exact-parent merge head
+is `693af26f3fb536f62784b475cbbebebfde28ff9f`.
 
 ## Evidence boundary
 
-Evidence covers a protected, feature-gated spend-ingestion candidate. It uses
+The detailed evidence below was collected on the former head and is retained
+as historical regression context until repeated on the refreshed exact head.
+It covers a protected, feature-gated spend-ingestion candidate. It uses
 only synthetic local CSVs and a disposable PostgreSQL 17.11 cluster. No Neon
 branch, Production database, lead, provider account, campaign, budget, message,
 WordPress surface, DNS record, Vercel Production environment, purchase,
@@ -120,7 +127,7 @@ errors, and no secret-bearing browser import.
 commit 9cbbc5731c928f9fd98226b6757132cdf1fc2dca
 commit 8b7271ebef06e61368eb474e3be5d6cf2c8f1fa9
 commit ed02f26af99911253f398ec5c1448e183a5dd976
-exact base d04984b4d162f13c79af261beb55a82f15a86b80 is an ancestor
+historical exact base d04984b4d162f13c79af261beb55a82f15a86b80 is an ancestor
 release doctor 43 pass / 0 fail / 0 skip
 staged gitleaks 148.84 KiB / no leaks
 git diff --check PASS
@@ -204,6 +211,19 @@ provider call, database write, campaign action, or message occurred.
 PR #218 remains Draft, open, clean, and mergeable. Production remains on the
 previously verified deployment. No Production migration, environment change,
 merge, deployment, import, or provider action has been performed.
+
+The former-head evidence is not current merge/deploy authority. Fresh
+exact-head application, disposable PostgreSQL, CI, immutable Preview,
+protected no-commit browser/visual, and runtime-log proof remains mandatory.
+
+The separate release gate remains:
+
+```text
+APPROVE PHASE 9 MARKETING SPEND INGRESS MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT
+```
+
+It does not authorize a spend import, provider action, campaign/budget change,
+lead/message action, or any other pending release.
 
 ## Truth statement
 

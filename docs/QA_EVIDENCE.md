@@ -1,5 +1,27 @@
 # QA Evidence
 
+## Phase 9 marketing-spend ingress refresh — 2026-08-29
+
+- Draft PR #218 reuses the canonical growth schema, Growth Command Center,
+  audited spend ledger, and safe-disabled import gate after exact sealed Draft
+  PR #217 `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf`.
+- Former PR #218 head `cd087e5c5c0fda82a3175b86b550c966120eb2ab`
+  is preserved at
+  `rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928`; exact-parent merge
+  head is `693af26f3fb536f62784b475cbbebebfde28ff9f`.
+- Application, API, migration, and test files merged automatically. Conflicts
+  were limited to two additive release-history ledgers; no parser,
+  persistence, SQL, route, RBAC, workbench, or browser-test file required
+  manual conflict resolution.
+- Former-head local, disposable PostgreSQL, CI, Preview, browser, visual, and
+  runtime-log proof is historical. Fresh exact-head proof is mandatory before
+  the separate migration/merge/deploy gate.
+- No Production, environment, Neon object or row, spend, lead, message,
+  provider, campaign/budget, WordPress, DNS, publication, purchase, deletion,
+  or NellySelly action occurred.
+- Full scope:
+  `docs/phase9/MARKETING_SPEND_INGRESS_QA_EVIDENCE.md`.
+
 ## Phase 9 vendor-ingress contract-lab refresh — 2026-08-28
 
 - Draft PR #217 reuses the existing vendor-neutral normalizer after exact

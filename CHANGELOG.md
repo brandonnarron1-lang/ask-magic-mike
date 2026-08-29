@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-08-29 — PR #218 refresh onto exact sealed PR #217
+
+- Preserved prior PR #218 head `cd087e5c5c0fda82a3175b86b550c966120eb2ab`
+  at `rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928`.
+- Merged exact sealed PR #217 head
+  `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf` without force push at
+  exact-parent merge head `693af26f3fb536f62784b475cbbebebfde28ff9f`.
+  Application, API, migration, and test files merged automatically; conflicts
+  were limited to two additive release-history ledgers.
+- Retained the existing Growth Command Center, canonical growth schema,
+  `growth:manage` boundary, immutable audit ledger, bounded CSV contract, and
+  safe-disabled import gate. No parallel database, dashboard, importer,
+  provider adapter, campaign manager, CRM, or analytics ledger was created.
+- Former-head proof is historical until fresh exact-head Node 24, disposable
+  PostgreSQL 17, immutable Preview, protected no-commit browser, security,
+  isolation, and runtime-log verification pass.
+- Changed no Production deployment, environment, Neon object or row, spend,
+  lead, message, provider, campaign, budget, WordPress surface, DNS,
+  publication, purchase, deletion, or NellySelly system.
+
 ## 2026-08-24 — Marketing-spend ledger ingress candidate
 
 - Reused the canonical growth schema, Growth Command Center, KPI engine,

@@ -183,7 +183,24 @@ browser, and runtime checks before any gate becomes requestable.
    protected no-write proof, then require
    `APPROVE PHASE 9 VENDOR INGRESS CONTRACT LAB MERGE AND PRODUCTION DEPLOYMENT`.
 
-8. Draft PR [#212](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/212)
+8. Draft PR [#218](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/218)
+   reuses exact sealed PR #217 head
+   `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf`, the canonical growth schema,
+   Growth Command Center, `growth:manage` RBAC, and immutable audit ledger.
+   Its former head `cd087e5c5c0fda82a3175b86b550c966120eb2ab` is
+   preserved at
+   `rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928`. It adds one
+   safe-disabled, bounded, audited spend-ingress contract and no parallel
+   database, dashboard, campaign manager, provider adapter, CRM, or analytics
+   ledger. Former proof is historical until repeated on the current GitHub PR
+   head. After PR #217 releases, refresh it onto exact `main`, apply the
+   reviewed additive migration, repeat complete exact-head and protected
+   no-commit proof, then require
+   `APPROVE PHASE 9 MARKETING SPEND INGRESS MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT`.
+   That gate keeps `GROWTH_SPEND_IMPORT_ENABLED=false`; importing one reviewed
+   report requires a later report-specific approval.
+
+9. Draft PR [#212](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/212)
    is a separate HOLD candidate that reuses the existing Google container and
    canonical event ledger for consent-gated cross-domain measurement. It must
    be refreshed only after the selected application sequence and requires
@@ -191,7 +208,8 @@ browser, and runtime checks before any gate becomes requestable.
    `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
 
 The historical shorter conversion-identity phrase released PR #195 and is
-exhausted; it cannot authorize PR #213, PR #214, PR #215, PR #216, or PR #217.
+exhausted; it cannot authorize PR #213, PR #214, PR #215, PR #216, PR #217,
+or PR #218.
 
 None of these later phrases can authorize another PR, secret, database write,
 form submission, notification, WordPress/DNS change, publication, spend,

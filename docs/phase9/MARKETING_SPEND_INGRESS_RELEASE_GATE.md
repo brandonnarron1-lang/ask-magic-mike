@@ -2,7 +2,13 @@
 
 Date: 2026-08-24
 Branch: `codex/phase9-spend-ledger-ingress-20260824`
-Exact base: sealed Draft PR #217 head `d04984b4d162f13c79af261beb55a82f15a86b80`
+Exact base: sealed Draft PR #217 head `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf`
+
+Refresh record: former PR #218 head
+`cd087e5c5c0fda82a3175b86b550c966120eb2ab` is preserved at
+`rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928`. Exact-parent merge head
+is `693af26f3fb536f62784b475cbbebebfde28ff9f`; product and migration files
+merged automatically and only additive release ledgers conflicted.
 
 ## Decision
 
@@ -115,11 +121,8 @@ match.
 ## Release order and exact gates
 
 This candidate is stacked after PR #217 and its entire ordered predecessor
-chain. It cannot move ahead of the current first gate:
-
-```text
-APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT
-```
+chain. PR #209 and its durability gate are complete and exhausted. PR #218
+cannot move ahead of pending PRs #210–#217.
 
 Only after every predecessor is released and this candidate has fresh exact-
 head evidence may the owner use:
@@ -163,7 +166,7 @@ part of rollback and requires a separate destructive-data decision.
 
 ## Current release decision
 
-**Sealed Draft Preview candidate only.** The exact code-bearing head
+**Historical former-head Preview evidence only.** The exact code-bearing head
 `ed02f26af99911253f398ec5c1448e183a5dd976` passed GitHub Release Gate run
 `32795263654`, deployed READY as immutable Preview
 `dpl_2E7rVLVQy5wHnabTwcCSjpwSjpS6`, and passed protected QA run `32795486986`.
@@ -171,6 +174,11 @@ The protected verifier recorded 17 pass / 6 intentional skip / 0 fail, all 8
 browser scenarios passed, desktop/mobile visual QA passed, no commit request was
 made, and the exact-deployment runtime audit found no error/fatal log, commit
 endpoint call, or provider activity.
+
+That proof predates the exact PR #217 parent refresh and is not current release
+authority. Fresh exact-head Node 24, disposable PostgreSQL 17, immutable
+Preview, protected no-commit browser/visual, security, isolation, and bounded
+runtime-log evidence must pass before the gate above can be used.
 
 PR #218 remains Draft, open, clean, and mergeable. No Production migration,
 environment change, merge, deployment, spend import, provider action, lead
