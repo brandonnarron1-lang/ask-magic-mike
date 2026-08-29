@@ -2030,7 +2030,7 @@ any bridge activation or shadow-mode test.
 - Evidence:
   [`phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS_QA_EVIDENCE.md`](./phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS_QA_EVIDENCE.md).
 
-## Phase 9 public owned-referral handoff — 2026-08-28
+## Phase 9 public owned-referral handoff — 2026-08-29
 
 - Reused the active Black Diamond homepage, approved 1200×630 social card,
   canonical `/ask` funnel, existing attribution persistence, and privacy-safe
@@ -2039,21 +2039,32 @@ any bridge activation or shadow-mode test.
   a consumer-facing, generic referral handoff; the non-indexed social review
   route remains available for controlled review but is no longer promoted to
   consumers from the homepage.
-- Added direct-click native Web Share, Clipboard copy, and a visible manual-copy
-  fallback without a third-party script, provider, popup, database, or sender.
+- Added direct-click native Web Share, an available `canShare` capability
+  probe, Clipboard copy, and a visible manual-copy fallback without a
+  third-party script, provider, popup, database, or sender.
 - Added exact `consumer_share` / `referral` / `amm_owned_demand_2026` /
   `homepage_referral_share` attribution and two bounded events whose labels do
   not overclaim delivery or publication.
 - The packet cannot contain form answers, saved plan state, current URL,
   session/lead IDs, contact details, click IDs, or free text.
-- Focused acceptance passes 32 tests on Node 24. The full local gate passes
-  266 files / 3,311 tests, strict typecheck, full lint, optimized build, and 95
-  active routes. Desktop/mobile no-write browser QA reports no overflow,
-  console/page error, bad response, external request, or internal
-  `/social-preview` link; axe reports zero WCAG A/AA violations on the new
-  section. Immutable Preview evidence remains required after push.
-- Production, WordPress, Vercel Production, Neon Production, external
-  publishing, lead submission, email/SMS/Push, and NellySelly remain unchanged.
+- Focused acceptance passes 36 tests on Node 24.18.0. The post-restack local
+  gate passes 266 files / 3,338 tests, strict typecheck, full lint, optimized
+  Next.js 15.5.21 build with 59 static pages, 95 active routes / 17 acknowledged
+  duplicates, 14/14 release safety, and deployable-source isolation.
+- Original head `c755764846a3aa2708def5c47cc36e6fa700941d` is preserved at
+  `rescue/amm-pr228-pre-pr227-exact-seal-20260829-0636`. The candidate was
+  reconciled through normal merge commit
+  `9b4b748f1513d6a00ed713e9fe5cd45c4546af98` onto exact sealed PR #227 head
+  `cf92b9cb64a7cc5b70c98d629cc86d2289fbfedb`; no rebase or force-push was used.
+- Prior desktop/mobile no-write browser QA reports no overflow, console/page
+  error, bad response, external request, or internal `/social-preview` link;
+  axe reports zero automated WCAG A/AA violations on the new section. Fresh
+  immutable exact-head Browser and hosted Preview evidence remain required
+  after push.
+- Production remains unchanged on authority commit
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. WordPress, Vercel Production,
+  Neon Production, external publishing, lead submission, email/SMS/Push, and
+  NellySelly remain unchanged.
 - Design and boundaries:
   [`phase9/PUBLIC_OWNED_REFERRAL_HANDOFF.md`](./phase9/PUBLIC_OWNED_REFERRAL_HANDOFF.md).
 - QA evidence:

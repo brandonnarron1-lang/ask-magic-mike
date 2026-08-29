@@ -1,11 +1,14 @@
 # Phase 9 Public Owned-Referral Handoff
 
-Decision date: 2026-08-28
+Decision date: 2026-08-29
 
 Canonical repository: `brandonnarron1-lang/ask-magic-mike`
 
-Release position: stacked after Draft PR #227; it cannot bypass PR #209 or any
-earlier reviewed application candidate.
+Release position: stacked on exact sealed Draft PR #227 head
+`cf92b9cb64a7cc5b70c98d629cc86d2289fbfedb`. Original PR #228 head
+`c755764846a3aa2708def5c47cc36e6fa700941d` is preserved at
+`rescue/amm-pr228-pre-pr227-exact-seal-20260829-0636`; reconciliation used a
+normal merge, not a rebase or force-push.
 
 ## Decision
 
@@ -30,7 +33,8 @@ This closes a specific gap found in the reuse-first audit:
 The homepage now offers two explicit, user-controlled actions:
 
 1. `Share Ask Magic Mike` invokes the browser's native share chooser only from
-   the button click and only when `navigator.share` is available.
+   the button click, only when `navigator.share` is available, and only when an
+   available `navigator.canShare` capability probe accepts the fixed packet.
 2. `Copy referral link` copies the same fixed URL when Clipboard is available.
    If Clipboard is denied or unsupported, the visible read-only URL is focused
    and selected for manual copy.
@@ -70,7 +74,8 @@ platform guidance:
 
 - `navigator.share` is secure-context and transient-activation gated;
 - the call occurs directly in the explicit button handler;
-- capability absence degrades to copy/manual selection; and
+- capability absence, a negative/failed `navigator.canShare` probe, or an
+  unavailable API degrades to copy/manual selection; and
 - success copy is limited to `Share options opened` because promise-resolution
   timing differs by operating system and does not prove delivery.
 
@@ -111,5 +116,7 @@ This candidate does not authorize or perform:
 - an email, SMS, Push, consumer acknowledgment, or external message; or
 - a NellySelly action.
 
-Production remains behind the exact PR #209 durability gate and the ordered
-application train. This tail candidate receives no independent leapfrog gate.
+PR #209's exact durability gate has already been consumed by Production commit
+`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`; repeating it cannot authorize
+this later Draft. Production remains unchanged, and this tail candidate has no
+independent leapfrog authority.

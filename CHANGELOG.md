@@ -6,8 +6,8 @@
   consumer-facing Share/Copy referral handoff using the existing Black Diamond
   identity and approved 1200×630 social card.
 - Added a fixed canonical `/ask` referral URL, privacy-allowlisted handoff/copy
-  events, native Web Share capability detection, and a Clipboard/manual-copy
-  fallback.
+  events, native Web Share plus `canShare` capability detection, and a
+  Clipboard/manual-copy fallback.
 - Added no publisher, provider, lead store, external send, database migration,
   Production mutation, or NellySelly dependency.
 
