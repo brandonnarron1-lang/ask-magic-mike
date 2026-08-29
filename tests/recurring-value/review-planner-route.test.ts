@@ -8,7 +8,8 @@ const read = (path: string) => readFileSync(join(root, path), "utf8");
 describe("Phase 9.4 recurring-value public route", () => {
   it("registers /plan in the canonical router, sitemap, navigation, and route manifest", () => {
     expect(existsSync(join(root, "app/plan/page.tsx"))).toBe(true);
-    expect(read("app/plan/page.tsx")).toContain('alternates: { canonical: "/plan" }');
+    expect(read("app/plan/page.tsx")).toContain("publicPageMetadata({");
+    expect(read("app/plan/page.tsx")).toContain('path: "/plan"');
     expect(read("app/sitemap.ts")).toContain('["/plan", 0.75]');
     expect(read("app/components/black-diamond/BlackDiamondHeader.tsx")).toContain(
       '{ href: "/plan", label: "Plan"',

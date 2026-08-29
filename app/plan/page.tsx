@@ -3,12 +3,13 @@ import { BlackDiamondHeader } from "../components/black-diamond/BlackDiamondHead
 import { Footer } from "../components/black-diamond/BlackDiamondShell";
 import { PageTracker } from "../components/black-diamond/PageTracker";
 import { RealEstateReviewPlanner } from "../components/black-diamond/RealEstateReviewPlanner";
+import { publicPageMetadata } from "../lib/publicMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata({
   title: "Real Estate Review Planner",
   description: "Build a private, device-saved seller, buyer, homeowner, or relocation review plan before requesting local guidance.",
-  alternates: { canonical: "/plan" },
-};
+  path: "/plan",
+});
 
 export default function PlanPage() {
   return (
