@@ -2,7 +2,7 @@
 
 Status: **code and WordPress 1.2.0 package candidate; live activation HOLD**
 
-Date: 2026-08-24
+Date: 2026-08-29
 
 ## Reuse-first decision
 
@@ -55,7 +55,10 @@ loaders with these boundaries:
 1. On Our Town, canonical bridge 1.2.0 exposes no Google runtime unless
    `AMM_GOOGLE_MEASUREMENT_ENABLED=true` and the existing provider cookie is
    exactly `allow`. Missing, deny, dismiss, malformed, and unknown states are
-   inert. The loader has no advertising grant or noscript fallback.
+   inert. The loader has no advertising grant or noscript fallback. A later
+   withdrawal pushes analytics and advertising purposes back to denied,
+   expires only recognized Google cookies, and detaches the injected script;
+   same-page re-allow stays fail closed against duplicate runtime loading.
 2. The WordPress gate appears at `wp_head` priority 0 and pins the exact fixed
    Google URL/container in browser code. The current legacy GTM head bootstrap
    and matching noscript iframe must be removed in the same controlled change;
@@ -149,6 +152,8 @@ This checklist is intentionally separate from code review:
    the same commit for Production.
 12. In a clean browser, prove Decline creates no Google request and no `_ga*`
    cookie. Then separately choose Allow and prove the approved container loads.
+   Withdraw the choice and prove a denied update, Google-cookie expiry, script
+   detachment, unrelated-cookie preservation, and no duplicate same-page load.
 13. Navigate through an existing tagged Our Town link to Ask Magic Mike. Verify
    `_gl` is present, both pages use the same GA4 destination/client identity,
    the destination returns 200, and UTMs remain intact.

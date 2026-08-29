@@ -56,6 +56,21 @@ describe("POST /api/events", () => {
     expect(recordMock).toHaveBeenCalledWith(expect.objectContaining({ eventName: "funnel_started" }));
   });
 
+  it("rejects a missing browser Origin before rate limiting or persistence", async () => {
+    const response = await POST(new Request("https://www.askmagicmike.com/api/events", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "user-agent": "Mozilla/5.0 Chrome/140",
+      },
+      body: JSON.stringify({ event_name: "funnel_started" }),
+    }));
+
+    expect(response.status).toBe(403);
+    expect(rateLimitMock).not.toHaveBeenCalled();
+    expect(recordMock).not.toHaveBeenCalled();
+  });
+
   it("persists a valid anonymous funnel identity without pre-creating a canonical session", async () => {
     const sessionId = "11111111-1111-4111-8111-111111111111";
     const response = await POST(request({

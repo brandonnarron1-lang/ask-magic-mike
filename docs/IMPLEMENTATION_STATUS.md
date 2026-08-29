@@ -21,6 +21,11 @@ Updated 2026-08-29.
   and personalization stay denied. The canonical WordPress bridge has its own
   default-off flag and requires the current consent provider's exact `allow`
   state. Neither boundary is activated by this consolidation.
+- **Security hardening:** both public browser analytics routes require a present
+  exact approved Origin. Experiment JSON is bounded at 4,096 bytes and exact
+  identifiers are validated before repository access. WordPress withdrawal
+  sends a denied update, removes the injected tag and only Google cookies, and
+  prevents duplicate same-page runtime loading.
 - **Live hold:** the read-only public preflight remains `HOLD` because Our Town
   currently initializes legacy GTM head/noscript code before the deferred
   cookie-choice provider. WordPress replacement and controlled runtime QA need

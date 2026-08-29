@@ -13,6 +13,11 @@
   configuration plus explicit consent, and WordPress bridge 1.2.0 requires its
   separate default-off constant plus the existing cookie provider's exact
   `allow` state.
+- Added fail-closed missing-Origin checks on both browser analytics routes,
+  reused the shared bounded JSON ingress for the experiment endpoint, aligned
+  its identifiers to canonical repository contracts, and added reversible
+  WordPress consent withdrawal with Google-only cookie expiry and no duplicate
+  same-page runtime.
 - Retained the public preflight `HOLD` until the brokerage's legacy pre-consent
   GTM head/noscript bootstrap is replaced under its independent owner gate.
 ## 2026-08-29 — PR #220 refresh onto exact sealed PR #219

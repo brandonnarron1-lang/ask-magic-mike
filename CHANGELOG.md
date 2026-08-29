@@ -16,6 +16,10 @@
 - The canonical WordPress bridge remains independently disabled by default;
   its 1.2.0 Basic Consent loader requires the existing provider's exact
   `allow` state and rejects coexistence with the legacy GTM bootstrap.
+- Hardened both public browser analytics routes to require a present approved
+  Origin, bounded experiment JSON at 4,096 bytes with exact input contracts,
+  and added explicit WordPress allow-to-deny revocation with Google-only cookie
+  expiry and duplicate-runtime prevention.
 - No Production configuration, deployment, migration, lead/event write,
   communication, WordPress edit, publication, spend, DNS, deletion, provider,
   or NellySelly action occurred.

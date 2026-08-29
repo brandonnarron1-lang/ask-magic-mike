@@ -66,7 +66,8 @@ async function readBoundedJson(req: Request) {
 
 export async function POST(req: Request) {
   const correlationId = crypto.randomUUID();
-  if (!isApprovedPublicOrigin(req.headers.get("origin"))) {
+  const origin = req.headers.get("origin");
+  if (!origin || !isApprovedPublicOrigin(origin)) {
     return NextResponse.json({ error: "This event origin is not approved.", correlation_id: correlationId }, { status: 403 });
   }
   if (isAutomatedBrowserUserAgent(req.headers.get("user-agent"))) {

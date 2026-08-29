@@ -11,6 +11,11 @@
   conversion outcomes, Web Vitals path, protected no-write browser harness,
   exact-origin widget checks, and automated-browser KPI exclusion while adding
   the consent-gated dedicated `ammDataLayer` boundary.
+- Post-reconciliation hardening requires a present exact Origin on both public
+  browser write routes, bounds experiment JSON at 4,096 bytes before parsing,
+  applies exact identifier/context validation, and gives WordPress an explicit
+  allow-to-deny revocation path with Google-only cookie expiry and duplicate
+  runtime prevention.
 - Both application and WordPress measurement activation remain disabled. The
   current read-only public preflight is still expected to return `HOLD` until
   separately approved WordPress consent-order remediation and runtime QA.
@@ -24,7 +29,11 @@
 - **Package acceptance:** PHP 8.1 syntax, ZIP integrity, source/archive parity,
   and SHA-256 sidecar verification pass for bridge 1.2.0. The current package
   digest is
-  `9b9534e7fdf078b60ed4f32c72fad93ed7632cf5702fc9a4fa58eefe26bf902c`.
+  `9e8ea868281f2d3395afccdb37da063f16129471656cfd37dca47557043cc4eb`.
+- **Current focused acceptance:** Node 24.18.0 passes 4 files / 46 tests for
+  public events, public experiments, WordPress consent behavior, and package
+  contracts. Strict TypeScript, targeted ESLint, ZIP integrity, and whitespace
+  checks pass. Full exact-head release/CI/Preview evidence remains pending.
 - **Live read-only preflight:** truthful verdict `HOLD`; the approved brokerage
   container and destination remain `GTM-KZMCSLTJ` / `G-RQRBB1G270`, Ask server
   HTML remains tag-inert, and no NellySelly identity collision is present. The

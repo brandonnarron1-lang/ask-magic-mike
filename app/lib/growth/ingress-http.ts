@@ -23,7 +23,7 @@ export function ingressSameOrigin(request: NextRequest) {
 }
 
 export async function readBoundedIngressJson(
-  request: NextRequest,
+  request: Request,
   options: { maxRequestBytes: number },
 ) {
   const contentType = request.headers.get("content-type")?.split(";", 1)[0]?.trim().toLowerCase();

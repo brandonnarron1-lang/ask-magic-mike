@@ -1,18 +1,18 @@
 # Phase 9 Cross-Domain Measurement QA Evidence
 
-Date: 2026-08-25
+Date: 2026-08-29
 
 Consolidated branch:
 `codex/phase9-cross-domain-measurement-consolidation-20260825`
 
-Cumulative base: exact PR #220 head
-`5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3`
+Cumulative base: exact sealed PR #220 head
+`19689e95d824d7d06e5f3b60cd18335f53018c93`
 
 Imported source: exact PR #212 head
 `758154ca73b64f24f2df8f183ba8b3f6f82f769a`
 
 Consolidation rescue ref:
-`rescue/amm-pr220-pre-cross-domain-consolidation-20260825-0042`
+`rescue/amm-pr221-pre-pr220-exact-seal-20260829-020318`
 
 WordPress pre-change rescue ref:
 `rescue/amm-pr212-pre-wordpress-consent-bridge-20260824-0244`
@@ -25,7 +25,8 @@ WordPress pre-change rescue ref:
   server-owned conversion outcomes, Web Vitals, dedicated no-write interceptor,
   and exact application-origin checks. A query-only navigation into internal QA
   now tears down an already-loaded analytics runtime and reloads cleanly.
-- Focused integration/privacy/WordPress verification: 9 files / 77 tests pass.
+- Former-head integration/privacy/WordPress verification: 9 files / 77 tests
+  passed before exact PR #220 reconciliation.
 - Complete Node 24.18.0 release gate: system isolation, 14/14 safety checks,
   261 test files / 3,275 tests, strict typecheck, full ESLint, optimized Next.js
   15.5.21 build, and 95 active routes / 17 acknowledged duplicates pass.
@@ -51,9 +52,27 @@ WordPress pre-change rescue ref:
   the 123.24 KB staged candidate and all 636 commits with no leak. The migration
   diff is empty, and `.env.example` contains only the public configuration name
   plus safe comments.
-- Exact-head CI, immutable Vercel Preview, protected dispatcher, deployment-log,
+- Fresh exact-head CI, immutable Vercel Preview, protected dispatcher, deployment-log,
   dependency, and secret evidence remain pending until the merge commit is
   pushed. Production and WordPress activation remain unchanged.
+
+## Post-reconciliation hardening evidence
+
+- Browser-facing `POST /api/events` and `POST /api/experiments/event` now
+  require a present exact approved Origin; missing Origin fails with 403 before
+  rate limiting or canonical repository access. The shared origin helper was
+  deliberately left unchanged for existing server-to-server contracts.
+- Experiment requests reuse the established bounded ingress reader, require
+  `application/json`, cap both declared and streamed bodies at 4,096 bytes,
+  and validate the registered key shape, exact 64-hex subject key, event/lead
+  consistency, UUID, and bounded public-path surface before Neon access.
+- WordPress consent withdrawal now pushes a denied Consent Mode update,
+  expires only recognized Google measurement cookies on the current host and
+  brokerage domain, detaches the injected GTM script, preserves unrelated
+  cookies, and refuses a duplicate same-page runtime after re-allow.
+- Focused Node 24.18.0 verification passes 4 files / 46 tests. Strict
+  TypeScript and targeted ESLint pass. ZIP integrity and `git diff --check`
+  pass. Full exact-head release, CI, Preview, and browser proof remain pending.
 
 ## Canonical WordPress bridge 1.2.0 consent repair candidate
 
@@ -70,7 +89,9 @@ WordPress pre-change rescue ref:
   request.
 - Behavioral coverage proves missing, deny, dismiss, unknown, malformed,
   wrong-container, and wrong-cookie states fail closed; explicit allow loads
-  one exact GTM runtime without duplication; an asynchronous allow is observed.
+  one exact GTM runtime without duplication; an asynchronous allow is observed;
+  and allow-to-deny revocation removes the script and Google cookies without
+  clearing unrelated cookies or duplicating a runtime on same-page re-allow.
 - Static security coverage rejects dynamic-code execution, HTML injection,
   cross-window messaging, and browser-navigation primitives in the loader.
 - The public preflight now recognizes only the canonical Basic Consent marker,
@@ -85,10 +106,10 @@ WordPress pre-change rescue ref:
 - Release archive:
   `output/release/ask-magic-mike-canonical-bridge-1.2.0.zip`.
   SHA-256:
-  `9b9534e7fdf078b60ed4f32c72fad93ed7632cf5702fc9a4fa58eefe26bf902c`.
-  The consolidation refresh changes only the README rollback instruction so it
-  does not recommend restoring the legacy pre-consent GTM bootstrap; source,
-  archive, and sidecar are verified together on the consolidated branch.
+  `9e8ea868281f2d3395afccdb37da063f16129471656cfd37dca47557043cc4eb`.
+  The consolidation refresh includes consent-revocation hardening and the
+  README rollback/acceptance contract; source, archive, and sidecar are
+  verified together on the consolidated branch.
   Preserved 1.1.0 and 1.0.0 rollback archives remain untouched.
 - No WordPress file, setting, page, form, cookie, cache, GTM/GA4 account,
   Production deployment, lead, notification, database row, or NellySelly
