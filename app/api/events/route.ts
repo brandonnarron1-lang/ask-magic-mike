@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { assertDatabaseMutationAllowed } from "../../../src/lib/preview-security";
 import { checkRateLimit, LIMITS, rateLimitKey } from "../../../src/lib/security/rate-limit";
+import {
+  assertDatabaseMutationAllowed,
+} from "../../../src/lib/preview-security";
 import { analyticsEvents } from "../../lib/constants";
 import { isAutomatedBrowserUserAgent } from "../../lib/browserAutomation";
 import {
@@ -24,6 +26,10 @@ import {
 
 const approvedEventNames = new Set<string>(analyticsEvents);
 const MAX_EVENT_BODY_BYTES = 4_096;
+const NO_STORE_HEADERS = {
+  "Cache-Control": "private, no-store, max-age=0",
+  Pragma: "no-cache",
+} as const;
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -67,25 +73,31 @@ async function readBoundedJson(req: Request) {
 
 export async function POST(req: Request) {
   const correlationId = crypto.randomUUID();
-  if (!isApprovedPublicOrigin(req.headers.get("origin"))) {
+  const origin = req.headers.get("origin");
+  if (!origin || !isApprovedPublicOrigin(origin)) {
     return NextResponse.json({ error: "This event origin is not approved.", correlation_id: correlationId }, { status: 403 });
   }
   if (isAutomatedBrowserUserAgent(req.headers.get("user-agent"))) {
     return NextResponse.json(
       { ok: true, persisted: false, excluded: "automation", correlation_id: correlationId },
-      { status: 202 },
+      { status: 202, headers: NO_STORE_HEADERS },
     );
   }
+  // Read-only Preview must refuse before the limiter can write a durable
+  // bucket or the analytics repository can persist an event. Controlled
+  // Preview mutation remains available only through the existing endpoint-
+  // attested PREVIEW_DATA_MODE / ALLOW_PREVIEW_DB_MUTATION gate.
   const mutation = assertDatabaseMutationAllowed();
   if (!mutation.ok) {
     return NextResponse.json(
       {
-        ok: true,
+        ok: false,
         persisted: false,
-        excluded: "preview_read_only",
+        error: mutation.publicMessage,
+        code: mutation.error,
         correlation_id: correlationId,
       },
-      { status: 202 },
+      { status: mutation.statusCode, headers: NO_STORE_HEADERS },
     );
   }
   const limit = await checkRateLimit(rateLimitKey(req.headers.get("x-forwarded-for")), LIMITS.analyticsEvent.limit, LIMITS.analyticsEvent.windowMs, "analyticsEvent");
