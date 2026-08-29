@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-08-29 — WordPress seller-intent publication hold
+
+- Reused the canonical Ask Magic Mike `/sell` funnel, protected Distribution
+  Command, existing WordPress manifest route, lead backend, attribution model,
+  and notification system; no parallel funnel, form engine, database,
+  publisher, dashboard, or CRM was created.
+- Added one exact-host, bounded, read-only structural decision packet for the
+  live `/we-buy-homes/` and `/we-buy-houses/` pages. It records page identity,
+  canonical/index state, exact-host Ask Magic Mike links, native-form count,
+  Gravity Form IDs, capture-system count, and a deterministic evidence hash.
+- Added a responsive seller-intent consolidation hold to the existing
+  protected Distribution Command and a downloadable `report:view` manifest.
+  The contract always withholds a tracked publication URL and keeps every
+  mutation, submission, message, and authorization flag false.
+- Marked historical `/value` snippets as reference-only so they cannot be
+  mistaken for a current publication packet.
+- Passed 271 files / 3,372 tests, strict typecheck, full lint, optimized build,
+  95-route proof, 14/14 release safety, deployable-source isolation, exact-head
+  CI, immutable Preview, and 15/15 protected desktop/mobile browser scenarios.
+- No Production deployment, WordPress/DNS edit, database write, lead
+  submission, provider/message, publication, spend, deletion, or NellySelly
+  interaction occurred.
+
 ## 2026-08-29 — Exact notification operations truth
 
 - Reused the canonical Neon `lead_notifications` outbox and protected Lead

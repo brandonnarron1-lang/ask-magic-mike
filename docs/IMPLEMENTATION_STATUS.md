@@ -2,6 +2,42 @@
 
 Updated 2026-08-29.
 
+## Phase 9 WordPress seller-intent truth — 2026-08-29
+
+- **Reuse decision:** the canonical Ask Magic Mike `/sell` funnel, existing
+  protected Distribution Command, WordPress manifest route, lead backend,
+  attribution contract, and notification system remain authoritative. No
+  second funnel, form engine, database, publisher, dashboard, or CRM was added.
+- **Observed conflict:** both `/we-buy-homes/` (page 3631) and
+  `/we-buy-houses/` (page 4364) remain self-canonical/index candidates. The
+  latter exposes a page-specific native intake plus global Gravity Form 7 and
+  no canonical Ask Magic Mike link; the former has an existing legacy tracked
+  link. Search, backlink, Regency, consent, and capture-owner evidence is still
+  required before choosing or redirecting either page.
+- **Candidate result:** one protected, `report:view`, no-store JSON packet now
+  records only bounded structural evidence for those exact two pages and
+  renders a clear publication hold in the existing admin surface. It always
+  returns no tracked publication href and all mutation, submission, messaging,
+  and authorization flags false.
+- **Acceptance:** code-bearing head
+  `750dacc52a16082edcb1ba95ffb34cd543a1221f` passed 3 focused files / 19
+  tests, 271 files / 3,372 full tests, strict TypeScript, full ESLint, optimized
+  Next.js 15.5.21 build, 95-route proof, 14/14 release safety, deployable-source
+  isolation, exact-head Release Gate run `33278194658`, immutable Preview
+  `dpl_D5x8eKHfbUijo2nDyGCQcrd14B9C`, and protected Preview run
+  `33278568998` with 18 checks, six intentional mutation skips, 15/15 browser
+  scenarios, and `PREVIEW_READY`. Anonymous admin access returned 401; the
+  generic Preview decision API failed closed with `rbac_not_enabled` because
+  Preview RBAC is intentionally disabled.
+- **Authority boundary:** Draft PR #235 is stacked on exact sealed PR #234 head
+  `5ff3d1079f50e5f05c7000edda75aacefa4a31c5`. Production remains PR #209
+  merge `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; PR #210 remains first in release order.
+  No Production, WordPress, Vercel environment, Neon, DNS, provider, lead,
+  message, publication, spend, deletion, or NellySelly mutation occurred.
+- Decision packet:
+  [`phase9/WORDPRESS_SELLER_INTENT_DECISION_PACKET.md`](./phase9/WORDPRESS_SELLER_INTENT_DECISION_PACKET.md).
+
 ## Phase 9 notification operations truth — 2026-08-29
 
 - **Reuse decision:** canonical Neon outbox, Lead Center, provider lifecycle

@@ -2057,3 +2057,44 @@ it performs no Google call, profile edit, message, or publication.
 
 Full evidence:
 [`phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS_QA_EVIDENCE.md`](./phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS_QA_EVIDENCE.md).
+
+## Phase 9 WordPress seller-intent truth — 2026-08-29
+
+This Draft candidate performed no Production deployment, WordPress/DNS edit,
+database write or migration, lead submission, email/SMS/Push delivery,
+provider call, publication, spend, deletion, or NellySelly operation.
+
+- Read-only WordPress surface audit: PASS — 42/42 pages fetched. It confirmed
+  three duplicate seller-value pages, two direct-purchase pages, four legacy
+  native capture pages, five multiple-capture pages, and Gravity Form 7 on 39
+  pages. The new packet deliberately narrows its evidence to page IDs 3631 and
+  4364 rather than duplicating that inventory.
+- Live `/we-buy-houses/` browser inspection: PASS at 1440×1000 and 390×844;
+  zero console warnings/errors, zero horizontal overflow, and no form
+  submission. The mobile document/form/control widths were 390/310/268 px.
+- Focused contract: PASS — 3 files / 19 tests.
+- Full local release gate: PASS — deployable-source isolation, 14/14 release
+  safety, 271 files / 3,372 tests, strict TypeScript, full ESLint, optimized
+  Next.js 15.5.21 build, and 95 active routes.
+- Exact code-bearing GitHub Release Gate: PASS — run `33278194658` on commit
+  `750dacc52a16082edcb1ba95ffb34cd543a1221f`, Node 24.
+- Immutable code-bearing Preview: READY — deployment
+  `dpl_D5x8eKHfbUijo2nDyGCQcrd14B9C` at the same commit.
+- Protected Preview QA: PASS — run `33278568998`, 18 checks / six intentional
+  mutation skips / zero failures, 15/15 browser scenarios, and
+  `PREVIEW_READY`. Desktop and 390 px mobile views showed a contained,
+  readable hold with no overlap, truncation, or horizontal overflow.
+- Runtime/auth boundary: PASS — anonymous `/admin/distribution` returned 401;
+  authenticated page access returned 200. The generic Preview API returned 409
+  `rbac_not_enabled`, correctly failing closed because that Preview does not
+  carry Production RBAC configuration. Authorization was not weakened and no
+  branch secret was added for QA.
+- Runtime log review: PASS — expected 401/200/409 requests only, with zero
+  warning, error, or fatal entries.
+- `git diff --check`: PASS on the code-bearing candidate.
+
+The final documentation-only head is revalidated after push and pinned in the
+Draft PR #235 seal so the immutable evidence does not require a
+self-referential evidence commit. Production remains PR #209 merge
+`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`; PR #210 remains the first
+eligible application candidate.
