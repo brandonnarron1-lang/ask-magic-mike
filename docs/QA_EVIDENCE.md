@@ -68,15 +68,22 @@
   acceptance remains 8 files / 117 tests.
 - **Release hygiene:** release doctor passes 43/43; the Production dependency
   audit reports no known vulnerability; redacted gitleaks reports no finding
-  across all 667 commits or the exact four-commit sealed-parent delta;
+  across all 668 commits or the exact five-commit sealed-parent delta;
   sealed-parent ancestry, whitespace, and clean tracked-tree checks pass.
 - **Focused security review:** `/admin/growth` remains server-authorized through
   `report:view`, force-dynamic, aggregate-only, and write-free. Public event
   origins remain allowlisted, ordinary Preview fails closed before durable
   limiter/body/repository work, and no raw HTML, browser secret, target writer,
   migration, or additional database query was added.
-- GitHub CI, immutable Vercel Preview, protected hosted browser/visual QA, and
-  exact-deployment runtime-log proof remain required after the final push.
+- **Browser-locator correction:** the first hosted no-write run passed all 18
+  read-only checks with six deliberate mutation skips, then produced 13 browser
+  passes and two failures because a legacy `.first()` assertion selected a
+  matching economics label inside the new intentionally collapsed audit. The
+  test now scopes economics assertions to the visible performance section and
+  independently opens, verifies, and closes the 42-contract readiness audit.
+  This changes no application behavior or data boundary.
+- The final seal requires GitHub CI, immutable Vercel Preview, protected hosted
+  browser/visual QA, and exact-deployment runtime-log proof on one exact head.
 - No Production row, environment, migration, target, lead, notification,
   provider, publication, spend, WordPress/DNS, deletion, or NellySelly action
   occurred.

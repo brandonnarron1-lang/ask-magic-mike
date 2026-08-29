@@ -49,10 +49,12 @@ Updated 2026-08-29.
   deployable-source Ask/Nelly isolation, safety 14/14, 264 files / 3,324 tests,
   strict typecheck, full ESLint, optimized 59-page build, 95 active routes / 17
   acknowledged duplicates, doctor 43/43, zero known Production dependency
-  vulnerabilities, 667-commit and exact four-commit redacted gitleaks scans,
+  vulnerabilities, 668-commit and exact five-commit redacted gitleaks scans,
   sealed-parent ancestry, whitespace, and focused security review. Immutable
-  Preview, hosted browser/visual, runtime-log, and GitHub CI evidence remain
-  mandatory on the final pushed head.
+  Preview, hosted browser/visual, runtime-log, and GitHub CI evidence are
+  mandatory on one final pushed head. The hosted browser contract now scopes
+  legacy economics labels to their visible section and directly exercises the
+  new collapsed readiness audit, avoiding duplicate-text ambiguity.
 - Detailed design: `docs/phase9/BASELINE_TARGET_READINESS.md`.
 
 ## Phase 9 lead-intent default truth — 2026-08-29

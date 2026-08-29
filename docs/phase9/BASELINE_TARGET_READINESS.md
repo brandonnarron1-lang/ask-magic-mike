@@ -193,12 +193,14 @@ These are evidence thresholds, not performance goals.
   95 active routes / 17 acknowledged duplicates. Focused acceptance passes 8
   files / 117 tests.
 - Release doctor passes 43/43 and the Production dependency audit reports no
-  known vulnerability. Redacted gitleaks reports no finding across all 667
-  commits or the exact four-commit sealed-parent delta. Sealed-parent ancestry,
+  known vulnerability. Redacted gitleaks reports no finding across all 668
+  commits or the exact five-commit sealed-parent delta. Sealed-parent ancestry,
   whitespace, clean tracked tree, and focused security review pass.
-- Immutable Preview, protected hosted browser/visual QA, exact-deployment
-  runtime-log proof, and GitHub CI remain required on the final pushed head
-  before the candidate can be sealed.
+- The hosted browser contract scopes duplicate economics labels to their visible
+  performance section and independently opens, verifies, and closes the new
+  readiness audit. Immutable Preview, protected hosted browser/visual QA,
+  exact-deployment runtime-log proof, and GitHub CI are required on one final
+  pushed head before the candidate can be sealed.
 
 ## Hosted Preview safety correction
 
