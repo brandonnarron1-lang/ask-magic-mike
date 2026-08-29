@@ -22,6 +22,10 @@ second WordPress plugin, lead store, analytics property, or cookie-choice UI.
 - The loader is pinned to the audited container `GTM-KZMCSLTJ`. It contains no
   alternate container, advertising grant, noscript iframe, browser secret, or
   arbitrary remote URL.
+- A later consent withdrawal sends a denied Consent Mode update, expires only
+  recognized Google measurement cookies, and detaches the injected GTM script.
+  It does not clear brokerage/session cookies or load a second GTM runtime if
+  the visitor changes the choice again on the same page.
 
 ## Secure configuration
 
@@ -77,7 +81,10 @@ does not enable the other.
 6. In a clean browser, prove missing, Decline, and dismiss states create no
    Google request, `dataLayer`, `_ga*` cookie, or GTM noscript request. Then
    separately choose Allow and prove exactly one request to
-   `gtm.js?id=GTM-KZMCSLTJ`.
+   `gtm.js?id=GTM-KZMCSLTJ`. Withdraw consent and prove the runtime receives a
+   denied update, the injected script and only Google cookies are removed, and
+   a same-page re-allow does not create a duplicate runtime. A normal next page
+   load may initialize once under the then-current explicit choice.
 7. Run `pnpm run amm:verify:cross-domain`; `REVIEW_READY` permits the separate
    authenticated GTM/GA4 review but is not by itself a Production release.
 
