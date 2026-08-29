@@ -25,22 +25,25 @@ Profile, spend, or NellySelly mutation.
 
 ## Export matrix
 
-The existing six owned channels each retain four approved placements:
+The existing seven owned channels each retain four approved placements:
 
 - general real-estate question;
 - seller value and sale-readiness review;
 - buyer property-match review; and
 - renter-to-homeownership readiness review.
 
-Each of the 24 canonical placements can produce three protected downloads:
+Each of the 28 canonical placements can produce three protected downloads. The
+four Google Business Profile placements additionally resolve the dedicated
+square format used by the native handoff:
 
 | Format | Output | Intended use |
 |---|---|---|
-| Feed | 1080×1350 PNG | 4:5 social or GBP review asset |
+| Feed | 1080×1350 PNG | 4:5 social review asset |
 | Story | 1080×1920 PNG | 9:16 story/reel cover with guarded top/bottom zones |
+| Square | 720×720 PNG | 1:1 Google Business Profile native-handoff asset; exact GBP channel only |
 | QR | vector SVG | Print or operator-composed placement |
 
-Total deterministic combinations: 72. The route renders only an allowlisted
+Total deterministic combinations: 88. The route renders only an allowlisted
 channel + placement + format tuple. It does not accept a destination URL,
 remote image URL, template body, consumer field, or arbitrary file name.
 
@@ -57,7 +60,7 @@ remote image URL, template body, consumer field, or arbitrary file name.
   JPEG after correcting the executable fixture's PNG MIME type and proving the
   existing approved PNG renders successfully.
 - Includes the conditional broker-review boundary and Equal Housing
-  identification in every generated feed/story image.
+  identification in every generated feed/story/square image.
 - Does not generate a new likeness or use the deprecated genie motif.
 
 The committed images under `output/phase9/owned-demand-assets/` are compressed

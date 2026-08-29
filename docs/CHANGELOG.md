@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-08-29 — Google Business Profile 1:1 native asset
+
+- Extended the existing protected owned-demand renderer with one 720x720 PNG
+  format and mapped only the Google Business Profile native handoff to it.
+- Reused the approved Mike Eatmon images, canonical placement copy, tracked
+  shortlinks, QR contract, Black Diamond visual system, compliance language,
+  two-gesture device share, and append-only proof boundary; no parallel studio
+  or publisher was created.
+- Added exact channel/format fail-closed routing, client asset-path validation,
+  all-offer PNG rendering, physical dimension, private-header, PNG-signature,
+  oversized/active-content, and added-query rejection coverage.
+- Corrected portrait/text collision and transparent-renter over-cropping found
+  during original-pixel visual QA. No AI-generated or altered likeness ships.
+- No Production/Preview deployment, database, secret, lead, message, provider,
+  publication, WordPress/DNS, spend, deletion, or NellySelly action occurred.
+
 ## 2026-08-29 — Identity-safe wide social preview card
 
 - Reused the approved Black Diamond desktop hero, exact Our Town Properties

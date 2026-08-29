@@ -483,6 +483,11 @@ const ASSET_DOWNLOADS: ReadonlyArray<{ format: OwnedDemandAssetFormat; label: st
   { format: "qr_svg", label: "Download QR SVG" },
 ];
 
+const GOOGLE_BUSINESS_PROFILE_SQUARE_DOWNLOAD = {
+  format: "square",
+  label: "Download 1:1 GBP PNG",
+} as const satisfies { format: OwnedDemandAssetFormat; label: string };
+
 function DemandAssetLinks({
   channelKey,
   placementKey,
@@ -490,9 +495,13 @@ function DemandAssetLinks({
   channelKey: string;
   placementKey: string;
 }) {
+  const assetDownloads = channelKey === "google_business_profile"
+    ? [GOOGLE_BUSINESS_PROFILE_SQUARE_DOWNLOAD, ...ASSET_DOWNLOADS]
+    : ASSET_DOWNLOADS;
+
   return (
     <div className="mt-3 flex flex-wrap gap-2" aria-label="Protected launch asset downloads">
-      {ASSET_DOWNLOADS.map((asset) => (
+      {assetDownloads.map((asset) => (
         <a
           key={asset.format}
           href={ownedDemandAssetHref(channelKey, placementKey, asset.format)}

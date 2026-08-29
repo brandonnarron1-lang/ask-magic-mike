@@ -2,6 +2,37 @@
 
 Updated 2026-08-29.
 
+## Phase 9 Google Business Profile square asset — 2026-08-29
+
+- **Reuse decision:** this candidate extends the existing Distribution Command,
+  approved creative catalog, private renderer, tracked shortlinks, native share
+  handoff, and publication-proof ledger. It adds no second visual system,
+  publisher, campaign manager, attribution store, lead path, or CRM.
+- **Channel-fidelity correction:** the Google Business Profile handoff now
+  resolves a dedicated 720x720 PNG instead of the social 4:5 feed format.
+  `square` resolves only for the exact Google Business Profile channel.
+- **Identity and compliance:** all four placements reuse untouched approved
+  Mike imagery, canonical copy, QR destinations, Black Diamond palette,
+  broker-review guardrails, and Equal Housing identification. No generated or
+  edited likeness is used.
+- **Current acceptance:** exact Node 24.18.0 passes the focused 2-file / 23-test
+  matrix and complete local release gate: deployable-source isolation, 14/14
+  release safety, 268 files / 3,354 tests, strict TypeScript, full ESLint,
+  optimized 59-page Next.js build, and 95/17 route proof. Diff-level redacted
+  Gitleaks and the Production dependency audit are clean. Original-pixel QA
+  passes the reference/square comparison and four-placement matrix after
+  correcting the first render's buyer collision and renter crop. Exact-commit
+  CI, immutable Preview, protected hosted verification, and runtime-log
+  evidence remain pending.
+- **Authority boundary:** Production remains
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. No Production/Preview
+  deployment, environment, database, lead/event, email/SMS/Push, provider,
+  publication/proof, WordPress/DNS, spend, deletion, or NellySelly mutation
+  occurred.
+- Detailed design and evidence:
+  `docs/phase9/GOOGLE_BUSINESS_PROFILE_SQUARE_ASSET.md` and
+  `docs/phase9/GOOGLE_BUSINESS_PROFILE_SQUARE_ASSET_QA_EVIDENCE.md`.
+
 ## Phase 9 identity-safe wide social preview — 2026-08-29
 
 - **Reuse decision:** the candidate keeps the approved Black Diamond hero,

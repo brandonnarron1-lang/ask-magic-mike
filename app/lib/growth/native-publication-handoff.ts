@@ -6,7 +6,7 @@ import {
 import { resolveOwnedDemandCreative } from "./owned-demand";
 
 const NATIVE_SHARE_FORMAT_BY_CHANNEL = {
-  google_business_profile: "feed",
+  google_business_profile: "square",
   facebook: "feed",
   instagram: "story",
   linkedin: "feed",

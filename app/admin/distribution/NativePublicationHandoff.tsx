@@ -83,7 +83,7 @@ function trustedProofHref(value: string) {
 
 function trustedHandoffInput(input: NativePublicationHandoffProps) {
   if (!/^[a-z0-9-]+\.png$/.test(input.filename) || !trustedProofHref(input.proofHref)) return false;
-  if (!/^\/api\/admin\/distribution\/assets\/[a-z_]+\/[a-z_]+\?format=(feed|story)$/.test(input.assetHref)) {
+  if (!/^\/api\/admin\/distribution\/assets\/[a-z_]+\/[a-z_]+\?format=(feed|story|square)$/.test(input.assetHref)) {
     return false;
   }
   if (

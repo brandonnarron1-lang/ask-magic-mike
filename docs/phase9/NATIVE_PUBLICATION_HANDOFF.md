@@ -23,8 +23,10 @@ friction.
 - Reuse the existing canonical placement catalog and protected asset route.
 - Offer the handoff only for Google Business Profile, Facebook, Instagram, and
   LinkedIn placements.
-- Use the existing 4:5 image for Google Business Profile, Facebook, and
-  LinkedIn, and the existing 9:16 image for Instagram.
+- Use the dedicated 720x720 image for Google Business Profile, the existing
+  4:5 image for Facebook and LinkedIn, and the existing 9:16 image for
+  Instagram. The square adaptation is documented in
+  `GOOGLE_BUSINESS_PROFILE_SQUARE_ASSET.md`.
 - Require one explicit tap to prepare the private same-origin PNG and a second
   explicit tap to invoke the device share sheet. This preserves the Web Share
   transient-user-activation boundary after asynchronous image preparation.

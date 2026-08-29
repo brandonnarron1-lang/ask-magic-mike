@@ -32,10 +32,17 @@ function renderFacebookHandoff() {
   return handoff;
 }
 
+function renderGoogleBusinessProfileHandoff() {
+  const handoff = resolveNativePublicationHandoff("google_business_profile", "seller_review");
+  if (!handoff) throw new Error("expected canonical Google Business Profile handoff");
+  render(<NativePublicationHandoff {...handoff} />);
+  return handoff;
+}
+
 describe("native publication handoff definitions", () => {
   it("reuses exactly 16 approved social placements and channel-native image formats", () => {
     const expectedFormats = {
-      google_business_profile: "feed",
+      google_business_profile: "square",
       facebook: "feed",
       instagram: "story",
       linkedin: "feed",
@@ -128,6 +135,36 @@ describe("NativePublicationHandoff", () => {
     const proofLink = screen.getByRole("link", { name: "Review matching proof requirements" });
     expect(proofLink).toHaveAttribute("href", handoff.proofHref);
     expect(screen.getByText(/Record only after an authorized person observes/i)).toBeVisible();
+  });
+
+  it("prepares the exact protected 1:1 Google Business Profile asset", async () => {
+    installShareApi(vi.fn(async () => undefined));
+    const handoff = renderGoogleBusinessProfileHandoff();
+
+    fireEvent.click(screen.getByRole("button", { name: "Prepare native share" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Open device share sheet" })).toBeEnabled());
+
+    expect(handoff.assetHref).toContain("format=square");
+    expect(handoff.filename).toContain("-square.png");
+    expect(globalThis.fetch).toHaveBeenCalledWith(handoff.assetHref, {
+      cache: "no-store",
+      credentials: "same-origin",
+      headers: { Accept: "image/png" },
+    });
+    expect(navigator.share).not.toHaveBeenCalled();
+  });
+
+  it("rejects a square asset path with any extra or unapproved query input", async () => {
+    installShareApi(vi.fn());
+    const handoff = resolveNativePublicationHandoff("google_business_profile", "seller_review");
+    if (!handoff) throw new Error("expected canonical Google Business Profile handoff");
+    render(<NativePublicationHandoff {...handoff} assetHref={`${handoff.assetHref}&url=https://evil.example`} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Prepare native share" }));
+
+    await waitFor(() => expect(screen.getByText(/could not be prepared/i)).toBeVisible());
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+    expect(navigator.share).not.toHaveBeenCalled();
   });
 
   it("treats a closed share sheet as no publication and keeps the prepared file reusable", async () => {
