@@ -141,5 +141,52 @@ for (const viewport of viewports) {
       path: `artifacts/growth-channel-economics-${viewport.name}.png`,
       fullPage: true,
     });
+
+    const distributionResponse = await page.goto("/admin/distribution", {
+      waitUntil: "networkidle",
+    });
+    expect(distributionResponse?.status()).toBe(200);
+    await expect(page.getByRole("heading", {
+      name: "Turn the existing audience into measurable local demand.",
+    })).toBeVisible();
+    const sellerDecisionLink = page.locator(
+      '[data-seller-intent-decision-manifest="true"]',
+    );
+    await expect(sellerDecisionLink).toBeVisible();
+    await expect(sellerDecisionLink).toHaveText("Download decision packet");
+    const sellerDecisionHref = await sellerDecisionLink.getAttribute("href");
+    expect(new URL(sellerDecisionHref || "", applicationOrigin).pathname).toBe(
+      "/api/admin/distribution/wordpress-change-set/wordpress_seller_intent_decision",
+    );
+    await expect(page.getByText("Seller-intent consolidation hold", { exact: true }))
+      .toBeVisible();
+    await expect(page.getByText(
+      "Choose the canonical seller page and capture owner before publishing another CTA.",
+      { exact: true },
+    )).toBeVisible();
+
+    const distributionDimensions = await page.evaluate(() => ({
+      documentWidth: document.documentElement.scrollWidth,
+      viewportWidth: document.documentElement.clientWidth,
+      errorOverlay: Boolean(
+        document.querySelector(
+          "[data-nextjs-dialog], .vite-error-overlay, #webpack-dev-server-client-overlay",
+        ),
+      ),
+      textLength: document.body.innerText.trim().length,
+    }));
+    expect(distributionDimensions.documentWidth).toBeLessThanOrEqual(
+      distributionDimensions.viewportWidth + 1,
+    );
+    expect(distributionDimensions.errorOverlay).toBe(false);
+    expect(distributionDimensions.textLength).toBeGreaterThan(500);
+    expect(mutationRequests).toEqual([]);
+    expect(consoleErrors).toEqual([]);
+    expect(pageErrors).toEqual([]);
+
+    await page.screenshot({
+      path: `artifacts/wordpress-seller-intent-decision-${viewport.name}.png`,
+      fullPage: true,
+    });
   });
 }
