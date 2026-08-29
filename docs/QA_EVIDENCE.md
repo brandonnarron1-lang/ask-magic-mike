@@ -1,6 +1,6 @@
 # QA Evidence
 
-## Phase 9 identity-safe wide social preview — 2026-08-28
+## Phase 9 identity-safe wide social preview — 2026-08-29
 
 - `pnpm run amm:verify:social-preview`: 40/42 live checks passed. Ask Magic
   Mike root, Ask, and Value surfaces returned 200 with Open Graph metadata for
@@ -19,16 +19,16 @@
   `e96c83acaa4555ce0bb4e62fda7db18cd8b6c0a2476efd1987a9f5843ec70aa4`,
   and logo SHA-256
   `d6f9cf50829416c348985307e68b111f8e46665a1c603810b46b55b377c32d49`.
-- Focused Vitest: PASS — 4 files / 175 tests. Complete release gate: PASS —
-  265 files / 3,304 tests, strict typecheck, full ESLint, optimized Next.js
+- Post-restack focused Vitest: PASS — 4 files / 143 tests. Complete release
+  gate: PASS — 265 files / 3,329 tests, strict typecheck, full ESLint, optimized Next.js
   15.5.21 build, 95 active routes / 17 acknowledged duplicates, 14/14 release
   safety checks, and deployable-source isolation.
 - Production dependency audit: PASS — no known vulnerabilities. Deterministic
   regeneration reproduced the exact output and lineage hashes. Release doctor:
-  HEALTHY — 43/43 on the clean code-bearing commit. Redacted Gitleaks: PASS —
-  239.33 KB staged candidate plus 647 commits / 16.13 MB, no leaks.
+  HEALTHY — 43/43. Redacted Gitleaks: PASS — exact PR #226 delta scanned two
+  commits / 24.12 KB and full history scanned 668 commits / 16.33 MB, no leaks.
   `git diff --check`: PASS.
-- Local browser visual/DOM QA: PASS at 1440x1000 and 390x844. The exact card,
+- Fresh in-app Browser visual/DOM QA: PASS at 1280x900 and 390x844. The exact card,
   identity-preservation label, review heading, navigation, and footer rendered;
   mobile had no horizontal overflow. Post-fix reloads produced no new browser
   error or warning.
@@ -36,11 +36,13 @@
   The shipped asset uses only deterministic composition of the approved source
   photograph and exact logo. Full source/final and browser evidence is recorded
   in `design-qa.md`.
-- Exact code-bearing head
-  `4683a7c752a40e29ba80ddcda150a0e4fbc5b07c` is cleanly mergeable and passes
-  GitHub Release Gate run `33213057838`. Immutable Vercel Preview deployment
-  `dpl_DqsFHqTMWp4JTuhnWVAQoDLU4XZm` is `READY` at
-  `https://ask-magic-mike-e2r699dzk-eyes-up-industries.vercel.app`.
+- Original code-bearing head
+  `4683a7c752a40e29ba80ddcda150a0e4fbc5b07c` remains preserved and passed
+  GitHub Release Gate run `33213057838`. PR #227 is now reconciled through a
+  normal merge onto sealed PR #226 head
+  `ae666aa6c31ed3726155e110f065b64d4b445040`; original PR #227 head
+  `10b1a43720c67b8218c110db488e5513a8d6c566` is preserved at
+  `rescue/amm-pr227-pre-pr226-exact-seal-20260829-0611`.
 - Authenticated in-app Browser proof: `/social-preview` returned the correct
   heading, identity-preservation label, non-index metadata, exact wide-card
   render, navigation, footer, and equal document/client width. Direct asset
@@ -51,8 +53,9 @@
   root, Ask, and Home Value. Preview-only passive telemetry returned HTTP 202
   through the established read-only guard. The checked window contained zero
   4xx, 5xx, warning, or error result. No form was submitted.
-- Production, Preview data, WordPress, DNS, email, SMS, lead records, providers,
-  and NellySelly remained unchanged.
+- Production remains unchanged at
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. Preview data, WordPress, DNS,
+  email, SMS, lead records, providers, and NellySelly remained unchanged.
 
 ## Release-authority deduplication — 2026-08-28
 

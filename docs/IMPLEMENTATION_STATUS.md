@@ -20,20 +20,22 @@ Updated 2026-08-29.
   public pages, images, robots, login, admin, and REST paths; `Facebot` and
   `meta-externalagent/1.1` returned 200. This is an upstream host rule, not a
   page or WordPress-content defect, and the candidate does not weaken it.
-- **Current acceptance:** exact Node 24.18.0 passes focused metadata/image
-  coverage (4 files / 175 tests), the complete release gate (265 files / 3,304
+- **Current acceptance:** exact Node 24.18.0 passes focused metadata/image and
+  release-authority coverage (4 files / 143 tests), the complete release gate (265 files / 3,329
   tests), strict TypeScript, full ESLint, optimized Next.js 15.5.21 build,
   95/17 route proof, 14/14 safety, deployable-source isolation, zero known
   Production dependency vulnerabilities, deterministic asset regeneration,
   whitespace proof, and responsive desktop/mobile browser QA. The mobile
   document width equals its client width. Release doctor passes 43/43 on the
-  clean code-bearing commit; redacted Gitleaks scans find no leak in the 239.33
-  KB candidate patch or the 647-commit history. Code-bearing head
-  `4683a7c752a40e29ba80ddcda150a0e4fbc5b07c` passes GitHub Release Gate run
-  `33213057838` and immutable Vercel Preview deployment
-  `dpl_DqsFHqTMWp4JTuhnWVAQoDLU4XZm`; the hosted card, root/Ask/Value metadata,
-  direct 1200x630 asset, responsive review surface, and clean runtime-log window
-  are verified.
+  restacked candidate; redacted Gitleaks scans find no leak in the exact
+  two-commit / 24.12 KB PR #226 delta or the 668-commit / 16.33 MB history.
+  Original code-bearing head `4683a7c752a40e29ba80ddcda150a0e4fbc5b07c`
+  passed GitHub Release Gate run `33213057838` and immutable Vercel Preview
+  deployment `dpl_DqsFHqTMWp4JTuhnWVAQoDLU4XZm`. The branch is now reconciled
+  through a normal merge onto sealed PR #226 head
+  `ae666aa6c31ed3726155e110f065b64d4b445040`; original PR #227 head
+  `10b1a43720c67b8218c110db488e5513a8d6c566` is preserved at
+  `rescue/amm-pr227-pre-pr226-exact-seal-20260829-0611`.
 - **Authority boundary:** Production remains on
   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. This Draft is stacked after
   sealed PR #226 and has no independent Production authority. No
