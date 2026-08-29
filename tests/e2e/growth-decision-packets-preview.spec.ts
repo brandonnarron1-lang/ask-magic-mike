@@ -65,6 +65,26 @@ for (const viewport of viewports) {
     await expect(page.getByText("Cost / signed client", { exact: true }).first()).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Revenue / referral fees" })).toBeAttached();
 
+    const economicsRegion = page.getByRole("region", {
+      name: "Channel economics table",
+    });
+    await expect(economicsRegion).toBeVisible();
+    await expect(
+      page.getByText("Scroll horizontally or use the arrow keys to review every evidence column."),
+    ).toBeVisible();
+    const economicsDimensions = await economicsRegion.evaluate((element) => ({
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+    }));
+    expect(economicsDimensions.scrollWidth).toBeGreaterThan(economicsDimensions.clientWidth);
+    await economicsRegion.focus();
+    await expect(economicsRegion).toBeFocused();
+    await economicsRegion.evaluate((element) => {
+      element.scrollLeft = 0;
+    });
+    await page.keyboard.press("ArrowRight");
+    await expect.poll(() => economicsRegion.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+
     const packetHeading = page.getByRole("heading", {
       name: "Local-demand decision packets",
     });

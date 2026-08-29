@@ -20,6 +20,9 @@
   close is reviewed.
 - Kept the Growth surface server-authorized, aggregate-only, read-only, and
   explicit that tracked contribution is not net income.
+- Made the intentionally wide channel-economics table an explicitly named,
+  keyboard-focusable scroll region with visible focus and arrow-key guidance;
+  protected browser acceptance now proves keyboard horizontal movement.
 - Former-head test and visual proof is historical until the refreshed exact
   head passes local, CI, immutable Preview, protected browser, security,
   isolation, and runtime-log acceptance.

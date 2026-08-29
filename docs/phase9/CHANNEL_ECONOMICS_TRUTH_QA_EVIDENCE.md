@@ -110,6 +110,22 @@ Visual inspection confirms the desktop hierarchy remains restrained and
 legible; mobile cards stack without clipping; and the intentionally wide
 economics table stays inside its own scroller rather than widening the page.
 
+## Independent accessibility refinement
+
+An exact-artifact visual review on 2026-08-29 confirmed responsive containment
+but identified that the intentionally wide channel table did not explicitly
+expose its horizontal scroller to keyboard-only users. The candidate now:
+
+- names the scroll container as the `Channel economics table` region;
+- makes the region keyboard-focusable with a visible focus outline;
+- provides visible arrow-key/horizontal-scroll guidance; and
+- extends protected desktop/mobile acceptance to prove overflow, focus, and
+  keyboard horizontal movement without adding a write request.
+
+The pre-refinement exact-head evidence below remains immutable historical proof.
+The refined head requires a fresh Release Gate, immutable Preview, and protected
+browser seal before this Draft may again be treated as Preview-ready.
+
 ## Former-head local release result — historical
 
 The original PR #223 head previously passed:
