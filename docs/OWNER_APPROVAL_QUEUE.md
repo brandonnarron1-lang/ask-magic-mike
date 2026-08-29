@@ -476,9 +476,14 @@ deletion, or NellySelly action.
 - PRs #92 and #119 through #121 remain archive-after-review history, not a
   parallel Production release plan.
 
-The first later WordPress mutation remains exactly one homepage href and still
-requires `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`
-after a fresh matching manifest and verified page-149 rollback.
+The former homepage href-only mutation is superseded while the public
+`.amm-cta` component remains hidden by `display:none !important`. The corrected
+manifest returns `hidden_target` and does not issue publication readiness. A
+new exact WordPress gate can be generated only after one visible placement and
+page-149 rollback are reviewed. The application-only visibility-truth candidate
+will later use
+`APPROVE PHASE 9 WORDPRESS CTA VISIBILITY TRUTH MERGE AND PRODUCTION DEPLOYMENT`
+when the ordered PR queue reaches it; that phrase cannot publish WordPress.
 
 ## People and brokerage decisions
 

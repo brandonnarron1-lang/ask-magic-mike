@@ -188,3 +188,11 @@ separate exact phrase:
 
 That later phrase authorizes only the reviewed homepage href replacement after
 a fresh matching manifest and verified revision.
+
+### 2026-08-29 visibility supersession
+
+Fresh public browser and server-runtime inspection found that the exact
+homepage anchor is nested in an `.amm-cta` component suppressed by public
+`display:none !important` CSS. The href-only publication recommendation and
+historical phrase above are therefore not currently requestable. See
+`WORDPRESS_HOMEPAGE_VISIBILITY_TRUTH.md`. No WordPress change occurred.

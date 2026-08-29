@@ -1207,6 +1207,22 @@ Updated 2026-08-29.
 - Detailed scope and rollback:
   `docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md`.
 
+### 2026-08-29 visibility correction
+
+- Fresh public browser QA found the homepage's single Ask Magic Mike anchor is
+  not visible because public CSS suppresses its `.amm-cta` container.
+- The existing readiness manifest now joins exact-link ancestry to known
+  public hiding selectors and fails closed with `hidden_target` instead of
+  treating hidden markup as an activatable placement.
+- The visibility facts are privacy-minimized, included in the deterministic
+  precondition hash, and covered against unrelated-rule and container-only
+  false positives.
+- The historical homepage href-only gate is superseded. No WordPress,
+  Production, database, notification, DNS, provider, or NellySelly mutation
+  occurred.
+- Detailed evidence and next decision boundary:
+  `docs/phase9/WORDPRESS_HOMEPAGE_VISIBILITY_TRUTH.md`.
+
 ## Phase 9 iOS phone handoff consolidation — 2026-08-22
 
 - Historical PR #179 was audited rather than merged wholesale. Its unique

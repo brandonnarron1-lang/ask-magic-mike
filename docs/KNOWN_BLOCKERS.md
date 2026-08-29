@@ -1,29 +1,30 @@
 # Known Operating Constraints
 
-Updated 2026-08-28. The public funnel, canonical Neon capture, Lead Center, and
+Updated 2026-08-29. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
 
 ## WordPress owned-demand publication boundary
 
-- Three existing public WordPress CTAs are now provably identifiable through
-  read-only manifests, but no page has been changed. The current links remain
-  live and reversible.
-- The fresh 2026-08-23 20:37 UTC server-runtime audit returned
-  `legacy_match_ready` for exact page IDs 149, 3952, and 3631 with one current
-  link each, zero lookalikes, and no blockers. These are readiness facts only;
-  every manifest still reports `publicationAuthorized=false` and
-  `mutationPerformed=false`.
-- The homepage is the only recommended first publication. It still requires a
-  fresh matching readiness manifest, verified page-149 revision/backup, the
-  exact phrase
-  `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`,
-  and post-publication public/mobile/analytics acceptance.
+- Three existing WordPress links remain identifiable through read-only
+  manifests, but no page has been changed.
+- Fresh 2026-08-29 public and browser inspection found that homepage page 149
+  has one exact Ask Magic Mike href inside an `.amm-cta` component suppressed
+  by public `display:none !important` CSS. The corrected manifest returns
+  `hidden_target`, `targetVisibility=hidden_by_known_css`, and
+  `publicationBlocked=true`.
+- The historical homepage href-only gate is not currently requestable. A link
+  replacement would remain invisible. Select and review one visible placement,
+  create a verified page-149 rollback, and generate a new exact publication
+  packet before any WordPress gate.
+- Home-value page 3952 and We Buy Homes page 3631 remain independent
+  `visible_candidate` decisions. They are not bulk-edit substitutes for the
+  blocked homepage placement.
 - A readiness manifest is not proof of publication or demand. Do not create a
   publication-proof row until an authorized operator actually publishes the
   exact link and supplies public evidence.
-- Home-value page 3952 and We Buy Homes page 3631 remain later independent
-  decisions. Do not bulk-edit them under the homepage gate.
+- Detailed visibility evidence:
+  `docs/phase9/WORDPRESS_HOMEPAGE_VISIBILITY_TRUTH.md`.
 
 ## Current release constraint
 

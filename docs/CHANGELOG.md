@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-08-29 — WordPress homepage visibility truth
+
+- Reused the existing protected WordPress readiness manifest and owned-demand
+  registry; no publisher, funnel, form, database, dashboard, or bridge was
+  added.
+- Corrected a false-ready boundary found by public visual QA: the homepage Ask
+  Magic Mike anchor exists inside an `.amm-cta` component suppressed by live
+  `display:none !important` CSS.
+- Added fail-closed `hidden_target` status, privacy-safe visibility counts, and
+  visibility-bound precondition hashing. An exact rule without the exact
+  container and an exact container without the rule do not create false
+  blocks.
+- The former homepage href-only publication gate is superseded until a visible
+  placement and verified page-149 rollback are reviewed.
+- Exact Node 24.18.0 release verification passes 271 files / 3,374 tests,
+  strict typecheck, full ESLint, optimized Next.js 15.5.21 build with 59 static
+  pages, 95/17 route proof, 14/14 release safety, system isolation, dependency
+  audit, diff scan, and redacted delta secret scan.
+- No Production deployment, WordPress edit, cache purge, database write, lead,
+  message, provider action, DNS change, spend, deletion, or NellySelly action
+  occurred.
+
 ## 2026-08-29 — WordPress seller-intent publication hold
 
 - Reused the canonical Ask Magic Mike `/sell` funnel, protected Distribution

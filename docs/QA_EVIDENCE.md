@@ -2098,3 +2098,42 @@ Draft PR #235 seal so the immutable evidence does not require a
 self-referential evidence commit. Production remains PR #209 merge
 `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`; PR #210 remains the first
 eligible application candidate.
+
+## Phase 9 WordPress homepage visibility truth — 2026-08-29
+
+Fresh read-only Production evidence overturned the earlier structural-only
+homepage readiness result without changing WordPress:
+
+- authenticated Growth/Distribution aggregates: 0 eligible live leads in 30
+  days, 0% useful attribution, 0 measured owned placements, and 35 prepared
+  placements; the measured constraint is owned-demand activation;
+- public server-runtime manifest before the repair: page 149, one exact legacy
+  href, one rollback href, zero lookalikes, and structural
+  `legacy_match_ready`;
+- independent browser DOM: one `askmagicmike.com` anchor with accessible text
+  `Start With Your Address`, but `visible=false` before and after carousel wait;
+- public source: exact `amm-visual-containment` CSS suppresses `.amm-cta` and
+  `.amm-cta--dark` using `display:none !important`;
+- corrected v2 live manifest: `hidden_target`,
+  `targetVisibility=hidden_by_known_css`, one hidden target, two hidden
+  selectors, page ID 149, zero lookalikes, `publicationBlocked=true`, and
+  precondition
+  `60614f9ce7f7e7fe165a6c3cf0d142a6669faf497fee4f94386aff34827d0638`;
+- separate fresh manifests: home-value page 3952 and We Buy Homes page 3631
+  remain `visible_candidate` / `legacy_match_ready`; neither was published;
+- focused contract/route verification: PASS — 2 files / 16 tests;
+- exact Node 24.18.0 release gate: PASS — system isolation, 14/14 safety, 271
+  files / 3,374 tests, strict typecheck, full ESLint, optimized Next.js 15.5.21
+  build with 59 static pages, and 95 active / 17 acknowledged routes;
+- Production dependency audit: PASS — no known vulnerabilities;
+- `git diff --check` and redacted Gitleaks delta scan: PASS;
+- official WordPress revision, GA4 manual-tagging, and Google canonical guidance
+  rechecked from primary sources; none treats hidden markup as a visible
+  placement or grants publication authority.
+
+No Production/Preview deployment, WordPress edit, revision, cache purge,
+database write or migration, lead submission, analytics write, email/SMS/Push,
+provider action, social publication, DNS change, spend, deletion, or
+NellySelly interaction occurred. Exact-head CI, immutable Preview, protected
+no-write browser QA, runtime logs, and final secret scans remain to be bound to
+the Draft candidate seal.

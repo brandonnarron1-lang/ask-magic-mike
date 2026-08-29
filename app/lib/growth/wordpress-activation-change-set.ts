@@ -29,6 +29,7 @@ export type WordPressActivationPlacementKey =
 
 export type WordPressActivationStatus =
   | "legacy_match_ready"
+  | "hidden_target"
   | "already_exact"
   | "page_id_unresolved"
   | "missing_target"
@@ -57,7 +58,7 @@ export interface WordPressPageIndexRow {
 }
 
 export interface WordPressActivationChangeSet {
-  schemaVersion: "amm.wordpress_activation_change_set.v1";
+  schemaVersion: "amm.wordpress_activation_change_set.v2";
   generatedAt: string;
   mode: "read_only_public_precondition";
   placementKey: WordPressActivationPlacementKey;
@@ -77,6 +78,9 @@ export interface WordPressActivationChangeSet {
   currentHrefOccurrences: number;
   askMagicMikeHrefOccurrences: number;
   rejectedLookalikeHrefOccurrences: number;
+  targetVisibility: "visible_candidate" | "hidden_by_known_css" | "unknown";
+  hiddenTargetOccurrences: number;
+  hiddenCssSelectorOccurrences: number;
   preconditionSha256: string;
   blockers: string[];
   publicationSteps: string[];
@@ -196,16 +200,93 @@ function attributeValue(tag: string, name: string) {
   return unquoted ? decodeHtmlEntities(unquoted[1]).trim() : "";
 }
 
+interface AskMagicMikeHrefEvidence {
+  url: URL;
+  ctaContainerClasses: string[];
+}
+
+const VOID_HTML_ELEMENTS = new Set([
+  "area",
+  "base",
+  "br",
+  "col",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
+]);
+const KNOWN_CTA_CONTAINER_CLASSES = new Set(["amm-cta", "amm-cta--dark"]);
+
+function classTokens(tag: string) {
+  return attributeValue(tag, "class")
+    .split(/\s+/)
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+function hiddenCtaCssEvidence(html: string) {
+  const hiddenClasses = new Set<string>();
+  let hiddenCssSelectorOccurrences = 0;
+  for (const styleMatch of html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style\s*>/gi)) {
+    const css = styleMatch[1].replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const ruleMatch of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      if (!/\bdisplay\s*:\s*none\s*!\s*important\b/i.test(ruleMatch[2])) continue;
+      for (const rawSelector of ruleMatch[1].split(",")) {
+        const selector = rawSelector.trim().replace(/\s+/g, " ");
+        for (const className of KNOWN_CTA_CONTAINER_CLASSES) {
+          const escapedClass = className.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          if (new RegExp(`^(?:(?:html|body)\\s+)?\\.${escapedClass}$`, "i").test(selector)) {
+            hiddenClasses.add(className);
+            hiddenCssSelectorOccurrences += 1;
+          }
+        }
+      }
+    }
+  }
+  return { hiddenClasses, hiddenCssSelectorOccurrences };
+}
+
 function extractAskMagicMikeHrefs(html: string, sourcePage: string) {
-  const hrefs: URL[] = [];
+  const hrefs: AskMagicMikeHrefEvidence[] = [];
   let rejectedLookalikeHrefOccurrences = 0;
-  for (const match of String(html).matchAll(/<a\b[^>]*>/gi)) {
-    const rawHref = attributeValue(match[0], "href");
-    if (!rawHref) continue;
-    try {
-      hrefs.push(normalizeAskMagicMikeUrl(rawHref, sourcePage));
-    } catch {
-      if (/askmagicmike/i.test(rawHref)) rejectedLookalikeHrefOccurrences += 1;
+  const stack: Array<{ tagName: string; classes: string[] }> = [];
+  for (const match of String(html).matchAll(/<\/?[a-z][^>]*>/gi)) {
+    const tag = match[0];
+    const closing = /^<\//.test(tag);
+    const tagName = tag.match(/^<\/?\s*([a-z][a-z0-9:-]*)/i)?.[1]?.toLowerCase();
+    if (!tagName) continue;
+
+    if (closing) {
+      const openIndex = stack.map((entry) => entry.tagName).lastIndexOf(tagName);
+      if (openIndex >= 0) stack.splice(openIndex);
+      continue;
+    }
+
+    const classes = classTokens(tag);
+    if (tagName === "a") {
+      const rawHref = attributeValue(tag, "href");
+      if (rawHref) {
+        try {
+          const url = normalizeAskMagicMikeUrl(rawHref, sourcePage);
+          const ctaContainerClasses = [...new Set([
+            ...stack.flatMap((entry) => entry.classes),
+            ...classes,
+          ].filter((className) => KNOWN_CTA_CONTAINER_CLASSES.has(className)))];
+          hrefs.push({ url, ctaContainerClasses });
+        } catch {
+          if (/askmagicmike/i.test(rawHref)) rejectedLookalikeHrefOccurrences += 1;
+        }
+      }
+    }
+
+    if (!VOID_HTML_ELEMENTS.has(tagName) && !/\/\s*>$/.test(tag)) {
+      stack.push({ tagName, classes });
     }
   }
   return { hrefs, rejectedLookalikeHrefOccurrences };
@@ -270,11 +351,30 @@ function hashPrecondition(input: {
   currentHrefOccurrences: number;
   askMagicMikeHrefOccurrences: number;
   rejectedLookalikeHrefOccurrences: number;
+  targetVisibility: WordPressActivationChangeSet["targetVisibility"];
+  hiddenTargetOccurrences: number;
+  hiddenCssSelectorOccurrences: number;
 }) {
   return createHash("sha256").update(JSON.stringify(input)).digest("hex");
 }
 
-function basePublicationSteps(target: WordPressActivationTarget, currentHref: string | null) {
+function basePublicationSteps(
+  target: WordPressActivationTarget,
+  currentHref: string | null,
+  targetVisibility: WordPressActivationChangeSet["targetVisibility"] = "unknown",
+) {
+  if (targetVisibility === "hidden_by_known_css") {
+    return [
+      `Create and verify a recoverable WordPress revision or page backup for page ID ${target.expectedPageId}.`,
+      "Do not publish an href-only change while the exact target remains suppressed by public CSS.",
+      "Select one visible existing placement or prepare a separately reviewed desktop/mobile restoration of this exact CTA component.",
+      "Regenerate this manifest and require a visible_candidate target with the expected page ID, rollback href, and SHA-256 precondition.",
+      "Publish only after a new exact placement-specific approval gate is issued and received.",
+      currentHref
+        ? "If later acceptance fails, restore the verified page revision and rollbackHref, then recheck the public page."
+        : "Do not publish because no exact rollback href is available.",
+    ];
+  }
   return [
     `Create and verify a recoverable WordPress revision or page backup for page ID ${target.expectedPageId}.`,
     "Regenerate this manifest immediately before editing and require the same SHA-256 precondition.",
@@ -290,6 +390,7 @@ function basePublicationSteps(target: WordPressActivationTarget, currentHref: st
 function statusDetail(status: WordPressActivationStatus) {
   const details: Record<WordPressActivationStatus, string> = {
     legacy_match_ready: "One exact legacy href and one exact published WordPress page record match the allowlisted placement.",
+    hidden_target: "The exact href exists, but a known public CSS rule suppresses its Ask Magic Mike CTA container.",
     already_exact: "The public placement already uses the canonical tracked href; no WordPress edit is needed.",
     page_id_unresolved: "The exact public href was found, but the published WordPress page record could not be resolved uniquely.",
     missing_target: "No exact legacy or canonical href matched this named placement.",
@@ -326,10 +427,20 @@ export function buildWordPressActivationChangeSet(input: {
     input.html,
     target.sourcePage,
   );
-  const legacyMatches = hrefs.filter((href) => matchesLegacyHref(href, target));
-  const proposedMatches = hrefs.filter((href) => comparableUrl(href) === proposedComparable);
+  const { hiddenClasses, hiddenCssSelectorOccurrences } = hiddenCtaCssEvidence(input.html);
+  const legacyMatches = hrefs.filter((href) => matchesLegacyHref(href.url, target));
+  const proposedMatches = hrefs.filter((href) => comparableUrl(href.url) === proposedComparable);
   const currentMatches = legacyMatches.length ? legacyMatches : proposedMatches;
-  const currentHref = currentMatches.length ? currentMatches[0].toString() : null;
+  const currentHref = currentMatches.length ? currentMatches[0].url.toString() : null;
+  const hiddenTargetOccurrences = currentMatches.filter((href) =>
+    href.ctaContainerClasses.some((className) => hiddenClasses.has(className))
+  ).length;
+  const targetVisibility: WordPressActivationChangeSet["targetVisibility"] =
+    currentMatches.length === 0
+      ? "unknown"
+      : hiddenTargetOccurrences > 0
+        ? "hidden_by_known_css"
+        : "visible_candidate";
 
   const rows = safeWordPressPageRows(input.pageRows).filter((row) => {
     try {
@@ -357,6 +468,11 @@ export function buildWordPressActivationChangeSet(input: {
   } else if (pageRow.id !== target.expectedPageId) {
     status = "precondition_mismatch";
     blockers.push(`Expected WordPress page ID ${target.expectedPageId}, but the public index resolved a different ID.`);
+  } else if (hiddenTargetOccurrences > 0) {
+    status = "hidden_target";
+    blockers.push(
+      "The exact target is inside an Ask Magic Mike CTA container suppressed by a public display:none !important rule; replacing only its href would not activate a visible owned-demand path.",
+    );
   } else if (proposedMatches.length === 1 && legacyMatches.length === 0) {
     status = "already_exact";
   } else if (legacyMatches.length === 1 && proposedMatches.length === 0) {
@@ -380,10 +496,13 @@ export function buildWordPressActivationChangeSet(input: {
     currentHrefOccurrences: currentMatches.length,
     askMagicMikeHrefOccurrences: hrefs.length,
     rejectedLookalikeHrefOccurrences,
+    targetVisibility,
+    hiddenTargetOccurrences,
+    hiddenCssSelectorOccurrences,
   });
 
   return {
-    schemaVersion: "amm.wordpress_activation_change_set.v1",
+    schemaVersion: "amm.wordpress_activation_change_set.v2",
     generatedAt: input.generatedAt ?? new Date().toISOString(),
     mode: "read_only_public_precondition",
     placementKey: target.placementKey,
@@ -403,9 +522,12 @@ export function buildWordPressActivationChangeSet(input: {
     currentHrefOccurrences: currentMatches.length,
     askMagicMikeHrefOccurrences: hrefs.length,
     rejectedLookalikeHrefOccurrences,
+    targetVisibility,
+    hiddenTargetOccurrences,
+    hiddenCssSelectorOccurrences,
     preconditionSha256,
     blockers,
-    publicationSteps: basePublicationSteps(target, currentHref),
+    publicationSteps: basePublicationSteps(target, currentHref, targetVisibility),
     approvalGate: target.approvalGate,
     mutationPerformed: false,
     containsRawPageHtml: false,
@@ -432,9 +554,12 @@ function buildFetchFailureChangeSet(
     currentHrefOccurrences: 0,
     askMagicMikeHrefOccurrences: 0,
     rejectedLookalikeHrefOccurrences: 0,
+    targetVisibility: "unknown",
+    hiddenTargetOccurrences: 0,
+    hiddenCssSelectorOccurrences: 0,
   });
   return {
-    schemaVersion: "amm.wordpress_activation_change_set.v1",
+    schemaVersion: "amm.wordpress_activation_change_set.v2",
     generatedAt,
     mode: "read_only_public_precondition",
     placementKey,
@@ -454,6 +579,9 @@ function buildFetchFailureChangeSet(
     currentHrefOccurrences: 0,
     askMagicMikeHrefOccurrences: 0,
     rejectedLookalikeHrefOccurrences: 0,
+    targetVisibility: "unknown",
+    hiddenTargetOccurrences: 0,
+    hiddenCssSelectorOccurrences: 0,
     preconditionSha256,
     blockers: ["Restore safe public read access and regenerate the manifest before any WordPress edit."],
     publicationSteps: basePublicationSteps(target, null),
