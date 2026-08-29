@@ -33,7 +33,7 @@ describe("Growth Command Center route and authority guards", () => {
     expect(page).toContain("Capability authority ledger");
     expect(page).toContain("A reviewed candidate is not Production");
     expect(page).toContain('href={item.href}');
-    expect(page).toContain('aria-label="Scrollable channel economics table"');
+    expect(page).toContain('aria-label="Channel economics table"');
     expect(page).toContain("tabIndex={0}");
     expect(capabilities).not.toContain("fetch(");
     expect(capabilities).not.toContain('"use server"');

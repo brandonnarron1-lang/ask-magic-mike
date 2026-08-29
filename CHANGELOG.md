@@ -2,6 +2,10 @@
 
 ## 2026-08-29 — Capability authority ledger candidate
 
+- Preserved the prior PR #230 head at
+  `rescue/amm-pr230-pre-pr229-parent-refresh-20260829-143600`, then merged exact
+  sealed PR #229 head `ab24fc0ef2eef10f9b368d57909d899dd053d204`
+  without rebase, reset, force push, or branch deletion.
 - Added one typed, read-only capability ledger to the existing protected Growth
   Command Center so Production, reviewed candidates, operator/host gates,
   external dependencies, and prohibited autonomy remain visibly distinct.
@@ -11,6 +15,9 @@
 - Replaced the consumed PR #209 durability gate and superseded homepage-only
   WordPress gate with the current ordered-candidate and consent-runtime gates;
   the ledger no longer presents historical authority as actionable.
+- Reconciled the inherited keyboard-scroll help with one stable accessible name
+  for the channel-economics region so the latest parent contract, browser query,
+  and static authorization guard agree.
 - Added no route, migration, package, provider call, public surface, mutation,
   secret, or Production change.
 

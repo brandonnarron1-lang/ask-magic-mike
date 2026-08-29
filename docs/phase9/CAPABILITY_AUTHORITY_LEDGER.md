@@ -113,11 +113,13 @@ Required checks:
 - strict typecheck, lint, full tests, optimized build, route manifest,
   release-safety, dependency audit, secret scan, and protected Preview visual QA.
 
-Local acceptance passes 267 files / 3,346 tests, strict typecheck, full lint,
+Local acceptance passes 267 files / 3,351 tests, strict typecheck, full lint,
 optimized Next.js 15.5.21 build, 95/17 route proof, 14/14 release safety,
 deployable-source isolation, zero known Production dependency vulnerabilities,
 and responsive desktop/mobile no-write visual QA with zero axe A/AA violations.
-Exact-head CI and immutable protected Preview proof remain pending until push.
+After the exact PR #229 parent refresh, fresh final-head CI and immutable
+protected Preview proof are recorded in the PR seal rather than a
+self-referential evidence-only source commit.
 
 Evidence:
 [`CAPABILITY_AUTHORITY_LEDGER_QA_EVIDENCE.md`](./CAPABILITY_AUTHORITY_LEDGER_QA_EVIDENCE.md).

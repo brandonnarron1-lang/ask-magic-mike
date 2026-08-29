@@ -814,7 +814,7 @@ export default async function GrowthCommandCenterPage({
             </p>
             <div
               aria-describedby="channel-economics-scroll-help"
-              aria-label="Scrollable channel economics table"
+              aria-label="Channel economics table"
               className="overflow-x-auto rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f0cf79]"
               role="region"
               tabIndex={0}

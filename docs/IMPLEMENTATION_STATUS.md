@@ -2182,11 +2182,14 @@ any bridge activation or shadow-mode test.
   Town consent-runtime gate; the page cannot create, consume, or broaden either
   approval. The completed-and-rolled-back crawler test is recorded only as a
   root/WHM access dependency.
-- Final local acceptance passes 267 files / 3,346 tests, strict typecheck, full
+- Final local acceptance passes 267 files / 3,351 tests, strict typecheck, full
   lint, optimized Next.js 15.5.21 build, 95/17 route proof, 14/14 safety,
   deployable-source isolation, zero known Production dependency
   vulnerabilities, and desktop/mobile no-write browser QA with zero axe A/AA
-  violations. Exact-head CI and immutable Preview proof remain pending.
+  violations. After the exact PR #229 parent refresh, fresh final-head CI,
+  immutable Preview, protected QA, visual/runtime, and Production non-mutation
+  evidence are pinned in the PR seal without a self-referential evidence-only
+  commit.
 - No route, migration, dependency, environment variable, secret, database,
   public page, provider, communication, WordPress, DNS, hosting, Production, or
   NellySelly state changed.
