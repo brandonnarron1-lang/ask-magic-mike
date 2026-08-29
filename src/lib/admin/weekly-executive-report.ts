@@ -155,7 +155,7 @@ export function buildWeeklyExecutiveReport(
     `RECOMMENDATIONS`,
     ...recommendations.map((r) => `  • ${r}`),
     ``,
-    `Social Preview: ${fbBlocked ? "Facebook 403 on OTP — pending host WAF fix." : "All clear."}`,
+    `Social Preview: ${fbBlocked ? "Facebook 403 on OTP — bounded host Apache correction pending." : "All clear."}`,
     ``,
     `— Ask Magic Mike / Our Town Properties, Wilson NC`,
     `  askmagicmike.com`,

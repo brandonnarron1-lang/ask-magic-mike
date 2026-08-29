@@ -105,6 +105,7 @@ describe("buyer-family contact and replay integrity", () => {
     await user.type(screen.getByLabelText("Phone"), "2525550194");
     await user.selectOptions(screen.getByLabelText("Timeline (optional)"), "3-6 months");
     await user.selectOptions(screen.getByLabelText("Financing context (optional)"), "Cash");
+    await user.click(screen.getByRole("checkbox", { name: /I have a preapproval or lender conversation underway/i }));
     await user.click(screen.getByRole("button", { name: "Request Renter Review" }));
 
     expect(await screen.findByText("Synthetic replay accepted.")).toBeVisible();
@@ -118,6 +119,7 @@ describe("buyer-family contact and replay integrity", () => {
       phone: "2525550194",
       timeline: "3-6 months",
       financing: "Cash",
+      preapproval: true,
     });
     expect(analytics.events).toContain("funnel_started");
     expect(analytics.events).toContain("contact_submitted");
@@ -159,6 +161,7 @@ describe("buyer-family contact and replay integrity", () => {
     expect(leadPayload.consent_call).toBe(false);
     expect(leadPayload).not.toHaveProperty("timeline");
     expect(leadPayload).not.toHaveProperty("financing");
+    expect(leadPayload).not.toHaveProperty("preapproval");
     expect(typeof leadPayload.idempotency_key).toBe("string");
 
     const eventBodies = fetchMock.mock.calls

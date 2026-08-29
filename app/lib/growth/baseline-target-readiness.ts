@@ -229,9 +229,9 @@ export const GROWTH_BASELINE_METRICS = [
     unit: "usd",
     direction: "context_only",
     minimumSampleSize: 1,
-    requiresLiveDemand: true,
+    requiresLiveDemand: false,
     targetCandidate: false,
-    definition: "Acquisition spend from canonical daily spend rows in the selected window.",
+    definition: "Acquisition spend from canonical daily spend rows in the selected window, including spend that produced no eligible lead.",
   },
   {
     key: "cost_per_lead",
@@ -375,7 +375,8 @@ export const GROWTH_BASELINE_METRICS = [
     minimumSampleSize: 20,
     requiresLiveDemand: true,
     targetCandidate: true,
-    definition: "Eligible live leads with immutable first-human-response evidence divided by eligible live leads.",
+    definition: "Assigned live leads with immutable first-human-response evidence divided by assigned live leads at agent grain.",
+    instrumentationGap: "System-wide first-response coverage and responder breakdowns exist, but an immutable assigned-lead denominator at agent grain is not yet aggregated.",
   },
   {
     key: "agent_conversion_rate",
@@ -597,6 +598,16 @@ function observationFor(
   const fieldAvailable = leadAggregateAvailable && growth.webVitals.configured;
   const portfolio = paidAndOwnedLeadCounts(growth);
   const spendPresent = economicsAvailable && growth.spendRowsRead > 0;
+  const spendCoverageComplete = growth.channels.every((channel) =>
+    !channel.flags.includes("spend_missing") &&
+    !channel.flags.includes("conversion_tracking_gap")
+  );
+  const closedRevenueCoverageComplete =
+    summary.closes > 0 &&
+    summary.closedRevenueRecordCount === summary.closes;
+  const referralFeeCoverageComplete =
+    summary.referralFeeExpectedCloseCount > 0 &&
+    summary.referralFeeRecordCount === summary.referralFeeExpectedCloseCount;
 
   switch (key) {
     case "eligible_live_lead_volume":
@@ -604,7 +615,6 @@ function observationFor(
     case "useful_source_attribution_rate":
       return { available: leadAggregateAvailable, value: summary.leads ? summary.attributedLeadRate : null, sampleSize: summary.leads, emptyReason: "A live lead denominator is required." };
     case "first_response_coverage_rate":
-    case "agent_first_follow_up_rate":
       return { available: leadAggregateAvailable, value: percentage(summary.firstResponseSampleSize, summary.leads), sampleSize: summary.leads, emptyReason: "A live lead denominator is required." };
     case "median_first_response_minutes":
       return { available: leadAggregateAvailable, value: summary.medianFirstResponseMinutes, sampleSize: summary.firstResponseSampleSize, emptyReason: "No immutable first-response sample exists in the selected window." };
@@ -627,19 +637,19 @@ function observationFor(
     case "tracked_spend":
       return { available: economicsAvailable, value: spendPresent ? summary.spendUsd : null, sampleSize: growth.spendRowsRead, emptyReason: "No reconciled spend row exists in the selected window." };
     case "cost_per_lead":
-      return { available: economicsAvailable, value: spendPresent ? summary.blendedCostPerLead : null, sampleSize: summary.leads, emptyReason: "Eligible live leads and reconciled spend are both required." };
+      return { available: economicsAvailable, value: spendPresent && spendCoverageComplete ? summary.blendedCostPerLead : null, sampleSize: summary.leads, emptyReason: "Eligible live leads and complete paid-channel spend coverage are both required." };
     case "cost_per_qualified_lead":
-      return { available: economicsAvailable, value: spendPresent ? summary.blendedCostPerQualifiedLead : null, sampleSize: summary.qualified, emptyReason: "Qualified live leads and reconciled spend are both required." };
+      return { available: economicsAvailable, value: spendPresent && spendCoverageComplete ? summary.blendedCostPerQualifiedLead : null, sampleSize: summary.qualified, emptyReason: "Qualified live leads and complete paid-channel spend coverage are both required." };
     case "cost_per_appointment":
-      return { available: economicsAvailable, value: spendPresent ? summary.blendedCostPerAppointment : null, sampleSize: summary.appointments, emptyReason: "Appointment progression and reconciled spend are both required." };
+      return { available: economicsAvailable, value: spendPresent && spendCoverageComplete ? summary.blendedCostPerAppointment : null, sampleSize: summary.appointments, emptyReason: "Appointment progression and complete paid-channel spend coverage are both required." };
     case "cost_per_signed_client":
-      return { available: economicsAvailable, value: spendPresent ? summary.blendedCostPerSignedClient : null, sampleSize: summary.agreements, emptyReason: "Signed-client outcomes and reconciled spend are both required." };
+      return { available: economicsAvailable, value: spendPresent && spendCoverageComplete ? summary.blendedCostPerSignedClient : null, sampleSize: summary.agreements, emptyReason: "Signed-client outcomes and complete paid-channel spend coverage are both required." };
     case "cost_per_close":
-      return { available: economicsAvailable, value: spendPresent ? summary.blendedCostPerClose : null, sampleSize: summary.closes, emptyReason: "Closed outcomes and reconciled spend are both required." };
+      return { available: economicsAvailable, value: spendPresent && spendCoverageComplete ? summary.blendedCostPerClose : null, sampleSize: summary.closes, emptyReason: "Closed outcomes and complete paid-channel spend coverage are both required." };
     case "attributed_revenue":
-      return { available: economicsAvailable, value: growth.outcomeRowsRead ? summary.attributedRevenueUsd : null, sampleSize: summary.closedRevenueRecordCount, emptyReason: "Actual brokerage-revenue outcome evidence is required." };
+      return { available: economicsAvailable, value: closedRevenueCoverageComplete ? summary.attributedRevenueUsd : null, sampleSize: summary.closedRevenueRecordCount, emptyReason: "Every eligible close requires an actual brokerage-revenue outcome before the selected-window total is measured." };
     case "recorded_referral_fees":
-      return { available: economicsAvailable, value: summary.referralFeeExpectedCloseCount ? summary.referralFeesUsd : null, sampleSize: summary.referralFeeExpectedCloseCount, emptyReason: "No eligible portal or referral close currently requires fee evidence." };
+      return { available: economicsAvailable, value: referralFeeCoverageComplete ? summary.referralFeesUsd : null, sampleSize: summary.referralFeeRecordCount, emptyReason: summary.referralFeeExpectedCloseCount > 0 ? "Every eligible portal or referral close requires explicit referral-fee evidence; an absent row is unknown, not zero." : "No eligible portal or referral close currently requires fee evidence." };
     case "tracked_contribution":
       return { available: economicsAvailable, value: summary.trackedContributionUsd, sampleSize: summary.closes, emptyReason: "Complete spend, close-revenue, and applicable referral-fee evidence is required." };
     case "return_on_ad_spend":

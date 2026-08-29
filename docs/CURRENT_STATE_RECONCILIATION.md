@@ -1,6 +1,6 @@
 # Current State Reconciliation
 
-Audited 2026-08-23. This document overrides older status claims when they
+Audited 2026-08-28. This document overrides older status claims when they
 conflict with observed Production, authenticated accounts, current `main`, or
 provider/database state.
 
@@ -8,8 +8,8 @@ provider/database state.
 
 | Asset | Evidence | Status |
 | --- | --- | --- |
-| GitHub | `brandonnarron1-lang/ask-magic-mike`; Production baseline PR #195 merge `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` | VERIFIED LIVE |
-| Vercel | `eyes-up-industries/ask-magic-mike`; project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` | VERIFIED LIVE |
+| GitHub | `brandonnarron1-lang/ask-magic-mike`; Production baseline PR #209 merge `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` | VERIFIED LIVE |
+| Vercel | `eyes-up-industries/ask-magic-mike`; project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; deployment `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` | VERIFIED LIVE |
 | Public host | `https://www.askmagicmike.com`; apex redirects 308 | VERIFIED LIVE |
 | Database | Neon `bitter-star-20214385`; Production branch `br-round-base-auh6h2wd` | VERIFIED LIVE |
 | Brokerage/SEO | `https://www.ourtownproperties.com` WordPress | VERIFIED LIVE |
@@ -18,7 +18,7 @@ provider/database state.
 | Free phone alerts | VAPID Web Push schema/provider/phone setup ready; physical device acceptance remains owner-scoped | READY — OWNER ACTIVATION |
 | NellySelly | Separate repository, project, domains, database, and environment | VERIFIED ISOLATED |
 
-Observed 2026-08-23 public evidence: the conversion verifier passes 15/15 and
+Observed after the 2026-08-28 PR #209 cutover: the conversion verifier passes 15/15 and
 the read-only Production smoke passes 19 checks with two intentional skips.
 `/`, `/ask`, `/sell`, `/value`, `/buy`, `/widget/v1`, `/api/health/live`, and
 `/api/health/ready` return 200. The apex redirects permanently to `www`.
@@ -26,10 +26,9 @@ Anonymous private routes are denied or temporarily redirected to the
 same-origin login route; authorized Lead Center sessions are additionally
 restricted by server-side role and assigned-lead scope.
 
-The current Production readiness body does not prove the durable limiter
-contract required by Draft PR #209. The candidate monitor therefore reports
-8/9 rather than accepting HTTP 200 alone. This is the known Production
-durability gate, not a public-funnel outage.
+The current Production readiness body proves the canonical Neon durable limiter
+table, schema, privileges, effective RLS bypass, runtime store, dedicated
+server-only secret, and aggregate contract. The strict monitor passes 9/9.
 
 No new repository, public app, provider ledger, or parallel lead database is
 warranted.
@@ -72,17 +71,17 @@ warranted.
 | PR | Disposition | Gate |
 | --- | --- | --- |
 | #195 conversion identity polish | Merged and live at `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` | Gate exhausted; it authorizes no later action |
-| #209 atomic controlled release candidate | Canonical Draft candidate; cumulative application work from #202 through #208 plus fail-closed Neon Preview endpoint attestation | Exact Preview-mutation and Production gates remain separate |
+| #209 atomic controlled release candidate | Merged and accepted at `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` / `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` | Gate exhausted; it authorizes no later action |
+| #210 canonical alias consolidation | Draft candidate refreshed onto accepted PR #209 `main`; permanent query-preserving compatibility redirects only | Requires fresh exact-head proof and its separate alias-consolidation gate |
 | #202 through #208 | Preserved incremental review records superseded for release by #209 | No independent merge or Production authority |
 | #221 / #212 cross-domain measurement | #221 is the ordered consolidated Draft; #212 is closed as an exact preserved ancestor | #212 has no independent gate; #221 remains held behind predecessors and live consent remediation |
-| #225 baseline/target readiness | Current ordered Draft tail; read-only evidence replacement for #187 | No target writer, migration, or Production authority |
+| #225 baseline/target readiness | Current ordered application Draft tail; read-only evidence replacement for #187 | No target writer, migration, or Production authority |
 | #187 KPI target register | Closed as superseded; branch, migration, and evidence preserved | No current release gate |
 
-PR #209 must remain Draft until its exact-head checks match the proposed
-deployment and the applicable exact gate is received. The conversion-identity
-gate used for PR #195 is exhausted and cannot authorize PR #209. PRs #92 and
-#119 through #121 remain `ARCHIVE AFTER REVIEW`; none should merge without a
-fresh requirement/diff audit.
+PR #209 is complete and its gate is exhausted. PR #210 is the next ordered
+application candidate; no prior approval authorizes it. PRs #92 and #119
+through #121 remain `ARCHIVE AFTER REVIEW`; none should merge without a fresh
+requirement/diff audit.
 
 ## Current aggregate truth
 

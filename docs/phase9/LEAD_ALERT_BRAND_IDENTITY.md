@@ -54,11 +54,11 @@ untested hypothesis until eligible live observations exist.
 
 ## Release boundary
 
-This candidate is based on exact final Draft PR #213 head
-`3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea` and follows PR #209 → PR #210 →
+This candidate is based on exact sealed Draft PR #213 head
+`d2a1bf01d0962e07dd1e460acd4c295e145cf6a8` and follows PR #209 → PR #210 →
 PR #211 → PR #213. Former PR #214 head
-`3ac0885a6f19fc479266457cff760ef836094470` is preserved at
-`rescue/amm-pr214-pre-final-pr213-cutover-hygiene-20260824-172407`. It must be
+`94e3d66190df138d42c1321adfeb0cefb0478545` is preserved at
+`rescue/amm-pr214-pre-pr213-exact-seal-20260828-222353`. It must be
 refreshed onto accepted `main` after those predecessors release and fully
 re-proven before any merge.
 

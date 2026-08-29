@@ -13,8 +13,9 @@
 - Web Push: disable the channel flag or revoke only affected devices; keep email
   and outbox evidence.
 - Hub subdomain: remove only the `hub` CNAME and Vercel domain attachment.
-- Crawler rule: remove only the path/method/rule-ID exception; keep ModSecurity
-  enabled.
+- Crawler rule: remove only the new per-vhost/account override, run
+  `apachectl configtest`, use a graceful reload, and retain the server-global
+  bot policy.
 
 After every rollback, run public smoke, readiness, funnel, anonymous-admin,
 bridge, queue, test-suppression, NellySelly isolation, and legacy-Vercel isolation

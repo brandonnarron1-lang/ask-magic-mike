@@ -47,14 +47,14 @@ describe("POST /api/analytics/event", () => {
     );
   });
 
-  it("accepts but does not rate-limit or persist ordinary Preview telemetry", async () => {
+  it("fails closed before rate limiting or persisting ordinary Preview telemetry", async () => {
     vi.stubEnv("VERCEL_ENV", "preview");
     const res = await POST(post({ eventName: "page_view", properties: { path: "/ask" } }));
-    expect(res.status).toBe(202);
+    expect(res.status).toBe(503);
     await expect(res.json()).resolves.toMatchObject({
-      ok: true,
+      ok: false,
       persisted: false,
-      excluded: "preview_read_only",
+      code: "preview_data_disabled",
     });
     expect(trackMock).not.toHaveBeenCalled();
   });

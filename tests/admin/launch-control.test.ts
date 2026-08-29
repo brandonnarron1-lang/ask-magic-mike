@@ -27,11 +27,11 @@ function makeTraffic(ammSafe = true, otpSafe = false) {
       { step: 3, action: "Post links", status: "waiting" as const },
       {
         step: 4,
-        action: "Fix host WAF",
+        action: "Apply bounded host Apache correction",
         status: "blocked" as const,
         blockerNote: "External action required",
       },
-      { step: 5, action: "Run full verify after WAF fix", status: "blocked" as const },
+      { step: 5, action: "Run full verify after host correction", status: "blocked" as const },
     ],
     nextBestAction: "Post askmagicmike.com links. Use UTM Copy Bank.",
     socialPreviewScore: "40/42",

@@ -1,6 +1,6 @@
 # Phase 9 lead-intent default truth
 
-Captured: 2026-08-28 EDT
+Captured: 2026-08-29 EDT
 
 Production mutation: none
 
@@ -18,6 +18,8 @@ The rendered forms visually preselected facts that a consumer had not stated:
 - Seller defaulted condition to `Move-in ready` and timeline to `ASAP`.
 - Buyer-family intake defaulted timeline to `30-60 days` and financing to
   `Not sure yet`.
+- An untouched buyer preapproval checkbox serialized as `false`, asserting a
+  negative financing fact even though the consumer had not answered it.
 
 Those values were serialized and persisted on an otherwise untouched form.
 Timeline is not decorative context: deterministic scoring assigns 30 points to
@@ -26,7 +28,8 @@ seller who supplied only phone, property, and seller intent could be recorded
 at score 75 instead of the truthful 45. A comparable buyer record could be
 recorded at 62 instead of 40. The canonical API also mapped an absent or
 unrecognized timeline to 24 months, collapsing unknown evidence into an
-asserted planning horizon.
+asserted planning horizon. Explicit `not sure` and `unknown` text was also
+collapsed into 24 months.
 
 This affected source-of-truth quality, priority bands, qualification grade,
 alert urgency, SLA interpretation, analytics, and downstream allocation. It
@@ -39,8 +42,11 @@ could make operators act on urgency the consumer never expressed.
 - Buyer timeline and financing context now begin with explicit, blank,
   optional prompts.
 - Untouched optional values are omitted from the browser payload.
-- Missing or unrecognized timelines persist as `null`; only an explicit
-  planning/unknown answer maps to the 24-month compatibility value.
+- An unchecked buyer preapproval affirmation is omitted; only a checked box
+  serializes `preapproval: true`.
+- Missing, unrecognized, and explicitly uncertain timelines persist as
+  `null`. Only an actual planning-horizon answer such as `Just planning`,
+  `Next year`, or `12+ months` maps to the 24-month compatibility value.
 - An unknown timeline remains an explainable score factor but contributes zero
   points.
 - Seller A-grade urgency requires an explicit timeline at or below three
@@ -72,23 +78,19 @@ telemetry boundary; Preview remained configured read-only.
 
 ## Automated acceptance
 
-Node 24 local verification:
+Reconciled Node 24.18.0 verification:
 
-- focused lead/form matrix: 4 files / 44 tests passed;
-- complete Vitest suite: 263 files / 3,290 tests passed;
-- strict TypeScript: passed;
-- ESLint: passed;
-- optimized Next.js 15.5.21 build: passed;
-- route manifest: 95 active / 17 acknowledged duplicate roots;
-- release safety: 14 / 14 passed;
-- deployable-source NellySelly isolation: passed;
-- Production dependency audit: no known vulnerabilities;
-- full Git-history Gitleaks scan: 643 commits, no leaks found.
+- focused lead/form matrix: 4 files / 48 tests passed;
+- omitted and explicitly uncertain timeline variants persist as `null` and
+  score zero timeline points;
+- untouched preapproval is absent while an affirmative check remains `true`;
+- exact-head suite, build, CI, immutable Preview, protected browser, security,
+  isolation, and runtime-log acceptance are recorded in PR #224's immutable
+  release evidence before promotion.
 
-Pre-commit release doctor is healthy with one expected nonblocking finding:
-the candidate tree is intentionally dirty before commit. Release authority is
-`LOCAL_READY`; exact-head Preview QA cannot exist until the branch is committed,
-pushed, and receives its immutable Vercel Preview.
+Exact-head hosted evidence is deliberately PR-bound because the final commit
+identity and immutable deployment do not exist until after this file is
+committed.
 
 ## Rollback
 

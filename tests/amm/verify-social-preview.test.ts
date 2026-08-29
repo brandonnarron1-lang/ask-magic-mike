@@ -16,9 +16,47 @@ import {
   hasStaleVercelUrl,
   hasCanonicalAskMikeLink,
   hasConfidentialMlsLeak,
+  buildCrawlerRemediation,
   CRAWLER_BLOCK_STATUSES,
   CRAWLER_AGENTS,
 } from "../../scripts/amm/verify-social-preview.mjs";
+
+describe("buildCrawlerRemediation", () => {
+  it("returns the exact bounded Apache guidance for the known OTP Facebook block", () => {
+    const lines = buildCrawlerRemediation([
+      {
+        url: "https://www.ourtownproperties.com/ask-mike/",
+        crawler: "facebook",
+        status: 403,
+      },
+      {
+        url: "https://www.ourtownproperties.com/agents/mike-eatmon/",
+        crawler: "facebook",
+        status: 403,
+      },
+    ]);
+    const guidance = lines.join(" ").toLowerCase();
+
+    expect(guidance).toContain("bad_bots");
+    expect(guidance).toContain("per-vhost/account");
+    expect(guidance).toContain("42/42");
+    expect(guidance).toContain("do not create a broad user-agent whitelist");
+  });
+
+  it("does not reuse the OTP diagnosis for an unknown crawler failure", () => {
+    const lines = buildCrawlerRemediation([
+      {
+        url: "https://www.askmagicmike.com/ask",
+        crawler: "linkedin",
+        status: 403,
+      },
+    ]);
+    const guidance = lines.join(" ").toLowerCase();
+
+    expect(guidance).toContain("differs from the known");
+    expect(guidance).not.toContain("bad_bots");
+  });
+});
 
 // ---------------------------------------------------------------------------
 // isCrawlerBlocked

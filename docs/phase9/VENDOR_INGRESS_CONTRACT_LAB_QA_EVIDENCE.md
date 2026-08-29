@@ -4,7 +4,15 @@ Date: 2026-08-24
 
 Branch: `codex/phase9-vendor-ingress-contract-lab-20260824`
 
-Base: `a6098ab4ee7a13d024bafc08264628e2691a8e06`
+Base: sealed Draft PR #216 head
+`211485df28fc818ab783ed357df8486f1460d5e2`
+
+Former PR #217 head `d04984b4d162f13c79af261beb55a82f15a86b80`
+is preserved at
+`rescue/amm-pr217-pre-pr216-exact-seal-20260828-234940`. Exact-parent
+application head is `e616170657861c3dd83fae43b28bef9cf89506af`.
+The evidence below was collected on the former head and is historical until
+repeated on the current exact head.
 
 ## Scope
 
@@ -13,7 +21,7 @@ provider account, credential, webhook, database, lead, message, campaign,
 WordPress surface, Vercel environment, Production deployment, or NellySelly
 system was used.
 
-## Completed local evidence
+## Historical local evidence
 
 Node runtime: `v24.18.0`.
 
@@ -87,13 +95,13 @@ pnpm release:doctor
 gitleaks git --redact --no-banner --log-opts='--all'
 Full tracked history scanned · no leaks found
 
-git merge-base --is-ancestor a6098ab4... HEAD
+git merge-base --is-ancestor 211485df... HEAD
 PASS
 
-git rev-list --count a6098ab4...HEAD
-1 code commit before this evidence-only seal
+git rev-list --count 211485df...HEAD
+3 commits through the exact-parent application merge
 
-git diff --check a6098ab4...HEAD
+git diff --check 211485df...HEAD
 PASS
 ```
 
@@ -104,6 +112,55 @@ safe documentation label `google_key` as well as an actual key value. The
 assertion was corrected to prohibit returned credential fields and synthetic
 signing material. This was a test defect, not a product-code failure.
 
+## Current exact-parent local evidence — 2026-08-29
+
+Exact release-authority reconciliation head:
+`5721a62f40a0d2c63475ca43608be066dddb018a`.
+
+All commands below ran on Node `v24.18.0` with the frozen pnpm lockfile:
+
+```text
+6 focused files / 46 tests PASS
+242 full-suite files / 3,153 tests PASS
+strict TypeScript PASS
+full ESLint PASS
+Next.js 15.5.21 optimized build PASS
+53 generated pages
+86 active routes / 17 acknowledged root/src duplicates
+release doctor 43/43 PASS
+release safety 14/14 PASS
+Ask/Nelly system isolation PASS
+Production dependency audit: no known vulnerabilities
+gitleaks: 649 reachable commits / ~16.21 MB / no leaks
+git diff --check PASS
+sealed-parent ancestry PASS / 4 candidate commits
+clean worktree PASS
+```
+
+The focused security review found no actionable defect in the new boundary:
+
+- both page and route enforce `growth:manage` server-side;
+- the cookie-authenticated POST requires exact same-origin `Origin` and rejects
+  an explicit non-same-origin `Sec-Fetch-Site`;
+- JSON is streamed and capped at 512 bytes before parsing;
+- the body accepts exactly one allowlisted profile key and no lead payload;
+- the only new browser request is a fixed same-origin API path;
+- React renders returned strings through normal escaped JSX;
+- HMAC/key comparisons reject malformed input and use `timingSafeEqual` only
+  after equal-length checks;
+- private responses are non-cacheable, noindex, nosniff, no-referrer, and
+  same-origin; and
+- source and diff scans found no provider/database client, dynamic outbound URL,
+  client secret, raw signing material response, dangerous HTML sink, or
+  NellySelly identifier.
+
+Current Follow Up Boss and Google first-party documentation was rechecked on
+2026-08-28 and continues to match the synthetic signature, envelope, field,
+`lead_id`, `google_key`, and forward-compatible unknown-field behavior recorded
+by the lab. Zillow remains contract-gated and no authenticated contract is
+invented. The documentation-only seal after this record must repeat exact-head
+CI and protected Preview proof.
+
 ## Pending exact-head release evidence
 
 The following must be completed after documentation, lint, and review settle
@@ -113,6 +170,16 @@ the final candidate head:
 - authenticated desktop/mobile visual and interaction QA;
 - exact Preview log audit proving no mutation or provider call; and
 - clean diff, ancestry, and worktree proof.
+
+The only later Production gate for this lab is:
+
+```text
+APPROVE PHASE 9 VENDOR INGRESS CONTRACT LAB MERGE AND PRODUCTION DEPLOYMENT
+```
+
+It has not been supplied and cannot authorize provider activation, credentials,
+webhook registration, lead import, messaging, database mutation, WordPress,
+DNS, spend, or any other release.
 
 ## Acceptance assertions
 

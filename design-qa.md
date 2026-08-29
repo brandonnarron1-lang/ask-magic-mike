@@ -59,6 +59,17 @@ Residual P3: the longest supporting sentence is intentionally secondary at
 very small thumbnail sizes. The primary title, brokerage mark, location, and
 domain remain readable, so no change is required.
 
+## 2026-08-29 restack verification
+
+- Fresh in-app Browser captures at 1280x900 and 390x844 match the approved
+  source and original accepted implementation.
+- The exact card rendered at the declared ratio with no facial, logo, copy,
+  crop, border, radius, spacing, or focal-point regression.
+- Mobile `scrollWidth` equaled `clientWidth`; the card, feed plate, story plate,
+  UTM block, and footer remained readable without horizontal overflow.
+- Deterministic regeneration reproduced 160,316 bytes and SHA-256
+  `68dea02d8b4beb24eb864363c2c0d30adc1c98f4d5f37872a32848dad037c713`.
+
 ## Comparison history
 
 1. An AI-assisted hierarchy concept was generated from the approved sources.

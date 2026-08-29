@@ -119,6 +119,41 @@ export function hasConfidentialMlsLeak(html) {
   return MLS_CONFIDENTIAL_PATTERNS.some((p) => p.test(html));
 }
 
+/**
+ * Builds safe operator guidance for detected crawler blocks.
+ * The exact OTP Facebook-only condition has authenticated Apache evidence;
+ * any different failure remains unknown and must not inherit that diagnosis.
+ */
+export function buildCrawlerRemediation(blockedSummary) {
+  const isKnownOtpFacebookBlock =
+    blockedSummary.length > 0 &&
+    blockedSummary.every(({ url, crawler }) => {
+      try {
+        return new URL(url).hostname === "www.ourtownproperties.com" && crawler === "facebook";
+      } catch {
+        return false;
+      }
+    });
+
+  if (isKnownOtpFacebookBlock) {
+    return [
+      "Known OTP Facebook-only block: authenticated evidence identifies the server-global Apache",
+      "facebookexternalhit -> bad_bots classifier and Require not env bad_bots denial.",
+      "Do not create a broad user-agent whitelist or disable ModSecurity/Wordfence.",
+      "Give the host docs/META_CRAWLER_HOSTING_OPERATOR_ACTION.md and require the bounded",
+      "per-vhost/account GET/HEAD override, config test, rollback, and 42/42 verification.",
+      "Re-run: pnpm run amm:verify:social-preview",
+    ];
+  }
+
+  return [
+    "This block differs from the known OTP Facebook-only condition.",
+    "Inspect the affected host's current edge, firewall, and application logs before changing policy.",
+    "Do not create a broad crawler allowlist from this result.",
+    "Re-run after a narrowly reviewed correction: pnpm run amm:verify:social-preview",
+  ];
+}
+
 // ---------------------------------------------------------------------------
 // URLs under test
 // ---------------------------------------------------------------------------
@@ -299,15 +334,9 @@ async function runChecks() {
       console.log(`    ${b.url}  →  ${b.crawler}  HTTP ${b.status}`);
     }
     console.log("\n  REMEDIATION:");
-    console.log("    The affected host is blocking social crawlers by user agent.");
-    console.log("    This is typically a Cloudflare Bot Fight Mode or WAF rule on the host.");
-    console.log("    To fix on OTP WordPress:");
-    console.log("      1. Log into Cloudflare or the host WAF for ourtownproperties.com");
-    console.log("      2. Allow FacebookExternalHit, Twitterbot, LinkedInBot, Slackbot, Discordbot");
-    console.log("      3. Or add a firewall exception for these user agent strings");
-    console.log("      4. Re-run: pnpm run amm:verify:social-preview");
-    console.log("    Ask Magic Mike (askmagicmike.com) is hosted on Vercel which does not");
-    console.log("    block social crawlers by default — check Vercel Edge Config if AMM blocks.");
+    for (const line of buildCrawlerRemediation(blockedSummary)) {
+      console.log(`    ${line}`);
+    }
   }
 
   if (fail === 0) {

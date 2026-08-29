@@ -1,14 +1,14 @@
 # Phase 9 Durable Rate-Limit Cutover Rehearsal
 
-Date: 2026-08-24
-Status: read-only operator guard; no Production authority
+Date: 2026-08-24; accepted 2026-08-28 (America/New_York)
+Status: historical accepted rehearsal; Production gate consumed and exhausted
 
 ## Purpose
 
-PR #209 already contains the reviewed durable Neon limiter, readiness contract,
-bounded emergency fallback, monitoring, and rollback. This rehearsal closes the
-remaining operator gap without adding another limiter, provider, database, or
-release vehicle.
+PR #209 contained the reviewed durable Neon limiter, readiness contract,
+bounded emergency fallback, monitoring, and rollback. This rehearsal closed the
+operator gap without adding another limiter, provider, database, or release
+vehicle.
 
 The command proves the exact GitHub, Vercel, Preview, Production, and
 environment-name boundary before the release gate is used. It has no execution,
@@ -63,24 +63,29 @@ The Preview correctly reports `rate_limit_required=false` and
 Production response correctly lacks the new limiter fields. Those are
 pre-release boundary checks, not release defects.
 
-## What remains gated
+## Accepted result
 
-The rehearsal does not consume or replace this exact gate:
+The owner supplied this exact gate once:
 
 ```text
 APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT
 ```
 
-After that gate, the operator still performs one controlled action set: enter a
-new Production-only encrypted secret without displaying it, merge only the
-revalidated PR head, let the canonical Git integration build the resulting
-merge commit, and complete the health/malformed-request/log/monitor acceptance
-in `docs/GO_LIVE_RUNBOOK.md`.
+That gate was consumed by the single controlled action set and is now
+exhausted. PR #209 head
+`b28b380f2cc3f9b63b2c0048b398e97a88dfee4b` merged as
+`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`; canonical Production deployment
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` passed the same-commit health,
+malformed-request, log, and strict monitor acceptance recorded in
+`docs/phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md`.
+
+Do not reuse this gate for a later commit, environment change, migration, or
+deployment. PR #210 has its own separate canonical-alias gate.
 
 ## Rollback
 
-The rehearsal itself needs no rollback because it writes nothing. Release
-rollback remains deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` first, followed
-by removal of only the newly added secret from future Production builds if
-required. Do not alter limiter buckets, lead/event/message data, stale Upstash
-variables, or NellySelly.
+The rehearsal itself needed no rollback because it wrote nothing. The accepted
+PR #209 release can still roll back first to deployment
+`dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`, followed by removal of only the PR #209
+Production secret from future builds if required. Do not alter limiter buckets,
+lead/event/message data, stale Upstash variables, or NellySelly.

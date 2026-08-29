@@ -1,11 +1,21 @@
 # Phase 9 public owned-referral handoff QA evidence
 
-Captured: 2026-08-28 18:32 EDT
+Refreshed: 2026-08-29 06:58 EDT
 
 Branch: `codex/phase9-owned-referral-handoff-20260828`
 
-Parent: exact Draft PR #227 head
-`10b1a43720c67b8218c110db488e5513a8d6c566`
+Parent: exact sealed Draft PR #227 head
+`cf92b9cb64a7cc5b70c98d629cc86d2289fbfedb`
+
+Original PR #228 head: `c755764846a3aa2708def5c47cc36e6fa700941d`,
+preserved at
+`rescue/amm-pr228-pre-pr227-exact-seal-20260829-0636`
+
+Restack method: normal merge commit
+`9b4b748f1513d6a00ed713e9fe5cd45c4546af98`; no rebase or force-push
+
+Code-bearing evidence head:
+`0442abc1cf0d9a14c5ffd21d1673561aff575db5`
 
 Production mutation: none
 
@@ -36,34 +46,35 @@ pnpm exec vitest run \
   tests/api/public-events-route.test.ts
 ```
 
-Result: **3 files / 32 tests passed**. Coverage includes the fixed packet,
+Result after capability hardening: **3 files / 36 tests passed**. Coverage
+includes the fixed packet,
 closed surface registry, active-homepage substitution, native handoff,
-cancelled chooser, Clipboard fallback, denied-Clipboard manual selection,
+cancelled/blocked chooser, `canShare` rejection, Clipboard fallback,
+denied-Clipboard manual selection,
 registered attribution, and PII-property rejection.
 
 The complete local release gate passed:
 
 - Ask Magic Mike / NellySelly deployable-source isolation: PASS;
 - release safety: 14/14 PASS;
-- Vitest: **266 files / 3,311 tests passed**;
+- Vitest: **266 files / 3,338 tests passed**;
 - strict TypeScript: PASS;
 - full ESLint: PASS;
 - optimized Next.js build: PASS, 59 static pages generated;
 - route manifest: PASS, 95 active routes / 17 acknowledged duplicates;
 - Production dependency audit: no known vulnerability;
-- redacted full-history gitleaks: 640 commits / approximately 16.02 MB / no
-  leak; and
-- exact staged-candidate gitleaks: approximately 26.92 KB / no leak; and
+- redacted full-history Gitleaks: 671 commits / approximately 16.34 MB / no
+  detected leak;
+- exact sealed-parent delta Gitleaks: two commits / approximately 32.93 KB / no
+  detected leak; and
 - `git diff --check`: PASS.
 
-Release doctor reported `HEALTHY`. Its sole non-blocking failed check was the
-expected dirty worktree before the candidate commit; all 42 substantive checks
-passed. After commit, the clean-tree rerun passed **43/43** with no failure or
-skip.
+Clean-tree release doctor: **43/43 PASS** with no failure or skip.
 
 ## No-write browser acceptance
 
-Playwright drove the optimized local build at desktop `1440 × 1000` and mobile
+The original code-bearing candidate's Playwright evidence drove the optimized
+local build at desktop `1440 × 1000` and mobile
 `390 × 844`. The accepted fresh mobile session installed a synthetic
 `/api/events` response before navigation. No lead, appointment, chat,
 notification, provider, or database endpoint was invoked.
@@ -138,9 +149,66 @@ conformance or replace human assistive-technology review.
 - Production, WordPress, Vercel Production, Neon Production, email/BCC, SMS,
   Push, DNS, publication, spend, and NellySelly remain unchanged.
 
-## Pending exact-head evidence
+## Refreshed immutable code-head evidence
 
-After commit and push, seal the Draft PR's immutable head, CI release gate,
-Vercel Preview deployment identity, protected no-write hosted browser pass,
-Preview runtime logs, and clean-tree release doctor. The candidate remains
-stacked after PR #227 and cannot bypass PR #209 or the ordered release train.
+GitHub Release Gate run
+[`33248609881`](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33248609881)
+completed successfully against exact code-bearing head
+`0442abc1cf0d9a14c5ffd21d1673561aff575db5`. Artifact
+`9713663618` has digest
+`sha256:b88ccee766d35cdbdedae2b705a72ac5ae7b9477ef801044c7e55972db59410c`.
+
+The immutable Vercel Preview was:
+
+- deployment: `dpl_AwzuekRKTR4UkM41YohrZAzS8xFX`;
+- URL:
+  `https://ask-magic-mike-covvyfir2-eyes-up-industries.vercel.app`;
+- target/status: `preview` / `READY`; and
+- build commit: `0442abc1cf0d9a14c5ffd21d1673561aff575db5`.
+
+Protected no-write acceptance run
+[`33248758409`](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33248758409)
+checked out that exact target commit while the bootstrap workflow remained on
+`main`. Artifact `9713722051` has digest
+`sha256:1ef8fea1569f6f42f7166d4c45d2a7cf4d1677784c09de8a9bd166769bde5893`.
+Results:
+
+- Preview QA: **18 pass / 6 safe write skips / 0 fail**;
+- browser E2E: **4 expected / 0 unexpected / 0 flaky / 0 skipped**;
+- release doctor: **43/43 pass**;
+- release candidate: **GO**, no blocker; and
+- launch authority: **PREVIEW_READY**.
+
+The mutation gate stayed blocked because `SAFE_DB_WRITE` was false. Preview
+health reported `database_env=preview`, `safe_for_preview_mutation=false`,
+`live_sms_disabled=true`, and `live_email_disabled=true`. No lead,
+notification, email, SMS, Push, appointment, publication, or database write
+was authorized by this run.
+
+Filtered runtime-log queries against the exact deployment returned **0 error**
+and **0 warning** records. Two information-level 503 responses were expected
+fail-closed Preview behavior:
+
+- authenticated `GET /api/admin/sla/sweep` safely refused a Preview data
+  write; and
+- `POST /api/events` safely refused Preview event persistence while
+  `safe_for_preview_mutation=false`.
+
+Fresh in-app Browser inspection used the immutable Preview at desktop
+`1440 x 1000` and mobile `390 x 844`. The reference and candidate captures
+were reviewed together. The compatibility hardening changed no DOM, styling,
+or asset source, and the comparison found no regression in image crop,
+typography, spacing, borders, button hierarchy, URL field, status region,
+responsive stacking, or horizontal overflow. The exact Preview's browser log
+buffer was empty. No real native share chooser, Clipboard write, analytics
+write, recipient, or external send was invoked during this refreshed visual
+pass; behavior-level native/Clipboard cases remain covered by the automated
+tests and mutation-free hosted browser suite above.
+
+The documentation-only seal commit created by this refresh necessarily changes
+the Draft PR head without changing runtime code. Its final CI and Preview
+identities are recorded in the PR body and seal comment after rerunning the
+same gates, avoiding a recursive sequence of evidence-only commits.
+
+Production stays on `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`.
+PR #209's consumed historical approval cannot authorize this Draft.

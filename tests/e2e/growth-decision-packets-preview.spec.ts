@@ -60,12 +60,25 @@ for (const viewport of viewports) {
         name: "Own the demand. Measure the money. Improve the machine.",
       }),
     ).toBeVisible();
-    const performanceMetrics = page.getByRole("region", {
-      name: "Growth performance metrics",
+    const baselineHeading = page.getByText("Baseline and target readiness", {
+      exact: true,
     });
-    await expect(performanceMetrics.getByText("Recorded referral fees", { exact: true })).toBeVisible();
-    await expect(performanceMetrics.getByText("Tracked contribution", { exact: true })).toBeVisible();
-    await expect(performanceMetrics.getByText("Cost / signed client", { exact: true })).toBeVisible();
+    await expect(baselineHeading).toBeVisible();
+    const baselineSection = baselineHeading.locator("xpath=ancestor::section");
+    await expect(baselineSection.getByText("Target entry", { exact: true })).toBeVisible();
+    const evidenceDetails = baselineSection.locator("details");
+    await expect(evidenceDetails).toHaveCount(1);
+    await evidenceDetails.locator("summary").click();
+    await expect(
+      baselineSection.getByText("Agent first-follow-up coverage", { exact: true }),
+    ).toBeVisible();
+    await evidenceDetails.locator("summary").click();
+
+    const growthMetrics = page.locator('section[aria-label="Growth performance metrics"]');
+    await expect(growthMetrics).toBeVisible();
+    await expect(growthMetrics.getByText("Recorded referral fees", { exact: true })).toBeVisible();
+    await expect(growthMetrics.getByText("Tracked contribution", { exact: true })).toBeVisible();
+    await expect(growthMetrics.getByText("Cost / signed client", { exact: true })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Revenue / referral fees" })).toBeAttached();
 
     const packetHeading = page.getByRole("heading", {
