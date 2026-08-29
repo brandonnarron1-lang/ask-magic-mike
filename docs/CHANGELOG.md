@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-08-29 — PR #220 refresh onto exact sealed PR #219
+
+- Preserved former PR #220 head
+  `5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3` at
+  `rescue/amm-pr220-pre-pr219-exact-seal-20260829-012049`.
+- Merged exact sealed PR #219 head
+  `b628fc00fc6b03d89871c65d884fe649db025968` without force push at
+  exact-parent merge head `61c162143cb9892f88a2318d32888ba2d644f329`.
+  Product, API, migration, route, and focused-test files merged without
+  conflict.
+- Retained the canonical Growth Command Center, bounded ingress transport,
+  growth ledgers, endpoint guards, RBAC, and audit system. Reconciled head
+  `d73abeb1f2979f3c217fc5b0a873b483e0bd5561` passes isolation, safety 14/14,
+  257 files / 3,238 tests, strict types, lint, optimized 59-page build, 95/17
+  routes, doctor 43/43, dependency audit, 655-commit gitleaks, exact-parent
+  ancestry, whitespace, and focused security review on Node 24.18.0.
+- A fresh disposable PostgreSQL 17.11 cluster applied all 37 migrations and
+  passed the spend, organic-search, and local-profile contracts with denied
+  browser/legacy-role execution and zero synthetic residue after rollback.
+  Exact-head CI, immutable Preview, protected no-commit browser/visual, and
+  runtime-log evidence remain pending after the documentation-only seal.
+- Production remains `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` /
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; no Production, environment, Neon,
+  Google/provider, profile, import, publication, lead, message, WordPress,
+  DNS, purchase, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-29 — PR #219 refresh onto exact sealed PR #218
 
 - Preserved former PR #219 head

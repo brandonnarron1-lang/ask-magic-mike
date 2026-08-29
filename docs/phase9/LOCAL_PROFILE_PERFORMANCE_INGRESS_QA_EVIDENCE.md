@@ -165,6 +165,61 @@ migration run reached the new migration successfully; its Studio service later
 became unhealthy. The isolated PostgreSQL 17 contract above is the
 authoritative database proof for this candidate.
 
+## Current exact-parent local proof — 2026-08-29
+
+Reconciled code-bearing head
+`d73abeb1f2979f3c217fc5b0a873b483e0bd5561` was verified with Node
+`v24.18.0`:
+
+| Check | Result |
+| --- | --- |
+| Deployable-source Ask/Nelly isolation | PASS |
+| Release safety | PASS — 14/14 |
+| Full Vitest suite | PASS — 257 files / 3,238 tests |
+| Strict TypeScript | PASS |
+| ESLint | PASS |
+| Optimized Next.js build | PASS — 15.5.21 / 59 generated pages |
+| Active route manifest | PASS — 95 routes / 17 acknowledged duplicates |
+| Release doctor | PASS — 43/43 |
+| Production dependency audit | PASS — no known vulnerabilities |
+| Full-history secret scan | PASS — 655 commits / approximately 16.25 MB / no leaks |
+| Exact sealed-parent ancestry | PASS |
+| `git diff --check` | PASS |
+| Focused security review | PASS — no actionable defect |
+
+The focused review confirmed server `growth:manage` RBAC, exact same-origin
+validation before authentication, bounded request/CSV parsing, fixed profile
+and metric allowlists, private response headers, React escaping, server-only
+environment access, parameterized SQL, exact Production endpoint attestation,
+safe-disabled commit authority, owner-connected `SECURITY INVOKER` execution,
+revoked browser/legacy-role execution, immutable receipts, and server-
+recomputed scores and fingerprints. The exact diff adds no unsafe HTML,
+dynamic code execution, browser secret/storage channel, unrestricted
+cross-origin messaging, provider call, profile mutation, or publisher.
+
+## Current exact-parent PostgreSQL proof — 2026-08-29
+
+A fresh unexposed Homebrew PostgreSQL 17.11 cluster applied all 37 repository
+migrations in lexical order and passed:
+
+- `marketing_spend_ingress_pg17.sql`;
+- `organic_search_ingress_pg17.sql`; and
+- `local_profile_performance_ingress_pg17.sql`.
+
+The contracts prove atomic insertion, exact replay, forged or malformed input
+rejection, identity isolation, immutable receipts, audit linkage, operator-
+state preservation, synthetic-source refusal, and denied execution for
+`anon`, `authenticated`, and `service_role`. Every contract rolled back. A
+database-native assertion then confirmed zero retained channels, campaigns,
+spend rows, market signals, market opportunities, or import receipts.
+
+The first cleanup assertion compared two equal JSON objects as order-sensitive
+strings and exited nonzero after all contracts had passed. It was rerun as a
+database-native numeric assertion and passed. The server was stopped and its
+cluster moved recoverably to Trash at
+`/Users/brandonnarron/.Trash/amm-pr220-pg17-amm-pr220-pg17.XJDuwD-20260829-013222`.
+No Neon or other remote database was connected.
+
 ## Historical pre-refresh application verification
 
 Exact-engine verification used Node `v24.18.0`.

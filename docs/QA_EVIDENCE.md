@@ -1,5 +1,36 @@
 # QA Evidence
 
+## Phase 9 local-profile performance ingress refresh — 2026-08-29
+
+- Draft PR #220 reuses exact sealed PR #219
+  `b628fc00fc6b03d89871c65d884fe649db025968`, the authenticated Growth
+  Command Center, shared bounded ingress transport, canonical growth ledgers,
+  exact Neon endpoint guards, `growth:manage` RBAC, and immutable audits.
+- Former PR #220 head `5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3`
+  is preserved at
+  `rescue/amm-pr220-pre-pr219-exact-seal-20260829-012049`; exact-parent merge
+  head is `61c162143cb9892f88a2318d32888ba2d644f329`.
+- Reconciled code-bearing head `d73abeb1f2979f3c217fc5b0a873b483e0bd5561`
+  passes Ask/Nelly isolation, safety 14/14, all 257 files / 3,238 tests,
+  strict types, lint, optimized 59-page Next.js 15.5.21 build, 95/17 route
+  proof, release doctor 43/43, dependency audit, 655-commit gitleaks,
+  exact-parent ancestry, whitespace, and focused security review on Node
+  24.18.0.
+- A fresh disposable PostgreSQL 17.11 cluster applied all 37 migrations and
+  passed the spend, organic-search, and local-profile contracts. Browser and
+  legacy-role execution remained denied, every synthetic transaction rolled
+  back, and a database-native assertion confirmed zero synthetic rows or
+  receipts. The stopped cluster was moved recoverably to Trash; no remote
+  database was connected.
+- Former-head CI, Preview, browser, visual, and runtime-log proof is historical.
+  Fresh exact-head remote proof is mandatory after the documentation-only
+  evidence seal and before the separate PR #220 migration/merge/deploy gate.
+- No Production, environment, Neon object or row, Google/provider call,
+  profile edit, import, publication, lead, message, WordPress, DNS, purchase,
+  deletion, or NellySelly action occurred.
+- Full scope:
+  `docs/phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS_QA_EVIDENCE.md`.
+
 ## Phase 9 organic-search ingress refresh — 2026-08-29
 
 - Draft PR #219 reuses exact sealed PR #218

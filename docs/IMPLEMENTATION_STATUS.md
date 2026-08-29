@@ -17,10 +17,21 @@ Updated 2026-08-29.
   and immutable audit ledger. It adds no parallel CRM, database, dashboard,
   Google/provider connector, profile editor, publisher, lead path, or message
   path.
-- The preserved original head passes all five focused files / 27 tests on Node
-  24.18.0. Fresh exact-parent full local, PostgreSQL 17, CI, immutable Preview,
-  protected no-commit browser/visual, and bounded runtime-log proof remains in
-  progress on the current PR head.
+- Reconciled code-bearing head `d73abeb1f2979f3c217fc5b0a873b483e0bd5561`
+  passes isolation, safety 14/14, all 257 files / 3,238 tests, strict
+  TypeScript, ESLint, optimized Next.js 15.5.21 build with 59 generated pages,
+  95/17 route proof, release doctor 43/43, zero known Production dependency
+  vulnerabilities, 655-commit gitleaks, exact-parent ancestry, whitespace,
+  and focused Next.js/React/SQL security review on Node 24.18.0.
+- A fresh disposable PostgreSQL 17.11 cluster applied all 37 migrations and
+  passed the spend, organic-search, and local-profile executable contracts.
+  Browser and legacy-role execution remained denied, every synthetic
+  transaction rolled back, and database-native assertion confirmed zero
+  retained synthetic rows or receipts. The stopped cluster was moved
+  recoverably to Trash; no remote database was connected.
+- Fresh exact-head CI, immutable Preview, protected no-commit browser/visual,
+  and bounded runtime-log proof remains mandatory after the documentation-only
+  evidence seal.
 - PR #220 remains Draft with `GROWTH_LOCAL_PROFILE_IMPORT_ENABLED=false` and
   no Production, migration, feature-gate, report-import, Google, WordPress,
   DNS, lead/message, or NellySelly authority.
