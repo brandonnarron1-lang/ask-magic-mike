@@ -86,7 +86,21 @@ for (const viewport of viewports) {
     await expect(page.getByText("Single-change scope")).toBeVisible();
     await expect(page.getByText("Primary decision metric")).toBeVisible();
     await expect(page.getByText("Authority boundary")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Copy internal brief" })).toBeVisible();
+    const copyButton = page.getByRole("button", { name: /internal brief/i });
+    await expect(copyButton).toBeVisible();
+    await page.context().grantPermissions(["clipboard-read", "clipboard-write"], {
+      origin: new URL(page.url()).origin,
+    });
+    await copyButton.click();
+    await expect(copyButton).toHaveText("Internal brief copied");
+    await expect(page.getByText(
+      "Internal organic search experiment brief copied to the clipboard.",
+    )).toHaveText("Internal organic search experiment brief copied to the clipboard.");
+    const copiedBrief = await page.evaluate(() => navigator.clipboard.readText());
+    expect(copiedBrief).toContain("# Organic search experiment brief");
+    expect(copiedBrief).toContain("Status: INTERNAL REVIEW ONLY");
+    expect(copiedBrief).toContain("Page: https://www.askmagicmike.com/internal-qa-organic-search");
+    expect(copiedBrief).not.toMatch(/private@example|provider_payload/i);
     await expect(page.getByRole("link", {
       name: "Google · Helpful, reliable, people-first content",
     })).toHaveAttribute("rel", "noopener noreferrer");
