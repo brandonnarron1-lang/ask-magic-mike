@@ -53,9 +53,14 @@ links, and every same-origin non-read HTTP request, and captures full-page scree
 spec passed locally at both widths against the truthful unconfigured/empty
 state. Hosted exact-head execution remains part of the Preview seal below.
 
-The final sealed PR #221 funnel-identity browser proof is preserved unchanged.
-PR #222 adds only the separate read-only Growth Command Center acceptance spec;
-it does not weaken, replace, or reinterpret PR #221 session-linkage assertions.
+Exact-head protected run `33241242726` exposed one stale stacked assertion: the
+restored PR #221 test expected canonical event requests even though the sealed
+measurement client intentionally excludes Playwright automation from that
+ledger. PR #222 reinstates its existing narrow correction. Playwright now
+proves privacy-safe browser events and zero canonical event requests from
+automation; unit and component coverage continues to prove that genuine
+consumer browsers send the same anonymous submission UUID to the first-party
+ledger. The complete mutation-free browser set passes 15/15 locally.
 
 ## Executable PostgreSQL 17 proof
 
@@ -108,7 +113,7 @@ Runtime: Node `v24.18.0`, pnpm `10.30.3`.
 | Production dependency audit | PASS — no known vulnerabilities |
 | Touched-path security review | PASS — no actionable finding |
 | Growth decision-packet browser acceptance | PASS — 2/2 local desktop/mobile checks |
-| PR #221 funnel identity proof | Preserved byte-for-byte relative to exact sealed PR #221 |
+| Complete mutation-free browser suite | PASS — 15/15 local checks |
 | `git diff --check` | PASS |
 | Release doctor before commit | HEALTHY — 42 pass / one expected nonblocking dirty-tree finding |
 | Release doctor on clean reconciled commit | Pending exact-head rerun after the merge commit |
