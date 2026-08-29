@@ -2,6 +2,10 @@
 
 ## 2026-08-29 — Google Business Profile 1:1 native asset
 
+- Preserved the prior PR #232 head at
+  `rescue/amm-pr232-pre-pr231-parent-refresh-20260829-153626`, then merged exact
+  sealed PR #231 head `16a633fc5d77ed7c911e9a276f6a1f561ad63fda`
+  through normal merge commit `8e5cfa7` without rewriting branch history.
 - Extended the existing protected owned-demand renderer with one 720x720 PNG
   format and mapped only the Google Business Profile native handoff to it.
 - Reused the approved Mike Eatmon images, canonical placement copy, tracked
@@ -11,8 +15,13 @@
 - Added exact channel/format fail-closed routing, client asset-path validation,
   all-offer PNG rendering, physical dimension, private-header, PNG-signature,
   oversized/active-content, and added-query rejection coverage.
+- Bound each prepared handoff across channel, placement, channel-native format,
+  canonical filename, proof return path, UTM source, and UTM medium so mixed
+  valid fields from different publication identities fail before fetch/share.
 - Corrected portrait/text collision and transparent-renter over-cropping found
   during original-pixel visual QA. No AI-generated or altered likeness ships.
+- Regenerated the exact refreshed candidate and proved all four square outputs
+  byte-for-byte and pixel-for-pixel identical to the accepted reference set.
 - Passed exact-head GitHub CI, immutable Vercel Preview, protected mutation-free
   hosted QA, 4/4 browser cases, and runtime-log review on the code-bearing
   commit. Preview returned `PREVIEW_READY`; no lead or database mutation ran.

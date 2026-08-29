@@ -5,12 +5,19 @@ import { useId, useState } from "react";
 export const NATIVE_PUBLICATION_MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 const APPROVED_DESTINATION_PATHS = new Set(["/ask", "/home-value", "/buy", "/rent"]);
-const APPROVED_PROOF_CHANNELS = new Set([
-  "google_business_profile",
-  "facebook",
-  "instagram",
-  "linkedin",
-]);
+const NATIVE_FORMAT_BY_PROOF_CHANNEL = {
+  google_business_profile: "square",
+  facebook: "feed",
+  instagram: "story",
+  linkedin: "feed",
+} as const;
+const ATTRIBUTION_MEDIUM_BY_PROOF_CHANNEL = {
+  google_business_profile: "organic_local",
+  facebook: "social_organic",
+  instagram: "social_organic",
+  linkedin: "social_organic",
+} as const;
+const APPROVED_PROOF_CHANNELS = new Set(Object.keys(NATIVE_FORMAT_BY_PROOF_CHANNEL));
 const APPROVED_PROOF_PLACEMENTS = new Set([
   "general_question",
   "seller_review",
@@ -59,7 +66,7 @@ function hasUnsafeControlCharacter(value: string) {
 }
 
 function trustedProofHref(value: string) {
-  if (!value.startsWith("/admin/distribution?") || value.startsWith("//")) return false;
+  if (!value.startsWith("/admin/distribution?") || value.startsWith("//")) return null;
 
   try {
     const url = new URL(value, "https://www.askmagicmike.com");
@@ -67,7 +74,7 @@ function trustedProofHref(value: string) {
     const placement = url.searchParams.get("proof_placement") ?? "";
     const expectedSearch = `?proof_channel=${channel}&proof_placement=${placement}`;
     const expectedHash = `#publication-proof-${channel}`;
-    return url.origin === "https://www.askmagicmike.com"
+    const trusted = url.origin === "https://www.askmagicmike.com"
       && !url.username
       && !url.password
       && url.pathname === "/admin/distribution"
@@ -76,16 +83,35 @@ function trustedProofHref(value: string) {
       && value === `${url.pathname}${url.search}${url.hash}`
       && APPROVED_PROOF_CHANNELS.has(channel)
       && APPROVED_PROOF_PLACEMENTS.has(placement);
+    return trusted ? { channel, placement } : null;
   } catch {
-    return false;
+    return null;
   }
 }
 
 function trustedHandoffInput(input: NativePublicationHandoffProps) {
-  if (!/^[a-z0-9-]+\.png$/.test(input.filename) || !trustedProofHref(input.proofHref)) return false;
-  if (!/^\/api\/admin\/distribution\/assets\/[a-z_]+\/[a-z_]+\?format=(feed|story|square)$/.test(input.assetHref)) {
-    return false;
-  }
+  const proof = trustedProofHref(input.proofHref);
+  const asset = input.assetHref.match(
+    /^\/api\/admin\/distribution\/assets\/([a-z_]+)\/([a-z_]+)\?format=(feed|story|square)$/,
+  );
+  if (!proof || !asset) return false;
+
+  const [, channel, placement, format] = asset;
+  const expectedFormat = NATIVE_FORMAT_BY_PROOF_CHANNEL[
+    channel as keyof typeof NATIVE_FORMAT_BY_PROOF_CHANNEL
+  ];
+  const expectedMedium = ATTRIBUTION_MEDIUM_BY_PROOF_CHANNEL[
+    channel as keyof typeof ATTRIBUTION_MEDIUM_BY_PROOF_CHANNEL
+  ];
+  const expectedFilename = `ask-magic-mike-${channel.replaceAll("_", "-")}-${placement.replaceAll("_", "-")}-${format}.png`;
+  if (
+    !expectedFormat
+    || !expectedMedium
+    || format !== expectedFormat
+    || proof.channel !== channel
+    || proof.placement !== placement
+    || input.filename !== expectedFilename
+  ) return false;
   if (
     input.channelLabel.length < 1
     || input.channelLabel.length > 80
@@ -113,6 +139,8 @@ function trustedHandoffInput(input: NativePublicationHandoffProps) {
       && APPROVED_DESTINATION_PATHS.has(url.pathname)
       && queryKeys.length === REQUIRED_UTM_KEYS.length
       && queryKeys.every((key, index) => key === REQUIRED_UTM_KEYS[index])
+      && source === channel
+      && medium === expectedMedium
       && SAFE_UTM_VALUE.test(source)
       && APPROVED_UTM_MEDIA.has(medium)
       && url.searchParams.get("utm_campaign") === "amm_owned_demand_2026"

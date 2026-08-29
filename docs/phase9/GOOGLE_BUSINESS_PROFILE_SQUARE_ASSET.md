@@ -14,9 +14,11 @@ No second creative studio or publisher is justified.
 
 The remaining channel-fidelity gap was specific: the native Google Business
 Profile handoff selected the existing 1080x1350 social feed image. Google's
-current Business Profile photo guidance recommends a square 720x720 image. This
-candidate adds that one format inside the existing renderer and maps only the
-Google Business Profile native handoff to it.
+current general Business Profile photo guidance recommends a square 720x720
+image. This candidate adds that one format inside the existing renderer and
+maps only the Google Business Profile native handoff to it. The guidance does
+not guarantee an unchanged Local Post crop, so native final-crop review remains
+mandatory.
 
 ## Implementation
 
@@ -31,10 +33,12 @@ Google Business Profile native handoff to it.
   renter headlines remain readable without changing their claims.
 - Keep the image behind the existing `report:view` session boundary with
   private/no-store, attachment-only, noindex, CSP-sandboxed responses.
-- Extend the client trust boundary to accept only the exact `format=square`
-  asset path; added parameters, arbitrary URLs, unknown channels, unknown
-  placements, active content, oversized files, and non-PNG bytes still fail
-  before native handoff.
+- Extend the client trust boundary to accept only one internally consistent
+  handoff identity: channel, placement, channel-native format, canonical
+  filename, proof return path, UTM source, and UTM medium must all agree. Added
+  parameters, arbitrary URLs, mismatched identities, unknown channels, unknown
+  placements, active content, oversized files, and non-PNG bytes fail before
+  native handoff.
 - Preserve the two-gesture Web Share flow. Preparing or handing a file to the
   device chooser does not prove publication and never writes the proof ledger.
 - Expose the same square file as the first protected Google Business Profile
@@ -69,16 +73,17 @@ Local QA artifacts are stored outside the repository at:
 ## Primary sources
 
 - [Google Business Profile photo guidance](https://support.google.com/business/answer/6123536?hl=en-en)
-  lists square 720x720 as the recommended resolution, JPG or PNG as accepted
-  formats, and a 10 KB to 5 MB size range.
+  lists square 720x720 as the recommended general photo resolution, JPG or PNG
+  as accepted formats, and a 10 KB to 5 MB size range.
 - [Google Business Profile photo management](https://support.google.com/business/answer/6103862/add-photos-or-videos-to-your-business-profile-computer?hl=en-GB)
   keeps final profile selection and review in Google's native operator flow.
 - [W3C Web Share Recommendation](https://www.w3.org/TR/web-share/) defines the
   user-agent chooser, file sharing, `canShare`, and transient-user-activation
   boundary retained by the existing two-gesture implementation.
 
-Platform requirements can change. The authorized operator must inspect the
-native editor and final crop before any separately approved publication.
+Platform requirements and native cropping can change. The authorized operator
+must inspect the native editor and final crop before any separately approved
+publication.
 
 ## Authority boundary
 

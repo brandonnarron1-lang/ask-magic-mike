@@ -2,28 +2,35 @@
 
 Date: 2026-08-29
 
-Status: code-bearing commit passed local acceptance, exact-commit CI, immutable
-Preview, protected mutation-free hosted QA, and runtime-log review. The final
-documentation seal is accepted only when its external exact-head reruns pass;
-those self-referential results belong in PR #232 rather than another commit.
+Status: exact-parent refreshed candidate. The original feature head passed
+local acceptance, exact-commit CI, immutable Preview, protected mutation-free
+hosted QA, and runtime-log review. The refreshed branch adds identity binding
+and must repeat exact-head external proof; those self-referential results belong
+in PR #232 rather than another commit.
 
 ## Source and scope
 
-- Exact sealed parent: `64d46bed00b0bee863ea6c327219ef145d853be2`
+- Exact sealed parent: `16a633fc5d77ed7c911e9a276f6a1f561ad63fda`
   (PR #231).
 - Feature branch:
   `codex/phase9-google-business-profile-square-assets-20260829`.
 - Draft PR: [#232](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/232),
   stacked on the exact sealed PR #231 head rather than `main`.
-- Code-bearing commit:
-  `d0e058da82c852e609d92d737d88aa5d5b6dbf48`.
-- Pre-change rescue branch:
+- Prior branch head preserved at:
+  `rescue/amm-pr232-pre-pr231-parent-refresh-20260829-153626`.
+- Exact-parent reconciliation commit:
+  `8e5cfa7de6d2efd11572d261f7fc19f0e4eafd72` (normal two-parent
+  merge; no rebase, reset, force push, or history deletion).
+- Original feature proof head:
+  `d0e058da82c852e609d92d737d88aa5d5b6dbf48`; the final refreshed
+  hardening head is recorded immutably in the PR seal after exact-head reruns.
+- Original pre-feature rescue branch remains:
   `rescue/amm-pre-gbp-square-20260829-0918`.
 - Canonical repository:
   `https://github.com/brandonnarron1-lang/ask-magic-mike`.
 - Scope: one protected 720x720 renderer format, exact Google Business Profile
-  mapping, exact-format fallback download, trust-boundary tests, documentation,
-  and no external-system mutation.
+  mapping, exact-format fallback download, cross-field publication-identity
+  binding, trust-boundary tests, documentation, and no external-system mutation.
 
 ## Commands and results
 
@@ -32,7 +39,7 @@ All project verification used exact Node `24.18.0` and pnpm `10.30.3`.
 | Check | Result |
 |---|---|
 | `pnpm install --frozen-lockfile` | PASS; lockfile unchanged |
-| Focused Vitest: owned-demand assets + native handoff | PASS; 2 files / 23 tests |
+| Focused Vitest: owned-demand assets + native handoff | PASS; 2 files / 24 tests on refreshed candidate |
 | `pnpm run typecheck` | PASS |
 | `git diff --check` | PASS |
 | `git diff --binary \| gitleaks stdin --redact --no-banner` | PASS; 28.68 KB scanned, zero leaks |
@@ -44,10 +51,11 @@ All project verification used exact Node `24.18.0` and pnpm `10.30.3`.
 | `pnpm run release:report` | Expected `NO-GO`; sole blocker is `preview_qa_report_missing` |
 | `pnpm run launch:authority` | `LOCAL_READY`; protected Preview QA remains required |
 
-## Exact-commit CI and hosted Preview
+## Original feature-head CI and hosted Preview
 
-The code-bearing commit was verified without database writes or external
-publication:
+The original feature head was verified without database writes or external
+publication. These results prove the renderer change but do not substitute for
+the refreshed exact-head reruns recorded in the final PR seal:
 
 | Evidence | Result |
 |---|---|
@@ -112,6 +120,10 @@ Automated coverage proves:
 - each final file is between Google's documented 10 KB and 5 MB bounds;
 - the Google native handoff resolves `format=square` and a `-square.png`
   filename;
+- channel, placement, channel-native format, canonical filename, proof return
+  path, UTM source, and UTM medium must describe one exact handoff identity;
+- cross-channel, cross-placement, wrong-format, wrong-filename, wrong-proof,
+  and wrong-attribution combinations fail before fetch or native sharing;
 - Facebook, Instagram, LinkedIn, WordPress, email-signature, and QR channels
   cannot resolve the square format through the server asset contract;
 - the protected route continues to require `report:view` and returns private,
@@ -135,6 +147,9 @@ or Low finding in the touched boundary.
   arbitrary outbound URL, or provider endpoint was introduced.
 - Route parameters and `format` are untrusted at ingress but resolve only
   through the canonical channel, placement, and format allowlists.
+- The client independently fails closed unless asset channel, placement,
+  format, filename, proof target, UTM source, and UTM medium remain correlated;
+  a valid field copied from a different placement or channel is not enough.
 - The image source remains a repository-owned path selected by canonical
   definitions and joined to the configured canonical origin; callers cannot
   supply a source or destination URL.
@@ -157,6 +172,10 @@ Final square outputs:
 | General question | 956,300 | `6af3de7d08c9c4e91e4b457d3aab56bd1af62905edff399f05dc0356dc02029b` |
 | Renter plan | 461,679 | `965896d4a5a2cc1350a1229ac0957d52ca0d70b93c7db2f7976b97da5538d9ff` |
 | Seller review | 959,375 | `5c42ee9c94b4193cec17662da20542bbe71f9fde7b4f570642c917c3b5942850` |
+
+The exact refreshed candidate regenerated all four files with those same byte
+counts and SHA-256 values. Individual byte comparison and the combined
+reference/candidate 2x2 matrix both reported zero changed pixels.
 
 Reviewed comparison artifacts:
 

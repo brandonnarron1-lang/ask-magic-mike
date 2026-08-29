@@ -129,8 +129,9 @@ The server performs no provider fetch and writes no database row.
   supports the 9:16 canvas and guarded sticker/text zones.
 - [Google Business Profile photo guidance](https://support.google.com/business/answer/6123536?hl=en)
   and [post policy](https://support.google.com/business/answer/7213077?hl=en)
-  informed the clear, non-phone-number visual treatment and required native
-  review.
+  informed the general 720x720 photo target, clear non-phone-number visual
+  treatment, and required native review. The general photo recommendation does
+  not guarantee an unchanged Local Post crop.
 
 Platform rules can change. The operator must recheck the native editor before
 publication; these references do not authorize a post.

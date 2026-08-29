@@ -11,25 +11,36 @@ Updated 2026-08-29.
 - **Channel-fidelity correction:** the Google Business Profile handoff now
   resolves a dedicated 720x720 PNG instead of the social 4:5 feed format.
   `square` resolves only for the exact Google Business Profile channel.
+- **Exact lineage:** the prior PR #232 head is preserved at
+  `rescue/amm-pr232-pre-pr231-parent-refresh-20260829-153626`; exact sealed PR
+  #231 head `16a633fc5d77ed7c911e9a276f6a1f561ad63fda` was reconciled
+  through normal merge `8e5cfa7` without history rewriting.
+- **Handoff integrity:** client validation now binds channel, placement,
+  channel-native format, canonical filename, proof target, UTM source, and UTM
+  medium as one identity. Mixed identities fail before image fetch or Web Share.
 - **Identity and compliance:** all four placements reuse untouched approved
   Mike imagery, canonical copy, QR destinations, Black Diamond palette,
   broker-review guardrails, and Equal Housing identification. No generated or
   edited likeness is used.
-- **Current acceptance:** exact Node 24.18.0 passes the focused 2-file / 23-test
-  matrix and complete local release gate: deployable-source isolation, 14/14
-  release safety, 268 files / 3,354 tests, strict TypeScript, full ESLint,
+- **Current acceptance:** exact Node 24.18.0 passes the refreshed focused 2-file
+  / 24-test matrix, strict TypeScript, targeted ESLint, Production dependency
+  audit, and whitespace proof. The original feature head passed the complete
+  local release gate: deployable-source isolation, 14/14 release safety, 268
+  files / 3,354 tests, strict TypeScript, full ESLint,
   optimized 59-page Next.js build, and 95/17 route proof. Diff-level redacted
   Gitleaks and the Production dependency audit are clean. Original-pixel QA
   passes the reference/square comparison and four-placement matrix after
-  correcting the first render's buyer collision and renter crop. Exact
-  code-bearing head `d0e058da82c852e609d92d737d88aa5d5b6dbf48`
+  correcting the first render's buyer collision and renter crop. The refreshed
+  four-file set is byte-for-byte and pixel-for-pixel identical. Original
+  feature head `d0e058da82c852e609d92d737d88aa5d5b6dbf48`
   passed Release Gate run `33255361223`. Immutable Preview
   `dpl_BJjuZsmDVeU9kVHnnrm9ZQm6eJkN` is `READY`; protected run
   `33255500962` passed 18 checks / six intentional mutation skips / zero
   failures plus 4/4 browser cases and returned `PREVIEW_READY`. The log window
   contained zero errors and only the expected no-write SLA 503. The final
-  documentation seal remains conditioned on exact-head repetition recorded on
-  PR #232 without a self-invalidating content-only follow-up commit.
+  documentation seal and refreshed release acceptance remain conditioned on
+  exact-head repetition recorded on PR #232 without a self-invalidating
+  content-only follow-up commit.
 - **Authority boundary:** Production remains
   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. No Production/Preview
   data write, canonical environment/configuration, lead/event,
