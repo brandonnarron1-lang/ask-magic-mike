@@ -1,8 +1,8 @@
 # Phase 9 local-demand decision packets
 
-Date: 2026-08-25
+Date: 2026-08-29
 
-Status: stacked implementation candidate; Production and external accounts unchanged
+Status: stacked reconciliation candidate; Production and external accounts unchanged
 
 Authority: read-only interpretation of approved, minimized, persisted evidence
 
@@ -124,3 +124,13 @@ approved release, application rollback is promotion of the last accepted Vercel
 deployment or a forward revert. The additive database guard may be removed only
 by a reviewed forward migration if Google restores and documents an equivalent
 metric; historical evidence remains preserved.
+
+After PR #221 and every earlier release-train predecessor is accepted, the only
+gate that may authorize this migration, PR merge, and matching Production commit
+is:
+
+`APPROVE PHASE 9 LOCAL-DEMAND METRIC TRUTH GUARD MIGRATION, PR 222 MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`
+
+That later phrase does not authorize a provider import, profile edit, public
+content publication, lead submission, email/SMS/Push, WordPress/DNS mutation,
+spend, deletion, or any NellySelly action.

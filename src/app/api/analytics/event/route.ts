@@ -54,8 +54,16 @@ export async function POST(req: NextRequest) {
   const mutation = assertDatabaseMutationAllowed();
   if (!mutation.ok) {
     return NextResponse.json(
-      { ok: true, persisted: false, excluded: "preview_read_only" },
-      { status: 202, headers: ctx.finish(202) },
+      {
+        ok: false,
+        persisted: false,
+        error: mutation.publicMessage,
+        code: mutation.error,
+      },
+      {
+        status: mutation.statusCode,
+        headers: ctx.finish(mutation.statusCode),
+      },
     );
   }
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;

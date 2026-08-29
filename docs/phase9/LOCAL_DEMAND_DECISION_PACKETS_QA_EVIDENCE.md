@@ -1,16 +1,16 @@
 # Phase 9 local-demand decision packets QA evidence
 
-Date: 2026-08-25
+Date: 2026-08-29
 
 Candidate branch: `codex/phase9-local-demand-decision-packets-20260825`
 
 Base: exact sealed PR #221 head
-`65eb466a2e7991364efe2db78044006ebcdf8b5d`
+`61e152cb7ce03fd1904a06f30435dbe7ef36c4e1`
 
-Status: local exact-engine candidate verified; immutable Preview and protected
-browser evidence pending; Production unchanged
+Status: reconciled local candidate verified; immutable exact-head Preview and
+protected browser evidence pending; Production unchanged
 
-Code-bearing commit:
+Original code-bearing commit before final PR #221 reconciliation:
 `5d550c5e76005f898cbe0482b12ca982359e46e8`
 
 ## Executive result
@@ -41,9 +41,9 @@ The focused suite proves:
 - the active local-profile CSV parser rejects `business_conversations` while
   keeping the legacy database summary field fixed at zero.
 
-Result: 4 focused files / 22 tests PASS after the final validation hardening.
-The broader adjacent suite passed 7 files / 36 tests before that final edge-case
-test was added.
+Result after reconciliation: 8 focused files / 60 tests PASS, including the
+decision builder, source parser, durable truth guard, ingress authorization,
+Neon endpoint identity, and PR #221 public-event Preview refusal contracts.
 
 The release candidate also includes a deployed-browser acceptance spec for the
 authenticated Growth Command Center. It exercises desktop and mobile widths,
@@ -53,20 +53,24 @@ links, and every same-origin non-read HTTP request, and captures full-page scree
 spec passed locally at both widths against the truthful unconfigured/empty
 state. Hosted exact-head execution remains part of the Preview seal below.
 
-The stacked Preview suite was also reconciled with the intentional automation
-exclusion introduced by the sealed cross-domain measurement base. Playwright
-now proves privacy-safe browser events and zero canonical event requests from
-automation; existing unit and component suites continue to prove that genuine
+Exact-head protected run `33241242726` exposed one stale stacked assertion: the
+restored PR #221 test expected canonical event requests even though the sealed
+measurement client intentionally excludes Playwright automation from that
+ledger. PR #222 reinstates its existing narrow correction. Playwright now
+proves privacy-safe browser events and zero canonical event requests from
+automation; unit and component coverage continues to prove that genuine
 consumer browsers send the same anonymous submission UUID to the first-party
 ledger. The complete mutation-free browser set passes 15/15 locally.
 
 ## Executable PostgreSQL 17 proof
 
-A disposable, unexposed `postgres:17-alpine` container was created with only a
-minimal `market_signals` contract and explicit `anon`, `authenticated`, and
+A disposable, unexposed PostgreSQL 17 runtime was created with only a minimal
+`market_signals` contract and explicit `anon`, `authenticated`, and
 `service_role` roles. One historical canonical conversation row was inserted
 before the migration. Then
-`20260825060000_local_demand_metric_truth_guard.sql` was applied.
+`20260825060000_local_demand_metric_truth_guard.sql` was applied. The final
+reconciliation proof ran on PostgreSQL 17.11 over a private local socket/loopback
+runtime; no Docker, Neon, or remote database was required.
 
 PASS cases:
 
@@ -78,7 +82,8 @@ PASS cases:
   roles;
 - one pre-migration historical canonical row remained present and unchanged;
 - a noncanonical archive row remained outside the guard's source scope; and
-- the temporary container was absent after the test.
+- the temporary cluster was stopped and moved to the user's Trash after the
+  test, outside every application execution path.
 
 Observed final counts:
 
@@ -97,8 +102,8 @@ Runtime: Node `v24.18.0`, pnpm `10.30.3`.
 
 | Check | Result |
 | --- | --- |
-| Final focused decision/metric/route/migration suite | PASS — 4 files / 22 tests |
-| Full Vitest suite | PASS — 263 files / 3,283 tests |
+| Final focused decision/metric/route/migration suite | PASS — 8 files / 60 tests |
+| Full Vitest suite | PASS — 263 files / 3,299 tests |
 | Strict TypeScript | PASS |
 | Full ESLint | PASS |
 | Optimized Next.js build | PASS — Next.js 15.5.21 / 59 static pages |
@@ -111,7 +116,7 @@ Runtime: Node `v24.18.0`, pnpm `10.30.3`.
 | Complete mutation-free browser suite | PASS — 15/15 local checks |
 | `git diff --check` | PASS |
 | Release doctor before commit | HEALTHY — 42 pass / one expected nonblocking dirty-tree finding |
-| Release doctor on clean code-bearing commit | HEALTHY — 43 pass / 0 fail / 0 skip |
+| Release doctor on clean reconciled commit | Pending exact-head rerun after the merge commit |
 
 ## Security review
 
@@ -150,9 +155,9 @@ pnpm exec playwright test tests/e2e/growth-decision-packets-preview.spec.ts
 git diff --check
 ```
 
-The PostgreSQL proof used `docker exec ... psql -v ON_ERROR_STOP=1` against the
-disposable local container and then verified its removal. No command printed a
-secret.
+The final PostgreSQL proof used Homebrew PostgreSQL 17.11 `initdb`, `pg_ctl`, and
+`psql -v ON_ERROR_STOP=1` against a disposable local cluster. It was stopped and
+moved recoverably to Trash after completion. No command printed a secret.
 
 ## Remaining proof before any release gate
 
@@ -166,4 +171,8 @@ secret.
    launch authority.
 
 Production migration, merge, and deployment require their own later explicit
-approval and cannot leapfrog PR #209 or any predecessor in the ordered train.
+approval and cannot leapfrog PRs #210 through #221 in the ordered train. After
+those predecessors release and this candidate is refreshed and reproven against
+exact `main`, its only application/database release phrase is:
+
+`APPROVE PHASE 9 LOCAL-DEMAND METRIC TRUTH GUARD MIGRATION, PR 222 MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`

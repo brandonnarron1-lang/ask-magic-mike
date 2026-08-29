@@ -6,6 +6,10 @@ Status: implementation candidate; Production and external accounts unchanged
 
 Authority: protected validation and operator-approved aggregate import only
 
+Current stack basis: exact sealed PR #219 head
+`b628fc00fc6b03d89871c65d884fe649db025968`. The former PR #220 head is
+preserved at `rescue/amm-pr220-pre-pr219-exact-seal-20260829-012049`.
+
 ## Decision
 
 Extend the existing Growth Intelligence ingress pattern with one bounded Google
@@ -123,3 +127,26 @@ Ready Vercel deployment. The additive receipt table should remain installed and
 immutable; preserve audit and signal history and use a reviewed forward fix for
 schema issues. Disabling the import environment gate stops new commits without
 removing evidence.
+
+## Release authority
+
+PR #209 is accepted and its durability gate is exhausted. PR #210 remains the
+first pending application candidate. This PR #220 candidate stays ordered after
+PR #219 and has no inherited Production, migration, feature-gate, or report-
+import authority.
+
+The safe-disabled application/schema release requires exactly:
+
+```text
+APPROVE PHASE 9 LOCAL PROFILE PERFORMANCE INGRESS PRODUCTION MIGRATION, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT
+```
+
+That release keeps `GROWTH_LOCAL_PROFILE_IMPORT_ENABLED=false`. Enabling real
+commits later requires the separate gate:
+
+```text
+APPROVE LOCAL PROFILE PERFORMANCE IMPORT GATE ENABLEMENT AND SAME-COMMIT PRODUCTION REDEPLOYMENT
+```
+
+Each real report remains independently bound to its reviewed reference,
+computed fingerprint, and authenticated typed confirmation.
