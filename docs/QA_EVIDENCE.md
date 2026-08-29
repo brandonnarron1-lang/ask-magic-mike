@@ -1,17 +1,18 @@
 # QA Evidence
 
-## Phase 9 lead-alert brand identity v3 refresh — 2026-08-24
+## Phase 9 lead-alert brand identity v3 refresh — 2026-08-28
 
 - Draft PR #214 reuses the canonical notification renderer, approved Mike/Our
   Town identity assets, existing urgency backgrounds, protected Message Review
   Studio, outbox, and provider controls; it does not create a notification or
   lead system.
-- Former PR #214 head `3ac0885a6f19fc479266457cff760ef836094470` is
+- Former PR #214 head `94e3d66190df138d42c1321adfeb0cefb0478545` is
   preserved at
-  `rescue/amm-pr214-pre-final-pr213-cutover-hygiene-20260824-172407`.
-- Exact final PR #213 parent
-  `3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea` merged with conflicts limited to
-  additive changelog history; no alert-renderer application file conflicted.
+  `rescue/amm-pr214-pre-pr213-exact-seal-20260828-222353`.
+- Exact sealed PR #213 parent
+  `d2a1bf01d0962e07dd1e460acd4c295e145cf6a8` merged with conflicts limited to
+  additive changelog and release-authority records; no alert-renderer
+  application file conflicted.
 - Prior candidate CI, Preview, and screenshot evidence is historical. Fresh
   exact-head Node 24, immutable Preview, protected no-write, no-send rendered
   acceptance, and deployment-log proof are required before the later gate.
