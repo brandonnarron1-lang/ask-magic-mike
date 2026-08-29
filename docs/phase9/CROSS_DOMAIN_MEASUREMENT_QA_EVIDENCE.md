@@ -17,6 +17,12 @@ Consolidation rescue ref:
 WordPress pre-change rescue ref:
 `rescue/amm-pr212-pre-wordpress-consent-bridge-20260824-0244`
 
+No Production action is authorized by this evidence. The later application
+gate remains
+`APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`
+and is not requestable while the separate WordPress consent-order preflight is
+`HOLD` or exact-head release/Preview proof is incomplete.
+
 ## Consolidated-branch local evidence
 
 - Reused the complete PR #212 implementation, package, and runbooks; no second

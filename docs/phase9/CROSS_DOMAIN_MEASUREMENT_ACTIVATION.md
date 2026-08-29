@@ -4,6 +4,12 @@ Status: **code and WordPress 1.2.0 package candidate; live activation HOLD**
 
 Date: 2026-08-29
 
+Draft PR #221 consolidates exact reviewed PR #212 onto exact sealed PR #220
+head `19689e95d824d7d06e5f3b60cd18335f53018c93`. It has no independent
+Production authority and requires
+`APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`
+only after the separate WordPress consent-order gate and fresh exact-head proof.
+
 ## Reuse-first decision
 
 The canonical Neon analytics ledger remains the operational source of truth.

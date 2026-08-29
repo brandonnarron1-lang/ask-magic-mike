@@ -276,7 +276,9 @@ browser, and runtime checks before any gate becomes requestable.
 
 11. Draft PR [#221](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/221)
    reuses and consolidates exact PR #212 onto exact sealed PR #220 head
-   `19689e95d824d7d06e5f3b60cd18335f53018c93`. It preserves the canonical
+   `19689e95d824d7d06e5f3b60cd18335f53018c93`. Its former head
+   `65eb466a2e7991364efe2db78044006ebcdf8b5d` is preserved at
+   `rescue/amm-pr221-pre-pr220-exact-seal-20260829-020318`. It preserves the canonical
    first-party ledger, applies exact Production-only container isolation,
    explicit basic consent, advertising denial, public-route allowlists, PII
    minimization, Preview/QA/automation exclusion, and the independently

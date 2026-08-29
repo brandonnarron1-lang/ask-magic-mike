@@ -75,6 +75,12 @@ const localProfileIngressDecision = readDoc(
 const localProfileIngressEvidence = readDoc(
   "phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS_QA_EVIDENCE.md"
 );
+const crossDomainMeasurementDecision = readDoc(
+  "phase9/CROSS_DOMAIN_MEASUREMENT_ACTIVATION.md"
+);
+const crossDomainMeasurementEvidence = readDoc(
+  "phase9/CROSS_DOMAIN_MEASUREMENT_QA_EVIDENCE.md"
+);
 const durableRateLimitRehearsal = readDoc(
   "phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md"
 );
@@ -126,6 +132,8 @@ const pr218SealedParent =
   "f065d8801bec295c99185d846ff4bc38de2a0a6f";
 const pr219SealedParent =
   "b628fc00fc6b03d89871c65d884fe649db025968";
+const pr220SealedParent =
+  "19689e95d824d7d06e5f3b60cd18335f53018c93";
 const canonicalAliasGate =
   "APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT";
 const askAccessibilityGate =
@@ -170,6 +178,8 @@ const pr219Rescue =
   "rescue/amm-pr219-pre-pr218-exact-seal-20260829-004949";
 const pr220Rescue =
   "rescue/amm-pr220-pre-pr219-exact-seal-20260829-012049";
+const pr221Rescue =
+  "rescue/amm-pr221-pre-pr220-exact-seal-20260829-020318";
 
 const completedReleaseLedger = [
   {
@@ -299,7 +309,7 @@ describe("current release-authority documentation", () => {
     const pr218 = ownerQueue.indexOf("Draft PR [#218]");
     const pr219 = ownerQueue.indexOf("Draft PR [#219]");
     const pr220 = ownerQueue.indexOf("Draft PR [#220]");
-    const pr212 = ownerQueue.indexOf("Draft PR [#212]");
+    const pr221 = ownerQueue.indexOf("Draft PR [#221]", pr220 + 1);
 
     expect(completedPr209).toBeGreaterThanOrEqual(0);
     expect(pr210).toBeGreaterThan(completedPr209);
@@ -312,7 +322,7 @@ describe("current release-authority documentation", () => {
     expect(pr218).toBeGreaterThan(pr217);
     expect(pr219).toBeGreaterThan(pr218);
     expect(pr220).toBeGreaterThan(pr219);
-    expect(pr212).toBeGreaterThan(pr220);
+    expect(pr221).toBeGreaterThan(pr220);
     expect(ownerQueue).toContain(canonicalAliasGate);
     expect(ownerQueue).toContain(askAccessibilityGate);
     expect(ownerQueue).toContain(responsiveIdentityGate);
@@ -453,6 +463,22 @@ describe("current release-authority documentation", () => {
     expect(localProfileIngressEvidence).not.toContain(completedDurabilityGate);
     expect(ownerQueue).toContain(pr220Rescue);
     expect(localProfileIngressEvidence).toContain(pr220Rescue);
+  });
+
+  it("binds PR #221's consolidated authority to the current sealed PR #220 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      crossDomainMeasurementDecision,
+      crossDomainMeasurementEvidence,
+    ]) {
+      expect(doc).toContain(pr220SealedParent);
+      expect(doc).toContain(crossDomainGate);
+    }
+    expect(ownerQueue).toContain(pr221Rescue);
+    expect(crossDomainMeasurementEvidence).toContain(pr221Rescue);
+    expect(ownerQueue).toMatch(
+      /PR #212 is preserved as reviewed source history[\s\S]*no independent release authority/i
+    );
   });
 
   it("resolves the mutable PR head from GitHub instead of self-pinning it", () => {
