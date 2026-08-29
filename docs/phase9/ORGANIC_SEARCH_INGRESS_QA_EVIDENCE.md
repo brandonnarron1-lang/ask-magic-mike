@@ -6,9 +6,15 @@ Draft PR: [#219](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/219)
 
 Branch: `codex/phase9-organic-search-ingress-20260824`
 
-Base: `cd087e5c5c0fda82a3175b86b550c966120eb2ab`
+Base: sealed PR #218 `f065d8801bec295c99185d846ff4bc38de2a0a6f`
 
 Latest code-bearing commit: `5552a1a77f17f94656952126c69fb003e11fbf95`
+
+Pre-refresh head: `5486bed20272d2a661bc28a0e3a4a4576b2cb11f`
+
+Rescue: `rescue/amm-pr219-pre-pr218-exact-seal-20260829-004949`
+
+Exact-parent reconciliation merge: `f2754d0e1858c1afcf639977051f3488ab591f89`
 
 ## Evidence boundary
 
@@ -18,6 +24,12 @@ container, and intercepted browser validation. No Neon branch, Production
 database, Search Console property, provider credential, page, lead, message,
 campaign, budget, WordPress/DNS surface, purchase, deletion, or NellySelly
 system was touched.
+
+The detailed results below are immutable historical proof for the pre-refresh
+head. They establish the feature contract but do not prove or authorize the
+current GitHub PR head. The refreshed branch must repeat every applicable local,
+PostgreSQL 17, exact-head CI, immutable Preview, browser, visual, and runtime-
+log check.
 
 ## Focused contract proof
 
@@ -214,8 +226,14 @@ provider call, page publication, lead action, or message occurred.
 ## Release state and truth statement
 
 PR #219 remains Draft and stacked after PR #218. Its runtime candidate is sealed
-at the exact code head above; a later documentation-only head does not change
-runtime behavior. Production remains unchanged.
+behind the exact gate below, which has not been supplied:
+
+```text
+APPROVE PHASE 9 ORGANIC SEARCH INGRESS MIGRATION, PR 219 MERGE, AND PRODUCTION DEPLOYMENT
+```
+
+The gate keeps `GROWTH_SEARCH_IMPORT_ENABLED=false` and does not authorize a
+Search Console import. Production remains unchanged.
 The candidate proves that a specifically reviewed owned-page report can be
 validated and later reconciled atomically after separate authority. It does not
 prove that Search Console was accessed, an export is complete, any real search

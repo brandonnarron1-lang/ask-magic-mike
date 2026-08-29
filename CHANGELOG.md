@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-08-29 — PR #219 refresh onto exact sealed PR #218
+
+- Preserved prior PR #219 head `5486bed20272d2a661bc28a0e3a4a4576b2cb11f`
+  at `rescue/amm-pr219-pre-pr218-exact-seal-20260829-004949`.
+- Merged exact sealed PR #218 head
+  `f065d8801bec295c99185d846ff4bc38de2a0a6f` without force push at
+  reconciliation head `f2754d0e1858c1afcf639977051f3488ab591f89`.
+  Product, API, migration, shared-ingress, route, and test files merged without
+  conflict.
+- Retained the canonical Growth Command Center, growth ledgers, shared bounded
+  ingress transport, endpoint attestation, RBAC, audit ledger, spend contract,
+  and safe-disabled organic-search contract. No parallel analytics product,
+  database, dashboard, OAuth client, provider adapter, or publisher was added.
+- Former-head proof is historical pending fresh exact-head Node 24, disposable
+  PostgreSQL 17, immutable Preview, protected no-commit browser/visual,
+  security, isolation, and runtime-log verification.
+- Changed no Production deployment, environment, Neon object or row, Search
+  Console property, import, page, lead, message, provider, campaign/budget,
+  WordPress surface, DNS, purchase, deletion, or NellySelly system.
+
 ## 2026-08-29 — PR #218 refresh onto exact sealed PR #217
 
 - Preserved prior PR #218 head `cd087e5c5c0fda82a3175b86b550c966120eb2ab`

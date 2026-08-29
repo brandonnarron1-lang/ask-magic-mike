@@ -63,6 +63,12 @@ const marketingSpendIngressDecision = readDoc(
 const marketingSpendIngressEvidence = readDoc(
   "phase9/MARKETING_SPEND_INGRESS_QA_EVIDENCE.md"
 );
+const organicSearchIngressDecision = readDoc(
+  "phase9/ORGANIC_SEARCH_INGRESS_RELEASE_GATE.md"
+);
+const organicSearchIngressEvidence = readDoc(
+  "phase9/ORGANIC_SEARCH_INGRESS_QA_EVIDENCE.md"
+);
 const durableRateLimitRehearsal = readDoc(
   "phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md"
 );
@@ -110,6 +116,8 @@ const pr216SealedParent =
   "211485df28fc818ab783ed357df8486f1460d5e2";
 const pr217SealedParent =
   "8a6b92039bb82c1158db514c2c2f064ceb9cbbcf";
+const pr218SealedParent =
+  "f065d8801bec295c99185d846ff4bc38de2a0a6f";
 const canonicalAliasGate =
   "APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT";
 const askAccessibilityGate =
@@ -126,6 +134,8 @@ const vendorIngressGate =
   "APPROVE PHASE 9 VENDOR INGRESS CONTRACT LAB MERGE AND PRODUCTION DEPLOYMENT";
 const marketingSpendIngressGate =
   "APPROVE PHASE 9 MARKETING SPEND INGRESS MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT";
+const organicSearchIngressGate =
+  "APPROVE PHASE 9 ORGANIC SEARCH INGRESS MIGRATION, PR 219 MERGE, AND PRODUCTION DEPLOYMENT";
 const crossDomainGate =
   "APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT";
 const pr210Rescue =
@@ -144,6 +154,8 @@ const pr217Rescue =
   "rescue/amm-pr217-pre-pr216-exact-seal-20260828-234940";
 const pr218Rescue =
   "rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928";
+const pr219Rescue =
+  "rescue/amm-pr219-pre-pr218-exact-seal-20260829-004949";
 
 const completedReleaseLedger = [
   {
@@ -390,6 +402,21 @@ describe("current release-authority documentation", () => {
     }
     expect(ownerQueue).toContain(pr218Rescue);
     expect(marketingSpendIngressEvidence).toContain(pr218Rescue);
+  });
+
+  it("binds PR #219's stacked authority to the current sealed PR #218 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      organicSearchIngressDecision,
+      organicSearchIngressEvidence,
+    ]) {
+      expect(doc).toContain(pr218SealedParent);
+      expect(doc).toContain(organicSearchIngressGate);
+    }
+    expect(ownerQueue).toContain(pr219Rescue);
+    expect(organicSearchIngressEvidence).toContain(pr219Rescue);
+    expect(organicSearchIngressDecision).toContain(canonicalAliasGate);
+    expect(organicSearchIngressDecision).not.toContain(completedDurabilityGate);
   });
 
   it("resolves the mutable PR head from GitHub instead of self-pinning it", () => {

@@ -2,6 +2,25 @@
 
 Updated 2026-08-29.
 
+## PR #219 downstream reconciliation — 2026-08-29
+
+- Preserved prior PR #219 head `5486bed20272d2a661bc28a0e3a4a4576b2cb11f`
+  at `rescue/amm-pr219-pre-pr218-exact-seal-20260829-004949`.
+- Merged exact sealed PR #218 head
+  `f065d8801bec295c99185d846ff4bc38de2a0a6f` without force push at
+  exact-parent reconciliation head
+  `f2754d0e1858c1afcf639977051f3488ab591f89`. Product, API, migration,
+  shared-ingress refactor, route, and test files merged automatically with no
+  conflict.
+- The candidate reuses the existing Growth Command Center, growth ledgers,
+  shared bounded ingress transport, endpoint attestation, `growth:manage`
+  permission, and audit system. It adds no Google/provider connection,
+  parallel database/dashboard, content publisher, lead path, or message path.
+- PR #219 remains Draft with `GROWTH_SEARCH_IMPORT_ENABLED=false` and no
+  Production or import authority. Its prior local, PostgreSQL, CI, Preview,
+  browser, visual, and runtime evidence is historical until repeated on the
+  refreshed exact head.
+
 ## PR #218 downstream reconciliation — 2026-08-29
 
 - Preserved prior PR #218 head `cd087e5c5c0fda82a3175b86b550c966120eb2ab`
@@ -1639,7 +1658,9 @@ any bridge activation or shadow-mode test.
 
 ## Phase 9 organic-search opportunity ingress — 2026-08-24
 
-- Draft PR #219 is stacked after sealed PR #218 and cannot leapfrog PR #209.
+- PR #209 is accepted and its gate is exhausted. Draft PR #219 is stacked
+  after sealed PR #218 and cannot leapfrog the first pending candidate, PR
+  #210, or PRs #211–#218.
 - The existing Growth Command Center now has a protected, Preview-first
   `/admin/growth/search-ingress` workbench and bounded preview/commit APIs.
 - One exact owned-page Search Console report can be normalized into existing
@@ -1650,12 +1671,13 @@ any bridge activation or shadow-mode test.
   immutable receipts/audits, exact replay, and operator-state preservation.
 - Safe default is `GROWTH_SEARCH_IMPORT_ENABLED=false`; Production and Preview
   database identity remains exact-endpoint attested.
-- Proof passes: 39 focused tests, 3,207 full tests, PostgreSQL 17 contract,
+- Historical pre-refresh proof passes: 39 focused tests, 3,207 full tests, PostgreSQL 17 contract,
   typecheck, lint, Node 24 build, 92-route manifest, 14/14 safety, isolation,
   dependency audit, staged secret scan, and exact-head protected Preview QA.
 - Runtime code head `5552a1a` is `READY` at immutable deployment
   `dpl_FcBUJ7hDxKu7oeMpXb8UuVHpkkCz`; Release Gate run `32801867752` and
-  protected QA run `32801994614` pass. Remote evidence is 17 pass / six
+  protected QA run `32801994614` pass. That evidence is bound to the former
+  head and must be repeated. Remote evidence was 17 pass / six
   intentional skip / zero fail and 10/10 browser cases with zero commit calls.
 - No Search Console access, Production migration/configuration/merge/deployment,
   real import, page publication, lead/message/campaign action, WordPress/DNS

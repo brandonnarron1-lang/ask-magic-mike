@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-08-29 — PR #219 refresh onto exact sealed PR #218
+
+- Preserved former PR #219 head
+  `5486bed20272d2a661bc28a0e3a4a4576b2cb11f` at
+  `rescue/amm-pr219-pre-pr218-exact-seal-20260829-004949`.
+- Merged exact sealed PR #218 head
+  `f065d8801bec295c99185d846ff4bc38de2a0a6f` without force push at
+  reconciliation head `f2754d0e1858c1afcf639977051f3488ab591f89`.
+  Product, API, migration, shared-ingress, route, and test files merged without
+  conflict.
+- Retained the existing growth ledgers and controls; prior PR #219 proof is
+  historical pending fresh exact-head application, PostgreSQL, Preview,
+  protected no-commit browser, visual, security, isolation, and runtime-log
+  evidence.
+- Production remains `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` /
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; no Production, environment, Neon, Search
+  Console, import, publication, lead, message, provider, campaign/budget,
+  WordPress, DNS, purchase, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-29 — PR #218 refresh onto exact sealed PR #217
 
 - Preserved former PR #218 head

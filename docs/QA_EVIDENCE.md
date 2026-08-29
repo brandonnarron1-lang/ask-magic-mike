@@ -1,5 +1,28 @@
 # QA Evidence
 
+## Phase 9 organic-search ingress refresh — 2026-08-29
+
+- Draft PR #219 reuses exact sealed PR #218
+  `f065d8801bec295c99185d846ff4bc38de2a0a6f`, the canonical Growth Command
+  Center, shared bounded ingress transport, growth ledgers, endpoint
+  attestation, `growth:manage` RBAC, and audit system.
+- Former PR #219 head `5486bed20272d2a661bc28a0e3a4a4576b2cb11f`
+  is preserved at
+  `rescue/amm-pr219-pre-pr218-exact-seal-20260829-004949`; exact-parent
+  reconciliation head is `f2754d0e1858c1afcf639977051f3488ab591f89`.
+- Product, API, migration, shared-refactor, route, and test files merged without
+  conflict. The existing spend-ingress parser, transport, and database-
+  identity behavior remains represented by its regression suite and the
+  combined Preview browser command retains both spend and organic scenarios.
+- Former-head local, disposable PostgreSQL, CI, Preview, browser, visual, and
+  runtime-log proof is historical. Fresh exact-head proof is mandatory before
+  the separate PR #219 migration/merge/deploy gate.
+- No Production, environment, Neon object or row, Search Console access,
+  import, publication, lead, message, provider, campaign/budget, WordPress,
+  DNS, purchase, deletion, or NellySelly action occurred.
+- Full scope:
+  `docs/phase9/ORGANIC_SEARCH_INGRESS_QA_EVIDENCE.md`.
+
 ## Phase 9 marketing-spend ingress refresh — 2026-08-29
 
 - Draft PR #218 reuses the canonical growth schema, Growth Command Center,
