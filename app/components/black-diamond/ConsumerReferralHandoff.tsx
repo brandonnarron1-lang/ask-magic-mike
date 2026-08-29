@@ -61,23 +61,24 @@ export function ConsumerReferralHandoff({
   }
 
   async function shareReferralLink() {
-    if (typeof navigator.share !== "function") {
+    if (
+      typeof navigator.share !== "function" ||
+      typeof navigator.canShare !== "function"
+    ) {
       await copyReferralLink();
       return;
     }
 
-    if (typeof navigator.canShare === "function") {
-      try {
-        if (!navigator.canShare(packet)) {
-          await copyReferralLink();
-          return;
-        }
-      } catch {
-        // Treat an inconsistent capability probe as unavailable and keep the
-        // visitor on the explicit, privacy-safe Clipboard/manual-copy path.
+    try {
+      if (!navigator.canShare(packet)) {
         await copyReferralLink();
         return;
       }
+    } catch {
+      // Treat an inconsistent capability probe as unavailable and keep the
+      // visitor on the explicit, privacy-safe Clipboard/manual-copy path.
+      await copyReferralLink();
+      return;
     }
 
     try {

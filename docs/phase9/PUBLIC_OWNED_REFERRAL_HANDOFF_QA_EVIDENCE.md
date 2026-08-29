@@ -1,21 +1,25 @@
 # Phase 9 public owned-referral handoff QA evidence
 
-Refreshed: 2026-08-29 06:58 EDT
+Refreshed: 2026-08-29 13:44 EDT
 
 Branch: `codex/phase9-owned-referral-handoff-20260828`
 
 Parent: exact sealed Draft PR #227 head
-`cf92b9cb64a7cc5b70c98d629cc86d2289fbfedb`
+`ee1dd462665e423c17a69b6ab7d1c3a7a70a1409`
 
-Original PR #228 head: `c755764846a3aa2708def5c47cc36e6fa700941d`,
+Former PR #228 head: `b1bd4b2012c037f4a71806b449541cdcfdd758b6`,
 preserved at
-`rescue/amm-pr228-pre-pr227-exact-seal-20260829-0636`
+`rescue/amm-pr228-pre-pr227-parent-refresh-20260829-133619`
 
 Restack method: normal merge commit
-`9b4b748f1513d6a00ed713e9fe5cd45c4546af98`; no rebase or force-push
+`38a22f5627f2b8f7293d9f65bf3a4f27b7475044`; no rebase or force-push
 
-Code-bearing evidence head:
-`0442abc1cf0d9a14c5ffd21d1673561aff575db5`
+Earlier source rescue:
+`rescue/amm-pr228-pre-pr227-exact-seal-20260829-0636`
+
+Final exact candidate head: recorded in the Draft PR body and immutable seal
+comment after branch-bound CI and Preview verification. This file is itself
+part of that candidate, so it does not embed a self-referential commit hash.
 
 Production mutation: none
 
@@ -46,30 +50,29 @@ pnpm exec vitest run \
   tests/api/public-events-route.test.ts
 ```
 
-Result after capability hardening: **3 files / 36 tests passed**. Coverage
-includes the fixed packet,
-closed surface registry, active-homepage substitution, native handoff,
-cancelled/blocked chooser, `canShare` rejection, Clipboard fallback,
-denied-Clipboard manual selection,
-registered attribution, and PII-property rejection.
+Result after exact-parent capability hardening: **3 files / 37 tests passed**.
+Coverage includes the fixed packet, closed surface registry,
+active-homepage substitution, native handoff only after a positive
+`canShare` probe, missing/negative/inconsistent capability fallback,
+cancelled/blocked chooser, Clipboard fallback, denied-Clipboard manual
+selection, registered attribution, and PII-property rejection.
 
-The complete local release gate passed:
+Current exact-parent local proof also passes:
 
-- Ask Magic Mike / NellySelly deployable-source isolation: PASS;
-- release safety: 14/14 PASS;
-- Vitest: **266 files / 3,338 tests passed**;
-- strict TypeScript: PASS;
-- full ESLint: PASS;
-- optimized Next.js build: PASS, 59 static pages generated;
-- route manifest: PASS, 95 active routes / 17 acknowledged duplicates;
-- Production dependency audit: no known vulnerability;
-- redacted full-history Gitleaks: 671 commits / approximately 16.34 MB / no
-  detected leak;
-- exact sealed-parent delta Gitleaks: two commits / approximately 32.93 KB / no
-  detected leak; and
-- `git diff --check`: PASS.
+- Ask Magic Mike / NellySelly deployable-source isolation;
+- release safety: **14/14**;
+- strict TypeScript;
+- targeted ESLint for every changed runtime and test file;
+- Production dependency audit with no known vulnerability; and
+- `git diff --check`.
 
-Clean-tree release doctor: **43/43 PASS** with no failure or skip.
+The prior code-bearing head passed the complete local gate at **266 files /
+3,338 tests**, full lint, optimized Next.js 15.5.21 build with 59 static pages,
+95 active routes / 17 acknowledged duplicates, clean-tree release doctor
+43/43, and redacted full/delta Gitleaks scans. Those results are retained as
+historical regression evidence only; the final pushed head requires fresh
+branch-bound Release Gate, immutable Preview, protected no-write browser QA,
+runtime-log inspection, and exact-head secret scans before seal.
 
 ## No-write browser acceptance
 
@@ -149,7 +152,7 @@ conformance or replace human assistive-technology review.
 - Production, WordPress, Vercel Production, Neon Production, email/BCC, SMS,
   Push, DNS, publication, spend, and NellySelly remain unchanged.
 
-## Refreshed immutable code-head evidence
+## Historical pre-parent-refresh immutable evidence
 
 GitHub Release Gate run
 [`33248609881`](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33248609881)

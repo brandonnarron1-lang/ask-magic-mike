@@ -2075,26 +2075,30 @@ any bridge activation or shadow-mode test.
   a consumer-facing, generic referral handoff; the non-indexed social review
   route remains available for controlled review but is no longer promoted to
   consumers from the homepage.
-- Added direct-click native Web Share, an available `canShare` capability
-  probe, Clipboard copy, and a visible manual-copy fallback without a
-  third-party script, provider, popup, database, or sender.
+- Added direct-click native Web Share only after an available `canShare`
+  capability probe accepts the fixed packet, plus Clipboard copy and a visible
+  manual-copy fallback without a third-party script, provider, popup, database,
+  or sender.
 - Added exact `consumer_share` / `referral` / `amm_owned_demand_2026` /
   `homepage_referral_share` attribution and two bounded events whose labels do
   not overclaim delivery or publication.
 - The packet cannot contain form answers, saved plan state, current URL,
   session/lead IDs, contact details, click IDs, or free text.
-- Focused acceptance passes 36 tests on Node 24.18.0. The post-restack local
-  gate passes 266 files / 3,338 tests, strict typecheck, full lint, optimized
-  Next.js 15.5.21 build with 59 static pages, 95 active routes / 17 acknowledged
-  duplicates, 14/14 release safety, deployable-source isolation, clean-tree
-  release doctor 43/43, and zero known Production dependency vulnerabilities.
-  Redacted Gitleaks reports no leak across 671 commits / approximately 16.34 MB
-  or the two-commit sealed-parent delta / approximately 32.93 KB.
-- Original head `c755764846a3aa2708def5c47cc36e6fa700941d` is preserved at
-  `rescue/amm-pr228-pre-pr227-exact-seal-20260829-0636`. The candidate was
+- Exact-parent focused acceptance passes 37 tests on Node 24.18.0, strict
+  typecheck, targeted lint, 14/14 release safety, deployable-source isolation,
+  `git diff --check`, and the Production dependency audit with no known
+  vulnerability. Historical pre-refresh proof also passed 266 files / 3,338
+  tests, full lint, optimized Next.js 15.5.21 build with 59 static pages, 95
+  active routes / 17 acknowledged duplicates, clean-tree release doctor 43/43,
+  and redacted full/delta Gitleaks scans. Fresh exact-head CI, Preview,
+  no-write browser QA, runtime-log, and secret-scan proof remain mandatory.
+- Former head `b1bd4b2012c037f4a71806b449541cdcfdd758b6` is preserved at
+  `rescue/amm-pr228-pre-pr227-parent-refresh-20260829-133619`. The candidate was
   reconciled through normal merge commit
-  `9b4b748f1513d6a00ed713e9fe5cd45c4546af98` onto exact sealed PR #227 head
-  `cf92b9cb64a7cc5b70c98d629cc86d2289fbfedb`; no rebase or force-push was used.
+  `38a22f5627f2b8f7293d9f65bf3a4f27b7475044` onto exact sealed PR #227 head
+  `ee1dd462665e423c17a69b6ab7d1c3a7a70a1409`; no rebase or force-push was used.
+  The earlier source rescue
+  `rescue/amm-pr228-pre-pr227-exact-seal-20260829-0636` also remains intact.
 - Prior desktop/mobile no-write browser QA reports no overflow, console/page
   error, bad response, external request, or internal `/social-preview` link;
   axe reports zero automated WCAG A/AA violations on the new section. Fresh
