@@ -8,6 +8,12 @@ specific expansions; they do not invalidate the live lead pipe.
 
 - Three existing WordPress links remain identifiable through read-only
   manifests, but no page has been changed.
+- Current Production's activation loop can still present the hidden homepage
+  CTA as its next operator decision because that deployed selector does not yet
+  consume the already-built live readiness manifests. The follow-up readiness
+  candidate fails closed on blocked/fetch-failed targets and selects the
+  visible home-value page when today's exact manifests are supplied. It is not
+  Production authority and performs no WordPress action.
 - Fresh 2026-08-29 public and browser inspection found that homepage page 149
   has one exact Ask Magic Mike href inside an `.amm-cta` component suppressed
   by public `display:none !important` CSS. The corrected manifest returns
@@ -20,11 +26,17 @@ specific expansions; they do not invalidate the live lead pipe.
 - Home-value page 3952 and We Buy Homes page 3631 remain independent
   `visible_candidate` decisions. They are not bulk-edit substitutes for the
   blocked homepage placement.
+- The live `2.10.0` plugin SHA still matches the reviewed restoration packet,
+  and isolated desktop/mobile preview proves the existing homepage CTA can be
+  restored without horizontal overflow while preserving the floating-widget
+  guard. The `2.10.1` save remains separately approval-gated and has not
+  occurred.
 - A readiness manifest is not proof of publication or demand. Do not create a
   publication-proof row until an authorized operator actually publishes the
   exact link and supplies public evidence.
 - Detailed visibility evidence:
-  `docs/phase9/WORDPRESS_HOMEPAGE_VISIBILITY_TRUTH.md`.
+  `docs/phase9/WORDPRESS_HOMEPAGE_VISIBILITY_TRUTH.md` and
+  `docs/phase9/OWNED_DEMAND_READINESS_AUTHORITY_QA_EVIDENCE.md`.
 
 ## Current release constraint
 

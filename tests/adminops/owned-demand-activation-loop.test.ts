@@ -193,6 +193,25 @@ describe("owned-demand per-placement activation loop", () => {
     )?.nextAction).toContain("Do not activate this placement yet");
   });
 
+  it("returns no recommendation when every prepared placement has an explicit readiness hold", () => {
+    const baseline = buildOwnedDemandActivationLoop(command(), ledger());
+    const result = buildOwnedDemandActivationLoop(
+      command(),
+      ledger(),
+      true,
+      baseline.placements.map((row) => ({
+        channelKey: row.channelKey,
+        placementKey: row.placementKey,
+        activationEligible: false,
+        status: "readiness_unavailable",
+        detail: "No exact native readiness evidence is available.",
+      })),
+    );
+
+    expect(result.readinessBlockedPlacements).toBe(result.totalPlacements);
+    expect(result.nextPlacement).toBeNull();
+  });
+
   it("fails closed when a latest proof no longer matches the current canonical attribution identity", () => {
     const result = buildOwnedDemandActivationLoop(command(), ledger([proof({
       trackedUrl: "https://www.askmagicmike.com/home-value?utm_source=facebook&utm_campaign=old_campaign",

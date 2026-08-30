@@ -12,6 +12,32 @@ chronological implementation ledger; older statements that named PR #210 or
 another component as the next release are preserved historical evidence, not
 current operator instructions.
 
+## Phase 9 owned-demand readiness authority — 2026-08-30
+
+- **Gap closed:** the existing activation loop no longer treats a prepared
+  WordPress placement as selectable when its exact live readiness manifest is
+  blocked or unavailable.
+- **Reuse:** the implementation consumes the established allowlisted
+  WordPress change-set reader, canonical owned-demand registry, Neon proof
+  ledger, and protected Distribution Command. No new publisher, funnel,
+  database, dashboard, or campaign engine was added.
+- **Live truth:** homepage page 149 is `hidden_target`; home-value page 3952 and
+  We Buy Homes page 3631 are `legacy_match_ready` and visible candidates. The
+  revised recommendation therefore selects the existing home-value placement.
+- **Efficiency and safety:** one shared page-index GET serves all three
+  manifests. A fetch failure becomes a readiness hold, not a false-ready
+  recommendation. Lifecycle evidence remains inspectable.
+- **Restoration proof:** the live `2.10.0` plugin matches its reviewed SHA, the
+  proposed `2.10.1` SHA matches, and isolated desktop/mobile rendering passes
+  with the separate floating widget still suppressed. No WordPress save was
+  performed.
+- **Initial verification:** focused Vitest passes 3 files / 47 tests, strict
+  TypeScript passes, and the diff check is clean. Full exact-head release and
+  hosted Preview proof remain required.
+- **Authority boundary:** no Production, WordPress, cache, database, lead,
+  message, provider, publication, DNS, spend, deletion, purchase, or
+  NellySelly action occurred.
+
 ## Phase 9 cumulative Production acceptance and authority closeout — 2026-08-30
 
 - **Accepted identity:** reviewed PR #238 head

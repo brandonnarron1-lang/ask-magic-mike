@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-08-30 — Owned-demand recommendations consume live WordPress readiness
+
+- Reused the protected WordPress manifest system and Distribution Command to
+  prevent a publication-blocked target from becoming the next activation
+  recommendation.
+- Added one shared WordPress page-index read for the three reviewed targets,
+  typed readiness decisions, fail-closed selection, and visible readiness-hold
+  evidence.
+- Current public evidence classifies homepage page 149 as hidden and pages
+  3952/3631 as visible legacy matches, so the existing home-value placement is
+  selected instead of the hidden homepage CTA.
+- Revalidated the separate hash-pinned `2.10.1` homepage visibility packet and
+  desktop/mobile local preview without saving WordPress.
+- Focused verification passes 3 files / 47 tests and strict TypeScript. No
+  Production, WordPress, database, lead, message, provider, publication, DNS,
+  spend, deletion, purchase, or NellySelly action occurred.
+
 ## 2026-08-30 — PR #238 Production acceptance and authority reconciliation
 
 - Recorded accepted Production merge

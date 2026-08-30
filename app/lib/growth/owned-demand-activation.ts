@@ -346,7 +346,7 @@ export function buildOwnedDemandActivationLoop(
       ? placements.find((placement) => (
           placement.state !== "measured_signal"
           && !(placement.state === "prepared_not_observed" && placement.selectionBlocked)
-        )) || placements.find((placement) => placement.state === "measured_signal") || null
+        )) || null
       : null,
     placements,
     authorityBoundary: "This loop joins append-only native observation evidence to exact first-party attribution. It cannot publish, send, spend, contact a consumer, or turn either evidence stream into a claim the other stream does not prove.",
