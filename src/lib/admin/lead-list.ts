@@ -7,6 +7,7 @@
  * Attribution and scoring are loaded as optional supplements so the list
  * degrades gracefully when those tables are absent or return errors.
  */
+import { neon } from "@neondatabase/serverless";
 import { LEAD_TYPES, LEAD_STATUSES, LEAD_GRADES } from "@/lib/leads/lead-types";
 import { SPAM_SUSPECT_THRESHOLD } from "@/lib/leads/spam-detector";
 
@@ -69,9 +70,11 @@ export interface LeadListResult {
   total: number;
   limit: number;
   offset: number;
+  error?: string;
 }
 
 const MAX_LIMIT = 100;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface AttributionSupplement {
   utm_source: string | null;
@@ -87,11 +90,170 @@ interface ScoreSupplement {
   temperature: string | null;
 }
 
+function validIso(value: string | null | undefined): value is string {
+  return Boolean(value && !Number.isNaN(Date.parse(value)));
+}
+
+async function loadNeonLeadList(
+  filters: LeadListFilters,
+  databaseUrl: string,
+  limit: number,
+  offset: number,
+): Promise<LeadListResult> {
+  const sql = neon(databaseUrl);
+  const params: unknown[] = [];
+  const where: string[] = [];
+  const bind = (value: unknown) => {
+    params.push(value);
+    return `$${params.length}`;
+  };
+
+  if (filters.leadType && (LEAD_TYPES as readonly string[]).includes(filters.leadType)) {
+    where.push(`l.lead_type = ${bind(filters.leadType)}`);
+  }
+  if (filters.status && (LEAD_STATUSES as readonly string[]).includes(filters.status)) {
+    where.push(`l.status = ${bind(filters.status)}`);
+  }
+  if (filters.grade && (LEAD_GRADES as readonly string[]).includes(filters.grade)) {
+    where.push(`l.lead_grade = ${bind(filters.grade)}`);
+  }
+  if (filters.source) where.push(`l.source = ${bind(filters.source.slice(0, 200))}`);
+  if (filters.assignedAgentId && UUID.test(filters.assignedAgentId)) {
+    where.push(`l.assigned_agent_id = ${bind(filters.assignedAgentId)}::uuid`);
+  }
+  if (filters.unassignedOnly) where.push("l.assigned_agent_id IS NULL");
+  if (filters.spamSuspect) where.push(`l.spam_score >= ${bind(SPAM_SUSPECT_THRESHOLD)}`);
+  if (filters.city) where.push(`l.city ILIKE ${bind(`%${filters.city.slice(0, 120)}%`)}`);
+  if (validIso(filters.createdFromIso)) {
+    where.push(`l.created_at >= ${bind(filters.createdFromIso)}::timestamptz`);
+  }
+  if (validIso(filters.createdToIso)) {
+    where.push(`l.created_at <= ${bind(filters.createdToIso)}::timestamptz`);
+  }
+  if (filters.followUpDue) {
+    where.push("l.next_follow_up_at IS NOT NULL");
+    where.push(`l.next_follow_up_at <= ${bind(new Date().toISOString())}::timestamptz`);
+  }
+  if (filters.neverContacted) {
+    where.push("l.status = 'assigned'");
+    where.push("l.last_contacted_at IS NULL");
+    where.push(`l.created_at < ${bind(new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString())}::timestamptz`);
+  }
+  if (filters.urgentOnly) where.push("l.lead_grade IN ('A+', 'A')");
+  if (filters.slaBreach) {
+    where.push("l.lead_grade IN ('A+', 'A')");
+    where.push("l.last_contacted_at IS NULL");
+    where.push(`l.created_at < ${bind(new Date(Date.now() - 5 * 60_000).toISOString())}::timestamptz`);
+  }
+  if (filters.q) {
+    const search = bind(`%${filters.q.trim().slice(0, 200)}%`);
+    where.push(`(
+      l.email ILIKE ${search}
+      OR l.first_name ILIKE ${search}
+      OR l.last_name ILIKE ${search}
+      OR l.phone ILIKE ${search}
+      OR l.normalized_property_address ILIKE ${search}
+    )`);
+  }
+
+  const orderBy = filters.sort === "highest_score"
+    ? "sc.composite_score DESC NULLS LAST, l.created_at DESC"
+    : filters.sort === "last_activity"
+      ? "l.last_contacted_at DESC NULLS LAST, l.created_at DESC"
+      : filters.sort === "sla_deadline"
+        ? "l.next_follow_up_at ASC NULLS LAST, l.created_at DESC"
+        : "l.created_at DESC";
+  const limitToken = bind(limit);
+  const offsetToken = bind(offset);
+
+  try {
+    const rows = await sql.query(
+      `SELECT l.id, l.created_at, l.first_name, l.last_name, l.email, l.phone,
+              l.lead_type, l.status, l.lead_grade, l.source, l.assigned_agent_id,
+              l.last_contacted_at, l.spam_score, l.city, l.state,
+              sa.utm_source AS attr_utm_source,
+              sa.utm_medium AS attr_utm_medium,
+              sa.utm_campaign AS attr_utm_campaign,
+              sa.referrer_type AS attr_referrer_type,
+              sa.is_paid AS attr_is_paid,
+              sa.landing_page AS attr_landing_page,
+              sc.composite_score,
+              sc.temperature,
+              COUNT(*) OVER() AS total_count
+         FROM public.leads AS l
+         LEFT JOIN LATERAL (
+           SELECT source_attribution.utm_source,
+                  source_attribution.utm_medium,
+                  source_attribution.utm_campaign,
+                  source_attribution.referrer_type,
+                  source_attribution.is_paid,
+                  source_attribution.landing_page
+             FROM public.source_attribution
+            WHERE source_attribution.lead_id = l.id
+            ORDER BY source_attribution.created_at DESC
+            LIMIT 1
+         ) AS sa ON true
+         LEFT JOIN public.lead_scores AS sc ON sc.lead_id = l.id
+         ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+         ORDER BY ${orderBy}
+         LIMIT ${limitToken} OFFSET ${offsetToken}`,
+      params,
+    ) as Array<Record<string, unknown>>;
+
+    const items = rows.map((row) => mapLeadListRow(
+      row,
+      row.attr_utm_source !== null && row.attr_utm_source !== undefined ||
+        row.attr_utm_medium !== null && row.attr_utm_medium !== undefined ||
+        row.attr_utm_campaign !== null && row.attr_utm_campaign !== undefined ||
+        row.attr_referrer_type !== null && row.attr_referrer_type !== undefined ||
+        row.attr_landing_page !== null && row.attr_landing_page !== undefined
+        ? {
+            utm_source: typeof row.attr_utm_source === "string" ? row.attr_utm_source : null,
+            utm_medium: typeof row.attr_utm_medium === "string" ? row.attr_utm_medium : null,
+            utm_campaign: typeof row.attr_utm_campaign === "string" ? row.attr_utm_campaign : null,
+            referrer_type: typeof row.attr_referrer_type === "string" ? row.attr_referrer_type : null,
+            is_paid: row.attr_is_paid === true,
+            landing_page: typeof row.attr_landing_page === "string" ? row.attr_landing_page : null,
+          }
+        : null,
+      row.composite_score !== null && row.composite_score !== undefined ||
+        row.temperature !== null && row.temperature !== undefined
+        ? {
+            composite_score: typeof row.composite_score === "number"
+              ? row.composite_score
+              : Number.isFinite(Number(row.composite_score))
+                ? Number(row.composite_score)
+                : null,
+            temperature: typeof row.temperature === "string" ? row.temperature : null,
+          }
+        : null,
+    ));
+    const rawTotal = rows[0]?.total_count;
+    const total = Number.isFinite(Number(rawTotal)) ? Number(rawTotal) : items.length;
+    return { configured: true, items, total, limit, offset };
+  } catch {
+    return {
+      configured: true,
+      items: [],
+      total: 0,
+      limit,
+      offset,
+      error: "lead_list_unavailable",
+    };
+  }
+}
+
 export async function loadLeadList(
   filters: LeadListFilters
 ): Promise<LeadListResult> {
-  const limit = Math.min(filters.limit ?? 25, MAX_LIMIT);
-  const offset = Math.max(filters.offset ?? 0, 0);
+  const rawLimit = Number.isFinite(filters.limit) ? Number(filters.limit) : 25;
+  const rawOffset = Number.isFinite(filters.offset) ? Number(filters.offset) : 0;
+  const limit = Math.max(1, Math.min(Math.trunc(rawLimit), MAX_LIMIT));
+  const offset = Math.max(Math.trunc(rawOffset), 0);
+
+  if (process.env.DATABASE_URL) {
+    return loadNeonLeadList(filters, process.env.DATABASE_URL, limit, offset);
+  }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -169,7 +331,7 @@ export async function loadLeadList(
 
   const { data, count, error } = await q;
   if (error) {
-    return { configured: true, items: [], total: 0, limit, offset };
+    return { configured: true, items: [], total: 0, limit, offset, error: "lead_list_unavailable" };
   }
 
   const rows = (data ?? []) as Array<Record<string, unknown>>;

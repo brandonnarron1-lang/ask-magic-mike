@@ -152,6 +152,97 @@ export interface AdminLeadMutationPersistence {
   mutateAdminLead(input: AdminLeadMutation): Promise<AdminLeadMutationResult>;
 }
 
+export type AdminLeadPatch = {
+  status?: string;
+  lead_type?: string;
+  lead_grade?: string | null;
+  next_follow_up_at?: string | null;
+  last_contacted_at?: string | null;
+  closed_lost_reason?: string | null;
+};
+
+export type AdminLeadPatchCommand = AdminLeadPatch & {
+  /** Atomic server-side directive; never maps to a leads table column. */
+  restore_status_before_spam?: true;
+};
+
+export type AdminLeadPatchMutation = {
+  leadId: string;
+  patch: AdminLeadPatchCommand;
+  actor: string;
+  occurredAt: string;
+};
+
+export type AdminLeadPatchMutationResult =
+  | {
+      ok: true;
+      leadId: string;
+      auditId: string;
+      updatedAt: string;
+      patch: AdminLeadPatch;
+    }
+  | {
+      ok: false;
+      error:
+        | "lead_not_found"
+        | "invalid_patch"
+        | "invalid_patch_field"
+        | "invalid_patch_value";
+    };
+
+export interface AdminLeadPatchPersistence {
+  patchAdminLead(input: AdminLeadPatchMutation): Promise<AdminLeadPatchMutationResult>;
+}
+
+export type AdminLeadNoteMutation = {
+  leadId: string;
+  content: string;
+  agentId?: string | null;
+  actor: string;
+  occurredAt: string;
+};
+
+export type AdminLeadNoteMutationResult =
+  | {
+      ok: true;
+      messageId: string;
+      auditId: string;
+      createdAt: string;
+    }
+  | { ok: false; error: "lead_not_found" | "agent_not_found" | "invalid_note" };
+
+export interface AdminLeadNotePersistence {
+  addAdminLeadNote(input: AdminLeadNoteMutation): Promise<AdminLeadNoteMutationResult>;
+}
+
+export type AdminLeadTaskMutation = {
+  leadId: string;
+  title: string;
+  body?: string | null;
+  dueAt?: string | null;
+  priority: "low" | "normal" | "high" | "urgent";
+  category?: string | null;
+  agentId?: string | null;
+  actor: string;
+  occurredAt: string;
+};
+
+export type AdminLeadTaskMutationResult =
+  | {
+      ok: true;
+      taskId: string;
+      auditId: string;
+      createdAt: string;
+    }
+  | {
+      ok: false;
+      error: "lead_not_found" | "agent_not_found" | "invalid_task";
+    };
+
+export interface AdminLeadTaskPersistence {
+  createAdminLeadTask(input: AdminLeadTaskMutation): Promise<AdminLeadTaskMutationResult>;
+}
+
 export type AdminFirstResponseMutation = {
   leadId: string;
   actor: string;
@@ -184,6 +275,7 @@ export type AdminAssignmentMutation = {
   agentId: string | null;
   expectedAgentId: string | null;
   action: "assigned" | "reassigned" | "unassigned";
+  reason?: string | null;
   notificationMode: "disabled" | "console" | "sandbox" | "production";
   actor: string;
   occurredAt: string;
@@ -251,6 +343,9 @@ export type ActivePersistenceBoundary = LeadLifecyclePersistence &
   AppointmentIntentPersistence &
   AdminLeadReadPersistence &
   AdminLeadMutationPersistence &
+  AdminLeadPatchPersistence &
+  AdminLeadNotePersistence &
+  AdminLeadTaskPersistence &
   AdminFirstResponseMutationPersistence &
   AdminAssignmentMutationPersistence &
   AdminAgentOperationsMutationPersistence &

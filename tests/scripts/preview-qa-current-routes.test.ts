@@ -53,6 +53,15 @@ describe("preview QA current route contract", () => {
     expect(source).toContain("authenticated cron request safely refused Preview data writes");
   });
 
+  it("requires durable IDs and authenticated readback for controlled mutation QA", () => {
+    expect(source).toContain('name: "INTERNAL QA — DO NOT CONTACT"');
+    expect(source).toContain("is_test: true");
+    expect(source).toContain('typeof note.json?.message_id === "string"');
+    expect(source).toContain('typeof task.json?.task_id === "string"');
+    expect(source).toContain('http("GET", `/api/admin/leads/${leadId}`');
+    expect(source).toContain('record(\n    "mutation:persistence_readback"');
+  });
+
   it("validates the private iOS install failure contract without minting or redeeming a token", () => {
     expect(source).toContain('ct.includes("application/json") || ct.includes("+json")');
     expect(source).toContain('const installPath = "/phone-alerts/install/preview-qa-invalid-token"');

@@ -121,9 +121,19 @@ describe("Admin PATCH unspam status preservation", () => {
     // Must not hardcode "qualified" as the target status when unspamming
     // (the route may still contain "qualified" as a LEAD_STATUSES member)
     expect(src).not.toContain(": \"qualified\"");
-    // Must restore prior status after reading it from DB
-    expect(src).toContain("priorStatus");
-    expect(src).toContain("mark_spam === false");
+    // The route delegates restoration to the atomic database operation, which
+    // recovers the last pre-spam status from immutable audit history.
+    expect(src).toContain("restore_status_before_spam = true");
+    const migration = readFileSync(
+      resolve(
+        process.cwd(),
+        "supabase/migrations/20260830190000_admin_lead_api_persistence.sql",
+      ),
+      "utf-8",
+    );
+    expect(migration).toContain("v_prior_status");
+    expect(migration).toContain("after_state->>'status' = 'spam'");
+    expect(migration).toContain("before_state->>'status'");
   });
 });
 

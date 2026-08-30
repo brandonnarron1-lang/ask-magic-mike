@@ -90,7 +90,7 @@ describe("Admin PATCH /api/admin/leads/[id] — lead_grade validation", () => {
   });
 
   it("validates lead_grade against the allowlist", () => {
-    expect(src).toContain("LEAD_GRADES as readonly string[]");
+    expect(src).toContain("z.enum(LEAD_GRADES)");
   });
 });
 

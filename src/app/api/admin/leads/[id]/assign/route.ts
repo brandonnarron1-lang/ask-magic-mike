@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { checkAdminAuth } from "@/lib/admin/auth";
+import { assignCanonicalAdminLead } from "@/lib/admin/lead-operations";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const AssignmentSchema = z.object({
+  agent_id: z.string().uuid(),
+  reason: z.string().trim().max(500).optional(),
+}).strict();
 
 export async function POST(
   req: NextRequest,
@@ -20,71 +26,41 @@ export async function POST(
   if (!UUID.test(id))
     return NextResponse.json({ ok: false, error: "bad_id" }, { status: 400, headers: NO_STORE });
 
-  const body = (await req.json().catch(() => ({}))) as {
-    agent_id?: string;
-    reason?: string;
-  };
-  if (!body.agent_id || !UUID.test(body.agent_id))
+  const parsed = AssignmentSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success)
     return NextResponse.json(
       { ok: false, error: "agent_id_required" },
       { status: 400, headers: NO_STORE }
     );
 
-  const supabaseConfigured =
-    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    !!process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseConfigured) {
-    return NextResponse.json(
-      { ok: true, note: "mock_mode", lead_id: id, agent_id: body.agent_id },
-      { headers: NO_STORE }
-    );
-  }
-
-  const { createAdminClient } = await import("@/lib/supabase/admin");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const client = createAdminClient() as any;
-
-  const { error: assignErr } = await client.from("leads").update({
-    assigned_agent_id: body.agent_id,
-    assigned_at: new Date().toISOString(),
-    assignment_status: "assigned",
-  }).eq("id", id);
-
-  if (assignErr) {
-    return NextResponse.json(
-      { ok: false, error: "assignment_failed" },
-      { status: 500, headers: NO_STORE }
-    );
-  }
-
-  const { error: assignmentInsertErr } = await client.from("agent_assignments").insert({
-    lead_id: id,
-    agent_id: body.agent_id,
-    assigned_by: "admin",
-    assignment_reason: body.reason ?? "manual_admin_assignment",
-    status: "pending",
-  });
-  if (assignmentInsertErr) {
-    console.error("[assign] agent_assignments insert failed:", assignmentInsertErr.message);
-  }
-
-  const { error: auditErr } = await client.from("audit_logs").insert({
+  const result = await assignCanonicalAdminLead({
+    leadId: id,
+    agentId: parsed.data.agent_id,
+    reason: parsed.data.reason,
     actor: auth.actor,
-    action: "lead.assigned",
-    resource_type: "lead",
-    resource_id: id,
-    after_state: { agent_id: body.agent_id, reason: body.reason ?? null },
   });
-  if (auditErr) {
-    console.error("[assign] audit_logs insert failed:", auditErr.message);
+  if (!result.ok) {
+    return NextResponse.json(
+      { ok: false, error: result.error },
+      { status: result.statusCode, headers: NO_STORE }
+    );
   }
 
   trackEventNoWait({
     eventName: "lead_assigned",
     leadId: id,
-    agentId: body.agent_id,
-    properties: { reason: body.reason ?? null },
+    agentId: parsed.data.agent_id,
+    properties: { reasonProvided: Boolean(parsed.data.reason) },
   });
 
-  return NextResponse.json({ ok: true }, { headers: NO_STORE });
+  return NextResponse.json({
+    ok: true,
+    lead_id: id,
+    agent_id: parsed.data.agent_id,
+    action: result.value.action,
+    audit_id: result.value.auditId ?? null,
+    notification_id: result.value.notificationId ?? null,
+    notification_status: result.value.notificationStatus ?? null,
+    idempotent_replay: result.value.idempotentReplay,
+  }, { headers: NO_STORE });
 }

@@ -36,7 +36,7 @@ function installAssignmentFetch(
         assignment_status: currentAgentId ? "assigned" : "unassigned",
       }]);
     }
-    if (method === "POST" && url.includes("/rest/v1/rpc/mutate_admin_assignment_v1")) {
+    if (method === "POST" && url.includes("/rest/v1/rpc/mutate_admin_assignment_v2")) {
       return response(rpcResult);
     }
     throw new Error(`Unexpected request ${method} ${url}`);
@@ -114,13 +114,14 @@ describe("atomic AdminOps agent allocation actions", () => {
     });
     expect(calls.map((call) => call.method)).toEqual(["GET", "POST"]);
     expect(calls[1].url).toBe(
-      "https://fake.supabase.co/rest/v1/rpc/mutate_admin_assignment_v1",
+      "https://fake.supabase.co/rest/v1/rpc/mutate_admin_assignment_v2",
     );
     expect(calls[1].body).toEqual({
       p_lead_id: LEAD_ID,
       p_agent_id: AGENT_ID,
       p_expected_agent_id: null,
       p_action: "assigned",
+      p_reason: null,
       p_notification_mode: "disabled",
       p_actor: "system/admin_basic_auth",
       p_occurred_at: "2026-07-16T12:00:00.000Z",

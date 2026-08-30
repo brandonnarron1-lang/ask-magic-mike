@@ -8,9 +8,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const leadsUpdateMock = vi.fn();
-const assignmentsInsertMock = vi.fn();
-const auditInsertMock = vi.fn();
+const operationMock = vi.fn();
 
 vi.mock("@/lib/admin/auth", () => ({
   checkAdminAuth: () => ({ ok: true, actor: "admin@test.com", status: 200 }),
@@ -20,27 +18,9 @@ vi.mock("@/lib/analytics/ledger", () => ({
   trackEventNoWait: vi.fn(),
 }));
 
-vi.mock("@/lib/supabase/admin", () => ({
-  createAdminClient: () => ({
-    from: (table: string) => {
-      if (table === "leads") return {
-        update: () => ({ eq: () => leadsUpdateMock() }),
-      };
-      if (table === "agent_assignments") return {
-        insert: (...args: unknown[]) => assignmentsInsertMock(...args),
-      };
-      if (table === "audit_logs") return {
-        insert: (...args: unknown[]) => auditInsertMock(...args),
-      };
-      return { update: vi.fn(), insert: vi.fn() };
-    },
-  }),
+vi.mock("@/lib/admin/lead-operations", () => ({
+  assignCanonicalAdminLead: (...args: unknown[]) => operationMock(...args),
 }));
-
-beforeEach(() => {
-  process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
-  process.env.SUPABASE_SERVICE_ROLE_KEY = "test-key";
-});
 
 import { POST } from "@/app/api/admin/leads/[id]/assign/route";
 
@@ -61,9 +41,16 @@ function makeRequest(body = { agent_id: AGENT_ID }): NextRequest {
 describe("POST /api/admin/leads/[id]/assign — DB reliability", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    leadsUpdateMock.mockResolvedValue({ error: null });
-    assignmentsInsertMock.mockResolvedValue({ error: null });
-    auditInsertMock.mockResolvedValue({ error: null });
+    operationMock.mockResolvedValue({
+      ok: true,
+      value: {
+        action: "assigned",
+        auditId: "00000000-0000-0000-0000-000000000020",
+        notificationId: null,
+        notificationStatus: "skipped",
+        idempotentReplay: false,
+      },
+    });
   });
 
   it("returns 200 ok:true on successful assignment", async () => {
@@ -74,7 +61,7 @@ describe("POST /api/admin/leads/[id]/assign — DB reliability", () => {
   });
 
   it("returns 500 when leads.update fails (critical: assignment not persisted)", async () => {
-    leadsUpdateMock.mockResolvedValue({ error: { message: "constraint violation" } });
+    operationMock.mockResolvedValue({ ok: false, statusCode: 500, error: "assignment_failed" });
 
     const res = await POST(makeRequest(), { params: Promise.resolve({ id: LEAD_ID }) });
     expect(res.status).toBe(500);
@@ -84,17 +71,17 @@ describe("POST /api/admin/leads/[id]/assign — DB reliability", () => {
   });
 
   it("does NOT return 200 when leads.update fails", async () => {
-    leadsUpdateMock.mockResolvedValue({ error: { message: "DB timeout" } });
+    operationMock.mockResolvedValue({ ok: false, statusCode: 502, error: "assignment_failed" });
     const res = await POST(makeRequest(), { params: Promise.resolve({ id: LEAD_ID }) });
     expect(res.status).not.toBe(200);
   });
 
-  it("still returns 200 when only audit_log insert fails (non-fatal)", async () => {
-    auditInsertMock.mockResolvedValue({ error: { message: "audit table missing" } });
+  it("fails closed when the atomic assignment/audit operation fails", async () => {
+    operationMock.mockResolvedValue({ ok: false, statusCode: 500, error: "assignment_failed" });
     const res = await POST(makeRequest(), { params: Promise.resolve({ id: LEAD_ID }) });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(500);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.ok).toBe(false);
   });
 
   it("returns 400 when agent_id is missing", async () => {

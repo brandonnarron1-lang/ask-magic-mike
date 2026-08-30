@@ -72,6 +72,9 @@ describe("AdminOps allocation route guards", () => {
     const libActions = read("app/lib/adminAgentAllocationActions.ts");
     const adapter = read("app/lib/persistence/supabasePostgrestAdapter.ts");
     const migration = read("supabase/migrations/20260716043829_infra_02_atomic_lifecycle.sql");
+    const reasonAwareMigration = read(
+      "supabase/migrations/20260830190000_admin_lead_api_persistence.sql",
+    );
     expect(routeActions).toContain('"use server"');
     expect(routeActions).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
     expect(libActions).toContain("mutateAdminAssignment");
@@ -80,11 +83,15 @@ describe("AdminOps allocation route guards", () => {
     expect(libActions).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
     expect(libActions).not.toContain("/api/leads");
     expect(libActions).not.toContain("/rest/v1/lead_notifications");
-    expect(adapter).toContain('this.rpc("mutate_admin_assignment_v1"');
+    expect(adapter).toContain('this.rpc("mutate_admin_assignment_v2"');
     expect(adapter).toContain('this.rpc("mutate_admin_agent_operations_v1"');
     expect(migration).toContain("CREATE OR REPLACE FUNCTION public.mutate_admin_assignment_v1");
     expect(migration).toContain("INSERT INTO public.agent_assignments");
     expect(migration).toContain("INSERT INTO public.audit_logs");
     expect(migration).toContain("INSERT INTO public.lead_notifications");
+    expect(reasonAwareMigration).toContain(
+      "CREATE OR REPLACE FUNCTION public.mutate_admin_assignment_v2",
+    );
+    expect(reasonAwareMigration).toContain("public.mutate_admin_assignment_v1(");
   });
 });

@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-08-30 — Neon Lead Center API persistence candidate
+
+- Activated the documented Lead Center REST paths under the authoritative root
+  router using thin wrappers over one handler implementation, and replaced
+  their Supabase-only/false `mock_mode` behavior with the canonical
+  provider-neutral persistence boundary and Neon-first reads.
+- Added atomic, allowlisted lead patch, note, task, and reason-aware assignment
+  functions with durable IDs, immutable privacy-minimized audit evidence, and
+  browser-role revocation.
+- Made spam clearing recover the last valid pre-spam status from immutable
+  audit history, with a legacy-only `new` fallback.
+- Strengthened controlled Preview QA to require exact note/task ID readback;
+  all synthetic records remain test-marked and outbound sends remain disabled.
+- No Production database, deployment, environment, WordPress, lead,
+  notification, DNS, publication, spend, deletion, or NellySelly change was
+  performed.
+
 ## 2026-08-29 — Secret-safe Vercel Production environment truth
 
 - Added a name-and-scope-only Vercel Production manifest path to the launch

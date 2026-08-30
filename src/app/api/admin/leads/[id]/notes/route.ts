@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { checkAdminAuth } from "@/lib/admin/auth";
+import { addCanonicalAdminLeadNote } from "@/lib/admin/lead-operations";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const NoteSchema = z.object({
+  note: z.string().trim().min(1).max(5000),
+  agent_id: z.string().uuid().nullable().optional(),
+}).strict();
 
 export async function POST(
   req: NextRequest,
@@ -20,61 +26,38 @@ export async function POST(
   if (!UUID.test(id))
     return NextResponse.json({ ok: false, error: "bad_id" }, { status: 400, headers: NO_STORE });
 
-  const body = (await req.json().catch(() => ({}))) as { note?: string; agent_id?: string };
-  const note = (body.note ?? "").trim();
-  if (!note)
+  const parsed = NoteSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) {
+    const tooLong = parsed.error.issues.some((issue) => issue.code === "too_big");
     return NextResponse.json(
-      { ok: false, error: "note_required" },
-      { status: 400, headers: NO_STORE }
-    );
-  if (note.length > 5000)
-    return NextResponse.json(
-      { ok: false, error: "note_too_long" },
-      { status: 413, headers: NO_STORE }
-    );
-
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.SUPABASE_SERVICE_ROLE_KEY
-  ) {
-    return NextResponse.json(
-      { ok: true, note: "mock_mode", body: note },
-      { headers: NO_STORE }
+      { ok: false, error: tooLong ? "note_too_long" : "note_required" },
+      { status: tooLong ? 413 : 400, headers: NO_STORE }
     );
   }
 
-  const { createAdminClient } = await import("@/lib/supabase/admin");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const client = createAdminClient() as any;
-
-  const { error: insertErr } = await client.from("messages").insert({
-    lead_id: id,
-    role: "agent",
-    content: note,
-    agent_id: body.agent_id ?? null,
-  });
-
-  if (insertErr) {
-    console.error("[notes] insert error:", insertErr.message);
-    return NextResponse.json(
-      { ok: false, error: "note_save_failed" },
-      { status: 500, headers: NO_STORE }
-    );
-  }
-
-  await client.from("audit_logs").insert({
+  const result = await addCanonicalAdminLeadNote({
+    leadId: id,
+    content: parsed.data.note,
+    agentId: parsed.data.agent_id,
     actor: auth.actor,
-    action: "lead.note_added",
-    resource_type: "lead",
-    resource_id: id,
-    after_state: { len: note.length },
   });
+  if (!result.ok) {
+    return NextResponse.json(
+      { ok: false, error: result.error },
+      { status: result.statusCode, headers: NO_STORE }
+    );
+  }
 
   trackEventNoWait({
     eventName: "note_added",
     leadId: id,
-    properties: { len: note.length },
+    properties: { len: parsed.data.note.length },
   });
 
-  return NextResponse.json({ ok: true }, { headers: NO_STORE });
+  return NextResponse.json({
+    ok: true,
+    message_id: result.value.messageId,
+    audit_id: result.value.auditId,
+    created_at: result.value.createdAt,
+  }, { headers: NO_STORE });
 }

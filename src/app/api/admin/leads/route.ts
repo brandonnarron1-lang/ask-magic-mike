@@ -29,5 +29,11 @@ export async function GET(req: NextRequest) {
     limit: u.searchParams.get("limit") ? Number(u.searchParams.get("limit")) : undefined,
     offset: u.searchParams.get("offset") ? Number(u.searchParams.get("offset")) : undefined,
   });
+  if (!result.configured || result.error) {
+    return NextResponse.json(
+      { ok: false, error: result.error || "lead_store_not_configured" },
+      { status: 503, headers: NO_STORE },
+    );
+  }
   return NextResponse.json({ ok: true, ...result }, { headers: NO_STORE });
 }

@@ -31,7 +31,9 @@ All of the following must be true before any mutation run:
 7. `PREVIEW_DATA_MODE=enabled` in the branch-scoped preview env only.
 8. `ALLOW_PREVIEW_DB_MUTATION=true` in the branch-scoped preview env only.
 9. `/api/admin/health` returns `safety.safe_for_preview_mutation: true`.
-10. Migration `00012` is applied to the Preview branch.
+10. The required canonical schema and candidate migration
+    `20260830190000_admin_lead_api_persistence.sql` are applied to the Preview
+    branch only.
 11. `ENABLE_SMS=false` and `ENABLE_EMAIL=false` — no live sends.
 
 ## Non-mutating precheck (always run this first)
@@ -60,8 +62,11 @@ SAFE_DB_WRITE=true \
 npm run preview:qa
 ```
 
-This produces lead/note/task/SLA/SMS/email rows in the **preview**
-database. Each QA write is tagged so cleanup is deterministic.
+This produces test lead/note/task/SLA and disabled-delivery evidence in the
+**preview** database. Each QA write is tagged so cleanup is deterministic.
+The run passes only when the note and task return durable IDs and an
+authenticated readback finds those exact IDs. A 2xx response alone is not
+acceptance evidence.
 
 ## QA-write fingerprints
 
@@ -86,6 +91,9 @@ select current_database(), current_setting('app.settings.environment', true);
 delete from tasks where lead_id in (
   select id from leads where source = 'preview_qa'
 );
+delete from messages where lead_id in (
+  select id from leads where source = 'preview_qa'
+);
 delete from message_deliveries where lead_id in (
   select id from leads where source = 'preview_qa'
 );
@@ -97,6 +105,10 @@ delete from listing_matches where lead_id in (
 );
 delete from leads where source = 'preview_qa';
 ```
+
+`audit_logs` is intentionally immutable. Its privacy-minimized QA evidence is
+retained and excluded from operational KPIs; do not weaken the no-update or
+no-delete rules to remove it.
 
 If anything in the above looks unfamiliar, **stop** — never run
 cleanup against a database you cannot positively identify as preview.
@@ -118,6 +130,7 @@ cleanup against a database you cannot positively identify as preview.
 - Expected Neon endpoint IDs are missing, invalid, or equal. → no.
 - Parsed database endpoint does not exactly match approved Preview. → no.
 - Migration 00012 not applied. → no.
+- Candidate admin persistence migration not applied. → no.
 - `PREVIEW_DATA_MODE=disabled` or unset. → no.
 - `ALLOW_PREVIEW_DB_MUTATION=false` or unset. → no.
 - Health endpoint unreachable. → no.
