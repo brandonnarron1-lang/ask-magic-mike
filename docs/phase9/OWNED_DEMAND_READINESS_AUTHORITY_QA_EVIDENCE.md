@@ -96,9 +96,26 @@ Strict TypeScript: passed
 git diff --check: passed
 ```
 
-Full exact-head release, hosted Preview, protected browser QA, runtime-log
-review, and secret scans are required before any application merge or
-Production deployment gate is requestable.
+## Exact-head release verification
+
+Completed at 2026-08-30 10:20 EDT on commit `76bd328`:
+
+```text
+System-isolation verification: passed
+Release safety: 14/14 checks passed
+Vitest: 278 files / 3,427 tests passed
+Strict TypeScript: passed
+ESLint: passed
+Next.js 15.5.21 production build: passed (60/60 static pages)
+Route manifest: passed (100 active routes; 22 acknowledged duplicates)
+Dependency audit at high severity: no known vulnerabilities
+git diff --check: passed
+```
+
+Hosted Preview, protected browser QA, and runtime-log review remain required
+before this stacked candidate can become mergeable. Its parent PR 244 also
+remains subject to its own exact owner approval before merge or Production
+deployment.
 
 ## Boundary
 
