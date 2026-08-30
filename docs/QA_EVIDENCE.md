@@ -1,5 +1,22 @@
 # QA Evidence
 
+## Refreshed cumulative PR #238 authority — 2026-08-30
+
+- Exact payload: `fd4f12c2438964f9fac08e63eba457f8ef3d1d84`, tree
+  `4aa9840fccf699587f4705ce00804899abb32d8e`.
+- PR #238 branch advanced only by fast-forward; prior head is preserved at
+  `rescue/amm-pr238-pre-admin-persistence-rollup-20260830-0145`.
+- Hosted Release Gate 33295435772, Vercel Preview
+  `dpl_EGLYa4m2FLA3FUCz4dzesA2dUeB3`, and protected no-write Preview QA
+  33295219129 all passed on the exact payload.
+- The authority manifest now pins all five reviewed migration hashes and treats
+  PRs #210–#243 as preserved lineage with no parallel Production gate.
+- Focused authority/cutover coverage passed 38/38. The full Node 24 Release
+  Gate passed 278 files / 3,423 tests, strict typecheck, ESLint, optimized
+  build, 100-route manifest, 14/14 safety, and system isolation.
+- Full evidence and boundaries are in
+  [`phase9/CUMULATIVE_RELEASE_AUTHORITY_REFRESH_QA_EVIDENCE.md`](./phase9/CUMULATIVE_RELEASE_AUTHORITY_REFRESH_QA_EVIDENCE.md).
+
 ## Five-migration cumulative cutover rehearsal — 2026-08-30
 
 - The cumulative runner now includes the Neon admin Lead Center persistence

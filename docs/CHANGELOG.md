@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-08-30 — Cumulative PR #238 payload and authority refreshed
+
+- Fast-forwarded Draft PR #238 without rewriting history to exact payload
+  `fd4f12c2438964f9fac08e63eba457f8ef3d1d84`, preserving its former head on
+  `rescue/amm-pr238-pre-admin-persistence-rollup-20260830-0145`.
+- Reconciled the single machine-readable authority to the five-migration
+  payload, exact hosted Release Gate, immutable Preview deployment, and
+  protected no-write Preview QA run.
+- Reclassified PRs #210–#243 as preserved lineage included in PR #238 with no
+  independent current Production authority.
+- No Production database, Vercel Production, WordPress, lead, notification,
+  provider, DNS, publication, spend, deletion, or NellySelly state changed.
+
 ## 2026-08-30 — Cumulative cutover includes Neon admin persistence
 
 - Closed a release-order gap where the cumulative runner sealed four growth

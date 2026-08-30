@@ -10,6 +10,26 @@ chronological implementation ledger; older statements that named PR #210 or
 another component as the next release are preserved historical evidence, not
 current operator instructions.
 
+## Phase 9 cumulative PR #238 authority refresh — 2026-08-30
+
+- **Single candidate:** Draft PR #238 now points by fast-forward to exact
+  payload `fd4f12c2438964f9fac08e63eba457f8ef3d1d84`, tree
+  `4aa9840fccf699587f4705ce00804899abb32d8e`.
+- **Recovery:** the former PR #238 head is preserved at
+  `rescue/amm-pr238-pre-admin-persistence-rollup-20260830-0145`; no history was
+  forced, deleted, or discarded.
+- **Hosted proof:** Release Gate run 33295435772 passed. Preview deployment
+  `dpl_EGLYa4m2FLA3FUCz4dzesA2dUeB3` is ready, and protected no-write Preview QA
+  run 33295219129 passed with `SAFE_DB_WRITE=false`.
+- **Authority manifest:** schema version 2 pins the payload SHA/tree, all five
+  migration hashes, rescue ref, exact hosted evidence, and PR #210–#243 lineage.
+- **Local verification:** focused authority/cutover coverage passes 38/38; the
+  full Node 24 Release Gate passes 278 files / 3,423 tests, typecheck, ESLint,
+  optimized build, 100-route manifest, 14/14 safety, and system isolation.
+- **Boundary:** Production remains on HOLD for the exact cumulative phrase. No
+  Production database, Vercel Production, WordPress, lead, notification,
+  provider, DNS, publication, spend, deletion, or NellySelly action occurred.
+
 ## Phase 9 cumulative Neon admin-persistence cutover extension — 2026-08-30
 
 - **Gap closed:** the stacked Lead Center API uses four Neon functions from

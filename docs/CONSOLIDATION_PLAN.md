@@ -66,11 +66,10 @@ recorded in
 ### 2. PR #238 — single cumulative Phase 9 candidate
 
 Draft PR #238 at exact head
-`de67db6e1183b2a47d329d4a9a11993d48d1992a` is the current application
-release vehicle. Its application tree is byte-for-byte equivalent to the tested
-PR #210–#237 component tail, while its second normal commit adds one
-hash-pinned, backup-first runner for the four reviewed additive growth
-migrations.
+`fd4f12c2438964f9fac08e63eba457f8ef3d1d84` is the current application
+release vehicle. Its linear history preserves the tested PR #210–#243
+component train and one hash-pinned, backup-first runner for the five reviewed
+additive migrations, including durable Neon Lead Center API persistence.
 
 Hosted Node 24 Release Gate, immutable Preview, protected no-write browser QA,
 runtime logs, dependency audit, secret scans, and route proof are sealed on the
@@ -86,10 +85,10 @@ provider, publication, spend, DNS, deletion, or NellySelly action.
 
 - PRs #202–#208 are superseded for release by PR #209. Their branches, checks,
   evidence, and rescue refs remain preserved.
-- PRs #210–#237 are preserved as component lineage included once in PR #238.
+- PRs #210–#243 are preserved as component lineage included once in PR #238.
   Their former individual gates are historical and not requestable.
-- PR #239 is read-only WordPress reconciliation tooling stacked after PR #238.
-  It is not included in the PR #238 gate and has no live export/import authority.
+- PR #239 was incorporated by the PR #238 fast-forward. Its read-only
+  WordPress reconciliation tooling has no live export/import authority.
 - PR #187's KPI target-register migration is deferred. Production has no
   eligible live-demand baseline, so deploying numeric targets now would create
   precision without evidence.
@@ -126,8 +125,8 @@ provider, publication, spend, DNS, deletion, or NellySelly action.
 
 ## PR #238 release risk and rollback
 
-The cumulative cutover combines an application release with four additive
-growth migrations. Its primary risks are wrong database identity, migration
+The cumulative cutover combines an application release with five additive
+migrations. Its primary risks are wrong database identity, migration
 drift, partial application, accidental import enablement, redirect/attribution
 regression, or deploying a commit other than the reviewed head. The guarded
 runner, exact manifest, one transaction, validated backup, disabled import
@@ -139,7 +138,7 @@ Cutover sequence after explicit approval:
    canonical unpooled Neon identity.
 2. Run the read-only guarded preflight and confirm all three growth import gates
    are false.
-3. Execute and verify only the four manifest-pinned migrations with the
+3. Execute and verify only the five manifest-pinned migrations with the
    validated backup retained.
 4. Merge only exact PR #238 head and deploy only that reviewed commit through
    the canonical Vercel project.

@@ -72,9 +72,9 @@ warranted.
 | --- | --- | --- |
 | #195 conversion identity polish | Merged and live at `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` | Gate exhausted; it authorizes no later action |
 | #209 atomic controlled release candidate | Merged and accepted at `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` / `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` | Gate exhausted; it authorizes no later action |
-| #238 cumulative Phase 9 candidate | Draft exact head `de67db6e1183b2a47d329d4a9a11993d48d1992a`; byte-consolidated PR #210–#237 application tree plus the guarded four-migration cutover | Single current application gate; exact phrase and sequence in `CURRENT_RELEASE_AUTHORITY.md` |
-| #239 WordPress legacy reconciliation | Read-only operator tooling stacked after exact PR #238 | Dependent review artifact only; not included in the PR #238 Production gate and no live export/import authority |
-| #210 through #237 | Preserved component lineage consolidated byte-for-byte into PR #238 | No independent current merge/deploy authority; historical component gates must not be replayed |
+| #238 cumulative Phase 9 candidate | Draft exact payload `fd4f12c2438964f9fac08e63eba457f8ef3d1d84`; linear PR #210–#243 application history plus the guarded five-migration cutover | Single current application gate; exact phrase and sequence in `CURRENT_RELEASE_AUTHORITY.md` |
+| #239 WordPress legacy reconciliation | Read-only operator tooling now incorporated by the PR #238 fast-forward | Preserved lineage only; no live export/import authority |
+| #210 through #243 | Preserved component lineage consolidated into PR #238 | No independent current merge/deploy authority; historical component gates must not be replayed |
 | #202 through #208 | Preserved incremental review records superseded for release by #209 | No independent merge or Production authority |
 | #221 / #212 cross-domain measurement | #221 is the ordered consolidated Draft; #212 is closed as an exact preserved ancestor | #212 has no independent gate; #221 remains held behind predecessors and live consent remediation |
 | #225 baseline/target readiness | Ordered read-only evidence replacement for #187 | No target writer, migration, or Production authority |

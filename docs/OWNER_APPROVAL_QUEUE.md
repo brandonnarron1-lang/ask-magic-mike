@@ -1,17 +1,17 @@
 # Owner Approval Queue
 
-Updated 2026-08-29 from authenticated GitHub, Vercel, Neon, WordPress, and
+Updated 2026-08-30 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
 ## Cumulative Phase 9 release candidate — exact gate not yet received
 
 - Draft PR [#238](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238)
-  is the byte-consolidated application candidate for the already-built Phase 9
-  stack. Exact candidate head is
-  `de67db6e1183b2a47d329d4a9a11993d48d1992a`; the pre-runner head remains
-  preserved at `rescue/amm-pr238-pre-cutover-runner-20260829-213310`.
-- One executable cutover now covers only the four reviewed additive growth
+  is the linear cumulative application candidate for the already-built Phase 9
+  stack. Exact payload head is
+  `fd4f12c2438964f9fac08e63eba457f8ef3d1d84`; the prior PR #238 head remains
+  preserved at `rescue/amm-pr238-pre-admin-persistence-rollup-20260830-0145`.
+- One executable cutover now covers only the five reviewed additive
   migrations. It requires exact Production Neon identity, source hashes,
   compatible ledger shape, absent targets, disabled import gates, a validated
   backup, bounded locks, one transaction, unchanged existing rows, hardened
@@ -20,7 +20,7 @@ queue covers only actions that still require a human or external-system gate.
   browser, runtime-log, dependency, and secret-scan evidence are sealed on the
   candidate head. The gate remains unconsumed and is now the only requestable
   application release gate.
-- The only phrase that can authorize the four
+- The only phrase that can authorize the five
   migrations, exact PR merge, and same-commit Production deployment is:
   `APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT`.
 - That phrase does not authorize enabling any growth import, provider access,

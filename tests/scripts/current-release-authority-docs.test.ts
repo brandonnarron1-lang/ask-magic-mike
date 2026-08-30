@@ -130,9 +130,12 @@ const completedDurabilityGate =
 const cumulativeReleaseGate =
   "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT";
 const cumulativeReleaseHead =
-  "de67db6e1183b2a47d329d4a9a11993d48d1992a";
+  "fd4f12c2438964f9fac08e63eba457f8ef3d1d84";
 const cumulativeReleaseTree =
-  "75abbbbe6767092e1d31b225014dd1bf574acda1";
+  "4aa9840fccf699587f4705ce00804899abb32d8e";
+const cumulativeReleaseGateRun = 33295435772;
+const cumulativePreviewDeployment = "dpl_EGLYa4m2FLA3FUCz4dzesA2dUeB3";
+const cumulativePreviewQaRun = 33295219129;
 const currentWordPressGate =
   "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA";
 const staleWordPressHomepageGate =
@@ -455,14 +458,14 @@ describe("current release-authority documentation", () => {
     expect(ownerQueue).toContain(plannerSocialIdentityGate);
     expect(ownerQueue).toContain(notificationOperationsGate);
     expect(notificationOperationsDecision).toContain(notificationOperationsGate);
-    expect(assetManifest).toContain("PRs #232–#237");
+    expect(assetManifest).toContain("PRs #232–#243");
     expect(currentState).toContain("#227 through #234");
     expect(ownerQueue).toMatch(/Preserved component train[\s\S]*historical evidence[\s\S]*(?:not|none is) currently requestable/i);
-    expect(currentState).toMatch(/#210 through #237[\s\S]*No independent current merge\/deploy authority/i);
+    expect(currentState).toMatch(/#210 through #243[\s\S]*No independent current merge\/deploy authority/i);
   });
 
   it("binds the machine-readable authority to the reviewed migration bytes", () => {
-    expect(CURRENT_RELEASE_AUTHORITY.schemaVersion).toBe(1);
+    expect(CURRENT_RELEASE_AUTHORITY.schemaVersion).toBe(2);
     expect(CURRENT_RELEASE_AUTHORITY.production).toEqual({
       pr: 209,
       mergeCommit: productionCommit,
@@ -476,9 +479,25 @@ describe("current release-authority documentation", () => {
       state: "draft",
       approvalGate: cumulativeReleaseGate,
       cutoverCommand: "pnpm run phase9:cumulative-growth:cutover -- --execute",
+      releaseGate: {
+        runId: cumulativeReleaseGateRun,
+        status: "success",
+      },
+      preview: {
+        deploymentId: cumulativePreviewDeployment,
+        target: "preview",
+        status: "ready",
+      },
+      previewQa: {
+        runId: cumulativePreviewQaRun,
+        safeDbWrite: false,
+        status: "success",
+      },
     });
-    expect(CURRENT_RELEASE_AUTHORITY.candidate.migrations).toHaveLength(4);
-    expect(new Set(CURRENT_RELEASE_AUTHORITY.candidate.migrations.map(({ version }) => version)).size).toBe(4);
+    expect(CURRENT_RELEASE_AUTHORITY.candidate.migrations).toHaveLength(5);
+    expect(new Set(CURRENT_RELEASE_AUTHORITY.candidate.migrations.map(({ version }) => version)).size).toBe(5);
+    expect(CURRENT_RELEASE_AUTHORITY.consolidatedComponentTrain.lastPr).toBe(243);
+    expect(CURRENT_RELEASE_AUTHORITY.dependentReviewArtifacts).toEqual([]);
 
     for (const migration of CURRENT_RELEASE_AUTHORITY.candidate.migrations) {
       const bytes = readFileSync(resolve(process.cwd(), migration.file));

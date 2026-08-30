@@ -131,7 +131,7 @@ export function buildGrowthCapabilityLedger({
       label: "Accepted Production and cumulative release candidate",
       domain: "govern",
       state: applicationState,
-      summary: `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is accepted in Production. PR ${CURRENT_RELEASE_AUTHORITY.candidate.pr} consolidates the reviewed Phase 9 component train into one exact-head application candidate with one guarded four-migration cutover.`,
+      summary: `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is accepted in Production. PR ${CURRENT_RELEASE_AUTHORITY.candidate.pr} consolidates the reviewed Phase 9 component train into one exact-head application candidate with one guarded five-migration cutover.`,
       evidence: [
         `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is live at ${CURRENT_RELEASE_AUTHORITY.production.mergeCommit} on ${CURRENT_RELEASE_AUTHORITY.production.deploymentId}; its gate is consumed`,
         `PR ${CURRENT_RELEASE_AUTHORITY.candidate.pr} exact head ${CURRENT_RELEASE_AUTHORITY.candidate.head} is the single cumulative application candidate`,

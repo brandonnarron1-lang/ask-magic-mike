@@ -105,19 +105,19 @@ variables; that remains a separate cleanup action.
 
 ## Current Phase 9 release sequence
 
-The singular current application candidate is PR #238. PRs #210–#237 are
+The singular current application candidate is PR #238. PRs #210–#243 are
 preserved component lineage included once in that cumulative tree; do not merge
 them individually or replay their former gates.
 
 1. `#180`, `#181`, `#183`, `#184`, `#185`, `#193`, `#196`, `#194`, `#195`, and
    `#209` are complete and their gates are exhausted.
-2. `#238` exact head `de67db6e1183b2a47d329d4a9a11993d48d1992a`
+2. `#238` exact payload head `fd4f12c2438964f9fac08e63eba457f8ef3d1d84`
    is fully sealed but held for its exact cumulative gate.
 3. Run its guarded read-only preflight, keep all three import gates false, then
-   execute/verify the four hash-pinned migrations before merging and deploying
+   execute/verify the five hash-pinned migrations before merging and deploying
    only that exact reviewed head.
-4. `#239` and later dependent review artifacts remain outside the PR #238 gate
-   and cannot advance ahead of it.
+4. Component PRs #239–#243 are preserved lineage already incorporated by the
+   PR #238 fast-forward and have no independent gate.
 
 The exact authority and current manifest are in
 `docs/CURRENT_RELEASE_AUTHORITY.md` and

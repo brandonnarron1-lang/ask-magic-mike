@@ -1,6 +1,6 @@
 # Known Operating Constraints
 
-Updated 2026-08-29. The public funnel, canonical Neon capture, Lead Center, and
+Updated 2026-08-30. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
 
@@ -36,11 +36,11 @@ specific expansions; they do not invalidate the live lead pipe.
   intentional skips, and strict monitoring 9/9. Every durable limiter
   capability and the dedicated-secret contract is ready.
 - Draft PR #238 at exact head
-  `de67db6e1183b2a47d329d4a9a11993d48d1992a` is the single cumulative
+  `fd4f12c2438964f9fac08e63eba457f8ef3d1d84` is the single cumulative
   application candidate. Its hosted Release Gate and protected no-write
   Preview proof pass; Production remains held only for the exact cumulative
   gate and guarded database preflight.
-- PRs #210–#237 are preserved component lineage included once in PR #238. They
+- PRs #210–#243 are preserved component lineage included once in PR #238. They
   are not a parallel queue, and their historical individual gates must not be
   replayed.
 - The only current application gate is

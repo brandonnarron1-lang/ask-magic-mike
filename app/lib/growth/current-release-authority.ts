@@ -17,6 +17,24 @@ export interface CurrentReleaseAuthorityManifest {
     state: "draft";
     approvalGate: string;
     cutoverCommand: string;
+    rescueBranch: string;
+    releaseGate: {
+      runId: number;
+      url: string;
+      status: "success";
+    };
+    preview: {
+      deploymentId: string;
+      url: string;
+      target: "preview";
+      status: "ready";
+    };
+    previewQa: {
+      runId: number;
+      url: string;
+      safeDbWrite: false;
+      status: "success";
+    };
     migrations: Array<{
       version: string;
       file: string;
