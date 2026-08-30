@@ -2,6 +2,35 @@
 
 Updated 2026-08-29.
 
+## Phase 9 cumulative growth Production cutover candidate — 2026-08-29
+
+- **Reuse decision:** Draft PR #238 remains the one cumulative application
+  candidate. The existing Neon database, Supabase-compatible migration ledger,
+  growth workbenches, append-only audit model, Vercel project, WordPress bridge,
+  lead backend, and Lead Center remain authoritative; no parallel database,
+  importer, dashboard, CRM, provider adapter, or release branch was created.
+- **Cutover hardening:** one executable runner now hash-pins the four already
+  reviewed spend, organic-search, local-profile, and metric-truth migrations;
+  attests the exact unpooled Production Neon identity; requires the exact
+  cumulative approval; keeps all three import gates disabled; validates the
+  migration ledger; takes bounded locks; creates and validates a mode-600
+  custom backup; and applies all four migrations plus four ledger rows in one
+  transaction with fail-closed rollback and postflight checks.
+- **Executable proof:** focused interlock tests pass, and the actual
+  execute/verify functions passed against disposable PostgreSQL 17.11 with
+  four migrations, four ledger rows, zero growth/receipt rows, hardened tables,
+  functions, and triggers, plus a validated 45,437-byte backup containing 93
+  restore entries. The temporary cluster was stopped and removed.
+- **Provenance:** the previously sealed PR #238 product head
+  `d7dcf291d84d744a26dbbd0947a68624a1efdefc` remains recoverable at
+  `rescue/amm-pr238-pre-cutover-runner-20260829-213310`. The release-tooling
+  commit is added normally without rewriting that history.
+- **Authority boundary:** no Production database, Vercel environment,
+  deployment, WordPress, provider, lead, notification, DNS, publication,
+  spend, deletion, or NellySelly mutation occurred. Execution, merge, and
+  deployment remain held for the exact phrase in
+  [`phase9/CUMULATIVE_GROWTH_PRODUCTION_CUTOVER.md`](./phase9/CUMULATIVE_GROWTH_PRODUCTION_CUTOVER.md).
+
 ## Phase 9 WordPress homepage CTA restoration packet — 2026-08-29
 
 - **Reuse decision:** repair the existing Lead Ops plugin in place. The

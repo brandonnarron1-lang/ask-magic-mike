@@ -2188,3 +2188,43 @@ Final exact-engine acceptance used Node `24.18.0`:
 - route manifest: PASS, 95 active / 17 acknowledged duplicate routes;
 - Production dependency audit: no known vulnerabilities; and
 - `git diff --check`: PASS.
+
+## Phase 9 cumulative growth Production cutover hardening — 2026-08-29
+
+The four additive growth migrations already included in Draft PR #238 now have
+one executable, fail-closed cutover instead of four manual SQL paths.
+
+Exact local engine: Node `24.18.0`.
+
+- Offline source verification: PASS — all four reviewed SHA-256 values match;
+  no connection was opened and no credential was printed.
+- Focused cutover interlocks: PASS — 1 file / 9 tests covering exact approval,
+  disabled import gates, mode conflicts, hash and transaction-envelope drift,
+  canonical absent-target preflight, ledger drift, owner/RLS/privilege/function
+  and trigger hardening, zero cutover receipts, backup, bounded locks, atomic
+  commit/rollback, and credential redaction.
+- Forced lint of the normally ignored operator script and its test: PASS.
+- Disposable database execute/verify: PASS on PostgreSQL `17.11 (Homebrew)` —
+  four migrations, four migration-ledger rows, zero growth rows, zero receipt
+  rows, all target tables/functions/triggers hardened, and the retired-metric
+  guard present and enabled.
+- Disposable backup proof: PASS — custom-format backup, mode-600 path contract,
+  45,437 bytes, 93 validated restore entries. The temporary cluster and proof
+  database were stopped and removed.
+- Full release gate: PASS — system isolation, 14/14 release safety, 274 files /
+  3,392 tests, strict TypeScript, full ESLint, optimized Next.js `15.5.21`
+  build with 59 static pages, and 95 active / 17 acknowledged routes.
+- Production dependency audit: PASS — no known vulnerability at severity high
+  or above.
+- Full-history redacted Gitleaks: PASS — 714 commits / approximately 18.47 MB,
+  no leaks.
+- Exact staged-delta redacted Gitleaks: PASS — approximately 51.51 KB, no
+  leaks.
+- `git diff --check`: PASS.
+
+No Production/Preview deployment, Neon query or migration, Vercel environment
+change, WordPress edit, provider call, lead submission, analytics write,
+email/SMS/Push, DNS change, publication, spend, deletion, or NellySelly action
+occurred during this proof. Hosted exact-head CI, immutable Preview, protected
+no-write browser QA, runtime-log review, and final staged secret scanning remain
+required before the cumulative approval gate becomes requestable.

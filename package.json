@@ -52,6 +52,7 @@
     "phase9:first-response:cutover": "node scripts/phase9-first-response-production-cutover.mjs",
     "phase9:publication-proof:cutover": "node scripts/phase9-publication-proof-production-cutover.mjs",
     "phase9:wordpress-proof-scope:cutover": "node scripts/phase9-wordpress-proof-scope-production-cutover.mjs",
+    "phase9:cumulative-growth:cutover": "node scripts/phase9-cumulative-growth-production-cutover.mjs",
     "amm:audit:wordpress": "node scripts/audit-wordpress-form-placements.mjs",
     "reconcile-wordpress-leads": "node scripts/reconcile-wordpress-leads.mjs",
     "check-lead-sla": "node scripts/check-lead-sla.mjs",

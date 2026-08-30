@@ -4,6 +4,29 @@ Updated 2026-08-29 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
+## Cumulative Phase 9 release candidate — exact gate not yet received
+
+- Draft PR [#238](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238)
+  is the byte-consolidated application candidate for the already-built Phase 9
+  stack. Its formerly sealed head is preserved at
+  `rescue/amm-pr238-pre-cutover-runner-20260829-213310` while guarded release
+  tooling is added through a normal follow-up commit.
+- One executable cutover now covers only the four reviewed additive growth
+  migrations. It requires exact Production Neon identity, source hashes,
+  compatible ledger shape, absent targets, disabled import gates, a validated
+  backup, bounded locks, one transaction, unchanged existing rows, hardened
+  postconditions, and rollback on any failure.
+- Fresh exact-head local release, hosted CI, immutable Preview, protected
+  no-write browser, runtime-log, and secret-scan evidence must be resealed after
+  the tooling commit. Until that proof passes, the gate is not requestable.
+- After the candidate is resealed, the only phrase that can authorize the four
+  migrations, exact PR merge, and same-commit Production deployment is:
+  `APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT`.
+- That phrase does not authorize enabling any growth import, provider access,
+  real or synthetic lead submission, email/SMS/Push, WordPress publication,
+  social/GBP/email publication, spend, DNS change, deletion, data import, or
+  NellySelly action.
+
 ## Cross-domain measurement consolidation — later, not currently requestable
 
 - Draft PR [#221](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/221)

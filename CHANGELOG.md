@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-29 — Cumulative Phase 9 growth cutover hardening
+
+- Added one hash-pinned, exact-identity Production cutover runner for the four
+  already-reviewed growth migrations instead of leaving four separate manual
+  SQL paths.
+- Added fail-closed approval, safe-disabled import-gate, endpoint, ledger,
+  prerequisite, backup, advisory-lock, single-transaction, ownership, RLS,
+  privilege, trigger, row-count, and rollback interlocks.
+- Proved the actual execute/verify path against disposable PostgreSQL 17.11:
+  four migrations and four ledger rows, zero growth/receipt rows, all hardened
+  objects present, and a validated custom backup with 93 restore entries.
+- Performed no Production database, Vercel, WordPress, provider, lead,
+  notification, DNS, spend, publication, deletion, or NellySelly mutation.
+
 ## 2026-08-29 — Organic experiment briefs exact-parent refresh
 
 - Preserved the prior PR #231 head at
