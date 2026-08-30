@@ -77,41 +77,36 @@ Every QA-created row is tagged with one or more of:
 - `notes` contains `preview-qa`
 - `utm_source=preview_qa` or `campaign=phase_2_release_hardening`
 
-These tags exist so cleanup can target QA rows only.
+These tags exist so closeout can identify QA rows only.
 
-## Cleanup plan
+## Closeout plan
 
-Run in the isolated Neon Preview branch SQL editor — never in Production.
+This schema treats consent and audit evidence as append-only. A QA lead that
+has durable consent rows must therefore be **retained and suppressible**, not
+partially deleted. Do not disable immutable triggers, delete child rows first,
+or weaken foreign keys merely to remove a test record.
 
-```sql
--- Sanity-check the preview ref first.
-select current_database(), current_setting('app.settings.environment', true);
+After acceptance, use the authenticated admin surface and atomic assignment
+function to leave the QA row in this terminal state:
 
--- Delete QA artefacts in dependency order.
-delete from tasks where lead_id in (
-  select id from leads where source = 'preview_qa'
-);
-delete from messages where lead_id in (
-  select id from leads where source = 'preview_qa'
-);
-delete from message_deliveries where lead_id in (
-  select id from leads where source = 'preview_qa'
-);
-delete from compliance_flags where lead_id in (
-  select id from leads where source = 'preview_qa'
-);
-delete from listing_matches where lead_id in (
-  select id from leads where source = 'preview_qa'
-);
-delete from leads where source = 'preview_qa';
-```
+- `is_test=true`;
+- `status=dead` (or the approved terminal test stage);
+- `assigned_agent_id=null` and `assignment_status=unassigned`;
+- `communication_suppressed=true`;
+- `email_suppressed=true`;
+- `sms_suppressed=true`;
+- every notification remains `skipped`, with zero provider message IDs and
+  zero attempts; and
+- immutable consent and privacy-minimized audit evidence remains present.
 
-`audit_logs` is intentionally immutable. Its privacy-minimized QA evidence is
-retained and excluded from operational KPIs; do not weaken the no-update or
-no-delete rules to remove it.
+Verify that operational reports and active-lead views exclude `is_test=true`.
+If a future schema introduces a tested purge function that preserves required
+evidence, use that reviewed function in one transaction. Until then, a direct
+`DELETE FROM leads` cleanup is prohibited.
 
-If anything in the above looks unfamiliar, **stop** — never run
-cleanup against a database you cannot positively identify as preview.
+If any identity, suppression, or endpoint check is unfamiliar, **stop** —
+never run closeout against a database you cannot positively identify as
+Preview.
 
 ## Evidence required for promotion review
 

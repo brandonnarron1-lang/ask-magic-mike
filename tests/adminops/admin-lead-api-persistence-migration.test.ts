@@ -5,6 +5,10 @@ const migration = readFileSync(
   "supabase/migrations/20260830190000_admin_lead_api_persistence.sql",
   "utf8",
 );
+const previewQaRunbook = readFileSync(
+  "docs/controlled-preview-mutation-qa.md",
+  "utf8",
+);
 
 describe("canonical admin lead API persistence migration", () => {
   it("ships atomic lead patch, note, task, and reason-aware assignment functions", () => {
@@ -44,5 +48,13 @@ describe("canonical admin lead API persistence migration", () => {
     );
     expect(migration).toContain("ARRAY['anon', 'authenticated']");
     expect(migration).toContain("SECURITY INVOKER");
+  });
+
+  it("retains append-only consent evidence instead of documenting partial deletion", () => {
+    expect(previewQaRunbook).toContain("consent and audit evidence as append-only");
+    expect(previewQaRunbook).toContain("is_test=true");
+    expect(previewQaRunbook).toContain("communication_suppressed=true");
+    expect(previewQaRunbook).toContain("`DELETE FROM leads` cleanup is prohibited");
+    expect(previewQaRunbook).not.toContain("delete from leads where source = 'preview_qa'");
   });
 });

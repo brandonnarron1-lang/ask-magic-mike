@@ -13,9 +13,13 @@
   audit history, with a legacy-only `new` fallback.
 - Strengthened controlled Preview QA to require exact note/task ID readback;
   all synthetic records remain test-marked and outbound sends remain disabled.
-- No Production database, deployment, environment, WordPress, lead,
-  notification, DNS, publication, spend, deletion, or NellySelly change was
-  performed.
+- Applied the additive migration only to the attested Neon Preview branch,
+  proved durable idempotent lead/note/task/patch/assignment behavior, then
+  retained the append-only-consent QA row as dead, unassigned, test-marked,
+  and fully communication-suppressed.
+- Restored Preview to read-only. No Production database, deployment,
+  environment, WordPress, lead, notification, DNS, publication, spend,
+  deletion, or NellySelly change was performed.
 
 ## 2026-08-29 — Secret-safe Vercel Production environment truth
 
