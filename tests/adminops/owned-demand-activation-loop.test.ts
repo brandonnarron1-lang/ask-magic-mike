@@ -150,6 +150,49 @@ describe("owned-demand per-placement activation loop", () => {
     });
   });
 
+  it("skips a publication-blocked WordPress target and recommends the next exact visible placement", () => {
+    const result = buildOwnedDemandActivationLoop(command(), ledger(), true, [
+      {
+        channelKey: "ourtown_wordpress",
+        placementKey: "wordpress_homepage_ask_mike",
+        activationEligible: false,
+        status: "hidden_target",
+        detail: "The exact CTA remains hidden by known public CSS.",
+      },
+      {
+        channelKey: "ourtown_wordpress",
+        placementKey: "wordpress_home_value",
+        activationEligible: true,
+        status: "legacy_match_ready",
+        detail: "One exact visible legacy CTA is ready for review.",
+        nextAction: "Use the exact home-value readiness manifest and approval gate.",
+      },
+    ]);
+
+    expect(result.nextPlacement).toMatchObject({
+      channelKey: "ourtown_wordpress",
+      placementKey: "wordpress_home_value",
+      selectionBlocked: false,
+      readinessStatus: "legacy_match_ready",
+      nextAction: "Use the exact home-value readiness manifest and approval gate.",
+    });
+    expect(result.readinessBlockedPlacements).toBe(1);
+    expect(placement(
+      result,
+      "ourtown_wordpress",
+      "wordpress_homepage_ask_mike",
+    )).toMatchObject({
+      selectionBlocked: true,
+      readinessStatus: "hidden_target",
+      readinessDetail: "The exact CTA remains hidden by known public CSS.",
+    });
+    expect(placement(
+      result,
+      "ourtown_wordpress",
+      "wordpress_homepage_ask_mike",
+    )?.nextAction).toContain("Do not activate this placement yet");
+  });
+
   it("fails closed when a latest proof no longer matches the current canonical attribution identity", () => {
     const result = buildOwnedDemandActivationLoop(command(), ledger([proof({
       trackedUrl: "https://www.askmagicmike.com/home-value?utm_source=facebook&utm_campaign=old_campaign",

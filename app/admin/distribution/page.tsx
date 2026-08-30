@@ -14,6 +14,7 @@ import {
   buildOwnedDemandActivationLoop,
   type OwnedDemandActivationLoop,
   type OwnedDemandActivationState,
+  type OwnedDemandPlacementReadiness,
 } from "../../lib/growth/owned-demand-activation";
 import {
   publicationPolicyForChannel,
@@ -31,6 +32,8 @@ import {
 } from "../../lib/growth/native-publication-handoff";
 import {
   isWordPressActivationPlacementKey,
+  loadWordPressActivationChangeSets,
+  toOwnedDemandPlacementReadiness,
   wordpressActivationManifestHref,
 } from "../../lib/growth/wordpress-activation-change-set";
 import { wordpressSellerIntentDecisionManifestHref } from "../../lib/growth/wordpress-seller-intent-decision";
@@ -396,6 +399,9 @@ function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
         <article className="rounded-xl border border-[#cda24a33] bg-[#171108] p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#cda24a]">Prepared · unobserved</p>
           <p className="mt-2 font-serif text-3xl text-[#f0cf79]">{joinedCount(loop.unobservedPlacements)}</p>
+          <p className="mt-1 text-[10px] leading-4 text-[#9f8450]">
+            {joinedCount(loop.readinessBlockedPlacements)} readiness hold{loop.readinessBlockedPlacements === 1 ? "" : "s"}
+          </p>
         </article>
       </div>
 
@@ -463,6 +469,11 @@ function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
                   {placement.stateLabel}
                 </span>
               </div>
+              {placement.selectionBlocked ? (
+                <p className="mt-3 rounded-lg border border-[#cda24a44] bg-[#171108] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.1em] text-[#f5dfa7]">
+                  Readiness hold · {placement.readinessStatus ? humanize(placement.readinessStatus) : "Review required"}
+                </p>
+              ) : null}
               <p className="mt-3 text-xs leading-5 text-[#a99f90]">{placement.nextAction}</p>
               <dl className="mt-3 grid grid-cols-2 gap-2 text-[10px] leading-4">
                 <div><dt className="uppercase tracking-[0.1em] text-[#6f6a61]">Lead signals</dt><dd className="mt-1 text-[#d9ceb8]">{loop.measurementAvailable ? placement.attributedLeads : "—"}</dd></div>
@@ -759,14 +770,23 @@ export default async function DistributionPage({
   }>;
 }) {
   const principal = await requireLeadCenterPermission("report:view");
-  const [growth, ledger, query] = await Promise.all([
+  const [growth, ledger, wordpressChangeSets, query] = await Promise.all([
     loadGrowthIntelligence(30),
     loadOwnedDemandPublicationProofLedger(),
+    loadWordPressActivationChangeSets(),
     searchParams,
   ]);
   const command = buildOwnedDemandCommand(growth);
   const measurement = assessOwnedDemandMeasurement(growth);
-  const activation = buildOwnedDemandActivationLoop(command, ledger, measurement.ready);
+  const wordpressReadiness = wordpressChangeSets.map(
+    toOwnedDemandPlacementReadiness,
+  ) satisfies OwnedDemandPlacementReadiness[];
+  const activation = buildOwnedDemandActivationLoop(
+    command,
+    ledger,
+    measurement.ready,
+    wordpressReadiness,
+  );
   const canManage = Boolean(principal && hasLeadCenterPermission(principal.role, "growth:manage"));
   const proofFocus = resolveNativePublicationProofFocus(query?.proof_channel, query?.proof_placement);
   const previewReadOnly = isPreviewDataDisabled();
