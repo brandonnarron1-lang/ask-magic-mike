@@ -9,8 +9,9 @@ Production authority: **HOLD until the exact approval phrase in this runbook is 
 ## Purpose
 
 This is the single executable cutover for the four additive growth migrations
-already present in the consolidated Phase 9 candidate. It replaces ad hoc SQL
-and four separate operator paths. It does not create another database,
+plus the canonical Neon Lead Center persistence migration already present in
+the consolidated Phase 9 stack. It replaces ad hoc SQL and five separate
+operator paths. It does not create another database,
 dashboard, provider connector, campaign engine, CRM, or lead system.
 
 The runner is:
@@ -39,10 +40,12 @@ order:
    - SHA-256: `68f292f8e1773c9d2b999c61311362576848020176c5dbdeaf0550ba4795047c`
 4. `20260825060000_local_demand_metric_truth_guard.sql`
    - SHA-256: `705fa33d1516451e721cd30d9991084ff3dae987849a2f47981eaeff762a561a`
+5. `20260830190000_admin_lead_api_persistence.sql`
+   - SHA-256: `f50ffe91740fdd0690a87d673daf9e5753f122e19279ef84d729d9435d7adc35`
 
 The fourth reviewed file contains its own `BEGIN` / `COMMIT` envelope. Only
 after its complete file hash matches does the runner remove that exact outer
-envelope so all four files and all four migration-ledger rows can commit or
+envelope so all five files and all five migration-ledger rows can commit or
 roll back together. Any additional, missing, nested, or moved transaction
 control fails closed.
 
@@ -90,11 +93,14 @@ Preflight requires:
 - the compatible `supabase_migrations.schema_migrations` ledger;
 - `anon`, `authenticated`, and `service_role` roles;
 - the existing audit, channel, campaign, spend, signal, and opportunity tables;
+- the existing lead, agent, message, task, routing, and assignment tables plus
+  every column consumed by the Lead Center persistence functions;
+- the existing `mutate_admin_assignment_v1` prerequisite;
 - the existing immutable-row guard;
 - all three new receipt tables absent;
-- all four new functions absent;
+- all eight new functions absent;
 - all four new triggers absent; and
-- all four migration-ledger versions absent.
+- all five migration-ledger versions absent.
 
 It returns only bounded schema state and row counts. It prints no connection
 string or credential.
@@ -117,7 +123,7 @@ pnpm run phase9:cumulative-growth:cutover -- --execute
 
 Execution:
 
-1. verifies all four migration hashes again;
+1. verifies all five migration hashes again;
 2. re-attests the exact unpooled Production identity;
 3. refuses if any growth import gate is true;
 4. starts one database transaction;
@@ -127,11 +133,12 @@ Execution:
 8. repeats preflight under lock;
 9. creates a mode-600 custom-format `pg_dump` backup and validates its
    `pg_restore --list` inventory;
-10. applies all four reviewed migrations in order;
+10. applies all five reviewed migrations in order;
 11. inserts one compatible migration-ledger row after each source;
-12. verifies owner, RLS, public/browser/legacy-role denial, append-only
-    triggers, truth guard, ledger singularity, zero receipt rows, and unchanged
-    existing table counts; and
+12. verifies owner, RLS, public/browser-role denial, the exact service-role
+    execution allowlist for Lead Center functions, append-only triggers, truth
+    guard, ledger singularity, zero receipt rows, and unchanged existing growth
+    table counts; and
 13. commits only when every postcondition passes.
 
 Any error rolls back the transaction. If a validated backup exists, the safe
@@ -159,7 +166,9 @@ Database first, application second:
    - `GROWTH_SEARCH_IMPORT_ENABLED`
    - `GROWTH_LOCAL_PROFILE_IMPORT_ENABLED`
 4. execute and verify the guarded database cutover;
-5. merge exact PR #238 head without rewriting history;
+5. merge only the refreshed exact PR #238 payload head containing the complete
+   stacked application and all five reviewed migrations, without rewriting
+   history;
 6. deploy or promote only that exact commit;
 7. verify `/api/health/ready`, public routes, authenticated boundaries, exact
    deployment metadata, and the deployment log window; and
@@ -185,12 +194,19 @@ audits, or leads is not part of rollback.
 
 ## Local executable proof
 
-A disposable PostgreSQL 17.11 cluster with the exact prerequisite growth
-contract ran the actual `execute` and `verify` functions. The proof created and
-validated a 45,437-byte custom backup with 93 restore entries, applied all four
-migrations in one transaction, recorded exactly four ledger rows, created all
-three hardened receipt tables and all four functions/triggers, retained zero
-growth and receipt rows, and then stopped and removed the temporary cluster.
+A disposable PostgreSQL 17.11 cluster built from the complete pre-cutover
+migration history ran the actual `execute` and `verify` functions. The proof
+created and validated a 330,638-byte custom backup with 616 restore entries,
+applied all five migrations in one transaction, recorded exactly five ledger
+rows, created all three hardened receipt tables, all four growth
+functions/triggers, and all four Neon Lead Center persistence functions,
+retained zero growth and receipt rows, and passed every postcondition.
+
+A second cluster restored that exact pre-cutover backup and injected a division
+by zero after the fifth migration body. The complete transaction rolled back:
+all eight target functions, all three target tables, all four target triggers,
+and all five ledger rows were absent, while every prerequisite check still
+passed. The validated failure-path backup also contained 616 restore entries.
 
 No Neon, Vercel, WordPress, provider, lead, notification, Production data, or
 NellySelly state was used or changed by that proof.

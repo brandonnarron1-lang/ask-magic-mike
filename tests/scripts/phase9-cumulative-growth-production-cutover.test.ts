@@ -19,6 +19,20 @@ const runnerSource = readFileSync(
 );
 
 const versions = Object.fromEntries(MIGRATIONS.map((migration) => [migration.version, 0]));
+const requiredColumnKeys = [
+  "leads.id", "leads.status", "leads.lead_type", "leads.lead_grade",
+  "leads.next_follow_up_at", "leads.last_contacted_at", "leads.closed_lost_reason",
+  "leads.updated_at", "agents.id", "messages.id", "messages.created_at",
+  "messages.lead_id", "messages.role", "messages.content", "messages.content_type",
+  "messages.agent_id", "tasks.id", "tasks.created_at", "tasks.updated_at",
+  "tasks.lead_id", "tasks.agent_id", "tasks.created_by", "tasks.title", "tasks.body",
+  "tasks.due_at", "tasks.priority", "tasks.category", "lead_routing.lead_id",
+  "lead_routing.assignment_reason", "agent_assignments.idempotency_key",
+  "agent_assignments.assignment_reason", "audit_logs.id", "audit_logs.created_at",
+  "audit_logs.actor", "audit_logs.action", "audit_logs.resource_type",
+  "audit_logs.resource_id", "audit_logs.before_state", "audit_logs.after_state",
+  "audit_logs.metadata",
+];
 
 function preflight(overrides: Record<string, unknown> = {}) {
   return {
@@ -37,7 +51,15 @@ function preflight(overrides: Record<string, unknown> = {}) {
       marketing_spend_daily: true,
       market_signals: true,
       market_opportunities: true,
+      leads: true,
+      agents: true,
+      messages: true,
+      tasks: true,
+      lead_routing: true,
+      agent_assignments: true,
     },
+    required_functions: { mutate_admin_assignment_v1: true },
+    required_columns: Object.fromEntries(requiredColumnKeys.map((key) => [key, true])),
     immutable_guard_present: true,
     target_tables: {
       marketing_spend_import_batches: false,
@@ -49,6 +71,10 @@ function preflight(overrides: Record<string, unknown> = {}) {
       import_organic_search_batch_v1: false,
       import_local_profile_performance_batch_v1: false,
       amm_reject_retired_local_profile_metric: false,
+      patch_admin_lead_v1: false,
+      add_admin_lead_note_v1: false,
+      create_admin_lead_task_v1: false,
+      mutate_admin_assignment_v2: false,
     },
     target_triggers: {
       marketing_spend_import_batches_reject_change: false,
@@ -79,14 +105,16 @@ function hardenedTable() {
   };
 }
 
-function hardenedFunction(searchPath: string) {
+function hardenedFunction(searchPath: string, serviceRoleExecute = false) {
   return {
     present: true,
     owner: "neondb_owner",
     security_definer: false,
     search_path: [searchPath],
     public_execute: false,
-    blocked_role_execute_count: 0,
+    anon_execute: false,
+    authenticated_execute: false,
+    service_role_execute: serviceRoleExecute,
   };
 }
 
@@ -113,6 +141,10 @@ function postflight(overrides: Record<string, unknown> = {}) {
       import_organic_search_batch_v1: hardenedFunction("search_path=public, pg_temp"),
       import_local_profile_performance_batch_v1: hardenedFunction("search_path=public, pg_temp"),
       amm_reject_retired_local_profile_metric: hardenedFunction('search_path=""'),
+      patch_admin_lead_v1: hardenedFunction("search_path=public, pg_temp", true),
+      add_admin_lead_note_v1: hardenedFunction("search_path=public, pg_temp", true),
+      create_admin_lead_task_v1: hardenedFunction("search_path=public, pg_temp", true),
+      mutate_admin_assignment_v2: hardenedFunction("search_path=public, pg_temp", true),
     },
     target_triggers: {
       marketing_spend_import_batches_reject_change: trigger("marketing_spend_import_batches"),
@@ -163,12 +195,13 @@ describe("Phase 9 cumulative growth Production cutover interlocks", () => {
 
   it("verifies every reviewed migration hash and removes only the reviewed outer envelope", async () => {
     const sources = await migrationSources();
-    expect(sources).toHaveLength(4);
+    expect(sources).toHaveLength(5);
     expect(sources.map((source) => source.sha256)).toEqual(
       MIGRATIONS.map((migration) => migration.sha256),
     );
     expect(sources[3].sql).not.toMatch(/^\s*BEGIN;/);
     expect(sources[3].sql).not.toMatch(/COMMIT;\s*$/);
+    expect(sources[4].file).toBe("20260830190000_admin_lead_api_persistence.sql");
     expect(() => normalizeMigrationSql(
       { file: "unexpected.sql", transactionWrapped: false },
       "BEGIN; SELECT 1; COMMIT;",
@@ -204,6 +237,12 @@ describe("Phase 9 cumulative growth Production cutover interlocks", () => {
     expect(() => validatePreflight(preflight({
       required_tables: { ...preflight().required_tables, market_signals: false },
     }))).toThrow("prerequisites_present");
+    expect(() => validatePreflight(preflight({
+      required_functions: { mutate_admin_assignment_v1: false },
+    }))).toThrow("prerequisite_functions_present");
+    expect(() => validatePreflight(preflight({
+      required_columns: { ...preflight().required_columns, "leads.updated_at": false },
+    }))).toThrow("prerequisite_columns_present");
   });
 
   it("rejects migration-ledger drift instead of guessing required columns", () => {
@@ -241,10 +280,17 @@ describe("Phase 9 cumulative growth Production cutover interlocks", () => {
     );
 
     const weakFunctions = postflight().target_functions;
-    weakFunctions.import_marketing_spend_batch_v1.blocked_role_execute_count = 1;
+    weakFunctions.import_marketing_spend_batch_v1.authenticated_execute = true;
     expect(() => validatePostflight(before, postflight({ target_functions: weakFunctions }))).toThrow(
       "target_functions_hardened",
     );
+
+    const missingAdminGrant = postflight().target_functions;
+    missingAdminGrant.patch_admin_lead_v1.service_role_execute = false;
+    expect(() => validatePostflight(
+      before,
+      postflight({ target_functions: missingAdminGrant }),
+    )).toThrow("target_functions_hardened");
 
     expect(() => validatePostflight(before, postflight({
       receipt_counts: {

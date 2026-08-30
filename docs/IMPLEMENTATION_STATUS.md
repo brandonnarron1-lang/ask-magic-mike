@@ -10,6 +10,27 @@ chronological implementation ledger; older statements that named PR #210 or
 another component as the next release are preserved historical evidence, not
 current operator instructions.
 
+## Phase 9 cumulative Neon admin-persistence cutover extension — 2026-08-30
+
+- **Gap closed:** the stacked Lead Center API uses four Neon functions from
+  `20260830190000_admin_lead_api_persistence.sql`; the former cumulative runner
+  stopped at the preceding four growth migrations.
+- **Single cutover:** the existing backup-first runner now hash-pins and applies
+  all five migrations and ledger rows in one bounded transaction. No parallel
+  migration path or database was added.
+- **Privilege proof:** preflight requires every existing Lead Center table,
+  column, and assignment prerequisite. Postflight denies `PUBLIC`, `anon`, and
+  `authenticated` while allowing `service_role` only on the four server-side
+  Lead Center functions.
+- **Executable proof:** PostgreSQL 17.11 execute/verify passed with five ledger
+  rows, all hardened objects, zero receipt rows, and a validated 330,638-byte
+  backup with 616 restore entries. A restored second cluster injected a late
+  failure and proved complete schema/ledger rollback.
+- **Authority boundary:** the stacked payload must be consolidated into and
+  resealed as the single PR #238 candidate. No Production database, Vercel,
+  WordPress, lead, message, provider, DNS, publication, spend, deletion, or
+  NellySelly action occurred.
+
 ## Phase 9 singular cumulative release authority — 2026-08-29
 
 - **Conflict closed:** a completion audit found that the sealed cumulative PR

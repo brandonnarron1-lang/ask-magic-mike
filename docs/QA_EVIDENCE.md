@@ -1,5 +1,25 @@
 # QA Evidence
 
+## Five-migration cumulative cutover rehearsal — 2026-08-30
+
+- The cumulative runner now includes the Neon admin Lead Center persistence
+  migration instead of leaving application code and required PostgreSQL
+  functions in separate release paths.
+- Focused interlock coverage passed 1 file / 9 tests; offline planning verified
+  all five source hashes without reading a database variable.
+- Actual execute/verify passed against disposable PostgreSQL 17.11 built from
+  the complete pre-cutover migration history. Five ledger rows, three hardened
+  receipt tables, eight hardened functions, four triggers, zero receipt rows,
+  and unchanged growth baselines were proven.
+- The runner created a validated 330,638-byte custom backup with 616 restore
+  entries. A second cluster restored it, injected a late failure after the
+  fifth migration, and proved all target schema plus all five ledger rows were
+  rolled back.
+- Full commands, fingerprints, privilege checks, and release boundaries are in
+  [`phase9/CUMULATIVE_ADMIN_PERSISTENCE_CUTOVER_QA_EVIDENCE.md`](./phase9/CUMULATIVE_ADMIN_PERSISTENCE_CUTOVER_QA_EVIDENCE.md).
+- No Neon Production, Vercel Production, WordPress, lead, notification,
+  provider, DNS, publication, spend, deletion, or NellySelly state changed.
+
 ## Singular cumulative release authority — 2026-08-29
 
 - A completion audit proved that sealed Draft PR #238 was already documented as

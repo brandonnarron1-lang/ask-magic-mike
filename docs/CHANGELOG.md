@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-08-30 — Cumulative cutover includes Neon admin persistence
+
+- Closed a release-order gap where the cumulative runner sealed four growth
+  migrations but the stacked Lead Center API required a fifth Neon migration.
+- Hash-pins all five migrations and applies them with five ledger rows in the
+  existing backup-first, single-transaction cutover.
+- Added fail-closed prerequisite checks for the existing Lead Center tables,
+  columns, and assignment function, plus exact browser-role denial and
+  service-role execution assertions for all eight target functions.
+- Disposable PostgreSQL 17.11 execute/verify passed with a validated
+  330,638-byte backup and 616 restore entries. A second restored cluster
+  injected a late error and proved zero partial tables, functions, triggers,
+  or ledger rows after rollback.
+- No Neon Production, Vercel Production, WordPress, lead, notification,
+  provider, DNS, publication, spend, deletion, or NellySelly state changed.
+
 ## 2026-08-29 — Current release authority made singular
 
 - Replaced conflicting active instructions with one canonical authority

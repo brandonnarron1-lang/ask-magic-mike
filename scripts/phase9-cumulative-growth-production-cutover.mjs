@@ -50,6 +50,13 @@ export const MIGRATIONS = Object.freeze([
     sha256: "705fa33d1516451e721cd30d9991084ff3dae987849a2f47981eaeff762a561a",
     transactionWrapped: true,
   }),
+  Object.freeze({
+    version: "20260830190000",
+    name: "admin_lead_api_persistence",
+    file: "20260830190000_admin_lead_api_persistence.sql",
+    sha256: "f50ffe91740fdd0690a87d673daf9e5753f122e19279ef84d729d9435d7adc35",
+    transactionWrapped: false,
+  }),
 ]);
 
 const MODULE_URL = new URL(import.meta.url);
@@ -65,6 +72,41 @@ const REQUIRED_TABLES = Object.freeze([
   "marketing_spend_daily",
   "market_signals",
   "market_opportunities",
+  "leads",
+  "agents",
+  "messages",
+  "tasks",
+  "lead_routing",
+  "agent_assignments",
+]);
+
+const REQUIRED_FUNCTIONS = Object.freeze([
+  Object.freeze({
+    name: "mutate_admin_assignment_v1",
+    signature: "public.mutate_admin_assignment_v1(uuid,uuid,uuid,text,text,text,timestamptz)",
+  }),
+]);
+
+const REQUIRED_COLUMNS = Object.freeze([
+  ...[
+    "id", "status", "lead_type", "lead_grade", "next_follow_up_at",
+    "last_contacted_at", "closed_lost_reason", "updated_at",
+  ].map((column) => Object.freeze({ table: "leads", column })),
+  ...["id"].map((column) => Object.freeze({ table: "agents", column })),
+  ...["id", "created_at", "lead_id", "role", "content", "content_type", "agent_id"]
+    .map((column) => Object.freeze({ table: "messages", column })),
+  ...[
+    "id", "created_at", "updated_at", "lead_id", "agent_id", "created_by",
+    "title", "body", "due_at", "priority", "category",
+  ].map((column) => Object.freeze({ table: "tasks", column })),
+  ...["lead_id", "assignment_reason"]
+    .map((column) => Object.freeze({ table: "lead_routing", column })),
+  ...["idempotency_key", "assignment_reason"]
+    .map((column) => Object.freeze({ table: "agent_assignments", column })),
+  ...[
+    "id", "created_at", "actor", "action", "resource_type", "resource_id",
+    "before_state", "after_state", "metadata",
+  ].map((column) => Object.freeze({ table: "audit_logs", column })),
 ]);
 
 const TARGET_TABLES = Object.freeze([
@@ -93,6 +135,30 @@ const TARGET_FUNCTIONS = Object.freeze([
     name: "amm_reject_retired_local_profile_metric",
     signature: "public.amm_reject_retired_local_profile_metric()",
     expectedSearchPath: null,
+  }),
+  Object.freeze({
+    name: "patch_admin_lead_v1",
+    signature: "public.patch_admin_lead_v1(uuid,jsonb,text,timestamptz)",
+    expectedSearchPath: "search_path=public, pg_temp",
+    serviceRoleExecute: true,
+  }),
+  Object.freeze({
+    name: "add_admin_lead_note_v1",
+    signature: "public.add_admin_lead_note_v1(uuid,text,uuid,text,timestamptz)",
+    expectedSearchPath: "search_path=public, pg_temp",
+    serviceRoleExecute: true,
+  }),
+  Object.freeze({
+    name: "create_admin_lead_task_v1",
+    signature: "public.create_admin_lead_task_v1(uuid,text,text,timestamptz,text,text,uuid,text,timestamptz)",
+    expectedSearchPath: "search_path=public, pg_temp",
+    serviceRoleExecute: true,
+  }),
+  Object.freeze({
+    name: "mutate_admin_assignment_v2",
+    signature: "public.mutate_admin_assignment_v2(uuid,uuid,uuid,text,text,text,text,timestamptz)",
+    expectedSearchPath: "search_path=public, pg_temp",
+    serviceRoleExecute: true,
   }),
 ]);
 
@@ -135,6 +201,12 @@ function valuesSql(rows) {
 
 const VERSION_VALUES_SQL = valuesSql(MIGRATIONS.map((migration) => [migration.version]));
 const REQUIRED_TABLE_VALUES_SQL = valuesSql(REQUIRED_TABLES.map((name) => [name]));
+const REQUIRED_FUNCTION_VALUES_SQL = valuesSql(
+  REQUIRED_FUNCTIONS.map((entry) => [entry.name, entry.signature]),
+);
+const REQUIRED_COLUMN_VALUES_SQL = valuesSql(
+  REQUIRED_COLUMNS.map((entry) => [entry.table, entry.column]),
+);
 const TARGET_TABLE_VALUES_SQL = valuesSql(TARGET_TABLES.map((name) => [name]));
 const TARGET_FUNCTION_VALUES_SQL = valuesSql(
   TARGET_FUNCTIONS.map((entry) => [entry.name, entry.signature, entry.expectedSearchPath ?? ""]),
@@ -220,6 +292,12 @@ WITH
 required_tables(name) AS (
   VALUES ${REQUIRED_TABLE_VALUES_SQL}
 ),
+required_functions(name, signature) AS (
+  VALUES ${REQUIRED_FUNCTION_VALUES_SQL}
+),
+required_columns(table_name, column_name) AS (
+  VALUES ${REQUIRED_COLUMN_VALUES_SQL}
+),
 target_tables(name) AS (
   VALUES ${TARGET_TABLE_VALUES_SQL}
 ),
@@ -260,6 +338,21 @@ SELECT jsonb_build_object(
   'required_tables', (
     SELECT jsonb_object_agg(name, to_regclass('public.' || name) IS NOT NULL)
     FROM required_tables
+  ),
+  'required_functions', (
+    SELECT jsonb_object_agg(name, to_regprocedure(signature) IS NOT NULL)
+    FROM required_functions
+  ),
+  'required_columns', (
+    SELECT jsonb_object_agg(
+      expected.table_name || '.' || expected.column_name,
+      columns.column_name IS NOT NULL
+    )
+    FROM required_columns expected
+    LEFT JOIN information_schema.columns columns
+      ON columns.table_schema = 'public'
+      AND columns.table_name = expected.table_name
+      AND columns.column_name = expected.column_name
   ),
   'immutable_guard_present',
     to_regprocedure('public.amm_reject_immutable_change()') IS NOT NULL,
@@ -362,12 +455,18 @@ function_state AS (
         FROM aclexplode(COALESCE(procedure.proacl, acldefault('f', procedure.proowner))) acl
         WHERE acl.grantee = 0 AND acl.privilege_type = 'EXECUTE'
       ) END,
-      'blocked_role_execute_count', CASE WHEN procedure.oid IS NULL THEN 3 ELSE (
-        SELECT count(*)
-        FROM pg_roles blocked
-        WHERE blocked.rolname IN ('anon', 'authenticated', 'service_role')
-          AND has_function_privilege(blocked.rolname, procedure.oid, 'EXECUTE')
-      ) END
+      'anon_execute', COALESCE(
+        has_function_privilege('anon', procedure.oid, 'EXECUTE'),
+        true
+      ),
+      'authenticated_execute', COALESCE(
+        has_function_privilege('authenticated', procedure.oid, 'EXECUTE'),
+        true
+      ),
+      'service_role_execute', COALESCE(
+        has_function_privilege('service_role', procedure.oid, 'EXECUTE'),
+        false
+      )
     ) AS state
   FROM target_functions expected
   LEFT JOIN pg_proc procedure ON procedure.oid = to_regprocedure(expected.signature)
@@ -433,6 +532,15 @@ function validateLedgerShape(snapshot) {
 }
 
 export function validatePreflight(snapshot) {
+  const prerequisiteTablesPresent = allValues(snapshot.required_tables, (value) => value === true);
+  const prerequisiteFunctionsPresent = allValues(
+    snapshot.required_functions,
+    (value) => value === true,
+  );
+  const prerequisiteColumnsPresent = allValues(
+    snapshot.required_columns,
+    (value) => value === true,
+  );
   const checks = {
     database: snapshot.database === EXPECTED_DATABASE,
     owner: snapshot.owner === EXPECTED_OWNER,
@@ -440,7 +548,11 @@ export function validatePreflight(snapshot) {
     can_create_public: snapshot.can_create_public === true,
     migration_ledger: snapshot.migration_ledger === true,
     roles_present: allValues(snapshot.roles, (value) => value === true),
-    prerequisites_present: allValues(snapshot.required_tables, (value) => value === true),
+    prerequisites_present:
+      prerequisiteTablesPresent && prerequisiteFunctionsPresent && prerequisiteColumnsPresent,
+    prerequisite_tables_present: prerequisiteTablesPresent,
+    prerequisite_functions_present: prerequisiteFunctionsPresent,
+    prerequisite_columns_present: prerequisiteColumnsPresent,
     immutable_guard_present: snapshot.immutable_guard_present === true,
     target_tables_absent: allValues(snapshot.target_tables, (value) => value === false),
     target_functions_absent: allValues(snapshot.target_functions, (value) => value === false),
@@ -479,7 +591,9 @@ export function validatePostflight(before, after, { requireEmptyReceipts = false
         state.owner === EXPECTED_OWNER &&
         state.security_definer === false &&
         state.public_execute === false &&
-        Number(state.blocked_role_execute_count) === 0 &&
+        state.anon_execute === false &&
+        state.authenticated_execute === false &&
+        state.service_role_execute === (entry.serviceRoleExecute === true) &&
         includesSearchPath(state.search_path, entry.expectedSearchPath);
     }),
     target_triggers_enabled: TARGET_TRIGGERS.every((entry) => {
@@ -503,6 +617,8 @@ function safeSnapshot(snapshot) {
     server_version: snapshot.server_version,
     roles: snapshot.roles,
     required_tables: snapshot.required_tables,
+    required_functions: snapshot.required_functions,
+    required_columns: snapshot.required_columns,
     immutable_guard_present: snapshot.immutable_guard_present,
     target_tables: snapshot.target_tables,
     target_functions: snapshot.target_functions,
@@ -611,6 +727,7 @@ export function plan() {
       migration_ledger_atomic: true,
       existing_rows_must_remain_unchanged: true,
       growth_import_gates_must_remain_disabled: true,
+      admin_lead_persistence_included: true,
     },
     modes: {
       plan: "offline and read-only",
@@ -678,7 +795,7 @@ async function main() {
     after: safeSnapshot(result.after),
     checks: result.checks,
     backup: safeBackup(result.backup),
-    next: "Keep all growth import gates false, merge exact PR #238 head, deploy that exact commit, and run Production health plus read-only verify before any import authority is considered.",
+    next: "Keep all growth import gates false, merge only the refreshed exact PR #238 payload head containing all five migrations, deploy that exact commit, and run Production health plus read-only verify before any import authority is considered.",
   }, null, 2));
 }
 
