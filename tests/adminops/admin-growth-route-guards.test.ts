@@ -20,20 +20,41 @@ describe("Growth Command Center route and authority guards", () => {
 
   it("keeps the Growth Command Center read-only", () => {
     const page = read("app/admin/growth/page.tsx");
+    const readiness = read("app/lib/growth/baseline-target-readiness.ts");
+    const capabilities = read("app/lib/growth/capability-ledger.ts");
     expect(page).not.toContain("<form");
     expect(page).not.toContain('"use server"');
     expect(page).not.toContain("'use server'");
     expect(page).not.toContain("fetch(");
     expect(page).not.toMatch(/method:\s*["'`](POST|PATCH|PUT|DELETE)["'`]/);
+    expect(page).toContain("Numeric target entry is disabled");
+    expect(page).toContain('href={baselineReadiness.priorityHref}');
+    expect(readiness).toContain("targetEntryEnabled: false");
+    expect(page).toContain("Capability authority ledger");
+    expect(page).toContain("A reviewed candidate is not Production");
+    expect(page).toContain('href={item.href}');
+    expect(page).toContain('aria-label="Channel economics table"');
+    expect(page).toContain("tabIndex={0}");
+    expect(capabilities).not.toContain("fetch(");
+    expect(capabilities).not.toContain('"use server"');
+    expect(capabilities).not.toMatch(/method:\s*["'`](POST|PATCH|PUT|DELETE)["'`]/);
   });
 
   it("keeps wide growth tables contained on mobile viewports", () => {
     const page = read("app/admin/growth/page.tsx");
     expect(page).toContain('className="min-w-0 rounded-2xl');
-    expect(page).toContain('className="min-w-[1040px]');
+    expect(page).toContain('className="min-w-[1440px]');
     expect(page).toContain("By lead type");
     expect(page).toContain("By response owner");
     expect(page).toContain("never uses today's mutable owner");
+    expect(page).toContain("Recorded referral fees");
+    expect(page).toContain("Tracked contribution");
+    expect(page).toContain("not net income");
+    expect(page).toContain('aria-label="Channel economics table"');
+    expect(page).toContain('aria-describedby="channel-economics-scroll-help"');
+    expect(page).toContain('role="region"');
+    expect(page).toContain("tabIndex={0}");
+    expect(page).toContain("Scroll horizontally or use the arrow keys");
   });
 
   it("excludes test and communication-suppressed records in canonical Neon reads", () => {

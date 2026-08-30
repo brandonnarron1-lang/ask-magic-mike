@@ -17,11 +17,20 @@ const HOME_ROW: WordPressPageIndexRow = {
 };
 const LEGACY_HOME_HREF =
   "https://www.askmagicmike.com/value?utm_source=ourtownproperties&#038;utm_medium=homepage_cta&#038;utm_campaign=website_widget";
+const HIDDEN_VISUAL_CONTAINMENT =
+  '<style id="amm-visual-containment">.amm-cta,.amm-cta--dark{display:none !important;}</style>';
 
-function homeHtml(hrefs: string[]) {
+function homeHtml(
+  hrefs: string[],
+  options: { wrapInCta?: boolean; style?: string } = {},
+) {
+  const anchors = hrefs
+    .map((href) => `<a class="cta" href="${href}">Ask Mike</a>`)
+    .join("\n");
   return `<!doctype html><html><body>
     <p>Public brokerage phone 252-243-7700</p>
-    ${hrefs.map((href) => `<a class="cta" href="${href}">Ask Mike</a>`).join("\n")}
+    ${options.style ?? ""}
+    ${options.wrapInCta ? `<div class="amm-cta amm-cta--dark">${anchors}</div>` : anchors}
     <script>window.privateExample = "must-not-enter-manifest";</script>
   </body></html>`;
 }
@@ -43,7 +52,7 @@ describe("WordPress owned-demand activation change set", () => {
   it("classifies one exact legacy homepage CTA as ready without performing a mutation", () => {
     const changeSet = buildHome(homeHtml([LEGACY_HOME_HREF]));
     expect(changeSet).toMatchObject({
-      schemaVersion: "amm.wordpress_activation_change_set.v1",
+      schemaVersion: "amm.wordpress_activation_change_set.v2",
       generatedAt: GENERATED_AT,
       mode: "read_only_public_precondition",
       placementKey: "wordpress_homepage_ask_mike",
@@ -55,6 +64,9 @@ describe("WordPress owned-demand activation change set", () => {
       expectedPageId: 149,
       currentHrefOccurrences: 1,
       rejectedLookalikeHrefOccurrences: 0,
+      targetVisibility: "visible_candidate",
+      hiddenTargetOccurrences: 0,
+      hiddenCssSelectorOccurrences: 0,
       mutationPerformed: false,
       containsRawPageHtml: false,
     });
@@ -66,6 +78,49 @@ describe("WordPress owned-demand activation change set", () => {
     expect(changeSet.approvalGate).toBe(
       "APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION",
     );
+  });
+
+  it("blocks an href-only publication when public CSS suppresses the exact CTA container", () => {
+    const changeSet = buildHome(homeHtml([LEGACY_HOME_HREF], {
+      wrapInCta: true,
+      style: HIDDEN_VISUAL_CONTAINMENT,
+    }));
+
+    expect(changeSet).toMatchObject({
+      status: "hidden_target",
+      publicationBlocked: true,
+      publicationAuthorized: false,
+      targetVisibility: "hidden_by_known_css",
+      hiddenTargetOccurrences: 1,
+      hiddenCssSelectorOccurrences: 2,
+      currentHrefOccurrences: 1,
+      mutationPerformed: false,
+    });
+    expect(changeSet.blockers.join(" ")).toContain("display:none !important");
+    expect(changeSet.publicationSteps.join(" ")).toContain("Do not publish an href-only change");
+    expect(changeSet.rollbackHref).toBe(changeSet.currentHref);
+  });
+
+  it("does not infer that an exact link is hidden from an unrelated rule or container class alone", () => {
+    const hiddenRuleWithoutContainer = buildHome(homeHtml([LEGACY_HOME_HREF], {
+      style: HIDDEN_VISUAL_CONTAINMENT,
+    }));
+    expect(hiddenRuleWithoutContainer).toMatchObject({
+      status: "legacy_match_ready",
+      targetVisibility: "visible_candidate",
+      hiddenTargetOccurrences: 0,
+      hiddenCssSelectorOccurrences: 2,
+    });
+
+    const containerWithoutHiddenRule = buildHome(homeHtml([LEGACY_HOME_HREF], {
+      wrapInCta: true,
+    }));
+    expect(containerWithoutHiddenRule).toMatchObject({
+      status: "legacy_match_ready",
+      targetVisibility: "visible_candidate",
+      hiddenTargetOccurrences: 0,
+      hiddenCssSelectorOccurrences: 0,
+    });
   });
 
   it("reports an already-canonical CTA and blocks an unnecessary publication", () => {
@@ -222,6 +277,7 @@ describe("WordPress activation API and operator boundary", () => {
     expect(route).toContain('requireLeadCenterApiPermission(request, "report:view")');
     expect(route).toContain("isWordPressActivationPlacementKey(placementKey)");
     expect(route).toContain("loadWordPressActivationChangeSet(placementKey)");
+    expect(route).toContain("loadWordPressSellerIntentDecisionManifest()");
     expect(route).toContain('"Cache-Control": "private, no-store, max-age=0"');
     expect(route).toContain('"Content-Security-Policy": "default-src \'none\'; sandbox"');
     expect(route).toContain('"Cross-Origin-Resource-Policy": "same-origin"');
@@ -234,6 +290,8 @@ describe("WordPress activation API and operator boundary", () => {
     expect(route).not.toMatch(/export async function (?:POST|PUT|PATCH|DELETE)/);
     expect(route).not.toMatch(/searchParams|DATABASE_URL|INSERT|UPDATE|DELETE|email|sms|send\(/i);
     expect(page).toContain("Download live readiness manifest");
+    expect(page).toContain("Download decision packet");
+    expect(page).toContain('data-seller-intent-decision-manifest="true"');
     expect(page).toContain("they do not publish");
     expect(page).toContain('channel.namedPlacements.length ? "xl:col-span-2" : ""');
   });

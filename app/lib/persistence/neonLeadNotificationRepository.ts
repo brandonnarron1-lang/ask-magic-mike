@@ -109,7 +109,11 @@ export class NeonLeadNotificationRepository implements LeadNotificationRepositor
 
   async listRecent(limit = 50) {
     const rows = await this.sql.query(
-      "SELECT * FROM public.lead_notifications ORDER BY created_at DESC LIMIT $1",
+      `SELECT n.*, l.is_test AS lead_is_test
+         FROM public.lead_notifications n
+         LEFT JOIN public.leads l ON l.id = n.lead_id
+        ORDER BY n.created_at DESC
+        LIMIT $1`,
       [Math.max(1, Math.min(limit, 100))],
     );
     return (rows as unknown[]).map(row).filter((value): value is LeadNotificationRecord => Boolean(value));
@@ -117,7 +121,12 @@ export class NeonLeadNotificationRepository implements LeadNotificationRepositor
 
   async listByLead(leadId: string, limit = 25) {
     const rows = await this.sql.query(
-      "SELECT * FROM public.lead_notifications WHERE lead_id = $1::uuid ORDER BY created_at DESC LIMIT $2",
+      `SELECT n.*, l.is_test AS lead_is_test
+         FROM public.lead_notifications n
+         LEFT JOIN public.leads l ON l.id = n.lead_id
+        WHERE n.lead_id = $1::uuid
+        ORDER BY n.created_at DESC
+        LIMIT $2`,
       [leadId, Math.max(1, Math.min(limit, 50))],
     );
     return (rows as unknown[]).map(row).filter((value): value is LeadNotificationRecord => Boolean(value));

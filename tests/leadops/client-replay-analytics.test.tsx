@@ -73,8 +73,7 @@ describe("client replay analytics suppression", () => {
     await user.click(screen.getByRole("button", { name: "Continue" }));
     await user.type(screen.getByLabelText("Your name"), "INTERNAL QA DO NOT CONTACT");
     await user.type(screen.getByLabelText("Email for your valuation follow-up"), "replay@example.test");
-    await user.click(screen.getByRole("button", { name: "Continue" }));
-    await user.type(screen.getByLabelText("Phone"), "2525550123");
+    await user.type(screen.getByLabelText("Phone (optional)"), "2525550123");
     await user.click(screen.getByRole("button", { name: "Request Valuation" }));
 
     expect(await screen.findByText("Your request is in.")).toBeVisible();

@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
+import { assertDatabaseMutationAllowed } from "../../../../src/lib/preview-security";
 import { checkRateLimit, LIMITS, rateLimitKey } from "../../../../src/lib/security/rate-limit";
+import { isAutomatedBrowserUserAgent } from "../../../lib/browserAutomation";
+import { readBoundedIngressJson } from "../../../lib/growth/ingress-http";
 import { isApprovedPublicOrigin } from "../../../lib/publicOrigin";
 import { recordPublicExperimentEvent } from "../../../lib/persistence/neonPublicExperimentRepository";
 
@@ -16,8 +19,23 @@ const NO_STORE_HEADERS = {
   Pragma: "no-cache",
 } as const;
 
+const MAX_EXPERIMENT_BODY_BYTES = 4_096;
+const EXPERIMENT_KEY_PATTERN = /^[a-z][a-z0-9_]{2,80}$/;
+const SUBJECT_KEY_PATTERN = /^[a-f0-9]{64}$/;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const SURFACE_PATTERN = /^\/[a-z0-9/_-]{0,119}$/;
+
 function experimentResponse(
-  body: { active: boolean; recorded: boolean; correlation_id: string; variant_key?: string | null },
+  body: {
+    active: boolean;
+    recorded: boolean;
+    correlation_id: string;
+    variant_key?: string | null;
+    excluded?: "automation";
+    error?: "preview_data_disabled";
+    message?: string;
+  },
   status: number,
 ) {
   return NextResponse.json(body, { status, headers: NO_STORE_HEADERS });
@@ -25,10 +43,38 @@ function experimentResponse(
 
 export async function POST(request: Request) {
   const correlationId = crypto.randomUUID();
-  if (!isApprovedPublicOrigin(request.headers.get("origin"))) {
+  const origin = request.headers.get("origin");
+  if (!origin || !isApprovedPublicOrigin(origin)) {
     return experimentResponse(
       { active: false, recorded: false, correlation_id: correlationId },
       403,
+    );
+  }
+  if (isAutomatedBrowserUserAgent(request.headers.get("user-agent"))) {
+    return experimentResponse(
+      {
+        active: false,
+        recorded: false,
+        excluded: "automation",
+        correlation_id: correlationId,
+      },
+      202,
+    );
+  }
+  // Preserve the same fail-closed Preview boundary as lead and appointment
+  // capture. This guard must run before the shared limiter because that limiter
+  // is itself a durable database write when DATABASE_URL is configured.
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return experimentResponse(
+      {
+        active: false,
+        recorded: false,
+        error: mutation.error,
+        message: mutation.publicMessage,
+        correlation_id: correlationId,
+      },
+      mutation.statusCode,
     );
   }
   const limit = await checkRateLimit(
@@ -44,9 +90,24 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = await request.json().catch(() => null) as EventBody | null;
-  if (!body || typeof body.experiment_key !== "string" ||
-    typeof body.subject_key !== "string" || typeof body.event_name !== "string") {
+  const parsed = await readBoundedIngressJson(request, {
+    maxRequestBytes: MAX_EXPERIMENT_BODY_BYTES,
+  });
+  if (!parsed.ok) {
+    return experimentResponse(
+      { active: false, recorded: false, correlation_id: correlationId },
+      parsed.status,
+    );
+  }
+
+  const body = parsed.value as EventBody;
+  if (
+    typeof body.experiment_key !== "string" ||
+    !EXPERIMENT_KEY_PATTERN.test(body.experiment_key) ||
+    typeof body.subject_key !== "string" ||
+    !SUBJECT_KEY_PATTERN.test(body.subject_key) ||
+    typeof body.event_name !== "string"
+  ) {
     return experimentResponse(
       { active: false, recorded: false, correlation_id: correlationId },
       400,
@@ -58,13 +119,25 @@ export async function POST(request: Request) {
       400,
     );
   }
+  if (
+    (body.surface !== undefined && body.surface !== null &&
+      (typeof body.surface !== "string" || !SURFACE_PATTERN.test(body.surface))) ||
+    (body.event_name === "exposure" && body.lead_id !== undefined && body.lead_id !== null) ||
+    (body.event_name === "lead_created" &&
+      (typeof body.lead_id !== "string" || !UUID_PATTERN.test(body.lead_id)))
+  ) {
+    return experimentResponse(
+      { active: false, recorded: false, correlation_id: correlationId },
+      400,
+    );
+  }
 
   const outcome = await recordPublicExperimentEvent({
     experimentKey: body.experiment_key,
     subjectKey: body.subject_key,
     eventName: body.event_name,
     leadId: typeof body.lead_id === "string" ? body.lead_id : null,
-    surface: typeof body.surface === "string" ? body.surface.slice(0, 120) : null,
+    surface: typeof body.surface === "string" ? body.surface : null,
   });
   return experimentResponse(
     {

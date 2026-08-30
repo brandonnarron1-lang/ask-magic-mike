@@ -88,7 +88,9 @@ describe("POST /api/leads validation and truthful persistence", () => {
 
   it.each([
     [{ funnel_type: "home_value", email: "a@example.test", phone: "2525550100" }, "Address is required."],
-    [{ funnel_type: "home_value", address: "1 Synthetic St", phone: "2525550100" }, "Email and phone are required"],
+    [{ funnel_type: "home_value", address: "1 Synthetic St" }, "Email or phone is required"],
+    [{ funnel_type: "home_value", address: "1 Synthetic St", email: "qa@example", phone: "2525550100" }, "valid email"],
+    [{ funnel_type: "home_value", address: "1 Synthetic St", phone: "5550100" }, "valid phone"],
     [{ funnel_type: "seller", address: "1 Synthetic St" }, "Property address and phone are required"],
     [{ funnel_type: "chat" }, "Question is required"],
     [{ funnel_type: "appointment" }, "Email or phone is required"],
@@ -173,6 +175,26 @@ describe("POST /api/leads validation and truthful persistence", () => {
 });
 
 describe("POST /api/leads atomic lifecycle command", () => {
+  it.each([
+    [{ email: "email-only@example.test" }, "email"],
+    [{ phone: "2525550110" }, "phone"],
+  ])("durably accepts a home-value request with %s as its only contact method", async (contact, expectedMethod) => {
+    const { calls } = installRpc();
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "88 Synthetic Contact Lane",
+      name: "INTERNAL QA DO NOT CONTACT",
+      ...contact,
+    }));
+
+    expect(response.status).toBe(200);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toContain("/rest/v1/rpc/capture_public_lead_v1");
+    const lead = calls[0].body.p_lead as Record<string, unknown>;
+    expect(expectedMethod === "email" ? lead.normalized_email : lead.normalized_phone).toBeTruthy();
+  });
+
   it("derives one stable UUID session from a non-UUID idempotency key", async () => {
     const { calls } = installRpc();
     const payload = {
@@ -269,6 +291,78 @@ describe("POST /api/leads atomic lifecycle command", () => {
     }));
     expect(chatResponse.status).toBe(200);
     expect(await chatResponse.json()).toHaveProperty("message");
+  });
+
+  it("keeps an omitted seller timeline unknown instead of manufacturing urgency", async () => {
+    const { calls } = installRpc();
+    const response = await POST(request({
+      funnel_type: "seller",
+      lead_source_surface: "seller_page",
+      address: "220 Synthetic Truth Lane",
+      phone: "2525550120",
+      widget_session_id: SESSION_ID,
+    }));
+
+    expect(response.status).toBe(200);
+    const lead = calls[0].body.p_lead as Record<string, unknown>;
+    expect(lead.timeline_months).toBeNull();
+    expect(lead.financing).toBeNull();
+    expect(lead.preapproval).toBeNull();
+    expect(lead.lead_grade).toBe("B");
+    expect(lead.score).toBe(45);
+    expect(lead.score_factors).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        code: "timeline_unknown",
+        points: 0,
+      }),
+    ]));
+  });
+
+  it.each(["Not sure yet", "Unknown", "Prefer not to say"])(
+    "keeps an explicit uncertain timeline unknown: %s",
+    async (timeline) => {
+      const { calls } = installRpc();
+      const response = await POST(request({
+        funnel_type: "buyer",
+        lead_source_surface: "buyer_page",
+        phone: "2525550120",
+        timeline,
+        widget_session_id: SESSION_ID,
+      }));
+
+      expect(response.status).toBe(200);
+      const lead = calls[0].body.p_lead as Record<string, unknown>;
+      expect(lead.timeline_months).toBeNull();
+      expect(lead.score_factors).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          code: "timeline_unknown",
+          points: 0,
+        }),
+      ]));
+    },
+  );
+
+  it("retains an explicit planning horizon without manufacturing urgency", async () => {
+    const { calls } = installRpc();
+    const response = await POST(request({
+      funnel_type: "seller",
+      lead_source_surface: "seller_page",
+      address: "221 Synthetic Planning Lane",
+      phone: "2525550120",
+      timeline: "Just planning",
+      widget_session_id: SESSION_ID,
+    }));
+
+    expect(response.status).toBe(200);
+    const lead = calls[0].body.p_lead as Record<string, unknown>;
+    expect(lead.timeline_months).toBe(24);
+    expect(lead.lead_grade).toBe("B");
+    expect(lead.score_factors).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        code: "timeline_unknown",
+        points: 0,
+      }),
+    ]));
   });
 
   it("returns the canonical lead on an idempotent replay", async () => {

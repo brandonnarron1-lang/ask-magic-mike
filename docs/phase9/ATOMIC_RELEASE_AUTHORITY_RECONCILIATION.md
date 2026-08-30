@@ -2,15 +2,27 @@
 
 Date: 2026-08-23  
 Canonical repository: `brandonnarron1-lang/ask-magic-mike`  
-Canonical Production: PR #195 merge
+Status: historical authority decision; superseded by accepted PR #209 release
+Canonical Production at time of decision: PR #195 merge
 `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`, Vercel deployment
 `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`  
-Canonical Draft candidate: PR #209,
+Canonical Draft candidate at time of decision: PR #209,
 `codex/phase9-controlled-release-candidate-20260823`
+
+## Accepted outcome — 2026-08-28
+
+PR #209 reviewed head `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b`
+merged as `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and passed
+same-commit Production acceptance on deployment
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Its exact gate is consumed and exhausted.
+PR #210 is now the next separate application candidate; this historical record
+grants it no authority. See
+`docs/phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md`.
 
 ## Decision
 
-PR #209 is the sole current application release vehicle. PRs #202 through #208
+At the time of this reconciliation, PR #209 was the sole current application
+release vehicle. PRs #202 through #208
 remain preserved as incremental review evidence but have no independent merge
 or Production authority. This replaces the obsolete stacked release sequence
 with one exact candidate, one matching deployment, and one rollback point.
@@ -22,7 +34,7 @@ Production deployments.
 
 ## Fresh authoritative evidence
 
-Observed without a form submission, authenticated lead read, database write,
+Observed on 2026-08-23 without a form submission, authenticated lead read, database write,
 message, publication, or configuration change:
 
 - GitHub `main` resolves to PR #195 merge
@@ -42,16 +54,18 @@ message, publication, or configuration change:
 
 ## Authority boundaries
 
-Optional isolated synthetic Preview mutation and deterministic cleanup require:
+At the time, optional isolated synthetic Preview mutation and deterministic
+cleanup required:
 
 `APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA`
 
 One encrypted Production-only durability secret, exact reviewed PR #209 merge,
-and matching same-commit Production deployment require:
+and matching same-commit Production deployment required:
 
 `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`
 
-The gates are not interchangeable. Neither authorizes a lead, email, SMS, Push,
+Those historical gates were not interchangeable. The Production gate is now
+consumed and exhausted. Neither authorized a lead, email, SMS, Push,
 consumer acknowledgment, WordPress edit, public post, paid media, DNS change,
 database migration, data deletion, or NellySelly action.
 

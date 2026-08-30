@@ -7,6 +7,7 @@ import {
 } from "../../../src/lib/messaging/template-registry";
 import { MESSAGE_SEQUENCES } from "../../../src/lib/messaging/sequence-engine";
 import { smsSegmentCount } from "../../../src/lib/messaging/sms-policy";
+import { LeadAlertPreviewGallery } from "../../components/admin/LeadAlertPreviewGallery";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -81,6 +82,10 @@ export default async function MessagePreviewPage() {
             </section>
           </div>
         </section>
+
+        <div className="mt-8">
+          <LeadAlertPreviewGallery />
+        </div>
 
         <section className="mt-8">
           <div>

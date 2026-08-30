@@ -89,6 +89,7 @@ function NotificationCard({ notification }: { notification: LeadNotificationReco
           <p className="mt-2 break-all text-xs text-[#8f8778]">Lead {notification.lead_id}</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {notification.lead_is_test ? <Badge>QA test</Badge> : null}
           <Badge>{notification.provider || "no provider"}</Badge>
           <Badge>
             {notification.attempt_count}/{notification.max_attempts} attempts
@@ -151,6 +152,18 @@ export default async function AdminNotificationsPage({
   await requireLeadCenterPermission("notification:manage");
   const params = searchParams ? await searchParams : {};
   const summary = await loadAdminLeadNotificationSummary();
+  const operations = summary.operations;
+  const stuckWork = operations
+    ? operations.stalePending + operations.staleProcessing
+    : 0;
+  const operationalAttention = operations
+    ? operations.retryDue +
+        stuckWork +
+        operations.failed +
+        operations.permanentlyFailed +
+        operations.providerTerminalFailure +
+        operations.orphanedTotal > 0
+    : false;
 
   return (
     <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
@@ -198,16 +211,69 @@ export default async function AdminNotificationsPage({
           </section>
         ) : null}
 
-        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
-          <MetricCard label="Total" value={summary.kpis.total} />
-          <MetricCard label="Pending" value={summary.kpis.pending} />
-          <MetricCard label="Sent" value={summary.kpis.sent} />
-          <MetricCard label="Failed" value={summary.kpis.failed} />
-          <MetricCard label="Skipped" value={summary.kpis.skipped} />
-          <MetricCard label="Retry" value={summary.kpis.retryScheduled} />
-        </div>
+        {operations ? (
+          <>
+            <section className={`mb-6 rounded-lg border p-5 ${operationalAttention ? "border-[#b4233a80] bg-[#3b09141f]" : "border-emerald-300/25 bg-emerald-300/[0.06]"}`}>
+              <p className={`text-xs font-bold uppercase tracking-[0.18em] ${operationalAttention ? "text-[#ff9f91]" : "text-emerald-200"}`}>
+                {operationalAttention ? "Operational attention required" : "Live notification queue clear"}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-[#d9ceb8]">
+                Exact canonical-store totals exclude {operations.testTotal} QA test record{operations.testTotal === 1 ? "" : "s"} from live KPIs.
+                {operations.orphanedTotal ? ` ${operations.orphanedTotal} orphaned notification record${operations.orphanedTotal === 1 ? "" : "s"} require integrity review.` : " No orphaned notification records were found."}
+              </p>
+              <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
+                <div>
+                  <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Oldest actionable</dt>
+                  <dd className="mt-1 text-[#f4ead4]">{shortDate(operations.oldestActionableAt)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Last accepted send</dt>
+                  <dd className="mt-1 text-[#f4ead4]">{shortDate(operations.lastSentAt)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Last provider confirmation</dt>
+                  <dd className="mt-1 text-[#f4ead4]">{shortDate(operations.lastProviderConfirmationAt)}</dd>
+                </div>
+              </dl>
+            </section>
 
-        <section className="mt-8 grid gap-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <MetricCard label="Live records" value={operations.liveTotal} />
+              <MetricCard label="Live queue" value={operations.queueDepth} />
+              <MetricCard label="Accepted sends" value={operations.sent} />
+              <MetricCard label="Provider confirmed" value={operations.providerConfirmed} />
+              <MetricCard label="Retry due" value={operations.retryDue} />
+              <MetricCard label="Stuck work" value={stuckWork} />
+              <MetricCard label="Failures" value={operations.failed + operations.permanentlyFailed} />
+              <MetricCard label="Provider failures" value={operations.providerTerminalFailure} />
+            </div>
+            <p className="mt-3 text-xs leading-5 text-[#8f8778]">
+              Live queue = pending ({operations.pending}) + processing ({operations.processing}) + retry scheduled ({operations.retryScheduled}).
+              Stuck work = pending over 5 minutes ({operations.stalePending}) + processing over 10 minutes ({operations.staleProcessing}).
+              Provider confirmation is distinct from provider acceptance.
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+              <MetricCard label="Recent sample" value={summary.kpis.total} />
+              <MetricCard label="Pending" value={summary.kpis.pending} />
+              <MetricCard label="Sent" value={summary.kpis.sent} />
+              <MetricCard label="Failed" value={summary.kpis.failed} />
+              <MetricCard label="Skipped" value={summary.kpis.skipped} />
+              <MetricCard label="Retry" value={summary.kpis.retryScheduled} />
+            </div>
+            <p className="mt-3 text-xs leading-5 text-[#ffcabd]">
+              Exact live operational totals are unavailable. The cards above describe only the bounded recent-record sample and must not be used as production KPIs.
+            </p>
+          </>
+        )}
+
+        <section className="mt-8 grid gap-4" aria-label="Recent notification records">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#e2c06f]">Recent records</p>
+            <p className="mt-2 text-sm text-[#8f8778]">Latest {summary.notifications.length} records, including clearly labeled QA history.</p>
+          </div>
           {summary.notifications.length ? (
             summary.notifications.map((notification) => (
               <NotificationCard key={notification.id} notification={notification} />

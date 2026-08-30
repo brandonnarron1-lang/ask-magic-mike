@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 const source = readFileSync("scripts/preview-qa.mjs", "utf8");
 const previewWorkflow = readFileSync(".github/workflows/preview-qa.yml", "utf8");
 const dispatchWorkflow = readFileSync(".github/workflows/preview-qa-dispatch.yml", "utf8");
+const playwrightConfig = readFileSync("playwright.config.ts", "utf8");
+const previewTestConfig = readFileSync("tests/e2e/preview-test-config.ts", "utf8");
 
 describe("preview QA current route contract", () => {
   it("probes the active Lead Center surfaces with Basic Auth", () => {
@@ -19,6 +21,31 @@ describe("preview QA current route contract", () => {
     expect(source).toContain('"Property address"');
     expect(source).not.toContain('"Start with your address"');
     expect(source).not.toContain('"not an appraisal"');
+  });
+
+  it("fails Preview QA if an external analytics or consent runtime is rendered", () => {
+    expect(source).toContain('record("preview:external_analytics_off", "pass"');
+    expect(source).toContain('"googletagmanager.com/gtm.js"');
+    expect(source).toContain('"GTM-KZMCSLTJ"');
+    expect(source).toContain('data-testid="external-analytics-consent"');
+    expect(source).toContain('await previewAnalyticsIsolation()');
+  });
+
+  it("does not reuse an unrelated local web server for Ask Magic Mike E2E", () => {
+    expect(playwrightConfig).toContain('const LOCAL_E2E_PORT = process.env.AMM_E2E_PORT ?? "3210"');
+    expect(playwrightConfig).toContain("reuseExistingServer: false");
+    expect(playwrightConfig).not.toContain("reuseExistingServer: true");
+    expect(previewTestConfig).toContain('const localE2ePort = process.env.AMM_E2E_PORT ?? "3210"');
+    expect(previewTestConfig).toContain('`http://127.0.0.1:${localE2ePort}`');
+    expect(previewTestConfig).not.toContain('"http://localhost:3000"');
+  });
+
+  it("classifies writes against the exact app origin while blocking every mutating request", () => {
+    const e2eSource = readFileSync("tests/e2e/widget-preview-flow.spec.ts", "utf8");
+    expect(e2eSource).toContain("requestUrl.origin === APPLICATION_ORIGIN");
+    expect(e2eSource).toContain('["POST", "PUT", "PATCH", "DELETE"]');
+    expect(e2eSource).toContain("await route.fulfill({");
+    expect(e2eSource).not.toContain("await route.continue(");
   });
 
   it("accepts only the explicit read-only Preview cron refusal", () => {

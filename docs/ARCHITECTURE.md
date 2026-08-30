@@ -128,11 +128,43 @@ public route → runtime validation → Neon analytics_events
 trusted operation → server ledger → Neon analytics_events
 ```
 
+Form funnels reuse their existing browser submission/idempotency UUID as a
+protected `funnel_session_id` property. It is absent from browser analytics
+dimensions and does not create a `sessions` row. If lead storage succeeds, the
+atomic capture reuses that UUID as `sessions.id`; aggregate queries can then
+join the pre-lead steps without weakening lifecycle atomicity. Browser-authored
+lead/widget creation, qualification, appointment-request, and notification
+outcome rows are refused; server post-storage `lead_created` is the canonical
+lead-conversion authority.
+
 The dependent field-experience candidate reuses this ledger for Production-only
 LCP/INP/CLS. It writes no lead/session/attribution identity, converts the raw
 browser metric ID to a domain-separated digest, and lets the protected Growth
 read model calculate bounded, digest-deduplicated P75 evidence by mobile and
 desktop. Preview renders no reporter and performs no telemetry write.
+
+### Growth economics and controlled spend ingress
+
+The Growth Command Center reads the existing canonical Neon tables
+`marketing_channels`, `marketing_campaigns`, and `marketing_spend_daily` for
+channel economics. It does not infer spend, revenue, or ROI from analytics
+events.
+
+The feature-gated spend workbench accepts one exact canonical CSV contract and
+performs a no-write server preview first. A later authorized commit revalidates
+the original bounded CSV, verifies the reviewed SHA-256 batch fingerprint, and
+calls the owner-only `import_marketing_spend_batch_v1` transaction. That
+function serializes imports, refuses synthetic or conflicting identities,
+reconciles campaign-day facts, and writes immutable per-row and aggregate audit
+evidence plus a minimized append-only receipt. Exact replay returns the prior
+receipt without duplicating spend. Raw CSV is never retained.
+
+`GROWTH_SPEND_IMPORT_ENABLED=false` is the deployment-safe default. A commit
+also requires explicit Production runtime/database labels and a distinct exact
+match to the configured Ask Magic Mike Production Neon endpoint. Preview,
+public/browser database roles, and the legacy service role have no mutation
+authority. The ingress has no provider client and cannot launch a campaign,
+change a budget, create a lead, or send a message.
 
 ### Valuation (`src/lib/valuation/`)
 
@@ -194,7 +226,11 @@ Every report stores the disclaimer text verbatim alongside the estimate. The `di
 
 ## Key Design Decisions
 
-**Session-first.** Sessions are created on page load before any lead data exists. This captures attribution and abandonment analytics even when no form is submitted.
+**Pseudonymous funnel identity first; canonical session on durable capture.**
+Public funnel events may carry the existing random submission UUID in protected
+analytics context, but analytics never insert `sessions`. The atomic lead
+lifecycle creates the canonical session and lead together so an early event
+cannot occupy the session key or block capture.
 
 **Scoring is deterministic.** No AI in the scoring path. The `scorer_version` field allows replaying historical scores against a new algorithm without data loss.
 
@@ -202,7 +238,9 @@ Every report stores the disclaimer text verbatim alongside the estimate. The `di
 
 **Consent is immutable.** `consent_timestamp` is never updated. The `consent_language_version` ties each record to the exact text shown at consent time.
 
-**Analytics never blocks.** `trackEventNoWait()` fires and forgets. Zero risk of analytics failure causing an intake failure.
+**Analytics never blocks lead storage.** Browser event recording is non-blocking
+and can fail independently. A lead success state depends only on durable lead
+capture; canonical conversion is written server-side afterward.
 
 **Money in cents.** All price values (sale price, estimate) are stored as BIGINT in cents to avoid floating point rounding issues.
 # Canonical Production lead pipe (refreshed 2026-08-21)
@@ -308,3 +346,21 @@ for historical credit. Unattributed evidence stays explicit, and every segment
 shows sample size/maturity before an operator treats it as directional or
 operational. Application rollback returns to v2; milestone and audit evidence
 is preserved.
+
+## Privacy-minimized organic-search ingress boundary (Phase 9)
+
+The Growth Command Center reuses `market_signals` and `market_opportunities` as
+the only organic-demand read model. The protected Search Console workbench does
+not add a provider connection or a parallel analytics store. It accepts one
+operator-reviewed owned-page report, validates it without writing, and sends
+only normalized page metrics and deterministic evidence to the owner-only
+`import_organic_search_batch_v1` transaction after a separate gate.
+
+Raw CSV, Search Console query text, credentials, and provider payloads are never
+durable inputs. Only approved Ask Magic Mike and Our Town page hosts pass.
+Signal, confidence, opportunity category, and score factors are deterministic;
+AI neither scores nor publishes. Import receipts and audits are immutable,
+exact replays are idempotent, and existing operator status/action class is
+preserved. `GROWTH_SEARCH_IMPORT_ENABLED=false` keeps deployments inert by
+default, while exact Neon endpoint attestation prevents Preview or cross-project
+mutation.

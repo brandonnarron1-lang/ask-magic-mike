@@ -19,7 +19,15 @@ describe("public search-authority metadata", () => {
     expect(metadata.twitter).toMatchObject({
       card: "summary_large_image",
       title: "Seller Options in Wilson, NC | Ask Magic Mike",
+      images: ["/brand/black-diamond/og-card-1200x630.jpg"],
     });
+    expect(metadata.openGraph?.images).toEqual([
+      expect.objectContaining({
+        url: "/brand/black-diamond/og-card-1200x630.jpg",
+        width: 1200,
+        height: 630,
+      }),
+    ]);
   });
 
   it("lets a compatibility route identify its canonical source", () => {

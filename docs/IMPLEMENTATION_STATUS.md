@@ -1,7 +1,954 @@
 # Implementation Status
 
-Updated 2026-08-23.
+Updated 2026-08-29.
 
+## Phase 9 WordPress homepage CTA restoration packet — 2026-08-29
+
+- **Reuse decision:** repair the existing Lead Ops plugin in place. The
+  existing page-149 CTA, `/value` compatibility route, Form 3 Canonical Bridge,
+  Neon backend, notification service, and protected Lead Center remain
+  authoritative; no parallel widget, form, database, notification engine, or
+  admin system is added.
+- **Authenticated truth:** plugin `2.10.0` emits the one confirmed CTA hide
+  rule, while a separate filter hides the floating widget. Canonical Bridge
+  `1.1.0` is enabled only for Form 3 with its secret configured and a prior
+  one-attempt controlled forward. Gravity Forms' own Admin Notification is
+  inactive and remains untouched.
+- **Candidate:** an offline, read-only verifier pins the exact live source hash,
+  requires one suppression block and one widget guard, derives the reviewed
+  `2.10.1` result hash, and fails closed on drift or reapplication. The patch
+  changes only two version declarations and the homepage suppression branch.
+- **Acceptance:** the authenticated live 127,762-byte source returns
+  `ready_for_review`; localhost desktop/mobile preview shows one visible,
+  contained, keyboard-focusable CTA with no horizontal overflow and no active
+  scripts/frames. Exact Node 24.18.0 passes 273 files / 3,383 tests, strict
+  typecheck, full ESLint, optimized 59-page build, 95/17 route proof, 14/14
+  safety, deployable-source isolation, and zero known Production dependency
+  vulnerabilities.
+- **Authority boundary:** no WordPress save or cache purge is authorized. The
+  exact future plugin-save gate is documented in
+  [`phase9/WORDPRESS_HOMEPAGE_CTA_RESTORATION_PACKET.md`](./phase9/WORDPRESS_HOMEPAGE_CTA_RESTORATION_PACKET.md).
+  No Production, page, form, database, lead, notification, provider, DNS,
+  publication, spend, deletion, or NellySelly mutation occurred.
+
+## Phase 9 WordPress homepage visibility truth — 2026-08-29
+
+- **Measured constraint:** authenticated Production Growth/Distribution shows
+  zero eligible live leads, zero measured owned placements, and a prepared
+  homepage placement. Public visual QA then found that placement is hidden, so
+  another dashboard or an href-only publication would not solve demand.
+- **Candidate result:** WordPress readiness schema v2 joins the exact target's
+  CTA-container ancestry to exact public `display:none !important` selectors,
+  records privacy-safe visibility counts, binds them into the precondition
+  hash, and returns `hidden_target` / `publicationBlocked=true`.
+- **Live read-only proof:** page 149, one legacy/rollback href, zero lookalikes,
+  one hidden target, two hidden selectors, and precondition
+  `60614f9ce7f7e7fe165a6c3cf0d142a6669faf497fee4f94386aff34827d0638`.
+  Home-value and We Buy Homes remain separate `visible_candidate` decisions.
+- **Local acceptance:** exact Node 24.18.0 release gate passes 271 files / 3,374
+  tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build, 95/17
+  route proof, 14/14 safety, system isolation, dependency audit, diff scan, and
+  redacted delta secret scan.
+- **Authority boundary:** Draft PR #236 is stacked on exact sealed PR #235 head
+  `b2d73a770f952ece5c89ec1741b09399fe632b21`. Code-bearing head is
+  `d432e90618dbe26b6aa66f50b9f39d545f81b2de`; final exact-head CI, immutable
+  Preview, protected QA, and runtime evidence will be pinned in the PR seal.
+  Production remains PR #209 and PR #210 remains first in release order. No
+  Production, WordPress, database, provider, message, DNS, publication, spend,
+  deletion, or NellySelly mutation occurred.
+- Decision and rollback:
+  [`phase9/WORDPRESS_HOMEPAGE_VISIBILITY_TRUTH.md`](./phase9/WORDPRESS_HOMEPAGE_VISIBILITY_TRUTH.md).
+
+## Phase 9 WordPress seller-intent truth — 2026-08-29
+
+- **Reuse decision:** the canonical Ask Magic Mike `/sell` funnel, existing
+  protected Distribution Command, WordPress manifest route, lead backend,
+  attribution contract, and notification system remain authoritative. No
+  second funnel, form engine, database, publisher, dashboard, or CRM was added.
+- **Observed conflict:** both `/we-buy-homes/` (page 3631) and
+  `/we-buy-houses/` (page 4364) remain self-canonical/index candidates. The
+  latter exposes a page-specific native intake plus global Gravity Form 7 and
+  no canonical Ask Magic Mike link; the former has an existing legacy tracked
+  link. Search, backlink, Regency, consent, and capture-owner evidence is still
+  required before choosing or redirecting either page.
+- **Candidate result:** one protected, `report:view`, no-store JSON packet now
+  records only bounded structural evidence for those exact two pages and
+  renders a clear publication hold in the existing admin surface. It always
+  returns no tracked publication href and all mutation, submission, messaging,
+  and authorization flags false.
+- **Acceptance:** code-bearing head
+  `750dacc52a16082edcb1ba95ffb34cd543a1221f` passed 3 focused files / 19
+  tests, 271 files / 3,372 full tests, strict TypeScript, full ESLint, optimized
+  Next.js 15.5.21 build, 95-route proof, 14/14 release safety, deployable-source
+  isolation, exact-head Release Gate run `33278194658`, immutable Preview
+  `dpl_D5x8eKHfbUijo2nDyGCQcrd14B9C`, and protected Preview run
+  `33278568998` with 18 checks, six intentional mutation skips, 15/15 browser
+  scenarios, and `PREVIEW_READY`. Anonymous admin access returned 401; the
+  generic Preview decision API failed closed with `rbac_not_enabled` because
+  Preview RBAC is intentionally disabled.
+- **Authority boundary:** Draft PR #235 is stacked on exact sealed PR #234 head
+  `5ff3d1079f50e5f05c7000edda75aacefa4a31c5`. Production remains PR #209
+  merge `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; PR #210 remains first in release order.
+  No Production, WordPress, Vercel environment, Neon, DNS, provider, lead,
+  message, publication, spend, deletion, or NellySelly mutation occurred.
+- Decision packet:
+  [`phase9/WORDPRESS_SELLER_INTENT_DECISION_PACKET.md`](./phase9/WORDPRESS_SELLER_INTENT_DECISION_PACKET.md).
+
+## Phase 9 notification operations truth — 2026-08-29
+
+- **Reuse decision:** canonical Neon outbox, Lead Center, provider lifecycle
+  metadata, and one-record retry remain authoritative. No second queue,
+  notification database, provider, dashboard, CRM, or migration was added.
+- **Observed gap:** the protected page's cards counted only its latest 50 rows
+  and mixed QA history with live operations. Exact queue depth, due retries,
+  stuck work, provider confirmation, orphan integrity, and last success were
+  not available to the operator or protected health monitor.
+- **Candidate result:** one read-only aggregate query now reports exact
+  live-only totals, separate QA exclusion, stale thresholds, provider accepted
+  versus confirmed state, provider terminal failures, and bounded timestamps.
+  Recent QA records are labeled; fallback counts are explicitly sample-only.
+- **Initial acceptance:** 4 focused files / 42 tests, strict TypeScript, and
+  targeted ESLint pass. Complete local release gate, exact-head CI, immutable
+  Preview, protected visual/contract QA, and log proof remain pending.
+- **Authority boundary:** exact parent is sealed PR #233 head
+  `ff67874eacdb44d7653c964ce395ae7bafd54910`, preserved at
+  `rescue/amm-pr234-base-pr233-20260829-171619`. Draft PR #234 implementation
+  head is `ba56f7b3ac98912c206eeb56fde4b004be78ea64`. Production remains PR #209
+  merge `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; PR #210 remains first in release order.
+- Decision/evidence:
+  `docs/phase9/NOTIFICATION_OPERATIONS_TRUTH.md` and
+  `docs/phase9/NOTIFICATION_OPERATIONS_TRUTH_QA_EVIDENCE.md`.
+
+## Phase 9 review planner social identity — 2026-08-29
+
+- **Observed defect:** the indexable `/plan` route declared the correct
+  canonical URL but inherited the homepage Open Graph URL because it was the
+  lone public route still using a partial route-local metadata object.
+- **Reuse decision:** the route now uses the established
+  `publicPageMetadata` helper with `path: "/plan"`; no route, component, visual
+  system, social card, analytics contract, lead path, or planner behavior was
+  rebuilt.
+- **Result:** canonical and `og:url` now both resolve to
+  `https://www.askmagicmike.com/plan`; title, description, robots, Twitter
+  metadata, and the canonical Ask Magic Mike card remain aligned.
+- **Lineage:** exact parent is sealed PR #232 head
+  `2687f98a26cb05c309136cacc136890f16d15ea8`. Runtime-fix head
+  `90534b548244ce9aae38cc7f16dea3745d0cc5ee` is preserved at
+  `rescue/amm-pr233-pre-authority-reconciliation-20260829-2105` before the
+  release-authority documentation reconciliation.
+- **Acceptance:** the first sealed head passed 269 files / 3,362 tests, strict
+  typecheck, full ESLint, optimized 59-page build, 14/14 release safety, and
+  protected Preview HTTP/metadata proof on deployment
+  `dpl_6kWfXipnQBEcmxa9vrP9ndnvesQc`. Final exact-head CI and protected Preview
+  evidence must be repeated and pinned in PR #233 after this documentation
+  reconciliation.
+- **Authority boundary:** Production remains
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. PR #210 remains the first ordered
+  application candidate. This tail cannot leapfrog any predecessor and adds no
+  migration, provider, WordPress, publication, lead/message, spend, deletion,
+  or NellySelly action.
+- Decision and evidence:
+  `docs/phase9/PLAN_SOCIAL_IDENTITY.md` and
+  `docs/phase9/PLAN_SOCIAL_IDENTITY_QA_EVIDENCE.md`.
+
+## Phase 9 Google Business Profile square asset — 2026-08-29
+
+- **Reuse decision:** this candidate extends the existing Distribution Command,
+  approved creative catalog, private renderer, tracked shortlinks, native share
+  handoff, and publication-proof ledger. It adds no second visual system,
+  publisher, campaign manager, attribution store, lead path, or CRM.
+- **Channel-fidelity correction:** the Google Business Profile handoff now
+  resolves a dedicated 720x720 PNG instead of the social 4:5 feed format.
+  `square` resolves only for the exact Google Business Profile channel.
+- **Exact lineage:** the prior PR #232 head is preserved at
+  `rescue/amm-pr232-pre-pr231-parent-refresh-20260829-153626`; exact sealed PR
+  #231 head `16a633fc5d77ed7c911e9a276f6a1f561ad63fda` was reconciled
+  through normal merge `8e5cfa7` without history rewriting.
+- **Handoff integrity:** client validation now binds channel, placement,
+  channel-native format, canonical filename, proof target, UTM source, and UTM
+  medium as one identity. Mixed identities fail before image fetch or Web Share.
+- **Identity and compliance:** all four placements reuse untouched approved
+  Mike imagery, canonical copy, QR destinations, Black Diamond palette,
+  broker-review guardrails, and Equal Housing identification. No generated or
+  edited likeness is used.
+- **Current acceptance:** exact Node 24.18.0 passes the refreshed focused 2-file
+  / 24-test matrix, strict TypeScript, targeted ESLint, Production dependency
+  audit, and whitespace proof. The original feature head passed the complete
+  local release gate: deployable-source isolation, 14/14 release safety, 268
+  files / 3,354 tests, strict TypeScript, full ESLint,
+  optimized 59-page Next.js build, and 95/17 route proof. Diff-level redacted
+  Gitleaks and the Production dependency audit are clean. Original-pixel QA
+  passes the reference/square comparison and four-placement matrix after
+  correcting the first render's buyer collision and renter crop. The refreshed
+  four-file set is byte-for-byte and pixel-for-pixel identical. Original
+  feature head `d0e058da82c852e609d92d737d88aa5d5b6dbf48`
+  passed Release Gate run `33255361223`. Immutable Preview
+  `dpl_BJjuZsmDVeU9kVHnnrm9ZQm6eJkN` is `READY`; protected run
+  `33255500962` passed 18 checks / six intentional mutation skips / zero
+  failures plus 4/4 browser cases and returned `PREVIEW_READY`. The log window
+  contained zero errors and only the expected no-write SLA 503. The final
+  documentation seal and refreshed release acceptance remain conditioned on
+  exact-head repetition recorded on PR #232 without a self-invalidating
+  content-only follow-up commit.
+- **Authority boundary:** Production remains
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. No Production/Preview
+  data write, canonical environment/configuration, lead/event,
+  email/SMS/Push, provider, publication/proof, WordPress/DNS, spend, business
+  data deletion, or NellySelly mutation occurred. A CLI-created empty Vercel
+  worktree project was verified to have no deployment or Production URL,
+  removed immediately, and the worktree was relinked to canonical
+  `ask-magic-mike`; exact evidence is in the QA record.
+- Detailed design and evidence:
+  `docs/phase9/GOOGLE_BUSINESS_PROFILE_SQUARE_ASSET.md` and
+  `docs/phase9/GOOGLE_BUSINESS_PROFILE_SQUARE_ASSET_QA_EVIDENCE.md`.
+
+## Phase 9 identity-safe wide social preview — 2026-08-29
+
+- **Reuse decision:** the candidate keeps the approved Black Diamond hero,
+  exact Our Town logo, existing 4:5/9:16 campaign exports, shared metadata
+  registry, and `/social-preview` review surface. It adds no second visual
+  system, lead path, database, provider, or publishing tool.
+- **Identity and format correction:** metadata now references one 1200x630
+  crawler card composed deterministically from the untouched approved Mike
+  photograph and logo. The committed JPEG is 160,316 bytes with SHA-256
+  `68dea02d8b4beb24eb864363c2c0d30adc1c98f4d5f37872a32848dad037c713`.
+  The reviewed AI concept was rejected for facial drift and is not used by the
+  application.
+- **Crawler truth:** a fresh live 42-check matrix passed 40 checks. Every tested
+  AskMagicMike.com browser/social profile returned HTTP 200. Our Town returned
+  HTTP 403 only to user agents containing `facebookexternalhit`, including on
+  public pages, images, robots, login, admin, and REST paths; `Facebot` and
+  `meta-externalagent/1.1` returned 200. This is an upstream host rule, not a
+  page or WordPress-content defect, and the candidate does not weaken it.
+- **Refreshed-parent local acceptance:** exact Node 24.18.0 passes focused
+  metadata/image/release-authority coverage (4 files / 144 tests), strict
+  TypeScript, targeted ESLint including the normally ignored generator,
+  14/14 release safety, deployable-source isolation, zero known Production
+  dependency vulnerabilities, deterministic byte-for-byte asset regeneration,
+  ancestry, and whitespace proof. Source/candidate comparison reconfirms the
+  exact approved Mike portrait, logo, crop, safe zones, visual hierarchy, and
+  claim-safe copy. Final branch-bound CI, immutable Preview, protected no-write
+  browser QA, and runtime-log proof remain mandatory on the final pushed head.
+- **History-preserving parent refresh:** former PR #227 head
+  `cf92b9cb64a7cc5b70c98d629cc86d2289fbfedb` is preserved at
+  `rescue/amm-pr227-pre-pr226-parent-refresh-20260829-131437`. Final sealed PR
+  #226 head `1a912d29e608d872a84d70c7563e91134d369741` was reconciled through normal
+  merge `89b57a7d16beb4f1c157d2f7fca6e49982623f10`; conflicts were limited to
+  additive implementation-status and QA ledgers. The earlier source rescue
+  `rescue/amm-pr227-pre-pr226-exact-seal-20260829-0611` also remains intact.
+- **Authority boundary:** Production remains on
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. This Draft is stacked after
+  sealed PR #226 and has no independent Production authority. No
+  Production/Preview data mutation, deployment, lead/message, provider call,
+  WordPress/DNS edit, publication, spend, deletion, or NellySelly action
+  occurred.
+- Detailed evidence: `docs/phase9/SOCIAL_PREVIEW_WIDE_CARD.md` and
+  `design-qa.md`.
+
+## Phase 9 release-authority deduplication — 2026-08-29
+
+- **Authenticated disposition:** GitHub reports PRs #187 and #212 closed and
+  unmerged with their source branches intact. Their final owner comments record
+  supersession by PRs #225 and #221 respectively; no branch or evidence was
+  deleted.
+- **Ancestry proof:** exact PR #212 head
+  `758154ca73b64f24f2df8f183ba8b3f6f82f769a` is an ancestor of current PR
+  #221 head `61e152cb7ce03fd1904a06f30435dbe7ef36c4e1`, which is an ancestor of
+  exact PR #225 head `f33c87f27bfcbbcad3b5566aefd80909d25303bb`.
+- **History-preserving refresh:** former PR #226 head
+  `ae666aa6c31ed3726155e110f065b64d4b445040` is preserved at
+  `rescue/amm-pr226-pre-pr225-parent-refresh-20260829-1249`. Exact PR #225 was
+  reconciled through normal merge
+  `954d66cfe629a9d14a73cd1d405ff9535b9de28b`; conflicts were limited to
+  additive implementation-status and QA ledgers.
+- **Authority boundary:** this Draft changes only seven documentation/test
+  files. It adds no application route, dashboard, writer, migration, provider,
+  CRM, publisher, consumer workflow, lead/message path, Production authority,
+  or NellySelly dependency. PR #210 remains the first ordered Production
+  candidate.
+- **Refreshed-parent local acceptance:** exact Node 24.18.0 passes the focused
+  release-authority contract 22/22, strict TypeScript, targeted ESLint, release
+  safety 14/14, deployable-source Ask/NellySelly isolation, Production
+  dependency audit, ancestry, and whitespace checks. Final branch-bound CI,
+  immutable Preview, protected no-write/browser QA, and runtime-log evidence
+  remain mandatory on the final pushed head.
+
+## Phase 9 baseline and target readiness — 2026-08-29
+
+- **Production truth:** a read-only canonical Neon aggregate at
+  `2026-08-28T19:45:52.419594+00:00` confirms 6 total lead rows, all 6
+  test/suppressed, with 0 eligible live/contactable leads, outcomes,
+  first-response milestones, spend rows/dollars, market signals,
+  opportunities, or non-test publication proofs. No PII was returned.
+- **Reuse decision:** the candidate extends the existing protected Growth
+  Command Center and current lead/response/outcome/spend/delivery/Web-Vitals
+  aggregates. It reuses and updates PR #187's vetted metric vocabulary while
+  excluding that stale candidate's migration, target writer, separate target
+  page, and numeric target lifecycle. PR #187 is now closed as superseded with
+  its branch, commits, migration, tests, and evidence preserved.
+- **Truth control:** 42 fixed evidence contracts now distinguish measured,
+  directional, insufficient, not-instrumented, and unavailable states. Zero
+  eligible live demand locks every demand-dependent baseline and target; QA
+  rows cannot become a denominator. Unknown is never rendered as measured zero.
+- **Operator path:** the existing `/admin/growth` page now exposes one compact
+  readiness gate, sample-state totals, `Target entry: Locked`, a collapsed
+  evidence audit, and a direct handoff to the existing
+  `/admin/distribution` command. No parallel dashboard or lead system exists.
+- **Provider risk:** canonical Production health is HTTP 200/ready, while Neon
+  showed 93% of monthly compute allowance consumed at the check time. The
+  changing provider value is documented rather than hard-coded into the app.
+- **Authority boundary:** the feature is aggregate-only, server-rendered,
+  `report:view` protected, and read-only. It has no form, server action, target
+  value, additional database query, database write, migration, message,
+  provider call, publication, spend, WordPress/DNS, deployment, deletion, or
+  NellySelly action.
+- **Hosted safety correction:** exact Preview QA found one inherited ordinary-
+  browser telemetry path that bypassed the Preview write guard. One
+  privacy-minimized `/ask` page-view was accepted on the Neon Preview branch;
+  an aggregate check proved zero matching rows on Production. The candidate now
+  applies the existing endpoint-aware Preview mutation guard before rate-limit
+  or persistence work in all public analytics and experiment event routes.
+  The reconciled contract fails closed with HTTP 503 and no-store semantics.
+- **Data-quality correction:** tracked spend is visible without a lead
+  denominator but cannot unlock a target; partial revenue/referral-fee totals
+  and incomplete paid-channel cost baselines remain unmeasured; agent
+  first-follow-up remains explicitly uninstrumented until agent-grain assignment
+  evidence exists. All 42 contract keys are unique.
+- **Current acceptance:** the previously sealed PR #225 head
+  `60599703cf8ac5e65794b696aefaebc6353bbdf0` is preserved at
+  `rescue/amm-pr225-pre-pr224-parent-refresh-20260829-1224`. Exact sealed PR
+  #224 head `2effb45e2a324c25875dcf7d24019eae8dfdad38` was merged without rebase,
+  reset, force push, or conflict at reconciliation commit
+  `eab49cbe2926f3726d289473c308363e1f03de9e`. The refreshed tree retains the
+  inherited lead-intent truth and keyboard-accessible channel-economics region.
+  Final exact head `f33c87f27bfcbbcad3b5566aefd80909d25303bb`
+  passes branch-bound GitHub Release Gate `33263356616`: Node 24, doctor
+  43/43, safety 14/14, 264 files / 3,324 tests, strict typecheck, full ESLint,
+  optimized 59-page build, and 95 active routes / 17 acknowledged duplicates.
+  Immutable Preview `dpl_9MNpd2ETo9Zgdd25NKfgue2ScQ7U` is READY at
+  `https://ask-magic-mike-fuedubfue-eyes-up-industries.vercel.app`; protected
+  run `33263505472` passes 18 read-only checks, six deliberate mutation skips,
+  15/15 browser checks, responsive before/after review, and exact-deployment
+  runtime inspection with zero warning, error, fatal, or mutating-method log.
+  The only 5xx is the expected read-only Preview SLA refusal. The hosted
+  browser contract scopes legacy economics labels to their visible section and
+  directly exercises the collapsed readiness audit, avoiding duplicate-text
+  ambiguity. Production remains unchanged at
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`.
+- Detailed design: `docs/phase9/BASELINE_TARGET_READINESS.md`.
+
+## Phase 9 lead-intent default truth — 2026-08-29
+
+- **Reuse decision:** the candidate extends the existing Seller and Buyer
+  forms, canonical lead lifecycle command, deterministic score, qualification
+  contract, and regression suites. It adds no parallel funnel, lead store,
+  CRM, router, provider, notification path, or visual system.
+- **Truth correction:** untouched forms no longer assert `Move-in ready`,
+  `ASAP`, `30-60 days`, or `Not sure yet`. Optional selects begin blank and
+  omitted fields remain unknown through browser serialization and canonical
+  persistence. An unchecked buyer preapproval affirmation is omitted rather
+  than persisted as a false consumer statement.
+- **Decision integrity:** unknown timeline now contributes zero score points,
+  persists as `null`, and cannot earn seller A-grade urgency. Explicit
+  planning-horizon answers retain their compatibility mapping; `not sure`,
+  `unknown`, and unrecognized text do not become 24 months.
+- **Current acceptance:** the previously sealed PR #224 head
+  `5c75b8f919442c05b607eb666c5595023057d94d` is preserved at
+  `rescue/amm-pr224-pre-pr223-accessibility-seal-20260829-1210`. The candidate
+  now inherits exact accessibility-refreshed PR #223 head
+  `1d893f4c23ca53a1b852a1953b953b40e6f997f3` through merge `614a67a` without
+  a force push. Exact Node 24.18.0 focused acceptance passes 4 files / 48 tests,
+  strict TypeScript and targeted ESLint. Final exact-head CI, immutable Preview,
+  protected browser, security, isolation, and runtime-log evidence is bound to
+  PR #224 before any promotion.
+- **Authority boundary:** no existing Production row is rewritten; no
+  migration, lead/event, communication, provider, WordPress, DNS, deployment,
+  publication, deletion, or NellySelly action occurred. Production remains
+  unchanged and the established first release gate still controls promotion.
+- Detailed design and evidence:
+  `docs/phase9/LEAD_INTENT_DEFAULT_TRUTH.md` and
+  `docs/phase9/LEAD_INTENT_DEFAULT_TRUTH_QA_EVIDENCE.md`.
+
+## Phase 9 channel-economics truth hardening — 2026-08-29
+
+- **Reuse decision:** original PR #223 head
+  `294e08fc8524e515364c7a7bd49cfe8413d3d08c` is preserved at
+  `rescue/amm-pr223-pre-pr222-exact-seal-20260829-040442`. This refreshed
+  candidate extends exact sealed PR #222 head
+  `c6ff9157e66705128a283b98096f74ca8247cdab`, the canonical Growth Command
+  Center, Neon lead/outcome/spend reads, deterministic opportunity radar, and
+  local-demand decision packets. It adds no parallel dashboard, CRM, database,
+  provider adapter, AI estimator, or write path.
+- **Truth correction:** `referral_paid` amounts are now recorded costs rather
+  than revenue. Repeated typed outcomes use the latest evidence snapshot, and
+  signed-client counts, CPQL, cost per signed client, fee burden, and tracked
+  contribution are exposed with explicit definitions.
+- **Unknown is not zero:** ROAS and tracked contribution are withheld unless
+  every close has actual brokerage-revenue evidence and every portal/referral
+  close has explicit fee evidence. Partial coverage blocks `scale_candidate`
+  and creates exact-count reconciliation opportunities.
+- **Authority boundary:** `/admin/growth` remains server-authorized,
+  aggregate-only, and read-only. It cannot write an outcome, assign a lead,
+  send a message, publish, call a provider, change spend, or touch WordPress,
+  DNS, Production, or NellySelly. Tracked contribution is explicitly not net
+  income.
+- **Current acceptance:** refreshed code-bearing head
+  `f52e661bcca09824eafc1c7006102ba9716a16b2` passes exact Node 24.18.0
+  isolation, safety 14/14, all 263 files / 3,306 tests, strict TypeScript,
+  full ESLint, optimized Next.js 15.5.21 build with 59 generated pages, 95/17
+  route proof, clean-tree doctor 43/43, Production dependency audit,
+  662-commit and exact-delta gitleaks, ancestry, whitespace, and focused
+  Next.js/React security review. Per-close fee matching rejects
+  unrelated-channel and same-channel non-close evidence; a dedicated test
+  proves explicit zero fee is valid review evidence. Authenticated local
+  production-build browser acceptance passes 2/2 desktop/mobile scenarios,
+  while CLI inspection confirms only GET requests, zero console errors or
+  warnings, contained table overflow, and readable truth states. Exact GitHub,
+  immutable Preview, protected hosted-browser, and runtime-log sealing remain
+  pending. Production remains unchanged at the current PR #209 release
+  authority; this Draft candidate has no Production authority.
+- Detailed design and evidence:
+  `docs/phase9/CHANNEL_ECONOMICS_TRUTH.md` and
+  `docs/phase9/CHANNEL_ECONOMICS_TRUTH_QA_EVIDENCE.md`.
+
+## Phase 9 local-demand decision packets — 2026-08-29
+
+- **Reuse decision:** this stacked candidate extends the canonical Growth
+  Command Center, exact sealed PR #221 head, persisted Neon opportunity ledger,
+  and existing Search Console/Business Profile workbenches. It adds no second
+  dashboard, CRM, provider connector, lead store, AI agent, campaign system, or
+  publication path.
+- **Implementation:** persisted opportunities now expose only type-allowlisted
+  aggregate evidence, bounded geography/segment context, confidence, evidence
+  freshness, a deterministic next review decision, source-workbench handoff,
+  and an explicit limitation. Raw queries, URLs, consumer data, provider IDs,
+  fingerprints, arbitrary evidence, and secret material are not rendered.
+- **Source-truth correction:** Google's retired `business_conversations` metric
+  is removed from active CSV acceptance. The legacy summary contract pins its
+  compatibility field to zero, while additive migration
+  `20260825060000_local_demand_metric_truth_guard.sql` rejects every new or
+  revised canonical GBP signal claiming the retired metric. Existing rows are
+  not scanned, rewritten, or deleted.
+- **Authority boundary:** `/admin/growth` remains server-authorized and
+  read-only. The packet builder is deterministic; it cannot publish, send,
+  assign, mutate a profile, spend, call Google, create a lead, or touch
+  WordPress, DNS, Production, or NellySelly.
+- **Current acceptance:** exact Node 24.18.0 passes the reconciled focused 8
+  files / 60 tests, all 263 files / 3,299 tests, strict TypeScript, full ESLint,
+  optimized Next.js 15.5.21 build, 95/17 route proof, 14/14 release safety,
+  deployable-source isolation, and Production dependency audit. Disposable
+  PostgreSQL 17.11 proves insert/update rejection, historical preservation, and
+  role denial. The original code-bearing commit
+  `5d550c5e76005f898cbe0482b12ca982359e46e8` is preserved in history; the
+  reconciliation is based on exact sealed PR #221 head
+  `61e152cb7ce03fd1904a06f30435dbe7ef36c4e1`. Exact clean-head
+  GitHub/Preview/browser sealing remains pending; Production is unchanged.
+- Detailed design and local evidence:
+  `docs/phase9/LOCAL_DEMAND_DECISION_PACKETS.md` and
+  `docs/phase9/LOCAL_DEMAND_DECISION_PACKETS_QA_EVIDENCE.md`.
+
+## Phase 9 cross-domain measurement consolidation — 2026-08-29
+
+- **Reuse decision:** exact PR #212 head
+  `758154ca73b64f24f2df8f183ba8b3f6f82f769a` contains the existing reviewed
+  consent-gated Ask runtime, WordPress bridge 1.2.0, release package, verifier,
+  tests, and activation/rollback runbooks. It is being reconciled onto exact
+  sealed PR #220 head `19689e95d824d7d06e5f3b60cd18335f53018c93`
+  instead of creating a second analytics implementation. Git ancestry proves
+  PR #212 is contained in PR #221; PR #212 is closed as superseded with its
+  branch and every artifact preserved.
+- **Authority boundary:** the cumulative train's canonical Neon event ledger,
+  server-owned conversion outcomes, valid pseudonymous funnel identity, Web
+  Vitals privacy controls, and automated-browser exclusion remain authoritative.
+  External analytics receives only registered public events and allowlisted
+  dimensions through the dedicated `ammDataLayer`; no PII or test traffic is
+  eligible.
+- **Fail-closed activation:** Ask requires exact Production-only container
+  configuration and explicit analytics consent. Advertising storage, user data,
+  and personalization stay denied. The canonical WordPress bridge has its own
+  default-off flag and requires the current consent provider's exact `allow`
+  state. Neither boundary is activated by this consolidation.
+- **Security hardening:** both public browser analytics routes require a present
+  exact approved Origin. Experiment JSON is bounded at 4,096 bytes and exact
+  identifiers are validated before repository access. WordPress withdrawal
+  sends a denied update, removes the injected tag and only Google cookies, and
+  prevents duplicate same-page runtime loading.
+- **Preview data hardening:** final application head
+  `735cc8930eb595b550adf69ace1d6fef3b82a939` applies the existing
+  endpoint-attested Preview mutation guard to both telemetry routes before rate
+  limiting or repository access. Read-only Preview returns HTTP 503 with
+  `private, no-store`; controlled Preview mutation remains a two-flag explicit
+  exception and was not enabled.
+- **Live hold:** the read-only public preflight remains `HOLD` because Our Town
+  currently initializes legacy GTM head/noscript code before the deferred
+  cookie-choice provider. WordPress replacement and controlled runtime QA need
+  their own later owner gate before Ask-side measurement can be considered.
+- **Former-head local acceptance:** exact Node 24.18.0 passed 9 focused files / 77 tests,
+  all 261 files / 3,275 tests, strict TypeScript, full ESLint, optimized Next.js
+  15.5.21 build, 95 active routes / 17 acknowledged duplicates, 14/14 release
+  safety, and system isolation. Isolated Chromium passes 4/4 mutation-blocked
+  runtime scenarios. PHP 8.1 syntax, package integrity, source/archive parity,
+  and checksum verification pass for the refreshed bridge 1.2.0 artifact.
+- **Exact application-head evidence:** Node 24 run `33239065433`, immutable
+  Preview `dpl_8bWUx49oChfNeUrQpErDA9XxwK24`, and protected run `33239236233`
+  pass 261 files / 3,291 tests, typecheck, lint, build, isolation, safety 14/14,
+  doctor 43/43, 18 read-only checks, six intentional mutation skips, 4/4 browser
+  scenarios, and `PREVIEW_READY`. Nine inspected desktop/mobile captures have
+  no overflow or console warning/error; runtime logs show the expected 503 and
+  no warning/error/fatal entry.
+- **Release order:** PR #209's Production authority is consumed and cannot be
+  reused. This candidate follows exact sealed PR #220 and still requires its
+  own later approval after the separate WordPress gate. One PII-free automatic
+  Preview page-view was persisted on superseded head `84ab4568...`, disclosed,
+  and left intact; no lead or communication resulted. No Production,
+  environment, WordPress, DNS, publication, spend, deletion, provider, or
+  NellySelly action has occurred.
+- Detailed design and historical evidence:
+  `docs/phase9/CROSS_DOMAIN_MEASUREMENT_ACTIVATION.md` and
+  `docs/phase9/CROSS_DOMAIN_MEASUREMENT_QA_EVIDENCE.md`.
+## PR #220 downstream reconciliation — 2026-08-29
+
+- Preserved prior PR #220 head `5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3`
+  at `rescue/amm-pr220-pre-pr219-exact-seal-20260829-012049` before change.
+- Merged exact sealed PR #219 head
+  `b628fc00fc6b03d89871c65d884fe649db025968` normally, without force push,
+  at exact-parent merge commit
+  `61c162143cb9892f88a2318d32888ba2d644f329`. Product, API, migration,
+  route, and focused-test files merged without conflict.
+- The candidate reuses the authenticated Growth Command Center, shared bounded
+  ingress transport, canonical `market_signals` and advisory
+  `market_opportunities`, exact Neon endpoint guards, `growth:manage` RBAC,
+  and immutable audit ledger. It adds no parallel CRM, database, dashboard,
+  Google/provider connector, profile editor, publisher, lead path, or message
+  path.
+- Reconciled code-bearing head `d73abeb1f2979f3c217fc5b0a873b483e0bd5561`
+  passes isolation, safety 14/14, all 257 files / 3,238 tests, strict
+  TypeScript, ESLint, optimized Next.js 15.5.21 build with 59 generated pages,
+  95/17 route proof, release doctor 43/43, zero known Production dependency
+  vulnerabilities, 655-commit gitleaks, exact-parent ancestry, whitespace,
+  and focused Next.js/React/SQL security review on Node 24.18.0.
+- A fresh disposable PostgreSQL 17.11 cluster applied all 37 migrations and
+  passed the spend, organic-search, and local-profile executable contracts.
+  Browser and legacy-role execution remained denied, every synthetic
+  transaction rolled back, and database-native assertion confirmed zero
+  retained synthetic rows or receipts. The stopped cluster was moved
+  recoverably to Trash; no remote database was connected.
+- Fresh exact-head CI, immutable Preview, protected no-commit browser/visual,
+  and bounded runtime-log proof remains mandatory after the documentation-only
+  evidence seal.
+- PR #220 remains Draft with `GROWTH_LOCAL_PROFILE_IMPORT_ENABLED=false` and
+  no Production, migration, feature-gate, report-import, Google, WordPress,
+  DNS, lead/message, or NellySelly authority.
+
+## PR #219 downstream reconciliation — 2026-08-29
+
+- Preserved prior PR #219 head `5486bed20272d2a661bc28a0e3a4a4576b2cb11f`
+  at `rescue/amm-pr219-pre-pr218-exact-seal-20260829-004949`.
+- Merged exact sealed PR #218 head
+  `f065d8801bec295c99185d846ff4bc38de2a0a6f` without force push at
+  exact-parent reconciliation head
+  `f2754d0e1858c1afcf639977051f3488ab591f89`. Product, API, migration,
+  shared-ingress refactor, route, and test files merged automatically with no
+  conflict.
+- The candidate reuses the existing Growth Command Center, growth ledgers,
+  shared bounded ingress transport, endpoint attestation, `growth:manage`
+  permission, and audit system. It adds no Google/provider connection,
+  parallel database/dashboard, content publisher, lead path, or message path.
+- Reconciled head `5d598cc2228b6564af883a9716aedf1aa28cb2fb`
+  passes isolation, safety 14/14, 252 files / 3,210 tests, strict TypeScript,
+  ESLint, the optimized 57-page Next.js 15.5.21 build, 92/17 route proof,
+  release doctor 43/43, zero known Production dependency vulnerabilities,
+  653-commit gitleaks, exact-parent ancestry, whitespace, and focused security
+  review on Node 24.18.0.
+- A fresh disposable PostgreSQL 17.11 cluster applied all 36 migrations and
+  passed both spend and organic executable contracts. Execution remained
+  denied to anon, authenticated, and service roles; rollback left zero
+  synthetic rows or receipts. The stopped cluster was moved recoverably to
+  Trash and no remote database was connected.
+- PR #219 remains Draft with `GROWTH_SEARCH_IMPORT_ENABLED=false` and no
+  Production or import authority. Fresh exact-head GitHub CI, immutable
+  Preview, protected no-commit browser/visual, and bounded runtime-log proof
+  remain mandatory after the documentation-only evidence seal.
+
+## PR #218 downstream reconciliation — 2026-08-29
+
+- Preserved prior PR #218 head `cd087e5c5c0fda82a3175b86b550c966120eb2ab`
+  at `rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928`.
+- Merged exact sealed PR #217 head
+  `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf` without force push. Application,
+  API, migration, and test files merged automatically; only `CHANGELOG.md` and
+  this additive release ledger required manual reconciliation. Exact-parent
+  merge head is `693af26f3fb536f62784b475cbbebebfde28ff9f`.
+- PR #218 remains Draft with `GROWTH_SPEND_IMPORT_ENABLED=false` and no
+  Production authority. Former local, PostgreSQL, CI, Preview, browser, visual,
+  and runtime-log proof is historical until repeated on the refreshed exact
+  head.
+- Exact-parent code-bearing/reconciliation head
+  `894643a60bd9fb50b441dccb3d2d3d8e6b5c805b` passes 6 focused files / 47
+  tests, all 247 files / 3,184 tests, strict TypeScript before and after build,
+  full ESLint, optimized Next.js 15.5.21 build with 55 generated pages, 89/17
+  route proof, release doctor 43/43, safety 14/14, Ask/Nelly isolation,
+  Production dependency audit, a 651-commit redacted secret scan, ancestry,
+  whitespace, and focused Next.js/React/SQL security review on Node 24.18.0.
+- A fresh disposable PostgreSQL 17.11 cluster applied all 35 migrations. The
+  spend-ingress executable contract passed, role execution remained denied,
+  and rollback left zero synthetic channels, campaigns, or receipts. Fresh
+  exact-head GitHub CI, immutable Preview, protected no-commit browser/visual,
+  and bounded runtime-log proof remain pending after the documentation seal.
+
+## PR #217 downstream reconciliation — 2026-08-28
+
+- Preserved prior PR #217 head `d04984b4d162f13c79af261beb55a82f15a86b80`
+  at `rescue/amm-pr217-pre-pr216-exact-seal-20260828-234940`.
+- Merged exact sealed PR #216 head
+  `211485df28fc818ab783ed357df8486f1460d5e2` without force push. Application
+  files merged automatically; only additive release-history ledgers required
+  manual reconciliation. Exact-parent application head is
+  `e616170657861c3dd83fae43b28bef9cf89506af`.
+- PR #217 remains Draft with no Production authority. Exact sealed head
+  `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf` passed complete local, CI,
+  immutable Preview, protected no-write browser, visual, security, isolation,
+  and runtime-log acceptance.
+## Phase 9 marketing-spend ledger ingress — 2026-08-24
+
+- **Reuse decision:** repository, migration-history, and branch searches found
+  the existing canonical `marketing_channels`, `marketing_campaigns`,
+  `marketing_spend_daily`, Growth Command Center, KPI calculations,
+  `growth:manage` permission, and immutable audit ledger—but no spend importer.
+  This candidate extends those assets on exact sealed Draft PR #217 head
+  `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf`; it adds no parallel database,
+  dashboard, provider adapter, campaign manager, or lead system.
+- **Implementation:** one protected paste/file workbench, two same-origin
+  bounded APIs, a strict 19-column CSV v1 normalizer, deterministic row/batch
+  fingerprints, minimized receipts, and one owner-only atomic Neon function.
+  Raw CSV is never persisted. Exact replay is idempotent; channel, campaign,
+  and daily-fact creation/revision retain immutable before/after evidence;
+  conflicting identities and synthetic/QA markers in any identity field fail
+  closed.
+- **Authority boundary:** `GROWTH_SPEND_IMPORT_ENABLED=false` is the safe
+  default. Preview cannot mutate, browser/database roles cannot execute the
+  import contract, and commits also require exact configured Ask Magic Mike
+  Production-endpoint attestation. This feature cannot contact a provider,
+  change a budget, launch a campaign, create a lead, send a message, or touch
+  WordPress, DNS, or NellySelly.
+- **Historical acceptance:** former code-bearing head passed 5 focused files /
+  30 tests, all 247 files / 3,182 tests,
+  strict TypeScript, full ESLint, optimized Next.js 15.5.21 build,
+  89/17 route proof, 14/14 release safety, Production dependency audit, system
+  isolation, script syntax, and whitespace checks pass on Node 24.18.0. A fresh
+  disposable PostgreSQL 17.11 rebuild of all 35 migrations passes executable
+  insert/replay/revision, malformed-date, identity, synthetic-refusal, audit,
+  immutability, role-denial, and rollback contracts. Exact code-bearing commit
+  `ed02f26af99911253f398ec5c1448e183a5dd976` has clean 43/43 release doctor,
+  staged/full-history secret, exact-base ancestry, and diff proof. GitHub
+  Release Gate `32795263654`, immutable Preview
+  `dpl_2E7rVLVQy5wHnabTwcCSjpwSjpS6`, and protected QA `32795486986` pass.
+  All 8 browser scenarios pass, including authenticated 1280 px and 390 px
+  spend-workbench proof with zero commit requests, zero overflow, and zero
+  browser errors. The exact-deployment log audit found no error/fatal log,
+  commit endpoint call, provider action, or spend-ingress API request. That
+  proof must be repeated on the refreshed exact head before release.
+- **Release order:** PR #209 is accepted; Draft PR #210 remains the first
+  pending application candidate. This stacked candidate cannot leapfrog PRs
+  #210–#217 and requires its own later,
+  exact migration/merge/deploy approval; importing one reviewed real report is
+  an additional report-specific approval.
+- Detailed scope:
+  `docs/phase9/MARKETING_SPEND_INGRESS_RELEASE_GATE.md` and
+  `docs/phase9/MARKETING_SPEND_INGRESS_QA_EVIDENCE.md`.
+
+## Phase 9 vendor ingress contract lab — 2026-08-24
+
+- **Reuse decision:** this candidate extends the existing Phase 9
+  `vendor-ingress.ts` normalization contract on exact sealed Draft PR #216 head
+  `211485df28fc818ab783ed357df8486f1460d5e2`; it adds no parallel lead API,
+  database, CRM, provider router, webhook store, or notification path.
+- **Implementation:** one `growth:manage`-protected page and one same-origin,
+  512-byte API exercise fixed Zillow, Follow Up Boss, Meta, and Google test
+  profiles. Follow Up Boss and Meta verify their documented raw-body HMAC
+  contracts, Google maps documented `user_column_data`, and Zillow fails closed
+  until authenticated provider onboarding supplies the real contract.
+- **Truth boundary:** every run is `isTest=true` and `INTERNAL QA — DO NOT
+  CONTACT`; caller-supplied payloads, raw-payload retention, provider calls,
+  database writes, lead creation, and live activation are structurally absent.
+  The shared normalizer now treats missing test state as a review reason and
+  continues to refuse inferred channel consent.
+- **Final acceptance:** exact head
+  `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf` passes 6 focused files / 46
+  tests, all 242 files / 3,153 tests, strict TypeScript before and after build,
+  full ESLint, optimized Next.js 15.5.21 build with 53 generated pages, 86/17
+  route proof, release doctor 43/43, safety 14/14, Ask/Nelly isolation,
+  Production dependency audit, a 650-commit redacted secret scan, ancestry,
+  whitespace, clean-worktree proof, and focused Next.js/React security review
+  on Node 24.18.0.
+- **CI/Preview proof:** GitHub Release Gate `33232958503` passed with artifact
+  `9709073285` and digest
+  `sha256:773f2f0577a15cf289e3003f2c9288021e6c18804795708cc97f68ab31f64e27`.
+  Immutable READY Preview `dpl_BbDatyCASikChD1UPt33znkwXWmb` at
+  `https://ask-magic-mike-f0xvpp05w-eyes-up-industries.vercel.app` passed
+  protected workflow `33233146887`: 17 no-write checks, 6 deliberate mutation
+  skips, and 6/6 desktop/mobile browser scenarios. Runtime logs contained no
+  POST/PUT/PATCH/DELETE or warning/error/fatal entry during the QA window.
+- **Safety:** no Production, environment, schema, database row, lead/event,
+  message, provider credential/call, WordPress/DNS, publication, spend,
+  deletion, or NellySelly action.
+- Detailed scope:
+  `docs/phase9/VENDOR_INGRESS_CONTRACT_LAB.md` and
+  `docs/phase9/VENDOR_INGRESS_CONTRACT_LAB_QA_EVIDENCE.md`.
+
+## Current accepted release — 2026-08-28
+
+- PR #209 reviewed head `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b`
+  merged as `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and passed
+  same-commit Production acceptance on deployment
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`.
+- The dedicated encrypted Production limiter secret is present by name/scope;
+  every durable limiter readiness boolean is true and strict monitoring passes
+  9/9. The exact gate is consumed and exhausted.
+- Draft PR #210 is the next ordered application candidate, sealed at exact head
+  `93af400494a94a8d8aedb09ece16bbff4dfd214b`; it remains unmerged and
+  un-deployed pending its separate exact gate.
+- No PR #210 Production, environment, database, lead, event, notification,
+  WordPress, DNS, publication, spend, deletion, or NellySelly mutation has
+  occurred.
+- Immutable acceptance evidence:
+  `docs/phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md`.
+
+## PR #211 downstream reconciliation — 2026-08-28
+
+- Preserved prior PR #211 head `5d566a4a14d4a7cb67175683fdf099e8d62747b7`
+  at `rescue/amm-pr211-pre-pr210-exact-seal-20260828-213129`.
+- Merged exact sealed PR #210 head
+  `93af400494a94a8d8aedb09ece16bbff4dfd214b` without force push while
+  preserving the existing Ask clarity, shared skip link, focus target, and
+  keyboard contracts.
+- PR #211 remains Draft with no Production authority. Former proof is
+  historical until fresh exact-head Node 24 and protected no-write Preview QA
+  pass.
+
+## PR #213 downstream reconciliation — 2026-08-28
+
+- Preserved prior PR #213 head `3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea`
+  at `rescue/amm-pr213-pre-pr211-exact-seal-20260828-215231`.
+- Merged exact sealed PR #211 head
+  `c5700eda5e32ff6ead9a985c86b811a3c46e1e66` without force push. Application
+  files merged without manual resolution; only additive history and executable
+  release-authority records conflicted.
+- PR #213 remains Draft with no Production authority. Its responsive menu and
+  focus contracts require fresh exact-head Node 24, immutable Preview,
+  screenshot-first responsive, browser-interaction, and no-write runtime proof.
+
+## Phase 9 funnel-event identity integrity — 2026-08-28
+
+- **Reuse decision:** the stacked candidate extends only the existing browser
+  submission UUID, `POST /api/events`, Neon analytics repository, and atomic
+  lead command in Draft PR #216 on exact Draft PR #215 head
+  `c53cec6043525b593b254c457efdbbe5a29c0520`; no tracker, cookie, form, API,
+  database, CRM, provider, or notification system is added.
+- **Conflict prevented:** inspection proved that pre-creating `sessions` for
+  anonymous events would make `capture_public_lead_v1` return an idempotency
+  conflict and could block a real lead. That approach was removed before any
+  commit or database use.
+- **Implementation:** validated pseudonymous funnel UUIDs are stored only as a
+  protected repository-injected analytics property, then naturally match
+  `sessions.id` when durable lead capture succeeds. Home Value, seller,
+  buyer/renter/open-house, Ask lead preparation, and appointment events share
+  the established UUID. Home Value synchronously creates or reuses that UUID
+  before the first address event, so its earliest stage cannot outrun passive
+  client initialization; unavailable secure browser crypto fails truthfully.
+- **KPI authority:** browser success remains available to GA/GTM/PostHog and
+  widget parents, while `/api/events` rejects browser-authored lead/widget
+  creation, qualification, appointment-request, and notification outcomes. The
+  server's post-storage event is the only canonical lead-conversion row;
+  replay cannot inflate it. Ask now emits its browser-only conversion signal
+  after a fresh successful durable response, matching the other funnels, and
+  suppresses that signal on idempotent replay.
+- **Privacy/consent:** the UUID is absent from browser dimensions, URLs, PII,
+  and public properties. Buyer/seller email/call permission now requires the
+  corresponding supplied contact method. Historical null-session events are
+  not backfilled or reclassified.
+- **Final sealed acceptance:** exact head
+  `211485df28fc818ab783ed357df8486f1460d5e2` on Node 24.18.0 passes 12 focused
+  files / 89 tests, all 239 files / 3,137 tests, strict TypeScript, full ESLint,
+  optimized Next.js 15.5.21 build, 84/17 route proof, release doctor 43/43,
+  safety 14/14, system isolation, dependency audit, a 648-commit redacted
+  tracked-history secret scan, ancestry, diff, and clean-worktree proof.
+- **Immutable Preview/browser proof:** READY deployment
+  `dpl_5AMQELNpzwU52cA4SN2ZivwzPt6f` at
+  `https://ask-magic-mike-mo6wo5449-eyes-up-industries.vercel.app` passed Release
+  Gate `33231948183` and exact-branch protected run `33232071508`: 17 read-only
+  checks, six deliberate mutation skips, all six desktop/mobile browser
+  scenarios, zero unexpected writes, `GO`, and `PREVIEW_READY`. Runtime filters
+  found zero POST/PUT/PATCH/DELETE and zero warning/error/fatal records in the
+  acceptance window.
+- **Parent refresh and proof correction:** former head
+  `a6098ab4ee7a13d024bafc08264628e2691a8e06` remains preserved at
+  `rescue/amm-pr216-pre-pr215-exact-seal-20260828-231335`. The default-branch
+  bootstrap run retained valid read-only evidence but exercised only three
+  browser scenarios; exact-branch run `33232071508` is the authority for all
+  six. PR #216's shared fail-closed mutation interceptor remains intact.
+- **Safety:** no Production, environment, schema, lead, message, provider,
+  WordPress/DNS, publication, spend, deletion, or NellySelly action.
+- Detailed scope:
+  `docs/phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY.md` and
+  `docs/phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY_QA_EVIDENCE.md`.
+
+## Phase 9 home-value completion integrity — 2026-08-24
+
+- **Reuse decision:** Draft PR #215 extends the released Home Value funnel and
+  canonical lead command on exact sealed Draft PR #214 head
+  `81a2c7544318d630437ed3e86cbea029c5c9b57d`; add no form, endpoint, database,
+  CRM, provider, notification path, or analytics system.
+- **Evidence:** one bounded, aggregate-only Production sequence reached
+  `contact_submitted` but not `lead_created`. Missing historical session and
+  funnel dimensions prevent identity or prospect classification; the record is
+  explicitly unclassified and no conversion rate is claimed.
+- **Implementation:** persist from the first valid Contact step, make phone
+  optional on the current email-first Home Value UI, accept email or phone at
+  the API contract, apply the same bounded email/phone validation in the UI and
+  API, prevent call-consent evidence without a phone, and emit a privacy-
+  allowlisted `lead_submit_failed` event on durable failure.
+- **Parent refresh:** former head `2d020358da1d7f95ebf82c47c0f1c0e83d6216d2`
+  is preserved at
+  `rescue/amm-pr215-pre-pr214-exact-seal-20260828-224229`. Exact sealed PR #214
+  merged with conflicts limited to additive changelog, QA-evidence, and
+  release-authority records; no application file required manual conflict
+  resolution.
+- **Application acceptance:** exact parent-refresh head
+  `eff8fc04449fab4fd34cd0fb69735e6787d0b382` passed 236 files / 3,108 tests,
+  strict types, lint, optimized build, 84/17 route proof, doctor 43/43, safety
+  14/14, isolation, dependency/secret checks, Release Gate `33229869967`,
+  READY Preview `dpl_8qNH7Ry1gSPqdSwHrRNM3Y9LHhZR`, and protected no-write
+  run `33230015801` with 17 pass / 6 intentional skips / 0 fail and 3/3
+  intercepted browser checks.
+- **Acceptance boundary:** current-run desktop/390/320 inspection found no
+  horizontal overflow and proved empty-address focus/error behavior without a
+  lead. Four Preview page-load telemetry POSTs were recorded explicitly; no
+  lead/delivery/provider request occurred. The resulting evidence-only head
+  still requires its own exact-head CI and protected Preview proof before the
+  later gate.
+- **Safety:** no Production, environment, database, lead/event, message,
+  provider, WordPress/DNS, publication, spend, deletion, or NellySelly action.
+- Detailed scope:
+  `docs/phase9/HOME_VALUE_COMPLETION_INTEGRITY.md` and
+  `docs/phase9/HOME_VALUE_COMPLETION_INTEGRITY_QA_EVIDENCE.md`.
+
+## Phase 9 lead-alert brand identity — 2026-08-24
+
+- **Reuse decision:** extend only the canonical lead-alert HTML renderer and
+  protected Message Review Studio in Draft PR #214 on exact sealed Draft PR #213
+  head `d2a1bf01d0962e07dd1e460acd4c295e145cf6a8`. Preserve score bands, routing,
+  recipients, outbox, BCC, providers, retry, suppression, and delivery gates.
+- **Implementation:** `lead_alert_email_v3` composes the approved Our Town logo
+  and Mike avatar over the existing privacy-safe HOT/ACTIVE/NEW/QA backgrounds.
+  Lead facts remain selectable HTML/plain text. The protected studio renders
+  three `[TEST]` synthetic no-send states with no contact details.
+- **Ledger integrity:** stored v1/v2 email alerts retain the legacy renderer on
+  retry; unknown recorded template versions fail closed instead of silently
+  changing content.
+- **Historical candidate acceptance:** the former head passed 234 files / 3,088 tests, strict
+  TypeScript, full ESLint, optimized Next.js 15.5.21 build, 84/17 route proof,
+  14/14 release safety, Ask Magic Mike / NellySelly deployable-source
+  isolation, no known Production dependency vulnerabilities, a redacted
+  599-commit history scan with no leaks, and whitespace verification. Exact
+  application head `46a9af538302951f1190df24a8bdf64f3be07450`
+  is READY on immutable Preview deployment
+  `dpl_CX5UbqeFUVE9BDdVCmhpttmNyy3Q`; 1280 × 720 and 390 × 844 rendered
+  acceptance passes with zero horizontal overflow, no send controls, and a
+  clean browser/runtime-error log. This proof is historical until the refreshed
+  head is reverified.
+- **Parent refresh:** former PR #214 head
+  `94e3d66190df138d42c1321adfeb0cefb0478545` is preserved at
+  `rescue/amm-pr214-pre-pr213-exact-seal-20260828-222353`; exact sealed PR #213
+  `d2a1bf01d0962e07dd1e460acd4c295e145cf6a8` merged with conflicts limited to
+  additive changelog and release-authority records. Fresh
+  exact-head CI, immutable Preview, no-send visual, and deployment-log proof
+  are mandatory before the later gate can be requested.
+- **Safety:** no generated likeness was accepted; no lead, email/BCC, SMS/MMS,
+  Push, consumer acknowledgment, provider call, database write/migration,
+  Production action, WordPress/DNS change, publication, spend, deletion, or
+  NellySelly action.
+- Detailed scope: `docs/phase9/LEAD_ALERT_BRAND_IDENTITY.md`.
+
+## Phase 9 responsive conversion-identity polish — 2026-08-24
+
+- **Reuse decision:** extend only the shared `BlackDiamondHeader` on exact
+  sealed Draft PR #211 head `c5700eda5e32ff6ead9a985c86b811a3c46e1e66`;
+  preserve the existing Black Diamond identity, Ask CTA, skip link, routes,
+  forms, lead command, consent, analytics, and providers.
+- **Evidence:** fresh exact-Preview screenshots show healthy desktop/mobile
+  identity and conversion surfaces, but the full intent navigation is hidden
+  below `md`, leaving only an implicit logo return or distant footer for path
+  switching.
+- **Implementation:** Draft PR #213 adds one compact intent menu, labeled
+  navigation landmarks, active-route `aria-current`, 44-pixel trigger,
+  Escape/focus return, outside-pointer close, narrow-phone sizing, and the
+  existing smooth-scroll declaration expected by Next.js.
+- **Local acceptance:** 3 focused files / 11 tests, all 232 files / 3,082
+  tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build with
+  52 generated pages, 83/17 route proof, release safety 14/14, system
+  isolation, no known Production dependency vulnerabilities, a redacted
+  596-commit gitleaks scan, and whitespace verification pass.
+  In-app browser checks at 1280×720, 390×844, and 320×700 prove complete
+  labels, current-route state, Buyer→Seller navigation, automatic close,
+  outside-click close, Escape focus return, no horizontal overflow, and a
+  warning/error-free fresh console.
+- **Compatibility correction:** the first remote run rejected one stale
+  source-string assertion for the Plan link after navigation moved into one
+  typed registry. The contract now requires the exact registry destination
+  and label; the full suite passes. Immutable exact-head remote proof remains
+  pending after the evidence commit.
+- **Safety:** no field fill, submit, migration, Production action, lead/event,
+  message, provider call, WordPress/DNS change, publication, spend, deletion,
+  or NellySelly action.
+- **Current parent refresh:** former PR #213 head
+  `3c5ecdec2941a3ef01fa26bd2810a3ffa3156eea`
+  is preserved at
+  `rescue/amm-pr213-pre-pr211-exact-seal-20260828-215231`; fresh exact-head
+  proof is required after the conflict-free application merge.
+- Detailed scope:
+  `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH.md` and
+  `docs/phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
+
+## Phase 9 Ask conversion clarity and keyboard access — 2026-08-23
+
+- **Reuse decision:** stack only the focused Ask/public-header correction on
+  canonical alias candidate `e41957ee6abe62a5ec15207cb3574efd6fc79ecc`.
+  Rescue ref `rescue/amm-pre-ask-conversion-accessibility-20260823-2235`
+  preserves the exact pre-change state.
+- **Evidence:** the current rendered Production DOM has one main landmark and
+  a labeled Ask field but no skip link; the active source still used
+  product-centric “advisor interface” language and allowed a blank Send action
+  to no-op before the server's required-message boundary.
+- **Implementation:** the shared Black Diamond header now exposes the first
+  focusable `Skip to main content` link, focuses one `#page-content` target,
+  and retains an href fallback. All 12 shared-header surfaces provide that
+  target with `tabIndex={-1}`. `/ask` uses consumer-action copy and a visible
+  required label; its existing field now declares the canonical 2,000-
+  character limit, name, type, autocomplete behavior, mobile enter hint, and
+  contextual description.
+- **Local acceptance:** exact Node 24.18.0 passes 3 focused files / 11 tests,
+  all 231 files / 3,065 tests, strict typecheck, ESLint, optimized Next.js
+  15.5.21 build with 52 static pages, 83/17 route proof, release safety 14/14,
+  system isolation, a no-vulnerability Production dependency audit, and a
+  redacted 574-commit secret scan with no leaks.
+- **Protected Preview acceptance:** the exact candidate head
+  `af22494d96bc3fe1ec930a24f350e4b3e863fe2f` renders on its immutable Vercel
+  Preview. Fresh in-app checks prove skip-link focus treatment and target
+  activation, native empty-submit blocking with no API request, 390x844
+  no-overflow geometry, and a warning/error-free inspected console.
+- **Evidence limit:** current in-app screenshot capture timed out on both the
+  target and a neutral control page; the operating-system fallback returned an
+  unusable black virtual-surface frame. No screenshot was accepted and no
+  screenshot-level visual-audit or full-accessibility claim is made.
+- **Safety:** no migration or external mutation. This candidate follows the
+  sealed PR #209 and Draft PR #210 stack; it has no independent authority to
+  merge or deploy.
+- Detailed scope: `docs/phase9/ASK_CONVERSION_ACCESSIBILITY_CLARITY.md` and
+  `docs/phase9/ASK_CONVERSION_ACCESSIBILITY_CLARITY_QA_EVIDENCE.md`.
 ## Phase 9 field-experience trust fast-track — 2026-08-23
 
 - **Reuse decision:** preserve PR #199 exact head
@@ -251,9 +1198,8 @@ Updated 2026-08-23.
   and immediately relinked the worktree to canonical Ask Magic Mike. The helper
   is recorded in the asset manifest and preserved for separately approved
   cleanup.
-- Exact future gate:
+- Historical gate consumed on 2026-08-28; it is exhausted and not reusable:
   `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
-
 ## Phase 9 conversion identity polish — 2026-08-22
 
 - A fresh Production no-submit audit found that the canonical home-value path
@@ -282,6 +1228,11 @@ Updated 2026-08-23.
   preserved at `rescue/amm-pr195-pre-released-pr194-refresh-20260822-1959`.
   The only automatic conflict was the cumulative QA evidence document; the
   application merge was clean.
+- PR #195 head `db13953fc5f6d24a684f66c9a1c10c6b929b72b3` was merged as
+  Production/main `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and accepted on
+  Vercel deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Fresh read-only
+  acceptance passes 15/15 conversion checks and 19/19 Production smoke checks
+  with two intentional authenticated/write skips.
 - Detailed decision and QA:
   `docs/phase9/CONVERSION_IDENTITY_POLISH.md` and
   `docs/phase9/CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md`.
@@ -312,6 +1263,22 @@ Updated 2026-08-23.
   candidate.
 - Detailed scope and rollback:
   `docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md`.
+
+### 2026-08-29 visibility correction
+
+- Fresh public browser QA found the homepage's single Ask Magic Mike anchor is
+  not visible because public CSS suppresses its `.amm-cta` container.
+- The existing readiness manifest now joins exact-link ancestry to known
+  public hiding selectors and fails closed with `hidden_target` instead of
+  treating hidden markup as an activatable placement.
+- The visibility facts are privacy-minimized, included in the deterministic
+  precondition hash, and covered against unrelated-rule and container-only
+  false positives.
+- The historical homepage href-only gate is superseded. No WordPress,
+  Production, database, notification, DNS, provider, or NellySelly mutation
+  occurred.
+- Detailed evidence and next decision boundary:
+  `docs/phase9/WORDPRESS_HOMEPAGE_VISIBILITY_TRUTH.md`.
 
 ## Phase 9 iOS phone handoff consolidation — 2026-08-22
 
@@ -1242,13 +2209,14 @@ any bridge activation or shadow-mode test.
 
 ## Phase 9 atomic release-authority reconciliation — 2026-08-23
 
-- Fresh authenticated GitHub/Vercel and read-only public checks confirm PR #195
+- Fresh authenticated GitHub/Vercel and read-only public checks confirmed at
+  that time that PR #195
   merge `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and Production deployment
-  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` remain the accepted live baseline.
-- PR #209 is now the sole documented application release candidate. PRs #202
+  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` were the accepted live baseline.
+- PR #209 became the sole documented application release candidate. PRs #202
   through #208 remain preserved as incremental review evidence with no
   independent merge or Production authority.
-- Current authority docs now expose one optional Preview-mutation gate, one
+- The then-current authority docs exposed one optional Preview-mutation gate, one
   combined Production durability/merge/deploy gate, and the later independent
   one-href WordPress homepage gate without reusing any consumed approval.
 - Added an executable five-check documentation contract so known stale stacked-
@@ -1258,3 +2226,219 @@ any bridge activation or shadow-mode test.
   durable Production limiter contract is released.
 - Full decision and no-action record:
   [`phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md`](./phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md).
+
+## Phase 9 organic-search opportunity ingress — 2026-08-24
+
+- PR #209 is accepted and its gate is exhausted. Draft PR #219 is stacked
+  after sealed PR #218 and cannot leapfrog the first pending candidate, PR
+  #210, or PRs #211–#218.
+- The existing Growth Command Center now has a protected, Preview-first
+  `/admin/growth/search-ingress` workbench and bounded preview/commit APIs.
+- One exact owned-page Search Console report can be normalized into existing
+  `market_signals` and advisory `market_opportunities`; no query text, raw CSV,
+  provider payload, or credential is retained.
+- Deterministic thresholds and visible factor points replace opaque AI scoring.
+- An additive PostgreSQL 17 contract provides owner-only atomic reconciliation,
+  immutable receipts/audits, exact replay, and operator-state preservation.
+- Safe default is `GROWTH_SEARCH_IMPORT_ENABLED=false`; Production and Preview
+  database identity remains exact-endpoint attested.
+- Historical pre-refresh proof passes: 39 focused tests, 3,207 full tests, PostgreSQL 17 contract,
+  typecheck, lint, Node 24 build, 92-route manifest, 14/14 safety, isolation,
+  dependency audit, staged secret scan, and exact-head protected Preview QA.
+- Runtime code head `5552a1a` is `READY` at immutable deployment
+  `dpl_FcBUJ7hDxKu7oeMpXb8UuVHpkkCz`; Release Gate run `32801867752` and
+  protected QA run `32801994614` pass. That evidence is bound to the former
+  head and must be repeated. Remote evidence was 17 pass / six
+  intentional skip / zero fail and 10/10 browser cases with zero commit calls.
+- No Search Console access, Production migration/configuration/merge/deployment,
+  real import, page publication, lead/message/campaign action, WordPress/DNS
+  edit, purchase, deletion, or NellySelly action occurred.
+- Evidence and exact gates:
+  [`phase9/ORGANIC_SEARCH_INGRESS_RELEASE_GATE.md`](./phase9/ORGANIC_SEARCH_INGRESS_RELEASE_GATE.md)
+  and
+  [`phase9/ORGANIC_SEARCH_INGRESS_QA_EVIDENCE.md`](./phase9/ORGANIC_SEARCH_INGRESS_QA_EVIDENCE.md).
+
+## Phase 9 local-profile performance ingress — 2026-08-25
+
+- Added a protected `/admin/growth/local-profile-ingress` workbench to the
+  existing Growth Command Center; no parallel dashboard or database was made.
+- Added bounded preview/commit APIs for one allowlisted, aggregate Google
+  Business Profile performance report contract.
+- Added deterministic signal normalization and one explainable
+  `local_profile_interaction_gap` opportunity policy.
+- Added an additive immutable receipt table and owner-only PostgreSQL import
+  function with server-side score/fingerprint recomputation, advisory locking,
+  exact replay, atomic reconciliation, and operator-state preservation.
+- Safe default is `GROWTH_LOCAL_PROFILE_IMPORT_ENABLED=false`; synthetic input
+  cannot commit and real input also requires endpoint/database/write
+  attestation, exact fingerprint, report reference, and typed confirmation.
+- Local proof passes 3,234 tests, PostgreSQL 17 contract/parity, typecheck,
+  lint, optimized build, 95-route manifest, 14/14 safety, isolation, dependency
+  and secret audits, and 2/2 responsive browser scenarios.
+- Draft PR #220 is clean/mergeable on PR #219. Code-bearing Preview deployment
+  `dpl_EFb7Vzs65KoNWDXJLNr59caV92fS` is `READY`; Release Gate run
+  `32808025256` and protected Preview QA run `32808693945` pass. Preview proof
+  is 17 pass / six intentional mutation skips / zero fail plus 12/12 current
+  browser scenarios.
+- Production and external systems are unchanged. The candidate must remain
+  stacked after PR #219 and the already ordered release train.
+- Evidence:
+  [`phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS_QA_EVIDENCE.md`](./phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS_QA_EVIDENCE.md).
+
+## Phase 9 public owned-referral handoff — 2026-08-29
+
+- Reused the active Black Diamond homepage, approved 1200×630 social card,
+  canonical `/ask` funnel, existing attribution persistence, and privacy-safe
+  analytics endpoint.
+- Replaced the public homepage's internal-facing social-ad asset promotion with
+  a consumer-facing, generic referral handoff; the non-indexed social review
+  route remains available for controlled review but is no longer promoted to
+  consumers from the homepage.
+- Added direct-click native Web Share only after an available `canShare`
+  capability probe accepts the fixed packet, plus Clipboard copy and a visible
+  manual-copy fallback without a third-party script, provider, popup, database,
+  or sender.
+- Added exact `consumer_share` / `referral` / `amm_owned_demand_2026` /
+  `homepage_referral_share` attribution and two bounded events whose labels do
+  not overclaim delivery or publication.
+- The packet cannot contain form answers, saved plan state, current URL,
+  session/lead IDs, contact details, click IDs, or free text.
+- Exact-parent focused acceptance passes 37 tests on Node 24.18.0, strict
+  typecheck, targeted lint, 14/14 release safety, deployable-source isolation,
+  `git diff --check`, and the Production dependency audit with no known
+  vulnerability. Historical pre-refresh proof also passed 266 files / 3,338
+  tests, full lint, optimized Next.js 15.5.21 build with 59 static pages, 95
+  active routes / 17 acknowledged duplicates, clean-tree release doctor 43/43,
+  and redacted full/delta Gitleaks scans. Fresh exact-head CI, Preview,
+  no-write browser QA, runtime-log, and secret-scan proof remain mandatory.
+- Former head `b1bd4b2012c037f4a71806b449541cdcfdd758b6` is preserved at
+  `rescue/amm-pr228-pre-pr227-parent-refresh-20260829-133619`. The candidate was
+  reconciled through normal merge commit
+  `38a22f5627f2b8f7293d9f65bf3a4f27b7475044` onto exact sealed PR #227 head
+  `ee1dd462665e423c17a69b6ab7d1c3a7a70a1409`; no rebase or force-push was used.
+  The earlier source rescue
+  `rescue/amm-pr228-pre-pr227-exact-seal-20260829-0636` also remains intact.
+- Prior desktop/mobile no-write browser QA reports no overflow, console/page
+  error, bad response, external request, or internal `/social-preview` link;
+  axe reports zero automated WCAG A/AA violations on the new section. Fresh
+  immutable exact-head Browser and hosted Preview evidence remain required
+  after push.
+- Production remains unchanged on authority commit
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. WordPress, Vercel Production,
+  Neon Production, external publishing, lead submission, email/SMS/Push, and
+  NellySelly remain unchanged.
+- Design and boundaries:
+  [`phase9/PUBLIC_OWNED_REFERRAL_HANDOFF.md`](./phase9/PUBLIC_OWNED_REFERRAL_HANDOFF.md).
+- QA evidence:
+  [`phase9/PUBLIC_OWNED_REFERRAL_HANDOFF_QA_EVIDENCE.md`](./phase9/PUBLIC_OWNED_REFERRAL_HANDOFF_QA_EVIDENCE.md).
+
+## Phase 9 OTP Facebook crawler exact Apache diagnosis — 2026-08-28
+
+- Fresh production checks remain 40/42: only the Our Town `/ask-mike/` and
+  Mike-agent pages return 403 to `facebookexternalhit`; Ask Magic Mike and all
+  tested non-Facebook social crawlers pass.
+- Authenticated cPanel/Apache inspection located the exact server-global
+  directives: `facebookexternalhit` is assigned to `bad_bots`, then denied by
+  `Require not env bad_bots` in `pre_virtualhost_global.conf`.
+- The error surface is `authz_core` `AH01630`, the cPanel production-domain
+  ModSecurity control reports Off, and no matching root `.htaccess` rule exists.
+- The former unknown-ModSecurity-rule-ID instruction is superseded by one
+  host-operator, per-vhost/account override specification limited to GET/HEAD
+  and four exact public paths.
+- The live verifier and existing Traffic/Revenue admin guidance now distinguish
+  this exact OTP Facebook-only condition from unknown crawler failures. They no
+  longer recommend Cloudflare Bot Fight Mode, a broad user-agent allowlist, or
+  a ModSecurity rule-ID search.
+- Focused no-network regression coverage passes 111 tests across the verifier,
+  Traffic readiness, and Launch Control modules. A fresh read-only live run
+  remains truthfully 40/42 and prints the bounded host change packet instead of
+  the superseded broad bypass.
+- Diagnosis reuse now requires the exact two known paths, crawler, and HTTP 403
+  result; partial, alternate-path, and alternate-status failures stay unknown.
+  The proposed host expression also enforces the two allowed hostnames and uses
+  `req_novary` to avoid cache fragmentation by Host or User-Agent.
+- Exact PR #229 head
+  `ab24fc0ef2eef10f9b368d57909d899dd053d204` passed 266 files / 3,345 tests,
+  strict typecheck, full lint, optimized build with 59 generated pages, 14/14
+  release safety, 43/43 release doctor, dependency audit, source isolation,
+  and exact-delta/full-history Gitleaks. Release Gate `33267688596`, immutable
+  Preview `dpl_9pRRE8JHQG28ohxhFgcJwbRufKdf`, and protected QA `33267872275`
+  passed with `GO` / `PREVIEW_READY` while all mutations remained fail-closed.
+- After PR #229 was sealed, the separately approved account-level test was
+  consumed. A backed-up document-root `.htaccess` trial parsed, but the two
+  HTML pages remained 403 because the earlier server-global authorization
+  decision had already been made. Acceptance failed, so the original file was
+  restored byte-for-byte and the retained backup was moved outside the public
+  root.
+- Post-rollback proof matches the 40/42 baseline: normal browsers return 200;
+  Facebook remains denied on the two pages, a non-allowlisted path, login,
+  admin, REST POST, and XML-RPC POST. The supported cPanel userdata include is
+  root-owned and unavailable to the account.
+- No active host-file override, firewall change, Apache reload, cache purge,
+  WordPress edit, Vercel/database change, communication, DNS, Production app,
+  or NellySelly action remains from the completed test.
+- Evidence and controlled change contract:
+  [`phase9/OTP_FACEBOOK_CRAWLER_APACHE_EVIDENCE_2026-08-28.md`](./phase9/OTP_FACEBOOK_CRAWLER_APACHE_EVIDENCE_2026-08-28.md)
+  and
+  [`FACEBOOK_CRAWLER_FIREWALL_CHANGE.md`](./FACEBOOK_CRAWLER_FIREWALL_CHANGE.md).
+- Controlled test evidence:
+  [`phase9/OTP_FACEBOOK_CRAWLER_ACCOUNT_OVERRIDE_TEST_2026-08-28.md`](./phase9/OTP_FACEBOOK_CRAWLER_ACCOUNT_OVERRIDE_TEST_2026-08-28.md).
+
+## Phase 9 capability authority ledger candidate — 2026-08-29
+
+- Reconciled the current competitive benchmark against executable code and the
+  ordered release/approval records instead of treating every benchmark feature
+  as a greenfield gap.
+- Added a pure typed ledger that separates established Production capability,
+  reviewed application candidates, operator/host gates, external dependencies,
+  and intentionally prohibited autonomy.
+- Rendered the ledger inside the existing `/admin/growth` route after its
+  `report:view` authorization boundary. The section contains no form, fetch,
+  server action, provider call, or mutation path.
+- The ledger excludes PR #209's consumed durability gate and the consumed
+  account-level crawler-test gate. It displays the future PR #230 application
+  gate with an explicit PR #210-first ordering warning, plus the current Our
+  Town consent-runtime gate; the page cannot create, consume, or broaden either
+  approval. The completed-and-rolled-back crawler test is recorded only as a
+  root/WHM access dependency.
+- Final local acceptance passes 267 files / 3,351 tests, strict typecheck, full
+  lint, optimized Next.js 15.5.21 build, 95/17 route proof, 14/14 safety,
+  deployable-source isolation, zero known Production dependency
+  vulnerabilities, and desktop/mobile no-write browser QA with zero axe A/AA
+  violations. After the exact PR #229 parent refresh, fresh final-head CI,
+  immutable Preview, protected QA, visual/runtime, and Production non-mutation
+  evidence are pinned in the PR seal without a self-referential evidence-only
+  commit.
+- No route, migration, dependency, environment variable, secret, database,
+  public page, provider, communication, WordPress, DNS, hosting, Production, or
+  NellySelly state changed.
+- Implementation and boundary contract:
+  [`phase9/CAPABILITY_AUTHORITY_LEDGER.md`](./phase9/CAPABILITY_AUTHORITY_LEDGER.md).
+- QA evidence:
+  [`phase9/CAPABILITY_AUTHORITY_LEDGER_QA_EVIDENCE.md`](./phase9/CAPABILITY_AUTHORITY_LEDGER_QA_EVIDENCE.md).
+
+## Phase 9 bounded organic page experiment briefs — 2026-08-29
+
+- Reused the existing protected Search Console CSV workbench, validated owned
+  page rows, deterministic opportunity scores, and Growth authority ledger.
+- Added a pure builder for internal-review-only experiment briefs containing
+  owner inputs, one-change scope, evidence-aware measurement, real-estate and
+  Fair Housing guardrails, stop conditions, and immutable official references.
+- Briefs produce no public copy and perform no provider call, live-page fetch,
+  database write, campaign, message, spend, redirect, or publication action.
+- Preserved the prior PR #231 head at
+  `rescue/amm-pr231-pre-pr230-parent-refresh-20260829-150534`, then merged exact
+  sealed PR #230 head `680e257d8e35b2033638e84b09c742608268fc20`
+  through normal merge commit `b840152`.
+- The refresh hardening replaced invalid flow-content children inside the
+  native disclosure summary with phrasing-content elements while retaining the
+  established Black Diamond visual hierarchy and responsive behavior.
+- Exact local Node 24 acceptance passes 9 focused files / 65 tests and 268
+  files / 3,357 full tests, plus strict typecheck and targeted lint. Final full
+  lint/build/safety/isolation, secret scans, immutable Preview, protected
+  no-write browser proof, runtime logs, and Production non-mutation evidence
+  remain bound to the final PR seal rather than a self-referential docs commit.
+- No Production, Vercel environment, Neon, WordPress, DNS, provider,
+  communication, publication, spend, deletion, or NellySelly mutation occurred.
+- Decision and QA evidence:
+  [`phase9/ORGANIC_SEARCH_EXPERIMENT_BRIEF_QA_EVIDENCE.md`](./phase9/ORGANIC_SEARCH_EXPERIMENT_BRIEF_QA_EVIDENCE.md).

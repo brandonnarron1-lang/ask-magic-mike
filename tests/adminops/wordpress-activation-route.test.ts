@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   requirePermission: vi.fn(),
   loadChangeSet: vi.fn(),
+  loadSellerIntentDecision: vi.fn(),
 }));
 
 vi.mock("@/lib/admin/rbac-session", () => ({
@@ -17,6 +18,16 @@ vi.mock("../../app/lib/growth/wordpress-activation-change-set", async (importOri
   return {
     ...actual,
     loadWordPressActivationChangeSet: mocks.loadChangeSet,
+  };
+});
+
+vi.mock("../../app/lib/growth/wordpress-seller-intent-decision", async (importOriginal) => {
+  const actual = await importOriginal<
+    typeof import("../../app/lib/growth/wordpress-seller-intent-decision")
+  >();
+  return {
+    ...actual,
+    loadWordPressSellerIntentDecisionManifest: mocks.loadSellerIntentDecision,
   };
 });
 
@@ -46,7 +57,7 @@ describe("GET WordPress activation change-set route", () => {
   it("returns a private attachment after report-view authorization", async () => {
     authorized();
     mocks.loadChangeSet.mockResolvedValue({
-      schemaVersion: "amm.wordpress_activation_change_set.v1",
+      schemaVersion: "amm.wordpress_activation_change_set.v2",
       placementKey: "wordpress_homepage_ask_mike",
       status: "legacy_match_ready",
       publicationAuthorized: false,
@@ -93,6 +104,37 @@ describe("GET WordPress activation change-set route", () => {
     expect(mocks.loadChangeSet).not.toHaveBeenCalled();
   });
 
+  it("returns the seller-intent decision packet through the same read-only boundary", async () => {
+    authorized();
+    mocks.loadSellerIntentDecision.mockResolvedValue({
+      schemaVersion: "amm.wordpress_seller_intent_decision.v1",
+      manifestKey: "wordpress_seller_intent_decision",
+      status: "decision_required",
+      publicationBlocked: true,
+      publicationAuthorized: false,
+      mutationPerformed: false,
+    });
+
+    const response = await GET(new NextRequest(
+      "https://www.askmagicmike.com/api/admin/distribution/wordpress-change-set/wordpress_seller_intent_decision",
+    ), {
+      params: Promise.resolve({ placementKey: "wordpress_seller_intent_decision" }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-disposition")).toContain(
+      "amm-wordpress_seller_intent_decision-wordpress-change-set.json",
+    );
+    await expect(response.json()).resolves.toMatchObject({
+      status: "decision_required",
+      publicationBlocked: true,
+      publicationAuthorized: false,
+      mutationPerformed: false,
+    });
+    expect(mocks.loadSellerIntentDecision).toHaveBeenCalledOnce();
+    expect(mocks.loadChangeSet).not.toHaveBeenCalled();
+  });
+
   it("rejects an unknown placement before any public WordPress fetch", async () => {
     authorized();
     const response = await GET(new NextRequest(REQUEST_URL), {
@@ -105,5 +147,6 @@ describe("GET WordPress activation change-set route", () => {
       error: "wordpress_activation_placement_not_found",
     });
     expect(mocks.loadChangeSet).not.toHaveBeenCalled();
+    expect(mocks.loadSellerIntentDecision).not.toHaveBeenCalled();
   });
 });

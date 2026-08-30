@@ -146,4 +146,54 @@ describe("NeonAnalyticsEventRepository", () => {
     expect(params[8]).toBe("home_value");
     expect(params[9]).toBe("browser/mobile");
   });
+
+  it("stores a privacy-minimized funnel identity without creating a canonical session", async () => {
+    const query = vi.fn().mockResolvedValue([]);
+    const repository = new NeonAnalyticsEventRepository({ query });
+    const sessionId = "11111111-1111-4111-8111-111111111111";
+
+    await repository.record({
+      eventName: "address_submitted",
+      eventCategory: "intake",
+      funnelSessionId: sessionId,
+      properties: {
+        funnel_name: "home_value",
+        current_path: "/home-value?utm_source=facebook",
+        device_category: "mobile",
+        funnel_session_id: "22222222-2222-4222-8222-222222222222",
+        arbitrary: "person@example.com",
+      },
+      utmSource: "facebook",
+      utmMedium: "social_organic",
+      utmCampaign: "home_value",
+      userAgent: "Mozilla/5.0 (iPhone) AppleWebKit/605.1.15",
+    });
+
+    expect(query).toHaveBeenCalledOnce();
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).toContain("INSERT INTO public.analytics_events");
+    expect(sql).not.toContain("INSERT INTO public.sessions");
+    expect(params[0]).toBeNull();
+    expect(params[5]).toBe(JSON.stringify({
+      funnel_name: "home_value",
+      current_path: "/home-value",
+      device_category: "mobile",
+      funnel_session_id: sessionId,
+    }));
+  });
+
+  it("does not retain an invalid funnel identifier", async () => {
+    const query = vi.fn().mockResolvedValue([]);
+    const repository = new NeonAnalyticsEventRepository({ query });
+
+    await repository.record({
+      eventName: "funnel_started",
+      funnelSessionId: "not-a-uuid",
+    });
+
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).not.toContain("INSERT INTO public.sessions");
+    expect(params[0]).toBeNull();
+    expect(params[5]).toBe("{}");
+  });
 });

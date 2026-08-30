@@ -6,7 +6,9 @@ Final local and point-in-time production verification completed on 2026-08-14:
 - Funnel verification: 15 of 15 pass.
 - Health verification: 2 of 2 pass; protected detail skipped.
 - Isolation: pass.
-- Social preview: 40 of 42; two known hosting-WAF Facebook crawler failures.
+- Social preview: 40 of 42; two known hosting-layer Facebook crawler failures.
+  Later authenticated 2026-08-28 evidence identified the exact Apache
+  `authz_core` rule; see `FACEBOOK_CRAWLER_403_ROOT_CAUSE.md`.
 - New public monitor: 9 of 9 pass.
 - Full Vitest suite: 150 files and 2,551 tests pass.
 - Chromium Playwright suite: 13 of 13 pass; lead submissions are intercepted and DB-mutation-free.

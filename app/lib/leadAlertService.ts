@@ -7,7 +7,7 @@ import type { LeadNotificationRecord, LeadNotificationRepository, NotificationPr
 import type { LeadPayload } from "./leadPayload";
 import { routeLead, type LeadRoutingDecision } from "./leadRouting";
 import { scoreLead, type LeadScore } from "./leadScoring";
-import { CONSUMER_ACK_TEMPLATE_VERSION, LEAD_ALERT_SMS_TEMPLATE_VERSION, LEAD_ALERT_TEMPLATE_VERSION, renderConsumerAcknowledgment, renderLeadAlert, renderLeadAlertSms } from "./leadAlertTemplates";
+import { CONSUMER_ACK_TEMPLATE_VERSION, LEAD_ALERT_SMS_TEMPLATE_VERSION, LEAD_ALERT_TEMPLATE_VERSION, renderConsumerAcknowledgment, renderLeadAlert, renderLeadAlertForTemplateVersion, renderLeadAlertSms } from "./leadAlertTemplates";
 import { shouldAttachLeadAlertMedia, shouldQueueAgentUrgencySms, visualAssetUrl } from "./leadAlertVisualTemplates";
 import { NeonPushSubscriptionRepository, type StaffPushRecipientRole } from "./persistence/neonPushSubscriptionRepository";
 
@@ -286,7 +286,15 @@ export async function retryLeadAlertNotification(notificationId: string) {
     const location = input.payload.city || input.payload.target_geography || "Wilson area";
     return deliver(current, { channel: "push", recipient: subscriptionId, subject: `${pushPriority(input.score.score)} ${input.routing.intentLabel}`, text: `${location} • Score ${input.score.score} • Open the secure Lead Center.` }, repo, provider);
   }
-  const rendered = renderLeadAlert(input);
+  const rendered = renderLeadAlertForTemplateVersion(input, current.template_version);
+  if (!rendered) {
+    return await repo.update(current.id, {
+      status: "permanently_failed",
+      error_code: "notification_template_version_unsupported",
+      error_summary: "The recorded lead-alert template version is not supported for retry.",
+      failed_at: nowIso(),
+    });
+  }
   return deliver(current, { channel: "email", recipient: configuredTo(), subject: rendered.subject, text: rendered.text, html: rendered.html, bcc: configuredBcc(), replyTo: rendered.safeEmail || undefined }, repo, provider);
 }
 

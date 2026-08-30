@@ -1,32 +1,45 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const path = "tests/e2e/widget-preview-flow.spec.ts";
-const source = readFileSync(path, "utf8");
+const specPath = "tests/e2e/widget-preview-flow.spec.ts";
+const interceptionPath = "tests/e2e/no-write-preview-interception.ts";
+const source = readFileSync(specPath, "utf8");
+const interception = readFileSync(interceptionPath, "utf8");
 
 describe("widget Preview browser no-write contract", () => {
-  it("intercepts the lead and every public telemetry endpoint", () => {
+  it("uses one fail-closed boundary for every first-party API mutation", () => {
+    expect(source).toContain(
+      'import { installNoWriteInterception } from "./no-write-preview-interception"',
+    );
+    expect(interception).toContain('page.route("**/api/**"');
+    expect(interception).toContain(
+      'new Set(["POST", "PUT", "PATCH", "DELETE"])',
+    );
     for (const endpoint of [
-      "leads",
-      "events",
-      "analytics/event",
-      "experiments/event",
-      "widget/events",
+      "/api/leads",
+      "/api/events",
+      "/api/analytics/event",
+      "/api/experiments/event",
     ]) {
-      expect(source).toContain(`page.route("**/api/${endpoint}"`);
+      expect(interception).toContain(`pathname === "${endpoint}"`);
     }
-    expect(source).toContain("persisted: false");
-    expect(source).toContain("test_intercepted: true");
-    expect(source).not.toContain("route.continue(");
+    expect(interception).toContain("unexpectedMutations.push");
+    expect(interception).toContain("unexpected_preview_write_blocked");
+    expect(interception).not.toContain("route.continue(");
   });
 
-  it("installs telemetry interception before either scenario navigates", () => {
-    const beforeEach = source.indexOf("test.beforeEach");
-    const install = source.indexOf("installNoWriteTelemetryRoutes(page)", beforeEach);
-    const navigation = source.indexOf('page.goto("/widget-preview")');
+  it("installs the fail-closed boundary before every scenario navigates", () => {
+    const installs = [...source.matchAll(/installNoWriteInterception\(page/g)].map(
+      (match) => match.index,
+    );
+    const navigations = [...source.matchAll(/page\.goto\(/g)].map(
+      (match) => match.index,
+    );
 
-    expect(beforeEach).toBeGreaterThan(-1);
-    expect(install).toBeGreaterThan(beforeEach);
-    expect(install).toBeLessThan(navigation);
+    expect(navigations.length).toBeGreaterThan(0);
+    expect(installs).toHaveLength(navigations.length);
+    for (let index = 0; index < navigations.length; index += 1) {
+      expect(installs[index]).toBeLessThan(navigations[index]);
+    }
   });
 });

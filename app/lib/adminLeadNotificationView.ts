@@ -3,6 +3,10 @@ import {
   getRecentNotificationActivity,
 } from "./leadNotificationService";
 import type { LeadNotificationRecord } from "./leadNotificationTypes";
+import {
+  loadNeonLeadNotificationOperations,
+  type LeadNotificationOperationsSnapshot,
+} from "./persistence/neonLeadNotificationOperations";
 
 export type AdminLeadNotificationSummary = {
   configured: boolean;
@@ -15,6 +19,7 @@ export type AdminLeadNotificationSummary = {
     skipped: number;
     retryScheduled: number;
   };
+  operations: LeadNotificationOperationsSnapshot | null;
   error?: string;
 };
 
@@ -30,6 +35,7 @@ function empty(configured: boolean, error?: string): AdminLeadNotificationSummar
       skipped: 0,
       retryScheduled: 0,
     },
+    operations: null,
     error,
   };
 }
@@ -53,12 +59,17 @@ export function summarizeNotifications(notifications: LeadNotificationRecord[]):
       skipped: notifications.filter((item) => item.status === "skipped").length,
       retryScheduled: notifications.filter((item) => item.status === "retry_scheduled").length,
     },
+    operations: null,
   };
 }
 
 export async function loadAdminLeadNotificationSummary(limit = 50): Promise<AdminLeadNotificationSummary> {
   try {
-    return summarizeNotifications(await getRecentNotificationActivity(limit));
+    const [notifications, operations] = await Promise.all([
+      getRecentNotificationActivity(limit),
+      loadNeonLeadNotificationOperations().catch(() => null),
+    ]);
+    return { ...summarizeNotifications(notifications), operations };
   } catch (error) {
     const message = error instanceof Error && error.message === "notification_store_not_configured"
       ? undefined

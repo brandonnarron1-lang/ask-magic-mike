@@ -15,7 +15,7 @@ export function PublicInfoPage({ eyebrow, title, intro, sections }: PublicInfoPa
       <section className="bg-[#050505] px-5 py-6 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl"><BlackDiamondHeader /></div>
       </section>
-      <section className="px-5 py-14 sm:px-8 lg:px-10">
+      <section id="page-content" tabIndex={-1} className="px-5 py-14 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-4xl">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#22c6d2]">{eyebrow}</p>
           <h1 className="mt-4 font-serif text-5xl leading-tight text-[#f4ead4] sm:text-6xl">{title}</h1>

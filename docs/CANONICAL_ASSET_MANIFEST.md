@@ -1,18 +1,28 @@
 # Canonical Asset Manifest
 
-Refreshed 2026-08-23 from authenticated Production, GitHub, Vercel, Neon, and
+Refreshed 2026-08-29 from authenticated Production, GitHub, Vercel, Neon, and
 WordPress evidence. Working systems outrank historical packets.
 
 | Asset | Current evidence | Disposition | Decision |
 |---|---|---|---|
 | `/Users/brandonnarron/Projects/ask-magic-mike` | Remote `brandonnarron1-lang/ask-magic-mike`; mature Next.js root `app/` runtime, Neon persistence, Lead Center, widgets, email/Web Push, analytics, tests | **CANONICAL** | Preserve Git history and continue only through reviewed PRs |
-| Vercel `eyes-up-industries/ask-magic-mike` | Project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; Production `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` from `main` merge `b450b41c66c6740bd20571cdbe7d8caf82e92d5e`; `www` live and apex 308 redirect | **CANONICAL** | Sole Ask Magic Mike Production application/domain owner |
-| Neon `bitter-star-20214385` | Production branch `br-round-base-auh6h2wd`, endpoint `ep-proud-bonus-autwv60g`, database `neondb`; canonical capture is healthy while durable-limiter readiness remains the PR #209 gate | **CANONICAL** | One lead/event/notification/audit source of truth; no Supabase Production runtime |
+| Vercel `eyes-up-industries/ask-magic-mike` | Project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; Production `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` from `main` merge `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`; `www` live and apex 308 redirect | **CANONICAL** | Sole Ask Magic Mike Production application/domain owner |
+| Neon `bitter-star-20214385` | Production branch `br-round-base-auh6h2wd`, endpoint `ep-proud-bonus-autwv60g`, database `neondb`; canonical capture and durable limiter readiness are healthy | **CANONICAL** | One lead/event/notification/audit source of truth; no Supabase Production runtime |
 | `OurTownProperties.com` WordPress | Existing SEO/FlexMLS/Gravity Forms surfaces; signed bridge 1.1.0; Form 3 only; duplicate Form 3 native alert inactive | **WORDPRESS BRIDGE ONLY** | Preserve URLs/content/entries; do not create a competing lead database |
-| PRs #183, #184, #185, #193, #196, #194, and #195 | Released campaign, proof-ledger, owned-demand, privacy/KPI, verifier, iOS handoff, and conversion-identity work culminating in Production `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` | **REFERENCE/DOCUMENTATION** | Released; every application/migration gate is exhausted and not reusable |
-| PR #209 / `codex/phase9-controlled-release-candidate-20260823` | Atomic cumulative application candidate from #202 through #208 plus fail-closed Neon Preview endpoint attestation and current release-authority reconciliation | **MERGE INTO CANONICAL** | Sole current application release vehicle; remain Draft until exact-head proof and exact Production gate |
+| PRs #183, #184, #185, #193, #196, #194, #195, and #209 | Released campaign, proof-ledger, owned-demand, privacy/KPI, verifier, iOS handoff, conversion-identity, and atomic durability work culminating in Production `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` | **REFERENCE/DOCUMENTATION** | Released; every consumed application/migration gate is exhausted and not reusable |
+| PR #210 / `codex/phase9-canonical-alias-consolidation-20260823` | Query-preserving permanent redirects from `/value` and `/we-buy-houses` to the established canonical conversion routes, plus the matching monitor contract | **MERGE INTO CANONICAL** | Next ordered application release vehicle; require fresh exact-head proof and its separate gate |
+| PR #232 / `codex/phase9-google-business-profile-square-assets-20260829` | Protected 720x720 Google Business Profile asset support inside the existing Distribution Command, stacked after PR #231 | **MERGE INTO CANONICAL** | Preserve as one ordered application candidate; it cannot publish externally or bypass predecessors |
+| PR #233 / `codex/phase9-plan-social-identity-20260829` | Shared-metadata correction aligning `/plan` canonical and Open Graph identity, stacked exactly after PR #232 | **MERGE INTO CANONICAL** | Preserve as an ordered application candidate; require predecessor releases, refresh, exact-head proof, and its separate gate |
+| PR #234 / `codex/phase9-notification-operations-truth-20260829` | Exact live-only notification queue/health aggregates inside the existing protected Lead Center and admin-health route, stacked exactly after PR #233 | **MERGE INTO CANONICAL** | Preserve as the current reviewed tail; no new queue/provider/database and no release authority before every predecessor plus its separate gate |
+| PR #235 / `codex/phase9-wordpress-seller-intent-truth-20260829` | Protected, read-only canonical/capture-owner decision packet for the existing We Buy Homes / We Buy Houses conflict, stacked exactly after PR #234 | **MERGE INTO CANONICAL** | Preserve one decision boundary; no tracked publication href or WordPress mutation is issued |
+| PR #236 / `codex/phase9-wordpress-homepage-visibility-truth-20260829` | Schema-v2 visibility truth on the existing WordPress readiness manifest; blocks the live hidden homepage CTA from false-ready publication, stacked exactly after PR #235 | **MERGE INTO CANONICAL** | Preserve as the ordered application tail; the application gate cannot publish WordPress and no href-only WordPress gate is currently requestable |
+| PR #209 / `codex/phase9-controlled-release-candidate-20260823` | Released atomic cumulative application work from #202 through #208 plus fail-closed Neon Preview endpoint attestation and durable limiter readiness | **REFERENCE/DOCUMENTATION** | Merged and accepted; its gate is exhausted |
 | PRs #202 through #208 | Incremental review branches whose cumulative work is represented once in PR #209 | **REFERENCE/DOCUMENTATION** | Preserve branches, rescue refs, checks, and evidence; no independent merge or Production authority |
-| PR #187 | Evidence-first KPI target register with migration | **UNKNOWN / NEEDS OWNER CONFIRMATION** | Defer until genuine eligible demand supplies a defensible baseline; not part of PR #209 |
+| PR #221 | Ordered cross-domain measurement consolidation containing exact PR #212 as an ancestor | **MERGE INTO CANONICAL** | Sole cross-domain candidate; remains held behind predecessors and live consent remediation |
+| Closed PR #212 | Preserved source candidate for consent-gated runtime and WordPress bridge 1.2.0 | **REFERENCE/DOCUMENTATION** | Closed as superseded by PR #221 with all history, package evidence, and rollback assets preserved |
+| PR #225 | Read-only 42-contract baseline and target-readiness layer on the existing Growth Command Center | **MERGE INTO CANONICAL** | Reuses existing aggregates and Distribution Command; no target writer or migration; remains ordered after every predecessor |
+| PR #226 | Documentation/test-only release-authority deduplication on exact PR #225 | **MERGE INTO CANONICAL** | Records closed PRs #187 and #212 as preserved superseded evidence, removes their parallel gates, and adds no application release vehicle |
+| Closed PR #187 | Historical KPI target register, separate target page/writer, and migration | **REFERENCE/DOCUMENTATION** | Superseded by PR #225's evidence-first read-only replacement; preserve history but do not revive its parallel gate before genuine eligible demand exists |
 | `codex/phase9-owned-demand-asset-studio-20260821` | Historical source for protected deterministic 4:5/story/QR exports | **REFERENCE/DOCUMENTATION** | Useful work is consolidated once in PR #185; do not release as a second stack |
 | PR #182 | Historical mixed candidate whose unique runtime/security work is preserved in the released current stack | **REFERENCE/DOCUMENTATION** | Superseded; duplicated authority docs/scanners must not merge as a second control plane |
 | PR #179 | Historical source of the unique token-scoped iOS Home Screen Web Push handoff | **REFERENCE/DOCUMENTATION** | Superseded by released PR #194; preserve history, but do not merge the old stack |
@@ -42,7 +52,7 @@ WordPress evidence. Working systems outrank historical packets.
   approved registered provider.
 - External campaign platforms remain human-operated; the application records
   evidence only after the native action occurs.
-- Historical PR #179, PR #182, PR #187, and incremental PRs #202 through #208
+- Historical PR #179, PR #182, closed PR #187, closed PR #212, and incremental PRs #202 through #208
   remain preserved. Their released or candidate work is represented once in
   the current stack, and none is an independent release vehicle. No branch,
   commit, worktree, or exact-head evidence was deleted.

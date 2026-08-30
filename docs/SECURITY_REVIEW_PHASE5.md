@@ -49,8 +49,9 @@ regression coverage is in `tests/admin/rbac-security-headers.test.ts`.
 
 ## Residual risks and holds
 
-1. Facebook's crawler is blocked by the Our Town hosting WAF on two exact public
-   GET/HEAD paths. No broad bypass was applied. The exact hosting action is in
+1. Facebook's crawler is blocked by the proven server-global Apache
+   `authz_core` rule on two exact public pages. No broad bypass was applied.
+   The bounded hosting action is in
    `META_CRAWLER_HOSTING_OPERATOR_ACTION.md`.
 2. Legacy Supabase adapters remain for historical compatibility tests, but the
    production Neon-only boundary and system-isolation tests pass. Supabase must

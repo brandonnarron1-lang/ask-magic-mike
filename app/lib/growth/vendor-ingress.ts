@@ -32,6 +32,7 @@ export type SupportedGrowthVendor = (typeof SUPPORTED_GROWTH_VENDORS)[number];
 
 export interface NormalizedVendorLead {
   vendor: SupportedGrowthVendor;
+  isTest: boolean | null;
   externalLeadId: string | null;
   externalEventId: string | null;
   receivedAt: string;
@@ -269,9 +270,13 @@ export function normalizeVendorLead(input: {
   const consentCall = firstBoolean(payload, [
     "consent_call", "consent.call", "permissions.call", "opt_in.call", "call_consent",
   ]);
+  const isTest = firstBoolean(payload, [
+    "is_test", "isTest", "test", "metadata.is_test", "metadata.isTest",
+  ]);
   const reviewReasons: string[] = [];
   if (!externalLeadId) reviewReasons.push("missing_external_lead_id");
   if (!email && !phone) reviewReasons.push("missing_contact_method");
+  if (isTest == null) reviewReasons.push("test_state_not_explicit");
   if (consentEmail == null && consentSms == null && consentCall == null) {
     reviewReasons.push("consent_not_explicit");
   }
@@ -279,6 +284,7 @@ export function normalizeVendorLead(input: {
 
   return {
     vendor,
+    isTest,
     externalLeadId,
     externalEventId,
     receivedAt: receivedAt.toISOString(),

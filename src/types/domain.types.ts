@@ -428,6 +428,7 @@ export interface AnalyticsEvent {
 export interface TrackEventParams {
   eventName: AnalyticsEventName;
   sessionId?: string;
+  funnelSessionId?: string;
   leadId?: string;
   agentId?: string;
   properties?: Record<string, unknown>;

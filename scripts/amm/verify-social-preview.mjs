@@ -119,6 +119,60 @@ export function hasConfidentialMlsLeak(html) {
   return MLS_CONFIDENTIAL_PATTERNS.some((p) => p.test(html));
 }
 
+/**
+ * Builds safe operator guidance for detected crawler blocks.
+ * The exact OTP Facebook-only condition has authenticated Apache evidence;
+ * any different failure remains unknown and must not inherit that diagnosis.
+ */
+export function buildCrawlerRemediation(blockedSummary) {
+  const expectedOtpFacebookPaths = new Set([
+    "/ask-mike/",
+    "/agents/mike-eatmon/",
+  ]);
+  const observedOtpFacebookPaths = new Set();
+
+  const hasOnlyExpectedOtpFacebookBlocks = blockedSummary.every(
+    ({ url, crawler, status }) => {
+      try {
+        const parsed = new URL(url);
+        const isExpected =
+          parsed.hostname === "www.ourtownproperties.com" &&
+          expectedOtpFacebookPaths.has(parsed.pathname) &&
+          crawler === "facebook" &&
+          status === 403;
+
+        if (isExpected) observedOtpFacebookPaths.add(parsed.pathname);
+        return isExpected;
+      } catch {
+        return false;
+      }
+    }
+  );
+
+  const isKnownOtpFacebookBlock =
+    blockedSummary.length === expectedOtpFacebookPaths.size &&
+    hasOnlyExpectedOtpFacebookBlocks &&
+    observedOtpFacebookPaths.size === expectedOtpFacebookPaths.size;
+
+  if (isKnownOtpFacebookBlock) {
+    return [
+      "Known OTP Facebook-only block: authenticated evidence identifies the server-global Apache",
+      "facebookexternalhit -> bad_bots classifier and Require not env bad_bots denial.",
+      "Do not create a broad user-agent whitelist or disable ModSecurity/Wordfence.",
+      "Give the host docs/META_CRAWLER_HOSTING_OPERATOR_ACTION.md and require the bounded",
+      "per-vhost/account GET/HEAD override, config test, rollback, and 42/42 verification.",
+      "Re-run: pnpm run amm:verify:social-preview",
+    ];
+  }
+
+  return [
+    "This block differs from the known OTP Facebook-only condition.",
+    "Inspect the affected host's current edge, firewall, and application logs before changing policy.",
+    "Do not create a broad crawler allowlist from this result.",
+    "Re-run after a narrowly reviewed correction: pnpm run amm:verify:social-preview",
+  ];
+}
+
 // ---------------------------------------------------------------------------
 // URLs under test
 // ---------------------------------------------------------------------------
@@ -224,9 +278,11 @@ async function runChecks() {
       const { status, html } = await fetchHtmlWithAgent(target.url, CRAWLER_AGENTS.browser);
       baselineStatus = status;
       baselineHtml = html;
-      status === 200
-        ? ok(`Browser baseline: HTTP ${status}`)
-        : err(`Browser baseline: HTTP ${status}`);
+      if (status === 200) {
+        ok(`Browser baseline: HTTP ${status}`);
+      } else {
+        err(`Browser baseline: HTTP ${status}`);
+      }
     } catch (e) {
       err("Browser baseline: fetch failed", String(e));
     }
@@ -273,16 +329,20 @@ async function runChecks() {
 
     // Step 4: stale Vercel URL check
     if (target.checkStale && baselineHtml) {
-      !hasStaleVercelUrl(baselineHtml)
-        ? ok("No stale ask-magic-mike.vercel.app URL")
-        : err("STALE URL: ask-magic-mike.vercel.app found in HTML");
+      if (hasStaleVercelUrl(baselineHtml)) {
+        err("STALE URL: ask-magic-mike.vercel.app found in HTML");
+      } else {
+        ok("No stale ask-magic-mike.vercel.app URL");
+      }
     }
 
     // Step 5: canonical ask-mike link check
     if (target.checkAskMike && baselineHtml) {
-      hasCanonicalAskMikeLink(baselineHtml)
-        ? ok("Canonical ourtownproperties.com/ask-mike link present")
-        : warn("Canonical ask-mike link not detected (may use a different CTA path)");
+      if (hasCanonicalAskMikeLink(baselineHtml)) {
+        ok("Canonical ourtownproperties.com/ask-mike link present");
+      } else {
+        warn("Canonical ask-mike link not detected (may use a different CTA path)");
+      }
     }
   }
 
@@ -299,15 +359,9 @@ async function runChecks() {
       console.log(`    ${b.url}  →  ${b.crawler}  HTTP ${b.status}`);
     }
     console.log("\n  REMEDIATION:");
-    console.log("    The affected host is blocking social crawlers by user agent.");
-    console.log("    This is typically a Cloudflare Bot Fight Mode or WAF rule on the host.");
-    console.log("    To fix on OTP WordPress:");
-    console.log("      1. Log into Cloudflare or the host WAF for ourtownproperties.com");
-    console.log("      2. Allow FacebookExternalHit, Twitterbot, LinkedInBot, Slackbot, Discordbot");
-    console.log("      3. Or add a firewall exception for these user agent strings");
-    console.log("      4. Re-run: pnpm run amm:verify:social-preview");
-    console.log("    Ask Magic Mike (askmagicmike.com) is hosted on Vercel which does not");
-    console.log("    block social crawlers by default — check Vercel Edge Config if AMM blocks.");
+    for (const line of buildCrawlerRemediation(blockedSummary)) {
+      console.log(`    ${line}`);
+    }
   }
 
   if (fail === 0) {

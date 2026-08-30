@@ -113,6 +113,7 @@ const PUBLIC_ATTRIBUTION_VALUE_REGISTRY: Record<PublicAttributionKey, ReadonlySe
     "askmagicmike.com",
     "campaign_preset",
     "chatgpt.com",
+    "consumer_share",
     "direct",
     "email",
     "email_list",
@@ -251,6 +252,7 @@ const PUBLIC_EVENT_PROPERTY_KEYS: Record<string, readonly string[]> = {
   email_submitted: ["funnel_name", "step_name"],
   phone_submit: ["funnel_name", "step_name"],
   phone_submitted: ["funnel_name", "step_name"],
+  lead_submit_failed: ["funnel_name", "lead_source_surface", "step_name"],
   consent_accepted: ["consent_language_version", "funnel_name"],
   consent_granted: ["consent_language_version", "funnel_name"],
   consent_declined: ["consent_language_version", "funnel_name"],
@@ -295,6 +297,8 @@ const PUBLIC_EVENT_PROPERTY_KEYS: Record<string, readonly string[]> = {
   review_plan_saved: ["completed_count", "focus", "goal", "horizon"],
   review_plan_task_completed: ["completed_count", "focus", "goal", "horizon", "task_id"],
   review_plan_handoff_clicked: ["completed_count", "focus", "goal", "horizon"],
+  referral_share_handoff: ["share_method", "surface"],
+  referral_link_copied: ["share_method", "surface"],
 };
 
 const STRING_PROPERTY_KEYS = new Set([
@@ -338,6 +342,7 @@ const STRING_PROPERTY_KEYS = new Set([
   "rating",
   "referrerType",
   "request_surface",
+  "share_method",
   "source",
   "status",
   "step_name",
@@ -485,10 +490,12 @@ const ENUM_VALUES: Partial<Record<string, ReadonlySet<string>>> = {
     "seller_page",
     "widget",
   ]),
+  share_method: new Set(["clipboard", "native"]),
   rating: new Set(["good", "needs-improvement", "poor"]),
   step_name: new Set([
     "address",
     "appointment_request",
+    "contact",
     "email",
     "hero",
     "landing",
@@ -533,6 +540,15 @@ const ENUM_VALUES: Partial<Record<string, ReadonlySet<string>>> = {
 };
 
 const PUBLIC_ANALYTICS_EVENTS = new Set(Object.keys(PUBLIC_EVENT_PROPERTY_KEYS));
+const CANONICAL_LEDGER_PROTECTED_EVENTS = new Set([
+  "lead_created",
+  "widget_lead_created",
+  "lead_qualified",
+  "appointment_requested",
+  "notification_queued",
+  "notification_delivered",
+  "notification_failed",
+]);
 
 function decoded(value: string) {
   try {
@@ -670,6 +686,14 @@ export function safeAnalyticsProperties(
 
 export function isApprovedPublicAnalyticsEvent(eventName: string) {
   return PUBLIC_ANALYTICS_EVENTS.has(eventName);
+}
+
+/**
+ * These events may be displayed to browser analytics after a trusted outcome,
+ * but a public ingestion route must never author their canonical Neon row.
+ */
+export function isCanonicalLedgerProtectedEvent(eventName: string) {
+  return CANONICAL_LEDGER_PROTECTED_EVENTS.has(eventName);
 }
 
 export function safePublicAnalyticsProperties(

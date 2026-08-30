@@ -6,6 +6,22 @@ Mode: read-only public precondition generation
 
 External mutation: none
 
+## 2026-08-29 visibility correction
+
+The historical structural audit below correctly identified the homepage href,
+but did not prove that its enclosing component was visible. Fresh browser and
+source inspection found public CSS suppressing `.amm-cta` and
+`.amm-cta--dark` with `display:none !important`. The corrected homepage
+manifest now reports `hidden_target`, `targetVisibility=hidden_by_known_css`,
+one hidden target, two hidden selectors, and
+`publicationBlocked=true`. The current privacy-safe precondition is
+`60614f9ce7f7e7fe165a6c3cf0d142a6669faf497fee4f94386aff34827d0638`.
+
+The homepage href-only publication procedure and approval phrase in this
+historical packet are superseded until a visible placement, desktop/mobile
+acceptance, and page-149 rollback are reviewed. See
+`WORDPRESS_HOMEPAGE_VISIBILITY_TRUTH.md`.
+
 ## Decision
 
 Do not build another funnel, form, lead store, dashboard, publisher, or analytics
@@ -106,11 +122,9 @@ recorded no application POST, console finding, overflow, or framework overlay.
 
 ## First publication candidate
 
-Only the homepage CTA is the recommended first action. It is the broadest
-existing owned-traffic entry point, changes one href on one established page,
-preserves all page content and current public brokerage contact details, and
-routes general intent to the canonical `/ask` funnel with complete placement
-attribution.
+The homepage was the historical recommended first action based on structural
+href evidence. The 2026-08-29 visibility correction supersedes that
+recommendation while the component remains hidden.
 
 The other two manifests prove readiness but do not authorize a bulk edit. They
 remain separate later decisions after homepage acceptance and initial demand
@@ -118,7 +132,9 @@ measurement.
 
 ## Publication procedure and rollback
 
-Immediately before a future homepage edit:
+The following historical href-only procedure is not actionable until a later
+manifest reports `targetVisibility=visible_candidate`. Immediately before any
+future homepage edit:
 
 1. download a fresh homepage manifest from the authenticated Distribution
    Command;

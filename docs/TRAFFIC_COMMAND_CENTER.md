@@ -16,7 +16,7 @@ The Traffic Command Center (`/admin/traffic`) is a read-only, real-time admin pa
 - Weekly executive summary
 - **Launch readiness status** — which links are safe to post right now
 - **UTM Copy Bank** — pre-built tracked URLs for every posting platform
-- **Do Not Post list** — which links must not be posted on Facebook until the host WAF is fixed
+- **Do Not Post list** — which links must not be posted on Facebook until the host Apache crawler rule is corrected
 
 No data is written from this page. No messages are sent. No leads are created.
 
@@ -42,11 +42,11 @@ The Launch Readiness panel appears at the top of the Traffic Command Center and 
 | Field | Meaning |
 |---|---|
 | **AMM Links — Safe ✓** | `askmagicmike.com` links are safe to post on all platforms including Facebook |
-| **OTP Facebook Links — Blocked ⚠** | `ourtownproperties.com` links must NOT be posted on Facebook until the host WAF is fixed |
+| **OTP Facebook Links — Blocked ⚠** | `ourtownproperties.com` links must NOT be posted on Facebook until the host Apache crawler rule is corrected |
 | **Post Here First** | `askmagicmike.com` — use this domain for all social posts right now |
 | **Social Preview Score** | `40/42` — AMM 3/3 pass, OTP 2 Facebook blocks pending |
 
-The **Launch Checklist** shows the exact step-by-step status. Steps marked `✓` are done. Steps marked `!` are blocked by an external action (Regency/host WAF).
+The **Launch Checklist** shows the exact step-by-step status. Steps marked `✓` are done. Steps marked `!` are blocked by an external hosting action.
 
 The **Next Action** callout tells you exactly what to do right now without reading anything else.
 
@@ -89,7 +89,10 @@ All links use `utm_campaign=amm_launch` and only point to approved `askmagicmike
 - `https://www.ourtownproperties.com/ask-mike/`
 - `https://www.ourtownproperties.com/agents/mike-eatmon/`
 
-Facebook's crawler (`facebookexternalhit/1.1`) receives HTTP 403 on `ourtownproperties.com` due to a host-level WAF rule at Liquid Web / Regency. The preview card will appear blank.
+Facebook's crawler (`facebookexternalhit/1.1`) receives HTTP 403 on
+`ourtownproperties.com` because a server-global Apache include assigns it to
+`bad_bots`, then `authz_core` applies `Require not env bad_bots`. The preview
+card will appear blank while the live matrix remains 40/42.
 
 ---
 
@@ -102,7 +105,11 @@ If you post these URLs on Facebook right now:
 - Facebook may down-rank the post.
 - Users who click will still reach the page — the block only affects the preview scraper.
 
-**Resolution:** Contact Regency / Liquid Web support and request that `facebookexternalhit/1.1` be whitelisted for `ourtownproperties.com`. This is a host-side action — no code change in this repo can fix it.
+**Resolution:** Give the hosting administrator
+`META_CRAWLER_HOSTING_OPERATOR_ACTION.md`. It specifies one reversible,
+per-account/per-vhost override limited to GET/HEAD and four public paths. Do
+not request an all-path user-agent whitelist or a ModSecurity disablement. This
+is a host-side action; application code cannot change the server-global rule.
 
 After confirmation, run:
 ```
@@ -134,12 +141,13 @@ The empty-state guidance panel on `/admin/traffic` provides the same three steps
 
 ---
 
-## What to Do When Regency Fixes facebookexternalhit
+## What to Do After the Host Corrects facebookexternalhit
 
-1. Regency / Liquid Web whitelists `facebookexternalhit/1.1` for `ourtownproperties.com`.
+1. The host applies and records the bounded override from
+   `FACEBOOK_CRAWLER_FIREWALL_CHANGE.md`.
 2. Run: `pnpm run amm:verify:social-preview` — expect 42/42.
 3. In `src/lib/admin/traffic-launch-readiness.ts`, set `OTP_FACEBOOK_SAFE = true`.
-4. Commit with message: `fix(admin): mark OTP Facebook previews clear after host WAF fix`.
+4. Commit with message: `fix(admin): mark OTP Facebook previews clear after host Apache fix`.
 5. The Launch Readiness panel will update automatically on next deploy.
 6. You can now post `ourtownproperties.com/ask-mike/` and `/agents/mike-eatmon/` links directly on Facebook.
 
@@ -151,7 +159,7 @@ The empty-state guidance panel on `/admin/traffic` provides the same three steps
 # Confirm funnel is alive (run before posting)
 pnpm run amm:verify:funnel
 
-# Check social preview status (40/42 expected until host WAF fix)
+# Check social preview status (40/42 expected until the bounded host fix)
 pnpm run amm:verify:social-preview || true
 
 # Full validation

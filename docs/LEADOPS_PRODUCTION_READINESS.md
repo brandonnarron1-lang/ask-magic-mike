@@ -70,8 +70,8 @@ All cleaned through `cleanAttribution()` — whitespace trimmed, empty strings n
 
 | Funnel type | Required fields |
 |---|---|
-| `home_value` | `address`, `email`, `phone` |
-| `widget` | `address`, `email`, `phone` |
+| `home_value` | `address`, and at least one of `email` or `phone` |
+| `widget` | `address`, and at least one of `email` or `phone` |
 | `seller` | `address`, `phone` |
 | `chat` | `question` |
 | `appointment` | `email` OR `phone` (either one) |

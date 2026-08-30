@@ -68,7 +68,7 @@ No reset was sent during this snapshot.
   connected to its Vercel or Neon runtime.
 - Legacy deployments remain disconnected from the canonical repository.
 - Social-preview verification remains 40 of 42. Meta alone receives HTTP 403
-  on Our Town `/ask-mike/` and `/agents/mike-eatmon/`; the host-managed WAF is
+  on Our Town `/ask-mike/` and `/agents/mike-eatmon/`; the hosting-layer rule is
   the remaining enforcement layer.
 
 ## Stabilization window

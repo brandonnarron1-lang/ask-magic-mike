@@ -28,7 +28,7 @@ function timelinePoints(timeline?: string) {
   if (/6\s*[-–]\s*12|six\s*to\s*twelve/.test(value)) {
     return { code: "timeline_year", label: "Within a year", points: 6 };
   }
-  return { code: "timeline_unknown", label: "Planning or unknown timeline", points: 2 };
+  return { code: "timeline_unknown", label: "Planning or unknown timeline", points: 0 };
 }
 
 export function scoreLead(payload: LeadPayload): LeadScore {

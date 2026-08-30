@@ -18,6 +18,24 @@ const PUBLICATION_PROOF_SQL_PATH = path.join(
   "tests",
   "owned_demand_publication_proofs_pg17.sql"
 );
+const SPEND_INGRESS_SQL_PATH = path.join(
+  ROOT,
+  "supabase",
+  "tests",
+  "marketing_spend_ingress_pg17.sql"
+);
+const ORGANIC_SEARCH_INGRESS_SQL_PATH = path.join(
+  ROOT,
+  "supabase",
+  "tests",
+  "organic_search_ingress_pg17.sql"
+);
+const LOCAL_PROFILE_PERFORMANCE_INGRESS_SQL_PATH = path.join(
+  ROOT,
+  "supabase",
+  "tests",
+  "local_profile_performance_ingress_pg17.sql"
+);
 
 function fail(message) {
   console.error(message);
@@ -95,6 +113,15 @@ const routingSql = fs.readFileSync(ROUTING_SQL_PATH, "utf8");
 const routing = psql(container, routingSql);
 const publicationProofSql = fs.readFileSync(PUBLICATION_PROOF_SQL_PATH, "utf8");
 const publicationProof = psql(container, publicationProofSql);
+const spendIngressSql = fs.readFileSync(SPEND_INGRESS_SQL_PATH, "utf8");
+const spendIngress = psql(container, spendIngressSql);
+const organicSearchIngressSql = fs.readFileSync(ORGANIC_SEARCH_INGRESS_SQL_PATH, "utf8");
+const organicSearchIngress = psql(container, organicSearchIngressSql);
+const localProfilePerformanceIngressSql = fs.readFileSync(
+  LOCAL_PROFILE_PERFORMANCE_INGRESS_SQL_PATH,
+  "utf8"
+);
+const localProfilePerformanceIngress = psql(container, localProfilePerformanceIngressSql);
 
 const schemaSql = `
 \\pset tuples_only on
@@ -113,9 +140,21 @@ objects as (
     to_regclass('public.lead_notifications') is not null as lead_notifications_exists,
     to_regclass('public.source_attribution') is not null as source_attribution_exists,
     to_regclass('public.owned_demand_publication_proofs') is not null as publication_proofs_exists,
+    to_regclass('public.marketing_spend_import_batches') is not null as spend_import_batches_exists,
+    to_regclass('public.organic_search_import_batches') is not null as organic_search_import_batches_exists,
+    to_regclass('public.local_profile_performance_import_batches') is not null as local_profile_performance_import_batches_exists,
     to_regprocedure(
       'public.record_owned_demand_publication_proof_v1(text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,timestamptz,text,boolean)'
-    ) is not null as publication_proof_function_exists
+    ) is not null as publication_proof_function_exists,
+    to_regprocedure(
+      'public.import_marketing_spend_batch_v1(text,jsonb,text,text,text)'
+    ) is not null as spend_import_function_exists,
+    to_regprocedure(
+      'public.import_organic_search_batch_v1(text,jsonb,text,text,text)'
+    ) is not null as organic_search_import_function_exists,
+    to_regprocedure(
+      'public.import_local_profile_performance_batch_v1(text,jsonb,jsonb,text,text,text)'
+    ) is not null as local_profile_performance_import_function_exists
 ),
 notification_checks as (
   select
@@ -144,6 +183,96 @@ publication_checks as (
     not has_table_privilege('anon', 'public.owned_demand_publication_proofs', 'SELECT') as publication_anon_select_denied,
     not has_table_privilege('authenticated', 'public.owned_demand_publication_proofs', 'SELECT') as publication_authenticated_select_denied
 ),
+spend_checks as (
+  select
+    (select relrowsecurity from pg_class where oid = 'public.marketing_spend_import_batches'::regclass) as spend_receipt_rls_enabled,
+    exists(
+      select 1 from pg_trigger
+      where tgrelid = 'public.marketing_spend_import_batches'::regclass
+        and tgname = 'marketing_spend_import_batches_reject_change'
+        and tgenabled <> 'D'
+        and not tgisinternal
+    ) as spend_receipt_immutable_trigger_exists,
+    not has_table_privilege('service_role', 'public.marketing_spend_import_batches', 'SELECT') as spend_service_select_denied,
+    not has_table_privilege('service_role', 'public.marketing_spend_import_batches', 'INSERT') as spend_service_insert_denied,
+    not has_table_privilege('anon', 'public.marketing_spend_import_batches', 'SELECT') as spend_anon_select_denied,
+    not has_table_privilege('authenticated', 'public.marketing_spend_import_batches', 'SELECT') as spend_authenticated_select_denied,
+    not has_function_privilege(
+      'service_role',
+      'public.import_marketing_spend_batch_v1(text,jsonb,text,text,text)',
+      'EXECUTE'
+    ) as spend_service_execute_denied,
+    not has_function_privilege(
+      'anon',
+      'public.import_marketing_spend_batch_v1(text,jsonb,text,text,text)',
+      'EXECUTE'
+    ) as spend_anon_execute_denied,
+    not has_function_privilege(
+      'authenticated',
+      'public.import_marketing_spend_batch_v1(text,jsonb,text,text,text)',
+      'EXECUTE'
+    ) as spend_authenticated_execute_denied
+),
+organic_search_checks as (
+  select
+    (select relrowsecurity from pg_class where oid = 'public.organic_search_import_batches'::regclass) as organic_search_receipt_rls_enabled,
+    exists(
+      select 1 from pg_trigger
+      where tgrelid = 'public.organic_search_import_batches'::regclass
+        and tgname = 'organic_search_import_batches_reject_change'
+        and tgenabled <> 'D'
+        and not tgisinternal
+    ) as organic_search_receipt_immutable_trigger_exists,
+    not has_table_privilege('service_role', 'public.organic_search_import_batches', 'SELECT') as organic_search_service_select_denied,
+    not has_table_privilege('service_role', 'public.organic_search_import_batches', 'INSERT') as organic_search_service_insert_denied,
+    not has_table_privilege('anon', 'public.organic_search_import_batches', 'SELECT') as organic_search_anon_select_denied,
+    not has_table_privilege('authenticated', 'public.organic_search_import_batches', 'SELECT') as organic_search_authenticated_select_denied,
+    not has_function_privilege(
+      'service_role',
+      'public.import_organic_search_batch_v1(text,jsonb,text,text,text)',
+      'EXECUTE'
+    ) as organic_search_service_execute_denied,
+    not has_function_privilege(
+      'anon',
+      'public.import_organic_search_batch_v1(text,jsonb,text,text,text)',
+      'EXECUTE'
+    ) as organic_search_anon_execute_denied,
+    not has_function_privilege(
+      'authenticated',
+      'public.import_organic_search_batch_v1(text,jsonb,text,text,text)',
+      'EXECUTE'
+    ) as organic_search_authenticated_execute_denied
+),
+local_profile_performance_checks as (
+  select
+    (select relrowsecurity from pg_class where oid = 'public.local_profile_performance_import_batches'::regclass) as local_profile_receipt_rls_enabled,
+    exists(
+      select 1 from pg_trigger
+      where tgrelid = 'public.local_profile_performance_import_batches'::regclass
+        and tgname = 'local_profile_performance_import_batches_reject_change'
+        and tgenabled <> 'D'
+        and not tgisinternal
+    ) as local_profile_receipt_immutable_trigger_exists,
+    not has_table_privilege('service_role', 'public.local_profile_performance_import_batches', 'SELECT') as local_profile_service_select_denied,
+    not has_table_privilege('service_role', 'public.local_profile_performance_import_batches', 'INSERT') as local_profile_service_insert_denied,
+    not has_table_privilege('anon', 'public.local_profile_performance_import_batches', 'SELECT') as local_profile_anon_select_denied,
+    not has_table_privilege('authenticated', 'public.local_profile_performance_import_batches', 'SELECT') as local_profile_authenticated_select_denied,
+    not has_function_privilege(
+      'service_role',
+      'public.import_local_profile_performance_batch_v1(text,jsonb,jsonb,text,text,text)',
+      'EXECUTE'
+    ) as local_profile_service_execute_denied,
+    not has_function_privilege(
+      'anon',
+      'public.import_local_profile_performance_batch_v1(text,jsonb,jsonb,text,text,text)',
+      'EXECUTE'
+    ) as local_profile_anon_execute_denied,
+    not has_function_privilege(
+      'authenticated',
+      'public.import_local_profile_performance_batch_v1(text,jsonb,jsonb,text,text,text)',
+      'EXECUTE'
+    ) as local_profile_authenticated_execute_denied
+),
 data_counts as (
   select
     (select count(*) from public.leads)::int as leads_count,
@@ -158,6 +287,9 @@ select jsonb_build_object(
   'objects', (select row_to_json(objects) from objects),
   'notification_checks', (select row_to_json(notification_checks) from notification_checks),
   'publication_checks', (select row_to_json(publication_checks) from publication_checks),
+  'spend_checks', (select row_to_json(spend_checks) from spend_checks),
+  'organic_search_checks', (select row_to_json(organic_search_checks) from organic_search_checks),
+  'local_profile_performance_checks', (select row_to_json(local_profile_performance_checks) from local_profile_performance_checks),
   'data_counts', (select row_to_json(data_counts) from data_counts)
 )::text;
 `;
@@ -181,7 +313,10 @@ const objectsOk =
   parsed &&
   Object.values(parsed.objects ?? {}).every((value) => value === true) &&
   Object.values(parsed.notification_checks ?? {}).every((value) => value === true) &&
-  Object.values(parsed.publication_checks ?? {}).every((value) => value === true);
+  Object.values(parsed.publication_checks ?? {}).every((value) => value === true) &&
+  Object.values(parsed.spend_checks ?? {}).every((value) => value === true) &&
+  Object.values(parsed.organic_search_checks ?? {}).every((value) => value === true) &&
+  Object.values(parsed.local_profile_performance_checks ?? {}).every((value) => value === true);
 
 const summary = {
   generated_at_utc: new Date().toISOString(),
@@ -194,6 +329,9 @@ const summary = {
   expected_final_migration_version: latestExpectedVersion,
   routing_sla_sql_passed: routing.status === 0,
   publication_proof_sql_passed: publicationProof.status === 0,
+  marketing_spend_ingress_sql_passed: spendIngress.status === 0,
+  organic_search_ingress_sql_passed: organicSearchIngress.status === 0,
+  local_profile_performance_ingress_sql_passed: localProfilePerformanceIngress.status === 0,
   schema_sql_passed: schema.status === 0,
   migration_status_passed: migrationOk,
   object_status_passed: !!objectsOk,
@@ -211,6 +349,9 @@ writeJson(SUMMARY_PATH, summary);
 if (
   routing.status !== 0 ||
   publicationProof.status !== 0 ||
+  spendIngress.status !== 0 ||
+  organicSearchIngress.status !== 0 ||
+  localProfilePerformanceIngress.status !== 0 ||
   schema.status !== 0 ||
   !migrationOk ||
   !objectsOk

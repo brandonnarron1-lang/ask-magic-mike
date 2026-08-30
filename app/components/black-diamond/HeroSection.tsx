@@ -50,7 +50,11 @@ export function HeroSection() {
       <div className="relative z-10 mx-auto flex min-h-[96svh] w-full max-w-7xl flex-col px-5 py-6 sm:px-8 lg:px-10">
         <BlackDiamondHeader onAsk={() => trackHero("ask_mike_chat")} />
 
-        <div className="flex flex-1 items-end pb-12 pt-20 md:items-center md:pb-0 md:pt-0">
+        <div
+          id="page-content"
+          tabIndex={-1}
+          className="flex flex-1 items-end pb-12 pt-20 md:items-center md:pb-0 md:pt-0"
+        >
           <div className="max-w-3xl">
             <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#e2c06f]">
               Our Town Properties | Wilson, NC

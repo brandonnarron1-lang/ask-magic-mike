@@ -1,6 +1,20 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { loadGrowthIntelligence } from "../../lib/growthIntelligenceView";
+import {
+  buildOpportunityDecisionPacket,
+  type GrowthOpportunityFreshness,
+} from "../../lib/growth/opportunity-decision";
+import {
+  buildGrowthBaselineReadiness,
+  formatGrowthBaselineValue,
+  type GrowthBaselineState,
+} from "../../lib/growth/baseline-target-readiness";
+import {
+  buildGrowthCapabilityLedger,
+  growthCapabilityStateLabel,
+  type GrowthCapabilityState,
+} from "../../lib/growth/capability-ledger";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 
 export const dynamic = "force-dynamic";
@@ -138,7 +152,14 @@ function StateBanner({
 
 function Flag({ value }: { value: string }) {
   const label = value.replaceAll("_", " ");
-  const critical = ["spend_missing", "conversion_tracking_gap", "appointment_gap"].includes(value);
+  const critical = [
+    "spend_missing",
+    "conversion_tracking_gap",
+    "appointment_gap",
+    "closed_revenue_missing",
+    "referral_fee_review_required",
+    "negative_tracked_contribution",
+  ].includes(value);
   return (
     <span className={`rounded-full border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.1em] ${
       critical
@@ -159,6 +180,63 @@ function SampleStatus({ value }: { value: "collecting" | "directional" | "operat
   return (
     <span className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.11em] ${tone}`}>
       {value}
+    </span>
+  );
+}
+
+function BaselineStatePill({ value }: { value: GrowthBaselineState }) {
+  const tone = value === "measured"
+    ? "border-[#4a8c6f66] bg-[#071712] text-[#83dab4]"
+    : value === "directional"
+      ? "border-[#4baab866] bg-[#06171b] text-[#7ee7f1]"
+      : value === "insufficient_sample"
+        ? "border-[#cda24a55] bg-[#171207] text-[#e4c36f]"
+        : value === "not_instrumented"
+          ? "border-[#8f6eb766] bg-[#120b1c] text-[#cbb1ef]"
+          : "border-[#a21f3d66] bg-[#2a0710] text-[#ff9ab1]";
+  return (
+    <span className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.11em] ${tone}`}>
+      {value.replaceAll("_", " ")}
+    </span>
+  );
+}
+
+function CapabilityStatePill({ value }: { value: GrowthCapabilityState }) {
+  const tone = value === "production_live"
+    ? "border-[#4a8c6f66] bg-[#071712] text-[#83dab4]"
+    : value === "release_candidate"
+      ? "border-[#4baab866] bg-[#06171b] text-[#7ee7f1]"
+      : value === "operator_gate"
+        ? "border-[#cda24a66] bg-[#171207] text-[#e4c36f]"
+        : value === "host_gate"
+          ? "border-[#d9783666] bg-[#1d0f07] text-[#f2a36d]"
+          : value === "external_dependency"
+            ? "border-[#8f6eb766] bg-[#120b1c] text-[#cbb1ef]"
+            : "border-[#a21f3d66] bg-[#2a0710] text-[#ff9ab1]";
+  return (
+    <span className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.11em] ${tone}`}>
+      {growthCapabilityStateLabel(value)}
+    </span>
+  );
+}
+
+function FreshnessStatus({
+  value,
+  label,
+}: {
+  value: GrowthOpportunityFreshness;
+  label: string;
+}) {
+  const tone = value === "current"
+    ? "border-[#4a8c6f66] bg-[#071712] text-[#83dab4]"
+    : value === "recent"
+      ? "border-[#4baab866] bg-[#06171b] text-[#7ee7f1]"
+      : value === "stale"
+        ? "border-[#a21f3d66] bg-[#2a0710] text-[#ff9ab1]"
+        : "border-white/10 bg-white/[.03] text-[#a89c8b]";
+  return (
+    <span className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.11em] ${tone}`}>
+      {label}
     </span>
   );
 }
@@ -233,6 +311,10 @@ export default async function GrowthCommandCenterPage({
   const windowDays = parseWindow(params.window);
   const data = await loadGrowthIntelligence(windowDays);
   const summary = data.summary;
+  const baselineReadiness = buildGrowthBaselineReadiness(data);
+  const capabilityLedger = buildGrowthCapabilityLedger({
+    currentTailInProduction: process.env.VERCEL_ENV === "production",
+  });
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_75%_0%,rgba(145,19,50,.17),transparent_34%),radial-gradient(circle_at_15%_15%,rgba(205,162,74,.11),transparent_30%),#040404] px-4 py-7 text-[#f4ead4] sm:px-6 sm:py-10">
@@ -263,10 +345,15 @@ export default async function GrowthCommandCenterPage({
             <nav className="flex flex-wrap gap-2" aria-label="Lead Center navigation">
               {[
                 ["Lead inbox", "/admin/leads"],
+                ["Distribution", "/admin/distribution"],
                 ["Reporting", "/admin/reporting"],
                 ["Allocation", "/admin/allocation"],
                 ["Action queue", "/admin/action-queue"],
                 ["Experiments", "/admin/experiments"],
+                ["Vendor ingress", "/admin/growth/vendor-ingress"],
+                ["Spend ingress", "/admin/growth/spend-ingress"],
+                ["Organic radar", "/admin/growth/search-ingress"],
+                ["Local profile", "/admin/growth/local-profile-ingress"],
               ].map(([label, href]) => (
                 <Link
                   key={href}
@@ -299,15 +386,234 @@ export default async function GrowthCommandCenterPage({
           <StateBanner configured={data.configured} schemaReady={data.schemaReady} error={data.error} />
         </div>
 
+        <div className="mt-5">
+          <Panel
+            eyebrow="Capability authority ledger"
+            title="Build once. Activate deliberately."
+            note="This is the canonical map of implemented capability, release state, external dependency, and prohibited authority. It performs no mutation and grants no approval."
+          >
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5" aria-label="Capability authority summary">
+              <MetricCard
+                label="Production live"
+                value={capabilityLedger.counts.production_live}
+                note="Established operating capability"
+                emphasis
+              />
+              <MetricCard
+                label="Reviewed candidate"
+                value={capabilityLedger.counts.release_candidate}
+                note="Preserve the existing release train"
+              />
+              <MetricCard
+                label="Human or host gate"
+                value={capabilityLedger.counts.operator_gate + capabilityLedger.counts.host_gate}
+                note="Prepared, not authorized"
+              />
+              <MetricCard
+                label="External dependency"
+                value={capabilityLedger.counts.external_dependency}
+                note="Contract, credentials, or licensed data"
+              />
+              <MetricCard
+                label="Prohibited"
+                value={capabilityLedger.counts.prohibited}
+                note="No unrestricted autonomy"
+              />
+            </div>
+
+            <div className="mt-4 rounded-xl border border-[#4baab833] bg-[#061317] px-4 py-3 text-xs leading-6 text-[#c7e7eb]">
+              Rendering context: <strong className="text-[#7ee7f1]">{capabilityLedger.generatedFor.replaceAll("_", " ")}</strong>. A reviewed candidate is not Production merely because its tests or Preview deployment pass.
+            </div>
+
+            <details className="group mt-4 rounded-xl border border-white/10 bg-black/30 p-4">
+              <summary className="cursor-pointer list-none text-xs font-bold uppercase tracking-[0.12em] text-[#d8c9aa] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f0cf79]">
+                <span className="inline-flex items-center gap-2">
+                  <span aria-hidden="true" className="text-[#d1aa53] transition group-open:rotate-90">›</span>
+                  Inspect all {capabilityLedger.items.length} capability decisions
+                </span>
+              </summary>
+              <div className="mt-4 grid gap-3 lg:grid-cols-2" aria-label="Canonical capability decisions">
+                {capabilityLedger.items.map((item) => (
+                  <article key={item.key} className="min-w-0 rounded-xl border border-white/[.08] bg-[#080808] p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.13em] text-[#8f8778]">{item.domain}</p>
+                        <h3 className="mt-2 font-serif text-xl text-[#f4ead4]">{item.label}</h3>
+                      </div>
+                      <CapabilityStatePill value={item.state} />
+                    </div>
+                    <p className="mt-3 text-xs leading-6 text-[#b8ad9c]">{item.summary}</p>
+                    <div className="mt-4 rounded-lg border border-white/[.07] bg-black/35 p-3">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.13em] text-[#8f8778]">Existing evidence</p>
+                      <ul className="mt-2 list-disc space-y-1.5 pl-4 text-[11px] leading-5 text-[#a89c8b]">
+                        {item.evidence.map((evidence) => <li key={evidence}>{evidence}</li>)}
+                      </ul>
+                    </div>
+                    <div className="mt-3 rounded-lg border border-[#cda24a33] bg-[#171107] p-3">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.13em] text-[#d1aa53]">Next allowed action</p>
+                      <p className="mt-2 text-[11px] leading-5 text-[#e2d5bd]">{item.nextAction}</p>
+                    </div>
+                    {item.approvalGate ? (
+                      <details className="mt-3 rounded-lg border border-[#a21f3d44] bg-[#19080d] p-3">
+                        <summary className="cursor-pointer text-[9px] font-bold uppercase tracking-[0.13em] text-[#ff9ab1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff9ab1]">
+                          Exact unconsumed approval gate
+                        </summary>
+                        <code className="mt-2 block whitespace-pre-wrap break-words text-[10px] leading-5 text-[#ffdbe4]">{item.approvalGate}</code>
+                      </details>
+                    ) : null}
+                    <Link
+                      href={item.href}
+                      className="mt-4 inline-flex min-h-10 items-center rounded-lg border border-white/10 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.11em] text-[#d8c9aa] transition hover:border-[#cda24a66] hover:text-[#f0cf79] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f0cf79]"
+                    >
+                      Open existing system
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            </details>
+          </Panel>
+        </div>
+
+        <div className="mt-5">
+          <Panel
+            eyebrow="Baseline and target readiness"
+            title={baselineReadiness.gateLabel}
+            note={`Canonical ${windowDays}-day evidence only. Numeric target entry is disabled; this view cannot record or approve a target.`}
+          >
+            <div className={`rounded-xl border p-5 ${
+              baselineReadiness.gate === "activation_required"
+                ? "border-[#cda24a66] bg-[linear-gradient(135deg,#1b1206,#090705)]"
+                : baselineReadiness.gate === "owner_review_possible"
+                  ? "border-[#4a8c6f66] bg-[#071712]"
+                  : baselineReadiness.gate === "unavailable"
+                    ? "border-[#a21f3d66] bg-[#2a0710]"
+                    : "border-[#4baab866] bg-[#06171b]"
+            }`}>
+              <div className="flex flex-wrap items-start justify-between gap-5">
+                <div className="max-w-4xl">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#d1aa53]">
+                    Next evidence-backed decision
+                  </p>
+                  <p className="mt-3 text-sm leading-7 text-[#e2d5bd]">{baselineReadiness.priorityAction}</p>
+                </div>
+                <Link
+                  href={baselineReadiness.priorityHref}
+                  className="inline-flex min-h-11 items-center rounded-lg border border-[#cda24a66] bg-black/30 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#f0cf79] transition hover:border-[#f0cf79] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f0cf79]"
+                >
+                  {baselineReadiness.priorityHref === "/admin/distribution"
+                    ? "Open existing Distribution Command"
+                    : "Review Growth evidence"}
+                </Link>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+              <MetricCard
+                label="Eligible live leads"
+                value={summary.leads}
+                note="QA and suppressed rows excluded"
+                emphasis
+              />
+              <MetricCard
+                label="Measured baselines"
+                value={baselineReadiness.counts.measured}
+                note="Minimum evidence threshold met"
+              />
+              <MetricCard
+                label="Directional"
+                value={baselineReadiness.counts.directional}
+                note="Visible, never target-ready"
+              />
+              <MetricCard
+                label="Still collecting"
+                value={baselineReadiness.counts.insufficient_sample}
+                note="Unknown is not zero"
+              />
+              <MetricCard
+                label="Instrumentation gaps"
+                value={baselineReadiness.counts.not_instrumented}
+                note="Named evidence contracts only"
+              />
+              <MetricCard
+                label="Unavailable"
+                value={baselineReadiness.counts.unavailable}
+                note="Required aggregate could not be read"
+              />
+              <MetricCard
+                label="Target entry"
+                value="Locked"
+                note={`${baselineReadiness.ownerReviewReadyCount} metric(s) evidence-ready for owner review`}
+              />
+            </div>
+
+            <details className="group mt-4 rounded-xl border border-white/10 bg-black/30 p-4">
+              <summary className="cursor-pointer list-none text-xs font-bold uppercase tracking-[0.12em] text-[#d8c9aa] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f0cf79]">
+                <span className="inline-flex items-center gap-2">
+                  <span aria-hidden="true" className="text-[#d1aa53] transition group-open:rotate-90">›</span>
+                  Inspect all {baselineReadiness.metrics.length} evidence contracts
+                </span>
+              </summary>
+              <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {baselineReadiness.metrics.map((metric) => (
+                  <article key={metric.key} className="rounded-xl border border-white/[.08] bg-[#080808] p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.13em] text-[#746d62]">
+                          {metric.category} · {metric.direction.replaceAll("_", " ")}
+                        </p>
+                        <h3 className="mt-2 text-sm font-semibold text-[#f4ead4]">{metric.label}</h3>
+                      </div>
+                      <BaselineStatePill value={metric.state} />
+                    </div>
+                    <p className="mt-4 font-serif text-2xl text-[#f0cf79]">
+                      {formatGrowthBaselineValue(metric.value, metric.unit)}
+                    </p>
+                    <p className="mt-1 text-[10px] text-[#746d62]">
+                      n={metric.sampleSize} · threshold {metric.minimumSampleSize}
+                    </p>
+                    <p className="mt-3 text-xs leading-5 text-[#a89c8b]">{metric.reason}</p>
+                    <p className="mt-3 border-t border-white/[.07] pt-3 text-[10px] leading-5 text-[#746d62]">
+                      {metric.definition}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </details>
+          </Panel>
+        </div>
+
         <section className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6" aria-label="Growth performance metrics">
           <MetricCard label="Leads" value={summary.leads} note={`${summary.attributedLeadRate}% usefully attributed`} />
           <MetricCard label="Qualified" value={summary.qualified} note="Score or lifecycle qualified" />
           <MetricCard label="Appointments" value={summary.appointments} note="Requested or later" />
+          <MetricCard label="Signed clients" value={summary.agreements} note="Agreement-signed or later evidence" emphasis />
           <MetricCard label="Closes" value={summary.closes} note="Outcome-led when available" emphasis />
           <MetricCard label="Tracked spend" value={money(summary.spendUsd)} note={`${summary.paidLeadSpendCoverageRate}% paid-lead spend coverage`} />
-          <MetricCard label="Attributed revenue" value={money(summary.attributedRevenueUsd)} note="Closed and referral outcomes" emphasis />
+          <MetricCard
+            label="Attributed revenue"
+            value={money(summary.attributedRevenueUsd)}
+            note={`${summary.closedRevenueRecordCount}/${summary.closes} closed outcomes carry actual brokerage revenue`}
+            emphasis
+          />
+          <MetricCard
+            label="Recorded referral fees"
+            value={money(summary.referralFeesUsd)}
+            note={summary.referralFeeExpectedCloseCount
+              ? `${summary.referralFeeRecordCount}/${summary.referralFeeExpectedCloseCount} portal/referral closes reviewed; never added to revenue`
+              : "No portal/referral close requires fee evidence in this window"}
+          />
+          <MetricCard
+            label="Tracked contribution"
+            value={money(summary.trackedContributionUsd)}
+            note={summary.trackedContributionRate == null
+              ? "Requires complete paid-spend, closed-revenue, and applicable referral-fee evidence"
+              : `${number(summary.trackedContributionRate)}% after tracked spend and recorded referral fees; not net income`}
+            emphasis
+          />
           <MetricCard label="Blended CPL" value={money(summary.blendedCostPerLead)} />
+          <MetricCard label="Blended CPQL" value={money(summary.blendedCostPerQualifiedLead)} />
           <MetricCard label="Cost / appointment" value={money(summary.blendedCostPerAppointment)} />
+          <MetricCard label="Cost / signed client" value={money(summary.blendedCostPerSignedClient)} />
           <MetricCard label="Cost / close" value={money(summary.blendedCostPerClose)} />
           <MetricCard label="ROAS" value={summary.returnOnAdSpend == null ? "—" : `${number(summary.returnOnAdSpend)}x`} />
           <MetricCard label="Dormant opportunities" value={summary.staleNurtureCandidates} note="Non-terminal and stale 30+ days" />
@@ -503,18 +809,31 @@ export default async function GrowthCommandCenterPage({
             title="Channel truth table"
             note={`${data.sourceRowsRead} lead rows · ${data.spendRowsRead} spend rows · ${data.outcomeRowsRead} outcome rows`}
           >
-            <div className="overflow-x-auto">
-              <table className="min-w-[1040px] w-full text-left text-sm">
+            <p id="channel-economics-scroll-help" className="mb-3 text-[10px] leading-5 text-[#8f8778]">
+              Scroll horizontally or use the arrow keys to review every evidence column.
+            </p>
+            <div
+              aria-describedby="channel-economics-scroll-help"
+              aria-label="Channel economics table"
+              className="overflow-x-auto rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f0cf79]"
+              role="region"
+              tabIndex={0}
+            >
+              <table className="min-w-[1440px] w-full text-left text-sm">
                 <thead className="border-b border-white/10 text-[10px] uppercase tracking-[0.14em] text-[#8f8778]">
                   <tr>
                     <th className="px-2 py-3">Source / campaign</th>
                     <th className="px-2 py-3">Leads</th>
                     <th className="px-2 py-3">Qualified</th>
                     <th className="px-2 py-3">Appts.</th>
+                    <th className="px-2 py-3">Signed</th>
                     <th className="px-2 py-3">Closes</th>
                     <th className="px-2 py-3">Spend</th>
-                    <th className="px-2 py-3">CPL</th>
+                    <th className="px-2 py-3">CPL / CPQL</th>
+                    <th className="px-2 py-3">Cost / appt. / signed</th>
                     <th className="px-2 py-3">Cost / close</th>
+                    <th className="px-2 py-3">Revenue / referral fees</th>
+                    <th className="px-2 py-3">Tracked contribution</th>
                     <th className="px-2 py-3">ROAS</th>
                     <th className="px-2 py-3">P50 / P75 / P90</th>
                     <th className="px-2 py-3">Signal</th>
@@ -532,10 +851,36 @@ export default async function GrowthCommandCenterPage({
                       <td className="px-2 py-4">{channel.leads}</td>
                       <td className="px-2 py-4">{channel.qualified}</td>
                       <td className="px-2 py-4">{channel.appointments}</td>
+                      <td className="px-2 py-4 text-[#f0cf79]">{channel.agreements}</td>
                       <td className="px-2 py-4 text-[#f0cf79]">{channel.closes}</td>
                       <td className="px-2 py-4">{money(channel.spendUsd)}</td>
-                      <td className="px-2 py-4">{money(channel.costPerLead)}</td>
+                      <td className="px-2 py-4">
+                        <span className="block">{money(channel.costPerLead)}</span>
+                        <span className="mt-1 block text-[10px] text-[#8f8778]">{money(channel.costPerQualifiedLead)} qualified</span>
+                      </td>
+                      <td className="px-2 py-4">
+                        <span className="block">{money(channel.costPerAppointment)}</span>
+                        <span className="mt-1 block text-[10px] text-[#8f8778]">{money(channel.costPerSignedClient)} signed</span>
+                      </td>
                       <td className="px-2 py-4">{money(channel.costPerClose)}</td>
+                      <td className="px-2 py-4">
+                        <span className="block text-[#f0cf79]">{money(channel.attributedRevenueUsd)}</span>
+                        <span className="mt-1 block text-[10px] text-[#8f8778]">
+                          Revenue evidence {channel.closedRevenueRecordCount}/{channel.closes}
+                        </span>
+                        <span className="mt-1 block text-[10px] text-[#8f8778]">
+                          {money(channel.referralFeesUsd)} recorded fees
+                          {channel.referralFeeExpectedCloseCount
+                            ? ` · evidence ${channel.referralFeeRecordCount}/${channel.referralFeeExpectedCloseCount}`
+                            : " · no fee review required"}
+                        </span>
+                      </td>
+                      <td className="px-2 py-4">
+                        <span className="block">{money(channel.trackedContributionUsd)}</span>
+                        <span className="mt-1 block text-[10px] text-[#8f8778]">
+                          {channel.trackedContributionRate == null ? "Evidence incomplete" : `${number(channel.trackedContributionRate)}% tracked`}
+                        </span>
+                      </td>
                       <td className="px-2 py-4">{channel.returnOnAdSpend == null ? "—" : `${channel.returnOnAdSpend}x`}</td>
                       <td className="px-2 py-4">
                         <span className="block">{responseMinutes(channel.medianFirstResponseMinutes)}</span>
@@ -554,7 +899,7 @@ export default async function GrowthCommandCenterPage({
                     </tr>
                   )) : (
                     <tr>
-                      <td className="px-2 py-5 text-[#8f8778]" colSpan={11}>No eligible live lead rows in this window.</td>
+                      <td className="px-2 py-5 text-[#8f8778]" colSpan={15}>No eligible live lead rows in this window.</td>
                     </tr>
                   )}
                 </tbody>
@@ -666,22 +1011,78 @@ export default async function GrowthCommandCenterPage({
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
           <Panel
             eyebrow="Persistent queue"
-            title="Reviewed market opportunities"
-            note="Rows appear after the Phase 9 migration and an approved ingestion or review process writes minimized evidence."
+            title="Local-demand decision packets"
+            note="Persisted signals become bounded review packets. Evidence is allowlisted; execution remains separately approved and audited."
           >
-            <div className="space-y-2">
-              {data.persistedOpportunities.length ? data.persistedOpportunities.map((item) => (
-                <article key={item.key} className="flex items-start justify-between gap-4 rounded-lg border border-white/10 bg-black/30 p-4">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-[#8f8778]">
-                      {item.type} · {item.status} · {item.actionClass.replaceAll("_", " ")}
-                    </p>
-                    <h3 className="mt-2 text-sm font-semibold text-[#f4ead4]">{item.title}</h3>
-                    <p className="mt-2 text-xs leading-5 text-[#a89c8b]">{item.rationale}</p>
-                  </div>
-                  <strong className="font-serif text-2xl text-[#f0cf79]">{number(item.score)}</strong>
-                </article>
-              )) : <p className="text-sm leading-6 text-[#8f8778]">No persisted opportunity rows.</p>}
+            <div className="space-y-3">
+              {data.persistedOpportunities.length ? data.persistedOpportunities.map((item) => {
+                const packet = buildOpportunityDecisionPacket(item, {
+                  now: new Date(data.generatedAt),
+                });
+                return (
+                  <article key={item.key} className="rounded-xl border border-white/10 bg-[linear-gradient(145deg,#0d0d0d,#060606)] p-4 sm:p-5">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div className="min-w-0 flex-1">
+                        <p className="break-words text-[10px] font-bold uppercase tracking-[0.14em] text-[#8f8778]">
+                          {item.type.replaceAll("_", " ")}
+                        </p>
+                        <h3 className="mt-2 font-serif text-xl text-[#f4ead4]">{item.title}</h3>
+                      </div>
+                      <div className="flex items-end gap-4 text-right">
+                        <div>
+                          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#746d62]">Score</p>
+                          <strong className="mt-1 block font-serif text-2xl text-[#f0cf79]">{number(item.score)}</strong>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#746d62]">Confidence</p>
+                          <strong className="mt-1 block font-serif text-2xl text-[#d8c9aa]">{packet.confidencePercent}%</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Flag value={item.status} />
+                      <Flag value={item.actionClass} />
+                      <Flag value={packet.confidenceLabel} />
+                      <FreshnessStatus value={packet.freshness} label={packet.freshnessLabel} />
+                    </div>
+
+                    {packet.context.length || packet.evidenceWindow ? (
+                      <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.11em] text-[#8f8778]">
+                        {[...packet.context, packet.evidenceWindow].filter(Boolean).join(" · ")}
+                      </p>
+                    ) : null}
+                    <p className="mt-3 text-xs leading-5 text-[#a89c8b]">{item.rationale}</p>
+
+                    {packet.evidence.length ? (
+                      <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        {packet.evidence.map((evidence) => (
+                          <div key={evidence.key} className="rounded-lg border border-white/[.07] bg-black/35 p-3">
+                            <dt className="text-[9px] font-bold uppercase tracking-[0.11em] text-[#746d62]">{evidence.label}</dt>
+                            <dd className="mt-1 text-sm font-semibold text-[#e2d5bd]">{evidence.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    ) : (
+                      <p className="mt-4 rounded-lg border border-dashed border-white/10 p-3 text-xs text-[#8f8778]">
+                        No allowlisted evidence fields are available for this opportunity type.
+                      </p>
+                    )}
+
+                    <div className="mt-4 rounded-lg border border-[#cda24a33] bg-[#171107] p-4">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#d1aa53]">Recommended next decision</p>
+                      <p className="mt-2 text-xs leading-5 text-[#e2d5bd]">{packet.nextDecision}</p>
+                    </div>
+                    <p className="mt-3 text-[10px] leading-5 text-[#746d62]">{packet.limitation}</p>
+                    <Link
+                      href={packet.sourceHref}
+                      className="mt-4 inline-flex min-h-10 items-center rounded-lg border border-[#cda24a55] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.11em] text-[#e4c36f] transition hover:border-[#cda24a] hover:text-[#f0cf79] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f0cf79]"
+                    >
+                      {packet.sourceLabel}
+                    </Link>
+                  </article>
+                );
+              }) : <p className="text-sm leading-6 text-[#8f8778]">No persisted opportunity rows.</p>}
             </div>
           </Panel>
 
@@ -731,7 +1132,7 @@ export default async function GrowthCommandCenterPage({
           </div>
         </Panel>
 
-        <footer className="mt-6 border-t border-white/10 py-6 text-xs leading-5 text-[#746d62]">
+        <footer className="mt-6 border-t border-white/10 py-6 text-xs leading-5 text-[#8f8778]">
           Growth Intelligence is internal operational software. It is not a valuation engine, lending decision system,
           fair-housing targeting tool, legal advisor, or authority to contact consumers. Test and suppressed records remain excluded.
         </footer>

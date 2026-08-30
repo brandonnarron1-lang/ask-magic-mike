@@ -35,6 +35,8 @@ export type LeadNotificationRecord = {
   sent_at: string | null;
   failed_at: string | null;
   metadata: Record<string, unknown>;
+  /** Read-only scope annotation joined by canonical Neon admin queries. */
+  lead_is_test?: boolean | null;
 };
 
 export type LeadNotificationCreateInput = {

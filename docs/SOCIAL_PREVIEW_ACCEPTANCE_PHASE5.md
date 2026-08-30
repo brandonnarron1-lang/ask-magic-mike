@@ -11,5 +11,10 @@ Command: `node scripts/amm/verify-social-preview.mjs`
 - Our Town `/agents/mike-eatmon/` with Facebook crawler: HTTP 403
 - Other tested crawlers on those pages: pass
 
-Verdict: **CONDITIONALLY ACCEPTED — EXACT HOST-MANAGED WAF ACTION REMAINS**.
+Verdict: **CONDITIONALLY ACCEPTED — EXACT HOST APACHE ACTION REMAINS**.
 The live lead funnel is unaffected. No broad security exception was created.
+
+Later authenticated 2026-08-28 evidence identified the exact
+`facebookexternalhit -> bad_bots` classifier and `Require not env bad_bots`
+denial. The current bounded action is in
+`FACEBOOK_CRAWLER_FIREWALL_CHANGE.md`; no ModSecurity rule-ID search remains.

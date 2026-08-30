@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { mikePlatformAssets } from "@/lib/mikePlatformAssets";
 import { serializeJsonLd } from "@/lib/security/json-ld";
 import { siteConfig } from "@/lib/site-config";
 
@@ -17,10 +18,10 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp",
-        width: 1024,
-        height: 1024,
-        alt: "Mike Eatmon, broker at Our Town Properties, Inc.",
+        url: mikePlatformAssets.openGraphCard.src,
+        width: mikePlatformAssets.openGraphCard.width,
+        height: mikePlatformAssets.openGraphCard.height,
+        alt: mikePlatformAssets.openGraphCard.alt,
       },
     ],
   },
@@ -29,9 +30,7 @@ export const metadata: Metadata = {
     title: "Ask Magic Mike by Our Town Properties",
     description:
       "Broker-reviewed real estate guidance for Wilson and Eastern NC. Free follow-up from Mike Eatmon.",
-    images: [
-      "/images/ask-magic-mike/brand-pack-v2/mike-headshot-source.webp",
-    ],
+    images: [mikePlatformAssets.openGraphCard.src],
   },
 };
 
