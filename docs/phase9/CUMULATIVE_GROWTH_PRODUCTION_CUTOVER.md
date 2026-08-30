@@ -24,8 +24,8 @@ The package command is:
 pnpm run phase9:cumulative-growth:cutover -- --plan
 ```
 
-`--plan` is the default, works offline, prints no credential, and verifies the
-reviewed migration hashes before any database connection is considered.
+`--plan` is the default, works offline, prints no credential, and verifies all
+five reviewed migration hashes before any database connection is considered.
 
 ## Exact migration set
 
@@ -91,7 +91,10 @@ Preflight requires:
 - canonical database, owner, endpoint, TLS, and channel binding;
 - PostgreSQL 17 or 18;
 - the compatible `supabase_migrations.schema_migrations` ledger;
-- `anon`, `authenticated`, and `service_role` roles;
+- the server-only `service_role` role;
+- bounded observation of the optional Supabase browser roles `anon` and
+  `authenticated`; either role may be absent on canonical Neon, and absence is
+  treated as a stronger denial state rather than a failed prerequisite;
 - the existing audit, channel, campaign, spend, signal, and opportunity tables;
 - the existing lead, agent, message, task, routing, and assignment tables plus
   every column consumed by the Lead Center persistence functions;
@@ -135,10 +138,11 @@ Execution:
    `pg_restore --list` inventory;
 10. applies all five reviewed migrations in order;
 11. inserts one compatible migration-ledger row after each source;
-12. verifies owner, RLS, public/browser-role denial, the exact service-role
-    execution allowlist for Lead Center functions, append-only triggers, truth
-    guard, ledger singularity, zero receipt rows, and unchanged existing growth
-    table counts; and
+12. verifies owner, RLS, public/browser-role denial, including safe handling
+    when optional browser roles do not exist, the exact service-role execution
+    allowlist for Lead Center functions, append-only triggers, truth guard,
+    ledger singularity, zero receipt rows, and unchanged existing growth table
+    counts; and
 13. commits only when every postcondition passes.
 
 Any error rolls back the transaction. If a validated backup exists, the safe

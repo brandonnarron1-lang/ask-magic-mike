@@ -111,11 +111,11 @@ them individually or replay their former gates.
 
 1. `#180`, `#181`, `#183`, `#184`, `#185`, `#193`, `#196`, `#194`, `#195`, and
    `#209` are complete and their gates are exhausted.
-2. `#238` exact payload head `fd4f12c2438964f9fac08e63eba457f8ef3d1d84`
+2. `#238` exact payload head `9232641329acb8a02ce4cf2419cb12768ce33d17`
    is fully sealed but held for its exact cumulative gate.
-3. Run its guarded read-only preflight, keep all three import gates false, then
-   execute/verify the five hash-pinned migrations before merging and deploying
-   only that exact reviewed head.
+3. Re-run its already-passing guarded read-only preflight, keep all three
+   import gates false, then execute/verify the five hash-pinned migrations
+   before merging and deploying only that exact reviewed head.
 4. Component PRs #239–#243 are preserved lineage already incorporated by the
    PR #238 fast-forward and have no independent gate.
 

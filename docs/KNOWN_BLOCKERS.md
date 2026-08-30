@@ -36,10 +36,11 @@ specific expansions; they do not invalidate the live lead pipe.
   intentional skips, and strict monitoring 9/9. Every durable limiter
   capability and the dedicated-secret contract is ready.
 - Draft PR #238 at exact head
-  `fd4f12c2438964f9fac08e63eba457f8ef3d1d84` is the single cumulative
+  `9232641329acb8a02ce4cf2419cb12768ce33d17` is the single cumulative
   application candidate. Its hosted Release Gate and protected no-write
-  Preview proof pass; Production remains held only for the exact cumulative
-  gate and guarded database preflight.
+  Preview proof pass, and the guarded read-only Production database preflight
+  passes. Production remains held only for the exact cumulative gate; preflight
+  must be revalidated immediately before authorized execution.
 - PRs #210–#243 are preserved component lineage included once in PR #238. They
   are not a parallel queue, and their historical individual gates must not be
   replayed.

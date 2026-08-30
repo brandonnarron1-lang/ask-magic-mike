@@ -9,13 +9,16 @@ queue covers only actions that still require a human or external-system gate.
 - Draft PR [#238](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238)
   is the linear cumulative application candidate for the already-built Phase 9
   stack. Exact payload head is
-  `fd4f12c2438964f9fac08e63eba457f8ef3d1d84`; the prior PR #238 head remains
-  preserved at `rescue/amm-pr238-pre-admin-persistence-rollup-20260830-0145`.
+  `9232641329acb8a02ce4cf2419cb12768ce33d17`; the prior PR #238 head remains
+  preserved at `rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224`.
 - One executable cutover now covers only the five reviewed additive
   migrations. It requires exact Production Neon identity, source hashes,
   compatible ledger shape, absent targets, disabled import gates, a validated
   backup, bounded locks, one transaction, unchanged existing rows, hardened
   postconditions, and rollback on any failure.
+- The corrected read-only Production preflight passes against the exact
+  unpooled endpoint with `service_role` present and the optional browser roles
+  absent. Execution will repeat that proof under lock before applying DDL.
 - Exact-head local release, hosted CI, immutable Preview, protected no-write
   browser, runtime-log, dependency, and secret-scan evidence are sealed on the
   candidate head. The gate remains unconsumed and is now the only requestable

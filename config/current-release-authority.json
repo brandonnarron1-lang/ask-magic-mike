@@ -10,26 +10,26 @@
     "pr": 238,
     "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238",
     "branch": "codex/phase9-cumulative-release-20260829",
-    "head": "fd4f12c2438964f9fac08e63eba457f8ef3d1d84",
-    "tree": "4aa9840fccf699587f4705ce00804899abb32d8e",
+    "head": "9232641329acb8a02ce4cf2419cb12768ce33d17",
+    "tree": "e6f388311fd07fc84ed0e580b77b190f7c56f458",
     "state": "draft",
     "approvalGate": "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT",
     "cutoverCommand": "pnpm run phase9:cumulative-growth:cutover -- --execute",
-    "rescueBranch": "rescue/amm-pr238-pre-admin-persistence-rollup-20260830-0145",
+    "rescueBranch": "rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224",
     "releaseGate": {
-      "runId": 33295435772,
-      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33295435772",
+      "runId": 33296816755,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33296816755",
       "status": "success"
     },
     "preview": {
-      "deploymentId": "dpl_EGLYa4m2FLA3FUCz4dzesA2dUeB3",
-      "url": "https://ask-magic-mike-kfp0zu2ge-eyes-up-industries.vercel.app",
+      "deploymentId": "dpl_81SFJbrytTH8fZVtuNmARrqgkuNV",
+      "url": "https://ask-magic-mike-4x51tm6c7-eyes-up-industries.vercel.app",
       "target": "preview",
       "status": "ready"
     },
     "previewQa": {
-      "runId": 33295219129,
-      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33295219129",
+      "runId": 33296896585,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33296896585",
       "safeDbWrite": false,
       "status": "success"
     },

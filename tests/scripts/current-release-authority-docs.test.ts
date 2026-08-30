@@ -130,12 +130,12 @@ const completedDurabilityGate =
 const cumulativeReleaseGate =
   "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT";
 const cumulativeReleaseHead =
-  "fd4f12c2438964f9fac08e63eba457f8ef3d1d84";
+  "9232641329acb8a02ce4cf2419cb12768ce33d17";
 const cumulativeReleaseTree =
-  "4aa9840fccf699587f4705ce00804899abb32d8e";
-const cumulativeReleaseGateRun = 33295435772;
-const cumulativePreviewDeployment = "dpl_EGLYa4m2FLA3FUCz4dzesA2dUeB3";
-const cumulativePreviewQaRun = 33295219129;
+  "e6f388311fd07fc84ed0e580b77b190f7c56f458";
+const cumulativeReleaseGateRun = 33296816755;
+const cumulativePreviewDeployment = "dpl_81SFJbrytTH8fZVtuNmARrqgkuNV";
+const cumulativePreviewQaRun = 33296896585;
 const currentWordPressGate =
   "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA";
 const staleWordPressHomepageGate =

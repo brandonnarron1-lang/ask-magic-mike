@@ -30,7 +30,7 @@ This document defines the single authoritative source of truth for Ask Magic Mik
 Current accepted Production release: PR #209 merge
 `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`, deployment
 `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Draft PR #238 at exact payload head
-`fd4f12c2438964f9fac08e63eba457f8ef3d1d84` is the single cumulative
+`9232641329acb8a02ce4cf2419cb12768ce33d17` is the single cumulative
 application candidate. PRs #210–#243 remain preserved component lineage with
 no independent current release authority. See
 [`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).

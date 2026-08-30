@@ -12,10 +12,10 @@ application payload or any live system.
 
 - Draft PR: [#238](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238)
 - Branch: `codex/phase9-cumulative-release-20260829`
-- Exact payload head: `fd4f12c2438964f9fac08e63eba457f8ef3d1d84`
-- Exact payload tree: `4aa9840fccf699587f4705ce00804899abb32d8e`
+- Exact payload head: `9232641329acb8a02ce4cf2419cb12768ce33d17`
+- Exact payload tree: `e6f388311fd07fc84ed0e580b77b190f7c56f458`
 - Prior-head rescue:
-  `rescue/amm-pr238-pre-admin-persistence-rollup-20260830-0145`
+  `rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224`
 
 The PR #238 branch moved from `de67db6e1183b2a47d329d4a9a11993d48d1992a`
 to the payload above by fast-forward only. No force push, branch deletion, or
@@ -24,11 +24,11 @@ history rewrite occurred.
 ## Exact hosted evidence
 
 - Hosted Release Gate:
-  [run 33295435772](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33295435772), successful.
-- Vercel Preview deployment: `dpl_EGLYa4m2FLA3FUCz4dzesA2dUeB3`, ready at
-  `https://ask-magic-mike-kfp0zu2ge-eyes-up-industries.vercel.app`.
+  [run 33296816755](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33296816755), successful.
+- Vercel Preview deployment: `dpl_81SFJbrytTH8fZVtuNmARrqgkuNV`, ready at
+  `https://ask-magic-mike-4x51tm6c7-eyes-up-industries.vercel.app`.
 - Protected Preview QA:
-  [run 33295219129](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33295219129), successful with
+  [run 33296896585](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33296896585), successful with
   `SAFE_DB_WRITE=false`.
 - Mutation-free widget/browser E2E and `PREVIEW_READY` authority assertion:
   successful.
@@ -66,11 +66,23 @@ Results:
 - route manifest: 100 active routes with 22 acknowledged root/source
   duplicates, passed.
 
+## Read-only Production preflight
+
+The exact payload runner connected through Neon's authenticated secure console
+to the unpooled Production endpoint and passed every bounded preflight check.
+It confirmed PostgreSQL 18.4, the canonical owner, `service_role`, all required
+tables/functions/columns, the immutable guard, absent target objects, and zero
+ledger rows for all five migrations. Optional `anon` and `authenticated` roles
+were absent and correctly treated as denied. The complete PII-free proof is in
+`CUMULATIVE_PRODUCTION_PREFLIGHT_2026-08-30.md`.
+
 ## Production boundary
 
-No Production database migration or query, Vercel Production change, WordPress
-save/publication, lead mutation, email/SMS/Push send, provider action, DNS
-change, publication, spend, deletion, or NellySelly action occurred.
+Production received only the bounded read-only catalog/count preflight. No
+Production database migration or mutation, Vercel Production change,
+WordPress save/publication, lead mutation, email/SMS/Push send, provider
+action, DNS change, publication, spend, deletion, or NellySelly action
+occurred.
 
 The only current Production gate remains:
 

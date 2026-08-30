@@ -1,6 +1,6 @@
 # Implementation Status
 
-Updated 2026-08-29.
+Updated 2026-08-30.
 
 Current release authority is singular and machine-bound in
 `docs/CURRENT_RELEASE_AUTHORITY.md` and
@@ -10,17 +10,35 @@ chronological implementation ledger; older statements that named PR #210 or
 another component as the next release are preserved historical evidence, not
 current operator instructions.
 
+## Phase 9 corrected cumulative Production preflight — 2026-08-30
+
+- **Live read-only proof:** the exact unpooled Neon Production target passed
+  every identity, PostgreSQL-version, ledger, table, function, column,
+  immutable-guard, absent-target, and zero-migration preflight check.
+- **Compatibility defect closed:** canonical Neon intentionally lacks the
+  optional Supabase `anon` and `authenticated` roles. The runner now requires
+  only server-side `service_role` and treats absent browser roles as denied.
+- **Postflight safety retained:** privilege checks join only roles that exist;
+  public denial and the exact four-function service-role allowlist remain
+  fail-closed.
+- **Executable proof:** a disposable PostgreSQL 17.11 cluster with both
+  optional roles absent passed the real five-migration execute and verify
+  paths with unchanged baselines, zero receipts, and a validated 616-entry
+  backup. The cluster and backup were deleted after verification.
+- **Authority boundary:** Production schema, data, Vercel, WordPress, leads,
+  notifications, DNS, publication, spend, and NellySelly were not changed.
+
 ## Phase 9 cumulative PR #238 authority refresh — 2026-08-30
 
 - **Single candidate:** Draft PR #238 now points by fast-forward to exact
-  payload `fd4f12c2438964f9fac08e63eba457f8ef3d1d84`, tree
-  `4aa9840fccf699587f4705ce00804899abb32d8e`.
+  payload `9232641329acb8a02ce4cf2419cb12768ce33d17`, tree
+  `e6f388311fd07fc84ed0e580b77b190f7c56f458`.
 - **Recovery:** the former PR #238 head is preserved at
-  `rescue/amm-pr238-pre-admin-persistence-rollup-20260830-0145`; no history was
+  `rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224`; no history was
   forced, deleted, or discarded.
-- **Hosted proof:** Release Gate run 33295435772 passed. Preview deployment
-  `dpl_EGLYa4m2FLA3FUCz4dzesA2dUeB3` is ready, and protected no-write Preview QA
-  run 33295219129 passed with `SAFE_DB_WRITE=false`.
+- **Hosted proof:** Release Gate run 33296816755 passed. Preview deployment
+  `dpl_81SFJbrytTH8fZVtuNmARrqgkuNV` is ready, and protected no-write Preview QA
+  run 33296896585 passed with `SAFE_DB_WRITE=false`.
 - **Authority manifest:** schema version 2 pins the payload SHA/tree, all five
   migration hashes, rescue ref, exact hosted evidence, and PR #210–#243 lineage.
 - **Local verification:** focused authority/cutover coverage passes 38/38; the

@@ -136,7 +136,7 @@ securely. CSV export remains available with audit logging.
 Current accepted Production is PR #209 merge
 `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
 `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Draft PR #238 at exact head
-`fd4f12c2438964f9fac08e63eba457f8ef3d1d84` is the single cumulative
+`9232641329acb8a02ce4cf2419cb12768ce33d17` is the single cumulative
 application candidate. It includes the tested PR #210–#243 component history
 and five guarded additive migrations. It does not authorize a report import,
 external placement, provider action, message, WordPress change, target,

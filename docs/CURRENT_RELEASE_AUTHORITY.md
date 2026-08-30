@@ -19,12 +19,12 @@ The protected Growth capability ledger consumes the same manifest.
 
 - Draft PR: [#238](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238)
 - Branch: `codex/phase9-cumulative-release-20260829`
-- Exact payload head: `fd4f12c2438964f9fac08e63eba457f8ef3d1d84`
-- Exact payload tree: `4aa9840fccf699587f4705ce00804899abb32d8e`
-- Hosted Release Gate: [run 33295435772](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33295435772), successful on the exact payload
-- Immutable Preview: `dpl_EGLYa4m2FLA3FUCz4dzesA2dUeB3`, [target Preview](https://ask-magic-mike-kfp0zu2ge-eyes-up-industries.vercel.app), ready
-- Protected no-write Preview QA: [run 33295219129](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33295219129), successful with `SAFE_DB_WRITE=false`
-- Prior PR #238 head rescue: `rescue/amm-pr238-pre-admin-persistence-rollup-20260830-0145`
+- Exact payload head: `9232641329acb8a02ce4cf2419cb12768ce33d17`
+- Exact payload tree: `e6f388311fd07fc84ed0e580b77b190f7c56f458`
+- Hosted Release Gate: [run 33296816755](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33296816755), successful on the exact payload
+- Immutable Preview: `dpl_81SFJbrytTH8fZVtuNmARrqgkuNV`, [target Preview](https://ask-magic-mike-4x51tm6c7-eyes-up-industries.vercel.app), ready
+- Protected no-write Preview QA: [run 33296896585](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33296896585), successful with `SAFE_DB_WRITE=false`
+- Prior PR #238 head rescue: `rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224`
 
 PR #238 fast-forwards the tested Phase 9 component tail and later reconciliation,
 environment-presence, durable Neon Lead Center, and cumulative-cutover work
@@ -38,6 +38,13 @@ PR #238 contains the hash-pinned, backup-first runner for exactly five additive
 migrations, including the service-role-only Neon functions required by the
 canonical Lead Center APIs. All import gates stay false. A migration release
 does not authorize importing a report.
+
+The corrected read-only Production preflight passed on 2026-08-30 against the
+exact unpooled Neon endpoint. Canonical Neon has `service_role` and intentionally
+lacks the optional Supabase `anon` and `authenticated` roles; the runner treats
+those absent browser roles as denied and still fails closed on every required
+schema, target, ledger, and privilege condition. Re-run the preflight under lock
+immediately before any authorized execution.
 
 ## Exact gate
 

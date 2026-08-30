@@ -1,14 +1,36 @@
 # QA Evidence
 
+## Corrected cumulative Production preflight — 2026-08-30
+
+- The encrypted Vercel Production `DATABASE_URL` remained non-exportable; a
+  temporary pull contained no credential and was deleted immediately.
+- The authenticated Neon console attested the exact unpooled Production
+  project, branch, endpoint, database, owner, TLS, and channel-binding state.
+- The first read-only preflight exposed a runner-only mismatch: canonical Neon
+  has `service_role` and intentionally lacks optional `anon` and
+  `authenticated` roles.
+- After correcting optional-role handling, the same read-only Production
+  preflight returned `ok: true`; all prerequisites were present and all three
+  receipt tables, eight functions, four triggers, and five ledger versions
+  remained absent.
+- Focused regression coverage passed 1 file / 9 tests. A disposable PostgreSQL
+  17.11 execute/verify with both browser roles absent passed all postconditions
+  and produced a validated 330,650-byte, 616-entry backup before cleanup.
+- Full bounded evidence is in
+  [`phase9/CUMULATIVE_PRODUCTION_PREFLIGHT_2026-08-30.md`](./phase9/CUMULATIVE_PRODUCTION_PREFLIGHT_2026-08-30.md).
+- No Production mutation, merge, deployment, WordPress change, lead access,
+  notification, provider action, DNS change, spend, deletion, or NellySelly
+  interaction occurred.
+
 ## Refreshed cumulative PR #238 authority — 2026-08-30
 
-- Exact payload: `fd4f12c2438964f9fac08e63eba457f8ef3d1d84`, tree
-  `4aa9840fccf699587f4705ce00804899abb32d8e`.
+- Exact payload: `9232641329acb8a02ce4cf2419cb12768ce33d17`, tree
+  `e6f388311fd07fc84ed0e580b77b190f7c56f458`.
 - PR #238 branch advanced only by fast-forward; prior head is preserved at
-  `rescue/amm-pr238-pre-admin-persistence-rollup-20260830-0145`.
-- Hosted Release Gate 33295435772, Vercel Preview
-  `dpl_EGLYa4m2FLA3FUCz4dzesA2dUeB3`, and protected no-write Preview QA
-  33295219129 all passed on the exact payload.
+  `rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224`.
+- Hosted Release Gate 33296816755, Vercel Preview
+  `dpl_81SFJbrytTH8fZVtuNmARrqgkuNV`, and protected no-write Preview QA
+  33296896585 all passed on the exact payload.
 - The authority manifest now pins all five reviewed migration hashes and treats
   PRs #210–#243 as preserved lineage with no parallel Production gate.
 - Focused authority/cutover coverage passed 38/38. The full Node 24 Release

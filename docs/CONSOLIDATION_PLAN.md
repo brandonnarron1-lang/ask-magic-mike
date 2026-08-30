@@ -66,7 +66,7 @@ recorded in
 ### 2. PR #238 — single cumulative Phase 9 candidate
 
 Draft PR #238 at exact head
-`fd4f12c2438964f9fac08e63eba457f8ef3d1d84` is the current application
+`9232641329acb8a02ce4cf2419cb12768ce33d17` is the current application
 release vehicle. Its linear history preserves the tested PR #210–#243
 component train and one hash-pinned, backup-first runner for the five reviewed
 additive migrations, including durable Neon Lead Center API persistence.

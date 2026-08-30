@@ -72,7 +72,7 @@ warranted.
 | --- | --- | --- |
 | #195 conversion identity polish | Merged and live at `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` | Gate exhausted; it authorizes no later action |
 | #209 atomic controlled release candidate | Merged and accepted at `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` / `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` | Gate exhausted; it authorizes no later action |
-| #238 cumulative Phase 9 candidate | Draft exact payload `fd4f12c2438964f9fac08e63eba457f8ef3d1d84`; linear PR #210–#243 application history plus the guarded five-migration cutover | Single current application gate; exact phrase and sequence in `CURRENT_RELEASE_AUTHORITY.md` |
+| #238 cumulative Phase 9 candidate | Draft exact payload `9232641329acb8a02ce4cf2419cb12768ce33d17`; linear PR #210–#243 application history plus the guarded five-migration cutover | Single current application gate; exact phrase and sequence in `CURRENT_RELEASE_AUTHORITY.md` |
 | #239 WordPress legacy reconciliation | Read-only operator tooling now incorporated by the PR #238 fast-forward | Preserved lineage only; no live export/import authority |
 | #210 through #243 | Preserved component lineage consolidated into PR #238 | No independent current merge/deploy authority; historical component gates must not be replayed |
 | #202 through #208 | Preserved incremental review records superseded for release by #209 | No independent merge or Production authority |

@@ -1,10 +1,24 @@
 # Changelog
 
+## 2026-08-30 — Cumulative Neon Production preflight passes
+
+- Corrected the cutover runner's stale requirement that optional Supabase
+  browser roles exist on canonical Neon.
+- Production read-only preflight now passes against the exact unpooled
+  `production` branch while still requiring `service_role`, all schema
+  prerequisites, and absence of all five pending migration targets.
+- Postflight now handles absent optional roles without weakening public or
+  service-role privilege assertions.
+- Real PostgreSQL 17.11 execute/verify passed with `anon` and `authenticated`
+  absent, all five migrations singular, all target objects hardened, unchanged
+  baselines, zero receipts, and a validated 616-entry backup.
+- Production remains unmodified and behind the exact cumulative approval gate.
+
 ## 2026-08-30 — Cumulative PR #238 payload and authority refreshed
 
 - Fast-forwarded Draft PR #238 without rewriting history to exact payload
-  `fd4f12c2438964f9fac08e63eba457f8ef3d1d84`, preserving its former head on
-  `rescue/amm-pr238-pre-admin-persistence-rollup-20260830-0145`.
+  `9232641329acb8a02ce4cf2419cb12768ce33d17`, preserving its former head on
+  `rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224`.
 - Reconciled the single machine-readable authority to the five-migration
   payload, exact hosted Release Gate, immutable Preview deployment, and
   protected no-write Preview QA run.
