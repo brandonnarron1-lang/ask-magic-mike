@@ -43,7 +43,7 @@ function preflight(overrides: Record<string, unknown> = {}) {
     migration_ledger: true,
     ledger_columns: ["version", "statements", "name"],
     ledger_required_columns: ["version"],
-    roles: { anon: true, authenticated: true, service_role: true },
+    roles: { anon: false, authenticated: false, service_role: true },
     required_tables: {
       audit_logs: true,
       marketing_channels: true,
@@ -214,10 +214,21 @@ describe("Phase 9 cumulative growth Production cutover interlocks", () => {
 
   it("accepts only the canonical absent-target Production prestate", () => {
     expect(validatePreflight(preflight())).toMatchObject({
+      service_role_present: true,
+      browser_role_state_observed: true,
       prerequisites_present: true,
       target_tables_absent: true,
       target_migrations_absent: true,
     });
+    expect(validatePreflight(preflight({
+      roles: { anon: true, authenticated: true, service_role: true },
+    }))).toMatchObject({
+      service_role_present: true,
+      browser_role_state_observed: true,
+    });
+    expect(() => validatePreflight(preflight({
+      roles: { anon: false, authenticated: false, service_role: false },
+    }))).toThrow("service_role_present");
     expect(validatePreflight(preflight({ server_version: "17.11" }))).toMatchObject({
       postgres_major_supported: true,
     });
@@ -314,6 +325,11 @@ describe("Phase 9 cumulative growth Production cutover interlocks", () => {
     expect(runnerSource).toContain('await client.query("COMMIT")');
     expect(runnerSource).toContain('await client.query("ROLLBACK")');
     expect(runnerSource).toContain("redactError(error?.message)");
+    expect(runnerSource).toContain("FROM pg_roles role");
+    expect(runnerSource).not.toContain("has_function_privilege('anon', procedure.oid");
+    expect(runnerSource).not.toContain(
+      "has_function_privilege('authenticated', procedure.oid",
+    );
     expect(runnerSource).not.toContain("console.log(process.env)");
     expect(runnerSource).not.toContain("{ ...process.env }");
   });

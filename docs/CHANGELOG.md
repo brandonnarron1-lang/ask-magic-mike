@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-30 — Cumulative Neon Production preflight passes
+
+- Corrected the cutover runner's stale requirement that optional Supabase
+  browser roles exist on canonical Neon.
+- Production read-only preflight now passes against the exact unpooled
+  `production` branch while still requiring `service_role`, all schema
+  prerequisites, and absence of all five pending migration targets.
+- Postflight now handles absent optional roles without weakening public or
+  service-role privilege assertions.
+- Real PostgreSQL 17.11 execute/verify passed with `anon` and `authenticated`
+  absent, all five migrations singular, all target objects hardened, unchanged
+  baselines, zero receipts, and a validated 616-entry backup.
+- Production remains unmodified and behind the exact cumulative approval gate.
+
 ## 2026-08-30 — Cumulative cutover includes Neon admin persistence
 
 - Closed a release-order gap where the cumulative runner sealed four growth

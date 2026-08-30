@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-08-30 — Neon optional-role cutover preflight correction
+
+- Ran the cumulative cutover runner in read-only mode against the exact
+  unpooled Neon Production endpoint and found one stale Supabase-era
+  prerequisite: canonical Neon intentionally has `service_role` but not the
+  optional `anon` or `authenticated` roles.
+- Updated preflight to require the server role while accepting either bounded
+  browser-role state, and updated postflight privilege checks to join only
+  roles that exist. An absent browser role is now correctly treated as denied.
+- Corrected Production preflight passed every identity, prerequisite,
+  absent-target, and zero-ledger check. A PostgreSQL 17.11 disposable execute
+  and verify also passed all five migrations with both browser roles absent.
+- No Production SQL, merge, deployment, environment change, WordPress save,
+  lead mutation, notification, DNS, spend, deletion, or NellySelly action was
+  performed.
+
 ## 2026-08-30 — Neon Lead Center API persistence candidate
 
 - Activated the documented Lead Center REST paths under the authoritative root

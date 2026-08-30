@@ -455,18 +455,24 @@ function_state AS (
         FROM aclexplode(COALESCE(procedure.proacl, acldefault('f', procedure.proowner))) acl
         WHERE acl.grantee = 0 AND acl.privilege_type = 'EXECUTE'
       ) END,
-      'anon_execute', COALESCE(
-        has_function_privilege('anon', procedure.oid, 'EXECUTE'),
-        true
-      ),
-      'authenticated_execute', COALESCE(
-        has_function_privilege('authenticated', procedure.oid, 'EXECUTE'),
-        true
-      ),
-      'service_role_execute', COALESCE(
-        has_function_privilege('service_role', procedure.oid, 'EXECUTE'),
-        false
-      )
+      'anon_execute', CASE WHEN procedure.oid IS NULL THEN true ELSE EXISTS (
+        SELECT 1
+        FROM pg_roles role
+        WHERE role.rolname = 'anon'
+          AND has_function_privilege(role.oid, procedure.oid, 'EXECUTE')
+      ) END,
+      'authenticated_execute', CASE WHEN procedure.oid IS NULL THEN true ELSE EXISTS (
+        SELECT 1
+        FROM pg_roles role
+        WHERE role.rolname = 'authenticated'
+          AND has_function_privilege(role.oid, procedure.oid, 'EXECUTE')
+      ) END,
+      'service_role_execute', CASE WHEN procedure.oid IS NULL THEN false ELSE EXISTS (
+        SELECT 1
+        FROM pg_roles role
+        WHERE role.rolname = 'service_role'
+          AND has_function_privilege(role.oid, procedure.oid, 'EXECUTE')
+      ) END
     ) AS state
   FROM target_functions expected
   LEFT JOIN pg_proc procedure ON procedure.oid = to_regprocedure(expected.signature)
@@ -547,7 +553,10 @@ export function validatePreflight(snapshot) {
     postgres_major_supported: /^(17|18)\./.test(String(snapshot.server_version ?? "")),
     can_create_public: snapshot.can_create_public === true,
     migration_ledger: snapshot.migration_ledger === true,
-    roles_present: allValues(snapshot.roles, (value) => value === true),
+    service_role_present: snapshot.roles?.service_role === true,
+    browser_role_state_observed:
+      typeof snapshot.roles?.anon === "boolean" &&
+      typeof snapshot.roles?.authenticated === "boolean",
     prerequisites_present:
       prerequisiteTablesPresent && prerequisiteFunctionsPresent && prerequisiteColumnsPresent,
     prerequisite_tables_present: prerequisiteTablesPresent,

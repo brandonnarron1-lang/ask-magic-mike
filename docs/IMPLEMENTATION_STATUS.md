@@ -1,6 +1,6 @@
 # Implementation Status
 
-Updated 2026-08-29.
+Updated 2026-08-30.
 
 Current release authority is singular and machine-bound in
 `docs/CURRENT_RELEASE_AUTHORITY.md` and
@@ -9,6 +9,24 @@ Draft PR #238 is the cumulative PR #210–#237 candidate. Lower sections are a
 chronological implementation ledger; older statements that named PR #210 or
 another component as the next release are preserved historical evidence, not
 current operator instructions.
+
+## Phase 9 corrected cumulative Production preflight — 2026-08-30
+
+- **Live read-only proof:** the exact unpooled Neon Production target passed
+  every identity, PostgreSQL-version, ledger, table, function, column,
+  immutable-guard, absent-target, and zero-migration preflight check.
+- **Compatibility defect closed:** canonical Neon intentionally lacks the
+  optional Supabase `anon` and `authenticated` roles. The runner now requires
+  only server-side `service_role` and treats absent browser roles as denied.
+- **Postflight safety retained:** privilege checks join only roles that exist;
+  public denial and the exact four-function service-role allowlist remain
+  fail-closed.
+- **Executable proof:** a disposable PostgreSQL 17.11 cluster with both
+  optional roles absent passed the real five-migration execute and verify
+  paths with unchanged baselines, zero receipts, and a validated 616-entry
+  backup. The cluster and backup were deleted after verification.
+- **Authority boundary:** Production schema, data, Vercel, WordPress, leads,
+  notifications, DNS, publication, spend, and NellySelly were not changed.
 
 ## Phase 9 cumulative Neon admin-persistence cutover extension — 2026-08-30
 

@@ -1,5 +1,27 @@
 # QA Evidence
 
+## Corrected cumulative Production preflight — 2026-08-30
+
+- The encrypted Vercel Production `DATABASE_URL` remained non-exportable; a
+  temporary pull contained no credential and was deleted immediately.
+- The authenticated Neon console attested the exact unpooled Production
+  project, branch, endpoint, database, owner, TLS, and channel-binding state.
+- The first read-only preflight exposed a runner-only mismatch: canonical Neon
+  has `service_role` and intentionally lacks optional `anon` and
+  `authenticated` roles.
+- After correcting optional-role handling, the same read-only Production
+  preflight returned `ok: true`; all prerequisites were present and all three
+  receipt tables, eight functions, four triggers, and five ledger versions
+  remained absent.
+- Focused regression coverage passed 1 file / 9 tests. A disposable PostgreSQL
+  17.11 execute/verify with both browser roles absent passed all postconditions
+  and produced a validated 330,650-byte, 616-entry backup before cleanup.
+- Full bounded evidence is in
+  [`phase9/CUMULATIVE_PRODUCTION_PREFLIGHT_2026-08-30.md`](./phase9/CUMULATIVE_PRODUCTION_PREFLIGHT_2026-08-30.md).
+- No Production mutation, merge, deployment, WordPress change, lead access,
+  notification, provider action, DNS change, spend, deletion, or NellySelly
+  interaction occurred.
+
 ## Five-migration cumulative cutover rehearsal — 2026-08-30
 
 - The cumulative runner now includes the Neon admin Lead Center persistence
