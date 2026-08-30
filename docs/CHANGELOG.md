@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-08-30 — Preview identity and controlled-proof reuse sealed
+
+- Scoped the existing fail-closed Preview database identity controls to Draft
+  PRs #238 and #244 with Preview and Production endpoint IDs distinct,
+  mutation disabled, and Preview data mode disabled.
+- Rebuilt the exact PR #238 payload and passed protected no-write QA with exact
+  Preview identity, Production-endpoint refusal, provider delivery disabled,
+  and 15/15 browser checks.
+- Reused the existing controlled Neon write/readback proof after proving its
+  application commit is an ancestor of PR #238 and its 36-file covered surface
+  plus migration are byte-identical. No duplicate synthetic lead was created.
+- Upgraded the release-authority manifest to schema version 3 with a
+  deterministic covered-surface hash and explicit durable-readback,
+  idempotency, disabled-delivery, and terminal-closeout assertions.
+- Production, WordPress, live leads, notifications, DNS, publication, spend,
+  deletion, and NellySelly remained unchanged.
+
 ## 2026-08-30 — Cumulative Neon Production preflight passes
 
 - Corrected the cutover runner's stale requirement that optional Supabase

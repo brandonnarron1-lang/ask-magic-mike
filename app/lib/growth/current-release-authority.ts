@@ -33,7 +33,24 @@ export interface CurrentReleaseAuthorityManifest {
       runId: number;
       url: string;
       safeDbWrite: false;
+      previewIdentityConfirmed: true;
+      productionEndpointRejected: true;
+      providerDeliveryDisabled: true;
       status: "success";
+    };
+    controlledMutationProof: {
+      status: "verified_reused_unchanged_surface";
+      evidencePath: string;
+      applicationCommit: string;
+      surfaceSha256: string;
+      surfaceFiles: string[];
+      migrationVersion: string;
+      migrationSha256: string;
+      previewIdentityConfirmed: true;
+      providerDeliveryDisabled: true;
+      durableReadback: true;
+      idempotencyVerified: true;
+      terminalTestCloseoutVerified: true;
     };
     migrations: Array<{
       version: string;

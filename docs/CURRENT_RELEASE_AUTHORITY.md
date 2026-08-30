@@ -22,8 +22,8 @@ The protected Growth capability ledger consumes the same manifest.
 - Exact payload head: `9232641329acb8a02ce4cf2419cb12768ce33d17`
 - Exact payload tree: `e6f388311fd07fc84ed0e580b77b190f7c56f458`
 - Hosted Release Gate: [run 33296816755](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33296816755), successful on the exact payload
-- Immutable Preview: `dpl_81SFJbrytTH8fZVtuNmARrqgkuNV`, [target Preview](https://ask-magic-mike-4x51tm6c7-eyes-up-industries.vercel.app), ready
-- Protected no-write Preview QA: [run 33296896585](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33296896585), successful with `SAFE_DB_WRITE=false`
+- Identity-attested Preview: `dpl_5LPXmh9LJdGqmzGCFonRTQJvUU1X`, [target Preview](https://ask-magic-mike-1e44zit4f-eyes-up-industries.vercel.app), ready on the exact payload
+- Protected no-write Preview QA: [run 33297711504](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33297711504), successful with `SAFE_DB_WRITE=false`, exact Preview identity, explicit Production-endpoint rejection, and provider delivery disabled
 - Prior PR #238 head rescue: `rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224`
 
 PR #238 fast-forwards the tested Phase 9 component tail and later reconciliation,
@@ -45,6 +45,26 @@ lacks the optional Supabase `anon` and `authenticated` roles; the runner treats
 those absent browser roles as denied and still fails closed on every required
 schema, target, ledger, and privilege condition. Re-run the preflight under lock
 immediately before any authorized execution.
+
+## Reused controlled-mutation proof
+
+The canonical Lead Center write path was already exercised on the isolated
+Neon Preview branch at application commit
+`382ebe32d41a23eeb0e4a969c733be78930ba87a`. That controlled run proved one
+test-marked lead, idempotent replay, durable note/task/patch/assignment IDs,
+authenticated readback, skipped notifications with zero provider attempts,
+and terminal communication-suppressed closeout. Its evidence is preserved in
+[`phase9/NEON_ADMIN_API_PERSISTENCE_QA_EVIDENCE.md`](./phase9/NEON_ADMIN_API_PERSISTENCE_QA_EVIDENCE.md).
+
+PR #238 contains that commit. A bounded comparison found zero changes across
+the 36 public-lead, admin-lead, persistence, Preview-safety, and candidate
+migration files covered by the controlled run. Their current deterministic
+surface SHA-256 is
+`823997fb72aed87a9c73e313c682361055a8622bc8d79c16dfbd62e7184c67d4`, and the
+candidate migration remains hash-identical at
+`f50ffe91740fdd0690a87d673daf9e5753f122e19279ef84d729d9435d7adc35`.
+The authority manifest now enforces both hashes. No duplicate synthetic lead
+was created merely to repeat already-proven behavior.
 
 ## Exact gate
 

@@ -29,12 +29,20 @@
 - PR #238 branch advanced only by fast-forward; prior head is preserved at
   `rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224`.
 - Hosted Release Gate 33296816755, Vercel Preview
-  `dpl_81SFJbrytTH8fZVtuNmARrqgkuNV`, and protected no-write Preview QA
-  33296896585 all passed on the exact payload.
+  `dpl_5LPXmh9LJdGqmzGCFonRTQJvUU1X`, and protected no-write Preview QA
+  33297711504 all passed on the exact payload. The runtime confirmed exact
+  Preview endpoint identity, Production-endpoint refusal, disabled email/SMS,
+  disabled provider delivery, and a closed mutation gate.
+- Existing controlled Preview mutation evidence was reused instead of creating
+  a duplicate synthetic lead. The proven application commit is an ancestor of
+  PR #238, the covered 36-file lead/admin/persistence surface has zero changes
+  and SHA-256
+  `823997fb72aed87a9c73e313c682361055a8622bc8d79c16dfbd62e7184c67d4`,
+  and the candidate migration hash remains unchanged.
 - The authority manifest now pins all five reviewed migration hashes and treats
   PRs #210–#243 as preserved lineage with no parallel Production gate.
-- Focused authority/cutover coverage passed 38/38. The full Node 24 Release
-  Gate passed 278 files / 3,423 tests, strict typecheck, ESLint, optimized
+- Focused authority/cutover coverage passed 39/39. The full Node 24 Release
+  Gate passed 278 files / 3,424 tests, strict typecheck, ESLint, optimized
   build, 100-route manifest, 14/14 safety, and system isolation.
 - Full evidence and boundaries are in
   [`phase9/CUMULATIVE_RELEASE_AUTHORITY_REFRESH_QA_EVIDENCE.md`](./phase9/CUMULATIVE_RELEASE_AUTHORITY_REFRESH_QA_EVIDENCE.md).

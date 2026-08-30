@@ -37,12 +37,20 @@ current operator instructions.
   `rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224`; no history was
   forced, deleted, or discarded.
 - **Hosted proof:** Release Gate run 33296816755 passed. Preview deployment
-  `dpl_81SFJbrytTH8fZVtuNmARrqgkuNV` is ready, and protected no-write Preview QA
-  run 33296896585 passed with `SAFE_DB_WRITE=false`.
-- **Authority manifest:** schema version 2 pins the payload SHA/tree, all five
-  migration hashes, rescue ref, exact hosted evidence, and PR #210–#243 lineage.
-- **Local verification:** focused authority/cutover coverage passes 38/38; the
-  full Node 24 Release Gate passes 278 files / 3,423 tests, typecheck, ESLint,
+  `dpl_5LPXmh9LJdGqmzGCFonRTQJvUU1X` is ready, and protected no-write Preview QA
+  run 33297711504 passed with exact Preview identity, Production-endpoint
+  refusal, disabled provider delivery, and `SAFE_DB_WRITE=false`.
+- **Evidence reuse:** the earlier controlled Neon Preview run covers a
+  byte-identical 36-file lead/admin/persistence surface and unchanged candidate
+  migration. The enforced surface SHA-256 is
+  `823997fb72aed87a9c73e313c682361055a8622bc8d79c16dfbd62e7184c67d4`.
+  Durable readback, idempotency, skipped delivery, and terminal test closeout
+  remain valid; no duplicate synthetic lead was created.
+- **Authority manifest:** schema version 3 pins the payload SHA/tree, all five
+  migration hashes, rescue ref, exact hosted evidence, controlled-mutation
+  surface hash, and PR #210–#243 lineage.
+- **Local verification:** focused authority/cutover coverage passes 39/39; the
+  full Node 24 Release Gate passes 278 files / 3,424 tests, typecheck, ESLint,
   optimized build, 100-route manifest, 14/14 safety, and system isolation.
 - **Boundary:** Production remains on HOLD for the exact cumulative phrase. No
   Production database, Vercel Production, WordPress, lead, notification,

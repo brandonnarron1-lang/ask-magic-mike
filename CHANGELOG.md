@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-08-30 — Preview identity and controlled-proof reuse
+
+- Scoped the established Preview/Production Neon endpoint attestations to the
+  cumulative Draft branches while keeping Preview writes and all providers
+  disabled.
+- Rebuilt exact PR #238 and passed protected no-write QA with confirmed Preview
+  identity, explicit Production-endpoint refusal, and 15/15 browser checks.
+- Bound the existing controlled Lead Center write/readback proof to PR #238 by
+  proving its 36-file surface and candidate migration are byte-identical;
+  avoided creating a redundant synthetic lead.
+- Production, WordPress, live leads, notifications, DNS, publication, spend,
+  deletion, and NellySelly remained unchanged.
+
 ## 2026-08-30 — Neon optional-role cutover preflight correction
 
 - Ran the cumulative cutover runner in read-only mode against the exact

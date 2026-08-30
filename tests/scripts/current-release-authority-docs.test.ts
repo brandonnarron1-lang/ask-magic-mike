@@ -106,6 +106,9 @@ const atomicAuthorityDecision = readDoc(
 const notificationOperationsDecision = readDoc(
   "phase9/NOTIFICATION_OPERATIONS_TRUTH.md"
 );
+const neonAdminPersistenceEvidence = readDoc(
+  "phase9/NEON_ADMIN_API_PERSISTENCE_QA_EVIDENCE.md"
+);
 
 const operatingDocs = [
   currentState,
@@ -134,8 +137,14 @@ const cumulativeReleaseHead =
 const cumulativeReleaseTree =
   "e6f388311fd07fc84ed0e580b77b190f7c56f458";
 const cumulativeReleaseGateRun = 33296816755;
-const cumulativePreviewDeployment = "dpl_81SFJbrytTH8fZVtuNmARrqgkuNV";
-const cumulativePreviewQaRun = 33296896585;
+const cumulativePreviewDeployment = "dpl_5LPXmh9LJdGqmzGCFonRTQJvUU1X";
+const cumulativePreviewQaRun = 33297711504;
+const controlledMutationApplicationCommit =
+  "382ebe32d41a23eeb0e4a969c733be78930ba87a";
+const controlledMutationSurfaceSha256 =
+  "823997fb72aed87a9c73e313c682361055a8622bc8d79c16dfbd62e7184c67d4";
+const controlledMutationMigrationSha256 =
+  "f50ffe91740fdd0690a87d673daf9e5753f122e19279ef84d729d9435d7adc35";
 const currentWordPressGate =
   "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA";
 const staleWordPressHomepageGate =
@@ -465,7 +474,7 @@ describe("current release-authority documentation", () => {
   });
 
   it("binds the machine-readable authority to the reviewed migration bytes", () => {
-    expect(CURRENT_RELEASE_AUTHORITY.schemaVersion).toBe(2);
+    expect(CURRENT_RELEASE_AUTHORITY.schemaVersion).toBe(3);
     expect(CURRENT_RELEASE_AUTHORITY.production).toEqual({
       pr: 209,
       mergeCommit: productionCommit,
@@ -491,7 +500,22 @@ describe("current release-authority documentation", () => {
       previewQa: {
         runId: cumulativePreviewQaRun,
         safeDbWrite: false,
+        previewIdentityConfirmed: true,
+        productionEndpointRejected: true,
+        providerDeliveryDisabled: true,
         status: "success",
+      },
+      controlledMutationProof: {
+        status: "verified_reused_unchanged_surface",
+        applicationCommit: controlledMutationApplicationCommit,
+        surfaceSha256: controlledMutationSurfaceSha256,
+        migrationVersion: "20260830190000",
+        migrationSha256: controlledMutationMigrationSha256,
+        previewIdentityConfirmed: true,
+        providerDeliveryDisabled: true,
+        durableReadback: true,
+        idempotencyVerified: true,
+        terminalTestCloseoutVerified: true,
       },
     });
     expect(CURRENT_RELEASE_AUTHORITY.candidate.migrations).toHaveLength(5);
@@ -505,6 +529,38 @@ describe("current release-authority documentation", () => {
         migration.sha256
       );
     }
+  });
+
+  it("binds reused controlled-mutation proof to the unchanged current surface", () => {
+    const proof = CURRENT_RELEASE_AUTHORITY.candidate.controlledMutationProof;
+    expect(proof.surfaceFiles).toHaveLength(36);
+    expect(new Set(proof.surfaceFiles).size).toBe(proof.surfaceFiles.length);
+    expect([...proof.surfaceFiles].sort()).toEqual(proof.surfaceFiles);
+
+    const surfaceHash = createHash("sha256");
+    for (const file of proof.surfaceFiles) {
+      surfaceHash.update(file);
+      surfaceHash.update("\0");
+      surfaceHash.update(readFileSync(resolve(process.cwd(), file)));
+      surfaceHash.update("\0");
+    }
+    expect(surfaceHash.digest("hex")).toBe(controlledMutationSurfaceSha256);
+
+    const candidateMigration = CURRENT_RELEASE_AUTHORITY.candidate.migrations.find(
+      ({ version }) => version === proof.migrationVersion
+    );
+    expect(candidateMigration?.sha256).toBe(controlledMutationMigrationSha256);
+    expect(proof.evidencePath).toBe(
+      "docs/phase9/NEON_ADMIN_API_PERSISTENCE_QA_EVIDENCE.md"
+    );
+    expect(neonAdminPersistenceEvidence).toContain(
+      controlledMutationApplicationCommit
+    );
+    expect(neonAdminPersistenceEvidence).toContain(
+      controlledMutationMigrationSha256
+    );
+    expect(currentReleaseAuthority).toContain(controlledMutationSurfaceSha256);
+    expect(implementationStatus).toContain(controlledMutationSurfaceSha256);
   });
 
   it("keeps superseded PRs #187 and #212 as preserved evidence without parallel authority", () => {
