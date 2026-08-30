@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-29 — Privacy-minimized WordPress legacy-lead dry-run
+
+- Upgraded the existing `reconcile-wordpress-leads` operator path with an optional
+  Production-endpoint-attested, transaction-read-only legacy CSV comparison.
+- Added deterministic match/conflict classifications, local-duplicate detection,
+  bounded CSV handling, PII-free output, and explicit refusal of import/execute
+  arguments.
+- Added synthetic tests and an operator runbook. No live WordPress export,
+  Production query, lead mutation, notification, provider call, or deployment was
+  performed.
+
 ## 2026-08-29 — Cumulative Phase 9 growth cutover hardening
 
 - Added one hash-pinned, exact-identity Production cutover runner for the four

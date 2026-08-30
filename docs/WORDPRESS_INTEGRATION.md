@@ -107,3 +107,13 @@ parse/load proof; forwarding remains disabled.
   returns the original lead and creates no second canonical email.
 - Further forms remain held until the timestamp-bounded pre-fix QA row is audited
   in the correct Neon owner session.
+
+## Historical local-store dry-run
+
+The existing `pnpm reconcile-wordpress-leads` path now supports an optional
+Production-attested `--legacy-csv` mode. It parses a separately approved local
+`amm_leads` export in memory, ignores names/messages/notes, compares only normalized
+email/phone identities with canonical candidates, uses property address only as
+corroboration, and emits a PII-free decision packet. The database transaction is
+read-only and the command has no import, merge, suppression, deletion, assignment,
+or message capability. See `WORDPRESS_LEGACY_LEAD_RECONCILIATION.md`.

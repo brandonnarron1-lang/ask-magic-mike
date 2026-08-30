@@ -54,7 +54,7 @@
     "phase9:wordpress-proof-scope:cutover": "node scripts/phase9-wordpress-proof-scope-production-cutover.mjs",
     "phase9:cumulative-growth:cutover": "node scripts/phase9-cumulative-growth-production-cutover.mjs",
     "amm:audit:wordpress": "node scripts/audit-wordpress-form-placements.mjs",
-    "reconcile-wordpress-leads": "node scripts/reconcile-wordpress-leads.mjs",
+    "reconcile-wordpress-leads": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/reconcile-wordpress-leads.mjs",
     "check-lead-sla": "node scripts/check-lead-sla.mjs",
     "staging:local:up": "node scripts/staging-local-up.mjs",
     "staging:local:verify": "node scripts/staging-local-verify.mjs",

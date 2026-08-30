@@ -12,7 +12,12 @@
 ## Point-in-time and operator-run
 
 - `pnpm monitor-production` - nine public, health, and anonymous-admin checks.
-- `pnpm reconcile-wordpress-leads` - Neon-side WordPress identity, allowlist, idempotency, and queue check; requires `DATABASE_URL`.
+- `pnpm reconcile-wordpress-leads` - Neon-side WordPress identity, allowlist,
+  idempotency, and queue check; requires `DATABASE_URL`.
+- `pnpm reconcile-wordpress-leads -- --legacy-csv /absolute/private/path.csv` -
+  Production-attested, transaction-read-only comparison of an approved legacy
+  WordPress export with canonical identity candidates. It emits no contact values
+  and performs no import. See `WORDPRESS_LEGACY_LEAD_RECONCILIATION.md`.
 - `pnpm check-lead-sla` - assignment, contact, unassigned, duplicate, and test-suppression check; requires `DATABASE_URL`.
 
 ## First-live protection

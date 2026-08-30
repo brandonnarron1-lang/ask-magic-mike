@@ -41,6 +41,10 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# Sensitive local reconciliation inputs (never commit WordPress lead exports)
+/private-reconciliation/
+*.amm-wordpress-leads.csv
+
 # Vercel
 .vercel
 
