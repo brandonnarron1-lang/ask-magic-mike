@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-08-30 — PR #238 Production acceptance and authority reconciliation
+
+- Recorded accepted Production merge
+  `cef0f366380e2e8aa95a70cf45a70830d7997d45`, tree
+  `e6f388311fd07fc84ed0e580b77b190f7c56f458`, Vercel deployment
+  `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe`, and successful Release Gate 33313337535.
+- Added the durable five-migration and runtime acceptance receipt, including
+  canonical Neon identity, one ledger row per version, unchanged bounded
+  counts, zero receipt/import rows, disabled import gates, and rollback.
+- Upgraded the authority manifest to schema 4 with no active candidate and no
+  reusable application gate; the protected Growth Center now fails closed
+  instead of presenting the consumed PR #238 phrase.
+- This reconciliation creates no Production authority and performs no
+  WordPress, lead, message, provider, DNS, publication, spend, deletion,
+  purchase, or NellySelly action.
+
+## 2026-08-30 — Preview identity and controlled-proof reuse sealed
+
+- Scoped the existing fail-closed Preview database identity controls to Draft
+  PRs #238 and #244 with Preview and Production endpoint IDs distinct,
+  mutation disabled, and Preview data mode disabled.
+- Rebuilt the exact PR #238 payload and passed protected no-write QA with exact
+  Preview identity, Production-endpoint refusal, provider delivery disabled,
+  and 15/15 browser checks.
+- Reused the existing controlled Neon write/readback proof after proving its
+  application commit is an ancestor of PR #238 and its 36-file covered surface
+  plus migration are byte-identical. No duplicate synthetic lead was created.
+- Upgraded the release-authority manifest to schema version 3 with a
+  deterministic covered-surface hash and explicit durable-readback,
+  idempotency, disabled-delivery, and terminal-closeout assertions.
+- Production, WordPress, live leads, notifications, DNS, publication, spend,
+  deletion, and NellySelly remained unchanged.
+
 ## 2026-08-30 — Cumulative Neon Production preflight passes
 
 - Corrected the cutover runner's stale requirement that optional Supabase
@@ -13,6 +46,19 @@
   absent, all five migrations singular, all target objects hardened, unchanged
   baselines, zero receipts, and a validated 616-entry backup.
 - Production remains unmodified and behind the exact cumulative approval gate.
+
+## 2026-08-30 — Cumulative PR #238 payload and authority refreshed
+
+- Fast-forwarded Draft PR #238 without rewriting history to exact payload
+  `9232641329acb8a02ce4cf2419cb12768ce33d17`, preserving its former head on
+  `rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224`.
+- Reconciled the single machine-readable authority to the five-migration
+  payload, exact hosted Release Gate, immutable Preview deployment, and
+  protected no-write Preview QA run.
+- Reclassified PRs #210–#243 as preserved lineage included in PR #238 with no
+  independent current Production authority.
+- No Production database, Vercel Production, WordPress, lead, notification,
+  provider, DNS, publication, spend, deletion, or NellySelly state changed.
 
 ## 2026-08-30 — Cumulative cutover includes Neon admin persistence
 

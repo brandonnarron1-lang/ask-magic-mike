@@ -1,6 +1,6 @@
 # Current State Reconciliation
 
-Audited 2026-08-28. This document overrides older status claims when they
+Audited through the 2026-08-30 PR #238 Production cutover. This document overrides older status claims when they
 conflict with observed Production, authenticated accounts, current `main`, or
 provider/database state.
 
@@ -8,8 +8,8 @@ provider/database state.
 
 | Asset | Evidence | Status |
 | --- | --- | --- |
-| GitHub | `brandonnarron1-lang/ask-magic-mike`; Production baseline PR #209 merge `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` | VERIFIED LIVE |
-| Vercel | `eyes-up-industries/ask-magic-mike`; project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; deployment `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` | VERIFIED LIVE |
+| GitHub | `brandonnarron1-lang/ask-magic-mike`; Production PR #238 merge `cef0f366380e2e8aa95a70cf45a70830d7997d45`, tree `e6f388311fd07fc84ed0e580b77b190f7c56f458` | VERIFIED LIVE |
+| Vercel | `eyes-up-industries/ask-magic-mike`; project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; deployment `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe` | VERIFIED LIVE |
 | Public host | `https://www.askmagicmike.com`; apex redirects 308 | VERIFIED LIVE |
 | Database | Neon `bitter-star-20214385`; Production branch `br-round-base-auh6h2wd` | VERIFIED LIVE |
 | Brokerage/SEO | `https://www.ourtownproperties.com` WordPress | VERIFIED LIVE |
@@ -18,7 +18,7 @@ provider/database state.
 | Free phone alerts | VAPID Web Push schema/provider/phone setup ready; physical device acceptance remains owner-scoped | READY — OWNER ACTIVATION |
 | NellySelly | Separate repository, project, domains, database, and environment | VERIFIED ISOLATED |
 
-Observed after the 2026-08-28 PR #209 cutover: the conversion verifier passes 15/15 and
+Observed after the 2026-08-30 PR #238 cutover: the conversion verifier passes 15/15 and
 the read-only Production smoke passes 19 checks with two intentional skips.
 `/`, `/ask`, `/sell`, `/value`, `/buy`, `/widget/v1`, `/api/health/live`, and
 `/api/health/ready` return 200. The apex redirects permanently to `www`.
@@ -72,9 +72,10 @@ warranted.
 | --- | --- | --- |
 | #195 conversion identity polish | Merged and live at `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` | Gate exhausted; it authorizes no later action |
 | #209 atomic controlled release candidate | Merged and accepted at `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` / `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` | Gate exhausted; it authorizes no later action |
-| #238 cumulative Phase 9 candidate | Draft exact head `de67db6e1183b2a47d329d4a9a11993d48d1992a`; byte-consolidated PR #210–#237 application tree plus the guarded four-migration cutover | Single current application gate; exact phrase and sequence in `CURRENT_RELEASE_AUTHORITY.md` |
-| #239 WordPress legacy reconciliation | Read-only operator tooling stacked after exact PR #238 | Dependent review artifact only; not included in the PR #238 Production gate and no live export/import authority |
-| #210 through #237 | Preserved component lineage consolidated byte-for-byte into PR #238 | No independent current merge/deploy authority; historical component gates must not be replayed |
+| #238 cumulative Phase 9 release | Reviewed head `9232641329acb8a02ce4cf2419cb12768ce33d17`; merged as `cef0f366380e2e8aa95a70cf45a70830d7997d45`; deployed as `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe`; five migrations applied and verified | Accepted Production; gate consumed and non-reusable |
+| Current application candidate | None | No application merge, migration, or Production deployment gate exists |
+| #239 WordPress legacy reconciliation | Read-only operator tooling now incorporated by the PR #238 fast-forward | Preserved lineage only; no live export/import authority |
+| #210 through #243 | Preserved component lineage consolidated into PR #238 | No independent current merge/deploy authority; historical component gates must not be replayed |
 | #202 through #208 | Preserved incremental review records superseded for release by #209 | No independent merge or Production authority |
 | #221 / #212 cross-domain measurement | #221 is the ordered consolidated Draft; #212 is closed as an exact preserved ancestor | #212 has no independent gate; #221 remains held behind predecessors and live consent remediation |
 | #225 baseline/target readiness | Ordered read-only evidence replacement for #187 | No target writer, migration, or Production authority |
@@ -82,9 +83,9 @@ warranted.
 | #227 through #234 | Preserved social identity, referral, host guidance, capability, organic experiment, Google Business Profile format, planner-metadata, and notification-operations component evidence | Included once in PR #238; no independent current gate |
 | #187 KPI target register | Closed as superseded; branch, migration, and evidence preserved | No current release gate |
 
-PR #209 is complete and its gate is exhausted. PR #238 is the single cumulative
-application candidate; no prior or component approval authorizes it. PRs #210
-through #237 remain preserved lineage rather than parallel release vehicles.
+PR #238 is complete and its gate is exhausted. There is no active application
+candidate; no prior or component approval authorizes another action. PRs #210
+through #243 remain preserved lineage rather than parallel release vehicles.
 PRs #92 and #119 through #121 remain `ARCHIVE AFTER REVIEW`; none should merge
 without a fresh requirement/diff audit.
 

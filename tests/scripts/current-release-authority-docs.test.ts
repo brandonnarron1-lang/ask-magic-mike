@@ -25,6 +25,9 @@ const knownLimitations = readDoc("KNOWN_LIMITATIONS.md");
 const goLiveRunbook = readDoc("GO_LIVE_RUNBOOK.md");
 const rollbackPlan = readDoc("ROLLBACK_PLAN.md");
 const implementationStatus = readDoc("IMPLEMENTATION_STATUS.md");
+const cumulativeProductionAcceptance = readDoc(
+  "phase9/CUMULATIVE_GROWTH_PRODUCTION_ACCEPTANCE_2026-08-30.md"
+);
 const canonicalAliasDecision = readDoc(
   "phase9/CANONICAL_ALIAS_CONSOLIDATION.md"
 );
@@ -106,6 +109,9 @@ const atomicAuthorityDecision = readDoc(
 const notificationOperationsDecision = readDoc(
   "phase9/NOTIFICATION_OPERATIONS_TRUTH.md"
 );
+const neonAdminPersistenceEvidence = readDoc(
+  "phase9/NEON_ADMIN_API_PERSISTENCE_QA_EVIDENCE.md"
+);
 
 const operatingDocs = [
   currentState,
@@ -121,8 +127,11 @@ const operatingDocs = [
 ].join("\n");
 
 const productionCommit =
+  "cef0f366380e2e8aa95a70cf45a70830d7997d45";
+const productionDeployment = "dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe";
+const priorProductionCommit =
   "a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca";
-const productionDeployment = "dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj";
+const priorProductionDeployment = "dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj";
 const rollbackCommit = "b450b41c66c6740bd20571cdbe7d8caf82e92d5e";
 const rollbackDeployment = "dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW";
 const completedDurabilityGate =
@@ -130,9 +139,18 @@ const completedDurabilityGate =
 const cumulativeReleaseGate =
   "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT";
 const cumulativeReleaseHead =
-  "de67db6e1183b2a47d329d4a9a11993d48d1992a";
+  "9232641329acb8a02ce4cf2419cb12768ce33d17";
 const cumulativeReleaseTree =
-  "75abbbbe6767092e1d31b225014dd1bf574acda1";
+  "e6f388311fd07fc84ed0e580b77b190f7c56f458";
+const cumulativeReleaseGateRun = 33313337535;
+const cumulativePreviewDeployment = "dpl_5LPXmh9LJdGqmzGCFonRTQJvUU1X";
+const cumulativePreviewQaRun = 33297711504;
+const controlledMutationApplicationCommit =
+  "382ebe32d41a23eeb0e4a969c733be78930ba87a";
+const controlledMutationSurfaceSha256 =
+  "823997fb72aed87a9c73e313c682361055a8622bc8d79c16dfbd62e7184c67d4";
+const controlledMutationMigrationSha256 =
+  "f50ffe91740fdd0690a87d673daf9e5753f122e19279ef84d729d9435d7adc35";
 const currentWordPressGate =
   "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA";
 const staleWordPressHomepageGate =
@@ -285,13 +303,19 @@ const completedReleaseLedger = [
   {
     pr: 209,
     head: pr209Head,
+    merge: priorProductionCommit,
+    deployment: priorProductionDeployment,
+  },
+  {
+    pr: 238,
+    head: cumulativeReleaseHead,
     merge: productionCommit,
     deployment: productionDeployment,
   },
 ] as const;
 
 describe("current release-authority documentation", () => {
-  it("identifies the accepted PR #209 Production commit and deployment", () => {
+  it("identifies the accepted PR #238 Production commit and deployment", () => {
     for (const doc of [
       currentState,
       assetManifest,
@@ -301,13 +325,9 @@ describe("current release-authority documentation", () => {
       knownBlockers,
       knownLimitations,
       goLiveRunbook,
-      canonicalAliasDecision,
-      canonicalAliasEvidence,
-      durableRateLimitAcceptance,
-      durableRateLimitDecision,
-      atomicAuthorityDecision,
       implementationStatus,
       currentReleaseAuthority,
+      cumulativeProductionAcceptance,
     ]) {
       expect(doc).toContain(productionCommit);
       expect(doc).toContain(productionDeployment);
@@ -326,8 +346,8 @@ describe("current release-authority documentation", () => {
   it("marks the PR #209 durability gate consumed and non-reusable", () => {
     expect(durableRateLimitRehearsal).toContain(completedDurabilityGate);
     expect(durableRateLimitRehearsal).toContain(pr209Head);
-    expect(durableRateLimitRehearsal).toContain(productionCommit);
-    expect(durableRateLimitRehearsal).toContain(productionDeployment);
+    expect(durableRateLimitRehearsal).toContain(priorProductionCommit);
+    expect(durableRateLimitRehearsal).toContain(priorProductionDeployment);
     expect(durableRateLimitRehearsal).toMatch(/consumed[\s\S]*exhausted/i);
     expect(durableRateLimitAcceptance).toMatch(
       /consumed PR #209 gate is exhausted/i
@@ -338,23 +358,21 @@ describe("current release-authority documentation", () => {
 
   it("keeps the capability ledger aligned with the current release authority", () => {
     expect(readme).toContain(productionCommit);
-    expect(readme).toMatch(/PR #238[\s\S]*single exact-head/i);
+    expect(readme).toMatch(/NO ACTIVE APPLICATION CANDIDATE/i);
     expect(readme).not.toMatch(/PR #210[\s\S]{0,120}first pending/i);
     expect(readme).not.toContain(
       "PR #209 is the sole atomic application candidate"
     );
 
-    expect(capabilityLedgerSource).toContain("CURRENT_CUMULATIVE_RELEASE_GATE");
+    expect(capabilityLedgerSource).toContain("CURRENT_APPLICATION_RELEASE_GATE");
     expect(capabilityLedgerSource).toContain(currentWordPressGate);
     expect(capabilityLedgerSource).not.toContain(completedDurabilityGate);
     expect(capabilityLedgerSource).not.toContain(staleWordPressHomepageGate);
-    expect(CURRENT_RELEASE_AUTHORITY.candidate.approvalGate).toBe(
-      cumulativeReleaseGate
-    );
-    expect(CURRENT_RELEASE_AUTHORITY.candidate.head).toBe(cumulativeReleaseHead);
+    expect(CURRENT_RELEASE_AUTHORITY.candidate).toBeNull();
+    expect(capabilityLedgerSource).not.toContain(cumulativeReleaseGate);
   });
 
-  it("identifies PR #238 as the single cumulative application candidate", () => {
+  it("identifies PR #238 as accepted and leaves no active application candidate", () => {
     for (const doc of [
       currentState,
       assetManifest,
@@ -371,9 +389,11 @@ describe("current release-authority documentation", () => {
     expect(currentReleaseAuthority).toContain(cumulativeReleaseHead);
     expect(currentReleaseAuthority).toContain(cumulativeReleaseTree);
     expect(currentReleaseAuthority).toContain(cumulativeReleaseGate);
-    expect(consolidationPlan).toContain(cumulativeReleaseGate);
-    expect(ownerQueue).toContain(cumulativeReleaseGate);
-    expect(knownBlockers).toContain(cumulativeReleaseGate);
+    expect(currentReleaseAuthority).toMatch(/candidate: null/i);
+    expect(currentReleaseAuthority).toMatch(/approval[\s\S]*consumed/i);
+    expect(consolidationPlan).toMatch(/no active application[\s\S]*candidate/i);
+    expect(ownerQueue).toMatch(/no active candidate/i);
+    expect(knownBlockers).toMatch(/no active application candidate/i);
     expect(canonicalAliasDecision).toContain(canonicalAliasGate);
     expect(canonicalAliasEvidence).toContain(canonicalAliasGate);
     expect(cumulativeReleaseGate).not.toBe(completedDurabilityGate);
@@ -455,37 +475,132 @@ describe("current release-authority documentation", () => {
     expect(ownerQueue).toContain(plannerSocialIdentityGate);
     expect(ownerQueue).toContain(notificationOperationsGate);
     expect(notificationOperationsDecision).toContain(notificationOperationsGate);
-    expect(assetManifest).toContain("PRs #232–#237");
+    expect(assetManifest).toContain("PRs #232–#243");
     expect(currentState).toContain("#227 through #234");
     expect(ownerQueue).toMatch(/Preserved component train[\s\S]*historical evidence[\s\S]*(?:not|none is) currently requestable/i);
-    expect(currentState).toMatch(/#210 through #237[\s\S]*No independent current merge\/deploy authority/i);
+    expect(currentState).toMatch(/#210 through #243[\s\S]*No independent current merge\/deploy authority/i);
   });
 
   it("binds the machine-readable authority to the reviewed migration bytes", () => {
-    expect(CURRENT_RELEASE_AUTHORITY.schemaVersion).toBe(1);
-    expect(CURRENT_RELEASE_AUTHORITY.production).toEqual({
-      pr: 209,
+    expect(CURRENT_RELEASE_AUTHORITY.schemaVersion).toBe(4);
+    expect(CURRENT_RELEASE_AUTHORITY.production).toMatchObject({
+      pr: 238,
+      reviewedHead: cumulativeReleaseHead,
       mergeCommit: productionCommit,
+      tree: cumulativeReleaseTree,
       deploymentId: productionDeployment,
+      status: "accepted",
+      rollbackDeploymentId: priorProductionDeployment,
+      releaseGate: {
+        runId: cumulativeReleaseGateRun,
+        status: "success",
+      },
     });
-    expect(CURRENT_RELEASE_AUTHORITY.candidate).toMatchObject({
+    expect(CURRENT_RELEASE_AUTHORITY.candidate).toBeNull();
+    expect(CURRENT_RELEASE_AUTHORITY.releasedCutover).toMatchObject({
       pr: 238,
       branch: "codex/phase9-cumulative-release-20260829",
-      head: cumulativeReleaseHead,
+      reviewedHead: cumulativeReleaseHead,
       tree: cumulativeReleaseTree,
-      state: "draft",
-      approvalGate: cumulativeReleaseGate,
+      mergeCommit: productionCommit,
+      deploymentId: productionDeployment,
+      status: "applied_and_verified",
+      approval: {
+        phrase: cumulativeReleaseGate,
+        status: "consumed",
+      },
       cutoverCommand: "pnpm run phase9:cumulative-growth:cutover -- --execute",
+      releaseGate: {
+        runId: cumulativeReleaseGateRun,
+        status: "success",
+      },
+      preview: {
+        deploymentId: cumulativePreviewDeployment,
+        target: "preview",
+        status: "ready",
+      },
+      previewQa: {
+        runId: cumulativePreviewQaRun,
+        safeDbWrite: false,
+        previewIdentityConfirmed: true,
+        productionEndpointRejected: true,
+        providerDeliveryDisabled: true,
+        status: "success",
+      },
+      controlledMutationProof: {
+        status: "verified_reused_unchanged_surface",
+        applicationCommit: controlledMutationApplicationCommit,
+        surfaceSha256: controlledMutationSurfaceSha256,
+        migrationVersion: "20260830190000",
+        migrationSha256: controlledMutationMigrationSha256,
+        previewIdentityConfirmed: true,
+        providerDeliveryDisabled: true,
+        durableReadback: true,
+        idempotencyVerified: true,
+        terminalTestCloseoutVerified: true,
+      },
+      importGates: {
+        marketingSpend: false,
+        organicSearch: false,
+        localProfilePerformance: false,
+      },
+      backupReceipt: {
+        sha256: "30fdeca85a7f883db9b812ed676a19f7ec141495fe1e1683bfb8b0e6282f8c49",
+        sizeBytes: 380265,
+        restoreEntries: 659,
+        retention: "retained_mode_600",
+      },
+      postflight: {
+        migrationLedgerRowsPerVersion: 1,
+        receiptRows: 0,
+        existingCountsUnchanged: true,
+        privilegeChecksPassed: true,
+        healthChecksPassed: true,
+      },
     });
-    expect(CURRENT_RELEASE_AUTHORITY.candidate.migrations).toHaveLength(4);
-    expect(new Set(CURRENT_RELEASE_AUTHORITY.candidate.migrations.map(({ version }) => version)).size).toBe(4);
+    expect(CURRENT_RELEASE_AUTHORITY.releasedCutover.migrations).toHaveLength(5);
+    expect(new Set(CURRENT_RELEASE_AUTHORITY.releasedCutover.migrations.map(({ version }) => version)).size).toBe(5);
+    expect(CURRENT_RELEASE_AUTHORITY.consolidatedComponentTrain.lastPr).toBe(243);
+    expect(CURRENT_RELEASE_AUTHORITY.dependentReviewArtifacts).toEqual([]);
 
-    for (const migration of CURRENT_RELEASE_AUTHORITY.candidate.migrations) {
+    for (const migration of CURRENT_RELEASE_AUTHORITY.releasedCutover.migrations) {
       const bytes = readFileSync(resolve(process.cwd(), migration.file));
       expect(createHash("sha256").update(bytes).digest("hex")).toBe(
         migration.sha256
       );
     }
+  });
+
+  it("binds reused controlled-mutation proof to the unchanged current surface", () => {
+    const proof = CURRENT_RELEASE_AUTHORITY.releasedCutover.controlledMutationProof;
+    expect(proof.surfaceFiles).toHaveLength(36);
+    expect(new Set(proof.surfaceFiles).size).toBe(proof.surfaceFiles.length);
+    expect([...proof.surfaceFiles].sort()).toEqual(proof.surfaceFiles);
+
+    const surfaceHash = createHash("sha256");
+    for (const file of proof.surfaceFiles) {
+      surfaceHash.update(file);
+      surfaceHash.update("\0");
+      surfaceHash.update(readFileSync(resolve(process.cwd(), file)));
+      surfaceHash.update("\0");
+    }
+    expect(surfaceHash.digest("hex")).toBe(controlledMutationSurfaceSha256);
+
+    const candidateMigration = CURRENT_RELEASE_AUTHORITY.releasedCutover.migrations.find(
+      ({ version }) => version === proof.migrationVersion
+    );
+    expect(candidateMigration?.sha256).toBe(controlledMutationMigrationSha256);
+    expect(proof.evidencePath).toBe(
+      "docs/phase9/NEON_ADMIN_API_PERSISTENCE_QA_EVIDENCE.md"
+    );
+    expect(neonAdminPersistenceEvidence).toContain(
+      controlledMutationApplicationCommit
+    );
+    expect(neonAdminPersistenceEvidence).toContain(
+      controlledMutationMigrationSha256
+    );
+    expect(currentReleaseAuthority).toContain(controlledMutationSurfaceSha256);
+    expect(implementationStatus).toContain(controlledMutationSurfaceSha256);
   });
 
   it("keeps superseded PRs #187 and #212 as preserved evidence without parallel authority", () => {
@@ -510,7 +625,7 @@ describe("current release-authority documentation", () => {
       canonicalAliasDecision,
       canonicalAliasEvidence,
     ]) {
-      expect(doc).toContain(productionCommit);
+      expect(doc).toContain(priorProductionCommit);
     }
     expect(ownerQueue).toContain(pr210Rescue);
     expect(canonicalAliasEvidence).toContain(pr210Rescue);
@@ -668,10 +783,11 @@ describe("current release-authority documentation", () => {
     expect(assetManifest).toMatch(/PR #226[\s\S]*documentation\/test-only/i);
   });
 
-  it("pins the cumulative head while preserving historical mutable-head warnings", () => {
+  it("pins the accepted cumulative head and closes its authority", () => {
     expect(ownerQueue).toContain(cumulativeReleaseHead);
-    expect(ownerQueue).toMatch(/current GitHub PR head/i);
-    expect(currentReleaseAuthority).toMatch(/Any head, tree, migration, target, or gate[\s\S]*invalidates the approval/i);
+    expect(currentReleaseAuthority).toContain(cumulativeReleaseHead);
+    expect(currentReleaseAuthority).toMatch(/candidate: null/i);
+    expect(currentReleaseAuthority).toMatch(/consumed[\s\S]*cannot authorize/i);
   });
 
   it("keeps the accepted rollback deployment immutable", () => {

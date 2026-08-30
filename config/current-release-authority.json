@@ -1,20 +1,108 @@
 {
-  "schemaVersion": 1,
-  "updatedAt": "2026-08-29",
+  "schemaVersion": 4,
+  "updatedAt": "2026-08-30",
   "production": {
-    "pr": 209,
-    "mergeCommit": "a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca",
-    "deploymentId": "dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj"
+    "pr": 238,
+    "reviewedHead": "9232641329acb8a02ce4cf2419cb12768ce33d17",
+    "mergeCommit": "cef0f366380e2e8aa95a70cf45a70830d7997d45",
+    "tree": "e6f388311fd07fc84ed0e580b77b190f7c56f458",
+    "deploymentId": "dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe",
+    "status": "accepted",
+    "rollbackDeploymentId": "dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj",
+    "releaseGate": {
+      "runId": 33313337535,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33313337535",
+      "status": "success"
+    }
   },
-  "candidate": {
+  "candidate": null,
+  "releasedCutover": {
     "pr": 238,
     "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238",
     "branch": "codex/phase9-cumulative-release-20260829",
-    "head": "de67db6e1183b2a47d329d4a9a11993d48d1992a",
-    "tree": "75abbbbe6767092e1d31b225014dd1bf574acda1",
-    "state": "draft",
-    "approvalGate": "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT",
+    "reviewedHead": "9232641329acb8a02ce4cf2419cb12768ce33d17",
+    "tree": "e6f388311fd07fc84ed0e580b77b190f7c56f458",
+    "mergeCommit": "cef0f366380e2e8aa95a70cf45a70830d7997d45",
+    "deploymentId": "dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe",
+    "status": "applied_and_verified",
+    "approval": {
+      "phrase": "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT",
+      "status": "consumed",
+      "consumedAt": "2026-08-30"
+    },
     "cutoverCommand": "pnpm run phase9:cumulative-growth:cutover -- --execute",
+    "rescueBranch": "rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224",
+    "releaseGate": {
+      "runId": 33313337535,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33313337535",
+      "status": "success"
+    },
+    "preview": {
+      "deploymentId": "dpl_5LPXmh9LJdGqmzGCFonRTQJvUU1X",
+      "url": "https://ask-magic-mike-1e44zit4f-eyes-up-industries.vercel.app",
+      "target": "preview",
+      "status": "ready"
+    },
+    "previewQa": {
+      "runId": 33297711504,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33297711504",
+      "safeDbWrite": false,
+      "previewIdentityConfirmed": true,
+      "productionEndpointRejected": true,
+      "providerDeliveryDisabled": true,
+      "status": "success"
+    },
+    "controlledMutationProof": {
+      "status": "verified_reused_unchanged_surface",
+      "evidencePath": "docs/phase9/NEON_ADMIN_API_PERSISTENCE_QA_EVIDENCE.md",
+      "applicationCommit": "382ebe32d41a23eeb0e4a969c733be78930ba87a",
+      "surfaceSha256": "823997fb72aed87a9c73e313c682361055a8622bc8d79c16dfbd62e7184c67d4",
+      "surfaceFiles": [
+        "app/api/admin/leads/[id]/assign/route.ts",
+        "app/api/admin/leads/[id]/notes/route.ts",
+        "app/api/admin/leads/[id]/route.ts",
+        "app/api/admin/leads/[id]/tasks/route.ts",
+        "app/api/admin/leads/route.ts",
+        "app/api/leads/route.ts",
+        "app/lib/leadAlertService.ts",
+        "app/lib/leadConsent.ts",
+        "app/lib/leadContactValidation.ts",
+        "app/lib/leadPayload.ts",
+        "app/lib/leadRouting.ts",
+        "app/lib/leadScoring.ts",
+        "app/lib/persistence/contracts.ts",
+        "app/lib/persistence/defaultPersistence.ts",
+        "app/lib/persistence/neonAdminLeadView.ts",
+        "app/lib/persistence/neonPostgresAdapter.ts",
+        "app/lib/publicOrigin.ts",
+        "app/lib/serverAnalytics.ts",
+        "app/lib/wordpressBridgeSignature.ts",
+        "scripts/preview-qa-lib.mjs",
+        "scripts/preview-qa.mjs",
+        "src/app/api/admin/leads/[id]/assign/route.ts",
+        "src/app/api/admin/leads/[id]/notes/route.ts",
+        "src/app/api/admin/leads/[id]/route.ts",
+        "src/app/api/admin/leads/[id]/tasks/route.ts",
+        "src/app/api/admin/leads/route.ts",
+        "src/lib/admin/auth.ts",
+        "src/lib/admin/health-safety.ts",
+        "src/lib/admin/lead-detail.ts",
+        "src/lib/admin/lead-list.ts",
+        "src/lib/admin/lead-operations.ts",
+        "src/lib/operations/first-live-lead-monitor.ts",
+        "src/lib/preview-security.ts",
+        "src/lib/security/neon-endpoint-identity.ts",
+        "src/lib/security/rate-limit.ts",
+        "supabase/migrations/20260830190000_admin_lead_api_persistence.sql"
+      ],
+      "migrationVersion": "20260830190000",
+      "migrationSha256": "f50ffe91740fdd0690a87d673daf9e5753f122e19279ef84d729d9435d7adc35",
+      "previewIdentityConfirmed": true,
+      "providerDeliveryDisabled": true,
+      "durableReadback": true,
+      "idempotencyVerified": true,
+      "terminalTestCloseoutVerified": true
+    },
     "migrations": [
       {
         "version": "20260824193000",
@@ -35,21 +123,43 @@
         "version": "20260825060000",
         "file": "supabase/migrations/20260825060000_local_demand_metric_truth_guard.sql",
         "sha256": "705fa33d1516451e721cd30d9991084ff3dae987849a2f47981eaeff762a561a"
+      },
+      {
+        "version": "20260830190000",
+        "file": "supabase/migrations/20260830190000_admin_lead_api_persistence.sql",
+        "sha256": "f50ffe91740fdd0690a87d673daf9e5753f122e19279ef84d729d9435d7adc35"
       }
-    ]
+    ],
+    "productionTarget": {
+      "provider": "neon",
+      "project": "bitter-star-20214385",
+      "branch": "br-round-base-auh6h2wd",
+      "endpoint": "ep-proud-bonus-autwv60g",
+      "database": "neondb"
+    },
+    "importGates": {
+      "marketingSpend": false,
+      "organicSearch": false,
+      "localProfilePerformance": false
+    },
+    "backupReceipt": {
+      "sha256": "30fdeca85a7f883db9b812ed676a19f7ec141495fe1e1683bfb8b0e6282f8c49",
+      "sizeBytes": 380265,
+      "restoreEntries": 659,
+      "retention": "retained_mode_600"
+    },
+    "postflight": {
+      "migrationLedgerRowsPerVersion": 1,
+      "receiptRows": 0,
+      "existingCountsUnchanged": true,
+      "privilegeChecksPassed": true,
+      "healthChecksPassed": true
+    }
   },
   "consolidatedComponentTrain": {
     "firstPr": 210,
-    "lastPr": 237,
+    "lastPr": 243,
     "disposition": "historical_lineage_no_independent_release_authority"
   },
-  "dependentReviewArtifacts": [
-    {
-      "pr": 239,
-      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/239",
-      "branch": "codex/phase9-wordpress-legacy-reconciliation-20260829",
-      "head": "7a1dc828ea353cd76e13ca0c7a3078c46433dd06",
-      "disposition": "post_candidate_read_only_operator_tooling"
-    }
-  ]
+  "dependentReviewArtifacts": []
 }

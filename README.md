@@ -19,17 +19,16 @@ brokerage, listings, and SEO authority and embeds or links into this system.
 - `OWNER ACTION` — Mike and Brandon must enroll their own phones; authenticated
   internal email remains the active alert path until each device passes QA.
 - `DEFERRED — PAID SERVICE` — carrier SMS/MMS; Web Push is the free-first path.
-- `VERIFIED LIVE` — PR #209's durable-rate-limit release is accepted at
-  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`; its exact gate is consumed and
-  cannot authorize another action.
-- `CUMULATIVE RELEASE HOLD` — Draft PR #238 is the single exact-head Phase 9
-  application candidate. It consolidates preserved PRs #210–#237 and four
-  guarded additive migrations; the earlier component gates are historical and
-  cannot be replayed.
+- `VERIFIED LIVE` — PR #238 is accepted at merge
+  `cef0f366380e2e8aa95a70cf45a70830d7997d45`, tree
+  `e6f388311fd07fc84ed0e580b77b190f7c56f458`, and Production deployment
+  `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe`; all five migrations passed postflight.
+- `NO ACTIVE APPLICATION CANDIDATE` — the PR #238 gate is consumed. PRs
+  #210–#243 remain historical lineage and no prior phrase can be replayed.
 
 The source-of-truth audit is in
 [`docs/CURRENT_STATE_RECONCILIATION.md`](docs/CURRENT_STATE_RECONCILIATION.md).
-The singular release gate, exact head, and cutover order are in
+The accepted release receipt and fail-closed candidate state are in
 [`docs/CURRENT_RELEASE_AUTHORITY.md`](docs/CURRENT_RELEASE_AUTHORITY.md).
 Documentation precedence and historical-packet handling are in
 [`docs/DOCUMENTATION_AUTHORITY.md`](docs/DOCUMENTATION_AUTHORITY.md).

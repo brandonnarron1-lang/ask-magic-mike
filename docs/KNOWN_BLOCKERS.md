@@ -1,6 +1,6 @@
 # Known Operating Constraints
 
-Updated 2026-08-29. The public funnel, canonical Neon capture, Lead Center, and
+Updated 2026-08-30. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
 
@@ -28,26 +28,25 @@ specific expansions; they do not invalidate the live lead pipe.
 
 ## Current release constraint
 
-- Current accepted Production is PR #209 merge
-  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
-  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Its durability gate and every earlier
+- Current accepted Production is PR #238 merge
+  `cef0f366380e2e8aa95a70cf45a70830d7997d45` on deployment
+  `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe`. Its cumulative gate and every earlier
   completed release gate are exhausted.
 - Fresh read-only Production checks pass conversion 15/15, smoke 19/19 with two
   intentional skips, and strict monitoring 9/9. Every durable limiter
   capability and the dedicated-secret contract is ready.
-- Draft PR #238 at exact head
-  `de67db6e1183b2a47d329d4a9a11993d48d1992a` is the single cumulative
-  application candidate. Its hosted Release Gate and protected no-write
-  Preview proof pass; Production remains held only for the exact cumulative
-  gate and guarded database preflight.
-- PRs #210–#237 are preserved component lineage included once in PR #238. They
+- The five-migration PR #238 cutover is applied and postflight-verified. All
+  three growth import gates remain false, and no growth receipt rows were
+  created.
+- PRs #210–#243 are preserved component lineage included once in PR #238. They
   are not a parallel queue, and their historical individual gates must not be
   replayed.
-- The only current application gate is
-  `APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT`.
+- There is no active application candidate or requestable application gate.
+  PR #244 is metadata reconciliation only and requires fresh exact authority
+  before any merge or Production deployment.
 - Preview Lead Center RBAC remains disabled, so the WordPress manifest API
   fails closed there. An authenticated role-bound runtime download is required
-  after application release and before any separately approved WordPress edit.
+  before any separately approved WordPress edit.
 - PR #187's KPI-target migration remains excluded until eligible genuine demand
   supplies a defensible baseline. Historical PR #179, PR #182, PRs #92 and
   #119 through #121 remain superseded or archive history.
@@ -70,7 +69,7 @@ specific expansions; they do not invalidate the live lead pipe.
   completes assigned-lead-only acceptance.
 - Web Push infrastructure is ready, but each device owner must grant browser
   permission and complete a controlled `[TEST]` receipt. The prepared iPhone
-  handoff still requires application release, physical Home Screen installation,
+  handoff still requires physical Home Screen installation,
   and the owner's explicit test-send approval. Brandon cannot enroll a device
   as Mike.
 - `hub.ourtownproperties.com` is not attached. DNS and Vercel domain mapping

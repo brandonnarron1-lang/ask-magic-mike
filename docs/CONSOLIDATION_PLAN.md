@@ -22,10 +22,11 @@ does not authorize a parallel application, database, notification engine, or CRM
 - Free-first phone alert: Web Push; carrier SMS remains disabled until a
   compliant registered provider is explicitly approved
 
-The Production baseline is PR #209, merge commit
-`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`, deployed as
-`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Its combined durability gate and every
-earlier release gate are exhausted and cannot authorize a later candidate.
+The Production baseline is PR #238, merge commit
+`cef0f366380e2e8aa95a70cf45a70830d7997d45`, tree
+`e6f388311fd07fc84ed0e580b77b190f7c56f458`, deployed as
+`dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe`. Its cumulative gate and every earlier
+release gate are exhausted and cannot authorize a later action.
 
 ## Consolidation already completed
 
@@ -48,48 +49,30 @@ earlier release gate are exhausted and cannot authorize a later candidate.
 
 ## Current release consolidation
 
-### 1. PR #209 — accepted atomic controlled release
+### 1. PR #238 — accepted cumulative Phase 9 release
 
-PR #209 merged and passed same-commit Production acceptance. It contains the
-reviewed cumulative work from incremental PRs #202 through #208 once, plus the
-fail-closed Neon endpoint attestation and durable Neon rate-limit contract.
+PR #238 merged and passed same-commit Production acceptance. Its reviewed head
+`9232641329acb8a02ce4cf2419cb12768ce33d17` became merge
+`cef0f366380e2e8aa95a70cf45a70830d7997d45` with the identical reviewed tree
+and deployment `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe`.
 
-The incremental PRs remain immutable review records, but none has independent
-merge or Production authority. This removes the risk of seven intermediate
-Production deployments, contradictory gates, or partial feature ordering.
+The backup-first cutover applied all five reviewed additive migrations once to
+canonical Neon and passed identity, ledger, count, privilege, receipt, import-
+gate, health, and runtime postflight checks. Acceptance evidence is in
+`docs/phase9/CUMULATIVE_GROWTH_PRODUCTION_ACCEPTANCE_2026-08-30.md`.
 
-PR #209 contained no database migration. Its Production-only encrypted secret,
-exact merge, bounded malformed request, 9/9 monitor, and clean log window are
-recorded in
-`docs/phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md`.
+The PR #238 approval phrase is consumed. There is no active application
+candidate and no current application merge, migration, or Production deploy
+gate.
 
-### 2. PR #238 — single cumulative Phase 9 candidate
-
-Draft PR #238 at exact head
-`de67db6e1183b2a47d329d4a9a11993d48d1992a` is the current application
-release vehicle. Its application tree is byte-for-byte equivalent to the tested
-PR #210–#237 component tail, while its second normal commit adds one
-hash-pinned, backup-first runner for the four reviewed additive growth
-migrations.
-
-Hosted Node 24 Release Gate, immutable Preview, protected no-write browser QA,
-runtime logs, dependency audit, secret scans, and route proof are sealed on the
-exact head. Only this phrase may authorize the guarded migrations, exact merge,
-and canonical Production deployment:
-
-`APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT`
-
-The phrase does not enable any growth import or authorize WordPress, messaging,
-provider, publication, spend, DNS, deletion, or NellySelly action.
-
-### 3. Preserved component and dependent candidates
+### 2. Preserved component and dependent history
 
 - PRs #202–#208 are superseded for release by PR #209. Their branches, checks,
   evidence, and rescue refs remain preserved.
-- PRs #210–#237 are preserved as component lineage included once in PR #238.
+- PRs #210–#243 are preserved as component lineage included once in accepted PR #238.
   Their former individual gates are historical and not requestable.
-- PR #239 is read-only WordPress reconciliation tooling stacked after PR #238.
-  It is not included in the PR #238 gate and has no live export/import authority.
+- PR #239 was incorporated by PR #238. Its read-only
+  WordPress reconciliation tooling has no live export/import authority.
 - PR #187's KPI target-register migration is deferred. Production has no
   eligible live-demand baseline, so deploying numeric targets now would create
   precision without evidence.
@@ -97,6 +80,8 @@ provider, publication, spend, DNS, deletion, or NellySelly action.
   stack work; their old gates are exhausted or obsolete.
 - PRs #92 and #119 through #121 remain archive-after-review history, not a
   parallel Production release sequence.
+- PR #244 reconciles post-cutover metadata only. It is not an active
+  application candidate and needs a new exact gate before merge/deploy.
 
 ## Components to retain and polish
 
@@ -124,35 +109,23 @@ provider, publication, spend, DNS, deletion, or NellySelly action.
   SMS gateway, or AI assignment engine.
 - PropertyLens, which is a separate product and not an Ask Magic Mike runtime.
 
-## PR #238 release risk and rollback
+## Accepted PR #238 rollback and future-release discipline
 
-The cumulative cutover combines an application release with four additive
-growth migrations. Its primary risks are wrong database identity, migration
-drift, partial application, accidental import enablement, redirect/attribution
-regression, or deploying a commit other than the reviewed head. The guarded
-runner, exact manifest, one transaction, validated backup, disabled import
-gates, and same-head acceptance checks fail closed around those risks.
+The cumulative cutover completed successfully. Continue monitoring canonical
+health, authorization boundaries, notification delivery, duplicate behavior,
+database postconditions, and the Neon free-tier compute limit. All three growth
+import gates remain false.
 
-Cutover sequence after explicit approval:
-
-1. Record exact `main`, PR #238 head/tree, Preview, Production, rollback, and
-   canonical unpooled Neon identity.
-2. Run the read-only guarded preflight and confirm all three growth import gates
-   are false.
-3. Execute and verify only the four manifest-pinned migrations with the
-   validated backup retained.
-4. Merge only exact PR #238 head and deploy only that reviewed commit through
-   the canonical Vercel project.
-5. Prove health, canonical redirects/destinations, attribution preservation,
-   anonymous admin denial, protected operations, database postconditions, and
-   a clean exact-deployment log window.
-6. Keep imports, external sends, WordPress changes, publications, data actions,
-   and dependent PRs behind their own gates.
+For a future release, record exact `main`, candidate head/tree, Preview,
+Production, rollback, database identity, migration hashes, and environment
+changes; run all read-only preflights; verify an immutable Preview; and obtain a
+new exact action-specific approval. Never reuse the consumed PR #238 phrase or
+infer authority from a passing check.
 
 Rollback:
 
-- Repoint the Production aliases to `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` if PR
-  #238 application acceptance fails.
+- Repoint the Production aliases to `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` if a
+  verified PR #238 application regression requires immediate rollback.
 - Before any separately approved import, leave the empty additive migration
   objects installed and prefer a reviewed forward fix; do not drop receipt,
   audit, signal, opportunity, lead, or notification data.

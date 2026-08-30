@@ -2,8 +2,10 @@
 
 ## Application
 
-Current Production is `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` at merge commit
-`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. Re-inspect Production and record
+Current Production is `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe` at merge commit
+`cef0f366380e2e8aa95a70cf45a70830d7997d45`, tree
+`e6f388311fd07fc84ed0e580b77b190f7c56f458`. Its immediate verified
+application rollback is `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Re-inspect Production and record
 the immediately preceding Ready deployment before a future release because
 aliases can move. If smoke checks fail, stop traffic activation and promote the
 recorded prior deployment. Do not delete a deployment or force-push.
@@ -81,10 +83,10 @@ accepts only plan or authenticated read-only preflight modes, refuses an
 unlinked Vercel checkout, and performs no secret entry, merge, deployment,
 database/event write, provider send, or configuration change.
 
-For cumulative PR #238, record and retain
-`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` as the immediate application rollback before
-cutover. Keep all three growth import gates false. If application acceptance
-fails before any separately approved import, restore that deployment and its
+For accepted cumulative PR #238, retain
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` as the immediate application rollback.
+Keep all three growth import gates false. If an application regression requires
+rollback before any separately approved import, restore that deployment and its
 aliases while leaving the empty additive migration objects and ledger rows in
 place for a reviewed forward fix. Do not drop receipt/audit objects, restore an
 older database automatically, alter the durable limiter secret, mutate

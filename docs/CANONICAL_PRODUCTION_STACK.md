@@ -27,12 +27,13 @@ This document defines the single authoritative source of truth for Ask Magic Mik
 | Node version | 24.x |
 | Automatic Git deployments | Enabled; Ignored Build Step command is empty |
 
-Current accepted Production release: PR #209 merge
-`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`, deployment
-`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Draft PR #238 at exact head
-`de67db6e1183b2a47d329d4a9a11993d48d1992a` is the single cumulative
-application candidate. PRs #210–#237 remain preserved component lineage with
-no independent current release authority. See
+Current accepted Production release: PR #238 merge
+`cef0f366380e2e8aa95a70cf45a70830d7997d45`, tree
+`e6f388311fd07fc84ed0e580b77b190f7c56f458`, deployment
+`dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe`. The five reviewed migrations are applied
+and verified. There is no active application candidate or reusable release
+gate. PRs #210–#243 remain preserved component lineage with no independent
+current release authority. See
 [`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).
 
 ### Verification command

@@ -1,19 +1,20 @@
 # Canonical Asset Manifest
 
-Refreshed 2026-08-29 from authenticated Production, GitHub, Vercel, Neon, and
+Refreshed through the 2026-08-30 PR #238 cutover from authenticated Production, GitHub, Vercel, Neon, and
 WordPress evidence. Working systems outrank historical packets.
 
 | Asset | Current evidence | Disposition | Decision |
 |---|---|---|---|
 | `/Users/brandonnarron/Projects/ask-magic-mike` | Remote `brandonnarron1-lang/ask-magic-mike`; mature Next.js root `app/` runtime, Neon persistence, Lead Center, widgets, email/Web Push, analytics, tests | **CANONICAL** | Preserve Git history and continue only through reviewed PRs |
-| Vercel `eyes-up-industries/ask-magic-mike` | Project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; Production `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` from `main` merge `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`; `www` live and apex 308 redirect | **CANONICAL** | Sole Ask Magic Mike Production application/domain owner |
-| Neon `bitter-star-20214385` | Production branch `br-round-base-auh6h2wd`, endpoint `ep-proud-bonus-autwv60g`, database `neondb`; canonical capture and durable limiter readiness are healthy | **CANONICAL** | One lead/event/notification/audit source of truth; no Supabase Production runtime |
+| Vercel `eyes-up-industries/ask-magic-mike` | Project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8`; Production `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe` from `main` merge `cef0f366380e2e8aa95a70cf45a70830d7997d45`, tree `e6f388311fd07fc84ed0e580b77b190f7c56f458`; `www` live and apex 308 redirect | **CANONICAL** | Sole Ask Magic Mike Production application/domain owner |
+| Neon `bitter-star-20214385` | Production branch `br-round-base-auh6h2wd`, endpoint `ep-proud-bonus-autwv60g`, database `neondb`; canonical capture and durable limiter are healthy; five PR #238 migrations are applied and postflight-verified with all import gates false | **CANONICAL** | One lead/event/notification/audit source of truth; no Supabase Production runtime |
 | `OurTownProperties.com` WordPress | Existing SEO/FlexMLS/Gravity Forms surfaces; signed bridge 1.1.0; Form 3 only; duplicate Form 3 native alert inactive | **WORDPRESS BRIDGE ONLY** | Preserve URLs/content/entries; do not create a competing lead database |
-| PRs #183, #184, #185, #193, #196, #194, #195, and #209 | Released campaign, proof-ledger, owned-demand, privacy/KPI, verifier, iOS handoff, conversion-identity, and atomic durability work culminating in Production `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` | **REFERENCE/DOCUMENTATION** | Released; every consumed application/migration gate is exhausted and not reusable |
-| PR #238 / `codex/phase9-cumulative-release-20260829` | Exact-head byte-consolidation of the tested PR #210–#237 application tree plus one hash-pinned, backup-first four-migration cutover | **CANONICAL** | Single current application candidate; use only the exact cumulative gate in `CURRENT_RELEASE_AUTHORITY.md` |
-| PR #239 / `codex/phase9-wordpress-legacy-reconciliation-20260829` | Read-only, PII-free WordPress legacy-lead reconciliation tooling stacked after exact PR #238 | **MERGE INTO CANONICAL** | Dependent review artifact only; no live export/import, no Production authority, and do not merge ahead of PR #238 |
+| PRs #183, #184, #185, #193, #196, #194, #195, #209, and #238 | Released campaign, proof-ledger, owned-demand, privacy/KPI, verifier, iOS handoff, conversion-identity, durability, and cumulative growth work culminating in Production `cef0f366380e2e8aa95a70cf45a70830d7997d45` | **REFERENCE/DOCUMENTATION** | Released; every consumed application/migration gate is exhausted and not reusable |
+| PR #238 / `codex/phase9-cumulative-release-20260829` | Reviewed payload `9232641329acb8a02ce4cf2419cb12768ce33d17`, tree `e6f388311fd07fc84ed0e580b77b190f7c56f458`; merged/deployed with five migrations applied and verified | **REFERENCE/DOCUMENTATION** | Accepted Production receipt; no active application candidate and no reusable cumulative gate |
+| PR #244 / `codex/phase9-cumulative-release-authority-refresh-20260830` | Post-cutover authority metadata reconciliation | **REFERENCE/DOCUMENTATION** | Preview/review vehicle only; not an active application candidate and no Production authority until a fresh exact gate |
+| PR #239 / `codex/phase9-wordpress-legacy-reconciliation-20260829` | Read-only, PII-free WordPress legacy-lead reconciliation tooling incorporated by the PR #238 fast-forward | **REFERENCE/DOCUMENTATION** | Preserved lineage only; no live export/import or independent Production authority |
 | PR #210 / `codex/phase9-canonical-alias-consolidation-20260823` | Query-preserving permanent redirects from `/value` and `/we-buy-houses` to the established canonical conversion routes, plus the matching monitor contract | **REFERENCE/DOCUMENTATION** | Preserved component included once in PR #238; its former individual gate is historical and not requestable |
-| PRs #232–#237 | Google Business Profile format, planner metadata, notification truth, seller-intent decision, homepage visibility, and CTA restoration-packet components | **REFERENCE/DOCUMENTATION** | Preserved and included once in PR #238; no individual current merge/deploy authority and no WordPress publication authority |
+| PRs #232–#243 | Google Business Profile format, planner metadata, notification truth, seller-intent decision, homepage visibility, CTA packet, reconciliation, environment proof, durable Neon admin APIs, and cutover-hardening components | **REFERENCE/DOCUMENTATION** | Preserved and included once in PR #238; no individual current merge/deploy authority and no WordPress publication authority |
 | PR #209 / `codex/phase9-controlled-release-candidate-20260823` | Released atomic cumulative application work from #202 through #208 plus fail-closed Neon Preview endpoint attestation and durable limiter readiness | **REFERENCE/DOCUMENTATION** | Merged and accepted; its gate is exhausted |
 | PRs #202 through #208 | Incremental review branches whose cumulative work is represented once in PR #209 | **REFERENCE/DOCUMENTATION** | Preserve branches, rescue refs, checks, and evidence; no independent merge or Production authority |
 | PR #221 | Cross-domain measurement component containing exact PR #212 as an ancestor | **REFERENCE/DOCUMENTATION** | Included once in PR #238; live consent remediation remains a separate WordPress gate |
@@ -51,7 +52,7 @@ WordPress evidence. Working systems outrank historical packets.
 - External campaign platforms remain human-operated; the application records
   evidence only after the native action occurs.
 - Historical PR #179, PR #182, closed PR #187, closed PR #212, incremental PRs
-  #202–#208, and component PRs #210–#237 remain preserved. Their released or
+  #202–#208, and component PRs #210–#243 remain preserved. Their released or
   candidate work is represented once in the current stack, and none is an
   independent release vehicle. No branch, commit, worktree, or exact-head
   evidence was deleted.

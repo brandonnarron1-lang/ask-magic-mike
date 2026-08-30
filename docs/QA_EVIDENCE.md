@@ -1,5 +1,35 @@
 # QA Evidence
 
+## PR #238 Production acceptance and post-cutover authority — 2026-08-30
+
+- Reviewed PR #238 head `9232641329acb8a02ce4cf2419cb12768ce33d17`
+  merged as `cef0f366380e2e8aa95a70cf45a70830d7997d45` with identical tree
+  `e6f388311fd07fc84ed0e580b77b190f7c56f458`.
+- Main Release Gate run 33313337535 passed; Vercel Production deployment
+  `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe` is READY and accepted.
+- All five migrations are applied exactly once on canonical Neon, bounded
+  counts stayed unchanged, receipt/import rows remained zero, all three import
+  gates remained false, and hardened postflight passed.
+- Public routes, health, canonical redirects, anonymous admin denial,
+  authenticated Lead Center access, desktop/mobile rendering, clean error/5xx
+  log queries, and Our Town non-interference passed.
+- Authority manifest schema 4 records `candidate: null`; the PR #238 approval
+  is consumed and cannot be replayed.
+- Post-cutover PR #244 local verification on Node 24.18.0 passes 278 test files
+  / 3,424 tests, TypeScript, ESLint, optimized 100-route build, 14/14 release
+  safety, system isolation, 15-file / 81-test focused security coverage, and a
+  dependency audit with no known vulnerabilities.
+- Redacted full-history secret scan returned no findings. Working-tree
+  candidates were classified as ignored build output, deliberate detector
+  fixtures, or documented synthetic QA evidence; no actionable credential was
+  found or displayed.
+- Full cutover receipt:
+  [`phase9/CUMULATIVE_GROWTH_PRODUCTION_ACCEPTANCE_2026-08-30.md`](./phase9/CUMULATIVE_GROWTH_PRODUCTION_ACCEPTANCE_2026-08-30.md).
+- PR #244 reconciliation evidence:
+  [`phase9/CUMULATIVE_RELEASE_AUTHORITY_REFRESH_QA_EVIDENCE.md`](./phase9/CUMULATIVE_RELEASE_AUTHORITY_REFRESH_QA_EVIDENCE.md).
+- No growth import, provider call, lead mutation, message, WordPress save, DNS,
+  publication, spend, purchase, deletion, or NellySelly action occurred.
+
 ## Corrected cumulative Production preflight — 2026-08-30
 
 - The encrypted Vercel Production `DATABASE_URL` remained non-exportable; a
@@ -21,6 +51,31 @@
 - No Production mutation, merge, deployment, WordPress change, lead access,
   notification, provider action, DNS change, spend, deletion, or NellySelly
   interaction occurred.
+
+## Refreshed cumulative PR #238 authority — 2026-08-30
+
+- Exact payload: `9232641329acb8a02ce4cf2419cb12768ce33d17`, tree
+  `e6f388311fd07fc84ed0e580b77b190f7c56f458`.
+- PR #238 branch advanced only by fast-forward; prior head is preserved at
+  `rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224`.
+- Hosted Release Gate 33296816755, Vercel Preview
+  `dpl_5LPXmh9LJdGqmzGCFonRTQJvUU1X`, and protected no-write Preview QA
+  33297711504 all passed on the exact payload. The runtime confirmed exact
+  Preview endpoint identity, Production-endpoint refusal, disabled email/SMS,
+  disabled provider delivery, and a closed mutation gate.
+- Existing controlled Preview mutation evidence was reused instead of creating
+  a duplicate synthetic lead. The proven application commit is an ancestor of
+  PR #238, the covered 36-file lead/admin/persistence surface has zero changes
+  and SHA-256
+  `823997fb72aed87a9c73e313c682361055a8622bc8d79c16dfbd62e7184c67d4`,
+  and the candidate migration hash remains unchanged.
+- The authority manifest now pins all five reviewed migration hashes and treats
+  PRs #210–#243 as preserved lineage with no parallel Production gate.
+- Focused authority/cutover coverage passed 39/39. The full Node 24 Release
+  Gate passed 278 files / 3,424 tests, strict typecheck, ESLint, optimized
+  build, 100-route manifest, 14/14 safety, and system isolation.
+- Full evidence and boundaries are in
+  [`phase9/CUMULATIVE_RELEASE_AUTHORITY_REFRESH_QA_EVIDENCE.md`](./phase9/CUMULATIVE_RELEASE_AUTHORITY_REFRESH_QA_EVIDENCE.md).
 
 ## Five-migration cumulative cutover rehearsal — 2026-08-30
 

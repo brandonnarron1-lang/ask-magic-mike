@@ -4,13 +4,41 @@ Updated 2026-08-30.
 
 Current release authority is singular and machine-bound in
 `docs/CURRENT_RELEASE_AUTHORITY.md` and
-`config/current-release-authority.json`: accepted Production is PR #209 and
-Draft PR #238 is the cumulative PR #210–#237 candidate. Lower sections are a
+`config/current-release-authority.json`: accepted Production is PR #238 merge
+`cef0f366380e2e8aa95a70cf45a70830d7997d45` on deployment
+`dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe`, and there is no active application
+candidate. Lower sections are a
 chronological implementation ledger; older statements that named PR #210 or
 another component as the next release are preserved historical evidence, not
 current operator instructions.
 
-## Phase 9 corrected cumulative Production preflight — 2026-08-30
+## Phase 9 cumulative Production acceptance and authority closeout — 2026-08-30
+
+- **Accepted identity:** reviewed PR #238 head
+  `9232641329acb8a02ce4cf2419cb12768ce33d17` merged as
+  `cef0f366380e2e8aa95a70cf45a70830d7997d45` with identical tree
+  `e6f388311fd07fc84ed0e580b77b190f7c56f458`; Release Gate run
+  33313337535 passed and Production deployment
+  `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe` is accepted.
+- **Database acceptance:** all five hash-pinned migrations are applied once on
+  canonical Neon and passed identity, ledger, row-count, receipt, privilege,
+  import-gate, health, and postflight verification. All three import gates
+  remain false.
+- **Rollback receipt:** immediate application rollback remains
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; the retained backup receipt is 380,265
+  bytes / 659 entries / SHA-256
+  `30fdeca85a7f883db9b812ed676a19f7ec141495fe1e1683bfb8b0e6282f8c49`.
+- **Authority closeout:** the PR #238 phrase is consumed. Manifest schema 4
+  records `candidate: null`; no active application merge, migration, or
+  Production deployment authority exists.
+- **Runtime proof:** public routes, health, canonical redirects, anonymous
+  admin denial, authenticated Lead Center access, desktop/mobile rendering,
+  clean error/5xx log queries, and Our Town non-interference passed.
+- **Boundary:** no import, provider call, lead mutation, email/SMS/Web Push,
+  WordPress save, DNS, publication, purchase, deletion, or NellySelly action
+  occurred.
+
+## Historical pre-cutover: corrected cumulative Production preflight — 2026-08-30
 
 - **Live read-only proof:** the exact unpooled Neon Production target passed
   every identity, PostgreSQL-version, ledger, table, function, column,
@@ -28,7 +56,35 @@ current operator instructions.
 - **Authority boundary:** Production schema, data, Vercel, WordPress, leads,
   notifications, DNS, publication, spend, and NellySelly were not changed.
 
-## Phase 9 cumulative Neon admin-persistence cutover extension — 2026-08-30
+## Historical pre-cutover: cumulative PR #238 authority refresh — 2026-08-30
+
+- **Single candidate:** Draft PR #238 now points by fast-forward to exact
+  payload `9232641329acb8a02ce4cf2419cb12768ce33d17`, tree
+  `e6f388311fd07fc84ed0e580b77b190f7c56f458`.
+- **Recovery:** the former PR #238 head is preserved at
+  `rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224`; no history was
+  forced, deleted, or discarded.
+- **Hosted proof:** Release Gate run 33296816755 passed. Preview deployment
+  `dpl_5LPXmh9LJdGqmzGCFonRTQJvUU1X` is ready, and protected no-write Preview QA
+  run 33297711504 passed with exact Preview identity, Production-endpoint
+  refusal, disabled provider delivery, and `SAFE_DB_WRITE=false`.
+- **Evidence reuse:** the earlier controlled Neon Preview run covers a
+  byte-identical 36-file lead/admin/persistence surface and unchanged candidate
+  migration. The enforced surface SHA-256 is
+  `823997fb72aed87a9c73e313c682361055a8622bc8d79c16dfbd62e7184c67d4`.
+  Durable readback, idempotency, skipped delivery, and terminal test closeout
+  remain valid; no duplicate synthetic lead was created.
+- **Authority manifest:** schema version 3 pins the payload SHA/tree, all five
+  migration hashes, rescue ref, exact hosted evidence, controlled-mutation
+  surface hash, and PR #210–#243 lineage.
+- **Local verification:** focused authority/cutover coverage passes 39/39; the
+  full Node 24 Release Gate passes 278 files / 3,424 tests, typecheck, ESLint,
+  optimized build, 100-route manifest, 14/14 safety, and system isolation.
+- **Boundary:** Production remains on HOLD for the exact cumulative phrase. No
+  Production database, Vercel Production, WordPress, lead, notification,
+  provider, DNS, publication, spend, deletion, or NellySelly action occurred.
+
+## Historical pre-cutover: cumulative Neon admin-persistence cutover extension — 2026-08-30
 
 - **Gap closed:** the stacked Lead Center API uses four Neon functions from
   `20260830190000_admin_lead_api_persistence.sql`; the former cumulative runner
@@ -49,7 +105,7 @@ current operator instructions.
   WordPress, lead, message, provider, DNS, publication, spend, deletion, or
   NellySelly action occurred.
 
-## Phase 9 singular cumulative release authority — 2026-08-29
+## Historical pre-cutover: singular cumulative release authority — 2026-08-29
 
 - **Conflict closed:** a completion audit found that the sealed cumulative PR
   #238 candidate coexisted with active “PR #210 first” operator guidance. The
@@ -74,7 +130,7 @@ current operator instructions.
   NellySelly action occurred. The only current cumulative gate remains the
   exact phrase in [`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).
 
-## Phase 9 cumulative growth Production cutover candidate — 2026-08-29
+## Historical pre-cutover: cumulative growth Production cutover candidate — 2026-08-29
 
 - **Reuse decision:** Draft PR #238 remains the one cumulative application
   candidate. The existing Neon database, Supabase-compatible migration ledger,
