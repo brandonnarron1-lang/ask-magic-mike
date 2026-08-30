@@ -2,7 +2,7 @@
 
 Date: 2026-08-29
 
-Status: isolated read-only candidate; no Production action
+Status: preserved read-only component; current authority reconciled after PR #238 roll-up; no Production action
 
 ## Decision
 
@@ -13,7 +13,7 @@ deployment, provider adapter, lead store, or automation engine.
 The ledger answers four questions before new work begins:
 
 1. Is the capability already established in Production?
-2. Is it implemented only in the reviewed ordered release train?
+2. Is it implemented only in the reviewed cumulative release candidate?
 3. Is the next step an explicit human, hosting, contract, credential, licensed
    data, privacy, or communication gate?
 4. Is the requested action intentionally prohibited?
@@ -29,7 +29,7 @@ risk without improving the live lead pipe.
 | State | Meaning |
 | --- | --- |
 | `production_live` | Established operating capability supported by existing Production evidence |
-| `release_candidate` | Implemented and reviewed in the current ordered branch train, but not Production |
+| `release_candidate` | Implemented and reviewed in the current cumulative candidate, but not Production |
 | `operator_gate` | Prepared next action requires a named human approval and separate execution evidence |
 | `host_gate` | Hosting-operator configuration is required and remains unapplied |
 | `external_dependency` | Contract, credentials, licensed data, approved provider field map, or privacy review is missing |
@@ -50,8 +50,8 @@ The ledger covers:
   routing, Lead Center, and notification outbox;
 - the approved signed Gravity Form 3 bridge;
 - outcome, attributed-revenue, and immutable first-response intelligence;
-- accepted PR 209 durable-rate-limit authority and the later ordered candidate
-  train, with the consumed PR 209 gate excluded;
+- accepted PR 209 durable-rate-limit authority and cumulative PR 238, with the
+  consumed PR 209 gate and historical component gates excluded;
 - permission-aware database revival and the device-private review planner;
 - prepared owned-traffic WordPress publication;
 - the exact Our Town Facebook-crawler Apache remediation and the completed,
@@ -72,7 +72,11 @@ repeating that gate.
 
 ## Architecture
 
-- `app/lib/growth/capability-ledger.ts` is a pure, typed, deterministic model.
+- `config/current-release-authority.json` is the machine-readable current
+  release identity and gate.
+- `app/lib/growth/current-release-authority.ts` gives the protected runtime a
+  typed, server-bundled view of that manifest.
+- `app/lib/growth/capability-ledger.ts` remains a pure, typed, deterministic model.
 - `app/admin/growth/page.tsx` renders the summary and expandable decision cards
   after the existing `report:view` authorization check.
 - Runtime classification uses only canonical server-side `VERCEL_ENV` to
@@ -99,8 +103,12 @@ repeating that gate.
 
 Required checks:
 
-- Preview/local state keeps the current application tail labeled as a candidate
-  and identifies PR #210 as the first pending predecessor;
+- Preview/local state keeps the current application tree labeled as a candidate
+  and identifies exact PR #238 as the single cumulative vehicle;
+- the manifest pins the accepted PR #209 baseline, PR #238 head/tree, exact
+  cumulative gate, and all four reviewed migration hashes;
+- component PRs #210–#237 remain preserved lineage with no independent current
+  authority;
 - Production state promotes only application-bound candidates;
 - WordPress, hosting, provider, consumer-send, and prohibited states remain
   separate in every runtime;
@@ -134,12 +142,11 @@ communication, analytics, or consumer state to reverse.
 ## Release position
 
 PR #209 is accepted in Production and its exact durability gate is consumed.
-This candidate is stacked after Draft PR #229, while PR #210 remains the first
-pending application candidate. PR #230 cannot bypass PR #210 or any later
-predecessor. Its future application-only gate, eligible only after predecessor
-release and fresh exact-head proof, is:
+This capability is included once in exact cumulative PR #238. PR #230 and the
+other component PRs remain historical lineage; their former individual gates
+are not requestable. The only current application gate is:
 
-`APPROVE PHASE 9 CAPABILITY AUTHORITY LEDGER MERGE AND PRODUCTION DEPLOYMENT`
+`APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT`
 
 That phrase does not authorize a WordPress edit, hosting change, database migration,
 lead/test submission, notification, consumer communication, provider activation,

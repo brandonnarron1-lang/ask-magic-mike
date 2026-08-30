@@ -1,5 +1,32 @@
 # QA Evidence
 
+## Singular cumulative release authority — 2026-08-29
+
+- A completion audit proved that sealed Draft PR #238 was already documented as
+  the cumulative PR #210–#237 candidate while several active operator records
+  and the protected Growth capability ledger still instructed operators to
+  start with PR #210. That contradiction could have authorized the wrong
+  release vehicle.
+- `config/current-release-authority.json` now binds accepted Production PR
+  #209, exact Draft PR #238 head/tree, the cumulative approval gate, ordered
+  cutover command, and the SHA-256 values recomputed from all four reviewed
+  migration files. A typed server-only adapter and protected ledger consume the
+  same record.
+- Active runbooks, status, owner queue, rollback guidance, and architecture
+  records now classify PRs #210–#237 as preserved historical lineage without
+  independent authority. PR #239 remains dependent read-only tooling.
+- Focused verification passed 2 files / 29 tests. The full Node 24.18.0 Release
+  Gate passed 275 files / 3,401 tests, strict TypeScript, full ESLint, optimized
+  Next.js 15.5.21 build with 59 pages, 95/17 route proof, 14/14 release safety,
+  and deployable-source isolation.
+- Complete command and boundary evidence is recorded in
+  [`phase9/CURRENT_RELEASE_AUTHORITY_TRUTH_QA_EVIDENCE.md`](./phase9/CURRENT_RELEASE_AUTHORITY_TRUTH_QA_EVIDENCE.md).
+  Exact-head hosted CI and immutable Preview identity are pinned to the Draft
+  PR after push to avoid a self-referential evidence commit.
+- No Production migration, merge, deployment, environment/secret change,
+  WordPress action, lead/PII access, message, provider action, DNS change,
+  publication, spend, deletion, or NellySelly interaction occurred.
+
 ## Phase 9 OTP Facebook crawler Apache diagnosis — 2026-08-29
 
 - The latest sealed PR #228 parent

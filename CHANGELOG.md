@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-29 — Singular cumulative release authority
+
+- Added one machine-readable, typed release-authority manifest that identifies
+  accepted Production as PR #209 and the only current cumulative application
+  candidate as exact Draft PR #238.
+- Reconciled active runbooks, owner gates, architecture records, rollback
+  guidance, and the protected Growth capability ledger so PRs #210–#237 remain
+  preserved lineage without presenting obsolete component gates as executable.
+- Bound the cumulative gate to the exact PR #238 head, tree, ordered cutover
+  command, and SHA-256 hashes of the four reviewed additive migrations.
+- Kept PR #239 classified as dependent read-only operator tooling. No
+  Production, database, WordPress, lead, message, provider, DNS, publication,
+  spend, deletion, or NellySelly action occurred.
+
 ## 2026-08-29 — Privacy-minimized WordPress legacy-lead dry-run
 
 - Upgraded the existing `reconcile-wordpress-leads` operator path with an optional

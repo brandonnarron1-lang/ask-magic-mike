@@ -4,6 +4,11 @@ Date: 2026-08-29
 
 Status: exact-parent refresh accepted locally; immutable exact-head PR seal pending
 
+> Historical component evidence. The current application authority is now
+> exact cumulative PR #238 as recorded in `docs/CURRENT_RELEASE_AUTHORITY.md`.
+> References below to PR #210-first ordering or the former PR #230 gate describe
+> the preserved component's original proof and are not current instructions.
+
 ## Scope and release identity
 
 - branch: `codex/phase9-capability-ledger-20260828`

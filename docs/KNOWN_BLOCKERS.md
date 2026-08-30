@@ -35,15 +35,16 @@ specific expansions; they do not invalidate the live lead pipe.
 - Fresh read-only Production checks pass conversion 15/15, smoke 19/19 with two
   intentional skips, and strict monitoring 9/9. Every durable limiter
   capability and the dedicated-secret contract is ready.
-- Draft PR #210 is the next ordered application release candidate. It contains
-  only query-preserving permanent compatibility redirects, one canonical
-  internal link, and the matching monitor/tests. It adds no migration or
-  external-system action.
-- PR #210 must pass fresh exact-head Node 24 CI, immutable Preview, protected
-  no-write browser proof, redirect/attribution checks, dependency/secret/diff
-  scans, and isolation proof before its separate gate is requestable.
-- Its only later application gate is
-  `APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`.
+- Draft PR #238 at exact head
+  `de67db6e1183b2a47d329d4a9a11993d48d1992a` is the single cumulative
+  application candidate. Its hosted Release Gate and protected no-write
+  Preview proof pass; Production remains held only for the exact cumulative
+  gate and guarded database preflight.
+- PRs #210–#237 are preserved component lineage included once in PR #238. They
+  are not a parallel queue, and their historical individual gates must not be
+  replayed.
+- The only current application gate is
+  `APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT`.
 - Preview Lead Center RBAC remains disabled, so the WordPress manifest API
   fails closed there. An authenticated role-bound runtime download is required
   after application release and before any separately approved WordPress edit.

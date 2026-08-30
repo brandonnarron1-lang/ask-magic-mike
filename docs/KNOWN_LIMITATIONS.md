@@ -135,18 +135,16 @@ securely. CSV export remains available with audit logging.
 
 Current accepted Production is PR #209 merge
 `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
-`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Draft PR #210 is the next ordered
-application candidate. It does not authorize an external placement, provider
-action, message, migration, or publication.
-PRs #225 through the current reviewed tail, PR #234, remain an ordered Draft
-train and cannot bypass PR #210 or any immediate predecessor. Their protected
-growth, social-asset, and metadata capabilities do not authorize an external
-placement, provider action, message, migration, target, Production data change,
-or publication.
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Draft PR #238 at exact head
+`de67db6e1183b2a47d329d4a9a11993d48d1992a` is the single cumulative
+application candidate. It includes the tested PR #210–#237 component tree and
+four guarded additive migrations. It does not authorize a report import,
+external placement, provider action, message, WordPress change, target,
+Production lead-data change, or publication.
 
 Current Production proves every durable limiter capability and the dedicated
-secret contract; strict monitoring passes 9/9. PR #210 is limited to canonical
-redirect consolidation and must receive its own fresh exact-head proof and gate.
+secret contract; strict monitoring passes 9/9. Historical component PRs
+#210–#237 retain evidence but have no independent current release authority.
 
 ### Prepared content is not published content
 
@@ -183,8 +181,8 @@ backup-first, identity, role, hash, and postflight interlocks.
 
 | Priority | Action | Gate |
 |---|---|---|
-| 1 | Complete fresh exact-head PR #210 redirect/attribution Preview proof | No Production authority |
-| 2 | Release PR #210 only after its separate exact gate | Canonical-alias Production gate |
+| 1 | Run the guarded PR #238 read-only Production preflight | Secure connection takeover; no mutation authority |
+| 2 | Execute migrations, merge exact PR #238, and deploy only after the exact cumulative gate | Cumulative Production gate |
 | 3 | Publish one approved zero-spend placement and record native proof | Channel-specific approval |
 | 4 | Activate Mike's account and enroll each owner's Web Push device | Per-person takeover/test approval |
 | 5 | Approve consent wording before expanding WordPress forms | Mike/BIC approval |

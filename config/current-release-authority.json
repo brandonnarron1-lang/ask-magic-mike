@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-29",
+  "production": {
+    "pr": 209,
+    "mergeCommit": "a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca",
+    "deploymentId": "dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj"
+  },
+  "candidate": {
+    "pr": 238,
+    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238",
+    "branch": "codex/phase9-cumulative-release-20260829",
+    "head": "de67db6e1183b2a47d329d4a9a11993d48d1992a",
+    "tree": "75abbbbe6767092e1d31b225014dd1bf574acda1",
+    "state": "draft",
+    "approvalGate": "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT",
+    "cutoverCommand": "pnpm run phase9:cumulative-growth:cutover -- --execute",
+    "migrations": [
+      {
+        "version": "20260824193000",
+        "file": "supabase/migrations/20260824193000_marketing_spend_ingress.sql",
+        "sha256": "9640e5807622d88c0ca3b1074ea3a0f4d304ca493dbe9ab1d573243e858ee6a1"
+      },
+      {
+        "version": "20260824220000",
+        "file": "supabase/migrations/20260824220000_organic_search_ingress.sql",
+        "sha256": "4d1ec2947134145a75a8b82e2edef71fcd7d8b0974ebfb909d838d1378e81626"
+      },
+      {
+        "version": "20260825033000",
+        "file": "supabase/migrations/20260825033000_local_profile_performance_ingress.sql",
+        "sha256": "68f292f8e1773c9d2b999c61311362576848020176c5dbdeaf0550ba4795047c"
+      },
+      {
+        "version": "20260825060000",
+        "file": "supabase/migrations/20260825060000_local_demand_metric_truth_guard.sql",
+        "sha256": "705fa33d1516451e721cd30d9991084ff3dae987849a2f47981eaeff762a561a"
+      }
+    ]
+  },
+  "consolidatedComponentTrain": {
+    "firstPr": 210,
+    "lastPr": 237,
+    "disposition": "historical_lineage_no_independent_release_authority"
+  },
+  "dependentReviewArtifacts": [
+    {
+      "pr": 239,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/239",
+      "branch": "codex/phase9-wordpress-legacy-reconciliation-20260829",
+      "head": "7a1dc828ea353cd76e13ca0c7a3078c46433dd06",
+      "disposition": "post_candidate_read_only_operator_tooling"
+    }
+  ]
+}

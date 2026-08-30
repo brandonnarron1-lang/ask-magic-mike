@@ -72,19 +72,21 @@ warranted.
 | --- | --- | --- |
 | #195 conversion identity polish | Merged and live at `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` | Gate exhausted; it authorizes no later action |
 | #209 atomic controlled release candidate | Merged and accepted at `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` / `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` | Gate exhausted; it authorizes no later action |
-| #210 canonical alias consolidation | Draft candidate refreshed onto accepted PR #209 `main`; permanent query-preserving compatibility redirects only | Requires fresh exact-head proof and its separate alias-consolidation gate |
+| #238 cumulative Phase 9 candidate | Draft exact head `de67db6e1183b2a47d329d4a9a11993d48d1992a`; byte-consolidated PR #210–#237 application tree plus the guarded four-migration cutover | Single current application gate; exact phrase and sequence in `CURRENT_RELEASE_AUTHORITY.md` |
+| #239 WordPress legacy reconciliation | Read-only operator tooling stacked after exact PR #238 | Dependent review artifact only; not included in the PR #238 Production gate and no live export/import authority |
+| #210 through #237 | Preserved component lineage consolidated byte-for-byte into PR #238 | No independent current merge/deploy authority; historical component gates must not be replayed |
 | #202 through #208 | Preserved incremental review records superseded for release by #209 | No independent merge or Production authority |
 | #221 / #212 cross-domain measurement | #221 is the ordered consolidated Draft; #212 is closed as an exact preserved ancestor | #212 has no independent gate; #221 remains held behind predecessors and live consent remediation |
 | #225 baseline/target readiness | Ordered read-only evidence replacement for #187 | No target writer, migration, or Production authority |
 | #226 release-authority deduplication | Documentation/test-only Draft on exact #225; closed #187 and #212 remain recoverable evidence | No application or independent Production authority; eventual merge requires its own narrow gate after #225 |
-| #227 through #234 | Ordered social identity, referral, host guidance, capability, organic experiment, Google Business Profile format, planner-metadata, and notification-operations candidates; exact current tail is Draft PR #234 on sealed PR #233 | No candidate may bypass PR #210 or an immediate predecessor; every application release requires refresh, complete exact-head proof, and its own gate |
+| #227 through #234 | Preserved social identity, referral, host guidance, capability, organic experiment, Google Business Profile format, planner-metadata, and notification-operations component evidence | Included once in PR #238; no independent current gate |
 | #187 KPI target register | Closed as superseded; branch, migration, and evidence preserved | No current release gate |
 
-PR #209 is complete and its gate is exhausted. PR #210 is the next ordered
-application candidate; no prior approval authorizes it. PR #234 is the current
-reviewed Draft tail, not the next release vehicle. PRs #92 and #119 through
-#121 remain `ARCHIVE AFTER REVIEW`; none should merge without a fresh
-requirement/diff audit.
+PR #209 is complete and its gate is exhausted. PR #238 is the single cumulative
+application candidate; no prior or component approval authorizes it. PRs #210
+through #237 remain preserved lineage rather than parallel release vehicles.
+PRs #92 and #119 through #121 remain `ARCHIVE AFTER REVIEW`; none should merge
+without a fresh requirement/diff audit.
 
 ## Current aggregate truth
 

@@ -8,18 +8,19 @@ queue covers only actions that still require a human or external-system gate.
 
 - Draft PR [#238](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238)
   is the byte-consolidated application candidate for the already-built Phase 9
-  stack. Its formerly sealed head is preserved at
-  `rescue/amm-pr238-pre-cutover-runner-20260829-213310` while guarded release
-  tooling is added through a normal follow-up commit.
+  stack. Exact candidate head is
+  `de67db6e1183b2a47d329d4a9a11993d48d1992a`; the pre-runner head remains
+  preserved at `rescue/amm-pr238-pre-cutover-runner-20260829-213310`.
 - One executable cutover now covers only the four reviewed additive growth
   migrations. It requires exact Production Neon identity, source hashes,
   compatible ledger shape, absent targets, disabled import gates, a validated
   backup, bounded locks, one transaction, unchanged existing rows, hardened
   postconditions, and rollback on any failure.
-- Fresh exact-head local release, hosted CI, immutable Preview, protected
-  no-write browser, runtime-log, and secret-scan evidence must be resealed after
-  the tooling commit. Until that proof passes, the gate is not requestable.
-- After the candidate is resealed, the only phrase that can authorize the four
+- Exact-head local release, hosted CI, immutable Preview, protected no-write
+  browser, runtime-log, dependency, and secret-scan evidence are sealed on the
+  candidate head. The gate remains unconsumed and is now the only requestable
+  application release gate.
+- The only phrase that can authorize the four
   migrations, exact PR merge, and same-commit Production deployment is:
   `APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT`.
 - That phrase does not authorize enabling any growth import, provider access,
@@ -27,13 +28,14 @@ queue covers only actions that still require a human or external-system gate.
   social/GBP/email publication, spend, DNS change, deletion, data import, or
   NellySelly action.
 
-## Cross-domain measurement consolidation — later, not currently requestable
+## Cross-domain measurement activation dependency — later, not currently requestable
 
 - Draft PR [#221](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/221)
-  consolidates exact PR #212 onto exact sealed PR #220 head
+  is preserved component lineage now included once in cumulative PR #238. It
+  originally consolidated exact PR #212 onto exact sealed PR #220 head
   `19689e95d824d7d06e5f3b60cd18335f53018c93`. PR #212 is closed as
   superseded with its branch, commits, package, evidence, and rollback assets
-  preserved. PR #221 is the sole cross-domain application candidate. It reuses
+  preserved. The included implementation reuses
   the existing Our Town GTM container and canonical Neon ledger with explicit basic
   consent, advertising consent denied, private/Preview/QA exclusion, exact
   container isolation, and the newer cumulative KPI/privacy controls.
@@ -58,9 +60,12 @@ queue covers only actions that still require a human or external-system gate.
   A separate superseded PR #221 Preview also persisted one PII-free automatic
   homepage page-view before the new server guard. No lead or message was
   created. Cleanup is not included in either candidate's release phrase.
-- After the hold clears, its only configuration/release phrase is:
-  `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
-- That phrase will not authorize a lead submission, email/SMS/Push, WordPress
+- The former PR #221 configuration/merge phrase is historical and not
+  requestable. After PR #238 is accepted and the WordPress consent-order hold
+  clears, generate a fresh configuration-only activation packet bound to the
+  deployed commit and current host settings.
+- A future configuration phrase will not authorize a lead submission,
+  email/SMS/Push, WordPress
   edit, marketing publication, spend, DNS change, database mutation, deletion,
   or NellySelly action.
 
@@ -134,14 +139,21 @@ provider action, or deletion.
 - Stale encrypted Upstash variable names remain ignored. Their deletion was not
   included and remains a separate action.
 
-## Next sequential candidates — no current release authority
+## Preserved component train — consolidated into PR #238
 
-These candidates preserve already-built work. They are not part of PR #209's
-consumed gate and must not be merged out of order:
+The entries below preserve the exact PR #210–#237 implementation lineage that
+is included once in PR #238. They are historical evidence, not a sequential
+Production queue. Their individual approval phrases are retained only to prove
+what each component formerly required; none is currently requestable or may be
+replayed. Use only the PR #238 cumulative gate above.
 
-Each proof set resolves the current GitHub PR head at verification time.
-If the head moves, proof must be repeated across exact-head CI, Preview,
-browser, and runtime checks before any gate becomes requestable.
+Branches, rescue refs, checks, and evidence remain recoverable. Do not merge an
+individual component PR, close/delete its lineage as part of this release, or
+treat a component phrase as authority for any action.
+
+PR #237, the hash-pinned WordPress homepage CTA restoration packet, is also
+included in the PR #238 tree. Its application files do not publish WordPress;
+the live plugin save remains a separate exact WordPress gate.
 
 1. Draft PR [#210](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/210)
    consolidates `/value` and `/we-buy-houses` onto the canonical conversion

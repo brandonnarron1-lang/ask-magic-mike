@@ -22,12 +22,15 @@ brokerage, listings, and SEO authority and embeds or links into this system.
 - `VERIFIED LIVE` — PR #209's durable-rate-limit release is accepted at
   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`; its exact gate is consumed and
   cannot authorize another action.
-- `ORDERED DRAFT TRAIN` — PR #210 is the first pending application candidate.
-  Later Drafts preserve already-built work but cannot leapfrog it or reuse PR
-  #209's exhausted authority.
+- `CUMULATIVE RELEASE HOLD` — Draft PR #238 is the single exact-head Phase 9
+  application candidate. It consolidates preserved PRs #210–#237 and four
+  guarded additive migrations; the earlier component gates are historical and
+  cannot be replayed.
 
 The source-of-truth audit is in
 [`docs/CURRENT_STATE_RECONCILIATION.md`](docs/CURRENT_STATE_RECONCILIATION.md).
+The singular release gate, exact head, and cutover order are in
+[`docs/CURRENT_RELEASE_AUTHORITY.md`](docs/CURRENT_RELEASE_AUTHORITY.md).
 Documentation precedence and historical-packet handling are in
 [`docs/DOCUMENTATION_AUTHORITY.md`](docs/DOCUMENTATION_AUTHORITY.md).
 The remaining human gates are in

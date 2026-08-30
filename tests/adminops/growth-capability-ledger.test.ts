@@ -21,8 +21,10 @@ describe("Growth capability authority ledger", () => {
     });
     expect(ledger.items.find((item) => item.key === "ordered_release_train")).toMatchObject({
       state: "release_candidate",
-      approvalGate: "APPROVE PHASE 9 CAPABILITY AUTHORITY LEDGER MERGE AND PRODUCTION DEPLOYMENT",
+      approvalGate: "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT",
     });
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 238");
+    expect(JSON.stringify(ledger)).not.toContain("PR 210 remains the first pending");
   });
 
   it("marks only the application-bound candidates live in the canonical Production runtime", () => {
@@ -73,7 +75,7 @@ describe("Growth capability authority ledger", () => {
     const facebookRecovery = ledger.items.find((item) => item.key === "facebook_preview_recovery");
 
     expect(gates).toEqual([
-      "APPROVE PHASE 9 CAPABILITY AUTHORITY LEDGER MERGE AND PRODUCTION DEPLOYMENT",
+      "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT",
       "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA",
     ]);
     expect(facebookRecovery?.approvalGate).toBeUndefined();

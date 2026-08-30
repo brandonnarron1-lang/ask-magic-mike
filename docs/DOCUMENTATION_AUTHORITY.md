@@ -1,35 +1,38 @@
 # Documentation Authority
 
-Updated 2026-08-23. This register prevents dated build packets from overriding
+Updated 2026-08-29. This register prevents dated build packets from overriding
 the observed production system.
 
 ## Operating source of truth
 
 Use these files for current decisions, in this order:
 
-1. `CURRENT_STATE_RECONCILIATION.md` — observed repository, deployment, runtime,
-   database, authorization, and provider state.
-2. `CANONICAL_ASSET_MANIFEST.md` and `CANONICAL_PRODUCTION_STACK.md` —
+1. `CURRENT_RELEASE_AUTHORITY.md` and
+   `config/current-release-authority.json` — singular current application gate,
+   exact candidate, accepted baseline, and execution order.
+2. `CURRENT_STATE_RECONCILIATION.md` — observed repository, deployment,
+   runtime, database, authorization, and provider state.
+3. `CANONICAL_ASSET_MANIFEST.md` and `CANONICAL_PRODUCTION_STACK.md` —
    canonical repository, project, domain, database, and asset dispositions.
-3. `CONSOLIDATION_PLAN.md` — merge order, systems to retain, and systems that
+4. `CONSOLIDATION_PLAN.md` — merge order, systems to retain, and systems that
    must remain separate.
-4. `PRODUCTION_LAUNCH_GATE.md` — mandatory release checklist.
-5. `GO_LIVE_RUNBOOK.md` — deploy, verify, and rollback procedure.
-6. `ENVIRONMENT_VARIABLE_MATRIX.md` and `.env.example` — names, scopes, and safe
+5. `PRODUCTION_LAUNCH_GATE.md` — mandatory release checklist.
+6. `GO_LIVE_RUNBOOK.md` — deploy, verify, and rollback procedure.
+7. `ENVIRONMENT_VARIABLE_MATRIX.md` and `.env.example` — names, scopes, and safe
    defaults only; the hosting secret interface remains authoritative for values.
-7. `OWNER_APPROVAL_QUEUE.md` — exact external-action and Production gates.
-8. `KNOWN_BLOCKERS.md` and `KNOWN_LIMITATIONS.md` — current operating
+8. `OWNER_APPROVAL_QUEUE.md` — exact external-action and Production gates.
+9. `KNOWN_BLOCKERS.md` and `KNOWN_LIMITATIONS.md` — current operating
    constraints and truthful capability boundaries.
-9. `IMPLEMENTATION_STATUS.md`, `QA_EVIDENCE.md`, and the applicable
+10. `IMPLEMENTATION_STATUS.md`, `QA_EVIDENCE.md`, and the applicable
    `docs/phase9/*_QA_EVIDENCE.md` file — current release evidence. Exact-head
    GitHub checks and matching Vercel deployment metadata outrank a run ID frozen
    into documentation.
 
-Current release authority is intentionally singular: Draft PR #209 supersedes
-the incremental #202 through #208 stack for release while preserving every PR
-and branch as review evidence. A historical gate attached to an earlier PR or
-an already released application cannot authorize a new merge, deployment,
-mutation, send, or publication.
+Current release authority is intentionally singular: accepted PR #209 remains
+the Production baseline, while Draft PR #238 consolidates the preserved
+PR #210–#237 component train into one exact-head candidate. A historical gate
+attached to a component PR or an already released application cannot authorize
+a new merge, deployment, mutation, send, or publication.
 
 `QA_EVIDENCE_CURRENT.md` is a cumulative 2026-08-14-era evidence packet with
 later appendices. Preserve it as provenance, but do not use its first baseline

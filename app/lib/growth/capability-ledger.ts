@@ -1,3 +1,8 @@
+import {
+  CURRENT_CUMULATIVE_RELEASE_GATE,
+  CURRENT_RELEASE_AUTHORITY,
+} from "./current-release-authority";
+
 export const GROWTH_CAPABILITY_STATES = [
   "production_live",
   "release_candidate",
@@ -34,9 +39,6 @@ export interface GrowthCapabilityLedger {
   items: GrowthCapabilityLedgerItem[];
   counts: Record<GrowthCapabilityState, number>;
 }
-
-const CAPABILITY_LEDGER_GATE =
-  "APPROVE PHASE 9 CAPABILITY AUTHORITY LEDGER MERGE AND PRODUCTION DEPLOYMENT";
 
 const CURRENT_WORDPRESS_GATE =
   "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA";
@@ -121,25 +123,25 @@ export function buildGrowthCapabilityLedger({
       ],
       nextAction: currentTailInProduction
         ? "Use the protected workbench to prepare one owner-reviewed page experiment at a time, then request the separate publication authority only after Preview and compliance review."
-        : "Preserve this read-only candidate behind every predecessor in the ordered release train; do not publish a page or treat this packet as release authority.",
+        : `Preserve this read-only capability inside cumulative PR ${CURRENT_RELEASE_AUTHORITY.candidate.pr}; do not publish a page or treat an experiment packet as release authority.`,
       href: "/admin/growth/search-ingress",
     },
     {
       key: "ordered_release_train",
-      label: "Accepted durability and ordered release train",
+      label: "Accepted Production and cumulative release candidate",
       domain: "govern",
       state: applicationState,
-      summary: "PR 209's Neon-backed limiter and fail-closed readiness are already accepted in Production. The later conversion, accessibility, growth, and operating improvements remain an ordered Draft train until each predecessor and exact release gate is satisfied.",
+      summary: `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is accepted in Production. PR ${CURRENT_RELEASE_AUTHORITY.candidate.pr} consolidates the reviewed Phase 9 component train into one exact-head application candidate with one guarded four-migration cutover.`,
       evidence: [
-        "PR 209 is live at the accepted Production authority commit and its durability gate is consumed",
-        "PR 210 remains the first pending application candidate",
-        "Later Drafts preserve exact-head CI, protected no-write Preview QA, rollback, and cannot leapfrog predecessors",
+        `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is live at ${CURRENT_RELEASE_AUTHORITY.production.mergeCommit} on ${CURRENT_RELEASE_AUTHORITY.production.deploymentId}; its gate is consumed`,
+        `PR ${CURRENT_RELEASE_AUTHORITY.candidate.pr} exact head ${CURRENT_RELEASE_AUTHORITY.candidate.head} is the single cumulative application candidate`,
+        `Component PRs ${CURRENT_RELEASE_AUTHORITY.consolidatedComponentTrain.firstPr}–${CURRENT_RELEASE_AUTHORITY.consolidatedComponentTrain.lastPr} remain preserved lineage with no independent current release authority`,
       ],
       nextAction: currentTailInProduction
-        ? "Keep the accepted durability contract green and release each later candidate only from its reviewed exact head."
-        : "Start with PR 210 and preserve the reviewed order. The capability-ledger gate is not requestable until every predecessor is accepted and this exact head is refreshed.",
+        ? "Verify the deployed commit, health, protected boundaries, migrations, and rollback evidence before considering any separately gated import or external action."
+        : `Use only the guarded PR ${CURRENT_RELEASE_AUTHORITY.candidate.pr} cutover after its exact approval. Do not merge component PRs individually or reuse their historical gates.`,
       href: "/admin/reporting",
-      ...(!currentTailInProduction ? { approvalGate: CAPABILITY_LEDGER_GATE } : {}),
+      ...(!currentTailInProduction ? { approvalGate: CURRENT_CUMULATIVE_RELEASE_GATE } : {}),
     },
     {
       key: "revival_and_review_planner",
@@ -154,7 +156,7 @@ export function buildGrowthCapabilityLedger({
       ],
       nextAction: currentTailInProduction
         ? "Collect real planner engagement and review eligible revival evidence before proposing any bounded consumer pilot."
-        : "Preserve the reviewed implementations and release them through the existing ordered train instead of rebuilding nurture or planning features.",
+        : `Preserve these reviewed implementations inside cumulative PR ${CURRENT_RELEASE_AUTHORITY.candidate.pr} instead of rebuilding nurture or planning features.`,
       href: "/admin/revival",
     },
     {

@@ -81,10 +81,15 @@ accepts only plan or authenticated read-only preflight modes, refuses an
 unlinked Vercel checkout, and performs no secret entry, merge, deployment,
 database/event write, provider send, or configuration change.
 
-PR #210 has no migration or environment change. If its canonical redirect
-acceptance fails, restore `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` and its aliases.
-Do not change the durable limiter secret, database, limiter rows, lead/event
-records, WordPress, or DNS as part of that application rollback.
+For cumulative PR #238, record and retain
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` as the immediate application rollback before
+cutover. Keep all three growth import gates false. If application acceptance
+fails before any separately approved import, restore that deployment and its
+aliases while leaving the empty additive migration objects and ledger rows in
+place for a reviewed forward fix. Do not drop receipt/audit objects, restore an
+older database automatically, alter the durable limiter secret, mutate
+lead/event/notification rows, change WordPress/DNS, or replay a historical
+component gate as part of rollback.
 
 ## WordPress
 

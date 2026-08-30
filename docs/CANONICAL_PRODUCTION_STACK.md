@@ -29,9 +29,11 @@ This document defines the single authoritative source of truth for Ask Magic Mik
 
 Current accepted Production release: PR #209 merge
 `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`, deployment
-`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Draft PR #210 is the next ordered
-application release candidate and has no Production authority until its fresh
-exact-head proof and separate gate are complete.
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Draft PR #238 at exact head
+`de67db6e1183b2a47d329d4a9a11993d48d1992a` is the single cumulative
+application candidate. PRs #210–#237 remain preserved component lineage with
+no independent current release authority. See
+[`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).
 
 ### Verification command
 

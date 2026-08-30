@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-08-29 — Current release authority made singular
+
+- Replaced conflicting active instructions with one canonical authority
+  contract shared by code, tests, operator documentation, and the protected
+  Growth capability ledger.
+- Records accepted Production PR #209, exact cumulative Draft PR #238, its
+  immutable Preview and hosted checks, the exact approval phrase, the ordered
+  cutover command, and all four reviewed migration hashes.
+- PRs #210–#237 remain auditable historical lineage; PR #239 remains dependent
+  read-only tooling and cannot move ahead of PR #238.
+- Exact Node 24.18.0 verification passed 275 files / 3,401 tests, strict
+  TypeScript, full ESLint, optimized Next.js 15.5.21 build with 59 pages,
+  95/17 route proof, 14/14 release safety, and deployable-source isolation.
+- No Production, database, WordPress, lead, notification, provider, DNS,
+  publication, spend, deletion, or NellySelly mutation occurred.
+
 ## 2026-08-29 — WordPress homepage visibility truth
 
 - Reused the existing protected WordPress readiness manifest and owned-demand

@@ -2,6 +2,39 @@
 
 Updated 2026-08-29.
 
+Current release authority is singular and machine-bound in
+`docs/CURRENT_RELEASE_AUTHORITY.md` and
+`config/current-release-authority.json`: accepted Production is PR #209 and
+Draft PR #238 is the cumulative PR #210–#237 candidate. Lower sections are a
+chronological implementation ledger; older statements that named PR #210 or
+another component as the next release are preserved historical evidence, not
+current operator instructions.
+
+## Phase 9 singular cumulative release authority — 2026-08-29
+
+- **Conflict closed:** a completion audit found that the sealed cumulative PR
+  #238 candidate coexisted with active “PR #210 first” operator guidance. The
+  protected Growth capability ledger and active runbooks now use one authority
+  contract instead of duplicating release order and approval text.
+- **Machine-bound identity:**
+  [`config/current-release-authority.json`](../config/current-release-authority.json)
+  records accepted Production PR #209, exact cumulative Draft PR #238
+  head/tree, its exact approval gate, ordered cutover command, and all four
+  reviewed migration hashes. A typed server-side adapter prevents client-side
+  exposure and keeps the ledger synchronized.
+- **Preserved lineage:** PRs #210–#237, their branches, rescue refs, checks, and
+  evidence remain recoverable but have no independent release authority. PR
+  #239 remains dependent read-only operator tooling and cannot precede PR #238.
+- **Verification:** focused tests pass 2 files / 29 tests. The full exact-tree
+  Node 24.18.0 Release Gate passes 275 files / 3,401 tests, strict TypeScript,
+  full ESLint, optimized 59-page Next.js build, 95/17 route proof, 14/14 safety,
+  and deployable-source isolation. Final exact-head hosted proof is attached to
+  the Draft PR after push.
+- **Authority boundary:** no Production, database, environment/secret,
+  WordPress, lead/PII, message, provider, DNS, publication, spend, deletion, or
+  NellySelly action occurred. The only current cumulative gate remains the
+  exact phrase in [`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).
+
 ## Phase 9 cumulative growth Production cutover candidate — 2026-08-29
 
 - **Reuse decision:** Draft PR #238 remains the one cumulative application
@@ -82,9 +115,10 @@ Updated 2026-08-29.
   `b2d73a770f952ece5c89ec1741b09399fe632b21`. Code-bearing head is
   `d432e90618dbe26b6aa66f50b9f39d545f81b2de`; final exact-head CI, immutable
   Preview, protected QA, and runtime evidence will be pinned in the PR seal.
-  Production remains PR #209 and PR #210 remains first in release order. No
-  Production, WordPress, database, provider, message, DNS, publication, spend,
-  deletion, or NellySelly mutation occurred.
+  Production remains PR #209. The section's former PR #210-first ordering is a
+  historical snapshot superseded by the current cumulative PR #238 authority.
+  No Production, WordPress, database, provider, message, DNS, publication,
+  spend, deletion, or NellySelly mutation occurred.
 - Decision and rollback:
   [`phase9/WORDPRESS_HOMEPAGE_VISIBILITY_TRUTH.md`](./phase9/WORDPRESS_HOMEPAGE_VISIBILITY_TRUTH.md).
 
@@ -118,9 +152,11 @@ Updated 2026-08-29.
 - **Authority boundary:** Draft PR #235 is stacked on exact sealed PR #234 head
   `5ff3d1079f50e5f05c7000edda75aacefa4a31c5`. Production remains PR #209
   merge `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
-  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; PR #210 remains first in release order.
-  No Production, WordPress, Vercel environment, Neon, DNS, provider, lead,
-  message, publication, spend, deletion, or NellySelly mutation occurred.
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. The section's former PR #210-first
+  ordering is a historical snapshot superseded by the current cumulative PR
+  #238 authority. No Production, WordPress, Vercel environment, Neon, DNS,
+  provider, lead, message, publication, spend, deletion, or NellySelly mutation
+  occurred.
 - Decision packet:
   [`phase9/WORDPRESS_SELLER_INTENT_DECISION_PACKET.md`](./phase9/WORDPRESS_SELLER_INTENT_DECISION_PACKET.md).
 
@@ -145,7 +181,9 @@ Updated 2026-08-29.
   `rescue/amm-pr234-base-pr233-20260829-171619`. Draft PR #234 implementation
   head is `ba56f7b3ac98912c206eeb56fde4b004be78ea64`. Production remains PR #209
   merge `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
-  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`; PR #210 remains first in release order.
+  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. The section's former PR #210-first
+  ordering is a historical snapshot superseded by the current cumulative PR
+  #238 authority.
 - Decision/evidence:
   `docs/phase9/NOTIFICATION_OPERATIONS_TRUTH.md` and
   `docs/phase9/NOTIFICATION_OPERATIONS_TRUTH_QA_EVIDENCE.md`.

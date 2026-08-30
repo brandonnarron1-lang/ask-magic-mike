@@ -105,17 +105,26 @@ variables; that remains a separate cleanup action.
 
 ## Current Phase 9 release sequence
 
-Release only one approved PR at a time and verify Production before advancing:
+The singular current application candidate is PR #238. PRs #210–#237 are
+preserved component lineage included once in that cumulative tree; do not merge
+them individually or replay their former gates.
 
 1. `#180`, `#181`, `#183`, `#184`, `#185`, `#193`, `#196`, `#194`, `#195`, and
    `#209` are complete and their gates are exhausted.
-2. `#210` is the next ordered application candidate. It must be refreshed onto
-   accepted PR #209 `main`, re-proven, and receive its own exact gate.
-3. Any later stacked candidate remains non-authoritative until its immediate
-   predecessor is accepted and it is refreshed and re-proven.
+2. `#238` exact head `de67db6e1183b2a47d329d4a9a11993d48d1992a`
+   is fully sealed but held for its exact cumulative gate.
+3. Run its guarded read-only preflight, keep all three import gates false, then
+   execute/verify the four hash-pinned migrations before merging and deploying
+   only that exact reviewed head.
+4. `#239` and later dependent review artifacts remain outside the PR #238 gate
+   and cannot advance ahead of it.
 
-Do not merge or deploy candidates out of order. Rebase and re-prove each one
-after its predecessor is released.
+The exact authority and current manifest are in
+`docs/CURRENT_RELEASE_AUTHORITY.md` and
+`config/current-release-authority.json`.
+
+Historical cutover commands below remain evidence for already completed or
+component releases. They do not supersede the current PR #238 runner or gate.
 
 PR #181 uses:
 
@@ -193,10 +202,9 @@ Preview verification left these empty Vercel helper projects intact:
 domain or Production effect. Do not delete any without a separate exact cleanup
 approval.
 
-Each item retains its own exact approval phrase. Refresh any downstream branch
-after the preceding Production merge, rerun Node 24 CI and Vercel Preview, and do
-not treat this ordering as authorization to merge, deploy, publish, send, or
-mutate data.
+Historical component phrases are exhausted or superseded for current release
+purposes. Do not treat the preserved ordering below as authority to merge,
+deploy, publish, send, import, or mutate data.
 
 ## Owned-traffic activation
 

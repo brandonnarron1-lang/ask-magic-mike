@@ -1,6 +1,9 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+
+import { CURRENT_RELEASE_AUTHORITY } from "../../app/lib/growth/current-release-authority";
 
 const readDoc = (name: string) =>
   readFileSync(resolve(process.cwd(), "docs", name), "utf8");
@@ -8,6 +11,7 @@ const readRepoFile = (name: string) =>
   readFileSync(resolve(process.cwd(), name), "utf8");
 
 const readme = readRepoFile("README.md");
+const currentReleaseAuthority = readDoc("CURRENT_RELEASE_AUTHORITY.md");
 const capabilityLedgerSource = readRepoFile(
   "app/lib/growth/capability-ledger.ts"
 );
@@ -105,6 +109,7 @@ const notificationOperationsDecision = readDoc(
 
 const operatingDocs = [
   currentState,
+  currentReleaseAuthority,
   assetManifest,
   canonicalStack,
   consolidationPlan,
@@ -122,8 +127,12 @@ const rollbackCommit = "b450b41c66c6740bd20571cdbe7d8caf82e92d5e";
 const rollbackDeployment = "dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW";
 const completedDurabilityGate =
   "APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT";
-const capabilityLedgerGate =
-  "APPROVE PHASE 9 CAPABILITY AUTHORITY LEDGER MERGE AND PRODUCTION DEPLOYMENT";
+const cumulativeReleaseGate =
+  "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT";
+const cumulativeReleaseHead =
+  "de67db6e1183b2a47d329d4a9a11993d48d1992a";
+const cumulativeReleaseTree =
+  "75abbbbe6767092e1d31b225014dd1bf574acda1";
 const currentWordPressGate =
   "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA";
 const staleWordPressHomepageGate =
@@ -298,6 +307,7 @@ describe("current release-authority documentation", () => {
       durableRateLimitDecision,
       atomicAuthorityDecision,
       implementationStatus,
+      currentReleaseAuthority,
     ]) {
       expect(doc).toContain(productionCommit);
       expect(doc).toContain(productionDeployment);
@@ -328,18 +338,23 @@ describe("current release-authority documentation", () => {
 
   it("keeps the capability ledger aligned with the current release authority", () => {
     expect(readme).toContain(productionCommit);
-    expect(readme).toMatch(/PR #210[\s\S]*first pending/i);
+    expect(readme).toMatch(/PR #238[\s\S]*single exact-head/i);
+    expect(readme).not.toMatch(/PR #210[\s\S]{0,120}first pending/i);
     expect(readme).not.toContain(
       "PR #209 is the sole atomic application candidate"
     );
 
-    expect(capabilityLedgerSource).toContain(capabilityLedgerGate);
+    expect(capabilityLedgerSource).toContain("CURRENT_CUMULATIVE_RELEASE_GATE");
     expect(capabilityLedgerSource).toContain(currentWordPressGate);
     expect(capabilityLedgerSource).not.toContain(completedDurabilityGate);
     expect(capabilityLedgerSource).not.toContain(staleWordPressHomepageGate);
+    expect(CURRENT_RELEASE_AUTHORITY.candidate.approvalGate).toBe(
+      cumulativeReleaseGate
+    );
+    expect(CURRENT_RELEASE_AUTHORITY.candidate.head).toBe(cumulativeReleaseHead);
   });
 
-  it("identifies PR #210 as the next distinct application candidate", () => {
+  it("identifies PR #238 as the single cumulative application candidate", () => {
     for (const doc of [
       currentState,
       assetManifest,
@@ -349,17 +364,22 @@ describe("current release-authority documentation", () => {
       knownBlockers,
       knownLimitations,
     ]) {
-      expect(doc).toMatch(/PR #210|PR \[#210\]/);
+      expect(doc).toMatch(/PR #238|PR \[#238\]/);
+      expect(doc).not.toMatch(/PR #210[\s\S]{0,120}(?:next|first pending)[\s\S]{0,80}(?:candidate|vehicle)/i);
     }
 
-    expect(consolidationPlan).toContain(canonicalAliasGate);
-    expect(ownerQueue).toContain(canonicalAliasGate);
+    expect(currentReleaseAuthority).toContain(cumulativeReleaseHead);
+    expect(currentReleaseAuthority).toContain(cumulativeReleaseTree);
+    expect(currentReleaseAuthority).toContain(cumulativeReleaseGate);
+    expect(consolidationPlan).toContain(cumulativeReleaseGate);
+    expect(ownerQueue).toContain(cumulativeReleaseGate);
+    expect(knownBlockers).toContain(cumulativeReleaseGate);
     expect(canonicalAliasDecision).toContain(canonicalAliasGate);
     expect(canonicalAliasEvidence).toContain(canonicalAliasGate);
-    expect(canonicalAliasGate).not.toBe(completedDurabilityGate);
+    expect(cumulativeReleaseGate).not.toBe(completedDurabilityGate);
   });
 
-  it("orders PR #210 and later candidates after completed PR #209", () => {
+  it("preserves the component lineage after PR #209 without parallel current authority", () => {
     const completedPr209 = ownerQueue.indexOf("PR [#209]");
     const pr210 = ownerQueue.indexOf("Draft PR [#210]");
     const pr211 = ownerQueue.indexOf("Draft PR [#211]");
@@ -435,12 +455,37 @@ describe("current release-authority documentation", () => {
     expect(ownerQueue).toContain(plannerSocialIdentityGate);
     expect(ownerQueue).toContain(notificationOperationsGate);
     expect(notificationOperationsDecision).toContain(notificationOperationsGate);
-    expect(assetManifest).toContain("PR #232");
-    expect(assetManifest).toContain("PR #233");
-    expect(assetManifest).toContain("PR #234");
+    expect(assetManifest).toContain("PRs #232–#237");
     expect(currentState).toContain("#227 through #234");
-    expect(currentState).toMatch(/PR #234[\s\S]*current[\s\S]*Draft tail/i);
-    expect(currentState).not.toContain("Current ordered application Draft tail");
+    expect(ownerQueue).toMatch(/Preserved component train[\s\S]*historical evidence[\s\S]*(?:not|none is) currently requestable/i);
+    expect(currentState).toMatch(/#210 through #237[\s\S]*No independent current merge\/deploy authority/i);
+  });
+
+  it("binds the machine-readable authority to the reviewed migration bytes", () => {
+    expect(CURRENT_RELEASE_AUTHORITY.schemaVersion).toBe(1);
+    expect(CURRENT_RELEASE_AUTHORITY.production).toEqual({
+      pr: 209,
+      mergeCommit: productionCommit,
+      deploymentId: productionDeployment,
+    });
+    expect(CURRENT_RELEASE_AUTHORITY.candidate).toMatchObject({
+      pr: 238,
+      branch: "codex/phase9-cumulative-release-20260829",
+      head: cumulativeReleaseHead,
+      tree: cumulativeReleaseTree,
+      state: "draft",
+      approvalGate: cumulativeReleaseGate,
+      cutoverCommand: "pnpm run phase9:cumulative-growth:cutover -- --execute",
+    });
+    expect(CURRENT_RELEASE_AUTHORITY.candidate.migrations).toHaveLength(4);
+    expect(new Set(CURRENT_RELEASE_AUTHORITY.candidate.migrations.map(({ version }) => version)).size).toBe(4);
+
+    for (const migration of CURRENT_RELEASE_AUTHORITY.candidate.migrations) {
+      const bytes = readFileSync(resolve(process.cwd(), migration.file));
+      expect(createHash("sha256").update(bytes).digest("hex")).toBe(
+        migration.sha256
+      );
+    }
   });
 
   it("keeps superseded PRs #187 and #212 as preserved evidence without parallel authority", () => {
@@ -623,10 +668,10 @@ describe("current release-authority documentation", () => {
     expect(assetManifest).toMatch(/PR #226[\s\S]*documentation\/test-only/i);
   });
 
-  it("resolves the mutable PR head from GitHub instead of self-pinning it", () => {
+  it("pins the cumulative head while preserving historical mutable-head warnings", () => {
+    expect(ownerQueue).toContain(cumulativeReleaseHead);
     expect(ownerQueue).toMatch(/current GitHub PR head/i);
-    expect(ownerQueue).toMatch(/If the head moves[\s\S]*proof must be repeated/i);
-    expect(ownerQueue).not.toMatch(/Exact head\s+`[0-9a-f]{40}`\s+passes/i);
+    expect(currentReleaseAuthority).toMatch(/Any head, tree, migration, target, or gate[\s\S]*invalidates the approval/i);
   });
 
   it("keeps the accepted rollback deployment immutable", () => {
@@ -648,6 +693,9 @@ describe("current release-authority documentation", () => {
       "sole current application release vehicle",
       "sole current application release candidate",
       "#209` is the sole next atomic application candidate",
+      "PR #210 is the first pending application candidate",
+      "Draft PR #210 is the next ordered application release candidate",
+      "Draft PR #210 is the next ordered application release vehicle",
     ];
 
     for (const staleClaim of staleAuthorityClaims) {
@@ -660,7 +708,7 @@ describe("current release-authority documentation", () => {
       /#202 through #208[\s\S]*No independent merge or Production authority/
     );
     expect(consolidationPlan).toMatch(
-      /PRs #202 through #208[\s\S]*superseded for release by PR #209/
+      /PRs #202[–-]#208[\s\S]*superseded for release by PR #209/
     );
     expect(ownerQueue).toMatch(
       /PRs #202 through #208[\s\S]*no independent release authority/
