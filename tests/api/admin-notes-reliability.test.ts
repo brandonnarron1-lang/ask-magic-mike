@@ -1,14 +1,14 @@
 /**
  * Reliability tests for POST /api/admin/leads/[id]/notes.
  *
- * Verifies that a Supabase insert failure returns 500, not 200.
+ * Verifies that a canonical persistence failure returns 500, not 200.
  * The invariant: { ok: true } means the note was saved.
  */
 
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const insertMock = vi.fn();
+const operationMock = vi.fn();
 const trackMock  = vi.fn();
 
 vi.mock("@/lib/admin/auth", () => ({
@@ -19,27 +19,9 @@ vi.mock("@/lib/analytics/ledger", () => ({
   trackEventNoWait: (...args: unknown[]) => trackMock(...args),
 }));
 
-vi.mock("@/lib/supabase/admin", () => ({
-  createAdminClient: () => ({
-    from: (table: string) => ({
-      insert: (...args: unknown[]) => {
-        if (table === "messages") return insertMock(...args);
-        // audit_logs: always succeed
-        return { data: null, error: null };
-      },
-    }),
-  }),
+vi.mock("@/lib/admin/lead-operations", () => ({
+  addCanonicalAdminLeadNote: (...args: unknown[]) => operationMock(...args),
 }));
-
-// Ensure the route sees Supabase as configured
-const originalEnv = process.env;
-beforeEach(() => {
-  process.env = {
-    ...originalEnv,
-    NEXT_PUBLIC_SUPABASE_URL: "https://test.supabase.co",
-    SUPABASE_SERVICE_ROLE_KEY: "test-key",
-  };
-});
 
 import { POST } from "@/app/api/admin/leads/[id]/notes/route";
 
@@ -59,7 +41,14 @@ function makeRequest(note = "Follow up tomorrow"): NextRequest {
 describe("POST /api/admin/leads/[id]/notes — DB reliability", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    insertMock.mockResolvedValue({ data: null, error: null });
+    operationMock.mockResolvedValue({
+      ok: true,
+      value: {
+        messageId: "00000000-0000-0000-0000-000000000010",
+        auditId: "00000000-0000-0000-0000-000000000011",
+        createdAt: "2026-08-30T12:00:00.000Z",
+      },
+    });
   });
 
   it("returns 200 with ok:true when insert succeeds", async () => {
@@ -67,13 +56,11 @@ describe("POST /api/admin/leads/[id]/notes — DB reliability", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
+    expect(body.message_id).toBe("00000000-0000-0000-0000-000000000010");
   });
 
   it("returns 500 when messages insert fails", async () => {
-    insertMock.mockResolvedValue({
-      data:  null,
-      error: { message: "relation \"messages\" does not exist" },
-    });
+    operationMock.mockResolvedValue({ ok: false, statusCode: 500, error: "note_save_failed" });
 
     const res = await POST(makeRequest(), { params: Promise.resolve({ id: VALID_ID }) });
     expect(res.status).toBe(500);
@@ -83,7 +70,7 @@ describe("POST /api/admin/leads/[id]/notes — DB reliability", () => {
   });
 
   it("does NOT return ok:true on DB failure", async () => {
-    insertMock.mockResolvedValue({ data: null, error: { message: "timeout" } });
+    operationMock.mockResolvedValue({ ok: false, statusCode: 502, error: "note_save_failed" });
 
     const res = await POST(makeRequest(), { params: Promise.resolve({ id: VALID_ID }) });
     const body = await res.json();

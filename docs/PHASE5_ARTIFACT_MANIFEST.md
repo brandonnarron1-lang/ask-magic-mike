@@ -45,8 +45,8 @@
   device before one `[TEST]` Push can be sent.
 - BIC/owner approval is required before any held Gravity Form or content asset
   is activated.
-- The hosting operator must create a narrow managed-WAF exception before Meta
-  acceptance can move from 40/42 to 42/42.
+- The hosting operator must apply the reviewed per-vhost/account Apache
+  override before Meta acceptance can move from 40/42 to 42/42.
 
 The final ZIP contains only operational documents and artifacts. It excludes
 credentials, reset links, hidden BCC values, cookies, Push endpoints, genuine

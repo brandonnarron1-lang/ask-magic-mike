@@ -4,12 +4,13 @@ import {
   type OwnedDemandCreativeDefinition,
 } from "./owned-demand";
 
-export const OWNED_DEMAND_ASSET_FORMATS = ["feed", "story", "qr_svg"] as const;
+export const OWNED_DEMAND_ASSET_FORMATS = ["feed", "story", "square", "qr_svg"] as const;
 export type OwnedDemandAssetFormat = (typeof OWNED_DEMAND_ASSET_FORMATS)[number];
 
 export const OWNED_DEMAND_IMAGE_SPECS = {
   feed: { width: 1080, height: 1350, label: "4:5 feed PNG" },
   story: { width: 1080, height: 1920, label: "9:16 story PNG" },
+  square: { width: 720, height: 720, label: "1:1 Google Business Profile PNG" },
 } as const;
 
 export type OwnedDemandImageFormat = keyof typeof OWNED_DEMAND_IMAGE_SPECS;
@@ -70,6 +71,7 @@ export function resolveOwnedDemandAssetRequest(
   formatValue: string | null,
 ): OwnedDemandAssetRequest | null {
   if (!isOwnedDemandAssetFormat(formatValue)) return null;
+  if (formatValue === "square" && channelKey !== "google_business_profile") return null;
   const creative = resolveOwnedDemandCreative(channelKey, placementKey);
   if (!creative) return null;
   return {

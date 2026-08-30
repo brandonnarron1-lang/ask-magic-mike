@@ -2,11 +2,22 @@
 
 ## Application
 
-Current Production is `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` at merge commit
-`b450b41c66c6740bd20571cdbe7d8caf82e92d5e`. Re-inspect Production and record
+Current Production is `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` at merge commit
+`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. Re-inspect Production and record
 the immediately preceding Ready deployment before a future release because
 aliases can move. If smoke checks fail, stop traffic activation and promote the
 recorded prior deployment. Do not delete a deployment or force-push.
+
+For cross-domain measurement, the pre-activation rollback is to leave the Ask
+Production configuration unset and keep
+`AMM_GOOGLE_MEASUREMENT_ENABLED` disabled in WordPress. After a separately
+approved WordPress activation, disable that constant and restore the backed-up
+1.1.0 bridge/source configuration through the reviewed rollback procedure; do
+not reintroduce a pre-consent GTM head/noscript bootstrap. After a separately
+approved Ask activation, remove the measurement configuration and promote the
+recorded prior Ready deployment if application smoke checks fail. Preserve the
+canonical first-party event ledger; external-tag rollback does not authorize
+event deletion.
 
 For the dependent field-experience candidate, application rollback to the prior
 accepted Vercel deployment removes the reporter and Growth panel code. It has
@@ -55,20 +66,30 @@ rollback instruction.
 
 ## Phase 9 durable rate-limit readiness
 
-PR #209 has no migration. Before release, record the exact prior Ready Vercel
-deployment. If any store-capability, dedicated-secret, malformed-request, log,
-or monitor acceptance check fails, restore that deployment/alias first. The
-prior immutable deployment does not gain a newly added Vercel environment
-value retroactively. After rollback health is proven, remove only the newly
-added `RATE_LIMIT_HASH_SECRET` from future Production builds if the incident
-requires it; never display or copy its value. Do not alter or delete
-`rate_limit_buckets` rows as part of application rollback. Stale encrypted
-Upstash variable removal remains a separate, unapproved cleanup.
+PR #209 had no migration and passed Production acceptance. Its immediate
+rollback deployment remains `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. If a later
+incident requires that rollback, restore the prior deployment/aliases first.
+The prior immutable deployment does not gain the newly added Vercel environment
+value retroactively. After rollback health is proven, remove only
+`RATE_LIMIT_HASH_SECRET` from future Production builds if the incident requires
+it; never display or copy its value. Do not alter or delete
+`rate_limit_buckets` rows. Stale encrypted Upstash variable removal remains a
+separate, unapproved cleanup.
 
 The `phase9:durable-rate-limit:readiness` rehearsal has no rollback step: it
 accepts only plan or authenticated read-only preflight modes, refuses an
 unlinked Vercel checkout, and performs no secret entry, merge, deployment,
 database/event write, provider send, or configuration change.
+
+For cumulative PR #238, record and retain
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` as the immediate application rollback before
+cutover. Keep all three growth import gates false. If application acceptance
+fails before any separately approved import, restore that deployment and its
+aliases while leaving the empty additive migration objects and ledger rows in
+place for a reviewed forward fix. Do not drop receipt/audit objects, restore an
+older database automatically, alter the durable limiter secret, mutate
+lead/event/notification rows, change WordPress/DNS, or replay a historical
+component gate as part of rollback.
 
 ## WordPress
 
@@ -76,13 +97,48 @@ Remove only the named reversible Custom HTML/shortcode/widget block or deactivat
 the isolated bridge after backing up. Do not edit parent theme, `functions.php`,
 FlexMLS/IDX, or unrelated forms. Restore prior page cache only if the owner approves.
 
-The canonical bridge is currently shadow-only. Immediate rollback is
-`AMM_CANONICAL_BRIDGE_ENABLED=false`; a one-form rollback removes only that ID
-from `AMM_CANONICAL_BRIDGE_FORM_IDS`. It has not forwarded, altered, or imported
-any lead record.
+Canonical bridge 1.1.0 is currently active only for the already-approved Form 3
+path. Preserve its exact enable flag, allowlist, HMAC secret, endpoint, Gravity
+entry, and notification state during a 1.2.0 upgrade. Lead-forwarding rollback
+is `AMM_CANONICAL_BRIDGE_ENABLED=false`; a one-form rollback removes only that
+ID from `AMM_CANONICAL_BRIDGE_FORM_IDS`. Do not use a measurement issue as
+authority to disable Form 3 or delete a WordPress/Neon record.
+
+Bridge 1.2.0 measurement rollback is independently
+`AMM_GOOGLE_MEASUREMENT_ENABLED=false`. Preserve the pre-change GTM head and
+noscript source and the 1.1.0 archive before installation. If controlled QA
+fails, disable the measurement flag first; reinstall 1.1.0 and restore the
+exact prior GTM source only when required by the approved rollback. Do not
+change the cookie-choice provider, purge unrelated cache, edit the parent
+theme, or touch NellySelly.
+
+For the separately gated homepage CTA restoration, first download and hash the
+complete active Lead Ops `2.10.0` plugin file. The accepted pre-change SHA-256
+is `41de351d57e91b8ecf1d611d8b052381166effaf693319b0f9e8da32f5d8e972`;
+the reviewed `2.10.1` result is
+`6b9a30de24e3fbbbac5aa49def7552afd6b2e21b7ede7beafa8ad095d9a9f44c`.
+If public acceptance fails, restore the exact backed-up `2.10.0` bytes and
+verify the original hash. Do not edit page 149, reactivate the Gravity Forms
+notification, disable Canonical Bridge Form 3 forwarding, alter lead or
+notification records, purge a cache without separate approval, or touch
+NellySelly.
 
 ## Email
 
 Set `EMAIL_ENABLED=false` / notification mode `disabled` to stop provider sends while
 preserving outbox rows. Do not delete failed delivery records; investigate and retry
 with the same idempotency key after correction.
+
+## Phase 9 organic-search ingress
+
+PR #219 is additive and safe-off. Before an import, rollback is to keep or set
+`GROWTH_SEARCH_IMPORT_ENABLED=false`, restore the immediately preceding verified
+Vercel deployment if application behavior regresses, and leave the empty
+`organic_search_import_batches` table plus owner-only function dormant. Do not
+drop the migration merely to roll back code.
+
+After a separately authorized report import, disable the feature gate and
+restore the prior application if needed, but preserve `market_signals`,
+`market_opportunities`, immutable import receipts, and audit rows. Prefer a
+reviewed forward correction. Deleting or rewriting organic-search evidence is a
+separate destructive-data action and is not authorized by application rollback.

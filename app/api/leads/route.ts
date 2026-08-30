@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { normalizeLeadPayload, type LeadPayload } from "../../lib/leadPayload";
+import { isValidLeadEmail, isValidLeadPhone } from "../../lib/leadContactValidation";
 import { PUBLIC_LEAD_SAVE_ERROR } from "../../lib/publicLeadErrors";
 import { consentGrantedForCall, consentGrantedForEmail, consentGrantedForSms, LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../lib/leadConsent";
 import { scoreLead } from "../../lib/leadScoring";
@@ -73,13 +74,13 @@ function primaryIntentFor(leadType: string, payload: LeadPayload) {
 
 function timelineMonthsFor(input?: string) {
   const value = (input || "").toLowerCase();
-  if (!value) return 24;
+  if (!value) return null;
   if (/\basap\b|immediate|as soon|right away|0\s*[-–]\s*30|under 30|this month/.test(value)) return 0;
   if (/30\s*[-–]\s*60|60\s*[-–]\s*90|31\s*[-–]\s*90|next 90|90 days/.test(value)) return 3;
   if (/3\s*[-–]\s*6|three\s*[-–]\s*six|3 to 6/.test(value)) return 6;
   if (/6\s*[-–]\s*12|six\s*[-–]\s*twelve|6 to 12/.test(value)) return 12;
-  if (/12\+|12 plus|more than 12|next year|just planning|just curious|not sure|unknown/.test(value)) return 24;
-  return 24;
+  if (/12\+|12 plus|more than 12|next year|just planning|just curious/.test(value)) return 24;
+  return null;
 }
 
 function splitName(payload: LeadPayload) {
@@ -233,7 +234,13 @@ function qualificationFor(payload: LeadPayload) {
   const hasProperty = Boolean(payload.address || payload.property_address);
   const sellerIntent = primaryIntentFor(leadType, payload) === "sell";
 
-  if (sellerIntent && hasProperty && hasContact && timelineMonths <= 3) {
+  if (
+    sellerIntent &&
+    hasProperty &&
+    hasContact &&
+    timelineMonths !== null &&
+    timelineMonths <= 3
+  ) {
     return { status: "qualified", lead_grade: "A" };
   }
   if (sellerIntent && hasProperty && hasContact) {
@@ -465,9 +472,10 @@ function validateLead(payload: LeadPayload) {
 
   if (
     (payload.funnel_type === "home_value" || payload.funnel_type === "widget") &&
-    (!payload.email || !payload.phone)
+    !payload.email &&
+    !payload.phone
   ) {
-    return "Email and phone are required for a home value request.";
+    return "Email or phone is required for a home value request.";
   }
 
   if (payload.funnel_type === "seller" && (!payload.address || !payload.phone)) {
@@ -490,11 +498,11 @@ function validateLead(payload: LeadPayload) {
     return "Email or phone is required for open-house registration.";
   }
 
-  if (payload.email && (payload.email.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(payload.email))) {
+  if (payload.email && !isValidLeadEmail(payload.email)) {
     return "Enter a valid email address.";
   }
 
-  if (payload.phone && (payload.phone.length > 40 || !/^[+()\d\s.-]{7,40}$/.test(payload.phone))) {
+  if (payload.phone && !isValidLeadPhone(payload.phone)) {
     return "Enter a valid phone number.";
   }
 

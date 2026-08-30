@@ -5,7 +5,8 @@
 Lead persistence is independent of email. After the atomic lead capture commits:
 
 1. Create one internal alert outbox row keyed by
-   `lead_alert:<lead_id>:lead_alert_email_v1`.
+   `lead_alert:<lead_id>:lead_alert_email_v3` for new alerts. Historical v1/v2
+   rows retain their recorded version and renderer during retry.
 2. Send to `LEAD_NOTIFICATION_TO` (default `mike@ourtownproperties.com`) and the
    secure `LEAD_NOTIFICATION_BCC` value, if configured. The BCC address is never
    rendered in the subject/body or logs.
@@ -92,14 +93,25 @@ Use three separate gates:
 # Visual internal-alert variants
 
 The supplied “HOT LEAD”, “Lead Assignment”, and “New Lead” images informed the
-notification hierarchy. The runtime implementation deliberately does **not**
-send those raster examples: they contain invented lead details and cannot be
-updated or suppressed safely. Instead, `leadAlertVisualTemplates.ts` selects
-an accessible HTML card from the deterministic score bands: `hot_priority`
-(80–100), `active_assignment` (60–79), `new_lead` (<60), and `qa_test`.
+notification hierarchy. The runtime deliberately does **not** send those
+raster examples because they contain invented lead details that cannot be
+updated, selected, copied, or suppressed safely.
 
-The generated abstract frame (`public/images/ask-magic-mike/notifications/lead-alert-frame-v1.png`)
-is decorative only; it has no person, logo, text, or consumer data. Email facts
-remain live text. SMS remains text-only and can only be enabled for an
-approved agent recipient, an approved carrier provider, score ≥60, and a
-non-test lead. No AI model determines lead importance, recipient, or sends.
+`leadAlertVisualTemplates.ts` selects one privacy-safe urgency background from
+the deterministic score bands: `hot_priority` (80–100),
+`active_assignment` (60–79), `new_lead` (<60), and `qa_test`. Email template
+`lead_alert_email_v3` composes that background with the approved, unchanged
+Our Town Properties logo and Mike Eatmon portrait already in the canonical
+brand pack. All urgency, source, score, contact, consent, assignment, and next-
+action facts remain accessible HTML and plain text. No consumer fact is burned
+into an image.
+
+The protected Message Review Studio renders HOT, ACTIVE, and NEW states only
+through a design-preview mode that forces `[TEST]`, states that no lead exists,
+contains no contact detail, and has no send control. Stored v1/v2 notifications
+remain version-pinned to the legacy renderer during retry; an unknown recorded
+template fails closed instead of silently changing content.
+
+SMS remains text-only by default. MMS media remains independently disabled and
+requires an approved registered carrier provider and non-test recipient. No AI
+model determines lead importance, recipient, routing, or delivery.

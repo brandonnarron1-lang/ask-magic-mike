@@ -52,6 +52,7 @@ export const analyticsEvents = [
   "address_submit",
   "email_submit",
   "phone_submit",
+  "lead_submit_failed",
   "seller_form_submit",
   "widget_opened",
   "widget_closed",
@@ -74,4 +75,6 @@ export const analyticsEvents = [
   "review_plan_saved",
   "review_plan_task_completed",
   "review_plan_handoff_clicked",
+  "referral_share_handoff",
+  "referral_link_copied",
 ] as const;

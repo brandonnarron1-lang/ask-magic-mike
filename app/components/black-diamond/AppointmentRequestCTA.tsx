@@ -66,11 +66,11 @@ export function AppointmentRequestCTA({
       funnel_name: funnelName,
       step_name: "appointment_request",
       request_surface: requestSurface,
-    });
+    }, { sessionId });
     trackEvent("appointment_cta_clicked", attribution, {
       funnel_name: funnelName,
       request_surface: requestSurface,
-    });
+    }, { sessionId });
 
     try {
       const response = await fetch("/api/appointments/request", {

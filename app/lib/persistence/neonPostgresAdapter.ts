@@ -7,9 +7,15 @@ import type {
   AdminAssignmentMutationResult,
   AdminFirstResponseMutation,
   AdminFirstResponseMutationResult,
+  AdminLeadNoteMutation,
+  AdminLeadNoteMutationResult,
+  AdminLeadPatchMutation,
+  AdminLeadPatchMutationResult,
   AdminLeadMutation,
   AdminLeadMutationResult,
   AdminLeadReadRequest,
+  AdminLeadTaskMutation,
+  AdminLeadTaskMutationResult,
   AppointmentIntent,
   AppointmentIntentResult,
   LeadLifecycleCapture,
@@ -233,6 +239,114 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
     };
   }
 
+  async patchAdminLead(input: AdminLeadPatchMutation): Promise<AdminLeadPatchMutationResult> {
+    const result = await this.rpc("patch_admin_lead_v1", [
+      input.leadId,
+      JSON.stringify(input.patch),
+      input.actor,
+      input.occurredAt,
+    ]);
+    if (result.ok !== true) {
+      const allowed = new Set([
+        "lead_not_found",
+        "invalid_patch",
+        "invalid_patch_field",
+        "invalid_patch_value",
+      ]);
+      return {
+        ok: false,
+        error: (allowed.has(String(result.error))
+          ? result.error
+          : "invalid_patch") as Extract<AdminLeadPatchMutationResult, { ok: false }>["error"],
+      };
+    }
+    if (
+      typeof result.lead_id !== "string" ||
+      typeof result.audit_id !== "string" ||
+      typeof result.updated_at !== "string"
+    ) {
+      throw new PersistenceUnavailableError("neon_admin_patch_response_invalid", 502);
+    }
+    const patch = { ...input.patch };
+    delete patch.restore_status_before_spam;
+    if (typeof result.resolved_status === "string") patch.status = result.resolved_status;
+    return {
+      ok: true,
+      leadId: result.lead_id,
+      auditId: result.audit_id,
+      updatedAt: result.updated_at,
+      patch,
+    };
+  }
+
+  async addAdminLeadNote(input: AdminLeadNoteMutation): Promise<AdminLeadNoteMutationResult> {
+    const result = await this.rpc("add_admin_lead_note_v1", [
+      input.leadId,
+      input.content,
+      input.agentId || null,
+      input.actor,
+      input.occurredAt,
+    ]);
+    if (result.ok !== true) {
+      const allowed = new Set(["lead_not_found", "agent_not_found", "invalid_note"]);
+      return {
+        ok: false,
+        error: (allowed.has(String(result.error))
+          ? result.error
+          : "invalid_note") as Extract<AdminLeadNoteMutationResult, { ok: false }>["error"],
+      };
+    }
+    if (
+      typeof result.message_id !== "string" ||
+      typeof result.audit_id !== "string" ||
+      typeof result.created_at !== "string"
+    ) {
+      throw new PersistenceUnavailableError("neon_admin_note_response_invalid", 502);
+    }
+    return {
+      ok: true,
+      messageId: result.message_id,
+      auditId: result.audit_id,
+      createdAt: result.created_at,
+    };
+  }
+
+  async createAdminLeadTask(input: AdminLeadTaskMutation): Promise<AdminLeadTaskMutationResult> {
+    const result = await this.rpc("create_admin_lead_task_v1", [
+      input.leadId,
+      input.title,
+      input.body || null,
+      input.dueAt || null,
+      input.priority,
+      input.category || null,
+      input.agentId || null,
+      input.actor,
+      input.occurredAt,
+    ]);
+    if (result.ok !== true) {
+      const allowed = new Set(["lead_not_found", "agent_not_found", "invalid_task"]);
+      return {
+        ok: false,
+        error: (allowed.has(String(result.error))
+          ? result.error
+          : "invalid_task") as Extract<AdminLeadTaskMutationResult, { ok: false }>["error"],
+      };
+    }
+    if (
+      typeof result.task_id !== "string" ||
+      typeof result.audit_id !== "string" ||
+      typeof result.created_at !== "string"
+    ) {
+      throw new PersistenceUnavailableError("neon_admin_task_response_invalid", 502);
+    }
+    return {
+      ok: true,
+      taskId: result.task_id,
+      auditId: result.audit_id,
+      createdAt: result.created_at,
+    };
+  }
+
   async recordAdminFirstResponse(
     input: AdminFirstResponseMutation,
   ): Promise<AdminFirstResponseMutationResult> {
@@ -276,9 +390,9 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
   }
 
   async mutateAdminAssignment(input: AdminAssignmentMutation): Promise<AdminAssignmentMutationResult> {
-    const result = await this.rpc("mutate_admin_assignment_v1", [
+    const result = await this.rpc("mutate_admin_assignment_v2", [
       input.leadId, input.agentId, input.expectedAgentId, input.action,
-      input.notificationMode, input.actor, input.occurredAt,
+      input.reason || null, input.notificationMode, input.actor, input.occurredAt,
     ]);
     if (result.ok !== true) {
       const errors = new Set(["lead_not_found", "agent_not_found", "agent_inactive", "agent_at_capacity", "assignment_conflict", "invalid_assignment_action"]);

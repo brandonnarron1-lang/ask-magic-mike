@@ -31,7 +31,9 @@ All of the following must be true before any mutation run:
 7. `PREVIEW_DATA_MODE=enabled` in the branch-scoped preview env only.
 8. `ALLOW_PREVIEW_DB_MUTATION=true` in the branch-scoped preview env only.
 9. `/api/admin/health` returns `safety.safe_for_preview_mutation: true`.
-10. Migration `00012` is applied to the Preview branch.
+10. The required canonical schema and candidate migration
+    `20260830190000_admin_lead_api_persistence.sql` are applied to the Preview
+    branch only.
 11. `ENABLE_SMS=false` and `ENABLE_EMAIL=false` — no live sends.
 
 ## Non-mutating precheck (always run this first)
@@ -60,8 +62,11 @@ SAFE_DB_WRITE=true \
 npm run preview:qa
 ```
 
-This produces lead/note/task/SLA/SMS/email rows in the **preview**
-database. Each QA write is tagged so cleanup is deterministic.
+This produces test lead/note/task/SLA and disabled-delivery evidence in the
+**preview** database. Each QA write is tagged so cleanup is deterministic.
+The run passes only when the note and task return durable IDs and an
+authenticated readback finds those exact IDs. A 2xx response alone is not
+acceptance evidence.
 
 ## QA-write fingerprints
 
@@ -72,34 +77,36 @@ Every QA-created row is tagged with one or more of:
 - `notes` contains `preview-qa`
 - `utm_source=preview_qa` or `campaign=phase_2_release_hardening`
 
-These tags exist so cleanup can target QA rows only.
+These tags exist so closeout can identify QA rows only.
 
-## Cleanup plan
+## Closeout plan
 
-Run in the isolated Neon Preview branch SQL editor — never in Production.
+This schema treats consent and audit evidence as append-only. A QA lead that
+has durable consent rows must therefore be **retained and suppressible**, not
+partially deleted. Do not disable immutable triggers, delete child rows first,
+or weaken foreign keys merely to remove a test record.
 
-```sql
--- Sanity-check the preview ref first.
-select current_database(), current_setting('app.settings.environment', true);
+After acceptance, use the authenticated admin surface and atomic assignment
+function to leave the QA row in this terminal state:
 
--- Delete QA artefacts in dependency order.
-delete from tasks where lead_id in (
-  select id from leads where source = 'preview_qa'
-);
-delete from message_deliveries where lead_id in (
-  select id from leads where source = 'preview_qa'
-);
-delete from compliance_flags where lead_id in (
-  select id from leads where source = 'preview_qa'
-);
-delete from listing_matches where lead_id in (
-  select id from leads where source = 'preview_qa'
-);
-delete from leads where source = 'preview_qa';
-```
+- `is_test=true`;
+- `status=dead` (or the approved terminal test stage);
+- `assigned_agent_id=null` and `assignment_status=unassigned`;
+- `communication_suppressed=true`;
+- `email_suppressed=true`;
+- `sms_suppressed=true`;
+- every notification remains `skipped`, with zero provider message IDs and
+  zero attempts; and
+- immutable consent and privacy-minimized audit evidence remains present.
 
-If anything in the above looks unfamiliar, **stop** — never run
-cleanup against a database you cannot positively identify as preview.
+Verify that operational reports and active-lead views exclude `is_test=true`.
+If a future schema introduces a tested purge function that preserves required
+evidence, use that reviewed function in one transaction. Until then, a direct
+`DELETE FROM leads` cleanup is prohibited.
+
+If any identity, suppression, or endpoint check is unfamiliar, **stop** —
+never run closeout against a database you cannot positively identify as
+Preview.
 
 ## Evidence required for promotion review
 
@@ -118,6 +125,7 @@ cleanup against a database you cannot positively identify as preview.
 - Expected Neon endpoint IDs are missing, invalid, or equal. → no.
 - Parsed database endpoint does not exactly match approved Preview. → no.
 - Migration 00012 not applied. → no.
+- Candidate admin persistence migration not applied. → no.
 - `PREVIEW_DATA_MODE=disabled` or unset. → no.
 - `ALLOW_PREVIEW_DB_MUTATION=false` or unset. → no.
 - Health endpoint unreachable. → no.

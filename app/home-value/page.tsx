@@ -21,7 +21,7 @@ export default function HomeValuePage() {
           <BlackDiamondHeader />
         </div>
       </section>
-      <section className="px-5 py-14 sm:px-8 lg:px-10">
+      <section id="page-content" tabIndex={-1} className="px-5 py-14 sm:px-8 lg:px-10">
         <HomeValueExperimentExperience />
       </section>
       <TrustProofStrip />

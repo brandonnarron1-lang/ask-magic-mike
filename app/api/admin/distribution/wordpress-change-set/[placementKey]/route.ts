@@ -4,6 +4,10 @@ import {
   isWordPressActivationPlacementKey,
   loadWordPressActivationChangeSet,
 } from "../../../../../lib/growth/wordpress-activation-change-set";
+import {
+  loadWordPressSellerIntentDecisionManifest,
+  WORDPRESS_SELLER_INTENT_DECISION_KEY,
+} from "../../../../../lib/growth/wordpress-seller-intent-decision";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -30,14 +34,17 @@ export async function GET(
   }
 
   const { placementKey } = await context.params;
-  if (!isWordPressActivationPlacementKey(placementKey)) {
+  const isSellerIntentDecision = placementKey === WORDPRESS_SELLER_INTENT_DECISION_KEY;
+  if (!isSellerIntentDecision && !isWordPressActivationPlacementKey(placementKey)) {
     return NextResponse.json(
       { ok: false, error: "wordpress_activation_placement_not_found" },
       { status: 404, headers: NO_STORE },
     );
   }
 
-  const changeSet = await loadWordPressActivationChangeSet(placementKey);
+  const changeSet = isSellerIntentDecision
+    ? await loadWordPressSellerIntentDecisionManifest()
+    : await loadWordPressActivationChangeSet(placementKey);
   return NextResponse.json(changeSet, {
     status: 200,
     headers: {

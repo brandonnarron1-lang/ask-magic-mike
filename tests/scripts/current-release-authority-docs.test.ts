@@ -1,10 +1,20 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { CURRENT_RELEASE_AUTHORITY } from "../../app/lib/growth/current-release-authority";
+
 const readDoc = (name: string) =>
   readFileSync(resolve(process.cwd(), "docs", name), "utf8");
+const readRepoFile = (name: string) =>
+  readFileSync(resolve(process.cwd(), name), "utf8");
 
+const readme = readRepoFile("README.md");
+const currentReleaseAuthority = readDoc("CURRENT_RELEASE_AUTHORITY.md");
+const capabilityLedgerSource = readRepoFile(
+  "app/lib/growth/capability-ledger.ts"
+);
 const currentState = readDoc("CURRENT_STATE_RECONCILIATION.md");
 const assetManifest = readDoc("CANONICAL_ASSET_MANIFEST.md");
 const canonicalStack = readDoc("CANONICAL_PRODUCTION_STACK.md");
@@ -14,12 +24,92 @@ const knownBlockers = readDoc("KNOWN_BLOCKERS.md");
 const knownLimitations = readDoc("KNOWN_LIMITATIONS.md");
 const goLiveRunbook = readDoc("GO_LIVE_RUNBOOK.md");
 const rollbackPlan = readDoc("ROLLBACK_PLAN.md");
+const implementationStatus = readDoc("IMPLEMENTATION_STATUS.md");
+const canonicalAliasDecision = readDoc(
+  "phase9/CANONICAL_ALIAS_CONSOLIDATION.md"
+);
+const canonicalAliasEvidence = readDoc(
+  "phase9/CANONICAL_ALIAS_CONSOLIDATION_QA_EVIDENCE.md"
+);
+const askAccessibilityDecision = readDoc(
+  "phase9/ASK_CONVERSION_ACCESSIBILITY_CLARITY.md"
+);
+const askAccessibilityEvidence = readDoc(
+  "phase9/ASK_CONVERSION_ACCESSIBILITY_CLARITY_QA_EVIDENCE.md"
+);
+const responsiveIdentityDecision = readDoc(
+  "phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH.md"
+);
+const responsiveIdentityEvidence = readDoc(
+  "phase9/RESPONSIVE_CONVERSION_IDENTITY_POLISH_QA_EVIDENCE.md"
+);
+const leadAlertIdentityDecision = readDoc(
+  "phase9/LEAD_ALERT_BRAND_IDENTITY.md"
+);
+const leadAlertIdentityEvidence = readDoc(
+  "phase9/LEAD_ALERT_BRAND_IDENTITY_QA_EVIDENCE.md"
+);
+const homeValueCompletionDecision = readDoc(
+  "phase9/HOME_VALUE_COMPLETION_INTEGRITY.md"
+);
+const homeValueCompletionEvidence = readDoc(
+  "phase9/HOME_VALUE_COMPLETION_INTEGRITY_QA_EVIDENCE.md"
+);
+const funnelEventIdentityDecision = readDoc(
+  "phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY.md"
+);
+const funnelEventIdentityEvidence = readDoc(
+  "phase9/FUNNEL_EVENT_IDENTITY_INTEGRITY_QA_EVIDENCE.md"
+);
+const vendorIngressDecision = readDoc(
+  "phase9/VENDOR_INGRESS_CONTRACT_LAB.md"
+);
+const vendorIngressEvidence = readDoc(
+  "phase9/VENDOR_INGRESS_CONTRACT_LAB_QA_EVIDENCE.md"
+);
+const marketingSpendIngressDecision = readDoc(
+  "phase9/MARKETING_SPEND_INGRESS_RELEASE_GATE.md"
+);
+const marketingSpendIngressEvidence = readDoc(
+  "phase9/MARKETING_SPEND_INGRESS_QA_EVIDENCE.md"
+);
+const organicSearchIngressDecision = readDoc(
+  "phase9/ORGANIC_SEARCH_INGRESS_RELEASE_GATE.md"
+);
+const organicSearchIngressEvidence = readDoc(
+  "phase9/ORGANIC_SEARCH_INGRESS_QA_EVIDENCE.md"
+);
+const localProfileIngressDecision = readDoc(
+  "phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS.md"
+);
+const localProfileIngressEvidence = readDoc(
+  "phase9/LOCAL_PROFILE_PERFORMANCE_INGRESS_QA_EVIDENCE.md"
+);
+const crossDomainMeasurementDecision = readDoc(
+  "phase9/CROSS_DOMAIN_MEASUREMENT_ACTIVATION.md"
+);
+const crossDomainMeasurementEvidence = readDoc(
+  "phase9/CROSS_DOMAIN_MEASUREMENT_QA_EVIDENCE.md"
+);
 const durableRateLimitRehearsal = readDoc(
   "phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md"
+);
+const durableRateLimitAcceptance = readDoc(
+  "phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md"
+);
+const durableRateLimitDecision = readDoc(
+  "phase9/DURABLE_RATE_LIMIT_READINESS.md"
+);
+const atomicAuthorityDecision = readDoc(
+  "phase9/ATOMIC_RELEASE_AUTHORITY_RECONCILIATION.md"
+);
+const notificationOperationsDecision = readDoc(
+  "phase9/NOTIFICATION_OPERATIONS_TRUTH.md"
 );
 
 const operatingDocs = [
   currentState,
+  currentReleaseAuthority,
   assetManifest,
   canonicalStack,
   consolidationPlan,
@@ -31,12 +121,124 @@ const operatingDocs = [
 ].join("\n");
 
 const productionCommit =
-  "b450b41c66c6740bd20571cdbe7d8caf82e92d5e";
-const productionDeployment = "dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW";
-const productionGate =
+  "a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca";
+const productionDeployment = "dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj";
+const rollbackCommit = "b450b41c66c6740bd20571cdbe7d8caf82e92d5e";
+const rollbackDeployment = "dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW";
+const completedDurabilityGate =
   "APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT";
-const previewMutationGate =
-  "APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA";
+const cumulativeReleaseGate =
+  "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT";
+const cumulativeReleaseHead =
+  "de67db6e1183b2a47d329d4a9a11993d48d1992a";
+const cumulativeReleaseTree =
+  "75abbbbe6767092e1d31b225014dd1bf574acda1";
+const currentWordPressGate =
+  "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA";
+const staleWordPressHomepageGate =
+  "APPROVE PHASE 9 OUR TOWN HOME PAGE ASK MAGIC MIKE CTA AND WIDGET PUBLICATION";
+const pr209Head = "b28b380f2cc3f9b63b2c0048b398e97a88dfee4b";
+const pr210SealedParent =
+  "93af400494a94a8d8aedb09ece16bbff4dfd214b";
+const pr211SealedParent =
+  "c5700eda5e32ff6ead9a985c86b811a3c46e1e66";
+const pr213SealedParent =
+  "d2a1bf01d0962e07dd1e460acd4c295e145cf6a8";
+const pr214SealedParent =
+  "81a2c7544318d630437ed3e86cbea029c5c9b57d";
+const pr215SealedParent =
+  "c53cec6043525b593b254c457efdbbe5a29c0520";
+const pr216SealedParent =
+  "211485df28fc818ab783ed357df8486f1460d5e2";
+const pr217SealedParent =
+  "8a6b92039bb82c1158db514c2c2f064ceb9cbbcf";
+const pr218SealedParent =
+  "f065d8801bec295c99185d846ff4bc38de2a0a6f";
+const pr219SealedParent =
+  "b628fc00fc6b03d89871c65d884fe649db025968";
+const pr220SealedParent =
+  "19689e95d824d7d06e5f3b60cd18335f53018c93";
+const pr221SealedParent =
+  "61e152cb7ce03fd1904a06f30435dbe7ef36c4e1";
+const pr222SealedParent =
+  "c6ff9157e66705128a283b98096f74ca8247cdab";
+const pr223SealedParent =
+  "1d893f4c23ca53a1b852a1953b953b40e6f997f3";
+const pr224SealedParent =
+  "2effb45e2a324c25875dcf7d24019eae8dfdad38";
+const pr225SealedParent =
+  "f33c87f27bfcbbcad3b5566aefd80909d25303bb";
+const canonicalAliasGate =
+  "APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT";
+const askAccessibilityGate =
+  "APPROVE PHASE 9 ASK CONVERSION ACCESSIBILITY MERGE AND PRODUCTION DEPLOYMENT";
+const responsiveIdentityGate =
+  "APPROVE PHASE 9 RESPONSIVE CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT";
+const leadAlertIdentityGate =
+  "APPROVE PHASE 9 LEAD-ALERT BRAND IDENTITY V3 MERGE AND PRODUCTION DEPLOYMENT";
+const homeValueCompletionGate =
+  "APPROVE PHASE 9 HOME-VALUE COMPLETION INTEGRITY MERGE AND PRODUCTION DEPLOYMENT";
+const funnelEventIdentityGate =
+  "APPROVE PHASE 9 FUNNEL EVENT IDENTITY INTEGRITY MERGE AND PRODUCTION DEPLOYMENT";
+const vendorIngressGate =
+  "APPROVE PHASE 9 VENDOR INGRESS CONTRACT LAB MERGE AND PRODUCTION DEPLOYMENT";
+const marketingSpendIngressGate =
+  "APPROVE PHASE 9 MARKETING SPEND INGRESS MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT";
+const organicSearchIngressGate =
+  "APPROVE PHASE 9 ORGANIC SEARCH INGRESS MIGRATION, PR 219 MERGE, AND PRODUCTION DEPLOYMENT";
+const localProfileIngressGate =
+  "APPROVE PHASE 9 LOCAL PROFILE PERFORMANCE INGRESS PRODUCTION MIGRATION, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT";
+const localProfileImportGate =
+  "APPROVE LOCAL PROFILE PERFORMANCE IMPORT GATE ENABLEMENT AND SAME-COMMIT PRODUCTION REDEPLOYMENT";
+const crossDomainGate =
+  "APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT";
+const localDemandGate =
+  "APPROVE PHASE 9 LOCAL-DEMAND METRIC TRUTH GUARD MIGRATION, PR 222 MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT";
+const channelEconomicsGate =
+  "APPROVE PHASE 9 CHANNEL ECONOMICS TRUTH MERGE AND PRODUCTION DEPLOYMENT";
+const leadIntentGate =
+  "APPROVE PHASE 9 LEAD INTENT DEFAULT TRUTH MERGE AND PRODUCTION DEPLOYMENT";
+const baselineReadinessGate =
+  "APPROVE PHASE 9 BASELINE AND TARGET READINESS MERGE AND PRODUCTION DEPLOYMENT";
+const releaseAuthorityGate =
+  "APPROVE PHASE 9 RELEASE AUTHORITY DEDUPLICATION MERGE";
+const gbpSquareAssetGate =
+  "APPROVE PHASE 9 GOOGLE BUSINESS PROFILE SQUARE ASSETS MERGE AND PRODUCTION DEPLOYMENT";
+const plannerSocialIdentityGate =
+  "APPROVE PHASE 9 REVIEW PLANNER SOCIAL IDENTITY MERGE AND PRODUCTION DEPLOYMENT";
+const notificationOperationsGate =
+  "APPROVE PHASE 9 NOTIFICATION OPERATIONS TRUTH MERGE AND PRODUCTION DEPLOYMENT";
+const pr210Rescue =
+  "rescue/amm-pr210-pre-main-cutover-20260828-210054";
+const pr211Rescue =
+  "rescue/amm-pr211-pre-pr210-exact-seal-20260828-213129";
+const pr213Rescue =
+  "rescue/amm-pr213-pre-pr211-exact-seal-20260828-215231";
+const pr214Rescue =
+  "rescue/amm-pr214-pre-pr213-exact-seal-20260828-222353";
+const pr215Rescue =
+  "rescue/amm-pr215-pre-pr214-exact-seal-20260828-224229";
+const pr216Rescue =
+  "rescue/amm-pr216-pre-pr215-exact-seal-20260828-231335";
+const pr217Rescue =
+  "rescue/amm-pr217-pre-pr216-exact-seal-20260828-234940";
+const pr218Rescue =
+  "rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928";
+const pr219Rescue =
+  "rescue/amm-pr219-pre-pr218-exact-seal-20260829-004949";
+const pr220Rescue =
+  "rescue/amm-pr220-pre-pr219-exact-seal-20260829-012049";
+const pr221Rescue =
+  "rescue/amm-pr221-pre-pr220-exact-seal-20260829-020318";
+const pr223Rescue =
+  "rescue/amm-pr223-pre-pr222-exact-seal-20260829-040442";
+const pr224Rescue =
+  "rescue/amm-pr224-pre-pr223-accessibility-seal-20260829-1210";
+const pr225Rescue =
+  "rescue/amm-pr225-pre-pr224-parent-refresh-20260829-1224";
+const pr226Rescue =
+  "rescue/amm-pr226-pre-pr225-parent-refresh-20260829-1249";
+
 const completedReleaseLedger = [
   {
     pr: 183,
@@ -77,27 +279,42 @@ const completedReleaseLedger = [
   {
     pr: 195,
     head: "db13953fc5f6d24a684f66c9a1c10c6b929b72b3",
+    merge: rollbackCommit,
+    deployment: rollbackDeployment,
+  },
+  {
+    pr: 209,
+    head: pr209Head,
     merge: productionCommit,
     deployment: productionDeployment,
   },
 ] as const;
 
 describe("current release-authority documentation", () => {
-  it("identifies the accepted Production commit and deployment", () => {
+  it("identifies the accepted PR #209 Production commit and deployment", () => {
     for (const doc of [
       currentState,
       assetManifest,
       canonicalStack,
       consolidationPlan,
       ownerQueue,
-      rollbackPlan,
+      knownBlockers,
+      knownLimitations,
+      goLiveRunbook,
+      canonicalAliasDecision,
+      canonicalAliasEvidence,
+      durableRateLimitAcceptance,
+      durableRateLimitDecision,
+      atomicAuthorityDecision,
+      implementationStatus,
+      currentReleaseAuthority,
     ]) {
       expect(doc).toContain(productionCommit);
       expect(doc).toContain(productionDeployment);
     }
   });
 
-  it("records each completed release as an exact head, merge, and Production deployment chain", () => {
+  it("records every completed release as an exact head, merge, and deployment chain", () => {
     for (const release of completedReleaseLedger) {
       expect(ownerQueue).toContain(`PR [#${release.pr}]`);
       expect(ownerQueue).toContain(release.head);
@@ -106,7 +323,38 @@ describe("current release-authority documentation", () => {
     }
   });
 
-  it("identifies PR #209 as the sole atomic application candidate", () => {
+  it("marks the PR #209 durability gate consumed and non-reusable", () => {
+    expect(durableRateLimitRehearsal).toContain(completedDurabilityGate);
+    expect(durableRateLimitRehearsal).toContain(pr209Head);
+    expect(durableRateLimitRehearsal).toContain(productionCommit);
+    expect(durableRateLimitRehearsal).toContain(productionDeployment);
+    expect(durableRateLimitRehearsal).toMatch(/consumed[\s\S]*exhausted/i);
+    expect(durableRateLimitAcceptance).toMatch(
+      /consumed PR #209 gate is exhausted/i
+    );
+    expect(ownerQueue).toMatch(/completed gates are exhausted/i);
+    expect(goLiveRunbook).toMatch(/exact gate is exhausted/i);
+  });
+
+  it("keeps the capability ledger aligned with the current release authority", () => {
+    expect(readme).toContain(productionCommit);
+    expect(readme).toMatch(/PR #238[\s\S]*single exact-head/i);
+    expect(readme).not.toMatch(/PR #210[\s\S]{0,120}first pending/i);
+    expect(readme).not.toContain(
+      "PR #209 is the sole atomic application candidate"
+    );
+
+    expect(capabilityLedgerSource).toContain("CURRENT_CUMULATIVE_RELEASE_GATE");
+    expect(capabilityLedgerSource).toContain(currentWordPressGate);
+    expect(capabilityLedgerSource).not.toContain(completedDurabilityGate);
+    expect(capabilityLedgerSource).not.toContain(staleWordPressHomepageGate);
+    expect(CURRENT_RELEASE_AUTHORITY.candidate.approvalGate).toBe(
+      cumulativeReleaseGate
+    );
+    expect(CURRENT_RELEASE_AUTHORITY.candidate.head).toBe(cumulativeReleaseHead);
+  });
+
+  it("identifies PR #238 as the single cumulative application candidate", () => {
     for (const doc of [
       currentState,
       assetManifest,
@@ -116,42 +364,338 @@ describe("current release-authority documentation", () => {
       knownBlockers,
       knownLimitations,
     ]) {
-      expect(doc).toMatch(/PR #209|PR \[#209\]/);
+      expect(doc).toMatch(/PR #238|PR \[#238\]/);
+      expect(doc).not.toMatch(/PR #210[\s\S]{0,120}(?:next|first pending)[\s\S]{0,80}(?:candidate|vehicle)/i);
     }
 
-    expect(consolidationPlan).toMatch(
-      /sole\s+current application release vehicle/i
+    expect(currentReleaseAuthority).toContain(cumulativeReleaseHead);
+    expect(currentReleaseAuthority).toContain(cumulativeReleaseTree);
+    expect(currentReleaseAuthority).toContain(cumulativeReleaseGate);
+    expect(consolidationPlan).toContain(cumulativeReleaseGate);
+    expect(ownerQueue).toContain(cumulativeReleaseGate);
+    expect(knownBlockers).toContain(cumulativeReleaseGate);
+    expect(canonicalAliasDecision).toContain(canonicalAliasGate);
+    expect(canonicalAliasEvidence).toContain(canonicalAliasGate);
+    expect(cumulativeReleaseGate).not.toBe(completedDurabilityGate);
+  });
+
+  it("preserves the component lineage after PR #209 without parallel current authority", () => {
+    const completedPr209 = ownerQueue.indexOf("PR [#209]");
+    const pr210 = ownerQueue.indexOf("Draft PR [#210]");
+    const pr211 = ownerQueue.indexOf("Draft PR [#211]");
+    const pr213 = ownerQueue.indexOf("Draft PR [#213]");
+    const pr214 = ownerQueue.indexOf("Draft PR [#214]");
+    const pr215 = ownerQueue.indexOf("Draft PR [#215]");
+    const pr216 = ownerQueue.indexOf("Draft PR [#216]");
+    const laterTrain = ownerQueue.indexOf("Draft PRs #217 through #226");
+    const pr217 = ownerQueue.indexOf("Draft PR [#217]");
+    const pr218 = ownerQueue.indexOf("Draft PR [#218]");
+    const pr219 = ownerQueue.indexOf("Draft PR [#219]");
+    const pr220 = ownerQueue.indexOf("Draft PR [#220]");
+    const pr221 = ownerQueue.indexOf("Draft PR [#221]", pr220 + 1);
+    const pr222 = ownerQueue.indexOf("Draft PR [#222]", pr221 + 1);
+    const pr223 = ownerQueue.indexOf("Draft PR [#223]", pr222 + 1);
+    const pr224 = ownerQueue.indexOf("Draft PR [#224]", pr223 + 1);
+    const pr225 = ownerQueue.indexOf("Draft PR [#225]", pr224 + 1);
+    const pr226 = ownerQueue.indexOf("Draft PR [#226]", pr225 + 1);
+    const pr227 = ownerQueue.indexOf("Draft PR [#227]", pr226 + 1);
+    const pr228 = ownerQueue.indexOf("Draft PR [#228]", pr227 + 1);
+    const pr229 = ownerQueue.indexOf("Draft PR [#229]", pr228 + 1);
+    const pr230 = ownerQueue.indexOf("Draft PR [#230]", pr229 + 1);
+    const pr231 = ownerQueue.indexOf("Draft PR [#231]", pr230 + 1);
+    const pr232 = ownerQueue.indexOf("Draft PR [#232]", pr231 + 1);
+    const pr233 = ownerQueue.indexOf("Draft PR [#233]", pr232 + 1);
+    const pr234 = ownerQueue.indexOf("Draft PR [#234]", pr233 + 1);
+
+    expect(completedPr209).toBeGreaterThanOrEqual(0);
+    expect(pr210).toBeGreaterThan(completedPr209);
+    expect(pr211).toBeGreaterThan(pr210);
+    expect(pr213).toBeGreaterThan(pr211);
+    expect(pr214).toBeGreaterThan(pr213);
+    expect(pr215).toBeGreaterThan(pr214);
+    expect(pr216).toBeGreaterThan(pr215);
+    expect(laterTrain).toBeGreaterThan(pr216);
+    expect(pr217).toBeGreaterThan(laterTrain);
+    expect(pr218).toBeGreaterThan(pr217);
+    expect(pr219).toBeGreaterThan(pr218);
+    expect(pr220).toBeGreaterThan(pr219);
+    expect(pr221).toBeGreaterThan(pr220);
+    expect(pr222).toBeGreaterThan(pr221);
+    expect(pr223).toBeGreaterThan(pr222);
+    expect(pr224).toBeGreaterThan(pr223);
+    expect(pr225).toBeGreaterThan(pr224);
+    expect(pr226).toBeGreaterThan(pr225);
+    expect(pr227).toBeGreaterThan(pr226);
+    expect(pr228).toBeGreaterThan(pr227);
+    expect(pr229).toBeGreaterThan(pr228);
+    expect(pr230).toBeGreaterThan(pr229);
+    expect(pr231).toBeGreaterThan(pr230);
+    expect(pr232).toBeGreaterThan(pr231);
+    expect(pr233).toBeGreaterThan(pr232);
+    expect(pr234).toBeGreaterThan(pr233);
+    expect(ownerQueue).not.toContain("Draft PR [#212]");
+    expect(ownerQueue).toMatch(/PR #221\s+is the sole cross-domain candidate/i);
+    expect(ownerQueue).toContain(canonicalAliasGate);
+    expect(ownerQueue).toContain(askAccessibilityGate);
+    expect(ownerQueue).toContain(responsiveIdentityGate);
+    expect(ownerQueue).toContain(leadAlertIdentityGate);
+    expect(ownerQueue).toContain(homeValueCompletionGate);
+    expect(ownerQueue).toContain(funnelEventIdentityGate);
+    expect(ownerQueue).toContain(vendorIngressGate);
+    expect(ownerQueue).toContain(marketingSpendIngressGate);
+    expect(ownerQueue).toContain(organicSearchIngressGate);
+    expect(ownerQueue).toContain(localProfileIngressGate);
+    expect(ownerQueue).toContain(crossDomainGate);
+    expect(ownerQueue).toContain(localDemandGate);
+    expect(ownerQueue).toContain(channelEconomicsGate);
+    expect(ownerQueue).toContain(leadIntentGate);
+    expect(ownerQueue).toContain(baselineReadinessGate);
+    expect(ownerQueue).toContain(releaseAuthorityGate);
+    expect(ownerQueue).toContain(gbpSquareAssetGate);
+    expect(ownerQueue).toContain(plannerSocialIdentityGate);
+    expect(ownerQueue).toContain(notificationOperationsGate);
+    expect(notificationOperationsDecision).toContain(notificationOperationsGate);
+    expect(assetManifest).toContain("PRs #232–#237");
+    expect(currentState).toContain("#227 through #234");
+    expect(ownerQueue).toMatch(/Preserved component train[\s\S]*historical evidence[\s\S]*(?:not|none is) currently requestable/i);
+    expect(currentState).toMatch(/#210 through #237[\s\S]*No independent current merge\/deploy authority/i);
+  });
+
+  it("binds the machine-readable authority to the reviewed migration bytes", () => {
+    expect(CURRENT_RELEASE_AUTHORITY.schemaVersion).toBe(1);
+    expect(CURRENT_RELEASE_AUTHORITY.production).toEqual({
+      pr: 209,
+      mergeCommit: productionCommit,
+      deploymentId: productionDeployment,
+    });
+    expect(CURRENT_RELEASE_AUTHORITY.candidate).toMatchObject({
+      pr: 238,
+      branch: "codex/phase9-cumulative-release-20260829",
+      head: cumulativeReleaseHead,
+      tree: cumulativeReleaseTree,
+      state: "draft",
+      approvalGate: cumulativeReleaseGate,
+      cutoverCommand: "pnpm run phase9:cumulative-growth:cutover -- --execute",
+    });
+    expect(CURRENT_RELEASE_AUTHORITY.candidate.migrations).toHaveLength(4);
+    expect(new Set(CURRENT_RELEASE_AUTHORITY.candidate.migrations.map(({ version }) => version)).size).toBe(4);
+
+    for (const migration of CURRENT_RELEASE_AUTHORITY.candidate.migrations) {
+      const bytes = readFileSync(resolve(process.cwd(), migration.file));
+      expect(createHash("sha256").update(bytes).digest("hex")).toBe(
+        migration.sha256
+      );
+    }
+  });
+
+  it("keeps superseded PRs #187 and #212 as preserved evidence without parallel authority", () => {
+    for (const doc of [currentState, assetManifest, ownerQueue]) {
+      expect(doc).toMatch(/(?:PR )?#187[^\n]*(?:closed|superseded)/i);
+      expect(doc).toMatch(/(?:PR )?#212[^\n]*(?:closed|superseded|preserved)/i);
+    }
+    expect(assetManifest).toContain("Closed PR #187");
+    expect(assetManifest).toContain("Closed PR #212");
+    expect(ownerQueue).not.toMatch(/PR \[#212\][\s\S]{0,200}separate HOLD candidate/i);
+    expect(ownerQueue).toMatch(
+      /branch, commits,[\s\S]{0,40}migration, tests, and evidence preserved/i
     );
-    expect(ownerQueue).toMatch(/sole\s+current application release vehicle/i);
-    expect(knownBlockers).toMatch(
-      /sole\s+current application release candidate/i
+    expect(ownerQueue).toMatch(
+      /branch,[\s\S]{0,40}consent repair package, evidence, and rollback materials remain preserved/i
     );
   });
 
-  it("keeps Preview mutation and Production release as distinct exact gates", () => {
-    for (const doc of [consolidationPlan, ownerQueue, knownBlockers]) {
-      expect(doc).toContain(previewMutationGate);
-      expect(doc).toContain(productionGate);
+  it("binds PR #210 to accepted main and preserves its pre-refresh head", () => {
+    for (const doc of [
+      ownerQueue,
+      canonicalAliasDecision,
+      canonicalAliasEvidence,
+    ]) {
+      expect(doc).toContain(productionCommit);
     }
-    expect(previewMutationGate).not.toBe(productionGate);
+    expect(ownerQueue).toContain(pr210Rescue);
+    expect(canonicalAliasEvidence).toContain(pr210Rescue);
+    expect(canonicalAliasEvidence).toMatch(/without force push/i);
+    expect(canonicalAliasEvidence).toMatch(
+      /Fresh exact-head Node[\s\S]*mandatory/i
+    );
   });
 
-  it("resolves the mutable PR head from GitHub instead of self-pinning it", () => {
+  it("binds PR #211's stacked authority to the current sealed PR #210 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      askAccessibilityDecision,
+      askAccessibilityEvidence,
+    ]) {
+      expect(doc).toContain(pr210SealedParent);
+    }
+    expect(ownerQueue).toContain(pr211Rescue);
+    expect(askAccessibilityEvidence).toContain(pr211Rescue);
+  });
+
+  it("binds PR #213's stacked authority to the current sealed PR #211 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      responsiveIdentityDecision,
+      responsiveIdentityEvidence,
+    ]) {
+      expect(doc).toContain(pr211SealedParent);
+    }
+    expect(responsiveIdentityEvidence).toContain(pr213Rescue);
+  });
+
+  it("binds PR #214's stacked authority to the current sealed PR #213 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      leadAlertIdentityDecision,
+      leadAlertIdentityEvidence,
+    ]) {
+      expect(doc).toContain(pr213SealedParent);
+    }
+    expect(leadAlertIdentityEvidence).toContain(pr214Rescue);
+  });
+
+  it("binds PR #215's stacked authority to the current sealed PR #214 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      homeValueCompletionDecision,
+      homeValueCompletionEvidence,
+    ]) {
+      expect(doc).toContain(pr214SealedParent);
+    }
+    expect(homeValueCompletionEvidence).toContain(pr215Rescue);
+  });
+
+  it("binds PR #216's stacked authority to the current sealed PR #215 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      funnelEventIdentityDecision,
+      funnelEventIdentityEvidence,
+    ]) {
+      expect(doc).toContain(pr215SealedParent);
+    }
+    expect(funnelEventIdentityEvidence).toContain(pr216Rescue);
+  });
+
+  it("binds PR #217's stacked authority to the current sealed PR #216 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      vendorIngressDecision,
+      vendorIngressEvidence,
+    ]) {
+      expect(doc).toContain(pr216SealedParent);
+      expect(doc).toContain(vendorIngressGate);
+    }
+    expect(ownerQueue).toContain(pr217Rescue);
+    expect(vendorIngressEvidence).toContain(pr217Rescue);
+  });
+
+  it("binds PR #218's stacked authority to the current sealed PR #217 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      marketingSpendIngressDecision,
+      marketingSpendIngressEvidence,
+    ]) {
+      expect(doc).toContain(pr217SealedParent);
+      expect(doc).toContain(marketingSpendIngressGate);
+    }
+    expect(ownerQueue).toContain(pr218Rescue);
+    expect(marketingSpendIngressEvidence).toContain(pr218Rescue);
+  });
+
+  it("binds PR #219's stacked authority to the current sealed PR #218 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      organicSearchIngressDecision,
+      organicSearchIngressEvidence,
+    ]) {
+      expect(doc).toContain(pr218SealedParent);
+      expect(doc).toContain(organicSearchIngressGate);
+    }
+    expect(ownerQueue).toContain(pr219Rescue);
+    expect(organicSearchIngressEvidence).toContain(pr219Rescue);
+    expect(organicSearchIngressDecision).toContain(canonicalAliasGate);
+    expect(organicSearchIngressDecision).not.toContain(completedDurabilityGate);
+  });
+
+  it("binds PR #220's stacked authority to the current sealed PR #219 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      localProfileIngressDecision,
+      localProfileIngressEvidence,
+    ]) {
+      expect(doc).toContain(pr219SealedParent);
+      expect(doc).toContain(localProfileIngressGate);
+      expect(doc).toContain(localProfileImportGate);
+    }
+    expect(localProfileIngressDecision).not.toContain(completedDurabilityGate);
+    expect(localProfileIngressEvidence).not.toContain(completedDurabilityGate);
+    expect(ownerQueue).toContain(pr220Rescue);
+    expect(localProfileIngressEvidence).toContain(pr220Rescue);
+  });
+
+  it("binds PR #221's consolidated authority to the current sealed PR #220 parent", () => {
+    for (const doc of [
+      ownerQueue,
+      crossDomainMeasurementDecision,
+      crossDomainMeasurementEvidence,
+    ]) {
+      expect(doc).toContain(pr220SealedParent);
+      expect(doc).toContain(crossDomainGate);
+    }
+    expect(ownerQueue).toContain(pr221Rescue);
+    expect(crossDomainMeasurementEvidence).toContain(pr221Rescue);
+    expect(ownerQueue).toMatch(
+      /PR #212 is closed as superseded[\s\S]*no independent release authority/i
+    );
+  });
+
+  it("keeps PRs #222 through #226 in one exact-parent release train", () => {
+    expect(ownerQueue).toContain(pr221SealedParent);
+    expect(ownerQueue).toContain(pr222SealedParent);
+    expect(ownerQueue).toContain(pr223SealedParent);
+    expect(ownerQueue).toContain(pr224SealedParent);
+    expect(ownerQueue).toContain(pr225SealedParent);
+    expect(ownerQueue).toContain(pr223Rescue);
+    expect(ownerQueue).toContain(pr224Rescue);
+    expect(ownerQueue).toContain(pr225Rescue);
+    expect(ownerQueue).toContain(pr226Rescue);
+    expect(ownerQueue).toContain(localDemandGate);
+    expect(ownerQueue).toContain(channelEconomicsGate);
+    expect(ownerQueue).toContain(leadIntentGate);
+    expect(ownerQueue).toContain(baselineReadinessGate);
+    expect(ownerQueue).toContain(releaseAuthorityGate);
+    expect(currentState).toMatch(/#226 release-authority deduplication/i);
+    expect(assetManifest).toMatch(/PR #226[\s\S]*documentation\/test-only/i);
+  });
+
+  it("pins the cumulative head while preserving historical mutable-head warnings", () => {
+    expect(ownerQueue).toContain(cumulativeReleaseHead);
     expect(ownerQueue).toMatch(/current GitHub PR head/i);
-    expect(ownerQueue).toMatch(/If the head moves[\s\S]*proof must be repeated/i);
-    expect(ownerQueue).not.toMatch(/Exact head\s+`[0-9a-f]{40}`\s+passes/i);
+    expect(currentReleaseAuthority).toMatch(/Any head, tree, migration, target, or gate[\s\S]*invalidates the approval/i);
   });
 
-  it("does not retain superseded stacked-release authority in operating docs", () => {
+  it("keeps the accepted rollback deployment immutable", () => {
+    expect(rollbackPlan).toContain(rollbackDeployment);
+    expect(rollbackPlan).toContain(productionDeployment);
+    expect(durableRateLimitRehearsal).toContain(rollbackDeployment);
+    expect(durableRateLimitAcceptance).toContain(rollbackCommit);
+    expect(durableRateLimitAcceptance).toContain(rollbackDeployment);
+  });
+
+  it("does not retain superseded release authority in operating docs", () => {
     const staleAuthorityClaims = [
       "Draft PR #202 is the immediate durability correction",
       "Release stacked candidates in order",
       "PR #185 is the single consolidation vehicle",
       "The Production baseline is PR #184",
       "PR #183 is merged and live. PR #184",
-      "For PR #202, add only the dedicated",
-      "PR #202 has no migration. Before release",
       "#202` is the next isolated durability candidate",
+      "sole current application release vehicle",
+      "sole current application release candidate",
+      "#209` is the sole next atomic application candidate",
+      "PR #210 is the first pending application candidate",
+      "Draft PR #210 is the next ordered application release candidate",
+      "Draft PR #210 is the next ordered application release vehicle",
     ];
 
     for (const staleClaim of staleAuthorityClaims) {
@@ -159,23 +703,12 @@ describe("current release-authority documentation", () => {
     }
   });
 
-  it("binds the go-live and rollback runbooks to the atomic PR #209 candidate", () => {
-    expect(goLiveRunbook).toContain("For PR #209, add only the dedicated");
-    expect(goLiveRunbook).toMatch(/`#209` is the sole next atomic application candidate/);
-    expect(goLiveRunbook).toContain("phase9:durable-rate-limit:readiness");
-    expect(rollbackPlan).toContain("PR #209 has no migration. Before release");
-    expect(rollbackPlan).toContain("phase9:durable-rate-limit:readiness");
-    expect(durableRateLimitRehearsal).toContain(productionGate);
-    expect(durableRateLimitRehearsal).toContain(productionDeployment);
-    expect(durableRateLimitRehearsal).toMatch(/writes nothing/i);
-  });
-
   it("preserves incremental PRs as evidence without independent authority", () => {
     expect(currentState).toMatch(
       /#202 through #208[\s\S]*No independent merge or Production authority/
     );
     expect(consolidationPlan).toMatch(
-      /PRs #202 through #208[\s\S]*superseded for release by PR #209/
+      /PRs #202[–-]#208[\s\S]*superseded for release by PR #209/
     );
     expect(ownerQueue).toMatch(
       /PRs #202 through #208[\s\S]*no independent release authority/

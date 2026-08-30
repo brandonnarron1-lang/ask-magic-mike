@@ -1,11 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { checkAdminAuth } from "@/lib/admin/auth";
 import { loadLeadDetail } from "@/lib/admin/lead-detail";
+import {
+  ADMIN_LEAD_STATUSES,
+  patchCanonicalAdminLead,
+  type CanonicalAdminLeadPatch,
+} from "@/lib/admin/lead-operations";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
-import { LEAD_STATUSES, LEAD_TYPES, LEAD_GRADES } from "@/lib/leads/lead-types";
+import { LEAD_TYPES, LEAD_GRADES } from "@/lib/leads/lead-types";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const timestamp = z.string().trim().max(64).refine(
+  (value) => !Number.isNaN(Date.parse(value)),
+  "invalid_timestamp",
+);
+const AdminLeadPatchSchema = z.object({
+  status: z.enum(ADMIN_LEAD_STATUSES).optional(),
+  lead_type: z.enum(LEAD_TYPES).optional(),
+  lead_grade: z.enum(LEAD_GRADES).nullable().optional(),
+  next_follow_up_at: timestamp.nullable().optional(),
+  last_contacted_at: timestamp.nullable().optional(),
+  closed_lost_reason: z.string().trim().max(500).nullable().optional(),
+  mark_spam: z.boolean().optional(),
+}).strict().refine((value) => Object.keys(value).length > 0, "no_supported_fields");
 
 export async function GET(
   req: NextRequest,
@@ -26,6 +45,12 @@ export async function GET(
     );
   }
   const detail = await loadLeadDetail(id);
+  if (detail && (!detail.configured || detail.error)) {
+    return NextResponse.json(
+      { ok: false, error: detail.error || "lead_store_not_configured" },
+      { status: 503, headers: NO_STORE }
+    );
+  }
   if (!detail) {
     return NextResponse.json(
       { ok: false, error: "not_found" },
@@ -53,88 +78,48 @@ export async function PATCH(
       { status: 400, headers: NO_STORE }
     );
   }
-  const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-
-  const updates: Record<string, unknown> = {};
-  if (typeof body.status === "string" && (LEAD_STATUSES as readonly string[]).includes(body.status)) {
-    updates.status = body.status;
-  }
-  if (typeof body.lead_type === "string" && (LEAD_TYPES as readonly string[]).includes(body.lead_type)) {
-    updates.lead_type = body.lead_type;
-  }
-  if (typeof body.lead_grade === "string" && (LEAD_GRADES as readonly string[]).includes(body.lead_grade)) {
-    updates.lead_grade = body.lead_grade;
-  }
-  if (typeof body.next_follow_up_at === "string" || body.next_follow_up_at === null)
-    updates.next_follow_up_at = body.next_follow_up_at;
-  if (typeof body.last_contacted_at === "string" || body.last_contacted_at === null)
-    updates.last_contacted_at = body.last_contacted_at;
-  if (typeof body.closed_lost_reason === "string")
-    updates.closed_lost_reason = body.closed_lost_reason;
-  if (typeof body.mark_spam === "boolean") {
-    if (body.mark_spam) {
-      updates.status = "spam";
-    }
-    // For mark_spam=false: status is restored after reading prior state below
-  }
-
-  if (Object.keys(updates).length === 0) {
+  const rawBody = await req.json().catch(() => null);
+  const parsed = AdminLeadPatchSchema.safeParse(rawBody);
+  if (!parsed.success) {
     return NextResponse.json(
       { ok: false, error: "no_supported_fields" },
       { status: 400, headers: NO_STORE }
     );
   }
-
-  const supabaseConfigured =
-    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    !!process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseConfigured) {
-    return NextResponse.json(
-      { ok: true, note: "mock_mode", updates },
-      { headers: NO_STORE }
-    );
+  const { mark_spam: markSpam, ...validatedPatch } = parsed.data;
+  const patch: CanonicalAdminLeadPatch = validatedPatch;
+  if (markSpam === true) patch.status = "spam";
+  if (markSpam === false) {
+    delete patch.status;
+    patch.restore_status_before_spam = true;
   }
 
-  const { createAdminClient } = await import("@/lib/supabase/admin");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const client = createAdminClient() as any;
-
-  const { data: prior } = await client
-    .from("leads")
-    .select("status, lead_type, lead_grade")
-    .eq("id", id)
-    .maybeSingle();
-
-  // Restore prior status when unspamming — never overwrite e.g. "appointment_set" with "qualified"
-  if (body.mark_spam === false) {
-    const priorStatus = prior?.status as string | null;
-    updates.status = (priorStatus && priorStatus !== "spam") ? priorStatus : "new";
-  }
-
-  const { error } = await client.from("leads").update(updates).eq("id", id);
-  if (error) {
-    return NextResponse.json(
-      { ok: false, error: error.message },
-      { status: 500, headers: NO_STORE }
-    );
-  }
-
-  await client.from("audit_logs").insert({
+  const result = await patchCanonicalAdminLead({
+    leadId: id,
+    patch,
     actor: auth.actor,
-    action: "lead.updated",
-    resource_type: "lead",
-    resource_id: id,
-    before_state: prior ?? null,
-    after_state: updates,
   });
+  if (!result.ok) {
+    return NextResponse.json(
+      { ok: false, error: result.error },
+      { status: result.statusCode, headers: NO_STORE }
+    );
+  }
 
-  if (updates.status) {
+  const persistedPatch = result.value.patch;
+  if (persistedPatch.status) {
     trackEventNoWait({
       eventName: "lead_updated",
       leadId: id,
-      properties: { newStatus: updates.status },
+      properties: { newStatus: persistedPatch.status },
     });
   }
 
-  return NextResponse.json({ ok: true, updates }, { headers: NO_STORE });
+  return NextResponse.json({
+    ok: true,
+    lead_id: result.value.leadId,
+    audit_id: result.value.auditId,
+    updated_at: result.value.updatedAt,
+    updates: persistedPatch,
+  }, { headers: NO_STORE });
 }

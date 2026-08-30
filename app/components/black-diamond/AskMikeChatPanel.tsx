@@ -51,7 +51,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
       funnel_name: "ask_mike_chat",
       step_name: stepName,
       lead_source_surface: surface,
-    });
+    }, { sessionId: chatSessionId });
     if (surface === "widget") {
       postToWidgetParent({ type: "askmagicmike:chat_started" }, attribution);
     }
@@ -73,7 +73,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
     trackEvent("chat_message_sent", attribution, {
       funnel_name: "ask_mike_chat",
       lead_source_surface: surface,
-    });
+    }, { sessionId: chatSessionId });
 
     try {
       const res = await fetch("/api/chat/message", {
@@ -97,7 +97,10 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
         leadPreparationInFlightRef.current = true;
         const leadRes = await fetch("/api/leads", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Idempotency-Key": chatSessionId,
+          },
           body: JSON.stringify({
             funnel_type: "chat",
             lead_source_surface: surface,
@@ -105,6 +108,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
             status: "new",
             assigned_agent_id: null,
             widget_session_id: chatSessionId,
+            idempotency_key: chatSessionId,
             attribution,
           }),
         });
@@ -115,12 +119,31 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
         };
         if (!leadRes.ok) throw new Error(publicLeadErrorMessage(leadData.error));
         if (!leadData.lead_id) throw new Error("lead_preparation_failed");
+        const idempotentReplay = leadRes.headers.get("X-AMM-Idempotent-Replay") === "1";
+        if (!idempotentReplay) {
+          trackEvent("lead_created", attribution, {
+            funnel_name: "ask_mike_chat",
+            lead_source_surface: surface,
+          }, { sessionId: chatSessionId });
+          if (surface === "widget") {
+            trackEvent("widget_lead_created", attribution, {
+              funnel_name: "ask_mike_chat",
+              lead_source_surface: surface,
+            }, { sessionId: chatSessionId });
+            postToWidgetParent({ type: "askmagicmike:lead_created" }, attribution);
+          }
+        }
         leadPreparedRef.current = true;
         setLeadReference({
           leadId: leadData.lead_id,
           sessionId: leadData.session_id || chatSessionId,
         });
       } catch {
+        trackEvent("lead_submit_failed", attribution, {
+          funnel_name: "ask_mike_chat",
+          lead_source_surface: surface,
+          step_name: "message_sent",
+        }, { sessionId: chatSessionId });
         setChatError("Mike's answer came through, but the appointment request path could not be prepared. You can still submit the home-value form for direct follow-up.");
       } finally {
         leadPreparationInFlightRef.current = false;
@@ -144,7 +167,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
     >
       <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#22c6d2]">Ask Mike</p>
       <h2 className="mt-3 font-serif text-3xl leading-tight text-[#f4ead4]">
-        A local-advisor interface for practical real estate decisions.
+        Start with the real estate question on your mind.
       </h2>
       <div className="mt-6 rounded-lg border border-white/10 bg-black/45 p-4">
         <div className="flex items-center gap-3 border-b border-white/10 pb-4">
@@ -218,20 +241,29 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
         ) : null}
         <form onSubmit={submit} className="mt-5">
           <label className="block">
-            <span className="sr-only">Ask Mike message</span>
+            <span className="mb-2 block text-sm font-semibold text-[#f4ead4]">
+              Your real estate question <span className="font-normal text-[#8f8778]">(required)</span>
+            </span>
             <input
+              type="text"
+              name="question"
               value={input}
               onChange={(event) => setInput(event.target.value)}
               onFocus={() => markStarted("message_focus")}
               placeholder="Ask Mike a real estate question..."
+              required
+              maxLength={2_000}
+              autoComplete="off"
+              enterKeyHint="send"
+              aria-describedby="ask-mike-question-help"
               className="amm-form-field rounded-full bg-black/60"
             />
           </label>
-          <button disabled={submitting} aria-busy={submitting} className="amm-cyan-button mt-3 w-full px-5 py-3 disabled:opacity-60">
+          <button type="submit" disabled={submitting} aria-busy={submitting} className="amm-cyan-button mt-3 w-full px-5 py-3 disabled:opacity-60">
             {submitting ? "Sending" : "Send Question"}
           </button>
         </form>
-        <p className="mt-4 text-xs leading-5 text-[#8f8778]">
+        <p id="ask-mike-question-help" className="mt-4 text-xs leading-5 text-[#8f8778]">
           For pricing, listing strategy, or property-specific facts, Mike or the Our Town Properties team should verify details directly.
         </p>
       </div>

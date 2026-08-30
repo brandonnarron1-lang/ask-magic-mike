@@ -1,9 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { checkAdminAuth } from "@/lib/admin/auth";
+import { createCanonicalAdminLeadTask } from "@/lib/admin/lead-operations";
 import { trackEventNoWait } from "@/lib/analytics/ledger";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const dueAt = z.string().trim().max(64).refine(
+  (value) => !Number.isNaN(Date.parse(value)),
+  "invalid_due_at",
+);
+const TaskSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+  body: z.string().trim().max(5000).nullable().optional(),
+  due_at: dueAt.nullable().optional(),
+  priority: z.enum(["low", "normal", "high", "urgent"]).default("normal"),
+  category: z.string().trim().max(100).nullable().optional(),
+  agent_id: z.string().uuid().nullable().optional(),
+}).strict();
 
 export async function POST(
   req: NextRequest,
@@ -19,62 +33,40 @@ export async function POST(
   if (!UUID.test(id))
     return NextResponse.json({ ok: false, error: "bad_id" }, { status: 400, headers: NO_STORE });
 
-  const body = (await req.json().catch(() => ({}))) as {
-    title?: string;
-    body?: string;
-    due_at?: string;
-    priority?: "low" | "normal" | "high" | "urgent";
-    category?: string;
-    agent_id?: string;
-  };
-  const title = (body.title ?? "").trim();
-  if (!title)
+  const parsed = TaskSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success)
     return NextResponse.json(
       { ok: false, error: "title_required" },
       { status: 400, headers: NO_STORE }
     );
 
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.SUPABASE_SERVICE_ROLE_KEY
-  ) {
+  const result = await createCanonicalAdminLeadTask({
+    leadId: id,
+    title: parsed.data.title,
+    body: parsed.data.body,
+    dueAt: parsed.data.due_at,
+    priority: parsed.data.priority,
+    category: parsed.data.category,
+    agentId: parsed.data.agent_id,
+    actor: auth.actor,
+  });
+  if (!result.ok) {
     return NextResponse.json(
-      { ok: true, note: "mock_mode", title },
-      { headers: NO_STORE }
-    );
-  }
-
-  const { createAdminClient } = await import("@/lib/supabase/admin");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const client = createAdminClient() as any;
-
-  const { data, error } = await client
-    .from("tasks")
-    .insert({
-      lead_id: id,
-      agent_id: body.agent_id ?? null,
-      created_by: auth.actor,
-      title,
-      body: body.body ?? null,
-      due_at: body.due_at ?? null,
-      priority: body.priority ?? "normal",
-      category: body.category ?? null,
-    })
-    .select("id")
-    .single();
-
-  if (error) {
-    return NextResponse.json(
-      { ok: false, error: error.message },
-      { status: 500, headers: NO_STORE }
+      { ok: false, error: result.error },
+      { status: result.statusCode, headers: NO_STORE }
     );
   }
 
   trackEventNoWait({
     eventName: "task_created",
     leadId: id,
-    properties: { taskId: data.id, priority: body.priority ?? "normal" },
+    properties: { taskId: result.value.taskId, priority: parsed.data.priority },
   });
 
-  return NextResponse.json({ ok: true, task_id: data.id }, { headers: NO_STORE });
+  return NextResponse.json({
+    ok: true,
+    task_id: result.value.taskId,
+    audit_id: result.value.auditId,
+    created_at: result.value.createdAt,
+  }, { headers: NO_STORE });
 }

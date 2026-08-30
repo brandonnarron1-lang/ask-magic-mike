@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { evaluateReadinessContract } from "../../scripts/lib/monitor-contracts.mjs";
+import {
+  evaluateReadinessContract,
+  evaluateRouteContract,
+  PRODUCTION_ROUTE_CONTRACTS,
+} from "../../scripts/lib/monitor-contracts.mjs";
 
 const readyBody = {
   ok: true,
@@ -55,5 +59,46 @@ describe("production monitor readiness contract", () => {
     expect(evaluateReadinessContract(null).ok).toBe(false);
     expect(evaluateReadinessContract([]).ok).toBe(false);
     expect(evaluateReadinessContract("ready").ok).toBe(false);
+  });
+});
+
+describe("production monitor public-route contract", () => {
+  it("checks canonical conversion documents and both permanent compatibility redirects", () => {
+    expect(PRODUCTION_ROUTE_CONTRACTS).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: "home-value", path: "/home-value", expected: 200 }),
+      expect.objectContaining({
+        name: "value-alias",
+        path: "/value",
+        expected: 308,
+        expectedLocation: "/home-value",
+      }),
+      expect.objectContaining({
+        name: "we-buy-houses-alias",
+        path: "/we-buy-houses",
+        expected: 308,
+        expectedLocation: "/sell",
+      }),
+    ]));
+    expect(PRODUCTION_ROUTE_CONTRACTS).not.toContainEqual(
+      expect.objectContaining({ path: "/value", expected: 200 }),
+    );
+  });
+
+  it("fails closed when an alias has the wrong status or destination", () => {
+    const alias = PRODUCTION_ROUTE_CONTRACTS.find(({ name }) => name === "value-alias");
+    expect(alias).toBeDefined();
+
+    expect(evaluateRouteContract(alias, {
+      status: 308,
+      location: "/home-value",
+    })).toEqual({ ok: true, statusOk: true, locationOk: true });
+    expect(evaluateRouteContract(alias, {
+      status: 200,
+      location: null,
+    })).toEqual({ ok: false, statusOk: false, locationOk: false });
+    expect(evaluateRouteContract(alias, {
+      status: 308,
+      location: "/value",
+    })).toEqual({ ok: false, statusOk: true, locationOk: false });
   });
 });

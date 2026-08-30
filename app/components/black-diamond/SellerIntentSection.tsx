@@ -30,6 +30,7 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
     sessionId: null,
   });
   const [submitting, setSubmitting] = useState(false);
+  const eventOptions = { sessionId: submissionId };
 
   useEffect(() => {
     setSubmissionId(tryCreateBrowserSubmissionId());
@@ -42,19 +43,22 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
     setSellerSuccess(false);
 
     const formData = new FormData(form);
+    const email = clean(formData.get("seller-email"));
+    const phone = clean(formData.get("seller-phone"));
+    const consent = formData.get("consent") === "yes";
     const payload = {
       funnel_type: "seller",
       lead_source_surface: surface,
       address: clean(formData.get("seller-address")),
       name: clean(formData.get("seller-name")) || undefined,
-      email: clean(formData.get("seller-email")) || undefined,
-      phone: clean(formData.get("seller-phone")),
-      condition: clean(formData.get("condition")),
-      timeline: clean(formData.get("seller-timeline")),
+      email: email || undefined,
+      phone,
+      condition: clean(formData.get("condition")) || undefined,
+      timeline: clean(formData.get("seller-timeline")) || undefined,
       notes: clean(formData.get("notes")) || undefined,
-      consent: formData.get("consent") === "yes",
-      consent_email: formData.get("consent") === "yes",
-      consent_call: formData.get("consent") === "yes",
+      consent,
+      consent_email: consent && Boolean(email),
+      consent_call: consent && Boolean(phone),
       consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
       consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
       consent_source: `${surface}:seller-intake`,
@@ -80,10 +84,10 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
       funnel_name: "seller",
       step_name: "seller_intent",
       lead_source_surface: surface,
-    });
-    trackEvent("funnel_started", attribution, { funnel_name: "seller", lead_source_surface: surface });
-    trackEvent("contact_submitted", attribution, { funnel_name: "seller", lead_source_surface: surface });
-    if (payload.consent) trackEvent("consent_accepted", attribution, { funnel_name: "seller", consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION });
+    }, eventOptions);
+    trackEvent("funnel_started", attribution, { funnel_name: "seller", lead_source_surface: surface }, eventOptions);
+    trackEvent("contact_submitted", attribution, { funnel_name: "seller", lead_source_surface: surface }, eventOptions);
+    if (payload.consent) trackEvent("consent_accepted", attribution, { funnel_name: "seller", consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION }, eventOptions);
 
     try {
       const res = await fetch("/api/leads", {
@@ -100,15 +104,20 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
       if (!res.ok) throw new Error(publicLeadErrorMessage(data.error));
       const idempotentReplay = res.headers.get("X-AMM-Idempotent-Replay") === "1";
       if (!idempotentReplay) {
-        trackEvent("lead_created", attribution, { funnel_name: "seller", step_name: "seller_intent" });
+        trackEvent("lead_created", attribution, { funnel_name: "seller", step_name: "seller_intent" }, eventOptions);
       }
       setSellerMessage(data.message || "Got it. Mike will review it.");
       setLeadReference({ leadId: data.lead_id || null, sessionId: data.session_id || null });
       setSellerSuccess(true);
-      trackEvent("thank_you_viewed", attribution, { funnel_name: "seller" });
+      trackEvent("thank_you_viewed", attribution, { funnel_name: "seller" }, eventOptions);
       form.reset();
       setSubmissionId(tryCreateBrowserSubmissionId());
     } catch (error) {
+      trackEvent("lead_submit_failed", attribution, {
+        funnel_name: "seller",
+        lead_source_surface: surface,
+        step_name: "seller_intent",
+      }, eventOptions);
       setSellerMessage(publicLeadErrorMessage(error instanceof Error ? error.message : undefined));
     } finally {
       setSubmitting(false);
@@ -135,16 +144,18 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
         <TextField name="seller-phone" required type="tel" label="Phone required" placeholder="Phone" />
         <TextField name="seller-email" type="email" label="Email optional" placeholder="Email" />
         <label className="block">
-          <span className="text-sm font-semibold text-[#f4ead4]">Condition</span>
-          <select name="condition" className="amm-form-field text-base">
+          <span className="text-sm font-semibold text-[#f4ead4]">Condition (optional)</span>
+          <select name="condition" defaultValue="" className="amm-form-field text-base">
+            <option value="">Select condition</option>
             {conditionOptions.map((option) => (
               <option key={option}>{option}</option>
             ))}
           </select>
         </label>
         <label className="block">
-          <span className="text-sm font-semibold text-[#f4ead4]">Timeline</span>
-          <select name="seller-timeline" className="amm-form-field text-base">
+          <span className="text-sm font-semibold text-[#f4ead4]">Timeline (optional)</span>
+          <select name="seller-timeline" defaultValue="" className="amm-form-field text-base">
+            <option value="">Select timeline</option>
             {timelineOptions.map((option) => (
               <option key={option}>{option}</option>
             ))}

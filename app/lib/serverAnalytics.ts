@@ -4,6 +4,7 @@ import {
 import {
   coarseAnalyticsUserAgent,
   isApprovedPublicAnalyticsEvent,
+  isCanonicalLedgerProtectedEvent,
   safeAnalyticsDimension,
   safeAnalyticsProperties,
   safePublicAnalyticsDimension,
@@ -15,6 +16,7 @@ export type ServerAnalyticsEvent = {
   eventName: string;
   category?: string;
   sessionId?: string | null;
+  funnelSessionId?: string | null;
   leadId?: string | null;
   properties?: Record<string, unknown>;
   attribution?: { source?: string; medium?: string; campaign?: string };
@@ -24,6 +26,7 @@ export type ServerAnalyticsEvent = {
 export {
   coarseAnalyticsUserAgent,
   isApprovedPublicAnalyticsEvent,
+  isCanonicalLedgerProtectedEvent,
   safeAnalyticsDimension,
   safeAnalyticsProperties,
   safePublicAnalyticsDimension,
@@ -36,6 +39,7 @@ export async function recordServerAnalyticsEvent(event: ServerAnalyticsEvent) {
     eventName: event.eventName,
     eventCategory: event.category,
     sessionId: event.sessionId,
+    funnelSessionId: event.funnelSessionId,
     leadId: event.leadId,
     properties: event.properties,
     utmSource: event.attribution?.source,

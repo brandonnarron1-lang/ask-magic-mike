@@ -1,6 +1,6 @@
 # Consolidation Plan
 
-Refreshed 2026-08-23 from authenticated GitHub, Vercel, Neon, and WordPress
+Refreshed 2026-08-28 from authenticated GitHub, Vercel, Neon, and WordPress
 evidence. This plan organizes and strengthens the system already in service; it
 does not authorize a parallel application, database, notification engine, or CRM.
 
@@ -22,10 +22,10 @@ does not authorize a parallel application, database, notification engine, or CRM
 - Free-first phone alert: Web Push; carrier SMS remains disabled until a
   compliant registered provider is explicitly approved
 
-The Production baseline is PR #195, merge commit
-`b450b41c66c6740bd20571cdbe7d8caf82e92d5e`, deployed as
-`dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Do not redeploy that commit or reuse its
-conversion-identity approval merely because an old approval prompt is repeated.
+The Production baseline is PR #209, merge commit
+`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`, deployed as
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Its combined durability gate and every
+earlier release gate are exhausted and cannot authorize a later candidate.
 
 ## Consolidation already completed
 
@@ -48,35 +48,48 @@ conversion-identity approval merely because an old approval prompt is repeated.
 
 ## Current release consolidation
 
-### 1. PR #209 — atomic controlled release candidate
+### 1. PR #209 — accepted atomic controlled release
 
-Draft PR #209 is the sole current application release vehicle. It contains the
+PR #209 merged and passed same-commit Production acceptance. It contains the
 reviewed cumulative work from incremental PRs #202 through #208 once, plus the
-fail-closed Neon endpoint attestation that prevents Preview mutation when a
-Production connection is mislabeled as Preview.
+fail-closed Neon endpoint attestation and durable Neon rate-limit contract.
 
 The incremental PRs remain immutable review records, but none has independent
 merge or Production authority. This removes the risk of seven intermediate
 Production deployments, contradictory gates, or partial feature ordering.
 
-PR #209 contains no database migration and does not enable consumer messaging,
-carrier SMS, Push delivery, WordPress publication, paid media, DNS changes, or
-NellySelly access. Its two remaining action classes are deliberately separate:
+PR #209 contained no database migration. Its Production-only encrypted secret,
+exact merge, bounded malformed request, 9/9 monitor, and clean log window are
+recorded in
+`docs/phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md`.
 
-- isolated synthetic Preview mutation and cleanup:
-  `APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA`;
-- one encrypted Production-only durability secret, exact reviewed PR #209
-  merge, and matching same-commit Production deployment:
-  `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
+### 2. PR #238 — single cumulative Phase 9 candidate
 
-Neither phrase authorizes an email, SMS, Push, consumer acknowledgment, lead,
-WordPress edit, external publication, spend, DNS change, data deletion, or
-NellySelly action.
+Draft PR #238 at exact head
+`de67db6e1183b2a47d329d4a9a11993d48d1992a` is the current application
+release vehicle. Its application tree is byte-for-byte equivalent to the tested
+PR #210–#237 component tail, while its second normal commit adds one
+hash-pinned, backup-first runner for the four reviewed additive growth
+migrations.
 
-### 2. Preserved and deferred candidates
+Hosted Node 24 Release Gate, immutable Preview, protected no-write browser QA,
+runtime logs, dependency audit, secret scans, and route proof are sealed on the
+exact head. Only this phrase may authorize the guarded migrations, exact merge,
+and canonical Production deployment:
 
-- PRs #202 through #208 are superseded for release by PR #209. Their branches,
-  checks, evidence, and rescue refs remain preserved.
+`APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT`
+
+The phrase does not enable any growth import or authorize WordPress, messaging,
+provider, publication, spend, DNS, deletion, or NellySelly action.
+
+### 3. Preserved component and dependent candidates
+
+- PRs #202–#208 are superseded for release by PR #209. Their branches, checks,
+  evidence, and rescue refs remain preserved.
+- PRs #210–#237 are preserved as component lineage included once in PR #238.
+  Their former individual gates are historical and not requestable.
+- PR #239 is read-only WordPress reconciliation tooling stacked after PR #238.
+  It is not included in the PR #238 gate and has no live export/import authority.
 - PR #187's KPI target-register migration is deferred. Production has no
   eligible live-demand baseline, so deploying numeric targets now would create
   precision without evidence.
@@ -111,33 +124,40 @@ NellySelly action.
   SMS gateway, or AI assignment engine.
 - PropertyLens, which is a separate product and not an Ask Magic Mike runtime.
 
-## PR #209 release risk and rollback
+## PR #238 release risk and rollback
 
-The immediate risk is configuration/application mismatch: entering the
-durability secret without deploying the code, deploying the code without the
-secret, or allowing Preview labels to conceal a Production database URL. PR
-#209 addresses this with one combined Production gate, exact-head evidence,
-categorical endpoint attestation, and a fail-closed readiness contract.
+The cumulative cutover combines an application release with four additive
+growth migrations. Its primary risks are wrong database identity, migration
+drift, partial application, accidental import enablement, redirect/attribution
+regression, or deploying a commit other than the reviewed head. The guarded
+runner, exact manifest, one transaction, validated backup, disabled import
+gates, and same-head acceptance checks fail closed around those risks.
 
 Cutover sequence after explicit approval:
 
-1. Record the exact Production deployment and exact tested PR #209 head.
-2. Enter only the purpose-specific encrypted Production durability secret.
-3. Merge only that exact head and allow the canonical Vercel project to deploy.
-4. Prove the deployment commit, Production alias, durable limiter capability,
-   health/readiness body, public funnels, anonymous admin denial, and logs.
-5. Send a malformed non-lead request to exercise one pseudonymized limiter
-   bucket only; verify no lead, event, notification, or message was created.
-6. Keep all external sends, WordPress changes, publications, and data actions
-   behind their own gates.
+1. Record exact `main`, PR #238 head/tree, Preview, Production, rollback, and
+   canonical unpooled Neon identity.
+2. Run the read-only guarded preflight and confirm all three growth import gates
+   are false.
+3. Execute and verify only the four manifest-pinned migrations with the
+   validated backup retained.
+4. Merge only exact PR #238 head and deploy only that reviewed commit through
+   the canonical Vercel project.
+5. Prove health, canonical redirects/destinations, attribution preservation,
+   anonymous admin denial, protected operations, database postconditions, and
+   a clean exact-deployment log window.
+6. Keep imports, external sends, WordPress changes, publications, data actions,
+   and dependent PRs behind their own gates.
 
 Rollback:
 
-- Repoint the Production aliases to
-  `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW` if the application candidate fails.
-- Remove or disable the new purpose-specific secret only if rollback evidence
-  requires it; do not change `DATABASE_URL` or delete limiter rows as part of
-  application rollback.
+- Repoint the Production aliases to `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` if PR
+  #238 application acceptance fails.
+- Before any separately approved import, leave the empty additive migration
+  objects installed and prefer a reviewed forward fix; do not drop receipt,
+  audit, signal, opportunity, lead, or notification data.
+- Do not change `DATABASE_URL`, `RATE_LIMIT_HASH_SECRET`, or limiter rows as
+  part of application rollback.
 - Preserve every audit, lead, notification, and publication-proof record.
 
 ## Remaining human and external gates

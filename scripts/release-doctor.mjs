@@ -209,13 +209,27 @@ async function main() {
   );
 
   // ─ Source-level forbidden patterns ─
-  const e2e = (await readText("tests/e2e/widget-preview-flow.spec.ts")) ?? "";
+  const widgetE2e =
+    (await readText("tests/e2e/widget-preview-flow.spec.ts")) ?? "";
+  const funnelE2e =
+    (await readText("tests/e2e/funnel-event-identity-preview.spec.ts")) ?? "";
+  const noWriteInterception =
+    (await readText("tests/e2e/no-write-preview-interception.ts")) ?? "";
+  const sharedNoWriteImport = 'from "./no-write-preview-interception"';
   results.push(
     check(
-      "e2e.intercepts_api_leads",
-      /page\.route\(\s*['"`]\*\*\/api\/leads['"`]/.test(e2e) ? "pass" : "fail",
+      "e2e.intercepts_api_mutations",
+      widgetE2e.includes(sharedNoWriteImport) &&
+        funnelE2e.includes(sharedNoWriteImport) &&
+        noWriteInterception.includes('page.route("**/api/**"') &&
+        noWriteInterception.includes(
+          'new Set(["POST", "PUT", "PATCH", "DELETE"])'
+        ) &&
+        noWriteInterception.includes("unexpected_preview_write_blocked")
+        ? "pass"
+        : "fail",
       true,
-      "widget e2e intercepts POST /api/leads"
+      "widget and funnel e2e share one fail-closed API mutation boundary"
     )
   );
 

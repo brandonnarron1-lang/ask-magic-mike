@@ -5,7 +5,7 @@
  * optional attribution passthrough, and that valid payloads reach the analytics
  * ledger. The ledger is mocked — no Supabase or network.
  */
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const trackMock = vi.fn();
@@ -27,8 +27,13 @@ function post(body: unknown): NextRequest {
 
 describe("POST /api/analytics/event", () => {
   beforeEach(() => {
+    vi.stubEnv("VERCEL_ENV", "production");
     trackMock.mockReset();
     trackMock.mockResolvedValue(true);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("accepts a known event name and calls trackEvent", async () => {
@@ -40,6 +45,18 @@ describe("POST /api/analytics/event", () => {
     expect(trackMock).toHaveBeenCalledWith(
       expect.objectContaining({ eventName: "landing_page_viewed" })
     );
+  });
+
+  it("fails closed before rate limiting or persisting ordinary Preview telemetry", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const res = await POST(post({ eventName: "page_view", properties: { path: "/ask" } }));
+    expect(res.status).toBe(503);
+    await expect(res.json()).resolves.toMatchObject({
+      ok: false,
+      persisted: false,
+      code: "preview_data_disabled",
+    });
+    expect(trackMock).not.toHaveBeenCalled();
   });
 
   it("returns 422 for unknown event names", async () => {
@@ -78,11 +95,13 @@ describe("POST /api/analytics/event", () => {
     expect(trackMock).toHaveBeenCalledWith(
       expect.objectContaining({
         eventName: "cta_chip_clicked",
+        funnelSessionId: "00000000-0000-4000-8000-000000000001",
         utmSource: "facebook",
         utmMedium: "paid_social",
         utmCampaign: "wilson-nc-sellers",
       })
     );
+    expect(trackMock.mock.calls[0][0]).not.toHaveProperty("sessionId");
   });
 
   it("uses IP only for abuse control and forwards a coarse user-agent class", async () => {
@@ -141,6 +160,18 @@ describe("POST /api/analytics/event", () => {
     expect(trackMock).not.toHaveBeenCalled();
   });
 
+  it.each(["lead_created", "widget_lead_created", "lead_qualified", "appointment_requested"])(
+    "rejects browser-authored canonical outcome %s",
+    async (eventName) => {
+      const res = await POST(post({
+        eventName,
+        sessionId: "00000000-0000-4000-8000-000000000001",
+      }));
+      expect(res.status).toBe(422);
+      expect(trackMock).not.toHaveBeenCalled();
+    },
+  );
+
   it("rejects nested properties and oversized bodies", async () => {
     const nested = await POST(post({
       eventName: "page_view",
@@ -174,7 +205,6 @@ describe("POST /api/analytics/event", () => {
     const widgetEvents = [
       "widget_opened",
       "widget_started",
-      "widget_lead_created",
       "widget_submit_failed",
     ] as const;
     for (const eventName of widgetEvents) {

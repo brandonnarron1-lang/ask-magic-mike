@@ -6,9 +6,15 @@ import type {
   AdminAssignmentMutationResult,
   AdminFirstResponseMutation,
   AdminFirstResponseMutationResult,
+  AdminLeadNoteMutation,
+  AdminLeadNoteMutationResult,
+  AdminLeadPatchMutation,
+  AdminLeadPatchMutationResult,
   AdminLeadMutation,
   AdminLeadMutationResult,
   AdminLeadReadRequest,
+  AdminLeadTaskMutation,
+  AdminLeadTaskMutationResult,
   AppointmentIntent,
   AppointmentIntentResult,
   LeadLifecycleCapture,
@@ -262,6 +268,93 @@ export class SupabasePostgrestAdapter implements ActivePersistenceBoundary {
     };
   }
 
+  async patchAdminLead(input: AdminLeadPatchMutation): Promise<AdminLeadPatchMutationResult> {
+    const result = await this.rpc("patch_admin_lead_v1", {
+      p_lead_id: input.leadId,
+      p_patch: input.patch,
+      p_actor: input.actor,
+      p_occurred_at: input.occurredAt,
+    });
+    if (result.ok !== true) {
+      const allowed = new Set([
+        "lead_not_found",
+        "invalid_patch",
+        "invalid_patch_field",
+        "invalid_patch_value",
+      ]);
+      return {
+        ok: false,
+        error: (allowed.has(String(result.error))
+          ? result.error
+          : "invalid_patch") as Extract<AdminLeadPatchMutationResult, { ok: false }>["error"],
+      };
+    }
+    const patch = { ...input.patch };
+    delete patch.restore_status_before_spam;
+    if (typeof result.resolved_status === "string") patch.status = result.resolved_status;
+    return {
+      ok: true,
+      leadId: requiredString(result.lead_id, "lead_id"),
+      auditId: requiredString(result.audit_id, "audit_id"),
+      updatedAt: requiredString(result.updated_at, "updated_at"),
+      patch,
+    };
+  }
+
+  async addAdminLeadNote(input: AdminLeadNoteMutation): Promise<AdminLeadNoteMutationResult> {
+    const result = await this.rpc("add_admin_lead_note_v1", {
+      p_lead_id: input.leadId,
+      p_content: input.content,
+      p_agent_id: input.agentId || null,
+      p_actor: input.actor,
+      p_occurred_at: input.occurredAt,
+    });
+    if (result.ok !== true) {
+      const allowed = new Set(["lead_not_found", "agent_not_found", "invalid_note"]);
+      return {
+        ok: false,
+        error: (allowed.has(String(result.error))
+          ? result.error
+          : "invalid_note") as Extract<AdminLeadNoteMutationResult, { ok: false }>["error"],
+      };
+    }
+    return {
+      ok: true,
+      messageId: requiredString(result.message_id, "message_id"),
+      auditId: requiredString(result.audit_id, "audit_id"),
+      createdAt: requiredString(result.created_at, "created_at"),
+    };
+  }
+
+  async createAdminLeadTask(input: AdminLeadTaskMutation): Promise<AdminLeadTaskMutationResult> {
+    const result = await this.rpc("create_admin_lead_task_v1", {
+      p_lead_id: input.leadId,
+      p_title: input.title,
+      p_body: input.body || null,
+      p_due_at: input.dueAt || null,
+      p_priority: input.priority,
+      p_category: input.category || null,
+      p_agent_id: input.agentId || null,
+      p_actor: input.actor,
+      p_occurred_at: input.occurredAt,
+    });
+    if (result.ok !== true) {
+      const allowed = new Set(["lead_not_found", "agent_not_found", "invalid_task"]);
+      return {
+        ok: false,
+        error: (allowed.has(String(result.error))
+          ? result.error
+          : "invalid_task") as Extract<AdminLeadTaskMutationResult, { ok: false }>["error"],
+      };
+    }
+    return {
+      ok: true,
+      taskId: requiredString(result.task_id, "task_id"),
+      auditId: requiredString(result.audit_id, "audit_id"),
+      createdAt: requiredString(result.created_at, "created_at"),
+    };
+  }
+
   async recordAdminFirstResponse(
     input: AdminFirstResponseMutation,
   ): Promise<AdminFirstResponseMutationResult> {
@@ -303,11 +396,12 @@ export class SupabasePostgrestAdapter implements ActivePersistenceBoundary {
   async mutateAdminAssignment(
     input: AdminAssignmentMutation,
   ): Promise<AdminAssignmentMutationResult> {
-    const result = await this.rpc("mutate_admin_assignment_v1", {
+    const result = await this.rpc("mutate_admin_assignment_v2", {
       p_lead_id: input.leadId,
       p_agent_id: input.agentId,
       p_expected_agent_id: input.expectedAgentId,
       p_action: input.action,
+      p_reason: input.reason || null,
       p_notification_mode: input.notificationMode,
       p_actor: input.actor,
       p_occurred_at: input.occurredAt,

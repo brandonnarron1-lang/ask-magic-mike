@@ -11,6 +11,7 @@ import {
   smtpConfigurationReady,
 } from "../../../../../app/lib/emailProviderConfiguration";
 import { durableRateLimitHashSecretReady } from "@/lib/security/rate-limit";
+import { loadNeonLeadNotificationOperations } from "../../../../../app/lib/persistence/neonLeadNotificationOperations";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
@@ -111,6 +112,9 @@ export async function GET(req: NextRequest) {
     "compliance_flags",
     "rate_limit_buckets",
   ].every((table) => tablePresence[table as TableName]);
+  const notificationOperations = tablePresence.lead_notifications
+    ? await loadNeonLeadNotificationOperations().catch(() => null)
+    : null;
 
   const smsEnabled = enabled(process.env.ENABLE_SMS);
   const emailEnabled = enabled(process.env.ENABLE_EMAIL) || enabled(process.env.EMAIL_ENABLED);
@@ -191,6 +195,23 @@ export async function GET(req: NextRequest) {
         preview_identity_confirmed:
           safety.identity.preview_identity_confirmed,
       },
+    },
+    notifications: {
+      configured: tablePresence.lead_notifications,
+      operations_query_ready: Boolean(notificationOperations),
+      live_total: notificationOperations?.liveTotal ?? null,
+      live_queue_depth: notificationOperations?.queueDepth ?? null,
+      retry_due: notificationOperations?.retryDue ?? null,
+      stale_pending: notificationOperations?.stalePending ?? null,
+      stale_processing: notificationOperations?.staleProcessing ?? null,
+      permanent_failures: notificationOperations?.permanentlyFailed ?? null,
+      provider_confirmed: notificationOperations?.providerConfirmed ?? null,
+      provider_terminal_failures: notificationOperations?.providerTerminalFailure ?? null,
+      orphaned_records: notificationOperations?.orphanedTotal ?? null,
+      test_records_excluded: notificationOperations?.testTotal ?? null,
+      last_sent_at: notificationOperations?.lastSentAt ?? null,
+      last_provider_confirmation_at:
+        notificationOperations?.lastProviderConfirmationAt ?? null,
     },
     safety: {
       live_sms_disabled: safety.live_sms_disabled,

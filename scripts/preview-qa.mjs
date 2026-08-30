@@ -6,6 +6,8 @@
  *   - vercel_preview_access — early access precheck. Detects 401/403 from
  *     Vercel Deployment Protection and fails fast with a clear remedy.
  *   - Public funnel HTTP 200 + required-copy spot-checks
+ *   - Preview analytics isolation: no external Google loader, approved GTM
+ *     container marker, consent surface, or analytics runtime marker
  *   - GET /api/admin/health (auth required)
  *   - Admin REST: dashboard / leads / list filters
  *   - SLA sweep with admin auth + optional cron-secret auth
@@ -265,6 +267,33 @@ async function publicRoutes() {
   }
 }
 
+async function previewAnalyticsIsolation() {
+  const r = await http("GET", "/");
+  const html = r.text || JSON.stringify(r.json ?? "");
+  const forbiddenMarkers = [
+    "googletagmanager.com/gtm.js",
+    "GTM-KZMCSLTJ",
+    'data-testid="external-analytics-consent"',
+    "Help improve the Ask Magic Mike experience?",
+    "ammExternalAnalytics",
+  ];
+  const found = forbiddenMarkers.filter((marker) => html.includes(marker));
+
+  if (r.ok && found.length === 0) {
+    record("preview:external_analytics_off", "pass", {
+      http: r.status,
+      message: "no external analytics or consent runtime rendered in Preview",
+    });
+  } else {
+    record("preview:external_analytics_off", "fail", {
+      http: r.status,
+      message: found.length
+        ? `forbidden Preview marker(s): ${found.join(", ")}`
+        : "homepage request failed",
+    });
+  }
+}
+
 async function wpUtmVariants() {
   const mediums = ["homepage_cta", "mike_profile", "seller_page_cta"];
   for (const m of mediums) {
@@ -484,6 +513,7 @@ async function mutationTests(gate) {
     record("mutation:lead_create", "skip", { message: gate.reason });
     record("mutation:lead_note", "skip", { message: gate.reason });
     record("mutation:lead_task", "skip", { message: gate.reason });
+    record("mutation:persistence_readback", "skip", { message: gate.reason });
     record("mutation:sla_persist", "skip", { message: gate.reason });
     record("mutation:webhook_sms_stop", "skip", { message: gate.reason });
     record("mutation:webhook_email_unsub", "skip", { message: gate.reason });
@@ -492,12 +522,14 @@ async function mutationTests(gate) {
   // 1) Create a QA lead.
   const lead = await http("POST", "/api/leads", {
     body: {
-      name: "Preview QA",
+      name: "INTERNAL QA — DO NOT CONTACT",
       email: `qa+${Date.now()}@example.com`,
       phone: "+12525550100",
       lead_type: "buyer",
       source: "ad_form",
       utm_source: "preview_qa",
+      notes: "INTERNAL QA — DO NOT CONTACT — preview persistence acceptance",
+      is_test: true,
       consent: { sms: true, email: true },
     },
   });
@@ -518,7 +550,7 @@ async function mutationTests(gate) {
   });
   record(
     "mutation:lead_note",
-    note.ok && note.json?.ok ? "pass" : "fail",
+    note.ok && note.json?.ok && typeof note.json?.message_id === "string" ? "pass" : "fail",
     { http: note.status }
   );
 
@@ -529,11 +561,30 @@ async function mutationTests(gate) {
   });
   record(
     "mutation:lead_task",
-    task.ok && task.json?.ok ? "pass" : "fail",
+    task.ok && task.json?.ok && typeof task.json?.task_id === "string" ? "pass" : "fail",
     { http: task.status }
   );
 
-  // 4) SLA persist. Active root runtime exposes the cron-compatible GET
+  // 4) Read the same IDs back through the authenticated detail API. A route
+  // response alone is not persistence evidence.
+  const detail = await http("GET", `/api/admin/leads/${leadId}`, {
+    headers: adminHeaders(),
+  });
+  const messageId = note.json?.message_id;
+  const taskId = task.json?.task_id;
+  const messagePersisted = typeof messageId === "string" &&
+    Array.isArray(detail.json?.messages) &&
+    detail.json.messages.some((row) => row?.id === messageId);
+  const taskPersisted = typeof taskId === "string" &&
+    Array.isArray(detail.json?.tasks) &&
+    detail.json.tasks.some((row) => row?.id === taskId);
+  record(
+    "mutation:persistence_readback",
+    detail.ok && detail.json?.ok && messagePersisted && taskPersisted ? "pass" : "fail",
+    { http: detail.status }
+  );
+
+  // 5) SLA persist. Active root runtime exposes the cron-compatible GET
   // surface only; POST remains inactive in src/app.
   const sla = await http("GET", "/api/admin/sla/sweep?persist=true", {
     headers: adminHeaders(),
@@ -544,7 +595,7 @@ async function mutationTests(gate) {
     { http: sla.status }
   );
 
-  // 5) Webhook SMS STOP (mock auth).
+  // 6) Webhook SMS STOP (mock auth).
   const sms = await http("POST", "/api/webhooks/sms/inbound", {
     headers: adminHeaders(),
     body: { From: "+12525550100", Body: "STOP" },
@@ -555,7 +606,7 @@ async function mutationTests(gate) {
     { http: sms.status, message: redact(JSON.stringify(sms.json ?? sms.text)) }
   );
 
-  // 6) Webhook email unsubscribe.
+  // 7) Webhook email unsubscribe.
   const email = await http("POST", "/api/webhooks/email/events", {
     headers: adminHeaders(),
     body: {
@@ -619,6 +670,7 @@ async function main() {
   let health = null;
   if (accessOk) {
     await publicRoutes();
+    await previewAnalyticsIsolation();
     await wpUtmVariants();
     health = await healthCheck();
     await adminListAndDashboard();

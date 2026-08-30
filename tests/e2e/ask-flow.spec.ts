@@ -42,8 +42,8 @@ test("active Ask Mike flow uses intercepted chat and lead persistence", async ({
   });
 
   await page.goto("/ask");
-  await expect(page.getByRole("heading", { name: /focused local real estate advisor/i })).toBeVisible();
-  await page.getByLabel("Ask Mike message").fill("What should I prepare before listing in Wilson?");
+  await expect(page.getByRole("heading", { name: /Ask Mike\. Get a practical local next step\./i })).toBeVisible();
+  await page.getByLabel(/Your real estate question/).fill("What should I prepare before listing in Wilson?");
   await page.getByRole("button", { name: "Send Question" }).click();
 
   await expect(page.getByText(/Synthetic local answer/)).toBeVisible();
@@ -60,7 +60,7 @@ test("active Ask Mike flow uses intercepted chat and lead persistence", async ({
     typeof (leadPayloads[0] as unknown as Record<string, unknown>).widget_session_id,
   ).toBe("string");
 
-  await page.getByLabel("Ask Mike message").fill("What about a second distinct question?");
+  await page.getByLabel(/Your real estate question/).fill("What about a second distinct question?");
   await page.getByRole("button", { name: "Send Question" }).click();
   await expect.poll(() => chatPayloads.length).toBe(2);
   expect(chatPayloads[1]).toMatchObject({
@@ -131,7 +131,7 @@ test("Ask Mike failed lead preparation retry reuses the conversation submission 
   });
 
   await page.goto("/ask");
-  await page.getByLabel("Ask Mike message").fill("Can Mike help me think through timing?");
+  await page.getByLabel(/Your real estate question/).fill("Can Mike help me think through timing?");
   await page.getByRole("button", { name: "Send Question" }).click();
   await expect(page.getByText(/appointment request path could not be prepared/i)).toBeVisible();
   expect(leadPayloads).toHaveLength(1);
@@ -143,7 +143,7 @@ test("Ask Mike failed lead preparation retry reuses the conversation submission 
   expect(leadPayloads).toHaveLength(2);
   expect(leadPayloads[1].widget_session_id).toBe(originalSubmissionId);
 
-  await page.getByLabel("Ask Mike message").fill("What should I ask on the follow-up call?");
+  await page.getByLabel(/Your real estate question/).fill("What should I ask on the follow-up call?");
   await page.getByRole("button", { name: "Send Question" }).click();
   await expect.poll(() => chatPayloads.length).toBe(3);
   expect(leadPayloads).toHaveLength(2);

@@ -23,15 +23,18 @@ friction.
 - Reuse the existing canonical placement catalog and protected asset route.
 - Offer the handoff only for Google Business Profile, Facebook, Instagram, and
   LinkedIn placements.
-- Use the existing 4:5 image for Google Business Profile, Facebook, and
-  LinkedIn, and the existing 9:16 image for Instagram.
+- Use the dedicated 720x720 image for Google Business Profile, the existing
+  4:5 image for Facebook and LinkedIn, and the existing 9:16 image for
+  Instagram. The square adaptation is documented in
+  `GOOGLE_BUSINESS_PROFILE_SQUARE_ASSET.md`.
 - Require one explicit tap to prepare the private same-origin PNG and a second
   explicit tap to invoke the device share sheet. This preserves the Web Share
   transient-user-activation boundary after asynchronous image preparation.
-- Validate the canonical campaign URL and its exact four UTM fields, approved
-  destination path, exact protected asset path, PNG media type and byte
-  signature, approved filename, safe copy bounds, and a five-megabyte image
-  ceiling before creating a browser `File`.
+- Validate one correlated publication identity across channel, placement,
+  channel-native format, canonical filename, proof target, UTM source, and UTM
+  medium. Also validate the exact four UTM fields, approved destination path,
+  exact protected asset path, PNG media type and byte signature, safe copy
+  bounds, and a five-megabyte image ceiling before creating a browser `File`.
 - Keep the Client Component isolated from the server-side QR/image-generation
   module so no server-capable dependency can drift into the browser bundle.
 - Use `navigator.canShare({ files })` before invoking `navigator.share`.

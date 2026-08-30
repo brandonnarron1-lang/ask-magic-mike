@@ -25,13 +25,13 @@ vi.mock("../../app/lib/serverAnalytics", async () => {
 
 import { POST } from "../../app/api/events/route";
 
-function request(body: unknown) {
+function request(body: unknown, userAgent = "Mozilla/5.0 Chrome/140") {
   return new Request("https://www.askmagicmike.com/api/events", {
     method: "POST",
     headers: {
       "content-type": "application/json",
       origin: "https://www.askmagicmike.com",
-      "user-agent": "Mozilla/5.0 Chrome/140",
+      "user-agent": userAgent,
     },
     body: JSON.stringify(body),
   });
@@ -56,6 +56,110 @@ describe("POST /api/events", () => {
     expect(recordMock).toHaveBeenCalledWith(expect.objectContaining({ eventName: "funnel_started" }));
   });
 
+  it("fails closed in read-only Preview before limiter or event persistence", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("DATABASE_ENV", "preview");
+    vi.stubEnv("PREVIEW_DATA_MODE", "disabled");
+    vi.stubEnv("ALLOW_PREVIEW_DB_MUTATION", "false");
+
+    const response = await POST(request({
+      event_name: "page_view",
+      properties: { current_path: "/" },
+    }));
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get("cache-control")).toBe("private, no-store, max-age=0");
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      persisted: false,
+      code: "preview_data_disabled",
+    });
+    expect(rateLimitMock).not.toHaveBeenCalled();
+    expect(recordMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a missing browser Origin before rate limiting or persistence", async () => {
+    const response = await POST(new Request("https://www.askmagicmike.com/api/events", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "user-agent": "Mozilla/5.0 Chrome/140",
+      },
+      body: JSON.stringify({ event_name: "funnel_started" }),
+    }));
+
+    expect(response.status).toBe(403);
+    expect(rateLimitMock).not.toHaveBeenCalled();
+    expect(recordMock).not.toHaveBeenCalled();
+  });
+
+  it("persists a valid anonymous funnel identity without pre-creating a canonical session", async () => {
+    const sessionId = "11111111-1111-4111-8111-111111111111";
+    const response = await POST(request({
+      event_name: "address_submitted",
+      session_id: sessionId,
+      properties: {
+        funnel_name: "home_value",
+        step_name: "address",
+        current_path: "/home-value",
+        funnel_session_id: "22222222-2222-4222-8222-222222222222",
+      },
+    }));
+
+    expect(response.status).toBe(202);
+    expect(recordMock).toHaveBeenCalledWith(expect.objectContaining({
+      eventName: "address_submitted",
+      sessionId: null,
+      funnelSessionId: sessionId,
+      leadId: null,
+    }));
+    expect(recordMock.mock.calls[0][0].properties).not.toHaveProperty("funnel_session_id");
+  });
+
+  it("does not persist a malformed funnel identifier", async () => {
+    const response = await POST(request({
+      event_name: "funnel_started",
+      session_id: "person@example.com",
+      properties: { funnel_name: "seller" },
+    }));
+
+    expect(response.status).toBe(202);
+    const event = recordMock.mock.calls[0][0] as Record<string, unknown>;
+    expect(event.sessionId).toBeNull();
+    expect(event).not.toHaveProperty("funnelSessionId");
+  });
+
+  it("accepts but does not persist automated-browser telemetry", async () => {
+    const response = await POST(request(
+      { event_name: "page_view", properties: { path: "/home-value" } },
+      "Mozilla/5.0 HeadlessChrome/140",
+    ));
+    expect(response.status).toBe(202);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: true,
+      persisted: false,
+      excluded: "automation",
+    });
+    expect(rateLimitMock).not.toHaveBeenCalled();
+    expect(recordMock).not.toHaveBeenCalled();
+  });
+
+  it("fails closed before rate limiting or persisting ordinary Preview telemetry", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const response = await POST(request({
+      event_name: "page_view",
+      properties: { path: "/ask" },
+    }));
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      persisted: false,
+      code: "preview_data_disabled",
+    });
+    expect(rateLimitMock).not.toHaveBeenCalled();
+    expect(recordMock).not.toHaveBeenCalled();
+  });
+
   it("fails truthfully when the canonical event write is unavailable", async () => {
     recordMock.mockResolvedValue(false);
     const response = await POST(request({ event_name: "page_view", properties: { path: "/" } }));
@@ -77,6 +181,19 @@ describe("POST /api/events", () => {
     expect(response.status).toBe(400);
     expect(recordMock).not.toHaveBeenCalled();
   });
+
+  it.each(["lead_created", "widget_lead_created", "lead_qualified", "appointment_requested"])(
+    "rejects browser-authored canonical outcome event %s",
+    async (eventName) => {
+      const response = await POST(request({
+        event_name: eventName,
+        session_id: "11111111-1111-4111-8111-111111111111",
+        properties: { funnel_name: "home_value" },
+      }));
+      expect(response.status).toBe(400);
+      expect(recordMock).not.toHaveBeenCalled();
+    },
+  );
 
   it("rejects an oversized event before parsing or persistence", async () => {
     const response = await POST(request({
@@ -156,7 +273,7 @@ describe("POST /api/events", () => {
     });
   });
 
-  it("rejects Web Vitals outside canonical Production or from automation", async () => {
+  it("suppresses Web Vitals in read-only Preview and excludes automation before persistence", async () => {
     vi.stubEnv("VERCEL_ENV", "preview");
     const previewResponse = await POST(request({
       event_name: "web_vital_observed",
@@ -171,7 +288,12 @@ describe("POST /api/events", () => {
         traffic_class: "public_production",
       },
     }));
-    expect(previewResponse.status).toBe(400);
+    expect(previewResponse.status).toBe(503);
+    await expect(previewResponse.json()).resolves.toMatchObject({
+      ok: false,
+      persisted: false,
+      code: "preview_data_disabled",
+    });
 
     vi.stubEnv("VERCEL_ENV", "production");
     const automationRequest = new Request("https://www.askmagicmike.com/api/events", {
@@ -196,7 +318,12 @@ describe("POST /api/events", () => {
       }),
     });
     const automationResponse = await POST(automationRequest);
-    expect(automationResponse.status).toBe(400);
+    expect(automationResponse.status).toBe(202);
+    await expect(automationResponse.json()).resolves.toMatchObject({
+      ok: true,
+      persisted: false,
+      excluded: "automation",
+    });
     expect(recordMock).not.toHaveBeenCalled();
   });
 

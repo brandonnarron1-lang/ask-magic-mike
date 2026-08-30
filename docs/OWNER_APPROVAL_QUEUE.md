@@ -1,8 +1,73 @@
 # Owner Approval Queue
 
-Updated 2026-08-24 from authenticated GitHub, Vercel, Neon, WordPress, and
+Updated 2026-08-29 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
+
+## Cumulative Phase 9 release candidate — exact gate not yet received
+
+- Draft PR [#238](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238)
+  is the byte-consolidated application candidate for the already-built Phase 9
+  stack. Exact candidate head is
+  `de67db6e1183b2a47d329d4a9a11993d48d1992a`; the pre-runner head remains
+  preserved at `rescue/amm-pr238-pre-cutover-runner-20260829-213310`.
+- One executable cutover now covers only the four reviewed additive growth
+  migrations. It requires exact Production Neon identity, source hashes,
+  compatible ledger shape, absent targets, disabled import gates, a validated
+  backup, bounded locks, one transaction, unchanged existing rows, hardened
+  postconditions, and rollback on any failure.
+- Exact-head local release, hosted CI, immutable Preview, protected no-write
+  browser, runtime-log, dependency, and secret-scan evidence are sealed on the
+  candidate head. The gate remains unconsumed and is now the only requestable
+  application release gate.
+- The only phrase that can authorize the four
+  migrations, exact PR merge, and same-commit Production deployment is:
+  `APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT`.
+- That phrase does not authorize enabling any growth import, provider access,
+  real or synthetic lead submission, email/SMS/Push, WordPress publication,
+  social/GBP/email publication, spend, DNS change, deletion, data import, or
+  NellySelly action.
+
+## Cross-domain measurement activation dependency — later, not currently requestable
+
+- Draft PR [#221](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/221)
+  is preserved component lineage now included once in cumulative PR #238. It
+  originally consolidated exact PR #212 onto exact sealed PR #220 head
+  `19689e95d824d7d06e5f3b60cd18335f53018c93`. PR #212 is closed as
+  superseded with its branch, commits, package, evidence, and rollback assets
+  preserved. The included implementation reuses
+  the existing Our Town GTM container and canonical Neon ledger with explicit basic
+  consent, advertising consent denied, private/Preview/QA exclusion, exact
+  container isolation, and the newer cumulative KPI/privacy controls.
+- No Google, Vercel environment, Production deployment setting, or WordPress
+  surface has changed. Final application head `735cc893...` passes exact Node 24
+  CI, immutable Preview, protected no-write QA, desktop/mobile visual review,
+  and runtime-log review. Read-only Preview now refuses first-party telemetry
+  writes server-side before rate limiting or repository access.
+- A follow-up live audit found the brokerage page starts GTM and its Google tag
+  before the deferred cookie-choice provider. The read-only cross-domain
+  preflight therefore returns `HOLD`. The gate is not requestable until that
+  ordering and authenticated GTM/GA4 domain/consent configuration pass.
+- Canonical bridge 1.2.0 contains the prepared, disabled-by-default repair.
+  It preserves the approved Form 3 bridge and replaces no indexed page or
+  cookie provider. Its first exact gate, after final PR/package evidence, is:
+  `APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA`.
+- That WordPress phrase authorizes backup, 1.2.0 installation, preservation of
+  current Form 3 settings, exact legacy GTM head/noscript removal, measurement
+  flag enablement, and reversible source/deny/allow/network QA only.
+- One live Production page-view row and one Production experiment-exposure
+  attempt from the earlier 2026-08-24 browser-routing error remain disclosed.
+  A separate superseded PR #221 Preview also persisted one PII-free automatic
+  homepage page-view before the new server guard. No lead or message was
+  created. Cleanup is not included in either candidate's release phrase.
+- The former PR #221 configuration/merge phrase is historical and not
+  requestable. After PR #238 is accepted and the WordPress consent-order hold
+  clears, generate a fresh configuration-only activation packet bound to the
+  deployed commit and current host settings.
+- A future configuration phrase will not authorize a lead submission,
+  email/SMS/Push, WordPress
+  edit, marketing publication, spend, DNS change, database mutation, deletion,
+  or NellySelly action.
 
 ## Completed Production release sequence
 
@@ -47,76 +112,433 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    `db13953fc5f6d24a684f66c9a1c10c6b929b72b3` was merged as
    `b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and accepted on Production
    deployment `dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. It contained no migration,
-   form submission, or message send.
+   form submission, or message send. Fresh read-only verification passes 15/15
+   funnel and 19/19 smoke checks.
+8. PR [#209](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/209)
+   — its exact combined durability gate was received; reviewed head
+   `b28b380f2cc3f9b63b2c0048b398e97a88dfee4b` was merged as
+   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and accepted on Production
+   deployment `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. The encrypted
+   Production-only limiter secret, all readiness booleans, bounded malformed
+   request, 9/9 monitor, same-commit Node 24 release gate, and clean log window
+   were verified. It contained no migration, lead, valid analytics event,
+   notification, message, WordPress, DNS, publication, spend, or NellySelly
+   action.
 
 These completed gates are exhausted and must not be reused as authority for a
 new action. None authorized a social/GBP post, email campaign, QR
 printing/distribution, consumer message, spend, DNS change, WordPress change,
 provider action, or deletion.
 
-## Atomic Production durability candidate
+## Completed Production durability release
 
-- Fresh 2026-08-23 read-only Production checks pass the public conversion
-  verifier 15/15 and smoke 19/19 with two intentional skips. The candidate
-  monitor reports 8/9 because the deployed readiness body does not prove the
-  required durable limiter contract. This is the one immediate Production
-  correction.
-- Draft PR [#209](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/209)
-  on branch `codex/phase9-controlled-release-candidate-20260823` is the sole
-  current application release vehicle. It consolidates the reviewed work from
-  PRs #202 through #208 once and binds Preview write authority to the actual
-  server-only Neon endpoint.
-- The latest branch-only security review also bounds the emergency memory
-  limiter and isolates fallback counters by route. The pre-hardening head is
-  preserved at
-  `rescue/amm-pr209-pre-memory-fallback-hardening-20260824-0333`. Treat the
-  current GitHub PR head—not a commit literal embedded in this mutable file—as
-  the release candidate. Immediately before using the gate, require that head
-  to remain Draft, cleanly mergeable against the recorded Production base, and
-  green in the full Node 24 release gate, exact Vercel Preview, protected
-  no-write acceptance, Widget E2E, dependency audit, secret scan, and current
-  Production preflight. If the head moves, every prior exact-head seal becomes
-  historical evidence and the complete proof must be repeated.
-- The exact pre-reconciliation application/security head
-  `b4e76f795d74d6a7c0947b16150cdb9c6c63e23a` passed 228 files / 3,054 tests,
-  strict typecheck, ESLint, optimized build, 83-route proof, 14/14 safety,
-  isolation, dependency and history-secret scans, exact Vercel Preview, 17
-  no-write passes with six intentional write skips, Widget 2/2, and categorical
-  exact Preview endpoint match/Production non-match. The final PR head must
-  repeat exact-head proof after this authority reconciliation.
-- Optional isolated synthetic Preview mutation and cleanup requires:
-  `APPROVE PHASE 9 NEON-ATTESTED CONTROLLED PREVIEW MUTATION QA`.
-- The only combined Production configuration/application release phrase is:
-  `APPROVE PHASE 9 DURABLE RATE-LIMIT READINESS SECRET ENTRY, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
-- The Production phrase authorizes one encrypted Production-only durability
-  secret, the exact reviewed PR #209 merge/deploy, and one malformed non-lead
-  request that writes only an HMAC-pseudonymized rate-limit bucket before
-  returning HTTP 400. It does not authorize a lead, analytics event, email,
-  SMS, Push, WordPress change, publication, spend, DNS change, migration,
-  deletion, or NellySelly action.
-- Stale encrypted Upstash variable names remain ignored. Their deletion is not
-  included in this gate.
+- PR #209 is merged, accepted, and documented in
+  `docs/phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md`.
+- Its exact gate is consumed and cannot authorize any later candidate, secret,
+  database action, message, publication, or cleanup.
+- Stale encrypted Upstash variable names remain ignored. Their deletion was not
+  included and remains a separate action.
+
+## Preserved component train — consolidated into PR #238
+
+The entries below preserve the exact PR #210–#237 implementation lineage that
+is included once in PR #238. They are historical evidence, not a sequential
+Production queue. Their individual approval phrases are retained only to prove
+what each component formerly required; none is currently requestable or may be
+replayed. Use only the PR #238 cumulative gate above.
+
+Branches, rescue refs, checks, and evidence remain recoverable. Do not merge an
+individual component PR, close/delete its lineage as part of this release, or
+treat a component phrase as authority for any action.
+
+PR #237, the hash-pinned WordPress homepage CTA restoration packet, is also
+included in the PR #238 tree. Its application files do not publish WordPress;
+the live plugin save remains a separate exact WordPress gate.
+
+1. Draft PR [#210](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/210)
+   consolidates `/value` and `/we-buy-houses` onto the canonical conversion
+   routes with permanent, query-preserving redirects and a matching Production
+   monitor contract. It has been merged forward onto accepted PR #209 `main`
+   `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` without force-pushing; the
+   immediately prior PR #210 head is preserved at
+   `rescue/amm-pr210-pre-main-cutover-20260828-210054`.
+   Fresh exact-head proof remains mandatory before requesting
+   `APPROVE PHASE 9 CANONICAL ALIAS CONSOLIDATION MERGE AND PRODUCTION DEPLOYMENT`.
+2. Draft PR [#211](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/211)
+   retains the shared skip-to-content path and clearer required Ask intake.
+   It is synchronized without force push with exact sealed PR #210 head
+   `93af400494a94a8d8aedb09ece16bbff4dfd214b`; the immediately prior PR #211
+   head is preserved at
+   `rescue/amm-pr211-pre-pr210-exact-seal-20260828-213129`. Fresh exact-head
+   proof remains mandatory, and it later requires
+   `APPROVE PHASE 9 ASK CONVERSION ACCESSIBILITY MERGE AND PRODUCTION DEPLOYMENT`
+   after a fresh exact-main refresh and proof.
+3. Draft PR [#213](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/213)
+   reuses the shared Black Diamond public header to restore complete mobile
+   Home Value / Sell / Buy / Plan / Ask navigation, current-route semantics,
+   and keyboard-safe dismissal without changing a funnel, form, route, API,
+   database, or visual system. It is synchronized with exact clean PR #211 head
+   `c5700eda5e32ff6ead9a985c86b811a3c46e1e66`; the immediately prior PR #213
+   head is preserved at
+   `rescue/amm-pr213-pre-pr211-exact-seal-20260828-215231`. It must
+   remain after #211 in release order. After all predecessors release, refresh
+   onto exact `main`, repeat full exact-head proof, then require
+   `APPROVE PHASE 9 RESPONSIVE CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`.
+4. Draft PR [#214](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/214)
+   reuses the canonical notification renderer, approved Mike/Our Town assets,
+   urgency selector, and protected Message Review Studio for
+   `lead_alert_email_v3`. It is synchronized without force push with exact
+   sealed Draft PR #213 head
+   `d2a1bf01d0962e07dd1e460acd4c295e145cf6a8`; the immediately prior PR #214
+   head is preserved at
+   `rescue/amm-pr214-pre-pr213-exact-seal-20260828-222353`. It must
+   remain after #213 in release order. After all predecessors release, refresh
+   onto exact `main`, repeat full exact-head and no-send visual proof, then require
+   `APPROVE PHASE 9 LEAD-ALERT BRAND IDENTITY V3 MERGE AND PRODUCTION DEPLOYMENT`.
+
+5. Draft PR [#215](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/215)
+   reuses exact sealed PR #214 head
+   `81a2c7544318d630437ed3e86cbea029c5c9b57d` and moves durable capture to the
+   first valid contact step, with email required on the current UI and phone
+   optional. Its immediately prior head is preserved at
+   `rescue/amm-pr215-pre-pr214-exact-seal-20260828-224229`. It adds
+   no schema or provider and applies one shared contact-validation contract at
+   the browser and API boundaries. Exact parent-refresh application head
+   `eff8fc04449fab4fd34cd0fb69735e6787d0b382` passed local, CI, immutable
+   Preview, protected no-write, intercepted-browser, responsive, and runtime-log
+   acceptance. The evidence-only seal must repeat exact-head proof. After PR
+   #214 releases, refresh it onto exact `main`, repeat complete proof, then require
+   `APPROVE PHASE 9 HOME-VALUE COMPLETION INTEGRITY MERGE AND PRODUCTION DEPLOYMENT`.
+
+6. Draft PR [#216](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/216)
+   reuses exact sealed PR #215 head
+   `c53cec6043525b593b254c457efdbbe5a29c0520` and the existing
+   submission/idempotency UUID, canonical event route, Neon event ledger, and
+   atomic lead command. The immediately prior PR #216 head
+   `a6098ab4ee7a13d024bafc08264628e2691a8e06` is preserved at
+   `rescue/amm-pr216-pre-pr215-exact-seal-20260828-231335`; the
+   earlier pre-refresh head remains at
+   `rescue/amm-pr216-pre-pr215-seal-sync-20260824-1353`. Initial code-bearing head
+   `0c45a33b706d7e8a02501ccf83baf24a83ec107d` links
+   privacy-minimized funnel stages without pre-creating `sessions`, closes the
+   first-interaction Home Value identity edge, and rejects browser-authored
+   lead/widget creation, qualification, appointment-request, and notification
+   outcomes. A later log audit invalidated older protected runs as no-write
+   proof because widget telemetry reached Preview after only `/api/leads` was
+   intercepted. Prior head `727c534f6f77b8a7acfe51eba361da57e6671cb4`
+   is preserved at
+   `rescue/amm-pr216-pre-widget-no-write-proof-fix-20260824-1432`; repair head
+   `90108d8b386a264ae8e536e6503043f79f7a14ae` gives both browser suites one
+   fail-closed mutation boundary. It has no migration, provider, cookie, form,
+   endpoint, or Production configuration change. Treat the current GitHub PR
+   head—not the historical code-bearing heads named here—as the final release
+   candidate; all earlier local, CI, Preview, browser, and runtime proof must be
+   repeated on that exact head. Exact sealed head
+   `211485df28fc818ab783ed357df8486f1460d5e2` passed complete local, CI,
+   immutable Preview, protected no-write, six-scenario browser, visual, and
+   runtime-log acceptance. Release Gate `33231948183` and exact-branch
+   protected run `33232071508` are the final PR #216 evidence authority.
+   After PR #215 releases, refresh it onto exact `main`, repeat complete
+   exact-head and write-intercepted Preview proof, then require
+   `APPROVE PHASE 9 FUNNEL EVENT IDENTITY INTEGRITY MERGE AND PRODUCTION DEPLOYMENT`.
+
+Draft PRs #217 through #226 continue the same ordered stack after #216.
+PR #221 is the sole cross-domain candidate; PR #225 is the current
+evidence-first application tail; PR #226 is its documentation/test-only
+authority cleanup. None may leapfrog a predecessor. Each must be refreshed
+onto the exact newly accepted base, re-proved, and receive its own documented
+gate before merge or Production.
+
+7. Draft PR [#217](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/217)
+   reuses exact sealed PR #216 head
+   `211485df28fc818ab783ed357df8486f1460d5e2`, the existing vendor-neutral
+   normalizer, and the authenticated Growth Intelligence surface. Its former
+   head `d04984b4d162f13c79af261beb55a82f15a86b80` is preserved at
+   `rescue/amm-pr217-pre-pr216-exact-seal-20260828-234940`. It adds only a
+   fixed-profile, `growth:manage`-protected synthetic contract lab for Zillow,
+   Follow Up Boss, Meta, and Google; it accepts no caller-supplied lead payload,
+   calls no provider, writes no database, and creates no lead or message. Prior
+   proof is historical until repeated on the current GitHub PR head. After PR
+   #216 releases, refresh it onto exact `main`, repeat complete exact-head and
+   protected no-write proof, then require
+   `APPROVE PHASE 9 VENDOR INGRESS CONTRACT LAB MERGE AND PRODUCTION DEPLOYMENT`.
+
+8. Draft PR [#218](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/218)
+   reuses exact sealed PR #217 head
+   `8a6b92039bb82c1158db514c2c2f064ceb9cbbcf`, the canonical growth schema,
+   Growth Command Center, `growth:manage` RBAC, and immutable audit ledger.
+   Its former head `cd087e5c5c0fda82a3175b86b550c966120eb2ab` is
+   preserved at
+   `rescue/amm-pr218-pre-pr217-exact-seal-20260829-001928`. It adds one
+   safe-disabled, bounded, audited spend-ingress contract and no parallel
+   database, dashboard, campaign manager, provider adapter, CRM, or analytics
+   ledger. Former proof is historical until repeated on the current GitHub PR
+   head. After PR #217 releases, refresh it onto exact `main`, apply the
+   reviewed additive migration, repeat complete exact-head and protected
+   no-commit proof, then require
+   `APPROVE PHASE 9 MARKETING SPEND INGRESS MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT`.
+   That gate keeps `GROWTH_SPEND_IMPORT_ENABLED=false`; importing one reviewed
+   report requires a later report-specific approval.
+
+9. Draft PR [#219](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/219)
+   reuses exact sealed PR #218 head
+   `f065d8801bec295c99185d846ff4bc38de2a0a6f`, the existing Growth Command
+   Center, `market_signals`, advisory `market_opportunities`, shared bounded
+   ingress primitives, `growth:manage` RBAC, and immutable audit ledger. Its
+   former head `5486bed20272d2a661bc28a0e3a4a4576b2cb11f` is preserved at
+   `rescue/amm-pr219-pre-pr218-exact-seal-20260829-004949`. It adds one
+   privacy-minimized, safe-disabled Search Console **Pages** report contract;
+   it stores no query text or raw CSV, calls no Google/provider API, and cannot
+   publish a page, create a lead, send a message, or cross into NellySelly.
+   Former proof is historical until repeated on the current GitHub PR head.
+   After PR #218 releases, refresh it onto exact `main`, apply the reviewed
+   additive migration, repeat complete exact-head and protected no-commit
+   proof, then require
+   `APPROVE PHASE 9 ORGANIC SEARCH INGRESS MIGRATION, PR 219 MERGE, AND PRODUCTION DEPLOYMENT`.
+   That gate keeps `GROWTH_SEARCH_IMPORT_ENABLED=false`; importing one exact
+   reviewed report requires a later report-specific approval.
+
+10. Draft PR [#220](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/220)
+   reuses exact sealed PR #219 head
+   `b628fc00fc6b03d89871c65d884fe649db025968`, the existing Growth Command
+   Center, shared bounded ingress transport, `market_signals`, advisory
+   `market_opportunities`, `growth:manage` RBAC, exact Neon endpoint guards,
+   and immutable audit ledger. Its former head
+   `5e605ca8bd8b313f7a4c29b2d1220c7c40a477a3` is preserved at
+   `rescue/amm-pr220-pre-pr219-exact-seal-20260829-012049`. It adds one
+   privacy-minimized, safe-disabled aggregate Google Business Profile
+   performance-report contract; it retains no raw CSV, search terms, provider
+   location IDs, credentials, or consumer PII, calls no Google/provider API,
+   and cannot edit a profile, publish content, create a lead, send a message,
+   or cross into NellySelly. Former proof is historical until repeated on the
+   current GitHub PR head. After PR #219 releases, refresh it onto exact
+   `main`, apply the reviewed additive migration, repeat complete exact-head
+   and protected no-commit proof, then require
+   `APPROVE PHASE 9 LOCAL PROFILE PERFORMANCE INGRESS PRODUCTION MIGRATION, MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
+   That gate keeps `GROWTH_LOCAL_PROFILE_IMPORT_ENABLED=false`; enabling real
+   commit authority requires the separate
+   `APPROVE LOCAL PROFILE PERFORMANCE IMPORT GATE ENABLEMENT AND SAME-COMMIT PRODUCTION REDEPLOYMENT`
+   gate, and each report still requires its reviewed reference, exact
+   fingerprint, and authenticated typed confirmation.
+
+11. Draft PR [#221](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/221)
+   reuses and consolidates exact PR #212 onto exact sealed PR #220 head
+   `19689e95d824d7d06e5f3b60cd18335f53018c93`. Its former head
+   `65eb466a2e7991364efe2db78044006ebcdf8b5d` is preserved at
+   `rescue/amm-pr221-pre-pr220-exact-seal-20260829-020318`. Its final sealed
+   head is `61e152cb7ce03fd1904a06f30435dbe7ef36c4e1`. It preserves the canonical
+   first-party ledger, applies exact Production-only container isolation,
+   explicit basic consent, advertising denial, public-route allowlists, PII
+   minimization, Preview/QA/automation exclusion, and the independently
+   disabled WordPress bridge 1.2.0. It remains a HOLD candidate pending fresh
+   exact-head release/Preview proof and the separately approved WordPress
+   consent-order remediation. Only after those controls pass may it request
+   `APPROVE PHASE 9 CROSS-DOMAIN MEASUREMENT CONFIGURATION, ENVIRONMENT ENTRY, MERGE, AND PRODUCTION DEPLOYMENT`.
+
+12. Draft PR [#222](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/222)
+   reuses exact sealed PR #221 head
+   `61e152cb7ce03fd1904a06f30435dbe7ef36c4e1`, the authenticated Growth
+   Command Center, and the canonical Search Console/Business Profile evidence
+   ledgers. Its former head `08e0d345dd52a01d5da9a42b10dde982cbcce606`
+   is preserved at
+   `rescue/amm-pr222-pre-pr221-exact-seal-20260829-031605`. It adds bounded,
+   deterministic, read-only local-demand decision packets and one forward-only
+   guard against new or revised canonical GBP signals claiming Google's
+   retired `business_conversations` metric. It adds no provider call, AI
+   publisher, message sender, profile mutation, lead path, database silo, or
+   NellySelly dependency. After PR #221 and all earlier candidates release,
+   refresh it onto exact `main`, repeat the migration rehearsal and complete
+   exact-head/protected no-write proof, then require
+   `APPROVE PHASE 9 LOCAL-DEMAND METRIC TRUTH GUARD MIGRATION, PR 222 MERGE, AND SAME-COMMIT PRODUCTION DEPLOYMENT`.
+
+13. Draft PR [#223](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/223)
+   reuses exact sealed PR #222 head
+   `c6ff9157e66705128a283b98096f74ca8247cdab`, the canonical Growth Command
+   Center, and existing lead/outcome/spend evidence. Original head
+   `294e08fc8524e515364c7a7bd49cfe8413d3d08c` remains preserved at
+   `rescue/amm-pr223-pre-pr222-exact-seal-20260829-040442`; current exact sealed
+   head is `1d893f4c23ca53a1b852a1953b953b40e6f997f3`. It treats referral-paid
+   amounts as costs, withholds ROAS/contribution when evidence is incomplete,
+   and keeps the aggregate Growth view read-only. After PR #222 releases,
+   refresh it onto exact `main`, repeat complete exact-head proof, then require
+   `APPROVE PHASE 9 CHANNEL ECONOMICS TRUTH MERGE AND PRODUCTION DEPLOYMENT`.
+
+14. Draft PR [#224](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/224)
+   reuses exact sealed PR #223 head
+   `1d893f4c23ca53a1b852a1953b953b40e6f997f3` and the existing Seller/Buyer
+   canonical lead path. Former head
+   `5c75b8f919442c05b607eb666c5595023057d94d` remains preserved at
+   `rescue/amm-pr224-pre-pr223-accessibility-seal-20260829-1210`; current exact
+   sealed head is `2effb45e2a324c25875dcf7d24019eae8dfdad38`. It preserves unstated
+   consumer intent as unknown and adds no schema, provider, form, router, or
+   lead silo. After PR #223 releases, refresh it onto exact `main`, repeat
+   complete exact-head proof, then require
+   `APPROVE PHASE 9 LEAD INTENT DEFAULT TRUTH MERGE AND PRODUCTION DEPLOYMENT`.
+
+15. Draft PR [#225](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/225)
+   reuses exact sealed PR #224 head
+   `2effb45e2a324c25875dcf7d24019eae8dfdad38` and the existing protected
+   Growth Command Center. Former head
+   `60599703cf8ac5e65794b696aefaebc6353bbdf0` remains preserved at
+   `rescue/amm-pr225-pre-pr224-parent-refresh-20260829-1224`; current exact
+   sealed head is `f33c87f27bfcbbcad3b5566aefd80909d25303bb`. It adds a read-only
+   42-contract baseline/target-readiness layer and deliberately excludes PR
+   #187's target writer, page, and migration. After PR #224 releases, refresh
+   it onto exact `main`, repeat complete exact-head proof, then require
+   `APPROVE PHASE 9 BASELINE AND TARGET READINESS MERGE AND PRODUCTION DEPLOYMENT`.
+
+16. Draft PR [#226](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/226)
+   is a documentation/test-only authority cleanup on exact sealed PR #225 head
+   `f33c87f27bfcbbcad3b5566aefd80909d25303bb`. Former head
+   `ae666aa6c31ed3726155e110f065b64d4b445040` remains preserved at
+   `rescue/amm-pr226-pre-pr225-parent-refresh-20260829-1249`; parent
+   reconciliation commit is
+   `954d66cfe629a9d14a73cd1d405ff9535b9de28b`. It records closed PRs #187 and
+   #212 as preserved evidence and removes their parallel release authority. It
+   adds no application, migration, writer, provider, lead/message, Production,
+   or NellySelly path. The candidate is always the current GitHub PR head; if
+   the head moves, exact-head proof must be repeated. After PR #225 releases,
+   its narrow gate is
+   `APPROVE PHASE 9 RELEASE AUTHORITY DEDUPLICATION MERGE`.
+
+17. Draft PR [#227](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/227)
+   reuses the exact PR #226 design and metadata system to add one identity-safe
+   1200×630 social preview. Its sealed head is
+   `ee1dd462665e423c17a69b6ab7d1c3a7a70a1409`; it adds no publisher, message,
+   lead path, database, or provider. After every predecessor releases and the
+   candidate is refreshed and reverified, its narrow gate is
+   `APPROVE PHASE 9 IDENTITY-SAFE WIDE SOCIAL PREVIEW MERGE`.
+
+18. Draft PR [#228](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/228)
+   reuses the existing homepage, canonical `/ask` funnel, Web Share capability
+   detection, Clipboard fallback, and privacy-safe event contract. Its sealed
+   head is `3c01eeb2dc133d6463d2ce19904ac3a08f56284c`; it creates no sender,
+   publisher, lead store, or provider. After PR #227 and every predecessor are
+   accepted and this candidate is refreshed and reverified, its narrow gate is
+   `APPROVE PHASE 9 PRIVACY-SAFE PUBLIC REFERRAL HANDOFF MERGE`.
+
+19. Draft PR [#229](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/229)
+   records the exact Our Town Facebook-crawler Apache diagnosis and bounded
+   operator guidance. Its sealed head is
+   `ab24fc0ef2eef10f9b368d57909d899dd053d204`. The separate account-level
+   override test was consumed, failed acceptance, and was rolled back
+   byte-for-byte; it is not reusable authority. The application candidate's
+   future narrow gate is
+   `APPROVE PHASE 9 OTP FACEBOOK CRAWLER DIAGNOSIS AND OPERATOR GUIDANCE MERGE`;
+   any root/WHM host action remains separately scoped.
+
+20. Draft PR [#230](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/230)
+   adds one read-only capability/authority ledger inside the existing protected
+   Growth Command Center. Its exact sealed head is
+   `680e257d8e35b2033638e84b09c742608268fc20`; it adds no route, migration,
+   provider, secret, public surface, or mutation path. It cannot leapfrog PR
+   #210 or any predecessor. After the ordered refresh and complete exact-head
+   proof, its future narrow gate is
+   `APPROVE PHASE 9 CAPABILITY AUTHORITY LEDGER MERGE AND PRODUCTION DEPLOYMENT`.
+
+21. Draft PR [#231](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/231)
+   reuses the protected organic-search workbench and exact sealed PR #230 head
+   `680e257d8e35b2033638e84b09c742608268fc20` to add deterministic,
+   internal-review-only page experiment briefs. The pre-refresh head is
+   preserved at
+   `rescue/amm-pr231-pre-pr230-parent-refresh-20260829-150534`; the current
+   exact candidate SHA and immutable proof are pinned in the PR seal. The
+   briefs do not create public copy or authorize a WordPress edit. Only after
+   PR #230 and every predecessor are accepted and this candidate is refreshed
+   and reverified may it request
+   `APPROVE PHASE 9 ORGANIC PAGE EXPERIMENT BRIEFS MERGE AND PRODUCTION DEPLOYMENT`.
+
+22. Draft PR [#232](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/232)
+   reuses the canonical protected Distribution Command and exact sealed PR
+   #231 head `16a633fc5d77ed7c911e9a276f6a1f561ad63fda` to add the missing
+   720x720 Google Business Profile format without creating a second creative
+   studio or publisher. Its exact sealed head is
+   `2687f98a26cb05c309136cacc136890f16d15ea8`. The application release cannot
+   publish to Google and cannot leapfrog any predecessor. Only after PR #231
+   and every predecessor are accepted, the candidate is refreshed, and its
+   complete exact-head proof is repeated may it request
+   `APPROVE PHASE 9 GOOGLE BUSINESS PROFILE SQUARE ASSETS MERGE AND PRODUCTION DEPLOYMENT`.
+
+23. Draft PR [#233](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/233)
+   repairs the review planner's inherited homepage Open Graph URL by reusing
+   the shared public metadata contract on exact sealed PR #232. Runtime-fix
+   head `90534b548244ce9aae38cc7f16dea3745d0cc5ee` remains preserved at
+   `rescue/amm-pr233-pre-authority-reconciliation-20260829-2105`; the final
+   exact candidate SHA and repeated immutable proof are pinned in the PR seal.
+   It adds no route, provider, migration, lead path, publisher, or external
+   action. Only after PR #232 and every predecessor are accepted, this
+   candidate is refreshed, and exact-head proof is repeated may it request
+   `APPROVE PHASE 9 REVIEW PLANNER SOCIAL IDENTITY MERGE AND PRODUCTION DEPLOYMENT`.
+
+24. Draft PR [#234](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/234)
+   reuses the canonical Neon notification outbox and protected Lead Center to
+   replace recent-sample KPI ambiguity with exact live-only operations truth.
+   Implementation head `ba56f7b3ac98912c206eeb56fde4b004be78ea64`
+   is stacked on exact sealed PR #233 head
+   `ff67874eacdb44d7653c964ce395ae7bafd54910`, preserved at
+   `rescue/amm-pr234-base-pr233-20260829-171619`. It adds no migration, queue,
+   provider, database, public route, bulk retry, or automatic send. Only after
+   PR #233 and every predecessor are accepted, this candidate is refreshed,
+   and complete exact-head proof is repeated may it request
+   `APPROVE PHASE 9 NOTIFICATION OPERATIONS TRUTH MERGE AND PRODUCTION DEPLOYMENT`.
+
+25. Draft PR [#235](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/235)
+   reuses the canonical `/sell` funnel and protected WordPress manifest route
+   to expose a fail-closed decision packet for the live `/we-buy-homes/` and
+   `/we-buy-houses/` conflict. Its exact sealed head is
+   `b2d73a770f952ece5c89ec1741b09399fe632b21` on exact PR #234 head
+   `5ff3d1079f50e5f05c7000edda75aacefa4a31c5`. It creates no funnel, form,
+   publisher, migration, provider, or mutation path. It remains ordered after
+   PR #234 and every predecessor; its final gate is pinned in its PR seal.
+
+26. Draft PR [#236](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/236)
+   reuses exact sealed PR #235 head
+   `b2d73a770f952ece5c89ec1741b09399fe632b21` and upgrades the existing
+   protected WordPress readiness contract so hidden markup cannot be reported
+   as an activatable placement. Code-bearing head
+   `d432e90618dbe26b6aa66f50b9f39d545f81b2de` adds no migration, publisher,
+   WordPress write, lead path, provider, or external action. After PR #235 and
+   every predecessor release, refresh and repeat exact-head proof, then require
+   `APPROVE PHASE 9 WORDPRESS CTA VISIBILITY TRUTH MERGE AND PRODUCTION DEPLOYMENT`.
+   That gate cannot publish WordPress.
+
+The historical shorter conversion-identity phrase released PR #195 and is
+exhausted; it cannot authorize PR #213 or any later candidate.
+
+None of these later phrases can authorize another PR, secret, database write,
+form submission, notification, WordPress/DNS change, publication, spend,
+deletion, or NellySelly action.
 
 ## Superseded and deferred release records
 
-- PRs #202 through #208 remain open or preserved only as incremental review
+- PRs #202 through #208 remain preserved only as incremental review
   evidence. PR #209 contains their reviewed cumulative application work once.
   They have no independent release authority and may not be merged or deployed
   under an old gate.
 - PRs #197, #198, #200, and #201 are closed with branches preserved. PR #199's
   unique field-experience work is included once in PR #209 through its reviewed
   current-stack successor.
-- PR #187's KPI-target migration remains deferred because Production has no
-  eligible live-demand baseline. It is not part of PR #209.
+- PR #187 is closed as superseded by PR #225, with its branch, commits,
+  migration, tests, and evidence preserved. Its KPI-target migration and
+  parallel target writer remain excluded because Production has no eligible
+  live-demand baseline.
+- PR #212 is closed as superseded by its exact descendant PR #221. Its branch,
+  consent repair package, evidence, and rollback materials remain preserved;
+  it has no independent release authority.
 - PR #182 and historical PR #179 are superseded by already released current-
   stack work. Physical Web Push enrollment and a `[TEST]` receipt remain
   separate per-person actions.
 - PRs #92 and #119 through #121 remain archive-after-review history, not a
   parallel Production release plan.
 
-The first later WordPress mutation remains exactly one homepage href and still
-requires `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`
-after a fresh matching manifest and verified page-149 rollback.
+The former homepage href-only mutation is superseded while the public
+`.amm-cta` component remains hidden by `display:none !important`. The corrected
+manifest returns `hidden_target` and does not issue publication readiness. A
+new exact WordPress gate can be generated only after one visible placement and
+page-149 rollback are reviewed. The application-only visibility-truth candidate
+will later use
+`APPROVE PHASE 9 WORDPRESS CTA VISIBILITY TRUTH MERGE AND PRODUCTION DEPLOYMENT`
+when the ordered PR queue reaches it; that phrase cannot publish WordPress.
 
 ## People and brokerage decisions
 
@@ -135,9 +557,10 @@ after a fresh matching manifest and verified page-149 rollback.
 
 ## Infrastructure and publication gates
 
-1. Hosting operator: identify the exact ModSecurity rule blocking the Facebook
-   crawler on selected WordPress URLs before approving one narrow GET/HEAD
-   exception. Do not weaken global bot protection.
+1. Hosting operator: apply the prepared per-vhost/account override for the
+   exact Apache `facebookexternalhit -> bad_bots` classification, limited to
+   GET/HEAD and four public paths. Do not edit the generated global include or
+   weaken global bot protection. See `FACEBOOK_CRAWLER_FIREWALL_CHANGE.md`.
 2. DNS/Vercel owner: approve attachment of `hub.ourtownproperties.com` and the
    exact Vercel-provided CNAME. Canonical `/admin` remains available meanwhile.
 3. Owner: approve each exact internal test send, consumer acknowledgment,

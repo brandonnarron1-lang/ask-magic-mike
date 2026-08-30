@@ -67,6 +67,20 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
+  async redirects() {
+    return [
+      {
+        source: "/value",
+        destination: "/home-value",
+        permanent: true,
+      },
+      {
+        source: "/we-buy-houses",
+        destination: "/sell",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

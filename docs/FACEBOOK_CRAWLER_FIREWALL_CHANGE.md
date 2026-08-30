@@ -1,35 +1,107 @@
-# Facebook Crawler Firewall Change Sheet
+# Facebook Crawler Apache Change Sheet
 
-Status: **NOT APPLIED - EXACT HOST RULE ID REQUIRED**.
+Status: **ACCOUNT-LEVEL TEST COMPLETED AND ROLLED BACK — ROOT/WHM HOST-LEVEL
+CHANGE STILL REQUIRED**.
 
-## Hosting-operator action
+## Exact cause
 
-In the Our Town Properties hosting ModSecurity audit log, reproduce one blocked
-`HEAD` request using `facebookexternalhit/1.1`, capture the exact managed-rule
-ID, and suppress only that rule when all of these conditions are true:
+The server-global Apache include classifies `facebookexternalhit` as
+`bad_bots`, then denies that environment class with `Require not env bad_bots`.
+The relevant directives are lines 11 and 24 of
+`/etc/apache2/conf.d/includes/pre_virtualhost_global.conf` (mirrored under
+`/usr/local/apache/conf/includes/`).
 
+This is an Apache `authz_core` denial. It is not a ModSecurity transaction and
+does not have a ModSecurity rule ID.
+
+## Account-level test result
+
+The exact test gate was consumed on 2026-08-28. A byte-backed-up, account-root
+`.htaccess` implementation of the same bounded expression parsed successfully
+but did not supersede the earlier server-global authorization decision. The two
+HTML pages remained 403, so the original `.htaccess` was restored immediately
+and its SHA-256 matched the retained backup. The supported userdata include is
+root-owned. Do not repeat the `.htaccess` workaround.
+
+Evidence:
+[`phase9/OTP_FACEBOOK_CRAWLER_ACCOUNT_OVERRIDE_TEST_2026-08-28.md`](./phase9/OTP_FACEBOOK_CRAWLER_ACCOUNT_OVERRIDE_TEST_2026-08-28.md).
+
+## Preferred hosting-operator action
+
+Use the host's managed vhost/account include mechanism to unset `bad_bots`
+only when every condition below is true:
+
+- host is `ourtownproperties.com` or `www.ourtownproperties.com`;
 - method is `GET` or `HEAD`;
-- verified Meta crawler condition follows the host's supported IP/rDNS
-  validation procedure; and
+- user agent begins with `facebookexternalhit/`; and
 - request path is exactly one of:
   - `/ask-mike/`
   - `/agents/mike-eatmon/`
   - `/wp-content/plugins/ask-magic-mike-lead-ops-social-upgrade/assets/social/02_open_graph_card_1200x630_safe_zone.jpg`
   - `/wp-content/uploads/amm_og_card_1200x630.jpg`
 
-Do not exempt `/wp-admin`, `/wp-login.php`, `/wp-json`, `admin-ajax.php`, XML-RPC,
-form submissions, arbitrary paths, arbitrary methods, or a caller that merely
-spoofs the user-agent string. Do not disable ModSecurity for the domain.
+Apache 2.4's supported `SetEnvIfExpr` syntax permits a later matching directive
+to unset an environment variable with `!bad_bots`. The hosting operator must
+confirm include order on this cPanel build and run `apachectl configtest`
+before a graceful reload. A representative operator-reviewed expression is:
+
+```apache
+SetEnvIfExpr "tolower(req_novary('Host')) =~ m#^(?:www\.)?ourtownproperties\.com(?::[0-9]+)?$# && tolower(req_novary('User-Agent')) =~ m#^facebookexternalhit/# && %{REQUEST_METHOD} =~ m#^(GET|HEAD)$# && %{REQUEST_URI} =~ m#^/(?:ask-mike/?|agents/mike-eatmon/?|wp-content/plugins/ask-magic-mike-lead-ops-social-upgrade/assets/social/02_open_graph_card_1200x630_safe_zone\.jpg|wp-content/uploads/amm_og_card_1200x630\.jpg)$#" !bad_bots
+```
+
+This snippet is a change specification, not a command to paste blindly. The
+host must place it in the supported per-account/per-vhost include after the
+global classifier and before authorization is evaluated. The expression keeps
+the hostname constraint explicit even inside a vhost include and uses
+`req_novary` so this access-control check does not add `Host` or `User-Agent`
+to the response's `Vary` header.
+
+## Prohibited shortcuts
+
+- Do not disable a firewall, ModSecurity, or the entire `bad_bots` policy.
+- Do not edit a cPanel-generated include directly.
+- Do not exempt arbitrary paths, methods, hosts, or all bots.
+- Do not exempt `/wp-admin`, `/wp-login.php`, `/wp-json`, `admin-ajax.php`,
+  XML-RPC, form submissions, or any REST write.
+- Do not treat user-agent text as proof that the caller is Meta. The bounded
+  path/method scope is required even if the host cannot perform supported
+  source verification.
+
+The hosting operator may instead remove the global `facebookexternalhit`
+classification only if it owns that server-wide policy and deliberately wants
+the result for every virtual host. That broader decision is outside this
+project's authority.
 
 ## Acceptance
 
-After the host change, run `pnpm run amm:verify:social-preview` and the focused
-matrix documented in `SOCIAL_PREVIEW_ACCEPTANCE_PHASE3.md`. Target: 42/42 in the
-standard matrix; public pages and images return 200 to the validated crawler;
-admin, login, REST writes, and form-submit routes remain outside the exception.
+1. Run `pnpm run amm:verify:social-preview`; require 42/42.
+2. Verify all four allowlisted paths return 200 for `GET` and `HEAD` with the
+   Facebook crawler user agent.
+3. Verify a non-allowlisted public path with the same spoofable user agent
+   remains denied under the host's current policy.
+4. Verify `/wp-login.php`, `/wp-admin/`, `/wp-json`, XML-RPC, form submits, and
+   REST writes receive the same protection as before.
+5. Verify normal browsers and the already-passing LinkedIn, X, Slack, and
+   Discord crawlers remain unchanged.
+6. Use Meta's Sharing Debugger to request a fresh scrape and confirm the title,
+   description, and image render correctly.
+7. Inspect Apache error/access logs for the exact test window; no unrelated
+   authorization behavior may change.
 
 ## Rollback
 
-Remove only the rule-ID/path/method exception, leave the managed ruleset enabled,
-purge only the affected public-page/image cache if the host requires it, and
-rerun the matrix. AskMagicMike.com social links remain the safe fallback.
+Remove only the new per-vhost/account override, run `apachectl configtest`,
+gracefully reload Apache through the host's supported process, and rerun the
+same matrix. Do not alter WordPress or Ask Magic Mike application code for this
+rollback.
+
+## Approval status
+
+The exact account-level test approval was received and consumed:
+
+`APPROVE NARROW OTP FACEBOOK CRAWLER APACHE OVERRIDE TEST`
+
+That test is complete and rolled back. It must not be shown as unconsumed or
+used to justify a broader exception. The reviewed root/WHM action remains
+unexecuted because the cPanel account cannot write the supported include or
+reload Apache. No hosting ticket was submitted.

@@ -1,6 +1,6 @@
 # Production Release and Go-Live Runbook
 
-Updated 2026-08-23. The public funnel is live. Use this runbook for incremental,
+Updated 2026-08-28. The public funnel is live. Use this runbook for incremental,
 reversible releases and controlled owned-traffic activation.
 
 ## Before merge
@@ -56,18 +56,17 @@ When the change touches capture, routing, email, push, SMS, or sequences:
 5. Never contact a genuine WordPress-only entry whose purpose or consent is
    unclear; preserve it for BIC review.
 
-## Durable rate-limit readiness release
+## Completed durable rate-limit readiness release
 
-For PR #209, add only the dedicated 32-or-more-character
-`RATE_LIMIT_HASH_SECRET` through the Ask Magic Mike Vercel Production secret
-interface under its exact combined gate. Never display, copy into chat, or
-persist the value in a shell argument or file. The old immutable deployment
-does not gain the new value; only a subsequent build does.
+PR #209 is accepted at merge
+`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and Production deployment
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Its dedicated Production secret, readiness
+booleans, bounded malformed request, 9/9 monitor, and log window passed. The
+exact gate is exhausted. See
+`docs/phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md`.
 
-Before requesting or using that gate, run the no-write operator rehearsal from
-the exact candidate head. It resolves the live PR/Vercel Preview itself and
-requires an existing checkout linked to the canonical Vercel project so it
-cannot auto-create a helper project:
+The following command remains historical/read-only evidence and rollback
+diagnostics. It cannot authorize or repeat the accepted release:
 
 ```text
 pnpm run phase9:durable-rate-limit:readiness -- --plan
@@ -75,10 +74,10 @@ AMM_VERCEL_PROJECT_CWD=/absolute/path/to/linked/ask-magic-mike \
   pnpm run phase9:durable-rate-limit:readiness -- --preflight
 ```
 
-Do not continue unless the second command reports `READY_FOR_EXACT_GATE`. It
-checks names/scopes and boolean health only, never a secret value. It refuses
-all execute, merge, and deploy modes. Full behavior and failure boundaries are
-in `docs/phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md`.
+The rehearsal checks names/scopes and boolean health only, never a secret value.
+It refuses execute, merge, and deploy modes. Full historical behavior and
+failure boundaries are in
+`docs/phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md`.
 
 Before merge, the read-only store probe must report `table`, `schema`,
 `permissions`, `rls`, and `ready` true when run with the intended secure runtime
@@ -94,31 +93,38 @@ interpret a local `database_not_configured` result as deployed-runtime failure.
 Use the protected candidate health endpoint to prove the encrypted Vercel
 runtime role, and use the public Production health endpoint after deployment.
 
-After the exact merge commit reaches Production, require HTTP 200 from
+For ongoing health, require HTTP 200 from
 `/api/health/ready` and literal true for `rate_limit_required`,
 `rate_limit_table`, `rate_limit_schema_ready`,
 `rate_limit_permissions_ready`, `rate_limit_rls_ready`,
 `rate_limit_store_ready`, `rate_limit_secret_ready`, and `rate_limit_ready`.
-Then execute only the approved malformed analytics request, verify HTTP 400,
-confirm no event/lead/message write, inspect the runtime log window, and rerun
-the nine-check monitor. Any false flag or new fallback log triggers rollback to
-the recorded prior deployment. Do not delete the ignored Upstash variables;
-that remains a separate cleanup action.
+Do not repeat the malformed acceptance request without a new exact authorization.
+Any false flag or new fallback log triggers investigation and, if required,
+rollback to the recorded prior deployment. Do not delete the ignored Upstash
+variables; that remains a separate cleanup action.
 
 ## Current Phase 9 release sequence
 
-Release only one approved PR at a time and verify Production before advancing:
+The singular current application candidate is PR #238. PRs #210–#237 are
+preserved component lineage included once in that cumulative tree; do not merge
+them individually or replay their former gates.
 
-1. `#180`, `#181`, `#183`, `#184`, `#185`, `#193`, `#196`, `#194`, and
-   `#195` are complete and their gates are exhausted.
-2. `#209` is the sole next atomic application candidate. It contains the
-   reviewed cumulative work from #202 through #208 once; those incremental PRs
-   have no independent merge or Production authority.
-3. Any later stacked candidate remains non-authoritative until #209 is accepted,
-   refreshed onto the exact new `main`, re-proven, and given its own exact gate.
+1. `#180`, `#181`, `#183`, `#184`, `#185`, `#193`, `#196`, `#194`, `#195`, and
+   `#209` are complete and their gates are exhausted.
+2. `#238` exact head `de67db6e1183b2a47d329d4a9a11993d48d1992a`
+   is fully sealed but held for its exact cumulative gate.
+3. Run its guarded read-only preflight, keep all three import gates false, then
+   execute/verify the four hash-pinned migrations before merging and deploying
+   only that exact reviewed head.
+4. `#239` and later dependent review artifacts remain outside the PR #238 gate
+   and cannot advance ahead of it.
 
-Do not merge or deploy candidates out of order. Rebase and re-prove each one
-after its predecessor is released.
+The exact authority and current manifest are in
+`docs/CURRENT_RELEASE_AUTHORITY.md` and
+`config/current-release-authority.json`.
+
+Historical cutover commands below remain evidence for already completed or
+component releases. They do not supersede the current PR #238 runner or gate.
 
 PR #181 uses:
 
@@ -196,10 +202,9 @@ Preview verification left these empty Vercel helper projects intact:
 domain or Production effect. Do not delete any without a separate exact cleanup
 approval.
 
-Each item retains its own exact approval phrase. Refresh any downstream branch
-after the preceding Production merge, rerun Node 24 CI and Vercel Preview, and do
-not treat this ordering as authorization to merge, deploy, publish, send, or
-mutate data.
+Historical component phrases are exhausted or superseded for current release
+purposes. Do not treat the preserved ordering below as authority to merge,
+deploy, publish, send, import, or mutate data.
 
 ## Owned-traffic activation
 
@@ -223,3 +228,32 @@ Paid traffic and carrier SMS remain separate approvals.
   notification, audit, identity, or session data as an application rollback.
 
 Record the outcome in `PRODUCTION_CHANGE_LOG.md`, including anything not proven.
+
+## Organic-search ingress candidate (PR #219)
+
+PR #219 is downstream of PR #218 and remains non-authoritative until the full
+predecessor train is released in order. Before any future release:
+
+1. refresh PR #219 onto the exact accepted `main`;
+2. rerun focused tests, the executable PostgreSQL 17 contract, full Vitest,
+   typecheck, lint, Node 24 build, route manifest, release safety, isolation,
+   dependency audit, secret scan, and immutable Preview/browser QA;
+3. confirm `GROWTH_SEARCH_IMPORT_ENABLED=false` in the target deployment;
+4. apply only `20260824220000_organic_search_ingress.sql` through the established
+   secure owner connection after the exact migration/merge/deploy approval;
+5. deploy the exact reviewed commit and prove protected page access, safe-off
+   commit behavior, health, routes, and logs; and
+6. leave Search Console access and report import unperformed.
+
+The future release gate is:
+
+```text
+APPROVE PHASE 9 ORGANIC SEARCH INGRESS MIGRATION, PR 219 MERGE, AND PRODUCTION DEPLOYMENT
+```
+
+To import later, first export one exact Search Console **Pages** report without
+the Queries dimension, validate it in the protected workbench, review every
+identity/metric/opportunity and the exact fingerprint, then request the separate
+report-specific gate documented in
+`phase9/ORGANIC_SEARCH_INGRESS_RELEASE_GATE.md`. Disable the feature gate again
+after the single reviewed import and reconcile the immutable receipt/audit.

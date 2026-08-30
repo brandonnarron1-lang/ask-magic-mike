@@ -73,11 +73,15 @@ operational action in `OWNER_ACTIONS_REMAINING.md`.
   social crawlers receive 200.
 - Our Town `/agents/mike-eatmon/`: Facebook crawler receives 403; browser and
   four other social crawlers receive 200.
-- Wordfence Live Traffic did not show the matching Facebook requests while
-  cPanel reports ModSecurity enabled for `ourtownproperties.com`. The block is
-  therefore upstream of WordPress, consistent with host ModSecurity/WAF.
-- cPanel exposes only a domain-wide ModSecurity switch, which is too broad and
-  was not changed.
+- Wordfence Live Traffic did not show the matching Facebook requests. At this
+  snapshot, the available evidence placed the block upstream of WordPress but
+  did not identify the responsible Apache directive.
+- Later authenticated 2026-08-28 diagnostics supersede that preliminary
+  classification: the domain's cPanel ModSecurity control reports Off, and the
+  exact denial is a server-global Apache `authz_core` rule that maps
+  `facebookexternalhit` to `bad_bots` and applies `Require not env bad_bots`.
+  See `phase9/OTP_FACEBOOK_CRAWLER_APACHE_EVIDENCE_2026-08-28.md`.
+- No broad ModSecurity switch or hosting rule was changed.
 
 ## Monitoring classification
 

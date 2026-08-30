@@ -1,6 +1,6 @@
 # Known Limitations — Ask Magic Mike
 
-Updated 2026-08-23. This document records the current Neon/Resend/Web Push
+Updated 2026-08-29. This document records the current Neon/Resend/Web Push
 system, not the superseded Supabase/mock-email/Twilio-era architecture.
 
 ## 1. Demand and measurement
@@ -19,13 +19,38 @@ rates remain low-confidence until genuine traffic produces adequate samples.
 Deterministic routing and scoring continue to work; AI summaries and statistical
 recommendations are advisory and never silently assign a lead.
 
-### Field-performance telemetry is prepared, not yet active
+### Numeric operating targets remain disabled
 
-The atomic PR #209 candidate can collect privacy-minimized LCP, INP, and CLS
-only after its Production gate. Preview is intentionally silent and current
-Production has no observations from this reporter. Browser headers are not
-authentication, so future aggregates remain rate-limited, deduplicated,
-sample-labeled, and advisory rather than treated as transaction truth.
+The protected Growth Command Center now names 42 baseline evidence contracts,
+their sample thresholds, and their readiness states. Production still has no
+eligible live-demand denominator, so target entry remains locked. Directional
+samples are visible when they exist but cannot become an approved target. A
+future durable target lifecycle requires measured evidence plus a separate
+owner-reviewed decision; QA rows cannot unlock it.
+
+Reconciled spend can be measured as independent context even when lead volume
+is zero, but that does not unlock a conversion or economics target. Partial
+close-revenue, referral-fee, or paid-channel spend coverage remains unknown
+rather than rendering a deceptively low dollar or cost value.
+
+### Field-performance telemetry is active but not decision-grade yet
+
+PR #209 activated the privacy-minimized LCP, INP, and CLS reporter. There is not
+yet enough genuine Production traffic to treat those observations as a stable
+baseline. Browser headers are not authentication, so aggregates remain
+rate-limited, deduplicated, sample-labeled, and advisory rather than
+transaction truth.
+
+### Preview database identity must be attested before any controlled write
+
+The current Vercel Preview has a reachable Neon credential but does not expose
+the expected Preview/Production endpoint-ID configuration in protected health.
+It therefore remains categorically read-only. Public analytics and experiment
+routes now enforce that same endpoint-aware guard before rate limiting or
+persistence. One privacy-minimized page-view created while this inherited gap
+was being diagnosed exists only on the Neon Preview branch; an aggregate check
+found no matching Production row. Do not enable Preview mutation until the
+separate endpoint-attestation gate passes.
 
 ## 2. Messaging and staff alerts
 
@@ -69,10 +94,11 @@ existence of an entry.
 
 ### Facebook crawler access is constrained on selected Our Town URLs
 
-The hosting WAF blocks FacebookExternalHit on selected WordPress paths. Use
-AskMagicMike.com links as the current social fallback. Any exception must name
-the exact managed rule, path, and GET/HEAD methods; global bot protection must
-not be weakened.
+The server-global Apache authorization policy blocks FacebookExternalHit on
+selected WordPress paths. The account-level `.htaccess` trial was ineffective
+and fully rolled back. Use AskMagicMike.com links as the current social
+fallback; the remaining correction requires a root/WHM per-vhost rule limited
+to the reviewed public paths and GET/HEAD methods.
 
 ## 4. Operator identity and private entry point
 
@@ -107,16 +133,18 @@ securely. CSV export remains available with audit logging.
 
 ### Current release state
 
-Current accepted Production is PR #195 merge
-`b450b41c66c6740bd20571cdbe7d8caf82e92d5e` on deployment
-`dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. Draft PR #209 is the sole current
-application candidate. It does not authorize an external placement, provider
-action, message, migration, or publication.
+Current accepted Production is PR #209 merge
+`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
+`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Draft PR #238 at exact head
+`de67db6e1183b2a47d329d4a9a11993d48d1992a` is the single cumulative
+application candidate. It includes the tested PR #210–#237 component tree and
+four guarded additive migrations. It does not authorize a report import,
+external placement, provider action, message, WordPress change, target,
+Production lead-data change, or publication.
 
-Current Production returns healthy public pages but does not yet prove the
-durable limiter contract that PR #209 requires. Candidate monitoring therefore
-reports 8/9 until the purpose-specific Production secret and matching code are
-released together under the exact gate.
+Current Production proves every durable limiter capability and the dedicated
+secret contract; strict monitoring passes 9/9. Historical component PRs
+#210–#237 retain evidence but have no independent current release authority.
 
 ### Prepared content is not published content
 
@@ -153,8 +181,8 @@ backup-first, identity, role, hash, and postflight interlocks.
 
 | Priority | Action | Gate |
 |---|---|---|
-| 1 | Complete optional Neon-attested synthetic Preview mutation and cleanup proof | Exact Preview-mutation approval |
-| 2 | Release atomic PR #209 with the dedicated durability secret and matching exact-head evidence | Exact Production gate |
+| 1 | Run the guarded PR #238 read-only Production preflight | Secure connection takeover; no mutation authority |
+| 2 | Execute migrations, merge exact PR #238, and deploy only after the exact cumulative gate | Cumulative Production gate |
 | 3 | Publish one approved zero-spend placement and record native proof | Channel-specific approval |
 | 4 | Activate Mike's account and enroll each owner's Web Push device | Per-person takeover/test approval |
 | 5 | Approve consent wording before expanding WordPress forms | Mike/BIC approval |

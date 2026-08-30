@@ -18,7 +18,9 @@ export default [
       "build/**",
       "next-env.d.ts",
       "output/**",
+      "playwright-report/**",
       "public/**",
+      "test-results/**",
       "docs/**",
       "scripts/**",
       "node_modules/**"

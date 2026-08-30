@@ -61,8 +61,8 @@ export const TrackEventSchema = z.object({
     "appointment_requested",
     "chat_opened",
     "chat_message_sent",
-    // Widget client events — the widget posts these through the public
-    // ingest endpoint; missing names here silently 422 and lose funnel data.
+    // Widget client events. Conversion success remains browser-visible, but
+    // public ingestion refuses the canonical widget conversion row.
     "widget_opened",
     "widget_started",
     "widget_intent_selected",

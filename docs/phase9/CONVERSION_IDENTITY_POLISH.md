@@ -2,7 +2,7 @@
 
 Date: 2026-08-22
 
-Status: released-main candidate refreshed after PR #194; Production unchanged
+Status: released on Production through PR #195
 
 ## Reuse-first decision
 
@@ -71,6 +71,11 @@ was this repository's cumulative QA-evidence document. Rollback is an
 application revert; there is no candidate migration or external state to
 reverse.
 
-Future exact gate after exact-head GitHub and protected Preview proof:
+Historical exact gate, consumed on 2026-08-23:
 
 `APPROVE PHASE 9 CONVERSION IDENTITY POLISH MERGE AND PRODUCTION DEPLOYMENT`
+
+PR #195 head `db13953fc5f6d24a684f66c9a1c10c6b929b72b3` merged as
+`b450b41c66c6740bd20571cdbe7d8caf82e92d5e` and is live on Vercel deployment
+`dpl_1bnT7C9SHamP8h13PjmtdSjvJPfW`. This phrase is exhausted and does not
+authorize a second deployment or a different candidate.

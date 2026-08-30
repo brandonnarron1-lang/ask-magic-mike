@@ -26,11 +26,22 @@ function emptySummary(): GrowthSummary {
     leads: 0,
     qualified: 0,
     appointments: 0,
+    agreements: 0,
     closes: 0,
     spendUsd: 0,
     attributedRevenueUsd: 0,
+    referralFeesUsd: 0,
+    trackedContributionUsd: null,
+    trackedContributionRate: null,
+    closedRevenueRecordCount: 0,
+    closedRevenueCoverageRate: null,
+    referralFeeRecordCount: 0,
+    referralFeeExpectedCloseCount: 0,
+    referralFeeCoverageRate: null,
     blendedCostPerLead: null,
+    blendedCostPerQualifiedLead: null,
     blendedCostPerAppointment: null,
+    blendedCostPerSignedClient: null,
     blendedCostPerClose: null,
     returnOnAdSpend: null,
     attributedLeadRate: 0,
@@ -85,7 +96,10 @@ describe("owned-demand asset studio", () => {
         expect(resolveOwnedDemandShortCode(shortCode!)?.trackedUrl).toBe(creative!.trackedUrl);
         expect(ownedDemandShortUrl(creative!)).toBe(`https://www.askmagicmike.com/go/${shortCode}`);
 
-        for (const format of ["feed", "story", "qr_svg"] as const) {
+        const formats = channel.key === "google_business_profile"
+          ? (["feed", "story", "square", "qr_svg"] as const)
+          : (["feed", "story", "qr_svg"] as const);
+        for (const format of formats) {
           const request = resolveOwnedDemandAssetRequest(channel.key, placementKey, format);
           expect(request?.filename).toMatch(/^ask-magic-mike-[a-z0-9-]+\.(png|svg)$/);
           expect(ownedDemandAssetHref(channel.key, placementKey, format)).toContain(`format=${format}`);
@@ -99,6 +113,7 @@ describe("owned-demand asset studio", () => {
     expect(resolveOwnedDemandAssetRequest("unknown", "seller_review", "feed")).toBeNull();
     expect(resolveOwnedDemandAssetRequest("facebook", "unknown", "feed")).toBeNull();
     expect(resolveOwnedDemandAssetRequest("facebook", "seller_review", "pdf")).toBeNull();
+    expect(resolveOwnedDemandAssetRequest("facebook", "seller_review", "square")).toBeNull();
     expect(resolveOwnedDemandAssetRequest("../facebook", "seller_review", "feed")).toBeNull();
     expect(resolveOwnedDemandShortCode("facebook-seller")).toBeNull();
     expect(resolveOwnedDemandShortCode("fb-seller/../../ask")).toBeNull();
@@ -154,9 +169,45 @@ describe("owned-demand asset studio", () => {
     }
   }, 60_000);
 
-  it("keeps feed and story output aligned to current platform-safe dimensions", () => {
+  it("renders native 1:1 Google Business Profile PNGs for every offer type", async () => {
+    const artifactDirectory = process.env.AMM_ASSET_ARTIFACT_DIR;
+
+    for (const placementKey of ["general_question", "seller_review", "buyer_match", "renter_plan"]) {
+      const creative = resolveOwnedDemandCreative("google_business_profile", placementKey);
+      expect(creative).not.toBeNull();
+      const asset = resolveOwnedDemandAssetRequest(
+        "google_business_profile",
+        placementKey,
+        "square",
+      )!;
+      const response = await renderOwnedDemandImage({
+        creative: creative!,
+        creativeUrl: dataUrlFor(creative!.creativeExportPath),
+        filename: asset.filename,
+        format: "square",
+      }).catch((error: unknown) => {
+        throw new Error(`Failed to render ${placementKey}/square`, { cause: error });
+      });
+      const bytes = Buffer.from(await response.arrayBuffer().catch((error: unknown) => {
+        throw new Error(`Failed to encode ${placementKey}/square`, { cause: error });
+      }));
+
+      expect([...bytes.subarray(0, 8)]).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+      expect(bytes.length).toBeGreaterThan(35_000);
+      expect(response.headers.get("cache-control")).toContain("no-store");
+      expect(response.headers.get("content-disposition")).toContain(asset.filename);
+
+      if (artifactDirectory) {
+        fs.mkdirSync(artifactDirectory, { recursive: true });
+        fs.writeFileSync(path.join(artifactDirectory, asset.filename), bytes);
+      }
+    }
+  }, 60_000);
+
+  it("keeps feed, story, and Google Business Profile output aligned to current platform-safe dimensions", () => {
     expect(OWNED_DEMAND_IMAGE_SPECS.feed).toMatchObject({ width: 1080, height: 1350 });
     expect(OWNED_DEMAND_IMAGE_SPECS.story).toMatchObject({ width: 1080, height: 1920 });
+    expect(OWNED_DEMAND_IMAGE_SPECS.square).toMatchObject({ width: 720, height: 720 });
   });
 
   it("renders renter exports from the retained Production portrait", () => {
@@ -190,6 +241,8 @@ describe("owned-demand asset route boundary", () => {
     expect(route).toContain('"X-Robots-Tag": "noindex, nofollow, noarchive"');
     expect(route).toContain('"Content-Security-Policy": "default-src \'none\'; sandbox"');
     expect(page).toContain("DemandAssetLinks");
+    expect(page).toContain('channelKey === "google_business_profile"');
+    expect(page).toContain("Download 1:1 GBP PNG");
     expect(page).toContain("Download 4:5 PNG");
     expect(page).toContain("Download 9:16 PNG");
     expect(page).toContain("Download QR SVG");

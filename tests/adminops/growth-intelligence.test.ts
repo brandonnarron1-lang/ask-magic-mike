@@ -83,10 +83,21 @@ describe("Phase 9 growth intelligence", () => {
       leads: 3,
       qualified: 2,
       appointments: 1,
+      agreements: 1,
       closes: 1,
       spendUsd: 400,
       attributedRevenueUsd: 8000,
-      returnOnAdSpend: 20,
+      referralFeesUsd: 0,
+      trackedContributionUsd: null,
+      trackedContributionRate: null,
+      closedRevenueRecordCount: 1,
+      closedRevenueCoverageRate: 100,
+      referralFeeRecordCount: 0,
+      referralFeeExpectedCloseCount: 0,
+      referralFeeCoverageRate: null,
+      blendedCostPerQualifiedLead: 200,
+      blendedCostPerSignedClient: 400,
+      returnOnAdSpend: null,
       speedToLeadRisks: 1,
       firstResponseSampleSize: 2,
       firstResponseCoverageRate: 66.7,
@@ -99,9 +110,22 @@ describe("Phase 9 growth intelligence", () => {
       leads: 2,
       qualified: 2,
       appointments: 1,
+      agreements: 1,
       closes: 1,
       costPerLead: 200,
+      costPerQualifiedLead: 200,
+      costPerAppointment: 400,
+      costPerSignedClient: 400,
       costPerClose: 400,
+      attributedRevenueUsd: 8000,
+      referralFeesUsd: 0,
+      trackedContributionUsd: 7600,
+      trackedContributionRate: 95,
+      closedRevenueRecordCount: 1,
+      closedRevenueCoverageRate: 100,
+      referralFeeRecordCount: 0,
+      referralFeeExpectedCloseCount: 0,
+      referralFeeCoverageRate: null,
       returnOnAdSpend: 20,
       medianFirstResponseMinutes: 3.5,
       p75FirstResponseMinutes: 3.8,
@@ -109,8 +133,404 @@ describe("Phase 9 growth intelligence", () => {
     });
     const meta = result.channels.find((channel) => channel.source === "meta");
     expect(meta?.flags).toContain("spend_missing");
+    expect(result.summary.trackedContributionUsd).toBeNull();
+    expect(result.summary.returnOnAdSpend).toBeNull();
     expect(result.opportunities.map((row) => row.key)).toContain("complete_paid_channel_economics");
     expect(result.opportunities.map((row) => row.key)).toContain("first_response_measurement");
+  });
+
+  it("treats referral-paid outcomes as cost, keeps the latest typed outcome, and computes signed-client economics", () => {
+    const result = buildGrowthIntelligence({
+      now: NOW,
+      leads: [
+        {
+          id: "portal-1",
+          createdAt: "2026-08-10T12:00:00.000Z",
+          status: "closed",
+          source: "zillow",
+          medium: "referral",
+          campaign: "wilson_buyers",
+        },
+        {
+          id: "portal-2",
+          createdAt: "2026-08-11T12:00:00.000Z",
+          status: "closed",
+          source: "zillow",
+          medium: "referral",
+          campaign: "wilson_buyers",
+        },
+      ],
+      spend: [{
+        source: "zillow",
+        medium: "referral",
+        campaign: "wilson_buyers",
+        spendUsd: 1000,
+      }],
+      outcomes: [
+        {
+          leadId: "portal-1",
+          outcomeType: "closed",
+          amountUsd: 7000,
+          occurredAt: "2026-08-15T12:00:00.000Z",
+        },
+        {
+          leadId: "portal-1",
+          outcomeType: "closed",
+          amountUsd: 9000,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+        {
+          leadId: "portal-1",
+          outcomeType: "referral_paid",
+          amountUsd: 2000,
+          occurredAt: "2026-08-15T12:00:00.000Z",
+        },
+        {
+          leadId: "portal-1",
+          outcomeType: "referral_paid",
+          amountUsd: 2500,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+        {
+          leadId: "portal-2",
+          outcomeType: "closed",
+          amountUsd: 6000,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+        {
+          leadId: "portal-2",
+          outcomeType: "referral_paid",
+          amountUsd: 1500,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(result.summary).toMatchObject({
+      agreements: 2,
+      closes: 2,
+      attributedRevenueUsd: 15000,
+      referralFeesUsd: 4000,
+      trackedContributionUsd: 10000,
+      trackedContributionRate: 66.7,
+      closedRevenueRecordCount: 2,
+      closedRevenueCoverageRate: 100,
+      referralFeeRecordCount: 2,
+      referralFeeExpectedCloseCount: 2,
+      referralFeeCoverageRate: 100,
+      blendedCostPerSignedClient: 500,
+      returnOnAdSpend: 15,
+    });
+    expect(result.channels[0]).toMatchObject({
+      agreements: 2,
+      closes: 2,
+      attributedRevenueUsd: 15000,
+      referralFeesUsd: 4000,
+      trackedContributionUsd: 10000,
+      trackedContributionRate: 66.7,
+      closedRevenueRecordCount: 2,
+      closedRevenueCoverageRate: 100,
+      referralFeeRecordCount: 2,
+      referralFeeExpectedCloseCount: 2,
+      referralFeeCoverageRate: 100,
+      costPerSignedClient: 500,
+      returnOnAdSpend: 15,
+    });
+    expect(result.channels[0].flags).toContain("scale_candidate");
+    expect(result.channels[0].flags).not.toContain("referral_fee_review_required");
+  });
+
+  it("treats an explicit zero referral fee as reviewed evidence rather than missing data", () => {
+    const result = buildGrowthIntelligence({
+      now: NOW,
+      leads: [{
+        id: "portal-zero-fee",
+        createdAt: "2026-08-10T12:00:00.000Z",
+        status: "closed",
+        source: "zillow",
+        medium: "referral",
+        campaign: "zero_fee_review",
+      }],
+      spend: [{
+        source: "zillow",
+        medium: "referral",
+        campaign: "zero_fee_review",
+        spendUsd: 250,
+      }],
+      outcomes: [
+        {
+          leadId: "portal-zero-fee",
+          outcomeType: "closed",
+          amountUsd: 5000,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+        {
+          leadId: "portal-zero-fee",
+          outcomeType: "referral_paid",
+          amountUsd: 0,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(result.summary).toMatchObject({
+      referralFeesUsd: 0,
+      referralFeeRecordCount: 1,
+      referralFeeExpectedCloseCount: 1,
+      referralFeeCoverageRate: 100,
+      trackedContributionUsd: 4750,
+      returnOnAdSpend: 20,
+    });
+    expect(result.channels[0].flags).not.toContain("referral_fee_review_required");
+  });
+
+  it("withholds scale recommendations when portal referral-fee evidence is missing", () => {
+    const result = buildGrowthIntelligence({
+      now: NOW,
+      leads: ["one", "two"].map((id) => ({
+        id,
+        createdAt: "2026-08-10T12:00:00.000Z",
+        status: "closed",
+        source: "realtor.com",
+        medium: "referral",
+        campaign: "ready_connect",
+      })),
+      spend: [{
+        source: "realtor.com",
+        medium: "referral",
+        campaign: "ready_connect",
+        spendUsd: 1000,
+      }],
+      outcomes: ["one", "two"].map((leadId) => ({
+        leadId,
+        outcomeType: "closed",
+        amountUsd: 8000,
+        occurredAt: "2026-08-17T12:00:00.000Z",
+      })),
+    });
+
+    expect(result.channels[0].flags).toContain("referral_fee_review_required");
+    expect(result.channels[0].flags).not.toContain("scale_candidate");
+    expect(result.channels[0].trackedContributionUsd).toBeNull();
+    expect(result.channels[0].returnOnAdSpend).toBeNull();
+    expect(result.opportunities.map((row) => row.key)).toContain("reconcile_referral_fee_evidence");
+    expect(result.opportunities.some((row) => row.key.startsWith("scale_"))).toBe(false);
+  });
+
+  it("does not let an unrelated fee record satisfy a portal close review", () => {
+    const result = buildGrowthIntelligence({
+      now: NOW,
+      leads: [
+        {
+          id: "portal",
+          createdAt: "2026-08-10T12:00:00.000Z",
+          status: "closed",
+          source: "zillow",
+          medium: "referral",
+          campaign: "portal",
+        },
+        {
+          id: "owned",
+          createdAt: "2026-08-10T12:00:00.000Z",
+          status: "closed",
+          source: "newsletter",
+          medium: "email",
+          campaign: "sphere",
+        },
+      ],
+      spend: [{
+        source: "zillow",
+        medium: "referral",
+        campaign: "portal",
+        spendUsd: 100,
+      }],
+      outcomes: [
+        {
+          leadId: "portal",
+          outcomeType: "closed",
+          amountUsd: 8000,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+        {
+          leadId: "owned",
+          outcomeType: "closed",
+          amountUsd: 6000,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+        {
+          leadId: "owned",
+          outcomeType: "referral_paid",
+          amountUsd: 500,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(result.summary).toMatchObject({
+      referralFeesUsd: 500,
+      referralFeeRecordCount: 0,
+      referralFeeExpectedCloseCount: 1,
+      referralFeeCoverageRate: 0,
+      trackedContributionUsd: null,
+      returnOnAdSpend: null,
+    });
+    expect(result.channels.find((channel) => channel.source === "zillow")?.flags)
+      .toContain("referral_fee_review_required");
+  });
+
+  it("does not let a non-closed lead fee mask a same-channel close fee gap", () => {
+    const result = buildGrowthIntelligence({
+      now: NOW,
+      leads: [
+        {
+          id: "closed-without-fee",
+          createdAt: "2026-08-10T12:00:00.000Z",
+          status: "closed",
+          source: "zillow",
+          medium: "referral",
+          campaign: "same_channel",
+        },
+        {
+          id: "open-with-fee",
+          createdAt: "2026-08-11T12:00:00.000Z",
+          status: "new",
+          source: "zillow",
+          medium: "referral",
+          campaign: "same_channel",
+        },
+      ],
+      spend: [{
+        source: "zillow",
+        medium: "referral",
+        campaign: "same_channel",
+        spendUsd: 100,
+      }],
+      outcomes: [
+        {
+          leadId: "closed-without-fee",
+          outcomeType: "closed",
+          amountUsd: 8000,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+        {
+          leadId: "open-with-fee",
+          outcomeType: "referral_paid",
+          amountUsd: 2000,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(result.summary).toMatchObject({
+      closes: 1,
+      referralFeesUsd: 2000,
+      referralFeeRecordCount: 0,
+      referralFeeExpectedCloseCount: 1,
+      referralFeeCoverageRate: 0,
+      trackedContributionUsd: null,
+      returnOnAdSpend: null,
+    });
+    expect(result.channels[0].flags).toContain("referral_fee_review_required");
+  });
+
+  it("treats partial revenue and referral-fee coverage as unknown, not zero", () => {
+    const result = buildGrowthIntelligence({
+      now: NOW,
+      leads: ["one", "two"].map((id) => ({
+        id,
+        createdAt: "2026-08-10T12:00:00.000Z",
+        status: "closed",
+        source: "zillow",
+        medium: "referral",
+        campaign: "partial_economics",
+      })),
+      spend: [{
+        source: "zillow",
+        medium: "referral",
+        campaign: "partial_economics",
+        spendUsd: 500,
+      }],
+      outcomes: [
+        {
+          leadId: "one",
+          outcomeType: "closed",
+          amountUsd: 9000,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+        {
+          leadId: "one",
+          outcomeType: "referral_paid",
+          amountUsd: 2500,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+        {
+          leadId: "two",
+          outcomeType: "closed",
+          amountUsd: null,
+          occurredAt: "2026-08-17T12:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(result.summary).toMatchObject({
+      closes: 2,
+      attributedRevenueUsd: 9000,
+      referralFeesUsd: 2500,
+      trackedContributionUsd: null,
+      returnOnAdSpend: null,
+      closedRevenueRecordCount: 1,
+      closedRevenueCoverageRate: 50,
+      referralFeeRecordCount: 1,
+      referralFeeExpectedCloseCount: 2,
+      referralFeeCoverageRate: 50,
+    });
+    expect(result.channels[0].flags).toEqual(expect.arrayContaining([
+      "closed_revenue_missing",
+      "referral_fee_review_required",
+    ]));
+    expect(result.channels[0].flags).not.toContain("scale_candidate");
+    expect(result.opportunities.find((row) => row.key === "complete_closed_revenue_evidence")?.evidence)
+      .toMatchObject({ closesMissingRevenue: 1 });
+    expect(result.opportunities.find((row) => row.key === "reconcile_referral_fee_evidence")?.evidence)
+      .toMatchObject({ closesNeedingReferralReview: 1 });
+  });
+
+  it("does not manufacture ROAS or contribution from a close without recorded revenue", () => {
+    const result = buildGrowthIntelligence({
+      now: NOW,
+      leads: [{
+        id: "closed-without-revenue",
+        createdAt: "2026-08-10T12:00:00.000Z",
+        status: "closed",
+        source: "google",
+        medium: "cpc",
+        campaign: "seller_intent",
+      }],
+      spend: [{
+        source: "google",
+        medium: "cpc",
+        campaign: "seller_intent",
+        spendUsd: 500,
+      }],
+      outcomes: [{
+        leadId: "closed-without-revenue",
+        outcomeType: "closed",
+        amountUsd: null,
+        occurredAt: "2026-08-17T12:00:00.000Z",
+      }],
+    });
+
+    expect(result.summary.returnOnAdSpend).toBeNull();
+    expect(result.summary.trackedContributionUsd).toBeNull();
+    expect(result.channels[0]).toMatchObject({
+      closes: 1,
+      attributedRevenueUsd: 0,
+      closedRevenueRecordCount: 0,
+      returnOnAdSpend: null,
+      trackedContributionUsd: null,
+    });
+    expect(result.channels[0].flags).toContain("closed_revenue_missing");
+    expect(result.opportunities.map((row) => row.key)).toContain("complete_closed_revenue_evidence");
   });
 
   it("computes interpolated first-response percentiles only from immutable evidence", () => {

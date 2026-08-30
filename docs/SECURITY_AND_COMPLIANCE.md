@@ -175,3 +175,23 @@ guaranteed result.
   noindex, same-origin framing, and server authorization. A complete
   nonce/hash-based public `script-src` CSP remains a defense-in-depth follow-up
   requiring a dedicated compatibility pass across the established funnel.
+
+## Phase 9 funnel-event identity integrity — 2026-08-24
+
+- Public funnel identity is an RFC 4122 UUID generated for the existing lead
+  submission, never a name, email, phone, address, click ID, cookie, IP, or
+  provider identifier.
+- The UUID is absent from browser analytics dimensions and is injected only at
+  the final protected Neon write boundary after validation. Public properties
+  cannot set or override `funnel_session_id`.
+- Analytics never pre-create canonical `sessions`, preserving the atomic
+  lead-capture/idempotency contract and eliminating a lead-loss collision.
+- Browser-authored lead/widget creation, qualification, appointment-request,
+  and notification-lifecycle outcomes are rejected by the canonical event
+  route. Durable lead storage and server-owned lifecycle records are the only
+  first-party outcome authorities.
+- The UUID is pseudonymous and linkable after lead creation, so it remains
+  protected by analytics access, retention, export, and deletion controls. It
+  is not legal identity, consent, or unique-person proof.
+- Historical unlinked events remain unclassified; no inferred backfill or
+  fabricated conversion rate is permitted.

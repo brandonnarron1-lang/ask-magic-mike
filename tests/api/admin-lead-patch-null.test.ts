@@ -11,34 +11,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const updateMock = vi.fn();
-const selectMock = vi.fn();
-const auditInsertMock = vi.fn();
+const operationMock = vi.fn();
 
 vi.mock("@/lib/admin/auth", () => ({
   checkAdminAuth: () => ({ ok: true, actor: "admin@test.com", status: 200 }),
 }));
 vi.mock("@/lib/analytics/ledger", () => ({ trackEventNoWait: vi.fn() }));
 vi.mock("@/lib/admin/lead-detail", () => ({ loadLeadDetail: vi.fn() }));
-vi.mock("@/lib/supabase/admin", () => ({
-  createAdminClient: () => ({
-    from: (table: string) => {
-      if (table === "leads") {
-        return {
-          update: () => ({ eq: () => updateMock() }),
-          select: () => ({ eq: () => ({ maybeSingle: () => selectMock() }) }),
-        };
-      }
-      if (table === "audit_logs") return { insert: (...a: unknown[]) => auditInsertMock(...a) };
-      return {};
-    },
-  }),
+vi.mock("@/lib/admin/lead-operations", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/admin/lead-operations")>()),
+  patchCanonicalAdminLead: (...args: unknown[]) => operationMock(...args),
 }));
-
-beforeEach(() => {
-  process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
-  process.env.SUPABASE_SERVICE_ROLE_KEY = "test-key";
-});
 
 import { PATCH } from "@/app/api/admin/leads/[id]/route";
 
@@ -58,12 +41,15 @@ function makeRequest(body: Record<string, unknown>) {
 describe("PATCH /api/admin/leads/[id] — null and new field handling", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    selectMock.mockResolvedValue({
-      data: { status: "new", lead_type: "seller", lead_grade: "A" },
-      error: null,
-    });
-    updateMock.mockResolvedValue({ error: null });
-    auditInsertMock.mockResolvedValue({ error: null });
+    operationMock.mockImplementation(async (input: { patch: Record<string, unknown> }) => ({
+      ok: true,
+      value: {
+        leadId: LEAD_ID,
+        auditId: "00000000-0000-0000-0000-000000000030",
+        updatedAt: "2026-08-30T12:00:00.000Z",
+        patch: input.patch,
+      },
+    }));
   });
 
   it("clears follow-up date when next_follow_up_at is null (previously returned 400)", async () => {
@@ -92,6 +78,16 @@ describe("PATCH /api/admin/leads/[id] — null and new field handling", () => {
     expect(res.status).toBe(200);
     const b = await res.json();
     expect(b.ok).toBe(true);
+  });
+
+  it("requests an atomic pre-spam status restore when clearing spam", async () => {
+    const res = await PATCH(makeRequest({ mark_spam: false }), {
+      params: Promise.resolve({ id: LEAD_ID }),
+    });
+    expect(res.status).toBe(200);
+    expect(operationMock).toHaveBeenCalledWith(expect.objectContaining({
+      patch: { restore_status_before_spam: true },
+    }));
   });
 
   it("returns 400 when no recognized fields are provided", async () => {

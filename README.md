@@ -19,12 +19,18 @@ brokerage, listings, and SEO authority and embeds or links into this system.
 - `OWNER ACTION` — Mike and Brandon must enroll their own phones; authenticated
   internal email remains the active alert path until each device passes QA.
 - `DEFERRED — PAID SERVICE` — carrier SMS/MMS; Web Push is the free-first path.
-- `DRAFT RELEASE GATE` — PR #209 is the sole atomic application candidate. It
-  closes the Production durable-rate-limit readiness gap and remains unmerged
-  until its exact Preview/Production evidence and approval gates are satisfied.
+- `VERIFIED LIVE` — PR #209's durable-rate-limit release is accepted at
+  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`; its exact gate is consumed and
+  cannot authorize another action.
+- `CUMULATIVE RELEASE HOLD` — Draft PR #238 is the single exact-head Phase 9
+  application candidate. It consolidates preserved PRs #210–#237 and four
+  guarded additive migrations; the earlier component gates are historical and
+  cannot be replayed.
 
 The source-of-truth audit is in
 [`docs/CURRENT_STATE_RECONCILIATION.md`](docs/CURRENT_STATE_RECONCILIATION.md).
+The singular release gate, exact head, and cutover order are in
+[`docs/CURRENT_RELEASE_AUTHORITY.md`](docs/CURRENT_RELEASE_AUTHORITY.md).
 Documentation precedence and historical-packet handling are in
 [`docs/DOCUMENTATION_AUTHORITY.md`](docs/DOCUMENTATION_AUTHORITY.md).
 The remaining human gates are in

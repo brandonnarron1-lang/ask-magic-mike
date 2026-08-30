@@ -226,14 +226,14 @@ Ask Magic Mike is a production-grade AI real estate lead system. As of this audi
 | Missing email follow-up automation | Medium | Operator is emailed via CRM; no automated sequences in AMM yet. |
 | Missing lead export (CSV/PDF) | Low | Revenue page shows leads but no download button. |
 | Missing push notification to operator | Low | SLA sweep runs on Cron but no push/SMS to Mike when urgent lead comes in. |
-| Facebook/Instagram 403 on OTP domain | Low | cPanel ModSecurity WAF — not addressable in code. Use askmagicmike.com links for all social. |
+| Facebook/Instagram 403 on OTP domain | Low | Server-global Apache `authz_core` rule; correction is a bounded host action, not app code. Use askmagicmike.com links until 42/42. |
 | WP .htaccess Editor plugin (deactivated) | Low | Installed to inspect .htaccess. Deactivate/delete when convenient. |
 
 ### Launch Blockers (External)
 
 | Blocker | Owner | Action Required |
 |---|---|---|
-| cPanel ModSecurity rule firing on `facebookexternalhit` | Hosting provider (Regency) | Log into cPanel > Security > ModSecurity, find rule ID for facebookexternalhit, whitelist. Until then: use askmagicmike.com-only links. |
+| Apache `facebookexternalhit -> bad_bots` authorization rule | Hosting provider (Regency/Liquid Web) | Follow `META_CRAWLER_HOSTING_OPERATOR_ACTION.md`; apply only the reviewed per-vhost/account override and require 42/42. Until then, use AskMagicMike.com-only links. |
 | WP CRM webhook for lead forwarding | Brandon / Mike | Decide if WP Gravity Forms leads should forward to AMM Supabase. Currently off. |
 
 ---
@@ -245,7 +245,7 @@ Everything in the "COMPLETE" rows above is ready to use. The funnel is live at `
 **Recommended sequence for launch week:**
 1. Post first organic social content using Distribution Command Center queue
 2. Update Mike's OTP profile page `/agents/mike-eatmon/` with AMM UTM link
-3. Activate cPanel ModSecurity whitelist (or accept the 40/42 social preview score)
+3. Have the host apply the bounded Apache override (or retain the documented 40/42 limitation)
 4. Optional: wire WP Gravity Forms → AMM Supabase CRM webhook
 5. Optional: add Calendly embed to `/ask` confirmation step
 
@@ -256,7 +256,7 @@ Everything in the "COMPLETE" rows above is ready to use. The funnel is live at `
 | Check | Status |
 |---|---|
 | Funnel verify (`amm:verify:funnel`) | ✅ 15/15 PASS |
-| Social preview | ✅ 40/42 (2 FB 403s = external WAF, not code) |
+| Social preview | ✅ 40/42 (2 FB 403s = proven external Apache rule, not app code) |
 | Build | ✅ Clean |
 | TypeCheck | ✅ Clean |
 | Lint | ✅ No errors (pre-existing warnings only) |

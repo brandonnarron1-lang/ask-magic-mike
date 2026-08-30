@@ -22,7 +22,7 @@ export default async function OpenHousePage({ params }: { params: Promise<{ prop
     <main className="min-h-screen bg-[#050505] text-[#f4ead4]">
       <PageTracker funnelName="open_house" />
       <section className="bg-[#050505] px-5 py-6 sm:px-8 lg:px-10"><div className="mx-auto max-w-7xl"><BlackDiamondHeader /></div></section>
-      <section className="px-5 py-14 sm:px-8 lg:px-10">
+      <section id="page-content" tabIndex={-1} className="px-5 py-14 sm:px-8 lg:px-10">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.86fr_1.14fr] lg:items-start">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">Open house</p>

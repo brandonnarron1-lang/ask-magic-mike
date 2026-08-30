@@ -8,7 +8,7 @@
 | WordPress canonical bridge | IMPLEMENTED — ACTIVATION REQUIRED | live plugin/page/form publication is an owner gate | backup, shadow health, form-specific QA, one-entry/one-lead reconciliation |
 | Staff Web Push | IMPLEMENTED — ACTIVATION REQUIRED | each owner must grant phone permission | active primary/copy subscriptions and approved internal QA receipt |
 | Global CSP enforcement | IMPLEMENTED — ACTIVATION REQUIRED | report-only telemetry and third-party inventory needed to avoid breakage | zero unexpected violations, enforced-header smoke |
-| Our Town Facebook crawler fix | BLOCKED — HUMAN ACTION | host/WAF or WordPress security setting is outside this branch | Facebook crawler gets 200 with correct OG metadata on both pages |
+| Our Town Facebook crawler fix | BLOCKED — HOST ACTION | proven server-global Apache rule is outside this branch; bounded override is prepared | Facebook crawler gets 200 with correct OG metadata on both pages and the verifier reaches 42/42 |
 | GA4/GTM/Search Console production changes | IMPLEMENTED — ACTIVATION REQUIRED | property/container access and publication approval | no-PII events, cross-domain session proof, test/internal exclusion |
 | External CRM synchronization | NOT REQUIRED | canonical Lead Center is sufficient for current operation | approved destination, field map, idempotent sandbox sync |
 | Paid ads/lead vendors | DEFERRED — PAID SERVICE | owned funnel must operate first; spend not approved | owner budget, compliance review, tagged campaign, conversion proof |

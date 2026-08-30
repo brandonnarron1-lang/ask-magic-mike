@@ -6,7 +6,7 @@
 - Activate Forms 1 and 6 one at a time after backup and consent-default QA.
 - Approve roster; apply RBAC migration in Preview; provision and verify one administrator.
 - Enroll Mike and Brandon Web Push with each device owner present.
-- Obtain the narrow hosting ModSecurity correction.
+- Obtain and verify the bounded hosting-level Apache crawler correction.
 
 ## Days 31-60
 

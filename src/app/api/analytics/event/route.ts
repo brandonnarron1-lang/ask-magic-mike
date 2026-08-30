@@ -4,11 +4,13 @@ import { trackEvent } from "@/lib/analytics/ledger";
 import {
   coarseAnalyticsUserAgent,
   isApprovedPublicAnalyticsEvent,
+  isCanonicalLedgerProtectedEvent,
   safePublicAnalyticsProperties,
   safeRegisteredPublicAnalyticsDimension,
 } from "@/lib/analytics/privacy";
 import { checkRateLimit, rateLimitKey, LIMITS } from "@/lib/security/rate-limit";
 import { requestContext } from "@/lib/observability/request";
+import { assertDatabaseMutationAllowed } from "@/lib/preview-security";
 import { isApprovedPublicOrigin } from "../../../../../app/lib/publicOrigin";
 
 const MAX_EVENT_BODY_BYTES = 4_096;
@@ -49,6 +51,21 @@ export async function POST(req: NextRequest) {
   if (!isApprovedPublicOrigin(req.headers.get("origin"))) {
     return NextResponse.json({ error: "origin_not_approved" }, { status: 403 });
   }
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return NextResponse.json(
+      {
+        ok: false,
+        persisted: false,
+        error: mutation.publicMessage,
+        code: mutation.error,
+      },
+      {
+        status: mutation.statusCode,
+        headers: ctx.finish(mutation.statusCode),
+      },
+    );
+  }
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
   const rl = await checkRateLimit(rateLimitKey(ip), LIMITS.analyticsEvent.limit, LIMITS.analyticsEvent.windowMs, "analyticsEvent");
   if (!rl.allowed) {
@@ -77,6 +94,9 @@ export async function POST(req: NextRequest) {
   if (!isApprovedPublicAnalyticsEvent(parsed.data.eventName)) {
     return NextResponse.json({ error: "event_not_public" }, { status: 422 });
   }
+  if (isCanonicalLedgerProtectedEvent(parsed.data.eventName)) {
+    return NextResponse.json({ error: "event_not_public" }, { status: 422 });
+  }
 
   const properties = safePublicAnalyticsProperties(
     parsed.data.eventName,
@@ -89,7 +109,7 @@ export async function POST(req: NextRequest) {
 
   const persisted = await trackEvent({
     eventName: parsed.data.eventName,
-    sessionId: parsed.data.sessionId,
+    funnelSessionId: parsed.data.sessionId,
     properties,
     utmSource: safeRegisteredPublicAnalyticsDimension("utm_source", parsed.data.utmSource) ?? undefined,
     utmMedium: safeRegisteredPublicAnalyticsDimension("utm_medium", parsed.data.utmMedium) ?? undefined,

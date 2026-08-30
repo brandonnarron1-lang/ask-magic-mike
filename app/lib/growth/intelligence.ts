@@ -75,15 +75,25 @@ export interface GrowthChannelEconomics {
   leads: number;
   qualified: number;
   appointments: number;
+  agreements: number;
   closes: number;
   spendUsd: number;
   attributedRevenueUsd: number;
+  referralFeesUsd: number;
+  trackedContributionUsd: number | null;
+  trackedContributionRate: number | null;
+  closedRevenueRecordCount: number;
+  closedRevenueCoverageRate: number | null;
+  referralFeeRecordCount: number;
+  referralFeeExpectedCloseCount: number;
+  referralFeeCoverageRate: number | null;
   impressions: number;
   clicks: number;
   platformLeads: number;
   costPerLead: number | null;
   costPerQualifiedLead: number | null;
   costPerAppointment: number | null;
+  costPerSignedClient: number | null;
   costPerClose: number | null;
   returnOnAdSpend: number | null;
   leadToQualifiedRate: number;
@@ -116,11 +126,22 @@ export interface GrowthSummary {
   leads: number;
   qualified: number;
   appointments: number;
+  agreements: number;
   closes: number;
   spendUsd: number;
   attributedRevenueUsd: number;
+  referralFeesUsd: number;
+  trackedContributionUsd: number | null;
+  trackedContributionRate: number | null;
+  closedRevenueRecordCount: number;
+  closedRevenueCoverageRate: number | null;
+  referralFeeRecordCount: number;
+  referralFeeExpectedCloseCount: number;
+  referralFeeCoverageRate: number | null;
   blendedCostPerLead: number | null;
+  blendedCostPerQualifiedLead: number | null;
   blendedCostPerAppointment: number | null;
+  blendedCostPerSignedClient: number | null;
   blendedCostPerClose: number | null;
   returnOnAdSpend: number | null;
   attributedLeadRate: number;
@@ -175,6 +196,14 @@ const APPOINTMENT_STATES = new Set([
   "appointment_confirmed",
   "under_contract",
   "agreement_signed",
+  "converted",
+  "closed",
+  "won",
+]);
+
+const AGREEMENT_STATES = new Set([
+  "agreement_signed",
+  "under_contract",
   "converted",
   "closed",
   "won",
@@ -303,18 +332,35 @@ function isAppointmentLead(lead: GrowthLeadFact) {
   return APPOINTMENT_STATES.has(statusFor(lead));
 }
 
+function isAgreementLead(lead: GrowthLeadFact) {
+  return AGREEMENT_STATES.has(statusFor(lead));
+}
+
 function isClosedLead(lead: GrowthLeadFact) {
   return CLOSED_STATES.has(statusFor(lead));
 }
 
 function latestOutcomeByLead(outcomes: GrowthOutcomeFact[]) {
-  const byLead = new Map<string, GrowthOutcomeFact[]>();
+  const byLeadAndType = new Map<string, Map<string, GrowthOutcomeFact>>();
   for (const outcome of outcomes) {
-    const rows = byLead.get(outcome.leadId) ?? [];
-    rows.push(outcome);
-    byLead.set(outcome.leadId, rows);
+    const outcomeType = normalizeGrowthKey(outcome.outcomeType, "");
+    if (!outcome.leadId || !outcomeType) continue;
+    const rows = byLeadAndType.get(outcome.leadId) ?? new Map<string, GrowthOutcomeFact>();
+    const current = rows.get(outcomeType);
+    const occurredAt = Date.parse(outcome.occurredAt ?? "");
+    const currentOccurredAt = Date.parse(current?.occurredAt ?? "");
+    if (
+      !current ||
+      (Number.isFinite(occurredAt) &&
+        (!Number.isFinite(currentOccurredAt) || occurredAt >= currentOccurredAt))
+    ) {
+      rows.set(outcomeType, outcome);
+    }
+    byLeadAndType.set(outcome.leadId, rows);
   }
-  return byLead;
+  return new Map(
+    [...byLeadAndType.entries()].map(([leadId, rows]) => [leadId, [...rows.values()]]),
+  );
 }
 
 function outcomeHas(rows: GrowthOutcomeFact[] | undefined, ...types: string[]) {
@@ -323,13 +369,13 @@ function outcomeHas(rows: GrowthOutcomeFact[] | undefined, ...types: string[]) {
   return rows.some((row) => wanted.has(normalizeGrowthKey(row.outcomeType)));
 }
 
-function outcomeRevenue(rows: GrowthOutcomeFact[] | undefined) {
-  if (!rows?.length) return 0;
-  return rows.reduce((sum, row) => {
-    const type = normalizeGrowthKey(row.outcomeType);
-    if (type !== "closed" && type !== "referral_paid") return sum;
-    return sum + Math.max(0, finiteNumber(row.amountUsd, 0));
-  }, 0);
+function outcomeAmount(rows: GrowthOutcomeFact[] | undefined, outcomeType: string) {
+  const row = rows?.find((candidate) =>
+    normalizeGrowthKey(candidate.outcomeType, "") === outcomeType,
+  );
+  if (row?.amountUsd == null) return null;
+  const amount = Number(row.amountUsd);
+  return Number.isFinite(amount) && amount >= 0 ? amount : null;
 }
 
 interface MutableChannel {
@@ -340,9 +386,13 @@ interface MutableChannel {
   leads: number;
   qualified: number;
   appointments: number;
+  agreements: number;
   closes: number;
   spendUsd: number;
   attributedRevenueUsd: number;
+  referralFeesUsd: number;
+  closedRevenueRecordCount: number;
+  referralFeeRecordCount: number;
   impressions: number;
   clicks: number;
   platformLeads: number;
@@ -358,9 +408,13 @@ function emptyChannel(source: string, medium: string, campaign: string, paid: bo
     leads: 0,
     qualified: 0,
     appointments: 0,
+    agreements: 0,
     closes: 0,
     spendUsd: 0,
     attributedRevenueUsd: 0,
+    referralFeesUsd: 0,
+    closedRevenueRecordCount: 0,
+    referralFeeRecordCount: 0,
     impressions: 0,
     clicks: 0,
     platformLeads: 0,
@@ -382,12 +436,50 @@ function finalizeChannel(key: string, channel: MutableChannel): GrowthChannelEco
     Math.min(channel.closes, 5) / 5 * 0.25;
   const confidence = round(bounded(evidencePoints, 0, 1), 2);
   const flags: string[] = [];
-  if (channel.paid && channel.leads > 0 && channel.spendUsd === 0) flags.push("spend_missing");
+  const spendMissing = channel.paid && channel.leads > 0 && channel.spendUsd === 0;
+  if (spendMissing) flags.push("spend_missing");
   if (channel.spendUsd > 0 && channel.leads === 0) flags.push("conversion_tracking_gap");
   if (channel.leads >= 5 && leadToQualifiedRate < 10) flags.push("low_qualification_rate");
   if (channel.leads >= 5 && channel.appointments === 0) flags.push("appointment_gap");
-  const roas = safeDivide(channel.attributedRevenueUsd, channel.spendUsd);
-  if (channel.closes >= 2 && roas != null && roas >= 3) flags.push("scale_candidate");
+  const closedRevenueMissingCount = Math.max(
+    0,
+    channel.closes - channel.closedRevenueRecordCount,
+  );
+  const closedRevenueComplete = channel.closes > 0 && closedRevenueMissingCount === 0;
+  const referralFeeExpectedCloseCount =
+    PORTAL_SOURCES.has(channel.source) || channel.medium.includes("referral")
+      ? channel.closes
+      : 0;
+  const referralFeeMissingCount = Math.max(
+    0,
+    referralFeeExpectedCloseCount - channel.referralFeeRecordCount,
+  );
+  const referralFeeReviewRequired = referralFeeMissingCount > 0;
+  const economicsComplete = closedRevenueComplete && !referralFeeReviewRequired && !spendMissing;
+  const trackedContributionUsd = economicsComplete
+    ? round(channel.attributedRevenueUsd - channel.referralFeesUsd - channel.spendUsd)
+    : null;
+  const trackedContributionRate = trackedContributionUsd == null || channel.attributedRevenueUsd <= 0
+    ? null
+    : round(trackedContributionUsd / channel.attributedRevenueUsd * 100, 1);
+  const roas = economicsComplete
+    ? safeDivide(channel.attributedRevenueUsd, channel.spendUsd)
+    : null;
+  if (closedRevenueMissingCount > 0) flags.push("closed_revenue_missing");
+  if (referralFeeReviewRequired) flags.push("referral_fee_review_required");
+  if (trackedContributionUsd != null && trackedContributionUsd < 0) {
+    flags.push("negative_tracked_contribution");
+  }
+  if (
+    channel.closes >= 2 &&
+    roas != null &&
+    roas >= 3 &&
+    trackedContributionUsd != null &&
+    trackedContributionUsd > 0 &&
+    !referralFeeReviewRequired
+  ) {
+    flags.push("scale_candidate");
+  }
   if (channel.leads >= 10 && channel.spendUsd === 0 && !channel.paid && qualityScore >= 25) {
     flags.push("owned_channel_winner");
   }
@@ -404,15 +496,29 @@ function finalizeChannel(key: string, channel: MutableChannel): GrowthChannelEco
     leads: channel.leads,
     qualified: channel.qualified,
     appointments: channel.appointments,
+    agreements: channel.agreements,
     closes: channel.closes,
     spendUsd: round(channel.spendUsd),
     attributedRevenueUsd: round(channel.attributedRevenueUsd),
+    referralFeesUsd: round(channel.referralFeesUsd),
+    trackedContributionUsd,
+    trackedContributionRate,
+    closedRevenueRecordCount: channel.closedRevenueRecordCount,
+    closedRevenueCoverageRate: channel.closes
+      ? rate(channel.closedRevenueRecordCount, channel.closes)
+      : null,
+    referralFeeRecordCount: channel.referralFeeRecordCount,
+    referralFeeExpectedCloseCount,
+    referralFeeCoverageRate: referralFeeExpectedCloseCount
+      ? rate(channel.referralFeeRecordCount, referralFeeExpectedCloseCount)
+      : null,
     impressions: channel.impressions,
     clicks: channel.clicks,
     platformLeads: channel.platformLeads,
     costPerLead: channel.leads ? round(channel.spendUsd / channel.leads) : null,
     costPerQualifiedLead: channel.qualified ? round(channel.spendUsd / channel.qualified) : null,
     costPerAppointment: channel.appointments ? round(channel.spendUsd / channel.appointments) : null,
+    costPerSignedClient: channel.agreements ? round(channel.spendUsd / channel.agreements) : null,
     costPerClose: channel.closes ? round(channel.spendUsd / channel.closes) : null,
     returnOnAdSpend: roas == null ? null : round(roas),
     leadToQualifiedRate,
@@ -520,6 +626,21 @@ function buildOpportunityRadar(input: {
   const missingSpendLeads = channels
     .filter((channel) => channel.flags.includes("spend_missing"))
     .reduce((sum, channel) => sum + channel.leads, 0);
+  const closesMissingRevenue = channels
+    .filter((channel) => channel.flags.includes("closed_revenue_missing"))
+    .reduce(
+      (sum, channel) => sum + Math.max(0, channel.closes - channel.closedRevenueRecordCount),
+      0,
+    );
+  const closesNeedingReferralReview = channels
+    .filter((channel) => channel.flags.includes("referral_fee_review_required"))
+    .reduce(
+      (sum, channel) => sum + Math.max(
+        0,
+        channel.referralFeeExpectedCloseCount - channel.referralFeeRecordCount,
+      ),
+      0,
+    );
 
   if (missingSpendLeads > 0) {
     opportunities.push({
@@ -532,6 +653,34 @@ function buildOpportunityRadar(input: {
       actionClass: "requires_approval",
       evidence: { missingSpendLeads, paidLeadSpendCoverageRate: summary.paidLeadSpendCoverageRate },
       recommendedNextStep: "Import daily portal and ad-platform spend, then reconcile campaign UTMs before changing budgets.",
+    });
+  }
+
+  if (closesMissingRevenue > 0) {
+    opportunities.push({
+      key: "complete_closed_revenue_evidence",
+      type: "measurement",
+      title: "Record actual closed brokerage revenue",
+      rationale: `${closesMissingRevenue} closed outcome${closesMissingRevenue === 1 ? "" : "s"} lack an actual recorded revenue amount. Close counts without revenue cannot support truthful ROAS or contribution decisions.`,
+      score: bounded(76 + Math.min(closesMissingRevenue * 3, 18), 0, 100),
+      confidence: 0.98,
+      actionClass: "recommend",
+      evidence: { closesMissingRevenue },
+      recommendedNextStep: "Record actual brokerage revenue through the protected Lead Center outcome workflow; never substitute sale price, list price, projected commission, or an estimate.",
+    });
+  }
+
+  if (closesNeedingReferralReview > 0) {
+    opportunities.push({
+      key: "reconcile_referral_fee_evidence",
+      type: "measurement",
+      title: "Reconcile referral-fee burden before scaling",
+      rationale: `${closesNeedingReferralReview} portal or referral-channel close${closesNeedingReferralReview === 1 ? "" : "s"} lack complete referral-fee evidence. The system will not treat missing fee evidence as zero or recommend scale from incomplete economics.`,
+      score: bounded(74 + Math.min(closesNeedingReferralReview * 3, 18), 0, 100),
+      confidence: 0.95,
+      actionClass: "recommend",
+      evidence: { closesNeedingReferralReview },
+      recommendedNextStep: "Confirm whether each close incurred a referral fee and record the actual fee as a separate referral-paid outcome; do not infer a contractual percentage.",
     });
   }
 
@@ -702,8 +851,24 @@ export function buildGrowthIntelligence(input: {
     row.leads += 1;
     if (isQualifiedLead(lead) || outcomeHas(leadOutcomes, "qualified")) row.qualified += 1;
     if (isAppointmentLead(lead) || outcomeHas(leadOutcomes, "appointment")) row.appointments += 1;
-    if (isClosedLead(lead) || outcomeHas(leadOutcomes, "closed")) row.closes += 1;
-    row.attributedRevenueUsd += outcomeRevenue(leadOutcomes);
+    if (
+      isAgreementLead(lead) ||
+      outcomeHas(leadOutcomes, "agreement_signed", "under_contract", "closed")
+    ) {
+      row.agreements += 1;
+    }
+    const closed = isClosedLead(lead) || outcomeHas(leadOutcomes, "closed");
+    if (closed) row.closes += 1;
+    const closedRevenue = outcomeAmount(leadOutcomes, "closed");
+    if (closedRevenue !== null) {
+      row.attributedRevenueUsd += closedRevenue;
+      row.closedRevenueRecordCount += 1;
+    }
+    const referralFee = outcomeAmount(leadOutcomes, "referral_paid");
+    if (referralFee !== null) {
+      row.referralFeesUsd += referralFee;
+      if (closed) row.referralFeeRecordCount += 1;
+    }
     const responseMinutes = firstResponseMinutes(lead);
     if (responseMinutes !== null) row.firstResponseMinutes.push(responseMinutes);
     channels.set(key, row);
@@ -732,12 +897,42 @@ export function buildGrowthIntelligence(input: {
       leads: acc.leads + channel.leads,
       qualified: acc.qualified + channel.qualified,
       appointments: acc.appointments + channel.appointments,
+      agreements: acc.agreements + channel.agreements,
       closes: acc.closes + channel.closes,
       spendUsd: acc.spendUsd + channel.spendUsd,
       revenueUsd: acc.revenueUsd + channel.attributedRevenueUsd,
+      referralFeesUsd: acc.referralFeesUsd + channel.referralFeesUsd,
+      closedRevenueRecordCount: acc.closedRevenueRecordCount + channel.closedRevenueRecordCount,
+      referralFeeEvidenceRecordCount: acc.referralFeeEvidenceRecordCount + Math.min(
+        channel.referralFeeRecordCount,
+        channel.referralFeeExpectedCloseCount,
+      ),
+      referralFeeExpectedCloseCount:
+        acc.referralFeeExpectedCloseCount + channel.referralFeeExpectedCloseCount,
     }),
-    { leads: 0, qualified: 0, appointments: 0, closes: 0, spendUsd: 0, revenueUsd: 0 },
+    {
+      leads: 0,
+      qualified: 0,
+      appointments: 0,
+      agreements: 0,
+      closes: 0,
+      spendUsd: 0,
+      revenueUsd: 0,
+      referralFeesUsd: 0,
+      closedRevenueRecordCount: 0,
+      referralFeeEvidenceRecordCount: 0,
+      referralFeeExpectedCloseCount: 0,
+    },
   );
+
+  const economicsComplete = totals.closes > 0 && finalizedChannels.every((channel) =>
+    !channel.flags.includes("spend_missing") &&
+    !channel.flags.includes("closed_revenue_missing") &&
+    !channel.flags.includes("referral_fee_review_required"),
+  );
+  const trackedContributionUsd = economicsComplete
+    ? round(totals.revenueUsd - totals.referralFeesUsd - totals.spendUsd)
+    : null;
 
   const attributedLeads = input.leads.filter(isAttributed).length;
   const paidLeads = finalizedChannels
@@ -782,13 +977,36 @@ export function buildGrowthIntelligence(input: {
     leads: totals.leads,
     qualified: totals.qualified,
     appointments: totals.appointments,
+    agreements: totals.agreements,
     closes: totals.closes,
     spendUsd: round(totals.spendUsd),
     attributedRevenueUsd: round(totals.revenueUsd),
+    referralFeesUsd: round(totals.referralFeesUsd),
+    trackedContributionUsd,
+    trackedContributionRate: trackedContributionUsd != null && totals.revenueUsd > 0
+      ? round(trackedContributionUsd / totals.revenueUsd * 100, 1)
+      : null,
+    closedRevenueRecordCount: totals.closedRevenueRecordCount,
+    closedRevenueCoverageRate: totals.closes
+      ? rate(totals.closedRevenueRecordCount, totals.closes)
+      : null,
+    referralFeeRecordCount: totals.referralFeeEvidenceRecordCount,
+    referralFeeExpectedCloseCount: totals.referralFeeExpectedCloseCount,
+    referralFeeCoverageRate: totals.referralFeeExpectedCloseCount
+      ? rate(totals.referralFeeEvidenceRecordCount, totals.referralFeeExpectedCloseCount)
+      : null,
     blendedCostPerLead: totals.leads ? round(totals.spendUsd / totals.leads) : null,
+    blendedCostPerQualifiedLead: totals.qualified
+      ? round(totals.spendUsd / totals.qualified)
+      : null,
     blendedCostPerAppointment: totals.appointments ? round(totals.spendUsd / totals.appointments) : null,
+    blendedCostPerSignedClient: totals.agreements
+      ? round(totals.spendUsd / totals.agreements)
+      : null,
     blendedCostPerClose: totals.closes ? round(totals.spendUsd / totals.closes) : null,
-    returnOnAdSpend: totals.spendUsd ? round(totals.revenueUsd / totals.spendUsd) : null,
+    returnOnAdSpend: totals.spendUsd && economicsComplete
+      ? round(totals.revenueUsd / totals.spendUsd)
+      : null,
     attributedLeadRate: rate(attributedLeads, input.leads.length),
     paidLeadSpendCoverageRate: rate(paidLeadsWithSpend, paidLeads),
     staleNurtureCandidates,

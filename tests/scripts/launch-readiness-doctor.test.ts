@@ -17,6 +17,12 @@ import {
   MLS_PATTERN,
   MLS_ALLOWLIST,
   CANONICAL_DOMAIN,
+  REQUIRED_PRODUCTION_ENV_VARS,
+  OPTIONAL_EMAIL_PROVIDER_SELECTOR,
+  PRODUCTION_FAIL_CLOSED_GATES,
+  parseVercelProductionEnvNames,
+  classifyEmailProviderPresence,
+  classifyFailClosedGatePresence,
 } from "../../scripts/amm/launch-readiness-doctor.mjs";
 
 // ---------------------------------------------------------------------------
@@ -282,6 +288,74 @@ describe("findMlsMarkers", () => {
     expect(MLS_ALLOWLIST).toContain("_inbox_flexmls");
     expect(MLS_ALLOWLIST).toContain("listing.schema");
     expect(MLS_ALLOWLIST).toContain("listing-sanitizer");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Secret-safe Vercel Production environment metadata
+// ---------------------------------------------------------------------------
+
+describe("parseVercelProductionEnvNames", () => {
+  it("returns only Production-scoped names from Vercel metadata", () => {
+    const result = parseVercelProductionEnvNames(JSON.stringify({
+      envs: [
+        { key: "DATABASE_URL", target: ["production"], type: "sensitive" },
+        { key: "DATABASE_URL", target: [["production"]], type: "sensitive" },
+        { key: "PREVIEW_ONLY", target: ["preview"], type: "plain" },
+        { key: "EMAIL_ENABLED", target: ["preview", "production"], type: "sensitive" },
+      ],
+    }));
+
+    expect(result).toEqual(["DATABASE_URL", "EMAIL_ENABLED"]);
+  });
+
+  it("rejects manifests that contain a value-bearing field", () => {
+    expect(() => parseVercelProductionEnvNames({
+      envs: [{ key: "DATABASE_URL", target: ["production"], value: "must-not-be-read" }],
+    })).toThrow("vercel_env_manifest_contains_values");
+  });
+
+  it("rejects invalid JSON and invalid top-level shapes", () => {
+    expect(() => parseVercelProductionEnvNames("not-json")).toThrow(
+      "vercel_env_manifest_invalid_json",
+    );
+    expect(() => parseVercelProductionEnvNames({ variables: [] })).toThrow(
+      "vercel_env_manifest_shape_invalid",
+    );
+  });
+});
+
+describe("Production provider and fail-closed gate presence", () => {
+  it("treats EMAIL_PROVIDER as optional when the existing Resend key is present", () => {
+    expect(classifyEmailProviderPresence(new Set(["RESEND_API_KEY"]))).toEqual({
+      ok: true,
+      mode: "resend_inferred_from_existing_key",
+      valueVerificationRequired: false,
+    });
+    expect(REQUIRED_PRODUCTION_ENV_VARS).not.toContain(OPTIONAL_EMAIL_PROVIDER_SELECTOR);
+  });
+
+  it("prefers an explicit selector and fails when neither selector nor key exists", () => {
+    expect(classifyEmailProviderPresence(["EMAIL_PROVIDER", "RESEND_API_KEY"])).toEqual({
+      ok: true,
+      mode: "explicit_selector_present",
+      valueVerificationRequired: true,
+    });
+    expect(classifyEmailProviderPresence([])).toEqual({
+      ok: false,
+      mode: "provider_unconfigured",
+      valueVerificationRequired: false,
+    });
+  });
+
+  it("classifies absent growth gates as fail-closed without guessing present values", () => {
+    const result = classifyFailClosedGatePresence(new Set(["GROWTH_SEARCH_IMPORT_ENABLED"]));
+    expect(result.absentSafe).toEqual([
+      "GROWTH_SPEND_IMPORT_ENABLED",
+      "GROWTH_LOCAL_PROFILE_IMPORT_ENABLED",
+    ]);
+    expect(result.presentNeedsValueVerification).toEqual(["GROWTH_SEARCH_IMPORT_ENABLED"]);
+    expect(PRODUCTION_FAIL_CLOSED_GATES).toHaveLength(3);
   });
 });
 

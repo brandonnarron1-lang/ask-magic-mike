@@ -3,12 +3,13 @@ import { BlackDiamondHeader } from "../components/black-diamond/BlackDiamondHead
 import { Footer } from "../components/black-diamond/BlackDiamondShell";
 import { PageTracker } from "../components/black-diamond/PageTracker";
 import { RealEstateReviewPlanner } from "../components/black-diamond/RealEstateReviewPlanner";
+import { publicPageMetadata } from "../lib/publicMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata({
   title: "Real Estate Review Planner",
   description: "Build a private, device-saved seller, buyer, homeowner, or relocation review plan before requesting local guidance.",
-  alternates: { canonical: "/plan" },
-};
+  path: "/plan",
+});
 
 export default function PlanPage() {
   return (
@@ -18,7 +19,7 @@ export default function PlanPage() {
         <div className="mx-auto max-w-7xl"><BlackDiamondHeader /></div>
       </section>
 
-      <section className="px-5 pb-12 pt-10 sm:px-8 sm:pb-16 lg:px-10 lg:pt-16">
+      <section id="page-content" tabIndex={-1} className="px-5 pb-12 pt-10 sm:px-8 sm:pb-16 lg:px-10 lg:pt-16">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_22rem] lg:items-end">
           <div>
             <p className="amm-eyebrow">Real Estate Review Planner</p>
