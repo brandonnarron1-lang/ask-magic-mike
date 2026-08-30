@@ -2137,3 +2137,54 @@ provider action, social publication, DNS change, spend, deletion, or
 NellySelly interaction occurred. Exact-head CI, immutable Preview, protected
 no-write browser QA, runtime logs, and final secret scans remain to be bound to
 the Draft candidate seal.
+
+## Phase 9 WordPress homepage CTA restoration packet — 2026-08-29
+
+Authenticated WordPress inspection identified the exact source of the hidden
+homepage CTA and confirmed the existing lead path without changing either:
+
+- active Lead Ops plugin version `2.10.0`, source SHA-256
+  `41de351d57e91b8ecf1d611d8b052381166effaf693319b0f9e8da32f5d8e972`;
+- one `wp_head` homepage rule hiding `.amm-cta` / `.amm-cta--dark`;
+- one separate output-buffer filter hiding only `.amm-widget`;
+- Canonical Bridge `1.1.0`, signing secret configured, allowlist limited to
+  Form 3, and the controlled Form 3 acceptance entry forwarded in one attempt;
+- Form 3's sole Gravity Forms Admin Notification inactive, so the canonical
+  backend remains the one internal notification owner; and
+- no WordPress setting, plugin file, page, form, cache, database, lead,
+  notification, provider, DNS, or NellySelly mutation.
+
+The offline packet changes only the plugin header version, class version, and
+the exact homepage suppression branch. Proposed SHA-256:
+`6b9a30de24e3fbbbac5aa49def7552afd6b2e21b7ede7beafa8ad095d9a9f44c`.
+It preserves the current CTA href, public phone, Form 3, Canonical Bridge, and
+floating-widget suppression. Focused/full release verification and exact-head
+candidate evidence follow after implementation review.
+
+Pre-publication visual QA used a localhost-only transformation of the fresh
+public homepage. It removed the one reviewed hide rule in memory, stripped 64
+scripts and two iframes, and blocked scripts, connections, frames, and form
+actions through CSP. It did not save or submit the page.
+
+- Desktop 1440x1000: CTA visible at 920x339 px; one exact tracked anchor; no
+  horizontal overflow; zero active scripts/iframes.
+- Mobile 390x844: CTA visible at 355 px wide; button 317x76 px; no horizontal
+  overflow; zero active scripts/iframes.
+- Keyboard: the native anchor remained in tab order and accepted focus with a
+  visible browser outline.
+- Visual inspection: Black Diamond panel, Mike image, address-first copy,
+  public `252-243-7700` phone, and surrounding brokerage hero remained
+  contained. Script-dependent icon glyphs were intentionally not an acceptance
+  signal in this no-script preview.
+
+Final exact-engine acceptance used Node `24.18.0`:
+
+- deployable-source/NellySelly isolation: PASS;
+- release safety: 14/14 PASS;
+- Vitest: 273 files / 3,383 tests PASS;
+- strict TypeScript: PASS;
+- full ESLint: PASS;
+- optimized Next.js 15.5.21 build: PASS, 59 static pages;
+- route manifest: PASS, 95 active / 17 acknowledged duplicate routes;
+- Production dependency audit: no known vulnerabilities; and
+- `git diff --check`: PASS.

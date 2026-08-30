@@ -2,6 +2,35 @@
 
 Updated 2026-08-29.
 
+## Phase 9 WordPress homepage CTA restoration packet — 2026-08-29
+
+- **Reuse decision:** repair the existing Lead Ops plugin in place. The
+  existing page-149 CTA, `/value` compatibility route, Form 3 Canonical Bridge,
+  Neon backend, notification service, and protected Lead Center remain
+  authoritative; no parallel widget, form, database, notification engine, or
+  admin system is added.
+- **Authenticated truth:** plugin `2.10.0` emits the one confirmed CTA hide
+  rule, while a separate filter hides the floating widget. Canonical Bridge
+  `1.1.0` is enabled only for Form 3 with its secret configured and a prior
+  one-attempt controlled forward. Gravity Forms' own Admin Notification is
+  inactive and remains untouched.
+- **Candidate:** an offline, read-only verifier pins the exact live source hash,
+  requires one suppression block and one widget guard, derives the reviewed
+  `2.10.1` result hash, and fails closed on drift or reapplication. The patch
+  changes only two version declarations and the homepage suppression branch.
+- **Acceptance:** the authenticated live 127,762-byte source returns
+  `ready_for_review`; localhost desktop/mobile preview shows one visible,
+  contained, keyboard-focusable CTA with no horizontal overflow and no active
+  scripts/frames. Exact Node 24.18.0 passes 273 files / 3,383 tests, strict
+  typecheck, full ESLint, optimized 59-page build, 95/17 route proof, 14/14
+  safety, deployable-source isolation, and zero known Production dependency
+  vulnerabilities.
+- **Authority boundary:** no WordPress save or cache purge is authorized. The
+  exact future plugin-save gate is documented in
+  [`phase9/WORDPRESS_HOMEPAGE_CTA_RESTORATION_PACKET.md`](./phase9/WORDPRESS_HOMEPAGE_CTA_RESTORATION_PACKET.md).
+  No Production, page, form, database, lead, notification, provider, DNS,
+  publication, spend, deletion, or NellySelly mutation occurred.
+
 ## Phase 9 WordPress homepage visibility truth — 2026-08-29
 
 - **Measured constraint:** authenticated Production Growth/Distribution shows

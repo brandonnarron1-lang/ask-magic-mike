@@ -1,0 +1,28 @@
+diff --git a/wp-content/plugins/ask-magic-mike-lead-ops-social-upgrade/ask-magic-mike-lead-ops-social-upgrade.php b/wp-content/plugins/ask-magic-mike-lead-ops-social-upgrade/ask-magic-mike-lead-ops-social-upgrade.php
+--- a/wp-content/plugins/ask-magic-mike-lead-ops-social-upgrade/ask-magic-mike-lead-ops-social-upgrade.php
++++ b/wp-content/plugins/ask-magic-mike-lead-ops-social-upgrade/ask-magic-mike-lead-ops-social-upgrade.php
+@@ -2,7 +2,7 @@
+ /**
+  * Plugin Name: Ask Magic Mike - Lead Ops & Social Share Upgrade
+  * Description: Ask Magic Mike Lead Ops, Social & Visual System — v2.0.0 deploys the approved platform-ready full-canvas Mike crops as real hero backgrounds (no CSS-mask portrait). Preserves lead ops, widget rules, Constant Contact suppression.
+- * Version: 2.10.0
++ * Version: 2.10.1
+  * Author: Ask Magic Mike / Our Town Properties
+  * Requires at least: 6.0
+  * Requires PHP: 7.4
+@@ -16,3 +16,3 @@ final class AMM_Lead_Ops_Social {
+-    const VERSION = '2.10.0';
++    const VERSION = '2.10.1';
+     const LEADS_TABLE = 'amm_leads';
+     const OG_DESC = 'Get a smarter starting point with local follow-up from Mike Eatmon and Our Town Properties in Wilson, NC. Not an appraisal or guaranteed sale price.';
+@@ -113,9 +113,9 @@
+             echo "main.amm-page{margin-top:0 !important;}\n";
+         }
+         if ($is_home && !$is_amm) {
+-            // Homepage only: remove the dark Ask Magic Mike CTA block.
+-            echo ".amm-cta,.amm-cta--dark{display:none !important;}\n";
++            // Keep the existing homepage CTA in the page builder's native layout.
++            // The floating widget remains suppressed separately in filter_homepage().
+         }
+         echo "</style>\n<!-- Ask Magic Mike: visual containment active v" . esc_attr(self::VERSION) . " -->\n";
+     }

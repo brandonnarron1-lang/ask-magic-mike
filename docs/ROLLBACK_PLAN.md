@@ -107,6 +107,17 @@ exact prior GTM source only when required by the approved rollback. Do not
 change the cookie-choice provider, purge unrelated cache, edit the parent
 theme, or touch NellySelly.
 
+For the separately gated homepage CTA restoration, first download and hash the
+complete active Lead Ops `2.10.0` plugin file. The accepted pre-change SHA-256
+is `41de351d57e91b8ecf1d611d8b052381166effaf693319b0f9e8da32f5d8e972`;
+the reviewed `2.10.1` result is
+`6b9a30de24e3fbbbac5aa49def7552afd6b2e21b7ede7beafa8ad095d9a9f44c`.
+If public acceptance fails, restore the exact backed-up `2.10.0` bytes and
+verify the original hash. Do not edit page 149, reactivate the Gravity Forms
+notification, disable Canonical Bridge Form 3 forwarding, alter lead or
+notification records, purge a cache without separate approval, or touch
+NellySelly.
+
 ## Email
 
 Set `EMAIL_ENABLED=false` / notification mode `disabled` to stop provider sends while
