@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-08-29 — Secret-safe Vercel Production environment truth
+
+- Added a name-and-scope-only Vercel Production manifest path to the launch
+  doctor, with value-bearing input rejection and no secret file creation.
+- Aligned email-provider readiness with the deployed runtime contract:
+  `EMAIL_PROVIDER` is explicit when present and Resend is safely inferred from
+  the existing `RESEND_API_KEY` when the selector is absent.
+- Added fail-closed classification for the three growth-import gates and tests
+  covering Production scope filtering, duplicate collapse, secret-field
+  rejection, provider fallback, and gate presence.
+- Documented the authenticated read-only evidence in
+  `docs/phase9/VERCEL_ENV_PRESENCE_TRUTH.md`.
+
 ## 2026-08-29 — Singular cumulative release authority
 
 - Added one machine-readable, typed release-authority manifest that identifies
