@@ -4,32 +4,25 @@ Updated 2026-08-30 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
-## Cumulative Phase 9 release candidate — exact gate not yet received
+## Application release authority — no active candidate
 
-- Draft PR [#238](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238)
-  is the linear cumulative application candidate for the already-built Phase 9
-  stack. Exact payload head is
-  `9232641329acb8a02ce4cf2419cb12768ce33d17`; the prior PR #238 head remains
-  preserved at `rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224`.
-- One executable cutover now covers only the five reviewed additive
-  migrations. It requires exact Production Neon identity, source hashes,
-  compatible ledger shape, absent targets, disabled import gates, a validated
-  backup, bounded locks, one transaction, unchanged existing rows, hardened
-  postconditions, and rollback on any failure.
-- The corrected read-only Production preflight passes against the exact
-  unpooled endpoint with `service_role` present and the optional browser roles
-  absent. Execution will repeat that proof under lock before applying DDL.
-- Exact-head local release, hosted CI, immutable Preview, protected no-write
-  browser, runtime-log, dependency, and secret-scan evidence are sealed on the
-  candidate head. The gate remains unconsumed and is now the only requestable
-  application release gate.
-- The only phrase that can authorize the five
-  migrations, exact PR merge, and same-commit Production deployment is:
-  `APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT`.
-- That phrase does not authorize enabling any growth import, provider access,
-  real or synthetic lead submission, email/SMS/Push, WordPress publication,
-  social/GBP/email publication, spend, DNS change, deletion, data import, or
-  NellySelly action.
+- PR [#238](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238)
+  is accepted at merge `cef0f366380e2e8aa95a70cf45a70830d7997d45`,
+  tree `e6f388311fd07fc84ed0e580b77b190f7c56f458`, and deployment
+  `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe`.
+- All five reviewed migrations are applied exactly once and passed postflight;
+  all three growth import gates remain false.
+- The PR #238 approval is consumed and cannot authorize any later action.
+- There is no active application candidate or requestable application merge,
+  migration, or Production deployment gate.
+- Draft PR [#244](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/244)
+  is a post-cutover metadata-reconciliation review vehicle only. After its
+  exact head, hosted checks, Preview identity, protected no-write QA, and
+  rollback are frozen, it requires a newly generated exact gate before merge
+  or Production deployment.
+- No current authority permits a growth import, provider access, lead
+  submission, email/SMS/Push, WordPress publication, social/GBP/email
+  publication, spend, DNS change, deletion, data import, or NellySelly action.
 
 ## Cross-domain measurement activation dependency — later, not currently requestable
 
@@ -127,6 +120,14 @@ new `main`, then rerun Node 24 CI and Vercel Preview before using its gate.
    were verified. It contained no migration, lead, valid analytics event,
    notification, message, WordPress, DNS, publication, spend, or NellySelly
    action.
+9. PR [#238](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238)
+   — its exact cumulative gate was received; reviewed head
+   `9232641329acb8a02ce4cf2419cb12768ce33d17` was merged as
+   `cef0f366380e2e8aa95a70cf45a70830d7997d45` with tree
+   `e6f388311fd07fc84ed0e580b77b190f7c56f458` and accepted on Production
+   deployment `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe`. The five migrations were
+   applied once and verified; no import, lead/message, WordPress, provider,
+   DNS, publication, spend, deletion, or NellySelly action occurred.
 
 These completed gates are exhausted and must not be reused as authority for a
 new action. None authorized a social/GBP post, email campaign, QR
@@ -142,13 +143,13 @@ provider action, or deletion.
 - Stale encrypted Upstash variable names remain ignored. Their deletion was not
   included and remains a separate action.
 
-## Preserved component train — consolidated into PR #238
+## Preserved component train — included in accepted PR #238
 
 The entries below preserve the exact PR #210–#237 implementation lineage that
 is included once in PR #238. They are historical evidence, not a sequential
 Production queue. Their individual approval phrases are retained only to prove
 what each component formerly required; none is currently requestable or may be
-replayed. Use only the PR #238 cumulative gate above.
+replayed. A future application release must create a new exact gate.
 
 Branches, rescue refs, checks, and evidence remain recoverable. Do not merge an
 individual component PR, close/delete its lineage as part of this release, or

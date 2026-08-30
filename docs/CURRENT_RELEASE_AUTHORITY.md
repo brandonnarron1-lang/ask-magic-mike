@@ -1,106 +1,100 @@
 # Current Release Authority
 
-Updated 2026-08-30. This is the canonical operator record for the next Ask
-Magic Mike application release. Historical per-PR gates remain evidence only.
+Updated 2026-08-30 from the accepted PR #238 Production cutover. This is the
+canonical operator record for current application release authority.
+Historical approval phrases are evidence only and cannot be replayed.
 
 The machine-readable companion is
 [`config/current-release-authority.json`](../config/current-release-authority.json).
-The protected Growth capability ledger consumes the same manifest.
+The protected Growth capability ledger consumes the same fail-closed manifest.
 
 ## Accepted Production
 
-- Released PR: **#209**
-- Merge commit: `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`
-- Vercel deployment: `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`
-- Disposition: live and accepted; its release gate is consumed and cannot
-  authorize another action.
+- Released PR: [#238](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238)
+- Reviewed head: `9232641329acb8a02ce4cf2419cb12768ce33d17`
+- Merge commit: `cef0f366380e2e8aa95a70cf45a70830d7997d45`
+- Production tree: `e6f388311fd07fc84ed0e580b77b190f7c56f458`
+- Vercel deployment: `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe`
+- Main Release Gate: [run 33313337535](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33313337535), successful
+- Canonical URL: `https://www.askmagicmike.com`
+- Immediate application rollback: `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`
+- Disposition: live and accepted
 
-## Single cumulative candidate
+## Active application candidate
 
-- Draft PR: [#238](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238)
-- Branch: `codex/phase9-cumulative-release-20260829`
-- Exact payload head: `9232641329acb8a02ce4cf2419cb12768ce33d17`
-- Exact payload tree: `e6f388311fd07fc84ed0e580b77b190f7c56f458`
-- Hosted Release Gate: [run 33296816755](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33296816755), successful on the exact payload
-- Identity-attested Preview: `dpl_5LPXmh9LJdGqmzGCFonRTQJvUU1X`, [target Preview](https://ask-magic-mike-1e44zit4f-eyes-up-industries.vercel.app), ready on the exact payload
-- Protected no-write Preview QA: [run 33297711504](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33297711504), successful with `SAFE_DB_WRITE=false`, exact Preview identity, explicit Production-endpoint rejection, and provider delivery disabled
-- Prior PR #238 head rescue: `rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224`
+**None.** The manifest records `candidate: null`. There is no current
+application approval phrase, merge authority, migration authority, or
+Production deployment authority.
 
-PR #238 fast-forwards the tested Phase 9 component tail and later reconciliation,
-environment-presence, durable Neon Lead Center, and cumulative-cutover work
-through PR #243 into one reviewable application candidate.
-Those component PRs, branches, rescue refs, checks, and evidence remain
-preserved as lineage, but none has independent current merge or Production
-authority. Do not start with PR #210 and do not replay an individual component
-gate.
-
-PR #238 contains the hash-pinned, backup-first runner for exactly five additive
-migrations, including the service-role-only Neon functions required by the
-canonical Lead Center APIs. All import gates stay false. A migration release
-does not authorize importing a report.
-
-The corrected read-only Production preflight passed on 2026-08-30 against the
-exact unpooled Neon endpoint. Canonical Neon has `service_role` and intentionally
-lacks the optional Supabase `anon` and `authenticated` roles; the runner treats
-those absent browser roles as denied and still fails closed on every required
-schema, target, ledger, and privilege condition. Re-run the preflight under lock
-immediately before any authorized execution.
-
-## Reused controlled-mutation proof
-
-The canonical Lead Center write path was already exercised on the isolated
-Neon Preview branch at application commit
-`382ebe32d41a23eeb0e4a969c733be78930ba87a`. That controlled run proved one
-test-marked lead, idempotent replay, durable note/task/patch/assignment IDs,
-authenticated readback, skipped notifications with zero provider attempts,
-and terminal communication-suppressed closeout. Its evidence is preserved in
-[`phase9/NEON_ADMIN_API_PERSISTENCE_QA_EVIDENCE.md`](./phase9/NEON_ADMIN_API_PERSISTENCE_QA_EVIDENCE.md).
-
-PR #238 contains that commit. A bounded comparison found zero changes across
-the 36 public-lead, admin-lead, persistence, Preview-safety, and candidate
-migration files covered by the controlled run. Their current deterministic
-surface SHA-256 is
-`823997fb72aed87a9c73e313c682361055a8622bc8d79c16dfbd62e7184c67d4`, and the
-candidate migration remains hash-identical at
-`f50ffe91740fdd0690a87d673daf9e5753f122e19279ef84d729d9435d7adc35`.
-The authority manifest now enforces both hashes. No duplicate synthetic lead
-was created merely to repeat already-proven behavior.
-
-## Exact gate
-
-The current Production authority is **HOLD** until this exact phrase is supplied:
+The approval supplied for PR #238 is consumed and exhausted:
 
 ```text
 APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT
 ```
 
-The phrase is valid only for the exact PR #238 head and reviewed migration
-hashes recorded in the manifest. Any head, tree, migration, target, or gate
-drift invalidates the approval and requires fresh evidence.
+That text is retained only as a release receipt. It cannot authorize PR #244,
+another commit, another migration, a redeploy, an import, or any external
+action.
 
-## Ordered execution
+## Released cutover receipt
 
-1. Revalidate exact PR head/tree, hosted checks, Preview identity, and rollback.
-2. Run the guarded read-only Production preflight against the exact unpooled
-   Neon Production endpoint using a securely entered connection.
-3. Confirm all three growth import gates are explicitly false.
-4. After the exact gate, execute and verify the five migrations through
-   `pnpm run phase9:cumulative-growth:cutover -- --execute`.
-5. Merge only the exact PR #238 head without rewriting history.
-6. Deploy only that reviewed commit to the canonical Vercel project.
-7. Verify health, public routes, authorization boundaries, logs, database
-   postconditions, and the rollback deployment.
+The accepted cutover applied exactly these five hash-pinned migrations once:
 
-## Preserved review lineage
+| Version | SHA-256 |
+| --- | --- |
+| `20260824193000` | `9640e5807622d88c0ca3b1074ea3a0f4d304ca493dbe9ab1d573243e858ee6a1` |
+| `20260824220000` | `4d1ec2947134145a75a8b82e2edef71fcd7d8b0974ebfb909d838d1378e81626` |
+| `20260825033000` | `68f292f8e1773c9d2b999c61311362576848020176c5dbdeaf0550ba4795047c` |
+| `20260825060000` | `705fa33d1516451e721cd30d9991084ff3dae987849a2f47981eaeff762a561a` |
+| `20260830190000` | `f50ffe91740fdd0690a87d673daf9e5753f122e19279ef84d729d9435d7adc35` |
 
-PRs #210 through #243 remain preserved review records. Advancing PR #238 by
-fast-forward caused GitHub to mark PR #239 incorporated into its base; no
-Production merge or deployment occurred. The remaining component branches and
-Draft PRs stay preserved for provenance and have no independent current gate.
+Canonical target identity was Neon project `bitter-star-20214385`, Production
+branch `br-round-base-auh6h2wd`, endpoint `ep-proud-bonus-autwv60g`, database
+`neondb`. Read-only preflight and postflight passed. Each version has exactly
+one ledger row; existing bounded counts stayed unchanged; all three receipt
+tables remained empty; and all three growth import gates remained false.
+
+The validated backup receipt is retained without committing its local path:
+380,265 bytes, 659 restore entries, mode 600, SHA-256
+`30fdeca85a7f883db9b812ed676a19f7ec141495fe1e1683bfb8b0e6282f8c49`.
+
+Hardened ownership, RLS, public/browser denial, the service-role allowlist,
+immutable triggers, the truth guard, health checks, and post-deploy read-only
+verification passed. No growth report was imported merely because its schema
+was released.
+
+## Controlled Lead Center proof
+
+The released tree retains the isolated Neon Preview controlled-mutation proof
+at application commit `382ebe32d41a23eeb0e4a969c733be78930ba87a`.
+The deterministic 36-file surface SHA-256 is
+`823997fb72aed87a9c73e313c682361055a8622bc8d79c16dfbd62e7184c67d4`.
+It proved test-marked durable write/readback, idempotent replay, skipped
+provider delivery, and terminal communication-suppressed closeout. It did not
+fabricate a live prospect.
+
+## Preserved lineage
+
+PRs #210 through #243 are historical component lineage included once in PR
+#238. Their branches, rescue refs, checks, and evidence remain recoverable,
+but no component PR or former phrase has independent current release
+authority. PR #244 is a metadata-reconciliation review vehicle only; it is not
+an active application candidate and requires its own fresh exact gate before
+any merge or Production deployment.
+
+## Creating a future candidate
+
+A future application release must first freeze a new exact head and tree,
+identify every migration and environment change, pass local and hosted release
+checks, produce an immutable Preview and protected no-write QA, document
+rollback, and then generate a new action-specific approval phrase. No authority
+may be inferred from an open PR, branch name, successful check, Preview, prior
+approval, or this receipt.
 
 ## Excluded authority
 
-The cumulative phrase does not authorize a growth-report import, provider
-login, WordPress publication, DNS/domain change, lead submission, email/SMS/Web
-Push send, consumer acknowledgment, social/GBP/email publication, paid spend,
-data deletion, or any NellySelly action. Those remain separate exact gates.
+Current release evidence does not authorize a growth-report import, provider
+login, WordPress publication, DNS/domain change, lead submission or mutation,
+email/SMS/Web Push send, consumer acknowledgment, social/GBP/email
+publication, paid spend, data deletion, purchase, or any NellySelly action.
+Those remain separate exact gates.

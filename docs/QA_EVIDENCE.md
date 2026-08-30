@@ -1,5 +1,35 @@
 # QA Evidence
 
+## PR #238 Production acceptance and post-cutover authority — 2026-08-30
+
+- Reviewed PR #238 head `9232641329acb8a02ce4cf2419cb12768ce33d17`
+  merged as `cef0f366380e2e8aa95a70cf45a70830d7997d45` with identical tree
+  `e6f388311fd07fc84ed0e580b77b190f7c56f458`.
+- Main Release Gate run 33313337535 passed; Vercel Production deployment
+  `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe` is READY and accepted.
+- All five migrations are applied exactly once on canonical Neon, bounded
+  counts stayed unchanged, receipt/import rows remained zero, all three import
+  gates remained false, and hardened postflight passed.
+- Public routes, health, canonical redirects, anonymous admin denial,
+  authenticated Lead Center access, desktop/mobile rendering, clean error/5xx
+  log queries, and Our Town non-interference passed.
+- Authority manifest schema 4 records `candidate: null`; the PR #238 approval
+  is consumed and cannot be replayed.
+- Post-cutover PR #244 local verification on Node 24.18.0 passes 278 test files
+  / 3,424 tests, TypeScript, ESLint, optimized 100-route build, 14/14 release
+  safety, system isolation, 15-file / 81-test focused security coverage, and a
+  dependency audit with no known vulnerabilities.
+- Redacted full-history secret scan returned no findings. Working-tree
+  candidates were classified as ignored build output, deliberate detector
+  fixtures, or documented synthetic QA evidence; no actionable credential was
+  found or displayed.
+- Full cutover receipt:
+  [`phase9/CUMULATIVE_GROWTH_PRODUCTION_ACCEPTANCE_2026-08-30.md`](./phase9/CUMULATIVE_GROWTH_PRODUCTION_ACCEPTANCE_2026-08-30.md).
+- PR #244 reconciliation evidence:
+  [`phase9/CUMULATIVE_RELEASE_AUTHORITY_REFRESH_QA_EVIDENCE.md`](./phase9/CUMULATIVE_RELEASE_AUTHORITY_REFRESH_QA_EVIDENCE.md).
+- No growth import, provider call, lead mutation, message, WordPress save, DNS,
+  publication, spend, purchase, deletion, or NellySelly action occurred.
+
 ## Corrected cumulative Production preflight — 2026-08-30
 
 - The encrypted Vercel Production `DATABASE_URL` remained non-exportable; a

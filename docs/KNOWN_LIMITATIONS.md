@@ -133,14 +133,14 @@ securely. CSV export remains available with audit logging.
 
 ### Current release state
 
-Current accepted Production is PR #209 merge
-`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
-`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Draft PR #238 at exact head
-`9232641329acb8a02ce4cf2419cb12768ce33d17` is the single cumulative
-application candidate. It includes the tested PR #210–#243 component history
-and five guarded additive migrations. It does not authorize a report import,
-external placement, provider action, message, WordPress change, target,
-Production lead-data change, or publication.
+Current accepted Production is PR #238 merge
+`cef0f366380e2e8aa95a70cf45a70830d7997d45` on deployment
+`dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe`. Its tested PR #210–#243 component
+history is included once, and all five guarded additive migrations are applied
+and verified. There is no active application candidate. The consumed PR #238
+phrase does not authorize a report import, external placement, provider
+action, message, WordPress change, target, Production lead-data change, or
+publication.
 
 Current Production proves every durable limiter capability and the dedicated
 secret contract; strict monitoring passes 9/9. Historical component PRs
@@ -181,9 +181,8 @@ backup-first, identity, role, hash, and postflight interlocks.
 
 | Priority | Action | Gate |
 |---|---|---|
-| 1 | Run the guarded PR #238 read-only Production preflight | Secure connection takeover; no mutation authority |
-| 2 | Execute migrations, merge exact PR #238, and deploy only after the exact cumulative gate | Cumulative Production gate |
-| 3 | Publish one approved zero-spend placement and record native proof | Channel-specific approval |
-| 4 | Activate Mike's account and enroll each owner's Web Push device | Per-person takeover/test approval |
-| 5 | Approve consent wording before expanding WordPress forms | Mike/BIC approval |
-| 6 | Attach `hub.ourtownproperties.com`, or add MLS/CRM integrations under an approved contract | Exact DNS/provider approval |
+| 1 | Reconcile the post-cutover authority metadata through reviewed PR #244 Preview proof | Fresh exact PR #244 merge/deploy gate after evidence is frozen |
+| 2 | Publish one approved zero-spend placement and record native proof | Channel-specific approval |
+| 3 | Activate Mike's account and enroll each owner's Web Push device | Per-person takeover/test approval |
+| 4 | Approve consent wording before expanding WordPress forms | Mike/BIC approval |
+| 5 | Attach `hub.ourtownproperties.com`, or add MLS/CRM integrations under an approved contract | Exact DNS/provider approval |

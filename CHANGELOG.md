@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-08-30 — PR #238 Production acceptance and fail-closed authority
+
+- Accepted reviewed PR #238 as merge
+  `cef0f366380e2e8aa95a70cf45a70830d7997d45`, tree
+  `e6f388311fd07fc84ed0e580b77b190f7c56f458`, and Vercel deployment
+  `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe` after Release Gate 33313337535 passed.
+- Recorded the five-migration canonical Neon cutover, unchanged bounded
+  counts, zero receipt rows, disabled import gates, validated backup receipt,
+  hardened privilege postflight, and healthy runtime acceptance.
+- Changed the machine-readable authority contract to schema 4 with
+  `candidate: null`; the consumed PR #238 phrase is retained only as evidence
+  and cannot be exposed as a current Growth Center gate.
+- Kept WordPress, leads, notifications, providers, DNS, publication, spend,
+  deletion, purchases, and NellySelly unchanged.
+
 ## 2026-08-30 — Preview identity and controlled-proof reuse
 
 - Scoped the established Preview/Production Neon endpoint attestations to the

@@ -1,24 +1,40 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "updatedAt": "2026-08-30",
   "production": {
-    "pr": 209,
-    "mergeCommit": "a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca",
-    "deploymentId": "dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj"
+    "pr": 238,
+    "reviewedHead": "9232641329acb8a02ce4cf2419cb12768ce33d17",
+    "mergeCommit": "cef0f366380e2e8aa95a70cf45a70830d7997d45",
+    "tree": "e6f388311fd07fc84ed0e580b77b190f7c56f458",
+    "deploymentId": "dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe",
+    "status": "accepted",
+    "rollbackDeploymentId": "dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj",
+    "releaseGate": {
+      "runId": 33313337535,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33313337535",
+      "status": "success"
+    }
   },
-  "candidate": {
+  "candidate": null,
+  "releasedCutover": {
     "pr": 238,
     "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238",
     "branch": "codex/phase9-cumulative-release-20260829",
-    "head": "9232641329acb8a02ce4cf2419cb12768ce33d17",
+    "reviewedHead": "9232641329acb8a02ce4cf2419cb12768ce33d17",
     "tree": "e6f388311fd07fc84ed0e580b77b190f7c56f458",
-    "state": "draft",
-    "approvalGate": "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT",
+    "mergeCommit": "cef0f366380e2e8aa95a70cf45a70830d7997d45",
+    "deploymentId": "dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe",
+    "status": "applied_and_verified",
+    "approval": {
+      "phrase": "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT",
+      "status": "consumed",
+      "consumedAt": "2026-08-30"
+    },
     "cutoverCommand": "pnpm run phase9:cumulative-growth:cutover -- --execute",
     "rescueBranch": "rescue/amm-pr238-pre-neon-role-preflight-fix-20260830-0224",
     "releaseGate": {
-      "runId": 33296816755,
-      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33296816755",
+      "runId": 33313337535,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33313337535",
       "status": "success"
     },
     "preview": {
@@ -113,7 +129,32 @@
         "file": "supabase/migrations/20260830190000_admin_lead_api_persistence.sql",
         "sha256": "f50ffe91740fdd0690a87d673daf9e5753f122e19279ef84d729d9435d7adc35"
       }
-    ]
+    ],
+    "productionTarget": {
+      "provider": "neon",
+      "project": "bitter-star-20214385",
+      "branch": "br-round-base-auh6h2wd",
+      "endpoint": "ep-proud-bonus-autwv60g",
+      "database": "neondb"
+    },
+    "importGates": {
+      "marketingSpend": false,
+      "organicSearch": false,
+      "localProfilePerformance": false
+    },
+    "backupReceipt": {
+      "sha256": "30fdeca85a7f883db9b812ed676a19f7ec141495fe1e1683bfb8b0e6282f8c49",
+      "sizeBytes": 380265,
+      "restoreEntries": 659,
+      "retention": "retained_mode_600"
+    },
+    "postflight": {
+      "migrationLedgerRowsPerVersion": 1,
+      "receiptRows": 0,
+      "existingCountsUnchanged": true,
+      "privilegeChecksPassed": true,
+      "healthChecksPassed": true
+    }
   },
   "consolidatedComponentTrain": {
     "firstPr": 210,

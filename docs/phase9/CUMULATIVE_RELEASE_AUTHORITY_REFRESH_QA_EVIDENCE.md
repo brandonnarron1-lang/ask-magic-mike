@@ -4,9 +4,51 @@ Date: 2026-08-30
 
 Authority branch: `codex/phase9-cumulative-release-authority-refresh-20260830`
 
-Production authority: **HOLD**. This change is metadata, documentation, tests,
-and protected runtime authority copy only. It does not change the immutable
-application payload or any live system.
+Current Production: **PR #238 ACCEPTED**. Active application candidate:
+**NONE**. This PR #244 change is metadata, documentation, tests, and protected
+runtime authority copy only. It creates no merge, migration, deployment, or
+external-action authority.
+
+## Post-cutover reconciliation
+
+- Accepted merge: `cef0f366380e2e8aa95a70cf45a70830d7997d45`
+- Accepted tree: `e6f388311fd07fc84ed0e580b77b190f7c56f458`
+- Accepted Vercel deployment: `dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe`
+- Successful Main Release Gate: run 33313337535
+- Immediate application rollback: `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`
+- Five manifest-pinned migrations: applied exactly once and postflight-verified
+- Growth import gates: all three false
+- Receipt/import rows: zero
+- Machine authority: schema 4, `candidate: null`
+- PR #238 approval: consumed and non-reusable
+
+The durable cutover and runtime receipt is
+[`CUMULATIVE_GROWTH_PRODUCTION_ACCEPTANCE_2026-08-30.md`](./CUMULATIVE_GROWTH_PRODUCTION_ACCEPTANCE_2026-08-30.md).
+
+## Post-cutover local verification
+
+- Required runtime: Node 24.18.0
+- `pnpm run release:gate`: PASS
+- System isolation: PASS; Ask Magic Mike deployable code contains no NellySelly
+  project identifiers
+- Release safety: 14/14 PASS
+- Vitest: 278 files / 3,424 tests PASS
+- TypeScript: PASS
+- ESLint: PASS
+- Optimized Next.js 15.5.21 build: PASS
+- Route manifest: 100 active / 22 acknowledged root-src duplicates, PASS
+- Focused security/auth suite: 15 files / 81 tests PASS
+- `pnpm audit --audit-level=high`: no known vulnerabilities
+- Redacted full Git-history secret scan: no findings
+- Redacted working-tree scan: no actionable credential. Findings were ignored
+  `.next` output, deliberate leak-detector fixtures, and one documented
+  synthetic QA idempotency identifier; no candidate value was printed.
+
+Hosted PR #244 checks, exact Preview identity, protected no-write QA, and log
+review must be attached to the final immutable PR head before any new merge or
+Production gate is requested.
+
+## Historical pre-cutover payload evidence
 
 ## Canonical payload
 

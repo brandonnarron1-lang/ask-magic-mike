@@ -1,6 +1,6 @@
 # Documentation Authority
 
-Updated 2026-08-29. This register prevents dated build packets from overriding
+Updated through the 2026-08-30 PR #238 cutover. This register prevents dated build packets from overriding
 the observed production system.
 
 ## Operating source of truth
@@ -8,8 +8,8 @@ the observed production system.
 Use these files for current decisions, in this order:
 
 1. `CURRENT_RELEASE_AUTHORITY.md` and
-   `config/current-release-authority.json` — singular current application gate,
-   exact candidate, accepted baseline, and execution order.
+   `config/current-release-authority.json` — accepted release receipt,
+   fail-closed candidate state, and current authority boundary.
 2. `CURRENT_STATE_RECONCILIATION.md` — observed repository, deployment,
    runtime, database, authorization, and provider state.
 3. `CANONICAL_ASSET_MANIFEST.md` and `CANONICAL_PRODUCTION_STACK.md` —
@@ -28,11 +28,11 @@ Use these files for current decisions, in this order:
    GitHub checks and matching Vercel deployment metadata outrank a run ID frozen
    into documentation.
 
-Current release authority is intentionally singular: accepted PR #209 remains
-the Production baseline, while Draft PR #238 consolidates the preserved
-PR #210–#237 component train into one exact-head candidate. A historical gate
-attached to a component PR or an already released application cannot authorize
-a new merge, deployment, mutation, send, or publication.
+Current release authority is intentionally fail-closed: accepted PR #238 is the
+Production baseline and the machine-readable candidate is null. PRs #210–#243
+remain preserved component lineage. A historical gate attached to a component
+PR or an already released application cannot authorize a new merge,
+deployment, mutation, send, or publication.
 
 `QA_EVIDENCE_CURRENT.md` is a cumulative 2026-08-14-era evidence packet with
 later appendices. Preserve it as provenance, but do not use its first baseline
