@@ -26,7 +26,8 @@ recipient address, phone number, secret, nonce, or customer PII.
    allowlist.
 2. The contract pins the audited Gravity Forms Consent field ID, public
    visibility, required state, language version, and SHA-256 of normalized
-   displayed copy.
+   displayed copy. Form 7 accepts exactly the release-owned `email` channel set;
+   configuration cannot silently add call or SMS permission.
 3. A missing field, wrong type, hidden/admin-only field, required-state drift,
    copy drift, or absent required check records `consent_contract_blocked` and
    performs no network forward.
@@ -40,7 +41,15 @@ recipient address, phone number, secret, nonce, or customer PII.
    `gf:{form}:{entry}` idempotency key, and `gravity_forms_{form}` consent source
    identify the same submission. Mismatch is rejected before persistence or
    notification work.
-7. The executable Form 7 readiness gate identifies the exact remaining live
+7. The exact Gravity entry creation time is normalized to UTC and retained as
+   the signed consent timestamp. A granted channel without that timestamp is
+   blocked.
+8. The plugin will send lead PII only to the exact canonical HTTPS lead API;
+   an alternate host, path, query, redirect target, or NellySelly URL is a
+   fail-closed configuration error.
+9. The lead API byte-bounds the streamed request before JSON parsing, including
+   chunked requests without `Content-Length`.
+10. The executable Form 7 readiness gate identifies the exact remaining live
    gaps and returns `GO` only for a consent-safe, privacy-bounded, single-alert
    canonical state.
 

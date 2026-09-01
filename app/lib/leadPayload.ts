@@ -79,6 +79,7 @@ export type LeadPayload = {
   consent_email?: boolean;
   consent_call?: boolean;
   consent_sms?: boolean;
+  consent_timestamp?: string | null;
   consent_language_version?: string;
   consent_language_text?: string;
   consent_source?: string;
@@ -149,6 +150,7 @@ export function normalizeLeadPayload(input: Record<string, unknown>): LeadPayloa
     consent_email: input.consent_email === true,
     consent_call: input.consent_call === true,
     consent_sms: input.consent_sms === true,
+    consent_timestamp: cleanOptional(input.consent_timestamp),
     consent_language_version: cleanOptional(input.consent_language_version),
     consent_language_text: cleanOptional(input.consent_language_text),
     consent_source: cleanOptional(input.consent_source),

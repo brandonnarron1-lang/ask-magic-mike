@@ -17,9 +17,17 @@ second WordPress plugin, lead store, analytics property, or cookie-choice UI.
 - Form 7 is runtime-blocked even if accidentally allowlisted unless an exact
   per-channel Gravity Forms Consent contract is configured and the live field
   type, public visibility, required state, and normalized copy hash all match.
+- Form 7 accepts exactly the release-approved `email` channel contract. Adding,
+  removing, or substituting call/SMS channels requires another reviewed release;
+  configuration alone cannot widen communication permission.
 - Signed bridge submissions preserve their source-specific consent version and
-  exact displayed copy. Missing or malformed evidence denies email, call, and
-  SMS instead of claiming the Ask Magic Mike public-form language.
+  exact displayed copy plus the Gravity entry creation time. Missing or malformed
+  evidence denies email, call, and SMS instead of claiming the Ask Magic Mike
+  public-form language.
+- Lead PII can be posted only to the exact canonical HTTPS endpoint
+  `https://www.askmagicmike.com/api/leads`. Any configured alternate host, path,
+  query, redirect target, or NellySelly endpoint fails closed before a payload is
+  created or sent.
 - Secrets are read from `wp-config.php` or the process environment, never WordPress
   options or the admin screen.
 - Google measurement is independently disabled by default. The loader accepts
@@ -50,6 +58,10 @@ The same 32+ character `WORDPRESS_BRIDGE_SECRET` must be stored as a Sensitive
 server-only Vercel environment variable. Do not paste its value into chat, logs,
 screenshots, source code, or WordPress options.
 
+`AMM_CANONICAL_BRIDGE_URL` is an explicit configuration assertion, not an open
+webhook destination. Version 1.3.0 accepts only the exact canonical URL shown
+above and records a safe configuration error for any other value.
+
 Form 7 additionally requires a non-secret, owner/BIC-approved contract. Use the
 actual IDs assigned by Gravity Forms after the Consent fields are added; do not
 guess them. Normalize each displayed checkbox label plus description to single
@@ -73,7 +85,10 @@ define('AMM_CANONICAL_BRIDGE_CONSENT_CONTRACTS', array(
 The equivalent hosting variable is `WORDPRESS_BRIDGE_CONSENT_CONTRACTS` as
 JSON. Leave it empty until the live definition, approval record, and candidate
 bridge package agree. A malformed or drifting contract records
-`consent_contract_blocked` and performs no network forward.
+`consent_contract_blocked` and performs no network forward. Form 7's approved
+channel set is exactly `email`; SMS and call remain denied. The bridge also
+requires a valid UTC Gravity `date_created` value before any channel grant can
+be forwarded.
 
 ## Activation sequence
 

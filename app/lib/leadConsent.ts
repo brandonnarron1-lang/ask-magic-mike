@@ -17,6 +17,7 @@ type ConsentEvidenceInput = {
   consent_email?: boolean;
   consent_call?: boolean;
   consent_sms?: boolean;
+  consent_timestamp?: string | null;
   consent_language_version?: string;
   consent_language_text?: string;
   consent_source?: string;
@@ -27,6 +28,7 @@ export type AuthoritativeConsentEvidence = {
   consent_email: boolean;
   consent_call: boolean;
   consent_sms: boolean;
+  consent_timestamp: string | null;
   consent_language_version: string;
   consent_language_text: string;
 };
@@ -34,6 +36,15 @@ export type AuthoritativeConsentEvidence = {
 function cleanEvidenceValue(value: unknown, maxLength: number) {
   const text = typeof value === "string" ? value.trim() : "";
   return text.length > 0 && text.length <= maxLength ? text : "";
+}
+
+function cleanConsentTimestamp(value: unknown) {
+  const text = cleanEvidenceValue(value, 40);
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(text)) {
+    return undefined;
+  }
+  const timestamp = Date.parse(text);
+  return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : undefined;
 }
 
 /**
@@ -45,14 +56,17 @@ function cleanEvidenceValue(value: unknown, maxLength: number) {
  */
 export function resolveAuthoritativeConsentEvidence(
   input: ConsentEvidenceInput,
-  options: { trustedWordPressBridge: boolean },
+  options: { trustedWordPressBridge: boolean; receivedAt?: string },
 ): AuthoritativeConsentEvidence {
   if (!options.trustedWordPressBridge) {
     return {
       consent: input.consent === true,
       consent_email: input.consent_email === true,
       consent_call: input.consent_call === true,
-      consent_sms: input.consent_sms === true,
+      // No current public lead form displays a separate SMS consent control.
+      // A caller-supplied boolean cannot widen the server-owned public copy.
+      consent_sms: false,
+      consent_timestamp: cleanConsentTimestamp(options.receivedAt) ?? new Date().toISOString(),
       consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
       consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
     };
@@ -61,10 +75,20 @@ export function resolveAuthoritativeConsentEvidence(
   const version = cleanEvidenceValue(input.consent_language_version, 120);
   const text = cleanEvidenceValue(input.consent_language_text, 4_000);
   const source = cleanEvidenceValue(input.consent_source, 120);
+  const timestamp = cleanConsentTimestamp(input.consent_timestamp);
+  const form7EmailOnly = source === "gravity_forms_7";
+  const unexpectedChannelGrant = input.consent_call === true ||
+    input.consent_sms === true ||
+    (input.consent_email === true && !form7EmailOnly);
+  const channelGranted = input.consent_email === true ||
+    input.consent_call === true ||
+    input.consent_sms === true;
   const valid =
     /^[a-z0-9][a-z0-9_.:-]*$/i.test(version) &&
     /^gravity_forms_[1-7]$/.test(source) &&
-    text.length > 0;
+    text.length > 0 &&
+    !unexpectedChannelGrant &&
+    (!channelGranted || timestamp !== undefined);
 
   if (!valid) {
     return {
@@ -72,6 +96,7 @@ export function resolveAuthoritativeConsentEvidence(
       consent_email: false,
       consent_call: false,
       consent_sms: false,
+      consent_timestamp: null,
       consent_language_version: WORDPRESS_UNVERIFIED_CONSENT_LANGUAGE_VERSION,
       consent_language_text: WORDPRESS_UNVERIFIED_CONSENT_LANGUAGE_TEXT,
     };
@@ -88,6 +113,7 @@ export function resolveAuthoritativeConsentEvidence(
     consent_email: email,
     consent_call: call,
     consent_sms: sms,
+    consent_timestamp: timestamp ?? null,
     consent_language_version: version,
     consent_language_text: text,
   };

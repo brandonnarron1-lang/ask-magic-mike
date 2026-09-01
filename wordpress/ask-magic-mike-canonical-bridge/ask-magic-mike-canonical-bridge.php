@@ -22,6 +22,8 @@ final class AMM_Canonical_Lead_Bridge {
     private const GOOGLE_MEASUREMENT_COOKIE = 'vv_cookieconsent_status';
     private const CONSENT_CHANNELS = array('email', 'call', 'sms');
     private const CONSENT_REQUIRED_FORM_IDS = array(7);
+    private const CONSENT_REQUIRED_CHANNELS = array(7 => array('email'));
+    private const CANONICAL_LEAD_ENDPOINT = 'https://www.askmagicmike.com/api/leads';
     private const UNVERIFIED_CONSENT_VERSION = 'wordpress_gravity_forms_unverified_v1';
     private const UNVERIFIED_CONSENT_TEXT = 'Canonical communication consent language was not captured by this Gravity Forms submission; communication permissions are denied.';
 
@@ -152,6 +154,14 @@ final class AMM_Canonical_Lead_Bridge {
                 continue;
             }
 
+            $configured_channel_names = array_keys($channels);
+            $expected_channel_names = self::CONSENT_REQUIRED_CHANNELS[$form_id] ?? array();
+            sort($configured_channel_names, SORT_STRING);
+            sort($expected_channel_names, SORT_STRING);
+            if ($configured_channel_names !== $expected_channel_names) {
+                continue;
+            }
+
             $normalized_channels = array();
             foreach (self::CONSENT_CHANNELS as $channel) {
                 $channel_contract = $channels[$channel] ?? null;
@@ -215,9 +225,27 @@ final class AMM_Canonical_Lead_Bridge {
             'consent_email' => false,
             'consent_call' => false,
             'consent_sms' => false,
+            'consent_timestamp' => '',
             'consent_language_version' => self::UNVERIFIED_CONSENT_VERSION,
             'consent_language_text' => self::UNVERIFIED_CONSENT_TEXT,
         );
+    }
+
+    private static function entryCreatedAt($entry): string {
+        $raw = self::value($entry, 'date_created');
+        if ($raw === '') {
+            return '';
+        }
+        $date = DateTimeImmutable::createFromFormat(
+            '!Y-m-d H:i:s',
+            $raw,
+            new DateTimeZone('UTC')
+        );
+        $errors = DateTimeImmutable::getLastErrors();
+        if (!$date || (is_array($errors) && ($errors['warning_count'] > 0 || $errors['error_count'] > 0))) {
+            return '';
+        }
+        return $date->format(DateTimeInterface::ATOM);
     }
 
     /**
@@ -266,6 +294,11 @@ final class AMM_Canonical_Lead_Bridge {
             $language[] = strtoupper($channel) . ': ' . $text;
         }
 
+        $consent_timestamp = self::entryCreatedAt($entry);
+        if (in_array(true, $grants, true) && $consent_timestamp === '') {
+            return array('ok' => false, 'error' => 'consent_timestamp_missing');
+        }
+
         return array(
             'ok' => true,
             'error' => '',
@@ -273,6 +306,7 @@ final class AMM_Canonical_Lead_Bridge {
             'consent_email' => $grants['email'],
             'consent_call' => $grants['call'],
             'consent_sms' => $grants['sms'],
+            'consent_timestamp' => $consent_timestamp,
             'consent_language_version' => (string) $contract['language_version'],
             'consent_language_text' => implode("\n", $language),
         );
@@ -288,9 +322,11 @@ final class AMM_Canonical_Lead_Bridge {
 
     private static function endpoint(): string {
         $configured = defined('AMM_CANONICAL_BRIDGE_URL') && is_string(AMM_CANONICAL_BRIDGE_URL)
-            ? AMM_CANONICAL_BRIDGE_URL
-            : 'https://www.askmagicmike.com/api/leads';
-        return esc_url_raw($configured);
+            ? trim(AMM_CANONICAL_BRIDGE_URL)
+            : self::CANONICAL_LEAD_ENDPOINT;
+        return hash_equals(self::CANONICAL_LEAD_ENDPOINT, $configured)
+            ? self::CANONICAL_LEAD_ENDPOINT
+            : '';
     }
 
     public static function after_submission($entry, $form): void {
@@ -339,6 +375,11 @@ final class AMM_Canonical_Lead_Bridge {
             self::record_status($form_id, $entry_id, 'configuration_error', $attempt, '', '', 'Bridge secret is missing or too short.');
             return;
         }
+        $endpoint = self::endpoint();
+        if ($endpoint === '') {
+            self::record_status($form_id, $entry_id, 'configuration_error', $attempt, '', '', 'Canonical lead endpoint is not approved.');
+            return;
+        }
 
         $consent = self::consentEvidence($entry, $form, $form_id);
         if (empty($consent['ok'])) {
@@ -354,7 +395,7 @@ final class AMM_Canonical_Lead_Bridge {
         }
         $timestamp = (string) time();
         $signature = hash_hmac('sha256', $timestamp . '.' . $entry_id . '.' . $body, $secret);
-        $response = wp_remote_post(self::endpoint(), array(
+        $response = wp_remote_post($endpoint, array(
             'timeout' => 15,
             'redirection' => 0,
             'headers' => array(
@@ -448,6 +489,7 @@ final class AMM_Canonical_Lead_Bridge {
             'consent_email' => !empty($consent['consent_email']),
             'consent_call' => !empty($consent['consent_call']),
             'consent_sms' => !empty($consent['consent_sms']),
+            'consent_timestamp' => sanitize_text_field((string) ($consent['consent_timestamp'] ?? '')),
             'consent_language_version' => sanitize_key((string) ($consent['consent_language_version'] ?? self::UNVERIFIED_CONSENT_VERSION)),
             'consent_language_text' => sanitize_textarea_field((string) ($consent['consent_language_text'] ?? self::UNVERIFIED_CONSENT_TEXT)),
             'consent_source' => 'gravity_forms_' . $form_id,

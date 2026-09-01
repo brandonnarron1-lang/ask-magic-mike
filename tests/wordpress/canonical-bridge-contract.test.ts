@@ -52,12 +52,23 @@ describe("WordPress canonical bridge contract", () => {
 
   it("blocks Form 7 unless exact per-channel Gravity consent is pinned", () => {
     expect(plugin).toContain("CONSENT_REQUIRED_FORM_IDS = array(7)");
+    expect(plugin).toContain("CONSENT_REQUIRED_CHANNELS = array(7 => array('email'))");
     expect(plugin).toContain("AMM_CANONICAL_BRIDGE_CONSENT_CONTRACTS");
     expect(plugin).toContain("WORDPRESS_BRIDGE_CONSENT_CONTRACTS");
     expect(plugin).toContain("consent_contract_blocked");
     expect(plugin).toContain("consent_language_hash_mismatch");
+    expect(plugin).toContain("consent_timestamp_missing");
+    expect(plugin).toContain("date_created");
     expect(plugin).toContain("$field_id . '.1'");
     expect(plugin).toContain("hash_equals");
+  });
+
+  it("allows lead PII to leave WordPress only for the canonical HTTPS endpoint", () => {
+    expect(plugin).toContain("CANONICAL_LEAD_ENDPOINT = 'https://www.askmagicmike.com/api/leads'");
+    expect(plugin).toContain("Canonical lead endpoint is not approved.");
+    expect(plugin).toContain("hash_equals(self::CANONICAL_LEAD_ENDPOINT, $configured)");
+    expect(plugin).toContain("wp_remote_post($endpoint");
+    expect(plugin).not.toMatch(/nellyselly/i);
   });
 
   it("uses deterministic Gravity Forms idempotency and bounded retries", () => {
