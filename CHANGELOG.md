@@ -13,6 +13,9 @@
 - Added canonical-capture coverage classification to the read-only surface
   audit so repeated sitewide forms outside the configured bridge allowlist are
   explicit rather than buried in page-by-page footprint noise.
+- Distinguished an unavailable bridge comparison from an explicitly empty
+  allowlist: unavailable configuration is reported without a false claim,
+  while an intentional empty allowlist flags every observed form fail-safe.
 
 ## 2026-09-01 — Protected Preview QA artifact recovery
 

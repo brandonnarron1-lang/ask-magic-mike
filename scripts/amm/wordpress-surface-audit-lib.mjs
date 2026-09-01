@@ -216,10 +216,12 @@ export function inspectWordPressPage(html, pageUrl) {
   };
 }
 
-export function summarizeWordPressSurface(pages, canonicalBridgeFormIds = []) {
+export function summarizeWordPressSurface(pages, canonicalBridgeFormIds = null) {
   const successful = pages.filter((page) => !page.error);
-  const configuredForms = uniqueSorted(canonicalBridgeFormIds.map(Number).filter(Number.isInteger));
-  const bridgeComparisonSupplied = configuredForms.length > 0;
+  const bridgeComparisonSupplied = Array.isArray(canonicalBridgeFormIds);
+  const configuredForms = uniqueSorted((canonicalBridgeFormIds ?? [])
+    .map(Number)
+    .filter((value) => Number.isInteger(value) && value > 0));
   const formPlacements = {};
   const pluginFootprints = {};
   const telephoneTargets = {};

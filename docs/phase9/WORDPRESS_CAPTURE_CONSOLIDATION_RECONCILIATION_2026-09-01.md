@@ -44,6 +44,17 @@ reason to build a sixth visual system.
 - The health ledger shows one prior successful Form 3 canonical forward. Forms
   1 and 7 remain shadow-only in the observed ledger.
 
+## Public audit comparison semantics
+
+- If `WORDPRESS_BRIDGE_FORM_IDS` is omitted, the report marks the comparison as
+  unavailable and does not pretend that an allowlist was inspected.
+- If the variable is supplied but empty, the report treats that as an explicit
+  empty configured allowlist and flags every observed Gravity form outside it.
+- Positive integer form IDs are the only accepted comparison values.
+- A read-only rerun at 2026-09-01T22:23:20Z inspected all 42 sitemap pages with
+  no failure. It again observed Form 3 once and Form 7 on 39 pages, with three
+  incomplete canonical links and two incomplete canonical embeds.
+
 ## Notification reconciliation
 
 | Form | Public purpose | Canonical bridge | Native Gravity notification | Current duplicate-send risk |

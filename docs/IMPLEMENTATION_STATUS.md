@@ -20,8 +20,14 @@ Updated 2026-09-01.
   inactive. Sitewide Form 7 remains shadow-only while its native notification
   is active, so it cannot be enabled safely as part of the Connector release.
 - **No new wheel:** the existing audit now classifies canonical coverage and
-  calls out repeated sitewide forms outside the bridge allowlist. No new form,
-  plugin, lead store, or notification engine was introduced.
+  calls out repeated sitewide forms outside the bridge allowlist. It reports an
+  unavailable comparison separately from an explicit empty allowlist, which
+  remains a fail-safe configured gap. No new form, plugin, lead store, or
+  notification engine was introduced.
+- **Current public rerun:** a read-only 2026-09-01T22:23:20Z audit again
+  inspected 42/42 sitemap pages with no request failure. Form 3 appeared once;
+  Form 7 appeared on 39 pages; three canonical links and two embeds still lack
+  complete placement attribution.
 - **No external mutation:** WordPress, Neon, Vercel Production, leads,
   notifications, secrets, cache, DNS, and NellySelly were unchanged. Full
   reconciliation and guarded sequence:

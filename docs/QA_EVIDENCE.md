@@ -23,13 +23,20 @@
   Mike has a legacy native form, Form 7, and the canonical iframe.
 - `WORDPRESS_BRIDGE_FORM_IDS=3 node
   scripts/audit-wordpress-form-placements.mjs` inspected 42/42 sitemap pages
-  successfully. Form 3 is configured on 1/42 pages; Form 7 is observed on
-  39/42 pages and is explicitly classified as a repeated sitewide form outside
-  the configured canonical allowlist. Three canonical links and two embeds
-  lack complete placement UTMs.
-- Focused audit tests pass 5/5. The complete local release gate passes system
-  isolation, 14/14 safety checks, 283 files / 3,450 tests, strict typecheck,
-  full lint, optimized Next.js 15.5.21 build, and 100 active route verification.
+  successfully again at 2026-09-01T22:23:20Z. Form 3 is configured on 1/42
+  pages; Form 7 is observed on 39/42 pages and is explicitly classified as a
+  repeated sitewide form outside the configured canonical allowlist. Three
+  canonical links and two embeds lack complete placement UTMs.
+- The audit now distinguishes an omitted comparison from an explicitly empty
+  allowlist. Omitted configuration reports `configuration_not_supplied`
+  without claiming a configured gap; an explicit empty list flags every
+  observed form outside the configured allowlist. Focused Node `24.20.0` tests
+  pass 6/6.
+- The pre-refresh candidate passed 283 files / 3,450 tests, strict typecheck,
+  full lint, optimized Next.js 15.5.21 build, 14/14 safety, system isolation,
+  and 100-route verification. That run is historical after the PR #252 parent
+  refresh; final exact-head CI and protected no-write Preview evidence are
+  sealed on PR #253 rather than creating a self-invalidating evidence commit.
 - Full evidence and the guarded no-duplicate cutover sequence are recorded in
   [`phase9/WORDPRESS_CAPTURE_CONSOLIDATION_RECONCILIATION_2026-09-01.md`](./phase9/WORDPRESS_CAPTURE_CONSOLIDATION_RECONCILIATION_2026-09-01.md).
 
