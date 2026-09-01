@@ -2,6 +2,29 @@
 
 Updated 2026-09-01.
 
+## Ask chat contactability hardening candidate — 2026-09-01
+
+- **Defect closed in source:** a starter prompt or typed Ask question now calls
+  only the existing chat endpoint. It cannot create, route, count, or notify a
+  lead.
+- **Deliberate conversion boundary:** the existing Black Diamond panel reveals
+  a separate local-follow-up form after an answer. Email or phone and the exact
+  versioned consent language are required before the canonical lead API is
+  called; the API enforces question, contact, and consent independently.
+- **Existing systems reused:** the follow-up retains the established session
+  UUID, idempotency, first/last-touch attribution, conversion analytics,
+  canonical atomic lead command, notifications, and appointment handoff. No
+  parallel form, database, provider, or CRM was introduced.
+- **Truth correction pending:** the audit exposed one uncontactable record
+  produced by the former live behavior. It is internal QA, not a prospect, and
+  remains unaltered until an exact guarded test/suppression transaction is
+  separately confirmed.
+- **Authority unchanged:** no Production/Preview deployment, merge, migration,
+  environment change, WordPress action, message, DNS action, publication,
+  spend, deletion, or NellySelly action is authorized by this source change.
+  Full design and acceptance contract:
+  [`phase9/ASK_CHAT_CONTACTABILITY_HARDENING.md`](./phase9/ASK_CHAT_CONTACTABILITY_HARDENING.md).
+
 ## Current release and owned-demand readiness review — 2026-09-01
 
 - **Accepted Production:** PR #247 merge

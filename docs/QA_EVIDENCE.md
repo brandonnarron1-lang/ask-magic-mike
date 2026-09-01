@@ -1,5 +1,31 @@
 # QA Evidence
 
+## Ask chat contactability hardening candidate — 2026-09-01
+
+- Focused Vitest passes 2 files / 40 tests covering the existing lead API and
+  Ask accessibility/conversion boundary.
+- Exact Node 24.18.0 full Vitest passes 283 files / 3,441 tests. Strict
+  TypeScript, full ESLint, two optimized Next.js 15.5.21 builds with 60 static
+  pages, and 100 active / 22 acknowledged duplicate route checks pass.
+- Release safety passes 14/14, system-isolation verification passes, and the
+  Production dependency audit reports no known vulnerability after pinning
+  transitive `browserslist` to patched version 4.28.7.
+- The updated Playwright file parses and lists both browser scenarios. The
+  local Playwright browser binary is unavailable, so browser execution is not
+  claimed from that command; protected in-app/Preview and hosted release proof
+  remain required.
+- Source contracts prove a successful chat answer makes no `/api/leads`
+  request, no browser `lead_created` event, and no appointment handoff.
+- Client validation requires email or phone and explicit consent. API
+  validation independently rejects chat lead payloads missing question,
+  contact, or consent before any persistence call.
+- Fresh capture and replay tests preserve one session/idempotency key while
+  suppressing duplicate conversion signals. SMS permission remains false.
+- No Production deployment, Preview deployment, merge, database mutation,
+  live-record correction, notification, WordPress action, DNS change,
+  publication, spend, deletion, or NellySelly action occurred during this
+  local evidence pass.
+
 ## WordPress Connector attribution candidate — 2026-09-01
 
 - Authenticated read-only capture preserved the exact live Connector 1.0.0 PHP

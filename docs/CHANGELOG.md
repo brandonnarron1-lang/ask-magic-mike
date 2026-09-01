@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-09-01 — Ask contactability and consent boundary candidate
+
+- Removed the automatic lead capture that followed every successful Ask answer.
+  Starter prompts and typed questions now remain chat interactions unless the
+  visitor deliberately requests local follow-up.
+- Added a responsive, accessible follow-up panel within the existing Black
+  Diamond component. It requires email or phone plus the exact versioned
+  consent language and preserves existing attribution and idempotency.
+- Hardened `POST /api/leads` so chat-lead payloads without contact or explicit
+  consent fail before persistence, routing, analytics conversion, or
+  notification work.
+- Kept SMS permission false unless separately collected. Added client, API, and
+  browser contracts for no-lead chat answers, validation, retry, fresh capture,
+  and replay suppression.
+- Pinned transitive `browserslist` to patched version 4.28.7 after the current
+  Production dependency audit identified the newly disclosed high-severity
+  advisories; the audit now reports no known vulnerability.
+- Added no migration, provider, lead store, form silo, or visual system. No
+  Production deployment, data correction, WordPress action, message, DNS
+  change, publication, spend, deletion, or NellySelly action occurred.
+
 ## 2026-09-01 — Fail-closed current operator command center
 
 - Replaced seven stale launch/traffic runbooks that still directed operators
