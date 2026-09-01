@@ -35,11 +35,12 @@ specific expansions; they do not invalidate the live lead pipe.
   credential-redeploy approval, and every earlier completed gate are consumed.
 - Post-deploy verification, two manual monitors, and the first scheduled
   six-hour monitor pass on the exact Production commit.
-- Draft PR #247 is an unsealed review vehicle based directly on current
+- PR #247 is the one reviewed application candidate based directly on current
   `main`. It has zero migrations and zero authorized external mutations.
-- There is no active application candidate and no current merge/deploy phrase.
-  Finish exact-Node local verification, hosted checks, immutable Preview,
-  protected no-write QA, and rollback review before generating a fresh gate.
+- Its reviewed content head/tree, exact-Node checks, hosted gate, immutable
+  Preview, protected no-write QA, and rollback are sealed. Merge/deploy remains
+  blocked only on the exact owner approval phrase and final authority-only
+  exact-head checks; the phrase grants no WordPress or external-action authority.
 - PR #238 is an applied five-migration receipt. PRs #244 and #245 are stale
   stacked review artifacts superseded by the current reconciliation and clean
   mainline port; none of their historical gates may be replayed.

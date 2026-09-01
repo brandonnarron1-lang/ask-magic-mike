@@ -78,7 +78,7 @@ export interface CurrentReleaseAuthorityManifest {
     branch: string;
     baseCommit: string;
     implementationHead: string;
-    state: "draft_unsealed";
+    state: "sealed_for_owner_approval";
     migrationCount: 0;
     externalMutationCount: 0;
   };
@@ -132,6 +132,8 @@ export interface CurrentReleaseAuthorityManifest {
 export const CURRENT_RELEASE_AUTHORITY =
   authorityManifest as CurrentReleaseAuthorityManifest;
 
-// Null is deliberate until a review vehicle is exact-head sealed and verified.
+// Only the singular exact-tree reviewed candidate may expose an application
+// release gate. WordPress publication and every other external action remain
+// independent gates.
 export const CURRENT_APPLICATION_RELEASE_GATE =
   CURRENT_RELEASE_AUTHORITY.candidate?.approvalGate ?? null;

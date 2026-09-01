@@ -71,14 +71,22 @@
       }
     }
   },
-  "candidate": null,
+  "candidate": {
+    "pr": 247,
+    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247",
+    "branch": "codex/owned-demand-readiness-main-20260901",
+    "reviewedHead": "f4503dc68b0f2c07a1e9c82827c27ffb5479e9f4",
+    "tree": "f1023e295332b939d21313ed626a9b3a8b2d5483",
+    "state": "reviewed",
+    "approvalGate": "APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT"
+  },
   "reviewVehicle": {
     "pr": 247,
     "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247",
     "branch": "codex/owned-demand-readiness-main-20260901",
     "baseCommit": "98a91f752c4c53dc0ae300dfc320f47b53e32820",
     "implementationHead": "6eb2d37f7dc2c116e92ba7ee7e7c2ea4f2482e99",
-    "state": "draft_unsealed",
+    "state": "sealed_for_owner_approval",
     "migrationCount": 0,
     "externalMutationCount": 0
   },

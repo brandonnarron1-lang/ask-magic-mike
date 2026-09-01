@@ -4,22 +4,26 @@ Updated 2026-09-01 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
-## Current application review — no requestable release gate
+## Current application review — exact owner gate requestable
 
 - Accepted Production is PR [#246](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/246)
   merge `98a91f752c4c53dc0ae300dfc320f47b53e32820` on deployment
   `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`; source deployment
   `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate rollback. The secure
   `DATABASE_URL` replacement/redeploy approval is consumed and not requestable.
-- Draft PR [#247](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247)
-  is a clean review vehicle for WordPress placement readiness. It is not an
-  active release candidate and has no reusable merge/deploy phrase.
+- PR [#247](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247)
+  is the one reviewed application candidate for WordPress placement readiness.
+  It is bound to reviewed content head
+  `f4503dc68b0f2c07a1e9c82827c27ffb5479e9f4` and tree
+  `f1023e295332b939d21313ed626a9b3a8b2d5483` with zero migrations or external
+  mutations.
 - PR #238 is an applied and verified five-migration receipt; its approval is
   consumed. PRs #244 and #245 are superseded stale reviews and remain preserved
   without current authority.
-- The next requestable application gate can be generated only after PR #247 is
-  exact-head sealed, Node 24 and hosted checks pass, immutable Preview identity
-  and protected no-write QA are recorded, and rollback is revalidated.
+- The one requestable application gate is
+  `APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT`.
+  Use it only if final authority-only exact-head checks remain green. It is not
+  reusable after acceptance or if product/configuration/target drift occurs.
 - No application gate authorizes WordPress publication, provider access, real
   or synthetic lead submission, email/SMS/Push, social/GBP/email publication,
   spend, DNS change, deletion, data import, or NellySelly action.

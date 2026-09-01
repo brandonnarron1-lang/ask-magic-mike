@@ -32,9 +32,10 @@ Current accepted Production release: PR #246 merge
 `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`. This is an environment-only redeploy of
 the same verified source after secure replacement of Production `DATABASE_URL`;
 `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is the immediate immutable application
-rollback. Draft PR #247 is an unsealed review
-vehicle only; `candidate: null` means there is no current application release
-gate. PR #238 is a consumed five-migration cutover receipt. See
+rollback. PR #247 is the only reviewed application candidate; its exact gate
+authorizes only an owner-approved same-tree application merge/deployment and
+does not authorize WordPress publication. PR #238 is a consumed five-migration
+cutover receipt. See
 [`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).
 
 ### Verification command

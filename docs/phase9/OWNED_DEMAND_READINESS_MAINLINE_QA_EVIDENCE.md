@@ -9,7 +9,7 @@ secret, or raw WordPress page body.
 
 The existing protected Distribution Command now consumes the existing bounded
 WordPress readiness manifests before choosing the next owned-demand placement.
-The clean implementation lives in Draft PR #247, based directly on accepted
+The clean implementation lives in reviewed PR #247, based directly on accepted
 Production PR #246. It does not merge stale stacked PRs #244/#245 and does not
 create another funnel, widget, publisher, form, database, CRM, campaign manager,
 notification service, or analytics store.
@@ -30,8 +30,9 @@ operator decision packet—not publication proof or publication authority.
 | Immediate rollback | `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` |
 | Canonical app | `https://www.askmagicmike.com` |
 | Neon | project `bitter-star-20214385`, branch `br-round-base-auh6h2wd`, database `neondb` |
-| Draft review | PR `#247`, branch `codex/owned-demand-readiness-main-20260901` |
+| Reviewed candidate | PR `#247`, branch `codex/owned-demand-readiness-main-20260901` |
 | Code-bearing head | `6eb2d37f7dc2c116e92ba7ee7e7c2ea4f2482e99` |
+| Reviewed content head/tree | `f4503dc68b0f2c07a1e9c82827c27ffb5479e9f4` / `f1023e295332b939d21313ed626a9b3a8b2d5483` |
 
 Canonical readiness and liveness returned HTTP 200. GitHub Release Gate run
 `33504917995`, post-deploy run `33505043074`, manual monitor runs
@@ -139,5 +140,7 @@ notifications, or proof history as part of application rollback.
 No WordPress save, plugin edit, page replacement, cache purge, database write,
 lead submission, email/SMS/Web Push send, consumer acknowledgment, DNS/domain
 change, social/GBP/email publication, spend, purchase, deletion, or NellySelly
-action occurred. PR #247 remains Draft and unsealed; `candidate: null` means no
-Production merge or deployment gate currently exists.
+action occurred. PR #247 is sealed only for the exact owner-approved
+application merge and same-tree deployment. Its gate does not authorize any of
+the excluded WordPress, data, message, provider, publication, or NellySelly
+actions above.

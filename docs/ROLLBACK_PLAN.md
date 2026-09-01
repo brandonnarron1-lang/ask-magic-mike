@@ -12,8 +12,8 @@ aliases and environment revisions can move. If smoke checks fail, stop traffic
 activation and promote the recorded prior deployment. Do not display a database
 credential, delete a deployment, change database rows, or force-push.
 
-Draft PR #247 has no migration, environment delta, provider action, or external
-mutation. Its rollback is application-only: retain PR #246 on the canonical
+Reviewed PR #247 has no migration, environment delta, provider action, or
+external mutation. Its rollback is application-only: retain PR #246 on the canonical
 aliases or promote the recorded prior Ready deployment. WordPress was not
 changed by the application review and therefore needs no WordPress rollback.
 

@@ -63,20 +63,23 @@ PR #238 remains the applied five-migration cutover receipt beneath this source.
 Its migration hashes, one-row-per-version ledger, disabled import gates, and
 postflight evidence remain preserved, but its approval is consumed.
 
-### 2. PR #247 — clean unsealed review vehicle
+### 2. PR #247 — clean sealed review candidate
 
-Draft PR #247 starts directly from accepted PR #246 `main` and ports only the
+PR #247 starts directly from accepted PR #246 `main` and ports only the
 unique WordPress placement-readiness behavior that remained stranded in stale
 stacked PR #245. It consumes the existing WordPress readiness manifests,
 canonical owned-demand registry, proof ledger, and Distribution Command; it
 does not create a parallel funnel, publisher, form, database, CRM, campaign
 manager, or notification service.
 
-The machine authority keeps `candidate: null`. PR #247 has no migration,
-environment delta, or authorized external mutation. It becomes eligible for a
-fresh release gate only after exact Node 24 local verification, hosted Release
-Gate, immutable Preview identity, protected no-write visual/runtime QA, and
-rollback review are sealed on its final exact head.
+The machine authority binds the one reviewed application candidate to content
+head `f4503dc68b0f2c07a1e9c82827c27ffb5479e9f4` and tree
+`f1023e295332b939d21313ed626a9b3a8b2d5483`. Exact Node 24 local verification,
+hosted Release Gate, immutable Preview identity, protected no-write
+visual/runtime QA, dependency/secret checks, and rollback review pass for that
+content. PR #247 has no migration, environment delta, or authorized external
+mutation. The final authority-only seal must pass the same exact-head checks;
+any product, migration, environment, or target drift invalidates the gate.
 
 ### 3. Preserved and superseded review lineage
 
@@ -139,7 +142,8 @@ Release preparation sequence:
    dependency, and secret checks.
 4. Prove immutable Preview identity and protected no-write desktop/mobile
    behavior without submitting a lead or calling a delivery provider.
-5. Generate a fresh exact PR/head Production gate only after evidence is sealed.
+5. Use only the exact sealed PR #247 application gate after all final
+   authority-only exact-head checks pass and the owner supplies it verbatim.
 6. Keep WordPress publication, sends, data actions, DNS, spend, and provider
    activation behind separate gates.
 

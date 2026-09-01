@@ -89,10 +89,11 @@ warranted.
 | #227 through #234 | Preserved social identity, referral, host guidance, capability, organic experiment, Google Business Profile format, planner-metadata, and notification-operations component evidence | Included once in PR #238; no independent current gate |
 | #187 KPI target register | Closed as superseded; branch, migration, and evidence preserved | No current release gate |
 
-PR #246 is complete and its gate is exhausted. There is no active application
-candidate. PR #247 remains review-only until exact-head verification and a new
-gate are sealed. PRs #210 through #245 remain preserved lineage or superseded
-review artifacts rather than parallel release vehicles.
+PR #246 is complete and its gate is exhausted. PR #247 is the one reviewed
+application candidate, bound to its recorded content head/tree and one exact
+owner-only application merge/deploy gate. It has no migration, WordPress, or
+external-action authority. PRs #210 through #245 remain preserved lineage or
+superseded review artifacts rather than parallel release vehicles.
 PRs #92 and #119 through #121 remain `ARCHIVE AFTER REVIEW`; none should merge
 without a fresh requirement/diff audit.
 

@@ -10,17 +10,21 @@ Updated 2026-09-01.
   securely replaced Neon Production connection, and current no-write monitor
   and smoke checks pass; `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate
   application rollback.
-- **Authority corrected:** the machine manifest now records PR #246 as
-  accepted, PR #238 as a consumed five-migration receipt, and no active
-  application candidate or reusable gate.
-- **Clean review vehicle:** Draft PR #247 is based directly on accepted `main`
+- **Authority sealed:** the machine manifest records PR #246 as accepted, PR
+  #238 as a consumed five-migration receipt, and PR #247 as the one reviewed
+  application candidate with one exact, owner-only merge/deploy gate.
+- **Clean reviewed candidate:** PR #247 is based directly on accepted `main`
   and ports only the WordPress placement-readiness fix. It does not merge stale
-  stacked PRs #244/#245.
+  stacked PRs #244/#245 and has zero migrations or authorized external
+  mutations.
 - **Operator safety:** hidden or unavailable WordPress placements fail closed;
   the existing Distribution Command can prefer the visible home-value page
   without claiming publication or editing WordPress.
 - **No external mutation:** this review adds no migration, secret, provider,
   lead, message, publication, DNS, spend, deletion, or NellySelly action.
+- **Independent WordPress boundary:** the PR #247 gate does not authorize a
+  WordPress save or publication. The visible Home Value placement remains a
+  later, page-specific approval after the application release is accepted.
 
 ## Production database-credential and CI recovery — 2026-09-01
 

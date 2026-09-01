@@ -24,14 +24,15 @@ brokerage, listings, and SEO authority and embeds or links into this system.
   `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`; the secure Neon Production credential
   redeploy and current no-write monitor/smoke checks pass. The exact source
   remains the accepted PR #246 merge.
-- `DRAFT REVIEW — NO RELEASE AUTHORITY` — PR #247 ports the WordPress
-  placement-readiness fix directly onto current `main`. The machine manifest
-  keeps `candidate: null` until exact-head verification and a fresh gate are
-  sealed. PR #238 is an applied, consumed five-migration receipt.
+- `REVIEWED CANDIDATE — OWNER APPROVAL REQUIRED` — PR #247 ports the WordPress
+  placement-readiness fix directly onto current `main`. Its reviewed content
+  head/tree, hosted gate, immutable Preview, rollback, and singular application
+  approval phrase are sealed in the machine manifest. PR #238 is an applied,
+  consumed five-migration receipt.
 
 The source-of-truth audit is in
 [`docs/CURRENT_STATE_RECONCILIATION.md`](docs/CURRENT_STATE_RECONCILIATION.md).
-The accepted Production identity, unsealed review vehicle, and consumed cutover
+The accepted Production identity, sealed review candidate, and consumed cutover
 receipts are in
 [`docs/CURRENT_RELEASE_AUTHORITY.md`](docs/CURRENT_RELEASE_AUTHORITY.md).
 Documentation precedence and historical-packet handling are in

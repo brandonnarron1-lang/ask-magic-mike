@@ -17,6 +17,10 @@ const runtimeRedeploySource = "dpl_E3Pob3TjWdxN9u4VK9xHZC61667g";
 const productionTree = "d32187a46244e5fa0240119f973371fbb0c9f063";
 const reviewedHead = "720de14f8d5ae0d3a137cf3944d9a0f09abdba9e";
 const implementationHead = "6eb2d37f7dc2c116e92ba7ee7e7c2ea4f2482e99";
+const candidateHead = "f4503dc68b0f2c07a1e9c82827c27ffb5479e9f4";
+const candidateTree = "f1023e295332b939d21313ed626a9b3a8b2d5483";
+const candidateGate =
+  "APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
 const consumedCutoverGate =
   "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT";
 
@@ -69,16 +73,24 @@ describe("current application release authority", () => {
     });
   });
 
-  it("keeps Draft PR 247 review-only until a fresh exact-head gate is sealed", () => {
-    expect(CURRENT_RELEASE_AUTHORITY.candidate).toBeNull();
-    expect(CURRENT_APPLICATION_RELEASE_GATE).toBeNull();
+  it("exposes only the exact-tree reviewed PR 247 application gate", () => {
+    expect(CURRENT_RELEASE_AUTHORITY.candidate).toEqual({
+      pr: 247,
+      url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247",
+      branch: "codex/owned-demand-readiness-main-20260901",
+      reviewedHead: candidateHead,
+      tree: candidateTree,
+      state: "reviewed",
+      approvalGate: candidateGate,
+    });
+    expect(CURRENT_APPLICATION_RELEASE_GATE).toBe(candidateGate);
     expect(CURRENT_RELEASE_AUTHORITY.reviewVehicle).toEqual({
       pr: 247,
       url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247",
       branch: "codex/owned-demand-readiness-main-20260901",
       baseCommit: productionCommit,
       implementationHead,
-      state: "draft_unsealed",
+      state: "sealed_for_owner_approval",
       migrationCount: 0,
       externalMutationCount: 0,
     });
@@ -148,8 +160,11 @@ describe("current application release authority", () => {
       expect(currentSection).not.toMatch(/PR #238[^\n]{0,180}(?:single|current|active)[^\n]{0,80}candidate/i);
     }
     expect(currentAuthority).toContain(implementationHead);
-    expect(currentAuthority).toMatch(/PR (?:\[#247\]|#247)[\s\S]*draft/i);
-    expect(currentAuthority).toMatch(/no active application candidate/i);
+    expect(currentAuthority).toContain(candidateHead);
+    expect(currentAuthority).toContain(candidateTree);
+    expect(currentAuthority).toContain(candidateGate);
+    expect(currentAuthority).toMatch(/PR (?:\[#247\]|#247)[\s\S]*(?:reviewed|sealed)/i);
+    expect(currentAuthority).toMatch(/only active application candidate/i);
     expect(currentAuthority).toMatch(/PR #238[\s\S]*consumed/i);
   });
 });

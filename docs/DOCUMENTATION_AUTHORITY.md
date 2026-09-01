@@ -9,8 +9,9 @@ Use these files for current decisions, in this order:
 
 1. `CURRENT_RELEASE_AUTHORITY.md` and
    `config/current-release-authority.json` — accepted Production, consumed
-   receipts, unsealed review vehicle, and any exact active gate. `candidate:
-   null` means no requestable application release authority.
+   receipts, the one reviewed application candidate, and its exact active gate.
+   A candidate gate applies only to the exact bound PR/tree and listed action;
+   it never implies authority for an external system.
 2. `CURRENT_STATE_RECONCILIATION.md` — observed repository, deployment,
    runtime, database, authorization, and provider state.
 3. `CANONICAL_ASSET_MANIFEST.md` and `CANONICAL_PRODUCTION_STACK.md` —
@@ -32,9 +33,11 @@ Use these files for current decisions, in this order:
 Current release authority is intentionally singular: accepted PR #246 merge
 `98a91f752c4c53dc0ae300dfc320f47b53e32820` on deployment
 `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` is the Production baseline; immutable source
-deployment `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate rollback. Draft PR
-#247 is an unsealed review vehicle, not an active candidate. PR #238 is a
-consumed cutover receipt. The credential-redeploy approval and every historical
+deployment `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate rollback. PR #247 is
+the one reviewed application candidate and exposes one exact owner-only
+same-tree merge/deploy gate. It has no migration or external-action authority
+and does not authorize WordPress publication. PR #238 is a consumed cutover
+receipt. The credential-redeploy approval and every historical
 component/application gate are consumed and cannot authorize a new merge,
 deployment, mutation, send, or publication.
 

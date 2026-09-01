@@ -49,15 +49,37 @@ change.
 
 ## Active application candidate
 
-**None.** The machine manifest intentionally records `candidate: null`, so
-there is no active application candidate and no current application approval
-phrase, merge authority, migration authority, or Production deployment
-authority.
+PR [#247](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247)
+is the only active application candidate:
 
-## Draft review vehicle
+- reviewed content head: `f4503dc68b0f2c07a1e9c82827c27ffb5479e9f4`;
+- reviewed content tree: `f1023e295332b939d21313ed626a9b3a8b2d5483`;
+- code-bearing implementation head:
+  `6eb2d37f7dc2c116e92ba7ee7e7c2ea4f2482e99`;
+- hosted Release Gate:
+  [33518169064](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33518169064), success;
+- immutable Preview: `dpl_B9KeqxqyL3RE881QEX9zo38a1Vo3`, Ready;
+- migrations: zero;
+- environment/secret changes: zero;
+- external mutations: zero;
+- immediate application rollback: `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`.
+
+The one current application approval phrase is:
+
+```text
+APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT
+```
+
+It authorizes only the exact PR merge and same-tree application deployment
+after the authority-only seal commit itself passes the mandatory exact-head
+checks. It does not authorize a WordPress edit or publication, database
+migration or data write, form submission, notification send, DNS action,
+purchase, external publication, deletion, or NellySelly action.
+
+## Sealed review vehicle
 
 PR [#247](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247) is a
-draft, unsealed review vehicle based directly on accepted Production commit
+sealed owner-approval review vehicle based directly on accepted Production commit
 `98a91f752c4c53dc0ae300dfc320f47b53e32820`. Its code-bearing implementation
 head is `6eb2d37f7dc2c116e92ba7ee7e7c2ea4f2482e99`.
 
@@ -68,11 +90,12 @@ placement without treating a draft or an attribution signal as publication
 proof. It adds no migration, environment variable, provider, public publisher,
 form, database, CRM, funnel, or notification engine.
 
-PR #247 is not an active application candidate yet. Complete exact-Node local
-verification, hosted Release Gate, immutable Preview identity, protected
-no-write visual/runtime QA, and rollback review before sealing a fresh gate.
-Successful checks or a Preview alone do not authorize merge or Production
-deployment.
+Exact Node 24 local verification, hosted Release Gate, immutable Preview
+identity, protected no-write visual/runtime QA, rollback review, dependency
+audit, and secret scans pass on the reviewed content head/tree. The final
+authority-only seal may update documentation and machine authority only; any
+product, migration, environment, or target drift invalidates this gate.
+Successful checks never substitute for receiving the exact owner approval.
 
 ## Consumed PR #238 cutover receipt
 

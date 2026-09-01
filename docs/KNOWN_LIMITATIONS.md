@@ -136,11 +136,11 @@ securely. CSV export remains available with audit logging.
 Current accepted Production is PR #246 merge
 `98a91f752c4c53dc0ae300dfc320f47b53e32820` on deployment
 `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`; source deployment
-`dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate rollback. Draft PR #247 is an
-unsealed review vehicle with no migration or external-action authority. The
-machine manifest keeps `candidate: null` until exact-head
-local/hosted/Preview/rollback evidence is complete and a fresh gate is
-generated.
+`dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate rollback. PR #247 is the one
+reviewed application candidate and has no migration or external-action
+authority. Its machine-bound content head/tree, hosted gate, immutable Preview,
+rollback, and exact owner-only application gate are sealed. Final
+authority-only exact-head checks must still match; drift invalidates the gate.
 
 PR #238 is an applied and verified five-migration receipt. Historical component
 and superseded review PRs retain evidence but have no independent current
@@ -182,7 +182,7 @@ backup-first, identity, role, hash, and postflight interlocks.
 
 | Priority | Action | Gate |
 |---|---|---|
-| 1 | Complete PR #247 exact-head release and visual QA without external mutation | No Production authority until a fresh exact gate is sealed |
+| 1 | Obtain the exact PR #247 owner approval after final exact-head checks remain green | Exact application-only gate in `CURRENT_RELEASE_AUTHORITY.md` |
 | 2 | Review one visible WordPress placement and verified rollback | Separate page-specific publication gate |
 | 3 | Publish one approved zero-spend placement and record native proof | Channel-specific approval |
 | 4 | Activate Mike's account and enroll each owner's Web Push device | Per-person takeover/test approval |
