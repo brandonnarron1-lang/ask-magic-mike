@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Ask Magic Mike Canonical Lead Bridge
  * Description: Explicit Gravity Forms forwarding plus an opt-in, consent-gated Google measurement bridge for Our Town Properties.
- * Version: 1.2.0
+ * Version: 1.3.0
  * Requires at least: 6.5
  * Requires PHP: 8.1
  * Author: Our Town Properties, Inc.
@@ -14,12 +14,16 @@ if (!defined('ABSPATH')) {
 }
 
 final class AMM_Canonical_Lead_Bridge {
-    private const VERSION = '1.2.0';
+    private const VERSION = '1.3.0';
     private const STATUS_OPTION = 'amm_canonical_bridge_status_v1';
     private const RETRY_HOOK = 'amm_canonical_bridge_retry_v1';
     private const MAX_ATTEMPTS = 3;
     private const GOOGLE_MEASUREMENT_CONTAINER = 'GTM-KZMCSLTJ';
     private const GOOGLE_MEASUREMENT_COOKIE = 'vv_cookieconsent_status';
+    private const CONSENT_CHANNELS = array('email', 'call', 'sms');
+    private const CONSENT_REQUIRED_FORM_IDS = array(7);
+    private const UNVERIFIED_CONSENT_VERSION = 'wordpress_gravity_forms_unverified_v1';
+    private const UNVERIFIED_CONSENT_TEXT = 'Canonical communication consent language was not captured by this Gravity Forms submission; communication permissions are denied.';
 
     /** Exact audited Gravity Forms allowlist. No form is discovered or guessed. */
     private const FORM_MAP = array(
@@ -119,6 +123,161 @@ final class AMM_Canonical_Lead_Bridge {
         return self::enabledGlobally() && in_array($form_id, self::configuredFormIds(), true);
     }
 
+    /**
+     * Normalize exact per-form consent contracts supplied through wp-config.php
+     * or a JSON hosting variable. Invalid entries are discarded so a required
+     * form remains blocked instead of silently accepting ambiguous consent.
+     */
+    private static function configuredConsentContracts(): array {
+        $configured = defined('AMM_CANONICAL_BRIDGE_CONSENT_CONTRACTS')
+            ? AMM_CANONICAL_BRIDGE_CONSENT_CONTRACTS
+            : getenv('WORDPRESS_BRIDGE_CONSENT_CONTRACTS');
+        if (is_string($configured) && trim($configured) !== '') {
+            $decoded = json_decode($configured, true);
+            $configured = is_array($decoded) ? $decoded : array();
+        }
+        if (!is_array($configured)) {
+            return array();
+        }
+
+        $contracts = array();
+        foreach ($configured as $form_key => $candidate) {
+            $form_id = absint($form_key);
+            if (!isset(self::FORM_MAP[$form_id]) || !is_array($candidate)) {
+                continue;
+            }
+            $version = sanitize_key((string) ($candidate['language_version'] ?? ''));
+            $channels = $candidate['channels'] ?? null;
+            if ($version === '' || !is_array($channels)) {
+                continue;
+            }
+
+            $normalized_channels = array();
+            foreach (self::CONSENT_CHANNELS as $channel) {
+                $channel_contract = $channels[$channel] ?? null;
+                if (!is_array($channel_contract)) {
+                    continue;
+                }
+                $field_id = absint($channel_contract['field_id'] ?? 0);
+                $language_sha256 = strtolower(trim((string) ($channel_contract['language_sha256'] ?? '')));
+                if ($field_id < 1 || !preg_match('/^[a-f0-9]{64}$/', $language_sha256)) {
+                    continue;
+                }
+                $normalized_channels[$channel] = array(
+                    'field_id' => $field_id,
+                    'language_sha256' => $language_sha256,
+                    'required' => !empty($channel_contract['required']),
+                );
+            }
+            if ($normalized_channels) {
+                $contracts[$form_id] = array(
+                    'language_version' => $version,
+                    'channels' => $normalized_channels,
+                );
+            }
+        }
+        ksort($contracts, SORT_NUMERIC);
+        return $contracts;
+    }
+
+    private static function fieldProperty($field, string $property, $fallback = null) {
+        if (is_object($field) && isset($field->{$property})) {
+            return $field->{$property};
+        }
+        if (is_array($field) && array_key_exists($property, $field)) {
+            return $field[$property];
+        }
+        return $fallback;
+    }
+
+    private static function findField($form, int $field_id) {
+        foreach ((array) ($form['fields'] ?? array()) as $field) {
+            if (absint(self::fieldProperty($field, 'id', 0)) === $field_id) {
+                return $field;
+            }
+        }
+        return null;
+    }
+
+    private static function normalizedConsentText($field): string {
+        $label = wp_strip_all_tags((string) self::fieldProperty($field, 'checkboxLabel', ''));
+        $description = wp_strip_all_tags((string) self::fieldProperty($field, 'description', ''));
+        $text = html_entity_decode(trim($label . ($description !== '' ? "\n" . $description : '')), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $normalized = preg_replace('/\s+/u', ' ', $text);
+        return is_string($normalized) ? trim($normalized) : '';
+    }
+
+    private static function deniedConsentEvidence(): array {
+        return array(
+            'ok' => true,
+            'error' => '',
+            'consent' => false,
+            'consent_email' => false,
+            'consent_call' => false,
+            'consent_sms' => false,
+            'consent_language_version' => self::UNVERIFIED_CONSENT_VERSION,
+            'consent_language_text' => self::UNVERIFIED_CONSENT_TEXT,
+        );
+    }
+
+    /**
+     * Validate the live Gravity Forms definition against the exact approved
+     * contract before trusting any communication permission. Gravity Forms'
+     * native Consent field stores checkbox state plus revision-backed text;
+     * the bridge additionally pins the normalized displayed copy by SHA-256.
+     */
+    private static function consentEvidence($entry, $form, int $form_id): array {
+        $contracts = self::configuredConsentContracts();
+        $contract = $contracts[$form_id] ?? null;
+        if (!is_array($contract)) {
+            if (in_array($form_id, self::CONSENT_REQUIRED_FORM_IDS, true)) {
+                return array('ok' => false, 'error' => 'consent_contract_missing');
+            }
+            return self::deniedConsentEvidence();
+        }
+
+        $grants = array('email' => false, 'call' => false, 'sms' => false);
+        $language = array();
+        foreach ($contract['channels'] as $channel => $channel_contract) {
+            if (!in_array($channel, self::CONSENT_CHANNELS, true)) {
+                return array('ok' => false, 'error' => 'consent_contract_channel_invalid');
+            }
+            $field_id = absint($channel_contract['field_id'] ?? 0);
+            $field = self::findField($form, $field_id);
+            if (!$field || (string) self::fieldProperty($field, 'type', '') !== 'consent') {
+                return array('ok' => false, 'error' => 'consent_field_missing_or_wrong_type');
+            }
+            $visibility = (string) self::fieldProperty($field, 'visibility', 'visible');
+            if (!empty(self::fieldProperty($field, 'adminOnly', false)) || !in_array($visibility, array('', 'visible'), true)) {
+                return array('ok' => false, 'error' => 'consent_field_not_public');
+            }
+            if ((bool) self::fieldProperty($field, 'isRequired', false) !== (bool) $channel_contract['required']) {
+                return array('ok' => false, 'error' => 'consent_field_required_state_mismatch');
+            }
+            $text = self::normalizedConsentText($field);
+            if ($text === '' || !hash_equals((string) $channel_contract['language_sha256'], hash('sha256', $text))) {
+                return array('ok' => false, 'error' => 'consent_language_hash_mismatch');
+            }
+            $checked = self::value($entry, $field_id . '.1') !== '';
+            if (!empty($channel_contract['required']) && !$checked) {
+                return array('ok' => false, 'error' => 'required_consent_not_recorded');
+            }
+            $grants[$channel] = $checked;
+            $language[] = strtoupper($channel) . ': ' . $text;
+        }
+
+        return array(
+            'ok' => true,
+            'error' => '',
+            'consent' => $grants['email'] || $grants['call'] || $grants['sms'],
+            'consent_email' => $grants['email'],
+            'consent_call' => $grants['call'],
+            'consent_sms' => $grants['sms'],
+            'consent_language_version' => (string) $contract['language_version'],
+            'consent_language_text' => implode("\n", $language),
+        );
+    }
+
     private static function secret(): string {
         if (defined('AMM_CANONICAL_BRIDGE_SECRET') && is_string(AMM_CANONICAL_BRIDGE_SECRET)) {
             return trim(AMM_CANONICAL_BRIDGE_SECRET);
@@ -181,7 +340,13 @@ final class AMM_Canonical_Lead_Bridge {
             return;
         }
 
-        $payload = self::map_payload($entry, $form_id);
+        $consent = self::consentEvidence($entry, $form, $form_id);
+        if (empty($consent['ok'])) {
+            self::record_status($form_id, $entry_id, 'consent_contract_blocked', $attempt, '', '', sanitize_key((string) ($consent['error'] ?? 'consent_contract_invalid')));
+            return;
+        }
+
+        $payload = self::map_payload($entry, $form_id, $consent);
         $body = wp_json_encode($payload, JSON_UNESCAPED_SLASHES);
         if (!is_string($body)) {
             self::record_status($form_id, $entry_id, 'mapping_error', $attempt, '', '', 'Payload encoding failed.');
@@ -239,7 +404,7 @@ final class AMM_Canonical_Lead_Bridge {
         }
     }
 
-    private static function map_payload($entry, int $form_id): array {
+    private static function map_payload($entry, int $form_id, array $consent): array {
         $config = self::FORM_MAP[$form_id];
         $name = self::name_value($entry, '1');
         $source_url = esc_url_raw(self::value($entry, 'source_url'));
@@ -279,12 +444,12 @@ final class AMM_Canonical_Lead_Bridge {
             'page_url' => $source_url,
             'idempotency_key' => 'gf:' . $form_id . ':' . absint($entry['id'] ?? 0),
             'is_test' => $is_test,
-            'consent' => false,
-            'consent_email' => false,
-            'consent_call' => false,
-            'consent_sms' => false,
-            'consent_language_version' => 'wordpress_gravity_forms_unverified_v1',
-            'consent_language_text' => 'Canonical communication consent language was not captured by this Gravity Forms submission; communication permissions are denied.',
+            'consent' => !empty($consent['consent']),
+            'consent_email' => !empty($consent['consent_email']),
+            'consent_call' => !empty($consent['consent_call']),
+            'consent_sms' => !empty($consent['consent_sms']),
+            'consent_language_version' => sanitize_key((string) ($consent['consent_language_version'] ?? self::UNVERIFIED_CONSENT_VERSION)),
+            'consent_language_text' => sanitize_textarea_field((string) ($consent['consent_language_text'] ?? self::UNVERIFIED_CONSENT_TEXT)),
             'consent_source' => 'gravity_forms_' . $form_id,
             'attribution' => array(
                 'source' => $touch['source'],
@@ -387,6 +552,7 @@ final class AMM_Canonical_Lead_Bridge {
         }
         $statuses = array_reverse((array) get_option(self::STATUS_OPTION, array()), true);
         $enabled_form_ids = self::configuredFormIds();
+        $consent_contract_form_ids = array_keys(self::configuredConsentContracts());
         $signing_state = strlen(self::secret()) >= 32
             ? __('Configured', 'amm-canonical-bridge')
             : __('Missing or too short', 'amm-canonical-bridge');
@@ -413,6 +579,9 @@ final class AMM_Canonical_Lead_Bridge {
             <p><strong><?php echo esc_html__('Version:', 'amm-canonical-bridge'); ?></strong> <?php echo esc_html(self::VERSION); ?></p>
             <p><strong><?php echo esc_html__('Signing secret:', 'amm-canonical-bridge'); ?></strong> <?php echo esc_html($signing_state); ?></p>
             <p><strong><?php echo esc_html__('Google measurement:', 'amm-canonical-bridge'); ?></strong> <?php echo esc_html($measurement_mode); ?></p>
+            <p><strong><?php echo esc_html__('Consent contracts:', 'amm-canonical-bridge'); ?></strong>
+                <?php echo esc_html($consent_contract_form_ids ? implode(', ', $consent_contract_form_ids) : __('None configured; consent-required forms remain blocked', 'amm-canonical-bridge')); ?>
+            </p>
             <p><?php echo esc_html__('Legacy GTM head and noscript snippets must be removed before the measurement gate is enabled. The gate loads only GTM-KZMCSLTJ after the existing consent cookie equals allow.', 'amm-canonical-bridge'); ?></p>
             <p><?php echo esc_html__('Secrets remain in wp-config.php or the hosting environment and are never displayed here.', 'amm-canonical-bridge'); ?></p>
             <table class="widefat striped">

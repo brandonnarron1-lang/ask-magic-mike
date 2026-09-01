@@ -7,6 +7,92 @@ export const LEAD_CONSENT_LANGUAGE_VERSION = "amm_contact_v2";
 export const LEAD_CONSENT_LANGUAGE_TEXT =
   "I agree that Our Town Properties may contact me about this request using the contact information I provide. Consent is not a condition of purchase or service. Message and data rates may apply where applicable. I can opt out at any time.";
 
+export const WORDPRESS_UNVERIFIED_CONSENT_LANGUAGE_VERSION =
+  "wordpress_gravity_forms_unverified_v1";
+export const WORDPRESS_UNVERIFIED_CONSENT_LANGUAGE_TEXT =
+  "Canonical communication consent language was not captured by this Gravity Forms submission; communication permissions are denied.";
+
+type ConsentEvidenceInput = {
+  consent?: boolean;
+  consent_email?: boolean;
+  consent_call?: boolean;
+  consent_sms?: boolean;
+  consent_language_version?: string;
+  consent_language_text?: string;
+  consent_source?: string;
+};
+
+export type AuthoritativeConsentEvidence = {
+  consent: boolean;
+  consent_email: boolean;
+  consent_call: boolean;
+  consent_sms: boolean;
+  consent_language_version: string;
+  consent_language_text: string;
+};
+
+function cleanEvidenceValue(value: unknown, maxLength: number) {
+  const text = typeof value === "string" ? value.trim() : "";
+  return text.length > 0 && text.length <= maxLength ? text : "";
+}
+
+/**
+ * Public Ask Magic Mike forms always use the server-owned canonical copy.
+ * A verified WordPress bridge may preserve source-specific consent evidence,
+ * but only with a bounded version, exact text, and an audited Gravity Forms
+ * source marker. Missing or malformed bridge evidence fails closed by denying
+ * every communication channel instead of claiming the public app copy.
+ */
+export function resolveAuthoritativeConsentEvidence(
+  input: ConsentEvidenceInput,
+  options: { trustedWordPressBridge: boolean },
+): AuthoritativeConsentEvidence {
+  if (!options.trustedWordPressBridge) {
+    return {
+      consent: input.consent === true,
+      consent_email: input.consent_email === true,
+      consent_call: input.consent_call === true,
+      consent_sms: input.consent_sms === true,
+      consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
+      consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
+    };
+  }
+
+  const version = cleanEvidenceValue(input.consent_language_version, 120);
+  const text = cleanEvidenceValue(input.consent_language_text, 4_000);
+  const source = cleanEvidenceValue(input.consent_source, 120);
+  const valid =
+    /^[a-z0-9][a-z0-9_.:-]*$/i.test(version) &&
+    /^gravity_forms_[1-7]$/.test(source) &&
+    text.length > 0;
+
+  if (!valid) {
+    return {
+      consent: false,
+      consent_email: false,
+      consent_call: false,
+      consent_sms: false,
+      consent_language_version: WORDPRESS_UNVERIFIED_CONSENT_LANGUAGE_VERSION,
+      consent_language_text: WORDPRESS_UNVERIFIED_CONSENT_LANGUAGE_TEXT,
+    };
+  }
+
+  const email = input.consent_email === true;
+  const call = input.consent_call === true;
+  const sms = input.consent_sms === true;
+  return {
+    // The legacy umbrella flag grants both email and call in public forms.
+    // Keep it false at the signed bridge boundary so one channel can never
+    // inflate permission for another channel.
+    consent: false,
+    consent_email: email,
+    consent_call: call,
+    consent_sms: sms,
+    consent_language_version: version,
+    consent_language_text: text,
+  };
+}
+
 export function consentGrantedForEmail(input: {
   consent?: boolean;
   consent_email?: boolean;

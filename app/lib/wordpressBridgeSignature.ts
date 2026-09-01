@@ -6,6 +6,10 @@ export type WordPressBridgeVerification =
   | { ok: true; entryId: string }
   | { ok: false; status: 400 | 401 | 503; error: string };
 
+export type WordPressBridgePayloadIdentityVerification =
+  | { ok: true; formId: string; entryId: string }
+  | { ok: false; status: 400; error: "wordpress_bridge_identity_mismatch" };
+
 function safeEqual(expected: string, supplied: string) {
   const expectedBuffer = Buffer.from(expected);
   const suppliedBuffer = Buffer.from(supplied);
@@ -54,4 +58,29 @@ export function verifyWordPressBridgeRequest(
   return safeEqual(expected, supplied)
     ? { ok: true, entryId }
     : { ok: false, status: 401, error: "wordpress_bridge_signature_invalid" };
+}
+
+/**
+ * Bind the signed entry header to the canonical payload identity. This keeps a
+ * valid bridge signature from accidentally attributing one Gravity Forms
+ * entry to another form, entry, or consent source.
+ */
+export function verifyWordPressBridgePayloadIdentity(
+  payload: { idempotency_key?: string; consent_source?: string },
+  signedEntryId: string,
+): WordPressBridgePayloadIdentityVerification {
+  const match = /^gf:([1-7]):(\d{1,20})$/.exec(payload.idempotency_key ?? "");
+  if (
+    !match ||
+    match[2] !== signedEntryId ||
+    payload.consent_source !== `gravity_forms_${match[1]}`
+  ) {
+    return {
+      ok: false,
+      status: 400,
+      error: "wordpress_bridge_identity_mismatch",
+    };
+  }
+
+  return { ok: true, formId: match[1], entryId: match[2] };
 }

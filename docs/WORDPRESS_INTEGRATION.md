@@ -38,6 +38,37 @@ intervals and stores only reconciliation metadata in WordPress. It does not call
 `wp_mail`, disable existing Gravity Forms notifications, create a second PII lead
 table, or activate itself.
 
+### Form 7 consent-contract candidate — 2026-09-01
+
+Bridge 1.3.0 is the current source candidate; live WordPress remains 1.1.0 and
+Form 7 remains outside the allowlist. Version 1.3.0 adds no new plugin or store.
+It requires `AMM_CANONICAL_BRIDGE_CONSENT_CONTRACTS` (or JSON
+`WORDPRESS_BRIDGE_CONSENT_CONTRACTS`) before Form 7 can forward. Each approved
+channel pins the actual native Gravity Forms Consent field ID, required state,
+version, and normalized displayed-copy SHA-256. Wrong type, hidden/admin-only
+state, required-state drift, text drift, or absent required consent records a
+safe `consent_contract_blocked` status and performs no network request.
+
+The application API accepts source-specific copy only after the existing HMAC
+bridge verification. Ordinary public forms always store the server-owned Ask
+Magic Mike version/text, and malformed signed evidence denies email, call, and
+SMS. It additionally requires the signed entry header, normalized
+`gf:{form}:{entry}` idempotency key, and `gravity_forms_{form}` consent source
+to identify the same submission; mismatch fails before persistence. Form 7's
+live field, notification, retention, privacy, Constant Contact, and allowlist
+readiness is executable via:
+
+```bash
+pnpm run amm:wordpress:form7-readiness -- --allow-hold
+```
+
+The current snapshot must remain `HOLD`; see
+`phase9/WORDPRESS_FORM7_CONSENT_CUTOVER_READINESS_2026-09-01.md`. The reviewed
+1.3.0 archive is
+`output/release/ask-magic-mike-canonical-bridge-1.3.0.zip`. Do not install,
+configure, allowlist Form 7, alter privacy settings, or disable its native
+notification without the named production action approval and rollback backup.
+
 The August 10/v6 package is a reusable bridge reference. The currently active
 legacy plugin already has a local `wp_amm_leads` table, public REST intake, `wp_mail`
 notification, local dashboard, and unsigned optional webhook. These must remain
