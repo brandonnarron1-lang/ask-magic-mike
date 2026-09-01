@@ -1,6 +1,6 @@
 # Phase 9 WordPress owned-demand activation change set
 
-Date: 2026-08-22
+Date: 2026-09-01
 
 Mode: read-only public precondition generation
 
@@ -43,11 +43,12 @@ form, send a message, change DNS, purge a cache, or touch Production data.
 
 ## Current public evidence
 
-Final read-only checks at 2026-08-22 21:40 America/New_York produced:
+Fresh read-only manifest generation and rendered desktop/mobile checks at
+2026-09-01 10:08 America/New_York produced:
 
 | Placement | Public page | WordPress page ID | Current public href | Proposed canonical href | Status |
 | --- | --- | ---: | --- | --- | --- |
-| Homepage Ask Magic Mike CTA | `https://www.ourtownproperties.com/` | 149 | `https://www.askmagicmike.com/value?utm_source=ourtownproperties&utm_medium=homepage_cta&utm_campaign=website_widget` | `https://www.askmagicmike.com/ask?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_homepage_ask_mike` | `legacy_match_ready` |
+| Homepage Ask Magic Mike CTA | `https://www.ourtownproperties.com/` | 149 | `https://www.askmagicmike.com/value?utm_source=ourtownproperties&utm_medium=homepage_cta&utm_campaign=website_widget` | `https://www.askmagicmike.com/ask?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_homepage_ask_mike` | `hidden_target` |
 | Established home-value page CTA | `https://www.ourtownproperties.com/how-much-is-your-home-worth/` | 3952 | `https://www.askmagicmike.com/value?utm_source=ourtownproperties&utm_medium=home_value_page&utm_campaign=website_widget` | `https://www.askmagicmike.com/home-value?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_home_value_page` | `legacy_match_ready` |
 | We Buy Homes CTA | `https://www.ourtownproperties.com/we-buy-homes/` | 3631 | `https://www.askmagicmike.com/value?utm_source=ourtownproperties&utm_medium=seller_page_cta&utm_campaign=website_widget` | `https://www.askmagicmike.com/sell?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_we_buy_homes` | `legacy_match_ready` |
 
@@ -55,12 +56,15 @@ All three public links currently preserve source, medium, and campaign, but
 omit placement-level `utm_content` and all route to the generic legacy
 `/value` destination. The proposed hrefs come directly from the existing
 `resolveOwnedDemandPlacement` registry. They are not separately invented URLs.
+The homepage target remains inside the known suppressed CTA container. The
+other two targets each render once, are visible at 1440-pixel desktop and
+390-pixel mobile widths, and introduce no horizontal overflow.
 
 The live manifest hashes at that observation were:
 
-- homepage: `8634d945fb0ccdb2b556bdc66e31b199cb0d5b4e9c95991fc5e2c00307884dc3`;
-- home value: `7487f7e499a67e0a047cb9d141048f98ec927f84a98cec6ba1fc058efb716fe7`;
-- We Buy Homes: `e8c3cdb946c1f0a12dfe331495b94c744e99c39410d9feb71e1ed484fb4eb4a3`.
+- homepage: `60614f9ce7f7e7fe165a6c3cf0d142a6669faf497fee4f94386aff34827d0638`;
+- home value: `1553a34563b872c41fcf3546d714802ffecf7104afd5b5eeae903084033b46cc`;
+- We Buy Homes: `890e4c808e227cf616049b293aefbe18c01b824e2b670b9ebe43f409c95d6c73`.
 
 These hashes are evidence, not reusable write authority. A fresh manifest must
 match immediately before any publication because the status, page modification
@@ -124,24 +128,32 @@ recorded no application POST, console finding, overflow, or framework overlay.
 
 The homepage was the historical recommended first action based on structural
 href evidence. The 2026-08-29 visibility correction supersedes that
-recommendation while the component remains hidden.
+recommendation while the component remains hidden. An href-only homepage edit
+remains prohibited.
 
-The other two manifests prove readiness but do not authorize a bulk edit. They
-remain separate later decisions after homepage acceptance and initial demand
-measurement.
+The established Home Value page is now the first safe publication candidate:
+its page ID is 3952, its one exact legacy CTA is visible on desktop and mobile,
+its rollback href is present, and its current manifest is
+`legacy_match_ready`. This ordering reuses the existing deterministic owned-
+demand placement priority; it does not infer demand or conversion from
+readiness.
+
+The We Buy Homes manifest is independently ready but remains a separate later
+decision. Do not combine both links into one approval or bulk edit. Homepage
+visibility restoration also remains a separate plugin-file decision.
 
 ## Publication procedure and rollback
 
-The following historical href-only procedure is not actionable until a later
-manifest reports `targetVisibility=visible_candidate`. Immediately before any
-future homepage edit:
+The following procedure applies only to the one Home Value CTA candidate.
+Immediately before any future edit:
 
-1. download a fresh homepage manifest from the authenticated Distribution
-   Command;
-2. require `status=legacy_match_ready`, page ID 149, one current href
-   occurrence, a non-null rollback href, and an unchanged SHA-256 precondition;
+1. download a fresh `wordpress_home_value` manifest from the authenticated
+   Distribution Command;
+2. require `status=legacy_match_ready`, `targetVisibility=visible_candidate`,
+   page ID 3952, one current href occurrence, a non-null rollback href, and an
+   unchanged SHA-256 precondition;
 3. create and verify a recoverable WordPress page revision or backup;
-4. receive the exact homepage publication approval below;
+4. receive the exact Home Value publication approval below;
 5. replace only that one href—no page, form, menu, theme, plugin, phone number,
    or copy replacement;
 6. publish and verify public status, destination, UTM values, canonical tags,
@@ -171,15 +183,24 @@ Application release and WordPress publication are different actions.
 
 - The application PR may be reviewed, merged, and deployed without changing
   WordPress.
-- The later homepage publication requires this exact separate phrase:
+- The first visible Home Value link publication requires this exact separate
+  phrase:
+
+`APPROVE PHASE 9 HOME VALUE CTA WORDPRESS PUBLICATION`
+
+That phrase authorizes only the one reviewed page-3952 href replacement after
+a fresh matching manifest and verified revision. It does not authorize the
+homepage, We Buy Homes, another page, form, menu, widget, cache purge, lead
+submission, email/SMS/Push send, social/GBP publication, database migration,
+DNS change, spend, deletion, or NellySelly action.
+
+- The hidden homepage requires a separately reviewed visibility restoration
+  and its own later phrase:
 
 `APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION`
 
-That phrase authorizes only the one reviewed homepage href replacement after a
-fresh matching manifest and verified revision. It does not authorize another
-page, form, menu, widget, cache purge, lead submission, email/SMS/Push send,
-social/GBP publication, database migration, DNS change, spend, deletion, or
-NellySelly action.
+That homepage phrase is not currently requestable while the manifest remains
+`hidden_target`; it cannot be used for an href-only edit.
 
 ## Non-goals
 
