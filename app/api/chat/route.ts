@@ -7,6 +7,32 @@ function clean(input: unknown) {
   return typeof input === "string" ? input.trim() : "";
 }
 
+class ChatPayloadTooLargeError extends Error {}
+
+async function readBoundedBody(req: Request, maxBytes: number) {
+  if (!req.body) return "";
+  const reader = req.body.getReader();
+  const decoder = new TextDecoder();
+  let bytesRead = 0;
+  let text = "";
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytesRead += value.byteLength;
+      if (bytesRead > maxBytes) {
+        await reader.cancel().catch(() => undefined);
+        throw new ChatPayloadTooLargeError();
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+    return text + decoder.decode();
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 const fallback =
   "I can help you think through that. For address-specific guidance, send the property address and the best way for Mike to follow up. I will not invent MLS facts or pricing without a real review.";
 
@@ -33,9 +59,19 @@ export async function POST(req: Request) {
     return respond({ error: "Too many chat requests. Please wait and try again." }, 429);
   }
 
+  let rawBody = "";
+  try {
+    rawBody = await readBoundedBody(req, 8_192);
+  } catch (error) {
+    if (error instanceof ChatPayloadTooLargeError) {
+      return respond({ error: "Message is too large." }, 413);
+    }
+    return respond({ error: "Invalid JSON." }, 400);
+  }
+
   let raw: unknown;
   try {
-    raw = await req.json();
+    raw = JSON.parse(rawBody);
   } catch {
     return respond({ error: "Invalid JSON." }, 400);
   }

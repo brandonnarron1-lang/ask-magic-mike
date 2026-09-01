@@ -73,15 +73,28 @@ proof.
   explicit contact and consent.
 - Protected Preview and hosted Node 24 release proof are required before any
   Production request is made.
+- The chat endpoint stream-bounds the complete request body to 8,192 bytes,
+  including chunked requests with no declared `Content-Length`, before JSON
+  parsing or provider use.
 
-Local exact-Node proof passes 283 test files / 3,441 tests, strict TypeScript,
-full ESLint, two optimized builds, 100-route verification, 14/14 release
-safety, system isolation, and a clean Production dependency audit.
+Post-refresh local proof passes 102 focused security/contactability tests and
+5/5 desktop/mobile browser scenarios. The exact Node `24.20.0` release gate
+passes 284 test files / 3,455 tests, strict TypeScript, full ESLint, an
+optimized Next.js `15.5.21` build with 60 static pages, 100 active / 22
+acknowledged duplicate routes, 14/14 release safety, system isolation, and a
+Production dependency audit with no known vulnerability. The inherited
+Browserslist constraint remains on patched `4.28.8`.
+
+The older PR #252 hosted runs and Previews predate the PR #251 base refresh and
+are historical evidence only. Final exact-head GitHub CI, immutable protected
+Preview, no-write browser QA, and runtime evidence are published on the PR
+thread so an evidence-only source commit cannot invalidate its own proof.
 
 ## Rollback and authority
 
 Rollback is an application-code revert; no database rollback is required. This
 candidate changes no Production deployment, environment variable, Neon data,
 WordPress surface, email/SMS/push provider, DNS record, publication, spend, or
-NellySelly system. Existing accepted Production and the singular PR #248
-application gate remain unchanged until a later exact-head release decision.
+NellySelly system. Its isolated Preview is disposable. Existing accepted
+Production and the singular PR #248 application gate remain unchanged until a
+later exact-head release decision.
