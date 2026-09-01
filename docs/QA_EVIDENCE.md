@@ -3,17 +3,18 @@
 ## Ask chat contactability hardening candidate — 2026-09-01
 
 - Draft PR [#252](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/252)
-  preserves the release stack by targeting PR #251's branch. Source commit
-  `5563038cd05c7d1908149b398a91db8062adec1d` and tree
-  `393348f320f64c939c88f1921ebfc81c1621b4fd` produced Ready Vercel Preview
-  `dpl_4YUBm7AfauwBfzZFfcY6h7sY5inz` at
-  `https://ask-magic-mike-23zko6jtp-eyes-up-industries.vercel.app`.
-- Hosted GitHub Release Gate run `33542843092` / job `99973080272` passes the
-  exact source head. The Vercel status check is Ready and the unrelated
-  Production verifier correctly skipped for this Draft Preview.
+  preserves the release stack by targeting PR #251's branch. Application
+  behavior remains isolated in commit
+  `5563038cd05c7d1908149b398a91db8062adec1d`; protected-Preview QA tooling and
+  evidence are sealed in candidate commit
+  `cbb9e89c5b231adfcbb0459bf2531397a13b36fe` and tree
+  `2c03a58c503619ff32f15b64b8ca634cbe2a350a`.
+- Hosted GitHub Release Gate run `33545872477` / job `99983097695` passes the
+  exact candidate head under Node 24. The Vercel status check is Ready and the
+  unrelated Production verifier correctly skipped for this Draft Preview.
 - Focused Vitest passes 2 files / 40 tests covering the existing lead API and
   Ask accessibility/conversion boundary.
-- Exact Node 24.18.0 full Vitest passes 283 files / 3,441 tests. Strict
+- Exact Node 24 full Vitest passes 283 files / 3,449 tests. Strict
   TypeScript, full ESLint, two optimized Next.js 15.5.21 builds with 60 static
   pages, and 100 active / 22 acknowledged duplicate route checks pass.
 - Release safety passes 14/14, system-isolation verification passes, and the
@@ -45,6 +46,22 @@
   validation, follow-up, and success states. The layout retains the existing
   visual system, readable labels, visible focus, and tap targets. Screenshots
   do not independently prove full WCAG conformance.
+- Exact-head Ready Preview `dpl_5FAavdV2RGVgGnST5hLv1vuJRAZu` at
+  `https://ask-magic-mike-ioijzndkd-eyes-up-industries.vercel.app` was then
+  exercised through the new explicit authenticated-Vercel-CLI transport. The
+  runner retained Deployment Protection, used no shell, put sensitive request
+  material only in bounded mode-0600 temporary files, and kept
+  `SAFE_DB_WRITE=false` / `FORCE_DB_WRITE=false`.
+- Machine Preview QA: 12 pass, 12 expected skips for missing admin/cron auth or
+  disabled mutations, and 0 fail. The public funnel, UTM variants, Preview
+  analytics isolation, private/noindex phone-install failure contract, public
+  listing response, and private-field leak guard all passed. The consolidated
+  release-candidate report is `GO`; launch authority remains honestly
+  `LOCAL_READY` because privileged health and browser-E2E artifacts were not
+  fabricated.
+- Release doctor passes 43/43, `pnpm audit --prod --audit-level=high` reports
+  no known vulnerability, and Gitleaks finds no secret across 744 tracked
+  commits or the staged delta.
 - No Production deployment, merge, database mutation, live-record correction,
   external notification, WordPress action, DNS change, publication, spend,
   deletion, or NellySelly action occurred. The only remote application action

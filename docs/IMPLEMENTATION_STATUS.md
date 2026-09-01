@@ -26,11 +26,16 @@ Updated 2026-09-01.
   for protected QA; no Production authority changed. Full design and
   acceptance contract:
   [`phase9/ASK_CHAT_CONTACTABILITY_HARDENING.md`](./phase9/ASK_CHAT_CONTACTABILITY_HARDENING.md).
-- **Sealed candidate:** Draft PR #252 targets PR #251's branch at source commit
-  `5563038cd05c7d1908149b398a91db8062adec1d`, tree
-  `393348f320f64c939c88f1921ebfc81c1621b4fd`, hosted Release Gate run
-  `33542843092`, and Ready Preview deployment
-  `dpl_4YUBm7AfauwBfzZFfcY6h7sY5inz`.
+- **Sealed candidate:** Draft PR #252 targets PR #251's branch. Application
+  behavior is isolated in source commit
+  `5563038cd05c7d1908149b398a91db8062adec1d`; protected-Preview tooling and
+  evidence are sealed at candidate commit
+  `cbb9e89c5b231adfcbb0459bf2531397a13b36fe`, tree
+  `2c03a58c503619ff32f15b64b8ca634cbe2a350a`, hosted Release Gate run
+  `33545872477`, and Ready Preview deployment
+  `dpl_5FAavdV2RGVgGnST5hLv1vuJRAZu`. Read-only machine Preview QA passes
+  12/12 required checks with 12 expected privileged/mutation skips and zero
+  failures; the consolidated release report is `GO`.
 
 ## Current release and owned-demand readiness review — 2026-09-01
 
