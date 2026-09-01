@@ -25,6 +25,24 @@
   `pnpm audit --prod --audit-level high` found no known vulnerability.
 - Gitleaks scanned the complete staged delta with redaction enabled and found
   no secret.
+- Hosted Node 24 run
+  [33527644227](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33527644227)
+  passed on authority head
+  `1dbe5036c4eed517c1d0a5f82290c90de5122876`, including native `php -l`,
+  3,426 tests, typecheck, lint, build, route assertions, and authority reports.
+- Immutable Preview `dpl_3sYgoq4SHqjvyN3EFDThUDDjMBBL` was Ready from that
+  exact head. Authenticated read-only Vercel requests returned 200 for `/`,
+  `/ask`, `/sell`, `/home-value`, `/buy`, `/rent`, `/widget/v1`,
+  `/robots.txt`, `/sitemap.xml`, `/api/health/live`, and
+  `/api/health/ready`; anonymous `/admin` and `/api/admin/health` returned
+  401. No write-mode request ran.
+- During the first protected-Preview request, Vercel CLI auto-linking from the
+  isolated directory created the unintended empty project
+  `amm-wordpress-connector-attribution-20260901`. Immediate read-only audit
+  proved zero deployments and zero environment variables. The exact empty
+  project and ignored local link were removed, then absence was re-verified.
+  Canonical project `ask-magic-mike`, its domains, deployments, configuration,
+  and Production aliases were unchanged.
 - Placement-manifest regression tests prove missing/stale Connector versions,
   hidden CSS, duplicates, lookalikes, page-ID drift, unavailable readiness, and
   fetch failures all fail closed. Non-actionable states expose no execution
@@ -35,7 +53,8 @@
   `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`; its approval is consumed and no
   application candidate is active.
 - No WordPress file, option, page, form, cache, lead, notification, database,
-  environment, DNS, spend, deletion, or NellySelly state changed.
+  canonical environment, DNS, spend, Production deployment, or NellySelly
+  state changed.
 
 ## Corrected cumulative Production preflight — 2026-08-30
 
