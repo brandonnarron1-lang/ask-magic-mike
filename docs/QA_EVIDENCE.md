@@ -2374,10 +2374,10 @@ Results:
 - Launch authority: 46 PASS / 0 FAIL / 0 `SKIP_OWNER`;
   `GO_CONTROLLED_TRAFFIC_READY`.
 - Focused Vitest after restoring the lockfile-pinned dependency tree: 2 files,
-  90 tests PASS. The first attempted invocation failed only because the fresh
+  92 tests PASS. The first attempted invocation failed only because the fresh
   isolated worktree had no `node_modules`; no product test failed.
 - Exact Node 24.18.0 release gate: PASS — system isolation, 14/14 release
-  safety, 283 test files / 3,428 tests, strict typecheck, full ESLint, optimized
+  safety, 283 test files / 3,430 tests, strict typecheck, full ESLint, optimized
   Next.js 15.5.21 build with 60 static pages, and 100 active / 22 acknowledged
   duplicate routes.
 - Live lead-pipe health: nine routes healthy, including `/api/health/live`.
