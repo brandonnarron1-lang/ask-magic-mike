@@ -45,6 +45,8 @@ import {
   classifyFailClosedGatePresence,
   loadCurrentProductionAuthority,
   releaseLogMatchesCurrentProduction,
+  CURRENT_OPERATING_DOCS,
+  validateCurrentOperatingDocs,
 } from "./launch-readiness-doctor.mjs";
 
 // ---------------------------------------------------------------------------
@@ -56,10 +58,13 @@ export const AUTHORITY_NOT_GO_OWNER = "NOT_GO_OWNER_ACTION_REQUIRED";
 export const AUTHORITY_NOT_GO_FAIL = "NOT_GO_FAILING_CHECKS";
 
 export const REQUIRED_AUTHORITY_DOCS = [
+  "docs/CURRENT_STATE_RECONCILIATION.md",
+  "docs/GO_LIVE_RUNBOOK.md",
   "docs/CONTROLLED_LAUNCH_RUNBOOK.md",
   "docs/OWNER_ACTION_PROOF_PACK.md",
   "docs/PRODUCTION_DEPLOY_REHEARSAL.md",
   "docs/GO_NO_GO_COMMAND_CENTER.md",
+  "docs/CONTROLLED_TRAFFIC_ACTIVATION.md",
   "docs/KNOWN_BLOCKERS.md",
   "docs/PRODUCTION_RELEASE_LOG.md",
   "docs/PRODUCTION_LAUNCH_GATE.md",
@@ -188,14 +193,30 @@ if (isMain) {
     }
   }
 
+  // ── Current operator-document contract ──────────────────────────────────
+  console.log("\n[Current operating documentation]");
+  if (!currentAuthority.ok) {
+    fail("operator documents cannot be verified", currentAuthority.reason);
+  } else {
+    const issues = validateCurrentOperatingDocs(ROOT, currentAuthority.authority);
+    if (issues.length === 0) {
+      pass(
+        "operator documents match canonical Production architecture",
+        `${CURRENT_OPERATING_DOCS.length} current control surfaces`,
+      );
+    } else {
+      fail(
+        `operator documentation has ${issues.length} currentness issue(s)`,
+        issues.slice(0, 8).map(({ doc, issue }) => `${doc}:${issue}`).join(", "),
+      );
+    }
+  }
+
   // ── Stale vercel.app URLs in operational docs ────────────────────────────
   console.log("\n[Stale vercel.app URLs in operational docs]");
-  const operationalDocs = [
-    join(ROOT, "docs/CONTROLLED_LAUNCH_RUNBOOK.md"),
-    join(ROOT, "docs/OWNER_ACTION_PROOF_PACK.md"),
-    join(ROOT, "docs/PRODUCTION_DEPLOY_REHEARSAL.md"),
-    join(ROOT, "docs/GO_NO_GO_COMMAND_CENTER.md"),
-  ].filter(existsSync);
+  const operationalDocs = CURRENT_OPERATING_DOCS
+    .map((relativePath) => join(ROOT, relativePath))
+    .filter(existsSync);
   const staleDocUrls = findStaleVercelUrlsInDocs(operationalDocs);
   if (staleDocUrls.length === 0) {
     pass("no stale vercel.app URLs in launch cockpit docs");

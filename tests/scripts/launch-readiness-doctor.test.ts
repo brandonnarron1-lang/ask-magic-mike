@@ -26,6 +26,10 @@ import {
   parseCurrentProductionAuthority,
   loadCurrentProductionAuthority,
   releaseLogMatchesCurrentProduction,
+  CURRENT_OPERATING_DOC_MARKER,
+  CURRENT_OPERATING_DOCS,
+  STALE_OPERATING_DOC_PATTERNS,
+  validateCurrentOperatingDocs,
 } from "../../scripts/amm/launch-readiness-doctor.mjs";
 
 // ---------------------------------------------------------------------------
@@ -517,6 +521,76 @@ describe("current Production release authority", () => {
     ].join("\n"));
 
     expect(releaseLogMatchesCurrentProduction(path, authority)).toEqual({ ok: true });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Current operator-document contract
+// ---------------------------------------------------------------------------
+
+describe("current operator-document contract", () => {
+  const authority = {
+    schemaVersion: 7,
+    pr: 247,
+    mergeCommit: "a2f3de834830f600df106dbf5836ae4bbde4eb4a",
+    tree: "0065f829fc94f87ab5e0faf596c8e56733be3972",
+    deploymentId: "dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U",
+    status: "accepted",
+  };
+
+  it("keeps every real operator control surface on canonical current truth", () => {
+    expect(validateCurrentOperatingDocs(process.cwd(), authority)).toEqual([]);
+  });
+
+  it("requires all seven current operating documents", () => {
+    expect(CURRENT_OPERATING_DOCS).toHaveLength(7);
+    expect(validateCurrentOperatingDocs("/does/not/exist", authority)).toEqual(
+      CURRENT_OPERATING_DOCS.map((doc) => ({ doc, issue: "missing" })),
+    );
+  });
+
+  it("detects retired database, auth, baseline, approval, and limiter instructions", () => {
+    const samples = [
+      "Open the Supabase Dashboard",
+      "ADMIN_SECRET=your_secret",
+      "main @ 815a33a",
+      "Complete OA-2",
+      "Create an Upstash account",
+    ];
+    for (const [index, sample] of samples.entries()) {
+      expect(STALE_OPERATING_DOC_PATTERNS[index].pattern.test(sample)).toBe(true);
+    }
+  });
+
+  it("fails a marked fixture when its command center carries the wrong deployment", () => {
+    const { mkdirSync, rmSync, writeFileSync } = require("fs");
+    const root = "/tmp/test-current-operating-docs";
+    rmSync(root, { recursive: true, force: true });
+    mkdirSync(`${root}/docs`, { recursive: true });
+    const common = [
+      CURRENT_OPERATING_DOC_MARKER,
+      "config/current-release-authority.json",
+      "Neon",
+      "Better Auth",
+      "OWNER_APPROVAL_QUEUE.md",
+      "KNOWN_BLOCKERS.md",
+    ].join("\n");
+    for (const doc of CURRENT_OPERATING_DOCS) {
+      const identity = [
+        `PR #${authority.pr}`,
+        authority.mergeCommit,
+        authority.tree,
+        doc.endsWith("GO_NO_GO_COMMAND_CENTER.md") ? "dpl_wrong" : authority.deploymentId,
+        "GO_CONTROLLED_TRAFFIC_READY",
+      ].join("\n");
+      writeFileSync(`${root}/${doc}`, `${common}\n${identity}\n`);
+    }
+
+    const issues = validateCurrentOperatingDocs(root, authority);
+    expect(issues).toContainEqual({
+      doc: "docs/GO_NO_GO_COMMAND_CENTER.md",
+      issue: `production_identity_missing:${authority.deploymentId}`,
+    });
   });
 });
 

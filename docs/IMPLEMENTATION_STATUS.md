@@ -2631,3 +2631,28 @@ any bridge activation or shadow-mode test.
 - No secret value was pulled or printed. No environment variable, deployment,
   database, WordPress file/page/form, lead, notification, analytics event, DNS,
   spend, deletion, or NellySelly state changed.
+
+## Phase 9 current operator-command center truth — 2026-09-01
+
+- Audited the documents named by the green launch authority and found seven
+  current operator surfaces still presenting retired database, authentication,
+  owner-action, and rate-limit instructions.
+- Rewrote only those live operator surfaces around accepted PR #247
+  Production, Neon, Better Auth/RBAC, the singular PR #248 application gate,
+  separately gated WordPress and owned-demand actions, and explicit rollback.
+  Historical packets remain preserved as provenance.
+- Added one shared fail-closed currentness contract to the launch doctor and
+  launch-authority report. It requires all seven marked documents, current
+  architecture references, the exact accepted release identity in the state
+  and command-center surfaces, and no known retired operator instruction.
+- Authenticated metadata-only Vercel verification found 61 Production-scoped
+  names without accepting values. The doctor passes 48/48; authority passes
+  51/51 with zero `SKIP_OWNER` and `GO_CONTROLLED_TRAFFIC_READY`.
+- Exact Node 24.18.0 local acceptance passes 4 focused files / 140 tests, 283
+  full files / 3,437 tests, strict typecheck, full lint, optimized Next.js
+  15.5.21 build with 60 static pages, 100 active / 22 acknowledged duplicate
+  routes, 14/14 safety, isolation, and the Production dependency audit.
+- This is an additive stacked Draft candidate. It performed no merge,
+  deployment, environment change, Neon query/mutation, WordPress action, lead
+  submission, communication, analytics write, DNS/publication/spend/deletion,
+  or NellySelly action.
