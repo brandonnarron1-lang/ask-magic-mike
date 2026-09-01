@@ -2625,8 +2625,11 @@ any bridge activation or shadow-mode test.
 - Fresh read-only Production evidence also passes the public lead-pipe health
   check, 15/15 conversion-funnel checks, and 19/19 smoke checks with only the
   intentional authenticated-health and write-session skips.
+- A fresh Production dependency audit exposed two high-severity Browserslist
+  advisories affecting `<=4.28.6`. The transitive path is now constrained to
+  `4.28.8`, its lockfile is refreshed, and the audit returns no known issue.
 - Exact Node 24.18.0 release verification passes system isolation, 14/14 safety,
-  283 test files / 3,436 tests, strict typecheck, full lint, optimized Next.js
+  284 test files / 3,437 tests, strict typecheck, full lint, optimized Next.js
   15.5.21 build with 60 static pages, and 100 active / 22 acknowledged duplicate
   routes.
 - No secret value was pulled or printed. No environment variable, deployment,

@@ -19,7 +19,10 @@
 - Reused the established Resend inference and growth-import fail-closed rules,
   with focused CLI tests for both a 47/47 GO result and value-bearing input
   rejection.
-- Exact Node 24.18.0 release verification passes 283 test files / 3,436 tests,
+- Pinned the newly vulnerable transitive Browserslist `<=4.28.6` range to
+  patched release `4.28.8`, refreshed its lockfile family, and added a
+  regression test; the Production dependency audit returns no known issue.
+- Exact Node 24.18.0 release verification passes 284 test files / 3,437 tests,
   strict typecheck, full lint, optimized build, 14/14 safety controls, system
   isolation, and the complete route manifest.
 - Authenticated name-only Production evidence found all 16 required variables,
