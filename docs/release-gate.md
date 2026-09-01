@@ -1,8 +1,9 @@
 # Release Gate
 
-The release gate makes the `platform/phase-2-release-hardening` branch
+The release gate makes any caller-selected PR branch or exact commit
 preview-ready. It is two independent layers — a static scan and a remote
-preview probe — that must both pass before promotion is considered.
+Preview probe — that must both pass before promotion is considered. The one
+manual GitHub workflow accepts `target_ref`; there is no parallel dispatcher.
 
 ## Layer 1 — static safety scan
 
@@ -88,8 +89,8 @@ Artifacts: `artifacts/preview-qa-report.json` and
 8. `npm run release:assert` (default `REQUIRE_VERDICT=LOCAL_READY`,
    tighten via env in CI). Exits nonzero if the verdict is below
    the required level.
-9. After production lands: `TARGET_URL="…" npm run monitor:synthetic`
-   for non-mutating smoke against the live target.
+9. After production lands: `pnpm monitor-production` for the same non-mutating
+   eleven-contract verification used by post-deploy and six-hour CI.
 10. **No production promotion without explicit human approval.** Only
     after every gate is green does `main` get touched, and only when
     the operator explicitly requests promotion. Controlled mutation

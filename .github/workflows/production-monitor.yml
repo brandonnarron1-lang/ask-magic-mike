@@ -1,29 +1,80 @@
-name: Ask Magic Mike production monitor
+name: Ask Magic Mike Production Monitor
 
 on:
   schedule:
-    - cron: "17 * * * *"
+    - cron: "5 */6 * * *"
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      trigger_kind:
+        description: "Verification source recorded in the evidence artifact"
+        required: false
+        type: string
+        default: "post_deploy"
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: amm-production-monitor
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   public-synthetic:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Checkout canonical monitor
+        uses: actions/checkout@v4
         with:
-          version: 10.30.3
-      - uses: actions/setup-node@v4
+          ref: main
+          persist-credentials: false
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm monitor-production
+
+      - name: Run bounded production verification
+        id: monitor
+        continue-on-error: true
+        env:
+          MONITOR_MAX_ATTEMPTS: "3"
+          MONITOR_RETRY_DELAY_MS: "2000"
+          MONITOR_TRIGGER: ${{ inputs.trigger_kind || github.event_name }}
+          TARGET_URL: https://www.askmagicmike.com
+        run: node scripts/monitor-production.mjs
+
+      - name: Publish verification summary
+        if: always()
+        run: cat artifacts/production-monitor-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Reconcile rolling production incident
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          MONITOR_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPORT_PATH: artifacts/production-monitor-report.json
+        run: node scripts/report-production-incident.mjs
+
+      - name: Upload production verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-monitor-${{ github.run_id }}
+          path: |
+            artifacts/production-monitor-report.json
+            artifacts/production-monitor-report.md
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Enforce production verification
+        if: always()
+        env:
+          MONITOR_OUTCOME: ${{ steps.monitor.outcome }}
+        run: |
+          if [ "$MONITOR_OUTCOME" != "success" ]; then
+            echo "Production verification failed after the bounded retry window."
+            exit 1
+          fi
