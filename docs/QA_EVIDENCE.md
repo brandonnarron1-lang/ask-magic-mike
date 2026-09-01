@@ -1,5 +1,38 @@
 # QA Evidence
 
+## WordPress canonical-capture reconciliation — 2026-09-01
+
+- Authenticated read-only WordPress inspection confirmed 29 active plugins and
+  five active Ask Magic Mike components. No plugin action, editor save, page
+  save, cache purge, or notification toggle was used.
+- The live Connector 1.0.0 source SHA-256 is
+  `2938f47cca5e667a5b65b39fecfd32bb492f7b8f579179ac2ad3105957095a8f`,
+  exactly matching the retained repository baseline. It has no Gravity hook,
+  remote POST, or secret literal and remains a render-only connector.
+- The live Canonical Lead Bridge 1.1.0 health panel reports the signing secret
+  configured without displaying it and forwarding enabled only for Form 3.
+  Source inspection confirms HMAC, idempotency, UTM/click-ID capture, bounded
+  retry, no `wp_mail()`, and denied email/call/SMS permissions for legacy forms
+  without canonical consent.
+- Gravity Form 3's single native admin notification is inactive. Gravity Form
+  7's single native admin notification is active. No recipient value was
+  displayed in evidence and no notification setting was changed.
+- Rendered read-only inspection at 1,280×720 confirmed Home Worth has Form 3,
+  sitewide Form 7, and one visible legacy `/value` CTA; We Buy Homes has the
+  legacy CTA only; Ask Magic Mike has Form 7 plus the canonical iframe; Ask
+  Mike has a legacy native form, Form 7, and the canonical iframe.
+- `WORDPRESS_BRIDGE_FORM_IDS=3 node
+  scripts/audit-wordpress-form-placements.mjs` inspected 42/42 sitemap pages
+  successfully. Form 3 is configured on 1/42 pages; Form 7 is observed on
+  39/42 pages and is explicitly classified as a repeated sitewide form outside
+  the configured canonical allowlist. Three canonical links and two embeds
+  lack complete placement UTMs.
+- Focused audit tests pass 5/5. The complete local release gate passes system
+  isolation, 14/14 safety checks, 283 files / 3,450 tests, strict typecheck,
+  full lint, optimized Next.js 15.5.21 build, and 100 active route verification.
+- Full evidence and the guarded no-duplicate cutover sequence are recorded in
+  [`phase9/WORDPRESS_CAPTURE_CONSOLIDATION_RECONCILIATION_2026-09-01.md`](./phase9/WORDPRESS_CAPTURE_CONSOLIDATION_RECONCILIATION_2026-09-01.md).
+
 ## Ask chat contactability hardening candidate — 2026-09-01
 
 - Draft PR [#252](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/252)

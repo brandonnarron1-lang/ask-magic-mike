@@ -219,6 +219,7 @@ export function inspectWordPressPage(html, pageUrl) {
 export function summarizeWordPressSurface(pages, canonicalBridgeFormIds = []) {
   const successful = pages.filter((page) => !page.error);
   const configuredForms = uniqueSorted(canonicalBridgeFormIds.map(Number).filter(Number.isInteger));
+  const bridgeComparisonSupplied = configuredForms.length > 0;
   const formPlacements = {};
   const pluginFootprints = {};
   const telephoneTargets = {};
@@ -277,8 +278,36 @@ export function summarizeWordPressSurface(pages, canonicalBridgeFormIds = []) {
     return { page: page.url, surfaces };
   }).filter((page) => page.surfaces.length > 1);
   const nonCanonicalFormPlacements = Object.entries(formPlacements)
-    .filter(([formId]) => configuredForms.length > 0 && !configuredForms.includes(Number(formId)))
+    .filter(([formId]) => bridgeComparisonSupplied && !configuredForms.includes(Number(formId)))
     .map(([formId, urls]) => ({ form_id: Number(formId), placement_count: urls.length }));
+  const sitewidePlacementThreshold = Math.max(3, Math.ceil(successful.length * 0.5));
+  const canonicalCaptureCoverage = Object.entries(formPlacements)
+    .map(([formId, urls]) => {
+      const numericFormId = Number(formId);
+      const configuredForForwarding = configuredForms.includes(numericFormId);
+      return {
+        form_id: numericFormId,
+        placement_count: urls.length,
+        placement_share: successful.length > 0
+          ? Number((urls.length / successful.length).toFixed(4))
+          : 0,
+        repeated_sitewide: urls.length >= sitewidePlacementThreshold,
+        configured_for_canonical_forwarding: configuredForForwarding,
+        coverage_state: !bridgeComparisonSupplied
+          ? "configuration_not_supplied"
+          : configuredForForwarding
+            ? "configured_for_canonical_forwarding"
+            : "observed_outside_configured_allowlist",
+      };
+    })
+    .sort((left, right) => left.form_id - right.form_id);
+  const sitewideCoverageGaps = canonicalCaptureCoverage
+    .filter((form) => form.repeated_sitewide && form.coverage_state === "observed_outside_configured_allowlist")
+    .map((form) => ({
+      form_id: form.form_id,
+      placement_count: form.placement_count,
+      placement_share: form.placement_share,
+    }));
 
   const riskFlags = [];
   for (const cluster of duplicateClusters) {
@@ -301,6 +330,12 @@ export function summarizeWordPressSurface(pages, canonicalBridgeFormIds = []) {
   if (nonCanonicalFormPlacements.length) {
     riskFlags.push({ code: "gravity_forms_outside_configured_canonical_allowlist", forms: nonCanonicalFormPlacements });
   }
+  if (sitewideCoverageGaps.length) {
+    riskFlags.push({
+      code: "sitewide_gravity_form_outside_configured_canonical_allowlist",
+      forms: sitewideCoverageGaps,
+    });
+  }
   if (Object.keys(telephoneTargets).length > 1) {
     riskFlags.push({ code: "multiple_public_telephone_targets_require_label_review", count: Object.keys(telephoneTargets).length });
   }
@@ -310,6 +345,11 @@ export function summarizeWordPressSurface(pages, canonicalBridgeFormIds = []) {
     successful_page_count: successful.length,
     failed_page_count: pages.length - successful.length,
     canonical_bridge_form_ids_supplied_for_comparison: configuredForms,
+    canonical_capture_coverage: {
+      comparison_supplied: bridgeComparisonSupplied,
+      sitewide_placement_threshold: sitewidePlacementThreshold,
+      forms: canonicalCaptureCoverage,
+    },
     gravity_form_placements: formPlacements,
     plugin_footprints: pluginFootprints,
     telephone_targets: telephoneTargets,

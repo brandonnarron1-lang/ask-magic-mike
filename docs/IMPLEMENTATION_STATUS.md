@@ -11,6 +11,22 @@ Updated 2026-09-01.
   hardening below is a Draft Preview candidate only and changes no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## WordPress canonical-capture reconciliation candidate — 2026-09-01
+
+- **Live baseline proved:** Connector 1.0.0 matches the retained source hash;
+  Canonical Lead Bridge 1.1.0 is active with its secret configured and only
+  Form 3 enabled.
+- **Duplicate-send boundary proved:** Form 3's native Gravity notification is
+  inactive. Sitewide Form 7 remains shadow-only while its native notification
+  is active, so it cannot be enabled safely as part of the Connector release.
+- **No new wheel:** the existing audit now classifies canonical coverage and
+  calls out repeated sitewide forms outside the bridge allowlist. No new form,
+  plugin, lead store, or notification engine was introduced.
+- **No external mutation:** WordPress, Neon, Vercel Production, leads,
+  notifications, secrets, cache, DNS, and NellySelly were unchanged. Full
+  reconciliation and guarded sequence:
+  [`phase9/WORDPRESS_CAPTURE_CONSOLIDATION_RECONCILIATION_2026-09-01.md`](./phase9/WORDPRESS_CAPTURE_CONSOLIDATION_RECONCILIATION_2026-09-01.md).
+
 ## Ask chat contactability hardening candidate — 2026-09-01
 
 - **Defect closed in source:** a starter prompt or typed Ask question now calls
