@@ -23,10 +23,11 @@ brokerage, listings, and SEO authority and embeds or links into this system.
   `a2f3de834830f600df106dbf5836ae4bbde4eb4a` on Vercel deployment
   `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`; exact-tree hosted verification,
   read-only monitor/smoke checks, and the canonical aliases pass.
-- `OFFLINE REVIEW IN PROGRESS` — the source-controlled WordPress Connector
-  1.1.0 candidate adds bounded per-placement attribution and public version
-  proof. It has not changed WordPress and exposes no reusable application gate.
-  PR #238 remains an applied, consumed five-migration receipt.
+- `DRAFT REVIEW — NO EXECUTION AUTHORITY` — PR #248 source-controls the
+  WordPress Connector 1.1.0 candidate with bounded per-placement attribution,
+  public version proof, and deterministic rollback. It has not changed
+  WordPress and exposes no reusable application gate. PR #238 remains an
+  applied, consumed five-migration receipt.
 
 The source-of-truth audit is in
 [`docs/CURRENT_STATE_RECONCILIATION.md`](docs/CURRENT_STATE_RECONCILIATION.md).

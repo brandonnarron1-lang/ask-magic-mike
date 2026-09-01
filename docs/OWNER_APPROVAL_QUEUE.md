@@ -13,9 +13,10 @@ queue covers only actions that still require a human or external-system gate.
   `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` is immediate application rollback.
 - The PR #247 application approval and secure `DATABASE_URL`
   replacement/redeploy approval are consumed and not requestable.
-- The source-controlled Connector 1.1.0 work is still an offline review branch
-  with zero migrations and zero authorized external mutations. It has no
-  application or WordPress execution authority.
+- Draft PR [#248](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248)
+  is the source-controlled Connector 1.1.0 review vehicle with zero migrations
+  and zero authorized external mutations. It is unsealed and has no application
+  or WordPress execution authority.
 - PR #238 is an applied and verified five-migration receipt; its approval is
   consumed. PRs #244 and #245 are superseded stale reviews and remain preserved
   without current authority.

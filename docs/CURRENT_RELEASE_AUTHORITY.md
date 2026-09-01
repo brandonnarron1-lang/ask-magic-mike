@@ -46,9 +46,17 @@ or NellySelly action. It is exhausted and cannot be replayed.
 ## Active application candidate
 
 There is no active application candidate and no reusable application release
-gate. The source-controlled WordPress Connector 1.1.0 work is an offline branch
-candidate only until it has a Draft PR, exact-head local and hosted verification,
-immutable Preview proof, rollback evidence, and a separately sealed gate.
+gate. Draft PR
+[#248](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248)
+is an unsealed review vehicle for the source-controlled WordPress Connector
+1.1.0 work. Its code-bearing implementation head is
+`3af515932b9ee07ccccb7ad4cbf7734d040f9a2c`, based directly on accepted
+Production `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, with zero migrations
+and zero external mutations.
+
+It cannot become an application candidate until its exact head passes local and
+hosted verification, immutable Preview proof, rollback review, and an
+authority-only seal. It cannot itself authorize a WordPress action.
 
 The future Connector plugin upgrade and any later WordPress page publication
 are independent WordPress actions. Neither is authorized by application

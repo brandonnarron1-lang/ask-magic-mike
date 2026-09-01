@@ -13,11 +13,12 @@ Updated 2026-09-01.
   `33522215178`, post-deploy verification `33522383308`, the canonical
   11-check monitor, 19-pass read-only smoke, health/readiness, auth boundary,
   and runtime error window all passed.
-- **Next offline candidate:** the exact live Connector 1.0.0 source and assets
-  are preserved in the canonical repository. A backward-compatible 1.1.0
+- **Draft PR #248:** the exact live Connector 1.0.0 source and assets are
+  preserved in the canonical repository. The backward-compatible 1.1.0
   candidate adds per-shortcode attribution and public version proof without
   changing WordPress. Deterministic install/rollback packages and their
-  SHA-256 contracts are ready; hosted native PHP lint remains mandatory.
+  SHA-256 contracts are ready; hosted native PHP lint remains mandatory. This
+  unsealed Draft has no application or WordPress execution authority.
 - **Corrected readiness:** v3 holds Home Value and We Buy Homes as
   `connector_upgrade_required` until the reviewed plugin capability is
   publicly proven. Unreviewed WordPress placements cannot become fallback

@@ -24,7 +24,8 @@ describe("Growth capability authority ledger", () => {
     });
     expect(ledger.items.find((item) => item.key === "ordered_release_train")?.approvalGate).toBeUndefined();
     expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 247");
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("No application candidate");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("Draft PR 248");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.nextAction).toContain("Draft PR 248");
     expect(JSON.stringify(ledger)).not.toContain("PR 210 remains the first pending");
   });
 

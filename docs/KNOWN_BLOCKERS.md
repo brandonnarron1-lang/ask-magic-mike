@@ -45,9 +45,10 @@ specific expansions; they do not invalidate the live lead pipe.
 - Exact-tree hosted release and post-deploy verification, the 11-check
   Production monitor, 19-pass read-only smoke, and runtime log window pass.
 - There is no active application candidate or reusable application release
-  gate. The offline Connector 1.1.0 branch has zero migrations and zero
-  authorized external mutations; it must become an exact-head reviewed PR
-  before any application release gate can exist.
+  gate. Draft PR #248 records the Connector 1.1.0 review vehicle with zero
+  migrations and zero authorized external mutations; it must pass exact-head
+  hosted/Preview review and an authority-only seal before any application
+  release gate can exist.
 - PR #238 is an applied five-migration receipt. PRs #244 and #245 are stale
   stacked review artifacts superseded by the current reconciliation and clean
   mainline port; none of their historical gates may be replayed.

@@ -84,7 +84,16 @@ describe("current application release authority", () => {
 
   it("exposes no replayable application gate after PR 247 acceptance", () => {
     expect(CURRENT_RELEASE_AUTHORITY.candidate).toBeNull();
-    expect(CURRENT_RELEASE_AUTHORITY.reviewVehicle).toBeNull();
+    expect(CURRENT_RELEASE_AUTHORITY.reviewVehicle).toEqual({
+      pr: 248,
+      url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248",
+      branch: "codex/wordpress-connector-attribution-v1-1-0-20260901",
+      baseCommit: productionCommit,
+      implementationHead: "3af515932b9ee07ccccb7ad4cbf7734d040f9a2c",
+      state: "draft_unsealed",
+      migrationCount: 0,
+      externalMutationCount: 0,
+    });
     expect(CURRENT_APPLICATION_RELEASE_GATE).toBeNull();
     expect(CURRENT_RELEASE_AUTHORITY.production.approval).toMatchObject({
       phrase: consumedApplicationGate,
@@ -160,6 +169,7 @@ describe("current application release authority", () => {
     expect(currentAuthority).toContain(productionTree);
     expect(currentAuthority).toContain(consumedApplicationGate);
     expect(currentAuthority).toMatch(/no active application candidate/i);
+    expect(currentAuthority).toMatch(/Draft PR[\s\S]*#248[\s\S]*unsealed/i);
     expect(currentAuthority).toMatch(/PR (?:\[#247\]|#247)[\s\S]*consumed/i);
     expect(currentAuthority).toMatch(/PR #238[\s\S]*consumed/i);
   });
