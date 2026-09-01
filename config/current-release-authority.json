@@ -1,43 +1,42 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "updatedAt": "2026-09-01",
   "production": {
-    "pr": 246,
-    "reviewedHead": "720de14f8d5ae0d3a137cf3944d9a0f09abdba9e",
-    "mergeCommit": "98a91f752c4c53dc0ae300dfc320f47b53e32820",
-    "tree": "d32187a46244e5fa0240119f973371fbb0c9f063",
-    "deploymentId": "dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe",
-    "generatedUrl": "https://ask-magic-mike-91lrzmnnk-eyes-up-industries.vercel.app",
+    "pr": 247,
+    "reviewedHead": "a9d1c1c2779337ab38c1276be8893309ecee39d2",
+    "mergeCommit": "a2f3de834830f600df106dbf5836ae4bbde4eb4a",
+    "tree": "0065f829fc94f87ab5e0faf596c8e56733be3972",
+    "deploymentId": "dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U",
+    "generatedUrl": "https://ask-magic-mike-571exyxlz-eyes-up-industries.vercel.app",
     "canonicalUrl": "https://www.askmagicmike.com",
     "status": "accepted",
-    "rollbackDeploymentId": "dpl_E3Pob3TjWdxN9u4VK9xHZC61667g",
+    "rollbackDeploymentId": "dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe",
+    "approval": {
+      "phrase": "APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT",
+      "status": "consumed",
+      "consumedAt": "2026-09-01"
+    },
     "releaseGate": {
-      "runId": 33504917995,
-      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33504917995",
+      "runId": 33522215178,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33522215178",
       "status": "success"
     },
     "postDeployVerification": {
-      "runId": 33505043074,
-      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33505043074",
+      "runId": 33522383308,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33522383308",
       "status": "success"
     },
-    "productionMonitorRuns": [
-      {
-        "runId": 33505253029,
-        "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33505253029",
-        "status": "success"
-      },
-      {
-        "runId": 33505284828,
-        "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33505284828",
-        "status": "success"
-      },
-      {
-        "runId": 33508066082,
-        "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33508066082",
-        "status": "success"
-      }
-    ],
+    "productionMonitorRuns": [],
+    "acceptanceVerification": {
+      "receiptUrl": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247#issuecomment-5495898644",
+      "monitorPassed": 11,
+      "monitorFailed": 0,
+      "smokePassed": 19,
+      "smokeSkipped": 2,
+      "smokeFailed": 0,
+      "runtimeErrorCount": 0,
+      "readinessStatus": 200
+    },
     "runtimeRedeploy": {
       "approval": {
         "phrase": "APPROVE SECURE ASK MAGIC MIKE DATABASE_URL REPLACEMENT AND PRODUCTION REDEPLOYMENT",
@@ -72,20 +71,20 @@
     }
   },
   "candidate": {
-    "pr": 247,
-    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247",
-    "branch": "codex/owned-demand-readiness-main-20260901",
-    "reviewedHead": "f4503dc68b0f2c07a1e9c82827c27ffb5479e9f4",
-    "tree": "f1023e295332b939d21313ed626a9b3a8b2d5483",
+    "pr": 248,
+    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248",
+    "branch": "codex/wordpress-connector-attribution-v1-1-0-20260901",
+    "reviewedHead": "32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f",
+    "tree": "d0842ec5ae23d1eaddbddc691bbeaaa704b18e77",
     "state": "reviewed",
-    "approvalGate": "APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT"
+    "approvalGate": "APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT"
   },
   "reviewVehicle": {
-    "pr": 247,
-    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247",
-    "branch": "codex/owned-demand-readiness-main-20260901",
-    "baseCommit": "98a91f752c4c53dc0ae300dfc320f47b53e32820",
-    "implementationHead": "6eb2d37f7dc2c116e92ba7ee7e7c2ea4f2482e99",
+    "pr": 248,
+    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248",
+    "branch": "codex/wordpress-connector-attribution-v1-1-0-20260901",
+    "baseCommit": "a2f3de834830f600df106dbf5836ae4bbde4eb4a",
+    "implementationHead": "3af515932b9ee07ccccb7ad4cbf7734d040f9a2c",
     "state": "sealed_for_owner_approval",
     "migrationCount": 0,
     "externalMutationCount": 0

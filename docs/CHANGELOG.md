@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-09-01 — WordPress Connector attribution upgrade candidate
+
+- Source-controlled the exact active Connector 1.0.0 PHP baseline and public
+  assets instead of creating another WordPress or lead subsystem.
+- Added a backward-compatible 1.1.0 candidate with bounded per-shortcode UTM
+  overrides, exact owned-host/relative-route enforcement, canonical defaults,
+  and a public non-sensitive version marker.
+- Upgraded the read-only WordPress manifest to v3 so missing or stale Connector
+  proof returns `connector_upgrade_required` before any page edit.
+- Prevented unreviewed WordPress placements from becoming fallback
+  recommendations when bounded readiness evidence exists for the channel.
+- Added exact placement contracts, rollback instructions, and focused tests.
+- Produced hash-pinned deterministic 1.1.0 install and byte-preserved 1.0.0
+  rollback ZIPs, with hosted native PHP lint required before release.
+- Reconciled machine release authority to accepted PR #247 and removed its
+  consumed application gate from all active operator paths.
+- Sealed PR #248 as the singular reviewed application candidate at content head
+  `32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f` and tree
+  `d0842ec5ae23d1eaddbddc691bbeaaa704b18e77` after complete local and hosted
+  Node 24 verification plus immutable no-write Preview proof.
+- Kept the application merge/deployment gate independent from the later
+  Connector plugin upgrade and page-publication gates, with current Production
+  deployment `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` recorded as rollback.
+  No WordPress save, plugin edit, cache purge, form submission, message,
+  database mutation, DNS change, spend, deletion, or NellySelly action occurred.
+
 ## 2026-09-01 — Production database credential and CI recovery
 
 - Restored canonical Production readiness by securely replacing the drifted

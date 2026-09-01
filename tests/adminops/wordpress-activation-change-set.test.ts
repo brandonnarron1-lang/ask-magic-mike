@@ -6,6 +6,8 @@ import {
   loadWordPressActivationChangeSets,
   normalizeWordPressActivationUrl,
   toOwnedDemandPlacementReadiness,
+  WORDPRESS_CONNECTOR_REQUIRED_VERSION,
+  WORDPRESS_CONNECTOR_UPGRADE_APPROVAL_GATE,
   type WordPressPageIndexRow,
 } from "../../app/lib/growth/wordpress-activation-change-set";
 
@@ -42,15 +44,28 @@ const HIDDEN_VISUAL_CONTAINMENT =
 
 function homeHtml(
   hrefs: string[],
-  options: { wrapInCta?: boolean; style?: string } = {},
+  options: {
+    wrapInCta?: boolean;
+    style?: string;
+    connectorVersion?: string | null;
+  } = {},
 ) {
   const anchors = hrefs
     .map((href) => `<a class="cta" href="${href}">Ask Mike</a>`)
     .join("\n");
+  const connectorVersion = options.connectorVersion === undefined
+    ? WORDPRESS_CONNECTOR_REQUIRED_VERSION
+    : options.connectorVersion;
+  const wrapInCta = options.wrapInCta === undefined
+    ? connectorVersion !== null
+    : options.wrapInCta;
+  const versionAttribute = connectorVersion
+    ? ` data-amm-connector-version="${connectorVersion}"`
+    : "";
   return `<!doctype html><html><body>
     <p>Public brokerage phone 252-243-7700</p>
     ${options.style ?? ""}
-    ${options.wrapInCta ? `<div class="amm-cta amm-cta--dark">${anchors}</div>` : anchors}
+    ${wrapInCta ? `<div class="amm-cta amm-cta--dark"${versionAttribute}>${anchors}</div>` : anchors}
     <script>window.privateExample = "must-not-enter-manifest";</script>
   </body></html>`;
 }
@@ -73,7 +88,7 @@ describe("WordPress owned-demand activation change set", () => {
   it("classifies one exact legacy homepage CTA as ready without performing a mutation", () => {
     const changeSet = buildHome(homeHtml([LEGACY_HOME_HREF]));
     expect(changeSet).toMatchObject({
-      schemaVersion: "amm.wordpress_activation_change_set.v2",
+      schemaVersion: "amm.wordpress_activation_change_set.v3",
       generatedAt: GENERATED_AT,
       mode: "read_only_public_precondition",
       placementKey: "wordpress_homepage_ask_mike",
@@ -88,6 +103,9 @@ describe("WordPress owned-demand activation change set", () => {
       targetVisibility: "visible_candidate",
       hiddenTargetOccurrences: 0,
       hiddenCssSelectorOccurrences: 0,
+      requiredConnectorVersion: "1.1.0",
+      observedConnectorVersions: ["1.1.0"],
+      connectorVersionReady: true,
       mutationPerformed: false,
       containsRawPageHtml: false,
     });
@@ -154,7 +172,7 @@ describe("WordPress owned-demand activation change set", () => {
       activationEligible: true,
       status: "legacy_match_ready",
     });
-    expect(readiness[1]?.nextAction).toContain("verified page rollback");
+    expect(readiness[1]?.nextAction).toContain("verified page-source rollback");
   });
 
   it("blocks an href-only publication when public CSS suppresses the exact CTA container", () => {
@@ -167,6 +185,8 @@ describe("WordPress owned-demand activation change set", () => {
       status: "hidden_target",
       publicationBlocked: true,
       publicationAuthorized: false,
+      approvalRequired: false,
+      approvalGate: null,
       targetVisibility: "hidden_by_known_css",
       hiddenTargetOccurrences: 1,
       hiddenCssSelectorOccurrences: 2,
@@ -181,9 +201,10 @@ describe("WordPress owned-demand activation change set", () => {
   it("does not infer that an exact link is hidden from an unrelated rule or container class alone", () => {
     const hiddenRuleWithoutContainer = buildHome(homeHtml([LEGACY_HOME_HREF], {
       style: HIDDEN_VISUAL_CONTAINMENT,
+      wrapInCta: false,
     }));
     expect(hiddenRuleWithoutContainer).toMatchObject({
-      status: "legacy_match_ready",
+      status: "connector_upgrade_required",
       targetVisibility: "visible_candidate",
       hiddenTargetOccurrences: 0,
       hiddenCssSelectorOccurrences: 2,
@@ -205,7 +226,46 @@ describe("WordPress owned-demand activation change set", () => {
     const exact = buildHome(homeHtml([ready.proposedHref]));
     expect(exact.status).toBe("already_exact");
     expect(exact.publicationBlocked).toBe(true);
+    expect(exact.approvalRequired).toBe(false);
+    expect(exact.approvalGate).toBeNull();
     expect(exact.currentHref).toBe(ready.proposedHref);
+  });
+
+  it("blocks page publication until the exact reviewed Connector version is publicly proven", () => {
+    const missingMarker = buildHome(homeHtml([LEGACY_HOME_HREF], {
+      connectorVersion: null,
+      wrapInCta: true,
+    }));
+    expect(missingMarker).toMatchObject({
+      schemaVersion: "amm.wordpress_activation_change_set.v3",
+      status: "connector_upgrade_required",
+      publicationBlocked: true,
+      publicationAuthorized: false,
+      requiredConnectorVersion: "1.1.0",
+      observedConnectorVersions: [],
+      connectorVersionReady: false,
+      approvalGate: WORDPRESS_CONNECTOR_UPGRADE_APPROVAL_GATE,
+    });
+    expect(missingMarker.pagePublicationApprovalGate).toBe(
+      "APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION",
+    );
+    expect(missingMarker.publicationSteps.join(" ")).toContain(
+      "Do not edit a WordPress page",
+    );
+    expect(toOwnedDemandPlacementReadiness(missingMarker)).toMatchObject({
+      activationEligible: false,
+      status: "connector_upgrade_required",
+    });
+
+    const staleMarker = buildHome(homeHtml([LEGACY_HOME_HREF], {
+      connectorVersion: "1.0.0",
+    }));
+    expect(staleMarker).toMatchObject({
+      status: "connector_upgrade_required",
+      observedConnectorVersions: ["1.0.0"],
+      connectorVersionReady: false,
+    });
+    expect(staleMarker.preconditionSha256).not.toBe(missingMarker.preconditionSha256);
   });
 
   it("fails closed for duplicate, missing, foreign, insecure, and lookalike targets", () => {
@@ -225,6 +285,8 @@ describe("WordPress owned-demand activation change set", () => {
       rejectedLookalikeHrefOccurrences: 2,
       publicationBlocked: true,
       publicationAuthorized: false,
+      approvalRequired: false,
+      approvalGate: null,
     });
   });
 
@@ -329,6 +391,8 @@ describe("WordPress owned-demand activation change set", () => {
       status: "fetch_failed",
       fetchErrorCode: "wordpress_page_fetch_failed",
       publicationBlocked: true,
+      approvalRequired: false,
+      approvalGate: null,
       mutationPerformed: false,
     });
     expect(cancelled).toBe(true);

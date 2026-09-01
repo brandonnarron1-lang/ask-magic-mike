@@ -18,8 +18,15 @@ specific expansions; they do not invalidate the live lead pipe.
   create a verified page-149 rollback, and generate a new exact publication
   packet before any WordPress gate.
 - Home-value page 3952 and We Buy Homes page 3631 remain independent
-  `visible_candidate` decisions. They are not bulk-edit substitutes for the
-  blocked homepage placement.
+  visible placements, but their live Connector 1.0.0 shortcode cannot render
+  the reviewed per-placement UTM contract. Both remain held until the
+  source-controlled 1.1.0 candidate is independently reviewed, backed up, and
+  upgraded through its exact plugin gate.
+- The page-publication gate is not requestable before the public
+  `data-amm-connector-version="1.1.0"` marker is present, legacy links are
+  unchanged, and a fresh v3 manifest returns `legacy_match_ready`.
+- Plugin upgrade and page-source publication are separate rollback and approval
+  boundaries. They must not be combined into a blind plugin-editor save.
 - A readiness manifest is not proof of publication or demand. Do not create a
   publication-proof row until an authorized operator actually publishes the
   exact link and supplies public evidence.
@@ -28,19 +35,23 @@ specific expansions; they do not invalidate the live lead pipe.
 
 ## Current release constraint
 
-- Current accepted Production is PR #246 merge
-  `98a91f752c4c53dc0ae300dfc320f47b53e32820` on deployment
-  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`; source deployment
-  `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate rollback. Its release gate,
-  credential-redeploy approval, and every earlier completed gate are consumed.
-- Post-deploy verification, two manual monitors, and the first scheduled
-  six-hour monitor pass on the exact Production commit.
-- PR #247 is the one reviewed application candidate based directly on current
-  `main`. It has zero migrations and zero authorized external mutations.
-- Its reviewed content head/tree, exact-Node checks, hosted gate, immutable
-  Preview, protected no-write QA, and rollback are sealed. Merge/deploy remains
-  blocked only on the exact owner approval phrase and final authority-only
-  exact-head checks; the phrase grants no WordPress or external-action authority.
+- Current accepted Production is PR #247 merge
+  `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, tree
+  `0065f829fc94f87ab5e0faf596c8e56733be3972`, on deployment
+  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`; deployment
+  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` is immediate rollback. The PR #247
+  application gate, credential-redeploy approval, and every earlier completed
+  gate are consumed.
+- Exact-tree hosted release and post-deploy verification, the 11-check
+  Production monitor, 19-pass read-only smoke, and runtime log window pass.
+- PR #248 is the only active reviewed application candidate at content head
+  `32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f` and exact tree
+  `d0842ec5ae23d1eaddbddc691bbeaaa704b18e77`. Hosted Release Gate
+  `33528697047` and immutable Preview `dpl_51JjPVTZizxPJZu1GAiWjVpFTaZn`
+  pass. Its singular requestable gate is
+  `APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT`.
+  That gate is application-only and cannot authorize the Connector plugin
+  upgrade, a WordPress page edit, or any other external action.
 - PR #238 is an applied five-migration receipt. PRs #244 and #245 are stale
   stacked review artifacts superseded by the current reconciliation and clean
   mainline port; none of their historical gates may be replayed.

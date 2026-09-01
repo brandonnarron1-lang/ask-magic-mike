@@ -271,6 +271,17 @@ export function buildOwnedDemandActivationLoop(
     const placementReadiness = readinessByPlacement.get(
       `${placement.channelKey}:${placement.placementKey}`,
     ) || null;
+    const effectiveReadiness = placementReadiness || (
+      readiness.length > 0 && placement.channelKey === "ourtown_wordpress"
+        ? {
+            channelKey: placement.channelKey,
+            placementKey: placement.placementKey,
+            activationEligible: false,
+            status: "readiness_unavailable",
+            detail: "This WordPress placement has no bounded live readiness manifest and cannot be selected by fallback priority.",
+          }
+        : null
+    );
     const proofMatchesAttribution = !latestProof || (
       latestProof.campaignKey === placement.campaign
       && latestProof.source === placement.source
@@ -293,13 +304,13 @@ export function buildOwnedDemandActivationLoop(
       ...activationPlacement
     } = placement;
     const selectionBlocked = Boolean(
-      placementReadiness && !placementReadiness.activationEligible,
+      effectiveReadiness && !effectiveReadiness.activationEligible,
     );
     const defaultNextAction = nextActionForState(state);
-    const nextAction = state === "prepared_not_observed" && placementReadiness
-      ? placementReadiness.activationEligible
-        ? placementReadiness.nextAction || defaultNextAction
-        : `Do not activate this placement yet. ${placementReadiness.detail}`
+    const nextAction = state === "prepared_not_observed" && effectiveReadiness
+      ? effectiveReadiness.activationEligible
+        ? effectiveReadiness.nextAction || defaultNextAction
+        : `Do not activate this placement yet. ${effectiveReadiness.detail}`
       : defaultNextAction;
     return {
       ...activationPlacement,
@@ -308,8 +319,8 @@ export function buildOwnedDemandActivationLoop(
       nextAction,
       latestProof,
       selectionBlocked,
-      readinessStatus: placementReadiness?.status || null,
-      readinessDetail: placementReadiness?.detail || null,
+      readinessStatus: effectiveReadiness?.status || null,
+      readinessDetail: effectiveReadiness?.detail || null,
     };
   }).sort((left, right) => (
     STATE_PRIORITY[left.state] - STATE_PRIORITY[right.state]

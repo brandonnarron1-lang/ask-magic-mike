@@ -22,8 +22,19 @@ interface ApplicationReleaseCandidate {
   approvalGate: string;
 }
 
+interface ApplicationReviewVehicle {
+  pr: number;
+  url: string;
+  branch: string;
+  baseCommit: string;
+  implementationHead: string;
+  state: "draft_unsealed" | "sealed_for_owner_approval";
+  migrationCount: 0;
+  externalMutationCount: 0;
+}
+
 export interface CurrentReleaseAuthorityManifest {
-  schemaVersion: 6;
+  schemaVersion: 7;
   updatedAt: string;
   production: {
     pr: number;
@@ -35,9 +46,24 @@ export interface CurrentReleaseAuthorityManifest {
     canonicalUrl: string;
     status: "accepted";
     rollbackDeploymentId: string;
+    approval: {
+      phrase: string;
+      status: "consumed";
+      consumedAt: string;
+    };
     releaseGate: SuccessfulRunReceipt;
     postDeployVerification: SuccessfulRunReceipt;
     productionMonitorRuns: SuccessfulRunReceipt[];
+    acceptanceVerification: {
+      receiptUrl: string;
+      monitorPassed: number;
+      monitorFailed: 0;
+      smokePassed: number;
+      smokeSkipped: number;
+      smokeFailed: 0;
+      runtimeErrorCount: 0;
+      readinessStatus: 200;
+    };
     runtimeRedeploy: {
       approval: {
         phrase: string;
@@ -72,16 +98,7 @@ export interface CurrentReleaseAuthorityManifest {
     };
   };
   candidate: ApplicationReleaseCandidate | null;
-  reviewVehicle: {
-    pr: number;
-    url: string;
-    branch: string;
-    baseCommit: string;
-    implementationHead: string;
-    state: "sealed_for_owner_approval";
-    migrationCount: 0;
-    externalMutationCount: 0;
-  };
+  reviewVehicle: ApplicationReviewVehicle | null;
   releasedCutover: {
     pr: number;
     url: string;

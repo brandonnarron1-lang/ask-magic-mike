@@ -1,5 +1,61 @@
 # QA Evidence
 
+## WordPress Connector attribution candidate — 2026-09-01
+
+- Authenticated read-only capture preserved the exact live Connector 1.0.0 PHP
+  source at SHA-256
+  `2938f47cca5e667a5b65b39fecfd32bb492f7b8f579179ac2ad3105957095a8f`.
+  The live CSS and JavaScript are preserved byte-for-byte.
+- The source-controlled 1.1.0 candidate is
+  `700c78b77b24b0038078e45c6526908078dac46cf1a591b73dd0f13a6d840ec8`.
+  Local `php-parser` 3.2.5 reports `PASS`. Native `php -l` is required by
+  the hosted Release Gate and must pass again on the target host before any
+  plugin replacement; native PHP is unavailable on this local Mac.
+- Deterministic package verification passed:
+  `ask-magic-mike-connector-1.1.0.zip` is
+  `56934bdcc9a8685493609ffbe76938f7889ef24a01e69d5f73bd1720eed7d4fa`;
+  the byte-preserved 1.0.0 rollback ZIP is
+  `cd1d9171ff40ccc28740e5e59380bf373cacd4ebe5a853fdeabee45cc9d5d261`.
+  Archive extraction reproduced the candidate, baseline, CSS, and JavaScript
+  source hashes exactly.
+- Exact Node 24.18.0 `pnpm run release:gate` passed 283 test files / 3,426
+  tests, strict typecheck, full ESLint, optimized Next.js 15.5.21 build with 60
+  generated pages, and 100 active-route checks.
+- `pnpm run release:safety` passed 14/14 and
+  `pnpm audit --prod --audit-level high` found no known vulnerability.
+- Gitleaks scanned the complete staged delta with redaction enabled and found
+  no secret.
+- Hosted Node 24 run
+  [33527644227](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33527644227)
+  passed on authority head
+  `1dbe5036c4eed517c1d0a5f82290c90de5122876`, including native `php -l`,
+  3,426 tests, typecheck, lint, build, route assertions, and authority reports.
+- Immutable Preview `dpl_3sYgoq4SHqjvyN3EFDThUDDjMBBL` was Ready from that
+  exact head. Authenticated read-only Vercel requests returned 200 for `/`,
+  `/ask`, `/sell`, `/home-value`, `/buy`, `/rent`, `/widget/v1`,
+  `/robots.txt`, `/sitemap.xml`, `/api/health/live`, and
+  `/api/health/ready`; anonymous `/admin` and `/api/admin/health` returned
+  401. No write-mode request ran.
+- During the first protected-Preview request, Vercel CLI auto-linking from the
+  isolated directory created the unintended empty project
+  `amm-wordpress-connector-attribution-20260901`. Immediate read-only audit
+  proved zero deployments and zero environment variables. The exact empty
+  project and ignored local link were removed, then absence was re-verified.
+  Canonical project `ask-magic-mike`, its domains, deployments, configuration,
+  and Production aliases were unchanged.
+- Placement-manifest regression tests prove missing/stale Connector versions,
+  hidden CSS, duplicates, lookalikes, page-ID drift, unavailable readiness, and
+  fetch failures all fail closed. Non-actionable states expose no execution
+  gate.
+- Production authority was reconciled to accepted PR #247 merge
+  `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, tree
+  `0065f829fc94f87ab5e0faf596c8e56733be3972`, deployment
+  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`; its approval is consumed and no
+  application candidate is active.
+- No WordPress file, option, page, form, cache, lead, notification, database,
+  canonical environment, DNS, spend, Production deployment, or NellySelly
+  state changed.
+
 ## Corrected cumulative Production preflight — 2026-08-30
 
 - The encrypted Vercel Production `DATABASE_URL` remained non-exportable; a

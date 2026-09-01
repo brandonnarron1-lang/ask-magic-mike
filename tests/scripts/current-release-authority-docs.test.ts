@@ -11,44 +11,57 @@ import {
 const readRepoFile = (name: string) =>
   readFileSync(resolve(process.cwd(), name), "utf8");
 
-const productionCommit = "98a91f752c4c53dc0ae300dfc320f47b53e32820";
-const productionDeployment = "dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe";
+const productionCommit = "a2f3de834830f600df106dbf5836ae4bbde4eb4a";
+const productionDeployment = "dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U";
+const productionRollback = "dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe";
 const runtimeRedeploySource = "dpl_E3Pob3TjWdxN9u4VK9xHZC61667g";
-const productionTree = "d32187a46244e5fa0240119f973371fbb0c9f063";
-const reviewedHead = "720de14f8d5ae0d3a137cf3944d9a0f09abdba9e";
-const implementationHead = "6eb2d37f7dc2c116e92ba7ee7e7c2ea4f2482e99";
-const candidateHead = "f4503dc68b0f2c07a1e9c82827c27ffb5479e9f4";
-const candidateTree = "f1023e295332b939d21313ed626a9b3a8b2d5483";
-const candidateGate =
+const productionTree = "0065f829fc94f87ab5e0faf596c8e56733be3972";
+const reviewedHead = "a9d1c1c2779337ab38c1276be8893309ecee39d2";
+const consumedApplicationGate =
   "APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
+const candidateReviewedHead = "32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f";
+const candidateTree = "d0842ec5ae23d1eaddbddc691bbeaaa704b18e77";
+const candidateApplicationGate =
+  "APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
 const consumedCutoverGate =
   "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT";
 
 describe("current application release authority", () => {
-  it("binds accepted Production to the recovered PR 246 source and deployment", () => {
-    expect(CURRENT_RELEASE_AUTHORITY.schemaVersion).toBe(6);
+  it("binds accepted Production to the released PR 247 source and deployment", () => {
+    expect(CURRENT_RELEASE_AUTHORITY.schemaVersion).toBe(7);
     expect(CURRENT_RELEASE_AUTHORITY.production).toMatchObject({
-      pr: 246,
+      pr: 247,
       reviewedHead,
       mergeCommit: productionCommit,
       tree: productionTree,
       deploymentId: productionDeployment,
       canonicalUrl: "https://www.askmagicmike.com",
       status: "accepted",
-      rollbackDeploymentId: runtimeRedeploySource,
-      releaseGate: { runId: 33504917995, status: "success" },
-      postDeployVerification: { runId: 33505043074, status: "success" },
+      rollbackDeploymentId: productionRollback,
+      approval: {
+        phrase: consumedApplicationGate,
+        status: "consumed",
+      },
+      releaseGate: { runId: 33522215178, status: "success" },
+      postDeployVerification: { runId: 33522383308, status: "success" },
+      acceptanceVerification: {
+        monitorPassed: 11,
+        monitorFailed: 0,
+        smokePassed: 19,
+        smokeSkipped: 2,
+        smokeFailed: 0,
+        runtimeErrorCount: 0,
+        readinessStatus: 200,
+      },
     });
-    expect(CURRENT_RELEASE_AUTHORITY.production.productionMonitorRuns.map(
-      ({ runId }) => runId,
-    )).toEqual([33505253029, 33505284828, 33508066082]);
+    expect(CURRENT_RELEASE_AUTHORITY.production.productionMonitorRuns).toEqual([]);
     expect(CURRENT_RELEASE_AUTHORITY.production.runtimeRedeploy).toMatchObject({
       approval: {
         phrase: "APPROVE SECURE ASK MAGIC MIKE DATABASE_URL REPLACEMENT AND PRODUCTION REDEPLOYMENT",
         status: "consumed",
       },
       sourceDeploymentId: runtimeRedeploySource,
-      deploymentId: productionDeployment,
+      deploymentId: productionRollback,
       reason: "production_database_url_replacement",
       target: {
         provider: "neon",
@@ -73,26 +86,30 @@ describe("current application release authority", () => {
     });
   });
 
-  it("exposes only the exact-tree reviewed PR 247 application gate", () => {
+  it("exposes only the exact-tree reviewed PR 248 application gate", () => {
     expect(CURRENT_RELEASE_AUTHORITY.candidate).toEqual({
-      pr: 247,
-      url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247",
-      branch: "codex/owned-demand-readiness-main-20260901",
-      reviewedHead: candidateHead,
+      pr: 248,
+      url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248",
+      branch: "codex/wordpress-connector-attribution-v1-1-0-20260901",
+      reviewedHead: candidateReviewedHead,
       tree: candidateTree,
       state: "reviewed",
-      approvalGate: candidateGate,
+      approvalGate: candidateApplicationGate,
     });
-    expect(CURRENT_APPLICATION_RELEASE_GATE).toBe(candidateGate);
     expect(CURRENT_RELEASE_AUTHORITY.reviewVehicle).toEqual({
-      pr: 247,
-      url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247",
-      branch: "codex/owned-demand-readiness-main-20260901",
+      pr: 248,
+      url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248",
+      branch: "codex/wordpress-connector-attribution-v1-1-0-20260901",
       baseCommit: productionCommit,
-      implementationHead,
+      implementationHead: "3af515932b9ee07ccccb7ad4cbf7734d040f9a2c",
       state: "sealed_for_owner_approval",
       migrationCount: 0,
       externalMutationCount: 0,
+    });
+    expect(CURRENT_APPLICATION_RELEASE_GATE).toBe(candidateApplicationGate);
+    expect(CURRENT_RELEASE_AUTHORITY.production.approval).toMatchObject({
+      phrase: consumedApplicationGate,
+      status: "consumed",
     });
   });
 
@@ -141,6 +158,7 @@ describe("current application release authority", () => {
     expect(adapter).toContain("candidate?.approvalGate ?? null");
     expect(ledger).toContain("CURRENT_APPLICATION_RELEASE_GATE");
     expect(ledger).not.toContain(consumedCutoverGate);
+    expect(ledger).not.toContain(consumedApplicationGate);
   });
 
   it("places current truth ahead of the preserved chronological ledger", () => {
@@ -156,15 +174,18 @@ describe("current application release authority", () => {
       const currentSection = readRepoFile(name).slice(0, 2_500);
       expect(currentSection).toContain(productionCommit);
       expect(currentSection).toContain(productionDeployment);
-      expect(currentSection).toMatch(/PR #?246|PR \[#246\]/);
+      expect(currentSection).toMatch(/PR #?247|PR \[#247\]/);
       expect(currentSection).not.toMatch(/PR #238[^\n]{0,180}(?:single|current|active)[^\n]{0,80}candidate/i);
     }
-    expect(currentAuthority).toContain(implementationHead);
-    expect(currentAuthority).toContain(candidateHead);
+    expect(currentAuthority).toContain(reviewedHead);
+    expect(currentAuthority).toContain(productionTree);
+    expect(currentAuthority).toContain(consumedApplicationGate);
+    expect(currentAuthority).toContain(candidateReviewedHead);
     expect(currentAuthority).toContain(candidateTree);
-    expect(currentAuthority).toContain(candidateGate);
-    expect(currentAuthority).toMatch(/PR (?:\[#247\]|#247)[\s\S]*(?:reviewed|sealed)/i);
-    expect(currentAuthority).toMatch(/only active application candidate/i);
+    expect(currentAuthority).toContain(candidateApplicationGate);
+    expect(currentAuthority).toMatch(/only active reviewed application candidate/i);
+    expect(currentAuthority).toMatch(/PR \[#248\][\s\S]*zero[\s\S]*migrations/i);
+    expect(currentAuthority).toMatch(/PR (?:\[#247\]|#247)[\s\S]*consumed/i);
     expect(currentAuthority).toMatch(/PR #238[\s\S]*consumed/i);
   });
 });

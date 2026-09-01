@@ -4,27 +4,38 @@ Updated 2026-09-01.
 
 ## Current release and owned-demand readiness review — 2026-09-01
 
-- **Accepted Production:** PR #246 merge
-  `98a91f752c4c53dc0ae300dfc320f47b53e32820` is live on deployment
-  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`. The environment-only redeploy uses the
-  securely replaced Neon Production connection, and current no-write monitor
-  and smoke checks pass; `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate
-  application rollback.
-- **Authority sealed:** the machine manifest records PR #246 as accepted, PR
-  #238 as a consumed five-migration receipt, and PR #247 as the one reviewed
-  application candidate with one exact, owner-only merge/deploy gate.
-- **Clean reviewed candidate:** PR #247 is based directly on accepted `main`
-  and ports only the WordPress placement-readiness fix. It does not merge stale
-  stacked PRs #244/#245 and has zero migrations or authorized external
-  mutations.
+- **Accepted Production:** PR #247 merge
+  `a2f3de834830f600df106dbf5836ae4bbde4eb4a` is live on deployment
+  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` with exact accepted tree
+  `0065f829fc94f87ab5e0faf596c8e56733be3972`. The prior Ready deployment
+  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` is immediate application rollback.
+- **Post-release proof:** hosted Node 24 Release Gate
+  `33522215178`, post-deploy verification `33522383308`, the canonical
+  11-check monitor, 19-pass read-only smoke, health/readiness, auth boundary,
+  and runtime error window all passed.
+- **Reviewed application candidate PR #248:** reviewed content head
+  `32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f`, exact tree
+  `d0842ec5ae23d1eaddbddc691bbeaaa704b18e77`, hosted Release Gate
+  `33528697047`, and immutable Ready Preview
+  `dpl_51JjPVTZizxPJZu1GAiWjVpFTaZn` are sealed for owner review. The exact
+  live Connector 1.0.0 source/assets remain preserved, while the
+  backward-compatible 1.1.0 candidate adds bounded per-shortcode attribution
+  and public version proof. Deterministic install/rollback packages, native
+  PHP lint, and read-only Preview checks pass with zero migrations and zero
+  external mutations.
+- **Corrected readiness:** v3 holds Home Value and We Buy Homes as
+  `connector_upgrade_required` until the reviewed plugin capability is
+  publicly proven. Unreviewed WordPress placements cannot become fallback
+  recommendations.
 - **Operator safety:** hidden or unavailable WordPress placements fail closed;
   the existing Distribution Command can prefer the visible home-value page
   without claiming publication or editing WordPress.
 - **No external mutation:** this review adds no migration, secret, provider,
   lead, message, publication, DNS, spend, deletion, or NellySelly action.
-- **Independent WordPress boundary:** the PR #247 gate does not authorize a
-  WordPress save or publication. The visible Home Value placement remains a
-  later, page-specific approval after the application release is accepted.
+- **Independent WordPress boundary:** the consumed PR #247 gate authorized no
+  WordPress save. The PR #248 application gate likewise authorizes no
+  WordPress action; plugin capability and page-3952 publication remain separate
+  future approval/rollback boundaries.
 
 ## Production database-credential and CI recovery — 2026-09-01
 

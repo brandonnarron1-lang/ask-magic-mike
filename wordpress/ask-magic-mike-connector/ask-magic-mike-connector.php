@@ -1,0 +1,455 @@
+<?php
+/**
+ * Plugin Name: Ask Magic Mike Connector
+ * Plugin URI: https://www.askmagicmike.com/
+ * Description: Adds Ask Magic Mike CTAs, iframe embeds, UTM tracking, and an optional floating CTA for Our Town Properties.
+ * Version: 1.1.0
+ * Author: Ask Magic Mike / Our Town Properties
+ * License: GPLv2 or later
+ * Text Domain: ask-magic-mike-connector
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+if ( ! defined( 'AMM_CONNECTOR_VERSION' ) ) {
+    define( 'AMM_CONNECTOR_VERSION', '1.1.0' );
+}
+
+if ( ! defined( 'AMM_CONNECTOR_OPTION_KEY' ) ) {
+    define( 'AMM_CONNECTOR_OPTION_KEY', 'amm_connector_options' );
+}
+
+/**
+ * Default plugin settings.
+ */
+function amm_connector_default_options() {
+    return array(
+        'base_url'          => 'https://www.askmagicmike.com',
+        'value_route'       => '/home-value',
+        'embed_route'       => '/embed/ask',
+        'utm_source'        => 'ourtown_wp',
+        'utm_campaign'      => 'ask_magic_mike',
+        'default_headline'  => 'Ask Magic Mike what your Wilson-area home may be worth.',
+        'default_text'      => 'Start with your address. Mike Eatmon will follow up with local guidance, not a generic internet guess.',
+        'default_button'    => 'Start With Your Address',
+        'floating_enabled'  => 0,
+        'floating_label'    => 'Ask Magic Mike',
+    );
+}
+
+/**
+ * Return merged/sanitized options.
+ */
+function amm_connector_get_options() {
+    $defaults = amm_connector_default_options();
+    $options  = get_option( AMM_CONNECTOR_OPTION_KEY, array() );
+
+    if ( ! is_array( $options ) ) {
+        $options = array();
+    }
+
+    return amm_connector_sanitize_options( wp_parse_args( $options, $defaults ) );
+}
+
+/**
+ * Activation: seed defaults without overwriting saved values.
+ */
+function amm_connector_activate() {
+    $existing = get_option( AMM_CONNECTOR_OPTION_KEY, null );
+    if ( null === $existing ) {
+        add_option( AMM_CONNECTOR_OPTION_KEY, amm_connector_default_options() );
+    }
+}
+register_activation_hook( __FILE__, 'amm_connector_activate' );
+
+/**
+ * Normalize route fields.
+ */
+function amm_connector_normalize_route( $route, $fallback ) {
+    $route = is_string( $route ) ? trim( $route ) : '';
+    if ( '' === $route ) {
+        $route = $fallback;
+    }
+
+    $route = '/' . ltrim( sanitize_text_field( $route ), '/' );
+    if ( ! preg_match( '#^/[a-z0-9/_-]*$#i', $route ) ) {
+        $route = '/' . ltrim( sanitize_text_field( $fallback ), '/' );
+    }
+
+    return $route;
+}
+
+/**
+ * Restrict the browser destination to the owned Ask Magic Mike hosts.
+ *
+ * The historical Vercel alias remains accepted so existing saved options keep
+ * working during a reversible upgrade. New installs default to the canonical
+ * www hostname.
+ */
+function amm_connector_normalize_base_url( $base_url, $fallback ) {
+    $base_url = is_string( $base_url ) ? esc_url_raw( trim( $base_url ) ) : '';
+    $parts    = $base_url ? wp_parse_url( $base_url ) : false;
+    $hosts    = array(
+        'askmagicmike.com',
+        'www.askmagicmike.com',
+        'ask-magic-mike.vercel.app',
+    );
+
+    if (
+        ! is_array( $parts )
+        || 'https' !== strtolower( isset( $parts['scheme'] ) ? (string) $parts['scheme'] : '' )
+        || ! in_array( strtolower( isset( $parts['host'] ) ? (string) $parts['host'] : '' ), $hosts, true )
+        || ! empty( $parts['user'] )
+        || ! empty( $parts['pass'] )
+        || ! empty( $parts['port'] )
+        || ! empty( $parts['query'] )
+        || ! empty( $parts['fragment'] )
+    ) {
+        return untrailingslashit( $fallback );
+    }
+
+    return 'https://' . strtolower( (string) $parts['host'] );
+}
+
+/**
+ * Sanitize one attribution dimension using the canonical public allowlist.
+ */
+function amm_connector_sanitize_utm_value( $value, $fallback = '' ) {
+    $value = is_scalar( $value ) ? sanitize_key( (string) $value ) : '';
+    if ( '' === $value && is_scalar( $fallback ) ) {
+        $value = sanitize_key( (string) $fallback );
+    }
+
+    return substr( $value, 0, 120 );
+}
+
+/**
+ * Sanitize settings.
+ */
+function amm_connector_sanitize_options( $input ) {
+    $defaults = amm_connector_default_options();
+    $input    = is_array( $input ) ? $input : array();
+
+    $base_url = amm_connector_normalize_base_url(
+        isset( $input['base_url'] ) ? $input['base_url'] : '',
+        $defaults['base_url']
+    );
+
+    return array(
+        'base_url'          => $base_url,
+        'value_route'       => amm_connector_normalize_route( isset( $input['value_route'] ) ? $input['value_route'] : '', $defaults['value_route'] ),
+        'embed_route'       => amm_connector_normalize_route( isset( $input['embed_route'] ) ? $input['embed_route'] : '', $defaults['embed_route'] ),
+        'utm_source'        => amm_connector_sanitize_utm_value( isset( $input['utm_source'] ) ? $input['utm_source'] : '', $defaults['utm_source'] ),
+        'utm_campaign'      => amm_connector_sanitize_utm_value( isset( $input['utm_campaign'] ) ? $input['utm_campaign'] : '', $defaults['utm_campaign'] ),
+        'default_headline'  => isset( $input['default_headline'] ) ? sanitize_text_field( $input['default_headline'] ) : $defaults['default_headline'],
+        'default_text'      => isset( $input['default_text'] ) ? sanitize_textarea_field( $input['default_text'] ) : $defaults['default_text'],
+        'default_button'    => isset( $input['default_button'] ) ? sanitize_text_field( $input['default_button'] ) : $defaults['default_button'],
+        'floating_enabled'  => ! empty( $input['floating_enabled'] ) ? 1 : 0,
+        'floating_label'    => isset( $input['floating_label'] ) ? sanitize_text_field( $input['floating_label'] ) : $defaults['floating_label'],
+    );
+}
+
+/**
+ * Register plugin settings.
+ */
+function amm_connector_register_settings() {
+    register_setting(
+        'amm_connector_settings_group',
+        AMM_CONNECTOR_OPTION_KEY,
+        array(
+            'type'              => 'array',
+            'sanitize_callback' => 'amm_connector_sanitize_options',
+            'default'           => amm_connector_default_options(),
+        )
+    );
+}
+add_action( 'admin_init', 'amm_connector_register_settings' );
+
+/**
+ * Admin menu.
+ */
+function amm_connector_admin_menu() {
+    add_options_page(
+        'Ask Magic Mike Connector',
+        'Ask Magic Mike',
+        'manage_options',
+        'ask-magic-mike-connector',
+        'amm_connector_render_settings_page'
+    );
+}
+add_action( 'admin_menu', 'amm_connector_admin_menu' );
+
+/**
+ * Render settings page.
+ */
+function amm_connector_render_settings_page() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+
+    $options = amm_connector_get_options();
+    ?>
+    <div class="wrap">
+        <h1>Ask Magic Mike Connector</h1>
+        <p>Use this plugin to place Ask Magic Mike CTA cards and iframe embeds across Our Town Properties without storing any secrets in WordPress.</p>
+
+        <form method="post" action="options.php">
+            <?php settings_fields( 'amm_connector_settings_group' ); ?>
+            <table class="form-table" role="presentation">
+                <tr>
+                    <th scope="row"><label for="amm-base-url">Base App URL</label></th>
+                    <td>
+                        <input id="amm-base-url" class="regular-text" type="url" name="<?php echo esc_attr( AMM_CONNECTOR_OPTION_KEY ); ?>[base_url]" value="<?php echo esc_attr( $options['base_url'] ); ?>" />
+                        <p class="description">Default: https://www.askmagicmike.com. Only owned Ask Magic Mike hosts are accepted.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="amm-value-route">Value Route</label></th>
+                    <td><input id="amm-value-route" class="regular-text" type="text" name="<?php echo esc_attr( AMM_CONNECTOR_OPTION_KEY ); ?>[value_route]" value="<?php echo esc_attr( $options['value_route'] ); ?>" /></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="amm-embed-route">Embed Route</label></th>
+                    <td><input id="amm-embed-route" class="regular-text" type="text" name="<?php echo esc_attr( AMM_CONNECTOR_OPTION_KEY ); ?>[embed_route]" value="<?php echo esc_attr( $options['embed_route'] ); ?>" /></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="amm-utm-source">UTM Source</label></th>
+                    <td><input id="amm-utm-source" class="regular-text" type="text" name="<?php echo esc_attr( AMM_CONNECTOR_OPTION_KEY ); ?>[utm_source]" value="<?php echo esc_attr( $options['utm_source'] ); ?>" /></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="amm-utm-campaign">UTM Campaign</label></th>
+                    <td><input id="amm-utm-campaign" class="regular-text" type="text" name="<?php echo esc_attr( AMM_CONNECTOR_OPTION_KEY ); ?>[utm_campaign]" value="<?php echo esc_attr( $options['utm_campaign'] ); ?>" /></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="amm-default-headline">Default CTA Headline</label></th>
+                    <td><input id="amm-default-headline" class="large-text" type="text" name="<?php echo esc_attr( AMM_CONNECTOR_OPTION_KEY ); ?>[default_headline]" value="<?php echo esc_attr( $options['default_headline'] ); ?>" /></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="amm-default-text">Default CTA Text</label></th>
+                    <td><textarea id="amm-default-text" class="large-text" rows="3" name="<?php echo esc_attr( AMM_CONNECTOR_OPTION_KEY ); ?>[default_text]"><?php echo esc_textarea( $options['default_text'] ); ?></textarea></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="amm-default-button">Default Button Text</label></th>
+                    <td><input id="amm-default-button" class="regular-text" type="text" name="<?php echo esc_attr( AMM_CONNECTOR_OPTION_KEY ); ?>[default_button]" value="<?php echo esc_attr( $options['default_button'] ); ?>" /></td>
+                </tr>
+                <tr>
+                    <th scope="row">Floating CTA</th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="<?php echo esc_attr( AMM_CONNECTOR_OPTION_KEY ); ?>[floating_enabled]" value="1" <?php checked( 1, (int) $options['floating_enabled'] ); ?> />
+                            Enable a floating Ask Magic Mike button site-wide
+                        </label>
+                        <br />
+                        <input class="regular-text" type="text" name="<?php echo esc_attr( AMM_CONNECTOR_OPTION_KEY ); ?>[floating_label]" value="<?php echo esc_attr( $options['floating_label'] ); ?>" />
+                    </td>
+                </tr>
+            </table>
+            <?php submit_button(); ?>
+        </form>
+
+        <hr />
+        <h2>Shortcodes</h2>
+        <p><code>[ask_magic_mike_cta source="home_value_page" button_text="Ask Magic Mike"]</code></p>
+        <p><code>[ask_magic_mike_cta route="/home-value" source="home_value_page" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_home_value_page" button_text="Ask Magic Mike"]</code></p>
+        <p><code>[ask_magic_mike_cta source="homepage_cta"]</code></p>
+        <p><code>[ask_magic_mike_cta source="mike_profile" headline="Have a real estate question for Magic Mike?" button_text="Ask Magic Mike"]</code></p>
+        <p><code>[ask_magic_mike_embed source="home_value_widget"]</code></p>
+
+        <h2>Recommended First Placement</h2>
+        <p>Place this on the “How Much Is Your Home Worth?” page first:</p>
+        <pre>[ask_magic_mike_cta route="/home-value" source="home_value_page" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_home_value_page" button_text="Ask Magic Mike"]</pre>
+        <p>The explicit UTM attributes apply only to this shortcode instance. Existing shortcodes remain backward compatible and continue using the saved global source and campaign.</p>
+    </div>
+    <?php
+}
+
+/**
+ * Build Ask Magic Mike URL with UTM parameters.
+ */
+function amm_connector_build_url( $route, $source, $content = '', $utm_overrides = array() ) {
+    $options       = amm_connector_get_options();
+    $base          = amm_connector_normalize_base_url( $options['base_url'], amm_connector_default_options()['base_url'] );
+    $route         = amm_connector_normalize_route( $route, $options['value_route'] );
+    $url           = $base . $route;
+    $utm_overrides = is_array( $utm_overrides ) ? $utm_overrides : array();
+
+    $args = array(
+        'utm_source'   => amm_connector_sanitize_utm_value( isset( $utm_overrides['utm_source'] ) ? $utm_overrides['utm_source'] : '', $options['utm_source'] ),
+        'utm_medium'   => amm_connector_sanitize_utm_value( isset( $utm_overrides['utm_medium'] ) ? $utm_overrides['utm_medium'] : '', $source ),
+        'utm_campaign' => amm_connector_sanitize_utm_value( isset( $utm_overrides['utm_campaign'] ) ? $utm_overrides['utm_campaign'] : '', $options['utm_campaign'] ),
+    );
+
+    $utm_content = amm_connector_sanitize_utm_value(
+        isset( $utm_overrides['utm_content'] ) ? $utm_overrides['utm_content'] : '',
+        $content
+    );
+    if ( '' !== $utm_content ) {
+        $args['utm_content'] = $utm_content;
+    }
+
+    return add_query_arg( $args, $url );
+}
+
+/**
+ * CTA shortcode.
+ *
+ * Examples:
+ * [ask_magic_mike_cta source="homepage_cta"]
+ * [ask_magic_mike_cta source="mike_profile" headline="Have a real estate question for Magic Mike?" button_text="Ask Magic Mike"]
+ */
+function amm_connector_cta_shortcode( $atts ) {
+    $options = amm_connector_get_options();
+
+    $atts = shortcode_atts(
+        array(
+            'source'       => 'cta',
+            'content'      => '',
+            'utm_source'   => '',
+            'utm_medium'   => '',
+            'utm_campaign' => '',
+            'utm_content'  => '',
+            'headline'     => $options['default_headline'],
+            'text'         => $options['default_text'],
+            'button'       => $options['default_button'],
+            'button_text'  => '',
+            'route'        => $options['value_route'],
+            'class'        => '',
+            'theme'        => 'dark',
+        ),
+        $atts,
+        'ask_magic_mike_cta'
+    );
+
+    $button_text = ! empty( $atts['button_text'] ) ? $atts['button_text'] : $atts['button'];
+    $source      = sanitize_key( $atts['source'] );
+    $content     = sanitize_key( $atts['content'] );
+    $theme       = sanitize_html_class( $atts['theme'] );
+    $extra_class = sanitize_html_class( $atts['class'] );
+    $url         = amm_connector_build_url(
+        $atts['route'],
+        $source,
+        $content,
+        array(
+            'utm_source'   => $atts['utm_source'],
+            'utm_medium'   => $atts['utm_medium'],
+            'utm_campaign' => $atts['utm_campaign'],
+            'utm_content'  => $atts['utm_content'],
+        )
+    );
+
+    ob_start();
+    ?>
+    <div class="amm-cta amm-cta--<?php echo esc_attr( $theme ); ?> <?php echo esc_attr( $extra_class ); ?>" data-amm-source="<?php echo esc_attr( $source ); ?>" data-amm-connector-version="<?php echo esc_attr( AMM_CONNECTOR_VERSION ); ?>">
+        <p class="amm-cta__kicker">✦ Ask Magic Mike</p>
+        <h3 class="amm-cta__headline"><?php echo esc_html( $atts['headline'] ); ?></h3>
+        <p class="amm-cta__text"><?php echo esc_html( $atts['text'] ); ?></p>
+        <a class="amm-cta__button" href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer" data-amm-link="1">
+            <?php echo esc_html( $button_text ); ?> →
+        </a>
+        <p class="amm-cta__footnote">No commitment. Mike follows up directly.</p>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode( 'ask_magic_mike_cta', 'amm_connector_cta_shortcode' );
+
+/**
+ * Embed shortcode.
+ *
+ * Example: [ask_magic_mike_embed source="home_value_widget"]
+ */
+function amm_connector_embed_shortcode( $atts ) {
+    $options = amm_connector_get_options();
+
+    $atts = shortcode_atts(
+        array(
+            'source'       => 'embed',
+            'content'      => '',
+            'utm_source'   => '',
+            'utm_medium'   => '',
+            'utm_campaign' => '',
+            'utm_content'  => '',
+            'route'        => $options['embed_route'],
+            'height'       => '820',
+            'title'        => 'Ask Magic Mike',
+            'class'        => '',
+        ),
+        $atts,
+        'ask_magic_mike_embed'
+    );
+
+    $source      = sanitize_key( $atts['source'] );
+    $content     = sanitize_key( $atts['content'] );
+    $extra_class = sanitize_html_class( $atts['class'] );
+    $height      = preg_replace( '/[^0-9]/', '', $atts['height'] );
+    $height      = $height ? $height : '820';
+    $url         = amm_connector_build_url(
+        $atts['route'],
+        $source,
+        $content,
+        array(
+            'utm_source'   => $atts['utm_source'],
+            'utm_medium'   => $atts['utm_medium'],
+            'utm_campaign' => $atts['utm_campaign'],
+            'utm_content'  => $atts['utm_content'],
+        )
+    );
+
+    ob_start();
+    ?>
+    <div class="amm-embed <?php echo esc_attr( $extra_class ); ?>" data-amm-source="<?php echo esc_attr( $source ); ?>" data-amm-connector-version="<?php echo esc_attr( AMM_CONNECTOR_VERSION ); ?>">
+        <iframe
+            src="<?php echo esc_url( $url ); ?>"
+            title="<?php echo esc_attr( $atts['title'] ); ?>"
+            width="100%"
+            height="<?php echo esc_attr( $height ); ?>"
+            loading="lazy"
+            frameborder="0"
+            allow="clipboard-write"
+        ></iframe>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode( 'ask_magic_mike_embed', 'amm_connector_embed_shortcode' );
+
+/**
+ * Enqueue frontend assets.
+ */
+function amm_connector_enqueue_assets() {
+    wp_enqueue_style(
+        'amm-connector-css',
+        plugin_dir_url( __FILE__ ) . 'assets/ask-magic-mike.css',
+        array(),
+        AMM_CONNECTOR_VERSION
+    );
+
+    wp_enqueue_script(
+        'amm-connector-js',
+        plugin_dir_url( __FILE__ ) . 'assets/ask-magic-mike.js',
+        array(),
+        AMM_CONNECTOR_VERSION,
+        true
+    );
+}
+add_action( 'wp_enqueue_scripts', 'amm_connector_enqueue_assets' );
+
+/**
+ * Render floating CTA if enabled.
+ */
+function amm_connector_render_floating_cta() {
+    $options = amm_connector_get_options();
+
+    if ( empty( $options['floating_enabled'] ) ) {
+        return;
+    }
+
+    $url = amm_connector_build_url( $options['value_route'], 'floating_cta', 'sitewide' );
+    ?>
+    <a class="amm-floating-cta" href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer" data-amm-link="1" data-amm-connector-version="<?php echo esc_attr( AMM_CONNECTOR_VERSION ); ?>">
+        <?php echo esc_html( $options['floating_label'] ); ?>
+    </a>
+    <?php
+}
+add_action( 'wp_footer', 'amm_connector_render_floating_cta', 100 );

@@ -46,6 +46,9 @@ jobs:
       - name: Release safety scan
         run: pnpm run release:safety
 
+      - name: WordPress Connector PHP syntax lint
+        run: php -l wordpress/ask-magic-mike-connector/ask-magic-mike-connector.php
+
       - name: Unit tests
         run: pnpm run test
 

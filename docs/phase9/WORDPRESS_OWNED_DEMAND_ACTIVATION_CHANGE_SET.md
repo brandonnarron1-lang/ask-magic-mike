@@ -6,6 +6,31 @@ Mode: read-only public precondition generation
 
 External mutation: none
 
+## 2026-09-01 Connector capability correction
+
+Authenticated source inspection proved that the active Connector 1.0.0 plugin
+stores page 3952 as a shortcode and supports only global source/campaign plus
+legacy `source`-as-medium behavior. It cannot generate the reviewed
+per-placement `owned_media` link while retaining the placement identifier.
+The public pages also expose no Connector version marker.
+
+The v3 candidate therefore supersedes the v2 `legacy_match_ready` page-edit
+procedure below until plugin capability is proven. It returns:
+
+- homepage page 149: `hidden_target`;
+- Home Value page 3952: `connector_upgrade_required`;
+- We Buy Homes page 3631: `connector_upgrade_required`.
+
+The first requestable future gate is the independently backed-up Connector
+upgrade:
+
+`APPROVE PHASE 9 WORDPRESS CONNECTOR 1.1.0 PLUGIN UPGRADE`
+
+The Home Value page-publication phrase is not requestable until the public
+1.1.0 marker is present, old shortcodes retain their prior links, and a fresh
+v3 manifest returns `legacy_match_ready`. See
+`WORDPRESS_CONNECTOR_ATTRIBUTION_UPGRADE.md`.
+
 ## 2026-08-29 visibility correction
 
 The historical structural audit below correctly identified the homepage href,
@@ -124,18 +149,20 @@ Basic Auth, no database configuration, disabled notification providers, and
 pre-navigation interception of every known application write endpoint. They
 recorded no application POST, console finding, overflow, or framework overlay.
 
-## First publication candidate
+## Historical first page candidate — currently held
 
 The homepage was the historical recommended first action based on structural
 href evidence. The 2026-08-29 visibility correction supersedes that
 recommendation while the component remains hidden. An href-only homepage edit
 remains prohibited.
 
-The established Home Value page is now the first safe publication candidate:
+The established Home Value page remains the first reviewed page candidate:
 its page ID is 3952, its one exact legacy CTA is visible on desktop and mobile,
 its rollback href is present, and its current manifest is
-`legacy_match_ready`. This ordering reuses the existing deterministic owned-
-demand placement priority; it does not infer demand or conversion from
+`connector_upgrade_required` under the corrected v3 contract. It cannot
+become page-publication-ready until the reviewed Connector 1.1.0 capability is
+installed and publicly proven. This ordering reuses the existing deterministic
+owned-demand placement priority; it does not infer demand or conversion from
 readiness.
 
 The We Buy Homes manifest is independently ready but remains a separate later
@@ -144,7 +171,9 @@ visibility restoration also remains a separate plugin-file decision.
 
 ## Publication procedure and rollback
 
-The following procedure applies only to the one Home Value CTA candidate.
+The following procedure applies only after the separate Connector upgrade has
+passed and a fresh v3 manifest proves `connectorVersionReady=true`. It then
+applies only to the one Home Value CTA candidate.
 Immediately before any future edit:
 
 1. download a fresh `wordpress_home_value` manifest from the authenticated
@@ -154,8 +183,9 @@ Immediately before any future edit:
    unchanged SHA-256 precondition;
 3. create and verify a recoverable WordPress page revision or backup;
 4. receive the exact Home Value publication approval below;
-5. replace only that one href—no page, form, menu, theme, plugin, phone number,
-   or copy replacement;
+5. verify the editor source contains the exact reviewed current shortcode and
+   replace only that shortcode instance—no page, form, menu, theme, plugin,
+   phone number, or copy replacement;
 6. publish and verify public status, destination, UTM values, canonical tags,
    desktop/mobile layout, keyboard behavior, and analytics without submitting
    a lead; and
@@ -183,8 +213,14 @@ Application release and WordPress publication are different actions.
 
 - The application PR may be reviewed, merged, and deployed without changing
   WordPress.
+- The Connector 1.1.0 upgrade is a separate, earlier external action requiring
+  this exact phrase:
+
+`APPROVE PHASE 9 WORDPRESS CONNECTOR 1.1.0 PLUGIN UPGRADE`
+
+That phrase authorizes no page save or publication.
 - The first visible Home Value link publication requires this exact separate
-  phrase:
+  phrase only after the Connector postflight is green:
 
 `APPROVE PHASE 9 HOME VALUE CTA WORDPRESS PUBLICATION`
 
