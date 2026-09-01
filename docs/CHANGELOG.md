@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-01 — Secret-safe Production launch-authority evidence
+
+- Extended the existing metadata-only Vercel environment check from the launch
+  doctor to the launch-authority report instead of introducing another secret
+  or configuration subsystem.
+- The authority command now accepts only the projected `key`, `target`, and
+  `type` fields, rejects value-bearing manifests, distinguishes Production
+  scope, and fails closed for missing required names.
+- Reused the established Resend inference and growth-import fail-closed rules,
+  with focused CLI tests for both a 46/46 GO result and value-bearing input
+  rejection.
+- Exact Node 24.18.0 release verification passes 283 test files / 3,428 tests,
+  strict typecheck, full lint, optimized build, 14/14 safety controls, system
+  isolation, and the complete route manifest.
+- Authenticated name-only Production evidence found all 16 required variables,
+  a valid Resend path, and all three growth write-gates absent. No secret value,
+  Vercel setting, deployment, database, WordPress surface, lead, notification,
+  DNS record, spend, deletion, or NellySelly system changed.
+
 ## 2026-09-01 — WordPress Connector attribution upgrade candidate
 
 - Source-controlled the exact active Connector 1.0.0 PHP baseline and public

@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { spawnSync } from "node:child_process";
+import { resolve } from "node:path";
 import {
   computeAuthorityStatus,
   findMissingAuthorityDocs,
@@ -219,6 +221,49 @@ describe("findMissingEnvVars", () => {
     // variable must be reported as an owner-scoped verification item.
     // This confirms the SKIP_OWNER behavior is correct
     expect(missingInTest.length).toBeGreaterThan(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Secret-safe Vercel Production metadata CLI mode
+// ---------------------------------------------------------------------------
+
+describe("--vercel-json-stdin", () => {
+  const script = resolve(process.cwd(), "scripts/amm/launch-authority-report.mjs");
+
+  it("reaches GO from names-and-scopes-only Production metadata", () => {
+    const envs = OWNER_GATED_VARS.map((key) => ({
+      key,
+      target: ["production"],
+      type: "sensitive",
+    }));
+    const result = spawnSync(process.execPath, [script, "--vercel-json-stdin"], {
+      input: JSON.stringify({ envs }),
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain("Vercel Production metadata parsed without values");
+    expect(result.stdout).toContain("LAUNCH_AUTHORITY: GO_CONTROLLED_TRAFFIC_READY");
+    expect(result.stdout).toContain("SKIP_OWNER: 0");
+    expect(result.stdout).not.toMatch(/^\s+SKIP_OWNER\s+/m);
+  });
+
+  it("fails closed when the manifest contains a value-bearing field", () => {
+    const result = spawnSync(process.execPath, [script, "--vercel-json-stdin"], {
+      input: JSON.stringify({
+        envs: [{
+          key: "DATABASE_URL",
+          target: ["production"],
+          value: "must-not-be-read",
+        }],
+      }),
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("vercel_env_manifest_contains_values");
+    expect(result.stdout).toContain("LAUNCH_AUTHORITY: NOT_GO_FAILING_CHECKS");
   });
 });
 
