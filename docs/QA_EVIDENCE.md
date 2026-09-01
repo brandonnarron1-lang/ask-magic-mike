@@ -2,6 +2,15 @@
 
 ## Ask chat contactability hardening candidate — 2026-09-01
 
+- Draft PR [#252](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/252)
+  preserves the release stack by targeting PR #251's branch. Source commit
+  `5563038cd05c7d1908149b398a91db8062adec1d` and tree
+  `393348f320f64c939c88f1921ebfc81c1621b4fd` produced Ready Vercel Preview
+  `dpl_4YUBm7AfauwBfzZFfcY6h7sY5inz` at
+  `https://ask-magic-mike-23zko6jtp-eyes-up-industries.vercel.app`.
+- Hosted GitHub Release Gate run `33542843092` / job `99973080272` passes the
+  exact source head. The Vercel status check is Ready and the unrelated
+  Production verifier correctly skipped for this Draft Preview.
 - Focused Vitest passes 2 files / 40 tests covering the existing lead API and
   Ask accessibility/conversion boundary.
 - Exact Node 24.18.0 full Vitest passes 283 files / 3,441 tests. Strict
@@ -21,10 +30,25 @@
   contact, or consent before any persistence call.
 - Fresh capture and replay tests preserve one session/idempotency key while
   suppressing duplicate conversion signals. SMS permission remains false.
-- No Production deployment, Preview deployment, merge, database mutation,
-  live-record correction, notification, WordPress action, DNS change,
-  publication, spend, deletion, or NellySelly action occurred during this
-  local evidence pass.
+- Hosted visual inspection confirms the immutable Preview renders the existing
+  Black Diamond desktop `/ask` surface and the new question-only disclosure.
+  A same-commit local optimized build was then placed behind an ephemeral
+  request-capture proxy so browser interaction could not reach a database,
+  email/SMS provider, analytics store, or AI provider.
+- Intercepted browser proof records one `POST /api/chat/message` and zero
+  `POST /api/leads` after clicking the starter prompt. Empty-contact and
+  missing-consent attempts create no request and focus the correct field. The
+  deliberate synthetic submission creates exactly one intercepted lead
+  request with `consent=true`, version `amm_contact_v2`, and
+  `consent_sms=false`, then reveals the existing appointment handoff.
+- Desktop and 390-pixel mobile screenshots cover initial, answered,
+  validation, follow-up, and success states. The layout retains the existing
+  visual system, readable labels, visible focus, and tap targets. Screenshots
+  do not independently prove full WCAG conformance.
+- No Production deployment, merge, database mutation, live-record correction,
+  external notification, WordPress action, DNS change, publication, spend,
+  deletion, or NellySelly action occurred. The only remote application action
+  was the isolated Vercel Preview for the exact application source commit.
 
 ## WordPress Connector attribution candidate — 2026-09-01
 

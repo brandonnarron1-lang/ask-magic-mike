@@ -19,11 +19,18 @@ Updated 2026-09-01.
   produced by the former live behavior. It is internal QA, not a prospect, and
   remains unaltered until an exact guarded test/suppression transaction is
   separately confirmed.
-- **Authority unchanged:** no Production/Preview deployment, merge, migration,
+- **Authority unchanged:** no Production deployment, merge, migration,
   environment change, WordPress action, message, DNS action, publication,
   spend, deletion, or NellySelly action is authorized by this source change.
-  Full design and acceptance contract:
+  An isolated Preview of the exact application source commit now exists solely
+  for protected QA; no Production authority changed. Full design and
+  acceptance contract:
   [`phase9/ASK_CHAT_CONTACTABILITY_HARDENING.md`](./phase9/ASK_CHAT_CONTACTABILITY_HARDENING.md).
+- **Sealed candidate:** Draft PR #252 targets PR #251's branch at source commit
+  `5563038cd05c7d1908149b398a91db8062adec1d`, tree
+  `393348f320f64c939c88f1921ebfc81c1621b4fd`, hosted Release Gate run
+  `33542843092`, and Ready Preview deployment
+  `dpl_4YUBm7AfauwBfzZFfcY6h7sY5inz`.
 
 ## Current release and owned-demand readiness review — 2026-09-01
 

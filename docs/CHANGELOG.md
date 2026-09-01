@@ -20,6 +20,9 @@
 - Added no migration, provider, lead store, form silo, or visual system. No
   Production deployment, data correction, WordPress action, message, DNS
   change, publication, spend, deletion, or NellySelly action occurred.
+- Sealed Draft PR #252 with a passing hosted Release Gate and Ready isolated
+  Vercel Preview. Protected desktop/mobile interaction proof used a same-commit
+  local request-capture proxy and made no external write.
 
 ## 2026-09-01 — Fail-closed current operator command center
 

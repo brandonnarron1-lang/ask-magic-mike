@@ -78,10 +78,23 @@ Local exact-Node proof passes 283 test files / 3,441 tests, strict TypeScript,
 full ESLint, two optimized builds, 100-route verification, 14/14 release
 safety, system isolation, and a clean Production dependency audit.
 
+Hosted proof is sealed on Draft PR #252 at source commit
+`5563038cd05c7d1908149b398a91db8062adec1d` and tree
+`393348f320f64c939c88f1921ebfc81c1621b4fd`. GitHub Release Gate run
+`33542843092` passes, and Vercel Preview deployment
+`dpl_4YUBm7AfauwBfzZFfcY6h7sY5inz` is Ready. Protected browser inspection
+confirmed the immutable hosted initial state. A same-commit local optimized
+build behind an ephemeral intercepting proxy then proved the interaction
+sequence without any external write: question only produced chat/events and no
+lead request; invalid contact and missing consent produced no request; explicit
+contact plus consent produced exactly one synthetic intercepted lead request.
+Desktop and 390-pixel mobile states were visually inspected.
+
 ## Rollback and authority
 
 Rollback is an application-code revert; no database rollback is required. This
 candidate changes no Production deployment, environment variable, Neon data,
 WordPress surface, email/SMS/push provider, DNS record, publication, spend, or
-NellySelly system. Existing accepted Production and the singular PR #248
-application gate remain unchanged until a later exact-head release decision.
+NellySelly system. Its isolated Preview is disposable. Existing accepted
+Production and the singular PR #248 application gate remain unchanged until a
+later exact-head release decision.
