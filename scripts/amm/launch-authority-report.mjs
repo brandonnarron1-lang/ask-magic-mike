@@ -4,7 +4,7 @@
  *
  * Read-only Go/No-Go authority report for Ask Magic Mike.
  * Imports pure helpers from launch-readiness-doctor.mjs and adds
- * authority-specific checks (PR #51 in release log, new cockpit docs).
+ * authority-specific checks against the canonical current-release manifest.
  *
  * No network calls. No secrets read. No .env files read.
  * No production mutations.
@@ -38,12 +38,13 @@ import {
   findNoveltyCopy,
   findMlsMarkers,
   checkCanonicalSiteConfig,
-  releaseLogMentionsPr,
   findStaleVercelUrlsInDocs,
   REQUIRED_PRODUCTION_ENV_VARS,
   parseVercelProductionEnvNames,
   classifyEmailProviderPresence,
   classifyFailClosedGatePresence,
+  loadCurrentProductionAuthority,
+  releaseLogMatchesCurrentProduction,
 } from "./launch-readiness-doctor.mjs";
 
 // ---------------------------------------------------------------------------
@@ -167,15 +168,23 @@ if (isMain) {
     }
   }
 
-  // ── Release log currency ─────────────────────────────────────────────────
+  // ── Current release authority and release-log currency ──────────────────
   console.log("\n[Release log currency]");
   const releaseLogPath = join(ROOT, "docs/PRODUCTION_RELEASE_LOG.md");
-  for (const prNum of [181]) {
-    const result = releaseLogMentionsPr(releaseLogPath, prNum);
+  const currentAuthority = loadCurrentProductionAuthority(ROOT);
+  if (!currentAuthority.ok) {
+    fail("current release authority manifest rejected", currentAuthority.reason);
+  } else {
+    const production = currentAuthority.authority;
+    pass(
+      `current release authority loaded: PR #${production.pr}`,
+      `${production.mergeCommit.slice(0, 7)} / ${production.deploymentId}`,
+    );
+    const result = releaseLogMatchesCurrentProduction(releaseLogPath, production);
     if (result.ok) {
-      pass(`release log mentions PR #${prNum}`);
+      pass(`release log matches current Production PR #${production.pr}`);
     } else {
-      fail(`release log missing PR #${prNum}`, result.reason);
+      fail(`release log is stale for current Production PR #${production.pr}`, result.reason);
     }
   }
 

@@ -166,6 +166,7 @@ describe("current application release authority", () => {
     for (const name of [
       "README.md",
       "docs/CANONICAL_PRODUCTION_STACK.md",
+      "docs/DOCUMENTATION_AUTHORITY.md",
       "docs/IMPLEMENTATION_STATUS.md",
       "docs/KNOWN_BLOCKERS.md",
       "docs/OWNER_APPROVAL_QUEUE.md",

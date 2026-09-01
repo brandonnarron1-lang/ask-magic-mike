@@ -1,7 +1,14 @@
 # Changelog
 
-## 2026-09-01 — Secret-safe Production launch-authority evidence
+## 2026-09-01 — Canonical Production launch-authority evidence
 
+- Replaced the historical PR #181 release-log proxy in both launch gates with
+  the existing canonical release-authority manifest. A green result now
+  requires the exact accepted PR #247 merge commit, Production tree, and Vercel
+  deployment ID in one bounded release-log block.
+- Updated the chronological Production release log and current documentation
+  authority to the accepted PR #247 deployment without changing application or
+  Production state.
 - Extended the existing metadata-only Vercel environment check from the launch
   doctor to the launch-authority report instead of introducing another secret
   or configuration subsystem.
@@ -10,9 +17,12 @@
   validate metadata shapes, distinguish Production scope, and fail closed for
   missing required names.
 - Reused the established Resend inference and growth-import fail-closed rules,
-  with focused CLI tests for both a 46/46 GO result and value-bearing input
+  with focused CLI tests for both a 47/47 GO result and value-bearing input
   rejection.
-- Exact Node 24.18.0 release verification passes 283 test files / 3,430 tests,
+- Pinned the newly vulnerable transitive Browserslist `<=4.28.6` range to
+  patched release `4.28.8`, refreshed its lockfile family, and added a
+  regression test; the Production dependency audit returns no known issue.
+- Exact Node 24.18.0 release verification passes 284 test files / 3,437 tests,
   strict typecheck, full lint, optimized build, 14/14 safety controls, system
   isolation, and the complete route manifest.
 - Authenticated name-only Production evidence found all 16 required variables,
