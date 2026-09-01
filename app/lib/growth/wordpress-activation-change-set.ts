@@ -91,6 +91,10 @@ export interface WordPressActivationChangeSet {
   fetchErrorCode?: "wordpress_page_fetch_failed" | "wordpress_page_index_fetch_failed";
 }
 
+export interface WordPressActivationLoadOptions {
+  timeoutMs?: number;
+}
+
 export function toOwnedDemandPlacementReadiness(
   changeSet: WordPressActivationChangeSet,
 ): OwnedDemandPlacementReadiness {
@@ -640,14 +644,18 @@ async function readResponseTextWithLimit(response: Response) {
 export async function fetchAllowlistedWordPressText(
   url: string,
   expectedContentType: "html" | "json",
+  timeoutMs = FETCH_TIMEOUT_MS,
 ) {
+  const boundedTimeoutMs = Number.isFinite(timeoutMs)
+    ? Math.min(FETCH_TIMEOUT_MS, Math.max(250, Math.floor(timeoutMs)))
+    : FETCH_TIMEOUT_MS;
   let currentUrl = normalizeWordPressActivationUrl(url);
   for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount += 1) {
     const response = await fetch(currentUrl, {
       headers: { "user-agent": "AskMagicMike-WordPress-Activation-Audit/1.0" },
       redirect: "manual",
       cache: "no-store",
-      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      signal: AbortSignal.timeout(boundedTimeoutMs),
     });
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get("location");
@@ -672,13 +680,22 @@ export async function fetchAllowlistedWordPressText(
 
 export async function loadWordPressActivationChangeSets(
   placementKeys: readonly WordPressActivationPlacementKey[] = WORDPRESS_ACTIVATION_PLACEMENT_KEYS,
+  options: WordPressActivationLoadOptions = {},
 ): Promise<WordPressActivationChangeSet[]> {
   if (placementKeys.length === 0) return [];
 
   const [indexResult, ...pageResults] = await Promise.allSettled([
-    fetchAllowlistedWordPressText(WORDPRESS_PAGE_INDEX_URL, "json"),
+    fetchAllowlistedWordPressText(
+      WORDPRESS_PAGE_INDEX_URL,
+      "json",
+      options.timeoutMs,
+    ),
     ...placementKeys.map((placementKey) => (
-      fetchAllowlistedWordPressText(TARGETS[placementKey].sourcePage, "html")
+      fetchAllowlistedWordPressText(
+        TARGETS[placementKey].sourcePage,
+        "html",
+        options.timeoutMs,
+      )
     )),
   ]);
 

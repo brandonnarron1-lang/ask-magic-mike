@@ -444,7 +444,13 @@ function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
             </p>
           </div>
         </article>
-      ) : null}
+      ) : (
+        <div className="mt-4 rounded-xl border border-[#cda24a55] bg-[#171108] p-4 text-sm leading-6 text-[#f5dfa7]">
+          Every remaining placement is already measured or on an explicit
+          readiness hold. Review the exact hold evidence below; do not invent a
+          new activation target or treat this state as publication proof.
+        </div>
+      )}
 
       <details className="group mt-4 rounded-xl border border-white/[.08] bg-black/30">
         <summary className="cursor-pointer list-none px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#9edbe2]">
@@ -773,7 +779,7 @@ export default async function DistributionPage({
   const [growth, ledger, wordpressChangeSets, query] = await Promise.all([
     loadGrowthIntelligence(30),
     loadOwnedDemandPublicationProofLedger(),
-    loadWordPressActivationChangeSets(),
+    loadWordPressActivationChangeSets(undefined, { timeoutMs: 5_000 }),
     searchParams,
   ]);
   const command = buildOwnedDemandCommand(growth);

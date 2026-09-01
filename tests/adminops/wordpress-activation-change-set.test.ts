@@ -66,6 +66,7 @@ function buildHome(html: string, pageRows: WordPressPageIndexRow[] = [HOME_ROW])
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 
 describe("WordPress owned-demand activation change set", () => {
@@ -101,6 +102,7 @@ describe("WordPress owned-demand activation change set", () => {
   });
 
   it("loads all reviewed WordPress targets with one shared page-index read and maps readiness truthfully", async () => {
+    const timeoutSpy = vi.spyOn(AbortSignal, "timeout");
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       const url = String(input);
       if (url.includes("/wp-json/")) {
@@ -128,8 +130,12 @@ describe("WordPress owned-demand activation change set", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const changeSets = await loadWordPressActivationChangeSets();
+    const changeSets = await loadWordPressActivationChangeSets(undefined, {
+      timeoutMs: 5_000,
+    });
     expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(timeoutSpy).toHaveBeenCalledTimes(4);
+    expect(timeoutSpy).toHaveBeenCalledWith(5_000);
     expect(fetchMock.mock.calls.filter(([input]) => (
       String(input).includes("/wp-json/")
     ))).toHaveLength(1);
@@ -365,7 +371,9 @@ describe("WordPress activation API and operator boundary", () => {
     expect(page).toContain('data-seller-intent-decision-manifest="true"');
     expect(page).toContain("they do not publish");
     expect(page).toContain("loadWordPressActivationChangeSets");
+    expect(page).toContain("timeoutMs: 5_000");
     expect(page).toContain("Readiness hold");
+    expect(page).toContain("Every remaining placement is already measured or on an explicit");
     expect(page).toContain('channel.namedPlacements.length ? "xl:col-span-2" : ""');
   });
 
