@@ -44,7 +44,27 @@ values rejected). An invalid value fails the `vercel_preview_access`
 precheck with `Invalid Vercel bypass secret: <reason>` and never prints
 the secret.
 
-The runner uses Node's built-in `fetch`; no system `curl` is required.
+The runner's default transport uses Node's built-in `fetch`; CI requires no
+system `curl` installation.
+
+For a local operator who is already authenticated with the Vercel CLI, use
+the explicit CLI transport instead of copying a protection-bypass secret:
+
+```bash
+PREVIEW_URL="https://<preview-url>" \
+PREVIEW_TRANSPORT=vercel_cli \
+VERCEL_CLI_CWD="/absolute/path/to/the/vercel-linked-ask-magic-mike-project" \
+SAFE_DB_WRITE=false \
+npm run preview:qa
+```
+
+This mode runs `vercel curl` with automatic Deployment Protection access.
+`VERCEL_CLI_CWD` is mandatory and absolute so a different linked Vercel
+project cannot be selected accidentally. Request bodies and sensitive headers
+are held only in mode-0600 temporary files, never process arguments; the
+runner removes the exact temporary directory after each request. It does not
+disable protection, print auth material, or relax the mutation gate. CI keeps
+using the default `fetch` transport with its configured bypass secret.
 
 ### Troubleshooting: HTTP 0 / network error
 

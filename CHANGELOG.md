@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-01 — Protected Preview QA artifact recovery
+
+- Added an explicit authenticated-Vercel-CLI transport to the existing Preview
+  QA runner, preserving Node `fetch` as the CI default and leaving Vercel
+  Deployment Protection enabled.
+- Kept admin/cron headers and request bodies out of process arguments by using
+  mode-0600 files inside one exact temporary directory per request; subprocess
+  execution is shell-free and cleanup is bounded to that directory.
+- Added fail-closed transport validation, redirect/header parsing, eight focused
+  transport tests, and operator documentation. Mutation checks remain disabled
+  unless the existing health-attested two-factor write gate authorizes them.
+- Proved the protected PR #252 Preview through the no-write path with 12 passes,
+  12 expected privileged/mutation skips, and zero failures. No Production,
+  database, WordPress, lead, notification, DNS, publication, spend, deletion,
+  or NellySelly action was performed.
+
 ## 2026-09-01 — Secure Neon Production credential redeploy
 
 - Replaced only Vercel Production `DATABASE_URL` with the Neon-generated

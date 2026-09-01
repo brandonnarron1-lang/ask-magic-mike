@@ -268,7 +268,7 @@ async function main() {
   const manualRemaining = [];
   if (!previewQa.present) {
     manualRemaining.push(
-      "Run `npm run preview:qa` against the latest preview (with VERCEL_AUTOMATION_BYPASS_SECRET) to produce artifacts/preview-qa-report.*"
+      "Run `npm run preview:qa` against the latest preview (with VERCEL_AUTOMATION_BYPASS_SECRET, or PREVIEW_TRANSPORT=vercel_cli from an authenticated linked project) to produce artifacts/preview-qa-report.*"
     );
   } else if (previewQa.access_blocked) {
     manualRemaining.push(
