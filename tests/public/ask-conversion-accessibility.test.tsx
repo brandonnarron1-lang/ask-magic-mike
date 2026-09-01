@@ -104,21 +104,12 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
     expect(chatRoute).toContain("Message must be 2,000 characters or fewer.");
   });
 
-  it("keeps a chat answer visible and links a privacy-safe lead-preparation failure", async () => {
+  it("keeps a chat answer anonymous until the visitor explicitly requests follow-up", async () => {
     const user = userEvent.setup();
-    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       if (String(input) === "/api/chat/message") {
         return new Response(JSON.stringify({ message: "Synthetic answer for internal QA." }), {
           status: 200,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-      if (String(input) === "/api/leads") {
-        const payload = JSON.parse(String(init?.body)) as Record<string, unknown>;
-        expect(init?.headers).toMatchObject({ "Idempotency-Key": payload.idempotency_key });
-        expect(payload.widget_session_id).toBe(payload.idempotency_key);
-        return new Response(JSON.stringify({ error: "Lead storage failed." }), {
-          status: 500,
           headers: { "Content-Type": "application/json" },
         });
       }
@@ -131,16 +122,91 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
     await user.click(screen.getByRole("button", { name: "Send Question" }));
 
     expect(await screen.findByText("Synthetic answer for internal QA.")).toBeVisible();
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      /appointment request path could not be prepared/i,
-    );
+    expect(screen.getByRole("heading", { name: "Want Mike's team to contact you?" })).toBeVisible();
+    expect(screen.getByText(/Sending a question by itself does not create a contact lead/)).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Request a conversation" })).not.toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).not.toHaveBeenCalledWith("/api/leads", expect.anything());
+    expect(vi.mocked(trackEvent).mock.calls.some(([event]) => event === "lead_created")).toBe(false);
+  });
+
+  it("requires a contact method and explicit consent before calling the lead API", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input) === "/api/chat/message") {
+        return new Response(JSON.stringify({ message: "Synthetic answer for internal QA." }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      throw new Error(`Unexpected request: ${String(input)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<AskMikeChatPanel />);
+
+    await user.type(screen.getByLabelText(/Your real estate question/), "Can Mike review my timing?");
+    await user.click(screen.getByRole("button", { name: "Send Question" }));
+    await screen.findByText("Synthetic answer for internal QA.");
+
+    await user.click(screen.getByRole("button", { name: "Request local follow-up" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(/email address or phone number/i);
+    expect(screen.getByLabelText("Email")).toHaveFocus();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await user.type(screen.getByLabelText("Email"), "qa@example.test");
+    await user.click(screen.getByRole("button", { name: "Request local follow-up" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(/confirm contact permission/i);
+    expect(screen.getByRole("checkbox", { name: /I agree that Our Town Properties/ })).toHaveFocus();
+    expect(screen.getByText(/Consent language version: amm_contact_v2 · Required/)).toBeVisible();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the chat answer visible when an explicit follow-up save fails", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input) === "/api/chat/message") {
+        return new Response(JSON.stringify({ message: "Synthetic answer for internal QA." }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (String(input) === "/api/leads") {
+        const payload = JSON.parse(String(init?.body)) as Record<string, unknown>;
+        expect(init?.headers).toMatchObject({ "Idempotency-Key": payload.idempotency_key });
+        expect(payload.widget_session_id).toBe(payload.idempotency_key);
+        expect(payload).toMatchObject({
+          funnel_type: "chat",
+          email: "qa@example.test",
+          consent: true,
+          consent_email: true,
+          consent_sms: false,
+          consent_source: "ask_page:ask-follow-up",
+        });
+        return new Response(JSON.stringify({ error: "Synthetic lead save failure." }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      throw new Error(`Unexpected request: ${String(input)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<AskMikeChatPanel />);
+
+    await user.type(screen.getByLabelText(/Your real estate question/), "How should I prepare to sell?");
+    await user.click(screen.getByRole("button", { name: "Send Question" }));
+    expect(await screen.findByText("Synthetic answer for internal QA.")).toBeVisible();
+    await user.type(screen.getByLabelText("Email"), "qa@example.test");
+    await user.click(screen.getByRole("checkbox", { name: /I agree that Our Town Properties/ }));
+    await user.click(screen.getByRole("button", { name: "Request local follow-up" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Synthetic lead save failure.");
+    expect(screen.getByText("Synthetic answer for internal QA.")).toBeVisible();
     await waitFor(() => {
       const failureCall = vi.mocked(trackEvent).mock.calls.find(([event]) => event === "lead_submit_failed");
-      expect(failureCall).toBeDefined();
       expect(failureCall?.[2]).toEqual({
         funnel_name: "ask_mike_chat",
         lead_source_surface: "ask_page",
-        step_name: "message_sent",
+        step_name: "contact_follow_up",
       });
       expect(failureCall?.[3]?.sessionId).toMatch(
         /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
@@ -182,6 +248,11 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
     await user.click(screen.getByRole("button", { name: "Send Question" }));
 
     expect(await screen.findByText("Synthetic answer for internal QA.")).toBeVisible();
+    expect(fetchMock.mock.calls.filter(([input]) => String(input) === "/api/leads")).toHaveLength(0);
+    expect(screen.queryByRole("button", { name: "Request a conversation" })).not.toBeInTheDocument();
+    await user.type(screen.getByLabelText("Phone"), "252-555-0199");
+    await user.click(screen.getByRole("checkbox", { name: /I agree that Our Town Properties/ }));
+    await user.click(screen.getByRole("button", { name: "Request local follow-up" }));
     expect(await screen.findByRole("button", { name: "Request a conversation" })).toBeVisible();
     await waitFor(() => {
       expect(

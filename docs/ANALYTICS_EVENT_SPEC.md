@@ -33,11 +33,12 @@ their own lead-associated events after authorization and durable persistence.
 
 ### Funnel identity and conversion authority
 
-Home Value, seller, buyer/renter/open-house, Ask lead preparation, and
+Home Value, seller, buyer/renter/open-house, consented Ask follow-up, and
 appointment actions reuse the cryptographically random UUID already used by
-the matching lead submission. The UUID is sent only as top-level first-party
-request context. It is not exposed in the browser analytics properties,
-PostHog payload, data layer, URL, or widget parent message.
+the matching lead submission. Ask questions use that pseudonymous session for
+funnel continuity but do not become leads. The UUID is sent only as top-level
+first-party request context. It is not exposed in the browser analytics
+properties, PostHog payload, data layer, URL, or widget parent message.
 
 `POST /api/events` validates the UUID and passes it to the Neon repository as
 protected context. The repository injects it into
@@ -59,6 +60,12 @@ Only `POST /api/leads` writes canonical `lead_created`, after durable lead
 storage and with the protected lead/session association. Qualification and
 appointment truth remain server-owned records. Idempotent replay does not
 create another conversion row.
+
+For Ask, `chat_started` and `chat_message_sent` prove only a question
+interaction. `contact_submitted` and `consent_accepted` occur only when the
+separate local-follow-up form passes client validation. The canonical
+`lead_created` event remains server-owned and exists only after the consented,
+contactable follow-up is durably stored.
 
 ### Field-experience event
 
