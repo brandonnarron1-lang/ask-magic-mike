@@ -29,6 +29,18 @@ export interface OwnedDemandActivationPlacement {
   stateLabel: string;
   nextAction: string;
   latestProof: OwnedDemandPublicationProofRow | null;
+  selectionBlocked: boolean;
+  readinessStatus: string | null;
+  readinessDetail: string | null;
+}
+
+export interface OwnedDemandPlacementReadiness {
+  channelKey: string;
+  placementKey: OwnedDemandPlacementKey;
+  activationEligible: boolean;
+  status: string;
+  detail: string;
+  nextAction?: string;
 }
 
 export interface OwnedDemandActivationLoop {
@@ -43,6 +55,7 @@ export interface OwnedDemandActivationLoop {
   identityReviewPlacements: number;
   signalReviewPlacements: number;
   unobservedPlacements: number;
+  readinessBlockedPlacements: number;
   attributedLeads: number;
   nextPlacement: OwnedDemandActivationPlacement | null;
   placements: OwnedDemandActivationPlacement[];
@@ -246,11 +259,18 @@ export function buildOwnedDemandActivationLoop(
   command: OwnedDemandCommand,
   ledger: Pick<OwnedDemandPublicationProofLedger, "configured" | "schemaReady" | "proofs" | "error">,
   measurementAvailable = true,
+  readiness: readonly OwnedDemandPlacementReadiness[] = [],
 ): OwnedDemandActivationLoop {
   const evidenceAvailable = ledger.configured && ledger.schemaReady && !ledger.error;
   const proofByPlacement = latestProofs(ledger.proofs);
+  const readinessByPlacement = new Map(
+    readiness.map((row) => [`${row.channelKey}:${row.placementKey}`, row] as const),
+  );
   const placements = flattenPlacements(command).map((placement): OwnedDemandActivationPlacement => {
     const latestProof = proofByPlacement.get(`${placement.channelKey}:${placement.placementKey}`) || null;
+    const placementReadiness = readinessByPlacement.get(
+      `${placement.channelKey}:${placement.placementKey}`,
+    ) || null;
     const proofMatchesAttribution = !latestProof || (
       latestProof.campaignKey === placement.campaign
       && latestProof.source === placement.source
@@ -272,12 +292,24 @@ export function buildOwnedDemandActivationLoop(
       content: _content,
       ...activationPlacement
     } = placement;
+    const selectionBlocked = Boolean(
+      placementReadiness && !placementReadiness.activationEligible,
+    );
+    const defaultNextAction = nextActionForState(state);
+    const nextAction = state === "prepared_not_observed" && placementReadiness
+      ? placementReadiness.activationEligible
+        ? placementReadiness.nextAction || defaultNextAction
+        : `Do not activate this placement yet. ${placementReadiness.detail}`
+      : defaultNextAction;
     return {
       ...activationPlacement,
       state,
       stateLabel: STATE_LABELS[state],
-      nextAction: nextActionForState(state),
+      nextAction,
       latestProof,
+      selectionBlocked,
+      readinessStatus: placementReadiness?.status || null,
+      readinessDetail: placementReadiness?.detail || null,
     };
   }).sort((left, right) => (
     STATE_PRIORITY[left.state] - STATE_PRIORITY[right.state]
@@ -306,9 +338,15 @@ export function buildOwnedDemandActivationLoop(
     identityReviewPlacements: placements.filter((placement) => placement.state === "proof_attribution_mismatch").length,
     signalReviewPlacements: placements.filter((placement) => placement.state === "signal_without_active_proof").length,
     unobservedPlacements: placements.filter((placement) => placement.state === "prepared_not_observed").length,
+    readinessBlockedPlacements: placements.filter(
+      (placement) => placement.state === "prepared_not_observed" && placement.selectionBlocked,
+    ).length,
     attributedLeads: placements.reduce((sum, placement) => sum + placement.attributedLeads, 0),
     nextPlacement: evidenceAvailable && measurementAvailable
-      ? placements.find((placement) => placement.state !== "measured_signal") || placements[0] || null
+      ? placements.find((placement) => (
+          placement.state !== "measured_signal"
+          && !placement.selectionBlocked
+        )) || null
       : null,
     placements,
     authorityBoundary: "This loop joins append-only native observation evidence to exact first-party attribution. It cannot publish, send, spend, contact a consumer, or turn either evidence stream into a claim the other stream does not prove.",

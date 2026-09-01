@@ -3,7 +3,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildWordPressActivationChangeSet,
   loadWordPressActivationChangeSet,
+  loadWordPressActivationChangeSets,
   normalizeWordPressActivationUrl,
+  toOwnedDemandPlacementReadiness,
   type WordPressPageIndexRow,
 } from "../../app/lib/growth/wordpress-activation-change-set";
 
@@ -15,8 +17,26 @@ const HOME_ROW: WordPressPageIndexRow = {
   status: "publish",
   modified_gmt: "2026-06-01T20:53:21",
 };
+const HOME_VALUE_ROW: WordPressPageIndexRow = {
+  id: 3952,
+  link: "https://www.ourtownproperties.com/how-much-is-your-home-worth/",
+  slug: "how-much-is-your-home-worth",
+  status: "publish",
+  modified_gmt: "2026-06-01T20:53:22",
+};
+const WE_BUY_HOMES_ROW: WordPressPageIndexRow = {
+  id: 3631,
+  link: "https://www.ourtownproperties.com/we-buy-homes/",
+  slug: "we-buy-homes",
+  status: "publish",
+  modified_gmt: "2026-06-01T20:53:23",
+};
 const LEGACY_HOME_HREF =
   "https://www.askmagicmike.com/value?utm_source=ourtownproperties&#038;utm_medium=homepage_cta&#038;utm_campaign=website_widget";
+const LEGACY_HOME_VALUE_HREF =
+  "https://www.askmagicmike.com/value?utm_source=ourtownproperties&#038;utm_medium=home_value_page&#038;utm_campaign=website_widget";
+const LEGACY_WE_BUY_HOMES_HREF =
+  "https://www.askmagicmike.com/value?utm_source=ourtownproperties&#038;utm_medium=seller_page_cta&#038;utm_campaign=website_widget";
 const HIDDEN_VISUAL_CONTAINMENT =
   '<style id="amm-visual-containment">.amm-cta,.amm-cta--dark{display:none !important;}</style>';
 
@@ -78,6 +98,57 @@ describe("WordPress owned-demand activation change set", () => {
     expect(changeSet.approvalGate).toBe(
       "APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION",
     );
+  });
+
+  it("loads all reviewed WordPress targets with one shared page-index read and maps readiness truthfully", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url.includes("/wp-json/")) {
+        return new Response(JSON.stringify([
+          HOME_ROW,
+          HOME_VALUE_ROW,
+          WE_BUY_HOMES_ROW,
+        ]), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }
+      const html = url === "https://www.ourtownproperties.com/"
+        ? homeHtml([LEGACY_HOME_HREF], {
+            wrapInCta: true,
+            style: HIDDEN_VISUAL_CONTAINMENT,
+          })
+        : url.includes("how-much-is-your-home-worth")
+          ? homeHtml([LEGACY_HOME_VALUE_HREF])
+          : homeHtml([LEGACY_WE_BUY_HOMES_HREF]);
+      return new Response(html, {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const changeSets = await loadWordPressActivationChangeSets();
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(fetchMock.mock.calls.filter(([input]) => (
+      String(input).includes("/wp-json/")
+    ))).toHaveLength(1);
+    expect(changeSets.map((row) => [row.placementKey, row.status])).toEqual([
+      ["wordpress_homepage_ask_mike", "hidden_target"],
+      ["wordpress_home_value", "legacy_match_ready"],
+      ["wordpress_we_buy_homes", "legacy_match_ready"],
+    ]);
+
+    const readiness = changeSets.map(toOwnedDemandPlacementReadiness);
+    expect(readiness[0]).toMatchObject({
+      activationEligible: false,
+      status: "hidden_target",
+    });
+    expect(readiness[1]).toMatchObject({
+      activationEligible: true,
+      status: "legacy_match_ready",
+    });
+    expect(readiness[1]?.nextAction).toContain("verified page rollback");
   });
 
   it("blocks an href-only publication when public CSS suppresses the exact CTA container", () => {
@@ -293,6 +364,8 @@ describe("WordPress activation API and operator boundary", () => {
     expect(page).toContain("Download decision packet");
     expect(page).toContain('data-seller-intent-decision-manifest="true"');
     expect(page).toContain("they do not publish");
+    expect(page).toContain("loadWordPressActivationChangeSets");
+    expect(page).toContain("Readiness hold");
     expect(page).toContain('channel.namedPlacements.length ? "xl:col-span-2" : ""');
   });
 
