@@ -11,6 +11,9 @@
  *
  * Usage:
  *   node scripts/amm/launch-authority-report.mjs
+ *   vercel env ls production --format json | \
+ *     jq '{envs:[.envs[]|{key,target,type}]}' | \
+ *     node scripts/amm/launch-authority-report.mjs --vercel-json-stdin
  *   npm run amm:launch:authority
  *
  * Exit codes:
@@ -23,7 +26,7 @@
  *   LAUNCH_AUTHORITY: NOT_GO_FAILING_CHECKS
  */
 
-import { existsSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { resolve, join } from "path";
 import { fileURLToPath } from "url";
 
@@ -38,6 +41,9 @@ import {
   releaseLogMentionsPr,
   findStaleVercelUrlsInDocs,
   REQUIRED_PRODUCTION_ENV_VARS,
+  parseVercelProductionEnvNames,
+  classifyEmailProviderPresence,
+  classifyFailClosedGatePresence,
 } from "./launch-readiness-doctor.mjs";
 
 // ---------------------------------------------------------------------------
@@ -263,17 +269,91 @@ if (isMain) {
     }
   }
 
-  // ── Owner-gated production env vars ─────────────────────────────────────
-  console.log("\n[Owner-gated production env vars (not verifiable here)]");
-  const missingVars = findMissingEnvVars(OWNER_GATED_VARS);
+  // ── Production env metadata ──────────────────────────────────────────────
+  const vercelManifestMode = process.argv.includes("--vercel-json-stdin");
+  let verifiedProductionEnvNames = null;
+  console.log(
+    vercelManifestMode
+      ? "\n[Production Vercel env metadata — names and scopes only]"
+      : "\n[Owner-gated production env vars (not verifiable here)]",
+  );
+
+  if (vercelManifestMode) {
+    try {
+      verifiedProductionEnvNames = new Set(
+        parseVercelProductionEnvNames(readFileSync(0, "utf8")),
+      );
+      pass(
+        "Vercel Production metadata parsed without values",
+        `${verifiedProductionEnvNames.size} scoped variable names`,
+      );
+    } catch (error) {
+      fail(
+        "Vercel Production metadata rejected",
+        error instanceof Error ? error.message : "vercel_env_manifest_invalid",
+      );
+    }
+  }
+
+  const observedNames = verifiedProductionEnvNames
+    ?? new Set(Object.keys(process.env).filter((name) => Boolean(process.env[name])));
+
   for (const v of OWNER_GATED_VARS) {
-    if (missingVars.includes(v)) {
+    if (observedNames.has(v)) {
+      pass(`${vercelManifestMode ? "production env var present" : "env var present locally"}: ${v}`);
+    } else if (vercelManifestMode && verifiedProductionEnvNames) {
+      fail(`required Production env var missing: ${v}`);
+    } else {
       skipOwner(
         `env var not set locally: ${v}`,
-        "set in Vercel Dashboard → verify via /api/admin/health"
+        "verify name-only presence in Vercel Production metadata",
       );
+    }
+  }
+
+  const emailProvider = classifyEmailProviderPresence(observedNames);
+  const explicitLocalProvider = String(process.env.EMAIL_PROVIDER ?? "").trim().toLowerCase();
+  if (!vercelManifestMode && explicitLocalProvider) {
+    if (explicitLocalProvider === "resend" || explicitLocalProvider === "smtp") {
+      pass("email provider selection is runtime-compatible", "EMAIL_PROVIDER is explicit");
     } else {
-      pass(`env var present locally: ${v}`);
+      fail("email provider selector is unsupported");
+    }
+  } else if (emailProvider.ok && !(vercelManifestMode && emailProvider.valueVerificationRequired)) {
+    pass(
+      "email provider selection is runtime-compatible",
+      "Resend is safely inferred from RESEND_API_KEY",
+    );
+  } else if (vercelManifestMode && emailProvider.valueVerificationRequired) {
+    skipOwner(
+      "EMAIL_PROVIDER value needs verification",
+      "name-only metadata proves selector presence but not a supported value",
+    );
+  } else if (vercelManifestMode && verifiedProductionEnvNames) {
+    fail("email provider is not configured");
+  } else {
+    skipOwner(
+      "email provider selection is not verifiable locally",
+      "EMAIL_PROVIDER is optional when the Production RESEND_API_KEY exists",
+    );
+  }
+
+  const failClosedGates = classifyFailClosedGatePresence(observedNames);
+  for (const gate of failClosedGates.absentSafe) {
+    if (vercelManifestMode && verifiedProductionEnvNames) {
+      pass(`growth import gate absent and fail-closed: ${gate}`);
+    }
+  }
+  for (const gate of failClosedGates.presentNeedsValueVerification) {
+    if (vercelManifestMode && verifiedProductionEnvNames) {
+      skipOwner(
+        `growth import gate value needs verification: ${gate}`,
+        "name-only metadata intentionally cannot reveal whether the value is false",
+      );
+    } else if (String(process.env[gate] ?? "").toLowerCase() === "true") {
+      fail(`growth import gate must remain disabled: ${gate}`);
+    } else if (process.env[gate]) {
+      pass(`growth import gate is locally disabled: ${gate}`);
     }
   }
 

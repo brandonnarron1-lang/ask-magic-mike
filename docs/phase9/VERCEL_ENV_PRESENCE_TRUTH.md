@@ -6,7 +6,7 @@ Vercel project
 
 ## Outcome
 
-The release doctor can now consume a metadata-only projection of the JSON
+The release doctor and launch-authority report can consume a metadata-only projection of the JSON
 emitted by `vercel env ls production --format json`. It accepts variable names,
 scopes, and safe metadata only. It never prints, persists, or compares secret
 values, and it rejects an input object containing a value-bearing field.
@@ -17,6 +17,10 @@ Run from the linked Ask Magic Mike checkout:
 vercel env ls production --scope eyes-up-industries --format json \
   | jq '{envs:[.envs[]|{key,target,type}]}' \
   | pnpm run amm:launch:doctor -- --vercel-json-stdin
+
+vercel env ls production --scope eyes-up-industries --format json \
+  | jq '{envs:[.envs[]|{key,target,type}]}' \
+  | pnpm run amm:launch:authority -- --vercel-json-stdin
 ```
 
 The `jq` projection is mandatory. Current Vercel CLI JSON can include a
@@ -71,3 +75,28 @@ Name-only metadata proves presence and scope, not correctness of a secret's
 value. Runtime readiness, provider delivery, webhook receipt, and database
 schema remain separate checks. No Production environment change is authorized
 by this document.
+
+## 2026-09-01 authority parity evidence
+
+An authenticated name-and-scope-only Production inspection again returned 61
+scoped variables. Both commands now consume the same fail-closed parser and
+classification rules:
+
+- all 16 required Production names are present;
+- Resend is runtime-compatible through the present `RESEND_API_KEY` without
+  inventing a missing `EMAIL_PROVIDER` requirement;
+- all three growth-import write-gate names remain absent and therefore default
+  to disabled; and
+- neither command accepted, wrote, printed, or persisted a value-bearing
+  environment payload.
+
+The doctor reported 46/46 PASS with zero skips. The candidate authority report
+also reported 46/46 PASS, zero `SKIP_OWNER`, and
+`GO_CONTROLLED_TRAFFIC_READY`. This closes the prior false hold caused by
+checking the local shell instead of authenticated Vercel Production metadata.
+Exact Node 24.18.0 release verification passes system isolation, 14/14 safety,
+283 test files / 3,428 tests, strict typecheck, full lint, optimized production
+build with 60 static pages, and a 100-route / 22-acknowledged-duplicate
+manifest.
+It does not authorize a merge, deployment, traffic publication, WordPress
+change, database mutation, lead submission, or message send.
