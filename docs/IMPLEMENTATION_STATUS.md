@@ -2605,3 +2605,28 @@ any bridge activation or shadow-mode test.
   communication, publication, spend, deletion, or NellySelly mutation occurred.
 - Decision and QA evidence:
   [`phase9/ORGANIC_SEARCH_EXPERIMENT_BRIEF_QA_EVIDENCE.md`](./phase9/ORGANIC_SEARCH_EXPERIMENT_BRIEF_QA_EVIDENCE.md).
+
+## Phase 9 secret-safe Production launch authority — 2026-09-01
+
+- Closed a current operating-truth defect without changing the application or
+  Production configuration: `amm:launch:authority` previously treated missing
+  local-shell secrets as 16 owner actions even when the corresponding Vercel
+  Production variables existed.
+- Added the same `--vercel-json-stdin` contract already proven by the release
+  doctor. The shared parser accepts only a Vercel metadata projection
+  containing variable names, targets, and types; value-bearing, unknown-field,
+  and malformed-entry input fails closed.
+- Authenticated name-only evidence found 61 Production-scoped variables, all 16
+  required names, the existing Resend provider path, and no enabled-by-presence
+  growth import gates. The candidate authority output is 46 PASS / 0 FAIL / 0
+  `SKIP_OWNER`, `GO_CONTROLLED_TRAFFIC_READY`.
+- Fresh read-only Production evidence also passes the public lead-pipe health
+  check, 15/15 conversion-funnel checks, and 19/19 smoke checks with only the
+  intentional authenticated-health and write-session skips.
+- Exact Node 24.18.0 release verification passes system isolation, 14/14 safety,
+  283 test files / 3,430 tests, strict typecheck, full lint, optimized Next.js
+  15.5.21 build with 60 static pages, and 100 active / 22 acknowledged duplicate
+  routes.
+- No secret value was pulled or printed. No environment variable, deployment,
+  database, WordPress file/page/form, lead, notification, analytics event, DNS,
+  spend, deletion, or NellySelly state changed.

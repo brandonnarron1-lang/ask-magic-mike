@@ -2353,3 +2353,37 @@ email/SMS/Push, DNS change, publication, spend, deletion, or NellySelly action
 occurred during this proof. Hosted exact-head CI, immutable Preview, protected
 no-write browser QA, runtime-log review, and final staged secret scanning remain
 required before the cumulative approval gate becomes requestable.
+
+## Phase 9 Production environment authority parity — 2026-09-01
+
+Read-only authenticated command:
+
+```bash
+vercel env ls production --format json \
+  | jq '{envs:[.envs[]|{key,target,type}]}' \
+  | node scripts/amm/launch-authority-report.mjs --vercel-json-stdin
+```
+
+Results:
+
+- Vercel metadata projection: 61 Production-scoped names; no values accepted or
+  logged.
+- Required environment names: 16/16 present.
+- Email provider: PASS through the existing Resend key contract.
+- Growth import gates: all three absent and fail-closed.
+- Launch authority: 46 PASS / 0 FAIL / 0 `SKIP_OWNER`;
+  `GO_CONTROLLED_TRAFFIC_READY`.
+- Focused Vitest after restoring the lockfile-pinned dependency tree: 2 files,
+  92 tests PASS. The first attempted invocation failed only because the fresh
+  isolated worktree had no `node_modules`; no product test failed.
+- Exact Node 24.18.0 release gate: PASS — system isolation, 14/14 release
+  safety, 283 test files / 3,430 tests, strict typecheck, full ESLint, optimized
+  Next.js 15.5.21 build with 60 static pages, and 100 active / 22 acknowledged
+  duplicate routes.
+- Live lead-pipe health: nine routes healthy, including `/api/health/live`.
+- Live conversion funnel: 15/15 PASS.
+- Read-only Production smoke: 19 PASS / 2 intentional SKIP / 0 FAIL.
+
+The check performed no Vercel write, environment pull, deployment, database
+query or migration, WordPress mutation, lead submission, email/SMS/Push,
+analytics write, DNS change, publication, spend, deletion, or NellySelly action.
