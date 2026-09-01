@@ -8,18 +8,22 @@ import {
 } from "../../app/lib/leadConsent";
 
 describe("authoritative lead consent evidence", () => {
+  const receivedAt = "2026-09-01T20:00:00.000Z";
+
   it("ignores public payload copy and uses the server-owned canonical language", () => {
     expect(resolveAuthoritativeConsentEvidence({
       consent: true,
       consent_email: true,
+      consent_sms: true,
       consent_language_version: "spoofed_v99",
       consent_language_text: "Spoofed public copy",
       consent_source: "unknown",
-    }, { trustedWordPressBridge: false })).toEqual({
+    }, { trustedWordPressBridge: false, receivedAt })).toEqual({
       consent: true,
       consent_email: true,
       consent_call: false,
       consent_sms: false,
+      consent_timestamp: receivedAt,
       consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
       consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
     });
@@ -31,6 +35,7 @@ describe("authoritative lead consent evidence", () => {
       consent_email: true,
       consent_call: false,
       consent_sms: false,
+      consent_timestamp: "2026-09-01T19:58:24Z",
       consent_language_version: "otp_form7_property_alert_email_v1",
       consent_language_text: "EMAIL: Approved property-alert language.",
       consent_source: "gravity_forms_7",
@@ -39,6 +44,7 @@ describe("authoritative lead consent evidence", () => {
       consent_email: true,
       consent_call: false,
       consent_sms: false,
+      consent_timestamp: "2026-09-01T19:58:24.000Z",
       consent_language_version: "otp_form7_property_alert_email_v1",
       consent_language_text: "EMAIL: Approved property-alert language.",
     });
@@ -49,12 +55,17 @@ describe("authoritative lead consent evidence", () => {
     { consent_language_version: "" },
     { consent_language_text: "" },
     { consent_language_version: "bad version with spaces" },
+    { consent_timestamp: "not-a-timestamp" },
+    { consent_call: true },
+    { consent_sms: true },
+    { consent_source: "gravity_forms_3" },
   ])("fails a malformed signed bridge contract closed: %o", (override) => {
     expect(resolveAuthoritativeConsentEvidence({
       consent: true,
       consent_email: true,
-      consent_call: true,
-      consent_sms: true,
+      consent_call: false,
+      consent_sms: false,
+      consent_timestamp: "2026-09-01T19:58:24Z",
       consent_language_version: "otp_form7_v1",
       consent_language_text: "Exact displayed language.",
       consent_source: "gravity_forms_7",
@@ -64,6 +75,7 @@ describe("authoritative lead consent evidence", () => {
       consent_email: false,
       consent_call: false,
       consent_sms: false,
+      consent_timestamp: null,
       consent_language_version: WORDPRESS_UNVERIFIED_CONSENT_LANGUAGE_VERSION,
       consent_language_text: WORDPRESS_UNVERIFIED_CONSENT_LANGUAGE_TEXT,
     });

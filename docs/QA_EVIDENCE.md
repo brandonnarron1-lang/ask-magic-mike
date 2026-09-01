@@ -20,23 +20,25 @@
   exactly eight actionable structural issues and no PII. Its deterministic
   accepted-state test returns `GO` only after exact consent, privacy, bridge,
   allowlist, and duplicate-notification conditions are represented.
-- Focused Vitest: 5 files / 63 tests passed. This covers authoritative API
+- Focused Vitest: 5 files / 72 tests passed. This covers authoritative API
   consent evidence, raw-body HMAC verification, exact form/entry/source identity
-  binding before persistence, signed WordPress route persistence, Bridge 1.3.0
-  source contract, and current-HOLD/future-GO readiness behavior.
+  binding before persistence, byte-bounded chunked intake, signed source consent
+  timestamps, email-only Form 7 channel enforcement, canonical-only WordPress
+  egress, signed WordPress route persistence, Bridge 1.3.0 source contract, and
+  current-HOLD/future-GO readiness behavior.
 - Full local release gate: system isolation passed; 14/14 release-safety checks
-  passed; 285 test files / 3,469 tests passed; strict TypeScript passed; full
+  passed; 286 test files / 3,483 tests passed; strict TypeScript passed; full
   ESLint passed; optimized Next.js 15.5.21 build passed with 60 static pages;
   route manifest passed with 100 active / 22 acknowledged duplicate routes.
 - `git diff --check`, Node syntax checks, ZIP integrity, and SHA-256 verification
   passed. Native `php -l` was unavailable because local PHP and Docker daemon
   were absent; a fresh temporary `php-parser` 3.7.0 AST parse passed.
-- Redacted `gitleaks git` scanned 747 reachable commits / approximately 19.17
-  MB with no finding. A separate redacted scan of the complete 92.83 KB
-  candidate delta, including new files and the release archive, found no leak.
+- A redacted `gitleaks dir` scan of the complete candidate working tree,
+  including the release archive, found no leak. Exact-head history scan
+  evidence is attached immutably to PR #254 after the final commit.
 - Bridge package:
   `output/release/ask-magic-mike-canonical-bridge-1.3.0.zip`; SHA-256
-  `106ba996e550d0fc130089ae3d3a8658860d71e4fd6b5eb432f68170ca8762e0`.
+  `a04b5bcf4e0e45e264260b3daeaf8158085e129b8deaf1c8b8f797e0aa31d2df`.
 - No WordPress save, notification toggle, form submission, email/SMS, database
   mutation, deployment, merge, secret change, cache purge, or deletion occurred.
 

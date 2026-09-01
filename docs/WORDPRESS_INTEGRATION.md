@@ -47,14 +47,21 @@ It requires `AMM_CANONICAL_BRIDGE_CONSENT_CONTRACTS` (or JSON
 channel pins the actual native Gravity Forms Consent field ID, required state,
 version, and normalized displayed-copy SHA-256. Wrong type, hidden/admin-only
 state, required-state drift, text drift, or absent required consent records a
-safe `consent_contract_blocked` status and performs no network request.
+safe `consent_contract_blocked` status and performs no network request. The
+release-owned Form 7 channel set is exactly `email`; configuration cannot add
+call or SMS permission without another reviewed code release.
 
 The application API accepts source-specific copy only after the existing HMAC
 bridge verification. Ordinary public forms always store the server-owned Ask
 Magic Mike version/text, and malformed signed evidence denies email, call, and
 SMS. It additionally requires the signed entry header, normalized
 `gf:{form}:{entry}` idempotency key, and `gravity_forms_{form}` consent source
-to identify the same submission; mismatch fails before persistence. Form 7's
+to identify the same submission; mismatch fails before persistence. It stores
+the normalized Gravity entry creation time as the consent timestamp and denies
+all channels if a granted signed submission lacks a valid source timestamp.
+The plugin accepts only `https://www.askmagicmike.com/api/leads` as its outbound
+lead endpoint, so a drifted URL cannot send brokerage lead PII to another host
+or application. Form 7's
 live field, notification, retention, privacy, Constant Contact, and allowlist
 readiness is executable via:
 

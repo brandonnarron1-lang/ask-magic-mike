@@ -16,12 +16,19 @@
   persistence: the signed entry header, `gf:{form}:{entry}` idempotency key,
   and `gravity_forms_{form}` consent source must agree or the request fails
   closed with zero database/provider calls.
+- Bound the complete lead request stream to 65,536 bytes before parsing, so a
+  chunked body cannot bypass intake limits by omitting `Content-Length`.
+- Locked WordPress lead egress to the exact canonical Ask Magic Mike HTTPS API;
+  an alternate host/path/query fails before lead PII is mapped or sent.
+- Preserved the Gravity entry creation time as the consent timestamp and made
+  Form 7's release-owned channel set exactly email-only. Missing source time or
+  any configured call/SMS expansion fails closed.
 - Added a PII-free live Form 7 snapshot and executable readiness gate. The
   current result is an honest eight-reason `HOLD`: no approved Consent field,
   active legacy notification, indefinite retention, raw IP retention, disabled
   WordPress privacy tools, no canonical allowlist, and live Bridge 1.1.0.
 - Produced the tested Bridge 1.3.0 install archive and SHA-256 sidecar. Focused
-  tests pass 63/63; the full release gate passes 285 files / 3,469 tests,
+  tests pass 72/72; the full release gate passes 286 files / 3,483 tests,
   strict typecheck, full lint, optimized build, 14/14 safety, system isolation,
   and 100-route verification.
 - No Production deployment, merge, WordPress save, notification toggle, form

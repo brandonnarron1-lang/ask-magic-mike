@@ -27,13 +27,17 @@ Updated 2026-09-01.
   malformed bridge evidence denies all channels; the legacy umbrella flag is
   disabled at the bridge boundary so email permission cannot grant calls/SMS.
   The signed entry header, canonical idempotency key, and consent-source form
-  identity must also match before any persistence or provider call.
+  identity must also match before any persistence or provider call. The API
+  stream-bounds every request before parsing, the plugin permits only the exact
+  canonical Ask Magic Mike endpoint, and granted signed consent retains the
+  normalized Gravity entry creation time. Form 7 is email-only in this release;
+  configuration cannot widen it to call or SMS.
 - **Executable status:** the PII-free snapshot returns the expected eight-item
   `HOLD`; a deterministic synthetic accepted state returns `GO`. The install
   artifact is `output/release/ask-magic-mike-canonical-bridge-1.3.0.zip` with
-  SHA-256 `106ba996e550d0fc130089ae3d3a8658860d71e4fd6b5eb432f68170ca8762e0`.
-- **Verification:** 63/63 focused tests and the complete local gate pass 285
-  files / 3,469 tests, strict typecheck, full lint, optimized Next.js build,
+  SHA-256 `a04b5bcf4e0e45e264260b3daeaf8158085e129b8deaf1c8b8f797e0aa31d2df`.
+- **Verification:** 71/71 focused tests and the complete local gate pass 286
+  files / 3,483 tests, strict typecheck, full lint, optimized Next.js build,
   system isolation, 14/14 safety, and 100 active route verification. PHP source
   parses successfully with `php-parser` 3.7.0; native PHP CLI was unavailable.
 - **Authority unchanged:** no Production/WordPress/Neon/provider mutation was

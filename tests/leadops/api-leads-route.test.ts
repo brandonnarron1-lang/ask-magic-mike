@@ -107,6 +107,37 @@ describe("POST /api/leads validation and truthful persistence", () => {
     expect(response.status).toBe(400);
   });
 
+  it("stream-bounds a chunked lead body before parsing or persistence", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const response = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: "é".repeat(33_000) }),
+    }));
+    expect(response.status).toBe(413);
+    expect(response.headers.get("X-AMM-Correlation-Id")).toBeTruthy();
+    expect(await response.json()).toMatchObject({ error: "Submission is too large." });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("returns a correlation ID when a declared lead body is oversized", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const response = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": "65537",
+      },
+      body: "{}",
+    }));
+    expect(response.status).toBe(413);
+    expect(response.headers.get("X-AMM-Correlation-Id")).toBeTruthy();
+    expect(await response.json()).toMatchObject({ error: "Submission is too large." });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
   it.each([
     [{ funnel_type: "home_value", email: "a@example.test", phone: "2525550100" }, "Address is required."],
     [{ funnel_type: "home_value", address: "1 Synthetic St" }, "Email or phone is required"],
@@ -303,6 +334,7 @@ describe("POST /api/leads atomic lifecycle command", () => {
       consent_email: true,
       consent_call: false,
       consent_sms: false,
+      consent_timestamp: "2026-09-01T19:58:24Z",
       consent_language_version: "otp_form7_property_alert_email_v1",
       consent_language_text: "EMAIL: Exact approved property-alert language.",
       consent_source: "gravity_forms_7",
@@ -318,11 +350,37 @@ describe("POST /api/leads atomic lifecycle command", () => {
       consent_email: true,
       consent_call: false,
       consent_sms: false,
+      consent_timestamp: "2026-09-01T19:58:24.000Z",
       consent_language_version: "otp_form7_property_alert_email_v1",
       consent_language_text: "EMAIL: Exact approved property-alert language.",
       consent_source: "gravity_forms_7",
       is_test: true,
       communication_suppressed: true,
+    });
+  });
+
+  it("stores a signed bridge lead but denies communication when source consent time is missing", async () => {
+    const { calls } = installRpc();
+    const response = await POST(signedWordPressRequest({
+      funnel_type: "buyer",
+      lead_type: "buyer",
+      lead_source_surface: "ourtownproperties",
+      name: "INTERNAL QA DO NOT CONTACT",
+      email: "form7-missing-time@example.test",
+      question: "INTERNAL QA DO NOT CONTACT missing source consent time",
+      idempotency_key: "gf:7:1901",
+      consent_email: true,
+      consent_language_version: "otp_form7_property_alert_email_v1",
+      consent_language_text: "EMAIL: Exact approved property-alert language.",
+      consent_source: "gravity_forms_7",
+    }));
+
+    expect(response.status).toBe(200);
+    expect(calls[0].body.p_lead).toMatchObject({
+      consent_email: false,
+      consent_call: false,
+      consent_sms: false,
+      consent_language_version: "wordpress_gravity_forms_unverified_v1",
     });
   });
 

@@ -34,6 +34,34 @@ import {
   verifyWordPressBridgeRequest,
 } from "../../lib/wordpressBridgeSignature";
 
+const MAX_LEAD_BODY_BYTES = 65_536;
+
+class LeadPayloadTooLargeError extends Error {}
+
+async function readBoundedLeadBody(req: Request) {
+  if (!req.body) return "";
+  const reader = req.body.getReader();
+  const decoder = new TextDecoder();
+  let bytesRead = 0;
+  let text = "";
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytesRead += value.byteLength;
+      if (bytesRead > MAX_LEAD_BODY_BYTES) {
+        await reader.cancel().catch(() => undefined);
+        throw new LeadPayloadTooLargeError();
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+    return text + decoder.decode();
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 const LEAD_TYPES = new Set([
   "buyer",
   "seller",
@@ -321,7 +349,7 @@ function buildLeadRow(payload: LeadPayload, req: Request, sessionId: string) {
     consent_sms: consentSms,
     consent_call: consentCall,
     consent_email: consentEmail,
-    consent_timestamp: consentEmail || consentCall || consentSms ? new Date().toISOString() : null,
+    consent_timestamp: consentEmail || consentCall || consentSms ? payload.consent_timestamp || new Date().toISOString() : null,
     consent_language_version: payload.consent_language_version || LEAD_CONSENT_LANGUAGE_VERSION,
     status: qualification.status,
     lead_type: leadType,
@@ -413,7 +441,7 @@ async function insertLead(payload: LeadPayload, req: Request) {
     const consentEmail = consentGrantedForEmail(payload);
     const consentCall = consentGrantedForCall(payload);
     const consentSms = consentGrantedForSms(payload);
-    const collectedAt = new Date().toISOString();
+    const collectedAt = payload.consent_timestamp || new Date().toISOString();
     await persistence.enrichLeadRecord({
       leadId: result.lead_id,
       leadPatch: {
@@ -541,6 +569,7 @@ function validateLead(payload: LeadPayload) {
 
 export async function POST(req: Request) {
   const correlationId = crypto.randomUUID();
+  const receivedAt = new Date().toISOString();
   const origin = req.headers.get("origin");
   if (!isApprovedPublicOrigin(origin)) {
     return NextResponse.json({ error: "This form origin is not approved.", correlation_id: correlationId }, { status: 403, headers: { "X-AMM-Correlation-Id": correlationId } });
@@ -568,13 +597,13 @@ export async function POST(req: Request) {
   let persistedLead: Awaited<ReturnType<typeof insertLead>>;
   try {
     const declaredSize = Number(req.headers.get("content-length") || "0");
-    if (Number.isFinite(declaredSize) && declaredSize > 65_536) {
-      return NextResponse.json({ error: "Submission is too large.", correlation_id: correlationId }, { status: 413 });
+    if (Number.isFinite(declaredSize) && declaredSize > MAX_LEAD_BODY_BYTES) {
+      return NextResponse.json(
+        { error: "Submission is too large.", correlation_id: correlationId },
+        { status: 413, headers: { "X-AMM-Correlation-Id": correlationId } },
+      );
     }
-    rawBody = await req.text();
-    if (rawBody.length > 65_536) {
-      return NextResponse.json({ error: "Submission is too large.", correlation_id: correlationId }, { status: 413 });
-    }
+    rawBody = await readBoundedLeadBody(req);
     if (req.headers.get("x-amm-wp-bridge")) {
       const bridge = verifyWordPressBridgeRequest(req, rawBody);
       if (!bridge.ok) {
@@ -587,8 +616,17 @@ export async function POST(req: Request) {
       trustedWordPressEntryId = bridge.entryId;
     }
     raw = JSON.parse(rawBody);
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
+  } catch (error) {
+    if (error instanceof LeadPayloadTooLargeError) {
+      return NextResponse.json(
+        { error: "Submission is too large.", correlation_id: correlationId },
+        { status: 413, headers: { "X-AMM-Correlation-Id": correlationId } },
+      );
+    }
+    return NextResponse.json(
+      { error: "Invalid JSON.", correlation_id: correlationId },
+      { status: 400, headers: { "X-AMM-Correlation-Id": correlationId } },
+    );
   }
 
   const input = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
@@ -619,6 +657,7 @@ export async function POST(req: Request) {
     ...normalizedPayload,
     ...resolveAuthoritativeConsentEvidence(normalizedPayload, {
       trustedWordPressBridge,
+      receivedAt,
     }),
   };
 
