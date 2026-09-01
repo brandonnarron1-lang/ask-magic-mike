@@ -2,6 +2,54 @@
 
 Updated 2026-09-01.
 
+## Current Production authority
+
+- **Accepted Production remains PR #247:** merge
+  `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, exact tree
+  `0065f829fc94f87ab5e0faf596c8e56733be3972`, and Ready deployment
+  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` remain authoritative. The Ask chat
+  hardening below is a Draft Preview candidate only and changes no Production,
+  database, WordPress, notification, DNS, or NellySelly authority.
+
+## Ask chat contactability hardening candidate — 2026-09-01
+
+- **Defect closed in source:** a starter prompt or typed Ask question now calls
+  only the existing chat endpoint. It cannot create, route, count, or notify a
+  lead.
+- **Deliberate conversion boundary:** the existing Black Diamond panel reveals
+  a separate local-follow-up form after an answer. Email or phone and the exact
+  versioned consent language are required before the canonical lead API is
+  called; the API enforces question, contact, and consent independently.
+- **Existing systems reused:** the follow-up retains the established session
+  UUID, idempotency, first/last-touch attribution, conversion analytics,
+  canonical atomic lead command, notifications, and appointment handoff. No
+  parallel form, database, provider, or CRM was introduced.
+- **Public request boundary hardened:** the chat route now stream-bounds the
+  complete request to 8,192 bytes before parsing, including requests without a
+  declared `Content-Length`. Generic contact consent continues to grant no SMS
+  permission.
+- **Truth correction pending:** the audit exposed one uncontactable record
+  produced by the former live behavior. It is internal QA, not a prospect, and
+  remains unaltered until an exact guarded test/suppression transaction is
+  separately confirmed.
+- **Authority unchanged:** no Production deployment, merge, migration,
+  environment change, WordPress action, message, DNS action, publication,
+  spend, deletion, or NellySelly action is authorized by this source change.
+  An isolated Preview of the exact application source commit now exists solely
+  for protected QA; no Production authority changed. Full design and
+  acceptance contract:
+  [`phase9/ASK_CHAT_CONTACTABILITY_HARDENING.md`](./phase9/ASK_CHAT_CONTACTABILITY_HARDENING.md).
+- **Refreshed candidate:** Draft PR #252 targets PR #251's branch and preserves
+  its former head at
+  `rescue/amm-pr252-pre-pr251-base-refresh-20260901-175042`. The refresh uses a
+  normal merge and retains the patched Browserslist `4.28.8` dependency
+  boundary. Current local proof passes 102 focused tests, 5/5 intercepted
+  desktop/mobile browser scenarios, and the exact Node `24.20.0` release gate:
+  284 files / 3,455 tests, strict typecheck, full lint, 14/14 safety, system
+  isolation, a 60-page optimized build, 100/22 route proof, and no known
+  dependency vulnerability. Superseded hosted runs remain historical; final
+  exact-head CI and protected no-write Preview proof are sealed on the PR.
+
 ## Current release and owned-demand readiness review — 2026-09-01
 
 - **Accepted Production:** PR #247 merge

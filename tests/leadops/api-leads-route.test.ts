@@ -93,6 +93,9 @@ describe("POST /api/leads validation and truthful persistence", () => {
     [{ funnel_type: "home_value", address: "1 Synthetic St", phone: "5550100" }, "valid phone"],
     [{ funnel_type: "seller", address: "1 Synthetic St" }, "Property address and phone are required"],
     [{ funnel_type: "chat" }, "Question is required"],
+    [{ funnel_type: "chat", question: "Synthetic question" }, "Email or phone is required for a chat follow-up"],
+    [{ funnel_type: "chat", question: "Synthetic question", email: "qa@example.test" }, "Consent is required for a chat follow-up"],
+    [{ funnel_type: "chat", question: "Synthetic question", email: "qa@example.test", consent: "true" }, "Consent is required for a chat follow-up"],
     [{ funnel_type: "appointment" }, "Email or phone is required"],
   ])("rejects an incomplete payload without persistence calls", async (payload, message) => {
     const fetchSpy = vi.fn();
@@ -282,14 +285,26 @@ describe("POST /api/leads atomic lifecycle command", () => {
       timeline_months: 3,
     });
 
-    installRpc();
+    const chat = installRpc();
     const chatResponse = await POST(request({
       funnel_type: "chat",
       lead_source_surface: "ask_page",
       question: "What is a synthetic inspection?",
+      email: "chat-follow-up@example.test",
+      phone: "2525550112",
+      consent: true,
+      consent_email: true,
+      consent_call: true,
+      consent_sms: false,
       widget_session_id: SESSION_ID,
     }));
     expect(chatResponse.status).toBe(200);
+    expect(chat.calls[0].body.p_lead).toMatchObject({
+      consent_email: true,
+      consent_call: true,
+      consent_sms: false,
+      consent_language_version: "amm_contact_v2",
+    });
     expect(await chatResponse.json()).toHaveProperty("message");
   });
 

@@ -1,5 +1,50 @@
 # QA Evidence
 
+## Ask chat contactability hardening candidate — 2026-09-01
+
+- Draft PR [#252](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/252)
+  was refreshed onto sealed PR #251 through a normal merge. The exact former
+  head remains recoverable at
+  `rescue/amm-pr252-pre-pr251-base-refresh-20260901-175042`; no history was
+  rewritten.
+- The only merge conflict was the stale candidate lockfile's Browserslist
+  `4.28.7` entry. Resolution preserved the inherited patched `4.28.8` override
+  and its regression test.
+- Source inspection proves `POST /api/chat/message` has no persistence,
+  routing, notification, or analytics-lead call. A successful answer exposes
+  an optional follow-up form; only valid contact plus the exact versioned
+  consent can call `POST /api/leads`.
+- The lead API normalizes booleans strictly, rejects a string value such as
+  `consent="true"`, requires question/contact/consent before persistence, and
+  stores email/call grants while leaving SMS false unless separately granted.
+- The chat API now stream-bounds the entire body to 8,192 bytes before JSON
+  parsing, including chunked requests without `Content-Length`; the added test
+  would have passed through the prior declared-length-only guard.
+- Focused Vitest passes 6 files / 102 tests covering public Ask behavior,
+  server lead validation/persistence mapping, streamed chat bounds, Preview
+  transport security, current Preview routes, and the dependency override.
+- Playwright passes 5/5 intercepted desktop/mobile scenarios across Ask retry
+  and cross-funnel event identity. The first run found an ambiguous selector
+  caused by Next's route-announcer alert; the test now targets the owned status
+  element and the complete rerun is green.
+- Exact Node `24.20.0` release verification passes deployable-source isolation,
+  14/14 safety controls, 284 files / 3,455 tests, strict TypeScript, full
+  ESLint, an optimized Next.js `15.5.21` build with 60 static pages, and 100
+  active / 22 acknowledged duplicate routes.
+- `pnpm audit --prod --audit-level high` reports no known vulnerabilities.
+  Focused lint has zero errors; `git diff --check` passes.
+- The explicit protected-Preview transport remains shell-free. Sensitive
+  headers and request bodies use one mode-0600 temporary directory per request,
+  Vercel CLI receives only the exact deployment URL/path and config-file path,
+  and the directory is removed in `finally`.
+- Superseded PR #252 CI/Preview records predate the PR #251 refresh and remain
+  historical only. Final exact-head CI, immutable Preview, no-write browser QA,
+  runtime review, and Gitleaks results are sealed on the PR thread rather than
+  creating a self-invalidating evidence commit.
+- No Production merge/deployment, Vercel setting, Neon query or mutation,
+  WordPress action, lead submission, email/SMS/Push, analytics write, DNS or
+  publication change, spend, deletion, or NellySelly action occurred.
+
 ## WordPress Connector attribution candidate — 2026-09-01
 
 - Authenticated read-only capture preserved the exact live Connector 1.0.0 PHP

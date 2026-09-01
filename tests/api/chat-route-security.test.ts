@@ -35,6 +35,16 @@ describe("POST /api/chat secure public boundary", () => {
     expect(response.status).toBe(413);
   });
 
+  it("stream-bounds the entire request when Content-Length is absent", async () => {
+    const response = await POST(new Request("https://www.askmagicmike.com/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "https://www.askmagicmike.com", "x-forwarded-for": "203.0.113.23" },
+      body: JSON.stringify({ message: "Hello", ignored_padding: "x".repeat(8_192) }),
+    }));
+    expect(response.status).toBe(413);
+    expect(await response.json()).toMatchObject({ error: "Message is too large." });
+  });
+
   it("returns the safe local fallback with a correlation ID when AI is disabled", async () => {
     const response = await POST(new Request("https://www.askmagicmike.com/api/chat", {
       method: "POST",

@@ -24,6 +24,13 @@
  *   SAFE_DB_WRITE=false \
  *   npm run preview:qa
  *
+ * For a protected Preview from an authenticated local Vercel CLI session:
+ *   PREVIEW_URL="https://…vercel.app" \
+ *   PREVIEW_TRANSPORT=vercel_cli \
+ *   VERCEL_CLI_CWD="/absolute/path/to/linked/project" \
+ *   SAFE_DB_WRITE=false \
+ *   npm run preview:qa
+ *
  * Bypass-secret env vars (precedence: highest first):
  *   1. VERCEL_AUTOMATION_BYPASS_SECRET
  *   2. VERCEL_PROTECTION_BYPASS_TOKEN
@@ -48,17 +55,31 @@
  * not printed.
  */
 
-import { mkdir, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { execFile } from "node:child_process";
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  rm,
+  writeFile,
+} from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import { promisify } from "node:util";
 import {
   getBypassConfig,
   buildRequestHeaders,
+  buildVercelCurlConfig,
   classifyAccessStatus,
+  getPreviewTransportConfig,
+  parseCurlHeaderDump,
   redactSecrets,
   shouldRunMutationChecks,
   summarizeFetchError,
   formatFetchErrorSummary,
 } from "./preview-qa-lib.mjs";
+
+const execFileAsync = promisify(execFile);
 
 const PREVIEW_URL = (process.env.PREVIEW_URL ?? "").replace(/\/$/, "");
 const ADMIN_SECRET = process.env.ADMIN_SECRET ?? "";
@@ -67,6 +88,7 @@ const PRINT_MANUAL_BYPASS_URL =
   (process.env.PRINT_MANUAL_BYPASS_URL ?? "false").toLowerCase() === "true";
 
 const BYPASS = getBypassConfig(process.env);
+const TRANSPORT = getPreviewTransportConfig(process.env);
 // Redact admin/cron secrets, the normalized bypass token, and — defensively —
 // the raw bypass env values (in case one was invalid and never normalized).
 const ALL_SECRETS = [
@@ -113,6 +135,9 @@ async function http(method, path, opts = {}) {
   if (body && typeof body !== "string") {
     headers["Content-Type"] = "application/json";
     body = JSON.stringify(body);
+  }
+  if (TRANSPORT.mode === "vercel_cli") {
+    return httpViaVercelCli(method, path, opts, headers, body);
   }
   let res;
   try {
@@ -171,6 +196,139 @@ async function http(method, path, opts = {}) {
   };
 }
 
+/**
+ * Execute a request through an authenticated Vercel CLI session. Sensitive
+ * headers and bodies are written to mode-0600 temporary files instead of
+ * process arguments; `execFile` is used directly with no shell. The exact
+ * temporary directory is removed in `finally` after every request.
+ */
+async function httpViaVercelCli(method, path, opts, headers, body) {
+  if (!TRANSPORT.valid || !TRANSPORT.cliCwd) {
+    return {
+      ok: false,
+      status: 0,
+      json: null,
+      text: "",
+      error: {
+        error_name: "VercelCliConfigurationError",
+        error_message: TRANSPORT.invalidReason,
+        cause_code: null,
+        cause_hostname: null,
+        cause_syscall: null,
+      },
+    };
+  }
+
+  const tempDir = await mkdtemp(join(tmpdir(), "amm-preview-qa-"));
+  const responseBodyPath = join(tempDir, "response-body");
+  const responseHeadersPath = join(tempDir, "response-headers");
+  const requestBodyPath = body ? join(tempDir, "request-body") : null;
+  const configPath = join(tempDir, "curl-config");
+
+  try {
+    if (requestBodyPath) {
+      await writeFile(requestBodyPath, body, { mode: 0o600 });
+    }
+    const config = buildVercelCurlConfig({
+      method,
+      headers,
+      outputPath: responseBodyPath,
+      headerPath: responseHeadersPath,
+      requestBodyPath,
+      followRedirects: (opts.redirect ?? "follow") === "follow",
+    });
+    await writeFile(configPath, config, { mode: 0o600 });
+
+    await execFileAsync(
+      "vercel",
+      [
+        "curl",
+        path,
+        "--deployment",
+        PREVIEW_URL,
+        "--",
+        "--config",
+        configPath,
+      ],
+      {
+        cwd: TRANSPORT.cliCwd,
+        maxBuffer: 1024 * 1024,
+      }
+    );
+
+    const [rawBody, rawHeaders] = await Promise.all([
+      readFile(responseBodyPath, "utf8").catch(() => ""),
+      readFile(responseHeadersPath, "utf8").catch(() => ""),
+    ]);
+    const parsed = parseCurlHeaderDump(rawHeaders);
+    if (parsed.status === 0) {
+      return {
+        ok: false,
+        status: 0,
+        json: null,
+        text: "",
+        error: {
+          error_name: "VercelCliResponseError",
+          error_message: "Vercel CLI returned no parseable HTTP response",
+          cause_code: null,
+          cause_hostname: null,
+          cause_syscall: null,
+        },
+      };
+    }
+
+    const contentType = parsed.headers["content-type"] ?? "";
+    let json = null;
+    let text = "";
+    if (
+      contentType.includes("application/json") ||
+      contentType.includes("+json")
+    ) {
+      try {
+        json = JSON.parse(rawBody);
+      } catch {
+        json = null;
+      }
+    } else {
+      text = rawBody;
+    }
+    return {
+      ok: parsed.status >= 200 && parsed.status < 300,
+      status: parsed.status,
+      json,
+      text,
+      location: parsed.headers.location ?? null,
+      responseHeaders: {
+        cacheControl: parsed.headers["cache-control"] ?? null,
+        contentType: parsed.headers["content-type"] ?? null,
+        referrerPolicy: parsed.headers["referrer-policy"] ?? null,
+        xRobotsTag: parsed.headers["x-robots-tag"] ?? null,
+      },
+    };
+  } catch (err) {
+    const summary = summarizeFetchError(err);
+    return {
+      ok: false,
+      status: 0,
+      json: null,
+      text: "",
+      error: {
+        error_name: summary.error_name ?? "VercelCliError",
+        error_message: "authenticated Vercel CLI request failed",
+        cause_code:
+          summary.cause_code ??
+          (err && typeof err === "object" && "code" in err
+            ? String(err.code)
+            : null),
+        cause_hostname: summary.cause_hostname,
+        cause_syscall: summary.cause_syscall,
+      },
+    };
+  } finally {
+    await rm(tempDir, { recursive: true, force: true });
+  }
+}
+
 function adminHeaders() {
   if (!ADMIN_SECRET) return {};
   return { "x-admin-secret": ADMIN_SECRET };
@@ -191,6 +349,12 @@ function cronHeaders() {
 // ─── Checks ────────────────────────────────────────────────────────────────
 
 async function vercelPreviewAccess() {
+  if (!TRANSPORT.valid) {
+    record("vercel_preview_access", "fail", {
+      message: `Invalid Preview transport: ${TRANSPORT.invalidReason}`,
+    });
+    return false;
+  }
   // A bypass secret was supplied but failed normalization — fail fast with the
   // reason (never the secret) instead of letting fetch throw a vague error.
   if (BYPASS.present && !BYPASS.valid) {
@@ -205,16 +369,19 @@ async function vercelPreviewAccess() {
   const r = await http("GET", "/", { redirect: "manual" });
   const classification = classifyAccessStatus(
     r.status,
-    BYPASS.present,
+    BYPASS.present || TRANSPORT.mode === "vercel_cli",
     r.location
   );
   switch (classification) {
     case "ok":
       record("vercel_preview_access", "pass", {
         http: r.status,
-        message: BYPASS.present
-          ? "bypass header accepted"
-          : "preview reachable without bypass",
+        message:
+          TRANSPORT.mode === "vercel_cli"
+            ? "authenticated Vercel CLI transport accepted"
+            : BYPASS.present
+              ? "bypass header accepted"
+              : "preview reachable without bypass",
       });
       return true;
     case "missing_bypass":
@@ -645,6 +812,11 @@ async function main() {
   }
   console.log(`Preview QA against: ${PREVIEW_URL}`);
   console.log(
+    `Transport: ${TRANSPORT.mode}${
+      TRANSPORT.valid ? "" : ` (INVALID: ${TRANSPORT.invalidReason})`
+    }`
+  );
+  console.log(
     `Bypass: ${
       BYPASS.present
         ? BYPASS.valid
@@ -700,6 +872,9 @@ async function main() {
       FORCE_DB_WRITE:
         (process.env.FORCE_DB_WRITE ?? "false").toLowerCase() === "true",
     },
+    preview_transport: TRANSPORT.mode,
+    preview_transport_valid: TRANSPORT.valid,
+    preview_transport_invalid_reason: TRANSPORT.invalidReason,
     protection_bypass_present: BYPASS.present,
     protection_bypass_valid: BYPASS.valid,
     protection_bypass_source: BYPASS.source,
@@ -745,6 +920,11 @@ function renderMarkdown(s) {
     `- Preview: \`${s.preview_url}\``,
     `- Run at: ${s.run_at}`,
     `- Mode: SAFE_DB_WRITE=${s.mode.SAFE_DB_WRITE} · FORCE_DB_WRITE=${s.mode.FORCE_DB_WRITE}`,
+    `- Preview transport: ${s.preview_transport}${
+      s.preview_transport_valid
+        ? ""
+        : ` (INVALID: ${s.preview_transport_invalid_reason})`
+    }`,
     `- Protection bypass: ${
       s.protection_bypass_present
         ? s.protection_bypass_valid
