@@ -7,6 +7,9 @@ import {
   getBypassConfig,
   buildRequestHeaders,
   classifyAccessStatus,
+  buildVercelCurlConfig,
+  getPreviewTransportConfig,
+  parseCurlHeaderDump,
   redactSecrets,
   shouldRunMutationChecks,
   summarizeFetchError,
@@ -323,6 +326,118 @@ describe("formatFetchErrorSummary", () => {
         cause_hostname: null,
       })
     ).toBe("TypeError");
+  });
+});
+
+describe("getPreviewTransportConfig", () => {
+  it("keeps fetch as the portable default", () => {
+    expect(getPreviewTransportConfig({})).toEqual({
+      mode: "fetch",
+      valid: true,
+      invalidReason: null,
+      cliCwd: null,
+    });
+  });
+
+  it("requires an absolute linked-project directory for Vercel CLI mode", () => {
+    const missing = getPreviewTransportConfig({
+      PREVIEW_TRANSPORT: "vercel_cli",
+    });
+    expect(missing.valid).toBe(false);
+    expect(missing.invalidReason).toMatch(/VERCEL_CLI_CWD/);
+
+    const relative = getPreviewTransportConfig({
+      PREVIEW_TRANSPORT: "vercel_cli",
+      VERCEL_CLI_CWD: "./wrong-project",
+    });
+    expect(relative.valid).toBe(false);
+
+    expect(
+      getPreviewTransportConfig({
+        PREVIEW_TRANSPORT: "vercel_cli",
+        VERCEL_CLI_CWD: "/tmp/linked-amm-project",
+      })
+    ).toEqual({
+      mode: "vercel_cli",
+      valid: true,
+      invalidReason: null,
+      cliCwd: "/tmp/linked-amm-project",
+    });
+  });
+
+  it("fails closed on an unknown transport", () => {
+    const cfg = getPreviewTransportConfig({ PREVIEW_TRANSPORT: "shell" });
+    expect(cfg.valid).toBe(false);
+    expect(cfg.invalidReason).toMatch(/fetch.*vercel_cli/);
+  });
+});
+
+describe("buildVercelCurlConfig", () => {
+  it("uses files for response data and sensitive request bodies", () => {
+    const config = buildVercelCurlConfig({
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-secret": "test-secret-value",
+      },
+      outputPath: "/tmp/response-body",
+      headerPath: "/tmp/response-headers",
+      requestBodyPath: "/tmp/request-body",
+      followRedirects: true,
+    });
+    expect(config).toContain('request = "POST"');
+    expect(config).toContain('output = "/tmp/response-body"');
+    expect(config).toContain('dump-header = "/tmp/response-headers"');
+    expect(config).toContain('data-binary = "@/tmp/request-body"');
+    expect(config).toContain("location");
+    expect(config).not.toContain("{\"lead\":");
+  });
+
+  it("rejects header injection and unsupported methods", () => {
+    expect(() =>
+      buildVercelCurlConfig({
+        method: "TRACE",
+        headers: {},
+        outputPath: "/tmp/body",
+        headerPath: "/tmp/headers",
+      })
+    ).toThrow(/unsupported HTTP method/);
+    expect(() =>
+      buildVercelCurlConfig({
+        method: "GET",
+        headers: { "x-test": "ok\r\nx-injected: yes" },
+        outputPath: "/tmp/body",
+        headerPath: "/tmp/headers",
+      })
+    ).toThrow(/control character/);
+  });
+});
+
+describe("parseCurlHeaderDump", () => {
+  it("uses the final response block after redirects", () => {
+    const parsed = parseCurlHeaderDump(
+      [
+        "HTTP/2 302",
+        "location: https://preview.example/final",
+        "",
+        "HTTP/2 200",
+        "content-type: application/json",
+        "cache-control: no-store",
+        "x-robots-tag: noindex, nofollow",
+        "",
+      ].join("\r\n")
+    );
+    expect(parsed.status).toBe(200);
+    expect(parsed.headers["content-type"]).toBe("application/json");
+    expect(parsed.headers["cache-control"]).toBe("no-store");
+    expect(parsed.headers.location).toBeUndefined();
+  });
+
+  it("returns status zero for malformed output", () => {
+    expect(parseCurlHeaderDump("not an HTTP response")).toEqual({
+      status: 0,
+      headers: {},
+    });
   });
 });
 

@@ -52,6 +52,14 @@ describe("preview QA current route contract", () => {
     expect(source).toContain("authenticated cron request safely refused Preview data writes");
   });
 
+  it("uses a shell-free, temp-file Vercel CLI transport for protected local QA", () => {
+    expect(source).toContain('PREVIEW_TRANSPORT=vercel_cli');
+    expect(source).toContain('execFileAsync(\n      "vercel"');
+    expect(source).toContain('await writeFile(configPath, config, { mode: 0o600 })');
+    expect(source).toContain('await rm(tempDir, { recursive: true, force: true })');
+    expect(source).not.toContain("shell: true");
+  });
+
   it("requires durable IDs and authenticated readback for controlled mutation QA", () => {
     expect(source).toContain('name: "INTERNAL QA — DO NOT CONTACT"');
     expect(source).toContain("is_test: true");
