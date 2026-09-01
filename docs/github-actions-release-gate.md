@@ -1,13 +1,18 @@
 # GitHub Actions release gate
 
-Two workflows enforce the release gate in CI:
+Four workflow layers enforce release and production truth without duplicating
+the same full-stack job:
 
-- `.github/workflows/release-gate.yml` — runs on every PR and push to
-  the release-hardening branch + main. No secrets required. Always
-  safe to run.
+- `.github/workflows/release-gate.yml` — runs on every PR and push to `main`.
+  No secrets required. Always safe to run.
 - `.github/workflows/preview-qa.yml` — manual (workflow_dispatch).
-  Runs the preview QA + browser e2e against a Vercel preview using
-  the required secrets.
+  Checks out the requested ref and runs Preview QA plus optional browser E2E
+  against a Vercel Preview using the required secrets.
+- `.github/workflows/production-post-deploy.yml` — reacts only to successful
+  Vercel Production deployment statuses and calls the canonical monitor.
+- `.github/workflows/production-monitor.yml` — reusable post-deploy verifier,
+  manual verifier, and six-hour scheduled synthetic. It has bounded retries,
+  evidence artifacts, and a rolling GitHub incident lifecycle.
 
 No production promotion workflow exists, and none will. Promotion is
 a human step.
@@ -81,7 +86,8 @@ automation promotes the build. The operator does.
 ## How to run preview QA manually from GitHub
 
 1. Actions → "Ask Magic Mike Preview QA" → Run workflow.
-2. Provide a `preview_url` input only if you want to skip discovery.
-3. Leave `safe_db_write` as `false`. The workflow refuses any other
+2. Set `target_ref` to the exact branch, tag, or commit under review.
+3. Provide a `preview_url` input only if you want to skip discovery.
+4. Leave `safe_db_write` as `false`. The workflow refuses any other
    value.
-4. Wait for the run, then download `artifacts/launch-authority-report.md`.
+5. Wait for the run, then download `artifacts/launch-authority-report.md`.

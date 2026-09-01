@@ -3,6 +3,10 @@ name: Ask Magic Mike Preview QA
 on:
   workflow_dispatch:
     inputs:
+      target_ref:
+        description: "Branch, tag, or commit to test"
+        required: true
+        default: "main"
       preview_url:
         description: "Preview URL (leave blank to auto-discover)"
         required: false
@@ -19,6 +23,13 @@ on:
         description: "Must be 'false'. Controlled mutation QA is intentionally manual."
         required: false
         default: "false"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: amm-preview-qa-${{ inputs.target_ref }}
+  cancel-in-progress: true
 
 jobs:
   preview-qa:
@@ -43,9 +54,14 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target_ref }}
+          persist-credentials: false
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10.30.3
 
       - name: Setup Node 24
         uses: actions/setup-node@v4
@@ -75,6 +91,7 @@ jobs:
         run: npm run release:doctor
 
       - name: Install Playwright browsers
+        if: inputs.run_browser_e2e == 'true'
         run: ./node_modules/.bin/playwright install --with-deps chromium
 
       - name: Determine PREVIEW_URL
@@ -137,3 +154,15 @@ jobs:
             artifacts/*.md
             artifacts/*.png
           if-no-files-found: ignore
+
+      - name: Summarize failed Preview QA
+        if: failure()
+        env:
+          CI_FAILURE_ROOT_CAUSE_CATEGORY: PREVIEW_OR_RELEASE_VALIDATION
+          CI_FAILURE_FAILED_COMPONENT: preview-qa
+          CI_FAILURE_EXPECTED: Protected Preview and all mutation-free release assertions pass
+          CI_FAILURE_ACTUAL: One or more required Preview or release assertions failed; inspect the first failed step and uploaded artifacts
+          CI_FAILURE_REMEDIATION: Repair the first failing assertion or protected-preview access configuration, then rerun against the same exact ref
+          CI_FAILURE_RETRY_SAFE: "true"
+          CI_FAILURE_PRODUCTION_IMPACT: Production is unchanged; this Preview candidate is blocked from promotion
+        run: node scripts/write-ci-failure-summary.mjs

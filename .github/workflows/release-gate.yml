@@ -4,9 +4,15 @@ on:
   pull_request:
   push:
     branches:
-      - platform/phase-2-release-hardening
       - main
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: amm-release-gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   local-release-gate:
@@ -17,9 +23,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10.30.3
 
       - name: Setup Node 24
         uses: actions/setup-node@v4
@@ -66,3 +76,15 @@ jobs:
             artifacts/*.json
             artifacts/*.md
           if-no-files-found: ignore
+
+      - name: Summarize failed release gate
+        if: failure()
+        env:
+          CI_FAILURE_ROOT_CAUSE_CATEGORY: SOURCE_OR_BUILD_VALIDATION
+          CI_FAILURE_FAILED_COMPONENT: local-release-gate
+          CI_FAILURE_EXPECTED: All mandatory release checks complete successfully
+          CI_FAILURE_ACTUAL: One or more mandatory release checks failed; inspect the first failed step and uploaded artifacts
+          CI_FAILURE_REMEDIATION: Repair the first failing deterministic check, rerun locally with Node 24, and push one reviewed fix
+          CI_FAILURE_RETRY_SAFE: "true"
+          CI_FAILURE_PRODUCTION_IMPACT: No production mutation occurred; the candidate is blocked from release
+        run: node scripts/write-ci-failure-summary.mjs

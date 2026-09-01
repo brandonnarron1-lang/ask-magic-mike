@@ -1,6 +1,24 @@
 # Implementation Status
 
-Updated 2026-08-30.
+Updated 2026-09-01.
+
+## Production database-credential and CI recovery — 2026-09-01
+
+- **Production restored:** canonical readiness is HTTP 200 with all database,
+  capture, notification, RBAC, durable rate-limit, and push checks true.
+- **Root cause isolated:** canonical Neon schema and privileges were healthy;
+  Vercel's sensitive Production database credential had drifted from the
+  functioning canonical runtime path. It was securely replaced and the exact
+  accepted deployment was redeployed without a migration or data write.
+- **CI consolidated:** one PR/main release gate, one manual Preview QA, one
+  post-deploy verifier, and one six-hour monitor replace duplicate Preview jobs
+  and the noisy hourly retry storm.
+- **Incident truth:** production monitoring is capped at three read-only
+  attempts, never false-greens a final failure, emits the seven required
+  diagnostic fields, and reconciles one rolling GitHub incident.
+- **Isolation preserved:** no WordPress, lead, notification, DNS, mailbox,
+  NellySelly, or production-data mutation was part of the repair. Full evidence
+  is in [`CI_RECOVERY_REPORT.md`](./CI_RECOVERY_REPORT.md).
 
 Current release authority is singular and machine-bound in
 `docs/CURRENT_RELEASE_AUTHORITY.md` and

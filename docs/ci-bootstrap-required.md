@@ -1,5 +1,12 @@
 # CI bootstrap — Preview QA dispatcher
 
+> **Superseded 2026-09-01.** This is retained as historical bootstrap context,
+> not an operator runbook. The dispatcher described below was deliberately
+> removed after `main` gained the complete Preview workflow. Use
+> [github-actions-release-gate.md](./github-actions-release-gate.md) and run
+> **Ask Magic Mike Preview QA** with its `target_ref` input. Do not recreate the
+> duplicate dispatcher.
+
 This doc explains the bootstrap PR that adds the Preview QA
 dispatcher workflow to `main`.
 

@@ -1,13 +1,28 @@
 #!/usr/bin/env node
 
+import { mkdir, writeFile } from "node:fs/promises";
 import {
   evaluateReadinessContract,
   evaluateRouteContract,
   PRODUCTION_ROUTE_CONTRACTS,
 } from "./lib/monitor-contracts.mjs";
+import {
+  boundedAttemptCount,
+  buildMonitorReport,
+  formatMonitorMarkdown,
+} from "./lib/monitor-report.mjs";
 
 const base = (process.env.TARGET_URL || "https://www.askmagicmike.com").replace(/\/$/, "");
 const timeoutMs = Number(process.env.MONITOR_TIMEOUT_MS || 12_000);
+const maxAttempts = boundedAttemptCount(process.env.MONITOR_MAX_ATTEMPTS);
+const retryDelayMs = Math.max(0, Number(process.env.MONITOR_RETRY_DELAY_MS || 2_000));
+const trigger = process.env.MONITOR_TRIGGER
+  || (process.env.GITHUB_ACTIONS ? process.env.GITHUB_EVENT_NAME : "point_in_time");
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function check(contract) {
   const { name, path, expected, expectedLocation } = contract;
   const started = Date.now();
@@ -59,14 +74,27 @@ async function check(contract) {
   }
 }
 
-const results = await Promise.all(PRODUCTION_ROUTE_CONTRACTS.map(check));
-const report = {
-  checked_at: new Date().toISOString(),
-  target: base,
-  type: process.env.GITHUB_ACTIONS ? "scheduled_synthetic" : "point_in_time",
-  passed: results.filter((item) => item.ok).length,
-  failed: results.filter((item) => !item.ok).length,
-  results,
-};
+const attempts = [];
+for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+  const results = await Promise.all(PRODUCTION_ROUTE_CONTRACTS.map(check));
+  const failed = results.filter((item) => !item.ok).length;
+  attempts.push({
+    attempt,
+    checked_at: new Date().toISOString(),
+    passed: results.length - failed,
+    failed,
+    results,
+  });
+  if (failed === 0 || attempt === maxAttempts) break;
+  await sleep(retryDelayMs * attempt);
+}
+
+const report = buildMonitorReport({ attempts, target: base, trigger, maxAttempts });
+const markdown = formatMonitorMarkdown(report);
+await mkdir("artifacts", { recursive: true });
+await Promise.all([
+  writeFile("artifacts/production-monitor-report.json", `${JSON.stringify(report, null, 2)}\n`, "utf8"),
+  writeFile("artifacts/production-monitor-report.md", markdown, "utf8"),
+]);
 console.log(JSON.stringify(report, null, 2));
 if (report.failed) process.exitCode = 1;

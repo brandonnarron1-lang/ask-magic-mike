@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-09-01 — Production database credential and CI recovery
+
+- Restored canonical Production readiness by securely replacing the drifted
+  Vercel database runtime credential with the proven least-privilege Neon
+  Production connection and redeploying the exact accepted application commit.
+- Consolidated duplicate Preview QA automation into one caller-selected manual
+  workflow and removed the obsolete release-branch push trigger.
+- Added post-deploy and six-hour production verification with a three-attempt
+  hard cap, durable JSON/Markdown evidence, stable incident fields, and one
+  rolling GitHub issue that closes on verified recovery.
+- Proved eleven of eleven live production contracts and focused monitor tests.
+  No schema migration, lead write, message send, WordPress edit, DNS change,
+  secret exposure, or NellySelly mutation occurred.
+
 ## 2026-08-30 — Cumulative Neon Production preflight passes
 
 - Corrected the cutover runner's stale requirement that optional Supabase

@@ -1,0 +1,24 @@
+name: Ask Magic Mike Post-Deploy Verification
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: amm-post-deploy-${{ github.event.deployment.id }}
+  cancel-in-progress: false
+
+jobs:
+  verify-production:
+    if: >-
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'Production'
+    permissions:
+      contents: read
+      issues: write
+    uses: ./.github/workflows/production-monitor.yml
+    with:
+      trigger_kind: post_deploy

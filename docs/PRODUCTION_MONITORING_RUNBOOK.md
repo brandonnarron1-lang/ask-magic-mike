@@ -6,12 +6,18 @@
   observed at audit, each HTTP 200. The staged Phase 3 change makes authenticated
   cron calls persist idempotent breach flags by default; manual admin calls stay
   dry-run unless explicitly requested.
-- GitHub Actions public synthetic: active hourly on `main`; the first observed
-  scheduled run completed successfully.
+- GitHub Actions public synthetic: every six hours on `main`, plus a bounded
+  verification after each successful Vercel Production deployment.
+- Each production verification makes at most three read-only attempts. A final
+  failure remains red; a transient recovery is preserved in the run artifact.
+- Failed runs open or update one rolling GitHub incident. A later green run
+  records the recovery and closes it automatically.
 
 ## Point-in-time and operator-run
 
-- `pnpm monitor-production` - nine public, health, and anonymous-admin checks.
+- `pnpm monitor-production` - eleven public, canonical-redirect, health,
+  readiness, and anonymous-admin checks. It writes aggregate-only JSON and
+  Markdown evidence to `artifacts/production-monitor-report.*`.
 - `pnpm reconcile-wordpress-leads` - Neon-side WordPress identity, allowlist,
   idempotency, and queue check; requires `DATABASE_URL`.
 - `pnpm reconcile-wordpress-leads -- --legacy-csv /absolute/private/path.csv` -
@@ -43,5 +49,10 @@ escalations are immediate incidents. Preserve correlation IDs and records, do
 not resubmit a genuine lead, and use `FIRST_LIVE_LEAD_RESPONSE_RUNBOOK.md`.
 Normal status belongs in one daily digest; do not send minute-by-minute all-clear
 messages.
+
+Every CI failure summary must retain `ROOT_CAUSE_CATEGORY`, `FAILED_COMPONENT`,
+`EXPECTED`, `ACTUAL`, `REMEDIATION`, `RETRY_SAFE`, and `PRODUCTION_IMPACT`.
+Never paste environment values, provider payloads, lead contact data, or BCC
+recipients into an issue or artifact.
 
 This baseline is scheduled synthetic monitoring, not continuous 24-hour observation.
