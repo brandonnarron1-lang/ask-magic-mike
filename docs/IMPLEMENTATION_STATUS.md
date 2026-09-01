@@ -11,6 +11,35 @@ Updated 2026-09-01.
   hardening below is a Draft Preview candidate only and changes no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Form 7 exact-consent cutover candidate — 2026-09-01
+
+- **Authoritative live state:** authenticated read-only inspection confirms
+  Form 7 has required name/email/message, optional phone, CAPTCHA and fail-closed
+  honeypot, a Thank You page confirmation, one active unconditional legacy
+  Admin Notification, no Consent field, indefinite retention, raw WordPress IP
+  storage, disabled export/erase integration, and no Constant Contact feed.
+- **Existing bridge upgraded in place:** Canonical Lead Bridge 1.3.0 blocks Form
+  7 unless a per-channel contract pins the exact live Gravity Consent field,
+  required state, language version, and normalized-copy SHA-256. Drift records
+  `consent_contract_blocked` and sends nothing.
+- **Canonical API corrected:** verified bridge consent evidence is retained
+  exactly; unsigned copy is ignored in favor of server-owned public-form copy;
+  malformed bridge evidence denies all channels; the legacy umbrella flag is
+  disabled at the bridge boundary so email permission cannot grant calls/SMS.
+  The signed entry header, canonical idempotency key, and consent-source form
+  identity must also match before any persistence or provider call.
+- **Executable status:** the PII-free snapshot returns the expected eight-item
+  `HOLD`; a deterministic synthetic accepted state returns `GO`. The install
+  artifact is `output/release/ask-magic-mike-canonical-bridge-1.3.0.zip` with
+  SHA-256 `106ba996e550d0fc130089ae3d3a8658860d71e4fd6b5eb432f68170ca8762e0`.
+- **Verification:** 63/63 focused tests and the complete local gate pass 285
+  files / 3,469 tests, strict typecheck, full lint, optimized Next.js build,
+  system isolation, 14/14 safety, and 100 active route verification. PHP source
+  parses successfully with `php-parser` 3.7.0; native PHP CLI was unavailable.
+- **Authority unchanged:** no Production/WordPress/Neon/provider mutation was
+  performed. Full evidence and controlled order:
+  [`phase9/WORDPRESS_FORM7_CONSENT_CUTOVER_READINESS_2026-09-01.md`](./phase9/WORDPRESS_FORM7_CONSENT_CUTOVER_READINESS_2026-09-01.md).
+
 ## WordPress canonical-capture reconciliation candidate — 2026-09-01
 
 - **Live baseline proved:** Connector 1.0.0 matches the retained source hash;

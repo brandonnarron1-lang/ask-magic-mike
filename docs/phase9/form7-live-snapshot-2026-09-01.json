@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-09-01T16:00:00-04:00",
+  "capture_method": "authenticated_read_only_wordpress_admin_audit",
+  "contains_pii": false,
+  "form_id": 7,
+  "title": "Never miss a property!",
+  "fields": [
+    { "id": 1, "type": "name", "label": "Your Name", "required": true },
+    { "id": 7, "type": "phone", "label": "Phone", "required": false },
+    { "id": 2, "type": "email", "label": "Your Email", "required": true },
+    { "id": 8, "type": "textarea", "label": "Your message", "required": true },
+    { "id": 5, "type": "captcha", "label": "CAPTCHA", "required": false }
+  ],
+  "spam": {
+    "captcha_present": true,
+    "honeypot_enabled": true,
+    "honeypot_action": "abort_without_entry",
+    "submission_speed_check": false
+  },
+  "confirmation": {
+    "type": "page",
+    "target": "https://www.ourtownproperties.com/thank-you/"
+  },
+  "notifications": [
+    {
+      "name": "Admin Notification",
+      "active": true,
+      "conditional_logic": false,
+      "recipient_mode": "entered_email"
+    }
+  ],
+  "constant_contact": {
+    "configured": false,
+    "feeds": []
+  },
+  "privacy": {
+    "prevent_ip_storage": false,
+    "retention_policy": "retain_indefinitely",
+    "retention_days": null,
+    "export_erase_enabled": false,
+    "identification_field_id": 2
+  },
+  "bridge": {
+    "live_plugin_version": "1.1.0",
+    "canonical_allowlisted": false,
+    "mode": "enabled_for_form_3_only"
+  },
+  "placements": {
+    "sitemap_pages_audited": 42,
+    "pages_with_form": 39,
+    "placement_share": 0.9286
+  },
+  "protected_entry_ids": [1550]
+}

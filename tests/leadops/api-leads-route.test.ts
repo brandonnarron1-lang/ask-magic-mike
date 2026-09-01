@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "../../app/api/leads/route";
 import { PUBLIC_LEAD_SAVE_ERROR } from "../../app/lib/publicLeadErrors";
+import { signWordPressBridgeBody } from "../../app/lib/wordpressBridgeSignature";
 
 const SESSION_ID = "11111111-1111-4111-8111-111111111111";
 const LEAD_ID = "22222222-2222-4222-8222-222222222222";
@@ -20,6 +21,7 @@ const ENV_KEYS = [
   "DATABASE_URL",
   "RATE_LIMIT_HASH_SECRET",
   "RATE_LIMIT_EMERGENCY_MEMORY",
+  "WORDPRESS_BRIDGE_SECRET",
 ] as const;
 const original = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
 
@@ -35,6 +37,25 @@ function request(body: Record<string, unknown>, headers: HeadersInit = {}) {
     method: "POST",
     headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify(body),
+  });
+}
+
+function signedWordPressRequest(body: Record<string, unknown>, entryId = "1901") {
+  const rawBody = JSON.stringify(body);
+  const timestamp = String(Math.floor(Date.now() / 1_000));
+  const secret = "synthetic-wordpress-bridge-secret-at-least-32-characters";
+  process.env.WORDPRESS_BRIDGE_SECRET = secret;
+  return new Request("http://localhost/api/leads", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Idempotency-Key": `gf:7:${entryId}`,
+      "X-AMM-WP-Bridge": "v1",
+      "X-AMM-WP-Timestamp": timestamp,
+      "X-AMM-WP-Entry": entryId,
+      "X-AMM-WP-Signature": `v1=${signWordPressBridgeBody(secret, timestamp, entryId, rawBody)}`,
+    },
+    body: rawBody,
   });
 }
 
@@ -264,6 +285,81 @@ describe("POST /api/leads atomic lifecycle command", () => {
       session_id: SESSION_ID,
       duplicate_of_lead_id: null,
     });
+  });
+
+  it("preserves exact consent evidence only from a verified WordPress bridge", async () => {
+    const { calls } = installRpc();
+    const response = await POST(signedWordPressRequest({
+      funnel_type: "buyer",
+      lead_type: "buyer",
+      lead_source_surface: "ourtownproperties",
+      name: "INTERNAL QA DO NOT CONTACT",
+      email: "form7-consent@example.test",
+      phone: "2525550199",
+      question: "INTERNAL QA DO NOT CONTACT property alert contract",
+      idempotency_key: "gf:7:1901",
+      consent: true,
+      consent_email: true,
+      consent_call: false,
+      consent_sms: false,
+      consent_language_version: "otp_form7_property_alert_email_v1",
+      consent_language_text: "EMAIL: Exact approved property-alert language.",
+      consent_source: "gravity_forms_7",
+      attribution: {
+        source: "ourtownproperties",
+        medium: "website_form",
+        content: "gravity_form_7",
+      },
+    }));
+
+    expect(response.status).toBe(200);
+    expect(calls[0].body.p_lead).toMatchObject({
+      consent_email: true,
+      consent_call: false,
+      consent_sms: false,
+      consent_language_version: "otp_form7_property_alert_email_v1",
+      consent_language_text: "EMAIL: Exact approved property-alert language.",
+      consent_source: "gravity_forms_7",
+      is_test: true,
+      communication_suppressed: true,
+    });
+  });
+
+  it.each([
+    {
+      label: "entry id",
+      idempotency_key: "gf:7:1902",
+      consent_source: "gravity_forms_7",
+    },
+    {
+      label: "form consent source",
+      idempotency_key: "gf:7:1901",
+      consent_source: "gravity_forms_3",
+    },
+  ])("rejects a signed WordPress bridge payload with a mismatched $label before persistence", async ({
+    idempotency_key,
+    consent_source,
+  }) => {
+    const { mock } = installRpc();
+    const response = await POST(signedWordPressRequest({
+      funnel_type: "buyer",
+      lead_type: "buyer",
+      lead_source_surface: "ourtownproperties",
+      name: "INTERNAL QA DO NOT CONTACT",
+      email: "form7-mismatch@example.test",
+      question: "INTERNAL QA DO NOT CONTACT identity mismatch",
+      idempotency_key,
+      consent_email: true,
+      consent_language_version: "otp_form7_property_alert_email_v1",
+      consent_language_text: "EMAIL: Exact approved property-alert language.",
+      consent_source,
+    }));
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({
+      code: "wordpress_bridge_identity_mismatch",
+    });
+    expect(mock).not.toHaveBeenCalled();
   });
 
   it("maps seller and chat leads without changing the public response shape", async () => {

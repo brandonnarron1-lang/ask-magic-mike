@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-09-01 — Form 7 exact-consent cutover boundary candidate
+
+- Reused Canonical Lead Bridge instead of creating another WordPress plugin,
+  lead store, notification engine, or Constant Contact feed.
+- Added Bridge 1.3.0 fail-closed consent contracts. Form 7 cannot forward even
+  when accidentally allowlisted unless its exact native Consent field type,
+  public visibility, required state, language version, and displayed-copy hash
+  match the approved per-channel contract.
+- Hardened `POST /api/leads` so unsigned clients cannot spoof stored consent
+  copy, a verified WordPress bridge can preserve exact source-specific evidence,
+  malformed bridge evidence denies every channel, and one channel can never
+  inflate permission for another through the legacy umbrella flag.
+- Bound every verified bridge body to one exact Gravity Forms identity before
+  persistence: the signed entry header, `gf:{form}:{entry}` idempotency key,
+  and `gravity_forms_{form}` consent source must agree or the request fails
+  closed with zero database/provider calls.
+- Added a PII-free live Form 7 snapshot and executable readiness gate. The
+  current result is an honest eight-reason `HOLD`: no approved Consent field,
+  active legacy notification, indefinite retention, raw IP retention, disabled
+  WordPress privacy tools, no canonical allowlist, and live Bridge 1.1.0.
+- Produced the tested Bridge 1.3.0 install archive and SHA-256 sidecar. Focused
+  tests pass 63/63; the full release gate passes 285 files / 3,469 tests,
+  strict typecheck, full lint, optimized build, 14/14 safety, system isolation,
+  and 100-route verification.
+- No Production deployment, merge, WordPress save, notification toggle, form
+  submission, email/SMS send, database write, cache purge, DNS change, lead
+  mutation, deletion, spend, or NellySelly action occurred.
+
 ## 2026-09-01 — Ask contactability and consent boundary candidate
 
 - Removed the automatic lead capture that followed every successful Ask answer.

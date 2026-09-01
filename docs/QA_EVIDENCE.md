@@ -1,5 +1,45 @@
 # QA Evidence
 
+## Form 7 exact-consent cutover boundary — 2026-09-01
+
+- Authenticated WordPress audit was read-only. It inspected the Form 7 editor,
+  Form Settings, Confirmations, Notifications, Personal Data, and Constant
+  Contact subviews without saving, toggling, submitting, opening an entry, or
+  exposing recipient values.
+- Sanitized live field contract: `1` name required, `7` phone optional, `2`
+  email required, `8` message required, `5` CAPTCHA. No Consent field exists.
+- Honeypot is enabled and aborts without entry; Submission Speed Check is off.
+  Default confirmation redirects to the existing Our Town Thank You page.
+- One legacy Admin Notification is active with no conditional logic. Its
+  recipient value is redacted and absent from committed evidence. Constant
+  Contact has no configured feed for Form 7.
+- Personal Data settings retain entries indefinitely, retain raw IP addresses,
+  and leave WordPress export/erase integration disabled. These are explicit
+  final-cutover HOLDs, not silently changed defaults.
+- `pnpm run amm:wordpress:form7-readiness -- --allow-hold` returns `HOLD` with
+  exactly eight actionable structural issues and no PII. Its deterministic
+  accepted-state test returns `GO` only after exact consent, privacy, bridge,
+  allowlist, and duplicate-notification conditions are represented.
+- Focused Vitest: 5 files / 63 tests passed. This covers authoritative API
+  consent evidence, raw-body HMAC verification, exact form/entry/source identity
+  binding before persistence, signed WordPress route persistence, Bridge 1.3.0
+  source contract, and current-HOLD/future-GO readiness behavior.
+- Full local release gate: system isolation passed; 14/14 release-safety checks
+  passed; 285 test files / 3,469 tests passed; strict TypeScript passed; full
+  ESLint passed; optimized Next.js 15.5.21 build passed with 60 static pages;
+  route manifest passed with 100 active / 22 acknowledged duplicate routes.
+- `git diff --check`, Node syntax checks, ZIP integrity, and SHA-256 verification
+  passed. Native `php -l` was unavailable because local PHP and Docker daemon
+  were absent; a fresh temporary `php-parser` 3.7.0 AST parse passed.
+- Redacted `gitleaks git` scanned 747 reachable commits / approximately 19.17
+  MB with no finding. A separate redacted scan of the complete 92.83 KB
+  candidate delta, including new files and the release archive, found no leak.
+- Bridge package:
+  `output/release/ask-magic-mike-canonical-bridge-1.3.0.zip`; SHA-256
+  `106ba996e550d0fc130089ae3d3a8658860d71e4fd6b5eb432f68170ca8762e0`.
+- No WordPress save, notification toggle, form submission, email/SMS, database
+  mutation, deployment, merge, secret change, cache purge, or deletion occurred.
+
 ## WordPress canonical-capture reconciliation — 2026-09-01
 
 - Authenticated read-only WordPress inspection confirmed 29 active plugins and
