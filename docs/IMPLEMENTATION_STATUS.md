@@ -24,6 +24,10 @@ Updated 2026-09-01.
   UUID, idempotency, first/last-touch attribution, conversion analytics,
   canonical atomic lead command, notifications, and appointment handoff. No
   parallel form, database, provider, or CRM was introduced.
+- **Public request boundary hardened:** the chat route now stream-bounds the
+  complete request to 8,192 bytes before parsing, including requests without a
+  declared `Content-Length`. Generic contact consent continues to grant no SMS
+  permission.
 - **Truth correction pending:** the audit exposed one uncontactable record
   produced by the former live behavior. It is internal QA, not a prospect, and
   remains unaltered until an exact guarded test/suppression transaction is
@@ -35,20 +39,16 @@ Updated 2026-09-01.
   for protected QA; no Production authority changed. Full design and
   acceptance contract:
   [`phase9/ASK_CHAT_CONTACTABILITY_HARDENING.md`](./phase9/ASK_CHAT_CONTACTABILITY_HARDENING.md).
-- **Sealed candidate:** Draft PR #252 targets PR #251's branch. Application
-  behavior is isolated in source commit
-  `5563038cd05c7d1908149b398a91db8062adec1d`; protected-Preview tooling and
-  evidence are sealed at candidate commit
-  `cbb9e89c5b231adfcbb0459bf2531397a13b36fe`, tree
-  `2c03a58c503619ff32f15b64b8ca634cbe2a350a`, hosted Release Gate run
-  `33545872477`, and Ready Preview deployment
-  `dpl_5FAavdV2RGVgGnST5hLv1vuJRAZu`. Read-only machine Preview QA passes
-  12/12 required checks with 12 expected privileged/mutation skips and zero
-  failures; the consolidated release report is `GO`. The corrected retained
-  browser identity contract and full fail-closed Playwright suite pass 15/15
-  desktop/mobile flows with no first-party mutation escaping interception, so
-  launch authority is `PREVIEW_READY`. Privileged health output and controlled
-  mutation evidence remain intentionally outstanding.
+- **Refreshed candidate:** Draft PR #252 targets PR #251's branch and preserves
+  its former head at
+  `rescue/amm-pr252-pre-pr251-base-refresh-20260901-175042`. The refresh uses a
+  normal merge and retains the patched Browserslist `4.28.8` dependency
+  boundary. Current local proof passes 102 focused tests, 5/5 intercepted
+  desktop/mobile browser scenarios, and the exact Node `24.20.0` release gate:
+  284 files / 3,455 tests, strict typecheck, full lint, 14/14 safety, system
+  isolation, a 60-page optimized build, 100/22 route proof, and no known
+  dependency vulnerability. Superseded hosted runs remain historical; final
+  exact-head CI and protected no-write Preview proof are sealed on the PR.
 
 ## Current release and owned-demand readiness review — 2026-09-01
 

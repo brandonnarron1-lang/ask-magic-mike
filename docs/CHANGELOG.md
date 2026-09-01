@@ -14,15 +14,16 @@
 - Kept SMS permission false unless separately collected. Added client, API, and
   browser contracts for no-lead chat answers, validation, retry, fresh capture,
   and replay suppression.
-- Pinned transitive `browserslist` to patched version 4.28.7 after the current
-  Production dependency audit identified the newly disclosed high-severity
-  advisories; the audit now reports no known vulnerability.
+- Added an 8,192-byte streamed request bound to the public chat endpoint so a
+  chunked body without `Content-Length` cannot bypass the pre-parse limit.
+- Preserved the inherited transitive Browserslist security constraint on
+  patched version `4.28.8`; the audit reports no known vulnerability.
 - Added no migration, provider, lead store, form silo, or visual system. No
   Production deployment, data correction, WordPress action, message, DNS
   change, publication, spend, deletion, or NellySelly action occurred.
-- Sealed Draft PR #252 with a passing hosted Release Gate and Ready isolated
-  Vercel Preview. Protected desktop/mobile interaction proof used a same-commit
-  local request-capture proxy and made no external write.
+- Refreshed Draft PR #252 onto sealed PR #251 through a normal merge while
+  preserving the former head on a rescue ref. Final exact-head CI and Preview
+  evidence are attached to the PR rather than committed recursively.
 
 ## 2026-09-01 — Fail-closed current operator command center
 

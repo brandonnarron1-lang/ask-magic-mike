@@ -20,6 +20,10 @@
   15/15 desktop/mobile flows with every first-party mutation intercepted, and
   launch authority advances honestly to `PREVIEW_READY` while privileged
   health/mutation evidence remains outstanding.
+- After the PR #251 base refresh, added a streamed 8,192-byte chat-body limit,
+  preserved patched Browserslist `4.28.8`, and reran 102 focused tests, 5/5
+  browser scenarios, and the 3,455-test Node 24 release gate. Earlier hosted
+  evidence is historical; current exact-head evidence is sealed on PR #252.
 
 ## 2026-09-01 — Secure Neon Production credential redeploy
 
