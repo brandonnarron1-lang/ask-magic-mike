@@ -7,7 +7,7 @@ import {
 } from "../../app/lib/growth/capability-ledger";
 
 describe("Growth capability authority ledger", () => {
-  it("keeps the reviewed tail labeled as a candidate outside Production", () => {
+  it("exposes the singular reviewed application candidate without broadening authority", () => {
     const ledger = buildGrowthCapabilityLedger({ currentTailInProduction: false });
 
     expect(ledger.generatedFor).toBe("preview_or_local");
@@ -21,9 +21,13 @@ describe("Growth capability authority ledger", () => {
     });
     expect(ledger.items.find((item) => item.key === "ordered_release_train")).toMatchObject({
       state: "release_candidate",
-      approvalGate: "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT",
     });
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 238");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.approvalGate).toBe(
+      "APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT",
+    );
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 246");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 247");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("only active reviewed application candidate");
     expect(JSON.stringify(ledger)).not.toContain("PR 210 remains the first pending");
   });
 
@@ -75,7 +79,7 @@ describe("Growth capability authority ledger", () => {
     const facebookRecovery = ledger.items.find((item) => item.key === "facebook_preview_recovery");
 
     expect(gates).toEqual([
-      "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT",
+      "APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT",
       "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA",
     ]);
     expect(facebookRecovery?.approvalGate).toBeUndefined();
@@ -84,6 +88,7 @@ describe("Growth capability authority ledger", () => {
     expect(JSON.stringify(ledger)).not.toContain("DURABLE RATE-LIMIT READINESS SECRET ENTRY");
     expect(JSON.stringify(ledger)).not.toContain("HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION");
     expect(JSON.stringify(ledger)).not.toContain("NARROW OTP FACEBOOK CRAWLER APACHE OVERRIDE TEST");
+    expect(JSON.stringify(ledger)).not.toContain("CUMULATIVE GROWTH MIGRATIONS, PR 238");
     expect(JSON.stringify(ledger)).not.toContain("APPROVE ALL");
   });
 });

@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-01 — Secure Neon Production credential redeploy
+
+- Replaced only Vercel Production `DATABASE_URL` with the Neon-generated
+  connection for project `bitter-star-20214385`, Production branch
+  `br-round-base-auh6h2wd`, and database `neondb`; no credential value was
+  printed, committed, or retained in the clipboard.
+- Redeployed exact accepted PR #246 merge
+  `98a91f752c4c53dc0ae300dfc320f47b53e32820` as Ready deployment
+  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`; retained source deployment
+  `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` as immediate rollback.
+- Verified HTTP 200 liveness/readiness, 11/11 Production monitor contracts,
+  19-pass read-only smoke with two intentional skips, canonical routing, and
+  zero Vercel runtime errors in the cutover window.
+- Applied no migration or database write and changed no code, WordPress page,
+  lead, notification, provider send, DNS record, NellySelly system, or public
+  content. The exact credential/redeploy approval is consumed.
+
 ## 2026-08-30 — Neon optional-role cutover preflight correction
 
 - Ran the cumulative cutover runner in read-only mode against the exact
@@ -1029,3 +1046,11 @@
 - Installed and activated the reviewed WordPress canonical bridge in inert
   shadow mode. Existing forms, notifications, and historical lead records were
   not modified or imported.
+# 2026-09-01 — Owned-demand readiness mainline review
+
+- Corrected current release authority to accepted PR #246 Production and a
+  consumed PR #238 cutover receipt.
+- Opened clean Draft PR #247 from current `main`; hidden or unavailable
+  WordPress placements now fail closed in the existing Distribution Command.
+- No Production, database, WordPress, lead, notification, publication, DNS,
+  spend, deletion, or NellySelly mutation occurred.

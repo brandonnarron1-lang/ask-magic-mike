@@ -3,6 +3,7 @@ import {
   resolveOwnedDemandPlacement,
   type WordPressOwnedPlacementKey,
 } from "./owned-demand";
+import type { OwnedDemandPlacementReadiness } from "./owned-demand-activation";
 
 const WORDPRESS_HOSTS = new Set([
   "ourtownproperties.com",
@@ -88,6 +89,32 @@ export interface WordPressActivationChangeSet {
   mutationPerformed: false;
   containsRawPageHtml: false;
   fetchErrorCode?: "wordpress_page_fetch_failed" | "wordpress_page_index_fetch_failed";
+}
+
+export interface WordPressActivationLoadOptions {
+  timeoutMs?: number;
+}
+
+export function toOwnedDemandPlacementReadiness(
+  changeSet: WordPressActivationChangeSet,
+): OwnedDemandPlacementReadiness {
+  const activationEligible = changeSet.targetVisibility === "visible_candidate" && (
+    changeSet.status === "legacy_match_ready" || changeSet.status === "already_exact"
+  );
+  const detail = changeSet.blockers[0] || changeSet.statusDetail;
+  const nextAction = changeSet.status === "already_exact"
+    ? "Verify the exact visible tracked link in WordPress, then record native publication proof. No href edit is needed."
+    : activationEligible
+      ? "Use the live readiness manifest, create a verified page rollback, obtain the exact WordPress publication gate, replace only the reviewed href, and record native proof after public verification."
+      : undefined;
+  return {
+    channelKey: "ourtown_wordpress",
+    placementKey: changeSet.placementKey,
+    activationEligible,
+    status: changeSet.status,
+    detail,
+    nextAction,
+  };
 }
 
 const TARGETS: Record<WordPressActivationPlacementKey, WordPressActivationTarget> = {
@@ -617,14 +644,18 @@ async function readResponseTextWithLimit(response: Response) {
 export async function fetchAllowlistedWordPressText(
   url: string,
   expectedContentType: "html" | "json",
+  timeoutMs = FETCH_TIMEOUT_MS,
 ) {
+  const boundedTimeoutMs = Number.isFinite(timeoutMs)
+    ? Math.min(FETCH_TIMEOUT_MS, Math.max(250, Math.floor(timeoutMs)))
+    : FETCH_TIMEOUT_MS;
   let currentUrl = normalizeWordPressActivationUrl(url);
   for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount += 1) {
     const response = await fetch(currentUrl, {
       headers: { "user-agent": "AskMagicMike-WordPress-Activation-Audit/1.0" },
       redirect: "manual",
       cache: "no-store",
-      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      signal: AbortSignal.timeout(boundedTimeoutMs),
     });
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get("location");
@@ -647,38 +678,62 @@ export async function fetchAllowlistedWordPressText(
   throw new Error("redirect_limit_exceeded");
 }
 
+export async function loadWordPressActivationChangeSets(
+  placementKeys: readonly WordPressActivationPlacementKey[] = WORDPRESS_ACTIVATION_PLACEMENT_KEYS,
+  options: WordPressActivationLoadOptions = {},
+): Promise<WordPressActivationChangeSet[]> {
+  if (placementKeys.length === 0) return [];
+
+  const [indexResult, ...pageResults] = await Promise.allSettled([
+    fetchAllowlistedWordPressText(
+      WORDPRESS_PAGE_INDEX_URL,
+      "json",
+      options.timeoutMs,
+    ),
+    ...placementKeys.map((placementKey) => (
+      fetchAllowlistedWordPressText(
+        TARGETS[placementKey].sourcePage,
+        "html",
+        options.timeoutMs,
+      )
+    )),
+  ]);
+
+  let parsedRows: unknown = null;
+  if (indexResult?.status === "fulfilled") {
+    try {
+      parsedRows = JSON.parse(indexResult.value);
+    } catch {
+      parsedRows = null;
+    }
+  }
+
+  return placementKeys.map((placementKey, index) => {
+    const pageResult = pageResults[index];
+    if (!pageResult || pageResult.status === "rejected") {
+      return buildFetchFailureChangeSet(placementKey, "wordpress_page_fetch_failed");
+    }
+    if (!Array.isArray(parsedRows)) {
+      return buildFetchFailureChangeSet(placementKey, "wordpress_page_index_fetch_failed");
+    }
+    try {
+      return buildWordPressActivationChangeSet({
+        placementKey,
+        html: pageResult.value,
+        pageRows: parsedRows,
+      });
+    } catch {
+      return buildFetchFailureChangeSet(placementKey, "wordpress_page_index_fetch_failed");
+    }
+  });
+}
+
 export async function loadWordPressActivationChangeSet(
   placementKey: WordPressActivationPlacementKey,
 ) {
-  const target = TARGETS[placementKey];
-  const [pageResult, indexResult] = await Promise.allSettled([
-    fetchAllowlistedWordPressText(target.sourcePage, "html"),
-    fetchAllowlistedWordPressText(WORDPRESS_PAGE_INDEX_URL, "json"),
-  ]);
-  if (pageResult.status === "rejected") {
-    return buildFetchFailureChangeSet(placementKey, "wordpress_page_fetch_failed");
-  }
-  if (indexResult.status === "rejected") {
-    return buildFetchFailureChangeSet(placementKey, "wordpress_page_index_fetch_failed");
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(indexResult.value);
-  } catch {
-    return buildFetchFailureChangeSet(placementKey, "wordpress_page_index_fetch_failed");
-  }
-  if (!Array.isArray(parsed)) {
-    return buildFetchFailureChangeSet(placementKey, "wordpress_page_index_fetch_failed");
-  }
-
-  try {
-    return buildWordPressActivationChangeSet({
-      placementKey,
-      html: pageResult.value,
-      pageRows: parsed,
-    });
-  } catch {
-    return buildFetchFailureChangeSet(placementKey, "wordpress_page_index_fetch_failed");
-  }
+  const [changeSet] = await loadWordPressActivationChangeSets([placementKey]);
+  return changeSet || buildFetchFailureChangeSet(
+    placementKey,
+    "wordpress_page_fetch_failed",
+  );
 }

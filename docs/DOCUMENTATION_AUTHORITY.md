@@ -1,6 +1,6 @@
 # Documentation Authority
 
-Updated 2026-08-29. This register prevents dated build packets from overriding
+Updated 2026-09-01. This register prevents dated build packets from overriding
 the observed production system.
 
 ## Operating source of truth
@@ -8,8 +8,10 @@ the observed production system.
 Use these files for current decisions, in this order:
 
 1. `CURRENT_RELEASE_AUTHORITY.md` and
-   `config/current-release-authority.json` — singular current application gate,
-   exact candidate, accepted baseline, and execution order.
+   `config/current-release-authority.json` — accepted Production, consumed
+   receipts, the one reviewed application candidate, and its exact active gate.
+   A candidate gate applies only to the exact bound PR/tree and listed action;
+   it never implies authority for an external system.
 2. `CURRENT_STATE_RECONCILIATION.md` — observed repository, deployment,
    runtime, database, authorization, and provider state.
 3. `CANONICAL_ASSET_MANIFEST.md` and `CANONICAL_PRODUCTION_STACK.md` —
@@ -28,11 +30,16 @@ Use these files for current decisions, in this order:
    GitHub checks and matching Vercel deployment metadata outrank a run ID frozen
    into documentation.
 
-Current release authority is intentionally singular: accepted PR #209 remains
-the Production baseline, while Draft PR #238 consolidates the preserved
-PR #210–#237 component train into one exact-head candidate. A historical gate
-attached to a component PR or an already released application cannot authorize
-a new merge, deployment, mutation, send, or publication.
+Current release authority is intentionally singular: accepted PR #246 merge
+`98a91f752c4c53dc0ae300dfc320f47b53e32820` on deployment
+`dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` is the Production baseline; immutable source
+deployment `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate rollback. PR #247 is
+the one reviewed application candidate and exposes one exact owner-only
+same-tree merge/deploy gate. It has no migration or external-action authority
+and does not authorize WordPress publication. PR #238 is a consumed cutover
+receipt. The credential-redeploy approval and every historical
+component/application gate are consumed and cannot authorize a new merge,
+deployment, mutation, send, or publication.
 
 `QA_EVIDENCE_CURRENT.md` is a cumulative 2026-08-14-era evidence packet with
 later appendices. Preserve it as provenance, but do not use its first baseline

@@ -133,18 +133,19 @@ securely. CSV export remains available with audit logging.
 
 ### Current release state
 
-Current accepted Production is PR #209 merge
-`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
-`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Draft PR #238 at exact head
-`de67db6e1183b2a47d329d4a9a11993d48d1992a` is the single cumulative
-application candidate. It includes the tested PR #210–#237 component tree and
-four guarded additive migrations. It does not authorize a report import,
-external placement, provider action, message, WordPress change, target,
-Production lead-data change, or publication.
+Current accepted Production is PR #246 merge
+`98a91f752c4c53dc0ae300dfc320f47b53e32820` on deployment
+`dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`; source deployment
+`dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate rollback. PR #247 is the one
+reviewed application candidate and has no migration or external-action
+authority. Its machine-bound content head/tree, hosted gate, immutable Preview,
+rollback, and exact owner-only application gate are sealed. Final
+authority-only exact-head checks must still match; drift invalidates the gate.
 
-Current Production proves every durable limiter capability and the dedicated
-secret contract; strict monitoring passes 9/9. Historical component PRs
-#210–#237 retain evidence but have no independent current release authority.
+PR #238 is an applied and verified five-migration receipt. Historical component
+and superseded review PRs retain evidence but have no independent current
+release authority. Current Production readiness, post-deploy verification, and
+the six-hour monitor pass.
 
 ### Prepared content is not published content
 
@@ -181,8 +182,8 @@ backup-first, identity, role, hash, and postflight interlocks.
 
 | Priority | Action | Gate |
 |---|---|---|
-| 1 | Run the guarded PR #238 read-only Production preflight | Secure connection takeover; no mutation authority |
-| 2 | Execute migrations, merge exact PR #238, and deploy only after the exact cumulative gate | Cumulative Production gate |
+| 1 | Obtain the exact PR #247 owner approval after final exact-head checks remain green | Exact application-only gate in `CURRENT_RELEASE_AUTHORITY.md` |
+| 2 | Review one visible WordPress placement and verified rollback | Separate page-specific publication gate |
 | 3 | Publish one approved zero-spend placement and record native proof | Channel-specific approval |
 | 4 | Activate Mike's account and enroll each owner's Web Push device | Per-person takeover/test approval |
 | 5 | Approve consent wording before expanding WordPress forms | Mike/BIC approval |

@@ -1,32 +1,32 @@
 # Owner Approval Queue
 
-Updated 2026-08-29 from authenticated GitHub, Vercel, Neon, WordPress, and
+Updated 2026-09-01 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
-## Cumulative Phase 9 release candidate — exact gate not yet received
+## Current application review — exact owner gate requestable
 
-- Draft PR [#238](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238)
-  is the byte-consolidated application candidate for the already-built Phase 9
-  stack. Exact candidate head is
-  `de67db6e1183b2a47d329d4a9a11993d48d1992a`; the pre-runner head remains
-  preserved at `rescue/amm-pr238-pre-cutover-runner-20260829-213310`.
-- One executable cutover now covers only the four reviewed additive growth
-  migrations. It requires exact Production Neon identity, source hashes,
-  compatible ledger shape, absent targets, disabled import gates, a validated
-  backup, bounded locks, one transaction, unchanged existing rows, hardened
-  postconditions, and rollback on any failure.
-- Exact-head local release, hosted CI, immutable Preview, protected no-write
-  browser, runtime-log, dependency, and secret-scan evidence are sealed on the
-  candidate head. The gate remains unconsumed and is now the only requestable
-  application release gate.
-- The only phrase that can authorize the four
-  migrations, exact PR merge, and same-commit Production deployment is:
-  `APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT`.
-- That phrase does not authorize enabling any growth import, provider access,
-  real or synthetic lead submission, email/SMS/Push, WordPress publication,
-  social/GBP/email publication, spend, DNS change, deletion, data import, or
-  NellySelly action.
+- Accepted Production is PR [#246](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/246)
+  merge `98a91f752c4c53dc0ae300dfc320f47b53e32820` on deployment
+  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`; source deployment
+  `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate rollback. The secure
+  `DATABASE_URL` replacement/redeploy approval is consumed and not requestable.
+- PR [#247](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247)
+  is the one reviewed application candidate for WordPress placement readiness.
+  It is bound to reviewed content head
+  `f4503dc68b0f2c07a1e9c82827c27ffb5479e9f4` and tree
+  `f1023e295332b939d21313ed626a9b3a8b2d5483` with zero migrations or external
+  mutations.
+- PR #238 is an applied and verified five-migration receipt; its approval is
+  consumed. PRs #244 and #245 are superseded stale reviews and remain preserved
+  without current authority.
+- The one requestable application gate is
+  `APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT`.
+  Use it only if final authority-only exact-head checks remain green. It is not
+  reusable after acceptance or if product/configuration/target drift occurs.
+- No application gate authorizes WordPress publication, provider access, real
+  or synthetic lead submission, email/SMS/Push, social/GBP/email publication,
+  spend, DNS change, deletion, data import, or NellySelly action.
 
 ## Cross-domain measurement activation dependency — later, not currently requestable
 

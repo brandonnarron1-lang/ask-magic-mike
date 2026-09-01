@@ -1,5 +1,5 @@
 import {
-  CURRENT_CUMULATIVE_RELEASE_GATE,
+  CURRENT_APPLICATION_RELEASE_GATE,
   CURRENT_RELEASE_AUTHORITY,
 } from "./current-release-authority";
 
@@ -43,12 +43,6 @@ export interface GrowthCapabilityLedger {
 const CURRENT_WORDPRESS_GATE =
   "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA";
 
-function currentApplicationState(
-  currentTailInProduction: boolean,
-): GrowthCapabilityState {
-  return currentTailInProduction ? "production_live" : "release_candidate";
-}
-
 export function growthCapabilityStateLabel(state: GrowthCapabilityState) {
   const labels: Record<GrowthCapabilityState, string> = {
     production_live: "Production live",
@@ -66,7 +60,11 @@ export function buildGrowthCapabilityLedger({
 }: {
   currentTailInProduction: boolean;
 }): GrowthCapabilityLedger {
-  const applicationState = currentApplicationState(currentTailInProduction);
+  const activeCandidate = CURRENT_RELEASE_AUTHORITY.candidate;
+  const reviewVehicle = CURRENT_RELEASE_AUTHORITY.reviewVehicle;
+  const applicationState: GrowthCapabilityState = activeCandidate && !currentTailInProduction
+    ? "release_candidate"
+    : "production_live";
   const items: GrowthCapabilityLedgerItem[] = [
     {
       key: "canonical_lead_pipe",
@@ -121,27 +119,33 @@ export function buildGrowthCapabilityLedger({
         "Page-specific decision packets retain no query text, raw CSV, consumer PII, or provider payload",
         "Google-aligned people-first review, qualified-outcome diagnostics, accessibility checks, and explicit authority boundaries",
       ],
-      nextAction: currentTailInProduction
-        ? "Use the protected workbench to prepare one owner-reviewed page experiment at a time, then request the separate publication authority only after Preview and compliance review."
-        : `Preserve this read-only capability inside cumulative PR ${CURRENT_RELEASE_AUTHORITY.candidate.pr}; do not publish a page or treat an experiment packet as release authority.`,
+      nextAction: activeCandidate && !currentTailInProduction
+        ? `Preserve this read-only capability inside reviewed application candidate PR ${activeCandidate.pr}; do not publish a page or treat an experiment packet as release authority.`
+        : "Use the protected workbench to prepare one owner-reviewed page experiment at a time, then request separate publication authority only after Preview and compliance review.",
       href: "/admin/growth/search-ingress",
     },
     {
       key: "ordered_release_train",
-      label: "Accepted Production and cumulative release candidate",
+      label: "Accepted Production release authority",
       domain: "govern",
       state: applicationState,
-      summary: `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is accepted in Production. PR ${CURRENT_RELEASE_AUTHORITY.candidate.pr} consolidates the reviewed Phase 9 component train into one exact-head application candidate with one guarded four-migration cutover.`,
+      summary: activeCandidate
+        ? `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is accepted in Production. PR ${activeCandidate.pr} is the only active reviewed application candidate.`
+        : `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is accepted in Production at ${CURRENT_RELEASE_AUTHORITY.production.mergeCommit}. Draft PR ${reviewVehicle.pr} is an unsealed review vehicle with no reusable application release gate.`,
       evidence: [
         `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is live at ${CURRENT_RELEASE_AUTHORITY.production.mergeCommit} on ${CURRENT_RELEASE_AUTHORITY.production.deploymentId}; its gate is consumed`,
-        `PR ${CURRENT_RELEASE_AUTHORITY.candidate.pr} exact head ${CURRENT_RELEASE_AUTHORITY.candidate.head} is the single cumulative application candidate`,
+        activeCandidate
+          ? `PR ${activeCandidate.pr} reviewed head ${activeCandidate.reviewedHead} is the single application candidate`
+          : `Draft PR ${reviewVehicle.pr} implementation head ${reviewVehicle.implementationHead} remains review-only until exact-head release verification is sealed`,
         `Component PRs ${CURRENT_RELEASE_AUTHORITY.consolidatedComponentTrain.firstPr}–${CURRENT_RELEASE_AUTHORITY.consolidatedComponentTrain.lastPr} remain preserved lineage with no independent current release authority`,
       ],
-      nextAction: currentTailInProduction
-        ? "Verify the deployed commit, health, protected boundaries, migrations, and rollback evidence before considering any separately gated import or external action."
-        : `Use only the guarded PR ${CURRENT_RELEASE_AUTHORITY.candidate.pr} cutover after its exact approval. Do not merge component PRs individually or reuse their historical gates.`,
+      nextAction: activeCandidate && !currentTailInProduction
+        ? `Use only the guarded PR ${activeCandidate.pr} release after fresh exact-head approval. Do not reuse any historical gate.`
+        : `Complete local and hosted verification for Draft PR ${reviewVehicle.pr}. Until a new exact release gate is sealed, keep candidate authority null and preserve Production PR ${CURRENT_RELEASE_AUTHORITY.production.pr}.`,
       href: "/admin/reporting",
-      ...(!currentTailInProduction ? { approvalGate: CURRENT_CUMULATIVE_RELEASE_GATE } : {}),
+      ...(activeCandidate && !currentTailInProduction && CURRENT_APPLICATION_RELEASE_GATE
+        ? { approvalGate: CURRENT_APPLICATION_RELEASE_GATE }
+        : {}),
     },
     {
       key: "revival_and_review_planner",
@@ -154,9 +158,9 @@ export function buildGrowthCapabilityLedger({
         "Internal drafts labeled not approved for send",
         "Device-private seller, buyer, homeowner, and relocation planning route",
       ],
-      nextAction: currentTailInProduction
-        ? "Collect real planner engagement and review eligible revival evidence before proposing any bounded consumer pilot."
-        : `Preserve these reviewed implementations inside cumulative PR ${CURRENT_RELEASE_AUTHORITY.candidate.pr} instead of rebuilding nurture or planning features.`,
+      nextAction: activeCandidate && !currentTailInProduction
+        ? `Preserve these reviewed implementations inside application candidate PR ${activeCandidate.pr} instead of rebuilding nurture or planning features.`
+        : "Collect real planner engagement and review eligible revival evidence before proposing any bounded consumer pilot.",
       href: "/admin/revival",
     },
     {
