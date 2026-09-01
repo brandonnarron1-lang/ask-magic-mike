@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-01 — WordPress canonical-capture reconciliation
+
+- Reconciled the authenticated live WordPress plugin, bridge, Gravity Forms
+  notification, and rendered placement state without changing Production.
+- Proved the live Connector 1.0.0 source matches the retained baseline and the
+  Canonical Lead Bridge forwards only Form 3, whose native notification is
+  already inactive.
+- Identified sitewide Form 7 as a real public capture surface that remains
+  shadow-only while its native notification is active; enabling it without a
+  consent/notification cutover would create a parallel or duplicate path.
+- Added canonical-capture coverage classification to the read-only surface
+  audit so repeated sitewide forms outside the configured bridge allowlist are
+  explicit rather than buried in page-by-page footprint noise.
+- Distinguished an unavailable bridge comparison from an explicitly empty
+  allowlist: unavailable configuration is reported without a false claim,
+  while an intentional empty allowlist flags every observed form fail-safe.
+
 ## 2026-09-01 — Protected Preview QA artifact recovery
 
 - Added an explicit authenticated-Vercel-CLI transport to the existing Preview
