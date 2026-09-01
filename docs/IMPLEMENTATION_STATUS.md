@@ -2617,13 +2617,15 @@ any bridge activation or shadow-mode test.
   variable names, targets, and types; value-bearing input fails closed.
 - Authenticated name-only evidence found 61 Production-scoped variables, all 16
   required names, the existing Resend provider path, and no enabled-by-presence
-  growth import gates. The candidate authority output is 46 PASS / 0 FAIL / 0
+  growth import gates. Both launch gates now load the canonical release
+  manifest and require an exact PR #247 merge/tree/deployment release-log
+  block. The candidate authority output is 47 PASS / 0 FAIL / 0
   `SKIP_OWNER`, `GO_CONTROLLED_TRAFFIC_READY`.
 - Fresh read-only Production evidence also passes the public lead-pipe health
   check, 15/15 conversion-funnel checks, and 19/19 smoke checks with only the
   intentional authenticated-health and write-session skips.
 - Exact Node 24.18.0 release verification passes system isolation, 14/14 safety,
-  283 test files / 3,428 tests, strict typecheck, full lint, optimized Next.js
+  283 test files / 3,433 tests, strict typecheck, full lint, optimized Next.js
   15.5.21 build with 60 static pages, and 100 active / 22 acknowledged duplicate
   routes.
 - No secret value was pulled or printed. No environment variable, deployment,

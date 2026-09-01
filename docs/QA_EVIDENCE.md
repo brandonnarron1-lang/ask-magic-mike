@@ -2371,13 +2371,16 @@ Results:
 - Required environment names: 16/16 present.
 - Email provider: PASS through the existing Resend key contract.
 - Growth import gates: all three absent and fail-closed.
-- Launch authority: 46 PASS / 0 FAIL / 0 `SKIP_OWNER`;
+- Canonical Production identity: PR #247, merge commit
+  `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, tree
+  `0065f829fc94f87ab5e0faf596c8e56733be3972`, and deployment
+  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` all match one release-log block.
+- Launch authority: 47 PASS / 0 FAIL / 0 `SKIP_OWNER`;
   `GO_CONTROLLED_TRAFFIC_READY`.
-- Focused Vitest after restoring the lockfile-pinned dependency tree: 2 files,
-  90 tests PASS. The first attempted invocation failed only because the fresh
-  isolated worktree had no `node_modules`; no product test failed.
+- Focused Vitest after restoring the lockfile-pinned dependency tree: 3 files,
+  100 tests PASS.
 - Exact Node 24.18.0 release gate: PASS — system isolation, 14/14 release
-  safety, 283 test files / 3,428 tests, strict typecheck, full ESLint, optimized
+  safety, 283 test files / 3,433 tests, strict typecheck, full ESLint, optimized
   Next.js 15.5.21 build with 60 static pages, and 100 active / 22 acknowledged
   duplicate routes.
 - Live lead-pipe health: nine routes healthy, including `/api/health/live`.

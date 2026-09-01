@@ -23,6 +23,9 @@ import {
   parseVercelProductionEnvNames,
   classifyEmailProviderPresence,
   classifyFailClosedGatePresence,
+  parseCurrentProductionAuthority,
+  loadCurrentProductionAuthority,
+  releaseLogMatchesCurrentProduction,
 } from "../../scripts/amm/launch-readiness-doctor.mjs";
 
 // ---------------------------------------------------------------------------
@@ -433,6 +436,87 @@ describe("releaseLogMentionsPr", () => {
   it("correctly checks the actual release log for the current production baseline", () => {
     const logPath = process.cwd() + "/docs/PRODUCTION_RELEASE_LOG.md";
     expect(releaseLogMentionsPr(logPath, 136).ok).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Canonical current Production release authority
+// ---------------------------------------------------------------------------
+
+describe("current Production release authority", () => {
+  const authority = {
+    schemaVersion: 7,
+    pr: 247,
+    mergeCommit: "a2f3de834830f600df106dbf5836ae4bbde4eb4a",
+    tree: "0065f829fc94f87ab5e0faf596c8e56733be3972",
+    deploymentId: "dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U",
+    status: "accepted",
+  };
+
+  it("loads the real canonical manifest and exact accepted Production identity", () => {
+    const result = loadCurrentProductionAuthority(process.cwd());
+    expect(result).toEqual({ ok: true, authority });
+  });
+
+  it("matches the real release log only when all Production identifiers agree", () => {
+    const logPath = process.cwd() + "/docs/PRODUCTION_RELEASE_LOG.md";
+    expect(releaseLogMatchesCurrentProduction(logPath, authority)).toEqual({ ok: true });
+  });
+
+  it("rejects invalid JSON and malformed Production authority", () => {
+    expect(() => parseCurrentProductionAuthority("not-json")).toThrow(
+      "current_release_authority_invalid_json",
+    );
+    expect(() => parseCurrentProductionAuthority({
+      schemaVersion: 7,
+      production: {
+        pr: 247,
+        mergeCommit: "short",
+        tree: authority.tree,
+        deploymentId: authority.deploymentId,
+        status: "candidate",
+      },
+    })).toThrow("current_release_authority_shape_invalid");
+  });
+
+  it("rejects historical mentions and mismatched release identifiers", () => {
+    const { writeFileSync } = require("fs");
+    const path = "/tmp/test-current-production-release-log.md";
+    writeFileSync(path, [
+      "# Production Release Log",
+      "",
+      "PR #247 was accepted.",
+      "",
+      "## [PR #247] Wrong release identity",
+      "",
+      `Production commit: ${authority.mergeCommit}`,
+      `Production tree: ${authority.tree}`,
+      "Deployment: dpl_wrong",
+    ].join("\n"));
+
+    const result = releaseLogMatchesCurrentProduction(path, authority);
+    expect(result.ok).toBe(false);
+    expect(result.reason).toContain("missing deployment");
+  });
+
+  it("accepts one exact current-PR block even when older releases follow", () => {
+    const { writeFileSync } = require("fs");
+    const path = "/tmp/test-current-production-release-log-exact.md";
+    writeFileSync(path, [
+      "# Production Release Log",
+      "",
+      "## [PR #247] Current release",
+      "",
+      `Production commit: ${authority.mergeCommit}`,
+      `Production tree: ${authority.tree}`,
+      `Deployment: ${authority.deploymentId}`,
+      "",
+      "## [PR #181] Historical release",
+      "",
+      "Preserved for chronology.",
+    ].join("\n"));
+
+    expect(releaseLogMatchesCurrentProduction(path, authority)).toEqual({ ok: true });
   });
 });
 

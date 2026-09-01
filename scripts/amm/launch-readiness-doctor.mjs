@@ -281,6 +281,102 @@ export function releaseLogMentionsPr(releaseLogPath, prNumber) {
 }
 
 /**
+ * Parse the repository's canonical release-authority manifest and return only
+ * the fields required to prove the accepted Production release. The manifest
+ * is configuration metadata, never a secret-bearing environment source.
+ */
+export function parseCurrentProductionAuthority(input) {
+  let payload;
+  try {
+    payload = typeof input === "string" ? JSON.parse(input) : input;
+  } catch {
+    throw new Error("current_release_authority_invalid_json");
+  }
+
+  const production = payload?.production;
+  const shaPattern = /^[0-9a-f]{40}$/;
+  if (
+    !payload
+    || typeof payload !== "object"
+    || !Number.isInteger(payload.schemaVersion)
+    || payload.schemaVersion < 1
+    || !production
+    || typeof production !== "object"
+    || !Number.isInteger(production.pr)
+    || production.pr < 1
+    || !shaPattern.test(String(production.mergeCommit ?? ""))
+    || !shaPattern.test(String(production.tree ?? ""))
+    || !/^dpl_[A-Za-z0-9]+$/.test(String(production.deploymentId ?? ""))
+    || production.status !== "accepted"
+  ) {
+    throw new Error("current_release_authority_shape_invalid");
+  }
+
+  return {
+    schemaVersion: payload.schemaVersion,
+    pr: production.pr,
+    mergeCommit: production.mergeCommit,
+    tree: production.tree,
+    deploymentId: production.deploymentId,
+    status: production.status,
+  };
+}
+
+export function loadCurrentProductionAuthority(root) {
+  const path = join(root, "config/current-release-authority.json");
+  const content = readFileSafe(path);
+  if (!content) {
+    return { ok: false, reason: "current_release_authority_missing" };
+  }
+  try {
+    return { ok: true, authority: parseCurrentProductionAuthority(content) };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error instanceof Error
+        ? error.message
+        : "current_release_authority_invalid",
+    };
+  }
+}
+
+/**
+ * Require one exact release-log block for the accepted Production PR. A mere
+ * historical PR mention is insufficient: the block must contain the manifest's
+ * merge commit, tree, and Vercel deployment ID.
+ */
+export function releaseLogMatchesCurrentProduction(releaseLogPath, authority) {
+  const content = readFileSafe(releaseLogPath);
+  if (!content) return { ok: false, reason: "PRODUCTION_RELEASE_LOG.md not found" };
+
+  const headingPattern = new RegExp(`^## \\[PR #${authority.pr}\\][^\\n]*$`, "m");
+  const heading = headingPattern.exec(content);
+  if (!heading || heading.index === undefined) {
+    return { ok: false, reason: `current PR #${authority.pr} block not found in release log` };
+  }
+
+  const afterHeading = content.slice(heading.index + heading[0].length);
+  const nextHeadingIndex = afterHeading.search(/^## \\[PR #\d+\\]/m);
+  const block = nextHeadingIndex >= 0
+    ? afterHeading.slice(0, nextHeadingIndex)
+    : afterHeading;
+  const required = [
+    ["merge commit", authority.mergeCommit],
+    ["production tree", authority.tree],
+    ["deployment", authority.deploymentId],
+  ];
+  for (const [label, value] of required) {
+    if (!block.includes(value)) {
+      return {
+        ok: false,
+        reason: `current PR #${authority.pr} release-log block missing ${label}`,
+      };
+    }
+  }
+  return { ok: true };
+}
+
+/**
  * Check that a set of operational docs do not contain stale vercel.app preview URLs.
  * Unlike the src check, this applies to specified doc paths directly.
  */
@@ -392,15 +488,23 @@ if (isMain) {
     }
   }
 
-  // ── Release log currency check ───────────────────────────────────────────
+  // ── Current release authority and release-log currency ──────────────────
   console.log("\n[Release log currency]");
   const releaseLogPath = join(ROOT, "docs/PRODUCTION_RELEASE_LOG.md");
-  for (const prNum of [181]) {
-    const logResult = releaseLogMentionsPr(releaseLogPath, prNum);
+  const currentAuthority = loadCurrentProductionAuthority(ROOT);
+  if (!currentAuthority.ok) {
+    fail("current release authority manifest rejected", currentAuthority.reason);
+  } else {
+    const production = currentAuthority.authority;
+    pass(
+      `current release authority loaded: PR #${production.pr}`,
+      `${production.mergeCommit.slice(0, 7)} / ${production.deploymentId}`,
+    );
+    const logResult = releaseLogMatchesCurrentProduction(releaseLogPath, production);
     if (logResult.ok) {
-      pass(`release log mentions PR #${prNum}`);
+      pass(`release log matches current Production PR #${production.pr}`);
     } else {
-      fail(`release log missing PR #${prNum} entry`, logResult.reason);
+      fail(`release log is stale for current Production PR #${production.pr}`, logResult.reason);
     }
   }
 
