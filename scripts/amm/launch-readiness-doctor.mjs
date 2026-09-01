@@ -421,6 +421,103 @@ export function releaseLogMatchesCurrentProduction(releaseLogPath, authority) {
   return { ok: true };
 }
 
+export const CURRENT_OPERATING_DOC_MARKER = "<!-- amm-current-operations-v1 -->";
+
+export const CURRENT_OPERATING_DOCS = [
+  "docs/CURRENT_STATE_RECONCILIATION.md",
+  "docs/GO_LIVE_RUNBOOK.md",
+  "docs/GO_NO_GO_COMMAND_CENTER.md",
+  "docs/CONTROLLED_LAUNCH_RUNBOOK.md",
+  "docs/OWNER_ACTION_PROOF_PACK.md",
+  "docs/PRODUCTION_DEPLOY_REHEARSAL.md",
+  "docs/CONTROLLED_TRAFFIC_ACTIVATION.md",
+];
+
+export const STALE_OPERATING_DOC_PATTERNS = [
+  {
+    id: "retired_database_operator_path",
+    pattern: /Supabase Dashboard|NEXT_PUBLIC_SUPABASE_URL|NEXT_PUBLIC_SUPABASE_ANON_KEY|SUPABASE_SERVICE_ROLE_KEY/i,
+  },
+  {
+    id: "retired_shared_secret_operator_path",
+    pattern: /ADMIN_SECRET=your_secret|x-admin-secret:\s*\$ADMIN_SECRET/i,
+  },
+  {
+    id: "stale_lc7_baseline",
+    pattern: /main`?\s*@\s*`?815a33a|1187\/1187|post-merge-train\s+#44[–-]#52/i,
+  },
+  {
+    id: "stale_owner_action_matrix",
+    pattern: /\bOA-[1-6]\b/,
+  },
+  {
+    id: "retired_rate_limit_requirement",
+    pattern: /\bUpstash\b/i,
+  },
+];
+
+const OPERATING_DOC_REQUIRED_TOKENS = [
+  "config/current-release-authority.json",
+  "Neon",
+  "Better Auth",
+  "OWNER_APPROVAL_QUEUE.md",
+  "KNOWN_BLOCKERS.md",
+];
+
+/**
+ * Fail closed when operator-facing documents drift back to retired database,
+ * auth, release, or approval instructions. These files are executable human
+ * control surfaces, not merely historical prose.
+ */
+export function validateCurrentOperatingDocs(root, authority) {
+  const issues = [];
+  for (const relativePath of CURRENT_OPERATING_DOCS) {
+    const content = readFileSafe(join(root, relativePath));
+    if (!content) {
+      issues.push({ doc: relativePath, issue: "missing" });
+      continue;
+    }
+    if (!content.includes(CURRENT_OPERATING_DOC_MARKER)) {
+      issues.push({ doc: relativePath, issue: "current_marker_missing" });
+    }
+    for (const token of OPERATING_DOC_REQUIRED_TOKENS) {
+      if (!content.includes(token)) {
+        issues.push({ doc: relativePath, issue: `required_token_missing:${token}` });
+      }
+    }
+    for (const { id, pattern } of STALE_OPERATING_DOC_PATTERNS) {
+      if (pattern.test(content)) issues.push({ doc: relativePath, issue: id });
+    }
+  }
+
+  for (const relativePath of [
+    "docs/CURRENT_STATE_RECONCILIATION.md",
+    "docs/GO_NO_GO_COMMAND_CENTER.md",
+  ]) {
+    const content = readFileSafe(join(root, relativePath));
+    const exactTokens = [
+      `PR #${authority.pr}`,
+      authority.mergeCommit,
+      authority.tree,
+      authority.deploymentId,
+    ];
+    for (const token of exactTokens) {
+      if (content && !content.includes(token)) {
+        issues.push({ doc: relativePath, issue: `production_identity_missing:${token}` });
+      }
+    }
+  }
+
+  const commandCenter = readFileSafe(join(root, "docs/GO_NO_GO_COMMAND_CENTER.md"));
+  if (commandCenter && !commandCenter.includes("GO_CONTROLLED_TRAFFIC_READY")) {
+    issues.push({
+      doc: "docs/GO_NO_GO_COMMAND_CENTER.md",
+      issue: "current_launch_authority_missing",
+    });
+  }
+  return issues;
+}
+
 /**
  * Check that a set of operational docs do not contain stale vercel.app preview URLs.
  * Unlike the src check, this applies to specified doc paths directly.
@@ -553,13 +650,30 @@ if (isMain) {
     }
   }
 
+  // ── Current operator-document contract ──────────────────────────────────
+  console.log("\n[Current operating documentation]");
+  if (!currentAuthority.ok) {
+    fail("operator documents cannot be verified", currentAuthority.reason);
+  } else {
+    const issues = validateCurrentOperatingDocs(ROOT, currentAuthority.authority);
+    if (issues.length === 0) {
+      pass(
+        "operator documents match canonical Production architecture",
+        `${CURRENT_OPERATING_DOCS.length} current control surfaces`,
+      );
+    } else {
+      fail(
+        `operator documentation has ${issues.length} currentness issue(s)`,
+        issues.slice(0, 8).map(({ doc, issue }) => `${doc}:${issue}`).join(", "),
+      );
+    }
+  }
+
   // ── Stale vercel.app URLs in new operational docs ────────────────────────
   console.log("\n[Stale vercel.app URLs in operational docs]");
-  const operationalDocs = [
-    join(ROOT, "docs/CONTROLLED_LAUNCH_RUNBOOK.md"),
-    join(ROOT, "docs/OWNER_ACTION_PROOF_PACK.md"),
-    join(ROOT, "docs/PRODUCTION_DEPLOY_REHEARSAL.md"),
-  ].filter(existsSync);
+  const operationalDocs = CURRENT_OPERATING_DOCS
+    .map((relativePath) => join(ROOT, relativePath))
+    .filter(existsSync);
   const staleDocUrls = findStaleVercelUrlsInDocs(operationalDocs);
   if (staleDocUrls.length === 0) {
     pass("no stale vercel.app URLs in operational docs");

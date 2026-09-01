@@ -92,15 +92,16 @@ classification rules:
 - neither command accepted, wrote, printed, or persisted a value-bearing
   environment payload.
 
-The doctor reported 47/47 PASS with zero skips. The candidate authority report
-also reported 47/47 PASS, zero `SKIP_OWNER`, and
+The current-operator contract adds one doctor check and four authority document
+existence checks. The doctor reported 48/48 PASS with zero skips. The candidate
+authority report reported 51/51 PASS, zero `SKIP_OWNER`, and
 `GO_CONTROLLED_TRAFFIC_READY`. This closes the prior false hold caused by
 checking the local shell instead of authenticated Vercel Production metadata.
 Both commands also loaded the canonical current-release manifest and required
 one exact PR #247 release-log block matching merge commit, Production tree, and
 Vercel deployment ID; a historical PR mention can no longer satisfy currency.
 Exact Node 24.18.0 release verification passes system isolation, 14/14 safety,
-284 test files / 3,437 tests, strict typecheck, full lint, optimized production
+284 test files / 3,441 tests, strict typecheck, full lint, optimized production
 build with 60 static pages, and a 100-route / 22-acknowledged-duplicate
 manifest.
 It does not authorize a merge, deployment, traffic publication, WordPress

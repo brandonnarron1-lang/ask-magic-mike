@@ -2393,3 +2393,36 @@ Results:
 The check performed no Vercel write, environment pull, deployment, database
 query or migration, WordPress mutation, lead submission, email/SMS/Push,
 analytics write, DNS change, publication, spend, deletion, or NellySelly action.
+
+## Phase 9 current operator-command center — 2026-09-01
+
+Story: canonical release authority plus the seven current operator documents
+must flow into fail-closed launch checks before any immutable Preview or
+separately approved Production action can be trusted.
+
+Results:
+
+- Current-document stale-pattern scan: PASS; zero retired database dashboard,
+  environment-name, shared-secret, LC-7/OA, or former rate-limit instructions
+  remain in the seven marked operator surfaces.
+- Current-document marker/reference scan: PASS; all seven include
+  `amm-current-operations-v1`, the release manifest, Neon, Better Auth,
+  `OWNER_APPROVAL_QUEUE.md`, and `KNOWN_BLOCKERS.md`.
+- Focused Vitest: PASS — 5 files / 113 tests. Coverage includes the real
+  repository, seven missing documents, five retired-pattern classes, wrong
+  deployment identity, and secret-bearing Vercel payload rejection.
+- Authenticated Vercel name/scope-only doctor: PASS — 61 Production-scoped
+  names, 48/48 checks, zero skips, no accepted values.
+- Authenticated Vercel name/scope-only authority: PASS — 51/51 checks, zero
+  `SKIP_OWNER`, `GO_CONTROLLED_TRAFFIC_READY`.
+- Exact Node 24.18.0 release gate: PASS — system isolation, 14/14 release
+  safety, 284 files / 3,441 tests, strict TypeScript, full ESLint, optimized
+  Next.js 15.5.21 build with 60 static pages, and 100 active / 22 acknowledged
+  duplicate routes.
+- Production dependency audit: PASS — no known vulnerabilities.
+- `node --check` for both modified scripts and `git diff --check`: PASS.
+
+The checks were read-only. No secret value was read into the checkout, printed,
+or persisted, and no merge, deployment, Vercel setting, Neon query/mutation,
+WordPress action, lead, email/SMS/Push, analytics write, DNS/publication/spend,
+deletion, or NellySelly action occurred.

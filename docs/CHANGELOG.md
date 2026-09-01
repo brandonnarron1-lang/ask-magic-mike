@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-09-01 — Fail-closed current operator command center
+
+- Replaced seven stale launch/traffic runbooks that still directed operators
+  toward retired database, shared-secret, and legacy owner-action procedures.
+  The current set now names accepted PR #247 Production, Neon persistence,
+  Better Auth/RBAC, the singular PR #248 application gate, separately gated
+  WordPress/publication actions, and explicit rollback boundaries.
+- Added a versioned current-operations marker and a shared validator to both
+  launch commands. Missing documents, missing current-system references,
+  retired instructions, or drift from the exact Production PR/merge/tree/
+  deployment now fail closed.
+- Authenticated Vercel name-and-scope metadata remains value-free and proves 61
+  Production-scoped names. The launch doctor passes 48/48 and the authority
+  report passes 51/51 with zero skips and
+  `GO_CONTROLLED_TRAFFIC_READY`.
+- Exact Node 24.18.0 verification passes 5 focused files / 113 tests, 284 full
+  files / 3,441 tests, strict typecheck, full lint, optimized Next.js 15.5.21
+  build with 60 static pages, 100 active / 22 acknowledged duplicate routes,
+  14/14 release safety, system isolation, and a clean Production dependency
+  audit.
+- No Production/Preview deployment, merge, environment change, Neon query or
+  mutation, WordPress action, lead submission, message, analytics write, DNS
+  change, publication, spend, deletion, or NellySelly action occurred.
+
 ## 2026-09-01 — Canonical Production launch-authority evidence
 
 - Replaced the historical PR #181 release-log proxy in both launch gates with

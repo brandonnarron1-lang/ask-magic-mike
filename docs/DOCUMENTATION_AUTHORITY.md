@@ -18,8 +18,13 @@ Use these files for current decisions, in this order:
    canonical repository, project, domain, database, and asset dispositions.
 4. `CONSOLIDATION_PLAN.md` — merge order, systems to retain, and systems that
    must remain separate.
-5. `PRODUCTION_LAUNCH_GATE.md` — mandatory release checklist.
-6. `GO_LIVE_RUNBOOK.md` — deploy, verify, and rollback procedure.
+5. `GO_NO_GO_COMMAND_CENTER.md`, `PRODUCTION_LAUNCH_GATE.md`,
+   `GO_LIVE_RUNBOOK.md`, `CONTROLLED_LAUNCH_RUNBOOK.md`,
+   `PRODUCTION_DEPLOY_REHEARSAL.md`, and
+   `CONTROLLED_TRAFFIC_ACTIVATION.md` — the current decision, release,
+   acceptance, rollback, and bounded traffic-expansion surfaces.
+6. `OWNER_ACTION_PROOF_PACK.md` — current evidence and receipt templates for
+   separately classified actions.
 7. `ENVIRONMENT_VARIABLE_MATRIX.md` and `.env.example` — names, scopes, and safe
    defaults only; the hosting secret interface remains authoritative for values.
 8. `OWNER_APPROVAL_QUEUE.md` — exact external-action and Production gates.
@@ -88,3 +93,12 @@ Any release that changes database identity, auth mode, provider state, domain
 mapping, WordPress allowlists, or a production approval gate must update the
 operating source-of-truth files in the same PR. Values and secrets are never
 copied into documentation.
+
+The seven current operator documents carry the
+`amm-current-operations-v1` marker and are enforced by both
+`scripts/amm/launch-readiness-doctor.mjs` and
+`scripts/amm/launch-authority-report.mjs`. The checks fail closed when a
+required document is missing, loses its marker or required current-system
+references, names the wrong release identity, or contains a known retired
+operator instruction. Historical files remain available for provenance but do
+not satisfy that contract.
