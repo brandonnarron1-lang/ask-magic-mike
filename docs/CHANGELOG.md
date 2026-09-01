@@ -28,7 +28,7 @@
   active legacy notification, indefinite retention, raw IP retention, disabled
   WordPress privacy tools, no canonical allowlist, and live Bridge 1.1.0.
 - Produced the tested Bridge 1.3.0 install archive and SHA-256 sidecar. Focused
-  tests pass 72/72; the full release gate passes 286 files / 3,483 tests,
+  tests pass 72/72; the full release gate passes 286 files / 3,484 tests,
   strict typecheck, full lint, optimized build, 14/14 safety, system isolation,
   and 100-route verification.
 - No Production deployment, merge, WordPress save, notification toggle, form

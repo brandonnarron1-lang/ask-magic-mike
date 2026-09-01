@@ -37,7 +37,7 @@ Updated 2026-09-01.
   artifact is `output/release/ask-magic-mike-canonical-bridge-1.3.0.zip` with
   SHA-256 `a04b5bcf4e0e45e264260b3daeaf8158085e129b8deaf1c8b8f797e0aa31d2df`.
 - **Verification:** 71/71 focused tests and the complete local gate pass 286
-  files / 3,483 tests, strict typecheck, full lint, optimized Next.js build,
+  files / 3,484 tests, strict typecheck, full lint, optimized Next.js build,
   system isolation, 14/14 safety, and 100 active route verification. PHP source
   parses successfully with `php-parser` 3.7.0; native PHP CLI was unavailable.
 - **Authority unchanged:** no Production/WordPress/Neon/provider mutation was

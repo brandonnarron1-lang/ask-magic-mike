@@ -27,7 +27,7 @@
   egress, signed WordPress route persistence, Bridge 1.3.0 source contract, and
   current-HOLD/future-GO readiness behavior.
 - Full local release gate: system isolation passed; 14/14 release-safety checks
-  passed; 286 test files / 3,483 tests passed; strict TypeScript passed; full
+  passed; 286 test files / 3,484 tests passed; strict TypeScript passed; full
   ESLint passed; optimized Next.js 15.5.21 build passed with 60 static pages;
   route manifest passed with 100 active / 22 acknowledged duplicate routes.
 - `git diff --check`, Node syntax checks, ZIP integrity, and SHA-256 verification
