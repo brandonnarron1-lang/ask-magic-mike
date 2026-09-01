@@ -3,7 +3,14 @@ import { createHash } from "node:crypto";
 import { normalizeLeadPayload, type LeadPayload } from "../../lib/leadPayload";
 import { isValidLeadEmail, isValidLeadPhone } from "../../lib/leadContactValidation";
 import { PUBLIC_LEAD_SAVE_ERROR } from "../../lib/publicLeadErrors";
-import { consentGrantedForCall, consentGrantedForEmail, consentGrantedForSms, LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../lib/leadConsent";
+import {
+  consentGrantedForCall,
+  consentGrantedForEmail,
+  consentGrantedForSms,
+  LEAD_CONSENT_LANGUAGE_TEXT,
+  LEAD_CONSENT_LANGUAGE_VERSION,
+  resolveAuthoritativeConsentEvidence,
+} from "../../lib/leadConsent";
 import { scoreLead } from "../../lib/leadScoring";
 import { routeLead } from "../../lib/leadRouting";
 import { enqueueLeadNotifications } from "../../lib/leadAlertService";
@@ -22,7 +29,38 @@ import {
   PREVIEW_READ_ONLY_MESSAGE,
   assertDatabaseMutationAllowed,
 } from "../../../src/lib/preview-security";
-import { verifyWordPressBridgeRequest } from "../../lib/wordpressBridgeSignature";
+import {
+  verifyWordPressBridgePayloadIdentity,
+  verifyWordPressBridgeRequest,
+} from "../../lib/wordpressBridgeSignature";
+
+const MAX_LEAD_BODY_BYTES = 65_536;
+
+class LeadPayloadTooLargeError extends Error {}
+
+async function readBoundedLeadBody(req: Request) {
+  if (!req.body) return "";
+  const reader = req.body.getReader();
+  const decoder = new TextDecoder();
+  let bytesRead = 0;
+  let text = "";
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytesRead += value.byteLength;
+      if (bytesRead > MAX_LEAD_BODY_BYTES) {
+        await reader.cancel().catch(() => undefined);
+        throw new LeadPayloadTooLargeError();
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+    return text + decoder.decode();
+  } finally {
+    reader.releaseLock();
+  }
+}
 
 const LEAD_TYPES = new Set([
   "buyer",
@@ -311,8 +349,8 @@ function buildLeadRow(payload: LeadPayload, req: Request, sessionId: string) {
     consent_sms: consentSms,
     consent_call: consentCall,
     consent_email: consentEmail,
-    consent_timestamp: consentEmail || consentCall || consentSms ? new Date().toISOString() : null,
-    consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
+    consent_timestamp: consentEmail || consentCall || consentSms ? payload.consent_timestamp || new Date().toISOString() : null,
+    consent_language_version: payload.consent_language_version || LEAD_CONSENT_LANGUAGE_VERSION,
     status: qualification.status,
     lead_type: leadType,
     lead_grade: qualification.lead_grade,
@@ -326,7 +364,7 @@ function buildLeadRow(payload: LeadPayload, req: Request, sessionId: string) {
     score_factors: score.factors,
     score_version: score.version,
     is_test: payload.is_test === true,
-    consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
+    consent_language_text: payload.consent_language_text || LEAD_CONSENT_LANGUAGE_TEXT,
     consent_ip_hash: consentIpHash(req),
     consent_source: payload.consent_source || payload.lead_source_surface,
     consent_user_agent: req.headers.get("user-agent") || null,
@@ -403,7 +441,7 @@ async function insertLead(payload: LeadPayload, req: Request) {
     const consentEmail = consentGrantedForEmail(payload);
     const consentCall = consentGrantedForCall(payload);
     const consentSms = consentGrantedForSms(payload);
-    const collectedAt = new Date().toISOString();
+    const collectedAt = payload.consent_timestamp || new Date().toISOString();
     await persistence.enrichLeadRecord({
       leadId: result.lead_id,
       leadPatch: {
@@ -412,7 +450,7 @@ async function insertLead(payload: LeadPayload, req: Request) {
         score_factors: score.factors,
         score_version: score.version,
         is_test: payload.is_test === true,
-        consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
+        consent_language_text: payload.consent_language_text || LEAD_CONSENT_LANGUAGE_TEXT,
         consent_ip_hash: consentIpHash(req),
         consent_source: payload.consent_source || payload.lead_source_surface,
         consent_user_agent: req.headers.get("user-agent") || null,
@@ -449,8 +487,8 @@ async function insertLead(payload: LeadPayload, req: Request) {
         lead_id: result.lead_id,
         consent_type: type,
         granted,
-        language_version: LEAD_CONSENT_LANGUAGE_VERSION,
-        language_text: LEAD_CONSENT_LANGUAGE_TEXT,
+        language_version: payload.consent_language_version || LEAD_CONSENT_LANGUAGE_VERSION,
+        language_text: payload.consent_language_text || LEAD_CONSENT_LANGUAGE_TEXT,
         user_agent: req.headers.get("user-agent") || null,
         collected_at: collectedAt,
       })),
@@ -531,6 +569,7 @@ function validateLead(payload: LeadPayload) {
 
 export async function POST(req: Request) {
   const correlationId = crypto.randomUUID();
+  const receivedAt = new Date().toISOString();
   const origin = req.headers.get("origin");
   if (!isApprovedPublicOrigin(origin)) {
     return NextResponse.json({ error: "This form origin is not approved.", correlation_id: correlationId }, { status: 403, headers: { "X-AMM-Correlation-Id": correlationId } });
@@ -553,16 +592,18 @@ export async function POST(req: Request) {
 
   let raw: unknown;
   let rawBody: string;
+  let trustedWordPressBridge = false;
+  let trustedWordPressEntryId: string | null = null;
   let persistedLead: Awaited<ReturnType<typeof insertLead>>;
   try {
     const declaredSize = Number(req.headers.get("content-length") || "0");
-    if (Number.isFinite(declaredSize) && declaredSize > 65_536) {
-      return NextResponse.json({ error: "Submission is too large.", correlation_id: correlationId }, { status: 413 });
+    if (Number.isFinite(declaredSize) && declaredSize > MAX_LEAD_BODY_BYTES) {
+      return NextResponse.json(
+        { error: "Submission is too large.", correlation_id: correlationId },
+        { status: 413, headers: { "X-AMM-Correlation-Id": correlationId } },
+      );
     }
-    rawBody = await req.text();
-    if (rawBody.length > 65_536) {
-      return NextResponse.json({ error: "Submission is too large.", correlation_id: correlationId }, { status: 413 });
-    }
+    rawBody = await readBoundedLeadBody(req);
     if (req.headers.get("x-amm-wp-bridge")) {
       const bridge = verifyWordPressBridgeRequest(req, rawBody);
       if (!bridge.ok) {
@@ -571,17 +612,54 @@ export async function POST(req: Request) {
           { status: bridge.status, headers: { "X-AMM-Correlation-Id": correlationId } },
         );
       }
+      trustedWordPressBridge = true;
+      trustedWordPressEntryId = bridge.entryId;
     }
     raw = JSON.parse(rawBody);
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
+  } catch (error) {
+    if (error instanceof LeadPayloadTooLargeError) {
+      return NextResponse.json(
+        { error: "Submission is too large.", correlation_id: correlationId },
+        { status: 413, headers: { "X-AMM-Correlation-Id": correlationId } },
+      );
+    }
+    return NextResponse.json(
+      { error: "Invalid JSON.", correlation_id: correlationId },
+      { status: 400, headers: { "X-AMM-Correlation-Id": correlationId } },
+    );
   }
 
   const input = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
-  const payload = normalizeLeadPayload({
+  const normalizedPayload = normalizeLeadPayload({
     ...input,
     idempotency_key: input.idempotency_key || req.headers.get("idempotency-key") || undefined,
   });
+  if (trustedWordPressBridge && trustedWordPressEntryId) {
+    const identity = verifyWordPressBridgePayloadIdentity(
+      normalizedPayload,
+      trustedWordPressEntryId,
+    );
+    if (!identity.ok) {
+      return NextResponse.json(
+        {
+          error: "WordPress bridge payload identity was rejected.",
+          code: identity.error,
+          correlation_id: correlationId,
+        },
+        {
+          status: identity.status,
+          headers: { "X-AMM-Correlation-Id": correlationId },
+        },
+      );
+    }
+  }
+  const payload: LeadPayload = {
+    ...normalizedPayload,
+    ...resolveAuthoritativeConsentEvidence(normalizedPayload, {
+      trustedWordPressBridge,
+      receivedAt,
+    }),
+  };
 
   if (payload.honeypot) {
     return NextResponse.json({ message: "Got it.", correlation_id: correlationId }, { status: 202, headers: { "X-AMM-Correlation-Id": correlationId } });
