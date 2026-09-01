@@ -2455,10 +2455,13 @@ Results:
   `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` all match one release-log block.
 - Launch authority: 47 PASS / 0 FAIL / 0 `SKIP_OWNER`;
   `GO_CONTROLLED_TRAFFIC_READY`.
-- Focused Vitest after restoring the lockfile-pinned dependency tree: 3 files,
-  100 tests PASS.
+- Focused Vitest after restoring the lockfile-pinned dependency tree: 4 files,
+  104 tests PASS.
+- `pnpm audit --prod --audit-level high`: PASS after constraining the newly
+  vulnerable Browserslist `<=4.28.6` range to patched release `4.28.8`;
+  lockfile regression coverage is included.
 - Exact Node 24.18.0 release gate: PASS — system isolation, 14/14 release
-  safety, 283 test files / 3,433 tests, strict typecheck, full ESLint, optimized
+  safety, 284 test files / 3,437 tests, strict typecheck, full ESLint, optimized
   Next.js 15.5.21 build with 60 static pages, and 100 active / 22 acknowledged
   duplicate routes.
 - Live lead-pipe health: nine routes healthy, including `/api/health/live`.
@@ -2483,7 +2486,7 @@ Results:
 - Current-document marker/reference scan: PASS; all seven include
   `amm-current-operations-v1`, the release manifest, Neon, Better Auth,
   `OWNER_APPROVAL_QUEUE.md`, and `KNOWN_BLOCKERS.md`.
-- Focused Vitest: PASS — 4 files / 140 tests. Coverage includes the real
+- Focused Vitest: PASS — 5 files / 113 tests. Coverage includes the real
   repository, seven missing documents, five retired-pattern classes, wrong
   deployment identity, and secret-bearing Vercel payload rejection.
 - Authenticated Vercel name/scope-only doctor: PASS — 61 Production-scoped
@@ -2491,7 +2494,7 @@ Results:
 - Authenticated Vercel name/scope-only authority: PASS — 51/51 checks, zero
   `SKIP_OWNER`, `GO_CONTROLLED_TRAFFIC_READY`.
 - Exact Node 24.18.0 release gate: PASS — system isolation, 14/14 release
-  safety, 283 files / 3,437 tests, strict TypeScript, full ESLint, optimized
+  safety, 284 files / 3,441 tests, strict TypeScript, full ESLint, optimized
   Next.js 15.5.21 build with 60 static pages, and 100 active / 22 acknowledged
   duplicate routes.
 - Production dependency audit: PASS — no known vulnerabilities.

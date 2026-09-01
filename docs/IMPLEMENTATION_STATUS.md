@@ -2661,8 +2661,9 @@ any bridge activation or shadow-mode test.
   local-shell secrets as 16 owner actions even when the corresponding Vercel
   Production variables existed.
 - Added the same `--vercel-json-stdin` contract already proven by the release
-  doctor. The authority accepts only a Vercel metadata projection containing
-  variable names, targets, and types; value-bearing input fails closed.
+  doctor. The shared parser accepts only a Vercel metadata projection
+  containing variable names, targets, and types; value-bearing, unknown-field,
+  and malformed-entry input fails closed.
 - Authenticated name-only evidence found 61 Production-scoped variables, all 16
   required names, the existing Resend provider path, and no enabled-by-presence
   growth import gates. Both launch gates now load the canonical release
@@ -2672,8 +2673,11 @@ any bridge activation or shadow-mode test.
 - Fresh read-only Production evidence also passes the public lead-pipe health
   check, 15/15 conversion-funnel checks, and 19/19 smoke checks with only the
   intentional authenticated-health and write-session skips.
+- A fresh Production dependency audit exposed two high-severity Browserslist
+  advisories affecting `<=4.28.6`. The transitive path is now constrained to
+  `4.28.8`, its lockfile is refreshed, and the audit returns no known issue.
 - Exact Node 24.18.0 release verification passes system isolation, 14/14 safety,
-  283 test files / 3,433 tests, strict typecheck, full lint, optimized Next.js
+  284 test files / 3,437 tests, strict typecheck, full lint, optimized Next.js
   15.5.21 build with 60 static pages, and 100 active / 22 acknowledged duplicate
   routes.
 - No secret value was pulled or printed. No environment variable, deployment,
@@ -2696,8 +2700,8 @@ any bridge activation or shadow-mode test.
 - Authenticated metadata-only Vercel verification found 61 Production-scoped
   names without accepting values. The doctor passes 48/48; authority passes
   51/51 with zero `SKIP_OWNER` and `GO_CONTROLLED_TRAFFIC_READY`.
-- Exact Node 24.18.0 local acceptance passes 4 focused files / 140 tests, 283
-  full files / 3,437 tests, strict typecheck, full lint, optimized Next.js
+- Exact Node 24.18.0 local acceptance passes 5 focused files / 113 tests, 284
+  full files / 3,441 tests, strict typecheck, full lint, optimized Next.js
   15.5.21 build with 60 static pages, 100 active / 22 acknowledged duplicate
   routes, 14/14 safety, isolation, and the Production dependency audit.
 - This is an additive stacked Draft candidate. It performed no merge,
