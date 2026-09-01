@@ -1,20 +1,100 @@
 {
-  "schemaVersion": 1,
-  "updatedAt": "2026-08-29",
+  "schemaVersion": 6,
+  "updatedAt": "2026-09-01",
   "production": {
-    "pr": 209,
-    "mergeCommit": "a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca",
-    "deploymentId": "dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj"
+    "pr": 246,
+    "reviewedHead": "720de14f8d5ae0d3a137cf3944d9a0f09abdba9e",
+    "mergeCommit": "98a91f752c4c53dc0ae300dfc320f47b53e32820",
+    "tree": "d32187a46244e5fa0240119f973371fbb0c9f063",
+    "deploymentId": "dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe",
+    "generatedUrl": "https://ask-magic-mike-91lrzmnnk-eyes-up-industries.vercel.app",
+    "canonicalUrl": "https://www.askmagicmike.com",
+    "status": "accepted",
+    "rollbackDeploymentId": "dpl_E3Pob3TjWdxN9u4VK9xHZC61667g",
+    "releaseGate": {
+      "runId": 33504917995,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33504917995",
+      "status": "success"
+    },
+    "postDeployVerification": {
+      "runId": 33505043074,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33505043074",
+      "status": "success"
+    },
+    "productionMonitorRuns": [
+      {
+        "runId": 33505253029,
+        "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33505253029",
+        "status": "success"
+      },
+      {
+        "runId": 33505284828,
+        "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33505284828",
+        "status": "success"
+      },
+      {
+        "runId": 33508066082,
+        "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33508066082",
+        "status": "success"
+      }
+    ],
+    "runtimeRedeploy": {
+      "approval": {
+        "phrase": "APPROVE SECURE ASK MAGIC MIKE DATABASE_URL REPLACEMENT AND PRODUCTION REDEPLOYMENT",
+        "status": "consumed",
+        "consumedAt": "2026-09-01"
+      },
+      "sourceDeploymentId": "dpl_E3Pob3TjWdxN9u4VK9xHZC61667g",
+      "deploymentId": "dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe",
+      "generatedUrl": "https://ask-magic-mike-91lrzmnnk-eyes-up-industries.vercel.app",
+      "reason": "production_database_url_replacement",
+      "target": {
+        "provider": "neon",
+        "project": "bitter-star-20214385",
+        "branch": "br-round-base-auh6h2wd",
+        "database": "neondb",
+        "role": "service_role",
+        "connectionPooling": true
+      },
+      "migrationCount": 0,
+      "databaseWriteCount": 0,
+      "verification": {
+        "checkedAt": "2026-09-01T13:32:46.626Z",
+        "monitorStatus": "passed",
+        "monitorPassed": 11,
+        "monitorFailed": 0,
+        "smokePassed": 19,
+        "smokeSkipped": 2,
+        "smokeFailed": 0,
+        "runtimeErrorCount": 0,
+        "readinessStatus": 200
+      }
+    }
   },
-  "candidate": {
+  "candidate": null,
+  "reviewVehicle": {
+    "pr": 247,
+    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247",
+    "branch": "codex/owned-demand-readiness-main-20260901",
+    "baseCommit": "98a91f752c4c53dc0ae300dfc320f47b53e32820",
+    "implementationHead": "6eb2d37f7dc2c116e92ba7ee7e7c2ea4f2482e99",
+    "state": "draft_unsealed",
+    "migrationCount": 0,
+    "externalMutationCount": 0
+  },
+  "releasedCutover": {
     "pr": 238,
     "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238",
-    "branch": "codex/phase9-cumulative-release-20260829",
-    "head": "de67db6e1183b2a47d329d4a9a11993d48d1992a",
-    "tree": "75abbbbe6767092e1d31b225014dd1bf574acda1",
-    "state": "draft",
-    "approvalGate": "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT",
-    "cutoverCommand": "pnpm run phase9:cumulative-growth:cutover -- --execute",
+    "reviewedHead": "9232641329acb8a02ce4cf2419cb12768ce33d17",
+    "mergeCommit": "cef0f366380e2e8aa95a70cf45a70830d7997d45",
+    "tree": "e6f388311fd07fc84ed0e580b77b190f7c56f458",
+    "deploymentId": "dpl_EU6Bx2Fj76HtBmNotCEKcfDk5uwe",
+    "status": "applied_and_verified",
+    "approval": {
+      "phrase": "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT",
+      "status": "consumed",
+      "consumedAt": "2026-08-30"
+    },
     "migrations": [
       {
         "version": "20260824193000",
@@ -35,21 +115,47 @@
         "version": "20260825060000",
         "file": "supabase/migrations/20260825060000_local_demand_metric_truth_guard.sql",
         "sha256": "705fa33d1516451e721cd30d9991084ff3dae987849a2f47981eaeff762a561a"
+      },
+      {
+        "version": "20260830190000",
+        "file": "supabase/migrations/20260830190000_admin_lead_api_persistence.sql",
+        "sha256": "f50ffe91740fdd0690a87d673daf9e5753f122e19279ef84d729d9435d7adc35"
       }
-    ]
+    ],
+    "productionTarget": {
+      "provider": "neon",
+      "project": "bitter-star-20214385",
+      "branch": "br-round-base-auh6h2wd",
+      "database": "neondb"
+    },
+    "importGates": {
+      "marketingSpend": false,
+      "organicSearch": false,
+      "localProfilePerformance": false
+    },
+    "postflight": {
+      "migrationLedgerRowsPerVersion": 1,
+      "receiptRows": 0,
+      "existingCountsUnchanged": true,
+      "privilegeChecksPassed": true,
+      "healthChecksPassed": true
+    }
   },
   "consolidatedComponentTrain": {
     "firstPr": 210,
-    "lastPr": 237,
+    "lastPr": 243,
     "disposition": "historical_lineage_no_independent_release_authority"
   },
-  "dependentReviewArtifacts": [
+  "supersededReviewArtifacts": [
     {
-      "pr": 239,
-      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/239",
-      "branch": "codex/phase9-wordpress-legacy-reconciliation-20260829",
-      "head": "7a1dc828ea353cd76e13ca0c7a3078c46433dd06",
-      "disposition": "post_candidate_read_only_operator_tooling"
+      "pr": 244,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/244",
+      "disposition": "superseded_by_pr247_mainline_reconciliation"
+    },
+    {
+      "pr": 245,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/245",
+      "disposition": "superseded_by_pr247_mainline_port"
     }
   ]
 }

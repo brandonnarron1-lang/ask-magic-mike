@@ -1,6 +1,6 @@
 # Known Operating Constraints
 
-Updated 2026-08-29. The public funnel, canonical Neon capture, Lead Center, and
+Updated 2026-09-01. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
 
@@ -28,26 +28,24 @@ specific expansions; they do not invalidate the live lead pipe.
 
 ## Current release constraint
 
-- Current accepted Production is PR #209 merge
-  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` on deployment
-  `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Its durability gate and every earlier
-  completed release gate are exhausted.
-- Fresh read-only Production checks pass conversion 15/15, smoke 19/19 with two
-  intentional skips, and strict monitoring 9/9. Every durable limiter
-  capability and the dedicated-secret contract is ready.
-- Draft PR #238 at exact head
-  `de67db6e1183b2a47d329d4a9a11993d48d1992a` is the single cumulative
-  application candidate. Its hosted Release Gate and protected no-write
-  Preview proof pass; Production remains held only for the exact cumulative
-  gate and guarded database preflight.
-- PRs #210–#237 are preserved component lineage included once in PR #238. They
-  are not a parallel queue, and their historical individual gates must not be
-  replayed.
-- The only current application gate is
-  `APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT`.
-- Preview Lead Center RBAC remains disabled, so the WordPress manifest API
-  fails closed there. An authenticated role-bound runtime download is required
-  after application release and before any separately approved WordPress edit.
+- Current accepted Production is PR #246 merge
+  `98a91f752c4c53dc0ae300dfc320f47b53e32820` on deployment
+  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`; source deployment
+  `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate rollback. Its release gate,
+  credential-redeploy approval, and every earlier completed gate are consumed.
+- Post-deploy verification, two manual monitors, and the first scheduled
+  six-hour monitor pass on the exact Production commit.
+- Draft PR #247 is an unsealed review vehicle based directly on current
+  `main`. It has zero migrations and zero authorized external mutations.
+- There is no active application candidate and no current merge/deploy phrase.
+  Finish exact-Node local verification, hosted checks, immutable Preview,
+  protected no-write QA, and rollback review before generating a fresh gate.
+- PR #238 is an applied five-migration receipt. PRs #244 and #245 are stale
+  stacked review artifacts superseded by the current reconciliation and clean
+  mainline port; none of their historical gates may be replayed.
+- Preview Lead Center RBAC remains disabled, so protected manifests fail closed
+  there. Role-bound Production inspection still requires an authenticated
+  operator session and does not authorize a WordPress edit.
 - PR #187's KPI-target migration remains excluded until eligible genuine demand
   supplies a defensible baseline. Historical PR #179, PR #182, PRs #92 and
   #119 through #121 remain superseded or archive history.

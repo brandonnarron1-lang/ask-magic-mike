@@ -27,12 +27,14 @@ This document defines the single authoritative source of truth for Ask Magic Mik
 | Node version | 24.x |
 | Automatic Git deployments | Enabled; Ignored Build Step command is empty |
 
-Current accepted Production release: PR #209 merge
-`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`, deployment
-`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Draft PR #238 at exact head
-`de67db6e1183b2a47d329d4a9a11993d48d1992a` is the single cumulative
-application candidate. PRs #210–#237 remain preserved component lineage with
-no independent current release authority. See
+Current accepted Production release: PR #246 merge
+`98a91f752c4c53dc0ae300dfc320f47b53e32820`, deployment
+`dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`. This is an environment-only redeploy of
+the same verified source after secure replacement of Production `DATABASE_URL`;
+`dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is the immediate immutable application
+rollback. Draft PR #247 is an unsealed review
+vehicle only; `candidate: null` means there is no current application release
+gate. PR #238 is a consumed five-migration cutover receipt. See
 [`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).
 
 ### Verification command
@@ -61,7 +63,7 @@ node scripts/amm/verify-production-alias.mjs
 
 | Field | Value |
 |-------|-------|
-| Provider | Neon PostgreSQL (Free) |
+| Provider | Neon PostgreSQL |
 | Project | `bitter-star-20214385` |
 | Production branch | `br-round-base-auh6h2wd` |
 | Production endpoint | `ep-proud-bonus-autwv60g` |

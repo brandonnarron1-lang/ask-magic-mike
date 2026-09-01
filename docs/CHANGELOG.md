@@ -1278,3 +1278,24 @@
   server analytics ledger, retry endpoint, and read-only lead-pipe health check.
 - Added explicit renter, open-house, privacy, terms, accessibility, and contact
   routes so the local candidate has no required public intake/compliance 404s.
+# 2026-09-01 — Current-main owned-demand readiness and release authority
+
+- Reconciled application authority to accepted PR #246 merge
+  `98a91f752c4c53dc0ae300dfc320f47b53e32820` and Production deployment
+  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`; immutable source deployment
+  `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate rollback.
+- Converted PR #238 from a stale active candidate into its truthful consumed
+  five-migration receipt; the protected capability ledger now exposes no
+  replayable application gate.
+- Opened clean Draft PR #247 from current `main` and ported only the unique
+  WordPress placement-readiness behavior from stale stacked PR #245.
+- Batched the three allowlisted WordPress readiness reads, held the hidden
+  homepage target, and selected the visible home-value target without claiming
+  publication or mutating WordPress.
+- Added deterministic selection, false-next-action, batching, fail-closed, and
+  authority regression coverage plus aggregate/public-structure evidence.
+- The Draft review itself performed no merge, migration, WordPress edit,
+  lead/message/provider action, publication, DNS change, spend, deletion, or
+  NellySelly action. A separate exact owner approval securely replaced only the
+  Production database credential and redeployed the unchanged accepted PR #246
+  artifact; that one-time approval is consumed.

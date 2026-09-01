@@ -19,17 +19,20 @@ brokerage, listings, and SEO authority and embeds or links into this system.
 - `OWNER ACTION` — Mike and Brandon must enroll their own phones; authenticated
   internal email remains the active alert path until each device passes QA.
 - `DEFERRED — PAID SERVICE` — carrier SMS/MMS; Web Push is the free-first path.
-- `VERIFIED LIVE` — PR #209's durable-rate-limit release is accepted at
-  `a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`; its exact gate is consumed and
-  cannot authorize another action.
-- `CUMULATIVE RELEASE HOLD` — Draft PR #238 is the single exact-head Phase 9
-  application candidate. It consolidates preserved PRs #210–#237 and four
-  guarded additive migrations; the earlier component gates are historical and
-  cannot be replayed.
+- `VERIFIED LIVE` — PR #246 is accepted at merge
+  `98a91f752c4c53dc0ae300dfc320f47b53e32820` on Vercel deployment
+  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`; the secure Neon Production credential
+  redeploy and current no-write monitor/smoke checks pass. The exact source
+  remains the accepted PR #246 merge.
+- `DRAFT REVIEW — NO RELEASE AUTHORITY` — PR #247 ports the WordPress
+  placement-readiness fix directly onto current `main`. The machine manifest
+  keeps `candidate: null` until exact-head verification and a fresh gate are
+  sealed. PR #238 is an applied, consumed five-migration receipt.
 
 The source-of-truth audit is in
 [`docs/CURRENT_STATE_RECONCILIATION.md`](docs/CURRENT_STATE_RECONCILIATION.md).
-The singular release gate, exact head, and cutover order are in
+The accepted Production identity, unsealed review vehicle, and consumed cutover
+receipts are in
 [`docs/CURRENT_RELEASE_AUTHORITY.md`](docs/CURRENT_RELEASE_AUTHORITY.md).
 Documentation precedence and historical-packet handling are in
 [`docs/DOCUMENTATION_AUTHORITY.md`](docs/DOCUMENTATION_AUTHORITY.md).

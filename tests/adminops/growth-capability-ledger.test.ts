@@ -7,23 +7,25 @@ import {
 } from "../../app/lib/growth/capability-ledger";
 
 describe("Growth capability authority ledger", () => {
-  it("keeps the reviewed tail labeled as a candidate outside Production", () => {
+  it("keeps an unsealed review vehicle distinct from release authority", () => {
     const ledger = buildGrowthCapabilityLedger({ currentTailInProduction: false });
 
     expect(ledger.generatedFor).toBe("preview_or_local");
     expect(ledger.counts).toEqual({
-      production_live: 3,
-      release_candidate: 3,
+      production_live: 6,
+      release_candidate: 0,
       operator_gate: 2,
       host_gate: 1,
       external_dependency: 2,
       prohibited: 1,
     });
     expect(ledger.items.find((item) => item.key === "ordered_release_train")).toMatchObject({
-      state: "release_candidate",
-      approvalGate: "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT",
+      state: "production_live",
     });
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 238");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.approvalGate).toBeUndefined();
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 246");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 247");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("unsealed");
     expect(JSON.stringify(ledger)).not.toContain("PR 210 remains the first pending");
   });
 
@@ -75,7 +77,6 @@ describe("Growth capability authority ledger", () => {
     const facebookRecovery = ledger.items.find((item) => item.key === "facebook_preview_recovery");
 
     expect(gates).toEqual([
-      "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT",
       "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA",
     ]);
     expect(facebookRecovery?.approvalGate).toBeUndefined();
@@ -84,6 +85,7 @@ describe("Growth capability authority ledger", () => {
     expect(JSON.stringify(ledger)).not.toContain("DURABLE RATE-LIMIT READINESS SECRET ENTRY");
     expect(JSON.stringify(ledger)).not.toContain("HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION");
     expect(JSON.stringify(ledger)).not.toContain("NARROW OTP FACEBOOK CRAWLER APACHE OVERRIDE TEST");
+    expect(JSON.stringify(ledger)).not.toContain("CUMULATIVE GROWTH MIGRATIONS, PR 238");
     expect(JSON.stringify(ledger)).not.toContain("APPROVE ALL");
   });
 });

@@ -2,11 +2,20 @@
 
 ## Application
 
-Current Production is `dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj` at merge commit
-`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca`. Re-inspect Production and record
-the immediately preceding Ready deployment before a future release because
-aliases can move. If smoke checks fail, stop traffic activation and promote the
-recorded prior deployment. Do not delete a deployment or force-push.
+Current Production is `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` at PR #246 merge
+commit `98a91f752c4c53dc0ae300dfc320f47b53e32820`. It is the secure Production
+`DATABASE_URL` redeploy of immutable source deployment
+`dpl_E3Pob3TjWdxN9u4VK9xHZC61667g`, which is now the immediate application
+rollback. The older Ready rollback `dpl_6xDEsJojfeWKrLPBYyrwgPGaCfBD` remains
+second-level evidence. Re-inspect deployments before any future release because
+aliases and environment revisions can move. If smoke checks fail, stop traffic
+activation and promote the recorded prior deployment. Do not display a database
+credential, delete a deployment, change database rows, or force-push.
+
+Draft PR #247 has no migration, environment delta, provider action, or external
+mutation. Its rollback is application-only: retain PR #246 on the canonical
+aliases or promote the recorded prior Ready deployment. WordPress was not
+changed by the application review and therefore needs no WordPress rollback.
 
 For cross-domain measurement, the pre-activation rollback is to leave the Ask
 Production configuration unset and keep

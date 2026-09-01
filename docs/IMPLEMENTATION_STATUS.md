@@ -2,6 +2,26 @@
 
 Updated 2026-09-01.
 
+## Current release and owned-demand readiness review — 2026-09-01
+
+- **Accepted Production:** PR #246 merge
+  `98a91f752c4c53dc0ae300dfc320f47b53e32820` is live on deployment
+  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`. The environment-only redeploy uses the
+  securely replaced Neon Production connection, and current no-write monitor
+  and smoke checks pass; `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate
+  application rollback.
+- **Authority corrected:** the machine manifest now records PR #246 as
+  accepted, PR #238 as a consumed five-migration receipt, and no active
+  application candidate or reusable gate.
+- **Clean review vehicle:** Draft PR #247 is based directly on accepted `main`
+  and ports only the WordPress placement-readiness fix. It does not merge stale
+  stacked PRs #244/#245.
+- **Operator safety:** hidden or unavailable WordPress placements fail closed;
+  the existing Distribution Command can prefer the visible home-value page
+  without claiming publication or editing WordPress.
+- **No external mutation:** this review adds no migration, secret, provider,
+  lead, message, publication, DNS, spend, deletion, or NellySelly action.
+
 ## Production database-credential and CI recovery — 2026-09-01
 
 - **Production restored:** canonical readiness is HTTP 200 with all database,
@@ -10,6 +30,12 @@ Updated 2026-09-01.
   Vercel's sensitive Production database credential had drifted from the
   functioning canonical runtime path. It was securely replaced and the exact
   accepted deployment was redeployed without a migration or data write.
+- **Cutover accepted:** approval
+  `APPROVE SECURE ASK MAGIC MIKE DATABASE_URL REPLACEMENT AND PRODUCTION REDEPLOYMENT`
+  was consumed once. Deployment `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` is Ready,
+  the canonical monitor passed 11/11, read-only smoke passed 19 with two
+  intentional skips, readiness returned HTTP 200, and Vercel reported zero
+  runtime errors in the cutover window.
 - **CI consolidated:** one PR/main release gate, one manual Preview QA, one
   post-deploy verifier, and one six-hour monitor replace duplicate Preview jobs
   and the noisy hourly retry storm.
@@ -22,11 +48,9 @@ Updated 2026-09-01.
 
 Current release authority is singular and machine-bound in
 `docs/CURRENT_RELEASE_AUTHORITY.md` and
-`config/current-release-authority.json`: accepted Production is PR #209 and
-Draft PR #238 is the cumulative PR #210–#237 candidate. Lower sections are a
-chronological implementation ledger; older statements that named PR #210 or
-another component as the next release are preserved historical evidence, not
-current operator instructions.
+`config/current-release-authority.json`. Lower sections are a chronological
+implementation ledger; older candidate or gate statements are preserved
+historical evidence, not current operator instructions.
 
 ## Phase 9 corrected cumulative Production preflight — 2026-08-30
 
