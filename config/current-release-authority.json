@@ -70,14 +70,22 @@
       }
     }
   },
-  "candidate": null,
+  "candidate": {
+    "pr": 248,
+    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248",
+    "branch": "codex/wordpress-connector-attribution-v1-1-0-20260901",
+    "reviewedHead": "32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f",
+    "tree": "d0842ec5ae23d1eaddbddc691bbeaaa704b18e77",
+    "state": "reviewed",
+    "approvalGate": "APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT"
+  },
   "reviewVehicle": {
     "pr": 248,
     "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248",
     "branch": "codex/wordpress-connector-attribution-v1-1-0-20260901",
     "baseCommit": "a2f3de834830f600df106dbf5836ae4bbde4eb4a",
     "implementationHead": "3af515932b9ee07ccccb7ad4cbf7734d040f9a2c",
-    "state": "draft_unsealed",
+    "state": "sealed_for_owner_approval",
     "migrationCount": 0,
     "externalMutationCount": 0
   },

@@ -19,6 +19,10 @@ const productionTree = "0065f829fc94f87ab5e0faf596c8e56733be3972";
 const reviewedHead = "a9d1c1c2779337ab38c1276be8893309ecee39d2";
 const consumedApplicationGate =
   "APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
+const candidateReviewedHead = "32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f";
+const candidateTree = "d0842ec5ae23d1eaddbddc691bbeaaa704b18e77";
+const candidateApplicationGate =
+  "APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
 const consumedCutoverGate =
   "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT";
 
@@ -82,19 +86,27 @@ describe("current application release authority", () => {
     });
   });
 
-  it("exposes no replayable application gate after PR 247 acceptance", () => {
-    expect(CURRENT_RELEASE_AUTHORITY.candidate).toBeNull();
+  it("exposes only the exact-tree reviewed PR 248 application gate", () => {
+    expect(CURRENT_RELEASE_AUTHORITY.candidate).toEqual({
+      pr: 248,
+      url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248",
+      branch: "codex/wordpress-connector-attribution-v1-1-0-20260901",
+      reviewedHead: candidateReviewedHead,
+      tree: candidateTree,
+      state: "reviewed",
+      approvalGate: candidateApplicationGate,
+    });
     expect(CURRENT_RELEASE_AUTHORITY.reviewVehicle).toEqual({
       pr: 248,
       url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248",
       branch: "codex/wordpress-connector-attribution-v1-1-0-20260901",
       baseCommit: productionCommit,
       implementationHead: "3af515932b9ee07ccccb7ad4cbf7734d040f9a2c",
-      state: "draft_unsealed",
+      state: "sealed_for_owner_approval",
       migrationCount: 0,
       externalMutationCount: 0,
     });
-    expect(CURRENT_APPLICATION_RELEASE_GATE).toBeNull();
+    expect(CURRENT_APPLICATION_RELEASE_GATE).toBe(candidateApplicationGate);
     expect(CURRENT_RELEASE_AUTHORITY.production.approval).toMatchObject({
       phrase: consumedApplicationGate,
       status: "consumed",
@@ -168,8 +180,11 @@ describe("current application release authority", () => {
     expect(currentAuthority).toContain(reviewedHead);
     expect(currentAuthority).toContain(productionTree);
     expect(currentAuthority).toContain(consumedApplicationGate);
-    expect(currentAuthority).toMatch(/no active application candidate/i);
-    expect(currentAuthority).toMatch(/Draft PR[\s\S]*#248[\s\S]*unsealed/i);
+    expect(currentAuthority).toContain(candidateReviewedHead);
+    expect(currentAuthority).toContain(candidateTree);
+    expect(currentAuthority).toContain(candidateApplicationGate);
+    expect(currentAuthority).toMatch(/only active reviewed application candidate/i);
+    expect(currentAuthority).toMatch(/PR \[#248\][\s\S]*zero[\s\S]*migrations/i);
     expect(currentAuthority).toMatch(/PR (?:\[#247\]|#247)[\s\S]*consumed/i);
     expect(currentAuthority).toMatch(/PR #238[\s\S]*consumed/i);
   });

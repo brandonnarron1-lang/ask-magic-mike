@@ -32,9 +32,13 @@ Current accepted Production release: PR #247 merge
 `0065f829fc94f87ab5e0faf596c8e56733be3972`, deployment
 `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`. Deployment
 `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` is the immediate application rollback.
-There is no active application candidate or reusable application gate. The
-offline Connector 1.1.0 work authorizes no WordPress publication. PR #238 is a
-consumed five-migration cutover receipt. See
+PR #248 is the only active reviewed application candidate at reviewed content
+head `32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f`, exact tree
+`d0842ec5ae23d1eaddbddc691bbeaaa704b18e77`, with hosted Release Gate
+`33528697047` and Ready immutable Preview
+`dpl_51JjPVTZizxPJZu1GAiWjVpFTaZn`. It has zero migrations or environment
+changes. Its application release authority does not authorize a WordPress
+plugin/page action. PR #238 is a consumed five-migration cutover receipt. See
 [`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).
 
 ### Verification command

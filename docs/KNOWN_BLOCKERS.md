@@ -44,11 +44,14 @@ specific expansions; they do not invalidate the live lead pipe.
   gate are consumed.
 - Exact-tree hosted release and post-deploy verification, the 11-check
   Production monitor, 19-pass read-only smoke, and runtime log window pass.
-- There is no active application candidate or reusable application release
-  gate. Draft PR #248 records the Connector 1.1.0 review vehicle with zero
-  migrations and zero authorized external mutations; it must pass exact-head
-  hosted/Preview review and an authority-only seal before any application
-  release gate can exist.
+- PR #248 is the only active reviewed application candidate at content head
+  `32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f` and exact tree
+  `d0842ec5ae23d1eaddbddc691bbeaaa704b18e77`. Hosted Release Gate
+  `33528697047` and immutable Preview `dpl_51JjPVTZizxPJZu1GAiWjVpFTaZn`
+  pass. Its singular requestable gate is
+  `APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT`.
+  That gate is application-only and cannot authorize the Connector plugin
+  upgrade, a WordPress page edit, or any other external action.
 - PR #238 is an applied five-migration receipt. PRs #244 and #245 are stale
   stacked review artifacts superseded by the current reconciliation and clean
   mainline port; none of their historical gates may be replayed.

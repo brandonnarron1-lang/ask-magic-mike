@@ -45,18 +45,36 @@ or NellySelly action. It is exhausted and cannot be replayed.
 
 ## Active application candidate
 
-There is no active application candidate and no reusable application release
-gate. Draft PR
-[#248](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248)
-is an unsealed review vehicle for the source-controlled WordPress Connector
-1.1.0 work. Its code-bearing implementation head is
-`3af515932b9ee07ccccb7ad4cbf7734d040f9a2c`, based directly on accepted
-Production `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, with zero migrations
-and zero external mutations.
+PR [#248](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248)
+is the only active reviewed application candidate. Its reviewed content head is
+`32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f`, exact tree is
+`d0842ec5ae23d1eaddbddc691bbeaaa704b18e77`, and code-bearing implementation
+head is `3af515932b9ee07ccccb7ad4cbf7734d040f9a2c`. It is based directly on
+accepted Production `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, with zero
+migrations and zero external mutations.
 
-It cannot become an application candidate until its exact head passes local and
-hosted verification, immutable Preview proof, rollback review, and an
-authority-only seal. It cannot itself authorize a WordPress action.
+The reviewed content passed the complete local Node 24 release gate and hosted
+Release Gate
+[33528697047](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33528697047).
+Immutable Preview deployment `dpl_51JjPVTZizxPJZu1GAiWjVpFTaZn` is Ready at
+`https://ask-magic-mike-4rli80xpr-eyes-up-industries.vercel.app`; its public,
+health, readiness, redirect, and protected-auth-boundary checks passed without a
+write, lead, form submission, message, or provider action. If the application
+release is later accepted and fails verification, current Production deployment
+`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` is the immediate application rollback.
+
+The singular requestable application gate is:
+
+```text
+APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT
+```
+
+It is bound only to PR #248 reviewed head/tree and a same-tree application
+Production deployment. Head, tree, migration, environment, or evidence drift
+invalidates it. It authorizes no WordPress plugin upload, activation, edit,
+page publication, cache purge, form or lead submission, email/SMS/Push send,
+database migration or data change, environment-variable change, DNS action,
+spend, deletion, or NellySelly action.
 
 The future Connector plugin upgrade and any later WordPress page publication
 are independent WordPress actions. Neither is authorized by application

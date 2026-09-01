@@ -13,12 +13,16 @@ Updated 2026-09-01.
   `33522215178`, post-deploy verification `33522383308`, the canonical
   11-check monitor, 19-pass read-only smoke, health/readiness, auth boundary,
   and runtime error window all passed.
-- **Draft PR #248:** the exact live Connector 1.0.0 source and assets are
-  preserved in the canonical repository. The backward-compatible 1.1.0
-  candidate adds per-shortcode attribution and public version proof without
-  changing WordPress. Deterministic install/rollback packages and their
-  SHA-256 contracts are ready; hosted native PHP lint remains mandatory. This
-  unsealed Draft has no application or WordPress execution authority.
+- **Reviewed application candidate PR #248:** reviewed content head
+  `32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f`, exact tree
+  `d0842ec5ae23d1eaddbddc691bbeaaa704b18e77`, hosted Release Gate
+  `33528697047`, and immutable Ready Preview
+  `dpl_51JjPVTZizxPJZu1GAiWjVpFTaZn` are sealed for owner review. The exact
+  live Connector 1.0.0 source/assets remain preserved, while the
+  backward-compatible 1.1.0 candidate adds bounded per-shortcode attribution
+  and public version proof. Deterministic install/rollback packages, native
+  PHP lint, and read-only Preview checks pass with zero migrations and zero
+  external mutations.
 - **Corrected readiness:** v3 holds Home Value and We Buy Homes as
   `connector_upgrade_required` until the reviewed plugin capability is
   publicly proven. Unreviewed WordPress placements cannot become fallback
@@ -29,7 +33,8 @@ Updated 2026-09-01.
 - **No external mutation:** this review adds no migration, secret, provider,
   lead, message, publication, DNS, spend, deletion, or NellySelly action.
 - **Independent WordPress boundary:** the consumed PR #247 gate authorized no
-  WordPress save. Plugin capability and page-3952 publication remain separate
+  WordPress save. The PR #248 application gate likewise authorizes no
+  WordPress action; plugin capability and page-3952 publication remain separate
   future approval/rollback boundaries.
 
 ## Production database-credential and CI recovery — 2026-09-01

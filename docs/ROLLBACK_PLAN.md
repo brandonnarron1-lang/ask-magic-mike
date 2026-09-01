@@ -13,10 +13,18 @@ activation and promote the recorded prior deployment. Do not display a database
 credential, delete a deployment, change database rows, or force-push.
 
 PR #247 changed no database migration, provider configuration, or WordPress
-surface. Its consumed gate cannot authorize later work. The offline Connector
-1.1.0 candidate has no Production rollback because it is not deployed; a future
-plugin upgrade must use the byte-preserved 1.0.0 plugin package and exact options
-backup as a separate WordPress rollback.
+surface. Its consumed gate cannot authorize later work. PR #248 is a reviewed
+application candidate with zero migrations and zero environment changes. If it
+is separately approved, merged, and fails Production acceptance, promote
+`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` as the immediate rollback and rerun the
+read-only monitor, smoke, auth-boundary, readiness, and runtime-log checks. Do
+not alter Neon or WordPress during that application rollback.
+
+The Connector 1.1.0 plugin package remains offline and independently gated. A
+future WordPress upgrade must first back up the exact active plugin/options and
+use the byte-preserved 1.0.0 plugin package as its separate rollback. The PR
+#248 application gate cannot authorize installation, activation, page 3952
+publication, a form submission, or a cache purge.
 
 For cross-domain measurement, the pre-activation rollback is to leave the Ask
 Production configuration unset and keep
