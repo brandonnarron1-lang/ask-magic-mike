@@ -156,7 +156,7 @@ test("Ask Mike failed explicit follow-up retry reuses the conversation submissio
   await page.getByLabel("Phone").fill("252-555-0198");
   await page.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check();
   await page.getByRole("button", { name: "Request local follow-up" }).click();
-  await expect(page.getByRole("alert")).toContainText("synthetic_lead_prep_failure");
+  await expect(page.locator("#ask-follow-up-status")).toContainText("synthetic_lead_prep_failure");
   expect(leadPayloads).toHaveLength(1);
   const originalSubmissionId = leadPayloads[0].widget_session_id;
   expect(typeof originalSubmissionId).toBe("string");

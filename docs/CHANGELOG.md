@@ -42,15 +42,16 @@
 - Kept SMS permission false unless separately collected. Added client, API, and
   browser contracts for no-lead chat answers, validation, retry, fresh capture,
   and replay suppression.
-- Pinned transitive `browserslist` to patched version 4.28.7 after the current
-  Production dependency audit identified the newly disclosed high-severity
-  advisories; the audit now reports no known vulnerability.
+- Added an 8,192-byte streamed request bound to the public chat endpoint so a
+  chunked body without `Content-Length` cannot bypass the pre-parse limit.
+- Preserved the inherited transitive Browserslist security constraint on
+  patched version `4.28.8`; the audit reports no known vulnerability.
 - Added no migration, provider, lead store, form silo, or visual system. No
   Production deployment, data correction, WordPress action, message, DNS
   change, publication, spend, deletion, or NellySelly action occurred.
-- Sealed Draft PR #252 with a passing hosted Release Gate and Ready isolated
-  Vercel Preview. Protected desktop/mobile interaction proof used a same-commit
-  local request-capture proxy and made no external write.
+- Refreshed Draft PR #252 onto sealed PR #251 through a normal merge while
+  preserving the former head on a rescue ref. Final exact-head CI and Preview
+  evidence are attached to the PR rather than committed recursively.
 
 ## 2026-09-01 — Fail-closed current operator command center
 
@@ -67,8 +68,8 @@
   Production-scoped names. The launch doctor passes 48/48 and the authority
   report passes 51/51 with zero skips and
   `GO_CONTROLLED_TRAFFIC_READY`.
-- Exact Node 24.18.0 verification passes 4 focused files / 140 tests, 283 full
-  files / 3,437 tests, strict typecheck, full lint, optimized Next.js 15.5.21
+- Exact Node 24.18.0 verification passes 5 focused files / 113 tests, 284 full
+  files / 3,441 tests, strict typecheck, full lint, optimized Next.js 15.5.21
   build with 60 static pages, 100 active / 22 acknowledged duplicate routes,
   14/14 release safety, system isolation, and a clean Production dependency
   audit.
@@ -88,13 +89,17 @@
 - Extended the existing metadata-only Vercel environment check from the launch
   doctor to the launch-authority report instead of introducing another secret
   or configuration subsystem.
-- The authority command now accepts only the projected `key`, `target`, and
-  `type` fields, rejects value-bearing manifests, distinguishes Production
-  scope, and fails closed for missing required names.
+- The shared parser and authority command now accept only the projected `key`,
+  `target`, and `type` fields, reject value-bearing and unknown fields,
+  validate metadata shapes, distinguish Production scope, and fail closed for
+  missing required names.
 - Reused the established Resend inference and growth-import fail-closed rules,
   with focused CLI tests for both a 47/47 GO result and value-bearing input
   rejection.
-- Exact Node 24.18.0 release verification passes 283 test files / 3,433 tests,
+- Pinned the newly vulnerable transitive Browserslist `<=4.28.6` range to
+  patched release `4.28.8`, refreshed its lockfile family, and added a
+  regression test; the Production dependency audit returns no known issue.
+- Exact Node 24.18.0 release verification passes 284 test files / 3,437 tests,
   strict typecheck, full lint, optimized build, 14/14 safety controls, system
   isolation, and the complete route manifest.
 - Authenticated name-only Production evidence found all 16 required variables,

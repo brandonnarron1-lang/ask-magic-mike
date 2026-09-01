@@ -13,6 +13,9 @@
 - Added canonical-capture coverage classification to the read-only surface
   audit so repeated sitewide forms outside the configured bridge allowlist are
   explicit rather than buried in page-by-page footprint noise.
+- Distinguished an unavailable bridge comparison from an explicitly empty
+  allowlist: unavailable configuration is reported without a false claim,
+  while an intentional empty allowlist flags every observed form fail-safe.
 
 ## 2026-09-01 — Protected Preview QA artifact recovery
 
@@ -34,6 +37,10 @@
   15/15 desktop/mobile flows with every first-party mutation intercepted, and
   launch authority advances honestly to `PREVIEW_READY` while privileged
   health/mutation evidence remains outstanding.
+- After the PR #251 base refresh, added a streamed 8,192-byte chat-body limit,
+  preserved patched Browserslist `4.28.8`, and reran 102 focused tests, 5/5
+  browser scenarios, and the 3,455-test Node 24 release gate. Earlier hosted
+  evidence is historical; current exact-head evidence is sealed on PR #252.
 
 ## 2026-09-01 — Secure Neon Production credential redeploy
 
