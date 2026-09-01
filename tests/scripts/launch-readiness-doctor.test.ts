@@ -313,6 +313,37 @@ describe("parseVercelProductionEnvNames", () => {
     expect(() => parseVercelProductionEnvNames({
       envs: [{ key: "DATABASE_URL", target: ["production"], value: "must-not-be-read" }],
     })).toThrow("vercel_env_manifest_contains_values");
+    expect(() => parseVercelProductionEnvNames({
+      envs: [],
+      token: "must-not-be-read",
+    })).toThrow("vercel_env_manifest_contains_values");
+  });
+
+  it("rejects every field outside the metadata-only projection allowlist", () => {
+    expect(() => parseVercelProductionEnvNames({
+      envs: [{
+        key: "DATABASE_URL",
+        target: ["production"],
+        type: "sensitive",
+        note: "not-approved-metadata",
+      }],
+    })).toThrow("vercel_env_manifest_field_invalid");
+    expect(() => parseVercelProductionEnvNames({
+      envs: [],
+      metadata: {},
+    })).toThrow("vercel_env_manifest_field_invalid");
+  });
+
+  it("rejects malformed keys, targets, and types instead of silently skipping them", () => {
+    expect(() => parseVercelProductionEnvNames({
+      envs: [{ key: "not-valid", target: ["production"], type: "plain" }],
+    })).toThrow("vercel_env_manifest_entry_invalid");
+    expect(() => parseVercelProductionEnvNames({
+      envs: [{ key: "DATABASE_URL", target: [{ scope: "production" }], type: "plain" }],
+    })).toThrow("vercel_env_manifest_entry_invalid");
+    expect(() => parseVercelProductionEnvNames({
+      envs: [{ key: "DATABASE_URL", target: ["production"], type: { kind: "plain" } }],
+    })).toThrow("vercel_env_manifest_entry_invalid");
   });
 
   it("rejects invalid JSON and invalid top-level shapes", () => {

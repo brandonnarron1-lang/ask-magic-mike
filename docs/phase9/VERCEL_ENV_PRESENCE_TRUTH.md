@@ -61,6 +61,8 @@ value-aware protected surface.
 
 - Production and Preview scopes are separated; only entries whose target
   includes `production` satisfy the check.
+- The parser accepts exactly one top-level `envs` field and only `key`,
+  `target`, and `type` inside each entry; every extra field fails closed.
 - Duplicate metadata rows are collapsed to one name.
 - Nested target arrays from Vercel CLI output are normalized.
 - Invalid JSON, invalid top-level shapes, invalid entries, and value-bearing
@@ -95,7 +97,7 @@ also reported 46/46 PASS, zero `SKIP_OWNER`, and
 `GO_CONTROLLED_TRAFFIC_READY`. This closes the prior false hold caused by
 checking the local shell instead of authenticated Vercel Production metadata.
 Exact Node 24.18.0 release verification passes system isolation, 14/14 safety,
-283 test files / 3,428 tests, strict typecheck, full lint, optimized production
+283 test files / 3,430 tests, strict typecheck, full lint, optimized production
 build with 60 static pages, and a 100-route / 22-acknowledged-duplicate
 manifest.
 It does not authorize a merge, deployment, traffic publication, WordPress

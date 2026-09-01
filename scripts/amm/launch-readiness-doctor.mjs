@@ -186,6 +186,17 @@ function flattenedTargets(target) {
   return target == null ? [] : [String(target)];
 }
 
+const VERCEL_ENV_MANIFEST_TOP_LEVEL_FIELDS = new Set(["envs"]);
+const VERCEL_ENV_MANIFEST_ENTRY_FIELDS = new Set(["key", "target", "type"]);
+const VERCEL_ENV_VALUE_FIELD_PATTERN =
+  /^(?:value|decrypted|secretValue|plainValue|password|token)$/i;
+
+function containsOnlyStrings(value) {
+  if (typeof value === "string") return true;
+  if (!Array.isArray(value)) return false;
+  return value.every(containsOnlyStrings);
+}
+
 /**
  * Parse the metadata-only projection produced from
  * `vercel env ls --format json` and return Production-scoped variable names.
@@ -204,18 +215,45 @@ export function parseVercelProductionEnvNames(input) {
     throw new Error("vercel_env_manifest_shape_invalid");
   }
 
+  const unsafeTopLevelField = Object.keys(payload).find((field) =>
+    VERCEL_ENV_VALUE_FIELD_PATTERN.test(field),
+  );
+  if (unsafeTopLevelField) throw new Error("vercel_env_manifest_contains_values");
+  if (
+    Object.keys(payload).some(
+      (field) => !VERCEL_ENV_MANIFEST_TOP_LEVEL_FIELDS.has(field),
+    )
+  ) {
+    throw new Error("vercel_env_manifest_field_invalid");
+  }
+
   const names = new Set();
   for (const item of payload.envs) {
     if (!item || typeof item !== "object" || Array.isArray(item)) {
       throw new Error("vercel_env_manifest_entry_invalid");
     }
     const unsafeField = Object.keys(item).find((field) =>
-      /^(?:value|decrypted|secretValue|plainValue|password|token)$/i.test(field),
+      VERCEL_ENV_VALUE_FIELD_PATTERN.test(field),
     );
     if (unsafeField) throw new Error("vercel_env_manifest_contains_values");
+    if (
+      Object.keys(item).some(
+        (field) => !VERCEL_ENV_MANIFEST_ENTRY_FIELDS.has(field),
+      )
+    ) {
+      throw new Error("vercel_env_manifest_field_invalid");
+    }
 
     const key = typeof item.key === "string" ? item.key.trim() : "";
-    if (!key || !/^[A-Z][A-Z0-9_]*$/.test(key)) continue;
+    if (!key || !/^[A-Z][A-Z0-9_]*$/.test(key)) {
+      throw new Error("vercel_env_manifest_entry_invalid");
+    }
+    if (item.target != null && !containsOnlyStrings(item.target)) {
+      throw new Error("vercel_env_manifest_entry_invalid");
+    }
+    if (item.type != null && typeof item.type !== "string") {
+      throw new Error("vercel_env_manifest_entry_invalid");
+    }
     if (flattenedTargets(item.target).includes("production")) names.add(key);
   }
   return [...names].sort();
