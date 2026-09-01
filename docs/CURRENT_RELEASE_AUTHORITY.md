@@ -8,94 +8,60 @@ statements elsewhere in the chronological ledger are historical receipts.
 
 ## Accepted Production
 
-- Released PR: [#246](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/246)
-- Reviewed head: `720de14f8d5ae0d3a137cf3944d9a0f09abdba9e`
-- Merge commit: `98a91f752c4c53dc0ae300dfc320f47b53e32820`
-- Production tree: `d32187a46244e5fa0240119f973371fbb0c9f063`
-- Vercel deployment: `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`
+- Released PR: [#247](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247)
+- Reviewed head: `a9d1c1c2779337ab38c1276be8893309ecee39d2`
+- Merge commit: `a2f3de834830f600df106dbf5836ae4bbde4eb4a`
+- Production tree: `0065f829fc94f87ab5e0faf596c8e56733be3972`
+- Vercel deployment: `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`
 - Generated URL:
-  `https://ask-magic-mike-91lrzmnnk-eyes-up-industries.vercel.app`
+  `https://ask-magic-mike-571exyxlz-eyes-up-industries.vercel.app`
 - Canonical URL: `https://www.askmagicmike.com`
 - Immediate application rollback deployment:
-  `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g`
+  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`
 
 The exact `main` release gate passed in GitHub run
-[33504917995](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33504917995).
+[33522215178](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33522215178).
 Post-deploy verification passed in run
-[33505043074](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33505043074).
-Two manual monitors and the first scheduled six-hour monitor passed in runs
-[33505253029](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33505253029),
-[33505284828](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33505284828),
-and
-[33508066082](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33508066082).
+[33522383308](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33522383308).
+The acceptance receipt records 11/11 monitor checks, 19 passing read-only smoke
+checks with two intentional skips, HTTP 200 readiness, and no error-level or 5xx
+runtime logs. The canonical aliases serve this exact deployment.
 
 Canonical readiness and live probes return HTTP 200. The database credential
 repair retained the canonical Neon project `bitter-star-20214385`, Production
 branch `br-round-base-auh6h2wd`, and database `neondb`; it did not create a
 parallel database or touch NellySelly.
 
-On 2026-09-01 the exact approval
-`APPROVE SECURE ASK MAGIC MIKE DATABASE_URL REPLACEMENT AND PRODUCTION REDEPLOYMENT`
-was consumed once. The Neon-generated Production connection was validated
-without displaying or storing its value, written only to Vercel's encrypted
-Production `DATABASE_URL`, and deployed by rebuilding the accepted PR #246
-artifact. No code, migration, database row, WordPress surface, lead,
-notification, provider send, or NellySelly system changed. The point-in-time
-Production monitor passed 11/11 contracts on its first attempt, read-only smoke
-passed 19 checks with two intentional skips and zero failures, readiness was
-HTTP 200, and Vercel reported no runtime errors in the cutover window. The
-approval is exhausted and cannot authorize a later credential or deployment
-change.
-
-## Active application candidate
-
-PR [#247](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247)
-is the only active application candidate:
-
-- reviewed content head: `f4503dc68b0f2c07a1e9c82827c27ffb5479e9f4`;
-- reviewed content tree: `f1023e295332b939d21313ed626a9b3a8b2d5483`;
-- code-bearing implementation head:
-  `6eb2d37f7dc2c116e92ba7ee7e7c2ea4f2482e99`;
-- hosted Release Gate:
-  [33518169064](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33518169064), success;
-- immutable Preview: `dpl_B9KeqxqyL3RE881QEX9zo38a1Vo3`, Ready;
-- migrations: zero;
-- environment/secret changes: zero;
-- external mutations: zero;
-- immediate application rollback: `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`.
-
-The one current application approval phrase is:
+The exact PR #247 release approval was consumed once:
 
 ```text
 APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT
 ```
 
-It authorizes only the exact PR merge and same-tree application deployment
-after the authority-only seal commit itself passes the mandatory exact-head
-checks. It does not authorize a WordPress edit or publication, database
-migration or data write, form submission, notification send, DNS action,
-purchase, external publication, deletion, or NellySelly action.
+It authorized only that application merge and same-tree Production deployment.
+It authorized no WordPress save, database migration or data write, lead
+submission, notification, DNS action, purchase, external publication, deletion,
+or NellySelly action. It is exhausted and cannot be replayed.
 
-## Sealed review vehicle
+## Active application candidate
 
-PR [#247](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247) is a
-sealed owner-approval review vehicle based directly on accepted Production commit
-`98a91f752c4c53dc0ae300dfc320f47b53e32820`. Its code-bearing implementation
-head is `6eb2d37f7dc2c116e92ba7ee7e7c2ea4f2482e99`.
+There is no active application candidate and no reusable application release
+gate. The source-controlled WordPress Connector 1.1.0 work is an offline branch
+candidate only until it has a Draft PR, exact-head local and hosted verification,
+immutable Preview proof, rollback evidence, and a separately sealed gate.
 
-It ports only the unique WordPress placement-readiness behavior from the stale
-stacked review into current `main`: hidden, ambiguous, missing, or unavailable
-placements fail closed; the Distribution Command can select a visible reviewed
-placement without treating a draft or an attribution signal as publication
-proof. It adds no migration, environment variable, provider, public publisher,
-form, database, CRM, funnel, or notification engine.
+The future Connector plugin upgrade and any later WordPress page publication
+are independent WordPress actions. Neither is authorized by application
+Production status.
 
-Exact Node 24 local verification, hosted Release Gate, immutable Preview
-identity, protected no-write visual/runtime QA, rollback review, dependency
-audit, and secret scans pass on the reviewed content head/tree. The final
-authority-only seal may update documentation and machine authority only; any
-product, migration, environment, or target drift invalidates this gate.
-Successful checks never substitute for receiving the exact owner approval.
+## Historical runtime-recovery receipt
+
+PR #246 merge `98a91f752c4c53dc0ae300dfc320f47b53e32820`
+was redeployed as `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` after the approved,
+secure Production `DATABASE_URL` replacement. Source deployment
+`dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` remains preserved. That credential gate is
+also consumed; it did not change the canonical Neon identity, run a migration,
+or touch WordPress, a lead, a notification, or NellySelly.
 
 ## Consumed PR #238 cutover receipt
 
@@ -111,13 +77,12 @@ The five hash-pinned migration receipts remain machine-verified in the
 authority manifest. Each version has one ledger row, existing bounded counts
 were unchanged, receipt rows remained zero, privilege and health checks passed,
 and the marketing-spend, organic-search, and local-profile import gates remain
-false. PR #246 changed CI and runtime verification only; it did not rerun or
-alter those migrations.
+false. PR #247 did not rerun or alter those migrations.
 
 ## Superseded review artifacts
 
 - Draft PR #244 records the pre-recovery PR #238 authority model and is
-  superseded by this PR #246 reconciliation.
+  superseded by the PR #246 reconciliation and accepted PR #247 release.
 - Draft PR #245 is stacked on #244 and is superseded by the clean PR #247
   mainline port.
 

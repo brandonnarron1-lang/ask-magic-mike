@@ -1,0 +1,50 @@
+{
+  "schema_version": "amm.wordpress_connector_placement_contracts.v1",
+  "required_plugin_version": "1.1.0",
+  "canonical_base_url": "https://www.askmagicmike.com",
+  "baseline": {
+    "version": "1.0.0",
+    "source_sha256": "2938f47cca5e667a5b65b39fecfd32bb492f7b8f579179ac2ad3105957095a8f",
+    "css_sha256": "3b6e6291bc6bf7c8e754c2ea1ace936526921904f3eb9d61bc1e493c58dd043e",
+    "javascript_sha256": "8c01ac0914bfec29435785ae6e5a5f9a9a2a96ba91c6843dcb449b3f6bb09290"
+  },
+  "candidate": {
+    "version": "1.1.0",
+    "source_sha256": "700c78b77b24b0038078e45c6526908078dac46cf1a591b73dd0f13a6d840ec8"
+  },
+  "packages": {
+    "install": {
+      "file": "output/release/ask-magic-mike-connector-1.1.0.zip",
+      "sha256": "56934bdcc9a8685493609ffbe76938f7889ef24a01e69d5f73bd1720eed7d4fa"
+    },
+    "rollback": {
+      "file": "output/release/ask-magic-mike-connector-1.0.0-rollback.zip",
+      "sha256": "cd1d9171ff40ccc28740e5e59380bf373cacd4ebe5a853fdeabee45cc9d5d261"
+    }
+  },
+  "placements": [
+    {
+      "placement_key": "wordpress_home_value",
+      "page_id": 3952,
+      "source_url": "https://www.ourtownproperties.com/how-much-is-your-home-worth/",
+      "publication_order": 1,
+      "shortcode": "[ask_magic_mike_cta route=\"/home-value\" source=\"home_value_page\" utm_source=\"ourtownproperties\" utm_medium=\"owned_media\" utm_campaign=\"amm_owned_demand_2026\" utm_content=\"wordpress_home_value_page\" button_text=\"Ask Magic Mike\"]",
+      "expected_href": "https://www.askmagicmike.com/home-value?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_home_value_page"
+    },
+    {
+      "placement_key": "wordpress_we_buy_homes",
+      "page_id": 3631,
+      "source_url": "https://www.ourtownproperties.com/we-buy-homes/",
+      "publication_order": 2,
+      "shortcode": "[ask_magic_mike_cta route=\"/sell\" source=\"seller_page_cta\" utm_source=\"ourtownproperties\" utm_medium=\"owned_media\" utm_campaign=\"amm_owned_demand_2026\" utm_content=\"wordpress_we_buy_homes\" button_text=\"Ask Magic Mike\"]",
+      "expected_href": "https://www.askmagicmike.com/sell?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_we_buy_homes"
+    }
+  ],
+  "blocked_placements": [
+    {
+      "placement_key": "wordpress_homepage_ask_mike",
+      "page_id": 149,
+      "reason": "The current CTA is hidden by known public CSS; an href-only or shortcode-only publication is not authorized."
+    }
+  ]
+}

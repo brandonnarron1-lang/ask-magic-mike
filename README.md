@@ -19,20 +19,18 @@ brokerage, listings, and SEO authority and embeds or links into this system.
 - `OWNER ACTION` — Mike and Brandon must enroll their own phones; authenticated
   internal email remains the active alert path until each device passes QA.
 - `DEFERRED — PAID SERVICE` — carrier SMS/MMS; Web Push is the free-first path.
-- `VERIFIED LIVE` — PR #246 is accepted at merge
-  `98a91f752c4c53dc0ae300dfc320f47b53e32820` on Vercel deployment
-  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`; the secure Neon Production credential
-  redeploy and current no-write monitor/smoke checks pass. The exact source
-  remains the accepted PR #246 merge.
-- `REVIEWED CANDIDATE — OWNER APPROVAL REQUIRED` — PR #247 ports the WordPress
-  placement-readiness fix directly onto current `main`. Its reviewed content
-  head/tree, hosted gate, immutable Preview, rollback, and singular application
-  approval phrase are sealed in the machine manifest. PR #238 is an applied,
-  consumed five-migration receipt.
+- `VERIFIED LIVE` — PR #247 is accepted at merge
+  `a2f3de834830f600df106dbf5836ae4bbde4eb4a` on Vercel deployment
+  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`; exact-tree hosted verification,
+  read-only monitor/smoke checks, and the canonical aliases pass.
+- `OFFLINE REVIEW IN PROGRESS` — the source-controlled WordPress Connector
+  1.1.0 candidate adds bounded per-placement attribution and public version
+  proof. It has not changed WordPress and exposes no reusable application gate.
+  PR #238 remains an applied, consumed five-migration receipt.
 
 The source-of-truth audit is in
 [`docs/CURRENT_STATE_RECONCILIATION.md`](docs/CURRENT_STATE_RECONCILIATION.md).
-The accepted Production identity, sealed review candidate, and consumed cutover
+The accepted Production identity, current review state, and consumed cutover
 receipts are in
 [`docs/CURRENT_RELEASE_AUTHORITY.md`](docs/CURRENT_RELEASE_AUTHORITY.md).
 Documentation precedence and historical-packet handling are in

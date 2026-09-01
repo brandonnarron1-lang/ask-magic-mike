@@ -176,7 +176,7 @@ describe("owned-demand per-placement activation loop", () => {
       readinessStatus: "legacy_match_ready",
       nextAction: "Use the exact home-value readiness manifest and approval gate.",
     });
-    expect(result.readinessBlockedPlacements).toBe(1);
+    expect(result.readinessBlockedPlacements).toBe(10);
     expect(placement(
       result,
       "ourtown_wordpress",
@@ -191,6 +191,15 @@ describe("owned-demand per-placement activation loop", () => {
       "ourtown_wordpress",
       "wordpress_homepage_ask_mike",
     )?.nextAction).toContain("Do not activate this placement yet");
+    expect(placement(
+      result,
+      "ourtown_wordpress",
+      "wordpress_mike_agent",
+    )).toMatchObject({
+      selectionBlocked: true,
+      readinessStatus: "readiness_unavailable",
+      readinessDetail: "This WordPress placement has no bounded live readiness manifest and cannot be selected by fallback priority.",
+    });
   });
 
   it("returns no recommendation when every prepared placement has an explicit readiness hold", () => {

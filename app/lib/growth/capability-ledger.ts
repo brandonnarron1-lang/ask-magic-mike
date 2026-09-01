@@ -131,17 +131,23 @@ export function buildGrowthCapabilityLedger({
       state: applicationState,
       summary: activeCandidate
         ? `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is accepted in Production. PR ${activeCandidate.pr} is the only active reviewed application candidate.`
-        : `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is accepted in Production at ${CURRENT_RELEASE_AUTHORITY.production.mergeCommit}. Draft PR ${reviewVehicle.pr} is an unsealed review vehicle with no reusable application release gate.`,
+        : reviewVehicle
+          ? `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is accepted in Production at ${CURRENT_RELEASE_AUTHORITY.production.mergeCommit}. Draft PR ${reviewVehicle.pr} is an unsealed review vehicle with no reusable application release gate.`
+          : `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is accepted in Production at ${CURRENT_RELEASE_AUTHORITY.production.mergeCommit}. No application candidate or reusable application release gate is active.`,
       evidence: [
         `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is live at ${CURRENT_RELEASE_AUTHORITY.production.mergeCommit} on ${CURRENT_RELEASE_AUTHORITY.production.deploymentId}; its gate is consumed`,
         activeCandidate
           ? `PR ${activeCandidate.pr} reviewed head ${activeCandidate.reviewedHead} is the single application candidate`
-          : `Draft PR ${reviewVehicle.pr} implementation head ${reviewVehicle.implementationHead} remains review-only until exact-head release verification is sealed`,
+          : reviewVehicle
+            ? `Draft PR ${reviewVehicle.pr} implementation head ${reviewVehicle.implementationHead} remains review-only until exact-head release verification is sealed`
+            : "No draft review vehicle is currently recorded in release authority",
         `Component PRs ${CURRENT_RELEASE_AUTHORITY.consolidatedComponentTrain.firstPr}–${CURRENT_RELEASE_AUTHORITY.consolidatedComponentTrain.lastPr} remain preserved lineage with no independent current release authority`,
       ],
       nextAction: activeCandidate && !currentTailInProduction
         ? `Use only the guarded PR ${activeCandidate.pr} release after fresh exact-head approval. Do not reuse any historical gate.`
-        : `Complete local and hosted verification for Draft PR ${reviewVehicle.pr}. Until a new exact release gate is sealed, keep candidate authority null and preserve Production PR ${CURRENT_RELEASE_AUTHORITY.production.pr}.`,
+        : reviewVehicle
+          ? `Complete local and hosted verification for Draft PR ${reviewVehicle.pr}. Until a new exact release gate is sealed, keep candidate authority null and preserve Production PR ${CURRENT_RELEASE_AUTHORITY.production.pr}.`
+          : `Keep candidate authority null until a new Draft PR passes exact-head local, hosted, Preview, rollback, and no-write verification. Preserve Production PR ${CURRENT_RELEASE_AUTHORITY.production.pr}.`,
       href: "/admin/reporting",
       ...(activeCandidate && !currentTailInProduction && CURRENT_APPLICATION_RELEASE_GATE
         ? { approvalGate: CURRENT_APPLICATION_RELEASE_GATE }
