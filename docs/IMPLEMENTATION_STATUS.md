@@ -2,6 +2,15 @@
 
 Updated 2026-09-01.
 
+## Current Production authority
+
+- **Accepted Production remains PR #247:** merge
+  `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, exact tree
+  `0065f829fc94f87ab5e0faf596c8e56733be3972`, and Ready deployment
+  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` remain authoritative. The Ask chat
+  hardening below is a Draft Preview candidate only and changes no Production,
+  database, WordPress, notification, DNS, or NellySelly authority.
+
 ## Ask chat contactability hardening candidate — 2026-09-01
 
 - **Defect closed in source:** a starter prompt or typed Ask question now calls
@@ -35,7 +44,11 @@ Updated 2026-09-01.
   `33545872477`, and Ready Preview deployment
   `dpl_5FAavdV2RGVgGnST5hLv1vuJRAZu`. Read-only machine Preview QA passes
   12/12 required checks with 12 expected privileged/mutation skips and zero
-  failures; the consolidated release report is `GO`.
+  failures; the consolidated release report is `GO`. The corrected retained
+  browser identity contract and full fail-closed Playwright suite pass 15/15
+  desktop/mobile flows with no first-party mutation escaping interception, so
+  launch authority is `PREVIEW_READY`. Privileged health output and controlled
+  mutation evidence remain intentionally outstanding.
 
 ## Current release and owned-demand readiness review — 2026-09-01
 

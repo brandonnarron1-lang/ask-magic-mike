@@ -15,6 +15,11 @@
   12 expected privileged/mutation skips, and zero failures. No Production,
   database, WordPress, lead, notification, DNS, publication, spend, deletion,
   or NellySelly action was performed.
+- Corrected the retained browser-identity test that still expected a question
+  alone to create an Ask lead. The full fail-closed Playwright suite now passes
+  15/15 desktop/mobile flows with every first-party mutation intercepted, and
+  launch authority advances honestly to `PREVIEW_READY` while privileged
+  health/mutation evidence remains outstanding.
 
 ## 2026-09-01 — Secure Neon Production credential redeploy
 

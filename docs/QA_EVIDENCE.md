@@ -56,9 +56,20 @@
   disabled mutations, and 0 fail. The public funnel, UTM variants, Preview
   analytics isolation, private/noindex phone-install failure contract, public
   listing response, and private-field leak guard all passed. The consolidated
-  release-candidate report is `GO`; launch authority remains honestly
-  `LOCAL_READY` because privileged health and browser-E2E artifacts were not
-  fabricated.
+  release-candidate report is `GO`.
+- The retained funnel-identity browser test initially exposed one stale
+  assertion: it expected an Ask question alone to create the fourth lead. The
+  application correctly refused. The test now proves zero lead/conversion
+  before deliberate follow-up, then enters synthetic contact details, accepts
+  the exact consent, verifies `consent_sms=false`, and observes one intercepted
+  lead plus the existing appointment handoff.
+- The complete fail-closed Playwright suite passes 15/15 desktop/mobile flows
+  serially with zero unexpected mutations. Every `/api/leads`, event, chat,
+  appointment, and experiment write is intercepted before the local network;
+  no database/provider call occurs. The machine JSON artifact reports
+  expected=15, unexpected=0, flaky=0, skipped=0, advancing launch authority to
+  `PREVIEW_READY`. Privileged health output remains intentionally uncaptured
+  and the mutation gate remains blocked.
 - Release doctor passes 43/43, `pnpm audit --prod --audit-level=high` reports
   no known vulnerability, and Gitleaks finds no secret across 744 tracked
   commits or the staged delta.
