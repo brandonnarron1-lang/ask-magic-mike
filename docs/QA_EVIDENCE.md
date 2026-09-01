@@ -36,80 +36,47 @@
 ## Ask chat contactability hardening candidate — 2026-09-01
 
 - Draft PR [#252](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/252)
-  preserves the release stack by targeting PR #251's branch. Application
-  behavior remains isolated in commit
-  `5563038cd05c7d1908149b398a91db8062adec1d`; protected-Preview QA tooling and
-  evidence are sealed in candidate commit
-  `cbb9e89c5b231adfcbb0459bf2531397a13b36fe` and tree
-  `2c03a58c503619ff32f15b64b8ca634cbe2a350a`.
-- Hosted GitHub Release Gate run `33545872477` / job `99983097695` passes the
-  exact candidate head under Node 24. The Vercel status check is Ready and the
-  unrelated Production verifier correctly skipped for this Draft Preview.
-- Focused Vitest passes 2 files / 40 tests covering the existing lead API and
-  Ask accessibility/conversion boundary.
-- Exact Node 24 full Vitest passes 283 files / 3,449 tests. Strict
-  TypeScript, full ESLint, two optimized Next.js 15.5.21 builds with 60 static
-  pages, and 100 active / 22 acknowledged duplicate route checks pass.
-- Release safety passes 14/14, system-isolation verification passes, and the
-  Production dependency audit reports no known vulnerability after pinning
-  transitive `browserslist` to patched version 4.28.7.
-- The updated Playwright file parses and lists both browser scenarios. The
-  local Playwright browser binary is unavailable, so browser execution is not
-  claimed from that command; protected in-app/Preview and hosted release proof
-  remain required.
-- Source contracts prove a successful chat answer makes no `/api/leads`
-  request, no browser `lead_created` event, and no appointment handoff.
-- Client validation requires email or phone and explicit consent. API
-  validation independently rejects chat lead payloads missing question,
-  contact, or consent before any persistence call.
-- Fresh capture and replay tests preserve one session/idempotency key while
-  suppressing duplicate conversion signals. SMS permission remains false.
-- Hosted visual inspection confirms the immutable Preview renders the existing
-  Black Diamond desktop `/ask` surface and the new question-only disclosure.
-  A same-commit local optimized build was then placed behind an ephemeral
-  request-capture proxy so browser interaction could not reach a database,
-  email/SMS provider, analytics store, or AI provider.
-- Intercepted browser proof records one `POST /api/chat/message` and zero
-  `POST /api/leads` after clicking the starter prompt. Empty-contact and
-  missing-consent attempts create no request and focus the correct field. The
-  deliberate synthetic submission creates exactly one intercepted lead
-  request with `consent=true`, version `amm_contact_v2`, and
-  `consent_sms=false`, then reveals the existing appointment handoff.
-- Desktop and 390-pixel mobile screenshots cover initial, answered,
-  validation, follow-up, and success states. The layout retains the existing
-  visual system, readable labels, visible focus, and tap targets. Screenshots
-  do not independently prove full WCAG conformance.
-- Exact-head Ready Preview `dpl_5FAavdV2RGVgGnST5hLv1vuJRAZu` at
-  `https://ask-magic-mike-ioijzndkd-eyes-up-industries.vercel.app` was then
-  exercised through the new explicit authenticated-Vercel-CLI transport. The
-  runner retained Deployment Protection, used no shell, put sensitive request
-  material only in bounded mode-0600 temporary files, and kept
-  `SAFE_DB_WRITE=false` / `FORCE_DB_WRITE=false`.
-- Machine Preview QA: 12 pass, 12 expected skips for missing admin/cron auth or
-  disabled mutations, and 0 fail. The public funnel, UTM variants, Preview
-  analytics isolation, private/noindex phone-install failure contract, public
-  listing response, and private-field leak guard all passed. The consolidated
-  release-candidate report is `GO`.
-- The retained funnel-identity browser test initially exposed one stale
-  assertion: it expected an Ask question alone to create the fourth lead. The
-  application correctly refused. The test now proves zero lead/conversion
-  before deliberate follow-up, then enters synthetic contact details, accepts
-  the exact consent, verifies `consent_sms=false`, and observes one intercepted
-  lead plus the existing appointment handoff.
-- The complete fail-closed Playwright suite passes 15/15 desktop/mobile flows
-  serially with zero unexpected mutations. Every `/api/leads`, event, chat,
-  appointment, and experiment write is intercepted before the local network;
-  no database/provider call occurs. The machine JSON artifact reports
-  expected=15, unexpected=0, flaky=0, skipped=0, advancing launch authority to
-  `PREVIEW_READY`. Privileged health output remains intentionally uncaptured
-  and the mutation gate remains blocked.
-- Release doctor passes 43/43, `pnpm audit --prod --audit-level=high` reports
-  no known vulnerability, and Gitleaks finds no secret across 744 tracked
-  commits or the staged delta.
-- No Production deployment, merge, database mutation, live-record correction,
-  external notification, WordPress action, DNS change, publication, spend,
-  deletion, or NellySelly action occurred. The only remote application action
-  was the isolated Vercel Preview for the exact application source commit.
+  was refreshed onto sealed PR #251 through a normal merge. The exact former
+  head remains recoverable at
+  `rescue/amm-pr252-pre-pr251-base-refresh-20260901-175042`; no history was
+  rewritten.
+- The only merge conflict was the stale candidate lockfile's Browserslist
+  `4.28.7` entry. Resolution preserved the inherited patched `4.28.8` override
+  and its regression test.
+- Source inspection proves `POST /api/chat/message` has no persistence,
+  routing, notification, or analytics-lead call. A successful answer exposes
+  an optional follow-up form; only valid contact plus the exact versioned
+  consent can call `POST /api/leads`.
+- The lead API normalizes booleans strictly, rejects a string value such as
+  `consent="true"`, requires question/contact/consent before persistence, and
+  stores email/call grants while leaving SMS false unless separately granted.
+- The chat API now stream-bounds the entire body to 8,192 bytes before JSON
+  parsing, including chunked requests without `Content-Length`; the added test
+  would have passed through the prior declared-length-only guard.
+- Focused Vitest passes 6 files / 102 tests covering public Ask behavior,
+  server lead validation/persistence mapping, streamed chat bounds, Preview
+  transport security, current Preview routes, and the dependency override.
+- Playwright passes 5/5 intercepted desktop/mobile scenarios across Ask retry
+  and cross-funnel event identity. The first run found an ambiguous selector
+  caused by Next's route-announcer alert; the test now targets the owned status
+  element and the complete rerun is green.
+- Exact Node `24.20.0` release verification passes deployable-source isolation,
+  14/14 safety controls, 284 files / 3,455 tests, strict TypeScript, full
+  ESLint, an optimized Next.js `15.5.21` build with 60 static pages, and 100
+  active / 22 acknowledged duplicate routes.
+- `pnpm audit --prod --audit-level high` reports no known vulnerabilities.
+  Focused lint has zero errors; `git diff --check` passes.
+- The explicit protected-Preview transport remains shell-free. Sensitive
+  headers and request bodies use one mode-0600 temporary directory per request,
+  Vercel CLI receives only the exact deployment URL/path and config-file path,
+  and the directory is removed in `finally`.
+- Superseded PR #252 CI/Preview records predate the PR #251 refresh and remain
+  historical only. Final exact-head CI, immutable Preview, no-write browser QA,
+  runtime review, and Gitleaks results are sealed on the PR thread rather than
+  creating a self-invalidating evidence commit.
+- No Production merge/deployment, Vercel setting, Neon query or mutation,
+  WordPress action, lead submission, email/SMS/Push, analytics write, DNS or
+  publication change, spend, deletion, or NellySelly action occurred.
 
 ## WordPress Connector attribution candidate — 2026-09-01
 
@@ -2488,10 +2455,13 @@ Results:
   `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` all match one release-log block.
 - Launch authority: 47 PASS / 0 FAIL / 0 `SKIP_OWNER`;
   `GO_CONTROLLED_TRAFFIC_READY`.
-- Focused Vitest after restoring the lockfile-pinned dependency tree: 3 files,
-  100 tests PASS.
+- Focused Vitest after restoring the lockfile-pinned dependency tree: 4 files,
+  104 tests PASS.
+- `pnpm audit --prod --audit-level high`: PASS after constraining the newly
+  vulnerable Browserslist `<=4.28.6` range to patched release `4.28.8`;
+  lockfile regression coverage is included.
 - Exact Node 24.18.0 release gate: PASS — system isolation, 14/14 release
-  safety, 283 test files / 3,433 tests, strict typecheck, full ESLint, optimized
+  safety, 284 test files / 3,437 tests, strict typecheck, full ESLint, optimized
   Next.js 15.5.21 build with 60 static pages, and 100 active / 22 acknowledged
   duplicate routes.
 - Live lead-pipe health: nine routes healthy, including `/api/health/live`.
@@ -2516,7 +2486,7 @@ Results:
 - Current-document marker/reference scan: PASS; all seven include
   `amm-current-operations-v1`, the release manifest, Neon, Better Auth,
   `OWNER_APPROVAL_QUEUE.md`, and `KNOWN_BLOCKERS.md`.
-- Focused Vitest: PASS — 4 files / 140 tests. Coverage includes the real
+- Focused Vitest: PASS — 5 files / 113 tests. Coverage includes the real
   repository, seven missing documents, five retired-pattern classes, wrong
   deployment identity, and secret-bearing Vercel payload rejection.
 - Authenticated Vercel name/scope-only doctor: PASS — 61 Production-scoped
@@ -2524,7 +2494,7 @@ Results:
 - Authenticated Vercel name/scope-only authority: PASS — 51/51 checks, zero
   `SKIP_OWNER`, `GO_CONTROLLED_TRAFFIC_READY`.
 - Exact Node 24.18.0 release gate: PASS — system isolation, 14/14 release
-  safety, 283 files / 3,437 tests, strict TypeScript, full ESLint, optimized
+  safety, 284 files / 3,441 tests, strict TypeScript, full ESLint, optimized
   Next.js 15.5.21 build with 60 static pages, and 100 active / 22 acknowledged
   duplicate routes.
 - Production dependency audit: PASS — no known vulnerabilities.
