@@ -69,7 +69,7 @@ export async function GET() {
     const rows = await sql.query(
       `SELECT
          current_database() AS database_name,
-         to_regprocedure('public.capture_public_lead_v1(jsonb,jsonb,jsonb,text)') IS NOT NULL AS capture_function,
+         to_regprocedure('public.capture_public_lead_v2(jsonb,jsonb,jsonb,text,jsonb)') IS NOT NULL AS capture_function,
          to_regclass('public.leads') IS NOT NULL AS leads_table,
          to_regclass('public.lead_notifications') IS NOT NULL AS notification_table,
          to_regclass('public.lead_center_users') IS NOT NULL

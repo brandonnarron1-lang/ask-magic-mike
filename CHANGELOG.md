@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-09-02 — Atomic public lead delivery intent
+
+- Added `capture_public_lead_v2` as an additive wrapper around the proven v1
+  contact, dedupe, routing, assignment, and audit transaction.
+- Moved deterministic score, QA suppression, source idempotency, exact consent
+  ledger, first/last-touch attribution, click IDs, and placement context into
+  the same commit as the canonical lead.
+- Seeded the required internal `lead_alert` outbox row in that transaction,
+  while keeping all recipient addresses, BCC values, provider secrets, rendered
+  bodies, and provider calls outside PostgreSQL.
+- Changed immediate delivery to atomically claim a transaction-seeded pending
+  row instead of returning it unsent; the existing five-minute pending recovery
+  remains the serverless-interruption fallback.
+- Moved request-idempotency replay/conflict handling into the locked database
+  function so replay can repair an historically missing outbox row without
+  creating a duplicate lead or provider call.
+- Added readiness enforcement for the v2 function, adapter contract tests,
+  pending-row delivery proof, migration safety checks, and real disposable
+  PostgreSQL 17 commit/replay/rollback verification.
+- No Production, Neon, provider, WordPress, DNS, lead, notification, analytics,
+  publication, spend, deletion, or NellySelly state changed.
+
 ## 2026-09-02 — Pending notification recovery
 
 - Extended the existing scheduled outbox worker to select never-claimed

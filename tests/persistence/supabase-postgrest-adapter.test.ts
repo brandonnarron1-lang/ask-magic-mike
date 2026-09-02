@@ -2,6 +2,11 @@ import { describe, expect, it, vi } from "vitest";
 import { PersistenceUnavailableError } from "../../app/lib/persistence/contracts";
 import { SupabasePostgrestAdapter } from "../../app/lib/persistence/supabasePostgrestAdapter";
 
+const internalNotification = {
+  templateVersion: "lead_alert_email_v3",
+  metadata: { correlation_id: "synthetic-correlation" },
+};
+
 function response(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -32,6 +37,7 @@ describe("Supabase PostgREST persistence adapter", () => {
       lead: { normalized_email: "person@example.test" },
       attribution: { utm_source: "synthetic" },
       notificationMode: "disabled",
+      internalNotification,
     });
 
     if (result.ok === false) throw new Error("expected capture success");
@@ -39,10 +45,14 @@ describe("Supabase PostgREST persistence adapter", () => {
     expect(request).toHaveBeenCalledTimes(1);
     const [url, init] = request.mock.calls[0];
     expect(String(url)).toBe(
-      "http://127.0.0.1:54321/rest/v1/rpc/capture_public_lead_v1",
+      "http://127.0.0.1:54321/rest/v1/rpc/capture_public_lead_v2",
     );
     expect(JSON.parse(String(init?.body))).toMatchObject({
       p_notification_mode: "disabled",
+      p_internal_notification: {
+        template_version: "lead_alert_email_v3",
+        metadata: { correlation_id: "synthetic-correlation" },
+      },
       p_session: { id: "22222222-2222-4222-8222-222222222222" },
     });
   });
@@ -99,6 +109,7 @@ describe("Supabase PostgREST persistence adapter", () => {
       lead: { normalized_email: "different@example.test" },
       attribution: {},
       notificationMode: "disabled",
+      internalNotification,
     })).resolves.toEqual({
       ok: false,
       error: "idempotency_conflict",
@@ -128,6 +139,7 @@ describe("Supabase PostgREST persistence adapter", () => {
         lead: { normalized_email: "conflict@example.test" },
         attribution: {},
         notificationMode: "disabled",
+        internalNotification,
       })).resolves.toEqual({
         ok: false,
         error,
@@ -154,9 +166,10 @@ describe("Supabase PostgREST persistence adapter", () => {
       lead: { normalized_email: "future@example.test" },
       attribution: {},
       notificationMode: "disabled",
+      internalNotification,
     })).rejects.toMatchObject({
       name: "PersistenceUnavailableError",
-      code: "capture_public_lead_v1_domain_failure",
+      code: "capture_public_lead_v2_domain_failure",
       statusCode: 502,
     });
 
@@ -166,6 +179,7 @@ describe("Supabase PostgREST persistence adapter", () => {
         lead: { normalized_email: "future@example.test" },
         attribution: {},
         notificationMode: "disabled",
+        internalNotification,
       });
     } catch (error) {
       expect(error).toBeInstanceOf(PersistenceUnavailableError);

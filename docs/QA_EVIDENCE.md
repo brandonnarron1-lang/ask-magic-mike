@@ -2790,3 +2790,35 @@ stored in the manifest. No browser credential entry was attempted after the
 WordPress reauthentication screen appeared. No save, publish, cache purge,
 form submission, lead, analytics event, email/SMS/Push, database action,
 deployment, DNS change, spend, deletion, or NellySelly mutation occurred.
+
+## Phase 9 atomic public lead delivery intent — 2026-09-02
+
+The capture boundary now commits one complete lead envelope and its canonical
+internal-email outbox intent through `capture_public_lead_v2`. Focused Vitest
+passed 5 files / 52 tests, including the adapter/RPC contract, source migration,
+39 public lead-route cases, and immediate claim/delivery of an already-seeded
+pending row without a second insert.
+
+A disposable local PostgreSQL 17 cluster applied every repository migration in
+order. The v2 function existed; `anon` and `authenticated` execute privileges
+were false; `service_role` execute was true. A synthetic `is_test=true` capture
+then proved:
+
+- score/test suppression/source idempotency persisted on the lead;
+- first/last touch, click ID, and placement persisted on attribution;
+- exactly three immutable consent rows were created;
+- exactly one canonical `lead_alert_email_v3` row was pending;
+- same-key replay returned the same lead and left one outbox row; and
+- a synthetic trigger-forced outbox insert failure left zero lead, session, and
+  contact rows, proving transaction rollback.
+
+Exact Node 24.18.0 acceptance passed system isolation, 14/14 release safety,
+300 files / 3,566 tests, strict TypeScript, full ESLint, optimized Next.js
+15.5.21 build with 60 static pages, and route verification with 102 active / 22
+acknowledged duplicate routes. The first build attempt stopped only on local
+`ENOSPC`; after deleting generated `.next` and stale worktree dependency caches,
+the same source tree compiled successfully.
+
+No Production or remote database write, provider send, Vercel setting change,
+WordPress action, live lead, analytics mutation, DNS/publication/spend action,
+deletion of business data, or NellySelly action occurred.

@@ -1,18 +1,25 @@
 import { describe, expect, it, vi } from "vitest";
 import { NeonPostgresAdapter } from "../../app/lib/persistence/neonPostgresAdapter";
 
+const internalNotification = {
+  templateVersion: "lead_alert_email_v3",
+  metadata: { correlation_id: "synthetic-correlation" },
+};
+
 describe("NeonPostgresAdapter", () => {
-  it("returns the existing Neon lead before capture for a persisted idempotency key", async () => {
-    const query = vi.fn().mockResolvedValueOnce([{
-      id: "22222222-2222-4222-8222-222222222222",
+  it("returns an idempotent replay from the atomic v2 capture", async () => {
+    const query = vi.fn().mockResolvedValueOnce([{ result: {
+      ok: true,
+      lead_id: "22222222-2222-4222-8222-222222222222",
       session_id: "11111111-1111-4111-8111-111111111111",
       widget_session_id: "11111111-1111-4111-8111-111111111111",
       duplicate_of_lead_id: null,
       assigned_agent_id: null,
       assignment_status: "unassigned",
-      request_fingerprint: "same-fingerprint",
-      incoming_fingerprint: "same-fingerprint",
-    }]);
+      notification_id: "33333333-3333-4333-8333-333333333333",
+      notification_status: "pending",
+      idempotent_replay: true,
+    } }]);
     const adapter = new NeonPostgresAdapter({ query } as never);
 
     const result = await adapter.captureLeadLifecycle({
@@ -20,6 +27,7 @@ describe("NeonPostgresAdapter", () => {
       lead: { request_idempotency_key: "gf:3:1549" },
       attribution: {},
       notificationMode: "disabled",
+      internalNotification,
     });
 
     expect(result).toMatchObject({
@@ -29,16 +37,20 @@ describe("NeonPostgresAdapter", () => {
       idempotent_replay: true,
     });
     expect(query).toHaveBeenCalledTimes(1);
-    expect(String(query.mock.calls[0][0])).toContain("request_idempotency_key = $1");
+    expect(String(query.mock.calls[0][0])).toContain("capture_public_lead_v2");
+    expect(JSON.parse(String(query.mock.calls[0][1][4]))).toEqual({
+      template_version: "lead_alert_email_v3",
+      metadata: { correlation_id: "synthetic-correlation" },
+    });
   });
 
-  it("rejects a reused Neon idempotency key when the payload fingerprint differs", async () => {
-    const query = vi.fn().mockResolvedValueOnce([{
-      id: "22222222-2222-4222-8222-222222222222",
+  it("returns a v2 idempotency conflict without a lead id", async () => {
+    const query = vi.fn().mockResolvedValueOnce([{ result: {
+      ok: false,
+      error: "idempotency_conflict",
       session_id: "11111111-1111-4111-8111-111111111111",
-      request_fingerprint: "original-fingerprint",
-      incoming_fingerprint: "different-fingerprint",
-    }]);
+      idempotent_replay: false,
+    } }]);
     const adapter = new NeonPostgresAdapter({ query } as never);
 
     const result = await adapter.captureLeadLifecycle({
@@ -46,6 +58,7 @@ describe("NeonPostgresAdapter", () => {
       lead: { request_idempotency_key: "gf:3:1549" },
       attribution: {},
       notificationMode: "disabled",
+      internalNotification,
     });
 
     expect(result).toEqual({

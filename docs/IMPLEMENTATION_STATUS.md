@@ -3050,3 +3050,29 @@ any bridge activation or shadow-mode test.
 - Production remains on accepted PR #247. No WordPress, Production, Neon,
   provider, lead, notification, analytics, DNS, publication, spend, deletion,
   or NellySelly state changed.
+
+## Phase 9 atomic public lead delivery intent — 2026-09-02
+
+- Audited the public `/api/leads` boundary and found two post-commit gaps: full
+  score/consent/attribution enrichment and creation of the required internal
+  email outbox row occurred after the durable v1 lead transaction.
+- Added one additive `capture_public_lead_v2` wrapper instead of a parallel lead
+  store, queue, or routing engine. It reuses v1 for contact identity, dedupe,
+  capacity routing, assignment history, and audit, then commits enrichment,
+  consent evidence, and the canonical `lead_alert` row in the same transaction.
+- Provider delivery remains post-commit and uses the existing repository,
+  renderer, configured recipient/BCC, provider adapter, conditional claim,
+  idempotency key, status ledger, and scheduled retry worker.
+- Request-idempotency locking moved into PostgreSQL. Replays can restore a
+  missing historical delivery intent without duplicating the lead; the public
+  replay response still invokes no provider.
+- Readiness now requires the v2 function. Rollback keeps v1 intact and requires
+  migration-before-application release ordering.
+- Disposable PostgreSQL 17 proof passed full migration application, privilege
+  checks, commit/replay cardinality, and forced outbox-failure rollback. Local
+  Node 24 acceptance passed 300 files / 3,566 tests, strict typecheck, full
+  lint, 14/14 safety, isolation, optimized build, 60 static pages, and 102/22
+  route verification.
+- Production remains accepted PR #247. This work changed no remote database,
+  deployment, provider, WordPress, lead, notification, analytics, DNS,
+  publication, spend, deletion, or NellySelly state.
