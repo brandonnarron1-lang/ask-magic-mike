@@ -46,6 +46,11 @@ Current accepted Production is PR #247 merge
 
 ## Current release constraint
 
+- The first-response work-coverage invariant is a later stacked Draft behind
+  the current reviewed train. It is not live, creates no release authority,
+  and cannot be used to claim that Production Action Queue coverage is already
+  complete. Production health remains authoritative until the train reaches a
+  separately reviewed and approved same-tree release.
 - Current accepted Production is PR #247 merge
   `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, tree
   `0065f829fc94f87ab5e0faf596c8e56733be3972`, on deployment

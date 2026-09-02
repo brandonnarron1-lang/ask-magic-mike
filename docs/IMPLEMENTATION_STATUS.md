@@ -11,6 +11,31 @@ Updated 2026-09-01.
   hardening below is a Draft Preview candidate only and changes no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Phase 9 first-response work coverage invariant — 2026-09-01
+
+- **Existing queue extended:** the canonical Daily Action Queue now returns an
+  aggregate proof that every eligible response risk is represented by either
+  its direct priority-1 card or an existing urgent task/appointment. No second
+  queue, task store, scheduler, or CRM was created.
+- **Truthful failure state:** immutable response evidence availability is
+  explicit. An unavailable ledger reports `Held`; it cannot become a false
+  zero or false 100% coverage result.
+- **Protected observability:** administrator health exposes only counts. Its
+  aggregate Neon query omits first name, last name, and address at selection
+  time and returns no lead-level identity or contact data.
+- **RBAC preserved:** only roles with `lead:view_all` see global coverage.
+  Assigned-only operators retain their filtered items without cross-agent
+  workload totals.
+- **Local acceptance:** exact Node 24.18.0 passes system isolation, 14/14
+  release-safety checks, 293 test files / 3,536 tests, strict TypeScript, full
+  ESLint, optimized Next.js 15.5.21 build, and all 102 active routes. Hosted
+  exact-head CI and immutable Preview evidence remain pending until push.
+- **Authority unchanged:** this stacked Draft has no independent release gate
+  and performed no Production, database, lead, task, response, notification,
+  communication, WordPress, provider, DNS, spend, deletion, or NellySelly
+  mutation. Design and rollback:
+  [`phase9/FIRST_RESPONSE_WORK_COVERAGE_INVARIANT.md`](./phase9/FIRST_RESPONSE_WORK_COVERAGE_INVARIANT.md).
+
 ## Phase 9 first-response Action Queue reconciliation — 2026-09-01
 
 - **Observed live mismatch:** authenticated aggregate-only Production review

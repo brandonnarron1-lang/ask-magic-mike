@@ -1,5 +1,31 @@
 # QA Evidence
 
+## First-response work coverage invariant — 2026-09-01
+
+- Focused Vitest acceptance passes 4 files / 23 tests across direct coverage,
+  existing-action coverage, unavailable-evidence failure, canonical Neon
+  aggregate-only selection, protected health minimization, and RBAC-safe UI.
+- Targeted ESLint and strict TypeScript pass.
+- Source checks prove the protected health reader calls aggregate-only mode,
+  its SQL omits first name, last name, and address, and the response contains
+  no lead ID, label, contact value, recipient, or message body.
+- Exact Node 24.18.0 `pnpm run release:gate` passes system isolation, 14/14
+  release-safety checks, 293 test files / 3,536 tests, strict TypeScript, full
+  ESLint, optimized Next.js 15.5.21 build, and the 102-active-route manifest
+  with 22 acknowledged root/src duplicates.
+- `pnpm audit --prod --audit-level high` reports no known vulnerabilities.
+  Redacted Gitleaks pre-commit scanning reports no leak. A staged-candidate and
+  exact-head history scan will be rerun after the final commit.
+- The successful build reported an `ENOSPC` warning while trying to write its
+  disposable webpack cache; it still compiled, generated all 60 static pages,
+  finalized traces, and exited successfully. Only the reproducible
+  `.next/cache` directory was removed afterward, restoring about 500 MB; no
+  source or evidence was removed.
+- Exact-head hosted CI, immutable Preview QA, and runtime-log review remain
+  pending until push. No Production, database, lead, task, response,
+  notification, communication, WordPress, provider, DNS, spend, deletion, or
+  NellySelly mutation occurred.
+
 ## First-response Action Queue reconciliation — 2026-09-01
 
 - The accepted PR #247 Production deployment passed all 11 point-in-time

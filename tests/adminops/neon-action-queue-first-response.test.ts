@@ -51,6 +51,14 @@ describe("canonical Neon first-response action queue", () => {
       lead_id: "11111111-1111-4111-8111-111111111111",
       assigned_agent_id: "22222222-2222-4222-8222-222222222222",
     }));
+    expect(result.firstResponseCoverage).toEqual({
+      evidenceAvailable: true,
+      riskCount: 1,
+      coveredCount: 1,
+      directQueueCount: 1,
+      coveredByExistingActionCount: 0,
+      uncoveredCount: 0,
+    });
 
     const leadQuery = mocks.query.mock.calls
       .map(([query]) => String(query))
@@ -62,6 +70,24 @@ describe("canonical Neon first-response action queue", () => {
     expect(leadQuery).toContain("rm.communication_suppressed = false");
   });
 
+  it("omits lead names and addresses from aggregate-only health reads", async () => {
+    mocks.query.mockResolvedValue([]);
+
+    const result = await loadNeonAdminActionQueue({ aggregateOnly: true });
+
+    expect(result.error).toBeUndefined();
+    expect(result.firstResponseCoverage.evidenceAvailable).toBe(true);
+    const leadQuery = mocks.query.mock.calls
+      .map(([query]) => String(query))
+      .find((query) => query.includes("FROM public.leads l"));
+    expect(leadQuery).toBeDefined();
+    expect(leadQuery).not.toContain("l.address_raw");
+    expect(leadQuery).not.toContain("l.first_name");
+    expect(leadQuery).not.toContain("l.last_name");
+    expect(leadQuery).toContain("l.timeline_months");
+    expect(leadQuery).toContain("l.is_test");
+  });
+
   it("fails closed when immutable response evidence cannot be read", async () => {
     mocks.query.mockImplementation(async (query: string) => {
       if (query.includes("FROM public.leads l")) throw new Error("response ledger unavailable");
@@ -71,6 +97,14 @@ describe("canonical Neon first-response action queue", () => {
     await expect(loadNeonAdminActionQueue()).resolves.toMatchObject({
       configured: true,
       items: [],
+      firstResponseCoverage: {
+        evidenceAvailable: false,
+        riskCount: 0,
+        coveredCount: 0,
+        directQueueCount: 0,
+        coveredByExistingActionCount: 0,
+        uncoveredCount: 0,
+      },
       error: "Canonical Neon action queue query failed",
     });
   });
