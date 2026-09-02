@@ -25,7 +25,7 @@ function fixture() {
       { path: "/inactive", file: "src/app/inactive/page.tsx" },
     ],
     vercel: {
-      crons: [{ path: "/api/admin/sla/sweep", schedule: "0 * * * *" }],
+      crons: [{ path: "/api/admin/sla/sweep", schedule: "*/5 * * * *" }],
     },
   };
 }

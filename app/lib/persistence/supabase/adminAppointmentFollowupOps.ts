@@ -844,7 +844,6 @@ export function buildDailyActionQueueWithCoverage(
           createdAt: text(lead.created_at),
           status: text(lead.status) || "new",
           conversionStage: text(lead.conversion_stage),
-          lastContactedAt: text(lead.last_contacted_at),
           firstHumanResponseAt: text(lead.first_human_response_at),
           isTest: lead.is_test === true,
           communicationSuppressed: lead.communication_suppressed === true,

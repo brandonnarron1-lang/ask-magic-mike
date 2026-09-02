@@ -20,8 +20,7 @@ export type FirstResponseRiskReason =
   | "future_created_at"
   | "outside_active_window"
   | "within_sla"
-  | "response_recorded"
-  | "contact_recorded";
+  | "response_recorded";
 
 export type FirstResponseRiskEvaluation = {
   isRisk: boolean;
@@ -48,7 +47,6 @@ export function evaluateFirstResponseRisk(input: {
   createdAt: string | null;
   status: string;
   conversionStage?: string | null;
-  lastContactedAt?: string | null;
   firstHumanResponseAt?: string | null;
   isTest?: boolean;
   communicationSuppressed?: boolean;
@@ -77,10 +75,6 @@ export function evaluateFirstResponseRisk(input: {
 
   if (timestamp(input.firstHumanResponseAt) !== null) {
     return { isRisk: false, reason: "response_recorded", dueAt, ageMinutes };
-  }
-
-  if (timestamp(input.lastContactedAt) !== null) {
-    return { isRisk: false, reason: "contact_recorded", dueAt, ageMinutes };
   }
 
   const activeWindowStart = nowTime - FIRST_RESPONSE_ACTIVE_WINDOW_DAYS * 24 * 60 * 60 * 1_000;

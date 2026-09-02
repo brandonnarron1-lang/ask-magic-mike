@@ -46,12 +46,12 @@ Intelligence and the Action Queue. A first-response risk exists only when:
 2. its effective lifecycle state is non-terminal;
 3. its creation time is valid and within the most recent seven days;
 4. at least 15 minutes have elapsed;
-5. no valid immutable first-human-response timestamp exists; and
-6. no valid mutable last-contact timestamp exists.
+5. no valid immutable first-human-response timestamp exists.
 
 The evaluator returns an explainable reason, exact SLA due time, and age in
-minutes. Invalid, future, excluded, terminal, responded, contacted, stale, and
-inside-SLA inputs fail closed.
+minutes. Invalid, future, excluded, terminal, responded, stale, and inside-SLA
+inputs fail closed. A mutable `leads.last_contacted_at` projection alone is
+not accepted as first-response proof.
 
 ## Queue behavior
 
