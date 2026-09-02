@@ -218,16 +218,18 @@ Updated 2026-09-01.
   11-check monitor, 19-pass read-only smoke, health/readiness, auth boundary,
   and runtime error window all passed.
 - **Reviewed application candidate PR #248:** reviewed content head
-  `32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f`, exact tree
-  `d0842ec5ae23d1eaddbddc691bbeaaa704b18e77`, hosted Release Gate
-  `33528697047`, and immutable Ready Preview
-  `dpl_51JjPVTZizxPJZu1GAiWjVpFTaZn` are sealed for owner review. The exact
+  `f6134b71f258003aa5dc201cf5ef7cdb6eb61ee7`, exact tree
+  `832be2750355391f9198fcaaaa6f46bb3beb8b3f`, hosted Release Gate
+  `33529949775`, and immutable Ready Preview
+  `dpl_2WE8ftPXZDrnkGdzVKtU2bzBnSBQ` are sealed for owner review. The exact
   live Connector 1.0.0 source/assets remain preserved, while the
   backward-compatible 1.1.0 candidate adds bounded per-shortcode attribution
   and public version proof. Deterministic install/rollback packages, native
   PHP lint, and read-only Preview checks pass with zero migrations and zero
   external mutations.
-- **Corrected readiness:** v3 holds Home Value and We Buy Homes as
+- **Corrected readiness:** v4 preserves the v3 Home Value and We Buy Homes
+  holds and adds a fail-closed rental additive-source contract. Home Value and
+  We Buy Homes remain
   `connector_upgrade_required` until the reviewed plugin capability is
   publicly proven. Unreviewed WordPress placements cannot become fallback
   recommendations.
@@ -2892,3 +2894,25 @@ any bridge activation or shadow-mode test.
 - No Production, WordPress, Vercel environment, Neon, lead, notification,
   analytics write, DNS, publication, spend, deletion, or NellySelly mutation
   occurred.
+
+## Phase 9 WordPress rental placement readiness — 2026-09-01
+
+- Public read-only WordPress evidence identifies Mike's profile as page 597,
+  Available Rentals as page 226, and Short Term Rentals as page 4120.
+- Mike's profile already contains a source-tagged Ask Magic Mike CTA through
+  `/ask-mike/`; the no-redo decision is to preserve it.
+- The existing `wordpress_rental_to_homeownership` registry entry now has a
+  protected v4 readiness manifest for page 226. Its additive mode returns
+  `authenticated_source_required`, no active `approvalGate`, no rollback href,
+  and no mutation authority until authenticated source evidence exists.
+- Page 4120 / Gravity Form 6 is explicitly outside the candidate because it
+  lacks approved explicit requested-response consent.
+- Focused acceptance passes 5 files / 63 tests, targeted ESLint, strict
+  TypeScript, and `git diff --check`.
+- Complete Node 24.18.0 release acceptance passes system isolation, 14/14
+  safety checks, 292 files / 3,529 tests, strict typecheck, full ESLint, an
+  optimized Next.js 15.5.21 build with 60 static pages, and 102 active / 22
+  acknowledged duplicate routes.
+- Production remains on accepted PR #247. No WordPress, Production, Neon,
+  provider, lead, notification, analytics, DNS, publication, spend, deletion,
+  or NellySelly state changed.

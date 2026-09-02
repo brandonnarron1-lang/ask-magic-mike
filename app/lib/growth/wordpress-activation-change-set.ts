@@ -26,6 +26,7 @@ export const WORDPRESS_ACTIVATION_PLACEMENT_KEYS = [
   "wordpress_homepage_ask_mike",
   "wordpress_home_value",
   "wordpress_we_buy_homes",
+  "wordpress_rental_to_homeownership",
 ] as const satisfies readonly WordPressOwnedPlacementKey[];
 
 export type WordPressActivationPlacementKey =
@@ -35,6 +36,7 @@ export type WordPressActivationStatus =
   | "legacy_match_ready"
   | "hidden_target"
   | "already_exact"
+  | "authenticated_source_required"
   | "connector_upgrade_required"
   | "seller_intent_decision_required"
   | "page_id_unresolved"
@@ -43,19 +45,33 @@ export type WordPressActivationStatus =
   | "precondition_mismatch"
   | "fetch_failed";
 
-interface WordPressActivationTarget {
+export type WordPressActivationChangeMode =
+  | "replace_existing_href"
+  | "add_new_shortcode";
+
+interface WordPressActivationTargetBase {
   placementKey: WordPressActivationPlacementKey;
   placementLabel: string;
   sourcePage: string;
   expectedPageId: number;
-  legacyPath: string;
-  legacySource: string;
-  legacyMedium: string;
-  legacyCampaign: string;
   proposedShortcode: string;
   approvalGate: string;
   requiresSellerIntentDecision: boolean;
+  scopeExclusions: readonly string[];
 }
+
+type WordPressActivationTarget = WordPressActivationTargetBase & (
+  | {
+      changeMode: "replace_existing_href";
+      legacyPath: string;
+      legacySource: string;
+      legacyMedium: string;
+      legacyCampaign: string;
+    }
+  | {
+      changeMode: "add_new_shortcode";
+    }
+);
 
 export interface WordPressPageIndexRow {
   id: number;
@@ -66,9 +82,10 @@ export interface WordPressPageIndexRow {
 }
 
 export interface WordPressActivationChangeSet {
-  schemaVersion: "amm.wordpress_activation_change_set.v3";
+  schemaVersion: "amm.wordpress_activation_change_set.v4";
   generatedAt: string;
   mode: "read_only_public_precondition";
+  changeMode: WordPressActivationChangeMode;
   placementKey: WordPressActivationPlacementKey;
   placementLabel: string;
   status: WordPressActivationStatus;
@@ -94,6 +111,7 @@ export interface WordPressActivationChangeSet {
   observedConnectorVersions: string[];
   connectorVersionReady: boolean;
   sellerIntentDecisionRequired: boolean;
+  scopeExclusions: string[];
   preconditionSha256: string;
   blockers: string[];
   publicationSteps: string[];
@@ -118,6 +136,8 @@ export function toOwnedDemandPlacementReadiness(
   const detail = changeSet.blockers[0] || changeSet.statusDetail;
   const nextAction = changeSet.status === "already_exact"
     ? "Verify the exact visible tracked link in WordPress, then record native publication proof. No href edit is needed."
+    : changeSet.status === "authenticated_source_required"
+      ? "Authenticate to WordPress, capture the exact raw editor source and recoverable page revision, then generate a source-bound additive candidate. This public manifest does not issue a publication gate."
     : changeSet.status === "connector_upgrade_required"
       ? "Back up the exact live Connector 1.0.0 source and options, obtain the plugin-upgrade gate, install the reviewed 1.1.0 candidate, verify legacy links remain unchanged, then regenerate this manifest before editing any page."
     : changeSet.status === "seller_intent_decision_required"
@@ -137,6 +157,7 @@ export function toOwnedDemandPlacementReadiness(
 
 const TARGETS: Record<WordPressActivationPlacementKey, WordPressActivationTarget> = {
   wordpress_homepage_ask_mike: {
+    changeMode: "replace_existing_href",
     placementKey: "wordpress_homepage_ask_mike",
     placementLabel: "Homepage Ask Magic Mike CTA",
     sourcePage: "https://www.ourtownproperties.com/",
@@ -148,8 +169,10 @@ const TARGETS: Record<WordPressActivationPlacementKey, WordPressActivationTarget
     proposedShortcode: '[ask_magic_mike_cta route="/ask" source="homepage_cta" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_homepage_ask_mike" button_text="Ask Magic Mike"]',
     approvalGate: "APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION",
     requiresSellerIntentDecision: false,
+    scopeExclusions: [],
   },
   wordpress_home_value: {
+    changeMode: "replace_existing_href",
     placementKey: "wordpress_home_value",
     placementLabel: "Established home-value page CTA",
     sourcePage: "https://www.ourtownproperties.com/how-much-is-your-home-worth/",
@@ -161,8 +184,10 @@ const TARGETS: Record<WordPressActivationPlacementKey, WordPressActivationTarget
     proposedShortcode: '[ask_magic_mike_cta route="/home-value" source="home_value_page" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_home_value_page" button_text="Ask Magic Mike"]',
     approvalGate: "APPROVE PHASE 9 HOME VALUE CTA WORDPRESS PUBLICATION",
     requiresSellerIntentDecision: false,
+    scopeExclusions: [],
   },
   wordpress_we_buy_homes: {
+    changeMode: "replace_existing_href",
     placementKey: "wordpress_we_buy_homes",
     placementLabel: "We Buy Homes CTA",
     sourcePage: "https://www.ourtownproperties.com/we-buy-homes/",
@@ -174,6 +199,20 @@ const TARGETS: Record<WordPressActivationPlacementKey, WordPressActivationTarget
     proposedShortcode: '[ask_magic_mike_cta route="/sell" source="seller_page_cta" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_we_buy_homes" headline="Thinking about selling but not sure where to start?" text="Ask Magic Mike for local guidance before you make your next move." button="Get Local Guidance"]',
     approvalGate: "APPROVE PHASE 9 WE BUY HOMES CTA WORDPRESS PUBLICATION",
     requiresSellerIntentDecision: true,
+    scopeExclusions: [],
+  },
+  wordpress_rental_to_homeownership: {
+    changeMode: "add_new_shortcode",
+    placementKey: "wordpress_rental_to_homeownership",
+    placementLabel: "Rental-to-homeownership CTA",
+    sourcePage: "https://www.ourtownproperties.com/rentals/",
+    expectedPageId: 226,
+    proposedShortcode: '[ask_magic_mike_cta route="/rent" source="rental_to_homeownership" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_rental_to_homeownership" headline="Renting now and planning your next move?" text="Ask Magic Mike for a broker-reviewed rental-to-homeownership readiness conversation. No financing or eligibility decision is promised." button="Review My Next Steps"]',
+    approvalGate: "APPROVE PHASE 9 RENTAL-TO-HOMEOWNERSHIP CTA WORDPRESS PUBLICATION",
+    requiresSellerIntentDecision: false,
+    scopeExclusions: [
+      "https://www.ourtownproperties.com/short-term-home-rentals/ (page 4120 / Gravity Form 6) remains excluded until explicit requested-response consent is approved and stored.",
+    ],
   },
 };
 
@@ -376,6 +415,7 @@ function extractAskMagicMikeHrefs(html: string, sourcePage: string) {
 }
 
 function matchesLegacyHref(url: URL, target: WordPressActivationTarget) {
+  if (target.changeMode !== "replace_existing_href") return false;
   const keys = [...url.searchParams.keys()].sort();
   return (
     url.pathname === target.legacyPath &&
@@ -440,6 +480,8 @@ function hashPrecondition(input: {
   observedConnectorVersions: string[];
   connectorVersionReady: boolean;
   sellerIntentDecisionRequired: boolean;
+  changeMode: WordPressActivationChangeMode;
+  scopeExclusions: readonly string[];
 }) {
   return createHash("sha256").update(JSON.stringify(input)).digest("hex");
 }
@@ -450,6 +492,17 @@ function basePublicationSteps(
   targetVisibility: WordPressActivationChangeSet["targetVisibility"] = "unknown",
   connectorVersionReady = false,
 ) {
+  if (target.changeMode === "add_new_shortcode" && !currentHref) {
+    return [
+      "Do not publish an additive CTA from public rendered HTML alone; this manifest intentionally issues no approval gate.",
+      `Authenticate to WordPress and capture the exact raw editor source, current revision metadata, and a recoverable backup for page ID ${target.expectedPageId}.`,
+      "Verify the exact insertion point and confirm the page has no existing Ask Magic Mike CTA, canonical lead form, or duplicate renter-to-buyer placement.",
+      ...target.scopeExclusions.map((exclusion) => `Preserve scope exclusion: ${exclusion}`),
+      `Prepare one source-bound insertion using exactly: ${target.proposedShortcode}`,
+      "Generate a new manifest bound to the raw-source SHA-256, revision/backup evidence, insertion anchor, mobile/accessibility acceptance, and rollback procedure.",
+      "Only that later exact-source candidate may request the pagePublicationApprovalGate; this public manifest cannot authorize publication.",
+    ];
+  }
   if (targetVisibility === "hidden_by_known_css") {
     return [
       `Create and verify a recoverable WordPress revision or page backup for page ID ${target.expectedPageId}.`,
@@ -500,6 +553,7 @@ function statusDetail(status: WordPressActivationStatus) {
     legacy_match_ready: "One exact legacy href and one exact published WordPress page record match the allowlisted placement.",
     hidden_target: "The exact href exists, but a known public CSS rule suppresses its Ask Magic Mike CTA container.",
     already_exact: "The public placement already uses the canonical tracked href; no WordPress edit is needed.",
+    authenticated_source_required: "The exact published page is known, but an additive CTA requires authenticated raw editor source, a recoverable revision, an insertion anchor, and rollback evidence.",
     connector_upgrade_required: "The rendered placement does not expose the exact reviewed Connector version marker, so a page edit is not yet safe.",
     seller_intent_decision_required: "The technical target is identifiable, but the existing canonical-page, capture-owner, duplicate-page, placement-key, and BIC copy-review decisions are unresolved.",
     page_id_unresolved: "The exact public href was found, but the published WordPress page record could not be resolved uniquely.",
@@ -575,7 +629,11 @@ export function buildWordPressActivationChangeSet(input: {
     rows.length > 1 ||
     legacyMatches.length > 1 ||
     proposedMatches.length > 1 ||
-    (legacyMatches.length && proposedMatches.length)
+    (legacyMatches.length && proposedMatches.length) ||
+    (
+      target.changeMode === "add_new_shortcode" &&
+      hrefs.length !== proposedMatches.length
+    )
   ) {
     status = "ambiguous_target";
     blockers.push("Resolve rejected lookalike/insecure links, duplicate page records, or duplicate matching hrefs before preparing any edit.");
@@ -585,6 +643,14 @@ export function buildWordPressActivationChangeSet(input: {
   } else if (pageRow.id !== target.expectedPageId) {
     status = "precondition_mismatch";
     blockers.push(`Expected WordPress page ID ${target.expectedPageId}, but the public index resolved a different ID.`);
+  } else if (
+    target.changeMode === "add_new_shortcode" &&
+    currentMatches.length === 0
+  ) {
+    status = "authenticated_source_required";
+    blockers.push(
+      "Public evidence proves the exact page identity and absence of a direct Ask Magic Mike placement, but it cannot prove the raw editor insertion point, recoverable revision, source hash, or rollback path required for an additive CTA.",
+    );
   } else if (hiddenTargetOccurrences > 0) {
     status = "hidden_target";
     blockers.push(
@@ -637,12 +703,15 @@ export function buildWordPressActivationChangeSet(input: {
     observedConnectorVersions,
     connectorVersionReady,
     sellerIntentDecisionRequired: target.requiresSellerIntentDecision,
+    changeMode: target.changeMode,
+    scopeExclusions: target.scopeExclusions,
   });
 
   return {
-    schemaVersion: "amm.wordpress_activation_change_set.v3",
+    schemaVersion: "amm.wordpress_activation_change_set.v4",
     generatedAt: input.generatedAt ?? new Date().toISOString(),
     mode: "read_only_public_precondition",
+    changeMode: target.changeMode,
     placementKey: target.placementKey,
     placementLabel: target.placementLabel,
     status,
@@ -668,6 +737,7 @@ export function buildWordPressActivationChangeSet(input: {
     observedConnectorVersions,
     connectorVersionReady,
     sellerIntentDecisionRequired: target.requiresSellerIntentDecision,
+    scopeExclusions: [...target.scopeExclusions],
     preconditionSha256,
     blockers,
     publicationSteps: basePublicationSteps(
@@ -709,11 +779,14 @@ function buildFetchFailureChangeSet(
     observedConnectorVersions: [],
     connectorVersionReady: false,
     sellerIntentDecisionRequired: target.requiresSellerIntentDecision,
+    changeMode: target.changeMode,
+    scopeExclusions: target.scopeExclusions,
   });
   return {
-    schemaVersion: "amm.wordpress_activation_change_set.v3",
+    schemaVersion: "amm.wordpress_activation_change_set.v4",
     generatedAt,
     mode: "read_only_public_precondition",
+    changeMode: target.changeMode,
     placementKey,
     placementLabel: target.placementLabel,
     status: "fetch_failed",
@@ -739,6 +812,7 @@ function buildFetchFailureChangeSet(
     observedConnectorVersions: [],
     connectorVersionReady: false,
     sellerIntentDecisionRequired: target.requiresSellerIntentDecision,
+    scopeExclusions: [...target.scopeExclusions],
     preconditionSha256,
     blockers: ["Restore safe public read access and regenerate the manifest before any WordPress edit."],
     publicationSteps: basePublicationSteps(target, null),

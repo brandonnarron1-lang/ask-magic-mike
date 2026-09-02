@@ -57,7 +57,7 @@ describe("GET WordPress activation change-set route", () => {
   it("returns a private attachment after report-view authorization", async () => {
     authorized();
     mocks.loadChangeSet.mockResolvedValue({
-      schemaVersion: "amm.wordpress_activation_change_set.v3",
+      schemaVersion: "amm.wordpress_activation_change_set.v4",
       placementKey: "wordpress_homepage_ask_mike",
       status: "legacy_match_ready",
       publicationAuthorized: false,

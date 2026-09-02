@@ -47,17 +47,17 @@ or NellySelly action. It is exhausted and cannot be replayed.
 
 PR [#248](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248)
 is the only active reviewed application candidate. Its reviewed content head is
-`32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f`, exact tree is
-`d0842ec5ae23d1eaddbddc691bbeaaa704b18e77`, and code-bearing implementation
+`f6134b71f258003aa5dc201cf5ef7cdb6eb61ee7`, exact tree is
+`832be2750355391f9198fcaaaa6f46bb3beb8b3f`, and code-bearing implementation
 head is `3af515932b9ee07ccccb7ad4cbf7734d040f9a2c`. It is based directly on
 accepted Production `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, with zero
 migrations and zero external mutations.
 
 The reviewed content passed the complete local Node 24 release gate and hosted
 Release Gate
-[33528697047](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33528697047).
-Immutable Preview deployment `dpl_51JjPVTZizxPJZu1GAiWjVpFTaZn` is Ready at
-`https://ask-magic-mike-4rli80xpr-eyes-up-industries.vercel.app`; its public,
+[33529949775](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/33529949775).
+Immutable Preview deployment `dpl_2WE8ftPXZDrnkGdzVKtU2bzBnSBQ` is Ready at
+`https://ask-magic-mike-fb4oga69f-eyes-up-industries.vercel.app`; its public,
 health, readiness, redirect, and protected-auth-boundary checks passed without a
 write, lead, form submission, message, or provider action. If the application
 release is later accepted and fails verification, current Production deployment

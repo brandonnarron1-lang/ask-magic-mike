@@ -18,8 +18,10 @@
 |---|---|---|---|---|
 | Homepage | Link button | `/ask-mike/` with UTMs | `utm_source=ourtownproperties&utm_medium=homepage_cta&utm_campaign=website_widget` | ✅ Live |
 | `/ask-mike/` | Iframe embed (amm-loader.js) | `/embed/ask` | `utm_source=ourtownproperties&utm_medium=referral&utm_campaign=website_widget` | ✅ Live |
-| Mike Eatmon profile | TBD | — | — | ⬜ Not installed |
-| Seller / "We Buy Homes" | TBD | — | — | ⬜ Not installed |
+| Mike Eatmon profile, page 597 | Existing source-tagged CTA | `/ask-mike/` | `utm_source=ourtownproperties&utm_medium=agent_profile_cta&utm_campaign=website_widget` | ✅ Live — preserve; do not add a duplicate |
+| Seller / "We Buy Homes" | Existing Connector CTA | Held exact `/sell` candidate | Canonical owned-demand tuple prepared | ⏸ Seller-intent/BIC decision required; do not publish from this packet |
+| Available Rental Listings, page 226 | No direct CTA | Prepared `/rent` candidate | `utm_content=wordpress_rental_to_homeownership` | ⏸ Authenticated raw source, backup, insertion anchor, and rollback required |
+| Short Term Home Rentals, page 4120 | Existing Gravity Form 6 workflow | No new CTA in this candidate | — | ⏸ Excluded until explicit requested-response consent is approved and stored |
 
 ---
 
@@ -63,7 +65,8 @@ The homepage already has a CTA pointing to `/ask-mike/`. If you want it to point
 
 ### B. Mike Eatmon Profile / Agent Bio Page
 
-Place at the bottom of the Mike Eatmon bio section.
+Historical example only. The Mike Eatmon profile already has a live
+source-tagged Ask Magic Mike CTA. Do not install this block or add a duplicate.
 
 ```html
 <div style="background:#0A0A0A; border:1px solid rgba(212,160,23,0.25); border-radius:12px; padding:1.5rem 2rem; text-align:center; margin:2rem 0;">

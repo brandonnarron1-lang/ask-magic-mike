@@ -40,10 +40,11 @@ under `https://www.askmagicmike.com/admin`.
 
 ## Current demand truth
 
-The latest read-only Production observation contains six suppressed/test leads
-and no contactable live prospect. This means the durable path is proven but
-genuine owned demand has not yet produced a sample. Never fabricate a prospect,
-rename a QA record, or contact `INTERNAL QA — DO NOT CONTACT` data.
+Do not operate from a fixed lead count in this document. Read the current
+Action Queue, Lead inbox, and Growth aggregate at the start of every shift;
+those protected runtime views are authoritative and may change after any
+genuine submission or response. Never fabricate a prospect, rename a QA
+record, or contact `INTERNAL QA — DO NOT CONTACT` data.
 
 ## Working a genuine lead
 
@@ -65,8 +66,9 @@ must remain attributable to the signed-in operator.
 
 - `/admin/distribution` prepares approved copy and tracked links. Copy controls
   are local-only and do not publish.
-- PR #183 is the next application release. PR #184 adds an append-only
-  publication-proof ledger after #183.
+- The only requestable application release phrase is maintained in
+  `OWNER_APPROVAL_QUEUE.md`. Newer stacked Drafts and historical PR phrases do
+  not create release authority.
 - A channel is not live until an authorized human publishes/configures/distributes
   it in the native platform and records valid evidence.
 - Social/GBP publication, email campaigns, QR distribution, WordPress changes,
@@ -114,8 +116,9 @@ must remain attributable to the signed-in operator.
   tokens into tickets, chat, screenshots, URLs, or reports.
 - Do not rerun a completed Production migration because an old approval phrase
   is repeated.
-- Do not merge PR #184 before PR #183; refresh and re-prove the stacked head
-  after #183 reaches Production.
+- Do not replay a historical PR phrase or merge a stacked Draft out of order;
+  refresh and re-prove the exact head after its approved parent reaches
+  Production.
 
 The exact active gates and resolved releases are maintained in
 `OWNER_APPROVAL_QUEUE.md`; that file overrides historical prompts.

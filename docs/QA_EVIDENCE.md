@@ -2614,3 +2614,64 @@ The checks were read-only. No secret value was read into the checkout, printed,
 or persisted, and no merge, deployment, Vercel setting, Neon query/mutation,
 WordPress action, lead, email/SMS/Push, analytics write, DNS/publication/spend,
 deletion, or NellySelly action occurred.
+
+## Phase 9 WordPress rental placement readiness — 2026-09-01
+
+Public evidence commands:
+
+```bash
+curl -fsS 'https://www.ourtownproperties.com/wp-json/wp/v2/pages/597?context=view&_fields=id,link,slug,status,modified_gmt,title,content'
+curl -fsS 'https://www.ourtownproperties.com/wp-json/wp/v2/pages/226?context=view&_fields=id,link,slug,status,modified_gmt,title,content'
+curl -fsS 'https://www.ourtownproperties.com/wp-json/wp/v2/pages/4120?context=view&_fields=id,link,slug,status,modified_gmt,title,content'
+```
+
+Privacy-minimized results:
+
+- page 597: published, modified `2026-07-22T15:13:14`, existing direct
+  source-tagged Ask Magic Mike path present;
+- page 226: published, modified `2025-06-16T19:09:52`, no direct Ask Magic
+  Mike placement in the public rendered content; and
+- page 4120: published, modified `2025-11-26T21:32:57`, excluded because the
+  existing Form 6 consent hold remains authoritative.
+
+Focused verification:
+
+```bash
+pnpm exec vitest run \
+  tests/adminops/wordpress-activation-change-set.test.ts \
+  tests/adminops/wordpress-activation-route.test.ts \
+  tests/adminops/owned-demand-activation-loop.test.ts \
+  tests/adminops/owned-demand-command.test.ts \
+  tests/scripts/current-release-authority-docs.test.ts
+pnpm exec eslint \
+  app/lib/growth/wordpress-activation-change-set.ts \
+  tests/adminops/wordpress-activation-change-set.test.ts \
+  tests/adminops/wordpress-activation-route.test.ts \
+  tests/scripts/current-release-authority-docs.test.ts
+pnpm typecheck
+git diff --check
+```
+
+Result: 5 files / 63 tests passed; targeted ESLint, strict typecheck, and diff
+validation passed. Coverage proves additive/source-required classification,
+exact page ID, compliant `/rent` UTM construction, Form-6 exclusion,
+no-current-href/rollback truth, duplicate-placement hold, exact-existing
+placement recognition, private GET-only API behavior, and current release
+authority consistency.
+
+Complete final-source command:
+
+```bash
+PATH=/opt/homebrew/opt/node@24/bin:$PATH pnpm run release:gate
+```
+
+Result: Node 24.18.0; system isolation passed; release safety passed 14/14;
+Vitest passed 292 files / 3,529 tests; strict typecheck and full ESLint passed;
+the optimized Next.js 15.5.21 build generated 60 static pages; route verification
+passed 102 active routes with 22 acknowledged root/source duplicates.
+
+No credential, cookie, raw editor source, page HTML, form value, or lead PII is
+stored in the manifest. No browser credential entry was attempted after the
+WordPress reauthentication screen appeared. No save, publish, cache purge,
+form submission, lead, analytics event, email/SMS/Push, database action,
+deployment, DNS change, spend, deletion, or NellySelly mutation occurred.
