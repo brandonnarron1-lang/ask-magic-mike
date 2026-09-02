@@ -18,6 +18,7 @@ export type PublicExperimentEventInput = {
   subjectKey: string;
   eventName: "exposure" | "lead_created";
   leadId?: string | null;
+  variantKey?: string | null;
   surface?: string | null;
 };
 
@@ -32,6 +33,8 @@ export type PublicExperimentEventResult = {
     | "registry_mismatch"
     | "not_approved"
     | "invalid_input"
+    | "missing_exposure"
+    | "variant_mismatch"
     | "ineligible_lead"
     | "unavailable";
 };
@@ -91,6 +94,13 @@ export class NeonPublicExperimentRepository {
 
     const definition = getPublicExperimentDefinition(input.experimentKey);
     if (!definition) return result("unknown_experiment");
+    if (input.surface !== definition.surface) return result("invalid_input");
+    if (
+      (input.eventName === "exposure" && (input.leadId || input.variantKey)) ||
+      (input.eventName === "lead_created" && (!input.leadId || !input.variantKey))
+    ) {
+      return result("invalid_input");
+    }
 
     const rows = await this.sql.query(
       `SELECT id, status, approval_status, variants
@@ -111,19 +121,20 @@ export class NeonPublicExperimentRepository {
     const experimentId = typeof experiment.id === "string" ? experiment.id : "";
     if (!UUID_PATTERN.test(experimentId)) return result("unavailable");
     const computedVariant = assignExperimentVariant(definition.key, input.subjectKey, variants);
-
-    await this.sql.query(
-      `INSERT INTO public.growth_experiment_assignments (
-         experiment_id, subject_key, variant_key, metadata
-       ) VALUES ($1::uuid, $2::text, $3::text, $4::jsonb)
-       ON CONFLICT (experiment_id, subject_key) DO NOTHING`,
-      [
-        experimentId,
-        input.subjectKey,
-        computedVariant,
-        JSON.stringify({ source: "public_experiment_v1", surface: definition.surface }),
-      ],
-    );
+    if (input.eventName === "exposure") {
+      await this.sql.query(
+        `INSERT INTO public.growth_experiment_assignments (
+           experiment_id, subject_key, variant_key, metadata
+         ) VALUES ($1::uuid, $2::text, $3::text, $4::jsonb)
+         ON CONFLICT (experiment_id, subject_key) DO NOTHING`,
+        [
+          experimentId,
+          input.subjectKey,
+          computedVariant,
+          JSON.stringify({ source: "public_experiment_v1", surface: definition.surface }),
+        ],
+      );
+    }
     const assignmentRows = await this.sql.query(
       `SELECT variant_key
          FROM public.growth_experiment_assignments
@@ -133,9 +144,20 @@ export class NeonPublicExperimentRepository {
     ) as Row[];
     const storedVariant = typeof assignmentRows[0]?.variant_key === "string"
       ? String(assignmentRows[0]?.variant_key)
-      : computedVariant;
+      : null;
+    if (!storedVariant) {
+      return input.eventName === "lead_created"
+        ? result("missing_exposure", { active: true })
+        : result("unavailable", { active: true });
+    }
     if (!definition.variants.some((variant) => variant.key === storedVariant)) {
       return result("registry_mismatch");
+    }
+    if (
+      storedVariant !== computedVariant ||
+      (input.eventName === "lead_created" && input.variantKey !== storedVariant)
+    ) {
+      return result("variant_mismatch", { active: true, variantKey: storedVariant });
     }
 
     let leadId: string | null = null;

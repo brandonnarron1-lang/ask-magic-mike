@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { assertDatabaseMutationAllowed } from "../../../../src/lib/preview-security";
-import { checkRateLimit, LIMITS, rateLimitKey } from "../../../../src/lib/security/rate-limit";
+import {
+  checkRateLimit,
+  LIMITS,
+  nonDurableRateLimitFallbackAllowed,
+  rateLimitKey,
+} from "../../../../src/lib/security/rate-limit";
 import { isAutomatedBrowserUserAgent } from "../../../lib/browserAutomation";
+import { getPublicExperimentDefinition } from "../../../lib/growth/experiment-registry";
 import { readBoundedIngressJson } from "../../../lib/growth/ingress-http";
 import { isApprovedPublicOrigin } from "../../../lib/publicOrigin";
 import { recordPublicExperimentEvent } from "../../../lib/persistence/neonPublicExperimentRepository";
@@ -10,7 +16,6 @@ type EventBody = {
   experiment_key?: unknown;
   subject_key?: unknown;
   event_name?: unknown;
-  lead_id?: unknown;
   surface?: unknown;
 };
 
@@ -22,23 +27,52 @@ const NO_STORE_HEADERS = {
 const MAX_EXPERIMENT_BODY_BYTES = 4_096;
 const EXPERIMENT_KEY_PATTERN = /^[a-z][a-z0-9_]{2,80}$/;
 const SUBJECT_KEY_PATTERN = /^[a-f0-9]{64}$/;
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const SURFACE_PATTERN = /^\/[a-z0-9/_-]{0,119}$/;
+const PUBLIC_EXPERIMENT_FIELDS = new Set([
+  "experiment_key",
+  "subject_key",
+  "event_name",
+  "surface",
+]);
 
 function experimentResponse(
-  body: {
-    active: boolean;
-    recorded: boolean;
-    correlation_id: string;
-    variant_key?: string | null;
-    excluded?: "automation";
-    error?: "preview_data_disabled";
-    message?: string;
-  },
+  correlationId: string,
+  body: Record<string, unknown>,
   status: number,
+  extraHeaders: Record<string, string> = {},
 ) {
-  return NextResponse.json(body, { status, headers: NO_STORE_HEADERS });
+  return NextResponse.json(
+    { ...body, correlation_id: correlationId },
+    {
+      status,
+      headers: {
+        ...NO_STORE_HEADERS,
+        "X-AMM-Correlation-Id": correlationId,
+        ...extraHeaders,
+      },
+    },
+  );
+}
+
+function rateLimitRetryAfter(resetAt: number) {
+  const maxSeconds = Math.ceil(LIMITS.analyticsEvent.windowMs / 1_000);
+  const secondsUntilReset = Math.ceil((resetAt - Date.now()) / 1_000);
+  return String(Math.max(
+    1,
+    Math.min(maxSeconds, Number.isFinite(secondsUntilReset) ? secondsUntilReset : maxSeconds),
+  ));
+}
+
+function invalidExperimentRequest(correlationId: string, code: string) {
+  return experimentResponse(
+    correlationId,
+    {
+      active: false,
+      recorded: false,
+      error: "Invalid experiment event.",
+      code,
+    },
+    400,
+  );
 }
 
 export async function POST(request: Request) {
@@ -46,37 +80,44 @@ export async function POST(request: Request) {
   const origin = request.headers.get("origin");
   if (!origin || !isApprovedPublicOrigin(origin)) {
     return experimentResponse(
-      { active: false, recorded: false, correlation_id: correlationId },
+      correlationId,
+      {
+        active: false,
+        recorded: false,
+        error: "This experiment origin is not approved.",
+        code: "origin_not_approved",
+      },
       403,
     );
   }
   if (isAutomatedBrowserUserAgent(request.headers.get("user-agent"))) {
     return experimentResponse(
+      correlationId,
       {
         active: false,
         recorded: false,
         excluded: "automation",
-        correlation_id: correlationId,
       },
       202,
     );
   }
-  // Preserve the same fail-closed Preview boundary as lead and appointment
-  // capture. This guard must run before the shared limiter because that limiter
-  // is itself a durable database write when DATABASE_URL is configured.
+
+  // Read-only Preview must refuse before the limiter can write a durable
+  // bucket or the experiment repository can mutate the canonical ledger.
   const mutation = assertDatabaseMutationAllowed();
   if (!mutation.ok) {
     return experimentResponse(
+      correlationId,
       {
         active: false,
         recorded: false,
-        error: mutation.error,
-        message: mutation.publicMessage,
-        correlation_id: correlationId,
+        error: mutation.publicMessage,
+        code: mutation.error,
       },
       mutation.statusCode,
     );
   }
+
   const limit = await checkRateLimit(
     rateLimitKey(request.headers.get("x-forwarded-for")),
     LIMITS.analyticsEvent.limit,
@@ -85,66 +126,134 @@ export async function POST(request: Request) {
   );
   if (!limit.allowed) {
     return experimentResponse(
-      { active: false, recorded: false, correlation_id: correlationId },
+      correlationId,
+      {
+        active: false,
+        recorded: false,
+        error: "Too many experiment events. Please wait and try again.",
+        code: "rate_limited",
+      },
       429,
+      { "Retry-After": rateLimitRetryAfter(limit.resetAt) },
+    );
+  }
+  if (!limit.durable && !nonDurableRateLimitFallbackAllowed()) {
+    return experimentResponse(
+      correlationId,
+      {
+        active: false,
+        recorded: false,
+        error: "Experiment measurement is temporarily unavailable.",
+        code: "rate_limit_store_unavailable",
+      },
+      503,
     );
   }
 
-  const parsed = await readBoundedIngressJson(request, {
-    maxRequestBytes: MAX_EXPERIMENT_BODY_BYTES,
-  });
-  if (!parsed.ok) {
+  let parsed: Awaited<ReturnType<typeof readBoundedIngressJson>>;
+  try {
+    parsed = await readBoundedIngressJson(request, {
+      maxRequestBytes: MAX_EXPERIMENT_BODY_BYTES,
+    });
+  } catch {
     return experimentResponse(
-      { active: false, recorded: false, correlation_id: correlationId },
+      correlationId,
+      {
+        active: false,
+        recorded: false,
+        error: "Invalid experiment event.",
+        code: "invalid_request",
+      },
+      400,
+    );
+  }
+  if (!parsed.ok) {
+    const code = parsed.status === 413
+      ? "payload_too_large"
+      : parsed.status === 415
+        ? "unsupported_media_type"
+        : "invalid_request";
+    return experimentResponse(
+      correlationId,
+      {
+        active: false,
+        recorded: false,
+        error: parsed.status === 413
+          ? "Experiment payload is too large."
+          : "Invalid experiment event.",
+        code,
+      },
       parsed.status,
     );
   }
 
   const body = parsed.value as EventBody;
+  // Durable conversions are server-authored after canonical lead storage.
+  // A public caller may request an exposure only; it cannot attach an
+  // arbitrary existing lead UUID to an experiment subject.
+  if (body.event_name === "lead_created") {
+    return invalidExperimentRequest(correlationId, "server_event_required");
+  }
+  if (Object.keys(body).some((field) => !PUBLIC_EXPERIMENT_FIELDS.has(field))) {
+    return invalidExperimentRequest(correlationId, "unexpected_field");
+  }
   if (
     typeof body.experiment_key !== "string" ||
     !EXPERIMENT_KEY_PATTERN.test(body.experiment_key) ||
     typeof body.subject_key !== "string" ||
     !SUBJECT_KEY_PATTERN.test(body.subject_key) ||
-    typeof body.event_name !== "string"
+    body.event_name !== "exposure" ||
+    typeof body.surface !== "string"
   ) {
-    return experimentResponse(
-      { active: false, recorded: false, correlation_id: correlationId },
-      400,
-    );
+    return invalidExperimentRequest(correlationId, "invalid_experiment_event");
   }
-  if (body.event_name !== "exposure" && body.event_name !== "lead_created") {
-    return experimentResponse(
-      { active: false, recorded: false, correlation_id: correlationId },
-      400,
-    );
-  }
-  if (
-    (body.surface !== undefined && body.surface !== null &&
-      (typeof body.surface !== "string" || !SURFACE_PATTERN.test(body.surface))) ||
-    (body.event_name === "exposure" && body.lead_id !== undefined && body.lead_id !== null) ||
-    (body.event_name === "lead_created" &&
-      (typeof body.lead_id !== "string" || !UUID_PATTERN.test(body.lead_id)))
-  ) {
-    return experimentResponse(
-      { active: false, recorded: false, correlation_id: correlationId },
-      400,
-    );
+  const definition = getPublicExperimentDefinition(body.experiment_key);
+  if (!definition || body.surface !== definition.surface) {
+    return invalidExperimentRequest(correlationId, "invalid_experiment_context");
   }
 
-  const outcome = await recordPublicExperimentEvent({
-    experimentKey: body.experiment_key,
-    subjectKey: body.subject_key,
-    eventName: body.event_name,
-    leadId: typeof body.lead_id === "string" ? body.lead_id : null,
-    surface: typeof body.surface === "string" ? body.surface : null,
-  });
+  let outcome: Awaited<ReturnType<typeof recordPublicExperimentEvent>>;
+  try {
+    outcome = await recordPublicExperimentEvent({
+      experimentKey: definition.key,
+      subjectKey: body.subject_key,
+      eventName: "exposure",
+      surface: definition.surface,
+    });
+  } catch {
+    return experimentResponse(
+      correlationId,
+      {
+        active: false,
+        recorded: false,
+        error: "Experiment measurement is temporarily unavailable.",
+        code: "experiment_store_unavailable",
+      },
+      503,
+    );
+  }
+  if (outcome.reason === "unavailable") {
+    return experimentResponse(
+      correlationId,
+      {
+        active: false,
+        recorded: false,
+        error: "Experiment measurement is temporarily unavailable.",
+        code: "experiment_store_unavailable",
+      },
+      503,
+    );
+  }
+  if (outcome.reason === "invalid_input") {
+    return invalidExperimentRequest(correlationId, "invalid_experiment_event");
+  }
+
   return experimentResponse(
+    correlationId,
     {
       active: outcome.active,
       recorded: outcome.recorded,
       variant_key: outcome.variantKey,
-      correlation_id: correlationId,
     },
     202,
   );
