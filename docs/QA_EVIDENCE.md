@@ -1,5 +1,37 @@
 # QA Evidence
 
+## Pending notification recovery — 2026-09-02
+
+- Stacked Draft PR
+  [#263](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/263)
+  starts from exact sealed PR #262 head
+  `0a255a7988d761577eb11c702b2e00e8cdaac3ce`. Its verified code-bearing
+  commit is `9ec39422e59063c7964c59f3e4701425cec877d8`, tree
+  `03462e612ac5217454262d315044b08003419022`.
+- Repository and runtime audit proved that AdminOps counted stale `pending`
+  rows after five minutes while the scheduled worker selected only `failed`
+  and `retry_scheduled`. This left a durable but never-claimed notification
+  without an automatic recovery path.
+- The canonical Neon query now selects due failures plus pending rows older
+  than the shared five-minute threshold, enforces remaining attempts, joins
+  only the lead test marker, and explicitly excludes `processing` rows.
+- Scheduled dispatch reuses the existing processors for internal alerts,
+  consented acknowledgments, and assignments. The protected one-record action
+  still refuses pending rows, and stale processing records remain manual
+  provider-reconciliation cases.
+- Exact Node 24 focused verification passes 5 files / 49 tests. The complete
+  release gate passes 298 files / 3,562 tests, strict typecheck, full ESLint,
+  optimized Next.js 15.5.21 build, 60 static pages, the
+  102-route/22-duplicate manifest, 14/14 safety controls, and Ask/NellySelly
+  isolation.
+- `pnpm audit --prod --audit-level high` reports no known vulnerability.
+  Redacted Gitleaks passes 764 history commits / approximately 19.56 MB and the
+  staged 21.55 KB candidate delta with no leak. Hosted exact-head CI, immutable
+  Preview, protected no-write acceptance, and runtime logs remain to be sealed.
+- No retry endpoint or cron was invoked. No database row, notification,
+  provider, email/SMS/Push, lead, task, environment value, WordPress surface,
+  DNS, publication, spend, deletion, or NellySelly action occurred.
+
 ## Autonomous notification retry readiness — 2026-09-02
 
 - A post-seal audit invalidated the first PR #262 head as final authority. It
@@ -19,9 +51,14 @@
   build, 60 static pages, and the 102-active-route/22-duplicate manifest.
 - `pnpm audit --prod --audit-level high` reports no known vulnerability.
   Redacted full-history Gitleaks scans 763 commits / approximately 19.54 MB
-  with no leak. Exact staged and exact-commit scans, hosted CI, immutable
-  Preview, no-write Preview acceptance, and runtime-log evidence remain to be
-  sealed on the repaired commit before a new seal is authoritative.
+  with no leak. Exact staged and exact-commit scans each cover approximately
+  15.94 KB with no leak. Hosted Release Gate `33591271127` passes on final head
+  `0a255a7988d761577eb11c702b2e00e8cdaac3ce`; immutable Preview
+  `dpl_C5kEaQoV2ooecnVFDhC4ZKTjdLDF` is Ready on that commit. Protected no-write
+  QA passes 12 checks with 12 intentional mutation/auth skips and zero
+  failures; anonymous retry and Lead Center boundaries return 401/no-store,
+  and the exact Preview log window contains zero error, fatal, or HTTP 500
+  events. The final seal is authoritative.
 
 - The superseded first-head focused Vitest passed 7 files / 55 tests across cron/admin authorization,
   Preview refusal before processing, aggregate-only cron output, bounded manual

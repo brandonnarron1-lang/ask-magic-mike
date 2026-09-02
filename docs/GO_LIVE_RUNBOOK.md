@@ -152,11 +152,15 @@ traffic and carrier messaging remain separate decisions.
   attribution, notifications, and response SLA in the Better Auth Lead Center.
 - Every activation window: confirm the one-minute notification-retry cron is
   authorized only by `CRON_SECRET`, Preview remains read-only, and the latest
-  aggregate run has no unavailable result. Never invoke it with a browser query
-  secret or record recipient/message data in cron output.
+  aggregate run has no unavailable result. Confirm stale `pending` work clears
+  through the five-minute atomic recovery path. Never invoke it with a browser
+  query secret or record recipient/message data in cron output.
 - Hourly during activation: 5xx rate, notification failures, retry-due and
   stale-processing counts, queue depth, duplicate rate, unassigned leads, and
   overdue SLA.
+- Never auto-replay a stale `processing` notification. Verify the exact provider
+  history and message ID first because provider acceptance may have occurred
+  before the application lost its response.
 - Next day: genuine/test KPI separation, source totals, first-response evidence,
   provider failures, and all published-placement receipts.
 

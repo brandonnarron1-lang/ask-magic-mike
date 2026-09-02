@@ -100,6 +100,9 @@ export type LeadNotificationRepository = {
   claimForProcessing(id: string, patch: Partial<LeadNotificationRecord>): Promise<LeadNotificationRecord | null>;
   listRecent(limit?: number): Promise<LeadNotificationRecord[]>;
   listByLead(leadId: string, limit?: number): Promise<LeadNotificationRecord[]>;
+  /** Due failures plus unclaimed pending rows older than the recovery cutoff.
+   * Processing rows are intentionally excluded because provider outcome may
+   * be ambiguous. */
   listRetryable(limit?: number, now?: Date): Promise<LeadNotificationRecord[]>;
 };
 

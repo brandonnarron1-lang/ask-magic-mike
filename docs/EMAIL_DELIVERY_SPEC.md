@@ -74,7 +74,11 @@ The existing protected retry route is also the scheduled worker. Vercel invokes
 `GET /api/admin/notifications/retry` once per minute in Production with
 `Authorization: Bearer $CRON_SECRET`; any other GET remains an authenticated,
 read-only readiness check. Each scheduled run processes at most 25 due rows
-sequentially and returns only status counts. It dispatches the three existing
+sequentially and returns only status counts. Due selection includes a
+never-claimed `pending` row only after the shared five-minute stale threshold,
+so a serverless interruption after durable insertion cannot strand the first
+attempt. The existing atomic conditional claim remains the concurrency and
+duplicate-send boundary. It dispatches the three existing
 outbox types (`lead_alert`, `consumer_ack`, and `agent_assignment`) through their
 version-pinned renderers and provider adapters. Unknown types become visible
 terminal failures instead of being silently dropped.
@@ -99,6 +103,12 @@ Unassignment, reassignment, deactivation, or a channel pause records a visible
 `skipped` result and cannot leak the lead to a stale recipient. The protected
 Lead Center retry action dispatches each row through its recorded type's own
 processor rather than assuming every row is an agent assignment.
+
+Rows already in `processing` are intentionally absent from automatic selection.
+The provider may have accepted such a request before the application lost its
+response. AdminOps identifies processing rows older than ten minutes and directs
+the operator to reconcile provider history and message ID before any state
+change or replay.
 
 SMTP 4xx and connection/TLS timeout errors are retryable. Authentication errors,
 5xx recipient rejection, and partial primary/BCC acceptance require operator

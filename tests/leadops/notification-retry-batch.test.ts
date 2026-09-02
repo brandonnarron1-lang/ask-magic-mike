@@ -120,11 +120,19 @@ describe("notification retry batch", () => {
   it("fails closed for non-retryable or unsupported one-record requests", async () => {
     const records = [
       row("sent", "lead_alert", { status: "sent" }),
+      row("pending", "lead_alert", { status: "pending" }),
       row("unknown", "future_type"),
     ];
     const { repo } = repository(records);
 
     await expect(retryNotificationByType("sent", {}, {
+      repository: repo,
+    })).resolves.toEqual({
+      ok: false,
+      statusCode: 409,
+      error: "notification_not_retryable",
+    });
+    await expect(retryNotificationByType("pending", {}, {
       repository: repo,
     })).resolves.toEqual({
       ok: false,
@@ -138,6 +146,43 @@ describe("notification retry batch", () => {
       statusCode: 409,
       error: "notification_type_unsupported",
     });
+  });
+
+  it("recovers stale pending rows selected by the repository through existing type processors", async () => {
+    const due = [
+      row("pending-alert", "lead_alert", {
+        status: "pending",
+        attempt_count: 0,
+        next_attempt_at: null,
+      }),
+      row("pending-assignment", "agent_assignment", {
+        status: "pending",
+        attempt_count: 0,
+        next_attempt_at: null,
+      }),
+    ];
+    const { repo } = repository(due);
+    const retryLeadAlert = vi.fn(async (id: string) => ({
+      ...due.find((candidate) => candidate.id === id)!,
+      status: "sent" as const,
+    }));
+    const retryAssignment = vi.fn(async (id: string) => ({
+      ok: true as const,
+      notification: {
+        ...due.find((candidate) => candidate.id === id)!,
+        status: "sent" as const,
+      },
+    }));
+
+    const results = await retryDueNotifications(25, {
+      repository: repo,
+      retryLeadAlert,
+      retryAssignment,
+    });
+
+    expect(results.map((result) => result?.status)).toEqual(["sent", "sent"]);
+    expect(retryLeadAlert).toHaveBeenCalledWith("pending-alert", { automated: true });
+    expect(retryAssignment).toHaveBeenCalledWith("pending-assignment");
   });
 
   it("dispatches every supported notification type through its existing processor", async () => {
@@ -171,8 +216,13 @@ describe("notification retry batch", () => {
     expect(retryAssignment).toHaveBeenCalledWith("assignment");
   });
 
-  it("suppresses test rows before any notification processor can send", async () => {
-    const testRow = row("qa", "lead_alert", { lead_is_test: true });
+  it("suppresses stale pending QA rows before any notification processor can send", async () => {
+    const testRow = row("qa", "lead_alert", {
+      status: "pending",
+      attempt_count: 0,
+      next_attempt_at: null,
+      lead_is_test: true,
+    });
     const { repo, update } = repository([testRow]);
     const retryLeadAlert = vi.fn();
     const retryAssignment = vi.fn();
