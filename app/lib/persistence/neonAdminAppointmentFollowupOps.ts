@@ -347,12 +347,19 @@ export async function loadNeonAdminActionQueue(): Promise<AdminActionQueueResult
   try {
     const [leads, appointments, tasks, notifications] = await Promise.all([
       sql.query(
-        `SELECT id, created_at, status, assigned_agent_id, assigned_at,
-                last_contacted_at, lead_grade, timeline_months, address_raw,
-                first_name, last_name
-           FROM public.leads
-          WHERE is_test = false AND communication_suppressed = false
-          ORDER BY created_at DESC LIMIT 500`,
+        `SELECT l.id, l.created_at, l.status, l.conversion_stage,
+                l.assigned_agent_id, l.assigned_at, l.last_contacted_at,
+                l.lead_grade, l.timeline_months, l.address_raw,
+                l.first_name, l.last_name, l.is_test,
+                l.communication_suppressed, rm.first_human_response_at,
+                true AS first_response_evidence_available
+           FROM public.leads l
+           LEFT JOIN public.lead_response_milestones rm
+             ON rm.lead_id = l.id
+            AND rm.is_test = false
+            AND rm.communication_suppressed = false
+          WHERE l.is_test = false AND l.communication_suppressed = false
+          ORDER BY l.created_at DESC LIMIT 500`,
       ),
       sql.query(`SELECT * FROM public.lead_appointments ORDER BY created_at DESC LIMIT 500`),
       sql.query(`SELECT * FROM public.tasks WHERE category LIKE 'followup:%' ORDER BY due_at ASC NULLS LAST LIMIT 500`),

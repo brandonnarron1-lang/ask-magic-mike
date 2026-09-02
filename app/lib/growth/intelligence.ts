@@ -1,3 +1,5 @@
+import { evaluateFirstResponseRisk } from "../firstResponseRisk";
+
 export type GrowthActionClass =
   | "observe"
   | "recommend"
@@ -942,8 +944,6 @@ export function buildGrowthIntelligence(input: {
     .filter((channel) => channel.paid && channel.spendUsd > 0)
     .reduce((sum, channel) => sum + channel.leads, 0);
   const staleCutoff = now.getTime() - 30 * 24 * 60 * 60 * 1000;
-  const recentCutoff = now.getTime() - 7 * 24 * 60 * 60 * 1000;
-  const responseThreshold = now.getTime() - 15 * 60 * 1000;
   const measuredFirstResponses = input.leads
     .map(firstResponseMinutes)
     .filter((value): value is number => value !== null);
@@ -958,17 +958,18 @@ export function buildGrowthIntelligence(input: {
   for (const lead of input.leads) {
     const created = new Date(lead.createdAt).getTime();
     const contacted = lead.lastContactedAt ? new Date(lead.lastContactedAt).getTime() : null;
-    const firstResponded = lead.firstHumanResponseAt
-      ? new Date(lead.firstHumanResponseAt).getTime()
-      : null;
     const terminal = TERMINAL_STATES.has(statusFor(lead));
     if (!terminal && Number.isFinite(created) && created < staleCutoff &&
       (contacted == null || !Number.isFinite(contacted) || contacted < staleCutoff)) {
       staleNurtureCandidates += 1;
     }
-    if (!terminal && Number.isFinite(created) && created >= recentCutoff && created <= responseThreshold &&
-      (firstResponded == null || !Number.isFinite(firstResponded)) &&
-      (contacted == null || !Number.isFinite(contacted))) {
+    if (evaluateFirstResponseRisk({
+      createdAt: lead.createdAt,
+      status: lead.status,
+      conversionStage: lead.conversionStage,
+      lastContactedAt: lead.lastContactedAt,
+      firstHumanResponseAt: lead.firstHumanResponseAt,
+    }, now).isRisk) {
       speedToLeadRisks += 1;
     }
   }

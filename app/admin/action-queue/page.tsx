@@ -101,7 +101,7 @@ export default async function AdminActionQueuePage() {
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#e2c06f]">AdminOps</p>
               <h1 className="mt-3 font-serif text-4xl">Daily action queue</h1>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-[#d9ceb8]">
-                Overdue follow-ups, appointment requests, today&apos;s appointments, stalled leads, and retry review in one ordered queue.
+                First-response risks, overdue follow-ups, appointment requests, today&apos;s appointments, stalled leads, and retry review in one ordered queue.
               </p>
             </div>
             <nav className="flex flex-wrap gap-2" aria-label="Admin navigation">
@@ -144,7 +144,7 @@ export default async function AdminActionQueuePage() {
               <h2 className="font-serif text-3xl">No open actions</h2>
               <p className="mt-3 text-sm text-[#d9ceb8]">
                 {queue.configured
-                  ? "No overdue follow-ups, appointment requests, stalled leads, or retry-scheduled notifications were returned."
+                  ? "No first-response risks, overdue follow-ups, appointment requests, stalled leads, or retry-scheduled notifications were returned."
                   : "The canonical Neon database is not configured in this environment."}
               </p>
             </div>
