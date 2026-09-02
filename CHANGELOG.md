@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-09-02 — Atomic Twilio status callback hardening
+
+- Retained the existing Twilio adapter, signed callback, canonical Neon outbox,
+  provider receipt ledger, and communication timeline; added no provider,
+  route, table, queue, recipient, migration, or environment variable.
+- Made status receipt, monotonic notification transition, and communication
+  event one parameterized PostgreSQL statement with retry-safe rollback.
+- Added deterministic replay suppression and out-of-order status handling so a
+  late callback cannot regress confirmed delivery and a later delivery can
+  correct an earlier provider failure.
+- Added Preview refusal, form-only input, declared/streamed body ceilings,
+  `SM`/`MM` identity and numeric error validation, private correlation, and
+  secret/PII-safe failures.
+- Added focused behavior tests and a local-only exact-SQL PostgreSQL proof for
+  processed, replay, out-of-order, correction, non-regression, forced rollback,
+  failed-receipt retry, and unmatched paths.
+- Production remains accepted PR #247; PR #248 remains the sole requestable
+  application gate. No Production, Neon, Twilio, WordPress, lead, message,
+  environment, DNS, publication, spend, deletion, or NellySelly state changed.
+
 ## 2026-09-02 — Atomic Resend webhook boundary hardening
 
 - Retained the existing Resend/Svix callback, Neon outbox, provider receipt

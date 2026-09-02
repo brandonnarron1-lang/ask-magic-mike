@@ -11,6 +11,33 @@ Updated 2026-09-02.
   candidates below are Draft/Preview work only and change no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Phase 9 atomic SMS status boundary — 2026-09-02
+
+- **Existing stack retained:** Twilio, its existing signed status route, the
+  canonical Neon notification outbox, provider receipt ledger, communication
+  timeline, and Lead Center delivery views remain the only authorities.
+- **Atomic retry contract:** receipt claim, monotonic notification update, and
+  timeline append now share one PostgreSQL statement. Any downstream failure
+  rolls back the receipt; exact replay is a no-op; an explicitly failed receipt
+  is reclaimable; unmatched signed callbacks are retained as ignored evidence.
+- **Ordering correctness:** stable rank guards account for Twilio's documented
+  out-of-order delivery. Late sent/failure states cannot regress stronger
+  evidence, while a later confirmed delivery can correct an earlier failure.
+- **Ingress safety:** Preview refuses before processing; form-only requests,
+  declared/streamed 20 KB limits, signature verification, SID/status/error
+  validation, private no-store correlation, and safe failures precede writes.
+- Focused verification passes 3 files / 34 tests, strict typecheck, and targeted
+  lint. Exact application SQL passes isolated PostgreSQL 17 tests for processed,
+  replay, ordering, correction, non-regression, rollback, retry, unmatched, and
+  late-match healing cases. Complete Node 24.18.0 acceptance passes 303 files / 3,671 tests,
+  repository-wide typecheck/lint, 14/14 safety, isolation, a 60-page optimized
+  build, 102/22 route proof, and a clean Production dependency audit. Hosted
+  exact-commit evidence remains pending.
+- This is an additive Draft successor to PR #272. Production remains accepted
+  PR #247 and PR #248 remains the sole requestable application gate. No Twilio
+  call, message, remote database action, Production/WordPress/environment
+  change, lead, DNS/publication/spend/deletion, or NellySelly action occurred.
+
 ## Phase 9 atomic email webhook boundary — 2026-09-02
 
 - **Existing delivery stack retained:** the Resend subscription, Svix secret,
