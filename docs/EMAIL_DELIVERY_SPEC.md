@@ -2,18 +2,28 @@
 
 ## Contract
 
-Lead persistence is independent of email. After the atomic lead capture commits:
+Lead persistence is independent of provider delivery. The public capture
+transaction now commits the complete lead and required internal delivery intent
+together:
 
-1. Create one internal alert outbox row keyed by
+1. Commit one internal alert outbox row keyed by
    `lead_alert:<lead_id>:lead_alert_email_v3` for new alerts. Historical v1/v2
    rows retain their recorded version and renderer during retry.
-2. Send to `LEAD_NOTIFICATION_TO` (default `mike@ourtownproperties.com`) and the
+2. After commit, atomically claim that row and send to `LEAD_NOTIFICATION_TO`
+   (default `mike@ourtownproperties.com`) and the
    secure `LEAD_NOTIFICATION_BCC` value, if configured. The BCC address is never
    rendered in the subject/body or logs.
 3. Create one separate consumer acknowledgment row only when the submitted email
    consent is true and suppression is false.
 4. Store provider, provider message ID, status, attempt count, timestamps,
    template version, safe error summary, and related lead ID in `lead_notifications`.
+
+`capture_public_lead_v2` also commits deterministic score factors, QA/test
+suppression, exact consent evidence, first/last-touch attribution, click IDs,
+placement context, and the source idempotency key. If the required outbox insert
+fails, the same transaction rolls back the lead; the public form cannot claim a
+durable success with no retryable internal alert. No recipient address, BCC,
+message body, or provider secret is stored by the capture function.
 
 ## Safe configuration
 
@@ -69,6 +79,12 @@ Attempts are bounded to three with 1 minute, 5 minute, and 30 minute backoff. A
 retryable provider/network/429/5xx response becomes `retry_scheduled`; exhaustion
 becomes `permanently_failed`. AdminOps shows both states and allows a controlled
 retry. A failed email does not lose or roll back the lead.
+
+The request path first claims and delivers the transaction-seeded `pending`
+record. If the function stops after commit but before that claim, the scheduled
+worker recovers the unclaimed row after five minutes. Idempotent request replay
+can also seed a missing canonical row for a historical lead; replay itself does
+not call the provider.
 
 The existing protected retry route is also the scheduled worker. Vercel invokes
 `GET /api/admin/notifications/retry` once per minute in Production with

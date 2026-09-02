@@ -136,7 +136,14 @@ async function enqueueOne(input: {
     ? `${input.type}:${input.leadId}:${input.templateVersion}:${input.channel}:${input.recipientRole || "internal"}:${input.recipientKey || "default"}`
     : `${input.type}:${input.leadId}:${input.templateVersion}`;
   const existing = await input.repo.findByIdempotencyKey(idempotencyKey);
-  if (existing) return existing;
+  // capture_public_lead_v2 seeds the required internal email row in the same
+  // transaction as the lead. Claim and deliver that pending row here; every
+  // other state remains governed by the normal retry/reconciliation policy.
+  if (existing) {
+    return existing.status === "pending"
+      ? deliver(existing, input, input.repo, input.provider)
+      : existing;
+  }
   const created = await input.repo.create({
     lead_id: input.leadId,
     agent_id: null,
@@ -450,11 +457,19 @@ export async function retryDueLeadAlertNotifications(limit = 25) {
   return retryDueNotifications(limit);
 }
 
-export async function enqueueLeadNotifications(input: LeadAlertInput) {
+type EnqueueLeadNotificationDependencies = {
+  repository?: LeadNotificationRepository;
+  provider?: NotificationProvider;
+};
+
+export async function enqueueLeadNotifications(
+  input: LeadAlertInput,
+  dependencies: EnqueueLeadNotificationDependencies = {},
+) {
   const delivery = assertProviderDeliveryAllowed();
   if (!delivery.ok) return { internal: null, sms: [], push: [], consumer: null, warning: delivery.error };
-  const repo = notificationRepository();
-  const provider = selectNotificationProvider();
+  const repo = dependencies.repository || notificationRepository();
+  const provider = dependencies.provider || selectNotificationProvider();
   const rendered = renderLeadAlert(input);
   try {
     const internal = await enqueueOne({

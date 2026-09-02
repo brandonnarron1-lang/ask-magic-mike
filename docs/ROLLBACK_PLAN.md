@@ -26,6 +26,16 @@ application deployment while retaining every `lead_notifications` row. Never
 reset a stale `processing` row or delete delivery history as part of application
 rollback; reconcile the provider result first.
 
+The atomic public-lead delivery-intent candidate must be released in two phases:
+apply `20260902012000_atomic_public_lead_delivery_intent.sql`, verify the v2
+function and server-only privileges, then promote the same verified application
+tree. If migration verification fails before application promotion, drop only
+`capture_public_lead_v2(jsonb,jsonb,jsonb,text,jsonb)` and keep v1 active. If the
+application fails after promotion, immediately restore the prior Ready
+application before considering a reviewed forward database correction. Do not
+drop v2 while an application that calls it is live, and never delete lead,
+consent, attribution, audit, or notification rows during rollback.
+
 The Connector 1.1.0 plugin package remains offline and independently gated. A
 future WordPress upgrade must first back up the exact active plugin/options and
 use the byte-preserved 1.0.0 plugin package as its separate rollback. The PR

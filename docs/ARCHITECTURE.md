@@ -255,7 +255,7 @@ conflict with this section.
   Vercel project `eyes-up-industries/ask-magic-mike`.
 - Canonical database: Neon PostgreSQL through the server-only
   `NeonPostgresAdapter` and the reviewed atomic function
-  `capture_public_lead_v1`. The Supabase/PostgREST adapter is rollback-only.
+  `capture_public_lead_v2`. The Supabase/PostgREST adapter is rollback-only.
 - Brokerage/SEO surface: `https://www.ourtownproperties.com` (WordPress,
   Beaver Builder, Gravity Forms, FlexMLS/IDX). It remains a presentation and
   attribution bridge, not a competing lead database.
@@ -265,6 +265,13 @@ conflict with this section.
 - Outbound delivery: the existing Resend adapter and `lead_notifications` outbox.
   Internal delivery uses the configured production boundary; consumer campaigns,
   carrier SMS, and other external sends retain independent approval/consent gates.
+
+`capture_public_lead_v2` wraps the proven v1 contact/dedupe/routing transaction
+and adds the complete deterministic score, test suppression, consent ledger,
+first/last-touch attribution, click IDs, placement context, source idempotency key,
+and one canonical internal-email outbox row before commit. Provider delivery stays
+outside the database transaction; a provider failure therefore cannot lose or
+roll back the lead, while an outbox-write failure cannot leave an alertless lead.
 
 ## Durable request sequence
 

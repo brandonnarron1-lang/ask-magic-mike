@@ -99,11 +99,15 @@ export class SupabasePostgrestAdapter implements ActivePersistenceBoundary {
   async captureLeadLifecycle(
     input: LeadLifecycleCapture,
   ): Promise<LeadLifecycleCaptureResult> {
-    const result = await this.rpc("capture_public_lead_v1", {
+    const result = await this.rpc("capture_public_lead_v2", {
       p_session: input.session,
       p_lead: input.lead,
       p_attribution: input.attribution,
       p_notification_mode: input.notificationMode,
+      p_internal_notification: {
+        template_version: input.internalNotification.templateVersion,
+        metadata: input.internalNotification.metadata,
+      },
     });
     if (result.ok === false) {
       if (
@@ -111,7 +115,7 @@ export class SupabasePostgrestAdapter implements ActivePersistenceBoundary {
         result.error !== "idempotency_conflict"
       ) {
         throw new PersistenceUnavailableError(
-          "capture_public_lead_v1_domain_failure",
+          "capture_public_lead_v2_domain_failure",
           502,
         );
       }
