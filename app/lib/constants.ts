@@ -61,6 +61,7 @@ export const analyticsEvents = [
   "chat_started",
   "chat_message_sent",
   "appointment_click",
+  "appointment_requested",
   "lead_created",
   "thank_you_viewed",
   "appointment_cta_clicked",
