@@ -11,6 +11,37 @@ Updated 2026-09-02.
   candidates below are Draft/Preview work only and change no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Phase 9 public appointment boundary hardening — 2026-09-02
+
+- **Existing transaction retained:** `request_public_appointment_v1` remains
+  the single appointment authority for lead/session verification, active-
+  request idempotency, lifecycle update, immutable audit, and confirmation
+  follow-up creation.
+- **Public edge completed in source:** the existing route now enforces the
+  shared origin policy, JSON media type, declared and streamed 2 KB limit,
+  object payload, canonical source surface, Preview zero-write ordering, and
+  durable Production limiting unless the existing exact break-glass flag is
+  active. Every response is no-store and correlation-addressable.
+- **Measurement authority repaired:** a new durable appointment result writes
+  the protected server-side `appointment_requested` event with only canonical
+  lead/session association and source surface. The consented browser event is
+  external-only; replay emits neither path again.
+- **No parallel system:** source validation is shared with lead normalization,
+  and the current adapter, CTA, analytics repository, privacy policy, rate
+  limiter, and database function remain in place.
+- **Verification state:** focused acceptance passes 4 files / 30 tests. Exact
+  Node 24.18.0 complete acceptance passes isolation, 14/14 safety controls, 300
+  files / 3,577 tests, strict typecheck, full ESLint, optimized Next.js 15.5.21
+  build with 60 static pages, and 102/22 route proof. Dependency/secret scans
+  pass with no known Production vulnerability and no leak across the approximately 29 KB
+  staged delta or 767-commit history. Intercepted local browser QA passes 2/2.
+  Hosted exact-head evidence remains pending.
+- **Authority unchanged:** Production is still PR #247 and PR #248 remains the
+  sole requestable application gate. No remote appointment, lead, analytics,
+  database, provider, WordPress, environment, deployment, DNS, publication,
+  spend, deletion, or NellySelly mutation occurred. Design and rollback:
+  [`phase9/PUBLIC_APPOINTMENT_BOUNDARY_HARDENING.md`](./phase9/PUBLIC_APPOINTMENT_BOUNDARY_HARDENING.md).
+
 ## Phase 9 pending notification recovery — 2026-09-02
 
 - **Review vehicle:** stacked Draft PR

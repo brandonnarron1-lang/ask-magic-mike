@@ -19,6 +19,22 @@ export type LeadSourceSurface =
   | "widget"
   | "ourtownproperties";
 
+const LEAD_SOURCE_SURFACES = new Set<LeadSourceSurface>([
+  "homepage",
+  "home_value_page",
+  "seller_page",
+  "buyer_page",
+  "renter_page",
+  "open_house",
+  "ask_page",
+  "widget",
+  "ourtownproperties",
+]);
+
+export function isLeadSourceSurface(value: unknown): value is LeadSourceSurface {
+  return typeof value === "string" && LEAD_SOURCE_SURFACES.has(value as LeadSourceSurface);
+}
+
 export type Attribution = {
   source?: string;
   medium?: string;
@@ -212,19 +228,7 @@ function normalizeFunnelType(input: unknown): FunnelType {
 }
 
 function normalizeSurface(input: unknown, funnelType: FunnelType): LeadSourceSurface {
-  if (
-    input === "homepage" ||
-    input === "home_value_page" ||
-    input === "seller_page" ||
-    input === "buyer_page" ||
-    input === "renter_page" ||
-    input === "open_house" ||
-    input === "ask_page" ||
-    input === "widget" ||
-    input === "ourtownproperties"
-  ) {
-    return input;
-  }
+  if (isLeadSourceSurface(input)) return input;
   if (funnelType === "seller") return "seller_page";
   if (funnelType === "buyer") return "buyer_page";
   if (funnelType === "renter") return "renter_page";

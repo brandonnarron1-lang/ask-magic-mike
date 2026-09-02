@@ -1,5 +1,31 @@
 # QA Evidence
 
+## Public appointment boundary hardening — 2026-09-02
+
+- The existing atomic appointment function, persistence adapter, Lead Center
+  lifecycle, audit record, and confirmation task remain unchanged; no second
+  appointment system was introduced.
+- Focused Vitest passes 4 files / 30 tests across route security, atomic
+  persistence contract, client outcome identity, and analytics privacy.
+- Strict TypeScript, targeted ESLint, and `git diff --check` pass.
+- Tests prove explicit foreign-origin refusal, JSON-only input, both body-size
+  defenses, object validation, exact source vocabulary, Preview zero-write,
+  Production durable-limit fail-closed/break-glass behavior, no-store and
+  correlation responses, trusted new-outcome recording, replay suppression,
+  renter attribution, and non-reversal of a committed appointment if the
+  secondary analytics write is unavailable.
+- Complete Node 24.18.0 release acceptance passes isolation, 14/14 safety
+  controls, 300 files / 3,577 tests, strict TypeScript, full ESLint, optimized
+  Next.js 15.5.21 build with 60 static pages, and the 102-active/22-duplicate
+  route manifest. Intercepted Ask/appointment Playwright passes 2/2 without a
+  remote write. Production dependency audit reports no known vulnerability;
+  redacted Gitleaks finds no leak in the approximately 29 KB staged delta or the
+  767-commit / approximately 19.62 MB history. Hosted CI, immutable Preview,
+  protected no-write browser QA, and runtime logs remain pending.
+- Detailed evidence:
+  [`phase9/PUBLIC_APPOINTMENT_BOUNDARY_HARDENING_QA_EVIDENCE.md`](./phase9/PUBLIC_APPOINTMENT_BOUNDARY_HARDENING_QA_EVIDENCE.md).
+- No external state was read or mutated by these focused tests.
+
 ## Pending notification recovery — 2026-09-02
 
 - Stacked Draft PR
