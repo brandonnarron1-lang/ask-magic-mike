@@ -12,6 +12,7 @@ import {
 } from "../../../../../app/lib/emailProviderConfiguration";
 import { durableRateLimitHashSecretReady } from "@/lib/security/rate-limit";
 import { loadNeonLeadNotificationOperations } from "../../../../../app/lib/persistence/neonLeadNotificationOperations";
+import { loadNeonAdminActionQueue } from "../../../../../app/lib/persistence/neonAdminAppointmentFollowupOps";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
@@ -25,6 +26,8 @@ const TABLES = [
   "compliance_flags",
   "rate_limit_buckets",
   "tasks",
+  "lead_appointments",
+  "lead_response_milestones",
   "listings",
   "listing_matches",
   "webhook_events",
@@ -112,9 +115,22 @@ export async function GET(req: NextRequest) {
     "compliance_flags",
     "rate_limit_buckets",
   ].every((table) => tablePresence[table as TableName]);
-  const notificationOperations = tablePresence.lead_notifications
-    ? await loadNeonLeadNotificationOperations().catch(() => null)
-    : null;
+  const actionQueueSchemaReady = [
+    "leads",
+    "tasks",
+    "lead_notifications",
+    "lead_appointments",
+    "lead_response_milestones",
+  ].every((table) => tablePresence[table as TableName]);
+  const [notificationOperations, actionQueueOperations] = await Promise.all([
+    tablePresence.lead_notifications
+      ? loadNeonLeadNotificationOperations().catch(() => null)
+      : null,
+    actionQueueSchemaReady
+      ? loadNeonAdminActionQueue({ aggregateOnly: true }).catch(() => null)
+      : null,
+  ]);
+  const firstResponseCoverage = actionQueueOperations?.firstResponseCoverage ?? null;
 
   const smsEnabled = enabled(process.env.ENABLE_SMS);
   const emailEnabled = enabled(process.env.ENABLE_EMAIL) || enabled(process.env.EMAIL_ENABLED);
@@ -212,6 +228,31 @@ export async function GET(req: NextRequest) {
       last_sent_at: notificationOperations?.lastSentAt ?? null,
       last_provider_confirmation_at:
         notificationOperations?.lastProviderConfirmationAt ?? null,
+    },
+    lead_operations: {
+      configured: actionQueueSchemaReady,
+      operations_query_ready: Boolean(
+        actionQueueOperations && !actionQueueOperations.error,
+      ),
+      action_queue_depth: actionQueueOperations?.items.length ?? null,
+      urgent_action_count: actionQueueOperations
+        ? actionQueueOperations.items.filter((item) => item.priority <= 2).length
+        : null,
+      first_response_evidence_available:
+        firstResponseCoverage?.evidenceAvailable ?? false,
+      first_response_risk_count: firstResponseCoverage?.riskCount ?? null,
+      first_response_covered_count: firstResponseCoverage?.coveredCount ?? null,
+      first_response_direct_queue_count:
+        firstResponseCoverage?.directQueueCount ?? null,
+      first_response_existing_action_coverage_count:
+        firstResponseCoverage?.coveredByExistingActionCount ?? null,
+      first_response_uncovered_count:
+        firstResponseCoverage?.uncoveredCount ?? null,
+      first_response_coverage_complete: Boolean(
+        firstResponseCoverage?.evidenceAvailable &&
+        firstResponseCoverage.uncoveredCount === 0,
+      ),
+      test_and_suppressed_records_excluded: true,
     },
     safety: {
       live_sms_disabled: safety.live_sms_disabled,

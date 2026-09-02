@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildDailyActionQueue,
+  buildDailyActionQueueWithCoverage,
   canTransitionAppointment,
   createAppointment,
   createFollowupTask,
@@ -252,6 +253,102 @@ describe("AdminOps appointment and follow-up operations", () => {
       status: "overdue",
       recommended_action: "Complete one-to-one follow-up and record the immutable first-response milestone",
     }));
+  });
+
+  it("proves every first-response risk is covered by a direct or existing operator action", () => {
+    const direct = buildDailyActionQueueWithCoverage({
+      now: NOW,
+      firstResponseEvidenceAvailable: true,
+      leads: [{
+        id: "lead-direct-coverage",
+        status: "assigned",
+        created_at: "2026-07-12T13:30:00.000Z",
+        assigned_agent_id: "agent-1",
+        first_response_evidence_available: true,
+        first_human_response_at: null,
+        last_contacted_at: null,
+        is_test: false,
+        communication_suppressed: false,
+      }],
+      appointments: [],
+      tasks: [],
+    });
+
+    expect(direct.firstResponseCoverage).toEqual({
+      evidenceAvailable: true,
+      riskCount: 1,
+      coveredCount: 1,
+      directQueueCount: 1,
+      coveredByExistingActionCount: 0,
+      uncoveredCount: 0,
+    });
+
+    const existing = buildDailyActionQueueWithCoverage({
+      now: NOW,
+      firstResponseEvidenceAvailable: true,
+      leads: [{
+        id: "lead-existing-coverage",
+        status: "assigned",
+        created_at: "2026-07-12T13:30:00.000Z",
+        assigned_agent_id: "agent-1",
+        first_response_evidence_available: true,
+        first_human_response_at: null,
+        last_contacted_at: null,
+        is_test: false,
+        communication_suppressed: false,
+      }],
+      appointments: [],
+      tasks: [{
+        id: "task-existing-coverage",
+        lead_id: "lead-existing-coverage",
+        agent_id: "agent-1",
+        title: "first contact",
+        body: null,
+        due_at: "2026-07-12T13:45:00.000Z",
+        status: "open",
+        priority: "urgent",
+        category: "followup:first_contact",
+        created_at: "2026-07-12T13:30:00.000Z",
+        updated_at: "2026-07-12T13:30:00.000Z",
+      }],
+    });
+
+    expect(existing.firstResponseCoverage).toEqual({
+      evidenceAvailable: true,
+      riskCount: 1,
+      coveredCount: 1,
+      directQueueCount: 0,
+      coveredByExistingActionCount: 1,
+      uncoveredCount: 0,
+    });
+    expect(existing.items.map((item) => item.type)).toEqual(["overdue_followup"]);
+  });
+
+  it("fails closed instead of claiming response coverage when immutable evidence is unavailable", () => {
+    const built = buildDailyActionQueueWithCoverage({
+      now: NOW,
+      firstResponseEvidenceAvailable: false,
+      leads: [{
+        id: "lead-unverifiable-coverage",
+        status: "assigned",
+        created_at: "2026-07-12T13:30:00.000Z",
+        first_response_evidence_available: false,
+        first_human_response_at: null,
+        last_contacted_at: null,
+      }],
+      appointments: [],
+      tasks: [],
+    });
+
+    expect(built.firstResponseCoverage).toEqual({
+      evidenceAvailable: false,
+      riskCount: 0,
+      coveredCount: 0,
+      directQueueCount: 0,
+      coveredByExistingActionCount: 0,
+      uncoveredCount: 0,
+    });
+    expect(built.items).toEqual([]);
   });
 
   it("fails closed for excluded, terminal, contacted, responded, stale, or unverifiable response evidence", () => {

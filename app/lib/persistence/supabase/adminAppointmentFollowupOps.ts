@@ -93,12 +93,35 @@ export type AdminActionQueueItem = {
   recommended_action: string;
 };
 
+export type AdminFirstResponseQueueCoverage = {
+  evidenceAvailable: boolean;
+  riskCount: number;
+  coveredCount: number;
+  directQueueCount: number;
+  coveredByExistingActionCount: number;
+  uncoveredCount: number;
+};
+
 export type AdminActionQueueResult = {
   configured: boolean;
   generatedAt: string;
   items: AdminActionQueueItem[];
+  firstResponseCoverage: AdminFirstResponseQueueCoverage;
   error?: string;
 };
+
+export function emptyFirstResponseQueueCoverage(
+  evidenceAvailable = false,
+): AdminFirstResponseQueueCoverage {
+  return {
+    evidenceAvailable,
+    riskCount: 0,
+    coveredCount: 0,
+    directQueueCount: 0,
+    coveredByExistingActionCount: 0,
+    uncoveredCount: 0,
+  };
+}
 
 export type AppointmentCalendarAdapterResult =
   | { ok: true; external_event_id: string | null; status: "disabled" | "synced" }
@@ -690,19 +713,35 @@ export async function updateFollowupTask(input: {
   return { ok: true, id: task.id, status: nextStatus };
 }
 
-export function buildDailyActionQueue(input: {
+type DailyActionQueueInput = {
   leads: Array<Record<string, unknown>>;
   appointments: AdminAppointmentRow[];
   tasks: AdminFollowupTaskRow[];
   notifications?: Array<Record<string, unknown>>;
+  firstResponseEvidenceAvailable?: boolean;
   now?: Date;
-}): AdminActionQueueItem[] {
+};
+
+export function buildDailyActionQueueWithCoverage(
+  input: DailyActionQueueInput,
+): {
+  items: AdminActionQueueItem[];
+  firstResponseCoverage: AdminFirstResponseQueueCoverage;
+} {
   const now = input.now || new Date();
   const todayStart = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
   const todayEnd = todayStart + 24 * 60 * 60 * 1000;
   const leadMap = new Map(input.leads.map((lead) => [text(lead.id) || "", lead]));
   const items: AdminActionQueueItem[] = [];
   const appointmentActionLeadIds = new Set<string>();
+  const firstResponseEvidenceAvailable = input.firstResponseEvidenceAvailable ?? (
+    input.leads.length > 0 &&
+    input.leads.every((lead) => lead.first_response_evidence_available === true)
+  );
+  let responseRiskCount = 0;
+  let directQueueCount = 0;
+  let coveredByExistingActionCount = 0;
+  let uncoveredCount = 0;
 
   const leadLabel = (leadId: string) => {
     const lead = leadMap.get(leadId);
@@ -824,6 +863,17 @@ export function buildDailyActionQueue(input: {
       (responseRiskQueued || immediateActionExists || appointmentActionLeadIds.has(leadId)),
     );
 
+    if (responseRisk?.isRisk) {
+      responseRiskCount += 1;
+      if (responseRiskQueued) {
+        directQueueCount += 1;
+      } else if (immediateActionExists || appointmentActionLeadIds.has(leadId)) {
+        coveredByExistingActionCount += 1;
+      } else {
+        uncoveredCount += 1;
+      }
+    }
+
     if (responseRiskQueued && responseRisk) {
       items.push({
         id: `first-response-${leadId}`,
@@ -887,18 +937,41 @@ export function buildDailyActionQueue(input: {
     });
   }
 
-  return items.sort((a, b) =>
-    a.priority - b.priority ||
-    (parseTime(a.due_at) || Number.MAX_SAFE_INTEGER) - (parseTime(b.due_at) || Number.MAX_SAFE_INTEGER) ||
-    a.lead_label.localeCompare(b.lead_label) ||
-    a.id.localeCompare(b.id),
-  );
+  return {
+    items: items.sort((a, b) =>
+      a.priority - b.priority ||
+      (parseTime(a.due_at) || Number.MAX_SAFE_INTEGER) - (parseTime(b.due_at) || Number.MAX_SAFE_INTEGER) ||
+      a.lead_label.localeCompare(b.lead_label) ||
+      a.id.localeCompare(b.id),
+    ),
+    firstResponseCoverage: {
+      evidenceAvailable: firstResponseEvidenceAvailable,
+      riskCount: responseRiskCount,
+      coveredCount: directQueueCount + coveredByExistingActionCount,
+      directQueueCount,
+      coveredByExistingActionCount,
+      uncoveredCount,
+    },
+  };
+}
+
+export function buildDailyActionQueue(
+  input: DailyActionQueueInput,
+): AdminActionQueueItem[] {
+  return buildDailyActionQueueWithCoverage(input).items;
 }
 
 export async function loadAdminActionQueue(): Promise<AdminActionQueueResult> {
   const config = configured();
   const now = new Date();
-  if (!config) return { configured: false, generatedAt: now.toISOString(), items: [] };
+  if (!config) {
+    return {
+      configured: false,
+      generatedAt: now.toISOString(),
+      items: [],
+      firstResponseCoverage: emptyFirstResponseQueueCoverage(),
+    };
+  }
 
   const leadsUrl = new URL("/rest/v1/leads", config.supabaseUrl);
   leadsUrl.searchParams.set("select", "id,created_at,status,assigned_agent_id,assigned_at,last_contacted_at,lead_grade,timeline_months,address_raw,first_name,last_name");
@@ -933,6 +1006,7 @@ export async function loadAdminActionQueue(): Promise<AdminActionQueueResult> {
       configured: true,
       generatedAt: now.toISOString(),
       items: [],
+      firstResponseCoverage: emptyFirstResponseQueueCoverage(),
       error: "Action queue query failed",
     };
   }
@@ -944,16 +1018,19 @@ export async function loadAdminActionQueue(): Promise<AdminActionQueueResult> {
     ? ((await notificationsResponse.json().catch(() => [])) as Array<Record<string, unknown>>)
     : [];
 
+  const built = buildDailyActionQueueWithCoverage({
+    leads,
+    appointments: appointmentRows.map(normalizeAppointment).filter((row): row is AdminAppointmentRow => Boolean(row)),
+    tasks: taskRows.map(normalizeTask).filter((row): row is AdminFollowupTaskRow => Boolean(row)),
+    notifications: notificationRows,
+    firstResponseEvidenceAvailable: false,
+    now,
+  });
+
   return {
     configured: true,
     generatedAt: now.toISOString(),
-    items: buildDailyActionQueue({
-      leads,
-      appointments: appointmentRows.map(normalizeAppointment).filter((row): row is AdminAppointmentRow => Boolean(row)),
-      tasks: taskRows.map(normalizeTask).filter((row): row is AdminFollowupTaskRow => Boolean(row)),
-      notifications: notificationRows,
-      now,
-    }),
+    ...built,
   };
 }
 
