@@ -48,6 +48,7 @@ import { hasLeadCenterPermission } from "../../../src/lib/admin/rbac-policy";
 import { isPreviewDataDisabled } from "../../../src/lib/preview-security";
 import { CopyDemandAsset } from "./CopyDemandAsset";
 import { NativePublicationHandoff } from "./NativePublicationHandoff";
+import { OpenHouseQrPacketBuilder } from "./OpenHouseQrPacketBuilder";
 import { recordOwnedDemandPublicationProofAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -375,7 +376,7 @@ function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
       title="Join native proof to first-party lead signals—without confusing either one."
       note={`${loop.totalPlacements} canonical placements · test and suppressed leads remain excluded upstream`}
     >
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6" aria-label="Owned-demand activation lifecycle totals">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-7" aria-label="Owned-demand activation lifecycle totals">
         <article className="rounded-xl border border-white/[.08] bg-black/35 p-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8f8778]">Exact placements</p>
           <p className="mt-2 font-serif text-3xl text-[#f4ead4]">{loop.totalPlacements}</p>
@@ -402,6 +403,11 @@ function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
           <p className="mt-1 text-[10px] leading-4 text-[#9f8450]">
             {joinedCount(loop.readinessBlockedPlacements)} readiness hold{loop.readinessBlockedPlacements === 1 ? "" : "s"}
           </p>
+        </article>
+        <article className="rounded-xl border border-[#7665d955] bg-[#100d22] p-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#b8acf5]">Instance-specific signals</p>
+          <p className="mt-2 font-serif text-3xl text-[#ded8ff]">{loop.measurementAvailable ? loop.instanceSpecificAttributedLeads : "—"}</p>
+          <p className="mt-1 text-[10px] leading-4 text-[#9d92cf]">Measured exactly; not collapsed into a static proof row</p>
         </article>
       </div>
 
@@ -744,6 +750,36 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
         </div>
       ) : null}
 
+      {channel.instancePlacements.length ? (
+        <div className="mt-5 rounded-xl border border-[#7665d944] bg-[#100d22] p-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#b8acf5]">Instance-specific capture</p>
+          <p className="mt-2 text-xs leading-5 text-[#9d92cf]">These exact UTM classes are included in the owned-source total, but each generated event URL keeps its own review packet and is not misrepresented as a generic static publication.</p>
+          <div className="mt-3 space-y-3">
+            {channel.instancePlacements.map((placement) => (
+              <article key={placement.key} className="rounded-lg border border-white/[.08] bg-black/35 p-3">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-semibold text-[#f4ead4]">{placement.label}</p>
+                    <code className="mt-1 block text-[10px] text-[#b8acf5]">utm_content={placement.content}</code>
+                  </div>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.11em] text-[#9d92cf]">
+                    {measurementReady
+                      ? placement.attributedLeads
+                        ? `${placement.attributedLeads} exact signal${placement.attributedLeads === 1 ? "" : "s"}`
+                        : "Unmeasured"
+                      : "Measurement unavailable"}
+                  </span>
+                </div>
+                <p className="mt-2 text-[11px] leading-5 text-[#8f8778]">{placement.reviewNote}</p>
+                <a href={placement.operatorHref} className="mt-3 inline-flex min-h-9 items-center rounded-full border border-[#7665d955] bg-[#191433] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.11em] text-[#ded8ff] transition hover:bg-[#231c46] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8acf5]">
+                  Open packet builder
+                </a>
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <details className="group mt-5 rounded-xl border border-[#4baab833] bg-[#061417]">
         <summary className="cursor-pointer list-none px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#9edbe2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#9edbe2]">
           <span className="flex items-center justify-between gap-3">
@@ -891,6 +927,16 @@ export default async function DistributionPage({
             <div className="grid gap-4 lg:grid-cols-3">
               {command.offers.map((offer) => <OfferFlightCard key={offer.key} offer={offer} />)}
             </div>
+          </Panel>
+        </div>
+
+        <div className="mt-5">
+          <Panel
+            eyebrow="Open-house QR registration"
+            title="Prepare one property-specific capture path without creating another form."
+            note="Reuses the live open-house intake, canonical lead API, owned-demand UTMs, and protected QR renderer. The packet is review-only and saves nothing."
+          >
+            <OpenHouseQrPacketBuilder />
           </Panel>
         </div>
 
