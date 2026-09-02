@@ -2,10 +2,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "../../app/api/leads/route";
 import { PUBLIC_LEAD_SAVE_ERROR } from "../../app/lib/publicLeadErrors";
 import { signWordPressBridgeBody } from "../../app/lib/wordpressBridgeSignature";
+import { assignExperimentVariant } from "../../app/lib/growth/experiment-engine";
+import { HOME_VALUE_TRUST_EXPERIMENT } from "../../app/lib/growth/experiment-registry";
 
 const SESSION_ID = "11111111-1111-4111-8111-111111111111";
 const LEAD_ID = "22222222-2222-4222-8222-222222222222";
 const DUPLICATE_ID = "33333333-3333-4333-8333-333333333333";
+const EXPERIMENT_SUBJECT_KEY = "e".repeat(64);
+const EXPERIMENT_VARIANT_KEY = assignExperimentVariant(
+  HOME_VALUE_TRUST_EXPERIMENT.key,
+  EXPERIMENT_SUBJECT_KEY,
+  [...HOME_VALUE_TRUST_EXPERIMENT.variants],
+);
 const ENV_KEYS = [
   "NEXT_PUBLIC_SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
@@ -286,6 +294,58 @@ describe("POST /api/leads validation and truthful persistence", () => {
       expect(fetchSpy).not.toHaveBeenCalled();
       vi.unstubAllGlobals();
     }
+  });
+
+  it.each([
+    { experiment_key: HOME_VALUE_TRUST_EXPERIMENT.key },
+    {
+      experiment_key: HOME_VALUE_TRUST_EXPERIMENT.key,
+      experiment_subject_key: EXPERIMENT_SUBJECT_KEY,
+      experiment_variant_key: EXPERIMENT_VARIANT_KEY === "control" ? "broker_review" : "control",
+      experiment_surface: HOME_VALUE_TRUST_EXPERIMENT.surface,
+    },
+    {
+      experiment_key: HOME_VALUE_TRUST_EXPERIMENT.key,
+      experiment_subject_key: EXPERIMENT_SUBJECT_KEY,
+      experiment_variant_key: EXPERIMENT_VARIANT_KEY,
+      experiment_surface: "/ask",
+    },
+    {
+      experiment_key: HOME_VALUE_TRUST_EXPERIMENT.key,
+      experiment_subject_key: EXPERIMENT_SUBJECT_KEY,
+      experiment_variant_key: EXPERIMENT_VARIANT_KEY,
+      experiment_surface: HOME_VALUE_TRUST_EXPERIMENT.surface,
+      lead_source_surface: "seller_page",
+    },
+  ])("rejects partial, substituted, or cross-surface experiment context %#", async (override) => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "3 Synthetic Experiment Boundary",
+      email: "experiment-boundary@example.test",
+      ...override,
+    }));
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({ code: "invalid_experiment_context" });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("accepts an exact deterministic home-value experiment context", async () => {
+    const { calls } = installRpc();
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "4 Synthetic Experiment Way",
+      email: "experiment-context@example.test",
+      experiment_key: HOME_VALUE_TRUST_EXPERIMENT.key,
+      experiment_subject_key: EXPERIMENT_SUBJECT_KEY,
+      experiment_variant_key: EXPERIMENT_VARIANT_KEY,
+      experiment_surface: HOME_VALUE_TRUST_EXPERIMENT.surface,
+    }));
+    expect(response.status).toBe(200);
+    expect(calls).toHaveLength(1);
   });
 
   it("does not trust a standalone public is_test boolean", async () => {

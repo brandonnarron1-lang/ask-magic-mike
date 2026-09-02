@@ -8,8 +8,7 @@ import { isBrowserAutomation } from "../browserAutomation";
 
 export async function recordExperimentEvent(
   context: PublicExperimentContext,
-  eventName: "exposure" | "lead_created",
-  leadId?: string | null,
+  eventName: "exposure",
 ) {
   if (isBrowserAutomation()) return null;
   try {
@@ -20,7 +19,6 @@ export async function recordExperimentEvent(
         experiment_key: context.experimentKey,
         subject_key: context.subjectKey,
         event_name: eventName,
-        lead_id: leadId ?? undefined,
         surface: HOME_VALUE_TRUST_EXPERIMENT.surface,
       }),
       keepalive: true,

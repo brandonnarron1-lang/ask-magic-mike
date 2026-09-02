@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-09-02 — Public experiment ingress boundary hardening
+
+- Retained the existing Home Value experiment, deterministic variant engine,
+  public exposure route, canonical Neon experiment ledger, and atomic public
+  lead lifecycle; no second route, store, provider, queue, or migration was
+  introduced.
+- Restricted public experiment ingress to bounded pseudonymous exposures and
+  rejected browser-authored conversions or arbitrary lead UUID attachment.
+- Bound `lead_created` experiment conversion to the server after canonical lead
+  commit, with exact Home Value context, prior stored exposure, deterministic
+  variant agreement, eligible-lead verification, replay suppression, and test
+  exclusion.
+- Added exact-origin, Preview zero-write, durable Production limiter, strict 4
+  KB JSON/schema, unknown-field, truthful 503, correlation, and bounded retry
+  controls with focused security and persistence tests.
+- Reused one score/routing computation across durable lead and notification
+  evidence without changing the scoring or routing algorithms.
+- Production remains accepted PR #247 and PR #248 remains the sole requestable
+  application gate. No Production, database, provider, WordPress, lead,
+  communication, analytics, environment, DNS, publication, spend, deletion, or
+  NellySelly state changed.
+
 ## 2026-09-02 — Public lead ingress boundary hardening
 
 - Retained the active root `POST /api/leads`, atomic
