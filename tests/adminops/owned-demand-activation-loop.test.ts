@@ -267,6 +267,16 @@ describe("owned-demand per-placement activation loop", () => {
     expect(result.measuredPlacements).toBe(1);
   });
 
+  it("keeps instance-specific open-house signals out of generic static placement proof", () => {
+    const result = buildOwnedDemandActivationLoop(command([
+      signal("qr", "owned_media", "open_house_registration", 2),
+    ]), ledger());
+    expect(placement(result, "qr_print", "general_question")?.attributedLeads).toBe(0);
+    expect(result.instanceSpecificAttributedLeads).toBe(2);
+    expect(result.attributedLeads).toBe(2);
+    expect(result.totalPlacements).toBe(35);
+  });
+
   it("treats attribution without a current active proof as a reconciliation issue, never publication proof", () => {
     const result = buildOwnedDemandActivationLoop(command([
       signal("instagram", "social_organic", "instagram_story_question", 1),

@@ -80,6 +80,9 @@ At minimum verify:
 - `/`, `/ask`, `/sell`, `/home-value`, `/buy`, `/rent`, `/widget/v1`,
   `/privacy`, `/terms`, `/accessibility`, `/contact`, `/robots.txt`, and
   `/sitemap.xml`;
+- when the candidate changes open-house capture, one reviewed
+  `/open-house/{public-reference}` route plus its deterministic
+  `/go/open-house/{public-reference}` redirect, with no form submission;
 - apex permanent redirect and canonical/Open Graph metadata;
 - `/api/health/live` and `/api/health/ready` with canonical Neon readiness;
 - anonymous private access denied or redirected to the same-origin Better Auth

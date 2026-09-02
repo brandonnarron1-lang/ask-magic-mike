@@ -1,5 +1,38 @@
 # QA Evidence
 
+## Open-house QR registration packet — 2026-09-01
+
+- Focused acceptance passed 6 files / 67 tests across public reference
+  validation, exact redirect identity, protected JSON/SVG exports, owned-demand
+  attribution, static-proof separation, public-route metadata/accessibility,
+  and retained image exports.
+- Full local release gate passed system isolation, 14/14 safety checks, 290
+  files / 3,514 tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21
+  build, and the 102-route manifest with 22 acknowledged root/src duplicates.
+- The first release-gate run correctly failed after a successful build because
+  the two new routes were not yet in the active manifest. The manifest was
+  updated with required-route and classification entries; the complete gate
+  then passed from the corrected tree.
+- Runtime HTTP acceptance proved a no-store 307 from
+  `/go/open-house/quinn-drive-september-open-house` to the exact canonical
+  source/medium/campaign/content/placement/property destination, 404 for the
+  reserved `unknown` reference, 200 for the validated public form, and a
+  fail-closed protected export without an authenticated session.
+- Playwright CLI inspected the built route at a 390×844 viewport. The semantic
+  snapshot exposed the mobile menu, two headings, all labeled controls, exact
+  consent version, submit control, and compliance copy. The full-page visual
+  showed no clipping or overlap. `/api/events` was locally intercepted with a
+  synthetic 202 response so visual QA could remain mutation-free; no form was
+  filled or submitted. The local-only screenshot is
+  `output/playwright/open-house-registration-mobile-no-write.png` and remains
+  ignored from Git.
+- The local machine reported Node 26.5.1 while `package.json` requests Node 24;
+  all checks passed, but exact-head hosted CI remains the authoritative Node 24
+  release proof.
+- No lead, analytics event, notification, email, SMS, Push, database,
+  WordPress, provider, publication, print, DNS, spend, deletion, Production,
+  or NellySelly mutation occurred.
+
 ## Form 7 exact-consent cutover boundary — 2026-09-01
 
 - Authenticated WordPress audit was read-only. It inspected the Form 7 editor,

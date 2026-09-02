@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-01 — Open-house QR registration packet
+
+- Reused the existing Distribution Command, QR renderer, canonical UTM model,
+  public open-house intake, and lead API to prepare property-specific open-
+  house registration packets without creating another form or lead store.
+- Added one deterministic no-store shortlink that accepts only a bounded
+  public-safe event reference and redirects to the exact canonical open-house
+  route with source, campaign, placement, and property attribution.
+- Added protected `report:view` JSON and high-error-correction SVG downloads,
+  an accessible operator builder, and fail-closed public-route validation.
+- Counted the exact open-house QR UTM class in owned-demand measurement while
+  keeping it separate from generic static publication proof and lifecycle
+  selection.
+- Required property/event fact review, a two-device scan, and an independent
+  distribution approval; packet generation itself cannot publish or create a
+  lead, event, notification, or proof row.
+- Performed no Production, database, WordPress, provider, communication, QR
+  distribution, DNS, spend, deletion, or NellySelly mutation.
+
 ## 2026-09-01 — Seller-intent approval artifact integrity
 
 - Replaced page 3631's hash-only seller-decision prerequisite with one strict,
