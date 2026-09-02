@@ -1,7 +1,7 @@
 # Phase 9 Pending Notification Recovery
 
 Date: 2026-09-02
-Status: stacked Draft candidate; Production unchanged
+Status: stacked Draft PR #263; Production unchanged
 
 ## Decision
 
@@ -73,6 +73,12 @@ The branch starts from exact sealed PR #262 head
 `rescue/amm-pr263-base-pr262-20260902`. It is downstream of every PR from #248
 through #262 and has no independent release authority. PR #248 remains the only
 requestable application gate.
+
+Draft PR #263 is
+`https://github.com/brandonnarron1-lang/ask-magic-mike/pull/263`. Its verified
+code-bearing commit is `9ec39422e59063c7964c59f3e4701425cec877d8`
+with tree `03462e612ac5217454262d315044b08003419022`; the final evidence-only
+head is recorded in the authoritative PR seal after hosted verification.
 
 Rollback is application-only: restore the immediately preceding accepted Ready
 deployment or remove this selection change while retaining every outbox row and

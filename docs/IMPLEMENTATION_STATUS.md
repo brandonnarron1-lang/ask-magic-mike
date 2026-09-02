@@ -13,6 +13,12 @@ Updated 2026-09-02.
 
 ## Phase 9 pending notification recovery — 2026-09-02
 
+- **Review vehicle:** stacked Draft PR
+  [#263](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/263)
+  starts from exact PR #262 head
+  `0a255a7988d761577eb11c702b2e00e8cdaac3ce`. Verified code-bearing head
+  `9ec39422e59063c7964c59f3e4701425cec877d8` has tree
+  `03462e612ac5217454262d315044b08003419022`.
 - **Durable gap closed in source:** the existing scheduled worker now selects
   an unclaimed `pending` outbox row after the same five-minute threshold
   already reported by notification operations. Previously that row could be
