@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-09-02 — Public AI chat provider boundary hardening
+
+- Retained the existing `/api/chat` and `/api/chat/message` funnel, Responses
+  API adapter, redaction/prompt-injection guardrails, model controls, and
+  deterministic fallback; no second chat or AI service was introduced.
+- Made read-only Preview deterministic before any shared rate-limit write or
+  OpenAI request, so visual review cannot consume provider credits or mutate
+  canonical Neon state.
+- Made Production refuse provider use when the shared limiter is non-durable,
+  except for the existing exact `RATE_LIMIT_EMERGENCY_MEMORY=1` break-glass
+  control.
+- Added JSON-only input, declared and streamed 8 KB body limits, strict object
+  validation, a 2,000-character message limit, bounded `Retry-After`, private
+  no-store responses, safe error codes, and response correlation headers.
+- Expanded focused provider-ordering and degraded-path tests without adding an
+  environment variable, migration, table, queue, route, provider, or external
+  mutation. Production remains accepted PR #247.
+- Passed the complete Node 24 gate with 300 files / 3,586 tests, strict types,
+  full lint, optimized Next.js 15.5.21 build, 60 static pages, 102-route proof,
+  14/14 safety controls, and Ask/NellySelly isolation. Intercepted browser QA,
+  Production dependency audit, and 769-commit redacted history scan pass.
+
 ## 2026-09-02 — Public appointment boundary hardening
 
 - Retained the atomic appointment/lifecycle/audit/follow-up transaction and
