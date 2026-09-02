@@ -33,6 +33,13 @@ const WE_BUY_HOMES_ROW: WordPressPageIndexRow = {
   status: "publish",
   modified_gmt: "2026-06-01T20:53:23",
 };
+const RENTALS_ROW: WordPressPageIndexRow = {
+  id: 226,
+  link: "https://www.ourtownproperties.com/rentals/",
+  slug: "rentals",
+  status: "publish",
+  modified_gmt: "2025-06-16T19:09:52",
+};
 const LEGACY_HOME_HREF =
   "https://www.askmagicmike.com/value?utm_source=ourtownproperties&#038;utm_medium=homepage_cta&#038;utm_campaign=website_widget";
 const LEGACY_HOME_VALUE_HREF =
@@ -88,7 +95,8 @@ describe("WordPress owned-demand activation change set", () => {
   it("classifies one exact legacy homepage CTA as ready without performing a mutation", () => {
     const changeSet = buildHome(homeHtml([LEGACY_HOME_HREF]));
     expect(changeSet).toMatchObject({
-      schemaVersion: "amm.wordpress_activation_change_set.v3",
+      schemaVersion: "amm.wordpress_activation_change_set.v4",
+      changeMode: "replace_existing_href",
       generatedAt: GENERATED_AT,
       mode: "read_only_public_precondition",
       placementKey: "wordpress_homepage_ask_mike",
@@ -128,6 +136,7 @@ describe("WordPress owned-demand activation change set", () => {
           HOME_ROW,
           HOME_VALUE_ROW,
           WE_BUY_HOMES_ROW,
+          RENTALS_ROW,
         ]), {
           status: 200,
           headers: { "content-type": "application/json" },
@@ -140,7 +149,9 @@ describe("WordPress owned-demand activation change set", () => {
           })
         : url.includes("how-much-is-your-home-worth")
           ? homeHtml([LEGACY_HOME_VALUE_HREF])
-          : homeHtml([LEGACY_WE_BUY_HOMES_HREF]);
+          : url.includes("we-buy-homes")
+            ? homeHtml([LEGACY_WE_BUY_HOMES_HREF])
+            : homeHtml([]);
       return new Response(html, {
         status: 200,
         headers: { "content-type": "text/html; charset=utf-8" },
@@ -151,8 +162,8 @@ describe("WordPress owned-demand activation change set", () => {
     const changeSets = await loadWordPressActivationChangeSets(undefined, {
       timeoutMs: 5_000,
     });
-    expect(fetchMock).toHaveBeenCalledTimes(4);
-    expect(timeoutSpy).toHaveBeenCalledTimes(4);
+    expect(fetchMock).toHaveBeenCalledTimes(5);
+    expect(timeoutSpy).toHaveBeenCalledTimes(5);
     expect(timeoutSpy).toHaveBeenCalledWith(5_000);
     expect(fetchMock.mock.calls.filter(([input]) => (
       String(input).includes("/wp-json/")
@@ -161,6 +172,7 @@ describe("WordPress owned-demand activation change set", () => {
       ["wordpress_homepage_ask_mike", "hidden_target"],
       ["wordpress_home_value", "legacy_match_ready"],
       ["wordpress_we_buy_homes", "seller_intent_decision_required"],
+      ["wordpress_rental_to_homeownership", "authenticated_source_required"],
     ]);
 
     const readiness = changeSets.map(toOwnedDemandPlacementReadiness);
@@ -178,6 +190,101 @@ describe("WordPress owned-demand activation change set", () => {
       status: "seller_intent_decision_required",
     });
     expect(readiness[2]?.nextAction).toContain("canonical-page");
+    expect(readiness[3]).toMatchObject({
+      activationEligible: false,
+      status: "authenticated_source_required",
+    });
+    expect(readiness[3]?.nextAction).toContain("raw editor source");
+  });
+
+  it("prepares a fail-closed additive rental CTA without inventing a WordPress insertion point", () => {
+    const changeSet = buildWordPressActivationChangeSet({
+      placementKey: "wordpress_rental_to_homeownership",
+      html: homeHtml([]),
+      pageRows: [RENTALS_ROW],
+      generatedAt: GENERATED_AT,
+    });
+
+    expect(changeSet).toMatchObject({
+      schemaVersion: "amm.wordpress_activation_change_set.v4",
+      changeMode: "add_new_shortcode",
+      placementKey: "wordpress_rental_to_homeownership",
+      status: "authenticated_source_required",
+      publicationBlocked: true,
+      publicationAuthorized: false,
+      approvalRequired: false,
+      approvalGate: null,
+      pagePublicationApprovalGate:
+        "APPROVE PHASE 9 RENTAL-TO-HOMEOWNERSHIP CTA WORDPRESS PUBLICATION",
+      sourcePage: "https://www.ourtownproperties.com/rentals/",
+      pageId: 226,
+      expectedPageId: 226,
+      pageModifiedGmt: "2025-06-16T19:09:52",
+      currentHref: null,
+      rollbackHref: null,
+      currentHrefOccurrences: 0,
+      askMagicMikeHrefOccurrences: 0,
+      targetVisibility: "unknown",
+      connectorVersionReady: false,
+      mutationPerformed: false,
+      containsRawPageHtml: false,
+    });
+    expect(changeSet.proposedHref).toBe(
+      "https://www.askmagicmike.com/rent?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_rental_to_homeownership",
+    );
+    expect(changeSet.proposedShortcode).toContain('route="/rent"');
+    expect(changeSet.proposedShortcode).toContain(
+      "No financing or eligibility decision is promised.",
+    );
+    expect(changeSet.scopeExclusions).toHaveLength(1);
+    expect(changeSet.scopeExclusions[0]).toContain("page 4120 / Gravity Form 6");
+    expect(changeSet.blockers.join(" ")).toContain("raw editor insertion point");
+    expect(changeSet.publicationSteps.join(" ")).toContain(
+      "this manifest intentionally issues no approval gate",
+    );
+    expect(changeSet.publicationSteps.join(" ")).toContain("raw-source SHA-256");
+    expect(toOwnedDemandPlacementReadiness(changeSet)).toMatchObject({
+      activationEligible: false,
+      status: "authenticated_source_required",
+    });
+  });
+
+  it("recognizes an exact visible rental placement but blocks duplicate additive candidates", () => {
+    const pending = buildWordPressActivationChangeSet({
+      placementKey: "wordpress_rental_to_homeownership",
+      html: homeHtml([]),
+      pageRows: [RENTALS_ROW],
+      generatedAt: GENERATED_AT,
+    });
+    const exact = buildWordPressActivationChangeSet({
+      placementKey: "wordpress_rental_to_homeownership",
+      html: homeHtml([pending.proposedHref]),
+      pageRows: [RENTALS_ROW],
+      generatedAt: GENERATED_AT,
+    });
+    expect(exact).toMatchObject({
+      status: "already_exact",
+      changeMode: "add_new_shortcode",
+      publicationBlocked: true,
+      approvalRequired: false,
+      approvalGate: null,
+      connectorVersionReady: true,
+      targetVisibility: "visible_candidate",
+    });
+
+    const unrelated = buildWordPressActivationChangeSet({
+      placementKey: "wordpress_rental_to_homeownership",
+      html: homeHtml([
+        "https://www.askmagicmike.com/ask?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=some_other_placement",
+      ]),
+      pageRows: [RENTALS_ROW],
+      generatedAt: GENERATED_AT,
+    });
+    expect(unrelated).toMatchObject({
+      status: "ambiguous_target",
+      publicationBlocked: true,
+      approvalGate: null,
+    });
   });
 
   it("holds page 3631 until the existing seller-intent and BIC decisions are recorded", () => {
@@ -284,7 +391,7 @@ describe("WordPress owned-demand activation change set", () => {
       wrapInCta: true,
     }));
     expect(missingMarker).toMatchObject({
-      schemaVersion: "amm.wordpress_activation_change_set.v3",
+      schemaVersion: "amm.wordpress_activation_change_set.v4",
       status: "connector_upgrade_required",
       publicationBlocked: true,
       publicationAuthorized: false,
