@@ -11,6 +11,38 @@ Updated 2026-09-02.
   candidates below are Draft/Preview work only and change no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Phase 9 atomic email webhook boundary — 2026-09-02
+
+- **Existing delivery stack retained:** the Resend subscription, Svix secret,
+  Neon notification outbox, provider receipt ledger, communication timeline,
+  suppression fields, and Lead Center delivery views remain canonical. No
+  provider, route, table, migration, queue, or environment name was added.
+- **Lost-retry gap closed:** receipt, notification, communication event, and
+  bounce/complaint suppression now execute in one parameterized PostgreSQL
+  statement. A failed downstream write rolls back the receipt so provider retry
+  remains possible; only an explicitly `failed` receipt can be reclaimed.
+- **Ingress tightened:** JSON-only input, declared/streamed 256 KB bounds,
+  exact raw-body signature verification, eight-event allowlist, provider ID and
+  timestamp validation, Preview refusal, private/no-store responses, and one
+  body/header correlation ID all fail closed before persistence.
+- **Idempotency strengthened:** exact replay makes no lifecycle mutation; a
+  completed event ID reused with a different payload hash returns a conflict.
+  Raw payloads, signatures, recipient emails, database errors, and secrets are
+  absent from stored metadata and safe logs.
+- Focused Node 24 verification passes 3 files / 27 tests, strict typecheck,
+  targeted lint, 14/14 release safety, and system isolation. An isolated local
+  PostgreSQL 17 contract run passes processed, replay, forced rollback, failed-
+  receipt retry, suppression, and unmatched-event cases.
+- Complete Node 24.18.0 acceptance passes 303 files / 3,655 tests, strict
+  typecheck, full ESLint, the optimized Next.js 15.5.21 Production build with
+  60 static pages, 102 active / 22 acknowledged duplicate routes, and the
+  Production dependency audit with no known vulnerability.
+- This is a stacked Draft from exact PR #271 head. Production remains accepted
+  PR #247 and PR #248 remains the sole requestable application gate. No remote
+  database/provider call, message, lead, WordPress action, deployment,
+  environment change, DNS/publication/spend/deletion, or NellySelly action
+  occurred.
+
 ## Phase 9 public experiment ingress boundary hardening — 2026-09-02
 
 - **Existing system retained:** the Home Value experiment UI, deterministic

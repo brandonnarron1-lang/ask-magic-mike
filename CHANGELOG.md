@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-09-02 — Atomic Resend webhook boundary hardening
+
+- Retained the existing Resend/Svix callback, Neon outbox, provider receipt
+  ledger, communication timeline, suppression fields, and Lead Center views;
+  no second provider, route, store, queue, migration, or environment contract
+  was introduced.
+- Replaced separate provider-lifecycle writes with one atomic parameterized
+  PostgreSQL statement so a downstream failure cannot strand a completed
+  receipt and defeat provider retry.
+- Added failed-receipt reclaim, exact-replay no-op behavior, payload-hash
+  collision rejection, and atomic delivered/delayed/terminal/suppression state.
+- Added JSON/event/identity/timestamp validation, declared and streamed body
+  bounds, Preview no-write, private correlated responses, and secret/PII-safe
+  failure logging.
+- Added focused behavior/source tests and a local-only executable PostgreSQL
+  proof for processed, replay, forced rollback, retry, suppression, and
+  unmatched-event paths.
+- Production remains accepted PR #247 and PR #248 remains the sole requestable
+  application gate. No Production, Neon, Resend, WordPress, lead, message,
+  environment, DNS, publication, spend, deletion, or NellySelly state changed.
+
 ## 2026-09-02 — Public experiment ingress boundary hardening
 
 - Retained the existing Home Value experiment, deterministic variant engine,

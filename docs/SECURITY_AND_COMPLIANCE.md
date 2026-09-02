@@ -289,3 +289,27 @@ guaranteed result.
   is not legal identity, consent, or unique-person proof.
 - Historical unlinked events remain unclassified; no inferred backfill or
   fabricated conversion rate is permitted.
+
+## Phase 9 signed email-webhook atomicity — 2026-09-02
+
+- Resend callbacks require the existing explicit enablement and Svix signature
+  over the exact raw payload; browser Origin is not treated as provider
+  authority.
+- JSON media type, bounded headers, a declared and streamed 256,000-byte body
+  ceiling, UTF-8 decoding, provider/message identity, normalized timestamp, and
+  the configured eight-event allowlist are enforced before database access.
+- Preview fails before payload processing or persistence even if provider
+  configuration drifts into that environment.
+- One SQL statement atomically claims the event, updates the canonical outbox,
+  appends the communication timeline, and suppresses future email when the
+  signed event requires it. Any failure rolls back the receipt and returns 503
+  so a retry is not silently discarded.
+- Completed event IDs are immutable idempotency authorities. Exact replay is a
+  no-op; a different payload hash under the same ID fails closed. Only a row
+  explicitly marked `failed` is retryable.
+- Raw payloads, destination addresses, signatures, credentials, database URLs,
+  and raw exception messages are absent from persistence, responses, and logs.
+  Responses are private/no-store, `nosniff`, and correlation-addressable.
+- Real-PostgreSQL proof runs only against an explicitly named local connection,
+  refuses remote hosts, uses a process-unique schema inside a rolled-back
+  transaction, and leaves no test database state.

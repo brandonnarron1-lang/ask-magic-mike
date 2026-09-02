@@ -457,3 +457,19 @@ exact replays are idempotent, and existing operator status/action class is
 preserved. `GROWTH_SEARCH_IMPORT_ENABLED=false` keeps deployments inert by
 default, while exact Neon endpoint attestation prevents Preview or cross-project
 mutation.
+
+## Atomic provider-email lifecycle boundary (Phase 9)
+
+Resend remains the authenticated internal-email provider and the canonical
+Neon outbox remains the delivery authority. The signed provider callback now
+executes receipt claim, notification lifecycle update, communication-event
+append, and eligible email suppression as a single parameterized PostgreSQL
+statement. An exact replay cannot repeat those effects, and an interrupted
+statement cannot strand a completed receipt ahead of missing downstream state.
+
+The callback is provider-authenticated rather than browser-Origin authorized.
+It therefore requires the existing Svix signature over the exact bounded raw
+body, an exact configured event allowlist, and a valid provider message ID.
+Preview is read-only. Raw payloads and recipient addresses are not retained in
+the provider receipt. This changes no schema, send adapter, retry worker,
+assignment rule, consent rule, or Lead Center read model.
