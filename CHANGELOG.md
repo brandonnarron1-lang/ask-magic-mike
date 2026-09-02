@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-09-02 — Public appointment boundary hardening
+
+- Retained the atomic appointment/lifecycle/audit/follow-up transaction and
+  hardened its existing public route with exact-origin, JSON-only, 2 KB body,
+  canonical source-surface, durable-rate-limit, no-store, and correlation-ID
+  controls.
+- Centralized the `LeadSourceSurface` runtime validator so lead intake and
+  appointment intent cannot drift onto competing source vocabularies.
+- Added the trusted `appointment_requested` conversion only after a new durable
+  request; browser analytics remains visible while canonical browser-authored
+  writes stay blocked, and idempotent replay cannot inflate KPIs.
+- Added focused security, privacy, analytics, UI, replay, and degraded-path
+  coverage without adding a route, store, queue, provider, calendar, or
+  migration.
+- Production remains accepted PR #247. No remote database, provider,
+  WordPress, deployment, lead, appointment, analytics, DNS, publication,
+  spend, deletion, or NellySelly action occurred.
+
 ## 2026-09-02 — Atomic public lead delivery intent
 
 - Added `capture_public_lead_v2` as an additive wrapper around the proven v1

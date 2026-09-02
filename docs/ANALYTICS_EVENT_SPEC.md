@@ -57,9 +57,12 @@ Historical null-session events are not backfilled or reclassified.
 after a successful response, but the client does not post them to the canonical
 event endpoint. The endpoint also rejects direct browser-authored attempts.
 Only `POST /api/leads` writes canonical `lead_created`, after durable lead
-storage and with the protected lead/session association. Qualification and
-appointment truth remain server-owned records. Idempotent replay does not
-create another conversion row.
+storage and with the protected lead/session association. Only
+`POST /api/appointments/request` writes canonical `appointment_requested`, and
+only after the existing atomic appointment/lifecycle/audit/follow-up function
+returns a new durable request. Both use the protected lead/session association;
+an idempotent replay creates no additional conversion row. Qualification and
+appointment truth therefore remain server-owned records.
 
 For Ask, `chat_started` and `chat_message_sent` prove only a question
 interaction. `contact_submitted` and `consent_accepted` occur only when the

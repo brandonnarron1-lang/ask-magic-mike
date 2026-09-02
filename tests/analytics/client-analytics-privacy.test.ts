@@ -110,6 +110,13 @@ describe("client analytics privacy boundary", () => {
       experiment_key: "home_value_path",
       variant_key: "broker_review",
     });
+    expect(safePublicAnalyticsProperties("appointment_requested", {
+      funnel_name: "renter",
+      request_surface: "renter_page",
+    })).toEqual({
+      funnel_name: "renter",
+      request_surface: "renter_page",
+    });
     expect(safePublicAnalyticsProperties("review_plan_task_completed", {
       goal: "seller",
       horizon: "90_days",
@@ -308,6 +315,35 @@ describe("client analytics privacy boundary", () => {
 
     expect(browser.ammDataLayer).toEqual([
       expect.objectContaining({ event: "widget_lead_created" }),
+    ]);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps appointment conversion visible externally without accepting a browser-authored ledger row", () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 202 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const browser = window as TestAnalyticsWindow;
+    browser.ammDataLayer = [];
+    browser.__ammExternalAnalyticsActive = true;
+    browser.__ammExternalAnalyticsContainerId = OUR_TOWN_GTM_CONTAINER_ID;
+    window.localStorage.setItem(
+      EXTERNAL_ANALYTICS_CONSENT_STORAGE_KEY,
+      "granted",
+    );
+
+    trackEvent(
+      "appointment_requested",
+      { source: "direct" },
+      { funnel_name: "renter", request_surface: "renter_page" },
+      { sessionId: "11111111-1111-4111-8111-111111111111" },
+    );
+
+    expect(browser.ammDataLayer).toEqual([
+      expect.objectContaining({
+        event: "appointment_requested",
+        funnel_name: "renter",
+        request_surface: "renter_page",
+      }),
     ]);
     expect(fetchMock).not.toHaveBeenCalled();
   });
