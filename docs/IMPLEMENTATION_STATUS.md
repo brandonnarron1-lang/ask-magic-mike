@@ -2806,3 +2806,31 @@ any bridge activation or shadow-mode test.
   deployment, environment change, Neon query/mutation, WordPress action, lead
   submission, communication, analytics write, DNS/publication/spend/deletion,
   or NellySelly action.
+
+## Phase 9 seller-intent approval artifact integrity — 2026-09-01
+
+- Audited the page-3631 cutover prerequisite and found that an arbitrary
+  64-character decision digest plus independently supplied flags could satisfy
+  the seller-decision boundary without proving one coherent approved artifact.
+- Added a strict, content-addressed `amm.wordpress_seller_intent_approval.v1`
+  contract with exact page pairs/IDs, capture-owner and disposition enums,
+  stable placement, `/sell` funnel, reviewed-evidence digest, owner/SEO/BIC
+  references, and rationale codes.
+- The page verifier now derives the decision and its SHA-256 from that artifact,
+  emits only hashed review references, and ignores the retired standalone
+  digest and duplicate decision fields.
+- The checked-in template remains `draft` and fails closed. No canonical page,
+  capture owner, SEO disposition, or BIC decision was invented by code.
+- Exact Node 24 focused verification passes 5 files / 41 tests, including
+  draft, extra-field, mismatch, unsupported-choice, secret-like-reference, and
+  standalone-digest attacks plus packet-link and freshness checks. Full
+  acceptance passes 289 files / 3,506 tests,
+  strict typecheck, full lint, a 60-page optimized build, 100/22 route proof,
+  14/14 safety, and system isolation. Hosted clean-install and immutable
+  Preview evidence remain required before sealing this stacked Draft.
+- The artifact binds the evidence packet's structural digest, exact generated
+  timestamp, and canonical whole-packet digest. Editing only the packet
+  timestamp therefore fails both timestamp and packet-digest validation.
+- No Production, WordPress, Vercel environment, Neon, lead, notification,
+  analytics write, DNS, publication, spend, deletion, or NellySelly mutation
+  occurred.

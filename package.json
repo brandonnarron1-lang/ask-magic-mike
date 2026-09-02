@@ -57,6 +57,7 @@
     "amm:audit:wordpress": "node scripts/audit-wordpress-form-placements.mjs",
     "amm:wordpress:form7-readiness": "node scripts/amm/wordpress-form7-cutover-readiness.mjs",
     "amm:wordpress:page3631-readiness": "node scripts/amm/wordpress-page3631-cutover-readiness.mjs",
+    "amm:wordpress:seller-decision:verify": "node scripts/amm/wordpress-seller-intent-decision-artifact.mjs",
     "amm:wordpress:page3952-readiness": "node scripts/amm/wordpress-page3952-cutover-readiness.mjs",
     "reconcile-wordpress-leads": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/reconcile-wordpress-leads.mjs",
     "check-lead-sla": "node scripts/check-lead-sla.mjs",

@@ -23,5 +23,11 @@
   "requiredCanonicalSourcePage": "https://www.ourtownproperties.com/we-buy-homes/",
   "requiredCaptureOwner": "ask_magic_mike",
   "requiredPlacementKey": "wordpress_we_buy_homes",
+  "allowedDuplicatePageDispositions": [
+    "redirect_to_canonical",
+    "canonicalize_to_canonical",
+    "noindex_and_preserve",
+    "preserve_both_single_capture_owner"
+  ],
   "requiresBicCopyReview": true
 }

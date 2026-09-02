@@ -33,6 +33,12 @@ const page3631CutoverContract = {
     "https://www.ourtownproperties.com/we-buy-homes/",
   requiredCaptureOwner: "ask_magic_mike",
   requiredPlacementKey: "wordpress_we_buy_homes",
+  allowedDuplicatePageDispositions: [
+    "redirect_to_canonical",
+    "canonicalize_to_canonical",
+    "noindex_and_preserve",
+    "preserve_both_single_capture_owner",
+  ],
   requiresBicCopyReview: true,
 };
 Object.freeze(page3631CutoverContract);
@@ -62,26 +68,31 @@ function argumentValue(name, fallback = "") {
 
 async function main() {
   const sourcePath = argumentValue("--source");
+  const sellerIntentDecisionPath = argumentValue(
+    "--seller-intent-decision-artifact",
+  );
+  const sellerIntentEvidencePath = argumentValue(
+    "--seller-intent-evidence-packet",
+  );
   if (!sourcePath) {
     throw new Error(
-      "usage: node scripts/amm/wordpress-page3631-cutover-readiness.mjs --source <page-source.txt> [--connector-version 1.1.0] [--postmeta-sha256 <digest>] [--revision-id <id>] [--revision-source-sha256 <digest>] [--seller-intent-decision-sha256 <digest>] [--canonical-source-page <url>] [--capture-owner ask_magic_mike] [--duplicate-page-disposition <decision>] [--placement-key wordpress_we_buy_homes] [--bic-copy-review-sha256 <digest>]",
+      "usage: node scripts/amm/wordpress-page3631-cutover-readiness.mjs --source <page-source.txt> [--connector-version 1.1.0] [--postmeta-sha256 <digest>] [--revision-id <id>] [--revision-source-sha256 <digest>] [--seller-intent-decision-artifact <approved-decision.json>] [--seller-intent-evidence-packet <protected-evidence.json>] [--bic-copy-review-sha256 <digest>]",
     );
   }
   const source = await readFile(sourcePath, "utf8");
+  const sellerIntentDecisionArtifact = sellerIntentDecisionPath
+    ? JSON.parse(await readFile(sellerIntentDecisionPath, "utf8"))
+    : undefined;
+  const sellerIntentDecisionEvidenceManifest = sellerIntentEvidencePath
+    ? JSON.parse(await readFile(sellerIntentEvidencePath, "utf8"))
+    : undefined;
   const result = prepareWordPressPage3631Cutover(source, {
     connectorVersion: argumentValue("--connector-version"),
     postmetaBackupSha256: argumentValue("--postmeta-sha256"),
     revisionId: argumentValue("--revision-id"),
     revisionSourceSha256: argumentValue("--revision-source-sha256"),
-    approvedSellerIntentDecisionSha256: argumentValue(
-      "--seller-intent-decision-sha256",
-    ),
-    approvedCanonicalSourcePage: argumentValue("--canonical-source-page"),
-    approvedCaptureOwner: argumentValue("--capture-owner"),
-    approvedDuplicatePageDisposition: argumentValue(
-      "--duplicate-page-disposition",
-    ),
-    approvedPlacementKey: argumentValue("--placement-key"),
+    sellerIntentDecisionArtifact,
+    sellerIntentDecisionEvidenceManifest,
     bicCopyReviewSha256: argumentValue("--bic-copy-review-sha256"),
   });
   process.stdout.write(`${JSON.stringify(result.manifest, null, 2)}\n`);
