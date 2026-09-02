@@ -11,6 +11,32 @@ Updated 2026-09-01.
   hardening below is a Draft Preview candidate only and changes no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Phase 9 SLA truth and cadence hardening — 2026-09-01
+
+- **One response truth:** the canonical Neon SLA sweep, Growth Intelligence,
+  and Daily Action Queue now accept only immutable
+  `lead_response_milestones.first_human_response_at` evidence. Mutable
+  `last_contacted_at` remains a lifecycle projection and can no longer hide an
+  unproven response obligation.
+- **Eligibility tightened:** live lead rows and response milestones are
+  independently screened for test and communication-suppression state, with
+  synthetic-email filtering retained as defense in depth. The open-state
+  reader now includes scored, escalated, and appointment-requested leads.
+- **Existing cron accelerated:** the authenticated, idempotent SLA sweep moves
+  from hourly to every five minutes in the Draft's `vercel.json`; no second
+  scheduler or route was added.
+- **Local acceptance:** focused verification passes 11 files / 68 tests. The
+  complete Node 24.18.0 gate passes 294 files / 3,538 tests, strict TypeScript,
+  full ESLint, 14/14 safety checks, isolation, optimized Next.js 15.5.21 build,
+  and all 102 active routes. Production dependency audit finds no known
+  vulnerabilities; staged and exact-commit redacted Gitleaks find no leaks.
+  Hosted exact-head evidence remains required.
+- **Authority unchanged:** accepted Production remains PR #247 on its existing
+  schedule. This stacked Draft performed no Production, database, lead, task,
+  notification, communication, WordPress, provider, DNS, spend, deletion, or
+  NellySelly mutation. Design and rollback:
+  [`phase9/SLA_TRUTH_AND_CADENCE_HARDENING.md`](./phase9/SLA_TRUTH_AND_CADENCE_HARDENING.md).
+
 ## Phase 9 first-response work coverage invariant — 2026-09-01
 
 - **Existing queue extended:** the canonical Daily Action Queue now returns an

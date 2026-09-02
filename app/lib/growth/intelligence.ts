@@ -967,7 +967,6 @@ export function buildGrowthIntelligence(input: {
       createdAt: lead.createdAt,
       status: lead.status,
       conversionStage: lead.conversionStage,
-      lastContactedAt: lead.lastContactedAt,
       firstHumanResponseAt: lead.firstHumanResponseAt,
     }, now).isRisk) {
       speedToLeadRisks += 1;

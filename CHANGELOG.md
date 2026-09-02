@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-01 — SLA truth and cadence hardening
+
+- Reused the existing SLA engine, immutable response ledger, compliance flags,
+  and Vercel cron instead of creating another scheduler or alerting system.
+- Made the canonical Neon sweep, Growth Intelligence, and Daily Action Queue
+  accept only immutable first-human-response evidence; mutable
+  `last_contacted_at` no longer clears a response risk.
+- Excluded communication-suppressed leads in SQL and application mapping while
+  retaining test and synthetic-record safeguards.
+- Restored scored, escalated, and appointment-requested leads to the open SLA
+  reader so lifecycle progression cannot silently remove an unproven response.
+- Changed the Draft cron contract from hourly to every five minutes and added
+  an exact configuration regression test.
+- Passed the complete Node 24.18.0 release gate: 294 test files / 3,538 tests,
+  strict typecheck, full lint, optimized build, 102-route manifest, 14/14
+  safety checks, and system isolation.
+- Added no schema, provider, message, public route, WordPress change, or
+  external mutation; Production remains unchanged.
+
 ## 2026-09-01 — First-response work coverage invariant
 
 - Extended the existing Daily Action Queue result with explainable aggregate

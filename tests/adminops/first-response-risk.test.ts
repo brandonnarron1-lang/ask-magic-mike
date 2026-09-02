@@ -31,7 +31,6 @@ describe("first-response risk contract", () => {
 
   it.each([
     ["response_recorded", { firstHumanResponseAt: "2026-07-12T13:50:00.000Z" }],
-    ["contact_recorded", { lastContactedAt: "2026-07-12T13:50:00.000Z" }],
     ["terminal", { conversionStage: "closed" }],
     ["excluded", { isTest: true }],
     ["excluded", { communicationSuppressed: true }],
@@ -41,6 +40,13 @@ describe("first-response risk contract", () => {
       status: "new",
       ...fields,
     }, NOW)).toEqual(expect.objectContaining({ isRisk: false, reason }));
+  });
+
+  it("does not treat a mutable last-contact projection as immutable response proof", () => {
+    expect(evaluateFirstResponseRisk({
+      createdAt: "2026-07-12T13:30:00.000Z",
+      status: "contacted",
+    }, NOW)).toEqual(expect.objectContaining({ isRisk: true, reason: "risk" }));
   });
 
   it("keeps old inventory in the revival/stalled workflow instead of speed-to-lead", () => {
