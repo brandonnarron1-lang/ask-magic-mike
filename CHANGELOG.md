@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-09-02 — Public analytics ingress boundary hardening
+
+- Retained the one active public analytics handler family:
+  `/api/widget/events` remains the exact alias of `/api/events`. The older
+  camel-case source remains outside the built root App Router and was hardened
+  only as a dormant fail-safe, not activated as a third endpoint.
+- Made Production persistence require an allowed durable shared rate-limit
+  result, preserving only the existing exact emergency-memory break-glass
+  control.
+- Excluded automated-browser telemetry before limiter or ledger access and
+  made the legacy camel-case ingress require an explicit approved origin.
+- Standardized private/no-store responses, server-generated correlation IDs,
+  safe error codes, and positive window-bounded `Retry-After` guidance without
+  changing either accepted request shape.
+- No Production, database, migration, provider, WordPress, lead,
+  communication, environment, DNS, publication, spend, deletion, or
+  NellySelly state changed.
+
 ## 2026-09-02 — Public chat-session boundary hardening
 
 - Retained the required `/api/chat/session` endpoint as an opaque public funnel

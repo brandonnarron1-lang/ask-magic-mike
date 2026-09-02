@@ -285,7 +285,7 @@ export const LIMITS = {
   intakeStep:     { limit: 30, windowMs:  5 * 60 * 1000 },
   /** /api/session/create — 30 per 10 minutes */
   sessionCreate:  { limit: 30, windowMs: 10 * 60 * 1000 },
-  /** /api/analytics/event — 60 per minute */
+  /** Public analytics ingress (/api/events and its widget alias) — 60 per minute */
   analyticsEvent: { limit: 60, windowMs:       60 * 1000 },
   /** /api/chat — 20 messages per 10 minutes */
   chatMessage:    { limit: 20, windowMs: 10 * 60 * 1000 },

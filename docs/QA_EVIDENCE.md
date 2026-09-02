@@ -1,5 +1,38 @@
 # QA Evidence
 
+## Public analytics ingress boundary hardening — 2026-09-02
+
+- The route-manifest audit confirmed that `/api/events` and its exact
+  `/api/widget/events` handler alias are the only active public analytics
+  ingress. The legacy `src/app/api/analytics/event` adapter is outside the
+  canonical root App Router build; its hardening is dormant defense in depth,
+  not a newly activated endpoint. Both source implementations target the same
+  Neon ledger. No replacement route, table, migration, store, or provider was
+  created.
+- Expanded focused Node 24 verification passes 28 project-file suites / 115
+  tests across both ingress contracts, the widget alias, browser privacy,
+  funnel identity, durable rate limiting, Preview zero-write behavior, and
+  security-foundation integrity. Strict TypeScript, targeted ESLint, and
+  whitespace validation also pass.
+- Tests prove active-route identity, exact-origin refusal, automated-browser KPI exclusion before
+  mutation, read-only Preview refusal before limiting, Production durable-
+  limiter enforcement, exact break-glass behavior, bounded throttling,
+  private/no-store body/header correlation, safe schema errors, and truthful
+  persistence failure.
+- Complete local acceptance also passes Ask Magic Mike/NellySelly isolation,
+  14/14 safety controls, 301 files / 3,603 tests, strict TypeScript,
+  repository-wide ESLint, an optimized Next.js 15.5.21 Production build with
+  60 static pages, and the 102-route manifest with 22 acknowledged root/src
+  duplicates. Production dependencies report no known vulnerabilities.
+  Redacted Gitleaks reports no leak in the approximately 32.5 KB staged
+  candidate or 771 history commits / 19.70 MB. Exact-commit and hosted evidence
+  remain to be sealed in
+  [`phase9/PUBLIC_ANALYTICS_INGRESS_BOUNDARY_QA_EVIDENCE.md`](./phase9/PUBLIC_ANALYTICS_INGRESS_BOUNDARY_QA_EVIDENCE.md).
+- All inputs are synthetic and persistence/provider adapters are mocked. No
+  remote analytics write, lead, communication, WordPress action, database
+  migration, Production deployment, DNS change, publication, spend, deletion,
+  or NellySelly mutation occurred.
+
 ## Public chat-session boundary hardening — 2026-09-02
 
 - The required `/api/chat/session` endpoint continues to issue only an opaque

@@ -11,6 +11,38 @@ Updated 2026-09-02.
   candidates below are Draft/Preview work only and change no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Phase 9 public analytics ingress boundary hardening — 2026-09-02
+
+- **One active ingress retained:** `/api/events` keeps its snake-case browser
+  contract and `/api/widget/events` remains an exact handler alias. The older
+  `src/app/api/analytics/event` camel-case source is absent from the canonical
+  root App Router build; it was hardened only as a dormant fail-safe and was
+  not activated. Both implementations target the same server-side Neon
+  repository, never competing ledgers.
+- **Production fails closed:** a public analytics record can be persisted only
+  after an allowed durable shared rate-limit result. Non-durable Production
+  limiting refuses the write unless the existing exact
+  `RATE_LIMIT_EMERGENCY_MEMORY=1` break-glass control is active.
+- **KPI and edge trust tightened:** the active state-changing ingress requires
+  an explicit approved origin; automated-browser telemetry is acknowledged but
+  excluded before limiter/ledger access. The same controls and safe schema
+  errors now protect the dormant compatibility source if router authority ever
+  changes.
+- **Response contract unified:** every outcome is private/no-store and carries
+  a server-generated body/header correlation pair. Throttling returns positive
+  retry guidance bounded by the existing analytics window.
+- **Verification state:** expanded focused Node 24 acceptance passes 28
+  project-file suites / 115 tests. Complete local acceptance passes Ask Magic
+  Mike/NellySelly isolation, 14/14 safety controls, 301 files / 3,603 tests,
+  strict TypeScript, repository-wide ESLint, an optimized Next.js 15.5.21
+  Production build with 60 static pages, and the 102-route manifest with 22
+  acknowledged root/src duplicates. Production dependencies report no known
+  vulnerabilities; redacted staged-delta and 771-commit history scans are
+  clean. Exact-commit and hosted evidence remain to be sealed.
+- **Authority unchanged:** Production remains accepted PR #247 and PR #248
+  remains the sole requestable application gate. Design and rollback:
+  [`phase9/PUBLIC_ANALYTICS_INGRESS_BOUNDARY.md`](./phase9/PUBLIC_ANALYTICS_INGRESS_BOUNDARY.md).
+
 ## Phase 9 public chat-session boundary hardening — 2026-09-02
 
 - **Existing endpoint retained:** `/api/chat/session` still returns a random
@@ -1963,10 +1995,11 @@ historical evidence, not current operator instructions.
   is insufficient: unregistered single-token names and address slugs are
   discarded, and open-house identifiers are reduced to a generic placement
   class. Full attribution remains in the protected canonical lead record.
-- Both public analytics routes now await the canonical Neon write, return HTTP
-  202 only for a durable event, and return HTTP 503 when persistence is
-  unavailable. All JSON-LD script surfaces share an escaping serializer rather
-  than inserting raw `JSON.stringify` output.
+- The active root analytics handler and retained dormant source implementation
+  now await the canonical Neon write, return HTTP 202 only for a durable event,
+  and return HTTP 503 when persistence is unavailable. All JSON-LD script
+  surfaces share an escaping serializer rather than inserting raw
+  `JSON.stringify` output.
 - The protected Growth Command Center adds aggregate-only outcome and delivery
   evidence for eligible non-test, non-suppressed leads. Optional-table or query
   failure renders unavailable instead of fabricating zero. A post-refresh audit
