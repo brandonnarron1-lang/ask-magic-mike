@@ -89,6 +89,10 @@ export type LeadPayload = {
   page_url?: string;
   widget_session_id?: string;
   idempotency_key?: string;
+  experiment_key?: string;
+  experiment_subject_key?: string;
+  experiment_variant_key?: string;
+  experiment_surface?: string;
   honeypot?: string;
   is_test?: boolean;
   consent?: boolean;
@@ -160,6 +164,10 @@ export function normalizeLeadPayload(input: Record<string, unknown>): LeadPayloa
     page_url: cleanOptional(input.page_url),
     widget_session_id: cleanOptional(input.widget_session_id),
     idempotency_key: cleanOptional(input.idempotency_key || input.request_fingerprint),
+    experiment_key: cleanOptional(input.experiment_key),
+    experiment_subject_key: cleanOptional(input.experiment_subject_key),
+    experiment_variant_key: cleanOptional(input.experiment_variant_key),
+    experiment_surface: cleanOptional(input.experiment_surface),
     honeypot: clean(input.website || input.honeypot),
     // Test classification is derived from the unmistakable QA marker pair,
     // never from a browser-controlled boolean by itself. This prevents an

@@ -1,5 +1,35 @@
 # QA Evidence
 
+## Public experiment ingress boundary hardening — 2026-09-02
+
+- Retained the existing Home Value experiment experience, deterministic
+  assignment engine, public exposure route, canonical Neon experiment tables,
+  and atomic lead transaction. No route, migration, provider, environment
+  variable, queue, WordPress component, or second ledger was added.
+- Focused Node 24 verification passes 6 files / 103 tests plus strict
+  TypeScript, targeted ESLint, and whitespace checks. Coverage includes exact
+  Origin, automated-browser exclusion, Preview zero-write, Production durable
+  limiting and exact break glass, JSON/schema/body bounds, unknown fields,
+  correlated failures, prior-exposure enforcement, deterministic variant
+  binding, eligible-lead verification, cross-surface context rejection, test
+  exclusion, and server-only conversion authorship.
+- The Home Value funnel now carries only verified non-contact context through
+  `/api/leads`; it no longer calls the experiment conversion endpoint from the
+  browser. Score/routing is computed once and reused by the durable lead and
+  notification metadata.
+- Complete local acceptance passes 303 files / 3,649 tests, strict TypeScript,
+  full ESLint, Ask/NellySelly isolation, 14/14 safety controls, an optimized
+  Next.js 15.5.21 build with 60 static pages, and the 102-active/22-duplicate
+  route manifest. Production dependencies have no known vulnerability; a
+  redacted scans pass the approximately 54 KB candidate and 773 history
+  commits / approximately 19.79 MB. Exact-commit and hosted no-write evidence
+  will be recorded in
+  [`phase9/PUBLIC_EXPERIMENT_INGRESS_BOUNDARY_QA_EVIDENCE.md`](./phase9/PUBLIC_EXPERIMENT_INGRESS_BOUNDARY_QA_EVIDENCE.md).
+- All local inputs and repositories/providers are synthetic or mocked. No
+  remote experiment event, lead, communication, WordPress action, migration,
+  Production deployment, environment/DNS change, publication, spend, deletion,
+  or NellySelly mutation occurred.
+
 ## Public lead ingress boundary hardening — 2026-09-02
 
 - Retained the active root `POST /api/leads`, `capture_public_lead_v2`, signed

@@ -11,6 +11,40 @@ Updated 2026-09-02.
   candidates below are Draft/Preview work only and change no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Phase 9 public experiment ingress boundary hardening — 2026-09-02
+
+- **Existing system retained:** the Home Value experiment UI, deterministic
+  variant engine, public exposure route, canonical Neon experiment ledger, and
+  atomic public lead transaction remain the only authorities. No route, table,
+  migration, provider, queue, environment variable, or parallel ledger was
+  added.
+- **Conversion authority repaired:** `/api/experiments/event` accepts only a
+  bounded pseudonymous exposure. Public `lead_created` authorship and arbitrary
+  lead UUID attachment are rejected; the server emits conversion only after
+  the exact canonical lead commits.
+- **Assignment integrity enforced:** lead context is all-or-nothing and bound
+  to the Home Value funnel, static surface, known registry definition, SHA-256
+  subject shape, and recomputed deterministic variant. Conversion requires the
+  prior stored exposure, matching assignment, and exact eligible non-test lead.
+- **Edge contract completed:** exact Origin, automation exclusion, Preview
+  zero-write ordering, durable Production limiting, strict 4 KB JSON/schema,
+  unknown-field rejection, truthful repository failure, private/no-store
+  correlation, and bounded retry guidance are covered.
+- **Deterministic evidence aligned:** score/routing is computed once and reused
+  for the canonical lead row and notification metadata. Lead replay and QA
+  records cannot inflate experiment conversions; event failure cannot reverse
+  an already committed lead.
+- **Verification state:** focused Node 24 acceptance passes 6 files / 103 tests.
+  Complete local acceptance passes 303 files / 3,649 tests, strict TypeScript,
+  full ESLint, Ask/NellySelly isolation, 14/14 safety controls, an optimized
+  Next.js 15.5.21 build with 60 static pages, and 102 active / 22 acknowledged
+  duplicate routes. Production dependencies have no known vulnerability; the
+  approximately 54 KB candidate and 773-commit redacted history scans are
+  clean. Exact-commit and hosted no-write evidence remain to be sealed.
+- **Authority unchanged:** Production remains accepted PR #247 and PR #248
+  remains the sole requestable application gate. Design and rollback:
+  [`phase9/PUBLIC_EXPERIMENT_INGRESS_BOUNDARY.md`](./phase9/PUBLIC_EXPERIMENT_INGRESS_BOUNDARY.md).
+
 ## Phase 9 public lead ingress boundary hardening — 2026-09-02
 
 - **Canonical pipe retained:** active root `POST /api/leads` still commits one

@@ -17,6 +17,11 @@ import { enqueueLeadNotifications } from "../../lib/leadAlertService";
 import { LEAD_ALERT_TEMPLATE_VERSION } from "../../lib/leadAlertTemplates";
 import { notificationMode as configuredNotificationMode } from "../../lib/leadNotificationProvider";
 import { recordServerAnalyticsEvent } from "../../lib/serverAnalytics";
+import {
+  resolvePublicExperimentLeadContext,
+  type VerifiedPublicExperimentLeadContext,
+} from "../../lib/growth/experiment-registry";
+import { recordLeadExperimentConversion } from "../../lib/growth/lead-experiment-conversion";
 import { createFirstLiveLeadMonitor } from "@/lib/operations/first-live-lead-monitor";
 import { isApprovedPublicOrigin } from "../../lib/publicOrigin";
 import {
@@ -316,14 +321,18 @@ function buildSessionRow(payload: LeadPayload, req: Request, sessionId: string) 
   };
 }
 
-function buildLeadRow(payload: LeadPayload, req: Request, sessionId: string) {
+function buildLeadRow(
+  payload: LeadPayload,
+  req: Request,
+  sessionId: string,
+  score: ReturnType<typeof scoreLead>,
+  routing: ReturnType<typeof routeLead>,
+) {
   const leadType = leadTypeFor(payload);
   const { firstName, lastName } = splitName(payload);
   const notes = buildNotes(payload);
   const qualification = qualificationFor(payload);
   const address = payload.property_address || payload.address || undefined;
-  const score = scoreLead(payload);
-  const routing = routeLead(payload, score.score);
   const consentEmail = consentGrantedForEmail(payload);
   const consentCall = consentGrantedForCall(payload);
   const consentSms = consentGrantedForSms(payload);
@@ -435,7 +444,7 @@ async function insertLead(
   const sessionId = sessionIdFor(payload);
   const result = await persistence.captureLeadLifecycle({
     session: buildSessionRow(payload, req, sessionId),
-    lead: buildLeadRow(payload, req, sessionId),
+    lead: buildLeadRow(payload, req, sessionId, score, routing),
     attribution: buildSourceAttributionRow(payload, req),
     // capture_public_lead_v2 always disables the legacy agent-assignment
     // outbox internally. This mode controls only the canonical lead alert.
@@ -593,6 +602,7 @@ export async function POST(req: Request) {
   let rawBody: string;
   let trustedWordPressBridge = false;
   let trustedWordPressEntryId: string | null = null;
+  let experimentContext: VerifiedPublicExperimentLeadContext | null = null;
   let persistedLead: Awaited<ReturnType<typeof insertLead>>;
   try {
     rawBody = await readBoundedPublicLeadBody(req);
@@ -666,6 +676,18 @@ export async function POST(req: Request) {
       400,
     );
   }
+  const resolvedExperimentContext = resolvePublicExperimentLeadContext(normalizedPayload);
+  if (!resolvedExperimentContext.ok) {
+    return leadResponse(
+      correlationId,
+      {
+        error: "Invalid experiment context.",
+        code: resolvedExperimentContext.code,
+      },
+      400,
+    );
+  }
+  experimentContext = resolvedExperimentContext.context;
   if (trustedWordPressBridge && trustedWordPressEntryId) {
     const identity = verifyWordPressBridgePayloadIdentity(
       normalizedPayload,
@@ -821,6 +843,28 @@ export async function POST(req: Request) {
         console.error("[leads] canonical outcome event write failed", {
           correlationId,
           error: "analytics_persistence_failed",
+        });
+      }
+
+      try {
+        const experimentOutcome = await recordLeadExperimentConversion({
+          context: experimentContext,
+          leadId: persistedLead.lead_id,
+          isTest: payload.is_test === true,
+        });
+        if (
+          experimentOutcome.attempted &&
+          !["recorded", "disabled", "not_approved"].includes(experimentOutcome.result.reason)
+        ) {
+          console.error("[leads] canonical experiment conversion was not recorded", {
+            correlationId,
+            reason: experimentOutcome.result.reason,
+          });
+        }
+      } catch {
+        console.error("[leads] canonical experiment conversion write failed", {
+          correlationId,
+          error: "experiment_persistence_failed",
         });
       }
 

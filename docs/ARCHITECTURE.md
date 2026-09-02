@@ -39,6 +39,34 @@ flag is deliberately active. All public responses are private/no-store and
 correlation-addressable. The historical `src/app` lead route is outside the
 deployed root App Router and is not a competing authority.
 
+## Active public experiment boundary
+
+The existing Home Value experiment uses one exposure endpoint and the existing
+canonical Neon growth ledger. The browser supplies only a SHA-256 pseudonymous
+subject to `POST /api/experiments/event`; the endpoint accepts exposure only,
+selects the deterministic variant after runtime/code/database approval gates,
+and never accepts a lead ID or browser-authored conversion.
+
+If the exposure is active, four bounded context fields accompany the existing
+`POST /api/leads` request. The lead route revalidates the exact experiment,
+subject shape, variant, Home Value source, and static surface before the
+canonical transaction. After a new non-test lead commits, the server writes the
+`lead_created` experiment event using that exact durable lead UUID. The
+repository requires the prior stored assignment, recomputes its deterministic
+variant, rejects substitutions, and confirms lead eligibility. Replay performs
+no second conversion write.
+
+```text
+public exposure -> deterministic stored assignment
+durable lead commit -> server-bound eligible conversion
+```
+
+Preview refuses before limiter/ledger mutation, Production requires durable
+limiting, and inactive/unapproved experiments fall back to the control funnel.
+This path reuses `growth_experiments`, `growth_experiment_assignments`, and
+`growth_experiment_events`; it does not create a second experiment or analytics
+system.
+
 ## Historical data flow (`SUPERSEDED`)
 
 ```

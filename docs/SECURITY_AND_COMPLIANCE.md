@@ -130,6 +130,33 @@
   stable safe errors. No database, provider, recipient/BCC, contact, existing
   lead, or raw exception detail is returned.
 
+## Public experiment ingress boundary — 2026-09-02
+
+- `POST /api/experiments/event` is exposure-only. It never accepts a public
+  lead UUID or public `lead_created` authority; conversion is authored only by
+  the server after canonical lead storage.
+- Exact approved Origin, automation exclusion, Preview refusal before shared
+  state, and an allowed durable Production limiter result are required before
+  experiment persistence. The existing exact emergency-memory control remains
+  the sole documented Production exception.
+- JSON-only object input has a 4,096-byte declared/streamed ceiling and an
+  exact four-field schema. Unknown keys, malformed SHA-256 subjects, unknown
+  experiments, non-exposure events, and cross-surface requests fail closed.
+- The code registry, Production runtime switch, and approved/running database
+  definition must all agree. Assignment remains deterministic and idempotent.
+- Experiment context on `/api/leads` is all-or-nothing and restricted to the
+  exact Home Value funnel/source/static surface. The server recomputes the
+  variant; a browser cannot substitute treatment identity.
+- Conversion never creates an assignment. It requires a prior stored exposure,
+  the matching deterministic variant, and the exact newly persisted lead with
+  test and communication-suppression exclusions.
+- The subject is a SHA-256 digest of an ephemeral random browser session seed,
+  not contact data. Public responses and safe logs omit lead details, subject
+  keys, recipient/BCC values, provider secrets, and raw database errors.
+- Every response is private/no-store and body/header correlated. Repository
+  outage is truthful 503, throttling has bounded retry guidance, and a
+  post-commit experiment failure cannot reverse a durable lead.
+
 
 ## WordPress activation-manifest boundary — 2026-08-22
 
