@@ -66,11 +66,34 @@ function nextAttemptAt(attemptCount: number) {
 
 function canSendAgentChannel(channel: LeadNotificationChannel, recipient: string | null | undefined) {
   if (!agentNotificationsEnabled()) return { ok: false, reason: "agent_notifications_disabled" };
+  if (channel === "push") return { ok: false, reason: "unsupported_assignment_channel" };
   if (channel === "sms" && !agentSmsNotificationsEnabled()) {
     return { ok: false, reason: "agent_sms_notifications_disabled" };
   }
   if (!recipient) return { ok: false, reason: `missing_agent_${channel}` };
   return { ok: true, reason: null };
+}
+
+function agentChannelFailureSummary(reason: string | null) {
+  if (reason === "agent_notifications_disabled") {
+    return "Agent notifications are disabled by configuration.";
+  }
+  if (reason === "agent_sms_notifications_disabled") {
+    return "Agent SMS notifications are disabled by configuration.";
+  }
+  if (reason === "unsupported_assignment_channel") {
+    return "The recorded assignment-notification channel is unsupported.";
+  }
+  return "Assigned agent recipient is missing.";
+}
+
+function assignmentRecipient(
+  channel: LeadNotificationChannel,
+  context: AssignmentNotificationContext,
+) {
+  if (channel === "email") return context.agent.email;
+  if (channel === "sms") return context.agent.phone;
+  return null;
 }
 
 function renderRequest(record: LeadNotificationRecord, context: AssignmentNotificationContext) {
@@ -170,11 +193,7 @@ export class LeadNotificationService {
         status: "skipped",
         provider: this.provider.name,
         error_code: sendable.reason,
-        error_summary: sendable.reason === "agent_notifications_disabled"
-          ? "Agent notifications are disabled by configuration."
-          : sendable.reason === "agent_sms_notifications_disabled"
-            ? "Agent SMS notifications are disabled by configuration."
-          : "Assigned agent recipient is missing.",
+        error_summary: agentChannelFailureSummary(sendable.reason),
         failed_at: nowIso(),
       });
       return { ok: true, notification: skipped || notification, warning: sendable.reason || undefined };
@@ -246,14 +265,45 @@ export class LeadNotificationService {
       });
       return { ok: true, notification: failed || working, warning: "notification_context_missing" };
     }
-    if (resolvedContext.lead.assigned_agent_id && resolvedContext.lead.assigned_agent_id !== resolvedContext.agent.id) {
+    if (resolvedContext.lead.assigned_agent_id !== resolvedContext.agent.id) {
       const skipped = await this.repo.update(current.id, {
         status: "skipped",
         error_code: "assignment_changed",
         error_summary: "Lead assignment changed before notification processing.",
         failed_at: nowIso(),
+        next_attempt_at: null,
       });
       return { ok: true, notification: skipped || working, warning: "assignment_changed" };
+    }
+
+    if (resolvedContext.agent.is_active === false) {
+      const skipped = await this.repo.update(current.id, {
+        status: "skipped",
+        error_code: "assigned_agent_inactive",
+        error_summary: "Assigned agent is inactive.",
+        failed_at: nowIso(),
+        next_attempt_at: null,
+      });
+      return { ok: true, notification: skipped || working, warning: "assigned_agent_inactive" };
+    }
+
+    const sendable = canSendAgentChannel(
+      working.channel,
+      assignmentRecipient(working.channel, resolvedContext),
+    );
+    if (!sendable.ok) {
+      const skipped = await this.repo.update(current.id, {
+        status: "skipped",
+        error_code: sendable.reason,
+        error_summary: agentChannelFailureSummary(sendable.reason),
+        failed_at: nowIso(),
+        next_attempt_at: null,
+      });
+      return {
+        ok: true,
+        notification: skipped || working,
+        warning: sendable.reason || undefined,
+      };
     }
 
     const request = renderRequest(working, resolvedContext);

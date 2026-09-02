@@ -348,6 +348,55 @@ type RetryBatchDependencies = {
   ) => Promise<LeadNotificationServiceResult>;
 };
 
+type RetryOneDependencies = {
+  repository?: LeadNotificationRepository;
+  retryLeadAlert?: (
+    notificationId: string,
+    options?: { automated?: boolean },
+  ) => Promise<LeadNotificationRecord | null>;
+  retryAssignment?: (
+    notificationId: string,
+  ) => Promise<LeadNotificationServiceResult>;
+};
+
+/** Dispatch one protected manual retry through the processor that owns the
+ * recorded notification type. This prevents lead alerts and consumer
+ * acknowledgments from being incorrectly interpreted as agent assignments. */
+export async function retryNotificationByType(
+  notificationId: string,
+  options: { automated?: boolean } = {},
+  dependencies: RetryOneDependencies = {},
+): Promise<LeadNotificationServiceResult> {
+  const delivery = assertProviderDeliveryAllowed();
+  if (!delivery.ok) {
+    return {
+      ok: false,
+      statusCode: delivery.statusCode,
+      error: delivery.error,
+    };
+  }
+  const repo = dependencies.repository || notificationRepository();
+  const current = await repo.findById(notificationId);
+  if (!current) {
+    return { ok: false, statusCode: 404, error: "notification_not_found" };
+  }
+  if (!["failed", "retry_scheduled"].includes(current.status)) {
+    return { ok: false, statusCode: 409, error: "notification_not_retryable" };
+  }
+  if (current.notification_type === "agent_assignment") {
+    const retryAssignment = dependencies.retryAssignment || retryAssignmentNotification;
+    return retryAssignment(notificationId);
+  }
+  if (["lead_alert", "consumer_ack"].includes(current.notification_type)) {
+    const retryLeadAlert = dependencies.retryLeadAlert || retryLeadAlertNotification;
+    const notification = await retryLeadAlert(notificationId, options);
+    return notification
+      ? { ok: true, notification }
+      : { ok: false, statusCode: 503, error: "notification_retry_unavailable" };
+  }
+  return { ok: false, statusCode: 409, error: "notification_type_unsupported" };
+}
+
 export async function retryDueNotifications(
   limit = 25,
   dependencies: RetryBatchDependencies = {},

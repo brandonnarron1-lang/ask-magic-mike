@@ -130,6 +130,24 @@ function context(overrides: Partial<AssignmentNotificationContext> = {}): Assign
   };
 }
 
+async function seedFailedAssignment(
+  repo: MemoryNotificationRepo,
+  channel: "email" | "sms" = "email",
+) {
+  return repo.create({
+    lead_id: LEAD_ID,
+    agent_id: AGENT_ID,
+    notification_type: "agent_assignment",
+    channel,
+    recipient_type: "agent",
+    recipient_reference: `${channel}_configured`,
+    template_version: `agent_assignment_${channel}_v1`,
+    idempotency_key: `lead_assignment:retry-permission:${channel}:${repo.rows.length}`,
+    status: "failed",
+    max_attempts: 3,
+  });
+}
+
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-07-10T12:00:00.000Z"));
@@ -278,6 +296,71 @@ describe("LeadNotificationService", () => {
     expect(repo.rows[0].status).toBe("permanently_failed");
     expect(blocked.ok).toBe(false);
     if (!blocked.ok) expect(blocked.error).toBe("notification_not_retryable");
+  });
+
+  it("revalidates current global and channel permission before retry delivery", async () => {
+    for (const scenario of [
+      {
+        channel: "email" as const,
+        configure: () => { process.env.AGENT_NOTIFICATIONS_ENABLED = "false"; },
+        errorCode: "agent_notifications_disabled",
+      },
+      {
+        channel: "sms" as const,
+        configure: () => { process.env.AGENT_SMS_NOTIFICATIONS_ENABLED = "false"; },
+        errorCode: "agent_sms_notifications_disabled",
+      },
+    ]) {
+      process.env.AGENT_NOTIFICATIONS_ENABLED = "true";
+      const repo = new MemoryNotificationRepo();
+      await seedFailedAssignment(repo, scenario.channel);
+      scenario.configure();
+      const provider = new ConsoleNotificationProvider("success");
+      const send = vi.spyOn(provider, "send");
+      const service = new LeadNotificationService(repo, provider);
+
+      const result = await service.retryNotification(repo.rows[0].id, context());
+
+      expect(result.ok).toBe(true);
+      expect(repo.rows[0].status).toBe("skipped");
+      expect(repo.rows[0].error_code).toBe(scenario.errorCode);
+      expect(repo.rows[0].next_attempt_at).toBeNull();
+      expect(send).not.toHaveBeenCalled();
+    }
+  });
+
+  it("never retries to an unassigned or inactive agent", async () => {
+    for (const scenario of [
+      {
+        context: context({
+          lead: { ...context().lead, assigned_agent_id: null },
+        }),
+        errorCode: "assignment_changed",
+      },
+      {
+        context: context({
+          agent: { ...context().agent, is_active: false },
+        }),
+        errorCode: "assigned_agent_inactive",
+      },
+    ]) {
+      const repo = new MemoryNotificationRepo();
+      await seedFailedAssignment(repo);
+      const provider = new ConsoleNotificationProvider("success");
+      const send = vi.spyOn(provider, "send");
+      const service = new LeadNotificationService(repo, provider);
+
+      const result = await service.retryNotification(
+        repo.rows[0].id,
+        scenario.context,
+      );
+
+      expect(result.ok).toBe(true);
+      expect(repo.rows[0].status).toBe("skipped");
+      expect(repo.rows[0].error_code).toBe(scenario.errorCode);
+      expect(repo.rows[0].next_attempt_at).toBeNull();
+      expect(send).not.toHaveBeenCalled();
+    }
   });
 
   it("does not call the provider when another worker already claimed the event", async () => {

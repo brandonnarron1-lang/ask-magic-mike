@@ -61,6 +61,18 @@ A bounce, complaint, unsubscribe, suppression, or QA transition that occurs
 after initial enqueue therefore prevents the later consumer send. Internal
 alerts remain operational records and do not contact the consumer.
 
+Agent-assignment retries also reload the current lead and agent before every
+provider call. Delivery is skipped when the lead is no longer assigned to that
+exact agent, the agent is inactive, the global staff-notification gate is off,
+the channel-specific SMS gate is off, the current destination is missing, or
+the stored channel is unsupported. A historical queue row therefore cannot
+override a later reassignment, unassignment, deactivation, or channel pause.
+
+The protected Lead Center one-record action dispatches by the row's recorded
+notification type. Internal lead alerts and consumer acknowledgments no longer
+pass through the agent-assignment processor. Preview refuses this manual path
+before even reading the repository.
+
 ## Duplicate and failure boundary
 
 The worker does not create a second notification row. Existing outbox
