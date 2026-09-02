@@ -6,8 +6,20 @@ Result: release-candidate interface ready; carrier activation not authorized and
 
 ## Inbound and sequence acceptance — 2026-08-16
 
-The active App Router inbound endpoint is `/api/webhooks/sms/inbound`. It uses canonical Neon storage only. Twilio mode requires the form-encoded raw body and a valid constant-time signature; disabled-provider QA mode requires the timing-safe admin header. The route enforces a 20 KB request cap, validates phone/body/provider IDs, hashes message content, and never stores the raw body.
+The active App Router inbound endpoint is `/api/webhooks/sms/inbound`. It uses
+canonical Neon storage only. Exact form media is treated as Twilio and requires
+a valid constant-time signature even if outbound delivery has been disabled.
+The admin-secret JSON mock mode is local/non-Production only; Production refuses
+it and read-only Preview refuses before body/auth/database work. The route
+enforces declared and streamed 20 KB caps, validates U.S. phone/body/provider
+IDs, hashes message content, and never stores the raw body or phone in webhook
+metadata.
 
-STOP immediately suppresses SMS, upserts purpose-specific opt-outs, and cancels active sequences. A normal reply cancels eligible sequences; HELP is recorded without cancellation. Provider event IDs are unique, so duplicate replay is idempotent. Forged signatures, unauthorized mock calls, invalid payloads, and oversized payloads fail before database mutation.
+STOP atomically suppresses every currently matching lead record, upserts every
+purpose-specific opt-out, and cancels active sequences. A normal reply cancels
+eligible sequences; HELP is recorded without cancellation. The provider receipt
+and all downstream mutations share one statement, so a partial failure rolls
+back completely. Exact replay is idempotent and conflicting event-ID reuse is
+rejected. START/UNSTOP is not an automatic re-opt-in path.
 
 Focused acceptance passed with no network/provider call and no carrier send.

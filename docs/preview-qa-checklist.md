@@ -259,41 +259,24 @@ curl -sXGET -H "Authorization: Bearer $CRON_SECRET" \
 With `?persist=true` the breaches insert into `compliance_flags`. Verify
 in Supabase if applied.
 
-## Webhooks (mock mode)
+## Inbound SMS webhook (read-only Preview)
 
-```bash
-H="x-admin-secret: $ADMIN_SECRET"
+Preview is intentionally zero-write. Do not submit a mock STOP/START payload or
+expect consent state to change. A bounded inert POST must return HTTP 503 with
+`error=preview_data_disabled`, a private/no-store response, and matching body
+and `X-AMM-Correlation-Id` values before provider verification or database
+construction. Runtime semantics are covered locally and by the isolated exact
+PostgreSQL contract in
+`phase9/SMS_INBOUND_CONSENT_ATOMIC_BOUNDARY_QA_EVIDENCE.md`.
 
-# Inbound SMS STOP
-curl -sXPOST -H "$H" -H "Content-Type: application/json" \
-  -d '{"From":"+12525551234","Body":"STOP"}' \
-  "$PREVIEW/api/webhooks/sms/inbound" | jq '.stop_handled'
-# Expected: true
+Production accepts only signed Twilio form callbacks. START/UNSTOP is not an
+automatic re-opt-in command.
 
-# Inbound SMS START
-curl -sXPOST -H "$H" -H "Content-Type: application/json" \
-  -d '{"From":"+12525551234","Body":"START"}' \
-  "$PREVIEW/api/webhooks/sms/inbound" | jq '.start_handled'
-# Expected: true
+## Email lifecycle webhook
 
-# Email — Resend-shaped unsubscribe
-curl -sXPOST -H "$H" -H "Content-Type: application/json" \
-  -d '{"type":"email.unsubscribed","data":{"email_id":"em_1","to":["qa@example.com"]}}' \
-  "$PREVIEW/api/webhooks/email/events" | jq '.event_type, .provider'
-# Expected: "unsubscribed" "resend"
-
-# Email — SendGrid bounce
-curl -sXPOST -H "$H" -H "Content-Type: application/json" \
-  -d '{"event":"bounce","email":"qa@example.com","sg_message_id":"sg-1"}' \
-  "$PREVIEW/api/webhooks/email/events" | jq '.event_type, .provider'
-# Expected: "bounced" "sendgrid"
-
-# Email — Postmark delivery
-curl -sXPOST -H "$H" -H "Content-Type: application/json" \
-  -d '{"RecordType":"Delivery","MessageID":"pm-1","Recipient":"qa@example.com"}' \
-  "$PREVIEW/api/webhooks/email/events" | jq '.event_type, .provider'
-# Expected: "delivered" "postmark"
-```
+Do not post generic/admin-secret lifecycle examples to current Preview. Current
+Production accepts only the configured signed Resend contract, and Preview must
+return its zero-write refusal. See `phase9/EMAIL_WEBHOOK_ATOMIC_BOUNDARY.md`.
 
 ## Listings
 

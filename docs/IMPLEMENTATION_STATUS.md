@@ -11,6 +11,35 @@ Updated 2026-09-02.
   candidates below are Draft/Preview work only and change no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Phase 9 atomic inbound SMS consent boundary — 2026-09-02
+
+- Reused the existing Twilio signature adapter, inbound route, canonical Neon
+  lead/permission/sequence tables, provider receipt ledger, and communication
+  timeline. No new provider, endpoint, migration, table, queue, or secret name
+  was added.
+- One SQL statement now claims the receipt and applies all downstream consent
+  effects. STOP covers every existing lead sharing the normalized U.S. number
+  and all six SMS purposes; replies cancel every eligible sequence; HELP/INFO
+  changes no permission. Exact replay is inert, content conflict is rejected,
+  failed receipts can retry, and an ignored early receipt can heal on replay.
+- Twilio authentication is independent of outbound enablement, so rollback does
+  not strand callbacks. Production refuses JSON mock input; Preview refuses
+  before body/auth/database work; strict media, body, field, phone, and provider
+  ID controls precede persistence. Webhook metadata contains neither raw phone
+  nor raw message text. START/UNSTOP cannot silently restore consent.
+- Focused verification passes 3 files / 27 tests, strict typecheck, targeted
+  lint, and exact PostgreSQL 17 processing/replay/conflict/rollback/retry/
+  unmatched/healing proof. Complete Node 24.18.0 acceptance passes system
+  isolation, 14/14 safety, 303 files / 3,678 tests, repository-wide typecheck
+  and lint, a 60-page optimized build, 102/22 route proof, and a Production
+  dependency audit with no known vulnerability. Redacted Gitleaks finds no
+  leak in the 54.96 KB staged candidate or 776 commits / 19.94 MB of history.
+  Exact-commit CI/Preview evidence remains to be sealed.
+- This remains a stacked Draft after PR #273. Production is unchanged and PR
+  #248 remains the only requestable application gate. No remote database,
+  carrier, lead, notification, WordPress, deployment, environment, DNS,
+  publication, spend, deletion, or NellySelly action occurred.
+
 ## Phase 9 atomic SMS status boundary — 2026-09-02
 
 - **Existing stack retained:** Twilio, its existing signed status route, the

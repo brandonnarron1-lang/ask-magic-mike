@@ -1,5 +1,30 @@
 # QA Evidence
 
+## Atomic inbound SMS consent boundary — 2026-09-02
+
+- Focused verification passes 3 files / 27 tests, strict TypeScript, targeted
+  ESLint, and whitespace checks. It covers Preview zero-write, Production mock
+  refusal, provider authentication independent of outbound flags, canonical URL
+  binding, exact media/schema/size/phone/provider validation, replay, conflict,
+  all-match response counts, private correlation, and safe persistence failure.
+- `pnpm run test:postgres:sms-inbound` extracts the route's exact SQL and runs
+  it only against an isolated local PostgreSQL 17 transaction. It proves STOP
+  across three lead records and 18 permission rows, all-sequence cancellation,
+  deterministic timeline selection, exact replay, conflicting payload hold,
+  reply and HELP semantics, failed-receipt retry, ignored-receipt healing,
+  forced full rollback, and minimized webhook metadata. The cluster was stopped
+  and removed.
+- Complete Node 24.18.0 acceptance passes system isolation, 14/14 safety,
+  303 files / 3,678 tests, strict TypeScript, repository-wide ESLint, an
+  optimized Next.js 15.5.21 build with 60 static pages, and 102 active / 22
+  acknowledged duplicate routes. The Production dependency audit reports no
+  known vulnerability. Redacted Gitleaks finds no leak in the 54.96 KB staged
+  candidate or 776 commits / 19.94 MB of history. Exact-commit CI, protected
+  Preview, and Production-invariant results will be sealed in
+  [`phase9/SMS_INBOUND_CONSENT_ATOMIC_BOUNDARY_QA_EVIDENCE.md`](./phase9/SMS_INBOUND_CONSENT_ATOMIC_BOUNDARY_QA_EVIDENCE.md).
+- No remote provider, database, lead, notification, WordPress, Production,
+  environment/DNS, publication, spend, deletion, or NellySelly action occurred.
+
 ## Atomic SMS status callback boundary — 2026-09-02
 
 - Reused the existing Twilio adapter, status route, Neon outbox, provider-event

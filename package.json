@@ -68,6 +68,7 @@
     "test:postgres:infra02": "node scripts/infra-02-local-db-verify.mjs --postgres-contract",
     "test:postgres:resend-webhook": "node scripts/verify-resend-webhook-atomic-sql.mjs",
     "test:postgres:twilio-status": "node scripts/verify-twilio-status-atomic-sql.mjs",
+    "test:postgres:sms-inbound": "node scripts/verify-inbound-sms-atomic-sql.mjs",
     "test:supabase:infra02": "node scripts/infra-02-local-db-verify.mjs --supabase-lifecycle",
     "release:pr121:offline": "node scripts/release/pr121-offline-release.mjs",
     "release:preflight": "pnpm run release:doctor && pnpm run release:gate && pnpm run release:report && pnpm run launch:authority",

@@ -33,6 +33,23 @@ or KPI test state. Public channel permission requires the server-owned umbrella
 consent plus the exact channel grant; SMS remains denied until a separately
 approved public SMS consent control exists.
 
+## Active inbound SMS consent boundary
+
+`POST /api/webhooks/sms/inbound` is the single consumer-reply/opt-out command.
+Exact form media is always treated as Twilio and requires the provider's signed
+canonical callback URL, independent of whether new outbound sends are enabled.
+The admin-secret JSON transport exists only for local non-Production tests;
+Production refuses it and Preview is zero-write.
+
+One canonical Neon statement claims the provider receipt, records one timeline
+event, suppresses every existing lead record matching the normalized U.S.
+number, upserts each SMS purpose permission, and cancels eligible sequences.
+Receipt failure therefore cannot become a false successful replay. Exact replay
+is inert, changed-content event-ID reuse conflicts, and a previously unmatched
+receipt can heal on the same signed replay after its lead exists. No raw phone
+or message body is retained in webhook metadata. See
+[`phase9/SMS_INBOUND_CONSENT_ATOMIC_BOUNDARY.md`](./phase9/SMS_INBOUND_CONSENT_ATOMIC_BOUNDARY.md).
+
 Read-only Preview refuses before the shared limiter can write. Production
 requires durable Neon-backed limiting unless the exact documented emergency
 flag is deliberately active. All public responses are private/no-store and

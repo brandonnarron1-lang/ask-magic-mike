@@ -243,9 +243,11 @@ What landed:
     writes `compliance_flags`.
   - All admin routes gated by `x-admin-secret` against `ADMIN_SECRET`.
 - **Webhook scaffolds**:
-  - `POST /api/webhooks/sms/inbound` — Twilio-style + JSON; handles
-    STOP/START/UNSTOP; writes `opt_out_sms`/`opt_in` flags; mirrors raw
-    payload to `webhook_events`.
+  - `POST /api/webhooks/sms/inbound` — signed Twilio form callback plus a
+    local-only strict JSON mock; atomically handles STOP, HELP, and consumer
+    replies through canonical Neon receipt/permission/timeline/sequence tables.
+    It retains no raw payload or phone in webhook metadata and deliberately
+    does not treat START/UNSTOP as automatic renewed consent.
   - `POST /api/webhooks/email/events` — provider-generic envelope;
     updates `message_deliveries`; bounce/unsubscribe writes
     `opt_out_email`.
