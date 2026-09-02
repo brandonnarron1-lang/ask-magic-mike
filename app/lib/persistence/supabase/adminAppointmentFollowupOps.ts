@@ -1,5 +1,6 @@
 import { updateAdminLeadStatus, type AdminLeadStatus } from "../../adminLeadActions";
 import { buildLeadStalledSignals } from "../../adminLeadTimeline";
+import { evaluateFirstResponseRisk } from "../../firstResponseRisk";
 import { assertDatabaseMutationAllowed } from "../../../../src/lib/preview-security";
 
 export const APPOINTMENT_STATUSES = [
@@ -79,6 +80,7 @@ export type AdminActionQueueItem = {
     | "appointment_today"
     | "appointment_no_show"
     | "appointment_request_unscheduled"
+    | "first_response_overdue"
     | "stalled_lead"
     | "notification_retry";
   priority: 1 | 2 | 3 | 4 | 5;
@@ -796,6 +798,47 @@ export function buildDailyActionQueue(input: {
   for (const lead of input.leads) {
     const leadId = text(lead.id);
     if (!leadId) continue;
+    if (lead.is_test === true || lead.communication_suppressed === true) continue;
+
+    const responseRisk = lead.first_response_evidence_available === true
+      ? evaluateFirstResponseRisk({
+          createdAt: text(lead.created_at),
+          status: text(lead.status) || "new",
+          conversionStage: text(lead.conversion_stage),
+          lastContactedAt: text(lead.last_contacted_at),
+          firstHumanResponseAt: text(lead.first_human_response_at),
+          isTest: lead.is_test === true,
+          communicationSuppressed: lead.communication_suppressed === true,
+        }, now)
+      : null;
+    const immediateActionExists = items.some(
+      (item) => item.lead_id === leadId && item.priority <= 2,
+    );
+    const responseRiskQueued = Boolean(
+      responseRisk?.isRisk &&
+      !appointmentActionLeadIds.has(leadId) &&
+      !immediateActionExists,
+    );
+    const responseRiskCovered = Boolean(
+      responseRisk?.isRisk &&
+      (responseRiskQueued || immediateActionExists || appointmentActionLeadIds.has(leadId)),
+    );
+
+    if (responseRiskQueued && responseRisk) {
+      items.push({
+        id: `first-response-${leadId}`,
+        type: "first_response_overdue",
+        priority: 1,
+        lead_id: leadId,
+        assigned_agent_id: assignedAgent(leadId),
+        lead_label: leadLabel(leadId),
+        owner: owner(leadId),
+        due_at: responseRisk.dueAt,
+        status: "overdue",
+        recommended_action: "Complete one-to-one follow-up and record the immutable first-response milestone",
+      });
+    }
+
     if (appointmentActionLeadIds.has(leadId)) continue;
     const signals = buildLeadStalledSignals({
       status: text(lead.status) || "new",
@@ -807,6 +850,10 @@ export function buildDailyActionQueue(input: {
       timeline_months: typeof lead.timeline_months === "number" ? lead.timeline_months : null,
     }, now);
     for (const signal of signals) {
+      if (
+        responseRiskCovered &&
+        ["unassigned_assignment_sla", "assigned_not_contacted", "hot_idle"].includes(signal.key)
+      ) continue;
       items.push({
         id: `stalled-${leadId}-${signal.key}`,
         type: "stalled_lead",

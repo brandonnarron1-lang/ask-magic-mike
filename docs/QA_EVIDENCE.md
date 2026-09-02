@@ -1,5 +1,33 @@
 # QA Evidence
 
+## First-response Action Queue reconciliation — 2026-09-01
+
+- The accepted PR #247 Production deployment passed all 11 point-in-time
+  monitor contracts, including canonical capture, notification storage, RBAC,
+  durable rate limiting, and Push readiness.
+- Authenticated Lead Center review used aggregate-only rendered values. In the
+  90-day window it showed one eligible live lead, 100% useful attribution, one
+  speed-to-lead risk, zero immutable first-response milestones, one terminal
+  internal alert, zero permanent internal failures, and zero Action Queue
+  items. No contact or row-level PII was retained in evidence.
+- Root-cause review proved Growth used a 15-minute/seven-day response contract
+  while the Action Queue waited for two- to four-hour legacy stalled signals
+  and did not join `lead_response_milestones`.
+- Focused acceptance currently passes 8 files / 92 tests across Growth,
+  baseline readiness, owned-demand regression, Action Queue ordering, pure
+  first-response evaluation, and canonical Neon join/failure behavior. The
+  narrowed response suite passes 3 files / 18 tests.
+- The complete local release gate passes: system isolation, 14/14 release-
+  safety checks, 292/292 test files and 3,527/3,527 tests, strict TypeScript,
+  full-repository ESLint, optimized Next.js 15.5.21 build, and the 102-active-
+  route manifest with 22 acknowledged root/src duplicates. Local Node 26
+  reports the repository's expected Node 24 engine warning; exact-head hosted
+  Node 24 CI, immutable Preview, and protected Preview evidence remain to be
+  sealed on the Draft PR.
+- No lead, task, status, response, assignment, notification, communication,
+  analytics, database, WordPress, provider, Production, DNS, spend, deletion,
+  or NellySelly mutation occurred.
+
 ## Open-house QR registration packet — 2026-09-01
 
 - Focused acceptance passed 6 files / 67 tests across public reference

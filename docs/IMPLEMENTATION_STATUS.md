@@ -11,6 +11,29 @@ Updated 2026-09-01.
   hardening below is a Draft Preview candidate only and changes no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Phase 9 first-response Action Queue reconciliation — 2026-09-01
+
+- **Observed live mismatch:** authenticated aggregate-only Production review
+  found one eligible 90-day lead, one response risk, zero immutable response
+  milestones, and zero Daily Action Queue items. Internal alert delivery was
+  terminal with zero permanent failures, isolating the gap to operator work
+  visibility rather than capture or notification.
+- **Existing queue repaired:** Growth Intelligence and the protected Action
+  Queue now share one pure 15-minute/seven-day first-response evaluator. The
+  Neon queue joins the immutable response ledger and returns one priority-1
+  `first_response_overdue` card when no higher-priority task or appointment
+  already covers the same work.
+- **No duplicate system:** current tasks, appointments, stalled signals,
+  notification retries, Lead Center detail, RBAC, and assignment filtering are
+  retained. No route, table, task row, provider, or second queue was added.
+- **Safety:** test, suppressed, terminal, responded, contacted, stale,
+  future-dated, and unverifiable rows fail closed. The view cannot contact,
+  reassign, update status, or record a response automatically.
+- **Authority unchanged:** no Production, database, lead, task, response,
+  notification, communication, WordPress, provider, DNS, spend, deletion, or
+  NellySelly mutation occurred. Design and rollback:
+  [`phase9/FIRST_RESPONSE_ACTION_QUEUE_RECONCILIATION.md`](./phase9/FIRST_RESPONSE_ACTION_QUEUE_RECONCILIATION.md).
+
 ## Phase 9 open-house QR registration packet — 2026-09-01
 
 - **Existing customer path reused:** the public dynamic open-house route,
@@ -36,8 +59,11 @@ Updated 2026-09-01.
   asset-studio, public-route, and accessibility acceptance passes 6 files / 67
   tests. The full local release gate passes 290 files / 3,514 tests, strict
   typecheck, full lint, 14/14 safety, isolation, optimized build, and all 102
-  active routes. A no-write 390×844 browser pass confirms the rendered route;
-  immutable Preview evidence remains to be sealed on the Draft PR.
+  active routes. Hosted Node 24 Release Gate `33580746769` passed on exact head
+  `1bd1cbce9a7cfa20ddbf141c66d25e087debfe4b`; immutable Preview
+  `dpl_38m3EXRnwPLR7cWKv44EZZcbteRJ` is Ready. Authenticated no-write Preview
+  QA passed 12 checks with 12 intentional mutation/auth skips and zero
+  failures. A no-write 390×844 browser pass confirms the rendered route.
 - **No external mutation:** no Production, database, WordPress, lead,
   notification, provider, QR distribution, DNS, spend, deletion, or
   NellySelly action occurred. Design and boundary:

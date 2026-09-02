@@ -220,4 +220,96 @@ describe("AdminOps appointment and follow-up operations", () => {
       recommended_action: "Complete or reschedule overdue follow-up",
     });
   });
+
+  it("surfaces the canonical 15-minute first-response risk without waiting for legacy stalled thresholds", () => {
+    const items = buildDailyActionQueue({
+      now: NOW,
+      leads: [{
+        id: "lead-response-risk",
+        status: "assigned",
+        created_at: "2026-07-12T13:40:00.000Z",
+        assigned_agent_id: "agent-1",
+        assigned_at: "2026-07-12T13:40:00.000Z",
+        first_response_evidence_available: true,
+        first_human_response_at: null,
+        last_contacted_at: null,
+        is_test: false,
+        communication_suppressed: false,
+      }],
+      appointments: [],
+      tasks: [],
+    });
+
+    expect(items).toHaveLength(1);
+    expect(items[0]).toEqual(expect.objectContaining({
+      id: "first-response-lead-response-risk",
+      type: "first_response_overdue",
+      priority: 1,
+      lead_id: "lead-response-risk",
+      assigned_agent_id: "agent-1",
+      owner: "agent-1",
+      due_at: "2026-07-12T13:55:00.000Z",
+      status: "overdue",
+      recommended_action: "Complete one-to-one follow-up and record the immutable first-response milestone",
+    }));
+  });
+
+  it("fails closed for excluded, terminal, contacted, responded, stale, or unverifiable response evidence", () => {
+    const base = {
+      status: "new",
+      created_at: "2026-07-12T13:30:00.000Z",
+      first_response_evidence_available: true,
+      first_human_response_at: null,
+      last_contacted_at: null,
+      is_test: false,
+      communication_suppressed: false,
+    };
+    const items = buildDailyActionQueue({
+      now: NOW,
+      leads: [
+        { ...base, id: "responded", first_human_response_at: "2026-07-12T13:35:00.000Z" },
+        { ...base, id: "contacted", last_contacted_at: "2026-07-12T13:36:00.000Z" },
+        { ...base, id: "test", is_test: true },
+        { ...base, id: "suppressed", communication_suppressed: true },
+        { ...base, id: "terminal", status: "converted" },
+        { ...base, id: "unverifiable", first_response_evidence_available: false },
+      ],
+      appointments: [],
+      tasks: [],
+    });
+
+    expect(items).toEqual([]);
+  });
+
+  it("does not duplicate an existing immediate action for the same lead", () => {
+    const items = buildDailyActionQueue({
+      now: NOW,
+      leads: [{
+        id: "lead-existing-action",
+        status: "assigned",
+        created_at: "2026-07-12T11:30:00.000Z",
+        assigned_agent_id: "agent-1",
+        assigned_at: "2026-07-12T11:30:00.000Z",
+        first_response_evidence_available: true,
+        first_human_response_at: null,
+        last_contacted_at: null,
+      }],
+      appointments: [],
+      tasks: [{
+        id: "task-existing-action",
+        lead_id: "lead-existing-action",
+        agent_id: "agent-1",
+        title: "first contact",
+        body: null,
+        due_at: "2026-07-12T13:45:00.000Z",
+        status: "open",
+        priority: "urgent",
+        category: "followup:first_contact",
+        created_at: "2026-07-12T13:30:00.000Z",
+        updated_at: "2026-07-12T13:30:00.000Z",
+      }],
+    });
+
+    expect(items.map((item) => item.type)).toEqual(["overdue_followup"]);
+  });
 });

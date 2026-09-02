@@ -83,6 +83,10 @@ At minimum verify:
 - when the candidate changes open-house capture, one reviewed
   `/open-house/{public-reference}` route plus its deterministic
   `/go/open-house/{public-reference}` redirect, with no form submission;
+- when the candidate changes response operations, compare aggregate-only
+  Growth response-risk and Action Queue coverage: every eligible risk must be
+  represented by `first_response_overdue` or an existing priority-1/2 action,
+  with test/suppressed rows excluded and no contact action performed;
 - apex permanent redirect and canonical/Open Graph metadata;
 - `/api/health/live` and `/api/health/ready` with canonical Neon readiness;
 - anonymous private access denied or redirected to the same-origin Better Auth

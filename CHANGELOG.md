@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-01 — First-response Action Queue reconciliation
+
+- Reused the existing protected Daily Action Queue and immutable response
+  ledger to close a live mismatch where Growth flagged one response risk but
+  the operator queue showed no action.
+- Added one shared pure 15-minute/seven-day response-risk evaluator so Growth
+  and Action Queue logic cannot drift.
+- Added a priority-1 `first_response_overdue` card with exact SLA due time,
+  current assignment identity, protected lead link, and explicit human next
+  action.
+- Suppressed duplicate cards when an immediate task or appointment already
+  covers the response obligation, while retaining independent operational
+  work.
+- Excluded test, suppressed, terminal, contacted, responded, stale,
+  future-dated, and unverifiable rows and preserved agent-assignment RBAC.
+- Performed no Production, lead, task, response, assignment, notification,
+  communication, database, WordPress, provider, DNS, spend, deletion, or
+  NellySelly mutation.
+
 ## 2026-09-01 — Open-house QR registration packet
 
 - Reused the existing Distribution Command, QR renderer, canonical UTM model,
