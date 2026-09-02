@@ -122,6 +122,14 @@ full Beaver Builder source. The executable source and rollback contract is
 documented in
 [`WORDPRESS_PAGE3952_SOURCE_CUTOVER_READINESS_2026-09-01.md`](./WORDPRESS_PAGE3952_SOURCE_CUTOVER_READINESS_2026-09-01.md).
 
+Authenticated inspection of page 3631 separately proved that its live
+shortcode includes a page-specific headline, body, and button. The earlier
+generic replacement would have discarded those values. The corrected
+copy-preserving source contract is documented in
+[`WORDPRESS_PAGE3631_SOURCE_CUTOVER_READINESS_2026-09-01.md`](./WORDPRESS_PAGE3631_SOURCE_CUTOVER_READINESS_2026-09-01.md).
+It remains blocked after Connector readiness until the existing seller-intent
+canonical-page/capture-owner decision and BIC copy review are recorded.
+
 ## Application boundary
 
 `amm.wordpress_activation_change_set.v3` adds:
@@ -131,7 +139,8 @@ documented in
 - `connectorVersionReady`;
 - `proposedShortcode`;
 - `pagePublicationApprovalGate`; and
-- `connector_upgrade_required`.
+- `connector_upgrade_required`; and
+- `seller_intent_decision_required` for the separately held seller page.
 
 The public parser trusts the version marker only on the existing
 `.amm-cta`, `.amm-embed`, or `.amm-floating-cta` surfaces. A random
@@ -165,6 +174,10 @@ This later gate is not requestable until the public page proves Connector
 returns `legacy_match_ready`, and the exact current page source, matching
 revision source, and postmeta have a verified rollback. It authorizes only the
 one reviewed shortcode replacement on page 3952.
+
+Page 3631 has no currently requestable publication gate. Its future gate can
+be issued only after the seller-intent and BIC prerequisites in its exact-source
+contract are satisfied; it must not be bundled with page 3952.
 
 ## Rollback
 

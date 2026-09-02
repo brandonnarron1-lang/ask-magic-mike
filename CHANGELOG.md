@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-01 — WordPress page 3631 copy-preserving decision boundary
+
+- Authenticated the exact 2,480-byte We Buy Homes Beaver Builder source and
+  pinned its one existing Ask Magic Mike shortcode and SHA-256 digest.
+- Corrected the earlier proposal so it retains the live CTA headline, body,
+  and button while adding only `/sell` routing and canonical owned-demand
+  attribution.
+- Reused one shared exact-source engine for pages 3631 and 3952, with
+  independent contracts and no write/provider path.
+- Made page 3631 fail closed until the existing seller-intent packet records
+  the canonical page, capture owner, duplicate-page disposition, placement key,
+  and a BIC/compliance copy-review digest in addition to rollback evidence.
+- Performed no WordPress save, page/form/plugin action, lead, notification,
+  database, deployment, DNS, publication, spend, deletion, or NellySelly
+  mutation.
+
 ## 2026-09-01 — WordPress page 3952 exact-source cutover contract
 
 - Authenticated the exact 411-byte Beaver Builder source for the established

@@ -11,6 +11,28 @@ Updated 2026-09-01.
   hardening below is a Draft Preview candidate only and changes no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## WordPress page 3631 copy-preserving decision boundary — 2026-09-01
+
+- **Live source pinned:** authenticated read-only inspection found one Ask
+  Magic Mike shortcode in the 2,480-byte published We Buy Homes source,
+  SHA-256 `2c6c4a1b75afd133b92840d0f846f2a82f059b25f73aa0b2914d97d02ab1b8df`.
+- **Copy-loss defect closed:** the reviewed 2,624-byte proposal preserves the
+  current headline, body, and button while adding only `/sell` routing and the
+  existing owned-demand attribution contract. Its SHA-256 is
+  `1919ec017662efd5dfa04e81bf789f72ec478c16cbae7d0c0e59e0f7899c08e2`.
+- **Existing decision boundary enforced:** page 3631 now reports
+  `seller_intent_decision_required`, no requestable gate, and no activation
+  eligibility until the established seller-intent packet resolves the
+  canonical page, capture owner, duplicate-page disposition, placement key,
+  and BIC copy review.
+- **No parallel implementation:** pages 3631 and 3952 use one pure read-only
+  exact-source engine with separate contracts. No new form, lead store,
+  publisher, notification engine, or CRM was created.
+- **Authority unchanged:** no WordPress, Production, database, provider,
+  communication, cache, DNS, spend, deletion, or NellySelly mutation occurred.
+  Evidence:
+  [`phase9/WORDPRESS_PAGE3631_SOURCE_CUTOVER_READINESS_2026-09-01.md`](./phase9/WORDPRESS_PAGE3631_SOURCE_CUTOVER_READINESS_2026-09-01.md).
+
 ## WordPress page 3952 exact-source cutover candidate — 2026-09-01
 
 - **Live source pinned:** authenticated read-only inspection found a 411-byte
@@ -24,6 +46,8 @@ Updated 2026-09-01.
   postmeta backup digest, and a revision whose source digest matches the exact
   current page source. Visible revision 4332 is not treated as sufficient
   without that digest.
+- **Shared implementation:** page 3952 now uses the same pure exact-source
+  engine as page 3631 while retaining its independent hashes and gate.
 - **Current state:** live in-memory verification returns
   `blocked_prerequisites`; page publication is not requestable or authorized.
   No WordPress, Production, database, provider, communication, cache, DNS,

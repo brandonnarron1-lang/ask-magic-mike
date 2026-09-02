@@ -9,6 +9,10 @@
   "proposedShortcode": "[ask_magic_mike_cta route=\"/home-value\" source=\"home_value_page\" utm_source=\"ourtownproperties\" utm_medium=\"owned_media\" utm_campaign=\"amm_owned_demand_2026\" utm_content=\"wordpress_home_value_page\" button_text=\"Ask Magic Mike\"]",
   "proposedSourceLength": 564,
   "proposedSourceSha256": "ef9f4f85f3b531644010e4b5e46121a6e12db3807c1f8c928a1945bf12bc266e",
+  "preservedLiterals": [
+    "source=\"home_value_page\"",
+    "button_text=\"Ask Magic Mike\""
+  ],
   "requiredConnectorVersion": "1.1.0",
   "approvalGate": "APPROVE PHASE 9 HOME VALUE CTA WORDPRESS PUBLICATION",
   "requiresPostmetaBackup": true,

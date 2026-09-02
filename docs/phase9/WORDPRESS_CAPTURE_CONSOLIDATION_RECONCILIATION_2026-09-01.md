@@ -86,8 +86,10 @@ in document flow. Public-source coverage observed it on 39 of 42 sitemap pages.
    WordPress page in the same action.
 2. Verify the exact 1.1.0 public version marker and legacy shortcode
    compatibility, retaining the captured 1.0.0 rollback archive.
-3. Separately preview and approve page 3952 and page 3631 CTA replacements so
-   `/home-value` and `/sell` receive complete placement UTMs.
+3. Separately preview and approve page 3952 so `/home-value` receives complete
+   placement UTMs. Hold page 3631 until the seller-intent packet records the
+   canonical page, capture owner, duplicate-page disposition, placement key,
+   and BIC copy review; only then generate its separate `/sell` candidate.
 4. Treat Form 7 as its own consent and notification cutover. Add/verify exact
    consent language first, run one unmistakable test through the public form,
    prove one Gravity entry and one canonical lead/alert, and only then request

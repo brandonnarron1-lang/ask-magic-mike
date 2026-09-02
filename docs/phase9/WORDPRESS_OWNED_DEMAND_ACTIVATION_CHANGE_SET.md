@@ -6,6 +6,23 @@ Mode: read-only public precondition generation
 
 External mutation: none
 
+## 2026-09-01 seller-page decision correction
+
+Authenticated page-3631 source review found that the earlier proposed
+shortcode would have removed its existing headline, explanatory text, and
+button label. The proposal now preserves that copy byte-for-byte while adding
+the existing `/sell` and owned-demand attribution values.
+
+Page 3631 is not a current publication candidate. The already-established
+seller-intent packet still requires an owner/SEO/BIC canonical-page,
+capture-owner, duplicate-page, and placement-key decision. Its corrected
+manifest therefore returns `seller_intent_decision_required`,
+`publicationBlocked=true`, `approvalGate=null`, and
+`activationEligible=false` after technical Connector readiness. Its offline
+source verifier also requires the approved decision and BIC copy-review
+digests. See
+`WORDPRESS_PAGE3631_SOURCE_CUTOVER_READINESS_2026-09-01.md`.
+
 ## 2026-09-01 Connector capability correction
 
 Authenticated source inspection proved that the active Connector 1.0.0 plugin
@@ -75,7 +92,7 @@ Fresh read-only manifest generation and rendered desktop/mobile checks at
 | --- | --- | ---: | --- | --- | --- |
 | Homepage Ask Magic Mike CTA | `https://www.ourtownproperties.com/` | 149 | `https://www.askmagicmike.com/value?utm_source=ourtownproperties&utm_medium=homepage_cta&utm_campaign=website_widget` | `https://www.askmagicmike.com/ask?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_homepage_ask_mike` | `hidden_target` |
 | Established home-value page CTA | `https://www.ourtownproperties.com/how-much-is-your-home-worth/` | 3952 | `https://www.askmagicmike.com/value?utm_source=ourtownproperties&utm_medium=home_value_page&utm_campaign=website_widget` | `https://www.askmagicmike.com/home-value?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_home_value_page` | `legacy_match_ready` |
-| We Buy Homes CTA | `https://www.ourtownproperties.com/we-buy-homes/` | 3631 | `https://www.askmagicmike.com/value?utm_source=ourtownproperties&utm_medium=seller_page_cta&utm_campaign=website_widget` | `https://www.askmagicmike.com/sell?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_we_buy_homes` | `legacy_match_ready` |
+| We Buy Homes CTA | `https://www.ourtownproperties.com/we-buy-homes/` | 3631 | `https://www.askmagicmike.com/value?utm_source=ourtownproperties&utm_medium=seller_page_cta&utm_campaign=website_widget` | withheld pending seller-intent decision | `seller_intent_decision_required` |
 
 All three public links currently preserve source, medium, and campaign, but
 omit placement-level `utm_content` and all route to the generic legacy
@@ -165,9 +182,10 @@ installed and publicly proven. This ordering reuses the existing deterministic
 owned-demand placement priority; it does not infer demand or conversion from
 readiness.
 
-The We Buy Homes manifest is independently ready but remains a separate later
-decision. Do not combine both links into one approval or bulk edit. Homepage
-visibility restoration also remains a separate plugin-file decision.
+The We Buy Homes manifest is held by the existing seller-intent and BIC
+decision boundary. It is not independently ready and must not be combined with
+Home Value in one approval or bulk edit. Homepage visibility restoration also
+remains a separate plugin-file decision.
 
 ## Publication procedure and rollback
 

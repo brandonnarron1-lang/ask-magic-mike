@@ -160,7 +160,7 @@ describe("WordPress owned-demand activation change set", () => {
     expect(changeSets.map((row) => [row.placementKey, row.status])).toEqual([
       ["wordpress_homepage_ask_mike", "hidden_target"],
       ["wordpress_home_value", "legacy_match_ready"],
-      ["wordpress_we_buy_homes", "legacy_match_ready"],
+      ["wordpress_we_buy_homes", "seller_intent_decision_required"],
     ]);
 
     const readiness = changeSets.map(toOwnedDemandPlacementReadiness);
@@ -173,6 +173,53 @@ describe("WordPress owned-demand activation change set", () => {
       status: "legacy_match_ready",
     });
     expect(readiness[1]?.nextAction).toContain("verified page-source rollback");
+    expect(readiness[2]).toMatchObject({
+      activationEligible: false,
+      status: "seller_intent_decision_required",
+    });
+    expect(readiness[2]?.nextAction).toContain("canonical-page");
+  });
+
+  it("holds page 3631 until the existing seller-intent and BIC decisions are recorded", () => {
+    const changeSet = buildWordPressActivationChangeSet({
+      placementKey: "wordpress_we_buy_homes",
+      html: homeHtml([LEGACY_WE_BUY_HOMES_HREF]),
+      pageRows: [WE_BUY_HOMES_ROW],
+      generatedAt: GENERATED_AT,
+    });
+
+    expect(changeSet).toMatchObject({
+      status: "seller_intent_decision_required",
+      publicationBlocked: true,
+      publicationAuthorized: false,
+      approvalRequired: false,
+      approvalGate: null,
+      pagePublicationApprovalGate:
+        "APPROVE PHASE 9 WE BUY HOMES CTA WORDPRESS PUBLICATION",
+      sellerIntentDecisionRequired: true,
+      connectorVersionReady: true,
+    });
+    expect(changeSet.blockers.join(" ")).toContain("seller-intent decision");
+    expect(changeSet.publicationSteps.join(" ")).toContain("BIC/compliance review");
+    expect(changeSet.proposedShortcode).toContain(
+      'headline="Thinking about selling but not sure where to start?"',
+    );
+    expect(changeSet.proposedShortcode).toContain(
+      'text="Ask Magic Mike for local guidance before you make your next move."',
+    );
+    expect(changeSet.proposedShortcode).toContain('button="Get Local Guidance"');
+
+    const missingTarget = buildWordPressActivationChangeSet({
+      placementKey: "wordpress_we_buy_homes",
+      html: homeHtml([]),
+      pageRows: [WE_BUY_HOMES_ROW],
+      generatedAt: GENERATED_AT,
+    });
+    expect(missingTarget).toMatchObject({
+      status: "missing_target",
+      publicationBlocked: true,
+      approvalGate: null,
+    });
   });
 
   it("blocks an href-only publication when public CSS suppresses the exact CTA container", () => {

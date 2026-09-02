@@ -36,7 +36,7 @@
       "page_id": 3631,
       "source_url": "https://www.ourtownproperties.com/we-buy-homes/",
       "publication_order": 2,
-      "shortcode": "[ask_magic_mike_cta route=\"/sell\" source=\"seller_page_cta\" utm_source=\"ourtownproperties\" utm_medium=\"owned_media\" utm_campaign=\"amm_owned_demand_2026\" utm_content=\"wordpress_we_buy_homes\" button_text=\"Ask Magic Mike\"]",
+      "shortcode": "[ask_magic_mike_cta route=\"/sell\" source=\"seller_page_cta\" utm_source=\"ourtownproperties\" utm_medium=\"owned_media\" utm_campaign=\"amm_owned_demand_2026\" utm_content=\"wordpress_we_buy_homes\" headline=\"Thinking about selling but not sure where to start?\" text=\"Ask Magic Mike for local guidance before you make your next move.\" button=\"Get Local Guidance\"]",
       "expected_href": "https://www.askmagicmike.com/sell?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_we_buy_homes"
     }
   ],

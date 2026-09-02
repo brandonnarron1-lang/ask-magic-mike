@@ -77,6 +77,7 @@ describe("WordPress page 3952 exact-source cutover readiness", () => {
       wordpressMutationPerformed: false,
       pageMutationPerformed: false,
       changesExactlyOneShortcode: true,
+      preservesReviewedLiterals: true,
       preservesCurrentPublicPhone: true,
       preservesGravityForms: true,
       preservesHtmlForms: true,
@@ -166,16 +167,22 @@ describe("WordPress page 3952 exact-source cutover readiness", () => {
   });
 
   it("keeps the verifier read-only, provider-free, and free of contact PII", () => {
-    const source = readFileSync(
-      "scripts/amm/wordpress-page3952-cutover-readiness.mjs",
-      "utf8",
-    );
+    const source = [
+      readFileSync(
+        "scripts/amm/wordpress-page3952-cutover-readiness.mjs",
+        "utf8",
+      ),
+      readFileSync(
+        "scripts/amm/wordpress-page-source-cutover-lib.mjs",
+        "utf8",
+      ),
+    ].join("\n");
     expect(source).toContain("readFile");
     expect(source).not.toMatch(
       /writeFile|fetch\(|DATABASE_URL|nodemailer|send\(|\bPOST\b|\bPUT\b|\bPATCH\b|\bDELETE\b/,
     );
     expect(source).not.toMatch(/252[- .]?245[- .]?4337/);
     expect(source).not.toMatch(/252[- .]?289[- .]?5194/);
-    expect(source).not.toContain("dabnelly23@gmail.com");
+    expect(source).not.toMatch(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
   });
 });
