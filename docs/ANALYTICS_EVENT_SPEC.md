@@ -8,11 +8,30 @@ and submitted lead context belong on the canonical lead/attribution records.
 The analytics table receives only controlled dimensions and aggregate-friendly
 identifiers.
 
-Both public ingestion paths—`POST /api/events` and
-`POST /api/analytics/event`—enforce exact event allowlists, origin policy,
-bounded JSON bodies, rate limiting, scalar-only properties, and event-specific
-property allowlists. The Neon repository applies the general privacy allowlist
-again before every durable write.
+The active public ingress consists of one handler family:
+`POST /api/events` accepts the current snake-case browser contract and
+`POST /api/widget/events` is an exact alias of that handler. Both paths
+converge on the canonical server-side Neon analytics repository.
+
+The repository also retains a historical camel-case adapter at
+`src/app/api/analytics/event/route.ts`. Because the root `app/` directory is
+the canonical Next.js router, that file is absent from the active route
+manifest and `/api/analytics/event` is not a deployed endpoint. Its boundary
+is kept fail-safe in case router authority changes, but it must not be treated
+as a live integration, a compatibility promise, or a second ledger.
+
+The active handler requires an explicit approved origin, a bounded JSON body,
+an approved event name, scalar-only and event-specific properties, and the
+shared analytics limiter. Automated-browser telemetry is acknowledged as
+excluded before limiter or repository access. Read-only Preview refuses an
+ordinary write before limiting; Production persists only after an allowed
+durable limiter result unless the existing exact emergency-memory break-glass
+control is active. Every outcome is private/no-store and returns a server-
+generated correlation ID in both the body and response header; throttled
+responses include positive retry guidance bounded by the limiter window. The
+Neon repository applies the general privacy allowlist again before every
+durable write. The dormant adapter now mirrors these edge guarantees without
+being added to the active route manifest.
 
 ## Browser-authorized events
 
