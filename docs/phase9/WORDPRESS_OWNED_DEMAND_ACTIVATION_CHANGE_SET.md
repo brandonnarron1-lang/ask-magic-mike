@@ -181,11 +181,14 @@ Immediately before any future edit:
 2. require `status=legacy_match_ready`, `targetVisibility=visible_candidate`,
    page ID 3952, one current href occurrence, a non-null rollback href, and an
    unchanged SHA-256 precondition;
-3. create and verify a recoverable WordPress page revision or backup;
+3. run `amm:wordpress:page3952-readiness` against the freshly captured page
+   source and require the expected source digest, exactly one reviewed current
+   shortcode, Connector 1.1.0, a verified postmeta-backup SHA-256, and a
+   revision whose source SHA-256 matches the current page source;
 4. receive the exact Home Value publication approval below;
-5. verify the editor source contains the exact reviewed current shortcode and
-   replace only that shortcode instance—no page, form, menu, theme, plugin,
-   phone number, or copy replacement;
+5. replace only the exact current shortcode identified by the contract—no
+   page-wide rewrite and no page, form, menu, theme, plugin, phone number, or
+   copy replacement;
 6. publish and verify public status, destination, UTM values, canonical tags,
    desktop/mobile layout, keyboard behavior, and analytics without submitting
    a lead; and

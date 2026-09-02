@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "amm.wordpress_page_source_cutover_contract.v1",
+  "placementKey": "wordpress_home_value",
+  "pageId": 3952,
+  "sourceUrl": "https://www.ourtownproperties.com/how-much-is-your-home-worth/",
+  "sourceLength": 411,
+  "sourceSha256": "6710a4457945d1aba0308b07def30dfa05a8935121cd02a6baa3c66611ec2bdf",
+  "currentShortcode": "[ask_magic_mike_cta source=\"home_value_page\" button_text=\"Ask Magic Mike\"]",
+  "proposedShortcode": "[ask_magic_mike_cta route=\"/home-value\" source=\"home_value_page\" utm_source=\"ourtownproperties\" utm_medium=\"owned_media\" utm_campaign=\"amm_owned_demand_2026\" utm_content=\"wordpress_home_value_page\" button_text=\"Ask Magic Mike\"]",
+  "proposedSourceLength": 564,
+  "proposedSourceSha256": "ef9f4f85f3b531644010e4b5e46121a6e12db3807c1f8c928a1945bf12bc266e",
+  "requiredConnectorVersion": "1.1.0",
+  "approvalGate": "APPROVE PHASE 9 HOME VALUE CTA WORDPRESS PUBLICATION",
+  "requiresPostmetaBackup": true,
+  "requiresRevision": true,
+  "requiresRevisionSourceHash": true
+}

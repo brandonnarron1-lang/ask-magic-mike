@@ -109,6 +109,19 @@ Expected destination:
 https://www.askmagicmike.com/home-value?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_home_value_page
 ```
 
+Authenticated editor inspection later proved that the live page does **not**
+currently include an explicit `route` attribute. Its exact reviewed token is:
+
+```text
+[ask_magic_mike_cta source="home_value_page" button_text="Ask Magic Mike"]
+```
+
+The page-publication packet must therefore replace that exact token once; it
+must not search for the earlier assumed `route="/value"` form or rewrite the
+full Beaver Builder source. The executable source and rollback contract is
+documented in
+[`WORDPRESS_PAGE3952_SOURCE_CUTOVER_READINESS_2026-09-01.md`](./WORDPRESS_PAGE3952_SOURCE_CUTOVER_READINESS_2026-09-01.md).
+
 ## Application boundary
 
 `amm.wordpress_activation_change_set.v3` adds:
@@ -149,9 +162,9 @@ social, spend, deletion, or NellySelly action.
 
 This later gate is not requestable until the public page proves Connector
 1.1.0, old shortcode destinations remain unchanged, a fresh v3 manifest
-returns `legacy_match_ready`, and the exact current page source and postmeta
-have a verified rollback. It authorizes only the one reviewed shortcode
-replacement on page 3952.
+returns `legacy_match_ready`, and the exact current page source, matching
+revision source, and postmeta have a verified rollback. It authorizes only the
+one reviewed shortcode replacement on page 3952.
 
 ## Rollback
 

@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-01 — WordPress page 3952 exact-source cutover contract
+
+- Authenticated the exact 411-byte Beaver Builder source for the established
+  Home Value page and found one live shortcode that relies on the Connector's
+  saved route rather than the previously assumed explicit `/value` attribute.
+- Added a deterministic one-token proposal with exact current/proposed hashes,
+  occurrence checks, form/phone preservation checks, and second-application
+  refusal.
+- Required Connector 1.1.0, a postmeta backup digest, and a revision whose
+  source digest matches the current page before the page-only approval can be
+  requested.
+- Performed no WordPress save, plugin action, cache purge, lead, notification,
+  database, deployment, DNS, publication, spend, deletion, or NellySelly
+  mutation.
+
 ## 2026-09-01 — WordPress canonical-capture reconciliation
 
 - Reconciled the authenticated live WordPress plugin, bridge, Gravity Forms

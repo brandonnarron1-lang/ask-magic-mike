@@ -11,6 +11,25 @@ Updated 2026-09-01.
   hardening below is a Draft Preview candidate only and changes no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## WordPress page 3952 exact-source cutover candidate — 2026-09-01
+
+- **Live source pinned:** authenticated read-only inspection found a 411-byte
+  published Beaver Builder source with one exact Ask Magic Mike shortcode,
+  SHA-256 `6710a4457945d1aba0308b07def30dfa05a8935121cd02a6baa3c66611ec2bdf`.
+- **Procedure defect closed:** the live token omits `route` and depends on the
+  Connector default. The candidate replaces only that token with the reviewed
+  `/home-value` + owned-demand UTM token; proposed bytes are pinned at 564 and
+  SHA-256 `ef9f4f85f3b531644010e4b5e46121a6e12db3807c1f8c928a1945bf12bc266e`.
+- **Rollback fails closed:** the verifier requires Connector 1.1.0, a valid
+  postmeta backup digest, and a revision whose source digest matches the exact
+  current page source. Visible revision 4332 is not treated as sufficient
+  without that digest.
+- **Current state:** live in-memory verification returns
+  `blocked_prerequisites`; page publication is not requestable or authorized.
+  No WordPress, Production, database, provider, communication, cache, DNS,
+  spend, deletion, or NellySelly mutation occurred. Evidence:
+  [`phase9/WORDPRESS_PAGE3952_SOURCE_CUTOVER_READINESS_2026-09-01.md`](./phase9/WORDPRESS_PAGE3952_SOURCE_CUTOVER_READINESS_2026-09-01.md).
+
 ## Form 7 exact-consent cutover candidate — 2026-09-01
 
 - **Authoritative live state:** authenticated read-only inspection confirms
