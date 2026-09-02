@@ -12,14 +12,27 @@ type LeadRow = {
   id: string;
   created_at: string;
   lead_grade: LeadGrade | null;
-  last_contacted_at: string | null;
+  first_human_response_at: string | null;
   email: string | null;
   is_test: boolean | null;
+  communication_suppressed: boolean | null;
   accepted_at: string | null;
 };
 
+const OPEN_SLA_LEAD_STATUSES = [
+  "new",
+  "scored",
+  "assigned",
+  "escalated",
+  "qualified",
+  "contacted",
+  "appointment_requested",
+] as const;
+
 /** Neon implementation of the provider-neutral SLA repository.
- * The query excludes test/synthetic records before the SLA engine sees them. */
+ * The query excludes test, synthetic, and communication-suppressed records
+ * before the SLA engine sees them. Contact proof comes only from the immutable
+ * first-response ledger; mutable `leads.last_contacted_at` is not evidence. */
 export class NeonSlaSweepRepository implements SlaSweepRepository {
   constructor(private readonly sql: NeonQuery) {}
 
@@ -30,9 +43,10 @@ export class NeonSlaSweepRepository implements SlaSweepRepository {
          l.id,
          l.created_at,
          l.lead_grade,
-         l.last_contacted_at,
+         first_response.first_human_response_at,
          l.email,
          COALESCE(l.is_test, false) AS is_test,
+         COALESCE(l.communication_suppressed, false) AS communication_suppressed,
          latest_routing.accepted_at
        FROM public.leads AS l
        LEFT JOIN LATERAL (
@@ -43,20 +57,36 @@ export class NeonSlaSweepRepository implements SlaSweepRepository {
           ORDER BY lr.accepted_at DESC
           LIMIT 1
        ) AS latest_routing ON true
+       LEFT JOIN LATERAL (
+         SELECT rm.first_human_response_at
+           FROM public.lead_response_milestones AS rm
+          WHERE rm.lead_id = l.id
+            AND rm.is_test = false
+            AND rm.communication_suppressed = false
+          LIMIT 1
+       ) AS first_response ON true
        WHERE l.status = ANY($1::text[])
+         AND COALESCE(l.is_test, false) = false
+         AND COALESCE(l.communication_suppressed, false) = false
        ORDER BY l.created_at DESC
        LIMIT $2`,
-      [["new", "qualified", "contacted", "assigned"], boundedLimit],
+      [[...OPEN_SLA_LEAD_STATUSES], boundedLimit],
     ) as LeadRow[];
 
     return rows
-      .filter((row) => row.is_test !== true && !isSyntheticEmail(row.email))
+      .filter((row) =>
+        row.is_test !== true &&
+        row.communication_suppressed !== true &&
+        !isSyntheticEmail(row.email)
+      )
       .map((row) => ({
         leadId: row.id,
         grade: row.lead_grade ?? "C",
         createdAt: new Date(row.created_at),
         acceptedAt: row.accepted_at ? new Date(row.accepted_at) : null,
-        contactedAt: row.last_contacted_at ? new Date(row.last_contacted_at) : null,
+        contactedAt: row.first_human_response_at
+          ? new Date(row.first_human_response_at)
+          : null,
       }));
   }
 

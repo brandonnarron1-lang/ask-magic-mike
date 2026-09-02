@@ -351,7 +351,7 @@ describe("AdminOps appointment and follow-up operations", () => {
     expect(built.items).toEqual([]);
   });
 
-  it("fails closed for excluded, terminal, contacted, responded, stale, or unverifiable response evidence", () => {
+  it("fails closed for excluded, terminal, responded, stale, or unverifiable response evidence", () => {
     const base = {
       status: "new",
       created_at: "2026-07-12T13:30:00.000Z",
@@ -365,7 +365,6 @@ describe("AdminOps appointment and follow-up operations", () => {
       now: NOW,
       leads: [
         { ...base, id: "responded", first_human_response_at: "2026-07-12T13:35:00.000Z" },
-        { ...base, id: "contacted", last_contacted_at: "2026-07-12T13:36:00.000Z" },
         { ...base, id: "test", is_test: true },
         { ...base, id: "suppressed", communication_suppressed: true },
         { ...base, id: "terminal", status: "converted" },
@@ -376,6 +375,32 @@ describe("AdminOps appointment and follow-up operations", () => {
     });
 
     expect(items).toEqual([]);
+  });
+
+  it("keeps a lead at risk when only the mutable last-contact projection exists", () => {
+    const items = buildDailyActionQueue({
+      now: NOW,
+      leads: [{
+        id: "legacy-contact-only",
+        status: "contacted",
+        created_at: "2026-07-12T13:30:00.000Z",
+        first_response_evidence_available: true,
+        first_human_response_at: null,
+        last_contacted_at: "2026-07-12T13:36:00.000Z",
+        is_test: false,
+        communication_suppressed: false,
+      }],
+      appointments: [],
+      tasks: [],
+    });
+
+    expect(items).toEqual([
+      expect.objectContaining({
+        id: "first-response-legacy-contact-only",
+        type: "first_response_overdue",
+        priority: 1,
+      }),
+    ]);
   });
 
   it("does not duplicate an existing immediate action for the same lead", () => {
