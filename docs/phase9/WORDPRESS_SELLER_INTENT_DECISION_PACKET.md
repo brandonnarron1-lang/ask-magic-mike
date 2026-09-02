@@ -92,6 +92,25 @@ values are recorded, a later candidate may generate one exact href-level change
 set, backup requirement, acceptance test, rollback, and separate publication
 gate.
 
+## Page 3631 enforcement update — 2026-09-01
+
+Authenticated editor inspection pinned page 3631 at 2,480 UTF-8 bytes with
+SHA-256
+`2c6c4a1b75afd133b92840d0f846f2a82f059b25f73aa0b2914d97d02ab1b8df`
+and one current Ask Magic Mike shortcode. The earlier proposed shortcode would
+have dropped the live headline, explanatory text, and button label. The
+corrected proposal preserves all three and changes only the routing/attribution
+attributes.
+
+That technical correction does not resolve this packet. The page-3631
+activation manifest now emits `seller_intent_decision_required`,
+`publicationBlocked=true`, `approvalGate=null`, and
+`activationEligible=false`. Its exact-source verifier additionally requires a
+digest of the approved decision artifact and a BIC/compliance copy-review
+artifact before a later page-publication gate can be requested. Full evidence
+is in
+[`WORDPRESS_PAGE3631_SOURCE_CUTOVER_READINESS_2026-09-01.md`](./WORDPRESS_PAGE3631_SOURCE_CUTOVER_READINESS_2026-09-01.md).
+
 ## Rollback and isolation
 
 This application candidate is additive and read-only. Its rollback is to

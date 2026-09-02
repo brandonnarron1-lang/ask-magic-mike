@@ -59,8 +59,12 @@ The proposed source is 564 UTF-8 bytes with SHA-256
 The source-controlled contract and verifier are:
 
 - `config/wordpress-page3952-cutover-contract.json`;
+- `scripts/amm/wordpress-page-source-cutover-lib.mjs`;
 - `scripts/amm/wordpress-page3952-cutover-readiness.mjs`; and
 - `tests/adminops/wordpress-page3952-cutover-readiness.test.ts`.
+
+The shared engine is also used by page 3631, while each page retains its own
+source hashes, shortcode contract, prerequisites, and approval gate.
 
 The verifier is read-only. It does not fetch, write, publish, call a provider,
 query a database, or include page source in its JSON manifest. It fails closed
@@ -89,7 +93,8 @@ Current blockers:
 
 ## Local verification
 
-- Four adjacent WordPress test files pass: 33/33 tests.
+- Nine focused WordPress, owned-demand, route-boundary, and current-authority
+  files pass 66/66 tests under exact Node 24.18.0.
 - Targeted ESLint, JavaScript syntax validation, JSON parsing, and
   `git diff --check` pass.
 - The hardened verifier was run directly against the authenticated in-memory
