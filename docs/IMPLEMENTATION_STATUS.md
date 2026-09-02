@@ -11,6 +11,38 @@ Updated 2026-09-01.
   hardening below is a Draft Preview candidate only and changes no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Phase 9 open-house QR registration packet — 2026-09-01
+
+- **Existing customer path reused:** the public dynamic open-house route,
+  consented buyer/open-house intake, canonical lead API, QR renderer,
+  Distribution Command, and owned-demand attribution remain the only systems.
+- **Real distribution gap closed:** the Friday QR plan previously exported
+  only a generic `/ask` QR. Operators can now prepare one bounded public-safe
+  event/listing reference, exact open-house UTMs, deterministic shortlink,
+  protected JSON review packet, and high-error-correction SVG.
+- **Fail-closed identity:** malformed, reserved, path-, URL-, query-, email-,
+  control-character-, and oversized references cannot generate a route or
+  asset. The public open-house page uses the same validator and returns 404 for
+  an invalid reference.
+- **Attribution seam closed:** exact `open_house_registration` QR signals now
+  contribute once to the owned-demand KPI and appear as an instance-specific
+  class. They are removed from the generic QR lifecycle count so a property-
+  specific URL is neither lost nor falsely represented by a static proof row.
+- **Authority remains separate:** every packet records property-fact and two-
+  device-scan requirements plus `publicationAuthorized=false`,
+  `mutationPerformed=false`, `leadSubmitted=false`, and
+  `notificationSent=false`. Preparing a packet is not proof of publication.
+- **Verification:** focused contract, attribution, activation-loop,
+  asset-studio, public-route, and accessibility acceptance passes 6 files / 67
+  tests. The full local release gate passes 290 files / 3,514 tests, strict
+  typecheck, full lint, 14/14 safety, isolation, optimized build, and all 102
+  active routes. A no-write 390×844 browser pass confirms the rendered route;
+  immutable Preview evidence remains to be sealed on the Draft PR.
+- **No external mutation:** no Production, database, WordPress, lead,
+  notification, provider, QR distribution, DNS, spend, deletion, or
+  NellySelly action occurred. Design and boundary:
+  [`phase9/OPEN_HOUSE_QR_REGISTRATION_PACKET.md`](./phase9/OPEN_HOUSE_QR_REGISTRATION_PACKET.md).
+
 ## WordPress page 3631 copy-preserving decision boundary — 2026-09-01
 
 - **Live source pinned:** authenticated read-only inspection found one Ask

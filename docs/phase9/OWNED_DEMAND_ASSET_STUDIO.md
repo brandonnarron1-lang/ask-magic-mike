@@ -95,6 +95,15 @@ QR codes use error-correction level H and a four-module quiet zone. H tolerates
 the greatest damage among the standard QR levels, but the design still avoids
 logos or text over the modules.
 
+The later open-house extension keeps this renderer and adds no second asset
+studio. Its protected builder accepts one bounded public event/listing
+reference, then derives
+`https://www.askmagicmike.com/go/open-house/{reference}`. The public shortlink
+can redirect only to the canonical `/open-house/{reference}` route with the
+fixed `qr` / `owned_media` / `amm_owned_demand_2026` /
+`open_house_registration` attribution contract. See
+[`OPEN_HOUSE_QR_REGISTRATION_PACKET.md`](./OPEN_HOUSE_QR_REGISTRATION_PACKET.md).
+
 ## Protected operator workflow
 
 1. Authenticate to the canonical Lead Center.

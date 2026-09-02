@@ -56,6 +56,7 @@ export interface OwnedDemandActivationLoop {
   signalReviewPlacements: number;
   unobservedPlacements: number;
   readinessBlockedPlacements: number;
+  instanceSpecificAttributedLeads: number;
   attributedLeads: number;
   nextPlacement: OwnedDemandActivationPlacement | null;
   placements: OwnedDemandActivationPlacement[];
@@ -218,7 +219,8 @@ function flattenPlacements(command: OwnedDemandCommand): PlacementInput[] {
       content: channel.content,
       attributedLeads: channel.attributedLeads
         - channel.offers.reduce((sum, offer) => sum + offer.attributedLeads, 0)
-        - channel.namedPlacements.reduce((sum, placement) => sum + placement.attributedLeads, 0),
+        - channel.namedPlacements.reduce((sum, placement) => sum + placement.attributedLeads, 0)
+        - channel.instancePlacements.reduce((sum, placement) => sum + placement.attributedLeads, 0),
     };
     const offers: PlacementInput[] = channel.offers.map((offer) => ({
       channelKey: channel.key,
@@ -336,6 +338,13 @@ export function buildOwnedDemandActivationLoop(
   const activeProofPlacements = applicableProofPlacements.filter((placement) => placement.latestProof && isActiveProof(placement.latestProof)).length;
   const pendingProofPlacements = applicableProofPlacements.filter((placement) => placement.latestProof && isPendingProof(placement.latestProof) && !isActiveProof(placement.latestProof)).length;
   const inactiveProofPlacements = applicableProofPlacements.length - activeProofPlacements - pendingProofPlacements;
+  const instanceSpecificAttributedLeads = command.channels.reduce(
+    (sum, channel) => sum + channel.instancePlacements.reduce(
+      (channelSum, placement) => channelSum + placement.attributedLeads,
+      0,
+    ),
+    0,
+  );
 
   return {
     generatedAt: command.generatedAt,
@@ -352,7 +361,9 @@ export function buildOwnedDemandActivationLoop(
     readinessBlockedPlacements: placements.filter(
       (placement) => placement.state === "prepared_not_observed" && placement.selectionBlocked,
     ).length,
-    attributedLeads: placements.reduce((sum, placement) => sum + placement.attributedLeads, 0),
+    instanceSpecificAttributedLeads,
+    attributedLeads: placements.reduce((sum, placement) => sum + placement.attributedLeads, 0)
+      + instanceSpecificAttributedLeads,
     nextPlacement: evidenceAvailable && measurementAvailable
       ? placements.find((placement) => (
           placement.state !== "measured_signal"
@@ -360,6 +371,6 @@ export function buildOwnedDemandActivationLoop(
         )) || null
       : null,
     placements,
-    authorityBoundary: "This loop joins append-only native observation evidence to exact first-party attribution. It cannot publish, send, spend, contact a consumer, or turn either evidence stream into a claim the other stream does not prove.",
+    authorityBoundary: "This loop joins append-only native observation evidence to exact first-party attribution. Instance-specific packet signals are counted separately from the static publication lifecycle. It cannot publish, send, spend, contact a consumer, or turn either evidence stream into a claim the other stream does not prove.",
   };
 }
