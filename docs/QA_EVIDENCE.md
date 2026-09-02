@@ -3012,3 +3012,36 @@ the same source tree compiled successfully.
 No Production or remote database write, provider send, Vercel setting change,
 WordPress action, live lead, analytics mutation, DNS/publication/spend action,
 deletion of business data, or NellySelly action occurred.
+
+## Phase 9 atomic email webhook boundary — 2026-09-02
+
+Focused Node 24 verification passes 3 files / 27 tests, strict TypeScript,
+targeted ESLint, whitespace validation, 14/14 release safety, and Ask Magic
+Mike/NellySelly system isolation. Tests cover signed-boundary failures,
+declared and streamed body limits, Preview no-write, exact event allowlisting,
+delivery/delay/bounce semantics, replay, event-ID collision, private
+correlation, and safe retryable database failure.
+
+`pnpm run test:postgres:resend-webhook` then executed the exact application SQL
+against an isolated local PostgreSQL 17 cluster. It passed matched processing,
+exact replay, intentionally forced mid-statement failure/rollback, reclaim of a
+`failed` receipt, bounce suppression, and unmatched-event handling. The
+verifier accepted only a local connection, rolled the full transaction back,
+and the temporary cluster was removed.
+
+Complete Node 24.18.0 acceptance then passed 303 test files / 3,655 tests,
+strict typecheck, repository-wide ESLint, the optimized Next.js 15.5.21 build
+with 60 static pages, and route verification with 102 active / 22 acknowledged
+duplicates. The Production dependency audit found no known vulnerability. An
+initial run against an older reclaimed dependency cache failed on missing
+locked packages; restoring the exact frozen lockfile fixed the toolchain only,
+after which the same source passed the complete gate.
+
+Redacted secret scanning found no leak in the approximately 50 KB staged
+candidate or across 774 commits / approximately 19.84 MB of repository history.
+
+No Neon or Resend credential was loaded. No remote callback, provider send,
+lead submission, database write, WordPress action, Production deployment,
+environment change, DNS/publication/spend/deletion, or NellySelly action
+occurred. Exact immutable hosted-Preview evidence will be attached to the
+sealed Draft commit.
