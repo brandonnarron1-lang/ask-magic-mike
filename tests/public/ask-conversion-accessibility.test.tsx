@@ -100,7 +100,8 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
     );
 
     const chatRoute = read("app/api/chat/route.ts");
-    expect(chatRoute).toContain("message.length > 2_000");
+    expect(chatRoute).toContain("MAX_CHAT_MESSAGE_CHARACTERS = 2_000");
+    expect(chatRoute).toContain("message.length > MAX_CHAT_MESSAGE_CHARACTERS");
     expect(chatRoute).toContain("Message must be 2,000 characters or fewer.");
   });
 

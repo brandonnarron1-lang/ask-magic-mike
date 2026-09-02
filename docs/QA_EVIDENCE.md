@@ -1,5 +1,35 @@
 # QA Evidence
 
+## Public AI chat provider boundary hardening — 2026-09-02
+
+- The existing public chat panel, `/api/chat` handler,
+  `/api/chat/message` alias, Responses API request, redaction and
+  prompt-injection guardrails, timeout/output bounds, and deterministic
+  fallback remain in place; no parallel chat or provider path was added.
+- Exact Node 24 focused acceptance passes 3 files / 50 tests across route
+  security, rate-limit store behavior, and Ask conversion/accessibility source
+  contracts. Targeted ESLint, strict TypeScript, and `git diff --check` pass.
+- Route tests prove foreign-origin refusal, JSON-only input, declared/streamed
+  body limits, object validation, message length, correlation/no-store headers,
+  bounded `Retry-After`, Preview refusal before limiter/provider access,
+  Production non-durable fail-closed behavior, exact break-glass behavior, and
+  provider access only after a durable limit result.
+- Complete Node 24 acceptance passes Ask/NellySelly isolation, 14/14 safety
+  controls, 300 files / 3,586 tests, strict TypeScript, full ESLint, optimized
+  Next.js 15.5.21 build with 60 static pages, and 102 active routes with 22
+  acknowledged duplicates. Intercepted Ask browser QA passes 2/2 without a
+  remote write. Production dependencies report no known vulnerability, and a
+  redacted scan passes the approximately 35 KB exact candidate delta plus 769
+  history commits / approximately 19.67 MB. Hosted CI, immutable Preview,
+  endpoint probes, and runtime-log review remain to be sealed on the exact
+  commit.
+- Detailed evidence:
+  [`phase9/PUBLIC_CHAT_PROVIDER_BOUNDARY_QA_EVIDENCE.md`](./phase9/PUBLIC_CHAT_PROVIDER_BOUNDARY_QA_EVIDENCE.md).
+- Tests use only synthetic input, mocked provider responses, and local
+  boundaries. They perform no remote query/write, AI request, lead submission,
+  analytics mutation, communication, WordPress action, deployment, DNS change,
+  publication, spend, deletion, or NellySelly action.
+
 ## Public appointment boundary hardening — 2026-09-02
 
 - The existing atomic appointment function, persistence adapter, Lead Center

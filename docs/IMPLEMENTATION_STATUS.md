@@ -11,6 +11,38 @@ Updated 2026-09-02.
   candidates below are Draft/Preview work only and change no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Phase 9 public AI chat provider boundary hardening — 2026-09-02
+
+- **Existing capability retained:** `/api/chat/message` continues to re-export
+  the canonical `/api/chat` handler. The current public panel, Responses API,
+  redaction/prompt-injection controls, bounded model output, timeout, and
+  deterministic fallback remain the only public chat path.
+- **Preview is side-effect free:** valid read-only Preview requests receive the
+  deterministic guidance fallback before the shared limiter or OpenAI client
+  can run. This preserves useful visual QA without Neon writes or provider
+  spend even if inherited Preview secrets are present.
+- **Production fails closed:** OpenAI is reachable only after a durable shared
+  rate-limit result. A degraded in-memory result returns a safe 503 unless the
+  already documented exact `RATE_LIMIT_EMERGENCY_MEMORY=1` break-glass flag is
+  active.
+- **Public edge completed in source:** the route now requires JSON, bounds both
+  declared and streamed bodies to 8 KB, accepts only an object with a nonempty
+  message of at most 2,000 characters, emits bounded throttle guidance, and
+  gives every private/no-store response a safe correlation identifier.
+- **Verification state:** focused Node 24 acceptance passes 3 files / 50 tests.
+  Complete acceptance passes isolation, 14/14 safety controls, 300 files /
+  3,586 tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build
+  with 60 static pages, and 102/22 route proof. Intercepted browser QA passes
+  2/2. Production dependencies, the approximately 35 KB exact candidate delta,
+  and the 769-commit history scan are clean; hosted exact-head evidence remains
+  to be sealed.
+- **Authority unchanged:** Production is still PR #247 and PR #248 remains the
+  sole requestable application gate. No provider call, Neon write, environment
+  change, Production deployment, WordPress action, communication, lead,
+  analytics event, DNS, publication, spend, deletion, or NellySelly mutation
+  occurred. Design and rollback:
+  [`phase9/PUBLIC_CHAT_PROVIDER_BOUNDARY.md`](./phase9/PUBLIC_CHAT_PROVIDER_BOUNDARY.md).
+
 ## Phase 9 public appointment boundary hardening — 2026-09-02
 
 - **Existing transaction retained:** `request_public_appointment_v1` remains

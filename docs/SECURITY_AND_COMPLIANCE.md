@@ -64,6 +64,15 @@
   HTTP 429 with a bounded `Retry-After` value and performs no appointment write.
   Read-only Preview rejects the request before even the rate-limit bucket can
   write, preserving the zero-mutation Preview boundary.
+- Public AI chat requires an approved explicit browser origin, JSON media type,
+  an object payload, an 8 KB declared/streamed body ceiling, and a 2,000-
+  character message ceiling. Responses are private/no-store and expose only a
+  random correlation identifier plus stable, non-sensitive error codes.
+- Read-only Preview returns deterministic guidance before shared rate limiting
+  or OpenAI access. Production may reach OpenAI only after a durable Neon-backed
+  limit result; a non-durable result fails closed unless the exact existing
+  emergency-memory flag is explicitly active. Prompt-injection detection,
+  redaction, `store: false`, bounded output, and bounded timeout remain active.
 
 ## WordPress activation-manifest boundary — 2026-08-22
 
