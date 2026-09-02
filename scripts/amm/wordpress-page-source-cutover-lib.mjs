@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { validateWordPressSellerIntentDecisionArtifact } from "./wordpress-seller-intent-decision-artifact-lib.mjs";
 
 function sha256Text(value) {
   return createHash("sha256").update(String(value ?? "")).digest("hex");
@@ -81,21 +82,12 @@ function normalizeEvidence(options, contract) {
     .toLowerCase();
   const revisionIdReady = Number.isSafeInteger(revisionId) && revisionId > 0;
   const revisionSourceReady = revisionSourceSha256 === contract.sourceSha256;
-  const approvedSellerIntentDecisionSha256 = String(
-    options.approvedSellerIntentDecisionSha256 ?? "",
-  ).trim().toLowerCase();
-  const approvedCanonicalSourcePage = String(
-    options.approvedCanonicalSourcePage ?? "",
-  ).trim();
-  const approvedCaptureOwner = String(
-    options.approvedCaptureOwner ?? "",
-  ).trim();
-  const approvedDuplicatePageDisposition = String(
-    options.approvedDuplicatePageDisposition ?? "",
-  ).trim();
-  const approvedPlacementKey = String(
-    options.approvedPlacementKey ?? "",
-  ).trim();
+  const sellerIntentDecision =
+    validateWordPressSellerIntentDecisionArtifact(
+      options.sellerIntentDecisionArtifact,
+      contract,
+      options.sellerIntentDecisionEvidenceManifest,
+    );
   const bicCopyReviewSha256 = String(options.bicCopyReviewSha256 ?? "")
     .trim()
     .toLowerCase();
@@ -108,19 +100,18 @@ function normalizeEvidence(options, contract) {
     revisionSourceSha256,
     revisionSourceReady,
     revisionReady: revisionIdReady && revisionSourceReady,
-    approvedSellerIntentDecisionSha256,
-    sellerIntentDecisionReady:
-      /^[a-f0-9]{64}$/.test(approvedSellerIntentDecisionSha256),
-    approvedCanonicalSourcePage,
-    canonicalSourcePageReady:
-      approvedCanonicalSourcePage === contract.requiredCanonicalSourcePage,
-    approvedCaptureOwner,
-    captureOwnerReady: approvedCaptureOwner === contract.requiredCaptureOwner,
-    approvedDuplicatePageDisposition,
-    duplicatePageDispositionReady:
-      /^[a-z][a-z0-9_]{2,80}$/.test(approvedDuplicatePageDisposition),
-    approvedPlacementKey,
-    placementKeyReady: approvedPlacementKey === contract.requiredPlacementKey,
+    approvedSellerIntentDecisionSha256:
+      sellerIntentDecision.artifactSha256,
+    sellerIntentDecisionReady: sellerIntentDecision.ready,
+    sellerIntentDecisionStatus: sellerIntentDecision.status,
+    sellerIntentDecisionBlockers: sellerIntentDecision.blockers,
+    sellerIntentDecision: sellerIntentDecision.decision,
+    sellerIntentDecisionApprovalReferenceSha256:
+      sellerIntentDecision.approvalReferenceSha256,
+    sellerIntentDecisionContainsRawApprovalReferences:
+      sellerIntentDecision.containsRawApprovalReferences,
+    sellerIntentDecisionEvidencePacketValidated:
+      sellerIntentDecision.evidencePacketValidated,
     bicCopyReviewSha256,
     bicCopyReviewReady: /^[a-f0-9]{64}$/.test(bicCopyReviewSha256),
   };
@@ -141,19 +132,7 @@ function prerequisiteBlockers(evidence, contract) {
   }
   if (contract.requiresSellerIntentDecision) {
     if (!evidence.sellerIntentDecisionReady) {
-      blockers.push("approved_seller_intent_decision_sha256_missing");
-    }
-    if (!evidence.canonicalSourcePageReady) {
-      blockers.push("canonical_source_page_unapproved");
-    }
-    if (!evidence.captureOwnerReady) {
-      blockers.push("capture_owner_unapproved");
-    }
-    if (!evidence.duplicatePageDispositionReady) {
-      blockers.push("duplicate_page_disposition_missing");
-    }
-    if (!evidence.placementKeyReady) {
-      blockers.push("stable_placement_key_unapproved");
+      blockers.push(...evidence.sellerIntentDecisionBlockers);
     }
   }
   if (contract.requiresBicCopyReview && !evidence.bicCopyReviewReady) {

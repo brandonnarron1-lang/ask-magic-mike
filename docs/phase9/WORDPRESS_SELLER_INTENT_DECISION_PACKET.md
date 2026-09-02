@@ -111,6 +111,24 @@ artifact before a later page-publication gate can be requested. Full evidence
 is in
 [`WORDPRESS_PAGE3631_SOURCE_CUTOVER_READINESS_2026-09-01.md`](./WORDPRESS_PAGE3631_SOURCE_CUTOVER_READINESS_2026-09-01.md).
 
+## Content-addressed approval enforcement — 2026-09-01
+
+The page-3631 verifier no longer accepts an arbitrary digest followed by a
+second set of decision arguments. One complete approved artifact must bind the
+reviewed evidence digest, canonical/duplicate page pair and IDs, capture owner,
+duplicate disposition, placement key, `/sell` funnel, review references, and
+rationale. The verifier also recomputes and validates the separately downloaded
+protected evidence packet, binds the artifact to that exact digest, and rejects
+timestamp or whole-packet tampering, approval before evidence, or approval
+outside a seven-day review window. It derives every decision field and digest
+from those two exact files and exposes only hashed references in its readiness
+manifest.
+
+The repository contains only a deliberately non-approved draft template. The
+owner/SEO/BIC decision remains unmade and publication remains blocked. The
+schema, allowed values, operator steps, and adversarial proof are documented in
+[`WORDPRESS_SELLER_INTENT_APPROVAL_ARTIFACT_2026-09-01.md`](./WORDPRESS_SELLER_INTENT_APPROVAL_ARTIFACT_2026-09-01.md).
+
 ## Rollback and isolation
 
 This application candidate is additive and read-only. Its rollback is to
