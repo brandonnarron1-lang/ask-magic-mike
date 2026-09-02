@@ -11,6 +11,29 @@ Updated 2026-09-02.
   candidates below are Draft/Preview work only and change no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Phase 9 current release-ledger drift guard — 2026-09-02
+
+- **Contradiction removed:** `KNOWN_LIMITATIONS.md` no longer identifies PR
+  #246 as Production, PR #247 as awaiting approval, or the consumed PR #247
+  gate as the next operator action.
+- **Current authority restored:** the ledger now names accepted PR #247
+  Production and exact PR #248 head/tree as the sole reviewed application
+  candidate, with all later work explicitly Draft-only.
+- **Runtime truth retained:** static lead-count and Preview-instance claims were
+  replaced with authenticated aggregate and endpoint-attestation authority.
+- **Drift prevention:** the current-authority regression now covers the
+  limitations ledger and rejects the superseded release wording.
+- **Verification state:** focused Node 24 acceptance passes 1 file / 6 tests.
+  Complete local acceptance passes Ask/NellySelly isolation, 14/14 safety
+  controls, 300 files / 3,587 tests, strict TypeScript, full ESLint, optimized
+  Next.js 15.5.21 build with 60 static pages, and 102/22 route proof. Production
+  dependencies report no known vulnerability. Staged-delta and 769-commit
+  history secret scans are clean; exact-commit and hosted exact-head evidence
+  remain to be sealed.
+- **Authority unchanged:** this is documentation/test hardening only. It does
+  not merge or deploy PR #248 and performs no external mutation. Design and
+  rollback: [`phase9/CURRENT_RELEASE_LEDGER_RECONCILIATION.md`](./phase9/CURRENT_RELEASE_LEDGER_RECONCILIATION.md).
+
 ## Phase 9 public AI chat provider boundary hardening — 2026-09-02
 
 - **Existing capability retained:** `/api/chat/message` continues to re-export

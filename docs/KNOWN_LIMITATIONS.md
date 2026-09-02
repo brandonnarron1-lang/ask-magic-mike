@@ -1,16 +1,33 @@
 # Known Limitations — Ask Magic Mike
 
-Updated 2026-08-29. This document records the current Neon/Resend/Web Push
+Updated 2026-09-02. This document records the current Neon/Resend/Web Push
 system, not the superseded Supabase/mock-email/Twilio-era architecture.
+
+## Current release authority
+
+- Accepted Production is PR #247 merge
+  `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, tree
+  `0065f829fc94f87ab5e0faf596c8e56733be3972`, on Ready deployment
+  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`.
+- PR #248 is the only active reviewed application candidate, at head
+  `f6134b71f258003aa5dc201cf5ef7cdb6eb61ee7` and tree
+  `832be2750355391f9198fcaaaa6f46bb3beb8b3f`.
+- The PR #247 approval is consumed. The only requestable application gate is
+  `APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT`.
+- This file describes limitations; `CURRENT_RELEASE_AUTHORITY.md` and its
+  machine-readable manifest remain authoritative if chronological evidence
+  elsewhere conflicts.
 
 ## 1. Demand and measurement
 
 ### No genuine live-demand sample yet
 
-Current aggregate Production evidence contains six suppressed/test leads and no
-contactable live prospect. Source, outcome, and first-response dashboards are
-therefore structurally ready but statistically empty. Never fabricate a prospect
-or relabel a QA submission to improve a KPI.
+This static file does not assert a current Production lead count. The last
+controlled baseline had no contactable live-demand sample; the authenticated
+Lead Center and Growth aggregates are the point-in-time authority. Until genuine
+demand supplies a defensible sample, source, outcome, and first-response
+analysis remains low-confidence. Never fabricate a prospect or relabel a QA
+submission to improve a KPI.
 
 ### Intelligence requires real observations
 
@@ -22,11 +39,12 @@ recommendations are advisory and never silently assign a lead.
 ### Numeric operating targets remain disabled
 
 The protected Growth Command Center now names 42 baseline evidence contracts,
-their sample thresholds, and their readiness states. Production still has no
-eligible live-demand denominator, so target entry remains locked. Directional
-samples are visible when they exist but cannot become an approved target. A
-future durable target lifecycle requires measured evidence plus a separate
-owner-reviewed decision; QA rows cannot unlock it.
+their sample thresholds, and their readiness states. At the last controlled
+baseline there was no eligible live-demand denominator, so target entry remained
+locked. Runtime aggregates—not this static file—determine current readiness.
+Directional samples cannot become an approved target until their evidence
+contract is satisfied. A future durable target lifecycle requires measured
+evidence plus a separate owner-reviewed decision; QA rows cannot unlock it.
 
 Reconciled spend can be measured as independent context even when lead volume
 is zero, but that does not unlock a conversion or economics target. Partial
@@ -43,12 +61,12 @@ transaction truth.
 
 ### Preview database identity must be attested before any controlled write
 
-The current Vercel Preview has a reachable Neon credential but does not expose
-the expected Preview/Production endpoint-ID configuration in protected health.
-It therefore remains categorically read-only. Public analytics and experiment
-routes now enforce that same endpoint-aware guard before rate limiting or
-persistence. One privacy-minimized page-view created while this inherited gap
-was being diagnosed exists only on the Neon Preview branch; an aggregate check
+Every Vercel Preview remains categorically read-only unless protected health
+attests a Preview Neon endpoint distinct from Production and all existing
+mutation controls agree. Public analytics and experiment routes enforce that
+endpoint-aware guard before rate limiting or persistence. One historical,
+privacy-minimized page-view created while the inherited-credential gap was
+being diagnosed exists only on the Neon Preview branch; an aggregate check
 found no matching Production row. Do not enable Preview mutation until the
 separate endpoint-attestation gate passes.
 
@@ -133,14 +151,17 @@ securely. CSV export remains available with audit logging.
 
 ### Current release state
 
-Current accepted Production is PR #246 merge
-`98a91f752c4c53dc0ae300dfc320f47b53e32820` on deployment
-`dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`; source deployment
-`dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate rollback. PR #247 is the one
-reviewed application candidate and has no migration or external-action
-authority. Its machine-bound content head/tree, hosted gate, immutable Preview,
-rollback, and exact owner-only application gate are sealed. Final
-authority-only exact-head checks must still match; drift invalidates the gate.
+Current accepted Production is PR #247 merge
+`a2f3de834830f600df106dbf5836ae4bbde4eb4a`, exact tree
+`0065f829fc94f87ab5e0faf596c8e56733be3972`, on deployment
+`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`. Deployment
+`dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` is the immediate application rollback.
+
+PR #248 is the only active reviewed application candidate. Its machine-bound
+head/tree, hosted gate, immutable Preview, rollback, and exact owner-only
+application gate are sealed. PRs #249 through #266 are ordered Draft review
+work with no independent Production authority. Head, tree, migration,
+environment, or evidence drift invalidates any future gate.
 
 PR #238 is an applied and verified five-migration receipt. Historical component
 and superseded review PRs retain evidence but have no independent current
@@ -182,9 +203,9 @@ backup-first, identity, role, hash, and postflight interlocks.
 
 | Priority | Action | Gate |
 |---|---|---|
-| 1 | Obtain the exact PR #247 owner approval after final exact-head checks remain green | Exact application-only gate in `CURRENT_RELEASE_AUTHORITY.md` |
-| 2 | Review one visible WordPress placement and verified rollback | Separate page-specific publication gate |
-| 3 | Publish one approved zero-spend placement and record native proof | Channel-specific approval |
+| 1 | Obtain the exact PR #248 owner approval while its sealed head/tree remain unchanged | Exact application-only gate in `CURRENT_RELEASE_AUTHORITY.md` |
+| 2 | After that application release passes, review and upgrade the hash-pinned Connector 1.1.0 package | Separate Connector plugin gate |
+| 3 | Rebuild the page-specific manifest and verified rollback before publishing one visible WordPress placement | Separate page-specific publication gate |
 | 4 | Activate Mike's account and enroll each owner's Web Push device | Per-person takeover/test approval |
 | 5 | Approve consent wording before expanding WordPress forms | Mike/BIC approval |
 | 6 | Attach `hub.ourtownproperties.com`, or add MLS/CRM integrations under an approved contract | Exact DNS/provider approval |
