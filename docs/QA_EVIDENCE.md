@@ -1,5 +1,57 @@
 # QA Evidence
 
+## Autonomous notification retry readiness — 2026-09-02
+
+- A post-seal audit invalidated the first PR #262 head as final authority. It
+  found that assignment retries did not re-check the current global/channel
+  permission and treated an unassigned lead as still eligible, while the Lead
+  Center one-record action routed every notification type through the
+  assignment processor. The earlier green evidence remains historical only.
+- The repaired focused contract passes 8 files / 65 tests. It proves exact
+  assignee and active-agent revalidation, global and SMS gate revalidation,
+  missing/unsupported channel refusal, type-correct one-record dispatch, and
+  Preview refusal before repository reads, in addition to the worker controls
+  below. The protected action also proves strict UUID anchoring and encoded
+  redirect status values. Targeted ESLint and strict TypeScript pass.
+- The complete repaired-source Node 24 `pnpm run release:gate` passes
+  Ask/NellySelly isolation, 14/14 release-safety controls, 298 test files / 3,558
+  tests, strict TypeScript, full-repository ESLint, optimized Next.js 15.5.21
+  build, 60 static pages, and the 102-active-route/22-duplicate manifest.
+- `pnpm audit --prod --audit-level high` reports no known vulnerability.
+  Redacted full-history Gitleaks scans 763 commits / approximately 19.54 MB
+  with no leak. Exact staged and exact-commit scans, hosted CI, immutable
+  Preview, no-write Preview acceptance, and runtime-log evidence remain to be
+  sealed on the repaired commit before a new seal is authoritative.
+
+- The superseded first-head focused Vitest passed 7 files / 55 tests across cron/admin authorization,
+  Preview refusal before processing, aggregate-only cron output, bounded manual
+  processing, one-minute configuration, all three known notification types,
+  QA suppression, consumer consent/suppression, unsupported-type visibility,
+  per-row failure containment, browser-middleware exclusion, Production
+  provider-readiness preservation, and PII-minimal Neon retry selection.
+- Targeted ESLint and strict TypeScript pass.
+- `pnpm routes:verify` compiles the optimized Next.js 15.5.21 application,
+  generates all 60 static pages, and proves 102 active routes with 22
+  acknowledged root/src duplicates. The configured retry cron points to the
+  existing active API route.
+- The first build correctly rejected a test helper exported from an App Router
+  route. It was made module-private; the corrected build passes. A concurrent
+  pre-build typecheck saw transient missing `.next/types` files while the build
+  rewrote that generated directory; the required sequential post-build
+  typecheck passes.
+- The superseded first head's Node 24 `pnpm run release:gate` passed Ask/NellySelly
+  isolation, 14/14 release-safety controls, 298 test files / 3,553 tests,
+  strict TypeScript, full-repository ESLint, optimized Next.js 15.5.21 build,
+  60 static pages, and the 102-active-route/22-duplicate manifest.
+- The superseded first head's dependency and secret scans were clean: redacted
+  full-history Gitleaks scanned 762 commits / approximately 19.51 MB, and its
+  exact staged delta scanned approximately 37 KB with no leak.
+- No cron was invoked, no outbox row was read or changed, and no provider,
+  email, SMS, Push, lead, task, response, analytics, Neon, WordPress, Vercel
+  environment, Production, DNS, spend, deletion, or NellySelly mutation
+  occurred.
+- Those first-head hosted and Preview results do not prove the repaired source.
+
 ## First-response work coverage invariant — 2026-09-01
 
 - Focused Vitest acceptance passes 4 files / 23 tests across direct coverage,

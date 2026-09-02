@@ -10,6 +10,10 @@ import { scoreLead, type LeadScore } from "./leadScoring";
 import { CONSUMER_ACK_TEMPLATE_VERSION, LEAD_ALERT_SMS_TEMPLATE_VERSION, LEAD_ALERT_TEMPLATE_VERSION, renderConsumerAcknowledgment, renderLeadAlert, renderLeadAlertForTemplateVersion, renderLeadAlertSms } from "./leadAlertTemplates";
 import { shouldAttachLeadAlertMedia, shouldQueueAgentUrgencySms, visualAssetUrl } from "./leadAlertVisualTemplates";
 import { NeonPushSubscriptionRepository, type StaffPushRecipientRole } from "./persistence/neonPushSubscriptionRepository";
+import {
+  retryNotification as retryAssignmentNotification,
+  type LeadNotificationServiceResult,
+} from "./leadNotificationService";
 
 const MAX_ATTEMPTS = 3;
 const RETRY_DELAYS_MS = [60_000, 5 * 60_000, 30 * 60_000];
@@ -23,7 +27,27 @@ export type LeadAlertInput = {
   routing: LeadRoutingDecision;
   submittedAt: string;
   duplicateOfLeadId?: string | null;
+  communicationSuppressed?: boolean;
+  emailSuppressed?: boolean;
 };
+
+export function consumerAcknowledgmentPermitted(
+  input: Pick<LeadAlertInput, "payload" | "communicationSuppressed" | "emailSuppressed">,
+) {
+  return Boolean(
+    input.payload.email &&
+    input.payload.consent_email &&
+    !input.payload.is_test &&
+    !input.communicationSuppressed &&
+    !input.emailSuppressed
+  );
+}
+
+export function suppressAutomatedTestRetry(
+  input: Pick<LeadAlertInput, "payload">,
+) {
+  return input.payload.is_test === true;
+}
 
 function nowIso() { return new Date().toISOString(); }
 function consumerAcknowledgmentEnabled() {
@@ -234,20 +258,35 @@ async function loadLeadAlertInput(leadId: string, metadata: Record<string, unkno
       routing,
       submittedAt: typeof row.created_at === "string" ? row.created_at : nowIso(),
       duplicateOfLeadId: typeof row.duplicate_of_lead_id === "string" ? row.duplicate_of_lead_id : null,
+      communicationSuppressed: row.communication_suppressed === true,
+      emailSuppressed: row.email_suppressed === true,
     };
   } catch {
     return null;
   }
 }
 
-export async function retryLeadAlertNotification(notificationId: string) {
+export async function retryLeadAlertNotification(
+  notificationId: string,
+  options: { automated?: boolean } = {},
+) {
   const repo = notificationRepository();
   const current = await repo.findById(notificationId);
   if (!current || !["lead_alert", "consumer_ack"].includes(current.notification_type)) return null;
   const input = await loadLeadAlertInput(current.lead_id, current.metadata);
   if (!input) return await repo.update(current.id, { status: "permanently_failed", error_code: "notification_context_missing", error_summary: "Lead context is missing for retry.", failed_at: nowIso() });
+  if (options.automated && suppressAutomatedTestRetry(input)) {
+    return await repo.update(current.id, {
+      status: "skipped",
+      error_code: "automated_test_retry_suppressed",
+      error_summary: "Automated retry never sends a QA test notification.",
+      failed_at: nowIso(),
+      next_attempt_at: null,
+    });
+  }
   const provider = selectNotificationProvider();
   if (current.notification_type === "consumer_ack") {
+    const acknowledgmentRecipient = input.payload.email;
     if (!consumerAcknowledgmentEnabled()) {
       return await repo.update(current.id, {
         status: "skipped",
@@ -256,11 +295,11 @@ export async function retryLeadAlertNotification(notificationId: string) {
         failed_at: nowIso(),
       });
     }
-    if (!input.payload.email || !input.payload.consent_email || input.payload.is_test) {
+    if (!consumerAcknowledgmentPermitted(input) || !acknowledgmentRecipient) {
       return await repo.update(current.id, { status: "skipped", error_code: "consumer_ack_not_permitted", error_summary: "Consumer acknowledgment is not permitted for this lead.", failed_at: nowIso() });
     }
     const rendered = renderConsumerAcknowledgment(input);
-    return deliver(current, { channel: "email", recipient: input.payload.email, subject: rendered.subject, text: rendered.text, html: rendered.html, replyTo: process.env.SMTP_REPLY_TO || process.env.RESEND_FROM || process.env.FROM_EMAIL }, repo, provider);
+    return deliver(current, { channel: "email", recipient: acknowledgmentRecipient, subject: rendered.subject, text: rendered.text, html: rendered.html, replyTo: process.env.SMTP_REPLY_TO || process.env.RESEND_FROM || process.env.FROM_EMAIL }, repo, provider);
   }
   if (current.channel === "sms") {
     if (input.payload.is_test) {
@@ -298,14 +337,113 @@ export async function retryLeadAlertNotification(notificationId: string) {
   return deliver(current, { channel: "email", recipient: configuredTo(), subject: rendered.subject, text: rendered.text, html: rendered.html, bcc: configuredBcc(), replyTo: rendered.safeEmail || undefined }, repo, provider);
 }
 
-export async function retryDueLeadAlertNotifications(limit = 25) {
-  const repo = notificationRepository();
+type RetryBatchDependencies = {
+  repository?: LeadNotificationRepository;
+  retryLeadAlert?: (
+    notificationId: string,
+    options?: { automated?: boolean },
+  ) => Promise<LeadNotificationRecord | null>;
+  retryAssignment?: (
+    notificationId: string,
+  ) => Promise<LeadNotificationServiceResult>;
+};
+
+type RetryOneDependencies = {
+  repository?: LeadNotificationRepository;
+  retryLeadAlert?: (
+    notificationId: string,
+    options?: { automated?: boolean },
+  ) => Promise<LeadNotificationRecord | null>;
+  retryAssignment?: (
+    notificationId: string,
+  ) => Promise<LeadNotificationServiceResult>;
+};
+
+/** Dispatch one protected manual retry through the processor that owns the
+ * recorded notification type. This prevents lead alerts and consumer
+ * acknowledgments from being incorrectly interpreted as agent assignments. */
+export async function retryNotificationByType(
+  notificationId: string,
+  options: { automated?: boolean } = {},
+  dependencies: RetryOneDependencies = {},
+): Promise<LeadNotificationServiceResult> {
+  const delivery = assertProviderDeliveryAllowed();
+  if (!delivery.ok) {
+    return {
+      ok: false,
+      statusCode: delivery.statusCode,
+      error: delivery.error,
+    };
+  }
+  const repo = dependencies.repository || notificationRepository();
+  const current = await repo.findById(notificationId);
+  if (!current) {
+    return { ok: false, statusCode: 404, error: "notification_not_found" };
+  }
+  if (!["failed", "retry_scheduled"].includes(current.status)) {
+    return { ok: false, statusCode: 409, error: "notification_not_retryable" };
+  }
+  if (current.notification_type === "agent_assignment") {
+    const retryAssignment = dependencies.retryAssignment || retryAssignmentNotification;
+    return retryAssignment(notificationId);
+  }
+  if (["lead_alert", "consumer_ack"].includes(current.notification_type)) {
+    const retryLeadAlert = dependencies.retryLeadAlert || retryLeadAlertNotification;
+    const notification = await retryLeadAlert(notificationId, options);
+    return notification
+      ? { ok: true, notification }
+      : { ok: false, statusCode: 503, error: "notification_retry_unavailable" };
+  }
+  return { ok: false, statusCode: 409, error: "notification_type_unsupported" };
+}
+
+export async function retryDueNotifications(
+  limit = 25,
+  dependencies: RetryBatchDependencies = {},
+) {
+  const repo = dependencies.repository || notificationRepository();
+  const retryLeadAlert = dependencies.retryLeadAlert || retryLeadAlertNotification;
+  const retryAssignment = dependencies.retryAssignment || retryAssignmentNotification;
   const rows = await repo.listRetryable(limit);
-  const results = [];
-  for (const row of rows.filter((candidate) => ["lead_alert", "consumer_ack"].includes(candidate.notification_type))) {
-    results.push(await retryLeadAlertNotification(row.id));
+  const results: Array<LeadNotificationRecord | null> = [];
+  for (const row of rows) {
+    try {
+      if (row.lead_is_test === true) {
+        results.push(await repo.update(row.id, {
+          status: "skipped",
+          error_code: "automated_test_retry_suppressed",
+          error_summary: "Automated retry never sends a QA test notification.",
+          failed_at: nowIso(),
+          next_attempt_at: null,
+        }));
+        continue;
+      }
+      if (["lead_alert", "consumer_ack"].includes(row.notification_type)) {
+        results.push(await retryLeadAlert(row.id, { automated: true }));
+        continue;
+      }
+      if (row.notification_type === "agent_assignment") {
+        const assignment = await retryAssignment(row.id);
+        results.push(assignment.ok ? assignment.notification : null);
+        continue;
+      }
+      results.push(await repo.update(row.id, {
+        status: "permanently_failed",
+        error_code: "notification_type_unsupported",
+        error_summary: "The queued notification type is not supported by the retry worker.",
+        failed_at: nowIso(),
+        next_attempt_at: null,
+      }));
+    } catch {
+      results.push(null);
+    }
   }
   return results;
+}
+
+/** Compatibility name retained for the existing protected admin endpoint. */
+export async function retryDueLeadAlertNotifications(limit = 25) {
+  return retryDueNotifications(limit);
 }
 
 export async function enqueueLeadNotifications(input: LeadAlertInput) {
@@ -379,11 +517,11 @@ export async function enqueueLeadNotifications(input: LeadAlertInput) {
       }
     }
     let consumer: LeadNotificationRecord | null = null;
+    const acknowledgmentRecipient = input.payload.email;
     if (
       consumerAcknowledgmentEnabled() &&
-      input.payload.email &&
-      input.payload.consent_email &&
-      !input.payload.is_test
+      consumerAcknowledgmentPermitted(input) &&
+      acknowledgmentRecipient
     ) {
       const ack = renderConsumerAcknowledgment(input);
       consumer = await enqueueOne({
@@ -391,7 +529,7 @@ export async function enqueueLeadNotifications(input: LeadAlertInput) {
         type: "consumer_ack",
         templateVersion: CONSUMER_ACK_TEMPLATE_VERSION,
         channel: "email",
-        recipient: input.payload.email,
+        recipient: acknowledgmentRecipient,
         subject: ack.subject,
         text: ack.text,
         html: ack.html,

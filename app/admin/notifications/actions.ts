@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { retryNotification } from "../../lib/leadNotificationService";
+import { retryNotificationByType } from "../../lib/leadAlertService";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -19,15 +19,15 @@ export async function retryLeadNotificationAction(formData: FormData) {
     redirect("/admin/notifications?notification_action=confirmation_required");
   }
 
-  const result = await retryNotification(notificationId);
+  const result = await retryNotificationByType(notificationId);
   revalidatePath("/admin/notifications");
 
   if (!result.ok) {
-    redirect("/admin/notifications?notification_action=" + result.error);
+    redirect("/admin/notifications?notification_action=" + encodeURIComponent(result.error));
   }
 
   if (result.warning) {
-    redirect("/admin/notifications?notification_action=retry_" + result.warning);
+    redirect("/admin/notifications?notification_action=retry_" + encodeURIComponent(result.warning));
   }
 
   redirect("/admin/notifications?notification_action=retry_processed");

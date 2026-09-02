@@ -134,9 +134,13 @@ export class NeonLeadNotificationRepository implements LeadNotificationRepositor
 
   async listRetryable(limit = 25, now = new Date()) {
     const rows = await this.sql.query(
-      `SELECT * FROM public.lead_notifications
-       WHERE status IN ('failed', 'retry_scheduled') AND next_attempt_at <= $1::timestamptz
-       ORDER BY next_attempt_at ASC LIMIT $2`,
+      `SELECT n.*, l.is_test AS lead_is_test
+         FROM public.lead_notifications n
+         LEFT JOIN public.leads l ON l.id = n.lead_id
+        WHERE n.status IN ('failed', 'retry_scheduled')
+          AND n.next_attempt_at <= $1::timestamptz
+        ORDER BY n.next_attempt_at ASC
+        LIMIT $2`,
       [now.toISOString(), Math.max(1, Math.min(limit, 50))],
     );
     return (rows as unknown[]).map(row).filter((value): value is LeadNotificationRecord => Boolean(value));

@@ -1,6 +1,6 @@
 # Implementation Status
 
-Updated 2026-09-01.
+Updated 2026-09-02.
 
 ## Current Production authority
 
@@ -10,6 +10,53 @@ Updated 2026-09-01.
   `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` remain authoritative. The Ask chat
   hardening below is a Draft Preview candidate only and changes no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
+
+## Phase 9 autonomous notification retry readiness — 2026-09-02
+
+- **Existing outbox activated, not replaced:** the established protected
+  `/api/admin/notifications/retry` route now distinguishes a Vercel
+  `CRON_SECRET` GET from the existing administrator readiness GET and bounded
+  manual POST. The Draft schedule is every minute with at most 25 due rows per
+  run.
+- **Complete known-type dispatch:** due `lead_alert`, `consumer_ack`, and
+  `agent_assignment` rows use their current service, renderer, provider,
+  idempotency key, and atomic claim. A failure in one row cannot prevent later
+  rows from being attempted; an unsupported type becomes a visible terminal
+  outbox failure.
+- **Permission revalidation:** canonical Neon retry reads annotate test scope;
+  automated QA rows become skipped without a provider call. Consumer
+  acknowledgments reload current communication/email suppression and consent
+  before retry, preventing a queued message from overruling a later opt-out or
+  suppression event.
+- **Agent and operator retry integrity:** assignment retries now require the
+  same exact current assignee, an active agent, current global/channel
+  permission, a current destination, and a supported channel before provider
+  delivery. The Lead Center's one-record action dispatches by recorded type,
+  fixing the prior assumption that every retry was an agent assignment. Both
+  automated and manual Preview paths refuse before repository access. The
+  server action strictly anchors notification UUIDs and URL-encodes status
+  values before redirecting.
+- **Fail-closed boundary:** Preview refuses the batch before repository or
+  provider access. Production also preserves due rows when the existing global
+  delivery gate, email switch, mode, or provider configuration is incomplete.
+  Cron output is aggregate-only and no-store; the protected manual POST retains
+  the existing per-record status contract. The API path remains outside the
+  browser-admin middleware and enforces its own timing-safe bearer check.
+- **Verification state:** the superseded first seal passed the complete release
+  gate and immutable Preview, but is historical rather than release authority.
+  The repaired source passes 8 focused files / 65 tests and the complete Node
+  24 release gate: Ask/NellySelly isolation, 14/14 safety controls, 298 test
+  files / 3,558 tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21
+  build, 60 static pages, and the 102-route/22-duplicate manifest. Production
+  dependencies have no known vulnerability, and redacted full-history Gitleaks
+  scans 763 commits / approximately 19.54 MB with no leak. Staged and
+  exact-commit scans, hosted exact-head CI, and immutable Preview remain to be
+  sealed on the repaired commit.
+- **Authority unchanged:** no Production merge/deploy, outbox mutation,
+  provider call, email/SMS/Push, environment change, database migration,
+  WordPress action, DNS, spend, deletion, or NellySelly action occurred.
+  Design and rollback:
+  [`phase9/AUTONOMOUS_NOTIFICATION_RETRY.md`](./phase9/AUTONOMOUS_NOTIFICATION_RETRY.md).
 
 ## Phase 9 SLA truth and cadence hardening — 2026-09-01
 

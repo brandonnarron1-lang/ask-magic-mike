@@ -1,5 +1,42 @@
 # Changelog
 
+## 2026-09-02 — Autonomous notification retry readiness
+
+- Reused the canonical `lead_notifications` outbox, claim-before-send updates,
+  provider adapters, idempotency keys, and protected retry route instead of
+  creating another queue or delivery service.
+- Added a Production-only Vercel cron contract that checks the existing bearer
+  `CRON_SECRET` and processes at most 25 due records every minute.
+- Unified scheduled dispatch for internal lead alerts, consented consumer
+  acknowledgments, and agent-assignment notifications while retaining bounded
+  provider backoff and per-record failure isolation.
+- Added defense-in-depth suppression: automatic jobs never send QA test rows,
+  and consumer acknowledgments re-check current communication/email
+  suppression before every retry.
+- Kept Preview read-only before repository or provider access and made cron
+  responses aggregate-only; administrator GET remains a non-mutating readiness
+  check and administrator POST retains protected per-record detail.
+- Preserved due outbox rows when Production mode, global delivery, email, or
+  provider readiness is incomplete, and proved the cron API remains outside the
+  browser-admin matcher while retaining route-level bearer authentication.
+- The first candidate head passed its Node 24 gate with 298 test files / 3,553
+  tests and immutable Preview checks; that evidence became historical after the
+  permission audit below.
+- Superseded that first seal after a deeper audit found a stale-permission edge:
+  assignment retries now re-check exact assignment, active-agent state, global
+  and channel gates, destination presence, and supported channel before send.
+- Corrected the protected one-record retry action to dispatch internal alerts,
+  consumer acknowledgments, and agent assignments through their own processors;
+  Preview now refuses that path before any repository read. Strict UUID
+  anchoring and encoded redirect status values harden its input/output boundary.
+- Passed the repaired final-source Node 24 release gate with 298 test files /
+  3,558 tests, strict typecheck, full lint, optimized build, 102-route
+  verification, 14/14 safety checks, and Ask/NellySelly isolation. Production
+  dependencies have no known vulnerability; redacted full-history Gitleaks
+  scans 763 commits / approximately 19.54 MB with no leak.
+- Added no migration, provider, credential, public route, WordPress change, or
+  external send. Production remains accepted PR #247.
+
 ## 2026-09-01 — SLA truth and cadence hardening
 
 - Reused the existing SLA engine, immutable response ledger, compliance flags,

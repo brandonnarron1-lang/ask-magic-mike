@@ -2,7 +2,7 @@
 
 <!-- amm-current-operations-v1 -->
 
-Updated 2026-09-01. Ask Magic Mike is already live. This runbook governs
+Updated 2026-09-02. Ask Magic Mike is already live. This runbook governs
 incremental application releases and controlled owned-traffic activation. It
 derives release identity from `config/current-release-authority.json`, uses
 Neon as the canonical database, and uses Better Auth plus server-side RBAC for
@@ -99,6 +99,13 @@ At minimum verify:
 Record exact deployment, source commit, check counts, skips, and limitations in
 the PR seal and production change log.
 
+For notification-retry releases, also prove that the authenticated cron path is
+outside browser-admin middleware, anonymous API access fails closed, Preview
+refuses before repository access, and a disabled/incomplete Production provider
+returns 503 without consuming due outbox rows. Prove current assignment,
+agent-active, global/channel permission, destination, and recorded-type checks
+run before every retried provider call.
+
 ## 6. Lead or communication acceptance
 
 When a release changes capture, routing, email, push, messaging, or sequences:
@@ -143,8 +150,13 @@ traffic and carrier messaging remain separate decisions.
 - Immediate: public health, readiness, route smoke, aliases, and error logs.
 - First genuine lead: storage-before-delivery, score/route, assignment, consent,
   attribution, notifications, and response SLA in the Better Auth Lead Center.
-- Hourly during activation: 5xx rate, notification failures, queue depth,
-  duplicate rate, unassigned leads, and overdue SLA.
+- Every activation window: confirm the one-minute notification-retry cron is
+  authorized only by `CRON_SECRET`, Preview remains read-only, and the latest
+  aggregate run has no unavailable result. Never invoke it with a browser query
+  secret or record recipient/message data in cron output.
+- Hourly during activation: 5xx rate, notification failures, retry-due and
+  stale-processing counts, queue depth, duplicate rate, unassigned leads, and
+  overdue SLA.
 - Next day: genuine/test KPI separation, source totals, first-response evidence,
   provider failures, and all published-placement receipts.
 
