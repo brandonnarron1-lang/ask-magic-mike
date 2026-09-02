@@ -1,5 +1,26 @@
 # QA Evidence
 
+## Current release-ledger drift guard — 2026-09-02
+
+- Source review found `KNOWN_LIMITATIONS.md` contradicted the authoritative
+  release ledger by naming PR #246 as Production, PR #247 as the candidate, and
+  PR #247 approval as the next action.
+- The repaired document names accepted PR #247 Production, sealed PR #248 as
+  the sole reviewed candidate, and the PR #247 gate as consumed. Static demand
+  language now defers to authenticated runtime aggregates.
+- Focused Node 24 acceptance passes 1 file / 6 tests. Complete local acceptance
+  passes Ask/NellySelly isolation, 14/14 safety controls, 300 files / 3,587
+  tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build with
+  60 static pages, and 102 active routes with 22 acknowledged duplicates.
+  Production dependencies report no known vulnerability. Redacted Gitleaks
+  finds no leak in the 13.15 KB staged delta or 769 commits / approximately
+  19.67 MB of history.
+- Focused and complete exact-tree verification are recorded in
+  [`phase9/CURRENT_RELEASE_LEDGER_RECONCILIATION_QA_EVIDENCE.md`](./phase9/CURRENT_RELEASE_LEDGER_RECONCILIATION_QA_EVIDENCE.md).
+- No Production, database, provider, WordPress, lead, analytics, appointment,
+  communication, environment, DNS, publication, spend, deletion, or
+  NellySelly mutation occurred.
+
 ## Public AI chat provider boundary hardening — 2026-09-02
 
 - The existing public chat panel, `/api/chat` handler,

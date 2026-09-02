@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-09-02 — Current release-ledger drift guard
+
+- Reconciled `KNOWN_LIMITATIONS.md` with the authoritative accepted PR #247
+  Production and the sealed PR #248 application candidate.
+- Removed a stale instruction to approve already-released PR #247 and replaced
+  fixed lead-count language with the authenticated runtime aggregates as the
+  point-in-time authority.
+- Clarified that Preview is read-only unless endpoint identity is attested and
+  every existing mutation control agrees.
+- Added regression coverage requiring current Production/candidate identities
+  in the limitations ledger and rejecting the stale PR #246/PR #247 authority
+  wording.
+- Passed the complete Node 24 gate with 300 files / 3,587 tests, strict types,
+  full lint, optimized Next.js 15.5.21 build, 60 static pages, 102-route proof,
+  14/14 safety controls, and Ask/NellySelly isolation. Production dependencies
+  report no known vulnerability; staged-delta and 769-commit redacted history
+  scans are clean.
+- No runtime, migration, provider, WordPress, lead, communication, environment,
+  DNS, publication, spend, deletion, or NellySelly state changed.
+
 ## 2026-09-02 — Public AI chat provider boundary hardening
 
 - Retained the existing `/api/chat` and `/api/chat/message` funnel, Responses

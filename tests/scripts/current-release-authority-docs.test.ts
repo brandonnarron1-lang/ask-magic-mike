@@ -169,6 +169,7 @@ describe("current application release authority", () => {
       "docs/DOCUMENTATION_AUTHORITY.md",
       "docs/IMPLEMENTATION_STATUS.md",
       "docs/KNOWN_BLOCKERS.md",
+      "docs/KNOWN_LIMITATIONS.md",
       "docs/OWNER_APPROVAL_QUEUE.md",
       "docs/ROLLBACK_PLAN.md",
     ]) {
@@ -188,5 +189,20 @@ describe("current application release authority", () => {
     expect(currentAuthority).toMatch(/PR \[#248\][\s\S]*zero[\s\S]*migrations/i);
     expect(currentAuthority).toMatch(/PR (?:\[#247\]|#247)[\s\S]*consumed/i);
     expect(currentAuthority).toMatch(/PR #238[\s\S]*consumed/i);
+  });
+
+  it("keeps the current limitations ledger aligned and blocks consumed-gate replay", () => {
+    const limitations = readRepoFile("docs/KNOWN_LIMITATIONS.md");
+    expect(limitations).toContain(productionCommit);
+    expect(limitations).toContain(productionTree);
+    expect(limitations).toContain(productionDeployment);
+    expect(limitations).toContain(candidateReviewedHead);
+    expect(limitations).toContain(candidateTree);
+    expect(limitations).toContain(candidateApplicationGate);
+    expect(limitations).toMatch(/PR #247 approval is consumed/i);
+    expect(limitations).toMatch(/PR #248 is the only active reviewed application candidate/i);
+    expect(limitations).not.toMatch(/Current accepted Production is PR #246/i);
+    expect(limitations).not.toMatch(/PR #247 is the one\s+reviewed application candidate/i);
+    expect(limitations).not.toMatch(/Obtain the exact PR #247 owner approval/i);
   });
 });
