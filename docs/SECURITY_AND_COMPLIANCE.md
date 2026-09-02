@@ -73,6 +73,14 @@
   limit result; a non-durable result fails closed unless the exact existing
   emergency-memory flag is explicitly active. Prompt-injection detection,
   redaction, `store: false`, bounded output, and bounded timeout remain active.
+- Public chat-session creation issues only a random opaque funnel identifier;
+  it is not an auth credential and creates no cookie or database row. Explicit
+  foreign origins fail before limiting, Preview returns before any shared
+  limiter write, and Production requires an allowed durable limit result unless
+  the exact existing emergency-memory break-glass control is active. Responses
+  are private/no-store, correlation-addressable, and return bounded retry
+  guidance when throttled.
+
 
 ## WordPress activation-manifest boundary — 2026-08-22
 

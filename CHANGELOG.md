@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-02 — Public chat-session boundary hardening
+
+- Retained the required `/api/chat/session` endpoint as an opaque public funnel
+  identifier issuer; no authenticated session, database row, cookie, or second
+  session store was added.
+- Made Preview issue the ephemeral identifier before shared rate limiting so a
+  read-only product check cannot write a Neon rate-limit bucket.
+- Made Production require an allowed durable limiter result before issuing an
+  identifier, preserving only the existing exact emergency-memory break-glass
+  control.
+- Added private/no-store responses, correlation IDs, stable safe error codes,
+  and bounded `Retry-After` guidance with focused origin/runtime tests.
+- No Production, database, migration, provider, WordPress, lead, communication,
+  analytics, environment, DNS, publication, spend, deletion, or NellySelly
+  state changed.
+
 ## 2026-09-02 — Current release-ledger drift guard
 
 - Reconciled `KNOWN_LIMITATIONS.md` with the authoritative accepted PR #247
