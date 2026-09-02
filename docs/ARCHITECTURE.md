@@ -128,6 +128,20 @@ public route → runtime validation → Neon analytics_events
 trusted operation → server ledger → Neon analytics_events
 ```
 
+The active public ingress preserves one wire format and one ledger.
+`/api/events` is the current snake-case browser handler and
+`/api/widget/events` re-exports that exact handler. It requires an explicit
+approved origin, excludes automated-browser telemetry before shared state
+access, refuses ordinary Preview writes before rate limiting, and permits
+Production persistence only after an allowed durable limiter result. Response
+correlation, no-store behavior, event/property allowlists, and safe failure
+semantics are enforced at that boundary.
+
+The historical camel-case adapter under `src/app/api/analytics/event` belongs
+to the ignored router tree and is not present in the active route manifest. It
+is retained fail-safe for source provenance, but is neither a live endpoint nor
+a second analytics authority.
+
 Form funnels reuse their existing browser submission/idempotency UUID as a
 protected `funnel_session_id` property. It is absent from browser analytics
 dimensions and does not create a `sessions` row. If lead storage succeeds, the

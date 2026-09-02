@@ -80,6 +80,19 @@
   the exact existing emergency-memory break-glass control is active. Responses
   are private/no-store, correlation-addressable, and return bounded retry
   guidance when throttled.
+- Public analytics ingestion has one active handler family and one canonical
+  Neon ledger: `/api/widget/events` is an exact alias of `/api/events`. The
+  historical camel-case source under the ignored `src/app` router is not in
+  the active route manifest; it remains hardened only as dormant defense in
+  depth. Both source implementations require an explicit approved origin,
+  bound JSON input to 4 KB, enforce public event/property allowlists, and
+  return only safe errors with private/no-store server correlation.
+- Automated-browser analytics is acknowledged but excluded before limiter or
+  repository access. Read-only Preview refuses ordinary persistence before the
+  limiter, and Production writes only after an allowed durable rate-limit
+  result unless the exact existing emergency-memory break-glass flag is
+  active. Origin and user-agent headers are abuse-reduction signals, not
+  authentication or legal identity proof.
 
 
 ## WordPress activation-manifest boundary — 2026-08-22
@@ -169,10 +182,11 @@ guaranteed result.
 - Durable abuse-control identifiers are domain-separated HMAC-SHA-256 values
   backed by a 32+ character server secret; raw caller keys are absent from SQL
   parameters and protected health exposes readiness as a boolean only.
-- Both public analytics routes validate origin, content type, body size, event
-  name, scalar schema, event-specific dimensions, safe paths, and coarse device
-  class before awaited canonical persistence. HTTP 202 means the Neon write
-  succeeded; an unavailable write fails truthfully with HTTP 503.
+- The active root analytics handler and retained dormant source implementation
+  validate origin, content type, body size, event name, scalar schema,
+  event-specific dimensions, safe paths, and coarse device class before
+  awaited canonical persistence. HTTP 202 means the Neon write succeeded; an
+  unavailable write fails truthfully with HTTP 503.
 - Public UTM and placement dimensions accept only a registered operational
   vocabulary. Slug shape alone is not trusted, so unregistered single-token
   names/address slugs are discarded and dynamic open-house IDs reduce to a

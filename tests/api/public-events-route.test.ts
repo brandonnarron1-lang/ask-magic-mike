@@ -7,10 +7,15 @@ vi.mock("../../src/lib/security/rate-limit", () => ({
   checkRateLimit: (...args: unknown[]) => rateLimitMock(...args),
   LIMITS: { analyticsEvent: { limit: 60, windowMs: 60_000 } },
   rateLimitKey: () => "test-client",
+  nonDurableRateLimitFallbackAllowed: () =>
+    process.env.VERCEL_ENV !== "production"
+    || process.env.RATE_LIMIT_EMERGENCY_MEMORY?.trim() === "1",
 }));
 
 vi.mock("../../app/lib/publicOrigin", () => ({
-  isApprovedPublicOrigin: () => true,
+  isApprovedPublicOrigin: (origin: string | null) =>
+    origin === "https://www.askmagicmike.com"
+    || origin === "https://www.ourtownproperties.com",
 }));
 
 vi.mock("../../app/lib/serverAnalytics", async () => {
@@ -24,6 +29,7 @@ vi.mock("../../app/lib/serverAnalytics", async () => {
 });
 
 import { POST } from "../../app/api/events/route";
+import { POST as widgetPOST } from "../../app/api/widget/events/route";
 
 function request(body: unknown, userAgent = "Mozilla/5.0 Chrome/140") {
   return new Request("https://www.askmagicmike.com/api/events", {
@@ -41,7 +47,12 @@ describe("POST /api/events", () => {
   beforeEach(() => {
     vi.stubEnv("VERCEL_ENV", "production");
     rateLimitMock.mockReset();
-    rateLimitMock.mockResolvedValue({ allowed: true });
+    rateLimitMock.mockResolvedValue({
+      allowed: true,
+      remaining: 59,
+      resetAt: Date.now() + 60_000,
+      durable: true,
+    });
     recordMock.mockReset();
     recordMock.mockResolvedValue(true);
   });
@@ -52,8 +63,15 @@ describe("POST /api/events", () => {
 
   it("persists an approved public event", async () => {
     const response = await POST(request({ event_name: "funnel_started", properties: { funnel_name: "seller" } }));
+    const body = await response.json();
     expect(response.status).toBe(202);
+    expect(response.headers.get("cache-control")).toBe("private, no-store, max-age=0");
+    expect(body.correlation_id).toBe(response.headers.get("x-amm-correlation-id"));
     expect(recordMock).toHaveBeenCalledWith(expect.objectContaining({ eventName: "funnel_started" }));
+  });
+
+  it("keeps the widget event endpoint on the same canonical handler", () => {
+    expect(widgetPOST).toBe(POST);
   });
 
   it("fails closed in read-only Preview before limiter or event persistence", async () => {
@@ -89,7 +107,82 @@ describe("POST /api/events", () => {
     }));
 
     expect(response.status).toBe(403);
+    const body = await response.json();
+    expect(body).toMatchObject({ code: "origin_not_approved" });
+    expect(body.correlation_id).toBe(response.headers.get("x-amm-correlation-id"));
+    expect(response.headers.get("cache-control")).toBe("private, no-store, max-age=0");
     expect(rateLimitMock).not.toHaveBeenCalled();
+    expect(recordMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a foreign browser Origin before rate limiting or persistence", async () => {
+    const response = await POST(new Request("https://www.askmagicmike.com/api/events", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        origin: "https://attacker.example",
+        "user-agent": "Mozilla/5.0 Chrome/140",
+      },
+      body: JSON.stringify({ event_name: "funnel_started" }),
+    }));
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toMatchObject({ code: "origin_not_approved" });
+    expect(rateLimitMock).not.toHaveBeenCalled();
+    expect(recordMock).not.toHaveBeenCalled();
+  });
+
+  it("fails closed before persistence when Production limiting is non-durable", async () => {
+    rateLimitMock.mockResolvedValue({
+      allowed: true,
+      remaining: 59,
+      resetAt: Date.now() + 60_000,
+      durable: false,
+    });
+
+    const response = await POST(request({ event_name: "page_view", properties: { current_path: "/" } }));
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      persisted: false,
+      code: "rate_limit_store_unavailable",
+    });
+    expect(recordMock).not.toHaveBeenCalled();
+  });
+
+  it("preserves the exact emergency-memory break-glass value", async () => {
+    vi.stubEnv("RATE_LIMIT_EMERGENCY_MEMORY", "1");
+    rateLimitMock.mockResolvedValue({
+      allowed: true,
+      remaining: 59,
+      resetAt: Date.now() + 60_000,
+      durable: false,
+    });
+
+    const response = await POST(request({ event_name: "page_view", properties: { current_path: "/" } }));
+
+    expect(response.status).toBe(202);
+    expect(recordMock).toHaveBeenCalledOnce();
+  });
+
+  it("returns bounded retry guidance without persisting a throttled event", async () => {
+    rateLimitMock.mockResolvedValue({
+      allowed: false,
+      remaining: 0,
+      resetAt: Date.now() + 10_000_000,
+      durable: true,
+    });
+
+    const response = await POST(request({ event_name: "page_view", properties: { current_path: "/" } }));
+    const body = await response.json();
+    const retryAfter = Number(response.headers.get("retry-after"));
+
+    expect(response.status).toBe(429);
+    expect(body).toMatchObject({ code: "rate_limited" });
+    expect(body.correlation_id).toBe(response.headers.get("x-amm-correlation-id"));
+    expect(retryAfter).toBeGreaterThan(0);
+    expect(retryAfter).toBeLessThanOrEqual(60);
     expect(recordMock).not.toHaveBeenCalled();
   });
 
