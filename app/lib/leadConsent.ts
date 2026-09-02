@@ -12,7 +12,7 @@ export function consentGrantedForEmail(input: {
   consent_email?: boolean;
   email?: string;
 }) {
-  return Boolean(input.email && (input.consent_email || input.consent));
+  return Boolean(input.email && input.consent_email === true);
 }
 
 export function consentGrantedForCall(input: {
@@ -20,7 +20,7 @@ export function consentGrantedForCall(input: {
   consent_call?: boolean;
   phone?: string;
 }) {
-  return Boolean(input.phone && (input.consent_call || input.consent));
+  return Boolean(input.phone && input.consent_call === true);
 }
 
 export function consentGrantedForSms(input: {

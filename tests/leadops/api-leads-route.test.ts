@@ -31,10 +31,27 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 function request(body: Record<string, unknown>, headers: HeadersInit = {}) {
+  const idempotencyKey = typeof body.idempotency_key === "string"
+    ? body.idempotency_key
+    : typeof body.request_fingerprint === "string"
+      ? body.request_fingerprint
+      : SESSION_ID;
+  const leadSourceSurface = typeof body.lead_source_surface === "string"
+    ? body.lead_source_surface
+    : "home_value_page";
   return new Request("http://localhost/api/leads", {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...headers },
-    body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+      Origin: "https://www.askmagicmike.com",
+      "Idempotency-Key": idempotencyKey,
+      ...headers,
+    },
+    body: JSON.stringify({
+      ...body,
+      lead_source_surface: leadSourceSurface,
+      idempotency_key: idempotencyKey,
+    }),
   });
 }
 
@@ -81,9 +98,152 @@ afterEach(() => {
 describe("POST /api/leads validation and truthful persistence", () => {
   it("returns 400 for invalid JSON", async () => {
     const response = await POST(
-      new Request("http://localhost/api/leads", { method: "POST", body: "{" }),
+      new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://www.askmagicmike.com",
+        },
+        body: "{",
+      }),
     );
     expect(response.status).toBe(400);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store, max-age=0");
+  });
+
+  it("bounds chunked and declared lead bodies before persistence", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const chunked = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://www.askmagicmike.com",
+      },
+      body: JSON.stringify({ question: "é".repeat(33_000) }),
+    }));
+    expect(chunked.status).toBe(413);
+    expect(chunked.headers.get("X-AMM-Correlation-Id")).toBeTruthy();
+
+    const declared = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": "65537",
+        Origin: "https://www.askmagicmike.com",
+      },
+      body: "{}",
+    }));
+    expect(declared.status).toBe(413);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("rejects unsigned origin-less requests and foreign browser origins", async () => {
+    for (const origin of [null, "https://attacker.example"]) {
+      const headers = new Headers({
+        "Content-Type": "application/json",
+        "Idempotency-Key": SESSION_ID,
+      });
+      if (origin) headers.set("Origin", origin);
+      const response = await POST(new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          funnel_type: "home_value",
+          lead_source_surface: "home_value_page",
+          address: "1 Synthetic Origin Way",
+          email: "origin@example.test",
+          idempotency_key: SESSION_ID,
+        }),
+      }));
+      expect(response.status).toBe(403);
+      await expect(response.json()).resolves.toMatchObject({ code: "origin_not_approved" });
+    }
+  });
+
+  it("requires JSON and a plain-object payload", async () => {
+    const unsupported = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain",
+        Origin: "https://www.askmagicmike.com",
+      },
+      body: "not-json",
+    }));
+    expect(unsupported.status).toBe(415);
+    await expect(unsupported.json()).resolves.toMatchObject({ code: "unsupported_media_type" });
+
+    const arrayPayload = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://www.askmagicmike.com",
+      },
+      body: "[]",
+    }));
+    expect(arrayPayload.status).toBe(400);
+    await expect(arrayPayload.json()).resolves.toMatchObject({ code: "invalid_payload" });
+  });
+
+  it("requires one bounded matching idempotency key", async () => {
+    const body = {
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "2 Synthetic Idempotency Way",
+      email: "idempotency@example.test",
+    };
+    const missing = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://www.askmagicmike.com",
+      },
+      body: JSON.stringify(body),
+    }));
+    expect(missing.status).toBe(400);
+    await expect(missing.json()).resolves.toMatchObject({ code: "idempotency_key_required" });
+
+    const conflict = await POST(request(
+      { ...body, idempotency_key: SESSION_ID },
+      { "Idempotency-Key": "44444444-4444-4444-8444-444444444444" },
+    ));
+    expect(conflict.status).toBe(400);
+    await expect(conflict.json()).resolves.toMatchObject({ code: "idempotency_key_conflict" });
+  });
+
+  it.each([
+    [{ funnel_type: "mystery" }, "invalid_funnel_type"],
+    [{ lead_source_surface: "unknown_surface" }, "invalid_lead_source_surface"],
+    [{ lead_type: "mystery" }, "invalid_lead_type"],
+    [{ score: 100 }, "protected_field_rejected"],
+    [{ assigned_agent_id: LEAD_ID }, "protected_field_rejected"],
+    [{ consent: "true" }, "invalid_field_type"],
+    [{ attribution: [] }, "invalid_attribution"],
+  ])("rejects malformed or privileged public input %o", async (override, code) => {
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "3 Synthetic Boundary Road",
+      email: "boundary@example.test",
+      ...override,
+    }));
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({ code });
+  });
+
+  it("does not trust a standalone public is_test boolean", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "4 Synthetic Test Marker Way",
+      email: "marker@example.test",
+      is_test: true,
+    }));
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({ code: "invalid_test_marker" });
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -95,7 +255,6 @@ describe("POST /api/leads validation and truthful persistence", () => {
     [{ funnel_type: "chat" }, "Question is required"],
     [{ funnel_type: "chat", question: "Synthetic question" }, "Email or phone is required for a chat follow-up"],
     [{ funnel_type: "chat", question: "Synthetic question", email: "qa@example.test" }, "Consent is required for a chat follow-up"],
-    [{ funnel_type: "chat", question: "Synthetic question", email: "qa@example.test", consent: "true" }, "Consent is required for a chat follow-up"],
     [{ funnel_type: "appointment" }, "Email or phone is required"],
   ])("rejects an incomplete payload without persistence calls", async (payload, message) => {
     const fetchSpy = vi.fn();
@@ -306,6 +465,28 @@ describe("POST /api/leads atomic lifecycle command", () => {
       consent_language_version: "amm_contact_v2",
     });
     expect(await chatResponse.json()).toHaveProperty("message");
+  });
+
+  it("does not let standalone channel booleans widen public communication consent", async () => {
+    const { calls } = installRpc();
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "210 Synthetic Consent Boundary",
+      email: "consent-boundary@example.test",
+      phone: "2525550119",
+      consent: false,
+      consent_email: true,
+      consent_call: true,
+      consent_sms: true,
+    }));
+
+    expect(response.status).toBe(200);
+    expect(calls[0].body.p_lead).toMatchObject({
+      consent_email: false,
+      consent_call: false,
+      consent_sms: false,
+    });
   });
 
   it("keeps an omitted seller timeline unknown instead of manufacturing urgency", async () => {
