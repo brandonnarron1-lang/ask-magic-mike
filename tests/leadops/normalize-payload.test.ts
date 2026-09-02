@@ -158,6 +158,15 @@ describe("normalizeLeadPayload — explicit QA evidence", () => {
 
     expect(p.is_test).toBe(true);
   });
+
+  it("ignores a browser-controlled is_test boolean without both QA markers", () => {
+    const p = normalizeLeadPayload({
+      name: "Ordinary Public Lead",
+      is_test: true,
+    });
+
+    expect(p.is_test).toBe(false);
+  });
 });
 
 // ─── cleanAttribution ─────────────────────────────────────────────────────────

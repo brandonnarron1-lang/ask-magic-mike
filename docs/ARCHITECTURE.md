@@ -7,6 +7,38 @@
 > that describe Supabase as canonical or `/api/intake/submit` as the active
 > public path are `SUPERSEDED` historical design notes retained for provenance.
 
+## Active public lead-capture boundary
+
+The active root `POST /api/leads` route is the one public lead command used by
+Ask Magic Mike funnels, the isolated iframe widget, and the signed Our Town
+Properties Gravity Forms bridge. It normalizes into one canonical Neon
+transaction:
+
+```text
+exact public Origin OR signed WordPress raw body
+  -> JSON/type/size/idempotency/consent validation
+  -> Preview zero-write + Production durable rate limit
+  -> deterministic score and routing preparation
+  -> capture_public_lead_v2
+       session + contact + lead + dedupe + assignment
+       source attribution + consent + audit + internal email outbox
+  -> post-commit immediate dispatch/analytics/monitoring
+       failure-isolated; outbox retry remains authoritative
+```
+
+Success is never reported before the lifecycle transaction commits. Replay
+returns the existing canonical identity without a second provider call.
+Browser input cannot author score, routing, assignment, suppression, duplicate,
+or KPI test state. Public channel permission requires the server-owned umbrella
+consent plus the exact channel grant; SMS remains denied until a separately
+approved public SMS consent control exists.
+
+Read-only Preview refuses before the shared limiter can write. Production
+requires durable Neon-backed limiting unless the exact documented emergency
+flag is deliberately active. All public responses are private/no-store and
+correlation-addressable. The historical `src/app` lead route is outside the
+deployed root App Router and is not a competing authority.
+
 ## Historical data flow (`SUPERSEDED`)
 
 ```

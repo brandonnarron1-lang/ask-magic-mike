@@ -161,7 +161,11 @@ export function normalizeLeadPayload(input: Record<string, unknown>): LeadPayloa
     widget_session_id: cleanOptional(input.widget_session_id),
     idempotency_key: cleanOptional(input.idempotency_key || input.request_fingerprint),
     honeypot: clean(input.website || input.honeypot),
-    is_test: input.is_test === true || isInternalQa,
+    // Test classification is derived from the unmistakable QA marker pair,
+    // never from a browser-controlled boolean by itself. This prevents an
+    // ordinary public caller from silently hiding a real submission from
+    // operational KPIs and live-notification paths.
+    is_test: isInternalQa,
     consent: input.consent === true,
     consent_email: input.consent_email === true,
     consent_call: input.consent_call === true,

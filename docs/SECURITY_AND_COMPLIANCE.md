@@ -94,6 +94,42 @@
   active. Origin and user-agent headers are abuse-reduction signals, not
   authentication or legal identity proof.
 
+## Public lead ingress boundary — 2026-09-02
+
+- The active root `POST /api/leads` route requires an explicit exact public
+  browser origin. Origin-less requests are restricted to the existing
+  WordPress bridge and must pass its raw-body HMAC, bounded timestamp, entry
+  identity, and form/payload binding before persistence.
+- JSON media type, plain-object shape, a 65,536-byte declared/streamed ceiling,
+  primitive types, canonical funnel/source/type vocabularies, nested
+  attribution types, and per-field lengths are enforced before the canonical
+  transaction.
+- The public boundary rejects browser-authored score, factor, routing,
+  assignment, suppression, duplicate, and non-new lifecycle state. Scoring,
+  routing, ownership, and dedupe remain deterministic server/database
+  decisions.
+- One bounded idempotency key is required; header/body aliases must agree.
+  Conflict and replay are resolved by the existing database command without
+  exposing another lead's identity.
+- A standalone browser `is_test` flag cannot suppress a live submission. The
+  required internal QA/do-not-contact evidence remains explicit, and test
+  records retain communication suppression and KPI exclusion downstream.
+- Public email/call grants require both the server-owned umbrella consent and
+  the exact channel boolean. Public SMS remains denied because no separately
+  approved SMS control is displayed. Signed WordPress evidence remains narrow
+  and source-specific.
+- Preview rejects before rate limiting so it cannot mutate Neon limiter state.
+  Production persistence requires an allowed durable limiter result unless the
+  exact documented emergency-memory control is active.
+- The canonical transaction commits lifecycle, attribution, consent, and the
+  required internal-email outbox row before success. Every immediate
+  post-commit integration is failure-isolated, so a provider or telemetry
+  failure cannot turn a stored lead into a false public failure or discard its
+  retryable notification intent.
+- Every response is private/no-store, correlation-addressable, and limited to
+  stable safe errors. No database, provider, recipient/BCC, contact, existing
+  lead, or raw exception detail is returned.
+
 
 ## WordPress activation-manifest boundary — 2026-08-22
 

@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-09-02 — Public lead ingress boundary hardening
+
+- Retained the active root `POST /api/leads`, atomic
+  `capture_public_lead_v2` lifecycle, signed WordPress bridge, deterministic
+  scoring/routing, canonical notification outbox, and retry worker.
+- Added exact browser-origin or signed-bridge enforcement, JSON/object/body
+  bounds, runtime primitive and attribution validation, canonical source/type
+  checks, protected operational-field rejection, and mandatory matching
+  idempotency references.
+- Prevented a standalone browser test flag from suppressing an ordinary lead
+  and prevented standalone email/call booleans from exceeding denied umbrella
+  consent. Public SMS remains denied under the current consent copy.
+- Moved read-only Preview refusal ahead of the shared limiter and isolated all
+  post-commit integrations so no Preview limiter row is written and no stored
+  lead becomes a false failure after provider or telemetry errors.
+- Standardized private/no-store responses, stable safe codes, correlation
+  identity, and bounded retry guidance without changing an active caller or
+  adding a route, migration, provider, secret, or parallel lead store.
+- Production remains accepted PR #247. No Production, database, provider,
+  WordPress, lead, communication, analytics, environment, DNS, publication,
+  spend, deletion, or NellySelly state changed.
+
 ## 2026-09-02 — Public analytics ingress boundary hardening
 
 - Retained the one active public analytics handler family:

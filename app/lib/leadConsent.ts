@@ -59,10 +59,14 @@ export function resolveAuthoritativeConsentEvidence(
   options: { trustedWordPressBridge: boolean; receivedAt?: string },
 ): AuthoritativeConsentEvidence {
   if (!options.trustedWordPressBridge) {
+    const consentAccepted = input.consent === true;
     return {
-      consent: input.consent === true,
-      consent_email: input.consent_email === true,
-      consent_call: input.consent_call === true,
+      consent: consentAccepted,
+      // Public channel permissions must be consistent with the displayed
+      // umbrella consent control. A caller cannot grant a channel by sending
+      // a standalone boolean that the public UI would never produce.
+      consent_email: consentAccepted && input.consent_email === true,
+      consent_call: consentAccepted && input.consent_call === true,
       // No current public lead form displays a separate SMS consent control.
       // A caller-supplied boolean cannot widen the server-owned public copy.
       consent_sms: false,
@@ -124,7 +128,7 @@ export function consentGrantedForEmail(input: {
   consent_email?: boolean;
   email?: string;
 }) {
-  return Boolean(input.email && (input.consent_email || input.consent));
+  return Boolean(input.email && input.consent_email === true);
 }
 
 export function consentGrantedForCall(input: {
@@ -132,7 +136,7 @@ export function consentGrantedForCall(input: {
   consent_call?: boolean;
   phone?: string;
 }) {
-  return Boolean(input.phone && (input.consent_call || input.consent));
+  return Boolean(input.phone && input.consent_call === true);
 }
 
 export function consentGrantedForSms(input: {

@@ -1,5 +1,31 @@
 # QA Evidence
 
+## Public lead ingress boundary hardening — 2026-09-02
+
+- Retained the active root `POST /api/leads`, `capture_public_lead_v2`, signed
+  Gravity Forms bridge, deterministic score/router, canonical Neon lifecycle,
+  internal notification outbox, and retry worker. No route, store, migration,
+  provider, secret, recipient, or parallel lead authority was added.
+- Focused Node 24 verification passes 6 files / 111 tests plus strict
+  TypeScript, targeted ESLint, and whitespace checks. It covers exact origin,
+  JSON/object/body limits, runtime types, protected fields, source vocabulary,
+  mandatory matching idempotency, QA classification, channel consent,
+  WordPress signatures, atomic outbox intent, replay, Preview zero-write,
+  Production durable-limiter failure, and truthful post-commit failure
+  isolation.
+- Complete local verification passes 301 files / 3,618 tests, strict
+  TypeScript, repository-wide ESLint, an optimized Next.js 15.5.21 build with
+  60 static pages, 102 active / 22 acknowledged duplicate routes, 14/14 safety
+  controls, and Ask/NellySelly isolation. Production dependencies report no
+  known vulnerability. Redacted Gitleaks finds no leak in the approximately
+  49.42 KB staged candidate or 772 commits / 19.74 MB of history. Exact-commit
+  and hosted no-write evidence will be recorded in
+  [`phase9/PUBLIC_LEAD_INGRESS_BOUNDARY_QA_EVIDENCE.md`](./phase9/PUBLIC_LEAD_INGRESS_BOUNDARY_QA_EVIDENCE.md).
+- All test inputs and providers are synthetic/mocked. No remote database
+  access, lead, analytics row, email/BCC, SMS, Push, consumer acknowledgment,
+  WordPress action, Production deployment, environment/DNS change,
+  publication, spend, deletion, or NellySelly action occurred.
+
 ## Public analytics ingress boundary hardening — 2026-09-02
 
 - The route-manifest audit confirmed that `/api/events` and its exact
