@@ -5,6 +5,13 @@ structure, repository identifiers, and verification results only. It contains
 no lead PII, database credential, provider token, private BCC value, session
 secret, or raw WordPress page body.
 
+> Current-candidate correction (2026-09-01): the page-3631 row below is the
+> accepted PR #247 Production snapshot. Authenticated source review in the
+> later Draft candidate preserves its existing CTA copy and changes its future
+> status to `seller_intent_decision_required`; it is not selection-eligible
+> until the established seller-intent and BIC decisions are recorded. This
+> correction changes no accepted Production or WordPress state.
+
 ## Executive result
 
 The existing protected Distribution Command now consumes the existing bounded

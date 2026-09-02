@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "amm.wordpress_page_source_cutover_contract.v1",
+  "placementKey": "wordpress_we_buy_homes",
+  "pageId": 3631,
+  "sourceUrl": "https://www.ourtownproperties.com/we-buy-homes/",
+  "sourceLength": 2480,
+  "sourceSha256": "2c6c4a1b75afd133b92840d0f846f2a82f059b25f73aa0b2914d97d02ab1b8df",
+  "currentShortcode": "[ask_magic_mike_cta source=\"seller_page_cta\" headline=\"Thinking about selling but not sure where to start?\" text=\"Ask Magic Mike for local guidance before you make your next move.\" button=\"Get Local Guidance\"]",
+  "proposedShortcode": "[ask_magic_mike_cta route=\"/sell\" source=\"seller_page_cta\" utm_source=\"ourtownproperties\" utm_medium=\"owned_media\" utm_campaign=\"amm_owned_demand_2026\" utm_content=\"wordpress_we_buy_homes\" headline=\"Thinking about selling but not sure where to start?\" text=\"Ask Magic Mike for local guidance before you make your next move.\" button=\"Get Local Guidance\"]",
+  "proposedSourceLength": 2624,
+  "proposedSourceSha256": "1919ec017662efd5dfa04e81bf789f72ec478c16cbae7d0c0e59e0f7899c08e2",
+  "preservedLiterals": [
+    "headline=\"Thinking about selling but not sure where to start?\"",
+    "text=\"Ask Magic Mike for local guidance before you make your next move.\"",
+    "button=\"Get Local Guidance\""
+  ],
+  "requiredConnectorVersion": "1.1.0",
+  "approvalGate": "APPROVE PHASE 9 WE BUY HOMES CTA WORDPRESS PUBLICATION",
+  "requiresPostmetaBackup": true,
+  "requiresRevision": true,
+  "requiresRevisionSourceHash": true,
+  "requiresSellerIntentDecision": true,
+  "requiredCanonicalSourcePage": "https://www.ourtownproperties.com/we-buy-homes/",
+  "requiredCaptureOwner": "ask_magic_mike",
+  "requiredPlacementKey": "wordpress_we_buy_homes",
+  "requiresBicCopyReview": true
+}

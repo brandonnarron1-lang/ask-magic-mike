@@ -1,5 +1,36 @@
 # Changelog
 
+## 2026-09-01 — WordPress page 3631 copy-preserving decision boundary
+
+- Authenticated the exact 2,480-byte We Buy Homes Beaver Builder source and
+  pinned its one existing Ask Magic Mike shortcode and SHA-256 digest.
+- Corrected the earlier proposal so it retains the live CTA headline, body,
+  and button while adding only `/sell` routing and canonical owned-demand
+  attribution.
+- Reused one shared exact-source engine for pages 3631 and 3952, with
+  independent contracts and no write/provider path.
+- Made page 3631 fail closed until the existing seller-intent packet records
+  the canonical page, capture owner, duplicate-page disposition, placement key,
+  and a BIC/compliance copy-review digest in addition to rollback evidence.
+- Performed no WordPress save, page/form/plugin action, lead, notification,
+  database, deployment, DNS, publication, spend, deletion, or NellySelly
+  mutation.
+
+## 2026-09-01 — WordPress page 3952 exact-source cutover contract
+
+- Authenticated the exact 411-byte Beaver Builder source for the established
+  Home Value page and found one live shortcode that relies on the Connector's
+  saved route rather than the previously assumed explicit `/value` attribute.
+- Added a deterministic one-token proposal with exact current/proposed hashes,
+  occurrence checks, form/phone preservation checks, and second-application
+  refusal.
+- Required Connector 1.1.0, a postmeta backup digest, and a revision whose
+  source digest matches the current page before the page-only approval can be
+  requested.
+- Performed no WordPress save, plugin action, cache purge, lead, notification,
+  database, deployment, DNS, publication, spend, deletion, or NellySelly
+  mutation.
+
 ## 2026-09-01 — WordPress canonical-capture reconciliation
 
 - Reconciled the authenticated live WordPress plugin, bridge, Gravity Forms

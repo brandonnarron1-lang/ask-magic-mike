@@ -36,6 +36,7 @@ export type WordPressActivationStatus =
   | "hidden_target"
   | "already_exact"
   | "connector_upgrade_required"
+  | "seller_intent_decision_required"
   | "page_id_unresolved"
   | "missing_target"
   | "ambiguous_target"
@@ -53,6 +54,7 @@ interface WordPressActivationTarget {
   legacyCampaign: string;
   proposedShortcode: string;
   approvalGate: string;
+  requiresSellerIntentDecision: boolean;
 }
 
 export interface WordPressPageIndexRow {
@@ -91,6 +93,7 @@ export interface WordPressActivationChangeSet {
   requiredConnectorVersion: string;
   observedConnectorVersions: string[];
   connectorVersionReady: boolean;
+  sellerIntentDecisionRequired: boolean;
   preconditionSha256: string;
   blockers: string[];
   publicationSteps: string[];
@@ -117,6 +120,8 @@ export function toOwnedDemandPlacementReadiness(
     ? "Verify the exact visible tracked link in WordPress, then record native publication proof. No href edit is needed."
     : changeSet.status === "connector_upgrade_required"
       ? "Back up the exact live Connector 1.0.0 source and options, obtain the plugin-upgrade gate, install the reviewed 1.1.0 candidate, verify legacy links remain unchanged, then regenerate this manifest before editing any page."
+    : changeSet.status === "seller_intent_decision_required"
+      ? "Resolve the existing seller-intent canonical-page, capture-owner, duplicate-page, placement-key, and BIC copy-review decisions before generating a page-publication candidate."
     : activationEligible
       ? "Use the live readiness manifest, create a verified page-source rollback, obtain the exact WordPress publication gate, replace only the reviewed shortcode instance, and record native proof after public verification."
       : undefined;
@@ -142,6 +147,7 @@ const TARGETS: Record<WordPressActivationPlacementKey, WordPressActivationTarget
     legacyCampaign: "website_widget",
     proposedShortcode: '[ask_magic_mike_cta route="/ask" source="homepage_cta" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_homepage_ask_mike" button_text="Ask Magic Mike"]',
     approvalGate: "APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION",
+    requiresSellerIntentDecision: false,
   },
   wordpress_home_value: {
     placementKey: "wordpress_home_value",
@@ -154,6 +160,7 @@ const TARGETS: Record<WordPressActivationPlacementKey, WordPressActivationTarget
     legacyCampaign: "website_widget",
     proposedShortcode: '[ask_magic_mike_cta route="/home-value" source="home_value_page" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_home_value_page" button_text="Ask Magic Mike"]',
     approvalGate: "APPROVE PHASE 9 HOME VALUE CTA WORDPRESS PUBLICATION",
+    requiresSellerIntentDecision: false,
   },
   wordpress_we_buy_homes: {
     placementKey: "wordpress_we_buy_homes",
@@ -164,8 +171,9 @@ const TARGETS: Record<WordPressActivationPlacementKey, WordPressActivationTarget
     legacySource: "ourtownproperties",
     legacyMedium: "seller_page_cta",
     legacyCampaign: "website_widget",
-    proposedShortcode: '[ask_magic_mike_cta route="/sell" source="seller_page_cta" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_we_buy_homes" button_text="Ask Magic Mike"]',
+    proposedShortcode: '[ask_magic_mike_cta route="/sell" source="seller_page_cta" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_we_buy_homes" headline="Thinking about selling but not sure where to start?" text="Ask Magic Mike for local guidance before you make your next move." button="Get Local Guidance"]',
     approvalGate: "APPROVE PHASE 9 WE BUY HOMES CTA WORDPRESS PUBLICATION",
+    requiresSellerIntentDecision: true,
   },
 };
 
@@ -431,6 +439,7 @@ function hashPrecondition(input: {
   hiddenCssSelectorOccurrences: number;
   observedConnectorVersions: string[];
   connectorVersionReady: boolean;
+  sellerIntentDecisionRequired: boolean;
 }) {
   return createHash("sha256").update(JSON.stringify(input)).digest("hex");
 }
@@ -463,6 +472,16 @@ function basePublicationSteps(
       "Regenerate this manifest before preparing any page-source edit or requesting a page publication gate.",
     ];
   }
+  if (target.requiresSellerIntentDecision) {
+    return [
+      "Do not request or use the page-publication gate while the seller-intent decision packet remains unresolved.",
+      "Download a fresh protected seller-intent decision packet and reconcile both indexed seller pages and their capture systems.",
+      "Record the approved canonical source page, capture owner, duplicate-page disposition, and stable placement key in a reviewable decision artifact.",
+      "Record BIC/compliance review of the surrounding direct-purchase and timing copy without silently changing that copy in this CTA-only candidate.",
+      "Generate a new exact-source candidate only if page 3631 remains the approved canonical source page and Ask Magic Mike remains the approved capture owner.",
+      "Regenerate this manifest after those decisions; this manifest issues no WordPress publication gate.",
+    ];
+  }
   return [
     `Create and verify a recoverable WordPress revision or page backup for page ID ${target.expectedPageId}.`,
     "Regenerate this manifest immediately before editing and require the same SHA-256 precondition.",
@@ -482,6 +501,7 @@ function statusDetail(status: WordPressActivationStatus) {
     hidden_target: "The exact href exists, but a known public CSS rule suppresses its Ask Magic Mike CTA container.",
     already_exact: "The public placement already uses the canonical tracked href; no WordPress edit is needed.",
     connector_upgrade_required: "The rendered placement does not expose the exact reviewed Connector version marker, so a page edit is not yet safe.",
+    seller_intent_decision_required: "The technical target is identifiable, but the existing canonical-page, capture-owner, duplicate-page, placement-key, and BIC copy-review decisions are unresolved.",
     page_id_unresolved: "The exact public href was found, but the published WordPress page record could not be resolved uniquely.",
     missing_target: "No exact legacy or canonical href matched this named placement.",
     ambiguous_target: "More than one matching href or page record exists, so the target is not safe to edit automatically.",
@@ -575,6 +595,14 @@ export function buildWordPressActivationChangeSet(input: {
     blockers.push(
       `The exact rendered placement does not expose data-amm-connector-version="${WORDPRESS_CONNECTOR_REQUIRED_VERSION}"; upgrade and verify the Connector before any page-source edit.`,
     );
+  } else if (
+    currentMatches.length === 1 &&
+    target.requiresSellerIntentDecision
+  ) {
+    status = "seller_intent_decision_required";
+    blockers.push(
+      "Resolve the protected seller-intent decision packet and BIC copy review before generating or requesting a page-3631 publication gate.",
+    );
   } else if (proposedMatches.length === 1 && legacyMatches.length === 0) {
     status = "already_exact";
   } else if (legacyMatches.length === 1 && proposedMatches.length === 0) {
@@ -608,6 +636,7 @@ export function buildWordPressActivationChangeSet(input: {
     hiddenCssSelectorOccurrences,
     observedConnectorVersions,
     connectorVersionReady,
+    sellerIntentDecisionRequired: target.requiresSellerIntentDecision,
   });
 
   return {
@@ -638,6 +667,7 @@ export function buildWordPressActivationChangeSet(input: {
     requiredConnectorVersion: WORDPRESS_CONNECTOR_REQUIRED_VERSION,
     observedConnectorVersions,
     connectorVersionReady,
+    sellerIntentDecisionRequired: target.requiresSellerIntentDecision,
     preconditionSha256,
     blockers,
     publicationSteps: basePublicationSteps(
@@ -678,6 +708,7 @@ function buildFetchFailureChangeSet(
     hiddenCssSelectorOccurrences: 0,
     observedConnectorVersions: [],
     connectorVersionReady: false,
+    sellerIntentDecisionRequired: target.requiresSellerIntentDecision,
   });
   return {
     schemaVersion: "amm.wordpress_activation_change_set.v3",
@@ -707,6 +738,7 @@ function buildFetchFailureChangeSet(
     requiredConnectorVersion: WORDPRESS_CONNECTOR_REQUIRED_VERSION,
     observedConnectorVersions: [],
     connectorVersionReady: false,
+    sellerIntentDecisionRequired: target.requiresSellerIntentDecision,
     preconditionSha256,
     blockers: ["Restore safe public read access and regenerate the manifest before any WordPress edit."],
     publicationSteps: basePublicationSteps(target, null),
