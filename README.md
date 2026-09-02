@@ -25,8 +25,8 @@ brokerage, listings, and SEO authority and embeds or links into this system.
   read-only monitor/smoke checks, and the canonical aliases pass.
 - `REVIEWED APPLICATION CANDIDATE — OWNER APPROVAL REQUIRED` — PR #248 is the
   only active application candidate at reviewed content head
-  `32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f`, tree
-  `d0842ec5ae23d1eaddbddc691bbeaaa704b18e77`. Exact local/hosted Node 24 and
+  `f6134b71f258003aa5dc201cf5ef7cdb6eb61ee7`, tree
+  `832be2750355391f9198fcaaaa6f46bb3beb8b3f`. Exact local/hosted Node 24 and
   immutable Preview checks pass with zero migrations or external mutations.
   Its application gate does not authorize a WordPress plugin or page change.
   PR #238 remains an applied, consumed five-migration receipt.

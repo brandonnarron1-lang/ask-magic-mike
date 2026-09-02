@@ -102,9 +102,10 @@ source `ourtownproperties`, medium `owned_media`, campaign
 | Homepage Ask Magic Mike | `/ask` | `wordpress_homepage_ask_mike` | Replace only the named CTA/link after backup |
 | Established home-value page | `/home-value` | `wordpress_home_value_page` | Keep Form 3; update the direct AMM next-step link only |
 | We Buy Homes | `/sell` | `wordpress_we_buy_homes` | Preserve conditional, human-reviewed language |
-| Mike agent page | `/ask` | `wordpress_mike_agent_page` | Add one inline tracked CTA; preserve profile content |
+| Mike agent page | `/ask` | `wordpress_mike_agent_page` | Preserve the already-live source-tagged CTA through `/ask-mike/`; do not add a duplicate or rewrite attribution without a separate exact-source packet |
 | Featured/listing surfaces | `/buy` | `wordpress_listing_buyer` | Use approved listing/agent identifiers only when verified |
-| Rentals | `/rent` | `wordpress_rental_to_homeownership` | Frame as readiness review; no lending or eligibility promise |
+| Available Rental Listings, page 226 | `/rent` | `wordpress_rental_to_homeownership` | Prepare one additive readiness-review CTA only after authenticated raw source, backup, insertion-anchor, and rollback proof; no financing or eligibility promise |
+| Short Term Home Rentals, page 4120 / Form 6 | — | — | Excluded from the rental CTA candidate until explicit requested-response consent is approved and stored |
 | Ask Magic Mike page iframe | `/embed/ask` through existing loader | `wordpress_ask_magic_mike_embed` | Add `data-utm-content`; do not add another form |
 
 Exact generated URLs and copy buttons are available in the authenticated

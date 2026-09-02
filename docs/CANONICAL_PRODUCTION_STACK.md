@@ -33,10 +33,10 @@ Current accepted Production release: PR #247 merge
 `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`. Deployment
 `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` is the immediate application rollback.
 PR #248 is the only active reviewed application candidate at reviewed content
-head `32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f`, exact tree
-`d0842ec5ae23d1eaddbddc691bbeaaa704b18e77`, with hosted Release Gate
-`33528697047` and Ready immutable Preview
-`dpl_51JjPVTZizxPJZu1GAiWjVpFTaZn`. It has zero migrations or environment
+head `f6134b71f258003aa5dc201cf5ef7cdb6eb61ee7`, exact tree
+`832be2750355391f9198fcaaaa6f46bb3beb8b3f`, with hosted Release Gate
+`33529949775` and Ready immutable Preview
+`dpl_2WE8ftPXZDrnkGdzVKtU2bzBnSBQ`. It has zero migrations or environment
 changes. Its application release authority does not authorize a WordPress
 plugin/page action. PR #238 is a consumed five-migration cutover receipt. See
 [`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).

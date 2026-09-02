@@ -1182,3 +1182,25 @@
   WordPress placements now fail closed in the existing Distribution Command.
 - No Production, database, WordPress, lead, notification, publication, DNS,
   spend, deletion, or NellySelly mutation occurred.
+
+## 2026-09-01 — WordPress rental placement readiness
+
+- Reused the existing protected WordPress readiness engine, Connector
+  shortcode, `/rent` funnel, owned-demand registry, and canonical lead backend
+  for one bounded rental-to-homeownership candidate.
+- Added a fail-closed additive-placement mode for Available Rentals page 226.
+  Public evidence returns `authenticated_source_required` and no active
+  publication gate until exact editor source, revision/backup, insertion
+  anchor, source hash, and rollback evidence are captured.
+- Recorded Mike's page-597 Ask Magic Mike CTA as already live and preserved;
+  no duplicate profile CTA is proposed.
+- Excluded Short Term Rentals page 4120 / Gravity Form 6 because explicit
+  requested-response consent remains unresolved.
+- Corrected the active PR #248 head/tree/CI/Preview identity from authenticated
+  GitHub evidence without changing its existing release phrase.
+- Complete Node 24 acceptance passes 292 files / 3,529 tests, strict typecheck,
+  full lint, optimized build, 14/14 safety checks, system isolation, and
+  102-active/22-acknowledged-duplicate route proof.
+- Performed no Production deployment, WordPress save, form submission, lead,
+  message, database action, environment change, publication, spend, deletion,
+  or NellySelly action.

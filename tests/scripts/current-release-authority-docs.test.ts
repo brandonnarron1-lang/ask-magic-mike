@@ -19,8 +19,8 @@ const productionTree = "0065f829fc94f87ab5e0faf596c8e56733be3972";
 const reviewedHead = "a9d1c1c2779337ab38c1276be8893309ecee39d2";
 const consumedApplicationGate =
   "APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
-const candidateReviewedHead = "32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f";
-const candidateTree = "d0842ec5ae23d1eaddbddc691bbeaaa704b18e77";
+const candidateReviewedHead = "f6134b71f258003aa5dc201cf5ef7cdb6eb61ee7";
+const candidateTree = "832be2750355391f9198fcaaaa6f46bb3beb8b3f";
 const candidateApplicationGate =
   "APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
 const consumedCutoverGate =

@@ -167,3 +167,26 @@ Use `CONTROLLED_TRAFFIC_ACTIVATION.md` for expansion stages and
 Stop traffic expansion and update `KNOWN_BLOCKERS.md` when the incident changes
 operating truth. No rollback action is implied by this document; use the exact
 authority in `OWNER_APPROVAL_QUEUE.md`.
+
+## 11. Additive rental CTA boundary
+
+The Available Rentals page-226 candidate is not an href replacement. A public
+readiness manifest may prove the page ID and absence of the exact CTA, but it
+must return `authenticated_source_required` and no active approval gate until
+the exact editor source is captured.
+
+Before requesting any rental-page publication:
+
+1. authenticate to WordPress without exposing credentials;
+2. capture exact page-226 editor source, current revision, and verified backup;
+3. choose and hash one stable insertion anchor that preserves FlexMLS listings;
+4. confirm no duplicate Ask Magic Mike CTA or canonical form exists;
+5. preserve the explicit exclusion of page 4120 / Gravity Form 6;
+6. generate a source-bound candidate with exact insertion and rollback steps;
+7. complete desktop/mobile, keyboard, canonical, performance, and no-submit
+   attribution acceptance; and
+8. only then request the exact page-specific WordPress publication gate.
+
+Mike's page-597 CTA is already live and must not be duplicated. The additive
+rental gate, a Connector plugin upgrade, and a Form 6 consent/form change are
+three separate actions; none authorizes another.

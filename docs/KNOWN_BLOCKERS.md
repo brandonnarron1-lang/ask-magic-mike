@@ -4,10 +4,15 @@ Updated 2026-09-01. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
 
+Current accepted Production is PR #247 merge
+`a2f3de834830f600df106dbf5836ae4bbde4eb4a` on deployment
+`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`.
+
 ## WordPress owned-demand publication boundary
 
 - Three existing WordPress links remain identifiable through read-only
-  manifests, but no page has been changed.
+  manifests, and one additive rental candidate is bounded by a read-only v4
+  manifest; no page has been changed.
 - Fresh 2026-08-29 public and browser inspection found that homepage page 149
   has one exact Ask Magic Mike href inside an `.amm-cta` component suppressed
   by public `display:none !important` CSS. The corrected manifest returns
@@ -24,9 +29,15 @@ specific expansions; they do not invalidate the live lead pipe.
   upgraded through its exact plugin gate.
 - The page-publication gate is not requestable before the public
   `data-amm-connector-version="1.1.0"` marker is present, legacy links are
-  unchanged, and a fresh v3 manifest returns `legacy_match_ready`.
+  unchanged, and a fresh v4 manifest returns `legacy_match_ready`.
 - Plugin upgrade and page-source publication are separate rollback and approval
   boundaries. They must not be combined into a blind plugin-editor save.
+- Mike's page-597 profile CTA is already live and source-tagged through
+  `/ask-mike/`; do not add a duplicate. Available Rentals page 226 is the one
+  additive rental candidate and remains `authenticated_source_required` until
+  raw editor source, backup, insertion-anchor, and rollback evidence exist.
+  Short Term Rentals page 4120 / Gravity Form 6 is excluded until explicit
+  requested-response consent is approved and stored.
 - A readiness manifest is not proof of publication or demand. Do not create a
   publication-proof row until an authorized operator actually publishes the
   exact link and supplies public evidence.
@@ -45,9 +56,9 @@ specific expansions; they do not invalidate the live lead pipe.
 - Exact-tree hosted release and post-deploy verification, the 11-check
   Production monitor, 19-pass read-only smoke, and runtime log window pass.
 - PR #248 is the only active reviewed application candidate at content head
-  `32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f` and exact tree
-  `d0842ec5ae23d1eaddbddc691bbeaaa704b18e77`. Hosted Release Gate
-  `33528697047` and immutable Preview `dpl_51JjPVTZizxPJZu1GAiWjVpFTaZn`
+  `f6134b71f258003aa5dc201cf5ef7cdb6eb61ee7` and exact tree
+  `832be2750355391f9198fcaaaa6f46bb3beb8b3f`. Hosted Release Gate
+  `33529949775` and immutable Preview `dpl_2WE8ftPXZDrnkGdzVKtU2bzBnSBQ`
   pass. Its singular requestable gate is
   `APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT`.
   That gate is application-only and cannot authorize the Connector plugin
@@ -110,7 +121,8 @@ path/method-specific correction is now appropriate.
 
 ## Truthful demand constraint
 
-Current aggregate Production evidence contains only suppressed/test leads and
-no contactable live prospect. A working funnel can be guaranteed; genuine demand
-cannot be fabricated. Test leads remain labeled, suppressed, and excluded from
-KPIs.
+Do not preserve a fixed Production lead count in an operating constraint.
+Protected Action Queue, Lead Center, and Growth aggregates are authoritative at
+the time of review and may change after any genuine submission or response. A
+working funnel can be guaranteed; genuine demand cannot be fabricated. Test
+leads remain labeled, suppressed, and excluded from KPIs.

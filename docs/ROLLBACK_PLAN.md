@@ -115,6 +115,16 @@ Remove only the named reversible Custom HTML/shortcode/widget block or deactivat
 the isolated bridge after backing up. Do not edit parent theme, `functions.php`,
 FlexMLS/IDX, or unrelated forms. Restore prior page cache only if the owner approves.
 
+Available Rentals page 226 currently has no approved Ask Magic Mike block, so
+the read-only rental readiness manifest has no executable rollback action. A
+future additive candidate must first capture and hash the exact editor source,
+current revision, database/page backup, insertion anchor, and source-level
+removal procedure. If later public acceptance fails, restore only that verified
+page-226 revision or remove only the exact inserted block, then recheck the
+FlexMLS listings, canonical, layout, and prior page source. Do not alter page
+4120 / Gravity Form 6 or duplicate Mike's already-live page-597 CTA as part of
+that rollback.
+
 Canonical bridge 1.1.0 is currently active only for the already-approved Form 3
 path. Preserve its exact enable flag, allowlist, HMAC secret, endpoint, Gravity
 entry, and notification state during a 1.2.0 upgrade. Lead-forwarding rollback

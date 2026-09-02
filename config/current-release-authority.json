@@ -74,8 +74,8 @@
     "pr": 248,
     "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248",
     "branch": "codex/wordpress-connector-attribution-v1-1-0-20260901",
-    "reviewedHead": "32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f",
-    "tree": "d0842ec5ae23d1eaddbddc691bbeaaa704b18e77",
+    "reviewedHead": "f6134b71f258003aa5dc201cf5ef7cdb6eb61ee7",
+    "tree": "832be2750355391f9198fcaaaa6f46bb3beb8b3f",
     "state": "reviewed",
     "approvalGate": "APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT"
   },

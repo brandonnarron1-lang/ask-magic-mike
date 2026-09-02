@@ -15,10 +15,10 @@ queue covers only actions that still require a human or external-system gate.
   replacement/redeploy approval are consumed and not requestable.
 - PR [#248](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248)
   is the only active reviewed application candidate. Its reviewed content head
-  is `32e3ac7157f9ecdd75fe63c4faafbab4f85cb48f`, exact tree is
-  `d0842ec5ae23d1eaddbddc691bbeaaa704b18e77`, hosted Release Gate
-  `33528697047` passes, and immutable Preview
-  `dpl_51JjPVTZizxPJZu1GAiWjVpFTaZn` is Ready. It has zero migrations, zero
+  is `f6134b71f258003aa5dc201cf5ef7cdb6eb61ee7`, exact tree is
+  `832be2750355391f9198fcaaaa6f46bb3beb8b3f`, hosted Release Gate
+  `33529949775` passes, and immutable Preview
+  `dpl_2WE8ftPXZDrnkGdzVKtU2bzBnSBQ` is Ready. It has zero migrations, zero
   environment changes, and zero authorized external mutations.
 - PR #238 is an applied and verified five-migration receipt; its approval is
   consumed. PRs #244 and #245 are superseded stale reviews and remain preserved
