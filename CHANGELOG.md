@@ -19,10 +19,21 @@
 - Preserved due outbox rows when Production mode, global delivery, email, or
   provider readiness is incomplete, and proved the cron API remains outside the
   browser-admin matcher while retaining route-level bearer authentication.
-- Passed the exact final-source Node 24 release gate with 298 test files / 3,553
-  tests, strict typecheck, full lint, optimized build, 102-route verification,
-  14/14 safety checks, and Ask/NellySelly isolation; dependency and redacted
-  full-history secret scans are clean.
+- The first candidate head passed its Node 24 gate with 298 test files / 3,553
+  tests and immutable Preview checks; that evidence became historical after the
+  permission audit below.
+- Superseded that first seal after a deeper audit found a stale-permission edge:
+  assignment retries now re-check exact assignment, active-agent state, global
+  and channel gates, destination presence, and supported channel before send.
+- Corrected the protected one-record retry action to dispatch internal alerts,
+  consumer acknowledgments, and agent assignments through their own processors;
+  Preview now refuses that path before any repository read. Strict UUID
+  anchoring and encoded redirect status values harden its input/output boundary.
+- Passed the repaired final-source Node 24 release gate with 298 test files /
+  3,558 tests, strict typecheck, full lint, optimized build, 102-route
+  verification, 14/14 safety checks, and Ask/NellySelly isolation. Production
+  dependencies have no known vulnerability; redacted full-history Gitleaks
+  scans 763 commits / approximately 19.54 MB with no leak.
 - Added no migration, provider, credential, public route, WordPress change, or
   external send. Production remains accepted PR #247.
 

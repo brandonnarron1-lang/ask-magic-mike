@@ -28,20 +28,30 @@ Updated 2026-09-02.
   acknowledgments reload current communication/email suppression and consent
   before retry, preventing a queued message from overruling a later opt-out or
   suppression event.
+- **Agent and operator retry integrity:** assignment retries now require the
+  same exact current assignee, an active agent, current global/channel
+  permission, a current destination, and a supported channel before provider
+  delivery. The Lead Center's one-record action dispatches by recorded type,
+  fixing the prior assumption that every retry was an agent assignment. Both
+  automated and manual Preview paths refuse before repository access. The
+  server action strictly anchors notification UUIDs and URL-encodes status
+  values before redirecting.
 - **Fail-closed boundary:** Preview refuses the batch before repository or
   provider access. Production also preserves due rows when the existing global
   delivery gate, email switch, mode, or provider configuration is incomplete.
   Cron output is aggregate-only and no-store; the protected manual POST retains
   the existing per-record status contract. The API path remains outside the
   browser-admin middleware and enforces its own timing-safe bearer check.
-- **Local acceptance:** 7 focused files / 55 tests pass. The exact final-source
-  Node 24 release gate passes system isolation, 14/14 safety controls, 298 test
-  files / 3,553 tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21
+- **Verification state:** the superseded first seal passed the complete release
+  gate and immutable Preview, but is historical rather than release authority.
+  The repaired source passes 8 focused files / 65 tests and the complete Node
+  24 release gate: Ask/NellySelly isolation, 14/14 safety controls, 298 test
+  files / 3,558 tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21
   build, 60 static pages, and the 102-route/22-duplicate manifest. Production
-  dependencies have no known vulnerability, and a redacted full-history scan
-  covers 762 commits / approximately 19.51 MB with no leak. The exact staged
-  delta also passes at approximately 37 KB. Hosted exact-head CI and
-  immutable Preview proof remain to be sealed after commit.
+  dependencies have no known vulnerability, and redacted full-history Gitleaks
+  scans 763 commits / approximately 19.54 MB with no leak. Staged and
+  exact-commit scans, hosted exact-head CI, and immutable Preview remain to be
+  sealed on the repaired commit.
 - **Authority unchanged:** no Production merge/deploy, outbox mutation,
   provider call, email/SMS/Push, environment change, database migration,
   WordPress action, DNS, spend, deletion, or NellySelly action occurred.

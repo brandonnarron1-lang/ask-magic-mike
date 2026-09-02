@@ -92,6 +92,14 @@ suppression, and test state. Manual administrator retry remains available for a
 separately approved QA exercise. The database claim and provider idempotency key
 remain the duplicate-send boundary; scheduled execution creates no second queue.
 
+Every assignment retry reloads and verifies the current exact assignee, active
+agent state, global staff-notification switch, channel switch, and current
+destination after atomically claiming the row but before provider delivery.
+Unassignment, reassignment, deactivation, or a channel pause records a visible
+`skipped` result and cannot leak the lead to a stale recipient. The protected
+Lead Center retry action dispatches each row through its recorded type's own
+processor rather than assuming every row is an agent assignment.
+
 SMTP 4xx and connection/TLS timeout errors are retryable. Authentication errors,
 5xx recipient rejection, and partial primary/BCC acceptance require operator
 review and are not retried automatically, because a blind retry could duplicate a

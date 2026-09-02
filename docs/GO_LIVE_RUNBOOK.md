@@ -102,7 +102,9 @@ the PR seal and production change log.
 For notification-retry releases, also prove that the authenticated cron path is
 outside browser-admin middleware, anonymous API access fails closed, Preview
 refuses before repository access, and a disabled/incomplete Production provider
-returns 503 without consuming due outbox rows.
+returns 503 without consuming due outbox rows. Prove current assignment,
+agent-active, global/channel permission, destination, and recorded-type checks
+run before every retried provider call.
 
 ## 6. Lead or communication acceptance
 
