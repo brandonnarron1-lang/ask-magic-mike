@@ -104,23 +104,27 @@ Current authenticated in-memory verification returns
 
 ## Local verification
 
-- Nine focused WordPress, owned-demand, route-boundary, and current-authority
-  files pass 66/66 tests under exact Node 24.18.0.
-- Targeted ESLint, JavaScript syntax validation, JSON parsing, 14/14 release
-  safety, NellySelly/deployable-source isolation, and `git diff --check` pass.
+- The content-addressed decision update passes 5 focused files / 41 tests and
+  the full repository passes 289 files / 3,506 tests under exact Node 24.18.0.
+- Strict typecheck, full ESLint, an optimized Next.js build with 60/60 static
+  pages, 100 active / 22 acknowledged duplicate routes, JavaScript syntax,
+  JSON parsing, 14/14 release safety, NellySelly/deployable-source isolation,
+  and `git diff --check` pass.
 - The authenticated page source was held in memory for verification; the raw
   2,480-byte source was not written to or retained in the repository.
-- Local repository-wide typecheck/build cannot be accepted from the reused
-  dependency directory because it lacks this stacked branch's Better Auth,
-  Svix, QRCode, Nodemailer, and PostgreSQL packages. A clean hosted install,
-  typecheck, build, and route proof are mandatory before sealing this Draft.
+- A fresh frozen dependency install removed the earlier reused-dependency
+  limitation. Hosted clean-install and immutable Preview evidence are still
+  required before sealing this Draft.
 
 ## Controlled future sequence
 
 1. Complete the separately gated Connector 1.1.0 upgrade and postflight.
 2. Resolve and record the four values already required by
    `WORDPRESS_SELLER_INTENT_DECISION_PACKET.md`, using current Search Console,
-   backlink, Regency, capture, and consent evidence.
+   backlink, Regency, capture, and consent evidence. Seal that choice in the
+   content-addressed artifact defined by
+   `WORDPRESS_SELLER_INTENT_APPROVAL_ARTIFACT_2026-09-01.md`; a digest alone is
+   not evidence.
 3. Obtain and record BIC/compliance review of the retained page copy. This
    CTA-only candidate must not silently rewrite surrounding claims.
 4. Only if page 3631 remains canonical and Ask Magic Mike remains the capture
@@ -135,11 +139,8 @@ Current authenticated in-memory verification returns
      --postmeta-sha256 <verified-postmeta-backup-digest> \
      --revision-id <verified-current-revision-id> \
      --revision-source-sha256 <verified-current-revision-source-digest> \
-     --seller-intent-decision-sha256 <approved-decision-artifact-digest> \
-     --canonical-source-page https://www.ourtownproperties.com/we-buy-homes/ \
-     --capture-owner ask_magic_mike \
-     --duplicate-page-disposition <approved-decision-key> \
-     --placement-key wordpress_we_buy_homes \
+     --seller-intent-decision-artifact <mode-0600-approved-decision.json> \
+     --seller-intent-evidence-packet <downloaded-protected-evidence.json> \
      --bic-copy-review-sha256 <approved-review-artifact-digest>
    ```
 
@@ -158,3 +159,9 @@ Neither the Connector gate nor any application PR approval authorizes this
 page action. This page gate does not authorize the duplicate-page SEO action,
 form/notification changes, cache purge, database migration, communication,
 DNS, social publication, spend, deletion, or NellySelly action.
+
+The former `--seller-intent-decision-sha256`, `--canonical-source-page`,
+`--capture-owner`, `--duplicate-page-disposition`, and `--placement-key`
+arguments are intentionally retired. Passing equivalent option properties to
+the library is also ignored; only a validated complete artifact can satisfy
+the seller-decision prerequisite.

@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-01 — Seller-intent approval artifact integrity
+
+- Replaced page 3631's hash-only seller-decision prerequisite with one strict,
+  content-addressed JSON artifact that binds the canonical page, page IDs,
+  capture owner, duplicate disposition, placement key, reviewed-evidence hash,
+  review references, and rationale.
+- Bound that artifact to the actual protected read-only evidence packet by
+  recomputing its structural digest and enforcing evidence-before-approval plus
+  a seven-day review window.
+- Added an unmistakably draft template and read-only validator; the system
+  still makes no owner, SEO, or BIC choice.
+- Removed the ability for a standalone digest and duplicated CLI flags to make
+  publication requestable, while retaining only hashed review references in
+  readiness output.
+- Performed no WordPress, database, deployment, lead, notification, DNS,
+  publication, spend, deletion, or NellySelly mutation.
+
 ## 2026-09-01 — WordPress page 3631 copy-preserving decision boundary
 
 - Authenticated the exact 2,480-byte We Buy Homes Beaver Builder source and
