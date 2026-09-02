@@ -1,5 +1,29 @@
 # QA Evidence
 
+## Atomic SMS status callback boundary — 2026-09-02
+
+- Reused the existing Twilio adapter, status route, Neon outbox, provider-event
+  ledger, and communication timeline. No provider, route, table, migration,
+  queue, recipient, or environment contract was added.
+- Focused verification passes 3 files / 34 tests, strict TypeScript, and
+  targeted ESLint. Tests cover URL/signature binding, Preview zero-write,
+  form/body bounds, lifecycle schema, replay, matched/unmatched receipts,
+  correlation, and safe persistence failure.
+- `pnpm run test:postgres:twilio-status` extracts and executes the exact route
+  SQL against a local-only PostgreSQL 17 cluster. It passes atomic processing,
+  replay, out-of-order rejection, later-delivery correction, terminal
+  non-regression, forced rollback, failed-receipt reclaim, and unmatched-event
+  handling, including exact late-match healing when the provider callback raced
+  ahead of Message SID persistence. The test transaction is rolled back and the cluster removed.
+- Complete Node 24.18.0 acceptance passes 303 files / 3,671 tests, strict
+  TypeScript, repository-wide ESLint, Ask/NellySelly isolation, 14/14 safety,
+  a 60-page optimized build, 102 active / 22 acknowledged duplicate routes,
+  and a Production audit with no known vulnerability. Secret, exact-commit
+  CI/Preview, runtime-log, and Production-invariant evidence remains to be sealed in
+  [`phase9/SMS_STATUS_ATOMIC_BOUNDARY_QA_EVIDENCE.md`](./phase9/SMS_STATUS_ATOMIC_BOUNDARY_QA_EVIDENCE.md).
+- No remote provider, database, lead, notification, WordPress, Production,
+  environment/DNS, publication, spend, deletion, or NellySelly action occurred.
+
 ## Public experiment ingress boundary hardening — 2026-09-02
 
 - Retained the existing Home Value experiment experience, deterministic

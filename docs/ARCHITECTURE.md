@@ -473,3 +473,18 @@ body, an exact configured event allowlist, and a valid provider message ID.
 Preview is read-only. Raw payloads and recipient addresses are not retained in
 the provider receipt. This changes no schema, send adapter, retry worker,
 assignment rule, consent rule, or Lead Center read model.
+
+## Atomic SMS status lifecycle boundary (Phase 9)
+
+The existing Twilio status endpoint remains the only carrier-status ingress.
+It verifies Twilio's signature over the canonical callback URL and all bounded
+form fields, then writes one deterministic provider receipt, one monotonic
+notification projection, and one communication event in a single PostgreSQL
+statement. Preview refuses before body processing or persistence.
+
+Because Twilio does not provide a unique status-event ID and does not guarantee
+callback arrival order, the receipt key is Message SID + normalized status and
+the projection uses a deterministic evidence rank. Exact replay does nothing;
+weaker late states cannot regress stronger evidence; confirmed delivery may
+correct an earlier failure. This changes no sender, recipient, retry worker,
+lead routing, database schema, or public phone identity.

@@ -313,3 +313,20 @@ guaranteed result.
 - Real-PostgreSQL proof runs only against an explicitly named local connection,
   refuses remote hosts, uses a process-unique schema inside a rolled-back
   transaction, and leaves no test database state.
+
+## Phase 9 signed SMS-status atomicity — 2026-09-02
+
+- Preview fails before request-body handling, signature verification, or data
+  access; provider callbacks are not browser-Origin authorized.
+- Production requires the existing server-only Twilio auth token and verifies
+  `X-Twilio-Signature` over the canonical URL and complete form parameter set.
+- Only form-encoded, bounded UTF-8 callbacks with valid `SM`/`MM` SIDs, known
+  status values, and optional numeric provider error codes reach persistence.
+- Normalized lifecycle fields—not the raw callback—are hashed. Receipts and
+  timeline metadata exclude phone numbers, message text, signatures, tokens,
+  database URLs, and raw provider errors.
+- Receipt, state projection, and timeline append are atomic and idempotent.
+  Forced failure leaves no misleading completed receipt; callback replay and
+  out-of-order delivery cannot repeat or regress lifecycle effects.
+- Every response is private/no-store, `nosniff`, and carries a matching
+  correlation ID. Logs emit only that ID and a fixed safe failure category.
