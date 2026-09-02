@@ -137,6 +137,12 @@ lead/widget creation, qualification, appointment-request, and notification
 outcome rows are refused; server post-storage `lead_created` is the canonical
 lead-conversion authority.
 
+`POST /api/chat/session` is a compatibility endpoint for issuing the same class
+of opaque public UUID. It is not an authentication session and performs no
+database write. Preview issues it before shared limiting; Production issues it
+only after an allowed durable rate-limit result. Canonical session ownership
+still begins inside the atomic lead-capture transaction.
+
 The dependent field-experience candidate reuses this ledger for Production-only
 LCP/INP/CLS. It writes no lead/session/attribution identity, converts the raw
 browser metric ID to a domain-separated digest, and lets the protected Growth

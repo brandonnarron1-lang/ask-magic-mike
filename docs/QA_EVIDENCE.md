@@ -1,5 +1,29 @@
 # QA Evidence
 
+## Public chat-session boundary hardening — 2026-09-02
+
+- The required `/api/chat/session` endpoint continues to issue only an opaque
+  UUID and does not create an authenticated session, cookie, database row,
+  provider request, or alternate persistence path.
+- Preview now returns before shared rate limiting; Production requires an
+  allowed durable result unless the existing exact emergency-memory control is
+  active. All responses are private/no-store and correlation-addressable.
+- Focused Node 24 verification passes 3 files / 48 tests across the new route
+  contract, the adjacent public chat provider boundary, and the shared limiter.
+  The complete local release gate also passes: 301 files / 3,593 tests, strict
+  TypeScript, repository-wide ESLint, a Next.js 15.5.21 Production build with
+  60 static pages, the 102-route manifest with 22 acknowledged root/src
+  duplicates, 14/14 release-safety controls, and system-isolation verification.
+  Production dependencies report no known vulnerabilities.
+- Exact-tree and hosted evidence will be recorded in
+  [`phase9/PUBLIC_CHAT_SESSION_BOUNDARY_QA_EVIDENCE.md`](./phase9/PUBLIC_CHAT_SESSION_BOUNDARY_QA_EVIDENCE.md).
+- The first complete-suite rerun stopped because the local macOS temporary
+  volume returned `ENOSPC`. Four reproducible build/dependency caches from
+  superseded temporary Ask Magic Mike worktrees were removed, the candidate's
+  exact frozen dependency set was restored, and the unchanged suite then
+  passed. No source, branch, worktree, evidence, credential, or external state
+  was removed or changed.
+
 ## Current release-ledger drift guard — 2026-09-02
 
 - Source review found `KNOWN_LIMITATIONS.md` contradicted the authoritative

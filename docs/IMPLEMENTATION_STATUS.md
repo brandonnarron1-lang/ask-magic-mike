@@ -11,6 +11,30 @@ Updated 2026-09-02.
   candidates below are Draft/Preview work only and change no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Phase 9 public chat-session boundary hardening — 2026-09-02
+
+- **Existing endpoint retained:** `/api/chat/session` still returns a random
+  UUID for public funnel correlation. It remains non-authenticating and creates
+  no database row, cookie, provider call, or parallel session authority.
+- **Preview is side-effect free:** Vercel/database Preview now returns its
+  ephemeral identifier before invoking the shared Neon rate limiter.
+- **Production fails closed:** an identifier is issued only after an allowed
+  durable limit result. Non-durable Production limiting returns a safe 503
+  unless the existing exact `RATE_LIMIT_EMERGENCY_MEMORY=1` break-glass control
+  is active.
+- **Response contract hardened:** explicit foreign origins fail before the
+  limiter; every response is private/no-store and correlation-addressable;
+  throttling includes positive, window-bounded retry guidance.
+- **Verification state:** the complete Node 24 local release gate passes: Ask
+  Magic Mike/NellySelly isolation, 14/14 release-safety controls, 301 files /
+  3,593 tests, strict TypeScript, repository-wide ESLint, Next.js 15.5.21
+  Production build with 60 static pages, and the 102-route manifest with 22
+  acknowledged root/src duplicates. Production dependencies report no known
+  vulnerabilities. Hosted exact-head evidence remains to be sealed.
+- **Authority unchanged:** Production remains accepted PR #247 and PR #248
+  remains the sole requestable application gate. Design and rollback:
+  [`phase9/PUBLIC_CHAT_SESSION_BOUNDARY.md`](./phase9/PUBLIC_CHAT_SESSION_BOUNDARY.md).
+
 ## Phase 9 current release-ledger drift guard — 2026-09-02
 
 - **Contradiction removed:** `KNOWN_LIMITATIONS.md` no longer identifies PR
