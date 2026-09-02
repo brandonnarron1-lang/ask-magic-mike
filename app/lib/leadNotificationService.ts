@@ -345,7 +345,7 @@ export class LeadNotificationService {
     }
     const current = await this.repo.findById(notificationId);
     if (!current) return { ok: false, statusCode: 404, error: "notification_not_found" };
-    if (!["failed", "retry_scheduled"].includes(current.status)) {
+    if (!["pending", "failed", "retry_scheduled"].includes(current.status)) {
       return { ok: false, statusCode: 409, error: "notification_not_retryable" };
     }
     if (current.attempt_count >= current.max_attempts) {

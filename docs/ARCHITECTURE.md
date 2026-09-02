@@ -270,11 +270,17 @@ conflict with this section.
 
 `public form/widget -> runtime validation and bot controls -> atomic Neon
 capture -> same-record consent/attribution/score enrichment -> internal notification
-outbox -> bounded provider retry -> AdminOps timeline`
+outbox -> atomic first attempt / five-minute unclaimed recovery -> bounded
+provider retry -> AdminOps timeline`
 
 Provider failure never rolls back a durable lead. A public success response is only
 returned after the atomic capture succeeds. Notification status is reported from
 the outbox, not inferred from an HTTP 200 from the public form.
+
+The scheduled worker may recover `pending` rows only after five minutes and
+only through the existing conditional claim. It never auto-replays
+`processing`; those records require provider-history reconciliation because the
+external outcome may be ambiguous.
 
 The existing atomic RPC remains the first durable write. Additive enrichment
 patches the same lead/source rows and appends immutable consent evidence before

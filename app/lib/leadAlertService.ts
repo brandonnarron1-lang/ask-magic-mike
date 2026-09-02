@@ -404,6 +404,10 @@ export async function retryDueNotifications(
   const repo = dependencies.repository || notificationRepository();
   const retryLeadAlert = dependencies.retryLeadAlert || retryLeadAlertNotification;
   const retryAssignment = dependencies.retryAssignment || retryAssignmentNotification;
+  // The repository also returns unclaimed pending rows only after the shared
+  // five-minute stale threshold. Atomic claim-before-send makes those safe to
+  // recover; processing rows remain excluded because provider outcome may be
+  // ambiguous and requires operator reconciliation.
   const rows = await repo.listRetryable(limit);
   const results: Array<LeadNotificationRecord | null> = [];
   for (const row of rows) {

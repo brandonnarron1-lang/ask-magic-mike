@@ -6,6 +6,7 @@ import type {
   LeadNotificationRecord,
   LeadNotificationRepository,
 } from "../leadNotificationTypes";
+import { NOTIFICATION_PENDING_STALE_MINUTES } from "../leadNotificationRetryPolicy";
 import {
   normalizeAssignmentAgentRow,
   normalizeAssignmentLeadRow,
@@ -137,11 +138,27 @@ export class NeonLeadNotificationRepository implements LeadNotificationRepositor
       `SELECT n.*, l.is_test AS lead_is_test
          FROM public.lead_notifications n
          LEFT JOIN public.leads l ON l.id = n.lead_id
-        WHERE n.status IN ('failed', 'retry_scheduled')
-          AND n.next_attempt_at <= $1::timestamptz
-        ORDER BY n.next_attempt_at ASC
-        LIMIT $2`,
-      [now.toISOString(), Math.max(1, Math.min(limit, 50))],
+        WHERE (
+          (
+            n.status IN ('failed', 'retry_scheduled')
+            AND n.next_attempt_at <= $1::timestamptz
+          )
+          OR (
+            n.status = 'pending'
+            AND n.created_at <= $1::timestamptz
+              - make_interval(mins => $2::int)
+          )
+        )
+          AND n.attempt_count < n.max_attempts
+        ORDER BY
+          CASE WHEN n.status = 'pending' THEN n.created_at ELSE n.next_attempt_at END ASC,
+          n.created_at ASC
+        LIMIT $3`,
+      [
+        now.toISOString(),
+        NOTIFICATION_PENDING_STALE_MINUTES,
+        Math.max(1, Math.min(limit, 50)),
+      ],
     );
     return (rows as unknown[]).map(row).filter((value): value is LeadNotificationRecord => Boolean(value));
   }

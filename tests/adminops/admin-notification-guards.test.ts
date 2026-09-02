@@ -93,6 +93,9 @@ describe("AdminOps notification guards", () => {
     expect(page).toContain("Exact canonical-store totals exclude");
     expect(page).toContain("QA test");
     expect(page).toContain("Provider confirmation is distinct from provider acceptance");
+    expect(page).toContain("Automatic pending recovery due");
+    expect(page).toContain("Provider reconciliation required");
+    expect(page).toContain("never auto-replays ambiguous processing records");
     expect(page).not.toContain("recipient_reference");
   });
 

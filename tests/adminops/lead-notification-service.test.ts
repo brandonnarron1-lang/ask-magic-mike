@@ -298,6 +298,33 @@ describe("LeadNotificationService", () => {
     if (!blocked.ok) expect(blocked.error).toBe("notification_not_retryable");
   });
 
+  it("recovers one unclaimed pending assignment through the existing atomic processor", async () => {
+    const repo = new MemoryNotificationRepo();
+    const provider = new ConsoleNotificationProvider("success");
+    const send = vi.spyOn(provider, "send");
+    const service = new LeadNotificationService(repo, provider);
+    const pending = await repo.create({
+      lead_id: LEAD_ID,
+      agent_id: AGENT_ID,
+      notification_type: "agent_assignment",
+      channel: "email",
+      recipient_type: "agent",
+      recipient_reference: "email_configured",
+      template_version: "agent_assignment_email_v1",
+      idempotency_key: "lead_assignment:stale-pending-recovery",
+      status: "pending",
+      max_attempts: 3,
+    });
+
+    const result = await service.retryNotification(pending.id, context());
+
+    expect(result.ok).toBe(true);
+    expect(repo.rows).toHaveLength(1);
+    expect(repo.rows[0].status).toBe("sent");
+    expect(repo.rows[0].attempt_count).toBe(1);
+    expect(send).toHaveBeenCalledOnce();
+  });
+
   it("revalidates current global and channel permission before retry delivery", async () => {
     for (const scenario of [
       {
