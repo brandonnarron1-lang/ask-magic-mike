@@ -4,8 +4,9 @@ import { assertDatabaseMutationAllowed } from "../../../src/lib/preview-security
 import {
   APPOINTMENT_STATUSES,
   FOLLOWUP_TASK_TYPES,
-  buildDailyActionQueue,
+  buildDailyActionQueueWithCoverage,
   canTransitionAppointment,
+  emptyFirstResponseQueueCoverage,
   normalizeAppointment,
   normalizeTask,
   validateAppointmentWindow,
@@ -340,17 +341,27 @@ export async function updateNeonFollowupTask(input: {
   }
 }
 
-export async function loadNeonAdminActionQueue(): Promise<AdminActionQueueResult> {
+export async function loadNeonAdminActionQueue(
+  options: { aggregateOnly?: boolean } = {},
+): Promise<AdminActionQueueResult> {
   const sql = queryFromEnv();
   const now = new Date();
-  if (!sql) return { configured: false, generatedAt: now.toISOString(), items: [] };
+  if (!sql) {
+    return {
+      configured: false,
+      generatedAt: now.toISOString(),
+      items: [],
+      firstResponseCoverage: emptyFirstResponseQueueCoverage(),
+    };
+  }
   try {
     const [leads, appointments, tasks, notifications] = await Promise.all([
       sql.query(
         `SELECT l.id, l.created_at, l.status, l.conversion_stage,
                 l.assigned_agent_id, l.assigned_at, l.last_contacted_at,
-                l.lead_grade, l.timeline_months, l.address_raw,
-                l.first_name, l.last_name, l.is_test,
+                l.lead_grade, l.timeline_months,
+                ${options.aggregateOnly ? "" : "l.address_raw, l.first_name, l.last_name,"}
+                l.is_test,
                 l.communication_suppressed, rm.first_human_response_at,
                 true AS first_response_evidence_available
            FROM public.leads l
@@ -365,18 +376,26 @@ export async function loadNeonAdminActionQueue(): Promise<AdminActionQueueResult
       sql.query(`SELECT * FROM public.tasks WHERE category LIKE 'followup:%' ORDER BY due_at ASC NULLS LAST LIMIT 500`),
       sql.query(`SELECT id, lead_id, agent_id, status, next_attempt_at FROM public.lead_notifications WHERE status = 'retry_scheduled' LIMIT 100`),
     ]);
+    const built = buildDailyActionQueueWithCoverage({
+      leads: leads as Array<Record<string, unknown>>,
+      appointments: (appointments as Array<Record<string, unknown>>).map(normalizeAppointment).filter((row): row is AdminAppointmentRow => Boolean(row)),
+      tasks: (tasks as Array<Record<string, unknown>>).map(normalizeTask).filter((row): row is AdminFollowupTaskRow => Boolean(row)),
+      notifications: notifications as Array<Record<string, unknown>>,
+      firstResponseEvidenceAvailable: true,
+      now,
+    });
     return {
       configured: true,
       generatedAt: now.toISOString(),
-      items: buildDailyActionQueue({
-        leads: leads as Array<Record<string, unknown>>,
-        appointments: (appointments as Array<Record<string, unknown>>).map(normalizeAppointment).filter((row): row is AdminAppointmentRow => Boolean(row)),
-        tasks: (tasks as Array<Record<string, unknown>>).map(normalizeTask).filter((row): row is AdminFollowupTaskRow => Boolean(row)),
-        notifications: notifications as Array<Record<string, unknown>>,
-        now,
-      }),
+      ...built,
     };
   } catch {
-    return { configured: true, generatedAt: now.toISOString(), items: [], error: "Canonical Neon action queue query failed" };
+    return {
+      configured: true,
+      generatedAt: now.toISOString(),
+      items: [],
+      firstResponseCoverage: emptyFirstResponseQueueCoverage(),
+      error: "Canonical Neon action queue query failed",
+    };
   }
 }

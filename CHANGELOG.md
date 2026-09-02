@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-01 — First-response work coverage invariant
+
+- Extended the existing Daily Action Queue result with explainable aggregate
+  response-risk coverage instead of adding a second queue or workflow engine.
+- Counted direct priority-1 response cards and existing urgent
+  task/appointment coverage separately, with a visible uncovered count.
+- Added aggregate-only protected health fields and omitted lead names and
+  addresses from the health SQL selection itself.
+- Failed closed when immutable response evidence is unavailable and prevented
+  assigned-only roles from seeing brokerage-wide response totals.
+- Passed the complete Node 24.18.0 release gate: 293 test files / 3,536 tests,
+  strict typecheck, full lint, optimized build, 102-route manifest, 14/14
+  safety checks, and system isolation.
+- Added no route, schema, migration, provider, message automation, or external
+  mutation; Production and WordPress remain unchanged.
+
 ## 2026-09-01 — First-response Action Queue reconciliation
 
 - Reused the existing protected Daily Action Queue and immutable response

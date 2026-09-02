@@ -2,8 +2,10 @@ export {
   APPOINTMENT_STATUSES,
   FOLLOWUP_TASK_TYPES,
   buildDailyActionQueue,
+  buildDailyActionQueueWithCoverage,
   canTransitionAppointment,
   disabledCalendarAdapter,
+  emptyFirstResponseQueueCoverage,
   normalizeAppointment,
   normalizeTask,
   validateAppointmentWindow,
@@ -11,6 +13,7 @@ export {
 export type {
   AdminActionQueueItem,
   AdminActionQueueResult,
+  AdminFirstResponseQueueCoverage,
   AdminAppointmentRow,
   AdminFollowupTaskRow,
   AppointmentCalendarAdapter,

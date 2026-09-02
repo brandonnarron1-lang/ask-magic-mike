@@ -19,6 +19,11 @@ under `https://www.askmagicmike.com/admin`.
    - Review overdue follow-ups, appointment requests, stalled leads, and retry
      items.
    - Work priority P1/P2 first.
+   - Administrators must confirm first-response coverage is complete. `Held`
+     means immutable response evidence is unavailable; any uncovered count is
+     an immediate operational escalation, not an empty-queue success.
+   - Assigned-only agents do not see brokerage-wide coverage totals; work only
+     the assigned items visible in their authenticated queue.
    - Open the lead detail before contacting anyone; verify it is not test,
      suppressed, duplicate-only, or consent-restricted.
 2. **Lead inbox — `/admin/leads?filter=active`**
