@@ -111,6 +111,22 @@ Twilio auth token is configured, even if outbound sending is disabled during a
 rollback. It never enables delivery itself. Retry uses the original recipient
 role and never reads a phone number from the database.
 
+## Consumer reply and STOP evidence
+
+Twilio posts consumer replies to `POST /api/webhooks/sms/inbound`. Exact form
+media is always treated as a provider callback and requires the canonical URL
+signature even if outbound delivery flags have since been disabled. Production
+does not accept the local admin-secret JSON mock path; Preview does not mutate.
+
+The callback atomically claims a minimized provider receipt, records one
+canonical timeline event, applies STOP to every existing lead record sharing
+the normalized U.S. number, upserts all SMS permission purposes, and cancels
+every eligible automated sequence. A normal reply cancels automation for human
+follow-up; HELP/INFO does not. Exact replay does nothing, changed payload reuse
+conflicts, and downstream failure rolls back the receipt so retry remains
+possible. Neither raw message text nor the phone number is stored in receipt or
+timeline metadata. START/UNSTOP does not restore permission automatically.
+
 ## Rollback
 
 Set `AGENT_SMS_NOTIFICATIONS_ENABLED=false` or `ENABLE_SMS=false`. Email and

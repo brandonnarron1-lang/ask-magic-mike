@@ -18,6 +18,13 @@
   only recipient roles; SMS bodies omit consumer contact details, full
   addresses, free text, and click IDs. Twilio delivery callbacks require
   signature verification.
+- Inbound SMS form callbacks remain signature-verifiable even after outbound
+  SMS is disabled, so rollback cannot strand an in-flight STOP. Production
+  refuses the admin-secret mock transport and Preview refuses all inbound
+  mutation before body/auth/database work. One atomic receipt/consent statement
+  suppresses every currently matching lead record and permission purpose; exact
+  replay is inert and raw phone/message content is absent from webhook ledgers.
+  Automatic START/UNSTOP re-opt-in is prohibited without new reviewed consent.
 - Security headers and exact iframe `frame-ancestors` allowlist.
 - No protected-class fields or proxies in scoring, routing, targeting, or public
   recommendations; no private MLS fields are exposed.

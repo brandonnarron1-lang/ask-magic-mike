@@ -1439,3 +1439,18 @@
   NellySelly action. A separate exact owner approval securely replaced only the
   Production database credential and redeployed the unchanged accepted PR #246
   artifact; that one-time approval is consumed.
+
+## 2026-09-02 — Atomic inbound SMS consent boundary candidate
+
+- Retained the existing Twilio/Neon messaging architecture and repaired the
+  inbound route instead of creating another provider, table, queue, or API.
+- Made receipt, timeline, all-matching-lead STOP suppression, permission
+  updates, and sequence cancellation one retry-safe PostgreSQL statement.
+- Separated callback reception from outbound-send enablement; blocked mock
+  payloads in Production and all data work in Preview; added strict body/media/
+  field/phone/provider validation, private correlation, and safe failures.
+- Added exact local PostgreSQL proof for all-record suppression, replay,
+  conflict, rollback, retry, unmatched, and late-match behavior. START/UNSTOP
+  remains a reviewed re-consent action, not an automatic keyword mutation.
+- No Production, Neon, Twilio, WordPress, environment, lead, message,
+  publication, DNS, spend, deletion, or NellySelly action occurred.
