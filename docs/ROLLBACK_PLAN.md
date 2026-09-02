@@ -20,6 +20,12 @@ is separately approved, merged, and fails Production acceptance, promote
 read-only monitor, smoke, auth-boundary, readiness, and runtime-log checks. Do
 not alter Neon or WordPress during that application rollback.
 
+The pending-notification recovery candidate has no migration or configuration
+change. Its eventual rollback is to restore the immediately preceding Ready
+application deployment while retaining every `lead_notifications` row. Never
+reset a stale `processing` row or delete delivery history as part of application
+rollback; reconcile the provider result first.
+
 The Connector 1.1.0 plugin package remains offline and independently gated. A
 future WordPress upgrade must first back up the exact active plugin/options and
 use the byte-preserved 1.0.0 plugin package as its separate rollback. The PR

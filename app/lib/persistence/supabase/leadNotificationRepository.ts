@@ -6,6 +6,7 @@ import type {
   LeadNotificationRepository,
   LeadNotificationStatus,
 } from "../../leadNotificationTypes";
+import { notificationPendingRecoveryCutoff } from "../../leadNotificationRetryPolicy";
 
 type SupabaseConfig = {
   supabaseUrl: string;
@@ -241,11 +242,15 @@ export class SupabaseLeadNotificationRepository implements LeadNotificationRepos
   async listRetryable(limit = 25, now = new Date()): Promise<LeadNotificationRecord[]> {
     const config = this.ensureConfig();
     const capped = Math.max(1, Math.min(limit, 50));
+    const nowIso = now.toISOString();
+    const stalePendingBefore = notificationPendingRecoveryCutoff(now).toISOString();
     const url = new URL("/rest/v1/lead_notifications", config.supabaseUrl);
-    url.searchParams.set("status", "in.(failed,retry_scheduled)");
-    url.searchParams.set("next_attempt_at", "lte." + now.toISOString());
+    url.searchParams.set(
+      "or",
+      `(and(status.in.(failed,retry_scheduled),next_attempt_at.lte.${nowIso}),and(status.eq.pending,created_at.lte.${stalePendingBefore}))`,
+    );
     url.searchParams.set("select", "*");
-    url.searchParams.set("order", "next_attempt_at.asc");
+    url.searchParams.set("order", "next_attempt_at.asc.nullsfirst,created_at.asc");
     url.searchParams.set("limit", String(capped));
     const response = await fetch(url, { headers: headers(config), cache: "no-store" });
     if (!response.ok) return [];

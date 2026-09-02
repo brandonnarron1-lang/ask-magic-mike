@@ -1,13 +1,19 @@
 import { neon } from "@neondatabase/serverless";
+import {
+  NOTIFICATION_PENDING_STALE_MINUTES,
+  NOTIFICATION_PROCESSING_STALE_MINUTES,
+} from "../leadNotificationRetryPolicy";
+
+export {
+  NOTIFICATION_PENDING_STALE_MINUTES,
+  NOTIFICATION_PROCESSING_STALE_MINUTES,
+} from "../leadNotificationRetryPolicy";
 
 type QueryClient = {
   query(sql: string, params?: unknown[]): Promise<unknown[]>;
 };
 
 type NotificationOperationsRow = Record<string, unknown>;
-
-export const NOTIFICATION_PENDING_STALE_MINUTES = 5;
-export const NOTIFICATION_PROCESSING_STALE_MINUTES = 10;
 
 export type LeadNotificationOperationsSnapshot = {
   exact: true;

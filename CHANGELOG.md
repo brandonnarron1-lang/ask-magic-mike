@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-09-02 — Pending notification recovery
+
+- Extended the existing scheduled outbox worker to select never-claimed
+  `pending` records only after the same five-minute threshold already shown in
+  AdminOps.
+- Kept the canonical Neon outbox, conditional claim-before-send,
+  idempotency key, current renderers/providers, permission revalidation, QA
+  suppression, and bounded attempts; no second queue or scheduler was added.
+- Continued to exclude stale `processing` records because an unknown provider
+  result must be reconciled before any replay.
+- Added distinct protected operator guidance for automatically recoverable
+  pending work and ambiguous processing work.
+- Mirrored the boundary in the dormant non-Production Supabase fallback and
+  centralized the five- and ten-minute operations thresholds.
+- Passed the Node 24 matrix with 5 focused files / 49 tests plus the complete
+  release gate: 298 files / 3,562 tests, strict typecheck, full lint, optimized
+  Next.js 15.5.21 build, 60 static pages, 102-route verification, 14/14 safety
+  controls, and Ask/NellySelly isolation.
+- Production dependencies report no known vulnerability. Redacted Gitleaks
+  passes 764 history commits / approximately 19.56 MB and the staged 21.55 KB
+  candidate delta with no leak.
+- Added no migration, environment value, route, provider, communication,
+  WordPress change, or external mutation. Production remains accepted PR #247.
+
 ## 2026-09-02 — Autonomous notification retry readiness
 
 - Reused the canonical `lead_notifications` outbox, claim-before-send updates,

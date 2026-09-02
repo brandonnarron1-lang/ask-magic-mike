@@ -7,9 +7,37 @@ Updated 2026-09-02.
 - **Accepted Production remains PR #247:** merge
   `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, exact tree
   `0065f829fc94f87ab5e0faf596c8e56733be3972`, and Ready deployment
-  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` remain authoritative. The Ask chat
-  hardening below is a Draft Preview candidate only and changes no Production,
+  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` remain authoritative. The ordered
+  candidates below are Draft/Preview work only and change no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
+
+## Phase 9 pending notification recovery — 2026-09-02
+
+- **Durable gap closed in source:** the existing scheduled worker now selects
+  an unclaimed `pending` outbox row after the same five-minute threshold
+  already reported by notification operations. Previously that row could be
+  counted forever but never processed after a serverless interruption between
+  durable insertion and first claim.
+- **No duplicate path:** recovery uses the current conditional claim,
+  idempotency key, provider adapter, versioned renderer, attempts, current
+  permission/recipient checks, and QA suppression. No route, queue, table,
+  provider, or scheduler was added.
+- **Ambiguity preserved:** `processing` remains excluded because the provider
+  may already have accepted the request. AdminOps now distinguishes automatic
+  pending recovery from provider-history reconciliation.
+- **Local verification:** exact Node 24 passes 5 focused files / 49 tests plus
+  the complete release gate: 298 files / 3,562 tests, strict typecheck, full
+  lint, optimized Next.js 15.5.21 build, 60 static pages, the
+  102-route/22-duplicate manifest, 14/14 safety controls, and Ask/NellySelly
+  isolation. Production dependencies report no known vulnerability; redacted
+  Gitleaks passes 764 history commits / approximately 19.56 MB and the staged
+  21.55 KB candidate delta. Hosted CI, immutable Preview, no-write, and
+  runtime-log proof remain required.
+- **Authority unchanged:** accepted Production is still PR #247 and PR #248 is
+  still the sole requestable application candidate. No cron, database,
+  provider, communication, environment, WordPress, DNS, publication, spend,
+  deletion, or NellySelly mutation occurred. Design and rollback:
+  [`phase9/PENDING_NOTIFICATION_RECOVERY.md`](./phase9/PENDING_NOTIFICATION_RECOVERY.md).
 
 ## Phase 9 autonomous notification retry readiness — 2026-09-02
 
@@ -44,14 +72,16 @@ Updated 2026-09-02.
   browser-admin middleware and enforces its own timing-safe bearer check.
 - **Verification state:** the superseded first seal passed the complete release
   gate and immutable Preview, but is historical rather than release authority.
-  The repaired source passes 8 focused files / 65 tests and the complete Node
-  24 release gate: Ask/NellySelly isolation, 14/14 safety controls, 298 test
-  files / 3,558 tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21
-  build, 60 static pages, and the 102-route/22-duplicate manifest. Production
-  dependencies have no known vulnerability, and redacted full-history Gitleaks
-  scans 763 commits / approximately 19.54 MB with no leak. Staged and
-  exact-commit scans, hosted exact-head CI, and immutable Preview remain to be
-  sealed on the repaired commit.
+  Final PR #262 head `0a255a7988d761577eb11c702b2e00e8cdaac3ce`
+  passes 8 focused files / 65 tests and the complete Node 24 release gate:
+  Ask/NellySelly isolation, 14/14 safety controls, 298 test files / 3,558
+  tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21 build, 60
+  static pages, and the 102-route/22-duplicate manifest. Production
+  dependencies have no known vulnerability. Redacted Gitleaks passes 763
+  history commits / approximately 19.54 MB plus the exact approximately 15.94
+  KB staged and commit deltas. Hosted Release Gate `33591271127`, immutable
+  Preview `dpl_C5kEaQoV2ooecnVFDhC4ZKTjdLDF`, 12-pass/12-intentional-skip
+  no-write QA, protected 401 boundaries, and zero error/fatal/500 logs pass.
 - **Authority unchanged:** no Production merge/deploy, outbox mutation,
   provider call, email/SMS/Push, environment change, database migration,
   WordPress action, DNS, spend, deletion, or NellySelly action occurred.
