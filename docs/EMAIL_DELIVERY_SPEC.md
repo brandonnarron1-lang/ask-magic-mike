@@ -171,3 +171,27 @@ template fails closed instead of silently changing content.
 SMS remains text-only by default. MMS media remains independently disabled and
 requires an approved registered carrier provider and non-test recipient. No AI
 model determines lead importance, recipient, routing, or delivery.
+
+## Atomic Resend lifecycle callback
+
+The existing `POST /api/webhooks/email/events` remains the only Resend callback
+and accepts only the eight lifecycle events configured on the provider
+subscription. It verifies bounded Svix headers and the exact raw JSON body
+before any database access, hashes rather than stores the payload, and refuses
+Preview writes even if a secret is copied accidentally.
+
+Receipt insertion, outbox mutation, communication-event insertion, and
+bounce/complaint suppression now share one parameterized PostgreSQL statement.
+Any database error rolls back every effect and returns a safe 503 so provider
+retry remains possible. Exact replay is acknowledged without mutation; only a
+receipt explicitly marked `failed` can be reclaimed. Reuse of a completed
+event ID with a different payload hash fails closed.
+
+Every callback response is private/no-store and correlated in both body and
+`X-AMM-Correlation-Id`. Stored metadata contains event class, timestamp,
+signature-verification truth, match state, and processing-contract version; it
+contains no raw payload, recipient address, signature, secret, or provider
+exception. Full contract and proof are in
+[`phase9/EMAIL_WEBHOOK_ATOMIC_BOUNDARY.md`](./phase9/EMAIL_WEBHOOK_ATOMIC_BOUNDARY.md)
+and
+[`phase9/EMAIL_WEBHOOK_ATOMIC_BOUNDARY_QA_EVIDENCE.md`](./phase9/EMAIL_WEBHOOK_ATOMIC_BOUNDARY_QA_EVIDENCE.md).
