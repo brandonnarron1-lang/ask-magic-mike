@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  consentGrantedForCall,
+  consentGrantedForEmail,
   LEAD_CONSENT_LANGUAGE_TEXT,
   LEAD_CONSENT_LANGUAGE_VERSION,
   resolveAuthoritativeConsentEvidence,
@@ -27,6 +29,40 @@ describe("authoritative lead consent evidence", () => {
       consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
       consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
     });
+  });
+
+  it("denies standalone public channel grants without umbrella consent", () => {
+    expect(resolveAuthoritativeConsentEvidence({
+      consent: false,
+      consent_email: true,
+      consent_call: true,
+    }, { trustedWordPressBridge: false, receivedAt })).toMatchObject({
+      consent: false,
+      consent_email: false,
+      consent_call: false,
+      consent_sms: false,
+    });
+  });
+
+  it("requires the exact authoritative channel grant at send time", () => {
+    expect(consentGrantedForEmail({
+      email: "lead@example.test",
+      consent: true,
+      consent_email: false,
+    })).toBe(false);
+    expect(consentGrantedForCall({
+      phone: "2525550119",
+      consent: true,
+      consent_call: false,
+    })).toBe(false);
+    expect(consentGrantedForEmail({
+      email: "lead@example.test",
+      consent_email: true,
+    })).toBe(true);
+    expect(consentGrantedForCall({
+      phone: "2525550119",
+      consent_call: true,
+    })).toBe(true);
   });
 
   it("preserves exact source-specific evidence only after bridge verification", () => {

@@ -35,54 +35,53 @@ import {
   verifyWordPressBridgePayloadIdentity,
   verifyWordPressBridgeRequest,
 } from "../../lib/wordpressBridgeSignature";
+import {
+  isPlainRecord,
+  MAX_PUBLIC_LEAD_BODY_BYTES,
+  PUBLIC_LEAD_TYPES,
+  PublicLeadPayloadTooLargeError,
+  readBoundedPublicLeadBody,
+  resolvePublicLeadIdempotencyKey,
+  validatePublicLeadFieldBounds,
+  validateRawPublicLeadInput,
+} from "../../lib/publicLeadIngress";
 
-const MAX_LEAD_BODY_BYTES = 65_536;
-
-class LeadPayloadTooLargeError extends Error {}
-
-async function readBoundedLeadBody(req: Request) {
-  if (!req.body) return "";
-  const reader = req.body.getReader();
-  const decoder = new TextDecoder();
-  let bytesRead = 0;
-  let text = "";
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      bytesRead += value.byteLength;
-      if (bytesRead > MAX_LEAD_BODY_BYTES) {
-        await reader.cancel().catch(() => undefined);
-        throw new LeadPayloadTooLargeError();
-      }
-      text += decoder.decode(value, { stream: true });
-    }
-    return text + decoder.decode();
-  } finally {
-    reader.releaseLock();
-  }
+const LEAD_RESPONSE_HEADERS = {
+  "Cache-Control": "private, no-store, max-age=0",
+  Pragma: "no-cache",
+} as const;
+function leadResponse(
+  correlationId: string,
+  body: Record<string, unknown>,
+  status = 200,
+  extraHeaders: Record<string, string> = {},
+) {
+  return NextResponse.json(
+    { ...body, correlation_id: correlationId },
+    {
+      status,
+      headers: {
+        ...LEAD_RESPONSE_HEADERS,
+        "X-AMM-Correlation-Id": correlationId,
+        ...extraHeaders,
+      },
+    },
+  );
 }
 
-const LEAD_TYPES = new Set([
-  "buyer",
-  "seller",
-  "seller_cash_offer",
-  "investor",
-  "listing_inquiry",
-  "open_house",
-  "home_value",
-  "relocation",
-  "renter",
-  "agent_referral",
-  "general_question",
-  "unknown",
-]);
+function rateLimitRetryAfter(resetAt: number) {
+  const maxSeconds = Math.ceil(LIMITS.intakeSubmit.windowMs / 1_000);
+  const secondsUntilReset = Math.ceil((resetAt - Date.now()) / 1_000);
+  return String(Math.max(
+    1,
+    Math.min(maxSeconds, Number.isFinite(secondsUntilReset) ? secondsUntilReset : maxSeconds),
+  ));
+}
 
 const PUBLIC_LEAD_CONFLICT_ERROR =
   "That submission conflicts with an existing request. Please refresh and submit again, or call Our Town Properties at 252-243-7700.";
 function leadTypeFor(payload: LeadPayload) {
-  if (payload.lead_type && LEAD_TYPES.has(payload.lead_type)) return payload.lead_type;
+  if (payload.lead_type && PUBLIC_LEAD_TYPES.has(payload.lead_type)) return payload.lead_type;
   if (payload.funnel_type === "seller") return "seller";
   if (payload.funnel_type === "buyer") return "buyer";
   if (payload.funnel_type === "renter") return "renter";
@@ -411,7 +410,13 @@ function buildSourceAttributionRow(payload: LeadPayload, req: Request) {
   };
 }
 
-async function insertLead(payload: LeadPayload, req: Request, correlationId: string) {
+async function insertLead(
+  payload: LeadPayload,
+  req: Request,
+  correlationId: string,
+  score: ReturnType<typeof scoreLead>,
+  routing: ReturnType<typeof routeLead>,
+) {
   const mutation = assertDatabaseMutationAllowed();
   if (!mutation.ok) throw new Error(mutation.error);
 
@@ -428,8 +433,6 @@ async function insertLead(payload: LeadPayload, req: Request, correlationId: str
   }
 
   const sessionId = sessionIdFor(payload);
-  const score = scoreLead(payload);
-  const routing = routeLead(payload, score.score);
   const result = await persistence.captureLeadLifecycle({
     session: buildSessionRow(payload, req, sessionId),
     lead: buildLeadRow(payload, req, sessionId),
@@ -507,27 +510,56 @@ function validateLead(payload: LeadPayload) {
     return "Enter a valid phone number.";
   }
 
-  const boundedFields: Array<[string, string | undefined, number]> = [
-    ["address", payload.address, 500],
-    ["name", payload.name, 160],
-    ["question", payload.question, 4000],
-    ["notes", payload.notes, 4000],
-    ["page_url", payload.page_url, 2048],
-    ["idempotency_key", payload.idempotency_key, 160],
-  ];
-  for (const [label, value, max] of boundedFields) {
-    if (value && value.length > max) return `${label} is too long.`;
-  }
-
-  return null;
+  return validatePublicLeadFieldBounds(payload);
 }
 
 export async function POST(req: Request) {
   const correlationId = crypto.randomUUID();
   const receivedAt = new Date().toISOString();
   const origin = req.headers.get("origin");
-  if (!isApprovedPublicOrigin(origin)) {
-    return NextResponse.json({ error: "This form origin is not approved.", correlation_id: correlationId }, { status: 403, headers: { "X-AMM-Correlation-Id": correlationId } });
+  const bridgeMarker = req.headers.get("x-amm-wp-bridge");
+  const bridgeRequested = bridgeMarker !== null;
+  // Browsers must provide an approved exact Origin. The sole origin-less
+  // caller is the signed WordPress server bridge, which is authenticated over
+  // the raw request body below before any lead mutation can occur.
+  if (
+    (origin && !isApprovedPublicOrigin(origin)) ||
+    (!origin && bridgeMarker !== "v1")
+  ) {
+    return leadResponse(
+      correlationId,
+      { error: "This form origin is not approved.", code: "origin_not_approved" },
+      403,
+    );
+  }
+
+  const contentType = req.headers.get("content-type")?.split(";", 1)[0]?.trim().toLowerCase();
+  if (contentType !== "application/json") {
+    return leadResponse(
+      correlationId,
+      { error: "Lead submissions require JSON.", code: "unsupported_media_type" },
+      415,
+    );
+  }
+  const declaredSize = Number(req.headers.get("content-length") || "0");
+  if (Number.isFinite(declaredSize) && declaredSize > MAX_PUBLIC_LEAD_BODY_BYTES) {
+    return leadResponse(
+      correlationId,
+      { error: "Submission is too large.", code: "payload_too_large" },
+      413,
+    );
+  }
+
+  // Read-only Preview must refuse before the durable limiter can write a
+  // rate_limit_buckets row. The capture adapter repeats this assertion as a
+  // defense-in-depth check immediately before the canonical transaction.
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return leadResponse(
+      correlationId,
+      { error: mutation.publicMessage, code: mutation.error },
+      mutation.statusCode,
+    );
   }
 
   const rateLimit = process.env.NODE_ENV === "test"
@@ -539,72 +571,114 @@ export async function POST(req: Request) {
         "intakeSubmit",
       );
   if (!rateLimit.allowed) {
-    return NextResponse.json({ error: "Too many requests. Please try again shortly.", correlation_id: correlationId }, { status: 429, headers: { "Retry-After": String(Math.max(1, Math.ceil((rateLimit.resetAt - Date.now()) / 1000))), "X-AMM-Correlation-Id": correlationId } });
+    return leadResponse(
+      correlationId,
+      { error: "Too many requests. Please try again shortly.", code: "rate_limited" },
+      429,
+      { "Retry-After": rateLimitRetryAfter(rateLimit.resetAt) },
+    );
   }
   if (!rateLimit.durable && !nonDurableRateLimitFallbackAllowed()) {
-    return NextResponse.json({ error: "Lead intake is temporarily unavailable.", correlation_id: correlationId }, { status: 503, headers: { "X-AMM-Correlation-Id": correlationId } });
+    return leadResponse(
+      correlationId,
+      {
+        error: "Lead intake is temporarily unavailable.",
+        code: "rate_limit_store_unavailable",
+      },
+      503,
+    );
   }
 
-  let raw: unknown;
+  let raw: Record<string, unknown>;
   let rawBody: string;
   let trustedWordPressBridge = false;
   let trustedWordPressEntryId: string | null = null;
   let persistedLead: Awaited<ReturnType<typeof insertLead>>;
   try {
-    const declaredSize = Number(req.headers.get("content-length") || "0");
-    if (Number.isFinite(declaredSize) && declaredSize > MAX_LEAD_BODY_BYTES) {
-      return NextResponse.json(
-        { error: "Submission is too large.", correlation_id: correlationId },
-        { status: 413, headers: { "X-AMM-Correlation-Id": correlationId } },
-      );
-    }
-    rawBody = await readBoundedLeadBody(req);
-    if (req.headers.get("x-amm-wp-bridge")) {
+    rawBody = await readBoundedPublicLeadBody(req);
+    if (bridgeRequested) {
       const bridge = verifyWordPressBridgeRequest(req, rawBody);
       if (!bridge.ok) {
-        return NextResponse.json(
-          { error: "WordPress bridge authorization failed.", code: bridge.error, correlation_id: correlationId },
-          { status: bridge.status, headers: { "X-AMM-Correlation-Id": correlationId } },
+        return leadResponse(
+          correlationId,
+          { error: "WordPress bridge authorization failed.", code: bridge.error },
+          bridge.status,
         );
       }
       trustedWordPressBridge = true;
       trustedWordPressEntryId = bridge.entryId;
     }
-    raw = JSON.parse(rawBody);
-  } catch (error) {
-    if (error instanceof LeadPayloadTooLargeError) {
-      return NextResponse.json(
-        { error: "Submission is too large.", correlation_id: correlationId },
-        { status: 413, headers: { "X-AMM-Correlation-Id": correlationId } },
+    const parsed: unknown = JSON.parse(rawBody);
+    if (!isPlainRecord(parsed)) {
+      return leadResponse(
+        correlationId,
+        { error: "Invalid lead payload.", code: "invalid_payload" },
+        400,
       );
     }
-    return NextResponse.json(
-      { error: "Invalid JSON.", correlation_id: correlationId },
-      { status: 400, headers: { "X-AMM-Correlation-Id": correlationId } },
+    raw = parsed;
+  } catch (error) {
+    if (error instanceof PublicLeadPayloadTooLargeError) {
+      return leadResponse(
+        correlationId,
+        { error: "Submission is too large.", code: "payload_too_large" },
+        413,
+      );
+    }
+    return leadResponse(
+      correlationId,
+      { error: "Invalid JSON.", code: "invalid_json" },
+      400,
     );
   }
 
-  const input = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const input = raw;
+  const rawValidation = validateRawPublicLeadInput(input);
+  if (rawValidation) {
+    return leadResponse(
+      correlationId,
+      { error: rawValidation.message, code: rawValidation.code },
+      400,
+    );
+  }
+  const idempotency = resolvePublicLeadIdempotencyKey(
+    input,
+    req.headers.get("idempotency-key"),
+  );
+  if (!idempotency.ok) {
+    return leadResponse(
+      correlationId,
+      { error: idempotency.failure.message, code: idempotency.failure.code },
+      400,
+    );
+  }
   const normalizedPayload = normalizeLeadPayload({
     ...input,
-    idempotency_key: input.idempotency_key || req.headers.get("idempotency-key") || undefined,
+    idempotency_key: idempotency.value,
   });
+  if (input.is_test === true && normalizedPayload.is_test !== true) {
+    return leadResponse(
+      correlationId,
+      {
+        error: "Test submissions require the internal QA do-not-contact markers.",
+        code: "invalid_test_marker",
+      },
+      400,
+    );
+  }
   if (trustedWordPressBridge && trustedWordPressEntryId) {
     const identity = verifyWordPressBridgePayloadIdentity(
       normalizedPayload,
       trustedWordPressEntryId,
     );
     if (!identity.ok) {
-      return NextResponse.json(
+      return leadResponse(
+        correlationId,
         {
           error: "WordPress bridge payload identity was rejected.",
           code: identity.error,
-          correlation_id: correlationId,
         },
-        {
-          status: identity.status,
-          headers: { "X-AMM-Correlation-Id": correlationId },
-        },
+        identity.status,
       );
     }
   }
@@ -617,105 +691,177 @@ export async function POST(req: Request) {
   };
 
   if (payload.honeypot) {
-    return NextResponse.json({ message: "Got it.", correlation_id: correlationId }, { status: 202, headers: { "X-AMM-Correlation-Id": correlationId } });
+    return leadResponse(correlationId, { message: "Got it." }, 202);
   }
   const validationError = validateLead(payload);
 
   if (validationError) {
-    return NextResponse.json({ error: validationError, correlation_id: correlationId }, { status: 400, headers: { "X-AMM-Correlation-Id": correlationId } });
+    return leadResponse(
+      correlationId,
+      { error: validationError, code: "invalid_lead_payload" },
+      400,
+    );
   }
 
-  const mutation = assertDatabaseMutationAllowed();
-  if (!mutation.ok) {
-    return NextResponse.json(
-      { error: mutation.publicMessage, code: mutation.error },
-      { status: mutation.statusCode, headers: { "X-AMM-Correlation-Id": correlationId } },
+  let score: ReturnType<typeof scoreLead>;
+  let routing: ReturnType<typeof routeLead>;
+  try {
+    score = scoreLead(payload);
+    routing = routeLead(payload, score.score);
+  } catch {
+    console.error("[leads] deterministic lead preparation failed", {
+      correlationId,
+      error: "lead_preparation_failed",
+    });
+    return leadResponse(
+      correlationId,
+      { error: PUBLIC_LEAD_SAVE_ERROR, code: "lead_preparation_failed" },
+      500,
     );
   }
 
   try {
-    persistedLead = await insertLead(payload, req, correlationId);
+    persistedLead = await insertLead(payload, req, correlationId, score, routing);
   } catch (error) {
     if (error instanceof Error && error.message === "preview_data_disabled") {
-      return NextResponse.json({ error: PREVIEW_READ_ONLY_MESSAGE, code: "preview_data_disabled", correlation_id: correlationId }, { status: 503, headers: { "X-AMM-Correlation-Id": correlationId } });
+      return leadResponse(
+        correlationId,
+        { error: PREVIEW_READ_ONLY_MESSAGE, code: "preview_data_disabled" },
+        503,
+      );
     }
     if (error instanceof Error && error.message === "lead_store_not_configured") {
-      return NextResponse.json({ error: PUBLIC_LEAD_SAVE_ERROR, code: "lead_store_not_configured", correlation_id: correlationId }, { status: 503, headers: { "X-AMM-Correlation-Id": correlationId } });
+      return leadResponse(
+        correlationId,
+        { error: PUBLIC_LEAD_SAVE_ERROR, code: "lead_store_not_configured" },
+        503,
+      );
     }
     console.error("Lead persistence failed", {
       funnel_type: payload.funnel_type,
       lead_source_surface: payload.lead_source_surface,
       error: error instanceof Error ? error.message : "unknown",
     });
-    return NextResponse.json({ error: PUBLIC_LEAD_SAVE_ERROR, correlation_id: correlationId }, { status: 500, headers: { "X-AMM-Correlation-Id": correlationId } });
+    return leadResponse(
+      correlationId,
+      { error: PUBLIC_LEAD_SAVE_ERROR, code: "lead_persistence_failed" },
+      500,
+    );
   }
 
   if (isLeadConflict(persistedLead)) {
-    return NextResponse.json({ error: PUBLIC_LEAD_CONFLICT_ERROR, code: persistedLead.error, correlation_id: correlationId }, { status: 409, headers: { "X-AMM-Correlation-Id": correlationId } });
+    return leadResponse(
+      correlationId,
+      { error: PUBLIC_LEAD_CONFLICT_ERROR, code: persistedLead.error },
+      409,
+    );
   }
 
   if (persistedLead.idempotent_replay) {
-    return NextResponse.json(
+    return leadResponse(
+      correlationId,
       {
         message: "Your request is stored for review. Mike or the approved team will follow up through the contact path you provided.",
         lead_id: persistedLead.lead_id,
         session_id: persistedLead.session_id,
         duplicate_of_lead_id: persistedLead.duplicate_of_lead_id ?? null,
-        correlation_id: correlationId,
       },
-      { headers: { "X-AMM-Idempotent-Replay": "1", "X-AMM-Correlation-Id": correlationId } },
+      200,
+      { "X-AMM-Idempotent-Replay": "1" },
     );
   }
 
-  const score = scoreLead(payload);
-  const routing = routeLead(payload, score.score);
-  let notificationResult: Awaited<ReturnType<typeof enqueueLeadNotifications>> | null = null;
   if (process.env.NODE_ENV !== "test") {
-    notificationResult = await enqueueLeadNotifications({
-      leadId: persistedLead.lead_id,
-      sessionId: persistedLead.session_id,
-      correlationId,
-      payload,
-      score,
-      routing,
-      submittedAt: new Date().toISOString(),
-      duplicateOfLeadId: persistedLead.duplicate_of_lead_id,
-    });
-    await recordServerAnalyticsEvent({
-      eventName: "lead_created",
-      category: "intake",
-      sessionId: persistedLead.session_id,
-      leadId: persistedLead.lead_id,
-      attribution: { source: payload.attribution.source, medium: payload.attribution.medium, campaign: payload.attribution.campaign },
-      properties: { funnel_name: payload.funnel_type, lead_source_surface: payload.lead_source_surface, is_test: payload.is_test === true, score: score.score },
-      userAgent: req.headers.get("user-agent"),
-    });
-    const internalStatus = notificationResult.internal?.status;
-    if (internalStatus) {
-      await recordServerAnalyticsEvent({
-        eventName: internalStatus === "sent" ? "notification_delivered" : internalStatus === "retry_scheduled" || internalStatus === "permanently_failed" ? "notification_failed" : "notification_queued",
-        category: "system",
-        sessionId: persistedLead.session_id,
-        leadId: persistedLead.lead_id,
-        properties: { notification_type: "lead_alert", status: internalStatus, is_test: payload.is_test === true },
-      });
-    }
-    if (!payload.is_test) {
-      const liveMonitor = createFirstLiveLeadMonitor();
-      if (liveMonitor) {
+    try {
+      let notificationResult: Awaited<ReturnType<typeof enqueueLeadNotifications>> | null = null;
+      try {
+        notificationResult = await enqueueLeadNotifications({
+          leadId: persistedLead.lead_id,
+          sessionId: persistedLead.session_id,
+          correlationId,
+          payload,
+          score,
+          routing,
+          submittedAt: receivedAt,
+          duplicateOfLeadId: persistedLead.duplicate_of_lead_id,
+        });
+        if (notificationResult.warning) {
+          console.error("[leads] post-commit notification dispatch reported a warning", {
+            correlationId,
+            warning: notificationResult.warning,
+          });
+        }
+      } catch {
+        // The canonical transaction already seeded the internal outbox row. A
+        // post-commit dispatch failure must not turn a durably stored lead into
+        // a false public failure; the scheduled recovery worker owns the retry.
+        console.error("[leads] post-commit notification dispatch failed", {
+          correlationId,
+          error: "notification_dispatch_failed",
+        });
+      }
+
+      try {
+        const leadCreatedRecorded = await recordServerAnalyticsEvent({
+          eventName: "lead_created",
+          category: "intake",
+          sessionId: persistedLead.session_id,
+          leadId: persistedLead.lead_id,
+          attribution: { source: payload.attribution.source, medium: payload.attribution.medium, campaign: payload.attribution.campaign },
+          properties: { funnel_name: payload.funnel_type, lead_source_surface: payload.lead_source_surface, is_test: payload.is_test === true, score: score.score },
+          userAgent: req.headers.get("user-agent"),
+        });
+        if (!leadCreatedRecorded) {
+          console.error("[leads] canonical outcome event write failed", {
+            correlationId,
+            error: "analytics_persistence_unavailable",
+          });
+        }
+      } catch {
+        console.error("[leads] canonical outcome event write failed", {
+          correlationId,
+          error: "analytics_persistence_failed",
+        });
+      }
+
+      const internalStatus = notificationResult?.internal?.status;
+      if (internalStatus) {
         try {
-          await liveMonitor.run({ leadId: persistedLead.lead_id, lookbackHours: 1 });
+          await recordServerAnalyticsEvent({
+            eventName: internalStatus === "sent" ? "notification_delivered" : internalStatus === "retry_scheduled" || internalStatus === "permanently_failed" ? "notification_failed" : "notification_queued",
+            category: "system",
+            sessionId: persistedLead.session_id,
+            leadId: persistedLead.lead_id,
+            properties: { notification_type: "lead_alert", status: internalStatus, is_test: payload.is_test === true },
+          });
         } catch {
-          console.error("First-live lead monitor failed", { error: "first_live_monitor_failed" });
+          console.error("[leads] notification outcome event write failed", {
+            correlationId,
+            error: "analytics_persistence_failed",
+          });
         }
       }
+
+      if (!payload.is_test) {
+        const liveMonitor = createFirstLiveLeadMonitor();
+        if (liveMonitor) {
+          await liveMonitor.run({ leadId: persistedLead.lead_id, lookbackHours: 1 });
+        }
+      }
+    } catch {
+      // Every activity in this block occurs after the canonical transaction.
+      // Preserve the truthful 200 and leave the seeded outbox row available
+      // for recovery if an unexpected post-commit integration fails.
+      console.error("[leads] unexpected post-commit activity failed", {
+        correlationId,
+        error: "post_commit_activity_failed",
+      });
     }
   }
-  return NextResponse.json({
+  return leadResponse(correlationId, {
     message: "Your request is stored for review. Mike or the approved team will follow up through the contact path you provided.",
     lead_id: persistedLead.lead_id,
     session_id: persistedLead.session_id,
     duplicate_of_lead_id: persistedLead.duplicate_of_lead_id ?? null,
-    correlation_id: correlationId,
-  }, { headers: { "X-AMM-Correlation-Id": correlationId } });
+  });
 }

@@ -19,6 +19,7 @@ const ENV_KEYS = [
   "AGENT_NOTIFICATIONS_ENABLED",
   "LEAD_NOTIFICATION_MODE",
   "DATABASE_URL",
+  "ALLOW_LEGACY_SUPABASE_FALLBACK",
   "RATE_LIMIT_HASH_SECRET",
   "RATE_LIMIT_EMERGENCY_MEMORY",
   "WORDPRESS_BRIDGE_SECRET",
@@ -33,10 +34,27 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 function request(body: Record<string, unknown>, headers: HeadersInit = {}) {
+  const idempotencyKey = typeof body.idempotency_key === "string"
+    ? body.idempotency_key
+    : typeof body.request_fingerprint === "string"
+      ? body.request_fingerprint
+      : SESSION_ID;
+  const leadSourceSurface = typeof body.lead_source_surface === "string"
+    ? body.lead_source_surface
+    : "home_value_page";
   return new Request("http://localhost/api/leads", {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...headers },
-    body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+      Origin: "https://www.askmagicmike.com",
+      "Idempotency-Key": idempotencyKey,
+      ...headers,
+    },
+    body: JSON.stringify({
+      ...body,
+      lead_source_surface: leadSourceSurface,
+      idempotency_key: idempotencyKey,
+    }),
   });
 }
 
@@ -102,9 +120,17 @@ afterEach(() => {
 describe("POST /api/leads validation and truthful persistence", () => {
   it("returns 400 for invalid JSON", async () => {
     const response = await POST(
-      new Request("http://localhost/api/leads", { method: "POST", body: "{" }),
+      new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://www.askmagicmike.com",
+        },
+        body: "{",
+      }),
     );
     expect(response.status).toBe(400);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store, max-age=0");
   });
 
   it("stream-bounds a chunked lead body before parsing or persistence", async () => {
@@ -112,7 +138,10 @@ describe("POST /api/leads validation and truthful persistence", () => {
     vi.stubGlobal("fetch", fetchSpy);
     const response = await POST(new Request("http://localhost/api/leads", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://www.askmagicmike.com",
+      },
       body: JSON.stringify({ question: "é".repeat(33_000) }),
     }));
     expect(response.status).toBe(413);
@@ -129,12 +158,148 @@ describe("POST /api/leads validation and truthful persistence", () => {
       headers: {
         "Content-Type": "application/json",
         "Content-Length": "65537",
+        Origin: "https://www.askmagicmike.com",
       },
       body: "{}",
     }));
     expect(response.status).toBe(413);
     expect(response.headers.get("X-AMM-Correlation-Id")).toBeTruthy();
     expect(await response.json()).toMatchObject({ error: "Submission is too large." });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("rejects unsigned origin-less requests and foreign browser origins", async () => {
+    for (const origin of [null, "https://attacker.example"]) {
+      const headers = new Headers({
+        "Content-Type": "application/json",
+        "Idempotency-Key": SESSION_ID,
+      });
+      if (origin) headers.set("Origin", origin);
+      const response = await POST(new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          funnel_type: "home_value",
+          lead_source_surface: "home_value_page",
+          address: "1 Synthetic Origin Way",
+          email: "origin@example.test",
+          idempotency_key: SESSION_ID,
+        }),
+      }));
+      expect(response.status).toBe(403);
+      await expect(response.json()).resolves.toMatchObject({ code: "origin_not_approved" });
+      expect(response.headers.get("Cache-Control")).toBe("private, no-store, max-age=0");
+    }
+  });
+
+  it("requires JSON and a plain-object payload", async () => {
+    const unsupported = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain",
+        Origin: "https://www.askmagicmike.com",
+      },
+      body: "not-json",
+    }));
+    expect(unsupported.status).toBe(415);
+    await expect(unsupported.json()).resolves.toMatchObject({ code: "unsupported_media_type" });
+
+    const arrayPayload = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://www.askmagicmike.com",
+      },
+      body: "[]",
+    }));
+    expect(arrayPayload.status).toBe(400);
+    await expect(arrayPayload.json()).resolves.toMatchObject({ code: "invalid_payload" });
+  });
+
+  it("requires one bounded matching idempotency key", async () => {
+    const body = {
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "2 Synthetic Idempotency Way",
+      email: "idempotency@example.test",
+    };
+    const missing = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://www.askmagicmike.com",
+      },
+      body: JSON.stringify(body),
+    }));
+    expect(missing.status).toBe(400);
+    await expect(missing.json()).resolves.toMatchObject({ code: "idempotency_key_required" });
+
+    const conflict = await POST(request(
+      { ...body, idempotency_key: SESSION_ID },
+      { "Idempotency-Key": "44444444-4444-4444-8444-444444444444" },
+    ));
+    expect(conflict.status).toBe(400);
+    await expect(conflict.json()).resolves.toMatchObject({ code: "idempotency_key_conflict" });
+
+    const invalid = await POST(request(
+      { ...body, idempotency_key: "invalid key with spaces" },
+    ));
+    expect(invalid.status).toBe(400);
+    await expect(invalid.json()).resolves.toMatchObject({ code: "idempotency_key_invalid" });
+  });
+
+  it.each([
+    [{ funnel_type: "mystery" }, "invalid_funnel_type"],
+    [{ lead_source_surface: "unknown_surface" }, "invalid_lead_source_surface"],
+    [{ lead_type: "mystery" }, "invalid_lead_type"],
+    [{ score: 100 }, "protected_field_rejected"],
+    [{ assigned_agent_id: LEAD_ID }, "protected_field_rejected"],
+    [{ consent: "true" }, "invalid_field_type"],
+    [{ attribution: [] }, "invalid_attribution"],
+  ])("rejects malformed or privileged public input %o", async (override, code) => {
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "3 Synthetic Boundary Road",
+      email: "boundary@example.test",
+      ...override,
+    }));
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({ code });
+  });
+
+  it("bounds normalized lead and attribution fields before persistence", async () => {
+    for (const override of [
+      { target_geography: "x".repeat(501) },
+      { attribution: { source: "x".repeat(121) } },
+      { attribution: { first_touch: { campaign: "x".repeat(241) } } },
+    ]) {
+      const fetchSpy = vi.fn();
+      vi.stubGlobal("fetch", fetchSpy);
+      const response = await POST(request({
+        funnel_type: "buyer",
+        lead_source_surface: "buyer_page",
+        email: "bounded@example.test",
+        ...override,
+      }));
+      expect(response.status).toBe(400);
+      expect(fetchSpy).not.toHaveBeenCalled();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("does not trust a standalone public is_test boolean", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "4 Synthetic Test Marker Way",
+      email: "marker@example.test",
+      is_test: true,
+    }));
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({ code: "invalid_test_marker" });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
@@ -147,7 +312,6 @@ describe("POST /api/leads validation and truthful persistence", () => {
     [{ funnel_type: "chat" }, "Question is required"],
     [{ funnel_type: "chat", question: "Synthetic question" }, "Email or phone is required for a chat follow-up"],
     [{ funnel_type: "chat", question: "Synthetic question", email: "qa@example.test" }, "Consent is required for a chat follow-up"],
-    [{ funnel_type: "chat", question: "Synthetic question", email: "qa@example.test", consent: "true" }, "Consent is required for a chat follow-up"],
     [{ funnel_type: "appointment" }, "Email or phone is required"],
   ])("rejects an incomplete payload without persistence calls", async (payload, message) => {
     const fetchSpy = vi.fn();
@@ -179,20 +343,31 @@ describe("POST /api/leads validation and truthful persistence", () => {
   });
 
   it("performs zero persistence/provider calls in Preview read-only mode", async () => {
+    const mutableEnv = process.env as Record<string, string | undefined>;
+    const originalNodeEnv = mutableEnv.NODE_ENV;
+    mutableEnv.NODE_ENV = "production";
     process.env.VERCEL_ENV = "preview";
     process.env.DATABASE_ENV = "preview";
     process.env.PREVIEW_DATA_MODE = "disabled";
     process.env.ALLOW_PREVIEW_DB_MUTATION = "false";
+    process.env.DATABASE_URL = "postgresql://synthetic:synthetic@ep-synthetic.us-east-1.aws.neon.tech/neondb?sslmode=require";
+    process.env.RATE_LIMIT_HASH_SECRET = "synthetic-rate-limit-hash-secret-at-least-32-characters";
     const fetchSpy = vi.fn();
     vi.stubGlobal("fetch", fetchSpy);
-    const response = await POST(request({
-      funnel_type: "seller",
-      lead_source_surface: "seller_page",
-      address: "2 Synthetic Ave",
-      phone: "2525550101",
-    }));
-    expect(response.status).toBe(503);
-    expect(fetchSpy).not.toHaveBeenCalled();
+    try {
+      const response = await POST(request({
+        funnel_type: "seller",
+        lead_source_surface: "seller_page",
+        address: "2 Synthetic Ave",
+        phone: "2525550101",
+      }));
+      expect(response.status).toBe(503);
+      await expect(response.json()).resolves.toMatchObject({ code: "preview_data_disabled" });
+      expect(fetchSpy).not.toHaveBeenCalled();
+    } finally {
+      if (originalNodeEnv === undefined) delete mutableEnv.NODE_ENV;
+      else mutableEnv.NODE_ENV = originalNodeEnv;
+    }
   });
 
   it("fails closed before parsing or persistence when Production durable limiting is unavailable", async () => {
@@ -392,15 +567,18 @@ describe("POST /api/leads atomic lifecycle command", () => {
       label: "entry id",
       idempotency_key: "gf:7:1902",
       consent_source: "gravity_forms_7",
+      expectedCode: "idempotency_key_conflict",
     },
     {
       label: "form consent source",
       idempotency_key: "gf:7:1901",
       consent_source: "gravity_forms_3",
+      expectedCode: "wordpress_bridge_identity_mismatch",
     },
   ])("rejects a signed WordPress bridge payload with a mismatched $label before persistence", async ({
     idempotency_key,
     consent_source,
+    expectedCode,
   }) => {
     const { mock } = installRpc();
     const response = await POST(signedWordPressRequest({
@@ -419,7 +597,7 @@ describe("POST /api/leads atomic lifecycle command", () => {
 
     expect(response.status).toBe(400);
     expect(await response.json()).toMatchObject({
-      code: "wordpress_bridge_identity_mismatch",
+      code: expectedCode,
     });
     expect(mock).not.toHaveBeenCalled();
   });
@@ -463,6 +641,27 @@ describe("POST /api/leads atomic lifecycle command", () => {
       consent_language_version: "amm_contact_v2",
     });
     expect(await chatResponse.json()).toHaveProperty("message");
+  });
+
+  it("does not let standalone public channel booleans widen communication consent", async () => {
+    const { calls } = installRpc();
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "210 Synthetic Consent Boundary",
+      email: "consent-boundary@example.test",
+      phone: "2525550119",
+      consent: false,
+      consent_email: true,
+      consent_call: true,
+    }));
+
+    expect(response.status).toBe(200);
+    expect(calls[0].body.p_lead).toMatchObject({
+      consent_email: false,
+      consent_call: false,
+      consent_sms: false,
+    });
   });
 
   it("keeps an omitted seller timeline unknown instead of manufacturing urgency", async () => {
@@ -666,8 +865,14 @@ describe("POST /api/leads atomic lifecycle command", () => {
   });
 
   it("keeps a committed lead successful when an external provider throws", async () => {
+    const mutableEnv = process.env as Record<string, string | undefined>;
+    const originalNodeEnv = mutableEnv.NODE_ENV;
+    mutableEnv.NODE_ENV = "production";
+    process.env.VERCEL_ENV = "development";
+    process.env.ALLOW_LEGACY_SUPABASE_FALLBACK = "true";
     process.env.OPENAI_API_KEY = "synthetic-openai-key";
     process.env.RESEND_API_KEY = "synthetic-resend-key";
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const fetchSpy = vi.fn(async (input: URL | RequestInfo) => {
       const url = String(input);
       if (url.includes("/rest/v1/rpc/capture_public_lead_v2")) {
@@ -677,16 +882,23 @@ describe("POST /api/leads atomic lifecycle command", () => {
     });
     vi.stubGlobal("fetch", fetchSpy);
 
-    const response = await POST(request({
-      funnel_type: "home_value",
-      lead_source_surface: "home_value_page",
-      address: "600 Synthetic Provider Ln",
-      email: "provider@example.test",
-      phone: "2525550107",
-      widget_session_id: SESSION_ID,
-    }));
-    expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({ lead_id: LEAD_ID });
+    try {
+      const response = await POST(request({
+        funnel_type: "home_value",
+        lead_source_surface: "home_value_page",
+        address: "600 Synthetic Provider Ln",
+        email: "provider@example.test",
+        phone: "2525550107",
+        widget_session_id: SESSION_ID,
+      }, { "X-Forwarded-For": "192.0.2.107" }));
+      expect(response.status).toBe(200);
+      expect(await response.json()).toMatchObject({ lead_id: LEAD_ID });
+      expect(fetchSpy.mock.calls.length).toBeGreaterThan(1);
+      expect(consoleError).toHaveBeenCalled();
+    } finally {
+      if (originalNodeEnv === undefined) delete mutableEnv.NODE_ENV;
+      else mutableEnv.NODE_ENV = originalNodeEnv;
+    }
   });
 
   it("maps unknown domain failures to a sanitized persistence error", async () => {

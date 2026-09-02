@@ -11,6 +11,35 @@ Updated 2026-09-02.
   candidates below are Draft/Preview work only and change no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
 
+## Phase 9 public lead ingress boundary hardening — 2026-09-02
+
+- **Canonical pipe retained:** active root `POST /api/leads` still commits one
+  `capture_public_lead_v2` lifecycle transaction and one required internal
+  email outbox intent. No second lead backend, queue, router, or WordPress
+  database was created.
+- **Edge contract hardened:** exact browser origin or signed WordPress bridge,
+  JSON/object/body limits, runtime types, canonical source vocabulary, field
+  bounds, and mandatory matching idempotency now fail before persistence.
+- **Server authority protected:** browser-authored score, routing, assignment,
+  suppression, duplicate state, and false test classification are rejected.
+  Channel permissions cannot exceed the displayed umbrella consent, and
+  public SMS remains denied.
+- **Truthful durability preserved:** Preview refuses before the limiter can
+  write; Production requires durable limiting; deterministic score/routing
+  preparation occurs before the transaction; every post-commit provider,
+  analytics, and monitoring action is isolated from the stored-lead response.
+- **Verification state:** focused Node 24 acceptance passes 6 files / 111
+  tests, strict TypeScript, targeted ESLint, and whitespace validation.
+  Complete local acceptance passes 301 files / 3,618 tests, strict TypeScript,
+  full ESLint, Ask/NellySelly isolation, 14/14 safety controls, an optimized
+  Next.js 15.5.21 build with 60 static pages, and 102 active / 22 acknowledged
+  duplicate routes. Production dependencies have no known vulnerability;
+  redacted staged/history secret scans are clean. Exact-commit and hosted
+  no-write evidence remain to be sealed.
+- **Authority unchanged:** Production remains accepted PR #247 and PR #248
+  remains the sole requestable application gate. Design and rollback:
+  [`phase9/PUBLIC_LEAD_INGRESS_BOUNDARY.md`](./phase9/PUBLIC_LEAD_INGRESS_BOUNDARY.md).
+
 ## Phase 9 public analytics ingress boundary hardening — 2026-09-02
 
 - **One active ingress retained:** `/api/events` keeps its snake-case browser
