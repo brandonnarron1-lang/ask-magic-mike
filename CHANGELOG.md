@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-09-02 — Autonomous notification retry readiness
+
+- Reused the canonical `lead_notifications` outbox, claim-before-send updates,
+  provider adapters, idempotency keys, and protected retry route instead of
+  creating another queue or delivery service.
+- Added a Production-only Vercel cron contract that checks the existing bearer
+  `CRON_SECRET` and processes at most 25 due records every minute.
+- Unified scheduled dispatch for internal lead alerts, consented consumer
+  acknowledgments, and agent-assignment notifications while retaining bounded
+  provider backoff and per-record failure isolation.
+- Added defense-in-depth suppression: automatic jobs never send QA test rows,
+  and consumer acknowledgments re-check current communication/email
+  suppression before every retry.
+- Kept Preview read-only before repository or provider access and made cron
+  responses aggregate-only; administrator GET remains a non-mutating readiness
+  check and administrator POST retains protected per-record detail.
+- Preserved due outbox rows when Production mode, global delivery, email, or
+  provider readiness is incomplete, and proved the cron API remains outside the
+  browser-admin matcher while retaining route-level bearer authentication.
+- Passed the exact final-source Node 24 release gate with 298 test files / 3,553
+  tests, strict typecheck, full lint, optimized build, 102-route verification,
+  14/14 safety checks, and Ask/NellySelly isolation; dependency and redacted
+  full-history secret scans are clean.
+- Added no migration, provider, credential, public route, WordPress change, or
+  external send. Production remains accepted PR #247.
+
 ## 2026-09-01 — SLA truth and cadence hardening
 
 - Reused the existing SLA engine, immutable response ledger, compliance flags,

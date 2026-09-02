@@ -1,6 +1,6 @@
 # Implementation Status
 
-Updated 2026-09-01.
+Updated 2026-09-02.
 
 ## Current Production authority
 
@@ -10,6 +10,43 @@ Updated 2026-09-01.
   `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` remain authoritative. The Ask chat
   hardening below is a Draft Preview candidate only and changes no Production,
   database, WordPress, notification, DNS, or NellySelly authority.
+
+## Phase 9 autonomous notification retry readiness — 2026-09-02
+
+- **Existing outbox activated, not replaced:** the established protected
+  `/api/admin/notifications/retry` route now distinguishes a Vercel
+  `CRON_SECRET` GET from the existing administrator readiness GET and bounded
+  manual POST. The Draft schedule is every minute with at most 25 due rows per
+  run.
+- **Complete known-type dispatch:** due `lead_alert`, `consumer_ack`, and
+  `agent_assignment` rows use their current service, renderer, provider,
+  idempotency key, and atomic claim. A failure in one row cannot prevent later
+  rows from being attempted; an unsupported type becomes a visible terminal
+  outbox failure.
+- **Permission revalidation:** canonical Neon retry reads annotate test scope;
+  automated QA rows become skipped without a provider call. Consumer
+  acknowledgments reload current communication/email suppression and consent
+  before retry, preventing a queued message from overruling a later opt-out or
+  suppression event.
+- **Fail-closed boundary:** Preview refuses the batch before repository or
+  provider access. Production also preserves due rows when the existing global
+  delivery gate, email switch, mode, or provider configuration is incomplete.
+  Cron output is aggregate-only and no-store; the protected manual POST retains
+  the existing per-record status contract. The API path remains outside the
+  browser-admin middleware and enforces its own timing-safe bearer check.
+- **Local acceptance:** 7 focused files / 55 tests pass. The exact final-source
+  Node 24 release gate passes system isolation, 14/14 safety controls, 298 test
+  files / 3,553 tests, strict TypeScript, full ESLint, optimized Next.js 15.5.21
+  build, 60 static pages, and the 102-route/22-duplicate manifest. Production
+  dependencies have no known vulnerability, and a redacted full-history scan
+  covers 762 commits / approximately 19.51 MB with no leak. The exact staged
+  delta also passes at approximately 37 KB. Hosted exact-head CI and
+  immutable Preview proof remain to be sealed after commit.
+- **Authority unchanged:** no Production merge/deploy, outbox mutation,
+  provider call, email/SMS/Push, environment change, database migration,
+  WordPress action, DNS, spend, deletion, or NellySelly action occurred.
+  Design and rollback:
+  [`phase9/AUTONOMOUS_NOTIFICATION_RETRY.md`](./phase9/AUTONOMOUS_NOTIFICATION_RETRY.md).
 
 ## Phase 9 SLA truth and cadence hardening — 2026-09-01
 

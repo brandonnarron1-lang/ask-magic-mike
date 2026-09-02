@@ -151,3 +151,22 @@ export function resolveSmtpConfiguration(
 export function smtpConfigurationReady(env: NodeJS.ProcessEnv = process.env) {
   return resolveSmtpConfiguration(env).ok;
 }
+
+/**
+ * Read-only readiness check for workers that must not consume durable outbox
+ * rows while the selected email provider is incomplete. No credential value
+ * leaves this function.
+ */
+export function emailProviderConfigurationReady(
+  env: NodeJS.ProcessEnv = process.env,
+) {
+  const provider = configuredEmailProvider(env);
+  if (provider === "smtp") return smtpConfigurationReady(env);
+  if (provider !== "resend") return false;
+
+  const apiKey = normalized(env.RESEND_API_KEY);
+  const fromEmail = normalized(
+    env.AGENT_NOTIFICATION_FROM_EMAIL || env.RESEND_FROM || env.FROM_EMAIL,
+  ).toLowerCase();
+  return Boolean(apiKey && validEmail(fromEmail));
+}

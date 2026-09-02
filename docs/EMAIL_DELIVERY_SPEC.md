@@ -70,6 +70,28 @@ retryable provider/network/429/5xx response becomes `retry_scheduled`; exhaustio
 becomes `permanently_failed`. AdminOps shows both states and allows a controlled
 retry. A failed email does not lose or roll back the lead.
 
+The existing protected retry route is also the scheduled worker. Vercel invokes
+`GET /api/admin/notifications/retry` once per minute in Production with
+`Authorization: Bearer $CRON_SECRET`; any other GET remains an authenticated,
+read-only readiness check. Each scheduled run processes at most 25 due rows
+sequentially and returns only status counts. It dispatches the three existing
+outbox types (`lead_alert`, `consumer_ack`, and `agent_assignment`) through their
+version-pinned renderers and provider adapters. Unknown types become visible
+terminal failures instead of being silently dropped.
+
+Before a Production batch reads the outbox, it verifies the existing Production
+mode, global delivery gate, email enablement, and selected Resend or SMTP
+configuration. An operational disablement or incomplete provider returns a
+no-store `notification_retry_delivery_not_ready` response and leaves due rows
+unchanged for a later healthy run. The check reports no credential value.
+
+Preview refuses the worker before repository or provider access. Automated runs
+mark QA rows skipped without sending, and every consumer-ack retry reloads the
+lead and re-checks current email consent, whole-record suppression, email
+suppression, and test state. Manual administrator retry remains available for a
+separately approved QA exercise. The database claim and provider idempotency key
+remain the duplicate-send boundary; scheduled execution creates no second queue.
+
 SMTP 4xx and connection/TLS timeout errors are retryable. Authentication errors,
 5xx recipient rejection, and partial primary/BCC acceptance require operator
 review and are not retried automatically, because a blind retry could duplicate a
