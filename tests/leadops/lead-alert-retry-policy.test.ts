@@ -11,6 +11,9 @@ function payload(overrides: Partial<LeadPayload> = {}): LeadPayload {
     lead_source_surface: "home_value_page",
     email: "consumer@example.test",
     consent_email: true,
+    consent_timestamp: "2026-09-28T12:00:00.000Z",
+    consent_language_version: "synthetic-consent-v1",
+    consent_language_text: "Synthetic exact consent language.",
     is_test: false,
     attribution: {},
     status: "new",
@@ -24,6 +27,9 @@ describe("lead-alert retry policy", () => {
     expect(consumerAcknowledgmentPermitted({ payload: payload() })).toBe(true);
     expect(consumerAcknowledgmentPermitted({ payload: payload({ consent_email: false }) })).toBe(false);
     expect(consumerAcknowledgmentPermitted({ payload: payload({ email: undefined }) })).toBe(false);
+    expect(consumerAcknowledgmentPermitted({ payload: payload({ consent_timestamp: null }) })).toBe(false);
+    expect(consumerAcknowledgmentPermitted({ payload: payload({ consent_language_version: undefined }) })).toBe(false);
+    expect(consumerAcknowledgmentPermitted({ payload: payload({ consent_language_text: undefined }) })).toBe(false);
     expect(consumerAcknowledgmentPermitted({ payload: payload({ is_test: true }) })).toBe(false);
     expect(consumerAcknowledgmentPermitted({ payload: payload(), communicationSuppressed: true })).toBe(false);
     expect(consumerAcknowledgmentPermitted({ payload: payload(), emailSuppressed: true })).toBe(false);

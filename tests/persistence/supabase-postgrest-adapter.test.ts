@@ -6,6 +6,11 @@ const internalNotification = {
   templateVersion: "lead_alert_email_v3",
   metadata: { correlation_id: "synthetic-correlation" },
 };
+const consumerNotification = {
+  enabled: true,
+  templateVersion: "consumer_ack_email_v1",
+  metadata: { consent_language_version: "synthetic-consent-v1" },
+};
 
 function response(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -38,6 +43,7 @@ describe("Supabase PostgREST persistence adapter", () => {
       attribution: { utm_source: "synthetic" },
       notificationMode: "disabled",
       internalNotification,
+      consumerNotification,
     });
 
     if (result.ok === false) throw new Error("expected capture success");
@@ -45,13 +51,18 @@ describe("Supabase PostgREST persistence adapter", () => {
     expect(request).toHaveBeenCalledTimes(1);
     const [url, init] = request.mock.calls[0];
     expect(String(url)).toBe(
-      "http://127.0.0.1:54321/rest/v1/rpc/capture_public_lead_v2",
+      "http://127.0.0.1:54321/rest/v1/rpc/capture_public_lead_v3",
     );
     expect(JSON.parse(String(init?.body))).toMatchObject({
       p_notification_mode: "disabled",
       p_internal_notification: {
         template_version: "lead_alert_email_v3",
         metadata: { correlation_id: "synthetic-correlation" },
+      },
+      p_consumer_notification: {
+        enabled: true,
+        template_version: "consumer_ack_email_v1",
+        metadata: { consent_language_version: "synthetic-consent-v1" },
       },
       p_session: { id: "22222222-2222-4222-8222-222222222222" },
     });
@@ -169,7 +180,7 @@ describe("Supabase PostgREST persistence adapter", () => {
       internalNotification,
     })).rejects.toMatchObject({
       name: "PersistenceUnavailableError",
-      code: "capture_public_lead_v2_domain_failure",
+      code: "capture_public_lead_v3_domain_failure",
       statusCode: 502,
     });
 

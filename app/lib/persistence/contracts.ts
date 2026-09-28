@@ -12,6 +12,14 @@ export type LeadLifecycleCapture = {
     templateVersion: string;
     metadata: Record<string, unknown>;
   };
+  /** Optional, server-authorized consumer acknowledgment intent. The database
+   * still derives eligibility from the stored lead's consent and suppression
+   * state before it creates an outbox row. */
+  consumerNotification?: {
+    enabled: boolean;
+    templateVersion: string;
+    metadata: Record<string, unknown>;
+  };
 };
 
 export type LeadLifecycleEnrichment = {
@@ -34,6 +42,9 @@ export type LeadLifecycleCaptureSuccess = {
   assignment_audit_id?: string | null;
   notification_id?: string | null;
   notification_status?: string | null;
+  consumer_notification_id?: string | null;
+  consumer_notification_status?: string | null;
+  consumer_notification_seeded?: boolean;
   idempotent_replay: boolean;
 };
 

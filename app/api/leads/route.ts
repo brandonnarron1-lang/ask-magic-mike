@@ -13,8 +13,14 @@ import {
 } from "../../lib/leadConsent";
 import { scoreLead } from "../../lib/leadScoring";
 import { routeLead } from "../../lib/leadRouting";
-import { enqueueLeadNotifications } from "../../lib/leadAlertService";
-import { LEAD_ALERT_TEMPLATE_VERSION } from "../../lib/leadAlertTemplates";
+import {
+  consumerAcknowledgmentEnabled,
+  enqueueLeadNotifications,
+} from "../../lib/leadAlertService";
+import {
+  CONSUMER_ACK_TEMPLATE_VERSION,
+  LEAD_ALERT_TEMPLATE_VERSION,
+} from "../../lib/leadAlertTemplates";
 import { notificationMode as configuredNotificationMode } from "../../lib/leadNotificationProvider";
 import { recordServerAnalyticsEvent } from "../../lib/serverAnalytics";
 import {
@@ -446,8 +452,8 @@ async function insertLead(
     session: buildSessionRow(payload, req, sessionId),
     lead: buildLeadRow(payload, req, sessionId, score, routing),
     attribution: buildSourceAttributionRow(payload, req),
-    // capture_public_lead_v2 always disables the legacy agent-assignment
-    // outbox internally. This mode controls only the canonical lead alert.
+    // capture_public_lead_v3 delegates to v2, which always disables the legacy
+    // agent-assignment outbox. This mode controls the canonical email intents.
     notificationMode: process.env.NODE_ENV === "test" ? "disabled" : configuredNotificationMode(),
     internalNotification: {
       templateVersion: LEAD_ALERT_TEMPLATE_VERSION,
@@ -457,6 +463,14 @@ async function insertLead(
         score: score.score,
         score_grade: score.grade,
         is_test: payload.is_test === true,
+        correlation_id: correlationId,
+      },
+    },
+    consumerNotification: {
+      enabled: process.env.NODE_ENV !== "test" && consumerAcknowledgmentEnabled(),
+      templateVersion: CONSUMER_ACK_TEMPLATE_VERSION,
+      metadata: {
+        consent_language_version: payload.consent_language_version || null,
         correlation_id: correlationId,
       },
     },

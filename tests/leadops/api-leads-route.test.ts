@@ -31,6 +31,7 @@ const ENV_KEYS = [
   "RATE_LIMIT_HASH_SECRET",
   "RATE_LIMIT_EMERGENCY_MEMORY",
   "WORDPRESS_BRIDGE_SECRET",
+  "CONSUMER_ACKNOWLEDGMENT_ENABLED",
 ] as const;
 const original = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
 
@@ -480,7 +481,7 @@ describe("POST /api/leads atomic lifecycle command", () => {
 
     expect(response.status).toBe(200);
     expect(calls).toHaveLength(1);
-    expect(calls[0].url).toContain("/rest/v1/rpc/capture_public_lead_v2");
+    expect(calls[0].url).toContain("/rest/v1/rpc/capture_public_lead_v3");
     const lead = calls[0].body.p_lead as Record<string, unknown>;
     expect(expectedMethod === "email" ? lead.normalized_email : lead.normalized_phone).toBeTruthy();
   });
@@ -525,7 +526,7 @@ describe("POST /api/leads atomic lifecycle command", () => {
 
     expect(response.status).toBe(200);
     expect(calls).toHaveLength(1);
-    expect(calls[0].url).toContain("/rest/v1/rpc/capture_public_lead_v2");
+    expect(calls[0].url).toContain("/rest/v1/rpc/capture_public_lead_v3");
     expect(calls[0].body).toMatchObject({
       p_session: {
         id: SESSION_ID,
@@ -548,6 +549,10 @@ describe("POST /api/leads atomic lifecycle command", () => {
       p_notification_mode: "disabled",
       p_internal_notification: {
         template_version: "lead_alert_email_v3",
+      },
+      p_consumer_notification: {
+        enabled: false,
+        template_version: "consumer_ack_email_v1",
       },
     });
     expect(await response.json()).toMatchObject({
@@ -836,7 +841,7 @@ describe("POST /api/leads atomic lifecycle command", () => {
       session_id: SESSION_ID,
     });
     expect(calls).toHaveLength(1);
-    expect(calls[0].url).toContain("/rest/v1/rpc/capture_public_lead_v2");
+    expect(calls[0].url).toContain("/rest/v1/rpc/capture_public_lead_v3");
     expect(calls.some((call) => call.url.includes("api.openai.com"))).toBe(false);
     expect(calls.some((call) => call.url.includes("api.resend.com"))).toBe(false);
     expect(calls.some((call) => call.url.includes("posthog"))).toBe(false);
@@ -901,7 +906,7 @@ describe("POST /api/leads atomic lifecycle command", () => {
   it("does not call generative or consumer providers from the public lead route", async () => {
     const fetchSpy = vi.fn((input: URL | RequestInfo, init?: RequestInit) => {
       const url = String(input);
-      if (url.includes("/rest/v1/rpc/capture_public_lead_v2")) {
+      if (url.includes("/rest/v1/rpc/capture_public_lead_v3")) {
         return Promise.resolve(jsonResponse(success()));
       }
       return Promise.reject(new Error("unexpected provider call"));
@@ -935,7 +940,7 @@ describe("POST /api/leads atomic lifecycle command", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const fetchSpy = vi.fn(async (input: URL | RequestInfo) => {
       const url = String(input);
-      if (url.includes("/rest/v1/rpc/capture_public_lead_v2")) {
+      if (url.includes("/rest/v1/rpc/capture_public_lead_v3")) {
         return jsonResponse(success());
       }
       throw new Error("synthetic provider unavailable");
