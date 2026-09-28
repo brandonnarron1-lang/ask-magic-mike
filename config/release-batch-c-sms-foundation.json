@@ -1,0 +1,25 @@
+{
+  "schema_version": "amm.release_batch.v1",
+  "status": "VERIFIED_NOT_PRODUCTION",
+  "batch": "C",
+  "name": "SMS CONSENT/STATUS FOUNDATION",
+  "base_commit": "a2f3de834830f600df106dbf5836ae4bbde4eb4a",
+  "source_prs": [273, 274],
+  "migrations": [],
+  "environment_names_referenced": ["TWILIO_AUTH_TOKEN", "SMS_WEBHOOK_MODE"],
+  "environment_changes_executed": 0,
+  "provider_activation": false,
+  "carrier_send_enabled": false,
+  "external_mutations_executed": 0,
+  "production_data_mutations_executed": 0,
+  "wordpress_mutations_executed": 0,
+  "rollback": "Re-alias the prior Vercel Production deployment; no schema rollback is required.",
+  "verification": {
+    "focused_test_files": 4,
+    "focused_tests": 45,
+    "postgres_version": "17.11",
+    "twilio_status_contract": "pass",
+    "inbound_sms_contract": "pass",
+    "typecheck": "pass"
+  }
+}
