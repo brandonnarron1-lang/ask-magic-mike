@@ -5,9 +5,14 @@ const internalNotification = {
   templateVersion: "lead_alert_email_v3",
   metadata: { correlation_id: "synthetic-correlation" },
 };
+const consumerNotification = {
+  enabled: true,
+  templateVersion: "consumer_ack_email_v1",
+  metadata: { consent_language_version: "synthetic-consent-v1" },
+};
 
 describe("NeonPostgresAdapter", () => {
-  it("returns an idempotent replay from the atomic v2 capture", async () => {
+  it("returns an idempotent replay from the atomic v3 capture wrapper", async () => {
     const query = vi.fn().mockResolvedValueOnce([{ result: {
       ok: true,
       lead_id: "22222222-2222-4222-8222-222222222222",
@@ -28,6 +33,7 @@ describe("NeonPostgresAdapter", () => {
       attribution: {},
       notificationMode: "disabled",
       internalNotification,
+      consumerNotification,
     });
 
     expect(result).toMatchObject({
@@ -37,14 +43,19 @@ describe("NeonPostgresAdapter", () => {
       idempotent_replay: true,
     });
     expect(query).toHaveBeenCalledTimes(1);
-    expect(String(query.mock.calls[0][0])).toContain("capture_public_lead_v2");
+    expect(String(query.mock.calls[0][0])).toContain("capture_public_lead_v3");
     expect(JSON.parse(String(query.mock.calls[0][1][4]))).toEqual({
       template_version: "lead_alert_email_v3",
       metadata: { correlation_id: "synthetic-correlation" },
     });
+    expect(JSON.parse(String(query.mock.calls[0][1][5]))).toEqual({
+      enabled: true,
+      template_version: "consumer_ack_email_v1",
+      metadata: { consent_language_version: "synthetic-consent-v1" },
+    });
   });
 
-  it("returns a v2 idempotency conflict without a lead id", async () => {
+  it("returns a v3 idempotency conflict without a lead id", async () => {
     const query = vi.fn().mockResolvedValueOnce([{ result: {
       ok: false,
       error: "idempotency_conflict",

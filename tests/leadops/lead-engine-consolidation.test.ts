@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { renderConsumerAcknowledgment, renderLeadAlert, renderLeadAlertSms } from "../../app/lib/leadAlertTemplates";
+import { CONSUMER_ACK_TEMPLATE_VERSION, renderConsumerAcknowledgment, renderConsumerAcknowledgmentForTemplateVersion, renderLeadAlert, renderLeadAlertSms } from "../../app/lib/leadAlertTemplates";
 import { scoreLead } from "../../app/lib/leadScoring";
 import { routeLead } from "../../app/lib/leadRouting";
 import { agentPushNotificationsEnabled, ResendEmailNotificationProvider, TwilioSmsNotificationProvider } from "../../app/lib/leadNotificationProvider";
@@ -128,6 +128,17 @@ describe("same-day lead engine contract", () => {
     expect(rendered.text).toContain("received your request");
     expect(rendered.text).not.toContain("valuation is");
     expect(rendered.text).not.toContain("within 5 minutes");
+  });
+
+  it("pins consumer acknowledgment rendering to its recorded template version", () => {
+    expect(renderConsumerAcknowledgmentForTemplateVersion(
+      { payload: { ...payload, is_test: false, consent_email: true } },
+      CONSUMER_ACK_TEMPLATE_VERSION,
+    )).not.toBeNull();
+    expect(renderConsumerAcknowledgmentForTemplateVersion(
+      { payload: { ...payload, is_test: false, consent_email: true } },
+      "consumer_ack_email_future",
+    )).toBeNull();
   });
 
   it("renders a minimal internal SMS with urgency, source, score, and a secure lead link", () => {

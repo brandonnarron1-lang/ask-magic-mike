@@ -37,8 +37,8 @@ function classifyCaptureError(error: unknown) {
   return "query_failed";
 }
 
-/** Server-only PostgreSQL adapter for Neon. The public capture keeps using the
- * same atomic SQL function; no browser ever receives DATABASE_URL. */
+/** Server-only PostgreSQL adapter for Neon. Public capture uses the additive
+ * v3 transaction wrapper; no browser ever receives DATABASE_URL. */
 export class NeonPostgresAdapter implements ActivePersistenceBoundary {
   constructor(private readonly sql: Query) {}
 
@@ -66,7 +66,7 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
   async captureLeadLifecycle(input: LeadLifecycleCapture): Promise<LeadLifecycleCaptureResult> {
     try {
       const rows = await this.sql.query(
-        "SELECT public.capture_public_lead_v2($1::jsonb, $2::jsonb, $3::jsonb, $4::text, $5::jsonb) AS result",
+        "SELECT public.capture_public_lead_v3($1::jsonb, $2::jsonb, $3::jsonb, $4::text, $5::jsonb, $6::jsonb) AS result",
         [
           JSON.stringify(input.session),
           JSON.stringify(input.lead),
@@ -75,6 +75,11 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
           JSON.stringify({
             template_version: input.internalNotification.templateVersion,
             metadata: input.internalNotification.metadata,
+          }),
+          JSON.stringify({
+            enabled: input.consumerNotification?.enabled === true,
+            template_version: input.consumerNotification?.templateVersion || null,
+            metadata: input.consumerNotification?.metadata || {},
           }),
         ],
       );

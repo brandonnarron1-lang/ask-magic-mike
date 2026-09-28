@@ -203,3 +203,12 @@ export function renderConsumerAcknowledgment(input: { payload: LeadPayload }) {
     html: `<div style="font-family:Arial,sans-serif;line-height:1.5"><p>${html(greeting)}</p><p>Ask Magic Mike and Our Town Properties received your request. Mike or the approved team will review it and follow up through the contact path you provided.</p><p>This message does not provide a valuation, offer, appointment, availability, or response-time promise.</p><p>Reply to this email or use the contact information on ourtownproperties.com if you need to add context.</p><p>Not a survey.</p></div>`,
   };
 }
+
+export function renderConsumerAcknowledgmentForTemplateVersion(
+  input: { payload: LeadPayload },
+  templateVersion: string,
+) {
+  return templateVersion === CONSUMER_ACK_TEMPLATE_VERSION
+    ? renderConsumerAcknowledgment(input)
+    : null;
+}

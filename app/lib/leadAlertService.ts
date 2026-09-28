@@ -7,7 +7,7 @@ import type { LeadNotificationRecord, LeadNotificationRepository, NotificationPr
 import type { LeadPayload } from "./leadPayload";
 import { routeLead, type LeadRoutingDecision } from "./leadRouting";
 import { scoreLead, type LeadScore } from "./leadScoring";
-import { CONSUMER_ACK_TEMPLATE_VERSION, LEAD_ALERT_SMS_TEMPLATE_VERSION, LEAD_ALERT_TEMPLATE_VERSION, renderConsumerAcknowledgment, renderLeadAlert, renderLeadAlertForTemplateVersion, renderLeadAlertSms } from "./leadAlertTemplates";
+import { CONSUMER_ACK_TEMPLATE_VERSION, LEAD_ALERT_SMS_TEMPLATE_VERSION, LEAD_ALERT_TEMPLATE_VERSION, renderConsumerAcknowledgment, renderConsumerAcknowledgmentForTemplateVersion, renderLeadAlert, renderLeadAlertForTemplateVersion, renderLeadAlertSms } from "./leadAlertTemplates";
 import { shouldAttachLeadAlertMedia, shouldQueueAgentUrgencySms, visualAssetUrl } from "./leadAlertVisualTemplates";
 import { NeonPushSubscriptionRepository, type StaffPushRecipientRole } from "./persistence/neonPushSubscriptionRepository";
 import {
@@ -37,6 +37,9 @@ export function consumerAcknowledgmentPermitted(
   return Boolean(
     input.payload.email &&
     input.payload.consent_email &&
+    input.payload.consent_timestamp &&
+    input.payload.consent_language_version?.trim() &&
+    input.payload.consent_language_text?.trim() &&
     !input.payload.is_test &&
     !input.communicationSuppressed &&
     !input.emailSuppressed
@@ -50,7 +53,7 @@ export function suppressAutomatedTestRetry(
 }
 
 function nowIso() { return new Date().toISOString(); }
-function consumerAcknowledgmentEnabled() {
+export function consumerAcknowledgmentEnabled() {
   return (process.env.CONSUMER_ACKNOWLEDGMENT_ENABLED || "false").toLowerCase() === "true";
 }
 function pushPriority(score: number) { return score >= 80 ? "[HOT]" : score >= 60 ? "[ACTIVE]" : "[NEW]"; }
@@ -136,9 +139,10 @@ async function enqueueOne(input: {
     ? `${input.type}:${input.leadId}:${input.templateVersion}:${input.channel}:${input.recipientRole || "internal"}:${input.recipientKey || "default"}`
     : `${input.type}:${input.leadId}:${input.templateVersion}`;
   const existing = await input.repo.findByIdempotencyKey(idempotencyKey);
-  // capture_public_lead_v2 seeds the required internal email row in the same
-  // transaction as the lead. Claim and deliver that pending row here; every
-  // other state remains governed by the normal retry/reconciliation policy.
+  // The canonical capture transaction seeds required internal email and any
+  // permitted consumer acknowledgment rows with these same idempotency keys.
+  // Claim and deliver a pending row here; every other state remains governed
+  // by the normal retry/reconciliation policy.
   if (existing) {
     return existing.status === "pending"
       ? deliver(existing, input, input.repo, input.provider)
@@ -223,6 +227,7 @@ async function loadLeadAlertInput(leadId: string, metadata: Record<string, unkno
       consent_email: row.consent_email === true,
       consent_call: row.consent_call === true,
       consent_sms: row.consent_sms === true,
+      consent_timestamp: typeof row.consent_timestamp === "string" ? row.consent_timestamp : null,
       consent_language_version: typeof row.consent_language_version === "string" ? row.consent_language_version : undefined,
       consent_language_text: typeof row.consent_language_text === "string" ? row.consent_language_text : undefined,
       is_test: row.is_test === true,
@@ -294,6 +299,19 @@ export async function retryLeadAlertNotification(
   const provider = selectNotificationProvider();
   if (current.notification_type === "consumer_ack") {
     const acknowledgmentRecipient = input.payload.email;
+    const rendered = renderConsumerAcknowledgmentForTemplateVersion(
+      input,
+      current.template_version,
+    );
+    if (!rendered) {
+      return await repo.update(current.id, {
+        status: "permanently_failed",
+        error_code: "notification_template_version_unsupported",
+        error_summary: "The recorded consumer-acknowledgment template version is not supported for retry.",
+        failed_at: nowIso(),
+        next_attempt_at: null,
+      });
+    }
     if (!consumerAcknowledgmentEnabled()) {
       return await repo.update(current.id, {
         status: "skipped",
@@ -305,7 +323,6 @@ export async function retryLeadAlertNotification(
     if (!consumerAcknowledgmentPermitted(input) || !acknowledgmentRecipient) {
       return await repo.update(current.id, { status: "skipped", error_code: "consumer_ack_not_permitted", error_summary: "Consumer acknowledgment is not permitted for this lead.", failed_at: nowIso() });
     }
-    const rendered = renderConsumerAcknowledgment(input);
     return deliver(current, { channel: "email", recipient: acknowledgmentRecipient, subject: rendered.subject, text: rendered.text, html: rendered.html, replyTo: process.env.SMTP_REPLY_TO || process.env.RESEND_FROM || process.env.FROM_EMAIL }, repo, provider);
   }
   if (current.channel === "sms") {
