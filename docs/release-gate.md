@@ -199,9 +199,24 @@ or use a bypass-cookie URL of the shape
 Slack, or QA reports.** Set `PRINT_MANUAL_BYPASS_URL=true` to surface
 the *template* of the URL without the token itself.
 
-The Vercel CLI also has `vercel curl`; this runner uses Node's
-built-in `fetch` so it does not depend on system `curl` being
-installed.
+The default transport is Node's built-in `fetch`, so CI does not depend on a
+system `curl` installation. A local operator with an authenticated Vercel CLI
+session may explicitly select Vercel's protected-deployment transport:
+
+```bash
+PREVIEW_URL="https://<preview-url>" \
+PREVIEW_TRANSPORT=vercel_cli \
+VERCEL_CLI_CWD="/absolute/path/to/the/vercel-linked-ask-magic-mike-project" \
+SAFE_DB_WRITE=false \
+npm run preview:qa
+```
+
+This invokes `vercel curl` without a shell. The absolute linked-project path is
+required, and headers/request bodies are passed through mode-0600 temporary
+files rather than command-line arguments. The runner deletes only its exact
+temporary directory after each request. Deployment Protection remains enabled,
+no CLI token or bypass secret is written to the report, and mutation checks
+remain fail-closed.
 
 ## Hard rules
 

@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-09-29 — Draft Batch A release truth and ingress hardening
+
+- Consolidated the unique release-authority and public-ingress capabilities from
+  historical Draft PRs #249–#252, #265–#266, and #268–#271 onto current main.
+- Hardened appointment, chat, session, analytics, lead, and experiment ingress
+  with exact origins, bounded bodies, deterministic idempotency, protected-field
+  rejection, PII filtering, and server-owned outcome recording.
+- Added protected-Preview Vercel CLI verification without weakening Deployment
+  Protection or exposing request headers/bodies in process arguments.
+- This entry records a Draft replacement branch only. It does not claim a merge,
+  deployment, environment change, Production write, WordPress publication, or
+  notification send.
+
 ## 2026-09-01 — Secure Neon Production credential redeploy
 
 - Replaced only Vercel Production `DATABASE_URL` with the Neon-generated

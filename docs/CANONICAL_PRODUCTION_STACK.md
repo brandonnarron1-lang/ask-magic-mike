@@ -27,15 +27,18 @@ This document defines the single authoritative source of truth for Ask Magic Mik
 | Node version | 24.x |
 | Automatic Git deployments | Enabled; Ignored Build Step command is empty |
 
-Current accepted Production release: PR #246 merge
-`98a91f752c4c53dc0ae300dfc320f47b53e32820`, deployment
-`dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`. This is an environment-only redeploy of
-the same verified source after secure replacement of Production `DATABASE_URL`;
-`dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is the immediate immutable application
-rollback. PR #247 is the only reviewed application candidate; its exact gate
-authorizes only an owner-approved same-tree application merge/deployment and
-does not authorize WordPress publication. PR #238 is a consumed five-migration
-cutover receipt. See
+Current accepted Production release: PR #247 merge
+`a2f3de834830f600df106dbf5836ae4bbde4eb4a`, exact tree
+`0065f829fc94f87ab5e0faf596c8e56733be3972`, deployment
+`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`. Deployment
+`dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` is the immediate application rollback.
+PR #248 is the only active reviewed application candidate at reviewed content
+head `f6134b71f258003aa5dc201cf5ef7cdb6eb61ee7`, exact tree
+`832be2750355391f9198fcaaaa6f46bb3beb8b3f`, with hosted Release Gate
+`36497982374` and Ready immutable Preview
+`dpl_2WE8ftPXZDrnkGdzVKtU2bzBnSBQ`. It has zero migrations or environment
+changes. Its application release authority does not authorize a WordPress
+plugin/page action. PR #238 is a consumed five-migration cutover receipt. See
 [`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).
 
 ### Verification command

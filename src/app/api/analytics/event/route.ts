@@ -8,12 +8,31 @@ import {
   safePublicAnalyticsProperties,
   safeRegisteredPublicAnalyticsDimension,
 } from "@/lib/analytics/privacy";
-import { checkRateLimit, rateLimitKey, LIMITS } from "@/lib/security/rate-limit";
+import {
+  checkRateLimit,
+  rateLimitKey,
+  LIMITS,
+  nonDurableRateLimitFallbackAllowed,
+} from "@/lib/security/rate-limit";
 import { requestContext } from "@/lib/observability/request";
 import { assertDatabaseMutationAllowed } from "@/lib/preview-security";
+import { isAutomatedBrowserUserAgent } from "../../../../../app/lib/browserAutomation";
 import { isApprovedPublicOrigin } from "../../../../../app/lib/publicOrigin";
 
 const MAX_EVENT_BODY_BYTES = 4_096;
+const PRIVATE_NO_STORE_HEADERS = {
+  "Cache-Control": "private, no-store, max-age=0",
+  Pragma: "no-cache",
+} as const;
+
+function rateLimitRetryAfter(resetAt: number) {
+  const maxSeconds = Math.ceil(LIMITS.analyticsEvent.windowMs / 1_000);
+  const secondsUntilReset = Math.ceil((resetAt - Date.now()) / 1_000);
+  return String(Math.max(
+    1,
+    Math.min(maxSeconds, Number.isFinite(secondsUntilReset) ? secondsUntilReset : maxSeconds),
+  ));
+}
 
 async function readBoundedJson(req: Request) {
   const contentType = req.headers.get("content-type")?.split(";", 1)[0]?.trim().toLowerCase();
@@ -47,55 +66,102 @@ async function readBoundedJson(req: Request) {
 }
 
 export async function POST(req: NextRequest) {
-  const ctx = requestContext("analytics/event", req.headers.get("x-request-id"));
-  if (!isApprovedPublicOrigin(req.headers.get("origin"))) {
-    return NextResponse.json({ error: "origin_not_approved" }, { status: 403 });
+  const ctx = requestContext("analytics/event");
+  const respond = (
+    body: Record<string, unknown>,
+    status: number,
+    extraHeaders: Record<string, string> = {},
+  ) => NextResponse.json(
+    { ...body, correlation_id: ctx.requestId },
+    {
+      status,
+      headers: {
+        ...ctx.finish(status),
+        ...PRIVATE_NO_STORE_HEADERS,
+        "X-AMM-Correlation-Id": ctx.requestId,
+        ...extraHeaders,
+      },
+    },
+  );
+
+  const origin = req.headers.get("origin");
+  if (!origin || !isApprovedPublicOrigin(origin)) {
+    return respond(
+      { error: "This event origin is not approved.", code: "origin_not_approved" },
+      403,
+    );
+  }
+  if (isAutomatedBrowserUserAgent(req.headers.get("user-agent"))) {
+    return respond(
+      { ok: true, persisted: false, excluded: "automation" },
+      202,
+    );
   }
   const mutation = assertDatabaseMutationAllowed();
   if (!mutation.ok) {
-    return NextResponse.json(
+    return respond(
       {
         ok: false,
         persisted: false,
         error: mutation.publicMessage,
         code: mutation.error,
       },
-      {
-        status: mutation.statusCode,
-        headers: ctx.finish(mutation.statusCode),
-      },
+      mutation.statusCode,
     );
   }
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
   const rl = await checkRateLimit(rateLimitKey(ip), LIMITS.analyticsEvent.limit, LIMITS.analyticsEvent.windowMs, "analyticsEvent");
   if (!rl.allowed) {
     ctx.log.warn("rate_limited", { request_id: ctx.requestId });
-    return NextResponse.json(
-      { error: "rate_limit_exceeded" },
-      { status: 429, headers: { ...ctx.responseHeaders(), "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+    return respond(
+      { error: "Too many events. Please wait and try again.", code: "rate_limited" },
+      429,
+      { "Retry-After": rateLimitRetryAfter(rl.resetAt) },
+    );
+  }
+  if (!rl.durable && !nonDurableRateLimitFallbackAllowed()) {
+    return respond(
+      {
+        ok: false,
+        persisted: false,
+        error: "Event collection is temporarily unavailable.",
+        code: "rate_limit_store_unavailable",
+      },
+      503,
     );
   }
 
   const body = await readBoundedJson(req);
   if (!body.ok) {
-    return NextResponse.json(
-      { error: body.status === 413 ? "Payload too large" : "Invalid JSON" },
-      { status: body.status },
+    const code = body.status === 413
+      ? "payload_too_large"
+      : body.status === 415
+        ? "unsupported_media_type"
+        : "invalid_json";
+    return respond(
+      { error: body.status === 413 ? "Payload too large" : "Invalid JSON", code },
+      body.status,
     );
   }
 
   const parsed = TrackEventSchema.safeParse(body.value);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", issues: parsed.error.flatten() },
-      { status: 422 }
+    return respond(
+      { error: "Validation failed", code: "invalid_event_payload" },
+      422,
     );
   }
   if (!isApprovedPublicAnalyticsEvent(parsed.data.eventName)) {
-    return NextResponse.json({ error: "event_not_public" }, { status: 422 });
+    return respond(
+      { error: "Invalid public event.", code: "event_not_public" },
+      422,
+    );
   }
   if (isCanonicalLedgerProtectedEvent(parsed.data.eventName)) {
-    return NextResponse.json({ error: "event_not_public" }, { status: 422 });
+    return respond(
+      { error: "Invalid public event.", code: "event_not_public" },
+      422,
+    );
   }
 
   const properties = safePublicAnalyticsProperties(
@@ -118,13 +184,15 @@ export async function POST(req: NextRequest) {
   });
 
   if (!persisted) {
-    return NextResponse.json(
-      { ok: false, persisted: false, error: "analytics_persistence_unavailable" },
-      { status: 503, headers: ctx.finish(503) },
+    return respond(
+      {
+        ok: false,
+        persisted: false,
+        error: "Event persistence is unavailable.",
+        code: "analytics_persistence_unavailable",
+      },
+      503,
     );
   }
-  return NextResponse.json(
-    { ok: true, persisted: true },
-    { status: 202, headers: ctx.finish(202) },
-  );
+  return respond({ ok: true, persisted: true }, 202);
 }

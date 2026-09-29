@@ -3,6 +3,15 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { HomeValueFunnel } from "../../app/components/black-diamond/HomeValueFunnel";
+import { assignExperimentVariant } from "../../app/lib/growth/experiment-engine";
+import { HOME_VALUE_TRUST_EXPERIMENT } from "../../app/lib/growth/experiment-registry";
+
+const EXPERIMENT_SUBJECT_KEY = "d".repeat(64);
+const EXPERIMENT_VARIANT_KEY = assignExperimentVariant(
+  HOME_VALUE_TRUST_EXPERIMENT.key,
+  EXPERIMENT_SUBJECT_KEY,
+  [...HOME_VALUE_TRUST_EXPERIMENT.variants],
+);
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
@@ -111,7 +120,11 @@ describe("home-value inline validation", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<HomeValueFunnel />);
+    render(<HomeValueFunnel experimentContext={{
+      experimentKey: HOME_VALUE_TRUST_EXPERIMENT.key,
+      subjectKey: EXPERIMENT_SUBJECT_KEY,
+      variantKey: EXPERIMENT_VARIANT_KEY,
+    }} />);
     await user.type(screen.getByLabelText("Property address"), "100 Internal QA Lane, Wilson NC");
     await user.click(screen.getByRole("button", { name: "Continue" }));
     expect(screen.getByText("Step 2 of 3")).toBeVisible();
@@ -133,6 +146,10 @@ describe("home-value inline validation", () => {
       consent: true,
       consent_email: true,
       consent_call: false,
+      experiment_key: HOME_VALUE_TRUST_EXPERIMENT.key,
+      experiment_subject_key: EXPERIMENT_SUBJECT_KEY,
+      experiment_variant_key: EXPERIMENT_VARIANT_KEY,
+      experiment_surface: HOME_VALUE_TRUST_EXPERIMENT.surface,
     });
     expect(typeof body.idempotency_key).toBe("string");
     const eventBodies = fetchMock.mock.calls
@@ -141,6 +158,7 @@ describe("home-value inline validation", () => {
     expect(eventBodies.length).toBeGreaterThan(0);
     expect(eventBodies.every((event) => event.session_id === body.idempotency_key)).toBe(true);
     expect(eventBodies.map((event) => event.event_name)).not.toContain("lead_created");
+    expect(fetchMock.mock.calls.some(([input]) => String(input) === "/api/experiments/event")).toBe(false);
   });
 
   it("keeps a failed durable write on the contact step and emits only safe failure telemetry", async () => {

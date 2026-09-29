@@ -186,6 +186,17 @@ function flattenedTargets(target) {
   return target == null ? [] : [String(target)];
 }
 
+const VERCEL_ENV_MANIFEST_TOP_LEVEL_FIELDS = new Set(["envs"]);
+const VERCEL_ENV_MANIFEST_ENTRY_FIELDS = new Set(["key", "target", "type"]);
+const VERCEL_ENV_VALUE_FIELD_PATTERN =
+  /^(?:value|decrypted|secretValue|plainValue|password|token)$/i;
+
+function containsOnlyStrings(value) {
+  if (typeof value === "string") return true;
+  if (!Array.isArray(value)) return false;
+  return value.every(containsOnlyStrings);
+}
+
 /**
  * Parse the metadata-only projection produced from
  * `vercel env ls --format json` and return Production-scoped variable names.
@@ -204,18 +215,45 @@ export function parseVercelProductionEnvNames(input) {
     throw new Error("vercel_env_manifest_shape_invalid");
   }
 
+  const unsafeTopLevelField = Object.keys(payload).find((field) =>
+    VERCEL_ENV_VALUE_FIELD_PATTERN.test(field),
+  );
+  if (unsafeTopLevelField) throw new Error("vercel_env_manifest_contains_values");
+  if (
+    Object.keys(payload).some(
+      (field) => !VERCEL_ENV_MANIFEST_TOP_LEVEL_FIELDS.has(field),
+    )
+  ) {
+    throw new Error("vercel_env_manifest_field_invalid");
+  }
+
   const names = new Set();
   for (const item of payload.envs) {
     if (!item || typeof item !== "object" || Array.isArray(item)) {
       throw new Error("vercel_env_manifest_entry_invalid");
     }
     const unsafeField = Object.keys(item).find((field) =>
-      /^(?:value|decrypted|secretValue|plainValue|password|token)$/i.test(field),
+      VERCEL_ENV_VALUE_FIELD_PATTERN.test(field),
     );
     if (unsafeField) throw new Error("vercel_env_manifest_contains_values");
+    if (
+      Object.keys(item).some(
+        (field) => !VERCEL_ENV_MANIFEST_ENTRY_FIELDS.has(field),
+      )
+    ) {
+      throw new Error("vercel_env_manifest_field_invalid");
+    }
 
     const key = typeof item.key === "string" ? item.key.trim() : "";
-    if (!key || !/^[A-Z][A-Z0-9_]*$/.test(key)) continue;
+    if (!key || !/^[A-Z][A-Z0-9_]*$/.test(key)) {
+      throw new Error("vercel_env_manifest_entry_invalid");
+    }
+    if (item.target != null && !containsOnlyStrings(item.target)) {
+      throw new Error("vercel_env_manifest_entry_invalid");
+    }
+    if (item.type != null && typeof item.type !== "string") {
+      throw new Error("vercel_env_manifest_entry_invalid");
+    }
     if (flattenedTargets(item.target).includes("production")) names.add(key);
   }
   return [...names].sort();
@@ -278,6 +316,199 @@ export function releaseLogMentionsPr(releaseLogPath, prNumber) {
     return { ok: false, reason: `PR #${prNumber} not found in release log` };
   }
   return { ok: true };
+}
+
+/**
+ * Parse the repository's canonical release-authority manifest and return only
+ * the fields required to prove the accepted Production release. The manifest
+ * is configuration metadata, never a secret-bearing environment source.
+ */
+export function parseCurrentProductionAuthority(input) {
+  let payload;
+  try {
+    payload = typeof input === "string" ? JSON.parse(input) : input;
+  } catch {
+    throw new Error("current_release_authority_invalid_json");
+  }
+
+  const production = payload?.production;
+  const shaPattern = /^[0-9a-f]{40}$/;
+  if (
+    !payload
+    || typeof payload !== "object"
+    || !Number.isInteger(payload.schemaVersion)
+    || payload.schemaVersion < 1
+    || !production
+    || typeof production !== "object"
+    || !Number.isInteger(production.pr)
+    || production.pr < 1
+    || !shaPattern.test(String(production.mergeCommit ?? ""))
+    || !shaPattern.test(String(production.tree ?? ""))
+    || !/^dpl_[A-Za-z0-9]+$/.test(String(production.deploymentId ?? ""))
+    || production.status !== "accepted"
+  ) {
+    throw new Error("current_release_authority_shape_invalid");
+  }
+
+  return {
+    schemaVersion: payload.schemaVersion,
+    pr: production.pr,
+    mergeCommit: production.mergeCommit,
+    tree: production.tree,
+    deploymentId: production.deploymentId,
+    status: production.status,
+  };
+}
+
+export function loadCurrentProductionAuthority(root) {
+  const path = join(root, "config/current-release-authority.json");
+  const content = readFileSafe(path);
+  if (!content) {
+    return { ok: false, reason: "current_release_authority_missing" };
+  }
+  try {
+    return { ok: true, authority: parseCurrentProductionAuthority(content) };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error instanceof Error
+        ? error.message
+        : "current_release_authority_invalid",
+    };
+  }
+}
+
+/**
+ * Require one exact release-log block for the accepted Production PR. A mere
+ * historical PR mention is insufficient: the block must contain the manifest's
+ * merge commit, tree, and Vercel deployment ID.
+ */
+export function releaseLogMatchesCurrentProduction(releaseLogPath, authority) {
+  const content = readFileSafe(releaseLogPath);
+  if (!content) return { ok: false, reason: "PRODUCTION_RELEASE_LOG.md not found" };
+
+  const headingPattern = new RegExp(`^## \\[PR #${authority.pr}\\][^\\n]*$`, "m");
+  const heading = headingPattern.exec(content);
+  if (!heading || heading.index === undefined) {
+    return { ok: false, reason: `current PR #${authority.pr} block not found in release log` };
+  }
+
+  const afterHeading = content.slice(heading.index + heading[0].length);
+  const nextHeadingIndex = afterHeading.search(/^## \\[PR #\d+\\]/m);
+  const block = nextHeadingIndex >= 0
+    ? afterHeading.slice(0, nextHeadingIndex)
+    : afterHeading;
+  const required = [
+    ["merge commit", authority.mergeCommit],
+    ["production tree", authority.tree],
+    ["deployment", authority.deploymentId],
+  ];
+  for (const [label, value] of required) {
+    if (!block.includes(value)) {
+      return {
+        ok: false,
+        reason: `current PR #${authority.pr} release-log block missing ${label}`,
+      };
+    }
+  }
+  return { ok: true };
+}
+
+export const CURRENT_OPERATING_DOC_MARKER = "<!-- amm-current-operations-v1 -->";
+
+export const CURRENT_OPERATING_DOCS = [
+  "docs/CURRENT_STATE_RECONCILIATION.md",
+  "docs/GO_LIVE_RUNBOOK.md",
+  "docs/GO_NO_GO_COMMAND_CENTER.md",
+  "docs/CONTROLLED_LAUNCH_RUNBOOK.md",
+  "docs/OWNER_ACTION_PROOF_PACK.md",
+  "docs/PRODUCTION_DEPLOY_REHEARSAL.md",
+  "docs/CONTROLLED_TRAFFIC_ACTIVATION.md",
+];
+
+export const STALE_OPERATING_DOC_PATTERNS = [
+  {
+    id: "retired_database_operator_path",
+    pattern: /Supabase Dashboard|NEXT_PUBLIC_SUPABASE_URL|NEXT_PUBLIC_SUPABASE_ANON_KEY|SUPABASE_SERVICE_ROLE_KEY/i,
+  },
+  {
+    id: "retired_shared_secret_operator_path",
+    pattern: /ADMIN_SECRET=your_secret|x-admin-secret:\s*\$ADMIN_SECRET/i,
+  },
+  {
+    id: "stale_lc7_baseline",
+    pattern: /main`?\s*@\s*`?815a33a|1187\/1187|post-merge-train\s+#44[–-]#52/i,
+  },
+  {
+    id: "stale_owner_action_matrix",
+    pattern: /\bOA-[1-6]\b/,
+  },
+  {
+    id: "retired_rate_limit_requirement",
+    pattern: /\bUpstash\b/i,
+  },
+];
+
+const OPERATING_DOC_REQUIRED_TOKENS = [
+  "config/current-release-authority.json",
+  "Neon",
+  "Better Auth",
+  "OWNER_APPROVAL_QUEUE.md",
+  "KNOWN_BLOCKERS.md",
+];
+
+/**
+ * Fail closed when operator-facing documents drift back to retired database,
+ * auth, release, or approval instructions. These files are executable human
+ * control surfaces, not merely historical prose.
+ */
+export function validateCurrentOperatingDocs(root, authority) {
+  const issues = [];
+  for (const relativePath of CURRENT_OPERATING_DOCS) {
+    const content = readFileSafe(join(root, relativePath));
+    if (!content) {
+      issues.push({ doc: relativePath, issue: "missing" });
+      continue;
+    }
+    if (!content.includes(CURRENT_OPERATING_DOC_MARKER)) {
+      issues.push({ doc: relativePath, issue: "current_marker_missing" });
+    }
+    for (const token of OPERATING_DOC_REQUIRED_TOKENS) {
+      if (!content.includes(token)) {
+        issues.push({ doc: relativePath, issue: `required_token_missing:${token}` });
+      }
+    }
+    for (const { id, pattern } of STALE_OPERATING_DOC_PATTERNS) {
+      if (pattern.test(content)) issues.push({ doc: relativePath, issue: id });
+    }
+  }
+
+  for (const relativePath of [
+    "docs/CURRENT_STATE_RECONCILIATION.md",
+    "docs/GO_NO_GO_COMMAND_CENTER.md",
+  ]) {
+    const content = readFileSafe(join(root, relativePath));
+    const exactTokens = [
+      `PR #${authority.pr}`,
+      authority.mergeCommit,
+      authority.tree,
+      authority.deploymentId,
+    ];
+    for (const token of exactTokens) {
+      if (content && !content.includes(token)) {
+        issues.push({ doc: relativePath, issue: `production_identity_missing:${token}` });
+      }
+    }
+  }
+
+  const commandCenter = readFileSafe(join(root, "docs/GO_NO_GO_COMMAND_CENTER.md"));
+  if (commandCenter && !commandCenter.includes("GO_CONTROLLED_TRAFFIC_READY")) {
+    issues.push({
+      doc: "docs/GO_NO_GO_COMMAND_CENTER.md",
+      issue: "current_launch_authority_missing",
+    });
+  }
+  return issues;
 }
 
 /**
@@ -392,25 +623,50 @@ if (isMain) {
     }
   }
 
-  // ── Release log currency check ───────────────────────────────────────────
+  // ── Current release authority and release-log currency ──────────────────
   console.log("\n[Release log currency]");
   const releaseLogPath = join(ROOT, "docs/PRODUCTION_RELEASE_LOG.md");
-  for (const prNum of [181]) {
-    const logResult = releaseLogMentionsPr(releaseLogPath, prNum);
+  const currentAuthority = loadCurrentProductionAuthority(ROOT);
+  if (!currentAuthority.ok) {
+    fail("current release authority manifest rejected", currentAuthority.reason);
+  } else {
+    const production = currentAuthority.authority;
+    pass(
+      `current release authority loaded: PR #${production.pr}`,
+      `${production.mergeCommit.slice(0, 7)} / ${production.deploymentId}`,
+    );
+    const logResult = releaseLogMatchesCurrentProduction(releaseLogPath, production);
     if (logResult.ok) {
-      pass(`release log mentions PR #${prNum}`);
+      pass(`release log matches current Production PR #${production.pr}`);
     } else {
-      fail(`release log missing PR #${prNum} entry`, logResult.reason);
+      fail(`release log is stale for current Production PR #${production.pr}`, logResult.reason);
+    }
+  }
+
+  // ── Current operator-document contract ──────────────────────────────────
+  console.log("\n[Current operating documentation]");
+  if (!currentAuthority.ok) {
+    fail("operator documents cannot be verified", currentAuthority.reason);
+  } else {
+    const issues = validateCurrentOperatingDocs(ROOT, currentAuthority.authority);
+    if (issues.length === 0) {
+      pass(
+        "operator documents match canonical Production architecture",
+        `${CURRENT_OPERATING_DOCS.length} current control surfaces`,
+      );
+    } else {
+      fail(
+        `operator documentation has ${issues.length} currentness issue(s)`,
+        issues.slice(0, 8).map(({ doc, issue }) => `${doc}:${issue}`).join(", "),
+      );
     }
   }
 
   // ── Stale vercel.app URLs in new operational docs ────────────────────────
   console.log("\n[Stale vercel.app URLs in operational docs]");
-  const operationalDocs = [
-    join(ROOT, "docs/CONTROLLED_LAUNCH_RUNBOOK.md"),
-    join(ROOT, "docs/OWNER_ACTION_PROOF_PACK.md"),
-    join(ROOT, "docs/PRODUCTION_DEPLOY_REHEARSAL.md"),
-  ].filter(existsSync);
+  const operationalDocs = CURRENT_OPERATING_DOCS
+    .map((relativePath) => join(ROOT, relativePath))
+    .filter(existsSync);
   const staleDocUrls = findStaleVercelUrlsInDocs(operationalDocs);
   if (staleDocUrls.length === 0) {
     pass("no stale vercel.app URLs in operational docs");

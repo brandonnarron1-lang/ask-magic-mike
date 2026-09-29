@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { trackEvent } from "../../lib/analytics";
-import type { Attribution } from "../../lib/leadPayload";
+import type { Attribution, LeadSourceSurface } from "../../lib/leadPayload";
 
 type RequestState = "idle" | "loading" | "success" | "already_requested" | "degraded" | "error";
 
 type AppointmentRequestCTAProps = {
   leadId: string | null;
   sessionId: string | null;
-  requestSurface: string;
+  requestSurface: LeadSourceSurface;
   funnelName: string;
   attribution: Attribution;
   compact?: boolean;
@@ -89,6 +89,12 @@ export function AppointmentRequestCTA({
         error?: string;
       };
       if (!response.ok) throw new Error(data.error || "appointment_request_failed");
+      if (data.status === "requested") {
+        trackEvent("appointment_requested", attribution, {
+          funnel_name: funnelName,
+          request_surface: requestSurface,
+        }, { sessionId });
+      }
       if (data.warning) {
         setState("degraded");
       } else if (data.status === "already_requested") {

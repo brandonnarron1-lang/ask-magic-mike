@@ -7,8 +7,10 @@ import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
 import { timelineOptions } from "../../lib/constants";
 import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
 import { isValidLeadEmail, isValidLeadPhone } from "../../lib/leadContactValidation";
-import type { PublicExperimentContext } from "../../lib/growth/experiment-registry";
-import { recordExperimentEvent } from "../../lib/growth/public-experiment-client";
+import {
+  publicExperimentLeadFields,
+  type PublicExperimentContext,
+} from "../../lib/growth/experiment-registry";
 import { publicLeadErrorMessage } from "../../lib/publicLeadErrors";
 import { LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../lib/leadConsent";
 import { postToWidgetParent } from "../../lib/widgetMessaging";
@@ -61,6 +63,7 @@ export function HomeValueFunnel({
   const experimentProperties = experimentContext
     ? { experiment_key: experimentContext.experimentKey, variant_key: experimentContext.variantKey }
     : {};
+  const experimentLeadContext = publicExperimentLeadFields(experimentContext);
   const eventOptions = { sessionId: submissionId };
 
   useEffect(() => {
@@ -161,6 +164,7 @@ export function HomeValueFunnel({
           assigned_agent_id: null,
           widget_session_id: submissionId,
           idempotency_key: submissionId,
+          ...(experimentLeadContext || {}),
           consent,
           consent_email: consent,
           consent_call: consent && Boolean(clean(phone)),
@@ -180,9 +184,6 @@ export function HomeValueFunnel({
       const idempotentReplay = res.headers.get("X-AMM-Idempotent-Replay") === "1";
       if (!idempotentReplay) {
         trackEvent("lead_created", attribution, { funnel_name: "home_value", step_name: "thank_you", ...experimentProperties }, eventOptions);
-        if (experimentContext && data.lead_id) {
-          void recordExperimentEvent(experimentContext, "lead_created", data.lead_id);
-        }
         if (surface === "widget") {
           trackEvent("widget_lead_created", attribution, { funnel_name: "home_value" }, eventOptions);
           postToWidgetParent({ type: "askmagicmike:lead_created" }, attribution);
