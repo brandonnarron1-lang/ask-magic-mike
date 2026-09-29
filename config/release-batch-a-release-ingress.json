@@ -28,9 +28,17 @@
     "pnpm": "10.30.3",
     "focused_test_files": 20,
     "focused_tests": 380,
+    "full_test_files": 287,
+    "full_tests": 3529,
     "dependency_audit": "zero_known_vulnerabilities",
+    "release_doctor": "43_pass_0_fail_0_skip",
+    "system_isolation": "pass",
+    "release_safety": "14_pass_0_fail",
     "typecheck": "pass",
-    "full_release_gate": "pending_final_candidate"
+    "lint": "pass",
+    "next_build": "pass_60_static_pages",
+    "route_manifest": "pass_100_active_22_acknowledged_duplicates",
+    "full_release_gate": "pass_local_pending_hosted_exact_head"
   },
   "approval_gate": "APPROVE PHASE 9 BATCH A RELEASE TRUTH AND PUBLIC INGRESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT"
 }

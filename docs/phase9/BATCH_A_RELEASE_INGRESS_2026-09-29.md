@@ -44,13 +44,19 @@ authorize spend.
 - 20 focused files / 380 tests passed across lead, consent, idempotency,
   experiment, chat, appointment, analytics, Preview, release-authority, and
   dependency-floor contracts;
-- strict TypeScript passed;
+- the complete suite passed 287 files / 3,529 tests;
+- the release doctor passed 43/43 checks, system isolation passed, and the
+  release safety scan passed 14/14 controls;
+- strict TypeScript and full ESLint passed;
+- the optimized Next.js 15.5.26 build generated 60 static pages and the route
+  manifest passed 100 active routes with 22 acknowledged root/src duplicates;
 - no migration file exists in the branch diff;
 - no candidate credential was added.
 
-The complete release gate, protected no-write Preview, and immutable rollback
-receipt must pass before this Draft can be considered for release. Exact totals
-and hosted evidence must be recorded against the final candidate commit.
+The complete local release gate passed. Protected no-write Preview, hosted
+exact-head checks, and an immutable rollback receipt must also pass before this
+Draft can be considered for release. Hosted evidence must be recorded against
+the final candidate commit.
 
 ## Rollback
 
