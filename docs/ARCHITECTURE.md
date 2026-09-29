@@ -255,7 +255,7 @@ conflict with this section.
   Vercel project `eyes-up-industries/ask-magic-mike`.
 - Canonical database: Neon PostgreSQL through the server-only
   `NeonPostgresAdapter` and the reviewed atomic function
-  `capture_public_lead_v1`. The Supabase/PostgREST adapter is rollback-only.
+  `capture_public_lead_v2`. The Supabase/PostgREST adapter is rollback-only.
 - Brokerage/SEO surface: `https://www.ourtownproperties.com` (WordPress,
   Beaver Builder, Gravity Forms, FlexMLS/IDX). It remains a presentation and
   attribution bridge, not a competing lead database.
@@ -266,15 +266,28 @@ conflict with this section.
   Internal delivery uses the configured production boundary; consumer campaigns,
   carrier SMS, and other external sends retain independent approval/consent gates.
 
+`capture_public_lead_v2` wraps the proven v1 contact/dedupe/routing transaction
+and adds the complete deterministic score, test suppression, consent ledger,
+first/last-touch attribution, click IDs, placement context, source idempotency key,
+and one canonical internal-email outbox row before commit. Provider delivery stays
+outside the database transaction; a provider failure therefore cannot lose or
+roll back the lead, while an outbox-write failure cannot leave an alertless lead.
+
 ## Durable request sequence
 
 `public form/widget -> runtime validation and bot controls -> atomic Neon
 capture -> same-record consent/attribution/score enrichment -> internal notification
-outbox -> bounded provider retry -> AdminOps timeline`
+outbox -> atomic first attempt / five-minute unclaimed recovery -> bounded
+provider retry -> AdminOps timeline`
 
 Provider failure never rolls back a durable lead. A public success response is only
 returned after the atomic capture succeeds. Notification status is reported from
 the outbox, not inferred from an HTTP 200 from the public form.
+
+The scheduled worker may recover `pending` rows only after five minutes and
+only through the existing conditional claim. It never auto-replays
+`processing`; those records require provider-history reconciliation because the
+external outcome may be ambiguous.
 
 The existing atomic RPC remains the first durable write. Additive enrichment
 patches the same lead/source rows and appends immutable consent evidence before
@@ -364,3 +377,19 @@ exact replays are idempotent, and existing operator status/action class is
 preserved. `GROWTH_SEARCH_IMPORT_ENABLED=false` keeps deployments inert by
 default, while exact Neon endpoint attestation prevents Preview or cross-project
 mutation.
+
+## Atomic provider-email lifecycle boundary (Phase 9)
+
+Resend remains the authenticated internal-email provider and the canonical
+Neon outbox remains the delivery authority. The signed provider callback now
+executes receipt claim, notification lifecycle update, communication-event
+append, and eligible email suppression as a single parameterized PostgreSQL
+statement. An exact replay cannot repeat those effects, and an interrupted
+statement cannot strand a completed receipt ahead of missing downstream state.
+
+The callback is provider-authenticated rather than browser-Origin authorized.
+It therefore requires the existing Svix signature over the exact bounded raw
+body, an exact configured event allowlist, and a valid provider message ID.
+Preview is read-only. Raw payloads and recipient addresses are not retained in
+the provider receipt. This changes no schema, send adapter, retry worker,
+assignment rule, consent rule, or Lead Center read model.

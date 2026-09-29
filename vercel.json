@@ -2,7 +2,11 @@
   "crons": [
     {
       "path": "/api/admin/sla/sweep",
-      "schedule": "0 * * * *"
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/admin/notifications/retry",
+      "schedule": "* * * * *"
     },
     {
       "path": "/api/admin/operations/first-live",

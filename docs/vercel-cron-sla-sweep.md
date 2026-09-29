@@ -19,7 +19,7 @@ The checked-in `vercel.json` contains the active cron target:
   "crons": [
     {
       "path": "/api/admin/sla/sweep",
-      "schedule": "0 * * * *"
+      "schedule": "*/5 * * * *"
     }
   ]
 }
@@ -44,9 +44,8 @@ The local `.env.example` already lists these.
 
 ## Schedule guidance
 
-- **Every 5 minutes** is appropriate for A+/A SLA windows (2-minute and
-  5-minute targets). Anything tighter starts pinging the route faster
-  than the SLA target deserves.
+- **Every 5 minutes** is the checked-in release-candidate schedule. It bounds
+  detection delay while keeping the existing authenticated, idempotent sweep.
 - **Every 15 minutes** is fine if A+ traffic is rare.
 - **Every 1 hour** is fine for B/C leads only — don't choose this if
   you ever ship paid traffic.
@@ -89,12 +88,15 @@ Response shape:
 
 For each detected breach:
 
-1. `compliance_flags` row inserted with `flag_type`
+1. Only live, non-synthetic, non-suppressed leads are eligible. Human contact
+   is proven by `lead_response_milestones.first_human_response_at`; the mutable
+   `leads.last_contacted_at` projection is intentionally not trusted.
+2. `compliance_flags` row inserted with `flag_type`
    `sla_accept_breached` or `sla_contact_breached`.
-2. `analytics_events` row inserted with the matching event name.
-3. The admin cockpit (`/admin/leads` and `/admin/leads/[id]`) surfaces
+3. `analytics_events` row inserted with the matching event name.
+4. The admin cockpit (`/admin/leads` and `/admin/leads/[id]`) surfaces
    the flag.
-4. **No** SMS/email is sent automatically (that's behind the
+5. **No** SMS/email is sent automatically (that's behind the
    communications adapter + consent gates and is intentionally
    separate from the sweep).
 

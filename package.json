@@ -10,11 +10,12 @@
     "overrides": {
       "nanoid@<3.3.18": "3.3.18",
       "postcss@<8.5.26": "8.5.26",
-      "sharp@<0.35.0": "0.35.0",
+      "sharp@<0.35.4": "0.35.4",
       "esbuild": "0.25.12",
       "vite": "6.4.3",
       "form-data": "4.0.6",
-      "js-yaml": "4.3.1",
+      "js-yaml": "4.3.2",
+      "browserslist@<=4.28.6": "4.28.8",
       "minimatch@3.1.5>brace-expansion": "1.1.18",
       "minimatch@9.0.9>brace-expansion": "2.1.4",
       "minimatch@10.2.5>brace-expansion": "5.0.9"
@@ -61,6 +62,7 @@
     "staging:local:fixtures": "node scripts/admin-lifecycle-local-fixtures.mjs",
     "staging:local:fixtures:cleanup": "node scripts/admin-lifecycle-local-fixtures.mjs --cleanup",
     "test:postgres:infra02": "node scripts/infra-02-local-db-verify.mjs --postgres-contract",
+    "test:postgres:resend-webhook": "node scripts/verify-resend-webhook-atomic-sql.mjs",
     "test:supabase:infra02": "node scripts/infra-02-local-db-verify.mjs --supabase-lifecycle",
     "release:pr121:offline": "node scripts/release/pr121-offline-release.mjs",
     "release:preflight": "pnpm run release:doctor && pnpm run release:gate && pnpm run release:report && pnpm run launch:authority",
@@ -97,8 +99,8 @@
     "date-fns": "^4.1.0",
     "lucide-react": "^0.460.0",
     "nanoid": "^5.1.16",
-    "next": "^15.5.21",
-    "nodemailer": "9.0.5",
+    "next": "^15.5.24",
+    "nodemailer": "10.0.12",
     "pg": "^8.23.0",
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
@@ -110,7 +112,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
-    "@next/eslint-plugin-next": "^15.5.21",
+    "@next/eslint-plugin-next": "^15.5.24",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4.3.2",
     "@testing-library/jest-dom": "^6.6.3",
@@ -124,10 +126,10 @@
     "@types/react-dom": "^19.0.0",
     "@types/web-push": "3.6.4",
     "@vitejs/plugin-react": "^4.3.4",
-    "@vitest/coverage-v8": "^3.2.6",
+    "@vitest/coverage-v8": "4.1.11",
     "autoprefixer": "^10.5.0",
     "eslint": "^9.39.4",
-    "eslint-config-next": "^15.5.21",
+    "eslint-config-next": "^15.5.24",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.7.0",
     "jsdom": "^25.0.1",
@@ -136,6 +138,6 @@
     "typescript": "^5.7.0",
     "typescript-eslint": "^8.62.1",
     "vite": "6.4.3",
-    "vitest": "3.2.6"
+    "vitest": "4.1.11"
   }
 }

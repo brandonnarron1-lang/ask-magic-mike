@@ -42,4 +42,19 @@ describe("admin health security boundary", () => {
     expect(source).not.toContain("recipient_reference:");
     expect(source).not.toContain("question_raw:");
   });
+
+  it("exposes aggregate first-response work coverage without lead identity", () => {
+    expect(source).toContain("loadNeonAdminActionQueue({ aggregateOnly: true })");
+    expect(source).toContain("lead_operations:");
+    expect(source).toContain("first_response_risk_count");
+    expect(source).toContain("first_response_covered_count");
+    expect(source).toContain("first_response_uncovered_count");
+    expect(source).toContain("first_response_coverage_complete");
+    expect(source).toContain("test_and_suppressed_records_excluded: true");
+    expect(source).not.toContain("lead_label:");
+    expect(source).not.toContain("lead_id:");
+    expect(source).not.toContain("first_name:");
+    expect(source).not.toContain("last_name:");
+    expect(source).not.toContain("address_raw:");
+  });
 });

@@ -2,18 +2,28 @@
 
 ## Contract
 
-Lead persistence is independent of email. After the atomic lead capture commits:
+Lead persistence is independent of provider delivery. The public capture
+transaction now commits the complete lead and required internal delivery intent
+together:
 
-1. Create one internal alert outbox row keyed by
+1. Commit one internal alert outbox row keyed by
    `lead_alert:<lead_id>:lead_alert_email_v3` for new alerts. Historical v1/v2
    rows retain their recorded version and renderer during retry.
-2. Send to `LEAD_NOTIFICATION_TO` (default `mike@ourtownproperties.com`) and the
+2. After commit, atomically claim that row and send to `LEAD_NOTIFICATION_TO`
+   (default `mike@ourtownproperties.com`) and the
    secure `LEAD_NOTIFICATION_BCC` value, if configured. The BCC address is never
    rendered in the subject/body or logs.
 3. Create one separate consumer acknowledgment row only when the submitted email
    consent is true and suppression is false.
 4. Store provider, provider message ID, status, attempt count, timestamps,
    template version, safe error summary, and related lead ID in `lead_notifications`.
+
+`capture_public_lead_v2` also commits deterministic score factors, QA/test
+suppression, exact consent evidence, first/last-touch attribution, click IDs,
+placement context, and the source idempotency key. If the required outbox insert
+fails, the same transaction rolls back the lead; the public form cannot claim a
+durable success with no retryable internal alert. No recipient address, BCC,
+message body, or provider secret is stored by the capture function.
 
 ## Safe configuration
 
@@ -70,6 +80,52 @@ retryable provider/network/429/5xx response becomes `retry_scheduled`; exhaustio
 becomes `permanently_failed`. AdminOps shows both states and allows a controlled
 retry. A failed email does not lose or roll back the lead.
 
+The request path first claims and delivers the transaction-seeded `pending`
+record. If the function stops after commit but before that claim, the scheduled
+worker recovers the unclaimed row after five minutes. Idempotent request replay
+can also seed a missing canonical row for a historical lead; replay itself does
+not call the provider.
+
+The existing protected retry route is also the scheduled worker. Vercel invokes
+`GET /api/admin/notifications/retry` once per minute in Production with
+`Authorization: Bearer $CRON_SECRET`; any other GET remains an authenticated,
+read-only readiness check. Each scheduled run processes at most 25 due rows
+sequentially and returns only status counts. Due selection includes a
+never-claimed `pending` row only after the shared five-minute stale threshold,
+so a serverless interruption after durable insertion cannot strand the first
+attempt. The existing atomic conditional claim remains the concurrency and
+duplicate-send boundary. It dispatches the three existing
+outbox types (`lead_alert`, `consumer_ack`, and `agent_assignment`) through their
+version-pinned renderers and provider adapters. Unknown types become visible
+terminal failures instead of being silently dropped.
+
+Before a Production batch reads the outbox, it verifies the existing Production
+mode, global delivery gate, email enablement, and selected Resend or SMTP
+configuration. An operational disablement or incomplete provider returns a
+no-store `notification_retry_delivery_not_ready` response and leaves due rows
+unchanged for a later healthy run. The check reports no credential value.
+
+Preview refuses the worker before repository or provider access. Automated runs
+mark QA rows skipped without sending, and every consumer-ack retry reloads the
+lead and re-checks current email consent, whole-record suppression, email
+suppression, and test state. Manual administrator retry remains available for a
+separately approved QA exercise. The database claim and provider idempotency key
+remain the duplicate-send boundary; scheduled execution creates no second queue.
+
+Every assignment retry reloads and verifies the current exact assignee, active
+agent state, global staff-notification switch, channel switch, and current
+destination after atomically claiming the row but before provider delivery.
+Unassignment, reassignment, deactivation, or a channel pause records a visible
+`skipped` result and cannot leak the lead to a stale recipient. The protected
+Lead Center retry action dispatches each row through its recorded type's own
+processor rather than assuming every row is an agent assignment.
+
+Rows already in `processing` are intentionally absent from automatic selection.
+The provider may have accepted such a request before the application lost its
+response. AdminOps identifies processing rows older than ten minutes and directs
+the operator to reconcile provider history and message ID before any state
+change or replay.
+
 SMTP 4xx and connection/TLS timeout errors are retryable. Authentication errors,
 5xx recipient rejection, and partial primary/BCC acceptance require operator
 review and are not retried automatically, because a blind retry could duplicate a
@@ -115,3 +171,27 @@ template fails closed instead of silently changing content.
 SMS remains text-only by default. MMS media remains independently disabled and
 requires an approved registered carrier provider and non-test recipient. No AI
 model determines lead importance, recipient, routing, or delivery.
+
+## Atomic Resend lifecycle callback
+
+The existing `POST /api/webhooks/email/events` remains the only Resend callback
+and accepts only the eight lifecycle events configured on the provider
+subscription. It verifies bounded Svix headers and the exact raw JSON body
+before any database access, hashes rather than stores the payload, and refuses
+Preview writes even if a secret is copied accidentally.
+
+Receipt insertion, outbox mutation, communication-event insertion, and
+bounce/complaint suppression now share one parameterized PostgreSQL statement.
+Any database error rolls back every effect and returns a safe 503 so provider
+retry remains possible. Exact replay is acknowledged without mutation; only a
+receipt explicitly marked `failed` can be reclaimed. Reuse of a completed
+event ID with a different payload hash fails closed.
+
+Every callback response is private/no-store and correlated in both body and
+`X-AMM-Correlation-Id`. Stored metadata contains event class, timestamp,
+signature-verification truth, match state, and processing-contract version; it
+contains no raw payload, recipient address, signature, secret, or provider
+exception. Full contract and proof are in
+[`phase9/EMAIL_WEBHOOK_ATOMIC_BOUNDARY.md`](./phase9/EMAIL_WEBHOOK_ATOMIC_BOUNDARY.md)
+and
+[`phase9/EMAIL_WEBHOOK_ATOMIC_BOUNDARY_QA_EVIDENCE.md`](./phase9/EMAIL_WEBHOOK_ATOMIC_BOUNDARY_QA_EVIDENCE.md).

@@ -6,6 +6,7 @@ import {
 } from "../../app/lib/leadNotificationProvider";
 import {
   configuredEmailProvider,
+  emailProviderConfigurationReady,
   resolveSmtpConfiguration,
 } from "../../app/lib/emailProviderConfiguration";
 
@@ -75,6 +76,18 @@ describe("authenticated SMTP email provider", () => {
 
     process.env.EMAIL_PROVIDER = "mock";
     expect(configuredEmailProvider()).toBe("invalid");
+  });
+
+  it("reports provider readiness without returning credential material", () => {
+    expect(emailProviderConfigurationReady()).toBe(true);
+
+    process.env.EMAIL_PROVIDER = "resend";
+    process.env.RESEND_API_KEY = "synthetic-resend-key";
+    process.env.RESEND_FROM = "alerts@example.test";
+    expect(emailProviderConfigurationReady()).toBe(true);
+
+    delete process.env.RESEND_FROM;
+    expect(emailProviderConfigurationReady()).toBe(false);
   });
 
   it("accepts only authenticated TLS on approved ports with bounded timeouts", () => {

@@ -80,7 +80,10 @@ function QueueCard({ item }: { item: AdminActionQueueItem }) {
 export default async function AdminActionQueuePage() {
   const principal = await requireLeadCenterPermission("task:manage_assigned");
   const loadedQueue = await loadAdminActionQueue();
-  const queue = principal && !hasLeadCenterPermission(principal.role, "lead:view_all")
+  const canViewAll = Boolean(
+    principal && hasLeadCenterPermission(principal.role, "lead:view_all"),
+  );
+  const queue = principal && !canViewAll
     ? {
         ...loadedQueue,
         items: principal.agentId
@@ -88,9 +91,15 @@ export default async function AdminActionQueuePage() {
               (item) => item.assigned_agent_id?.toLowerCase() === principal.agentId?.toLowerCase(),
             )
           : [],
-      }
+    }
     : loadedQueue;
   const urgent = queue.items.filter((item) => item.priority <= 2).length;
+  const responseCoverage = canViewAll ? queue.firstResponseCoverage : null;
+  const responseCoverageNeedsAttention =
+    Boolean(
+      responseCoverage &&
+      (!responseCoverage.evidenceAvailable || responseCoverage.uncoveredCount > 0),
+    );
 
   return (
     <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
@@ -101,7 +110,7 @@ export default async function AdminActionQueuePage() {
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#e2c06f]">AdminOps</p>
               <h1 className="mt-3 font-serif text-4xl">Daily action queue</h1>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-[#d9ceb8]">
-                Overdue follow-ups, appointment requests, today&apos;s appointments, stalled leads, and retry review in one ordered queue.
+                First-response risks, overdue follow-ups, appointment requests, today&apos;s appointments, stalled leads, and retry review in one ordered queue.
               </p>
             </div>
             <nav className="flex flex-wrap gap-2" aria-label="Admin navigation">
@@ -115,7 +124,7 @@ export default async function AdminActionQueuePage() {
           </div>
         </header>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className={`grid gap-4 md:grid-cols-2 ${canViewAll ? "xl:grid-cols-4" : "xl:grid-cols-3"}`}>
           <div className="rounded-lg border border-[#cda24a24] bg-[#0b0b0b] p-4">
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#8f8778]">Open actions</p>
             <p className="mt-3 font-serif text-3xl">{queue.items.length}</p>
@@ -128,6 +137,31 @@ export default async function AdminActionQueuePage() {
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan-200">Generated</p>
             <p className="mt-3 text-sm text-[#f4ead4]">{shortDate(queue.generatedAt)}</p>
           </div>
+          {responseCoverage ? (
+            <div className={`rounded-lg border p-4 ${
+              responseCoverageNeedsAttention
+                ? "border-[#7f1d1d] bg-[#2a0909]"
+                : "border-cyan-400/25 bg-cyan-400/10"
+            }`}>
+              <p className={`text-[11px] font-bold uppercase tracking-[0.16em] ${
+                responseCoverageNeedsAttention ? "text-[#ffd7d7]" : "text-cyan-200"
+              }`}>
+                First-response coverage
+              </p>
+              <p className="mt-3 font-serif text-3xl">
+                {responseCoverage.evidenceAvailable
+                  ? `${responseCoverage.coveredCount}/${responseCoverage.riskCount}`
+                  : "Held"}
+              </p>
+              <p className="mt-2 text-xs leading-5 text-[#d9ceb8]">
+                {!responseCoverage.evidenceAvailable
+                  ? "Immutable response evidence is unavailable; coverage is not inferred."
+                  : responseCoverage.uncoveredCount > 0
+                    ? `${responseCoverage.uncoveredCount} response risk(s) lack an operator action.`
+                    : "Every current response risk has a direct or existing operator action."}
+              </p>
+            </div>
+          ) : null}
         </div>
 
         {queue.error ? (
@@ -144,7 +178,7 @@ export default async function AdminActionQueuePage() {
               <h2 className="font-serif text-3xl">No open actions</h2>
               <p className="mt-3 text-sm text-[#d9ceb8]">
                 {queue.configured
-                  ? "No overdue follow-ups, appointment requests, stalled leads, or retry-scheduled notifications were returned."
+                  ? "No first-response risks, overdue follow-ups, appointment requests, stalled leads, or retry-scheduled notifications were returned."
                   : "The canonical Neon database is not configured in this environment."}
               </p>
             </div>

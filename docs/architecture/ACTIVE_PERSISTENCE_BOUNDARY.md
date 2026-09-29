@@ -37,7 +37,12 @@ AdminOps page / server action
         -> src/lib/persistence/supabase/sla-sweep-repository.ts
 ```
 
-Public capture invokes `capture_public_lead_v1`. It commits session, identity, lead, attribution, duplicate decision, qualification projection, routing, assignment history, audit, and notification outbox together. Appointment intent invokes `request_public_appointment_v1`; appointment, lead projection, audit, and the confirmation task commit together.
+Public capture invokes `capture_public_lead_v2`. It keeps the proven v1 identity,
+dedupe, routing, assignment, and audit behavior, then atomically commits complete
+lead enrichment, immutable consent evidence, first/last-touch attribution, and
+the single canonical internal `lead_alert` outbox row. Provider delivery occurs
+only after commit. Appointment intent invokes `request_public_appointment_v1`;
+appointment, lead projection, audit, and the confirmation task commit together.
 
 Identity conflicts detected before the write phase return a sanitized `identity_conflict` result without writing lifecycle rows. Identity conflicts detected after a contact or first identity insert are raised inside a PL/pgSQL subtransaction; the subtransaction rolls back the contact/identity/session/lead/attribution/audit/routing/history/outbox write phase before returning the same sanitized `identity_conflict` result. A legacy orphan session row with no lead is treated as an `idempotency_conflict` and is not reused; this deterministic refusal avoids attaching a new lead to an ambiguous historical request id.
 

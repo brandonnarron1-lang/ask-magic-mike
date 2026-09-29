@@ -5,6 +5,10 @@ import {
   loadAdminLeadNotificationSummary,
 } from "../../lib/adminLeadNotificationView";
 import type { LeadNotificationRecord } from "../../lib/leadNotificationTypes";
+import {
+  NOTIFICATION_PENDING_STALE_MINUTES,
+  NOTIFICATION_PROCESSING_STALE_MINUTES,
+} from "../../lib/leadNotificationRetryPolicy";
 import { retryLeadNotificationAction } from "./actions";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 
@@ -249,9 +253,29 @@ export default async function AdminNotificationsPage({
             </div>
             <p className="mt-3 text-xs leading-5 text-[#8f8778]">
               Live queue = pending ({operations.pending}) + processing ({operations.processing}) + retry scheduled ({operations.retryScheduled}).
-              Stuck work = pending over 5 minutes ({operations.stalePending}) + processing over 10 minutes ({operations.staleProcessing}).
+              Stuck work = pending over {NOTIFICATION_PENDING_STALE_MINUTES} minutes ({operations.stalePending}) + processing over {NOTIFICATION_PROCESSING_STALE_MINUTES} minutes ({operations.staleProcessing}).
               Provider confirmation is distinct from provider acceptance.
             </p>
+            {operations.stalePending > 0 ? (
+              <section className="mt-4 rounded-lg border border-amber-300/30 bg-amber-300/[0.07] p-4">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-200">
+                  Automatic pending recovery due
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[#d9ceb8]">
+                  These records were durably stored but never claimed for delivery. The scheduled worker recovers them through the existing atomic claim after the {NOTIFICATION_PENDING_STALE_MINUTES}-minute safety window.
+                </p>
+              </section>
+            ) : null}
+            {operations.staleProcessing > 0 ? (
+              <section className="mt-4 rounded-lg border border-[#b4233a80] bg-[#3b09141f] p-4">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#ff9f91]">
+                  Provider reconciliation required
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[#d9ceb8]">
+                  A processing record older than {NOTIFICATION_PROCESSING_STALE_MINUTES} minutes may already have reached its provider. Verify provider history and message ID before changing its state; the worker never auto-replays ambiguous processing records.
+                </p>
+              </section>
+            ) : null}
           </>
         ) : (
           <>

@@ -75,7 +75,11 @@ describe("AdminOps notification guards", () => {
   it("keeps manual retry one-record and server-action based", () => {
     const action = read("app/admin/notifications/actions.ts");
     expect(action).toContain('"use server"');
-    expect(action).toContain("retryNotification(notificationId)");
+    expect(action).toContain("retryNotificationByType(notificationId)");
+    expect(action).not.toContain('from "../../lib/leadNotificationService"');
+    expect(action).toContain("{12}$/i");
+    expect(action).toContain("encodeURIComponent(result.error)");
+    expect(action).toContain("encodeURIComponent(result.warning)");
     expect(action).toContain("redirect(");
     expect(action).not.toContain("listRetryable");
     expect(action).not.toMatch(/\bbulk\b/i);
@@ -89,6 +93,9 @@ describe("AdminOps notification guards", () => {
     expect(page).toContain("Exact canonical-store totals exclude");
     expect(page).toContain("QA test");
     expect(page).toContain("Provider confirmation is distinct from provider acceptance");
+    expect(page).toContain("Automatic pending recovery due");
+    expect(page).toContain("Provider reconciliation required");
+    expect(page).toContain("never auto-replays ambiguous processing records");
     expect(page).not.toContain("recipient_reference");
   });
 
