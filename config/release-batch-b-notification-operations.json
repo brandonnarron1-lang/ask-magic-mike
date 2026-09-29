@@ -1,0 +1,60 @@
+{
+  "schema_version": "amm.release_batch.v1",
+  "status": "VERIFIED_NOT_PRODUCTION",
+  "batch": "B",
+  "name": "DURABLE NOTIFICATION OPERATIONS",
+  "base_commit": "a2f3de834830f600df106dbf5836ae4bbde4eb4a",
+  "source_prs": [258, 260, 261, 262, 263, 264, 272],
+  "release_order_prerequisite": "Batch A accepted or explicitly declined; if accepted, reconcile Batch B onto its exact accepted tree and rerun all gates.",
+  "migrations": [
+    "supabase/migrations/20260902012000_atomic_public_lead_delivery_intent.sql"
+  ],
+  "migration_sha256": {
+    "supabase/migrations/20260902012000_atomic_public_lead_delivery_intent.sql": "03242c1c9f84ba655fcf23758d32551f1f9caf9dd1c6d07e13f68762db96c2f7"
+  },
+  "migration_application_executed": false,
+  "environment_names_referenced": [
+    "AGENT_NOTIFICATIONS_ENABLED",
+    "CRON_SECRET",
+    "DATABASE_URL",
+    "EMAIL_ENABLED",
+    "EMAIL_PROVIDER",
+    "LEAD_NOTIFICATION_BCC",
+    "LEAD_NOTIFICATION_MODE",
+    "LEAD_NOTIFICATION_PRODUCTION_ENABLED",
+    "LEAD_NOTIFICATION_TO",
+    "RESEND_API_KEY",
+    "RESEND_WEBHOOK_SECRET",
+    "SMTP_PASSWORD",
+    "VERCEL_ENV"
+  ],
+  "environment_changes_executed": 0,
+  "provider_activation": false,
+  "outbound_messages_executed": 0,
+  "external_mutations_executed": 0,
+  "production_data_mutations_executed": 0,
+  "wordpress_mutations_executed": 0,
+  "potential_activation_effect": "A Production deployment schedules the protected retry worker. If existing Production delivery gates are already enabled, eligible non-test email outbox rows may be sent.",
+  "rollback": "Restore Vercel Production deployment dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U first; preserve all lead/notification records and retain the additive v2 function until in-flight requests are reconciled.",
+  "verification": {
+    "node": "24.18.0",
+    "pnpm": "10.30.3",
+    "focused_test_files": 23,
+    "focused_tests": 168,
+    "dependency_audit": "zero_known_vulnerabilities",
+    "postgres_webhook_contract": "pass_local_postgresql_17",
+    "migration_replay": "pass_40_of_40_local_postgresql_17",
+    "atomic_capture_contract": "pass_one_test_lead_three_consents_one_outbox_idempotent_replay",
+    "atomic_capture_rollback": "pass_forced_outbox_failure_left_zero_lead_session_contact_notification_rows",
+    "system_isolation": "pass",
+    "release_safety": "14_pass_0_fail",
+    "full_test_files": 293,
+    "full_tests": 3475,
+    "typecheck": "pass",
+    "lint": "pass",
+    "next_build": "pass_next_15_5_26_60_static_pages",
+    "route_manifest": "pass_100_active_22_acknowledged_duplicates",
+    "full_release_gate": "pass_local_pending_hosted_exact_head"
+  },
+  "planned_approval_gate": "APPROVE PHASE 9 BATCH B ATOMIC NOTIFICATION MIGRATION, ELIGIBLE EMAIL RETRY ACTIVATION, MERGE, AND SAME-TREE PRODUCTION DEPLOYMENT"
+}

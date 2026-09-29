@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-09-29 — Durable notification operations consolidation candidate
+
+- Consolidated the unique work from Draft PRs #258, #260–#264, and #272 onto
+  accepted PR #247 without merging their stacked ancestry or creating another
+  lead store, queue, worker, provider, or dashboard.
+- Reconciled first-response risks into the existing Action Queue; added the
+  protected scheduled retry path, stale-pending recovery, atomic public lead
+  plus internal-alert intent, and atomic Resend webhook receipt lifecycle.
+- Added one unapplied additive migration for `capture_public_lead_v2`; no Neon,
+  Vercel, provider, WordPress, lead, message, DNS, publication, spend, deletion,
+  or NellySelly mutation occurred.
+- Reused Batch A's reviewed dependency floors. Focused verification passes 23
+  files / 168 tests, strict TypeScript, a zero-vulnerability Production audit,
+  the exact webhook SQL contract on disposable PostgreSQL 17, and all 40
+  migrations plus synthetic v2 idempotency and forced-outbox rollback on
+  disposable PostgreSQL 17.
+- The complete Node 24 release gate passes system isolation, 14/14 safety
+  controls, 293 files / 3,475 tests, strict TypeScript, full ESLint, the
+  optimized Next.js 15.5.26 build with 60 static pages, and 100 active / 22
+  acknowledged duplicate routes.
+- Batch B remains local-only and must be reconciled onto Batch A if Batch A is
+  accepted. Its email-retry activation effect requires an explicit future gate.
+
 ## 2026-09-01 — Secure Neon Production credential redeploy
 
 - Replaced only Vercel Production `DATABASE_URL` with the Neon-generated
