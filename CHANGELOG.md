@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-09-29 — Batch D WordPress and placement readiness candidate
+
+- Consolidated the still-useful capabilities from Draft PRs #253–#257 and
+  #259 onto the accepted PR #247 Production base without replaying their
+  obsolete stacked ancestry or creating another lead, notification, QR,
+  WordPress, or dashboard system.
+- Added the signed Canonical Lead Bridge 1.3.0 boundary, fail-closed Form 7
+  consent contract, exact page-readiness and rollback tooling, seller-decision
+  gate, protected open-house packet/QR flow, and additive rental-placement
+  readiness.
+- Preserved Connector 1.1.0 as separate Draft PR #248 and documented the
+  required Batch A/Batch D/Batch B reconciliation order instead of implying
+  that an old component PR is independently releaseable.
+- Verified 161 focused and 3,481 full tests, strict typecheck, ESLint,
+  optimized Next.js 15.5.26 build, route/system-isolation/release-safety
+  contracts, archive integrity, and zero known production dependency
+  vulnerabilities. Exact-head hosted CI and immutable Preview proof remain
+  pending until the consolidated branch is pushed.
+- Performed no Production deployment, migration, WordPress mutation, QR
+  publication, outbound message, provider/secret change, or NellySelly action.
+
 ## 2026-09-01 — Secure Neon Production credential redeploy
 
 - Replaced only Vercel Production `DATABASE_URL` with the Neon-generated

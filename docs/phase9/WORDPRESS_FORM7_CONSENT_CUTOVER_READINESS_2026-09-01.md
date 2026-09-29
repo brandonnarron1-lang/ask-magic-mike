@@ -88,8 +88,11 @@ It prints only structural evidence and never recipient values or entry PII.
 
 ## Controlled cutover order
 
-1. Merge and release the existing stacked application work in order, beginning
-   with PR 248 only after its exact approval.
+1. Follow the current consolidated release order: decide Batch A, reconcile
+   Batch D onto its exact accepted tree if Batch A is accepted, and verify the
+   resulting exact head. Keep Connector Draft PR #248 separate and apply it
+   only after its own exact approval; Form 7 bridge readiness does not merge or
+   implicitly authorize that connector candidate.
 2. Install Canonical Bridge 1.3.0 with Form 3 unchanged and Form 7 still absent
    from the allowlist. Verify the checksum and health marker.
 3. Back up the WordPress database, Form 7 export, current notification, current

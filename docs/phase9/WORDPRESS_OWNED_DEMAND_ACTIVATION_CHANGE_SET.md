@@ -64,8 +64,8 @@ upgrade:
 The Home Value page-publication phrase is not requestable until the public
 1.1.0 marker is present, old shortcodes retain their prior links, and a fresh
 v3 manifest returns `legacy_match_ready`. The Connector candidate and its
-rollback assets remain owned by the separate Batch A release candidate; this
-batch does not duplicate or claim those artifacts.
+rollback assets remain owned by separate Draft PR #248; this batch does not
+duplicate, merge, deploy, or claim those artifacts.
 
 ## 2026-08-29 visibility correction
 

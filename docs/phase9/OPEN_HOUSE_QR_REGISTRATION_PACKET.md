@@ -2,8 +2,8 @@
 
 Date: 2026-09-01
 
-Status: stacked Draft application candidate; no Production or distribution
-authority
+Status: consolidated in the Batch D Draft candidate; no Production or
+distribution authority
 
 ## Decision
 
@@ -158,12 +158,15 @@ exact attribution, no-authority fields, shortlink redirect, unknown-reference
 404, RBAC denial, private/no-store JSON and SVG downloads, arbitrary-
 destination rejection, command-center reuse, and public-route validation.
 
-The candidate remains stacked behind PR #256 and cannot leapfrog PR #248, the
-only currently requestable application release. No new approval phrase is
-requestable from this Draft. A later release must be refreshed onto accepted
-`main`, receive complete exact-head CI/Preview/browser/log proof, and use a
-separately reviewed application gate. QR printing, placement, publication, or
-sending always remains an independent action.
+This capability is now consolidated into Batch D on accepted PR #247 rather
+than being independently releaseable from its historical stack. Before any
+merge, Batch A must be accepted or explicitly declined; if accepted, Batch D
+must be reconciled onto Batch A's exact accepted tree and every gate rerun.
+The resulting exact head must receive complete CI, Preview, browser, and log
+proof under the separately reviewed Batch D application gate. Connector Draft
+PR #248 remains independent and is not a prerequisite for this open-house
+application capability. QR printing, placement, publication, or sending
+always remains an independent action-time approval.
 
 Rollback before release is to close the Draft. After a separately approved
 application release, revert its merge or restore the immediately preceding
