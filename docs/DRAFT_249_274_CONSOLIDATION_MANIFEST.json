@@ -1,21 +1,44 @@
 {
   "schema_version": "amm.draft_consolidation.v1",
-  "generated_at": "2026-09-28T23:31:00Z",
-  "status": "PREPARED",
+  "generated_at": "2026-09-29T18:34:00Z",
+  "status": "DRAFT_REPLACEMENTS_BUILT_AND_VERIFIED",
   "repository": "https://github.com/brandonnarron1-lang/ask-magic-mike.git",
   "current_main": {
     "commit": "a2f3de834830f600df106dbf5836ae4bbde4eb4a",
     "tree": "0065f829fc94f87ab5e0faf596c8e56733be3972"
   },
+  "accepted_production": {
+    "pr": 247,
+    "deployment": "dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U",
+    "rollback_deployment": "dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe"
+  },
+  "execution_status": {
+    "merge_order": ["A", "D", "B", "C"],
+    "next_application_decision": {
+      "batch": "A",
+      "pr": 278,
+      "head": "65a09dc0137b97bda407ee24b0914e8f9bffd9c0",
+      "tree": "5775ba6a315abde9bbe55f770ccda2a64f897362"
+    },
+    "connector_pr": 248,
+    "consumer_ack_pr": 275,
+    "production_mutations_executed": 0
+  },
   "scope": {
     "first_pr": 249,
     "last_pr": 274,
-    "count": 26
+    "count": 26,
+    "assigned_to_replacement_count": 25,
+    "evidence_only_prs": [267]
   },
   "policy": "Do not merge the stack sequentially. Preserve old Drafts until replacement batches are accepted and separately approved for archival.",
   "replacement_batches": {
     "A": {
       "name": "RELEASE TRUTH + INGRESS HARDENING",
+      "replacement_pr": 278,
+      "replacement_head": "65a09dc0137b97bda407ee24b0914e8f9bffd9c0",
+      "replacement_tree": "5775ba6a315abde9bbe55f770ccda2a64f897362",
+      "replacement_status": "VERIFIED_NOT_PRODUCTION",
       "prs": [
         249,
         250,
@@ -31,6 +54,10 @@
     },
     "B": {
       "name": "DURABLE NOTIFICATION OPERATIONS",
+      "replacement_pr": 279,
+      "replacement_head": "131072e619eff72882c91931b60b8e93080d1280",
+      "replacement_tree": "a30a239d25d5a577130433999b48d48ea05ba9af",
+      "replacement_status": "VERIFIED_NOT_PRODUCTION_MIGRATION_SEPARATE",
       "prs": [
         258,
         260,
@@ -43,6 +70,10 @@
     },
     "C": {
       "name": "SMS CONSENT/STATUS FOUNDATION",
+      "replacement_pr": 277,
+      "replacement_head": "a2b5acf01006e3105d746cf8d8ca4da653d75cec",
+      "replacement_tree": "99910b7988daaef012d3b567a9897faa7c6b016b",
+      "replacement_status": "VERIFIED_NOT_PRODUCTION_PROVIDER_DISABLED",
       "prs": [
         273,
         274
@@ -51,6 +82,10 @@
     },
     "D": {
       "name": "WORDPRESS / OPEN-HOUSE / RENTAL PLACEMENT READINESS",
+      "replacement_pr": 280,
+      "replacement_head": "d1b2aa4219eb6176b6e0607d38f4fd822e0dcbf6",
+      "replacement_tree": "e5d11221e611268c8bc12909cd86f5a189cdaaae",
+      "replacement_status": "VERIFIED_NOT_PRODUCTION",
       "prs": [
         253,
         254,

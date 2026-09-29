@@ -16,6 +16,41 @@
 
 **Authority:** read-only external inspection plus local repository inspection; no Production mutation was made
 
+## 2026-09-29 continuation receipt — current execution authority
+
+This receipt supersedes the next-step priority recorded at the 2026-09-28
+evidence cutoff. It does not rewrite the historical audit.
+
+- Accepted Production remains PR #247 at merge commit
+  `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, tree
+  `0065f829fc94f87ab5e0faf596c8e56733be3972`, and Vercel deployment
+  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`. The prior accepted deployment
+  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` remains its rollback target.
+- Batch A is Draft PR #278 at
+  `65a09dc0137b97bda407ee24b0914e8f9bffd9c0`; exact-head CI, protected
+  mutation-free Preview QA, 15/15 browser scenarios, and a 500-event runtime
+  scan pass with zero error/fatal, 5xx, or NellySelly references.
+- Batch B is Draft PR #279 at
+  `131072e619eff72882c91931b60b8e93080d1280`; its additive notification
+  migration remains unapplied and separately gated.
+- Batch C is Draft PR #277 at
+  `a2b5acf01006e3105d746cf8d8ca4da653d75cec`; provider/carrier delivery
+  remains disabled.
+- Batch D is Draft PR #280 at
+  `d1b2aa4219eb6176b6e0607d38f4fd822e0dcbf6`; exact-head CI, protected
+  mutation-free Preview QA, 15/15 browser scenarios, and a 500-event runtime
+  scan pass with zero error/fatal, 5xx, or NellySelly references.
+- Connector PR #248 and consumer-acknowledgment PR #275 remain separate. No
+  connector install, consumer send, or Production action has been inferred.
+
+Merge-tree rehearsal proves A+D, A+B, and D+B conflict in the canonical lead
+route or its tests; A+C merges cleanly; B+C has a package-manifest conflict.
+The controlled sequence is therefore A, reconciled D, reconciled B, then C.
+PR #248 is refreshed later as an independent connector delta. The exact next
+gate is now Batch A as recorded in `docs/NEXT_PRODUCTION_GATE.md`. Later
+references in this dated audit that call PR #248 the next gate are historical
+cutoff statements and must not override this receipt.
+
 ## 1. Executive decision
 
 Ask Magic Mike is not a mockup and does not need another greenfield rebuild. It is an operating lead platform with a live public funnel, one canonical Neon PostgreSQL database, deterministic lead scoring and routing, a protected Lead Center, durable notification records, production email, a signed WordPress bridge, Web Push infrastructure, analytics/growth controls, and a mature release/rollback system.

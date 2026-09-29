@@ -4,6 +4,37 @@ Copy everything below the divider into the next Codex task on this machine.
 
 ---
 
+## 2026-09-29 continuation receipt — read before the dated prompt
+
+This receipt overrides the dated prompt's PR248-first sequence. Do not restart
+the audit or rebuild the consolidation batches.
+
+- Accepted Production is PR #247 at merge commit
+  `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, tree
+  `0065f829fc94f87ab5e0faf596c8e56733be3972`, Vercel deployment
+  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`; rollback is
+  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`.
+- Batch A: Draft PR #278,
+  `65a09dc0137b97bda407ee24b0914e8f9bffd9c0`, exact-head CI + protected
+  no-write Preview/browser/runtime proof green. This is the next application
+  decision.
+- Batch D: Draft PR #280,
+  `d1b2aa4219eb6176b6e0607d38f4fd822e0dcbf6`, exact-head CI + protected
+  no-write Preview/browser/runtime proof green. Reconcile it only after Batch A
+  is accepted or explicitly declined.
+- Batch B: Draft PR #279,
+  `131072e619eff72882c91931b60b8e93080d1280`; reconcile after Batch D. Its
+  additive migration and eligible-email retry activation remain separate.
+- Batch C: Draft PR #277,
+  `a2b5acf01006e3105d746cf8d8ca4da653d75cec`; provider/carrier delivery remains
+  disabled.
+- Connector PR #248 and consumer-ack PR #275 remain separate and unapproved.
+
+Use `docs/DRAFT_249_274_CONSOLIDATION_PLAN.md`, its JSON manifest, and
+`docs/NEXT_PRODUCTION_GATE.md` as current execution authority. Preserve old
+Drafts until replacement acceptance and separate archival approval. Do not
+merge or deploy from this receipt alone.
+
 # ASK MAGIC MIKE — CONTROLLED CONSOLIDATION, RELEASE-AUTHORITY REPAIR, AND PRODUCTION GAP CLOSURE
 
 ## ROLE
