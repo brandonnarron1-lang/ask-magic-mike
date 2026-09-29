@@ -78,27 +78,6 @@ value. Runtime readiness, provider delivery, webhook receipt, and database
 schema remain separate checks. No Production environment change is authorized
 by this document.
 
-## 2026-09-01 authority parity evidence
-
-An authenticated name-and-scope-only Production inspection again returned 61
-scoped variables. Both commands now consume the same fail-closed parser and
-classification rules:
-
-- all 16 required Production names are present;
-- Resend is runtime-compatible through the present `RESEND_API_KEY` without
-  inventing a missing `EMAIL_PROVIDER` requirement;
-- all three growth-import write-gate names remain absent and therefore default
-  to disabled; and
-- neither command accepted, wrote, printed, or persisted a value-bearing
-  environment payload.
-
-The doctor reported 46/46 PASS with zero skips. The candidate authority report
-also reported 46/46 PASS, zero `SKIP_OWNER`, and
-`GO_CONTROLLED_TRAFFIC_READY`. This closes the prior false hold caused by
-checking the local shell instead of authenticated Vercel Production metadata.
-Exact Node 24.18.0 release verification passes system isolation, 14/14 safety,
-283 test files / 3,430 tests, strict typecheck, full lint, optimized production
-build with 60 static pages, and a 100-route / 22-acknowledged-duplicate
-manifest.
-It does not authorize a merge, deployment, traffic publication, WordPress
-change, database mutation, lead submission, or message send.
+Current environment presence, deployment identity, and release verdicts must be
+regenerated for the exact candidate commit. Historical pass totals are evidence
+for their original commit only and never establish current authority.
