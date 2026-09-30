@@ -70,14 +70,22 @@
       }
     }
   },
-  "candidate": null,
+  "candidate": {
+    "pr": 281,
+    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281",
+    "branch": "codex/phase-e-wordpress-proof",
+    "reviewedHead": "3b1853b535000e09b6e9c40221f5898bd87a92f9",
+    "tree": "23bc513823874e629cfc525c2832bbad4282f480",
+    "state": "ready_for_owner_approval",
+    "approvalGate": "APPROVE PHASE E WORDPRESS ACTIVATION HARDENING PR 281 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT"
+  },
   "reviewVehicle": {
     "pr": 281,
     "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281",
     "branch": "codex/phase-e-wordpress-proof",
     "baseCommit": "fa1d0fb077882309970b801bbdfaa756107c2104",
-    "implementationHead": "9a45c3e84bdde66bc99ede8b8a40a57571ed63c9",
-    "state": "draft_unsealed",
+    "implementationHead": "3b1853b535000e09b6e9c40221f5898bd87a92f9",
+    "state": "sealed_for_owner_approval",
     "migrationCount": 0,
     "externalMutationCount": 0
   },

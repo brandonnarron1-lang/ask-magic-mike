@@ -4,7 +4,7 @@ Updated 2026-09-30 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
-## Current application release — PR #281 review only, no gate requestable
+## Current application release — PR #281 exact gate requestable
 
 - Accepted Production is PR [#280](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280)
   merge `fa1d0fb077882309970b801bbdfaa756107c2104`, tree
@@ -19,20 +19,34 @@ queue covers only actions that still require a human or external-system gate.
 - PR #238 is an applied and verified five-migration receipt; its approval is
   consumed. PRs #244 and #245 are superseded stale reviews and remain preserved
   without current authority.
-- There is no unconsumed application merge/deploy phrase.
 - Draft PR [#281](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281)
-  is the sole unsealed Phase E review vehicle at implementation head
-  `9a45c3e84bdde66bc99ede8b8a40a57571ed63c9`. Candidate authority remains
-  null until the final PR head/tree, hosted Node 24 gate, immutable Preview,
-  rollback, no-write browser proof, and runtime-log review are sealed.
-- No application gate authorizes WordPress publication, provider access, real
-  or synthetic lead submission, email/SMS/Push, social/GBP/email publication,
-  spend, DNS change, deletion, data import, or NellySelly action.
+  is the sole sealed Phase E candidate at reviewed head
+  `3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
+  `23bc513823874e629cfc525c2832bbad4282f480`. Hosted Release Gate
+  `36784156065`, immutable Preview `dpl_4iWCBVSoqFbvffq7KAWhteQBTX6Y`,
+  protected no-write/browser run `36784678748`, and runtime-log review pass.
+- Migration count: 0. Environment changes: 0. External mutations so far: 0.
+- Expected impact: deploy the hardened callback path, current-main Connector
+  1.1.0 review package, activation verification tooling, and evidence docs to
+  the existing Ask Magic Mike Vercel project. No live placement changes merely
+  because the package becomes available in the repository.
+- Rollback: redeploy `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`; no schema or data
+  rollback is required.
 
-The next potential external action is the Connector 1.1.0 plugin upgrade. It is
-not requestable until the current Phase E candidate passes exact-head review and
-the live 1.0.0 source/options backup, archive hashes, and native PHP lint are
-freshly proved. Its exact phrase remains:
+The exact current application gate is:
+
+`APPROVE PHASE E WORDPRESS ACTIVATION HARDENING PR 281 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT`
+
+That phrase authorizes only PR #281 merge and same-tree Ask Magic Mike Vercel
+Production deployment. It does not authorize WordPress publication, provider
+access, real or synthetic lead submission, email/SMS/Push, social/GBP/email
+publication, spend, DNS change, deletion, data import, or NellySelly action.
+
+After PR #281 is accepted, the next potential external action is the Connector
+1.1.0 plugin upgrade. It is not requestable until the live 1.0.0 source/options
+backup, archive hashes, native PHP lint, and rollback rehearsal are freshly
+proved in an authenticated WordPress/cPanel session. Its future exact phrase
+remains:
 
 `APPROVE PHASE 9 WORDPRESS CONNECTOR 1.1.0 PLUGIN UPGRADE`
 

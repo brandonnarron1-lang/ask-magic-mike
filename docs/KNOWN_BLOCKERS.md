@@ -44,10 +44,11 @@ specific expansions; they do not invalidate the live lead pipe.
   gate are consumed.
 - Exact-tree hosted release and post-deploy verification, the 11-check
   Production monitor, 19-pass read-only smoke, and runtime log window pass.
-- Candidate authority is null. Draft PR #281 is the sole unsealed Phase E
-  review vehicle at implementation head
-  `9a45c3e84bdde66bc99ede8b8a40a57571ed63c9`; it authorizes no merge,
-  deployment, Connector upgrade, WordPress page edit, or other external action.
+- Draft PR #281 is the sole sealed Phase E application candidate at reviewed
+  head `3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
+  `23bc513823874e629cfc525c2832bbad4282f480`. Its exact app-only merge/deploy
+  gate is requestable, but it authorizes no Connector installation, WordPress
+  page edit, database/environment mutation, lead submission, or send.
 - PR #238 is an applied five-migration receipt. PRs #244 and #245 are stale
   stacked review artifacts superseded by the current reconciliation and clean
   mainline port; none of their historical gates may be replayed.

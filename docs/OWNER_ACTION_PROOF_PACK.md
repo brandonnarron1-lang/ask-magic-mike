@@ -30,23 +30,23 @@ this file.
 ## 2. Application candidate evidence
 
 ```text
-PR: 281 (unsealed review vehicle)
+PR: 281 (sealed application candidate)
 Base branch and commit: main @ fa1d0fb077882309970b801bbdfaa756107c2104
-Implementation head: 9a45c3e84bdde66bc99ede8b8a40a57571ed63c9
-Final reviewed head: ____________________
-Tree: ____________________
-Migration count: ______
-Environment changes: ______
-External mutations: ______
-Vercel project: ____________________
-Immutable Preview deployment: ____________________
-Preview status: READY / NOT READY
-Rollback deployment: ____________________
-Hosted Release Gate URL/result: ____________________
-Local Node version: ____________________
-Release gate result: ____________________
-Dependency audit: ____________________
-Secret scan: ____________________
+Implementation/final reviewed head: 3b1853b535000e09b6e9c40221f5898bd87a92f9
+Tree: 23bc513823874e629cfc525c2832bbad4282f480
+Migration count: 0
+Environment changes: 0
+External mutations: 0
+Vercel project: eyes-up-industries/ask-magic-mike
+Immutable Preview deployment: dpl_4iWCBVSoqFbvffq7KAWhteQBTX6Y
+Preview status: READY
+Rollback deployment: dpl_aepoH5pzDwPMkerbrp9YekzVrdKD
+Hosted Release Gate URL/result: https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36784156065 — PASS
+Protected Preview/browser URL/result: https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36784678748 — PASS
+Local Node version: 24.18.0
+Release gate result: PASS — 293 files / 3,605 tests; typecheck, lint, build, routes, safety, isolation
+Dependency audit: PASS — no known production vulnerability
+Secret scan: PASS — no staged secret finding
 ```
 
 Required read-only proof:

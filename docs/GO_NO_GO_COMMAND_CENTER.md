@@ -45,13 +45,14 @@ consumed. They cannot authorize another action.
 
 ## §4 — Current release queue
 
-No application candidate or merge/deploy gate is currently requestable. Draft
-PR #281 is the sole unsealed Phase E review vehicle at implementation head
-`9a45c3e84bdde66bc99ede8b8a40a57571ed63c9`; PR #248 is preserved
-Connector lineage and PR #279 is preserved notification lineage. Their prior
-gates are invalid after the Production advance.
-Neither authorizes a WordPress plugin/page change, Neon migration, environment
-edit, message, publication, or data action.
+Draft PR #281 is the sole sealed Phase E application candidate at reviewed head
+`3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
+`23bc513823874e629cfc525c2832bbad4282f480`; its exact app-only merge/deploy
+gate is requestable from `OWNER_APPROVAL_QUEUE.md`. PR #248 remains preserved
+Connector lineage and PR #279 remains preserved notification lineage; their
+prior gates are invalid. The PR #281 gate does not authorize a WordPress
+plugin/page change, Neon mutation, environment edit, message, publication, or
+data action.
 
 ## §5 — Controlled-traffic GO criteria
 

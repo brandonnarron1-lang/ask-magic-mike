@@ -112,8 +112,12 @@ NellySelly.
 
 ## Immediate boundary
 
-Draft PR #281 is now the current-main Phase E review vehicle at implementation
-head `9a45c3e84bdde66bc99ede8b8a40a57571ed63c9`. Complete hosted and
-immutable-Preview verification before sealing any application gate. The first
-external mutation remains blocked until fresh authenticated
-WordPress preflight succeeds and the exact plugin-only gate is supplied.
+Draft PR #281 is the sealed current-main Phase E candidate at reviewed head
+`3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
+`23bc513823874e629cfc525c2832bbad4282f480`. Hosted Release Gate
+`36784156065`, immutable Preview `dpl_4iWCBVSoqFbvffq7KAWhteQBTX6Y`, protected
+no-write/browser run `36784678748`, and the runtime-log review pass. Its exact
+app-only gate is requestable from `OWNER_APPROVAL_QUEUE.md`. The first
+WordPress mutation remains blocked until that candidate is accepted and fresh
+authenticated WordPress preflight succeeds for the independent plugin-only
+gate.

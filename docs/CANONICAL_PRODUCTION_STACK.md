@@ -32,11 +32,12 @@ Current accepted Production release: PR #280 merge
 `d9533274418430b750a87b8259902cddff5b2937`, deployment
 `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`. Deployment
 `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is the immediate application rollback.
-Draft PR #281 is the unsealed Phase E review vehicle at implementation head
-`9a45c3e84bdde66bc99ede8b8a40a57571ed63c9`; candidate authority remains
-null and no application gate is requestable. Its source preparation authorizes
-no WordPress plugin/page action. PR #238 is a consumed five-migration cutover
-receipt. See
+Draft PR #281 is the sealed Phase E application candidate at reviewed head
+`3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
+`23bc513823874e629cfc525c2832bbad4282f480`. Its app-only merge/deploy gate is
+requestable, but authorizes no WordPress plugin/page action, lead, send, data
+write, environment change, or NellySelly action. PR #238 is a consumed
+five-migration cutover receipt. See
 [`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).
 
 ### Verification command

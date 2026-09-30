@@ -91,6 +91,33 @@ Next development compiler chunk race. Both passed serially. The normal local
 configuration now uses one worker and the unchanged command passes 26/26;
 deployed immutable Preview runs retain normal parallelism.
 
+## Exact-head hosted and immutable-Preview receipt
+
+- reviewed head: `3b1853b535000e09b6e9c40221f5898bd87a92f9`;
+- reviewed tree: `23bc513823874e629cfc525c2832bbad4282f480`;
+- hosted Node 24 Release Gate:
+  [36784156065](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36784156065),
+  PASS;
+- immutable Preview: `dpl_4iWCBVSoqFbvffq7KAWhteQBTX6Y`,
+  `https://ask-magic-mike-ed9f9jfpm-eyes-up-industries.vercel.app`, Ready and
+  bound by GitHub deployment receipt to the reviewed head;
+- protected no-write QA/browser run:
+  [36784678748](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36784678748),
+  PASS in 4m25s;
+- Preview API QA: 18 pass, 7 intentional mutation skips, 0 fail;
+- deployed browser E2E: 6 suites / 15 pass / 0 fail / 0 flaky / 0 skipped;
+- release doctor: 43 pass / 0 fail / 0 skip;
+- safety scan: 14 pass / 0 fail;
+- release-candidate verdict: GO with zero blockers;
+- launch-authority verdict: `PREVIEW_READY`; and
+- Vercel runtime review: no error, fatal, or HTTP 500 record in the inspected
+  exact-deployment window.
+
+The generic launch report correctly records controlled Preview mutation QA as
+not run. Phase E contains no migration and the Preview identity policy remained
+fail-closed, with live email/SMS disabled; no attempt was made to weaken those
+guards merely to manufacture a write receipt.
+
 ## Failure and recovery proof
 
 | Path | Evidence | Result |

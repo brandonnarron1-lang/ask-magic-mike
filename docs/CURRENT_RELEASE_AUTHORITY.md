@@ -45,14 +45,35 @@ or NellySelly action. It is exhausted and cannot be replayed.
 
 ## Application review state
 
-There is no unconsumed application candidate or application merge/deploy gate.
 PR #280 is accepted Production and its gate is exhausted. Draft PR
 [#281](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281) is the
-sole Phase E review vehicle. Its implementation head is
-`9a45c3e84bdde66bc99ede8b8a40a57571ed63c9`, its base is the accepted PR
-#280 merge, and it has zero migrations and zero external mutations. It remains
-`draft_unsealed`; therefore candidate authority stays null and PR #281 exposes
-no reusable approval phrase.
+sole sealed Phase E application candidate. Its reviewed head is
+`3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
+`23bc513823874e629cfc525c2832bbad4282f480`, on the accepted PR #280 base. It
+has zero migrations, zero environment changes, and zero external mutations.
+
+Hosted Node 24 Release Gate
+[36784156065](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36784156065),
+immutable Preview `dpl_4iWCBVSoqFbvffq7KAWhteQBTX6Y`, protected no-write
+Preview/browser run
+[36784678748](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36784678748),
+local desktop/mobile checks, and runtime-log review pass. Preview QA returned
+18 pass, 7 intentional mutation skips, and 0 fail; the six browser suites
+returned 15 pass, 0 fail; and no error, fatal, or HTTP 500 runtime record was
+found for the inspected deployment window.
+
+The only current application gate is:
+
+```text
+APPROVE PHASE E WORDPRESS ACTIVATION HARDENING PR 281 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT
+```
+
+It authorizes only the reviewed PR #281 merge and same-tree Vercel Production
+deployment. It authorizes no WordPress installation/save/cache purge, Neon
+migration or data write, environment/secret change, lead submission, email/BCC
+or other message, provider action, DNS change, marketing publication, spend,
+deletion, or NellySelly action. Immediate application rollback remains
+`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`.
 
 PR [#248](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248)
 remains preserved historical lineage. Its Connector 1.1.0 files are being

@@ -13,10 +13,13 @@ Updated 2026-09-30.
   `36694290376`, post-deploy verification `36694479286`, the canonical
   11-check monitor, 19-pass read-only smoke, health/readiness, auth boundary,
   and runtime error window all passed.
-- **Consumed application authority:** PR #280's merge/deploy gate is exhausted.
-  Candidate authority remains null; Draft PR #281 is the sole unsealed Phase E
-  review vehicle at implementation head
-  `9a45c3e84bdde66bc99ede8b8a40a57571ed63c9` and exposes no gate.
+- **Current application candidate:** PR #280's merge/deploy gate is exhausted.
+  Draft PR #281 is the sole sealed Phase E candidate at reviewed head
+  `3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
+  `23bc513823874e629cfc525c2832bbad4282f480`. Hosted Release Gate
+  `36784156065`, immutable Preview `dpl_4iWCBVSoqFbvffq7KAWhteQBTX6Y`, and
+  protected no-write/browser run `36784678748` pass. Its exact app-only gate is
+  in `OWNER_APPROVAL_QUEUE.md`.
 - **Reconciled Connector lineage:** Phase E ports only the reviewed Connector
   1.1.0 source, exact 1.0.0 rollback baseline, deterministic archives, and
   contract tests from PR #248 onto current `main`. No WordPress file has been
@@ -30,10 +33,10 @@ Updated 2026-09-30.
   without claiming publication or editing WordPress.
 - **No external mutation:** this preparation adds no migration, secret, provider,
   lead, message, publication, DNS, spend, deletion, or NellySelly action.
-- **Independent WordPress boundary:** the consumed PR #280 gate authorized no
-  WordPress save. No current application gate authorizes a WordPress action;
-  plugin capability and page-3952 publication remain separate future
-  approval/rollback boundaries.
+- **Independent WordPress boundary:** neither the consumed PR #280 gate nor the
+  requestable PR #281 app gate authorizes a WordPress save. Plugin capability
+  and page-3952 publication remain separate future approval/rollback
+  boundaries.
 
 ## Production database-credential and CI recovery — 2026-09-01
 
