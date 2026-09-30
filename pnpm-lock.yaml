@@ -6854,7 +6854,7 @@ snapshots:
     dependencies:
       '@next/env': 15.5.26
       '@swc/helpers': 0.5.15
-      caniuse-lite: 1.0.30001810
+      caniuse-lite: 1.0.30001813
       postcss: 8.5.26
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
