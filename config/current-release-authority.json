@@ -71,7 +71,16 @@
     }
   },
   "candidate": null,
-  "reviewVehicle": null,
+  "reviewVehicle": {
+    "pr": 281,
+    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281",
+    "branch": "codex/phase-e-wordpress-proof",
+    "baseCommit": "fa1d0fb077882309970b801bbdfaa756107c2104",
+    "implementationHead": "9a45c3e84bdde66bc99ede8b8a40a57571ed63c9",
+    "state": "draft_unsealed",
+    "migrationCount": 0,
+    "externalMutationCount": 0
+  },
   "releasedCutover": {
     "pr": 238,
     "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/238",

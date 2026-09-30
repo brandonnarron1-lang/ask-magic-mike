@@ -2,7 +2,7 @@
 
 <!-- amm-current-operations-v1 -->
 
-Updated 2026-09-29. This template records evidence for gated operations without
+Updated 2026-09-30. This template records evidence for gated operations without
 storing credentials or personal data. Release identity comes from
 `config/current-release-authority.json`; the canonical database is Neon and the
 staff boundary is Better Auth plus server-side RBAC. Use
@@ -30,9 +30,10 @@ this file.
 ## 2. Application candidate evidence
 
 ```text
-PR: ____________________
-Base branch and commit: ____________________
-Head commit: ____________________
+PR: 281 (unsealed review vehicle)
+Base branch and commit: main @ fa1d0fb077882309970b801bbdfaa756107c2104
+Implementation head: 9a45c3e84bdde66bc99ede8b8a40a57571ed63c9
+Final reviewed head: ____________________
 Tree: ____________________
 Migration count: ______
 Environment changes: ______

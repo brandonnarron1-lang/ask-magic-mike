@@ -112,6 +112,8 @@ NellySelly.
 
 ## Immediate boundary
 
-Continue repository verification and seal a current-main Connector candidate.
-The first external mutation remains blocked until fresh authenticated
+Draft PR #281 is now the current-main Phase E review vehicle at implementation
+head `9a45c3e84bdde66bc99ede8b8a40a57571ed63c9`. Complete hosted and
+immutable-Preview verification before sealing any application gate. The first
+external mutation remains blocked until fresh authenticated
 WordPress preflight succeeds and the exact plugin-only gate is supplied.

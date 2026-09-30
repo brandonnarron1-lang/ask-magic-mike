@@ -32,10 +32,11 @@ Current accepted Production release: PR #280 merge
 `d9533274418430b750a87b8259902cddff5b2937`, deployment
 `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`. Deployment
 `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is the immediate application rollback.
-No application gate is currently requestable. Phase E is reconciling only the
-reviewed Connector 1.1.0 package from PR #248; that source preparation does not
-authorize a WordPress plugin/page action. PR #238 is a consumed five-migration
-cutover receipt. See
+Draft PR #281 is the unsealed Phase E review vehicle at implementation head
+`9a45c3e84bdde66bc99ede8b8a40a57571ed63c9`; candidate authority remains
+null and no application gate is requestable. Its source preparation authorizes
+no WordPress plugin/page action. PR #238 is a consumed five-migration cutover
+receipt. See
 [`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).
 
 ### Verification command

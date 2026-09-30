@@ -7,29 +7,30 @@ import {
 } from "../../app/lib/growth/capability-ledger";
 
 describe("Growth capability authority ledger", () => {
-  it("shows accepted PR 280 with no replayable application candidate", () => {
+  it("shows accepted PR 280 plus unsealed review-only PR 281", () => {
     const ledger = buildGrowthCapabilityLedger({ currentTailInProduction: false });
 
     expect(ledger.generatedFor).toBe("preview_or_local");
     expect(ledger.counts).toEqual({
-      production_live: 6,
-      release_candidate: 0,
+      production_live: 3,
+      release_candidate: 3,
       operator_gate: 2,
       host_gate: 1,
       external_dependency: 2,
       prohibited: 1,
     });
     expect(ledger.items.find((item) => item.key === "ordered_release_train")).toMatchObject({
-      state: "production_live",
+      state: "release_candidate",
     });
     expect(ledger.items.find((item) => item.key === "ordered_release_train")?.approvalGate).toBeUndefined();
     expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 280");
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("No application candidate");
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.nextAction).toContain("PR 280");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("Draft PR 281");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("no reusable application release gate");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.nextAction).toContain("Draft PR 281");
     expect(JSON.stringify(ledger)).not.toContain("PR 210 remains the first pending");
   });
 
-  it("marks only the application-bound candidates live in the canonical Production runtime", () => {
+  it("keeps the review vehicle out of canonical Production runtime state", () => {
     const ledger = buildGrowthCapabilityLedger({ currentTailInProduction: true });
 
     expect(ledger.generatedFor).toBe("production");

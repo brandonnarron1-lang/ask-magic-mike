@@ -44,10 +44,10 @@ specific expansions; they do not invalidate the live lead pipe.
   gate are consumed.
 - Exact-tree hosted release and post-deploy verification, the 11-check
   Production monitor, 19-pass read-only smoke, and runtime log window pass.
-- There is no unconsumed application candidate. Phase E is reconciling only the
-  reviewed Connector 1.1.0 package from PR #248. Its source-controlled
-  preparation does not authorize a Connector upgrade, WordPress page edit, or
-  any other external action.
+- Candidate authority is null. Draft PR #281 is the sole unsealed Phase E
+  review vehicle at implementation head
+  `9a45c3e84bdde66bc99ede8b8a40a57571ed63c9`; it authorizes no merge,
+  deployment, Connector upgrade, WordPress page edit, or other external action.
 - PR #238 is an applied five-migration receipt. PRs #244 and #245 are stale
   stacked review artifacts superseded by the current reconciliation and clean
   mainline port; none of their historical gates may be replayed.

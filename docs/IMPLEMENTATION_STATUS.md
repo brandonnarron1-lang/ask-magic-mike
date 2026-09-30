@@ -13,8 +13,10 @@ Updated 2026-09-30.
   `36694290376`, post-deploy verification `36694479286`, the canonical
   11-check monitor, 19-pass read-only smoke, health/readiness, auth boundary,
   and runtime error window all passed.
-- **Consumed application authority:** PR #280's merge/deploy gate is exhausted;
-  there is no current application candidate.
+- **Consumed application authority:** PR #280's merge/deploy gate is exhausted.
+  Candidate authority remains null; Draft PR #281 is the sole unsealed Phase E
+  review vehicle at implementation head
+  `9a45c3e84bdde66bc99ede8b8a40a57571ed63c9` and exposes no gate.
 - **Reconciled Connector lineage:** Phase E ports only the reviewed Connector
   1.1.0 source, exact 1.0.0 rollback baseline, deterministic archives, and
   contract tests from PR #248 onto current `main`. No WordPress file has been

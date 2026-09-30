@@ -43,9 +43,11 @@ or deletion.
 
 - PR #280 is accepted Production. Its exact merge-and-deploy gate is consumed
   and cannot authorize any Phase E external action.
-- There is no current application release candidate. Phase E narrowly ports the
-  reviewed Connector 1.1.0 package from preserved PR #248 onto current `main`;
-  it does not import stale authority metadata or create a second plugin.
+- Candidate authority remains null. Draft PR #281 is the sole unsealed Phase E
+  review vehicle at implementation head
+  `9a45c3e84bdde66bc99ede8b8a40a57571ed63c9`; it ports the reviewed
+  Connector 1.1.0 package from PR #248 and the narrow atomic callback pattern
+  from PR #279 without importing their stale authority or unrelated stacks.
 - Connector installation, Home Value page 3952 publication, and the controlled
   QA lead/send remain separate exact gates.
 - PR #238 is an applied five-migration receipt. Its gate is consumed and its

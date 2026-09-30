@@ -2,7 +2,7 @@
 
 <!-- amm-current-operations-v1 -->
 
-Updated 2026-09-29. This is the current operator decision surface. It reads
+Updated 2026-09-30. This is the current operator decision surface. It reads
 release identity from `config/current-release-authority.json`, uses Neon for
 durable Production data, and uses Better Auth plus server-side RBAC for the
 Lead Center. Exact pending actions are in `OWNER_APPROVAL_QUEUE.md`; capability
@@ -45,9 +45,11 @@ consumed. They cannot authorize another action.
 
 ## §4 — Current release queue
 
-No application candidate or merge/deploy gate is currently requestable. The
-Phase E branch remains an unsealed local review vehicle; PR #248 is preserved
-connector lineage whose previous gate is invalid after the Production advance.
+No application candidate or merge/deploy gate is currently requestable. Draft
+PR #281 is the sole unsealed Phase E review vehicle at implementation head
+`9a45c3e84bdde66bc99ede8b8a40a57571ed63c9`; PR #248 is preserved
+Connector lineage and PR #279 is preserved notification lineage. Their prior
+gates are invalid after the Production advance.
 Neither authorizes a WordPress plugin/page change, Neon migration, environment
 edit, message, publication, or data action.
 

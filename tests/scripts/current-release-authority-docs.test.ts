@@ -18,6 +18,7 @@ const runtimeRedeployDeployment = "dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe";
 const runtimeRedeploySource = "dpl_E3Pob3TjWdxN9u4VK9xHZC61667g";
 const productionTree = "d9533274418430b750a87b8259902cddff5b2937";
 const reviewedHead = "0b70701c46a7228b075e9630576df5188f5d9c62";
+const phaseEImplementationHead = "9a45c3e84bdde66bc99ede8b8a40a57571ed63c9";
 const consumedApplicationGate =
   "APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
 const consumedCutoverGate =
@@ -83,9 +84,18 @@ describe("current application release authority", () => {
     });
   });
 
-  it("records PR 280 as accepted with no replayable application candidate", () => {
+  it("records PR 281 as an unsealed review vehicle with no replayable gate", () => {
     expect(CURRENT_RELEASE_AUTHORITY.candidate).toBeNull();
-    expect(CURRENT_RELEASE_AUTHORITY.reviewVehicle).toBeNull();
+    expect(CURRENT_RELEASE_AUTHORITY.reviewVehicle).toMatchObject({
+      pr: 281,
+      url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281",
+      branch: "codex/phase-e-wordpress-proof",
+      baseCommit: productionCommit,
+      implementationHead: phaseEImplementationHead,
+      state: "draft_unsealed",
+      migrationCount: 0,
+      externalMutationCount: 0,
+    });
     expect(CURRENT_APPLICATION_RELEASE_GATE).toBeNull();
     expect(CURRENT_RELEASE_AUTHORITY.production.approval).toMatchObject({
       phrase: consumedApplicationGate,
