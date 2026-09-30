@@ -6,11 +6,8 @@ import {
   growthCapabilityStateLabel,
 } from "../../app/lib/growth/capability-ledger";
 
-const candidateApplicationGate =
-  "APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
-
 describe("Growth capability authority ledger", () => {
-  it("shows only the reviewed PR 248 tail as a Preview application candidate", () => {
+  it("shows PR 280 as an unsealed Preview review vehicle without a release gate", () => {
     const ledger = buildGrowthCapabilityLedger({ currentTailInProduction: false });
 
     expect(ledger.generatedFor).toBe("preview_or_local");
@@ -24,12 +21,12 @@ describe("Growth capability authority ledger", () => {
     });
     expect(ledger.items.find((item) => item.key === "ordered_release_train")).toMatchObject({
       state: "release_candidate",
-      approvalGate: candidateApplicationGate,
     });
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 247");
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 248");
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("only active reviewed application candidate");
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.nextAction).toContain("PR 248");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.approvalGate).toBeUndefined();
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 278");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("Draft PR 280");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("unsealed review vehicle");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.nextAction).toContain("Draft PR 280");
     expect(JSON.stringify(ledger)).not.toContain("PR 210 remains the first pending");
   });
 
@@ -67,7 +64,7 @@ describe("Growth capability authority ledger", () => {
     expect(ledger.items.every((item) => item.href.startsWith("/admin/"))).toBe(true);
     expect(GROWTH_CAPABILITY_STATES.map(growthCapabilityStateLabel)).toEqual([
       "Production live",
-      "Reviewed candidate",
+      "Application review",
       "Operator approval required",
       "Hosting action required",
       "External dependency",
@@ -81,7 +78,6 @@ describe("Growth capability authority ledger", () => {
     const facebookRecovery = ledger.items.find((item) => item.key === "facebook_preview_recovery");
 
     expect(gates).toEqual([
-      candidateApplicationGate,
       "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA",
     ]);
     expect(facebookRecovery?.approvalGate).toBeUndefined();

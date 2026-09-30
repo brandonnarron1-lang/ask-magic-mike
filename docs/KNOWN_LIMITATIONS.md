@@ -133,14 +133,13 @@ securely. CSV export remains available with audit logging.
 
 ### Current release state
 
-Current accepted Production is PR #246 merge
-`98a91f752c4c53dc0ae300dfc320f47b53e32820` on deployment
-`dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`; source deployment
-`dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate rollback. PR #247 is the one
-reviewed application candidate and has no migration or external-action
-authority. Its machine-bound content head/tree, hosted gate, immutable Preview,
-rollback, and exact owner-only application gate are sealed. Final
-authority-only exact-head checks must still match; drift invalidates the gate.
+Current accepted Production is PR #278 merge
+`75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1` on deployment
+`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`; deployment
+`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` is immediate rollback. Draft PR #280 is an
+unsealed review vehicle with no migration or external-action authority. No
+application merge/deploy gate is currently requestable; fresh exact-head
+hosted, Preview, rollback, and no-write evidence must be sealed first.
 
 PR #238 is an applied and verified five-migration receipt. Historical component
 and superseded review PRs retain evidence but have no independent current

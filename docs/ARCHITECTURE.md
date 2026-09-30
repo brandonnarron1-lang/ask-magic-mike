@@ -299,9 +299,9 @@ fields are excluded.
 
 ## Rollback
 
-The recorded Production baseline is PR #181 merge
-`5335697edf31eed0b8a38cd0295a4f5e7d501a3e`, Vercel deployment
-`dpl_HVoqg1t4j2SJWPFMEEzpiHGQ6hmM`. Application rollback re-points aliases to
+The recorded Production baseline is PR #278 merge
+`75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`, Vercel deployment
+`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`. Application rollback re-points aliases to
 the recorded prior Ready artifact. Database rollback is release-specific,
 backup-first, and evidence-preserving; lead, consent, notification, response,
 outcome, and audit records are never deleted merely to roll back application

@@ -1,28 +1,27 @@
 # Implementation Status
 
-Updated 2026-09-01.
+Updated 2026-09-29.
 
-## Current release and owned-demand readiness review — 2026-09-01
+## Current release and Batch D reconciliation — 2026-09-29
 
-- **Accepted Production:** PR #247 merge
-  `a2f3de834830f600df106dbf5836ae4bbde4eb4a` is live on deployment
-  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` with exact accepted tree
-  `0065f829fc94f87ab5e0faf596c8e56733be3972`. The prior Ready deployment
-  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` is immediate application rollback.
+- **Accepted Production:** PR #278 merge
+  `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1` is live on deployment
+  `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` with exact accepted tree
+  `5775ba6a315abde9bbe55f770ccda2a64f897362`. The prior Ready deployment
+  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` is immediate application rollback.
 - **Post-release proof:** hosted Node 24 Release Gate
-  `33522215178`, post-deploy verification `33522383308`, the canonical
+  `36646434774`, post-deploy verification `36646574413`, the canonical
   11-check monitor, 19-pass read-only smoke, health/readiness, auth boundary,
   and runtime error window all passed.
-- **Reviewed application candidate PR #248:** reviewed content head
-  `f6134b71f258003aa5dc201cf5ef7cdb6eb61ee7`, exact tree
-  `832be2750355391f9198fcaaaa6f46bb3beb8b3f`, hosted Release Gate
-  `36497982374`, and immutable Ready Preview
-  `dpl_2WE8ftPXZDrnkGdzVKtU2bzBnSBQ` are sealed for owner review. The exact
-  live Connector 1.0.0 source/assets remain preserved, while the
-  backward-compatible 1.1.0 candidate adds bounded per-shortcode attribution
-  and public version proof. Deterministic install/rollback packages, native
-  PHP lint, and read-only Preview checks pass with zero migrations and zero
-  external mutations.
+- **Unsealed application review PR #280:** Batch D has been reconciled onto the
+  exact PR #278 Production tree at implementation checkpoint
+  `fddf5adee832263a7b6e17b492437d6367f822c4`. Its combined public-ingress and
+  signed-WordPress contract passes the focused local suite. Fresh exact-head
+  hosted CI and immutable Preview proof are still required before any release
+  gate is requestable.
+- **Preserved Connector PR #248:** Connector 1.1.0 remains separate, but its
+  prior gate is invalid after the Production advance. Reconcile and reverify it
+  only after Batch D is accepted; do not install or publish it from this branch.
 - **Corrected readiness:** v3 holds Home Value and We Buy Homes as
   `connector_upgrade_required` until the reviewed plugin capability is
   publicly proven. Unreviewed WordPress placements cannot become fallback
@@ -30,12 +29,12 @@ Updated 2026-09-01.
 - **Operator safety:** hidden or unavailable WordPress placements fail closed;
   the existing Distribution Command can prefer the visible home-value page
   without claiming publication or editing WordPress.
-- **No external mutation:** this review adds no migration, secret, provider,
+- **No external mutation:** this reconciliation adds no migration, secret, provider,
   lead, message, publication, DNS, spend, deletion, or NellySelly action.
-- **Independent WordPress boundary:** the consumed PR #247 gate authorized no
-  WordPress save. The PR #248 application gate likewise authorizes no
-  WordPress action; plugin capability and page-3952 publication remain separate
-  future approval/rollback boundaries.
+- **Independent WordPress boundary:** the consumed PR #278 gate authorized no
+  WordPress save. No current application gate authorizes a WordPress action;
+  plugin capability and page-3952 publication remain separate future
+  approval/rollback boundaries.
 
 ## Production database-credential and CI recovery — 2026-09-01
 

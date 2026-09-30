@@ -2,7 +2,7 @@
 
 <!-- amm-current-operations-v1 -->
 
-Audited 2026-09-01. This operating record is derived from
+Audited 2026-09-29. This operating record is derived from
 `config/current-release-authority.json`, authenticated platform evidence, and
 live read-only checks. `OWNER_APPROVAL_QUEUE.md` controls unconsumed actions;
 `KNOWN_BLOCKERS.md` controls capability limits. Older packets remain historical
@@ -13,10 +13,10 @@ evidence and are not operator instructions.
 | Asset | Current identity | Status |
 | --- | --- | --- |
 | Repository | `brandonnarron1-lang/ask-magic-mike`, protected `main` | VERIFIED |
-| Accepted source | PR #247, merge `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, tree `0065f829fc94f87ab5e0faf596c8e56733be3972` | ACCEPTED |
+| Accepted source | PR #278, merge `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`, tree `5775ba6a315abde9bbe55f770ccda2a64f897362` | ACCEPTED |
 | Vercel | `eyes-up-industries/ask-magic-mike`, project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8` | VERIFIED |
-| Production | `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`, canonical `https://www.askmagicmike.com` | READY |
-| Application rollback | `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` | PRESERVED |
+| Production | `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`, canonical `https://www.askmagicmike.com` | READY |
+| Application rollback | `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` | PRESERVED |
 | Database | Neon project `bitter-star-20214385`, branch `br-round-base-auh6h2wd`, database `neondb` | CANONICAL |
 | Private access | Better Auth sessions plus server-side RBAC at `/admin` | ACTIVE |
 | Brokerage surface | `https://www.ourtownproperties.com` WordPress | LIVE / SEPARATE CHANGE BOUNDARY |
@@ -27,25 +27,26 @@ evidence and are not operator instructions.
 
 ## Accepted Production evidence
 
-The exact PR #247 release gate and post-deploy verification passed. The
+The exact PR #278 release gate and post-deploy verification passed. The
 acceptance record proves 11/11 monitoring checks, 19 passing read-only smoke
 checks with two intentional skips, HTTP 200 readiness, and zero observed
 runtime errors. The public funnel, canonical Neon persistence, deterministic
 scoring/routing, Better Auth Lead Center boundary, notification outbox, and
 test/KPI exclusions are live.
 
-The PR #247 release approval and the later secure database-credential redeploy
+The PR #278 release approval and the earlier secure database-credential redeploy
 approval are consumed. Neither can authorize another merge, deployment,
 environment change, database operation, WordPress edit, message, publication,
 or deletion.
 
 ## Current release stack
 
-- PR #248 is the one requestable application candidate recorded in
-  `config/current-release-authority.json`. Its exact gate is listed only in
-  `OWNER_APPROVAL_QUEUE.md` and authorizes no WordPress action.
-- Downstream Draft review vehicles may add evidence or hardening, but they have
-  no release authority and must not leapfrog PR #248.
+- No application release gate is currently requestable.
+- Draft PR #280 is the recorded unsealed Batch D review vehicle. It has no
+  release authority until fresh exact-head CI, Preview, no-write QA, and runtime
+  evidence are sealed.
+- PR #248 remains preserved connector lineage, but its prior gate is invalid
+  after the Production advance and must not leapfrog Batch D.
 - PR #238 is an applied five-migration receipt. Its gate is consumed and its
   migrations must not be replayed.
 - PRs #244 and #245 are superseded review artifacts with no current authority.

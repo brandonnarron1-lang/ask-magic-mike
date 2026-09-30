@@ -14,11 +14,12 @@
 - Preserved Connector 1.1.0 as separate Draft PR #248 and documented the
   required Batch A/Batch D/Batch B reconciliation order instead of implying
   that an old component PR is independently releaseable.
-- The pre-reconciliation candidate verified 161 focused and 3,481 full tests,
-  strict typecheck, ESLint, an optimized Next.js 15.5.26 build,
-  route/system-isolation/release-safety contracts, archive integrity, and zero
-  known Production dependency vulnerabilities. Exact reconciled-head hosted
-  CI and immutable Preview proof remain pending until this candidate is pushed.
+- The reconciled candidate verifies 216 focused and 3,591 full tests, strict
+  typecheck, ESLint, an optimized Next.js 15.5.26 build with 60 static pages,
+  a 102-route manifest, system-isolation and 14/14 release-safety contracts,
+  archive integrity, and zero known Production dependency vulnerabilities.
+  Exact reconciled-head hosted CI and immutable Preview proof remain pending
+  until this candidate is pushed.
 - Performed no Production deployment, migration, WordPress mutation, QR
   publication, outbound message, provider/secret change, or NellySelly action.
 

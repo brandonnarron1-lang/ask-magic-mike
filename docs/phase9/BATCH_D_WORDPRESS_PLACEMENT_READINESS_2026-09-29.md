@@ -5,8 +5,8 @@ Status: `VERIFIED_NOT_PRODUCTION`
 Date: 2026-09-29
 
 This release candidate consolidates the still-useful WordPress and placement
-capabilities from Draft PRs #253–#257 and #259 onto the accepted PR #247
-Production base. It does not replay their stacked ancestry, replace the
+capabilities from Draft PRs #253–#257 and #259 and is now reconciled onto the
+accepted PR #278 Production base. It does not replay their stacked ancestry, replace the
 canonical lead system, or claim that a dated authenticated observation is
 current Production truth.
 
@@ -143,10 +143,10 @@ Counted local runtime:
 - Vitest 4.1.11;
 - Next.js 15.5.26.
 
-Results:
+Results after reconciliation onto accepted PR #278:
 
-- 15 focused files / 161 tests pass;
-- 289 total files / 3,481 tests pass;
+- 19 focused files / 216 tests pass;
+- 292 total files / 3,591 tests pass;
 - strict TypeScript passes;
 - full ESLint passes;
 - optimized Production build passes with 60 static pages;
@@ -163,25 +163,27 @@ Results:
 - no remote endpoint, database, provider, WordPress admin, or Production
   credential was used by these proofs.
 
-Exact-head hosted CI, immutable Preview, protected no-write browser QA, and
-runtime-log evidence are recorded only after this candidate is committed and
-pushed.
+Local release verification is complete. Exact-head hosted CI, immutable
+Preview, protected no-write browser QA, and runtime-log evidence are recorded
+only after the reconciled evidence commit is pushed.
 
 ## Release ordering
 
-Batch D is based on accepted PR #247. Batch A modifies the same public lead
-ingress and dependency boundary, so this exact branch is not mergeable by
-policy until Batch A is accepted or explicitly declined.
+Batch A was accepted as PR #278. Batch D is reconciled onto its exact accepted
+tree at implementation checkpoint
+`fddf5adee832263a7b6e17b492437d6367f822c4`. The combined route preserves
+Batch A's bounded parsing, protected-field rejection, deterministic
+idempotency, test-marker checks, experiments, durable rate limiting, and public
+channel gating while adding Batch D's raw-body HMAC, signed-entry identity, and
+fail-closed source-specific consent evidence.
 
 Preferred order:
 
-1. decide Batch A;
-2. reconcile Batch D onto the exact accepted Batch A tree if Batch A is
-   accepted, then rerun every local and hosted gate;
-3. accept Batch D before Batch B, or reconcile Batch B onto the exact accepted
+1. rerun every local and hosted gate on reconciled Batch D;
+2. accept Batch D before Batch B, or reconcile Batch B onto the exact accepted
    Batch D tree, because both touch `POST /api/leads`; and
-4. keep PR #248 independent until its exact connector gate is separately
-   received.
+3. keep PR #248 independent and reconcile/reverify it after Batch D before any
+   new connector gate is sealed.
 
 No branch may infer acceptance from this ordering note.
 
@@ -204,7 +206,7 @@ This work performed no:
 ## Rollback
 
 For the application candidate, restore Vercel deployment
-`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`. No database rollback is required because
+`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`. No database rollback is required because
 Batch D contains no migration.
 
 The application release gate does not authorize WordPress. Any later

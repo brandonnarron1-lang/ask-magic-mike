@@ -1,5 +1,23 @@
 # Production Release Log
 
+## [PR #278] Batch A release truth and public-ingress hardening
+
+**Merged:** 2026-09-29
+**Production commit:** `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`
+**Production tree:** `5775ba6a315abde9bbe55f770ccda2a64f897362`
+**Deployment:** `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` (`READY`)
+**Immediate rollback:** `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`
+
+- Hardened public lead, chat, appointment, analytics, and experiment ingress
+  while preserving the existing canonical lead lifecycle.
+- Hosted release gate `36646434774` and post-deploy verification
+  `36646574413` passed against the exact accepted tree.
+- Read-only acceptance passed 11/11 monitor and 19 smoke checks with two
+  intentional skips, zero failures, and no observed runtime error or 5xx event.
+- No migration, environment change, WordPress mutation, lead/form submission,
+  outbound message, provider action, DNS change, spend, deletion, or NellySelly
+  action occurred.
+
 ## [PR #247] WordPress placement readiness enforcement
 
 **Merged:** 2026-09-01
