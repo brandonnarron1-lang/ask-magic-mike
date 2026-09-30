@@ -6,6 +6,67 @@ Mode: read-only public precondition generation
 
 External mutation: none
 
+## 2026-09-01 no-redo and rental-readiness correction
+
+Fresh public REST/rendered evidence proves that Mike's page-597 agent profile
+already has a live, source-tagged Ask Magic Mike CTA through `/ask-mike/`.
+Preserve it; do not install another profile CTA from a historical packet.
+
+The existing protected change-set engine now includes the already-registered
+`wordpress_rental_to_homeownership` placement without creating a new system.
+Available Rental Listings page 226 is the one additive candidate. Because no
+direct Ask Magic Mike CTA exists there and public HTML cannot prove an editor
+insertion point or rollback, its v4 manifest returns
+`authenticated_source_required`, `publicationBlocked=true`, and
+`approvalGate=null`. Short Term Home Rentals page 4120 and Gravity Form 6 are
+explicitly excluded until requested-response consent is approved and stored.
+
+See
+[`WORDPRESS_RENTAL_PLACEMENT_READINESS_2026-09-01.md`](./WORDPRESS_RENTAL_PLACEMENT_READINESS_2026-09-01.md).
+
+## 2026-09-01 seller-page decision correction
+
+Authenticated page-3631 source review found that the earlier proposed
+shortcode would have removed its existing headline, explanatory text, and
+button label. The proposal now preserves that copy byte-for-byte while adding
+the existing `/sell` and owned-demand attribution values.
+
+Page 3631 is not a current publication candidate. The already-established
+seller-intent packet still requires an owner/SEO/BIC canonical-page,
+capture-owner, duplicate-page, and placement-key decision. Its corrected
+manifest therefore returns `seller_intent_decision_required`,
+`publicationBlocked=true`, `approvalGate=null`, and
+`activationEligible=false` after technical Connector readiness. Its offline
+source verifier also requires the approved decision and BIC copy-review
+digests. See
+`WORDPRESS_PAGE3631_SOURCE_CUTOVER_READINESS_2026-09-01.md`.
+
+## 2026-09-01 Connector capability correction
+
+Authenticated source inspection proved that the active Connector 1.0.0 plugin
+stores page 3952 as a shortcode and supports only global source/campaign plus
+legacy `source`-as-medium behavior. It cannot generate the reviewed
+per-placement `owned_media` link while retaining the placement identifier.
+The public pages also expose no Connector version marker.
+
+The v3 candidate therefore supersedes the v2 `legacy_match_ready` page-edit
+procedure below until plugin capability is proven. It returns:
+
+- homepage page 149: `hidden_target`;
+- Home Value page 3952: `connector_upgrade_required`;
+- We Buy Homes page 3631: `connector_upgrade_required`.
+
+The first requestable future gate is the independently backed-up Connector
+upgrade:
+
+`APPROVE PHASE 9 WORDPRESS CONNECTOR 1.1.0 PLUGIN UPGRADE`
+
+The Home Value page-publication phrase is not requestable until the public
+1.1.0 marker is present, old shortcodes retain their prior links, and a fresh
+v3 manifest returns `legacy_match_ready`. The Connector candidate and its
+rollback assets remain owned by separate Draft PR #248; this batch does not
+duplicate, merge, deploy, or claim those artifacts.
+
 ## 2026-08-29 visibility correction
 
 The historical structural audit below correctly identified the homepage href,
@@ -36,8 +97,8 @@ and first-live monitors returned HTTP 200 without server errors. The next safe
 step is therefore one precise, measurable CTA activation on an existing
 brokerage page.
 
-This change adds a protected JSON readiness manifest for three already-built
-WordPress placements. It inspects only the live public page and the public
+This change exposes protected JSON readiness manifests for three existing-link
+placements and one additive rental candidate. It inspects only the live public page and the public
 WordPress page index. It does not log into WordPress, write a post, submit a
 form, send a message, change DNS, purge a cache, or touch Production data.
 
@@ -50,7 +111,8 @@ Fresh read-only manifest generation and rendered desktop/mobile checks at
 | --- | --- | ---: | --- | --- | --- |
 | Homepage Ask Magic Mike CTA | `https://www.ourtownproperties.com/` | 149 | `https://www.askmagicmike.com/value?utm_source=ourtownproperties&utm_medium=homepage_cta&utm_campaign=website_widget` | `https://www.askmagicmike.com/ask?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_homepage_ask_mike` | `hidden_target` |
 | Established home-value page CTA | `https://www.ourtownproperties.com/how-much-is-your-home-worth/` | 3952 | `https://www.askmagicmike.com/value?utm_source=ourtownproperties&utm_medium=home_value_page&utm_campaign=website_widget` | `https://www.askmagicmike.com/home-value?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_home_value_page` | `legacy_match_ready` |
-| We Buy Homes CTA | `https://www.ourtownproperties.com/we-buy-homes/` | 3631 | `https://www.askmagicmike.com/value?utm_source=ourtownproperties&utm_medium=seller_page_cta&utm_campaign=website_widget` | `https://www.askmagicmike.com/sell?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_we_buy_homes` | `legacy_match_ready` |
+| We Buy Homes CTA | `https://www.ourtownproperties.com/we-buy-homes/` | 3631 | `https://www.askmagicmike.com/value?utm_source=ourtownproperties&utm_medium=seller_page_cta&utm_campaign=website_widget` | withheld pending seller-intent decision | `seller_intent_decision_required` |
+| Rental-to-homeownership CTA | `https://www.ourtownproperties.com/rentals/` | 226 | none | `https://www.askmagicmike.com/rent?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_rental_to_homeownership` | `authenticated_source_required` |
 
 All three public links currently preserve source, medium, and campaign, but
 omit placement-level `utm_content` and all route to the generic legacy
@@ -81,8 +143,9 @@ The protected endpoint is:
 It requires Lead Center `report:view` permission and accepts only:
 
 - `wordpress_homepage_ask_mike`;
-- `wordpress_home_value`; and
-- `wordpress_we_buy_homes`.
+- `wordpress_home_value`;
+- `wordpress_we_buy_homes`; and
+- `wordpress_rental_to_homeownership`.
 
 Every response is private, `no-store`, same-origin, no-referrer, non-indexable,
 and downloaded as JSON. The manifest contains only structural evidence:
@@ -93,10 +156,13 @@ and downloaded as JSON. The manifest contains only structural evidence:
 - page modification timestamp;
 - matching occurrence counts;
 - deterministic SHA-256 precondition;
-- status, blockers, ordered verification steps, and exact approval phrase.
+- status, blockers, ordered verification steps, and any future
+  placement-specific approval phrase.
 
-Even a ready manifest always emits `publicationAuthorized=false` and
-`approvalRequired=true`; readiness can never grant its own publication gate.
+Every manifest emits `publicationAuthorized=false`. `approvalRequired` becomes
+true only when the current technical state makes a specific next gate
+requestable; additive rental readiness keeps `approvalRequired=false` and
+`approvalGate=null`. Readiness can never grant its own publication authority.
 
 It does not retain raw HTML, page copy, telephone numbers, form values,
 credentials, cookies, tokens, database data, or lead PII.
@@ -106,7 +172,8 @@ port, every redirect hop, content type, response status, and a 3 MB streaming
 response limit with a 20-second timeout. It requires an explicit published
 WordPress index status and fails closed for an unknown placement, duplicate href,
 duplicate page record, missing target, page-ID drift, unsafe link, fetch error,
-or already-canonical placement.
+already-canonical placement, or additive placement without authenticated source
+and rollback evidence.
 
 ## Stack and interface acceptance
 
@@ -124,27 +191,32 @@ Basic Auth, no database configuration, disabled notification providers, and
 pre-navigation interception of every known application write endpoint. They
 recorded no application POST, console finding, overflow, or framework overlay.
 
-## First publication candidate
+## Historical first page candidate — currently held
 
 The homepage was the historical recommended first action based on structural
 href evidence. The 2026-08-29 visibility correction supersedes that
 recommendation while the component remains hidden. An href-only homepage edit
 remains prohibited.
 
-The established Home Value page is now the first safe publication candidate:
+The established Home Value page remains the first reviewed page candidate:
 its page ID is 3952, its one exact legacy CTA is visible on desktop and mobile,
 its rollback href is present, and its current manifest is
-`legacy_match_ready`. This ordering reuses the existing deterministic owned-
-demand placement priority; it does not infer demand or conversion from
+`connector_upgrade_required` under the corrected v4 contract. It cannot
+become page-publication-ready until the reviewed Connector 1.1.0 capability is
+installed and publicly proven. This ordering reuses the existing deterministic
+owned-demand placement priority; it does not infer demand or conversion from
 readiness.
 
-The We Buy Homes manifest is independently ready but remains a separate later
-decision. Do not combine both links into one approval or bulk edit. Homepage
-visibility restoration also remains a separate plugin-file decision.
+The We Buy Homes manifest is held by the existing seller-intent and BIC
+decision boundary. It is not independently ready and must not be combined with
+Home Value in one approval or bulk edit. Homepage visibility restoration also
+remains a separate plugin-file decision.
 
 ## Publication procedure and rollback
 
-The following procedure applies only to the one Home Value CTA candidate.
+The following procedure applies only after the separate Connector upgrade has
+passed and a fresh v4 manifest proves `connectorVersionReady=true`. It then
+applies only to the one Home Value CTA candidate.
 Immediately before any future edit:
 
 1. download a fresh `wordpress_home_value` manifest from the authenticated
@@ -152,10 +224,14 @@ Immediately before any future edit:
 2. require `status=legacy_match_ready`, `targetVisibility=visible_candidate`,
    page ID 3952, one current href occurrence, a non-null rollback href, and an
    unchanged SHA-256 precondition;
-3. create and verify a recoverable WordPress page revision or backup;
+3. run `amm:wordpress:page3952-readiness` against the freshly captured page
+   source and require the expected source digest, exactly one reviewed current
+   shortcode, Connector 1.1.0, a verified postmeta-backup SHA-256, and a
+   revision whose source SHA-256 matches the current page source;
 4. receive the exact Home Value publication approval below;
-5. replace only that one href—no page, form, menu, theme, plugin, phone number,
-   or copy replacement;
+5. replace only the exact current shortcode identified by the contract—no
+   page-wide rewrite and no page, form, menu, theme, plugin, phone number, or
+   copy replacement;
 6. publish and verify public status, destination, UTM values, canonical tags,
    desktop/mobile layout, keyboard behavior, and analytics without submitting
    a lead; and
@@ -183,8 +259,14 @@ Application release and WordPress publication are different actions.
 
 - The application PR may be reviewed, merged, and deployed without changing
   WordPress.
+- The Connector 1.1.0 upgrade is a separate, earlier external action requiring
+  this exact phrase:
+
+`APPROVE PHASE 9 WORDPRESS CONNECTOR 1.1.0 PLUGIN UPGRADE`
+
+That phrase authorizes no page save or publication.
 - The first visible Home Value link publication requires this exact separate
-  phrase:
+  phrase only after the Connector postflight is green:
 
 `APPROVE PHASE 9 HOME VALUE CTA WORDPRESS PUBLICATION`
 

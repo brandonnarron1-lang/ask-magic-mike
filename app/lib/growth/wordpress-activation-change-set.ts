@@ -16,6 +16,9 @@ const ASK_MAGIC_MIKE_HOSTS = new Set([
 const MAX_RESPONSE_BYTES = 3_000_000;
 const MAX_REDIRECTS = 5;
 const FETCH_TIMEOUT_MS = 20_000;
+export const WORDPRESS_CONNECTOR_REQUIRED_VERSION = "1.1.0";
+export const WORDPRESS_CONNECTOR_UPGRADE_APPROVAL_GATE =
+  "APPROVE PHASE 9 WORDPRESS CONNECTOR 1.1.0 PLUGIN UPGRADE";
 export const WORDPRESS_PAGE_INDEX_URL =
   "https://www.ourtownproperties.com/wp-json/wp/v2/pages?per_page=100&_fields=id,link,slug,status,modified_gmt";
 
@@ -23,6 +26,7 @@ export const WORDPRESS_ACTIVATION_PLACEMENT_KEYS = [
   "wordpress_homepage_ask_mike",
   "wordpress_home_value",
   "wordpress_we_buy_homes",
+  "wordpress_rental_to_homeownership",
 ] as const satisfies readonly WordPressOwnedPlacementKey[];
 
 export type WordPressActivationPlacementKey =
@@ -32,23 +36,42 @@ export type WordPressActivationStatus =
   | "legacy_match_ready"
   | "hidden_target"
   | "already_exact"
+  | "authenticated_source_required"
+  | "connector_upgrade_required"
+  | "seller_intent_decision_required"
   | "page_id_unresolved"
   | "missing_target"
   | "ambiguous_target"
   | "precondition_mismatch"
   | "fetch_failed";
 
-interface WordPressActivationTarget {
+export type WordPressActivationChangeMode =
+  | "replace_existing_href"
+  | "add_new_shortcode";
+
+interface WordPressActivationTargetBase {
   placementKey: WordPressActivationPlacementKey;
   placementLabel: string;
   sourcePage: string;
   expectedPageId: number;
-  legacyPath: string;
-  legacySource: string;
-  legacyMedium: string;
-  legacyCampaign: string;
+  proposedShortcode: string;
   approvalGate: string;
+  requiresSellerIntentDecision: boolean;
+  scopeExclusions: readonly string[];
 }
+
+type WordPressActivationTarget = WordPressActivationTargetBase & (
+  | {
+      changeMode: "replace_existing_href";
+      legacyPath: string;
+      legacySource: string;
+      legacyMedium: string;
+      legacyCampaign: string;
+    }
+  | {
+      changeMode: "add_new_shortcode";
+    }
+);
 
 export interface WordPressPageIndexRow {
   id: number;
@@ -59,22 +82,24 @@ export interface WordPressPageIndexRow {
 }
 
 export interface WordPressActivationChangeSet {
-  schemaVersion: "amm.wordpress_activation_change_set.v2";
+  schemaVersion: "amm.wordpress_activation_change_set.v4";
   generatedAt: string;
   mode: "read_only_public_precondition";
+  changeMode: WordPressActivationChangeMode;
   placementKey: WordPressActivationPlacementKey;
   placementLabel: string;
   status: WordPressActivationStatus;
   statusDetail: string;
   publicationBlocked: boolean;
   publicationAuthorized: false;
-  approvalRequired: true;
+  approvalRequired: boolean;
   sourcePage: string;
   pageId: number | null;
   expectedPageId: number;
   pageModifiedGmt: string | null;
   currentHref: string | null;
   proposedHref: string;
+  proposedShortcode: string;
   rollbackHref: string | null;
   currentHrefOccurrences: number;
   askMagicMikeHrefOccurrences: number;
@@ -82,10 +107,16 @@ export interface WordPressActivationChangeSet {
   targetVisibility: "visible_candidate" | "hidden_by_known_css" | "unknown";
   hiddenTargetOccurrences: number;
   hiddenCssSelectorOccurrences: number;
+  requiredConnectorVersion: string;
+  observedConnectorVersions: string[];
+  connectorVersionReady: boolean;
+  sellerIntentDecisionRequired: boolean;
+  scopeExclusions: string[];
   preconditionSha256: string;
   blockers: string[];
   publicationSteps: string[];
-  approvalGate: string;
+  approvalGate: string | null;
+  pagePublicationApprovalGate: string;
   mutationPerformed: false;
   containsRawPageHtml: false;
   fetchErrorCode?: "wordpress_page_fetch_failed" | "wordpress_page_index_fetch_failed";
@@ -98,14 +129,21 @@ export interface WordPressActivationLoadOptions {
 export function toOwnedDemandPlacementReadiness(
   changeSet: WordPressActivationChangeSet,
 ): OwnedDemandPlacementReadiness {
-  const activationEligible = changeSet.targetVisibility === "visible_candidate" && (
+  const activationEligible = changeSet.connectorVersionReady
+    && changeSet.targetVisibility === "visible_candidate" && (
     changeSet.status === "legacy_match_ready" || changeSet.status === "already_exact"
   );
   const detail = changeSet.blockers[0] || changeSet.statusDetail;
   const nextAction = changeSet.status === "already_exact"
     ? "Verify the exact visible tracked link in WordPress, then record native publication proof. No href edit is needed."
+    : changeSet.status === "authenticated_source_required"
+      ? "Authenticate to WordPress, capture the exact raw editor source and recoverable page revision, then generate a source-bound additive candidate. This public manifest does not issue a publication gate."
+    : changeSet.status === "connector_upgrade_required"
+      ? "Back up the exact live Connector 1.0.0 source and options, obtain the plugin-upgrade gate, install the reviewed 1.1.0 candidate, verify legacy links remain unchanged, then regenerate this manifest before editing any page."
+    : changeSet.status === "seller_intent_decision_required"
+      ? "Resolve the existing seller-intent canonical-page, capture-owner, duplicate-page, placement-key, and BIC copy-review decisions before generating a page-publication candidate."
     : activationEligible
-      ? "Use the live readiness manifest, create a verified page rollback, obtain the exact WordPress publication gate, replace only the reviewed href, and record native proof after public verification."
+      ? "Use the live readiness manifest, create a verified page-source rollback, obtain the exact WordPress publication gate, replace only the reviewed shortcode instance, and record native proof after public verification."
       : undefined;
   return {
     channelKey: "ourtown_wordpress",
@@ -119,6 +157,7 @@ export function toOwnedDemandPlacementReadiness(
 
 const TARGETS: Record<WordPressActivationPlacementKey, WordPressActivationTarget> = {
   wordpress_homepage_ask_mike: {
+    changeMode: "replace_existing_href",
     placementKey: "wordpress_homepage_ask_mike",
     placementLabel: "Homepage Ask Magic Mike CTA",
     sourcePage: "https://www.ourtownproperties.com/",
@@ -127,9 +166,13 @@ const TARGETS: Record<WordPressActivationPlacementKey, WordPressActivationTarget
     legacySource: "ourtownproperties",
     legacyMedium: "homepage_cta",
     legacyCampaign: "website_widget",
+    proposedShortcode: '[ask_magic_mike_cta route="/ask" source="homepage_cta" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_homepage_ask_mike" button_text="Ask Magic Mike"]',
     approvalGate: "APPROVE PHASE 9 HOMEPAGE ASK MAGIC MIKE CTA WORDPRESS PUBLICATION",
+    requiresSellerIntentDecision: false,
+    scopeExclusions: [],
   },
   wordpress_home_value: {
+    changeMode: "replace_existing_href",
     placementKey: "wordpress_home_value",
     placementLabel: "Established home-value page CTA",
     sourcePage: "https://www.ourtownproperties.com/how-much-is-your-home-worth/",
@@ -138,9 +181,13 @@ const TARGETS: Record<WordPressActivationPlacementKey, WordPressActivationTarget
     legacySource: "ourtownproperties",
     legacyMedium: "home_value_page",
     legacyCampaign: "website_widget",
+    proposedShortcode: '[ask_magic_mike_cta route="/home-value" source="home_value_page" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_home_value_page" button_text="Ask Magic Mike"]',
     approvalGate: "APPROVE PHASE 9 HOME VALUE CTA WORDPRESS PUBLICATION",
+    requiresSellerIntentDecision: false,
+    scopeExclusions: [],
   },
   wordpress_we_buy_homes: {
+    changeMode: "replace_existing_href",
     placementKey: "wordpress_we_buy_homes",
     placementLabel: "We Buy Homes CTA",
     sourcePage: "https://www.ourtownproperties.com/we-buy-homes/",
@@ -149,7 +196,23 @@ const TARGETS: Record<WordPressActivationPlacementKey, WordPressActivationTarget
     legacySource: "ourtownproperties",
     legacyMedium: "seller_page_cta",
     legacyCampaign: "website_widget",
+    proposedShortcode: '[ask_magic_mike_cta route="/sell" source="seller_page_cta" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_we_buy_homes" headline="Thinking about selling but not sure where to start?" text="Ask Magic Mike for local guidance before you make your next move." button="Get Local Guidance"]',
     approvalGate: "APPROVE PHASE 9 WE BUY HOMES CTA WORDPRESS PUBLICATION",
+    requiresSellerIntentDecision: true,
+    scopeExclusions: [],
+  },
+  wordpress_rental_to_homeownership: {
+    changeMode: "add_new_shortcode",
+    placementKey: "wordpress_rental_to_homeownership",
+    placementLabel: "Rental-to-homeownership CTA",
+    sourcePage: "https://www.ourtownproperties.com/rentals/",
+    expectedPageId: 226,
+    proposedShortcode: '[ask_magic_mike_cta route="/rent" source="rental_to_homeownership" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_rental_to_homeownership" headline="Renting now and planning your next move?" text="Ask Magic Mike for a broker-reviewed rental-to-homeownership readiness conversation. No financing or eligibility decision is promised." button="Review My Next Steps"]',
+    approvalGate: "APPROVE PHASE 9 RENTAL-TO-HOMEOWNERSHIP CTA WORDPRESS PUBLICATION",
+    requiresSellerIntentDecision: false,
+    scopeExclusions: [
+      "https://www.ourtownproperties.com/short-term-home-rentals/ (page 4120 / Gravity Form 6) remains excluded until explicit requested-response consent is approved and stored.",
+    ],
   },
 };
 
@@ -230,6 +293,7 @@ function attributeValue(tag: string, name: string) {
 interface AskMagicMikeHrefEvidence {
   url: URL;
   ctaContainerClasses: string[];
+  connectorVersions: string[];
 }
 
 const VOID_HTML_ELEMENTS = new Set([
@@ -249,12 +313,24 @@ const VOID_HTML_ELEMENTS = new Set([
   "wbr",
 ]);
 const KNOWN_CTA_CONTAINER_CLASSES = new Set(["amm-cta", "amm-cta--dark"]);
+const KNOWN_CONNECTOR_MARKER_CLASSES = new Set([
+  "amm-cta",
+  "amm-embed",
+  "amm-floating-cta",
+]);
 
 function classTokens(tag: string) {
   return attributeValue(tag, "class")
     .split(/\s+/)
     .map((value) => value.trim())
     .filter(Boolean);
+}
+
+function connectorVersion(tag: string) {
+  const value = attributeValue(tag, "data-amm-connector-version");
+  return /^\d+\.\d+\.\d+(?:-[a-z0-9.-]+)?$/i.test(value) && value.length <= 32
+    ? value
+    : "";
 }
 
 function hiddenCtaCssEvidence(html: string) {
@@ -282,7 +358,11 @@ function hiddenCtaCssEvidence(html: string) {
 function extractAskMagicMikeHrefs(html: string, sourcePage: string) {
   const hrefs: AskMagicMikeHrefEvidence[] = [];
   let rejectedLookalikeHrefOccurrences = 0;
-  const stack: Array<{ tagName: string; classes: string[] }> = [];
+  const stack: Array<{
+    tagName: string;
+    classes: string[];
+    connectorVersion: string;
+  }> = [];
   for (const match of String(html).matchAll(/<\/?[a-z][^>]*>/gi)) {
     const tag = match[0];
     const closing = /^<\//.test(tag);
@@ -296,6 +376,7 @@ function extractAskMagicMikeHrefs(html: string, sourcePage: string) {
     }
 
     const classes = classTokens(tag);
+    const tagConnectorVersion = connectorVersion(tag);
     if (tagName === "a") {
       const rawHref = attributeValue(tag, "href");
       if (rawHref) {
@@ -305,7 +386,17 @@ function extractAskMagicMikeHrefs(html: string, sourcePage: string) {
             ...stack.flatMap((entry) => entry.classes),
             ...classes,
           ].filter((className) => KNOWN_CTA_CONTAINER_CLASSES.has(className)))];
-          hrefs.push({ url, ctaContainerClasses });
+          const connectorVersions = [...new Set([
+            ...stack
+              .filter((entry) => entry.classes.some((className) =>
+                KNOWN_CONNECTOR_MARKER_CLASSES.has(className),
+              ))
+              .map((entry) => entry.connectorVersion),
+            classes.some((className) => KNOWN_CONNECTOR_MARKER_CLASSES.has(className))
+              ? tagConnectorVersion
+              : "",
+          ].filter(Boolean))].sort();
+          hrefs.push({ url, ctaContainerClasses, connectorVersions });
         } catch {
           if (/askmagicmike/i.test(rawHref)) rejectedLookalikeHrefOccurrences += 1;
         }
@@ -313,13 +404,18 @@ function extractAskMagicMikeHrefs(html: string, sourcePage: string) {
     }
 
     if (!VOID_HTML_ELEMENTS.has(tagName) && !/\/\s*>$/.test(tag)) {
-      stack.push({ tagName, classes });
+      stack.push({
+        tagName,
+        classes,
+        connectorVersion: tagConnectorVersion,
+      });
     }
   }
   return { hrefs, rejectedLookalikeHrefOccurrences };
 }
 
 function matchesLegacyHref(url: URL, target: WordPressActivationTarget) {
+  if (target.changeMode !== "replace_existing_href") return false;
   const keys = [...url.searchParams.keys()].sort();
   return (
     url.pathname === target.legacyPath &&
@@ -381,6 +477,11 @@ function hashPrecondition(input: {
   targetVisibility: WordPressActivationChangeSet["targetVisibility"];
   hiddenTargetOccurrences: number;
   hiddenCssSelectorOccurrences: number;
+  observedConnectorVersions: string[];
+  connectorVersionReady: boolean;
+  sellerIntentDecisionRequired: boolean;
+  changeMode: WordPressActivationChangeMode;
+  scopeExclusions: readonly string[];
 }) {
   return createHash("sha256").update(JSON.stringify(input)).digest("hex");
 }
@@ -389,7 +490,19 @@ function basePublicationSteps(
   target: WordPressActivationTarget,
   currentHref: string | null,
   targetVisibility: WordPressActivationChangeSet["targetVisibility"] = "unknown",
+  connectorVersionReady = false,
 ) {
+  if (target.changeMode === "add_new_shortcode" && !currentHref) {
+    return [
+      "Do not publish an additive CTA from public rendered HTML alone; this manifest intentionally issues no approval gate.",
+      `Authenticate to WordPress and capture the exact raw editor source, current revision metadata, and a recoverable backup for page ID ${target.expectedPageId}.`,
+      "Verify the exact insertion point and confirm the page has no existing Ask Magic Mike CTA, canonical lead form, or duplicate renter-to-buyer placement.",
+      ...target.scopeExclusions.map((exclusion) => `Preserve scope exclusion: ${exclusion}`),
+      `Prepare one source-bound insertion using exactly: ${target.proposedShortcode}`,
+      "Generate a new manifest bound to the raw-source SHA-256, revision/backup evidence, insertion anchor, mobile/accessibility acceptance, and rollback procedure.",
+      "Only that later exact-source candidate may request the pagePublicationApprovalGate; this public manifest cannot authorize publication.",
+    ];
+  }
   if (targetVisibility === "hidden_by_known_css") {
     return [
       `Create and verify a recoverable WordPress revision or page backup for page ID ${target.expectedPageId}.`,
@@ -402,10 +515,31 @@ function basePublicationSteps(
         : "Do not publish because no exact rollback href is available.",
     ];
   }
+  if (!connectorVersionReady) {
+    return [
+      "Do not edit a WordPress page while the reviewed Connector version marker is missing.",
+      "Re-read the live Connector PHP source and require the recorded 1.0.0 SHA-256 precondition.",
+      "Export the active Connector directory and saved options as a recoverable plugin rollback.",
+      `Obtain the exact ${WORDPRESS_CONNECTOR_UPGRADE_APPROVAL_GATE} gate and install only the reviewed ${WORDPRESS_CONNECTOR_REQUIRED_VERSION} candidate.`,
+      "Verify existing shortcode destinations and layout remain unchanged, then require the public 1.1.0 version marker.",
+      "Regenerate this manifest before preparing any page-source edit or requesting a page publication gate.",
+    ];
+  }
+  if (target.requiresSellerIntentDecision) {
+    return [
+      "Do not request or use the page-publication gate while the seller-intent decision packet remains unresolved.",
+      "Download a fresh protected seller-intent decision packet and reconcile both indexed seller pages and their capture systems.",
+      "Record the approved canonical source page, capture owner, duplicate-page disposition, and stable placement key in a reviewable decision artifact.",
+      "Record BIC/compliance review of the surrounding direct-purchase and timing copy without silently changing that copy in this CTA-only candidate.",
+      "Generate a new exact-source candidate only if page 3631 remains the approved canonical source page and Ask Magic Mike remains the approved capture owner.",
+      "Regenerate this manifest after those decisions; this manifest issues no WordPress publication gate.",
+    ];
+  }
   return [
     `Create and verify a recoverable WordPress revision or page backup for page ID ${target.expectedPageId}.`,
     "Regenerate this manifest immediately before editing and require the same SHA-256 precondition.",
-    `Replace only the one approved ${target.placementLabel} href; do not replace the page, form, menu, theme, or plugin.`,
+    `Verify the editor source contains the one reviewed current shortcode, then replace only that ${target.placementLabel} shortcode instance; do not replace the page, form, menu, theme, or plugin.`,
+    `Require the replacement shortcode to equal: ${target.proposedShortcode}`,
     "Publish only after the exact approval gate below is received.",
     "Verify the public source page, tracked destination, canonical tags, layout, mobile behavior, and analytics event without submitting a lead.",
     currentHref
@@ -419,6 +553,9 @@ function statusDetail(status: WordPressActivationStatus) {
     legacy_match_ready: "One exact legacy href and one exact published WordPress page record match the allowlisted placement.",
     hidden_target: "The exact href exists, but a known public CSS rule suppresses its Ask Magic Mike CTA container.",
     already_exact: "The public placement already uses the canonical tracked href; no WordPress edit is needed.",
+    authenticated_source_required: "The exact published page is known, but an additive CTA requires authenticated raw editor source, a recoverable revision, an insertion anchor, and rollback evidence.",
+    connector_upgrade_required: "The rendered placement does not expose the exact reviewed Connector version marker, so a page edit is not yet safe.",
+    seller_intent_decision_required: "The technical target is identifiable, but the existing canonical-page, capture-owner, duplicate-page, placement-key, and BIC copy-review decisions are unresolved.",
     page_id_unresolved: "The exact public href was found, but the published WordPress page record could not be resolved uniquely.",
     missing_target: "No exact legacy or canonical href matched this named placement.",
     ambiguous_target: "More than one matching href or page record exists, so the target is not safe to edit automatically.",
@@ -459,6 +596,13 @@ export function buildWordPressActivationChangeSet(input: {
   const proposedMatches = hrefs.filter((href) => comparableUrl(href.url) === proposedComparable);
   const currentMatches = legacyMatches.length ? legacyMatches : proposedMatches;
   const currentHref = currentMatches.length ? currentMatches[0].url.toString() : null;
+  const observedConnectorVersions = [...new Set(
+    currentMatches.flatMap((href) => href.connectorVersions),
+  )].sort();
+  const connectorVersionReady =
+    currentMatches.length === 1
+    && observedConnectorVersions.length === 1
+    && observedConnectorVersions[0] === WORDPRESS_CONNECTOR_REQUIRED_VERSION;
   const hiddenTargetOccurrences = currentMatches.filter((href) =>
     href.ctaContainerClasses.some((className) => hiddenClasses.has(className))
   ).length;
@@ -485,7 +629,11 @@ export function buildWordPressActivationChangeSet(input: {
     rows.length > 1 ||
     legacyMatches.length > 1 ||
     proposedMatches.length > 1 ||
-    (legacyMatches.length && proposedMatches.length)
+    (legacyMatches.length && proposedMatches.length) ||
+    (
+      target.changeMode === "add_new_shortcode" &&
+      hrefs.length !== proposedMatches.length
+    )
   ) {
     status = "ambiguous_target";
     blockers.push("Resolve rejected lookalike/insecure links, duplicate page records, or duplicate matching hrefs before preparing any edit.");
@@ -495,10 +643,31 @@ export function buildWordPressActivationChangeSet(input: {
   } else if (pageRow.id !== target.expectedPageId) {
     status = "precondition_mismatch";
     blockers.push(`Expected WordPress page ID ${target.expectedPageId}, but the public index resolved a different ID.`);
+  } else if (
+    target.changeMode === "add_new_shortcode" &&
+    currentMatches.length === 0
+  ) {
+    status = "authenticated_source_required";
+    blockers.push(
+      "Public evidence proves the exact page identity and absence of a direct Ask Magic Mike placement, but it cannot prove the raw editor insertion point, recoverable revision, source hash, or rollback path required for an additive CTA.",
+    );
   } else if (hiddenTargetOccurrences > 0) {
     status = "hidden_target";
     blockers.push(
       "The exact target is inside an Ask Magic Mike CTA container suppressed by a public display:none !important rule; replacing only its href would not activate a visible owned-demand path.",
+    );
+  } else if (currentMatches.length === 1 && !connectorVersionReady) {
+    status = "connector_upgrade_required";
+    blockers.push(
+      `The exact rendered placement does not expose data-amm-connector-version="${WORDPRESS_CONNECTOR_REQUIRED_VERSION}"; upgrade and verify the Connector before any page-source edit.`,
+    );
+  } else if (
+    currentMatches.length === 1 &&
+    target.requiresSellerIntentDecision
+  ) {
+    status = "seller_intent_decision_required";
+    blockers.push(
+      "Resolve the protected seller-intent decision packet and BIC copy review before generating or requesting a page-3631 publication gate.",
     );
   } else if (proposedMatches.length === 1 && legacyMatches.length === 0) {
     status = "already_exact";
@@ -512,6 +681,11 @@ export function buildWordPressActivationChangeSet(input: {
   const pageId = pageRow?.id ?? null;
   const pageModifiedGmt = pageRow?.modified_gmt || null;
   const proposedHref = proposed.toString();
+  const approvalGate = status === "connector_upgrade_required"
+    ? WORDPRESS_CONNECTOR_UPGRADE_APPROVAL_GATE
+    : status === "legacy_match_ready"
+      ? target.approvalGate
+      : null;
   const preconditionSha256 = hashPrecondition({
     placementKey: target.placementKey,
     status,
@@ -526,25 +700,32 @@ export function buildWordPressActivationChangeSet(input: {
     targetVisibility,
     hiddenTargetOccurrences,
     hiddenCssSelectorOccurrences,
+    observedConnectorVersions,
+    connectorVersionReady,
+    sellerIntentDecisionRequired: target.requiresSellerIntentDecision,
+    changeMode: target.changeMode,
+    scopeExclusions: target.scopeExclusions,
   });
 
   return {
-    schemaVersion: "amm.wordpress_activation_change_set.v2",
+    schemaVersion: "amm.wordpress_activation_change_set.v4",
     generatedAt: input.generatedAt ?? new Date().toISOString(),
     mode: "read_only_public_precondition",
+    changeMode: target.changeMode,
     placementKey: target.placementKey,
     placementLabel: target.placementLabel,
     status,
     statusDetail: statusDetail(status),
     publicationBlocked: status !== "legacy_match_ready",
     publicationAuthorized: false,
-    approvalRequired: true,
+    approvalRequired: approvalGate !== null,
     sourcePage: target.sourcePage,
     pageId,
     expectedPageId: target.expectedPageId,
     pageModifiedGmt,
     currentHref,
     proposedHref,
+    proposedShortcode: target.proposedShortcode,
     rollbackHref: currentHref,
     currentHrefOccurrences: currentMatches.length,
     askMagicMikeHrefOccurrences: hrefs.length,
@@ -552,10 +733,21 @@ export function buildWordPressActivationChangeSet(input: {
     targetVisibility,
     hiddenTargetOccurrences,
     hiddenCssSelectorOccurrences,
+    requiredConnectorVersion: WORDPRESS_CONNECTOR_REQUIRED_VERSION,
+    observedConnectorVersions,
+    connectorVersionReady,
+    sellerIntentDecisionRequired: target.requiresSellerIntentDecision,
+    scopeExclusions: [...target.scopeExclusions],
     preconditionSha256,
     blockers,
-    publicationSteps: basePublicationSteps(target, currentHref, targetVisibility),
-    approvalGate: target.approvalGate,
+    publicationSteps: basePublicationSteps(
+      target,
+      currentHref,
+      targetVisibility,
+      connectorVersionReady,
+    ),
+    approvalGate,
+    pagePublicationApprovalGate: target.approvalGate,
     mutationPerformed: false,
     containsRawPageHtml: false,
   };
@@ -584,24 +776,31 @@ function buildFetchFailureChangeSet(
     targetVisibility: "unknown",
     hiddenTargetOccurrences: 0,
     hiddenCssSelectorOccurrences: 0,
+    observedConnectorVersions: [],
+    connectorVersionReady: false,
+    sellerIntentDecisionRequired: target.requiresSellerIntentDecision,
+    changeMode: target.changeMode,
+    scopeExclusions: target.scopeExclusions,
   });
   return {
-    schemaVersion: "amm.wordpress_activation_change_set.v2",
+    schemaVersion: "amm.wordpress_activation_change_set.v4",
     generatedAt,
     mode: "read_only_public_precondition",
+    changeMode: target.changeMode,
     placementKey,
     placementLabel: target.placementLabel,
     status: "fetch_failed",
     statusDetail: statusDetail("fetch_failed"),
     publicationBlocked: true,
     publicationAuthorized: false,
-    approvalRequired: true,
+    approvalRequired: false,
     sourcePage: target.sourcePage,
     pageId: null,
     expectedPageId: target.expectedPageId,
     pageModifiedGmt: null,
     currentHref: null,
     proposedHref,
+    proposedShortcode: target.proposedShortcode,
     rollbackHref: null,
     currentHrefOccurrences: 0,
     askMagicMikeHrefOccurrences: 0,
@@ -609,10 +808,16 @@ function buildFetchFailureChangeSet(
     targetVisibility: "unknown",
     hiddenTargetOccurrences: 0,
     hiddenCssSelectorOccurrences: 0,
+    requiredConnectorVersion: WORDPRESS_CONNECTOR_REQUIRED_VERSION,
+    observedConnectorVersions: [],
+    connectorVersionReady: false,
+    sellerIntentDecisionRequired: target.requiresSellerIntentDecision,
+    scopeExclusions: [...target.scopeExclusions],
     preconditionSha256,
     blockers: ["Restore safe public read access and regenerate the manifest before any WordPress edit."],
     publicationSteps: basePublicationSteps(target, null),
-    approvalGate: target.approvalGate,
+    approvalGate: null,
+    pagePublicationApprovalGate: target.approvalGate,
     mutationPerformed: false,
     containsRawPageHtml: false,
     fetchErrorCode,

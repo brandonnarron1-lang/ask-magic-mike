@@ -1,6 +1,6 @@
 {
   "schema_version": "amm.release_batch.v1",
-  "status": "VERIFIED_NOT_PRODUCTION",
+  "status": "RELEASED_AND_ACCEPTED",
   "batch": "A",
   "name": "RELEASE TRUTH AND PUBLIC INGRESS",
   "base_commit": "a2f3de834830f600df106dbf5836ae4bbde4eb4a",
@@ -22,6 +22,10 @@
   "external_mutations_executed": 0,
   "production_data_mutations_executed": 0,
   "wordpress_mutations_executed": 0,
+  "reviewed_head": "65a09dc0137b97bda407ee24b0914e8f9bffd9c0",
+  "merge_commit": "75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1",
+  "production_tree": "5775ba6a315abde9bbe55f770ccda2a64f897362",
+  "production_deployment": "dpl_aepoH5pzDwPMkerbrp9YekzVrdKD",
   "rollback": "Re-alias Vercel Production deployment dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U; no schema rollback is required.",
   "verification": {
     "node": "24.18.0",
@@ -38,7 +42,8 @@
     "lint": "pass",
     "next_build": "pass_60_static_pages",
     "route_manifest": "pass_100_active_22_acknowledged_duplicates",
-    "full_release_gate": "pass_local_pending_hosted_exact_head"
+    "full_release_gate": "pass_hosted_run_36646434774",
+    "post_deploy_verification": "pass_hosted_run_36646574413"
   },
   "approval_gate": "APPROVE PHASE 9 BATCH A RELEASE TRUTH AND PUBLIC INGRESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT"
 }

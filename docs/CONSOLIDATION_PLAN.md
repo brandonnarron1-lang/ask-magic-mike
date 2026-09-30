@@ -1,6 +1,6 @@
 # Consolidation Plan
 
-Refreshed 2026-09-01 from authenticated GitHub, Vercel, Neon, and WordPress
+Refreshed 2026-09-29 from authenticated GitHub, Vercel, Neon, and WordPress
 evidence. This plan organizes and strengthens the system already in service; it
 does not authorize a parallel application, database, notification engine, or CRM.
 
@@ -22,13 +22,12 @@ does not authorize a parallel application, database, notification engine, or CRM
 - Free-first phone alert: Web Push; carrier SMS remains disabled until a
   compliant registered provider is explicitly approved
 
-The Production baseline is PR #246, merge commit
-`98a91f752c4c53dc0ae300dfc320f47b53e32820`, deployed as
-`dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` after the approved secure Production
-`DATABASE_URL` replacement. The immutable source deployment
-`dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` is immediate rollback. Its recovery and
-credential-redeploy gates and every earlier release gate are consumed and
-cannot authorize a later candidate.
+The Production baseline is PR #278, merge commit
+`75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`, deployed as
+`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`. Deployment
+`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` is immediate rollback. Its release gate,
+the earlier credential-redeploy gate, and every earlier release gate are
+consumed and cannot authorize a later candidate.
 
 ## Consolidation already completed
 
@@ -51,35 +50,35 @@ cannot authorize a later candidate.
 
 ## Current release consolidation
 
-### 1. PR #246 — accepted Production recovery
+### 1. PR #278 — accepted Production ingress hardening
 
-PR #246 merged and passed the exact `main` Release Gate, post-deploy
-verification, two manual monitors, and the first scheduled six-hour monitor.
-It restored truthful CI and bounded incident reconciliation after the secure
-canonical Neon credential repair. It created no application database, schema,
-lead, notification, WordPress, DNS, or NellySelly mutation.
+PR #278 merged and passed the exact `main` Release Gate, post-deploy
+verification, read-only smoke/monitor acceptance, auth boundary, and runtime
+log review. It hardened the existing public ingress without creating another
+application, database, lead lifecycle, or notification system. It created no
+schema, lead, notification, WordPress, DNS, or NellySelly mutation.
 
 PR #238 remains the applied five-migration cutover receipt beneath this source.
 Its migration hashes, one-row-per-version ledger, disabled import gates, and
 postflight evidence remain preserved, but its approval is consumed.
 
-### 2. PR #247 — clean sealed review candidate
+### 2. PR #280 — sealed Batch D application candidate
 
-PR #247 starts directly from accepted PR #246 `main` and ports only the
-unique WordPress placement-readiness behavior that remained stranded in stale
-stacked PR #245. It consumes the existing WordPress readiness manifests,
-canonical owned-demand registry, proof ledger, and Distribution Command; it
-does not create a parallel funnel, publisher, form, database, CRM, campaign
-manager, or notification service.
+PR #280 now starts from accepted PR #278 `main` and consolidates only the
+useful signed-WordPress, source-consent, open-house packet, and rental-placement
+readiness work from the preserved Draft lineage. It consumes the existing
+WordPress readiness manifests, canonical owned-demand registry, proof ledger,
+and Distribution Command; it does not create a parallel funnel, publisher,
+form, database, CRM, campaign manager, or notification service.
 
-The machine authority binds the one reviewed application candidate to content
-head `f4503dc68b0f2c07a1e9c82827c27ffb5479e9f4` and tree
-`f1023e295332b939d21313ed626a9b3a8b2d5483`. Exact Node 24 local verification,
-hosted Release Gate, immutable Preview identity, protected no-write
-visual/runtime QA, dependency/secret checks, and rollback review pass for that
-content. PR #247 has no migration, environment delta, or authorized external
-mutation. The final authority-only seal must pass the same exact-head checks;
-any product, migration, environment, or target drift invalidates the gate.
+The machine authority records reviewed implementation head
+`7baff2dcafd65e666c7846165be8c2d6ab3d9ab0` and tree
+`69b76a5f8ced4261d57facc201fc0cb45e467e71` as the single
+`ready_for_owner_approval` application candidate. PR #280 has no migration,
+environment delta, or authorized external mutation. Exact Node 24 hosted CI,
+immutable Preview identity, protected no-write/browser QA, local visual QA,
+dependency/secret checks, runtime logs, and rollback review passed. Its exact
+application-only merge/deploy gate is requestable and unconsumed.
 
 ### 3. Preserved and superseded review lineage
 
@@ -88,9 +87,9 @@ any product, migration, environment, or target drift invalidates the gate.
 - PRs #210–#243 remain historical lineage represented once by released PR
   #238. Their former gates are not requestable.
 - Draft PR #244 is a pre-recovery authority reconciliation and Draft PR #245 is
-  stacked on it. Both are superseded by PR #246 current truth plus the clean PR
-  #247 port; their branches and evidence remain preserved until archival
-  review.
+  stacked on it. Both are superseded historical reviews. PR #248 preserves the
+  separate Connector 1.1.0 work but must be reconciled after Batch D before any
+  new gate is sealed.
 - PR #187's KPI target-register migration remains deferred because Production
   still has no eligible genuine-demand baseline.
 - PR #182, PR #179, PRs #92 and #119–#121 remain superseded or

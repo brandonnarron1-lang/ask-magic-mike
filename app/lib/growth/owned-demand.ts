@@ -73,6 +73,10 @@ export interface OwnedDemandAttributionSignal {
 }
 
 export type OwnedDemandOfferKey = "seller_review" | "buyer_match" | "renter_plan";
+export const OWNED_DEMAND_OPEN_HOUSE_REGISTRATION_CONTENT =
+  "open_house_registration" as const;
+export type OwnedDemandInstancePlacementKey =
+  typeof OWNED_DEMAND_OPEN_HOUSE_REGISTRATION_CONTENT;
 export type WordPressOwnedPlacementKey =
   | "wordpress_homepage_ask_mike"
   | "wordpress_home_value"
@@ -130,6 +134,22 @@ export interface OwnedDemandNamedPlacement extends OwnedDemandPlacementDefinitio
   status: OwnedDemandStatus;
 }
 
+/**
+ * Attribution for a family of operator-generated, instance-specific URLs.
+ * These are measured exactly by UTM content but deliberately stay outside the
+ * static publication-proof placement list because each packet has its own
+ * reviewed reference and destination URL.
+ */
+export interface OwnedDemandInstancePlacement {
+  key: OwnedDemandInstancePlacementKey;
+  label: string;
+  content: string;
+  operatorHref: string;
+  attributedLeads: number;
+  status: OwnedDemandStatus;
+  reviewNote: string;
+}
+
 export interface OwnedDemandChannel {
   key: string;
   label: string;
@@ -149,6 +169,7 @@ export interface OwnedDemandChannel {
   reviewNote: string;
   offers: OwnedDemandOfferPlacement[];
   namedPlacements: OwnedDemandNamedPlacement[];
+  instancePlacements: OwnedDemandInstancePlacement[];
 }
 
 export interface OwnedDemandPlanItem {
@@ -186,6 +207,17 @@ export function buildOwnedDemandChannelPacket(channel: OwnedDemandChannel) {
         "",
       ]
     : [];
+  const instancePlacements = channel.instancePlacements.length
+    ? [
+        "INSTANCE-SPECIFIC ATTRIBUTION CLASSES",
+        ...channel.instancePlacements.flatMap((placement) => [
+          `${placement.label.toUpperCase()} — utm_content=${placement.content}`,
+          `Operator workspace: ${placement.operatorHref}`,
+          `Review boundary: ${placement.reviewNote}`,
+        ]),
+        "",
+      ]
+    : [];
 
   return [
     `ASK MAGIC MIKE — ${channel.label.toUpperCase()} OWNED-DEMAND FLIGHT`,
@@ -199,6 +231,7 @@ export function buildOwnedDemandChannelPacket(channel: OwnedDemandChannel) {
     "",
     ...sections.flatMap((section) => [section, ""]),
     ...namedPlacements,
+    ...instancePlacements,
     `Next human step: ${channel.operatorStep}`,
     `Channel review: ${channel.reviewNote}`,
     "External publication remains a separate human-reviewed approval.",
@@ -596,9 +629,30 @@ export function buildOwnedDemandCommand(
           status: attributedLeads > 0 ? "signal_detected" : "ready_unmeasured",
         };
       });
+    const openHouseAttributedLeads = definition.key === "qr_print"
+      ? leadsForPlacement(
+          intelligence.ownedDemandSignals,
+          definition,
+          OWNED_DEMAND_OPEN_HOUSE_REGISTRATION_CONTENT,
+        )
+      : 0;
+    const instancePlacements: OwnedDemandInstancePlacement[] = definition.key === "qr_print"
+      ? [{
+          key: OWNED_DEMAND_OPEN_HOUSE_REGISTRATION_CONTENT,
+          label: "Open-house registration packets",
+          content: OWNED_DEMAND_OPEN_HOUSE_REGISTRATION_CONTENT,
+          operatorHref: "#open-house-qr-builder",
+          attributedLeads: openHouseAttributedLeads,
+          status: openHouseAttributedLeads > 0
+            ? "signal_detected"
+            : "ready_unmeasured",
+          reviewNote: "Each event or listing reference requires its own reviewed packet and two-device scan. Do not collapse an instance URL into a generic static publication proof.",
+        }]
+      : [];
     const attributedLeads = genericAttributedLeads
       + offerPlacements.reduce((sum, offer) => sum + offer.attributedLeads, 0)
-      + namedPlacements.reduce((sum, placement) => sum + placement.attributedLeads, 0);
+      + namedPlacements.reduce((sum, placement) => sum + placement.attributedLeads, 0)
+      + instancePlacements.reduce((sum, placement) => sum + placement.attributedLeads, 0);
     const legacyAttributedLeads = namedPlacements.reduce(
       (sum, placement) => sum + placement.legacyAttributedLeads,
       0,
@@ -622,6 +676,7 @@ export function buildOwnedDemandCommand(
       reviewNote: definition.reviewNote,
       offers: offerPlacements,
       namedPlacements,
+      instancePlacements,
     };
   });
 

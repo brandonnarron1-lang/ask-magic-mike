@@ -46,7 +46,7 @@ const CURRENT_WORDPRESS_GATE =
 export function growthCapabilityStateLabel(state: GrowthCapabilityState) {
   const labels: Record<GrowthCapabilityState, string> = {
     production_live: "Production live",
-    release_candidate: "Reviewed candidate",
+    release_candidate: "Application review",
     operator_gate: "Operator approval required",
     host_gate: "Hosting action required",
     external_dependency: "External dependency",
@@ -62,7 +62,7 @@ export function buildGrowthCapabilityLedger({
 }): GrowthCapabilityLedger {
   const activeCandidate = CURRENT_RELEASE_AUTHORITY.candidate;
   const reviewVehicle = CURRENT_RELEASE_AUTHORITY.reviewVehicle;
-  const applicationState: GrowthCapabilityState = activeCandidate && !currentTailInProduction
+  const applicationState: GrowthCapabilityState = (activeCandidate || reviewVehicle) && !currentTailInProduction
     ? "release_candidate"
     : "production_live";
   const items: GrowthCapabilityLedgerItem[] = [
@@ -121,6 +121,8 @@ export function buildGrowthCapabilityLedger({
       ],
       nextAction: activeCandidate && !currentTailInProduction
         ? `Preserve this read-only capability inside reviewed application candidate PR ${activeCandidate.pr}; do not publish a page or treat an experiment packet as release authority.`
+        : reviewVehicle && !currentTailInProduction
+          ? `Preserve this read-only capability inside unsealed Draft PR ${reviewVehicle.pr}; do not publish a page or infer release authority before exact-head verification is sealed.`
         : "Use the protected workbench to prepare one owner-reviewed page experiment at a time, then request separate publication authority only after Preview and compliance review.",
       href: "/admin/growth/search-ingress",
     },
@@ -166,6 +168,8 @@ export function buildGrowthCapabilityLedger({
       ],
       nextAction: activeCandidate && !currentTailInProduction
         ? `Preserve these reviewed implementations inside application candidate PR ${activeCandidate.pr} instead of rebuilding nurture or planning features.`
+        : reviewVehicle && !currentTailInProduction
+          ? `Preserve these implementations inside unsealed Draft PR ${reviewVehicle.pr} instead of rebuilding them; no send or release authority exists yet.`
         : "Collect real planner engagement and review eligible revival evidence before proposing any bounded consumer pilot.",
       href: "/admin/revival",
     },

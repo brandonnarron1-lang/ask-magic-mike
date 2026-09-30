@@ -99,4 +99,81 @@ describe("WordPress public-surface audit", () => {
       expect.objectContaining({ code: "gravity_forms_outside_configured_canonical_allowlist" }),
     ]));
   });
+
+  it("separates a repeated sitewide Gravity form from an enabled intent form", () => {
+    const makePage = (path, extraForm = "") => inspectWordPressPage(`
+      <!doctype html>
+      <html>
+        <head><title>${path}</title><link rel="canonical" href="https://www.ourtownproperties.com${path}"></head>
+        <body>
+          <div id="gform_wrapper_7"><form id="gform_7" data-formid="7"></form></div>
+          ${extraForm}
+        </body>
+      </html>
+    `, `https://www.ourtownproperties.com${path}`);
+
+    const summary = summarizeWordPressSurface([
+      makePage("/", '<div id="gform_wrapper_3"><form id="gform_3" data-formid="3"></form></div>'),
+      makePage("/agents/mike-eatmon/"),
+      makePage("/rentals/"),
+      makePage("/ask-magic-mike/"),
+    ], [3]);
+
+    expect(summary.canonical_capture_coverage).toEqual({
+      comparison_supplied: true,
+      sitewide_placement_threshold: 3,
+      forms: [
+        {
+          form_id: 3,
+          placement_count: 1,
+          placement_share: 0.25,
+          repeated_sitewide: false,
+          configured_for_canonical_forwarding: true,
+          coverage_state: "configured_for_canonical_forwarding",
+        },
+        {
+          form_id: 7,
+          placement_count: 4,
+          placement_share: 1,
+          repeated_sitewide: true,
+          configured_for_canonical_forwarding: false,
+          coverage_state: "observed_outside_configured_allowlist",
+        },
+      ],
+    });
+    expect(summary.risk_flags).toContainEqual({
+      code: "sitewide_gravity_form_outside_configured_canonical_allowlist",
+      forms: [{ form_id: 7, placement_count: 4, placement_share: 1 }],
+    });
+  });
+
+  it("distinguishes an unavailable comparison from an explicitly empty allowlist", () => {
+    const pages = ["/", "/rentals/", "/ask-magic-mike/"].map((path) => inspectWordPressPage(`
+      <!doctype html>
+      <html>
+        <head><title>${path}</title></head>
+        <body><div id="gform_wrapper_7"><form id="gform_7" data-formid="7"></form></div></body>
+      </html>
+    `, `https://www.ourtownproperties.com${path}`));
+
+    const unavailable = summarizeWordPressSurface(pages);
+    expect(unavailable.canonical_capture_coverage).toMatchObject({
+      comparison_supplied: false,
+      forms: [{ form_id: 7, coverage_state: "configuration_not_supplied" }],
+    });
+    expect(unavailable.risk_flags).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "gravity_forms_outside_configured_canonical_allowlist" }),
+      expect.objectContaining({ code: "sitewide_gravity_form_outside_configured_canonical_allowlist" }),
+    ]));
+
+    const explicitlyEmpty = summarizeWordPressSurface(pages, []);
+    expect(explicitlyEmpty.canonical_capture_coverage).toMatchObject({
+      comparison_supplied: true,
+      forms: [{ form_id: 7, coverage_state: "observed_outside_configured_allowlist" }],
+    });
+    expect(explicitlyEmpty.risk_flags).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "gravity_forms_outside_configured_canonical_allowlist" }),
+      expect.objectContaining({ code: "sitewide_gravity_form_outside_configured_canonical_allowlist" }),
+    ]));
+  });
 });

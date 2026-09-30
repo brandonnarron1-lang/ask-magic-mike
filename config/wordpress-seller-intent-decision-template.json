@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "amm.wordpress_seller_intent_approval.v1",
+  "decisionStatus": "draft",
+  "decisionId": "",
+  "approvedAt": "",
+  "reviewedEvidenceSha256": "",
+  "reviewedEvidenceGeneratedAt": "",
+  "reviewedEvidencePacketSha256": "",
+  "canonicalSourcePage": "",
+  "canonicalPageId": null,
+  "captureOwner": "",
+  "duplicateSourcePage": "",
+  "duplicatePageId": null,
+  "duplicatePageDisposition": "",
+  "placementKey": "",
+  "canonicalFunnel": "https://www.askmagicmike.com/sell",
+  "approvalReferences": {
+    "owner": "",
+    "seo": "",
+    "bic": ""
+  },
+  "reasonCodes": []
+}

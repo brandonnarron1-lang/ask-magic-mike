@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   signWordPressBridgeBody,
+  verifyWordPressBridgePayloadIdentity,
   verifyWordPressBridgeRequest,
 } from "@/../app/lib/wordpressBridgeSignature";
 
@@ -43,5 +44,27 @@ describe("WordPress bridge HMAC", () => {
   it("fails closed when the secret is absent", () => {
     expect(verifyWordPressBridgeRequest(request(), body, {}, 1_786_464_000_000))
       .toMatchObject({ ok: false, status: 503 });
+  });
+});
+
+describe("WordPress bridge payload identity", () => {
+  it("binds the signed entry to one form and consent source", () => {
+    expect(verifyWordPressBridgePayloadIdentity({
+      idempotency_key: "gf:7:151",
+      consent_source: "gravity_forms_7",
+    }, "151")).toEqual({ ok: true, formId: "7", entryId: "151" });
+  });
+
+  it.each([
+    [{ idempotency_key: "gf:7:152", consent_source: "gravity_forms_7" }, "151"],
+    [{ idempotency_key: "gf:7:151", consent_source: "gravity_forms_3" }, "151"],
+    [{ idempotency_key: "gf:8:151", consent_source: "gravity_forms_8" }, "151"],
+    [{ idempotency_key: "not-a-gravity-forms-key", consent_source: "gravity_forms_7" }, "151"],
+  ])("rejects a mismatched signed identity", (payload, signedEntryId) => {
+    expect(verifyWordPressBridgePayloadIdentity(payload, signedEntryId)).toEqual({
+      ok: false,
+      status: 400,
+      error: "wordpress_bridge_identity_mismatch",
+    });
   });
 });

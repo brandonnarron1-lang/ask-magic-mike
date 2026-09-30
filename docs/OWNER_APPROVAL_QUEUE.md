@@ -1,46 +1,41 @@
 # Owner Approval Queue
 
-Updated 2026-09-01 from authenticated GitHub, Vercel, Neon, WordPress, and
+Updated 2026-09-29 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
 ## Current application release — one exact gate requestable
 
-- Accepted Production is PR [#247](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/247)
-  merge `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, tree
-  `0065f829fc94f87ab5e0faf596c8e56733be3972`, on deployment
-  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`. Deployment
-  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` is immediate application rollback.
-- The PR #247 application approval and secure `DATABASE_URL`
-  replacement/redeploy approval are consumed and not requestable.
+- Accepted Production is PR [#278](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/278)
+  merge `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`, tree
+  `5775ba6a315abde9bbe55f770ccda2a64f897362`, on deployment
+  `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`. Deployment
+  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` is immediate application rollback.
+- The PR #278 application approval, PR #247 application approval, and secure
+  `DATABASE_URL` replacement/redeploy approval are consumed and not requestable.
+- Draft PR [#280](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280)
+  is the single sealed Batch D application candidate at reviewed head
+  `7baff2dcafd65e666c7846165be8c2d6ab3d9ab0` and tree
+  `69b76a5f8ced4261d57facc201fc0cb45e467e71`. It has zero migrations,
+  environment changes, and external mutations. Exact-head hosted CI,
+  immutable Preview, protected no-write browser QA, local desktop/mobile
+  visual QA, and runtime-log review passed.
 - PR [#248](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248)
-  is the only active reviewed application candidate. Its reviewed content head
-  is `f6134b71f258003aa5dc201cf5ef7cdb6eb61ee7`, exact tree is
-  `832be2750355391f9198fcaaaa6f46bb3beb8b3f`, hosted Release Gate
-  `36497982374` passes, and immutable Preview
-  `dpl_2WE8ftPXZDrnkGdzVKtU2bzBnSBQ` is Ready. It has zero migrations, zero
-  environment changes, and zero authorized external mutations.
+  preserves the separate Connector 1.1.0 work, but its previous application
+  gate is invalid after the Production advance and is not requestable.
 - PR #238 is an applied and verified five-migration receipt; its approval is
   consumed. PRs #244 and #245 are superseded stale reviews and remain preserved
   without current authority.
-- The one requestable application gate is:
+- The only requestable application merge/deploy phrase is:
 
-  ```text
-  APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT
-  ```
-
-  It permits only PR #248 merge and a same-tree deployment to the existing Ask
-  Magic Mike Vercel Production project. If acceptance fails, immediately restore
-  current Production deployment `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` and leave
-  WordPress unchanged.
+  `APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT`
 - No application gate authorizes WordPress publication, provider access, real
   or synthetic lead submission, email/SMS/Push, social/GBP/email publication,
   spend, DNS change, deletion, data import, or NellySelly action.
 
-The later Connector 1.1.0 plugin upgrade is a separate WordPress gate and is not
-included in the PR #248 application release phrase. Page 3952 publication is a
-third independent action after the public version marker and fresh readiness
-proof pass.
+The later Connector 1.1.0 plugin upgrade is a separate WordPress gate. Page
+3952 publication is a third independent action after the public version marker
+and fresh readiness proof pass.
 
 ## Cross-domain measurement activation dependency — later, not currently requestable
 

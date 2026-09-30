@@ -132,6 +132,29 @@ describe("Owned Demand Command", () => {
     expect(result.attributedLiveLeads).toBe(7);
   });
 
+  it("counts open-house packet attribution as an exact instance-specific QR signal", () => {
+    const result = buildOwnedDemandCommand({
+      summary: summary({ leads: 2, attributedLeadRate: 100 }),
+      ownedDemandSignals: [
+        signal("qr", "owned_media", "open_house_registration", 2),
+      ],
+    });
+    const qr = result.channels.find((row) => row.key === "qr_print");
+    expect(qr?.attributedLeads).toBe(2);
+    expect(qr?.instancePlacements).toEqual([
+      expect.objectContaining({
+        key: "open_house_registration",
+        content: "open_house_registration",
+        attributedLeads: 2,
+        status: "signal_detected",
+      }),
+    ]);
+    expect(result.attributedLiveLeads).toBe(2);
+    expect(buildOwnedDemandChannelPacket(qr!)).toContain(
+      "INSTANCE-SPECIFIC ATTRIBUTION CLASSES",
+    );
+  });
+
   it("does not call unrelated attributed demand a measured owned-channel signal", () => {
     const result = buildOwnedDemandCommand({
       summary: summary({ leads: 3, attributedLeadRate: 100 }),

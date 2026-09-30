@@ -1,6 +1,6 @@
 # Known Operating Constraints
 
-Updated 2026-09-01. The public funnel, canonical Neon capture, Lead Center, and
+Updated 2026-09-29. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
 
@@ -35,23 +35,21 @@ specific expansions; they do not invalidate the live lead pipe.
 
 ## Current release constraint
 
-- Current accepted Production is PR #247 merge
-  `a2f3de834830f600df106dbf5836ae4bbde4eb4a`, tree
-  `0065f829fc94f87ab5e0faf596c8e56733be3972`, on deployment
-  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`; deployment
-  `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` is immediate rollback. The PR #247
+- Current accepted Production is PR #278 merge
+  `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`, tree
+  `5775ba6a315abde9bbe55f770ccda2a64f897362`, on deployment
+  `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`; deployment
+  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` is immediate rollback. The PR #278
   application gate, credential-redeploy approval, and every earlier completed
   gate are consumed.
 - Exact-tree hosted release and post-deploy verification, the 11-check
   Production monitor, 19-pass read-only smoke, and runtime log window pass.
-- PR #248 is the only active reviewed application candidate at content head
-  `f6134b71f258003aa5dc201cf5ef7cdb6eb61ee7` and exact tree
-  `832be2750355391f9198fcaaaa6f46bb3beb8b3f`. Hosted Release Gate
-  `36497982374` and immutable Preview `dpl_2WE8ftPXZDrnkGdzVKtU2bzBnSBQ`
-  pass. Its singular requestable gate is
-  `APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT`.
-  That gate is application-only and cannot authorize the Connector plugin
-  upgrade, a WordPress page edit, or any other external action.
+- Draft PR #280 is the single sealed Batch D application candidate at reviewed
+  head `7baff2dcafd65e666c7846165be8c2d6ab3d9ab0`; its exact application-only
+  merge/deploy gate is requestable and unconsumed. PR #248 preserves the
+  Connector 1.1.0 work, but its old gate is invalid after the Production
+  advance. Neither the PR #280 gate nor this status record authorizes a
+  Connector plugin upgrade, WordPress page edit, or any other external action.
 - PR #238 is an applied five-migration receipt. PRs #244 and #245 are stale
   stacked review artifacts superseded by the current reconciliation and clean
   mainline port; none of their historical gates may be replayed.

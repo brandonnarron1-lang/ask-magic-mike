@@ -1,6 +1,6 @@
 # Ask Magic Mike Canonical Lead Bridge
 
-Version 1.2.0 extends the existing isolated bridge in place. It continues to
+Version 1.3.0 extends the existing isolated bridge in place. It continues to
 forward an explicit approved subset of audited Gravity Forms IDs 1–7 to
 `https://www.askmagicmike.com/api/leads` and can independently provide the
 brokerage site's consent-safe Google measurement loader. It does not create a
@@ -14,6 +14,20 @@ second WordPress plugin, lead store, analytics property, or cookie-choice UI.
   correlation ID, timestamp, and a safe error code. It does not duplicate entry PII.
 - It never calls `wp_mail()` and never sends a consumer acknowledgment.
 - Existing Gravity Forms notifications remain untouched until exact-form QA passes.
+- Form 7 is runtime-blocked even if accidentally allowlisted unless an exact
+  per-channel Gravity Forms Consent contract is configured and the live field
+  type, public visibility, required state, and normalized copy hash all match.
+- Form 7 accepts exactly the release-approved `email` channel contract. Adding,
+  removing, or substituting call/SMS channels requires another reviewed release;
+  configuration alone cannot widen communication permission.
+- Signed bridge submissions preserve their source-specific consent version and
+  exact displayed copy plus the Gravity entry creation time. Missing or malformed
+  evidence denies email, call, and SMS instead of claiming the Ask Magic Mike
+  public-form language.
+- Lead PII can be posted only to the exact canonical HTTPS endpoint
+  `https://www.askmagicmike.com/api/leads`. Any configured alternate host, path,
+  query, redirect target, or NellySelly endpoint fails closed before a payload is
+  created or sent.
 - Secrets are read from `wp-config.php` or the process environment, never WordPress
   options or the admin screen.
 - Google measurement is independently disabled by default. The loader accepts
@@ -36,12 +50,45 @@ define('AMM_CANONICAL_BRIDGE_SECRET', getenv('WORDPRESS_BRIDGE_SECRET'));
 define('AMM_CANONICAL_BRIDGE_URL', 'https://www.askmagicmike.com/api/leads');
 define('AMM_CANONICAL_BRIDGE_ENABLED', false);
 define('AMM_CANONICAL_BRIDGE_FORM_IDS', array());
+define('AMM_CANONICAL_BRIDGE_CONSENT_CONTRACTS', array());
 define('AMM_GOOGLE_MEASUREMENT_ENABLED', false);
 ```
 
 The same 32+ character `WORDPRESS_BRIDGE_SECRET` must be stored as a Sensitive
 server-only Vercel environment variable. Do not paste its value into chat, logs,
 screenshots, source code, or WordPress options.
+
+`AMM_CANONICAL_BRIDGE_URL` is an explicit configuration assertion, not an open
+webhook destination. Version 1.3.0 accepts only the exact canonical URL shown
+above and records a safe configuration error for any other value.
+
+Form 7 additionally requires a non-secret, owner/BIC-approved contract. Use the
+actual IDs assigned by Gravity Forms after the Consent fields are added; do not
+guess them. Normalize each displayed checkbox label plus description to single
+spaces and pin its SHA-256 hash:
+
+```php
+define('AMM_CANONICAL_BRIDGE_CONSENT_CONTRACTS', array(
+    7 => array(
+        'language_version' => 'approved_version_here',
+        'channels' => array(
+            'email' => array(
+                'field_id' => 0, // Replace with the audited Consent field ID.
+                'language_sha256' => 'replace_with_64_lowercase_hex_characters',
+                'required' => true,
+            ),
+        ),
+    ),
+));
+```
+
+The equivalent hosting variable is `WORDPRESS_BRIDGE_CONSENT_CONTRACTS` as
+JSON. Leave it empty until the live definition, approval record, and candidate
+bridge package agree. A malformed or drifting contract records
+`consent_contract_blocked` and performs no network forward. Form 7's approved
+channel set is exactly `email`; SMS and call remain denied. The bridge also
+requires a valid UTC Gravity `date_created` value before any channel grant can
+be forwarded.
 
 ## Activation sequence
 
@@ -54,8 +101,20 @@ screenshots, source code, or WordPress options.
 5. Enable forwarding and submit one unmistakable `is_test=true` QA record through
    that live public form.
 6. Verify one Gravity entry, one Neon lead, one notification, and one canonical ID.
-7. Repeat deliberately for forms 2, 3, and 7; do not widen the allowlist implicitly.
+7. Repeat deliberately for forms 2 and 3. Form 7 additionally requires the
+   executable cutover report to return `GO`; do not widen the allowlist implicitly.
 8. Disable the matching Gravity Forms admin notification only after delivery proof.
+
+Run the Form 7 gate from the canonical repository:
+
+```bash
+pnpm run amm:wordpress:form7-readiness -- --allow-hold
+```
+
+`HOLD` is the expected result for the preserved 2026-09-01 live snapshot. The
+command returns `GO` only after approved consent fields, bounded privacy state,
+the 1.3 consent-contract runtime, canonical allowlisting, and duplicate native
+notification retirement are represented in a fresh sanitized snapshot.
 
 Rollback is one constant change: set `AMM_CANONICAL_BRIDGE_ENABLED` to `false`.
 For a single-form rollback, remove only that ID from
@@ -69,7 +128,7 @@ does not enable the other.
 
 1. Back up WordPress files/database and preserve the current head/noscript GTM
    source before any live edit.
-2. Install version 1.2.0 with `AMM_GOOGLE_MEASUREMENT_ENABLED=false` and verify
+2. Install version 1.3.0 with `AMM_GOOGLE_MEASUREMENT_ENABLED=false` and verify
    the existing Form 3 lead-forwarding state is unchanged.
 3. Remove the exact legacy `GTM-KZMCSLTJ` inline head bootstrap and its matching
    `<noscript>` iframe. Do not remove the existing cookie-choice provider.

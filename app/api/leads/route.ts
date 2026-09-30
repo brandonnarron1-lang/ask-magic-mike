@@ -3,7 +3,14 @@ import { createHash } from "node:crypto";
 import { normalizeLeadPayload, type LeadPayload } from "../../lib/leadPayload";
 import { isValidLeadEmail, isValidLeadPhone } from "../../lib/leadContactValidation";
 import { PUBLIC_LEAD_SAVE_ERROR } from "../../lib/publicLeadErrors";
-import { consentGrantedForCall, consentGrantedForEmail, consentGrantedForSms, LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../lib/leadConsent";
+import {
+  consentGrantedForCall,
+  consentGrantedForEmail,
+  consentGrantedForSms,
+  LEAD_CONSENT_LANGUAGE_TEXT,
+  LEAD_CONSENT_LANGUAGE_VERSION,
+  resolveAuthoritativeConsentEvidence,
+} from "../../lib/leadConsent";
 import { scoreLead } from "../../lib/leadScoring";
 import { routeLead } from "../../lib/leadRouting";
 import { enqueueLeadNotifications } from "../../lib/leadAlertService";
@@ -27,7 +34,10 @@ import {
   PREVIEW_READ_ONLY_MESSAGE,
   assertDatabaseMutationAllowed,
 } from "../../../src/lib/preview-security";
-import { verifyWordPressBridgeRequest } from "../../lib/wordpressBridgeSignature";
+import {
+  verifyWordPressBridgePayloadIdentity,
+  verifyWordPressBridgeRequest,
+} from "../../lib/wordpressBridgeSignature";
 import {
   isPlainRecord,
   MAX_PUBLIC_LEAD_BODY_BYTES,
@@ -348,8 +358,8 @@ function buildLeadRow(
     consent_sms: consentSms,
     consent_call: consentCall,
     consent_email: consentEmail,
-    consent_timestamp: consentEmail || consentCall || consentSms ? new Date().toISOString() : null,
-    consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
+    consent_timestamp: consentEmail || consentCall || consentSms ? payload.consent_timestamp || new Date().toISOString() : null,
+    consent_language_version: payload.consent_language_version || LEAD_CONSENT_LANGUAGE_VERSION,
     status: qualification.status,
     lead_type: leadType,
     lead_grade: qualification.lead_grade,
@@ -363,7 +373,7 @@ function buildLeadRow(
     score_factors: score.factors,
     score_version: score.version,
     is_test: payload.is_test === true,
-    consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
+    consent_language_text: payload.consent_language_text || LEAD_CONSENT_LANGUAGE_TEXT,
     consent_ip_hash: consentIpHash(req),
     consent_source: payload.consent_source || payload.lead_source_surface,
     consent_user_agent: req.headers.get("user-agent") || null,
@@ -443,7 +453,7 @@ async function insertLead(
     const consentEmail = consentGrantedForEmail(payload);
     const consentCall = consentGrantedForCall(payload);
     const consentSms = consentGrantedForSms(payload);
-    const collectedAt = new Date().toISOString();
+    const collectedAt = payload.consent_timestamp || new Date().toISOString();
     await persistence.enrichLeadRecord({
       leadId: result.lead_id,
       leadPatch: {
@@ -452,7 +462,7 @@ async function insertLead(
         score_factors: score.factors,
         score_version: score.version,
         is_test: payload.is_test === true,
-        consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
+        consent_language_text: payload.consent_language_text || LEAD_CONSENT_LANGUAGE_TEXT,
         consent_ip_hash: consentIpHash(req),
         consent_source: payload.consent_source || payload.lead_source_surface,
         consent_user_agent: req.headers.get("user-agent") || null,
@@ -489,8 +499,8 @@ async function insertLead(
         lead_id: result.lead_id,
         consent_type: type,
         granted,
-        language_version: LEAD_CONSENT_LANGUAGE_VERSION,
-        language_text: LEAD_CONSENT_LANGUAGE_TEXT,
+        language_version: payload.consent_language_version || LEAD_CONSENT_LANGUAGE_VERSION,
+        language_text: payload.consent_language_text || LEAD_CONSENT_LANGUAGE_TEXT,
         user_agent: req.headers.get("user-agent") || null,
         collected_at: collectedAt,
       })),
@@ -628,6 +638,8 @@ export async function POST(req: Request) {
 
   let raw: Record<string, unknown>;
   let rawBody: string;
+  let trustedWordPressBridge = false;
+  let trustedWordPressEntryId: string | null = null;
   let experimentContext: VerifiedPublicExperimentLeadContext | null = null;
   let persistedLead: Awaited<ReturnType<typeof insertLead>>;
   try {
@@ -641,6 +653,8 @@ export async function POST(req: Request) {
           bridge.status,
         );
       }
+      trustedWordPressBridge = true;
+      trustedWordPressEntryId = bridge.entryId;
     }
     const parsed: unknown = JSON.parse(rawBody);
     if (!isPlainRecord(parsed)) {
@@ -675,9 +689,13 @@ export async function POST(req: Request) {
       400,
     );
   }
+  const idempotencyHeader = req.headers.get("idempotency-key");
+  // A verified WordPress request is bound to its signed Gravity Forms entry.
+  // Resolve the body identity first so a conflicting generic header cannot
+  // preempt the stronger bridge-specific identity check below.
   const idempotency = resolvePublicLeadIdempotencyKey(
     input,
-    req.headers.get("idempotency-key"),
+    trustedWordPressBridge ? null : idempotencyHeader,
   );
   if (!idempotency.ok) {
     return leadResponse(
@@ -690,6 +708,25 @@ export async function POST(req: Request) {
     ...input,
     idempotency_key: idempotency.value,
   });
+  if (trustedWordPressBridge && trustedWordPressEntryId) {
+    const identity = verifyWordPressBridgePayloadIdentity(
+      normalizedPayload,
+      trustedWordPressEntryId,
+    );
+    if (
+      !identity.ok ||
+      (idempotencyHeader !== null && idempotencyHeader !== normalizedPayload.idempotency_key)
+    ) {
+      return leadResponse(
+        correlationId,
+        {
+          error: "WordPress bridge payload identity was rejected.",
+          code: "wordpress_bridge_identity_mismatch",
+        },
+        400,
+      );
+    }
+  }
   if (input.is_test === true && normalizedPayload.is_test !== true) {
     return leadResponse(
       correlationId,
@@ -713,12 +750,21 @@ export async function POST(req: Request) {
   }
   experimentContext = resolvedExperimentContext.context;
   const umbrellaConsent = normalizedPayload.consent === true;
+  const consentInput = trustedWordPressBridge
+    ? normalizedPayload
+    : {
+        ...normalizedPayload,
+        consent_email: umbrellaConsent && normalizedPayload.consent_email === true,
+        consent_call: umbrellaConsent && normalizedPayload.consent_call === true,
+        // The current public copy is not a standalone SMS opt-in.
+        consent_sms: false,
+      };
   const payload: LeadPayload = {
     ...normalizedPayload,
-    consent_email: umbrellaConsent && normalizedPayload.consent_email === true,
-    consent_call: umbrellaConsent && normalizedPayload.consent_call === true,
-    // The current public copy is not a standalone SMS opt-in.
-    consent_sms: false,
+    ...resolveAuthoritativeConsentEvidence(consentInput, {
+      trustedWordPressBridge,
+      receivedAt,
+    }),
   };
 
   if (payload.honeypot) {

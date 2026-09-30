@@ -1,0 +1,68 @@
+{
+  "schema_version": "amm.release_batch.v1",
+  "status": "READY_FOR_OWNER_APPROVAL",
+  "batch": "D",
+  "name": "WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS",
+  "base_commit": "75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1",
+  "reconciled_implementation_head": "7baff2dcafd65e666c7846165be8c2d6ab3d9ab0",
+  "reconciled_implementation_tree": "69b76a5f8ced4261d57facc201fc0cb45e467e71",
+  "source_prs": [
+    253,
+    254,
+    255,
+    256,
+    257,
+    259
+  ],
+  "source_merge_commits_excluded": [
+    "56b1db86577955962ac5ebba00917ad4d130bc48",
+    "a347beaa423ab368ce319ceb05c004cb2303a95b"
+  ],
+  "release_order_prerequisite": "Satisfied: Batch A was accepted as PR 278 and Batch D was reconciled onto its exact accepted tree. Fresh reconciled-head gates remain required. Prefer Batch D before Batch B because both modify POST /api/leads.",
+  "connector_dependency": "PR 248 remains separate and is required only before Connector-dependent WordPress page publication; it is not merged or authorized here.",
+  "migrations": [],
+  "wordpress_package": {
+    "file": "output/release/ask-magic-mike-canonical-bridge-1.3.0.zip",
+    "sha256": "a04b5bcf4e0e45e264260b3daeaf8158085e129b8deaf1c8b8f797e0aa31d2df",
+    "installed": false
+  },
+  "environment_names_referenced": [
+    "WORDPRESS_BRIDGE_SECRET",
+    "WORDPRESS_BRIDGE_FORM_IDS",
+    "WORDPRESS_BRIDGE_CONSENT_CONTRACTS"
+  ],
+  "environment_changes_executed": 0,
+  "provider_activation": false,
+  "outbound_messages_executed": 0,
+  "external_mutations_executed": 0,
+  "production_data_mutations_executed": 0,
+  "wordpress_mutations_executed": 0,
+  "qr_publications_executed": 0,
+  "rollback": "Restore Vercel Production deployment dpl_aepoH5pzDwPMkerbrp9YekzVrdKD; no database rollback is required. Any later WordPress action requires its own exact backup and rollback.",
+  "verification": {
+    "node": "24.18.0",
+    "pnpm": "10.30.3",
+    "focused_test_files": 19,
+    "focused_tests": 216,
+    "full_test_files": 292,
+    "full_tests": 3591,
+    "dependency_audit": "zero_known_vulnerabilities",
+    "typecheck": "pass",
+    "lint": "pass",
+    "next_build": "pass_next_15_5_26_60_static_pages",
+    "route_manifest": "pass_102_active_22_acknowledged_duplicates",
+    "system_isolation": "pass",
+    "release_safety": "14_pass_0_fail",
+    "archive_integrity": "zip_sha256_and_php_source_match",
+    "security_review": "no_new_critical_high_or_medium_findings",
+    "secret_scan": "three_unchanged_whole_tree_baseline_matches_zero_in_batch_diff",
+    "full_release_gate": "pass_hosted_run_36651493066",
+    "immutable_preview_deployment": "dpl_Hy6aAoNytqGmCwhoj3KRQoVRB1o3",
+    "immutable_preview_url": "https://ask-magic-mike-cysr1qz8z-eyes-up-industries.vercel.app",
+    "preview_qa": "pass_18_skip_7_fail_0_safe_db_write_false_run_36651730308",
+    "browser_e2e": "pass_15_expected_0_unexpected_run_36651730308",
+    "local_visual_smoke": "pass_8_of_8_desktop_mobile",
+    "runtime_log_review": "pass_0_5xx_0_error_fatal_0_nellyselly_mentions"
+  },
+  "planned_approval_gate": "APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT"
+}

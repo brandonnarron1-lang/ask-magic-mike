@@ -3,20 +3,26 @@ import { BuyerIntentSection } from "../../components/black-diamond/BuyerIntentSe
 import { BlackDiamondHeader } from "../../components/black-diamond/BlackDiamondHeader";
 import { Footer } from "../../components/black-diamond/BlackDiamondShell";
 import { PageTracker } from "../../components/black-diamond/PageTracker";
+import {
+  buildOpenHouseRegistrationPacket,
+  normalizeOpenHouseRegistrationReference,
+} from "../../lib/growth/open-house-registration";
 import { nonIndexablePageMetadata } from "../../lib/publicMetadata";
+import { notFound } from "next/navigation";
 
 export const metadata: Metadata = nonIndexablePageMetadata(
   "Open House Interest Registration",
   "Property-specific open-house interest and follow-up request route.",
 );
 
-function displayProperty(value: string) {
-  return decodeURIComponent(value).replace(/[-_]+/g, " ").slice(0, 160);
-}
-
 export default async function OpenHousePage({ params }: { params: Promise<{ propertyOrId: string }> }) {
   const { propertyOrId } = await params;
-  const propertyLabel = displayProperty(propertyOrId);
+  const normalizedReference = normalizeOpenHouseRegistrationReference(propertyOrId);
+  const packet = normalizedReference
+    ? buildOpenHouseRegistrationPacket(normalizedReference)
+    : null;
+  if (!packet) notFound();
+  const propertyLabel = packet.displayLabel;
 
   return (
     <main className="min-h-screen bg-[#050505] text-[#f4ead4]">
@@ -33,7 +39,7 @@ export default async function OpenHousePage({ params }: { params: Promise<{ prop
           <BuyerIntentSection
             surface="open_house"
             preset="open_house"
-            propertyId={propertyOrId}
+            propertyId={packet.propertyId}
             propertyLabel={propertyLabel}
           />
         </div>

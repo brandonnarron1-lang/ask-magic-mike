@@ -2,7 +2,7 @@
 
 <!-- amm-current-operations-v1 -->
 
-Updated 2026-09-01. This template records evidence for gated operations without
+Updated 2026-09-29. This template records evidence for gated operations without
 storing credentials or personal data. Release identity comes from
 `config/current-release-authority.json`; the canonical database is Neon and the
 staff boundary is Better Auth plus server-side RBAC. Use
@@ -14,11 +14,11 @@ capability limits.
 Record only public identifiers:
 
 ```text
-Accepted PR: 247
-Merge commit: a2f3de834830f600df106dbf5836ae4bbde4eb4a
-Production tree: 0065f829fc94f87ab5e0faf596c8e56733be3972
-Production deployment: dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U
-Application rollback: dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe
+Accepted PR: 278
+Merge commit: 75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1
+Production tree: 5775ba6a315abde9bbe55f770ccda2a64f897362
+Production deployment: dpl_aepoH5pzDwPMkerbrp9YekzVrdKD
+Application rollback: dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U
 Canonical URL: https://www.askmagicmike.com
 Release approval status: consumed
 ```

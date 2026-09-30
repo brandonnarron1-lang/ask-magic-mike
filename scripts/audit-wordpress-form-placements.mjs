@@ -11,10 +11,13 @@ const sitemapUrl = normalizeWordPressAuditUrl(
   process.env.WORDPRESS_SITEMAP_URL
     || "https://www.ourtownproperties.com/page-sitemap.xml",
 );
-const canonicalBridgeFormIds = (process.env.WORDPRESS_BRIDGE_FORM_IDS || "")
-  .split(",")
-  .map((value) => Number(value.trim()))
-  .filter(Number.isInteger);
+const rawCanonicalBridgeFormIds = process.env.WORDPRESS_BRIDGE_FORM_IDS;
+const canonicalBridgeFormIds = rawCanonicalBridgeFormIds === undefined
+  ? null
+  : rawCanonicalBridgeFormIds
+    .split(",")
+    .map((value) => Number(value.trim()))
+    .filter((value) => Number.isInteger(value) && value > 0);
 const headers = { "user-agent": "AskMagicMike-WordPress-Surface-Audit/2.0" };
 
 async function getText(url) {

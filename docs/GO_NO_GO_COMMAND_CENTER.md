@@ -2,7 +2,7 @@
 
 <!-- amm-current-operations-v1 -->
 
-Updated 2026-09-01. This is the current operator decision surface. It reads
+Updated 2026-09-29. This is the current operator decision surface. It reads
 release identity from `config/current-release-authority.json`, uses Neon for
 durable Production data, and uses Better Auth plus server-side RBAC for the
 Lead Center. Exact pending actions are in `OWNER_APPROVAL_QUEUE.md`; capability
@@ -19,14 +19,14 @@ paid campaign, or deletion.
 
 ## §2 — Accepted Production
 
-- PR #247
-- Merge: `a2f3de834830f600df106dbf5836ae4bbde4eb4a`
-- Tree: `0065f829fc94f87ab5e0faf596c8e56733be3972`
-- Deployment: `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`
+- PR #278
+- Merge: `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`
+- Tree: `5775ba6a315abde9bbe55f770ccda2a64f897362`
+- Deployment: `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`
 - Canonical URL: `https://www.askmagicmike.com`
-- Immediate application rollback: `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`
+- Immediate application rollback: `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`
 
-The PR #247 release and secure database-credential redeploy approvals are
+The PR #278 release and secure database-credential redeploy approvals are
 consumed. They cannot authorize another action.
 
 ## §3 — Proven operating layers
@@ -45,10 +45,11 @@ consumed. They cannot authorize another action.
 
 ## §4 — Current release queue
 
-PR #248 is the sole requestable application candidate. Its exact head/tree and
-gate are in `OWNER_APPROVAL_QUEUE.md`. Downstream Drafts are review vehicles and
-must not leapfrog it. The application gate authorizes no WordPress plugin/page
-change, Neon migration, environment edit, message, publication, or data action.
+No application candidate or merge/deploy gate is currently requestable. Draft
+PR #280 is an unsealed review vehicle; PR #248 is preserved connector lineage
+whose previous gate is invalid after the Production advance. Neither authorizes
+a WordPress plugin/page change, Neon migration, environment edit, message,
+publication, or data action.
 
 ## §5 — Controlled-traffic GO criteria
 

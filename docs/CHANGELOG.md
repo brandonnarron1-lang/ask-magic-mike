@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-29 — Batch D WordPress and placement candidate sealed
+
+- Reconciled the existing signed WordPress bridge, exact Form 7 consent
+  contract, page-readiness tools, open-house packet/QR workflow, and rental
+  placement readiness onto accepted PR #278 without creating parallel lead,
+  notification, WordPress, dashboard, or QR systems.
+- Preserved Batch A's bounded public-ingress controls while adding raw-body
+  HMAC, signed-entry identity binding, and source-specific fail-closed consent.
+- Passed full local and hosted Node 24 verification, immutable protected
+  Preview QA, 15 mutation-intercepted browser tests, eight desktop/mobile
+  visual checks, clean runtime logs, dependency audit, and secret scan.
+- Sealed Draft PR #280 as the single application candidate with zero migrations
+  and zero external mutations. Production, WordPress, data, messaging, QR,
+  DNS, spend, deletion, and NellySelly remain unchanged behind independent
+  exact gates.
+
 ## 2026-09-01 — Production database credential and CI recovery
 
 - Restored canonical Production readiness by securely replacing the drifted

@@ -1,6 +1,6 @@
 # Documentation Authority
 
-Updated 2026-09-01. This register prevents dated build packets from overriding
+Updated 2026-09-29. This register prevents dated build packets from overriding
 the observed production system.
 
 ## Operating source of truth
@@ -9,7 +9,7 @@ Use these files for current decisions, in this order:
 
 1. `CURRENT_RELEASE_AUTHORITY.md` and
    `config/current-release-authority.json` — accepted Production, consumed
-   receipts, the one reviewed application candidate, and its exact active gate.
+   receipts, the current review vehicle, and whether an application gate exists.
    A candidate gate applies only to the exact bound PR/tree and listed action;
    it never implies authority for an external system.
 2. `CURRENT_STATE_RECONCILIATION.md` — observed repository, deployment,
@@ -35,16 +35,16 @@ Use these files for current decisions, in this order:
    GitHub checks and matching Vercel deployment metadata outrank a run ID frozen
    into documentation.
 
-Current release authority is intentionally singular: accepted PR #247 merge
-`a2f3de834830f600df106dbf5836ae4bbde4eb4a` on deployment
-`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` is the Production baseline; deployment
-`dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe` is immediate application rollback. PR #248
-is the one reviewed application candidate and exposes one exact owner-only
-same-tree merge/deploy gate. It has no migration or external-action authority
-and does not authorize a WordPress plugin or page change. PR #238 is a consumed
-cutover receipt. The PR #247 release approval, credential-redeploy approval,
-and every historical component/application gate are consumed and cannot
-authorize a new merge, deployment, mutation, send, or publication.
+Current release authority is intentionally singular: accepted PR #278 merge
+`75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1` on deployment
+`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is the Production baseline; deployment
+`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` is immediate application rollback. Draft PR
+#280 is an unsealed review vehicle, and no application gate is currently
+requestable. PR #248 remains preserved connector lineage whose previous gate is
+invalid. PR #238 is a consumed cutover receipt. The PR #278 release approval,
+credential-redeploy approval, and every historical component/application gate
+are consumed and cannot authorize a new merge, deployment, mutation, send, or
+publication.
 
 `QA_EVIDENCE_CURRENT.md` is a cumulative 2026-08-14-era evidence packet with
 later appendices. Preserve it as provenance, but do not use its first baseline
