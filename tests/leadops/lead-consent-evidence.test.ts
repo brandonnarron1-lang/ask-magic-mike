@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  consentGrantedForCall,
+  consentGrantedForEmail,
+  consentGrantedForSms,
   LEAD_CONSENT_LANGUAGE_TEXT,
   LEAD_CONSENT_LANGUAGE_VERSION,
   resolveAuthoritativeConsentEvidence,
@@ -91,5 +94,40 @@ describe("authoritative lead consent evidence", () => {
       consent_language_text: WORDPRESS_UNVERIFIED_CONSENT_LANGUAGE_TEXT,
       consent_source: "gravity_forms_3",
     }, { trustedWordPressBridge: true }).consent).toBe(false);
+  });
+});
+
+describe("authoritative lead communication permissions", () => {
+  it("requires the exact channel permission at use time", () => {
+    expect(consentGrantedForEmail({
+      email: "lead@example.test",
+      consent: true,
+      consent_email: false,
+    })).toBe(false);
+    expect(consentGrantedForCall({
+      phone: "2525550119",
+      consent: true,
+      consent_call: false,
+    })).toBe(false);
+    expect(consentGrantedForSms({
+      phone: "2525550119",
+      consent: true,
+      consent_sms: false,
+    })).toBe(false);
+  });
+
+  it("grants only an explicitly recorded channel", () => {
+    expect(consentGrantedForEmail({
+      email: "lead@example.test",
+      consent_email: true,
+    })).toBe(true);
+    expect(consentGrantedForCall({
+      phone: "2525550119",
+      consent_call: true,
+    })).toBe(true);
+    expect(consentGrantedForSms({
+      phone: "2525550119",
+      consent_sms: true,
+    })).toBe(true);
   });
 });

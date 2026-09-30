@@ -181,6 +181,146 @@ export function formatFetchErrorSummary(summary) {
 }
 
 /**
+ * Resolve the HTTP transport used by the Preview QA runner.
+ *
+ * `fetch` remains the portable default for CI. `vercel_cli` is an explicit
+ * local-operator mode that delegates deployment-protection authentication to
+ * an already-authenticated Vercel CLI session. The linked project directory is
+ * required and must be absolute so the runner cannot silently target whatever
+ * project happens to be linked from the caller's current directory.
+ *
+ * @param {Record<string, string|undefined>} env
+ * @returns {{ mode: "fetch"|"vercel_cli", valid: boolean,
+ *   invalidReason: string|null, cliCwd: string|null }}
+ */
+export function getPreviewTransportConfig(env) {
+  const rawMode = (env.PREVIEW_TRANSPORT ?? "fetch").trim().toLowerCase();
+  if (rawMode !== "fetch" && rawMode !== "vercel_cli") {
+    return {
+      mode: "fetch",
+      valid: false,
+      invalidReason:
+        'PREVIEW_TRANSPORT must be either "fetch" or "vercel_cli"',
+      cliCwd: null,
+    };
+  }
+  if (rawMode === "fetch") {
+    return {
+      mode: "fetch",
+      valid: true,
+      invalidReason: null,
+      cliCwd: null,
+    };
+  }
+
+  const cliCwd = (env.VERCEL_CLI_CWD ?? "").trim();
+  if (!cliCwd) {
+    return {
+      mode: "vercel_cli",
+      valid: false,
+      invalidReason:
+        "VERCEL_CLI_CWD is required when PREVIEW_TRANSPORT=vercel_cli",
+      cliCwd: null,
+    };
+  }
+  if (!cliCwd.startsWith("/") || /[\r\n\0]/.test(cliCwd)) {
+    return {
+      mode: "vercel_cli",
+      valid: false,
+      invalidReason:
+        "VERCEL_CLI_CWD must be an absolute path without control characters",
+      cliCwd: null,
+    };
+  }
+  return {
+    mode: "vercel_cli",
+    valid: true,
+    invalidReason: null,
+    cliCwd,
+  };
+}
+
+function quoteCurlConfigValue(value) {
+  const text = String(value);
+  if (/[\r\n\0]/.test(text)) {
+    throw new Error("curl config value contains a forbidden control character");
+  }
+  return `"${text.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+
+/**
+ * Build a curl config file for `vercel curl` without putting sensitive header
+ * values or request bodies in process arguments. Callers must write the
+ * returned string to a mode-0600 temporary file and delete it after use.
+ *
+ * @param {{ method: string; headers: Record<string, string>;
+ *   outputPath: string; headerPath: string; requestBodyPath?: string|null;
+ *   followRedirects?: boolean }} input
+ * @returns {string}
+ */
+export function buildVercelCurlConfig(input) {
+  const method = String(input.method ?? "GET").toUpperCase();
+  if (!/^(GET|HEAD|POST|PUT|PATCH|DELETE|OPTIONS)$/.test(method)) {
+    throw new Error("unsupported HTTP method for Vercel CLI transport");
+  }
+  const lines = [
+    "silent",
+    "show-error",
+    `request = ${quoteCurlConfigValue(method)}`,
+    `output = ${quoteCurlConfigValue(input.outputPath)}`,
+    `dump-header = ${quoteCurlConfigValue(input.headerPath)}`,
+  ];
+  if (input.followRedirects) lines.push("location");
+
+  for (const [name, value] of Object.entries(input.headers ?? {})) {
+    if (!/^[A-Za-z0-9!#$%&'*+.^_`|~-]+$/.test(name)) {
+      throw new Error("invalid HTTP header name for Vercel CLI transport");
+    }
+    lines.push(
+      `header = ${quoteCurlConfigValue(`${name}: ${String(value)}`)}`
+    );
+  }
+  if (input.requestBodyPath) {
+    lines.push(
+      `data-binary = ${quoteCurlConfigValue(`@${input.requestBodyPath}`)}`
+    );
+  }
+  return `${lines.join("\n")}\n`;
+}
+
+/**
+ * Parse the final HTTP response block from curl's `--dump-header` output.
+ * Redirect-following requests can contain multiple response blocks; only the
+ * final block represents the body saved by curl.
+ *
+ * @param {string} raw
+ * @returns {{ status: number; headers: Record<string, string> }}
+ */
+export function parseCurlHeaderDump(raw) {
+  const blocks = String(raw ?? "")
+    .split(/\r?\n\r?\n/)
+    .map((block) => block.trim())
+    .filter((block) => /^HTTP\/\S+\s+\d{3}\b/i.test(block));
+  const finalBlock = blocks.at(-1) ?? "";
+  const lines = finalBlock.split(/\r?\n/);
+  const statusMatch = lines[0]?.match(/^HTTP\/\S+\s+(\d{3})\b/i);
+  const status = statusMatch ? Number(statusMatch[1]) : 0;
+  /** @type {Record<string, string>} */
+  const headers = {};
+  for (const line of lines.slice(1)) {
+    const colon = line.indexOf(":");
+    if (colon <= 0) continue;
+    const name = line.slice(0, colon).trim().toLowerCase();
+    const value = line.slice(colon + 1).trim();
+    if (!name) continue;
+    headers[name] = headers[name]
+      ? `${headers[name]}, ${value}`
+      : value;
+  }
+  return { status, headers };
+}
+
+/**
  * Classify an HTTP status returned by the preview's public surface
  * relative to whether a bypass secret was supplied.
  *

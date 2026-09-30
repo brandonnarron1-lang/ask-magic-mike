@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { checkRateLimit, LIMITS, rateLimitKey } from "../../../src/lib/security/rate-limit";
+import {
+  checkRateLimit,
+  LIMITS,
+  nonDurableRateLimitFallbackAllowed,
+  rateLimitKey,
+} from "../../../src/lib/security/rate-limit";
 import {
   assertDatabaseMutationAllowed,
 } from "../../../src/lib/preview-security";
@@ -32,6 +37,34 @@ const NO_STORE_HEADERS = {
 } as const;
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function eventResponse(
+  correlationId: string,
+  body: Record<string, unknown>,
+  status = 200,
+  extraHeaders: Record<string, string> = {},
+) {
+  return NextResponse.json(
+    { ...body, correlation_id: correlationId },
+    {
+      status,
+      headers: {
+        ...NO_STORE_HEADERS,
+        "X-AMM-Correlation-Id": correlationId,
+        ...extraHeaders,
+      },
+    },
+  );
+}
+
+function rateLimitRetryAfter(resetAt: number) {
+  const maxSeconds = Math.ceil(LIMITS.analyticsEvent.windowMs / 1_000);
+  const secondsUntilReset = Math.ceil((resetAt - Date.now()) / 1_000);
+  return String(Math.max(
+    1,
+    Math.min(maxSeconds, Number.isFinite(secondsUntilReset) ? secondsUntilReset : maxSeconds),
+  ));
+}
 
 function publicEventSessionId(value: unknown) {
   return typeof value === "string" && UUID_PATTERN.test(value) ? value : null;
@@ -75,12 +108,17 @@ export async function POST(req: Request) {
   const correlationId = crypto.randomUUID();
   const origin = req.headers.get("origin");
   if (!origin || !isApprovedPublicOrigin(origin)) {
-    return NextResponse.json({ error: "This event origin is not approved.", correlation_id: correlationId }, { status: 403 });
+    return eventResponse(
+      correlationId,
+      { error: "This event origin is not approved.", code: "origin_not_approved" },
+      403,
+    );
   }
   if (isAutomatedBrowserUserAgent(req.headers.get("user-agent"))) {
-    return NextResponse.json(
-      { ok: true, persisted: false, excluded: "automation", correlation_id: correlationId },
-      { status: 202, headers: NO_STORE_HEADERS },
+    return eventResponse(
+      correlationId,
+      { ok: true, persisted: false, excluded: "automation" },
+      202,
     );
   }
   // Read-only Preview must refuse before the limiter can write a durable
@@ -89,45 +127,91 @@ export async function POST(req: Request) {
   // attested PREVIEW_DATA_MODE / ALLOW_PREVIEW_DB_MUTATION gate.
   const mutation = assertDatabaseMutationAllowed();
   if (!mutation.ok) {
-    return NextResponse.json(
+    return eventResponse(
+      correlationId,
       {
         ok: false,
         persisted: false,
         error: mutation.publicMessage,
         code: mutation.error,
-        correlation_id: correlationId,
       },
-      { status: mutation.statusCode, headers: NO_STORE_HEADERS },
+      mutation.statusCode,
     );
   }
-  const limit = await checkRateLimit(rateLimitKey(req.headers.get("x-forwarded-for")), LIMITS.analyticsEvent.limit, LIMITS.analyticsEvent.windowMs, "analyticsEvent");
-  if (!limit.allowed) return NextResponse.json({ error: "Too many events.", correlation_id: correlationId }, { status: 429 });
+  const limit = await checkRateLimit(
+    rateLimitKey(req.headers.get("x-forwarded-for")),
+    LIMITS.analyticsEvent.limit,
+    LIMITS.analyticsEvent.windowMs,
+    "analyticsEvent",
+  );
+  if (!limit.allowed) {
+    return eventResponse(
+      correlationId,
+      { error: "Too many events. Please wait and try again.", code: "rate_limited" },
+      429,
+      { "Retry-After": rateLimitRetryAfter(limit.resetAt) },
+    );
+  }
+  if (!limit.durable && !nonDurableRateLimitFallbackAllowed()) {
+    return eventResponse(
+      correlationId,
+      {
+        ok: false,
+        persisted: false,
+        error: "Event collection is temporarily unavailable.",
+        code: "rate_limit_store_unavailable",
+      },
+      503,
+    );
+  }
   const parsed = await readBoundedJson(req);
   if (!parsed.ok) {
-    return NextResponse.json(
+    const code = parsed.status === 413
+      ? "payload_too_large"
+      : parsed.status === 415
+        ? "unsupported_media_type"
+        : "invalid_json";
+    return eventResponse(
+      correlationId,
       {
         error: parsed.status === 413 ? "Event payload is too large." : "Invalid event payload.",
-        correlation_id: correlationId,
+        code,
       },
-      { status: parsed.status },
+      parsed.status,
     );
   }
   const body = parsed.value;
   if (typeof body.event_name !== "string" || !approvedEventNames.has(body.event_name)) {
-    return NextResponse.json({ error: "Invalid event.", correlation_id: correlationId }, { status: 400 });
+    return eventResponse(
+      correlationId,
+      { error: "Invalid event.", code: "invalid_event" },
+      400,
+    );
   }
   if (!isApprovedPublicAnalyticsEvent(body.event_name)) {
-    return NextResponse.json({ error: "Invalid public event.", correlation_id: correlationId }, { status: 400 });
+    return eventResponse(
+      correlationId,
+      { error: "Invalid public event.", code: "event_not_public" },
+      400,
+    );
   }
   if (isCanonicalLedgerProtectedEvent(body.event_name)) {
-    return NextResponse.json({ error: "Invalid public event.", correlation_id: correlationId }, { status: 400 });
+    return eventResponse(
+      correlationId,
+      { error: "Invalid public event.", code: "event_not_public" },
+      400,
+    );
   }
   const properties = body.properties && typeof body.properties === "object" && !Array.isArray(body.properties) ? body.properties as Record<string, unknown> : {};
   const webVitalProperties = body.event_name === "web_vital_observed"
     ? normalizeWebVitalEventProperties(properties)
     : null;
   if (body.event_name === "web_vital_observed" && !webVitalProperties) {
-    return NextResponse.json({ error: "Invalid experience event.", correlation_id: correlationId }, { status: 400 });
+    return eventResponse(
+      correlationId,
+      { error: "Invalid experience event.", code: "invalid_experience_event" },
+      400,
+    );
   }
   const webVitalUserAgent = webVitalProperties
     ? coarseWebVitalUserAgent(req.headers.get("user-agent"), webVitalProperties.device_category)
@@ -136,7 +220,11 @@ export async function POST(req: Request) {
     webVitalProperties &&
     (!isCanonicalProductionWebVitalRequest(req) || !webVitalUserAgent?.startsWith("browser/"))
   ) {
-    return NextResponse.json({ error: "Invalid experience event.", correlation_id: correlationId }, { status: 400 });
+    return eventResponse(
+      correlationId,
+      { error: "Invalid experience event.", code: "invalid_experience_event" },
+      400,
+    );
   }
   const funnelSessionId = webVitalProperties ? null : publicEventSessionId(body.session_id);
   const persisted = await recordServerAnalyticsEvent({
@@ -174,10 +262,16 @@ export async function POST(req: Request) {
       : coarseAnalyticsUserAgent(req.headers.get("user-agent"), properties.device_category),
   });
   if (!persisted) {
-    return NextResponse.json(
-      { ok: false, persisted: false, error: "Event persistence is unavailable.", correlation_id: correlationId },
-      { status: 503 },
+    return eventResponse(
+      correlationId,
+      {
+        ok: false,
+        persisted: false,
+        error: "Event persistence is unavailable.",
+        code: "event_persistence_unavailable",
+      },
+      503,
     );
   }
-  return NextResponse.json({ ok: true, persisted: true, correlation_id: correlationId }, { status: 202 });
+  return eventResponse(correlationId, { ok: true, persisted: true }, 202);
 }

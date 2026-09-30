@@ -3,9 +3,10 @@
 ## 2026-09-29 — Batch D WordPress and placement readiness candidate
 
 - Consolidated the still-useful capabilities from Draft PRs #253–#257 and
-  #259 onto the accepted PR #247 Production base without replaying their
-  obsolete stacked ancestry or creating another lead, notification, QR,
-  WordPress, or dashboard system.
+  #259, then reconciled them onto the exact accepted Batch A Production merge
+  `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1` without replaying obsolete
+  stacked ancestry or creating another lead, notification, QR, WordPress, or
+  dashboard system.
 - Added the signed Canonical Lead Bridge 1.3.0 boundary, fail-closed Form 7
   consent contract, exact page-readiness and rollback tooling, seller-decision
   gate, protected open-house packet/QR flow, and additive rental-placement
@@ -13,13 +14,28 @@
 - Preserved Connector 1.1.0 as separate Draft PR #248 and documented the
   required Batch A/Batch D/Batch B reconciliation order instead of implying
   that an old component PR is independently releaseable.
-- Verified 161 focused and 3,481 full tests, strict typecheck, ESLint,
-  optimized Next.js 15.5.26 build, route/system-isolation/release-safety
-  contracts, archive integrity, and zero known production dependency
-  vulnerabilities. Exact-head hosted CI and immutable Preview proof remain
-  pending until the consolidated branch is pushed.
+- The pre-reconciliation candidate verified 161 focused and 3,481 full tests,
+  strict typecheck, ESLint, an optimized Next.js 15.5.26 build,
+  route/system-isolation/release-safety contracts, archive integrity, and zero
+  known Production dependency vulnerabilities. Exact reconciled-head hosted
+  CI and immutable Preview proof remain pending until this candidate is pushed.
 - Performed no Production deployment, migration, WordPress mutation, QR
   publication, outbound message, provider/secret change, or NellySelly action.
+
+## 2026-09-29 — Accepted Batch A release truth and ingress hardening
+
+- Consolidated the unique release-authority and public-ingress capabilities from
+  historical Draft PRs #249–#252, #265–#266, and #268–#271 onto current main.
+- Hardened appointment, chat, session, analytics, lead, and experiment ingress
+  with exact origins, bounded bodies, deterministic idempotency, protected-field
+  rejection, PII filtering, and server-owned outcome recording.
+- Added protected-Preview Vercel CLI verification without weakening Deployment
+  Protection or exposing request headers/bodies in process arguments.
+- Accepted PR #278 merged as `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`
+  and deployed from the same reviewed tree to Vercel Production deployment
+  `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`; hosted release and post-deploy contracts
+  passed. The release performed no environment change, Production data write,
+  WordPress publication, or notification send.
 
 ## 2026-09-01 — Secure Neon Production credential redeploy
 

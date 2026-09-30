@@ -4,13 +4,16 @@
  *
  * Read-only Go/No-Go authority report for Ask Magic Mike.
  * Imports pure helpers from launch-readiness-doctor.mjs and adds
- * authority-specific checks (PR #51 in release log, new cockpit docs).
+ * authority-specific checks against the canonical current-release manifest.
  *
  * No network calls. No secrets read. No .env files read.
  * No production mutations.
  *
  * Usage:
  *   node scripts/amm/launch-authority-report.mjs
+ *   vercel env ls production --format json | \
+ *     jq '{envs:[.envs[]|{key,target,type}]}' | \
+ *     node scripts/amm/launch-authority-report.mjs --vercel-json-stdin
  *   npm run amm:launch:authority
  *
  * Exit codes:
@@ -23,7 +26,7 @@
  *   LAUNCH_AUTHORITY: NOT_GO_FAILING_CHECKS
  */
 
-import { existsSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { resolve, join } from "path";
 import { fileURLToPath } from "url";
 
@@ -35,9 +38,15 @@ import {
   findNoveltyCopy,
   findMlsMarkers,
   checkCanonicalSiteConfig,
-  releaseLogMentionsPr,
   findStaleVercelUrlsInDocs,
   REQUIRED_PRODUCTION_ENV_VARS,
+  parseVercelProductionEnvNames,
+  classifyEmailProviderPresence,
+  classifyFailClosedGatePresence,
+  loadCurrentProductionAuthority,
+  releaseLogMatchesCurrentProduction,
+  CURRENT_OPERATING_DOCS,
+  validateCurrentOperatingDocs,
 } from "./launch-readiness-doctor.mjs";
 
 // ---------------------------------------------------------------------------
@@ -49,10 +58,13 @@ export const AUTHORITY_NOT_GO_OWNER = "NOT_GO_OWNER_ACTION_REQUIRED";
 export const AUTHORITY_NOT_GO_FAIL = "NOT_GO_FAILING_CHECKS";
 
 export const REQUIRED_AUTHORITY_DOCS = [
+  "docs/CURRENT_STATE_RECONCILIATION.md",
+  "docs/GO_LIVE_RUNBOOK.md",
   "docs/CONTROLLED_LAUNCH_RUNBOOK.md",
   "docs/OWNER_ACTION_PROOF_PACK.md",
   "docs/PRODUCTION_DEPLOY_REHEARSAL.md",
   "docs/GO_NO_GO_COMMAND_CENTER.md",
+  "docs/CONTROLLED_TRAFFIC_ACTIVATION.md",
   "docs/KNOWN_BLOCKERS.md",
   "docs/PRODUCTION_RELEASE_LOG.md",
   "docs/PRODUCTION_LAUNCH_GATE.md",
@@ -161,26 +173,50 @@ if (isMain) {
     }
   }
 
-  // ── Release log currency ─────────────────────────────────────────────────
+  // ── Current release authority and release-log currency ──────────────────
   console.log("\n[Release log currency]");
   const releaseLogPath = join(ROOT, "docs/PRODUCTION_RELEASE_LOG.md");
-  for (const prNum of [181]) {
-    const result = releaseLogMentionsPr(releaseLogPath, prNum);
+  const currentAuthority = loadCurrentProductionAuthority(ROOT);
+  if (!currentAuthority.ok) {
+    fail("current release authority manifest rejected", currentAuthority.reason);
+  } else {
+    const production = currentAuthority.authority;
+    pass(
+      `current release authority loaded: PR #${production.pr}`,
+      `${production.mergeCommit.slice(0, 7)} / ${production.deploymentId}`,
+    );
+    const result = releaseLogMatchesCurrentProduction(releaseLogPath, production);
     if (result.ok) {
-      pass(`release log mentions PR #${prNum}`);
+      pass(`release log matches current Production PR #${production.pr}`);
     } else {
-      fail(`release log missing PR #${prNum}`, result.reason);
+      fail(`release log is stale for current Production PR #${production.pr}`, result.reason);
+    }
+  }
+
+  // ── Current operator-document contract ──────────────────────────────────
+  console.log("\n[Current operating documentation]");
+  if (!currentAuthority.ok) {
+    fail("operator documents cannot be verified", currentAuthority.reason);
+  } else {
+    const issues = validateCurrentOperatingDocs(ROOT, currentAuthority.authority);
+    if (issues.length === 0) {
+      pass(
+        "operator documents match canonical Production architecture",
+        `${CURRENT_OPERATING_DOCS.length} current control surfaces`,
+      );
+    } else {
+      fail(
+        `operator documentation has ${issues.length} currentness issue(s)`,
+        issues.slice(0, 8).map(({ doc, issue }) => `${doc}:${issue}`).join(", "),
+      );
     }
   }
 
   // ── Stale vercel.app URLs in operational docs ────────────────────────────
   console.log("\n[Stale vercel.app URLs in operational docs]");
-  const operationalDocs = [
-    join(ROOT, "docs/CONTROLLED_LAUNCH_RUNBOOK.md"),
-    join(ROOT, "docs/OWNER_ACTION_PROOF_PACK.md"),
-    join(ROOT, "docs/PRODUCTION_DEPLOY_REHEARSAL.md"),
-    join(ROOT, "docs/GO_NO_GO_COMMAND_CENTER.md"),
-  ].filter(existsSync);
+  const operationalDocs = CURRENT_OPERATING_DOCS
+    .map((relativePath) => join(ROOT, relativePath))
+    .filter(existsSync);
   const staleDocUrls = findStaleVercelUrlsInDocs(operationalDocs);
   if (staleDocUrls.length === 0) {
     pass("no stale vercel.app URLs in launch cockpit docs");
@@ -263,17 +299,91 @@ if (isMain) {
     }
   }
 
-  // ── Owner-gated production env vars ─────────────────────────────────────
-  console.log("\n[Owner-gated production env vars (not verifiable here)]");
-  const missingVars = findMissingEnvVars(OWNER_GATED_VARS);
+  // ── Production env metadata ──────────────────────────────────────────────
+  const vercelManifestMode = process.argv.includes("--vercel-json-stdin");
+  let verifiedProductionEnvNames = null;
+  console.log(
+    vercelManifestMode
+      ? "\n[Production Vercel env metadata — names and scopes only]"
+      : "\n[Owner-gated production env vars (not verifiable here)]",
+  );
+
+  if (vercelManifestMode) {
+    try {
+      verifiedProductionEnvNames = new Set(
+        parseVercelProductionEnvNames(readFileSync(0, "utf8")),
+      );
+      pass(
+        "Vercel Production metadata parsed without values",
+        `${verifiedProductionEnvNames.size} scoped variable names`,
+      );
+    } catch (error) {
+      fail(
+        "Vercel Production metadata rejected",
+        error instanceof Error ? error.message : "vercel_env_manifest_invalid",
+      );
+    }
+  }
+
+  const observedNames = verifiedProductionEnvNames
+    ?? new Set(Object.keys(process.env).filter((name) => Boolean(process.env[name])));
+
   for (const v of OWNER_GATED_VARS) {
-    if (missingVars.includes(v)) {
+    if (observedNames.has(v)) {
+      pass(`${vercelManifestMode ? "production env var present" : "env var present locally"}: ${v}`);
+    } else if (vercelManifestMode && verifiedProductionEnvNames) {
+      fail(`required Production env var missing: ${v}`);
+    } else {
       skipOwner(
         `env var not set locally: ${v}`,
-        "set in Vercel Dashboard → verify via /api/admin/health"
+        "verify name-only presence in Vercel Production metadata",
       );
+    }
+  }
+
+  const emailProvider = classifyEmailProviderPresence(observedNames);
+  const explicitLocalProvider = String(process.env.EMAIL_PROVIDER ?? "").trim().toLowerCase();
+  if (!vercelManifestMode && explicitLocalProvider) {
+    if (explicitLocalProvider === "resend" || explicitLocalProvider === "smtp") {
+      pass("email provider selection is runtime-compatible", "EMAIL_PROVIDER is explicit");
     } else {
-      pass(`env var present locally: ${v}`);
+      fail("email provider selector is unsupported");
+    }
+  } else if (emailProvider.ok && !(vercelManifestMode && emailProvider.valueVerificationRequired)) {
+    pass(
+      "email provider selection is runtime-compatible",
+      "Resend is safely inferred from RESEND_API_KEY",
+    );
+  } else if (vercelManifestMode && emailProvider.valueVerificationRequired) {
+    skipOwner(
+      "EMAIL_PROVIDER value needs verification",
+      "name-only metadata proves selector presence but not a supported value",
+    );
+  } else if (vercelManifestMode && verifiedProductionEnvNames) {
+    fail("email provider is not configured");
+  } else {
+    skipOwner(
+      "email provider selection is not verifiable locally",
+      "EMAIL_PROVIDER is optional when the Production RESEND_API_KEY exists",
+    );
+  }
+
+  const failClosedGates = classifyFailClosedGatePresence(observedNames);
+  for (const gate of failClosedGates.absentSafe) {
+    if (vercelManifestMode && verifiedProductionEnvNames) {
+      pass(`growth import gate absent and fail-closed: ${gate}`);
+    }
+  }
+  for (const gate of failClosedGates.presentNeedsValueVerification) {
+    if (vercelManifestMode && verifiedProductionEnvNames) {
+      skipOwner(
+        `growth import gate value needs verification: ${gate}`,
+        "name-only metadata intentionally cannot reveal whether the value is false",
+      );
+    } else if (String(process.env[gate] ?? "").toLowerCase() === "true") {
+      fail(`growth import gate must remain disabled: ${gate}`);
+    } else if (process.env[gate]) {
+      pass(`growth import gate is locally disabled: ${gate}`);
     }
   }
 

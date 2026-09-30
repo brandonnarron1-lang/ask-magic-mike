@@ -1,6 +1,7 @@
 import { assertDatabaseMutationAllowed } from "../../src/lib/preview-security";
 import { createDefaultPersistence } from "./persistence/defaultPersistence";
 import { PersistenceUnavailableError } from "./persistence/contracts";
+import type { LeadSourceSurface } from "./leadPayload";
 
 export type PublicAppointmentRequestResult =
   | {
@@ -20,7 +21,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export async function requestPublicAppointment(input: {
   leadId: string;
   sessionId: string;
-  requestSurface?: string | null;
+  requestSurface?: LeadSourceSurface | null;
   now?: Date;
 }): Promise<PublicAppointmentRequestResult> {
   if (!UUID.test(input.leadId)) {

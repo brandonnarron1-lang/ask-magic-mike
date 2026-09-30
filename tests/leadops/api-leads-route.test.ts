@@ -2,10 +2,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "../../app/api/leads/route";
 import { PUBLIC_LEAD_SAVE_ERROR } from "../../app/lib/publicLeadErrors";
 import { signWordPressBridgeBody } from "../../app/lib/wordpressBridgeSignature";
+import { assignExperimentVariant } from "../../app/lib/growth/experiment-engine";
+import { HOME_VALUE_TRUST_EXPERIMENT } from "../../app/lib/growth/experiment-registry";
 
 const SESSION_ID = "11111111-1111-4111-8111-111111111111";
 const LEAD_ID = "22222222-2222-4222-8222-222222222222";
 const DUPLICATE_ID = "33333333-3333-4333-8333-333333333333";
+const EXPERIMENT_SUBJECT_KEY = "e".repeat(64);
+const EXPERIMENT_VARIANT_KEY = assignExperimentVariant(
+  HOME_VALUE_TRUST_EXPERIMENT.key,
+  EXPERIMENT_SUBJECT_KEY,
+  [...HOME_VALUE_TRUST_EXPERIMENT.variants],
+);
 const ENV_KEYS = [
   "NEXT_PUBLIC_SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
@@ -33,10 +41,27 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 function request(body: Record<string, unknown>, headers: HeadersInit = {}) {
+  const idempotencyKey = typeof body.idempotency_key === "string"
+    ? body.idempotency_key
+    : typeof body.request_fingerprint === "string"
+      ? body.request_fingerprint
+      : SESSION_ID;
+  const leadSourceSurface = typeof body.lead_source_surface === "string"
+    ? body.lead_source_surface
+    : "home_value_page";
   return new Request("http://localhost/api/leads", {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...headers },
-    body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+      Origin: "https://www.askmagicmike.com",
+      "Idempotency-Key": idempotencyKey,
+      ...headers,
+    },
+    body: JSON.stringify({
+      ...body,
+      lead_source_surface: leadSourceSurface,
+      idempotency_key: idempotencyKey,
+    }),
   });
 }
 
@@ -102,9 +127,224 @@ afterEach(() => {
 describe("POST /api/leads validation and truthful persistence", () => {
   it("returns 400 for invalid JSON", async () => {
     const response = await POST(
-      new Request("http://localhost/api/leads", { method: "POST", body: "{" }),
+      new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://www.askmagicmike.com",
+        },
+        body: "{",
+      }),
     );
     expect(response.status).toBe(400);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store, max-age=0");
+  });
+
+  it("bounds chunked and declared lead bodies before persistence", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const chunked = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://www.askmagicmike.com",
+      },
+      body: JSON.stringify({ question: "é".repeat(33_000) }),
+    }));
+    expect(chunked.status).toBe(413);
+    expect(chunked.headers.get("X-AMM-Correlation-Id")).toBeTruthy();
+
+    const declared = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": "65537",
+        Origin: "https://www.askmagicmike.com",
+      },
+      body: "{}",
+    }));
+    expect(declared.status).toBe(413);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("rejects unsigned origin-less requests and foreign browser origins", async () => {
+    for (const origin of [null, "https://attacker.example"]) {
+      const headers = new Headers({
+        "Content-Type": "application/json",
+        "Idempotency-Key": SESSION_ID,
+      });
+      if (origin) headers.set("Origin", origin);
+      const response = await POST(new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          funnel_type: "home_value",
+          lead_source_surface: "home_value_page",
+          address: "1 Synthetic Origin Way",
+          email: "origin@example.test",
+          idempotency_key: SESSION_ID,
+        }),
+      }));
+      expect(response.status).toBe(403);
+      await expect(response.json()).resolves.toMatchObject({ code: "origin_not_approved" });
+    }
+  });
+
+  it("requires JSON and a plain-object payload", async () => {
+    const unsupported = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain",
+        Origin: "https://www.askmagicmike.com",
+      },
+      body: "not-json",
+    }));
+    expect(unsupported.status).toBe(415);
+    await expect(unsupported.json()).resolves.toMatchObject({ code: "unsupported_media_type" });
+
+    const arrayPayload = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://www.askmagicmike.com",
+      },
+      body: "[]",
+    }));
+    expect(arrayPayload.status).toBe(400);
+    await expect(arrayPayload.json()).resolves.toMatchObject({ code: "invalid_payload" });
+  });
+
+  it("requires one bounded matching idempotency key", async () => {
+    const body = {
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "2 Synthetic Idempotency Way",
+      email: "idempotency@example.test",
+    };
+    const missing = await POST(new Request("http://localhost/api/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://www.askmagicmike.com",
+      },
+      body: JSON.stringify(body),
+    }));
+    expect(missing.status).toBe(400);
+    await expect(missing.json()).resolves.toMatchObject({ code: "idempotency_key_required" });
+
+    const conflict = await POST(request(
+      { ...body, idempotency_key: SESSION_ID },
+      { "Idempotency-Key": "44444444-4444-4444-8444-444444444444" },
+    ));
+    expect(conflict.status).toBe(400);
+    await expect(conflict.json()).resolves.toMatchObject({ code: "idempotency_key_conflict" });
+  });
+
+  it.each([
+    [{ funnel_type: "mystery" }, "invalid_funnel_type"],
+    [{ lead_source_surface: "unknown_surface" }, "invalid_lead_source_surface"],
+    [{ lead_type: "mystery" }, "invalid_lead_type"],
+    [{ score: 100 }, "protected_field_rejected"],
+    [{ assigned_agent_id: LEAD_ID }, "protected_field_rejected"],
+    [{ consent: "true" }, "invalid_field_type"],
+    [{ attribution: [] }, "invalid_attribution"],
+  ])("rejects malformed or privileged public input %o", async (override, code) => {
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "3 Synthetic Boundary Road",
+      email: "boundary@example.test",
+      ...override,
+    }));
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({ code });
+  });
+
+  it("bounds normalized lead and attribution fields before persistence", async () => {
+    for (const override of [
+      { target_geography: "x".repeat(501) },
+      { attribution: { source: "x".repeat(121) } },
+      { attribution: { first_touch: { campaign: "x".repeat(241) } } },
+    ]) {
+      const fetchSpy = vi.fn();
+      vi.stubGlobal("fetch", fetchSpy);
+      const response = await POST(request({
+        funnel_type: "buyer",
+        lead_source_surface: "buyer_page",
+        email: "bounded@example.test",
+        ...override,
+      }));
+      expect(response.status).toBe(400);
+      expect(fetchSpy).not.toHaveBeenCalled();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it.each([
+    { experiment_key: HOME_VALUE_TRUST_EXPERIMENT.key },
+    {
+      experiment_key: HOME_VALUE_TRUST_EXPERIMENT.key,
+      experiment_subject_key: EXPERIMENT_SUBJECT_KEY,
+      experiment_variant_key: EXPERIMENT_VARIANT_KEY === "control" ? "broker_review" : "control",
+      experiment_surface: HOME_VALUE_TRUST_EXPERIMENT.surface,
+    },
+    {
+      experiment_key: HOME_VALUE_TRUST_EXPERIMENT.key,
+      experiment_subject_key: EXPERIMENT_SUBJECT_KEY,
+      experiment_variant_key: EXPERIMENT_VARIANT_KEY,
+      experiment_surface: "/ask",
+    },
+    {
+      experiment_key: HOME_VALUE_TRUST_EXPERIMENT.key,
+      experiment_subject_key: EXPERIMENT_SUBJECT_KEY,
+      experiment_variant_key: EXPERIMENT_VARIANT_KEY,
+      experiment_surface: HOME_VALUE_TRUST_EXPERIMENT.surface,
+      lead_source_surface: "seller_page",
+    },
+  ])("rejects partial, substituted, or cross-surface experiment context %#", async (override) => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "3 Synthetic Experiment Boundary",
+      email: "experiment-boundary@example.test",
+      ...override,
+    }));
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({ code: "invalid_experiment_context" });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("accepts an exact deterministic home-value experiment context", async () => {
+    const { calls } = installRpc();
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "4 Synthetic Experiment Way",
+      email: "experiment-context@example.test",
+      experiment_key: HOME_VALUE_TRUST_EXPERIMENT.key,
+      experiment_subject_key: EXPERIMENT_SUBJECT_KEY,
+      experiment_variant_key: EXPERIMENT_VARIANT_KEY,
+      experiment_surface: HOME_VALUE_TRUST_EXPERIMENT.surface,
+    }));
+    expect(response.status).toBe(200);
+    expect(calls).toHaveLength(1);
+  });
+
+  it("does not trust a standalone public is_test boolean", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "4 Synthetic Test Marker Way",
+      email: "marker@example.test",
+      is_test: true,
+    }));
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({ code: "invalid_test_marker" });
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it("stream-bounds a chunked lead body before parsing or persistence", async () => {
@@ -112,7 +352,10 @@ describe("POST /api/leads validation and truthful persistence", () => {
     vi.stubGlobal("fetch", fetchSpy);
     const response = await POST(new Request("http://localhost/api/leads", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://www.askmagicmike.com",
+      },
       body: JSON.stringify({ question: "é".repeat(33_000) }),
     }));
     expect(response.status).toBe(413);
@@ -129,6 +372,7 @@ describe("POST /api/leads validation and truthful persistence", () => {
       headers: {
         "Content-Type": "application/json",
         "Content-Length": "65537",
+        Origin: "https://www.askmagicmike.com",
       },
       body: "{}",
     }));
@@ -145,6 +389,8 @@ describe("POST /api/leads validation and truthful persistence", () => {
     [{ funnel_type: "home_value", address: "1 Synthetic St", phone: "5550100" }, "valid phone"],
     [{ funnel_type: "seller", address: "1 Synthetic St" }, "Property address and phone are required"],
     [{ funnel_type: "chat" }, "Question is required"],
+    [{ funnel_type: "chat", question: "Synthetic question" }, "Email or phone is required for a chat follow-up"],
+    [{ funnel_type: "chat", question: "Synthetic question", email: "qa@example.test" }, "Consent is required for a chat follow-up"],
     [{ funnel_type: "appointment" }, "Email or phone is required"],
   ])("rejects an incomplete payload without persistence calls", async (payload, message) => {
     const fetchSpy = vi.fn();
@@ -436,15 +682,49 @@ describe("POST /api/leads atomic lifecycle command", () => {
       timeline_months: 3,
     });
 
-    installRpc();
+    const chat = installRpc();
     const chatResponse = await POST(request({
       funnel_type: "chat",
       lead_source_surface: "ask_page",
       question: "What is a synthetic inspection?",
+      email: "chat-follow-up@example.test",
+      phone: "2525550112",
+      consent: true,
+      consent_email: true,
+      consent_call: true,
+      consent_sms: false,
       widget_session_id: SESSION_ID,
     }));
     expect(chatResponse.status).toBe(200);
+    expect(chat.calls[0].body.p_lead).toMatchObject({
+      consent_email: true,
+      consent_call: true,
+      consent_sms: false,
+      consent_language_version: "amm_contact_v2",
+    });
     expect(await chatResponse.json()).toHaveProperty("message");
+  });
+
+  it("does not let standalone channel booleans widen public communication consent", async () => {
+    const { calls } = installRpc();
+    const response = await POST(request({
+      funnel_type: "home_value",
+      lead_source_surface: "home_value_page",
+      address: "210 Synthetic Consent Boundary",
+      email: "consent-boundary@example.test",
+      phone: "2525550119",
+      consent: false,
+      consent_email: true,
+      consent_call: true,
+      consent_sms: true,
+    }));
+
+    expect(response.status).toBe(200);
+    expect(calls[0].body.p_lead).toMatchObject({
+      consent_email: false,
+      consent_call: false,
+      consent_sms: false,
+    });
   });
 
   it("keeps an omitted seller timeline unknown instead of manufacturing urgency", async () => {

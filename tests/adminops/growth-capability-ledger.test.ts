@@ -6,8 +6,11 @@ import {
   growthCapabilityStateLabel,
 } from "../../app/lib/growth/capability-ledger";
 
+const candidateApplicationGate =
+  "APPROVE PHASE 9 CONNECTOR READINESS APPLICATION PR 248 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
+
 describe("Growth capability authority ledger", () => {
-  it("exposes the singular reviewed application candidate without broadening authority", () => {
+  it("shows only the reviewed PR 248 tail as a Preview application candidate", () => {
     const ledger = buildGrowthCapabilityLedger({ currentTailInProduction: false });
 
     expect(ledger.generatedFor).toBe("preview_or_local");
@@ -21,13 +24,12 @@ describe("Growth capability authority ledger", () => {
     });
     expect(ledger.items.find((item) => item.key === "ordered_release_train")).toMatchObject({
       state: "release_candidate",
+      approvalGate: candidateApplicationGate,
     });
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.approvalGate).toBe(
-      "APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT",
-    );
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 246");
     expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 247");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 248");
     expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("only active reviewed application candidate");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.nextAction).toContain("PR 248");
     expect(JSON.stringify(ledger)).not.toContain("PR 210 remains the first pending");
   });
 
@@ -79,7 +81,7 @@ describe("Growth capability authority ledger", () => {
     const facebookRecovery = ledger.items.find((item) => item.key === "facebook_preview_recovery");
 
     expect(gates).toEqual([
-      "APPROVE PHASE 9 WORDPRESS PLACEMENT READINESS PR 247 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT",
+      candidateApplicationGate,
       "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA",
     ]);
     expect(facebookRecovery?.approvalGate).toBeUndefined();

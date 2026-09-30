@@ -23,6 +23,13 @@ import {
   parseVercelProductionEnvNames,
   classifyEmailProviderPresence,
   classifyFailClosedGatePresence,
+  parseCurrentProductionAuthority,
+  loadCurrentProductionAuthority,
+  releaseLogMatchesCurrentProduction,
+  CURRENT_OPERATING_DOC_MARKER,
+  CURRENT_OPERATING_DOCS,
+  STALE_OPERATING_DOC_PATTERNS,
+  validateCurrentOperatingDocs,
 } from "../../scripts/amm/launch-readiness-doctor.mjs";
 
 // ---------------------------------------------------------------------------
@@ -313,6 +320,37 @@ describe("parseVercelProductionEnvNames", () => {
     expect(() => parseVercelProductionEnvNames({
       envs: [{ key: "DATABASE_URL", target: ["production"], value: "must-not-be-read" }],
     })).toThrow("vercel_env_manifest_contains_values");
+    expect(() => parseVercelProductionEnvNames({
+      envs: [],
+      token: "must-not-be-read",
+    })).toThrow("vercel_env_manifest_contains_values");
+  });
+
+  it("rejects every field outside the metadata-only projection allowlist", () => {
+    expect(() => parseVercelProductionEnvNames({
+      envs: [{
+        key: "DATABASE_URL",
+        target: ["production"],
+        type: "sensitive",
+        note: "not-approved-metadata",
+      }],
+    })).toThrow("vercel_env_manifest_field_invalid");
+    expect(() => parseVercelProductionEnvNames({
+      envs: [],
+      metadata: {},
+    })).toThrow("vercel_env_manifest_field_invalid");
+  });
+
+  it("rejects malformed keys, targets, and types instead of silently skipping them", () => {
+    expect(() => parseVercelProductionEnvNames({
+      envs: [{ key: "not-valid", target: ["production"], type: "plain" }],
+    })).toThrow("vercel_env_manifest_entry_invalid");
+    expect(() => parseVercelProductionEnvNames({
+      envs: [{ key: "DATABASE_URL", target: [{ scope: "production" }], type: "plain" }],
+    })).toThrow("vercel_env_manifest_entry_invalid");
+    expect(() => parseVercelProductionEnvNames({
+      envs: [{ key: "DATABASE_URL", target: ["production"], type: { kind: "plain" } }],
+    })).toThrow("vercel_env_manifest_entry_invalid");
   });
 
   it("rejects invalid JSON and invalid top-level shapes", () => {
@@ -433,6 +471,157 @@ describe("releaseLogMentionsPr", () => {
   it("correctly checks the actual release log for the current production baseline", () => {
     const logPath = process.cwd() + "/docs/PRODUCTION_RELEASE_LOG.md";
     expect(releaseLogMentionsPr(logPath, 136).ok).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Canonical current Production release authority
+// ---------------------------------------------------------------------------
+
+describe("current Production release authority", () => {
+  const authority = {
+    schemaVersion: 7,
+    pr: 247,
+    mergeCommit: "a2f3de834830f600df106dbf5836ae4bbde4eb4a",
+    tree: "0065f829fc94f87ab5e0faf596c8e56733be3972",
+    deploymentId: "dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U",
+    status: "accepted",
+  };
+
+  it("loads the real canonical manifest and exact accepted Production identity", () => {
+    const result = loadCurrentProductionAuthority(process.cwd());
+    expect(result).toEqual({ ok: true, authority });
+  });
+
+  it("matches the real release log only when all Production identifiers agree", () => {
+    const logPath = process.cwd() + "/docs/PRODUCTION_RELEASE_LOG.md";
+    expect(releaseLogMatchesCurrentProduction(logPath, authority)).toEqual({ ok: true });
+  });
+
+  it("rejects invalid JSON and malformed Production authority", () => {
+    expect(() => parseCurrentProductionAuthority("not-json")).toThrow(
+      "current_release_authority_invalid_json",
+    );
+    expect(() => parseCurrentProductionAuthority({
+      schemaVersion: 7,
+      production: {
+        pr: 247,
+        mergeCommit: "short",
+        tree: authority.tree,
+        deploymentId: authority.deploymentId,
+        status: "candidate",
+      },
+    })).toThrow("current_release_authority_shape_invalid");
+  });
+
+  it("rejects historical mentions and mismatched release identifiers", () => {
+    const { writeFileSync } = require("fs");
+    const path = "/tmp/test-current-production-release-log.md";
+    writeFileSync(path, [
+      "# Production Release Log",
+      "",
+      "PR #247 was accepted.",
+      "",
+      "## [PR #247] Wrong release identity",
+      "",
+      `Production commit: ${authority.mergeCommit}`,
+      `Production tree: ${authority.tree}`,
+      "Deployment: dpl_wrong",
+    ].join("\n"));
+
+    const result = releaseLogMatchesCurrentProduction(path, authority);
+    expect(result.ok).toBe(false);
+    expect(result.reason).toContain("missing deployment");
+  });
+
+  it("accepts one exact current-PR block even when older releases follow", () => {
+    const { writeFileSync } = require("fs");
+    const path = "/tmp/test-current-production-release-log-exact.md";
+    writeFileSync(path, [
+      "# Production Release Log",
+      "",
+      "## [PR #247] Current release",
+      "",
+      `Production commit: ${authority.mergeCommit}`,
+      `Production tree: ${authority.tree}`,
+      `Deployment: ${authority.deploymentId}`,
+      "",
+      "## [PR #181] Historical release",
+      "",
+      "Preserved for chronology.",
+    ].join("\n"));
+
+    expect(releaseLogMatchesCurrentProduction(path, authority)).toEqual({ ok: true });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Current operator-document contract
+// ---------------------------------------------------------------------------
+
+describe("current operator-document contract", () => {
+  const authority = {
+    schemaVersion: 7,
+    pr: 247,
+    mergeCommit: "a2f3de834830f600df106dbf5836ae4bbde4eb4a",
+    tree: "0065f829fc94f87ab5e0faf596c8e56733be3972",
+    deploymentId: "dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U",
+    status: "accepted",
+  };
+
+  it("keeps every real operator control surface on canonical current truth", () => {
+    expect(validateCurrentOperatingDocs(process.cwd(), authority)).toEqual([]);
+  });
+
+  it("requires all seven current operating documents", () => {
+    expect(CURRENT_OPERATING_DOCS).toHaveLength(7);
+    expect(validateCurrentOperatingDocs("/does/not/exist", authority)).toEqual(
+      CURRENT_OPERATING_DOCS.map((doc) => ({ doc, issue: "missing" })),
+    );
+  });
+
+  it("detects retired database, auth, baseline, approval, and limiter instructions", () => {
+    const samples = [
+      "Open the Supabase Dashboard",
+      "ADMIN_SECRET=your_secret",
+      "main @ 815a33a",
+      "Complete OA-2",
+      "Create an Upstash account",
+    ];
+    for (const [index, sample] of samples.entries()) {
+      expect(STALE_OPERATING_DOC_PATTERNS[index].pattern.test(sample)).toBe(true);
+    }
+  });
+
+  it("fails a marked fixture when its command center carries the wrong deployment", () => {
+    const { mkdirSync, rmSync, writeFileSync } = require("fs");
+    const root = "/tmp/test-current-operating-docs";
+    rmSync(root, { recursive: true, force: true });
+    mkdirSync(`${root}/docs`, { recursive: true });
+    const common = [
+      CURRENT_OPERATING_DOC_MARKER,
+      "config/current-release-authority.json",
+      "Neon",
+      "Better Auth",
+      "OWNER_APPROVAL_QUEUE.md",
+      "KNOWN_BLOCKERS.md",
+    ].join("\n");
+    for (const doc of CURRENT_OPERATING_DOCS) {
+      const identity = [
+        `PR #${authority.pr}`,
+        authority.mergeCommit,
+        authority.tree,
+        doc.endsWith("GO_NO_GO_COMMAND_CENTER.md") ? "dpl_wrong" : authority.deploymentId,
+        "GO_CONTROLLED_TRAFFIC_READY",
+      ].join("\n");
+      writeFileSync(`${root}/${doc}`, `${common}\n${identity}\n`);
+    }
+
+    const issues = validateCurrentOperatingDocs(root, authority);
+    expect(issues).toContainEqual({
+      doc: "docs/GO_NO_GO_COMMAND_CENTER.md",
+      issue: `production_identity_missing:${authority.deploymentId}`,
+    });
   });
 });
 

@@ -19,6 +19,22 @@ export type LeadSourceSurface =
   | "widget"
   | "ourtownproperties";
 
+const LEAD_SOURCE_SURFACES = new Set<LeadSourceSurface>([
+  "homepage",
+  "home_value_page",
+  "seller_page",
+  "buyer_page",
+  "renter_page",
+  "open_house",
+  "ask_page",
+  "widget",
+  "ourtownproperties",
+]);
+
+export function isLeadSourceSurface(value: unknown): value is LeadSourceSurface {
+  return typeof value === "string" && LEAD_SOURCE_SURFACES.has(value as LeadSourceSurface);
+}
+
 export type Attribution = {
   source?: string;
   medium?: string;
@@ -73,6 +89,10 @@ export type LeadPayload = {
   page_url?: string;
   widget_session_id?: string;
   idempotency_key?: string;
+  experiment_key?: string;
+  experiment_subject_key?: string;
+  experiment_variant_key?: string;
+  experiment_surface?: string;
   honeypot?: string;
   is_test?: boolean;
   consent?: boolean;
@@ -144,8 +164,16 @@ export function normalizeLeadPayload(input: Record<string, unknown>): LeadPayloa
     page_url: cleanOptional(input.page_url),
     widget_session_id: cleanOptional(input.widget_session_id),
     idempotency_key: cleanOptional(input.idempotency_key || input.request_fingerprint),
+    experiment_key: cleanOptional(input.experiment_key),
+    experiment_subject_key: cleanOptional(input.experiment_subject_key),
+    experiment_variant_key: cleanOptional(input.experiment_variant_key),
+    experiment_surface: cleanOptional(input.experiment_surface),
     honeypot: clean(input.website || input.honeypot),
-    is_test: input.is_test === true || isInternalQa,
+    // Test classification is derived from the unmistakable QA marker pair,
+    // never from a browser-controlled boolean by itself. This prevents an
+    // ordinary public caller from silently hiding a real submission from
+    // operational KPIs and live-notification paths.
+    is_test: isInternalQa,
     consent: input.consent === true,
     consent_email: input.consent_email === true,
     consent_call: input.consent_call === true,
@@ -212,19 +240,7 @@ function normalizeFunnelType(input: unknown): FunnelType {
 }
 
 function normalizeSurface(input: unknown, funnelType: FunnelType): LeadSourceSurface {
-  if (
-    input === "homepage" ||
-    input === "home_value_page" ||
-    input === "seller_page" ||
-    input === "buyer_page" ||
-    input === "renter_page" ||
-    input === "open_house" ||
-    input === "ask_page" ||
-    input === "widget" ||
-    input === "ourtownproperties"
-  ) {
-    return input;
-  }
+  if (isLeadSourceSurface(input)) return input;
   if (funnelType === "seller") return "seller_page";
   if (funnelType === "buyer") return "buyer_page";
   if (funnelType === "renter") return "renter_page";

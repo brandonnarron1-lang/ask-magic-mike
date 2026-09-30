@@ -1,272 +1,202 @@
-# Controlled Traffic Activation — Ask Magic Mike
+# Controlled Traffic Activation
 
-**Version:** LC-7  
-**Code state:** `main` @ `815a33a` — authority packet complete  
-**Audience:** Brandon Narron (operator)  
-**Authority gate:** `npm run amm:launch:authority` must end with `NOT_GO_OWNER_ACTION_REQUIRED` — not FAILING_CHECKS  
-**Companion documents:**
-- `docs/GO_NO_GO_COMMAND_CENTER.md` — single-page authority decision
-- `docs/CONTROLLED_LAUNCH_RUNBOOK.md` — full procedure detail for each step
-- `docs/OWNER_ACTION_PROOF_PACK.md` — evidence capture template
-- `docs/PRODUCTION_DEPLOY_REHEARSAL.md` — deployment-day timeline
+<!-- amm-current-operations-v1 -->
 
-This document converts launch authority into the exact private-test and limited-traffic activation sequence. Follow each stage in order. Do not advance to the next stage until the current stage's Stop If column is clear.
+Updated 2026-09-01. This runbook expands owned demand only after the canonical
+lead path is healthy. Release identity comes from
+`config/current-release-authority.json`; durable lead data is in Neon; staff
+access uses Better Auth plus server-side RBAC. Action authority comes from
+`OWNER_APPROVAL_QUEUE.md`; stop conditions come from `KNOWN_BLOCKERS.md`.
 
----
+The canonical public site already accepts ordinary direct and organic visits.
+This document governs deliberate placement or campaign expansion. It does not
+turn a public visitor into a test lead, and it does not authorize a merge,
+deployment, WordPress edit, message, publication, database mutation, DNS change,
+provider purchase, or paid campaign.
 
-## §1 — Purpose and Scope
+## Activation principles
 
-This is the execution document for moving from "code is ready" to "real people can reach www.askmagicmike.com." It covers:
+- Durable storage must succeed before a success state or notification attempt.
+- A genuine public submission is a live prospect. Never fabricate one.
+- Controlled QA uses `is_test=true` and `INTERNAL QA — DO NOT CONTACT`, and is
+  excluded from production KPIs.
+- Expand one attributable placement at a time. Preserve first touch, last
+  touch, source URL, referrer, placement, UTMs, click IDs, consent, and session
+  identity.
+- Do not place contact data or other PII in analytics events or URLs.
+- A launch application gate and an external publication gate are different
+  approvals.
 
-- Private test by operator (Brandon) and broker (Mike Eatmon) only
-- Confirmation of first real lead in production database
-- Activating the three WordPress CTAs on ourtownproperties.com
-- 24-hour monitoring window before any broader traffic
+## Required evidence before expansion
 
-It does NOT cover:
-- Paid advertising — separate approval required
-- Mass email / SMS outreach — separate compliance review required
-- Social media announcement — separate content review required
-- MLS / IDX data integration — separate broker board approval required
+| Evidence | Requirement |
+| --- | --- |
+| Application identity | Accepted Production and rollback deployment match the release-authority register |
+| Release health | Launch doctor, authority report, smoke, funnel, route, and isolation checks pass |
+| Data plane | Canonical Neon readiness is healthy; no competing lead database is treated as authoritative |
+| Access boundary | Anonymous private routes deny access; Better Auth/RBAC grants only permitted records |
+| Notification boundary | Lead storage is independent of delivery; failures remain visible and retryable |
+| Attribution | Placement contract and tagged target URL are reviewed before publication |
+| Approval | Exact, unconsumed gate names the system, placement/action, and rollback |
 
----
+If any identity, environment, authorization, or proof differs from the recorded
+authority, stop before creating traffic.
 
-## §2 — Prerequisites
+## Stage 0 — continuous public readiness
 
-All five owner actions must be complete before Stage 1. Verify each in `docs/OWNER_ACTION_PROOF_PACK.md` before starting.
+Stage 0 is read-only and may run at any time:
 
-| Owner Action | Required For | Verification |
-|---|---|---|
-| OA-1: Vercel env vars set | Every stage | `docs/OWNER_ACTION_PROOF_PACK.md` §3 row OA-1 = ✅ PASS |
-| OA-2: Supabase tables + RLS verified | Every stage | §3 row OA-2 = ✅ PASS (all 13 tables, RLS enabled) |
-| OA-3: Admin auth verified | Every stage | §3 row OA-3 = ✅ PASS (401 without creds, 200 with creds, no mock banner) |
-| OA-4: Production smoke passed | Every stage | §3 row OA-4 = ✅ PASS (`19+ pass · 0 fail`) |
-| OA-5: One real test lead submitted and confirmed | Stage 2+ | §3 row OA-5 = ✅ PASS (lead in Supabase + /admin) |
+1. verify `https://www.askmagicmike.com` and the intended offer routes return
+   expected non-5xx responses;
+2. verify canonical metadata names the Production hostname;
+3. verify health/readiness without exposing values;
+4. verify anonymous Lead Center and protected admin endpoints deny access;
+5. inspect recent errors and notification-failure counts; and
+6. confirm the current authority report ends in
+   `GO_CONTROLLED_TRAFFIC_READY`.
 
-Run `npm run amm:launch:authority` before starting. Authority must be `NOT_GO_OWNER_ACTION_REQUIRED` (OA-1–OA-5 incomplete) or — after all five are done — `GO_CONTROLLED_TRAFFIC_READY`.
+Natural direct and organic traffic may continue while these checks pass. A
+material failure triggers the pause procedure below.
 
-**If authority is `NOT_GO_FAILING_CHECKS`, stop. Do not proceed to any stage.**
+## Stage 1 — application release acceptance
 
----
+Use this stage only when a new application release has its own exact approval.
 
-## §3 — Activation Stage Table
+1. execute only the approved PR/tree deployment sequence;
+2. prove the canonical alias resolves to that exact Ready deployment;
+3. run public smoke, funnel, health, isolation, and anonymous-auth checks;
+4. inspect release-correlated errors; and
+5. record the acceptance and immediate rollback artifact.
 
-| Stage | Action | Owner | Evidence | Stop If | Status |
-|---|---|---|---|---|---|
-| S1: Private test | Redeploy Vercel after all env vars set; verify site loads at www.askmagicmike.com | Brandon | Vercel Dashboard: deployment READY, aliased to www.askmagicmike.com | Deployment fails or is not aliased | ⬜ TODO |
-| S1: Smoke | `npm run amm:smoke:prod` passes | Brandon | Terminal: `19 pass · 2 skip · 0 fail` (or better) | Any FAIL | ⬜ TODO |
-| S1: Admin verified | `/admin` 401 without creds; dashboard loads with live data, no mock banner | Brandon | Screenshot (mask credentials) | Mock banner visible; page loads without auth | ⬜ TODO |
-| S1: Mike private review | Send www.askmagicmike.com link to Mike Eatmon via direct message — NOT social/email | Brandon → Mike | Mike confirms site loads and looks correct | Mike reports issues or cannot access | ⬜ TODO |
-| S2: Real test lead | Submit one real test lead via /ask (operator email/phone only; see §5) | Brandon | Confirmation screen captured | Error screen; no confirmation | ⬜ TODO |
-| S2: Lead in Supabase | Test lead appears in leads table with score + temperature populated | Brandon | Supabase Dashboard screenshot (redact contact info) | Lead missing; score null; temperature null | ⬜ TODO |
-| S2: Lead in /admin | Test lead visible in Recent Leads with temperature badge and score | Brandon | /admin screenshot (redact name/contact) | Lead missing from admin | ⬜ TODO |
-| S2: Delete test lead | Delete all 5 related rows (sessions, leads, contacts, consents, source_attribution) | Brandon | Note row IDs deleted | Deletion errors — note and continue | ⬜ TODO |
-| S3: WP CTAs live | Update three WordPress CTA buttons to www.askmagicmike.com/value?utm_source=ourtown_wp... URLs | Brandon / Regency | Browser: CTA click routes to correct URL with UTM params | CTA routes to vercel.app preview URL; UTM params missing | ⬜ TODO |
-| S3: UTM captured | UTM params captured in sessionStorage on landing | Brandon | DevTools → Application → Storage → amm_attribution shows utm_source: ourtown_wp | Key missing or empty | ⬜ TODO |
-| S4: 1h monitor | 1 hour after first real traffic: check Vercel function logs, Supabase, /admin | Brandon | No 5xx errors; leads appearing; scores populated | >10% of intake submit calls return 5xx — pause immediately | ⬜ TODO |
-| S4: 24h monitor | Next morning: review all leads, crm_sync_log, analytics_events | Brandon | /admin shows correct leads; crm_sync_log status: skipped; events include intake_completed | Any 5xx pattern; DEV MOCK banner appearance | ⬜ TODO |
+Do not add a WordPress placement, submit a QA lead, send a message, or publish a
+campaign as part of an application-only gate.
 
----
+## Stage 2 — one WordPress placement
 
-## §4 — Stage 1: Private Test Deployment
+This stage requires both the separately approved Connector 1.1.0 plugin upgrade
+and an exact publication gate for one visible placement. Before editing:
 
-**Trigger:** All OA-1–OA-4 complete. OA-5 not yet required.
+1. create a fresh WordPress backup and placement manifest;
+2. confirm the approved form/page/CTA ID and current destination;
+3. confirm signed forwarding, retry visibility, local audit-copy behavior, and
+   duplicate-email prevention;
+4. define a stable `placement_id` and tagged canonical target URL; and
+5. record the one-step rollback.
 
-```bash
-# 1. Confirm deployment is live
-# Vercel Dashboard → Project → Deployments → confirm latest is READY + aliased to www.askmagicmike.com
+After publication, inspect the page anonymously on mobile and desktop, follow
+the CTA without submitting a fabricated lead, verify the canonical destination
+and attribution parameters, and record the visible result. Do not enable a
+site-wide widget during this stage.
 
-# 2. Run smoke (read-only, no credentials needed)
-npm run amm:smoke:prod
+Recommended order after separate approvals:
 
-# 3. Run launch authority report
-npm run amm:launch:authority
+1. homepage Ask Magic Mike placement;
+2. home-value placement;
+3. We Buy Houses/seller placement;
+4. Mike agent page;
+5. selected listing, rental, and open-house placements.
 
-# 4. Run public CTA final check
-npm run amm:public:cta-check
+Advance one placement at a time only after the previous placement remains
+healthy.
 
-# 5. Run funnel verify
-npm run amm:verify:funnel
+## Stage 3 — one owned-distribution placement
+
+Each Google Business Profile post, social post, email/newsletter item, or QR
+placement is a separate external publication/send action unless one exact gate
+explicitly lists a bounded set.
+
+For an approved placement:
+
+- use the reviewed offer and compliant copy;
+- use the canonical hostname and stable UTM convention;
+- record channel, account/page, URL, publication time, and rollback/removal
+  method without storing credentials;
+- verify the public destination and analytics event names; and
+- observe genuine-lead, duplicate, notification, and SLA behavior before adding
+  another placement.
+
+No paid traffic is included.
+
+## Stage 4 — measured expansion
+
+Expand only after a meaningful observation window shows:
+
+- the public route and submission API remain healthy;
+- every lead has one canonical durable record;
+- consent and attribution are present;
+- dedupe and idempotency prevent duplicate records and alerts;
+- assignment, score explanation, and SLA are visible;
+- notification delivery or failure/retry state is visible;
+- test records remain excluded from live KPIs; and
+- operators can respond within the approved SLA.
+
+Use demand and operational evidence, not synthetic volume, to decide whether to
+add the next placement.
+
+## Monitoring schedule
+
+| Checkpoint | Inspect | Pause when |
+| --- | --- | --- |
+| Immediately | Public route, canonical URL, placement destination | Wrong route, hostname, content, or attribution |
+| 15 minutes | Vercel errors and 5xx responses | New release/placement-correlated failures |
+| 1 hour | Lead creation, duplicate rate, queue/failure state, SLA | Missing, duplicated, unassigned, or invisible failure state |
+| First genuine lead | Source/consent, score/route, Lead Center record, notification ledger | Any critical field or durable step is missing |
+| 24 hours | Source totals, qualified leads, notification failures, response outcomes | KPI contamination or unresolved operational regression |
+
+Record exact timestamps and immutable evidence in `OWNER_ACTION_PROOF_PACK.md`.
+Do not label queued notification state as delivered.
+
+## Channels not activated by this runbook
+
+- paid search, paid social, retargeting, or lead-vendor purchases;
+- carrier SMS or automated consumer texting;
+- bulk or nurture email;
+- unreviewed social/GBP publication;
+- global WordPress injection;
+- DNS, domain, mailbox, or sender-authentication changes;
+- MLS/IDX data expansion;
+- live-data deletion, merge, or import; and
+- any NellySelly system, domain, project, database, or credential.
+
+Each requires its own approved scope and applicable compliance review.
+
+## Pause and rollback
+
+Pause deliberate traffic expansion when any of these occurs:
+
+- a public lead route returns 5xx or reports success without durable storage;
+- private data is visible without authorization;
+- the canonical database or project identity is uncertain;
+- leads are missing, duplicated, misrouted, or absent from the Lead Center;
+- notification failures are hidden or retry state is not observable;
+- attribution or consent evidence is missing;
+- test traffic enters live KPIs; or
+- the release/placement differs from the approved evidence.
+
+Then:
+
+1. stop only the affected newly activated placement or channel;
+2. restore its recorded prior state or application rollback artifact;
+3. preserve lead, audit, notification, and error records;
+4. re-run route, health, auth, data, and notification checks; and
+5. update `KNOWN_BLOCKERS.md` and the proof pack before resuming.
+
+Do not delete lead records, purge caches, change DNS, or send incident messaging
+unless separately authorized.
+
+## Activation receipt
+
+```text
+Operator: ____________________
+Timestamp: ____________________
+Stage and exact placement: ____________________
+Approval phrase/status: ____________________
+Release/deployment identity: ____________________
+Target URL and placement_id: ____________________
+Preflight evidence: ____________________
+Post-publication evidence: ____________________
+Monitoring result: PASS / PAUSE / ROLLBACK
+Rollback action/result: ____________________
 ```
 
-After all pass, send the URL to Mike Eatmon via direct message. Do not post publicly. Do not send to leads. Ask Mike to confirm the site loads, copy reads correctly, and CTAs work.
-
-**Stop conditions:**
-- Any smoke FAIL
-- Mike reports the site does not load or looks wrong
-- `amm:public:cta-check` ends with `PUBLIC_CTA_CHECK: FAIL`
-
----
-
-## §5 — Stage 2: First Real Lead Confirmation
-
-**Trigger:** Stage 1 complete. Mike confirmed site looks correct.
-
-Submit one real lead using operator credentials (Brandon's email and phone number only). Do not use fake contact info — the lead will create a real database record that must be deleted afterward.
-
-```
-URL:   https://www.askmagicmike.com/ask
-Name:  Brandon Narron (operator test)
-Email: brandonnarron1@gmail.com
-Phone: your mobile (optional)
-Question: "This is a launch verification test from the operator. Please disregard."
-Intent:   "Just exploring"
-Timeline: "Not sure"
-Consent:  Check all three boxes
-```
-
-**After submission:**
-1. Confirm "Your request is in" screen appears
-2. Confirm "What happens now" 3-step panel is visible
-3. Check Supabase leads table — row should appear within 30 seconds
-4. Verify score and temperature are populated (not null/0)
-5. Check /admin — lead visible in Recent Leads within 60 seconds
-6. Delete all 5 related rows from Supabase (leads, sessions, contacts, consents, source_attribution)
-
-Record each step in `docs/OWNER_ACTION_PROOF_PACK.md` §3 rows OA-5.
-
-**Stop conditions:**
-- Confirmation screen does not appear
-- Lead does not appear in Supabase within 2 minutes
-- Score is null or 0 after 2 minutes
-
----
-
-## §6 — Stage 3: WordPress CTA Activation
-
-**Trigger:** Stage 2 complete. Test lead confirmed and deleted.
-
-**What to activate:** The three WordPress CTAs on ourtownproperties.com. These are the only traffic source for controlled launch. No paid advertising. No social posts.
-
-| Page | Button Label | Target URL |
-|---|---|---|
-| Homepage | (Mike's CTA button) | `https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike` |
-| Mike Eatmon profile page | (profile CTA button) | `https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=mike_profile&utm_campaign=ask_magic_mike` |
-| We Buy Homes / Seller page | (seller CTA button) | `https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=seller_page_cta&utm_campaign=ask_magic_mike` |
-
-**Verification per CTA:**
-1. Open the WordPress page in incognito
-2. Click the CTA button
-3. Confirm URL bar shows `www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=...`
-4. Open DevTools → Application → Storage → Local/Session Storage → confirm `amm_attribution` key has `utm_source: ourtown_wp`
-5. Do NOT complete a fake lead submission from the WordPress CTA
-
-Record WordPress CTA evidence in `docs/OWNER_ACTION_PROOF_PACK.md` §3 rows OA-6.
-
----
-
-## §7 — Stage 4: 24-Hour Monitoring
-
-After WordPress CTAs are live, monitor for 24 hours before any additional traffic sources.
-
-| Time | Action | Check | Stop If |
-|---|---|---|---|
-| T+15m | Vercel function logs | `/api/intake/submit` returns 200s | More than 10% 5xx — pause immediately |
-| T+1h | Supabase leads table | Rows being created; scores populated; source attribution `utm_source: ourtown_wp` | Zero rows after real traffic — intake failing silently |
-| T+1h | Run smoke | `npm run amm:smoke:prod` → 19+ pass / 0 fail | Any new FAIL |
-| T+1h | /admin | First real lead visible; temperature badge; score; no DEV MOCK banner | Mock banner appears |
-| T+4h | /admin | All leads look correct; no anomalies | Scoring 0 on all leads; or any DEV MOCK appearance |
-| T+24h | crm_sync_log | Status: `skipped` for all rows (null CRM adapter, expected) | Status: `error` — investigate |
-| T+24h | analytics_events | Event types include `session_created`, `intake_completed`, `lead_scored` | No events at all |
-
----
-
-## §8 — What Is NOT Activated Here
-
-The following require separate approvals and are explicitly out of scope for controlled traffic activation:
-
-| Channel | Status | Required Before Activation |
-|---|---|---|
-| Paid advertising (Google, Facebook, etc.) | ❌ Not activated | Separate approval + budget decision |
-| Mass email / SMS outreach | ❌ Not activated | TCPA attorney review + DNC scrub |
-| Social media announcement posts | ❌ Not activated | Content review by Mike Eatmon |
-| MLS / IDX live listing data | ❌ Not activated | IDX agreement from MLS board |
-| CRM adapter (Follow Up Boss / kvCORE) | ❌ Not activated | API key setup + CRM account |
-| Rate limiter (Upstash Redis) | ❌ Not activated | Upstash account + UPSTASH_REDIS_REST_URL env var |
-
-Do not claim TCPA consent, Redis rate limiting, or MLS/IDX compliance are complete — they are not, and attempting to activate those channels without completing the required steps is a hard stop.
-
----
-
-## §9 — Escalation and Pause Procedure
-
-If any Stop If condition in §3 is triggered, pause immediately:
-
-```
-1. Do not send additional traffic to www.askmagicmike.com
-2. Do not post publicly about the issue
-3. Do not tell leads or visitors that there is a technical problem
-4. Investigate the root cause using:
-   - Vercel Dashboard → Functions → Logs
-   - Supabase Dashboard → Logs → API / Database
-   - npm run amm:smoke:prod (if site is reachable)
-5. Document the issue in docs/KNOWN_BLOCKERS.md
-6. Fix the root cause before resuming
-```
-
----
-
-## §10 — Hard Stop Conditions
-
-Any one of these = immediate rollback of WordPress CTAs + Vercel deployment:
-
-```
-[ ] More than 10% of /api/intake/submit calls return 5xx in Vercel logs
-[ ] /admin loads without authentication in production
-[ ] DEV MOCK DATA banner appears in production /admin
-[ ] Real leads submitted but not appearing in Supabase after 5 minutes
-[ ] Health endpoint returns false for SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY
-[ ] Any public page returns 500 instead of a styled error page
-```
-
-**Rollback procedure:**
-1. WordPress CTAs: revert CTA buttons to prior URLs or remove buttons in WP Admin
-2. Vercel: Dashboard → Project → Deployments → find prior known-good → Promote to Production
-3. Run `npm run amm:smoke:prod` on rolled-back deployment to confirm recovery
-4. Contact Mike Eatmon privately with a timeline for the fix — do not communicate publicly
-
----
-
-## §11 — Traffic Pause Diagnostic Commands
-
-Run these if issues are suspected (all read-only, no mutations):
-
-```bash
-# Full smoke against production
-npm run amm:smoke:prod
-
-# Funnel structure verify
-npm run amm:verify:funnel
-
-# Launch authority report
-npm run amm:launch:authority
-
-# Launch doctor (static code check)
-npm run amm:launch:doctor
-
-# Public CTA static check
-npm run amm:public:cta-check
-
-# Health endpoint (requires ADMIN_SECRET exported)
-curl -s -H "x-admin-secret: $ADMIN_SECRET" \
-  https://www.askmagicmike.com/api/admin/health | python3 -m json.tool
-```
-
----
-
-## §12 — Sign-Off Block
-
-Complete this block before advancing to Stage 3 (WordPress CTAs live):
-
-```
-Operator:           Brandon Narron
-Date:               _______________
-Stage 1 complete:   [ ] Private test passed; Mike confirmed site
-Stage 2 complete:   [ ] Test lead submitted, confirmed in Supabase + /admin, deleted
-Authority at sign:  [ ] NOT_GO_OWNER_ACTION_REQUIRED (OA items complete) or GO_CONTROLLED_TRAFFIC_READY
-Code state:         main @ 815a33a
-Decision:           [ ] AUTHORIZED — activate Stage 3 (WordPress CTAs)
-```
-
-Evidence for each completed stage is in `docs/OWNER_ACTION_PROOF_PACK.md`.  
-Go/No-Go authority decision is in `docs/GO_NO_GO_COMMAND_CENTER.md`.
+`GO_NO_GO_COMMAND_CENTER.md` is the current operational decision surface.

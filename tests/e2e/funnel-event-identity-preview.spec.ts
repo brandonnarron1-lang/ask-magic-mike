@@ -180,16 +180,35 @@ for (const viewport of viewports) {
     await page.getByLabel(/Your real estate question/).fill("INTERNAL QA — what should I prepare before listing?");
     await page.getByRole("button", { name: "Send Question" }).click();
     await expect(page.getByText("INTERNAL QA — synthetic local answer; no provider called.")).toBeVisible();
+    await expect.poll(() => capture.leads.length).toBe(3);
+    await expect.poll(async () =>
+      (await browserEvents(page)).some((entry) => entry.event === "lead_created"),
+    ).toBe(false);
+    await page.getByLabel("Your name (optional)").fill("INTERNAL QA DO NOT CONTACT");
+    await page.getByLabel("Email").fill("ask-funnel-qa@example.com");
+    await page.getByLabel("Phone").fill("2525550103");
+    await page.getByRole("checkbox").check();
+    await page.getByRole("button", { name: "Request local follow-up" }).click();
+    await expect(page.getByText("INTERNAL QA — intercepted before durable storage.")).toBeVisible();
     await expect.poll(() => capture.leads.length).toBe(4);
     const askLead = capture.leads.at(-1) as JsonRecord;
+    expect(askLead.consent).toBe(true);
+    expect(askLead.consent_email).toBe(true);
+    expect(askLead.consent_call).toBe(true);
+    expect(askLead.consent_sms).toBe(false);
     const askSessionId = String(askLead.widget_session_id);
     await expectAutomatedBrowserEvents(
       page,
       capture,
       eventStart,
       askSessionId,
-      ["chat_started", "chat_message_sent"],
-      ["INTERNAL QA — what should I prepare before listing?"],
+      ["chat_started", "chat_message_sent", "contact_submitted", "consent_accepted"],
+      [
+        "INTERNAL QA — what should I prepare before listing?",
+        "INTERNAL QA DO NOT CONTACT",
+        "ask-funnel-qa@example.com",
+        "2525550103",
+      ],
     );
     await expectBrowserConversion(page);
     await expectNoHorizontalOverflow(page);

@@ -1,259 +1,162 @@
 # Production Release and Go-Live Runbook
 
-Updated 2026-08-28. The public funnel is live. Use this runbook for incremental,
-reversible releases and controlled owned-traffic activation.
+<!-- amm-current-operations-v1 -->
 
-## Before merge
+Updated 2026-09-01. Ask Magic Mike is already live. This runbook governs
+incremental application releases and controlled owned-traffic activation. It
+derives release identity from `config/current-release-authority.json`, uses
+Neon as the canonical database, and uses Better Auth plus server-side RBAC for
+staff access. Current gates are in `OWNER_APPROVAL_QUEUE.md`; capability limits
+are in `KNOWN_BLOCKERS.md`.
 
-1. Fetch current `origin/main`; use an isolated worktree and preserve unrelated
-   user or agent changes.
-2. Record PR, immutable head commit, Vercel project, Preview deployment, current
-   Production deployment, and rollback deployment.
-3. Run the Node 24 release gate and confirm the Vercel Preview is Ready.
-4. Verify changed routes in the protected Preview. Separate build, DOM/runtime,
-   screenshot, database, provider-delivery, and physical-device evidence.
-5. Classify migrations, environment changes, sends, WordPress publication, DNS,
-   and external marketing as separate state changes.
-6. Present the release-specific Production gate from the PR. Do not reuse a gate.
+## 1. Resolve the exact change
 
-## Merge and deploy
+1. Confirm the canonical repository, protected `main`, current Production
+   deployment, and rollback deployment from the release-authority manifest.
+2. Record the candidate PR, immutable head, tree, base, migration count,
+   environment delta, external-action count, and Vercel Preview ID.
+3. Confirm the candidate is ordered behind every prerequisite. A downstream
+   Draft must never leapfrog the one requestable application candidate.
+4. Classify each state change independently: application deploy, Neon
+   migration, environment/provider change, WordPress plugin, WordPress page,
+   DNS, test send, consumer message, publication, spend, or data mutation.
+5. Stop if a historical or consumed phrase is presented as authority.
 
-1. Merge only the approved clean PR into `main` using the repository ruleset.
-2. Let the canonical Git integration deploy the resulting `main` commit to the
-   single owned Vercel project. Do not deploy from a different repository or
-   attach Ask Magic Mike domains to another project.
-3. Wait for Ready and confirm both custom aliases resolve to the approved
-   deployment. Do not promote an artifact built from a different commit.
-4. If an additive Neon Production migration is part of the release, use its own
-   exact approval, pre/post assertions, transaction boundary, and forward-fix
-   plan. A code approval alone is insufficient.
+## 2. Prove the immutable candidate
 
-## Immediate verification
+Use Node 24 and the repository's established checks:
 
-Run the repository health, funnel, route, release, and isolation verifiers. At a
-minimum confirm:
-
-- `/`, `/ask`, `/sell`, `/value`, `/home-value`, `/buy`, `/rent`,
-  `/open-house/<approved-id>`, `/widget/v1`, `/privacy`, `/terms`,
-  `/accessibility`, `/contact`, `/robots.txt`, and `/sitemap.xml`;
-- apex 308 redirect and canonical metadata;
-- live/readiness health with canonical Neon;
-- anonymous `/admin` redirect to `/lead-center-login` and authorized RBAC access;
-- no NellySelly hostname, project, database, variable, or content crossover; and
-- no error-level regression in the observed Vercel window.
-
-## Lead or messaging release verification
-
-When the change touches capture, routing, email, push, SMS, or sequences:
-
-1. Use a synthetic record marked `is_test=true` and
-   `INTERNAL QA — DO NOT CONTACT` only after the exact QA-send/mutation approval.
-2. Submit through the public form, not directly into the database.
-3. Prove one canonical lead, attribution/consent, deterministic score/routing,
-   one idempotent notification set, Lead Center visibility, and KPI exclusion.
-4. For real provider tests, prove provider message ID and final delivery or
-   failure/retry state. A 200 or queued state is not delivery proof.
-5. Never contact a genuine WordPress-only entry whose purpose or consent is
-   unclear; preserve it for BIC review.
-
-## Completed durable rate-limit readiness release
-
-PR #209 is accepted at merge
-`a0a0aea8dd7746dbed7b25b45ad72f2884e6a0ca` and Production deployment
-`dpl_DJBHm5umeXK2AkrMeca5LK4FMQzj`. Its dedicated Production secret, readiness
-booleans, bounded malformed request, 9/9 monitor, and log window passed. The
-exact gate is exhausted. See
-`docs/phase9/DURABLE_RATE_LIMIT_PRODUCTION_ACCEPTANCE_2026-08-28.md`.
-
-The following command remains historical/read-only evidence and rollback
-diagnostics. It cannot authorize or repeat the accepted release:
-
-```text
-pnpm run phase9:durable-rate-limit:readiness -- --plan
-AMM_VERCEL_PROJECT_CWD=/absolute/path/to/linked/ask-magic-mike \
-  pnpm run phase9:durable-rate-limit:readiness -- --preflight
+```bash
+pnpm install --frozen-lockfile
+pnpm run release:gate
+pnpm run amm:launch:doctor
+pnpm run amm:launch:authority
 ```
 
-The rehearsal checks names/scopes and boolean health only, never a secret value.
-It refuses execute, merge, and deploy modes. Full historical behavior and
-failure boundaries are in
-`docs/phase9/DURABLE_RATE_LIMIT_CUTOVER_REHEARSAL.md`.
+Additionally require:
 
-Before merge, the read-only store probe must report `table`, `schema`,
-`permissions`, `rls`, and `ready` true when run with the intended secure runtime
-connection:
+- clean mergeability and exact-head hosted Release Gate success;
+- a Ready immutable Vercel Preview built from that head;
+- protected read-only route, metadata, auth-boundary, and runtime-log checks;
+- production dependency audit and redacted staged secret scan; and
+- no secret value, recipient value, database connection, token, cookie, or
+  private key in logs, screenshots, artifacts, or the diff.
 
-```text
-pnpm run rate-limit:verify-store
-```
+The authenticated environment check consumes only variable names, scopes, and
+types. It must never pull or print values.
 
-Vercel variables typed `sensitive` are intentionally unavailable to local
-`vercel env run`. Do not weaken the variable type, export a database URL, or
-interpret a local `database_not_configured` result as deployed-runtime failure.
-Use the protected candidate health endpoint to prove the encrypted Vercel
-runtime role, and use the public Production health endpoint after deployment.
+## 3. Present the action-specific gate
 
-For ongoing health, require HTTP 200 from
-`/api/health/ready` and literal true for `rate_limit_required`,
-`rate_limit_table`, `rate_limit_schema_ready`,
-`rate_limit_permissions_ready`, `rate_limit_rls_ready`,
-`rate_limit_store_ready`, `rate_limit_secret_ready`, and `rate_limit_ready`.
-Do not repeat the malformed acceptance request without a new exact authorization.
-Any false flag or new fallback log triggers investigation and, if required,
-rollback to the recorded prior deployment. Do not delete the ignored Upstash
-variables; that remains a separate cleanup action.
+Immediately before a gated action, present:
 
-## Current Phase 9 release sequence
+1. exact PR/head/tree or exact external artifact hash;
+2. affected systems, routes, and data;
+3. verification evidence and known limits;
+4. explicit exclusions;
+5. rollback target and trigger; and
+6. the one current phrase from `OWNER_APPROVAL_QUEUE.md`.
 
-The singular current application candidate is PR #238. PRs #210–#237 are
-preserved component lineage included once in that cumulative tree; do not merge
-them individually or replay their former gates.
+An application gate does not authorize a Neon migration, WordPress change,
+message, publication, environment edit, DNS action, spend, or deletion.
 
-1. `#180`, `#181`, `#183`, `#184`, `#185`, `#193`, `#196`, `#194`, `#195`, and
-   `#209` are complete and their gates are exhausted.
-2. `#238` exact head `de67db6e1183b2a47d329d4a9a11993d48d1992a`
-   is fully sealed but held for its exact cumulative gate.
-3. Run its guarded read-only preflight, keep all three import gates false, then
-   execute/verify the four hash-pinned migrations before merging and deploying
-   only that exact reviewed head.
-4. `#239` and later dependent review artifacts remain outside the PR #238 gate
-   and cannot advance ahead of it.
+## 4. Merge and application deployment
 
-The exact authority and current manifest are in
-`docs/CURRENT_RELEASE_AUTHORITY.md` and
-`config/current-release-authority.json`.
+Only after the exact application gate is received:
 
-Historical cutover commands below remain evidence for already completed or
-component releases. They do not supersede the current PR #238 runner or gate.
+1. revalidate the PR head/tree and all hosted checks;
+2. merge through the protected GitHub ruleset;
+3. allow the canonical Git integration to deploy that resulting `main` commit
+   to the one Ask Magic Mike Vercel project;
+4. wait for Ready and prove the canonical aliases resolve to that artifact; and
+5. stop and restore the recorded rollback deployment if acceptance fails.
 
-PR #181 uses:
+Never deploy from another repository or attach Ask Magic Mike domains to a
+different project.
 
-```text
-pnpm run phase9:first-response:cutover -- --plan
-pnpm run phase9:first-response:cutover -- --preflight
-pnpm run phase9:first-response:cutover -- --execute
-pnpm run phase9:first-response:cutover -- --verify
-```
+## 5. Immediate read-only acceptance
 
-Enter the unpooled owner connection only through the secure environment; never
-place it in chat, a command argument, a report, or a committed file. `--execute`
-must fail unless the exact release-specific approval phrase is present. Retain
-the validated mode-600 backup until the exact application deployment and
-authenticated checks pass.
+At minimum verify:
 
-The stacked publication-proof ledger uses:
+- `/`, `/ask`, `/sell`, `/home-value`, `/buy`, `/rent`, `/widget/v1`,
+  `/privacy`, `/terms`, `/accessibility`, `/contact`, `/robots.txt`, and
+  `/sitemap.xml`;
+- apex permanent redirect and canonical/Open Graph metadata;
+- `/api/health/live` and `/api/health/ready` with canonical Neon readiness;
+- anonymous private access denied or redirected to the same-origin Better Auth
+  login route;
+- authorized RBAC access only when an operator is already authenticated;
+- no NellySelly identifier, hostname, project, database, variable, or content
+  crossover; and
+- no error-level or 5xx regression in the observed Vercel window.
 
-```text
-pnpm run staging:local:verify
-pnpm run phase9:publication-proof:cutover -- --plan
-pnpm run phase9:publication-proof:cutover -- --preflight
-pnpm run phase9:publication-proof:cutover -- --execute
-pnpm run phase9:publication-proof:cutover -- --verify
-```
+Record exact deployment, source commit, check counts, skips, and limitations in
+the PR seal and production change log.
 
-Run `staging:local:verify` only against the disposable local Supabase stack and
-only when `supabase/.temp/project-ref` is absent. It must prove the executable
-role/idempotency/audit/immutability contract before any Production preflight.
+## 6. Lead or communication acceptance
 
-Its exact approval is:
+When a release changes capture, routing, email, push, messaging, or sequences:
 
-```text
-APPROVE PHASE 9 OWNED-DEMAND PUBLICATION PROOF LEDGER PRODUCTION MIGRATION, MERGE, AND PRODUCTION DEPLOYMENT
-```
+1. keep all write/send checks disabled until their separate exact approval;
+2. use only `is_test=true` and `INTERNAL QA — DO NOT CONTACT` for controlled QA;
+3. submit through the public form rather than inserting a row directly;
+4. prove one canonical record, consent/attribution, deterministic score/route,
+   Lead Center visibility, KPI exclusion, and idempotent outbox entries;
+5. prove provider message ID and final delivery/failure state when a real test
+   send is authorized; and
+6. suppress the QA record after acceptance. Deletion is a separate data action.
 
-That approval permits only the additive migration, reviewed code merge, and
-canonical application deployment. It does not authorize a GBP/social post,
-email campaign/signature change, QR distribution, consumer message, or spend.
+A 200 response or queued state is not delivery proof. Never label a synthetic
+record as a genuine prospect.
 
-PR #184 and that exact gate are complete and exhausted. Do not replay them.
+## 7. WordPress activation order
 
-The PR #185 WordPress proof-scope repair uses:
+Keep WordPress as the brokerage and SEO surface, not a competing lead backend.
+The safe order is:
 
-```text
-pnpm run phase9:wordpress-proof-scope:cutover -- --plan
-pnpm run phase9:wordpress-proof-scope:cutover -- --preflight
-pnpm run phase9:wordpress-proof-scope:cutover -- --execute
-pnpm run phase9:wordpress-proof-scope:cutover -- --verify
-```
+1. application readiness release;
+2. separately approved Connector plugin backup/upgrade;
+3. public version-marker and fresh read-only manifest proof;
+4. one page-specific rollback packet and publication approval;
+5. one visible placement at a time; and
+6. public link, attribution, layout, performance, and bridge-health proof.
 
-Its exact approval is:
+Do not combine plugin and page changes. Do not activate the hidden homepage
+component by changing only its link.
 
-```text
-APPROVE PHASE 9 OWNED-DEMAND WORDPRESS PROOF MIGRATION, PR 185 MERGE, AND PRODUCTION DEPLOYMENT
-```
+## 8. Controlled owned traffic
 
-The runner pins the reviewed migration bytes, accepts the unpooled owner
-connection only through a secure environment, validates the backup, fails
-closed unless exactly six legacy constraints are present, and proves six
-validated v2 constraints plus unchanged rows, function, RLS, trigger, and
-grants. The gate does not authorize recording proof or publishing externally.
+Natural direct and organic visits can enter the live funnel now. New owned
+placements, Google Business Profile, social, email, QR, or brokerage-page
+changes require their own publication evidence and approval. Start with one
+reversible placement, monitor attribution and delivery, then expand. Paid
+traffic and carrier messaging remain separate decisions.
 
-Preview verification left these empty Vercel helper projects intact:
-`amm-phase9-campaign-compliance-20260821`
-(`prj_JUyx03Rh8iABqAFepNNuPI2jJqut`) and
-`amm-phase9-publication-ledger-20260821`
-(`prj_QcHch6KY1m2g0BKtOoVVFregRhho`),
-`amm-phase9-current-router-safety-20260821`
-(`prj_iGynowHru4TBNwWgvoiSIG193Ukf`),
-`amm-phase9-phone-handoff-consolidation-20260822`
-(`prj_Mb30U4zzULbWox6TPJ0QlJ4cVYSY`), and
-`amm-phase9-durable-rate-limit-readiness-20260823`
-(`prj_Da74SJxkGLrCa1oqkRo2cOmlaAkB`). All have zero deployments and no custom
-domain or Production effect. Do not delete any without a separate exact cleanup
-approval.
+## 9. Monitoring
 
-Historical component phrases are exhausted or superseded for current release
-purposes. Do not treat the preserved ordering below as authority to merge,
-deploy, publish, send, import, or mutate data.
+- Immediate: public health, readiness, route smoke, aliases, and error logs.
+- First genuine lead: storage-before-delivery, score/route, assignment, consent,
+  attribution, notifications, and response SLA in the Better Auth Lead Center.
+- Hourly during activation: 5xx rate, notification failures, queue depth,
+  duplicate rate, unassigned leads, and overdue SLA.
+- Next day: genuine/test KPI separation, source totals, first-response evidence,
+  provider failures, and all published-placement receipts.
 
-## Owned-traffic activation
+Use `CONTROLLED_TRAFFIC_ACTIVATION.md` for expansion stages and
+`OWNER_ACTION_PROOF_PACK.md` for evidence fields.
 
-After the lead path and exact publication gate pass, activate one reversible
-placement at a time: canonical Our Town CTA, then approved page-specific widget,
-then tagged GBP/social/email assets. Monitor conversion, source attribution,
-duplicate rate, notification failures, and response SLA before expanding.
-Paid traffic and carrier SMS remain separate approvals.
+## 10. Rollback and incident boundaries
 
-## Rollback
-
-- Code: restore the recorded prior Vercel deployment/alias; verify health and
-  canonical routes.
-- WordPress: disable only the changed placement/form ID and restore its proven
-  prior notification behavior without deleting entries.
-- Messaging: pause only the affected channel/processor; preserve lead and outbox
+- Application: restore the recorded Vercel rollback deployment and re-run
+  canonical health/route checks.
+- WordPress: restore only the changed plugin/page artifact from its verified
+  backup; preserve entries and bridge audit history.
+- Messaging: pause only the affected channel/processor and preserve outbox
   records for reconciliation.
-- RBAC: revoke affected sessions first. Disable the feature only under the
-  reviewed break-glass procedure; retain identity/audit tables.
-- Database: prefer a forward fix. Never delete or drop canonical lead, consent,
-  notification, audit, identity, or session data as an application rollback.
+- Better Auth/RBAC: revoke affected sessions first; do not weaken role or
+  assignment checks.
+- Neon: prefer a reviewed forward fix. Never drop or delete lead, consent,
+  notification, audit, identity, or session data to roll back application code.
 
-Record the outcome in `PRODUCTION_CHANGE_LOG.md`, including anything not proven.
-
-## Organic-search ingress candidate (PR #219)
-
-PR #219 is downstream of PR #218 and remains non-authoritative until the full
-predecessor train is released in order. Before any future release:
-
-1. refresh PR #219 onto the exact accepted `main`;
-2. rerun focused tests, the executable PostgreSQL 17 contract, full Vitest,
-   typecheck, lint, Node 24 build, route manifest, release safety, isolation,
-   dependency audit, secret scan, and immutable Preview/browser QA;
-3. confirm `GROWTH_SEARCH_IMPORT_ENABLED=false` in the target deployment;
-4. apply only `20260824220000_organic_search_ingress.sql` through the established
-   secure owner connection after the exact migration/merge/deploy approval;
-5. deploy the exact reviewed commit and prove protected page access, safe-off
-   commit behavior, health, routes, and logs; and
-6. leave Search Console access and report import unperformed.
-
-The future release gate is:
-
-```text
-APPROVE PHASE 9 ORGANIC SEARCH INGRESS MIGRATION, PR 219 MERGE, AND PRODUCTION DEPLOYMENT
-```
-
-To import later, first export one exact Search Console **Pages** report without
-the Queries dimension, validate it in the protected workbench, review every
-identity/metric/opportunity and the exact fingerprint, then request the separate
-report-specific gate documented in
-`phase9/ORGANIC_SEARCH_INGRESS_RELEASE_GATE.md`. Disable the feature gate again
-after the single reviewed import and reconcile the immutable receipt/audit.
+Stop traffic expansion and update `KNOWN_BLOCKERS.md` when the incident changes
+operating truth. No rollback action is implied by this document; use the exact
+authority in `OWNER_APPROVAL_QUEUE.md`.

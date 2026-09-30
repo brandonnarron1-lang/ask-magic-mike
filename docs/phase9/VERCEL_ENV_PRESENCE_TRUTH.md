@@ -6,7 +6,7 @@ Vercel project
 
 ## Outcome
 
-The release doctor can now consume a metadata-only projection of the JSON
+The release doctor and launch-authority report can consume a metadata-only projection of the JSON
 emitted by `vercel env ls production --format json`. It accepts variable names,
 scopes, and safe metadata only. It never prints, persists, or compares secret
 values, and it rejects an input object containing a value-bearing field.
@@ -17,6 +17,10 @@ Run from the linked Ask Magic Mike checkout:
 vercel env ls production --scope eyes-up-industries --format json \
   | jq '{envs:[.envs[]|{key,target,type}]}' \
   | pnpm run amm:launch:doctor -- --vercel-json-stdin
+
+vercel env ls production --scope eyes-up-industries --format json \
+  | jq '{envs:[.envs[]|{key,target,type}]}' \
+  | pnpm run amm:launch:authority -- --vercel-json-stdin
 ```
 
 The `jq` projection is mandatory. Current Vercel CLI JSON can include a
@@ -57,6 +61,8 @@ value-aware protected surface.
 
 - Production and Preview scopes are separated; only entries whose target
   includes `production` satisfy the check.
+- The parser accepts exactly one top-level `envs` field and only `key`,
+  `target`, and `type` inside each entry; every extra field fails closed.
 - Duplicate metadata rows are collapsed to one name.
 - Nested target arrays from Vercel CLI output are normalized.
 - Invalid JSON, invalid top-level shapes, invalid entries, and value-bearing
@@ -71,3 +77,7 @@ Name-only metadata proves presence and scope, not correctness of a secret's
 value. Runtime readiness, provider delivery, webhook receipt, and database
 schema remain separate checks. No Production environment change is authorized
 by this document.
+
+Current environment presence, deployment identity, and release verdicts must be
+regenerated for the exact candidate commit. Historical pass totals are evidence
+for their original commit only and never establish current authority.

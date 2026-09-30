@@ -27,6 +27,17 @@ export type PublicExperimentContext = {
   variantKey: string;
 };
 
+export type PublicExperimentLeadFields = {
+  experiment_key: string;
+  experiment_subject_key: string;
+  experiment_variant_key: string;
+  experiment_surface: string;
+};
+
+export type VerifiedPublicExperimentLeadContext = PublicExperimentContext & {
+  surface: string;
+};
+
 export const HOME_VALUE_TRUST_EXPERIMENT: PublicExperimentDefinition = {
   key: "home_value_trust_promise_v1",
   name: "Home value trust promise",
@@ -76,6 +87,94 @@ const PUBLIC_EXPERIMENTS = new Map([
 
 export function getPublicExperimentDefinition(key: string) {
   return PUBLIC_EXPERIMENTS.get(key) ?? null;
+}
+
+const SUBJECT_KEY_PATTERN = /^[a-f0-9]{64}$/;
+
+/**
+ * Produce the bounded, non-PII experiment fields that accompany a durable
+ * lead. A context exists only after the exposure endpoint has returned an
+ * active server-selected variant; the lead endpoint validates it again.
+ */
+export function publicExperimentLeadFields(
+  context: PublicExperimentContext | null | undefined,
+): PublicExperimentLeadFields | null {
+  if (!context || !SUBJECT_KEY_PATTERN.test(context.subjectKey)) return null;
+  const definition = getPublicExperimentDefinition(context.experimentKey);
+  if (!definition) return null;
+  const expectedVariant = assignExperimentVariant(
+    definition.key,
+    context.subjectKey,
+    [...definition.variants],
+  );
+  if (context.variantKey !== expectedVariant) return null;
+  return {
+    experiment_key: definition.key,
+    experiment_subject_key: context.subjectKey,
+    experiment_variant_key: expectedVariant,
+    experiment_surface: definition.surface,
+  };
+}
+
+/**
+ * Revalidate browser-authored experiment context at the server boundary.
+ * Partial, cross-surface, unknown, or variant-substituted context is rejected;
+ * absence remains valid because public experiments are approval-gated.
+ */
+export function resolvePublicExperimentLeadContext(input: {
+  funnel_type?: unknown;
+  lead_source_surface?: unknown;
+  experiment_key?: unknown;
+  experiment_subject_key?: unknown;
+  experiment_variant_key?: unknown;
+  experiment_surface?: unknown;
+}):
+  | { ok: true; context: VerifiedPublicExperimentLeadContext | null }
+  | { ok: false; code: "invalid_experiment_context" } {
+  const values = [
+    input.experiment_key,
+    input.experiment_subject_key,
+    input.experiment_variant_key,
+    input.experiment_surface,
+  ];
+  if (values.every((value) => value === undefined || value === null || value === "")) {
+    return { ok: true, context: null };
+  }
+  if (values.some((value) => typeof value !== "string" || !value)) {
+    return { ok: false, code: "invalid_experiment_context" };
+  }
+  if (input.funnel_type !== "home_value" || input.lead_source_surface !== "home_value_page") {
+    return { ok: false, code: "invalid_experiment_context" };
+  }
+
+  const experimentKey = input.experiment_key as string;
+  const subjectKey = input.experiment_subject_key as string;
+  const variantKey = input.experiment_variant_key as string;
+  const surface = input.experiment_surface as string;
+  if (!SUBJECT_KEY_PATTERN.test(subjectKey)) {
+    return { ok: false, code: "invalid_experiment_context" };
+  }
+  const definition = getPublicExperimentDefinition(experimentKey);
+  if (!definition || surface !== definition.surface) {
+    return { ok: false, code: "invalid_experiment_context" };
+  }
+  const expectedVariant = assignExperimentVariant(
+    definition.key,
+    subjectKey,
+    [...definition.variants],
+  );
+  if (variantKey !== expectedVariant) {
+    return { ok: false, code: "invalid_experiment_context" };
+  }
+  return {
+    ok: true,
+    context: {
+      experimentKey: definition.key,
+      subjectKey,
+      variantKey: expectedVariant,
+      surface: definition.surface,
+    },
+  };
 }
 
 export function validateExperimentDefinition(definition: PublicExperimentDefinition) {

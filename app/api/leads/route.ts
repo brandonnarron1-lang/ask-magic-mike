@@ -15,6 +15,11 @@ import { scoreLead } from "../../lib/leadScoring";
 import { routeLead } from "../../lib/leadRouting";
 import { enqueueLeadNotifications } from "../../lib/leadAlertService";
 import { recordServerAnalyticsEvent } from "../../lib/serverAnalytics";
+import {
+  resolvePublicExperimentLeadContext,
+  type VerifiedPublicExperimentLeadContext,
+} from "../../lib/growth/experiment-registry";
+import { recordLeadExperimentConversion } from "../../lib/growth/lead-experiment-conversion";
 import { createFirstLiveLeadMonitor } from "@/lib/operations/first-live-lead-monitor";
 import { isApprovedPublicOrigin } from "../../lib/publicOrigin";
 import {
@@ -33,54 +38,54 @@ import {
   verifyWordPressBridgePayloadIdentity,
   verifyWordPressBridgeRequest,
 } from "../../lib/wordpressBridgeSignature";
+import {
+  isPlainRecord,
+  MAX_PUBLIC_LEAD_BODY_BYTES,
+  PUBLIC_LEAD_TYPES,
+  PublicLeadPayloadTooLargeError,
+  readBoundedPublicLeadBody,
+  resolvePublicLeadIdempotencyKey,
+  validatePublicLeadFieldBounds,
+  validateRawPublicLeadInput,
+} from "../../lib/publicLeadIngress";
 
-const MAX_LEAD_BODY_BYTES = 65_536;
+const LEAD_RESPONSE_HEADERS = {
+  "Cache-Control": "private, no-store, max-age=0",
+  Pragma: "no-cache",
+} as const;
 
-class LeadPayloadTooLargeError extends Error {}
-
-async function readBoundedLeadBody(req: Request) {
-  if (!req.body) return "";
-  const reader = req.body.getReader();
-  const decoder = new TextDecoder();
-  let bytesRead = 0;
-  let text = "";
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      bytesRead += value.byteLength;
-      if (bytesRead > MAX_LEAD_BODY_BYTES) {
-        await reader.cancel().catch(() => undefined);
-        throw new LeadPayloadTooLargeError();
-      }
-      text += decoder.decode(value, { stream: true });
-    }
-    return text + decoder.decode();
-  } finally {
-    reader.releaseLock();
-  }
+function leadResponse(
+  correlationId: string,
+  body: Record<string, unknown>,
+  status = 200,
+  extraHeaders: Record<string, string> = {},
+) {
+  return NextResponse.json(
+    { ...body, correlation_id: correlationId },
+    {
+      status,
+      headers: {
+        ...LEAD_RESPONSE_HEADERS,
+        "X-AMM-Correlation-Id": correlationId,
+        ...extraHeaders,
+      },
+    },
+  );
 }
 
-const LEAD_TYPES = new Set([
-  "buyer",
-  "seller",
-  "seller_cash_offer",
-  "investor",
-  "listing_inquiry",
-  "open_house",
-  "home_value",
-  "relocation",
-  "renter",
-  "agent_referral",
-  "general_question",
-  "unknown",
-]);
+function rateLimitRetryAfter(resetAt: number) {
+  const maxSeconds = Math.ceil(LIMITS.intakeSubmit.windowMs / 1_000);
+  const secondsUntilReset = Math.ceil((resetAt - Date.now()) / 1_000);
+  return String(Math.max(
+    1,
+    Math.min(maxSeconds, Number.isFinite(secondsUntilReset) ? secondsUntilReset : maxSeconds),
+  ));
+}
 
 const PUBLIC_LEAD_CONFLICT_ERROR =
   "That submission conflicts with an existing request. Please refresh and submit again, or call Our Town Properties at 252-243-7700.";
 function leadTypeFor(payload: LeadPayload) {
-  if (payload.lead_type && LEAD_TYPES.has(payload.lead_type)) return payload.lead_type;
+  if (payload.lead_type && PUBLIC_LEAD_TYPES.has(payload.lead_type)) return payload.lead_type;
   if (payload.funnel_type === "seller") return "seller";
   if (payload.funnel_type === "buyer") return "buyer";
   if (payload.funnel_type === "renter") return "renter";
@@ -315,14 +320,18 @@ function buildSessionRow(payload: LeadPayload, req: Request, sessionId: string) 
   };
 }
 
-function buildLeadRow(payload: LeadPayload, req: Request, sessionId: string) {
+function buildLeadRow(
+  payload: LeadPayload,
+  req: Request,
+  sessionId: string,
+  score: ReturnType<typeof scoreLead>,
+  routing: ReturnType<typeof routeLead>,
+) {
   const leadType = leadTypeFor(payload);
   const { firstName, lastName } = splitName(payload);
   const notes = buildNotes(payload);
   const qualification = qualificationFor(payload);
   const address = payload.property_address || payload.address || undefined;
-  const score = scoreLead(payload);
-  const routing = routeLead(payload, score.score);
   const consentEmail = consentGrantedForEmail(payload);
   const consentCall = consentGrantedForCall(payload);
   const consentSms = consentGrantedForSms(payload);
@@ -409,7 +418,12 @@ function buildSourceAttributionRow(payload: LeadPayload, req: Request) {
   };
 }
 
-async function insertLead(payload: LeadPayload, req: Request) {
+async function insertLead(
+  payload: LeadPayload,
+  req: Request,
+  score: ReturnType<typeof scoreLead>,
+  routing: ReturnType<typeof routeLead>,
+) {
   const mutation = assertDatabaseMutationAllowed();
   if (!mutation.ok) throw new Error(mutation.error);
 
@@ -428,7 +442,7 @@ async function insertLead(payload: LeadPayload, req: Request) {
   const sessionId = sessionIdFor(payload);
   const result = await persistence.captureLeadLifecycle({
     session: buildSessionRow(payload, req, sessionId),
-    lead: buildLeadRow(payload, req, sessionId),
+    lead: buildLeadRow(payload, req, sessionId, score, routing),
     attribution: buildSourceAttributionRow(payload, req),
     // The public capture owns the single internal lead-alert outbox below.
     // Disable the legacy assignment outbox here so a Mike assignment cannot
@@ -436,8 +450,6 @@ async function insertLead(payload: LeadPayload, req: Request) {
     notificationMode: "disabled",
   });
   if (process.env.NODE_ENV !== "test" && result.ok && !result.idempotent_replay && persistence.enrichLeadRecord) {
-    const score = scoreLead(payload);
-    const routing = routeLead(payload, score.score);
     const consentEmail = consentGrantedForEmail(payload);
     const consentCall = consentGrantedForCall(payload);
     const consentSms = consentGrantedForSms(payload);
@@ -524,6 +536,14 @@ function validateLead(payload: LeadPayload) {
     return "Question is required for chat leads.";
   }
 
+  if (payload.funnel_type === "chat" && !payload.email && !payload.phone) {
+    return "Email or phone is required for a chat follow-up request.";
+  }
+
+  if (payload.funnel_type === "chat" && !payload.consent) {
+    return "Consent is required for a chat follow-up request.";
+  }
+
   if (payload.funnel_type === "appointment" && !payload.email && !payload.phone) {
     return "Email or phone is required to schedule an appointment.";
   }
@@ -544,27 +564,52 @@ function validateLead(payload: LeadPayload) {
     return "Enter a valid phone number.";
   }
 
-  const boundedFields: Array<[string, string | undefined, number]> = [
-    ["address", payload.address, 500],
-    ["name", payload.name, 160],
-    ["question", payload.question, 4000],
-    ["notes", payload.notes, 4000],
-    ["page_url", payload.page_url, 2048],
-    ["idempotency_key", payload.idempotency_key, 160],
-  ];
-  for (const [label, value, max] of boundedFields) {
-    if (value && value.length > max) return `${label} is too long.`;
-  }
-
-  return null;
+  return validatePublicLeadFieldBounds(payload);
 }
 
 export async function POST(req: Request) {
   const correlationId = crypto.randomUUID();
   const receivedAt = new Date().toISOString();
   const origin = req.headers.get("origin");
-  if (!isApprovedPublicOrigin(origin)) {
-    return NextResponse.json({ error: "This form origin is not approved.", correlation_id: correlationId }, { status: 403, headers: { "X-AMM-Correlation-Id": correlationId } });
+  const bridgeMarker = req.headers.get("x-amm-wp-bridge");
+  const bridgeRequested = bridgeMarker !== null;
+  if (
+    (origin && !isApprovedPublicOrigin(origin)) ||
+    (!origin && bridgeMarker !== "v1")
+  ) {
+    return leadResponse(
+      correlationId,
+      { error: "This form origin is not approved.", code: "origin_not_approved" },
+      403,
+    );
+  }
+
+  const contentType = req.headers.get("content-type")?.split(";", 1)[0]?.trim().toLowerCase();
+  if (contentType !== "application/json") {
+    return leadResponse(
+      correlationId,
+      { error: "Lead submissions require JSON.", code: "unsupported_media_type" },
+      415,
+    );
+  }
+  const declaredSize = Number(req.headers.get("content-length") || "0");
+  if (Number.isFinite(declaredSize) && declaredSize > MAX_PUBLIC_LEAD_BODY_BYTES) {
+    return leadResponse(
+      correlationId,
+      { error: "Submission is too large.", code: "payload_too_large" },
+      413,
+    );
+  }
+
+  // Preview must fail before the durable limiter can write state. The capture
+  // adapter repeats this assertion immediately before the canonical write.
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) {
+    return leadResponse(
+      correlationId,
+      { error: mutation.publicMessage, code: mutation.error },
+      mutation.statusCode,
+    );
   }
 
   const rateLimit = process.env.NODE_ENV === "test"
@@ -576,183 +621,336 @@ export async function POST(req: Request) {
         "intakeSubmit",
       );
   if (!rateLimit.allowed) {
-    return NextResponse.json({ error: "Too many requests. Please try again shortly.", correlation_id: correlationId }, { status: 429, headers: { "Retry-After": String(Math.max(1, Math.ceil((rateLimit.resetAt - Date.now()) / 1000))), "X-AMM-Correlation-Id": correlationId } });
+    return leadResponse(
+      correlationId,
+      { error: "Too many requests. Please try again shortly.", code: "rate_limited" },
+      429,
+      { "Retry-After": rateLimitRetryAfter(rateLimit.resetAt) },
+    );
   }
   if (!rateLimit.durable && !nonDurableRateLimitFallbackAllowed()) {
-    return NextResponse.json({ error: "Lead intake is temporarily unavailable.", correlation_id: correlationId }, { status: 503, headers: { "X-AMM-Correlation-Id": correlationId } });
+    return leadResponse(
+      correlationId,
+      { error: "Lead intake is temporarily unavailable.", code: "rate_limit_store_unavailable" },
+      503,
+    );
   }
 
-  let raw: unknown;
+  let raw: Record<string, unknown>;
   let rawBody: string;
   let trustedWordPressBridge = false;
   let trustedWordPressEntryId: string | null = null;
+  let experimentContext: VerifiedPublicExperimentLeadContext | null = null;
   let persistedLead: Awaited<ReturnType<typeof insertLead>>;
   try {
-    const declaredSize = Number(req.headers.get("content-length") || "0");
-    if (Number.isFinite(declaredSize) && declaredSize > MAX_LEAD_BODY_BYTES) {
-      return NextResponse.json(
-        { error: "Submission is too large.", correlation_id: correlationId },
-        { status: 413, headers: { "X-AMM-Correlation-Id": correlationId } },
-      );
-    }
-    rawBody = await readBoundedLeadBody(req);
-    if (req.headers.get("x-amm-wp-bridge")) {
+    rawBody = await readBoundedPublicLeadBody(req);
+    if (bridgeRequested) {
       const bridge = verifyWordPressBridgeRequest(req, rawBody);
       if (!bridge.ok) {
-        return NextResponse.json(
-          { error: "WordPress bridge authorization failed.", code: bridge.error, correlation_id: correlationId },
-          { status: bridge.status, headers: { "X-AMM-Correlation-Id": correlationId } },
+        return leadResponse(
+          correlationId,
+          { error: "WordPress bridge authorization failed.", code: bridge.error },
+          bridge.status,
         );
       }
       trustedWordPressBridge = true;
       trustedWordPressEntryId = bridge.entryId;
     }
-    raw = JSON.parse(rawBody);
-  } catch (error) {
-    if (error instanceof LeadPayloadTooLargeError) {
-      return NextResponse.json(
-        { error: "Submission is too large.", correlation_id: correlationId },
-        { status: 413, headers: { "X-AMM-Correlation-Id": correlationId } },
+    const parsed: unknown = JSON.parse(rawBody);
+    if (!isPlainRecord(parsed)) {
+      return leadResponse(
+        correlationId,
+        { error: "Invalid lead payload.", code: "invalid_payload" },
+        400,
       );
     }
-    return NextResponse.json(
-      { error: "Invalid JSON.", correlation_id: correlationId },
-      { status: 400, headers: { "X-AMM-Correlation-Id": correlationId } },
+    raw = parsed;
+  } catch (error) {
+    if (error instanceof PublicLeadPayloadTooLargeError) {
+      return leadResponse(
+        correlationId,
+        { error: "Submission is too large.", code: "payload_too_large" },
+        413,
+      );
+    }
+    return leadResponse(
+      correlationId,
+      { error: "Invalid JSON.", code: "invalid_json" },
+      400,
     );
   }
 
-  const input = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const input = raw;
+  const rawValidation = validateRawPublicLeadInput(input);
+  if (rawValidation) {
+    return leadResponse(
+      correlationId,
+      { error: rawValidation.message, code: rawValidation.code },
+      400,
+    );
+  }
+  const idempotencyHeader = req.headers.get("idempotency-key");
+  // A verified WordPress request is bound to its signed Gravity Forms entry.
+  // Resolve the body identity first so a conflicting generic header cannot
+  // preempt the stronger bridge-specific identity check below.
+  const idempotency = resolvePublicLeadIdempotencyKey(
+    input,
+    trustedWordPressBridge ? null : idempotencyHeader,
+  );
+  if (!idempotency.ok) {
+    return leadResponse(
+      correlationId,
+      { error: idempotency.failure.message, code: idempotency.failure.code },
+      400,
+    );
+  }
   const normalizedPayload = normalizeLeadPayload({
     ...input,
-    idempotency_key: input.idempotency_key || req.headers.get("idempotency-key") || undefined,
+    idempotency_key: idempotency.value,
   });
   if (trustedWordPressBridge && trustedWordPressEntryId) {
     const identity = verifyWordPressBridgePayloadIdentity(
       normalizedPayload,
       trustedWordPressEntryId,
     );
-    if (!identity.ok) {
-      return NextResponse.json(
+    if (
+      !identity.ok ||
+      (idempotencyHeader !== null && idempotencyHeader !== normalizedPayload.idempotency_key)
+    ) {
+      return leadResponse(
+        correlationId,
         {
           error: "WordPress bridge payload identity was rejected.",
-          code: identity.error,
-          correlation_id: correlationId,
+          code: "wordpress_bridge_identity_mismatch",
         },
-        {
-          status: identity.status,
-          headers: { "X-AMM-Correlation-Id": correlationId },
-        },
+        400,
       );
     }
   }
+  if (input.is_test === true && normalizedPayload.is_test !== true) {
+    return leadResponse(
+      correlationId,
+      {
+        error: "Test submissions require the internal QA do-not-contact markers.",
+        code: "invalid_test_marker",
+      },
+      400,
+    );
+  }
+  const resolvedExperimentContext = resolvePublicExperimentLeadContext(normalizedPayload);
+  if (!resolvedExperimentContext.ok) {
+    return leadResponse(
+      correlationId,
+      {
+        error: "Invalid experiment context.",
+        code: resolvedExperimentContext.code,
+      },
+      400,
+    );
+  }
+  experimentContext = resolvedExperimentContext.context;
+  const umbrellaConsent = normalizedPayload.consent === true;
+  const consentInput = trustedWordPressBridge
+    ? normalizedPayload
+    : {
+        ...normalizedPayload,
+        consent_email: umbrellaConsent && normalizedPayload.consent_email === true,
+        consent_call: umbrellaConsent && normalizedPayload.consent_call === true,
+        // The current public copy is not a standalone SMS opt-in.
+        consent_sms: false,
+      };
   const payload: LeadPayload = {
     ...normalizedPayload,
-    ...resolveAuthoritativeConsentEvidence(normalizedPayload, {
+    ...resolveAuthoritativeConsentEvidence(consentInput, {
       trustedWordPressBridge,
       receivedAt,
     }),
   };
 
   if (payload.honeypot) {
-    return NextResponse.json({ message: "Got it.", correlation_id: correlationId }, { status: 202, headers: { "X-AMM-Correlation-Id": correlationId } });
+    return leadResponse(correlationId, { message: "Got it." }, 202);
   }
   const validationError = validateLead(payload);
 
   if (validationError) {
-    return NextResponse.json({ error: validationError, correlation_id: correlationId }, { status: 400, headers: { "X-AMM-Correlation-Id": correlationId } });
+    return leadResponse(
+      correlationId,
+      { error: validationError, code: "invalid_lead_payload" },
+      400,
+    );
   }
 
-  const mutation = assertDatabaseMutationAllowed();
-  if (!mutation.ok) {
-    return NextResponse.json(
-      { error: mutation.publicMessage, code: mutation.error },
-      { status: mutation.statusCode, headers: { "X-AMM-Correlation-Id": correlationId } },
+  let score: ReturnType<typeof scoreLead>;
+  let routing: ReturnType<typeof routeLead>;
+  try {
+    score = scoreLead(payload);
+    routing = routeLead(payload, score.score);
+  } catch {
+    console.error("[leads] deterministic lead preparation failed", {
+      correlationId,
+      error: "lead_preparation_failed",
+    });
+    return leadResponse(
+      correlationId,
+      { error: PUBLIC_LEAD_SAVE_ERROR, code: "lead_preparation_failed" },
+      500,
     );
   }
 
   try {
-    persistedLead = await insertLead(payload, req);
+    persistedLead = await insertLead(payload, req, score, routing);
   } catch (error) {
     if (error instanceof Error && error.message === "preview_data_disabled") {
-      return NextResponse.json({ error: PREVIEW_READ_ONLY_MESSAGE, code: "preview_data_disabled", correlation_id: correlationId }, { status: 503, headers: { "X-AMM-Correlation-Id": correlationId } });
+      return leadResponse(
+        correlationId,
+        { error: PREVIEW_READ_ONLY_MESSAGE, code: "preview_data_disabled" },
+        503,
+      );
     }
     if (error instanceof Error && error.message === "lead_store_not_configured") {
-      return NextResponse.json({ error: PUBLIC_LEAD_SAVE_ERROR, code: "lead_store_not_configured", correlation_id: correlationId }, { status: 503, headers: { "X-AMM-Correlation-Id": correlationId } });
+      return leadResponse(
+        correlationId,
+        { error: PUBLIC_LEAD_SAVE_ERROR, code: "lead_store_not_configured" },
+        503,
+      );
     }
     console.error("Lead persistence failed", {
       funnel_type: payload.funnel_type,
       lead_source_surface: payload.lead_source_surface,
       error: error instanceof Error ? error.message : "unknown",
     });
-    return NextResponse.json({ error: PUBLIC_LEAD_SAVE_ERROR, correlation_id: correlationId }, { status: 500, headers: { "X-AMM-Correlation-Id": correlationId } });
+    return leadResponse(
+      correlationId,
+      { error: PUBLIC_LEAD_SAVE_ERROR, code: "lead_persistence_failed" },
+      500,
+    );
   }
 
   if (isLeadConflict(persistedLead)) {
-    return NextResponse.json({ error: PUBLIC_LEAD_CONFLICT_ERROR, code: persistedLead.error, correlation_id: correlationId }, { status: 409, headers: { "X-AMM-Correlation-Id": correlationId } });
+    return leadResponse(
+      correlationId,
+      { error: PUBLIC_LEAD_CONFLICT_ERROR, code: persistedLead.error },
+      409,
+    );
   }
 
   if (persistedLead.idempotent_replay) {
-    return NextResponse.json(
+    return leadResponse(
+      correlationId,
       {
         message: "Your request is stored for review. Mike or the approved team will follow up through the contact path you provided.",
         lead_id: persistedLead.lead_id,
         session_id: persistedLead.session_id,
         duplicate_of_lead_id: persistedLead.duplicate_of_lead_id ?? null,
-        correlation_id: correlationId,
       },
-      { headers: { "X-AMM-Idempotent-Replay": "1", "X-AMM-Correlation-Id": correlationId } },
+      200,
+      { "X-AMM-Idempotent-Replay": "1" },
     );
   }
 
-  const score = scoreLead(payload);
-  const routing = routeLead(payload, score.score);
-  let notificationResult: Awaited<ReturnType<typeof enqueueLeadNotifications>> | null = null;
   if (process.env.NODE_ENV !== "test") {
-    notificationResult = await enqueueLeadNotifications({
-      leadId: persistedLead.lead_id,
-      sessionId: persistedLead.session_id,
-      correlationId,
-      payload,
-      score,
-      routing,
-      submittedAt: new Date().toISOString(),
-      duplicateOfLeadId: persistedLead.duplicate_of_lead_id,
-    });
-    await recordServerAnalyticsEvent({
-      eventName: "lead_created",
-      category: "intake",
-      sessionId: persistedLead.session_id,
-      leadId: persistedLead.lead_id,
-      attribution: { source: payload.attribution.source, medium: payload.attribution.medium, campaign: payload.attribution.campaign },
-      properties: { funnel_name: payload.funnel_type, lead_source_surface: payload.lead_source_surface, is_test: payload.is_test === true, score: score.score },
-      userAgent: req.headers.get("user-agent"),
-    });
-    const internalStatus = notificationResult.internal?.status;
-    if (internalStatus) {
-      await recordServerAnalyticsEvent({
-        eventName: internalStatus === "sent" ? "notification_delivered" : internalStatus === "retry_scheduled" || internalStatus === "permanently_failed" ? "notification_failed" : "notification_queued",
-        category: "system",
-        sessionId: persistedLead.session_id,
-        leadId: persistedLead.lead_id,
-        properties: { notification_type: "lead_alert", status: internalStatus, is_test: payload.is_test === true },
-      });
-    }
-    if (!payload.is_test) {
-      const liveMonitor = createFirstLiveLeadMonitor();
-      if (liveMonitor) {
+    try {
+      let notificationResult: Awaited<ReturnType<typeof enqueueLeadNotifications>> | null = null;
+      try {
+        notificationResult = await enqueueLeadNotifications({
+          leadId: persistedLead.lead_id,
+          sessionId: persistedLead.session_id,
+          correlationId,
+          payload,
+          score,
+          routing,
+          submittedAt: receivedAt,
+          duplicateOfLeadId: persistedLead.duplicate_of_lead_id,
+        });
+        if (notificationResult.warning) {
+          console.error("[leads] post-commit notification dispatch reported a warning", {
+            correlationId,
+            warning: notificationResult.warning,
+          });
+        }
+      } catch {
+        console.error("[leads] post-commit notification dispatch failed", {
+          correlationId,
+          error: "notification_dispatch_failed",
+        });
+      }
+
+      try {
+        await recordServerAnalyticsEvent({
+          eventName: "lead_created",
+          category: "intake",
+          sessionId: persistedLead.session_id,
+          leadId: persistedLead.lead_id,
+          attribution: { source: payload.attribution.source, medium: payload.attribution.medium, campaign: payload.attribution.campaign },
+          properties: { funnel_name: payload.funnel_type, lead_source_surface: payload.lead_source_surface, is_test: payload.is_test === true, score: score.score },
+          userAgent: req.headers.get("user-agent"),
+        });
+      } catch {
+        console.error("[leads] canonical outcome event write failed", {
+          correlationId,
+          error: "analytics_persistence_failed",
+        });
+      }
+
+      try {
+        const experimentOutcome = await recordLeadExperimentConversion({
+          context: experimentContext,
+          leadId: persistedLead.lead_id,
+          isTest: payload.is_test === true,
+        });
+        if (
+          experimentOutcome.attempted &&
+          !["recorded", "disabled", "not_approved"].includes(experimentOutcome.result.reason)
+        ) {
+          console.error("[leads] canonical experiment conversion was not recorded", {
+            correlationId,
+            reason: experimentOutcome.result.reason,
+          });
+        }
+      } catch {
+        console.error("[leads] canonical experiment conversion write failed", {
+          correlationId,
+          error: "experiment_persistence_failed",
+        });
+      }
+
+      const internalStatus = notificationResult?.internal?.status;
+      if (internalStatus) {
         try {
-          await liveMonitor.run({ leadId: persistedLead.lead_id, lookbackHours: 1 });
+          await recordServerAnalyticsEvent({
+            eventName: internalStatus === "sent" ? "notification_delivered" : internalStatus === "retry_scheduled" || internalStatus === "permanently_failed" ? "notification_failed" : "notification_queued",
+            category: "system",
+            sessionId: persistedLead.session_id,
+            leadId: persistedLead.lead_id,
+            properties: { notification_type: "lead_alert", status: internalStatus, is_test: payload.is_test === true },
+          });
         } catch {
-          console.error("First-live lead monitor failed", { error: "first_live_monitor_failed" });
+          console.error("[leads] notification outcome event write failed", {
+            correlationId,
+            error: "analytics_persistence_failed",
+          });
         }
       }
+
+      if (!payload.is_test) {
+        const liveMonitor = createFirstLiveLeadMonitor();
+        if (liveMonitor) {
+          await liveMonitor.run({ leadId: persistedLead.lead_id, lookbackHours: 1 });
+        }
+      }
+    } catch {
+      // Storage has already committed. A noncritical post-commit integration
+      // must not turn a durable lead into a false public failure.
+      console.error("[leads] unexpected post-commit activity failed", {
+        correlationId,
+        error: "post_commit_activity_failed",
+      });
     }
   }
-  return NextResponse.json({
+  return leadResponse(correlationId, {
     message: "Your request is stored for review. Mike or the approved team will follow up through the contact path you provided.",
     lead_id: persistedLead.lead_id,
     session_id: persistedLead.session_id,
     duplicate_of_lead_id: persistedLead.duplicate_of_lead_id ?? null,
-    correlation_id: correlationId,
-  }, { headers: { "X-AMM-Correlation-Id": correlationId } });
+  });
 }

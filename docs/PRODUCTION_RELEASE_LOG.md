@@ -1,5 +1,24 @@
 # Production Release Log
 
+## [PR #247] WordPress placement readiness enforcement
+
+**Merged:** 2026-09-01
+**Production commit:** `a2f3de834830f600df106dbf5836ae4bbde4eb4a`
+**Production tree:** `0065f829fc94f87ab5e0faf596c8e56733be3972`
+**Deployment:** `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` (`READY`)
+**Immediate rollback:** `dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe`
+
+- Made the current owned-demand and WordPress placement readiness state
+  fail-closed without editing WordPress or creating another lead subsystem.
+- Reconciled application release authority to the accepted mainline and
+  exhausted the exact PR #247 merge/same-tree deployment gate.
+- GitHub Release Gate, post-deploy verification, 11/11 Production monitoring,
+  19-pass read-only smoke, readiness, auth-boundary, and runtime-error checks
+  passed against the exact Production deployment.
+- No WordPress save, plugin upload, page publication, cache purge, database
+  migration or data write, form/lead submission, email/SMS/Push, DNS change,
+  external publication, spend, deletion, or NellySelly action occurred.
+
 ## [PR #184] Owned-demand publication-proof ledger
 
 **Migration applied:** 2026-08-22
