@@ -1,5 +1,31 @@
 # QA Evidence
 
+## Phase E pre-activation hardening — 2026-09-30
+
+- Reconciled Production to accepted PR #280 merge
+  `fa1d0fb077882309970b801bbdfaa756107c2104`, exact tree
+  `d9533274418430b750a87b8259902cddff5b2937`, and Ready deployment
+  `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` before implementation.
+- Full local release gate passed 293 test files / 3,605 tests, strict
+  typecheck, ESLint, optimized Next.js 15.5.26 build with 60 static pages,
+  102/22 route proof, 14/14 release safety, and deployable-source isolation.
+- The normal local Playwright command passed 26/26 mutation-free browser tests
+  after constraining local development compilation to one worker; immutable
+  Preview runs remain parallel-capable.
+- Production metadata-only launch doctor passed 48/48 and launch authority
+  passed 51/51 with no values read. Dependency audit found no known Production
+  vulnerability. A 500-record Production log window contained only `info`
+  records and no 5xx/fatal/error signature.
+- Public page 3952 desktop/mobile baseline is captured under
+  `output/playwright/phase-e/`. The page is healthy but still renders Connector
+  1.0.0 and the legacy `/value` CTA, so publication and live QA remain held.
+- Full pre-activation evidence, failure-path results, security findings, and
+  the gated QA table are in
+  [`phase9/PHASE_E_QA_AND_SECURITY_EVIDENCE_2026-09-30.md`](./phase9/PHASE_E_QA_AND_SECURITY_EVIDENCE_2026-09-30.md).
+- No WordPress save, lead submission, email/BCC send, database write,
+  Production deployment, environment change, DNS action, cache purge, spend,
+  deletion, or NellySelly action occurred.
+
 ## Batch D WordPress and placement readiness — 2026-09-29
 
 - Reviewed implementation head

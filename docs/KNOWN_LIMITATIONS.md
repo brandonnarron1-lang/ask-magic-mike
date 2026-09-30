@@ -1,6 +1,6 @@
 # Known Limitations — Ask Magic Mike
 
-Updated 2026-08-29. This document records the current Neon/Resend/Web Push
+Updated 2026-09-30. This document records the current Neon/Resend/Web Push
 system, not the superseded Supabase/mock-email/Twilio-era architecture.
 
 ## 1. Demand and measurement
@@ -133,13 +133,12 @@ securely. CSV export remains available with audit logging.
 
 ### Current release state
 
-Current accepted Production is PR #278 merge
-`75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1` on deployment
-`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`; deployment
-`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` is immediate rollback. Draft PR #280 is an
-unsealed review vehicle with no migration or external-action authority. No
-application merge/deploy gate is currently requestable; fresh exact-head
-hosted, Preview, rollback, and no-write evidence must be sealed first.
+Current accepted Production is PR #280 merge
+`fa1d0fb077882309970b801bbdfaa756107c2104` on deployment
+`dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`; deployment
+`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is immediate rollback. Its gate is
+consumed and no application merge/deploy gate is currently requestable.
+Phase E Connector source preparation has no WordPress mutation authority.
 
 PR #238 is an applied and verified five-migration receipt. Historical component
 and superseded review PRs retain evidence but have no independent current

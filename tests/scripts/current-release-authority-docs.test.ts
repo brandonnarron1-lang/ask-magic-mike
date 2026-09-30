@@ -11,27 +11,23 @@ import {
 const readRepoFile = (name: string) =>
   readFileSync(resolve(process.cwd(), name), "utf8");
 
-const productionCommit = "75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1";
-const productionDeployment = "dpl_aepoH5pzDwPMkerbrp9YekzVrdKD";
-const productionRollback = "dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U";
+const productionCommit = "fa1d0fb077882309970b801bbdfaa756107c2104";
+const productionDeployment = "dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ";
+const productionRollback = "dpl_aepoH5pzDwPMkerbrp9YekzVrdKD";
 const runtimeRedeployDeployment = "dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe";
 const runtimeRedeploySource = "dpl_E3Pob3TjWdxN9u4VK9xHZC61667g";
-const productionTree = "5775ba6a315abde9bbe55f770ccda2a64f897362";
-const reviewedHead = "65a09dc0137b97bda407ee24b0914e8f9bffd9c0";
+const productionTree = "d9533274418430b750a87b8259902cddff5b2937";
+const reviewedHead = "0b70701c46a7228b075e9630576df5188f5d9c62";
 const consumedApplicationGate =
-  "APPROVE PHASE 9 BATCH A RELEASE TRUTH AND PUBLIC INGRESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
-const reviewImplementationHead = "7baff2dcafd65e666c7846165be8c2d6ab3d9ab0";
-const reviewImplementationTree = "69b76a5f8ced4261d57facc201fc0cb45e467e71";
-const currentApplicationGate =
   "APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
 const consumedCutoverGate =
   "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT";
 
 describe("current application release authority", () => {
-  it("binds accepted Production to the released PR 278 source and deployment", () => {
+  it("binds accepted Production to the released PR 280 source and deployment", () => {
     expect(CURRENT_RELEASE_AUTHORITY.schemaVersion).toBe(7);
     expect(CURRENT_RELEASE_AUTHORITY.production).toMatchObject({
-      pr: 278,
+      pr: 280,
       reviewedHead,
       mergeCommit: productionCommit,
       tree: productionTree,
@@ -43,8 +39,8 @@ describe("current application release authority", () => {
         phrase: consumedApplicationGate,
         status: "consumed",
       },
-      releaseGate: { runId: 36646434774, status: "success" },
-      postDeployVerification: { runId: 36646574413, status: "success" },
+      releaseGate: { runId: 36694290376, status: "success" },
+      postDeployVerification: { runId: 36694479286, status: "success" },
       acceptanceVerification: {
         monitorPassed: 11,
         monitorFailed: 0,
@@ -87,27 +83,10 @@ describe("current application release authority", () => {
     });
   });
 
-  it("seals reconciled PR 280 as the only application candidate", () => {
-    expect(CURRENT_RELEASE_AUTHORITY.candidate).toEqual({
-      pr: 280,
-      url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280",
-      branch: "codex/batch-d-wordpress-placements-20260928",
-      reviewedHead: reviewImplementationHead,
-      tree: reviewImplementationTree,
-      state: "ready_for_owner_approval",
-      approvalGate: currentApplicationGate,
-    });
-    expect(CURRENT_RELEASE_AUTHORITY.reviewVehicle).toEqual({
-      pr: 280,
-      url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280",
-      branch: "codex/batch-d-wordpress-placements-20260928",
-      baseCommit: productionCommit,
-      implementationHead: reviewImplementationHead,
-      state: "sealed_for_owner_approval",
-      migrationCount: 0,
-      externalMutationCount: 0,
-    });
-    expect(CURRENT_APPLICATION_RELEASE_GATE).toBe(currentApplicationGate);
+  it("records PR 280 as accepted with no replayable application candidate", () => {
+    expect(CURRENT_RELEASE_AUTHORITY.candidate).toBeNull();
+    expect(CURRENT_RELEASE_AUTHORITY.reviewVehicle).toBeNull();
+    expect(CURRENT_APPLICATION_RELEASE_GATE).toBeNull();
     expect(CURRENT_RELEASE_AUTHORITY.production.approval).toMatchObject({
       phrase: consumedApplicationGate,
       status: "consumed",
@@ -175,16 +154,14 @@ describe("current application release authority", () => {
       const currentSection = readRepoFile(name).slice(0, 2_500);
       expect(currentSection).toContain(productionCommit);
       expect(currentSection).toContain(productionDeployment);
-      expect(currentSection).toMatch(/PR #?278|PR \[#278\]/);
+      expect(currentSection).toMatch(/PR #?280|PR \[#280\]/);
       expect(currentSection).not.toMatch(/PR #238[^\n]{0,180}(?:single|current|active)[^\n]{0,80}candidate/i);
     }
     expect(currentAuthority).toContain(reviewedHead);
     expect(currentAuthority).toContain(productionTree);
     expect(currentAuthority).toContain(consumedApplicationGate);
-    expect(currentAuthority).toContain(reviewImplementationHead);
-    expect(currentAuthority).toContain(currentApplicationGate);
-    expect(currentAuthority).toMatch(/PR \[#248\][\s\S]*previous application gate[\s\S]*invalid/i);
-    expect(currentAuthority).toMatch(/PR (?:\[#278\]|#278)[\s\S]*consumed/i);
+    expect(currentAuthority).toMatch(/PR \[#248\][\s\S]*Connector 1\.1\.0[\s\S]*reconciled/i);
+    expect(currentAuthority).toMatch(/PR (?:\[#280\]|#280)[\s\S]*consumed/i);
     expect(currentAuthority).toMatch(/PR #238[\s\S]*consumed/i);
   });
 });

@@ -35,13 +35,15 @@ Use these files for current decisions, in this order:
    GitHub checks and matching Vercel deployment metadata outrank a run ID frozen
    into documentation.
 
-Current release authority is intentionally singular: accepted PR #278 merge
-`75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1` on deployment
-`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is the Production baseline; deployment
-`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` is immediate application rollback. Draft PR
-#280 is an unsealed review vehicle, and no application gate is currently
-requestable. PR #248 remains preserved connector lineage whose previous gate is
-invalid. PR #238 is a consumed cutover receipt. The PR #278 release approval,
+Current release authority is intentionally singular: accepted PR #280 merge
+`fa1d0fb077882309970b801bbdfaa756107c2104`, tree
+`d9533274418430b750a87b8259902cddff5b2937`, on deployment
+`dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` is the Production baseline; deployment
+`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is immediate application rollback. Phase E
+is an unsealed review branch until its exact PR/head/tree and hosted proof are
+recorded, so no application gate is currently requestable. PR #248 remains
+preserved connector lineage whose previous gate is invalid. PR #238 is a
+consumed cutover receipt. The PR #280 release approval,
 credential-redeploy approval, and every historical component/application gate
 are consumed and cannot authorize a new merge, deployment, mutation, send, or
 publication.

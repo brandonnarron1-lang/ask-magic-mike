@@ -14,11 +14,11 @@ capability limits.
 Record only public identifiers:
 
 ```text
-Accepted PR: 278
-Merge commit: 75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1
-Production tree: 5775ba6a315abde9bbe55f770ccda2a64f897362
-Production deployment: dpl_aepoH5pzDwPMkerbrp9YekzVrdKD
-Application rollback: dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U
+Accepted PR: 280
+Merge commit: fa1d0fb077882309970b801bbdfaa756107c2104
+Production tree: d9533274418430b750a87b8259902cddff5b2937
+Production deployment: dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ
+Application rollback: dpl_aepoH5pzDwPMkerbrp9YekzVrdKD
 Canonical URL: https://www.askmagicmike.com
 Release approval status: consumed
 ```

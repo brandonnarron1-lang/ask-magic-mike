@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-09-30 — Phase E pre-activation release candidate
+
+- Reconciled accepted Production to PR #280, merge
+  `fa1d0fb077882309970b801bbdfaa756107c2104`, tree
+  `d9533274418430b750a87b8259902cddff5b2937`, and Ready deployment
+  `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` before changing source.
+- Ported only the reviewed Connector 1.1.0 source, deterministic install and
+  rollback archives, and contract tests from preserved PR #248; no competing
+  WordPress, lead, notification, or CRM subsystem was introduced.
+- Ported the reviewed PR #279 single-statement Resend callback boundary onto
+  current `main`, then added fail-closed timestamps, Preview isolation,
+  bounded input, event-ID conflict detection, private correlation IDs, and
+  ordered-event guards so duplicate/stale callbacks cannot regress provider
+  truth or strand a committed receipt after partial side effects.
+- Made local Playwright runs deterministic and passed 293 files / 3,605 tests,
+  strict typecheck, ESLint, optimized build, 102-route proof, 26/26 browser
+  tests, dependency audit, live monitor/smoke/funnel checks, and system
+  isolation.
+- No Production deployment, WordPress edit, lead submission, provider send,
+  database write, environment change, DNS action, cache purge, spend,
+  deletion, or NellySelly action occurred. Plugin installation, page 3952
+  publication, and the controlled QA lead remain separate owner-gated actions.
+
 ## 2026-09-29 — Batch D WordPress and placement candidate sealed
 
 - Reconciled the existing signed WordPress bridge, exact Form 7 consent

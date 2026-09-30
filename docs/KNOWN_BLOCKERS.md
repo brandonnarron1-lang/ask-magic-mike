@@ -1,6 +1,6 @@
 # Known Operating Constraints
 
-Updated 2026-09-29. The public funnel, canonical Neon capture, Lead Center, and
+Updated 2026-09-30. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
 
@@ -35,21 +35,19 @@ specific expansions; they do not invalidate the live lead pipe.
 
 ## Current release constraint
 
-- Current accepted Production is PR #278 merge
-  `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`, tree
-  `5775ba6a315abde9bbe55f770ccda2a64f897362`, on deployment
-  `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`; deployment
-  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` is immediate rollback. The PR #278
+- Current accepted Production is PR #280 merge
+  `fa1d0fb077882309970b801bbdfaa756107c2104`, tree
+  `d9533274418430b750a87b8259902cddff5b2937`, on deployment
+  `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`; deployment
+  `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is immediate rollback. The PR #280
   application gate, credential-redeploy approval, and every earlier completed
   gate are consumed.
 - Exact-tree hosted release and post-deploy verification, the 11-check
   Production monitor, 19-pass read-only smoke, and runtime log window pass.
-- Draft PR #280 is the single sealed Batch D application candidate at reviewed
-  head `7baff2dcafd65e666c7846165be8c2d6ab3d9ab0`; its exact application-only
-  merge/deploy gate is requestable and unconsumed. PR #248 preserves the
-  Connector 1.1.0 work, but its old gate is invalid after the Production
-  advance. Neither the PR #280 gate nor this status record authorizes a
-  Connector plugin upgrade, WordPress page edit, or any other external action.
+- There is no unconsumed application candidate. Phase E is reconciling only the
+  reviewed Connector 1.1.0 package from PR #248. Its source-controlled
+  preparation does not authorize a Connector upgrade, WordPress page edit, or
+  any other external action.
 - PR #238 is an applied five-migration receipt. PRs #244 and #245 are stale
   stacked review artifacts superseded by the current reconciliation and clean
   mainline port; none of their historical gates may be replayed.

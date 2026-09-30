@@ -1,5 +1,24 @@
 # Production Release Log
 
+## [PR #280] Batch D WordPress and placement readiness
+
+**Merged:** 2026-09-30
+**Production commit:** `fa1d0fb077882309970b801bbdfaa756107c2104`
+**Production tree:** `d9533274418430b750a87b8259902cddff5b2937`
+**Deployment:** `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` (`READY`)
+**Immediate rollback:** `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`
+
+- Released the existing signed WordPress, source-consent, open-house, and
+  rental-placement readiness work without creating a parallel funnel, lead
+  store, CRM, notification service, or WordPress system.
+- Hosted release gate `36694290376` and post-deploy verification
+  `36694479286` passed against the exact accepted tree.
+- Read-only acceptance passed 11/11 monitoring checks and 19 smoke checks with
+  two intentional skips, zero failures, and no observed runtime error or 5xx.
+- No migration, environment change, WordPress mutation, lead/form submission,
+  outbound message, provider action, DNS change, spend, deletion, or
+  NellySelly action occurred.
+
 ## [PR #278] Batch A release truth and public-ingress hardening
 
 **Merged:** 2026-09-29

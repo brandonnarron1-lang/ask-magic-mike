@@ -27,15 +27,15 @@ This document defines the single authoritative source of truth for Ask Magic Mik
 | Node version | 24.x |
 | Automatic Git deployments | Enabled; Ignored Build Step command is empty |
 
-Current accepted Production release: PR #278 merge
-`75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`, exact tree
-`5775ba6a315abde9bbe55f770ccda2a64f897362`, deployment
-`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`. Deployment
-`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` is the immediate application rollback.
-No application gate is currently requestable. Draft PR #280 is the unsealed
-Batch D review vehicle; PR #248 remains preserved connector lineage whose old
-gate is invalid after the Production advance. Neither authorizes a WordPress
-plugin/page action. PR #238 is a consumed five-migration cutover receipt. See
+Current accepted Production release: PR #280 merge
+`fa1d0fb077882309970b801bbdfaa756107c2104`, exact tree
+`d9533274418430b750a87b8259902cddff5b2937`, deployment
+`dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`. Deployment
+`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is the immediate application rollback.
+No application gate is currently requestable. Phase E is reconciling only the
+reviewed Connector 1.1.0 package from PR #248; that source preparation does not
+authorize a WordPress plugin/page action. PR #238 is a consumed five-migration
+cutover receipt. See
 [`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).
 
 ### Verification command
