@@ -1,11 +1,11 @@
 {
   "schema_version": "amm.release_batch.v1",
-  "status": "VERIFIED_NOT_PRODUCTION",
+  "status": "READY_FOR_OWNER_APPROVAL",
   "batch": "D",
   "name": "WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS",
   "base_commit": "75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1",
-  "reconciled_implementation_head": "fddf5adee832263a7b6e17b492437d6367f822c4",
-  "reconciled_implementation_tree": "6f0b6383a9218e4f625dfb732280e688d2d52672",
+  "reconciled_implementation_head": "7baff2dcafd65e666c7846165be8c2d6ab3d9ab0",
+  "reconciled_implementation_tree": "69b76a5f8ced4261d57facc201fc0cb45e467e71",
   "source_prs": [
     253,
     254,
@@ -56,7 +56,13 @@
     "archive_integrity": "zip_sha256_and_php_source_match",
     "security_review": "no_new_critical_high_or_medium_findings",
     "secret_scan": "three_unchanged_whole_tree_baseline_matches_zero_in_batch_diff",
-    "full_release_gate": "pass_local_pending_hosted_exact_head"
+    "full_release_gate": "pass_hosted_run_36651493066",
+    "immutable_preview_deployment": "dpl_Hy6aAoNytqGmCwhoj3KRQoVRB1o3",
+    "immutable_preview_url": "https://ask-magic-mike-cysr1qz8z-eyes-up-industries.vercel.app",
+    "preview_qa": "pass_18_skip_7_fail_0_safe_db_write_false_run_36651730308",
+    "browser_e2e": "pass_15_expected_0_unexpected_run_36651730308",
+    "local_visual_smoke": "pass_8_of_8_desktop_mobile",
+    "runtime_log_review": "pass_0_5xx_0_error_fatal_0_nellyselly_mentions"
   },
   "planned_approval_gate": "APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT"
 }

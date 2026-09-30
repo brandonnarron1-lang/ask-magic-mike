@@ -45,14 +45,28 @@ or NellySelly action. It is exhausted and cannot be replayed.
 
 ## Application review state
 
-No application release gate is currently requestable. Draft PR
-[#280](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280) is the
-unsealed Batch D review vehicle. Its reconciled implementation checkpoint is
-`fddf5adee832263a7b6e17b492437d6367f822c4`, based on accepted Production
+Draft PR [#280](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280)
+is the single sealed Batch D application candidate. Its reviewed implementation
+head is `7baff2dcafd65e666c7846165be8c2d6ab3d9ab0`, tree
+`69b76a5f8ced4261d57facc201fc0cb45e467e71`, based on accepted Production
 `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`, with zero migrations and zero
-external mutations. It must pass fresh exact-head Node 24 CI, immutable
-Preview, protected no-write browser QA, and runtime-log review before any
-application gate can be sealed.
+external mutations. Hosted Release Gate run
+[36651493066](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36651493066),
+immutable Preview `dpl_Hy6aAoNytqGmCwhoj3KRQoVRB1o3`, protected no-write
+Preview/browser run
+[36651730308](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36651730308),
+local desktop/mobile visual QA, and runtime-log review passed.
+
+The only current application gate is:
+
+```text
+APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT
+```
+
+It authorizes only the reviewed PR #280 merge and same-tree Production
+deployment. It authorizes no Connector PR #248 action, WordPress save, QR
+publication, message, provider/secret change, database mutation, DNS action,
+marketing publication, spend, deletion, or NellySelly action.
 
 PR [#248](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248)
 preserves the separate Connector 1.1.0 candidate, but its previous application gate

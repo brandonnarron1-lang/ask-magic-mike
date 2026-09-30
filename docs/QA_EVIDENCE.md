@@ -1,5 +1,37 @@
 # QA Evidence
 
+## Batch D WordPress and placement readiness — 2026-09-29
+
+- Reviewed implementation head
+  `7baff2dcafd65e666c7846165be8c2d6ab3d9ab0`, tree
+  `69b76a5f8ced4261d57facc201fc0cb45e467e71`, is based directly on accepted PR
+  #278 merge `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`.
+- Local Node 24 verification passed 19 focused files / 216 tests, 292 total
+  files / 3,591 tests, strict typecheck, full ESLint, Next.js 15.5.26 build with
+  60 static pages, 102/22 route proof, 14/14 release safety, system isolation,
+  zero known production dependency vulnerabilities, and a zero-finding
+  Batch-diff Gitleaks scan.
+- Exact-head hosted Release Gate run
+  [36651493066](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36651493066)
+  passed on Node 24.
+- Immutable Preview `dpl_Hy6aAoNytqGmCwhoj3KRQoVRB1o3` is Ready at
+  `https://ask-magic-mike-cysr1qz8z-eyes-up-industries.vercel.app`.
+- Protected Preview run
+  [36651730308](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36651730308)
+  passed 18 read-only checks, deliberately skipped all seven mutations with
+  `SAFE_DB_WRITE=false`, and passed all 15 browser tests with zero unexpected,
+  flaky, or skipped browser results.
+- Eight local desktop/mobile screenshots passed required-copy, forbidden-copy,
+  horizontal-overflow, bare-appraisal, and console-error checks. The only first
+  pass mismatch was a stale `/ask` QA tagline; the assertion was corrected to
+  the accepted Batch A headline and all eight views passed.
+- Exact Preview runtime logs contained zero 5xx, error/fatal, or NellySelly
+  crossover entries. Provider delivery was disabled and the Preview database
+  mutation safety gate remained false.
+- No Production deployment, database write, WordPress edit, lead submission,
+  notification, QR publication, DNS action, spend, deletion, or NellySelly
+  action occurred.
+
 ## Corrected cumulative Production preflight — 2026-08-30
 
 - The encrypted Vercel Production `DATABASE_URL` remained non-exportable; a

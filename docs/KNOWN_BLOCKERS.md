@@ -44,11 +44,12 @@ specific expansions; they do not invalidate the live lead pipe.
   gate are consumed.
 - Exact-tree hosted release and post-deploy verification, the 11-check
   Production monitor, 19-pass read-only smoke, and runtime log window pass.
-- No application gate is requestable. Draft PR #280 is the unsealed Batch D
-  review vehicle and still requires fresh exact-head hosted and Preview proof.
-  PR #248 preserves the Connector 1.1.0 work, but its old gate is invalid after
-  the Production advance. Neither can authorize a Connector plugin upgrade,
-  WordPress page edit, or any other external action.
+- Draft PR #280 is the single sealed Batch D application candidate at reviewed
+  head `7baff2dcafd65e666c7846165be8c2d6ab3d9ab0`; its exact application-only
+  merge/deploy gate is requestable and unconsumed. PR #248 preserves the
+  Connector 1.1.0 work, but its old gate is invalid after the Production
+  advance. Neither the PR #280 gate nor this status record authorizes a
+  Connector plugin upgrade, WordPress page edit, or any other external action.
 - PR #238 is an applied five-migration receipt. PRs #244 and #245 are stale
   stacked review artifacts superseded by the current reconciliation and clean
   mainline port; none of their historical gates may be replayed.

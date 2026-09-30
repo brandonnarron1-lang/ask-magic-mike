@@ -62,7 +62,7 @@ PR #238 remains the applied five-migration cutover receipt beneath this source.
 Its migration hashes, one-row-per-version ledger, disabled import gates, and
 postflight evidence remain preserved, but its approval is consumed.
 
-### 2. PR #280 — unsealed Batch D review vehicle
+### 2. PR #280 — sealed Batch D application candidate
 
 PR #280 now starts from accepted PR #278 `main` and consolidates only the
 useful signed-WordPress, source-consent, open-house packet, and rental-placement
@@ -71,12 +71,14 @@ WordPress readiness manifests, canonical owned-demand registry, proof ledger,
 and Distribution Command; it does not create a parallel funnel, publisher,
 form, database, CRM, campaign manager, or notification service.
 
-The machine authority records implementation checkpoint
-`fddf5adee832263a7b6e17b492437d6367f822c4` as a `draft_unsealed` review
-vehicle. PR #280 has no migration, environment delta, or authorized external
-mutation. Exact Node 24 hosted CI, immutable Preview identity, protected
-no-write visual/runtime QA, dependency/secret checks, and rollback review must
-pass before an application gate can be sealed.
+The machine authority records reviewed implementation head
+`7baff2dcafd65e666c7846165be8c2d6ab3d9ab0` and tree
+`69b76a5f8ced4261d57facc201fc0cb45e467e71` as the single
+`ready_for_owner_approval` application candidate. PR #280 has no migration,
+environment delta, or authorized external mutation. Exact Node 24 hosted CI,
+immutable Preview identity, protected no-write/browser QA, local visual QA,
+dependency/secret checks, runtime logs, and rollback review passed. Its exact
+application-only merge/deploy gate is requestable and unconsumed.
 
 ### 3. Preserved and superseded review lineage
 

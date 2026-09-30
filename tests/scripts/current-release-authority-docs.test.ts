@@ -20,7 +20,10 @@ const productionTree = "5775ba6a315abde9bbe55f770ccda2a64f897362";
 const reviewedHead = "65a09dc0137b97bda407ee24b0914e8f9bffd9c0";
 const consumedApplicationGate =
   "APPROVE PHASE 9 BATCH A RELEASE TRUTH AND PUBLIC INGRESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
-const reviewImplementationHead = "fddf5adee832263a7b6e17b492437d6367f822c4";
+const reviewImplementationHead = "7baff2dcafd65e666c7846165be8c2d6ab3d9ab0";
+const reviewImplementationTree = "69b76a5f8ced4261d57facc201fc0cb45e467e71";
+const currentApplicationGate =
+  "APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
 const consumedCutoverGate =
   "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT";
 
@@ -84,19 +87,27 @@ describe("current application release authority", () => {
     });
   });
 
-  it("keeps the reconciled PR 280 review vehicle unsealed with no application gate", () => {
-    expect(CURRENT_RELEASE_AUTHORITY.candidate).toBeNull();
+  it("seals reconciled PR 280 as the only application candidate", () => {
+    expect(CURRENT_RELEASE_AUTHORITY.candidate).toEqual({
+      pr: 280,
+      url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280",
+      branch: "codex/batch-d-wordpress-placements-20260928",
+      reviewedHead: reviewImplementationHead,
+      tree: reviewImplementationTree,
+      state: "ready_for_owner_approval",
+      approvalGate: currentApplicationGate,
+    });
     expect(CURRENT_RELEASE_AUTHORITY.reviewVehicle).toEqual({
       pr: 280,
       url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280",
       branch: "codex/batch-d-wordpress-placements-20260928",
       baseCommit: productionCommit,
       implementationHead: reviewImplementationHead,
-      state: "draft_unsealed",
+      state: "sealed_for_owner_approval",
       migrationCount: 0,
       externalMutationCount: 0,
     });
-    expect(CURRENT_APPLICATION_RELEASE_GATE).toBeNull();
+    expect(CURRENT_APPLICATION_RELEASE_GATE).toBe(currentApplicationGate);
     expect(CURRENT_RELEASE_AUTHORITY.production.approval).toMatchObject({
       phrase: consumedApplicationGate,
       status: "consumed",
@@ -171,7 +182,7 @@ describe("current application release authority", () => {
     expect(currentAuthority).toContain(productionTree);
     expect(currentAuthority).toContain(consumedApplicationGate);
     expect(currentAuthority).toContain(reviewImplementationHead);
-    expect(currentAuthority).toMatch(/No application release gate is currently requestable/i);
+    expect(currentAuthority).toContain(currentApplicationGate);
     expect(currentAuthority).toMatch(/PR \[#248\][\s\S]*previous application gate[\s\S]*invalid/i);
     expect(currentAuthority).toMatch(/PR (?:\[#278\]|#278)[\s\S]*consumed/i);
     expect(currentAuthority).toMatch(/PR #238[\s\S]*consumed/i);

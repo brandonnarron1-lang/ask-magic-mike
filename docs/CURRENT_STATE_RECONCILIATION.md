@@ -41,10 +41,14 @@ or deletion.
 
 ## Current release stack
 
-- No application release gate is currently requestable.
-- Draft PR #280 is the recorded unsealed Batch D review vehicle. It has no
-  release authority until fresh exact-head CI, Preview, no-write QA, and runtime
-  evidence are sealed.
+- Draft PR #280 is the single sealed Batch D application candidate at reviewed
+  head `7baff2dcafd65e666c7846165be8c2d6ab3d9ab0` and tree
+  `69b76a5f8ced4261d57facc201fc0cb45e467e71`. Hosted Node 24 CI, immutable
+  Preview, protected no-write QA, 15 mutation-intercepted browser tests,
+  desktop/mobile visual review, and runtime logs passed.
+- Its exact merge-and-same-tree-deployment gate is requestable, but remains
+  unconsumed. It authorizes no WordPress, database, message, publication, DNS,
+  spend, deletion, provider/secret, or NellySelly action.
 - PR #248 remains preserved connector lineage, but its prior gate is invalid
   after the Production advance and must not leapfrog Batch D.
 - PR #238 is an applied five-migration receipt. Its gate is consumed and its

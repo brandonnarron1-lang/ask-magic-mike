@@ -70,14 +70,22 @@
       }
     }
   },
-  "candidate": null,
+  "candidate": {
+    "pr": 280,
+    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280",
+    "branch": "codex/batch-d-wordpress-placements-20260928",
+    "reviewedHead": "7baff2dcafd65e666c7846165be8c2d6ab3d9ab0",
+    "tree": "69b76a5f8ced4261d57facc201fc0cb45e467e71",
+    "state": "ready_for_owner_approval",
+    "approvalGate": "APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT"
+  },
   "reviewVehicle": {
     "pr": 280,
     "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280",
     "branch": "codex/batch-d-wordpress-placements-20260928",
     "baseCommit": "75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1",
-    "implementationHead": "fddf5adee832263a7b6e17b492437d6367f822c4",
-    "state": "draft_unsealed",
+    "implementationHead": "7baff2dcafd65e666c7846165be8c2d6ab3d9ab0",
+    "state": "sealed_for_owner_approval",
     "migrationCount": 0,
     "externalMutationCount": 0
   },

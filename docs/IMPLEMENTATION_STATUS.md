@@ -13,12 +13,14 @@ Updated 2026-09-29.
   `36646434774`, post-deploy verification `36646574413`, the canonical
   11-check monitor, 19-pass read-only smoke, health/readiness, auth boundary,
   and runtime error window all passed.
-- **Unsealed application review PR #280:** Batch D has been reconciled onto the
-  exact PR #278 Production tree at implementation checkpoint
-  `fddf5adee832263a7b6e17b492437d6367f822c4`. Its combined public-ingress and
-  signed-WordPress contract passes the focused local suite. Fresh exact-head
-  hosted CI and immutable Preview proof are still required before any release
-  gate is requestable.
+- **Sealed application candidate PR #280:** Batch D has been reconciled onto the
+  exact PR #278 Production tree at reviewed head
+  `7baff2dcafd65e666c7846165be8c2d6ab3d9ab0`, tree
+  `69b76a5f8ced4261d57facc201fc0cb45e467e71`. Its combined public-ingress and
+  signed-WordPress contract passed hosted Node 24 run `36651493066`, immutable
+  Preview `dpl_Hy6aAoNytqGmCwhoj3KRQoVRB1o3`, protected no-write/browser run
+  `36651730308`, local desktop/mobile visual QA, and clean runtime-log review.
+  Its exact application gate is requestable but unconsumed.
 - **Preserved Connector PR #248:** Connector 1.1.0 remains separate, but its
   prior gate is invalid after the Production advance. Reconcile and reverify it
   only after Batch D is accepted; do not install or publish it from this branch.

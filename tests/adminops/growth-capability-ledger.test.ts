@@ -7,7 +7,7 @@ import {
 } from "../../app/lib/growth/capability-ledger";
 
 describe("Growth capability authority ledger", () => {
-  it("shows PR 280 as an unsealed Preview review vehicle without a release gate", () => {
+  it("shows PR 280 as the single sealed application candidate", () => {
     const ledger = buildGrowthCapabilityLedger({ currentTailInProduction: false });
 
     expect(ledger.generatedFor).toBe("preview_or_local");
@@ -22,11 +22,13 @@ describe("Growth capability authority ledger", () => {
     expect(ledger.items.find((item) => item.key === "ordered_release_train")).toMatchObject({
       state: "release_candidate",
     });
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.approvalGate).toBeUndefined();
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.approvalGate).toBe(
+      "APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT",
+    );
     expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 278");
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("Draft PR 280");
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("unsealed review vehicle");
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.nextAction).toContain("Draft PR 280");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 280");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("only active reviewed application candidate");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.nextAction).toContain("PR 280");
     expect(JSON.stringify(ledger)).not.toContain("PR 210 remains the first pending");
   });
 
@@ -78,6 +80,7 @@ describe("Growth capability authority ledger", () => {
     const facebookRecovery = ledger.items.find((item) => item.key === "facebook_preview_recovery");
 
     expect(gates).toEqual([
+      "APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT",
       "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA",
     ]);
     expect(facebookRecovery?.approvalGate).toBeUndefined();

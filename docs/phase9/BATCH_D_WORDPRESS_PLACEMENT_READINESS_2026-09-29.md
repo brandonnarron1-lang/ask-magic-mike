@@ -1,6 +1,6 @@
 # Batch D — WordPress, open-house, and rental placement readiness
 
-Status: `VERIFIED_NOT_PRODUCTION`
+Status: `READY_FOR_OWNER_APPROVAL`
 
 Date: 2026-09-29
 
@@ -163,15 +163,35 @@ Results after reconciliation onto accepted PR #278:
 - no remote endpoint, database, provider, WordPress admin, or Production
   credential was used by these proofs.
 
-Local release verification is complete. Exact-head hosted CI, immutable
-Preview, protected no-write browser QA, and runtime-log evidence are recorded
-only after the reconciled evidence commit is pushed.
+Exact implementation-head release verification is complete:
+
+- reviewed head `7baff2dcafd65e666c7846165be8c2d6ab3d9ab0` and tree
+  `69b76a5f8ced4261d57facc201fc0cb45e467e71`;
+- hosted Node 24 Release Gate run
+  [36651493066](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36651493066)
+  passed;
+- immutable Vercel Preview `dpl_Hy6aAoNytqGmCwhoj3KRQoVRB1o3` is Ready at
+  `https://ask-magic-mike-cysr1qz8z-eyes-up-industries.vercel.app`;
+- protected Preview QA run
+  [36651730308](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36651730308)
+  passed 18 read-only checks with seven deliberate mutation skips and zero
+  failures while `SAFE_DB_WRITE=false`;
+- all 15 mutation-intercepted browser tests passed with zero unexpected or
+  flaky results;
+- eight local desktop/mobile visual-smoke views passed with no overflow,
+  forbidden copy, missing required content, or browser console error; and
+- the exact Preview runtime window contained zero 5xx, error/fatal, or
+  NellySelly crossover entries.
+
+The Preview health contract confirmed that provider delivery and database
+mutation were both disabled. No lead, note, task, webhook, notification, or
+external publication was created by this evidence run.
 
 ## Release ordering
 
 Batch A was accepted as PR #278. Batch D is reconciled onto its exact accepted
-tree at implementation checkpoint
-`fddf5adee832263a7b6e17b492437d6367f822c4`. The combined route preserves
+tree and sealed at reviewed implementation checkpoint
+`7baff2dcafd65e666c7846165be8c2d6ab3d9ab0`. The combined route preserves
 Batch A's bounded parsing, protected-field rejection, deterministic
 idempotency, test-marker checks, experiments, durable rate limiting, and public
 channel gating while adding Batch D's raw-body HMAC, signed-entry identity, and
@@ -179,7 +199,7 @@ fail-closed source-specific consent evidence.
 
 Preferred order:
 
-1. rerun every local and hosted gate on reconciled Batch D;
+1. use only the exact Batch D gate below for the reviewed PR #280 candidate;
 2. accept Batch D before Batch B, or reconcile Batch B onto the exact accepted
    Batch D tree, because both touch `POST /api/leads`; and
 3. keep PR #248 independent and reconcile/reverify it after Batch D before any
@@ -191,7 +211,8 @@ No branch may infer acceptance from this ordering note.
 
 This work performed no:
 
-- Production or Preview deployment;
+- Production deployment or alias change; one isolated immutable Preview was
+  created solely for read-only and mutation-intercepted QA;
 - GitHub merge or branch-protection change;
 - Neon migration, query against live lead data, or production-data mutation;
 - Vercel environment or secret change;
@@ -217,10 +238,10 @@ snapshot; Form 7 rollback removes only Form 7 from the allowlist and restores
 only its proven prior notification/configuration. Lead and audit records are
 preserved.
 
-## Planned future application gate
+## Current application gate
 
-Not requestable until release ordering, exact-head hosted verification, and
-Preview no-write QA are complete:
+The local, hosted, immutable-Preview, browser, visual, and runtime-log evidence
+is complete. The following gate is now requestable for reviewed PR #280:
 
 `APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT`
 
