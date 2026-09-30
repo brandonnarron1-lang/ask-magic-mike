@@ -57,7 +57,7 @@ const PAGES = [
     desktop: { width: 1440, height: 1000 },
     mobile: { width: 390, height: 844 },
     required: [
-      "A focused local real estate advisor interface.",
+      "Ask Mike. Get a practical local next step.",
       "objective criteria you choose",
       "Mike Eatmon",
       "Our Town Properties",
