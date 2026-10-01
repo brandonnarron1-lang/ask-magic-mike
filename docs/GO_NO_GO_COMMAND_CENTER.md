@@ -2,7 +2,7 @@
 
 <!-- amm-current-operations-v1 -->
 
-Updated 2026-09-29. This is the current operator decision surface. It reads
+Updated 2026-09-30. This is the current operator decision surface. It reads
 release identity from `config/current-release-authority.json`, uses Neon for
 durable Production data, and uses Better Auth plus server-side RBAC for the
 Lead Center. Exact pending actions are in `OWNER_APPROVAL_QUEUE.md`; capability
@@ -19,14 +19,14 @@ paid campaign, or deletion.
 
 ## §2 — Accepted Production
 
-- PR #278
-- Merge: `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`
-- Tree: `5775ba6a315abde9bbe55f770ccda2a64f897362`
-- Deployment: `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`
+- PR #280
+- Merge: `fa1d0fb077882309970b801bbdfaa756107c2104`
+- Tree: `d9533274418430b750a87b8259902cddff5b2937`
+- Deployment: `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`
 - Canonical URL: `https://www.askmagicmike.com`
-- Immediate application rollback: `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`
+- Immediate application rollback: `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`
 
-The PR #278 release and secure database-credential redeploy approvals are
+The PR #280 release and secure database-credential redeploy approvals are
 consumed. They cannot authorize another action.
 
 ## §3 — Proven operating layers
@@ -45,11 +45,14 @@ consumed. They cannot authorize another action.
 
 ## §4 — Current release queue
 
-No application candidate or merge/deploy gate is currently requestable. Draft
-PR #280 is an unsealed review vehicle; PR #248 is preserved connector lineage
-whose previous gate is invalid after the Production advance. Neither authorizes
-a WordPress plugin/page change, Neon migration, environment edit, message,
-publication, or data action.
+Draft PR #281 is the sole sealed Phase E application candidate at reviewed head
+`3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
+`23bc513823874e629cfc525c2832bbad4282f480`; its exact app-only merge/deploy
+gate is requestable from `OWNER_APPROVAL_QUEUE.md`. PR #248 remains preserved
+Connector lineage and PR #279 remains preserved notification lineage; their
+prior gates are invalid. The PR #281 gate does not authorize a WordPress
+plugin/page change, Neon mutation, environment edit, message, publication, or
+data action.
 
 ## §5 — Controlled-traffic GO criteria
 

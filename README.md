@@ -19,16 +19,19 @@ brokerage, listings, and SEO authority and embeds or links into this system.
 - `OWNER ACTION` — Mike and Brandon must enroll their own phones; authenticated
   internal email remains the active alert path until each device passes QA.
 - `DEFERRED — PAID SERVICE` — carrier SMS/MMS; Web Push is the free-first path.
-- `VERIFIED LIVE` — PR #278 is accepted at merge
-  `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1` on Vercel deployment
-  `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`; exact-tree hosted verification,
+- `VERIFIED LIVE` — PR #280 is accepted at merge
+  `fa1d0fb077882309970b801bbdfaa756107c2104` on Vercel deployment
+  `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`; exact-tree hosted verification,
   read-only monitor/smoke checks, and the canonical aliases pass.
-- `DRAFT REVIEW — NO RELEASE GATE` — PR #280 is reconciling Batch D onto the
-  exact PR #278 Production tree. Fresh exact-head Node 24 CI, immutable Preview,
-  protected no-write QA, and runtime-log evidence are required before a gate
-  can be sealed. PR #248 remains preserved connector lineage but its prior gate
-  is invalid after the Production advance. PR #238 remains an applied,
-  consumed five-migration receipt.
+- `PHASE E SEALED CANDIDATE` — Draft PR #281 at reviewed head
+  `3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
+  `23bc513823874e629cfc525c2832bbad4282f480`, reconciles the reviewed
+  Connector 1.1.0 package from PR #248 and the narrow atomic callback pattern
+  from PR #279 onto current `main`. Exact-head hosted Release Gate, immutable
+  Preview, protected no-write QA, 15 browser scenarios, and runtime-log review
+  pass. Its exact app-only gate is recorded in `OWNER_APPROVAL_QUEUE.md`. No
+  WordPress plugin/page, database, lead, message, or Production state has
+  changed. PR #238 remains an applied, consumed five-migration receipt.
 
 The source-of-truth audit is in
 [`docs/CURRENT_STATE_RECONCILIATION.md`](docs/CURRENT_STATE_RECONCILIATION.md).

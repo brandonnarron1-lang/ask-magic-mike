@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-09-30 — Phase E pre-activation release candidate
+
+- Reconciled accepted Production to PR #280, merge
+  `fa1d0fb077882309970b801bbdfaa756107c2104`, tree
+  `d9533274418430b750a87b8259902cddff5b2937`, and Ready deployment
+  `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` before changing source.
+- Ported only the reviewed Connector 1.1.0 source, deterministic install and
+  rollback archives, and contract tests from preserved PR #248; no competing
+  WordPress, lead, notification, or CRM subsystem was introduced.
+- Ported the reviewed PR #279 single-statement Resend callback boundary onto
+  current `main`, then added fail-closed timestamps, Preview isolation,
+  bounded input, event-ID conflict detection, private correlation IDs, and
+  ordered-event guards so duplicate/stale callbacks cannot regress provider
+  truth or strand a committed receipt after partial side effects.
+- Made local Playwright runs deterministic and passed 293 files / 3,605 tests,
+  strict typecheck, ESLint, optimized build, 102-route proof, 26/26 browser
+  tests, dependency audit, live monitor/smoke/funnel checks, and system
+  isolation.
+- Sealed reviewed head `3b1853b535000e09b6e9c40221f5898bd87a92f9`,
+  tree `23bc513823874e629cfc525c2832bbad4282f480`, after hosted Release Gate
+  `36784156065`, immutable Preview `dpl_4iWCBVSoqFbvffq7KAWhteQBTX6Y`,
+  protected no-write/browser run `36784678748`, and clean runtime-log review.
+  The resulting exact gate is app-only and leaves every WordPress and send
+  operation independently gated.
+- No Production deployment, WordPress edit, lead submission, provider send,
+  database write, environment change, DNS action, cache purge, spend,
+  deletion, or NellySelly action occurred. Plugin installation, page 3952
+  publication, and the controlled QA lead remain separate owner-gated actions.
+
 ## 2026-09-29 — Batch D WordPress and placement candidate sealed
 
 - Reconciled the existing signed WordPress bridge, exact Form 7 consent

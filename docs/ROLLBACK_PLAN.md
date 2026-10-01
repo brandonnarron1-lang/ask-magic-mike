@@ -2,29 +2,28 @@
 
 ## Application
 
-Current Production is `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` at PR #278 merge
-commit `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1` and exact tree
-`5775ba6a315abde9bbe55f770ccda2a64f897362`. Deployment
-`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` is the immediate application rollback;
+Current Production is `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` at PR #280 merge
+commit `fa1d0fb077882309970b801bbdfaa756107c2104` and exact tree
+`d9533274418430b750a87b8259902cddff5b2937`. Deployment
+`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is the immediate application rollback;
 immutable source deployment `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` remains
 second-level evidence. Re-inspect deployments before any future release because
 aliases and environment revisions can move. If smoke checks fail, stop traffic
 activation and promote the recorded prior deployment. Do not display a database
 credential, delete a deployment, change database rows, or force-push.
 
-PR #278 changed no database migration, provider configuration, or WordPress
-surface. Its consumed gate cannot authorize later work. Draft PR #280 is an
-unsealed review vehicle with zero migrations and zero environment changes. If
-it is later sealed, separately approved, merged, and fails Production
-acceptance, promote `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` as the immediate
-rollback and rerun the read-only monitor, smoke, auth-boundary, readiness, and
-runtime-log checks. Do not alter Neon or WordPress during that application
-rollback.
+PR #280 changed no database migration, provider configuration, or WordPress
+surface. Its consumed gate cannot authorize later work. If the current
+application fails Production acceptance, promote
+`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` as the immediate rollback and rerun the
+read-only monitor, smoke, auth-boundary, readiness, and runtime-log checks. Do
+not alter Neon or WordPress during that application rollback.
 
-The Connector 1.1.0 plugin package remains offline and independently gated. A
+The Connector 1.1.0 plugin package is source-controlled in the Phase E
+candidate and remains offline and independently gated. A
 future WordPress upgrade must first back up the exact active plugin/options and
 use the byte-preserved 1.0.0 plugin package as its separate rollback. The PR
-#280 application gate, if later sealed, cannot authorize installation, activation, page 3952
+#280 consumed application gate cannot authorize installation, activation, page 3952
 publication, a form submission, or a cache purge.
 
 For cross-domain measurement, the pre-activation rollback is to leave the Ask

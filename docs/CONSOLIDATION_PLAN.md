@@ -22,10 +22,11 @@ does not authorize a parallel application, database, notification engine, or CRM
 - Free-first phone alert: Web Push; carrier SMS remains disabled until a
   compliant registered provider is explicitly approved
 
-The Production baseline is PR #278, merge commit
-`75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`, deployed as
-`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`. Deployment
-`dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U` is immediate rollback. Its release gate,
+The Production baseline is PR #280, merge commit
+`fa1d0fb077882309970b801bbdfaa756107c2104`, tree
+`d9533274418430b750a87b8259902cddff5b2937`, deployed as
+`dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`. Deployment
+`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is immediate rollback. Its release gate,
 the earlier credential-redeploy gate, and every earlier release gate are
 consumed and cannot authorize a later candidate.
 
@@ -50,35 +51,31 @@ consumed and cannot authorize a later candidate.
 
 ## Current release consolidation
 
-### 1. PR #278 — accepted Production ingress hardening
+### 1. PR #280 — accepted Production placement readiness
 
-PR #278 merged and passed the exact `main` Release Gate, post-deploy
+PR #280 merged and passed the exact `main` Release Gate, post-deploy
 verification, read-only smoke/monitor acceptance, auth boundary, and runtime
-log review. It hardened the existing public ingress without creating another
-application, database, lead lifecycle, or notification system. It created no
-schema, lead, notification, WordPress, DNS, or NellySelly mutation.
+log review. It includes Batch D's signed WordPress, source-consent, open-house,
+and rental-placement readiness without creating another application, database,
+lead lifecycle, or notification system. It created no schema, lead,
+notification, WordPress, DNS, or NellySelly mutation.
 
 PR #238 remains the applied five-migration cutover receipt beneath this source.
 Its migration hashes, one-row-per-version ledger, disabled import gates, and
 postflight evidence remain preserved, but its approval is consumed.
 
-### 2. PR #280 — sealed Batch D application candidate
+### 2. Phase E — narrow post-release hardening candidate
 
-PR #280 now starts from accepted PR #278 `main` and consolidates only the
-useful signed-WordPress, source-consent, open-house packet, and rental-placement
-readiness work from the preserved Draft lineage. It consumes the existing
-WordPress readiness manifests, canonical owned-demand registry, proof ledger,
-and Distribution Command; it does not create a parallel funnel, publisher,
-form, database, CRM, campaign manager, or notification service.
-
-The machine authority records reviewed implementation head
-`7baff2dcafd65e666c7846165be8c2d6ab3d9ab0` and tree
-`69b76a5f8ced4261d57facc201fc0cb45e467e71` as the single
-`ready_for_owner_approval` application candidate. PR #280 has no migration,
-environment delta, or authorized external mutation. Exact Node 24 hosted CI,
-immutable Preview identity, protected no-write/browser QA, local visual QA,
-dependency/secret checks, runtime logs, and rollback review passed. Its exact
-application-only merge/deploy gate is requestable and unconsumed.
+Phase E starts directly from accepted PR #280 and ports only the reviewed
+Connector 1.1.0 source, deterministic install/rollback archives, and contract
+tests from preserved PR #248. It also ports the single-statement Resend
+callback boundary from preserved draft PR #279, without importing that PR's
+unapplied migration or unrelated notification/SLA train, then hardens the
+callback against concurrent duplicates and stale-event state regression. It introduces
+no migration, environment delta, provider, lead store, notification engine, or
+WordPress mutation. The branch remains unsealed until its exact PR/head/tree,
+hosted gate, immutable Preview, and no-write proof are recorded; no application
+gate is requestable before that seal.
 
 ### 3. Preserved and superseded review lineage
 

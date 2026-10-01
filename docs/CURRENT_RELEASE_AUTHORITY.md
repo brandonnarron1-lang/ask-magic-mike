@@ -1,6 +1,6 @@
 # Current Release Authority
 
-Updated 2026-09-29 from authenticated GitHub, Vercel, Neon, and public-runtime
+Updated 2026-09-30 from authenticated GitHub, Vercel, Neon, and public-runtime
 evidence. This file and
 [`config/current-release-authority.json`](../config/current-release-authority.json)
 are the current application release authority. Older gates and candidate
@@ -8,21 +8,21 @@ statements elsewhere in the chronological ledger are historical receipts.
 
 ## Accepted Production
 
-- Released PR: [#278](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/278)
-- Reviewed head: `65a09dc0137b97bda407ee24b0914e8f9bffd9c0`
-- Merge commit: `75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`
-- Production tree: `5775ba6a315abde9bbe55f770ccda2a64f897362`
-- Vercel deployment: `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`
+- Released PR: [#280](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280)
+- Reviewed head: `0b70701c46a7228b075e9630576df5188f5d9c62`
+- Merge commit: `fa1d0fb077882309970b801bbdfaa756107c2104`
+- Production tree: `d9533274418430b750a87b8259902cddff5b2937`
+- Vercel deployment: `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`
 - Generated URL:
-  `https://ask-magic-mike-4jeilcm17-eyes-up-industries.vercel.app`
+  `https://ask-magic-mike-3tg2au2ax-eyes-up-industries.vercel.app`
 - Canonical URL: `https://www.askmagicmike.com`
 - Immediate application rollback deployment:
-  `dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U`
+  `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`
 
 The exact `main` release gate passed in GitHub run
-[36646434774](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36646434774).
+[36694290376](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36694290376).
 Post-deploy verification passed in run
-[36646574413](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36646574413).
+[36694479286](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36694479286).
 The acceptance receipt records 11/11 monitor checks, 19 passing read-only smoke
 checks with two intentional skips, HTTP 200 readiness, and no error-level or 5xx
 runtime logs. The canonical aliases serve this exact deployment.
@@ -32,10 +32,10 @@ repair retained the canonical Neon project `bitter-star-20214385`, Production
 branch `br-round-base-auh6h2wd`, and database `neondb`; it did not create a
 parallel database or touch NellySelly.
 
-The exact PR #278 release approval was consumed once:
+The exact PR #280 release approval was consumed once:
 
 ```text
-APPROVE PHASE 9 BATCH A RELEASE TRUTH AND PUBLIC INGRESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT
+APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT
 ```
 
 It authorized only that application merge and same-tree Production deployment.
@@ -45,35 +45,46 @@ or NellySelly action. It is exhausted and cannot be replayed.
 
 ## Application review state
 
-Draft PR [#280](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280)
-is the single sealed Batch D application candidate. Its reviewed implementation
-head is `7baff2dcafd65e666c7846165be8c2d6ab3d9ab0`, tree
-`69b76a5f8ced4261d57facc201fc0cb45e467e71`, based on accepted Production
-`75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1`, with zero migrations and zero
-external mutations. Hosted Release Gate run
-[36651493066](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36651493066),
-immutable Preview `dpl_Hy6aAoNytqGmCwhoj3KRQoVRB1o3`, protected no-write
+PR #280 is accepted Production and its gate is exhausted. Draft PR
+[#281](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281) is the
+sole sealed Phase E application candidate. Its reviewed head is
+`3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
+`23bc513823874e629cfc525c2832bbad4282f480`, on the accepted PR #280 base. It
+has zero migrations, zero environment changes, and zero external mutations.
+
+Hosted Node 24 Release Gate
+[36784156065](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36784156065),
+immutable Preview `dpl_4iWCBVSoqFbvffq7KAWhteQBTX6Y`, protected no-write
 Preview/browser run
-[36651730308](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36651730308),
-local desktop/mobile visual QA, and runtime-log review passed.
+[36784678748](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36784678748),
+local desktop/mobile checks, and runtime-log review pass. Preview QA returned
+18 pass, 7 intentional mutation skips, and 0 fail; the six browser suites
+returned 15 pass, 0 fail; and no error, fatal, or HTTP 500 runtime record was
+found for the inspected deployment window.
 
 The only current application gate is:
 
 ```text
-APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT
+APPROVE PHASE E WORDPRESS ACTIVATION HARDENING PR 281 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT
 ```
 
-It authorizes only the reviewed PR #280 merge and same-tree Production
-deployment. It authorizes no Connector PR #248 action, WordPress save, QR
-publication, message, provider/secret change, database mutation, DNS action,
-marketing publication, spend, deletion, or NellySelly action.
+It authorizes only the reviewed PR #281 merge and same-tree Vercel Production
+deployment. It authorizes no WordPress installation/save/cache purge, Neon
+migration or data write, environment/secret change, lead submission, email/BCC
+or other message, provider action, DNS change, marketing publication, spend,
+deletion, or NellySelly action. Immediate application rollback remains
+`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`.
 
 PR [#248](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248)
-preserves the separate Connector 1.1.0 candidate, but its previous application gate
-is invalid after the PR #278 Production advance. It must be reconciled onto the
-eventual accepted Batch D tree and reverified before it can expose any release
-authority. Connector installation and every later WordPress page publication
-remain independent WordPress actions.
+remains preserved historical lineage. Its Connector 1.1.0 files are being
+reconciled narrowly onto current Production in Phase E without importing its
+obsolete release metadata. Connector installation and every later WordPress
+page publication remain independent WordPress actions with independent backups
+and exact gates.
+
+Draft PR #279 remains a conflicting broad notification train. Phase E reuses
+only its reviewed single-statement callback pattern and does not import its
+unapplied migration, lockfile, SLA, or unrelated notification changes.
 
 ## Historical runtime-recovery receipt
 

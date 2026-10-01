@@ -2,7 +2,7 @@
 
 <!-- amm-current-operations-v1 -->
 
-Updated 2026-09-29. This template records evidence for gated operations without
+Updated 2026-09-30. This template records evidence for gated operations without
 storing credentials or personal data. Release identity comes from
 `config/current-release-authority.json`; the canonical database is Neon and the
 staff boundary is Better Auth plus server-side RBAC. Use
@@ -14,11 +14,11 @@ capability limits.
 Record only public identifiers:
 
 ```text
-Accepted PR: 278
-Merge commit: 75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1
-Production tree: 5775ba6a315abde9bbe55f770ccda2a64f897362
-Production deployment: dpl_aepoH5pzDwPMkerbrp9YekzVrdKD
-Application rollback: dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U
+Accepted PR: 280
+Merge commit: fa1d0fb077882309970b801bbdfaa756107c2104
+Production tree: d9533274418430b750a87b8259902cddff5b2937
+Production deployment: dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ
+Application rollback: dpl_aepoH5pzDwPMkerbrp9YekzVrdKD
 Canonical URL: https://www.askmagicmike.com
 Release approval status: consumed
 ```
@@ -30,22 +30,23 @@ this file.
 ## 2. Application candidate evidence
 
 ```text
-PR: ____________________
-Base branch and commit: ____________________
-Head commit: ____________________
-Tree: ____________________
-Migration count: ______
-Environment changes: ______
-External mutations: ______
-Vercel project: ____________________
-Immutable Preview deployment: ____________________
-Preview status: READY / NOT READY
-Rollback deployment: ____________________
-Hosted Release Gate URL/result: ____________________
-Local Node version: ____________________
-Release gate result: ____________________
-Dependency audit: ____________________
-Secret scan: ____________________
+PR: 281 (sealed application candidate)
+Base branch and commit: main @ fa1d0fb077882309970b801bbdfaa756107c2104
+Implementation/final reviewed head: 3b1853b535000e09b6e9c40221f5898bd87a92f9
+Tree: 23bc513823874e629cfc525c2832bbad4282f480
+Migration count: 0
+Environment changes: 0
+External mutations: 0
+Vercel project: eyes-up-industries/ask-magic-mike
+Immutable Preview deployment: dpl_4iWCBVSoqFbvffq7KAWhteQBTX6Y
+Preview status: READY
+Rollback deployment: dpl_aepoH5pzDwPMkerbrp9YekzVrdKD
+Hosted Release Gate URL/result: https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36784156065 — PASS
+Protected Preview/browser URL/result: https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36784678748 — PASS
+Local Node version: 24.18.0
+Release gate result: PASS — 293 files / 3,605 tests; typecheck, lint, build, routes, safety, isolation
+Dependency audit: PASS — no known production vulnerability
+Secret scan: PASS — no staged secret finding
 ```
 
 Required read-only proof:

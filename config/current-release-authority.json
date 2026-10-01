@@ -1,34 +1,34 @@
 {
   "schemaVersion": 7,
-  "updatedAt": "2026-09-29",
+  "updatedAt": "2026-09-30",
   "production": {
-    "pr": 278,
-    "reviewedHead": "65a09dc0137b97bda407ee24b0914e8f9bffd9c0",
-    "mergeCommit": "75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1",
-    "tree": "5775ba6a315abde9bbe55f770ccda2a64f897362",
-    "deploymentId": "dpl_aepoH5pzDwPMkerbrp9YekzVrdKD",
-    "generatedUrl": "https://ask-magic-mike-4jeilcm17-eyes-up-industries.vercel.app",
+    "pr": 280,
+    "reviewedHead": "0b70701c46a7228b075e9630576df5188f5d9c62",
+    "mergeCommit": "fa1d0fb077882309970b801bbdfaa756107c2104",
+    "tree": "d9533274418430b750a87b8259902cddff5b2937",
+    "deploymentId": "dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ",
+    "generatedUrl": "https://ask-magic-mike-3tg2au2ax-eyes-up-industries.vercel.app",
     "canonicalUrl": "https://www.askmagicmike.com",
     "status": "accepted",
-    "rollbackDeploymentId": "dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U",
+    "rollbackDeploymentId": "dpl_aepoH5pzDwPMkerbrp9YekzVrdKD",
     "approval": {
-      "phrase": "APPROVE PHASE 9 BATCH A RELEASE TRUTH AND PUBLIC INGRESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT",
+      "phrase": "APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT",
       "status": "consumed",
-      "consumedAt": "2026-09-29"
+      "consumedAt": "2026-09-30"
     },
     "releaseGate": {
-      "runId": 36646434774,
-      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36646434774",
+      "runId": 36694290376,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36694290376",
       "status": "success"
     },
     "postDeployVerification": {
-      "runId": 36646574413,
-      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36646574413",
+      "runId": 36694479286,
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36694479286",
       "status": "success"
     },
     "productionMonitorRuns": [],
     "acceptanceVerification": {
-      "receiptUrl": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/278#issuecomment-5901209721",
+      "receiptUrl": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280#issuecomment-5908129860",
       "monitorPassed": 11,
       "monitorFailed": 0,
       "smokePassed": 19,
@@ -71,20 +71,20 @@
     }
   },
   "candidate": {
-    "pr": 280,
-    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280",
-    "branch": "codex/batch-d-wordpress-placements-20260928",
-    "reviewedHead": "7baff2dcafd65e666c7846165be8c2d6ab3d9ab0",
-    "tree": "69b76a5f8ced4261d57facc201fc0cb45e467e71",
+    "pr": 281,
+    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281",
+    "branch": "codex/phase-e-wordpress-proof",
+    "reviewedHead": "3b1853b535000e09b6e9c40221f5898bd87a92f9",
+    "tree": "23bc513823874e629cfc525c2832bbad4282f480",
     "state": "ready_for_owner_approval",
-    "approvalGate": "APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT"
+    "approvalGate": "APPROVE PHASE E WORDPRESS ACTIVATION HARDENING PR 281 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT"
   },
   "reviewVehicle": {
-    "pr": 280,
-    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280",
-    "branch": "codex/batch-d-wordpress-placements-20260928",
-    "baseCommit": "75c6955c9b8eb3a7cb08fa10dc92b3a8bf2c4df1",
-    "implementationHead": "7baff2dcafd65e666c7846165be8c2d6ab3d9ab0",
+    "pr": 281,
+    "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281",
+    "branch": "codex/phase-e-wordpress-proof",
+    "baseCommit": "fa1d0fb077882309970b801bbdfaa756107c2104",
+    "implementationHead": "3b1853b535000e09b6e9c40221f5898bd87a92f9",
     "state": "sealed_for_owner_approval",
     "migrationCount": 0,
     "externalMutationCount": 0
