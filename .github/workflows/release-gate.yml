@@ -2,6 +2,7 @@ name: Ask Magic Mike Release Gate
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
   push:
     branches:
       - main
@@ -25,6 +26,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -42,6 +44,10 @@ jobs:
 
       - name: Release doctor
         run: pnpm run release:doctor
+
+      - name: Validate immutable release intent
+        if: github.event_name == 'pull_request'
+        run: pnpm run release:intent:validate
 
       - name: Release safety scan
         run: pnpm run release:safety

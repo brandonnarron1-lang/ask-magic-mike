@@ -2,6 +2,10 @@
 
 This document defines the single authoritative source of truth for Ask Magic Mike's production infrastructure. All deploys, config changes, and domain operations must reference these entries.
 
+Release policy is tracked in `config/release-authority-policy.json`. Current
+accepted Production and rollback identities are observed, not predicted here;
+resolve them with `pnpm release:authority:resolve`.
+
 ---
 
 ## Repository
@@ -27,22 +31,17 @@ This document defines the single authoritative source of truth for Ask Magic Mik
 | Node version | 24.x |
 | Automatic Git deployments | Enabled; Ignored Build Step command is empty |
 
-Current accepted Production release: PR #281 merge
-`a3a0c235decab5a8e9209d983358d200a36ca979`, exact tree
-`7c8b8395e3cbf4b31b81d52b05add21894f0911e`, deployment
-`dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`. Prior PR #280 deployment
-`dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` is the immediate application rollback;
-`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is its second-level historical rollback.
-No application candidate or reusable release gate is active. Connector 1.1.0
-and the reviewed page-3952 Home Value CTA are live under separately consumed
-WordPress gates. PR #238 is a consumed five-migration cutover receipt. See
-[`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).
+The canonical repository/project/domain rows above are stable policy. The
+deployment-generated receipt is authoritative for the changing PR, merge,
+tree, deployment, verifier, and rollback fields. Historical application and
+cutover receipts remain in [`PRODUCTION_RELEASE_LOG.md`](./PRODUCTION_RELEASE_LOG.md)
+and [`CURRENT_RELEASE_AUTHORITY.md`](./CURRENT_RELEASE_AUTHORITY.md).
 
 ### Verification command
 
 ```bash
-# Confirm canonical alias is active
-node scripts/amm/verify-production-alias.mjs
+# Resolve receipt and confirm GitHub/Vercel/alias/health agreement
+pnpm release:authority:resolve
 ```
 
 ---

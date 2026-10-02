@@ -2,9 +2,11 @@
 
 <!-- amm-current-operations-v1 -->
 
-Audited 2026-10-01. This operating record is derived from
-`config/current-release-authority.json`, authenticated platform evidence, and
-live read-only checks. `OWNER_APPROVAL_QUEUE.md` controls unconsumed actions;
+Audited 2026-10-02. Stable release policy is
+`config/release-authority-policy.json`. Current accepted Production is derived
+from the latest deployment-generated receipt and authenticated with
+`pnpm release:authority:resolve`, not inferred from this prose.
+`OWNER_APPROVAL_QUEUE.md` controls unconsumed actions;
 `KNOWN_BLOCKERS.md` controls capability limits. Older packets remain historical
 evidence and are not operator instructions.
 
@@ -13,10 +15,10 @@ evidence and are not operator instructions.
 | Asset | Current identity | Status |
 | --- | --- | --- |
 | Repository | `brandonnarron1-lang/ask-magic-mike`, protected `main` | VERIFIED |
-| Accepted source | PR #281, merge `a3a0c235decab5a8e9209d983358d200a36ca979`, tree `7c8b8395e3cbf4b31b81d52b05add21894f0911e` | ACCEPTED |
+| Accepted source | Latest authenticated acceptance receipt returned by the resolver | RESOLVE AT USE |
 | Vercel | `eyes-up-industries/ask-magic-mike`, project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8` | VERIFIED |
-| Production | `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`, canonical `https://www.askmagicmike.com` | READY |
-| Application rollback | `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` (prior PR #280 Production) | PRESERVED |
+| Production | Receipt-selected Ready deployment; canonical `https://www.askmagicmike.com` | RESOLVE AT USE |
+| Application rollback | Receipt-selected prior Ready deployment | RESOLVE AT USE |
 | Database | Neon project `bitter-star-20214385`, branch `br-round-base-auh6h2wd`, database `neondb` | CANONICAL |
 | Private access | Better Auth sessions plus server-side RBAC at `/admin` | ACTIVE |
 | Brokerage surface | `https://www.ourtownproperties.com` WordPress | LIVE / SEPARATE CHANGE BOUNDARY |
@@ -25,24 +27,22 @@ evidence and are not operator instructions.
 | Carrier messaging | Provider adapter retained but disabled without a compliant registered sender | DEFERRED |
 | NellySelly | Separate repository, deployment, domains, database, and environment | VERIFIED ISOLATED |
 
-## Accepted Production evidence
+## Accepted Production evidence procedure
 
-The exact PR #281 release gate and post-deploy verification passed. The
-acceptance record proves 11/11 monitoring checks, 19 passing read-only smoke
-checks with two intentional skips, HTTP 200 readiness, and zero observed
-runtime errors. The public funnel, canonical Neon persistence, deterministic
-scoring/routing, Better Auth Lead Center boundary, notification outbox, and
-test/KPI exclusions are live.
+Run the resolver immediately before an operational decision. It validates
+receipt integrity and proves exact GitHub source/tree/PR/deployment, Vercel
+project/target/source/alias, required verifier results, HTTP health, and Ready
+rollback agreement. A contradiction is a hard stop and is never repaired
+automatically.
 
-The PR #281 release approval and the earlier secure database-credential redeploy
-approval are consumed. Neither can authorize another merge, deployment,
-environment change, database operation, WordPress edit, message, publication,
-or deletion.
+Historical PR #282, #281, #280, and credential-redeploy approvals are consumed.
+None can authorize another merge, deployment, environment change, database
+operation, WordPress edit, message, publication, or deletion.
 
-## Current release stack
+## Historical Phase E stack (accepted 2026-10-01)
 
-- PR #281 is accepted Production. Its exact merge-and-deploy gate is consumed;
-  no application candidate or reusable release gate is active.
+- PR #281 was the accepted Production snapshot at the time. Its exact
+  merge-and-deploy gate is consumed and is not current-state authority.
 - Final-head Release Gate `36785767916`, protected no-write/browser run
   `36786151363`, main Release Gate `36795930424`, post-deploy verification
   `36796044756`, recurring monitors, and the zero-error runtime window pass.
@@ -99,8 +99,8 @@ or deletion.
 
 ## Operating source order
 
-When evidence conflicts, use authenticated live state, then
-`config/current-release-authority.json`, `CURRENT_RELEASE_AUTHORITY.md`, this
+When evidence conflicts, use the authenticated resolver output, then
+`config/release-authority-policy.json`, `CURRENT_RELEASE_AUTHORITY.md`, this
 file, `PRODUCTION_LAUNCH_GATE.md`, `GO_LIVE_RUNBOOK.md`,
 `OWNER_APPROVAL_QUEUE.md`, and `KNOWN_BLOCKERS.md`. Record new evidence instead
 of following stale chronological copy.

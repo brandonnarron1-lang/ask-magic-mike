@@ -1,5 +1,10 @@
 # Known Operating Constraints
 
+Current release identity is resolved from authenticated external evidence using
+`pnpm release:authority:resolve`; tracked policy is
+`config/release-authority-policy.json`. Any PR/deployment identifiers below are
+dated historical context unless the resolver returns them now.
+
 Updated 2026-10-01. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
@@ -36,16 +41,12 @@ specific expansions; they do not invalidate the live lead pipe.
 
 ## Current release constraint
 
-- Current accepted Production is PR #281 merge
-  `a3a0c235decab5a8e9209d983358d200a36ca979`, tree
-  `7c8b8395e3cbf4b31b81d52b05add21894f0911e`, on deployment
-  `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`; prior PR #280 deployment
-  `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` is immediate rollback. PR #281's
-  application gate, the credential-redeploy approval, and every earlier
-  completed gate are consumed.
-- Exact-tree hosted release and post-deploy verification, the 11-check
-  Production monitor, 19-pass read-only smoke, and runtime log window pass.
-- No application candidate or reusable application release gate is active.
+- Accepted Production must resolve from the newest valid receipt with GitHub,
+  Vercel, canonical alias, health, verifier, and Ready rollback agreement.
+- A missing or contradictory receipt is a hard stop, not authority to fall back
+  to a dated PR/deployment paragraph.
+- Historical application and credential-redeploy gates are consumed. The
+  source policy's candidate field is the only source-local application gate.
 - PR #238 is an applied five-migration receipt. PRs #244 and #245 are stale
   stacked review artifacts superseded by the current reconciliation and clean
   mainline port; none of their historical gates may be replayed.

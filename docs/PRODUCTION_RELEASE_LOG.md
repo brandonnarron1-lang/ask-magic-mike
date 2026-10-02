@@ -1,5 +1,9 @@
 # Production Release Log
 
+This file is chronological history, not current authority. Stable policy lives
+in `config/release-authority-policy.json`; resolve the latest accepted
+deployment-generated receipt with `pnpm release:authority:resolve`.
+
 ## [PR #281] Phase E WordPress activation hardening
 
 **Merged:** 2026-10-01

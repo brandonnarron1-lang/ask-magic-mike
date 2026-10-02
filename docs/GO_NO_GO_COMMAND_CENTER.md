@@ -2,8 +2,9 @@
 
 <!-- amm-current-operations-v1 -->
 
-Updated 2026-10-01. This is the current operator decision surface. It reads
-release identity from `config/current-release-authority.json`, uses Neon for
+Updated 2026-10-02. This is the current operator decision surface. Stable
+policy lives in `config/release-authority-policy.json`; it reads current release
+identity from `pnpm release:authority:resolve`, uses Neon for
 durable Production data, and uses Better Auth plus server-side RBAC for the
 Lead Center. Exact pending actions are in `OWNER_APPROVAL_QUEUE.md`; capability
 limits are in `KNOWN_BLOCKERS.md`.
@@ -19,15 +20,16 @@ paid campaign, or deletion.
 
 ## §2 — Accepted Production
 
-- PR #281
-- Merge: `a3a0c235decab5a8e9209d983358d200a36ca979`
-- Tree: `7c8b8395e3cbf4b31b81d52b05add21894f0911e`
-- Deployment: `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`
-- Canonical URL: `https://www.askmagicmike.com`
-- Immediate application rollback: `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`
+Resolve immediately before the decision. Require `status: accepted`, all
+resolver checks true, canonical `https://www.askmagicmike.com`, and a Ready
+rollback. The command must exit zero:
 
-The PR #281 release and secure database-credential redeploy approvals are
-consumed. They cannot authorize another action.
+```bash
+pnpm release:authority:resolve
+```
+
+No consumed release or credential-redeploy approval can authorize another
+action.
 
 ## §3 — Proven operating layers
 
@@ -45,8 +47,8 @@ consumed. They cannot authorize another action.
 
 ## §4 — Current release queue
 
-No application candidate or reusable application release gate is active. PR
-#281 is accepted Production and its gate is consumed. PR #248 remains preserved
+No reusable historical application release gate is active. The source policy's
+candidate field controls whether one newly reviewed gate exists. PR #248 remains preserved
 Connector lineage and PR #279 remains preserved notification lineage; their
 prior gates are invalid. Any future code, WordPress, Neon, environment,
 message, publication, or data action requires a newly reviewed, action-specific
@@ -147,7 +149,7 @@ Use `CONTROLLED_TRAFFIC_ACTIVATION.md` for staged expansion and
 ```text
 Operator: ____________________
 Timestamp: ___________________
-Accepted Production matches config/current-release-authority.json: [ ]
+Accepted Production resolves with every authenticated receipt check true: [ ]
 Launch authority result: GO_CONTROLLED_TRAFFIC_READY [ ]
 Canonical Neon health/readiness: [ ]
 Better Auth anonymous and authorized boundaries verified: [ ]

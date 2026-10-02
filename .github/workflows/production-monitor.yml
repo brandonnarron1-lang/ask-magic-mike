@@ -11,6 +11,11 @@ on:
         required: false
         type: string
         default: "post_deploy"
+      expected_release_sha:
+        description: "Exact merge commit the canonical Production alias must serve"
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -43,6 +48,7 @@ jobs:
           MONITOR_MAX_ATTEMPTS: "3"
           MONITOR_RETRY_DELAY_MS: "2000"
           MONITOR_TRIGGER: ${{ inputs.trigger_kind || github.event_name }}
+          MONITOR_EXPECTED_RELEASE_SHA: ${{ inputs.expected_release_sha || '' }}
           TARGET_URL: https://www.askmagicmike.com
         run: node scripts/monitor-production.mjs
 

@@ -5,156 +5,67 @@ import { describe, expect, it } from "vitest";
 
 import {
   CURRENT_APPLICATION_RELEASE_GATE,
-  CURRENT_RELEASE_AUTHORITY,
-} from "../../app/lib/growth/current-release-authority";
+  RELEASE_AUTHORITY_POLICY,
+} from "../../app/lib/growth/release-authority-policy";
+import { validateReleaseAuthorityPolicy } from "../../scripts/lib/release-authority-receipt.mjs";
 
 const readRepoFile = (name: string) =>
   readFileSync(resolve(process.cwd(), name), "utf8");
 
-const productionCommit = "a3a0c235decab5a8e9209d983358d200a36ca979";
-const productionDeployment = "dpl_8488csXCtbfHMMZUF6KDQRiJVwTk";
-const productionRollback = "dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ";
-const runtimeRedeployDeployment = "dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe";
-const runtimeRedeploySource = "dpl_E3Pob3TjWdxN9u4VK9xHZC61667g";
-const productionTree = "7c8b8395e3cbf4b31b81d52b05add21894f0911e";
-const reviewedHead = "8c493aa4a36b96f21d8fe380dcfa781ca0a4c68e";
-const consumedApplicationGate =
-  "APPROVE PHASE E WORDPRESS ACTIVATION HARDENING PR 281 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
-const priorProductionCommit = "fa1d0fb077882309970b801bbdfaa756107c2104";
-const priorProductionDeployment = "dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ";
-const priorProductionTree = "d9533274418430b750a87b8259902cddff5b2937";
-const priorReviewedHead = "0b70701c46a7228b075e9630576df5188f5d9c62";
-const priorProductionRollback = "dpl_aepoH5pzDwPMkerbrp9YekzVrdKD";
-const consumedPriorApplicationGate =
-  "APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
-const consumedCutoverGate =
-  "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT";
-
-describe("current application release authority", () => {
-  it("binds accepted Production to the released PR 281 source and deployment", () => {
-    expect(CURRENT_RELEASE_AUTHORITY.schemaVersion).toBe(8);
-    expect(CURRENT_RELEASE_AUTHORITY.production).toMatchObject({
-      pr: 281,
-      reviewedHead,
-      mergeCommit: productionCommit,
-      tree: productionTree,
-      deploymentId: productionDeployment,
-      canonicalUrl: "https://www.askmagicmike.com",
-      status: "accepted",
-      rollbackDeploymentId: productionRollback,
-      approval: {
-        phrase: consumedApplicationGate,
-        status: "consumed",
-      },
-      releaseGate: { runId: 36795930424, status: "success" },
-      postDeployVerification: { runId: 36796044756, status: "success" },
-      acceptanceVerification: {
-        monitorPassed: 11,
-        monitorFailed: 0,
-        smokePassed: 19,
-        smokeSkipped: 2,
-        smokeFailed: 0,
-        runtimeErrorCount: 0,
-        readinessStatus: 200,
-      },
+describe("release authority policy", () => {
+  it("separates source policy from accepted Production evidence", () => {
+    expect(validateReleaseAuthorityPolicy(RELEASE_AUTHORITY_POLICY)).toBe(
+      RELEASE_AUTHORITY_POLICY,
+    );
+    expect(RELEASE_AUTHORITY_POLICY.schemaVersion).toBe(1);
+    expect(RELEASE_AUTHORITY_POLICY.authorityModel).toEqual({
+      policy: "source_authored",
+      candidate: "review_time_only",
+      acceptedProduction: "deployment_generated_receipt",
+      resolver: "authenticated_fail_closed",
     });
-    expect(
-      CURRENT_RELEASE_AUTHORITY.production.productionMonitorRuns.map(
-        ({ runId }) => runId,
-      ),
-    ).toEqual([
-      36799551647,
-      36825831303,
-      36862584883,
-      36907081177,
-      36948549028,
-    ]);
-    expect(CURRENT_RELEASE_AUTHORITY.production.runtimeRedeploy).toMatchObject({
-      approval: {
-        phrase: "APPROVE SECURE ASK MAGIC MIKE DATABASE_URL REPLACEMENT AND PRODUCTION REDEPLOYMENT",
-        status: "consumed",
-      },
-      sourceDeploymentId: runtimeRedeploySource,
-      deploymentId: runtimeRedeployDeployment,
-      reason: "production_database_url_replacement",
-      target: {
-        provider: "neon",
-        project: "bitter-star-20214385",
-        branch: "br-round-base-auh6h2wd",
-        database: "neondb",
-        role: "service_role",
-        connectionPooling: true,
-      },
-      migrationCount: 0,
-      databaseWriteCount: 0,
-      verification: {
-        monitorStatus: "passed",
-        monitorPassed: 11,
-        monitorFailed: 0,
-        smokePassed: 19,
-        smokeSkipped: 2,
-        smokeFailed: 0,
-        runtimeErrorCount: 0,
-        readinessStatus: 200,
-      },
-    });
-  });
-
-  it("retains PR 280 as the prior release and exposes no reusable candidate gate", () => {
-    expect(CURRENT_RELEASE_AUTHORITY.priorApplicationRelease).toMatchObject({
-      pr: 280,
-      reviewedHead: priorReviewedHead,
-      mergeCommit: priorProductionCommit,
-      tree: priorProductionTree,
-      deploymentId: priorProductionDeployment,
-      status: "superseded_by_pr281",
-      rollbackDeploymentId: priorProductionRollback,
-      approval: {
-        phrase: consumedPriorApplicationGate,
-        status: "consumed",
-      },
-      releaseGate: { runId: 36694290376, status: "success" },
-      postDeployVerification: { runId: 36694479286, status: "success" },
-    });
-    expect(CURRENT_RELEASE_AUTHORITY.candidate).toBeNull();
-    expect(CURRENT_RELEASE_AUTHORITY.reviewVehicle).toBeNull();
+    expect(RELEASE_AUTHORITY_POLICY).not.toHaveProperty("production");
+    expect(RELEASE_AUTHORITY_POLICY.candidate).toBeNull();
+    expect(RELEASE_AUTHORITY_POLICY.reviewVehicle).toBeNull();
     expect(CURRENT_APPLICATION_RELEASE_GATE).toBeNull();
-    expect(CURRENT_RELEASE_AUTHORITY.production.approval).toMatchObject({
-      phrase: consumedApplicationGate,
-      status: "consumed",
-    });
   });
 
-  it("retains the PR 238 database cutover as a consumed, hash-verified receipt", () => {
-    const cutover = CURRENT_RELEASE_AUTHORITY.releasedCutover;
-    expect(cutover).toMatchObject({
-      pr: 238,
-      status: "applied_and_verified",
-      approval: {
-        phrase: consumedCutoverGate,
-        status: "consumed",
-      },
-      productionTarget: {
-        provider: "neon",
-        project: "bitter-star-20214385",
-        branch: "br-round-base-auh6h2wd",
-        database: "neondb",
-      },
-      importGates: {
-        marketingSpend: false,
-        organicSearch: false,
-        localProfilePerformance: false,
-      },
-      postflight: {
-        migrationLedgerRowsPerVersion: 1,
-        receiptRows: 0,
-        existingCountsUnchanged: true,
-        privilegeChecksPassed: true,
-        healthChecksPassed: true,
-      },
+  it("keeps consumed approvals historical and non-replayable", () => {
+    expect(
+      RELEASE_AUTHORITY_POLICY.approvalPolicy.historicalApprovalReplayAllowed,
+    ).toBe(false);
+    expect(RELEASE_AUTHORITY_POLICY.consumedApprovals.map(({ pr }) => pr)).toEqual([
+      282,
+      281,
+      280,
+      238,
+    ]);
+    expect(
+      new Set(
+        RELEASE_AUTHORITY_POLICY.consumedApprovals.map(({ phrase }) => phrase),
+      ).size,
+    ).toBe(RELEASE_AUTHORITY_POLICY.consumedApprovals.length);
+  });
+
+  it("preserves PR 282 as receipt bootstrap and older releases as history", () => {
+    expect(RELEASE_AUTHORITY_POLICY.receiptStore.bootstrap).toMatchObject({
+      kind: "github_pr_comment",
+      pr: 282,
+      commentId: 5952265961,
+      status: "accepted_historical_bootstrap",
     });
+    expect(RELEASE_AUTHORITY_POLICY.historicalApplicationReleases).toMatchObject([
+      { pr: 282, status: "bootstrap_receipt_source" },
+      { pr: 281, status: "superseded_by_pr282" },
+      { pr: 280, status: "superseded_by_pr281" },
+    ]);
+  });
+
+  it("retains the PR 238 migration receipt and exact migration hashes", () => {
+    const cutover = RELEASE_AUTHORITY_POLICY.releasedCutover;
+    expect(cutover.pr).toBe(238);
+    expect(cutover.status).toBe("applied_and_verified");
     expect(cutover.migrations).toHaveLength(5);
-    expect(new Set(cutover.migrations.map(({ version }) => version)).size).toBe(5);
     for (const migration of cutover.migrations) {
       const bytes = readFileSync(resolve(process.cwd(), migration.file));
       expect(createHash("sha256").update(bytes).digest("hex")).toBe(
@@ -163,42 +74,37 @@ describe("current application release authority", () => {
     }
   });
 
-  it("keeps protected runtime copy fail-closed with no replayable PR 238 gate", () => {
-    const adapter = readRepoFile("app/lib/growth/current-release-authority.ts");
+  it("keeps runtime release gating source-local and network-free", () => {
+    const adapter = readRepoFile("app/lib/growth/release-authority-policy.ts");
     const ledger = readRepoFile("app/lib/growth/capability-ledger.ts");
-    expect(adapter).toContain("CURRENT_APPLICATION_RELEASE_GATE");
     expect(adapter).toContain("candidate?.approvalGate ?? null");
+    expect(adapter).not.toContain("fetch(");
+    expect(adapter).not.toContain("CURRENT_RELEASE_AUTHORITY");
     expect(ledger).toContain("CURRENT_APPLICATION_RELEASE_GATE");
-    expect(ledger).not.toContain(consumedCutoverGate);
-    expect(ledger).not.toContain(consumedApplicationGate);
-    expect(ledger).not.toContain(consumedPriorApplicationGate);
+    expect(ledger).toContain("pnpm release:authority:resolve");
+    for (const { phrase } of RELEASE_AUTHORITY_POLICY.consumedApprovals) {
+      expect(ledger).not.toContain(phrase);
+    }
   });
 
-  it("places current truth ahead of the preserved chronological ledger", () => {
-    const currentAuthority = readRepoFile("docs/CURRENT_RELEASE_AUTHORITY.md");
+  it("makes operational docs resolve current Production instead of predicting it", () => {
     for (const name of [
       "README.md",
+      "docs/CURRENT_RELEASE_AUTHORITY.md",
+      "docs/CURRENT_STATE_RECONCILIATION.md",
       "docs/CANONICAL_PRODUCTION_STACK.md",
       "docs/IMPLEMENTATION_STATUS.md",
-      "docs/KNOWN_BLOCKERS.md",
       "docs/OWNER_APPROVAL_QUEUE.md",
+      "docs/KNOWN_BLOCKERS.md",
       "docs/ROLLBACK_PLAN.md",
+      "docs/PRODUCTION_RELEASE_LOG.md",
     ]) {
-      const currentSection = readRepoFile(name).slice(0, 2_500);
-      expect(currentSection).toContain(productionCommit);
-      expect(currentSection).toContain(productionDeployment);
-      expect(currentSection).toMatch(/PR #?281|PR \[#281\]/);
-      expect(currentSection).not.toMatch(/PR #238[^\n]{0,180}(?:single|current|active)[^\n]{0,80}candidate/i);
+      const currentSection = readRepoFile(name).slice(0, 3_500);
+      expect(currentSection).toContain("config/release-authority-policy.json");
+      expect(currentSection).toContain("pnpm release:authority:resolve");
     }
-    expect(currentAuthority).toContain(reviewedHead);
-    expect(currentAuthority).toContain(productionTree);
-    expect(currentAuthority).toContain(consumedApplicationGate);
-    expect(currentAuthority).toContain(priorProductionCommit);
-    expect(currentAuthority).toContain(priorProductionTree);
-    expect(currentAuthority).toContain(consumedPriorApplicationGate);
-    expect(readRepoFile("docs/OWNER_APPROVAL_QUEUE.md")).toContain(consumedApplicationGate);
-    expect(currentAuthority).toMatch(/PR \[#248\][\s\S]*Connector 1\.1\.0[\s\S]*active/i);
-    expect(currentAuthority).toMatch(/PR (?:\[#280\]|#280)[\s\S]*consumed/i);
-    expect(currentAuthority).toMatch(/PR #238[\s\S]*consumed/i);
+    expect(readRepoFile("docs/CURRENT_RELEASE_AUTHORITY.md")).toMatch(
+      /historical[\s\S]*PR #282/i,
+    );
   });
 });

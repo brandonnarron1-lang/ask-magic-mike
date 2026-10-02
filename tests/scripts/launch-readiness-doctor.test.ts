@@ -23,9 +23,9 @@ import {
   parseVercelProductionEnvNames,
   classifyEmailProviderPresence,
   classifyFailClosedGatePresence,
-  parseCurrentProductionAuthority,
-  loadCurrentProductionAuthority,
-  releaseLogMatchesCurrentProduction,
+  parseReleaseAuthorityPolicy,
+  loadReleaseAuthorityPolicy,
+  parseProductionAuthorityResolution,
   CURRENT_OPERATING_DOC_MARKER,
   CURRENT_OPERATING_DOCS,
   STALE_OPERATING_DOC_PATTERNS,
@@ -475,83 +475,39 @@ describe("releaseLogMentionsPr", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Canonical current Production release authority
+// Source policy and externally resolved Production authority
 // ---------------------------------------------------------------------------
 
-describe("current Production release authority", () => {
-  const authority = {
-    schemaVersion: 8,
-    pr: 281,
-    mergeCommit: "a3a0c235decab5a8e9209d983358d200a36ca979",
-    tree: "7c8b8395e3cbf4b31b81d52b05add21894f0911e",
-    deploymentId: "dpl_8488csXCtbfHMMZUF6KDQRiJVwTk",
-    status: "accepted",
-  };
-
-  it("loads the real canonical manifest and exact accepted Production identity", () => {
-    const result = loadCurrentProductionAuthority(process.cwd());
-    expect(result).toEqual({ ok: true, authority });
+describe("release authority architecture", () => {
+  it("loads source policy without embedding current Production", () => {
+    const result = loadReleaseAuthorityPolicy(process.cwd());
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.reason);
+    expect(result.policy).not.toHaveProperty("production");
+    expect(result.policy.candidate).toBeNull();
+    expect(result.policy.receiptStore.kind).toBe("github_release_asset");
   });
 
-  it("matches the real release log only when all Production identifiers agree", () => {
-    const logPath = process.cwd() + "/docs/PRODUCTION_RELEASE_LOG.md";
-    expect(releaseLogMatchesCurrentProduction(logPath, authority)).toEqual({ ok: true });
-  });
-
-  it("rejects invalid JSON and malformed Production authority", () => {
-    expect(() => parseCurrentProductionAuthority("not-json")).toThrow(
-      "current_release_authority_invalid_json",
+  it("rejects invalid JSON and a self-referential policy", () => {
+    expect(() => parseReleaseAuthorityPolicy("not-json")).toThrow(
+      "release_authority_policy_invalid_json",
     );
-    expect(() => parseCurrentProductionAuthority({
-      schemaVersion: 7,
-      production: {
-        pr: 247,
-        mergeCommit: "short",
-        tree: authority.tree,
-        deploymentId: authority.deploymentId,
-        status: "candidate",
-      },
-    })).toThrow("current_release_authority_shape_invalid");
+    const real = loadReleaseAuthorityPolicy(process.cwd());
+    if (!real.ok) throw new Error(real.reason);
+    expect(() =>
+      parseReleaseAuthorityPolicy({ ...real.policy, schemaVersion: 2 }),
+    ).toThrow("release_policy_schema_unsupported");
   });
 
-  it("rejects historical mentions and mismatched release identifiers", () => {
-    const { writeFileSync } = require("fs");
-    const path = "/tmp/test-current-production-release-log.md";
-    writeFileSync(path, [
-      "# Production Release Log",
-      "",
-      "PR #281 was accepted.",
-      "",
-      "## [PR #281] Wrong release identity",
-      "",
-      `Production commit: ${authority.mergeCommit}`,
-      `Production tree: ${authority.tree}`,
-      "Deployment: dpl_wrong",
-    ].join("\n"));
-
-    const result = releaseLogMatchesCurrentProduction(path, authority);
-    expect(result.ok).toBe(false);
-    expect(result.reason).toContain("missing deployment");
-  });
-
-  it("accepts one exact current-PR block even when older releases follow", () => {
-    const { writeFileSync } = require("fs");
-    const path = "/tmp/test-current-production-release-log-exact.md";
-    writeFileSync(path, [
-      "# Production Release Log",
-      "",
-      "## [PR #281] Current release",
-      "",
-      `Production commit: ${authority.mergeCommit}`,
-      `Production tree: ${authority.tree}`,
-      `Deployment: ${authority.deploymentId}`,
-      "",
-      "## [PR #181] Historical release",
-      "",
-      "Preserved for chronology.",
-    ].join("\n"));
-
-    expect(releaseLogMatchesCurrentProduction(path, authority)).toEqual({ ok: true });
+  it("rejects an unaccepted or unchecked authority resolution", () => {
+    const real = loadReleaseAuthorityPolicy(process.cwd());
+    if (!real.ok) throw new Error(real.reason);
+    expect(() =>
+      parseProductionAuthorityResolution(
+        { schemaVersion: "amm.production-authority-resolution.v1", status: "rejected", checks: [] },
+        real.policy,
+      ),
+    ).toThrow("production_authority_resolution_invalid");
   });
 });
 
@@ -560,22 +516,13 @@ describe("current Production release authority", () => {
 // ---------------------------------------------------------------------------
 
 describe("current operator-document contract", () => {
-  const authority = {
-    schemaVersion: 8,
-    pr: 281,
-    mergeCommit: "a3a0c235decab5a8e9209d983358d200a36ca979",
-    tree: "7c8b8395e3cbf4b31b81d52b05add21894f0911e",
-    deploymentId: "dpl_8488csXCtbfHMMZUF6KDQRiJVwTk",
-    status: "accepted",
-  };
-
-  it("keeps every real operator control surface on canonical current truth", () => {
-    expect(validateCurrentOperatingDocs(process.cwd(), authority)).toEqual([]);
+  it("keeps every real operator control surface on the resolver contract", () => {
+    expect(validateCurrentOperatingDocs(process.cwd())).toEqual([]);
   });
 
   it("requires all seven current operating documents", () => {
     expect(CURRENT_OPERATING_DOCS).toHaveLength(7);
-    expect(validateCurrentOperatingDocs("/does/not/exist", authority)).toEqual(
+    expect(validateCurrentOperatingDocs("/does/not/exist")).toEqual(
       CURRENT_OPERATING_DOCS.map((doc) => ({ doc, issue: "missing" })),
     );
   });
@@ -593,34 +540,31 @@ describe("current operator-document contract", () => {
     }
   });
 
-  it("fails a marked fixture when its command center carries the wrong deployment", () => {
+  it("fails a marked fixture when it omits the resolver command", () => {
     const { mkdirSync, rmSync, writeFileSync } = require("fs");
     const root = "/tmp/test-current-operating-docs";
     rmSync(root, { recursive: true, force: true });
     mkdirSync(`${root}/docs`, { recursive: true });
     const common = [
       CURRENT_OPERATING_DOC_MARKER,
-      "config/current-release-authority.json",
+      "config/release-authority-policy.json",
       "Neon",
       "Better Auth",
       "OWNER_APPROVAL_QUEUE.md",
       "KNOWN_BLOCKERS.md",
     ].join("\n");
     for (const doc of CURRENT_OPERATING_DOCS) {
-      const identity = [
-        `PR #${authority.pr}`,
-        authority.mergeCommit,
-        authority.tree,
-        doc.endsWith("GO_NO_GO_COMMAND_CENTER.md") ? "dpl_wrong" : authority.deploymentId,
+      const contract = [
+        doc.endsWith("GO_NO_GO_COMMAND_CENTER.md") ? "resolver intentionally missing" : "pnpm release:authority:resolve",
         "GO_CONTROLLED_TRAFFIC_READY",
       ].join("\n");
-      writeFileSync(`${root}/${doc}`, `${common}\n${identity}\n`);
+      writeFileSync(`${root}/${doc}`, `${common}\n${contract}\n`);
     }
 
-    const issues = validateCurrentOperatingDocs(root, authority);
+    const issues = validateCurrentOperatingDocs(root);
     expect(issues).toContainEqual({
       doc: "docs/GO_NO_GO_COMMAND_CENTER.md",
-      issue: `production_identity_missing:${authority.deploymentId}`,
+      issue: "required_token_missing:pnpm release:authority:resolve",
     });
   });
 });

@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-10-02 — Deployment-generated release authority receipts
+
+- Replaced the self-referential tracked Production manifest with stable
+  `config/release-authority-policy.json`, a source-local optional candidate
+  gate, and authenticated deployment-generated acceptance receipts.
+- Added deterministic receipt generation, integrity hashing, idempotent GitHub
+  Release publication, PR #282 bootstrap normalization, and a fail-closed
+  GitHub/Vercel/alias/health/rollback resolver.
+- Bound canonical health checks to the non-sensitive Vercel source SHA and made
+  the post-deploy monitor reject a canonical alias serving another commit.
+- Added pre-merge release-intent validation so migration and external-mutation
+  declarations fail before merge; the same declaration is rechecked when the
+  Production receipt is generated.
+- Removed runtime dependence on current deployment literals. Public behavior,
+  Neon, WordPress, notifications, DNS, providers, and NellySelly are unchanged.
+
 ## 2026-10-01 — Phase E Home Value placement and delivery proof complete
 
 - Reconciled machine-readable release authority to accepted PR #281 merge

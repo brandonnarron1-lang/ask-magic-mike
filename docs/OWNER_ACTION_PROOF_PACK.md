@@ -2,9 +2,10 @@
 
 <!-- amm-current-operations-v1 -->
 
-Updated 2026-09-30. This template records evidence for gated operations without
-storing credentials or personal data. Release identity comes from
-`config/current-release-authority.json`; the canonical database is Neon and the
+Updated 2026-10-02. This template records evidence for gated operations without
+storing credentials or personal data. Stable release policy is
+`config/release-authority-policy.json`; capture current identity from
+`pnpm release:authority:resolve`. The canonical database is Neon and the
 staff boundary is Better Auth plus server-side RBAC. Use
 `OWNER_APPROVAL_QUEUE.md` for the exact current gate and `KNOWN_BLOCKERS.md` for
 capability limits.
@@ -14,13 +15,14 @@ capability limits.
 Record only public identifiers:
 
 ```text
-Accepted PR: 280
-Merge commit: fa1d0fb077882309970b801bbdfaa756107c2104
-Production tree: d9533274418430b750a87b8259902cddff5b2937
-Production deployment: dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ
-Application rollback: dpl_aepoH5pzDwPMkerbrp9YekzVrdKD
+Resolver checked at: ____________________
+Accepted PR: ____________________
+Merge commit: ____________________
+Production tree: ____________________
+Production deployment: ____________________
+Application rollback: ____________________
 Canonical URL: https://www.askmagicmike.com
-Release approval status: consumed
+Resolver result/check count: accepted / ____________________
 ```
 
 Do not place database connections, provider keys, admin credentials, session
@@ -30,21 +32,21 @@ this file.
 ## 2. Application candidate evidence
 
 ```text
-PR: 281 (sealed application candidate)
-Base branch and commit: main @ fa1d0fb077882309970b801bbdfaa756107c2104
-Implementation/final reviewed head: 3b1853b535000e09b6e9c40221f5898bd87a92f9
-Tree: 23bc513823874e629cfc525c2832bbad4282f480
-Migration count: 0
-Environment changes: 0
-External mutations: 0
+PR: ____________________
+Base branch and commit: ____________________
+Implementation/final reviewed head: ____________________
+Tree: ____________________
+Migration count: ____________________
+Environment changes: ____________________
+External mutations: ____________________
 Vercel project: eyes-up-industries/ask-magic-mike
-Immutable Preview deployment: dpl_4iWCBVSoqFbvffq7KAWhteQBTX6Y
-Preview status: READY
-Rollback deployment: dpl_aepoH5pzDwPMkerbrp9YekzVrdKD
-Hosted Release Gate URL/result: https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36784156065 — PASS
-Protected Preview/browser URL/result: https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/36784678748 — PASS
-Local Node version: 24.18.0
-Release gate result: PASS — 293 files / 3,605 tests; typecheck, lint, build, routes, safety, isolation
+Immutable Preview deployment: ____________________
+Preview status: READY / NOT READY
+Rollback deployment from resolver: ____________________
+Hosted Release Gate URL/result: ____________________
+Protected Preview/browser URL/result: ____________________
+Local Node version: 24.x
+Release gate result: ____________________
 Dependency audit: PASS — no known production vulnerability
 Secret scan: PASS — no staged secret finding
 ```
@@ -196,7 +198,7 @@ No application, WordPress, or database gate authorizes this section.
 ```text
 Operator: ____________________
 Timestamp: ____________________
-Observed state matches config/current-release-authority.json: [ ]
+Observed state matches authenticated resolver output: [ ]
 Launch authority result: ____________________
 Neon health/readiness: [ ]
 Better Auth/RBAC boundary: [ ]

@@ -4,7 +4,8 @@
 
 Updated 2026-09-01. Ask Magic Mike is already live. This runbook governs
 incremental application releases and controlled owned-traffic activation. It
-derives release identity from `config/current-release-authority.json`, uses
+uses stable policy from `config/release-authority-policy.json` and resolves
+current Production with `pnpm release:authority:resolve`; it uses
 Neon as the canonical database, and uses Better Auth plus server-side RBAC for
 staff access. Current gates are in `OWNER_APPROVAL_QUEUE.md`; capability limits
 are in `KNOWN_BLOCKERS.md`.
@@ -12,7 +13,7 @@ are in `KNOWN_BLOCKERS.md`.
 ## 1. Resolve the exact change
 
 1. Confirm the canonical repository, protected `main`, current Production
-   deployment, and rollback deployment from the release-authority manifest.
+   deployment, and rollback deployment from the authenticated resolver output.
 2. Record the candidate PR, immutable head, tree, base, migration count,
    environment delta, external-action count, and Vercel Preview ID.
 3. Confirm the candidate is ordered behind every prerequisite. A downstream

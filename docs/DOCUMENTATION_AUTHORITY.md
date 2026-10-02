@@ -1,15 +1,16 @@
 # Documentation Authority
 
-Updated 2026-09-29. This register prevents dated build packets from overriding
+Updated 2026-10-02. This register prevents dated build packets from overriding
 the observed production system.
 
 ## Operating source of truth
 
 Use these files for current decisions, in this order:
 
-1. `CURRENT_RELEASE_AUTHORITY.md` and
-   `config/current-release-authority.json` — accepted Production, consumed
-   receipts, the current review vehicle, and whether an application gate exists.
+1. `config/release-authority-policy.json`, `CURRENT_RELEASE_AUTHORITY.md`, and
+   `RELEASE_AUTHORITY_RECEIPTS.md` — stable policy, consumed receipts, current
+   review vehicle, and the authenticated current-state mechanism. Run
+   `pnpm release:authority:resolve` for accepted Production.
    A candidate gate applies only to the exact bound PR/tree and listed action;
    it never implies authority for an external system.
 2. `CURRENT_STATE_RECONCILIATION.md` — observed repository, deployment,
@@ -35,18 +36,11 @@ Use these files for current decisions, in this order:
    GitHub checks and matching Vercel deployment metadata outrank a run ID frozen
    into documentation.
 
-Current release authority is intentionally singular: accepted PR #280 merge
-`fa1d0fb077882309970b801bbdfaa756107c2104`, tree
-`d9533274418430b750a87b8259902cddff5b2937`, on deployment
-`dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` is the Production baseline; deployment
-`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is immediate application rollback. Phase E
-is an unsealed review branch until its exact PR/head/tree and hosted proof are
-recorded, so no application gate is currently requestable. PR #248 remains
-preserved connector lineage whose previous gate is invalid. PR #238 is a
-consumed cutover receipt. The PR #280 release approval,
-credential-redeploy approval, and every historical component/application gate
-are consumed and cannot authorize a new merge, deployment, mutation, send, or
-publication.
+Current release authority is singular but external to application source. The
+newest valid deployment-generated receipt must agree with authenticated
+GitHub, Vercel, canonical alias, health, verifier, and rollback evidence.
+Tracked historical receipts remain chronology only; consumed approvals cannot
+authorize a new merge, deployment, mutation, send, or publication.
 
 `QA_EVIDENCE_CURRENT.md` is a cumulative 2026-08-14-era evidence packet with
 later appendices. Preserve it as provenance, but do not use its first baseline
@@ -91,16 +85,17 @@ deployment authority. Never delete them solely because the system advanced.
 
 ## Update rule
 
-Any release that changes database identity, auth mode, provider state, domain
-mapping, WordPress allowlists, or a production approval gate must update the
-operating source-of-truth files in the same PR. Values and secrets are never
-copied into documentation.
+Any release that changes stable policy, database identity, auth mode, provider
+state, domain mapping, WordPress allowlists, or a candidate approval gate must
+update the relevant operating files in the same PR. Final merge/deployment and
+post-deploy facts belong only in the generated receipt; they do not require a
+follow-up source commit. Values and secrets are never copied into documentation.
 
 The seven current operator documents carry the
 `amm-current-operations-v1` marker and are enforced by both
 `scripts/amm/launch-readiness-doctor.mjs` and
 `scripts/amm/launch-authority-report.mjs`. The checks fail closed when a
-required document is missing, loses its marker or required current-system
-references, names the wrong release identity, or contains a known retired
+required document is missing, loses its marker or required resolver/policy
+references, or contains a known retired
 operator instruction. Historical files remain available for provenance but do
 not satisfy that contract.

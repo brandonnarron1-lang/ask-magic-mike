@@ -4,7 +4,8 @@
  *
  * Read-only Go/No-Go authority report for Ask Magic Mike.
  * Imports pure helpers from launch-readiness-doctor.mjs and adds
- * authority-specific checks against the canonical current-release manifest.
+ * authority-specific checks against source policy and an optional,
+ * authenticated Production receipt resolution.
  *
  * No network calls. No secrets read. No .env files read.
  * No production mutations.
@@ -43,8 +44,8 @@ import {
   parseVercelProductionEnvNames,
   classifyEmailProviderPresence,
   classifyFailClosedGatePresence,
-  loadCurrentProductionAuthority,
-  releaseLogMatchesCurrentProduction,
+  loadReleaseAuthorityPolicy,
+  parseProductionAuthorityResolution,
   CURRENT_OPERATING_DOCS,
   validateCurrentOperatingDocs,
 } from "./launch-readiness-doctor.mjs";
@@ -173,32 +174,63 @@ if (isMain) {
     }
   }
 
-  // ── Current release authority and release-log currency ──────────────────
-  console.log("\n[Release log currency]");
-  const releaseLogPath = join(ROOT, "docs/PRODUCTION_RELEASE_LOG.md");
-  const currentAuthority = loadCurrentProductionAuthority(ROOT);
-  if (!currentAuthority.ok) {
-    fail("current release authority manifest rejected", currentAuthority.reason);
+  // ── Policy and externally resolved Production receipt ──────────────────
+  console.log("\n[Release authority architecture]");
+  const releasePolicy = loadReleaseAuthorityPolicy(ROOT);
+  if (!releasePolicy.ok) {
+    fail("release authority policy rejected", releasePolicy.reason);
   } else {
-    const production = currentAuthority.authority;
     pass(
-      `current release authority loaded: PR #${production.pr}`,
-      `${production.mergeCommit.slice(0, 7)} / ${production.deploymentId}`,
+      "source-authored release policy is valid",
+      `schema ${releasePolicy.policy.schemaVersion}; accepted Production is external evidence`,
     );
-    const result = releaseLogMatchesCurrentProduction(releaseLogPath, production);
-    if (result.ok) {
-      pass(`release log matches current Production PR #${production.pr}`);
+    if (releasePolicy.policy.candidate === null) {
+      pass("no reusable application candidate gate is active");
     } else {
-      fail(`release log is stale for current Production PR #${production.pr}`, result.reason);
+      pass(
+        "one exact source-local candidate is active",
+        `PR #${releasePolicy.policy.candidate.pr}`,
+      );
     }
+  }
+
+  const resolutionArg = process.argv.indexOf("--authority-resolution");
+  if (resolutionArg >= 0) {
+    const resolutionPath = process.argv[resolutionArg + 1];
+    if (!releasePolicy.ok || !resolutionPath) {
+      fail("authenticated Production resolution cannot be checked");
+    } else {
+      try {
+        const resolution = parseProductionAuthorityResolution(
+          readFileSync(resolve(resolutionPath), "utf8"),
+          releasePolicy.policy,
+        );
+        pass(
+          "authenticated Production receipt resolves without contradiction",
+          `PR #${resolution.receipt.source.pr} / ${resolution.receipt.deployment.id}`,
+        );
+        pass("GitHub and Vercel accepted-source agreement", `${resolution.checks.length} checks`);
+        pass("rollback deployment identity is verified", resolution.receipt.rollback.deploymentId);
+      } catch (error) {
+        fail(
+          "authenticated Production resolution rejected",
+          error instanceof Error ? error.message : "resolution_invalid",
+        );
+      }
+    }
+  } else {
+    skipOwner(
+      "authenticated current Production receipt not supplied to static report",
+      "run pnpm release:authority:resolve, then pass its JSON with --authority-resolution",
+    );
   }
 
   // ── Current operator-document contract ──────────────────────────────────
   console.log("\n[Current operating documentation]");
-  if (!currentAuthority.ok) {
-    fail("operator documents cannot be verified", currentAuthority.reason);
+  if (!releasePolicy.ok) {
+    fail("operator documents cannot be verified", releasePolicy.reason);
   } else {
-    const issues = validateCurrentOperatingDocs(ROOT, currentAuthority.authority);
+    const issues = validateCurrentOperatingDocs(ROOT);
     if (issues.length === 0) {
       pass(
         "operator documents match canonical Production architecture",

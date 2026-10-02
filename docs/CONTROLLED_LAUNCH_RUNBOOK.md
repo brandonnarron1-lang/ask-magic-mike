@@ -3,9 +3,10 @@
 <!-- amm-current-operations-v1 -->
 
 Updated 2026-09-01. The funnel is already live. This runbook controls a future
-application release and any subsequent low-volume activation. Release identity
-comes from `config/current-release-authority.json`; Production persistence is
-Neon; staff access is Better Auth with server-side RBAC. Use
+application release and any subsequent low-volume activation. Stable policy is
+`config/release-authority-policy.json`; current identity comes from
+`pnpm release:authority:resolve`. Production persistence is Neon; staff access
+is Better Auth with server-side RBAC. Use
 `OWNER_APPROVAL_QUEUE.md` for exact gates and `KNOWN_BLOCKERS.md` for current
 holds.
 

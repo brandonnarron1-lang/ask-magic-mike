@@ -7,7 +7,7 @@ import {
 } from "../../app/lib/growth/capability-ledger";
 
 describe("Growth capability authority ledger", () => {
-  it("shows accepted PR 281 with no reusable application candidate", () => {
+  it("uses the resolver for accepted Production with no reusable candidate", () => {
     const ledger = buildGrowthCapabilityLedger({ currentTailInProduction: false });
 
     expect(ledger.generatedFor).toBe("preview_or_local");
@@ -23,8 +23,9 @@ describe("Growth capability authority ledger", () => {
       state: "production_live",
     });
     expect(ledger.items.find((item) => item.key === "ordered_release_train")?.approvalGate).toBeUndefined();
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 281");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("deployment-generated receipt");
     expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("No application candidate");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.evidence.join(" ")).toContain("pnpm release:authority:resolve");
     expect(ledger.items.find((item) => item.key === "ordered_release_train")?.nextAction).toContain("candidate authority null");
     expect(JSON.stringify(ledger)).not.toContain("PR 210 remains the first pending");
   });

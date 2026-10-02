@@ -1,10 +1,15 @@
 # Owner Approval Queue
 
-Updated 2026-10-01 from authenticated GitHub, Vercel, Neon, WordPress, and
+Updated 2026-10-02. Release policy is
+`config/release-authority-policy.json`; run `pnpm release:authority:resolve`
+before binding any application gate. The resolver's authenticated receipt, not
+this queue, supplies current Production and rollback identity.
+
+The queue was previously updated 2026-10-01 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
-## Current status — Phase E accepted; no immediate approval request
+## Historical Phase E status — accepted; gates consumed
 
 - PR [#281](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281)
   is merged as `a3a0c235decab5a8e9209d983358d200a36ca979`, tree
