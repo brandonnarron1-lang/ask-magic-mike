@@ -2,29 +2,29 @@
 
 ## Application
 
-Current Production is `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` at PR #280 merge
-commit `fa1d0fb077882309970b801bbdfaa756107c2104` and exact tree
-`d9533274418430b750a87b8259902cddff5b2937`. Deployment
-`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is the immediate application rollback;
-immutable source deployment `dpl_E3Pob3TjWdxN9u4VK9xHZC61667g` remains
-second-level evidence. Re-inspect deployments before any future release because
+Current Production is `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk` at PR #281 merge
+commit `a3a0c235decab5a8e9209d983358d200a36ca979` and exact tree
+`7c8b8395e3cbf4b31b81d52b05add21894f0911e`. Prior PR #280 deployment
+`dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` is the immediate application rollback;
+deployment `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` remains the second-level
+historical rollback. Re-inspect deployments before any future release because
 aliases and environment revisions can move. If smoke checks fail, stop traffic
 activation and promote the recorded prior deployment. Do not display a database
 credential, delete a deployment, change database rows, or force-push.
 
-PR #280 changed no database migration, provider configuration, or WordPress
+PR #281 changed no database migration, provider configuration, or WordPress
 surface. Its consumed gate cannot authorize later work. If the current
 application fails Production acceptance, promote
-`dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` as the immediate rollback and rerun the
+`dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` as the immediate rollback and rerun the
 read-only monitor, smoke, auth-boundary, readiness, and runtime-log checks. Do
 not alter Neon or WordPress during that application rollback.
 
-The Connector 1.1.0 plugin package is source-controlled in the Phase E
-candidate and remains offline and independently gated. A
-future WordPress upgrade must first back up the exact active plugin/options and
-use the byte-preserved 1.0.0 plugin package as its separate rollback. The PR
-#280 consumed application gate cannot authorize installation, activation, page 3952
-publication, a form submission, or a cache purge.
+Connector 1.1.0 and the reviewed page-3952 Home Value CTA are active under
+separately consumed WordPress gates. Their protected plugin and page/postmeta
+backups remain the only approved WordPress rollback sources. The PR #281
+application gate cannot authorize a plugin/page rollback, cache purge, form
+submission, or message send. Check for intervening edits before any page-level
+restore and invalidate only page 3952's cache layers when required.
 
 For cross-domain measurement, the pre-activation rollback is to leave the Ask
 Production configuration unset and keep

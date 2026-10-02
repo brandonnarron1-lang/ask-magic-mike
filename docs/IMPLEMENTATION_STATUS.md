@@ -1,42 +1,35 @@
 # Implementation Status
 
-Updated 2026-09-30.
+Updated 2026-10-01.
 
-## Current release and Phase E preparation — 2026-09-30
+## Current release and Phase E completion — 2026-10-01
 
-- **Accepted Production:** PR #280 merge
-  `fa1d0fb077882309970b801bbdfaa756107c2104` is live on deployment
-  `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` with exact accepted tree
-  `d9533274418430b750a87b8259902cddff5b2937`. The prior Ready deployment
-  `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is immediate application rollback.
+- **Accepted Production:** PR #281 merge
+  `a3a0c235decab5a8e9209d983358d200a36ca979` is live on deployment
+  `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk` with exact accepted tree
+  `7c8b8395e3cbf4b31b81d52b05add21894f0911e`. Prior PR #280 deployment
+  `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` is immediate application rollback.
 - **Post-release proof:** hosted Node 24 Release Gate
-  `36694290376`, post-deploy verification `36694479286`, the canonical
+  `36795930424`, post-deploy verification `36796044756`, the canonical
   11-check monitor, 19-pass read-only smoke, health/readiness, auth boundary,
-  and runtime error window all passed.
-- **Current application candidate:** PR #280's merge/deploy gate is exhausted.
-  Draft PR #281 is the sole sealed Phase E candidate at reviewed head
-  `3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
-  `23bc513823874e629cfc525c2832bbad4282f480`. Hosted Release Gate
-  `36784156065`, immutable Preview `dpl_4iWCBVSoqFbvffq7KAWhteQBTX6Y`, and
-  protected no-write/browser run `36784678748` pass. Its exact app-only gate is
-  in `OWNER_APPROVAL_QUEUE.md`.
-- **Reconciled Connector lineage:** Phase E ports only the reviewed Connector
-  1.1.0 source, exact 1.0.0 rollback baseline, deterministic archives, and
-  contract tests from PR #248 onto current `main`. No WordPress file has been
-  changed and no stale PR #248 release metadata is imported.
-- **Corrected readiness:** v3 holds Home Value and We Buy Homes as
-  `connector_upgrade_required` until the reviewed plugin capability is
-  publicly proven. Unreviewed WordPress placements cannot become fallback
-  recommendations.
-- **Operator safety:** hidden or unavailable WordPress placements fail closed;
-  the existing Distribution Command can prefer the visible home-value page
-  without claiming publication or editing WordPress.
-- **No external mutation:** this preparation adds no migration, secret, provider,
-  lead, message, publication, DNS, spend, deletion, or NellySelly action.
-- **Independent WordPress boundary:** neither the consumed PR #280 gate nor the
-  requestable PR #281 app gate authorizes a WordPress save. Plugin capability
-  and page-3952 publication remain separate future approval/rollback
-  boundaries.
+  runtime error window, and five later recurring monitors all passed.
+- **No active application candidate:** PR #281's exact gate is consumed.
+  Candidate and review-vehicle authority are null until a new exact head passes
+  the complete Preview and release process.
+- **Connector and placement active:** the reviewed Connector 1.1.0 package is
+  active with its exact rollback archive preserved. Page 3952 now serves the
+  separately approved Home Value CTA with `home_value_page` source and the
+  reviewed owned-media UTM contract.
+- **One-lead delivery proved:** one suppressed `QA TEST` Home Value submission
+  created one canonical lead, preserved attribution and consent, scored and
+  routed deterministically, appeared once in Lead Center, and produced one
+  Resend alert with separate provider-delivered events for the primary and
+  hidden audit-BCC recipients. It remains excluded from live KPIs and all
+  consumer channels.
+- **Independent boundaries preserved:** application, Connector, page, cache,
+  controlled-QA, and message approvals were consumed only for their exact
+  actions. No migration, DNS, paid provider, consumer send, deletion, or
+  NellySelly action occurred.
 
 ## Production database-credential and CI recovery — 2026-09-01
 

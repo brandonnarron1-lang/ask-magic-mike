@@ -1,13 +1,20 @@
 # Known Operating Constraints
 
-Updated 2026-09-30. The public funnel, canonical Neon capture, Lead Center, and
+Updated 2026-10-01. The public funnel, canonical Neon capture, Lead Center, and
 internal authenticated email delivery are operational. These constraints limit
 specific expansions; they do not invalidate the live lead pipe.
 
-## WordPress owned-demand publication boundary
+## Remaining WordPress owned-demand boundaries
 
-- Three existing WordPress links remain identifiable through read-only
-  manifests, but no page has been changed.
+- Home Value page 3952 is now the one proven placement. Connector 1.1.0, the
+  reviewed source-tagged CTA, page-scoped cache refresh, and one controlled QA
+  submission completed under separately consumed approvals with protected
+  page/plugin rollback artifacts.
+- The CTA link-out path proved canonical persistence and notification delivery.
+  It does not claim a fresh Form 3 bridge execution; Form 3 remains preserved
+  under its independent signed-bridge contract.
+- Other WordPress placements remain unpublished until their own fresh source,
+  backup, attribution, rendered-link, and rollback evidence is reviewed.
 - Fresh 2026-08-29 public and browser inspection found that homepage page 149
   has one exact Ask Magic Mike href inside an `.amm-cta` component suppressed
   by public `display:none !important` CSS. The corrected manifest returns
@@ -17,16 +24,10 @@ specific expansions; they do not invalidate the live lead pipe.
   replacement would remain invisible. Select and review one visible placement,
   create a verified page-149 rollback, and generate a new exact publication
   packet before any WordPress gate.
-- Home-value page 3952 and We Buy Homes page 3631 remain independent
-  visible placements, but their live Connector 1.0.0 shortcode cannot render
-  the reviewed per-placement UTM contract. Both remain held until the
-  source-controlled 1.1.0 candidate is independently reviewed, backed up, and
-  upgraded through its exact plugin gate.
-- The page-publication gate is not requestable before the public
-  `data-amm-connector-version="1.1.0"` marker is present, legacy links are
-  unchanged, and a fresh v3 manifest returns `legacy_match_ready`.
-- Plugin upgrade and page-source publication are separate rollback and approval
-  boundaries. They must not be combined into a blind plugin-editor save.
+- We Buy Homes page 3631 remains an independent visible placement and must not
+  inherit page 3952's consumed publication or QA authority.
+- Plugin upgrade and page-source publication remain separate rollback and
+  approval boundaries for every future placement.
 - A readiness manifest is not proof of publication or demand. Do not create a
   publication-proof row until an authorized operator actually publishes the
   exact link and supplies public evidence.
@@ -35,20 +36,16 @@ specific expansions; they do not invalidate the live lead pipe.
 
 ## Current release constraint
 
-- Current accepted Production is PR #280 merge
-  `fa1d0fb077882309970b801bbdfaa756107c2104`, tree
-  `d9533274418430b750a87b8259902cddff5b2937`, on deployment
-  `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`; deployment
-  `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is immediate rollback. The PR #280
-  application gate, credential-redeploy approval, and every earlier completed
-  gate are consumed.
+- Current accepted Production is PR #281 merge
+  `a3a0c235decab5a8e9209d983358d200a36ca979`, tree
+  `7c8b8395e3cbf4b31b81d52b05add21894f0911e`, on deployment
+  `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`; prior PR #280 deployment
+  `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` is immediate rollback. PR #281's
+  application gate, the credential-redeploy approval, and every earlier
+  completed gate are consumed.
 - Exact-tree hosted release and post-deploy verification, the 11-check
   Production monitor, 19-pass read-only smoke, and runtime log window pass.
-- Draft PR #281 is the sole sealed Phase E application candidate at reviewed
-  head `3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
-  `23bc513823874e629cfc525c2832bbad4282f480`. Its exact app-only merge/deploy
-  gate is requestable, but it authorizes no Connector installation, WordPress
-  page edit, database/environment mutation, lead submission, or send.
+- No application candidate or reusable application release gate is active.
 - PR #238 is an applied five-migration receipt. PRs #244 and #245 are stale
   stacked review artifacts superseded by the current reconciliation and clean
   mainline port; none of their historical gates may be replayed.

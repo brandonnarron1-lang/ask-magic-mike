@@ -3,10 +3,10 @@
 
 ## Access Summary
 
-**WordPress admin:** You have an administrator account on the site. Check email
-(brandonnarron1@gmail.com / dabnelly23@gmail.com) for the credentials Scott Burns
-(Regency) sent on 12/15/25, or retrieve via the 1Password secure link keyed off
-your Gmail account. WordPress admin URL: `https://www.ourtownproperties.com/wp-admin`
+**WordPress admin:** You have an administrator account on the site. Retrieve
+the Regency-issued credentials through the approved owner mailbox or its
+1Password secure link; no account address or credential belongs in this
+handoff. WordPress admin URL: `https://www.ourtownproperties.com/wp-admin`
 
 **Page builder:** Beaver Builder Pro (visual editor). Edit pages via WP Admin →
 Pages → hover any page → Beaver Builder. Do NOT use the theme code editor.

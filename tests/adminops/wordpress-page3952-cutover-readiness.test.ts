@@ -41,12 +41,12 @@ describe("WordPress page 3952 exact-source cutover readiness", () => {
     expect(diskContract).toEqual(WORDPRESS_PAGE3952_CUTOVER_CONTRACT);
     expect(WORDPRESS_PAGE3952_CUTOVER_CONTRACT).toMatchObject({
       pageId: 3952,
-      sourceLength: 411,
+      sourceLength: 420,
       sourceSha256:
-        "6710a4457945d1aba0308b07def30dfa05a8935121cd02a6baa3c66611ec2bdf",
-      proposedSourceLength: 564,
+        "36a6b4f32329ffde16aef17dc1bc1ec815fdf4154ad80bf7ff3039d4326d7160",
+      proposedSourceLength: 573,
       proposedSourceSha256:
-        "ef9f4f85f3b531644010e4b5e46121a6e12db3807c1f8c928a1945bf12bc266e",
+        "8bd52066b2cff51c2e2463fedd9f394d4174e5e353acdcc806bad5f691062816",
       requiredConnectorVersion: "1.1.0",
       approvalGate: WORDPRESS_PAGE3952_PUBLICATION_GATE,
     });

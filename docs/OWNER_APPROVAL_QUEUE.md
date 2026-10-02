@@ -1,57 +1,83 @@
 # Owner Approval Queue
 
-Updated 2026-09-30 from authenticated GitHub, Vercel, Neon, WordPress, and
+Updated 2026-10-01 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
 queue covers only actions that still require a human or external-system gate.
 
-## Current application release — PR #281 exact gate requestable
+## Current status — Phase E accepted; no immediate approval request
 
-- Accepted Production is PR [#280](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/280)
-  merge `fa1d0fb077882309970b801bbdfaa756107c2104`, tree
-  `d9533274418430b750a87b8259902cddff5b2937`, on deployment
-  `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`. Deployment
-  `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` is immediate application rollback.
-- The PR #280 application approval, PR #247 application approval, and secure
-  `DATABASE_URL` replacement/redeploy approval are consumed and not requestable.
-- PR [#248](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/248)
-  preserves historical Connector 1.1.0 lineage. Phase E is reconciling only
-  that reviewed package onto current `main`; its previous gate remains invalid.
-- PR #238 is an applied and verified five-migration receipt; its approval is
-  consumed. PRs #244 and #245 are superseded stale reviews and remain preserved
-  without current authority.
-- Draft PR [#281](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281)
-  is the sole sealed Phase E candidate at reviewed head
-  `3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
-  `23bc513823874e629cfc525c2832bbad4282f480`. Hosted Release Gate
-  `36784156065`, immutable Preview `dpl_4iWCBVSoqFbvffq7KAWhteQBTX6Y`,
-  protected no-write/browser run `36784678748`, and runtime-log review pass.
-- Migration count: 0. Environment changes: 0. External mutations so far: 0.
-- Expected impact: deploy the hardened callback path, current-main Connector
-  1.1.0 review package, activation verification tooling, and evidence docs to
-  the existing Ask Magic Mike Vercel project. No live placement changes merely
-  because the package becomes available in the repository.
-- Rollback: redeploy `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`; no schema or data
-  rollback is required.
+- PR [#281](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281)
+  is merged as `a3a0c235decab5a8e9209d983358d200a36ca979`, tree
+  `7c8b8395e3cbf4b31b81d52b05add21894f0911e`, and accepted on Ready Vercel
+  Production deployment `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`.
+- Its exact application gate
+  `APPROVE PHASE E WORDPRESS ACTIVATION HARDENING PR 281 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT`
+  was consumed once and cannot be reused. No application candidate is active.
+- Connector 1.1.0 is active with verified PHP SHA-256
+  `700c78b77b24b0038078e45c6526908078dac46cf1a591b73dd0f13a6d840ec8`.
+  Its prior plugin-only approval is consumed and not requestable.
+- The page-only publication gate was received and consumed on 2026-10-01.
+  WordPress saved page 3952 once after an atomic precondition pass. Its current
+  source is the reviewed 573-byte result with SHA-256
+  `8bd52066b2cff51c2e2463fedd9f394d4174e5e353acdcc806bad5f691062816`.
+  The previous source was 420 bytes / SHA-256
+  `36a6b4f32329ffde16aef17dc1bc1ec815fdf4154ad80bf7ff3039d4326d7160`.
+- A protected raw post/postmeta backup exists outside the web root; checksum
+  verification and offline restoration rehearsal pass. Revision 4426 exactly
+  matches the prechange source; new revision 4427 exactly matches the reviewed
+  postchange source. The private readiness manifest has SHA-256
+  `00fa52f96e2bd83a32641188d6289bd9bc4bf8390f1e0706a7241bc81b5dee1d`
+  and returns `ready_for_approval` with no blockers.
+- The separately approved builder-alignment gate was received and consumed on
+  2026-10-01. One guarded transaction replaced only node
+  `70yltx6swbpf -> settings -> text` in `_fl_builder_data` meta ID 31311 and
+  `_fl_builder_draft` meta ID 31308. Both rows moved from 158747 bytes /
+  SHA-256 `1ecdf9ab75451bc4438e123eb14cb98a4ddc1192a71cf43b1a1e124037a336d5`
+  to 158900 bytes / SHA-256
+  `801bfd5c6efefc89a666a5a5b81c4eceb4ab9dd91866635d46a20aa3a8b48cb9`.
+  The transaction and exact postconditions passed.
+- Only page 3952's Beaver Builder assets and WP Super Cache entry were
+  invalidated. The normal public cache was regenerated with the reviewed URL;
+  no global purge occurred.
+- Public desktop and iPhone 13 postflight now proves HTTP 200, the correct
+  canonical, one Connector 1.1.0 marker, exactly one reviewed CTA, zero legacy
+  CTA, keyboard focusability, preserved query values, destination HTTP 200,
+  and one Home Value form. The reviewed destination is:
+  `https://www.askmagicmike.com/home-value?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_home_value_page`.
+- The complete page rollback remains the protected prepublication source and
+  postmeta backup. A builder-only rollback may restore the two exact protected
+  prechange rows if they still match the reviewed candidate hashes, then clear
+  only page 3952's two cache layers. No rollback was required.
+- Public health reports Production, Neon configured, notification mode
+  `production`, email enabled, and the lead/capture/notification/RBAC/rate-limit
+  schema ready. Vercel metadata confirms the existing Production recipient,
+  protected audit-BCC, Resend, database, and delivery-control variables are
+  present; their Sensitive values were not displayed or copied.
+- The exact one-time controlled-QA gate was received and consumed. One public
+  Home Value QA submission created canonical lead
+  `27cdd1a9-b85f-4092-bbc4-deec15754814`, correlation
+  `8c755b19-1bfb-4aa1-951b-75fa961275b1`, and one internal
+  `lead_alert_email_v3` message through the existing provider.
+- Lead Center proves the assigned test record, preserved Our Town source/UTM
+  chain, consent version, score, routing, permission blocks, and unified
+  capture/attribution/notification history. The notification center reports
+  one Resend attempt, no retry, and provider message
+  `01a0fa53-542b-755a-930b-c255e6b5e089` as delivered.
+- The authenticated Resend message record proves separate Sent and Delivered
+  events for the configured primary recipient and hidden audit BCC at Oct 1,
+  9:56 PM EDT. Their inboxes were not available for independent inbox-placement
+  inspection; no duplicate send was made.
+- The record remains `QA TEST`, communication-suppressed, and excluded from
+  live KPIs. Consumer acknowledgment, nurture, SMS, push, phone outreach, and
+  agent-assignment email remain blocked or disabled.
+- The historical gate phrase
+  `APPROVE PHASE E ONE HOME VALUE LINK-OUT QA LEAD AND INTERNAL TEST EMAIL/BCC`
+  is consumed and must not be reused.
 
-The exact current application gate is:
-
-`APPROVE PHASE E WORDPRESS ACTIVATION HARDENING PR 281 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT`
-
-That phrase authorizes only PR #281 merge and same-tree Ask Magic Mike Vercel
-Production deployment. It does not authorize WordPress publication, provider
-access, real or synthetic lead submission, email/SMS/Push, social/GBP/email
-publication, spend, DNS change, deletion, data import, or NellySelly action.
-
-After PR #281 is accepted, the next potential external action is the Connector
-1.1.0 plugin upgrade. It is not requestable until the live 1.0.0 source/options
-backup, archive hashes, native PHP lint, and rollback rehearsal are freshly
-proved in an authenticated WordPress/cPanel session. Its future exact phrase
-remains:
-
-`APPROVE PHASE 9 WORDPRESS CONNECTOR 1.1.0 PLUGIN UPGRADE`
-
-Page 3952 publication is a later independent action after the public version
-marker and fresh readiness proof pass.
+No Phase E owner action remains. The next product boundary—Agent Command
+Center, unified lead timeline, next-action rules, reviewed AI follow-up drafts,
+and source-to-appointment reporting—requires a new reviewed change set and its
+own release authority.
 
 ## Cross-domain measurement activation dependency — later, not currently requestable
 

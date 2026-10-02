@@ -2,7 +2,9 @@
 
 Date: 2026-09-30
 
-Status: **PRE-ACTIVATION — LIVE QA NOT EXECUTED**
+Live acceptance addendum: 2026-10-01 EDT / 2026-10-02 UTC
+
+Status: **COMPLETE**
 
 This record separates code/runtime proof from the owner-gated WordPress and
 message actions. No synthetic record is labeled as a live prospect, and no
@@ -11,10 +13,10 @@ end-to-end stage is marked PASS without inspectable evidence.
 ## Canonical baseline
 
 - repository: `brandonnarron1-lang/ask-magic-mike`;
-- accepted source: PR #280 merge
-  `fa1d0fb077882309970b801bbdfaa756107c2104`;
-- accepted tree: `d9533274418430b750a87b8259902cddff5b2937`;
-- Production: `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`, Ready;
+- accepted source: PR #281 merge
+  `a3a0c235decab5a8e9209d983358d200a36ca979`;
+- accepted tree: `7c8b8395e3cbf4b31b81d52b05add21894f0911e`;
+- Production: `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`, Ready;
 - application rollback: `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`, Ready;
 - database: existing Neon Production database; and
 - Phase E migrations/environment changes: zero.
@@ -24,7 +26,7 @@ end-to-end stage is marked PASS without inspectable evidence.
 The selected first placement is WordPress page 3952,
 `https://www.ourtownproperties.com/how-much-is-your-home-worth/`.
 
-Observed before state:
+Historical before state:
 
 - HTTP 200 and correct canonical tag;
 - one visible Connector CTA;
@@ -37,30 +39,103 @@ Observed before state:
   390×844; and
 - existing Form 7 prompt and cookie banner preserved, not repurposed.
 
+Current accepted state after the two independently approved page-only actions:
+
+- HTTP 200 and the same correct canonical;
+- Connector 1.1.0 marker exactly once;
+- reviewed CTA exactly once and legacy CTA zero times;
+- destination
+  `https://www.askmagicmike.com/home-value?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_home_value_page`;
+- desktop and iPhone 13 destination HTTP 200 with the full query preserved and
+  one Home Value form;
+- visible, native-anchor CTA reached through keyboard Tab navigation; and
+- existing source-page forms and unrelated links preserved.
+
+The approved placement actions changed one shortcode in `post_content`, then
+the same one string in the bound Beaver Builder published/draft metadata, and
+cleared only page 3952's two cache layers. The later controlled-QA approval was
+consumed for exactly one submission through that verified placement.
+
 Evidence:
 
 - `output/playwright/phase-e/home-value-before-desktop.png`;
 - `output/playwright/phase-e/home-value-before-mobile.png`; and
-- matching Markdown DOM/accessibility snapshots in the same directory.
+- matching Markdown DOM/accessibility snapshots in the same directory;
+- owner-local `artifacts/phase-e-page3952-20261001/builder-alignment-execution.png`;
+- owner-local `artifacts/phase-e-page3952-20261001/builder-alignment-postflight-server.png`;
+- owner-local `artifacts/phase-e-page3952-20261001/public-aligned-desktop.png`;
+  and
+- owner-local `artifacts/phase-e-page3952-20261001/public-aligned-mobile.png`.
+
+The postflight artifacts are intentionally ignored by Git and retained in the
+owner's private worktree artifact store; no cPanel session URL or secret is
+committed.
 
 ## Controlled QA lead evidence table
 
 | Stage | Expected | Evidence | Result |
 | --- | --- | --- | --- |
-| WordPress CTA | one page-3952 CTA using the reviewed destination | public baseline above; replacement not published | **HELD — OWNER GATE** |
-| Attribution | exact placement/source/UTM persisted | contract/unit coverage only; no Production QA record | **NOT EXECUTED** |
-| Consent | approved evidence and version persisted | consent and signed-bridge tests pass; no Production QA record | **NOT EXECUTED** |
-| Intake | one canonical public request | public route is healthy; no QA submission authorized | **NOT EXECUTED** |
-| Idempotency | one stable key | lead/WordPress replay contracts pass locally | **NOT EXECUTED LIVE** |
-| Persistence | one durable Neon lead | canonical storage tests pass; no QA row created | **NOT EXECUTED** |
-| Scoring | canonical deterministic server score | scoring tests pass; no QA lead score exists | **NOT EXECUTED** |
-| Routing | canonical deterministic route | routing tests pass; no QA routing event exists | **NOT EXECUTED** |
-| Assignment | one expected owner plus history | assignment tests pass; no QA assignment exists | **NOT EXECUTED** |
-| Lead Center | visible exactly once | RBAC/read-model tests pass; no QA lead exists | **NOT EXECUTED** |
-| Outbox | one notification intent | outbox/idempotency tests pass; no QA intent created | **NOT EXECUTED** |
-| Email | provider accepted/delivered | provider config names are present; no email sent | **NOT EXECUTED** |
-| BCC | protected audit copy | protected config name is present; private value not read; no send | **NOT EXECUTED** |
-| Timeline | coherent communication/audit chain | timeline/callback tests pass; no QA chain exists | **NOT EXECUTED** |
+| WordPress CTA | one page-3952 CTA using the reviewed destination | server cache plus desktop/mobile/keyboard public postflight | **PASS** |
+| Attribution | exact placement/source/UTM persisted | Lead Center: `ourtownproperties / owned_media / amm_owned_demand_2026`; source detail `home_value_page`; alert source URL retains `utm_content=wordpress_home_value_page` | **PASS** |
+| Consent | approved evidence and version persisted | alert receipt reports `email; amm_contact_v2`; Lead Center permission matrix blocks all consumer purposes for the test record | **PASS** |
+| Intake | one canonical public request | one normal-browser submission; lead `27cdd1a9-b85f-4092-bbc4-deec15754814`; correlation `8c755b19-1bfb-4aa1-951b-75fa961275b1` | **PASS** |
+| Idempotency | one stable key | session/idempotency identity `3168b13e-b286-44da-b826-8632840fb6cc`; one lead and one lead-alert intent observed; no live replay attempted | **PASS** |
+| Persistence | one durable Neon lead | authenticated Lead Center read model loads the canonical record after submission | **PASS** |
+| Scoring | canonical deterministic server score | provider-rendered canonical alert reports `60/100 (ACTIVE)` and the three contributing factors | **PASS** |
+| Routing | canonical deterministic route | alert records Home Value routing to Mike with the canonical no-separate-recipient reason | **PASS** |
+| Assignment | one expected owner plus history | Lead Center state is `ASSIGNED`; created and assigned timestamps match the capture minute | **PASS** |
+| Lead Center | visible exactly once | authenticated detail route resolves the one canonical lead ID and unified activity history | **PASS** |
+| Outbox | one notification intent | notification center shows one `lead_alert / email`, Resend attempt `1/3`, no next retry, and a separate disabled assignment-email record | **PASS** |
+| Email | provider accepted and recipient-server delivered | Resend message `01a0fa53-542b-755a-930b-c255e6b5e089`; primary recipient Sent and Delivered at Oct 1, 9:56 PM EDT | **PASS** |
+| BCC | protected audit copy recipient-server delivered | the same Resend record lists the hidden configured audit recipient as Sent and Delivered at Oct 1, 9:56 PM EDT; private address omitted | **PASS** |
+| Primary mailbox receipt | inbox placement when mailbox is accessible | primary mailbox was not available in the authenticated session; no resend performed | **UNVERIFIED** |
+| Audit mailbox receipt | inbox placement when mailbox is accessible | authenticated Resend recipient event proves delivery to the audit recipient; its mailbox session was unavailable | **UNVERIFIED** |
+| Timeline | coherent communication/audit chain | Lead Center shows capture, attribution, one Resend notification, and the expected disabled assignment notification | **PASS** |
+| QA exclusion | test identity and KPI/consumer suppression | notification center marks `QA TEST`; Lead Center marks `TEST RECORD — DO NOT CONTACT`, email opt-out active, consumer email/SMS/phone purposes blocked, and no sequence created | **PASS** |
+
+Production configuration was checked without exposing values. Vercel lists the
+database, provider, primary-recipient, audit-BCC, and delivery controls as
+Production-scoped Sensitive variables. Public health independently reports
+Production, Neon configured/ready, notification mode `production`, and email
+enabled. These are readiness facts, not email or BCC delivery proof.
+
+## Controlled QA execution receipt
+
+The exact one-time QA gate was received and consumed. The operator opened the
+published Our Town Properties page, followed its reviewed CTA, and submitted
+the resulting public Home Value form once with unmistakable `INTERNAL QA — DO
+NOT CONTACT` identity and operator-controlled contact details. No direct
+database insertion, second browser submission, manual replay, or resend was
+used.
+
+- canonical lead: `27cdd1a9-b85f-4092-bbc4-deec15754814`;
+- session/idempotency identity: `3168b13e-b286-44da-b826-8632840fb6cc`;
+- correlation ID: `8c755b19-1bfb-4aa1-951b-75fa961275b1`;
+- submitted: `2026-10-02T01:55:59.931Z`;
+- provider message ID: `01a0fa53-542b-755a-930b-c255e6b5e089`;
+- template: `lead_alert_email_v3`;
+- attempts: `1/3`; no next retry;
+- provider event: `delivered` at the capture minute; and
+- subject:
+  `[TEST] HOME VALUE LEAD | ourtownproperties | Home Value | INTERNAL QA — DO NOT CONTACT — 999 Verification Way, Wilson, NC | INTERNAL QA — DO NOT CONTACT | Score 60`.
+
+Resend exposes recipient-specific timelines on the one message record. Both the
+configured primary recipient and the hidden audit BCC show `Sent` and
+`Delivered` at Oct 1, 9:56 PM EDT. This proves provider acceptance and
+recipient-server delivery separately for both recipients. Neither mailbox was
+available for independent inbox-placement inspection, so both mailbox-receipt
+rows remain `UNVERIFIED`; that limitation did not trigger another send.
+
+The link-out path represents the reviewed WordPress placement in
+`utm_content=wordpress_home_value_page` and the source page in
+`home_value_page`. Its separate widget-only `placement_id` is intentionally
+null and the alert therefore renders that optional line as `Not provided`;
+the canonical UTM placement is preserved in the attribution row and source
+URL. The Form 3 HMAC bridge was not exercised by this link-out submission.
+
+Consumer acknowledgment, nurture, SMS, push, phone outreach, agent-assignment
+email, and AI follow-up were not sent or started. The test record remains
+communication-suppressed and excluded from ordinary Production KPIs.
 
 ## Commands executed in this session
 
@@ -83,6 +158,19 @@ GitHub's pinned Node 24 workflow remains the hosted release-authoritative check.
 | 500-record Vercel Production log window | PASS; 500 `info`, zero error/fatal/5xx signature |
 | public apex/canonical/health checks | PASS; www 200, apex 308 to www, live/ready 200 |
 | page-3952 source readiness command without authenticated source/backup inputs | EXPECTED FAIL-CLOSED; no mutation |
+| page-3952 builder payload native PHP lint | PASS |
+| guarded builder transaction and exact server postflight | PASS; two bound rows only, page-only cache invalidation |
+| page-3952 desktop/iPhone/keyboard postflight | PASS; no form submission |
+| Production `/api/health/live` and `/api/health/ready` | PASS; Production/Neon/notification/readiness checks healthy |
+| focused page-contract tests under Node 24.18.0 | PASS; 2 files / 13 tests |
+| focused QA classification, lead route, notification, replay, Home Value validation, and consolidation tests under Node 24.18.0 | PASS; 6 files / 136 tests |
+| post-acceptance focused regression under Node 24.18.0 | PASS; 6 files / 119 tests covering public lead intake, page 3952, Home Value validation, consolidation, notification service, and Resend callbacks |
+| authenticated Lead Center detail read | PASS; one assigned QA record, attribution, permission blocks, and coherent activity history |
+| authenticated notification-center read | PASS; one QA lead alert, attempt 1/3, delivered provider event, no retry |
+| authenticated Resend message/recipient read | PASS; one message; primary and hidden audit recipient each Sent and Delivered |
+| authorized mailbox inspection | UNVERIFIED; the signed-in Gmail session was not either delivery mailbox; no credential request or resend |
+| post-acceptance public HTTP checks | PASS; brokerage page, nine Ask Magic Mike public/health surfaces returned 200; apex returned 308 to canonical `www` |
+| JSON parse, JavaScript syntax, targeted ESLint, `git diff --check` | PASS |
 
 The first browser attempt could not launch because the lockfile-selected
 Playwright Chromium binary was absent. After installing that exact browser,
@@ -135,9 +223,11 @@ guards merely to manufacture a write receipt.
 | Attribution mismatch | server-owned attribution policy tests | PASS |
 | Preview isolation | no-write Preview/browser and ingress safety tests | PASS |
 
-These are local/Preview-safe contract results. Provider-failure, replay, and
-delivery behavior for the eventual Production QA lead must still be attached
-to that lead's correlation and provider identifiers after approval.
+These failure and replay checks remain local/Preview-safe contracts; no live
+provider was intentionally broken and the one Production QA request was not
+replayed. The Production QA receipt above now binds normal-path persistence,
+outbox, callback, delivery, and Lead Center evidence to its correlation and
+provider identifiers.
 
 ## Security review
 
@@ -194,18 +284,16 @@ relative route syntax, sanitizes/caps attribution dimensions, escapes rendered
 output, and contains no secret, lead API, email, database, dynamic execution,
 or remote-fetch subsystem. `pnpm audit` and the release safety scan are clean.
 
-## Activation boundary
+## Completion boundary
 
-No WordPress backup, plugin install, page save, QA lead, email, or BCC delivery
-was executed. The safe sequence remains:
+Phase E is complete. PR #281, Connector 1.1.0, protected page rollback,
+page-3952 publication, builder alignment, page-only cache invalidation, public
+postflight, one controlled QA intake, canonical persistence, Lead Center read,
+one internal alert, and recipient-specific primary/BCC delivery are proven.
+No Phase E approval remains requestable, and the one-time QA gate must not be
+reused for another submission or message.
 
-1. seal and accept the Phase E application candidate;
-2. authenticate to WordPress/cPanel and capture a fresh live Connector 1.0.0
-   source/options backup plus native PHP lint and rollback proof;
-3. receive the exact plugin-only gate;
-4. install Connector 1.1.0 and prove the public marker without changing page
-   3952;
-5. capture a fresh page 3952 source/postmeta/revision backup and pass readiness;
-6. receive the independent page-only gate and publish one shortcode;
-7. verify render and receive the separate controlled QA lead/send gate; and
-8. submit exactly one labeled QA lead and append every live proof row above.
+The next implementation boundary is: **Agent Command Center: Today queue,
+unified lead timeline, next-action rules, reviewed AI follow-up drafts, and
+source-to-appointment reporting.** It requires its own reviewed scope and
+release authority; this receipt does not start it.

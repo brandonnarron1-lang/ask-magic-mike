@@ -66,7 +66,10 @@ Evidence is appended only from executed commands and deployed checks.
 - Post-release Production checks: smoke 19 passed with 2 intentional read-only skips; funnel 15/15; monitor 9/9; lead-pipe health passed; liveness/readiness passed; NellySelly isolation passed; no released-route runtime error cluster was observed.
 - One Brandon-only QA email was accepted by Resend. Subject: `[TEST — BRANDON QA] Phase 7 messaging release-candidate review`; provider message ID: `871e5b96-a10b-492a-bb23-9898824f0cd3`. The API confirmed `duplicate=false`, no Mike delivery, no consumer delivery, and no BCC.
 - Read-only Resend dashboard inspection confirmed `sent` and `delivered` at 10:50 AM. Read-only inspection of the already-authenticated authorized Gmail account confirmed the message in `brandonnarron1@gmail.com` Inbox with the expected sender, subject prefix, QA banner, HTML body, and review link. Evidence is stored under `output/phase7/screenshots/email-acceptance/`.
-- The Gmail connector remains attached to `dabnelly23@gmail.com`; the recipient proof came from the authenticated browser account at Gmail slot `u/0`. No mailbox write was performed.
+- The Gmail connector remains attached to the protected audit mailbox; the
+  recipient proof came from the separately authenticated operator mailbox at
+  Gmail slot `u/0`. No private audit address is recorded here and no mailbox
+  write was performed.
 - Resend webhook ingestion is enabled and signed-event acceptance passed. The synthetic acceptance event is not represented as a provider-delivered email.
 
 ## Remaining release boundaries

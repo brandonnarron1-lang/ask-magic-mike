@@ -1,5 +1,32 @@
 # Changelog
 
+## 2026-10-01 — Phase E Home Value placement and delivery proof complete
+
+- Reconciled machine-readable release authority to accepted PR #281 merge
+  `a3a0c235decab5a8e9209d983358d200a36ca979`, tree
+  `7c8b8395e3cbf4b31b81d52b05add21894f0911e`, and Production deployment
+  `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`; retained PR #280 as the immediate
+  rollback and cleared the consumed PR #281 candidate gate.
+- Activated only the reviewed Our Town Properties page-3952 Home Value CTA,
+  aligned its bound Beaver Builder published/draft metadata, invalidated only
+  that page's two cache layers, and preserved the verified page-level rollback.
+- Proved the live brokerage CTA, canonical `/home-value` destination, full
+  source/UTM query, Connector 1.1.0 marker, desktop/mobile render, and keyboard
+  access without changing any other WordPress placement.
+- Consumed the separate one-time QA gate for one unmistakably labeled public
+  submission. Canonical lead `27cdd1a9-b85f-4092-bbc4-deec15754814` is durable,
+  assigned, scored, attributed, consent-versioned, communication-suppressed,
+  KPI-excluded, and visible in Lead Center with coherent activity history.
+- Verified one `lead_alert_email_v3` provider message,
+  `01a0fa53-542b-755a-930b-c255e6b5e089`, at attempt 1/3 with no retry.
+  Resend reports separate Sent and Delivered events for the configured primary
+  recipient and hidden audit BCC. Independent mailbox placement remains
+  unverified because those inbox sessions were unavailable; no resend occurred.
+- Sent no consumer acknowledgment, nurture, SMS, push, phone outreach, or
+  agent-assignment email. No application deployment, database migration,
+  environment/DNS change, deletion, global cache purge, or NellySelly action
+  accompanied the acceptance run.
+
 ## 2026-09-30 — Phase E pre-activation release candidate
 
 - Reconciled accepted Production to PR #280, merge

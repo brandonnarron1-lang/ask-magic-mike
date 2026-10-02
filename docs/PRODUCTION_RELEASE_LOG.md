@@ -1,5 +1,26 @@
 # Production Release Log
 
+## [PR #281] Phase E WordPress activation hardening
+
+**Merged:** 2026-10-01
+**Production commit:** `a3a0c235decab5a8e9209d983358d200a36ca979`
+**Production tree:** `7c8b8395e3cbf4b31b81d52b05add21894f0911e`
+**Deployment:** `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk` (`READY`)
+**Immediate rollback:** `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`
+
+- Reconciled the reviewed Connector 1.1.0 package and narrow idempotent provider
+  callback hardening onto the accepted application without adding a parallel
+  lead store, notification path, or WordPress system.
+- Final-head Release Gate `36785767916`, protected Preview QA `36786151363`,
+  main Release Gate `36795930424`, and post-deploy verification `36796044756`
+  passed against the exact accepted tree.
+- Acceptance passed 11/11 Production contracts, 19 read-only smoke checks with
+  two intentional skips, 15/15 cross-site conversion checks, and the clean
+  runtime error window. Five later scheduled Production monitors also passed.
+- No migration, environment change, WordPress mutation, lead/form submission,
+  outbound message, provider action, DNS change, spend, deletion, or
+  NellySelly action occurred during the application release.
+
 ## [PR #280] Batch D WordPress and placement readiness
 
 **Merged:** 2026-09-30

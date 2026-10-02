@@ -34,7 +34,7 @@ interface ApplicationReviewVehicle {
 }
 
 export interface CurrentReleaseAuthorityManifest {
-  schemaVersion: 7;
+  schemaVersion: 8;
   updatedAt: string;
   production: {
     pr: number;
@@ -96,6 +96,23 @@ export interface CurrentReleaseAuthorityManifest {
         readinessStatus: 200;
       };
     };
+  };
+  priorApplicationRelease: {
+    pr: number;
+    reviewedHead: string;
+    mergeCommit: string;
+    tree: string;
+    deploymentId: string;
+    generatedUrl: string;
+    status: "superseded_by_pr281";
+    rollbackDeploymentId: string;
+    approval: {
+      phrase: string;
+      status: "consumed";
+      consumedAt: string;
+    };
+    releaseGate: SuccessfulRunReceipt;
+    postDeployVerification: SuccessfulRunReceipt;
   };
   candidate: ApplicationReleaseCandidate | null;
   reviewVehicle: ApplicationReviewVehicle | null;
