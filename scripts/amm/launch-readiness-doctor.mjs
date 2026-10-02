@@ -24,6 +24,11 @@
 import { readFileSync, existsSync, readdirSync } from "fs";
 import { resolve, join } from "path";
 import { fileURLToPath } from "url";
+import {
+  RESOLUTION_SCHEMA_VERSION,
+  validateProductionAcceptanceReceipt,
+  validateReleaseAuthorityPolicy,
+} from "../lib/release-authority-receipt.mjs";
 
 // ---------------------------------------------------------------------------
 // Helpers — exported for tests
@@ -318,100 +323,52 @@ export function releaseLogMentionsPr(releaseLogPath, prNumber) {
   return { ok: true };
 }
 
-/**
- * Parse the repository's canonical release-authority manifest and return only
- * the fields required to prove the accepted Production release. The manifest
- * is configuration metadata, never a secret-bearing environment source.
- */
-export function parseCurrentProductionAuthority(input) {
+export function parseReleaseAuthorityPolicy(input) {
   let payload;
   try {
     payload = typeof input === "string" ? JSON.parse(input) : input;
   } catch {
-    throw new Error("current_release_authority_invalid_json");
+    throw new Error("release_authority_policy_invalid_json");
   }
-
-  const production = payload?.production;
-  const shaPattern = /^[0-9a-f]{40}$/;
-  if (
-    !payload
-    || typeof payload !== "object"
-    || !Number.isInteger(payload.schemaVersion)
-    || payload.schemaVersion < 1
-    || !production
-    || typeof production !== "object"
-    || !Number.isInteger(production.pr)
-    || production.pr < 1
-    || !shaPattern.test(String(production.mergeCommit ?? ""))
-    || !shaPattern.test(String(production.tree ?? ""))
-    || !/^dpl_[A-Za-z0-9]+$/.test(String(production.deploymentId ?? ""))
-    || production.status !== "accepted"
-  ) {
-    throw new Error("current_release_authority_shape_invalid");
-  }
-
-  return {
-    schemaVersion: payload.schemaVersion,
-    pr: production.pr,
-    mergeCommit: production.mergeCommit,
-    tree: production.tree,
-    deploymentId: production.deploymentId,
-    status: production.status,
-  };
+  return validateReleaseAuthorityPolicy(payload);
 }
 
-export function loadCurrentProductionAuthority(root) {
-  const path = join(root, "config/current-release-authority.json");
+export function loadReleaseAuthorityPolicy(root) {
+  const path = join(root, "config/release-authority-policy.json");
   const content = readFileSafe(path);
   if (!content) {
-    return { ok: false, reason: "current_release_authority_missing" };
+    return { ok: false, reason: "release_authority_policy_missing" };
   }
   try {
-    return { ok: true, authority: parseCurrentProductionAuthority(content) };
+    return { ok: true, policy: parseReleaseAuthorityPolicy(content) };
   } catch (error) {
     return {
       ok: false,
       reason: error instanceof Error
         ? error.message
-        : "current_release_authority_invalid",
+        : "release_authority_policy_invalid",
     };
   }
 }
 
-/**
- * Require one exact release-log block for the accepted Production PR. A mere
- * historical PR mention is insufficient: the block must contain the manifest's
- * merge commit, tree, and Vercel deployment ID.
- */
-export function releaseLogMatchesCurrentProduction(releaseLogPath, authority) {
-  const content = readFileSafe(releaseLogPath);
-  if (!content) return { ok: false, reason: "PRODUCTION_RELEASE_LOG.md not found" };
-
-  const headingPattern = new RegExp(`^## \\[PR #${authority.pr}\\][^\\n]*$`, "m");
-  const heading = headingPattern.exec(content);
-  if (!heading || heading.index === undefined) {
-    return { ok: false, reason: `current PR #${authority.pr} block not found in release log` };
+export function parseProductionAuthorityResolution(input, policy) {
+  let payload;
+  try {
+    payload = typeof input === "string" ? JSON.parse(input) : input;
+  } catch {
+    throw new Error("production_authority_resolution_invalid_json");
   }
-
-  const afterHeading = content.slice(heading.index + heading[0].length);
-  const nextHeadingIndex = afterHeading.search(/^## \\[PR #\d+\\]/m);
-  const block = nextHeadingIndex >= 0
-    ? afterHeading.slice(0, nextHeadingIndex)
-    : afterHeading;
-  const required = [
-    ["merge commit", authority.mergeCommit],
-    ["production tree", authority.tree],
-    ["deployment", authority.deploymentId],
-  ];
-  for (const [label, value] of required) {
-    if (!block.includes(value)) {
-      return {
-        ok: false,
-        reason: `current PR #${authority.pr} release-log block missing ${label}`,
-      };
-    }
+  if (
+    payload?.schemaVersion !== RESOLUTION_SCHEMA_VERSION
+    || payload.status !== "accepted"
+    || !Array.isArray(payload.checks)
+    || payload.checks.length === 0
+    || payload.checks.some((check) => check?.ok !== true)
+  ) {
+    throw new Error("production_authority_resolution_invalid");
   }
-  return { ok: true };
+  validateProductionAcceptanceReceipt(payload.receipt, policy);
+  return payload;
 }
 
 export const CURRENT_OPERATING_DOC_MARKER = "<!-- amm-current-operations-v1 -->";
@@ -450,7 +407,8 @@ export const STALE_OPERATING_DOC_PATTERNS = [
 ];
 
 const OPERATING_DOC_REQUIRED_TOKENS = [
-  "config/current-release-authority.json",
+  "config/release-authority-policy.json",
+  "pnpm release:authority:resolve",
   "Neon",
   "Better Auth",
   "OWNER_APPROVAL_QUEUE.md",
@@ -462,7 +420,7 @@ const OPERATING_DOC_REQUIRED_TOKENS = [
  * auth, release, or approval instructions. These files are executable human
  * control surfaces, not merely historical prose.
  */
-export function validateCurrentOperatingDocs(root, authority) {
+export function validateCurrentOperatingDocs(root) {
   const issues = [];
   for (const relativePath of CURRENT_OPERATING_DOCS) {
     const content = readFileSafe(join(root, relativePath));
@@ -480,24 +438,6 @@ export function validateCurrentOperatingDocs(root, authority) {
     }
     for (const { id, pattern } of STALE_OPERATING_DOC_PATTERNS) {
       if (pattern.test(content)) issues.push({ doc: relativePath, issue: id });
-    }
-  }
-
-  for (const relativePath of [
-    "docs/CURRENT_STATE_RECONCILIATION.md",
-    "docs/GO_NO_GO_COMMAND_CENTER.md",
-  ]) {
-    const content = readFileSafe(join(root, relativePath));
-    const exactTokens = [
-      `PR #${authority.pr}`,
-      authority.mergeCommit,
-      authority.tree,
-      authority.deploymentId,
-    ];
-    for (const token of exactTokens) {
-      if (content && !content.includes(token)) {
-        issues.push({ doc: relativePath, issue: `production_identity_missing:${token}` });
-      }
     }
   }
 
@@ -623,32 +563,64 @@ if (isMain) {
     }
   }
 
-  // ── Current release authority and release-log currency ──────────────────
-  console.log("\n[Release log currency]");
-  const releaseLogPath = join(ROOT, "docs/PRODUCTION_RELEASE_LOG.md");
-  const currentAuthority = loadCurrentProductionAuthority(ROOT);
-  if (!currentAuthority.ok) {
-    fail("current release authority manifest rejected", currentAuthority.reason);
+  // ── Source policy and externally resolved Production receipt ─────────────
+  console.log("\n[Release authority architecture]");
+  const releasePolicy = loadReleaseAuthorityPolicy(ROOT);
+  if (!releasePolicy.ok) {
+    fail("release authority policy rejected", releasePolicy.reason);
   } else {
-    const production = currentAuthority.authority;
     pass(
-      `current release authority loaded: PR #${production.pr}`,
-      `${production.mergeCommit.slice(0, 7)} / ${production.deploymentId}`,
+      "source-authored release policy is valid",
+      `schema ${releasePolicy.policy.schemaVersion}; no current Production identity embedded`,
     );
-    const logResult = releaseLogMatchesCurrentProduction(releaseLogPath, production);
-    if (logResult.ok) {
-      pass(`release log matches current Production PR #${production.pr}`);
+    pass(
+      "deployment receipt store is configured",
+      `${releasePolicy.policy.receiptStore.kind} / ${releasePolicy.policy.receiptStore.assetName}`,
+    );
+    if (releasePolicy.policy.candidate === null) {
+      pass("no reusable application candidate gate is active");
     } else {
-      fail(`release log is stale for current Production PR #${production.pr}`, logResult.reason);
+      pass("one source-local reviewed candidate is present", `PR #${releasePolicy.policy.candidate.pr}`);
     }
+  }
+
+  const resolutionArg = process.argv.indexOf("--authority-resolution");
+  if (resolutionArg >= 0) {
+    const resolutionPath = process.argv[resolutionArg + 1];
+    if (!releasePolicy.ok || !resolutionPath) {
+      fail("authenticated Production resolution cannot be checked");
+    } else {
+      try {
+        const resolution = parseProductionAuthorityResolution(
+          readFileSync(resolve(resolutionPath), "utf8"),
+          releasePolicy.policy,
+        );
+        pass(
+          "authenticated Production receipt resolves without contradiction",
+          `PR #${resolution.receipt.source.pr} / ${resolution.receipt.deployment.id}`,
+        );
+        pass("GitHub and Vercel accepted-source agreement", `${resolution.checks.length} checks`);
+        pass("rollback deployment identity is verified", resolution.receipt.rollback.deploymentId);
+      } catch (error) {
+        fail(
+          "authenticated Production resolution rejected",
+          error instanceof Error ? error.message : "resolution_invalid",
+        );
+      }
+    }
+  } else {
+    skip(
+      "authenticated current Production receipt not supplied to static doctor",
+      "run pnpm release:authority:resolve, then pass its JSON with --authority-resolution",
+    );
   }
 
   // ── Current operator-document contract ──────────────────────────────────
   console.log("\n[Current operating documentation]");
-  if (!currentAuthority.ok) {
-    fail("operator documents cannot be verified", currentAuthority.reason);
+  if (!releasePolicy.ok) {
+    fail("operator documents cannot be verified", releasePolicy.reason);
   } else {
-    const issues = validateCurrentOperatingDocs(ROOT, currentAuthority.authority);
+    const issues = validateCurrentOperatingDocs(ROOT);
     if (issues.length === 0) {
       pass(
         "operator documents match canonical Production architecture",

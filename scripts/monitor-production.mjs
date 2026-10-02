@@ -18,6 +18,7 @@ const maxAttempts = boundedAttemptCount(process.env.MONITOR_MAX_ATTEMPTS);
 const retryDelayMs = Math.max(0, Number(process.env.MONITOR_RETRY_DELAY_MS || 2_000));
 const trigger = process.env.MONITOR_TRIGGER
   || (process.env.GITHUB_ACTIONS ? process.env.GITHUB_EVENT_NAME : "point_in_time");
+const expectedReleaseCommit = String(process.env.MONITOR_EXPECTED_RELEASE_SHA || "").trim();
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -33,6 +34,11 @@ async function check(contract) {
       headers: { "User-Agent": "AskMagicMike-Production-Monitor/1.0" },
     });
     const actualLocation = response.headers.get("location");
+    const observedReleaseCommit = response.headers.get("x-amm-release-commit");
+    const shouldCheckReleaseIdentity = Boolean(expectedReleaseCommit)
+      && (name === "live" || name === "ready");
+    const releaseIdentityOk = !shouldCheckReleaseIdentity
+      || observedReleaseCommit === expectedReleaseCommit;
     const routeContract = evaluateRouteContract(contract, {
       status: response.status,
       location: actualLocation,
@@ -50,9 +56,16 @@ async function check(contract) {
       path,
       expected,
       actual: response.status,
-      ok: routeContract.ok && (readinessContract?.ok ?? true),
+      ok: routeContract.ok && (readinessContract?.ok ?? true) && releaseIdentityOk,
       duration_ms: Date.now() - started,
       cache_control: response.headers.get("cache-control"),
+      ...(name === "live" || name === "ready"
+        ? {
+            release_commit: observedReleaseCommit,
+            expected_release_commit: expectedReleaseCommit || null,
+            release_identity_ok: releaseIdentityOk,
+          }
+        : {}),
       ...(expectedLocation
         ? {
             expected_location: expectedLocation,
@@ -89,7 +102,13 @@ for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
   await sleep(retryDelayMs * attempt);
 }
 
-const report = buildMonitorReport({ attempts, target: base, trigger, maxAttempts });
+const report = buildMonitorReport({
+  attempts,
+  target: base,
+  trigger,
+  maxAttempts,
+  expectedReleaseCommit,
+});
 const markdown = formatMonitorMarkdown(report);
 await mkdir("artifacts", { recursive: true });
 await Promise.all([

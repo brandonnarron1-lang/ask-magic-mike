@@ -4,8 +4,11 @@ on:
   deployment_status:
 
 permissions:
+  actions: read
   contents: read
+  deployments: read
   issues: write
+  pull-requests: read
 
 concurrency:
   group: amm-post-deploy-${{ github.event.deployment.id }}
@@ -22,3 +25,62 @@ jobs:
     uses: ./.github/workflows/production-monitor.yml
     with:
       trigger_kind: post_deploy
+      expected_release_sha: ${{ github.event.deployment.sha }}
+
+  publish-acceptance-receipt:
+    name: publish-acceptance-receipt
+    needs: verify-production
+    if: needs.verify-production.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: write
+      deployments: read
+      pull-requests: read
+    steps:
+      - name: Checkout deployed source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha }}
+          persist-credentials: false
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Download canonical monitor evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: production-monitor-${{ github.run_id }}
+          path: artifacts
+
+      - name: Run read-only Production smoke
+        env:
+          TARGET_URL: https://www.askmagicmike.com
+        run: node scripts/prod-smoke.mjs
+
+      - name: Generate deterministic acceptance receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACCEPTED_REPOSITORY: ${{ github.repository }}
+          ACCEPTED_DEPLOYMENT_SHA: ${{ github.event.deployment.sha }}
+          ACCEPTED_GITHUB_DEPLOYMENT_ID: ${{ github.event.deployment.id }}
+          ACCEPTED_DEPLOYMENT_STATUS_AT: ${{ github.event.deployment_status.created_at || github.event.deployment_status.updated_at }}
+          ACCEPTED_POST_DEPLOY_RUN_ID: ${{ github.run_id }}
+          ACCEPTED_POST_DEPLOY_RESULT: success
+        run: node scripts/release/generate-production-acceptance-receipt.mjs
+
+      - name: Publish idempotent GitHub Release receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/release/publish-production-acceptance-receipt.mjs
+
+      - name: Upload run-scoped receipt evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-acceptance-receipt-${{ github.run_id }}
+          path: artifacts/release-authority/
+          if-no-files-found: error
+          retention-days: 30

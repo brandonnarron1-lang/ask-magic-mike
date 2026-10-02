@@ -1,8 +1,13 @@
 # Rollback Plan
 
+Resolve the currently accepted Production and immediate Ready rollback before
+action with `pnpm release:authority:resolve`. Stable rules live in
+`config/release-authority-policy.json`; do not infer current rollback from a
+dated paragraph.
+
 ## Application
 
-Current Production is `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk` at PR #281 merge
+Historical 2026-10-01 receipt: Production was `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk` at PR #281 merge
 commit `a3a0c235decab5a8e9209d983358d200a36ca979` and exact tree
 `7c8b8395e3cbf4b31b81d52b05add21894f0911e`. Prior PR #280 deployment
 `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` is the immediate application rollback;

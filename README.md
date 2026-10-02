@@ -7,6 +7,14 @@ brokerage, listings, and SEO authority and embeds or links into this system.
 
 ## Current status
 
+Current accepted Production is not hardcoded in this README. Source policy is
+[`config/release-authority-policy.json`](config/release-authority-policy.json);
+retrieve and authenticate the latest deployment-generated receipt with:
+
+```bash
+pnpm release:authority:resolve
+```
+
 - `VERIFIED LIVE` — `https://www.askmagicmike.com` and the public seller,
   buyer, renter, open-house, widget, privacy, and accessibility routes.
 - `VERIFIED LIVE` — durable Neon capture, attribution, consent, deterministic
@@ -19,13 +27,9 @@ brokerage, listings, and SEO authority and embeds or links into this system.
 - `OWNER ACTION` — Mike and Brandon must enroll their own phones; authenticated
   internal email remains the active alert path until each device passes QA.
 - `DEFERRED — PAID SERVICE` — carrier SMS/MMS; Web Push is the free-first path.
-- `VERIFIED LIVE` — PR #281 is accepted at merge
-  `a3a0c235decab5a8e9209d983358d200a36ca979`, tree
-  `7c8b8395e3cbf4b31b81d52b05add21894f0911e`, on Vercel deployment
-  `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`; exact-tree hosted verification,
-  post-deploy contracts, recurring monitors, smoke checks, and canonical aliases
-  pass. PR #280 deployment `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` is the immediate
-  application rollback.
+- `VERIFIED LIVE` — the resolver cross-checks the accepted receipt against the
+  GitHub source/tree, Vercel Production deployment/project/alias, exact verifier
+  runs, health probes, and Ready rollback. It fails closed on contradiction.
 - `PHASE E VERIFIED LIVE` — Connector 1.1.0 and the reviewed page-3952 Home
   Value CTA are active. One suppressed QA submission proved canonical Neon
   persistence, attribution, consent, deterministic routing, Lead Center
@@ -37,9 +41,10 @@ brokerage, listings, and SEO authority and embeds or links into this system.
 
 The source-of-truth audit is in
 [`docs/CURRENT_STATE_RECONCILIATION.md`](docs/CURRENT_STATE_RECONCILIATION.md).
-The accepted Production identity, current review state, and consumed cutover
-receipts are in
+The authority model, current review state, and consumed cutover history are in
 [`docs/CURRENT_RELEASE_AUTHORITY.md`](docs/CURRENT_RELEASE_AUTHORITY.md).
+Receipt generation and durable storage are documented in
+[`docs/RELEASE_AUTHORITY_RECEIPTS.md`](docs/RELEASE_AUTHORITY_RECEIPTS.md).
 Documentation precedence and historical-packet handling are in
 [`docs/DOCUMENTATION_AUTHORITY.md`](docs/DOCUMENTATION_AUTHORITY.md).
 The remaining human gates are in

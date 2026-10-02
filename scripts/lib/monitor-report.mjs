@@ -14,6 +14,9 @@ function expectedFor(result) {
   if (result.expected_location) {
     return `${statusText} redirect to ${cleanScalar(result.expected_location)}`;
   }
+  if (result.release_identity_ok === false && result.expected_release_commit) {
+    return `${statusText} from release ${cleanScalar(result.expected_release_commit)}`;
+  }
   if (result.name === "ready") {
     return `${statusText} with every required readiness flag true`;
   }
@@ -23,6 +26,9 @@ function expectedFor(result) {
 function actualFor(result) {
   if (result.error) return cleanScalar(result.error);
   const parts = [`HTTP ${result.actual ?? "no response"}`];
+  if (result.release_identity_ok === false) {
+    parts.push(`release ${cleanScalar(result.release_commit, "missing")}`);
+  }
   if (result.expected_location && result.actual_location !== result.expected_location) {
     parts.push(`location ${cleanScalar(result.actual_location, "missing")}`);
   }
@@ -39,6 +45,14 @@ function classifyFailure(result) {
       category: "NETWORK_OR_TIMEOUT",
       remediation: "Retry the read-only probe; if it persists, inspect DNS, TLS, Vercel status, and deployment logs.",
       impact: `The ${result.name} production contract could not be observed.`,
+    };
+  }
+
+  if (result.release_identity_ok === false) {
+    return {
+      category: "RELEASE_IDENTITY_MISMATCH",
+      remediation: "Inspect the Vercel Production alias and deployment source. Do not accept or repair automatically; restore the reviewed alias only through the exact release gate.",
+      impact: "The canonical hostname is not serving the merge commit being accepted.",
     };
   }
 
@@ -142,7 +156,13 @@ export function summarizeFailures(results) {
   };
 }
 
-export function buildMonitorReport({ attempts, target, trigger, maxAttempts }) {
+export function buildMonitorReport({
+  attempts,
+  target,
+  trigger,
+  maxAttempts,
+  expectedReleaseCommit = "",
+}) {
   const finalAttempt = attempts.at(-1);
   const firstFailedAttempt = attempts.find((attempt) => attempt.failed > 0);
   const recovered = Boolean(firstFailedAttempt && finalAttempt.failed === 0);
@@ -159,6 +179,10 @@ export function buildMonitorReport({ attempts, target, trigger, maxAttempts }) {
     };
   }
 
+  const observedReleaseCommit = finalAttempt.results.find(
+    (result) => result.name === "live",
+  )?.release_commit ?? null;
+
   return {
     schema_version: "amm.production-monitor.v2",
     checked_at: finalAttempt.checked_at,
@@ -169,6 +193,8 @@ export function buildMonitorReport({ attempts, target, trigger, maxAttempts }) {
     attempt_count: attempts.length,
     passed: finalAttempt.passed,
     failed: finalAttempt.failed,
+    expected_release_commit: expectedReleaseCommit || null,
+    observed_release_commit: observedReleaseCommit,
     summary,
     results: finalAttempt.results,
     attempts,

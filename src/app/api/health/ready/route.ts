@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { releaseRuntimeHeaders } from "@/lib/release/runtime-evidence";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -19,7 +20,7 @@ export async function GET() {
   if (missingEnv.length > 0) {
     return NextResponse.json(
       { ok: false, status: "not_ready", reason: "configuration_error" },
-      { status: 503 }
+      { status: 503, headers: { "Cache-Control": "no-store", ...releaseRuntimeHeaders() } },
     );
   }
 
@@ -31,15 +32,18 @@ export async function GET() {
     if (error) {
       return NextResponse.json(
         { ok: false, status: "not_ready", reason: "db_unreachable" },
-        { status: 503 }
+        { status: 503, headers: { "Cache-Control": "no-store", ...releaseRuntimeHeaders() } },
       );
     }
   } catch {
     return NextResponse.json(
       { ok: false, status: "not_ready", reason: "db_error" },
-      { status: 503 }
+      { status: 503, headers: { "Cache-Control": "no-store", ...releaseRuntimeHeaders() } },
     );
   }
 
-  return NextResponse.json({ ok: true, status: "ready" });
+  return NextResponse.json(
+    { ok: true, status: "ready" },
+    { headers: { "Cache-Control": "no-store", ...releaseRuntimeHeaders() } },
+  );
 }

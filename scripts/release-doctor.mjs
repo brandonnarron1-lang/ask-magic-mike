@@ -24,6 +24,12 @@ import { mkdir, readFile, writeFile, access } from "node:fs/promises";
 import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { decideExitCode, summarize } from "./release-doctor-lib.mjs";
+import {
+  validateReleaseAuthorityPolicy,
+} from "./lib/release-authority-receipt.mjs";
+import {
+  parseProductionAuthorityResolution,
+} from "./amm/launch-readiness-doctor.mjs";
 
 const REPO_ROOT = resolve(".");
 const OUT_DIR = resolve(REPO_ROOT, "artifacts");
@@ -81,6 +87,7 @@ async function main() {
       dirty ? "uncommitted changes present" : "working tree clean"
     )
   );
+
   results.push(
     check(
       "git.branch_present",
@@ -101,6 +108,9 @@ async function main() {
     "release:doctor",
     "release:report",
     "release:assert",
+    "release:authority:resolve",
+    "release:authority:generate",
+    "release:intent:validate",
     "preview:find",
     "preview:wait",
     "preview:qa",
@@ -130,6 +140,15 @@ async function main() {
     "scripts/release-candidate-report.mjs",
     "scripts/launch-authority-report.mjs",
     "scripts/synthetic-monitor.mjs",
+    "scripts/release/resolve-production-authority.mjs",
+    "scripts/release/generate-production-acceptance-receipt.mjs",
+    "scripts/release/publish-production-acceptance-receipt.mjs",
+    "scripts/release/validate-release-intent.mjs",
+    "scripts/lib/release-authority-receipt.mjs",
+    "config/release-authority-policy.json",
+    "docs/RELEASE_AUTHORITY_RECEIPTS.md",
+    ".github/workflows/production-monitor.yml",
+    ".github/workflows/production-post-deploy.yml",
     "src/lib/admin/health-safety.ts",
     "src/app/api/admin/health/route.ts",
     "tests/e2e/widget-preview-flow.spec.ts",
@@ -143,6 +162,97 @@ async function main() {
         true,
         ok ? `${f} present` : `missing required file: ${f}`
       )
+    );
+  }
+
+  // ─ Release authority policy / receipt separation ─
+  const releasePolicyText = await readText("config/release-authority-policy.json");
+  let releasePolicyValid = false;
+  let parsedReleasePolicy = null;
+  let releasePolicyReason = "release authority policy missing";
+  if (releasePolicyText) {
+    try {
+      parsedReleasePolicy = JSON.parse(releasePolicyText);
+      const policy = validateReleaseAuthorityPolicy(parsedReleasePolicy);
+      releasePolicyValid = true;
+      releasePolicyReason = `schema ${policy.schemaVersion}; accepted Production is externally resolved`;
+    } catch (error) {
+      releasePolicyReason = error instanceof Error ? error.message : "release authority policy invalid";
+    }
+  }
+  results.push(
+    check(
+      "authority.policy_valid",
+      releasePolicyValid ? "pass" : "fail",
+      true,
+      releasePolicyReason,
+    ),
+  );
+  const embedsCurrentProduction = parsedReleasePolicy
+    ? Object.prototype.hasOwnProperty.call(parsedReleasePolicy, "production")
+    : true;
+  results.push(
+    check(
+      "authority.no_source_authored_current_production",
+      !embedsCurrentProduction ? "pass" : "fail",
+      true,
+      !embedsCurrentProduction
+        ? "tracked policy contains no self-authored current Production object"
+        : "tracked policy must not embed current Production identity",
+    ),
+  );
+  results.push(
+    check(
+      "authority.legacy_manifest_removed",
+      !(await exists("config/current-release-authority.json")) ? "pass" : "fail",
+      true,
+      "legacy self-referential current-release manifest is absent",
+    ),
+  );
+
+  const resolutionArg = process.argv.indexOf("--authority-resolution");
+  const resolutionPath = resolutionArg >= 0 ? process.argv[resolutionArg + 1] : null;
+  if (resolutionPath && releasePolicyValid) {
+    try {
+      const resolutionText = await readFile(resolve(REPO_ROOT, resolutionPath), "utf8");
+      const resolution = parseProductionAuthorityResolution(
+        resolutionText,
+        parsedReleasePolicy,
+      );
+      results.push(
+        check(
+          "authority.current_receipt_resolved",
+          "pass",
+          true,
+          `accepted PR #${resolution.receipt.source.pr}; ${resolution.checks.length} authenticated checks`,
+        ),
+      );
+      results.push(
+        check(
+          "authority.rollback_identity_verified",
+          "pass",
+          true,
+          `rollback ${resolution.receipt.rollback.deploymentId} is Ready and project-bound`,
+        ),
+      );
+    } catch (error) {
+      results.push(
+        check(
+          "authority.current_receipt_resolved",
+          "fail",
+          true,
+          error instanceof Error ? error.message : "authority resolution invalid",
+        ),
+      );
+    }
+  } else {
+    results.push(
+      check(
+        "authority.current_receipt_resolved",
+        "skip",
+        false,
+        "supply --authority-resolution <resolver-json> for authenticated current-state proof",
+      ),
     );
   }
 

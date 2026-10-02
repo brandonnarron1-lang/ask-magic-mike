@@ -86,6 +86,18 @@ describe("production monitor incident summaries", () => {
     expect(push.ROOT_CAUSE_CATEGORY).toBe("NOTIFICATION_READINESS");
   });
 
+  it("classifies a canonical release identity contradiction separately", () => {
+    const summary = summarizeFailures([result({
+      name: "live",
+      release_identity_ok: false,
+      release_commit: "wrong-source",
+      ok: false,
+    })]);
+
+    expect(summary.ROOT_CAUSE_CATEGORY).toBe("RELEASE_IDENTITY_MISMATCH");
+    expect(summary.REMEDIATION).toContain("Production alias");
+  });
+
   it("caps retry attempts at three and never permits zero", () => {
     expect(boundedAttemptCount(99)).toBe(3);
     expect(boundedAttemptCount(0)).toBe(1);

@@ -1,7 +1,7 @@
 import {
   CURRENT_APPLICATION_RELEASE_GATE,
-  CURRENT_RELEASE_AUTHORITY,
-} from "./current-release-authority";
+  RELEASE_AUTHORITY_POLICY,
+} from "./release-authority-policy";
 
 export const GROWTH_CAPABILITY_STATES = [
   "production_live",
@@ -60,8 +60,8 @@ export function buildGrowthCapabilityLedger({
 }: {
   currentTailInProduction: boolean;
 }): GrowthCapabilityLedger {
-  const activeCandidate = CURRENT_RELEASE_AUTHORITY.candidate;
-  const reviewVehicle = CURRENT_RELEASE_AUTHORITY.reviewVehicle;
+  const activeCandidate = RELEASE_AUTHORITY_POLICY.candidate;
+  const reviewVehicle = RELEASE_AUTHORITY_POLICY.reviewVehicle;
   const applicationState: GrowthCapabilityState = (activeCandidate || reviewVehicle) && !currentTailInProduction
     ? "release_candidate"
     : "production_live";
@@ -132,24 +132,24 @@ export function buildGrowthCapabilityLedger({
       domain: "govern",
       state: applicationState,
       summary: activeCandidate
-        ? `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is accepted in Production. PR ${activeCandidate.pr} is the only active reviewed application candidate.`
+        ? `Accepted Production is resolved from the latest verified deployment receipt. PR ${activeCandidate.pr} is the only active reviewed application candidate.`
         : reviewVehicle
-          ? `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is accepted in Production at ${CURRENT_RELEASE_AUTHORITY.production.mergeCommit}. Draft PR ${reviewVehicle.pr} is an unsealed review vehicle with no reusable application release gate.`
-          : `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is accepted in Production at ${CURRENT_RELEASE_AUTHORITY.production.mergeCommit}. No application candidate or reusable application release gate is active.`,
+          ? `Accepted Production is resolved from the latest verified deployment receipt. Draft PR ${reviewVehicle.pr} is an unsealed review vehicle with no reusable application release gate.`
+          : "Accepted Production is resolved from a deployment-generated receipt. No application candidate or reusable application release gate is active.",
       evidence: [
-        `PR ${CURRENT_RELEASE_AUTHORITY.production.pr} is live at ${CURRENT_RELEASE_AUTHORITY.production.mergeCommit} on ${CURRENT_RELEASE_AUTHORITY.production.deploymentId}; its gate is consumed`,
+        "Run pnpm release:authority:resolve for authenticated GitHub, Vercel, alias, health, and rollback agreement",
         activeCandidate
           ? `PR ${activeCandidate.pr} reviewed head ${activeCandidate.reviewedHead} is the single application candidate`
           : reviewVehicle
             ? `Draft PR ${reviewVehicle.pr} implementation head ${reviewVehicle.implementationHead} remains review-only until exact-head release verification is sealed`
             : "No draft review vehicle is currently recorded in release authority",
-        `Component PRs ${CURRENT_RELEASE_AUTHORITY.consolidatedComponentTrain.firstPr}–${CURRENT_RELEASE_AUTHORITY.consolidatedComponentTrain.lastPr} remain preserved lineage with no independent current release authority`,
+        `Component PRs ${RELEASE_AUTHORITY_POLICY.consolidatedComponentTrain.firstPr}–${RELEASE_AUTHORITY_POLICY.consolidatedComponentTrain.lastPr} remain preserved lineage with no independent current release authority`,
       ],
       nextAction: activeCandidate && !currentTailInProduction
         ? `Use only the guarded PR ${activeCandidate.pr} release after fresh exact-head approval. Do not reuse any historical gate.`
         : reviewVehicle
-          ? `Complete local and hosted verification for Draft PR ${reviewVehicle.pr}. Until a new exact release gate is sealed, keep candidate authority null and preserve Production PR ${CURRENT_RELEASE_AUTHORITY.production.pr}.`
-          : `Keep candidate authority null until a new Draft PR passes exact-head local, hosted, Preview, rollback, and no-write verification. Preserve Production PR ${CURRENT_RELEASE_AUTHORITY.production.pr}.`,
+          ? `Complete local and hosted verification for Draft PR ${reviewVehicle.pr}. Keep candidate authority null until a new exact release gate is sealed; retrieve Production through the authenticated resolver.`
+          : "Keep candidate authority null until a new Draft PR passes exact-head local, hosted, Preview, rollback, and no-write verification. Retrieve Production through the authenticated resolver.",
       href: "/admin/reporting",
       ...(activeCandidate && !currentTailInProduction && CURRENT_APPLICATION_RELEASE_GATE
         ? { approvalGate: CURRENT_APPLICATION_RELEASE_GATE }

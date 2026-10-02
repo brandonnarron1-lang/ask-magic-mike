@@ -1,10 +1,15 @@
 # Implementation Status
 
-Updated 2026-10-01.
+Updated 2026-10-02.
 
-## Current release and Phase E completion — 2026-10-01
+Current release identity is deliberately external to tracked source. Policy is
+`config/release-authority-policy.json`; run `pnpm release:authority:resolve` for
+the latest authenticated Production receipt. Dated sections below are
+chronological implementation evidence, not current deployment authority.
 
-- **Accepted Production:** PR #281 merge
+## Historical Phase E completion receipt — 2026-10-01
+
+- **At acceptance time:** PR #281 merge
   `a3a0c235decab5a8e9209d983358d200a36ca979` is live on deployment
   `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk` with exact accepted tree
   `7c8b8395e3cbf4b31b81d52b05add21894f0911e`. Prior PR #280 deployment
@@ -55,11 +60,10 @@ Updated 2026-10-01.
   NellySelly, or production-data mutation was part of the repair. Full evidence
   is in [`CI_RECOVERY_REPORT.md`](./CI_RECOVERY_REPORT.md).
 
-Current release authority is singular and machine-bound in
-`docs/CURRENT_RELEASE_AUTHORITY.md` and
-`config/current-release-authority.json`. Lower sections are a chronological
-implementation ledger; older candidate or gate statements are preserved
-historical evidence, not current operator instructions.
+Current authority now comes from a deployment-generated receipt resolved
+against authenticated GitHub and Vercel state. The tracked policy and resolver
+contract are in `config/release-authority-policy.json` and
+`docs/RELEASE_AUTHORITY_RECEIPTS.md`.
 
 ## Phase 9 corrected cumulative Production preflight — 2026-08-30
 
@@ -106,9 +110,9 @@ historical evidence, not current operator instructions.
   #238 candidate coexisted with active “PR #210 first” operator guidance. The
   protected Growth capability ledger and active runbooks now use one authority
   contract instead of duplicating release order and approval text.
-- **Machine-bound identity:**
-  [`config/current-release-authority.json`](../config/current-release-authority.json)
-  records accepted Production PR #209, exact cumulative Draft PR #238
+- **Historical machine-bound identity:** the now-retired
+  `config/current-release-authority.json` recorded accepted Production PR #209,
+  exact cumulative Draft PR #238
   head/tree, its exact approval gate, ordered cutover command, and all four
   reviewed migration hashes. A typed server-side adapter prevents client-side
   exposure and keeps the ledger synchronized.

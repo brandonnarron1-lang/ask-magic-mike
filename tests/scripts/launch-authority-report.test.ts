@@ -231,7 +231,7 @@ describe("findMissingEnvVars", () => {
 describe("--vercel-json-stdin", () => {
   const script = resolve(process.cwd(), "scripts/amm/launch-authority-report.mjs");
 
-  it("reaches GO from names-and-scopes-only Production metadata", () => {
+  it("keeps GO blocked until authenticated receipt evidence accompanies metadata", () => {
     const envs = OWNER_GATED_VARS.map((key) => ({
       key,
       target: ["production"],
@@ -244,9 +244,9 @@ describe("--vercel-json-stdin", () => {
 
     expect(result.status).toBe(0);
     expect(result.stdout).toContain("Vercel Production metadata parsed without values");
-    expect(result.stdout).toContain("LAUNCH_AUTHORITY: GO_CONTROLLED_TRAFFIC_READY");
-    expect(result.stdout).toContain("SKIP_OWNER: 0");
-    expect(result.stdout).not.toMatch(/^\s+SKIP_OWNER\s+/m);
+    expect(result.stdout).toContain("LAUNCH_AUTHORITY: NOT_GO_OWNER_ACTION_REQUIRED");
+    expect(result.stdout).toContain("SKIP_OWNER: 1");
+    expect(result.stdout).toContain("authenticated current Production receipt not supplied");
   });
 
   it("fails closed when the manifest contains a value-bearing field", () => {

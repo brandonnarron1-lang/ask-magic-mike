@@ -2,9 +2,10 @@
 
 <!-- amm-current-operations-v1 -->
 
-Updated 2026-09-01. This runbook expands owned demand only after the canonical
-lead path is healthy. Release identity comes from
-`config/current-release-authority.json`; durable lead data is in Neon; staff
+Updated 2026-10-02. This runbook expands owned demand only after the canonical
+lead path is healthy. Stable release policy is
+`config/release-authority-policy.json`; resolve current identity with
+`pnpm release:authority:resolve`. Durable lead data is in Neon; staff
 access uses Better Auth plus server-side RBAC. Action authority comes from
 `OWNER_APPROVAL_QUEUE.md`; stop conditions come from `KNOWN_BLOCKERS.md`.
 

@@ -3,9 +3,10 @@
 <!-- amm-current-operations-v1 -->
 
 Updated 2026-09-01. This is a no-write rehearsal until the exact application
-gate is received. Release identity comes from
-`config/current-release-authority.json`; durable data is Neon; staff access is
-Better Auth plus server-side RBAC. Current authority is in
+gate is received. Stable policy is `config/release-authority-policy.json`;
+resolve accepted Production and rollback with
+`pnpm release:authority:resolve`. Durable data is Neon; staff access is Better
+Auth plus server-side RBAC. Current action authority is in
 `OWNER_APPROVAL_QUEUE.md`; stop conditions are in `KNOWN_BLOCKERS.md`.
 
 ## Preflight

@@ -8,6 +8,7 @@ import {
   evaluateRateLimitStoreCapability,
   RATE_LIMIT_STORE_CAPABILITY_SELECT,
 } from "@/lib/security/rate-limit-readiness";
+import { releaseRuntimeHeaders } from "@/lib/release/runtime-evidence";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +61,7 @@ export async function GET() {
         phone_setup_configured: hasValidPhoneSetupConfiguration(),
         push_ready: false,
       },
-      { status: 503, headers: { "Cache-Control": "no-store" } },
+      { status: 503, headers: { "Cache-Control": "no-store", ...releaseRuntimeHeaders() } },
     );
   }
 
@@ -116,7 +117,7 @@ export async function GET() {
         phone_setup_configured: phoneSetupConfigured,
         push_ready: pushReady,
       },
-      { status: ready ? 200 : 503, headers: { "Cache-Control": "no-store" } },
+      { status: ready ? 200 : 503, headers: { "Cache-Control": "no-store", ...releaseRuntimeHeaders() } },
     );
   } catch (error) {
     return NextResponse.json(
@@ -141,7 +142,7 @@ export async function GET() {
         phone_setup_configured: hasValidPhoneSetupConfiguration(),
         push_ready: false,
       },
-      { status: 503, headers: { "Cache-Control": "no-store" } },
+      { status: 503, headers: { "Cache-Control": "no-store", ...releaseRuntimeHeaders() } },
     );
   }
 }

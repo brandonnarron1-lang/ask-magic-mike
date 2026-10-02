@@ -11,8 +11,20 @@ describe("preview QA current route contract", () => {
     expect(source).toContain('http("GET", "/admin"');
     expect(source).toContain('http("GET", "/admin/leads?filter=active"');
     expect(source).toContain("adminBasicHeaders()");
+    expect(source).toContain('"admin:anonymous_dashboard_denied"');
+    expect(source).toContain('"admin:anonymous_leads_denied"');
+    expect(source).toContain("anonymousDash.status === 401");
+    expect(source).toContain("anonymousList.status === 401");
     expect(source).not.toContain('http("GET", "/api/admin/dashboard"');
     expect(source).not.toContain('http("GET", "/api/admin/leads?limit=5"');
+  });
+
+  it("binds Preview runtime identity to the reviewed source SHA", () => {
+    expect(source).toContain('http("GET", "/api/health/live"');
+    expect(source).toContain('res.headers.get("x-amm-release-commit")');
+    expect(source).toContain('parsed.headers["x-amm-release-commit"]');
+    expect(source).toContain('record("release:runtime_identity", "pass"');
+    expect(source).toContain("observed === EXPECTED_RELEASE_SHA");
   });
 
   it("checks the active address funnel instead of retired campaign prose", () => {

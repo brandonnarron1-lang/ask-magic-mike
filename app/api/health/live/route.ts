@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { releaseRuntimeHeaders } from "@/lib/release/runtime-evidence";
 
 export async function GET() {
   return NextResponse.json({
@@ -10,5 +11,5 @@ export async function GET() {
     notification_mode: process.env.LEAD_NOTIFICATION_MODE || process.env.NOTIFICATION_PROVIDER_MODE || "disabled",
     email_enabled: process.env.EMAIL_ENABLED === "true" || process.env.AGENT_NOTIFICATIONS_ENABLED === "true",
     checked_at: new Date().toISOString(),
-  }, { headers: { "Cache-Control": "no-store" } });
+  }, { headers: { "Cache-Control": "no-store", ...releaseRuntimeHeaders() } });
 }
