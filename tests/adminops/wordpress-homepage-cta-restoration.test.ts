@@ -144,7 +144,7 @@ describe("WordPress homepage CTA restoration packet", () => {
     expect(source).not.toMatch(/writeFile|fetch\(|DATABASE_URL|nodemailer|send\(|POST|PUT|PATCH|DELETE/);
     expect(source).not.toContain("252-245-4337");
     expect(source).not.toContain("252-289-5194");
-    expect(source).not.toContain("dabnelly23@gmail.com");
+    expect(source).not.toMatch(/[A-Z0-9._%+-]+@(?:gmail|ourtownproperties)\.com/i);
   });
 
   it("ships one minimal review patch without a competing widget or form change", () => {

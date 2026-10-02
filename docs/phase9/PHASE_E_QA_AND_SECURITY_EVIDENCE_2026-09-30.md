@@ -2,7 +2,9 @@
 
 Date: 2026-09-30
 
-Status: **PLACEMENT LIVE — CONTROLLED QA NOT AUTHORIZED OR EXECUTED**
+Live acceptance addendum: 2026-10-01 EDT / 2026-10-02 UTC
+
+Status: **COMPLETE**
 
 This record separates code/runtime proof from the owner-gated WordPress and
 message actions. No synthetic record is labeled as a live prospect, and no
@@ -49,9 +51,10 @@ Current accepted state after the two independently approved page-only actions:
 - visible, native-anchor CTA reached through keyboard Tab navigation; and
 - existing source-page forms and unrelated links preserved.
 
-The approved actions changed one shortcode in `post_content`, then the same
-one string in the bound Beaver Builder published/draft metadata, and cleared
-only page 3952's two cache layers. No form was submitted.
+The approved placement actions changed one shortcode in `post_content`, then
+the same one string in the bound Beaver Builder published/draft metadata, and
+cleared only page 3952's two cache layers. The later controlled-QA approval was
+consumed for exactly one submission through that verified placement.
 
 Evidence:
 
@@ -73,25 +76,66 @@ committed.
 | Stage | Expected | Evidence | Result |
 | --- | --- | --- | --- |
 | WordPress CTA | one page-3952 CTA using the reviewed destination | server cache plus desktop/mobile/keyboard public postflight | **PASS** |
-| Attribution | exact placement/source/UTM persisted | contract/unit coverage only; no Production QA record | **NOT EXECUTED** |
-| Consent | approved evidence and version persisted | consent and signed-bridge tests pass; no Production QA record | **NOT EXECUTED** |
-| Intake | one canonical public request | public route is healthy; separate QA submission is not authorized | **NOT EXECUTED** |
-| Idempotency | one stable key | lead/WordPress replay contracts pass locally | **NOT EXECUTED LIVE** |
-| Persistence | one durable Neon lead | canonical storage tests pass; no QA row created | **NOT EXECUTED** |
-| Scoring | canonical deterministic server score | scoring tests pass; no QA lead score exists | **NOT EXECUTED** |
-| Routing | canonical deterministic route | routing tests pass; no QA routing event exists | **NOT EXECUTED** |
-| Assignment | one expected owner plus history | assignment tests pass; no QA assignment exists | **NOT EXECUTED** |
-| Lead Center | visible exactly once | RBAC/read-model tests pass; no QA lead exists | **NOT EXECUTED** |
-| Outbox | one notification intent | outbox/idempotency tests pass; no QA intent created | **NOT EXECUTED** |
-| Email | provider accepted/delivered | provider config names are present; no email sent | **NOT EXECUTED** |
-| BCC | protected audit copy | protected config name is present; private value not read; no send | **NOT EXECUTED** |
-| Timeline | coherent communication/audit chain | timeline/callback tests pass; no QA chain exists | **NOT EXECUTED** |
+| Attribution | exact placement/source/UTM persisted | Lead Center: `ourtownproperties / owned_media / amm_owned_demand_2026`; source detail `home_value_page`; alert source URL retains `utm_content=wordpress_home_value_page` | **PASS** |
+| Consent | approved evidence and version persisted | alert receipt reports `email; amm_contact_v2`; Lead Center permission matrix blocks all consumer purposes for the test record | **PASS** |
+| Intake | one canonical public request | one normal-browser submission; lead `27cdd1a9-b85f-4092-bbc4-deec15754814`; correlation `8c755b19-1bfb-4aa1-951b-75fa961275b1` | **PASS** |
+| Idempotency | one stable key | session/idempotency identity `3168b13e-b286-44da-b826-8632840fb6cc`; one lead and one lead-alert intent observed; no live replay attempted | **PASS** |
+| Persistence | one durable Neon lead | authenticated Lead Center read model loads the canonical record after submission | **PASS** |
+| Scoring | canonical deterministic server score | provider-rendered canonical alert reports `60/100 (ACTIVE)` and the three contributing factors | **PASS** |
+| Routing | canonical deterministic route | alert records Home Value routing to Mike with the canonical no-separate-recipient reason | **PASS** |
+| Assignment | one expected owner plus history | Lead Center state is `ASSIGNED`; created and assigned timestamps match the capture minute | **PASS** |
+| Lead Center | visible exactly once | authenticated detail route resolves the one canonical lead ID and unified activity history | **PASS** |
+| Outbox | one notification intent | notification center shows one `lead_alert / email`, Resend attempt `1/3`, no next retry, and a separate disabled assignment-email record | **PASS** |
+| Email | provider accepted and recipient-server delivered | Resend message `01a0fa53-542b-755a-930b-c255e6b5e089`; primary recipient Sent and Delivered at Oct 1, 9:56 PM EDT | **PASS** |
+| BCC | protected audit copy recipient-server delivered | the same Resend record lists the hidden configured audit recipient as Sent and Delivered at Oct 1, 9:56 PM EDT; private address omitted | **PASS** |
+| Primary mailbox receipt | inbox placement when mailbox is accessible | primary mailbox was not available in the authenticated session; no resend performed | **UNVERIFIED** |
+| Audit mailbox receipt | inbox placement when mailbox is accessible | authenticated Resend recipient event proves delivery to the audit recipient; its mailbox session was unavailable | **UNVERIFIED** |
+| Timeline | coherent communication/audit chain | Lead Center shows capture, attribution, one Resend notification, and the expected disabled assignment notification | **PASS** |
+| QA exclusion | test identity and KPI/consumer suppression | notification center marks `QA TEST`; Lead Center marks `TEST RECORD — DO NOT CONTACT`, email opt-out active, consumer email/SMS/phone purposes blocked, and no sequence created | **PASS** |
 
 Production configuration was checked without exposing values. Vercel lists the
 database, provider, primary-recipient, audit-BCC, and delivery controls as
 Production-scoped Sensitive variables. Public health independently reports
 Production, Neon configured/ready, notification mode `production`, and email
 enabled. These are readiness facts, not email or BCC delivery proof.
+
+## Controlled QA execution receipt
+
+The exact one-time QA gate was received and consumed. The operator opened the
+published Our Town Properties page, followed its reviewed CTA, and submitted
+the resulting public Home Value form once with unmistakable `INTERNAL QA — DO
+NOT CONTACT` identity and operator-controlled contact details. No direct
+database insertion, second browser submission, manual replay, or resend was
+used.
+
+- canonical lead: `27cdd1a9-b85f-4092-bbc4-deec15754814`;
+- session/idempotency identity: `3168b13e-b286-44da-b826-8632840fb6cc`;
+- correlation ID: `8c755b19-1bfb-4aa1-951b-75fa961275b1`;
+- submitted: `2026-10-02T01:55:59.931Z`;
+- provider message ID: `01a0fa53-542b-755a-930b-c255e6b5e089`;
+- template: `lead_alert_email_v3`;
+- attempts: `1/3`; no next retry;
+- provider event: `delivered` at the capture minute; and
+- subject:
+  `[TEST] HOME VALUE LEAD | ourtownproperties | Home Value | INTERNAL QA — DO NOT CONTACT — 999 Verification Way, Wilson, NC | INTERNAL QA — DO NOT CONTACT | Score 60`.
+
+Resend exposes recipient-specific timelines on the one message record. Both the
+configured primary recipient and the hidden audit BCC show `Sent` and
+`Delivered` at Oct 1, 9:56 PM EDT. This proves provider acceptance and
+recipient-server delivery separately for both recipients. Neither mailbox was
+available for independent inbox-placement inspection, so both mailbox-receipt
+rows remain `UNVERIFIED`; that limitation did not trigger another send.
+
+The link-out path represents the reviewed WordPress placement in
+`utm_content=wordpress_home_value_page` and the source page in
+`home_value_page`. Its separate widget-only `placement_id` is intentionally
+null and the alert therefore renders that optional line as `Not provided`;
+the canonical UTM placement is preserved in the attribution row and source
+URL. The Form 3 HMAC bridge was not exercised by this link-out submission.
+
+Consumer acknowledgment, nurture, SMS, push, phone outreach, agent-assignment
+email, and AI follow-up were not sent or started. The test record remains
+communication-suppressed and excluded from ordinary Production KPIs.
 
 ## Commands executed in this session
 
@@ -120,6 +164,12 @@ GitHub's pinned Node 24 workflow remains the hosted release-authoritative check.
 | Production `/api/health/live` and `/api/health/ready` | PASS; Production/Neon/notification/readiness checks healthy |
 | focused page-contract tests under Node 24.18.0 | PASS; 2 files / 13 tests |
 | focused QA classification, lead route, notification, replay, Home Value validation, and consolidation tests under Node 24.18.0 | PASS; 6 files / 136 tests |
+| post-acceptance focused regression under Node 24.18.0 | PASS; 6 files / 119 tests covering public lead intake, page 3952, Home Value validation, consolidation, notification service, and Resend callbacks |
+| authenticated Lead Center detail read | PASS; one assigned QA record, attribution, permission blocks, and coherent activity history |
+| authenticated notification-center read | PASS; one QA lead alert, attempt 1/3, delivered provider event, no retry |
+| authenticated Resend message/recipient read | PASS; one message; primary and hidden audit recipient each Sent and Delivered |
+| authorized mailbox inspection | UNVERIFIED; the signed-in Gmail session was not either delivery mailbox; no credential request or resend |
+| post-acceptance public HTTP checks | PASS; brokerage page, nine Ask Magic Mike public/health surfaces returned 200; apex returned 308 to canonical `www` |
 | JSON parse, JavaScript syntax, targeted ESLint, `git diff --check` | PASS |
 
 The first browser attempt could not launch because the lockfile-selected
@@ -173,9 +223,11 @@ guards merely to manufacture a write receipt.
 | Attribution mismatch | server-owned attribution policy tests | PASS |
 | Preview isolation | no-write Preview/browser and ingress safety tests | PASS |
 
-These are local/Preview-safe contract results. Provider-failure, replay, and
-delivery behavior for the eventual Production QA lead must still be attached
-to that lead's correlation and provider identifiers after approval.
+These failure and replay checks remain local/Preview-safe contracts; no live
+provider was intentionally broken and the one Production QA request was not
+replayed. The Production QA receipt above now binds normal-path persistence,
+outbox, callback, delivery, and Lead Center evidence to its correlation and
+provider identifiers.
 
 ## Security review
 
@@ -232,23 +284,16 @@ relative route syntax, sanitizes/caps attribution dimensions, escapes rendered
 output, and contains no secret, lead API, email, database, dynamic execution,
 or remote-fetch subsystem. `pnpm audit` and the release safety scan are clean.
 
-## Activation boundary
+## Completion boundary
 
-PR #281, Connector 1.1.0, the protected page backup, the one-token
-`post_content` publication, builder metadata alignment, page-only cache
-invalidation, and public postflight are complete. No QA lead, email, or BCC
-delivery was executed.
+Phase E is complete. PR #281, Connector 1.1.0, protected page rollback,
+page-3952 publication, builder alignment, page-only cache invalidation, public
+postflight, one controlled QA intake, canonical persistence, Lead Center read,
+one internal alert, and recipient-specific primary/BCC delivery are proven.
+No Phase E approval remains requestable, and the one-time QA gate must not be
+reused for another submission or message.
 
-The sole immediate external gate is:
-
-`APPROVE PHASE E ONE HOME VALUE LINK-OUT QA LEAD AND INTERNAL TEST EMAIL/BCC`
-
-It is scoped to exactly one server-recognized `INTERNAL QA — DO NOT CONTACT`
-submission through the live page-3952 CTA and Home Value form, its canonical
-suppressed/KPI-excluded lifecycle records, one existing-provider `[TEST]`
-internal alert to the configured primary recipient and hidden audit BCC, and
-read-only delivery verification. Consumer acknowledgment, nurture, SMS, push,
-second submission, manual replay, resend, deletion, or unrelated system change
-remain unauthorized. On approval, append inspectable lead, correlation,
-provider, Lead Center, receipt, and audit evidence to the table above without
-exposing contact data or the private BCC value.
+The next implementation boundary is: **Agent Command Center: Today queue,
+unified lead timeline, next-action rules, reviewed AI follow-up drafts, and
+source-to-appointment reporting.** It requires its own reviewed scope and
+release authority; this receipt does not start it.
