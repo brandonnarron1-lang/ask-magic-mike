@@ -2,15 +2,103 @@
 
 Date: 2026-09-01
 
-Mode: authenticated read-only evidence plus offline deterministic proposal
+Initial mode: authenticated read-only evidence plus offline deterministic proposal
 
-External mutation: none
+Subsequent approved mutation: one page save, two exact page-3952 builder
+metadata replacements, and page-only cache invalidation as receipted below
 
-## Result
+## 2026-10-01 refreshed prepublication baseline
+
+The September discovery record below remains historical evidence. A fresh
+authenticated read found the same page, content, and single legacy shortcode,
+but the database now stores nine line endings as `CRLF` instead of `LF`. The
+visible content is unchanged; the exact byte contract is not.
+
+| Field | Current reviewed value |
+| --- | --- |
+| Current source | 420 bytes / `36a6b4f32329ffde16aef17dc1bc1ec815fdf4154ad80bf7ff3039d4326d7160` |
+| Historical revision 4332 | 411 bytes / `6710a4457945d1aba0308b07def30dfa05a8935121cd02a6baa3c66611ec2bdf` |
+| Exact difference | Nine `CRLF` line endings in current source versus nine `LF` line endings in revision 4332 |
+| Reviewed candidate | 573 bytes / `8bd52066b2cff51c2e2463fedd9f394d4174e5e353acdcc806bad5f691062816` |
+| Matching prechange revision | 4426 / exact current-source digest |
+| Serialized postmeta rows | 13 / protected backup digest recorded in the private readiness receipt |
+| Readiness manifest | `00fa52f96e2bd83a32641188d6289bd9bc4bf8390f1e0706a7241bc81b5dee1d` |
+| Verifier result | `ready_for_approval`; publication still blocked |
+
+The raw post, source, candidate, serialized postmeta, revision evidence,
+checksums, and rollback instructions are held in the owner-hosted private
+backup outside the web root. The private path and raw backup are deliberately
+not committed. Focused readiness and Connector tests pass 13/13. The exact
+page-only publication phrase was unchanged at that prepublication checkpoint;
+it was later received and consumed as recorded below.
+
+## 2026-10-01 publication receipt
+
+The page-only approval was received and consumed after the refreshed readiness
+proof. The atomic precondition passed and WordPress saved page 3952 exactly
+once. Postconditions are:
+
+| Field | Verified value |
+| --- | --- |
+| Current source | 573 bytes / `8bd52066b2cff51c2e2463fedd9f394d4174e5e353acdcc806bad5f691062816` |
+| Legacy / reviewed token count | 0 / 1 |
+| New matching revision | 4427 |
+| Server-rendered reviewed / legacy href count | 1 / 0 |
+| Connector marker | 1.1.0, one occurrence |
+| Public render | legacy href; `cache-control: max-age=600` |
+| External effects | one page save only; no cache invalidation or lead/message action |
+
+The page's two WP Super Cache files regenerated after the approved save but
+still contained the legacy link, disproving a cache-only diagnosis. Beaver
+Builder's published and draft metadata are the actual remaining render source:
+
+| Metadata record | Current exact value | Reviewed exact candidate |
+| --- | --- | --- |
+| `_fl_builder_data` / meta ID 31311 | 158747 bytes / `1ecdf9ab75451bc4438e123eb14cb98a4ddc1192a71cf43b1a1e124037a336d5` | 158900 bytes / `801bfd5c6efefc89a666a5a5b81c4eceb4ab9dd91866635d46a20aa3a8b48cb9` |
+| `_fl_builder_draft` / meta ID 31308 | 158747 bytes / `1ecdf9ab75451bc4438e123eb14cb98a4ddc1192a71cf43b1a1e124037a336d5` | 158900 bytes / `801bfd5c6efefc89a666a5a5b81c4eceb4ab9dd91866635d46a20aa3a8b48cb9` |
+
+Each row contains one legacy token and no reviewed token at node
+`70yltx6swbpf -> settings -> text`. A read-only deserialize/serialize rehearsal
+is byte-exact before replacement and changes only that one string. The source,
+Connector, and unrelated builder values do not need another edit. Public
+postflight at this checkpoint required the independent, hash-bound
+builder-alignment and page-only cache gate recorded in
+`docs/OWNER_APPROVAL_QUEUE.md`.
+
+## 2026-10-01 builder alignment and public acceptance receipt
+
+The exact builder-alignment gate was later received and consumed. The prepared
+payload passed server-native PHP lint. Its atomic preconditions passed, and one
+transaction replaced only the reviewed shortcode string at node
+`70yltx6swbpf -> settings -> text` in the two bound metadata rows.
+
+| Field | Verified postcondition |
+| --- | --- |
+| `_fl_builder_data` / meta ID 31311 | 158900 bytes / `801bfd5c6efefc89a666a5a5b81c4eceb4ab9dd91866635d46a20aa3a8b48cb9`; legacy/reviewed count 0/1 |
+| `_fl_builder_draft` / meta ID 31308 | 158900 bytes / `801bfd5c6efefc89a666a5a5b81c4eceb4ab9dd91866635d46a20aa3a8b48cb9`; legacy/reviewed count 0/1 |
+| `post_content` | 573 bytes / `8bd52066b2cff51c2e2463fedd9f394d4174e5e353acdcc806bad5f691062816` |
+| Database transaction | committed once; postcondition pass |
+| Beaver Builder invalidation | page 3952 only |
+| WP Super Cache invalidation | `wp_cache_post_id_gc(3952, false)`; no global purge |
+| Normal HTTPS cache | regenerated; reviewed/legacy CTA count 1/0 |
+| Public canonical | `https://www.ourtownproperties.com/how-much-is-your-home-worth/` |
+| Public connector marker | 1.1.0; one occurrence |
+| Public CTA | reviewed `/home-value` URL with exact four UTM values; one occurrence |
+| Destination | HTTP 200; query preserved; one Home Value form |
+| Desktop/mobile/keyboard | pass at desktop and iPhone 13; CTA is visible and keyboard focusable |
+| Lead/message effects | none; no form submission or provider send |
+
+No rollback was needed. The private backup remains the complete page-level
+rollback; the exact prechange builder rows remain the narrower builder-only
+rollback when their candidate-hash guard still matches. The page and builder
+approval phrases are consumed and must not be reused for a lead or message.
+
+## Original September readiness result — historical
 
 The established Our Town Properties Home Value page can be updated without a
-page-wide Beaver Builder rewrite, but publication is intentionally blocked.
-The exact live source contains one legacy Ask Magic Mike shortcode and no
+page-wide Beaver Builder rewrite. At the time of the original September
+readiness review, publication was intentionally blocked. That baseline source
+contained one legacy Ask Magic Mike shortcode and no
 other shortcode, phone number, Gravity Forms marker, or HTML form. The
 reviewed proposal replaces only that token and preserves every byte before and
 after it.

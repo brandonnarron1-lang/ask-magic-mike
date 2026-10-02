@@ -2,7 +2,7 @@
 
 Date: 2026-09-30
 
-Status: **PRE-ACTIVATION — LIVE QA NOT EXECUTED**
+Status: **PLACEMENT LIVE — CONTROLLED QA NOT AUTHORIZED OR EXECUTED**
 
 This record separates code/runtime proof from the owner-gated WordPress and
 message actions. No synthetic record is labeled as a live prospect, and no
@@ -11,10 +11,10 @@ end-to-end stage is marked PASS without inspectable evidence.
 ## Canonical baseline
 
 - repository: `brandonnarron1-lang/ask-magic-mike`;
-- accepted source: PR #280 merge
-  `fa1d0fb077882309970b801bbdfaa756107c2104`;
-- accepted tree: `d9533274418430b750a87b8259902cddff5b2937`;
-- Production: `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`, Ready;
+- accepted source: PR #281 merge
+  `a3a0c235decab5a8e9209d983358d200a36ca979`;
+- accepted tree: `7c8b8395e3cbf4b31b81d52b05add21894f0911e`;
+- Production: `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`, Ready;
 - application rollback: `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`, Ready;
 - database: existing Neon Production database; and
 - Phase E migrations/environment changes: zero.
@@ -24,7 +24,7 @@ end-to-end stage is marked PASS without inspectable evidence.
 The selected first placement is WordPress page 3952,
 `https://www.ourtownproperties.com/how-much-is-your-home-worth/`.
 
-Observed before state:
+Historical before state:
 
 - HTTP 200 and correct canonical tag;
 - one visible Connector CTA;
@@ -37,20 +37,45 @@ Observed before state:
   390×844; and
 - existing Form 7 prompt and cookie banner preserved, not repurposed.
 
+Current accepted state after the two independently approved page-only actions:
+
+- HTTP 200 and the same correct canonical;
+- Connector 1.1.0 marker exactly once;
+- reviewed CTA exactly once and legacy CTA zero times;
+- destination
+  `https://www.askmagicmike.com/home-value?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_home_value_page`;
+- desktop and iPhone 13 destination HTTP 200 with the full query preserved and
+  one Home Value form;
+- visible, native-anchor CTA reached through keyboard Tab navigation; and
+- existing source-page forms and unrelated links preserved.
+
+The approved actions changed one shortcode in `post_content`, then the same
+one string in the bound Beaver Builder published/draft metadata, and cleared
+only page 3952's two cache layers. No form was submitted.
+
 Evidence:
 
 - `output/playwright/phase-e/home-value-before-desktop.png`;
 - `output/playwright/phase-e/home-value-before-mobile.png`; and
-- matching Markdown DOM/accessibility snapshots in the same directory.
+- matching Markdown DOM/accessibility snapshots in the same directory;
+- owner-local `artifacts/phase-e-page3952-20261001/builder-alignment-execution.png`;
+- owner-local `artifacts/phase-e-page3952-20261001/builder-alignment-postflight-server.png`;
+- owner-local `artifacts/phase-e-page3952-20261001/public-aligned-desktop.png`;
+  and
+- owner-local `artifacts/phase-e-page3952-20261001/public-aligned-mobile.png`.
+
+The postflight artifacts are intentionally ignored by Git and retained in the
+owner's private worktree artifact store; no cPanel session URL or secret is
+committed.
 
 ## Controlled QA lead evidence table
 
 | Stage | Expected | Evidence | Result |
 | --- | --- | --- | --- |
-| WordPress CTA | one page-3952 CTA using the reviewed destination | public baseline above; replacement not published | **HELD — OWNER GATE** |
+| WordPress CTA | one page-3952 CTA using the reviewed destination | server cache plus desktop/mobile/keyboard public postflight | **PASS** |
 | Attribution | exact placement/source/UTM persisted | contract/unit coverage only; no Production QA record | **NOT EXECUTED** |
 | Consent | approved evidence and version persisted | consent and signed-bridge tests pass; no Production QA record | **NOT EXECUTED** |
-| Intake | one canonical public request | public route is healthy; no QA submission authorized | **NOT EXECUTED** |
+| Intake | one canonical public request | public route is healthy; separate QA submission is not authorized | **NOT EXECUTED** |
 | Idempotency | one stable key | lead/WordPress replay contracts pass locally | **NOT EXECUTED LIVE** |
 | Persistence | one durable Neon lead | canonical storage tests pass; no QA row created | **NOT EXECUTED** |
 | Scoring | canonical deterministic server score | scoring tests pass; no QA lead score exists | **NOT EXECUTED** |
@@ -61,6 +86,12 @@ Evidence:
 | Email | provider accepted/delivered | provider config names are present; no email sent | **NOT EXECUTED** |
 | BCC | protected audit copy | protected config name is present; private value not read; no send | **NOT EXECUTED** |
 | Timeline | coherent communication/audit chain | timeline/callback tests pass; no QA chain exists | **NOT EXECUTED** |
+
+Production configuration was checked without exposing values. Vercel lists the
+database, provider, primary-recipient, audit-BCC, and delivery controls as
+Production-scoped Sensitive variables. Public health independently reports
+Production, Neon configured/ready, notification mode `production`, and email
+enabled. These are readiness facts, not email or BCC delivery proof.
 
 ## Commands executed in this session
 
@@ -83,6 +114,13 @@ GitHub's pinned Node 24 workflow remains the hosted release-authoritative check.
 | 500-record Vercel Production log window | PASS; 500 `info`, zero error/fatal/5xx signature |
 | public apex/canonical/health checks | PASS; www 200, apex 308 to www, live/ready 200 |
 | page-3952 source readiness command without authenticated source/backup inputs | EXPECTED FAIL-CLOSED; no mutation |
+| page-3952 builder payload native PHP lint | PASS |
+| guarded builder transaction and exact server postflight | PASS; two bound rows only, page-only cache invalidation |
+| page-3952 desktop/iPhone/keyboard postflight | PASS; no form submission |
+| Production `/api/health/live` and `/api/health/ready` | PASS; Production/Neon/notification/readiness checks healthy |
+| focused page-contract tests under Node 24.18.0 | PASS; 2 files / 13 tests |
+| focused QA classification, lead route, notification, replay, Home Value validation, and consolidation tests under Node 24.18.0 | PASS; 6 files / 136 tests |
+| JSON parse, JavaScript syntax, targeted ESLint, `git diff --check` | PASS |
 
 The first browser attempt could not launch because the lockfile-selected
 Playwright Chromium binary was absent. After installing that exact browser,
@@ -196,16 +234,21 @@ or remote-fetch subsystem. `pnpm audit` and the release safety scan are clean.
 
 ## Activation boundary
 
-No WordPress backup, plugin install, page save, QA lead, email, or BCC delivery
-was executed. The safe sequence remains:
+PR #281, Connector 1.1.0, the protected page backup, the one-token
+`post_content` publication, builder metadata alignment, page-only cache
+invalidation, and public postflight are complete. No QA lead, email, or BCC
+delivery was executed.
 
-1. seal and accept the Phase E application candidate;
-2. authenticate to WordPress/cPanel and capture a fresh live Connector 1.0.0
-   source/options backup plus native PHP lint and rollback proof;
-3. receive the exact plugin-only gate;
-4. install Connector 1.1.0 and prove the public marker without changing page
-   3952;
-5. capture a fresh page 3952 source/postmeta/revision backup and pass readiness;
-6. receive the independent page-only gate and publish one shortcode;
-7. verify render and receive the separate controlled QA lead/send gate; and
-8. submit exactly one labeled QA lead and append every live proof row above.
+The sole immediate external gate is:
+
+`APPROVE PHASE E ONE HOME VALUE LINK-OUT QA LEAD AND INTERNAL TEST EMAIL/BCC`
+
+It is scoped to exactly one server-recognized `INTERNAL QA — DO NOT CONTACT`
+submission through the live page-3952 CTA and Home Value form, its canonical
+suppressed/KPI-excluded lifecycle records, one existing-provider `[TEST]`
+internal alert to the configured primary recipient and hidden audit BCC, and
+read-only delivery verification. Consumer acknowledgment, nurture, SMS, push,
+second submission, manual replay, resend, deletion, or unrelated system change
+remain unauthorized. On approval, append inspectable lead, correlation,
+provider, Lead Center, receipt, and audit evidence to the table above without
+exposing contact data or the private BCC value.

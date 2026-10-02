@@ -9,16 +9,16 @@ const page3952CutoverContract = {
   pageId: 3952,
   sourceUrl:
     "https://www.ourtownproperties.com/how-much-is-your-home-worth/",
-  sourceLength: 411,
+  sourceLength: 420,
   sourceSha256:
-    "6710a4457945d1aba0308b07def30dfa05a8935121cd02a6baa3c66611ec2bdf",
+    "36a6b4f32329ffde16aef17dc1bc1ec815fdf4154ad80bf7ff3039d4326d7160",
   currentShortcode:
     '[ask_magic_mike_cta source="home_value_page" button_text="Ask Magic Mike"]',
   proposedShortcode:
     '[ask_magic_mike_cta route="/home-value" source="home_value_page" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_home_value_page" button_text="Ask Magic Mike"]',
-  proposedSourceLength: 564,
+  proposedSourceLength: 573,
   proposedSourceSha256:
-    "ef9f4f85f3b531644010e4b5e46121a6e12db3807c1f8c928a1945bf12bc266e",
+    "8bd52066b2cff51c2e2463fedd9f394d4174e5e353acdcc806bad5f691062816",
   preservedLiterals: [
     'source="home_value_page"',
     'button_text="Ask Magic Mike"',
