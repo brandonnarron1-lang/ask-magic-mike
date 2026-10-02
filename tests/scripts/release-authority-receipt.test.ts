@@ -4,12 +4,15 @@ import policyJson from "../../config/release-authority-policy.json";
 import {
   assertIdempotentReceiptReplay,
   assertNoSensitiveReceiptData,
+  buildReceiptFileChecksum,
   buildProductionAcceptanceReceipt,
   canonicalJson,
   evaluateResolvedAuthority,
   parseReleaseIntent,
   selectReceiptWithBootstrap,
+  serializeReceiptDocument,
   sha256,
+  validateReceiptFileChecksum,
   validateProductionAcceptanceReceipt,
   validateReleaseAuthorityPolicy,
   withReceiptIntegrity,
@@ -119,6 +122,25 @@ describe("Production acceptance receipts", () => {
       sha256(canonicalJson({ a: 1, b: 2 })),
     );
     expect(validReceipt()).toEqual(validReceipt());
+  });
+
+  it("creates a checksum for the exact published receipt bytes", () => {
+    const document = serializeReceiptDocument(validReceipt());
+    const checksum = buildReceiptFileChecksum(document, policy.receiptStore.assetName);
+    expect(checksum).toBe(`${sha256(document)}  ${policy.receiptStore.assetName}\n`);
+    expect(
+      validateReceiptFileChecksum(document, checksum, policy.receiptStore.assetName),
+    ).toBe(true);
+    expect(() =>
+      validateReceiptFileChecksum(
+        `${document} `,
+        checksum,
+        policy.receiptStore.assetName,
+      ),
+    ).toThrow("receipt_file_checksum_mismatch");
+    expect(() =>
+      validateReceiptFileChecksum(document, checksum, "different.json"),
+    ).toThrow("receipt_checksum_asset_name_mismatch");
   });
 
   it("validates a complete accepted receipt and exact replay", () => {

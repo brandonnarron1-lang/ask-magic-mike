@@ -79,6 +79,24 @@ export function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
 }
 
+export function serializeReceiptDocument(receipt) {
+  return `${JSON.stringify(receipt, null, 2)}\n`;
+}
+
+export function buildReceiptFileChecksum(receiptDocument, assetName) {
+  const name = requireString(assetName, "receipt_checksum_asset_name_missing");
+  return `${sha256(receiptDocument)}  ${name}\n`;
+}
+
+export function validateReceiptFileChecksum(receiptDocument, checksumDocument, assetName) {
+  const name = requireString(assetName, "receipt_checksum_asset_name_missing");
+  const match = /^([0-9a-f]{64})  ([^\r\n]+)\r?\n?$/.exec(String(checksumDocument ?? ""));
+  if (!match) fail("receipt_checksum_format_invalid");
+  if (match[2] !== name) fail("receipt_checksum_asset_name_mismatch");
+  if (match[1] !== sha256(receiptDocument)) fail("receipt_file_checksum_mismatch");
+  return true;
+}
+
 export function assertNoSensitiveReceiptData(value, path = "receipt") {
   if (Array.isArray(value)) {
     value.forEach((entry, index) => assertNoSensitiveReceiptData(entry, `${path}[${index}]`));

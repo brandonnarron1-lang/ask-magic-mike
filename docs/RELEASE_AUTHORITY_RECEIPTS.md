@@ -31,7 +31,9 @@ node scripts/release/publish-production-acceptance-receipt.mjs
 The generator derives repository, PR, merge, tree, GitHub deployment, Vercel
 deployment/project/target, aliases, verifier runs, monitor/smoke/readiness,
 change counts, rollback, timestamp, and acceptance state from authenticated
-evidence. Canonical JSON carries a SHA-256 integrity value. Values resembling
+evidence. Canonical JSON carries a SHA-256 integrity value over the canonical
+payload, while the separate `.sha256` asset covers the exact published JSON
+file bytes. Values resembling
 credentials or customer contact data are rejected.
 
 ## Durable storage and retention
