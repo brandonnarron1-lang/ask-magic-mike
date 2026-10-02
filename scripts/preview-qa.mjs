@@ -84,6 +84,11 @@ const execFileAsync = promisify(execFile);
 const PREVIEW_URL = (process.env.PREVIEW_URL ?? "").replace(/\/$/, "");
 const ADMIN_SECRET = process.env.ADMIN_SECRET ?? "";
 const CRON_SECRET = process.env.CRON_SECRET ?? "";
+const EXPECTED_RELEASE_SHA = (
+  process.env.EXPECTED_RELEASE_SHA
+  ?? process.env.GITHUB_SHA
+  ?? ""
+).trim();
 const PRINT_MANUAL_BYPASS_URL =
   (process.env.PRINT_MANUAL_BYPASS_URL ?? "false").toLowerCase() === "true";
 
@@ -192,6 +197,9 @@ async function http(method, path, opts = {}) {
       contentType: res.headers.get("content-type"),
       referrerPolicy: res.headers.get("referrer-policy"),
       xRobotsTag: res.headers.get("x-robots-tag"),
+      releaseCommit: res.headers.get("x-amm-release-commit"),
+      releaseTarget: res.headers.get("x-amm-release-target"),
+      releaseUrl: res.headers.get("x-amm-release-url"),
     },
   };
 }
@@ -303,6 +311,9 @@ async function httpViaVercelCli(method, path, opts, headers, body) {
         contentType: parsed.headers["content-type"] ?? null,
         referrerPolicy: parsed.headers["referrer-policy"] ?? null,
         xRobotsTag: parsed.headers["x-robots-tag"] ?? null,
+        releaseCommit: parsed.headers["x-amm-release-commit"] ?? null,
+        releaseTarget: parsed.headers["x-amm-release-target"] ?? null,
+        releaseUrl: parsed.headers["x-amm-release-url"] ?? null,
       },
     };
   } catch (err) {
@@ -434,6 +445,28 @@ async function publicRoutes() {
   }
 }
 
+async function releaseIdentity() {
+  const r = await http("GET", "/api/health/live");
+  const observed = r.responseHeaders?.releaseCommit ?? "";
+  if (!EXPECTED_RELEASE_SHA) {
+    record("release:runtime_identity", "skip", {
+      http: r.status,
+      message: "no EXPECTED_RELEASE_SHA or GITHUB_SHA",
+    });
+    return;
+  }
+  if (r.ok && observed === EXPECTED_RELEASE_SHA) {
+    record("release:runtime_identity", "pass", { http: r.status });
+  } else {
+    record("release:runtime_identity", "fail", {
+      http: r.status,
+      message: observed
+        ? "runtime release commit does not match the reviewed source"
+        : "runtime release commit header missing",
+    });
+  }
+}
+
 async function previewAnalyticsIsolation() {
   const r = await http("GET", "/");
   const html = r.text || JSON.stringify(r.json ?? "");
@@ -518,6 +551,32 @@ async function healthCheck() {
 }
 
 async function adminListAndDashboard() {
+  const anonymousDash = await http("GET", "/admin", { redirect: "manual" });
+  record(
+    "admin:anonymous_dashboard_denied",
+    anonymousDash.status === 401 ? "pass" : "fail",
+    {
+      http: anonymousDash.status,
+      ...(anonymousDash.status === 401
+        ? {}
+        : { message: "anonymous Lead Center shell was not denied" }),
+    }
+  );
+
+  const anonymousList = await http("GET", "/admin/leads?filter=active", {
+    redirect: "manual",
+  });
+  record(
+    "admin:anonymous_leads_denied",
+    anonymousList.status === 401 ? "pass" : "fail",
+    {
+      http: anonymousList.status,
+      ...(anonymousList.status === 401
+        ? {}
+        : { message: "anonymous lead inbox was not denied" }),
+    }
+  );
+
   if (!ADMIN_SECRET) {
     record("admin:dashboard", "skip", { message: "no ADMIN_SECRET" });
     record("admin:leads", "skip", { message: "no ADMIN_SECRET" });
@@ -842,6 +901,7 @@ async function main() {
   let health = null;
   if (accessOk) {
     await publicRoutes();
+    await releaseIdentity();
     await previewAnalyticsIsolation();
     await wpUtmVariants();
     health = await healthCheck();
