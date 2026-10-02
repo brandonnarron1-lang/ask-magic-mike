@@ -6,6 +6,7 @@ import {
   buildBootstrapReceiptFromComment,
   evaluateResolvedAuthority,
   selectReceiptWithBootstrap,
+  validateReceiptFileChecksum,
   validateProductionAcceptanceReceipt,
   validateReleaseAuthorityPolicy,
 } from "../lib/release-authority-receipt.mjs";
@@ -13,6 +14,7 @@ import {
   fetchStatus,
   findSuccessfulVercelStatus,
   ghApi,
+  runTextCommand,
   vercelApi,
 } from "../lib/release-authority-platform.mjs";
 
@@ -45,9 +47,33 @@ function releaseAssetReceipt(policy) {
   const selected = releases[0];
   const asset = selected.assets?.find((item) => item.name === policy.receiptStore.assetName);
   if (!asset) throw new Error("published_receipt_asset_missing");
-  const receipt = ghApi(asset.url, {
-    headers: ["Accept: application/octet-stream"],
-  });
+  const checksumAsset = selected.assets?.find(
+    (item) => item.name === policy.receiptStore.checksumAssetName,
+  );
+  if (!checksumAsset) throw new Error("published_receipt_checksum_asset_missing");
+  const receiptDocument = runTextCommand("gh", [
+    "api",
+    asset.url,
+    "-H",
+    "Accept: application/octet-stream",
+  ]);
+  const checksumDocument = runTextCommand("gh", [
+    "api",
+    checksumAsset.url,
+    "-H",
+    "Accept: application/octet-stream",
+  ]);
+  validateReceiptFileChecksum(
+    receiptDocument,
+    checksumDocument,
+    policy.receiptStore.assetName,
+  );
+  let receipt;
+  try {
+    receipt = JSON.parse(receiptDocument);
+  } catch {
+    throw new Error("published_receipt_invalid_json");
+  }
   validateProductionAcceptanceReceipt(receipt, policy);
   return receipt;
 }

@@ -3,9 +3,11 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import {
+  buildReceiptFileChecksum,
   buildProductionAcceptanceReceipt,
   parseReleaseIntent,
   receiptTag,
+  serializeReceiptDocument,
   validateReleaseAuthorityPolicy,
 } from "../lib/release-authority-receipt.mjs";
 import {
@@ -244,9 +246,14 @@ async function main() {
   const receiptPath = resolve(OUT_DIR, policy.receiptStore.assetName);
   const checksumPath = resolve(OUT_DIR, policy.receiptStore.checksumAssetName);
   const notesPath = resolve(OUT_DIR, "release-notes.md");
+  const receiptDocument = serializeReceiptDocument(receipt);
+  const checksumDocument = buildReceiptFileChecksum(
+    receiptDocument,
+    policy.receiptStore.assetName,
+  );
   await Promise.all([
-    writeFile(receiptPath, `${JSON.stringify(receipt, null, 2)}\n`, "utf8"),
-    writeFile(checksumPath, `${receipt.integrity.canonicalPayloadSha256}  ${policy.receiptStore.assetName}\n`, "utf8"),
+    writeFile(receiptPath, receiptDocument, "utf8"),
+    writeFile(checksumPath, checksumDocument, "utf8"),
     writeFile(
       notesPath,
       `# Ask Magic Mike Production acceptance\n\n` +

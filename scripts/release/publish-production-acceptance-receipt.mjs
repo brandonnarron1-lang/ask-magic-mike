@@ -6,6 +6,7 @@ import { basename, join, resolve } from "node:path";
 import {
   assertIdempotentReceiptReplay,
   receiptTag,
+  validateReceiptFileChecksum,
   validateProductionAcceptanceReceipt,
   validateReleaseAuthorityPolicy,
 } from "../lib/release-authority-receipt.mjs";
@@ -15,6 +16,18 @@ const ROOT = resolve(".");
 
 async function readJson(path) {
   return JSON.parse(await readFile(path, "utf8"));
+}
+
+async function readReceiptFiles(receiptPath, checksumPath, assetName) {
+  const [receiptDocument, checksumDocument] = await Promise.all([
+    readFile(receiptPath, "utf8"),
+    readFile(checksumPath, "utf8"),
+  ]);
+  validateReceiptFileChecksum(receiptDocument, checksumDocument, assetName);
+  return {
+    receipt: JSON.parse(receiptDocument),
+    checksumDocument,
+  };
 }
 
 function releaseExists(repository, tag) {
@@ -42,26 +55,40 @@ async function main() {
     ROOT,
     process.env.RELEASE_NOTES_PATH || "artifacts/release-authority/release-notes.md",
   );
-  const receipt = validateProductionAcceptanceReceipt(await readJson(receiptPath), policy);
+  const candidateFiles = await readReceiptFiles(
+    receiptPath,
+    checksumPath,
+    policy.receiptStore.assetName,
+  );
+  const receipt = validateProductionAcceptanceReceipt(candidateFiles.receipt, policy);
   const tag = receiptTag(receipt, policy);
   const existing = releaseExists(policy.repository, tag);
 
   if (existing) {
     const temp = await mkdtemp(join(tmpdir(), "amm-release-receipt-"));
     try {
-      runTextCommand("gh", [
-        "release",
-        "download",
-        tag,
-        "--repo",
-        policy.repository,
-        "--pattern",
+      for (const pattern of [policy.receiptStore.assetName, policy.receiptStore.checksumAssetName]) {
+        runTextCommand("gh", [
+          "release",
+          "download",
+          tag,
+          "--repo",
+          policy.repository,
+          "--pattern",
+          pattern,
+          "--dir",
+          temp,
+        ]);
+      }
+      const publishedFiles = await readReceiptFiles(
+        join(temp, policy.receiptStore.assetName),
+        join(temp, policy.receiptStore.checksumAssetName),
         policy.receiptStore.assetName,
-        "--dir",
-        temp,
-      ]);
-      const published = await readJson(join(temp, policy.receiptStore.assetName));
-      assertIdempotentReceiptReplay(published, receipt);
+      );
+      assertIdempotentReceiptReplay(publishedFiles.receipt, receipt);
+      if (publishedFiles.checksumDocument !== candidateFiles.checksumDocument) {
+        throw new Error("receipt_checksum_replay_conflict");
+      }
       process.stdout.write(`${JSON.stringify({ status: "already_published", tag, url: existing.url })}\n`);
       return;
     } finally {
