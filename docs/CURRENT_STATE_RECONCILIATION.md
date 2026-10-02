@@ -2,7 +2,7 @@
 
 <!-- amm-current-operations-v1 -->
 
-Audited 2026-09-30. This operating record is derived from
+Audited 2026-10-01. This operating record is derived from
 `config/current-release-authority.json`, authenticated platform evidence, and
 live read-only checks. `OWNER_APPROVAL_QUEUE.md` controls unconsumed actions;
 `KNOWN_BLOCKERS.md` controls capability limits. Older packets remain historical
@@ -13,10 +13,10 @@ evidence and are not operator instructions.
 | Asset | Current identity | Status |
 | --- | --- | --- |
 | Repository | `brandonnarron1-lang/ask-magic-mike`, protected `main` | VERIFIED |
-| Accepted source | PR #280, merge `fa1d0fb077882309970b801bbdfaa756107c2104`, tree `d9533274418430b750a87b8259902cddff5b2937` | ACCEPTED |
+| Accepted source | PR #281, merge `a3a0c235decab5a8e9209d983358d200a36ca979`, tree `7c8b8395e3cbf4b31b81d52b05add21894f0911e` | ACCEPTED |
 | Vercel | `eyes-up-industries/ask-magic-mike`, project `prj_gxOKtO9yz1ziGTeiuKGONkSdPjO8` | VERIFIED |
-| Production | `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`, canonical `https://www.askmagicmike.com` | READY |
-| Application rollback | `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD` | PRESERVED |
+| Production | `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`, canonical `https://www.askmagicmike.com` | READY |
+| Application rollback | `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` (prior PR #280 Production) | PRESERVED |
 | Database | Neon project `bitter-star-20214385`, branch `br-round-base-auh6h2wd`, database `neondb` | CANONICAL |
 | Private access | Better Auth sessions plus server-side RBAC at `/admin` | ACTIVE |
 | Brokerage surface | `https://www.ourtownproperties.com` WordPress | LIVE / SEPARATE CHANGE BOUNDARY |
@@ -27,33 +27,32 @@ evidence and are not operator instructions.
 
 ## Accepted Production evidence
 
-The exact PR #280 release gate and post-deploy verification passed. The
+The exact PR #281 release gate and post-deploy verification passed. The
 acceptance record proves 11/11 monitoring checks, 19 passing read-only smoke
 checks with two intentional skips, HTTP 200 readiness, and zero observed
 runtime errors. The public funnel, canonical Neon persistence, deterministic
 scoring/routing, Better Auth Lead Center boundary, notification outbox, and
 test/KPI exclusions are live.
 
-The PR #280 release approval and the earlier secure database-credential redeploy
+The PR #281 release approval and the earlier secure database-credential redeploy
 approval are consumed. Neither can authorize another merge, deployment,
 environment change, database operation, WordPress edit, message, publication,
 or deletion.
 
 ## Current release stack
 
-- PR #280 is accepted Production. Its exact merge-and-deploy gate is consumed
-  and cannot authorize any Phase E external action.
-- Draft PR #281 is the sole sealed Phase E application candidate at reviewed
-  head `3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
-  `23bc513823874e629cfc525c2832bbad4282f480`; it ports the reviewed
-  Connector 1.1.0 package from PR #248 and the narrow atomic callback pattern
-  from PR #279 without importing their stale authority or unrelated stacks.
-- Hosted Release Gate `36784156065`, immutable Preview
-  `dpl_4iWCBVSoqFbvffq7KAWhteQBTX6Y`, protected no-write/browser run
-  `36784678748`, and the zero-error runtime window pass. Its exact app-only
-  gate is requestable from `OWNER_APPROVAL_QUEUE.md`.
-- Connector installation, Home Value page 3952 publication, and the controlled
-  QA lead/send remain separate exact gates.
+- PR #281 is accepted Production. Its exact merge-and-deploy gate is consumed;
+  no application candidate or reusable release gate is active.
+- Final-head Release Gate `36785767916`, protected no-write/browser run
+  `36786151363`, main Release Gate `36795930424`, post-deploy verification
+  `36796044756`, recurring monitors, and the zero-error runtime window pass.
+- Connector 1.1.0, Home Value page 3952 publication, page-only cache refresh,
+  and the one controlled QA lead/send completed under their own separately
+  consumed gates with protected rollback artifacts.
+- The link-out QA path proved one canonical test lead, attribution, consent,
+  deterministic score/routing, Lead Center visibility, one notification intent,
+  and separate provider-delivered events for the primary and hidden audit-BCC
+  recipients. The test remains suppressed and excluded from live KPIs.
 - PR #238 is an applied five-migration receipt. Its gate is consumed and its
   migrations must not be replayed.
 - PRs #244 and #245 are superseded review artifacts with no current authority.
@@ -77,9 +76,8 @@ or deletion.
 
 - No contactable genuine prospect has yet been proven in the aggregate ledger;
   synthetic/test records remain suppressed and excluded from KPIs.
-- WordPress Connector 1.0.0 cannot render the reviewed per-placement attribution
-  contract. The 1.1.0 application readiness work and the later plugin/page
-  actions remain separate gates.
+- WordPress Connector 1.1.0 renders the reviewed page-3952 attribution contract.
+  Other placements still require their own page-specific evidence and gates.
 - The homepage Ask Magic Mike component is hidden by known CSS; changing only
   its link would not create a visible placement.
 - Consumer acknowledgments, nurture, carrier messaging, external publication,

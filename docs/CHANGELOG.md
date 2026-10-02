@@ -2,6 +2,11 @@
 
 ## 2026-10-01 — Phase E Home Value placement and delivery proof complete
 
+- Reconciled machine-readable release authority to accepted PR #281 merge
+  `a3a0c235decab5a8e9209d983358d200a36ca979`, tree
+  `7c8b8395e3cbf4b31b81d52b05add21894f0911e`, and Production deployment
+  `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`; retained PR #280 as the immediate
+  rollback and cleared the consumed PR #281 candidate gate.
 - Activated only the reviewed Our Town Properties page-3952 Home Value CTA,
   aligned its bound Beaver Builder published/draft metadata, invalidated only
   that page's two cache layers, and preserved the verified page-level rollback.

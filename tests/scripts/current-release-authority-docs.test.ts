@@ -11,27 +11,30 @@ import {
 const readRepoFile = (name: string) =>
   readFileSync(resolve(process.cwd(), name), "utf8");
 
-const productionCommit = "fa1d0fb077882309970b801bbdfaa756107c2104";
-const productionDeployment = "dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ";
-const productionRollback = "dpl_aepoH5pzDwPMkerbrp9YekzVrdKD";
+const productionCommit = "a3a0c235decab5a8e9209d983358d200a36ca979";
+const productionDeployment = "dpl_8488csXCtbfHMMZUF6KDQRiJVwTk";
+const productionRollback = "dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ";
 const runtimeRedeployDeployment = "dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe";
 const runtimeRedeploySource = "dpl_E3Pob3TjWdxN9u4VK9xHZC61667g";
-const productionTree = "d9533274418430b750a87b8259902cddff5b2937";
-const reviewedHead = "0b70701c46a7228b075e9630576df5188f5d9c62";
-const phaseEImplementationHead = "3b1853b535000e09b6e9c40221f5898bd87a92f9";
-const phaseEImplementationTree = "23bc513823874e629cfc525c2832bbad4282f480";
-const phaseEApplicationGate =
-  "APPROVE PHASE E WORDPRESS ACTIVATION HARDENING PR 281 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
+const productionTree = "7c8b8395e3cbf4b31b81d52b05add21894f0911e";
+const reviewedHead = "8c493aa4a36b96f21d8fe380dcfa781ca0a4c68e";
 const consumedApplicationGate =
+  "APPROVE PHASE E WORDPRESS ACTIVATION HARDENING PR 281 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
+const priorProductionCommit = "fa1d0fb077882309970b801bbdfaa756107c2104";
+const priorProductionDeployment = "dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ";
+const priorProductionTree = "d9533274418430b750a87b8259902cddff5b2937";
+const priorReviewedHead = "0b70701c46a7228b075e9630576df5188f5d9c62";
+const priorProductionRollback = "dpl_aepoH5pzDwPMkerbrp9YekzVrdKD";
+const consumedPriorApplicationGate =
   "APPROVE PHASE 9 BATCH D WORDPRESS, OPEN-HOUSE, AND RENTAL PLACEMENT READINESS MERGE AND SAME-TREE PRODUCTION DEPLOYMENT";
 const consumedCutoverGate =
   "APPROVE PHASE 9 CUMULATIVE GROWTH MIGRATIONS, PR 238 MERGE, AND PRODUCTION DEPLOYMENT";
 
 describe("current application release authority", () => {
-  it("binds accepted Production to the released PR 280 source and deployment", () => {
-    expect(CURRENT_RELEASE_AUTHORITY.schemaVersion).toBe(7);
+  it("binds accepted Production to the released PR 281 source and deployment", () => {
+    expect(CURRENT_RELEASE_AUTHORITY.schemaVersion).toBe(8);
     expect(CURRENT_RELEASE_AUTHORITY.production).toMatchObject({
-      pr: 280,
+      pr: 281,
       reviewedHead,
       mergeCommit: productionCommit,
       tree: productionTree,
@@ -43,8 +46,8 @@ describe("current application release authority", () => {
         phrase: consumedApplicationGate,
         status: "consumed",
       },
-      releaseGate: { runId: 36694290376, status: "success" },
-      postDeployVerification: { runId: 36694479286, status: "success" },
+      releaseGate: { runId: 36795930424, status: "success" },
+      postDeployVerification: { runId: 36796044756, status: "success" },
       acceptanceVerification: {
         monitorPassed: 11,
         monitorFailed: 0,
@@ -55,7 +58,17 @@ describe("current application release authority", () => {
         readinessStatus: 200,
       },
     });
-    expect(CURRENT_RELEASE_AUTHORITY.production.productionMonitorRuns).toEqual([]);
+    expect(
+      CURRENT_RELEASE_AUTHORITY.production.productionMonitorRuns.map(
+        ({ runId }) => runId,
+      ),
+    ).toEqual([
+      36799551647,
+      36825831303,
+      36862584883,
+      36907081177,
+      36948549028,
+    ]);
     expect(CURRENT_RELEASE_AUTHORITY.production.runtimeRedeploy).toMatchObject({
       approval: {
         phrase: "APPROVE SECURE ASK MAGIC MIKE DATABASE_URL REPLACEMENT AND PRODUCTION REDEPLOYMENT",
@@ -87,27 +100,25 @@ describe("current application release authority", () => {
     });
   });
 
-  it("seals PR 281 as the only current application candidate", () => {
-    expect(CURRENT_RELEASE_AUTHORITY.candidate).toEqual({
-      pr: 281,
-      url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281",
-      branch: "codex/phase-e-wordpress-proof",
-      reviewedHead: phaseEImplementationHead,
-      tree: phaseEImplementationTree,
-      state: "ready_for_owner_approval",
-      approvalGate: phaseEApplicationGate,
+  it("retains PR 280 as the prior release and exposes no reusable candidate gate", () => {
+    expect(CURRENT_RELEASE_AUTHORITY.priorApplicationRelease).toMatchObject({
+      pr: 280,
+      reviewedHead: priorReviewedHead,
+      mergeCommit: priorProductionCommit,
+      tree: priorProductionTree,
+      deploymentId: priorProductionDeployment,
+      status: "superseded_by_pr281",
+      rollbackDeploymentId: priorProductionRollback,
+      approval: {
+        phrase: consumedPriorApplicationGate,
+        status: "consumed",
+      },
+      releaseGate: { runId: 36694290376, status: "success" },
+      postDeployVerification: { runId: 36694479286, status: "success" },
     });
-    expect(CURRENT_RELEASE_AUTHORITY.reviewVehicle).toMatchObject({
-      pr: 281,
-      url: "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281",
-      branch: "codex/phase-e-wordpress-proof",
-      baseCommit: productionCommit,
-      implementationHead: phaseEImplementationHead,
-      state: "sealed_for_owner_approval",
-      migrationCount: 0,
-      externalMutationCount: 0,
-    });
-    expect(CURRENT_APPLICATION_RELEASE_GATE).toBe(phaseEApplicationGate);
+    expect(CURRENT_RELEASE_AUTHORITY.candidate).toBeNull();
+    expect(CURRENT_RELEASE_AUTHORITY.reviewVehicle).toBeNull();
+    expect(CURRENT_APPLICATION_RELEASE_GATE).toBeNull();
     expect(CURRENT_RELEASE_AUTHORITY.production.approval).toMatchObject({
       phrase: consumedApplicationGate,
       status: "consumed",
@@ -160,6 +171,7 @@ describe("current application release authority", () => {
     expect(ledger).toContain("CURRENT_APPLICATION_RELEASE_GATE");
     expect(ledger).not.toContain(consumedCutoverGate);
     expect(ledger).not.toContain(consumedApplicationGate);
+    expect(ledger).not.toContain(consumedPriorApplicationGate);
   });
 
   it("places current truth ahead of the preserved chronological ledger", () => {
@@ -175,17 +187,17 @@ describe("current application release authority", () => {
       const currentSection = readRepoFile(name).slice(0, 2_500);
       expect(currentSection).toContain(productionCommit);
       expect(currentSection).toContain(productionDeployment);
-      expect(currentSection).toMatch(/PR #?280|PR \[#280\]/);
+      expect(currentSection).toMatch(/PR #?281|PR \[#281\]/);
       expect(currentSection).not.toMatch(/PR #238[^\n]{0,180}(?:single|current|active)[^\n]{0,80}candidate/i);
     }
     expect(currentAuthority).toContain(reviewedHead);
     expect(currentAuthority).toContain(productionTree);
     expect(currentAuthority).toContain(consumedApplicationGate);
-    expect(currentAuthority).toContain(phaseEImplementationHead);
-    expect(currentAuthority).toContain(phaseEImplementationTree);
-    expect(currentAuthority).toContain(phaseEApplicationGate);
-    expect(readRepoFile("docs/OWNER_APPROVAL_QUEUE.md")).toContain(phaseEApplicationGate);
-    expect(currentAuthority).toMatch(/PR \[#248\][\s\S]*Connector 1\.1\.0[\s\S]*reconciled/i);
+    expect(currentAuthority).toContain(priorProductionCommit);
+    expect(currentAuthority).toContain(priorProductionTree);
+    expect(currentAuthority).toContain(consumedPriorApplicationGate);
+    expect(readRepoFile("docs/OWNER_APPROVAL_QUEUE.md")).toContain(consumedApplicationGate);
+    expect(currentAuthority).toMatch(/PR \[#248\][\s\S]*Connector 1\.1\.0[\s\S]*active/i);
     expect(currentAuthority).toMatch(/PR (?:\[#280\]|#280)[\s\S]*consumed/i);
     expect(currentAuthority).toMatch(/PR #238[\s\S]*consumed/i);
   });

@@ -480,11 +480,11 @@ describe("releaseLogMentionsPr", () => {
 
 describe("current Production release authority", () => {
   const authority = {
-    schemaVersion: 7,
-    pr: 280,
-    mergeCommit: "fa1d0fb077882309970b801bbdfaa756107c2104",
-    tree: "d9533274418430b750a87b8259902cddff5b2937",
-    deploymentId: "dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ",
+    schemaVersion: 8,
+    pr: 281,
+    mergeCommit: "a3a0c235decab5a8e9209d983358d200a36ca979",
+    tree: "7c8b8395e3cbf4b31b81d52b05add21894f0911e",
+    deploymentId: "dpl_8488csXCtbfHMMZUF6KDQRiJVwTk",
     status: "accepted",
   };
 
@@ -520,9 +520,9 @@ describe("current Production release authority", () => {
     writeFileSync(path, [
       "# Production Release Log",
       "",
-      "PR #280 was accepted.",
+      "PR #281 was accepted.",
       "",
-      "## [PR #280] Wrong release identity",
+      "## [PR #281] Wrong release identity",
       "",
       `Production commit: ${authority.mergeCommit}`,
       `Production tree: ${authority.tree}`,
@@ -540,7 +540,7 @@ describe("current Production release authority", () => {
     writeFileSync(path, [
       "# Production Release Log",
       "",
-      "## [PR #280] Current release",
+      "## [PR #281] Current release",
       "",
       `Production commit: ${authority.mergeCommit}`,
       `Production tree: ${authority.tree}`,
@@ -561,11 +561,11 @@ describe("current Production release authority", () => {
 
 describe("current operator-document contract", () => {
   const authority = {
-    schemaVersion: 7,
-    pr: 280,
-    mergeCommit: "fa1d0fb077882309970b801bbdfaa756107c2104",
-    tree: "d9533274418430b750a87b8259902cddff5b2937",
-    deploymentId: "dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ",
+    schemaVersion: 8,
+    pr: 281,
+    mergeCommit: "a3a0c235decab5a8e9209d983358d200a36ca979",
+    tree: "7c8b8395e3cbf4b31b81d52b05add21894f0911e",
+    deploymentId: "dpl_8488csXCtbfHMMZUF6KDQRiJVwTk",
     status: "accepted",
   };
 

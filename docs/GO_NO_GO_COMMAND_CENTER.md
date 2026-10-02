@@ -2,7 +2,7 @@
 
 <!-- amm-current-operations-v1 -->
 
-Updated 2026-09-30. This is the current operator decision surface. It reads
+Updated 2026-10-01. This is the current operator decision surface. It reads
 release identity from `config/current-release-authority.json`, uses Neon for
 durable Production data, and uses Better Auth plus server-side RBAC for the
 Lead Center. Exact pending actions are in `OWNER_APPROVAL_QUEUE.md`; capability
@@ -19,14 +19,14 @@ paid campaign, or deletion.
 
 ## §2 — Accepted Production
 
-- PR #280
-- Merge: `fa1d0fb077882309970b801bbdfaa756107c2104`
-- Tree: `d9533274418430b750a87b8259902cddff5b2937`
-- Deployment: `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`
+- PR #281
+- Merge: `a3a0c235decab5a8e9209d983358d200a36ca979`
+- Tree: `7c8b8395e3cbf4b31b81d52b05add21894f0911e`
+- Deployment: `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`
 - Canonical URL: `https://www.askmagicmike.com`
-- Immediate application rollback: `dpl_aepoH5pzDwPMkerbrp9YekzVrdKD`
+- Immediate application rollback: `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`
 
-The PR #280 release and secure database-credential redeploy approvals are
+The PR #281 release and secure database-credential redeploy approvals are
 consumed. They cannot authorize another action.
 
 ## §3 — Proven operating layers
@@ -40,19 +40,17 @@ consumed. They cannot authorize another action.
 | Internal email | Canonical outbox, authenticated provider, protected audit BCC, retry and delivery ledger | GO |
 | Free staff alerts | Web Push infrastructure ready; each physical device requires owner acceptance | CONDITIONAL |
 | Carrier messaging | No compliant registered sender/provider enabled | NO-GO FOR SMS/MMS |
-| WordPress bridge | Signed form-specific bridge live; owned-demand placement upgrade remains gated | CONDITIONAL |
+| WordPress bridge | Signed form-specific bridge and Connector 1.1.0 live; page 3952 Home Value placement proved; other placements remain separately gated | GO / SCOPED |
 | System isolation | Repository, Vercel, domains, database, and environment separated from NellySelly | GO |
 
 ## §4 — Current release queue
 
-Draft PR #281 is the sole sealed Phase E application candidate at reviewed head
-`3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
-`23bc513823874e629cfc525c2832bbad4282f480`; its exact app-only merge/deploy
-gate is requestable from `OWNER_APPROVAL_QUEUE.md`. PR #248 remains preserved
+No application candidate or reusable application release gate is active. PR
+#281 is accepted Production and its gate is consumed. PR #248 remains preserved
 Connector lineage and PR #279 remains preserved notification lineage; their
-prior gates are invalid. The PR #281 gate does not authorize a WordPress
-plugin/page change, Neon mutation, environment edit, message, publication, or
-data action.
+prior gates are invalid. Any future code, WordPress, Neon, environment,
+message, publication, or data action requires a newly reviewed, action-specific
+gate.
 
 ## §5 — Controlled-traffic GO criteria
 

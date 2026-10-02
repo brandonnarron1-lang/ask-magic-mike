@@ -19,19 +19,21 @@ brokerage, listings, and SEO authority and embeds or links into this system.
 - `OWNER ACTION` — Mike and Brandon must enroll their own phones; authenticated
   internal email remains the active alert path until each device passes QA.
 - `DEFERRED — PAID SERVICE` — carrier SMS/MMS; Web Push is the free-first path.
-- `VERIFIED LIVE` — PR #280 is accepted at merge
-  `fa1d0fb077882309970b801bbdfaa756107c2104` on Vercel deployment
-  `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ`; exact-tree hosted verification,
-  read-only monitor/smoke checks, and the canonical aliases pass.
-- `PHASE E SEALED CANDIDATE` — Draft PR #281 at reviewed head
-  `3b1853b535000e09b6e9c40221f5898bd87a92f9`, tree
-  `23bc513823874e629cfc525c2832bbad4282f480`, reconciles the reviewed
-  Connector 1.1.0 package from PR #248 and the narrow atomic callback pattern
-  from PR #279 onto current `main`. Exact-head hosted Release Gate, immutable
-  Preview, protected no-write QA, 15 browser scenarios, and runtime-log review
-  pass. Its exact app-only gate is recorded in `OWNER_APPROVAL_QUEUE.md`. No
-  WordPress plugin/page, database, lead, message, or Production state has
-  changed. PR #238 remains an applied, consumed five-migration receipt.
+- `VERIFIED LIVE` — PR #281 is accepted at merge
+  `a3a0c235decab5a8e9209d983358d200a36ca979`, tree
+  `7c8b8395e3cbf4b31b81d52b05add21894f0911e`, on Vercel deployment
+  `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`; exact-tree hosted verification,
+  post-deploy contracts, recurring monitors, smoke checks, and canonical aliases
+  pass. PR #280 deployment `dpl_51jpakXn2zav3WPQYfUmAiSBBHqZ` is the immediate
+  application rollback.
+- `PHASE E VERIFIED LIVE` — Connector 1.1.0 and the reviewed page-3952 Home
+  Value CTA are active. One suppressed QA submission proved canonical Neon
+  persistence, attribution, consent, deterministic routing, Lead Center
+  visibility, internal Resend delivery, hidden audit-BCC delivery, and audit
+  history without consumer contact or KPI inclusion. All related one-time gates
+  are consumed; no application candidate or reusable release gate is active.
+- `HISTORICAL RECEIPT` — PR #238 remains an applied, consumed five-migration
+  database receipt and does not represent a current release candidate.
 
 The source-of-truth audit is in
 [`docs/CURRENT_STATE_RECONCILIATION.md`](docs/CURRENT_STATE_RECONCILIATION.md).

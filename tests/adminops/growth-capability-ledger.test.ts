@@ -7,28 +7,25 @@ import {
 } from "../../app/lib/growth/capability-ledger";
 
 describe("Growth capability authority ledger", () => {
-  it("shows accepted PR 280 plus sealed application candidate PR 281", () => {
+  it("shows accepted PR 281 with no reusable application candidate", () => {
     const ledger = buildGrowthCapabilityLedger({ currentTailInProduction: false });
 
     expect(ledger.generatedFor).toBe("preview_or_local");
     expect(ledger.counts).toEqual({
-      production_live: 3,
-      release_candidate: 3,
+      production_live: 6,
+      release_candidate: 0,
       operator_gate: 2,
       host_gate: 1,
       external_dependency: 2,
       prohibited: 1,
     });
     expect(ledger.items.find((item) => item.key === "ordered_release_train")).toMatchObject({
-      state: "release_candidate",
+      state: "production_live",
     });
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.approvalGate).toBe(
-      "APPROVE PHASE E WORDPRESS ACTIVATION HARDENING PR 281 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT",
-    );
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 280");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.approvalGate).toBeUndefined();
     expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("PR 281");
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("only active reviewed application candidate");
-    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.nextAction).toContain("PR 281");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.summary).toContain("No application candidate");
+    expect(ledger.items.find((item) => item.key === "ordered_release_train")?.nextAction).toContain("candidate authority null");
     expect(JSON.stringify(ledger)).not.toContain("PR 210 remains the first pending");
   });
 
@@ -80,7 +77,6 @@ describe("Growth capability authority ledger", () => {
     const facebookRecovery = ledger.items.find((item) => item.key === "facebook_preview_recovery");
 
     expect(gates).toEqual([
-      "APPROVE PHASE E WORDPRESS ACTIVATION HARDENING PR 281 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT",
       "APPROVE PHASE 9 OUR TOWN BASIC CONSENT BRIDGE 1.2.0 INSTALLATION, LEGACY GTM REMOVAL, AND CONTROLLED RUNTIME QA",
     ]);
     expect(facebookRecovery?.approvalGate).toBeUndefined();

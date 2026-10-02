@@ -10,6 +10,9 @@ queue covers only actions that still require a human or external-system gate.
   is merged as `a3a0c235decab5a8e9209d983358d200a36ca979`, tree
   `7c8b8395e3cbf4b31b81d52b05add21894f0911e`, and accepted on Ready Vercel
   Production deployment `dpl_8488csXCtbfHMMZUF6KDQRiJVwTk`.
+- Its exact application gate
+  `APPROVE PHASE E WORDPRESS ACTIVATION HARDENING PR 281 MERGE AND SAME-TREE PRODUCTION DEPLOYMENT`
+  was consumed once and cannot be reused. No application candidate is active.
 - Connector 1.1.0 is active with verified PHP SHA-256
   `700c78b77b24b0038078e45c6526908078dac46cf1a591b73dd0f13a6d840ec8`.
   Its prior plugin-only approval is consumed and not requestable.
