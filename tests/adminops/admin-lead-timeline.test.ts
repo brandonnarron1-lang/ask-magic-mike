@@ -10,6 +10,12 @@ import {
 } from "../../app/lib/adminLeadTimeline";
 
 describe("AdminOps lead timeline", () => {
+  it("renders canonical QA suppression evidence with a stable protected timeline identity", () => {
+    const result = normalizeAuditTimelineEvent({ id: "qa-audit", action: "lead.qa_suppressed", actor: "system/public_lead_capture", after_state: { is_test: true, email: "private@example.test" }, metadata: { raw_provider_payload: "never render" } });
+    expect(result).toMatchObject({ id: "audit:qa-audit", event_type: "lead.qa_suppressed", snapshot: false, label: "QA capture suppressed", actor: "system/public_lead_capture" });
+    expect(JSON.stringify(result)).not.toContain("private@example.test");
+    expect(JSON.stringify(result)).not.toContain("raw_provider_payload");
+  });
   it("normalizes lifecycle, assignment, and notification events without raw payloads", () => {
     const lifecycle = normalizeAuditTimelineEvent({
       id: "audit-life",

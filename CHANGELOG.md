@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-03 — Atomic QA evidence candidate (not Production acceptance)
+
+- Add one compatible v1 function migration: server-classified QA flags and
+  `lead.qa_suppressed` commit together; replay and required-stage failure remain
+  atomic. No backfill, provider/schedule activation, or parallel store.
+- Strengthen unsafe-QA detection and render the protected audit event in the
+  existing timeline. Fix JSONB attribution ordering in canonical reporting.
+- Add real isolated PostgreSQL root-handler, replay/concurrency, rollback,
+  provider-failure, authorization, ACC and PR #279 successor regression proof.
+- PR #279's unique notification reliability work stays deferred and preserved.
+  See `docs/phase9/AUTOMATIC_QA_AUDIT_EVIDENCE_2026-10-03.md`.
+
 ## 2026-09-29 — Batch D WordPress and placement readiness candidate
 
 - Consolidated the still-useful capabilities from Draft PRs #253–#257 and

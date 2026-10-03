@@ -143,14 +143,14 @@ export async function loadNeonAdminReportingSummary(
              SELECT sa.utm_source, sa.utm_campaign, sa.placement_id
                FROM public.source_attribution sa
               WHERE sa.lead_id = l.id
-              ORDER BY CASE WHEN sa.first_touch THEN 0 ELSE 1 END, sa.created_at ASC, sa.id ASC
+              ORDER BY CASE WHEN jsonb_typeof(sa.first_touch) = 'object' THEN 0 ELSE 1 END, sa.created_at ASC, sa.id ASC
               LIMIT 1
            ) ft ON true
            LEFT JOIN LATERAL (
              SELECT sa.utm_source, sa.utm_campaign, sa.placement_id
                FROM public.source_attribution sa
               WHERE sa.lead_id = l.id
-              ORDER BY CASE WHEN sa.last_touch THEN 0 ELSE 1 END, sa.created_at DESC, sa.id DESC
+              ORDER BY CASE WHEN jsonb_typeof(sa.last_touch) = 'object' THEN 0 ELSE 1 END, sa.created_at DESC, sa.id DESC
               LIMIT 1
            ) lt ON true
            LEFT JOIN LATERAL (

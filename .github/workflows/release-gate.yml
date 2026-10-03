@@ -58,6 +58,9 @@ jobs:
       - name: Unit tests
         run: pnpm run test
 
+      - name: Isolated PostgreSQL QA audit atomicity and replay
+        run: pnpm run test:postgres:qa-audit
+
       - name: Typecheck
         run: pnpm run typecheck
 

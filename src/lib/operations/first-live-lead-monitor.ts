@@ -139,7 +139,11 @@ export class FirstLiveLeadMonitor {
       `SELECT
          COUNT(*) FILTER (
            WHERE COALESCE(l.is_test, false) = true
-             AND COALESCE(l.communication_suppressed, false) = false
+             AND (
+               COALESCE(l.communication_suppressed, false) = false
+               OR COALESCE(l.email_suppressed, false) = false
+               OR COALESCE(l.sms_suppressed, false) = false
+             )
          )::int AS unsuppressed_qa,
          COUNT(*) FILTER (
            WHERE COALESCE(l.is_test, false) = true
