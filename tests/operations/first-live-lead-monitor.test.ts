@@ -65,6 +65,9 @@ describe("FirstLiveLeadMonitor", () => {
 
     expect(report.scanned).toBe(0);
     expect(report.queue).toEqual({ unsuppressedQa: 1, qaWithoutExplicitEvidence: 2 });
+    const invariantSql = String(query.mock.calls[1][0]);
+    expect(invariantSql).toContain("OR COALESCE(l.email_suppressed, false) = false");
+    expect(invariantSql).toContain("OR COALESCE(l.sms_suppressed, false) = false");
     expect(JSON.stringify(query.mock.calls)).not.toContain("phone_normalized");
   });
 });

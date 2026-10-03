@@ -173,6 +173,12 @@ export function normalizeAuditTimelineEvent(row: Record<string, unknown>): Admin
   if (action === "lead.first_human_response_recorded") {
     return event({ ...base, type: "response", summary: "First human response recorded", detail: "Immutable speed-to-lead evidence recorded" });
   }
+  if (action === "lead.qa_suppressed") {
+    return event({
+      ...base, type: "lifecycle", summary: "QA capture suppressed",
+      detail: "Test classification and communication suppression recorded; not a consumer lead",
+    });
+  }
   if (["lead.assigned", "lead.reassigned", "lead.unassigned"].includes(action)) {
     return event({
       ...base,
