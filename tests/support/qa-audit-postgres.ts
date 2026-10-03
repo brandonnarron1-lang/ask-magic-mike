@@ -8,6 +8,7 @@ export const migration = "20261003203000_atomic_qa_capture_evidence.sql";
 export const acceptedMigration = "20260716043829_infra_02_atomic_lifecycle.sql";
 export const database = "amm_qa_upgrade";
 export const statements: Array<{ sql: string; params: unknown[] }> = [];
+let containerStarted = false;
 
 export function psql(sql: string, db = database): string {
   if (!/^amm_qa_(upgrade|fresh)$/.test(db)) throw new Error("isolated_database_required");
@@ -59,6 +60,7 @@ export async function startDatabase(): Promise<void> {
   if (process.env.AMM_QA_POSTGRES_TEST !== "1") throw new Error("explicit_isolated_test_required");
   execFileSync("docker", ["run", "-d", "--name", container, "--network", "none", "--memory", "512m",
     "--label", "com.askmagicmike.purpose=qa-audit-isolated", "-e", "POSTGRES_HOST_AUTH_METHOD=trust", "postgres:17-alpine"]);
+  containerStarted = true;
   const identity = JSON.parse(execFileSync("docker", ["inspect", container], { encoding: "utf8" }))[0];
   if (identity.HostConfig.NetworkMode !== "none" || Object.keys(identity.HostConfig.PortBindings || {}).length ||
     identity.Config.Labels["com.askmagicmike.purpose"] !== "qa-audit-isolated") throw new Error("container_isolation_failed");
@@ -101,5 +103,7 @@ export async function concurrent(sql: string): Promise<string> {
 
 export function stopDatabase(): void {
   // Exact UUID-named test container only; no unrelated stack or volume removed.
+  if (!containerStarted) return;
   execFileSync("docker", ["rm", "-f", "-v", container], { stdio: "ignore" });
+  containerStarted = false;
 }

@@ -71,7 +71,7 @@ Two small compatibility fixes accompany the marker:
 
 New and ONLY Production migration in this candidate:
 `supabase/migrations/20261003203000_atomic_qa_capture_evidence.sql`.
-SHA-256: `f94e6bbab69359820414edf260f17acb37a977b4245cf659aaf4597cb9b8111c`.
+SHA-256: `90bdaf70f16472b51e572da02849deff0f20f40766902aed8ef8140010b971a3`.
 
 One function replaced; no new table, signature, migration backfill, or data
 repair. Role grants are conditional because Neon does not have the Supabase
@@ -150,6 +150,12 @@ the PostgreSQL command; ordinary unit runs skip its opt-in database cases.
 Full Supabase stack commands are not invoked because their fixed ports/services
 could collide with unrelated local projects; the isolated command exercises the
 actual canonical SQL and callers without touching their containers.
+
+A later sealed-source rerun found Docker Desktop stopped (missing daemon
+socket), so its PostgreSQL cases did NOT run. The test remains fail-closed:
+no mock fallback replaces database assertions. Runtime restart and a fresh
+successful exact-head run are required; cleanup does not mask startup failure
+by attempting to remove a container that was never created.
 
 ## Side effects, rollback and remaining gate
 

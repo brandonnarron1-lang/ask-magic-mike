@@ -437,4 +437,3 @@ BEGIN
 END;
 $grants$;
 COMMIT;
-
