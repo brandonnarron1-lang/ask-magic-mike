@@ -164,7 +164,9 @@ export async function createNeonAppointment(input: {
 }
 
 export async function transitionNeonAppointment(input: {
+  leadId: string;
   appointmentId: string;
+  expectedUpdatedAt: string | null;
   status: string;
   startsAt?: string | null;
   endsAt?: string | null;
@@ -173,6 +175,7 @@ export async function transitionNeonAppointment(input: {
   now?: Date;
   actor?: string;
 }): Promise<AppointmentMutationResult> {
+  if (!UUID.test(input.leadId)) return { ok: false, statusCode: 400, error: "invalid_lead_id" };
   if (!UUID.test(input.appointmentId)) return { ok: false, statusCode: 400, error: "invalid_appointment_id" };
   if (!isAppointmentStatus(input.status)) return { ok: false, statusCode: 400, error: "invalid_appointment_status" };
   const mutation = assertDatabaseMutationAllowed();
@@ -182,11 +185,14 @@ export async function transitionNeonAppointment(input: {
 
   try {
     const rows = await sql.query(
-      `SELECT * FROM public.lead_appointments WHERE id = $1::uuid LIMIT 1`,
-      [input.appointmentId],
+      `SELECT * FROM public.lead_appointments WHERE id = $1::uuid AND lead_id = $2::uuid LIMIT 1`,
+      [input.appointmentId, input.leadId],
     ) as Array<Record<string, unknown>>;
     const current = normalizeAppointment(rows[0] || {});
     if (!current) return { ok: false, statusCode: 404, error: "appointment_not_found" };
+    if (current.updated_at !== text(input.expectedUpdatedAt)) {
+      return { ok: false, statusCode: 409, error: "stale_appointment_version" };
+    }
     if (current.status === input.status) {
       return { ok: true, id: current.id, status: current.status, warning: "appointment_status_already_current" };
     }
@@ -219,9 +225,21 @@ export async function transitionNeonAppointment(input: {
          completed_at = CASE WHEN $1 = 'completed' THEN $5::timestamptz WHEN $1 = 'scheduled' THEN NULL ELSE completed_at END,
          canceled_at = CASE WHEN $1 = 'canceled' THEN $5::timestamptz WHEN $1 = 'scheduled' THEN NULL ELSE canceled_at END,
          cancellation_reason = CASE WHEN $1 = 'canceled' THEN COALESCE($6, 'not_specified') WHEN $1 = 'scheduled' THEN NULL ELSE cancellation_reason END
-       WHERE id = $7::uuid AND status = $8
+       WHERE id = $7::uuid AND lead_id = $8::uuid AND status = $9
+         AND updated_at IS NOT DISTINCT FROM $10::timestamptz
        RETURNING id`,
-      [input.status, startsAt, endsAt, timezone, now.toISOString(), text(input.cancellationReason), current.id, current.status],
+      [
+        input.status,
+        startsAt,
+        endsAt,
+        timezone,
+        now.toISOString(),
+        text(input.cancellationReason),
+        current.id,
+        input.leadId,
+        current.status,
+        current.updated_at,
+      ],
     ) as Array<Record<string, unknown>>;
     if (!updated.length) return { ok: false, statusCode: 409, error: "concurrent_appointment_update" };
     await syncLeadLifecycle(current.lead_id, input.status, now, input.actor);
@@ -292,21 +310,30 @@ export async function createNeonFollowupTask(input: {
 }
 
 export async function updateNeonFollowupTask(input: {
+  leadId: string;
   taskId: string;
+  expectedUpdatedAt: string | null;
   action: "complete" | "cancel" | "reschedule";
   dueAt?: string | null;
   outcome?: string | null;
   actor?: string;
 }): Promise<FollowupMutationResult> {
+  if (!UUID.test(input.leadId)) return { ok: false, statusCode: 400, error: "invalid_lead_id" };
   if (!UUID.test(input.taskId)) return { ok: false, statusCode: 400, error: "invalid_followup_id" };
   const mutation = assertDatabaseMutationAllowed();
   if (!mutation.ok) return { ok: false, statusCode: mutation.statusCode, error: mutation.error };
   const sql = queryFromEnv();
   if (!sql) return { ok: false, statusCode: 503, error: "followup_store_not_configured" };
   try {
-    const rows = await sql.query(`SELECT * FROM public.tasks WHERE id = $1::uuid LIMIT 1`, [input.taskId]) as Array<Record<string, unknown>>;
+    const rows = await sql.query(
+      `SELECT * FROM public.tasks WHERE id = $1::uuid AND lead_id = $2::uuid LIMIT 1`,
+      [input.taskId, input.leadId],
+    ) as Array<Record<string, unknown>>;
     const task = normalizeTask(rows[0] || {});
     if (!task?.lead_id) return { ok: false, statusCode: 404, error: "followup_not_found" };
+    if (task.updated_at !== text(input.expectedUpdatedAt)) {
+      return { ok: false, statusCode: 409, error: "stale_followup_version" };
+    }
     let nextStatus: FollowupTaskStatus = task.status;
     let dueAt = task.due_at;
     let body = task.body;
@@ -322,8 +349,10 @@ export async function updateNeonFollowupTask(input: {
     }
     const updated = await sql.query(
       `UPDATE public.tasks SET status = $1, due_at = $2::timestamptz, body = $3
-        WHERE id = $4::uuid AND status = $5 RETURNING id`,
-      [nextStatus, dueAt, body, task.id, task.status],
+        WHERE id = $4::uuid AND lead_id = $5::uuid AND status = $6
+          AND updated_at IS NOT DISTINCT FROM $7::timestamptz
+        RETURNING id`,
+      [nextStatus, dueAt, body, task.id, input.leadId, task.status, task.updated_at],
     ) as Array<Record<string, unknown>>;
     if (!updated.length) return { ok: false, statusCode: 409, error: "concurrent_followup_update" };
     await writeAudit(sql, {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildLeadTimeline,
+  buildLeadTimelinePage,
   normalizeAuditTimelineEvent,
   normalizeAppointmentTimelineEvent,
   normalizeFollowupTimelineEvent,
@@ -20,13 +21,19 @@ describe("AdminOps lead timeline", () => {
       metadata: { raw_provider_payload: { secret: "not shown" } },
     });
 
-    expect(lifecycle).toEqual({
-      id: "audit-life",
+    expect(lifecycle).toMatchObject({
+      id: "audit:audit-life",
+      source_id: "audit-life",
+      source_type: "audit",
+      event_type: "lead.lifecycle_changed",
       occurred_at: "2026-07-12T12:00:00.000Z",
+      recorded_at: "2026-07-12T12:00:00.000Z",
       type: "lifecycle",
       label: "Lifecycle changed to dead",
+      summary: "Lifecycle changed to dead",
       actor: "system/admin_basic_auth",
       detail: "Reason: unresponsive",
+      snapshot: false,
     });
 
     const assignment = normalizeAuditTimelineEvent({
@@ -39,7 +46,7 @@ describe("AdminOps lead timeline", () => {
       metadata: { assignment_action: "assigned", Authorization: "Bearer service-role-value" },
     });
     expect(assignment?.label).toBe("Lead assigned");
-    expect(assignment?.actor).toBe("AdminOps");
+    expect(assignment?.actor).toBe("Protected actor");
     expect(assignment?.detail).toBe("assigned to [redacted phone]");
 
     const notification = normalizeNotificationTimelineEvent({
@@ -51,13 +58,15 @@ describe("AdminOps lead timeline", () => {
       provider: "authorization: Bearer service-role-value",
       provider_response: { raw: "not shown" },
     });
-    expect(notification).toEqual({
-      id: "notification-1",
+    expect(notification).toMatchObject({
+      id: "notification:notification-1:snapshot",
+      source_type: "notification",
       occurred_at: "2026-07-12T11:05:00.000Z",
       type: "notification",
       label: "Notification retry scheduled",
-      actor: "AdminOps",
+      actor: "Protected actor",
       detail: "agent assignment / email",
+      snapshot: true,
     });
     expect(JSON.stringify([lifecycle, assignment, notification])).not.toContain("example.test");
     expect(JSON.stringify([lifecycle, assignment, notification])).not.toContain("2525550100");
@@ -73,8 +82,9 @@ describe("AdminOps lead timeline", () => {
       after_state: { first_human_response_at: "2026-08-20T12:07:00.000Z" },
       metadata: { private_note: "do not render", source: "admin_lead_detail" },
     });
-    expect(response).toEqual({
-      id: "audit-response",
+    expect(response).toMatchObject({
+      id: "audit:audit-response",
+      source_type: "audit",
       occurred_at: "2026-08-20T12:07:00.000Z",
       type: "response",
       label: "First human response recorded",
@@ -84,7 +94,7 @@ describe("AdminOps lead timeline", () => {
     expect(JSON.stringify(response)).not.toContain("private_note");
   });
 
-  it("builds newest-first timeline and suppresses duplicate events", () => {
+  it("builds newest-first timeline and preserves distinct stable source events", () => {
     const timeline = buildLeadTimeline({
       lead: {
         id: "lead-1",
@@ -115,12 +125,75 @@ describe("AdminOps lead timeline", () => {
 
     expect(timeline.map((event) => event.label)).toEqual([
       "Lifecycle changed to qualified",
-      "Lead captured",
+      "Lifecycle changed to qualified",
       "Attribution captured",
+      "Lead captured",
     ]);
     expect(JSON.stringify(timeline)).not.toContain("jane@example.test");
     expect(JSON.stringify(timeline)).not.toContain("2525550100");
     expect(JSON.stringify(timeline)).not.toContain("service-role");
+  });
+
+  it("keeps delayed events and page boundaries deterministic while exposing partial sources", () => {
+    const input = {
+      lead: {
+        id: "lead-page",
+        created_at: "2026-07-10T10:00:00.000Z",
+        attribution_summary: "No attribution captured",
+        lead_source_surface: "home value",
+      },
+      auditRows: [
+        {
+          id: "audit-equal-b",
+          created_at: "2026-07-12T13:00:00.000Z",
+          action: "lead.lifecycle_changed",
+          after_state: { status: "qualified" },
+          metadata: { occurred_at: "2026-07-12T12:00:00.000Z" },
+        },
+        {
+          id: "audit-equal-a",
+          created_at: "2026-07-12T13:00:00.000Z",
+          action: "lead.lifecycle_changed",
+          after_state: { status: "qualified" },
+          metadata: { occurred_at: "2026-07-12T12:00:00.000Z" },
+        },
+        {
+          id: "audit-delayed",
+          created_at: "2026-07-13T13:00:00.000Z",
+          action: "lead.lifecycle_changed",
+          after_state: { status: "contacted" },
+          metadata: { occurred_at: "2026-07-11T12:00:00.000Z" },
+        },
+        {
+          id: "audit-delayed",
+          created_at: "2026-07-13T13:00:00.000Z",
+          action: "lead.lifecycle_changed",
+          after_state: { status: "contacted" },
+          metadata: { occurred_at: "2026-07-11T12:00:00.000Z" },
+        },
+      ],
+      incompleteSources: ["communications", "communications"],
+    };
+
+    const first = buildLeadTimelinePage(input, { offset: 0, limit: 2 });
+    const second = buildLeadTimelinePage(input, { offset: 2, limit: 2 });
+
+    expect(first.events.map((item) => item.id)).toEqual([
+      "audit:audit-equal-a",
+      "audit:audit-equal-b",
+    ]);
+    expect(second.events.map((item) => item.id)).toEqual([
+      "audit:audit-delayed",
+      "lead:lead-page:captured",
+    ]);
+    expect(new Set([...first.events, ...second.events].map((item) => item.id)).size).toBe(4);
+    expect(first).toMatchObject({
+      hasMore: true,
+      complete: false,
+      incompleteSources: ["communications"],
+      loadedCount: 4,
+    });
+    expect(second.hasMore).toBe(false);
   });
 
   it("normalizes appointment and follow-up events without exposing unsafe metadata", () => {
@@ -133,13 +206,15 @@ describe("AdminOps lead timeline", () => {
       location_label: "Private customer address",
       updated_at: "2026-07-12T14:00:00.000Z",
     });
-    expect(appointment).toEqual({
-      id: "appointment-appointment-1-confirmed",
+    expect(appointment).toMatchObject({
+      id: "appointment:appointment-1:snapshot",
+      source_type: "appointment",
       occurred_at: "2026-07-12T14:00:00.000Z",
       type: "appointment",
       label: "Appointment confirmed",
-      actor: "AdminOps",
+      actor: "Unknown actor",
       detail: "Starts 2026-07-12T15:00:00.000Z (America/New_York)",
+      snapshot: true,
     });
 
     const followup = normalizeFollowupTimelineEvent({
@@ -151,13 +226,15 @@ describe("AdminOps lead timeline", () => {
       body: "Call +1 252-555-0100 with Authorization: Bearer token",
       updated_at: "2026-07-12T12:00:00.000Z",
     });
-    expect(followup).toEqual({
-      id: "followup-task-1-open",
+    expect(followup).toMatchObject({
+      id: "task:task-1:snapshot",
+      source_type: "task",
       occurred_at: "2026-07-12T12:00:00.000Z",
       type: "followup",
       label: "Follow-up open",
-      actor: "AdminOps",
+      actor: "Protected actor",
       detail: "appointment confirmation due 2026-07-12T16:00:00.000Z",
+      snapshot: true,
     });
     expect(JSON.stringify([appointment, followup])).not.toContain("secret-token");
     expect(JSON.stringify([appointment, followup])).not.toContain("agent@example.test");
@@ -174,13 +251,15 @@ describe("AdminOps lead timeline", () => {
       metadata: { actor: "agent@example.test", note: "Private commission note" },
       occurred_at: "2026-08-19T20:05:00.000Z",
     });
-    expect(outcome).toEqual({
-      id: "outcome-outcome-1",
+    expect(outcome).toMatchObject({
+      id: "outcome:outcome-1",
+      source_type: "outcome",
       occurred_at: "2026-08-19T20:05:00.000Z",
       type: "outcome",
       label: "Outcome closed",
-      actor: "AdminOps",
+      actor: "Unknown actor",
       detail: "Canonical business outcome recorded",
+      snapshot: false,
     });
     expect(JSON.stringify(outcome)).not.toContain("15000");
     expect(JSON.stringify(outcome)).not.toContain("example.test");

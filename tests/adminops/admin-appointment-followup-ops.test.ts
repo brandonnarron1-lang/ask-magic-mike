@@ -42,7 +42,7 @@ describe("AdminOps appointment and follow-up operations", () => {
       statusCode: 503,
       error: "preview_data_disabled",
     });
-    await expect(transitionAppointment({ appointmentId: APPOINTMENT_ID, status: "scheduled" })).resolves.toEqual({
+    await expect(transitionAppointment({ leadId: LEAD_ID, appointmentId: APPOINTMENT_ID, expectedUpdatedAt: null, status: "scheduled" })).resolves.toEqual({
       ok: false,
       statusCode: 503,
       error: "preview_data_disabled",
@@ -56,7 +56,7 @@ describe("AdminOps appointment and follow-up operations", () => {
       statusCode: 503,
       error: "preview_data_disabled",
     });
-    await expect(updateFollowupTask({ taskId: TASK_ID, action: "complete" })).resolves.toEqual({
+    await expect(updateFollowupTask({ leadId: LEAD_ID, taskId: TASK_ID, expectedUpdatedAt: null, action: "complete" })).resolves.toEqual({
       ok: false,
       statusCode: 503,
       error: "preview_data_disabled",

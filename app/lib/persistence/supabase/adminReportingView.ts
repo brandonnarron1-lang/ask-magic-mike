@@ -19,6 +19,11 @@ export type AdminReportingLeadRow = {
   email: string | null;
   phone: string | null;
   widget_session_id: string | null;
+  first_touch_source?: string | null;
+  last_touch_source?: string | null;
+  attribution_campaign?: string | null;
+  attribution_placement?: string | null;
+  outcome_types?: string[];
   is_test?: boolean;
   communication_suppressed?: boolean;
 };
@@ -45,6 +50,50 @@ export type AdminAgentPerformanceGroup = {
   closedLost: number;
   stalled: number;
   conversionRate: number;
+};
+
+export type AdminOperationalTrust = {
+  responseSla: {
+    available: boolean;
+    measured: number;
+    withinTarget: number;
+    targetMinutes: number;
+    unknown: number;
+    rate: number | null;
+  };
+  assignmentAcceptance: {
+    available: boolean;
+    measured: number;
+    accepted: number;
+    pending: number;
+    rate: number | null;
+  };
+  notifications: {
+    available: boolean;
+    intents: number;
+    providerAccepted: number;
+    delivered: number;
+    failed: number;
+    deliveryUnknown: number;
+    providerAcceptanceRate: number | null;
+    deliveryRate: number | null;
+  };
+  duplicates: {
+    available: boolean;
+    canonicalLeads: number;
+    excludedAliases: number;
+    submissionRecords: number;
+    rate: number | null;
+  };
+  aiUsage: {
+    available: boolean;
+    requests: number;
+    providerResponses: number;
+    deterministicFallbacks: number;
+    blocked: number;
+    fallbackRate: number | null;
+    estimatedCostUsd: number;
+  };
 };
 
 export type AdminReportingSummary = {
@@ -102,8 +151,73 @@ export type AdminReportingSummary = {
   intents: Array<{ primary_intent: string; count: number }>;
   timelines: Array<{ timeline_months: number | null; label: string; count: number }>;
   hotLeads: AdminReportingLeadRow[];
+  sourceConversion: Array<{
+    source: string;
+    captured: number;
+    qualified: number;
+    appointments: number;
+    closedWon: number;
+    commissions: number;
+    conversionRate: number;
+  }>;
+  dataTrust: {
+    included: number;
+    excludedTest: number;
+    excludedSuppressed: number;
+    excludedDuplicates: number;
+    unknownFirstTouch: number;
+    unknownLastTouch: number;
+    outcomesObserved: number;
+  };
+  operationalTrust: AdminOperationalTrust;
   error?: string;
 };
+
+export function unavailableOperationalTrust(canonicalLeads = 0): AdminOperationalTrust {
+  return {
+    responseSla: {
+      available: false,
+      measured: 0,
+      withinTarget: 0,
+      targetMinutes: 5,
+      unknown: canonicalLeads,
+      rate: null,
+    },
+    assignmentAcceptance: {
+      available: false,
+      measured: 0,
+      accepted: 0,
+      pending: 0,
+      rate: null,
+    },
+    notifications: {
+      available: false,
+      intents: 0,
+      providerAccepted: 0,
+      delivered: 0,
+      failed: 0,
+      deliveryUnknown: 0,
+      providerAcceptanceRate: null,
+      deliveryRate: null,
+    },
+    duplicates: {
+      available: false,
+      canonicalLeads,
+      excludedAliases: 0,
+      submissionRecords: canonicalLeads,
+      rate: null,
+    },
+    aiUsage: {
+      available: false,
+      requests: 0,
+      providerResponses: 0,
+      deterministicFallbacks: 0,
+      blocked: 0,
+      fallbackRate: null,
+      estimatedCostUsd: 0,
+    },
+  };
+}
 
 const REPORTING_SELECT = [
   "id",
@@ -242,6 +356,17 @@ function emptySummary(
     intents: [],
     timelines: [],
     hotLeads: [],
+    sourceConversion: [],
+    dataTrust: {
+      included: 0,
+      excludedTest: 0,
+      excludedSuppressed: 0,
+      excludedDuplicates: 0,
+      unknownFirstTouch: 0,
+      unknownLastTouch: 0,
+      outcomesObserved: 0,
+    },
+    operationalTrust: unavailableOperationalTrust(),
     error,
   };
 }
@@ -346,6 +471,13 @@ export function normalizeReportingLeadRow(row: Record<string, unknown>): AdminRe
     is_test: row.is_test === true || row.is_test === "true",
     communication_suppressed:
       row.communication_suppressed === true || row.communication_suppressed === "true",
+    first_touch_source: text(row.first_touch_source),
+    last_touch_source: text(row.last_touch_source),
+    attribution_campaign: text(row.attribution_campaign),
+    attribution_placement: text(row.attribution_placement),
+    outcome_types: Array.isArray(row.outcome_types)
+      ? row.outcome_types.filter((value): value is string => typeof value === "string")
+      : [],
   };
 }
 
@@ -406,6 +538,7 @@ export function summarizeReportingRows(
   agentNames: ReadonlyMap<string, string> = new Map(),
   appointmentRows: Array<Record<string, unknown>> = [],
   followupRows: Array<Record<string, unknown>> = [],
+  excluded: { test?: number; suppressed?: number } = {},
 ): AdminReportingSummary {
   const normalizedRows = rows.map((row) => normalizeReportingLeadRow(row as unknown as Record<string, unknown>));
   const nonSpamRows = normalizedRows.filter((row) => !isSpamOrTest(row));
@@ -544,6 +677,30 @@ export function summarizeReportingRows(
     })
     .slice(0, 12);
 
+  const sourceConversionMap = new Map<string, AdminReportingSummary["sourceConversion"][number]>();
+  for (const row of nonSpamRows) {
+    const source = row.first_touch_source || "Unknown first touch";
+    const outcomes = new Set(row.outcome_types || []);
+    const group = sourceConversionMap.get(source) || {
+      source,
+      captured: 0,
+      qualified: 0,
+      appointments: 0,
+      closedWon: 0,
+      commissions: 0,
+      conversionRate: 0,
+    };
+    group.captured += 1;
+    if (isQualified(row)) group.qualified += 1;
+    if (isAppointment(row) || outcomes.has("appointment_held") || outcomes.has("appointment_set")) group.appointments += 1;
+    if (isConverted(row) || outcomes.has("closed_won")) group.closedWon += 1;
+    if (outcomes.has("commission_received") || outcomes.has("commission_settled")) group.commissions += 1;
+    sourceConversionMap.set(source, group);
+  }
+  const sourceConversion = [...sourceConversionMap.values()]
+    .map((group) => ({ ...group, conversionRate: percent(group.closedWon, group.captured) }))
+    .sort((a, b) => b.captured - a.captured || b.closedWon - a.closedWon || a.source.localeCompare(b.source));
+
   return {
     configured: true,
     windowDays,
@@ -585,6 +742,17 @@ export function summarizeReportingRows(
     intents: groupSimple(nonSpamRows, "primary_intent") as Array<{ primary_intent: string; count: number }>,
     timelines,
     hotLeads,
+    sourceConversion,
+    dataTrust: {
+      included: nonSpamRows.length,
+      excludedTest: Math.max(0, excluded.test || 0),
+      excludedSuppressed: Math.max(0, excluded.suppressed || 0),
+      excludedDuplicates: 0,
+      unknownFirstTouch: nonSpamRows.filter((row) => !row.first_touch_source).length,
+      unknownLastTouch: nonSpamRows.filter((row) => !row.last_touch_source).length,
+      outcomesObserved: nonSpamRows.filter((row) => (row.outcome_types || []).length > 0).length,
+    },
+    operationalTrust: unavailableOperationalTrust(nonSpamRows.length),
   };
 }
 

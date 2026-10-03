@@ -207,17 +207,39 @@ function StatusActionForm({
   );
 }
 
-function Timeline({ events }: { events: AdminLeadTimelineEvent[] }) {
+function Timeline({
+  events,
+  leadId,
+  offset,
+  limit,
+  hasMore,
+  complete,
+  incompleteSources,
+}: {
+  events: AdminLeadTimelineEvent[];
+  leadId: string;
+  offset: number;
+  limit: number;
+  hasMore: boolean;
+  complete: boolean;
+  incompleteSources: string[];
+}) {
   if (!events.length) {
     return <p className="text-sm text-[#8f8778]">No activity events returned.</p>;
   }
   return (
-    <ol className="space-y-3" aria-label="Lead activity timeline">
-      {events.map((event) => (
-        <li key={event.id} className="rounded-md border border-white/10 bg-[#080808] p-4">
+    <div>
+      {!complete ? (
+        <p role="status" className="mb-4 rounded-md border border-amber-300/25 bg-amber-300/[.07] p-3 text-sm text-amber-100">
+          History is incomplete. Unavailable sources: {incompleteSources.join(", ")}.
+        </p>
+      ) : null}
+      <ol className="space-y-3" aria-label="Lead activity timeline">
+        {events.map((event) => (
+          <li key={event.id} className="rounded-md border border-white/10 bg-[#080808] p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-[#f4ead4]">{event.label}</p>
+              <p className="text-sm font-semibold text-[#f4ead4]">{event.summary}</p>
               <p className="mt-1 text-xs text-[#8f8778]">{event.detail}</p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -225,10 +247,27 @@ function Timeline({ events }: { events: AdminLeadTimelineEvent[] }) {
               <Badge>{shortDate(event.occurred_at)}</Badge>
             </div>
           </div>
-          {event.actor ? <p className="mt-3 text-xs text-[#8f8778]">Actor: {event.actor}</p> : null}
+          <p className="mt-3 text-xs text-[#8f8778]">
+            Actor: {event.actor} · Source: {event.source_type}{event.snapshot ? " (current-state snapshot)" : ""}
+          </p>
         </li>
-      ))}
-    </ol>
+        ))}
+      </ol>
+      {offset > 0 || hasMore ? (
+        <nav className="mt-4 flex flex-wrap gap-2" aria-label="Activity history pages">
+          {offset > 0 ? (
+            <Link href={`/admin/leads/${leadId}?timeline_offset=${Math.max(0, offset - limit)}#activity`} className="rounded-md border border-white/15 px-3 py-2 text-xs font-semibold text-[#d9ceb8]">
+              Newer activity
+            </Link>
+          ) : null}
+          {hasMore ? (
+            <Link href={`/admin/leads/${leadId}?timeline_offset=${offset + limit}#activity`} className="rounded-md border border-[#cda24a55] bg-[#cda24a12] px-3 py-2 text-xs font-semibold text-[#f4ead4]">
+              Older activity
+            </Link>
+          ) : null}
+        </nav>
+      ) : null}
+    </div>
   );
 }
 
@@ -312,6 +351,7 @@ function AppointmentCard({ leadId, appointment }: { leadId: string; appointment:
           <form key={status} action={transitionAppointmentAction} className="rounded-md border border-white/10 bg-white/[0.02] p-3">
             <input type="hidden" name="lead_id" value={leadId} />
             <input type="hidden" name="appointment_id" value={appointment.id} />
+            <input type="hidden" name="record_version" value={appointment.updated_at || ""} />
             <input type="hidden" name="status" value={status} />
             <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
             {status === "scheduled" ? (
@@ -410,6 +450,7 @@ function FollowupTaskCard({ leadId, task }: { leadId: string; task: AdminFollowu
             <form key={action} action={updateFollowupTaskAction}>
               <input type="hidden" name="lead_id" value={leadId} />
               <input type="hidden" name="task_id" value={task.id} />
+              <input type="hidden" name="record_version" value={task.updated_at || ""} />
               <input type="hidden" name="task_action" value={action} />
               <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
               <button className="w-full rounded-md border border-[#cda24a33] bg-[#cda24a14] px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#f4ead4]">
@@ -420,6 +461,7 @@ function FollowupTaskCard({ leadId, task }: { leadId: string; task: AdminFollowu
           <form action={updateFollowupTaskAction}>
             <input type="hidden" name="lead_id" value={leadId} />
             <input type="hidden" name="task_id" value={task.id} />
+            <input type="hidden" name="record_version" value={task.updated_at || ""} />
             <input type="hidden" name="task_action" value="reschedule" />
             <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
             <input aria-label="New follow-up due time" required name="due_at" type="datetime-local" className="mb-2 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
@@ -533,7 +575,7 @@ export default async function AdminLeadDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ status_action?: string; appointment_action?: string; followup_action?: string; response_action?: string }>;
+  searchParams?: Promise<{ status_action?: string; appointment_action?: string; followup_action?: string; response_action?: string; timeline_offset?: string }>;
 }) {
   const { id } = await params;
   const principal = await requireLeadCenterLeadPermission(id, "lead:view_assigned");
@@ -543,11 +585,11 @@ export default async function AdminLeadDetailPage({
   const canUpdateLead = Boolean(
     principal && hasLeadCenterPermission(principal.role, "lead:update_assigned"),
   );
-  const emptyQuery: { status_action?: string; appointment_action?: string; followup_action?: string; response_action?: string } = {};
-  const [detail, query] = await Promise.all([
-    loadAdminLeadDetail(id, principal),
-    searchParams ? searchParams : Promise.resolve(emptyQuery),
-  ]);
+  const emptyQuery: { status_action?: string; appointment_action?: string; followup_action?: string; response_action?: string; timeline_offset?: string } = {};
+  const query = searchParams ? await searchParams : emptyQuery;
+  const parsedOffset = Number.parseInt(query.timeline_offset || "0", 10);
+  const timelineOffset = Number.isFinite(parsedOffset) ? Math.max(0, Math.min(parsedOffset, 1_000)) : 0;
+  const detail = await loadAdminLeadDetail(id, principal, { offset: timelineOffset, limit: 30 });
   if (detail.configured && !detail.lead && detail.error === "lead_not_found") notFound();
   const lead = detail.lead;
 
@@ -653,6 +695,7 @@ export default async function AdminLeadDetailPage({
                 leadId={lead.id}
                 isTest={lead.is_test}
                 suppressed={lead.communication_suppressed}
+                initialDrafts={detail.aiDrafts || []}
               />
 
               <Phase7MessagingControlPanel leadId={lead.id} />
@@ -685,9 +728,19 @@ export default async function AdminLeadDetailPage({
 
               <FollowupPanel leadId={lead.id} tasks={detail.followupTasks} />
 
-              <Panel title="Unified activity history">
-                <Timeline events={detail.timeline} />
-              </Panel>
+              <div id="activity">
+                <Panel title="Unified activity history">
+                  <Timeline
+                    events={detail.timeline}
+                    leadId={lead.id}
+                    offset={detail.timelinePage?.offset || 0}
+                    limit={detail.timelinePage?.limit || 30}
+                    hasMore={detail.timelinePage?.hasMore || false}
+                    complete={detail.timelinePage?.complete ?? true}
+                    incompleteSources={detail.timelinePage?.incompleteSources || []}
+                  />
+                </Panel>
+              </div>
             </section>
 
             <aside className="space-y-5">

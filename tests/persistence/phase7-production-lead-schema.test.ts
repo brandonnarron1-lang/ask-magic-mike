@@ -7,17 +7,17 @@ const ASYNC_INTELLIGENCE = readFileSync("src/lib/ai/neon-intelligence.ts", "utf8
 const PERMISSION_REPOSITORY = readFileSync("src/lib/messaging/neon-communication-repository.ts", "utf8");
 
 describe("Phase 7 Production lead-schema compatibility", () => {
-  it.each([
-    ["interactive Copilot", COPILOT_ROUTE],
-    ["async Copilot", ASYNC_INTELLIGENCE],
-  ])("uses canonical lead columns for %s", (_label, source) => {
-    expect(source).toContain("l.lead_type");
-    expect(source).toContain("l.source_detail");
-    expect(source).toContain("l.question_raw");
-    expect(source).not.toContain("l.funnel_type");
-    expect(source).not.toContain("l.lead_source_surface");
-    expect(source).not.toContain("l.timeline,");
-    expect(source).not.toContain("l.question,");
+  it("uses one canonical Production lead-facts loader for interactive and async Copilot", () => {
+    expect(COPILOT_ROUTE).toContain("loadLeadIntelligenceFacts(");
+    expect(ASYNC_INTELLIGENCE).toContain("l.lead_type");
+    expect(ASYNC_INTELLIGENCE).toContain("l.source_detail");
+    expect(ASYNC_INTELLIGENCE).toContain("l.question_raw");
+    for (const source of [COPILOT_ROUTE, ASYNC_INTELLIGENCE]) {
+      expect(source).not.toContain("l.funnel_type");
+      expect(source).not.toContain("l.lead_source_surface");
+      expect(source).not.toContain("l.timeline,");
+      expect(source).not.toContain("l.question,");
+    }
   });
 
   it("uses canonical source fields for communication permission review", () => {
@@ -27,7 +27,7 @@ describe("Phase 7 Production lead-schema compatibility", () => {
   });
 
   it("maps canonical Production rows into advisory-only AI facts", async () => {
-    const query = vi.fn().mockResolvedValue([{
+    const query = vi.fn().mockResolvedValueOnce([{
       id: "59bba7cf-fe27-42c3-adb6-27b27727e5c7",
       lead_type: "seller",
       status: "assigned",
@@ -38,14 +38,17 @@ describe("Phase 7 Production lead-schema compatibility", () => {
       timeline_months: 0,
       target_geography: "Wilson, NC",
       city: "Wilson",
-      consent_email: false,
-      consent_sms: false,
-      consent_call: false,
       is_test: true,
       communication_suppressed: true,
       question_raw: "INTERNAL QA — DO NOT CONTACT",
       notes: null,
       placement_id: "phase7_acceptance",
+    }]).mockResolvedValueOnce([{
+      channel: "email",
+      purpose: "requested_service_response",
+      state: "allowed",
+      manual_review_required: false,
+      updated_at: "2026-10-02T12:00:00.000Z",
     }]);
 
     const loaded = await loadLeadIntelligenceFacts({ query } as never, "59bba7cf-fe27-42c3-adb6-27b27727e5c7");
@@ -55,6 +58,8 @@ describe("Phase 7 Production lead-schema compatibility", () => {
       source: "internal_qa",
       placement: "phase7_acceptance",
       timeline: "0 months",
+      consentEmail: true,
+      consentSms: false,
       isTest: true,
       suppressed: true,
       question: "INTERNAL QA — DO NOT CONTACT",

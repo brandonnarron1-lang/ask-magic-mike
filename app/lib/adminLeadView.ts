@@ -15,25 +15,48 @@ export {
 } from "./persistence/supabase/adminLeadView";
 export type {
   AdminAttributionView,
+  AdminAiDraftReviewRow,
   AdminLeadDetailResult,
   AdminLeadFirstResponseRow,
   AdminLeadInboxResult,
+  AdminLeadInboxQuery,
   AdminLeadOutcomeRow,
   AdminLeadView,
 } from "./persistence/supabase/adminLeadView";
 
-export function loadAdminLeadInbox(limit = 50, principal: LeadCenterPrincipal | null = null) {
-  if (process.env.DATABASE_URL) return loadNeonAdminLeadInbox(limit, principal);
+export async function loadAdminLeadInbox(
+  input: number | import("./persistence/supabase/adminLeadView").AdminLeadInboxQuery = 50,
+  principal: LeadCenterPrincipal | null = null,
+) {
+  if (process.env.DATABASE_URL) return loadNeonAdminLeadInbox(input, principal);
   const legacyAllowed = process.env.NODE_ENV === "test" ||
     (process.env.VERCEL_ENV !== "production" && process.env.ALLOW_LEGACY_SUPABASE_FALLBACK === "true");
-  return legacyAllowed ? loadSupabaseAdminLeadInbox(limit) : loadNeonAdminLeadInbox(limit, principal);
+  if (!legacyAllowed) return loadNeonAdminLeadInbox(input, principal);
+  const query = typeof input === "number" ? { limit: input } : input;
+  const result = await loadSupabaseAdminLeadInbox(100);
+  const { filterAdminLeadInbox } = await import("./adminLeadInboxFilters");
+  let leads = filterAdminLeadInbox(result.leads, query.filter || "active");
+  const search = query.search?.trim().toLowerCase();
+  if (search) {
+    leads = leads.filter((lead) => [lead.id, lead.name, lead.email, lead.phone, lead.address]
+      .some((value) => value?.toLowerCase().includes(search)));
+  }
+  if (query.sort === "oldest") leads.sort((a, b) => (a.created_at || "").localeCompare(b.created_at || ""));
+  const offset = Math.max(0, query.offset || 0);
+  const limit = Math.max(1, Math.min(query.limit || 25, 100));
+  const total = leads.length;
+  return { ...result, leads: leads.slice(offset, offset + limit), page: { offset, limit, total, hasMore: offset + limit < total } };
 }
 
-export function loadAdminLeadDetail(leadId: string, principal: LeadCenterPrincipal | null = null) {
-  if (process.env.DATABASE_URL) return loadNeonAdminLeadDetail(leadId, principal);
+export function loadAdminLeadDetail(
+  leadId: string,
+  principal: LeadCenterPrincipal | null = null,
+  pagination: { offset?: number; limit?: number } = {},
+) {
+  if (process.env.DATABASE_URL) return loadNeonAdminLeadDetail(leadId, principal, pagination);
   const legacyAllowed = process.env.NODE_ENV === "test" ||
     (process.env.VERCEL_ENV !== "production" && process.env.ALLOW_LEGACY_SUPABASE_FALLBACK === "true");
   return legacyAllowed
     ? loadSupabaseAdminLeadDetail(leadId)
-    : loadNeonAdminLeadDetail(leadId, principal);
+    : loadNeonAdminLeadDetail(leadId, principal, pagination);
 }
