@@ -585,23 +585,33 @@ async function adminListAndDashboard() {
   const dash = await http("GET", "/admin", {
     headers: adminBasicHeaders(),
   });
-  if (dash.ok && dash.text.includes("Ask Magic Mike") && dash.text.includes("Lead Center"))
+  if (
+    dash.ok &&
+    dash.text.includes("Ask Magic Mike") &&
+    dash.text.includes("Command Center") &&
+    dash.text.includes("What needs attention today.")
+  )
     record("admin:dashboard", "pass", { http: dash.status });
   else
     record("admin:dashboard", "fail", {
       http: dash.status,
-      message: "authenticated Lead Center shell did not render",
+      message: "authenticated Command Center Today surface did not render",
     });
 
   const list = await http("GET", "/admin/leads?filter=active", {
     headers: adminBasicHeaders(),
   });
-  if (list.ok && list.text.includes("Ask Magic Mike") && list.text.includes("Lead Center"))
+  if (
+    list.ok &&
+    list.text.includes("Ask Magic Mike") &&
+    list.text.includes("Command Center") &&
+    list.text.includes("Lead inbox and routing readiness")
+  )
     record("admin:leads", "pass", { http: list.status });
   else
     record("admin:leads", "fail", {
       http: list.status,
-      message: "authenticated lead inbox did not render",
+      message: "authenticated Command Center lead inbox did not render",
     });
 }
 

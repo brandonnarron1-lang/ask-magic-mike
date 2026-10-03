@@ -15,6 +15,12 @@ describe("preview QA current route contract", () => {
     expect(source).toContain('"admin:anonymous_leads_denied"');
     expect(source).toContain("anonymousDash.status === 401");
     expect(source).toContain("anonymousList.status === 401");
+    expect(source).toContain('dash.text.includes("Command Center")');
+    expect(source).toContain('dash.text.includes("What needs attention today.")');
+    expect(source).toContain('list.text.includes("Command Center")');
+    expect(source).toContain('list.text.includes("Lead inbox and routing readiness")');
+    expect(source).not.toContain('dash.text.includes("Lead Center")');
+    expect(source).not.toContain('list.text.includes("Lead Center")');
     expect(source).not.toContain('http("GET", "/api/admin/dashboard"');
     expect(source).not.toContain('http("GET", "/api/admin/leads?limit=5"');
   });
