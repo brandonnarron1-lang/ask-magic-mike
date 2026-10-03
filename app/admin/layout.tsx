@@ -2,22 +2,30 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { isPreviewDataDisabled } from "../../src/lib/preview-security";
 import { requireLeadCenterAuthenticated } from "../../src/lib/admin/rbac-session";
+import { hasLeadCenterPermission, type LeadCenterPermission } from "../../src/lib/admin/rbac-policy";
 
-const ADMIN_NAVIGATION = [
-  ["Leads", "/admin/leads"],
-  ["Action queue", "/admin/action-queue"],
-  ["Allocation", "/admin/allocation"],
-  ["Reporting", "/admin/reporting"],
-  ["Growth", "/admin/growth"],
-  ["Revival", "/admin/revival"],
-  ["Owned demand", "/admin/distribution"],
-  ["Experiments", "/admin/experiments"],
-  ["Notifications", "/admin/notifications"],
-] as const;
+const PRIMARY_NAVIGATION: Array<[string, string, LeadCenterPermission]> = [
+  ["Today", "/admin/today", "lead:view_assigned"],
+  ["Leads", "/admin/leads", "lead:view_assigned"],
+  ["Activity", "/admin/activity", "lead:view_assigned"],
+  ["Reports", "/admin/reporting", "report:view"],
+];
+
+const REVIVAL_NAVIGATION = ["Revival", "/admin/revival"] as const;
+
+const ADMIN_NAVIGATION: Array<[string, string, LeadCenterPermission]> = [
+  ["Allocation", "/admin/allocation", "lead:assign"],
+  ["Growth", "/admin/growth", "growth:manage"],
+  [...REVIVAL_NAVIGATION, "growth:manage"],
+  ["Owned demand", "/admin/distribution", "growth:manage"],
+  ["Experiments", "/admin/experiments", "growth:manage"],
+  ["Notifications", "/admin/notifications", "notification:manage"],
+];
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  await requireLeadCenterAuthenticated();
+  const principal = await requireLeadCenterAuthenticated();
   const previewReadOnly = isPreviewDataDisabled();
+  const can = (permission: LeadCenterPermission) => !principal || hasLeadCenterPermission(principal.role, permission);
 
   return (
     <>
@@ -33,15 +41,27 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       ) : null}
       <div className="border-b border-white/10 bg-[#050505] px-4 py-3 text-[#d9ceb8]">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
-          <Link href="/admin/leads" className="text-xs font-bold uppercase tracking-[0.19em] text-[#e2c06f]">
-            Ask Magic Mike · Lead Center
+          <Link href="/admin/today" className="text-xs font-bold uppercase tracking-[0.19em] text-[#e2c06f]">
+            Ask Magic Mike · Command Center
           </Link>
-          <nav className="flex flex-wrap gap-1.5" aria-label="Lead Center command navigation">
-            {ADMIN_NAVIGATION.map(([label, href]) => (
+          <nav className="flex flex-wrap gap-1.5" aria-label="Command Center navigation">
+            {PRIMARY_NAVIGATION.filter(([, , permission]) => can(permission)).map(([label, href]) => (
               <Link
                 key={href}
                 href={href}
                 className="rounded-full border border-white/10 bg-white/[.03] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.11em] text-[#b9ae9d] transition hover:border-[#cda24a66] hover:text-[#f0cf79]"
+              >
+                {label}
+              </Link>
+            ))}
+            {ADMIN_NAVIGATION.some(([, , permission]) => can(permission)) ? (
+              <span aria-hidden="true" className="mx-1 hidden h-6 w-px bg-white/10 sm:block" />
+            ) : null}
+            {ADMIN_NAVIGATION.filter(([, , permission]) => can(permission)).map(([label, href]) => (
+              <Link
+                key={href}
+                href={href}
+                className="rounded-full border border-[#cda24a24] bg-[#cda24a08] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.11em] text-[#a99b82] transition hover:border-[#cda24a66] hover:text-[#f0cf79]"
               >
                 {label}
               </Link>

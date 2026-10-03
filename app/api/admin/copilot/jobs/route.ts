@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireLeadCenterApiPermission } from "@/lib/admin/rbac-session";
 import { hasLeadCenterPermission } from "@/lib/admin/rbac-policy";
+import { assertDatabaseMutationAllowed } from "@/lib/preview-security";
 
 const NO_STORE = { "Cache-Control": "no-store, max-age=0" };
 const schema = z.object({ leadId: z.string().uuid() });
@@ -22,6 +23,8 @@ export async function POST(request: NextRequest) {
   if (!sameOrigin(request)) return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403, headers: NO_STORE });
   const auth = await requireLeadCenterApiPermission(request, "lead:view_assigned");
   if (!auth.ok) return auth.response;
+  const mutation = assertDatabaseMutationAllowed();
+  if (!mutation.ok) return NextResponse.json({ ok: false, error: mutation.error }, { status: mutation.statusCode, headers: NO_STORE });
   if (!enabled()) return NextResponse.json({ ok: false, error: "async_copilot_disabled" }, { status: 409, headers: NO_STORE });
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ ok: false, error: "invalid_request" }, { status: 400, headers: NO_STORE });
@@ -30,12 +33,17 @@ export async function POST(request: NextRequest) {
   const scoped = !hasLeadCenterPermission(auth.principal.role, "lead:view_all");
   if (scoped && !auth.principal.agentId) return NextResponse.json({ ok: false, error: "lead_not_found" }, { status: 404, headers: NO_STORE });
   const leads = await sql.query(
-    `SELECT id FROM public.leads WHERE id = $1::uuid${scoped ? " AND assigned_agent_id = $2::uuid" : ""} LIMIT 1`,
+    `SELECT id, updated_at, is_test, communication_suppressed
+       FROM public.leads
+      WHERE id = $1::uuid${scoped ? " AND assigned_agent_id = $2::uuid" : ""} LIMIT 1`,
     scoped ? [parsed.data.leadId, auth.principal.agentId] : [parsed.data.leadId],
-  ) as Array<{ id: string }>;
+  ) as Array<{ id: string; updated_at: string; is_test: boolean; communication_suppressed: boolean }>;
   if (!leads[0]) return NextResponse.json({ ok: false, error: "lead_not_found" }, { status: 404, headers: NO_STORE });
+  if (leads[0].is_test || leads[0].communication_suppressed) {
+    return NextResponse.json({ ok: false, error: "lead_not_eligible_for_ai_draft" }, { status: 409, headers: NO_STORE });
+  }
   const release = process.env.VERCEL_GIT_COMMIT_SHA || "local";
-  const requestKey = createHash("sha256").update(`${parsed.data.leadId}:${auth.principal.userId}:phase7-v1:${release}`).digest("hex");
+  const requestKey = createHash("sha256").update(`${parsed.data.leadId}:${auth.principal.userId}:acc-v1:${leads[0].updated_at}`).digest("hex");
   const rows = await sql.query(
     `INSERT INTO public.ai_intelligence_jobs
       (lead_id, status, request_key, requested_by, metadata)
@@ -66,4 +74,3 @@ export async function GET(request: NextRequest) {
   ) as Array<Record<string, unknown>>;
   return NextResponse.json({ ok: true, jobs: rows }, { headers: NO_STORE });
 }
-

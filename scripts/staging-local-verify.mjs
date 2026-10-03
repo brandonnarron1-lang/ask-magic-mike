@@ -36,6 +36,12 @@ const LOCAL_PROFILE_PERFORMANCE_INGRESS_SQL_PATH = path.join(
   "tests",
   "local_profile_performance_ingress_pg17.sql"
 );
+const AGENT_COMMAND_CENTER_SQL_PATH = path.join(
+  ROOT,
+  "supabase",
+  "tests",
+  "agent_command_center_pg17.sql"
+);
 
 function fail(message) {
   console.error(message);
@@ -122,6 +128,8 @@ const localProfilePerformanceIngressSql = fs.readFileSync(
   "utf8"
 );
 const localProfilePerformanceIngress = psql(container, localProfilePerformanceIngressSql);
+const agentCommandCenterSql = fs.readFileSync(AGENT_COMMAND_CENTER_SQL_PATH, "utf8");
+const agentCommandCenter = psql(container, agentCommandCenterSql);
 
 const schemaSql = `
 \\pset tuples_only on
@@ -143,6 +151,9 @@ objects as (
     to_regclass('public.marketing_spend_import_batches') is not null as spend_import_batches_exists,
     to_regclass('public.organic_search_import_batches') is not null as organic_search_import_batches_exists,
     to_regclass('public.local_profile_performance_import_batches') is not null as local_profile_performance_import_batches_exists,
+    to_regclass('public.lead_action_reviews') is not null as lead_action_reviews_exists,
+    to_regclass('public.ai_budget_reservations') is not null as ai_budget_reservations_exists,
+    to_regclass('public.ai_draft_reviews') is not null as ai_draft_reviews_exists,
     to_regprocedure(
       'public.record_owned_demand_publication_proof_v1(text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,timestamptz,text,boolean)'
     ) is not null as publication_proof_function_exists,
@@ -154,7 +165,16 @@ objects as (
     ) is not null as organic_search_import_function_exists,
     to_regprocedure(
       'public.import_local_profile_performance_batch_v1(text,jsonb,jsonb,text,text,text)'
-    ) is not null as local_profile_performance_import_function_exists
+    ) is not null as local_profile_performance_import_function_exists,
+    to_regprocedure(
+      'public.mutate_lead_action_review_v1(uuid,text,text,text,timestamptz,integer,text,timestamptz)'
+    ) is not null as lead_action_review_function_exists,
+    to_regprocedure(
+      'public.reserve_ai_budget_v1(text,uuid,text,text,numeric,numeric,text,timestamptz)'
+    ) is not null as ai_budget_reservation_function_exists,
+    to_regprocedure(
+      'public.mutate_ai_draft_review_v1(uuid,integer,text,text,text,text,timestamptz)'
+    ) is not null as ai_draft_review_function_exists
 ),
 notification_checks as (
   select
@@ -332,6 +352,7 @@ const summary = {
   marketing_spend_ingress_sql_passed: spendIngress.status === 0,
   organic_search_ingress_sql_passed: organicSearchIngress.status === 0,
   local_profile_performance_ingress_sql_passed: localProfilePerformanceIngress.status === 0,
+  agent_command_center_sql_passed: agentCommandCenter.status === 0,
   schema_sql_passed: schema.status === 0,
   migration_status_passed: migrationOk,
   object_status_passed: !!objectsOk,
@@ -352,6 +373,7 @@ if (
   spendIngress.status !== 0 ||
   organicSearchIngress.status !== 0 ||
   localProfilePerformanceIngress.status !== 0 ||
+  agentCommandCenter.status !== 0 ||
   schema.status !== 0 ||
   !migrationOk ||
   !objectsOk

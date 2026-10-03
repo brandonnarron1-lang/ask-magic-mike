@@ -1,6 +1,7 @@
 import {
   buildLeadStalledSignals,
   buildLeadTimeline,
+  type AdminLeadTimelinePage,
   type AdminLeadTimelineEvent,
 } from "../../adminLeadTimeline";
 import type { StalledLeadSignal } from "../../adminLeadLifecycle";
@@ -83,6 +84,28 @@ export type AdminLeadFirstResponseRow = {
   evidence_audit_id: string | null;
 };
 
+export type AdminAiDraftReviewRow = {
+  id: string;
+  draft_key: string;
+  version: number;
+  artifact_type: string;
+  channel: string | null;
+  purpose: string;
+  status: string;
+  content: string;
+  content_hash: string;
+  source_fingerprint: string;
+  evidence_references: string[];
+  missing_facts: string[];
+  limitations: string[];
+  model: string;
+  created_by: string;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type AdminLeadDetailResult = {
   configured: boolean;
   lead: AdminLeadView | null;
@@ -91,13 +114,29 @@ export type AdminLeadDetailResult = {
   followupTasks: AdminFollowupTaskRow[];
   outcomes: AdminLeadOutcomeRow[];
   firstResponse: AdminLeadFirstResponseRow | null;
+  aiDrafts?: AdminAiDraftReviewRow[];
+  timelinePage?: AdminLeadTimelinePage;
   error?: string;
 };
 
 export type AdminLeadInboxResult = {
   configured: boolean;
   leads: AdminLeadView[];
+  page?: {
+    offset: number;
+    limit: number;
+    total: number;
+    hasMore: boolean;
+  };
   error?: string;
+};
+
+export type AdminLeadInboxQuery = {
+  limit?: number;
+  offset?: number;
+  filter?: "active" | "working" | "qualified" | "closed" | "all";
+  sort?: "newest" | "oldest" | "priority" | "followup";
+  search?: string | null;
 };
 
 const ATTRIBUTION_KEYS = [

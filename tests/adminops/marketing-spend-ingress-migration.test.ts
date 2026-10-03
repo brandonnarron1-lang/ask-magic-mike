@@ -61,8 +61,9 @@ describe("marketing-spend ingress migration", () => {
     expect(postgresContract).toContain("import_marketing_spend_batch_v1");
     expect(postgresContract).toContain("idempotent_replay");
     expect(postgresContract).toContain("growth.spend_row_revised");
-    expect(postgresContract).toContain("SET LOCAL ROLE authenticated");
-    expect(postgresContract).toContain("insufficient_privilege");
+    expect(postgresContract).toContain("has_function_privilege");
+    expect(postgresContract).toContain("ARRAY['anon', 'authenticated', 'service_role']");
+    expect(postgresContract).not.toContain("SET LOCAL ROLE authenticated");
     expect(postgresContract).toContain("SQLSTATE '55000'");
     expect(postgresContract).toMatch(/BEGIN;[\s\S]*ROLLBACK;/);
     expect(postgresContract).toContain("INTERNAL_QA_LOCAL_ONLY");

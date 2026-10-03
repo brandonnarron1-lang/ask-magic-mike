@@ -110,7 +110,9 @@ export async function transitionAppointmentAction(formData: FormData) {
   const principal = await requireLeadCenterLeadPermission(leadId, "lead:update_assigned");
   const returnTo = safeReturnTo(String(formData.get("return_to") ?? `/admin/leads/${leadId}`));
   const result = await transitionAppointment({
+    leadId,
     appointmentId: String(formData.get("appointment_id") ?? ""),
+    expectedUpdatedAt: String(formData.get("record_version") ?? "") || null,
     status: String(formData.get("status") ?? ""),
     startsAt: String(formData.get("starts_at") ?? "") || null,
     endsAt: String(formData.get("ends_at") ?? "") || null,
@@ -120,6 +122,7 @@ export async function transitionAppointmentAction(formData: FormData) {
   });
   revalidatePath("/admin/leads");
   revalidatePath("/admin/action-queue");
+  revalidatePath("/admin/today");
   revalidatePath("/admin/reporting");
   if (returnTo.startsWith("/admin/leads/")) revalidatePath(returnTo);
   redirect(returnTo + "?appointment_action=" + (result.ok ? result.warning || "updated" : result.error));
@@ -148,7 +151,9 @@ export async function updateFollowupTaskAction(formData: FormData) {
   const principal = await requireLeadCenterLeadPermission(leadId, "task:manage_assigned");
   const returnTo = safeReturnTo(String(formData.get("return_to") ?? `/admin/leads/${leadId}`));
   const result = await updateFollowupTask({
+    leadId,
     taskId: String(formData.get("task_id") ?? ""),
+    expectedUpdatedAt: String(formData.get("record_version") ?? "") || null,
     action: String(formData.get("task_action") ?? "complete") as "complete" | "cancel" | "reschedule",
     dueAt: String(formData.get("due_at") ?? "") || null,
     outcome: String(formData.get("outcome") ?? "") || null,
@@ -156,6 +161,7 @@ export async function updateFollowupTaskAction(formData: FormData) {
   });
   revalidatePath("/admin/leads");
   revalidatePath("/admin/action-queue");
+  revalidatePath("/admin/today");
   if (returnTo.startsWith("/admin/leads/")) revalidatePath(returnTo);
   redirect(returnTo + "?followup_action=" + (result.ok ? result.warning || "updated" : result.error));
 }

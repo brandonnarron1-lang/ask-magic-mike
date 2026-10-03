@@ -15,8 +15,8 @@ import { updateLeadStatusAction } from "./actions";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 import {
   ADMIN_LEAD_INBOX_FILTERS,
-  filterAdminLeadInbox,
 } from "../../lib/adminLeadInboxFilters";
+import { LeadSearchPanel } from "./lead-search-panel";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -263,13 +263,27 @@ function LeadCard({ lead }: { lead: AdminLeadView }) {
 export default async function AdminLeadsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ filter?: string; status_action?: string }>;
+  searchParams?: Promise<{ filter?: string; sort?: string; page?: string; status_action?: string }>;
 }) {
   const principal = await requireLeadCenterPermission("lead:view_assigned");
-  const inbox = await loadAdminLeadInbox(50, principal);
   const params = searchParams ? await searchParams : {};
-  const activeFilter = params.filter || "active";
-  const visibleLeads = filterAdminLeadInbox(inbox.leads, activeFilter);
+  const activeFilter = ADMIN_LEAD_INBOX_FILTERS.some((item) => item.key === params.filter)
+    ? params.filter as "active" | "working" | "qualified" | "closed" | "all"
+    : "active";
+  const sort = ["newest", "oldest", "priority", "followup"].includes(params.sort || "")
+    ? params.sort as "newest" | "oldest" | "priority" | "followup"
+    : "newest";
+  const requestedPage = Math.max(1, Math.min(Number.parseInt(params.page || "1", 10) || 1, 200));
+  const pageSize = 25;
+  const inbox = await loadAdminLeadInbox({
+    filter: activeFilter,
+    sort,
+    offset: (requestedPage - 1) * pageSize,
+    limit: pageSize,
+  }, principal);
+  const page = inbox.page || { offset: 0, limit: pageSize, total: inbox.leads.length, hasMore: false };
+  const pageHref = (nextPage: number, filter = activeFilter) =>
+    `/admin/leads?filter=${filter}&sort=${sort}&page=${nextPage}`;
 
   return (
     <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
@@ -321,14 +335,15 @@ export default async function AdminLeadsPage({
         </header>
 
         {!inbox.leads.length ? (
-          <EmptyState configured={inbox.configured} error={inbox.error} />
+          <div className="space-y-4"><LeadSearchPanel /><EmptyState configured={inbox.configured} error={inbox.error} /></div>
         ) : (
           <section className="space-y-4">
+            <LeadSearchPanel />
             <nav className="flex flex-wrap gap-2" aria-label="Lead status filters">
               {ADMIN_LEAD_INBOX_FILTERS.map((filter) => (
                 <a
                   key={filter.key}
-                  href={`/admin/leads?filter=${filter.key}`}
+                  href={pageHref(1, filter.key)}
                   className={`rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] ${
                     activeFilter === filter.key
                       ? "border-[#cda24a] bg-[#cda24a] text-black"
@@ -339,11 +354,31 @@ export default async function AdminLeadsPage({
                 </a>
               ))}
             </nav>
-            {visibleLeads.length ? visibleLeads.map((lead) => (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-[#080808] p-3">
+              <p className="text-xs text-[#8f8778]">
+                {page.total.toLocaleString()} authorized lead{page.total === 1 ? "" : "s"} · page {requestedPage}
+              </p>
+              <form method="get" className="flex items-center gap-2">
+                <input type="hidden" name="filter" value={activeFilter} />
+                <label className="text-xs text-[#8f8778]" htmlFor="lead-sort">Sort</label>
+                <select id="lead-sort" name="sort" defaultValue={sort} className="rounded-md border border-[#cda24a33] bg-[#050505] px-3 py-2 text-xs text-[#f4ead4]">
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
+                  <option value="priority">Priority score</option>
+                  <option value="followup">Next follow-up</option>
+                </select>
+                <button className="rounded-md border border-[#cda24a44] px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-[#f0cf79]">Apply</button>
+              </form>
+            </div>
+            {inbox.leads.length ? inbox.leads.map((lead) => (
               <LeadCard key={lead.id} lead={lead} />
             )) : (
               <EmptyState configured={inbox.configured} error="No leads match this status filter." />
             )}
+            <nav className="flex items-center justify-between" aria-label="Lead inbox pagination">
+              {requestedPage > 1 ? <Link href={pageHref(requestedPage - 1)} className="text-sm text-[#f0cf79]">Previous page</Link> : <span />}
+              {page.hasMore ? <Link href={pageHref(requestedPage + 1)} className="text-sm text-[#f0cf79]">Next page</Link> : <span />}
+            </nav>
           </section>
         )}
       </div>

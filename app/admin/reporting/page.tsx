@@ -9,7 +9,6 @@ import {
   type StatusBucketKey,
 } from "../../lib/adminReportingView";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
-import { hasLeadCenterPermission } from "../../../src/lib/admin/rbac-policy";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -51,6 +50,16 @@ function contactPresence(row: AdminReportingLeadRow) {
   if (row.email) return "Email present";
   if (row.phone) return "Phone present";
   return "Not provided";
+}
+
+function evidenceRate(
+  numerator: number,
+  denominator: number,
+  rate: number | null,
+  available: boolean,
+) {
+  if (!available) return "Unavailable";
+  return `${numerator}/${denominator} · ${rate === null ? "—" : `${rate}%`}`;
 }
 
 function MetricCard({
@@ -180,6 +189,41 @@ function AgentPerformanceTable({ rows }: { rows: AdminAgentPerformanceGroup[] })
   );
 }
 
+function SourceConversionTable({ rows }: { rows: AdminReportingSummary["sourceConversion"] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full text-left text-sm">
+        <thead className="text-[11px] uppercase tracking-[0.14em] text-[#8f8778]">
+          <tr>
+            <th className="py-2 pr-4">First-touch source</th>
+            <th className="py-2 pr-4">Captured</th>
+            <th className="py-2 pr-4">Qualified</th>
+            <th className="py-2 pr-4">Appointments</th>
+            <th className="py-2 pr-4">Closed won</th>
+            <th className="py-2 pr-4">Commissions</th>
+            <th className="py-2">Closed / captured</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-white/10 text-[#f4ead4]">
+          {rows.length ? rows.map((row) => (
+            <tr key={row.source}>
+              <td className="py-3 pr-4 text-[#d9ceb8]">{row.source}</td>
+              <td className="py-3 pr-4">{row.captured}</td>
+              <td className="py-3 pr-4">{row.qualified}</td>
+              <td className="py-3 pr-4">{row.appointments}</td>
+              <td className="py-3 pr-4">{row.closedWon}</td>
+              <td className="py-3 pr-4">{row.commissions}</td>
+              <td className="py-3">{row.closedWon}/{row.captured} · {row.conversionRate}%</td>
+            </tr>
+          )) : (
+            <tr><td className="py-3 text-[#8f8778]" colSpan={7}>No included leads in this window.</td></tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function HotLeadList({ rows }: { rows: AdminReportingLeadRow[] }) {
   return (
     <div className="grid gap-3 lg:grid-cols-2">
@@ -227,14 +271,8 @@ export default async function AdminReportingPage({
   const principal = await requireLeadCenterPermission("report:view");
   const params = searchParams ? await searchParams : {};
   const windowDays = parseWindow(params.window);
-  const summary = await loadAdminReportingSummary(windowDays);
-  const visibleHotLeads = !principal || hasLeadCenterPermission(principal.role, "lead:view_all")
-    ? summary.hotLeads
-    : principal.agentId
-      ? summary.hotLeads.filter(
-          (lead) => lead.assigned_agent_id?.toLowerCase() === principal.agentId?.toLowerCase(),
-        )
-      : [];
+  const summary = await loadAdminReportingSummary(windowDays, principal);
+  const visibleHotLeads = summary.hotLeads;
 
   return (
     <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
@@ -366,6 +404,93 @@ export default async function AdminReportingPage({
 
           <Panel title="Source attribution">
             <SourceTable rows={summary.sources} />
+          </Panel>
+
+          <Panel title="Source to outcome">
+            <SourceConversionTable rows={summary.sourceConversion} />
+            <p className="mt-3 text-xs leading-5 text-[#8f8778]">
+              First-touch cohorts with explicit n/N rates. Appointment and commission columns use durable lifecycle/outcome evidence; unknown attribution remains visible.
+            </p>
+          </Panel>
+
+          <Panel title="Reporting data trust">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+              <MetricCard label="Included" value={summary.dataTrust.included} />
+              <MetricCard label="Test excluded" value={summary.dataTrust.excludedTest} />
+              <MetricCard label="Suppressed excluded" value={summary.dataTrust.excludedSuppressed} />
+              <MetricCard label="Duplicate aliases excluded" value={summary.dataTrust.excludedDuplicates} />
+              <MetricCard label="Unknown first touch" value={summary.dataTrust.unknownFirstTouch} />
+              <MetricCard label="Unknown last touch" value={summary.dataTrust.unknownLastTouch} />
+              <MetricCard label="Outcome coverage" value={`${summary.dataTrust.outcomesObserved}/${summary.dataTrust.included}`} />
+            </div>
+          </Panel>
+
+          <Panel title="Operational evidence">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <MetricCard
+                label="First response ≤ 5 min"
+                value={evidenceRate(
+                  summary.operationalTrust.responseSla.withinTarget,
+                  summary.operationalTrust.responseSla.measured,
+                  summary.operationalTrust.responseSla.rate,
+                  summary.operationalTrust.responseSla.available,
+                )}
+                note={`${summary.operationalTrust.responseSla.unknown} included leads have no immutable first-response evidence. Internal service target; not a public promise.`}
+              />
+              <MetricCard
+                label="Assignment accepted"
+                value={evidenceRate(
+                  summary.operationalTrust.assignmentAcceptance.accepted,
+                  summary.operationalTrust.assignmentAcceptance.measured,
+                  summary.operationalTrust.assignmentAcceptance.rate,
+                  summary.operationalTrust.assignmentAcceptance.available,
+                )}
+                note={`${summary.operationalTrust.assignmentAcceptance.pending} latest assignments remain pending.`}
+              />
+              <MetricCard
+                label="Provider accepted"
+                value={evidenceRate(
+                  summary.operationalTrust.notifications.providerAccepted,
+                  summary.operationalTrust.notifications.intents,
+                  summary.operationalTrust.notifications.providerAcceptanceRate,
+                  summary.operationalTrust.notifications.available,
+                )}
+                note="Provider message ID / notification intents. Acceptance is not delivery."
+              />
+              <MetricCard
+                label="Provider delivered"
+                value={evidenceRate(
+                  summary.operationalTrust.notifications.delivered,
+                  summary.operationalTrust.notifications.intents,
+                  summary.operationalTrust.notifications.deliveryRate,
+                  summary.operationalTrust.notifications.available,
+                )}
+                note={`${summary.operationalTrust.notifications.failed} failed; ${summary.operationalTrust.notifications.deliveryUnknown} lack terminal delivery evidence. Delivery is not inbox placement.`}
+              />
+              <MetricCard
+                label="Duplicate aliases"
+                value={evidenceRate(
+                  summary.operationalTrust.duplicates.excludedAliases,
+                  summary.operationalTrust.duplicates.submissionRecords,
+                  summary.operationalTrust.duplicates.rate,
+                  summary.operationalTrust.duplicates.available,
+                )}
+                note="Aliases / canonical plus alias submission records. Aliases are excluded from business KPIs."
+              />
+              <MetricCard
+                label="AI deterministic fallback"
+                value={evidenceRate(
+                  summary.operationalTrust.aiUsage.deterministicFallbacks,
+                  summary.operationalTrust.aiUsage.requests,
+                  summary.operationalTrust.aiUsage.fallbackRate,
+                  summary.operationalTrust.aiUsage.available,
+                )}
+                note={`${summary.operationalTrust.aiUsage.providerResponses} provider responses; ${summary.operationalTrust.aiUsage.blocked} blocked; estimated recorded cost $${summary.operationalTrust.aiUsage.estimatedCostUsd.toFixed(4)}.`}
+              />
+            </div>
+            <p className="mt-3 text-xs leading-5 text-[#8f8778]">
+              Cohort grain is distinct canonical live leads created in the selected UTC window. Test, suppressed, and duplicate-alias records are excluded before joins; unavailable evidence is never rendered as zero success.
+            </p>
           </Panel>
 
           <Panel title="Campaign/source-detail performance">

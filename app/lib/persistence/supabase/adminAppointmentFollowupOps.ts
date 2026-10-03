@@ -438,7 +438,9 @@ export async function createAppointment(input: {
 }
 
 export async function transitionAppointment(input: {
+  leadId: string;
   appointmentId: string;
+  expectedUpdatedAt: string | null;
   status: string;
   startsAt?: string | null;
   endsAt?: string | null;
@@ -447,6 +449,7 @@ export async function transitionAppointment(input: {
   now?: Date;
   actor?: string;
 }): Promise<AppointmentMutationResult> {
+  if (!UUID.test(input.leadId)) return { ok: false, statusCode: 400, error: "invalid_lead_id" };
   if (!UUID.test(input.appointmentId)) return { ok: false, statusCode: 400, error: "invalid_appointment_id" };
   if (!isAppointmentStatus(input.status)) return { ok: false, statusCode: 400, error: "invalid_appointment_status" };
   const mutation = assertDatabaseMutationAllowed();
@@ -456,6 +459,7 @@ export async function transitionAppointment(input: {
 
   const readUrl = new URL("/rest/v1/lead_appointments", config.supabaseUrl);
   readUrl.searchParams.set("id", "eq." + input.appointmentId);
+  readUrl.searchParams.set("lead_id", "eq." + input.leadId);
   readUrl.searchParams.set("select", "*");
   readUrl.searchParams.set("limit", "1");
   const readResponse = await fetch(readUrl, { headers: buildHeaders(config.serviceKey), cache: "no-store" });
@@ -463,6 +467,9 @@ export async function transitionAppointment(input: {
   const rows = (await readResponse.json().catch(() => [])) as Array<Record<string, unknown>>;
   const current = normalizeAppointment(rows[0] || {});
   if (!current) return { ok: false, statusCode: 404, error: "appointment_not_found" };
+  if (current.updated_at !== text(input.expectedUpdatedAt)) {
+    return { ok: false, statusCode: 409, error: "stale_appointment_version" };
+  }
 
   if (current.status === input.status) {
     return { ok: true, id: current.id, status: current.status, warning: "appointment_status_already_current" };
@@ -514,7 +521,9 @@ export async function transitionAppointment(input: {
 
   const writeUrl = new URL("/rest/v1/lead_appointments", config.supabaseUrl);
   writeUrl.searchParams.set("id", "eq." + current.id);
+  writeUrl.searchParams.set("lead_id", "eq." + input.leadId);
   writeUrl.searchParams.set("status", "eq." + current.status);
+  writeUrl.searchParams.set("updated_at", current.updated_at ? "eq." + current.updated_at : "is.null");
   writeUrl.searchParams.set("select", "*");
   const response = await fetch(writeUrl, {
     method: "PATCH",
@@ -615,12 +624,15 @@ export async function createFollowupTask(input: {
 }
 
 export async function updateFollowupTask(input: {
+  leadId: string;
   taskId: string;
+  expectedUpdatedAt: string | null;
   action: "complete" | "cancel" | "reschedule";
   dueAt?: string | null;
   outcome?: string | null;
   actor?: string;
 }): Promise<FollowupMutationResult> {
+  if (!UUID.test(input.leadId)) return { ok: false, statusCode: 400, error: "invalid_lead_id" };
   if (!UUID.test(input.taskId)) return { ok: false, statusCode: 400, error: "invalid_followup_id" };
   const mutation = assertDatabaseMutationAllowed();
   if (!mutation.ok) return { ok: false, statusCode: mutation.statusCode, error: mutation.error };
@@ -629,6 +641,7 @@ export async function updateFollowupTask(input: {
 
   const readUrl = new URL("/rest/v1/tasks", config.supabaseUrl);
   readUrl.searchParams.set("id", "eq." + input.taskId);
+  readUrl.searchParams.set("lead_id", "eq." + input.leadId);
   readUrl.searchParams.set("select", "*");
   readUrl.searchParams.set("limit", "1");
   const readResponse = await fetch(readUrl, { headers: buildHeaders(config.serviceKey), cache: "no-store" });
@@ -636,6 +649,9 @@ export async function updateFollowupTask(input: {
   const rows = (await readResponse.json().catch(() => [])) as Array<Record<string, unknown>>;
   const task = normalizeTask(rows[0] || {});
   if (!task || !task.lead_id) return { ok: false, statusCode: 404, error: "followup_not_found" };
+  if (task.updated_at !== text(input.expectedUpdatedAt)) {
+    return { ok: false, statusCode: 409, error: "stale_followup_version" };
+  }
 
   const patch: Record<string, unknown> = {};
   let nextStatus: FollowupTaskStatus = task.status;
@@ -660,7 +676,9 @@ export async function updateFollowupTask(input: {
 
   const writeUrl = new URL("/rest/v1/tasks", config.supabaseUrl);
   writeUrl.searchParams.set("id", "eq." + task.id);
+  writeUrl.searchParams.set("lead_id", "eq." + input.leadId);
   writeUrl.searchParams.set("status", "eq." + task.status);
+  writeUrl.searchParams.set("updated_at", task.updated_at ? "eq." + task.updated_at : "is.null");
   writeUrl.searchParams.set("select", "*");
   const response = await fetch(writeUrl, {
     method: "PATCH",

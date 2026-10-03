@@ -28,6 +28,33 @@ export type AiLeadIntelligenceResult = {
   reason?: string;
 };
 
+export type AiRuntimeConfig = {
+  model: string;
+  dailyCostLimitUsd: number;
+  perLeadCostLimitUsd: number;
+  timeoutMs: number;
+  maxOutputTokens: number;
+  maxAttempts: number;
+};
+
+function numericEnv(name: string, fallback: number) {
+  const raw = process.env[name];
+  if (raw == null || raw.trim() === "") return fallback;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+export function getAiRuntimeConfig(): AiRuntimeConfig {
+  return {
+    model: process.env.OPENAI_LEAD_INTELLIGENCE_MODEL || "gpt-6-luna",
+    dailyCostLimitUsd: Math.max(0, numericEnv("AI_DAILY_COST_LIMIT_USD", 1)),
+    perLeadCostLimitUsd: Math.max(0, numericEnv("AI_PER_LEAD_COST_LIMIT_USD", 0.05)),
+    timeoutMs: Math.max(1_000, Math.min(numericEnv("AI_TIMEOUT_MS", 8_000), 20_000)),
+    maxOutputTokens: Math.max(300, Math.min(numericEnv("AI_MAX_OUTPUT_TOKENS", 1_200), 2_500)),
+    maxAttempts: Math.max(1, Math.min(numericEnv("AI_PROVIDER_MAX_ATTEMPTS", 2), 2)),
+  };
+}
+
 function fallback(facts: LeadIntelligenceFacts, reason: string, latencyMs = 0): AiLeadIntelligenceResult {
   const contactAllowed = [facts.consentEmail ? "email" : null, facts.consentSms ? "SMS" : null, facts.consentCall ? "call" : null].filter(Boolean);
   return {
@@ -55,7 +82,6 @@ function fallback(facts: LeadIntelligenceFacts, reason: string, latencyMs = 0): 
       consentLimitations: contactAllowed.length ? [`Recorded requested contact paths: ${contactAllowed.join(", ")}. Purpose-specific permission must still be checked.`] : ["No contact permission is recorded."],
       geographyNote: facts.targetGeography || "No approved geography fact is available.",
       sourceQualityNote: facts.source ? `Recorded source: ${facts.source}${facts.placement ? ` / ${facts.placement}` : ""}.` : "Source quality is unknown.",
-      confidence: 0.55,
       explanation: `Deterministic fallback used: ${reason}. No AI decision changed routing, consent, assignment, or priority.`,
     },
   };
@@ -68,17 +94,21 @@ function aiEnabled() {
 
 function estimatedCost(model: string, inputTokens: number, outputTokens: number) {
   const prices: Record<string, [number, number]> = {
-    "gpt-5.6-luna": [1, 6],
-    "gpt-5.6-terra": [2.5, 15],
-    "gpt-5.6": [5, 30],
+    "gpt-6-luna": [0.1, 0.5],
+    "gpt-6.1-sol": [2, 10],
+    "gpt-6-astra": [10, 50],
   };
-  const [inputPerMillion, outputPerMillion] = prices[model] || [5, 30];
+  const [inputPerMillion, outputPerMillion] = prices[model] || [10, 50];
   return Number(((inputTokens * inputPerMillion + outputTokens * outputPerMillion) / 1_000_000).toFixed(6));
+}
+
+export function reservedAiRequestCost(config = getAiRuntimeConfig()) {
+  return estimatedCost(config.model, 6_000, config.maxOutputTokens);
 }
 
 export async function generateAiLeadIntelligence(
   facts: LeadIntelligenceFacts,
-  budget: { dailyEstimatedCostUsd?: number } = {},
+  budget: { dailyEstimatedCostUsd?: number; reservationAuthorized?: boolean } = {},
 ): Promise<AiLeadIntelligenceResult> {
   const started = Date.now();
   const sanitizedQuestion = redactLeadText(facts.question || "");
@@ -90,20 +120,26 @@ export async function generateAiLeadIntelligence(
   if (!aiEnabled()) return fallback(facts, "ai_feature_disabled", Date.now() - started);
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return fallback(facts, "openai_key_unavailable", Date.now() - started);
-  const dailyLimit = Math.max(0, Number(process.env.AI_DAILY_COST_LIMIT_USD) || 1);
-  if ((budget.dailyEstimatedCostUsd || 0) >= dailyLimit) {
+  const config = getAiRuntimeConfig();
+  if (config.perLeadCostLimitUsd === 0) {
+    return fallback(facts, "per_lead_ai_cost_cap_reached", Date.now() - started);
+  }
+  if (reservedAiRequestCost(config) > config.perLeadCostLimitUsd) {
+    return fallback(facts, "per_lead_ai_cost_cap_reached", Date.now() - started);
+  }
+  if (!budget.reservationAuthorized && (config.dailyCostLimitUsd === 0 || (budget.dailyEstimatedCostUsd || 0) >= config.dailyCostLimitUsd)) {
     return fallback(facts, "daily_ai_cost_cap_reached", Date.now() - started);
   }
 
-  const model = process.env.OPENAI_LEAD_INTELLIGENCE_MODEL || "gpt-5.6-luna";
-  const timeout = Math.max(1_000, Math.min(Number(process.env.AI_TIMEOUT_MS) || 8_000, 20_000));
-  const maxOutputTokens = Math.max(300, Math.min(Number(process.env.AI_MAX_OUTPUT_TOKENS) || 1_200, 2_500));
+  const model = config.model;
+  const timeout = config.timeoutMs;
+  const maxOutputTokens = config.maxOutputTokens;
   const safeFacts = {
     ...facts,
     question: delimitUntrusted(sanitizedQuestion),
   };
 
-  const maxAttempts = Math.max(1, Math.min(Number(process.env.AI_PROVIDER_MAX_ATTEMPTS) || 2, 2));
+  const maxAttempts = config.maxAttempts;
   let lastReason = "openai_request_failed";
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
@@ -144,8 +180,7 @@ export async function generateAiLeadIntelligence(
       const inputTokens = data.usage?.input_tokens || 0;
       const outputTokens = data.usage?.output_tokens || 0;
       const cost = estimatedCost(model, inputTokens, outputTokens);
-      const perLeadCap = Math.max(0, Number(process.env.AI_PER_LEAD_COST_LIMIT_USD) || 0.05);
-      if (cost > perLeadCap) return fallback(facts, "per_lead_cost_cap_exceeded", Date.now() - started);
+      if (cost > config.perLeadCostLimitUsd) return fallback(facts, "per_lead_cost_cap_exceeded", Date.now() - started);
       return {
         ok: true,
         mode: "openai_responses",

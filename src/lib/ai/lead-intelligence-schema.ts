@@ -18,7 +18,6 @@ export const aiLeadIntelligenceSchema = z.object({
   consentLimitations: z.array(z.string().max(240)).max(10),
   geographyNote: z.string().max(400),
   sourceQualityNote: z.string().max(400),
-  confidence: z.number().min(0).max(1),
   explanation: z.string().max(700),
 });
 
@@ -45,7 +44,6 @@ export const AI_LEAD_INTELLIGENCE_JSON_SCHEMA = {
     consentLimitations: { type: "array", items: { type: "string" }, maxItems: 10 },
     geographyNote: { type: "string" },
     sourceQualityNote: { type: "string" },
-    confidence: { type: "number", minimum: 0, maximum: 1 },
     explanation: { type: "string" },
   },
   required: [
@@ -53,6 +51,6 @@ export const AI_LEAD_INTELLIGENCE_JSON_SCHEMA = {
     "motivationIndicators", "potentialObjections", "recommendedNextHumanAction",
     "suggestedQuestions", "suggestedCallOpener", "suggestedEmailDraft",
     "suggestedSmsDraft", "recommendedCadence", "riskFlags", "consentLimitations",
-    "geographyNote", "sourceQualityNote", "confidence", "explanation",
+    "geographyNote", "sourceQualityNote", "explanation",
   ],
 } as const;

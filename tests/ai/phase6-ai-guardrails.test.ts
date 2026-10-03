@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { delimitUntrusted, detectPromptInjection, redactLeadText } from "@/lib/ai/guardrails";
-import { generateAiLeadIntelligence } from "@/lib/ai/openai-responses";
+import { generateAiLeadIntelligence, getAiRuntimeConfig, reservedAiRequestCost } from "@/lib/ai/openai-responses";
 
 const facts = {
   leadType: "seller",
@@ -37,7 +37,6 @@ const structuredOutput = {
   consentLimitations: ["No consumer communication."],
   geographyNote: "Recorded geography only.",
   sourceQualityNote: "Recorded source only.",
-  confidence: 0.8,
   explanation: "Advisory output; deterministic controls remain authoritative.",
 };
 
@@ -49,6 +48,7 @@ describe("Phase 6 AI guardrails", () => {
     delete process.env.AI_PROVIDER_MAX_ATTEMPTS;
     delete process.env.AI_DAILY_COST_LIMIT_USD;
     delete process.env.AI_PER_LEAD_COST_LIMIT_USD;
+    delete process.env.OPENAI_LEAD_INTELLIGENCE_MODEL;
     vi.unstubAllGlobals();
   });
 
@@ -92,6 +92,32 @@ describe("Phase 6 AI guardrails", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("preserves an explicit zero daily budget and defaults to the current low-cost model", async () => {
+    process.env.AI_LEAD_INTELLIGENCE_ENABLED = "true";
+    process.env.OPENAI_API_KEY = "synthetic-test-key";
+    process.env.AI_DAILY_COST_LIMIT_USD = "0";
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    expect(getAiRuntimeConfig()).toMatchObject({ model: "gpt-6-luna", dailyCostLimitUsd: 0 });
+    const result = await generateAiLeadIntelligence(facts);
+    expect(result.reason).toBe("daily_ai_cost_cap_reached");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("blocks before provider access when the bounded maximum exceeds the per-lead cap", async () => {
+    process.env.AI_LEAD_INTELLIGENCE_ENABLED = "true";
+    process.env.OPENAI_API_KEY = "synthetic-test-key";
+    process.env.OPENAI_LEAD_INTELLIGENCE_MODEL = "gpt-6-astra";
+    process.env.AI_PER_LEAD_COST_LIMIT_USD = "0.05";
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const config = getAiRuntimeConfig();
+    expect(reservedAiRequestCost(config)).toBeGreaterThan(config.perLeadCostLimitUsd);
+    const result = await generateAiLeadIntelligence(facts, { reservationAuthorized: true });
+    expect(result.reason).toBe("per_lead_ai_cost_cap_reached");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("retries one transient provider failure and accepts strict structured output", async () => {
     process.env.AI_LEAD_INTELLIGENCE_ENABLED = "true";
     process.env.OPENAI_API_KEY = "synthetic-test-key";
@@ -106,7 +132,11 @@ describe("Phase 6 AI guardrails", () => {
     const result = await generateAiLeadIntelligence(facts);
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(result.mode).toBe("openai_responses");
-    expect(result.output).toMatchObject({ intent: "seller", confidence: 0.8 });
+    expect(result.output).toMatchObject({
+      intent: "seller",
+      explanation: "Advisory output; deterministic controls remain authoritative.",
+    });
+    expect(result.output).not.toHaveProperty("confidence");
     const providerRequest = JSON.parse(String((fetchMock.mock.calls[1][1] as RequestInit).body));
     expect(providerRequest.store).toBe(false);
     expect(providerRequest.text.format).toMatchObject({ type: "json_schema", strict: true });
