@@ -34,8 +34,8 @@ replace release authority, Phase E evidence, or the canonical data model.
 - atomic shared AI budget reservations/finalization; and
 - immutable, versioned AI draft reviews with purpose/channel approval checks.
 
-The migration must be tested on an attested isolated Neon branch before a
-separate Production migration approval. Approval never sends a draft.
+The migration must be tested on an attested isolated PostgreSQL database before
+a separate Production migration approval. Approval never sends a draft.
 
 ## Competitive pattern check (primary sources)
 
@@ -156,10 +156,11 @@ records from production KPIs and always display sample size/evidence maturity.
 ## Local release-candidate receipt
 
 Executed on the assigned Apple-silicon machine on 2026-10-02 with Node 24.
-This is local evidence, not Production or representative-database evidence.
+This is isolated local evidence, not Production or representative-volume
+performance evidence.
 
 - `pnpm release:gate` — PASS: Ask Magic Mike/NellySelly isolation, 14/14
-  release-safety checks, 299 Vitest files and 3,637 tests, strict typecheck,
+  release-safety checks, 299 Vitest files and 3,638 tests, strict typecheck,
   lint, optimized Next.js build, and the 106-route manifest.
 - `pnpm test:e2e` — PASS: 30/30 Chromium tests. The Agent Command Center was
   exercised at 1440 px, 390 px, 320 px, and a 200% visual zoom simulation,
@@ -167,9 +168,21 @@ This is local evidence, not Production or representative-database evidence.
 - Visual artifacts are retained locally under `output/playwright/`; they are
   review evidence, not release authority and not a claim of native-browser
   zoom or live Neon data.
-- Static migration contract tests passed. The additive migration has **not**
-  been applied or transaction-tested on Production; an attested isolated Neon
-  branch remains the required next database venue.
+- A disposable, unlinked Supabase PostgreSQL 17.6 container applied all 40
+  migrations from an empty database and then passed the complete local staging
+  verifier. Six rollback-only SQL contracts passed, including the new Agent
+  Command Center transaction suite; counts after verification remained zero
+  leads, zero notifications, and zero audit rows. Provider calls, email, and SMS
+  were all zero.
+- The database exercise verified RLS, explicit denial of the five new RPCs to
+  `anon`/`authenticated`, least-privilege server access, queue concurrency
+  versions, shared/zero AI budget behavior, over-reservation protection,
+  immutable draft versions, permission-bound approval, audit writes, and
+  no-send behavior. It also replaced an unsafe legacy revoked-function
+  invocation in the marketing-spend contract with a catalog privilege check;
+  the full verifier then completed without a database-process crash.
+- The additive migration has **not** been applied or transaction-tested on
+  Production. No representative-volume latency claim is made.
 - Live OpenAI generation was not invoked. Mocked provider, zero-budget,
   permission, origin, RBAC, Preview, stale-fact, and no-send guards passed.
 
@@ -194,11 +207,10 @@ complete history.
 
 ## Remaining release sequence
 
-1. Open the review PR and verify its immutable, no-write Preview.
-2. Create an isolated Neon branch and transaction-test the additive migration.
-3. Run authorized database-backed RBAC, Today, timeline, reporting, budget, and
-   draft-review checks against that branch.
-4. Evaluate the approved low-cost model with synthetic/test-only facts and a
-   hard nonzero budget; approval must still perform no send.
-5. Request one exact migration/merge/same-tree Production gate with rollback
+1. Complete review of PR #285 against its exact head and immutable no-write
+   Preview receipt.
+2. Request one exact migration/merge/same-tree Production gate with rollback
    identities. Production remains unchanged until that gate is granted.
+3. Keep paid model generation disabled or at an explicit zero budget. A bounded
+   synthetic live-model evaluation remains a later, separately authorized
+   provider action and approval still performs no send.

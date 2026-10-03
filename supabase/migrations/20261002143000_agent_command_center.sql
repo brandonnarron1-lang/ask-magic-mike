@@ -217,7 +217,6 @@ DECLARE
 BEGIN
   IF length(coalesce(p_request_key, '')) NOT BETWEEN 16 AND 200
      OR p_daily_limit_usd < 0 OR p_reserve_cost_usd < 0
-     OR p_reserve_cost_usd > p_daily_limit_usd
      OR length(btrim(coalesce(p_actor_user_id, ''))) < 1
      OR NOT EXISTS (SELECT 1 FROM public.leads WHERE id = p_lead_id) THEN
     RETURN jsonb_build_object('ok', false, 'error', 'invalid_budget_reservation');
@@ -304,6 +303,7 @@ BEGIN
     RETURN jsonb_build_object('ok', true, 'idempotent_replay', true, 'usage_id', NULL);
   END IF;
   IF v_reservation.status <> 'reserved' OR p_actual_cost_usd < 0
+     OR p_actual_cost_usd > v_reservation.reserved_cost_usd
      OR p_input_tokens < 0 OR p_output_tokens < 0 OR p_latency_ms < 0 THEN
     RETURN jsonb_build_object('ok', false, 'error', 'invalid_budget_finalization');
   END IF;
@@ -495,6 +495,40 @@ REVOKE ALL ON FUNCTION public.reserve_ai_budget_v1(text, uuid, text, text, numer
 REVOKE ALL ON FUNCTION public.finalize_ai_budget_reservation_v1(uuid, numeric, integer, integer, text, text, boolean, integer, timestamptz) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.persist_ai_intelligence_draft_v1(uuid, text, text, text, text, jsonb, text, boolean, text, text, text, text, text, text, jsonb, jsonb, jsonb, timestamptz) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.mutate_ai_draft_review_v1(uuid, integer, text, text, text, text, timestamptz) FROM PUBLIC;
+
+-- Supabase can provision explicit default EXECUTE grants to its API roles.
+-- Revoking PUBLIC alone does not remove those grants, so fail closed for every
+-- browser-facing role and grant only the server-side service role when present.
+DO $acc_function_privileges$
+DECLARE
+  role_name text;
+  function_signature text;
+  function_signatures text[] := ARRAY[
+    'public.mutate_lead_action_review_v1(uuid, text, text, text, timestamptz, integer, text, timestamptz)',
+    'public.reserve_ai_budget_v1(text, uuid, text, text, numeric, numeric, text, timestamptz)',
+    'public.finalize_ai_budget_reservation_v1(uuid, numeric, integer, integer, text, text, boolean, integer, timestamptz)',
+    'public.persist_ai_intelligence_draft_v1(uuid, text, text, text, text, jsonb, text, boolean, text, text, text, text, text, text, jsonb, jsonb, jsonb, timestamptz)',
+    'public.mutate_ai_draft_review_v1(uuid, integer, text, text, text, text, timestamptz)'
+  ];
+BEGIN
+  FOREACH role_name IN ARRAY ARRAY['anon', 'authenticated'] LOOP
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = role_name) THEN
+      FOREACH function_signature IN ARRAY function_signatures LOOP
+        EXECUTE format('REVOKE ALL ON FUNCTION %s FROM %I', function_signature, role_name);
+      END LOOP;
+    END IF;
+  END LOOP;
+
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+    GRANT SELECT, INSERT, UPDATE ON public.lead_action_reviews TO service_role;
+    GRANT SELECT, INSERT, UPDATE ON public.ai_budget_reservations TO service_role;
+    GRANT SELECT, INSERT ON public.ai_draft_reviews TO service_role;
+    FOREACH function_signature IN ARRAY function_signatures LOOP
+      EXECUTE format('GRANT EXECUTE ON FUNCTION %s TO service_role', function_signature);
+    END LOOP;
+  END IF;
+END
+$acc_function_privileges$;
 
 COMMENT ON TABLE public.lead_action_reviews IS
   'Operator review state over deterministic Command Center projections; canonical tasks and lead state remain unchanged.';

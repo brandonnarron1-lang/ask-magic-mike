@@ -316,19 +316,22 @@ BEGIN
 END;
 $assert_receipt_immutable$;
 
-SET LOCAL ROLE authenticated;
 DO $assert_browser_denied$
+DECLARE
+  role_name text;
 BEGIN
-  BEGIN
-    PERFORM public.import_marketing_spend_batch_v1(
-      repeat('e', 64), '[]'::jsonb, 'browser', 'blocked', 'IMPORT REVIEWED SPEND'
-    );
-    RAISE EXCEPTION 'authenticated browser function execution unexpectedly succeeded';
-  EXCEPTION WHEN insufficient_privilege THEN
-    NULL;
-  END;
+  FOREACH role_name IN ARRAY ARRAY['anon', 'authenticated', 'service_role']
+  LOOP
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = role_name) AND
+       has_function_privilege(
+         role_name,
+         'public.import_marketing_spend_batch_v1(text,jsonb,text,text,text)',
+         'EXECUTE'
+       ) THEN
+      RAISE EXCEPTION '% unexpectedly has marketing-spend import execution', role_name;
+    END IF;
+  END LOOP;
 END;
 $assert_browser_denied$;
-RESET ROLE;
 
 ROLLBACK;
