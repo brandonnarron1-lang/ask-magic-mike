@@ -1,4 +1,4 @@
-import type { AdminLeadView } from "./persistence/supabase/adminLeadView";
+import type { AdminLeadView,AdminLeadDetailResult } from "./persistence/supabase/adminLeadView";
 import { canAccessAssignedLead, hasLeadCenterPermission, type LeadCenterPrincipal } from "../../src/lib/admin/rbac-policy";
 
 export const LEAD_PRESENTATION_VERSION = "reference_cards_v1";
@@ -39,6 +39,7 @@ export function leadSubtype(lead: Pick<AdminLeadView, "funnel_type">): LeadSubty
 export function presentLead(input: {
   lead: AdminLeadView; principal: LeadCenterPrincipal; tier: DisclosureTier;
   offer?: LeadOfferSnapshot; subtype?: LeadSubtype;
+  evidence?: Pick<AdminLeadDetailResult,"appointments"|"followupTasks"|"outcomes">;
 }): LeadPresentation {
   const { lead, principal, tier, offer } = input;
   const full = (tier === "assigned" || tier === "supervisor") && canAccessAssignedLead(principal, lead.assigned_agent_id);
@@ -71,8 +72,11 @@ export function presentLead(input: {
       : offer && intendedOffer && tier !== "audit" ? [{ id: "review", label: "Review Claim / Pass", href: `/admin/allocation/offers/${offer.id}` }] : [],
     steps: [{ label: "Assignment", state: lead.assigned_agent_id ? "complete" : "pending" },
       { label: "Human contact", state: full && lead.last_contacted_at ? "complete" : "pending" },
-      { label: "Next task", state: full && lead.next_follow_up_at ? "complete" : "pending" },
-      { label: "Reviewed packet", state: "blocked" }],
+      { label: "Appointment request", state: full && input.evidence?.appointments.some(a=>["requested","scheduled","confirmed","completed"].includes(a.status)) ? "complete" : "pending" },
+      { label: "Appointment confirmation", state: full && input.evidence?.appointments.some(a=>Boolean(a.confirmed_at)&&["confirmed","completed"].includes(a.status)) ? "complete" : "pending" },
+      { label: "Next task recorded", state: full && input.evidence?.followupTasks.some(task=>task.status==="open"||task.status==="in_progress") ? "complete" : "pending" },
+      { label: "Reviewed packet", state: ["seller","cash_seller","investor_buyer"].includes(subtype)?"blocked":"not_applicable" },
+      { label: "Documented outcome", state: full && input.evidence?.outcomes.length ? "complete" : "pending" }],
   };
   if (full) result.identity = { name: lead.name || "Name not recorded", email: lead.email, phone: lead.phone, address: lead.address, question: lead.question };
   if (offer && intendedOffer && tier !== "audit") result.offer = { ...offer, code: undefined };

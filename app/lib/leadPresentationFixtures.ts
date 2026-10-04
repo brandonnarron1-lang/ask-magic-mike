@@ -1,8 +1,16 @@
 import { normalizeAdminLeadRow } from "./persistence/supabase/adminLeadView";
 import { presentLead, type DisclosureTier, type LeadSubtype, type OfferState } from "./leadPresentation";
 import type { LeadCenterPrincipal } from "../../src/lib/admin/rbac-policy";
+import type { AllocationWorkspaceState } from "./leadAllocationReadModel";
 
 const AGENT = "00000000-0000-4000-8000-000000000001";
+export const allocationWorkspaceFixture:AllocationWorkspaceState={ready:false,held:true,
+ metrics:{pending:0,ambiguous:0,overdue:0,oldestPendingSeconds:0,reservedSegments:0,estimatedMicros:0},
+ policy:{version:1,mode:"sequential",offerSeconds:180,startsAt:null,fallback:"SYNTHETIC CUSTODIAN"},
+ leads:[{id:"00000000-0000-4000-8000-000000000081",version:0,town:"Wilson",intent:"buyer",score:84,source:"synthetic_review",ownerId:null,owner:"Unassigned",lifecycle:"new"},
+ {id:"00000000-0000-4000-8000-000000000082",version:1,town:"Elm City",intent:"seller",score:72,source:"synthetic_wordpress",ownerId:AGENT,owner:"SYNTHETIC CUSTODIAN",lifecycle:"working"}],
+ offers:[{reference:"QA-ROUTING-REVIEW",version:1,state:"expired",deadline:"2026-10-04T18:43:00.000Z",reason:"Synthetic approved-coverage example; not a live assignment",town:"Elm City",intent:"seller",score:72,source:"synthetic_wordpress",ownerId:AGENT,owner:"SYNTHETIC CUSTODIAN",lifecycle:"working",recipient:"SYNTHETIC REVIEWER",delivery:"email: skipped; no provider call"}],
+ roster:[{id:AGENT,name:"SYNTHETIC REVIEWER",paused:true,approved:false,towns:["Wilson","Elm City"],intents:["buyer","seller"],currentLoad:0,outstanding:0,concurrentCap:1,dailyCap:1,weight:1,channels:"No enrolled channel"}]};
 export function leadCardFixture(input: { subtype: LeadSubtype; tier: DisclosureTier; state: OfferState; score: number; isTest: boolean }) {
   const lead = normalizeAdminLeadRow({ id: "00000000-0000-4000-8000-000000000002", is_test: input.isTest,
     first_name: "INTERNAL QA", last_name: "DO NOT CONTACT", communication_suppressed: true, status: "new",

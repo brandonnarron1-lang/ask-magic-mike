@@ -30,3 +30,8 @@ const actual=await sharp(readFileSync("output/playwright/reference-buyer-assigne
 const heights=await Promise.all([reference,actual].map(input=>sharp(input).metadata()));
 await sharp({create:{width:730,height:Math.max(...heights.map(meta=>meta.height)),channels:3,background:"#080A0B"}}).composite([{input:reference,left:0,top:0},{input:actual,left:380,top:0}]).png().toFile("output/reference-allocation/buyer-focused-reference-versus-render.png");
 console.log("Saved buyer-focused-reference-versus-render.png (source phone-content crop left; real synthetic assigned card right).");
+const routingReference=await sharp(readFileSync(sources[0])).extract({left:1348,top:269,width:291,height:554}).resize(350,null).png().toBuffer();
+const routingActual=await sharp(readFileSync("output/playwright/reference-routing-board-390.png")).resize(350,null).png().toBuffer();
+const routingHeights=await Promise.all([routingReference,routingActual].map(input=>sharp(input).metadata()));
+await sharp({create:{width:730,height:Math.max(...routingHeights.map(meta=>meta.height)),channels:3,background:"#080A0B"}}).composite([{input:routingReference,left:0,top:0},{input:routingActual,left:380,top:0}]).png().toFile("output/reference-allocation/routing-focused-reference-versus-render.png");
+console.log("Saved routing-focused-reference-versus-render.png (source routing content left; actual suppressed no-send routing workspace right).");

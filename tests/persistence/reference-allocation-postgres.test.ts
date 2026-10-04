@@ -5,6 +5,7 @@ import { bind,concurrent,install,literal,localQuery,psql,startDatabase,stopDatab
 import { commandRequestHash,resolveAllocationOffer,staffPhoneFingerprint,createPossessionChallenge,processEnrolledStaffCommand,allocationCommandCode } from "../../app/lib/leadAllocation";
 import { dispatchAllocationIntent } from "../../app/lib/leadAllocationDispatch";
 import type { NotificationProvider } from "../../app/lib/leadNotificationTypes";
+import { loadAllocationWorkspace } from "../../app/lib/leadAllocationReadModel";
 
 const fallback="00000000-0000-4000-8000-000000009901";
 async function fixture(fanout=2,initialOffers=true) {
@@ -27,6 +28,18 @@ function resolveSql(offer:{id:string;version:number},user:string,action="claim",
 describe.runIf(process.env.AMM_QA_POSTGRES_TEST==="1")("Reference allocation — real isolated PostgreSQL",()=>{
  beforeAll(async()=>{await startDatabase();install("amm_qa_upgrade",true);vi.stubEnv("LEAD_ALLOCATION_ENABLED","true");vi.stubEnv("LEAD_ALLOCATION_SENDS_ENABLED","true");vi.stubEnv("LEAD_ALLOCATION_COMMAND_SECRET","synthetic-allocation-test-key-not-a-credential");vi.stubEnv("VERCEL_ENV","development");},120000);
  afterAll(()=>{stopDatabase();vi.unstubAllEnvs();},20000);
+ it("admin routing read model uses real canonical source, roster, deadline and outbox with no private contact JSON",async()=>{
+  const f=await fixture(1);
+  psql(`UPDATE leads SET source='synthetic_owned_media' WHERE id='${f.lead}';`);
+  const view=await loadAllocationWorkspace({userId:f.admin,name:"SYNTHETIC ADMIN",email:"admin@example.test",role:"administrator",agentId:null},localQuery);
+  expect(view.error).toBeUndefined();expect(view.ready).toBe(true);
+  expect(view.leads.find(lead=>lead.id===f.lead)).toMatchObject({source:"synthetic_owned_media",intent:"buyer",town:"Wilson",lifecycle:"new",ownerId:fallback});
+  expect(view.offers.some(offer=>offer.delivery.includes("email: pending")&&offer.recipient==="SYNTHETIC AGENT")).toBe(true);
+  expect(view.roster.find(agent=>agent.id===f.agents[0])).toMatchObject({approved:true,paused:false,concurrentCap:3});
+  expect(JSON.stringify(view)).not.toContain("@example.test");expect(JSON.stringify(view)).not.toContain("phone_fingerprint");
+  const analyst=await loadAllocationWorkspace({userId:f.admin,name:"SYNTHETIC",email:"admin@example.test",role:"read_only_analyst",agentId:null},localQuery);
+  expect(analyst.ready).toBe(false);expect(analyst.leads).toEqual([]);
+ });
  it("due discovery offers a new durable lead once and exact replay cannot create another intent",async()=>{
   const f=await fixture(1,false);
   const due=JSON.parse(psql("SELECT expire_lead_allocation_offers_v1(25);"));expect(due.first_offered).toBe(1);

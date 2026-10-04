@@ -653,7 +653,7 @@ export default async function AdminLeadDetailPage({
         ) : (
           <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
             <section className="space-y-5">
-              {principal ? <ReferenceLeadCard view={presentLead({ lead, principal, tier: "assigned" })} /> : null}
+              {principal ? <ReferenceLeadCard view={presentLead({ lead, principal, tier: "assigned", evidence: {appointments:detail.appointments,followupTasks:detail.followupTasks,outcomes:detail.outcomes} })} /> : null}
               {(["seller","cash_seller","investor_buyer"] as string[]).includes(leadSubtype(lead)) ? <LeadEvidenceWorkspace leadId={lead.id} kind={leadSubtype(lead) as "seller"|"cash_seller"|"investor_buyer"} allowed={canUpdateLead&&!lead.is_test&&!lead.communication_suppressed}/> : null}
               <Panel title="Lead state">
                 <div className="flex flex-wrap gap-2">

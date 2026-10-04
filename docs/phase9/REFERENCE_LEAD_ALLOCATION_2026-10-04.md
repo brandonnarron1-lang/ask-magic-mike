@@ -45,6 +45,15 @@ Missing comps/value/availability stay unknown. CMA/offer analysis preparation
 saves a broker-review task, not a valuation, binding offer, packet or send.
 Known financing is labeled self-reported, never independently verified.
 
+The existing routing workspace now filters the bounded canonical candidate /
+offer read model by intent, town, source, owner, priority, offer and lifecycle.
+It exposes real recipient/channel records, policy/deadline and reviewed roster /
+capacity without leaking contact destinations or implying current eligibility.
+Native expandable filters/health keep mobile lead rows ahead of configuration.
+SQL remains the allocation authority. Lead-detail next steps use loaded canonical
+appointments, open tasks and documented outcomes, not notification delivery or
+decorative checkmarks. No approved packet is fabricated.
+
 `app/lib/leadPresentation.ts` is the server disclosure contract. Intended-agent
 pre-claim pages get category/town/priority/deadline, not contact/property/free
 text. Assigned views use the existing real role/ownership permissions. Audit
@@ -183,10 +192,11 @@ existing visual asset register. `design-qa.md` records the visual gate. The PR
 receipt holds exact head/tree, hosted status and measured command counts.
 
 Session evidence (not inherited): frozen install passed; final `release:gate`
-passed 3,688 unit tests / 46 skipped, typecheck, lint, build, isolation/safety
+passed 3,698 unit tests / 47 skipped, typecheck, lint, build, isolation/safety
 and 113 active route identities. Three actual isolated PostgreSQL suites passed
-47/47 (57.70s) including a no-send accepted SMS and enrolled-sender-bound CLAIM sharing
-one offer/assignment. Final built Chromium review passed 5/5 (8.8s), all four
+48/48 (58.96s) including real admin routing read queries, a no-send accepted SMS
+and enrolled-sender-bound CLAIM sharing one offer/assignment. Built Chromium
+review passed 6/6 (9.4s), including the real no-send routing board and all four
 widths, six subtypes, assigned/pre-claim, keyboard and 200% text zoom. Read-only
 Production smoke passed 19 checks / 2 skipped: authenticated admin health and
 write mode were not run. Release doctor before freeze had one nonblocking dirty

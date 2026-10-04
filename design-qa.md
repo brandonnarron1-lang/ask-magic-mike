@@ -32,21 +32,38 @@ This composition is design evidence, **not** notification artwork.
 Focused combined input, opened after final recapture:
 `output/reference-allocation/buyer-focused-reference-versus-render.png`.
 Source phone-content crop is x29/y269/291x554, normalized to 350px wide;
-actual assigned card is 350x1139 from a 390px viewport. Original card facts
+actual assigned card is 350x1223 from a 390px viewport. Original card facts
 cannot be matched 1:1 to a synthetic QA record; comparison is hierarchy,
 tokens, controls and readable density, not fabricated identity/price fidelity.
 
 Additional inspected final renders:
 
-- `output/playwright/reference-buyer-390.png` (350x1021).
-- `output/playwright/reference-buyer-assigned-390.png` (350x1139).
-- `output/playwright/reference-buyer-assigned-1440.png` (566x1053).
+- `output/playwright/reference-buyer-390.png` (350x1105).
+- `output/playwright/reference-buyer-assigned-390.png` (350x1223).
+- `output/playwright/reference-buyer-assigned-1440.png` (566x1137).
+- `output/playwright/reference-routing-board-390.png` (350x1087); normalized
+  focused routing comparison is 730x1087.
 - `output/playwright/reference-email-images-off-390.png` (350x1816).
 - `output/playwright/reference-text-zoom-200.png` (1200x3112).
 - `public/images/ask-magic-mike/notifications/allocation-buyer-v1.jpg`
   (720x900, compressed, no EXIF).
 
 ## Findings and comparison history
+
+- [P2, fixed and recaptured] The live routing workspace lacked
+  intent/town/source/owner/priority/offer/lifecycle filters and recipient/channel
+  history. Added presentation-only bounded filters, real canonical roster and
+  delivery reads, and persisted appointment/task/outcome checklist evidence.
+  These controls do not replace SQL eligibility or activate a recipient.
+  Actual PostgreSQL reads and built browser interaction both passed.
+- [P2, fixed and recaptured] The first routing-board recapture
+  buried the queue beneath seven filters and operating metrics. Native
+  expandable filters/roster/health now prioritize lead rows and next actions.
+  Earlier comparison retained as
+  `output/reference-allocation/routing-first-overexpanded-comparison.png`.
+  Final `routing-focused-reference-versus-render.png` was reopened: the queue
+  now precedes operating details, and filters/health use keyboard-operable
+  native summaries. Source routing crop: x1348/y269/291x554, normalized to 350px.
 
 - [P2, fixed] Mobile facts/actions were too vertically dispersed for triage.
   Earlier combined and focused captures showed one-column facts, wrapping
@@ -87,10 +104,12 @@ No actionable P0/P1/P2 visual finding remains within this candidate scope.
 
 ## Interaction and test receipt
 
-Final built browser run: **5/5 passed**, 8.8s. All widths, all six subtypes,
+Final built browser run: **6/6 passed**, 9.4s. All widths, all six subtypes,
 pre-claim/assigned, expandable score factors, no-send disabled preview controls,
 real email link/images blocked/plain text, exact SMS/expiry and MMS text/pixels,
-keyboard, 200% text zoom and page-error assertions. No page errors observed.
+keyboard, 200% text zoom and page-error assertions. The real routing board also
+tests filtering/clear, collapsed controls, no-send mutations, all four widths
+and 200% text zoom. No page errors observed.
 Actual role/ownership permissions are covered by isolated handler/SQL tests;
 DB-backed four-role browser sessions remain UNVERIFIED, not substituted by
 synthetic local authentication.

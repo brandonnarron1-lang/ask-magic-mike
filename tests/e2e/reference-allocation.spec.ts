@@ -65,3 +65,34 @@ test("Studio keyboard and 200% text zoom remain operable",async({browser})=>{
  await studio.screenshot({path:"output/playwright/reference-text-zoom-200.png"});
  await context.close();
 });
+test("Routing board filters canonical-shaped rows without enabling preview mutations",async({browser})=>{
+ const context=await browser.newContext({viewport:{width:390,height:1000},httpCredentials:{username:"",password:process.env.ADMIN_SECRET||"changeme-local"}});
+ const page=await context.newPage();await page.goto("/admin/message-previews",{waitUntil:"domcontentloaded"});
+ const studio=page.getByRole("region",{name:"Reference-driven cross-channel studio"});
+ await studio.getByLabel("Channel",{exact:true}).selectOption("web");await studio.getByLabel("Module / subtype",{exact:true}).selectOption("routing");
+ const board=studio.getByRole("region",{name:"Smart Routing + Next Steps",exact:true});
+ await expect(board.getByRole("list",{name:"Filtered allocation candidates"}).getByRole("listitem")).toHaveCount(2);
+ await board.getByText("Filter routing queue",{exact:true}).click();
+ await board.getByLabel("Routing Intent",{exact:true}).selectOption("seller");
+ await expect(board.getByRole("list",{name:"Filtered allocation candidates"}).getByRole("listitem")).toHaveCount(1);
+ await board.getByLabel("Routing Offer state",{exact:true}).selectOption("expired");
+ await expect(board.getByRole("list",{name:"Filtered allocation candidates"}).getByRole("listitem")).toHaveCount(0);
+ await expect(board.getByRole("list",{name:"Filtered allocation offers"}).getByRole("listitem")).toHaveCount(1);
+ await board.getByText("Queue health, policy and expiry controls",{exact:true}).click();
+ await expect(board.getByRole("button",{name:"Process allocation-only expiry"})).toBeDisabled();
+ await board.getByText("Queue health, policy and expiry controls",{exact:true}).click();
+ await board.getByRole("button",{name:"Clear routing filters"}).click();
+ await expect(board.getByRole("list",{name:"Filtered allocation candidates"}).getByRole("listitem")).toHaveCount(2);
+ await board.getByText("Filter routing queue",{exact:true}).click();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1)).toBe(true);
+ for(const width of [320,390,768,1440]){
+  await page.setViewportSize({width,height:1000});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1)).toBe(true);
+  if(width===390||width===1440)await board.screenshot({path:`output/playwright/reference-routing-board-${width}.png`});
+ }
+ await page.setViewportSize({width:1280,height:1000});await page.evaluate(()=>{document.documentElement.style.fontSize="200%";});
+ await board.getByText("Filter routing queue",{exact:true}).click();
+ await board.getByLabel("Routing Town",{exact:true}).focus();await expect(board.getByLabel("Routing Town",{exact:true})).toBeFocused();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1)).toBe(true);
+ await context.close();
+});

@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import { LEAD_MODULES, LEAD_PRESENTATION_VERSION, type DisclosureTier, type LeadSubtype, type OfferState } from "../../lib/leadPresentation";
-import { leadCardFixture } from "../../lib/leadPresentationFixtures";
+import { leadCardFixture,allocationWorkspaceFixture } from "../../lib/leadPresentationFixtures";
 import { renderLeadOfferEmail, renderLeadOfferSms } from "../../lib/leadOfferRenderers";
 import { ReferenceLeadCard } from "./ReferenceLeadCard";
+import { AllocationWorkspace } from "./AllocationWorkspace";
 
 export function CrossChannelReviewStudio() {
   const [subtype, setSubtype] = useState<LeadSubtype>("buyer");
@@ -31,5 +32,6 @@ export function CrossChannelReviewStudio() {
       {channel === "all" || channel === "sms" ? <section className="min-w-0 rounded-2xl border border-[#D9AF52]/35 bg-[#121619] p-5"><h3 className="text-lg font-bold text-[#D9AF52]">SMS · exact handset text</h3><pre className="mt-4 whitespace-pre-wrap break-words rounded-xl border border-[#24BED8]/35 bg-[#080A0B] p-4 text-sm leading-6 text-[#F5EAD1]">{sms.text}</pre><p className="mt-4 text-sm text-[#D9CEB8]">{sms.encoding} · {sms.units} encoding units · {sms.segments} segments. Pricing and registration unverified; no carrier send.</p></section> : null}
       {channel === "all" || channel === "mms" ? <section className="min-w-0 rounded-2xl border border-[#D9AF52]/35 bg-[#121619] p-5"><h3 className="text-lg font-bold text-[#D9AF52]">MMS · category-only artwork</h3>{/* Static, local, non-personal artwork; never the consumer's property. */}<img src={`/images/ask-magic-mike/notifications/allocation-${LEAD_MODULES[subtype].media}-v1.jpg`} width={720} height={900} alt={`${LEAD_MODULES[subtype].label} illustrative category artwork. Commands and deadline are in the message text.`} className="mt-4 h-auto w-full rounded-xl" /><h4 className="mt-4 text-sm font-bold text-[#D9AF52]">Independently usable companion text</h4><pre className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-[#F5EAD1]">{sms.text}</pre><p className="mt-4 text-sm text-[#D9CEB8]">Artwork contains no lead facts, code or capability. SMS and MMS are alternatives, not a double-send.</p></section> : null}
     </div>
+    {(channel==="all"||channel==="web")&&subtype==="routing"?<AllocationWorkspace state={allocationWorkspaceFixture} preview/>:null}
   </section>;
 }
