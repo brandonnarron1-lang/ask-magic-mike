@@ -17,9 +17,9 @@ export function LeadAlertPreviewGallery({ standalone = false }: { standalone?: b
       </div>
       <div className="mt-5 grid gap-5 xl:grid-cols-3">
         {LEAD_ALERT_DESIGN_PREVIEWS.map((preview) => (
-          <article key={preview.id} className="rounded-xl border border-white/10 bg-[#0b0b0b] p-4">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <div>
+          <article key={preview.id} className="min-w-0 rounded-xl border border-white/10 bg-[#0b0b0b] p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0 break-words">
                 <p className="text-sm font-semibold text-[#f4ead4]">{preview.label}</p>
                 <p className="mt-1 text-xs text-[#8f8778]">Synthetic score {preview.score}</p>
               </div>
