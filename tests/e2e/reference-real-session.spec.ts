@@ -224,11 +224,21 @@ test("Real administrator session renders six cross-channel subtypes at four widt
   for(const width of [320,390,768,1440]){
     await page.setViewportSize({width,height:1000});
     await studio.getByLabel("Channel",{exact:true}).selectOption("web");
+    // Hydration can leave the initial all-channel preview visible briefly.
+    // Wait for the requested web-only render, then enforce the same strict
+    // overflow budget on every host/font environment (including hosted Linux).
+    await expect(studio.locator("iframe")).toHaveCount(0);
+    await expect(studio.locator("pre")).toHaveCount(0);
     for(const subtype of ["buyer","seller","cash_seller","investor_buyer","copilot","routing"]){
       await studio.getByLabel("Module / subtype",{exact:true}).selectOption(subtype);
       const card=studio.locator(`[data-reference-lead-card="${subtype}"]`);
       await expect(card).toBeVisible();
-      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1)).toBe(true);
+      await expect.poll(()=>page.evaluate(()=>{
+        const width=document.documentElement.clientWidth;
+        return document.documentElement.scrollWidth<=width+1?[]:
+          Array.from(document.querySelectorAll("body *")).filter(el=>el.getBoundingClientRect().right>width+1)
+            .slice(0,5).map(el=>`${el.tagName}:${String(el.className).slice(0,120)}:${Math.round(el.getBoundingClientRect().right)}`);
+      }),{message:`No horizontal overflow at ${width}px / ${subtype}`}).toEqual([]);
       if(width===390||width===1440)await card.screenshot({path:`output/playwright/real-session-reference-${subtype}-${width}.png`});
     }
     await studio.getByLabel("Channel",{exact:true}).selectOption("email");
