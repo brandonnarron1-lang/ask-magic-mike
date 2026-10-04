@@ -1,0 +1,14 @@
+{
+  "status": "prepared_not_installed",
+  "project": "ask-magic-mike",
+  "team": "eyes-up-industries",
+  "path": "/api/admin/allocation/due",
+  "schedule": "* * * * *",
+  "authentication": "existing CRON_SECRET bearer",
+  "cadenceSeconds": 60,
+  "functionMaxDurationSeconds": 45,
+  "leaseSeconds": 90,
+  "maxIntentsPerTick": 5,
+  "activation": "Separate owner-approved new-lead policy, channels, roster, caps, cutoff and cadence; not authorized by application release",
+  "productionProbesAllowed": false
+}
