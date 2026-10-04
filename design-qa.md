@@ -1,95 +1,104 @@
-# Design QA — Ask Magic Mike Wide Social Card
+# Reference-driven Lead Center — visual acceptance
 
-- Source visual truth:
-  - `public/brand/black-diamond/hero-home-desktop.jpg`
-  - `public/brand/black-diamond/our-town-logo.png`
-- Implementation:
-  - `public/brand/black-diamond/og-card-1200x630.jpg`
-  - `app/social-preview/page.tsx`
-- Full-view comparison:
-  - `artifacts/phase9/social-preview-wide-card/source-vs-final.jpg`
-- Focused identity comparison:
-  - `artifacts/phase9/social-preview-wide-card/identity-source-vs-final.jpg`
-- Browser-rendered evidence:
-  - `artifacts/phase9/social-preview-wide-card/desktop-full.png`
-  - `artifacts/phase9/social-preview-wide-card/desktop-card.png`
-  - `artifacts/phase9/social-preview-wide-card/mobile-full.png`
-  - `artifacts/phase9/social-preview-wide-card/mobile-card.png`
-- State: static, non-indexed Social Preview review surface.
-
-## Normalization
-
-- Source pixels: 2880x1620.
-- Source normalization: resize to 1200x675, top-align, crop to 1200x630.
-- Final card: 1200x630 JPEG at density 1.
-- Desktop browser: 1440x1000 viewport; rendered card container
-  1230x645.75 CSS pixels with the 1200:630 ratio preserved.
-- Mobile browser: 390x844 viewport, 375 CSS-pixel document width; rendered card
-  301x158.015625 CSS pixels with document `scrollWidth=clientWidth=375`.
-- The browser and source comparisons use matching 1.9048:1 framing. No device
-  frame or browser chrome is part of the focused card evidence.
-
-## Findings
-
-No actionable P0, P1, or P2 differences remain.
-
-- Fonts and typography: the condensed display face, narrow uppercase location
-  line, supporting sans serif, and domain line preserve the selected hierarchy
-  and remain crisp in the committed raster. Headline and domain retain priority
-  when the card is reduced to mobile preview width.
-- Spacing and layout rhythm: logo, rules, headline, supporting copy, and domain
-  stay inside the left safe zone. Mike remains isolated on the right with no
-  collision at desktop or mobile rendering.
-- Colors and visual tokens: `#050505`, `#d5aa36`, `#b91f2e`, and
-  `#f5f0e6` match the existing Black Diamond black/gold/red/cream system.
-- Image quality and asset fidelity: the final card composites the approved hero
-  and exact logo. The focused comparison shows the Mike crop and background are
-  source-faithful. Output is a 160 KB, quality-90 JPEG with no transparency or
-  crawler-incompatible format.
-- Copy and content: all four strings are spelled correctly. No valuation,
-  offer, response-time, availability, phone, MLS, lead, or synthetic-prospect
-  claim appears.
-- Accessibility: the metadata alt text identifies Mike, Our Town Properties,
-  Wilson, and the purpose of the image without repeating promotional copy.
-- Responsive behavior: the review route has no horizontal overflow at the
-  tested mobile width. The exact asset uses `object-cover` inside a matching
-  aspect ratio, so no focal content is clipped.
-
-Residual P3: the longest supporting sentence is intentionally secondary at
-very small thumbnail sizes. The primary title, brokerage mark, location, and
-domain remain readable, so no change is required.
-
-## 2026-08-29 restack verification
-
-- Fresh in-app Browser captures at 1280x900 and 390x844 match the approved
-  source and original accepted implementation.
-- The exact card rendered at the declared ratio with no facial, logo, copy,
-  crop, border, radius, spacing, or focal-point regression.
-- Mobile `scrollWidth` equaled `clientWidth`; the card, feed plate, story plate,
-  UTM block, and footer remained readable without horizontal overflow.
-- Deterministic regeneration reproduced 160,316 bytes and SHA-256
-  `68dea02d8b4beb24eb864363c2c0d30adc1c98f4d5f37872a32848dad037c713`.
-
-## Comparison history
-
-1. An AI-assisted hierarchy concept was generated from the approved sources.
-   It established the left-copy/right-subject composition but subtly changed
-   Mike's face. That was treated as a P1 identity-fidelity failure and rejected
-   as a runtime asset.
-2. The card was rebuilt deterministically from the untouched hero and exact
-   logo. The post-fix full and focused comparisons show the approved identity,
-   crop, background, logo, copy, and visual hierarchy.
-3. Browser QA initially emitted one LCP warning for the existing story asset.
-   The existing review-only feed/story images were marked priority; subsequent
-   reloads produced no new warning. No browser error was observed.
-
-## Primary interaction and console check
-
-The new surface is intentionally static. Existing primary navigation and footer
-links remained present in the rendered DOM. Desktop and mobile loads completed,
-the exact card image rendered, and no new console error or warning followed the
-post-fix reloads.
-
-## Final result
-
+Date: 2026-10-04. Scope: the implemented, **local no-send** review candidate,
+not deployed acceptance, a carrier receipt or a four-role live-data session.
 final result: passed
+
+## Source and comparison evidence
+
+Source visual truth, opened and preserved unchanged:
+
+- `/Users/brandonnarron/Downloads/ChatGPT Image Oct 4, 2026, 10_54_52 AM-1.png`
+  (Reference A, 1672x941): five phone-content modules.
+- `/Users/brandonnarron/Downloads/ChatGPT Image Oct 4, 2026, 10_54_53 AM-2.png`
+  (Reference B, 1672x941): overarching black/gold/cream direction.
+
+Hashes and approved logo/derivative provenance are in
+`docs/PHASE6_VISUAL_ASSET_REGISTER.md`. Reference facts and portraits are not
+CRM data. Explicit user restrictions on deterministic pixels, privacy and
+approved assets supersede generic generated-image matching guidance.
+
+Actual built route: `/admin/message-previews`, Node 24 / Next production build,
+Chromium, local synthetic Basic-Auth fixture venue, no database or sends.
+Widths: 320/390/768/1440 CSS px; density 1; reduced motion in width tests.
+Both pre-claim and assigned synthetic cards were exercised for all six subtypes.
+Captured at 390 and 1440; no fake phone bezel is application content.
+
+Full-view combined input, opened after final recapture:
+`output/reference-allocation/reference-versus-render.png` (2840x3570).
+Both source boards appear left, six actual 390px pre-claim cards right.
+This composition is design evidence, **not** notification artwork.
+
+Focused combined input, opened after final recapture:
+`output/reference-allocation/buyer-focused-reference-versus-render.png`.
+Source phone-content crop is x29/y269/291x554, normalized to 350px wide;
+actual assigned card is 350x1139 from a 390px viewport. Original card facts
+cannot be matched 1:1 to a synthetic QA record; comparison is hierarchy,
+tokens, controls and readable density, not fabricated identity/price fidelity.
+
+Additional inspected final renders:
+
+- `output/playwright/reference-buyer-390.png` (350x1021).
+- `output/playwright/reference-buyer-assigned-390.png` (350x1139).
+- `output/playwright/reference-buyer-assigned-1440.png` (566x1053).
+- `output/playwright/reference-email-images-off-390.png` (350x1816).
+- `output/playwright/reference-text-zoom-200.png` (1200x3112).
+- `public/images/ask-magic-mike/notifications/allocation-buyer-v1.jpg`
+  (720x900, compressed, no EXIF).
+
+## Findings and comparison history
+
+- [P2, fixed] Mobile facts/actions were too vertically dispersed for triage.
+  Earlier combined and focused captures showed one-column facts, wrapping
+  score position and a repeated preview warning under every action. Reduced
+  padding, stable identity/score tracks, two-column facts/actions, expandable
+  score evidence and one preview warning retain semantics and 44px controls.
+  Final combined/focused captures above were reopened: hierarchy and rhythm
+  are clearer; no clipped facts, overlap or horizontal overflow remains.
+- [P2, fixed] MMS-only selection lacked its own companion text. The final
+  panel now renders the exact independently usable text beside its real JPEG;
+  browser assertions verify opt-out and truthful original deadline content.
+- Native selector labels and hydration/keyboard verification were repaired
+  during interaction QA. Final selectors expose exact accessible labels;
+  native keyboard type-ahead changes the subtype after client hydration.
+
+No actionable P0/P1/P2 visual finding remains within this candidate scope.
+
+## Required fidelity surfaces
+
+- Typography: compact operational sans-serif, readable 14px facts, appropriate
+  weight/line height, tabular score, restrained serif studio heading. Approved
+  script exists only in the real logo. Reference poster display lettering is
+  not copied into operational controls. Wrapping and 200% text zoom verified.
+- Spacing/layout: narrow gold keylines, dark layered panels, circular identity
+  treatment, category ribbon, grouped facts/insight and paired controls; no
+  nested mock phones. Desktop uses the existing real workspace, not five phones.
+- Tokens: black/charcoal/gold/cream; ruby buyer, emerald seller, gold cash and
+  cyan copilot. Labelled TEST/HOT/ACTIVE/NEW is separate from category; elevated
+  accent foregrounds avoid unreadable dark accent text. Visible keyboard focus.
+- Assets: approved high-resolution logo, existing icon library, no regenerated
+  likeness or fabricated consumer/property imagery. Deterministic MMS uses
+  explicitly generic illustrative artwork, as the user requires. No reference
+  facts, PII, commands or authorization secrets enter its pixels/media path.
+- Copy/content: the five exact module names and distinct cash/investor subtype;
+  unknown remains unknown, financing is self-reported, CMA/offer preparation
+  requests human evidence review. No fake availability, value or appointment.
+  Send-time snapshots/deadlines do not masquerade as current assignment.
+
+## Interaction and test receipt
+
+Final built browser run: **5/5 passed**, 8.8s. All widths, all six subtypes,
+pre-claim/assigned, expandable score factors, no-send disabled preview controls,
+real email link/images blocked/plain text, exact SMS/expiry and MMS text/pixels,
+keyboard, 200% text zoom and page-error assertions. No page errors observed.
+Actual role/ownership permissions are covered by isolated handler/SQL tests;
+DB-backed four-role browser sessions remain UNVERIFIED, not substituted by
+synthetic local authentication.
+
+Implementation checklist: source opened; combined/focused inputs reopened;
+P2 fixes recaptured; final browser assertions passed; all five fidelity surfaces
+checked; privacy and channel adaptations recorded.
+
+P3 / external follow-up: verify Gmail/Apple Mail/Outlook dark-mode/inbox behavior
+and carrier/device rendering in a separately approved bounded staff pilot.
+The browser email iframe is not evidence of those clients or live delivery.

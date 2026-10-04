@@ -224,6 +224,9 @@ export class LeadNotificationService {
     }
     const current = await this.repo.findById(notificationId);
     if (!current) return { ok: false, statusCode: 404, error: "notification_not_found" };
+    if (current.notification_type.startsWith("allocation_")) {
+      return { ok: false, statusCode: 409, error: "allocation_dispatch_requires_scoped_processor" };
+    }
     if (current.status === "sent") return { ok: true, notification: current };
     if (current.provider_message_id || (current.status === "pending" && current.attempt_count !== 0)) {
       return { ok: false, statusCode: 409, error: "provider_reconciliation_required" };

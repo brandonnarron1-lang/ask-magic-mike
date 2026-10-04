@@ -3,6 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 const PREVIEW_URL = process.env.PREVIEW_URL?.replace(/\/$/, "") ?? "";
 const LOCAL_E2E_PORT = process.env.AMM_E2E_PORT ?? "3210";
 const LOCAL_E2E_URL = `http://127.0.0.1:${LOCAL_E2E_PORT}`;
+const BUILT_E2E = process.env.AMM_E2E_BUILT === "1";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -25,7 +26,9 @@ export default defineConfig({
   webServer: PREVIEW_URL
     ? undefined
     : {
-        command: `NODE_ENV=development ./node_modules/.bin/next dev --hostname 127.0.0.1 --port ${LOCAL_E2E_PORT}`,
+        command: BUILT_E2E
+          ? `./node_modules/.bin/next start --hostname 127.0.0.1 --port ${LOCAL_E2E_PORT}`
+          : `NODE_ENV=development ./node_modules/.bin/next dev --hostname 127.0.0.1 --port ${LOCAL_E2E_PORT}`,
         url: LOCAL_E2E_URL,
         // Never attach Ask Magic Mike QA to an unrelated app that happens to
         // own the local port. A collision must fail visibly.

@@ -12,7 +12,10 @@ describe("SMS policy", () => {
   it("counts GSM and unicode message segments", () => {
     expect(smsSegmentCount("a".repeat(160))).toBe(1);
     expect(smsSegmentCount("a".repeat(161))).toBe(2);
-    expect(smsSegmentCount("é".repeat(71))).toBe(2);
+    expect(smsSegmentCount("é".repeat(71))).toBe(1);
+    expect(smsSegmentCount("{".repeat(81))).toBe(2);
+    expect(smsSegmentCount("汉".repeat(71))).toBe(2);
+    expect(smsSegmentCount("😀".repeat(36))).toBe(2);
   });
 
   it("enforces Eastern quiet hours", () => {

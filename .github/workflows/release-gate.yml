@@ -64,6 +64,9 @@ jobs:
       - name: Isolated PostgreSQL notification reliability and recovery
         run: pnpm run test:postgres:notification-reliability
 
+      - name: Isolated PostgreSQL reference allocation and no-send claims
+        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/reference-allocation-postgres.test.ts
+
       - name: Typecheck
         run: pnpm run typecheck
 

@@ -97,10 +97,12 @@ function leadTypeFor(payload: LeadPayload) {
 }
 
 function primaryIntentFor(leadType: string, payload: LeadPayload) {
+  // Investor is a buy-box request, not a homeowner requesting a cash offer.
+  // Applies to new normalized intake only; historical records are not rewritten.
+  if (leadType === "investor") return "buy";
   if (
     leadType === "seller" ||
     leadType === "seller_cash_offer" ||
-    leadType === "investor" ||
     leadType === "home_value" ||
     payload.funnel_type === "seller"
   ) {

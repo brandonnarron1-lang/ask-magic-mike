@@ -130,7 +130,8 @@ export function Phase6CopilotPanel({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">Agent Command Center · grounded drafts</p>
-          <h2 className="mt-2 text-xl font-semibold text-[#f4ead4]">Human-review copilot</h2>
+          <h2 className="mt-2 text-xl font-semibold text-[#f4ead4]">AI + Human Conversation Copilot</h2>
+          <p className="mt-2 text-sm leading-6 text-cyan-100">Human-review copilot · grounded drafts, versioned approval, separate send review.</p>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#bdb4a4]">
             Creates one evidence-linked, versioned draft. It cannot send, assign, score, schedule, or change the lead. Approval is a recorded review decision—not delivery.
           </p>

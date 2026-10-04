@@ -11,11 +11,28 @@ export function classifyInboundSms(value: string): "stop" | "help" | "reply" {
   return "reply";
 }
 
-export function smsSegmentCount(value: string) {
-  const gsm = Array.from(value).every((character) => character.charCodeAt(0) <= 127);
+// GSM 03.38 is not ASCII. Extended characters consume two septets; Unicode
+// consumes UTF-16 code units (a supplementary character consumes two).
+const GSM_BASIC = new Set(Array.from("@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà"));
+const GSM_EXTENDED = new Set(Array.from("\f^{}\\[~]|€"));
+
+export function smsEncodingEstimate(value: string) {
+  let septets = 0;
+  let gsm = true;
+  for (const character of value) {
+    if (GSM_BASIC.has(character)) septets++;
+    else if (GSM_EXTENDED.has(character)) septets += 2;
+    else { gsm = false; break; }
+  }
+  const units = gsm ? septets : value.length;
   const single = gsm ? 160 : 70;
   const multipart = gsm ? 153 : 67;
-  return value.length <= single ? 1 : Math.ceil(value.length / multipart);
+  return { encoding: gsm ? "GSM-7" as const : "UCS-2" as const, units,
+    segments: units <= single ? 1 : Math.ceil(units / multipart) };
+}
+
+export function smsSegmentCount(value: string) {
+  return smsEncodingEstimate(value).segments;
 }
 
 export function isWithinSmsSendWindow(

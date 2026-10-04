@@ -11,6 +11,7 @@
 /artifacts
 /.playwright-cli
 /output/playwright/
+/output/reference-allocation/
 /.amm-run
 
 # Next.js

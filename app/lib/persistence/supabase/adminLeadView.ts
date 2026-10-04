@@ -48,6 +48,11 @@ export type AdminLeadView = {
   closed_lost_reason: string | null;
   conversion_stage: string | null;
   lead_grade: string | null;
+  score?: number | null;
+  score_reasons?: string[];
+  stated_city?: string | null;
+  stated_financing?: string | null;
+  stated_preapproval?: boolean | null;
   timeline_months: number | null;
   source: string | null;
   source_detail: string | null;
@@ -325,6 +330,14 @@ export function normalizeAdminLeadRow(row: Record<string, unknown>): AdminLeadVi
     closed_lost_reason: text(row.closed_lost_reason),
     conversion_stage: text(row.conversion_stage),
     lead_grade: text(row.lead_grade),
+    score: numberOrNull(row.score),
+    score_reasons: Array.isArray(row.score_factors) ? row.score_factors.map((factor) => {
+      if (factor && typeof factor === "object") return text((factor as Record<string, unknown>).explanation) || text((factor as Record<string, unknown>).label) || "";
+      return "";
+    }).filter(Boolean) : [],
+    stated_city: text(row.city),
+    stated_financing: text(row.financing),
+    stated_preapproval: typeof row.preapproval==="boolean"?row.preapproval:null,
     timeline_months: numberOrNull(row.timeline_months),
     source: text(row.source),
     source_detail: text(row.source_detail),

@@ -9,6 +9,8 @@ import { loadAdminLeadNotificationSummary } from "../../lib/adminLeadNotificatio
 import type { AdminAssignmentAuditRecord } from "../../lib/adminAssignmentAudit";
 import { assignLeadToAgentAction, unassignLeadAction, updateAgentOperationsAction } from "./actions";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
+import { loadAllocationWorkspace } from "../../lib/leadAllocationReadModel";
+import { AllocationWorkspace } from "../../components/admin/AllocationWorkspace";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -295,7 +297,8 @@ export default async function AdminAllocationPage({
 }: {
   searchParams?: Promise<{ assignment_action?: string }>;
 }) {
-  await requireLeadCenterPermission("lead:assign");
+  const principal=await requireLeadCenterPermission("lead:assign");
+  const allocationWorkspace=await loadAllocationWorkspace(principal);
   const params = searchParams ? await searchParams : {};
   const [summary, notifications] = await Promise.all([
     loadAdminAgentAllocationView(),
@@ -305,6 +308,7 @@ export default async function AdminAllocationPage({
   return (
     <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
       <div className="mx-auto max-w-6xl">
+        <AllocationWorkspace state={allocationWorkspace}/>
         <header className="mb-7 border-b border-[#cda24a33] pb-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
