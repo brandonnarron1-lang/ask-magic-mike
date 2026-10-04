@@ -8,14 +8,16 @@ change is included. No new public QA, provider call, credential entry or spend.
 
 ## Identity and dependencies
 
-Fresh authority resolution on 2026-10-04: 25/25 checks passed. Accepted main is
-`4e7d818d9405e3ef5f31f0feb9ffb19bdfa22c82` (PR #286), tree
-`a78737b701d8da78d0539419e87ac813b8cb9c91`, Production
-`dpl_6emNTgVrMq1Qc64xxYVg7GAHRC1m`. Current application remains unchanged.
+Fresh authority resolution at 2026-10-04T22:22:39Z: 25/25 checks passed. Accepted
+main is `4f00826043bbe2b2d13779fd143d28a66ff61158` (PR #287), tree
+`eddb7c08e930a0937af03eba574b4a0090759f6e`, Production
+`dpl_2bZJGzHEzrPLZa9qrueGDk38nMhY`. This session has not changed Production.
 
-This branch is `codex/reference-lead-allocation-20261004`, based on sealed,
-still-open PR #287 head `8c411833f8557bce325094a1224d8301efbf1144`, tree
-`eddb7c08e930a0937af03eba574b4a0090759f6e`. It does not broaden #287's gate.
+This branch is `codex/reference-lead-allocation-20261004`. Accepted main was
+merged non-destructively; PR #288 now targets `main`. The rescue branch
+`rescue/amm-pr288-pre-master-acceptance-20261004-2230` preserves the prior head
+`35280b7bae317ab0c8fa7d751cc1dc09db5005f2`. #287 is accepted, not a pending gate.
+Its historical reviewed head was `8c411833f8557bce325094a1224d8301efbf1144`.
 PR #277 `a2b5acf01006e3105d746cf8d8ca4da653d75cec` supplies only compatible
 bounded signed SMS receipt/STOP/status logic. PR #279 remains provenance,
 not another merge. The existing completed public QA receipt is not replayed.
@@ -24,8 +26,8 @@ ONE new additive migration relative to #287:
 `supabase/migrations/20261004160000_reference_lead_allocation.sql`, SHA-256
 `f66867945f2548ceef2e29e17950be280f98dcf33befa4c9dddc9daa0ff97210`.
 It is applied only to isolated local PostgreSQL in this run. #287's migration
-is an independent earlier dependency: two migrations in total from accepted
-#286, not two newly authored migrations here. Never modify an accepted migration.
+is already accepted. There is exactly ONE migration relative to current main;
+do not reapply #287. Never modify an accepted migration.
 
 ## Connected implementation
 
@@ -126,8 +128,8 @@ not made an eligible agent by this implementation.
 
 ## Safe activation boundaries (NOT executed)
 
-1. Accept #287 under its independent current gate; rebase this candidate on that
-   accepted main, then repeat exact-head CI, immutable Preview and no-write QA.
+1. #287 is accepted and #288 is merge-reconciled against main. Seal the final
+   reviewed source, then repeat exact-head CI, immutable Preview and no-write QA.
 2. Backup/verify the existing Neon schema and predecessor; apply only the exact
    additive source above under a new migration/application approval. Deploy the
    same reviewed tree, flags held. Keep original capture/alert behavior intact.
@@ -171,12 +173,13 @@ Commands (Node 24.18.0, pnpm 10.30.3; one heavy pipeline at a time):
 pnpm install --frozen-lockfile
 pnpm release:gate
 AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/reference-allocation-postgres.test.ts tests/persistence/automatic-qa-audit-evidence.test.ts tests/persistence/notification-reliability-postgres.test.ts --no-file-parallelism
+pnpm test:reference:sessions
 AMM_E2E_BUILT=1 AMM_E2E_PORT=3219 VERCEL_ENV=development pnpm exec playwright test tests/e2e/reference-allocation.spec.ts
 node scripts/amm/reference-allocation-comparison.mjs
 pnpm smoke:prod
 ```
 
-Local browser command additionally used an unmistakably synthetic local-only
+Historical pre-master browser evidence used an unmistakably synthetic local-only
 admin fixture secret and disabled RBAC in the isolated no-database browser
 venue; it did not weaken Production auth. Actual four-role handler tests use
 real permission policy with mocked session/SQL. Actual built, DB-backed
@@ -191,7 +194,8 @@ receipts. Source hashes and optimized public category artwork are in the
 existing visual asset register. `design-qa.md` records the visual gate. The PR
 receipt holds exact head/tree, hosted status and measured command counts.
 
-Session evidence (not inherited): frozen install passed; final `release:gate`
+Historical pre-master session evidence (not rerun evidence for the updated head):
+frozen install passed; that session's `release:gate`
 passed 3,698 unit tests / 47 skipped, typecheck, lint, build, isolation/safety
 and 113 active route identities. Three actual isolated PostgreSQL suites passed
 48/48 (58.96s) including real admin routing read queries, a no-send accepted SMS
@@ -203,10 +207,10 @@ write mode were not run. Release doctor before freeze had one nonblocking dirty
 worktree finding; rerun after commit for the exact-head receipt. No synthetic
 record was written to Neon and no real provider message was sent.
 
-The positive PostgreSQL orchestrator test invokes the canonical enrolled-staff
+The historical positive PostgreSQL orchestrator test invokes the canonical enrolled-staff
 helper, not a carrier-originated signed HTTP request. Signature/account/SID
 validation is separately exercised in isolated webhook handler tests. Neither
-is a real handset proof. Final clean release doctor passes 58 / 0 fail / 1 skip.
+is a real handset proof. That historical release doctor passed 58 / 0 fail / 1 skip.
 
 ## Rollback
 
@@ -221,3 +225,92 @@ application; do not restore pre-286 capture v1. Exact accepted deployment must
 be re-resolved at that gate, not guessed from this dated document. Pending held
 offers become non-actionable under current policy checks. No rollback or live
 data mutation was performed here.
+
+## Master completion delta — 2026-10-04
+
+This section supersedes the earlier real-session/HTTP acceptance limits, not
+historical receipts. Eight built Chromium tests passed again at 23:07:19Z with genuine
+Better Auth password/session rows and real isolated PostgreSQL17. Five synthetic
+identities cover four roles plus a competing agent. The test-only Neon HTTP wire
+adapter executes unchanged SQL, not query/result mocks. It rejects non-loopback
+database targets and external fetches. RBAC, Origin checks and Preview guards
+are not disabled. Docker publishes only a random loopback port, bounds memory
+to 512MiB and removes only its UUID-labeled disposable container afterwards.
+Production credentials are not inherited. Fictional contacts cannot receive
+messages; application and provider sends remain false, budgets zero.
+
+Proven: real login, assigned-only list/detail, analyst reporting, direct URL/API
+denials, preclaim redaction, stale version rejection, browser Claim, exact Pass
+replay, a signed HTTP SMS/web race with one assignment/task/audit winner and one
+confirmation per approved channel, official Twilio SDK signature conformance,
+account/destination/phone binding, possession VERIFY, PAUSE/RESUME, STATUS,
+throttle/STOP precedence, no consent restoration through START, real task stale
+form/completion, persisted Today snooze, timeline pagination and session revocation.
+Six studio subtypes render under a real admin session at 320/390/768/1440px,
+keyboard/200% text; compiled email images-off, expired SMS and actual category
+JPEGs pass. This is browser rendering, not mailbox/carrier/device acceptance.
+
+Discovered and fixed: staff availability/STOP SQL needed an explicit command
+parameter cast; native driver Date values were omitted from task/appointment,
+Today and timeline projections; PostgreSQL task/appointment CAS versions must
+be selected as text to retain microseconds. Assigned cards with no question now
+say "Original question not recorded", not "identity locked". Regression tests
+retain consent holds. No permission, routing, QA suppression or schema safety
+rule was relaxed.
+
+Isolated load: 300 additional synthetic leads (225 normal-like local fixtures,
+75 QA/suppressed), 1,500 audit rows; 12 samples per route, concurrency3, predeclared
+p95 budget2,000ms. Today p50/p95=230/261ms; inbox88/97; paginated detail36/40;
+allocation51/76; analyst reporting27/31; zero HTTP/projection errors. App RSS
+observed during SQL fetches peaked550MiB, not whole-machine peak memory. SQL plan
+is retained; the small dataset does not justify a new index. This is loopback
+performance, NOT Neon/Vercel latency, dispatch throughput or a promised SLA.
+Final fixture count306 leads/16 notification intents/0 provider IDs/0 reservations;
+none were written to Production. Test database was removed after acceptance.
+
+Fresh final-source gates: frozen install; `pnpm release:gate` (3,703 passed,
+47 skipped; typecheck, lint, build, isolation, safety14/14,113 routes); three
+real PostgreSQL suites48/48 in56.56s; real-session Chromium8/8 in11.8s;
+read-only predecessor Production smoke19 pass/2 skipped; production dependency
+audit reports no known vulnerabilities. Authenticated Production health and
+mutations were not run. Exact-head hosted evidence is collected after sealing.
+
+Fresh public WordPress audit:42/42 pages HTTP200, Home Value destination and four
+UTMs intact; Form7 appears on39 pages, Forms1/3/4/6 on one each. This public scan
+does NOT verify authenticated forwarding/consent configuration. Four legacy
+native capture pages, five multiple-surface pages, two incomplete CTA UTM links
+and two incomplete embeds remain review holds. Forms2/5 were not found in this
+sitemap, not declared absent from WordPress. No publication or plugin change.
+
+Private local evidence: `.amm-run/reference-session-acceptance/{receipt.json,
+performance.json,transport.log,wordpress-audit.json,build.log}` and actual
+`output/playwright/real-session-*` screenshots. Keep with the preserved worktree;
+do not upload credentials, cookies, traces, live contacts or private backups.
+Hosted current-head CI/Preview are recorded in the frozen PR receipt separately.
+
+### One completion register
+
+| Priority / track | State | Evidence / exact gap | Dependency and next action | Owner / acceptance / scope |
+| --- | --- | --- | --- | --- |
+| P0 existing capture/QA/email | VERIFIED LIVE | Accepted #287 receipt; earlier provider delivery proof, independent primary/BCC mailbox receipt still unverified | Preserve; do not repeat lead/send or permanent failures | Release operator; accepted receipt unchanged; Production |
+| P0 #288 real auth/HTTP | TEST-PROVEN | Eight built real-session/SQL tests; STOP/date/version defects fixed; hosted exact-head checks pending seal | Run complete final gates/CI/Preview | Engineering; all checks on same reviewed tree; isolated/Preview only |
+| P1 #288 disabled release | EXTERNAL GATE | One additive migration; no live apply/merge/deploy authority yet | Exact-source approval phrase below, then one migration and accepted Git-source deployment | Owner/release operator; flags held, policy inactive, budgets0, MMSoff |
+| P1 scheduler | IMPLEMENTED | Protected bounded processor exists, NO installed cadence/lease acceptance | Separate small successor; measure five-intent throughput and protected60s lease/jitter/restart | Engineering then owner; no due/retry Production probe |
+| P1 Twilio/channel | EXTERNAL GATE | Console is at login; actual account, sender, registration, costs unverified | Owner sign-in then read-only account inspection; combined sender/setup decision | Owner; no purchase/config/send authority |
+| P1 HELP/STATUS handset | FAILED | Deterministic application result has no handset reply | Reviewed budgeted existing-outbox or verified provider-response successor; avoid duplicate opt-out replies | Engineering/provider owner; staff pilot verifies visible response |
+| P1 staff pilot / roster | EXTERNAL GATE | No human enrollment/device or real two-agent proof this session | Approved participants, legitimate own logins, purpose consent/VERIFY, finite segments/cost/stop matrix | Owner + participating agents; carrier/device/claim tiers distinct |
+| P1 allocation activation | EXTERNAL GATE | No approved policy/start/caps/channel/cadence; dispatch inactive | New-only cutoff and small rollout after release/channel/pilot/lease acceptance | BIC/owner; no historic/QA redistribution or retry drain |
+| P2 owned acquisition | VERIFIED LIVE | Page3952 link-out remains intact; other placements/legacy forms held,42-page read-only scan | Separate page/builder backup/diff authority; Form7/entry1550 remains held | Owner/WordPress operator; sequential publication, never global CSS/cache |
+| P2 measurement | UNVERIFIED | Consent bridge1.2.0 is separate from Connector1.1.0; current tag-order/grant/revoke not newly proven | Isolated privacy tests then separate measurement activation gate | Owner/analytics; no PII, QA/admin exclusion; attribution independent |
+| P2 conversion / nurture | TEST-PROVEN | Existing appointment-request/review-only workflow and consent regression suites; no live calendar/automation acceptance | Preserve truthful request; review stopping events/quiet-hours before separate activation | Operator/BIC; not a confirmed booking or permission to message |
+| P2 AI / licensed data | UNVERIFIED | Existing GPT-6 Luna review-only adapter; current official model docs checked; account access, paid outputs/feed rights unproven | Redacted rubric + approved evaluation budget, broker/data-rights review | Owner/BIC; no model switch/spend, invented MLS/value or autonomous sends |
+| P2 reporting/performance | TEST-PROVEN | Five role-scoped built views,300-lead/1,500-audit fixture within local budgets; no production conversion claims | Hosted/network cohort proof and genuine source-to-outcome events | Engineering/operator; clicks/delivery/contact/booking/outcome remain distinct |
+| P1 operator / restore | UNVERIFIED | Synthetic role acceptance is not Mike/roster acceptance; no live restore rehearsal | Own-login operator checklist; existing secure backup to isolated destination under data scope | Owner/operator; preserve accepted assignments/audit/STOP on rollback |
+| P3 expansion | DEFERRED EXPANSION | Native sources/calendar, reactivation, homeowner updates, licensed search, campaign packets, voice notes, source-to-close coaching | Begin one actually used integration only after core dispatch acceptance | Product owner; not a hidden launch prerequisite |
+
+Next unmet application gate (NOT approved):
+`APPROVE ASK MAGIC MIKE REFERENCE LEAD ALLOCATION PRODUCTION MIGRATION, MERGE, AND SAME-TREE PRODUCTION DEPLOYMENT`.
+It excludes provider setup, staff pilot, policy/roster, cadence activation, spend,
+WordPress publication, consumer messages and general retry processing. Production
+rollback starts from accepted #287 `dpl_2bZJGzHEzrPLZa9qrueGDk38nMhY`, freshly
+re-resolved before release; keep additive schema and all accepted evidence.

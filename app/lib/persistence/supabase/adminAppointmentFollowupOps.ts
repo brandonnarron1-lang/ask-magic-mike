@@ -151,6 +151,7 @@ function configured() {
 }
 
 function text(value: unknown): string | null {
+  if (value instanceof Date) return Number.isFinite(value.getTime()) ? value.toISOString() : null;
   if (typeof value !== "string") return null;
   const cleaned = value.trim();
   return cleaned || null;

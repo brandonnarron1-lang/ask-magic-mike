@@ -36,7 +36,7 @@ export async function loadNeonAdminTodayQueue(
 
   try {
     const leads = await sql.query(
-      `SELECT l.id, l.created_at, l.updated_at, l.status, l.score, l.lead_grade,
+      `SELECT l.id, l.created_at, l.updated_at::text AS updated_at, l.status, l.score, l.lead_grade,
               l.is_test, l.communication_suppressed, l.assigned_agent_id,
               l.assigned_at, l.last_contacted_at, l.next_follow_up_at,
               l.address_raw, l.first_name, l.last_name,
@@ -64,14 +64,14 @@ export async function loadNeonAdminTodayQueue(
 
     const [appointmentRows, taskRows, notificationRows, permissionRows, reviewRows] = await Promise.all([
       sql.query(
-        `SELECT a.* FROM public.lead_appointments a
+        `SELECT a.*, a.updated_at::text AS updated_at FROM public.lead_appointments a
           WHERE a.lead_id = ANY($1::uuid[])
             AND a.status IN ('requested','scheduled','confirmed','reschedule_requested')
           ORDER BY COALESCE(a.starts_at, a.requested_at, a.created_at), a.id LIMIT 2000`,
         [leadIds],
       ),
       sql.query(
-        `SELECT t.* FROM public.tasks t
+        `SELECT t.*, t.updated_at::text AS updated_at FROM public.tasks t
           WHERE t.lead_id = ANY($1::uuid[])
             AND t.category LIKE 'followup:%'
             AND t.status IN ('open','in_progress')

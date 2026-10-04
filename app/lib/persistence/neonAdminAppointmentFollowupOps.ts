@@ -185,7 +185,7 @@ export async function transitionNeonAppointment(input: {
 
   try {
     const rows = await sql.query(
-      `SELECT * FROM public.lead_appointments WHERE id = $1::uuid AND lead_id = $2::uuid LIMIT 1`,
+      `SELECT *, updated_at::text AS updated_at FROM public.lead_appointments WHERE id = $1::uuid AND lead_id = $2::uuid LIMIT 1`,
       [input.appointmentId, input.leadId],
     ) as Array<Record<string, unknown>>;
     const current = normalizeAppointment(rows[0] || {});
@@ -326,7 +326,7 @@ export async function updateNeonFollowupTask(input: {
   if (!sql) return { ok: false, statusCode: 503, error: "followup_store_not_configured" };
   try {
     const rows = await sql.query(
-      `SELECT * FROM public.tasks WHERE id = $1::uuid AND lead_id = $2::uuid LIMIT 1`,
+      `SELECT *, updated_at::text AS updated_at FROM public.tasks WHERE id = $1::uuid AND lead_id = $2::uuid LIMIT 1`,
       [input.taskId, input.leadId],
     ) as Array<Record<string, unknown>>;
     const task = normalizeTask(rows[0] || {});
@@ -383,8 +383,8 @@ export async function loadNeonAdminActionQueue(): Promise<AdminActionQueueResult
           WHERE is_test = false AND communication_suppressed = false
           ORDER BY created_at DESC LIMIT 500`,
       ),
-      sql.query(`SELECT * FROM public.lead_appointments ORDER BY created_at DESC LIMIT 500`),
-      sql.query(`SELECT * FROM public.tasks WHERE category LIKE 'followup:%' ORDER BY due_at ASC NULLS LAST LIMIT 500`),
+      sql.query(`SELECT *, updated_at::text AS updated_at FROM public.lead_appointments ORDER BY created_at DESC LIMIT 500`),
+      sql.query(`SELECT *, updated_at::text AS updated_at FROM public.tasks WHERE category LIKE 'followup:%' ORDER BY due_at ASC NULLS LAST LIMIT 500`),
       sql.query(`SELECT id, lead_id, agent_id, status, next_attempt_at FROM public.lead_notifications WHERE status = 'retry_scheduled' LIMIT 100`),
     ]);
     return {

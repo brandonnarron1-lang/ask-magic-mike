@@ -88,6 +88,7 @@ const TERMINAL_STATUSES = new Set(["converted", "dead", "closed", "closed_won", 
 const ACTIVE_STATUSES = new Set(["assigned", "contacted", "qualified", "appointment_requested", "appointment_set", "nurture", "escalated"]);
 
 function text(value: unknown): string | null {
+  if (value instanceof Date) return Number.isFinite(value.getTime()) ? value.toISOString() : null;
   if (typeof value !== "string") return null;
   const cleaned = value.trim();
   return cleaned || null;

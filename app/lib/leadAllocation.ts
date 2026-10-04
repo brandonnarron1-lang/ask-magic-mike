@@ -95,7 +95,7 @@ export async function processEnrolledStaffCommand(sql: AllocationQuery, input: {
   if (["pause","resume","stop"].includes(command.action)) {
     const hash = createHash("sha256").update(`${fingerprint}:${command.action}`).digest("hex");
     const rows = await sql.query(`WITH receipt AS (INSERT INTO public.lead_allocation_command_receipts(receipt_key,actor_user_id,request_hash,result)
-      VALUES($1,$2,$3,jsonb_build_object('ok',true,'action',$4)) ON CONFLICT DO NOTHING RETURNING receipt_key),
+      VALUES($1,$2,$3,jsonb_build_object('ok',true,'action',$4::text)) ON CONFLICT DO NOTHING RETURNING receipt_key),
       changed AS (UPDATE public.agent_operational_enrollment SET paused=($4<>'resume'),
         revoked_at=CASE WHEN $4='stop' THEN now() ELSE revoked_at END,updated_at=now()
         WHERE agent_id=$5::uuid AND EXISTS(SELECT 1 FROM receipt) RETURNING agent_id),

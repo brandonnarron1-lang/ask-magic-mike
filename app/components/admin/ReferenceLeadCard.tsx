@@ -20,7 +20,7 @@ export function ReferenceLeadCard({ view, preview = false }: { view: LeadPresent
         <div className="flex min-w-0 items-start gap-2"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[#D9AF52]/60 bg-[#080A0B]"><UserRound size={20} aria-hidden="true" /></span><div className="min-w-0"><h3 className="break-words text-base font-semibold">{view.identity?.name || "Identity protected"}</h3><p className="mt-1 break-words text-sm text-[#D9CEB8]">{view.location}</p></div></div>
         <div className="rounded-lg border border-[#D9AF52]/45 bg-[#080A0B] px-3 py-2 text-right"><p className="text-xs font-bold tracking-wider" style={{ color: view.priority === "HOT" ? "#FF8794" : "#D9AF52" }}>{view.priority}</p><p className="mt-1 font-mono text-2xl">{view.score ?? "—"}</p></div>
       </div>
-      <p className="break-words text-sm leading-5 text-[#D9CEB8]">{view.identity?.question || "Identity and property details unlock only after authorized assignment."}</p>
+      <p className="break-words text-sm leading-5 text-[#D9CEB8]">{view.identity ? view.identity.question || "Original question not recorded." : "Identity and property details unlock only after authorized assignment."}</p>
       <dl className="grid grid-cols-2 gap-3 rounded-xl border border-[#D9AF52]/25 bg-[#080A0B] p-3">
         {[ ["Source", view.source], ["Timeline", view.timeline], ["Budget / value", view.budget], ["Financing", view.financing] ].map(([label, value]) => <div key={label} className="min-w-0"><dt className="text-xs uppercase tracking-wide text-[#D9AF52]">{label}</dt><dd className="mt-1 break-words text-sm leading-5">{value}</dd></div>)}
       </dl>

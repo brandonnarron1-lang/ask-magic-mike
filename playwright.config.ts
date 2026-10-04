@@ -2,7 +2,10 @@ import { defineConfig, devices } from "@playwright/test";
 
 const PREVIEW_URL = process.env.PREVIEW_URL?.replace(/\/$/, "") ?? "";
 const LOCAL_E2E_PORT = process.env.AMM_E2E_PORT ?? "3210";
-const LOCAL_E2E_URL = `http://127.0.0.1:${LOCAL_E2E_PORT}`;
+// NextURL canonicalizes loopback IPs to localhost. Use its canonical host for
+// the isolated real-session suite so real Origin/CSRF checks remain intact.
+const LOCAL_E2E_HOST = process.env.AMM_ISOLATED_SESSION_ACCEPTANCE === "1" ? "localhost" : "127.0.0.1";
+const LOCAL_E2E_URL = `http://${LOCAL_E2E_HOST}:${LOCAL_E2E_PORT}`;
 const BUILT_E2E = process.env.AMM_E2E_BUILT === "1";
 
 export default defineConfig({

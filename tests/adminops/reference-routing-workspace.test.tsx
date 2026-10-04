@@ -5,9 +5,26 @@ import { allocationWorkspaceFixture } from "../../app/lib/leadPresentationFixtur
 import { ALLOCATION_FILTERS,EMPTY_ALLOCATION_FILTERS,matchesAllocationFilters,allocationPriority } from "../../app/lib/allocationWorkspaceFilters";
 import { normalizeAdminLeadRow } from "../../app/lib/persistence/supabase/adminLeadView";
 import { presentLead } from "../../app/lib/leadPresentation";
+import { ReferenceLeadCard } from "../../app/components/admin/ReferenceLeadCard";
+import { leadCardFixture } from "../../app/lib/leadPresentationFixtures";
 import { normalizeAppointment,normalizeTask } from "../../app/lib/persistence/supabase/adminAppointmentFollowupOps";
 
 describe("routing workspace and persisted checklist — no send",()=>{
+ it("preserves native driver dates while retaining the exact text CAS version",()=>{
+  const at=new Date("2026-10-04T22:00:00.123Z"),version="2026-10-04 22:00:00.123456+00";
+  const task=normalizeTask({id:"synthetic-task",title:"DO NOT CONTACT",due_at:at,created_at:at,updated_at:version});
+  expect(task).toMatchObject({due_at:at.toISOString(),created_at:at.toISOString(),updated_at:version});
+  expect(normalizeTask({id:"synthetic-task",title:"DO NOT CONTACT",due_at:new Date("invalid")})?.due_at).toBeNull();
+  expect(normalizeAppointment({id:"synthetic-appointment",lead_id:"synthetic-lead",status:"requested",requested_at:at,updated_at:version})).toMatchObject({requested_at:at.toISOString(),updated_at:version});
+ });
+ it("distinguishes an absent question from protected pre-claim identity",()=>{
+  const assigned=leadCardFixture({subtype:"buyer",tier:"assigned",state:"accepted",score:80,isTest:true});
+  assigned.identity!.question=null;
+  expect(renderToStaticMarkup(<ReferenceLeadCard view={assigned}/>)).toContain("Original question not recorded.");
+  expect(renderToStaticMarkup(<ReferenceLeadCard view={assigned}/>)).not.toContain("Identity and property details unlock");
+  const protectedView=leadCardFixture({subtype:"buyer",tier:"pre_claim",state:"offered",score:80,isTest:true});
+  expect(renderToStaticMarkup(<ReferenceLeadCard view={protectedView}/>)).toContain("Identity and property details unlock");
+ });
  it("offers all seven operational filters and keeps synthetic mutations disabled",()=>{
   const html=renderToStaticMarkup(<AllocationWorkspace state={allocationWorkspaceFixture} preview/>);
   expect(html.match(/<select/g)).toHaveLength(7);expect(html).toContain("Provider acceptance is not human contact");

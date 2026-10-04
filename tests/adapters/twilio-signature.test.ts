@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createHmac } from "node:crypto";
+import twilio from "twilio";
 import {
   computeTwilioSignature,
   verifyTwilioSignature,
@@ -15,6 +16,15 @@ function sign(url: string, params: Record<string, string> = {}): string {
 }
 
 describe("computeTwilioSignature", () => {
+  it("matches the official SDK for exact URL/query/Unicode/form parameters",()=>{
+    const url="https://www.askmagicmike.com/api/webhooks/sms/inbound?scope=staff%20v1";
+    const params={Body:"HELP café + &",From:"+12025550111",To:"+12025550100",AccountSid:`AC${"a".repeat(32)}`,MessageSid:`SM${"b".repeat(32)}`};
+    const signature=twilio.getExpectedTwilioSignature(TOKEN,url,params);
+    expect(computeTwilioSignature({url,authToken:TOKEN,formParams:params})).toBe(signature);
+    expect(twilio.validateRequest(TOKEN,signature,url,params)).toBe(true);
+    expect(verifyTwilioSignature({url,authToken:TOKEN,formParams:params,providedSignature:signature}).ok).toBe(true);
+    expect(verifyTwilioSignature({url:url.replace("scope=staff%20v1","scope=other"),authToken:TOKEN,formParams:params,providedSignature:signature}).ok).toBe(false);
+  });
   it("matches the documented Twilio algorithm for URL-only requests", () => {
     const sig = computeTwilioSignature({ url: URL_BASE, authToken: TOKEN });
     expect(sig).toBe(sign(URL_BASE));

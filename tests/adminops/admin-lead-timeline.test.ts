@@ -10,6 +10,10 @@ import {
 } from "../../app/lib/adminLeadTimeline";
 
 describe("AdminOps lead timeline", () => {
+  it("retains native PostgreSQL timestamps rather than showing Unknown activity",()=>{
+    const at=new Date("2026-10-04T22:00:00.123Z");
+    expect(normalizeAuditTimelineEvent({id:"isolated-date",action:"lead.lifecycle_changed",created_at:at,after_state:{status:"new"}})).toMatchObject({occurred_at:at.toISOString(),recorded_at:at.toISOString()});
+  });
   it("renders canonical QA suppression evidence with a stable protected timeline identity", () => {
     const result = normalizeAuditTimelineEvent({ id: "qa-audit", action: "lead.qa_suppressed", actor: "system/public_lead_capture", after_state: { is_test: true, email: "private@example.test" }, metadata: { raw_provider_payload: "never render" } });
     expect(result).toMatchObject({ id: "audit:qa-audit", event_type: "lead.qa_suppressed", snapshot: false, label: "QA capture suppressed", actor: "system/public_lead_capture" });
