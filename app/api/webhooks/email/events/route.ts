@@ -160,6 +160,7 @@ async function recordResendEventAtomically(input: {
           AND notification.provider_message_id = $2
         ORDER BY notification.created_at DESC, notification.id
         LIMIT 1
+        FOR UPDATE OF notification
      ),
      claimed_webhook AS (
        INSERT INTO public.provider_webhook_events AS receipt
@@ -186,6 +187,7 @@ async function recordResendEventAtomically(input: {
              processed_at = now(),
              metadata = EXCLUDED.metadata
        WHERE receipt.processing_status = 'failed'
+         AND receipt.payload_hash = EXCLUDED.payload_hash
        RETURNING receipt.id, receipt.processing_status, receipt.payload_hash
      ),
      matched_notification AS (
@@ -195,22 +197,34 @@ async function recordResendEventAtomically(input: {
      ),
      notification_update AS (
        UPDATE public.lead_notifications AS notification
-          SET status = CASE WHEN $6::boolean THEN 'permanently_failed' ELSE notification.status END,
-              error_code = CASE WHEN $6::boolean THEN $7 ELSE notification.error_code END,
+          SET status = CASE
+                WHEN $6::boolean THEN 'permanently_failed'
+                WHEN $8::boolean AND notification.error_code = 'resend_failed' THEN 'sent'
+                ELSE notification.status END,
+              error_code = CASE
+                WHEN notification.error_code IN ('resend_bounced','resend_complained','resend_suppressed') THEN notification.error_code
+                WHEN $6::boolean THEN $7
+                WHEN $8::boolean AND notification.error_code = 'resend_failed' THEN NULL
+                ELSE notification.error_code END,
               error_summary = CASE
                 WHEN $6::boolean THEN 'Provider lifecycle event requires review.'
+                WHEN $8::boolean AND notification.error_code = 'resend_failed' THEN NULL
                 ELSE notification.error_summary
               END,
               failed_at = CASE
                 WHEN $6::boolean THEN COALESCE(notification.failed_at, now())
+                WHEN $8::boolean AND notification.error_code = 'resend_failed' THEN NULL
                 ELSE notification.failed_at
               END,
               sent_at = CASE
                 WHEN $8::boolean THEN COALESCE(notification.sent_at, $5::timestamptz, now())
                 ELSE notification.sent_at
               END,
+              next_attempt_at = CASE WHEN $6::boolean OR $8::boolean THEN NULL ELSE notification.next_attempt_at END,
               updated_at = now(),
               metadata = COALESCE(notification.metadata, '{}'::jsonb) || $9::jsonb
+                || CASE WHEN $8::boolean AND notification.error_code = 'resend_failed'
+                     THEN jsonb_build_object('provider_terminal_failure', false) ELSE '{}'::jsonb END
          FROM matched_notification AS matched
         WHERE notification.id = matched.id
           AND (matched.previous_event_at IS NULL OR matched.previous_event_at <= $5::timestamptz)

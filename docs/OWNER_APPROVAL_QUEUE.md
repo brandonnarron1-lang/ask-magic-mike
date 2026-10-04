@@ -11,6 +11,16 @@ queue covers only actions that still require a human or external-system gate.
 
 ## Historical Phase E status — accepted; gates consumed
 
+Post-286 continuation (2026-10-03): the accepted P0 repair is not reopened.
+A fresh Home Value public acceptance needs a separate one-submission gate;
+the historical Phase E QA approval below remains consumed. Scope and the local
+PR #279 successor are in
+[`POST_286_NOTIFICATION_RELIABILITY_2026-10-03.md`](phase9/POST_286_NOTIFICATION_RELIABILITY_2026-10-03.md).
+The proposed fresh QA gate is
+`APPROVE POST-286 ONE HOME VALUE QA ACCEPTANCE AND INTERNAL TEST EMAIL/BCC`.
+Migration/application release and retry/send activation remain distinct; no
+retry schedule or external mutation is authorized by candidate preparation.
+
 - PR [#281](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/281)
   is merged as `a3a0c235decab5a8e9209d983358d200a36ca979`, tree
   `7c8b8395e3cbf4b31b81d52b05add21894f0911e`, and accepted on Ready Vercel

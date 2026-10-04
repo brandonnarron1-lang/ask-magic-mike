@@ -39,7 +39,7 @@ export async function loadNeonAdminTodayQueue(
       `SELECT l.id, l.created_at, l.updated_at, l.status, l.score, l.lead_grade,
               l.is_test, l.communication_suppressed, l.assigned_agent_id,
               l.assigned_at, l.last_contacted_at, l.next_follow_up_at,
-              l.address_raw, l.first_name, l.last_name, l.name,
+              l.address_raw, l.first_name, l.last_name,
               aa.id AS assignment_id, aa.status AS assignment_status,
               rm.first_human_response_at
          FROM public.leads l
@@ -80,10 +80,10 @@ export async function loadNeonAdminTodayQueue(
       ),
       sql.query(
         `SELECT n.id, n.lead_id, n.agent_id, n.status, n.next_attempt_at,
-                n.created_at, n.updated_at
+                n.created_at, n.updated_at, n.attempt_count, n.provider_message_id
            FROM public.lead_notifications n
           WHERE n.lead_id = ANY($1::uuid[])
-            AND n.status IN ('failed','retry_scheduled','permanently_failed')
+            AND n.status IN ('failed','retry_scheduled','permanently_failed','pending','processing')
           ORDER BY n.updated_at DESC, n.id LIMIT 1000`,
         [leadIds],
       ),

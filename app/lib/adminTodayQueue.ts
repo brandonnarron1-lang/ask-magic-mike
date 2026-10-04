@@ -3,6 +3,7 @@ import type {
   AdminFollowupTaskRow,
 } from "./adminAppointmentFollowupOps";
 import type { LeadCenterPermission } from "../../src/lib/admin/rbac-policy";
+import { NOTIFICATION_PENDING_STALE_MINUTES, NOTIFICATION_PROCESSING_STALE_MINUTES } from "./leadNotificationRetryPolicy";
 
 export const TODAY_PRIORITY_BUCKETS = [
   "unassigned_exception",
@@ -34,6 +35,8 @@ export type TodayReasonCode =
   | "appointment_today"
   | "appointment_unscheduled"
   | "notification_failed"
+  | "notification_pending_stale"
+  | "notification_provider_reconciliation"
   | "active_lead"
   | "new_lead";
 
@@ -320,15 +323,20 @@ export function buildAdminTodayQueue(input: {
     const leadId = text(notification.lead_id);
     const lead = leadId ? leadMap.get(leadId) : null;
     const status = text(notification.status);
-    if (!leadId || !lead || !["failed", "retry_scheduled", "permanently_failed"].includes(status || "")) continue;
+    const stalePending = status === "pending" && time(text(notification.created_at)) <= nowMs - NOTIFICATION_PENDING_STALE_MINUTES * 60_000;
+    const ambiguous = (status === "processing" && time(text(notification.updated_at)) <= nowMs - NOTIFICATION_PROCESSING_STALE_MINUTES * 60_000)
+      || (stalePending && (number(notification.attempt_count) !== 0 || Boolean(text(notification.provider_message_id))));
+    if (!leadId || !lead || (!stalePending && !ambiguous && !["failed", "retry_scheduled", "permanently_failed"].includes(status || ""))) continue;
     const notificationId = text(notification.id) || leadId;
     add({
       actionKey: `notification:${notificationId}`, leadId, taskId: null, appointmentId: null, notificationId,
       assignedAgentId: text(lead.assigned_agent_id), leadLabel: leadName(lead), actionKind: "review_notification",
       priorityBucket: "notification_failure", dueAt: text(notification.next_attempt_at) || text(notification.updated_at), timezone,
-      reasonCodes: ["notification_failed"], evidenceReferences: [`notification:${notificationId}`], blockers: [],
+      reasonCodes: [ambiguous ? "notification_provider_reconciliation" : stalePending ? "notification_pending_stale" : "notification_failed"], evidenceReferences: [`notification:${notificationId}`], blockers: [],
       requiredPermission: "notification:manage", recordVersion: text(notification.updated_at) || text(notification.created_at) || "unknown",
-      recommendedAction: "Inspect provider evidence and retry policy before intervention.",
+      recommendedAction: ambiguous ? "Reconcile provider history before intervention; do not resend an ambiguous delivery."
+        : stalePending ? "Inspect the never-claimed intent and delivery configuration; scheduled recovery is not activated."
+        : "Inspect provider evidence and retry policy before intervention.",
     });
   }
 

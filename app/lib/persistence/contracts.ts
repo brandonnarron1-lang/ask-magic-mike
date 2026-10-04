@@ -8,6 +8,8 @@ export type LeadLifecycleCapture = {
   lead: Record<string, unknown>;
   attribution: Record<string, unknown>;
   notificationMode: "disabled" | "console" | "sandbox" | "production";
+  /** Present only for canonical public v2; omitted compatibility callers keep v1. */
+  internalNotification?: { templateVersion: string; metadata: Record<string, unknown> };
 };
 
 export type LeadLifecycleEnrichment = {

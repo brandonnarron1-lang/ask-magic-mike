@@ -6,6 +6,7 @@ import type {
   LeadNotificationRecord,
   LeadNotificationRepository,
 } from "../leadNotificationTypes";
+import { NOTIFICATION_PENDING_STALE_MINUTES } from "../leadNotificationRetryPolicy";
 import {
   normalizeAssignmentAgentRow,
   normalizeAssignmentLeadRow,
@@ -89,7 +90,7 @@ export class NeonLeadNotificationRepository implements LeadNotificationRepositor
     return row((rows as unknown[])[0]);
   }
 
-  async claimForProcessing(id: string, patch: Partial<LeadNotificationRecord>) {
+  async claimForProcessing(id: string, patch: Partial<LeadNotificationRecord>, options: { allowInitialInternalQa?: boolean } = {}) {
     const entries = Object.entries(patch).filter(([key]) => PATCH_COLUMNS.has(key));
     if (!entries.length) return null;
     const values: unknown[] = [];
@@ -101,8 +102,21 @@ export class NeonLeadNotificationRepository implements LeadNotificationRepositor
     const rows = await this.sql.query(
       `UPDATE public.lead_notifications SET ${assignments.join(", ")}
        WHERE id = $${values.length}::uuid
-         AND status IN ('pending', 'failed', 'retry_scheduled') RETURNING *`,
-      values,
+         AND status IN ('pending', 'failed', 'retry_scheduled')
+         AND attempt_count < max_attempts
+         AND provider_message_id IS NULL
+         AND (status <> 'pending' OR attempt_count = 0)
+         AND (status = 'pending' OR next_attempt_at <= now())
+         AND NOT EXISTS (
+           SELECT 1 FROM public.leads l WHERE l.id=lead_notifications.lead_id
+             AND (COALESCE(l.is_test,false) OR COALESCE(l.communication_suppressed,false)
+               OR COALESCE(l.email_suppressed,false) OR COALESCE(l.sms_suppressed,false))
+             AND NOT (lead_notifications.notification_type='lead_alert'
+               AND lead_notifications.channel='email' AND l.is_test=true
+               AND lead_notifications.status='pending' AND lead_notifications.attempt_count=0
+               AND $${values.length + 1}::boolean)
+         ) RETURNING *`,
+      [...values, options.allowInitialInternalQa === true],
     );
     return row((rows as unknown[])[0]);
   }
@@ -134,10 +148,34 @@ export class NeonLeadNotificationRepository implements LeadNotificationRepositor
 
   async listRetryable(limit = 25, now = new Date()) {
     const rows = await this.sql.query(
-      `SELECT * FROM public.lead_notifications
-       WHERE status IN ('failed', 'retry_scheduled') AND next_attempt_at <= $1::timestamptz
-       ORDER BY next_attempt_at ASC LIMIT $2`,
-      [now.toISOString(), Math.max(1, Math.min(limit, 50))],
+      `SELECT n.*, l.is_test AS lead_is_test
+         FROM public.lead_notifications n
+         LEFT JOIN public.leads l ON l.id = n.lead_id
+        WHERE (
+          (
+            n.status IN ('failed', 'retry_scheduled')
+            AND n.next_attempt_at <= $1::timestamptz
+          )
+          OR (
+            n.status = 'pending'
+            AND n.attempt_count = 0
+            AND n.created_at <= $1::timestamptz
+              - make_interval(mins => $2::int)
+          )
+        )
+          AND n.attempt_count < n.max_attempts
+          AND n.provider_message_id IS NULL
+          AND l.is_test = false AND l.communication_suppressed = false
+          AND l.email_suppressed = false AND l.sms_suppressed = false
+        ORDER BY
+          CASE WHEN n.status = 'pending' THEN n.created_at ELSE n.next_attempt_at END ASC,
+          n.created_at ASC
+        LIMIT $3`,
+      [
+        now.toISOString(),
+        NOTIFICATION_PENDING_STALE_MINUTES,
+        Math.max(1, Math.min(limit, 50)),
+      ],
     );
     return (rows as unknown[]).map(row).filter((value): value is LeadNotificationRecord => Boolean(value));
   }

@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 // No URL, credentials, exposed port, network, remote link or provider required.
 export const container = `amm-qa-audit-${randomUUID()}`;
 export const migration = "20261003203000_atomic_qa_capture_evidence.sql";
+export const reliabilityMigration = "20261004020000_public_lead_notification_reliability.sql";
 export const acceptedMigration = "20260716043829_infra_02_atomic_lifecycle.sql";
 export const database = "amm_qa_upgrade";
 export const statements: Array<{ sql: string; params: unknown[] }> = [];
@@ -27,10 +28,36 @@ export function bind(sql: string, params: unknown[] = []): string {
   return sql.replace(/\$(\d+)\b/g, (_, index: string) => literal(params[Number(index) - 1]));
 }
 
+// Data-modifying WITH statements must remain top-level. psql CSV lets the
+// actual webhook transaction execute intact instead of wrapping/mocking it.
+function topLevelRows(sql: string): Array<Record<string, unknown>> {
+  const output = execFileSync("docker", ["exec", "-i", container, "psql", "-X", "-U", "postgres", "-d", database,
+    "-v", "ON_ERROR_STOP=1", "--csv", "-q"], { input: `SET ROLE service_role; ${sql};`, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] });
+  const records: string[][] = []; let record: string[] = []; let field = ""; let quoted = false;
+  for (let i = 0; i < output.length; i++) {
+    const c = output[i];
+    if (c === '"') {
+      if (quoted && output[i + 1] === '"') { field += '"'; i++; } else quoted = !quoted;
+    } else if (!quoted && (c === "," || c === "\n")) {
+      record.push(field); field = "";
+      if (c === "\n") { records.push(record); record = []; }
+    } else field += c;
+  }
+  if (field || record.length) { record.push(field); records.push(record); }
+  const [columns, ...rows] = records;
+  return rows.filter((row) => row.length === columns.length).map((row) => Object.fromEntries(columns.map((column, index) => {
+    const value = row[index];
+    const typed = value === "t" ? true : value === "f" ? false : value === "" ? null
+      : /^-?\d+$/.test(value) ? Number(value) : value;
+    return [column, typed];
+  })));
+}
+
 export const localQuery = {
   async query(sql: string, params: unknown[] = []): Promise<Array<Record<string, unknown>>> {
     statements.push({ sql, params });
     const bound = bind(sql.replace(/;\s*$/, ""), params);
+    if (/^\s*WITH\b/i.test(bound) && /\b(INSERT|UPDATE|DELETE)\b/i.test(bound)) return topLevelRows(bound);
     const write = /^\s*(INSERT|UPDATE|DELETE)\b/i.test(bound);
     if (write && !/\bRETURNING\b/i.test(bound)) {
       psql(`SET ROLE service_role; ${bound};`);
@@ -83,6 +110,7 @@ export function install(db: "amm_qa_upgrade" | "amm_qa_fresh", includeRepair: bo
   psql("CREATE SCHEMA extensions; CREATE EXTENSION pgcrypto WITH SCHEMA extensions;", db);
   for (const file of readdirSync("supabase/migrations").filter((file) => file.endsWith(".sql")).sort()) {
     if (!includeRepair && file === migration) continue;
+    if (!includeRepair && file === reliabilityMigration) continue;
     psql(readFileSync(`supabase/migrations/${file}`, "utf8"), db);
   }
   // Emulate server-role table access; browser roles receive no table grants.
