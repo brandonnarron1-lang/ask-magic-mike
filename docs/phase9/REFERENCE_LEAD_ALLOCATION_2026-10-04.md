@@ -295,7 +295,7 @@ Hosted current-head CI/Preview are recorded in the frozen PR receipt separately.
 | P0 existing capture/QA/email | VERIFIED LIVE | Accepted #287 receipt; earlier provider delivery proof, independent primary/BCC mailbox receipt still unverified | Preserve; do not repeat lead/send or permanent failures | Release operator; accepted receipt unchanged; Production |
 | P0 #288 real auth/HTTP | TEST-PROVEN | Eight built real-session/SQL tests; STOP/date/version defects fixed; hosted exact-head checks pending seal | Run complete final gates/CI/Preview | Engineering; all checks on same reviewed tree; isolated/Preview only |
 | P1 #288 disabled release | EXTERNAL GATE | One additive migration; no live apply/merge/deploy authority yet | Exact-source approval phrase below, then one migration and accepted Git-source deployment | Owner/release operator; flags held, policy inactive, budgets0, MMSoff |
-| P1 scheduler | IMPLEMENTED | Protected bounded processor exists, NO installed cadence/lease acceptance | Separate small successor; measure five-intent throughput and protected60s lease/jitter/restart | Engineering then owner; no due/retry Production probe |
+| P1 scheduler | IMPLEMENTED | Separate successor:90s durable token lease,60s duplicate hold,45s function ceiling, five-intent batch, overload discovery hold with continuing expiry cleanup; NO installed cadence | Finish successor SQL/restart/restore/full gates, then review separately | Engineering then owner; no due/retry Production probe |
 | P1 Twilio/channel | EXTERNAL GATE | Console is at login; actual account, sender, registration, costs unverified | Owner sign-in then read-only account inspection; combined sender/setup decision | Owner; no purchase/config/send authority |
 | P1 HELP/STATUS handset | FAILED | Deterministic application result has no handset reply | Reviewed budgeted existing-outbox or verified provider-response successor; avoid duplicate opt-out replies | Engineering/provider owner; staff pilot verifies visible response |
 | P1 staff pilot / roster | EXTERNAL GATE | No human enrollment/device or real two-agent proof this session | Approved participants, legitimate own logins, purpose consent/VERIFY, finite segments/cost/stop matrix | Owner + participating agents; carrier/device/claim tiers distinct |
@@ -305,7 +305,7 @@ Hosted current-head CI/Preview are recorded in the frozen PR receipt separately.
 | P2 conversion / nurture | TEST-PROVEN | Existing appointment-request/review-only workflow and consent regression suites; no live calendar/automation acceptance | Preserve truthful request; review stopping events/quiet-hours before separate activation | Operator/BIC; not a confirmed booking or permission to message |
 | P2 AI / licensed data | UNVERIFIED | Existing GPT-6 Luna review-only adapter; current official model docs checked; account access, paid outputs/feed rights unproven | Redacted rubric + approved evaluation budget, broker/data-rights review | Owner/BIC; no model switch/spend, invented MLS/value or autonomous sends |
 | P2 reporting/performance | TEST-PROVEN | Five role-scoped built views,300-lead/1,500-audit fixture within local budgets; no production conversion claims | Hosted/network cohort proof and genuine source-to-outcome events | Engineering/operator; clicks/delivery/contact/booking/outcome remain distinct |
-| P1 operator / restore | UNVERIFIED | Synthetic role acceptance is not Mike/roster acceptance; no live restore rehearsal | Own-login operator checklist; existing secure backup to isolated destination under data scope | Owner/operator; preserve accepted assignments/audit/STOP on rollback |
+| P1 operator / restore | UNVERIFIED | Synthetic role acceptance is not Mike/roster acceptance; synthetic-only pg_dump/restore tested, live secure backup/restore remains unverified | Own-login operator checklist; existing secure backup to isolated destination under data scope | Owner/operator; preserve accepted assignments/audit/STOP on rollback |
 | P3 expansion | DEFERRED EXPANSION | Native sources/calendar, reactivation, homeowner updates, licensed search, campaign packets, voice notes, source-to-close coaching | Begin one actually used integration only after core dispatch acceptance | Product owner; not a hidden launch prerequisite |
 
 Next unmet application gate (NOT approved):
@@ -314,3 +314,58 @@ It excludes provider setup, staff pilot, policy/roster, cadence activation, spen
 WordPress publication, consumer messages and general retry processing. Production
 rollback starts from accepted #287 `dpl_2bZJGzHEzrPLZa9qrueGDk38nMhY`, freshly
 re-resolved before release; keep additive schema and all accepted evidence.
+
+### Separate scheduler successor / operating boundary
+
+PR288 remains sealed separately. The successor adds ONE operational singleton
+lease (not another queue), an additive migration, and the existing protected
+due processor's lease/checkpoint wrapper. It does NOT modify `vercel.json`,
+install cadence, approve policy, enroll staff, or change environment values.
+`config/lead-allocation-cadence-readiness.json` is preparation, not activation.
+Authenticated read-only Vercel evidence:eyes-up-industries is active Pro;
+official [cron usage](https://vercel.com/docs/cron-jobs/usage-and-pricing)
+permits per-minute scheduling; function usage still has costs. Ninety-second
+crash lease plus a45s function ceiling can delay recovery to a later tick.
+Early/duplicate invocations inside60s are held; do not promise exact intervals.
+Record actual start gap/lateness and backlog age from DB-clock receipts.
+
+Five intents/tick is NOT five leads/minute. Synthetic actual processor fixtures
+include confirmations. Algebraic review bound:SMS-only offer+confirmation is
+two intents/lead; dual-channel is four, before escalation. Three dual-channel
+arrivals/minute demand12intents/minute versus a5maximum and accumulate70 over
+ten modeled minutes; not measured carrier throughput. Existing20sends/agent/day,
+paid budget, hours/capacity, Preview and suppression gates still apply. No
+expected live arrival volume has been approved. Above50pending or600s age,
+hold new discovery, clean expired offers boundedly, keep custodian ownership,
+and require operator review; never silently drain or widen retry eligibility.
+
+Fresh acquisition preparation:existing QR factory produced seller/buyer/renter
+SVG +224/448px PNGs; Apple Vision decoded6/6 actual images. Public `/go/qr-*`
+redirects307 to the exact owned tracked routes with UTMs. Local receipt/assets:
+`.amm-run/reference-session-acceptance/owned-qr/`. This is not print/device or
+publication acceptance. WordPress/public distribution remain separate holds.
+
+Daily operator procedure (not automated human acceptance):
+
+1. Resolve accepted release; review Today, unassigned/fallback, queue age,
+   ambiguous provider outcomes, permanent failures and consent holds read-only.
+2. Assigned agent uses own login:Claim/Pass, notes/task/next action, reviewed
+   draft, appointment *request*, evidenced human contact and verified outcome.
+   Delivery/clicks never count as contact or booking.
+3. On duplicate ownership, wrong recipient/suppression, budget breach or absent
+   fallback, use the separately authorized pause procedure. Preserve assignments,
+   audit, STOP/in-flight callbacks and ambiguous reservations; no blind resend.
+4. Review true source/cohort counts excluding QA/duplicate/suppressed/unknown;
+   no conversion/revenue assertions without sufficient genuine outcomes.
+
+Staff pilot remains held:actual participants/own-login consent and channel
+registration are not verified. Brandon audit does not create agent eligibility.
+Prepare SMS-first two-approved-agent matrix:up to16inbound messages and
+8outbound messages/24segments,0MMS; count automatic provider responses inside
+the ceiling. Current official [US pricing](https://www.twilio.com/en-us/sms/pricing/us)
+lists$0.0083base/SMS segment each direction:up to$0.332base plus carrier,
+number and registration charges; actual account/trial/pricing UNVERIFIED.
+No purchase/send authority. HELP/STATUS handset reply and a safe staff-only
+pilot capability must be proven before pilot; ordinary QA stays suppressed.
+Existing tested consumer automation remains held. AI is review-only, with no
+paid evaluation/account entitlement or licensed live MLS proof in this run.

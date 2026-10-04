@@ -67,6 +67,9 @@ jobs:
       - name: Isolated PostgreSQL reference allocation and no-send claims
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/reference-allocation-postgres.test.ts
 
+      - name: Isolated PostgreSQL scheduler lease, bounded processor and synthetic restore
+        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/allocation-scheduler-postgres.test.ts
+
       - name: Typecheck
         run: pnpm run typecheck
 

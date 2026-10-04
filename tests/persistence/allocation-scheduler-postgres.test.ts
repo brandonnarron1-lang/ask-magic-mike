@@ -5,11 +5,12 @@ import {execFileSync} from "node:child_process";
 import {afterAll,beforeAll,describe,expect,it,vi} from "vitest";
 import {container,concurrent,install,localQuery,psql,startDatabase,stopDatabase} from "../support/qa-audit-postgres";
 import {runAllocationScheduler} from "../../app/lib/leadAllocationScheduler";
+import {resolveAllocationOffer} from "../../app/lib/leadAllocation";
 const transport=vi.hoisted(()=>({send:vi.fn(async()=>({ok:true as const,provider:"synthetic-no-network",providerMessageId:`SYNTHETIC-${Math.random()}`}))}));
 vi.mock("../../app/lib/leadNotificationProvider",async original=>({...await original<typeof import("../../app/lib/leadNotificationProvider")>(),selectNotificationProvider:()=>({name:"synthetic-no-network",send:transport.send})}));
 
 describe.runIf(process.env.AMM_QA_POSTGRES_TEST==="1")("scheduler lease — actual isolated PostgreSQL, no-send",()=>{
- beforeAll(async()=>{await startDatabase();install("amm_qa_upgrade",true);vi.stubEnv("LEAD_ALLOCATION_ENABLED","true");vi.stubEnv("LEAD_ALLOCATION_DUE_ENABLED","true");vi.stubEnv("LEAD_ALLOCATION_SENDS_ENABLED","false");},120000);
+ beforeAll(async()=>{await startDatabase();install("amm_qa_upgrade",true);vi.stubEnv("LEAD_ALLOCATION_ENABLED","true");vi.stubEnv("LEAD_ALLOCATION_DUE_ENABLED","true");vi.stubEnv("LEAD_ALLOCATION_SENDS_ENABLED","false");vi.stubEnv("LEAD_ALLOCATION_COMMAND_SECRET","synthetic-scheduler-test-key-not-a-credential");},120000);
  afterAll(()=>{stopDatabase();vi.unstubAllEnvs();});
  const acquire=(token:string)=>`SET ROLE service_role; SELECT acquire_lead_allocation_scheduler_v1('${token}');`;
  it("inactive default policy does not acquire or write a lease",async()=>{
@@ -71,7 +72,9 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST==="1")("scheduler lease — actu
   }
   // Three accepted synthetic offers add real confirmation intents to the same
   // outbox. No real lead, provider, email address or device participates.
-  psql(`SELECT resolve_lead_allocation_offer_v1(id,version,'${user}','claim','synthetic:'||id,'synthetic-hash') FROM (SELECT * FROM lead_allocation_offers ORDER BY created_at LIMIT 3) o;`);
+  const offers=JSON.parse(psql("SELECT json_agg(o) FROM (SELECT id,version FROM lead_allocation_offers ORDER BY created_at LIMIT 3) o;")) as Array<{id:string;version:number}>;
+  for(const offer of offers)expect(await resolveAllocationOffer(localQuery,{offerId:offer.id,version:offer.version,userId:user,action:"claim",receipt:`synthetic:${offer.id}`})).toMatchObject({ok:true,state:"accepted"});
+  expect(psql("SELECT count(*) FROM lead_notifications WHERE notification_type='allocation_confirmation';")).toBe("3");
   const before=Number(psql("SELECT count(*) FROM lead_notifications WHERE status='pending';"));
   expect(before).toBe(13); // 3 accepted offer intents are correctly skipped
   vi.stubEnv("VERCEL_ENV","development");vi.stubEnv("LEAD_NOTIFICATION_MODE","production");vi.stubEnv("LEAD_NOTIFICATION_PRODUCTION_ENABLED","true");
@@ -92,7 +95,22 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST==="1")("scheduler lease — actu
   expect(transport.send).toHaveBeenCalledTimes(13);
   expect(psql("SELECT count(*) FROM lead_notifications WHERE notification_type='allocation_confirmation' AND status='sent';")).toBe("3");
   vi.stubEnv("LEAD_ALLOCATION_SENDS_ENABLED","false");
- });
+ },30000);
+ it("overload still expires stale intents and creates fallback tasks without discovering another lead",async()=>{
+  const lead=randomUUID(),session=randomUUID();
+  psql(`INSERT INTO sessions(id) VALUES('${session}'); INSERT INTO leads(id,session_id,first_name,lead_type,primary_intent,city,state,assigned_agent_id,assigned_at) VALUES('${lead}','${session}','SYNTHETIC OVERLOAD DO NOT CONTACT','buyer','buy','Wilson','NC','00000000-0000-4000-8000-000000009901',now());
+    UPDATE lead_allocation_offers SET deadline=now()-interval '1 second' WHERE state='offered';
+    INSERT INTO lead_notifications(lead_id,agent_id,notification_type,channel,recipient_type,template_version,idempotency_key,status,metadata,created_at)
+    SELECT o.lead_id,o.agent_id,'allocation_offer','email','agent','reference_cards_v1','synthetic-overload:'||i,'pending',jsonb_build_object('offer_id',o.id,'offer_version',o.version),now()-interval '11 minutes'
+    FROM (SELECT * FROM lead_allocation_offers WHERE state='offered' LIMIT 1) o CROSS JOIN generate_series(1,51) i;
+    UPDATE lead_allocation_scheduler_lease SET lease_until=NULL,last_started_at=now()-interval '61 seconds';`);
+  const result=await runAllocationScheduler(localQuery);
+  expect(result).toMatchObject({ok:true,overloaded:true,expiry:{discovery_held:true,first_offered:0},after:{pending:0}});
+  expect(psql(`SELECT count(*) FROM lead_allocation_offers WHERE lead_id='${lead}';`)).toBe("0");
+  expect(psql("SELECT count(*) FROM tasks WHERE category='allocation_fallback';")).toBe("10");
+  expect(psql("SELECT count(*) FROM lead_notifications WHERE idempotency_key LIKE 'synthetic-overload:%' AND status='skipped';")).toBe("51");
+  expect(transport.send).toHaveBeenCalledTimes(13); // no overload sends
+ },30000);
  it("synthetic-only pg_dump/restore roundtrip preserves rows, functions and denied browser ACLs",()=>{
   const dump=execFileSync("docker",["exec",container,"pg_dump","-U","postgres","-d","amm_qa_upgrade","-Fc"],{maxBuffer:32*1024*1024});
   execFileSync("docker",["exec","-i",container,"pg_restore","-U","postgres","-d","amm_qa_fresh","--exit-on-error"],{input:dump,stdio:["pipe","ignore","pipe"]});
