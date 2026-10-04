@@ -13,7 +13,7 @@ main is `4f00826043bbe2b2d13779fd143d28a66ff61158` (PR #287), tree
 `eddb7c08e930a0937af03eba574b4a0090759f6e`, Production
 `dpl_2bZJGzHEzrPLZa9qrueGDk38nMhY`. This session has not changed Production.
 
-This branch is `codex/reference-lead-allocation-20261004`. Accepted main was
+PR288's branch is `codex/reference-lead-allocation-20261004`. Accepted main was
 merged non-destructively; PR #288 now targets `main`. The rescue branch
 `rescue/amm-pr288-pre-master-acceptance-20261004-2230` preserves the prior head
 `35280b7bae317ab0c8fa7d751cc1dc09db5005f2`. #287 is accepted, not a pending gate.
@@ -295,7 +295,7 @@ Hosted current-head CI/Preview are recorded in the frozen PR receipt separately.
 | P0 existing capture/QA/email | VERIFIED LIVE | Accepted #287 receipt; earlier provider delivery proof, independent primary/BCC mailbox receipt still unverified | Preserve; do not repeat lead/send or permanent failures | Release operator; accepted receipt unchanged; Production |
 | P0 #288 real auth/HTTP | TEST-PROVEN | Eight built real-session/SQL tests; STOP/date/version defects fixed; hosted exact-head checks pending seal | Run complete final gates/CI/Preview | Engineering; all checks on same reviewed tree; isolated/Preview only |
 | P1 #288 disabled release | EXTERNAL GATE | One additive migration; no live apply/merge/deploy authority yet | Exact-source approval phrase below, then one migration and accepted Git-source deployment | Owner/release operator; flags held, policy inactive, budgets0, MMSoff |
-| P1 scheduler | IMPLEMENTED | Separate successor:90s durable token lease,60s duplicate hold,45s function ceiling, five-intent batch, overload discovery hold with continuing expiry cleanup; NO installed cadence | Finish successor SQL/restart/restore/full gates, then review separately | Engineering then owner; no due/retry Production probe |
+| P1 scheduler | TEST-PROVEN | Separate successor:90s durable token lease,60s duplicate hold,45s function ceiling, five-intent batch, overload discovery hold/expiry cleanup;9actual SQL tests; full local gate; NO installed cadence | Hosted successor gates/base acceptance, then review separately | Engineering then owner; no due/retry Production probe |
 | P1 Twilio/channel | EXTERNAL GATE | Console is at login; actual account, sender, registration, costs unverified | Owner sign-in then read-only account inspection; combined sender/setup decision | Owner; no purchase/config/send authority |
 | P1 HELP/STATUS handset | FAILED | Deterministic application result has no handset reply | Reviewed budgeted existing-outbox or verified provider-response successor; avoid duplicate opt-out replies | Engineering/provider owner; staff pilot verifies visible response |
 | P1 staff pilot / roster | EXTERNAL GATE | No human enrollment/device or real two-agent proof this session | Approved participants, legitimate own logins, purpose consent/VERIFY, finite segments/cost/stop matrix | Owner + participating agents; carrier/device/claim tiers distinct |
@@ -322,6 +322,24 @@ lease (not another queue), an additive migration, and the existing protected
 due processor's lease/checkpoint wrapper. It does NOT modify `vercel.json`,
 install cadence, approve policy, enroll staff, or change environment values.
 `config/lead-allocation-cadence-readiness.json` is preparation, not activation.
+Successor branch:`codex/allocation-scheduler-readiness-20261004`. It adds ONE
+migration relative to sealedPR288, TWO pending migrations relative to accepted
+PR287. Never apply the successor migration under PR288's one-migration gate.
+Source:`20261004233000_lead_allocation_scheduler_lease.sql`, SHA256
+`db4741b4472efc086e575353db6dd78ccac26944597fcb19ce2d359c00f0d480`.
+The predecessor expiry function becomes a compatibility wrapper around the
+same versioned implementation, with discovery explicitly held during overload;
+save existing function definitions/ACLs before any separately approved cutover.
+Fresh successor local gate:3,708unit pass/56skip,typecheck/lint/build/isolation/
+safety113route identities; real-session8/8. Nine real SQL tests cover lease
+race/restart/stale-token fence,cadence replay,no-send hold,downstream failure,
+browser ACL denial,13synthetic no-network dispatches across5/5/3batches including
+3confirmations,bounded expiry during overload,and synthetic pg_dump/restore.
+Final combined four-suite run57/57 passed in71.61s, including scheduler9/9.
+Fixture provider IDs are synthetic, not receipts.
+Restore compares row totals and actual catalog-function hashes in an isolated
+destination; no live PII/credential/backup was copied and Production restoration
+is not claimed. All disposable databases/containers were removed.
 Authenticated read-only Vercel evidence:eyes-up-industries is active Pro;
 official [cron usage](https://vercel.com/docs/cron-jobs/usage-and-pricing)
 permits per-minute scheduling; function usage still has costs. Ninety-second
