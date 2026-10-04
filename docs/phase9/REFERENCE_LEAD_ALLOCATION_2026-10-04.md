@@ -185,13 +185,18 @@ receipt holds exact head/tree, hosted status and measured command counts.
 Session evidence (not inherited): frozen install passed; final `release:gate`
 passed 3,688 unit tests / 46 skipped, typecheck, lint, build, isolation/safety
 and 113 active route identities. Three actual isolated PostgreSQL suites passed
-47/47 (57.70s) including a no-send accepted SMS and signed-bound CLAIM sharing
+47/47 (57.70s) including a no-send accepted SMS and enrolled-sender-bound CLAIM sharing
 one offer/assignment. Final built Chromium review passed 5/5 (8.8s), all four
 widths, six subtypes, assigned/pre-claim, keyboard and 200% text zoom. Read-only
 Production smoke passed 19 checks / 2 skipped: authenticated admin health and
 write mode were not run. Release doctor before freeze had one nonblocking dirty
 worktree finding; rerun after commit for the exact-head receipt. No synthetic
 record was written to Neon and no real provider message was sent.
+
+The positive PostgreSQL orchestrator test invokes the canonical enrolled-staff
+helper, not a carrier-originated signed HTTP request. Signature/account/SID
+validation is separately exercised in isolated webhook handler tests. Neither
+is a real handset proof. Final clean release doctor passes 58 / 0 fail / 1 skip.
 
 ## Rollback
 
