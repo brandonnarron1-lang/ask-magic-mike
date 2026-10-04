@@ -65,6 +65,16 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
 
   async captureLeadLifecycle(input: LeadLifecycleCapture): Promise<LeadLifecycleCaptureResult> {
     try {
+      if (input.internalNotification) {
+        const rows = await this.sql.query(
+          "SELECT public.capture_public_lead_v2($1::jsonb, $2::jsonb, $3::jsonb, $4::text, $5::jsonb) AS result",
+          [JSON.stringify(input.session), JSON.stringify(input.lead), JSON.stringify(input.attribution),
+            input.notificationMode, JSON.stringify({ template_version: input.internalNotification.templateVersion, metadata: input.internalNotification.metadata })],
+        ) as Array<Record<string, unknown>>;
+        const result = rows[0]?.result;
+        if (!result || typeof result !== "object" || Array.isArray(result)) throw new Error("capture_result_invalid");
+        return result as LeadLifecycleCaptureResult;
+      }
       const idempotencyKey = typeof input.lead.request_idempotency_key === "string"
         ? input.lead.request_idempotency_key.trim()
         : "";

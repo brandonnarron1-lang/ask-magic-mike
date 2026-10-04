@@ -43,7 +43,8 @@ function empty(configured: boolean, error?: string): AdminLeadNotificationSummar
 export function isNotificationRetryEligible(notification: LeadNotificationRecord) {
   return (
     ["failed", "retry_scheduled"].includes(notification.status) &&
-    notification.attempt_count < notification.max_attempts
+    notification.attempt_count < notification.max_attempts &&
+    !notification.provider_message_id && notification.lead_is_test !== true
   );
 }
 

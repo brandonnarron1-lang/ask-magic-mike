@@ -14,6 +14,8 @@ import {
 import { scoreLead } from "../../lib/leadScoring";
 import { routeLead } from "../../lib/leadRouting";
 import { enqueueLeadNotifications } from "../../lib/leadAlertService";
+import { LEAD_ALERT_TEMPLATE_VERSION } from "../../lib/leadAlertTemplates";
+import { notificationMode } from "../../lib/leadNotificationProvider";
 import { recordServerAnalyticsEvent } from "../../lib/serverAnalytics";
 import {
   resolvePublicExperimentLeadContext,
@@ -423,6 +425,7 @@ async function insertLead(
   req: Request,
   score: ReturnType<typeof scoreLead>,
   routing: ReturnType<typeof routeLead>,
+  correlationId: string,
 ) {
   const mutation = assertDatabaseMutationAllowed();
   if (!mutation.ok) throw new Error(mutation.error);
@@ -444,68 +447,17 @@ async function insertLead(
     session: buildSessionRow(payload, req, sessionId),
     lead: buildLeadRow(payload, req, sessionId, score, routing),
     attribution: buildSourceAttributionRow(payload, req),
-    // The public capture owns the single internal lead-alert outbox below.
-    // Disable the legacy assignment outbox here so a Mike assignment cannot
-    // create a duplicate email alongside the canonical alert.
-    notificationMode: "disabled",
+    // v2 disables legacy assignment delivery and atomically seeds the canonical
+    // internal intent. Dispatch below occurs only after this transaction commits.
+    notificationMode: process.env.NODE_ENV === "test" ? "disabled" : notificationMode(),
+    internalNotification: {
+      templateVersion: LEAD_ALERT_TEMPLATE_VERSION,
+      metadata: { source_label: routing.sourceLabel, intent_label: routing.intentLabel,
+        score: score.score, score_grade: score.grade, is_test: payload.is_test === true,
+        correlation_id: correlationId },
+    },
   });
-  if (process.env.NODE_ENV !== "test" && result.ok && !result.idempotent_replay && persistence.enrichLeadRecord) {
-    const consentEmail = consentGrantedForEmail(payload);
-    const consentCall = consentGrantedForCall(payload);
-    const consentSms = consentGrantedForSms(payload);
-    const collectedAt = payload.consent_timestamp || new Date().toISOString();
-    await persistence.enrichLeadRecord({
-      leadId: result.lead_id,
-      leadPatch: {
-        city: payload.city || null,
-        score: score.score,
-        score_factors: score.factors,
-        score_version: score.version,
-        is_test: payload.is_test === true,
-        consent_language_text: payload.consent_language_text || LEAD_CONSENT_LANGUAGE_TEXT,
-        consent_ip_hash: consentIpHash(req),
-        consent_source: payload.consent_source || payload.lead_source_surface,
-        consent_user_agent: req.headers.get("user-agent") || null,
-        communication_suppressed: payload.is_test === true,
-        email_suppressed: payload.is_test === true,
-        sms_suppressed: payload.is_test === true,
-        routing_reason: routing.routingReason,
-        target_geography: payload.target_geography || null,
-        financing: payload.financing || null,
-        preapproval: payload.preapproval ?? null,
-        request_idempotency_key: payload.idempotency_key || null,
-      },
-      attributionPatch: {
-        first_touch: payload.attribution.first_touch || null,
-        last_touch: payload.attribution.last_touch || payload.attribution,
-        click_ids: {
-          gclid: payload.attribution.gclid || null,
-          gbraid: payload.attribution.gbraid || null,
-          wbraid: payload.attribution.wbraid || null,
-          fbclid: payload.attribution.fbclid || null,
-          msclkid: payload.attribution.msclkid || null,
-        },
-        placement_id: payload.attribution.placement_id || payload.attribution.placement || null,
-        page_title: payload.attribution.page_title || null,
-        listing_id: payload.listing_id || payload.attribution.listing_id || null,
-        property_id: payload.property_id || payload.attribution.property_id || null,
-        agent_id: payload.agent_id || payload.attribution.agent_id || null,
-      },
-      consents: [
-        ["email", consentEmail],
-        ["call", consentCall],
-        ["sms", consentSms],
-      ].map(([type, granted]) => ({
-        lead_id: result.lead_id,
-        consent_type: type,
-        granted,
-        language_version: payload.consent_language_version || LEAD_CONSENT_LANGUAGE_VERSION,
-        language_text: payload.consent_language_text || LEAD_CONSENT_LANGUAGE_TEXT,
-        user_agent: req.headers.get("user-agent") || null,
-        collected_at: collectedAt,
-      })),
-    });
-  }
+  // v2 commits required enrichment, consent and internal intent with capture.
   return result;
 }
 
@@ -798,7 +750,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    persistedLead = await insertLead(payload, req, score, routing);
+    persistedLead = await insertLead(payload, req, score, routing, correlationId);
   } catch (error) {
     if (error instanceof Error && error.message === "preview_data_disabled") {
       return leadResponse(

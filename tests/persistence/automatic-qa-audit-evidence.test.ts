@@ -71,6 +71,7 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("automatic QA evidence:
     const before = counts();
     psql(repair);
     expect(counts()).toBe(before);
+    psql(readFileSync("supabase/migrations/20261004020000_public_lead_notification_reliability.sql", "utf8"));
     expect(psql(`SELECT count(*) FROM audit_logs WHERE resource_id=${literal(existing.lead_id)} AND action='lead.qa_suppressed';`)).toBe("0");
     // Preserve this fixture but make monitor tests scoped to newly captured QA.
     psql(`UPDATE source_attribution SET utm_source='internal_qa_fixture',utm_medium='qa' WHERE session_id=${literal(old.session.id)};`);
@@ -94,7 +95,7 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("automatic QA evidence:
     const result = await response.json();
     expect(response.status, JSON.stringify(result)).toBe(200);
     qaId = result.lead_id;
-    const captured = statements.filter((entry) => entry.sql.includes("capture_public_lead_v1(")).at(-1)!;
+    const captured = statements.filter((entry) => entry.sql.includes("capture_public_lead_v2(")).at(-1)!;
     const serverLead = JSON.parse(String(captured.params[1]));
     expect(serverLead.is_test).toBe(true);
     const row = (await localQuery.query("SELECT * FROM leads WHERE id=$1::uuid", [qaId]))[0];
@@ -158,7 +159,7 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("automatic QA evidence:
     const response = await POST(makeRequest());
     expect(response.status).toBe(200);
     const result = await response.json();
-    const capture = statements.filter((entry) => entry.sql.includes("capture_public_lead_v1(")).at(-1)!;
+    const capture = statements.filter((entry) => entry.sql.includes("capture_public_lead_v2(")).at(-1)!;
     expect(JSON.parse(String(capture.params[1]))).toMatchObject({ is_test: false, consent_sms: false, consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT });
     expect(psql(`SELECT count(*) FROM audit_logs WHERE resource_id=${literal(result.lead_id)} AND actor='forged';`)).toBe("0");
     const before = counts(); const calls = statements.length;
@@ -199,14 +200,19 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("automatic QA evidence:
     const { scoreLead } = await import("../../app/lib/leadScoring"); const { routeLead } = await import("../../app/lib/leadRouting");
     const payload = normalizeLeadPayload({ name: "INTERNAL QA — DO NOT CONTACT", email: "qa@example.test", funnel_type: "home_value", consent_email: true, city: "Synthetic QA", attribution: { source: "ourtownproperties", medium: "owned_media" } });
     const score = scoreLead(payload);
-    const input = { leadId: qaId, sessionId: randomUUID(), correlationId: randomUUID(), payload, score, routing: routeLead(payload, score.score), submittedAt: new Date().toISOString() };
+    // Compatibility proof for repaired v1 (no v2 intent). The successor suite
+    // exercises v2 and actual post-commit orchestration without unit-mode skips.
+    const captured = await adapter.captureLeadLifecycle(fixture());
+    if (!captured.ok) throw new Error("capture_failed");
+    const notificationLeadId = captured.lead_id;
+    const input = { leadId: notificationLeadId, sessionId: randomUUID(), correlationId: randomUUID(), payload, score, routing: routeLead(payload, score.score), submittedAt: new Date().toISOString() };
     const result = await enqueueLeadNotifications(input);
     expect(result.internal?.status).toBe("retry_scheduled"); expect(result.internal?.attempt_count).toBe(1);
     expect(result.consumer).toBeNull(); expect(result.sms).toEqual([]); expect(result.push).toEqual([]);
     expect(provider.send).toHaveBeenCalledTimes(1);
     await enqueueLeadNotifications(input); expect(provider.send).toHaveBeenCalledTimes(1);
-    expect(psql(`SELECT count(*) FROM lead_notifications WHERE lead_id=${literal(qaId)} AND notification_type='lead_alert';`)).toBe("1");
-    expect(psql(`SELECT count(*) FROM audit_logs WHERE resource_id=${literal(qaId)} AND action='lead.qa_suppressed';`)).toBe("1");
+    expect(psql(`SELECT count(*) FROM lead_notifications WHERE lead_id=${literal(notificationLeadId)} AND notification_type='lead_alert';`)).toBe("1");
+    expect(psql(`SELECT count(*) FROM audit_logs WHERE resource_id=${literal(notificationLeadId)} AND action='lead.qa_suppressed';`)).toBe("1");
     for (const purpose of MESSAGE_PURPOSES.filter((value) => !["internal_alert", "qa_test"].includes(value))) {
       for (const channel of ["email", "sms", "push", "phone"] as const) expect(decideCommunicationPermission({ channel, purpose, isTest: true, suppressed: true, autoSendEnabled: true, humanApproved: true }).allowed).toBe(false);
     }

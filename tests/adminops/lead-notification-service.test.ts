@@ -352,7 +352,7 @@ describe("LeadNotificationService", () => {
 
   it("prevents notifying the wrong agent after reassignment", async () => {
     const repo = new MemoryNotificationRepo();
-    const provider = new ConsoleNotificationProvider("success");
+    const provider = new ConsoleNotificationProvider("retryable_failure");
     const service = new LeadNotificationService(repo, provider);
     const created = await service.createAssignmentNotification(context());
     expect(created.ok).toBe(true);
@@ -368,6 +368,17 @@ describe("LeadNotificationService", () => {
     expect(retry.ok).toBe(true);
     expect(repo.rows[0].status).toBe("skipped");
     expect(repo.rows[0].error_code).toBe("assignment_changed");
+  });
+
+  it("requires reconciliation instead of resending a failed row carrying an accepted provider ID", async () => {
+    const repo = new MemoryNotificationRepo();
+    const provider = new ConsoleNotificationProvider("success");
+    const service = new LeadNotificationService(repo, provider);
+    await service.createAssignmentNotification(context());
+    const spy = vi.spyOn(provider, "send");
+    repo.rows[0].status = "retry_scheduled";
+    expect(await service.processNotification(repo.rows[0].id, context())).toMatchObject({ ok: false, error: "provider_reconciliation_required" });
+    expect(spy).not.toHaveBeenCalled();
   });
 
   it("keeps customer notification activation disabled independently", async () => {

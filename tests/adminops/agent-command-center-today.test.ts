@@ -21,6 +21,21 @@ function lead(overrides: Record<string, unknown> = {}) {
 }
 
 describe("Agent Command Center Today projection", () => {
+  it("distinguishes never-claimed pending risk from ambiguous provider reconciliation without activating retries", () => {
+    const leadId = String(lead().id);
+    const result = buildAdminTodayQueue({ leads: [lead()], appointments: [], tasks: [], now: NOW,
+      notifications: [
+        { id: "pending", lead_id: leadId, status: "pending", attempt_count: 0, created_at: "2026-10-02T14:00:00Z" },
+        { id: "processing", lead_id: leadId, status: "processing", attempt_count: 1, updated_at: "2026-10-02T14:00:00Z" },
+        { id: "fresh", lead_id: leadId, status: "pending", attempt_count: 0, created_at: "2026-10-02T14:59:00Z" },
+        { id: "claimed-pending", lead_id: leadId, status: "pending", attempt_count: 1, created_at: "2026-10-02T14:00:00Z" },
+      ] });
+    const notifications = result.items.filter((item) => item.notificationId);
+    expect(notifications).toHaveLength(3);
+    expect(notifications.find((item) => item.notificationId === "pending")?.reasonCodes).toEqual(["notification_pending_stale"]);
+    expect(notifications.find((item) => item.notificationId === "processing")?.recommendedAction).toContain("do not resend");
+    expect(notifications.find((item) => item.notificationId === "claimed-pending")?.reasonCodes).toEqual(["notification_provider_reconciliation"]);
+  });
   it("excludes test records from work while reporting the exclusion", () => {
     const result = buildAdminTodayQueue({
       leads: [lead({ is_test: true })],

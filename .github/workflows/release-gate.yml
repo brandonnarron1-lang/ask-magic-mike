@@ -61,6 +61,9 @@ jobs:
       - name: Isolated PostgreSQL QA audit atomicity and replay
         run: pnpm run test:postgres:qa-audit
 
+      - name: Isolated PostgreSQL notification reliability and recovery
+        run: pnpm run test:postgres:notification-reliability
+
       - name: Typecheck
         run: pnpm run typecheck
 
