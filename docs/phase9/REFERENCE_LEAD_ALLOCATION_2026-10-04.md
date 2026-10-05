@@ -1,9 +1,10 @@
 # Reference lead allocation — operator / release guide
 
-Current status (2026-10-05): #288 accepted; #289 reconciled/test-proven but
-release held; separate staff-pilot command readiness candidate, not activation.
+Current status (2026-10-05): #289 accepted; #290 forward-reconciled onto that
+accepted main; staff-pilot command readiness remains a disabled candidate,
+not a Production release or pilot activation.
 The dated review history below remains evidence of earlier states. The
-Post-288 reconciliation section supersedes its pending-release statements.
+Post-289 reconciliation below supersedes earlier pending-release statements.
 Work only in Ask Magic Mike. Neon, Vercel, the approved email provider, directory,
 canonical intake, lead/contact records, tasks, assignments, audit and notification
 outbox remain the authorities. No WordPress/connector, NellySelly or PropertyLens
@@ -295,11 +296,12 @@ Hosted current-head CI/Preview are recorded in the frozen PR receipt separately.
 
 | Priority / track | State | Evidence / exact gap | Dependency and next action | Owner / acceptance / scope |
 | --- | --- | --- | --- | --- |
-| P0 existing capture/QA/email | VERIFIED LIVE | Accepted #287 receipt; earlier provider delivery proof, independent primary/BCC mailbox receipt still unverified | Preserve; do not repeat lead/send or permanent failures | Release operator; accepted receipt unchanged; Production |
+| P0 existing capture/QA/email | VERIFIED LIVE | Accepted #289 preserves earlier capture/provider delivery proof; independent primary/BCC mailbox receipt still unverified | Preserve; do not repeat lead/send or permanent failures | Release operator; accepted receipt unchanged; Production |
 | P0 #288 real auth/HTTP | ACCEPTED | Accepted merge472b4bcd/tree3aa30e84; receipt and 25/25 fresh resolver checks | Preserve completed release; no repeated migration/QA | Production; historical test tiers remain distinct |
 | P1 #288 disabled release | ACCEPTED | Migration ledger1/exact source hash; policy inactive/budgets0; enrollment/offer/reservation0 at11:16Z | Consumed approval; not requestable | Owner/release operator; no cadence or send activation |
-| P1 scheduler #289 | TEST-PROVEN / RELEASE HELD | Final34fd0674/tree0f765c93;3710unit/57SQL/8real-session passes; hosted37304847363SUCCESS; exact protected Preview15pass/12skip;30s I/O-start budget fixed | One separately approved scheduler migration/merge/same-tree deployment; initial rollback accepted288 | No due/retry Production probe; no cron/env/activation |
-| P1 Twilio/channel | EXTERNAL GATE | Console is at login; actual account, sender, registration, costs unverified | Owner sign-in then read-only account inspection; combined sender/setup decision | Owner; no purchase/config/send authority |
+| P1 scheduler #289 | ACCEPTED | Accepted main b8aba8b0/tree0f765c93; Ready dpl_81e1MY7Y79dQcYYcoTq1U72ED1ZZ; fresh authority25/25;16:09Z ledger1/exact scheduler SHA, lease0 | Consumed migration/release authority; preserve accepted scheduler and receipt | No due/retry Production probe; no cron/env/activation |
+| P1 command capability #290 | RECONCILED / RELEASE HELD | Accepted main merged forward; rescue branch preserves e1b60d1; ONE pilot migration, Production ledger0/table absent | Fresh exact-source local/hosted/immutable Preview seal, then separate capability-only gate | No pilot scope, staff enrollment, provider configuration or sends |
+| P1 Twilio/channel | EXTERNAL GATE | Owner sign-in completed; authenticated account chooser says No Accounts Yet; no sender/registration/account price to inspect | Owner identifies existing account or separately approves legitimate setup; no creation implied | Owner; no purchase/config/send authority |
 | P1 HELP/STATUS handset | ISOLATED TEST-PROVEN / LIVE UNVERIFIED | Separate successor queues canonical fixed reply, signed HTTP/SQL/provider fake proof; provider HELP/STOP/START never gets duplicate app response | Capability release then actual account/registered sender/approved handset proof | No carrier/device delivery claimed |
 | P1 staff pilot / roster | PREPARED / EXTERNAL DEPENDENCIES | Private expiring/capped QA context implemented; live enrollment0; Mike missing unique mobile/SMS/possession; second genuine agent absent | Combined packet below; no invented agent/admin eligibility; code release is not pilot authority | Explicit endpoints, price, window and paid effects required before pilot |
 | P1 allocation activation | EXTERNAL GATE | No approved policy/start/caps/channel/cadence; dispatch inactive | New-only cutoff and small rollout after release/channel/pilot/lease acceptance | BIC/owner; no historic/QA redistribution or retry drain |
@@ -312,14 +314,13 @@ Hosted current-head CI/Preview are recorded in the frozen PR receipt separately.
 | P3 expansion | DEFERRED EXPANSION | Native sources/calendar, reactivation, homeowner updates, licensed search, campaign packets, voice notes, source-to-close coaching | Begin one actually used integration only after core dispatch acceptance | Product owner; not a hidden launch prerequisite |
 
 Next unmet application gate (NOT approved):
-`APPROVE ASK MAGIC MIKE BOUNDED ALLOCATION SCHEDULER PRODUCTION MIGRATION, MERGE, AND SAME-TREE PRODUCTION DEPLOYMENT`.
-Binding: PR289 head34fd06745f94ebab1d902c98fddcf217fbd2145e,
-tree0f765c935ef57467f93c864bd543c351f5641f4b, one migration SHA256
-db4741b4472efc086e575353db6dd78ccac26944597fcb19ce2d359c00f0d480.
+`APPROVE ASK MAGIC MIKE STAFF PILOT COMMAND READINESS PRODUCTION MIGRATION, MERGE, AND SAME-TREE PRODUCTION DEPLOYMENT`.
+Binding: separately sealed PR290 final head/tree, one pilot migration SHA256
+`c7673e70ea45ed0055216d0af9a0f7bb1b40e9d993ff790fe04a3ee040820b52`.
 No environment changes; no activation, roster, provider setup, pilot, cadence,
 messages, spend, WordPress/DNS/billing/NellySelly or historical retries.
-Initial compatible application rollback is accepted288
-`dpl_B5vrcWKotEHBz4EyBJ6bdD6veY9r`; resolve again before any release.
+Initial compatible application rollback is accepted289
+`dpl_81e1MY7Y79dQcYYcoTq1U72ED1ZZ`; resolve again before any release.
 
 ### Historical separate scheduler review / operating boundary (2026-10-04)
 
@@ -384,7 +385,8 @@ Daily operator procedure (not automated human acceptance):
 
 Staff pilot remains held:actual participants/own-login consent and channel
 registration are not verified. Brandon audit does not create agent eligibility.
-Prepare SMS-first two-approved-agent matrix:up to16inbound messages and
+Historical preliminary matrix (superseded by the finite packet below):
+prepare SMS-first two-approved-agent matrix:up to16inbound messages and
 8outbound messages/24segments,0MMS; count automatic provider responses inside
 the ceiling. Current official [US pricing](https://www.twilio.com/en-us/sms/pricing/us)
 lists$0.0083base/SMS segment each direction:up to$0.332base plus carrier,
@@ -394,9 +396,29 @@ pilot capability must be proven before pilot; ordinary QA stays suppressed.
 Existing tested consumer automation remains held. AI is review-only, with no
 paid evaluation/account entitlement or licensed live MLS proof in this run.
 
-## Post-288 reconciliation and executable pilot packet — 2026-10-05
+## Post-289 reconciliation and executable pilot packet — 2026-10-05
 
-### Current source and independent release boundaries
+### Current accepted source and PR290 boundary
+
+Fresh authority resolution at16:00:32Z passes25/25: accepted main
+`b8aba8b091a5dda38bf8b474dcaeadd8cc36d399`, reviewed/deployed tree
+`0f765c935ef57467f93c864bd543c351f5641f4b`, Ready Production
+`dpl_81e1MY7Y79dQcYYcoTq1U72ED1ZZ`. The immutable
+[acceptance receipt](https://github.com/brandonnarron1-lang/ask-magic-mike/releases/tag/amm-production-acceptance/dpl_81e1MY7Y79dQcYYcoTq1U72ED1ZZ)
+remains the authority. #289 is completed; do not replay its approval/migration.
+
+Existing PR290 branch `codex/staff-pilot-command-readiness-20261005` was
+forward-merged with accepted main in `78063b7`; no force-push/rebase/reset.
+Rescue `rescue/amm-pr290-pre-accepted289-20261005` preserves `e1b60d1`;
+the existing rescue stash, generated assets and earlier private receipts remain.
+The final exact-source PR290 seal belongs in that PR, not a mutable branch or
+inherited Preview. Capability release approval is absent. There is exactly ONE
+additional migration relative to accepted #289, zero environment changes and
+no pilot/roster/provider/WordPress/cadence activation. Compatible application
+rollback is accepted #289 above; retain schema/audit/STOP/assignment records,
+never drop functions called by the app.
+
+### Historical pre-289 reconciliation — retained, superseded above
 
 Fresh accepted authority at11:07:47Z:25/25. Main/Production is
 `472b4bcd5ae367f3a3c4f1af84531cdde2439e9f`, tree
@@ -419,7 +441,8 @@ passed on the final head. Protected immutable Preview
 15pass/12skip. Privileged health, cloud mutations and device checks are skipped,
 not accepted. Exact wrapper succeeds with present and absent browser roles;
 forced post-source verification failure rolls everything back and preserves
-canonical capture bytes. #289 is still draft/unmerged; ledger0/table absent.
+canonical capture bytes. At that earlier observation #289 was draft/unmerged;
+ledger0/table absent. Those observations are not the current release state.
 
 Separate branch `codex/staff-pilot-command-readiness-20261005` adds one
 capability migration relative to #289:
@@ -431,12 +454,14 @@ It installs no rows/roster/schedule and updates no global allocation policy.
 no deployment environment has been changed. The future capability-only gate,
 not an approval or currently requested activation, is:
 `APPROVE ASK MAGIC MIKE STAFF PILOT COMMAND READINESS PRODUCTION MIGRATION, MERGE, AND SAME-TREE PRODUCTION DEPLOYMENT`.
-Accept #289 first, refresh/seal this successor, apply only its exact guarded
-migration, then deploy matching callers. No paid pilot authority is implied.
+#289 is now accepted. Refresh/seal this successor, then under its separate
+capability-only approval apply only its exact guarded migration and deploy
+matching callers. No paid pilot authority is implied.
 
 ### Account, directory and legitimate possession dependencies
 
-Production read-only snapshot11:16:19Z: staff_v1 inactive, starts/approval/
+Fresh Production read-only snapshot16:09:30Z: #289 ledger1/exact source SHA,
+#290 ledger0/table absent; scheduler lease0. Staff_v1 inactive, starts/approval/
 fallback null, budgets0, MMSfalse; enrollments/offers/commands/reservations0.
 Existing10leads/4contacts/27consents/10attributions/22audits/20notifications/
 6assignments/1task are observations, not frozen concurrent-business guarantees.
@@ -452,11 +477,15 @@ binding and is not an eligible second participant. Brandon audit is not an
 agent. Second genuinely approved agent, private endpoints and fallback are
 still unselected. Do not arm a two-person contract until those exist.
 
-Twilio console is at email login; no login/SSO/account change was attempted.
-Actual account/subaccount, sender/service, trial restrictions, registration,
-callbacks, account-specific prices and delivery limits are UNVERIFIED.
-After legitimate secure sign-in, inspect only the existing account. If setup is
-needed, bind separate exact authority to its existing sender/service/callbacks,
+Owner completed legitimate Twilio sign-in. The authenticated account chooser
+shows **No Accounts Yet**; no account/subaccount, sender or service is available
+for inspection in this identity. Screenshot is private in
+`.amm-run/post289-pr290-readiness-20261005/twilio-account-summary.png`.
+No account was created and no phone/provider/credential setting was changed.
+Trial status, registration, callbacks, account-specific prices and delivery
+limits remain UNVERIFIED. Owner must identify an existing accessible account or
+separately authorize legitimate setup. Any setup gate must bind sender/service/
+callbacks,
 registration and secure Vercel values; no purchase or irreversible Advanced
 Opt-Out enablement is implicit. Preserve Resend and public brokerage phone.
 
@@ -527,6 +556,15 @@ account costs. No new number/registration/subscription is authorized.
 See [Advanced Opt-Out](https://www.twilio.com/docs/messaging/tutorials/advanced-opt-out)
 for provider reply precedence; configuration itself remains unchanged.
 
+The current official [trial guide](https://www.twilio.com/docs/usage/tutorials/how-to-use-your-free-trial-account)
+distinguishes new and legacy Console experiences. New trials use predefined
+message templates rather than arbitrary custom bodies; do not assume this
+workflow can run on a new trial. Trials restrict recipients to verified phones;
+US toll-free sending requires verification and US A2P10DLC registration requires
+a paid account. Actual account capability must be inspected before selecting a
+pilot venue. Recipient verification itself can send a message and remains a
+separate setup scope, not an effect of read-only inspection.
+
 Scenarios within envelope: two VERIFY acknowledgments; context1 two offers,
 one competing CLAIM winner/confirmation/ack, late action rejected, STATUS+HELP;
 context2 two offers, PASS acknowledgment then winner/confirmation/ack;
@@ -555,19 +593,25 @@ slots.90s crash lease/60s early hold, platform delays and long processing can
 skip ticks; measure queue age and gaps before promising an SLA. Function/provider
 usage costs still apply. Machine GET due is a mutation and was NOT probed.
 
-Fresh successor gates and exact hosted/immutable-Preview seals are pinned in
-its PR receipt. Local3711unit/68skip, strict types/lint/build/isolation/safety/
+Historical initial PR290 evidence at `e1b60d1` (not newly executed post-289
+acceptance): local3711unit/68skip, strict types/lint/build/isolation/safety/
 114routes passed;69real-PG and9real-session checks pass. Two-role-catalog
 atomic migration rehearsals preserve capture, defaults and required row locks.
 These receipts distinguish no-send fixture
 acceptance from carrier/device delivery. No hosted or privileged evidence may
-be inherited from #289 or #288 for this different tree.
+be inherited from #289 or #288 for this different tree. Reconciled-candidate
+fresh gate results and exact hosted/immutable Preview identities belong in the
+final PR290 seal. Device and carrier evidence remains NOT RUN.
 Private evidence stays in the preserved worktree `.amm-run/post288-readiness-20261005/`
 and `.amm-run/reference-session-acceptance/`, including logs, role-catalog
 rehearsals and actual-session screenshots. Never publish credentials, phone
 values, protected backups, signed payloads or cookies.
 
-Order: accept #289 disabled → accept separately sealed command-readiness
+Current private reconciliation/read-only receipts and fresh gate logs are under
+`.amm-run/post289-pr290-readiness-20261005/`; preceding directories retain
+historical evidence. Never publish private endpoints or secrets.
+
+Order: preserve accepted #289 disabled → accept separately sealed command-readiness
 capability disabled → independently approved account/roster/consent setup →
 exact participant/window/price/message pilot authority → real device proof →
 later bounded new-only policy/cadence activation. This session performs none of

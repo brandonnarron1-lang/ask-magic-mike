@@ -5,29 +5,34 @@ Updated 2026-10-05. Release policy is
 before binding any application gate. The resolver's authenticated receipt, not
 this queue, supplies current Production and rollback identity.
 
-## Current Post-288 boundary — supersedes historical pending statements
+## Current Post-289 boundary — supersedes historical pending statements
 
-Accepted #288 is main472b4bcd5ae367f3a3c4f1af84531cdde2439e9f,
-tree3aa30e848a2bc2013ac65bb61cd695d7adf0a096, Ready Production
-dpl_B5vrcWKotEHBz4EyBJ6bdD6veY9r; fresh resolver25/25 on2026-10-05.
-Its migration/approval are consumed, not requestable again.
+Accepted #289 is main `b8aba8b091a5dda38bf8b474dcaeadd8cc36d399`,
+tree `0f765c935ef57467f93c864bd543c351f5641f4b`, Ready Production
+`dpl_81e1MY7Y79dQcYYcoTq1U72ED1ZZ`; fresh resolver25/25 at16:00:32Z
+on2026-10-05. Its receipt is the authority; #288/#289 approvals and migrations
+are consumed, not requestable again. Read-only Neon at16:09:30Z confirms #289
+ledger1/exact SHA, inactive policy/zero budgets, lease/enrollment/offer/command/
+reservation0, no #290 ledger or pilot table. Historical evidence below remains.
 
 Next unmet gate (not approved):
-`APPROVE ASK MAGIC MIKE BOUNDED ALLOCATION SCHEDULER PRODUCTION MIGRATION, MERGE, AND SAME-TREE PRODUCTION DEPLOYMENT`.
-Applies only to draft #289 head34fd06745f94ebab1d902c98fddcf217fbd2145e,
-tree0f765c935ef57467f93c864bd543c351f5641f4b and ONE additional migration
-20261004233000_lead_allocation_scheduler_lease.sql, SHA256
-db4741b4472efc086e575353db6dd78ccac26944597fcb19ce2d359c00f0d480.
-Keep disabled; environment changes0; no cron, enrollment, pilot, provider,
-messages, spend, ordinary policy activation, WordPress/DNS/billing/other product
-or historical retry. Initial compatible application rollback is accepted #288.
-Role-aware wrapper atomicity was rehearsed against both browser-role catalogs.
+`APPROVE ASK MAGIC MIKE STAFF PILOT COMMAND READINESS PRODUCTION MIGRATION, MERGE, AND SAME-TREE PRODUCTION DEPLOYMENT`.
+Applies only to separately sealed draft #290 and ONE additional migration
+`20261005140000_staff_allocation_pilot.sql`, SHA256
+`c7673e70ea45ed0055216d0af9a0f7bb1b40e9d993ff790fe04a3ee040820b52`.
+Accepted main was forward-merged without rewriting history; the current PR seal
+must bind the final head/tree, hosted gate and immutable Preview before approval.
+Keep disabled; environment changes0; no cron, roster, enrollment, pilot scope,
+provider changes, messages, spend, ordinary policy activation, WordPress/DNS/
+billing/other product or historical retry. Compatible rollback is accepted #289.
 
-Independent command/pilot-readiness successor is separately reviewed, not part
-of #289 authority. Its capability-only migration adds an empty private scope;
-default flags remain false. Account/sender/pricing, two genuine staff endpoints,
-consent/possession, window and proposed usage cap remain independent gates.
-No pilot release or paid send approval is currently requested. Use the existing
+The capability-only migration adds an empty private scope; default flags remain
+false. After owner sign-in, Twilio's account chooser shows **No Accounts Yet**
+(2026-10-05); no account/subaccount or sender can be verified in this identity.
+Account creation/purchase/setup remains held, not inferred from login authority.
+Two genuine staff endpoints, consent/possession, fallback, current sender quote,
+window and proposed usage cap remain independent gates. No paid pilot approval
+is currently requested. Use the existing
 [operator guide](phase9/REFERENCE_LEAD_ALLOCATION_2026-10-04.md) completion
 register/combined packet; do not create another approval queue or routing stack.
 
