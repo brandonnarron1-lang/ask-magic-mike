@@ -4,6 +4,9 @@ import { processPendingAllocationIntents } from "./leadAllocationDispatch";
 
 export const ALLOCATION_CADENCE_SECONDS = 60;
 export const ALLOCATION_BATCH_SIZE = 5;
+// Forty-five-second route, ten-second provider timeout. Stop starting I/O
+// after thirty seconds, leaving one request plus reconciliation margin.
+export const ALLOCATION_DISPATCH_WINDOW_MS = 30_000;
 // These conservative review limits hold discovery, not capture/owner custody.
 export const ALLOCATION_BACKLOG_LIMIT = 50;
 export const ALLOCATION_QUEUE_AGE_LIMIT_SECONDS = 600;
@@ -23,6 +26,7 @@ export async function allocationBacklog(sql: AllocationQuery) {
 export async function runAllocationScheduler(sql:AllocationQuery) {
   if(process.env.LEAD_ALLOCATION_ENABLED!=="true"||process.env.LEAD_ALLOCATION_DUE_ENABLED!=="true")
     return {ok:true,held:true,processed:0};
+  const deadline=Date.now()+ALLOCATION_DISPATCH_WINDOW_MS;
   const token=randomUUID();
   const row=(await sql.query("SELECT public.acquire_lead_allocation_scheduler_v1($1::uuid) AS result",[token]))[0];
   const lease=row?.result as {acquired?:boolean;reason?:string;start_gap_seconds?:number|null;late_seconds?:number|null}|undefined;
@@ -39,7 +43,7 @@ export async function runAllocationScheduler(sql:AllocationQuery) {
     // Expiry cleanup continues even during overload, avoiding permanent
     // head-of-line blocking by stale offer alerts. Only discovery is held.
     const expiry=(await sql.query("SELECT public.expire_lead_allocation_offers_v2(25,$1::boolean) AS result",[!overloaded]))[0]?.result;
-    const dispatch=await processPendingAllocationIntents(sql,{beforeEach:ownsLease});
+    const dispatch=await processPendingAllocationIntents(sql,{beforeEach:async()=>Date.now()<deadline&&await ownsLease()});
     const after=await allocationBacklog(sql);
     summary={ok:true,overloaded,fallbackReviewRequired:overloaded,before,after,
       startGapSeconds:lease.start_gap_seconds??null,lateSeconds:lease.late_seconds??null,

@@ -2,9 +2,9 @@
 import {beforeEach,afterEach,describe,expect,it,vi} from "vitest";
 const dispatch=vi.hoisted(()=>vi.fn());
 vi.mock("../../app/lib/leadAllocationDispatch",()=>({processPendingAllocationIntents:dispatch}));
-import {runAllocationScheduler} from "../../app/lib/leadAllocationScheduler";
+import {runAllocationScheduler,ALLOCATION_DISPATCH_WINDOW_MS} from "../../app/lib/leadAllocationScheduler";
 beforeEach(()=>{vi.stubEnv("LEAD_ALLOCATION_ENABLED","true");vi.stubEnv("LEAD_ALLOCATION_DUE_ENABLED","true");dispatch.mockReset().mockResolvedValue({processed:5,accepted:3,reconciliationRequired:1});});
-afterEach(()=>vi.unstubAllEnvs());
+afterEach(()=>{vi.unstubAllEnvs();vi.useRealTimers();});
 function fixture(pending=0,oldest=0){
  const query=vi.fn(async(sql:string)=>sql.includes("acquire_lead_allocation_scheduler_v1")?[{result:{acquired:true,start_gap_seconds:65,late_seconds:5}}]:
   sql.includes("true AS owned")?[{owned:true}]:sql.includes("count(*)::int AS pending")?[{pending,oldest_seconds:oldest}]:
@@ -32,6 +32,30 @@ describe("scheduler bounded orchestration",()=>{
  });
  it("records actual cadence lateness, not an exact sixty-second SLA",async()=>{
   expect(await runAllocationScheduler(fixture())).toMatchObject({startGapSeconds:65,lateSeconds:5});
+ });
+ it("slow/ambiguous no-send outcomes stop new I/O before the route ceiling, without releasing reservations or retrying",async()=>{
+  vi.useFakeTimers();vi.setSystemTime(new Date('2026-10-05T12:00:00Z'));
+  let attempts=0;
+  dispatch.mockImplementation(async(_sql,controls)=>{
+   for(let i=0;i<5;i++){
+    if(!await controls.beforeEach())break;
+    attempts++;
+    // Existing adapter timeout/ambiguous reservation. No real provider I/O.
+    vi.setSystemTime(Date.now()+10_000);
+   }
+   return {processed:attempts,accepted:0,reconciliationRequired:attempts};
+  });
+  const result=await runAllocationScheduler(fixture());
+  expect(ALLOCATION_DISPATCH_WINDOW_MS).toBe(30_000);
+  expect(result).toMatchObject({ok:true,dispatch:{processed:3,reconciliationRequired:3}});
+  expect(attempts).toBe(3);
+ });
+ it("elapsed discovery/read work consumes the same deadline, not an extra provider window",async()=>{
+  vi.useFakeTimers();vi.setSystemTime(new Date('2026-10-05T12:00:00Z'));
+  const sql=fixture(),normal=sql.query.getMockImplementation()!;
+  sql.query.mockImplementation(async s=>{if(s.includes('expire_lead_allocation_offers_v2'))vi.setSystemTime(Date.now()+31_000);return normal(s);});
+  dispatch.mockImplementation(async(_sql,controls)=>({processed:await controls.beforeEach()?1:0}));
+  expect(await runAllocationScheduler(sql)).toMatchObject({dispatch:{processed:0}});
  });
  it("five intents include offer and confirmation work; bounded overload does not imply lead capacity",()=>{
   // Deterministic capacity fixture, not carrier throughput. Three dual-channel
