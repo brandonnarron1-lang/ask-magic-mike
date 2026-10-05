@@ -1,12 +1,15 @@
 # Reference lead allocation — operator / release guide
 
-Status: dependent review candidate, not Production acceptance or channel activation.
+Current status (2026-10-05): #288 accepted; #289 reconciled/test-proven but
+release held; separate staff-pilot command readiness candidate, not activation.
+The dated review history below remains evidence of earlier states. The
+Post-288 reconciliation section supersedes its pending-release statements.
 Work only in Ask Magic Mike. Neon, Vercel, the approved email provider, directory,
 canonical intake, lead/contact records, tasks, assignments, audit and notification
 outbox remain the authorities. No WordPress/connector, NellySelly or PropertyLens
 change is included. No new public QA, provider call, credential entry or spend.
 
-## Identity and dependencies
+## Historical #288 review identity and dependencies (2026-10-04)
 
 Fresh authority resolution at 2026-10-04T22:22:39Z: 25/25 checks passed. Accepted
 main is `4f00826043bbe2b2d13779fd143d28a66ff61158` (PR #287), tree
@@ -288,17 +291,17 @@ performance.json,transport.log,wordpress-audit.json,build.log}` and actual
 do not upload credentials, cookies, traces, live contacts or private backups.
 Hosted current-head CI/Preview are recorded in the frozen PR receipt separately.
 
-### One completion register
+### One completion register — reconciled 2026-10-05
 
 | Priority / track | State | Evidence / exact gap | Dependency and next action | Owner / acceptance / scope |
 | --- | --- | --- | --- | --- |
 | P0 existing capture/QA/email | VERIFIED LIVE | Accepted #287 receipt; earlier provider delivery proof, independent primary/BCC mailbox receipt still unverified | Preserve; do not repeat lead/send or permanent failures | Release operator; accepted receipt unchanged; Production |
-| P0 #288 real auth/HTTP | TEST-PROVEN | Eight built real-session/SQL tests; STOP/date/version defects fixed; hosted exact-head checks pending seal | Run complete final gates/CI/Preview | Engineering; all checks on same reviewed tree; isolated/Preview only |
-| P1 #288 disabled release | EXTERNAL GATE | One additive migration; no live apply/merge/deploy authority yet | Exact-source approval phrase below, then one migration and accepted Git-source deployment | Owner/release operator; flags held, policy inactive, budgets0, MMSoff |
-| P1 scheduler | TEST-PROVEN | Separate successor:90s durable token lease,60s duplicate hold,45s function ceiling, five-intent batch, overload discovery hold/expiry cleanup;9actual SQL tests; full local gate; NO installed cadence | Hosted successor gates/base acceptance, then review separately | Engineering then owner; no due/retry Production probe |
+| P0 #288 real auth/HTTP | ACCEPTED | Accepted merge472b4bcd/tree3aa30e84; receipt and 25/25 fresh resolver checks | Preserve completed release; no repeated migration/QA | Production; historical test tiers remain distinct |
+| P1 #288 disabled release | ACCEPTED | Migration ledger1/exact source hash; policy inactive/budgets0; enrollment/offer/reservation0 at11:16Z | Consumed approval; not requestable | Owner/release operator; no cadence or send activation |
+| P1 scheduler #289 | TEST-PROVEN / RELEASE HELD | Final34fd0674/tree0f765c93;3710unit/57SQL/8real-session passes; hosted37304847363SUCCESS; exact protected Preview15pass/12skip;30s I/O-start budget fixed | One separately approved scheduler migration/merge/same-tree deployment; initial rollback accepted288 | No due/retry Production probe; no cron/env/activation |
 | P1 Twilio/channel | EXTERNAL GATE | Console is at login; actual account, sender, registration, costs unverified | Owner sign-in then read-only account inspection; combined sender/setup decision | Owner; no purchase/config/send authority |
-| P1 HELP/STATUS handset | FAILED | Deterministic application result has no handset reply | Reviewed budgeted existing-outbox or verified provider-response successor; avoid duplicate opt-out replies | Engineering/provider owner; staff pilot verifies visible response |
-| P1 staff pilot / roster | EXTERNAL GATE | No human enrollment/device or real two-agent proof this session | Approved participants, legitimate own logins, purpose consent/VERIFY, finite segments/cost/stop matrix | Owner + participating agents; carrier/device/claim tiers distinct |
+| P1 HELP/STATUS handset | ISOLATED TEST-PROVEN / LIVE UNVERIFIED | Separate successor queues canonical fixed reply, signed HTTP/SQL/provider fake proof; provider HELP/STOP/START never gets duplicate app response | Capability release then actual account/registered sender/approved handset proof | No carrier/device delivery claimed |
+| P1 staff pilot / roster | PREPARED / EXTERNAL DEPENDENCIES | Private expiring/capped QA context implemented; live enrollment0; Mike missing unique mobile/SMS/possession; second genuine agent absent | Combined packet below; no invented agent/admin eligibility; code release is not pilot authority | Explicit endpoints, price, window and paid effects required before pilot |
 | P1 allocation activation | EXTERNAL GATE | No approved policy/start/caps/channel/cadence; dispatch inactive | New-only cutoff and small rollout after release/channel/pilot/lease acceptance | BIC/owner; no historic/QA redistribution or retry drain |
 | P2 owned acquisition | VERIFIED LIVE | Page3952 link-out remains intact; other placements/legacy forms held,42-page read-only scan | Separate page/builder backup/diff authority; Form7/entry1550 remains held | Owner/WordPress operator; sequential publication, never global CSS/cache |
 | P2 measurement | UNVERIFIED | Consent bridge1.2.0 is separate from Connector1.1.0; current tag-order/grant/revoke not newly proven | Isolated privacy tests then separate measurement activation gate | Owner/analytics; no PII, QA/admin exclusion; attribution independent |
@@ -309,13 +312,16 @@ Hosted current-head CI/Preview are recorded in the frozen PR receipt separately.
 | P3 expansion | DEFERRED EXPANSION | Native sources/calendar, reactivation, homeowner updates, licensed search, campaign packets, voice notes, source-to-close coaching | Begin one actually used integration only after core dispatch acceptance | Product owner; not a hidden launch prerequisite |
 
 Next unmet application gate (NOT approved):
-`APPROVE ASK MAGIC MIKE REFERENCE LEAD ALLOCATION PRODUCTION MIGRATION, MERGE, AND SAME-TREE PRODUCTION DEPLOYMENT`.
-It excludes provider setup, staff pilot, policy/roster, cadence activation, spend,
-WordPress publication, consumer messages and general retry processing. Production
-rollback starts from accepted #287 `dpl_2bZJGzHEzrPLZa9qrueGDk38nMhY`, freshly
-re-resolved before release; keep additive schema and all accepted evidence.
+`APPROVE ASK MAGIC MIKE BOUNDED ALLOCATION SCHEDULER PRODUCTION MIGRATION, MERGE, AND SAME-TREE PRODUCTION DEPLOYMENT`.
+Binding: PR289 head34fd06745f94ebab1d902c98fddcf217fbd2145e,
+tree0f765c935ef57467f93c864bd543c351f5641f4b, one migration SHA256
+db4741b4472efc086e575353db6dd78ccac26944597fcb19ce2d359c00f0d480.
+No environment changes; no activation, roster, provider setup, pilot, cadence,
+messages, spend, WordPress/DNS/billing/NellySelly or historical retries.
+Initial compatible application rollback is accepted288
+`dpl_B5vrcWKotEHBz4EyBJ6bdD6veY9r`; resolve again before any release.
 
-### Separate scheduler successor / operating boundary
+### Historical separate scheduler review / operating boundary (2026-10-04)
 
 PR288 remains sealed separately. The successor adds ONE operational singleton
 lease (not another queue), an additive migration, and the existing protected
@@ -387,3 +393,183 @@ No purchase/send authority. HELP/STATUS handset reply and a safe staff-only
 pilot capability must be proven before pilot; ordinary QA stays suppressed.
 Existing tested consumer automation remains held. AI is review-only, with no
 paid evaluation/account entitlement or licensed live MLS proof in this run.
+
+## Post-288 reconciliation and executable pilot packet — 2026-10-05
+
+### Current source and independent release boundaries
+
+Fresh accepted authority at11:07:47Z:25/25. Main/Production is
+`472b4bcd5ae367f3a3c4f1af84531cdde2439e9f`, tree
+`3aa30e848a2bc2013ac65bb61cd695d7adf0a096`, deployment
+`dpl_B5vrcWKotEHBz4EyBJ6bdD6veY9r`. Accepted #288 migration source/ledger
+matches `f66867945f2548ceef2e29e17950be280f98dcf33befa4c9dddc9daa0ff97210`.
+Its first wrapper rollback (absent anon role) and corrected two-catalog
+verification remain historical disclosures, not a reason to replay the release.
+
+#289 was forward-merged onto accepted main without force-push; rescue branch
+`rescue/amm-pr289-pre-post288-reconcile-20261005` preserves2bc9d902.
+Five ten-second requests could exceed the45s route ceiling. Final34fd0674
+fixes the start budget to30s from orchestration entry, including discovery;
+real lease fencing still runs before each I/O. No timer extends the window.
+The one scheduler SQL source is unchanged. Fresh local3710unit/56skip,
+57real-PG,8real-session,build/typecheck/lint/isolation/safety/113routes pass.
+Hosted [37304847363](https://github.com/brandonnarron1-lang/ask-magic-mike/actions/runs/37304847363)
+passed on the final head. Protected immutable Preview
+`dpl_AXt3RVCACm4v35r2ctwhfx2spxDJ` matches that head/project; no-write checks
+15pass/12skip. Privileged health, cloud mutations and device checks are skipped,
+not accepted. Exact wrapper succeeds with present and absent browser roles;
+forced post-source verification failure rolls everything back and preserves
+canonical capture bytes. #289 is still draft/unmerged; ledger0/table absent.
+
+Separate branch `codex/staff-pilot-command-readiness-20261005` adds one
+capability migration relative to #289:
+`20261005140000_staff_allocation_pilot.sql`, SHA256
+`c7673e70ea45ed0055216d0af9a0f7bb1b40e9d993ff790fe04a3ee040820b52`.
+It installs no rows/roster/schedule and updates no global allocation policy.
+`LEAD_ALLOCATION_STAFF_PILOT_ENABLED` and
+`LEAD_ALLOCATION_STAFF_PILOT_SENDS_ENABLED` are documented false defaults;
+no deployment environment has been changed. The future capability-only gate,
+not an approval or currently requested activation, is:
+`APPROVE ASK MAGIC MIKE STAFF PILOT COMMAND READINESS PRODUCTION MIGRATION, MERGE, AND SAME-TREE PRODUCTION DEPLOYMENT`.
+Accept #289 first, refresh/seal this successor, apply only its exact guarded
+migration, then deploy matching callers. No paid pilot authority is implied.
+
+### Account, directory and legitimate possession dependencies
+
+Production read-only snapshot11:16:19Z: staff_v1 inactive, starts/approval/
+fallback null, budgets0, MMSfalse; enrollments/offers/commands/reservations0.
+Existing10leads/4contacts/27consents/10attributions/22audits/20notifications/
+6assignments/1task are observations, not frozen concurrent-business guarantees.
+Queue processing0/retry-due0; two historical permanent failures are preserved.
+Neon is the existing bitter-star project/primary production branch; no new DB.
+
+Mike's genuine directory ref `b9c08f62-673f-4cac-bb4b-8f2c87227eb1` has an
+active primary-owner user binding, but no directory mobile, SMS preference or
+operational enrollment/consent/possession. Current hours are Mon–Fri8–20,
+Sat9–17 America/New_York; no Sunday coverage. These hours are not a newly
+approved pilot roster. The other admin-escalation row lacks an agent-user/mobile
+binding and is not an eligible second participant. Brandon audit is not an
+agent. Second genuinely approved agent, private endpoints and fallback are
+still unselected. Do not arm a two-person contract until those exist.
+
+Twilio console is at email login; no login/SSO/account change was attempted.
+Actual account/subaccount, sender/service, trial restrictions, registration,
+callbacks, account-specific prices and delivery limits are UNVERIFIED.
+After legitimate secure sign-in, inspect only the existing account. If setup is
+needed, bind separate exact authority to its existing sender/service/callbacks,
+registration and secure Vercel values; no purchase or irreversible Advanced
+Opt-Out enablement is implicit. Preserve Resend and public brokerage phone.
+
+For each approved staff participant: existing own login → administrator binds
+allowlisted directory/user → exact operational consent → browser challenge
+(no outbound OTP) → phone sends VERIFY to actual registered sender → existing
+sender/binding/SID/hash verification → explicit SMS-only preference + RESUME.
+An expiring private scope allows only its owner to approve that roster; no
+arbitrary endpoint, public form or administrator can become an agent.
+
+### Server scope, templates and proposed cost envelope — NOT APPROVED
+
+The private operational scope requires an unbanned approving administrator,
+approval reference/reviewed tree/current price evidence,1–2 unique allowlisted
+agent references, explicit fallback, positive caps and a start/end ≤1hour.
+There is no HTTP arming/price/roster/budget endpoint. An separately approved
+guarded operator transaction must bind the actual recipients/window/pricing
+under canonical advisory lock731042026;
+the capability migration creates zero scopes. Pre-window, expired, paused,
+wrong-owner, preview or unapproved operations fail closed.
+
+Protected same-origin administrator POST `/api/admin/allocation/pilot` accepts
+only strict `seed {pilotId,index:1..3}`, `offer {pilotId,leadId,version}`,
+`dispatch {pilotId}`, `pause {pilotId}`, `expire {pilotId}`. Pause/expiry may
+close an existing owned scope after its window; they cannot reopen it. Seed
+uses canonical capture, registration and audit once per index, with no contact
+endpoint, no consumer permission or notification, all QA/suppression flags true,
+and name `INTERNAL QA — DO NOT CONTACT`. Source is private
+`staff_allocation_pilot_v1`; a matching source string alone grants no exception.
+Ordinary due, retry and KPI paths exclude these fixtures.
+
+Canonical offer/claim/assignment/outbox/reservation functions are reused with
+checked predecessor replacements, not another routing service. Pilot offers,
+assignments, last-offered load-balancing and budget reservations do not consume
+ordinary capacity/budgets. Real directory/RBAC/consent/possession/binding checks
+remain. MMS/email are held. `reference_cards_v1` SMS offers/confirmations and
+fixed `staff_commands_v1` HELP/STATUS/VERIFY/PAUSE/RESUME/CLAIM/PASS responses
+share the same outbox and cap. Reply templates never contain raw inbound text
+or consumer contact data. STATUS explicitly reports a requested snapshot.
+
+Signed account/destination HTTP validation precedes every command. Provider
+`OptOutType=HELP/STOP/START` means Twilio already replied: no duplicate app
+message. Empty TwiML prevents a second synchronous response. STOP bypasses
+action throttles/caps, revokes staff SMS, and retains consumer STOP processing;
+START/RESUME never restore revoked purpose consent. Exact SID replay cannot
+send again; SID/body conflicts are rejected. A known hold leaves intent pending;
+unknown provider outcome retains processing/ambiguous reservation for inspection,
+never automatic resend/refund. General retries cannot select allocation replies.
+
+Proposed one-hour, two-approved-agent, SMS-only scenario ceiling (unapproved):
+3 registered staff-only contexts;22 application outbound messages,66 segments,
+≤3segments/message,≤12messages/agent,32mutating actions. Candidate scope budget
+would be1,320,000micros at a reviewed **$0.020/segment** ceiling. Isolated
+server enforcement covers application messages/segments/reservations only.
+Allow20inbound one-segment commands plus2reserved provider-only HELP/STOP replies:
+up to24total outbound messages/68segments +20inbound segments. Model=$1.76;
+proposed total usage ceiling=$2.00,margin$0.24. These are proposals, not funds or
+recipient authorization. Unexpected long inbound texts/provider auto-replies,
+tax/add-ons/unrelated account traffic are not controlled by app reservations.
+Actual quote exceeding the model keeps activation held and requires review.
+
+Current official [US pricing](https://www.twilio.com/en-us/sms/pricing/us):
+$0.0083base/segment each direction; listed long-code carrier surcharges up to
+$0.005outbound/$0.0035inbound; failed-message fee$0.001/message. Existing number
+fees ($1.15long-code/$2.15toll-free monthly), registration/setup, recurring,
+optional engagement/compliance services and taxes are separate, unverified
+account costs. No new number/registration/subscription is authorized.
+See [Advanced Opt-Out](https://www.twilio.com/docs/messaging/tutorials/advanced-opt-out)
+for provider reply precedence; configuration itself remains unchanged.
+
+Scenarios within envelope: two VERIFY acknowledgments; context1 two offers,
+one competing CLAIM winner/confirmation/ack, late action rejected, STATUS+HELP;
+context2 two offers, PASS acknowledgment then winner/confirmation/ack;
+context3 two offers then scoped expiry/fallback; PAUSE/RESUME acknowledgments;
+provider HELP/STOP without extra app response. No stress flood, new public QA,
+email/BCC, consumer acknowledgment or actual-client reassignment. Device
+receipt/inbound/assignment/timeline/cost reconciliation are all NOT RUN live.
+If only one genuine participant exists, do not claim a two-agent race.
+
+Abort on wrong recipient/role/source, revoked consent, unknown price, missing
+fallback, expiry, caps, duplicate ownership or ambiguous acceptance. Pause only
+the pilot scope/flag under its approved stop scope; preserve accepted assignment,
+test/audit rows, STOP and ambiguous reservation. Inspect provider evidence before
+any separately authorized resend. Compatible application rollback retains schema;
+do not drop called functions, delete records or restore pre-286 capture.
+
+### Cadence, proof and next boundary
+
+Fresh Vercel read-only account evidence: active Pro, fluid iad1; only existing
+copilot/first-live/SLA crons. No allocation cron. Current official
+[cron limits](https://vercel.com/docs/cron-jobs/usage-and-pricing) allow100jobs
+per project and Pro per-minute schedules; old2/40limits are stale. Proposed
+later cadence `* * * * *` is NOT installed. Capacity ceiling is five new intents
+per admitted tick, not five leads; offer/confirmation/channel fanout consume
+slots.90s crash lease/60s early hold, platform delays and long processing can
+skip ticks; measure queue age and gaps before promising an SLA. Function/provider
+usage costs still apply. Machine GET due is a mutation and was NOT probed.
+
+Fresh successor gates and exact hosted/immutable-Preview seals are pinned in
+its PR receipt. Local3711unit/68skip, strict types/lint/build/isolation/safety/
+114routes passed;69real-PG and9real-session checks pass. Two-role-catalog
+atomic migration rehearsals preserve capture, defaults and required row locks.
+These receipts distinguish no-send fixture
+acceptance from carrier/device delivery. No hosted or privileged evidence may
+be inherited from #289 or #288 for this different tree.
+Private evidence stays in the preserved worktree `.amm-run/post288-readiness-20261005/`
+and `.amm-run/reference-session-acceptance/`, including logs, role-catalog
+rehearsals and actual-session screenshots. Never publish credentials, phone
+values, protected backups, signed payloads or cookies.
+
+Order: accept #289 disabled → accept separately sealed command-readiness
+capability disabled → independently approved account/roster/consent setup →
+exact participant/window/price/message pilot authority → real device proof →
+later bounded new-only policy/cadence activation. This session performs none of
+those Production effects. Next implementation boundary remains operational
+channel acceptance, not a visual rebuild or new CRM/provider.

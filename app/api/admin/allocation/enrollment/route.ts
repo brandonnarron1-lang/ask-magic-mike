@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireLeadCenterApiPermission } from "../../../../../src/lib/admin/rbac-session";
 import { hasLeadCenterPermission } from "../../../../../src/lib/admin/rbac-policy";
 import { allocationMutationGate,allocationQuery,ALLOCATION_CONSENT_TEXT,ALLOCATION_CONSENT_VERSION,staffPhoneFingerprint,createPossessionChallenge } from "../../../../lib/leadAllocation";
+import { staffPilotMutationGate } from "../../../../lib/staffAllocationPilot";
 const bodySchema=z.discriminatedUnion("action",[
  z.object({action:z.literal("approve"),agentId:z.string().uuid(),userId:z.string().min(1).max(120),towns:z.array(z.enum(["Wilson","Elm City","Lucama","Stantonsburg","Sims","Kenly"])).min(1).max(6),intents:z.array(z.enum(["buyer","seller","seller_cash_offer","investor","home_value","renter"])).min(1).max(6)}).strict(),
  z.object({action:z.literal("consent"),text:z.literal(ALLOCATION_CONSENT_TEXT),version:z.literal(ALLOCATION_CONSENT_VERSION),confirmed:z.literal(true)}).strict(),
@@ -15,18 +16,33 @@ export async function GET(request:NextRequest) {
  const sql=allocationQuery();if(!sql)return NextResponse.json({ok:false,error:"database_unavailable"},{status:503,headers});
  try{
   const rows=await sql.query("SELECT approved_at,possession_verified_at,consent_at,consent_version,revoked_at,paused,email_enabled,sms_enabled,mms_enabled,towns,intents,weight,daily_cap,concurrent_cap FROM public.agent_operational_enrollment WHERE user_id=$1 AND agent_id=$2::uuid",[auth.principal.userId,auth.principal.agentId]);
-  return NextResponse.json({ok:true,enrollment:rows[0]||null,held:process.env.LEAD_ALLOCATION_ENABLED!=="true"},{headers});
+  const pilot=staffPilotMutationGate().ok&&Boolean((await sql.query(`SELECT p.id FROM public.lead_allocation_pilots p
+   JOIN public.lead_center_users approver ON approver.id=p.approved_by
+   WHERE p.active AND p.approved_at IS NOT NULL AND approver.role='administrator' AND approver.banned IS NOT TRUE
+   AND ($1::uuid=ANY(p.allowed_agents) OR ($2::boolean AND p.approved_by=$3))
+   AND clock_timestamp()>=p.starts_at AND clock_timestamp()<p.ends_at`,[auth.principal.agentId||null,hasLeadCenterPermission(auth.principal.role,"routing:manage"),auth.principal.userId]))[0]);
+  return NextResponse.json({ok:true,enrollment:rows[0]||null,staffPilot:Boolean(pilot),held:process.env.LEAD_ALLOCATION_ENABLED!=="true"&&!pilot},{headers});
  }catch{return NextResponse.json({ok:false,error:"allocation_schema_unavailable"},{status:503,headers});}
 }
 export async function POST(request:NextRequest) {
  const headers={"Cache-Control":"private, no-store"};
  if(request.headers.get("origin")!==new URL(request.url).origin)return NextResponse.json({ok:false,error:"invalid_origin"},{status:403,headers});
  const auth=await requireLeadCenterApiPermission(request,"lead:view_assigned");if(!auth.ok)return auth.response;
- const gate=allocationMutationGate();if(!gate.ok)return NextResponse.json({ok:false,error:gate.error},{status:gate.statusCode,headers});
+ const gate=allocationMutationGate();
  const parsed=bodySchema.safeParse(await request.json().catch(()=>null));if(!parsed.success)return NextResponse.json({ok:false,error:"invalid_request"},{status:400,headers});
  const sql=allocationQuery();if(!sql)return NextResponse.json({ok:false,error:"database_unavailable"},{status:503,headers});
  const body=parsed.data;
  try {
+  if(!gate.ok) {
+   const target=body.action==='approve'?body.agentId:auth.principal.agentId;
+   const scope=staffPilotMutationGate().ok&&target&&(await sql.query(`SELECT p.id FROM public.lead_allocation_pilots p
+    JOIN public.lead_center_users approver ON approver.id=p.approved_by
+    WHERE p.active AND p.approved_at IS NOT NULL AND approver.role='administrator' AND approver.banned IS NOT TRUE
+      AND $1::uuid=ANY(p.allowed_agents) AND (NOT $2::boolean OR p.approved_by=$3)
+      AND clock_timestamp()>=p.starts_at AND clock_timestamp()<p.ends_at`,[target,body.action==='approve',auth.principal.userId]))[0];
+   if(!scope)return NextResponse.json({ok:false,error:gate.error},{status:gate.statusCode,headers});
+   if(body.action==='preferences'&&(body.email||body.mms))return NextResponse.json({ok:false,error:'pilot_sms_only'},{status:409,headers});
+  }
   if(body.action==="approve") {
    if(!hasLeadCenterPermission(auth.principal.role,"routing:manage"))return NextResponse.json({ok:false,error:"forbidden"},{status:403,headers});
    const rows=await sql.query(`WITH approved AS (INSERT INTO public.agent_operational_enrollment(agent_id,user_id,approved_at,approved_by,towns,intents)

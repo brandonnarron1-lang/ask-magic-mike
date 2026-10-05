@@ -204,6 +204,20 @@ test("Today real task completion/stale form, paginated timeline and 200% text re
   await page.close();
 });
 
+test("Real staff sessions cannot arm, seed or dispatch a held private pilot", async () => {
+  const before = (await sql("SELECT count(*)::int AS n FROM lead_notifications"))[0].n;
+  const body = {action:"seed",pilotId:randomUUID(),index:1};
+  for (const role of ["owner", "agent", "analyst", "other"]) {
+    expect((await appRequest(role,"/api/admin/allocation/pilot","POST",body)).status()).toBe(403);
+  }
+  const held = await appRequest("admin","/api/admin/allocation/pilot","POST",body);
+  expect(held.status()).toBe(409);
+  expect(await held.json()).toMatchObject({ok:false,error:"staff_pilot_activation_held"});
+  expect((await sql("SELECT count(*)::int AS n FROM lead_allocation_pilots"))[0].n).toBe(0);
+  expect((await sql("SELECT count(*)::int AS n FROM lead_notifications"))[0].n).toBe(before);
+  expect((await sql("SELECT count(*)::int AS n FROM lead_allocation_send_reservations"))[0].n).toBe(0);
+});
+
 test("Database session revocation blocks subsequent offer/API/page access", async () => {
   const id = offerFor("pass", "other").id;
   expect((await appRequest("other",`/api/admin/allocation/offers/${id}`)).status()).toBe(200);

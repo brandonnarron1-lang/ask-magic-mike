@@ -6,9 +6,11 @@ import { verifyTwilioSignature } from "@/lib/adapters/twilio-signature";
 import { classifyInboundSms } from "@/lib/messaging/sms-policy";
 import { isPreviewRuntime } from "@/lib/preview-security";
 import { processEnrolledStaffCommand } from "../../../../lib/leadAllocation";
+import { processPendingStaffPilotIntents } from "../../../../lib/leadAllocationDispatch";
 import { normalizeUsSmsRecipient } from "../../../../lib/leadNotificationProvider";
 
 export const runtime = "nodejs";
+export const maxDuration = 45;
 
 const MAX_WEBHOOK_BODY_BYTES = 20_000;
 const MAX_MESSAGE_CHARACTERS = 1_600;
@@ -367,6 +369,7 @@ export async function POST(request: NextRequest) {
   let body: string;
   let providerMessageId: string;
   let signatureVerified = false;
+  let providerOptOutType: string | undefined;
 
   if (mode === "twilio") {
     const params = parseUniqueForm(rawBody);
@@ -393,6 +396,11 @@ export async function POST(request: NextRequest) {
     body = (params.Body || "").trim();
     providerMessageId = (params.MessageSid || params.SmsSid || "").trim();
     signatureVerified = true;
+    providerOptOutType = ["STOP", "HELP", "START"].includes(params.OptOutType) ? params.OptOutType : undefined;
+    // Only provider-signed/account-bound metadata can override a customized
+    // keyword. Twilio has already replied; never duplicate that response.
+    if (providerOptOutType === "STOP") body = "STOP";
+    if (providerOptOutType === "HELP") body = "HELP";
   } else {
     const payload = parseStrictMockPayload(rawBody);
     if (!payload) {
@@ -419,8 +427,22 @@ export async function POST(request: NextRequest) {
   // changes consumer permissions. No automatic TwiML/carrier reply.
   if (mode === "twilio" && process.env.LEAD_ALLOCATION_COMMAND_SECRET) {
     try {
-      const staff = await processEnrolledStaffCommand(neon(process.env.DATABASE_URL), { from: `+1${normalizedPhone}`, body, sid: providerMessageId });
-      if (staff.handled && classification !== "stop") return webhookResponse(correlationId, staff, staff.ok ? 200 : 409);
+      const staff = await processEnrolledStaffCommand(neon(process.env.DATABASE_URL), { from: `+1${normalizedPhone}`, body, sid: providerMessageId, providerOptOutType });
+      if (staff.handled && classification !== "stop") {
+        // Canonical intent was committed first. Disabled flags do no I/O;
+        // ambiguous sends remain reserved, never a provider/TwiML fallback.
+        const transport = "replyQueued" in staff && staff.replyQueued
+          ? await processPendingStaffPilotIntents(neon(process.env.DATABASE_URL), undefined, `twilio:${providerMessageId}:staff`)
+          : { held: true, processed: 0 };
+        if (staff.ok && (("replyQueued" in staff && staff.replyQueued) || providerOptOutType === "HELP")) {
+          // The handset response uses the budgeted REST/outbox path or the
+          // provider's own opt-out reply. Never a second <Message> send.
+          return new NextResponse("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response/>", {
+            headers: { "Content-Type": "application/xml; charset=utf-8", "Cache-Control": "private, no-store", "X-Correlation-ID": correlationId },
+          });
+        }
+        return webhookResponse(correlationId, { ...staff, transport }, staff.ok ? 200 : 409);
+      }
     } catch {
       return webhookResponse(correlationId, { ok: false, error: "staff_command_unavailable" }, 503);
     }

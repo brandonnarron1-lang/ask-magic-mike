@@ -1,9 +1,35 @@
 # Owner Approval Queue
 
-Updated 2026-10-02. Release policy is
+Updated 2026-10-05. Release policy is
 `config/release-authority-policy.json`; run `pnpm release:authority:resolve`
 before binding any application gate. The resolver's authenticated receipt, not
 this queue, supplies current Production and rollback identity.
+
+## Current Post-288 boundary — supersedes historical pending statements
+
+Accepted #288 is main472b4bcd5ae367f3a3c4f1af84531cdde2439e9f,
+tree3aa30e848a2bc2013ac65bb61cd695d7adf0a096, Ready Production
+dpl_B5vrcWKotEHBz4EyBJ6bdD6veY9r; fresh resolver25/25 on2026-10-05.
+Its migration/approval are consumed, not requestable again.
+
+Next unmet gate (not approved):
+`APPROVE ASK MAGIC MIKE BOUNDED ALLOCATION SCHEDULER PRODUCTION MIGRATION, MERGE, AND SAME-TREE PRODUCTION DEPLOYMENT`.
+Applies only to draft #289 head34fd06745f94ebab1d902c98fddcf217fbd2145e,
+tree0f765c935ef57467f93c864bd543c351f5641f4b and ONE additional migration
+20261004233000_lead_allocation_scheduler_lease.sql, SHA256
+db4741b4472efc086e575353db6dd78ccac26944597fcb19ce2d359c00f0d480.
+Keep disabled; environment changes0; no cron, enrollment, pilot, provider,
+messages, spend, ordinary policy activation, WordPress/DNS/billing/other product
+or historical retry. Initial compatible application rollback is accepted #288.
+Role-aware wrapper atomicity was rehearsed against both browser-role catalogs.
+
+Independent command/pilot-readiness successor is separately reviewed, not part
+of #289 authority. Its capability-only migration adds an empty private scope;
+default flags remain false. Account/sender/pricing, two genuine staff endpoints,
+consent/possession, window and proposed usage cap remain independent gates.
+No pilot release or paid send approval is currently requested. Use the existing
+[operator guide](phase9/REFERENCE_LEAD_ALLOCATION_2026-10-04.md) completion
+register/combined packet; do not create another approval queue or routing stack.
 
 The queue was previously updated 2026-10-01 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This
