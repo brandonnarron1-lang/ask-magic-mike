@@ -64,6 +64,9 @@ jobs:
       - name: Isolated PostgreSQL notification reliability and recovery
         run: pnpm run test:postgres:notification-reliability
 
+      - name: Isolated PostgreSQL reference allocation and no-send claims
+        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/reference-allocation-postgres.test.ts
+
       - name: Typecheck
         run: pnpm run typecheck
 
@@ -72,6 +75,12 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+      - name: Install Chromium for isolated real-session acceptance
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Built application real-session and signed HTTP-to-SQL acceptance
+        run: pnpm run test:reference:sessions
 
       - name: Assert canonical route manifest and cron targets
         run: pnpm run routes:assert
@@ -90,6 +99,8 @@ jobs:
           path: |
             artifacts/*.json
             artifacts/*.md
+            .amm-run/reference-session-acceptance/receipt.json
+            .amm-run/reference-session-acceptance/performance.json
           if-no-files-found: ignore
 
       - name: Summarize failed release gate

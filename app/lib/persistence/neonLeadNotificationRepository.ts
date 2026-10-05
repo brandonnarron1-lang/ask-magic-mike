@@ -165,6 +165,7 @@ export class NeonLeadNotificationRepository implements LeadNotificationRepositor
         )
           AND n.attempt_count < n.max_attempts
           AND n.provider_message_id IS NULL
+          AND n.notification_type NOT IN ('allocation_offer','allocation_confirmation')
           AND l.is_test = false AND l.communication_suppressed = false
           AND l.email_suppressed = false AND l.sms_suppressed = false
         ORDER BY

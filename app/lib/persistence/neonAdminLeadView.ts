@@ -64,10 +64,10 @@ const TIMELINE_SOURCE_QUERIES = {
                      FROM public.lead_notifications
                     WHERE lead_id = $1::uuid
                     ORDER BY COALESCE(sent_at, failed_at, updated_at, created_at) DESC, id DESC LIMIT $2`,
-  appointments: `SELECT * FROM public.lead_appointments
+  appointments: `SELECT *, updated_at::text AS updated_at FROM public.lead_appointments
                     WHERE lead_id = $1::uuid
                     ORDER BY COALESCE(updated_at, created_at) DESC, id DESC LIMIT $2`,
-  tasks: `SELECT * FROM public.tasks
+  tasks: `SELECT *, updated_at::text AS updated_at FROM public.tasks
            WHERE lead_id = $1::uuid
            ORDER BY COALESCE(updated_at, created_at, due_at) DESC, id DESC LIMIT $2`,
   outcomes: `SELECT id, outcome_type, amount_usd, occurred_at, source_system,

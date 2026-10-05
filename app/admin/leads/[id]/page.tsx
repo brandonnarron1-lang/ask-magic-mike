@@ -23,6 +23,9 @@ import { requireLeadCenterLeadPermission } from "../../../../src/lib/admin/rbac-
 import { hasLeadCenterPermission } from "../../../../src/lib/admin/rbac-policy";
 import { Phase6CopilotPanel } from "../../../../src/components/admin/phase6-copilot-panel";
 import { Phase7MessagingControlPanel } from "../../../../src/components/admin/phase7-messaging-control-panel";
+import { ReferenceLeadCard } from "../../../components/admin/ReferenceLeadCard";
+import { presentLead, leadSubtype } from "../../../lib/leadPresentation";
+import { LeadEvidenceWorkspace } from "../../../components/admin/LeadEvidenceWorkspace";
 import {
   createAppointmentAction,
   createFollowupTaskAction,
@@ -650,6 +653,8 @@ export default async function AdminLeadDetailPage({
         ) : (
           <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
             <section className="space-y-5">
+              {principal ? <ReferenceLeadCard view={presentLead({ lead, principal, tier: "assigned", evidence: {appointments:detail.appointments,followupTasks:detail.followupTasks,outcomes:detail.outcomes} })} /> : null}
+              {(["seller","cash_seller","investor_buyer"] as string[]).includes(leadSubtype(lead)) ? <LeadEvidenceWorkspace leadId={lead.id} kind={leadSubtype(lead) as "seller"|"cash_seller"|"investor_buyer"} allowed={canUpdateLead&&!lead.is_test&&!lead.communication_suppressed}/> : null}
               <Panel title="Lead state">
                 <div className="flex flex-wrap gap-2">
                   <Badge>{lead.status}</Badge>
@@ -691,14 +696,14 @@ export default async function AdminLeadDetailPage({
                 </Panel>
               ) : null}
 
-              <Phase6CopilotPanel
+              <div id="next-action-review"><Phase6CopilotPanel
                 leadId={lead.id}
                 isTest={lead.is_test}
                 suppressed={lead.communication_suppressed}
                 initialDrafts={detail.aiDrafts || []}
-              />
+              /></div>
 
-              <Phase7MessagingControlPanel leadId={lead.id} />
+              <div id="message-review"><Phase7MessagingControlPanel leadId={lead.id} /></div>
 
               <Panel title="Lifecycle controls">
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -717,7 +722,7 @@ export default async function AdminLeadDetailPage({
                 </p>
               </Panel>
 
-              <AppointmentPanel leadId={lead.id} appointments={detail.appointments} />
+              <div id="appointment-review"><AppointmentPanel leadId={lead.id} appointments={detail.appointments} /></div>
 
               <OutcomePanel
                 outcomes={detail.outcomes}
@@ -771,7 +776,7 @@ export default async function AdminLeadDetailPage({
                 </dl>
               </Panel>
 
-              <Panel title="Operational profile">
+              <div id="contact-review"><Panel title="Operational profile">
                 <dl className="grid gap-4">
                   <Field label="Name" value={lead.name || "Not provided"} />
                   <Field label="Contact" value={lead.contact_summary} />
@@ -780,7 +785,7 @@ export default async function AdminLeadDetailPage({
                   <Field label="Grade" value={lead.lead_grade || "Unknown"} />
                   <Field label="Assigned agent" value={lead.assigned_agent_id || "Unassigned"} />
                 </dl>
-              </Panel>
+              </Panel></div>
             </aside>
           </div>
         )}

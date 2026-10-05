@@ -664,6 +664,13 @@ describe("POST /api/leads atomic lifecycle command", () => {
     expect(mock).not.toHaveBeenCalled();
   });
 
+  it.each([ ["investor","buy"], ["seller_cash_offer","sell"] ])("keeps %s distinct in the canonical capture transaction",async(leadType,intent)=>{
+    const {calls}=installRpc();
+    const response=await POST(request({funnel_type:leadType==="investor"?"buyer":"seller",lead_type:leadType,lead_source_surface:leadType==="investor"?"buyer_page":"seller_page",name:"INTERNAL QA DO NOT CONTACT",email:"synthetic@example.test",phone:"9195550100",address:"INTERNAL QA — DO NOT CONTACT — synthetic property",question:"INTERNAL QA DO NOT CONTACT — isolated subtype contract"}));
+    expect(response.status,JSON.stringify(await response.clone().json())).toBe(200);
+    expect(calls[0].body.p_lead).toMatchObject({lead_type:leadType,primary_intent:intent,is_test:true,communication_suppressed:true});
+  });
+
   it("maps seller and chat leads without changing the public response shape", async () => {
     const seller = installRpc();
     const sellerResponse = await POST(request({

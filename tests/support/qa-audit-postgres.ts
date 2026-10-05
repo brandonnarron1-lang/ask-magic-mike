@@ -83,14 +83,22 @@ export function acceptedFunction(): string {
   return match[0];
 }
 
-export async function startDatabase(): Promise<void> {
+export async function startDatabase(options: { loopbackTcp?: boolean } = {}): Promise<string | undefined> {
   if (process.env.AMM_QA_POSTGRES_TEST !== "1") throw new Error("explicit_isolated_test_required");
-  execFileSync("docker", ["run", "-d", "--name", container, "--network", "none", "--memory", "512m",
+  // Docker Desktop does not publish ports for internal-only networks. Opt-in
+  // real-session tests use a disposable bridge with strictly loopback binding;
+  // their built-app transport refuses nonlocal DBs and all external fetches.
+  execFileSync("docker", ["run", "-d", "--name", container, "--network", options.loopbackTcp ? "bridge" : "none", "--memory", "512m",
+    ...(options.loopbackTcp ? ["-p", "127.0.0.1::5432"] : []),
     "--label", "com.askmagicmike.purpose=qa-audit-isolated", "-e", "POSTGRES_HOST_AUTH_METHOD=trust", "postgres:17-alpine"]);
   containerStarted = true;
   const identity = JSON.parse(execFileSync("docker", ["inspect", container], { encoding: "utf8" }))[0];
-  if (identity.HostConfig.NetworkMode !== "none" || Object.keys(identity.HostConfig.PortBindings || {}).length ||
-    identity.Config.Labels["com.askmagicmike.purpose"] !== "qa-audit-isolated") throw new Error("container_isolation_failed");
+  const ports = identity.HostConfig.PortBindings || {};
+  const networkOk = options.loopbackTcp
+    ? identity.HostConfig.NetworkMode === "bridge" &&
+      Object.keys(ports).length === 1 && ports["5432/tcp"]?.every((binding: { HostIp: string }) => binding.HostIp === "127.0.0.1")
+    : identity.HostConfig.NetworkMode === "none" && Object.keys(ports).length === 0;
+  if (!networkOk || identity.Config.Labels["com.askmagicmike.purpose"] !== "qa-audit-isolated") throw new Error("container_isolation_failed");
   let ready = false;
   for (let i = 0; i < 60; i++) {
     try {
@@ -104,6 +112,10 @@ export async function startDatabase(): Promise<void> {
     input: "CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role BYPASSRLS; CREATE DATABASE amm_qa_upgrade; CREATE DATABASE amm_qa_fresh;",
     stdio: ["pipe", "ignore", "pipe"],
   });
+  if (options.loopbackTcp) {
+    const port = JSON.parse(execFileSync("docker", ["inspect", container], { encoding: "utf8" }))[0].NetworkSettings.Ports["5432/tcp"][0].HostPort;
+    return `postgresql://postgres@127.0.0.1:${port}/${database}`;
+  }
 }
 
 export function install(db: "amm_qa_upgrade" | "amm_qa_fresh", includeRepair: boolean): void {

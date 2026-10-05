@@ -8,6 +8,7 @@ import {
 import { MESSAGE_SEQUENCES } from "../../../src/lib/messaging/sequence-engine";
 import { smsSegmentCount } from "../../../src/lib/messaging/sms-policy";
 import { LeadAlertPreviewGallery } from "../../components/admin/LeadAlertPreviewGallery";
+import { CrossChannelReviewStudio } from "../../components/admin/CrossChannelReviewStudio";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -47,6 +48,7 @@ export default async function MessagePreviewPage() {
           </p>
         </header>
 
+        <CrossChannelReviewStudio />
         <section className="mt-8 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
           <div className="rounded-xl border border-white/10 bg-[#0b0b0b] p-4">
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-[#e2c06f]">Responsive email QA rendering</p>

@@ -21,6 +21,11 @@ function lead(overrides: Record<string, unknown> = {}) {
 }
 
 describe("Agent Command Center Today projection", () => {
+  it("reads native driver dates and does not lose a stale pending notification",()=>{
+    const result=buildAdminTodayQueue({leads:[lead({created_at:new Date("2026-10-02T14:00:00Z")})],appointments:[],tasks:[],now:NOW,
+      notifications:[{id:"pending-native",lead_id:lead().id,status:"pending",attempt_count:0,created_at:new Date("2026-10-02T14:00:00Z")}]});
+    expect(result.items.some(item=>item.reasonCodes.includes("notification_pending_stale"))).toBe(true);
+  });
   it("distinguishes never-claimed pending risk from ambiguous provider reconciliation without activating retries", () => {
     const leadId = String(lead().id);
     const result = buildAdminTodayQueue({ leads: [lead()], appointments: [], tasks: [], now: NOW,
