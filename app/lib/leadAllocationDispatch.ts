@@ -14,12 +14,16 @@ function configuredTransportReady(mobile:boolean) {
 
 /** Shared bounded post-commit processor for the protected admin and machine
  * venues. It cannot select old failures, retries or consumer messages. */
-export async function processPendingAllocationIntents(sql:AllocationQuery) {
+export async function processPendingAllocationIntents(sql:AllocationQuery,controls?:{beforeEach:()=>Promise<boolean>}) {
  if(process.env.LEAD_ALLOCATION_ENABLED!=="true"||process.env.LEAD_ALLOCATION_SENDS_ENABLED!=="true"||process.env.LEAD_ALLOCATION_TRANSPORT_APPROVED!=="true"||notificationMode()!=="production"||!productionNotificationDeliveryEnabled())return {held:true,processed:0,noHistoricalRetries:true};
  const pending=await sql.query("SELECT id FROM public.lead_notifications WHERE notification_type IN ('allocation_offer','allocation_confirmation') AND status='pending' AND attempt_count=0 AND provider_message_id IS NULL ORDER BY created_at,id LIMIT 5");
  const provider=selectNotificationProvider(),results=[];
- for(const row of pending)results.push(await dispatchAllocationIntent(sql,provider,String(row.id),{segmentCostMicros:Number(process.env.LEAD_ALLOCATION_SEGMENT_COST_MICROS),mmsCostMicros:Number(process.env.LEAD_ALLOCATION_MMS_COST_MICROS),mmsReady:process.env.LEAD_ALLOCATION_MMS_FETCH_VERIFIED==="true"}));
- return {held:false,processed:results.length,results,noHistoricalRetries:true};
+ for(const row of pending){
+  if(controls&&!await controls.beforeEach())break;
+  results.push(await dispatchAllocationIntent(sql,provider,String(row.id),{segmentCostMicros:Number(process.env.LEAD_ALLOCATION_SEGMENT_COST_MICROS),mmsCostMicros:Number(process.env.LEAD_ALLOCATION_MMS_COST_MICROS),mmsReady:process.env.LEAD_ALLOCATION_MMS_FETCH_VERIFIED==="true"}));
+ }
+ return {held:false,processed:results.length,accepted:results.filter(result=>result.ok===true).length,
+  reconciliationRequired:results.filter(result=>"reconciliationRequired" in result&&result.reconciliationRequired).length,results,noHistoricalRetries:true};
 }
 
 /** Only new allocation intents. Never general retries. All sends happen after

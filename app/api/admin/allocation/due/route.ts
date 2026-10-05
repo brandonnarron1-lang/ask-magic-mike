@@ -3,7 +3,8 @@ import { requireLeadCenterApiPermission } from "../../../../../src/lib/admin/rba
 import { allocationQuery } from "../../../../lib/leadAllocation";
 import { assertDatabaseMutationAllowed } from "../../../../../src/lib/preview-security";
 import { checkBearerSecret } from "../../../../../src/lib/admin/auth";
-import { processPendingAllocationIntents } from "../../../../lib/leadAllocationDispatch";
+import { runAllocationScheduler } from "../../../../lib/leadAllocationScheduler";
+export const maxDuration=45;
 export async function GET(request:NextRequest) {
  const headers={"Cache-Control":"private, no-store"};
  // Machine-authenticated due endpoint only; human/browser GET cannot mutate.
@@ -11,7 +12,7 @@ export async function GET(request:NextRequest) {
  const gate=assertDatabaseMutationAllowed();if(!gate.ok)return NextResponse.json({ok:false,error:gate.error},{status:gate.statusCode,headers});
  if(process.env.LEAD_ALLOCATION_DUE_ENABLED!=="true"||process.env.LEAD_ALLOCATION_ENABLED!=="true")return NextResponse.json({ok:true,held:true,processed:0},{headers});
  const sql=allocationQuery();if(!sql)return NextResponse.json({ok:false,error:"database_unavailable"},{status:503,headers});
- try{const rows=await sql.query("SELECT public.expire_lead_allocation_offers_v1(25) AS result");const dispatch=await processPendingAllocationIntents(sql);return NextResponse.json({...rows[0]?.result as object,dispatch},{headers});}catch{return NextResponse.json({ok:false,error:"allocation_due_failed"},{status:503,headers});}
+ try{const result=await runAllocationScheduler(sql);return NextResponse.json(result,{status:result.ok?200:503,headers});}catch{return NextResponse.json({ok:false,error:"allocation_due_failed"},{status:503,headers});}
 }
 export async function POST(request:NextRequest) {
  const headers={"Cache-Control":"private, no-store"};
