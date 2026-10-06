@@ -15,6 +15,7 @@ import { GET as dueGet } from "../../app/api/admin/allocation/due/route";
 import { GET as offerGet } from "../../app/api/admin/allocation/offers/[id]/route";
 import { GET as enrollmentGet } from "../../app/api/admin/allocation/enrollment/route";
 import { allocationQuery } from "../../app/lib/leadAllocation";
+import { POST as pilotPost } from "../../app/api/admin/allocation/pilot/route";
 const lead="00000000-0000-4000-8000-000000007711",agent="00000000-0000-4000-8000-000000007712";
 function request(path:string,body:object,origin="https://www.askmagicmike.com"){return new NextRequest(`https://www.askmagicmike.com${path}`,{method:"POST",headers:{"Content-Type":"application/json",Origin:origin},body:JSON.stringify(body)});}
 beforeEach(()=>{
@@ -24,6 +25,19 @@ beforeEach(()=>{
  mocks.task.mockResolvedValue({ok:true,value:{taskId:"fixture-task",auditId:"fixture-audit",createdAt:"2026-10-04T16:00:00Z"}});
 });
 describe("reference allocation actual route guards — isolated mocked session, no send",()=>{
+ it("pilot stays admin/same-origin/Preview gated with no request-authored recipients, scopes or prices",async()=>{
+  const body={action:'seed',pilotId:lead,index:1};
+  expect((await pilotPost(request('/api/admin/allocation/pilot',body))).status).toBe(403);
+  expect(mocks.query).not.toHaveBeenCalled();mocks.principal!.role='administrator';
+  expect((await pilotPost(request('/api/admin/allocation/pilot',body,'https://unowned.invalid'))).status).toBe(403);
+  expect((await pilotPost(request('/api/admin/allocation/pilot',body))).status).toBe(409);
+  vi.stubEnv('LEAD_ALLOCATION_STAFF_PILOT_ENABLED','true');vi.stubEnv('VERCEL_ENV','preview');
+  expect((await pilotPost(request('/api/admin/allocation/pilot',body))).status).toBe(503);
+  expect(mocks.query).not.toHaveBeenCalled();vi.stubEnv('VERCEL_ENV','development');
+  expect((await pilotPost(request('/api/admin/allocation/pilot',{...body,recipient:'+19195550199',budget:1}))).status).toBe(400);
+  expect(mocks.query).not.toHaveBeenCalled();mocks.query.mockResolvedValue([]);
+  expect((await pilotPost(request('/api/admin/allocation/pilot',body))).status).toBe(409);
+ });
  it("same-origin assigned task uses the existing canonical transaction",async()=>{
   const response=await createTask(request(`/api/admin/leads/${lead}/tasks`,{title:"Synthetic evidence task",body:"No send",category:"evidence_review",priority:"normal"}),{params:Promise.resolve({id:lead})});
   expect(response.status).toBe(200);expect(mocks.task).toHaveBeenCalledWith(expect.objectContaining({leadId:lead,agentId:agent,actor:"lead_center:fixture-staff"}));

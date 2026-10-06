@@ -1,9 +1,40 @@
 # Owner Approval Queue
 
-Updated 2026-10-02. Release policy is
+Updated 2026-10-05. Release policy is
 `config/release-authority-policy.json`; run `pnpm release:authority:resolve`
 before binding any application gate. The resolver's authenticated receipt, not
 this queue, supplies current Production and rollback identity.
+
+## Current Post-289 boundary — supersedes historical pending statements
+
+Accepted #289 is main `b8aba8b091a5dda38bf8b474dcaeadd8cc36d399`,
+tree `0f765c935ef57467f93c864bd543c351f5641f4b`, Ready Production
+`dpl_81e1MY7Y79dQcYYcoTq1U72ED1ZZ`; fresh resolver25/25 at16:00:32Z
+on2026-10-05. Its receipt is the authority; #288/#289 approvals and migrations
+are consumed, not requestable again. Read-only Neon at16:09:30Z confirms #289
+ledger1/exact SHA, inactive policy/zero budgets, lease/enrollment/offer/command/
+reservation0, no #290 ledger or pilot table. Historical evidence below remains.
+
+Next unmet gate (not approved):
+`APPROVE ASK MAGIC MIKE STAFF PILOT COMMAND READINESS PRODUCTION MIGRATION, MERGE, AND SAME-TREE PRODUCTION DEPLOYMENT`.
+Applies only to separately sealed draft #290 and ONE additional migration
+`20261005140000_staff_allocation_pilot.sql`, SHA256
+`c7673e70ea45ed0055216d0af9a0f7bb1b40e9d993ff790fe04a3ee040820b52`.
+Accepted main was forward-merged without rewriting history; the current PR seal
+must bind the final head/tree, hosted gate and immutable Preview before approval.
+Keep disabled; environment changes0; no cron, roster, enrollment, pilot scope,
+provider changes, messages, spend, ordinary policy activation, WordPress/DNS/
+billing/other product or historical retry. Compatible rollback is accepted #289.
+
+The capability-only migration adds an empty private scope; default flags remain
+false. After owner sign-in, Twilio's account chooser shows **No Accounts Yet**
+(2026-10-05); no account/subaccount or sender can be verified in this identity.
+Account creation/purchase/setup remains held, not inferred from login authority.
+Two genuine staff endpoints, consent/possession, fallback, current sender quote,
+window and proposed usage cap remain independent gates. No paid pilot approval
+is currently requested. Use the existing
+[operator guide](phase9/REFERENCE_LEAD_ALLOCATION_2026-10-04.md) completion
+register/combined packet; do not create another approval queue or routing stack.
 
 The queue was previously updated 2026-10-01 from authenticated GitHub, Vercel, Neon, WordPress, and
 Production evidence. The public funnel and internal email path are live. This

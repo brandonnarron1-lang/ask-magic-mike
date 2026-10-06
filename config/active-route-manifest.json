@@ -33,6 +33,7 @@
     "/api/admin/allocation/enrollment",
     "/api/admin/allocation/offers",
     "/api/admin/allocation/offers/[id]",
+    "/api/admin/allocation/pilot",
     "/api/admin/allocation/process",
     "/api/admin/copilot/drafts/[draftKey]",
     "/api/admin/copilot/jobs",
@@ -144,6 +145,7 @@
     ]
   },
   "classifications": {
+    "/api/admin/allocation/pilot": "active-same-origin-rbac-private-allowlisted-expiring-staff-qa-scope-default-held",
     "/distribution": "inactive-src-only",
     "/campaigns": "inactive-src-only",
     "/admin/traffic": "inactive-src-only",

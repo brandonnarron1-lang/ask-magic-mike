@@ -6,6 +6,7 @@ import { normalizeAdminLeadRow } from "./persistence/supabase/adminLeadView";
 import { presentLead, type LeadOfferSnapshot } from "./leadPresentation";
 import { checkRateLimit, durableRateLimitRequired } from "../../src/lib/security/rate-limit";
 import { normalizeUsSmsRecipient } from "./leadNotificationProvider";
+import { pilotOfferAllowed, queueStaffCommandReply } from "./staffAllocationPilot";
 
 export type AllocationQuery = { query(sql: string, params?: unknown[]): Promise<Array<Record<string, unknown>>> };
 export { ALLOCATION_CONSENT_VERSION,ALLOCATION_CONSENT_TEXT } from "./leadAllocationConsent";
@@ -41,7 +42,7 @@ export function parseStaffCommand(body: string) {
   const normalized = body.trim().toUpperCase();
   const scoped = /^(CLAIM|PASS|STATUS|VERIFY) ([A-HJ-NP-Z2-9]{8})$/.exec(normalized);
   if (scoped) return { action: scoped[1].toLowerCase() as "claim" | "pass" | "status" | "verify", code: scoped[2] };
-  if (/^(PAUSE|RESUME|HELP|STOP|STOPALL|UNSUBSCRIBE|CANCEL|END|QUIT)$/.test(normalized)) return { action: ["STOPALL","UNSUBSCRIBE","CANCEL","END","QUIT"].includes(normalized) ? "stop" : normalized.toLowerCase(), code: null };
+  if (/^(PAUSE|RESUME|HELP|INFO|STOP|STOPALL|UNSUBSCRIBE|CANCEL|END|QUIT)$/.test(normalized)) return { action: ["STOPALL","UNSUBSCRIBE","CANCEL","END","QUIT"].includes(normalized) ? "stop" : normalized === "INFO" ? "help" : normalized.toLowerCase(), code: null };
   return null;
 }
 export function commandRequestHash(offerId: string, version: number, actor: string, action: string) {
@@ -53,7 +54,7 @@ export async function loadAllocationOffer(sql: AllocationQuery, id: string, prin
   const rows = await sql.query(`SELECT o.*, l.*, o.id AS offer_id, o.state AS offer_state,o.version AS offer_version,o.agent_id AS offer_agent_id,o.reference AS offer_reference,
     e.user_id AS intended_user,e.paused AS recipient_paused,p.active AS policy_active,p.version AS current_policy_version FROM public.lead_allocation_offers o
     JOIN public.leads l ON l.id=o.lead_id JOIN public.agent_operational_enrollment e ON e.agent_id=o.agent_id
-    JOIN public.lead_center_users u ON u.id=e.user_id CROSS JOIN public.lead_allocation_policy p
+    JOIN public.lead_center_users u ON u.id=e.user_id CROSS JOIN LATERAL public.effective_lead_allocation_policy_v1(l.id) p
     WHERE p.id='staff_v1' AND o.id=$1::uuid AND e.user_id=$2 AND u.banned IS NOT TRUE AND u.role IN ('approved_agent','primary_lead_owner') AND u."agentId"=o.agent_id::text AND e.revoked_at IS NULL`, [id, principal.userId]);
   const row = rows[0]; if (!row) return null;
   const deadline = String(row.deadline);
@@ -69,7 +70,7 @@ export async function resolveAllocationOffer(sql: AllocationQuery, input: { offe
 
 /** Verified Twilio handler calls this AFTER signature/account/destination
  * checks. No arbitrary public phone or principal can invoke the operation. */
-export async function processEnrolledStaffCommand(sql: AllocationQuery, input: { from: string; body: string; sid: string }) {
+export async function processEnrolledStaffCommand(sql: AllocationQuery, input: { from: string; body: string; sid: string; providerOptOutType?: string }) {
   const fingerprint = staffPhoneFingerprint(input.from);
   const matches = await sql.query(`SELECT e.*,g.notification_phone,u.role,u.banned,u."agentId" AS user_agent_id FROM public.agent_operational_enrollment e
     JOIN public.agents g ON g.id=e.agent_id JOIN public.lead_center_users u ON u.id=e.user_id
@@ -84,10 +85,15 @@ export async function processEnrolledStaffCommand(sql: AllocationQuery, input: {
   const limit=await checkRateLimit(`staff-command:${fingerprint}`,10,60_000);
   // Opt-out must not be rejected by challenge or command throttles.
   if(command.action!=="stop"&&(!limit.allowed||(durableRateLimitRequired()&&!limit.durable)))return {handled:true,ok:false,error:"staff_command_rate_limit"};
+  const reply = (action: string, state?: string) => queueStaffCommandReply(sql, {
+    agentId: String(staff.agent_id), userId: String(staff.user_id), sid: input.sid,
+    fingerprint, body: input.body, action, state, providerOptOutType: input.providerOptOutType,
+  });
   if(command.action==="verify") {
     const hash=createHash("sha256").update(command.code!).digest("hex");
     const rows=await sql.query("SELECT public.verify_staff_allocation_possession_v1($1::uuid,$2,$3,$4,$5) AS result",[staff.agent_id,staff.user_id,fingerprint,hash,`twilio:${input.sid}:staff`]);
-    return {handled:true,...(rows[0]?.result as object),action:"verify",replyQueued:false};
+    const result=rows[0]?.result as {ok?:boolean};
+    return {handled:true,...result,action:"verify",...(result?.ok?await reply("verify"):{replyQueued:false})};
   }
   if(command.action!=="stop"&&!staff.possession_verified_at)return {handled:true,ok:false,error:"staff_possession_unverified"};
   // STOP is processed even with outbound dispatch off. RESUME does not grant
@@ -102,16 +108,19 @@ export async function processEnrolledStaffCommand(sql: AllocationQuery, input: {
       audit AS (INSERT INTO public.audit_logs(actor,action,resource_type,resource_id,metadata) SELECT $2,'allocation.staff_'||$4,'agent',agent_id,jsonb_build_object('receipt',$1) FROM changed RETURNING id)
       SELECT request_hash,result FROM public.lead_allocation_command_receipts WHERE receipt_key=$1 UNION ALL SELECT $3,jsonb_build_object('ok',true,'action',$4) FROM receipt`, [`twilio:${input.sid}:staff`,String(staff.user_id),hash,command.action,staff.agent_id]);
     if (rows[0]?.request_hash !== hash) return { handled: true, ok: false, error: "command_receipt_conflict" };
-    return { handled: true, ok: true, action: command.action };
+    return { handled: true, ok: true, action: command.action, ...await reply(command.action) };
   }
-  if (command.action === "help") return { handled: true, ok: true, action: "help", replyQueued: false };
+  if (command.action === "help") return { handled: true, ok: true, action: "help", ...await reply("help") };
   if (staff.consent_at == null || !staff.sms_enabled) return { handled: true, ok: false, error: "staff_sms_not_enrolled" };
   const rows = await sql.query("SELECT id,version,agent_id,deadline,state FROM public.lead_allocation_offers WHERE agent_id=$1::uuid AND deadline>now()-interval '15 minutes' ORDER BY created_at DESC LIMIT 20", [staff.agent_id]);
   const offer = rows.find(row => { const expected=allocationCommandCode({ id:String(row.id),version:Number(row.version),agentId:String(row.agent_id) }); return command.code && timingSafeEqual(Buffer.from(expected),Buffer.from(command.code)); });
   if (!offer) return { handled:true,ok:false,error:"invalid_or_stale_offer_code" };
-  if (command.action === "status") return { handled:true,ok:true,state:offer.state==="offered"&&new Date(String(offer.deadline)).getTime()<=Date.now()?"expired":offer.state,replyQueued:false };
-  const gate=allocationMutationGate(); if (!gate.ok) return {handled:true,ok:false,error:gate.error};
+  if (command.action === "status") {
+    const state=offer.state==="offered"&&new Date(String(offer.deadline)).getTime()<=Date.now()?"expired":String(offer.state);
+    return { handled:true,ok:true,state,...await reply("status",state) };
+  }
+  const gate=allocationMutationGate(); if (!gate.ok && !await pilotOfferAllowed(sql,String(offer.id),String(staff.user_id))) return {handled:true,ok:false,error:gate.error};
   const result=await resolveAllocationOffer(sql,{offerId:String(offer.id),version:Number(offer.version),userId:String(staff.user_id),action:command.action as "claim"|"pass",receipt:`twilio:${input.sid}:staff`});
-  return {handled:true,...result};
+  return {handled:true,...result,...(result?.ok?await reply(command.action,result.state):{replyQueued:false})};
 }
 export function createPossessionChallenge() { const alphabet="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; const value=Array.from(randomBytes(8),b=>alphabet[b%alphabet.length]).join(""); return { value, hash:createHash("sha256").update(value).digest("hex") }; }
