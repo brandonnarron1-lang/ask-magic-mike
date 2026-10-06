@@ -186,6 +186,9 @@ export async function loadNeonAdminLeadInbox(
       error: "lead_center_principal_required",
     };
   }
+  if (!hasLeadCenterPermission(principal.role, "lead:view_assigned")) {
+    return { configured: true, leads: [], page: { offset, limit: cappedLimit, total: 0, hasMore: false }, error: "lead_center_lead_permission_required" };
+  }
   try {
     const scoped = !hasLeadCenterPermission(principal.role, "lead:view_all");
     if (scoped && !principal.agentId) {
@@ -266,6 +269,9 @@ export async function loadNeonAdminLeadDetail(
   }
   if (!principal) {
     return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], firstResponse: null, error: "lead_center_principal_required" };
+  }
+  if (!hasLeadCenterPermission(principal.role, "lead:view_assigned")) {
+    return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], firstResponse: null, error: "lead_center_lead_permission_required" };
   }
 
   try {

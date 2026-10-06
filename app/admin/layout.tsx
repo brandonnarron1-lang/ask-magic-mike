@@ -4,6 +4,11 @@ import { isPreviewDataDisabled } from "../../src/lib/preview-security";
 import { requireLeadCenterAuthenticated } from "../../src/lib/admin/rbac-session";
 import { hasLeadCenterPermission, type LeadCenterPermission } from "../../src/lib/admin/rbac-policy";
 
+// Identity may be configured after build. Redirect aliases also inherit this
+// authenticated layout: never prerender/prefetch it as a static, shared shell.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const PRIMARY_NAVIGATION: Array<[string, string, LeadCenterPermission]> = [
   ["Today", "/admin/today", "lead:view_assigned"],
   ["Leads", "/admin/leads", "lead:view_assigned"],

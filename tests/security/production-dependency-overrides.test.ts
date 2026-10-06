@@ -10,7 +10,8 @@ describe("production dependency security overrides", () => {
 
     expect(packageJson.pnpm?.overrides?.["browserslist@<=4.28.6"]).toBe("4.28.8");
     expect(packageJson.pnpm?.overrides?.["js-yaml"]).toBe("4.3.2");
-    expect(packageJson.pnpm?.overrides?.["sharp@<0.35.4"]).toBe("0.35.4");
+    expect(packageJson.pnpm?.overrides?.["sharp@<0.35.5"]).toBe("0.35.5");
+    expect(packageJson.pnpm?.overrides?.["source-map-js@<1.2.2"]).toBe("1.2.2");
     expect(packageJson.dependencies?.next).toBe("^15.5.24");
     expect(packageJson.dependencies?.nodemailer).toBe("10.0.12");
     expect(packageJson.devDependencies?.vitest).toBe("4.1.11");
@@ -18,7 +19,10 @@ describe("production dependency security overrides", () => {
     expect(lockfile).toContain("js-yaml@4.3.2:");
     expect(lockfile).toContain("next@15.5.26");
     expect(lockfile).toContain("nodemailer@10.0.12:");
-    expect(lockfile).toContain("sharp@0.35.4:");
+    expect(lockfile.includes("sharp@0.35.5:")).toBe(true);
+    expect(lockfile.includes("source-map-js@1.2.2:")).toBe(true);
+    expect(lockfile).not.toMatch(/^ {2}sharp@0\.35\.[0-4]:/m);
+    expect(lockfile).not.toMatch(/^ {2}source-map-js@1\.2\.[01]:/m);
     expect(lockfile).toContain("vitest@4.1.11:");
     expect(lockfile).not.toMatch(/^ {2}browserslist@4\.28\.[0-6]:/m);
     expect(lockfile).not.toMatch(/^ {2}js-yaml@4\.3\.[01]:/m);

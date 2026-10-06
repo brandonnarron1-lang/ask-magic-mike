@@ -73,6 +73,9 @@ jobs:
       - name: Isolated staff-only pilot scopes, replies and canonical budget fences
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/staff-allocation-pilot-postgres.test.ts
 
+      - name: Isolated PostgreSQL conversion atomicity and complete reporting
+        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/conversion-transaction-postgres.test.ts tests/persistence/conversion-reporting-postgres.test.ts --maxWorkers=1 --no-file-parallelism
+
       - name: Typecheck
         run: pnpm run typecheck
 
@@ -87,6 +90,9 @@ jobs:
 
       - name: Built application real-session and signed HTTP-to-SQL acceptance
         run: pnpm run test:reference:sessions
+
+      - name: Built application conversion journey and responsive acceptance
+        run: AMM_CONVERSION_SESSION_ACCEPTANCE=1 pnpm run test:reference:sessions
 
       - name: Assert canonical route manifest and cron targets
         run: pnpm run routes:assert
@@ -106,6 +112,7 @@ jobs:
             artifacts/*.json
             artifacts/*.md
             .amm-run/reference-session-acceptance/receipt.json
+            .amm-run/reference-session-acceptance/conversion-receipt.json
             .amm-run/reference-session-acceptance/performance.json
           if-no-files-found: ignore
 

@@ -1,9 +1,8 @@
 // @vitest-environment node
 import {randomUUID} from "node:crypto";
 import {createHash} from "node:crypto";
-import {execFileSync} from "node:child_process";
 import {afterAll,beforeAll,describe,expect,it,vi} from "vitest";
-import {container,concurrent,install,localQuery,psql,startDatabase,stopDatabase} from "../support/qa-audit-postgres";
+import {dumpAndRestoreSyntheticDatabase,concurrent,install,localQuery,psql,startDatabase,stopDatabase} from "../support/qa-audit-postgres";
 import {runAllocationScheduler} from "../../app/lib/leadAllocationScheduler";
 import {resolveAllocationOffer} from "../../app/lib/leadAllocation";
 const transport=vi.hoisted(()=>({send:vi.fn(async()=>({ok:true as const,provider:"synthetic-no-network",providerMessageId:`SYNTHETIC-${Math.random()}`}))}));
@@ -112,8 +111,7 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST==="1")("scheduler lease — actu
   expect(transport.send).toHaveBeenCalledTimes(13); // no overload sends
  },30000);
  it("synthetic-only pg_dump/restore roundtrip preserves rows, functions and denied browser ACLs",()=>{
-  const dump=execFileSync("docker",["exec",container,"pg_dump","-U","postgres","-d","amm_qa_upgrade","-Fc"],{maxBuffer:32*1024*1024});
-  execFileSync("docker",["exec","-i",container,"pg_restore","-U","postgres","-d","amm_qa_fresh","--exit-on-error"],{input:dump,stdio:["pipe","ignore","pipe"]});
+  const dump=dumpAndRestoreSyntheticDatabase();
   const totals="SELECT json_build_object('leads',(SELECT count(*) FROM leads),'intents',(SELECT count(*) FROM lead_notifications),'assignments',(SELECT count(*) FROM agent_assignments),'audit',(SELECT count(*) FROM audit_logs),'lease',(SELECT run_count FROM lead_allocation_scheduler_lease));";
   expect(psql(totals,"amm_qa_fresh")).toBe(psql(totals));
   // Resolve actual overload by catalog identity; no guessed function arguments.

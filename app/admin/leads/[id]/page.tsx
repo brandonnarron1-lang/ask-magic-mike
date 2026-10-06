@@ -24,12 +24,14 @@ import { hasLeadCenterPermission } from "../../../../src/lib/admin/rbac-policy";
 import { Phase6CopilotPanel } from "../../../../src/components/admin/phase6-copilot-panel";
 import { Phase7MessagingControlPanel } from "../../../../src/components/admin/phase7-messaging-control-panel";
 import { ReferenceLeadCard } from "../../../components/admin/ReferenceLeadCard";
+import { ConversionMutationForm } from "../../../components/admin/ConversionMutationForm";
 import { presentLead, leadSubtype } from "../../../lib/leadPresentation";
 import { LeadEvidenceWorkspace } from "../../../components/admin/LeadEvidenceWorkspace";
 import {
   createAppointmentAction,
   createFollowupTaskAction,
   recordFirstHumanResponseAction,
+  recordHumanFollowthroughAction,
   transitionAppointmentAction,
   updateFollowupTaskAction,
   updateLeadStatusAction,
@@ -38,7 +40,7 @@ import {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-function shortDate(value: string | null) {
+function shortDate(value: string | null, timezone?: string) {
   if (!value) return "Unknown";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
@@ -47,6 +49,7 @@ function shortDate(value: string | null) {
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    ...(timezone ? { timeZone: timezone, timeZoneName: "short" as const } : {}),
   }).format(date);
 }
 
@@ -111,7 +114,7 @@ function Badge({ children, tone = "gold" }: { children: ReactNode; tone?: "gold"
 
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-lg border border-white/10 bg-[#0b0b0b] p-5">
+    <section className="min-w-0 rounded-lg border border-white/10 bg-[#0b0b0b] p-4 sm:p-5">
       <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-[#e2c06f]">{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
@@ -174,7 +177,7 @@ function StatusActionForm({
       : "border-[#cda24a33] bg-[#cda24a14] text-[#f4ead4] hover:border-[#cda24a]";
 
   return (
-    <form action={updateLeadStatusAction} className="rounded-md border border-white/10 bg-white/[0.03] p-3">
+    <ConversionMutationForm action={updateLeadStatusAction} submitLabel={label} successMessage="Lifecycle saved. No message sent." confirmationLabel={requiresConfirmation ? confirmationLabel : undefined} className={`rounded-md border p-3 ${buttonClass}`}>
       <input type="hidden" name="lead_id" value={leadId} />
       <input type="hidden" name="status" value={status} />
       <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
@@ -194,19 +197,7 @@ function StatusActionForm({
           </span>
         </label>
       ) : null}
-      {requiresConfirmation ? (
-        <label className="mt-2 flex items-start gap-2 text-[11px] leading-4 text-[#d9ceb8]">
-          <input required type="checkbox" name="confirm" value="yes" className="mt-0.5" aria-label={confirmationLabel} />
-          <span>{confirmationLabel}</span>
-        </label>
-      ) : null}
-      <button
-        type="submit"
-        className={`mt-3 w-full rounded-md border px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] transition ${buttonClass}`}
-      >
-        {label}
-      </button>
-    </form>
+    </ConversionMutationForm>
   );
 }
 
@@ -276,9 +267,10 @@ function Timeline({
 
 function AppointmentCreateForm({ leadId }: { leadId: string }) {
   return (
-    <form action={createAppointmentAction} className="rounded-md border border-white/10 bg-white/[0.03] p-4">
+    <ConversionMutationForm action={createAppointmentAction} submitLabel="Create appointment record" successMessage="Appointment record saved. No calendar event or invitation created." confirmationLabel="Confirm this appointment request or agreed schedule is real. This saves an internal record only." className="rounded-md border border-white/10 bg-white/[0.03] p-4">
       <input type="hidden" name="lead_id" value={leadId} />
       <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
+      <p className="text-sm leading-6 text-[#d9ceb8]">Requested can have no scheduled time. Scheduled requires both start and end, with a duration of at most eight hours.</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
           Status
@@ -288,7 +280,7 @@ function AppointmentCreateForm({ leadId }: { leadId: string }) {
           </select>
         </label>
         <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
-          Timezone
+          Appointment timezone (starts and ends)
           <input name="timezone" defaultValue="America/New_York" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
         </label>
         <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
@@ -314,10 +306,7 @@ function AppointmentCreateForm({ leadId }: { leadId: string }) {
           <input name="location_label" maxLength={120} className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
         </label>
       </div>
-      <button type="submit" className="mt-3 rounded-md border border-[#cda24a33] bg-[#cda24a14] px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#f4ead4]">
-        Create appointment
-      </button>
-    </form>
+    </ConversionMutationForm>
   );
 }
 
@@ -334,14 +323,14 @@ function appointmentNextStatuses(status: AppointmentStatus): AppointmentStatus[]
   return transitions[status] || [];
 }
 
-function AppointmentCard({ leadId, appointment }: { leadId: string; appointment: AdminAppointmentRow }) {
+function AppointmentCard({ leadId, appointment, canUpdate }: { leadId: string; appointment: AdminAppointmentRow; canUpdate: boolean }) {
   return (
     <article className="rounded-md border border-white/10 bg-[#080808] p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-[#f4ead4]">{appointment.status.replaceAll("_", " ")}</p>
           <p className="mt-1 text-xs text-[#8f8778]">
-            {appointment.starts_at ? shortDate(appointment.starts_at) : "No scheduled time"} · {appointment.timezone}
+            {appointment.starts_at ? shortDate(appointment.starts_at, appointment.timezone) : "No scheduled time"} · {appointment.timezone}
           </p>
         </div>
         <Badge tone={appointment.status === "completed" ? "cyan" : appointment.status === "canceled" || appointment.status === "no_show" ? "ruby" : "gold"}>
@@ -350,18 +339,19 @@ function AppointmentCard({ leadId, appointment }: { leadId: string; appointment:
       </div>
       {appointment.location_label ? <p className="mt-3 text-xs text-[#d9ceb8]">{appointment.location_label}</p> : null}
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
-        {appointmentNextStatuses(appointment.status).map((status) => (
-          <form key={status} action={transitionAppointmentAction} className="rounded-md border border-white/10 bg-white/[0.02] p-3">
+        {(canUpdate ? appointmentNextStatuses(appointment.status) : []).map((status) => (
+          <ConversionMutationForm key={status} action={transitionAppointmentAction} submitLabel={`Mark ${status.replaceAll("_", " ")}`} successMessage={`Appointment marked ${status.replaceAll("_", " ")}. No calendar update or invitation sent.`} confirmationLabel={status === "completed" ? "Confirm this appointment actually took place. Task completion alone does not count." : status === "no_show" ? "Confirm the appointment time passed and the person did not attend." : status === "confirmed" ? "Confirm the person actually agreed to this appointment." : `Confirm the actual appointment change to ${status.replaceAll("_", " ")}.`} className="rounded-md border border-white/10 bg-white/[0.02] p-3">
             <input type="hidden" name="lead_id" value={leadId} />
             <input type="hidden" name="appointment_id" value={appointment.id} />
             <input type="hidden" name="record_version" value={appointment.updated_at || ""} />
             <input type="hidden" name="status" value={status} />
+            <input type="hidden" name="timezone" value={appointment.timezone} />
             <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
             {status === "scheduled" ? (
-              <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
-                Starts
+              <div className="space-y-3"><label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+                Starts ({appointment.timezone})
                 <input required name="starts_at" type="datetime-local" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
-              </label>
+              </label><label className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">Ends ({appointment.timezone})<input required name="ends_at" type="datetime-local" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" /></label><p className="text-xs leading-5 text-[#b9b09f]">End must follow start; at most eight hours.</p></div>
             ) : null}
             {status === "canceled" ? (
               <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
@@ -369,26 +359,24 @@ function AppointmentCard({ leadId, appointment }: { leadId: string; appointment:
                 <input name="cancellation_reason" maxLength={120} className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
               </label>
             ) : null}
-            <button className="w-full rounded-md border border-[#cda24a33] bg-[#cda24a14] px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#f4ead4]">
-              Mark {status.replaceAll("_", " ")}
-            </button>
-          </form>
+          </ConversionMutationForm>
         ))}
       </div>
     </article>
   );
 }
 
-function AppointmentPanel({ leadId, appointments }: { leadId: string; appointments: AdminAppointmentRow[] }) {
+function AppointmentPanel({ leadId, appointments, canUpdate }: { leadId: string; appointments: AdminAppointmentRow[]; canUpdate: boolean }) {
   return (
     <Panel title="Appointment operations">
       <div className="space-y-3">
+        <p className="text-sm leading-6 text-[#d9ceb8]">Internal appointment records only. No calendar availability is checked, no external calendar event is created, and no invitation is sent.</p>
         {appointments.length ? appointments.map((appointment) => (
-          <AppointmentCard key={appointment.id} leadId={leadId} appointment={appointment} />
+          <AppointmentCard key={appointment.id} leadId={leadId} appointment={appointment} canUpdate={canUpdate} />
         )) : (
           <p className="text-sm text-[#8f8778]">No appointment record yet.</p>
         )}
-        <AppointmentCreateForm leadId={leadId} />
+        {canUpdate && !appointments.some((appointment) => ["requested", "scheduled", "confirmed", "reschedule_requested"].includes(appointment.status)) ? <AppointmentCreateForm leadId={leadId} /> : null}
       </div>
     </Panel>
   );
@@ -396,7 +384,7 @@ function AppointmentPanel({ leadId, appointments }: { leadId: string; appointmen
 
 function FollowupCreateForm({ leadId }: { leadId: string }) {
   return (
-    <form action={createFollowupTaskAction} className="rounded-md border border-white/10 bg-white/[0.03] p-4">
+    <ConversionMutationForm action={createFollowupTaskAction} submitLabel="Add follow-up" successMessage="Follow-up task saved. No contact attempted and no first human response inferred." newActionLabel="Start a separate follow-up" className="rounded-md border border-white/10 bg-white/[0.03] p-4">
       <input type="hidden" name="lead_id" value={leadId} />
       <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
       <div className="grid gap-3 sm:grid-cols-2">
@@ -422,6 +410,10 @@ function FollowupCreateForm({ leadId }: { leadId: string }) {
           </select>
         </label>
         <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
+          Due timezone
+          <input required name="timezone" defaultValue="America/New_York" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
+        </label>
+        <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
           Due
           <input required name="due_at" type="datetime-local" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
         </label>
@@ -430,14 +422,11 @@ function FollowupCreateForm({ leadId }: { leadId: string }) {
           <input name="note" maxLength={160} className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
         </label>
       </div>
-      <button className="mt-3 rounded-md border border-[#cda24a33] bg-[#cda24a14] px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#f4ead4]">
-        Add follow-up
-      </button>
-    </form>
+    </ConversionMutationForm>
   );
 }
 
-function FollowupTaskCard({ leadId, task }: { leadId: string; task: AdminFollowupTaskRow }) {
+function FollowupTaskCard({ leadId, task, canManage }: { leadId: string; task: AdminFollowupTaskRow; canManage: boolean }) {
   return (
     <article className="rounded-md border border-white/10 bg-[#080808] p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -447,48 +436,87 @@ function FollowupTaskCard({ leadId, task }: { leadId: string; task: AdminFollowu
         </div>
         <Badge tone={task.status === "done" ? "cyan" : task.status === "cancelled" ? "ruby" : "gold"}>{task.status}</Badge>
       </div>
-      {task.status === "open" || task.status === "in_progress" ? (
-        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+      {canManage && (task.status === "open" || task.status === "in_progress") ? (
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {(["complete", "cancel"] as const).map((action) => (
-            <form key={action} action={updateFollowupTaskAction}>
+            <ConversionMutationForm key={action} action={updateFollowupTaskAction} submitLabel={action === "complete" ? "Complete task" : "Cancel task"} successMessage={action === "complete" ? "Task completed. First human response was not inferred." : "Task canceled. No message sent."}>
               <input type="hidden" name="lead_id" value={leadId} />
               <input type="hidden" name="task_id" value={task.id} />
               <input type="hidden" name="record_version" value={task.updated_at || ""} />
               <input type="hidden" name="task_action" value={action} />
               <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
-              <button className="w-full rounded-md border border-[#cda24a33] bg-[#cda24a14] px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#f4ead4]">
-                {action}
-              </button>
-            </form>
+            </ConversionMutationForm>
           ))}
-          <form action={updateFollowupTaskAction}>
+          <ConversionMutationForm action={updateFollowupTaskAction} submitLabel="Reschedule follow-up" successMessage="Follow-up due time saved. No human response inferred." className="sm:col-span-2">
             <input type="hidden" name="lead_id" value={leadId} />
             <input type="hidden" name="task_id" value={task.id} />
             <input type="hidden" name="record_version" value={task.updated_at || ""} />
             <input type="hidden" name="task_action" value="reschedule" />
             <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
             <input aria-label="New follow-up due time" required name="due_at" type="datetime-local" className="mb-2 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]" />
-            <button className="w-full rounded-md border border-[#cda24a33] bg-[#cda24a14] px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#f4ead4]">
-              Reschedule
-            </button>
-          </form>
+            <label className="block text-xs text-[#d9ceb8]">New due timezone<input required name="timezone" defaultValue="America/New_York" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-sm text-[#f4ead4]" /></label>
+          </ConversionMutationForm>
         </div>
       ) : null}
     </article>
   );
 }
 
-function FollowupPanel({ leadId, tasks }: { leadId: string; tasks: AdminFollowupTaskRow[] }) {
+function FollowupPanel({ leadId, tasks, canManage }: { leadId: string; tasks: AdminFollowupTaskRow[]; canManage: boolean }) {
   return (
     <Panel title="Follow-up tasks">
       <div className="space-y-3">
+        <p className="text-sm leading-6 text-[#d9ceb8]">A task is a reminder, not contact evidence. Completing one never records first human response.</p>
         {tasks.length ? tasks.map((task) => (
-          <FollowupTaskCard key={task.id} leadId={leadId} task={task} />
+          <FollowupTaskCard key={task.id} leadId={leadId} task={task} canManage={canManage} />
         )) : (
           <p className="text-sm text-[#8f8778]">No follow-up tasks yet.</p>
         )}
-        <FollowupCreateForm leadId={leadId} />
+        {canManage ? <FollowupCreateForm leadId={leadId} /> : null}
       </div>
+    </Panel>
+  );
+}
+
+function ManualHumanFollowthroughForm({ leadId }: { leadId: string }) {
+  const fieldClass = "mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-3 py-2 text-sm text-[#f4ead4]";
+  return (
+    <Panel title="Log manual interaction + next task">
+      <ConversionMutationForm action={recordHumanFollowthroughAction} submitLabel="Save interaction and next task" successMessage="Manual interaction and next task saved together. No message sent. A confirmed two-way conversation records first-response evidence atomically, without overwriting existing evidence." confirmationLabel="Confirm this manual interaction actually occurred and the next task reflects the agreed follow-through." newActionLabel="Log a separate interaction" className="rounded-md border border-white/10 bg-white/[0.03] p-4">
+        <input type="hidden" name="lead_id" value={leadId} />
+        <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
+        <p className="text-sm leading-6 text-[#d9ceb8]">Operator-entered evidence, not a provider delivery receipt. The interaction and next reminder save together or neither saves. This form never calls, emails, sends a message, or books a calendar event.</p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="text-sm text-[#d9ceb8]">Actual channel
+            <select name="channel" required className={fieldClass}>
+              <option value="phone">Phone</option><option value="email">Email</option><option value="in_person">In person</option><option value="other">Other</option>
+            </select>
+          </label>
+          <label className="text-sm text-[#d9ceb8]">Actual result
+            <select name="interaction_result" required className={fieldClass}>
+              <option value="attempted">Attempted — no conversation established</option><option value="no_answer">No answer</option><option value="two_way_conversation">Two-way conversation</option>
+            </select>
+          </label>
+          <label className="text-sm text-[#d9ceb8]">Next task
+            <select name="task_type" required className={fieldClass}>
+              <option value="manual_callback">Manual callback</option><option value="qualification_followup">Qualification follow-up</option><option value="appointment_confirmation">Appointment confirmation</option><option value="appointment_followup">Appointment follow-up</option><option value="document_followup">Document follow-up</option><option value="nurture_check_in">Nurture check-in</option><option value="first_contact">First contact</option>
+            </select>
+          </label>
+          <label className="text-sm text-[#d9ceb8]">Next task due
+            <input name="due_at" type="datetime-local" required className={fieldClass} />
+          </label>
+          <label className="text-sm text-[#d9ceb8]">Due timezone
+            <input name="timezone" required defaultValue="America/New_York" className={fieldClass} />
+          </label>
+          <label className="text-sm text-[#d9ceb8]">Safe interaction note
+            <textarea name="note" required maxLength={160} rows={3} className={fieldClass} />
+          </label>
+        </div>
+        <label className="flex items-start gap-3 text-sm leading-6 text-[#d9ceb8]">
+          <input name="confirm_first_response" type="checkbox" value="yes" className="w-5 shrink-0 accent-[#cda24a]" />
+          <span>Required for a two-way conversation: I confirm a real two-way conversation occurred now. Do not select for attempted contact or no answer. First-response evidence saves together with the next task and existing evidence is never overwritten.</span>
+        </label>
+      </ConversionMutationForm>
     </Panel>
   );
 }
@@ -541,7 +569,7 @@ function OutcomePanel({
         </p>
       )}
       {canViewRevenue && leadStatus === "converted" ? (
-        <form action={updateLeadStatusAction} className="mt-4 rounded-md border border-cyan-400/20 bg-cyan-400/[.06] p-4">
+        <ConversionMutationForm action={updateLeadStatusAction} submitLabel="Update closed revenue" successMessage="Actual closed brokerage revenue saved." confirmationLabel="Confirm this is actual brokerage revenue, not sale price, list price, or estimated value." className="mt-4 rounded-md border border-cyan-400/20 bg-cyan-400/[.06] p-4">
           <input type="hidden" name="lead_id" value={leadId} />
           <input type="hidden" name="status" value="converted" />
           <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
@@ -556,14 +584,7 @@ function OutcomePanel({
               className="mt-2 w-full rounded-md border border-cyan-400/25 bg-[#050505] px-3 py-2 text-sm text-[#f4ead4]"
             />
           </label>
-          <label className="mt-3 flex items-start gap-2 text-[11px] leading-4 text-[#d9ceb8]">
-            <input required type="checkbox" name="confirm" value="yes" className="mt-0.5" />
-            <span>Confirm this is actual brokerage revenue, not sale price, list price, or estimated value.</span>
-          </label>
-          <button className="mt-3 rounded-md border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-cyan-100">
-            Update closed revenue
-          </button>
-        </form>
+        </ConversionMutationForm>
       ) : null}
       <p className="mt-3 text-xs leading-5 text-[#8f8778]">
         Qualified, appointment-set, and terminal lifecycle actions write this ledger idempotently.
@@ -588,6 +609,7 @@ export default async function AdminLeadDetailPage({
   const canUpdateLead = Boolean(
     principal && hasLeadCenterPermission(principal.role, "lead:update_assigned"),
   );
+  const canManageTasks = Boolean(principal && hasLeadCenterPermission(principal.role, "task:manage_assigned"));
   const emptyQuery: { status_action?: string; appointment_action?: string; followup_action?: string; response_action?: string; timeline_offset?: string } = {};
   const query = searchParams ? await searchParams : emptyQuery;
   const parsedOffset = Number.parseInt(query.timeline_offset || "0", 10);
@@ -597,7 +619,7 @@ export default async function AdminLeadDetailPage({
   const lead = detail.lead;
 
   return (
-    <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
+    <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4] [overflow-wrap:anywhere]">
       <div className="mx-auto max-w-6xl">
         <header className="mb-7 border-b border-[#cda24a33] pb-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -652,7 +674,7 @@ export default async function AdminLeadDetailPage({
           </Panel>
         ) : (
           <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
-            <section className="space-y-5">
+            <section className="min-w-0 space-y-5">
               {principal ? <ReferenceLeadCard view={presentLead({ lead, principal, tier: "assigned", evidence: {appointments:detail.appointments,followupTasks:detail.followupTasks,outcomes:detail.outcomes} })} /> : null}
               {(["seller","cash_seller","investor_buyer"] as string[]).includes(leadSubtype(lead)) ? <LeadEvidenceWorkspace leadId={lead.id} kind={leadSubtype(lead) as "seller"|"cash_seller"|"investor_buyer"} allowed={canUpdateLead&&!lead.is_test&&!lead.communication_suppressed}/> : null}
               <Panel title="Lead state">
@@ -679,22 +701,17 @@ export default async function AdminLeadDetailPage({
 
               {!detail.firstResponse && canUpdateLead ? (
                 <Panel title="First-response evidence">
-                  <form action={recordFirstHumanResponseAction} className="rounded-md border border-cyan-400/20 bg-cyan-400/[.06] p-4">
+                  <ConversionMutationForm action={recordFirstHumanResponseAction} submitLabel="Record first human response" successMessage="First human response evidence saved at server time. No message sent." confirmationLabel="Confirm an actual one-to-one human follow-up occurred now. Completing a task does not establish this." className="rounded-md border border-cyan-400/20 bg-cyan-400/[.06] p-4">
                     <input type="hidden" name="lead_id" value={lead.id} />
                     <input type="hidden" name="return_to" value={`/admin/leads/${lead.id}`} />
                     <p className="text-sm leading-6 text-[#d9ceb8]">
                       Use this only immediately after a real one-to-one human follow-up. It records the current server time once, preserves later lifecycle stages, and never sends a message.
                     </p>
-                    <label className="mt-3 flex items-start gap-2 text-[11px] leading-4 text-[#d9ceb8]">
-                      <input required type="checkbox" name="confirm" value="yes" className="mt-0.5" />
-                      <span>Confirm an actual human follow-up occurred now.</span>
-                    </label>
-                    <button className="mt-3 rounded-md border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-cyan-100">
-                      Record first human response
-                    </button>
-                  </form>
+                  </ConversionMutationForm>
                 </Panel>
               ) : null}
+
+              {canUpdateLead && canManageTasks ? <ManualHumanFollowthroughForm leadId={lead.id} /> : null}
 
               <div id="next-action-review"><Phase6CopilotPanel
                 leadId={lead.id}
@@ -707,7 +724,7 @@ export default async function AdminLeadDetailPage({
 
               <Panel title="Lifecycle controls">
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {ADMIN_LEAD_STATUS_ACTIONS.map((action) => (
+                  {(canUpdateLead ? ADMIN_LEAD_STATUS_ACTIONS : []).map((action) => (
                     <StatusActionForm
                       key={action.status}
                       leadId={lead.id}
@@ -722,7 +739,7 @@ export default async function AdminLeadDetailPage({
                 </p>
               </Panel>
 
-              <div id="appointment-review"><AppointmentPanel leadId={lead.id} appointments={detail.appointments} /></div>
+              <div id="appointment-review"><AppointmentPanel leadId={lead.id} appointments={detail.appointments} canUpdate={canUpdateLead} /></div>
 
               <OutcomePanel
                 outcomes={detail.outcomes}
@@ -731,7 +748,7 @@ export default async function AdminLeadDetailPage({
                 leadStatus={lead.status}
               />
 
-              <FollowupPanel leadId={lead.id} tasks={detail.followupTasks} />
+              <FollowupPanel leadId={lead.id} tasks={detail.followupTasks} canManage={canManageTasks} />
 
               <div id="activity">
                 <Panel title="Unified activity history">
@@ -748,7 +765,7 @@ export default async function AdminLeadDetailPage({
               </div>
             </section>
 
-            <aside className="space-y-5">
+            <aside className="min-w-0 space-y-5">
               <Panel title="Stalled signals">
                 {lead.stalled_signals.length ? (
                   <div className="space-y-3">

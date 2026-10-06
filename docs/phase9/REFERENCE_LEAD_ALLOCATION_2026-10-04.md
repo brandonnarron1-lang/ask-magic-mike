@@ -617,3 +617,24 @@ exact participant/window/price/message pilot authority → real device proof →
 later bounded new-only policy/cadence activation. This session performs none of
 those Production effects. Next implementation boundary remains operational
 channel acceptance, not a visual rebuild or new CRM/provider.
+
+### Current completion-register delta — 2026-10-06
+
+This dated delta supersedes stale **current-state** claims above, not historical
+release/test evidence. See [conversion implementation and proof](CONVERSION_COMPLETION_2026-10-06.md).
+
+| Track | Current state | Exact remaining boundary |
+| --- | --- | --- |
+| PR290 baseline | ACCEPTED: authenticated resolver25/25, main03958774/tree28002086/Ready `dpl_DN4whSpSceS2Gt12hVrsSST3ytRC` | Completed gate consumed; do not re-merge/migrate it |
+| D1 / Twilio29850012 | SUBMITTED ONCE; authenticated initial read: New, no human reply | No reminder/duplicate inquiry; account eligibility/price still pending |
+| A1–A4/B1–B6/C1–C2/D2 | PENDING | Separate dirty disclosure branch/private review remains unmerged; no implied copy/roster/funding/pilot approval |
+| Conversion reliability | INDEPENDENT LOCAL CANDIDATE | One additive migration, zero tables/env/provider/cadence changes; frozen candidate needs its own hosted/immutable Preview and exact release authority |
+| Human follow-through / reporting | IMPLEMENTED on existing Today/detail/timeline/reporting | Actual isolated sessions/SQL proof is not Production promotion, carrier delivery or Mike's personal acceptance |
+| Existing intake/internal email | PRESERVED | No new live QA/send; two permanent failures untouched; ordinary approved paths not disabled |
+| Rental acquisition | EXISTING PACKET VERIFIED, page226 authenticated source still required | Visible exact insertion + page/builder revision/backup/rollback before separate publication gate; page3952 not republished; page149/Form7 still held |
+| New messaging/pilot/cadence | HELD | No enrollment, sender verification, dispatch, budget, cron, email/push substitute or spending |
+
+Candidate scope excludes Production writes/deployment, WordPress publication,
+consumer/staff messages, historical backfill/retries, DNS/billing and inactive
+projects. Once locally sealed, the next unconsumed action is review publication
+for hosted CI/immutable no-write Preview—not another PR290 or channel gate.

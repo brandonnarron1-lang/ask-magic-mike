@@ -70,6 +70,7 @@ try {
   const env = {
     PATH: process.env.PATH, HOME: process.env.HOME, TMPDIR: process.env.TMPDIR,
     AMM_QA_POSTGRES_TEST: "1", AMM_ISOLATED_SESSION_ACCEPTANCE: "1", AMM_E2E_FIXTURE_PATH: fixturePath,
+    ...(process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1" ? { AMM_CONVERSION_SESSION_ACCEPTANCE: "1" } : {}),
     AMM_E2E_FIXTURE_PASSWORD: password, AMM_E2E_BUILT: "1", AMM_E2E_PORT: String(port),
     VERCEL_ENV: "development", DATABASE_URL: connection, BETTER_AUTH_URL: origin,
     BETTER_AUTH_SECRET: randomBytes(32).toString("hex"), LEAD_CENTER_RBAC_ENABLED: "true",
@@ -82,9 +83,12 @@ try {
     AMM_E2E_TWILIO_TOKEN: authToken,
     NODE_OPTIONS: `--dns-result-order=ipv4first --import=${path.resolve("tests/support/isolated-neon-transport.mjs")}`,
   };
-  child = spawn("pnpm", ["exec", "playwright", "test", "tests/e2e/reference-real-session.spec.ts"], { env, stdio: "inherit" });
+  const suite = process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
+    ? "tests/e2e/conversion-real-session.spec.ts" : "tests/e2e/reference-real-session.spec.ts";
+  child = spawn("pnpm", ["exec", "playwright", "test", suite], { env, stdio: "inherit" });
   const exit = await new Promise((resolve, reject) => { child.on("error", reject); child.on("exit", resolve); });
   const counts = JSON.parse(psql(`SELECT json_build_object('leads',count(*),'notifications',(SELECT count(*) FROM lead_notifications),'provider_ids',(SELECT count(*) FROM lead_notifications WHERE provider_message_id IS NOT NULL),'reservations',(SELECT count(*) FROM lead_allocation_send_reservations)) FROM leads;`));
-  writeFileSync(path.join(runDir, "receipt.json"), JSON.stringify({ at: new Date().toISOString(), exit, scope: "built-app-real-auth-isolated-postgresql", productionWrites: 0, providerCalls: 0, counts }, null, 2), { mode: 0o600 });
+  const receiptName = process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1" ? "conversion-receipt.json" : "receipt.json";
+  writeFileSync(path.join(runDir, receiptName), JSON.stringify({ at: new Date().toISOString(), exit, suite, scope: "built-app-real-auth-isolated-postgresql", productionWrites: 0, providerCalls: 0, counts }, null, 2), { mode: 0o600 });
   process.exitCode = Number(exit || 0);
 } finally { if (child && child.exitCode === null) child.kill("SIGTERM"); stopDatabase(); }

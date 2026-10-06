@@ -36,6 +36,7 @@ import {
   loadNeonAdminActionQueue,
   transitionNeonAppointment,
   updateNeonFollowupTask,
+  recordNeonHumanFollowthrough,
 } from "./persistence/neonAdminAppointmentFollowupOps";
 
 function legacyFallbackSelected() {
@@ -45,20 +46,24 @@ function legacyFallbackSelected() {
   );
 }
 
-export function createAppointment(input: Parameters<typeof createLegacyAppointment>[0]) {
+export function createAppointment(input: Parameters<typeof createNeonAppointment>[0]) {
   return legacyFallbackSelected() ? createLegacyAppointment(input) : createNeonAppointment(input);
 }
 
-export function transitionAppointment(input: Parameters<typeof transitionLegacyAppointment>[0]) {
+export function transitionAppointment(input: Parameters<typeof transitionNeonAppointment>[0]) {
   return legacyFallbackSelected() ? transitionLegacyAppointment(input) : transitionNeonAppointment(input);
 }
 
-export function createFollowupTask(input: Parameters<typeof createLegacyFollowupTask>[0]) {
+export function createFollowupTask(input: Parameters<typeof createNeonFollowupTask>[0]) {
   return legacyFallbackSelected() ? createLegacyFollowupTask(input) : createNeonFollowupTask(input);
 }
 
-export function updateFollowupTask(input: Parameters<typeof updateLegacyFollowupTask>[0]) {
+export function updateFollowupTask(input: Parameters<typeof updateNeonFollowupTask>[0]) {
   return legacyFallbackSelected() ? updateLegacyFollowupTask(input) : updateNeonFollowupTask(input);
+}
+
+export function recordHumanFollowthrough(input: Parameters<typeof recordNeonHumanFollowthrough>[0]) {
+  return recordNeonHumanFollowthrough(input);
 }
 
 export function loadAdminActionQueue() {

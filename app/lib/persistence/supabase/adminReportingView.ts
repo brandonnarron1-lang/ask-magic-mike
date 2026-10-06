@@ -26,6 +26,80 @@ export type AdminReportingLeadRow = {
   outcome_types?: string[];
   is_test?: boolean;
   communication_suppressed?: boolean;
+  is_duplicate?: boolean;
+  duplicate_of_lead_id?: string | null;
+  has_contact?: boolean;
+  first_human_response_recorded?: boolean;
+  manual_attempt_recorded?: boolean;
+  two_way_contact_recorded?: boolean;
+};
+
+export const REPORTING_APPOINTMENT_STATES = [
+  "requested", "scheduled", "confirmed", "completed", "no_show", "canceled",
+] as const;
+export type ReportingAppointmentState = typeof REPORTING_APPOINTMENT_STATES[number];
+export type ReportingScope = "all_live_leads" | "assigned_live_leads" | "aggregate_only";
+export type ReportingDrillthroughCursor = { end: Date; createdAt: string; id: string };
+export type AdminReportingDrillthrough = {
+  configured: boolean;
+  rows: Array<{ id: string; created_at: string; assigned_agent_id: string | null }>;
+  limit: number;
+  hasMore: boolean;
+  nextCursor: string | null;
+  error?: string;
+};
+
+/** Cursor contains only a cohort anchor and stable (created_at, UUID) key, not
+ * contact/search text or authority. Every page rechecks the principal in SQL. */
+export function parseReportingDrillthroughCursor(
+  value: string, windowDays: 7 | 30 | 90, now = new Date(),
+): ReportingDrillthroughCursor | null {
+  const [window, end, createdAt, id, extra] = value.split("~");
+  if (extra !== undefined || window !== String(windowDays) || !end || !createdAt ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || "")) return null;
+  const anchor = new Date(end);
+  const created = new Date(createdAt);
+  if (!Number.isFinite(anchor.getTime()) || !Number.isFinite(created.getTime()) ||
+    anchor.getTime() > now.getTime() || now.getTime() - anchor.getTime() > 24 * 60 * 60 * 1000 ||
+    created.getTime() >= anchor.getTime() || created.getTime() < anchor.getTime() - windowDays * 24 * 60 * 60 * 1000) return null;
+  // Keep PostgreSQL microseconds: Date.toISOString() would truncate the key
+  // and skip rows sharing the last page record's millisecond.
+  return { end: anchor, createdAt, id };
+}
+
+export type ConversionReportingGroup = {
+  source: string;
+  captured: number;
+  qualified: number;
+  firstHumanResponse: number;
+  manualAttempted: number | null;
+  twoWayContact: number | null;
+  manualEvidenceUnknown: number;
+  appointments: number;
+  appointmentStates: Record<ReportingAppointmentState, number>;
+  otherAppointmentStates: number;
+  appointmentEvidenceUnknown: number;
+  closedWon: number;
+  outcomeEvidenceUnknown: number;
+  commissions: number | null;
+  conversionRate: number | null;
+};
+
+export type AdminConversionReporting = {
+  available: boolean;
+  cohort: {
+    basis: "lead_created_at";
+    timezone: "UTC";
+    startInclusive: string;
+    endExclusive: string;
+    denominator: number | null;
+    scope: ReportingScope;
+    totals: "complete" | "unavailable";
+    calculation: "full_scoped_cohort_in_memory";
+  };
+  totals: ConversionReportingGroup | null;
+  sources: ConversionReportingGroup[];
+  limitations: string[];
 };
 
 export type StatusBucketKey = "new" | "working" | "qualified_appointment" | "closed" | "spam_test";
@@ -134,9 +208,9 @@ export type AdminReportingSummary = {
     completed: number;
     canceled: number;
     noShow: number;
-    requestToScheduledRate: number;
-    scheduledToCompletedRate: number;
-    noShowRate: number;
+    requestToScheduledRate: number | null;
+    scheduledToCompletedRate: number | null;
+    noShowRate: number | null;
   };
   followupOps: {
     open: number;
@@ -157,8 +231,8 @@ export type AdminReportingSummary = {
     qualified: number;
     appointments: number;
     closedWon: number;
-    commissions: number;
-    conversionRate: number;
+    commissions: number | null;
+    conversionRate: number | null;
   }>;
   dataTrust: {
     included: number;
@@ -170,6 +244,7 @@ export type AdminReportingSummary = {
     outcomesObserved: number;
   };
   operationalTrust: AdminOperationalTrust;
+  conversionReporting: AdminConversionReporting;
   error?: string;
 };
 
@@ -270,6 +345,13 @@ function text(value: unknown): string | null {
   return cleaned || null;
 }
 
+// Neon decodes timestamptz into Date objects; REST compatibility reads return
+// strings. Preserve strings (including microseconds), normalize only real Dates.
+function timestamp(value: unknown): string | null {
+  if (value instanceof Date) return Number.isFinite(value.getTime()) ? value.toISOString() : null;
+  return text(value);
+}
+
 function numberOrNull(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && value.trim()) {
@@ -367,6 +449,7 @@ function emptySummary(
       outcomesObserved: 0,
     },
     operationalTrust: unavailableOperationalTrust(),
+    conversionReporting: reconcileConversionReporting([], now, windowDays),
     error,
   };
 }
@@ -400,11 +483,11 @@ function summarizeFollowupOps(rows: Array<Record<string, unknown>>, now: Date) {
   return {
     open: openRows.length,
     overdue: openRows.filter((row) => {
-      const dueAt = parseTime(text(row.due_at));
+      const dueAt = parseTime(timestamp(row.due_at));
       return Number.isFinite(dueAt) && dueAt < now.getTime();
     }).length,
     dueToday: openRows.filter((row) => {
-      const dueAt = parseTime(text(row.due_at));
+      const dueAt = parseTime(timestamp(row.due_at));
       return Number.isFinite(dueAt) && dueAt >= todayStart && dueAt < todayEnd;
     }).length,
     completed,
@@ -451,7 +534,7 @@ function groupSimple(
 export function normalizeReportingLeadRow(row: Record<string, unknown>): AdminReportingLeadRow {
   return {
     id: text(row.id) || "unknown",
-    created_at: text(row.created_at),
+    created_at: timestamp(row.created_at),
     status: text(row.status) || "new",
     lead_type: text(row.lead_type),
     source: text(row.source),
@@ -460,8 +543,8 @@ export function normalizeReportingLeadRow(row: Record<string, unknown>): AdminRe
     timeline_months: numberOrNull(row.timeline_months),
     primary_intent: text(row.primary_intent),
     assigned_agent_id: text(row.assigned_agent_id),
-    assigned_at: text(row.assigned_at),
-    last_contacted_at: text(row.last_contacted_at),
+    assigned_at: timestamp(row.assigned_at),
+    last_contacted_at: timestamp(row.last_contacted_at),
     lead_grade: text(row.lead_grade),
     conversion_stage: text(row.conversion_stage),
     address_raw: text(row.address_raw),
@@ -471,6 +554,13 @@ export function normalizeReportingLeadRow(row: Record<string, unknown>): AdminRe
     is_test: row.is_test === true || row.is_test === "true",
     communication_suppressed:
       row.communication_suppressed === true || row.communication_suppressed === "true",
+    is_duplicate: row.is_duplicate === true || row.is_duplicate === "true",
+    duplicate_of_lead_id: text(row.duplicate_of_lead_id),
+    has_contact: row.has_contact === true || row.has_contact === "true",
+    first_human_response_recorded:
+      row.first_human_response_recorded === true || row.first_human_response_recorded === "true",
+    manual_attempt_recorded: row.manual_attempt_recorded === true || row.manual_attempt_recorded === "true",
+    two_way_contact_recorded: row.two_way_contact_recorded === true || row.two_way_contact_recorded === "true",
     first_touch_source: text(row.first_touch_source),
     last_touch_source: text(row.last_touch_source),
     attribution_campaign: text(row.attribution_campaign),
@@ -499,7 +589,7 @@ export function isSpamOrTest(row: AdminReportingLeadRow): boolean {
 }
 
 export function isContactable(row: AdminReportingLeadRow): boolean {
-  return Boolean(row.email || row.phone);
+  return Boolean(row.has_contact || row.email || row.phone);
 }
 
 export function isQualified(row: AdminReportingLeadRow): boolean {
@@ -531,6 +621,91 @@ export function timelineLabel(months: number | null | undefined): string {
   return "Unknown";
 }
 
+/** Read-only reconciliation, not a projection writer. Appointment states are
+ * exact current record states, distinct per lead within each state; they may
+ * overlap when a lead has multiple appointments. No later state proves an
+ * earlier state. Missing records mean no observed evidence, not a negative
+ * business outcome. Legacy capped REST reads cannot establish completeness. */
+export function reconcileConversionReporting(
+  rows: AdminReportingLeadRow[],
+  now = new Date(),
+  windowDays: 7 | 30 | 90 = 30,
+  appointmentRows: Array<Record<string, unknown>> = [],
+  evidence?: { complete: boolean; scope: ReportingScope },
+): AdminConversionReporting {
+  const start = now.getTime() - windowDays * 24 * 60 * 60 * 1000;
+  const result: AdminConversionReporting = {
+    available: evidence?.complete === true,
+    cohort: {
+      basis: "lead_created_at", timezone: "UTC",
+      startInclusive: new Date(start).toISOString(), endExclusive: now.toISOString(),
+      denominator: null, scope: evidence?.scope || "all_live_leads", totals: "unavailable",
+      calculation: "full_scoped_cohort_in_memory",
+    },
+    totals: null, sources: [],
+    limitations: [
+      "Manual attempts and two-way contact require provenance-gated operator audit records. Delivery, task completion, and first human response are not substitutes for two-way evidence.",
+      "Commission settlement is unavailable: a closed outcome or referral payment is not commission-settlement evidence.",
+      "Appointment states are current canonical records, not a historical transition funnel; states may overlap across appointments for one lead.",
+    ],
+  };
+  if (!result.available) return result;
+  const cohort = [...new Map(rows.filter((row) => {
+    const captured = parseTime(row.created_at);
+    return row.id !== "unknown" && !isSpamOrTest(row) && !row.is_duplicate && !row.duplicate_of_lead_id &&
+      Number.isFinite(captured) && captured >= start && captured < now.getTime();
+  }).map((row) => [row.id, row])).values()];
+  const leads = new Map(cohort.map((row) => [row.id, row]));
+  const states = new Map<string, Set<string>>();
+  for (const record of appointmentRows) {
+    const leadId = text(record.lead_id);
+    const lead = leadId ? leads.get(leadId) : undefined;
+    const recorded = parseTime(timestamp(record.created_at));
+    const state = text(record.status);
+    if (!leadId || !lead || !text(record.id) || !state ||
+      !Number.isFinite(recorded) || recorded < parseTime(lead.created_at) || recorded >= now.getTime()) continue;
+    // All values come from the existing canonical appointment status contract.
+    if (![...REPORTING_APPOINTMENT_STATES, "reschedule_requested"].includes(state as ReportingAppointmentState)) continue;
+    const leadStates = states.get(leadId) || new Set<string>();
+    leadStates.add(state);
+    states.set(leadId, leadStates);
+  }
+  function group(source: string, members: AdminReportingLeadRow[]): ConversionReportingGroup {
+    const closedWon = members.filter((row) => row.outcome_types?.includes("closed")).length;
+    return {
+      source, captured: members.length,
+      qualified: members.filter((row) => statusOf(row) === "qualified" || row.outcome_types?.includes("qualified")).length,
+      firstHumanResponse: members.filter((row) => row.first_human_response_recorded).length,
+      manualAttempted: members.filter((row) => row.manual_attempt_recorded).length,
+      twoWayContact: members.filter((row) => row.two_way_contact_recorded).length,
+      manualEvidenceUnknown: members.filter((row) => !row.manual_attempt_recorded).length,
+      appointments: members.filter((row) => states.has(row.id)).length,
+      appointmentStates: Object.fromEntries(REPORTING_APPOINTMENT_STATES.map((state) => [
+        state, members.filter((row) => states.get(row.id)?.has(state)).length,
+      ])) as Record<ReportingAppointmentState, number>,
+      otherAppointmentStates: members.filter((row) => states.get(row.id)?.has("reschedule_requested")).length,
+      appointmentEvidenceUnknown: members.filter((row) => !states.has(row.id)).length,
+      closedWon,
+      outcomeEvidenceUnknown: members.filter((row) => !row.outcome_types?.length).length,
+      commissions: null,
+      conversionRate: members.length ? percent(closedWon, members.length) : null,
+    };
+  }
+  const sources = new Map<string, AdminReportingLeadRow[]>();
+  for (const lead of cohort) {
+    const source = lead.first_touch_source || "Unknown first touch";
+    const members = sources.get(source) || [];
+    members.push(lead);
+    sources.set(source, members);
+  }
+  result.cohort.denominator = cohort.length;
+  result.cohort.totals = "complete";
+  result.totals = group("All included leads", cohort);
+  result.sources = [...sources].map(([source, members]) => group(source, members))
+    .sort((a, b) => b.captured - a.captured || a.source.localeCompare(b.source));
+  return result;
+}
+
 export function summarizeReportingRows(
   rows: AdminReportingLeadRow[],
   now = new Date(),
@@ -538,10 +713,28 @@ export function summarizeReportingRows(
   agentNames: ReadonlyMap<string, string> = new Map(),
   appointmentRows: Array<Record<string, unknown>> = [],
   followupRows: Array<Record<string, unknown>> = [],
-  excluded: { test?: number; suppressed?: number } = {},
+  excluded: { test?: number; suppressed?: number; duplicate?: number } = {},
+  canonicalEvidence?: { complete: boolean; scope: ReportingScope },
 ): AdminReportingSummary {
-  const normalizedRows = rows.map((row) => normalizeReportingLeadRow(row as unknown as Record<string, unknown>));
-  const nonSpamRows = normalizedRows.filter((row) => !isSpamOrTest(row));
+  const normalizedRows = [...new Map(rows.map((row) => normalizeReportingLeadRow(row as unknown as Record<string, unknown>))
+    .map((row) => [row.id, row])).values()].filter((row) => !canonicalEvidence || (
+      parseTime(row.created_at) >= now.getTime() - windowDays * 24 * 60 * 60 * 1000 &&
+      parseTime(row.created_at) < now.getTime()
+    ));
+  const nonSpamRows = normalizedRows.filter((row) => !isSpamOrTest(row) && !row.is_duplicate && !row.duplicate_of_lead_id);
+  const conversionReporting = reconcileConversionReporting(normalizedRows, now, windowDays, appointmentRows, canonicalEvidence);
+  const cohortById = new Map(nonSpamRows.map((row) => [row.id, row]));
+  const appointmentLeadIds = new Set(appointmentRows.filter((record) => {
+    const lead = cohortById.get(text(record.lead_id) || "");
+    return lead && text(record.id) &&
+      [...REPORTING_APPOINTMENT_STATES, "reschedule_requested"].includes(String(record.status)) &&
+      parseTime(timestamp(record.created_at)) >= parseTime(lead.created_at) &&
+      parseTime(timestamp(record.created_at)) < now.getTime();
+  }).map((row) => text(row.lead_id)));
+  const qualified = (row: AdminReportingLeadRow) => canonicalEvidence
+    ? statusOf(row) === "qualified" || Boolean(row.outcome_types?.includes("qualified")) : isQualified(row);
+  const appointment = (row: AdminReportingLeadRow) => canonicalEvidence ? appointmentLeadIds.has(row.id) : isAppointment(row);
+  const converted = (row: AdminReportingLeadRow) => canonicalEvidence ? Boolean(row.outcome_types?.includes("closed")) : isConverted(row);
   const contactableCount = nonSpamRows.filter(isContactable).length;
   const statusBuckets: Record<StatusBucketKey, number> = {
     new: 0,
@@ -576,11 +769,11 @@ export function summarizeReportingRows(
     };
     group.count += 1;
     if (isContactable(row)) group.contactable += 1;
-    if (isQualified(row) || isAppointment(row)) group.qualifiedAppointment += 1;
-    if (isConverted(row)) group.converted += 1;
+    if (qualified(row) || appointment(row)) group.qualifiedAppointment += 1;
+    if (converted(row)) group.converted += 1;
     sourceMap.set(key, group);
 
-    const campaign = row.source_detail || row.source || "Unknown campaign";
+    const campaign = row.attribution_campaign || row.source_detail || row.source || "Unknown campaign";
     const campaignGroup = campaignMap.get(campaign) || {
       key: campaign,
       label: campaign,
@@ -592,8 +785,8 @@ export function summarizeReportingRows(
     };
     campaignGroup.count += 1;
     if (isContactable(row)) campaignGroup.contactable += 1;
-    if (isQualified(row) || isAppointment(row)) campaignGroup.qualifiedAppointment += 1;
-    if (isConverted(row)) campaignGroup.converted += 1;
+    if (qualified(row) || appointment(row)) campaignGroup.qualifiedAppointment += 1;
+    if (converted(row)) campaignGroup.converted += 1;
     campaignMap.set(campaign, campaignGroup);
 
     if (row.assigned_agent_id) {
@@ -609,9 +802,9 @@ export function summarizeReportingRows(
         conversionRate: 0,
       };
       agent.assigned += 1;
-      if (isQualified(row)) agent.qualified += 1;
-      if (isAppointment(row)) agent.appointments += 1;
-      if (isConverted(row)) agent.converted += 1;
+      if (qualified(row)) agent.qualified += 1;
+      if (appointment(row)) agent.appointments += 1;
+      if (converted(row)) agent.converted += 1;
       if (isClosedLost(row)) agent.closedLost += 1;
       if (buildStalledLeadSignals(row, now).length) agent.stalled += 1;
       agentMap.set(row.assigned_agent_id, agent);
@@ -677,29 +870,11 @@ export function summarizeReportingRows(
     })
     .slice(0, 12);
 
-  const sourceConversionMap = new Map<string, AdminReportingSummary["sourceConversion"][number]>();
-  for (const row of nonSpamRows) {
-    const source = row.first_touch_source || "Unknown first touch";
-    const outcomes = new Set(row.outcome_types || []);
-    const group = sourceConversionMap.get(source) || {
-      source,
-      captured: 0,
-      qualified: 0,
-      appointments: 0,
-      closedWon: 0,
-      commissions: 0,
-      conversionRate: 0,
-    };
-    group.captured += 1;
-    if (isQualified(row)) group.qualified += 1;
-    if (isAppointment(row) || outcomes.has("appointment_held") || outcomes.has("appointment_set")) group.appointments += 1;
-    if (isConverted(row) || outcomes.has("closed_won")) group.closedWon += 1;
-    if (outcomes.has("commission_received") || outcomes.has("commission_settled")) group.commissions += 1;
-    sourceConversionMap.set(source, group);
-  }
-  const sourceConversion = [...sourceConversionMap.values()]
-    .map((group) => ({ ...group, conversionRate: percent(group.closedWon, group.captured) }))
-    .sort((a, b) => b.captured - a.captured || b.closedWon - a.closedWon || a.source.localeCompare(b.source));
+  const sourceConversion = conversionReporting.sources.map((group) => ({
+    source: group.source, captured: group.captured, qualified: group.qualified,
+    appointments: group.appointments, closedWon: group.closedWon,
+    commissions: group.commissions, conversionRate: group.conversionRate,
+  }));
 
   return {
     configured: true,
@@ -714,19 +889,19 @@ export function summarizeReportingRows(
     },
     funnel: {
       captured: nonSpamRows.length,
-      contacted: nonSpamRows.filter((row) => CONTACTED_STATUSES.has(statusOf(row))).length,
-      qualified: nonSpamRows.filter(isQualified).length,
-      appointment: nonSpamRows.filter(isAppointment).length,
-      converted: nonSpamRows.filter(isConverted).length,
+      contacted: nonSpamRows.filter((row) => canonicalEvidence ? row.first_human_response_recorded : CONTACTED_STATUSES.has(statusOf(row))).length,
+      qualified: nonSpamRows.filter(qualified).length,
+      appointment: nonSpamRows.filter(appointment).length,
+      converted: nonSpamRows.filter(converted).length,
       lostDisqualified: normalizedRows.filter((row) => isClosedLost(row) || isSpamOrTest(row)).length,
     },
     rates: {
-      qualificationRate: percent(nonSpamRows.filter(isQualified).length, nonSpamRows.length),
-      appointmentRate: percent(nonSpamRows.filter(isAppointment).length, nonSpamRows.filter(isQualified).length),
-      conversionRate: percent(nonSpamRows.filter(isConverted).length, nonSpamRows.length),
+      qualificationRate: percent(nonSpamRows.filter(qualified).length, nonSpamRows.length),
+      appointmentRate: percent(nonSpamRows.filter(appointment).length, canonicalEvidence ? nonSpamRows.length : nonSpamRows.filter(qualified).length),
+      conversionRate: percent(nonSpamRows.filter(converted).length, nonSpamRows.length),
       closeRate: percent(
-        nonSpamRows.filter(isConverted).length,
-        nonSpamRows.filter(isConverted).length + nonSpamRows.filter(isClosedLost).length,
+        nonSpamRows.filter(converted).length,
+        nonSpamRows.filter(converted).length + nonSpamRows.filter(isClosedLost).length,
       ),
       disqualificationRate: percent(normalizedRows.filter(isSpamOrTest).length, normalizedRows.length),
     },
@@ -735,7 +910,15 @@ export function summarizeReportingRows(
     sources,
     campaigns,
     agentPerformance,
-    appointmentOps: summarizeAppointmentOps(appointmentRows),
+    appointmentOps: conversionReporting.totals ? {
+      ...conversionReporting.totals.appointmentStates,
+      noShow: conversionReporting.totals.appointmentStates.no_show,
+      // Historical transition rates require transition evidence, not the
+      // current-state appointment inventory available to this read model.
+      requestToScheduledRate: null, scheduledToCompletedRate: null,
+      noShowRate: conversionReporting.totals.captured
+        ? percent(conversionReporting.totals.appointmentStates.no_show, conversionReporting.totals.captured) : null,
+    } : summarizeAppointmentOps(appointmentRows),
     followupOps: summarizeFollowupOps(followupRows, now),
     topPages,
     leadTypes: groupSimple(nonSpamRows, "lead_type") as Array<{ lead_type: string; count: number }>,
@@ -747,12 +930,13 @@ export function summarizeReportingRows(
       included: nonSpamRows.length,
       excludedTest: Math.max(0, excluded.test || 0),
       excludedSuppressed: Math.max(0, excluded.suppressed || 0),
-      excludedDuplicates: 0,
+      excludedDuplicates: Math.max(0, excluded.duplicate || 0),
       unknownFirstTouch: nonSpamRows.filter((row) => !row.first_touch_source).length,
       unknownLastTouch: nonSpamRows.filter((row) => !row.last_touch_source).length,
       outcomesObserved: nonSpamRows.filter((row) => (row.outcome_types || []).length > 0).length,
     },
     operationalTrust: unavailableOperationalTrust(nonSpamRows.length),
+    conversionReporting,
   };
 }
 

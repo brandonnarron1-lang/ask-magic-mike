@@ -1,14 +1,20 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   loadAdminReportingSummary,
+  loadAdminReportingDrillthrough,
+  parseReportingDrillthroughCursor,
+  REPORTING_APPOINTMENT_STATES,
   type AdminReportingGroup,
   type AdminAgentPerformanceGroup,
   type AdminReportingLeadRow,
   type AdminReportingSummary,
   type StatusBucketKey,
+  type ConversionReportingGroup,
 } from "../../lib/adminReportingView";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
+import { canAccessAssignedLead, hasLeadCenterPermission } from "../../../src/lib/admin/rbac-policy";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -42,6 +48,7 @@ function shortDate(value: string | null) {
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    timeZone: "UTC",
   }).format(date);
 }
 
@@ -94,7 +101,7 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function EmptyNotice({ summary }: { summary: AdminReportingSummary }) {
-  if (summary.rows.length && !summary.error) return null;
+  if (summary.conversionReporting.available && summary.conversionReporting.cohort.denominator && !summary.error) return null;
 
   return (
     <section className="rounded-lg border border-[#cda24a33] bg-[#0d0d0d] p-6">
@@ -102,7 +109,7 @@ function EmptyNotice({ summary }: { summary: AdminReportingSummary }) {
         Reporting status
       </p>
       <h2 className="mt-3 font-serif text-3xl text-[#f4ead4]">
-        {summary.configured ? "No reporting rows returned" : "Canonical Neon database not configured"}
+        {summary.error ? "Reporting unavailable" : summary.configured ? "No leads captured in this cohort" : "Canonical Neon database not configured"}
       </h2>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-[#d9ceb8]">
         {summary.error ||
@@ -189,7 +196,7 @@ function AgentPerformanceTable({ rows }: { rows: AdminAgentPerformanceGroup[] })
   );
 }
 
-function SourceConversionTable({ rows }: { rows: AdminReportingSummary["sourceConversion"] }) {
+function SourceConversionTable({ rows }: { rows: ConversionReportingGroup[] }) {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full text-left text-sm">
@@ -198,7 +205,14 @@ function SourceConversionTable({ rows }: { rows: AdminReportingSummary["sourceCo
             <th className="py-2 pr-4">First-touch source</th>
             <th className="py-2 pr-4">Captured</th>
             <th className="py-2 pr-4">Qualified</th>
-            <th className="py-2 pr-4">Appointments</th>
+            <th className="py-2 pr-4">First human response</th>
+            <th className="py-2 pr-4">Manual attempted</th>
+            <th className="py-2 pr-4">Two-way contact</th>
+            <th className="py-2 pr-4">No manual evidence</th>
+            {REPORTING_APPOINTMENT_STATES.map((state) => (
+              <th key={state} className="py-2 pr-4">{state.replaceAll("_", " ")}</th>
+            ))}
+            <th className="py-2 pr-4">No appointment evidence</th>
             <th className="py-2 pr-4">Closed won</th>
             <th className="py-2 pr-4">Commissions</th>
             <th className="py-2">Closed / captured</th>
@@ -210,13 +224,23 @@ function SourceConversionTable({ rows }: { rows: AdminReportingSummary["sourceCo
               <td className="py-3 pr-4 text-[#d9ceb8]">{row.source}</td>
               <td className="py-3 pr-4">{row.captured}</td>
               <td className="py-3 pr-4">{row.qualified}</td>
-              <td className="py-3 pr-4">{row.appointments}</td>
+              <td className="py-3 pr-4">{row.firstHumanResponse}</td>
+              <td className="py-3 pr-4">{row.manualAttempted ?? "Unavailable"}</td>
+              <td className="py-3 pr-4">{row.twoWayContact ?? "Unavailable"}</td>
+              <td className="py-3 pr-4">{row.manualEvidenceUnknown}</td>
+              {REPORTING_APPOINTMENT_STATES.map((state) => (
+                <td key={state} className="py-3 pr-4">
+                  {evidenceRate(row.appointmentStates[state], row.captured,
+                    row.captured ? Math.round(row.appointmentStates[state] / row.captured * 100) : null, true)}
+                </td>
+              ))}
+              <td className="py-3 pr-4">{row.appointmentEvidenceUnknown}</td>
               <td className="py-3 pr-4">{row.closedWon}</td>
-              <td className="py-3 pr-4">{row.commissions}</td>
-              <td className="py-3">{row.closedWon}/{row.captured} · {row.conversionRate}%</td>
+              <td className="py-3 pr-4">{row.commissions ?? "Unavailable"}</td>
+              <td className="py-3">{evidenceRate(row.closedWon, row.captured, row.conversionRate, true)}</td>
             </tr>
           )) : (
-            <tr><td className="py-3 text-[#8f8778]" colSpan={7}>No included leads in this window.</td></tr>
+            <tr><td className="py-3 text-[#8f8778]" colSpan={17}>No included leads in this window.</td></tr>
           )}
         </tbody>
       </table>
@@ -231,7 +255,9 @@ function HotLeadList({ rows }: { rows: AdminReportingLeadRow[] }) {
         <article key={row.id} className="rounded-md border border-[#cda24a24] bg-[#080808] p-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <p className="text-sm font-semibold text-[#f4ead4]">
-              {row.address_raw || row.page_url || row.id}
+              <Link href={`/admin/leads/${encodeURIComponent(row.id)}`}>
+                {row.address_raw || row.id}
+              </Link>
             </p>
             <span className="rounded-full border border-[#cda24a33] bg-[#cda24a14] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#e2c06f]">
               {row.status}
@@ -266,13 +292,26 @@ function HotLeadList({ rows }: { rows: AdminReportingLeadRow[] }) {
 export default async function AdminReportingPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ window?: string }>;
+  searchParams?: Promise<{ window?: string; after?: string }>;
 }) {
   const principal = await requireLeadCenterPermission("report:view");
+  // The shared compatibility guard can return null when RBAC is disabled.
+  // This reporting surface still requires a genuine scoped session.
+  if (!principal) redirect("/lead-center-login?error=session");
   const params = searchParams ? await searchParams : {};
   const windowDays = parseWindow(params.window);
-  const summary = await loadAdminReportingSummary(windowDays, principal);
-  const visibleHotLeads = summary.hotLeads;
+  const parsedCursor = params.after ? parseReportingDrillthroughCursor(params.after, windowDays) : null;
+  const asOf = parsedCursor?.end || new Date();
+  const summary = await loadAdminReportingSummary(windowDays, principal, asOf);
+  const visibleHotLeads = summary.hotLeads.filter((row) => canAccessAssignedLead(principal, row.assigned_agent_id));
+  const canViewLeads = hasLeadCenterPermission(principal.role, "lead:view_all") ||
+    hasLeadCenterPermission(principal.role, "lead:view_assigned");
+  const drillthrough = canViewLeads ? await loadAdminReportingDrillthrough({
+    principal, windowDays, cursor: params.after, asOf,
+  }) : null;
+  const permittedRows = drillthrough?.rows.filter((row) => canAccessAssignedLead(principal, row.assigned_agent_id)) || [];
+  const conversion = summary.conversionReporting;
+  const cohortCount = conversion.cohort.denominator ?? 0;
 
   return (
     <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
@@ -290,24 +329,30 @@ export default async function AdminReportingPage({
               </p>
             </div>
             <nav className="flex flex-wrap gap-2" aria-label="Admin navigation">
+              {canViewLeads ? (
               <Link
                 href="/admin/leads"
                 className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]"
               >
                 Lead inbox
               </Link>
+              ) : null}
+              {hasLeadCenterPermission(principal.role, "lead:assign") ? (
               <Link
                 href="/admin/allocation"
                 className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]"
               >
                 Agent allocation
               </Link>
+              ) : null}
+              {hasLeadCenterPermission(principal.role, "task:manage_assigned") ? (
               <Link
                 href="/admin/action-queue"
                 className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]"
               >
                 Action queue
               </Link>
+              ) : null}
             </nav>
           </div>
           <nav className="mt-5 flex flex-wrap gap-2" aria-label="Reporting windows">
@@ -325,52 +370,66 @@ export default async function AdminReportingPage({
               </a>
             ))}
           </nav>
+          <p className="mt-4 text-xs leading-5 text-[#d9ceb8]">
+            Lead-capture cohort: {conversion.cohort.startInclusive} inclusive to {conversion.cohort.endExclusive} exclusive.
+            Timezone: UTC. Denominator: {conversion.cohort.denominator ?? "Unavailable"} distinct canonical live leads.
+            Scope: {conversion.cohort.scope.replaceAll("_", " ")}. Totals: {conversion.cohort.totals}; not limited by drill-through pages.
+            Calculation: full scoped cohort fetched and reconciled in memory, not SQL aggregate totals.
+            Test, suppressed, spam, and duplicate aliases are excluded. Outcomes are observed canonical records, not predicted conversions.
+          </p>
         </header>
 
+        {!conversion.available ? <EmptyNotice summary={summary} /> : <>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard label="Leads today" value={summary.kpis.leadsToday} />
-          <MetricCard label="Leads last 7 days" value={summary.kpis.leadsLast7Days} />
-          <MetricCard label="Leads last 30 days" value={summary.kpis.leadsLast30Days} />
+          <MetricCard label="Leads last 7 days" value={summary.kpis.leadsLast7Days} note="Within the selected capture cohort" />
+          <MetricCard label="Leads last 30 days" value={summary.kpis.leadsLast30Days} note="Within the selected capture cohort" />
           <MetricCard
             label="Contactable rate"
-            value={`${summary.kpis.contactableRate}%`}
+            value={cohortCount ? `${summary.kpis.contactableRate}%` : "—"}
             note="Email or phone present"
           />
         </div>
 
         <div className="mt-5 grid gap-4 md:grid-cols-5">
           <MetricCard label="Captured" value={summary.funnel.captured} />
-          <MetricCard label="Contacted" value={summary.funnel.contacted} />
+          <MetricCard label="First human response" value={summary.funnel.contacted} note="Immutable recorded evidence; not proof of two-way contact" />
           <MetricCard label="Qualified" value={summary.funnel.qualified} />
           <MetricCard label="Appointment" value={summary.funnel.appointment} />
-          <MetricCard label="Converted" value={summary.funnel.converted} />
+          <MetricCard label="Closed outcome" value={summary.funnel.converted} />
+        </div>
+        <div className="mt-5 grid gap-4 md:grid-cols-3">
+          <MetricCard label="Manual attempted" value={conversion.totals!.manualAttempted ?? "Unavailable"} note="Distinct leads with canonical operator attempted, no-answer, or two-way audit records" />
+          <MetricCard label="Two-way contact" value={conversion.totals!.twoWayContact ?? "Unavailable"} note="Explicit manual two_way_conversation audit result only" />
+          <MetricCard label="No manual evidence" value={conversion.totals!.manualEvidenceUnknown} note="Unknown, not confirmed no attempts" />
         </div>
 
         <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           <MetricCard
             label="Qualification rate"
-            value={`${summary.rates.qualificationRate}%`}
-            note="Qualified or later / captured non-spam leads"
+            value={evidenceRate(summary.funnel.qualified, cohortCount, cohortCount ? summary.rates.qualificationRate : null, true)}
+            note="Qualified status or recorded qualified outcome / captured cohort"
           />
           <MetricCard
             label="Appointment rate"
-            value={`${summary.rates.appointmentRate}%`}
-            note="Appointment requested or set / qualified-or-later leads"
+            value={evidenceRate(summary.funnel.appointment, cohortCount, cohortCount ? summary.rates.appointmentRate : null, true)}
+            note="Distinct leads with canonical appointment records / captured cohort"
           />
           <MetricCard
             label="Conversion rate"
-            value={`${summary.rates.conversionRate}%`}
-            note="Converted / captured non-spam leads"
+            value={evidenceRate(summary.funnel.converted, cohortCount, cohortCount ? summary.rates.conversionRate : null, true)}
+            note="Recorded closed outcome / captured cohort; not settled commission"
           />
           <MetricCard
             label="Close rate"
-            value={`${summary.rates.closeRate}%`}
-            note="Converted / converted plus closed-lost leads"
+            value={evidenceRate(summary.funnel.converted, summary.funnel.converted + summary.funnel.lostDisqualified,
+              summary.funnel.converted + summary.funnel.lostDisqualified ? summary.rates.closeRate : null, true)}
+            note="Recorded closed outcome / closed outcomes plus closed-lost leads"
           />
           <MetricCard
-            label="Disqualification rate"
-            value={`${summary.rates.disqualificationRate}%`}
-            note="Spam or disqualified leads / all captured leads"
+            label="No outcome evidence"
+            value={conversion.totals!.outcomeEvidenceUnknown}
+            note="Unknown, not confirmed no conversion"
           />
         </div>
 
@@ -407,10 +466,13 @@ export default async function AdminReportingPage({
           </Panel>
 
           <Panel title="Source to outcome">
-            <SourceConversionTable rows={summary.sourceConversion} />
+            <SourceConversionTable rows={conversion.sources} />
             <p className="mt-3 text-xs leading-5 text-[#8f8778]">
-              First-touch cohorts with explicit n/N rates. Appointment and commission columns use durable lifecycle/outcome evidence; unknown attribution remains visible.
+              Each state uses distinct leads / that source&apos;s captured cohort. States are exact current appointment records,
+              not inferred milestones; one lead can appear in multiple states across different appointments.
+              Missing appointment/outcome records mean unknown evidence, not a confirmed negative outcome.
             </p>
+            {conversion.limitations.map((limitation) => <p key={limitation} className="mt-2 text-xs leading-5 text-[#8f8778]">{limitation}</p>)}
           </Panel>
 
           <Panel title="Reporting data trust">
@@ -497,36 +559,25 @@ export default async function AdminReportingPage({
             <SourceTable rows={summary.campaigns} />
           </Panel>
 
-          <Panel title="Agent performance">
+          {canViewLeads ? <Panel title="Agent performance">
             <AgentPerformanceTable rows={summary.agentPerformance} />
             <p className="mt-3 text-xs leading-5 text-[#8f8778]">
               Rates include sample counts and are operational indicators, not compensation or employment scoring.
             </p>
-          </Panel>
+          </Panel> : null}
 
           <Panel title="Appointment operations">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <MetricCard label="Requests" value={summary.appointmentOps.requested} />
-              <MetricCard label="Scheduled+" value={summary.appointmentOps.scheduled} note="Scheduled, confirmed, completed, or no-show" />
-              <MetricCard label="Completed" value={summary.appointmentOps.completed} />
-              <MetricCard label="No-shows" value={summary.appointmentOps.noShow} />
-              <MetricCard
-                label="Request → scheduled"
-                value={`${summary.appointmentOps.requestToScheduledRate}%`}
-                note="Scheduled-or-later / requested plus scheduled-or-later"
-              />
-              <MetricCard
-                label="Scheduled → completed"
-                value={`${summary.appointmentOps.scheduledToCompletedRate}%`}
-                note="Completed / scheduled-or-later"
-              />
-              <MetricCard
-                label="No-show rate"
-                value={`${summary.appointmentOps.noShowRate}%`}
-                note="No-show / confirmed-or-later"
-              />
-              <MetricCard label="Canceled" value={summary.appointmentOps.canceled} />
+              {REPORTING_APPOINTMENT_STATES.map((state) => (
+                <MetricCard key={state} label={state.replaceAll("_", " ")}
+                  value={evidenceRate(conversion.totals!.appointmentStates[state], cohortCount,
+                    cohortCount ? Math.round(conversion.totals!.appointmentStates[state] / cohortCount * 100) : null, true)}
+                  note="Distinct leads in this exact current state / captured cohort" />
+              ))}
+              <MetricCard label="Reschedule requested" value={conversion.totals!.otherAppointmentStates} />
+              <MetricCard label="No appointment evidence" value={conversion.totals!.appointmentEvidenceUnknown} note="Unknown, not confirmed no appointment" />
             </div>
+            <p className="mt-3 text-xs text-[#8f8778]">Request-to-scheduled and scheduled-to-completed transition rates are unavailable without historical transition evidence.</p>
           </Panel>
 
           <Panel title="Follow-up operations">
@@ -538,14 +589,15 @@ export default async function AdminReportingPage({
               <MetricCard label="Canceled" value={summary.followupOps.cancelled} />
               <MetricCard
                 label="Completion rate"
-                value={`${summary.followupOps.completionRate}%`}
-                note="Completed / all follow-up tasks in window"
+                value={summary.followupOps.open + summary.followupOps.completed + summary.followupOps.cancelled
+                  ? `${summary.followupOps.completionRate}%` : "—"}
+                note="Completed / canonical follow-up tasks belonging to the captured cohort; task completion is not contact evidence"
               />
             </div>
           </Panel>
 
           <div className="grid gap-5 lg:grid-cols-2">
-            <Panel title="Top pages">
+            {canViewLeads ? <Panel title="Top pages">
               <div className="space-y-3 text-sm">
                 {summary.topPages.length ? summary.topPages.map((row) => (
                   <div key={row.page_url} className="flex items-center justify-between gap-4">
@@ -556,7 +608,7 @@ export default async function AdminReportingPage({
                   </div>
                 )) : <p className="text-[#8f8778]">No page URLs captured.</p>}
               </div>
-            </Panel>
+            </Panel> : null}
 
             <Panel title="Intent and timeline mix">
               <div className="grid gap-4 sm:grid-cols-3">
@@ -603,10 +655,24 @@ export default async function AdminReportingPage({
             </Panel>
           </div>
 
-          <Panel title="Hot lead indicators">
+          {canViewLeads ? <Panel title="Hot lead indicators">
             <HotLeadList rows={visibleHotLeads} />
-          </Panel>
+          </Panel> : null}
+          {canViewLeads ? <Panel title="Permitted cohort drill-through">
+            <p className="mb-3 text-xs text-[#8f8778]">Showing up to {drillthrough?.limit || 50} permitted records per scoped SQL page with a stable UTC cohort anchor. This display limit does not cap any reporting total. Detail routes recheck access.</p>
+            {drillthrough?.error ? <p className="mb-3 text-sm text-[#d9ceb8]">Drill-through unavailable: {drillthrough.error}</p> : null}
+            <ul className="space-y-2 text-sm">
+              {permittedRows.map((row) => (
+                <li key={row.id}><Link href={`/admin/leads/${encodeURIComponent(row.id)}`} className="text-[#e2c06f]">Lead {row.id}</Link></li>
+              ))}
+            </ul>
+            <nav className="mt-4 flex gap-4 text-sm" aria-label="Cohort record pages">
+              {params.after ? <Link href={`/admin/reporting?window=${windowDays}`}>First page</Link> : null}
+              {drillthrough?.nextCursor ? <Link href={`/admin/reporting?window=${windowDays}&after=${encodeURIComponent(drillthrough.nextCursor)}`}>Next page</Link> : null}
+            </nav>
+          </Panel> : null}
         </div>
+        </>}
       </div>
     </main>
   );

@@ -174,6 +174,10 @@ export function normalizeAuditTimelineEvent(row: Record<string, unknown>): Admin
   if (action === "lead.first_human_response_recorded") {
     return event({ ...base, type: "response", summary: "First human response recorded", detail: "Immutable speed-to-lead evidence recorded" });
   }
+  if (action === "lead.human_interaction_recorded") {
+    return event({ ...base, type: "response", summary: `Human ${text(meta.result)?.replaceAll("_", " ") || "interaction"} recorded`,
+      detail: sanitizeTimelineText(`Channel: ${text(meta.channel) || "unknown"}. Manual operator evidence; next task recorded. Not provider-verified contact.`) });
+  }
   if (action === "lead.qa_suppressed") {
     return event({
       ...base, type: "lifecycle", summary: "QA capture suppressed",
