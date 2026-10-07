@@ -113,7 +113,7 @@ export function BlackDiamondShell() {
 export function Footer() {
   return (
     <footer className="border-t border-[#cda24a2e] bg-[#050505] px-5 py-10 sm:px-8 lg:px-10">
-      <div className="mx-auto grid max-w-7xl gap-6 text-sm text-[#d9ceb8] md:grid-cols-[1fr_auto]">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 text-sm text-[#d9ceb8] [overflow-wrap:anywhere] md:grid-cols-[1fr_auto]">
         <div>
           <p className="font-semibold text-[#f4ead4]">Our Town Properties</p>
           <p className="mt-2">askmagicmike.com | ourtownproperties.com | Wilson, NC</p>

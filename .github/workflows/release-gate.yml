@@ -88,6 +88,9 @@ jobs:
       - name: Install Chromium for isolated real-session acceptance
         run: pnpm exec playwright install --with-deps chromium
 
+      - name: Built public enlarged-text reflow acceptance (no writes)
+        run: AMM_E2E_BUILT=1 pnpm exec playwright test tests/e2e/public-text-reflow.spec.ts --workers 1 --reporter=line
+
       - name: Built application real-session and signed HTTP-to-SQL acceptance
         run: pnpm run test:reference:sessions
 

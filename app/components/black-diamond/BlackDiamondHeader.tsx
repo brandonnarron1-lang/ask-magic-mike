@@ -69,7 +69,7 @@ export function BlackDiamondHeader({ onAsk }: HeaderProps) {
     <header
       ref={header}
       onKeyDown={handleMobileNavigationKeyDown}
-      className="relative z-50 flex items-center justify-between gap-3 sm:gap-4"
+      className="relative z-50 flex flex-wrap items-center justify-between gap-3 sm:gap-4"
     >
       <a
         href="#page-content"
@@ -114,7 +114,7 @@ export function BlackDiamondHeader({ onAsk }: HeaderProps) {
           );
         })}
       </nav>
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex max-w-full shrink-0 flex-wrap items-center justify-end gap-2">
         <Link
           href="/ask"
           onClick={onAsk}
@@ -156,7 +156,7 @@ export function BlackDiamondHeader({ onAsk }: HeaderProps) {
                     closeMobileNavigation();
                     if (item.href === "/ask") onAsk?.();
                   }}
-                  className={`flex min-h-12 items-center justify-between rounded-xl border px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22c6d2] ${item.href === "/ask" ? "col-span-2" : ""} ${
+                  className={`flex min-h-12 min-w-0 flex-wrap items-center justify-between gap-1 rounded-xl border px-4 py-3 text-sm font-semibold [overflow-wrap:anywhere] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22c6d2] ${item.href === "/ask" ? "col-span-2" : ""} ${
                     current
                       ? item.accent === "cyan"
                         ? "border-[#22c6d2aa] bg-[#22c6d21a] text-[#9df2f5]"
@@ -164,7 +164,7 @@ export function BlackDiamondHeader({ onAsk }: HeaderProps) {
                       : "border-white/10 bg-white/[.035] text-[#f4ead4] hover:border-[#cda24a88]"
                   }`}
                 >
-                  <span>{item.label}</span>
+                  <span className="min-w-0">{item.label}</span>
                   {current ? (
                     <span className="hidden text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#8f8778] min-[360px]:inline">
                       Current
