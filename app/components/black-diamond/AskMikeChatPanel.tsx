@@ -251,14 +251,14 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
   return (
     <LuxuryCard
       id="ask-mike"
-      className={`bg-[radial-gradient(circle_at_top_right,rgba(34,198,210,.14),transparent_32%),linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025))] ${compact ? "p-4" : "p-5 sm:p-7"}`}
+      className={`min-w-0 [overflow-wrap:anywhere] bg-[radial-gradient(circle_at_top_right,rgba(34,198,210,.14),transparent_32%),linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025))] ${compact ? "p-4" : "p-5 sm:p-7"}`}
     >
       <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#22c6d2]">Ask Mike</p>
       <h2 className="mt-3 font-serif text-3xl leading-tight text-[#f4ead4]">
         Start with the real estate question on your mind.
       </h2>
       <div className="mt-6 rounded-lg border border-white/10 bg-black/45 p-4">
-        <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+        <div className="flex flex-wrap items-center gap-3 border-b border-white/10 pb-4">
           <Image src="/brand/black-diamond/our-town-logo.png" alt="Our Town Properties" width={96} height={41} className="h-auto w-20" />
           <div>
             <p className="font-semibold text-[#f4ead4]">Mike Eatmon</p>

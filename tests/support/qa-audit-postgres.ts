@@ -1,5 +1,8 @@
 import { execFileSync, spawn } from "node:child_process";
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, mkdtempSync, chmodSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createServer } from "node:net";
 import { randomUUID } from "node:crypto";
 
 // No URL, credentials, exposed port, network, remote link or provider required.
@@ -10,11 +13,23 @@ export const acceptedMigration = "20260716043829_infra_02_atomic_lifecycle.sql";
 export const database = "amm_qa_upgrade";
 export const statements: Array<{ sql: string; params: unknown[] }> = [];
 let containerStarted = false;
+const nativeBin = "/opt/homebrew/opt/postgresql@17/bin";
+let nativeDirectory: string | undefined;
+let nativePort = 5432;
+function connectionArgs(db: string) {
+  if (!nativeDirectory) throw new Error("isolated_native_database_required");
+  return ["-h", nativeDirectory, "-p", String(nativePort), "-U", "postgres", "-d", db];
+}
+function databaseCommand(db: string, args: string[]) {
+  return nativeDirectory
+    ? { binary: join(nativeBin, "psql"), args: [...connectionArgs(db), ...args] }
+    : { binary: "docker", args: ["exec", "-i", container, "psql", "-U", "postgres", "-d", db, ...args] };
+}
 
 export function psql(sql: string, db = database): string {
   if (!/^amm_qa_(upgrade|fresh)$/.test(db)) throw new Error("isolated_database_required");
-  return execFileSync("docker", ["exec", "-i", container, "psql", "-X", "-U", "postgres", "-d", db,
-    "-v", "ON_ERROR_STOP=1", "-A", "-t", "-q"], { input: sql, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"], maxBuffer: 16 * 1024 * 1024 }).trim();
+  const command = databaseCommand(db, ["-X", "-v", "ON_ERROR_STOP=1", "-A", "-t", "-q"]);
+  return execFileSync(command.binary, command.args, { input: sql, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"], maxBuffer: 16 * 1024 * 1024, timeout: 30_000 }).trim();
 }
 
 export function literal(value: unknown): string {
@@ -31,8 +46,8 @@ export function bind(sql: string, params: unknown[] = []): string {
 // Data-modifying WITH statements must remain top-level. psql CSV lets the
 // actual webhook transaction execute intact instead of wrapping/mocking it.
 function topLevelRows(sql: string): Array<Record<string, unknown>> {
-  const output = execFileSync("docker", ["exec", "-i", container, "psql", "-X", "-U", "postgres", "-d", database,
-    "-v", "ON_ERROR_STOP=1", "--csv", "-q"], { input: `SET ROLE service_role; ${sql};`, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] });
+  const command = databaseCommand(database, ["-X", "-v", "ON_ERROR_STOP=1", "--csv", "-q"]);
+  const output = execFileSync(command.binary, command.args, { input: `SET ROLE service_role; ${sql};`, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"], timeout: 30_000 });
   const records: string[][] = []; let record: string[] = []; let field = ""; let quoted = false;
   for (let i = 0; i < output.length; i++) {
     const c = output[i];
@@ -85,6 +100,23 @@ export function acceptedFunction(): string {
 
 export async function startDatabase(options: { loopbackTcp?: boolean } = {}): Promise<string | undefined> {
   if (process.env.AMM_QA_POSTGRES_TEST !== "1") throw new Error("explicit_isolated_test_required");
+  // Explicit local-only alternative when Docker Desktop is unavailable. Never
+  // connect to a configured app database or start/stop a shared Homebrew service.
+  if (process.env.AMM_QA_NATIVE_POSTGRES_TEST === "1") {
+    nativeDirectory = mkdtempSync(join(tmpdir(), "amm-qa-native-"));
+    chmodSync(nativeDirectory, 0o700);
+    execFileSync(join(nativeBin, "initdb"), ["-D", join(nativeDirectory, "data"), "-U", "postgres", "-A", "trust", "--no-locale"], { stdio: "pipe", timeout: 30_000 });
+    if (options.loopbackTcp) {
+      const portServer = createServer();
+      await new Promise<void>((resolve, reject) => { portServer.once("error", reject); portServer.listen(0, "127.0.0.1", resolve); });
+      nativePort = (portServer.address() as { port: number }).port;
+      await new Promise<void>((resolve, reject) => portServer.close((error) => error ? reject(error) : resolve()));
+    }
+    execFileSync(join(nativeBin, "pg_ctl"), ["-D", join(nativeDirectory, "data"), "-l", join(nativeDirectory, "server.log"), "-o", `-k ${nativeDirectory} -p ${nativePort} -h '${options.loopbackTcp ? "127.0.0.1" : ""}' -c shared_buffers=32MB -c max_connections=20`, "-w", "start"], { stdio: "pipe", timeout: 30_000 });
+    const setup = databaseCommand("postgres", ["-X", "-v", "ON_ERROR_STOP=1"]);
+    execFileSync(setup.binary, setup.args, { input: "CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role BYPASSRLS; CREATE DATABASE amm_qa_upgrade; CREATE DATABASE amm_qa_fresh;", stdio: "pipe", timeout: 30_000 });
+    return options.loopbackTcp ? `postgresql://postgres@127.0.0.1:${nativePort}/${database}` : undefined;
+  }
   // Docker Desktop does not publish ports for internal-only networks. Opt-in
   // real-session tests use a disposable bridge with strictly loopback binding;
   // their built-app transport refuses nonlocal DBs and all external fetches.
@@ -118,9 +150,10 @@ export async function startDatabase(options: { loopbackTcp?: boolean } = {}): Pr
   }
 }
 
-export function install(db: "amm_qa_upgrade" | "amm_qa_fresh", includeRepair: boolean): void {
+export function install(db: "amm_qa_upgrade" | "amm_qa_fresh", includeRepair: boolean, excluded: ReadonlySet<string> = new Set()): void {
   psql("CREATE SCHEMA extensions; CREATE EXTENSION pgcrypto WITH SCHEMA extensions;", db);
   for (const file of readdirSync("supabase/migrations").filter((file) => file.endsWith(".sql")).sort()) {
+    if (excluded.has(file)) continue;
     if (!includeRepair && file === migration) continue;
     if (!includeRepair && file === reliabilityMigration) continue;
     psql(readFileSync(`supabase/migrations/${file}`, "utf8"), db);
@@ -131,7 +164,8 @@ export function install(db: "amm_qa_upgrade" | "amm_qa_fresh", includeRepair: bo
 
 export async function concurrent(sql: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const child = spawn("docker", ["exec", "-i", container, "psql", "-X", "-U", "postgres", "-d", database, "-v", "ON_ERROR_STOP=1", "-A", "-t", "-q"]);
+    const command = databaseCommand(database, ["-X", "-v", "ON_ERROR_STOP=1", "-A", "-t", "-q"]);
+    const child = spawn(command.binary, command.args);
     let output = ""; let error = "";
     child.stdout.on("data", (value) => { output += String(value); });
     child.stderr.on("data", (value) => { error += String(value); });
@@ -141,7 +175,31 @@ export async function concurrent(sql: string): Promise<string> {
   });
 }
 
+// Same real pg_dump/pg_restore rehearsal in either existing isolated venue.
+// The fixed source/destination are synthetic databases owned by this fixture;
+// never accept app credentials, another database name, or a configured URL.
+export function dumpAndRestoreSyntheticDatabase(): Buffer {
+  if (process.env.AMM_QA_POSTGRES_TEST !== "1") throw new Error("explicit_isolated_test_required");
+  if (nativeDirectory) {
+    const dump = execFileSync(join(nativeBin, "pg_dump"), [...connectionArgs("amm_qa_upgrade"), "-Fc"], { maxBuffer: 32 * 1024 * 1024, timeout: 30_000 });
+    execFileSync(join(nativeBin, "pg_restore"), [...connectionArgs("amm_qa_fresh"), "--exit-on-error"], { input: dump, stdio: ["pipe", "ignore", "pipe"], timeout: 30_000 });
+    return dump;
+  }
+  if (!containerStarted) throw new Error("owned_fixture_required");
+  const dump = execFileSync("docker", ["exec", container, "pg_dump", "-U", "postgres", "-d", "amm_qa_upgrade", "-Fc"], { maxBuffer: 32 * 1024 * 1024, timeout: 30_000 });
+  execFileSync("docker", ["exec", "-i", container, "pg_restore", "-U", "postgres", "-d", "amm_qa_fresh", "--exit-on-error"], { input: dump, stdio: ["pipe", "ignore", "pipe"], timeout: 30_000 });
+  return dump;
+}
+
 export function stopDatabase(): void {
+  if (nativeDirectory) {
+    const owned = nativeDirectory;
+    execFileSync(join(nativeBin, "pg_ctl"), ["-D", join(owned, "data"), "-m", "fast", "-w", "stop"], { stdio: "pipe", timeout: 20_000 });
+    nativeDirectory = undefined;
+    if (!owned.startsWith(join(tmpdir(), "amm-qa-native-"))) throw new Error("native_cleanup_identity_failed");
+    rmSync(owned, { recursive: true });
+    return;
+  }
   // Exact UUID-named test container only; no unrelated stack or volume removed.
   if (!containerStarted) return;
   execFileSync("docker", ["rm", "-f", "-v", container], { stdio: "ignore" });

@@ -21,8 +21,8 @@ export default function AskPage() {
         </div>
       </section>
       <section id="page-content" tabIndex={-1} className="px-5 py-14 sm:px-8 lg:px-10">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.8fr_1.2fr] lg:items-start">
-          <div>
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 lg:grid-cols-[.8fr_1.2fr] lg:items-start">
+          <div className="min-w-0 [overflow-wrap:anywhere]">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#22c6d2]">Ask Mike</p>
             <h1 className="mt-4 font-serif text-5xl leading-tight text-[#f4ead4] sm:text-6xl">
               Ask Mike. Get a practical local next step.

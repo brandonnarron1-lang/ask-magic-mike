@@ -225,7 +225,7 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
   }
 
   async mutateAdminLead(input: AdminLeadMutation): Promise<AdminLeadMutationResult> {
-    const result = await this.rpc("mutate_admin_lead_status_v3", [
+    const result = await this.rpc("mutate_admin_lead_status_v4", [
       input.leadId, input.expectedStatus, input.nextStatus, JSON.stringify(input.patch),
       input.reason || null, input.outcomeAmountUsd ?? null, input.actor, input.occurredAt,
     ]);
@@ -360,7 +360,7 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
   async recordAdminFirstResponse(
     input: AdminFirstResponseMutation,
   ): Promise<AdminFirstResponseMutationResult> {
-    const result = await this.rpc("record_admin_first_response_v1", [
+    const result = await this.rpc("record_admin_first_response_v2", [
       input.leadId,
       input.actor,
       input.occurredAt,

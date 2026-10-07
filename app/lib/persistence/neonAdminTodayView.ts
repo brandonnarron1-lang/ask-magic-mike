@@ -31,6 +31,9 @@ export async function loadNeonAdminTodayQueue(
   if (!principal) {
     return { ...emptyAdminTodayQueue(now, "America/New_York", "lead_center_principal_required"), configured: true };
   }
+  if (!hasLeadCenterPermission(principal.role, "lead:view_assigned")) {
+    return { ...emptyAdminTodayQueue(now, "America/New_York", "lead_center_lead_permission_required"), configured: true };
+  }
   const canViewAll = hasLeadCenterPermission(principal.role, "lead:view_all");
   if (!canViewAll && !principal.agentId) return { ...emptyAdminTodayQueue(now), configured: true };
 

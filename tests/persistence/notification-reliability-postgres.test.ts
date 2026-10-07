@@ -254,14 +254,33 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("PR279 successor: real 
   it("actual Today/timeline/reporting reads preserve assigned-only scope, QA exclusion, pagination and all supported roles", async () => {
     const { loadNeonAdminTodayQueue } = await import("../../app/lib/persistence/neonAdminTodayView");
     const { loadNeonAdminLeadDetail } = await import("../../app/lib/persistence/neonAdminLeadView");
+    const { loadNeonAdminLeadInbox } = await import("../../app/lib/persistence/neonAdminLeadView");
     const { loadNeonAdminReportingSummary } = await import("../../app/lib/persistence/neonAdminReportingView");
     const agent = psql(`SELECT assigned_agent_id FROM leads WHERE id=${literal(ordinaryId)};`);
     const principal = { userId: "synthetic-operator", email: "operator@example.test", name: "SYNTHETIC OPERATOR", role: "administrator" as const, agentId: null };
     for (const role of ["administrator", "primary_lead_owner", "approved_agent", "read_only_analyst"] as const) {
       const scoped = { ...principal, role, agentId: agent };
+      if (role === "read_only_analyst") {
+        // Even an analyst supplied with an agentId must not acquire a private
+        // projection through a lower-level repository call. Deny before SQL.
+        const beforeDenied = statements.length;
+        expect(await loadNeonAdminTodayQueue(scoped)).toMatchObject({ error: "lead_center_lead_permission_required", items: [] });
+        expect(await loadNeonAdminLeadDetail(ordinaryId, scoped)).toMatchObject({ error: "lead_center_lead_permission_required", lead: null, timeline: [] });
+        expect(await loadNeonAdminLeadInbox(50, scoped)).toMatchObject({ error: "lead_center_lead_permission_required", leads: [] });
+        expect(statements.length).toBe(beforeDenied);
+        const report = await loadNeonAdminReportingSummary(30, scoped);
+        expect(report.error).toBeUndefined(); expect(report.rows).toEqual([]);
+        expect(JSON.stringify(report)).not.toContain(ordinaryId);
+        continue;
+      }
       const today = await loadNeonAdminTodayQueue(scoped); expect(today.error).toBeUndefined(); expect(today.items.some((row) => row.leadId === qaId)).toBe(false);
       const detail = await loadNeonAdminLeadDetail(ordinaryId, scoped, { offset: 0, limit: 1 }); expect(detail.error).toBeUndefined(); expect(detail.lead?.id).toBe(ordinaryId);
-      const report = await loadNeonAdminReportingSummary(30, scoped); expect(report.error).toBeUndefined(); expect(report.rows.some((row) => row.id === qaId)).toBe(false);
+      const report = await loadNeonAdminReportingSummary(30, scoped);
+      if (role === "approved_agent") {
+        expect(report.error).toBe("lead_center_report_permission_required"); expect(report.rows).toEqual([]);
+      } else {
+        expect(report.error).toBeUndefined(); expect(report.rows.some((row) => row.id === qaId)).toBe(false);
+      }
     }
     const denied = await loadNeonAdminLeadDetail(ordinaryId, { ...principal, role: "approved_agent", agentId: randomUUID() }); expect(denied.lead).toBeNull();
     expect(JSON.stringify((await loadNeonAdminLeadDetail(qaId, principal, { limit: 100 })).timeline)).not.toContain(webhookSecret);
