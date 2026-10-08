@@ -56,10 +56,12 @@ function seedMany(count: number, agent: string | null = null) {
 
 describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("conversion reporting: real isolated PostgreSQL reconciliation", () => {
   let client: Client | undefined;
+  let fixtureConnectionString: string;
   beforeAll(async () => {
     const connectionString = await startDatabase({ loopbackTcp: true }); install("amm_qa_upgrade", true);
     if (!connectionString || new URL(connectionString).hostname !== "127.0.0.1" ||
       new URL(connectionString).pathname !== "/amm_qa_upgrade") throw new Error("isolated_loopback_fixture_required");
+    fixtureConnectionString = connectionString;
     // Use real driver Date decoding, also exercised through Neon by the built
     // browser suite. Cursor SELECTs explicitly preserve timestamp microseconds.
     // Only transport is replaced; no result/SQL mock. This single-connection
@@ -301,7 +303,9 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("conversion reporting: 
           conversionReporting:{...old.conversionReporting,cohort:{...old.conversionReporting.cohort,calculation:'database_snapshot_aggregate'}}});
       }
     }
-  });
+    // This fixture includes Docker/psql startup and nine accepted/candidate
+    // comparisons. Its deadline is not the separate 2s reporting-scale target.
+  }, 30_000);
 
   it('combines high-cardinality groups explicitly without changing any full-cohort count',async()=>{
     const before=await loadNeonAdminReportingSummary(30,administrator);
@@ -320,17 +324,46 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("conversion reporting: 
     const id=seed({source:'synthetic_snapshot'}),anchor=new Date();
     const before=await loadNeonAdminReportingSummary(30,administrator,anchor);
     reportingQuery.query.mockImplementationOnce(async(statement:string,params:unknown[])=>{
-      const pending=client!.query("WITH snapshot_delay AS MATERIALIZED(SELECT pg_sleep(0.25)), "+statement.replace(/^WITH /,'')+' FROM snapshot_delay',params);
-      await new Promise(resolve=>setTimeout(resolve,60));
-      psql(`UPDATE leads SET status='qualified' WHERE id=${literal(id)};`);
-      return (await pending).rows;
+      const blocker = new Client({ connectionString: fixtureConnectionString });
+      await blocker.connect();
+      const lockKey = Number.parseInt(randomUUID().replaceAll('-', '').slice(0, 7), 16);
+      try {
+        const pid = (await client!.query('SELECT pg_backend_pid() AS pid')).rows[0].pid;
+        await blocker.query('SELECT pg_advisory_lock($1::bigint)', [lockKey]);
+        const pending = client!.query(
+          `WITH snapshot_gate AS MATERIALIZED(SELECT pg_advisory_xact_lock(${lockKey})), ` +
+          statement.replace(/^WITH /, '') + ' FROM snapshot_gate', params,
+        );
+        try {
+          // Observe the actual report statement waiting inside PostgreSQL.
+          // A fixed sleep cannot prove its snapshot began on a loaded runner.
+          let observed = false;
+          const deadline = Date.now() + 5_000;
+          while (Date.now() < deadline) {
+            const activity = (await blocker.query(
+              "SELECT wait_event_type, wait_event FROM pg_stat_activity WHERE pid=$1", [pid],
+            )).rows[0];
+            if (activity?.wait_event_type === 'Lock' && activity.wait_event === 'advisory') {
+              observed = true; break;
+            }
+            await new Promise(resolve => setTimeout(resolve, 10));
+          }
+          expect(observed).toBe(true);
+          await blocker.query("UPDATE leads SET status='qualified' WHERE id=$1::uuid", [id]);
+        } finally {
+          await blocker.query('SELECT pg_advisory_unlock($1::bigint)', [lockKey]);
+        }
+        return (await pending).rows;
+      } finally {
+        await blocker.end();
+      }
     });
     const concurrent=await loadNeonAdminReportingSummary(30,administrator,anchor);
     expect(concurrent.error).toBeUndefined();expect(concurrent.funnel.qualified).toBe(before.funnel.qualified);
     expect(concurrent.rows.find(r=>r.id===id)?.status).toBe('new');
     const after=await loadNeonAdminReportingSummary(30,administrator,anchor);
     expect(after.funnel.qualified).toBe(before.funnel.qualified+1);expect(after.rows.find(r=>r.id===id)?.status).toBe('qualified');
-  });
+  }, 15_000);
 
   it('rechecks ownership and revoked report permission on later cursor requests',async()=>{
     const owner={...administrator,role:'primary_lead_owner' as const,agentId:ownerAgent};
