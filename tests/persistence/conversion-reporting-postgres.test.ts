@@ -5,6 +5,7 @@ import { Client } from "pg";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { install, literal, psql, startDatabase, statements, stopDatabase } from "../support/qa-audit-postgres";
 import { loadNeonAdminReportingSummary, loadNeonAdminReportingDrillthrough } from "../../app/lib/persistence/neonAdminReportingView";
+import { loadAcceptedReportingSummary } from '../support/acceptedReportingReference';
 import type { LeadCenterPrincipal } from "../../src/lib/admin/rbac-policy";
 
 const reportingQuery = vi.hoisted(() => ({ query: vi.fn() }));
@@ -78,6 +79,20 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("conversion reporting: 
     vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("external_network_forbidden"); }));
   }, 120_000);
   afterAll(async () => { await client?.end(); stopDatabase(); vi.unstubAllEnvs(); vi.unstubAllGlobals(); }, 30_000);
+
+  it('distinguishes a measured empty cohort from an unavailable database', async () => {
+    const anchor = new Date();
+    const old = await loadAcceptedReportingSummary(30, administrator, anchor);
+    const fresh = await loadNeonAdminReportingSummary(30, administrator, anchor);
+    expect(fresh.error).toBeUndefined();
+    expect(fresh.conversionReporting.cohort.denominator).toBe(0);
+    expect(fresh.conversionReporting.totals?.conversionRate).toBeNull();
+    expect(fresh).toEqual({ ...old, displayBounds: fresh.displayBounds,
+      conversionReporting: { ...old.conversionReporting, cohort: {
+        ...old.conversionReporting.cohort, calculation: 'database_snapshot_aggregate',
+      } },
+    });
+  });
 
   it("reconciles distinct-lead states and recorded closed outcomes, without status-inferred appointments or contact", async () => {
     const source = `synthetic-reporting-states-${randomUUID()}`;
@@ -172,7 +187,7 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("conversion reporting: 
     const report = await loadNeonAdminReportingSummary(30, administrator);
     expect(report.error).toBeUndefined(); expect(report.conversionReporting.cohort.denominator).toBe(1270);
     expect(report.conversionReporting.cohort.totals).toBe("complete");
-    expect(report.conversionReporting.cohort.calculation).toBe("full_scoped_cohort_in_memory");
+    expect(report.conversionReporting.cohort.calculation).toBe("database_snapshot_aggregate");
     expect(report.conversionReporting.totals).toMatchObject({ captured: 1270, appointments: 9, closedWon: 2,
       manualAttempted: 2, twoWayContact: 1, firstHumanResponse: 1, manualEvidenceUnknown: 1268,
       appointmentEvidenceUnknown: 1261, outcomeEvidenceUnknown: 1268,
@@ -181,7 +196,7 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("conversion reporting: 
       excludedDuplicates: 2, unknownFirstTouch: 1257, unknownLastTouch: 1257, outcomesObserved: 2 });
     expect(report.conversionReporting.sources.find((row) => row.source === "Unknown first touch")?.captured).toBe(1257);
     expect(report.conversionReporting.sources.reduce((sum, row) => sum + row.captured, 0)).toBe(report.conversionReporting.cohort.denominator);
-    expect(report.rows.length).toBe(report.conversionReporting.cohort.denominator);
+    expect(report.rows.length).toBe(50);
     expect(report.funnel.captured).toBe(report.conversionReporting.cohort.denominator);
     expect(report.operationalTrust.duplicates.canonicalLeads).toBe(report.conversionReporting.cohort.denominator);
   });
@@ -198,7 +213,8 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("conversion reporting: 
       expect(result.nextCursor).toMatch(/\.\d{6}Z~/); cursor = result.nextCursor!;
     }
     expect(allIds.length).toBe(1270); expect(new Set(allIds).size).toBe(1270);
-    expect([...allIds].sort()).toEqual(report.rows.map((row) => row.id).sort());
+    expect(report.rows.every(row=>allIds.includes(row.id))).toBe(true);
+    expect(psql("SELECT count(*) FROM leads WHERE is_test=false AND communication_suppressed=false AND is_duplicate=false AND duplicate_of_lead_id IS NULL AND created_at>=now()-interval '30 days' AND created_at<now();")).toBe(String(allIds.length));
     const ownerIds: string[] = []; cursor = undefined;
     const owner = { ...administrator, role: "primary_lead_owner" as const, agentId: ownerAgent };
     for (let page = 0; page < 10; page++) {
@@ -226,7 +242,7 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("conversion reporting: 
     process.stdout.write(`CONVERSION_REPORTING_LOOPBACK_TIMING ${JSON.stringify({ transport: "PostgreSQL 17 TCP loopback 127.0.0.1",
       eligibleLeads: 1270, reportingReads: 5, sqlRoundTrips: statements.length - before,
       p50Ms: Number(percentile(0.50).toFixed(2)), p95Ms: Number(percentile(0.95).toFixed(2)),
-      aggregation: "full scoped cohort in memory", productionSla: false })}\n`);
+      aggregation: "one database snapshot, bounded detail/dimensions", productionSla: false })}\n`);
   });
 
   it("does not report a real missing canonical source as a measured-zero success", async () => {
@@ -236,5 +252,98 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("conversion reporting: 
       expect(report.error).toBe("Canonical Neon reporting query failed");
       expect(report.conversionReporting).toMatchObject({ available: false, totals: null, sources: [], cohort: { denominator: null } });
     } finally { psql("ALTER TABLE public.synthetic_conversion_reporting_unavailable RENAME TO lead_outcomes;"); }
+  });
+
+  it('preserves every public metric against the accepted independent implementation for all permitted scopes',async()=>{
+    const anchor=new Date();
+    for(const role of ['administrator','primary_lead_owner','read_only_analyst'] as const){
+      const principal={...administrator,role,agentId:role==='primary_lead_owner'?ownerAgent:null};
+      const old=await loadAcceptedReportingSummary(30,principal,anchor);
+      const fresh=await loadNeonAdminReportingSummary(30,principal,anchor);
+      expect(old.error).toBeUndefined();expect(fresh.error).toBeUndefined();
+      const expected={...old,rows:old.rows.slice(0,50),displayBounds:fresh.displayBounds,
+        conversionReporting:{...old.conversionReporting,cohort:{...old.conversionReporting.cohort,calculation:'database_snapshot_aggregate'}}};
+      expect(fresh).toEqual(expected);
+    }
+  });
+
+  it('preserves every widget across mixed dates, status, hot/stalled facts, attribution shapes and null evidence', async () => {
+    for (const [index, status] of ['new', 'scored', 'qualified', 'assigned', 'contacted',
+      'appointment_requested', 'appointment_set', 'nurture', 'dead', 'converted', 'escalated'].entries()) {
+      const id = seed({ source: ' synthetic_mixed ', status, ageDays: index % 3 === 0 ? 12 : 5,
+        agent: index % 2 === 0 ? ownerAgent : null });
+      psql(`UPDATE leads SET lead_type='seller',primary_intent='sell',timeline_months=${index % 2 === 0 ? 0 : 6},
+        assigned_at=created_at+interval '1 hour',last_contacted_at=${index % 3 === 0 ? "created_at+interval '2 hours'" : 'NULL'},
+        lead_grade='A',source_detail=${literal(index % 2 === 0 ? ' ' : ' mixed detail ')},
+        page_url=${literal('https://example.test/synthetic-mixed-'+index)} WHERE id=${literal(id)};
+        UPDATE source_attribution SET first_touch=${literal(JSON.stringify(index % 2 === 0 ? {source:' first JSON source '} : []))}::jsonb,
+        last_touch=${literal(JSON.stringify(index % 2 === 0 ? {utm_source:' last JSON source '} : null))}::jsonb,
+        utm_campaign=${literal(index % 2 === 0 ? ' ' : ' mixed campaign ')} WHERE lead_id=${literal(id)};
+        INSERT INTO tasks(lead_id,title,category,status,due_at,created_at) VALUES
+        (${literal(id)},'SYNTHETIC NULL/DUE','followup:manual_callback','open',NULL,now()-interval '1 hour'),
+        (${literal(id)},'SYNTHETIC OVERDUE','followup:manual_callback','open',now()-interval '1 hour',now()-interval '1 hour'),
+        (${literal(id)},'SYNTHETIC FUTURE','followup:manual_callback','open',now()+interval '2 days',now()-interval '1 hour');`);
+      appointment(id, index % 2 === 0 ? 'reschedule_requested' : 'no_show');
+      appointment(id, 'completed'); appointment(id, 'completed');
+      if (index % 2 === 0) { outcome(id, 'qualified'); outcome(id, 'qualified'); }
+      if (index % 3 === 0) { outcome(id, 'closed'); outcome(id, 'closed'); }
+    }
+    const today = seed({source:'synthetic_today'});
+    psql(`UPDATE leads SET created_at=now()-interval '1 hour',email=' ',phone=NULL WHERE id=${literal(today)};`);
+    const anchor = new Date();
+    for (const window of [7, 30, 90] as const) {
+      for (const role of ['administrator', 'primary_lead_owner', 'read_only_analyst'] as const) {
+        const principal = {...administrator, role, agentId: role === 'primary_lead_owner' ? ownerAgent : null};
+        const old = await loadAcceptedReportingSummary(window, principal, anchor);
+        const fresh = await loadNeonAdminReportingSummary(window, principal, anchor);
+        expect(old.error).toBeUndefined(); expect(fresh.error).toBeUndefined();
+        expect(fresh).toEqual({...old, rows:old.rows.slice(0,50), displayBounds:fresh.displayBounds,
+          conversionReporting:{...old.conversionReporting,cohort:{...old.conversionReporting.cohort,calculation:'database_snapshot_aggregate'}}});
+      }
+    }
+  });
+
+  it('combines high-cardinality groups explicitly without changing any full-cohort count',async()=>{
+    const before=await loadNeonAdminReportingSummary(30,administrator);
+    psql(`WITH ids AS MATERIALIZED(SELECT gen_random_uuid() id,i FROM generate_series(1,75)i), s AS(INSERT INTO sessions(id) SELECT id FROM ids RETURNING id)
+      INSERT INTO leads(id,session_id,first_name,created_at,source,source_detail,lead_type,primary_intent) SELECT ids.id,ids.id,'SYNTHETIC DIMENSION',now()-interval '1 day','synthetic_dimension_'||i,'detail_'||i,'renter','unknown' FROM ids JOIN s ON s.id=ids.id;
+      INSERT INTO source_attribution(lead_id,session_id,utm_source) SELECT id,session_id,source FROM leads WHERE first_name='SYNTHETIC DIMENSION';`);
+    const r=await loadNeonAdminReportingSummary(30,administrator);
+    expect(r.error).toBeUndefined();expect(r.funnel.captured).toBe(before.funnel.captured+75);
+    for(const groups of [r.sources,r.campaigns]){expect(groups.length).toBe(51);expect(groups.reduce((s,g)=>s+g.count,0)).toBe(r.funnel.captured);expect(groups.some(g=>g.label.includes('groups (combined)'))).toBe(true);}
+    expect(r.conversionReporting.sources.length).toBe(51);expect(r.conversionReporting.sources.reduce((s,g)=>s+g.captured,0)).toBe(r.funnel.captured);
+    expect(r.leadTypes.reduce((s,g)=>s+g.count,0)).toBe(r.funnel.captured);
+    expect(r.intents.reduce((s,g)=>s+g.count,0)).toBe(r.funnel.captured);
+  });
+
+  it('uses one actual statement snapshot despite an intervening current-status edit',async()=>{
+    const id=seed({source:'synthetic_snapshot'}),anchor=new Date();
+    const before=await loadNeonAdminReportingSummary(30,administrator,anchor);
+    reportingQuery.query.mockImplementationOnce(async(statement:string,params:unknown[])=>{
+      const pending=client!.query("WITH snapshot_delay AS MATERIALIZED(SELECT pg_sleep(0.25)), "+statement.replace(/^WITH /,'')+' FROM snapshot_delay',params);
+      await new Promise(resolve=>setTimeout(resolve,60));
+      psql(`UPDATE leads SET status='qualified' WHERE id=${literal(id)};`);
+      return (await pending).rows;
+    });
+    const concurrent=await loadNeonAdminReportingSummary(30,administrator,anchor);
+    expect(concurrent.error).toBeUndefined();expect(concurrent.funnel.qualified).toBe(before.funnel.qualified);
+    expect(concurrent.rows.find(r=>r.id===id)?.status).toBe('new');
+    const after=await loadNeonAdminReportingSummary(30,administrator,anchor);
+    expect(after.funnel.qualified).toBe(before.funnel.qualified+1);expect(after.rows.find(r=>r.id===id)?.status).toBe('qualified');
+  });
+
+  it('rechecks ownership and revoked report permission on later cursor requests',async()=>{
+    const owner={...administrator,role:'primary_lead_owner' as const,agentId:ownerAgent};
+    const first=await loadNeonAdminReportingDrillthrough({principal:owner,limit:1});expect(first.nextCursor).toBeTruthy();
+    psql(`UPDATE leads SET assigned_agent_id=${literal(otherAgent)} WHERE assigned_agent_id=${literal(ownerAgent)};`);
+    const later=await loadNeonAdminReportingDrillthrough({principal:owner,cursor:first.nextCursor!});expect(later.rows).toEqual([]);
+    const denied=await loadNeonAdminReportingDrillthrough({principal:{...owner,role:'approved_agent'},cursor:first.nextCursor!});expect(denied.error).toBe('lead_center_drillthrough_permission_required');
+    const mismatched=await loadNeonAdminReportingDrillthrough({principal:administrator,windowDays:7,cursor:first.nextCursor!});expect(mismatched.error).toBe('invalid_reporting_cursor');
+  });
+
+  it('does not turn a real cancelled SQL query into a complete zero report',async()=>{
+    await client!.query('SET statement_timeout=1');
+    try{const r=await loadNeonAdminReportingSummary(30,administrator);expect(r.error).toBe('Canonical Neon reporting query failed');expect(r.conversionReporting.available).toBe(false);expect(r.conversionReporting.cohort.denominator).toBeNull();}
+    finally{await client!.query('SET statement_timeout=0');}
   });
 });

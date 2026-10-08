@@ -1,5 +1,24 @@
 # Owner Approval Queue
 
+## Current local continuation boundary — 2026-10-08
+
+Authenticated resolver25/25 confirms accepted PR291/main
+`a0cc89457459a584c3e3b2a1bf7a035a6a556217`, deployment
+`dpl_GbjB6VYfCn4bAKT9JBd4afEJUuWT`. Its migration/release approval is consumed.
+Rental page226 publication and its two-file cache operation are complete; do
+not repeat them or request their completed gates.
+
+Local reporting successor: `codex/reporting-bounds-20261008`, zero migrations,
+environment/provider/publication changes. See the current continuation receipt
+in `phase9/CONVERSION_COMPLETION_2026-10-06.md` for actual verification and limits.
+No review push/PR authority was supplied for this new source. Next gate, once
+local verification is sealed: permission to push the exact local candidate and
+open ONE review PR with existing GitHub CI/Vercel Preview build side effects.
+This does NOT authorize merge, Production deployment, remote schema/seed/secret
+changes, customer-data access, lead/message/pilot actions or spend. Unsafe
+Preview data acceptance remains held independently, as does human participation.
+The historical queue below is chronology, not permission to replay old gates.
+
 Updated 2026-10-05. Release policy is
 `config/release-authority-policy.json`; run `pnpm release:authority:resolve`
 before binding any application gate. The resolver's authenticated receipt, not

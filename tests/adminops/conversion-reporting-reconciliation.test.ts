@@ -136,7 +136,12 @@ describe("conversion reporting: scoped canonical SQL and protected display", () 
     vi.stubEnv("DATABASE_URL", "postgres://synthetic-only.invalid/not-a-real-db");
     vi.useFakeTimers(); vi.setSystemTime(NOW);
     query.mockImplementation(async (sql: string) => {
-      if (sql.includes("AS first_human_response_recorded")) return [lead("one", { has_contact: true })];
+      if (sql.startsWith('WITH reporting_cohort AS')) return [{totals:{captured:1,contactable:1,qualified:0,appointments:0,closedWon:0,
+        firstHumanResponse:0,manualAttempted:0,twoWayContact:0,manualEvidenceUnknown:1,appointmentEvidenceUnknown:1,
+        otherAppointmentStates:0,outcomeEvidenceUnknown:1,lost:0,stalled:1,unknownFirstTouch:0,unknownLastTouch:0,outcomesObserved:0,
+        today:0,last7:1,last30:1,bucketNew:1,bucketWorking:0,bucketQualified:0,bucketClosed:0,
+        ...Object.fromEntries(REPORTING_APPOINTMENT_STATES.map(s=>[`state_${s}`,0]))},groups:[],exclusions:{excluded_test:0,excluded_suppressed:0,excluded_duplicate:0},
+        operational:{canonical_leads:1},followups:{open:0,overdue:0,dueToday:0,completed:0,cancelled:0},details:[],hot:[],agent_names:{}}];
       if (sql.includes("AS excluded_test")) return [{ excluded_test: 0, excluded_suppressed: 0, excluded_duplicate: 0 }];
       if (sql.includes("AS canonical_leads")) return [{ canonical_leads: 1 }];
       return [];
@@ -166,7 +171,8 @@ describe("conversion reporting: scoped canonical SQL and protected display", () 
     }
     const appointmentSql = query.mock.calls.find(([sql]) => sql.includes("FROM public.lead_appointments"))![0];
     expect(appointmentSql).not.toContain("a.created_at >= $1");
-    expect(appointmentSql).not.toMatch(/LIMIT\s+\d+/i);
+    expect(appointmentSql.split('appts AS MATERIALIZED (')[1].split('followups AS MATERIALIZED')[0]).not.toMatch(/LIMIT\s+\d+/i);
+    expect(query).toHaveBeenCalledTimes(1);
     expect(query.mock.calls[0][0]).toContain("o.is_test = false AND o.communication_suppressed = false");
   });
 

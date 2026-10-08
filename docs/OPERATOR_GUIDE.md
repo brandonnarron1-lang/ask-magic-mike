@@ -4,6 +4,36 @@
 
 This guide covers daily operation of the Ask Magic Mike platform for brokers and administrators.
 
+## Current operator acceptance — 2026-10-08
+
+Use the released `/admin/today`, `/admin/leads`, permitted lead detail, and
+`/admin/reporting` workflow. Canonical storage is Neon; sign in with your own
+Better Auth account. Historical sections below predate the current authority
+receipt and must not be used to change credentials or enable automation.
+
+Five-minute read-only walkthrough (no task edits or messages):
+
+1. Open Today, then your permitted inbox. Confirm whose assignment you can see.
+2. Open a permitted lead. Read source/UTMs and communication permission before
+   deciding whether contact is allowed. A phone/email value is not permission.
+3. Review the next task, due time and owner. Completing a task does not prove
+   contact. A manually documented attempt is not a two-way conversation.
+4. Inspect appointment state. Requested is not scheduled; scheduled is not
+   confirmed. Nothing here proves an external calendar event was created.
+5. Review the timeline's actor/time/provenance. AI follow-up drafts do not send.
+6. Open the permitted source/outcome report. Unknown evidence is not a negative
+   outcome, and closed is not settled commission. Approved agents do not gain
+   analyst/report permissions by possessing a link.
+
+Human acceptance remains **PENDING** until the actual operator completes this
+journey in their own account/device and confirms these distinctions. Engineering
+sessions and synthetic records are not Mike's or another staff member's acceptance.
+No password reset, impersonation, role change or live task mutation is part of it.
+
+Preview remains held: runtime no-send guards do not prove physical separation or
+synthetic-only provenance. Use the existing minimal clean-venue setup scope; do
+not read its private rows, clone customer data, or migrate it under read-only scope.
+
 ---
 
 ## Platform Overview
