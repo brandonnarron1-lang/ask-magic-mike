@@ -2,6 +2,28 @@ import { readFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import { Pool } from "pg";
 import { expect, test, type BrowserContext } from "@playwright/test";
+import { renderReadableLeadAlert } from "../../app/lib/leadAlertReadableTemplate";
+import type { LeadAlertRenderInput } from "../../app/lib/leadAlertTemplates";
+
+// Render current compiled source from explicit synthetic data. A clean hosted
+// checkout must not depend on an ignored artifact from an operator's machine.
+const emailFixture: LeadAlertRenderInput = {
+  leadId: "00000000-0000-4000-8000-000000000101",
+  sessionId: "00000000-0000-4000-8000-000000000102",
+  correlationId: "00000000-0000-4000-8000-000000000103",
+  payload: {
+    funnel_type: "renter", lead_type: "renter", lead_source_surface: "renter_page",
+    name: "INTERNAL QA — DO NOT CONTACT", city: "Wilson", timeline: "Just planning",
+    question: "Synthetic review only. No consumer exists.", is_test: true,
+    consent_email: false, consent_call: false, consent_sms: false,
+    consent_language_version: "isolated_fixture_v1",
+    attribution: { source: "ourtownproperties", medium: "owned_media", campaign: "isolated_fixture" },
+    status: "new", assigned_agent_id: null,
+  },
+  score: { score: 23, grade: "new", version: "deterministic_v1", factors: [], explanation: "Synthetic score only" },
+  routing: { owner: "mike", sourceLabel: "ourtownproperties", intentLabel: "Rental-to-homeownership", routingReason: "Synthetic review only" },
+  submittedAt: "2026-10-09T12:49:38.090Z",
+};
 
 test.skip(process.env.AMM_ISOLATED_SESSION_ACCEPTANCE !== "1" || process.env.AMM_LEAD_READABILITY_ACCEPTANCE !== "1", "Disposable local real-session venue only");
 test.describe.configure({mode:"serial"});
@@ -136,7 +158,7 @@ for(const width of [320,390,768,1440]) {
       const asset=assets[new URL(route.request().url()).pathname];
       return asset?route.fulfill({status:200,contentType:"image/webp",body:readFileSync(asset)}):route.abort();
     }); // No provider, contact or private-data request.
-    await page.setContent(readFileSync(".amm-run/lead-alert-readability-20261009/email-preview.html","utf8"));
+    await page.setContent(renderReadableLeadAlert(emailFixture).html);
     const link=page.getByRole("link",{name:"Open saved lead",exact:true}); await expect(link).toBeVisible();
     expect((await link.boundingBox())!.y).toBeLessThan(600);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
