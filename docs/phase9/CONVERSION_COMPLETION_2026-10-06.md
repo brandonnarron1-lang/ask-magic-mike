@@ -42,14 +42,15 @@ Accepted release approval remains consumed. Migration/environment changes: zero.
 
 ### Verification and external effects
 
-Final application-source `pnpm release:gate`: PASS — 3,792 unit passes/99 explicit
+Predecessor candidate `fa90f192551b7db064a740de6a38d5df32648f86`
+`pnpm release:gate`: PASS — 3,792 unit passes/99 explicit
 skips, strict typecheck, lint, isolation, safety14/14, optimized build and active
 routes114/114 (22 acknowledged duplicates). Focused readability/messaging checks
 passed; the isolated PostgreSQL notification suite passed19/19, including parallel
 review-copy, failure, callback ordering/replay and durable lead tests. Provider
 results in that suite are mocked isolated evidence, not live delivery.
 
-Built-app real-session readability browser suite:9/9 PASS in8.3s at320/390/768/1440,
+Predecessor built-app real-session readability browser suite:9/9 PASS in8.3s at320/390/768/1440,
 200% root text, keyboard navigation, current-permission/role/QA fail-closed checks
 and actual compiled email HTML. Conversion real-session regression:8/8 PASS in18.5s,
 including genuine atomic task/appointment saves, replay, stale versions and reporting.
@@ -62,11 +63,24 @@ hydration error was not reproduced on the final rebuilt source; final pageerror
 assertions pass. Reference real-session regression:9/9 PASS in23.2s, including real
 four-role boundaries, session revocation, concurrent/replayed allocation, local
 signed HTTP/STOP controls, held pilot, timeline pagination and cross-channel
-rendering. Those signed requests were localhost fixtures, not carrier activation.
+rendering. These browser results precede the extended closed-record maintenance
+regression and are not substituted for verification of its repair. Those signed
+requests were localhost fixtures, not carrier activation.
 Its bounded300-lead/1,500-audit-row loopback check is not a hosted scale/SLA claim;
-the prior50k latency hold remains unchanged. All26 built-app browser cases pass.
+the prior50k latency hold remains unchanged. All26 predecessor built-app browser cases pass.
 The final test adapter opens closed disclosures only when needed, preserving
 actual pagination and action assertions rather than removing hidden-field checks.
+
+The extended real-session case then reproduced hidden existing appointment/task
+maintenance on a closed lead. The narrow repair separates internal maintenance
+permission from contact/new-appointment permission. Its first frozen gate exposed
+an existing asynchronous unit-test race: the blocked native-share test checked
+the UI before the rejected promise settled (3,791 passes,99 explicit skips,one
+failure). The test now waits for the unchanged expected error state before
+asserting that no success was recorded; its focused ten cases pass. No product
+sharing behavior, assertions or safety rule was weakened. Fresh frozen-source
+gate/browser results and artifact checksums belong in the private candidate
+receipt after execution; the predecessor passes above are not final acceptance.
 
 Commands actually executed (Node24.18.0/pnpm10.30.3, native PostgreSQL17):
 
@@ -76,6 +90,7 @@ pnpm release:authority:resolve
 pnpm release:gate
 pnpm typecheck
 pnpm lint
+pnpm exec vitest run tests/public/consumer-referral-handoff.test.tsx
 AMM_RENDER_READABLE_EMAIL=1 pnpm exec vitest run tests/leadops/lead-alert-readability.test.ts
 AMM_QA_POSTGRES_TEST=1 AMM_QA_NATIVE_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/notification-reliability-postgres.test.ts
 AMM_QA_POSTGRES_TEST=1 AMM_QA_NATIVE_POSTGRES_TEST=1 AMM_LEAD_READABILITY_ACCEPTANCE=1 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/amm/reference-session-acceptance.mjs
