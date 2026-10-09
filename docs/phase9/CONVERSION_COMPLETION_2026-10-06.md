@@ -1,5 +1,177 @@
 # Conversion completion — 2026-10-06
 
+## Current continuation receipt — 2026-10-08 (local reporting candidate)
+
+This section supersedes the dated readiness statements below, without rewriting
+their historical evidence. It is NOT a Production acceptance receipt.
+
+### Retained release and acquisition
+
+- Authenticated authority resolver at18:27:55Z:25/25 accepted checks. Main
+  `a0cc89457459a584c3e3b2a1bf7a035a6a556217`, tree
+  `dc0b4480847baff27a2be3ef86a2d74c48334980`, accepted PR291/deployment
+  `dpl_GbjB6VYfCn4bAKT9JBd4afEJUuWT`. No repeated migration/release.
+- Page226 rental activation is COMPLETE. Its originating private cache receipt
+  was accessible and read. Exactly two previously invalidated HTML/gzip files
+  remain recoverable; no page, builder, cache, form, plugin or public QA action
+  was repeated. Existing newsletter-dismissal/cookie-script issues remain separate.
+- Page3952, Form7, ordinary capture/Mike-first/internal email, two historical
+  permanent failures, ticket29850012, other worktrees and inactive projects
+  were not changed. No hosted customer rows were read for this work.
+
+### Measured failure attribution and bounded correction
+
+The previous2GiB abort occurred in the combined Vitest process, not a separately
+measured hosted application. Fixture/expected arrays, retained summaries and
+`vi.fn` query-result history inflated that process. Removing only the outer
+fixture arrays was insufficient: retained mock results still inflated memory.
+Those intermediate measurements are preserved, not substituted for final evidence.
+
+The corrected experiment incrementally seeds synthetic PostgreSQL17 and runs
+accepted/candidate code in separate standalone Node24 processes, with a plain
+loopback transport and no test framework/result history. The unchanged accepted
+application still reaches981MiB RSS and44.6MB serialized output at50,000leads.
+Therefore BOTH harness retention and actual all-row application materialization
+contributed. No evidence establishes a Production outage or a DB memory failure.
+
+Local branch `codex/reporting-bounds-20261008` starts from accepted291. The repair:
+
+- Computes all existing metrics in ONE parameterized SELECT/MVCC snapshot.
+- Aggregates manual evidence once per eligible lead; distinct appointments,
+  tasks, attribution fallbacks, outcome provenance, role/date/exclusion/null
+  semantics and operational-trust widgets remain present.
+- Returns50 lead detail rows,12 hot rows and up to50 named groups/dimension;
+  all remaining groups are explicitly combined as Other with exact counts.
+  Top Pages remains top10, not a complete page-dimension listing.
+- Preserves the existing100-row maximum microsecond/UUID keyset drill-through,
+  rechecking current role/ownership on every request. A cohort cutoff does not
+  freeze later edits; the UI now says so. No browser-spanning transaction.
+- Leaves analyst projections private-value-free; denied roles never query.
+  A failed/cancelled statement yields unavailable/null, never fake zero totals.
+- Removes three irrelevant cohort-wide sorts; the bounded details/hot records
+  still have explicit deterministic ordering. No schema/index/grant/lockfile/
+  environment/provider change, cache, export, warehouse or backfill.
+
+All widget fields are compared against an independent copy of accepted291 on
+synthetic records, including mixed first/last-touch JSON, blank strings, missing
+evidence, states, hot/stalled signals, due tasks and7/30/90-day role scopes.
+High-cardinality totals, actual concurrent snapshot consistency, permission
+changes, unavailable/cancelled SQL and existing stable paging are tested separately.
+
+### Final standalone before/after measurements
+
+Same deterministic workload/anchor, one warmup, five serial reads and three
+concurrent reads. Each lead has2appointments plus a repeated completed event
+every tenth lead,3tasks and3audits; four exclusion fixtures plus old/future
+records. Exact independent expected totals passed for EVERY cohort below.
+
+| Leads | Accepted p50/p95 ms | Candidate p50/p95 ms | Accepted/candidate peak app RSS MiB | Accepted/candidate JSON bytes |
+| ---: | ---: | ---: | ---: | ---: |
+| 1,270 | 870.28 /902.25 | 84.90 /87.37 | 185.48 /102.14 | 1,137,506 /51,406 |
+| 10,000 | 601.20 /623.25 | 442.82 /465.33 | 367.16 /103.52 | 8,918,354 /51,466 |
+| 50,000 | 3,822.66 /3,844.80 | 2,421.40 /2,542.48 | 981.16 /100.94 | 44,609,080 /51,693 |
+
+SQL requests/report:6 ->1. Three-concurrent wall times at50k:10,228.51 ->3,121.05ms.
+At50k, accepted/candidate baseline RSS93.64/90.98MiB; incremental peak887.52/9.95MiB;
+peak heap682.69/12.03MiB; incremental heap671.90/1.04MiB. Parent measurement-window
+peak94.72/92.00MiB. DB process summed RSS528.44/412.77MiB (shared pages are double
+counted; this is NOT unique resident RAM). Seed time13.13/14.69s is separate from
+report timing. Driver query timings and per-query ANALYZE/BUFFERS JSON are retained
+privately; the latter runs outside the measurement window.
+
+Targets were declared before tuning: p95<=2s, app RSS<=512MiB, response<=1MiB,
+<=6queries. Abort guards remained2GiB/process,8GiB free disk,600s and15s SQL timeout.
+These are small-sample nearest-rank p95 values, not statistical/hosted SLAs.
+The final candidate meets all declared targets THROUGH10,000leads. At50,000 it
+preserves exact counts and bounded application output/memory but FAILS the2s
+latency target. Do not market50k as accepted hosted capacity. Remaining DB work
+includes materialized CTEs and temporary I/O; do not hide that cost behind app
+memory improvement. Bounded row/group counts do not guarantee a fixed byte size
+for arbitrarily long historical strings. High-cardinality grouping correctness
+is covered separately, not represented as the five-source throughput workload.
+
+Two attempted audit-join/projection optimizations regressed PostgreSQL's planner
+to repeated scans and were rejected. Their plans/measurements remain private.
+A newly added fixture tried duplicate active appointments; the actual unique
+index rejected it. The fixture now repeats completed appointments instead;
+the production constraint was NOT changed. An accidental Docker invocation was
+stopped before benchmark setup completed; final evidence uses native PostgreSQL.
+
+Reproduce only with clean local Node24/pnpm10.30.3 and existing native PostgreSQL17:
+
+```bash
+AMM_QA_POSTGRES_TEST=1 AMM_QA_NATIVE_POSTGRES_TEST=1 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/amm/reporting-scale.mjs --large --accepted
+AMM_QA_POSTGRES_TEST=1 AMM_QA_NATIVE_POSTGRES_TEST=1 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/amm/reporting-scale.mjs --large
+```
+
+The diagnostic exits after finishing a cohort; exit0 is NOT a budget-pass seal.
+Compare recorded metrics to `limits`;50k is explicitly latency-held above.
+It refuses configured app URLs/hosted environments, never inherits provider
+credentials into workers, and cleans up only its UUID-owned disposable database.
+The accepted test reference is not imported by application code.
+
+### Operator, Preview, review and effects
+
+The current five-minute read-only walkthrough is in `docs/OPERATOR_GUIDE.md`.
+HUMAN ACCEPTANCE PENDING: no actual staff member completed it in their own
+account/device during this engineering run. Automated synthetic Better Auth
+sessions, even successful ones, do not imply human acceptance. No live task,
+appointment, assignment, consent or communication action was taken.
+
+Preview remains UNVERIFIED/UNSAFE for private-row acceptance: previously copied
+Production provenance, physical current binding and synthetic-only data scope
+remain unresolved. No Preview private rows, canary writes, credentials, schema,
+remote branch or seed operation was used. Retain the existing clean-venue setup
+scope; runtime no-send flags do not establish safe data provenance.
+
+Verification executed this continuation (not inherited PR291 counts):
+
+| Command / check | Actual result |
+| --- | --- |
+| `pnpm install --frozen-lockfile --ignore-scripts` | PASS; Node24.18.0/pnpm10.30.3, package/lockfile unchanged |
+| `pnpm release:authority:resolve` | PASS25/25 at18:27:55Z |
+| Standalone before/after benchmark commands above | Exact counts PASS at1,270/10k/50k;50k latency target FAIL, not an accepted capacity seal |
+| Focused PostgreSQL reporting + reconciliation unit files | PASS30/30, including15real PostgreSQL reporting cases |
+| `pnpm release:gate` | PASS:3,770unit passes/97explicit skips;309files pass/6skip; typecheck/lint/build/isolation,14safety checks,114active routes |
+| Existing seven-file serial PostgreSQL gate (command below) | PASS98/98 in79.13s; real local SQL, no provider/network substitution labeled live |
+| `AMM_QA_NATIVE_POSTGRES_TEST=1 AMM_CONVERSION_SESSION_ACCEPTANCE=1 pnpm test:reference:sessions` | PASS8/8 in23.0s; full source-to-task/appointment/report journey, role gates,320/390/768/1440,200%zoom/root text |
+| `AMM_QA_NATIVE_POSTGRES_TEST=1 pnpm test:reference:sessions` | PASS9/9 in23.2s; actual synthetic sessions, revocation/directAPI/signed inbound/STOP/held-pilot/report checks |
+| `env -u ADMIN_SECRET pnpm smoke:prod` | PASS19/2intentional skips/0fail; read-only public/unauthenticated checks, no session-create POST |
+| Reference integrity | Accepted291 file matches after only2import relocations and2export names; no SQL or aggregation change |
+| `git diff --check`; outgoing-pattern scan | PASS;13candidate files,0matched secret patterns; not a full-history credential audit |
+
+The seven-file PostgreSQL invocation is the exact command retained in the
+historical execution section below, freshly executed with native opt-in and
+serial workers. Its current98pass count supersedes the historical91 only for
+this candidate. Unit97skips include these opt-in SQL cases; they were run
+separately, not silently counted as unit passes.
+
+Browser evidence uses genuine Better Auth sessions on synthetic disposable
+PostgreSQL. Conversion fixture:7leads/14intents; reference fixture:306leads/
+16intents. BOTH receipts:0providerIDs/0send reservations/0provider calls/
+0Production writes, then fixture teardown. Screenshots were captured and the
+390px Source-to-outcome panel was visually inspected. This is not full WCAG
+certification, carrier acceptance or human operator use. Current-head hosted
+CI/Preview, production private-row checks, migration/deployment and live
+lead/mailbox/device actions were NOT RUN.
+
+Private evidence:
+`.amm-run/reporting-bounds/` in this local worktree (0700 directory/0600 files),
+plus synthetic browser artifacts under `output/playwright/`. They are not public
+uploads or durable off-machine backups. Existing WordPress backups stay in their
+original secured locations. No push, PR, remote migration, deployment, send,
+pilot/cron/provider/WP/cache/billing or other-project mutation was performed.
+
+Rollback: this additive local app-only candidate can be discarded/reverted in
+its own branch without any schema reversal or customer-data deletion. Accepted291
+remains running. Any future review publication must bind this successor's exact
+head/tree and expected CI/Vercel Preview effects; prior approvals are consumed.
+The next owner gate is review publication ONLY, not merge/Production permission.
+
+---
+
+## Historical October6 candidate record (retained)
+
 Independent conversion-reliability candidate, NOT a Production acceptance receipt.
 Canonical root app/Neon remain unchanged in architecture. No new CRM, store,
 provider, plugin, calendar connection or messaging activation. This dated delta
@@ -203,3 +375,63 @@ redeployment/restore was not performed by this task.
 
 Security references: [source-map-js advisory](https://github.com/advisories/GHSA-68fv-2mgg-jv7q),
 [Sharp advisory](https://github.com/advisories/GHSA-wq5f-xc86-pv6w).
+
+## 2026-10-09 authorized synthetic Preview acceptance delta
+
+The current owner instruction authorizes one schema-only expiring QA venue,
+reporting-branch-only Preview configuration, protected canonical/operator QA,
+necessary QA integration corrections on PR292, and conditional protected merge
+plus an app-only Production release. Earlier review-only holds are historical;
+neither they nor PR291's consumed approval authorize unrelated operations.
+
+New QA provenance was verified independently through Neon infrastructure and
+database-side branch/endpoint identity: all90 application tables contained zero
+rows before seeding. No external-job extensions or foreign servers were present.
+The two URL-pattern function matches were owned-domain validation allowlists,
+not embedded secrets or external calls. The venue uses fixed0.25CU, five-minute
+auto-suspend and24-hour expiry; it does not fork or sanitize customer records.
+The existing uncertain Preview remains untouched. QA-only fresh credentials
+and a restricted runtime role have no superuser/DDL/replication/RLS-bypass flags.
+Its explicit RLS/table/function grants are confined to the new disposable venue,
+not source migrations or Production changes.
+
+Minimal fixtures: five fresh Better Auth identities, three synthetic agents,
+25 unmistakably labeled test/suppressed leads, zero initial tasks/notifications.
+All44 settings apply only to the reporting Preview branch. All inherited
+connection/admin/cron/phone-signing values are overridden with QA-only values;
+delivery, consumer channels, AI/live adapters, allocation/pilot and async work
+remain off. Merely passing the shared database/provider Preview guard is not
+treated as no-send evidence. Private metadata, fixture manifest, empty-state
+receipt and configuration journal are in the existing ignored execution record.
+
+QA integration defects were corrected without weakening application protections:
+exact same-origin login redirects count as anonymous denial; real private
+synthetic Better Auth sessions replace the legacy-only page probe; canonical
+intake uses a stable replay key and reserved example.test identity with no
+channel consent; suppressed QA task creation must remain409; Preview SMS and
+disabled email callbacks must remain refused. Cron-auth GET is a write and is
+not executed in the read-only pass. Private credentials/cookies are never
+written to the canonical report or process arguments.
+
+Initial actual protected read-only run:22PASS/8explicit mutation skips/0FAIL.
+Initial controlled synthetic run:30PASS/0SKIP/0FAIL, including durable lead/note
+readback, task suppression, SLA writes and callback refusals. These runs use the
+first new QA build of the prior reviewed source and the corrected local harness;
+they are not yet the final frozen-source release seal. Final source/deployment,
+operator results and release disposition belong to the later sanitized PR
+receipt and generated Production acceptance, not a predicted source assertion.
+
+The inherited measured10k passing envelope and50k FAIL/LATENCY HELD remain
+unchanged. No50k benchmark was repeated or relabeled. Genuine human operator
+acceptance, carrier/disclosure/enrollment decisions and mailbox delivery proof
+remain separate. Production schema/env, pages226/3952 and caches, historical
+failures, Twilio ticket29850012, NellySelly and PropertyLens remain untouched.
+
+Hosted successor run37926140721 remains recorded FAILED: its fresh-schema,
+ACL and rollback installation case reached Vitest's default five-second
+timeout. It did not report a failed business assertion. Only that full-schema
+case now has a bounded30-second setup timeout; no test, protection or reporting
+latency target is removed or relaxed. The focused actual native PostgreSQL
+conversion transaction suite then passed all14 cases (10.47seconds total).
+The succeeding exact-source hosted run must still pass independently before
+merge; a local pass does not replace that required check.

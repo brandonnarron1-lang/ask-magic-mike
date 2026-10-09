@@ -95,7 +95,7 @@ export type AdminConversionReporting = {
     denominator: number | null;
     scope: ReportingScope;
     totals: "complete" | "unavailable";
-    calculation: "full_scoped_cohort_in_memory";
+    calculation: "full_scoped_cohort_in_memory" | "database_snapshot_aggregate";
   };
   totals: ConversionReportingGroup | null;
   sources: ConversionReportingGroup[];
@@ -245,6 +245,7 @@ export type AdminReportingSummary = {
   };
   operationalTrust: AdminOperationalTrust;
   conversionReporting: AdminConversionReporting;
+  displayBounds?: { leadRows: number; dimensionGroups: number; remainderGroups: Array<{ dimension: string; groups: number; leads: number }> };
   error?: string;
 };
 

@@ -374,9 +374,15 @@ export default async function AdminReportingPage({
             Lead-capture cohort: {conversion.cohort.startInclusive} inclusive to {conversion.cohort.endExclusive} exclusive.
             Timezone: UTC. Denominator: {conversion.cohort.denominator ?? "Unavailable"} distinct canonical live leads.
             Scope: {conversion.cohort.scope.replaceAll("_", " ")}. Totals: {conversion.cohort.totals}; not limited by drill-through pages.
-            Calculation: full scoped cohort fetched and reconciled in memory, not SQL aggregate totals.
+            Calculation: {conversion.cohort.calculation === 'database_snapshot_aggregate' ? 'database aggregates in one statement snapshot' : 'full scoped cohort reconciled in memory'}.
             Test, suppressed, spam, and duplicate aliases are excluded. Outcomes are observed canonical records, not predicted conversions.
+            Status and ownership are current at this response snapshot; later pages recheck current permission and may reflect edits.
           </p>
+          {summary.displayBounds ? <p className="mt-3 text-xs leading-5 text-[#d9ceb8]">
+            Dimensions show up to {summary.displayBounds.dimensionGroups} named groups, with remaining groups combined and labeled Other.
+            Full totals include every eligible lead; top pages remain a top-ten view. Lead details use the permitted cursor pages below.
+            {summary.displayBounds.remainderGroups.map(group => ` ${group.dimension}: ${group.groups} other groups / ${group.leads} leads.`).join('')}
+          </p> : null}
         </header>
 
         {!conversion.available ? <EmptyNotice summary={summary} /> : <>

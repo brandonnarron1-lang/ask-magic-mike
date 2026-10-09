@@ -1,6 +1,6 @@
 import { neon } from "@neondatabase/serverless";
-import { boundedReportingSql, mapBoundedReporting, type BoundedReportingRow } from './boundedReporting';
 import {
+  normalizeReportingLeadRow,
   summarizeReportingRows,
   reconcileConversionReporting,
   parseReportingDrillthroughCursor,
@@ -8,11 +8,11 @@ import {
   type AdminOperationalTrust,
   type AdminReportingSummary,
   type AdminReportingDrillthrough,
-} from "./supabase/adminReportingView";
+} from "../../app/lib/persistence/supabase/adminReportingView";
 import {
   hasLeadCenterPermission,
   type LeadCenterPrincipal,
-} from "../../../src/lib/admin/rbac-policy";
+} from "../../src/lib/admin/rbac-policy";
 
 type Query = ReturnType<typeof neon>;
 
@@ -114,7 +114,7 @@ export function normalizeOperationalTrustRow(
 
 /** Canonical Lead Center reporting reads. Test and suppressed records are
  * excluded in SQL before any KPI, source, or agent aggregation is built. */
-export async function loadNeonAdminReportingSummary(
+export async function loadAcceptedReportingSummary(
   windowDays: 7 | 30 | 90 = 30,
   principal: LeadCenterPrincipal | null = null,
   asOf?: Date,
@@ -142,8 +142,9 @@ export async function loadNeonAdminReportingSummary(
        NULL::text AS address_raw, NULL::text AS email, NULL::text AS phone, NULL::text AS widget_session_id`
     : "l.source_detail, l.page_url, l.assigned_agent_id, l.address_raw, l.email, l.phone, l.widget_session_id";
   try {
-    const reads = [
-      `SELECT l.id, l.created_at, l.status, l.lead_type, l.source,
+    const [leadRows, appointmentRows, followupRows, exclusionRows, operationalRows] = await Promise.all([
+      sql.query(
+        `SELECT l.id, l.created_at, l.status, l.lead_type, l.source,
                 l.timeline_months, l.primary_intent, ${privateColumns},
                 l.assigned_at, l.last_contacted_at, l.lead_grade, l.conversion_stage,
                 l.is_test, l.communication_suppressed, l.is_duplicate, l.duplicate_of_lead_id,
@@ -186,14 +187,32 @@ export async function loadNeonAdminReportingSummary(
                 AND o.occurred_at >= l.created_at AND o.occurred_at < ${endParam}
                 AND o.created_at < ${endParam}
            ) outcomes ON true
-           LEFT JOIN human_facts human ON human.lead_id = l.id
+           LEFT JOIN LATERAL (
+             SELECT bool_or(a.metadata->>'result' IN ('attempted', 'no_answer', 'two_way_conversation')) AS manual_attempt_recorded,
+                    bool_or(a.metadata->>'result' = 'two_way_conversation') AS two_way_contact_recorded
+               FROM public.audit_logs a
+              WHERE a.resource_type = 'lead' AND a.resource_id = l.id
+                AND a.action = 'lead.human_interaction_recorded'
+                AND a.metadata->>'provenance' = 'manual_operator_record'
+                AND a.metadata->>'result' IN ('attempted', 'no_answer', 'two_way_conversation')
+                AND a.metadata->>'channel' IN ('phone', 'email', 'in_person', 'other')
+                AND a.created_at >= l.created_at AND a.created_at < ${endParam}
+                AND CASE WHEN pg_input_is_valid(a.metadata->>'occurred_at', 'timestamp with time zone')
+                         THEN (a.metadata->>'occurred_at')::timestamptz >= l.created_at
+                          AND (a.metadata->>'occurred_at')::timestamptz < ${endParam}
+                         ELSE false END
+           ) human ON true
           WHERE ${cohortClause}
             AND l.is_test = false
             AND l.communication_suppressed = false
             AND l.status NOT IN ('spam', 'test', 'internal_qa')
             AND COALESCE(l.is_duplicate, false) = false
-            AND l.duplicate_of_lead_id IS NULL${scopeClause}`,
-      `SELECT a.id, a.status, a.starts_at, a.lead_id, a.assigned_agent_id, a.created_at
+            AND l.duplicate_of_lead_id IS NULL${scopeClause}
+          ORDER BY l.created_at DESC, l.id DESC`,
+        args,
+      ),
+      sql.query(
+        `SELECT a.id, a.status, a.starts_at, a.lead_id, a.assigned_agent_id, a.created_at
            FROM public.lead_appointments a
            JOIN public.leads l ON l.id = a.lead_id
           WHERE ${cohortClause}
@@ -202,8 +221,12 @@ export async function loadNeonAdminReportingSummary(
             AND l.communication_suppressed = false
             AND l.status NOT IN ('spam', 'test', 'internal_qa')
             AND COALESCE(l.is_duplicate, false) = false
-            AND l.duplicate_of_lead_id IS NULL${scopeClause}`,
-      `SELECT t.id, t.status, t.due_at, t.lead_id, t.agent_id, t.category, t.created_at
+            AND l.duplicate_of_lead_id IS NULL${scopeClause}
+          ORDER BY a.created_at DESC, a.id DESC`,
+        args,
+      ),
+      sql.query(
+        `SELECT t.id, t.status, t.due_at, t.lead_id, t.agent_id, t.category, t.created_at
            FROM public.tasks t
            JOIN public.leads l ON l.id = t.lead_id
           WHERE t.category LIKE 'followup:%'
@@ -213,8 +236,12 @@ export async function loadNeonAdminReportingSummary(
             AND l.communication_suppressed = false
             AND l.status NOT IN ('spam', 'test', 'internal_qa')
             AND COALESCE(l.is_duplicate, false) = false
-            AND l.duplicate_of_lead_id IS NULL${scopeClause}`,
-      `SELECT
+            AND l.duplicate_of_lead_id IS NULL${scopeClause}
+          ORDER BY t.created_at DESC, t.id DESC`,
+        args,
+      ),
+      sql.query(
+        `SELECT
            count(*) FILTER (WHERE l.is_test = true)::integer AS excluded_test,
            count(*) FILTER (WHERE l.communication_suppressed = true)::integer AS excluded_suppressed,
            count(*) FILTER (
@@ -224,7 +251,10 @@ export async function loadNeonAdminReportingSummary(
            )::integer AS excluded_duplicate
            FROM public.leads l
           WHERE ${cohortClause}${scopeClause}`,
-      `WITH eligible_leads AS MATERIALIZED (
+        args,
+      ),
+      sql.query(
+        `WITH eligible_leads AS MATERIALIZED (
            SELECT l.id, l.created_at
              FROM public.leads l
             WHERE ${cohortClause}
@@ -295,15 +325,60 @@ export async function loadNeonAdminReportingSummary(
            (SELECT count(*) FROM scoped_ai WHERE mode = 'openai_responses')::integer AS ai_provider_responses,
            (SELECT count(*) FROM scoped_ai WHERE mode = 'deterministic_fallback')::integer AS ai_fallbacks,
            (SELECT count(*) FROM scoped_ai WHERE mode = 'blocked')::integer AS ai_blocked,
-           COALESCE((SELECT sum(estimated_cost_usd) FROM scoped_ai), 0)::numeric AS ai_estimated_cost_usd`
-    ];
-    const cohort = `SELECT l.id,l.created_at FROM public.leads l WHERE ${cohortClause}
-      AND l.is_test=false AND l.communication_suppressed=false AND l.status NOT IN ('spam','test','internal_qa')
-      AND COALESCE(l.is_duplicate,false)=false AND l.duplicate_of_lead_id IS NULL${scopeClause}`;
-    const records = await sql.query(boundedReportingSql(reads, endParam, aggregateOnly, cohort), args);
-    const record = (records as BoundedReportingRow[])[0];
-    const complete = mapBoundedReporting(record, now, windowDays, aggregateOnly ? "aggregate_only" : scoped ? "assigned_live_leads" : "all_live_leads");
-    complete.operationalTrust = normalizeOperationalTrustRow(record.operational);
+           COALESCE((SELECT sum(estimated_cost_usd) FROM scoped_ai), 0)::numeric AS ai_estimated_cost_usd`,
+        args,
+      ),
+    ]);
+
+    const normalized = (leadRows as Array<Record<string, unknown>>).map(normalizeReportingLeadRow);
+    const liveLeadIds = new Set(normalized.map((row) => row.id));
+    const liveAppointmentRows = filterOperationalRowsForLiveLeads(
+      appointmentRows as Array<Record<string, unknown>>,
+      liveLeadIds,
+    );
+    const liveFollowupRows = filterOperationalRowsForLiveLeads(
+      followupRows as Array<Record<string, unknown>>,
+      liveLeadIds,
+    );
+    const agentIds = aggregateOnly ? [] : [...new Set(normalized.map((row) => row.assigned_agent_id).filter(Boolean))] as string[];
+    const agentRows = agentIds.length
+      ? await sql.query(
+          `SELECT id, name FROM public.agents WHERE id = ANY($1::uuid[])`,
+          [agentIds],
+        )
+      : [];
+    const agentNames = new Map<string, string>();
+    for (const row of agentRows as Array<Record<string, unknown>>) {
+      if (typeof row.id === "string" && typeof row.name === "string") {
+        agentNames.set(row.id, row.name);
+      }
+    }
+
+    const summary = summarizeReportingRows(
+      normalized,
+      now,
+      windowDays,
+      agentNames,
+      liveAppointmentRows,
+      liveFollowupRows,
+      {
+        test: Number((exclusionRows as Array<Record<string, unknown>>)[0]?.excluded_test || 0),
+        suppressed: Number((exclusionRows as Array<Record<string, unknown>>)[0]?.excluded_suppressed || 0),
+        duplicate: Number((exclusionRows as Array<Record<string, unknown>>)[0]?.excluded_duplicate || 0),
+      },
+      { complete: true, scope: aggregateOnly ? "aggregate_only" : scoped ? "assigned_live_leads" : "all_live_leads" },
+    );
+    const operationalTrust = normalizeOperationalTrustRow(
+      (operationalRows as Array<Record<string, unknown>>)[0],
+    );
+    const excludedDuplicates = Number(
+      (exclusionRows as Array<Record<string, unknown>>)[0]?.excluded_duplicate || 0,
+    );
+    const complete = {
+      ...summary,
+      operationalTrust,
+      dataTrust: { ...summary.dataTrust, excludedDuplicates },
+    };
     return aggregateOnly ? { ...complete, rows: [], hotLeads: [], topPages: [], agentPerformance: [] } : complete;
   } catch {
     return emptySummary(true, windowDays, now, "Canonical Neon reporting query failed");
@@ -312,7 +387,7 @@ export async function loadNeonAdminReportingSummary(
 
 /** Stable, bounded read-only drill-through. Totals remain the separate full
  * scoped-cohort reconciliation; this page query never computes/caps totals. */
-export async function loadNeonAdminReportingDrillthrough(input: {
+export async function loadAcceptedReportingDrillthrough(input: {
   principal: LeadCenterPrincipal | null;
   windowDays?: 7 | 30 | 90;
   cursor?: string;

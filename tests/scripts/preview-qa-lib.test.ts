@@ -14,9 +14,29 @@ import {
   shouldRunMutationChecks,
   summarizeFetchError,
   formatFetchErrorSummary,
+  anonymousLeadCenterDenied,
+  leadCenterSessionCookie,
 } from "../../scripts/preview-qa-lib.mjs";
 
 const FORCE_CONFIRM_TOKEN = "I_UNDERSTAND_THIS_WRITES_TO_THE_CONFIGURED_DATABASE";
+
+describe("actual Lead Center auth boundary", () => {
+  const origin = "https://qa.vercel.app";
+  it("accepts a denial or exact same-origin return-to login redirect, not login-page 200", () => {
+    expect(anonymousLeadCenterDenied({status:401},origin,"/admin")).toBe(true);
+    expect(anonymousLeadCenterDenied({status:307,location:"/lead-center-login?returnTo=%2Fadmin"},origin,"/admin")).toBe(true);
+    expect(anonymousLeadCenterDenied({status:200,location:"/lead-center-login?returnTo=%2Fadmin"},origin,"/admin")).toBe(false);
+  });
+  it("rejects SSO, external login, wrong return paths and unrelated redirects", () => {
+    for(const location of ["https://vercel.com/sso-api", "https://other.vercel.app/lead-center-login?returnTo=%2Fadmin", "/lead-center-login?returnTo=%2Fadmin%2Fusers", "/unrelated?returnTo=%2Fadmin", "/lead-center-login"]) {
+      expect(anonymousLeadCenterDenied({status:307,location},origin,"/admin")).toBe(false);
+    }
+  });
+  it("extracts only the real session token without cookie attributes or injection", () => {
+    expect(leadCenterSessionCookie(["__Secure-amm-lead-center.session_token=synthetic; Path=/; HttpOnly", "tracking=other; Path=/"])).toBe("__Secure-amm-lead-center.session_token=synthetic");
+    expect(leadCenterSessionCookie(["__Secure-amm-lead-center.session_token=x\r\nCookie: injected", "amm-lead-center.session_token=x,other=y"])).toBe("");
+  });
+});
 
 describe("getBypassConfig", () => {
   it("returns null when no bypass env var is set", () => {

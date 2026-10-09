@@ -12,8 +12,8 @@
  *   - Admin REST: dashboard / leads / list filters
  *   - SLA sweep with admin auth + optional cron-secret auth
  *   - Public listing search — asserts no private MLS fields
- *   - Optional mutation tests (lead create / note / task / message /
- *     SLA persist / inbound webhooks) gated by SAFE_DB_WRITE and the
+ *   - Optional synthetic lead/note/SLA writes and QA task/callback refusal
+ *     contracts, gated by SAFE_DB_WRITE and the
  *     health endpoint's `safe_for_preview_mutation` flag.
  *
  * Run:
@@ -39,8 +39,10 @@
  *
  * Defaults to SAFE_DB_WRITE=false. Mutation tests are NEVER run by
  * accident — they require BOTH SAFE_DB_WRITE=true AND the health
- * endpoint to report safe_for_preview_mutation=true, OR an explicit
- * FORCE_DB_WRITE=true + CONFIRM_FORCE_DB_WRITE confirmation token.
+ * endpoint to report safe_for_preview_mutation=true. FORCE_DB_WRITE cannot
+ * override a failed physical endpoint or runtime safety attestation.
+ * PREVIEW_QA_CREDENTIALS_FILE supplies fresh, private synthetic Better Auth
+ * credentials where RBAC is active; no RBAC/CSRF/provider policy is relaxed.
  *
  * Output:
  *   - human summary on stdout
@@ -56,10 +58,12 @@
  */
 
 import { execFile } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import {
   mkdir,
   mkdtemp,
   readFile,
+  stat,
   rm,
   writeFile,
 } from "node:fs/promises";
@@ -77,6 +81,8 @@ import {
   shouldRunMutationChecks,
   summarizeFetchError,
   formatFetchErrorSummary,
+  anonymousLeadCenterDenied,
+  leadCenterSessionCookie,
 } from "./preview-qa-lib.mjs";
 
 const execFileAsync = promisify(execFile);
@@ -109,6 +115,7 @@ const OUT_DIR = resolve("artifacts");
 
 /** @type {Array<{ name: string; status: "pass"|"fail"|"skip"; http?: number; message?: string; excerpt?: string }>} */
 const results = [];
+let sessionCookie = "";
 
 let accessBlocked = false;
 
@@ -151,6 +158,7 @@ async function http(method, path, opts = {}) {
       headers,
       body,
       redirect: opts.redirect ?? "follow",
+      signal: AbortSignal.timeout(30_000),
     });
   } catch (err) {
     // fetch threw before any HTTP response (DNS/TLS/socket, or an invalid
@@ -192,6 +200,7 @@ async function http(method, path, opts = {}) {
     json,
     text,
     location: res.headers.get("location"),
+    setCookies: res.headers.getSetCookie(),
     responseHeaders: {
       cacheControl: res.headers.get("cache-control"),
       contentType: res.headers.get("content-type"),
@@ -261,6 +270,7 @@ async function httpViaVercelCli(method, path, opts, headers, body) {
       {
         cwd: TRANSPORT.cliCwd,
         maxBuffer: 1024 * 1024,
+        timeout: 60_000,
       }
     );
 
@@ -306,6 +316,7 @@ async function httpViaVercelCli(method, path, opts, headers, body) {
       json,
       text,
       location: parsed.headers.location ?? null,
+      setCookies: rawHeaders.split(/\r?\n/).filter(line => /^set-cookie:/i.test(line)).map(line => line.replace(/^set-cookie:\s*/i, "")),
       responseHeaders: {
         cacheControl: parsed.headers["cache-control"] ?? null,
         contentType: parsed.headers["content-type"] ?? null,
@@ -554,10 +565,10 @@ async function adminListAndDashboard() {
   const anonymousDash = await http("GET", "/admin", { redirect: "manual" });
   record(
     "admin:anonymous_dashboard_denied",
-    anonymousDash.status === 401 ? "pass" : "fail",
+    anonymousLeadCenterDenied(anonymousDash, PREVIEW_URL, "/admin") ? "pass" : "fail",
     {
       http: anonymousDash.status,
-      ...(anonymousDash.status === 401
+      ...(anonymousLeadCenterDenied(anonymousDash, PREVIEW_URL, "/admin")
         ? {}
         : { message: "anonymous Lead Center shell was not denied" }),
     }
@@ -568,22 +579,43 @@ async function adminListAndDashboard() {
   });
   record(
     "admin:anonymous_leads_denied",
-    anonymousList.status === 401 ? "pass" : "fail",
+    anonymousLeadCenterDenied(anonymousList, PREVIEW_URL, "/admin/leads?filter=active") ? "pass" : "fail",
     {
       http: anonymousList.status,
-      ...(anonymousList.status === 401
+      ...(anonymousLeadCenterDenied(anonymousList, PREVIEW_URL, "/admin/leads?filter=active")
         ? {}
         : { message: "anonymous lead inbox was not denied" }),
     }
   );
 
-  if (!ADMIN_SECRET) {
+  const credentialsFile = process.env.PREVIEW_QA_CREDENTIALS_FILE;
+  if (credentialsFile) {
+    const mode = (await stat(credentialsFile)).mode;
+    if ((mode & 0o077) !== 0) throw new Error("private_QA_credentials_file_required");
+    const credentials = JSON.parse(await readFile(credentialsFile, "utf8")).users?.admin;
+    if (!credentials?.email?.endsWith("@example.test") || !credentials?.password?.startsWith("SYNTHETIC-")) {
+      throw new Error("synthetic_QA_identity_required");
+    }
+    ALL_SECRETS.push(credentials.password);
+    const login = await http("POST", "/api/lead-center-auth/sign-in/email", {
+      headers: { Origin: new URL(PREVIEW_URL).origin }, body: credentials, redirect: "manual",
+    });
+    sessionCookie = leadCenterSessionCookie(login.setCookies || []);
+    if (sessionCookie) ALL_SECRETS.push(sessionCookie, sessionCookie.split("=", 2)[1]);
+    const verified = sessionCookie ? await http("GET", "/api/lead-center-auth/get-session", {
+      headers: { Cookie: sessionCookie }, redirect: "manual",
+    }) : null;
+    const valid = login.ok && verified?.ok && verified.json?.user?.email === credentials.email && verified.json?.user?.role === "administrator";
+    record("admin:real_qa_session", valid ? "pass" : "fail", { http: verified?.status || login.status });
+    if (!valid) return;
+  }
+  if (!ADMIN_SECRET && !sessionCookie) {
     record("admin:dashboard", "skip", { message: "no ADMIN_SECRET" });
     record("admin:leads", "skip", { message: "no ADMIN_SECRET" });
     return;
   }
   const dash = await http("GET", "/admin", {
-    headers: adminBasicHeaders(),
+    headers: sessionCookie ? { Cookie: sessionCookie } : adminBasicHeaders(),
   });
   if (
     dash.ok &&
@@ -599,7 +631,7 @@ async function adminListAndDashboard() {
     });
 
   const list = await http("GET", "/admin/leads?filter=active", {
-    headers: adminBasicHeaders(),
+    headers: sessionCookie ? { Cookie: sessionCookie } : adminBasicHeaders(),
   });
   if (
     list.ok &&
@@ -630,6 +662,12 @@ async function slaSweep() {
       });
   }
   if (CRON_SECRET) {
+    // Cron-auth GET persists even without ?persist=true. SAFE_DB_WRITE=false
+    // never authorizes this probe's writes; dry-run admin coverage is separate.
+    if ((process.env.SAFE_DB_WRITE || "false").toLowerCase() !== "true") {
+      record("sla:sweep_cron", "skip", { message: "cron GET persists; read-only run does not permit that probe" });
+      return;
+    }
     const r = await http("GET", "/api/admin/sla/sweep", {
       headers: cronHeaders(),
     });
@@ -755,19 +793,29 @@ async function mutationTests(gate) {
     record("mutation:webhook_email_unsub", "skip", { message: gate.reason });
     return;
   }
+  const runId = process.env.PREVIEW_QA_RUN_ID;
+  if (!runId || !/^[a-zA-Z0-9_-]{8,100}$/.test(runId)) {
+    record("mutation:lead_create", "fail", { message: "stable PREVIEW_QA_RUN_ID required; no submission attempted" });
+    return;
+  }
   // 1) Create a QA lead.
   const lead = await http("POST", "/api/leads", {
     body: {
       name: "INTERNAL QA — DO NOT CONTACT",
-      email: `qa+${Date.now()}@example.com`,
-      phone: "+12525550100",
-      lead_type: "buyer",
-      source: "ad_form",
-      utm_source: "preview_qa",
+      email: `qa-${runId}@example.test`,
+      phone: "+12025550199",
+      funnel_type: "buyer",
+      lead_source_surface: "buyer_page",
+      idempotency_key: `preview-qa-${runId}`,
+      attribution: { source: "remote_synthetic_qa", medium: "qa", campaign: "post292_acceptance" },
       notes: "INTERNAL QA — DO NOT CONTACT — preview persistence acceptance",
       is_test: true,
-      consent: { sms: true, email: true },
+      consent: false,
+      consent_email: false,
+      consent_call: false,
+      consent_sms: false,
     },
+    headers: { Origin: new URL(PREVIEW_URL).origin },
   });
   if (!lead.ok || !lead.json?.lead_id) {
     record("mutation:lead_create", "fail", {
@@ -790,14 +838,15 @@ async function mutationTests(gate) {
     { http: note.status }
   );
 
-  // 3) Task.
+  // 3) QA leads are intentionally held from operational follow-up tasks.
+  // Never clear is_test or suppression just to obtain a task ID.
   const task = await http("POST", `/api/admin/leads/${leadId}/tasks`, {
     headers: adminHeaders(),
-    body: { title: "preview-qa task", priority: "low" },
+    body: { title: "INTERNAL QA SIMULATED — DO NOT CONTACT", priority: "low" },
   });
   record(
-    "mutation:lead_task",
-    task.ok && task.json?.ok && typeof task.json?.task_id === "string" ? "pass" : "fail",
+    "mutation:qa_task_suppression",
+    task.status === 409 && task.json?.error === "test_or_suppressed_task_held" ? "pass" : "fail",
     { http: task.status }
   );
 
@@ -807,16 +856,16 @@ async function mutationTests(gate) {
     headers: adminHeaders(),
   });
   const messageId = note.json?.message_id;
-  const taskId = task.json?.task_id;
   const messagePersisted = typeof messageId === "string" &&
     Array.isArray(detail.json?.messages) &&
     detail.json.messages.some((row) => row?.id === messageId);
-  const taskPersisted = typeof taskId === "string" &&
+  const noQaTask =
     Array.isArray(detail.json?.tasks) &&
-    detail.json.tasks.some((row) => row?.id === taskId);
+    !detail.json.tasks.some((row) => row?.title === "INTERNAL QA SIMULATED — DO NOT CONTACT");
+  const excluded = detail.json?.lead?.is_test === true && detail.json?.lead?.communication_suppressed === true;
   record(
     "mutation:persistence_readback",
-    detail.ok && detail.json?.ok && messagePersisted && taskPersisted ? "pass" : "fail",
+    detail.ok && detail.json?.ok && messagePersisted && noQaTask && excluded ? "pass" : "fail",
     { http: detail.status }
   );
 
@@ -831,18 +880,18 @@ async function mutationTests(gate) {
     { http: sla.status }
   );
 
-  // 6) Webhook SMS STOP (mock auth).
+  // 6) Preview callbacks must fail closed, including mock STOP.
   const sms = await http("POST", "/api/webhooks/sms/inbound", {
     headers: adminHeaders(),
-    body: { From: "+12525550100", Body: "STOP" },
+    body: { from: "+12025550199", body: "STOP", message_id: `mock_${randomUUID().replaceAll("-", "")}` },
   });
   record(
-    "mutation:webhook_sms_stop",
-    sms.ok && sms.json?.stop_handled ? "pass" : "fail",
+    "mutation:preview_sms_callback_refused",
+    sms.status === 503 && sms.json?.error === "preview_data_disabled" ? "pass" : "fail",
     { http: sms.status, message: redact(JSON.stringify(sms.json ?? sms.text)) }
   );
 
-  // 7) Webhook email unsubscribe.
+  // 7) No Resend callback activation or fabricated provider delivery in QA.
   const email = await http("POST", "/api/webhooks/email/events", {
     headers: adminHeaders(),
     body: {
@@ -851,8 +900,8 @@ async function mutationTests(gate) {
     },
   });
   record(
-    "mutation:webhook_email_unsub",
-    email.ok && email.json?.event_type === "unsubscribed" ? "pass" : "fail",
+    "mutation:preview_email_callback_refused",
+    email.status === 409 && email.json?.error === "webhook_disabled" ? "pass" : "fail",
     { http: email.status }
   );
 }
@@ -915,6 +964,11 @@ async function main() {
     await previewAnalyticsIsolation();
     await wpUtmVariants();
     health = await healthCheck();
+    if (health?.safety?.provider_delivery_enabled !== false || health?.env?.customer_email_enabled !== false || health?.env?.customer_sms_enabled !== false) {
+      record("preview:outbound_transports_off", "fail", { message: "effective no-send controls not verified" });
+      throw new Error("preview_no_send_attestation_failed");
+    }
+    record("preview:outbound_transports_off", "pass");
     await adminListAndDashboard();
     await slaSweep();
     await phoneInstallHandoff();
