@@ -4,7 +4,27 @@
  * Kept dependency-free and side-effect-free so unit tests can cover
  * the bypass / classification / redaction logic without spinning up
  * a server or making network calls.
- */
+*/
+
+/** A local Lead Center login redirect is a denial, not protected-page access.
+ * An SSO redirect, unrelated return path or 200 login page is never a pass. */
+export function anonymousLeadCenterDenied(response, previewUrl, returnTo) {
+  if (response.status === 401) return true;
+  if (![303, 307, 308].includes(response.status) || !response.location) return false;
+  try {
+    const url = new URL(response.location, previewUrl);
+    return url.origin === new URL(previewUrl).origin &&
+      url.pathname === "/lead-center-login" && url.searchParams.get("returnTo") === returnTo;
+  } catch { return false; }
+}
+
+/** Keep only legitimate Better Auth session cookies, not arbitrary Set-Cookie
+ * data. The result stays in memory and must be added to secret redaction. */
+export function leadCenterSessionCookie(setCookies) {
+  return setCookies.map(value => value.split(";", 1)[0]).filter(value =>
+    /^(?:__Secure-)?amm-lead-center\.session_token=[^\s;,]+$/.test(value),
+  ).join("; ");
+}
 
 /**
  * @typedef {Object} BypassConfig

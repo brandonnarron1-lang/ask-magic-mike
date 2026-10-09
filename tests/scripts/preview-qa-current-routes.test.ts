@@ -7,14 +7,19 @@ const playwrightConfig = readFileSync("playwright.config.ts", "utf8");
 const previewTestConfig = readFileSync("tests/e2e/preview-test-config.ts", "utf8");
 
 describe("preview QA current route contract", () => {
-  it("probes the active Lead Center surfaces with Basic Auth", () => {
+  it("probes genuine QA sessions while preserving the legacy non-RBAC venue contract", () => {
     expect(source).toContain('http("GET", "/admin"');
     expect(source).toContain('http("GET", "/admin/leads?filter=active"');
     expect(source).toContain("adminBasicHeaders()");
     expect(source).toContain('"admin:anonymous_dashboard_denied"');
     expect(source).toContain('"admin:anonymous_leads_denied"');
-    expect(source).toContain("anonymousDash.status === 401");
-    expect(source).toContain("anonymousList.status === 401");
+    expect(source).toContain('anonymousLeadCenterDenied(anonymousDash, PREVIEW_URL, "/admin")');
+    expect(source).toContain('anonymousLeadCenterDenied(anonymousList, PREVIEW_URL, "/admin/leads?filter=active")');
+    expect(source).toContain('"/api/lead-center-auth/sign-in/email"');
+    expect(source).toContain('"/api/lead-center-auth/get-session"');
+    expect(source).toContain('verified.json?.user?.role === "administrator"');
+    expect(source).toContain('throw new Error("synthetic_QA_identity_required")');
+    expect(source).toContain('if ((mode & 0o077) !== 0)');
     expect(source).toContain('dash.text.includes("Command Center")');
     expect(source).toContain('dash.text.includes("What needs attention today.")');
     expect(source).toContain('list.text.includes("Command Center")');
@@ -82,9 +87,23 @@ describe("preview QA current route contract", () => {
     expect(source).toContain('name: "INTERNAL QA — DO NOT CONTACT"');
     expect(source).toContain("is_test: true");
     expect(source).toContain('typeof note.json?.message_id === "string"');
-    expect(source).toContain('typeof task.json?.task_id === "string"');
+    expect(source).toContain('task.status === 409 && task.json?.error === "test_or_suppressed_task_held"');
+    expect(source).toContain('detail.json?.lead?.is_test === true');
+    expect(source).toContain('detail.json?.lead?.communication_suppressed === true');
+    expect(source).toContain('stable PREVIEW_QA_RUN_ID required; no submission attempted');
+    expect(source).toContain('email: `qa-${runId}@example.test`');
+    expect(source).toContain('consent_sms: false');
     expect(source).toContain('http("GET", `/api/admin/leads/${leadId}`');
     expect(source).toContain('record(\n    "mutation:persistence_readback"');
+  });
+
+  it("does not exercise unsafe cron writes or pretend Preview callbacks were processed", () => {
+    expect(source).toContain('cron GET persists; read-only run does not permit that probe');
+    expect(source).toContain('"mutation:preview_sms_callback_refused"');
+    expect(source).toContain('"mutation:preview_email_callback_refused"');
+    expect(source).toContain('sms.status === 503 && sms.json?.error === "preview_data_disabled"');
+    expect(source).toContain('email.status === 409 && email.json?.error === "webhook_disabled"');
+    expect(source).toContain('throw new Error("preview_no_send_attestation_failed")');
   });
 
   it("validates the private iOS install failure contract without minting or redeeming a token", () => {

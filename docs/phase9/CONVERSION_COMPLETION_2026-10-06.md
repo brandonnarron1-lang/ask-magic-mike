@@ -375,3 +375,54 @@ redeployment/restore was not performed by this task.
 
 Security references: [source-map-js advisory](https://github.com/advisories/GHSA-68fv-2mgg-jv7q),
 [Sharp advisory](https://github.com/advisories/GHSA-wq5f-xc86-pv6w).
+
+## 2026-10-09 authorized synthetic Preview acceptance delta
+
+The current owner instruction authorizes one schema-only expiring QA venue,
+reporting-branch-only Preview configuration, protected canonical/operator QA,
+necessary QA integration corrections on PR292, and conditional protected merge
+plus an app-only Production release. Earlier review-only holds are historical;
+neither they nor PR291's consumed approval authorize unrelated operations.
+
+New QA provenance was verified independently through Neon infrastructure and
+database-side branch/endpoint identity: all90 application tables contained zero
+rows before seeding. No external-job extensions or foreign servers were present.
+The two URL-pattern function matches were owned-domain validation allowlists,
+not embedded secrets or external calls. The venue uses fixed0.25CU, five-minute
+auto-suspend and24-hour expiry; it does not fork or sanitize customer records.
+The existing uncertain Preview remains untouched. QA-only fresh credentials
+and a restricted runtime role have no superuser/DDL/replication/RLS-bypass flags.
+Its explicit RLS/table/function grants are confined to the new disposable venue,
+not source migrations or Production changes.
+
+Minimal fixtures: five fresh Better Auth identities, three synthetic agents,
+25 unmistakably labeled test/suppressed leads, zero initial tasks/notifications.
+All44 settings apply only to the reporting Preview branch. All inherited
+connection/admin/cron/phone-signing values are overridden with QA-only values;
+delivery, consumer channels, AI/live adapters, allocation/pilot and async work
+remain off. Merely passing the shared database/provider Preview guard is not
+treated as no-send evidence. Private metadata, fixture manifest, empty-state
+receipt and configuration journal are in the existing ignored execution record.
+
+QA integration defects were corrected without weakening application protections:
+exact same-origin login redirects count as anonymous denial; real private
+synthetic Better Auth sessions replace the legacy-only page probe; canonical
+intake uses a stable replay key and reserved example.test identity with no
+channel consent; suppressed QA task creation must remain409; Preview SMS and
+disabled email callbacks must remain refused. Cron-auth GET is a write and is
+not executed in the read-only pass. Private credentials/cookies are never
+written to the canonical report or process arguments.
+
+Initial actual protected read-only run:22PASS/8explicit mutation skips/0FAIL.
+Initial controlled synthetic run:30PASS/0SKIP/0FAIL, including durable lead/note
+readback, task suppression, SLA writes and callback refusals. These runs use the
+first new QA build of the prior reviewed source and the corrected local harness;
+they are not yet the final frozen-source release seal. Final source/deployment,
+operator results and release disposition belong to the later sanitized PR
+receipt and generated Production acceptance, not a predicted source assertion.
+
+The inherited measured10k passing envelope and50k FAIL/LATENCY HELD remain
+unchanged. No50k benchmark was repeated or relabeled. Genuine human operator
+acceptance, carrier/disclosure/enrollment decisions and mailbox delivery proof
+remain separate. Production schema/env, pages226/3952 and caches, historical
+failures, Twilio ticket29850012, NellySelly and PropertyLens remain untouched.
