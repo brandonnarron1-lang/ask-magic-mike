@@ -1,4 +1,5 @@
 import { readFileSync, mkdirSync } from "node:fs";
+import path from "node:path";
 import { Pool } from "pg";
 import { expect, test, type BrowserContext } from "@playwright/test";
 
@@ -8,6 +9,7 @@ let fixture: {ids:Record<string,string>;leads:Record<string,string>};
 let pool:Pool;
 let context:BrowserContext;
 const query=async(statement:string,values:unknown[]=[]) => (await pool.query(statement,values)).rows;
+const output = process.env.AMM_E2E_OUTPUT_DIR || "output/playwright";
 test.beforeAll(async({browser})=>{
   const url=new URL(process.env.DATABASE_URL||"");
   if(process.env.VERCEL_ENV!=="development" || process.env.PREVIEW_URL || !["localhost","127.0.0.1"].includes(url.hostname) || url.pathname!=="/amm_qa_upgrade") throw new Error("disposable_local_database_required");
@@ -28,7 +30,7 @@ test.beforeAll(async({browser})=>{
   await page.close();
   await query("UPDATE leads SET question_raw=$2,source='ourtownproperties',timeline_months=3 WHERE id=$1",[fixture.leads.agent,'Question: SYNTHETIC REQUEST — NOT A CONSUMER\nAttribution: {"source":"ourtownproperties","campaign":"synthetic"}']);
   await query("INSERT INTO communication_permissions(lead_id,channel,purpose,state,consent_text,source,evidence_at) VALUES($1,'phone','manual_one_to_one','allowed','SYNTHETIC — NO CONTACT','isolated_fixture',now())",[fixture.leads.agent]);
-  mkdirSync("output/playwright",{recursive:true});
+  mkdirSync(output,{recursive:true});
 });
 test.afterAll(async()=>{await context?.close();await pool?.end();});
 for(const width of [320,390,768,1440]) {
@@ -44,7 +46,7 @@ for(const width of [320,390,768,1440]) {
     await call.focus();await expect(call).toBeFocused();await page.keyboard.press("Enter");
     await expect(page.getByRole("button",{name:"Open dialer"})).toBeDisabled(); // Never open or call the fictional number.
     await page.getByRole("button",{name:"Cancel",exact:true}).click();
-    await page.screenshot({path:`output/playwright/readable-lead-${width}.png`,fullPage:false});
+    await page.screenshot({path:path.join(output,`readable-lead-${width}.png`),fullPage:false});
     await page.evaluate(()=>{document.documentElement.style.fontSize="200%";});
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
     // Extra administration stays absent for an assigned-agent session.
@@ -52,12 +54,12 @@ for(const width of [320,390,768,1440]) {
     await page.getByRole("navigation",{name:"Lead next steps"}).getByRole("link",{name:"History",exact:true}).focus();
     await page.keyboard.press("Enter");
     const history=page.locator("summary").filter({hasText:"Unified activity history"});
-    await history.focus();await page.keyboard.press("Enter");
     await expect(history.locator("..")).toHaveAttribute("open","");
+    await expect(history).toBeFocused();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
     await page.keyboard.press("Enter");
     await page.evaluate(()=>window.scrollTo(0,0));
-    await page.screenshot({path:`output/playwright/readable-lead-200-${width}.png`,fullPage:false});
+    await page.screenshot({path:path.join(output,`readable-lead-200-${width}.png`),fullPage:false});
     expect(errors).toEqual([]); await page.close();
   });
 }
@@ -68,7 +70,7 @@ test("QA is visibly blocked; changed opt-out and role/assignment fail closed wit
   await page.goto(`/admin/leads/${fixture.leads.agent}`); await expect(page.getByRole("heading",{level:1})).toHaveText("Test lead");
   await expect(page.getByText("Contact blocked.",{exact:false})).toBeVisible(); await expect(page.getByRole("button",{name:"Review & call"})).toHaveCount(0);
   await expect(page.getByRole("form",{name:"Save interaction and next task"})).toHaveCount(0);
-  await page.screenshot({path:"output/playwright/readable-qa-lead-390.png",fullPage:false});
+  await page.screenshot({path:path.join(output,"readable-qa-lead-390.png"),fullPage:false});
   await query("UPDATE leads SET is_test=false,communication_suppressed=false WHERE id=$1",[fixture.leads.agent]);
   await page.goto(`/admin/leads/${fixture.leads.agent}`); await page.getByRole("button",{name:"Review & call"}).click();
   await query("UPDATE communication_permissions SET state='opted_out' WHERE lead_id=$1 AND channel='phone' AND purpose='manual_one_to_one'",[fixture.leads.agent]);
@@ -91,6 +93,40 @@ test("QA is visibly blocked; changed opt-out and role/assignment fail closed wit
   expect((await query("SELECT count(*)::int AS n FROM lead_response_milestones"))[0].n).toBe(0);
   await page.close();
 });
+test("one click reveals tasks and appointments; a direct history bookmark opens its panel",async()=>{
+  // Restore this synthetic lead after the preceding terminal-state regression.
+  await query("UPDATE leads SET status='assigned' WHERE id=$1",[fixture.leads.agent]);
+  const page=await context.newPage(); await page.setViewportSize({width:390,height:1000});
+  await page.goto(`/admin/leads/${fixture.leads.agent}`);
+  const nav=page.getByRole("navigation",{name:"Lead next steps"});
+  await nav.getByRole("link",{name:"Log result / next task",exact:true}).click();
+  await expect(page.getByRole("form",{name:"Save interaction and next task"})).toBeVisible();
+  await nav.getByRole("link",{name:"Appointments",exact:true}).click();
+  const appointments=page.locator("#appointment-review > details");
+  await expect(appointments).toHaveAttribute("open","");
+  await expect(appointments.locator("summary")).toBeFocused();
+  await page.goto(`/admin/leads/${fixture.leads.agent}#activity`);
+  await expect(page.locator("#activity > details")).toHaveAttribute("open","");
+  await expect(page.locator("#activity > details > summary")).toBeFocused();
+  await page.close();
+});
+test("optional seller evidence stays closed until requested and QA cannot save it",async()=>{
+  await query("UPDATE leads SET lead_type='home_value',is_test=true,communication_suppressed=true WHERE id=$1",[fixture.leads.agent]);
+  const page=await context.newPage(); await page.setViewportSize({width:390,height:1000});
+  await page.goto(`/admin/leads/${fixture.leads.agent}`);
+  const evidence=page.locator("summary").filter({hasText:/^Property evidence \(optional\)$/});
+  await expect(evidence).toBeVisible();
+  await expect(evidence.locator("..")).not.toHaveAttribute("open","");
+  await expect(page.getByLabel("Evidence source URL")).not.toBeVisible();
+  await page.goto(`/admin/leads/${fixture.leads.agent}#property-evidence-review`);
+  await expect(evidence.locator("..")).toHaveAttribute("open","");
+  await expect(page.getByLabel("Evidence source URL")).toBeVisible();
+  await expect(page.getByRole("button",{name:"Save review task",exact:true})).toBeDisabled();
+  expect((await query("SELECT count(*)::int AS n FROM lead_notifications WHERE provider_message_id IS NOT NULL"))[0].n).toBe(0);
+  await page.screenshot({path:path.join(output,"seller-evidence-on-request-390.png"),fullPage:false});
+  await query("UPDATE leads SET lead_type='buyer',is_test=false,communication_suppressed=false WHERE id=$1",[fixture.leads.agent]);
+  await page.close();
+});
 for(const width of [320,390,768,1440]) {
   test(`Actual compiled email fits ${width}px with main link early`,async({browser})=>{
     const ctx=await browser.newContext({viewport:{width,height:1000}}); const page=await ctx.newPage();
@@ -105,6 +141,6 @@ for(const width of [320,390,768,1440]) {
     expect((await link.boundingBox())!.y).toBeLessThan(600);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
     await expect(page.locator("body")).not.toContainText("First touch:");
-    await page.screenshot({path:`output/playwright/readable-email-${width}.png`,fullPage:true});await ctx.close();
+    await page.screenshot({path:path.join(output,`readable-email-${width}.png`),fullPage:true});await ctx.close();
   });
 }

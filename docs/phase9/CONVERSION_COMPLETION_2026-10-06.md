@@ -1,6 +1,63 @@
 # Conversion completion — 2026-10-06
 
-## Readability continuation — 2026-10-09 (local candidate, NOT deployed)
+## Post-293 operational delta — 2026-10-09
+
+Authenticated `pnpm release:authority:resolve` at `2026-10-09T18:34:24Z`
+passed25/25 for accepted PR293: main `c12349d16c479fea064ffb7f2095c13cc27ab3ce`,
+tree `d979311ba30d4e26ac7c0c59cbc666fc4fd243ec`, Ready Production
+`dpl_87EEEL6skmBXenjcpPgKiFzbTCnY`. Its release approval is consumed;
+no release, migration or deployment was repeated. The deployed compact overview
+and email v4 supersede the historical preparation below. Current acceptance
+remains the deployment-generated receipt, not this dated observation.
+
+Read-only refresh exposed a real shortcut defect: History scrolled to a closed
+panel. Local `codex/lead-center-navigation-20261009` makes existing links and
+bookmarks reveal/focus the requested panel, and collapses optional property
+evidence. Permission, contact, assignment, intake and provider behavior are
+unchanged. This successor is **NOT deployed**. The existing runner now keeps
+new fixtures/screenshots/transport logs/receipts in a private run namespace and
+labels development diagnostics separately from built-app acceptance.
+
+Bounded Production reads at `2026-10-09T18:39:53Z` inspected only the two already
+authorized QA references and source/copy notification keys: both QA records
+remain suppressed, the original v3 intent is sent with delivered-event metadata,
+and no v4 review-copy intent exists. The requested ONE copy is approved but
+**NOT SENT**. Resend browser access is signed out; Vercel metadata marks the
+existing Production values non-exportable Secrets. Metadata is not recipient or
+flag verification. The missing boundary is legitimate private execution holding
+that configuration, not another send approval. No credential copy/rotation,
+public send route, lead replay, customer send or provider/account change occurred.
+Mike's new-copy receipt and BCC receipt are NOT RUN. Brandon's own-account
+three-step read-only guide is ready; human acceptance remains PENDING.
+
+New test attempts and exact successor identity belong in the existing ignored
+`.amm-run/lead-center-navigation-20261009/` receipt. Initial unit timeouts and the
+documentation-header failure remain recorded, not relabeled as passes. An initial
+built browser run caught React418 during initial hydration; its trace is retained.
+Development diagnostic11/11 and rebuilt browser11/11 passed without removing the
+page-error assertion. The initial hydration cause is **not established** and must
+remain visible in review; a later pass is not a claimed framework fix. Protected
+hosted review remains necessary, and uncertain Preview customer-data access stays
+held. Prior conversion/reference/notification results below are inherited.
+
+Fresh successor checks: unit3,802 PASS/99 explicit skips; focused25/25;
+strict typecheck, lint, optimized build, routes114/114, safety14/14 and source
+isolation PASS. Two fresh built-app runs passed11/11 each at320/390/768/1440,
+200% root text, keyboard/bookmarks and real local Better Auth/PostgreSQL sessions.
+New artifact-boundary tests initially exposed the application's required-env
+typing on a deliberately credential-free child; only the test type annotation
+was corrected. A later bounded Production reread failed on a guessed column
+name, then passed using the schema's actual `duplicate_of_lead_id`. Its transaction
+was read-only and made no writes. Both failures remain in the private receipt.
+
+There were zero Production writes/sends, WordPress changes, remote QA wakes,
+environment/schema changes or new PR/deploy effects. Preserve the two historical
+permanent notification failures, completed QA, ticket29850012 and sealed receipts.
+NellySelly and PropertyLens were untouched. The next source-bound application
+action is permission to publish this frozen successor for ONE review PR and its
+existing CI/Preview build effects only; it is not merge/Production/send authority.
+
+## Historical readability preparation — 2026-10-09 (superseded by accepted PR293)
 
 Owner-supplied iPhone screenshots show the web page reached from Mail, not just
 an email rendering defect: the entire stored intake text/tracking JSON became
