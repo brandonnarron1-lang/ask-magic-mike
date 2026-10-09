@@ -23,9 +23,12 @@ import { requireLeadCenterLeadPermission } from "../../../../src/lib/admin/rbac-
 import { hasLeadCenterPermission } from "../../../../src/lib/admin/rbac-policy";
 import { Phase6CopilotPanel } from "../../../../src/components/admin/phase6-copilot-panel";
 import { Phase7MessagingControlPanel } from "../../../../src/components/admin/phase7-messaging-control-panel";
-import { ReferenceLeadCard } from "../../../components/admin/ReferenceLeadCard";
+import { LeadQuickOverview } from "../../../components/admin/LeadQuickOverview";
+import { isTerminalContactRecord } from "../../../lib/manualContactReview";
+import { isPreviewRuntime } from "../../../../src/lib/preview-security";
 import { ConversionMutationForm } from "../../../components/admin/ConversionMutationForm";
 import { presentLead, leadSubtype } from "../../../lib/leadPresentation";
+import { leadPageHeading, leadRequestLabel, leadSourceLabel, leadTimelineLabel } from "../../../lib/leadReadability";
 import { LeadEvidenceWorkspace } from "../../../components/admin/LeadEvidenceWorkspace";
 import {
   createAppointmentAction,
@@ -40,7 +43,7 @@ import {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-function shortDate(value: string | null, timezone?: string) {
+function shortDate(value: string | null, timezone = "America/New_York") {
   if (!value) return "Unknown";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
@@ -112,7 +115,10 @@ function Badge({ children, tone = "gold" }: { children: ReactNode; tone?: "gold"
   );
 }
 
-function Panel({ title, children }: { title: string; children: ReactNode }) {
+function Panel({ title, children, collapsed = true }: { title: string; children: ReactNode; collapsed?: boolean }) {
+  if (collapsed) return <details className="min-w-0 rounded-lg border border-white/10 bg-[#0b0b0b] px-4 sm:px-5">
+    <summary className="cursor-pointer py-4 text-sm font-semibold text-[#e2c06f] focus-visible:outline-2 focus-visible:outline-cyan-300">{title}</summary><div className="min-w-0 pb-5">{children}</div>
+  </details>;
   return (
     <section className="min-w-0 rounded-lg border border-white/10 bg-[#0b0b0b] p-4 sm:p-5">
       <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-[#e2c06f]">{title}</h2>
@@ -617,30 +623,18 @@ export default async function AdminLeadDetailPage({
   const detail = await loadAdminLeadDetail(id, principal, { offset: timelineOffset, limit: 30 });
   if (detail.configured && !detail.lead && detail.error === "lead_not_found") notFound();
   const lead = detail.lead;
+  const contactBlocked = Boolean(lead && (lead.is_test || lead.communication_suppressed || isTerminalContactRecord(lead.status, lead.conversion_stage)));
+  const canFollowThrough = canUpdateLead && !contactBlocked;
 
   return (
-    <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4] [overflow-wrap:anywhere]">
+    <main className="min-h-screen bg-[#050505] px-4 py-5 text-[#f4ead4] [overflow-wrap:anywhere]">
       <div className="mx-auto max-w-6xl">
-        <header className="mb-7 border-b border-[#cda24a33] pb-5">
+        <header className="mb-4 border-b border-[#cda24a33] pb-4">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#e2c06f]">AdminOps</p>
-              <h1 className="mt-3 font-serif text-4xl">{lead?.primary_detail || "Lead detail"}</h1>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-[#d9ceb8]">
-                Validated lifecycle controls, stalled-lead signals, attribution, and unified activity history.
-              </p>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#e2c06f]">Lead Center</p>
+              <h1 className="mt-2 break-words text-2xl font-semibold">{leadPageHeading(lead?.name, lead?.is_test)}</h1>
             </div>
-            <nav className="flex flex-wrap gap-2" aria-label="Admin navigation">
-              <Link href="/admin/leads" className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]">
-                Lead inbox
-              </Link>
-              <Link href="/admin/reporting" className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]">
-                Reporting
-              </Link>
-              <Link href="/admin/action-queue" className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]">
-                Action queue
-              </Link>
-            </nav>
           </div>
           <div className="mt-4 space-y-2">
             {query.status_action ? (
@@ -667,7 +661,7 @@ export default async function AdminLeadDetailPage({
         </header>
 
         {!lead ? (
-          <Panel title="Lead detail status">
+          <Panel title="Lead detail status" collapsed={false}>
             <p className="text-sm text-[#d9ceb8]">
               {detail.error || "The canonical Neon database is not configured in this environment."}
             </p>
@@ -675,7 +669,7 @@ export default async function AdminLeadDetailPage({
         ) : (
           <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
             <section className="min-w-0 space-y-5">
-              {principal ? <ReferenceLeadCard view={presentLead({ lead, principal, tier: "assigned", evidence: {appointments:detail.appointments,followupTasks:detail.followupTasks,outcomes:detail.outcomes} })} /> : null}
+              {principal ? <LeadQuickOverview view={presentLead({ lead, principal, tier: "assigned", evidence: {appointments:detail.appointments,followupTasks:detail.followupTasks,outcomes:detail.outcomes} })} leadId={lead.id} receivedAt={lead.created_at} request={leadRequestLabel(lead.funnel_type)} blocked={contactBlocked} canReview={canUpdateLead && !isPreviewRuntime()} status={lead.status}/> : null}
               {(["seller","cash_seller","investor_buyer"] as string[]).includes(leadSubtype(lead)) ? <LeadEvidenceWorkspace leadId={lead.id} kind={leadSubtype(lead) as "seller"|"cash_seller"|"investor_buyer"} allowed={canUpdateLead&&!lead.is_test&&!lead.communication_suppressed}/> : null}
               <Panel title="Lead state">
                 <div className="flex flex-wrap gap-2">
@@ -699,7 +693,7 @@ export default async function AdminLeadDetailPage({
                 </dl>
               </Panel>
 
-              {!detail.firstResponse && canUpdateLead ? (
+              {!detail.firstResponse && canFollowThrough ? (
                 <Panel title="First-response evidence">
                   <ConversionMutationForm action={recordFirstHumanResponseAction} submitLabel="Record first human response" successMessage="First human response evidence saved at server time. No message sent." confirmationLabel="Confirm an actual one-to-one human follow-up occurred now. Completing a task does not establish this." className="rounded-md border border-cyan-400/20 bg-cyan-400/[.06] p-4">
                     <input type="hidden" name="lead_id" value={lead.id} />
@@ -711,16 +705,16 @@ export default async function AdminLeadDetailPage({
                 </Panel>
               ) : null}
 
-              {canUpdateLead && canManageTasks ? <ManualHumanFollowthroughForm leadId={lead.id} /> : null}
+              <div id="follow-up">{canFollowThrough && canManageTasks ? <ManualHumanFollowthroughForm leadId={lead.id} /> : <FollowupPanel leadId={lead.id} tasks={detail.followupTasks} canManage={false}/>}</div>
 
-              <div id="next-action-review"><Phase6CopilotPanel
+              <details id="next-action-review" className="min-w-0 rounded-lg border border-white/10 p-4"><summary className="cursor-pointer text-sm font-semibold text-[#e2c06f]">AI draft tools (review required)</summary><div className="mt-4"><Phase6CopilotPanel
                 leadId={lead.id}
                 isTest={lead.is_test}
                 suppressed={lead.communication_suppressed}
                 initialDrafts={detail.aiDrafts || []}
-              /></div>
+              /></div></details>
 
-              <div id="message-review"><Phase7MessagingControlPanel leadId={lead.id} /></div>
+              <details id="message-review" className="min-w-0 rounded-lg border border-white/10 p-4"><summary className="cursor-pointer text-sm font-semibold text-[#e2c06f]">Communication permissions & advanced messaging</summary><div className="mt-4"><Phase7MessagingControlPanel leadId={lead.id} /></div></details>
 
               <Panel title="Lifecycle controls">
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -739,7 +733,7 @@ export default async function AdminLeadDetailPage({
                 </p>
               </Panel>
 
-              <div id="appointment-review"><AppointmentPanel leadId={lead.id} appointments={detail.appointments} canUpdate={canUpdateLead} /></div>
+              <div id="appointment-review"><AppointmentPanel leadId={lead.id} appointments={detail.appointments} canUpdate={canFollowThrough} /></div>
 
               <OutcomePanel
                 outcomes={detail.outcomes}
@@ -748,7 +742,7 @@ export default async function AdminLeadDetailPage({
                 leadStatus={lead.status}
               />
 
-              <FollowupPanel leadId={lead.id} tasks={detail.followupTasks} canManage={canManageTasks} />
+              {canFollowThrough ? <FollowupPanel leadId={lead.id} tasks={detail.followupTasks} canManage={canManageTasks} /> : null}
 
               <div id="activity">
                 <Panel title="Unified activity history">
@@ -797,11 +791,21 @@ export default async function AdminLeadDetailPage({
                 <dl className="grid gap-4">
                   <Field label="Name" value={lead.name || "Not provided"} />
                   <Field label="Contact" value={lead.contact_summary} />
-                  <Field label="Funnel" value={lead.funnel_type} />
-                  <Field label="Timeline" value={lead.timeline || (lead.timeline_months ?? "Unknown")} />
+                  <Field label="Funnel" value={leadSourceLabel(lead.funnel_type)} />
+                  <Field label="Timeline" value={leadTimelineLabel(lead.timeline || lead.timeline_months)} />
                   <Field label="Grade" value={lead.lead_grade || "Unknown"} />
-                  <Field label="Assigned agent" value={lead.assigned_agent_id || "Unassigned"} />
+                  <Field label="Qualification score" value={lead.score == null ? "Not recorded" : `${lead.score}/100`} />
+                  <Field label="Assignment" value={lead.assigned_agent_id ? "Assigned — review activity history" : "Unassigned"} />
                 </dl>
+                {lead.score_reasons?.length ? <details className="mt-4 min-w-0"><summary className="cursor-pointer py-2 text-sm text-[#e2c06f]">Recorded score factors</summary><ul className="mt-2 space-y-2 text-sm text-[#d9ceb8]">{lead.score_reasons.map((reason,index)=><li key={index}>{reason}</li>)}</ul></details> : null}
+                <details className="mt-5 min-w-0 rounded-md border border-[#cda24a33] p-3">
+                  <summary className="cursor-pointer text-sm text-[#e2c06f]">Technical record details (optional)</summary>
+                  <dl className="mt-4 grid min-w-0 gap-4">
+                    <Field label="Lead identifier" value={lead.id} />
+                    <Field label="Agent identifier" value={lead.assigned_agent_id || "Unassigned"} />
+                    <Field label="Original intake text (unaltered)" value={lead.question || "Not recorded"} />
+                  </dl>
+                </details>
               </Panel></div>
             </aside>
           </div>

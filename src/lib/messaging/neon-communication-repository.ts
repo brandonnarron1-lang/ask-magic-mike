@@ -1,4 +1,5 @@
 import { neon } from "@neondatabase/serverless";
+import { isTerminalContactRecord } from "../../../app/lib/manualContactReview";
 import type { LeadCenterPrincipal } from "@/lib/admin/rbac-policy";
 import { hasLeadCenterPermission } from "@/lib/admin/rbac-policy";
 import type { MessageChannel, MessagePurpose } from "./permission-engine";
@@ -30,7 +31,7 @@ export async function loadLeadPermissionContext(leadId: string, principal: LeadC
   const leads = await sql.query(
     `SELECT id, is_test, communication_suppressed, email_suppressed, sms_suppressed,
             consent_email, consent_sms, consent_call, consent_timestamp,
-            source, source_detail, page_url, assigned_agent_id
+            source, source_detail, page_url, assigned_agent_id, phone, email, status, conversion_stage
        FROM public.leads
       WHERE id = $1::uuid${scoped ? " AND assigned_agent_id = $2::uuid" : ""}
       LIMIT 1`,
@@ -67,7 +68,10 @@ export async function loadLeadPermissionContext(leadId: string, principal: LeadC
     source: text(permission.source),
     evidenceAt: text(permission.evidence_at),
   }));
-  return { ok: true as const, sql, lead, permissions };
+  return { ok: true as const, sql, lead, permissions, contact: {
+    phone: text(row.phone), email: text(row.email),
+    terminal: isTerminalContactRecord(text(row.status), text(row.conversion_stage)),
+  } };
 }
 
 export async function evaluateAndRecordPermission(input: {

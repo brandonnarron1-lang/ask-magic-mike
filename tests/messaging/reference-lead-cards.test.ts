@@ -8,6 +8,15 @@ import { smsEncodingEstimate } from "../../src/lib/messaging/sms-policy";
 import { normalizeAdminLeadRow } from "../../app/lib/persistence/supabase/adminLeadView";
 
 describe("reference lead cards — no send", () => {
+  it("keeps diagnostic JSON out of the operator summary without altering the canonical record", () => {
+    const question = 'Question: INTERNAL QA — DO NOT CONTACT\nAttribution: {"source":"ourtownproperties"}';
+    const lead = normalizeAdminLeadRow({id:"00000000-0000-4000-8000-000000000002", assigned_agent_id:"00000000-0000-4000-8000-000000000001", question_raw:question, timeline_months:0, source:"ourtownproperties"});
+    const view = presentLead({lead,tier:"assigned",principal:{userId:"fixture",name:"SYNTHETIC",email:"synthetic@example.test",role:"approved_agent",agentId:lead.assigned_agent_id}});
+    expect(view.identity?.question).toBe("Question: INTERNAL QA — DO NOT CONTACT");
+    expect(view.source).toBe("Our Town Properties website");
+    expect(view.timeline).toBe("Immediate / within 30 days");
+    expect(lead.question).toBe(question);
+  });
   for (const subtype of Object.keys(LEAD_MODULES) as LeadSubtype[]) {
     it(`${subtype}: one snapshot, accessible facts, no private transport data`, () => {
       const view = leadCardFixture({ subtype, tier: "assigned", state: "offered", score: 84, isTest: true });

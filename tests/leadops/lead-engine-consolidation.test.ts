@@ -114,13 +114,14 @@ describe("same-day lead engine contract", () => {
     });
     expect(rendered.subject).toContain("[TEST]");
     expect(rendered.subject).toContain("AskMagicMike.com QA");
-    expect(rendered.subject).toContain("Score");
+    expect(rendered.subject).not.toContain("Score");
+    expect(rendered.text).toContain("Review priority:");
     expect(rendered.text).toContain("QA TEST — DO NOT CONTACT");
     expect(rendered.text).toContain("Not a survey.");
     expect(rendered.html).not.toContain("LEAD_NOTIFICATION_BCC");
     expect(rendered.visualTemplate.id).toBe("qa_test");
-    expect(rendered.html).toContain("lead-alert-frame-v1.png");
-    expect(rendered.html).toContain("Open secure Lead Center");
+    expect(rendered.html).toContain("our-town-properties-logo.webp");
+    expect(rendered.html).toContain("Open saved lead");
   });
 
   it("renders a consumer acknowledgment without inventing a result or response time", () => {

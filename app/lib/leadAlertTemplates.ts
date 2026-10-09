@@ -1,13 +1,14 @@
 import type { LeadPayload } from "./leadPayload";
 import type { LeadRoutingDecision } from "./leadRouting";
 import type { LeadScore } from "./leadScoring";
+import { renderReadableLeadAlert } from "./leadAlertReadableTemplate";
 import {
   selectLeadAlertVisualTemplate,
   shouldRenderLeadAlertVisual,
   visualAssetUrl,
 } from "./leadAlertVisualTemplates";
 
-export const LEAD_ALERT_TEMPLATE_VERSION = "lead_alert_email_v3";
+export const LEAD_ALERT_TEMPLATE_VERSION = "lead_alert_email_v4";
 export const LEAD_ALERT_SMS_TEMPLATE_VERSION = "lead_alert_sms_v2";
 export const CONSUMER_ACK_TEMPLATE_VERSION = "consumer_ack_email_v1";
 
@@ -165,11 +166,11 @@ function renderLeadAlertWithMode(
 }
 
 export function renderLeadAlert(input: LeadAlertRenderInput) {
-  return renderLeadAlertWithMode(input, "delivery", "brand_v3");
+  return renderReadableLeadAlert(input);
 }
 
 export function renderLeadAlertDesignPreview(input: LeadAlertRenderInput) {
-  return renderLeadAlertWithMode(input, "design_preview", "brand_v3");
+  return renderReadableLeadAlert(input, "design_preview");
 }
 
 export function renderLeadAlertForTemplateVersion(
@@ -177,6 +178,9 @@ export function renderLeadAlertForTemplateVersion(
   templateVersion: string,
 ) {
   if (templateVersion === LEAD_ALERT_TEMPLATE_VERSION) {
+    return renderReadableLeadAlert(input);
+  }
+  if (templateVersion === "lead_alert_email_v3") {
     return renderLeadAlertWithMode(input, "delivery", "brand_v3");
   }
   if (templateVersion === "lead_alert_email_v1" || templateVersion === "lead_alert_email_v2") {

@@ -480,6 +480,49 @@ type EnqueueLeadNotificationDependencies = {
   provider?: NotificationProvider;
 };
 
+/** One owner-requested review copy of an already-sent internal QA email.
+ * No public route or automatic worker calls this operation. The caller needs
+ * separate exact send authority. Preserve the original intent/provider receipt;
+ * this copy uses the existing outbox, configured primary/BCC and provider only. */
+export async function sendOwnerRequestedQaReviewCopy(
+  sourceNotificationId: string,
+  dependencies: EnqueueLeadNotificationDependencies & {
+    loadInput?: (leadId: string, metadata: Record<string, unknown>) => Promise<LeadAlertInput | null>;
+  } = {},
+) {
+  const delivery = assertProviderDeliveryAllowed();
+  if (!delivery.ok || !notificationRetryDeliveryReady()) return { ok: false, error: "qa_review_delivery_not_ready", notification: null };
+  const repo = dependencies.repository || notificationRepository();
+  const original = await repo.findById(sourceNotificationId);
+  if (!original || original.notification_type !== "lead_alert" || original.channel !== "email" ||
+    original.recipient_type !== "internal" || original.status !== "sent" || !original.provider_message_id ||
+    !["lead_alert_email_v1", "lead_alert_email_v2", "lead_alert_email_v3"].includes(original.template_version)) {
+    return { ok: false, error: "qa_review_source_not_eligible", notification: null };
+  }
+  const input = await (dependencies.loadInput || loadLeadAlertInput)(original.lead_id, original.metadata);
+  if (!input?.payload.is_test || !input.communicationSuppressed || !input.emailSuppressed) {
+    return { ok: false, error: "qa_review_requires_suppressed_test", notification: null };
+  }
+  const key = `qa_review_copy:${original.id}:${LEAD_ALERT_TEMPLATE_VERSION}`;
+  // Repeating the command only reads its previous result, even if processing or
+  // failed. Do not silently turn an ambiguous send into another provider call.
+  const existing = await repo.findByIdempotencyKey(key);
+  if (existing) return { ok: existing.status === "sent", error: null, notification: existing };
+  const rendered = renderLeadAlert(input);
+  const created = await repo.create({
+    lead_id: original.lead_id, agent_id: null, notification_type: "lead_alert", channel: "email",
+    recipient_type: "internal", recipient_reference: safeRecipientReference("email", configuredTo()),
+    template_version: LEAD_ALERT_TEMPLATE_VERSION, idempotency_key: key, status: "pending", max_attempts: 1,
+    provider: notificationMode(), metadata: { is_test: true, correlation_id: input.correlationId,
+      review_copy_of: original.id, original_provider_reference: original.provider_message_id,
+      canonical_lead_id: input.duplicateOfLeadId || input.leadId, owner_requested: true, read_only_walkthrough: true },
+  });
+  const sent = await deliver(created, { channel: "email", recipient: configuredTo(), bcc: configuredBcc(),
+    subject: rendered.subject, text: rendered.text, html: rendered.html }, repo,
+    dependencies.provider || selectNotificationProvider(), { allowInitialInternalQa: true });
+  return { ok: sent.status === "sent", error: sent.status === "sent" ? null : "qa_review_not_sent", notification: sent };
+}
+
 export async function enqueueLeadNotifications(
   input: LeadAlertInput,
   dependencies: EnqueueLeadNotificationDependencies = {},

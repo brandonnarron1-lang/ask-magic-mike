@@ -17,6 +17,11 @@ const origin = `http://localhost:${process.env.AMM_E2E_PORT}`;
 const offerFor = (key: string, role = "agent") => f.offers[key].find(o => o.agent_id === f.agents[role])!;
 const commandCode = (key: string, role: string) => f.codes[key][f.offers[key].findIndex(o => o.agent_id === f.agents[role])];
 const sql = async (text: string, values: unknown[] = []) => (await pool.query(text, values)).rows;
+async function openTimeline(page: Page) {
+  const summary=page.locator("summary").filter({hasText:/^Unified activity history$/});
+  // Next navigation may preserve the native disclosure's open state.
+  if(await summary.locator("..").getAttribute("open")===null) await summary.click();
+}
 // Chromium treats loopback as a secure context; Playwright's Node HTTP client
 // does not send Secure Better Auth cookies over HTTP. Exercise same-origin
 // browser fetch, not a credential-less request accidentally proving a 401.
@@ -61,6 +66,7 @@ test("Real sessions enforce four-role list/detail/report and direct API boundari
     await expect(page.getByText(`SYNTHETIC ${role === "admin" ? "AGENT" : role.toUpperCase()} DO NOT CONTACT`, { exact: true }).first()).toBeVisible();
     if (role !== "admin") await expect(page.getByText("SYNTHETIC OTHER DO NOT CONTACT", { exact: true })).toHaveCount(0);
     await page.goto(`/admin/leads/${f.leads[role === "admin" ? "agent" : role]}`);
+    await page.locator("summary").filter({hasText:/^Operational profile$/}).click();
     await expect(page.getByText(`private-${role === "admin" ? "agent" : role}@example.test`, { exact: false }).first()).toBeVisible();
     await page.screenshot({ path: `output/playwright/real-session-${role}-390.png`, fullPage: true });
     if (role !== "admin") {
@@ -172,9 +178,11 @@ test("Signed account/destination, phone binding, invalid signature and STOP prec
 test("Today real task completion/stale form, paginated timeline and 200% text remain scoped", async () => {
   const page = await contexts.agent.newPage();
   await page.goto(`/admin/leads/${f.leads.agent}`);
+  await openTimeline(page);
   await expect(page.getByRole("link", { name: "Older activity" })).toBeVisible();
   await page.getByRole("link", { name: "Older activity" }).click();
   await expect(page).toHaveURL(/timeline_offset=30/);
+  await openTimeline(page);
   await expect(page.getByRole("link", { name: "Newer activity" })).toBeVisible();
   await page.goto("/admin/today");
   await expect(page.getByRole("heading", { name: /What needs attention today/ })).toBeVisible();

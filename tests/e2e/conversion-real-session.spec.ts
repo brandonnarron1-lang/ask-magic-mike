@@ -19,12 +19,20 @@ function actionForm(page: Page, name: string): Locator {
   return page.getByRole("form",{name,exact:true});
 }
 function panel(page: Page, name: string): Locator {
+  if (name === "Appointment operations") return page.locator("details").filter({ has: page.locator("summary").filter({hasText:/^Appointment operations$/}) }).last();
   return page.locator("section").filter({ has: page.getByRole("heading", { name, exact: true }) }).last();
+}
+async function openWorkPanels(page: Page) {
+  for (const name of ["Log manual interaction + next task", "Appointment operations", "Follow-up tasks", "First-response evidence"]) {
+    const summary=page.locator("main details > summary").filter({hasText:new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}$`)}).first();
+    if (await summary.count() && await summary.locator("..").getAttribute("open") === null) await summary.click();
+  }
 }
 async function openLead(role = "agent") {
   const page = await contexts[role].newPage();
   await page.goto(`/admin/leads/${fixture.leads.agent}`);
-  await expect(page.getByRole("heading", { name: "Appointment operations", exact: true })).toBeVisible();
+  await expect(page.locator("summary").filter({hasText:/^Appointment operations$/})).toBeVisible();
+  await openWorkPanels(page);
   return page;
 }
 async function countResponse() {
@@ -120,6 +128,7 @@ test("Actual source-tagged inquiry reaches Mike-first owner, human follow-throug
   const wrongSession=await owner.request.post("/api/appointments/request",{headers:{Origin:"https://www.askmagicmike.com"},data:{...appointmentBody,session_id:randomUUID()}});
   expect(wrongSession.status()).toBe(404);
   await owner.goto(`/admin/leads/${leadId}`);
+  await openWorkPanels(owner);
   const human=actionForm(owner,"Save interaction and next task");
   await human.getByLabel("Actual channel").selectOption("phone"); await human.getByLabel("Actual result").selectOption("two_way_conversation");
   await human.getByLabel("Safe interaction note",{exact:true}).fill("SYNTHETIC WALKTHROUGH ONLY — NOT A REAL CONVERSATION OR CONSUMER");

@@ -149,6 +149,47 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("PR279 successor: real 
     expect((await new NeonLeadNotificationRepository(localQuery as never).listRetryable()).some((row) => row.lead_id === id)).toBe(false);
   });
 
+  it("one requested readable QA copy preserves the original sent receipt and concurrent repeats cannot send twice", async () => {
+    const { result } = await submit();
+    // The public handler returns the lead identity; recover its one original intent.
+    const originalId = psql(`SELECT id FROM lead_notifications WHERE lead_id=${literal(result.lead_id)} AND notification_type='lead_alert' LIMIT 1;`);
+    psql(`UPDATE lead_notifications SET template_version='lead_alert_email_v3',status='sent',provider_message_id='synthetic_original_receipt' WHERE id=${literal(originalId)};`);
+    const original = psql(`SELECT row_to_json(n) FROM lead_notifications n WHERE id=${literal(originalId)};`);
+    const leadsBefore = psql("SELECT jsonb_build_array((SELECT count(*) FROM leads),(SELECT count(*) FROM contacts),(SELECT count(*) FROM consents),(SELECT count(*) FROM agent_assignments));");
+    provider.send.mockReset(); provider.send.mockImplementation(async request => {
+      expect(request.channel).toBe("email"); expect(request.recipient).toBe("operator@example.test"); expect(request.bcc).toEqual(["audit@example.test"]);
+      expect(request.text).toContain("QA TEST — DO NOT CONTACT"); expect(request.text).not.toContain("First touch:");
+      expect(psql(`SELECT status FROM lead_notifications WHERE id=${literal(request.notificationId)};`)).toBe("processing");
+      return {ok:true,provider:"isolated",providerMessageId:"synthetic_review_receipt"};
+    });
+    const { sendOwnerRequestedQaReviewCopy } = await import("../../app/lib/leadAlertService");
+    await Promise.all(Array.from({length:5},()=>sendOwnerRequestedQaReviewCopy(originalId)));
+    expect(provider.send).toHaveBeenCalledTimes(1);
+    expect((await sendOwnerRequestedQaReviewCopy(originalId)).ok).toBe(true); expect(provider.send).toHaveBeenCalledTimes(1);
+    expect(psql(`SELECT count(*) FROM lead_notifications WHERE metadata->>'review_copy_of'=${literal(originalId)} AND template_version='lead_alert_email_v4' AND status='sent' AND max_attempts=1;`)).toBe("1");
+    expect(psql(`SELECT row_to_json(n) FROM lead_notifications n WHERE id=${literal(originalId)};`)).toBe(original);
+    expect(psql("SELECT jsonb_build_array((SELECT count(*) FROM leads),(SELECT count(*) FROM contacts),(SELECT count(*) FROM consents),(SELECT count(*) FROM agent_assignments));")).toBe(leadsBefore);
+  });
+
+  it("requested QA copy fails closed on live records and Preview; failed copy is not silently resent", async () => {
+    const { sendOwnerRequestedQaReviewCopy } = await import("../../app/lib/leadAlertService");
+    const { result } = await submit();
+    const originalId=psql(`SELECT id FROM lead_notifications WHERE lead_id=${literal(result.lead_id)} AND notification_type='lead_alert' LIMIT 1;`);
+    psql(`UPDATE lead_notifications SET template_version='lead_alert_email_v3',status='sent',provider_message_id='synthetic_original_receipt' WHERE id=${literal(originalId)};`);
+    provider.send.mockReset();
+    vi.stubEnv("VERCEL_ENV","preview");
+    try { expect((await sendOwnerRequestedQaReviewCopy(originalId)).error).toBe("qa_review_delivery_not_ready"); }
+    finally { vi.stubEnv("VERCEL_ENV","development"); }
+    psql(`UPDATE leads SET is_test=false WHERE id=${literal(result.lead_id)};`);
+    expect((await sendOwnerRequestedQaReviewCopy(originalId)).error).toBe("qa_review_requires_suppressed_test"); expect(provider.send).not.toHaveBeenCalled();
+    psql(`UPDATE leads SET is_test=true WHERE id=${literal(result.lead_id)};`);
+    provider.send.mockResolvedValue({ok:false,provider:"isolated",retryable:true,errorCode:"synthetic_failure",errorSummary:"Synthetic provider failure"});
+    expect((await sendOwnerRequestedQaReviewCopy(originalId)).notification?.status).toBe("permanently_failed");
+    const before=tableCounts();
+    expect((await sendOwnerRequestedQaReviewCopy(originalId)).ok).toBe(false);
+    expect(provider.send).toHaveBeenCalledTimes(1); expect(tableCounts()).toBe(before);
+  });
+
   it("actual signed callbacks are atomic, duplicate-safe, ordered, conflict-safe and conservatively suppress bounce", async () => {
     const { POST } = await import("../../app/api/webhooks/email/events/route"); const fixture = await callbackFixture();
     const now = Date.now(); const old = new Date(now - 60_000).toISOString(); const current = new Date(now).toISOString(); const later = new Date(now + 60_000).toISOString(); const id = `synthetic_${randomUUID()}`;

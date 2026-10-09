@@ -10,7 +10,8 @@ import { hashPassword } from "better-auth/crypto";
 import { startDatabase, stopDatabase, install, psql, literal } from "../../tests/support/qa-audit-postgres.ts";
 
 if (process.env.AMM_QA_POSTGRES_TEST !== "1" || process.env.VERCEL_ENV === "production" || process.env.VERCEL_ENV === "preview" || process.env.DATABASE_URL || process.env.PREVIEW_URL) throw new Error("explicit_clean_isolated_venue_required");
-const runDir = path.resolve(".amm-run/reference-session-acceptance");
+const readability = process.env.AMM_LEAD_READABILITY_ACCEPTANCE === "1";
+const runDir = path.resolve(readability ? ".amm-run/lead-alert-readability-20261009/real-session" : ".amm-run/reference-session-acceptance");
 mkdirSync(runDir, { recursive: true });
 const reserve = createServer();
 await new Promise(resolve => reserve.listen(0, "127.0.0.1", resolve));
@@ -71,6 +72,7 @@ try {
     PATH: process.env.PATH, HOME: process.env.HOME, TMPDIR: process.env.TMPDIR,
     AMM_QA_POSTGRES_TEST: "1", AMM_ISOLATED_SESSION_ACCEPTANCE: "1", AMM_E2E_FIXTURE_PATH: fixturePath,
     ...(process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1" ? { AMM_CONVERSION_SESSION_ACCEPTANCE: "1" } : {}),
+    ...(readability ? { AMM_LEAD_READABILITY_ACCEPTANCE: "1" } : {}),
     AMM_E2E_FIXTURE_PASSWORD: password, AMM_E2E_BUILT: "1", AMM_E2E_PORT: String(port),
     VERCEL_ENV: "development", DATABASE_URL: connection, BETTER_AUTH_URL: origin,
     BETTER_AUTH_SECRET: randomBytes(32).toString("hex"), LEAD_CENTER_RBAC_ENABLED: "true",
@@ -83,7 +85,7 @@ try {
     AMM_E2E_TWILIO_TOKEN: authToken,
     NODE_OPTIONS: `--dns-result-order=ipv4first --import=${path.resolve("tests/support/isolated-neon-transport.mjs")}`,
   };
-  const suite = process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
+  const suite = readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
     ? "tests/e2e/conversion-real-session.spec.ts" : "tests/e2e/reference-real-session.spec.ts";
   child = spawn("pnpm", ["exec", "playwright", "test", suite], { env, stdio: "inherit" });
   const exit = await new Promise((resolve, reject) => { child.on("error", reject); child.on("exit", resolve); });

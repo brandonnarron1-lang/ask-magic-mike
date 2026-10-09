@@ -3,7 +3,10 @@
 // Loaded only by the opt-in loopback acceptance runner, never by application code.
 import { Pool } from "pg";
 import { appendFileSync } from "node:fs";
-const diagnostic = value => appendFileSync(".amm-run/reference-session-acceptance/transport.log", `${JSON.stringify(value)}\n`, { mode: 0o600 });
+const diagnosticPath = process.env.AMM_LEAD_READABILITY_ACCEPTANCE === "1"
+  ? ".amm-run/lead-alert-readability-20261009/real-session/transport.log"
+  : ".amm-run/reference-session-acceptance/transport.log";
+const diagnostic = value => appendFileSync(diagnosticPath, `${JSON.stringify(value)}\n`, { mode: 0o600 });
 const url = new URL(process.env.DATABASE_URL || "http://invalid");
 if (process.env.AMM_ISOLATED_SESSION_ACCEPTANCE !== "1" || process.env.VERCEL_ENV !== "development" ||
     url.hostname !== "localhost" || url.pathname !== "/amm_qa_upgrade" || url.username !== "postgres") {

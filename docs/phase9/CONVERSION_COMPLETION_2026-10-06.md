@@ -1,5 +1,125 @@
 # Conversion completion — 2026-10-06
 
+## Readability continuation — 2026-10-09 (local candidate, NOT deployed)
+
+Owner-supplied iPhone screenshots show the web page reached from Mail, not just
+an email rendering defect: the entire stored intake text/tracking JSON became
+the large page heading and was repeated inside the card. Expanded permissions,
+AI and lifecycle panels obscured follow-up. The inspected existing MIME is valid
+UTF-8; the template, not character encoding, inserted the diagnostic detail.
+
+### Current release and narrow correction
+
+Authenticated `pnpm release:authority:resolve` at `2026-10-09T15:17:39Z` passed
+25/25 checks for accepted PR292: merge `d071c17a25453614bcf1c95fc5ddca24e11cefd4`,
+tree `75b24b02dd42bbee984622ed99e7d046f10283bb`, Ready Production
+`dpl_8vSxG9ByEh3nKRHwqNHXAH5GXAcF`. This candidate is on
+`codex/lead-alert-readability-20261009`; exact frozen identity belongs in the
+existing ignored execution record, not a self-referential source receipt.
+Accepted release approval remains consumed. Migration/environment changes: zero.
+
+- Email v4: short readable subject, single-column facts, early main-record link,
+  Eastern receipt time and three plain walkthrough steps. No raw tracking JSON,
+  diagnostic identifiers or contact addresses in the visible body/subject.
+  Version-pinned v1/v2/v3 remain unchanged for their old queued intents.
+- Lead detail: name or **Test lead** heading; compact request/area/timeframe/
+  readable source/assignment before permission-aware contact actions. Duplicate
+  navigation is removed. Tasks, appointments, history and advanced controls use
+  native expandable sections; optional original text and score factors remain.
+  Stored intake, scoring, attribution, consent and audit evidence are not rewritten.
+- Manual contact opens the operator's dialer/composer only after explicit review
+  and a fresh scoped server permission read. It sends nothing and does not record
+  completed contact. Tests, suppressed/terminal records, opt-outs, unknown/held
+  permission, unassigned-role access and Preview contact tools stay blocked.
+  A reproduced phone opt-out/legacy-consent conflict is fixed fail-closed.
+- Prepared one-copy operation uses the existing outbox/provider, configured primary
+  and private BCC, stable copy key and one atomic claim. It preserves the original
+  sent row/provider ID; parallel calls send once. Failure/ambiguous state is retained,
+  not implicitly resent. There is no public route, automatic trigger or new provider.
+
+### Verification and external effects
+
+Final application-source `pnpm release:gate`: PASS — 3,792 unit passes/99 explicit
+skips, strict typecheck, lint, isolation, safety14/14, optimized build and active
+routes114/114 (22 acknowledged duplicates). Focused readability/messaging checks
+passed; the isolated PostgreSQL notification suite passed19/19, including parallel
+review-copy, failure, callback ordering/replay and durable lead tests. Provider
+results in that suite are mocked isolated evidence, not live delivery.
+
+Built-app real-session readability browser suite:9/9 PASS in8.3s at320/390/768/1440,
+200% root text, keyboard navigation, current-permission/role/QA fail-closed checks
+and actual compiled email HTML. Conversion real-session regression:8/8 PASS in18.5s,
+including genuine atomic task/appointment saves, replay, stale versions and reporting.
+Both use fresh local PostgreSQL, genuine generated Better Auth sessions and synthetic
+records with all providers off; no credential, customer record or runtime RBAC bypass.
+The earlier nine-case development diagnostic pass is not substituted for this rebuilt
+evidence. Preparation failures (transport log path, sign-in suffix matching returnTo,
+optional score field type and presentation selectors) were fixed. An earlier compiled
+hydration error was not reproduced on the final rebuilt source; final pageerror
+assertions pass. Reference real-session regression:9/9 PASS in23.2s, including real
+four-role boundaries, session revocation, concurrent/replayed allocation, local
+signed HTTP/STOP controls, held pilot, timeline pagination and cross-channel
+rendering. Those signed requests were localhost fixtures, not carrier activation.
+Its bounded300-lead/1,500-audit-row loopback check is not a hosted scale/SLA claim;
+the prior50k latency hold remains unchanged. All26 built-app browser cases pass.
+The final test adapter opens closed disclosures only when needed, preserving
+actual pagination and action assertions rather than removing hidden-field checks.
+
+Commands actually executed (Node24.18.0/pnpm10.30.3, native PostgreSQL17):
+
+```bash
+pnpm install --frozen-lockfile --offline
+pnpm release:authority:resolve
+pnpm release:gate
+pnpm typecheck
+pnpm lint
+AMM_RENDER_READABLE_EMAIL=1 pnpm exec vitest run tests/leadops/lead-alert-readability.test.ts
+AMM_QA_POSTGRES_TEST=1 AMM_QA_NATIVE_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/notification-reliability-postgres.test.ts
+AMM_QA_POSTGRES_TEST=1 AMM_QA_NATIVE_POSTGRES_TEST=1 AMM_LEAD_READABILITY_ACCEPTANCE=1 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/amm/reference-session-acceptance.mjs
+AMM_QA_POSTGRES_TEST=1 AMM_QA_NATIVE_POSTGRES_TEST=1 AMM_CONVERSION_SESSION_ACCEPTANCE=1 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/amm/reference-session-acceptance.mjs
+AMM_QA_NATIVE_POSTGRES_TEST=1 pnpm test:reference:sessions
+git diff --check
+```
+
+Frozen-lockfile offline install was already up to date; no dependency or lockfile
+change. Typecheck/lint/diff checks were repeated after final browser-selector edits
+and passed. All disposable PostgreSQL servers were stopped by their owned runner.
+
+Fresh bounded Production GETs returned 200 for `/`, `/ask`, `/home-value`, `/buy`,
+`/rent`, `/open-house/ask-magic-mike`, `/widget/v1`,
+`/integrations/ourtownproperties`, `/api/health/live`, `/api/health/ready`.
+Apex redirects 308 to the canonical www hostname. No form submission was made.
+These checks do not establish queue or inbox health, which was not newly measured.
+Previous 3,774-unit/98-PostgreSQL/hosted acceptance results remain inherited.
+
+Private synthetic previews and local identity/test receipts are under the existing
+ignored `.amm-run/lead-alert-readability-20261009/` (outer mode0700).
+Screenshots are in ignored `output/playwright/`, not live email/device acceptance.
+No Production/remote data writes, PR push, deploy, notification resend, WordPress
+or provider/account change, QA branch wake or spending occurred. NellySelly and
+PropertyLens were untouched. Preserve the two historical permanent failures,
+ticket29850012, completed QA and original sealed release/closeout artifacts.
+
+### Next exact boundary
+
+Authorize pushing the frozen readability candidate and opening ONE protected
+review PR, including existing hosted CI/Preview build effects only. This does
+not authorize merge, Production, remote schema/seed/secret changes, delivery,
+pilot, paid provider or unsafe Preview data access. The prior unsafe Preview stays
+held and the retired schema-only QA venue is not reopened. After protected review,
+bind the usual new exact-source Production approval; no new migration is needed.
+
+The owner's one cleaner QA review email request to Mike and the approved private
+audit recipient is retained, not requested again. Execute only after the reviewed
+release is accepted and current recipient/source/send preconditions are verified.
+Use the existing rental QA intent and canonical main-record link, not a new lead
+or replay of the old sent row. Primary provider delivery, Mike mailbox receipt and
+audit-BCC receipt must be checked independently; no receipt is fabricated here.
+Brandon can use his own account for the guide's read-only walkthrough without
+Mike's inbox. Neither engineering navigation nor Brandon's acceptance impersonates
+Mike's own human acceptance. Roll back a released candidate to accepted292; do not
+undo older migrations or delete evidence.
+
 ## Current continuation receipt — 2026-10-08 (local reporting candidate)
 
 This section supersedes the dated readiness statements below, without rewriting
@@ -435,3 +555,147 @@ latency target is removed or relaxed. The focused actual native PostgreSQL
 conversion transaction suite then passed all14 cases (10.47seconds total).
 The succeeding exact-source hosted run must still pass independently before
 merge; a local pass does not replace that required check.
+
+## 2026-10-09 final acceptance and bounded Production validation
+
+The preceding pending statements are historical. Final reviewed head90abd9904d111eba5a0c62041bee9e843693916e
+passed the protected canonical QA30/30, five-role operator27/27 and browser15/15.
+The exact-source hosted run37928097287 passed3,774unit tests/97explicit skips,
+98isolated PostgreSQL checks and the separate real-session/conversion/reflow suites.
+All13pre-merge evidence-file checksums remain unchanged. The frozen-source integration
+changes did not weaken RBAC, assertion semantics, branch protection or latency targets.
+
+PR292 merged normally asd071c17a25453614bcf1c95fc5ddca24e11cefd4.
+Accepted Production deploymentdpl_8vSxG9ByEh3nKRHwqNHXAH5GXAcF uses exactly reviewed
+tree75b24b02dd42bbee984622ed99e7d046f10283bb and existing Production configuration,
+not a promoted synthetic Preview build. Production migrations0/environment changes0.
+[Official acceptance](https://github.com/brandonnarron1-lang/ask-magic-mike/releases/tag/amm-production-acceptance/dpl_8vSxG9ByEh3nKRHwqNHXAH5GXAcF)
+was downloaded with its matching file checksum; final authority resolution25/25,
+monitor11/11 and read-only smoke19PASS/2intentional skips independently passed.
+Runtime log counts were not collected; that is not a zero-errors assertion.
+
+The separate owner-authorized Production acceptance test followed the unchanged
+page226rentals CTA exactly once at12:49:40Z. Test referencef51dab09,
+correlation12d89ab7: one durable suppressed intake/contact linkage, four correct UTMs,
+first/last touch, actualamm_contact_v2 consent, deterministic score23 and atomic QA audit.
+The approved test contact deduplicated to the retained Mike-owned QA record27cdd1a9;
+no fresh assignment/business conversion was fabricated. One outbox intent/attempt/
+Resend dispatch01a120b6 has signed sent/delivered events. The exact audit BCC copy was
+verified in the approved audit mailbox with hidden-copy headers. Mike's own inbox
+receipt and actual Production Lead Center UI remain UNVERIFIED. No second submission
+or resend; no consumer acknowledgment/nurture/SMS/Push; test/duplicate KPI exclusions
+remain set. Production pending queue0; historical permanent failures2unchanged.
+
+Bounded READ ONLY SQL validated2live-eligible Production records, not invented demand
+or staff conversations. Protected Production UI/API comparison remains unverified:
+there was no legitimately available Production operator session. Sensitive CLI
+exports being unavailable was not treated as evidence that live configuration is off.
+
+The one disposable schema-only QA target retains its fixed0.25CU/300-second
+auto-suspend/2026-10-10T11:31:02Zexpiry. Final26leads are alltest/suppressed; one skipped
+notification has zero attempts/provider IDs; no due tasks/appointments.45settings are
+reporting-branch-only (the final additional setting suppresses Preview toolbar JS).
+Temporary mutation ability is now closed both in configuration and database ACLs:
+runtime writable tables0, executable application/security-definer functions0.
+Ten independently inspected provider-owned UUID value functions remain, not a write
+bypass. The final immutable closure build is protected/read-only with all transports off.
+Exact metered cost is unverified; no new plan/recharge/recurring commitment was made.
+
+The complete private operational receipt and checksum index are retained under the
+existing ignored execution record, not temporary screenshot paths. This appended
+register entry is a local documentation-only continuation; it was not part of the
+accepted release tree and does not require another application deployment or PR.
+Rollback remains the READY accepted PR291 app without schema reversal. Page226/page3952,
+caches, connector, disclosure candidate, old Preview, ticket29850012 and unrelated
+projects remain untouched.10k measured passing envelope/50k2542ms vs2000ms
+FAIL/LATENCY HELD are preserved. Next boundary is genuine own-session operator
+acceptance of the released Today/timeline/next-action/reporting workflow, not a new CRM.
+
+## 2026-10-09 post-292 operator acceptance and QA lifecycle closeout
+
+Fresh authority resolution at13:47Z passed25/25; remote main remains
+`d071c17a25453614bcf1c95fc5ddca24e11cefd4`, accepted deployment
+`dpl_8vSxG9ByEh3nKRHwqNHXAH5GXAcF`, reviewed tree
+`75b24b02dd42bbee984622ed99e7d046f10283bb`. No merge, deployment, migration,
+new inquiry, resend or Production business-data mutation was repeated.
+
+The bounded repeatable-read READ ONLY check was restricted to the two existing
+approved QA references plus notification status aggregates. Canonical27cdd1a9
+was created/assigned at`2026-10-02T01:56:00.040Z` (October1,21:56EDT), Home Value
+score60; assignment history remains pending. Rental duplicate intakef51dab09 at
+`2026-10-09T12:49:40.101Z` retains score23, its four exact rental UTMs, own consent
+and atomic creation/QA-suppression evidence; it points to the existing canonical
+record without a new assignment. Both records remain test/suppressed/KPI-excluded.
+The rental intent remains one sent attempt with Resend01a120b6 and delivered
+metadata at`12:49:51.365Z`. No waiting notification statuses were present; two
+historical permanent failures are unchanged. This is storage/provider evidence,
+not a new delivery test or proof of Mike's mailbox.
+
+Actual Production browser navigation to the canonical detail redirected to
+`/lead-center-login?error=session`. A legitimate Mike session is unavailable;
+Today/inbox/detail/timeline/report UI and personal acceptance remain unverified
+or not run. The connected mailbox is not Mike's and was not searched as his inbox.
+The previously verified hidden audit-BCC receipt remains VERIFIED. Mike's own
+receipt/folder is UNVERIFIED. The existing operator guide now supplies the exact
+subject, time, canonical link and own-account read-only handoff.
+
+Current lead-detail timeline source queries select exactlead_id; the canonical
+Home Value source must not be represented as the rental intake's source. Visible
+cross-intake association has not been established. Expected test filtering and
+missing human login are not demonstrated application defects; no application
+code or permission changes were made. No staff participation is inferred from
+the inherited27-role or15-browser checks.
+
+Fresh QA runtime ACL reads confirmed26synthetic suppressed leads, zero unsafe
+leads/external dispatches/inherited roles, zero writable tables and executable
+application/security-definer functions. Ten provider-owned pure UUID functions
+remain. Protected closure-build GET confirmed all12runtime checks, including
+no-write/no-email/no-SMS/no-consumer delivery/no-AI.45current settings remain
+branch-only, including an explicit QA DATABASE_URL; no inherited provider key
+was present. No mutation probe or grant reset was executed.
+
+After final reads, the existing exact disposable compute was suspended once
+under its approved lifecycle; fresh provider metadata confirmed`idle`, no pending
+transition, at`2026-10-09T14:00:19.400Z`. Fixed0.25CU and300-second auto-suspend
+remain. Provider-configured expiry is still`2026-10-10T11:31:02Z`; expiry/deletion
+has NOT yet happened. No extension, replacement, new automation or background
+promise was created. No matching owned proxy/browser/monitor wake process remained.
+Production is on its distinct existing branch/endpoint. Preview keeps its explicit
+QA binding and disabled legacy fallback; expiration can make QA reads unavailable,
+not redirect them to Production or the old uncertain Preview.
+
+The final browser inventory had no matching disposable-QA tab. Exact-resource
+references were absent from local Codex automations and user LaunchAgents;
+user crontab was absent or unavailable. No unrelated tab/job was stopped and no
+schedule changed. This bounded inventory is not a claim about inaccessible
+third-party probes.
+
+Resource-level hourly usage API returned1,128compute-unit-seconds (0.313333CU-hours)
+and1,308,234public-network bytes for11:00–13:00Z ONLY. Later/unfinalized usage,
+storage and final billing are not established; exact charge remains UNVERIFIED.
+The original20final-evidence and13premerge checksums were independently rechecked
+unchanged. Fixtures remain`reporting-remote-qa-v1`, schema-only PostgreSQL18.6;
+source/provenance/ACL/report associations are preserved in the existing private
+execution record, with a supplemental closeout checksum index. Original seals and
+the original operational receipt were not rewritten.
+
+New session checks: authority25/25; four bounded public HTTP GETs200
+(`/api/health/live`, `/api/health/ready`, `/`, `/plan`), both health routes attest
+accepted source; bounded Production/QA reads; protected QA runtime12/12; exact
+compute idle/expiry postflight. No full test/build/benchmark was repeated; prior
+3,774unit/97skips/98PostgreSQL results remain inherited. Two preparation-only
+diagnostic errors (checksum-field selection; UUID/text comparison) were corrected
+locally; the failed READ ONLY transaction rolled back and is not a product defect.
+
+Files changed are this existing completion register and`docs/OPERATOR_GUIDE.md`
+plus ignored private diagnostics/receipts. Documentation-only changes are local,
+not part of the accepted Production tree; no new PR/release is warranted. App
+rollback remains accepted291; pages226/3952/caches/forms, old Preview, disclosure
+candidate, ticket29850012, NellySelly, PropertyLens and permanent failures remain
+unchanged.50k2,542ms vs2,000ms remains FAIL/LATENCY HELD; no rebenchmark was performed.
+
+Next human boundary: Mike locates the existing October9,08:49EDT rental TEST
+message and reports its actual folder, then signs into his own Production account
+and completes the guide's read-only canonical-lead/Today/report walkthrough.
+Reply`TAKEOVER DONE` when his session is ready; no credentials in chat. QA closeout
+does not wait on that participation or extend the branch.
