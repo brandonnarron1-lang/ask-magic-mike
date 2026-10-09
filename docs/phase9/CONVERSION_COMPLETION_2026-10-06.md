@@ -426,3 +426,12 @@ unchanged. No50k benchmark was repeated or relabeled. Genuine human operator
 acceptance, carrier/disclosure/enrollment decisions and mailbox delivery proof
 remain separate. Production schema/env, pages226/3952 and caches, historical
 failures, Twilio ticket29850012, NellySelly and PropertyLens remain untouched.
+
+Hosted successor run37926140721 remains recorded FAILED: its fresh-schema,
+ACL and rollback installation case reached Vitest's default five-second
+timeout. It did not report a failed business assertion. Only that full-schema
+case now has a bounded30-second setup timeout; no test, protection or reporting
+latency target is removed or relaxed. The focused actual native PostgreSQL
+conversion transaction suite then passed all14 cases (10.47seconds total).
+The succeeding exact-source hosted run must still pass independently before
+merge; a local pass does not replace that required check.

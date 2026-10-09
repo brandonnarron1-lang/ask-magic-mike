@@ -155,5 +155,8 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("Conversion: actual Neo
     // missing role to satisfy its grant wrapper.
     psql("DROP OWNED BY anon,authenticated;", "amm_qa_upgrade"); psql("DROP OWNED BY anon,authenticated;", "amm_qa_fresh");
     psql("DROP ROLE anon; DROP ROLE authenticated;", "amm_qa_fresh"); psql(conversionSql,"amm_qa_fresh");
-  });
+    // This case installs the entire accepted schema, verifies both database
+    // ACLs and rehearses rollback. Bound that setup independently of the
+    // unchanged reporting latency budgets; the assertions still all run.
+  }, 30_000);
 });
